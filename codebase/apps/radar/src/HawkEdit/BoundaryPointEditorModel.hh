@@ -32,8 +32,8 @@ class BoundaryPointEditorModel
   vector<Point> getBoundaryPoints(string radarFilePath,
     string &fieldName, int sweepIndex, int boundaryIndex);	
 
-  void evaluateMouseRelease(int worldX, int worldY, bool isShiftKeyDown);
-  bool evaluatePoint(int worldX, int worldY);
+  void addDeleteBoundaryPoint(int worldX, int worldY, bool isShiftKeyDown);
+  bool moveBoundaryPoint(int startX, int startY, int worldX, int worldY);
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);
 	void addPoint(float x, float y);

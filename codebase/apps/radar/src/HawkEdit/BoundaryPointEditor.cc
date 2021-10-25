@@ -360,11 +360,20 @@ bool BoundaryPointEditor::evaluateCursor(bool isShiftKeyDown) {
   return changeCursor;
 }
 
-void BoundaryPointEditor::evaluateMouseRelease(int worldReleaseX, int worldReleaseY,
+bool BoundaryPointEditor::moveBoundaryPoint(int startX, int startY,
+ int worldX, int worldY) {
+  bool redraw = _boundaryPointEditorModel->moveBoundaryPoint(
+  	startX, startY, worldX, worldY);
+  return redraw;
+}
+
+
+
+void BoundaryPointEditor::addDeleteBoundaryPoint(int worldReleaseX, int worldReleaseY,
 	bool isShiftKeyDown)
 {
   LOG(DEBUG) << "enter x,y = " << worldReleaseX << "," << worldReleaseY;
-	_boundaryPointEditorModel->evaluateMouseRelease(worldReleaseX, worldReleaseY,
+	_boundaryPointEditorModel->addDeleteBoundaryPoint(worldReleaseX, worldReleaseY,
 		isShiftKeyDown);
 
 	/*
@@ -768,10 +777,9 @@ int BoundaryPointEditor::getBrushRadius()
 }
 
 
-bool BoundaryPointEditor::evaluatePoint(int worldX, int worldY)
+bool BoundaryPointEditor::isOverBoundaryPoint(int worldX, int worldY)
 {
-  bool redraw = _boundaryPointEditorModel->evaluatePoint(worldX, worldY);
-  return redraw;
+  return _boundaryPointEditorModel->isOverAnyPoint(worldX, worldY);
 }
 
 // returns the file path for the boundary file, given the currently selected field and sweep

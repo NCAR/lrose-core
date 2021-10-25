@@ -193,8 +193,11 @@ public:
   void drawBoundary(WorldPlot &_zoomWorld, QPainter &painter);
   void mouseMoveEvent(int worldX, int worldY);  
   bool evaluateCursor(bool isShiftKeyDown);
-  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY, 
+  void addDeleteBoundaryPoint(double mouseReleaseX, double mouseReleaseY, 
     bool isShiftKeyDown);
+  bool isOverBoundaryPoint(double worldX, double worldY);
+  bool moveBoundaryPoint(double worldPressX, double worldPressY,
+  double worldReleaseX, double worldReleaseY);
   bool evaluateRange(double xRange);
 
   void runForEachRayScript(QString script, bool useBoundary);

@@ -3930,8 +3930,10 @@ void PolarManager::drawBoundary(WorldPlot &zoomWorld, QPainter &painter) {
   }
 }
 
+// I'm not sure this is used???
 void PolarManager::mouseMoveEvent(int worldX, int worldY)
 {  
+  /*
   if (boundaryPointEditorControl != NULL) {
 
     bool redraw = boundaryPointEditorControl->evaluatePoint(worldX, worldY);
@@ -3939,6 +3941,7 @@ void PolarManager::mouseMoveEvent(int worldX, int worldY)
       _ppi->showSelectedField(); 
     }
   }
+  */
 }
 
 bool PolarManager::evaluateCursor(bool isShiftKeyDown) {
@@ -3956,12 +3959,30 @@ bool PolarManager::evaluateRange(double xRange) {
   }
 }
 
-void PolarManager::evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY,
+bool PolarManager::isOverBoundaryPoint(double worldX, double worldY) {
+  if (boundaryPointEditorControl != NULL) {
+    return boundaryPointEditorControl->isOverBoundaryPoint(worldX, worldY);
+  } else {
+    return false;
+  }
+}
+
+bool PolarManager::moveBoundaryPoint(double worldPressX, double worldPressY,
+  double worldReleaseX, double worldReleaseY) {
+  bool redraw = false;
+  if (boundaryPointEditorControl != NULL) {
+    redraw = boundaryPointEditorControl->moveBoundaryPoint(worldPressX, worldPressY,
+      worldReleaseX, worldReleaseY);
+  }
+  return redraw;
+}
+
+void PolarManager::addDeleteBoundaryPoint(double mouseReleaseX, double mouseReleaseY,
   bool isShiftKeyDown)
 {    
     // If boundary editor active, then interpret boundary mouse release event
   if (boundaryPointEditorControl != NULL) {
-    boundaryPointEditorControl->evaluateMouseRelease(mouseReleaseX, mouseReleaseY,
+    boundaryPointEditorControl->addDeleteBoundaryPoint(mouseReleaseX, mouseReleaseY,
       isShiftKeyDown);
 /*  moved to BPE
     BoundaryPointEditor *editor = boundaryPointEditorControl;

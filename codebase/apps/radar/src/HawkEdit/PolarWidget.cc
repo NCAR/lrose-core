@@ -80,7 +80,8 @@ PolarWidget::PolarWidget(QWidget* parent,
         _angleLinesEnabled(false),
         _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0),
-        _ringSpacing(10.0)
+        _ringSpacing(10.0),
+        _boundaryTrackMouseMove(false)
 
 {
   _params = ParamFile::Instance();
@@ -116,6 +117,7 @@ PolarWidget::PolarWidget(QWidget* parent,
   // create the rubber band
 
   _rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+  //_rubberBandLine = new QRubberBand(QRubberBand::Line, this);
 
   // Allow the size_t type to be passed to slots
 
@@ -575,7 +577,7 @@ QPixmap* PolarWidget::getPixmap()
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
-
+  /*
   if (e->button() == Qt::RightButton) {
 
     //-------
@@ -591,16 +593,40 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
       emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
 
   } else {
+  */
+
+  /* ----
+      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+      _worldPressY *= -1.0;
+      //_worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+      //_worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+      // if mouse was pressed near a boundary point, then move the boundary point
+      // otherwise, this is a zoom
+      if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
+
+  // ---  
+  */
 
 
-  _rubberBand->setGeometry(QRect(e->pos(), QSize()));
-  _rubberBand->show();
 
   _mousePressX = e->x();
   _mousePressY = e->y();
 
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);
   _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+  _worldPressY *= -1.0; // rotate about the x-axis 180 degrees
+  //}
+  if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
+      _rubberBand->hide();
+      _boundaryTrackMouseMove = true;
+  } else {
+      _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+      _rubberBand->show();
+      //_boundaryTrackMouseMove = false;
   }
 }
 
@@ -611,29 +637,34 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
-  int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
-  int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
+  double worldX = _zoomWorld.getXWorld(e->pos().x());
+  double worldY = _zoomWorld.getYWorld(e->pos().y());
+
+  worldY *= -1.0; // rotate about the x-axis 180 degrees
 
   // ---- insert here ---
 
-  _manager->mouseMoveEvent(worldX, worldY);
-  /*
-  if (_manager._boundaryEditorDialog->isVisible()) {
-
-    BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
-    
-    if (tool == BoundaryToolType::polygon && 
-        BoundaryPointEditor::Instance()->isAClosedPolygon() && 
+  //_manager->mouseMoveEvent(worldX, worldY);
+  
+  //if (_manager._boundaryEditorDialog->isVisible()) {
+  if (_boundaryTrackMouseMove) {
+    /*BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
+  
+    if (tool == BoundaryToolType::polygon &&
+        BoundaryPointEditor::Instance()->isAClosedPolygon() &&
         BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY)) {
       BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
     } else if (tool == BoundaryToolType::brush) {
       BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
     }
+    */
     //_dirty = true;
+    _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
+      worldX, worldY);
     update();
-    return;
+    return;    
   }
-   */
+   
 
   /* ---- cut here --- 
   if (_manager._boundaryEditorDialog->isVisible() && BoundaryPointEditor::Instance()->isPolygonFinished() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
@@ -669,8 +700,10 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   _zoomCornerX = _mousePressX + moveX;
   _zoomCornerY = _mousePressY + moveY;
-
-  newRect = newRect.normalized();
+  
+  //if (_rubberBand->shape() != QRubberBand::Rectangle) {
+    newRect = newRect.normalized();
+  //}
   _rubberBand->setGeometry(newRect);
 
 }
@@ -686,88 +719,82 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   _pointClicked = false;
 
   QRect rgeom = _rubberBand->geometry();
-
-  // If the mouse hasn't moved much, assume we are clicking rather than
-  // zooming
-
   QPointF clickPos(e->pos());
   
   _mouseReleaseX = clickPos.x();
   _mouseReleaseY = clickPos.y();
+  _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+  _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+  //QTransform flipTransform = _zoomTransform;
+  //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
+  //qreal mx = _mouseReleaseX;
+  //qreal my = _mouseReleaseY;
+  //qreal wx;
+  //qreal wy;
+  //flipTransform.map(mx, my, &wx, &wy);
+  //_worldReleaseX = wx;
+  _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+  LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
+  LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
+  //LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;  
 
   // get click location in world coords
 
-  if (rgeom.width() <= 20) {
-    
-    // Emit a signal to indicate that the click location has changed
-    
-    _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-    _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-
-
-    QTransform flipTransform = _zoomTransform;
-    //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
-    qreal mx = _mouseReleaseX;
-    qreal my = _mouseReleaseY;
-    qreal wx;
-    qreal wy;
-    flipTransform.map(mx, my, &wx, &wy);
-
-    _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-
-    LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
-    LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
-    LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;    
-
-    // ---
-    // --- insert here ---
-    bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
-    _manager->evaluateMouseRelease(_worldReleaseX, _worldReleaseY, isShiftKeyDown);
-    //_manager->evaluateMouseRelease(wx, wy, isShiftKeyDown);    
-
-    // ----
-    double x_km = _worldReleaseX;
-    double y_km = _worldReleaseY;
-    _pointClicked = true;
-
-    // get ray closest to click point
-
-    const RadxRay *closestRay = _getClosestRay(x_km, y_km);
-
-    // emit signal
-
-    emit locationClicked(x_km, y_km, closestRay);
-  
+  // --- if shift key is down, then pass message on to boundary point control
+  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if (isShiftKeyDown) {
+    _manager->addDeleteBoundaryPoint(_worldReleaseX, _worldReleaseY, isShiftKeyDown);
   } else {
-
-    // mouse moved more than 20 pixels, so a zoom occurred
-    
-    _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-    _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-    _worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-    _worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-
-    _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
-
-    _setTransform(_zoomWorld.getTransform());
-
-    _setGridSpacing();
-
-    // enable unzoom button
-    
-    _manager->enableZoomButton();
-    
-    // Update the window in the renderers
-    
-    //_dirty = true;
-    //_refreshImages();
-
-  }
-    
-  // hide the rubber band
-
+    if (rgeom.width() <= 20) {
+      // If the mouse hasn't moved much, assume we are clicking rather than
+      // zooming
+      //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      //QTransform flipTransform = _zoomTransform;
+      //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
+      //qreal mx = _mouseReleaseX;
+      //qreal my = _mouseReleaseY;
+      //qreal wx;
+      //qreal wy;
+      //flipTransform.map(mx, my, &wx, &wy);
+      //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+      //LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
+      //LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
+      //LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;    
+      double x_km = _worldReleaseX;
+      double y_km = _worldReleaseY;
+      _pointClicked = true;
+      // get ray closest to click point
+      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+      // Emit a signal to indicate that the click location has changed
+      emit locationClicked(x_km, y_km, closestRay);
+    } else {
+      // mouse moved more than 20 pixels, so a zoom occurred
+      // or moving boundary points
+      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
+      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
+      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+      _worldPressY *= -1.0;
+      //_worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
+      //_worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+      // if mouse was pressed near a boundary point, then move the boundary point
+      // otherwise, this is a zoom
+      if (_boundaryTrackMouseMove) {
+      //if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
+        _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
+          _worldReleaseX, _worldReleaseY);
+      } else {
+        _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+        _setTransform(_zoomWorld.getTransform());
+        _setGridSpacing();
+        _manager->enableZoomButton();        
+      }
+    }
+  }  
   _rubberBand->hide();
+  _boundaryTrackMouseMove = false;
   update();
   
 }

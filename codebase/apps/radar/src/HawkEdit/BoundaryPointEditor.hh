@@ -47,9 +47,10 @@ class BoundaryPointEditor : public QObject
 	//string getRootBoundaryDir();
 	void setBoundaryDir(string &openFilePath);
 
-  bool evaluatePoint(int worldX, int worldY);
+  bool isOverBoundaryPoint(int worldX, int worldY);
   bool evaluateCursor(bool isShiftKeyDown);
-  void evaluateMouseRelease(int mouseReleaseX, int mouseReleaseY, bool isShiftKeyDown);
+  void addDeleteBoundaryPoint(int mouseReleaseX, int mouseReleaseY, bool isShiftKeyDown);
+  bool moveBoundaryPoint(int startX, int startY, int worldX, int worldY);
 	static BoundaryPointEditor* Instance();
 	void makeCircle(int x, int y, float radius);
 	void addToBrushShape(float x, float y);

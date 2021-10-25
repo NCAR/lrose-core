@@ -45,7 +45,7 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
   LOG(DEBUG) << "npoints = " << points.size();
 	for (int i=1; i < (int) points.size(); i++)
 	{
-		LOG(DEBUG) << "drawing point " << i;
+		cerr << "drawing point " << i << " x,y = " << points[i].x << "," << points[i].y << endl;
 		//worldPlot.drawLine(painter, points[i-1].x, points[i-1].y, points[i].x, points[i].y);
 		painter.drawLine(points[i-1].x, points[i-1].y, points[i].x, points[i].y);		
 		if (isFinished && currentTool == BoundaryToolType::polygon)
@@ -66,7 +66,8 @@ void BoundaryView::drawPointBox(WorldPlot worldPlot, QPainter &painter, Point po
 
 	QColor boundaryColor(color.c_str());
   QBrush yellowBrush(boundaryColor);
-	int size = 3; // pointBoxScale / worldPlot.getXPixelsPerWorld();
+	int size = 3 / worldPlot.getXPixelsPerWorld();
+	if (size <= 0) size = 1;
 	//worldPlot.fillRectangle(painter, yellowBrush, x-(size/2), y-(size/2), size, size);
 	painter.fillRect(x-(size/2), y-(size/2), size, size, yellowBrush);
 

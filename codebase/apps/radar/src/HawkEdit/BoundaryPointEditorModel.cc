@@ -238,7 +238,8 @@ void BoundaryPointEditorModel::moveNearestPointTo(float x, float y)
 	}
 }
 
-// Return true if (x,y) is very close to any existing point
+// Return true if (x,y) is very close to any existing point 
+// in pixel space.
 // (relevant with the Polygon Tool)
 bool BoundaryPointEditorModel::isOverAnyPoint(float x, float y)
 {
@@ -931,7 +932,7 @@ const char *BoundaryPointEditorModel::refreshBoundary(
 }
 
 
-bool BoundaryPointEditorModel::evaluatePoint(int worldX, int worldY)
+bool BoundaryPointEditorModel::moveBoundaryPoint(int startX, int startY, int worldX, int worldY)
 {
   bool redraw = false;
 
@@ -939,7 +940,7 @@ bool BoundaryPointEditorModel::evaluatePoint(int worldX, int worldY)
     
     if (currentTool == BoundaryToolType::polygon && 
         isAClosedPolygon() && 
-        isOverAnyPoint(worldX, worldY)) {
+        isOverAnyPoint(startX, startY)) { // worldX, worldY)) {
       moveNearestPointTo(worldX, worldY);
       redraw = true;
     } else if (currentTool == BoundaryToolType::brush) {
@@ -967,7 +968,7 @@ void BoundaryPointEditorModel::checkToAddOrDelPoint(float x, float y, bool isShi
 }
 // end for safe keeping 
 
-void BoundaryPointEditorModel::evaluateMouseRelease(int worldReleaseX, int worldReleaseY,
+void BoundaryPointEditorModel::addDeleteBoundaryPoint(int worldReleaseX, int worldReleaseY,
 	bool isShiftKeyDown)
 {	
 	if (currentTool == BoundaryToolType::polygon) {

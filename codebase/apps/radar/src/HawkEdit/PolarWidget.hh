@@ -433,6 +433,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   QRubberBand *_rubberBand;
+  QRubberBand *_rubberBandRectangle;
+  QRubberBand *_rubberBandLine;
 
   /**
    * @brief The rubber band origin.
@@ -601,6 +603,8 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   bool _dirty;
 
+  bool _boundaryTrackMouseMove;
+  
  public:
 
   
