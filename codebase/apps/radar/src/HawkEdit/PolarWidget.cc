@@ -786,8 +786,25 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
           _worldReleaseX, _worldReleaseY);
       } else {
-        _zoomWorld.set(_worldPressX, _worldPressY, _worldReleaseX, _worldReleaseY);
+
+        // use rgeom
+
+        int xMin, xMax, yMin, yMax;
+        rgeom.getCoords(&xMin, &yMax, &xMax, &yMin);
+
+        int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+        qreal sx = _zoomTransform.m11();
+        qreal sy = _zoomTransform.m22();
+        qreal dx = _zoomTransform.dx();
+        qreal dy = _zoomTransform.dy();        
+        yMaxWorld = (yMax - dy) / sy;
+        xMaxWorld = (xMax - dx) / sx;
+        yMinWorld = (yMin - dy) / sy;
+        xMinWorld = (xMin - dx) / sx;
+
+        _zoomWorld.set2(xMinWorld, yMinWorld, xMaxWorld, yMaxWorld);
         _setTransform(_zoomWorld.getTransform());
+
         _setGridSpacing();
         _manager->enableZoomButton();        
       }
@@ -1314,7 +1331,7 @@ void PolarWidget::drawRings(QPainter &painter)
     //painter.setPen(pen);
     //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
-    cerr << "_ringSpacing = " << _ringSpacing << endl;
+    LOG(DEBUG) << "_ringSpacing = " << _ringSpacing;
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       QRectF rect(-ringRange, -ringRange, ringRange * 2.0, ringRange * 2.0);

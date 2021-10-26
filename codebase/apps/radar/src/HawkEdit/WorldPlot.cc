@@ -226,7 +226,6 @@ void WorldPlot::set(double xMinWorld,
                     double yMaxWorld)
 {
 
-  
   if (_xMinWorld < _xMaxWorld) {
     _xMinWorld = MIN(xMinWorld, xMaxWorld);
     _xMaxWorld = MAX(xMinWorld, xMaxWorld);
@@ -242,6 +241,22 @@ void WorldPlot::set(double xMinWorld,
     _yMinWorld = MAX(yMinWorld, yMaxWorld);
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
+
+  _computeTransform();
+
+}
+
+// REALLY, these are in world coords
+void WorldPlot::set2(double xMinPixel,
+                    double yMinPixel,
+                    double xMaxPixel,
+                    double yMaxPixel)
+{
+
+  _xMaxWorld = xMaxPixel;
+  _xMinWorld = xMinPixel;
+  _yMinWorld = yMinPixel;
+  _yMaxWorld = yMaxPixel;
 
   _computeTransform();
 
@@ -1518,14 +1533,20 @@ void WorldPlot::_computeTransform()
     abs((_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld));
     
   _transform.reset();
+  /*
   int centerXPixelSpace = _xMinPixel + _plotWidth/2;
   //int centerYPixelSpace = _yMinPixel - _plotHeight/2;
   // OR ...
   int centerYPixelSpace = _yMinPixel + _plotHeight/2;  
 
   _transform.translate(centerXPixelSpace, centerYPixelSpace);
-  LOG(DEBUG) << "translating to x,y in pixel space " << 
-    centerXPixelSpace << ", " << centerYPixelSpace;
+  */
+  qreal dx = _xMinPixel - _xMinWorld * _xPixelsPerWorld;
+  qreal dy = _yMaxPixel + _yMinWorld * _yPixelsPerWorld;
+  //qreal dy = _yMinPixel - _yMinWorld * _yPixelsPerWorld;
+  _transform.translate(dx, dy);
+  //LOG(DEBUG) << "translating to x,y in pixel space " << 
+  //  centerXPixelSpace << ", " << centerYPixelSpace;
   //_transform.translate(_xMinPixel, _yMinPixel);
   //_transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
   // 
