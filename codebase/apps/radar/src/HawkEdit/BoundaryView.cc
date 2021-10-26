@@ -45,7 +45,7 @@ void BoundaryView::draw(WorldPlot worldPlot, QPainter &painter,
   LOG(DEBUG) << "npoints = " << points.size();
 	for (int i=1; i < (int) points.size(); i++)
 	{
-		cerr << "drawing point " << i << " x,y = " << points[i].x << "," << points[i].y << endl;
+		LOG(DEBUG) << "drawing point " << i << " x,y = " << points[i].x << "," << points[i].y;
 		//worldPlot.drawLine(painter, points[i-1].x, points[i-1].y, points[i].x, points[i].y);
 		painter.drawLine(points[i-1].x, points[i-1].y, points[i].x, points[i].y);		
 		if (isFinished && currentTool == BoundaryToolType::polygon)
