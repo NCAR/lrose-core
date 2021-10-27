@@ -126,18 +126,6 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // create the field renderers
   _fieldRendererController = new FieldRendererController();
-  /*
-  size_t nFields = displayFieldController->getNFields();
-  for (size_t ii = 0; ii < nFields; ii++) {
-    DisplayField *displayField = displayFieldController->getField(ii);
-    FieldRenderer *fieldRenderer =
-      new FieldRenderer(displayField->getName()); // *_fields[ii]);
-    fieldRenderer->createImage(width(), height());
-    _fieldRendererController->addFieldRenderer(fieldRenderer);
-  }
-*/
-
-
 
   // init other values
 
@@ -163,15 +151,6 @@ PolarWidget::PolarWidget(QWidget* parent,
 PolarWidget::~PolarWidget()
 {
 
-  
-  // Delete all of the field renderers
-  //delete _fieldRendererController;
-  /*
-  for (size_t i = 0; i < _fieldRenderers.size(); ++i) {
-    delete _fieldRenderers[i];
-  }
-  _fieldRenderers.clear();
-  */
 }
 
 
@@ -227,8 +206,6 @@ void PolarWidget::configureRange(double max_range)
   // Initialize the images used for double-buffering.  For some reason,
   // the window size is incorrect at this point, but that will be corrected
   // by the system with a call to resize().
-  //_dirty = true;
-  //_refreshImages();
   LOG(DEBUG) << "exit";
 }
 
@@ -300,7 +277,6 @@ QTransform *PolarWidget::computeTextTransform(
     
   transform->reset();
   transform->scale(xPixelsPerWorld, yPixelsPerWorld);
-  //_transform.rotateRadians(M_PI, Qt::XAxis);
 
   return transform;
 }
@@ -331,8 +307,6 @@ void PolarWidget::unzoomView()
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
   _setGridSpacing();
-  //_dirty = true;
-  //_refreshImages();
   update();
   LOG(DEBUG) << "exit";
 }
@@ -377,69 +351,11 @@ void PolarWidget::setAngleLines(const bool enabled)
 // Who needs to know about the new fields?
 // Beams, FieldRenderers, DisplayFieldController 
 void PolarWidget::addNewFields(vector<DisplayField *> &newFields) 
-//void PolarWidget::addField(string &fieldName) 
 {
   LOG(DEBUG) << "enter";
 
-  //FieldRendererView *fieldRenderer =
-  //    new FieldRenderer(_params, fieldIdx, *newFields[ii]);
-  //fieldRenderer->createImage(width(), height());
-
-
-  // add to the field renderers any new fields in the volume
-  // for each field in the volume
-  /*
-  LOG(DEBUG) << "all fields in _vol ... ";
-  vector<RadxField *> allFields = vol->getFields();
-  vector<RadxField *>::iterator it;
-  for (it = allFields.begin(); it != allFields.end(); it++) {
-    LOG(DEBUG) << *it;
-  }
-  */
-/*
-  //LOG(DEBUG) << "fieldRenderers ...";
-  for (size_t ii = 0; ii < newFields.size(); ii++) {
-
-    //    displayFieldController->addField(newFields[ii]);
-
-    int fieldIdx = newFields[ii]->getButtonRow() - 1; // TODO: fix HACK!
-    //LOG(DEBUG) << "_fieldRenderers.size() before insert = " << lastFieldIdx;
-    // HERE ... 
-    // Q: What is fieldIndex?  
-    FieldRenderer *fieldRenderer =
-      new FieldRenderer(_params, fieldIdx, *newFields[ii]);
-    fieldRenderer->createImage(width(), height());
-    _fieldRendererController->addFieldRenderer(fieldRenderer);
-//    _fieldRenderers.push_back(fieldRenderer);
-
-    //LOG(DEBUG) << "_fieldRenderers.size() after insert = " << _fieldRenderers.size(); 
-
-  }
-*/
-  // TODO: this may be handled by addBeam, or fillColor?
-  //_ppiBeamController->addFieldsToEachBeam(needRay, newFields);    
-
-
-  // activateArchiveRendering();
   LOG(DEBUG) << "exit";
 }
-
-
-/*
-// TODO: this should be a slot?
-// TODO: sort out new fields in PolarManager
-// Who needs to know about the new fields?
-// Beams, FieldRenderers, DisplayFieldController 
-void PolarWidget::updateField(size_t fieldIdx) 
-{
-  LOG(DEBUG) << "enter";
-
-  _fieldRendererController->updateImage(fieldIdx, width(), height());
-      //    fieldRenderer->createImage(width(), height());
-
-  LOG(DEBUG) << "exit";
-}
-*/
 
 /*************************************************************************
  * turn on archive-style rendering - all fields
@@ -448,14 +364,7 @@ void PolarWidget::updateField(size_t fieldIdx)
 void PolarWidget::activateArchiveRendering()
 {
   LOG(DEBUG) << "enter";
-  //_fieldRendererController->activateArchiveRendering();
-  //_fieldRendererController->performRendering(0); 
-  /*
-  LOG(DEBUG) << "_fieldRenderers.size()  = " << _fieldRenderers.size(); 
-  for (size_t ii = 0; ii < _fieldRenderers.size(); ii++) {
-    _fieldRenderers[ii]->setBackgroundRenderingOn();
-  }
-  */
+
   LOG(DEBUG) << "exit";
 }
 
@@ -470,31 +379,11 @@ void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle
 {
   try {
 
-    // If we weren't rendering the current field, do nothing
-    //if (field_num != selectedField) {
-    //  return;
-    //}
-    //update();
-
-    //setImage(
     // set the context ...
     _currentSweepAngle = currentSweepAngle;
     _rayLocationController = rayLocationController;
     _currentColorMap = colorMap;
     _backgroundColor = backgroundColor;
-    /*
-      _fieldRendererController->renderImage(width(), height(), 
-      currentFieldName, _zoomTransform, currentSweepAngle,
-      rayLocationController, colorMap, "purple"); // backgroundColor);
-     */
-
-/*
-  _fieldRendererController->refreshImages(width(), height(), size(),
-            _backgroundBrush.color().rgb(),
-            _zoomTransform, 
-            selectedField, 
-            _ppiBeams);
-            */
     
     update();
   } catch (std::range_error &ex) {
@@ -514,8 +403,6 @@ void PolarWidget::backgroundColor(const QColor &color)
   QPalette new_palette = palette();
   new_palette.setColor(QPalette::Dark, _backgroundBrush.color());
   setPalette(new_palette);
-  //_dirty = true;
-  //_refreshImages();
 }
 
 
@@ -565,8 +452,6 @@ QPixmap* PolarWidget::getPixmap()
   return pixmap;
 }
 
-
-
 void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) {
         qreal sx = _zoomTransform.m11();
         qreal sy = _zoomTransform.m22();
@@ -587,70 +472,17 @@ void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) 
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  /*
-  if (e->button() == Qt::RightButton) {
-
-    //-------
-
-      QPointF clickPos(e->pos());
-
-      _mousePressX = e->x();
-      _mousePressY = e->y();
-
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
-      emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
-
-  } else {
-  */
-
-  /* ----
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-      _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-      _worldPressY *= -1.0;
-      //_worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-      //_worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
-      // if mouse was pressed near a boundary point, then move the boundary point
-      // otherwise, this is a zoom
-      if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
-
-  // ---  
-  */
-
-
-
   _mousePressX = e->x();
   _mousePressY = e->y();
 
-  //_worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  //_worldPressY = _zoomWorld.getYWorld(_mousePressY);
-
   mapPixelToWorld(_mousePressX, _mousePressY, &_worldPressX, &_worldPressY);
-  /*
-        int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
-        qreal sx = _zoomTransform.m11();
-        qreal sy = _zoomTransform.m22();
-        qreal dx = _zoomTransform.dx();
-        qreal dy = _zoomTransform.dy();        
-        _worldPressY = (_mousePressY - dy) / sy;
-        _worldPressX = (_mousePressX - dx) / sx;
-        //yMinWorld = (yMin - dy) / sy;
-        //xMinWorld = (xMin - dx) / sx;
-  */
 
-  //_worldPressY *= -1.0; // rotate about the x-axis 180 degrees
-  //}
   if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
       _rubberBand->hide();
       _boundaryTrackMouseMove = true;
   } else {
       _rubberBand->setGeometry(QRect(e->pos(), QSize()));
       _rubberBand->show();
-      //_boundaryTrackMouseMove = false;
   }
 }
 
@@ -661,57 +493,18 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
-  double worldX; //  = _zoomWorld.getXWorld(e->pos().x());
-  double worldY; //  = _zoomWorld.getYWorld(e->pos().y());
+  double worldX;
+  double worldY;
 
-  //worldY *= -1.0; // rotate about the x-axis 180 degrees
-
-  /*----
-        //int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
-        qreal sx = _zoomTransform.m11();
-        qreal sy = _zoomTransform.m22();
-        qreal dx = _zoomTransform.dx();
-        qreal dy = _zoomTransform.dy();        
-        worldY = (e->pos().y() - dy) / sy;
-        worldX = (e->pos().x() - dx) / sx;
-  //----
-  */
   mapPixelToWorld(e->pos().x(), e->pos().y(), &worldX, &worldY);
-
-  // ---- insert here ---
-
-  //_manager->mouseMoveEvent(worldX, worldY);
   
-  //if (_manager._boundaryEditorDialog->isVisible()) {
   if (_boundaryTrackMouseMove) {
-    /*BoundaryToolType tool = BoundaryPointEditor::Instance()->getCurrentTool();
-  
-    if (tool == BoundaryToolType::polygon &&
-        BoundaryPointEditor::Instance()->isAClosedPolygon() &&
-        BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY)) {
-      BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
-    } else if (tool == BoundaryToolType::brush) {
-      BoundaryPointEditor::Instance()->addToBrushShape(worldX, worldY);
-    }
-    */
-    //_dirty = true;
     _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
       worldX, worldY);
     update();
     return;    
   }
    
-
-  /* ---- cut here --- 
-  if (_manager._boundaryEditorDialog->isVisible() && BoundaryPointEditor::Instance()->isPolygonFinished() && BoundaryPointEditor::Instance()->isOverAnyPoint(worldX, worldY))
-  {
-	BoundaryPointEditor::Instance()->moveNearestPointTo(worldX, worldY);
-	update();
-	return;
-  }
-  // ----- cut here ----
-  */
-
   // Zooming with the mouse
 
   int x = e->x();
@@ -737,9 +530,7 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
   _zoomCornerX = _mousePressX + moveX;
   _zoomCornerY = _mousePressY + moveY;
   
-  //if (_rubberBand->shape() != QRubberBand::Rectangle) {
-    newRect = newRect.normalized();
-  //}
+  newRect = newRect.normalized();
   _rubberBand->setGeometry(newRect);
 
 }
@@ -759,31 +550,6 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   
   _mouseReleaseX = clickPos.x();
   _mouseReleaseY = clickPos.y();
-  //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-  //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-  //QTransform flipTransform = _zoomTransform;
-  //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
-  //qreal mx = _mouseReleaseX;
-  //qreal my = _mouseReleaseY;
-  //qreal wx;
-  //qreal wy;
-  //flipTransform.map(mx, my, &wx, &wy);
-  //_worldReleaseX = wx;
-  //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-  //LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
-  //LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
-  //LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;  
-
-
-  /* ---
-        qreal sx = _zoomTransform.m11();
-        qreal sy = _zoomTransform.m22();
-        qreal dx = _zoomTransform.dx();
-        qreal dy = _zoomTransform.dy();        
-        _worldReleaseY = (_mouseReleaseY - dy) / sy;
-        _worldReleaseX = (_mouseReleaseX - dx) / sx;
-  // --- 
-  */
 
   mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
   // get click location in world coords
@@ -796,19 +562,7 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     if (rgeom.width() <= 20) {
       // If the mouse hasn't moved much, assume we are clicking rather than
       // zooming
-      //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-      //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-      //QTransform flipTransform = _zoomTransform;
-      //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
-      //qreal mx = _mouseReleaseX;
-      //qreal my = _mouseReleaseY;
-      //qreal wx;
-      //qreal wy;
-      //flipTransform.map(mx, my, &wx, &wy);
-      //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-      //LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
-      //LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
-      //LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;    
+  
       double x_km = _worldReleaseX;
       double y_km = _worldReleaseY;
       _pointClicked = true;
@@ -819,18 +573,10 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     } else {
       // mouse moved more than 20 pixels, so a zoom occurred
       // or moving boundary points
-      //_worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      //_worldPressY = _zoomWorld.getYWorld(_mousePressY);
-      //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-      //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-      //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-      //_worldPressY *= -1.0;
-      //_worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
-      //_worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
+
       // if mouse was pressed near a boundary point, then move the boundary point
       // otherwise, this is a zoom
       if (_boundaryTrackMouseMove) {
-      //if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
         _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
           _worldReleaseX, _worldReleaseY);
       } else {
@@ -841,16 +587,6 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         rgeom.getCoords(&xMin, &yMax, &xMax, &yMin);
 
         double xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
-        /*
-        qreal sx = _zoomTransform.m11();
-        qreal sy = _zoomTransform.m22();
-        qreal dx = _zoomTransform.dx();
-        qreal dy = _zoomTransform.dy();        
-        yMaxWorld = (yMax - dy) / sy;
-        xMaxWorld = (xMax - dx) / sx;
-        yMinWorld = (yMin - dy) / sy;
-        xMinWorld = (xMin - dx) / sx;
-        */
 
         mapPixelToWorld(xMax, yMax, &xMaxWorld, &yMaxWorld);
         mapPixelToWorld(xMin, yMin, &xMinWorld, &yMinWorld);
@@ -888,32 +624,12 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   QImage m_base_buffer;
 
   try {
-    //_refreshImages();
-    //QImage image;
     QPainter painter(this); //
     // QPainter painter(this);  If you paint to a Widget, can only be done inside paintEvent
 
-    //painter.save();
-    //painter.setCompositionMode(QPainter::CompositionMode_Source);
-
-    
-    /*
-    if (_image != NULL) {
-        LOG(DEBUG) << "image is NOT NULL image = " << _image;
-        painter.drawImage(0, 0, *_image);
-            //painter.drawImage(100, 300, *_image);
-    }
-    */
-    //painter.restore();
-    //-------- here kluge ... content of showSelectedField ...
-
     string selectedField = displayFieldController->getSelectedFieldName();
     if (selectedField.length() > 0) {
-      //_fieldRendererController->renderImage(&painter, selectedField);
 
-
-      
-//-----
         // using a QImage
         if (1){ // m_buffer.size() != size()) {
             LOG(DEBUG) << " inside first QImage size = " << width() << " x " << height();
@@ -930,9 +646,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
             _fieldRendererController->renderImage(p, 0, 0, // 0 means they aren't used; width(), height(), 
               selectedField, _zoomTransform, 
               _currentSweepAngle,
-              _rayLocationController, _currentColorMap, _backgroundBrush.color()); // "purple"); // backgroundColor);
+              _rayLocationController, _currentColorMap, _backgroundBrush.color());
         }
-
 
         // TODO: move to sizeInBytes when no longer supporting Centos7;
         // byteCount() and numBytes() are obsolete.
@@ -942,82 +657,18 @@ void PolarWidget::paintEvent(QPaintEvent *event)
         {
             QPainter p(&m_buffer);
             p.setTransform(_zoomTransform);
-            //drawSource(p);
-            // draw overlays
-            //p.setPen(Qt::blue);
-            //p.setFont(QFont("Arial", 30));
-            //trial += 1;
-            //QString theText;
-            //theText.append("Qt ");
-            //QString junk; junk.setNum(trial);
-            //theText.append(junk);
-            //painter.drawText(rect(), Qt::AlignCenter, theText);
-            //p.drawText(50, 50, "50, 50"); // theText);
-            //p.drawText(-50, 50, "-50, 50");
-            //p.drawText(-50, -50, "-50, -50");
-            
             _drawOverlays(p);
-            //_drawBoundary(p);
             _manager->drawBoundary(_zoomWorld, p);  
             //if there are no points, this does nothing
             // todo overlay boundary image
         }
 
-        //painter.setTransform(_zoomTransform);
         bool horizontal = false;
         bool vertical = true;
-        painter.drawImage(0, 0, m_buffer); // .mirrored(horizontal, vertical));
-//----  
-
-
-
-
-// need to plot data in a QImage, so that the overlays don't wipe out the data
-
-      //QImage myimage("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
-      //painter.drawImage(0,0, *image);
-
+        painter.drawImage(0, 0, m_buffer);
+      // need to plot data in a QImage, so that the overlays don't wipe out the data
    
-
     }
-/*  }
-      // keep pointer to BoundaryPointEditorControl ???
-
-      //QImage _boundaryImage = 
-      //_manager->drawBoundary(_zoomWorld, painter);  
-      //if there are no points, this does nothing
-      // todo overlay boundary image
-    } else {
-      LOG(DEBUG) << "selected field is empty";
-      painter.drawText(rect(), Qt::AlignCenter, "No image available"); 
-    }
-    //-- end kluge
-    */
-
-    /*
-    string selectedField = displayFieldController->getSelectedFieldName();
-    _image = _fieldRendererController->getImage(selectedField);
-  //update(); 
-  QPainter painter(this);
-  //size_t selectedField = displayFieldController->getSelectedFieldNum();
-
-  //FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
-
-  //QImage *image = _fieldRendererController->getImage(selectedField, selectedSweep);
-  //painter.drawImage(0, 0, *(displayFieldController->getSelectedFieldImage()));
-  //painter.(0, 0, *(fieldRenderer->getImage()));
-  //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
-  // _image should already be set by previous slot imageReady
-  if (_image != NULL) {
-    painter.drawImage(0, 0, *_image);
-        //painter.drawImage(100, 300, *_image);
-  }
-
-  _drawOverlays(painter);
-
-  BoundaryPointEditor::Instance()->draw(_zoomWorld, painter);  //if there are no points, this does nothing
-   */
   } catch (const std::out_of_range& ex) {
     LOG(DEBUG) << ex.what();
   } catch (std::range_error &ex) {
@@ -1034,36 +685,6 @@ void PolarWidget::showSelectedField()
     string selectedField = displayFieldController->getSelectedFieldName();
     if (selectedField.length() > 0) {
 
-      //setImage(_fieldRendererController->getImage(selectedField));
-
-      //update(); 
-      //QPainter painter(this);
-      //size_t selectedField = displayFieldController->getSelectedFieldNum();
-
-      //FieldRenderer *fieldRenderer = _fieldRendererController->get(selectedField);
-
-      //QImage *image = _fieldRendererController->getImage(selectedField, selectedSweep);
-      //painter.drawImage(0, 0, *(displayFieldController->getSelectedFieldImage()));
-      //painter.(0, 0, *(fieldRenderer->getImage()));
-      //  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
-
-      /* moved to paintEvent ...
-      // _image should already be set by previous slot imageReady
-      if (_image != NULL) {
-        LOG(DEBUG) << "image is NOT NULL";
-        painter.drawImage(0, 0, *_image);
-            //painter.drawImage(100, 300, *_image);
-      }
-      */
-
-      //_drawOverlays(painter);
-
-      // keep pointer to BoundaryPointEditorControl ???
-
-      //QImage _boundaryImage = 
-      //_manager->drawBoundary(_zoomWorld, painter);  
-      //if there are no points, this does nothing
-      // todo overlay boundary image
     } else {
       LOG(DEBUG) << "selected field is empty";
     }
@@ -1110,7 +731,6 @@ void PolarWidget::resize(const int width, const int height)
   int new_height = sizeNeeded;
   setGeometry(0, 0, new_width, new_height);
 
-  //_resetWorld(new_width, new_height);
   LOG(DEBUG) << "exit";
 }
 
@@ -1145,34 +765,6 @@ void PolarWidget::_setTransform(const QTransform &transform)
   
 }
   
-/*************************************************************************
- * perform the rendering
- */
-/*
-void PolarWidget::_performRendering()
-{
-  LOG(DEBUG) << "enter";
-  
-  try {
-    size_t selectedField = displayFieldController->getSelectedFieldNum();
-    _fieldRendererController->performRendering(selectedField);
-    update();
-  } catch (std::range_error &ex) {
-      LOG(ERROR) << ex.what();
-      // QMessageBox::warning(NULL, "Error changing color map", ex.what());
-  }
-  
-  LOG(DEBUG) << "exit";
-}
-*/
-
-/*
-void PolarWidget::setImage(QImage *image) {
-  //_image = image;
-  //LOG(DEBUG) << "\n\n IMAGE = " <<  _image;
-}
-*/
-
 void PolarWidget::informationMessage()
 {
   // QMessageBox::StandardButton reply;
@@ -1213,68 +805,8 @@ void PolarWidget::notImplemented()
 const RadxRay *PolarWidget::_getClosestRay(double x_km, double y_km)
 
 {
-
-  /* TODO: fix up ... 
-
-  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
-  double radarDisplayAz = 90.0 - clickAz;
-  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-                          << x_km << "," << y_km; 
-  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
-             << x_km << y_km;
-
-  double minDiff = 1.0e99;
-  const RadxRay *closestRay = NULL;
-  // _ppiBeams may be empty at this point, so get the closest ray from the 
-  // RadxVol itself.
-  // 
-  LOG(DEBUG) << "_ppiBeams.size() = " << _ppiBeams.size();
-  for (size_t ii = 0; ii < _ppiBeams.size(); ii++) {
-    const RadxRay *ray = _ppiBeams[ii]->getRay();
-    double rayAz = ray->getAzimuthDeg();
-    // LOG(DEBUG) << "rayAz = " << rayAz;
-    double diff = fabs(radarDisplayAz - rayAz);
-    if (diff > 180.0) {
-      diff = fabs(diff - 360.0);
-    }
-    if (diff < minDiff) {
-      closestRay = ray;
-      minDiff = diff;
-    }
-  }
-
-  if (closestRay != NULL)
-    LOG(DEBUG) << "closestRay has azimuth " << closestRay->getAzimuthDeg();
-  else
-    LOG(DEBUG) << "Error: No ray found";
-  return closestRay;
-*/
   return NULL;
-
 }
-
-
-/*
-////////////////////////////////////////////////////////////////////////////
-// get azimuth closest to click point
-
-double PolarWidget::_getClosestAz(double x_km, double y_km)
-
-{
-
-  double clickAz = atan2(y_km, x_km) * RAD_TO_DEG;
-  double radarDisplayAz = 90.0 - clickAz;
-  if (radarDisplayAz < 0.0) radarDisplayAz += 360.0;
-  LOG(DEBUG) << "clickAz = " << clickAz << " from x_km, y_km = " 
-                          << x_km << "," << y_km; 
-  LOG(DEBUG) << "radarDisplayAz = " << radarDisplayAz << " from x_km, y_km = "
-             << x_km << y_km;
-
-  return radarDisplayAz;
-
-}
-*/
 
 /*************************************************************************
  * _setGridSpacing()
@@ -1346,8 +878,7 @@ void PolarWidget::drawRings(QPainter &painter)
   if (!_ringsEnabled && !_gridsEnabled && !_angleLinesEnabled) {
     return;
   }
-  //LOG(DEBUG) << "before annoying thing";
-  //    painter.drawText(30, 30, "annoying thing!");
+
   // save painter state
 
   painter.save();
@@ -1369,21 +900,7 @@ void PolarWidget::drawRings(QPainter &painter)
   // Draw rings
 
   if (_ringSpacing > 0.0 && _ringsEnabled) {
-
-    // Set up the painter
   
-    //painter.save();
-    //painter.setTransform(_zoomTransform);
-    //painter.setPen(_gridRingsColor);
-  
-    // set narrow line width
-    //QPen pen = painter.pen();
-    //pen.setWidth(0);
-    //QBrush brush("black", Qt::CrossPattern);
-    //pen.setBrush(brush);
-    //painter.setPen(pen);
-    //painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-
     LOG(DEBUG) << "_ringSpacing = " << _ringSpacing;
     double ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
@@ -1392,29 +909,18 @@ void PolarWidget::drawRings(QPainter &painter)
       ringRange += _ringSpacing;
     }
 
-  
     // Draw the labels
     painter.save();
 
     QTransform xform = painter.worldTransform();
 
-    //QTransform flipTransform;
-    //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
-    //bool combine = true;
-    //painter.setWorldTransform(flipTransform, combine);
     QTransform identity;
     painter.setWorldTransform(identity, false);
     QFont font = painter.font();
-    //qreal pointSize = _params->range_ring_label_font_size / hscale;
-    //if (pointSize < 0.5) pointSize = 0.5;
-    //cerr << "pointSize = " << pointSize << endl;
 
-    font.setPointSize(12); // pointSize);
-    //font.setPixelSize(10);
-      //_zoomWorld.getXPixelsPerWorld());
+    font.setPointSize(12);
     painter.setFont(font);
 
-    
     ringRange = _ringSpacing;
     while (ringRange <= _maxRangeKm) {
       double labelPosD = ringRange * SIN_45;
@@ -1422,32 +928,20 @@ void PolarWidget::drawRings(QPainter &painter)
       int labelPos = (int) labelPosD;
       QString labelStr(labelStrS.c_str());
 
-      /* draws text with scale, inside zoom coordinates
-      painter.drawText(  labelPos, labelPos, labelStr); // Qt::AlignCenter);
-      painter.drawText(  -labelPos, labelPos, labelStr); // Qt::AlignCenter);
-      painter.drawText(  labelPos, -labelPos, labelStr); // Qt::AlignCenter);
-      painter.drawText(  -labelPos, -labelPos, labelStr); // Qt::AlignCenter);
-      */
-      // drawText without scaling; outsize zoom coordinates
-      //double vlabelPosD = labelPosD / vscale + vtranslate;
-      //double hlabelPosD = labelPosD / hscale + htranslate;  
-      //int vlabelPos = (int) vlabelPosD;
-      //int hlabelPos = (int) hlabelPosD;          
-      //cerr << "hlabelPos, vlabelPos = " << hlabelPos << ", " << vlabelPos << endl;
       qreal x; 
       qreal y;
       qreal labelPosQR = (qreal) labelPosD; 
       xform.map(labelPosQR, labelPosQR, &x, &y);
-      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+      painter.drawText(  x, y, labelStr);
 
       xform.map(-labelPosQR, labelPosQR, &x, &y);
-      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+      painter.drawText(  x, y, labelStr);
 
       xform.map(labelPosQR, -labelPosQR, &x, &y);
-      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+      painter.drawText(  x, y, labelStr);
 
       xform.map(-labelPosQR, -labelPosQR, &x, &y);
-      painter.drawText(  x, y, labelStr); // Qt::AlignCenter);
+      painter.drawText(  x, y, labelStr);
 
       ringRange += _ringSpacing;
     }
@@ -1520,9 +1014,6 @@ void PolarWidget::drawAzimuthLines(QPainter &painter) {
   
     // Draw the lines along the X and Y axes
 
-    //_zoomWorld.drawLine(painter, 0, -_maxRangeKm, 0, _maxRangeKm);
-    //_zoomWorld.drawLine(painter, -_maxRangeKm, 0, _maxRangeKm, 0);
-
     painter.drawLine(0, -_maxRangeKm, 0, _maxRangeKm);
     painter.drawLine(-_maxRangeKm, 0, _maxRangeKm, 0);
 
@@ -1575,14 +1066,9 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
 
   const std::vector<ColorMap::CmapEntry> &cmap = colorMap.getEntries();
 
-
-  //QTransform transform = painter.transform. getXPixelsPerWorld
-      // plot using x:0 - 100, y: 0 - 100; (0,0) upper left corner
+  // plot using x:0 - 100, y: 0 - 100; (0,0) upper left corner
   QTransform *textTransform = configureTextTransform();
   painter.setWorldTransform(*textTransform); 
-
-  //textTransform.getXPixelsPerWorld() ???? // This is from WorldPlot, we aren't doing this.
-
 
   //int _plotHeight = height();
   int _widthPixels = width();
@@ -1649,18 +1135,9 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
   // scale the font
   
   QFont font = painter.font();
-  /*
-  if (defaultFont.pointSize() > patchHt / 3) {
-    int pointSize = patchHt / 3;
-    if (pointSize < 7) {
-      pointSize = 7;
-    }
-    QFont scaledFont(defaultFont);
-    scaledFont.setPointSizeF(pointSize);
-    */
-    font.setPointSize(2);
-    painter.setFont(font);
-  //}
+
+  font.setPointSize(2);
+  painter.setFont(font);
   
   // add labels
 
@@ -1702,14 +1179,7 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
     for (size_t ii = 0; ii < cmap.size(); ii++) {
       const ColorMap::CmapEntry &entry = cmap[ii];
       QString label = QString("%1").arg(entry.minVal,0,format,ndecimals);
-      //int iyy = (int) yy;
-      //bool doText = false;
-      //if (prevIyy < 0) {
-      //  doText = true;
-      //} else if ((prevIyy - iyy) > textHt * 2) {
-      //  doText = true;
-      //}
-      //if (doText) {
+
         double yPos = 100 - bottomMargin - ii*patchHt - (textHt+4)/2; // /2;
         painter.drawText(xStartPlusABit, //  xStart+5, 
                          (int) yPos, // iyy, 
@@ -1717,9 +1187,6 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
                          width + 4, textHt + 4, 
                          Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
                          label);
-      //  prevIyy = iyy;
-      //}
-      //yy -= patchHt;
     }
     
     // last label at top
@@ -1733,16 +1200,7 @@ void PolarWidget::drawColorScaleFromWorldPlot(const ColorMap &colorMap,
                          //width, iPatchHt, 
                          width + 4, textHt + 4, 
                          Qt::AlignLeft | Qt::AlignVCenter, // Qt::AlignCenter | Qt::AlignHCenter, 
-                         label);
-
-    //int iyy = (int) yy;
-    //if ((prevIyy - iyy) > textHt * 2) {
-    //  painter.drawText(xStart, iyy, width, iPatchHt, 
-    //                   Qt::AlignVCenter | Qt::AlignHCenter, 
-    //                   label);
-    //}
-    //yy -= patchHt;
-    
+                         label);    
   }
 
 /*  // add Units label
@@ -1986,87 +1444,3 @@ void PolarWidget::_drawScreenText(QPainter &painter,
   painter.drawText(bRect, flags, text.c_str());
     
 }
-
-/*
-void PolarWidget::_refreshImages()
-{
-
-  //FieldRendererController::refreshImages(int width, int height, QSize image_size,
-  //            QColor backgroundColor, // QRgb background_brush_color_rgb,
-  //            QTransform zoomTransform,
-  //            size_t selectedField,
-  //            vector< PpiBeam* > &Beams);
-  LOG(DEBUG) << "enter " << "image dirty? = " << (_dirty ? "true" : "false");
-  //if (_dirty) {
-    _fieldRendererController->refreshImages(width(), height(), size(),
-            _backgroundBrush, // .color().rgb(),
-            _zoomTransform); 
-            //selectedField);
-            // _ppiBeams);
-  //  _dirty = false;
-  }
-
-  LOG(DEBUG) << "exit";
-}
-*/
-
-/* slots for context editing; create and show the associated modeless dialog and return                                   
-
-void PolarWidget::contextMenuCancel()
-{
-  //  informationMessage();
-
-  //notImplemented();                                                                                                     
-}
-
-void PolarWidget::contextMenuParameterColors()
-{
-
-  informationMessage();
-   
-}
-
-void PolarWidget::contextMenuView()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-void PolarWidget::contextMenuEditor()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-
-
-void PolarWidget::contextMenuExamine()         
-{
-  informationMessage();                                                                                                 
-
-}
-
-void PolarWidget::contextMenuDataWidget()
-{
-  informationMessage();
-
-  //  notImplemented();                                                                                                   
-}
-
-void PolarWidget::contextMenuHistogram()
-{
-  informationMessage();
-  //  notImplemented();                                                                                                   
-}
-*/
-/*
-void PolarWidget::ExamineEdit(const RadxRay *closestRay) 
-{
-  notImplemented();
-}
-
-void PolarWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol) 
-{  
-  notImplemented();
-}
-
-*/
