@@ -490,7 +490,7 @@ void SpreadSheetView::createActions()
     connect(applyEditsAction, &QAction::triggered, this, &SpreadSheetView::applyChanges);
 
     clearEditsAction = new QAction(tr("&Clear Edits"), this);
-    //connect(replotAction, &QAction::triggered, this, &SpreadSheetView::replot);
+    connect(clearEditsAction, &QAction::triggered, this, &SpreadSheetView::applyEdits);
 
 }
 
