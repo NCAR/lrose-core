@@ -84,6 +84,7 @@ public slots:
   void adjustNyquistFromRay(float factor, int top);
   void adjustNyquistFromSelection(float factor);
   void adjustNyquistFromSelectionToEnd(float factor);
+  void adjustNyquistGeneral(float factor, bool fromSelection, int startRow);
 
   void notImplementedMessage();
 

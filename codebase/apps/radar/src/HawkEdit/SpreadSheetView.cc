@@ -1450,6 +1450,11 @@ void SpreadSheetView::addNyquistFromSelectionToEnd() {
 
 void SpreadSheetView::adjustNyquistFromSelectionToEnd(float factor) {
 
+  int top = 0;
+  bool fromSelection = true;
+  adjustNyquistGeneral(factor, fromSelection, top);
+    /*
+
     //QModelIndexList indexList = table->selectedIndexes();
     QList<QTableWidgetItem *> indexList = table->selectedItems();
 
@@ -1476,18 +1481,57 @@ void SpreadSheetView::adjustNyquistFromSelectionToEnd(float factor) {
     // set new value
     adjustNyquistFromSelection(factor);
   // --  
+  */
 }
 
 void SpreadSheetView::subtractNyquistFromRay() {
   float factor = -1.0;
-  int top = 1;
-  adjustNyquistFromRay(factor, top);
+  int top = 0;
+  bool fromSelection = false;
+  adjustNyquistGeneral(factor, fromSelection, top);
 }
 
 void SpreadSheetView::addNyquistFromRay() {
   float factor = 1.0;
-  int top = 1;
-  adjustNyquistFromRay(factor, top);
+  int top = 0;
+  bool fromSelection = false;
+  adjustNyquistGeneral(factor, fromSelection, top);
+}
+
+
+void SpreadSheetView::adjustNyquistGeneral(float factor, bool fromSelection, int startRow) {
+
+    //QModelIndexList indexList = table->selectedIndexes();
+    QList<QTableWidgetItem *> indexList = table->selectedItems();
+
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = indexList.begin(); i != indexList.end(); ++i) {     
+        QTableWidgetItem *selection = *i;
+        int column = selection->column();
+        int top;
+        if (fromSelection) {
+            int row = selection->row();
+            top = row;
+        } else {
+            top = startRow;
+        }
+        int currentColumn = column; // table->currentColumn();
+        //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
+        //int top = 1;
+        int left = currentColumn;
+        int bottom = table->rowCount() - 1;
+        int right = currentColumn;
+         
+        QTableWidgetSelectionRange range(top, left, bottom, right);
+        bool select = true;
+        table->setRangeSelected(range, select);
+    }
+    // subtract the Nyquist value from the ray data 
+    // for each selected cell
+    // subtract Nyquist
+    // set new value
+    adjustNyquistFromSelection(factor);
+  // --  
 }
 
 // factor = -1.0 to subtract
