@@ -566,6 +566,16 @@ QPixmap* PolarWidget::getPixmap()
 }
 
 
+
+void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) {
+        qreal sx = _zoomTransform.m11();
+        qreal sy = _zoomTransform.m22();
+        qreal dx = _zoomTransform.dx();
+        qreal dy = _zoomTransform.dy();        
+        *worldY = (y - dy) / sy;
+        *worldX = (x - dx) / sx;
+}
+
 /*************************************************************************
  * Slots
  *************************************************************************/
@@ -616,9 +626,23 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
   _mousePressX = e->x();
   _mousePressY = e->y();
 
-  _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-  _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-  _worldPressY *= -1.0; // rotate about the x-axis 180 degrees
+  //_worldPressX = _zoomWorld.getXWorld(_mousePressX);
+  //_worldPressY = _zoomWorld.getYWorld(_mousePressY);
+
+  mapPixelToWorld(_mousePressX, _mousePressY, &_worldPressX, &_worldPressY);
+  /*
+        int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+        qreal sx = _zoomTransform.m11();
+        qreal sy = _zoomTransform.m22();
+        qreal dx = _zoomTransform.dx();
+        qreal dy = _zoomTransform.dy();        
+        _worldPressY = (_mousePressY - dy) / sy;
+        _worldPressX = (_mousePressX - dx) / sx;
+        //yMinWorld = (yMin - dy) / sy;
+        //xMinWorld = (xMin - dx) / sx;
+  */
+
+  //_worldPressY *= -1.0; // rotate about the x-axis 180 degrees
   //}
   if (_manager->isOverBoundaryPoint(_worldPressX, _worldPressY)) {
       _rubberBand->hide();
@@ -637,10 +661,22 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
-  double worldX = _zoomWorld.getXWorld(e->pos().x());
-  double worldY = _zoomWorld.getYWorld(e->pos().y());
+  double worldX; //  = _zoomWorld.getXWorld(e->pos().x());
+  double worldY; //  = _zoomWorld.getYWorld(e->pos().y());
 
-  worldY *= -1.0; // rotate about the x-axis 180 degrees
+  //worldY *= -1.0; // rotate about the x-axis 180 degrees
+
+  /*----
+        //int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+        qreal sx = _zoomTransform.m11();
+        qreal sy = _zoomTransform.m22();
+        qreal dx = _zoomTransform.dx();
+        qreal dy = _zoomTransform.dy();        
+        worldY = (e->pos().y() - dy) / sy;
+        worldX = (e->pos().x() - dx) / sx;
+  //----
+  */
+  mapPixelToWorld(e->pos().x(), e->pos().y(), &worldX, &worldY);
 
   // ---- insert here ---
 
@@ -723,8 +759,8 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   
   _mouseReleaseX = clickPos.x();
   _mouseReleaseY = clickPos.y();
-  _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-  _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+  //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+  //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
   //QTransform flipTransform = _zoomTransform;
   //flipTransform.rotateRadians(-M_PI, Qt::XAxis); 
   //qreal mx = _mouseReleaseX;
@@ -733,11 +769,23 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   //qreal wy;
   //flipTransform.map(mx, my, &wx, &wy);
   //_worldReleaseX = wx;
-  _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-  LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
-  LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
+  //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+  //LOG(DEBUG) << "_mouseReleaseX,Y= " << _mouseReleaseX << ", " << _mouseReleaseY;
+  //LOG(DEBUG) << "_worldReleaseX,Y= " << _worldReleaseX << ", " << _worldReleaseY; 
   //LOG(DEBUG) << "         flipX,Y= " << wx << ", " << wy;  
 
+
+  /* ---
+        qreal sx = _zoomTransform.m11();
+        qreal sy = _zoomTransform.m22();
+        qreal dx = _zoomTransform.dx();
+        qreal dy = _zoomTransform.dy();        
+        _worldReleaseY = (_mouseReleaseY - dy) / sy;
+        _worldReleaseX = (_mouseReleaseX - dx) / sx;
+  // --- 
+  */
+
+  mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
   // get click location in world coords
 
   // --- if shift key is down, then pass message on to boundary point control
@@ -771,12 +819,12 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     } else {
       // mouse moved more than 20 pixels, so a zoom occurred
       // or moving boundary points
-      _worldPressX = _zoomWorld.getXWorld(_mousePressX);
-      _worldPressY = _zoomWorld.getYWorld(_mousePressY);
-      _worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
-      _worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
-      _worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
-      _worldPressY *= -1.0;
+      //_worldPressX = _zoomWorld.getXWorld(_mousePressX);
+      //_worldPressY = _zoomWorld.getYWorld(_mousePressY);
+      //_worldReleaseX = _zoomWorld.getXWorld(_mouseReleaseX);
+      //_worldReleaseY = _zoomWorld.getYWorld(_mouseReleaseY);
+      //_worldReleaseY *= -1.0; // rotate about the x-axis 180 degrees
+      //_worldPressY *= -1.0;
       //_worldReleaseX = _zoomWorld.getXWorld(_zoomCornerX);
       //_worldReleaseY = _zoomWorld.getYWorld(_zoomCornerY);
       // if mouse was pressed near a boundary point, then move the boundary point
@@ -792,7 +840,8 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         int xMin, xMax, yMin, yMax;
         rgeom.getCoords(&xMin, &yMax, &xMax, &yMin);
 
-        int xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+        double xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+        /*
         qreal sx = _zoomTransform.m11();
         qreal sy = _zoomTransform.m22();
         qreal dx = _zoomTransform.dx();
@@ -801,6 +850,10 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
         xMaxWorld = (xMax - dx) / sx;
         yMinWorld = (yMin - dy) / sy;
         xMinWorld = (xMin - dx) / sx;
+        */
+
+        mapPixelToWorld(xMax, yMax, &xMaxWorld, &yMaxWorld);
+        mapPixelToWorld(xMin, yMin, &xMinWorld, &yMinWorld);
 
         _zoomWorld.set2(xMinWorld, yMinWorld, xMaxWorld, yMaxWorld);
         _setTransform(_zoomWorld.getTransform());

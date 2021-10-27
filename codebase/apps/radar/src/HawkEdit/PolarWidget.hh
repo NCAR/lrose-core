@@ -215,6 +215,8 @@ class DLL_EXPORT PolarWidget : public QWidget
     return _aspectRatio;
   }
 
+  void mapPixelToWorld(int x, int y, double *worldX, double *worldY);
+
   ////////////////
   // Qt signals //
   ////////////////
