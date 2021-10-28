@@ -54,16 +54,18 @@ public slots:
     void cancelFormulaInput();
     void displayHelp();
     void scriptComplete();
-  //void clear();
+    //void clear();
 
-  void notImplementedMessage();
+    void notImplementedMessage();
 
-  //void setupSoloFunctions(SoloFunctions *soloFunctions);
+    //void setupSoloFunctions(SoloFunctions *soloFunctions);
 
-  void fieldNamesProvided(vector<string> fieldNames);
-  //void fieldDataSent(vector<float> *data, int useless, int c);
+    void fieldNamesProvided(vector<string> fieldNames);
+    //void fieldDataSent(vector<float> *data, int useless, int c);
 
-  void applyChanges();
+    void applyChanges();
+    void currentSweepClicked(bool checked);
+    void allSweepsClicked(bool checked);
 
   //  void printQJSEngineContext();
 
@@ -108,9 +110,21 @@ private:
     QLabel *cellLabel;
     TextEdit *formulaInput;
     TextEdit *formulaInputForEachRay;
-    QCheckBox *useBoundaryWidget;
+    QPushButton *useBoundaryWidget;
+    //QRadioButton *applyToCurrentSweep;
+    //QRadioButton *applyToAllSweeps;
     QTreeView *helpView;
     QHBoxLayout *scriptEditLayout;
+
+    QPushButton *currentSweepToggleButton;
+    QPushButton *allSweepsToggleButton;
+    QGroupBox *scriptModifiers;
+    QVBoxLayout *checkBoxLayout;
+    QWidget *scriptEditWidget;
+
+    QVBoxLayout *helpViewLayout;
+    QWidget *helpWidget;
+
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
 

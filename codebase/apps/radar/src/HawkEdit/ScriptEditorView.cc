@@ -144,15 +144,51 @@ Q_DECLARE_METATYPE(QVector<double>)
     toolBar->addAction(applyAct);
 */
 
-    useBoundaryWidget = new QCheckBox("Use Boundary", this);
-    useBoundaryWidget->setChecked(true);
+    useBoundaryWidget = new QPushButton(tr("Use &Boundary"));
+    useBoundaryWidget->setCheckable(true);
+    useBoundaryWidget->setChecked(false);
+
+    //QGroupBox *sweepSelection = new QGroupBox("Select Sweep", this);
+    //sweepSelection->setFlat(true);
+    //sweepSelection->setExclusive(true);
+    //applyToCurrentSweep = new QRadioButton("current sweep", this);
+    //applyToAllSweeps = new QRadioButton("all sweeps", this);
+    //applyToCurrentSweep->setChecked(true);
+
+    currentSweepToggleButton = new QPushButton(tr("&Current Sweep"));
+    currentSweepToggleButton->setCheckable(true);
+    currentSweepToggleButton->setChecked(true);
+    allSweepsToggleButton = new QPushButton(tr("&All Sweeps"));
+    allSweepsToggleButton->setCheckable(true);
+    allSweepsToggleButton->setChecked(false);
+
+    //QVBoxLayout *vbox = new QVBoxLayout;
+    //vbox->addWidget(currentSweepToggleButton);
+    //vbox->addWidget(AllSweepsToggleButton);   
+    //vbox->addStretch(1);
+    //sweepSelection->setLayout(vbox); 
+
+    scriptModifiers = new QGroupBox("Modifiers", this);
+    checkBoxLayout = new QVBoxLayout;
+    checkBoxLayout->addWidget(useBoundaryWidget);
+    checkBoxLayout->addWidget(currentSweepToggleButton);
+    checkBoxLayout->addWidget(allSweepsToggleButton);
+    checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
+    scriptModifiers->setLayout(checkBoxLayout);
+
+    // QAbstractButton::clicked(bool checked = false)
+    // If the button is checkable, 
+    // checked is true if the button is checked, or false if the button is unchecked.
+    connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+    connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
     // scriptEditLayout->addWidget(oneTimeWidget);
-    scriptEditLayout->addWidget(useBoundaryWidget);
+    scriptEditLayout->addWidget(scriptModifiers);
+    //scriptEditLayout->addWidget(sweepSelection);
 
-    QWidget *scriptEditWidget = new QWidget();
+    scriptEditWidget = new QWidget();
     scriptEditWidget->setLayout(scriptEditLayout);
 
       //-------
@@ -177,13 +213,13 @@ Q_DECLARE_METATYPE(QVector<double>)
       helpView->setModel(model);
       //helpView->setWindowTitle(QObject::tr("Script Help"));
     //}
-    QVBoxLayout *helpViewLayout = new QVBoxLayout();
+    helpViewLayout = new QVBoxLayout();
     helpViewLayout->addWidget(new QLabel("Script Commands"));
     helpViewLayout->addWidget(helpView);
 
     //helpView->setEnabled(true); // TODO: help window not showing. 
     //scriptEditLayout->addWidget(helpView);
-    QWidget *helpWidget = new QWidget(); 
+    helpWidget = new QWidget(); 
     helpWidget->setLayout(helpViewLayout);
     //-------    
       
@@ -200,6 +236,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     //setCentralWidget(table);
     LOG(DEBUG) << "setCentralWidgets";
 
+/*
     QPushButton *firstSweepButton = new QPushButton("First Sweep");
     QPushButton *lastSweepButton = new QPushButton("Last Sweep");
     TextEdit *dateTimeFirstSweepInput = new TextEdit(this);
@@ -223,7 +260,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     QWidget *stopTimeWidget = new QWidget();
     startTimeWidget->setLayout(startTimeLayout);
     stopTimeWidget->setLayout(stopTimeLayout);
-    
+*/    
     //    QVBoxLayout *startStopTimeLayout = new QVBoxLayout();
     //startStopTimeLayout->addWidget(startTimeWidget);
     //startStopTimeLayout->addWidget(stopTimeWidget);
@@ -852,6 +889,29 @@ void ScriptEditorView::criticalMessage(std::string message)
 
 void ScriptEditorView::closeEvent() {
     emit scriptEditorClosed();
+}
+
+
+// QAbstractButton::clicked(bool checked = false)
+// If the button is checkable, 
+// checked is true if the button is checked, or false if the button is unchecked.
+//    connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+//    connect(AllSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
+
+void ScriptEditorView::currentSweepClicked(bool checked) {
+  if (checked) {
+    allSweepsToggleButton->setChecked(false);
+  } else {
+    allSweepsToggleButton->setChecked(true);    
+  }
+}
+
+void ScriptEditorView::allSweepsClicked(bool checked) {
+  if (checked) {
+    currentSweepToggleButton->setChecked(false);
+  } else {
+    currentSweepToggleButton->setChecked(true);    
+  }  
 }
 
 /*
