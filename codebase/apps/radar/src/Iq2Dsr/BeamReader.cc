@@ -1949,19 +1949,27 @@ void BeamReader::_setPrt()
   if (_params.override_primary_prt) {
     _prt = _params.primary_prt_secs;
   }
+
+  // check for staggered mode first, and then alternating
+  // if staggered, it cannot be alternating
+
+  _checkIsStaggeredPrt();
   
-  // check if we have alternating h/v pulses
-  
-  _checkIsAlternating();
+  if (_isStaggeredPrt) {
+    _isAlternating = false;
+  } else {
+    // check if we have alternating h/v pulses
+    _checkIsAlternating();
+  }
   
   // check if we have staggered PRT pulses - does not apply
   // to alternating mode
   
-  if (_isAlternating) {
-    _isStaggeredPrt = false;
-  } else {
-    _checkIsStaggeredPrt();
-  }
+  // if (_isAlternating) {
+  //   _isStaggeredPrt = false;
+  // } else {
+  //   _checkIsStaggeredPrt();
+  // }
   
   // compute mean PRF
   
