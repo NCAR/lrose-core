@@ -403,6 +403,8 @@ public:
 
   output_packing_t output_packing;
 
+  tdrp_bool_t add_xmit_mode_to_file_name;
+
   tdrp_bool_t save_normal_scan_data;
 
   tdrp_bool_t one_file_only;
@@ -472,7 +474,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 
