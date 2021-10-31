@@ -11,19 +11,24 @@ SUB_DIRS = \
 	tdrp \
 	scripts \
 	procmap \
+	titan \
+	trec \
+	didss \
+	ingest \
+	dsserver \
+	mdv_utils \
+        physics \
+        satApps \
+	spdb_utils \
+	filters \
+        awc \
+	hydro \
+	interp \
 	radar \
-        Radx 
-
-
-	# spdb_utils \
-        # physics \
-	# dsserver \
-	# trec \
-	#mdv_utils \
-	# didss \
-	# hydro \
-        # awc \
-	#interp \
-	# ingest \
+	refractt \
+        Radx \
+        cidd \
+        spol \
+        xpol
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
