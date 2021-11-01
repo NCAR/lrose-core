@@ -1550,23 +1550,6 @@ void Beam::_computeMomDpAltHvCoOnly()
 void Beam::_computeMomDpSimHv()
 {
 
-  // staggered PRT is a special case
-
-  if (_isStagPrt) {
-    for (int igate = 0; igate < _nGates; igate++) {
-      GateData *gate = _gateData[igate];
-      MomentsFields &fields = gate->fields;
-      _mom->dpSimHvStagPrt(gate->iqhcOrig,
-                           gate->iqvcOrig,
-                           gate->iqhcPrtShort,
-                           gate->iqvcPrtShort,
-                           gate->iqhcPrtLong,
-                           gate->iqvcPrtLong,
-                           igate, false, fields);
-    }
-    return;
-  }
-
   // copy gate fields to _momFields array
   
   for (int igate = 0; igate < _nGates; igate++) {
