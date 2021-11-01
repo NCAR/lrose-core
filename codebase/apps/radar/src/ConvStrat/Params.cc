@@ -956,6 +956,18 @@
     tt->single_val.d = 0.5;
     tt++;
     
+    // Parameter 'secondary_convectivity_for_dual_thresh'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("secondary_convectivity_for_dual_thresh");
+    tt->descr = tdrpStrDup("Secondary convectivity for dual threshold technique.");
+    tt->help = tdrpStrDup("The dual threshold procedure takes the primary clumps and breaks them apart by clumping at the secondary threshold, and then growing the secondary clumps back out again to the original boundaries. This helps to prevent large monolithic clumps.");
+    tt->val_offset = (char *) &secondary_convectivity_for_dual_thresh - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
     // Parameter 'max_convectivity_for_stratiform'
     // ctype is 'double'
     

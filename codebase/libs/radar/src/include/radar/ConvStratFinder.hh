@@ -133,6 +133,13 @@ public:
     _minConvectivityForConvective = val;
   }
   
+  // set secondary convectivity threshold for convective regions
+  // this is for splitting clumps using the dual-threshold technique
+  
+  void setSecondaryConvectivity(double val) {
+    _secondaryConvectivity = val;
+  }
+
   // Set convectivity threshold for stratiform regions.
   // Convectivity values below this indicate stratiform.
   // Convectivity values between this and minConvectivityForConvective
@@ -313,6 +320,7 @@ private:
 
   double _minConvectivityForConvective;
   double _maxConvectivityForStratiform;
+  double _secondaryConvectivity;
   int _minOverlapForClumping;
 
   double _dbzForEchoTops;

@@ -70,6 +70,7 @@ ConvStratFinder::ConvStratFinder()
   _minVertExtentForConvectiveKm = 1.0; 
 
   _minConvectivityForConvective = 0.5;
+  _secondaryConvectivity = 0.7;
   _maxConvectivityForStratiform = 0.4;
   _minOverlapForClumping = 1;
 
@@ -732,6 +733,18 @@ void ConvStratFinder::_performClumping()
     gridGeom.setProjType(PjgTypes::PROJ_FLAT);
   }
 
+  double minFractionAllParts = 0.5;
+  double minFractionEachPart = 0.05;
+  double minAreaEachPart = 20.0;
+
+  _clumping.setUseDualThresholds(_secondaryConvectivity,
+                                 minFractionAllParts,
+                                 minFractionEachPart,
+                                 minAreaEachPart,
+                                 _minVolForConvectiveKm3,
+                                 1.0e99,
+                                 _verbose);
+  
   vector<ClumpProps> clumpVec;
   _clumping.loadClumpVector(gridGeom, _convectivity3D.dat(), 
                             _minConvectivityForConvective,

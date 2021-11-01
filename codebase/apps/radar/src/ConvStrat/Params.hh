@@ -429,6 +429,8 @@ public:
 
   double min_convectivity_for_convective;
 
+  double secondary_convectivity_for_dual_thresh;
+
   double max_convectivity_for_stratiform;
 
   int min_overlap_for_convective_clumps;
@@ -462,7 +464,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[48];
+  mutable TDRPtable _table[49];
 
   const char *_className;
 
