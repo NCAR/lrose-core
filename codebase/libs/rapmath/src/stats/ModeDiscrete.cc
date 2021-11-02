@@ -35,6 +35,7 @@
 #include <rapmath/ModeDiscrete.hh>
 #include <algorithm>
 #include <climits>
+#include <map>
 
 ///////////////////////////////////////////////////////////////////////
 // Compute the mode of a discrete data set (integer-based values).
@@ -56,50 +57,30 @@ int ModeDiscrete::compute(const int *vals, size_t nVals)
     return vals[0];
   }
 
-  // compute min and max
+  // count up the frequency of each value
   
-  int minVal = INT_MAX;
-  int maxVal = INT_MIN;
+  map<int, size_t> counts;
   for (size_t ipt = 0; ipt < nVals; ipt++) {
     int val = vals[ipt];
-    minVal = min(minVal, val);
-    maxVal = max(maxVal, val);
-  }
-
-  // compute range of possible values
-  
-  size_t irange = maxVal - minVal + 1;
-  
-  // set up vector of possible values,
-  // for summing the frequency of each value
-  
-  vector<size_t> count;
-  count.resize(irange);
-  fill(count.begin(), count.end(), 0);
-  
-  // count number of entries for each non-missing discrete val
-  
-  for (size_t ipt = 0; ipt < nVals; ipt++) {
-    int val = vals[ipt];
-    size_t index = val - minVal;
-    count[index]++;
-  }
-  
-  // find the value with the max count
-  
-  size_t indexForMax = 0;
-  size_t maxCount = 0;
-  for (size_t ii = 0; ii < count.size(); ii++) {
-    if (count[ii] > maxCount) {
-      maxCount = count[ii];
-      indexForMax = ii;
+    if (counts.count(val) == 0) {
+      counts[val] = 1;
+    } else {
+      counts[val]++;
     }
   }
-    
-  // return the mode
 
-  int modeVal = indexForMax + minVal;
-  return modeVal;
-    
+  // find the val with the max count
+
+  size_t maxCount = 0;
+  int valForMax = 0;
+  for (auto ii = counts.begin(); ii != counts.end(); ii++) {
+    if (ii->second > maxCount) {
+      valForMax = ii->first;
+      maxCount = ii->second;
+    }
+  }
+
+  return valForMax;
+
 }
 
