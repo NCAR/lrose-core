@@ -37,6 +37,7 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
+#include <rapmath/ModeDiscrete.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -3128,6 +3129,39 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
 
   Radx::DataType_t dataTypeIn = fieldMid->getDataType();
 
+  // discrete mode uses integers
+  
+  if (method == STATS_METHOD_DISCRETE_MODE) {
+
+    // create results array, using ints
+    
+    RadxArray<Radx::si32> data_;
+    Radx::si32 *data = data_.alloc(nPoints);
+    for (size_t ipt = 0; ipt < nPoints; ipt++) {
+      data[ipt] = Radx::missingSi32;
+    }
+
+    // compute the discrete mode
+
+    _computeModeDiscrete(nPoints,
+                         fieldsIn,
+                         data,
+                         maxFractionMissing);
+
+    // add data to stats field
+    
+    stats->addDataSi32(nPoints, data);
+  
+    // convert to incoming data type
+  
+    stats->convertToType(dataTypeIn);
+    
+    // return the created field - must be freed by caller
+    
+    return stats;
+
+  }
+
   // create results array, using doubles
 
   RadxArray<Radx::fl64> data_;
@@ -3368,6 +3402,59 @@ void RadxField::_computeMedian(size_t nPoints,
 }
 
         
+//////////////////////////////////////////////////////////
+// compute mode for discrete data sets
+
+void RadxField::_computeModeDiscrete(size_t nPoints,
+                                     const vector<const RadxField *> &fieldsIn,
+                                     Radx::si32 *data,
+                                     double maxFractionMissing)
+
+{
+
+  // set up vector for storing the valid data at each point
+
+  vector< vector<int> > goodValsVec;
+  goodValsVec.resize(nPoints);
+  
+  // loop through the fields
+  
+  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+
+    // make a copy of the field and convert to ints
+
+    RadxField copy(*fieldsIn[ifield]);
+    copy.convertToSi32();
+    const Radx::si32 *vals = copy.getDataSi32();
+    Radx::si32 miss = copy.getMissingSi32();
+
+    // loop through the points, adding to the goodVals array
+    // if the data is valid at that point
+
+    for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
+      Radx::si32 val = *vals;
+      if (val != miss) {
+        goodValsVec[ipt].push_back(val);
+      }
+    }
+    
+  } // ifield
+      
+  // compute the mode across all fields
+
+  size_t minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    vector<int> &goodVals = goodValsVec[ipt];
+    if (goodVals.size() >= minValid) {
+      int mode = ModeDiscrete::compute(goodVals.data(), goodVals.size());
+      data[ipt] = mode;
+    } else {
+      data[ipt] = Radx::missingSi32;
+    }
+  }
+
+}
+
 //////////////////////////////////////////////////////////
 // compute maximum
 

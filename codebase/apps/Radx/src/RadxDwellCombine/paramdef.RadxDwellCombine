@@ -199,13 +199,14 @@ typedef enum {
   DWELL_STATS_MEDIAN = 1,
   DWELL_STATS_MAXIMUM = 2,
   DWELL_STATS_MINIMUM = 3,
-  DWELL_STATS_MIDDLE = 4
+  DWELL_STATS_MIDDLE = 4,
+  DWELL_STATS_DISCRETE_MODE = 5
 } dwell_stats_method_t;
 
 paramdef enum dwell_stats_method_t {
   p_default = DWELL_STATS_MEAN;
   p_descr = "Method for computing stats on the dwell.";
-  p_help = "MIDDLE refers to the middle ray in the dwell sequence.";
+  p_help = "MIDDLE refers to the middle ray in the dwell sequence. The DISCRETE_MODE computes applies only to discrete (integer) fields, and returns the most common entry in a discrete data set.";
 } dwell_stats_method;
 
 paramdef double {

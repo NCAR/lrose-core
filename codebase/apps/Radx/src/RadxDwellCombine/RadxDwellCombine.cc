@@ -1130,6 +1130,9 @@ RadxField::StatsMethod_t
     case Params::DWELL_STATS_MEDIAN:
       return RadxField::STATS_METHOD_MEDIAN;
       break;
+    case Params::DWELL_STATS_DISCRETE_MODE:
+      return RadxField::STATS_METHOD_DISCRETE_MODE;
+      break;
     case Params::DWELL_STATS_MAXIMUM:
       return RadxField::STATS_METHOD_MAXIMUM;
       break;

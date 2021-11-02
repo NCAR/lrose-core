@@ -1011,7 +1011,8 @@ public:
     STATS_METHOD_MAXIMUM = 2, /**< Computing the maximum of a series */
     STATS_METHOD_MINIMUM = 3, /**< Computing the minumum of a series */
     STATS_METHOD_MIDDLE = 4, /**< Using the middle entry in a series */
-    STATS_METHOD_LAST = 5
+    STATS_METHOD_DISCRETE_MODE = 5, /**< Most frequent entry in a discrete field */
+    STATS_METHOD_LAST = 6
 
   } StatsMethod_t;
 
@@ -1189,6 +1190,11 @@ private:
                       const vector<const RadxField *> &fieldsIn,
                       Radx::fl64 *data,
                       double maxFractionMissing);
+
+  void _computeModeDiscrete(size_t nPoints,
+                            const vector<const RadxField *> &fieldsIn,
+                            Radx::si32 *data,
+                            double maxFractionMissing);
 
   void _computeMaximum(size_t nPoints,
                        const vector<const RadxField *> &fieldsIn,
