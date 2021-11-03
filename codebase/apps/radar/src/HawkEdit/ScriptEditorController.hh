@@ -52,6 +52,8 @@ public slots:
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
+  void runForEachRayScript(QString script, int currentSweepIndex,
+  bool useBoundary, vector<Point> &boundaryPoints);
 private:
 
 
@@ -74,6 +76,7 @@ private:
   void fieldNamesProvided(vector<string> *fieldNames);
   void _assign(string tempName, string userDefinedName);
   void _assignByRay(string tempName, string userDefinedName);
+  void regularizeRays();
   //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
   //  std::map<QString, QString> *currentVariableContext);
 };

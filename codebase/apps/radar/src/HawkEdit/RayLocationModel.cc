@@ -157,7 +157,11 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
 
   // get the field data
   const RadxField *field = ray->getField(fieldName);
-
+  if (field == NULL) {
+    string msg = "no data for field in ray ";
+    msg.append(fieldName);
+    throw std::invalid_argument(msg);
+  }
   // cerr << "there arenGates " << nGates;
 
   //field->convertToFl32();

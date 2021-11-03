@@ -14,6 +14,7 @@
 #include <QSlider>
 #include <QListWidget>
 #include <QLabel>
+#include <QStatusBar>
 
 #include <list>
 
@@ -153,6 +154,8 @@ class BoundaryPointEditorView : public QDialog
   bool forceHide = true;
   QSlider *_circleRadiusSlider;
   QSlider *_brushRadiusSlider;
+
+  QStatusBar *statusBar;
 
   const int nBoundaries = 5;
 

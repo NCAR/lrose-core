@@ -47,10 +47,19 @@ const vector<float> *DataModel::GetData(string fieldName,
 
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol.getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(startRayIndex + rayIdx);
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  
+  //if ((rayIdx > sweep->getEndRayIndex()) ||
+  //    (rayIdx < startRayIndex)) {
+  //  string msg = "DataModel::GetData rayIdx outside sweep ";
+  //  msg.append(std::to_string(rayIdx));
+  //  throw msg;
+  //}
+
+
+  RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -298,12 +307,19 @@ void DataModel::RemoveField(string &fieldName) {
 // remove field from ray
 void DataModel::RemoveField(size_t rayIdx, string &fieldName) {
   RadxRay *ray = getRay(rayIdx);
-  int result = ray->removeField(fieldName);
-  if (result != 0) {
-    string msg = "failed to remove field from ray: ";
-    msg.append(fieldName); 
-    throw std::invalid_argument(msg);
+  if (ray != NULL) {
+    int result = ray->removeField(fieldName);
+    if (result != 0) {
+      string msg = "failed to remove field from ray: ";
+      msg.append(fieldName); 
+      throw std::invalid_argument(msg);
+    }
   }
+}
+
+void DataModel::regularizeRays() {
+  bool nFieldsConstantPerRay = true;
+  _vol.loadFieldsFromRays(nFieldsConstantPerRay);
 }
 
 void DataModel::readData(string path, vector<string> &fieldNames,
@@ -407,16 +423,18 @@ void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldNam
      // replaceField(RadxField *field);
     //RadxField *srcField = fetchDataField(*it, fromFieldName);
     RadxField *srcField = fetchDataField(ray, fromFieldName);
-    Radx::fl32 *src = srcField->getDataFl32();
+    if (srcField != NULL) {
+      Radx::fl32 *src = srcField->getDataFl32();
 
-    //RadxField *dstField = fetchDataField(*it, toFieldName);
-    RadxField *dstField = fetchDataField(ray, toFieldName);
-    Radx::fl32 *dst = dstField->getDataFl32();
+      //RadxField *dstField = fetchDataField(*it, toFieldName);
+      RadxField *dstField = fetchDataField(ray, toFieldName);
+      Radx::fl32 *dst = dstField->getDataFl32();
 
-    size_t nbytes = ray->getNGates();
-    //      #include <string.h>
-    // void *memcpy(void *restrict dst, const void *restrict src, size_t n);
-    memcpy(dst, src, nbytes*sizeof(Radx::fl32));
+      size_t nbytes = ray->getNGates();
+      //      #include <string.h>
+      // void *memcpy(void *restrict dst, const void *restrict src, size_t n);
+      memcpy(dst, src, nbytes*sizeof(Radx::fl32));
+    }
   //}
 }
 
@@ -461,6 +479,45 @@ size_t DataModel::getNRays(int sweepNumber) {
   size_t nRays = sweep->getNRays();
   return nRays;
 }
+
+// get the number of rays for a sweep
+size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
+  _vol.loadRaysFromFields();
+  const vector<RadxSweep *> sweeps = _vol.getSweeps();
+  RadxSweep *sweep = sweeps.at(sweepIndex); 
+  if (sweep == NULL) {
+    throw std::invalid_argument("bad sweep index");
+  }
+  size_t nRays = sweep->getNRays();
+  return nRays;
+}
+
+// get the first ray for a sweep
+size_t DataModel::getFirstRayIndex(int sweepIndex) {
+  _vol.loadRaysFromFields();
+  
+  const vector<RadxSweep *> sweeps = _vol.getSweeps();
+  RadxSweep *sweep = sweeps.at(sweepIndex);  
+  if (sweep == NULL) {
+    throw std::invalid_argument("bad sweep index");
+  }
+  size_t firstRayIndex = sweep->getStartRayIndex();
+  return firstRayIndex;
+}
+
+/*
+int DataModel::getSweepNumber(int sweepIndex) {
+
+  const vector<RadxSweep *> sweeps = _vol.getSweeps();
+  try {
+    RadxSweep *sweep = sweeps.at(sweepIndex);
+    int sweepNumber = sweep->getSweepNumber();
+  } catch (exception??) {
+    throw std::invalid_argument("bad sweep index");
+  }
+  return sweepNumber;
+}
+*/
 
 double DataModel::getRayAzimuthDeg(size_t rayIdx) {
   _vol.loadRaysFromFields();

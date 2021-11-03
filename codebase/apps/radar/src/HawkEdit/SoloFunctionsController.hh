@@ -170,16 +170,19 @@ public:
 
   void reset();
   void setCurrentRayToFirst();
+  void setCurrentRayToFirstOf(int sweepIndex);
   bool moreRays();
   void nextRay();
 
   void setCurrentSweepToFirst();
+  void setCurrentSweepTo(int sweepIndex);
   bool moreSweeps();
   void nextSweep();
 
   void applyBoundary(bool useBoundaryMask, vector<Point> &boundaryPoints);
   void clearBoundary();
   const vector<bool> *GetBoundaryMask();
+  void regularizeRays();
   void assignByRay(string tempName, string userDefinedName);
   void assign(string tempName, string userDefinedName);
   void assign(size_t rayIdx, string tempName, string userDefinedName);

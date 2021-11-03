@@ -196,6 +196,14 @@ BoundaryPointEditorView::BoundaryPointEditorView(QWidget *parent)
   connect(_boundaryEditorSaveBtn, SIGNAL(clicked()),
    this, SLOT(saveBoundaryEditorClick()));
 
+/*
+TODO: need a signal or call back to View, that boundary was saved successfully
+  statusBar = new QStatusBar(this);
+  _boundaryEditorDialogLayout->addWidget(statusBar, ++row, 0);
+  statusBar->showMessage(tr("Ready"));
+
+*/
+
 }
 
 void BoundaryPointEditorView::saveBoundaryEditorClick()

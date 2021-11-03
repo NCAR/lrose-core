@@ -360,6 +360,15 @@ bool BoundaryPointEditor::evaluateCursor(bool isShiftKeyDown) {
   return changeCursor;
 }
 
+bool BoundaryPointEditor::evaluatePoint(int worldReleaseX, int worldReleaseY) {
+  bool isUsed = false;
+  if (!_boundaryPointEditorModel->isAClosedPolygon()) {
+  	_boundaryPointEditorModel->addPoint(worldReleaseX, worldReleaseY);
+  	isUsed = true;
+  }
+  return isUsed;
+}
+
 bool BoundaryPointEditor::moveBoundaryPoint(int startX, int startY,
  int worldX, int worldY) {
   bool redraw = _boundaryPointEditorModel->moveBoundaryPoint(

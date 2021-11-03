@@ -200,7 +200,8 @@ public:
   double worldReleaseX, double worldReleaseY);
   bool evaluateRange(double xRange);
 
-  void runForEachRayScript(QString script, bool useBoundary);
+  void runForEachRayScript(QString script, bool useBoundary,
+    bool useAllSweeps);
 
   void closeEvent(QEvent *event);
 

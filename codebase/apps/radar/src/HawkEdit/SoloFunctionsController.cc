@@ -634,6 +634,15 @@ void SoloFunctionsController::setCurrentSweepToFirst() {
 
 }
 
+void SoloFunctionsController::setCurrentSweepTo(int sweepIndex) {
+  cerr << "entry setCurrentSweepToFirst" << endl;
+  _currentSweepIdx = (size_t) sweepIndex;
+  cerr << "exit setCurrentSweepToFirst" << endl;
+
+  //LOG(DEBUG) << "exit";
+
+}
+
 
 void SoloFunctionsController::setCurrentRayToFirst() {
   //cerr << "entry setCurrentRayToFirst" << endl;
@@ -643,6 +652,17 @@ void SoloFunctionsController::setCurrentRayToFirst() {
 
   //LOG(DEBUG) << "exit";
 
+}
+
+// BE CAREFUL!! SweepIndex (int) vs. SweepNumber (int)
+//              size_t vs. int
+void SoloFunctionsController::setCurrentRayToFirstOf(int sweepIndex) {
+  // find the first ray of this sweep
+  // find the last ray of this sweep
+  DataModel *dataModel = DataModel::Instance();
+  //int sweepNumber = dataModel->getSweepNumber(sweepIndex);
+  _currentRayIdx = dataModel->getFirstRayIndex(sweepIndex);
+  _nRays = _currentRayIdx + 2; // dataModel->getNRaysSweepIndex(sweepIndex);
 }
 
 void SoloFunctionsController::nextRay() {
@@ -689,6 +709,11 @@ bool SoloFunctionsController::moreSweeps() {
   //  _data->loadFieldsFromRays();
 
   return (_currentSweepIdx < _nSweeps);
+}
+
+void SoloFunctionsController::regularizeRays() {
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->regularizeRays();  
 }
 
 void SoloFunctionsController::assign(size_t rayIdx, string tempName, string userDefinedName) {
