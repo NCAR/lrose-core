@@ -2634,10 +2634,45 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
     return;
   }
 
+  // notify the status display area to update
   _locationClicked(xkm, ykm, ray);
-  // update the spreadsheet if it is active
-  if (sheetView != NULL) {
-    _examineSpreadSheetSetup(azDeg, range);
+
+  // first right of refusal is the boundary editor, if a polygon is not complete
+  // TODO:  moved to BPE
+    //BoundaryPointEditor *editor = boundaryPointEditorControl;
+    //int _worldReleaseX = mouseReleaseX;
+    //int _worldReleaseY = mouseReleaseY;
+  bool isUseful = false;
+  if (boundaryPointEditorControl != NULL) {
+    isUseful = boundaryPointEditorControl->evaluatePoint((int) xkm, (int) ykm);
+  }
+
+  /*
+      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
+        if (!editor->isAClosedPolygon()) {
+          editor->addPoint(_worldReleaseX, _worldReleaseY);
+        } else { //polygon finished, user may want to insert/delete a point
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        }
+      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
+        if (editor->isAClosedPolygon()) {
+          editor->checkToAddOrDelPoint(_worldReleaseX,
+                                       _worldReleaseY);
+        } else {
+          editor->makeCircle(_worldReleaseX,
+                             _worldReleaseY,
+                             editor->getCircleRadius());
+        }
+      }  
+  */
+
+  // second choice is the spreadsheet editor
+  if (!isUseful) {
+    // update the spreadsheet if it is active
+    if (sheetView != NULL) {
+      _examineSpreadSheetSetup(azDeg, range);
+    }
   }
 
 }
@@ -3983,30 +4018,7 @@ void PolarManager::addDeleteBoundaryPoint(double mouseReleaseX, double mouseRele
     // If boundary editor active, then interpret boundary mouse release event
   if (boundaryPointEditorControl != NULL) {
     boundaryPointEditorControl->addDeleteBoundaryPoint(mouseReleaseX, mouseReleaseY,
-      isShiftKeyDown);
-/*  moved to BPE
-    BoundaryPointEditor *editor = boundaryPointEditorControl;
-    int _worldReleaseX = mouseReleaseX;
-    int _worldReleaseY = mouseReleaseY;
-
-      if (editor->getCurrentTool() == BoundaryToolType::polygon) {
-        if (!editor->isAClosedPolygon()) {
-          editor->addPoint(_worldReleaseX, _worldReleaseY);
-        } else { //polygon finished, user may want to insert/delete a point
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-        }
-      } else if (editor->getCurrentTool() == BoundaryToolType::circle) {
-        if (editor->isAClosedPolygon()) {
-          editor->checkToAddOrDelPoint(_worldReleaseX,
-                                       _worldReleaseY);
-        } else {
-          editor->makeCircle(_worldReleaseX,
-                             _worldReleaseY,
-                             editor->getCircleRadius());
-        }
-      }  
-     */  
+      isShiftKeyDown); 
   }
 } 
 
@@ -5849,12 +5861,18 @@ void PolarManager::EditRunScript() {
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::runForEachRayScript(QString script, bool useBoundary) {
+void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps) {
   vector<Point> boundaryPoints;
   if (boundaryPointEditorControl != NULL) {
     boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
-  scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+  if (useAllSweeps) {
+    scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+  } else {
+    // send the current sweep to the script editor controller
+    int currentSweepIndex = _sweepController->getSelectedNumber();
+    scriptEditorControl->runForEachRayScript(script, currentSweepIndex, useBoundary, boundaryPoints);
+  }
 }
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)

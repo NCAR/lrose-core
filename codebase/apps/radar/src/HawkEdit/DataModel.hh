@@ -72,6 +72,8 @@ public:
   void copyField(size_t rayIdx, string fromFieldName, string toFieldName);
   bool fieldExists(size_t rayIdx, string fieldName);
 
+  void regularizeRays();
+
   void get();
   const vector<float> *GetData(string fieldName,
               int rayIdx, int sweepIdx);
@@ -83,6 +85,9 @@ public:
   const float *fetchData(RadxRay *ray, string &fieldName);
   size_t getNRays(); // string fieldName, double sweepAngle);
   size_t getNRays(int sweepNumber);
+  size_t getNRaysSweepIndex(int sweepIndex);
+  size_t getFirstRayIndex(int sweepIndex);
+  int getSweepNumber(int sweepIndex);
   const vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);

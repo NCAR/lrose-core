@@ -49,6 +49,7 @@ class BoundaryPointEditor : public QObject
 
   bool isOverBoundaryPoint(int worldX, int worldY);
   bool evaluateCursor(bool isShiftKeyDown);
+  bool evaluatePoint(int worldReleaseX, int worldReleaseY);
   void addDeleteBoundaryPoint(int mouseReleaseX, int mouseReleaseY, bool isShiftKeyDown);
   bool moveBoundaryPoint(int startX, int startY, int worldX, int worldY);
 	static BoundaryPointEditor* Instance();

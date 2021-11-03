@@ -157,10 +157,10 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     currentSweepToggleButton = new QPushButton(tr("&Current Sweep"));
     currentSweepToggleButton->setCheckable(true);
-    currentSweepToggleButton->setChecked(true);
+    currentSweepToggleButton->setChecked(false);
     allSweepsToggleButton = new QPushButton(tr("&All Sweeps"));
     allSweepsToggleButton->setCheckable(true);
-    allSweepsToggleButton->setChecked(false);
+    allSweepsToggleButton->setChecked(true);
 
     //QVBoxLayout *vbox = new QVBoxLayout;
     //vbox->addWidget(currentSweepToggleButton);
@@ -483,13 +483,14 @@ void ScriptEditorView::acceptFormulaInput()
     cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
     
     bool useBoundary = useBoundaryWidget->isChecked(); 
+    bool useAllSweeps = allSweepsToggleButton->isChecked();     
 
     // Send the scripts to the controller for processing
     try {
       //emit runOneTimeOnlyScript(oneTimeOnlyScript);
       //emit runForEachRayScript(forEachRayScript, useBoundary);
       PolarManager *polarManager = (PolarManager *) parent();
-      polarManager->runForEachRayScript(forEachRayScript, useBoundary);
+      polarManager->runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
     /*
     // Grab the context before evaluating the formula
     //  YES! This works.  The new global variables are listed here;
@@ -899,19 +900,29 @@ void ScriptEditorView::closeEvent() {
 //    connect(AllSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
 void ScriptEditorView::currentSweepClicked(bool checked) {
+  currentSweepToggleButton->setChecked(false);
+  allSweepsToggleButton->setChecked(true);
+  notImplementedMessage();
+  /*
   if (checked) {
     allSweepsToggleButton->setChecked(false);
   } else {
     allSweepsToggleButton->setChecked(true);    
   }
+  */
 }
 
 void ScriptEditorView::allSweepsClicked(bool checked) {
+  currentSweepToggleButton->setChecked(false);
+  allSweepsToggleButton->setChecked(true);
+  notImplementedMessage();
+  /*
   if (checked) {
     currentSweepToggleButton->setChecked(false);
   } else {
     currentSweepToggleButton->setChecked(true);    
   }  
+  */
 }
 
 /*
