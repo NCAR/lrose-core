@@ -37,7 +37,6 @@
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
 #include <Radx/ByteOrder.hh>
-#include <rapmath/ModeDiscrete.hh>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -3446,7 +3445,7 @@ void RadxField::_computeModeDiscrete(size_t nPoints,
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<int> &goodVals = goodValsVec[ipt];
     if (goodVals.size() >= minValid) {
-      int mode = ModeDiscrete::compute(goodVals.data(), goodVals.size());
+      int mode = _computeMode(goodVals);
       data[ipt] = mode;
     } else {
       data[ipt] = Radx::missingSi32;
@@ -4042,4 +4041,51 @@ void RadxField::_swapMetaNumbers(msgMetaNumbers_t &meta)
   ByteOrder::swap32(&meta.missingFl32, 16 * sizeof(Radx::si32));
 }
           
+
+///////////////////////////////////////////////////////////////////////
+// Compute the mode of a discrete data set (integer-based values).
+// The mode is defined as the value with the highest count in the array.
+//
+// Return val:
+//   If there is more that one value with the highest count, the lowest
+//   of those values will be returned.
+
+int RadxField::_computeMode(const vector<int> &vals)
+  
+{
+
+  if (vals.size() < 1) {
+    return 0;
+  }
+
+  if (vals.size() == 1) {
+    return vals[0];
+  }
+
+  // count up the frequency of each value
+  
+  map<int, size_t> num;
+  for (size_t ipt = 0; ipt < vals.size(); ipt++) {
+    int val = vals[ipt];
+    if (num.count(val) == 0) {
+      num[val] = 1;
+    } else {
+      num[val]++;
+    }
+  }
+
+  // find the val with the max count
+  
+  size_t maxCount = 0;
+  int valForMax = 0;
+  for (auto ii = num.begin(); ii != num.end(); ii++) {
+    if (ii->second > maxCount) {
+      valForMax = ii->first;
+      maxCount = ii->second;
+    }
+  }
+
+  return valForMax;
+
+}
 

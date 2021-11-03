@@ -1284,7 +1284,11 @@ private:
   /// swap meta numbers
   
   static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
-          
+
+  // compute discrete mode
+
+  int _computeMode(const vector<int> &vals);
+
 };
 
 #endif
