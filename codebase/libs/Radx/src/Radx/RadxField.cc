@@ -1609,23 +1609,61 @@ void RadxField::convertToSi32(double scale,
     return;
   }
 
-  convertToFl32();
-  
-  Radx::fl32 *fdata = (Radx::fl32 *) _data;
   Radx::si32 *idata = new Radx::si32[_nPoints];
-  for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (fdata[ii] == _missingFl32) {
-      idata[ii] = Radx::missingSi32;
-    } else {
-      long long int ival =
-        (long long int) floor((fdata[ii] - offset) / scale + 0.5);
-      if (ival < -2147483647 || ival > 2147483647) {
+
+  if (_dataType == Radx::SI08 &&
+      fabs(scale - _scale) < 0.00001 &&
+      fabs(offset - _offset) < 0.00001) {
+    
+    // integer8 to integer32
+    
+    Radx::si08 *bdata = (Radx::si08 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (bdata[ii] == _missingSi08) {
         idata[ii] = Radx::missingSi32;
       } else {
-        idata[ii] = (Radx::si32) ival;
+        idata[ii] = bdata[ii];
       }
     }
+
+  } else if (_dataType == Radx::SI16 &&
+             fabs(scale - _scale) < 0.00001 &&
+             fabs(offset - _offset) < 0.00001) {
+
+    // integer16 to integer32
+    
+    Radx::si16 *sdata = (Radx::si16 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (sdata[ii] == _missingSi16) {
+        idata[ii] = Radx::missingSi32;
+      } else {
+        idata[ii] = sdata[ii];
+      }
+    }
+
+  } else {
+
+    // convert to floats and then back again
+    
+    convertToFl32();
+    
+    Radx::fl32 *fdata = (Radx::fl32 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (fdata[ii] == _missingFl32) {
+        idata[ii] = Radx::missingSi32;
+      } else {
+        long long int ival =
+          (long long int) floor((fdata[ii] - offset) / scale + 0.5);
+        if (ival < -2147483647 || ival > 2147483647) {
+          idata[ii] = Radx::missingSi32;
+        } else {
+          idata[ii] = (Radx::si32) ival;
+        }
+      }
+    }
+
   }
+
   _buf.clear();
   _data = _buf.add(idata, _nPoints * sizeof(Radx::si32));
   delete[] idata;
@@ -1652,22 +1690,45 @@ void RadxField::convertToSi16(double scale,
     return;
   }
 
-  convertToFl32();
-
-  Radx::fl32 *fdata = (Radx::fl32 *) _data;
   Radx::si16 *sdata = new Radx::si16[_nPoints];
-  for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (fdata[ii] == _missingFl32) {
-      sdata[ii] = Radx::missingSi16;
-    } else {
-      int idata = (int) floor((fdata[ii] - offset) / scale + 0.5);
-      if (idata < -32767 || idata > 32767) {
+
+  if (_dataType == Radx::SI08 &&
+      fabs(scale - _scale) < 0.00001 &&
+      fabs(offset - _offset) < 0.00001) {
+
+    // integer8 to integer16
+    
+    Radx::si08 *bdata = (Radx::si08 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (bdata[ii] == _missingSi08) {
         sdata[ii] = Radx::missingSi16;
       } else {
-        sdata[ii] = (Radx::si16) idata;
+        sdata[ii] = bdata[ii];
       }
     }
+
+  } else {
+
+    // convert to floats and then back again
+    
+    convertToFl32();
+    
+    Radx::fl32 *fdata = (Radx::fl32 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (fdata[ii] == _missingFl32) {
+        sdata[ii] = Radx::missingSi16;
+      } else {
+        int idata = (int) floor((fdata[ii] - offset) / scale + 0.5);
+        if (idata < -32767 || idata > 32767) {
+          sdata[ii] = Radx::missingSi16;
+        } else {
+          sdata[ii] = (Radx::si16) idata;
+        }
+      }
+    }
+
   }
+  
   _buf.clear();
   _data = _buf.add(sdata, _nPoints * sizeof(Radx::si16));
   delete[] sdata;
@@ -1731,7 +1792,11 @@ void RadxField::convertToSi32()
   if (_dataType == Radx::SI32) {
     return;
   }
-  
+
+  if (_dataType == Radx::SI16 || _dataType == Radx::SI08) {
+    convertToSi32(_scale, _offset);
+  }
+
   // convert to fl32s
 
   convertToFl32();
@@ -1776,6 +1841,10 @@ void RadxField::convertToSi16()
     return;
   }
   
+  if (_dataType == Radx::SI08) {
+    convertToSi16(_scale, _offset);
+  }
+
   // convert to fl32s
 
   convertToFl32();
@@ -3122,8 +3191,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
   RadxField *stats =
     new RadxField(fieldMid->getName(), fieldMid->getUnits());
   stats->copyMetaData(*fieldMid);
-  stats->setTypeFl64(Radx::missingFl64);
-
+  
   // save the incoming data type
 
   Radx::DataType_t dataTypeIn = fieldMid->getDataType();
@@ -3149,6 +3217,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
 
     // add data to stats field
     
+    stats->setTypeSi32(Radx::missingSi32, 0, 1);
     stats->addDataSi32(nPoints, data);
   
     // convert to incoming data type
@@ -3168,6 +3237,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     data[ipt] = Radx::missingFl64;
   }
+  stats->setTypeFl64(Radx::missingFl64);
 
   // compute the stats
 
@@ -3423,7 +3493,7 @@ void RadxField::_computeModeDiscrete(size_t nPoints,
     // make a copy of the field and convert to ints
 
     RadxField copy(*fieldsIn[ifield]);
-    copy.convertToSi32();
+    copy.convertToSi32(_scale, _offset);
     const Radx::si32 *vals = copy.getDataSi32();
     Radx::si32 miss = copy.getMissingSi32();
 
@@ -3436,9 +3506,9 @@ void RadxField::_computeModeDiscrete(size_t nPoints,
         goodValsVec[ipt].push_back(val);
       }
     }
-    
+
   } // ifield
-      
+
   // compute the mode across all fields
 
   size_t minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
@@ -4077,15 +4147,15 @@ int RadxField::_computeMode(const vector<int> &vals)
   // find the val with the max count
   
   size_t maxCount = 0;
-  int valForMax = 0;
+  int modeVal = 0;
   for (auto ii = num.begin(); ii != num.end(); ii++) {
     if (ii->second > maxCount) {
-      valForMax = ii->first;
+      modeVal = ii->first;
       maxCount = ii->second;
     }
   }
 
-  return valForMax;
+  return modeVal;
 
 }
 
