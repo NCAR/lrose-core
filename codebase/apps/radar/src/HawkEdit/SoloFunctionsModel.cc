@@ -1664,19 +1664,25 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
   double startRange;
   double gateSpace;
   dataModel->getPredomRayGeom(&startRange, &gateSpace);
-  size_t from_gate = ceil((lower_threshold - startRange) / gateSpace);
-  if (from_gate > nGates) {
-    string msg = "RemoveRing: lower_threshold exceeds number of gates; setting to max number of gates";
-    cerr << msg << endl;
-    from_gate = nGates;
-    //throw std::invalid_argument(msg);
+  size_t from_gate = 0;
+  if (lower_threshold > startRange) {
+    from_gate = ceil((lower_threshold - startRange) / gateSpace);
+    if (from_gate > nGates) {
+      string msg = "RemoveRing: lower_threshold exceeds number of gates; setting to max number of gates";
+      cerr << msg << endl;
+      from_gate = nGates;
+      //throw std::invalid_argument(msg);
+    }
   }
-  size_t to_gate = ceil((upper_threshold - startRange) / gateSpace);
-  if (to_gate > nGates) {
-    string msg = "RemoveRing: upper_threshold exceeds number of gates; setting to max number of gates";
-    cerr << msg << endl;
-    to_gate = nGates;
-    //throw std::invalid_argument(msg);
+  size_t to_gate = 0;
+  if (upper_threshold > startRange) {
+    to_gate = ceil((upper_threshold - startRange) / gateSpace);
+    if (to_gate > nGates) {
+      string msg = "RemoveRing: upper_threshold exceeds number of gates; setting to max number of gates";
+      cerr << msg << endl;
+      to_gate = nGates;
+      //throw std::invalid_argument(msg);
+    }
   }
   //----
 
