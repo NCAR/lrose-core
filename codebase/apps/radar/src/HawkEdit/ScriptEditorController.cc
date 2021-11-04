@@ -1091,7 +1091,7 @@ uncate(100);
       _soloFunctionsController->nextRay();
     } // end while more rays
 
-    //_soloFunctionsController->regularizeRays();  // make sure all rays have the same fields.
+    _soloFunctionsController->regularizeRays();  // make sure all rays have the same fields.
 
     //_soloFunctionsController->nextSweep();
     
@@ -1188,7 +1188,7 @@ uncate(100);
               if (currentValue[length-1] == '#') {
                 currentValue.resize(length-1);
                 //tempName.append("#");
-                _assign(currentValue, originalName);
+                _assign(currentValue, originalName, currentSweepIndex);
                 // add Variable list ToScriptEditor(it2.name(), it2.value());
                 //newFieldNames << it2.name();
               }
@@ -1222,13 +1222,20 @@ void ScriptEditorController::_assignByRay(string tempName, string userDefinedNam
   _soloFunctionsController->assignByRay(tempName, userDefinedName);
 }
 
-// may not be used 
 void ScriptEditorController::_assign(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol
   _soloFunctionsController->assign(tempName, userDefinedName);
 }
-//
+
+void ScriptEditorController::_assign(string tempName, string userDefinedName,
+  int sweepIndex) {
+
+  // rename the field in the RadxVol; only copy data for a
+  // single sweep
+  _soloFunctionsController->assign(tempName, userDefinedName, 
+    (size_t) sweepIndex);
+}
 
 
 void ScriptEditorController::regularizeRays() {

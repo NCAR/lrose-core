@@ -75,6 +75,8 @@ private:
   void setupSoloFunctions(SoloFunctionsController *soloFunctions);
   void fieldNamesProvided(vector<string> *fieldNames);
   void _assign(string tempName, string userDefinedName);
+  void _assign(string tempName, string userDefinedName,
+    int sweepIndex);
   void _assignByRay(string tempName, string userDefinedName);
   void regularizeRays();
   //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 

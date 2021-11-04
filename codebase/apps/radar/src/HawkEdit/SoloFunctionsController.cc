@@ -662,7 +662,7 @@ void SoloFunctionsController::setCurrentRayToFirstOf(int sweepIndex) {
   DataModel *dataModel = DataModel::Instance();
   //int sweepNumber = dataModel->getSweepNumber(sweepIndex);
   _currentRayIdx = dataModel->getFirstRayIndex(sweepIndex);
-  _nRays = _currentRayIdx + 2; // dataModel->getNRaysSweepIndex(sweepIndex);
+  _nRays = _currentRayIdx + dataModel->getNRaysSweepIndex(sweepIndex);
 }
 
 void SoloFunctionsController::nextRay() {
@@ -671,6 +671,12 @@ void SoloFunctionsController::nextRay() {
   if ((_currentRayIdx % 100) == 0) {
     cerr << "   current ray " << _currentRayIdx << endl;
   }
+
+  DataModel *dataModel = DataModel::Instance();
+  size_t lastRayIndex = dataModel->getLastRayIndex(_currentSweepIdx);  
+  if (_currentRayIdx > lastRayIndex) {
+    _currentSweepIdx += 1;
+  } 
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;
   //LOG(DEBUG) << "exit";
@@ -751,6 +757,17 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName) {
   }
 }
 
+void SoloFunctionsController::assign(string tempName, string userDefinedName,
+  size_t sweepIndex) {
+
+  // for each ray of sweep
+  DataModel *dataModel = DataModel::Instance();
+  size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
+  for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
+    assign(rayIdx, tempName, userDefinedName);
+  }
+}
 
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {

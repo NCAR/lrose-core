@@ -87,6 +87,7 @@ public:
   size_t getNRays(int sweepNumber);
   size_t getNRaysSweepIndex(int sweepIndex);
   size_t getFirstRayIndex(int sweepIndex);
+  size_t getLastRayIndex(int sweepIndex);  
   int getSweepNumber(int sweepIndex);
   const vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);

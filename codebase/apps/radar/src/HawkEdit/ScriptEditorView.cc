@@ -900,29 +900,29 @@ void ScriptEditorView::closeEvent() {
 //    connect(AllSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
 void ScriptEditorView::currentSweepClicked(bool checked) {
-  currentSweepToggleButton->setChecked(false);
-  allSweepsToggleButton->setChecked(true);
-  notImplementedMessage();
-  /*
+  //currentSweepToggleButton->setChecked(false);
+  //allSweepsToggleButton->setChecked(true);
+  //notImplementedMessage();
+  
   if (checked) {
     allSweepsToggleButton->setChecked(false);
   } else {
     allSweepsToggleButton->setChecked(true);    
   }
-  */
+  
 }
 
 void ScriptEditorView::allSweepsClicked(bool checked) {
-  currentSweepToggleButton->setChecked(false);
-  allSweepsToggleButton->setChecked(true);
-  notImplementedMessage();
-  /*
+  //currentSweepToggleButton->setChecked(false);
+  //allSweepsToggleButton->setChecked(true);
+  //notImplementedMessage();
+  
   if (checked) {
     currentSweepToggleButton->setChecked(false);
   } else {
     currentSweepToggleButton->setChecked(true);    
   }  
-  */
+  
 }
 
 /*

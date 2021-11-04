@@ -186,6 +186,8 @@ public:
   void assignByRay(string tempName, string userDefinedName);
   void assign(string tempName, string userDefinedName);
   void assign(size_t rayIdx, string tempName, string userDefinedName);
+  void assign(string tempName, string userDefinedName,
+    size_t sweepIndex);
   const vector<float> *getData(string &fieldName);
   void setData(string &fieldName, vector<float> *fieldData);
 

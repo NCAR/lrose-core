@@ -51,12 +51,12 @@ const vector<float> *DataModel::GetData(string fieldName,
   //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   //}
   
-  //if ((rayIdx > sweep->getEndRayIndex()) ||
-  //    (rayIdx < startRayIndex)) {
-  //  string msg = "DataModel::GetData rayIdx outside sweep ";
-  //  msg.append(std::to_string(rayIdx));
-  //  throw msg;
-  //}
+  if ((rayIdx > sweep->getEndRayIndex()) ||
+      (rayIdx < startRayIndex)) {
+    string msg = "DataModel::GetData rayIdx outside sweep ";
+    msg.append(std::to_string(rayIdx));
+    throw msg;
+  }
 
 
   RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
@@ -320,6 +320,7 @@ void DataModel::RemoveField(size_t rayIdx, string &fieldName) {
 void DataModel::regularizeRays() {
   bool nFieldsConstantPerRay = true;
   _vol.loadFieldsFromRays(nFieldsConstantPerRay);
+  _vol.loadRaysFromFields();
 }
 
 void DataModel::readData(string path, vector<string> &fieldNames,
@@ -503,6 +504,24 @@ size_t DataModel::getFirstRayIndex(int sweepIndex) {
   }
   size_t firstRayIndex = sweep->getStartRayIndex();
   return firstRayIndex;
+}
+
+// get the last ray for a sweep
+size_t DataModel::getLastRayIndex(int sweepIndex) {
+  _vol.loadRaysFromFields();
+  
+  const vector<RadxSweep *> sweeps = _vol.getSweeps();
+  if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
+    string msg = "DataModel::getLastRayIndex sweepIndex out of bounds ";
+    msg.append(std::to_string(sweepIndex));
+    throw std::invalid_argument(msg);
+  }
+  RadxSweep *sweep = sweeps.at(sweepIndex);  
+  if (sweep == NULL) {
+    throw std::invalid_argument("bad sweep index");
+  }
+  size_t lastRayIndex = sweep->getEndRayIndex();
+  return lastRayIndex;
 }
 
 /*
