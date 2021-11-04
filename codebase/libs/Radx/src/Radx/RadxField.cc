@@ -3217,7 +3217,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
 
     // add data to stats field
     
-    stats->setTypeSi32(Radx::missingSi32, 0, 1);
+    stats->setTypeSi32(Radx::missingSi32, 1, 0);
     stats->addDataSi32(nPoints, data);
   
     // convert to incoming data type
