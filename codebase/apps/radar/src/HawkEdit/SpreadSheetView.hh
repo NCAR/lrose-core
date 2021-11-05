@@ -86,6 +86,8 @@ public slots:
   void adjustNyquistFromSelectionToEnd(float factor);
   void adjustNyquistGeneral(float factor, bool fromSelection, int startRow);
 
+  void setRangeToAllSelectedColumns(int startRow, int fromSelection);
+
   void notImplementedMessage();
 
 

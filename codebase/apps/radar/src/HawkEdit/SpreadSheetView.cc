@@ -1390,36 +1390,42 @@ void SpreadSheetView::columnHeaderClicked(int index) {
   criticalMessage(to_string(index));
 }
 
+// fromSelection means from the selected row to the last gate
+void SpreadSheetView::setRangeToAllSelectedColumns(int startRow, int fromSelection) {
+    QList<QTableWidgetItem *> indexList = table->selectedItems();
+
+    QList<QTableWidgetItem *>::iterator i;
+    for (i = indexList.begin(); i != indexList.end(); ++i) {     
+        QTableWidgetItem *selection = *i;
+        int column = selection->column();
+        int top;
+        if (fromSelection) {
+            int row = selection->row();
+            top = row;
+        } else {
+            top = startRow;
+        }
+        int currentColumn = column; // table->currentColumn();
+        //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
+        //int top = 1;
+        int left = currentColumn;
+        int bottom = table->rowCount() - 1;
+        int right = currentColumn;
+         
+        QTableWidgetSelectionRange range(top, left, bottom, right);
+        bool select = true;
+        table->setRangeSelected(range, select);
+    }
+}
+
 void SpreadSheetView::deleteRay() {
     LOG(DEBUG) << "enter";
-    // TODO: set the Range to the column
-    int currentColumn = table->currentColumn();
-    //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
-    int top = 1;
-    int left = currentColumn;
-    int bottom = table->rowCount();
-    int right = currentColumn;
-     
-    QTableWidgetSelectionRange range(top, left, bottom, right);
-    bool select = true;
-    table->setRangeSelected(range, select);
-    //QString missingValue;
-    //missingValue.setNum(_missingDataValue);
+    // set the Range to all selected columns
+    int startRow = 0;
+    bool fromRowToEnd = false;
+    setRangeToAllSelectedColumns(startRow, fromRowToEnd);
     setSelectionToValue(QString(_missingDataString.c_str()));
-
-
     LOG(DEBUG) << "exit";
-    // select the range, then set the selection to missing value, using setSelection ...
-    //int currentColumn = table->currentColumn();
-    //QTableWidgetItem *currentHeader = table->horizontalHeaderItem(table->currentColumn());
-    //if (currentHeader != NULL) {
-    //    QString label = currentHeader->text();
-    //    float az = getAzimuth(label);
-    //    string fieldName = getFieldName(label);
-        // TODO: keep in view until save or apply? Add an Undo? In configuration dock?
-        // TODO: working here ...
-        //emit setDataMissing(currentHeader->text().toStdString(), _missingDataValue); // emit signal
-    //}
 
 }
 
@@ -1453,35 +1459,7 @@ void SpreadSheetView::adjustNyquistFromSelectionToEnd(float factor) {
   int top = 0;
   bool fromSelection = true;
   adjustNyquistGeneral(factor, fromSelection, top);
-    /*
 
-    //QModelIndexList indexList = table->selectedIndexes();
-    QList<QTableWidgetItem *> indexList = table->selectedItems();
-
-    QList<QTableWidgetItem *>::iterator i;
-    for (i = indexList.begin(); i != indexList.end(); ++i) {     
-        QTableWidgetItem *selection = *i;
-        int column = selection->column();
-        int row = selection->row();
-        int top = row;
-        int currentColumn = column; // table->currentColumn();
-        //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
-        //int top = 1;
-        int left = currentColumn;
-        int bottom = table->rowCount() - 1;
-        int right = currentColumn;
-         
-        QTableWidgetSelectionRange range(top, left, bottom, right);
-        bool select = true;
-        table->setRangeSelected(range, select);
-    }
-    // subtract the Nyquist value from the ray data 
-    // for each selected cell
-    // subtract Nyquist
-    // set new value
-    adjustNyquistFromSelection(factor);
-  // --  
-  */
 }
 
 void SpreadSheetView::subtractNyquistFromRay() {
@@ -1501,37 +1479,12 @@ void SpreadSheetView::addNyquistFromRay() {
 
 void SpreadSheetView::adjustNyquistGeneral(float factor, bool fromSelection, int startRow) {
 
-    //QModelIndexList indexList = table->selectedIndexes();
-    QList<QTableWidgetItem *> indexList = table->selectedItems();
-
-    QList<QTableWidgetItem *>::iterator i;
-    for (i = indexList.begin(); i != indexList.end(); ++i) {     
-        QTableWidgetItem *selection = *i;
-        int column = selection->column();
-        int top;
-        if (fromSelection) {
-            int row = selection->row();
-            top = row;
-        } else {
-            top = startRow;
-        }
-        int currentColumn = column; // table->currentColumn();
-        //QTableWidgetSelectionRange::QTableWidgetSelectionRange(t)
-        //int top = 1;
-        int left = currentColumn;
-        int bottom = table->rowCount() - 1;
-        int right = currentColumn;
-         
-        QTableWidgetSelectionRange range(top, left, bottom, right);
-        bool select = true;
-        table->setRangeSelected(range, select);
-    }
+    setRangeToAllSelectedColumns(startRow, fromSelection);
     // subtract the Nyquist value from the ray data 
     // for each selected cell
     // subtract Nyquist
     // set new value
     adjustNyquistFromSelection(factor);
-  // --  
 }
 
 // factor = -1.0 to subtract
