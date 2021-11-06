@@ -466,8 +466,6 @@ void ConvStratFinder::_computeColMax()
     for (size_t iy = 0; iy < _ny; iy++) {
       for (size_t ix = 0; ix < _nx; ix++, jj++, ii++) {
         
-        // size_t jj = ix + iy * _nx;
-        // size_t ii = jj + iz * _nxy;
         fl32 dbzVal = dbz[ii];
         
         if (dbzVal == _missingFl32) {
@@ -751,20 +749,13 @@ void ConvStratFinder::_performClumping()
                             _minOverlapForClumping,
                             clumpVec);
 
-  // _nClumps = _clumping.performClumping(_nx, _ny, _zKm.size(),
-  //                                      _convectivity3D.dat(),
-  //                                      _minOverlapForClumping,
-  //                                      _minConvectivityForConvective);
-  
   if (_verbose) {
     cerr << "ConvStratFinder::_performClumping()" << endl;
     cerr << "  N clumps: " << clumpVec.size() << endl;
   }
 
   _freeClumps();
-  // const Clump_order *clumpOrders = _clumping.getClumps();
   for (size_t ii = 0; ii < clumpVec.size(); ii++) {
-    // const Clump_order *clumpOrder = clumpOrders + ii;
     StormClump *clump = new StormClump(this, clumpVec[ii]);
     clump->computeGeom();
     _clumps.push_back(clump);
@@ -1352,9 +1343,9 @@ void ConvStratFinder::StormClump::computeGeom()
   double minZKm = 9999.0;
   double maxZKm = -9999.0;
 
-  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvGlobal().size(); irun++) {
     
-    const Interval &intvl = _cprops.intvLocal(irun);
+    const Interval &intvl = _cprops.intvGlobal(irun);
     if (irun == 0) {
       _id = intvl.id;
     }
@@ -1447,9 +1438,9 @@ void ConvStratFinder::StormClump::setPartition()
   int nPtsPlane = _finder->_nx * _finder->_ny;
   int nx = _finder->_nx;
   
-  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvGlobal().size(); irun++) {
     
-    const Interval &intvl = _cprops.intvLocal(irun);
+    const Interval &intvl = _cprops.intvGlobal(irun);
     
     int iy = intvl.row_in_plane;
     int iz = intvl.plane;
@@ -1486,9 +1477,9 @@ bool ConvStratFinder::StormClump::stratiformBelow()
   double nMiss = 0.0;
   double nStrat = 0.0;
   
-  for (size_t irun = 0; irun < _cprops.intvLocal().size(); irun++) {
+  for (size_t irun = 0; irun < _cprops.intvGlobal().size(); irun++) {
     
-    const Interval &intvl = _cprops.intvLocal(irun);
+    const Interval &intvl = _cprops.intvGlobal(irun);
     
     int iy = intvl.row_in_plane;
     int iz = intvl.plane;
