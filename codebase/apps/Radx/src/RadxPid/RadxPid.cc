@@ -859,6 +859,29 @@ int RadxPid::_storeDerivedRay(WorkerThread *thread)
 int RadxPid::_writeVol()
 {
 
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    const vector<RadxRay *> &inRays = _vol.getRays();
+    for (size_t ii = 0; ii < inRays.size(); ii++) {
+      RadxRay *inRay = inRays[ii];
+      double inTime = inRay->getTimeDouble();
+      for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
+        RadxRay *outRay = _derivedRays[jj];
+        double outTime = outRay->getTimeDouble();
+        if (fabs(inTime - outTime) < 0.001) {
+          if (inRay->getNGates() != outRay->getNGates()) {
+            cerr << "777777777777777777777777777777" << endl;
+            cerr << "inRay time: " << inRay->getRadxTime().asString(6) << endl;
+            cerr << "outRay time: " << outRay->getRadxTime().asString(6) << endl;
+            cerr << "inRay nGates: " << inRay->getNGates() << endl;
+            cerr << "outRay nGates: " << outRay->getNGates() << endl;
+            cerr << "777777777777777777777777777777" << endl;
+          }
+          break;
+        }
+      } // jj
+    } // ii
+  }
+
   // clear the input rays
 
   _vol.clearRays();
@@ -866,7 +889,8 @@ int RadxPid::_writeVol()
   // add the derived rays to the volume
   
   for (size_t iray = 0; iray < _derivedRays.size(); iray++) {
-    _vol.addRay(_derivedRays[iray]);
+    RadxRay *ray = _derivedRays[iray];
+    _vol.addRay(ray);
   }
   
   _vol.sortRaysByNumber();
