@@ -70,9 +70,14 @@ ConvStratFinder::ConvStratFinder()
   _minVertExtentForConvectiveKm = 1.0; 
 
   _minConvectivityForConvective = 0.5;
-  _secondaryConvectivity = 0.7;
   _maxConvectivityForStratiform = 0.4;
   _minOverlapForClumping = 1;
+
+  _useDualThresholds = false;
+  _secondaryConvectivityThreshold = 0.65;
+  _minFractionAllParts = 0.50;
+  _minFractionEachPart = 0.01;
+  _minSizeEachPart = 1;
 
   _shallowHtKm = 5.0;
   _deepHtKm = 10.0;
@@ -182,6 +187,24 @@ void ConvStratFinder::setGridHtThresholds(const fl32 *shallowHtGrid,
   assert(nptsPlane == _nxy);
   memcpy(_shallowHtGrid.dat(), shallowHtGrid, _nxy * sizeof(fl32));
   memcpy(_deepHtGrid.dat(), deepHtGrid, _nxy * sizeof(fl32));
+
+}
+
+/////////////////////////////////////
+// set whether to use dual thresholds
+
+void ConvStratFinder::setUseDualThresholds(double secondary_threshold,
+                                           double min_fraction_all_parts,
+                                           double min_fraction_each_part,
+                                           double min_size_each_part)
+
+{
+
+  _useDualThresholds = true;
+  _secondaryConvectivityThreshold = secondary_threshold;
+  _minFractionAllParts = min_fraction_all_parts;
+  _minFractionEachPart = min_fraction_each_part;
+  _minSizeEachPart = min_size_each_part;
 
 }
 
@@ -731,34 +754,40 @@ void ConvStratFinder::_performClumping()
     gridGeom.setProjType(PjgTypes::PROJ_FLAT);
   }
 
-  double minFractionAllParts = 0.5;
-  double minFractionEachPart = 0.05;
-  double minAreaEachPart = 20.0;
-
-  _clumping.setUseDualThresholds(_secondaryConvectivity,
-                                 minFractionAllParts,
-                                 minFractionEachPart,
-                                 minAreaEachPart,
-                                 _minVolForConvectiveKm3,
-                                 1.0e99,
-                                 _verbose);
+  if (_useDualThresholds) {
+    _clumping.setUseDualThresholds(_secondaryConvectivityThreshold,
+                                   _minFractionAllParts,
+                                   _minFractionEachPart,
+                                   _minSizeEachPart,
+                                   _minVolForConvectiveKm3,
+                                   1.0e99,
+                                   _verbose);
+  }
   
   vector<ClumpProps> clumpVec;
   _clumping.loadClumpVector(gridGeom, _convectivity3D.dat(), 
                             _minConvectivityForConvective,
                             _minOverlapForClumping,
-                            clumpVec);
+                            clumpVec,
+                            _minVolForConvectiveKm3);
 
   if (_verbose) {
     cerr << "ConvStratFinder::_performClumping()" << endl;
-    cerr << "  N clumps: " << clumpVec.size() << endl;
+    cerr << "  N clumps all sizes: " << clumpVec.size() << endl;
   }
 
   _freeClumps();
   for (size_t ii = 0; ii < clumpVec.size(); ii++) {
-    StormClump *clump = new StormClump(this, clumpVec[ii]);
-    clump->computeGeom();
-    _clumps.push_back(clump);
+    if (clumpVec[ii].volumeKm3() >= _minVolForConvectiveKm3) {
+      StormClump *clump = new StormClump(this, clumpVec[ii]);
+      clump->computeGeom();
+      _clumps.push_back(clump);
+    }
+  }
+
+  if (_verbose) {
+    cerr << "  Min vol for conv: " << _minVolForConvectiveKm3 << endl;
+    cerr << "  N clumps vol>min: " << _clumps.size() << endl;
   }
 
 }
