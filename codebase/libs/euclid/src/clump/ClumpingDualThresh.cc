@@ -61,7 +61,7 @@ ClumpingDualThresh::ClumpingDualThresh() :
         _secondaryThreshold(45.0),
         _minFractionAllParts(0.5),
         _minFractionEachPart(0.05),
-        _minAreaEachPart(20.0),
+        _minSizeEachPart(20.0),
         _minClumpVolume(30.0),
         _maxClumpVolume(1.0e9),
         _clumping(NULL)
@@ -196,15 +196,11 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
 
 {
 
-  if (_debug) {
-    fprintf(stderr, "Computing using secondary threshold\n");
-  }
-
   // check size
   
   if (primaryClump.clumpSize() < _minClumpVolume ||
       primaryClump.clumpSize() > _maxClumpVolume) {
-    return (0);
+    return 0;
   }
     
   // initialize the working grids
@@ -249,7 +245,7 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
     sumSize += thisSize;
     double fractionThisPart = thisSize / sizeOuter;
     if (fractionThisPart >= _minFractionEachPart &&
-	subClump.clumpSize() >= _minAreaEachPart) {
+	subClump.clumpSize() >= _minSizeEachPart) {
       nLargeEnough++;
       valid.push_back(TRUE);
     } else {
@@ -266,7 +262,7 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
     _nSubClumps = 1;
     _allocSubClumps();
     _subClumps[0] = primaryClump;
-    return (1);
+    return 1;
 
   }
 
@@ -314,8 +310,8 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
   for (size_t i = 0; i < _nSubClumps; i++) {
     _computeSubClump(primaryClump, i+1);
   }
-  
-  return (_nSubClumps);
+
+  return _nSubClumps;
 
 }
 
@@ -731,8 +727,6 @@ void ClumpingDualThresh::_computeSubClump(const ClumpProps &primaryClump, int cl
   
   _subClumps[clump_id-1].init(subClumping->getClumps() + clumpNum,
         		      _inputGeom);
-
-  // _subClumps[clump_id-1].printMeta(cerr);
 
 }
 

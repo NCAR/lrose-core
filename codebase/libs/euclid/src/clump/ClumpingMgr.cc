@@ -331,7 +331,7 @@ void ClumpingMgr::_allocRowh(int nrows_per_vol)
 void ClumpingMgr::setUseDualThresholds(double secondary_threshold,
                                        double min_fraction_all_parts,
                                        double min_fraction_each_part,
-                                       double min_area_each_part,
+                                       double min_size_each_part,
                                        double min_clump_volume,
                                        double max_clump_volume,
                                        bool debug /* = false */)
@@ -345,7 +345,7 @@ void ClumpingMgr::setUseDualThresholds(double secondary_threshold,
   _dualT->setSecondaryThreshold(secondary_threshold);
   _dualT->setMinFractionAllParts(min_fraction_all_parts);
   _dualT->setMinFractionEachPart(min_fraction_each_part);
-  _dualT->setMinAreaEachPart(min_area_each_part);
+  _dualT->setMinSizeEachPart(min_size_each_part);
   _dualT->setMinClumpVolume(min_clump_volume);
   _dualT->setMaxClumpVolume(max_clump_volume);
   _dualT->setDebug(debug);
@@ -361,7 +361,8 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
                                   const fl32 *inputData,
                                   double primary_threshold,
                                   int min_grid_overlap,
-                                  vector<ClumpProps> &clumpVec)
+                                  vector<ClumpProps> &clumpVec,
+                                  double min_volume_km3 /* = 0.0 */)
 
 {
 
@@ -375,6 +376,20 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
 
   _nClumps = performClumping(_gridGeom.nx(), _gridGeom.ny(), _gridGeom.nz(),
                              inputData, min_grid_overlap, primary_threshold);
+
+  int nLargeEnough = 0;
+  {
+    const Clump_order *clump = getClumps();
+    for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
+      ClumpProps cprops;
+      cprops.init(clump, _gridGeom);
+      if (cprops.volumeKm3() >= min_volume_km3) {
+        nLargeEnough++;
+      }
+    }
+  }
+  
+  int nAdded = 0;
   
   // load up clump vector
   
@@ -388,13 +403,16 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
       ClumpProps cprops;
       cprops.init(clump, _gridGeom);
-      int n_sub_clumps = _dualT->compute(cprops);
-      if (n_sub_clumps == 1) {
-        clumpVec.push_back(cprops);
-      } else {
-	for (int i = 0; i < n_sub_clumps; i++) {
-	  clumpVec.push_back(_dualT->subClumps()[i]);
-	}
+      if (cprops.volumeKm3() >= min_volume_km3) {
+        int n_sub_clumps = _dualT->compute(cprops);
+        if (n_sub_clumps == 1) {
+          clumpVec.push_back(cprops);
+        } else {
+          nAdded += (n_sub_clumps - 1);
+          for (int i = 0; i < n_sub_clumps; i++) {
+            clumpVec.push_back(_dualT->subClumps()[i]);
+          }
+        }
       }
     } // iclump
 
@@ -406,7 +424,9 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
     for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
       ClumpProps cprops;
       cprops.init(clump, _gridGeom);
-      clumpVec.push_back(cprops);
+      if (cprops.volumeKm3() >= min_volume_km3) {
+        clumpVec.push_back(cprops);
+      }
     } // iclump
 
   } // if (_dualT != NULL)

@@ -120,7 +120,7 @@ public:
   void setUseDualThresholds(double secondary_threshold,
                             double min_fraction_all_parts,
                             double min_fraction_each_part,
-                            double min_area_each_part,
+                            double min_size_each_part,
                             double min_clump_volume,
                             double max_clump_volume,
                             bool debug = false);
@@ -133,7 +133,8 @@ public:
                        const fl32 *inputData,
                        double primary_threshold,
                        int min_grid_overlap,
-                       vector<ClumpProps> &clumps);
+                       vector<ClumpProps> &clumps,
+                       double min_volume_km3 = 0.0);
 
   // Adjust the clumps for an (x, y) grid offset
   // for example when performing dual thresholding

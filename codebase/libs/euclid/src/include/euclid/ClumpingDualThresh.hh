@@ -70,7 +70,7 @@ public:
   void setSecondaryThreshold(double val) { _secondaryThreshold = val; }
   void setMinFractionAllParts(double val) { _minFractionAllParts = val; }
   void setMinFractionEachPart(double val) { _minFractionEachPart = val; }
-  void setMinAreaEachPart(double val) { _minAreaEachPart = val; }
+  void setMinSizeEachPart(double val) { _minSizeEachPart = val; }
   void setMinClumpVolume(double val) { _minClumpVolume = val; }
   void setMaxClumpVolume(double val) { _maxClumpVolume = val; }
 
@@ -120,7 +120,7 @@ private:
   double _secondaryThreshold;
   double _minFractionAllParts;
   double _minFractionEachPart;
-  double _minAreaEachPart;
+  double _minSizeEachPart;
   double _minClumpVolume;
   double _maxClumpVolume;
 
