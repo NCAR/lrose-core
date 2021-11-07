@@ -956,18 +956,6 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'secondary_convectivity_for_dual_thresh'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("secondary_convectivity_for_dual_thresh");
-    tt->descr = tdrpStrDup("Secondary convectivity for dual threshold technique.");
-    tt->help = tdrpStrDup("The dual threshold procedure takes the primary clumps and breaks them apart by clumping at the secondary threshold, and then growing the secondary clumps back out again to the original boundaries. This helps to prevent large monolithic clumps.");
-    tt->val_offset = (char *) &secondary_convectivity_for_dual_thresh - &_start_;
-    tt->single_val.d = 0.7;
-    tt++;
-    
     // Parameter 'max_convectivity_for_stratiform'
     // ctype is 'double'
     
@@ -997,6 +985,81 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OPTIONS TO USE DUAL THRESHOLDS.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'secondary_convectivity_for_dual_thresh'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("secondary_convectivity_for_dual_thresh");
+    tt->descr = tdrpStrDup("Secondary convectivity for dual threshold technique.");
+    tt->help = tdrpStrDup("The dual threshold procedure takes the primary clumps and breaks them apart by clumping at the secondary threshold, and then growing the secondary clumps back out again to the original boundaries. This helps to prevent large monolithic clumps.");
+    tt->val_offset = (char *) &secondary_convectivity_for_dual_thresh - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
+    // Parameter 'use_dual_thresholds'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_dual_thresholds");
+    tt->descr = tdrpStrDup("Option to use dual thresholds to identify convective clumps.");
+    tt->help = tdrpStrDup("NOTE: this step is performed in 2D. If set, the identification is performed in multiple stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. This is the default method. Then, using the dual_threshold parameters, a search is performed for clumps within the envelope exceeding the min convectivity threshold. If there is only one region at the higher convectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelope, but stop growing where they meet between the higher-convectivity areas. The final clumps are computed by breaking the original clump into regions based upon these secondary areas.");
+    tt->val_offset = (char *) &use_dual_thresholds - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'dual_threshold'
+    // ctype is '_dual_threshold_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("dual_threshold");
+    tt->descr = tdrpStrDup("Parameters for dual threshold identification. Performed in 2D.");
+    tt->help = tdrpStrDup("See 'use_dual_thresholds'. secondary_threshold: convectivity threshold for this stage. A number of regions may be identified at the higher threshold. min_fraction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_size_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.");
+    tt->val_offset = (char *) &dual_threshold - &_start_;
+    tt->struct_def.name = tdrpStrDup("dual_threshold_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("secondary_threshold");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &dual_threshold.secondary_threshold - (char *) &dual_threshold;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("min_fraction_all_parts");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &dual_threshold.min_fraction_all_parts - (char *) &dual_threshold;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("min_fraction_each_part");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &dual_threshold.min_fraction_each_part - (char *) &dual_threshold;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("min_size_each_part");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &dual_threshold.min_size_each_part - (char *) &dual_threshold;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0.65;
+      tt->struct_vals[1].d = 0.33;
+      tt->struct_vals[2].d = 0.02;
+      tt->struct_vals[3].d = 2;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
