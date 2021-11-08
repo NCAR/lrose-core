@@ -538,7 +538,7 @@ int RadxPid::_processFile(const string &filePath)
     cerr << "  Cannot compute KDP and attenuation" << endl;
     return -1;
   }
-
+  
   // add extra fields to output
 
   if (_params.PID_write_debug_fields) {
@@ -752,15 +752,26 @@ void RadxPid::_addExtraFieldsToOutput()
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
     
     RadxRay *inputRay = inputRays[iray];
-    RadxRay *outputRay = _derivedRays[iray];
 
-    // make a copy of the input fields
+    // match output ray to input ray based on time
+    
+    RadxRay *outputRay = NULL;
+    double inTime = inputRay->getTimeDouble();
+    for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
+      RadxRay *derivedRay = _derivedRays[jj];
+      double outTime = derivedRay->getTimeDouble();
+      if (fabs(inTime - outTime) < 0.001) {
+        outputRay = derivedRay;
+        break;
+      }
+    } // jj
 
-    RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
-
-    // add to output
-
-    outputRay->addField(mlFld);
+    if (outputRay != NULL) {
+      // make a copy of the input fields
+      RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
+      // add to output
+      outputRay->addField(mlFld);
+    }
 
   } // iray
 
@@ -858,29 +869,6 @@ int RadxPid::_storeDerivedRay(WorkerThread *thread)
 
 int RadxPid::_writeVol()
 {
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    const vector<RadxRay *> &inRays = _vol.getRays();
-    for (size_t ii = 0; ii < inRays.size(); ii++) {
-      RadxRay *inRay = inRays[ii];
-      double inTime = inRay->getTimeDouble();
-      for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
-        RadxRay *outRay = _derivedRays[jj];
-        double outTime = outRay->getTimeDouble();
-        if (fabs(inTime - outTime) < 0.001) {
-          if (inRay->getNGates() != outRay->getNGates()) {
-            cerr << "777777777777777777777777777777" << endl;
-            cerr << "inRay time: " << inRay->getRadxTime().asString(6) << endl;
-            cerr << "outRay time: " << outRay->getRadxTime().asString(6) << endl;
-            cerr << "inRay nGates: " << inRay->getNGates() << endl;
-            cerr << "outRay nGates: " << outRay->getNGates() << endl;
-            cerr << "777777777777777777777777777777" << endl;
-          }
-          break;
-        }
-      } // jj
-    } // ii
-  }
 
   // clear the input rays
 
