@@ -108,6 +108,11 @@ void LeoRadxFile::_clearRays()
   _rays.clear();
 }
 
+void LeoRadxFile::_clearHeaderData() {
+  _headingAngle = 0.0;
+  _directionOffset = 0.0;
+}
+
 /////////////////////////////////////////////////////////
 // Check if specified file is Leosphere format
 // Returns true if supported, false otherwise
@@ -377,6 +382,7 @@ int LeoRadxFile::_readHeaderData(string &xml)
   int nLinesRead = 0;
 
   _ranges.clear();
+  _clearHeaderData();
 
   // read through the header records
   
@@ -554,6 +560,26 @@ int LeoRadxFile::_readHeaderData(string &xml)
 
     if (tag.find("Header") != string::npos) {
       nHeaderLines = stoi(valStr);
+    }
+
+    if (tag.find("DirectionOffset") != string::npos) {
+      double dval;
+      if (sscanf(valStr.c_str(), "%lg", &dval) == 1) {
+        _directionOffset = dval;
+        if (_debug) {
+          cerr << "  direction offset: " << _directionOffset << endl;
+        }
+      }
+    }
+
+    if (tag.find("HeadingAngle") != string::npos) {
+      double dval;
+      if (sscanf(valStr.c_str(), "%lg", &dval) == 1) {
+        _headingAngle = dval;
+        if (_debug) {
+          cerr << "  heading angle: " << _headingAngle << endl;
+        }
+      }
     }
 
   } // while
@@ -1245,7 +1271,7 @@ void LeoRadxFile::_findFieldsModel7()
       field.standardName = "Radial Wind Speed";
       field.longName = "Radial Wind Speed";
       field.units = "m/s";
-    }
+    } 
 
     _fields.push_back(field);
 
@@ -1513,6 +1539,9 @@ int LeoRadxFile::_readRayDataModel866()
     if (_azimuthIndex >= 0) {
       az = atof(toks[_azimuthIndex].c_str());
     }
+    // azimuth is relative to instrument coordinate system
+    // so, add the DirectionOffset
+    az += _directionOffset;
     ray->setAzimuthDeg(az);
     
     // fixed angle
@@ -2034,6 +2063,9 @@ int LeoRadxFile::_readRayDataModel7()
     if (_azimuthIndex >= 0) {
       az = atof(toks[_azimuthIndex].c_str());
     }
+    // azimuth is relative to instrument coordinate system
+    // so, add the DirectionOffset and HeadingAngle
+    az += _directionOffset + _headingAngle;
     ray->setAzimuthDeg(az);
     
     // fixed angle
@@ -2694,9 +2726,9 @@ bool LeoRadxFile::findAzimuthAngle(string &columnLabel) {
     found = columnLabel.find("Azimuth Angle") != string::npos;
   } else if (_modelNum == 100) {
     found = columnLabel.find("Azimuth") != string::npos;
-  } //else if (_isModel7 || _isModel866) {
-  //  found =  columnLabel.find("Position") != string::npos;
-  //} 
+  } else if ((_modelNum == 7) || (_modelNum == 866)) {
+    found =  columnLabel.find("Position") != string::npos;
+  } 
   return found;  
 }
 

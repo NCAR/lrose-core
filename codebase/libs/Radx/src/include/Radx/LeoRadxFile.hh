@@ -197,6 +197,9 @@ private:
   int _elevationIndex;
   int _azimuthIndex;
   int _rangeColumnIndex;
+
+  double _directionOffset;
+  double _headingAngle;
   
   double _azLimit1, _azLimit2;
   double _elLimit1, _elLimit2;
@@ -231,6 +234,7 @@ private:
   // private methods
   
   void _clearRays();
+  void _clearHeaderData();
 
   int _readHeaderData(string &xml);
   void _findFieldsModel200();
