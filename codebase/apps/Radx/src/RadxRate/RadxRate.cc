@@ -811,15 +811,26 @@ void RadxRate::_addExtraFieldsToOutput()
   for (size_t iray = 0; iray < inputRays.size(); iray++) {
     
     RadxRay *inputRay = inputRays[iray];
-    RadxRay *outputRay = _derivedRays[iray];
+    
+    // match output ray to input ray based on time
+    
+    RadxRay *outputRay = NULL;
+    double inTime = inputRay->getTimeDouble();
+    for (size_t jj = 0; jj < _derivedRays.size(); jj++) {
+      RadxRay *derivedRay = _derivedRays[jj];
+      double outTime = derivedRay->getTimeDouble();
+      if (fabs(inTime - outTime) < 0.001) {
+        outputRay = derivedRay;
+        break;
+      }
+    } // jj
 
-    // make a copy of the input fields
-
-    RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
-
-    // add to output
-
-    outputRay->addField(mlFld);
+    if (outputRay != NULL) {
+      // make a copy of the input fields
+      RadxField *mlFld = new RadxField(*inputRay->getField(mlFieldName));
+      // add to output
+      outputRay->addField(mlFld);
+    }
 
   } // iray
 
