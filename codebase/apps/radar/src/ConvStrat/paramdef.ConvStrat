@@ -220,12 +220,6 @@ commentdef {
   p_header = "OPTIONS TO USE DUAL THRESHOLDS.";
 }
 
-paramdef double {
-  p_default = 0.7;
-  p_descr = "Secondary convectivity for dual threshold technique.";
-  p_help = "The dual threshold procedure takes the primary clumps and breaks them apart by clumping at the secondary threshold, and then growing the secondary clumps back out again to the original boundaries. This helps to prevent large monolithic clumps.";
-} secondary_convectivity_for_dual_thresh;
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to use dual thresholds to identify convective clumps.";

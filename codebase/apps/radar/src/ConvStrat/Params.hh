@@ -442,8 +442,6 @@ public:
 
   int min_overlap_for_convective_clumps;
 
-  double secondary_convectivity_for_dual_thresh;
-
   tdrp_bool_t use_dual_thresholds;
 
   dual_threshold_t dual_threshold;
@@ -477,7 +475,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 
