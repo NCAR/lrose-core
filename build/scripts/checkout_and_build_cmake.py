@@ -815,7 +815,7 @@ def buildFractl():
     
     # do the build and install
 
-    cmd = "make -k -j 8 install/strip"
+    cmd = "make VERBOSE=1 -k -j 8 install/strip"
     shellCmd(cmd)
 
     return
@@ -854,7 +854,7 @@ def buildVortrac():
     
     # do the build and install
     
-    cmd = "make -k -j 8 install/strip"
+    cmd = "make VERBOSE=1 -k -j 8 install/strip"
     shellCmd(cmd)
     
     # install resources
@@ -903,7 +903,7 @@ def buildSamurai():
 
     # do the build and install
 
-    cmd = "make -k -j 8 install/strip"
+    cmd = "make VERBOSE=1 -k -j 8 install/strip"
     shellCmd(cmd)
 
     return
