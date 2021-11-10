@@ -262,7 +262,7 @@ void SweepModel::setSelectedAngle(double value) {
   */
 
   DataModel *dataModel = DataModel::Instance();
-  _selectedSweepNumber = dataModel->getSweepNumber(value);
+  _selectedSweepNumber = dataModel->getSweepNumber((float) value);
   LOG(DEBUG) << "exit _selectedSweepNumber = " << _selectedSweepNumber;
 }
 
