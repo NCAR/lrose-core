@@ -240,6 +240,12 @@ paramdef boolean {
 } preserve_sweeps;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Preserve rays just as they are in the file.";
+  p_help = "Applies generally to SIGMET data. If true, the ray details are preserved. If false, we order the rays increasing in time.";
+} preserve_rays;
+
+paramdef boolean {
   p_default = true;
   p_descr = "Option to remove long range rays.";
   p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";

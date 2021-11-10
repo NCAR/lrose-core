@@ -318,6 +318,8 @@ private:
   double _getFixedAngle(int sweepIndex, double el, double az);
   void _setHrdSources();
 
+  bool _detectIncreasingTimeElevation();
+
   string _fieldId2Name(int fieldId);
   string _fieldId2Units(int fieldId);
   void _fieldId2ScaleBias(int fieldId, double &scale, double &bias);

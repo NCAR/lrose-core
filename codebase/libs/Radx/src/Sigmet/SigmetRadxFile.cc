@@ -341,7 +341,7 @@ int SigmetRadxFile::readFromPath(const string &path,
 
   // sort rays by time order if we have accurate time
 
-  if (_hasSubsecTime) {
+  if ((_hasSubsecTime) && (!_readPreserveRays)) {
     _readVol->sortRaysByTime();
   }
   
@@ -988,6 +988,38 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
 
 }
 
+bool SigmetRadxFile::_detectIncreasingTimeElevation() {
+    bool divergence = false;
+    size_t iray = 0;
+    bool equal = true;
+    Radx::ui16 i_sec;
+    Radx::ui16 i1_sec;
+    //cerr << "i_sec " << i_sec << endl;
+    while (iray < _rayInfo.size()-1 && equal) {
+      i_sec = _rayInfo[iray].hdr.seconds;
+      i1_sec = _rayInfo[iray+1].hdr.seconds;      
+      if (i_sec == i1_sec) {
+        iray += 1;
+      } else {
+        equal = false;
+      }
+    }
+    if (i_sec < i1_sec) {
+      // the times are increasing
+      // check the elevation for divergence
+      if (_rayInfo[iray].hdr.start_el < _rayInfo[iray+1].hdr.start_el)
+        divergence = false;
+      else divergence = true;
+    } else {
+      // the times are decreasing
+      // check the elevation for divergence
+      if (_rayInfo[iray].hdr.start_el < _rayInfo[iray+1].hdr.start_el)
+        divergence = true;
+      else divergence = false; 
+    }
+    return divergence;
+}
+
 /////////////////////////////////////
 // process a sweep of data
 //
@@ -1013,10 +1045,39 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
   // somewhere other than north, so we need to find the starting point
 
   int startIndex = 0;
-  for (size_t iray = 1; iray < _rayInfo.size(); iray++) {
-    if (_rayInfo[iray].hdr.seconds < _rayInfo[iray-1].hdr.seconds) {
-      startIndex = iray;
-      break;
+  if (_readPreserveRays) {
+
+    // always sort by increasing time
+    // then, depending on the elevation rising or falling sort by 
+    // increasing elevation or decreasing elevation.
+    // HOW to detect, elevation rising or falling?
+
+    bool isSweepDiverging = _detectIncreasingTimeElevation();
+
+    struct {
+        bool operator()(RayInfo a, RayInfo b) const { 
+          if (a.hdr.seconds != b.hdr.seconds) return a.hdr.seconds < b.hdr.seconds;
+          else return a.hdr.start_el > b.hdr.start_el; }
+    } diverging;
+
+    struct {
+        bool operator()(RayInfo a, RayInfo b) const { 
+          if (a.hdr.seconds != b.hdr.seconds) return a.hdr.seconds < b.hdr.seconds;
+          else return a.hdr.start_el < b.hdr.start_el; }
+    } increasing;
+
+    if (isSweepDiverging) {
+      std::sort(_rayInfo.begin(), _rayInfo.end(), diverging);
+    } else {
+      std::sort(_rayInfo.begin(), _rayInfo.end(), increasing);
+    }
+  } else {
+
+    for (size_t iray = 1; iray < _rayInfo.size(); iray++) {
+      if (_rayInfo[iray].hdr.seconds < _rayInfo[iray-1].hdr.seconds) {
+        startIndex = iray;
+        break;
+      }
     }
   }
   
@@ -1215,7 +1276,7 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
       fieldNum++;
       
     } // ifield
-    
+
     if (doPrint || _verbose) {
       ray->print(out);
     }

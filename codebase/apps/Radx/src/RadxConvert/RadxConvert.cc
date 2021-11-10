@@ -888,6 +888,12 @@ void RadxConvert::_setupRead(RadxFile &file)
     file.setReadPreserveSweeps(false);
   }
 
+  if (_params.preserve_rays) {
+    file.setReadPreserveRays(true);
+  } else {
+    file.setReadPreserveRays(false);
+  }
+
   if (_params.remove_long_range_rays) {
     file.setReadRemoveLongRange(true);
   } else {

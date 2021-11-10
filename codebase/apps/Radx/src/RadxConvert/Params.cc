@@ -1019,6 +1019,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'preserve_rays'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("preserve_rays");
+    tt->descr = tdrpStrDup("Preserve rays just as they are in the file.");
+    tt->help = tdrpStrDup("Applies generally to SIGMET data. If true, the ray details are preserved. If false, we order the rays increasing in time.");
+    tt->val_offset = (char *) &preserve_rays - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'remove_long_range_rays'
     // ctype is 'tdrp_bool_t'
     

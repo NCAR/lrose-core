@@ -566,6 +566,8 @@ public:
 
   tdrp_bool_t preserve_sweeps;
 
+  tdrp_bool_t preserve_rays;
+
   tdrp_bool_t remove_long_range_rays;
 
   tdrp_bool_t remove_short_range_rays;
@@ -813,7 +815,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[180];
+  mutable TDRPtable _table[181];
 
   const char *_className;
 

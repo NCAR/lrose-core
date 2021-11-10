@@ -510,6 +510,7 @@ void RadxFile::copyReadDirectives(const RadxFile &other)
   _readMaxRangeKm = other._readMaxRangeKm;
   _readRemoveLongRange = other._readRemoveLongRange;
   _readPreserveSweeps = other._readPreserveSweeps;
+  _readPreserveRays = other._readPreserveRays;
   _readComputeSweepAnglesFromVcpTables = other._readComputeSweepAnglesFromVcpTables;
   _readRemoveShortRange = other._readRemoveShortRange;
   _readMetadataOnly = other._readMetadataOnly;
@@ -2157,6 +2158,7 @@ void RadxFile::clearRead()
   _readMaxRangeKm = Radx::missingMetaDouble;
   _readRemoveLongRange = false;
   _readPreserveSweeps = false;
+  _readPreserveRays = false;
   _readComputeSweepAnglesFromVcpTables = false;
   _readRemoveShortRange = false;
   _readMetadataOnly = false;
@@ -2361,6 +2363,21 @@ void RadxFile::setReadPreserveSweeps(bool val)
 
 {
   _readPreserveSweeps = val;
+}
+
+/////////////////////////////////////////////////////////////////
+/// Set flag to indicate that we want to preserve the
+/// ray details in the file we read in.
+/// This generally applies to SIGMET data - by default the
+/// rays are ordered by time.
+/// If this flag is true, the ray order in the
+/// the raw data file is unchanged.
+/// Defaults to false.
+
+void RadxFile::setReadPreserveRays(bool val)
+
+{
+  _readPreserveRays = val;
 }
 
 /////////////////////////////////////////////////////////////////
