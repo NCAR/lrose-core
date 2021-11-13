@@ -29,6 +29,8 @@ def main():
 
     global thisScriptDir
     thisScriptDir = os.path.dirname(__file__)
+    if (len(thisScriptDir) == 0):
+        thisScriptDir = "."
     os.chdir(thisScriptDir)
     thisScriptDir = os.getcwd()
 
