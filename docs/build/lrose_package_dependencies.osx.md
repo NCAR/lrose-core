@@ -27,9 +27,7 @@ You may also need to run:
 
 Install the stand-alone XCode command line tools by downloading "Command Line Tools" from:
 
-```
-  http://developer.apple.com/downloads
-```
+* [http://developer.apple.com/downloads](http://developer.apple.com/downloads)
 
 You will need to register for a free Apple id, no credit card is required.
 
