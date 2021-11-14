@@ -28,9 +28,7 @@ This formula is used to perform the homebrew build.
 
 Download ```lrose-core.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [https://github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 Choose the latest version.
 
@@ -184,9 +182,7 @@ fractl can be installed using the ```lrose-fractl.rb``` brew formula.
 
 Download ```lrose-fractl.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [https://github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
@@ -222,9 +218,7 @@ The ```vortrac``` application analyses rotations in single Doppler data. It is m
 
 Download ```lrose-vortrac.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [https://github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
@@ -260,9 +254,7 @@ The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU. ``
 
 Download ```lrose-samurai.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [https://github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
