@@ -112,8 +112,6 @@ If the build is successful, lrose will be installed in:
 In these directories, links will be created that point to the actual files
 in ```/usr/local/Cellar```.
 
-See also: [Homebrew Notes](./homebrew_notes.md)
-
 <a name="verify"/>
 
 ## 4. Verify the installation
