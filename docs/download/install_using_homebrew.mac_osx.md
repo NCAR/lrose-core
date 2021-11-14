@@ -156,9 +156,7 @@ If needed, uninstall fractl, vortrac and samurai:
 
 Next, download the new version of the brew formula, from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [https://github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 Choose from the appropriate distribution.
 
