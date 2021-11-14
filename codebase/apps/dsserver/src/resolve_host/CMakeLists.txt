@@ -88,6 +88,7 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
 
 # link libs
 

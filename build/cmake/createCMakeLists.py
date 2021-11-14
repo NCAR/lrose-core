@@ -1391,6 +1391,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
     fo.write("  link_directories (/usr/local/lib)\n")
     fo.write("endif()\n")
+    fo.write("add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )\n")
     fo.write("\n")
 
     fo.write("# link libs\n")
