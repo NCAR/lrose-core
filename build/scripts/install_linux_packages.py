@@ -88,11 +88,10 @@ def main():
             installPackagesCentos6()
         elif (osVersion == 7):
             installPackagesCentos7()
-        elif (osVersion == 8):
+        else:
             installPackagesCentos8()
     elif (osType == "almalinux"):
-        if (osVersion == 8):
-            installPackagesAlmalinux8()
+        installPackagesAlmalinux8()
     elif (osType == "fedora"):
          installPackagesFedora()
     elif (osType == "debian"):
@@ -273,7 +272,7 @@ def installPackagesCentos8():
     shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
     
 ########################################################################
-# install packages for ALMA LINUX 8
+# install packages for ALMALINUX 8
 
 def installPackagesAlmalinux8():
 
@@ -545,6 +544,8 @@ def getOsType():
           nameline = line.lower()
           if (nameline.find("centos") >= 0):
             osType = "centos"
+          elif (nameline.find("almalinux") >= 0):
+            osType = "almalinux"
           elif (nameline.find("fedora") >= 0):
             osType = "fedora"
           elif (nameline.find("debian") >= 0):
