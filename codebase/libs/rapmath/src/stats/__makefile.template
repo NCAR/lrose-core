@@ -39,7 +39,8 @@ CPPC_SRCS = \
 	DistLognorm.cc \
 	DistNormal.cc \
 	DistPolynomial.cc \
-	Distribution.cc
+	Distribution.cc \
+	ModeDiscrete.cc
 
 #
 # general targets

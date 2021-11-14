@@ -111,6 +111,7 @@ set (SRCS
       ./stats/DistNormal.cc
       ./stats/DistPolynomial.cc
       ./stats/Distribution.cc
+      ./stats/ModeDiscrete.cc
       ./tree/bd_tree.c
       ./trig/trig.c
       ./umath/dir_speed_2_uv.c
