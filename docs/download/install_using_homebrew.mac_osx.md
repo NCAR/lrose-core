@@ -131,7 +131,7 @@ Try the commands:
 
 <a name="upgrade"/>
 
-## 5. Upgrade to a new version
+## 5. Upgrade to a new LROSE version (DO NOT use admin privileges)
 
 When the time comes to upgrade, you will first need to uninstall the current version.
 
