@@ -56,9 +56,12 @@ The official homebrew install docs are at:
 
 * [https://docs.brew.sh/Installatio](https://docs.brew.sh/Installation)
 
-To install brew, run the following script:
+To install brew, run the following script in a bash shell.
+
+If you are not running bash, execute a bash shell first.
 
 ```
+  /bin/bash
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   /usr/local/bin/brew update
 ```
