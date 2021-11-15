@@ -16,7 +16,7 @@ However for our purposes here, XCode is free, so this will not actually cost you
 
 Go to the developer download page:
 
-* [http://developer.apple.com/downloads](http://developer.apple.com/downloads)
+* [developer.apple.com/downloads](http://developer.apple.com/downloads)
 
 and you will find the following entries (perhaps with different versions):
 
@@ -54,7 +54,7 @@ To install brew you will need to run with admin privileges.
 
 The official homebrew install docs are at:
 
-* [https://docs.brew.sh/Installatio](https://docs.brew.sh/Installation)
+* [docs.brew.sh/Installation](https://docs.brew.sh/Installation)
 
 To install brew, run the following script in a bash shell.
 
