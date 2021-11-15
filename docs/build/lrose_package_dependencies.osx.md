@@ -1,5 +1,7 @@
 # LROSE-CORE package dependencies - OSX
 
+### NOTE: this page requires ```admin``` privileges.
+
 ## Install XCode and the Command Line Tools
 
 ### Get an Apple ID (account)
@@ -26,7 +28,7 @@ Xcode comes packaged as an ```.xip``` file.
 
 The command line tools are packaged as a ```.dmg``` file.
 
-### Install XCode and Command line tools
+### Install XCode and Command line tools (requries ```admin``` privileges)
 
 Double-click on the downloaded items (in your browser) or open them in a terminal window. Follow the instructions for installation.
 
@@ -46,7 +48,7 @@ You should reboot after installing or upgrading XCode.
 
 The reboot will perform some steps to complete the XCode install.
 
-## Install homebrew
+## Install homebrew (requries ```admin``` privileges)
 
 To install brew you will need to run with admin privileges.
 
@@ -80,3 +82,4 @@ More specifically, you need write permission for the following directories:
 
 WARNING - when using brew to install packages, do not use ```root``` or ```sudo```. This is very important. If you do, it will lead to permissions problems.
 
+Only use admin privileges for installing brew itself, NOT for USING brew to install other packages.
