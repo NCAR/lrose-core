@@ -52,7 +52,11 @@ The reboot will perform some steps to complete the XCode install.
 
 To install brew you will need to run with admin privileges.
 
-Run the following script:
+The official homebrew install docs are at:
+
+* [https://docs.brew.sh/Installatio](https://docs.brew.sh/Installation)
+
+To install brew, run the following script:
 
 ```
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
