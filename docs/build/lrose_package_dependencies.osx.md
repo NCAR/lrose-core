@@ -39,7 +39,7 @@ The reboot will perform some steps to complete the XCode install.
 
 ## Install homebrew
 
-Run the following ruby script:
+Run the following:
 
 ```
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
