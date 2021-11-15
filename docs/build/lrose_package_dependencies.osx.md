@@ -8,9 +8,9 @@
 
 To download the XCode package, get an Apple ID and register for the Apple App Store.
 
-You will need to provide a credit card, so Apple can charge you if you actually buy anything.  
+You will need to provide a credit card, so that Apple can charge you if you actually buy anything.  
 
-XCode is free, so this will not actually cost you anything.
+However for our purposes here, XCode is free, so this will not actually cost you anything.
 
 ### Download XCode and Command line tools
 
