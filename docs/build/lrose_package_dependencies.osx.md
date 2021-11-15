@@ -18,7 +18,7 @@ Go to the developer download page:
 
 and you will find the following entries (perhaps with different versions):
 
-<img align="left" width="175" height="175" src="../images/xcode_download.png">
+<img align="left" width="400" height="175" src="../images/xcode_download.png">
 
 Download both Xcode and the command line tools.
 
