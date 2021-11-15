@@ -11,23 +11,22 @@
 
 <a name="prepare"/>
 
-## 1. Prepare
+## 1. Prepare (requires admin privileges)
+
+### Install XCode and the Command Line Tools
 
 Install either the XCode development environment or a stand-alone version of the
 XCode command line tools.  If you intend to do lots of Apple development and
 want to use an IDE, then install XCode.
 
-You also need to install Homebrew.
+You also need to install Homebrew. See:
 
 * [Install XCode and Homebrew](../build/lrose_package_dependencies.osx.md)
 
-Then use homebrew to install the required packages:
-
-```
-  brew install hdf5 netcdf fftw flex jpeg libpng libzip qt szip pkg-config cmake rsync libx11 libxext
-```
-
 ## 2. Download
+
+** NOTE - when using brew, do NOT use admin privileges. **
+** Always run brew as yourself, otherwise you will create permission problems. ***
 
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
