@@ -25,8 +25,8 @@ You also need to install Homebrew. See:
 
 ## 2. Download
 
-** NOTE - when using brew, do NOT use admin privileges. **
-** Always run brew as yourself, otherwise you will create permission problems. ***
+**NOTE - when using brew, do NOT use admin privileges.**
+**Always run brew as yourself, otherwise you will create permission problems.**
 
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
@@ -39,7 +39,7 @@ Choose the latest version.
 
 <a name="install"/>
 
-## 3. Install
+## 3. Install (DO NOT use admin privileges)
 
 Let us assume you have downloaded the latest core distribution, containing all of the core apps.
 
@@ -174,7 +174,7 @@ See [install](#install) for checking on the install.
 
 <a name="fractl"/>
 
-## 6. Installing fractl
+## 6. Installing fractl (DO NOT use admin privileges)
 
 The ```fractl``` application performs dual-Doppler analysis. It is maintained by CSU. ```fractl``` is dependent on ```lrose-core```.
 
@@ -211,7 +211,7 @@ To upgrade:
 
 <a name="vortrac"/>
 
-## 7. Installing vortrac
+## 7. Installing vortrac (DO NOT use admin privileges)
 
 The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU. ```vortrac``` is dependent on ```lrose-core```.
 
@@ -247,7 +247,7 @@ To upgrade:
 
 <a name="samurai"/>
 
-## 8. Installing samurai
+## 8. Installing samurai (DO NOT use admin privileges)
 
 The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU. ```samurai``` is dependent on ```lrose-core```.
 
