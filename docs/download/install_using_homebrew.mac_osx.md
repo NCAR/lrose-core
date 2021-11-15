@@ -21,6 +21,12 @@ You also need to install Homebrew.
 
 * [Install XCode and Homebrew](../build/lrose_package_dependencies.osx.md)
 
+Then use homebrew to install the required packages:
+
+```
+  brew install hdf5 netcdf fftw flex jpeg libpng libzip qt szip pkg-config cmake rsync libx11 libxext
+```
+
 ## 2. Download
 
 You need to download the brew formula from the lrose repository.
