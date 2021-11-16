@@ -49,3 +49,14 @@ If you do not want to do this, you can omit this step.
   zypper update -y
 ```
 
+# Checkout lrose bootstrap
+
+
+```
+  mkdir git
+  cd git
+  git clone https://github.com/ncar/lrose-bootstrap
+```
+
+
+
