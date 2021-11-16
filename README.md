@@ -44,7 +44,6 @@ The latest release can be found at:
 | [LINUX - Debian, Ubuntu](./docs/download/download_package_and_install.debian.md) | Install from .deb package file |
 | [LINUX - Suse](./docs/download/download_package_and_install.suse.md) | Install from .rpm package file |
 | [LINUX - Alma Linux](./docs/download/download_package_and_install.redhat.md) | Install from .rpm package file |
-| [LINUX - Oracle](./docs/download/download_package_and_install.oracle.md) | Install from .rpm package file |
 | [MAC lrose-core](./docs/download/install_using_homebrew.mac_osx.md) | Build and install using homebrew |
 | [MAC HawkEye](./docs/download/hawkeye_install_from_dmg.md) | Install HawkEye from DMG file |
 | [CIDD - LINUX](./docs/download/CIDD_binary_download_and_install.linux.md) | Binary install of CIDD for LINUX |
