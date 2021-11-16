@@ -48,7 +48,7 @@ You should reboot after installing or upgrading XCode.
 
 The reboot will perform some steps to complete the XCode install.
 
-## Install homebrew (requries ```admin``` privileges)
+## Install homebrew (requires ```admin``` privileges)
 
 To install brew you will need to run with admin privileges.
 

@@ -109,9 +109,9 @@ You can watch the progress using:
 If the build is successful, lrose will be installed in:
 
 ```
-  /usr/local/opt/lrose/include
-  /usr/local/opt/lrose/lib
-  /usr/local/opt/lrose/bin
+  /usr/local/include
+  /usr/local/lib
+  /usr/local/bin
 ```
 
 In these directories, links will be created that point to the actual files
@@ -123,10 +123,10 @@ in ```/usr/local/Cellar```.
 
 Try the commands:
 ```
-  /usr/local/opt/lrose/bin/RadxPrint -h
-  /usr/local/opt/lrose/bin/RadxConvert -h
-  /usr/local/opt/lrose/bin/Radx2Grid -h
-  /usr/local/opt/lrose/bin/HawkEye
+  /usr/local/bin/RadxPrint -h
+  /usr/local/bin/RadxConvert -h
+  /usr/local/bin/Radx2Grid -h
+  /usr/local/bin/HawkEye
 ```
 
 <a name="upgrade"/>
@@ -202,6 +202,12 @@ For example you should expect to see:
   Warning: Treating lrose-fractl.rb as a formula.
 ```
 
+fractl will be installed as:
+
+```
+  /usr/local/bin/fractl
+```
+
 To upgrade:
 
 ```
@@ -238,6 +244,12 @@ For example you should expect to see:
   Warning: Treating lrose-vortrac.rb as a formula.
 ```
 
+vortrac will be installed as:
+
+```
+  /usr/local/bin/vortrac
+```
+
 To upgrade:
 
 ```
@@ -272,6 +284,12 @@ For example you should expect to see:
   Error: Failed to load cask: lrose-samurai.rb
   Cask 'lrose-samurai' is unreadable
   Warning: Treating lrose-samurai.rb as a formula.
+```
+
+samurai will be installed as:
+
+```
+  /usr/local/bin/samurai
 ```
 
 To upgrade:
