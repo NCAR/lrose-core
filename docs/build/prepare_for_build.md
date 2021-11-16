@@ -7,6 +7,7 @@ This document explains how to prepare a bare-bones OS for an LROSE download and 
 ```
   yum update -y
   yum install -y epel-release
+  yum install -y git
 ```
 
 WARNING - this will update to the latest sub-version of the release.
@@ -23,34 +24,38 @@ If you do not want to do this, you can omit this step.
   dnf config-manager --set-enabled powertools
   dnf install -y python2 python3
   alternatives --set python /usr/bin/python3
+  dnf install -y git
 ```
 
 ## Fedora
 
 ```
   yum update -y
+  yum install -y git
 ```
 
 ## Oracle 8
 
 ```
   dnf update -y
+  dnf install -y git
 ```
 
 ## Debian
 
 ```
   apt-get update
+  apt-get install -y git
 ```
 
 ## Suse
 
 ```
   zypper update -y
+  zypper install -y git
 ```
 
 # Checkout lrose bootstrap
-
 
 ```
   mkdir git
