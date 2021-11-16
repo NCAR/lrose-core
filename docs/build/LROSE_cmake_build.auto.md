@@ -35,6 +35,8 @@ This can be changed using the ```--prefix``` argument on the scripts.
 
 ## 2. Prepare
 
+* [Prepare your OS for the build](./prepare_for_build.md)
+
 ### Create a working directory for cloning:
 
 ```
@@ -44,7 +46,7 @@ This can be changed using the ```--prefix``` argument on the scripts.
 
 ### Install required packages
 
-See:
+See also:
 
 * [lrose-core package dependencies](./lrose_package_dependencies.md)
 
