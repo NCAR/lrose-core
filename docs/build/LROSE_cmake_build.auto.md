@@ -73,6 +73,12 @@ You will see the following scripts:
   lrose_checkout_and_build_cmake.py
 ```
 
+```do_build_all_cmake.py``` calls ```install_linux_packages.py``` to ensure that all of the required packages are installed, prior to performing the compile. The install script determines the version of LINUX you are running and installs the appropriate dependency packages.
+
+```do_build_all_cmake.py``` then calls ```lrose_checkout_and_build_cmake.py``` to checkout, compile and install lrose-core.
+
+And finally ```do_build_all_cmake.py``` will optionally checkout, compile and install the wind applications ```fractl```, ```vortrac``` and ```samurai```.
+
 ### Run the ```do_build_all_cmake.py``` script:
 
 To see the usage:
