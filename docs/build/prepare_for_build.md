@@ -8,6 +8,7 @@ This document explains how to prepare a bare-bones OS for an LROSE download and 
   yum update -y
   yum install -y epel-release
   yum install -y git
+  yum install -y python
 ```
 
 WARNING - this will update to the latest sub-version of the release.
@@ -32,13 +33,7 @@ If you do not want to do this, you can omit this step.
 ```
   yum update -y
   yum install -y git
-```
-
-## Oracle 8
-
-```
-  dnf update -y
-  dnf install -y git
+  yum install -y python
 ```
 
 ## Debian
@@ -46,6 +41,7 @@ If you do not want to do this, you can omit this step.
 ```
   apt-get update
   apt-get install -y git
+  apt-get install -y python
 ```
 
 ## Suse
@@ -53,6 +49,15 @@ If you do not want to do this, you can omit this step.
 ```
   zypper update -y
   zypper install -y git
+  zypper install -y python
+```
+
+## Oracle 8
+
+```
+  dnf update -y
+  dnf install -y git
+  dnf install -y python
 ```
 
 # Checkout lrose bootstrap
