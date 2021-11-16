@@ -63,5 +63,12 @@ If you do not want to do this, you can omit this step.
   git clone https://github.com/ncar/lrose-bootstrap
 ```
 
+# Install package dependencies
+
+```
+  cd lrose-bootstrap/scripts
+  ./install_linux_packages
+```
+
 
 
