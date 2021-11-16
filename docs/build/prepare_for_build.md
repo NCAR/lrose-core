@@ -1,4 +1,4 @@
-# Prepare for build depending on the OS
+# 1. Prepare for build depending on the OS
 
 This document explains how to prepare a bare-bones OS for an LROSE download and build.
 
@@ -60,7 +60,7 @@ If you do not want to do this, you can omit this step.
   dnf install -y python
 ```
 
-# Checkout lrose bootstrap
+# 2. Checkout lrose bootstrap
 
 ```
   mkdir git
@@ -68,7 +68,7 @@ If you do not want to do this, you can omit this step.
   git clone https://github.com/ncar/lrose-bootstrap
 ```
 
-# Install package dependencies
+# 3. Install package dependencies
 
 ```
   cd lrose-bootstrap/scripts
