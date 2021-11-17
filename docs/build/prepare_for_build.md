@@ -2,6 +2,8 @@
 
 This document explains how to prepare a bare-bones OS for an LROSE download and build.
 
+These steps need to be performed as ```root```, or using ```sudo```.
+
 ## Centos 7
 
 ```
@@ -69,6 +71,8 @@ If you do not want to do this, you can omit this step.
 ```
 
 # 3. Install package dependencies
+
+This must be run as ```root``` or using ```sudo```.
 
 ```
   cd lrose-bootstrap/scripts
