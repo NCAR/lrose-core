@@ -240,15 +240,19 @@ int IwrfTsGet::_loadFileList(const DateTime &searchTime)
     _fileListStartTimes.push_back(xx.first);
     _fileListPaths.push_back(xx.second);
   }
-  for (size_t ii = 0; ii < _fileListStartTimes.size(); ii++) {
-    if (ii < _fileListStartTimes.size() - 1) {
-      _fileListEndTimes.push_back(_fileListStartTimes[ii + 1]);
-    } else {
-      // for the last file we use the length of the previous file,
-      // in seconds
-      int prevFileLengthSecs =
-        _fileListEndTimes[ii - 1] - _fileListStartTimes[ii - 1];
-      _fileListEndTimes[ii] = _fileListStartTimes[ii] + prevFileLengthSecs;
+  if (_fileListStartTimes.size() == 1) {
+    _fileListEndTimes.push_back(_fileListStartTimes[0]);
+  } else {
+    for (size_t ii = 0; ii < _fileListStartTimes.size(); ii++) {
+      if (ii < _fileListStartTimes.size() - 1) {
+        _fileListEndTimes.push_back(_fileListStartTimes[ii + 1]);
+      } else {
+        // for the last file we use the length of the previous file,
+        // in seconds
+        int prevFileLengthSecs =
+          _fileListEndTimes[ii - 1] - _fileListStartTimes[ii - 1];
+        _fileListEndTimes[ii] = _fileListStartTimes[ii] + prevFileLengthSecs;
+      }
     }
   }
   
