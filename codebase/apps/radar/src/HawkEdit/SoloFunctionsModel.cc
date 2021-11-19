@@ -4,6 +4,7 @@
 #include <regex>
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 
 #include "SoloFunctionsModel.hh"
 //#include "RemoveAcMotion.cc" // This comes from an external library
@@ -968,6 +969,11 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
   if (firstRayInSweep) {
     // reset the running average?
     last_good_v0 = missingValue;
+  }
+  // if bad data value is not set, i.e. still the default value
+  // then set the bad data value to the missing value from the data
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
   }
  
   LOG(DEBUG) << "args: ";

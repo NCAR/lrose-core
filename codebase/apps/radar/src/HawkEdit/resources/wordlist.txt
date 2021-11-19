@@ -15,14 +15,12 @@ APPEND_HISTOGRAM_TO_FILE - not implemented
 AREA_HISTOGRAM( <field> ) - not implemented
 ASSERT_BAD_FLAGS( <field>, <bad mask> )
 A_SPECKLE = <integer> 
-BB_GATES_AVERAGED( <integer> gates )
-BB_MAX_NEG_FOLDS( <integer> )
-BB_MAX_POS_FOLDS( <integer> )
-BB_UNFOLDING( <field> )
-BB_UNFOLDING(<field>)
-BB_UNFOLDING_AC_WIND ( <field>, <max pos
-BB_USE_FIRST_GOOD_GATE
-BB_USE_LOCAL_WIND
+BB_GATES_AVERAGED = <integer> 
+BB_MAX_NEG_FOLDS = <integer>
+BB_MAX_POS_FOLDS = <integer>
+BB_UNFOLDING_FIRST_GOOD_GATE(<field>, NYQUIST_VELOCITY, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, [bad data value], [clip gate])
+BB_UNFOLDING_AC_WIND(<field>, NYQUIST_VELOCITY, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, [bad data value], [clip gate])
+BB_UNFOLDING_LOCAL_WIND(<field>, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, EW_WIND, NS_WIND, NYQUIST_VELOCITY, [bad data value], [clip gate])
 CLEAR_BAD_FLAGS (<bad mask>)
 COMPLEMENT_BAD_FLAGS (<bad mask>)
 COPY_BAD_FLAGS( <field> )
@@ -36,7 +34,7 @@ DONT_USE_BOUNDARY
 DO_HISTOGRAM - not implemented
 DUPLICATE <field>( <field> )
 ESTABLISH_AND_RESET <field> to <field> )
-EW_WIND ( <real> )
+EW_WIND = <real>
 EXP( <field>,  <real> )  
 FIRST_GOOD_GATE( <integer> )
 FIX_VORTEX_VELOCITIES( <field> )

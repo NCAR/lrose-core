@@ -669,7 +669,8 @@ void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
   _currentRayIdx += 1;
   if ((_currentRayIdx % 100) == 0) {
-    cerr << "   current ray " << _currentRayIdx << endl;
+    cerr << "   current ray " << _currentRayIdx << 
+      " current sweep index " << _currentSweepIdx << endl;
   }
 
   DataModel *dataModel = DataModel::Instance();
