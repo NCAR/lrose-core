@@ -51,6 +51,7 @@
 #include <string>
 
 #include "MpdNcFile.hh"
+#include "Names.hh"
 
 using namespace std;
 
@@ -521,14 +522,10 @@ int Mpd2Radx::_processMpdNcFile(const string &readPath)
 // Add in the height, pressure and temperature
 // environmental fields
 
-void Mpd2Radx::_addEnvFields(RadxRay *ray)
+void Mpd2Radx::_addEnvFields(const RadxVol &vol, RadxRay *ray)
 {
 
-  double altitudeKm = _params.instrument_altitude_meters / 1000.0;
-  const RadxGeoref *geo = ray->getGeoreference();
-  if (geo) {
-    altitudeKm = geo->getAltitudeKmMsl();
-  }
+  double altitudeKm = vol.getAltitudeKm();
 
   double elevDeg = ray->getElevationDeg();
   size_t nGates = ray->getNGates();
@@ -552,7 +549,7 @@ void Mpd2Radx::_addEnvFields(RadxRay *ray)
 
   if (_params.read_temp_and_pressure_profile_from_model_files) {
     if (_getModelData(ray->getTimeSecs()) == 0) {
-      _setProfileFromModel(ray, htMeters, tempK, presHpa);
+      _setProfileFromModel(vol, ray, htMeters, tempK, presHpa);
     }
   }
 
@@ -658,7 +655,8 @@ int Mpd2Radx::_getModelData(time_t rayTime)
 ///////////////////////////////////////////////////////
 // set the profile from the model data
 
-int Mpd2Radx::_setProfileFromModel(RadxRay *ray,
+int Mpd2Radx::_setProfileFromModel(const RadxVol &vol,
+                                   RadxRay *ray,
                                    Radx::fl32 *htMeters,
                                    Radx::fl32 *tempK,
                                    Radx::fl32 *presHpa)
@@ -667,15 +665,8 @@ int Mpd2Radx::_setProfileFromModel(RadxRay *ray,
 
   // get lat and lon
 
-  double lat = 0.0, lon = 0.0;
-  const RadxGeoref *geo = ray->getGeoreference();
-  if (geo == NULL) {
-    lat = _params.instrument_latitude_deg;
-    lon = _params.instrument_longitude_deg;
-  } else {
-    lat = geo->getLatitude();
-    lon = geo->getLongitude();
-  }
+  double lat = vol.getLatitudeDeg();
+  double lon = vol.getLongitudeDeg();
 
   // get grid location index
 

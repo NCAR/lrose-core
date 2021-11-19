@@ -831,6 +831,115 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("READING TEMPERATURE AND PRESSURE PROFILE FROM MODEL FILES");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'read_temp_and_pressure_profile_from_model_files'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_temp_and_pressure_profile_from_model_files");
+    tt->descr = tdrpStrDup("Option to read temperature and pressure profiles from model files.");
+    tt->help = tdrpStrDup("The model output has been converted into MDV/NetCDF, with temperature and pressure fields on constant height vlevels. Vlevel units are km.");
+    tt->val_offset = (char *) &read_temp_and_pressure_profile_from_model_files - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'model_temperature_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_temperature_field_name");
+    tt->descr = tdrpStrDup("Name of temperature field in model data.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &model_temperature_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("TMP");
+    tt++;
+    
+    // Parameter 'temperature_profile_units'
+    // ctype is '_temperature_units_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("temperature_profile_units");
+    tt->descr = tdrpStrDup("Units for temperature profile data.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &temperature_profile_units - &_start_;
+    tt->enum_def.name = tdrpStrDup("temperature_units_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("DEGREES_CELCIUS");
+      tt->enum_def.fields[0].val = DEGREES_CELCIUS;
+      tt->enum_def.fields[1].name = tdrpStrDup("DEGREES_KELVIN");
+      tt->enum_def.fields[1].val = DEGREES_KELVIN;
+    tt->single_val.e = DEGREES_CELCIUS;
+    tt++;
+    
+    // Parameter 'model_pressure_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_pressure_field_name");
+    tt->descr = tdrpStrDup("Name of pressure field in model data.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &model_pressure_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Pressure");
+    tt++;
+    
+    // Parameter 'pressure_profile_units'
+    // ctype is '_pressure_units_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("pressure_profile_units");
+    tt->descr = tdrpStrDup("Units for pressure profile data.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &pressure_profile_units - &_start_;
+    tt->enum_def.name = tdrpStrDup("pressure_units_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PA");
+      tt->enum_def.fields[0].val = PA;
+      tt->enum_def.fields[1].name = tdrpStrDup("HPA");
+      tt->enum_def.fields[1].val = HPA;
+    tt->single_val.e = HPA;
+    tt++;
+    
+    // Parameter 'model_profile_mdv_data_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("model_profile_mdv_data_url");
+    tt->descr = tdrpStrDup("Location for model data for temp and pressure profile.");
+    tt->help = tdrpStrDup("Data is in MDV or CF NetCDF format");
+    tt->val_offset = (char *) &model_profile_mdv_data_url - &_start_;
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/mdv/gfs");
+    tt++;
+    
+    // Parameter 'model_profile_search_margin_secs'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("model_profile_search_margin_secs");
+    tt->descr = tdrpStrDup("The search margin when looking for suitable model data (secs).");
+    tt->help = tdrpStrDup("If a data file has previously been read, within this search margin, then that file is used again.");
+    tt->val_offset = (char *) &model_profile_search_margin_secs - &_start_;
+    tt->single_val.i = 7200;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -883,11 +992,11 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("WRITING DATA TO OUTPUT DIRECTORY");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1024,11 +1133,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("Applies to CfRadial output files only.");
     tt++;

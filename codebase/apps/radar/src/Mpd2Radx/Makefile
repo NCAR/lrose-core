@@ -52,14 +52,16 @@ HDRS = \
 	Params.hh \
 	Args.hh \
 	Mpd2Radx.hh \
-	MpdNcFile.hh
+	MpdNcFile.hh \
+	Names.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
 	Main.cc \
 	Mpd2Radx.cc \
-	MpdNcFile.cc
+	MpdNcFile.cc \
+	Names.cc
 
 #
 # tdrp macros

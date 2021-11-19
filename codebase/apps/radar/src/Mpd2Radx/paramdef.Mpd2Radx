@@ -159,6 +159,56 @@ paramdef struct mpd_field_t {
 } mpd_fields[];
 
 commentdef {
+  p_header = "READING TEMPERATURE AND PRESSURE PROFILE FROM MODEL FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read temperature and pressure profiles from model files.";
+  p_help = "The model output has been converted into MDV/NetCDF, with temperature and pressure fields on constant height vlevels. Vlevel units are km.";
+} read_temp_and_pressure_profile_from_model_files;
+
+paramdef string {
+  p_default = "TMP";
+  p_descr = "Name of temperature field in model data.";
+} model_temperature_field_name;
+
+typedef enum {
+  DEGREES_CELCIUS, DEGREES_KELVIN
+} temperature_units_t;
+
+paramdef enum temperature_units_t {
+  p_default = DEGREES_CELCIUS;
+  p_descr = "Units for temperature profile data.";
+} temperature_profile_units;
+
+paramdef string {
+  p_default = "Pressure";
+  p_descr = "Name of pressure field in model data.";
+} model_pressure_field_name;
+
+typedef enum {
+  PA, HPA
+} pressure_units_t;
+
+paramdef enum pressure_units_t {
+  p_default = HPA;
+  p_descr = "Units for pressure profile data.";
+} pressure_profile_units;
+
+paramdef string {
+  p_default = "$(DATA_DIR)/mdv/gfs";
+  p_descr = "Location for model data for temp and pressure profile.";
+  p_help = "Data is in MDV or CF NetCDF format";
+} model_profile_mdv_data_url;
+
+paramdef int {
+  p_default = 7200;
+  p_descr = "The search margin when looking for suitable model data (secs).";
+  p_help = "If a data file has previously been read, within this search margin, then that file is used again.";
+} model_profile_search_margin_secs;
+
+commentdef {
   p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
 }
 

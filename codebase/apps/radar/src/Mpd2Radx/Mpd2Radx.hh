@@ -106,9 +106,12 @@ private:
 
   int _processMpdNcFile(const string &filePath);
   
+  void _addEnvFields(const RadxVol &vol, RadxRay *ray);
+
   int _getModelData(time_t rayTime);
 
-  int _setProfileFromModel(RadxRay *ray,
+  int _setProfileFromModel(const RadxVol &vol,
+                           RadxRay *ray,
                            Radx::fl32 *htMeters,
                            Radx::fl32 *tempK,
                            Radx::fl32 *presHpa);

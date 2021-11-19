@@ -224,10 +224,7 @@ private:
                          string outputName,
                          NcxxVar &var,
                          bool &gotStatus,
-                         bool required = false,
-                         bool applyMask = false,
-                         const string maskName = "",
-                         int maskValidValue = 0);
+                         bool required = false);
   
   int _readMaskVar(const string &maskFieldName,
                    vector<int> &maskVals);

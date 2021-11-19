@@ -209,7 +209,7 @@ int MpdNcFile::getTimeFromPath(const string &path, RadxTime &rtime)
 // Use getErrStr() if error occurs
 
 int MpdNcFile::readFromPath(const string &path,
-                             RadxVol &vol)
+                            RadxVol &vol)
   
 {
   
@@ -287,7 +287,7 @@ int MpdNcFile::readFromPath(const string &path,
   
   // add field variables to file rays
 
-  if (_params.mhayman_specify_fields) {
+  if (_params.specify_output_fields) {
     if (_readFieldVariablesSpecified()) {
       _addErrStr(errStr);
       return -1;
@@ -716,8 +716,8 @@ int MpdNcFile::_readRayVar(const string &name, vector<float> &vals)
 // returns 0 on success, -1 on failure
 
 int MpdNcFile::_getRayVar(NcxxVar &var,
-                           const string &name,
-                           bool required)
+                          const string &name,
+                          bool required)
 
 {
   
@@ -771,7 +771,6 @@ int MpdNcFile::_createRays(const string &path)
   // compile a list of the rays to be read in
   
   _rays.clear();
-  RadxCfactors corr;
 
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
 
@@ -810,52 +809,10 @@ int MpdNcFile::_createRays(const string &path)
       
     }
     
-    if (_params.read_georef_data_from_aircraft_system) {
-
-      RadxGeoref geo;
-      if (RawFile::readGeorefFromSpdb(_params.georef_data_spdb_url,
-                                      _dataTimes[ii].utime(),
-                                      _params.georef_data_search_margin_secs,
-                                      _params.debug >= Params::DEBUG_VERBOSE,
-                                      geo) == 0) {
-        if (_telescopeDirection[ii] == 1) {
-          // pointing up
-          geo.setRotation(-4.0);
-          geo.setTilt(0.0);
-          ray->setElevationDeg(94.0);
-          if (_params.correct_elevation_angle_for_roll) {
-            float roll = geo.getRoll();
-            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
-              ray->setElevationDeg(94.0 - roll);
-            }
-          }
-        } else {
-          // pointing down
-          geo.setRotation(184.0);
-          geo.setTilt(0.0);
-          ray->setElevationDeg(-94.0);
-          if (_params.correct_elevation_angle_for_roll) {
-            float roll = geo.getRoll();
-            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
-              ray->setElevationDeg(-94.0 - geo.getRoll());
-            }
-          }
-        }
-
-        ray->setGeoref(geo);
-
-      } // if (MpdNcFile::readGeorefFromSpdb ...
-
-    } // if (_params.read_georef_data_from_aircraft_system)
-    
-    // other metadata - overloading
-    
-    ray->setEstimatedNoiseDbmHc(_polAngle[ii]);
-    
     // hard coded 2000 as replacement for DATA_shot_count from raw file
 
-    ray->setNSamples(2000);
-    ray->setPrtSec(1.0 / 4000.0);
+    // ray->setNSamples(2000);
+    // ray->setPrtSec(1.0 / 4000.0);
     
     // add to ray vector
     
@@ -1018,15 +975,15 @@ int MpdNcFile::_readFieldVariablesSpecified()
   
   // loop through the variables as specified in the params file
 
-  int nFields = _params.mhayman_fields_n;
+  int nFields = _params.mpd_fields_n;
   for (int ifield = 0; ifield < nFields; ifield++) {
   
-    Params::mhayman_field_t &mfld = _params._mhayman_fields[ifield];
-    NcxxVar var = _file.getVar(mfld.field_name);
+    Params::mpd_field_t &mfld = _params._mpd_fields[ifield];
+    NcxxVar var = _file.getVar(mfld.mpd_name);
     if (var.isNull()) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       _addErrStr("  Cannot find specified field, name: ",
-                 mfld.field_name);
+                 mfld.mpd_name);
       iret = -1;
       continue;
     }
@@ -1036,7 +993,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
     if (ftype != ncxxFloat && ftype != ncxxByte) {
       // not a valid type for field data
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
-      _addErrStr("  Variable wrong type, name: ", mfld.field_name);
+      _addErrStr("  Variable wrong type, name: ", mfld.mpd_name);
       _addErrStr("  Type must be float or byte");
       _addErrStr("  Type is: ", Ncxx::ncxxTypeToStr(ftype));
       iret = -1;
@@ -1045,24 +1002,14 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
     // set output name
     
-    string outputName(mfld.field_name);
+    string outputName(mfld.mpd_name);
     if (strlen(mfld.output_name) > 0) {
       outputName = mfld.output_name;
     }
 
-    // check if we need to apply mask
-    
-    bool applyMask = false;
-    if (mfld.apply_mask && (strlen(mfld.mask_name) > 0) && (ftype == ncxxFloat)) {
-      applyMask = true;
-    }
-
     // read in variable
     
-    if (_readFieldVariable(var.getName(), "", var, gotStatus,
-                           true, applyMask,
-                           mfld.mask_name, 
-                           mfld.mask_valid_value)) {
+    if (_readFieldVariable(var.getName(), "", var, gotStatus)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       iret = -1;
     }
@@ -1083,13 +1030,10 @@ int MpdNcFile::_readFieldVariablesSpecified()
 // read in a field variable
 
 int MpdNcFile::_readFieldVariable(string inputName,
-                                   string outputName,
-                                   NcxxVar &var,
-                                   bool &gotStatus,
-                                   bool required /* = false */,
-                                   bool applyMask /* = false */,
-                                   const string maskName /* = "" */,
-                                   int maskValidValue /* = 0 */)
+                                  string outputName,
+                                  NcxxVar &var,
+                                  bool &gotStatus,
+                                  bool required /* = false */)
   
 {
 
@@ -1153,9 +1097,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
   // if not, it is probably a raw field with a longer dimension
   
   NcxxDim dim1 = var.getDim(1);
-  bool isRawField = false;
   if (dim1 != _rangeDim) {
-    isRawField = true;
     // must be a float field
     if (ftype != ncxxFloat) {
       if (!required) {
@@ -1195,71 +1137,24 @@ int MpdNcFile::_readFieldVariable(string inputName,
     }
   }
 
-  if (isRawField) {
-    
-    vector<int> maskVals;
-    if (applyMask) {
-      // read in mask vals
-      if (_readMaskVar(maskName, maskVals)) {
-        _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-        _addErrStr("  cannot read mask for field: ", inputName);
-        _addErrStr("  mask field name: ", maskName);
-        return -1;
-      }
-    }
-
-    if (_addRawFieldToRays(var, outputName, units, description,
-                           applyMask, maskVals, maskValidValue)) {
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-      _addErrStr("  cannot read raw field name: ", inputName);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
-  } else if (applyMask) {
-    
-    // read in mask vals
-    
-    vector<int> maskVals;
-    if (_readMaskVar(maskName, maskVals)) {
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-      _addErrStr("  cannot read mask for field: ", inputName);
-      _addErrStr("  mask field name: ", maskName);
-      return -1;
-    }
-
-    // use mask
-    
-    if (_addMaskedFieldToRays(var, outputName, units, description,
-                              maskVals, maskValidValue)) {
+  // no mask
+  
+  if (ftype == ncxxFloat) {
+    if (_addFl32FieldToRays(var, outputName, units, description)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
       return -1;
     }
-
   } else {
-    
-    // no mask
-    
-    if (ftype == ncxxFloat) {
-      if (_addFl32FieldToRays(var, outputName, units, description)) {
-        _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-        _addErrStr("  cannot read field name: ", inputName);
-        _addErrStr(_file.getErrStr());
-        return -1;
-      }
-    } else {
-      if (_addSi08FieldToRays(var, outputName, units, description)) {
-        _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-        _addErrStr("  cannot read field name: ", inputName);
-        _addErrStr(_file.getErrStr());
-        return -1;
-      }
+    if (_addSi08FieldToRays(var, outputName, units, description)) {
+      _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
+      _addErrStr("  cannot read field name: ", inputName);
+      _addErrStr(_file.getErrStr());
+      return -1;
     }
-    
   }
-      
+  
   // add processing status to statusXml, if appropriate
   
   if (procStatus.size() > 0) {
@@ -1280,7 +1175,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
 // returns 0 on success, -1 on failure
 
 int MpdNcFile::_readMaskVar(const string &maskFieldName,
-                             vector<int> &maskVals)
+                            vector<int> &maskVals)
 
 {
 
@@ -1365,9 +1260,9 @@ int MpdNcFile::_readMaskVar(const string &maskFieldName,
 // Returns 0 on success, -1 on failure
 
 int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
-                                    const string &name,
-                                    const string &units,
-                                    const string &description)
+                                   const string &name,
+                                   const string &units,
+                                   const string &description)
   
 {
 
@@ -1418,19 +1313,19 @@ int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
   string outName(name);
   string standardName;
 
-  if (outName.find(_params.combined_hi_field_name) != string::npos) {
-    outName = Names::CombinedHighCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
-    outName = Names::CombinedLowCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.molecular_field_name) != string::npos) {
-    outName = Names::MolecularCounts;
-    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  } else if (outName.find(_params.cross_field_name) != string::npos) {
-    outName = Names::CrossPolarCounts;
-    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  }
+  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
+  //   outName = Names::CombinedHighCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
+  //   outName = Names::CombinedLowCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
+  //   outName = Names::MolecularCounts;
+  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
+  //   outName = Names::CrossPolarCounts;
+  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  // }
   
   // loop through the rays
   
@@ -1463,9 +1358,9 @@ int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
 // Returns 0 on success, -1 on failure
 
 int MpdNcFile::_addFl32FieldToRays(NcxxVar &var,
-                                    const string &name,
-                                    const string &units,
-                                    const string &description)
+                                   const string &name,
+                                   const string &units,
+                                   const string &description)
   
 {
 
@@ -1516,19 +1411,19 @@ int MpdNcFile::_addFl32FieldToRays(NcxxVar &var,
   string outName(name);
   string standardName;
 
-  if (outName.find(_params.combined_hi_field_name) != string::npos) {
-    outName = Names::CombinedHighCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
-    outName = Names::CombinedLowCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.molecular_field_name) != string::npos) {
-    outName = Names::MolecularCounts;
-    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  } else if (outName.find(_params.cross_field_name) != string::npos) {
-    outName = Names::CrossPolarCounts;
-    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  }
+  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
+  //   outName = Names::CombinedHighCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
+  //   outName = Names::CombinedLowCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
+  //   outName = Names::MolecularCounts;
+  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
+  //   outName = Names::CrossPolarCounts;
+  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  // }
   
   // loop through the rays
   
@@ -1561,12 +1456,12 @@ int MpdNcFile::_addFl32FieldToRays(NcxxVar &var,
 // Returns 0 on success, -1 on failure
 
 int MpdNcFile::_addRawFieldToRays(NcxxVar &var,
-                                   const string &name,
-                                   const string &units,
-                                   const string &description,
-                                   bool applyMask,
-                                   const vector<int> &maskVals,
-                                   int maskValidValue)
+                                  const string &name,
+                                  const string &units,
+                                  const string &description,
+                                  bool applyMask,
+                                  const vector<int> &maskVals,
+                                  int maskValidValue)
   
 {
   
@@ -1765,11 +1660,11 @@ int MpdNcFile::_addRawFieldToRays(NcxxVar &var,
 // Returns 0 on success, -1 on failure
 
 int MpdNcFile::_addMaskedFieldToRays(NcxxVar &var,
-                                      const string &name,
-                                      const string &units,
-                                      const string &description,
-                                      vector<int> &maskVals,
-                                      int maskValidValue)
+                                     const string &name,
+                                     const string &units,
+                                     const string &description,
+                                     vector<int> &maskVals,
+                                     int maskValidValue)
   
 {
 
@@ -1829,19 +1724,19 @@ int MpdNcFile::_addMaskedFieldToRays(NcxxVar &var,
   string outName(name);
   string standardName;
   
-  if (outName.find(_params.combined_hi_field_name) != string::npos) {
-    outName = Names::CombinedHighCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.combined_lo_field_name) != string::npos) {
-    outName = Names::CombinedLowCounts;
-    standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  } else if (outName.find(_params.molecular_field_name) != string::npos) {
-    outName = Names::MolecularCounts;
-    standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  } else if (outName.find(_params.cross_field_name) != string::npos) {
-    outName = Names::CrossPolarCounts;
-    standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  }
+  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
+  //   outName = Names::CombinedHighCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
+  //   outName = Names::CombinedLowCounts;
+  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
+  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
+  //   outName = Names::MolecularCounts;
+  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
+  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
+  //   outName = Names::CrossPolarCounts;
+  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
+  // }
   
   // loop through the rays
   
@@ -1874,9 +1769,9 @@ int MpdNcFile::_addMaskedFieldToRays(NcxxVar &var,
 // Returns 0 on success, -1 on failure
 
 int MpdNcFile::_addSi08FieldToRays(NcxxVar &var,
-                                    const string &name,
-                                    const string &units,
-                                    const string &description)
+                                   const string &name,
+                                   const string &units,
+                                   const string &description)
   
 {
 
@@ -1942,7 +1837,7 @@ void MpdNcFile::_addErrInt(string label, int iarg, bool cr)
 // Default format is %g.
 
 void MpdNcFile::_addErrDbl(string label, double darg,
-                            string format, bool cr)
+                           string format, bool cr)
   
 {
   Radx::addErrDbl(_errStr, label, darg, format, cr);
@@ -1964,63 +1859,5 @@ void MpdNcFile::_clearRays()
     delete _rays[ii];
   }
   _rays.clear();
-}
-
-///////////////////////////////////////////////////////////////////
-// compute the true azimuth, elevation, etc. from platform
-// parameters using Testud's equations with their different
-// definitions of rotation angle, etc.
-//
-// see Wen-Chau Lee's paper
-// "Mapping of the Airborne Doppler Radar Data"
-
-void MpdNcFile::computeRadarAngles(RadxGeoref &georef,
-                                   RadxCfactors &corr,
-                                   double &azimuthDeg,
-                                   double &elevationDeg)
-  
-{
-  
-  double R = (georef.getRoll() + corr.getRollCorr()) * Radx::DegToRad;
-  double P = (georef.getPitch() + corr.getPitchCorr()) * Radx::DegToRad;
-  double H = (georef.getHeading() + corr.getHeadingCorr()) * Radx::DegToRad;
-  double D = (georef.getDrift() + corr.getDriftCorr()) * Radx::DegToRad;
-  double T = H + D;
-  
-  double sinP = sin(P);
-  double cosP = cos(P);
-  double sinD = sin(D);
-  double cosD = cos(D);
-  
-  double theta_a = 
-    (georef.getRotation() + corr.getRotationCorr()) * Radx::DegToRad;
-  double tau_a =
-    (georef.getTilt() + corr.getTiltCorr()) * Radx::DegToRad;
-  double sin_tau_a = sin(tau_a);
-  double cos_tau_a = cos(tau_a);
-  double sin_theta_rc = sin(theta_a + R); /* roll corrected rotation angle */
-  double cos_theta_rc = cos(theta_a + R); /* roll corrected rotation angle */
-  
-  double xsubt = (cos_theta_rc * sinD * cos_tau_a * sinP
-                  + cosD * sin_theta_rc * cos_tau_a
-                  -sinD * cosP * sin_tau_a);
-  
-  double ysubt = (-cos_theta_rc * cosD * cos_tau_a * sinP
-                  + sinD * sin_theta_rc * cos_tau_a
-                  + cosP * cosD * sin_tau_a);
-  
-  double zsubt = (cosP * cos_tau_a * cos_theta_rc
-                  + sinP * sin_tau_a);
-  
-  double lambda_t = atan2(xsubt, ysubt);
-  double azimuthRad = fmod(lambda_t + T, M_PI * 2.0);
-  double elevationRad = asin(zsubt);
-  
-  elevationDeg = elevationRad * Radx::RadToDeg;
-  azimuthDeg = azimuthRad * Radx::RadToDeg;
-  if (azimuthDeg < 0) {
-    azimuthDeg += 360.0;
-  }
-  
 }
 
