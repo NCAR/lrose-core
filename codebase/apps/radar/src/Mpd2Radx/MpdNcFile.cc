@@ -97,19 +97,17 @@ void MpdNcFile::clear()
   _project.clear();
   _statusXml.clear();
 
-  // _timeVar.setNull();
   _dataTimes.clear();
   _dTimes.clear();
 
-  // _rangeVar.setNull();
   _rangeKm.clear();
   _geom.setRangeGeom(0.0075, 154.2432);
 
   _clearRayVariables();
 
   _instrumentType = Radx::INSTRUMENT_TYPE_LIDAR;
-  _platformType = Radx::PLATFORM_TYPE_AIRCRAFT;
-  _primaryAxis = Radx::PRIMARY_AXIS_Y_PRIME;
+  _platformType = Radx::PLATFORM_TYPE_FIXED;
+  _primaryAxis = Radx::PRIMARY_AXIS_Z_PRIME;
 
   _rays.clear();
   
@@ -154,53 +152,6 @@ bool MpdNcFile::isMpdNcFile(const string &path)
 
 }
 
-////////////////////////////////////////////////
-// get the date and time from a dorade file path
-// returns 0 on success, -1 on failure
-
-int MpdNcFile::getTimeFromPath(const string &path, RadxTime &rtime)
-
-{
-
-  RadxPath rpath(path);
-  const string &fileName = rpath.getFile();
-  
-  // find first digit in entry name - if no digits, return now
-
-  const char *start = NULL;
-  for (size_t ii = 0; ii < fileName.size(); ii++) {
-    if (isdigit(fileName[ii])) {
-      start = fileName.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) return -1;
-  const char *end = start + strlen(start);
-  
-  // iteratively try getting the date and time from the string
-  // moving along by one character at a time
-  
-  while (start < end - 14) {
-    char cc;
-    int year, month, day, hour, min;
-    if (sscanf(start, "%4d%2d%2d%c%2d%2d",
-               &year, &month, &day, &cc, &hour, &min) == 6) {
-      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-        return -1;
-      }
-      if (hour < 0 || hour > 23 || min < 0 || min > 59) {
-        return -1;
-      }
-      rtime.set(year, month, day, hour, min, 0);
-      return 0;
-    }
-    start++;
-  }
-  
-  return -1;
-  
-}
-
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
@@ -220,10 +171,6 @@ int MpdNcFile::readFromPath(const string &path,
   string errStr("ERROR - MpdNcFile::readFromPath");
 
   _readVol = &vol;
-
-  // get the start time from the file path
-
-  getTimeFromPath(path, _startTime);
 
   // init
   
@@ -499,6 +446,16 @@ int MpdNcFile::_readRange()
     return -1;
   }
   
+  // get units
+
+  string units = "m";
+  try {
+    NcxxVarAtt unitsAtt = _timeVar.getAtt("units");
+    units = unitsAtt.asString();
+  } catch (NcxxException& e) {
+    // no range units
+  }
+  
   _rangeKm.clear();
   RadxArray<double> rangeMeters_;
   double *rangeMeters = rangeMeters_.alloc(_nRangeInFile);
@@ -506,7 +463,12 @@ int MpdNcFile::_readRange()
     _rangeVar.getVal(rangeMeters);
     double *rr = rangeMeters;
     for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
-      _rangeKm.push_back(*rr / 1000.0);
+      if (units == "km") {
+        _rangeKm.push_back(*rr);
+      } else {
+        // meters
+        _rangeKm.push_back(*rr / 1000.0);
+      }
     }
   } catch (NcxxException& e) {
     _addErrStr("ERROR - MpdNcFile::_readRangeVariable");
@@ -523,7 +485,7 @@ int MpdNcFile::_readRange()
   }
   _gateSpacingIsConstant = remap.getGateSpacingIsConstant();
   _geom.setRangeGeom(remap.getStartRangeKm(), remap.getGateSpacingKm());
-  
+
   return 0;
 
 }

@@ -95,11 +95,6 @@ public:
   int readFromPath(const string &path,
                    RadxVol &vol);
   
-  /// Get the date and time from a dorade file path.
-  /// returns 0 on success, -1 on failure
-
-  int getTimeFromPath(const string &path, RadxTime &rtime);
-  
   ////////////////////////
   /// \name Error string:
   //@{
