@@ -222,6 +222,7 @@ private:
     }
   };
   vector<Field> _fields;
+  vector<Field> _fieldQualifiers;
   set<string> _fieldNames;
   map<string, size_t> _fieldCols;
 
@@ -242,7 +243,9 @@ private:
   void _findFieldsModel7();
   bool _findFieldsModel100();
   void _findFieldsModel866();
-
+  void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
+  void _printFieldQualifiers();
+  void _addFieldQualifiers(RadxRay *ray, vector<string> &tok);
 
   int _readRayDataModel200();
   int _readRayDataModel70();
