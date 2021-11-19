@@ -1,0 +1,312 @@
+/*********************************************************
+ * parameter definitions for Mpd2Radx
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Nov 2021
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Reads MPD-style Netcdf data files, and converts to a standard CfRadial.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = 
+  "In REALTIME mode, the program waits for a new input file.  "
+  "In ARCHIVE mode, it moves through the data between the start "
+  "and end times set on the command line. "
+  "In FILELIST mode, it moves through the list of file names "
+  "specified on the command line. "
+  "Paths (in ARCHIVE mode, at least) MUST contain a "
+  "day-directory above the data file -- ./data_file.ext will not "
+  "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+commentdef {
+  p_header = "Searching for files in REALTIME mode";
+}
+
+paramdef int {
+  p_default = 300;
+  p_descr = "Maximum age of realtime data (secs)";
+  p_help =  "REALTIME mode only. Only data less old than this will be used.";
+} max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "REALTIME mode only. If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "REALTIME mode only. If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "REALTIME mode only. Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "REALTIME mode only. If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "REALTIME mode only. This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} file_quiescence;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "REALTIME mode only. If set, only files with this extension will be processed.";
+} search_ext;
+
+commentdef {
+  p_header = "Converting MPD NetCDF Files";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the output fields.";
+  p_help = "If false, all fields found in the files will be written out.";
+} specify_output_fields;
+
+typedef struct {
+  string mpd_name;
+  string output_name;
+  string cf_standard_name;
+  string units;
+} mpd_field_t;
+
+paramdef struct mpd_field_t {
+  p_default = {
+    {
+      mpd_name = "Absolute_Humidity",
+      output_name = "Absolute_Humidity",
+      cf_standard_name = "absolute_humidity",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "HSRLMolecular_MolecularBackscatter",
+      output_name = "HSRLMolecular_MolecularBackscatter",
+      cf_standard_name = "molecular_backscatter",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "Aerosol_Backscatter_Coefficient",
+      output_name = "Aerosol_Backscatter_Coefficient",
+      cf_standard_name = "aerosol_backscatter_coefficient",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "Backscatter_Ratio",
+      output_name = "Backscatter_Ratio",
+      cf_standard_name = "backscatter_ratio",
+      units = ""
+    }
+  };
+  p_descr = "Details of fields to be included in output data set.";
+  p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.";
+} mpd_fields[];
+
+commentdef {
+  p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the instrument name.";
+  p_help = "If true, the name provided will be used.";
+} override_instrument_name;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "Instrument name.";
+  p_help = "See override_instrument_name.";
+} instrument_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the site name.";
+  p_help = "If true, the name provided will be used.";
+} override_site_name;
+
+paramdef string {
+  p_default = "unknown";
+  p_descr = "Site name.";
+  p_help = "See override_site_name.";
+} site_name;
+
+commentdef {
+  p_header = "WRITING DATA TO OUTPUT DIRECTORY";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used.";
+} output_filename_prefix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include sub-seconds in date-time part of file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
+} include_subsecs_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a hyphen between date and time in filename.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
+} use_hyphen_in_file_name_datetime_part;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
+  p_text = "Applies to CfRadial output files only.";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the version global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
+} version_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the title global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
+} title_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the institution global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
+} institution_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the references global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
+} references_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the source global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
+} source_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the history global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
+} history_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the comment global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
+} comment_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the author global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
+} author_override;
+
