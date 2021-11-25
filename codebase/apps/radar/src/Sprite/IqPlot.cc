@@ -1318,9 +1318,12 @@ void IqPlot::_plotPhasor(QPainter &painter,
   // legends
 
   double cpa = RadarMoments::computeCpa(iq, nSamples);
+  double cpaAlt = RadarMoments::computeCpaAlt(iq, nSamples);
+  vector<string> legends;
   char text[1024];
   snprintf(text, 1024, "CPA: %.2f", cpa);
-  vector<string> legends;
+  legends.push_back(text);
+  snprintf(text, 1024, "CPA-alt: %.2f", cpaAlt);
   legends.push_back(text);
   _zoomWorld.drawLegendsTopLeft(painter, legends);
   
