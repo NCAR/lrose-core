@@ -422,6 +422,13 @@ public:
 
   char* search_ext;
 
+  tdrp_bool_t include_qualifier_fields;
+
+  tdrp_bool_t specify_qualifier_fields;
+
+  mpd_field_t *_qualifier_fields;
+  int qualifier_fields_n;
+
   tdrp_bool_t specify_output_fields;
 
   mpd_field_t *_mpd_fields;
@@ -492,7 +499,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 

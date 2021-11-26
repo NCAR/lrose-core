@@ -111,18 +111,92 @@ commentdef {
   p_header = "Converting MPD NetCDF Files";
 }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the output fields.";
-  p_help = "If false, all fields found in the files will be written out.";
-} specify_output_fields;
-
 typedef struct {
   string mpd_name;
   string output_name;
   string cf_standard_name;
   string units;
 } mpd_field_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to include the qualifier fields.";
+  p_help = "If true, (time)-based fields will be included as qualifier fields.";
+} include_qualifier_fields;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the qualifier fields. Only applies if include_qualifier_fields is true.";
+  p_help = "If false, all time-based fields found in the files will be written out.";
+} specify_qualifier_fields;
+
+paramdef struct mpd_field_t {
+  p_default = {
+    {
+      mpd_name = "HSRLCombined_LaserShotCount",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "HSRLMolecular_LaserShotCount",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "WVOffline_LaserShotCount",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "WVOnline_LaserShotCount",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "HSRLCombined_nRangeBins",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "HSRLMolecular_nRangeBins",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "WVOffline_nRangeBins",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+    ,
+    {
+      mpd_name = "WVOnline_nRangeBins",
+      output_name = "",
+      cf_standard_name = "",
+      units = ""
+    }
+  };
+  p_descr = "Details of qualifier fields to be included in output data set. Applies if specify_qualifier_fields is true.";
+  p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.";
+} qualifier_fields[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the output fields.";
+  p_help = "If false, all fields found in the files will be written out.";
+} specify_output_fields;
 
 paramdef struct mpd_field_t {
   p_default = {

@@ -200,6 +200,7 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
   int _readRange();
+  int _readRayQualifierFields();
   void _clearRayVariables();
   int _readRayVariables();
 

@@ -217,7 +217,13 @@ int MpdNcFile::readFromPath(const string &path,
     _addErrStr(errStr);
     return -1;
   }
+
+  // read in ray qualifier fields
   
+  if (_readRayQualifierFields()) {
+    return -1;
+  }
+
   // read in ray metadata variables
   
   if (_readRayVariables()) {
@@ -288,7 +294,7 @@ int MpdNcFile::_readDimensions()
     _rangeDim = _file.getDim("range");
     _nRangeInFile = _rangeDim.getSize();
     
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     _addErrStr("ERROR - MpdNcFile::_readDimensions");
     _addErrStr("  exception: ", e.what());
@@ -491,6 +497,26 @@ int MpdNcFile::_readRange()
 }
 
 ///////////////////////////////////
+// read in ray qualifier fields
+
+int MpdNcFile::_readRayQualifierFields()
+
+{
+
+  int nVars = _file.getVarCount();
+  const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
+
+  cerr << "11111111 nVars: " << nVars << endl;
+  cerr << "11111111 vars.size(): " << vars.size() << endl;
+  for (auto ii = vars.begin(); ii != vars.end(); ii++) {
+    cerr << "2222222 var: " << ii->first << endl;
+  }
+
+  return 0;
+
+}
+
+///////////////////////////////////
 // clear the ray variables
 
 void MpdNcFile::_clearRayVariables()
@@ -522,7 +548,7 @@ int MpdNcFile::_readRayVariables()
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar("polarization", _polAngle);
+  _readRayVar("HSRLCombined_LaserShotCount", _polAngle);
   if (_polAngle.size() < _nTimesInFile) {
     _addErrStr("ERROR - polarization variable required");
     iret = -1;
@@ -606,7 +632,11 @@ int MpdNcFile::_readRayVar(const string &name, vector<double> &vals)
 {
 
   vals.clear();
-
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+    vals.push_back(-9999.0);
+  }
+  return 0;
+  
   // get var
   
   NcxxVar var;
@@ -644,6 +674,10 @@ int MpdNcFile::_readRayVar(const string &name, vector<float> &vals)
 {
 
   vals.clear();
+  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+    vals.push_back((float) -9999.0);
+  }
+  return 0;
 
   // get var
   

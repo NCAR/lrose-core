@@ -755,6 +755,105 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'include_qualifier_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_qualifier_fields");
+    tt->descr = tdrpStrDup("Option to include the qualifier fields.");
+    tt->help = tdrpStrDup("If true, (time)-based fields will be included as qualifier fields.");
+    tt->val_offset = (char *) &include_qualifier_fields - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'specify_qualifier_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_qualifier_fields");
+    tt->descr = tdrpStrDup("Option to specify the qualifier fields. Only applies if include_qualifier_fields is true.");
+    tt->help = tdrpStrDup("If false, all time-based fields found in the files will be written out.");
+    tt->val_offset = (char *) &specify_qualifier_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'qualifier_fields'
+    // ctype is '_mpd_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("qualifier_fields");
+    tt->descr = tdrpStrDup("Details of qualifier fields to be included in output data set. Applies if specify_qualifier_fields is true.");
+    tt->help = tdrpStrDup("If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.");
+    tt->array_offset = (char *) &_qualifier_fields - &_start_;
+    tt->array_n_offset = (char *) &qualifier_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(mpd_field_t);
+    tt->array_n = 8;
+    tt->struct_def.name = tdrpStrDup("mpd_field_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("mpd_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_qualifier_fields->mpd_name - (char *) _qualifier_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("output_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_qualifier_fields->output_name - (char *) _qualifier_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("cf_standard_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_qualifier_fields->cf_standard_name - (char *) _qualifier_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("units");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_qualifier_fields->units - (char *) _qualifier_fields;
+    tt->n_struct_vals = 32;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("HSRLCombined_LaserShotCount");
+      tt->struct_vals[1].s = tdrpStrDup("");
+      tt->struct_vals[2].s = tdrpStrDup("");
+      tt->struct_vals[3].s = tdrpStrDup("");
+      tt->struct_vals[4].s = tdrpStrDup("HSRLMolecular_LaserShotCount");
+      tt->struct_vals[5].s = tdrpStrDup("");
+      tt->struct_vals[6].s = tdrpStrDup("");
+      tt->struct_vals[7].s = tdrpStrDup("");
+      tt->struct_vals[8].s = tdrpStrDup("WVOffline_LaserShotCount");
+      tt->struct_vals[9].s = tdrpStrDup("");
+      tt->struct_vals[10].s = tdrpStrDup("");
+      tt->struct_vals[11].s = tdrpStrDup("");
+      tt->struct_vals[12].s = tdrpStrDup("WVOnline_LaserShotCount");
+      tt->struct_vals[13].s = tdrpStrDup("");
+      tt->struct_vals[14].s = tdrpStrDup("");
+      tt->struct_vals[15].s = tdrpStrDup("");
+      tt->struct_vals[16].s = tdrpStrDup("HSRLCombined_nRangeBins");
+      tt->struct_vals[17].s = tdrpStrDup("");
+      tt->struct_vals[18].s = tdrpStrDup("");
+      tt->struct_vals[19].s = tdrpStrDup("");
+      tt->struct_vals[20].s = tdrpStrDup("HSRLMolecular_nRangeBins");
+      tt->struct_vals[21].s = tdrpStrDup("");
+      tt->struct_vals[22].s = tdrpStrDup("");
+      tt->struct_vals[23].s = tdrpStrDup("");
+      tt->struct_vals[24].s = tdrpStrDup("WVOffline_nRangeBins");
+      tt->struct_vals[25].s = tdrpStrDup("");
+      tt->struct_vals[26].s = tdrpStrDup("");
+      tt->struct_vals[27].s = tdrpStrDup("");
+      tt->struct_vals[28].s = tdrpStrDup("WVOnline_nRangeBins");
+      tt->struct_vals[29].s = tdrpStrDup("");
+      tt->struct_vals[30].s = tdrpStrDup("");
+      tt->struct_vals[31].s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'specify_output_fields'
     // ctype is 'tdrp_bool_t'
     
