@@ -346,7 +346,7 @@ int MattNcFile::_readDimensions()
     _rangeDim = _file.getDim("range");
     _nRangeInFile = _rangeDim.getSize();
     
-  } catch (NcxxException e) {
+  } catch (NcxxException &e) {
 
     _addErrStr("ERROR - MattNcFile::_readDimensions");
     _addErrStr("  exception: ", e.what());
