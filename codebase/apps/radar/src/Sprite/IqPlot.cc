@@ -1297,12 +1297,12 @@ void IqPlot::_plotPhasor(QPainter &painter,
   
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the I vs Q data
+  // draw the phasor data
 
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
-  pen.setStyle(Qt::SolidLine);
+  pen.setStyle(Qt::DashLine);
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> iqpts;
@@ -1312,7 +1312,16 @@ void IqPlot::_plotPhasor(QPainter &painter,
     QPointF pt(ival, qval);
     iqpts.push_back(pt);
   }
-  _zoomWorld.drawLines(painter, iqpts);
+  // _zoomWorld.drawLines(painter, iqpts);
+
+  QPen pointPen(painter.pen());
+  pointPen.setColor(_params.iqplot_line_color);
+  pointPen.setStyle(Qt::SolidLine);
+  pen.setCapStyle(Qt::RoundCap);
+  pointPen.setWidth(_params.iqplot_line_width * 2);
+  painter.setPen(pointPen);
+  _zoomWorld.drawPoints(painter, iqpts);
+
   painter.restore();
 
   // legends

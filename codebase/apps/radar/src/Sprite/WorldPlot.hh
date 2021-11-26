@@ -237,6 +237,26 @@ public:
     return (yPixel - _yMinPixel) / _yPixelsPerWorld + _yMinWorld;
   }
   
+  // draw a point in pixel coords
+  
+  void drawPixelPoint(QPainter &painter,
+                      double xx, double yy);
+
+  // draw a point in world coords
+  
+  void drawPoint(QPainter &painter,
+                 double xx, double yy);
+
+  // draw points in pixel coords
+  
+  void drawPixelPoints(QPainter &painter,
+                       const QVector<QPointF> &points);
+
+  // draw points in world coords
+  
+  void drawPoints(QPainter &painter,
+                  const QVector<QPointF> &points);
+
   // draw a line in pixel coords
   
   void drawPixelLine(QPainter &painter,
@@ -251,7 +271,7 @@ public:
 
   // draw lines between consecutive points
 
-  void drawLines(QPainter &painter, QVector<QPointF> &points);
+  void drawLines(QPainter &painter, const QVector<QPointF> &points);
 
   // draw a rectangle
   
