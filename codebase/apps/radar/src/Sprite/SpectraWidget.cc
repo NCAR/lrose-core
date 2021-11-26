@@ -1980,7 +1980,7 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   QAction plotQVals("Plot Q Vals", &contextMenu);
   connect(&plotQVals, &QAction::triggered,
           [this, id] () {
-            _iqPlots[id]->setPlotType(Params::I_VALS);
+            _iqPlots[id]->setPlotType(Params::Q_VALS);
             _configureIqPlot(id);
           } );
   setPlotTypeMenu.addAction(&plotQVals);
