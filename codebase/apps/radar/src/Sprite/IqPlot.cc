@@ -1312,7 +1312,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
     QPointF pt(ival, qval);
     iqpts.push_back(pt);
   }
-  // _zoomWorld.drawLines(painter, iqpts);
+  _zoomWorld.drawLines(painter, iqpts);
 
   QPen pointPen(painter.pen());
   pointPen.setColor(_params.iqplot_line_color);
