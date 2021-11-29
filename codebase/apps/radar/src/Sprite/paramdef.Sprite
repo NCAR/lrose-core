@@ -727,22 +727,46 @@ typedef struct {
   boolean use_regression_filter;
   int regression_order;
   boolean regression_filter_interp_across_notch;
+  boolean compute_plot_range_dynamically;
 } iq_plot_t;
 
 paramdef struct iq_plot_t {
   p_default = {
-    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true },
-    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true }
+    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true }
   };
   p_descr = "Details of IQ plots for each sub panel.";
-  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.";
+  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra.";
 } iq_plots[];
+
+typedef struct {
+  iq_plot_type_t plot_type;
+  double min_val;
+  double max_val;
+} iq_plot_static_range_t;
+
+paramdef struct iq_plot_static_range_t {
+  p_default = {
+    { SPECTRAL_POWER, -120.0, +10.0 },
+    { SPECTRAL_PHASE, -180.0, +180.0 },
+    { SPECTRAL_ZDR, -10.0, +20.0 },
+    { SPECTRAL_PHIDP, -180.0, +180.0 },
+    { TS_POWER, -80, +10.0 },
+    { TS_PHASE, -180.0, +180.0 },
+    { I_VALS, -1.0, +1.0 },
+    { Q_VALS, -1.0, +1.0 },
+    { I_VS_Q, -1.0, +1.0 },
+    { PHASOR, -20.0, +20.0 }
+  };
+  p_descr = "Static plot ranges for the IQ plot types.";
+  p_help = "These are used if compute_plot_range_dynamically is false. Otherwise the plot range is computed from the data. There must be 1 entry for each plot type.";
+} iq_plot_static_ranges[10];
 
 paramdef int {
   p_default = 0;

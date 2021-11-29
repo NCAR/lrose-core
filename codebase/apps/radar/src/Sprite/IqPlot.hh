@@ -36,6 +36,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <QDialog>
 #include <QWidget>
@@ -118,7 +119,7 @@ public:
 
   // set the plot type and channel
 
-  void setPlotType(Params::iq_plot_type_t val) { _plotType = val; }
+  void setPlotType(Params::iq_plot_type_t val);
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
   void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
@@ -130,7 +131,12 @@ public:
   void setClutWidthMps(double val) { _clutWidthMps = val; }
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
-  void setRegrFiltInterpAcrossNotch(bool val) { _regrFiltInterpAcrossNotch = val; }
+  void setRegrFiltInterpAcrossNotch(bool val) {
+    _regrFiltInterpAcrossNotch = val;
+  }
+  void setComputePlotRangeDynamically(bool val) {
+    _computePlotRangeDynamically = val;
+  }
 
   // zooming
 
@@ -181,7 +187,12 @@ public:
   double getClutWidthMps() const { return _clutWidthMps; }
   bool getUseRegrFilt() const { return _useRegrFilt; }
   int getRegrOrder() const { return _regrOrder; }
-  bool getRegrFiltInterpAcrossNotch() const { return _regrFiltInterpAcrossNotch; }
+  bool getRegrFiltInterpAcrossNotch() const {
+    return _regrFiltInterpAcrossNotch;
+  }
+  bool getComputePlotRangeDynamically() const {
+    return _computePlotRangeDynamically;
+  }
 
   // get strings
 
@@ -204,6 +215,7 @@ protected:
 
   Params::iq_plot_type_t _plotType;
   Params::rx_channel_t _rxChannel;
+  Params::iq_plot_static_range_t _staticRange;
 
   // fft window
   
@@ -220,6 +232,7 @@ protected:
   bool _useRegrFilt;
   int _regrOrder;
   bool _regrFiltInterpAcrossNotch;
+  bool _computePlotRangeDynamically;
 
   // unzoomed world
 
