@@ -331,7 +331,7 @@ int MpdNcFile::_readGlobalAttributes()
   
   _project.clear();
   try {
-    NcxxGroupAtt att = _file.getAtt("project");
+    NcxxGroupAtt att = _file.getAtt("Project");
     _project = att.asString();
   } catch (NcxxException& e) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -348,6 +348,28 @@ int MpdNcFile::_readGlobalAttributes()
     }
   }
 
+  // location
+
+  _latDeg = 0.0;
+  _lonDeg = 0.0;
+  _altM = 0.0;
+
+  try {
+    _file.getAtt("latitude").getValues(&_latDeg);
+    _file.getAtt("longitude").getValues(&_lonDeg);
+    _file.getAtt("elevation").getValues(&_altM);
+  } catch (NcxxException& e) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - problem reading latitude, longitude, elevation" << endl;
+    }
+  }
+
+  _readVol->setLatitudeDeg(_latDeg);
+  _readVol->setLongitudeDeg(_lonDeg);
+  _readVol->setAltitudeKm(_altM / 1000.0);
+
+  // xml for global attributes
+  
   return 0;
 
 }
@@ -523,18 +545,21 @@ void MpdNcFile::_clearRayVariables()
 
 {
 
-  _polAngle.clear();
-  _telescopeDirection.clear();
+  _nSamples.clear();
 
-  _lat.clear();
-  _lon.clear();
-  _alt.clear();
-  _roll.clear();
-  _pitch.clear();
-  _heading.clear();
-  _pressure.clear();
-  _tas.clear();
-  _temp.clear();
+  // _polAngle.clear();
+
+  // _telescopeDirection.clear();
+
+  // _lat.clear();
+  // _lon.clear();
+  // _alt.clear();
+  // _roll.clear();
+  // _pitch.clear();
+  // _heading.clear();
+  // _pressure.clear();
+  // _tas.clear();
+  // _temp.clear();
 
 }
 
@@ -548,41 +573,50 @@ int MpdNcFile::_readRayVariables()
   _clearRayVariables();
   int iret = 0;
 
-  _readRayVar("HSRLCombined_LaserShotCount", _polAngle);
-  if (_polAngle.size() < _nTimesInFile) {
-    _addErrStr("ERROR - polarization variable required");
-    iret = -1;
+  if (strlen(_params.n_samples_field_name) > 0) {
+    _readRayVar(_params.n_samples_field_name, _nSamples);
+    if (_nSamples.size() < _nTimesInFile) {
+      _addErrStr("WARNING - reading n_samples, field name: ", 
+                 _params.n_samples_field_name);
+      for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+        _nSamples.push_back(-9999.0);
+      }
+    }
+  } else {
+    for (size_t ii = 0; ii < _nTimesInFile; ii++) {
+      _nSamples.push_back(-9999.0);
+    }
   }
 
-  _readRayVar("TelescopeDirection", _telescopeDirection);
-  if (_telescopeDirection.size() < _nTimesInFile) {
-    _addErrStr("ERROR - TelescopeLocked variable required");
-    iret = -1;
-  }
+  // _readRayVar("TelescopeDirection", _telescopeDirection);
+  // if (_telescopeDirection.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - TelescopeLocked variable required");
+  //   iret = -1;
+  // }
 
-  _readRayVar("GGLAT", _lat);
-  if (_lat.size() < _nTimesInFile) {
-    _addErrStr("ERROR - GGLAT variable required");
-    iret = -1;
-  }
+  // _readRayVar("GGLAT", _lat);
+  // if (_lat.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - GGLAT variable required");
+  //   iret = -1;
+  // }
 
-  _readRayVar("GGLON", _lon);
-  if (_lon.size() < _nTimesInFile) {
-    _addErrStr("ERROR - GGLON variable required");
-    iret = -1;
-  }
+  // _readRayVar("GGLON", _lon);
+  // if (_lon.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - GGLON variable required");
+  //   iret = -1;
+  // }
 
-  _readRayVar("GGALT", _alt);
-  if (_alt.size() < _nTimesInFile) {
-    _addErrStr("ERROR - GGALT variable required");
-    iret = -1;
-  }
+  // _readRayVar("GGALT", _alt);
+  // if (_alt.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - GGALT variable required");
+  //   iret = -1;
+  // }
 
-  _readRayVar("ROLL", _roll);
-  if (_roll.size() < _nTimesInFile) {
-    _addErrStr("ERROR - ROLL variable required");
-    iret = -1;
-  }
+  // _readRayVar("ROLL", _roll);
+  // if (_roll.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - ROLL variable required");
+  //   iret = -1;
+  // }
 
   // _readRayVar("PITCH", _pitch);
   // if (_pitch.size() < _nTimesInFile) {
@@ -590,11 +624,11 @@ int MpdNcFile::_readRayVariables()
   //   iret = -1;
   // }
 
-  _readRayVar("THDG", _heading);
-  if (_heading.size() < _nTimesInFile) {
-    _addErrStr("ERROR - THDG variable required");
-    iret = -1;
-  }
+  // _readRayVar("THDG", _heading);
+  // if (_heading.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - THDG variable required");
+  //   iret = -1;
+  // }
 
   // _readRayVar("PSXC", _pressure);
   // if (_pressure.size() < _nTimesInFile) {
@@ -602,24 +636,23 @@ int MpdNcFile::_readRayVariables()
   //   iret = -1;
   // }
 
-  _readRayVar("TASX", _tas);
-  if (_tas.size() < _nTimesInFile) {
-    _addErrStr("ERROR - TASX variable required");
-    iret = -1;
-  }
+  // _readRayVar("TASX", _tas);
+  // if (_tas.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - TASX variable required");
+  //   iret = -1;
+  // }
 
-  _readRayVar("ATX", _temp);
-  if (_temp.size() < _nTimesInFile) {
-    _addErrStr("ERROR - ATX variable required");
-    iret = -1;
-  }
+  // _readRayVar("ATX", _temp);
+  // if (_temp.size() < _nTimesInFile) {
+  //   _addErrStr("ERROR - ATX variable required");
+  //   iret = -1;
+  // }
 
   if (iret) {
     _addErrStr("ERROR - MpdNcFile::_readRayVariables");
-    return -1;
   }
 
-  return 0;
+  return iret;
 
 }
 
@@ -785,30 +818,15 @@ int MpdNcFile::_createRays(const string &path)
     ray->setTargetScanRateDegPerSec(0.0);
     ray->setIsIndexed(false);
 
-    // georeference
+    // pointing up
     
-    if (_telescopeDirection[ii] == 1) {
-
-      // pointing up
-
-      ray->setAzimuthDeg(0.0);
-      ray->setElevationDeg(94.0);
-      ray->setFixedAngleDeg(94.0);
-      
-    } else {
-      
-      // pointing down
-      
-      ray->setAzimuthDeg(0.0);
-      ray->setElevationDeg(-94.0);
-      ray->setFixedAngleDeg(-94.0);
-      
+    ray->setAzimuthDeg(0.0);
+    ray->setElevationDeg(90.0);
+    ray->setFixedAngleDeg(90.0);
+     
+    if (_nSamples[ii] > 0) {
+      ray->setNSamples((int) (_nSamples[ii] + 0.5));
     }
-    
-    // hard coded 2000 as replacement for DATA_shot_count from raw file
-
-    // ray->setNSamples(2000);
-    // ray->setPrtSec(1.0 / 4000.0);
     
     // add to ray vector
     

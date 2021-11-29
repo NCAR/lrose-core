@@ -157,23 +157,14 @@ private:
   RadxRangeGeom _geom;
   bool _gateSpacingIsConstant;
   vector<double> _rangeKm;
-  
-  // polarization
 
-  vector<double> _polAngle;
-  
-  // georeference variables
-  
-  vector<double> _telescopeDirection;
-  vector<double> _lat;
-  vector<double> _lon;
-  vector<double> _alt;
-  vector<double> _roll;
-  vector<double> _pitch;
-  vector<double> _heading;
-  vector<double> _pressure;
-  vector<double> _tas;
-  vector<double> _temp;
+  // ray variables
+
+  vector<double> _nSamples;
+
+  // location
+
+  double _latDeg, _lonDeg, _altM;
 
   // metadata
 

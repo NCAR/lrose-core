@@ -422,6 +422,8 @@ public:
 
   char* search_ext;
 
+  char* n_samples_field_name;
+
   tdrp_bool_t include_qualifier_fields;
 
   tdrp_bool_t specify_qualifier_fields;
@@ -499,7 +501,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

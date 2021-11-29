@@ -111,6 +111,12 @@ commentdef {
   p_header = "Converting MPD NetCDF Files";
 }
 
+paramdef string {
+  p_default = "WVOnline_ProfileCount";
+  p_descr = "Field name for n_samples field.";
+  p_help = "This will be used to fill in n_samples. If empty, it will not be used.";
+} n_samples_field_name;
+
 typedef struct {
   string mpd_name;
   string output_name;

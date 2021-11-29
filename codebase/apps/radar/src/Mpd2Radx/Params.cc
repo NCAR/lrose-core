@@ -755,6 +755,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'n_samples_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("n_samples_field_name");
+    tt->descr = tdrpStrDup("Field name for n_samples field.");
+    tt->help = tdrpStrDup("This will be used to fill in n_samples. If empty, it will not be used.");
+    tt->val_offset = (char *) &n_samples_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("WVOnline_ProfileCount");
+    tt++;
+    
     // Parameter 'include_qualifier_fields'
     // ctype is 'tdrp_bool_t'
     
