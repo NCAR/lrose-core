@@ -998,7 +998,7 @@
     tt->descr = tdrpStrDup("Option to use dual thresholds to identify convective clumps.");
     tt->help = tdrpStrDup("NOTE: this step is performed in 2D. If set, the identification is performed in multiple stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. This is the default method. Then, using the dual_threshold parameters, a search is performed for clumps within the envelope exceeding the min convectivity threshold. If there is only one region at the higher convectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelope, but stop growing where they meet between the higher-convectivity areas. The final clumps are computed by breaking the original clump into regions based upon these secondary areas.");
     tt->val_offset = (char *) &use_dual_thresholds - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'dual_threshold'
