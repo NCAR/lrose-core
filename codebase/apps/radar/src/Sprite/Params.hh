@@ -211,7 +211,14 @@ public:
     tdrp_bool_t use_regression_filter;
     int regression_order;
     tdrp_bool_t regression_filter_interp_across_notch;
+    tdrp_bool_t compute_plot_range_dynamically;
   } iq_plot_t;
+
+  typedef struct {
+    iq_plot_type_t plot_type;
+    double min_val;
+    double max_val;
+  } iq_plot_static_range_t;
 
   ///////////////////////////
   // Member functions
@@ -704,6 +711,9 @@ public:
   iq_plot_t *_iq_plots;
   int iq_plots_n;
 
+  iq_plot_static_range_t *_iq_plot_static_ranges;
+  int iq_plot_static_ranges_n;
+
   int iqplot_top_margin;
 
   int iqplot_bottom_margin;
@@ -889,7 +899,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[207];
+  mutable TDRPtable _table[208];
 
   const char *_className;
 

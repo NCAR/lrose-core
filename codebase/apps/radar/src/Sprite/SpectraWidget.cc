@@ -1332,6 +1332,8 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
   iqplot->setRegrFiltInterpAcrossNotch
     (_params._iq_plots[id].regression_filter_interp_across_notch);
+  iqplot->setComputePlotRangeDynamically
+    (_params._iq_plots[id].compute_plot_range_dynamically);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -2001,6 +2003,17 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotPhasor);
 
+  QAction dynamicRange("Compute plot range dynamically", &contextMenu);
+  dynamicRange.setCheckable(true);
+  dynamicRange.setChecked
+    (_iqPlots[id]->getComputePlotRangeDynamically());
+  connect(&dynamicRange, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setComputePlotRangeDynamically(state);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&dynamicRange);
+  
   ///////////////////////////////////////
   // set channel sub-menu
   
