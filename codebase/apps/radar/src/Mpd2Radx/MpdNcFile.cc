@@ -171,6 +171,7 @@ int MpdNcFile::readFromPath(const string &path,
   string errStr("ERROR - MpdNcFile::readFromPath");
 
   _readVol = &vol;
+  _readVol->clear();
 
   // init
   
@@ -314,7 +315,122 @@ int MpdNcFile::_readDimensions()
 int MpdNcFile::_readGlobalAttributes()
 
 {
+  
+  const std::multimap<std::string, NcxxGroupAtt> attMap = _file.getAtts();
+  for (auto ii = attMap.begin(); ii != attMap.end(); ii++) {
 
+    string attName = ii->first;
+    NcxxGroupAtt att = ii->second;
+
+    // check for history global attribute
+    
+    if (att.getName() == "history") {
+      _history = att.asString();
+    } else if (att.getName() == "description") {
+      _readVol->setComment(att.asString());
+    } else if (att.getName() == "Project") {
+      _project = att.asString();
+    } else if (att.getName() == "latitude") {
+      double latDeg;
+      att.getValues(&latDeg);
+      _readVol->setLatitudeDeg(latDeg);
+    } else if (att.getName() == "longitude") {
+      double lonDeg;
+      att.getValues(&lonDeg);
+      _readVol->setLongitudeDeg(lonDeg);
+    } else if (att.getName() == "elevation") {
+      double altM;
+      att.getValues(&altM);
+      _readVol->setAltitudeKm(altM / 1000.0);
+    } else if (att.getName() == "MPD_Number") {
+      int mpdNum;
+      att.getValues(&mpdNum);
+      char text[1024];
+      snprintf(text, 1024, "MPD-number-%d", mpdNum);
+      _readVol->setInstrumentName(text);
+    } else {
+      nc_type attType = att.getType().getId();
+      switch (attType) {
+        case (NC_BYTE):
+          cerr << "XXXXXXXXXX NC_BYTE: " << att.getName() << endl;
+          break;
+        case (NC_SHORT):
+          cerr << "XXXXXXXXXX NC_SHORT: " << att.getName() << endl;
+          break;
+        case (NC_INT):
+          cerr << "XXXXXXXXXX NC_INT: " << att.getName() << endl;
+          break;
+        case (NC_UBYTE):
+          cerr << "XXXXXXXXXX NC_UBYTE: " << att.getName() << endl;
+          break;
+        case (NC_USHORT):
+          cerr << "XXXXXXXXXX NC_USHORT: " << att.getName() << endl;
+          break;
+        case (NC_UINT):
+          cerr << "XXXXXXXXXX NC_UINT: " << att.getName() << endl;
+          break;
+        case (NC_INT64):
+          cerr << "XXXXXXXXXX NC_INT64: " << att.getName() << endl;
+          break;
+        case (NC_UINT64):
+          cerr << "XXXXXXXXXX NC_UINT64: " << att.getName() << endl;
+          break;
+        case (NC_FLOAT):
+          cerr << "XXXXXXXXXX NC_FLOAT: " << att.getName() << endl;
+          break;
+        case (NC_DOUBLE):
+          cerr << "XXXXXXXXXX NC_DOUBLE: " << att.getName() << endl;
+          break;
+        case (NC_STRING):
+          cerr << "XXXXXXXXXX NC_STRING: " << att.getName() << endl;
+          break;
+        case (NC_CHAR):
+          cerr << "XXXXXXXXXX NC_CHAR: " << att.getName() << endl;
+          break;
+        default: {}
+      } // switch
+      switch (attType) {
+        case (NC_BYTE):
+        case (NC_SHORT):
+        case (NC_INT):
+        case (NC_UBYTE):
+        case (NC_USHORT):
+        case (NC_UINT):
+        case (NC_INT64):
+        case (NC_UINT64): {
+          int ival;
+          att.getValues(&ival);
+          char text[1024];
+          snprintf(text, 1024, "%d", ival);
+          _readVol->addUserGlobAttr(att.getName(),
+                                    RadxVol::UserGlobAttr::ATTR_INT,
+                                    text);
+          break;
+        }
+        case (NC_FLOAT):
+        case (NC_DOUBLE): {
+          double dval;
+          att.getValues(&dval);
+          char text[1024];
+          snprintf(text, 1024, "%g", dval);
+          _readVol->addUserGlobAttr(att.getName(),
+                                    RadxVol::UserGlobAttr::ATTR_DOUBLE,
+                                    text);
+          break;
+        }
+        case (NC_STRING):
+        case (NC_CHAR):
+        default: {
+          _readVol->addUserGlobAttr(att.getName(),
+                                    RadxVol::UserGlobAttr::ATTR_STRING,
+                                    att.asString());
+          break;
+        }
+      } // switch
+    } // if
+
+  } // ii
+  
   // check for history global attribute
   
   _history.clear();
@@ -844,8 +960,6 @@ int MpdNcFile::_createRays(const string &path)
 void MpdNcFile::_loadReadVolume()
 {
 
-  _readVol->clear();
-
   _readVol->setOrigFormat("MPD-RAW");
   _readVol->setVolumeNumber(-9999);
   _readVol->setInstrumentType(_instrumentType);
@@ -870,7 +984,6 @@ void MpdNcFile::_loadReadVolume()
   _readVol->setHistory(_history);
   _readVol->setInstitution("NCAR");
   _readVol->setReferences("");
-  _readVol->setComment("");
   _readVol->setDriver("Mpd2Radx");
   _readVol->setCreated(_startTime.getW3cStr());
   _readVol->setStatusXml(_statusXml);
