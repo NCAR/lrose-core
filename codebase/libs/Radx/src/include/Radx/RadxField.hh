@@ -1211,8 +1211,8 @@ private:
                       Radx::fl64 *data,
                       double maxFractionMissing);
 
-  int _computeMinValid(int nn,
-                       double maxFractionMissing);
+  int _computeMinNValid(int nn,
+                        double maxFractionMissing);
   
   /////////////////////////////////////////////////
   // serialization

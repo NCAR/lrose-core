@@ -3220,10 +3220,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
     stats->setTypeSi32(Radx::missingSi32, 1, 0);
     stats->addDataSi32(nPoints, data);
   
-    // convert to incoming data type
-  
-    stats->convertToType(dataTypeIn);
-    
+    // return integer field
     // return the created field - must be freed by caller
     
     return stats;
@@ -3360,9 +3357,9 @@ void RadxField::_computeMean(size_t nPoints,
     
   } // ifield
 
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] >= minValid) {
+    if (count[ipt] >= minNValid) {
       double mean = sum[ipt] / count[ipt];
       if (convertToLinear) {
         mean = 10.0 * log10(mean);
@@ -3419,9 +3416,9 @@ void RadxField::_computeMeanFolded(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] >= minValid) {
+    if (count[ipt] >= minNValid) {
       double angleMean = atan2(sumy[ipt], sumx[ipt]);
       data[ipt] = _getFoldValue(angleMean, foldLimitLower, foldRange);
     }
@@ -3458,10 +3455,10 @@ void RadxField::_computeMedian(size_t nPoints,
     
   } // ifield
   
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<double> &series = seriesArray[ipt];
-    if ((int) series.size() >= minValid) {
+    if ((int) series.size() >= minNValid) {
       sort(series.begin(), series.end());
       double median = series[series.size()/2];
       data[ipt] = median;
@@ -3493,7 +3490,7 @@ void RadxField::_computeModeDiscrete(size_t nPoints,
     // make a copy of the field and convert to ints
 
     RadxField copy(*fieldsIn[ifield]);
-    copy.convertToSi32(_scale, _offset);
+    copy.convertToSi32(1.0, 0.0);
     const Radx::si32 *vals = copy.getDataSi32();
     Radx::si32 miss = copy.getMissingSi32();
 
@@ -3511,10 +3508,10 @@ void RadxField::_computeModeDiscrete(size_t nPoints,
 
   // compute the mode across all fields
 
-  size_t minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  size_t minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<int> &goodVals = goodValsVec[ipt];
-    if (goodVals.size() >= minValid) {
+    if (goodVals.size() >= minNValid) {
       int mode = _computeMode(goodVals);
       data[ipt] = mode;
     } else {
@@ -3563,9 +3560,9 @@ void RadxField::_computeMaximum(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (max[ipt] > -1.0e98 && count[ipt] >= minValid) {
+    if (max[ipt] > -1.0e98 && count[ipt] >= minNValid) {
       data[ipt] = max[ipt];
     }
   }
@@ -3612,9 +3609,9 @@ void RadxField::_computeMinimum(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (min[ipt] < 1.0e98 && count[ipt] >= minValid) {
+    if (min[ipt] < 1.0e98 && count[ipt] >= minNValid) {
       data[ipt] = min[ipt];
     }
   }
@@ -3661,9 +3658,9 @@ void RadxField::_computeMiddle(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (!std::isnan(mid[ipt]) && count[ipt] >= minValid) {
+    if (!std::isnan(mid[ipt]) && count[ipt] >= minNValid) {
       data[ipt] = mid[ipt];
     }
   }
@@ -3674,18 +3671,18 @@ void RadxField::_computeMiddle(size_t nPoints,
 // compute the minimum number of valid points, given
 // the n and the max missing fraction
 
-int RadxField::_computeMinValid(int nn,
-                                double maxFractionMissing)
+int RadxField::_computeMinNValid(int nn,
+                                 double maxFractionMissing)
 
 {
 
-  int minValid = (int) ((1.0 - maxFractionMissing) * nn + 0.5);
-  if (minValid < 1) {
-    minValid = 1;
-  } else if (minValid > nn) {
-    minValid = nn;
+  int minNValid = (int) ((1.0 - maxFractionMissing) * nn + 0.5);
+  if (minNValid < 1) {
+    minNValid = 1;
+  } else if (minNValid > nn) {
+    minNValid = nn;
   }
-  return minValid;
+  return minNValid;
 
 }
 
