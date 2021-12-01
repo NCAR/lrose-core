@@ -54,6 +54,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 //////////////
@@ -220,9 +221,11 @@ int MpdNcFile::readFromPath(const string &path,
   }
 
   // read in ray qualifier fields
-  
-  if (_readRayQualifierFields()) {
-    return -1;
+
+  if (_params.include_qualifier_fields) {
+    if (_readRayQualifierFields()) {
+      return -1;
+    }
   }
 
   // read in ray metadata variables
@@ -322,169 +325,82 @@ int MpdNcFile::_readGlobalAttributes()
     string attName = ii->first;
     NcxxGroupAtt att = ii->second;
 
-    // check for history global attribute
-    
     if (att.getName() == "history") {
+
       _history = att.asString();
+
     } else if (att.getName() == "description") {
+
       _readVol->setComment(att.asString());
+
     } else if (att.getName() == "Project") {
+
       _project = att.asString();
+
     } else if (att.getName() == "latitude") {
+
       double latDeg;
       att.getValues(&latDeg);
       _readVol->setLatitudeDeg(latDeg);
+
     } else if (att.getName() == "longitude") {
+
       double lonDeg;
       att.getValues(&lonDeg);
       _readVol->setLongitudeDeg(lonDeg);
+
     } else if (att.getName() == "elevation") {
+
       double altM;
       att.getValues(&altM);
       _readVol->setAltitudeKm(altM / 1000.0);
+
     } else if (att.getName() == "MPD_Number") {
+
       int mpdNum;
       att.getValues(&mpdNum);
       char text[1024];
       snprintf(text, 1024, "MPD-number-%d", mpdNum);
       _readVol->setInstrumentName(text);
+
     } else {
-      nc_type attType = att.getType().getId();
-      switch (attType) {
-        case (NC_BYTE):
-          cerr << "XXXXXXXXXX NC_BYTE: " << att.getName() << endl;
-          break;
-        case (NC_SHORT):
-          cerr << "XXXXXXXXXX NC_SHORT: " << att.getName() << endl;
-          break;
-        case (NC_INT):
-          cerr << "XXXXXXXXXX NC_INT: " << att.getName() << endl;
-          break;
-        case (NC_UBYTE):
-          cerr << "XXXXXXXXXX NC_UBYTE: " << att.getName() << endl;
-          break;
-        case (NC_USHORT):
-          cerr << "XXXXXXXXXX NC_USHORT: " << att.getName() << endl;
-          break;
-        case (NC_UINT):
-          cerr << "XXXXXXXXXX NC_UINT: " << att.getName() << endl;
-          break;
-        case (NC_INT64):
-          cerr << "XXXXXXXXXX NC_INT64: " << att.getName() << endl;
-          break;
-        case (NC_UINT64):
-          cerr << "XXXXXXXXXX NC_UINT64: " << att.getName() << endl;
-          break;
-        case (NC_FLOAT):
-          cerr << "XXXXXXXXXX NC_FLOAT: " << att.getName() << endl;
-          break;
-        case (NC_DOUBLE):
-          cerr << "XXXXXXXXXX NC_DOUBLE: " << att.getName() << endl;
-          break;
-        case (NC_STRING):
-          cerr << "XXXXXXXXXX NC_STRING: " << att.getName() << endl;
-          break;
-        case (NC_CHAR):
-          cerr << "XXXXXXXXXX NC_CHAR: " << att.getName() << endl;
-          break;
-        default: {}
-      } // switch
-      switch (attType) {
-        case (NC_BYTE):
-        case (NC_SHORT):
-        case (NC_INT):
-        case (NC_UBYTE):
-        case (NC_USHORT):
-        case (NC_UINT):
-        case (NC_INT64):
-        case (NC_UINT64): {
-          int ival;
-          att.getValues(&ival);
-          char text[1024];
-          snprintf(text, 1024, "%d", ival);
-          _readVol->addUserGlobAttr(att.getName(),
-                                    RadxVol::UserGlobAttr::ATTR_INT,
-                                    text);
-          break;
-        }
-        case (NC_FLOAT):
-        case (NC_DOUBLE): {
-          double dval;
-          att.getValues(&dval);
-          char text[1024];
-          snprintf(text, 1024, "%g", dval);
-          _readVol->addUserGlobAttr(att.getName(),
-                                    RadxVol::UserGlobAttr::ATTR_DOUBLE,
-                                    text);
-          break;
-        }
-        case (NC_STRING):
-        case (NC_CHAR):
-        default: {
-          _readVol->addUserGlobAttr(att.getName(),
-                                    RadxVol::UserGlobAttr::ATTR_STRING,
-                                    att.asString());
-          break;
-        }
-      } // switch
-    } // if
+
+      NcxxType attType = att.getType();
+      if (attType == ncxxByte ||
+          attType == ncxxShort ||
+          attType == ncxxInt ||
+          attType == ncxxUbyte ||
+          attType == ncxxUshort ||
+          attType == ncxxUint ||
+          attType == ncxxInt64 ||
+          attType == ncxxUint64) {
+        // int attribute
+        int ival;
+        att.getValues(&ival);
+        char text[1024];
+        snprintf(text, 1024, "%d", ival);
+        _readVol->addUserGlobAttr(att.getName(),
+                                  RadxVol::UserGlobAttr::ATTR_INT,
+                                  text);
+      } else if (attType == ncxxFloat || attType == ncxxDouble) {
+        // float attribute
+        double dval;
+        att.getValues(&dval);
+        char text[1024];
+        snprintf(text, 1024, "%g", dval);
+        _readVol->addUserGlobAttr(att.getName(),
+                                  RadxVol::UserGlobAttr::ATTR_DOUBLE,
+                                  text);
+      } else {
+        // string attribute
+        _readVol->addUserGlobAttr(att.getName(),
+                                  RadxVol::UserGlobAttr::ATTR_STRING,
+                                  att.asString());
+      } // if (attType == ncxxByte ...
+
+    } // if (att.getName() == "history") ...
 
   } // ii
-  
-  // check for history global attribute
-  
-  _history.clear();
-  try {
-    NcxxGroupAtt att = _file.getAtt("history");
-    _history = att.asString();
-  } catch (NcxxException& e) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no history global attribute found" << endl;
-    }
-  }
-  
-  // check for project global attribute
-  
-  _project.clear();
-  try {
-    NcxxGroupAtt att = _file.getAtt("Project");
-    _project = att.asString();
-  } catch (NcxxException& e) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no project global attribute found" << endl;
-    }
-  }
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (_history.size() > 0) {
-      cerr << "Global attr history: " << _history << endl;
-    }
-    if (_project.size() > 0) {
-      cerr << "Global attr project: " << _project << endl;
-    }
-  }
-
-  // location
-
-  _latDeg = 0.0;
-  _lonDeg = 0.0;
-  _altM = 0.0;
-
-  try {
-    _file.getAtt("latitude").getValues(&_latDeg);
-    _file.getAtt("longitude").getValues(&_lonDeg);
-    _file.getAtt("elevation").getValues(&_altM);
-  } catch (NcxxException& e) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - problem reading latitude, longitude, elevation" << endl;
-    }
-  }
-
-  _readVol->setLatitudeDeg(_latDeg);
-  _readVol->setLongitudeDeg(_lonDeg);
-  _readVol->setAltitudeKm(_altM / 1000.0);
-
-  // xml for global attributes
   
   return 0;
 
@@ -641,14 +557,115 @@ int MpdNcFile::_readRayQualifierFields()
 
 {
 
-  int nVars = _file.getVarCount();
-  const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
-
-  cerr << "11111111 nVars: " << nVars << endl;
-  cerr << "11111111 vars.size(): " << vars.size() << endl;
-  for (auto ii = vars.begin(); ii != vars.end(); ii++) {
-    cerr << "2222222 var: " << ii->first << endl;
+  // create a map for the required fields
+  
+  map<string, Params::mpd_field_t> qualFields;
+  if (_params.specify_qualifier_fields) {
+    for (int ii = 0; ii < _params.qualifier_fields_n; ii++) {
+      qualFields[_params._qualifier_fields[ii].mpd_name] = _params._qualifier_fields[ii];
+    }
   }
+  
+  const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
+  for (auto ii = vars.begin(); ii != vars.end(); ii++) {
+    
+    string varName = ii->first;
+    const NcxxVar &var = ii->second;
+
+    // check we have 1 dimension, time
+
+    if (var.getDimCount() != 1) {
+      continue;
+    }
+    if (var.getDim(0) != _timeDim) {
+      continue;
+    }
+
+    // check if we need this field
+    
+    auto qualIndex = qualFields.find(varName);
+    if (qualFields.size() == 0 || qualIndex != qualFields.end()) {
+      
+      // yes - add this field
+
+      // set names and units
+      
+      string outputName = varName;
+      string longName;
+      string standardName;
+      
+      try {
+        NcxxVarAtt longNameAtt = var.getAtt("descripion");
+        longName = longNameAtt.asString();
+      } catch (NcxxException& e) { }
+      
+      string units;
+      try {
+        NcxxVarAtt unitsAtt = var.getAtt("units");
+        units = unitsAtt.asString();
+      } catch (NcxxException& e) { }
+
+      // override from params
+      
+      if (qualFields.size() != 0) {
+        const Params::mpd_field_t &fieldParams = qualIndex->second;
+        if (strlen(fieldParams.output_name) > 0) {
+          outputName = fieldParams.output_name;
+        }
+        if (strlen(fieldParams.units) > 0) {
+          units = fieldParams.units;
+        }
+        if (strlen(fieldParams.cf_standard_name) > 0) {
+          standardName = fieldParams.cf_standard_name;
+        }
+      }
+      
+      NcxxType varType = var.getType();
+      if (varType == ncxxDouble) {
+
+        // double field
+
+        if (_addFl64FieldToRays(var, outputName, units,
+                                longName, standardName, true)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } else if (varType == ncxxFloat) {
+
+        // float field
+
+        if (_addFl32FieldToRays(var, outputName, units,
+                                longName, standardName, true)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } else if (varType == ncxxByte ||
+                 varType == ncxxShort ||
+                 varType == ncxxInt ||
+                 varType == ncxxUbyte ||
+                 varType == ncxxUshort ||
+                 varType == ncxxUint ||
+                 varType == ncxxInt64 ||
+                 varType == ncxxUint64) {
+        
+        // int field
+        
+        if (_addSi32FieldToRays(var, outputName, units,
+                                longName, standardName, true)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } // if (varType == ncxxDouble ...
+      
+    } // if (qualFields.size() == 0 ...
+
+  } // ii
 
   return 0;
 
@@ -1267,7 +1284,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
   // no mask
   
   if (ftype == ncxxFloat) {
-    if (_addFl32FieldToRays(var, outputName, units, description)) {
+    if (_addFl32FieldToRays(var, outputName, units, description, "", false)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
@@ -1386,46 +1403,23 @@ int MpdNcFile::_readMaskVar(const string &maskFieldName,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
+int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    const string &name,
                                    const string &units,
-                                   const string &description)
+                                   const string &longName,
+                                   const string &standardName,
+                                   bool isQualifier)
   
 {
 
-  // check whether this variable uses the range dimension
-  // if not, it is probably a raw field with a longer dimension
-  
-  NcxxDim dim1 = var.getDim(1);
-  bool usesRangeDim = true;
-  if (dim1 != _rangeDim) {
-    usesRangeDim = false;
-  }
-  if (!usesRangeDim) {
-    // read in special range variable for this variable
-    const multimap<string, NcxxVar> &vars = _file.getVars();
-    for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-         iter != vars.end(); iter++) {
-      NcxxVar rvar = iter->second;
-      if (rvar.isNull()) {
-        continue;
-      }
-      int numDims = rvar.getDimCount();
-      // we need fields with 1 dimension
-      if (numDims != 1) {
-        continue;
-      }
-      // check that we have the correct dimensions
-      if (rvar.getDim(0) != dim1) {
-        continue;
-      }
-    }
-  } // 
-
   // get data from array
   
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
   RadxArray<Radx::fl64> ddata_;
-  Radx::fl64 *ddata = ddata_.alloc(_nPoints);
+  Radx::fl64 *ddata = ddata_.alloc(nData);
   try {
     var.getVal(ddata);
   } catch (NcxxException& e) {
@@ -1434,25 +1428,6 @@ int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
                name);
     return -1;
   }
-
-  // set name
-  
-  string outName(name);
-  string standardName;
-
-  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
-  //   outName = Names::CombinedHighCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
-  //   outName = Names::CombinedLowCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
-  //   outName = Names::MolecularCounts;
-  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
-  //   outName = Names::CrossPolarCounts;
-  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  // }
   
   // loop through the rays
   
@@ -1461,16 +1436,20 @@ int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
     // get data for ray
     
     int startIndex = iray * _nRangeInFile;
-    Radx::fl64 *dd = ddata + startIndex;
+    int nGates = _nRangeInFile;
+    if (isQualifier) {
+      startIndex = iray;
+      nGates = 1;
+    }
 
+    Radx::fl64 *dd = ddata + startIndex;
     RadxField *field =
-      _rays[iray]->addField(outName, units, _nRangeInFile,
+      _rays[iray]->addField(name, units, nGates,
                             Radx::missingFl64,
-                            dd,
-                            true);
+                            dd, true, isQualifier);
     
     field->setStandardName(standardName);
-    field->setLongName(description);
+    field->setLongName(longName);
     field->copyRangeGeom(_geom);
     
   } // iray
@@ -1484,73 +1463,31 @@ int MpdNcFile::_addFl64FieldToRays(NcxxVar &var,
 // The _rays array has previously been set up by _createRays()
 // Returns 0 on success, -1 on failure
 
-int MpdNcFile::_addFl32FieldToRays(NcxxVar &var,
+int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
                                    const string &name,
                                    const string &units,
-                                   const string &description)
+                                   const string &longName,
+                                   const string &standardName,
+                                   bool isQualifier)
   
 {
 
-  // check whether this variable uses the range dimension
-  // if not, it is probably a raw field with a longer dimension
-  
-  NcxxDim dim1 = var.getDim(1);
-  bool usesRangeDim = true;
-  if (dim1 != _rangeDim) {
-    usesRangeDim = false;
-  }
-  if (!usesRangeDim) {
-    // read in special range variable for this variable
-    const multimap<string, NcxxVar> &vars = _file.getVars();
-    for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-         iter != vars.end(); iter++) {
-      NcxxVar rvar = iter->second;
-      if (rvar.isNull()) {
-        continue;
-      }
-      int numDims = rvar.getDimCount();
-      // we need fields with 1 dimension
-      if (numDims != 1) {
-        continue;
-      }
-      // check that we have the correct dimensions
-      if (rvar.getDim(0) != dim1) {
-        continue;
-      }
-    }
-  } // 
-
   // get data from array
   
-  RadxArray<Radx::fl32> ddata_;
-  Radx::fl32 *ddata = ddata_.alloc(_nPoints);
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  RadxArray<Radx::fl32> fdata_;
+  Radx::fl32 *fdata = fdata_.alloc(nData);
   try {
-    var.getVal(ddata);
+    var.getVal(fdata);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - MpdNcFile::_addFl32FieldToRays");
     _addErrStr("  getVal fails, cannot get range data array, var name: ",
                name);
     return -1;
   }
-
-  // set name
-  
-  string outName(name);
-  string standardName;
-
-  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
-  //   outName = Names::CombinedHighCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
-  //   outName = Names::CombinedLowCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
-  //   outName = Names::MolecularCounts;
-  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
-  //   outName = Names::CrossPolarCounts;
-  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  // }
   
   // loop through the rays
   
@@ -1559,16 +1496,81 @@ int MpdNcFile::_addFl32FieldToRays(NcxxVar &var,
     // get data for ray
     
     int startIndex = iray * _nRangeInFile;
-    Radx::fl32 *dd = ddata + startIndex;
+    int nGates = _nRangeInFile;
+    if (isQualifier) {
+      startIndex = iray;
+      nGates = 1;
+    }
 
+    Radx::fl32 *ff = fdata + startIndex;
     RadxField *field =
-      _rays[iray]->addField(outName, units, _nRangeInFile,
+      _rays[iray]->addField(name, units, nGates,
                             Radx::missingFl32,
-                            dd,
-                            true);
+                            ff, true, isQualifier);
     
     field->setStandardName(standardName);
-    field->setLongName(description);
+    field->setLongName(longName);
+    field->copyRangeGeom(_geom);
+    
+  } // iray
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////////////////////////////
+// Add int field to rays
+// The _rays array has previously been set up by _createRays()
+// Returns 0 on success, -1 on failure
+
+int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
+                                   const string &name,
+                                   const string &units,
+                                   const string &longName,
+                                   const string &standardName,
+                                   bool isQualifier)
+  
+{
+
+  // get data from array
+  
+  size_t nData = _nPoints;
+  if (isQualifier) {
+    nData = _nTimesInFile;
+  }
+  RadxArray<Radx::si32> idata_;
+  Radx::si32 *idata = idata_.alloc(nData);
+  try {
+    var.getVal(idata);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - MpdNcFile::_addSi32FieldToRays");
+    _addErrStr("  getVal fails, cannot get range data array, var name: ",
+               name);
+    return -1;
+  }
+  
+  // loop through the rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+
+    // get data for ray
+    
+    int startIndex = iray * _nRangeInFile;
+    int nGates = _nRangeInFile;
+    if (isQualifier) {
+      startIndex = iray;
+      nGates = 1;
+    }
+
+    Radx::si32 *id = idata + startIndex;
+    RadxField *field =
+      _rays[iray]->addField(name, units, nGates,
+                            Radx::missingSi32,
+                            id, 1.0, 0.0,
+                            true, isQualifier);
+    
+    field->setStandardName(standardName);
+    field->setLongName(longName);
     field->copyRangeGeom(_geom);
     
   } // iray

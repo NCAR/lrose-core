@@ -216,15 +216,26 @@ private:
   int _readMaskVar(const string &maskFieldName,
                    vector<int> &maskVals);
 
-  int _addFl64FieldToRays(NcxxVar &var,
+  int _addFl64FieldToRays(const NcxxVar &var,
                           const string &name,
                           const string &units,
-                          const string &description);
+                          const string &longName,
+                          const string &standardName,
+                          bool isQualifier);
   
-  int _addFl32FieldToRays(NcxxVar &var,
+  int _addFl32FieldToRays(const NcxxVar &var,
                           const string &name,
                           const string &units,
-                          const string &description);
+                          const string &longName,
+                          const string &standardName,
+                          bool isQualifier);
+  
+  int _addSi32FieldToRays(const NcxxVar &var,
+                          const string &name,
+                          const string &units,
+                          const string &longName,
+                          const string &standardName,
+                          bool isQualifier);
   
   int _addMaskedFieldToRays(NcxxVar &var,
                             const string &name,
