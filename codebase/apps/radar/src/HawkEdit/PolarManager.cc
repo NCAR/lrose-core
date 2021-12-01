@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// HawkEye.cc
+// PolarManager.cc
 //
-// HawkEye object
+// Polar Manager object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -189,27 +189,31 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   //_sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
 
-  _archiveStartTimeEdit = NULL;
-  _archiveEndTimeEdit = NULL;
+  //_archiveStartTimeEdit = NULL;
+  //_archiveEndTimeEdit = NULL;
 
-  _selectedTimeLabel = NULL;
+  //_selectedTimeLabel = NULL;
   
-  _back1 = NULL;
-  _fwd1 = NULL;
-  _backPeriod = NULL;
-  _fwdPeriod = NULL;
+  //_back1 = NULL;
+  //_fwd1 = NULL;
+  //_backPeriod = NULL;
+  //_fwdPeriod = NULL;
 
-  _timeControl = NULL;
+  _timeNavController = NULL;
+  _timeNavView = NULL;
   _timeControlPlaced = false;
-  _timeLayout = NULL;
-  _timeSlider = NULL;
+  //_timeLayout = NULL;
+  //_timeSlider = NULL;
 
   ParamFile *_params = ParamFile::Instance();
 
   _setArchiveMode(_params->begin_in_archive_mode);
-  _archiveStartTime.set(_params->archive_start_time);
-  _archiveEndTime = _archiveStartTime + _params->archive_time_span_secs;
-  _archiveScanIndex = 0;
+
+  if (_timeNavController != NULL) {
+    //_timeNavController->setArchiveStartTime(_params->archive_start_time);
+    //_timeNavController->setArchiveEndTime(_archiveStartTime + _params->archive_time_span_secs);
+    //_timeNavController->setArchiveScanIndex(0);
+  }
 
   _imagesArchiveStartTime.set(_params->images_archive_start_time);
   _imagesArchiveEndTime.set(_params->images_archive_end_time);
@@ -388,7 +392,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
     //_ppi->setStartOfSweep(true);
     //_rhi->setStartOfSweep(true);
-    _goBack1();
+    //_goBack1();
 
   } else if (key == Qt::Key_Right) {
 
@@ -396,7 +400,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     
     //_ppi->setStartOfSweep(true);
     //_rhi->setStartOfSweep(true);
-    _goFwd1();
+    //_goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
@@ -550,6 +554,8 @@ void PolarManager::_setupWindows()
   // time panel
 
   _createTimeControl();
+  _showTimeControl();
+
 
   // fill out menu bar
 
@@ -577,9 +583,7 @@ void PolarManager::_setupWindows()
 
   //_createBoundaryEditorDialog();
 
-  if (_archiveMode) {
-    _showTimeControl();
-  }
+ 
    _setSweepPanelVisibility();
 
 }
@@ -631,8 +635,8 @@ void PolarManager::_createActions()
   // show time control window
   _showTimeControlAct = new QAction(tr("Show time control window"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
-  connect(_showTimeControlAct, SIGNAL(triggered()), _timeControl,
-          SLOT(show()));
+  //connect(_showTimeControlAct, SIGNAL(triggered()), _timeNavController,
+  //        SLOT(show()));
 
   /* realtime mode
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
@@ -849,7 +853,8 @@ void PolarManager::setFieldToMissing(QString fieldName) {
 // set input file list for archive mode
 
 void PolarManager::setArchiveFileList(const vector<string> &list,
-                                      bool fromCommandLine /* = true */)
+                                      bool fromCommandLine // = true 
+)
 {
 
   if (fromCommandLine && list.size() > 0) {
@@ -862,14 +867,19 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
     startTimeSecs =  (startTimeSecs / 300) * 300;
     time_t endTimeSecs = endTime.utime();
     endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-    _archiveStartTime.set(startTimeSecs);
-    _archiveEndTime.set(endTimeSecs);
-    _archiveScanIndex = 0;
+    //_archiveStartTime.set(startTimeSecs);
+    //_archiveEndTime.set(endTimeSecs);
+    //_archiveScanIndex = 0;
   }
 
   _archiveFileList = list;
   _setArchiveRetrievalPending();
 
+  if (_timeNavController) {
+    _timeNavController->fetchArchiveFiles(list.at(0));
+  }
+
+/*
   if (_archiveScanIndex < 0) {
     _archiveScanIndex = 0;
   } else if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
@@ -884,6 +894,7 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
       _timeSlider->setMaximum(_archiveFileList.size() - 1);
     _timeSlider->setSliderPosition(_archiveScanIndex);
   }
+
 
   // check if the paths include a day dir
 
@@ -912,7 +923,7 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 
   _setGuiFromArchiveStartTime();
   _setGuiFromArchiveEndTime();
-
+*/
 }
   
 ///////////////////////////////////////////////
@@ -922,6 +933,7 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 int PolarManager::loadArchiveFileList()
 
 {
+  /*
   RadxTimeList timeList;
   timeList.setDir(_params->archive_data_url);
   timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
@@ -940,10 +952,11 @@ int PolarManager::loadArchiveFileList()
   }
 
   setArchiveFileList(timeList.getPathList(), false);
-  
+  */
   return 0;
 
 }
+
 
 ///////////////////////////////////////
 // handle data in archive mode
@@ -961,7 +974,7 @@ void PolarManager::_handleArchiveData()
   // set cursor to wait cursor
 
   this->setCursor(Qt::WaitCursor);
-  _timeControl->setCursor(Qt::WaitCursor);
+  //_timeNavController->setCursor(Qt::WaitCursor);
   
   // get data
   try {
@@ -969,7 +982,7 @@ void PolarManager::_handleArchiveData()
     _setupRayLocation();
   } catch (FileIException &ex) {
     this->setCursor(Qt::ArrowCursor);
-    _timeControl->setCursor(Qt::ArrowCursor);
+    //_timeNavController->setCursor(Qt::ArrowCursor);
     return;
   }
   
@@ -983,7 +996,7 @@ void PolarManager::_handleArchiveData()
   
   _plotArchiveData();
   this->setCursor(Qt::ArrowCursor);
-  _timeControl->setCursor(Qt::ArrowCursor);
+  //_timeNavController->setCursor(Qt::ArrowCursor);
 
   _activateArchiveRendering();
 
@@ -1203,7 +1216,7 @@ int PolarManager::_getArchiveData()
            _plotStartTime.getMin(),
            _plotStartTime.getSec());
 
-  _selectedTimeLabel->setText(text);
+  //_selectedTimeLabel->setText(text);
 
   // adjust angles for elevation surveillance if needed
   
@@ -2824,191 +2837,38 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 }
 
 //////////////////////////////////////////////
-// create the time panel
+// create the time navigation controller and view
 
 void PolarManager::_createTimeControl()
 {
-  
-  _timeControl = new QDialog(this);
-  _timeControl->setWindowTitle("Time controller");
-  QPoint pos(0,0);
-  _timeControl->move(pos);
-
-  QBoxLayout *timeControlLayout =
-    new QBoxLayout(QBoxLayout::TopToBottom, _timeControl);
-  timeControlLayout->setSpacing(0);
-
-  // create time panel
-  
-  _timePanel = new QFrame(_timeControl);
-  timeControlLayout->addWidget(_timePanel, Qt::AlignCenter);
-  _timeLayout = new QVBoxLayout;
-  _timePanel->setLayout(_timeLayout);
-
-  QFrame *timeUpper = new QFrame(_timePanel);
-  QHBoxLayout *timeUpperLayout = new QHBoxLayout;
-  timeUpperLayout->setSpacing(10);
-  timeUpper->setLayout(timeUpperLayout);
-  
-  QFrame *timeLower = new QFrame(_timePanel);
-  QHBoxLayout *timeLowerLayout = new QHBoxLayout;
-  timeLowerLayout->setSpacing(10);
-  timeLower->setLayout(timeLowerLayout);
-
-  _timeLayout->addWidget(timeUpper);
-  _timeLayout->addWidget(timeLower);
-  
-  // create slider
-  
-  _timeSlider = new QSlider(Qt::Horizontal);
-  _timeSlider->setFocusPolicy(Qt::StrongFocus);
-  _timeSlider->setTickPosition(QSlider::TicksBothSides);
-  _timeSlider->setTickInterval(1);
-  _timeSlider->setTracking(true);
-  _timeSlider->setSingleStep(1);
-  _timeSlider->setPageStep(0);
-  _timeSlider->setFixedWidth(400);
-  _timeSlider->setToolTip("Drag to change time selection");
-  
-  // active time
-
-  // _selectedTimeLabel = new QLabel("yyyy/MM/dd hh:mm:ss", _timePanel);
-  _selectedTimeLabel = new QPushButton(_timePanel);
-  _selectedTimeLabel->setText("yyyy/MM/dd hh:mm:ss");
-  QPalette pal = _selectedTimeLabel->palette();
-  pal.setColor(QPalette::Active, QPalette::Button, Qt::cyan);
-  _selectedTimeLabel->setPalette(pal);
-  _selectedTimeLabel->setToolTip("This is the selected data time");
-
-  // time editing
-
-  _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate startDate(_archiveStartTime.getYear(), 
-                  _archiveStartTime.getMonth(),
-                  _archiveStartTime.getDay());
-  QTime startTime(_archiveStartTime.getHour(),
-                  _archiveStartTime.getMin(),
-                  _archiveStartTime.getSec());
-  QDateTime startDateTime(startDate, startTime);
-  _archiveStartTimeEdit->setDateTime(startDateTime);
-  connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
-  _archiveStartTimeEdit->setToolTip("Start time of archive period");
-  
-  _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
-  _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  QDate endDate(_archiveEndTime.getYear(), 
-                 _archiveEndTime.getMonth(),
-                 _archiveEndTime.getDay());
-  QTime endTime(_archiveEndTime.getHour(),
-                 _archiveEndTime.getMin(),
-                 _archiveEndTime.getSec());
-  QDateTime endDateTime(endDate, endTime);
-  _archiveEndTimeEdit->setDateTime(endDateTime);
-  connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-          this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
-  _archiveEndTimeEdit->setToolTip("End time of archive period");
-  
-  // fwd and back buttons
-
-  _back1 = new QPushButton(timeLower);
-  _back1->setText("<");
-  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
-  _back1->setToolTip("Go back by 1 file");
-  
-  _fwd1 = new QPushButton(timeLower);
-  _fwd1->setText(">");
-  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
-  _fwd1->setToolTip("Go forward by 1 file");
-    
-  _backPeriod = new QPushButton(timeLower);
-  _backPeriod->setText("<<");
-  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
-  _backPeriod->setToolTip("Go back by the archive time period");
-  
-  _fwdPeriod = new QPushButton(timeLower);
-  _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
-  _fwdPeriod->setToolTip("Go forward by the archive time period");
-
-  // accept cancel buttons
-
-  QPushButton *acceptButton = new QPushButton(timeUpper);
-  acceptButton->setText("Accept");
-  QPalette acceptPalette = acceptButton->palette();
-  acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
-  acceptButton->setPalette(acceptPalette);
-  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
-  acceptButton->setToolTip("Accept the selected start and end times");
-
-  QPushButton *cancelButton = new QPushButton(timeUpper);
-  cancelButton->setText("Cancel");
-  QPalette cancelPalette = cancelButton->palette();
-  cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
-  cancelButton->setPalette(cancelPalette);
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
-  cancelButton->setToolTip("Cancel the selected start and end times");
-    
-  // add time widgets to layout
-  
-  int stretch = 0;
-  timeUpperLayout->addWidget(cancelButton, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_archiveStartTimeEdit, stretch, Qt::AlignRight);
-  timeUpperLayout->addWidget(_selectedTimeLabel, stretch, Qt::AlignCenter);
-  timeUpperLayout->addWidget(_archiveEndTimeEdit, stretch, Qt::AlignLeft);
-  timeUpperLayout->addWidget(acceptButton, stretch, Qt::AlignLeft);
-  
-  timeLowerLayout->addWidget(_backPeriod, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_back1, stretch, Qt::AlignRight);
-  timeLowerLayout->addWidget(_timeSlider, stretch, Qt::AlignCenter);
-  timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
-  timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
-
+  _timeNavView = new TimeNavView(this);
+  _timeNavController = new TimeNavController(_timeNavView);
+  /*
   // connect slots for time slider
-  
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-          this, SLOT(_timeSliderActionTriggered(int)));
-  
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderValueChanged(int)));
-  
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
 
-  connect(_timeSlider, SIGNAL(sliderPressed()),
-          this, SLOT(_timeSliderPressed()));
+  connect(_timeNavView, SIGNAL(endTimeChanged(string)),
+          this, SLOT(endTimeChanged(string)));
+  
+  connect(_timeNavView, SIGNAL(startTimeChanged(string)),
+          this, SLOT(startTimeChanged(string)));
+  
+  connect(_timeNavView, SIGNAL(newTimeSelected(int)),
+          this, SLOT(newTimeSelected(int)));
 
+//  connect(_timeNavView, SIGNAL(sliderPressed()),
+//          this, SLOT(_timeSliderPressed()));
+*/
 }
 
-/////////////////////////////////////
-// show the time controller dialog
+
 
 void PolarManager::_showTimeControl()
 {
-
-  if (_timeControl) {
-    if (_timeControl->isVisible()) {
-      _timeControl->setVisible(false);
-    } else {
-      if (!_timeControlPlaced) {
-        _timeControl->setVisible(true);
-        QPoint pos;
-        pos.setX(x() + 
-                 (frameGeometry().width() / 2) -
-                 (_timeControl->width() / 2));
-        pos.setY(y() + frameGeometry().height());
-        _timeControl->move(pos);
-      }
-      _timeControl->setVisible(true);
-      _timeControl->raise();
-    }
+  if (_timeNavView) {
+    _timeNavView->showTimeControl();
   }
 }
-
-/////////////////////////////////////
-// place the time controller dialog
-
+/*
 void PolarManager::_placeTimeControl()
 {
 
@@ -3025,93 +2885,7 @@ void PolarManager::_placeTimeControl()
     }
   }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// print time slider actions for debugging
-
-void PolarManager::_timeSliderActionTriggered(int action) {
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    switch (action) {
-      case QAbstractSlider::SliderNoAction:
-        cerr << "SliderNoAction action in _timeSliderActionTriggered" << endl;
-        break;
-      case QAbstractSlider::SliderSingleStepAdd: 
-        cerr << "SliderSingleStepAdd action in _timeSliderActionTriggered" << endl;
-        break; 
-      case QAbstractSlider::SliderSingleStepSub:	
-        cerr << "SliderSingleStepSub action in _timeSliderActionTriggered" << endl;
-        break;
-      case QAbstractSlider::SliderPageStepAdd:
-        cerr << "SliderPageStepAdd action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderPageStepSub:
-        cerr << "SliderPageStepSub action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderToMinimum:
-        cerr << "SliderToMinimum action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderToMaximum:
-        cerr << "SliderToMaximum action in _timeSliderActionTriggered" << endl;
-        break;	
-      case QAbstractSlider::SliderMove:
-        cerr << "SliderMove action in _timeSliderActionTriggered" << endl;
-        break;
-      default: 
-        cerr << "unknown action in _timeSliderActionTriggered" << endl;
-    }
-    cerr << "timeSliderActionTriggered, value: " << _timeSlider->value() << endl;
-  }
-} 
-
-void PolarManager::_timeSliderValueChanged(int value) 
-{
-  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
-    return;
-  }
-  // get path for this value
-  string path = _archiveFileList[value];
-  // get time for this path
-  RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
-  _setGuiFromSelectedTime();
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider changed, value: " << value << endl;
-  }
-}
-
-void PolarManager::_timeSliderReleased() 
-{
-  int value = _timeSlider->value();
-  if (value < 0 || value > (int) _archiveFileList.size() - 1) {
-    return;
-  }
-  // get path for this value
-  string path = _archiveFileList[value];
-  // get time for this path
-  RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
-  // set selected time
-  _selectedTime = pathTime;
-  _setGuiFromSelectedTime();
-  // request data
-  if (_archiveScanIndex != value) {
-    _archiveScanIndex = value;
-    _setArchiveRetrievalPending();
-  }
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
-  }
-}
-
-void PolarManager::_timeSliderPressed() 
-{
-  int value = _timeSlider->value();
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
-  }
-}
+*/
 
 ////////////////////////////////////////////////////
 // create the file chooser dialog
@@ -3123,10 +2897,10 @@ void PolarManager::_openFile()
   LOG(DEBUG) << "enter";
   // seed with files for the day currently in view
   // generate like this: *yyyymmdd*
-  string pattern = _archiveStartTime.getDateStrPlain();
-  QString finalPattern = "All Files (*);; Cfradial (*.nc);; All files (*";
-  finalPattern.append(pattern.c_str());
-  finalPattern.append("*)");
+  //string pattern = _archiveStartTime.getDateStrPlain();
+  QString finalPattern = "All Files (*);; Cfradial (*.nc);; All files (*)";
+  //finalPattern.append(pattern.c_str());
+  //finalPattern.append("*)");
 
   QString inputPath = "/"; // QDir::currentPath();
   // get the path of the current file, if available 
@@ -3364,6 +3138,8 @@ void PolarManager::_showFileChooserDialog()
 
 }
 
+/*
+moved to TimeNavMVC classes
 ////////////////////////////////////////////////////////
 // set times from gui widgets
 
@@ -3415,40 +3191,7 @@ void PolarManager::_setGuiFromArchiveStartTime()
   _guiStartTime = _archiveStartTime;
 }
 
-////////////////////////////////////////////////////////
-// set gui widget from archive end time
 
-void PolarManager::_setGuiFromArchiveEndTime()
-{
-  if (!_archiveEndTimeEdit) {
-    return;
-  }
-  QDate date(_archiveEndTime.getYear(), 
-             _archiveEndTime.getMonth(),
-             _archiveEndTime.getDay());
-  QTime time(_archiveEndTime.getHour(),
-             _archiveEndTime.getMin(),
-             _archiveEndTime.getSec());
-  QDateTime datetime(date, time);
-  _archiveEndTimeEdit->setDateTime(datetime);
-  _guiEndTime = _archiveEndTime;
-}
-
-////////////////////////////////////////////////////////
-// set gui selected time label
-
-void PolarManager::_setGuiFromSelectedTime()
-{
-  char text[128];
-  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           _selectedTime.getYear(),
-           _selectedTime.getMonth(),
-           _selectedTime.getDay(),
-           _selectedTime.getHour(),
-           _selectedTime.getMin(),
-           _selectedTime.getSec());
-  _selectedTimeLabel->setText(text);
-}
 
 ////////////////////////////////////////////////////////
 // set archive start time
@@ -3532,6 +3275,7 @@ void PolarManager::_goFwdPeriod()
   _timeSlider->setSliderPosition(_archiveScanIndex);
 
 }
+*/
 
 ////////////////////////////////////////////////////////
 // set for pending archive retrieval
@@ -3594,7 +3338,7 @@ void PolarManager::_activateArchiveRendering()
 
 void PolarManager::_createArchiveImageFiles()
 {
-  
+  /*
   if (_params->images_creation_mode ==
       Params::CREATE_IMAGES_THEN_EXIT) {
     
@@ -3634,7 +3378,7 @@ void PolarManager::_createArchiveImageFiles()
     } // stime
     
   } // if (_params->images_creation_mode ...
-
+  */
 }
 
 /////////////////////////////////////////////////////
