@@ -196,6 +196,7 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _legendXml = rhs._legendXml;
   _thresholdingXml = rhs._thresholdingXml;
   _comment = rhs._comment;
+  _ancillaryVariables = rhs._ancillaryVariables;
 
   _dataType = rhs._dataType;
   _byteWidth = rhs._byteWidth;
@@ -2916,6 +2917,9 @@ void RadxField::print(ostream &out) const
   if (_comment.size() > 0) {
     out << "  comment: " << _comment << endl;
   }
+  if (_ancillaryVariables.size() > 0) {
+    out << "  ancillaryVariables: " << _ancillaryVariables << endl;
+  }
   out << "  units: " << _units << endl;
   out << "  nRays: " << getNRays() << endl;
   out << "  nPoints: " << _nPoints << endl;
@@ -2986,6 +2990,11 @@ void RadxField::print(ostream &out) const
   if (_comment.size() > 0) {
     out << "----------------- comment -----------------" <<  endl;
     out << _comment << endl;
+    out << "-------------------------------------------" <<  endl;
+  }
+  if (_ancillaryVariables.size() > 0) {
+    out << "----------------- ancillaryVariables -----------------" <<  endl;
+    out << _ancillaryVariables << endl;
     out << "-------------------------------------------" <<  endl;
   }
   out << "=========================================" << endl;
@@ -3900,6 +3909,7 @@ void RadxField::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
   xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
   xml += RadxXml::writeString("comment", level + 1, _comment);
+  xml += RadxXml::writeString("ancillaryVariables", level + 1, _ancillaryVariables);
 
   xml += RadxXml::writeEndTag("RadxField", level);
 
@@ -3971,6 +3981,10 @@ int RadxField::_setMetaStringsFromXml(const char *xml,
   }
   if (RadxXml::readString(contents, "comment", _comment)) {
     missingTags.push_back("comment");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "ancillaryVariables", _ancillaryVariables)) {
+    missingTags.push_back("ancillaryVariables");
     iret = -1;
   }
 

@@ -180,6 +180,11 @@ public:
 
   void setComment(const string &val) { _comment = val; }
 
+  /// Set the ancillary variables attribute
+  /// The ancillary variables are those that qualify this field
+  
+  void setAncillaryVariables(const string &val) { _ancillaryVariables = val; }
+
   /// Set sampling ratio.
   ///
   /// Sometimes the number of samples used to compute different
@@ -724,6 +729,11 @@ public:
 
   const string &getComment() const { return _comment; }
 
+  /// Get the ancillary variables attribute
+  /// The ancillary variables are those that qualify this field
+  
+  const string &getAncillaryVariables() const { return _ancillaryVariables; }
+
   /// Get number of rays represented in field data.
   
   size_t getNRays() const { return _rayStartIndex.size(); }
@@ -1085,6 +1095,7 @@ private:
   string _legendXml;
   string _thresholdingXml;
   string _comment;
+  string _ancillaryVariables;
   
   Radx::DataType_t _dataType;
   int _byteWidth;

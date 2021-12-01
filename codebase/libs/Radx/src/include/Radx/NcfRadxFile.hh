@@ -558,6 +558,7 @@ private:
   string _fieldName, _fieldUnits;
   string _fieldStandardName, _fieldLongName;
   string _fieldCommentStr;
+  string _fieldAncillaryVariablesStr;
   string _fieldLegendXml, _fieldThresholdingXml;
   double _fieldSamplingRatio;
   bool _fieldIsDiscrete;
@@ -623,6 +624,7 @@ private:
                             string &standardName,
                             string &longName,
                             string &commentStr,
+                            string &ancillaryVariablesStr,
                             string &legendXml,
                             string &thresholdingXml,
                             double &samplingRatio,
