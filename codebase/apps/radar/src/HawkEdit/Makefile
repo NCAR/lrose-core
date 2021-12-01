@@ -106,6 +106,9 @@ HDRS = \
 	SweepView.hh \
 	SweepController.hh \
 	SweepModel.hh \
+	TimeNavView.hh \
+	TimeNavController.hh \
+	TimeNavModel.hh \
 	TimeScaleWidget.hh \
 	WorldPlot.hh
 
@@ -143,6 +146,8 @@ NORM_SRCS = \
 	SpreadSheetUtils.cc \
 	SweepModel.cc \
 	SweepController.cc \
+	TimeNavModel.cc \
+	TimeNavController.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
@@ -172,6 +177,7 @@ MOC_SRCS = \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
 	SweepView.cc \
+	TimeNavView.cc \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \

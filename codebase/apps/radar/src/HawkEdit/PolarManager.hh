@@ -62,6 +62,8 @@
 #include "ScriptEditorView.hh"
 #include "BoundaryPointEditor.hh"
 #include "BoundaryPointEditorView.hh"
+#include "TimeNavView.hh"
+#include "TimeNavController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -558,6 +560,7 @@ private:
   bool _archiveMode;
   bool _archiveRetrievalPending;
 
+/*
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _guiStartTime;
   RadxTime _archiveStartTime;
@@ -573,6 +576,7 @@ private:
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
+  */
   /*
   QPushButton *_boundaryEditorClearBtn;
   QPushButton *_boundaryEditorHelpBtn;
@@ -593,7 +597,8 @@ private:
 
   // time controller settings dialog
   
-  QDialog *_timeControl;
+  TimeNavView *_timeNavView;
+  TimeNavController *_timeNavController;
   bool _timeControlPlaced;
 
   int _nArchiveScans;
@@ -603,18 +608,21 @@ private:
 
   // time slider
 
-  QFrame *_timePanel;
-  QVBoxLayout *_timeLayout;
+  //QFrame *_timePanel;
+  //QVBoxLayout *_timeLayout;
 
-  QSlider *_timeSlider;
-
+  //QSlider *_timeSlider;
+/*
   RadxTime _archiveIntermediateTime;
 
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
+  */
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
+  
+
   int _imagesScanIntervalSecs;
 
   // saving images in real time mode
@@ -770,31 +778,31 @@ private slots:
 
   // archive mode
   
-  void _setArchiveStartTime(const RadxTime &rtime);
-  void _setArchiveEndTime(const RadxTime &rtime);
-  void _setArchiveStartTimeFromGui(const QDateTime &qdt);
-  void _setArchiveEndTimeFromGui(const QDateTime &qdt);
-  void _acceptGuiTimes();
-  void _cancelGuiTimes();
+  //void _setArchiveStartTime(const RadxTime &rtime);
+  //void _setArchiveEndTime(const RadxTime &rtime);
+  //void _setArchiveStartTimeFromGui(const QDateTime &qdt);
+  //void _setArchiveEndTimeFromGui(const QDateTime &qdt);
+  //void _acceptGuiTimes();
+  //void _cancelGuiTimes();
 
-  void _goBack1();
-  void _goFwd1();
-  void _goBackPeriod();
-  void _goFwdPeriod();
+  //void _goBack1();
+  //void _goFwd1();
+  //void _goBackPeriod();
+  //void _goFwdPeriod();
 
   void _setArchiveRetrievalPending();
 
   // time controller
 
   void _showTimeControl();
-  void _placeTimeControl();
+  //void _placeTimeControl();
 
   // time slider
 
-  void _timeSliderActionTriggered(int action);
-  void _timeSliderValueChanged(int value);
-  void _timeSliderReleased();
-  void _timeSliderPressed();
+  //void _timeSliderActionTriggered(int action);
+  //void _timeSliderValueChanged(int value);
+  //void _timeSliderReleased();
+  //void _timeSliderPressed();
 
   //circle radius slider for BoundaryPointEditor
   //void _circleRadiusSliderValueChanged(int value);
