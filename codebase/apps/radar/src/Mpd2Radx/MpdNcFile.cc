@@ -38,7 +38,6 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxRay.hh>
-#include <Radx/RadxGeoref.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRcalib.hh>
 #include <Radx/RadxPath.hh>
@@ -624,7 +623,7 @@ int MpdNcFile::_readRayQualifierFields()
           standardName = fieldParams.cf_standard_name;
         }
       }
-      
+
       NcxxType varType = var.getType();
       if (varType == ncxxDouble) {
 
@@ -933,15 +932,6 @@ void MpdNcFile::_loadReadVolume()
   
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);
-
-  if (_rays.size() > 0) {
-    const RadxGeoref *georef = _rays[0]->getGeoreference();
-    if (georef) {
-      _readVol->setLatitudeDeg(georef->getLatitude());
-      _readVol->setLongitudeDeg(georef->getLongitude());
-      _readVol->setAltitudeKm(georef->getAltitudeKmMsl());
-    }
-  }
 
   _readVol->copyRangeGeom(_geom);
 
@@ -1264,8 +1254,6 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                             Radx::missingFl64,
                             dd, true, isQualifier);
 
-    field->printWithData(cerr);
-    
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
