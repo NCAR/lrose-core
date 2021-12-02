@@ -779,20 +779,8 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'specify_qualifier_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_qualifier_fields");
-    tt->descr = tdrpStrDup("Option to specify the qualifier fields. Only applies if include_qualifier_fields is true.");
-    tt->help = tdrpStrDup("If false, all time-based fields found in the files will be written out.");
-    tt->val_offset = (char *) &specify_qualifier_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'qualifier_fields'
-    // ctype is '_mpd_field_t'
+    // ctype is '_qual_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
@@ -803,9 +791,9 @@
     tt->array_n_offset = (char *) &qualifier_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(mpd_field_t);
+    tt->array_elem_size = sizeof(qual_field_t);
     tt->array_n = 8;
-    tt->struct_def.name = tdrpStrDup("mpd_field_t");
+    tt->struct_def.name = tdrpStrDup("qual_field_t");
     tt->struct_def.nfields = 4;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
@@ -866,18 +854,6 @@
       tt->struct_vals[31].s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'specify_output_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_output_fields");
-    tt->descr = tdrpStrDup("Option to specify the output fields.");
-    tt->help = tdrpStrDup("If false, all fields found in the files will be written out.");
-    tt->val_offset = (char *) &specify_output_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'mpd_fields'
     // ctype is '_mpd_field_t'
     
@@ -885,7 +861,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("mpd_fields");
     tt->descr = tdrpStrDup("Details of fields to be included in output data set.");
-    tt->help = tdrpStrDup("If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.");
+    tt->help = tdrpStrDup("If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used. If the mask_field_name is specified the mask field will be read in and used to mask out bad data in the output field. If the mask field name is empty no mask will be applied.");
     tt->array_offset = (char *) &_mpd_fields - &_start_;
     tt->array_n_offset = (char *) &mpd_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -893,7 +869,7 @@
     tt->array_elem_size = sizeof(mpd_field_t);
     tt->array_n = 4;
     tt->struct_def.name = tdrpStrDup("mpd_field_t");
-    tt->struct_def.nfields = 4;
+    tt->struct_def.nfields = 6;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -916,25 +892,55 @@
       tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_mpd_fields->units - (char *) _mpd_fields;
-    tt->n_struct_vals = 16;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[4].fname = tdrpStrDup("mask_field_name");
+      tt->struct_def.fields[4].ptype = STRING_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_mpd_fields->mask_field_name - (char *) _mpd_fields;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("output_encoding_t");
+      tt->struct_def.fields[5].fname = tdrpStrDup("output_encoding");
+      tt->struct_def.fields[5].ptype = ENUM_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &_mpd_fields->output_encoding - (char *) _mpd_fields;
+        tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_encoding_t");
+        tt->struct_def.fields[5].enum_def.nfields = 4;
+        tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT64");
+        tt->struct_def.fields[5].enum_def.fields[0].val = OUTPUT_ENCODING_FLOAT64;
+        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
+        tt->struct_def.fields[5].enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
+        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
+        tt->struct_def.fields[5].enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
+        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
+        tt->struct_def.fields[5].enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
+    tt->n_struct_vals = 24;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("Absolute_Humidity");
       tt->struct_vals[1].s = tdrpStrDup("Absolute_Humidity");
       tt->struct_vals[2].s = tdrpStrDup("absolute_humidity");
       tt->struct_vals[3].s = tdrpStrDup("");
-      tt->struct_vals[4].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
-      tt->struct_vals[5].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
-      tt->struct_vals[6].s = tdrpStrDup("molecular_backscatter");
-      tt->struct_vals[7].s = tdrpStrDup("");
-      tt->struct_vals[8].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
-      tt->struct_vals[9].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
-      tt->struct_vals[10].s = tdrpStrDup("aerosol_backscatter_coefficient");
-      tt->struct_vals[11].s = tdrpStrDup("");
-      tt->struct_vals[12].s = tdrpStrDup("Backscatter_Ratio");
-      tt->struct_vals[13].s = tdrpStrDup("Backscatter_Ratio");
-      tt->struct_vals[14].s = tdrpStrDup("backscatter_ratio");
+      tt->struct_vals[4].s = tdrpStrDup("Absolute_Humidity_mask");
+      tt->struct_vals[5].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[6].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
+      tt->struct_vals[7].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
+      tt->struct_vals[8].s = tdrpStrDup("molecular_backscatter");
+      tt->struct_vals[9].s = tdrpStrDup("");
+      tt->struct_vals[10].s = tdrpStrDup("");
+      tt->struct_vals[11].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[12].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[13].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[14].s = tdrpStrDup("aerosol_backscatter_coefficient");
       tt->struct_vals[15].s = tdrpStrDup("");
+      tt->struct_vals[16].s = tdrpStrDup("Aerosol_Backscatter_Coefficient_mask");
+      tt->struct_vals[17].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[18].s = tdrpStrDup("Backscatter_Ratio");
+      tt->struct_vals[19].s = tdrpStrDup("Backscatter_Ratio");
+      tt->struct_vals[20].s = tdrpStrDup("backscatter_ratio");
+      tt->struct_vals[21].s = tdrpStrDup("");
+      tt->struct_vals[22].s = tdrpStrDup("Backscatter_Ratio_mask");
+      tt->struct_vals[23].e = OUTPUT_ENCODING_INT16;
     tt++;
     
     // Parameter 'Comment 5'
@@ -1121,7 +1127,7 @@
     tt->descr = tdrpStrDup("Output directory path.");
     tt->help = tdrpStrDup("Files will be written to this directory.");
     tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
+    tt->single_val.s = tdrpStrDup("/tmp/mpd_output");
     tt++;
     
     // Parameter 'output_filename_mode'

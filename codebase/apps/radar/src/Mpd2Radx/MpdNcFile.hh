@@ -200,7 +200,6 @@ private:
   void _loadReadVolume();
   void _convertPressureToHpa();
 
-  int _readFieldVariablesAuto();
   int _readFieldVariablesSpecified();
 
   int _readFieldVariable(string inputName,

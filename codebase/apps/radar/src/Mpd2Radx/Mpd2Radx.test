@@ -218,21 +218,7 @@ n_samples_field_name = "WVOnline_ProfileCount";
 // Type: boolean
 //
 
-include_qualifier_fields = FALSE;
-
-///////////// specify_qualifier_fields ////////////////
-//
-// Option to specify the qualifier fields. Only applies if 
-//   include_qualifier_fields is true.
-//
-// If false, all time-based fields found in the files will be written 
-//   out.
-//
-//
-// Type: boolean
-//
-
-specify_qualifier_fields = TRUE;
+include_qualifier_fields = TRUE;
 
 ///////////// qualifier_fields ////////////////////////
 //
@@ -314,18 +300,6 @@ qualifier_fields = {
   }
 };
 
-///////////// specify_output_fields ///////////////////
-//
-// Option to specify the output fields.
-//
-// If false, all fields found in the files will be written out.
-//
-//
-// Type: boolean
-//
-
-specify_output_fields = TRUE;
-
 ///////////// mpd_fields //////////////////////////////
 //
 // Details of fields to be included in output data set.
@@ -333,7 +307,10 @@ specify_output_fields = TRUE;
 // If the output_name is not specified, the input name is used 
 //   unchanged. If the standard_name is not specified, the standard name 
 //   attribute will be omitted. If units are not specified, the units from 
-//   the input file will be used.
+//   the input file will be used. If the mask_field_name is specified the 
+//   mask field will be read in and used to mask out bad data in the 
+//   output field. If the mask field name is empty no mask will be 
+//   applied.
 //
 //
 // Type: struct
@@ -342,6 +319,13 @@ specify_output_fields = TRUE;
 //      string output_name;
 //      string cf_standard_name;
 //      string units;
+//      string mask_field_name;
+//      output_encoding_t output_encoding;
+//        Options:
+//          OUTPUT_ENCODING_FLOAT64
+//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
 //   }
 //
 // 1D array - variable length.
@@ -352,28 +336,36 @@ mpd_fields = {
     mpd_name = "Absolute_Humidity",
     output_name = "Absolute_Humidity",
     cf_standard_name = "absolute_humidity",
-    units = ""
+    units = "",
+    mask_field_name = "",
+    output_encoding = OUTPUT_ENCODING_INT16
   }
   ,
   {
     mpd_name = "HSRLMolecular_MolecularBackscatter",
     output_name = "HSRLMolecular_MolecularBackscatter",
     cf_standard_name = "molecular_backscatter",
-    units = ""
+    units = "",
+    mask_field_name = "",
+    output_encoding = OUTPUT_ENCODING_INT16
   }
   ,
   {
     mpd_name = "Aerosol_Backscatter_Coefficient",
     output_name = "Aerosol_Backscatter_Coefficient",
     cf_standard_name = "aerosol_backscatter_coefficient",
-    units = ""
+    units = "",
+    mask_field_name = "",
+    output_encoding = OUTPUT_ENCODING_INT16
   }
   ,
   {
     mpd_name = "Backscatter_Ratio",
     output_name = "Backscatter_Ratio",
     cf_standard_name = "backscatter_ratio",
-    units = ""
+    units = "",
+    mask_field_name = "",
+    output_encoding = OUTPUT_ENCODING_INT16
   }
 };
 
@@ -537,7 +529,7 @@ site_name = "unknown";
 // Type: string
 //
 
-output_dir = "./output";
+output_dir = "/tmp/mpd_output";
 
 ///////////// output_filename_mode ////////////////////
 //

@@ -242,16 +242,9 @@ int MpdNcFile::readFromPath(const string &path,
   
   // add field variables to file rays
 
-  if (_params.specify_output_fields) {
-    if (_readFieldVariablesSpecified()) {
-      _addErrStr(errStr);
-      return -1;
-    }
-  } else {
-    if (_readFieldVariablesAuto()) {
-      _addErrStr(errStr);
-      return -1;
-    }
+  if (_readFieldVariablesSpecified()) {
+    _addErrStr(errStr);
+    return -1;
   }
 
   // Convert any pressure fields to hPa
@@ -557,11 +550,9 @@ int MpdNcFile::_readRayQualifierFields()
 
   // create a map for the required fields
   
-  map<string, Params::mpd_field_t> qualFields;
-  if (_params.specify_qualifier_fields) {
-    for (int ii = 0; ii < _params.qualifier_fields_n; ii++) {
-      qualFields[_params._qualifier_fields[ii].mpd_name] = _params._qualifier_fields[ii];
-    }
+  map<string, Params::qual_field_t> qualFields;
+  for (int ii = 0; ii < _params.qualifier_fields_n; ii++) {
+    qualFields[_params._qualifier_fields[ii].mpd_name] = _params._qualifier_fields[ii];
   }
   
   const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
@@ -612,7 +603,7 @@ int MpdNcFile::_readRayQualifierFields()
       // override from params
       
       if (qualFields.size() != 0) {
-        const Params::mpd_field_t &fieldParams = qualIndex->second;
+        const Params::qual_field_t &fieldParams = qualIndex->second;
         if (strlen(fieldParams.output_name) > 0) {
           outputName = fieldParams.output_name;
         }
@@ -979,33 +970,6 @@ void MpdNcFile::_convertPressureToHpa()
 }
 
 ////////////////////////////////////////////
-// read the field variables automatically
-
-int MpdNcFile::_readFieldVariablesAuto()
-
-{
-
-  // loop through the variables, adding data fields as appropriate
-  
-  const multimap<string, NcxxVar> &vars = _file.getVars();
-
-  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-       iter != vars.end(); iter++) {
-    
-    NcxxVar var = iter->second;
-    if (var.isNull()) {
-      continue;
-    }
-    
-    _readFieldVariable(var.getName(), "", "", var);
-    
-  } // iter
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////
 // read the field variables as specified in
 // the parameter file
 
@@ -1210,8 +1174,6 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    bool isQualifier)
   
 {
-
-  cerr << "111111111111111111 field: " << name << endl;
 
   // get data from array
   

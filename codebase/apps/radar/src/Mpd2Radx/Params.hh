@@ -81,6 +81,13 @@ public:
   } mode_t;
 
   typedef enum {
+    OUTPUT_ENCODING_FLOAT64 = 0,
+    OUTPUT_ENCODING_FLOAT32 = 1,
+    OUTPUT_ENCODING_INT32 = 2,
+    OUTPUT_ENCODING_INT16 = 3
+  } output_encoding_t;
+
+  typedef enum {
     DEGREES_CELCIUS = 0,
     DEGREES_KELVIN = 1
   } temperature_units_t;
@@ -104,6 +111,15 @@ public:
     char* output_name;
     char* cf_standard_name;
     char* units;
+  } qual_field_t;
+
+  typedef struct {
+    char* mpd_name;
+    char* output_name;
+    char* cf_standard_name;
+    char* units;
+    char* mask_field_name;
+    output_encoding_t output_encoding;
   } mpd_field_t;
 
   ///////////////////////////
@@ -426,12 +442,8 @@ public:
 
   tdrp_bool_t include_qualifier_fields;
 
-  tdrp_bool_t specify_qualifier_fields;
-
-  mpd_field_t *_qualifier_fields;
+  qual_field_t *_qualifier_fields;
   int qualifier_fields_n;
-
-  tdrp_bool_t specify_output_fields;
 
   mpd_field_t *_mpd_fields;
   int mpd_fields_n;
@@ -501,7 +513,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

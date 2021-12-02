@@ -122,7 +122,7 @@ typedef struct {
   string output_name;
   string cf_standard_name;
   string units;
-} mpd_field_t;
+} qual_field_t;
 
 paramdef boolean {
   p_default = TRUE;
@@ -130,13 +130,7 @@ paramdef boolean {
   p_help = "If true, (time)-based fields will be included as qualifier fields.";
 } include_qualifier_fields;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to specify the qualifier fields. Only applies if include_qualifier_fields is true.";
-  p_help = "If false, all time-based fields found in the files will be written out.";
-} specify_qualifier_fields;
-
-paramdef struct mpd_field_t {
+paramdef struct qual_field_t {
   p_default = {
     {
       mpd_name = "HSRLCombined_LaserShotCount",
@@ -198,11 +192,21 @@ paramdef struct mpd_field_t {
   p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.";
 } qualifier_fields[];
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the output fields.";
-  p_help = "If false, all fields found in the files will be written out.";
-} specify_output_fields;
+typedef enum {
+  OUTPUT_ENCODING_FLOAT64,
+  OUTPUT_ENCODING_FLOAT32,
+  OUTPUT_ENCODING_INT32,
+  OUTPUT_ENCODING_INT16
+} output_encoding_t;
+
+typedef struct {
+  string mpd_name;
+  string output_name;
+  string cf_standard_name;
+  string units;
+  string mask_field_name;
+  output_encoding_t output_encoding;
+} mpd_field_t;
 
 paramdef struct mpd_field_t {
   p_default = {
@@ -210,32 +214,40 @@ paramdef struct mpd_field_t {
       mpd_name = "Absolute_Humidity",
       output_name = "Absolute_Humidity",
       cf_standard_name = "absolute_humidity",
-      units = ""
+      units = "",
+      mask_field_name = "Absolute_Humidity_mask",
+      output_encoding = OUTPUT_ENCODING_INT16
     }
     ,
     {
       mpd_name = "HSRLMolecular_MolecularBackscatter",
       output_name = "HSRLMolecular_MolecularBackscatter",
       cf_standard_name = "molecular_backscatter",
-      units = ""
+      units = "",
+      mask_field_name = "",
+      output_encoding = OUTPUT_ENCODING_INT16
     }
     ,
     {
       mpd_name = "Aerosol_Backscatter_Coefficient",
       output_name = "Aerosol_Backscatter_Coefficient",
       cf_standard_name = "aerosol_backscatter_coefficient",
-      units = ""
+      units = "",
+      mask_field_name = "Aerosol_Backscatter_Coefficient_mask",
+      output_encoding = OUTPUT_ENCODING_INT16
     }
     ,
     {
       mpd_name = "Backscatter_Ratio",
       output_name = "Backscatter_Ratio",
       cf_standard_name = "backscatter_ratio",
-      units = ""
+      units = "",
+      mask_field_name = "Backscatter_Ratio_mask",
+      output_encoding = OUTPUT_ENCODING_INT16
     }
   };
   p_descr = "Details of fields to be included in output data set.";
-  p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used.";
+  p_help = "If the output_name is not specified, the input name is used unchanged. If the standard_name is not specified, the standard name attribute will be omitted. If units are not specified, the units from the input file will be used. If the mask_field_name is specified the mask field will be read in and used to mask out bad data in the output field. If the mask field name is empty no mask will be applied.";
 } mpd_fields[];
 
 commentdef {
@@ -321,7 +333,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./output";
+  p_default = "/tmp/mpd_output";
   p_descr = "Output directory path.";
   p_help = "Files will be written to this directory.";
 } output_dir;
