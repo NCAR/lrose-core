@@ -176,10 +176,6 @@ private:
 
   vector<RadxRay *> _rays;
 
-  // extra attributes in XML
-
-  string _statusXml;
-  
   // private methods for NcfRadial.cc
   
   void _clearRays();
@@ -197,7 +193,7 @@ private:
 
   int _readRayVar(const string &name, vector<double> &vals);
   int _readRayVar(const string &name, vector<float> &vals);
-  int _getRayVar(NcxxVar &var, const string &name, bool required);
+  int _getRayVar(NcxxVar &var, const string &name);
 
   int _createRays(const string &path);
 
@@ -210,13 +206,8 @@ private:
   int _readFieldVariable(string inputName,
                          string outputName,
                          string standardName,
-                         NcxxVar &var,
-                         bool &gotStatus,
-                         bool required = false);
+                         NcxxVar &var);
   
-  int _readMaskVar(const string &maskFieldName,
-                   vector<int> &maskVals);
-
   int _addFl64FieldToRays(const NcxxVar &var,
                           const string &name,
                           const string &units,
@@ -241,26 +232,6 @@ private:
                           const string &ancillaryVariables,
                           bool isQualifier);
   
-  int _addMaskedFieldToRays(NcxxVar &var,
-                            const string &name,
-                            const string &units,
-                            const string &description,
-                            vector<int> &maskVals,
-                            int maskValidValue);
-    
-  int _addRawFieldToRays(NcxxVar &var,
-                         const string &name,
-                         const string &units,
-                         const string &description,
-                         bool applyMask,
-                         const vector<int> &maskVals,
-                         int maskValidValue);
-
-  int _addSi08FieldToRays(NcxxVar &var,
-                          const string &name,
-                          const string &units,
-                          const string &description);
-
   /// add integer value to error string, with label
 
   void _addErrInt(string label, int iarg,

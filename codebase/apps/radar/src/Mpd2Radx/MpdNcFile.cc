@@ -96,7 +96,6 @@ void MpdNcFile::clear()
 
   _history.clear();
   _project.clear();
-  _statusXml.clear();
 
   _dataTimes.clear();
   _dTimes.clear();
@@ -689,20 +688,6 @@ void MpdNcFile::_clearRayVariables()
 
   _nSamples.clear();
 
-  // _polAngle.clear();
-
-  // _telescopeDirection.clear();
-
-  // _lat.clear();
-  // _lon.clear();
-  // _alt.clear();
-  // _roll.clear();
-  // _pitch.clear();
-  // _heading.clear();
-  // _pressure.clear();
-  // _tas.clear();
-  // _temp.clear();
-
 }
 
 ///////////////////////////////////
@@ -730,66 +715,6 @@ int MpdNcFile::_readRayVariables()
     }
   }
 
-  // _readRayVar("TelescopeDirection", _telescopeDirection);
-  // if (_telescopeDirection.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - TelescopeLocked variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("GGLAT", _lat);
-  // if (_lat.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - GGLAT variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("GGLON", _lon);
-  // if (_lon.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - GGLON variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("GGALT", _alt);
-  // if (_alt.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - GGALT variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("ROLL", _roll);
-  // if (_roll.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - ROLL variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("PITCH", _pitch);
-  // if (_pitch.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - PITCH variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("THDG", _heading);
-  // if (_heading.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - THDG variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("PSXC", _pressure);
-  // if (_pressure.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - PSXC variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("TASX", _tas);
-  // if (_tas.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - TASX variable required");
-  //   iret = -1;
-  // }
-
-  // _readRayVar("ATX", _temp);
-  // if (_temp.size() < _nTimesInFile) {
-  //   _addErrStr("ERROR - ATX variable required");
-  //   iret = -1;
-  // }
-
   if (iret) {
     _addErrStr("ERROR - MpdNcFile::_readRayVariables");
   }
@@ -815,7 +740,7 @@ int MpdNcFile::_readRayVar(const string &name, vector<double> &vals)
   // get var
   
   NcxxVar var;
-  if (_getRayVar(var, name, true)) {
+  if (_getRayVar(var, name)) {
     _addErrStr("ERROR - MpdNcFile::_readRayVar");
     return -1;
   }
@@ -857,7 +782,7 @@ int MpdNcFile::_readRayVar(const string &name, vector<float> &vals)
   // get var
   
   NcxxVar var;
-  if (_getRayVar(var, name, true)) {
+  if (_getRayVar(var, name)) {
     _addErrStr("ERROR - MpdNcFile::_readRayVar");
     return -1;
   }
@@ -887,8 +812,7 @@ int MpdNcFile::_readRayVar(const string &name, vector<float> &vals)
 // returns 0 on success, -1 on failure
 
 int MpdNcFile::_getRayVar(NcxxVar &var,
-                          const string &name,
-                          bool required)
+                          const string &name)
 
 {
   
@@ -896,34 +820,28 @@ int MpdNcFile::_getRayVar(NcxxVar &var,
   
   var = _file.getVar(name);
   if (var.isNull()) {
-    if (required) {
-      _addErrStr("ERROR - MpdNcFile::_getRayVar");
-      _addErrStr("  Cannot read variable, name: ", name);
-      _addErrStr(_file.getErrStr());
-    }
+    _addErrStr("ERROR - MpdNcFile::_getRayVar");
+    _addErrStr("  Cannot read variable, name: ", name);
+    _addErrStr(_file.getErrStr());
     return -1;
   }
 
   // check time dimension
   
   if (var.getDimCount() < 1) {
-    if (required) {
-      _addErrStr("ERROR - MpdNcFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has no dimensions");
-    }
+    _addErrStr("ERROR - MpdNcFile::_getRayVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has no dimensions");
     return -1;
   }
 
   NcxxDim timeDim = var.getDim(0);
   if (timeDim != _timeDim) {
-    if (required) {
-      _addErrStr("ERROR - MpdNcFile::_getRayVar");
-      _addErrStr("  variable name: ", name);
-      _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 timeDim.getName());
-      _addErrStr("  should be 'time'");
-    }
+    _addErrStr("ERROR - MpdNcFile::_getRayVar");
+    _addErrStr("  variable name: ", name);
+    _addErrStr("  variable has incorrect dimension, dim name: ", 
+               timeDim.getName());
+    _addErrStr("  should be 'time'");
     return -1;
   }
 
@@ -1012,7 +930,6 @@ void MpdNcFile::_loadReadVolume()
   _readVol->setReferences("");
   _readVol->setDriver("Mpd2Radx");
   _readVol->setCreated(_startTime.getW3cStr());
-  _readVol->setStatusXml(_statusXml);
   
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);
@@ -1078,12 +995,6 @@ int MpdNcFile::_readFieldVariablesAuto()
 
 {
 
-  // initialize status xml
-
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("FieldStatus", 0);
-  bool gotStatus = false;
-
   // loop through the variables, adding data fields as appropriate
   
   const multimap<string, NcxxVar> &vars = _file.getVars();
@@ -1096,16 +1007,10 @@ int MpdNcFile::_readFieldVariablesAuto()
       continue;
     }
     
-    _readFieldVariable(var.getName(), "", "", var, gotStatus);
+    _readFieldVariable(var.getName(), "", "", var);
     
   } // iter
   
-  if (gotStatus) {
-    _statusXml += RadxXml::writeEndTag("FieldStatus", 0);
-  } else {
-    _statusXml.clear();
-  }
-
   return 0;
 
 }
@@ -1120,12 +1025,6 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
   int iret = 0;
 
-  // initialize status xml
-  
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("FieldStatus", 0);
-  bool gotStatus = false;
-  
   // loop through the variables as specified in the params file
 
   int nFields = _params.mpd_fields_n;
@@ -1163,18 +1062,12 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
     // read in variable
     
-    if (_readFieldVariable(var.getName(), outputName, standardName, var, gotStatus)) {
+    if (_readFieldVariable(var.getName(), outputName, standardName, var)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       iret = -1;
     }
 
   } // ivar
-
-  if (gotStatus) {
-    _statusXml += RadxXml::writeEndTag("FieldStatus", 0);
-  } else {
-    _statusXml.clear();
-  }
 
   return iret;
 
@@ -1186,9 +1079,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
 int MpdNcFile::_readFieldVariable(string inputName,
                                   string outputName,
                                   string standardName,
-                                  NcxxVar &var,
-                                  bool &gotStatus,
-                                  bool required /* = false */)
+                                  NcxxVar &var)
   
 {
 
@@ -1210,9 +1101,6 @@ int MpdNcFile::_readFieldVariable(string inputName,
 
   NcxxType ftype = var.getType();
   if (ftype != ncxxFloat && ftype != ncxxDouble) {
-    if (!required) {
-      return 0;
-    }
     // not a valid type for field data
     _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
     _addErrStr("  Variable wrong type, name: ", inputName);
@@ -1224,9 +1112,6 @@ int MpdNcFile::_readFieldVariable(string inputName,
   int numDims = var.getDimCount();
   // we need fields with 2 dimensions
   if (numDims != 2) {
-    if (!required) {
-      return 0;
-    }
     // not a valid type for field data
     _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
     _addErrStr("  Variable should have 2 dimensions, name: ", inputName);
@@ -1238,9 +1123,6 @@ int MpdNcFile::_readFieldVariable(string inputName,
   
   NcxxDim timeDim = var.getDim(0);
   if (timeDim != _timeDim) {
-    if (!required) {
-      return 0;
-    }
     _addErrStr("ERROR - MpdNcFile::_readFieldVariable()");
     _addErrStr("  Variable does not have time dimension: ",
                inputName);
@@ -1255,9 +1137,6 @@ int MpdNcFile::_readFieldVariable(string inputName,
   if (dim1 != _rangeDim) {
     // must be a float field
     if (ftype != ncxxFloat) {
-      if (!required) {
-        return 0;
-      }
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  Variable must be of type float: ", inputName);
       return -1;
@@ -1303,7 +1182,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
   // no mask
   
   if (ftype == ncxxDouble) {
-    if (_addFl32FieldToRays(var, outputName, units, description, standardName, 
+    if (_addFl64FieldToRays(var, outputName, units, description, standardName, 
                             ancillaryVariables, false)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
@@ -1319,98 +1198,10 @@ int MpdNcFile::_readFieldVariable(string inputName,
       return -1;
     }
   } else {
-    if (_addSi08FieldToRays(var, outputName, units, description)) {
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
-      _addErrStr("  cannot read field name: ", inputName);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
+    cerr << "WARNING - MpdNcFile::_readFieldVariable" << endl;
+    cerr << "  Field not float or double: " << inputName << endl;
   }
   
-  return 0;
-
-}
-
-////////////////////////////////////////////
-// get a mask field
-// returns 0 on success, -1 on failure
-
-int MpdNcFile::_readMaskVar(const string &maskFieldName,
-                            vector<int> &maskVals)
-
-{
-
-  // init
-
-  maskVals.clear();
-
-  // get var
-
-  NcxxVar var = _file.getVar(maskFieldName);
-  if (var.isNull()) {
-    _addErrStr("ERROR - MpdNcFile::_readMaskVar()");
-    _addErrStr("  Cannot find mask field, name: ", maskFieldName);
-    return -1;
-  }
-    
-  // we need fields with 2 dimensions
-
-  int numDims = var.getDimCount();
-  if (numDims != 2) {
-    _addErrStr("ERROR - MpdNcFile::_getMaskVar()");
-    _addErrStr("  Bad mask field: ", maskFieldName);
-    _addErrStr("  first dim is not time");
-    return -1;
-  }
-
-  // check the type
-  NcxxType ftype = var.getType();
-  if (ftype != ncxxByte) {
-    // not a valid type for field data
-    // not a valid type for field data
-    _addErrStr("ERROR - MpdNcFile::_getMaskVar()");
-    _addErrStr("  Bad mask field: ", maskFieldName);
-    _addErrStr("  Not an 8-bit byte field");
-    return -1;
-  }
-  
-  // check that we have the correct dimensions
-
-  NcxxDim timeDim = var.getDim(0);
-  if (timeDim != _timeDim) {
-    _addErrStr("ERROR - MpdNcFile::_getMaskVar()");
-    _addErrStr("  Bad mask field: ", maskFieldName);
-    _addErrStr("  first dim is not time");
-    return -1;
-  }
-  
-  NcxxDim rangeDim = var.getDim(1);
-  if (rangeDim != _rangeDim) {
-    _addErrStr("ERROR - MpdNcFile::_getMaskVar()");
-    _addErrStr("  Bad mask field: ", maskFieldName);
-    _addErrStr("  second dim is not range");
-    return -1;
-  }
-  
-  // get data from array as bytes
-  
-  RadxArray<unsigned char> ndata_;
-  unsigned char *ndata = ndata_.alloc(_nPoints);
-  try {
-    var.getVal(ndata);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - MpdNcFile::_readFieldVariablesAuto()");
-    _addErrStr("  Time has no units");
-    _addErrStr("  exception: ", e.what());
-    return -1;
-  }
-
-  // load up vals
-  
-  for (int ii = 0; ii < _nPoints; ii++) {
-    maskVals.push_back((int) ndata[ii]);
-  }
-
   return 0;
 
 }
@@ -1429,6 +1220,8 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    bool isQualifier)
   
 {
+
+  cerr << "111111111111111111 field: " << name << endl;
 
   // get data from array
   
@@ -1465,10 +1258,13 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
       _rays[iray]->addField(name, units, nGates,
                             Radx::missingFl64,
                             dd, true, isQualifier);
+
+    field->printWithData(cerr);
     
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
+    field->setAncillaryVariables(ancillaryVariables);
     
   } // iray
   
@@ -1530,6 +1326,7 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
+    field->setAncillaryVariables(ancillaryVariables);
     
   } // iray
   
@@ -1592,384 +1389,13 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
+    field->setAncillaryVariables(ancillaryVariables);
     
   } // iray
   
   return 0;
   
 }
-
-//////////////////////////////////////////////////////////////
-// Add raw field to rays
-// raw fields have a different dimension
-// Returns 0 on success, -1 on failure
-
-int MpdNcFile::_addRawFieldToRays(NcxxVar &var,
-                                  const string &name,
-                                  const string &units,
-                                  const string &description,
-                                  bool applyMask,
-                                  const vector<int> &maskVals,
-                                  int maskValidValue)
-  
-{
-  
-  // get the range dimension for this variable
-  // this should differ from the main range dimension
-  
-  NcxxDim dim1 = var.getDim(1);
-  NcxxVar rangeVar;
-  // read in special range variable for this variable
-  const multimap<string, NcxxVar> &vars = _file.getVars();
-  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
-       iter != vars.end(); iter++) {
-    NcxxVar rvar = iter->second;
-    if (rvar.isNull()) {
-      continue;
-    }
-    int numDims = rvar.getDimCount();
-    // range field has only 1 dimension
-    if (numDims != 1) {
-      continue;
-    }
-    // check that we have the correct dimensions
-    if (rvar.getDim(0) == dim1) {
-      rangeVar = rvar;
-      break;
-    }
-  } // iter
-  if (rangeVar.isNull()) {
-    _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-    _addErrStr("  Cannot find raw range for field name: ", name);
-    _addErrStr("  Should be: ", dim1.getName());
-    return -1;
-  }
-
-  NcxxDim rawRangeDim = rangeVar.getDim(0);
-  int nRawRange = rawRangeDim.getSize();
-  if (rawRangeDim.getSize() < _rangeDim.getSize()) {
-    _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-    _addErrInt("  Raw range field too short, size: ",
-               rawRangeDim.getSize());
-    _addErrInt("  Should at least equal range dim, size: ",
-               _rangeDim.getSize());
-    return -1;
-  }
-  
-  // load up range data
-  
-  vector<float> rawRange;
-  NcxxType rtype = rangeVar.getType();
-  if (rtype == ncxxFloat) {
-    
-    RadxArray<Radx::fl32> range_;
-    Radx::fl32 *range = range_.alloc(nRawRange);
-    try {
-      rangeVar.getVal(range);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-      _addErrStr("  Cannot read float range variable: ", rangeVar.getName());
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
-    for (int ii = 0; ii < nRawRange; ii++) {
-      rawRange.push_back(range[ii]);
-    }
-  
-  } else if (rtype == ncxxDouble) {
-
-    RadxArray<Radx::fl64> range_;
-    Radx::fl64 *range = range_.alloc(nRawRange);
-    try {
-      rangeVar.getVal(range);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-      _addErrStr("  Cannot read float range variable: ", rangeVar.getName());
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
-    for (int ii = 0; ii < nRawRange; ii++) {
-      rawRange.push_back(range[ii]);
-    }
-    
-  } else {
-    
-    _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-    _addErrStr("  Bad type for range variable: ", rangeVar.getName());
-    _addErrStr("  Should be float or float");
-    return -1;
-
-  }
-
-  // get field data
-  
-  int nPoints = _nTimesInFile * nRawRange;
-  RadxArray<Radx::fl64> ddata_;
-  Radx::fl64 *ddata = ddata_.alloc(nPoints);
-  
-  NcxxType ftype = var.getType();
-  if (rtype == ncxxFloat) {
-
-    // read in as floats
-
-    RadxArray<Radx::fl32> fdata_;
-    Radx::fl32 *fdata = fdata_.alloc(nPoints);
-    try {
-      var.getVal(fdata);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-      _addErrStr("  Cannot read float data for var: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
-    // copy floats to doubles
-
-    for (int ii = 0; ii < nPoints; ii++) {
-      ddata[ii] = fdata[ii];
-    }
-  
-  } else if (rtype == ncxxDouble) {
-
-    try {
-      var.getVal(ddata);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-      _addErrStr("  Cannot read double data for var: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-
-  }
-    
-  // compute the indices of the range array relative to the main range array
-
-  float startRangeInFile = _rangeKm[0] * 1000.0;
-  int rawRangeStartIndex = -1;
-  for (int ii = 0; ii < nRawRange; ii++) {
-    if (fabs(startRangeInFile - rawRange[ii]) < 0.1) {
-      rawRangeStartIndex = ii;
-      break;
-    }
-  }
-  if (rawRangeStartIndex < 0) {
-    _addErrStr("ERROR - MpdNcFile::_addRawFieldToRays");
-    _addErrStr("  Cannot match raw range to file range array");
-    return -1;
-  }
-  int rawRangeEndIndex = rawRangeStartIndex + _nRangeInFile;
-  if (rawRangeEndIndex > nRawRange) {
-    rawRangeEndIndex = nRawRange;
-  }
-  int nCopy = rawRangeEndIndex - rawRangeStartIndex;
-
-  // apply mask?
-  
-  if (applyMask && ((int) maskVals.size() == _nPoints)) {
-    for (size_t iray = 0; iray < _rays.size(); iray++) {
-      int dataStartIndex = iray * nRawRange + rawRangeStartIndex;
-      int maskStartIndex = iray * _nRangeInFile;
-      for (int ii = 0; ii < nCopy; ii++) {
-        if (maskVals[maskStartIndex + ii] != maskValidValue) {
-          ddata[dataStartIndex + ii] = Radx::missingFl64;
-        }
-      } // ii
-    } // iray
-  } // if (applyMask && (maskValues.size() == _nPoints))
-
-  // loop through the rays, copying in the raw data fields
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-
-    // get data for ray
-    
-    int startIndex = iray * nRawRange + rawRangeStartIndex;
-    Radx::fl64 *dd = ddata + startIndex;
-    
-    RadxField *field =
-      _rays[iray]->addField(name, units, nCopy,
-                            Radx::missingFl64,
-                            dd,
-                            true);
-    
-    field->setLongName(description);
-    field->copyRangeGeom(_geom);
-    
-  } // iray
-  
-  return 0;
-  
-}
-
-//////////////////////////////////////////////////////////////
-// Add masked field to rays
-// The _rays array has previously been set up by _createRays()
-// Returns 0 on success, -1 on failure
-
-int MpdNcFile::_addMaskedFieldToRays(NcxxVar &var,
-                                     const string &name,
-                                     const string &units,
-                                     const string &description,
-                                     vector<int> &maskVals,
-                                     int maskValidValue)
-  
-{
-
-  // get data from array
-  
-  RadxArray<Radx::fl64> ddata_;
-  Radx::fl64 *ddata = ddata_.alloc(_nPoints);
-
-  NcxxType ftype = var.getType();
-  if (ftype == ncxxFloat) {
-    
-    // read in as floats
-    
-    RadxArray<Radx::fl32> fdata_;
-    Radx::fl32 *fdata = fdata_.alloc(_nPoints);
-    try {
-      var.getVal(fdata);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addMaskedFieldToRays");
-      _addErrStr("  Cannot read float data for var: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-    
-    // copy floats to doubles
-
-    for (int ii = 0; ii < _nPoints; ii++) {
-      ddata[ii] = fdata[ii];
-    }
-  
-  } else if (ftype == ncxxDouble) {
-
-    try {
-      var.getVal(ddata);
-    } catch (NcxxException& e) {
-      _addErrStr("ERROR - MpdNcFile::_addMaskedFieldToRays");
-      _addErrStr("  Cannot read double data for var: ", name);
-      _addErrStr(_file.getErrStr());
-      return -1;
-    }
-
-  }
-
-  // apply mask
-  
-  for (int ii = 0; ii < _nPoints; ii++) {
-    if (ii > (int) maskVals.size() - 1) {
-      break;
-    }
-    if (maskVals[ii] != maskValidValue) {
-      ddata[ii] = Radx::missingFl64;
-    }
-  }
-
-  // set name
-
-  string outName(name);
-  string standardName;
-  
-  // if (outName.find(_params.combined_hi_mpd_name) != string::npos) {
-  //   outName = Names::CombinedHighCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.combined_lo_mpd_name) != string::npos) {
-  //   outName = Names::CombinedLowCounts;
-  //   standardName = Names::lidar_copolar_combined_backscatter_photon_count;
-  // } else if (outName.find(_params.molecular_mpd_name) != string::npos) {
-  //   outName = Names::MolecularCounts;
-  //   standardName = Names::lidar_copolar_molecular_backscatter_photon_count;
-  // } else if (outName.find(_params.cross_mpd_name) != string::npos) {
-  //   outName = Names::CrossPolarCounts;
-  //   standardName = Names::lidar_crosspolar_combined_backscatter_photon_count;
-  // }
-  
-  // loop through the rays
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-
-    // get data for ray
-    
-    int startIndex = iray * _nRangeInFile;
-    Radx::fl64 *dd = ddata + startIndex;
-    
-    RadxField *field =
-      _rays[iray]->addField(outName, units, _nRangeInFile,
-                            Radx::missingFl64,
-                            dd,
-                            true);
-    
-    field->setStandardName(standardName);
-    field->setLongName(description);
-    field->copyRangeGeom(_geom);
-    
-  } // iray
-  
-  return 0;
-  
-}
-
-//////////////////////////////////////////////////////////////
-// Add int8 field to rays - this will be a mask
-// The _rays array has previously been set up by _createRays()
-// Returns 0 on success, -1 on failure
-
-int MpdNcFile::_addSi08FieldToRays(NcxxVar &var,
-                                   const string &name,
-                                   const string &units,
-                                   const string &description)
-  
-{
-
-  // get data from array as bytes
-
-  RadxArray<unsigned char> ndata_;
-  unsigned char *ndata = ndata_.alloc(_nPoints);
-  
-  try {
-    var.getVal(ndata);
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - MpdNcFile::_addSi08FieldToRays");
-    _addErrStr("  Cannot read float data for var: ", name);
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-  
-  // convert to si08 
-
-  RadxArray<Radx::si08> sdata_;
-  Radx::si08 *sdata = sdata_.alloc(_nPoints);
-  for (int ii = 0; ii < _nPoints; ii++) {
-    sdata[ii] = (int) ndata[ii];
-  }
-  
-  // loop through the rays
-  
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
-
-    // get data for ray
-    
-    int startIndex = iray * _nRangeInFile;
-    Radx::si08 *sd = sdata + startIndex;
-    
-    RadxField *field =
-      _rays[iray]->addField(name, units, _nRangeInFile,
-                            Radx::missingSi08,
-                            sd, 1.0, 0.0,
-                            true);
-    
-    field->setComment(description);
-    field->copyRangeGeom(_geom);
-    
-  }
-  
-  return 0;
-  
-}
-
 
 ///////////////////////////////////////////////
 // add labelled integer value to error string,
