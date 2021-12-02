@@ -1,3 +1,39 @@
+C  *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+C  ** Copyright UCAR (c) 1990 - 2016                                         
+C  ** University Corporation for Atmospheric Research (UCAR)                 
+C  ** National Center for Atmospheric Research (NCAR)                        
+C  ** Boulder, Colorado, USA                                                 
+C  ** BSD licence applies - redistribution and use in source and binary      
+C  ** forms, with or without modification, are permitted provided that       
+C  ** the following conditions are met:                                      
+C  ** 1) If the software is modified to produce derivative works,            
+C  ** such modified software should be clearly marked, so as not             
+C  ** to confuse it with the version available from UCAR.                    
+C  ** 2) Redistributions of source code must retain the above copyright      
+C  ** notice, this list of conditions and the following disclaimer.          
+C  ** 3) Redistributions in binary form must reproduce the above copyright   
+C  ** notice, this list of conditions and the following disclaimer in the    
+C  ** documentation and/or other materials provided with the distribution.   
+C  ** 4) Neither the name of UCAR nor the names of its contributors,         
+C  ** if any, may be used to endorse or promote products derived from        
+C  ** this software without specific prior written permission.               
+C  ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
+C  ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
+C  ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
+C  *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C  spolTS.f
+C 
+C  John Hubbert, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+C 
+C  Dec 2021
+C 
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C 
+C  Perform regression clutter filtering
+C 
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
 C BELOW IS DOCUMENTATION FOR THE NCAR?CISL FFTPACK. IT CAN DO ARBITRARY LENGTHS FFTs.
 C  THE PACKAGE USES 3 CALLS or SUBROUTINE
 c     1 CFFT1I(N, WSAVE, LENSAV, IER)  INITIALIZES THE NEEDED PARAMETERS AND ARRAYS for FFT "PACK"
