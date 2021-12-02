@@ -1239,6 +1239,11 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                name);
     return -1;
   }
+  for (size_t ii = 0; ii < nData; ii++) {
+    if (std::isnan(ddata[ii])) {
+      ddata[ii] = Radx::missingFl64;
+    }
+  }
   
   // loop through the rays
   
@@ -1252,7 +1257,7 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
       startIndex = iray;
       nGates = 1;
     }
-
+    
     Radx::fl64 *dd = ddata + startIndex;
     RadxField *field =
       _rays[iray]->addField(name, units, nGates,
@@ -1302,6 +1307,11 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
     _addErrStr("  getVal fails, cannot get range data array, var name: ",
                name);
     return -1;
+  }
+  for (size_t ii = 0; ii < nData; ii++) {
+    if (std::isnan(fdata[ii])) {
+      fdata[ii] = Radx::missingFl32;
+    }
   }
   
   // loop through the rays
