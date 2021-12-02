@@ -394,9 +394,11 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
   _writeVol->countGeorefsNotMissing(_geoCount);
 
   if (_verbose) {
-    cerr << "============= GEOREF FIELD COUNT ==================" << endl;
-    _geoCount.print(cerr);
-    cerr << "===================================================" << endl;
+    if (_georefsActive) {
+      cerr << "============= GEOREF FIELD COUNT ==================" << endl;
+      _geoCount.print(cerr);
+      cerr << "===================================================" << endl;
+    }
   }
 
   // add attributes, dimensions and variables
