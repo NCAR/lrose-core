@@ -588,11 +588,12 @@ int MpdNcFile::_readRayQualifierFields()
       
       // yes - add this field
 
-      // set names and units
+      // set attributes
       
       string outputName = varName;
       string longName;
       string standardName;
+      string ancillaryVariables;
       
       try {
         NcxxVarAtt longNameAtt = var.getAtt("descripion");
@@ -605,6 +606,11 @@ int MpdNcFile::_readRayQualifierFields()
         units = unitsAtt.asString();
       } catch (NcxxException& e) { }
 
+      // try {
+      //   NcxxVarAtt ancillaryVariablesAtt = var.getAtt("ancillary_variables");
+      //   ancillaryVariables = ancillaryVariablesAtt.asString();
+      // } catch (NcxxException& e) { }
+      
       // override from params
       
       if (qualFields.size() != 0) {
@@ -626,7 +632,8 @@ int MpdNcFile::_readRayQualifierFields()
         // double field
 
         if (_addFl64FieldToRays(var, outputName, units,
-                                longName, standardName, true)) {
+                                longName, standardName,
+                                ancillaryVariables, true)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -637,7 +644,8 @@ int MpdNcFile::_readRayQualifierFields()
         // float field
 
         if (_addFl32FieldToRays(var, outputName, units,
-                                longName, standardName, true)) {
+                                longName, standardName,
+                                ancillaryVariables, true)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -655,7 +663,8 @@ int MpdNcFile::_readRayQualifierFields()
         // int field
         
         if (_addSi32FieldToRays(var, outputName, units,
-                                longName, standardName, true)) {
+                                longName, standardName, 
+                                ancillaryVariables, true)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -1087,7 +1096,7 @@ int MpdNcFile::_readFieldVariablesAuto()
       continue;
     }
     
-    _readFieldVariable(var.getName(), "", var, gotStatus);
+    _readFieldVariable(var.getName(), "", "", var, gotStatus);
     
   } // iter
   
@@ -1134,11 +1143,11 @@ int MpdNcFile::_readFieldVariablesSpecified()
     
     // check the type
     NcxxType ftype = var.getType();
-    if (ftype != ncxxFloat && ftype != ncxxByte) {
+    if (ftype != ncxxFloat && ftype != ncxxDouble) {
       // not a valid type for field data
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       _addErrStr("  Variable wrong type, name: ", mfld.mpd_name);
-      _addErrStr("  Type must be float or byte");
+      _addErrStr("  Type must be float or double");
       _addErrStr("  Type is: ", Ncxx::ncxxTypeToStr(ftype));
       iret = -1;
       continue;
@@ -1150,10 +1159,11 @@ int MpdNcFile::_readFieldVariablesSpecified()
     if (strlen(mfld.output_name) > 0) {
       outputName = mfld.output_name;
     }
+    string standardName(mfld.cf_standard_name);
 
     // read in variable
     
-    if (_readFieldVariable(var.getName(), "", var, gotStatus)) {
+    if (_readFieldVariable(var.getName(), outputName, standardName, var, gotStatus)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       iret = -1;
     }
@@ -1175,6 +1185,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
 int MpdNcFile::_readFieldVariable(string inputName,
                                   string outputName,
+                                  string standardName,
                                   NcxxVar &var,
                                   bool &gotStatus,
                                   bool required /* = false */)
@@ -1198,14 +1209,14 @@ int MpdNcFile::_readFieldVariable(string inputName,
   // check the type
 
   NcxxType ftype = var.getType();
-  if (ftype != ncxxFloat && ftype != ncxxByte) {
+  if (ftype != ncxxFloat && ftype != ncxxDouble) {
     if (!required) {
       return 0;
     }
     // not a valid type for field data
     _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
     _addErrStr("  Variable wrong type, name: ", inputName);
-    _addErrStr("  Type must be float or byte");
+    _addErrStr("  Type must be float or double");
     _addErrStr("  Type is: ", Ncxx::ncxxTypeToStr(ftype));
     return -1;
   }
@@ -1253,7 +1264,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
     }
   }
 
-  // set names, units, etc
+  // attributes
   
   string units;
   try {
@@ -1268,12 +1279,20 @@ int MpdNcFile::_readFieldVariable(string inputName,
   }
 
   string description;
-  string procStatus;
   try {
     NcxxVarAtt descAtt = var.getAtt("description");
     description = descAtt.asString();
-    NcxxVarAtt statusAtt = var.getAtt("ProcessingStatus");
-    procStatus = statusAtt.asString();
+  } catch (NcxxException& e) {
+    if (_params.debug) {
+      cerr << "WARNING - getting attributes for field: " << inputName << endl;
+      cerr << "  " << e.whatStr() << endl;
+    }
+  }
+
+  string ancillaryVariables;
+  try {
+    NcxxVarAtt descAtt = var.getAtt("ancillary_variables");
+    ancillaryVariables = descAtt.asString();
   } catch (NcxxException& e) {
     if (_params.debug) {
       cerr << "WARNING - getting attributes for field: " << inputName << endl;
@@ -1283,8 +1302,17 @@ int MpdNcFile::_readFieldVariable(string inputName,
 
   // no mask
   
-  if (ftype == ncxxFloat) {
-    if (_addFl32FieldToRays(var, outputName, units, description, "", false)) {
+  if (ftype == ncxxDouble) {
+    if (_addFl32FieldToRays(var, outputName, units, description, standardName, 
+                            ancillaryVariables, false)) {
+      _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
+      _addErrStr("  cannot read field name: ", inputName);
+      _addErrStr(_file.getErrStr());
+      return -1;
+    }
+  } else if (ftype == ncxxFloat) {
+    if (_addFl32FieldToRays(var, outputName, units, description, standardName, 
+                            ancillaryVariables, false)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
@@ -1297,17 +1325,6 @@ int MpdNcFile::_readFieldVariable(string inputName,
       _addErrStr(_file.getErrStr());
       return -1;
     }
-  }
-  
-  // add processing status to statusXml, if appropriate
-  
-  if (procStatus.size() > 0) {
-    _statusXml += RadxXml::writeStartTag("Field", 1);
-    _statusXml += RadxXml::writeString("Name", 2, outputName);
-    _statusXml += RadxXml::writeString("Description", 2, description);
-    _statusXml += RadxXml::writeString("Status", 2, procStatus);
-    _statusXml += RadxXml::writeEndTag("Field", 1);
-    gotStatus = true;
   }
   
   return 0;
@@ -1408,6 +1425,7 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &ancillaryVariables,
                                    bool isQualifier)
   
 {
@@ -1468,6 +1486,7 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &ancillaryVariables,
                                    bool isQualifier)
   
 {
@@ -1528,6 +1547,7 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &ancillaryVariables,
                                    bool isQualifier)
   
 {

@@ -324,7 +324,7 @@ qualifier_fields = {
 // Type: boolean
 //
 
-specify_output_fields = FALSE;
+specify_output_fields = TRUE;
 
 ///////////// mpd_fields //////////////////////////////
 //

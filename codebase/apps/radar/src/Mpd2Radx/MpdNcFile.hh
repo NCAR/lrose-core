@@ -209,6 +209,7 @@ private:
 
   int _readFieldVariable(string inputName,
                          string outputName,
+                         string standardName,
                          NcxxVar &var,
                          bool &gotStatus,
                          bool required = false);
@@ -221,6 +222,7 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &ancillaryVariables,
                           bool isQualifier);
   
   int _addFl32FieldToRays(const NcxxVar &var,
@@ -228,6 +230,7 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &ancillaryVariables,
                           bool isQualifier);
   
   int _addSi32FieldToRays(const NcxxVar &var,
@@ -235,6 +238,7 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &ancillaryVariables,
                           bool isQualifier);
   
   int _addMaskedFieldToRays(NcxxVar &var,
