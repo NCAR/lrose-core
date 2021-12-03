@@ -903,17 +903,19 @@
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_mpd_fields->output_encoding - (char *) _mpd_fields;
         tt->struct_def.fields[5].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[5].enum_def.nfields = 4;
+        tt->struct_def.fields[5].enum_def.nfields = 5;
         tt->struct_def.fields[5].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[5].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT64");
-        tt->struct_def.fields[5].enum_def.fields[0].val = OUTPUT_ENCODING_FLOAT64;
-        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-        tt->struct_def.fields[5].enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT32;
-        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
-        tt->struct_def.fields[5].enum_def.fields[2].val = OUTPUT_ENCODING_INT32;
-        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-        tt->struct_def.fields[5].enum_def.fields[3].val = OUTPUT_ENCODING_INT16;
+        tt->struct_def.fields[5].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_ASIS");
+        tt->struct_def.fields[5].enum_def.fields[0].val = OUTPUT_ENCODING_ASIS;
+        tt->struct_def.fields[5].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT64");
+        tt->struct_def.fields[5].enum_def.fields[1].val = OUTPUT_ENCODING_FLOAT64;
+        tt->struct_def.fields[5].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
+        tt->struct_def.fields[5].enum_def.fields[2].val = OUTPUT_ENCODING_FLOAT32;
+        tt->struct_def.fields[5].enum_def.fields[3].name = tdrpStrDup("OUTPUT_ENCODING_INT32");
+        tt->struct_def.fields[5].enum_def.fields[3].val = OUTPUT_ENCODING_INT32;
+        tt->struct_def.fields[5].enum_def.fields[4].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
+        tt->struct_def.fields[5].enum_def.fields[4].val = OUTPUT_ENCODING_INT16;
     tt->n_struct_vals = 24;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

@@ -193,6 +193,7 @@ paramdef struct qual_field_t {
 } qualifier_fields[];
 
 typedef enum {
+  OUTPUT_ENCODING_ASIS,
   OUTPUT_ENCODING_FLOAT64,
   OUTPUT_ENCODING_FLOAT32,
   OUTPUT_ENCODING_INT32,

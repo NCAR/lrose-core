@@ -81,10 +81,11 @@ public:
   } mode_t;
 
   typedef enum {
-    OUTPUT_ENCODING_FLOAT64 = 0,
-    OUTPUT_ENCODING_FLOAT32 = 1,
-    OUTPUT_ENCODING_INT32 = 2,
-    OUTPUT_ENCODING_INT16 = 3
+    OUTPUT_ENCODING_ASIS = 0,
+    OUTPUT_ENCODING_FLOAT64 = 1,
+    OUTPUT_ENCODING_FLOAT32 = 2,
+    OUTPUT_ENCODING_INT32 = 3,
+    OUTPUT_ENCODING_INT16 = 4
   } output_encoding_t;
 
   typedef enum {

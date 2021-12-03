@@ -622,7 +622,8 @@ int MpdNcFile::_readRayQualifierFields()
 
         if (_addFl64FieldToRays(var, outputName, units,
                                 longName, standardName,
-                                ancillaryVariables, true)) {
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -634,7 +635,8 @@ int MpdNcFile::_readRayQualifierFields()
 
         if (_addFl32FieldToRays(var, outputName, units,
                                 longName, standardName,
-                                ancillaryVariables, true)) {
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -653,7 +655,8 @@ int MpdNcFile::_readRayQualifierFields()
         
         if (_addSi32FieldToRays(var, outputName, units,
                                 longName, standardName, 
-                                ancillaryVariables, true)) {
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
           _addErrStr("  Cannot add field: ", outputName);
           return -1;
@@ -1016,7 +1019,10 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
     // read in variable
     
-    if (_readFieldVariable(var.getName(), outputName, standardName, var)) {
+    if (_readFieldVariable(var.getName(), outputName, standardName, 
+                           mfld.mask_field_name,
+                           mfld.output_encoding,
+                           var)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
       iret = -1;
     }
@@ -1033,6 +1039,8 @@ int MpdNcFile::_readFieldVariablesSpecified()
 int MpdNcFile::_readFieldVariable(string inputName,
                                   string outputName,
                                   string standardName,
+                                  string maskFieldName,
+                                  Params::output_encoding_t encoding,
                                   NcxxVar &var)
   
 {
@@ -1137,7 +1145,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
   
   if (ftype == ncxxDouble) {
     if (_addFl64FieldToRays(var, outputName, units, description, standardName, 
-                            ancillaryVariables, false)) {
+                            ancillaryVariables, false, encoding)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
@@ -1145,7 +1153,7 @@ int MpdNcFile::_readFieldVariable(string inputName,
     }
   } else if (ftype == ncxxFloat) {
     if (_addFl32FieldToRays(var, outputName, units, description, standardName, 
-                            ancillaryVariables, false)) {
+                            ancillaryVariables, false, encoding)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
@@ -1171,7 +1179,8 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    const string &longName,
                                    const string &standardName,
                                    const string &ancillaryVariables,
-                                   bool isQualifier)
+                                   bool isQualifier,
+                                   Params::output_encoding_t encoding)
   
 {
 
@@ -1220,7 +1229,23 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
     field->setAncillaryVariables(ancillaryVariables);
-    
+
+    switch (encoding) {
+      case Params::OUTPUT_ENCODING_FLOAT64:
+        field->convertToFl64();
+        break;
+      case Params::OUTPUT_ENCODING_FLOAT32:
+        field->convertToFl32();
+        break;
+      case Params::OUTPUT_ENCODING_INT32:
+        field->convertToSi32();
+        break;
+      case Params::OUTPUT_ENCODING_INT16:
+        field->convertToSi16();
+        break;
+      default: {}
+    }
+
   } // iray
   
   return 0;
@@ -1238,7 +1263,8 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
                                    const string &longName,
                                    const string &standardName,
                                    const string &ancillaryVariables,
-                                   bool isQualifier)
+                                   bool isQualifier,
+                                   Params::output_encoding_t encoding)
   
 {
 
@@ -1288,6 +1314,22 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
     field->copyRangeGeom(_geom);
     field->setAncillaryVariables(ancillaryVariables);
     
+    switch (encoding) {
+      case Params::OUTPUT_ENCODING_FLOAT64:
+        field->convertToFl64();
+        break;
+      case Params::OUTPUT_ENCODING_FLOAT32:
+        field->convertToFl32();
+        break;
+      case Params::OUTPUT_ENCODING_INT32:
+        field->convertToSi32();
+        break;
+      case Params::OUTPUT_ENCODING_INT16:
+        field->convertToSi16();
+        break;
+      default: {}
+    }
+
   } // iray
   
   return 0;
@@ -1305,7 +1347,8 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
                                    const string &longName,
                                    const string &standardName,
                                    const string &ancillaryVariables,
-                                   bool isQualifier)
+                                   bool isQualifier,
+                                   Params::output_encoding_t encoding)
   
 {
 
@@ -1351,6 +1394,22 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
     field->copyRangeGeom(_geom);
     field->setAncillaryVariables(ancillaryVariables);
     
+    switch (encoding) {
+      case Params::OUTPUT_ENCODING_FLOAT64:
+        field->convertToFl64();
+        break;
+      case Params::OUTPUT_ENCODING_FLOAT32:
+        field->convertToFl32();
+        break;
+      case Params::OUTPUT_ENCODING_INT32:
+        field->convertToSi32();
+        break;
+      case Params::OUTPUT_ENCODING_INT16:
+        field->convertToSi16();
+        break;
+      default: {}
+    }
+
   } // iray
   
   return 0;

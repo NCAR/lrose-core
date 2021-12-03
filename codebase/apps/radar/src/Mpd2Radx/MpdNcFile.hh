@@ -205,6 +205,8 @@ private:
   int _readFieldVariable(string inputName,
                          string outputName,
                          string standardName,
+                         string maskFieldName,
+                         Params::output_encoding_t encoding,
                          NcxxVar &var);
   
   int _addFl64FieldToRays(const NcxxVar &var,
@@ -213,7 +215,8 @@ private:
                           const string &longName,
                           const string &standardName,
                           const string &ancillaryVariables,
-                          bool isQualifier);
+                          bool isQualifier,
+                          Params::output_encoding_t encoding);
   
   int _addFl32FieldToRays(const NcxxVar &var,
                           const string &name,
@@ -221,7 +224,8 @@ private:
                           const string &longName,
                           const string &standardName,
                           const string &ancillaryVariables,
-                          bool isQualifier);
+                          bool isQualifier,
+                          Params::output_encoding_t encoding);
   
   int _addSi32FieldToRays(const NcxxVar &var,
                           const string &name,
@@ -229,7 +233,8 @@ private:
                           const string &longName,
                           const string &standardName,
                           const string &ancillaryVariables,
-                          bool isQualifier);
+                          bool isQualifier,
+                          Params::output_encoding_t encoding);
   
   /// add integer value to error string, with label
 
