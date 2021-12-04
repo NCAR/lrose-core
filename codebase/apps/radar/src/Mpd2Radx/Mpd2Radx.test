@@ -322,6 +322,7 @@ qualifier_fields = {
 //      string mask_field_name;
 //      output_encoding_t output_encoding;
 //        Options:
+//          OUTPUT_ENCODING_ASIS
 //          OUTPUT_ENCODING_FLOAT64
 //          OUTPUT_ENCODING_FLOAT32
 //          OUTPUT_ENCODING_INT32
@@ -337,7 +338,7 @@ mpd_fields = {
     output_name = "Absolute_Humidity",
     cf_standard_name = "absolute_humidity",
     units = "",
-    mask_field_name = "",
+    mask_field_name = "Absolute_Humidity_mask",
     output_encoding = OUTPUT_ENCODING_INT16
   }
   ,
@@ -355,7 +356,7 @@ mpd_fields = {
     output_name = "Aerosol_Backscatter_Coefficient",
     cf_standard_name = "aerosol_backscatter_coefficient",
     units = "",
-    mask_field_name = "",
+    mask_field_name = "Aerosol_Backscatter_Coefficient_mask",
     output_encoding = OUTPUT_ENCODING_INT16
   }
   ,
@@ -364,7 +365,7 @@ mpd_fields = {
     output_name = "Backscatter_Ratio",
     cf_standard_name = "backscatter_ratio",
     units = "",
-    mask_field_name = "",
+    mask_field_name = "Backscatter_Ratio_mask",
     output_encoding = OUTPUT_ENCODING_INT16
   }
 };

@@ -595,11 +595,6 @@ int MpdNcFile::_readRayQualifierFields()
         units = unitsAtt.asString();
       } catch (NcxxException& e) { }
 
-      // try {
-      //   NcxxVarAtt ancillaryVariablesAtt = var.getAtt("ancillary_variables");
-      //   ancillaryVariables = ancillaryVariablesAtt.asString();
-      // } catch (NcxxException& e) { }
-      
       // override from params
       
       if (qualFields.size() != 0) {
@@ -621,7 +616,7 @@ int MpdNcFile::_readRayQualifierFields()
         // double field
 
         if (_addFl64FieldToRays(var, outputName, units,
-                                longName, standardName,
+                                longName, standardName, "",
                                 ancillaryVariables, true,
                                 Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
@@ -634,7 +629,7 @@ int MpdNcFile::_readRayQualifierFields()
         // float field
 
         if (_addFl32FieldToRays(var, outputName, units,
-                                longName, standardName,
+                                longName, standardName, "",
                                 ancillaryVariables, true,
                                 Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
@@ -654,7 +649,7 @@ int MpdNcFile::_readRayQualifierFields()
         // int field
         
         if (_addSi32FieldToRays(var, outputName, units,
-                                longName, standardName, 
+                                longName, standardName, "",
                                 ancillaryVariables, true,
                                 Params::OUTPUT_ENCODING_ASIS)) {
           _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
@@ -986,7 +981,9 @@ int MpdNcFile::_readFieldVariablesSpecified()
 
   int nFields = _params.mpd_fields_n;
   for (int ifield = 0; ifield < nFields; ifield++) {
-  
+
+    // get var
+
     Params::mpd_field_t &mfld = _params._mpd_fields[ifield];
     NcxxVar var = _file.getVar(mfld.mpd_name);
     if (var.isNull()) {
@@ -1131,29 +1128,27 @@ int MpdNcFile::_readFieldVariable(string inputName,
   }
 
   string ancillaryVariables;
-  try {
-    NcxxVarAtt descAtt = var.getAtt("ancillary_variables");
-    ancillaryVariables = descAtt.asString();
-  } catch (NcxxException& e) {
-    if (_params.debug) {
-      cerr << "WARNING - getting attributes for field: " << inputName << endl;
-      cerr << "  " << e.whatStr() << endl;
-    }
+  if (maskFieldName.size() > 0) {
+    ancillaryVariables = maskFieldName;
   }
 
   // no mask
   
   if (ftype == ncxxDouble) {
-    if (_addFl64FieldToRays(var, outputName, units, description, standardName, 
-                            ancillaryVariables, false, encoding)) {
+    if (_addFl64FieldToRays(var, outputName, units, 
+                            description, standardName, 
+                            maskFieldName, ancillaryVariables,
+                            false, encoding)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
       return -1;
     }
   } else if (ftype == ncxxFloat) {
-    if (_addFl32FieldToRays(var, outputName, units, description, standardName, 
-                            ancillaryVariables, false, encoding)) {
+    if (_addFl32FieldToRays(var, outputName, units, 
+                            description, standardName,
+                            maskFieldName, ancillaryVariables,
+                            false, encoding)) {
       _addErrStr("ERROR - MpdNcFile::_readFieldVariable");
       _addErrStr("  cannot read field name: ", inputName);
       _addErrStr(_file.getErrStr());
@@ -1178,6 +1173,7 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &maskFieldName,
                                    const string &ancillaryVariables,
                                    bool isQualifier,
                                    Params::output_encoding_t encoding)
@@ -1205,7 +1201,25 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
       ddata[ii] = Radx::missingFl64;
     }
   }
-  
+
+  // read in mask data and apply as applicable
+
+  if (maskFieldName.size() > 0 && !isQualifier) {
+    vector<int> maskVals;
+    if (_readMaskVar(maskFieldName, maskVals)) {
+      _addErrStr("ERROR - MpdNcFile::_addFl64FieldToRays");
+      _addErrStr("  Cannot read in mask field: ", maskFieldName);
+      return -1;
+    }
+    if (maskVals.size() == nData) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (maskVals[ii] != 1) {
+          ddata[ii] = Radx::missingFl64;
+        }
+      } // ii
+    }
+  } // if (maskFieldName.size() > 0 && !isQualifier)
+
   // loop through the rays
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1224,11 +1238,13 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
       _rays[iray]->addField(name, units, nGates,
                             Radx::missingFl64,
                             dd, true, isQualifier);
-
+    
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
-    field->setAncillaryVariables(ancillaryVariables);
+    if (ancillaryVariables.size() > 0) {
+      field->setAncillaryVariables(ancillaryVariables);
+    }
 
     switch (encoding) {
       case Params::OUTPUT_ENCODING_FLOAT64:
@@ -1262,6 +1278,7 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &maskFieldName,
                                    const string &ancillaryVariables,
                                    bool isQualifier,
                                    Params::output_encoding_t encoding)
@@ -1290,6 +1307,24 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
     }
   }
   
+  // read in mask data and apply as applicable
+
+  if (maskFieldName.size() > 0 && !isQualifier) {
+    vector<int> maskVals;
+    if (_readMaskVar(maskFieldName, maskVals)) {
+      _addErrStr("ERROR - MpdNcFile::_addFl64FieldToRays");
+      _addErrStr("  Cannot read in mask field: ", maskFieldName);
+      return -1;
+    }
+    if (maskVals.size() == nData) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (maskVals[ii] != 1) {
+          fdata[ii] = Radx::missingFl32;
+        }
+      } // ii
+    }
+  } // if (maskFieldName.size() > 0 && !isQualifier)
+
   // loop through the rays
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1312,7 +1347,9 @@ int MpdNcFile::_addFl32FieldToRays(const NcxxVar &var,
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
-    field->setAncillaryVariables(ancillaryVariables);
+    if (ancillaryVariables.size() > 0) {
+      field->setAncillaryVariables(ancillaryVariables);
+    }
     
     switch (encoding) {
       case Params::OUTPUT_ENCODING_FLOAT64:
@@ -1346,6 +1383,7 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
                                    const string &units,
                                    const string &longName,
                                    const string &standardName,
+                                   const string &maskFieldName,
                                    const string &ancillaryVariables,
                                    bool isQualifier,
                                    Params::output_encoding_t encoding)
@@ -1369,6 +1407,24 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
     return -1;
   }
   
+  // read in mask data and apply as applicable
+
+  if (maskFieldName.size() > 0 && !isQualifier) {
+    vector<int> maskVals;
+    if (_readMaskVar(maskFieldName, maskVals)) {
+      _addErrStr("ERROR - MpdNcFile::_addFl64FieldToRays");
+      _addErrStr("  Cannot read in mask field: ", maskFieldName);
+      return -1;
+    }
+    if (maskVals.size() == nData) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (maskVals[ii] != 1) {
+          idata[ii] = Radx::missingSi32;
+        }
+      } // ii
+    }
+  } // if (maskFieldName.size() > 0 && !isQualifier)
+
   // loop through the rays
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1392,7 +1448,9 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
     field->setStandardName(standardName);
     field->setLongName(longName);
     field->copyRangeGeom(_geom);
-    field->setAncillaryVariables(ancillaryVariables);
+    if (ancillaryVariables.size() > 0) {
+      field->setAncillaryVariables(ancillaryVariables);
+    }
     
     switch (encoding) {
       case Params::OUTPUT_ENCODING_FLOAT64:
@@ -1414,6 +1472,90 @@ int MpdNcFile::_addSi32FieldToRays(const NcxxVar &var,
   
   return 0;
   
+}
+
+////////////////////////////////////////////
+// get a mask field
+// returns 0 on success, -1 on failure
+
+int MpdNcFile::_readMaskVar(const string &maskFieldName,
+                            vector<int> &maskVals)
+
+{
+
+  // init
+
+  maskVals.clear();
+
+  // get var
+
+  NcxxVar var = _file.getVar(maskFieldName);
+  if (var.isNull()) {
+    _addErrStr("ERROR - MattNcFile::_readMaskVar()");
+    _addErrStr("  Cannot find mask field, name: ", maskFieldName);
+    return -1;
+  }
+    
+  // we need fields with 2 dimensions
+
+  int numDims = var.getDimCount();
+  if (numDims != 2) {
+    _addErrStr("ERROR - MattNcFile::_getMaskVar()");
+    _addErrStr("  Bad mask field: ", maskFieldName);
+    _addErrStr("  first dim is not time");
+    return -1;
+  }
+
+  // check the type
+  NcxxType ftype = var.getType();
+  if (ftype != ncxxByte) {
+    // not a valid type for field data
+    // not a valid type for field data
+    _addErrStr("ERROR - MattNcFile::_getMaskVar()");
+    _addErrStr("  Bad mask field: ", maskFieldName);
+    _addErrStr("  Not an 8-bit byte field");
+    return -1;
+  }
+  
+  // check that we have the correct dimensions
+
+  NcxxDim timeDim = var.getDim(0);
+  if (timeDim != _timeDim) {
+    _addErrStr("ERROR - MattNcFile::_getMaskVar()");
+    _addErrStr("  Bad mask field: ", maskFieldName);
+    _addErrStr("  first dim is not time");
+    return -1;
+  }
+  
+  NcxxDim rangeDim = var.getDim(1);
+  if (rangeDim != _rangeDim) {
+    _addErrStr("ERROR - MattNcFile::_getMaskVar()");
+    _addErrStr("  Bad mask field: ", maskFieldName);
+    _addErrStr("  second dim is not range");
+    return -1;
+  }
+  
+  // get data from array as bytes
+  
+  RadxArray<unsigned char> ndata_;
+  unsigned char *ndata = ndata_.alloc(_nPoints);
+  try {
+    var.getVal(ndata);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - MattNcFile::_readFieldVariablesAuto()");
+    _addErrStr("  Time has no units");
+    _addErrStr("  exception: ", e.what());
+    return -1;
+  }
+
+  // load up vals
+  
+  for (int ii = 0; ii < _nPoints; ii++) {
+    maskVals.push_back((int) ndata[ii]);
+  }
+
+  return 0;
+
 }
 
 ///////////////////////////////////////////////

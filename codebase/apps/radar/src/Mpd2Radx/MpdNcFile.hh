@@ -214,6 +214,7 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &maskFieldName,
                           const string &ancillaryVariables,
                           bool isQualifier,
                           Params::output_encoding_t encoding);
@@ -223,6 +224,7 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &maskFieldName,
                           const string &ancillaryVariables,
                           bool isQualifier,
                           Params::output_encoding_t encoding);
@@ -232,10 +234,16 @@ private:
                           const string &units,
                           const string &longName,
                           const string &standardName,
+                          const string &maskFieldName,
                           const string &ancillaryVariables,
                           bool isQualifier,
                           Params::output_encoding_t encoding);
-  
+
+  // read in mask variable
+
+  int _readMaskVar(const string &maskFieldName,
+                   vector<int> &maskVals);
+
   /// add integer value to error string, with label
 
   void _addErrInt(string label, int iarg,
