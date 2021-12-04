@@ -326,7 +326,7 @@ qualifier_fields = {
 //          OUTPUT_ENCODING_FLOAT64
 //          OUTPUT_ENCODING_FLOAT32
 //          OUTPUT_ENCODING_INT32
-//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_FLOAT32
 //   }
 //
 // 1D array - variable length.
@@ -339,16 +339,7 @@ mpd_fields = {
     cf_standard_name = "absolute_humidity",
     units = "",
     mask_field_name = "Absolute_Humidity_mask",
-    output_encoding = OUTPUT_ENCODING_INT16
-  }
-  ,
-  {
-    mpd_name = "HSRLMolecular_MolecularBackscatter",
-    output_name = "HSRLMolecular_MolecularBackscatter",
-    cf_standard_name = "molecular_backscatter",
-    units = "",
-    mask_field_name = "",
-    output_encoding = OUTPUT_ENCODING_INT16
+    output_encoding = OUTPUT_ENCODING_FLOAT32
   }
   ,
   {
@@ -357,7 +348,7 @@ mpd_fields = {
     cf_standard_name = "aerosol_backscatter_coefficient",
     units = "",
     mask_field_name = "Aerosol_Backscatter_Coefficient_mask",
-    output_encoding = OUTPUT_ENCODING_INT16
+    output_encoding = OUTPUT_ENCODING_FLOAT32
   }
   ,
   {
@@ -366,7 +357,16 @@ mpd_fields = {
     cf_standard_name = "backscatter_ratio",
     units = "",
     mask_field_name = "Backscatter_Ratio_mask",
-    output_encoding = OUTPUT_ENCODING_INT16
+    output_encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    mpd_name = "HSRLMolecular_MolecularBackscatter",
+    output_name = "HSRLMolecular_MolecularBackscatter",
+    cf_standard_name = "molecular_backscatter",
+    units = "",
+    mask_field_name = "",
+    output_encoding = OUTPUT_ENCODING_FLOAT32
   }
 };
 
@@ -530,7 +530,7 @@ site_name = "unknown";
 // Type: string
 //
 
-output_dir = "/tmp/mpd_output";
+output_dir = "$(HOME)/data/mpd/cfradial/mpd05";
 
 ///////////// output_filename_mode ////////////////////
 //

@@ -1211,9 +1211,11 @@ int MpdNcFile::_addFl64FieldToRays(const NcxxVar &var,
       _addErrStr("  Cannot read in mask field: ", maskFieldName);
       return -1;
     }
+
     if (maskVals.size() == nData) {
       for (size_t ii = 0; ii < nData; ii++) {
-        if (maskVals[ii] != 1) {
+        // cerr << "22222 val, mask: " << ddata[ii] << ", " << maskVals[ii] << endl;
+        if (maskVals[ii] == 1) {
           ddata[ii] = Radx::missingFl64;
         }
       } // ii

@@ -217,16 +217,7 @@ paramdef struct mpd_field_t {
       cf_standard_name = "absolute_humidity",
       units = "",
       mask_field_name = "Absolute_Humidity_mask",
-      output_encoding = OUTPUT_ENCODING_INT16
-    }
-    ,
-    {
-      mpd_name = "HSRLMolecular_MolecularBackscatter",
-      output_name = "HSRLMolecular_MolecularBackscatter",
-      cf_standard_name = "molecular_backscatter",
-      units = "",
-      mask_field_name = "",
-      output_encoding = OUTPUT_ENCODING_INT16
+      output_encoding = OUTPUT_ENCODING_FLOAT32
     }
     ,
     {
@@ -235,7 +226,7 @@ paramdef struct mpd_field_t {
       cf_standard_name = "aerosol_backscatter_coefficient",
       units = "",
       mask_field_name = "Aerosol_Backscatter_Coefficient_mask",
-      output_encoding = OUTPUT_ENCODING_INT16
+      output_encoding = OUTPUT_ENCODING_FLOAT32
     }
     ,
     {
@@ -244,7 +235,16 @@ paramdef struct mpd_field_t {
       cf_standard_name = "backscatter_ratio",
       units = "",
       mask_field_name = "Backscatter_Ratio_mask",
-      output_encoding = OUTPUT_ENCODING_INT16
+      output_encoding = OUTPUT_ENCODING_FLOAT32
+    }
+    ,
+    {
+      mpd_name = "HSRLMolecular_MolecularBackscatter",
+      output_name = "HSRLMolecular_MolecularBackscatter",
+      cf_standard_name = "molecular_backscatter",
+      units = "",
+      mask_field_name = "",
+      output_encoding = OUTPUT_ENCODING_FLOAT32
     }
   };
   p_descr = "Details of fields to be included in output data set.";
