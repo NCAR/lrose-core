@@ -45,6 +45,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxRangeGeom.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxTime.hh>
 #include <Ncxx/NcxxVar.hh>
 #include <Spdb/DsSpdb.hh>
 #include <cstring>
@@ -893,8 +894,39 @@ int MpdNcFile::_createRays(const string &path)
 void MpdNcFile::_loadReadVolume()
 {
 
+  _readVol->setDriver("Mpd2Radx(NCAR)");
+  if (strlen(_params.title) > 0) {
+    _readVol->setTitle(_params.title);
+  }
+
+  if (strlen(_params.institution) > 0) {
+    _readVol->setInstitution(_params.institution);
+  }
+  
+  if (strlen(_params.references) > 0) {
+    _readVol->setReferences(_params.references);
+  }
+
+  if (strlen(_params.source_override) > 0) {
+    _readVol->setSource(_params.source_override);
+  }
+
+  if (strlen(_params.history_override) > 0) {
+    _readVol->setHistory(_params.history_override);
+  }
+
+  if (strlen(_params.author) > 0) {
+    _readVol->setAuthor(_params.author);
+  }
+
+  if (strlen(_params.comment_override) > 0) {
+    _readVol->setComment(_params.comment_override);
+  }
+
+  RadxTime now(RadxTime::NOW);
+  _readVol->setCreated(now.asString());
+
   _readVol->setOrigFormat("MPD-RAW");
-  // _readVol->setVolumeNumber(-9999);
   _readVol->setInstrumentType(_instrumentType);
   _readVol->setInstrumentName(_params.instrument_name);
   _readVol->setSiteName(_params.site_name);
@@ -907,8 +939,6 @@ void MpdNcFile::_loadReadVolume()
   _readVol->setTitle("NCAR EOL MPD");
   _readVol->setHistory(_history);
   _readVol->setDriver("Mpd2Radx");
-  RadxTime now(RadxTime::NOW);
-  _readVol->setCreated(now.getW3cStr());
   
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);

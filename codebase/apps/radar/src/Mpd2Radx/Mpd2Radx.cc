@@ -361,47 +361,6 @@ void Mpd2Radx::_setupWrite(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// set selected global attributes
-
-void Mpd2Radx::_setGlobalAttr(RadxVol &vol)
-{
-
-  vol.setDriver("Mpd2Radx(NCAR)");
-
-  if (strlen(_params.title) > 0) {
-    vol.setTitle(_params.title);
-  }
-
-  if (strlen(_params.institution) > 0) {
-    vol.setInstitution(_params.institution);
-  }
-
-  if (strlen(_params.references) > 0) {
-    vol.setReferences(_params.references);
-  }
-
-  if (strlen(_params.source_override) > 0) {
-    vol.setSource(_params.source_override);
-  }
-
-  if (strlen(_params.history_override) > 0) {
-    vol.setHistory(_params.history_override);
-  }
-
-  if (strlen(_params.author) > 0) {
-    vol.setAuthor(_params.author);
-  }
-
-  if (strlen(_params.comment_override) > 0) {
-    vol.setComment(_params.comment_override);
-  }
-
-  RadxTime now(RadxTime::NOW);
-  vol.setCreated(now.asString());
-
-}
-
-//////////////////////////////////////////////////
 // write out the volume
 
 int Mpd2Radx::_writeVol(RadxVol &vol)
@@ -489,11 +448,7 @@ int Mpd2Radx::_processMpdNcFile(const string &readPath)
     return -1;
   }
   
-  vector<RadxRay *> rays = vol.getRays();
-
-  // set global attributes as needed
-
-  _setGlobalAttr(vol);
+  // vector<RadxRay *> rays = vol.getRays();
 
   // write the file
   if (_writeVol(vol)) {
