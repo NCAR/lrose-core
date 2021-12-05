@@ -19,6 +19,7 @@ SUB_DIRS = \
 	CreateStationList \
 	CsuSounding2Spdb \
 	EolMobileKml2Spdb \
+	EraNc2Mdv \
 	GemVolXml2Dsr \
 	Gini2Mdv \
 	GoesRGLM2Spdb \
