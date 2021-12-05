@@ -186,7 +186,6 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
   int _readRange();
-  int _readRayQualifierFields();
   void _clearRayVariables();
   int _readRayVariables();
 
@@ -199,7 +198,7 @@ private:
   void _loadReadVolume();
   void _convertPressureToHpa();
 
-  int _readFieldVariablesSpecified();
+  int _readFieldVariables();
 
   int _readFieldVariable(string inputName,
                          string outputName,
@@ -208,6 +207,8 @@ private:
                          Params::output_encoding_t encoding,
                          NcxxVar &var);
   
+  int _readRayQualifierFields();
+
   int _addFl64FieldToRays(const NcxxVar &var,
                           const string &name,
                           const string &units,

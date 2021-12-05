@@ -206,7 +206,7 @@ search_ext = "";
 // Type: string
 //
 
-n_samples_field_name = "WVOnline_ProfileCount";
+n_samples_field_name = "WVOnline_LaserShotCount";
 
 ///////////// include_qualifier_fields ////////////////
 //

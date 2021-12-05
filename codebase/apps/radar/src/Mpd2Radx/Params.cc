@@ -764,7 +764,7 @@
     tt->descr = tdrpStrDup("Field name for n_samples field.");
     tt->help = tdrpStrDup("This will be used to fill in n_samples. If empty, it will not be used.");
     tt->val_offset = (char *) &n_samples_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("WVOnline_ProfileCount");
+    tt->single_val.s = tdrpStrDup("WVOnline_LaserShotCount");
     tt++;
     
     // Parameter 'include_qualifier_fields'

@@ -112,7 +112,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "WVOnline_ProfileCount";
+  p_default = "WVOnline_LaserShotCount";
   p_descr = "Field name for n_samples field.";
   p_help = "This will be used to fill in n_samples. If empty, it will not be used.";
 } n_samples_field_name;

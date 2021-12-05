@@ -219,14 +219,6 @@ int MpdNcFile::readFromPath(const string &path,
     return -1;
   }
 
-  // read in ray qualifier fields
-
-  if (_params.include_qualifier_fields) {
-    if (_readRayQualifierFields()) {
-      return -1;
-    }
-  }
-
   // read in ray metadata variables
   
   if (_readRayVariables()) {
@@ -243,9 +235,17 @@ int MpdNcFile::readFromPath(const string &path,
   
   // add field variables to file rays
 
-  if (_readFieldVariablesSpecified()) {
+  if (_readFieldVariables()) {
     _addErrStr(errStr);
     return -1;
+  }
+
+  // read in ray qualifier fields
+
+  if (_params.include_qualifier_fields) {
+    if (_readRayQualifierFields()) {
+      return -1;
+    }
   }
 
   // Convert any pressure fields to hPa
@@ -544,132 +544,6 @@ int MpdNcFile::_readRange()
 }
 
 ///////////////////////////////////
-// read in ray qualifier fields
-
-int MpdNcFile::_readRayQualifierFields()
-
-{
-
-  // create a map for the required fields
-  
-  map<string, Params::qual_field_t> qualFields;
-  for (int ii = 0; ii < _params.qualifier_fields_n; ii++) {
-    qualFields[_params._qualifier_fields[ii].mpd_name] = _params._qualifier_fields[ii];
-  }
-  
-  const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
-  for (auto ii = vars.begin(); ii != vars.end(); ii++) {
-    
-    string varName = ii->first;
-    const NcxxVar &var = ii->second;
-
-    // check we have 1 dimension, time
-
-    if (var.getDimCount() != 1) {
-      continue;
-    }
-    if (var.getDim(0) != _timeDim) {
-      continue;
-    }
-
-    // check if we need this field
-    
-    auto qualIndex = qualFields.find(varName);
-    if (qualFields.size() == 0 || qualIndex != qualFields.end()) {
-      
-      // yes - add this field
-
-      // set attributes
-      
-      string outputName = varName;
-      string longName;
-      string standardName;
-      string ancillaryVariables;
-      
-      try {
-        NcxxVarAtt longNameAtt = var.getAtt("descripion");
-        longName = longNameAtt.asString();
-      } catch (NcxxException& e) { }
-      
-      string units;
-      try {
-        NcxxVarAtt unitsAtt = var.getAtt("units");
-        units = unitsAtt.asString();
-      } catch (NcxxException& e) { }
-
-      // override from params
-      
-      if (qualFields.size() != 0) {
-        const Params::qual_field_t &fieldParams = qualIndex->second;
-        if (strlen(fieldParams.output_name) > 0) {
-          outputName = fieldParams.output_name;
-        }
-        if (strlen(fieldParams.units) > 0) {
-          units = fieldParams.units;
-        }
-        if (strlen(fieldParams.cf_standard_name) > 0) {
-          standardName = fieldParams.cf_standard_name;
-        }
-      }
-
-      NcxxType varType = var.getType();
-      if (varType == ncxxDouble) {
-
-        // double field
-
-        if (_addFl64FieldToRays(var, outputName, units,
-                                longName, standardName, "",
-                                ancillaryVariables, true,
-                                Params::OUTPUT_ENCODING_ASIS)) {
-          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
-          _addErrStr("  Cannot add field: ", outputName);
-          return -1;
-        }
-
-      } else if (varType == ncxxFloat) {
-
-        // float field
-
-        if (_addFl32FieldToRays(var, outputName, units,
-                                longName, standardName, "",
-                                ancillaryVariables, true,
-                                Params::OUTPUT_ENCODING_ASIS)) {
-          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
-          _addErrStr("  Cannot add field: ", outputName);
-          return -1;
-        }
-
-      } else if (varType == ncxxByte ||
-                 varType == ncxxShort ||
-                 varType == ncxxInt ||
-                 varType == ncxxUbyte ||
-                 varType == ncxxUshort ||
-                 varType == ncxxUint ||
-                 varType == ncxxInt64 ||
-                 varType == ncxxUint64) {
-        
-        // int field
-        
-        if (_addSi32FieldToRays(var, outputName, units,
-                                longName, standardName, "",
-                                ancillaryVariables, true,
-                                Params::OUTPUT_ENCODING_ASIS)) {
-          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
-          _addErrStr("  Cannot add field: ", outputName);
-          return -1;
-        }
-
-      } // if (varType == ncxxDouble ...
-      
-    } // if (qualFields.size() == 0 ...
-
-  } // ii
-
-  return 0;
-
-}
-
-///////////////////////////////////
 // clear the ray variables
 
 void MpdNcFile::_clearRayVariables()
@@ -722,10 +596,6 @@ int MpdNcFile::_readRayVar(const string &name, vector<double> &vals)
 {
 
   vals.clear();
-  for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    vals.push_back(-9999.0);
-  }
-  return 0;
   
   // get var
   
@@ -992,7 +862,7 @@ void MpdNcFile::_convertPressureToHpa()
 // read the field variables as specified in
 // the parameter file
 
-int MpdNcFile::_readFieldVariablesSpecified()
+int MpdNcFile::_readFieldVariables()
 
 {
 
@@ -1008,7 +878,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
     Params::mpd_field_t &mfld = _params._mpd_fields[ifield];
     NcxxVar var = _file.getVar(mfld.mpd_name);
     if (var.isNull()) {
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
+      _addErrStr("ERROR - MpdNcFile::_readFieldVariables()");
       _addErrStr("  Cannot find specified field, name: ",
                  mfld.mpd_name);
       iret = -1;
@@ -1019,7 +889,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
     NcxxType ftype = var.getType();
     if (ftype != ncxxFloat && ftype != ncxxDouble) {
       // not a valid type for field data
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
+      _addErrStr("ERROR - MpdNcFile::_readFieldVariables()");
       _addErrStr("  Variable wrong type, name: ", mfld.mpd_name);
       _addErrStr("  Type must be float or double");
       _addErrStr("  Type is: ", Ncxx::ncxxTypeToStr(ftype));
@@ -1041,7 +911,7 @@ int MpdNcFile::_readFieldVariablesSpecified()
                            mfld.mask_field_name,
                            mfld.output_encoding,
                            var)) {
-      _addErrStr("ERROR - MpdNcFile::_readFieldVariablesSpecified()");
+      _addErrStr("ERROR - MpdNcFile::_readFieldVariables()");
       iret = -1;
     }
 
@@ -1180,6 +1050,132 @@ int MpdNcFile::_readFieldVariable(string inputName,
     cerr << "  Field not float or double: " << inputName << endl;
   }
   
+  return 0;
+
+}
+
+///////////////////////////////////
+// read in ray qualifier fields
+
+int MpdNcFile::_readRayQualifierFields()
+
+{
+
+  // create a map for the required fields
+  
+  map<string, Params::qual_field_t> qualFields;
+  for (int ii = 0; ii < _params.qualifier_fields_n; ii++) {
+    qualFields[_params._qualifier_fields[ii].mpd_name] = _params._qualifier_fields[ii];
+  }
+  
+  const std::multimap<std::string, NcxxVar> &vars = _file.getVars();
+  for (auto ii = vars.begin(); ii != vars.end(); ii++) {
+    
+    string varName = ii->first;
+    const NcxxVar &var = ii->second;
+
+    // check we have 1 dimension, time
+
+    if (var.getDimCount() != 1) {
+      continue;
+    }
+    if (var.getDim(0) != _timeDim) {
+      continue;
+    }
+
+    // check if we need this field
+    
+    auto qualIndex = qualFields.find(varName);
+    if (qualFields.size() == 0 || qualIndex != qualFields.end()) {
+      
+      // yes - add this field
+
+      // set attributes
+      
+      string outputName = varName;
+      string longName;
+      string standardName;
+      string ancillaryVariables;
+      
+      try {
+        NcxxVarAtt longNameAtt = var.getAtt("descripion");
+        longName = longNameAtt.asString();
+      } catch (NcxxException& e) { }
+      
+      string units;
+      try {
+        NcxxVarAtt unitsAtt = var.getAtt("units");
+        units = unitsAtt.asString();
+      } catch (NcxxException& e) { }
+
+      // override from params
+      
+      if (qualFields.size() != 0) {
+        const Params::qual_field_t &fieldParams = qualIndex->second;
+        if (strlen(fieldParams.output_name) > 0) {
+          outputName = fieldParams.output_name;
+        }
+        if (strlen(fieldParams.units) > 0) {
+          units = fieldParams.units;
+        }
+        if (strlen(fieldParams.cf_standard_name) > 0) {
+          standardName = fieldParams.cf_standard_name;
+        }
+      }
+
+      NcxxType varType = var.getType();
+      if (varType == ncxxDouble) {
+
+        // double field
+
+        if (_addFl64FieldToRays(var, outputName, units,
+                                longName, standardName, "",
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } else if (varType == ncxxFloat) {
+
+        // float field
+
+        if (_addFl32FieldToRays(var, outputName, units,
+                                longName, standardName, "",
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } else if (varType == ncxxByte ||
+                 varType == ncxxShort ||
+                 varType == ncxxInt ||
+                 varType == ncxxUbyte ||
+                 varType == ncxxUshort ||
+                 varType == ncxxUint ||
+                 varType == ncxxInt64 ||
+                 varType == ncxxUint64) {
+        
+        // int field
+        
+        if (_addSi32FieldToRays(var, outputName, units,
+                                longName, standardName, "",
+                                ancillaryVariables, true,
+                                Params::OUTPUT_ENCODING_ASIS)) {
+          _addErrStr("ERROR - MpdNcFile::_readRayQualifierFields");
+          _addErrStr("  Cannot add field: ", outputName);
+          return -1;
+        }
+
+      } // if (varType == ncxxDouble ...
+      
+    } // if (qualFields.size() == 0 ...
+
+  } // ii
+
   return 0;
 
 }
