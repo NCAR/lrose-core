@@ -463,11 +463,7 @@ public:
 
   int model_profile_search_margin_secs;
 
-  tdrp_bool_t override_instrument_name;
-
   char* instrument_name;
-
-  tdrp_bool_t override_site_name;
 
   char* site_name;
 
@@ -491,13 +487,11 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  char* version_override;
+  char* title;
 
-  char* title_override;
+  char* institution;
 
-  char* institution_override;
-
-  char* references_override;
+  char* references;
 
   char* source_override;
 
@@ -505,7 +499,7 @@ public:
 
   char* comment_override;
 
-  char* author_override;
+  char* author;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -514,7 +508,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

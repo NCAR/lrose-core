@@ -146,7 +146,6 @@ private:
   
   // times
 
-  RadxTime _startTime;
   NcxxVar _timeVar;
   vector<RadxTime> _dataTimes;
   vector<double> _dTimes;

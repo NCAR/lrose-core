@@ -924,25 +924,25 @@
       tt->struct_vals[2].s = tdrpStrDup("absolute_humidity");
       tt->struct_vals[3].s = tdrpStrDup("");
       tt->struct_vals[4].s = tdrpStrDup("Absolute_Humidity_mask");
-      tt->struct_vals[5].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[6].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
-      tt->struct_vals[7].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
-      tt->struct_vals[8].s = tdrpStrDup("molecular_backscatter");
+      tt->struct_vals[5].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[6].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[7].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
+      tt->struct_vals[8].s = tdrpStrDup("aerosol_backscatter_coefficient");
       tt->struct_vals[9].s = tdrpStrDup("");
-      tt->struct_vals[10].s = tdrpStrDup("");
-      tt->struct_vals[11].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[12].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
-      tt->struct_vals[13].s = tdrpStrDup("Aerosol_Backscatter_Coefficient");
-      tt->struct_vals[14].s = tdrpStrDup("aerosol_backscatter_coefficient");
+      tt->struct_vals[10].s = tdrpStrDup("Aerosol_Backscatter_Coefficient_mask");
+      tt->struct_vals[11].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[12].s = tdrpStrDup("Backscatter_Ratio");
+      tt->struct_vals[13].s = tdrpStrDup("Backscatter_Ratio");
+      tt->struct_vals[14].s = tdrpStrDup("backscatter_ratio");
       tt->struct_vals[15].s = tdrpStrDup("");
-      tt->struct_vals[16].s = tdrpStrDup("Aerosol_Backscatter_Coefficient_mask");
-      tt->struct_vals[17].e = OUTPUT_ENCODING_INT16;
-      tt->struct_vals[18].s = tdrpStrDup("Backscatter_Ratio");
-      tt->struct_vals[19].s = tdrpStrDup("Backscatter_Ratio");
-      tt->struct_vals[20].s = tdrpStrDup("backscatter_ratio");
+      tt->struct_vals[16].s = tdrpStrDup("Backscatter_Ratio_mask");
+      tt->struct_vals[17].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[18].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
+      tt->struct_vals[19].s = tdrpStrDup("HSRLMolecular_MolecularBackscatter");
+      tt->struct_vals[20].s = tdrpStrDup("molecular_backscatter");
       tt->struct_vals[21].s = tdrpStrDup("");
-      tt->struct_vals[22].s = tdrpStrDup("Backscatter_Ratio_mask");
-      tt->struct_vals[23].e = OUTPUT_ENCODING_INT16;
+      tt->struct_vals[22].s = tdrpStrDup("");
+      tt->struct_vals[23].e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
     // Parameter 'Comment 5'
@@ -1063,18 +1063,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'override_instrument_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_instrument_name");
-    tt->descr = tdrpStrDup("Option to override the instrument name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_instrument_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'instrument_name'
     // ctype is 'char*'
     
@@ -1085,18 +1073,6 @@
     tt->help = tdrpStrDup("See override_instrument_name.");
     tt->val_offset = (char *) &instrument_name - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'override_site_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_site_name");
-    tt->descr = tdrpStrDup("Option to override the site name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_site_name - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'site_name'
@@ -1261,51 +1237,39 @@
     tt->comment_text = tdrpStrDup("Applies to CfRadial output files only.");
     tt++;
     
-    // Parameter 'version_override'
+    // Parameter 'title'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("version_override");
-    tt->descr = tdrpStrDup("Option to override the version global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the version attribute.");
-    tt->val_offset = (char *) &version_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("title");
+    tt->descr = tdrpStrDup("Option to set the title global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to set the title attribute.");
+    tt->val_offset = (char *) &title - &_start_;
+    tt->single_val.s = tdrpStrDup("MPD");
     tt++;
     
-    // Parameter 'title_override'
+    // Parameter 'institution'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("title_override");
-    tt->descr = tdrpStrDup("Option to override the title global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
-    tt->val_offset = (char *) &title_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("institution");
+    tt->descr = tdrpStrDup("Option to set the institution global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to set the institution attribute.");
+    tt->val_offset = (char *) &institution - &_start_;
+    tt->single_val.s = tdrpStrDup("NCAR/EOL/RSF");
     tt++;
     
-    // Parameter 'institution_override'
+    // Parameter 'references'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("institution_override");
-    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
-    tt->val_offset = (char *) &institution_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'references_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("references_override");
-    tt->descr = tdrpStrDup("Option to override the references global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
-    tt->val_offset = (char *) &references_override - &_start_;
+    tt->param_name = tdrpStrDup("references");
+    tt->descr = tdrpStrDup("Option to set the references global attribute.");
+    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to set the references attribute.");
+    tt->val_offset = (char *) &references - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
@@ -1315,8 +1279,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("source_override");
-    tt->descr = tdrpStrDup("Option to override the source global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
+    tt->descr = tdrpStrDup("Option to override the project global attribute.");
+    tt->help = tdrpStrDup("If empty, the Project global attribute in the file will be used. If not empty, this string is used to override the Project attribute.");
     tt->val_offset = (char *) &source_override - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -1328,7 +1292,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("history_override");
     tt->descr = tdrpStrDup("Option to override the history global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
+    tt->help = tdrpStrDup("If empty, we will use the history attribute in the file. If not empty, this string is used to override the history attribute.");
     tt->val_offset = (char *) &history_override - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -1340,21 +1304,21 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("comment_override");
     tt->descr = tdrpStrDup("Option to override the comment global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
+    tt->help = tdrpStrDup("If empty, the description global attribute will be used. If not empty, this string is used to override the description attribute.");
     tt->val_offset = (char *) &comment_override - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'author_override'
+    // Parameter 'author'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("author_override");
-    tt->descr = tdrpStrDup("Option to override the author global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
-    tt->val_offset = (char *) &author_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->param_name = tdrpStrDup("author");
+    tt->descr = tdrpStrDup("Set the author global attribute.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &author - &_start_;
+    tt->single_val.s = tdrpStrDup("NCAR/EOL/RSF");
     tt++;
     
     // trailing entry has param_name set to NULL

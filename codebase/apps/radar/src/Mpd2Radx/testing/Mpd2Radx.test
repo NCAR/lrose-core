@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for Mpd2Radx
+ * TDRP params for ./Mpd2Radx
  **********************************************************************/
 
 //======================================================================
@@ -244,6 +244,27 @@ include_qualifier_fields = TRUE;
 
 qualifier_fields = {
   {
+    mpd_name = "Surface_Temperature",
+    output_name = "",
+    cf_standard_name = "",
+    units = ""
+  }
+  ,
+  {
+    mpd_name = "Surface_Pressure",
+    output_name = "",
+    cf_standard_name = "",
+    units = ""
+  }
+  ,
+  {
+    mpd_name = "Surface_RelHum",
+    output_name = "",
+    cf_standard_name = "",
+    units = ""
+  }
+  ,
+  {
     mpd_name = "HSRLCombined_LaserShotCount",
     output_name = "",
     cf_standard_name = "",
@@ -326,7 +347,7 @@ qualifier_fields = {
 //          OUTPUT_ENCODING_FLOAT64
 //          OUTPUT_ENCODING_FLOAT32
 //          OUTPUT_ENCODING_INT32
-//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT16
 //   }
 //
 // 1D array - variable length.
@@ -466,18 +487,6 @@ model_profile_search_margin_secs = 7200;
 //
 //======================================================================
  
-///////////// override_instrument_name ////////////////
-//
-// Option to override the instrument name.
-//
-// If true, the name provided will be used.
-//
-//
-// Type: boolean
-//
-
-override_instrument_name = FALSE;
-
 ///////////// instrument_name /////////////////////////
 //
 // Instrument name.
@@ -488,19 +497,7 @@ override_instrument_name = FALSE;
 // Type: string
 //
 
-instrument_name = "unknown";
-
-///////////// override_site_name //////////////////////
-//
-// Option to override the site name.
-//
-// If true, the name provided will be used.
-//
-//
-// Type: boolean
-//
-
-override_site_name = FALSE;
+instrument_name = "MPD05";
 
 ///////////// site_name ///////////////////////////////
 //
@@ -512,7 +509,7 @@ override_site_name = FALSE;
 // Type: string
 //
 
-site_name = "unknown";
+site_name = "CSU";
 
 //======================================================================
 //
@@ -663,64 +660,51 @@ write_latest_data_info = FALSE;
 //
 //======================================================================
  
-///////////// version_override ////////////////////////
+///////////// title ///////////////////////////////////
 //
-// Option to override the version global attribute.
+// Option to set the title global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the version attribute.
-//
-//
-// Type: string
-//
-
-version_override = "";
-
-///////////// title_override //////////////////////////
-//
-// Option to override the title global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the title attribute.
+// If empty, no effect. If not empty, this string is used to set the 
+//   title attribute.
 //
 //
 // Type: string
 //
 
-title_override = "";
+title = "MPD";
 
-///////////// institution_override ////////////////////
+///////////// institution /////////////////////////////
 //
-// Option to override the institution global attribute.
+// Option to set the institution global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the institution attribute.
+// If empty, no effect. If not empty, this string is used to set the 
+//   institution attribute.
 //
 //
 // Type: string
 //
 
-institution_override = "";
+institution = "NCAR/EOL/RSF";
 
-///////////// references_override /////////////////////
+///////////// references //////////////////////////////
 //
-// Option to override the references global attribute.
+// Option to set the references global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the references attribute.
+// If empty, no effect. If not empty, this string is used to set the 
+//   references attribute.
 //
 //
 // Type: string
 //
 
-references_override = "";
+references = "";
 
 ///////////// source_override /////////////////////////
 //
-// Option to override the source global attribute.
+// Option to override the project global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the source attribute.
+// If empty, the Project global attribute in the file will be used. If 
+//   not empty, this string is used to override the Project attribute.
 //
 //
 // Type: string
@@ -732,8 +716,8 @@ source_override = "";
 //
 // Option to override the history global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the history attribute.
+// If empty, we will use the history attribute in the file. If not 
+//   empty, this string is used to override the history attribute.
 //
 //
 // Type: string
@@ -745,8 +729,8 @@ history_override = "";
 //
 // Option to override the comment global attribute.
 //
-// If empty, no effect. If not empty, this string is used to override 
-//   the comment attribute.
+// If empty, the description global attribute will be used. If not 
+//   empty, this string is used to override the description attribute.
 //
 //
 // Type: string
@@ -754,16 +738,13 @@ history_override = "";
 
 comment_override = "";
 
-///////////// author_override /////////////////////////
+///////////// author //////////////////////////////////
 //
-// Option to override the author global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the author attribute.
+// Set the author global attribute.
 //
 //
 // Type: string
 //
 
-author_override = "";
+author = "NCAR/EOL/RSF";
 

@@ -305,23 +305,11 @@ commentdef {
   p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
 }
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the instrument name.";
-  p_help = "If true, the name provided will be used.";
-} override_instrument_name;
-
 paramdef string {
   p_default = "unknown";
   p_descr = "Instrument name.";
   p_help = "See override_instrument_name.";
 } instrument_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to override the site name.";
-  p_help = "If true, the name provided will be used.";
-} override_site_name;
 
 paramdef string {
   p_default = "unknown";
@@ -406,50 +394,43 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "";
-  p_descr = "Option to override the version global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
-} version_override;
+  p_default = "MPD";
+  p_descr = "Option to set the title global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to set the title attribute.";
+} title;
+
+paramdef string {
+  p_default = "NCAR/EOL/RSF";
+  p_descr = "Option to set the institution global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to set the institution attribute.";
+} institution;
 
 paramdef string {
   p_default = "";
-  p_descr = "Option to override the title global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
-} title_override;
+  p_descr = "Option to set the references global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to set the references attribute.";
+} references;
 
 paramdef string {
   p_default = "";
-  p_descr = "Option to override the institution global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
-} institution_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the references global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
-} references_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the source global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
+  p_descr = "Option to override the project global attribute.";
+  p_help = "If empty, the Project global attribute in the file will be used. If not empty, this string is used to override the Project attribute.";
 } source_override;
 
 paramdef string {
   p_default = "";
   p_descr = "Option to override the history global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
+  p_help = "If empty, we will use the history attribute in the file. If not empty, this string is used to override the history attribute.";
 } history_override;
 
 paramdef string {
   p_default = "";
   p_descr = "Option to override the comment global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
+  p_help = "If empty, the description global attribute will be used. If not empty, this string is used to override the description attribute.";
 } comment_override;
 
 paramdef string {
-  p_default = "";
-  p_descr = "Option to override the author global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
-} author_override;
+  p_default = "NCAR/EOL/RSF";
+  p_descr = "Set the author global attribute.";
+} author;
 

@@ -100,7 +100,7 @@ void MpdNcFile::clear()
   _dTimes.clear();
 
   _rangeKm.clear();
-  _geom.setRangeGeom(0.0075, 154.2432);
+  _geom.setRangeGeom(0.0375, -0.0470);
 
   _clearRayVariables();
 
@@ -327,6 +327,7 @@ int MpdNcFile::_readGlobalAttributes()
     } else if (att.getName() == "Project") {
 
       _project = att.asString();
+      _readVol->setSource(att.asString());
 
     } else if (att.getName() == "latitude") {
 
@@ -893,31 +894,21 @@ void MpdNcFile::_loadReadVolume()
 {
 
   _readVol->setOrigFormat("MPD-RAW");
-  _readVol->setVolumeNumber(-9999);
+  // _readVol->setVolumeNumber(-9999);
   _readVol->setInstrumentType(_instrumentType);
-  _readVol->setInstrumentName("MPD");
-  _readVol->setSiteName("GV");
+  _readVol->setInstrumentName(_params.instrument_name);
+  _readVol->setSiteName(_params.site_name);
   _readVol->setPlatformType(_platformType);
   _readVol->setPrimaryAxis(_primaryAxis);
   
   _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 538.0e-9);
   _readVol->addFrequencyHz(Radx::LIGHT_SPEED / 1064.0e-9);
   
-  _readVol->setLidarConstant(-9999.0);
-  _readVol->setLidarPulseEnergyJ(-9999.0);
-  _readVol->setLidarPeakPowerW(-9999.0);
-  _readVol->setLidarApertureDiamCm(-9999.0);
-  _readVol->setLidarApertureEfficiency(-9999.0);
-  _readVol->setLidarFieldOfViewMrad(-9999.0);
-  _readVol->setLidarBeamDivergenceMrad(-9999.0);
-
   _readVol->setTitle("NCAR EOL MPD");
-  _readVol->setSource("MPD software");
   _readVol->setHistory(_history);
-  _readVol->setInstitution("NCAR");
-  _readVol->setReferences("");
   _readVol->setDriver("Mpd2Radx");
-  _readVol->setCreated(_startTime.getW3cStr());
+  RadxTime now(RadxTime::NOW);
+  _readVol->setCreated(now.getW3cStr());
   
   _readVol->setScanName("Vert");
   _readVol->setScanId(0);

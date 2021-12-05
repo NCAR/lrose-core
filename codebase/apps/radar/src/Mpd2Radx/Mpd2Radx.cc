@@ -349,7 +349,7 @@ void Mpd2Radx::_setupWrite(RadxFile &file)
 
   file.setWriteInstrNameInFileName
     (_params.include_instrument_name_in_file_name);
-
+  
   file.setWriteSiteNameInFileName(false);
   file.setWriteScanTypeInFileName(false);
   file.setWriteVolNumInFileName(false);
@@ -368,20 +368,16 @@ void Mpd2Radx::_setGlobalAttr(RadxVol &vol)
 
   vol.setDriver("Mpd2Radx(NCAR)");
 
-  if (strlen(_params.version_override) > 0) {
-    vol.setVersion(_params.version_override);
+  if (strlen(_params.title) > 0) {
+    vol.setTitle(_params.title);
   }
 
-  if (strlen(_params.title_override) > 0) {
-    vol.setTitle(_params.title_override);
+  if (strlen(_params.institution) > 0) {
+    vol.setInstitution(_params.institution);
   }
 
-  if (strlen(_params.institution_override) > 0) {
-    vol.setInstitution(_params.institution_override);
-  }
-
-  if (strlen(_params.references_override) > 0) {
-    vol.setReferences(_params.references_override);
+  if (strlen(_params.references) > 0) {
+    vol.setReferences(_params.references);
   }
 
   if (strlen(_params.source_override) > 0) {
@@ -392,8 +388,8 @@ void Mpd2Radx::_setGlobalAttr(RadxVol &vol)
     vol.setHistory(_params.history_override);
   }
 
-  if (strlen(_params.author_override) > 0) {
-    vol.setAuthor(_params.author_override);
+  if (strlen(_params.author) > 0) {
+    vol.setAuthor(_params.author);
   }
 
   if (strlen(_params.comment_override) > 0) {
@@ -493,13 +489,6 @@ int Mpd2Radx::_processMpdNcFile(const string &readPath)
     return -1;
   }
   
-  // override radar name and site name if requested
-  if (_params.override_instrument_name) {
-    vol.setInstrumentName(_params.instrument_name);
-  }
-  if (_params.override_site_name) {
-    vol.setSiteName(_params.site_name);
-  }
   vector<RadxRay *> rays = vol.getRays();
 
   // set global attributes as needed
