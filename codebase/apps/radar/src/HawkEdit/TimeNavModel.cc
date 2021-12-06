@@ -114,23 +114,37 @@ int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
 
   // get the first day/time under this starting point 
   RadxTimeList timeList;
-  timeList.setDir(archiveDataUrl);
-  timeList.setModeFirst();
+  // need to separate directory from the filename
+  // then, send the directory to the timeList
+  // need to find a pattern like this *<separator>YYYYMMDD
+  // then send the string from start to end of pattern
+  // to the timeList
+  //
+  RadxPath thePath(archiveDataUrl);
+  if (thePath.isDir()) {
+    timeList.setDir(archiveDataUrl);
+  } else {
+    string dir = thePath.getDirectory();
+    timeList.setDir(dir);
+  }
+
+  timeList.setModeAll();
   timeList.compile();
 
   // TODO: how to report error? throw exception???
   if (timeList.getPathList().size() < 1) {
-    cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
-    cerr << "  Cannot load file list for url: " 
-         << archiveDataUrl << endl;
-    cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
-    cerr << "  End time: " << _archiveEndTime.getStr() << endl;
-    _urlOK = false;
-    return -1;
+    //cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
+    //cerr << "  Cannot load file list for url: " 
+    //     << archiveDataUrl << endl;
+    //cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
+    //cerr << "  End time: " << _archiveEndTime.getStr() << endl;
+    //_urlOK = false;
+    //return -1;
   }
 
-  _archiveStartTime = timeList.getPathList().at(0);
+  _archiveStartTime = timeList.getValidTimes().front();
 
+/*
   // get the last day/time under this starting point 
   //RadxTimeList timeList;
   //timeList.setDir(archiveDataUrl);
@@ -148,9 +162,11 @@ int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
     return -1;
   } 
 
-  _archiveEndTime = timeList.getPathList().at(0);
+*/
+  _archiveEndTime = timeList.getValidTimes().back();
 
 
+/*
   // get the last day/time under this starting point 
   //RadxTimeList timeList;
   //timeList.setDir(archiveDataUrl);
@@ -169,6 +185,7 @@ int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
     return -1;
 
   }
+*/
 
   setArchiveFileList(timeList.getPathList(), false);
   

@@ -67,7 +67,8 @@ public:
     MODE_LAST               = 2,
     MODE_CLOSEST            = 3,
     MODE_FIRST_BEFORE       = 4,
-    MODE_FIRST_AFTER        = 5
+    MODE_FIRST_AFTER        = 5,
+    MODE_ALL                = 6
   
   } time_list_mode_t;
   
@@ -147,6 +148,13 @@ public:
   // after the search time within the search margin
   
   void setModeFirstAfter(RadxTime search_time, double time_margin);
+
+  /////////////////////////////////////////////////////////////////
+  // SetModeAll
+  //
+  // set the time list mode so that it finds all the available data 
+  
+  void setModeAll();
   
   /// Set aggregation into volume on read.
   /// If true, individual sweep files will be aggregated into a
@@ -272,6 +280,7 @@ private:
   void _compileClosest(const string &topDir);
   void _compileFirstBefore(const string &topDir);
   void _compileFirstAfter(const string &topDir);
+  void _compileAll(const string &topDir);
   
   void _searchForValid(const string &topDir,
                        RadxTime startTime,
@@ -316,6 +325,9 @@ private:
                    RadxTime startTime,
                    RadxTime endTime,
                    TimePathSet &timePaths);
+
+  void _addAll(const string &topDir,
+           TimePathSet &timePaths);
 
   void _getDayDirs(const string &topDir,
 		   TimePathSet &dayDirs);

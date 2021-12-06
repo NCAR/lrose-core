@@ -247,14 +247,19 @@ void TimeNavView::setGuiFromArchiveStartTime(int year, int month, int day,
   //  return;
   //}
   // QDate::QDate(int y, int m, int d)
-  QDate date(year, 
-             month,
-             day);
+  // 
+  QCalendar calendar;
+  QDate date = calendar.dateFromParts(year, month, day);
+  //QDate date(year, 
+  //           month,
+  //           day);
   QTime time(hour,
              minute,
              seconds);
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
+        setVisible(true);
+      raise();
 }
 
 ////////////////////////////////////////////////////////
@@ -424,12 +429,13 @@ void TimeNavView::showTimeControl()
       // always place the time navigation view
         setVisible(true);
         QPoint pos;
-        pos.setX(x() + 
-                 (_parent->frameGeometry().width() / 2) -
-                 (width() / 2));
-        pos.setY(y() + _parent->frameGeometry().height());
+        pos.setX(x()); // + 
+                 //(frameGeometry().width() / 2) -
+                 //(width() / 2));
+        pos.setY(y() + frameGeometry().height());
         move(pos);
       //}
+      
       setVisible(true);
       raise();
     }

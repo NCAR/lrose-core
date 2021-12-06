@@ -64,6 +64,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QFrame>
 #include <QFont>
 #include <QLabel>
@@ -266,6 +267,8 @@ PolarManager::~PolarManager()
   //  delete[] _ppiRays;
   //}
   // TODO: delete all controllers
+  if (_timeNavController) delete _timeNavController;
+  if (_timeNavView) delete _timeNavView;
 }
 
 //////////////////////////////////////////////////
@@ -551,11 +554,6 @@ void PolarManager::_setupWindows()
           this, SLOT(selectedSweepChanged(double)));
   connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
   //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
-  // time panel
-
-  _createTimeControl();
-  _showTimeControl();
-
 
   // fill out menu bar
 
@@ -586,6 +584,10 @@ void PolarManager::_setupWindows()
  
    _setSweepPanelVisibility();
 
+  // time panel
+
+  _createTimeControl();
+  _showTimeControl();
 }
 
 //////////////////////////////
@@ -611,10 +613,10 @@ void PolarManager::_createActions()
   _params = ParamFile::Instance();
 
   // freeze display
-  _freezeAct = new QAction(tr("Freeze"), this);
-  _freezeAct->setShortcut(tr("Esc"));
-  _freezeAct->setStatusTip(tr("Freeze display"));
-  connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
+  //_freezeAct = new QAction(tr("Freeze"), this);
+  //_freezeAct->setShortcut(tr("Esc"));
+  //_freezeAct->setStatusTip(tr("Freeze display"));
+  //connect(_freezeAct, SIGNAL(triggered()), this, SLOT(_freeze()));
   
   // show user click in dialog
   _showClickAct = new QAction(tr("Show Click"), this);
@@ -627,16 +629,16 @@ void PolarManager::_createActions()
   connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(showBoundaryEditor()));
   
   // set time controller settings
-  _timeControllerAct = new QAction(tr("Time-Config"), this);
-  _timeControllerAct->setStatusTip(tr("Show time control window"));
-  connect(_timeControllerAct, SIGNAL(triggered()), this,
-          SLOT(_showTimeControl()));
+  //_timeControllerAct = new QAction(tr("Time-Config"), this);
+  //_timeControllerAct->setStatusTip(tr("Show time control window"));
+  //connect(_timeControllerAct, SIGNAL(triggered()), this,
+  //        SLOT(_showTimeControl()));
 
   // show time control window
-  _showTimeControlAct = new QAction(tr("Show time control window"), this);
+  _showTimeControlAct = new QAction(tr("Show/hide time navigation"), this);
   _showTimeControlAct->setStatusTip(tr("Show time control window"));
-  //connect(_showTimeControlAct, SIGNAL(triggered()), _timeNavController,
-  //        SLOT(show()));
+  connect(_showTimeControlAct, SIGNAL(triggered()), this,
+          SLOT(_showTimeControl()));
 
   /* realtime mode
   _realtimeAct = new QAction(tr("Set realtime mode"), this);
@@ -760,7 +762,7 @@ void PolarManager::_createMenus()
   _fileMenu->addAction(_saveImageAct);
   _fileMenu->addAction(_exitAct);
 
-  _timeMenu = menuBar()->addMenu(tr("&Time-control"));
+  _timeMenu = menuBar()->addMenu(tr("&Time"));
   _timeMenu->addAction(_showTimeControlAct);
   _timeMenu->addSeparator();
   //_timeMenu->addAction(_realtimeAct);
@@ -772,7 +774,7 @@ void PolarManager::_createMenus()
   _overlaysMenu->addSeparator();
   _overlaysMenu->addAction(_showRhiAct);
 
-  menuBar()->addAction(_freezeAct);
+  //menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
 
   _boundaryMenu = menuBar()->addMenu(tr("&Boundary"));
@@ -876,7 +878,14 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
   _setArchiveRetrievalPending();
 
   if (_timeNavController) {
-    _timeNavController->fetchArchiveFiles(list.at(0));
+    // move up two levels in the directory to find the top level
+    // maybe like this ...
+    //  .../toplevel/yyyymmdd/chosenfile
+    QDir theDir(QString(list.at(0).c_str()));
+    if (theDir.cd("../../")) {
+      string thePath = theDir.absolutePath().toStdString();
+      _timeNavController->fetchArchiveFiles(thePath);
+    }
   }
 
 /*
