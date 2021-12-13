@@ -258,8 +258,8 @@ void TimeNavView::setGuiFromArchiveStartTime(int year, int month, int day,
              seconds);
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
-        setVisible(true);
-      raise();
+      //  setVisible(true);
+      // raise();
 }
 
 ////////////////////////////////////////////////////////

@@ -46,10 +46,9 @@ class TimeNavModel {
 
 public:
 
-  void setArchiveFileList(const vector<string> &list,
-                                      bool fromCommandLine /* = true */);
+  void setArchiveFileList(const vector<string> &list);
 
-  int loadArchiveFileList(string archiveDataUrl);
+  int findArchiveFileList(string archiveDataUrl);
 
   int getNArchiveFiles() { return  (int) _archiveFileList.size(); };
 
@@ -67,6 +66,9 @@ public:
 
   void changeSelectedTime(int value);
   void setSelectedFile(int value);
+  void setSelectedFile(string fileName);
+
+  string &getSelectedArchiveFile();
 
   // void DoSomething();
 

@@ -66,7 +66,8 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const RadxPlatform &platform,
 			 DisplayFieldController *displayFieldController,
 			 //                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                         bool haveFilteredFields,
+                         RayLocationController *rayLocationController) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -81,7 +82,8 @@ PolarWidget::PolarWidget(QWidget* parent,
         _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0),
         _ringSpacing(10.0),
-        _boundaryTrackMouseMove(false)
+        _boundaryTrackMouseMove(false),
+        _rayLocationController(rayLocationController)
 
 {
   _params = ParamFile::Instance();
@@ -123,6 +125,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   qRegisterMetaType<size_t>("size_t");
 
+  _resetWorld(_manager->height(), _manager->height());
 
   // create the field renderers
   _fieldRendererController = new FieldRendererController();
@@ -374,14 +377,14 @@ void PolarWidget::activateArchiveRendering()
  */
 
 void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle,
-  RayLocationController *rayLocationController, ColorMap &colorMap,
+  ColorMap &colorMap,
   QColor backgroundColor)
 {
   try {
 
     // set the context ...
     _currentSweepAngle = currentSweepAngle;
-    _rayLocationController = rayLocationController;
+    //_rayLocationController = rayLocationController;
     _currentColorMap = colorMap;
     _backgroundColor = backgroundColor;
     
@@ -631,7 +634,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
     if (selectedField.length() > 0) {
 
         // using a QImage
-        if (1){ // m_buffer.size() != size()) {
+        if (_rayLocationController == NULL) {
+          cerr << "something crazy happened: bailing!" << endl;
+          return;
+        } else { // m_buffer.size() != size()) {
             LOG(DEBUG) << " inside first QImage size = " << width() << " x " << height();
             m_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
             m_base_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
@@ -893,8 +899,11 @@ void PolarWidget::drawRings(QPainter &painter)
   qreal htranslate = painter.combinedTransform().m31();
   qreal vtranslate = painter.combinedTransform().m32();
 
-
-  pen.setWidth(1.0/hscale * 2.0);
+cerr << "before setWidth " << endl;
+  float width = 1.0/hscale * 2.0;
+  if (width <= 0) width = 1.0;
+  pen.setWidth(width);
+cerr << "after setWidth " << endl;
   painter.setPen(pen);
   
   // Draw rings

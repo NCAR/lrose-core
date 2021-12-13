@@ -153,8 +153,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   // initialize
 
   // from DisplayManager ...
-  _beamTimerId = 0;
-  _frozen = false;
+  //_beamTimerId = 0;
+  // _frozen = false;
   //  _displayFieldController->setSelectedField(0);
   _prevFieldNum = -1;
 
@@ -179,7 +179,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   _nGates = 1000;
   _maxRangeKm = 1.0;
   
-  _archiveRetrievalPending = false;
+  //_archiveRetrievalPending = false;
   
   _ppiFrame = NULL;
   _ppi = NULL;
@@ -283,15 +283,15 @@ int PolarManager::run(QApplication &app)
 
   show();
 
-  if (_archiveFileList.size() == 0) {
-    //getFileAndFields();
-    _openFile();
-  }
+  //if (_archiveFileList.size() == 0) {
+  //  //getFileAndFields();
+  //  _openFile();
+  //}
  
 
   // set timer running
   
-  _beamTimerId = startTimer(2000);
+  //_beamTimerId = startTimer(2000);
   
   return app.exec();
 
@@ -343,13 +343,14 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
     return;
   }
   
-  // for ESC, freeze / unfreeze
+  /* for ESC, freeze / unfreeze
 
   if (keychar == 27) {
     _freezeAct->trigger();
     return;
   }
-  
+  */
+
   // check for short-cut keys to fields
   size_t nFields = _displayFieldController->getNFields();
   for (size_t ifield = 0; ifield < nFields; ifield++) {
@@ -475,7 +476,9 @@ void PolarManager::_setupWindows()
 
  // _ppi = new PpiWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
 
-  _ppi = new PolarWidget(_ppiFrame, this, _platform, _displayFieldController, _haveFilteredFields);
+  _ppi = new PolarWidget(_ppiFrame, this, _platform, 
+    _displayFieldController, _haveFilteredFields,
+    _rayLocationController);
   _ppiFrame->setMinimumSize(400,400);
   _ppi->setMinimumSize(400,400);
 
@@ -857,9 +860,15 @@ void PolarManager::setFieldToMissing(QString fieldName) {
 void PolarManager::setArchiveFileList(const vector<string> &list,
                                       bool fromCommandLine // = true 
 )
+// TODO: don't think fromCommandLine is used???
 {
 
-  if (fromCommandLine && list.size() > 0) {
+  if (list.size() <= 0) {
+    errorMessage("Error", "Empty list of archive files");
+    return;
+  } 
+
+/* done in TimeNavMVC classes
     // determine start and end time from file list
     RadxTime startTime, endTime;
     NcfRadxFile::getTimeFromPath(list[0], startTime);
@@ -872,19 +881,24 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
     //_archiveStartTime.set(startTimeSecs);
     //_archiveEndTime.set(endTimeSecs);
     //_archiveScanIndex = 0;
-  }
+*/
 
-  _archiveFileList = list;
-  _setArchiveRetrievalPending();
+  //_archiveFileList = list;
+  //_setArchiveRetrievalPending();
 
   if (_timeNavController) {
     // move up two levels in the directory to find the top level
     // maybe like this ...
     //  .../toplevel/yyyymmdd/chosenfile
-    QDir theDir(QString(list.at(0).c_str()));
+    QString fullUrl(QString(list.at(0).c_str()));
+    QDir theDir(fullUrl);
     if (theDir.cd("../../")) {
-      string thePath = theDir.absolutePath().toStdString();
-      _timeNavController->fetchArchiveFiles(thePath);
+      QString thePath = theDir.absolutePath();
+      QFileInfo fileInfo(fullUrl);
+      QString theFile = fileInfo.fileName();
+      _timeNavController->fetchArchiveFiles(thePath.toStdString(),
+        theFile.toStdString());
+      //_timeNavController->fetchArchiveFiles
     }
   }
 
@@ -1191,12 +1205,13 @@ int PolarManager::_getArchiveData()
 
   DataModel *dataModel = DataModel::Instance();
 
-  // be sure to call setArchiveFileList before we get here!
-  if (_archiveScanIndex >= 0 &&
-      _archiveScanIndex < (int) _archiveFileList.size()) {
+  // be sure to call setArchiveFileList before we get here! TODO: TimeNav now manages this;
+  // may be able to remove this restriction
+  //if (_archiveScanIndex >= 0 &&
+  //    _archiveScanIndex < (int) _archiveFileList.size()) {
     
     try {
-      string inputPath = _archiveFileList[_archiveScanIndex];
+      string inputPath = _timeNavController->getSelectedArchiveFile();
       vector<string> fieldNames = _displayFieldController->getFieldNames();
       dataModel->readData(inputPath, fieldNames,
         debug_verbose, debug_extra);
@@ -1209,7 +1224,7 @@ int PolarManager::_getArchiveData()
         errorDialog.exec();
       }
     }
-  }
+  //}
 
   // set plot times
   
@@ -1224,23 +1239,6 @@ int PolarManager::_getArchiveData()
            _plotStartTime.getHour(),
            _plotStartTime.getMin(),
            _plotStartTime.getSec());
-
-  //_selectedTimeLabel->setText(text);
-
-  // adjust angles for elevation surveillance if needed
-  
-  //dataModel->setAnglesForElevSurveillance();
-  
-  // compute the fixed angles from the rays
-  // so that we reflect reality
-  
-  //dataModel->computeFixedAnglesFromRays();
-
-  // load the sweep manager
-  
-  //_sweepManager.set(_vol);
-  // TODO: signal new volume read?
-
 
     LOG(DEBUG) << "----------------------------------------------------";
     LOG(DEBUG) << "perform archive retrieval";
@@ -1643,49 +1641,17 @@ void PolarManager::_plotArchiveData()
 
 {
 
-  
     LOG(DEBUG) << "enter";
     LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
   
-
   // initialize plotting
 
   _initialRay = true;
 
-  /*
-  // handle the rays
-  
-  const vector<RadxRay *> &rays = _vol.getRays();
-  if (rays.size() < 1) {
-    cerr << "ERROR - _plotArchiveData" << endl;
-    cerr << "  No rays found" << endl;
-    return;
-  }
-  
-  const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  if (sweeps.size() < 1) {
-    cerr << "ERROR - _plotArchiveData" << endl;
-    cerr << "  No sweeps found" << endl;
-    return;
-  }
-*/
   // clear the canvas
 
   _clear();
 
-/*
-  // handle the rays
-
-  const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-  for (size_t ii = gsweep.radx->getStartRayIndex();
-       ii <= gsweep.radx->getEndRayIndex(); ii++) {
-    RadxRay *ray = rays[ii];
-    _handleRay(_platform, ray);
-    if (ii == 0) {
-      _updateStatusPanel(ray);
-    }
-  }
-  */
 
   string currentFieldName = _displayFieldController->getSelectedFieldName();
   double currentSweepAngle = _sweepController->getSelectedAngle();
@@ -1696,11 +1662,7 @@ void PolarManager::_plotArchiveData()
   QColor backgroundColor(backgroundColorName.c_str());
 
   _ppi->displayImage(currentFieldName, currentSweepAngle,
-    _rayLocationController, *colorMap, backgroundColor); 
-
-  // _sweepController->getSelectedAngle(),
-  // _displayFieldController->getSelectedFieldName());
-  //_updateStatusPanel(???);
+    *colorMap, backgroundColor); 
 
   LOG(DEBUG) << "exit";
 }
@@ -2006,6 +1968,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 // call when new data file is read; or when switching to new sweep?
 // or when new parameter file is read
 void PolarManager::_setupRayLocation() {
+  cerr << "setupRayLocations: enter " << endl;
   float ppi_rendering_beam_width = _platform.getRadarBeamWidthDegH();
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
@@ -2015,6 +1978,7 @@ void PolarManager::_setupRayLocation() {
     currentSweepNumber);
 
   _setMaxRangeKm();
+    cerr << "setupRayLocations: exit " << endl;
 }
 
 // find and set the max range for the Ppi display
@@ -2461,6 +2425,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index,
 ////////////////////////////////////////////
 // freeze / unfreeze
 
+/*
 void PolarManager::_freeze()
 {
   if (_frozen) {
@@ -2474,6 +2439,7 @@ void PolarManager::_freeze()
     _initialRay = true;
   }
 }
+*/
 
 ////////////////////////////////////////////
 // unzoom
@@ -2913,8 +2879,10 @@ void PolarManager::_openFile()
 
   QString inputPath = "/"; // QDir::currentPath();
   // get the path of the current file, if available 
-  if (_archiveFileList.size() > 0) {
-    QDir temp(_archiveFileList[0].c_str());
+  string currentFile = _timeNavController->getSelectedArchiveFile();
+  if (!currentFile.empty()) {
+  //if (_archiveFileList.size() > 0) {
+    QDir temp(currentFile.c_str());
     inputPath = temp.absolutePath();
   } 
 
@@ -2950,6 +2918,9 @@ void PolarManager::_openFile()
     boundaryPointEditorView->setVisible(false);
   }
 
+  // update the time navigation mechanism
+  //updateTimeNavigation(fileList, false);
+
   LOG(DEBUG) << "exit";
 }
 
@@ -2965,7 +2936,7 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
     _updateDisplayFields(selectedFields);
   //_setupDisplayFields(allFieldNames);
      // trying this ... to get the data from the file selected
-    _setArchiveRetrievalPending();
+    //_setArchiveRetrievalPending();
 
     try {
       _getArchiveData();
@@ -2977,71 +2948,6 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
       return;
     }
 
-    
-  
-/*
-  // now update the time controller window
-  QDateTime now = QDateTime::currentDateTime();  
-  //QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-  _setArchiveStartTimeFromGui(now);
-
-  _setArchiveEndTimeFromGui(now);
-  
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
-  QFileInfo fileInfo(filename);
-  string absolutePath = fileInfo.absolutePath().toStdString();
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "changing to path " << absolutePath << endl;
-  }
-//  loadArchiveFileList(dir.absolutePath());
-
-  RadxTimeList timeList;
-  timeList.setDir(absolutePath);
-  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
-  if (timeList.compile()) {
-    cerr << "ERROR - PolarManager::openFile()" << endl;
-    cerr << "  " << timeList.getErrStr() << endl;
-  }
-
-  //vector<string> pathList = timeList.getPathList();
-  //if (pathList.size() <= 0) {
-  //  cerr << "ERROR - PolarManager::openFile()" << endl;
-  //  cerr << "  pathList is empty" << endl;
-  //  cerr << "  " << timeList.getErrStr() << endl;
-  //} else {
-  //  if (_params->debug >= Params::DEBUG_VERBOSE) {
-  //    cerr << "pathList is NOT empty" << endl;
-  //    for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {
-  //     cerr << *i << endl;
-  //    }
-  //    cerr << endl;
-  //  }
-  
-    setArchiveFileList(fileList, false); // pathList, false);
-
-    // now fetch the first time and last time from the directory
-    // and set these values in the time controller display
-
-    RadxTime firstTime;
-    RadxTime lastTime;
-    timeList.getFirstAndLastTime(firstTime, lastTime);
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      cerr << "first time " << firstTime << endl;
-      cerr << "last time " << lastTime << endl;
-    }
-    // convert RadxTime to QDateTime 
-    _archiveStartTime = firstTime;
-    _archiveEndTime = lastTime;
-    _setGuiFromArchiveStartTime();
-    _setGuiFromArchiveEndTime();
-  //} // end else pathList is not empty
-
-      // set initial field to 0
-
-      // _changeField(0, false);
-      //_reconcileDisplayFields();
-*/
     LOG(DEBUG) << "exit";
   }
 }
@@ -3097,8 +3003,9 @@ void PolarManager::_saveFile()
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
-  if (_archiveFileList.size() > 0) {
-    QDir temp(_archiveFileList[0].c_str());
+  string currentFile = _timeNavController->getSelectedArchiveFile();
+  if (!currentFile.empty()) {  
+    QDir temp(currentFile.c_str());
     inputPath = temp.absolutePath();
   } 
 
@@ -3289,10 +3196,10 @@ void PolarManager::_goFwdPeriod()
 ////////////////////////////////////////////////////////
 // set for pending archive retrieval
 
-void PolarManager::_setArchiveRetrievalPending()
-{
-  _archiveRetrievalPending = true;
-}
+//void PolarManager::_setArchiveRetrievalPending()
+//{
+  //_archiveRetrievalPending = true;
+//}
 
 /////////////////////////////////////
 // clear display widgets
@@ -3855,14 +3762,11 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
   // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
   int currentSweepIndex = _sweepController->getSelectedNumber();
-  if (_archiveFileList.size() > 0) {
-    string radarFilePath = _archiveFileList.at(0);
+  string currentFile = _timeNavController->getSelectedArchiveFile();
+  if (!currentFile.empty()) {
+
+    string radarFilePath = currentFile;
   
-	//string text = "Boundary" + to_string(boundaryIndex);
-	//string outputDir;
-	//string fileExt = _boundaryEditorList->currentItem()->text().toUtf8().constData();
-	//string path = _getOutputPath(false, outputDir, fileExt);
-	//boundaryPointEditorControl->save(path);
     try {
       boundaryPointEditorControl->save(boundaryIndex, currentFieldName, 
         currentSweepIndex, radarFilePath);
@@ -3870,7 +3774,8 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
       errorMessage("Save Boundary Error", ex.what());
     }
   } else {
-    errorMessage("Save Boundary Error", "no File Path found");
+    errorMessage("Save Boundary Error",
+      "cannot save boundary, because no open archive file");
   }
   LOG(DEBUG) << "exit";
 }
@@ -3882,20 +3787,24 @@ void PolarManager::loadBoundaryEvent(int boundaryIndex)
   //if (boundaryIndex > 0) {
     //  saved boundary
     // get selected field name
-    string currentFieldName = _displayFieldController->getSelectedFieldName();
-    int currentSweepIndex = _sweepController->getSelectedNumber();
-    if (_archiveFileList.size() > 0) {
-      string radarFilePath = _archiveFileList.at(0);
-      bool successful = boundaryPointEditorControl->load(boundaryIndex, 
-        currentFieldName, currentSweepIndex, radarFilePath);
-      if (!successful) {
-        string msg = "could not load boundary for " + currentFieldName;
-        errorMessage("Load Boundary Error", msg.c_str());
-      }
-    } else {
-      errorMessage("Load Boundary Error", "no File Path found");
+  string currentFieldName = _displayFieldController->getSelectedFieldName();
+  int currentSweepIndex = _sweepController->getSelectedNumber();
+  string currentFile = _timeNavController->getSelectedArchiveFile();
+
+  if (!currentFile.empty()) {
+
+  string radarFilePath = currentFile;
+
+    bool successful = boundaryPointEditorControl->load(boundaryIndex, 
+      currentFieldName, currentSweepIndex, radarFilePath);
+    if (!successful) {
+      string msg = "could not load boundary for " + currentFieldName;
+      errorMessage("Load Boundary Error", msg.c_str());
     }
-  //}
+  } else {
+    errorMessage("Load Boundary Error",
+     "cannot load boundary, because no open archive file");
+  }
 
   // repaint which clears the existing boundary
   _ppi->update(); // showSelectedField();   
@@ -3911,8 +3820,12 @@ void PolarManager::refreshBoundaries()
     // get selected field name
     string currentFieldName = _displayFieldController->getSelectedFieldName();
     int currentSweepIndex = _sweepController->getSelectedNumber();
-    if (_archiveFileList.size() > 0) {
-      string radarFilePath = _archiveFileList.at(0);
+
+    string currentFile = _timeNavController->getSelectedArchiveFile();
+
+    if (!currentFile.empty()) {
+
+      string radarFilePath = currentFile;    
     
       boundaryPointEditorControl->refreshBoundaries(
         radarFilePath, 

@@ -116,7 +116,8 @@ class DLL_EXPORT PolarWidget : public QWidget
               const RadxPlatform &platform,
               //const vector<DisplayField *> &fields,
 	      DisplayFieldController *displayFieldController,
-              bool haveFilteredFields);
+              bool haveFilteredFields,
+              RayLocationController *rayLocationController);
   
   /**
    * @brief Destructor.
@@ -241,7 +242,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   //void displayImage(const size_t field_num);
   void displayImage(string currentFieldName, double currentSweepAngle,
-    RayLocationController *rayLocationController, ColorMap &colorMap,
+    ColorMap &colorMap,
     QColor backgroundColor);
   //void imageReady(QImage *image);
   /**

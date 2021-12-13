@@ -47,12 +47,14 @@ class TimeNavController {
 
 public:
 
-  TimeNavController(QWidget *parent);
+  TimeNavController(TimeNavView *view);
   ~TimeNavController();
 
   void fetchArchiveFiles(string seedFileName);
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);
+  void fetchArchiveFiles(string seedPath, string seedFileName);
+  string &getSelectedArchiveFile();
 
 private:
 

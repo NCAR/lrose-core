@@ -38,9 +38,9 @@
 
 #include "TimeNavController.hh"
 
-TimeNavController::TimeNavController(QWidget *parent) {
+TimeNavController::TimeNavController(TimeNavView *view) {
 
-	_view = new TimeNavView(parent);
+	_view = view;
 	_model = new TimeNavModel();
 
 }
@@ -50,13 +50,21 @@ TimeNavController::~TimeNavController() {
   if (_model != NULL) delete _model;
 }
 
-void TimeNavController::fetchArchiveFiles(string seedFileName) {
-  _model->loadArchiveFileList(seedFileName);
+void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName) {
+  _model->findArchiveFileList(seedPath);
   _setGuiFromArchiveStartTime();  
   _setGuiFromArchiveEndTime();
+  _model->setSelectedFile(seedFileName);
   _setGuiFromSelectedTime();
 
   _view->setNTicks(_model->getNArchiveFiles());
+
+  _view->showTimeControl();
+}
+
+
+string &TimeNavController::getSelectedArchiveFile() {
+  return _model->getSelectedArchiveFile();
 }
 
 ////////////////////////////////////////////////////////

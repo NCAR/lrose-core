@@ -49,33 +49,36 @@
 ///////////////////////////////////////
 // set input file list for archive mode
 
-void TimeNavModel::setArchiveFileList(const vector<string> &list,
-                                      bool fromCommandLine /* = true */)
+void TimeNavModel::setArchiveFileList(const vector<string> &list)
 {
 
-  if (fromCommandLine && list.size() > 0) {
-    // determine start and end time from file list
-    RadxTime startTime, endTime;
-    NcfRadxFile::getTimeFromPath(list[0], startTime);
-    NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
-    // round to nearest five minutes
-    time_t startTimeSecs = startTime.utime();
-    startTimeSecs =  (startTimeSecs / 300) * 300;
-    time_t endTimeSecs = endTime.utime();
-    endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-    _archiveStartTime.set(startTimeSecs);
-    _archiveEndTime.set(endTimeSecs);
-    _archiveScanIndex = 0;
-  }
+  if (list.size() <= 0) {
+    throw std::invalid_argument("empty archive list");
+  } 
 
+  // determine start and end time from file list
+  RadxTime startTime, endTime;
+  NcfRadxFile::getTimeFromPath(list[0], startTime);
+  NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
+  // round to nearest five minutes
+  time_t startTimeSecs = startTime.utime();
+  startTimeSecs =  (startTimeSecs / 300) * 300;
+  time_t endTimeSecs = endTime.utime();
+  endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
+  _archiveStartTime.set(startTimeSecs);
+  _archiveEndTime.set(endTimeSecs);
+  _archiveScanIndex = 0;
+  _selectedTime.set(startTimeSecs);
+  
   _archiveFileList = list;
 
+  /*
   if (_archiveScanIndex < 0) {
     _archiveScanIndex = 0;
   } else if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
     _archiveScanIndex = _archiveFileList.size() - 1;
   }
-
+  */
 /*
   if (_timeSlider) {
     _timeSlider->setMinimum(0);
@@ -107,7 +110,7 @@ void TimeNavModel::setArchiveFileList(const vector<string> &list,
 // starting point is the archiveDataUrl
 // returns 0 on success, -1 on failure
 
-int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
+int TimeNavModel::findArchiveFileList(string archiveDataUrl)
 {
 
   bool _urlOK;
@@ -133,6 +136,9 @@ int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
 
   // TODO: how to report error? throw exception???
   if (timeList.getPathList().size() < 1) {
+    string msg("No archive files found at  ");
+    msg.append(archiveDataUrl);
+    throw std::invalid_argument(msg);
     //cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
     //cerr << "  Cannot load file list for url: " 
     //     << archiveDataUrl << endl;
@@ -187,7 +193,7 @@ int TimeNavModel::loadArchiveFileList(string archiveDataUrl)
   }
 */
 
-  setArchiveFileList(timeList.getPathList(), false);
+  setArchiveFileList(timeList.getPathList());
   
   return 0;
 
@@ -325,5 +331,39 @@ void TimeNavModel::setSelectedFile(int value)
     _archiveScanIndex = value;
   }
 
+}
+
+void TimeNavModel::setSelectedFile(string fileName) 
+{
+
+  vector<string>::iterator it;
+  bool found = false;
+  it = _archiveFileList.begin();
+  while ( (it != _archiveFileList.end()) && !found ) {
+    RadxPath thePath(*it);
+    if (thePath.getFile().compare(fileName) == 0) {
+      _archiveScanIndex = it - _archiveFileList.begin();
+      found = true;
+    }
+    ++it;
+  }  
+
+  if (found) {
+    // get time for this path
+    RadxTime pathTime;
+    NcfRadxFile::getTimeFromPath(fileName, pathTime);
+    // set selected time
+    _selectedTime = pathTime;
+  }
+
+}
+
+string &TimeNavModel::getSelectedArchiveFile() { 
+  if (_archiveFileList.size() <= 0) {
+    string empty;
+    return empty;
+  } else {
+    return _archiveFileList.at(_archiveScanIndex);
+  }
 }
 

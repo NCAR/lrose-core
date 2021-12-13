@@ -305,8 +305,8 @@ private:
   // beam reading timer
 
   //static bool _firstTimerEvent;
-  int _beamTimerId;
-  bool _frozen;
+  //int _beamTimerId;
+  //bool _frozen;
 
   // data fields
   //  vector <DisplayField *> _fields;
@@ -332,7 +332,7 @@ private:
   // actions
   
   QAction *_exitAct;
-  QAction *_freezeAct;
+  //QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_unzoomAct;
   QAction *_refreshAct;
@@ -601,10 +601,10 @@ private:
   TimeNavController *_timeNavController;
   bool _timeControlPlaced;
 
-  int _nArchiveScans;
-  vector<string> _archiveFileList;
-  int _archiveScanIndex;
-  bool _archiveFilesHaveDayDir;
+  //int _nArchiveScans;
+  //vector<string> _archiveFileList;
+  //int _archiveScanIndex;
+  //bool _archiveFilesHaveDayDir;
 
   // time slider
 
@@ -749,7 +749,7 @@ private slots:
   // end from DisplayManager
 
 
-  void _freeze();
+  //void _freeze();
   void _unzoom();
   void _refresh();
   //void _changeField(int fieldId, bool guiMode = true);
@@ -790,7 +790,7 @@ private slots:
   //void _goBackPeriod();
   //void _goFwdPeriod();
 
-  void _setArchiveRetrievalPending();
+  //void _setArchiveRetrievalPending();
 
   // time controller
 
