@@ -278,7 +278,7 @@ int ConvStrat::_doRead()
 {
   
   _inMdvx.clear();
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     _inMdvx.setDebug(true);
   }
   _inMdvx.addReadField(_params.dbz_field_name);
@@ -714,7 +714,7 @@ int ConvStrat::_doWrite()
   // copying master header from input object
   
   _outMdvx.clear();
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     _outMdvx.setDebug(true);
   }
   _outMdvx.setWriteLdataInfo();
