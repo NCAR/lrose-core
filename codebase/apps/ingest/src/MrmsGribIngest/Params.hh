@@ -76,7 +76,8 @@ public:
 
   typedef enum {
     REALTIME = 0,
-    FILELIST = 1
+    ARCHIVE = 1,
+    FILELIST = 2
   } mode_t;
 
   typedef enum {
