@@ -24,6 +24,7 @@ SUB_DIRS = \
 	Gini2Mdv \
 	GoesRGLM2Spdb \
 	GoesRnetCDF2Mdv \
+	GpmHdf5ToMdv \
 	Grib2Mdv \
 	Grib2toMdv \
 	GtsSockIngest \
