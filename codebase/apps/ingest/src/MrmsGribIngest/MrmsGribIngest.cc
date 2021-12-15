@@ -378,6 +378,19 @@ int MrmsGribIngest::_processFileArchive(const string &inputPath)
     cerr << "  Cannot get time from file: " << inputPath << endl;
     return -1;
   }
+
+  // elapsed time since last file
+
+  long secsSinceLatestFile = fileDataTime - _latestDataTime;
+  if (secsSinceLatestFile < _params.min_time_between_output_files_in_secs) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "--------------------------------------------" << endl;
+      cerr << "Ignoring this file: " << inputPath << endl;
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  Secs since last time: " << secsSinceLatestFile << endl;
+    }
+    return 0;
+  }
   
   // check if we have already processed this file
   
@@ -460,15 +473,15 @@ int MrmsGribIngest::_processFileArchive(const string &inputPath)
     LayerPair lp(_getHeightKm(*layer), layer);
     _layers.insert(lp);
 
+    if (_params.debug) {
+      cerr << "  data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  n layers so far: " << _layers.size() << endl;
+    }
+
   } // ipath
 
   _latestDataTime = fileDataTime;
   
-  if (_params.debug) {
-    cerr << "  data time: " << DateTime::strm(_latestDataTime) << endl;
-    cerr << "  n layers: " << _layers.size() << endl;
-  }
-
   if (_layers.size() < 1) {
     cerr << "ERROR - no layers found for data time: " << DateTime::strm(fileDataTime) << endl;
     return -1;
