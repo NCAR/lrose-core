@@ -38,6 +38,8 @@
 
 #include "TimeNavView.hh"
 
+#include <QMessageBox>
+
 TimeNavView::TimeNavView(QWidget *parent)
 {
 
@@ -127,23 +129,23 @@ TimeNavView::TimeNavView(QWidget *parent)
 
   _back1 = new QPushButton(timeLower);
   _back1->setText("<");
-  connect(_back1, SIGNAL(clicked()), this, SLOT(_goBack1()));
+  connect(_back1, &QPushButton::clicked, this, &TimeNavView::_goBack1);
   _back1->setToolTip("Go back by 1 file");
   
   _fwd1 = new QPushButton(timeLower);
   _fwd1->setText(">");
-  connect(_fwd1, SIGNAL(clicked()), this, SLOT(_goFwd1()));
+  connect(_fwd1, &QPushButton::clicked, this, &TimeNavView::_goFwd1);
   _fwd1->setToolTip("Go forward by 1 file");
     
   _backPeriod = new QPushButton(timeLower);
   _backPeriod->setText("<<");
-  connect(_backPeriod, SIGNAL(clicked()), this, SLOT(_goBackPeriod()));
-  _backPeriod->setToolTip("Go back by the archive time period");
+  connect(_backPeriod, &QPushButton::clicked, this, &TimeNavView::_goBackPeriod);
+  _backPeriod->setToolTip("Go back by quarter time period");
   
   _fwdPeriod = new QPushButton(timeLower);
   _fwdPeriod->setText(">>");
-  connect(_fwdPeriod, SIGNAL(clicked()), this, SLOT(_goFwdPeriod()));
-  _fwdPeriod->setToolTip("Go forward by the archive time period");
+  connect(_fwdPeriod, &QPushButton::clicked, this, &TimeNavView::_goFwdPeriod);
+  _fwdPeriod->setToolTip("Go forward by quarter time period");
 
   // accept cancel buttons
 
@@ -363,6 +365,40 @@ void TimeNavView::timeSliderPressed()
   //}
 }
 
+void TimeNavView::_goBack1() {
+  int value = _timeSlider->value();
+  value = value - 1;
+  if (value >= 0)
+    setSliderPosition(value);  
+  else 
+    errorMessage("Note", "at the beginning of archive");
+}
+
+void TimeNavView::_goFwd1() {
+  int value = _timeSlider->value();
+  value = value + 1;
+  if (value <= _timeSlider->maximum())
+    setSliderPosition(value);  
+  else  
+    errorMessage("Note", "at the end of archive");
+}
+
+void TimeNavView::_goBackPeriod() {
+  int value = _timeSlider->value();
+  value = value - _timeSlider->maximum()/4;
+  if (value < 0)
+    value = 0;
+  setSliderPosition(value);
+}
+
+void TimeNavView::_goFwdPeriod() {
+  int value = _timeSlider->value();
+  value = value + _timeSlider->maximum()/4;
+  int max = _timeSlider->maximum();
+  if (value > max)
+    value = max;
+  setSliderPosition(value); 
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // print time slider actions for debugging
@@ -509,5 +545,7 @@ void TimeNavView::cancelGuiTimes()
 }
 
 
-
+void TimeNavView::errorMessage(string title, string message) {
+  QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+}
 

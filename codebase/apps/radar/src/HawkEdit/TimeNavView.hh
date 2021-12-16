@@ -105,8 +105,14 @@ public slots:
 
   void acceptGuiTimes();
   void cancelGuiTimes();
+  void _goBack1();  
+  void _goFwd1();
+  void _goBackPeriod();
+  void _goFwdPeriod();
 
 private:
+
+  void errorMessage(string title, string message);
 
   QWidget *_parent;
   
