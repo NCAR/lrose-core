@@ -199,6 +199,10 @@ int MrmsGribIngest::_processFileRealtime(const string &inputPath)
 {
   
   PMU_auto_register("Processing file - realtime");
+  if (_params.debug) {
+    cerr << "--------------------------------------------" << endl;
+    cerr << "Processing file: " << inputPath << endl;
+  }
     
   // uncompress the file if needed
   
@@ -212,27 +216,12 @@ int MrmsGribIngest::_processFileRealtime(const string &inputPath)
   time_t fileDataTime = 0;
   bool dateOnly = false;
   if (DataFileNames::getDataTime(uncompressedPath, fileDataTime, dateOnly)) {
-    cerr << "ERROR - _processFileRealtime" << endl;
+    cerr << "WARNING - _processFileRealtime" << endl;
     cerr << "  Cannot get time from file: " << uncompressedPath << endl;
-  }
-
-  // check if we have already processed this file
-  
-  if (_fileDataTimes.find(fileDataTime) != _fileDataTimes.end()) {
-    // time previously processed - so ignore
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "--------------------------------------------" << endl;
-      cerr << "Ignoring this file: " << uncompressedPath << endl;
+  } else {
+    if (_params.debug) {
       cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
-      cerr << "  Time already processed" << endl;
     }
-    return 0;
-  }
-  
-  if (_params.debug) {
-    cerr << "--------------------------------------------" << endl;
-    cerr << "Processing file: " << uncompressedPath << endl;
-    cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
   }
 
   // create MDV output file
@@ -379,19 +368,6 @@ int MrmsGribIngest::_processFileArchive(const string &inputPath)
     return -1;
   }
 
-  // elapsed time since last file
-
-  long secsSinceLatestFile = fileDataTime - _latestDataTime;
-  if (secsSinceLatestFile < _params.min_time_between_output_files_in_secs) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "--------------------------------------------" << endl;
-      cerr << "Ignoring this file: " << inputPath << endl;
-      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
-      cerr << "  Secs since last time: " << secsSinceLatestFile << endl;
-    }
-    return 0;
-  }
-  
   // check if we have already processed this file
   
   if (_fileDataTimes.find(fileDataTime) != _fileDataTimes.end()) {
@@ -405,6 +381,19 @@ int MrmsGribIngest::_processFileArchive(const string &inputPath)
     return 0;
   }
 
+  // elapsed time since last file
+
+  long secsSinceLatestFile = fileDataTime - _latestDataTime;
+  if (secsSinceLatestFile < _params.min_time_between_output_files_in_secs) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "--------------------------------------------" << endl;
+      cerr << "Ignoring this file: " << inputPath << endl;
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  Secs since last time: " << secsSinceLatestFile << endl;
+    }
+    return 0;
+  }
+  
   // get list of files at this time
 
   vector<string> timedPathList;
@@ -481,6 +470,7 @@ int MrmsGribIngest::_processFileArchive(const string &inputPath)
   } // ipath
 
   _latestDataTime = fileDataTime;
+  _fileDataTimes.insert(fileDataTime);
   
   if (_layers.size() < 1) {
     cerr << "ERROR - no layers found for data time: " << DateTime::strm(fileDataTime) << endl;
