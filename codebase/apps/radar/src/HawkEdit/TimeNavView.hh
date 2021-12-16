@@ -68,6 +68,8 @@ using namespace std;
 
 class TimeNavView : public QDialog {
 
+  Q_OBJECT
+
 public:
 
   TimeNavView(QWidget *parent);
@@ -98,7 +100,7 @@ signals:
   void newTimeIndexSelected(int value);
   void timeSliderMoved(int value);
 
-// slots
+public slots:
 
   void acceptGuiTimes();
   void cancelGuiTimes();

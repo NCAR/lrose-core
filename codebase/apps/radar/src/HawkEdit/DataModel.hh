@@ -82,6 +82,7 @@ public:
   RadxTime getEndTimeSecs();
 
   RadxField *fetchDataField(RadxRay *ray, string &fieldName);
+  //const RadxField *fetchDataField(const RadxRay *ray, string &fieldName);
   const float *fetchData(RadxRay *ray, string &fieldName);
   size_t getNRays(); // string fieldName, double sweepAngle);
   size_t getNRays(int sweepNumber);
@@ -89,7 +90,7 @@ public:
   size_t getFirstRayIndex(int sweepIndex);
   size_t getLastRayIndex(int sweepIndex);  
   int getSweepNumber(int sweepIndex);
-  const vector<RadxRay *> &getRays();
+  vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
   float getMissingFl32(string fieldName);
@@ -132,7 +133,7 @@ private:
 //DataModel *DataModel::_instance = NULL;  
   static DataModel *_instance;
 
-  RadxVol _vol;
+  RadxVol *_vol;
 
 };
 

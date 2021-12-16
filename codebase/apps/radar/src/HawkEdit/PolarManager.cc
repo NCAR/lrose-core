@@ -208,7 +208,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   ParamFile *_params = ParamFile::Instance();
 
-  _setArchiveMode(_params->begin_in_archive_mode);
+  //_setArchiveMode(_params->begin_in_archive_mode);
 
   if (_timeNavController != NULL) {
     //_timeNavController->setArchiveStartTime(_params->archive_start_time);
@@ -585,7 +585,7 @@ void PolarManager::_setupWindows()
   //_createBoundaryEditorDialog();
 
  
-   _setSweepPanelVisibility();
+   //_setSweepPanelVisibility();
 
   // time panel
 
@@ -596,16 +596,16 @@ void PolarManager::_setupWindows()
 //////////////////////////////
 // add/remove  sweep panel (archive mode only)
 
-void PolarManager::_setSweepPanelVisibility()
-{
-  if (_sweepPanel != NULL) {
-    if (_archiveMode) {
-      _sweepPanel->setVisible(true);
-    } else {
-      _sweepPanel->setVisible(false);
-    }
-  }
-}
+//void PolarManager::_setSweepPanelVisibility()
+//{
+//  if (_sweepPanel != NULL) {
+//    if (_archiveMode) {
+//      _sweepPanel->setVisible(true);
+//    } else {
+//     _sweepPanel->setVisible(false);
+//    }
+//  }
+//}
 
 //////////////////////////////
 // create actions for menus
@@ -984,11 +984,12 @@ int PolarManager::loadArchiveFileList()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void PolarManager::_handleArchiveData()
-{
+//void PolarManager::_handleArchiveData()
+//{
+/*
     LOG(DEBUG) << "enter";
 
-  _ppi->setArchiveMode(true);
+  //_ppi->setArchiveMode(true);
   //_ppi->setStartOfSweep(true);
 
   //_rhi->setArchiveMode(true);
@@ -1021,13 +1022,14 @@ void PolarManager::_handleArchiveData()
   this->setCursor(Qt::ArrowCursor);
   //_timeNavController->setCursor(Qt::ArrowCursor);
 
-  _activateArchiveRendering();
+  //_activateArchiveRendering();
 
   if (_firstTime) {
     _firstTime = false;
   }
   
 }
+*/
 
 /////////////////////////////
 // get data in archive mode
@@ -1603,7 +1605,7 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
   // _plotArchiveData();
   // TODO: create this ... from plotArchiveData()
   _updateArchiveData(newFieldNames); 
-  _activateArchiveRendering();
+  //_activateArchiveRendering();
 
   LOG(DEBUG) << "exit"; 
 }
@@ -1650,7 +1652,7 @@ void PolarManager::_plotArchiveData()
 
   // clear the canvas
 
-  _clear();
+  //_clear();
 
 
   string currentFieldName = _displayFieldController->getSelectedFieldName();
@@ -1660,9 +1662,12 @@ void PolarManager::_plotArchiveData()
   
   string backgroundColorName = _displayFieldController->getBackgroundColor();
   QColor backgroundColor(backgroundColorName.c_str());
-
-  _ppi->displayImage(currentFieldName, currentSweepAngle,
-    *colorMap, backgroundColor); 
+  try {
+    _ppi->displayImage(currentFieldName, currentSweepAngle,
+      *colorMap, backgroundColor); 
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
+  }
 
   LOG(DEBUG) << "exit";
 }
@@ -2258,6 +2263,7 @@ void PolarManager::dataFileChanged() {
 
   _sweepController->clearSweepRadioButtons();
   _sweepController->createSweepRadioButtons();
+  _plotArchiveData();
 
 }
 
@@ -2267,7 +2273,7 @@ void PolarManager::dataFileChanged() {
 void PolarManager::_storeRayLoc(const RadxRay *ray, const double az,
                                 const double beam_width, RayLoc *ray_loc)
 {
-
+x
   // Determine the extent of this ray
 
   if (_params->ppi_override_rendering_beam_width) {
@@ -2818,24 +2824,28 @@ void PolarManager::_createTimeControl()
 {
   _timeNavView = new TimeNavView(this);
   _timeNavController = new TimeNavController(_timeNavView);
-  /*
+  
   // connect slots for time slider
 
-  connect(_timeNavView, SIGNAL(endTimeChanged(string)),
-          this, SLOT(endTimeChanged(string)));
+  //connect(_timeNavView, SIGNAL(endTimeChanged(string)),
+  //        this, SLOT(endTimeChanged(string)));
   
-  connect(_timeNavView, SIGNAL(startTimeChanged(string)),
-          this, SLOT(startTimeChanged(string)));
+  //connect(_timeNavView, SIGNAL(startTimeChanged(string)),
+  //        this, SLOT(startTimeChanged(string)));
   
-  connect(_timeNavView, SIGNAL(newTimeSelected(int)),
-          this, SLOT(newTimeSelected(int)));
+  connect(_timeNavView, &TimeNavView::newTimeIndexSelected,
+          this, &PolarManager::newTimeSelected);
 
 //  connect(_timeNavView, SIGNAL(sliderPressed()),
 //          this, SLOT(_timeSliderPressed()));
-*/
+
 }
 
-
+void PolarManager::newTimeSelected(int index) {
+  _timeNavController->timeSliderValueChanged(index);
+  _readDataFile2();
+  _plotArchiveData();
+}
 
 void PolarManager::_showTimeControl()
 {
@@ -2937,6 +2947,24 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
   //_setupDisplayFields(allFieldNames);
      // trying this ... to get the data from the file selected
     //_setArchiveRetrievalPending();
+    
+    _readDataFile2();
+    /*
+    try {
+      _getArchiveData();
+      _setupRayLocation();
+
+    } catch (FileIException &ex) { 
+      this->setCursor(Qt::ArrowCursor);
+      // _timeControl->setCursor(Qt::ArrowCursor);
+      return;
+    }
+    */
+    LOG(DEBUG) << "exit";
+  }
+}
+
+void PolarManager::_readDataFile2() {
 
     try {
       _getArchiveData();
@@ -2947,10 +2975,8 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
-
-    LOG(DEBUG) << "exit";
-  }
 }
+
 /*
 void PolarManager::_reconcileDisplayFields() {
 
@@ -3204,29 +3230,29 @@ void PolarManager::_goFwdPeriod()
 /////////////////////////////////////
 // clear display widgets
 
-void PolarManager::_clear()
-{
+//void PolarManager::_clear()
+//{
   //if (_ppi) {
   //  _ppi->clear();
   //}
   //if (_rhi) {
   //  _rhi->clear();
   //}
-}
+//}
 
 /////////////////////////////////////
 // set archive mode
 
-void PolarManager::_setArchiveMode(bool state)
-{
-  _archiveMode = state;
-  _setSweepPanelVisibility();
+//void PolarManager::_setArchiveMode(bool state)
+//{
+//  _archiveMode = state;
+//  _setSweepPanelVisibility();
 
-  if (_ppi) {
-    _ppi->setArchiveMode(state);
-  }
+//  if (_ppi) {
+//    _ppi->setArchiveMode(state);
+//  }
 
-}
+//}
 
 ////////////////////////////////////////////////////////
 // set modes for retrieving the data
@@ -3235,9 +3261,9 @@ void PolarManager::_setArchiveMode(bool state)
 /////////////////////////////////////
 // activate archive rendering
 
-void PolarManager::_activateArchiveRendering()
-{
-  _clear();
+//void PolarManager::_activateArchiveRendering()
+//{
+//  _clear();
   //_displayFieldController->renderFields();
   //if (_ppi) {
     //_fieldRendererController->performRendering(0);
@@ -3247,7 +3273,7 @@ void PolarManager::_activateArchiveRendering()
   //  _rhi->activateArchiveRendering();
     //_fieldRendererController->performRendering(0); // activateArchiveRendering();
   //}
-}
+//}
 
 /////////////////////////////////////////////////////
 // creating image files in archive mode

@@ -252,7 +252,7 @@ void TimeNavController::_goFwdPeriod()
 void TimeNavController::timeSliderValueChanged(int value) 
 {
 
-  _model->changeSelectedTime(value);
+  _model->setSelectedFile(value);
   /*
   size_t nFiles = _model->getNArchiveFiles();
   if (value < 0 || value > (int) nFiles - 1) {

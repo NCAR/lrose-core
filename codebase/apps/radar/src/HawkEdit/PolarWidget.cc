@@ -100,7 +100,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // mode
 
-  _archiveMode = _params->begin_in_archive_mode;
+//  _archiveMode = _params->begin_in_archive_mode;
 
   // Set up the background color
 
@@ -294,10 +294,10 @@ QTransform *PolarWidget::computeTextTransform(
  * set archive mode
  */
 
-void PolarWidget::setArchiveMode(bool archive_mode)
-{
-  _archiveMode = archive_mode;
-}
+//void PolarWidget::setArchiveMode(bool archive_mode)
+//{
+//  _archiveMode = archive_mode;
+//}
 
 /*************************************************************************
  * unzoom the view
@@ -680,6 +680,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   } catch (std::range_error &ex) {
       LOG(ERROR) << ex.what();
       //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  } catch (std::invalid_argument &ex) {
+    _manager->errorMessage("Error", ex.what());
   }
   LOG(DEBUG) << "exit";
 }
@@ -899,11 +901,10 @@ void PolarWidget::drawRings(QPainter &painter)
   qreal htranslate = painter.combinedTransform().m31();
   qreal vtranslate = painter.combinedTransform().m32();
 
-cerr << "before setWidth " << endl;
   float width = 1.0/hscale * 2.0;
   if (width <= 0) width = 1.0;
   pen.setWidth(width);
-cerr << "after setWidth " << endl;
+
   painter.setPen(pen);
   
   // Draw rings

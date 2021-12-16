@@ -297,7 +297,7 @@ void TimeNavModel::getSelectedTime(int *year, int *month, int *day,
 
 }
 
-void TimeNavModel::changeSelectedTime(int value) 
+/* void TimeNavModel::changeSelectedTime(int value) 
 {
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {
     return;
@@ -311,6 +311,7 @@ void TimeNavModel::changeSelectedTime(int value)
   _selectedTime = pathTime;
 
 }
+*/
 
 void TimeNavModel::setSelectedFile(int value) 
 {
@@ -327,9 +328,9 @@ void TimeNavModel::setSelectedFile(int value)
   _selectedTime = pathTime;
 
   // request data
-  if (_archiveScanIndex != value) {
+  //if (_archiveScanIndex != value) {
     _archiveScanIndex = value;
-  }
+  //}
 
 }
 

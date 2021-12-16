@@ -256,6 +256,8 @@ public slots:
 
   void spreadsheetDataChanged();
 
+  void newTimeSelected(int value);
+
   void errorMessage(string title, string message);
 
 signals:
@@ -646,7 +648,7 @@ private:
   
   // local methods
 
-  void _clear();
+  //void _clear();
   void _setupWindows();
   void _createActions();
   void _createMenus();
@@ -654,6 +656,7 @@ private:
   // data retrieval
 
   void _readDataFile(vector<string> *selectedFields);
+  void _readDataFile2();
 
   // handleArchiveData calls:
   // getArchiveData
@@ -677,7 +680,7 @@ private:
   //       an instance of RayLoc.
 
 
-  void _handleArchiveData();
+  //void _handleArchiveData();
   int _getArchiveData();
   void _plotArchiveData();
   void _updateArchiveData(vector<string> &fieldNames);
@@ -709,16 +712,16 @@ private:
 
   // modes
 
-  void _setArchiveMode(bool state);
+  //void _setArchiveMode(bool state);
   //void _activateRealtimeRendering();
-  void _activateArchiveRendering();
+  //void _activateArchiveRendering();
 
   // archive mode
 
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
-  void _setSweepPanelVisibility();
+  //void _setSweepPanelVisibility();
 
   // time slider
 

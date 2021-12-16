@@ -249,7 +249,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    * set archive mode
    */
   
-  void setArchiveMode(bool archive_mode);
+  //void setArchiveMode(bool archive_mode);
 
   /**
    * @brief Unzoom the view.
@@ -412,7 +412,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // archive mode
 
-  bool _archiveMode;
+  //bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for

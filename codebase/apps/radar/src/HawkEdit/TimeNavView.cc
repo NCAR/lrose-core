@@ -178,19 +178,22 @@ TimeNavView::TimeNavView(QWidget *parent)
   timeLowerLayout->addWidget(_fwd1, stretch, Qt::AlignLeft);
   timeLowerLayout->addWidget(_fwdPeriod, stretch, Qt::AlignLeft);
 
+
+  _timeSlider->setTracking(true);
+
   // connect slots for time slider
   
-  connect(_timeSlider, SIGNAL(actionTriggered(int)),
-          this, SLOT(_timeSliderActionTriggered(int)));
+  //connect(_timeSlider, SIGNAL(actionTriggered(int)),
+  //        this, SLOT(_timeSliderActionTriggered(int)));
   
-  connect(_timeSlider, SIGNAL(valueChanged(int)),
-          this, SLOT(_timeSliderValueChanged(int)));
+  connect(_timeSlider, &QSlider::valueChanged,
+          this, &TimeNavView::timeSliderReleased);
   
-  connect(_timeSlider, SIGNAL(sliderReleased()),
-          this, SLOT(_timeSliderReleased()));
+  connect(_timeSlider, &QSlider::sliderReleased,
+          this, &TimeNavView::timeSliderReleased);
 
-  connect(_timeSlider, SIGNAL(sliderPressed()),
-          this, SLOT(_timeSliderPressed()));
+  connect(_timeSlider, &QSlider::sliderPressed,
+          this, &TimeNavView::timeSliderPressed);
 
 }
 
@@ -326,7 +329,7 @@ void TimeNavView::timeSliderReleased()
 {
   int value = _timeSlider->value();
 
-  //emit newTimeIndexSelected(value);
+  emit newTimeIndexSelected(value);
   /* move to controller ...
   // get path for this value
   string path = _archiveFileList[value];

@@ -45,7 +45,7 @@ public:
   size_t endIndex;
   // bool master;
   bool active;
-  const RadxRay *ray;
+  RadxRay *ray;
 
   RayLoc() {
     startIndex = 0;

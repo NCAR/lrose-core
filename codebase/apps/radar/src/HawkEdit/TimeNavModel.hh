@@ -64,7 +64,7 @@ public:
   void getSelectedTime(int *year, int *month, int *day,
     int *hour, int *minute, int *seconds);
 
-  void changeSelectedTime(int value);
+  //void changeSelectedTime(int value);
   void setSelectedFile(int value);
   void setSelectedFile(string fileName);
 

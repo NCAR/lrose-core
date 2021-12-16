@@ -206,6 +206,7 @@ MOC_OUTPUT = \
 	moc_SpreadSheetDelegate.cpp \
 	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
+	moc_TimeNavView.cpp \
 	qrc_resources.cpp \
 	qrc_customcompleter.cpp
 
