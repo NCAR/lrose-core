@@ -240,6 +240,11 @@ void TimeNavView::setNTicks(int nFiles) {
 
 }
 
+void TimeNavView::setSliderPosition(int value) {
+  _timeSlider->setValue(value);
+  // note: this triggers the notifier signal: valueChanged
+}
+
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 

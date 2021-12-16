@@ -50,6 +50,7 @@ public:
   TimeNavController(TimeNavView *view);
   ~TimeNavController();
 
+  void setSliderPosition();
   void fetchArchiveFiles(string seedFileName);
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);

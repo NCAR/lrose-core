@@ -368,3 +368,6 @@ string &TimeNavModel::getSelectedArchiveFile() {
   }
 }
 
+int TimeNavModel::getPositionOfSelection() {
+  return _archiveScanIndex;
+}

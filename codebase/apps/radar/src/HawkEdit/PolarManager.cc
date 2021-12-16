@@ -952,11 +952,11 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 ///////////////////////////////////////////////
 // get archive file list by searching for files
 // returns 0 on success, -1 on failure
-
+/*
 int PolarManager::loadArchiveFileList()
 
 {
-  /*
+  
   RadxTimeList timeList;
   timeList.setDir(_params->archive_data_url);
   timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
@@ -975,10 +975,10 @@ int PolarManager::loadArchiveFileList()
   }
 
   setArchiveFileList(timeList.getPathList(), false);
-  */
+  
   return 0;
-
 }
+*/
 
 
 ///////////////////////////////////////
@@ -2930,6 +2930,7 @@ void PolarManager::_openFile()
 
   // update the time navigation mechanism
   //updateTimeNavigation(fileList, false);
+  _timeNavController->setSliderPosition();
 
   LOG(DEBUG) << "exit";
 }

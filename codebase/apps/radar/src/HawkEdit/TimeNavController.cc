@@ -58,10 +58,16 @@ void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName) 
   _setGuiFromSelectedTime();
 
   _view->setNTicks(_model->getNArchiveFiles());
+  //setSliderPosition(_model->getPositionOfSelection());
 
   _view->showTimeControl();
 }
 
+
+void TimeNavController::setSliderPosition() {
+  int value = _model->getPositionOfSelection();
+  _view->setSliderPosition(value);
+}
 
 string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
@@ -253,6 +259,7 @@ void TimeNavController::timeSliderValueChanged(int value)
 {
 
   _model->setSelectedFile(value);
+  _setGuiFromSelectedTime();
   /*
   size_t nFiles = _model->getNArchiveFiles();
   if (value < 0 || value > (int) nFiles - 1) {

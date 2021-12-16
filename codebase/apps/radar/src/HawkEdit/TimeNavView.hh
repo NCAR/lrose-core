@@ -80,6 +80,7 @@ public:
   bool _archiveFilesHaveDayDir;
 
   void setNTicks(int nFiles);
+  void setSliderPosition(int value);
   void setGuiFromArchiveStartTime(int year, int month, int day,
     int hour, int minute, int seconds);
   void setGuiFromArchiveEndTime(int year, int month, int day,

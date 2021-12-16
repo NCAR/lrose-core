@@ -141,7 +141,7 @@ public:
   // load archive file list by searching for files
   // returns 0 on success, -1 on failure
   
-  int loadArchiveFileList();
+  //int loadArchiveFileList();
 
 
   //  const RadxVol getDataVolume();

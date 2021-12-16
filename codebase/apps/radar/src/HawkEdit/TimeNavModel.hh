@@ -69,6 +69,7 @@ public:
   void setSelectedFile(string fileName);
 
   string &getSelectedArchiveFile();
+  int getPositionOfSelection();
 
   // void DoSomething();
 
