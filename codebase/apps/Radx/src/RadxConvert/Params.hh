@@ -109,6 +109,18 @@ public:
   } primary_axis_t;
 
   typedef enum {
+    SWEEP_MODE_SECTOR = 1,
+    SWEEP_MODE_RHI = 3,
+    SWEEP_MODE_VERTICAL_POINTING = 4,
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+    SWEEP_MODE_SUNSCAN = 11,
+    SWEEP_MODE_POINTING = 12,
+    SWEEP_MODE_SUNSCAN_RHI = 17,
+    SWEEP_MODE_ELECTRONIC_STEERING = 20
+  } sweep_mode_t;
+
+  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -660,6 +672,12 @@ public:
 
   double optimized_transitions_max_elev_error;
 
+  tdrp_bool_t override_sweep_mode;
+
+  sweep_mode_t sweep_mode;
+
+  tdrp_bool_t set_sweep_mode_from_ray_angles;
+
   tdrp_bool_t adjust_sweep_limits_using_angles;
 
   tdrp_bool_t sort_sweeps_by_fixed_angle;
@@ -815,7 +833,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[181];
+  mutable TDRPtable _table[184];
 
   const char *_className;
 

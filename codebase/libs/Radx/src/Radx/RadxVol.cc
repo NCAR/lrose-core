@@ -765,7 +765,9 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
       maxCount = count;
     }
   }
-
+  if (predomMode == Radx::SWEEP_MODE_NOT_SET) {
+    predomMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  }
   return predomMode;
 
 }

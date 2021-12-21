@@ -671,6 +671,36 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-sweep_mode")) {
+      
+      if (i < argc - 1) {
+        i++;
+        sprintf(tmp_str, "override_sweep_mode = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+        if (strstr("sur", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_AZIMUTH_SURVEILLANCE;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("sec", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_SECTOR;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("rhi", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_RHI;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("sun", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_SUNSCAN;");
+          TDRP_add_override(&override, tmp_str);
+        } else {
+          OK = false;
+        }
+      } else {
+	OK = false;
+      }
+
+    } else if (!strcmp(argv[i], "-sweep_mode_from_angles")) {
+      
+      sprintf(tmp_str, "set_sweep_mode_from_ray_angles = true;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-relaxed_limits")) {
       
       sprintf(tmp_str, "apply_strict_angle_limits = false;");
@@ -1028,8 +1058,6 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -name ? ] override instrument name\n"
       << "\n"
-      // << "  [ -ncxx ] convert to cfradial using Ncxx classes\n"
-      // << "\n"
       << "  [ -nexrad ] convert to NEXRAD archive level 2\n"
       << "\n"
       << "  [ -nssl_mrd ] convert to NSSL MRD format\n"
@@ -1125,6 +1153,12 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -sweep_max ? ] set max sweep number\n"
       << "     use '-sweep' for setting minimum\n"
+      << "\n"
+      << "  [ -sweep_mode ? ] set sweep mode\n"
+      << "     Options are: sur, sec, rhi, sunscan\n"
+      << "\n"
+      << "  [ -sweep_mode_from_angles ] set sweep mode from angles\n"
+      << "     Check angles to determine the sweep mode\n"
       << "\n"
       << "  [ -time_offset ? ] set time offset (secs)\n"
       << "\n"

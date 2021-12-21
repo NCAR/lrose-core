@@ -34,6 +34,7 @@
 #include "VarTransform.hh"
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
@@ -687,6 +688,21 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
       cerr << "DEBUG - adjusting sweep limits using angles" << endl;
     }
     vol.adjustSweepLimitsUsingAngles();
+  }
+
+  // sweep mode
+
+  if (_params.override_sweep_mode) {
+    vector<RadxRay *> &rays = vol.getRays();
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      rays[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
+    }
+    vector<RadxSweep *> &sweeps = vol.getSweeps();
+    for (size_t ii = 0; ii < sweeps.size(); ii++) {
+      sweeps[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
+    }
+  } else if (_params.set_sweep_mode_from_ray_angles) {
+    vol.setSweepScanModeFromRayAngles();
   }
 
   // set number of gates constant if requested
@@ -1384,7 +1400,6 @@ void RadxConvert::_censorFields(RadxVol &vol)
   for (size_t ii = 0; ii < rays.size(); ii++) {
     _censorRay(rays[ii]);
   }
-  
 
 }
 

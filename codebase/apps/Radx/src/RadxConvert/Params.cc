@@ -1705,6 +1705,64 @@
     tt->single_val.d = 0.25;
     tt++;
     
+    // Parameter 'override_sweep_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_sweep_mode");
+    tt->descr = tdrpStrDup("Option to override the sweep modes in the data.");
+    tt->help = tdrpStrDup("If TRUE, the mode for all sweeps is set to sweep_mode.");
+    tt->val_offset = (char *) &override_sweep_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sweep_mode'
+    // ctype is '_sweep_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("sweep_mode");
+    tt->descr = tdrpStrDup("Sweep mode for all sweeps.");
+    tt->help = tdrpStrDup("See override_sweep_mode.");
+    tt->val_offset = (char *) &sweep_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("sweep_mode_t");
+    tt->enum_def.nfields = 9;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SWEEP_MODE_SECTOR");
+      tt->enum_def.fields[0].val = SWEEP_MODE_SECTOR;
+      tt->enum_def.fields[1].name = tdrpStrDup("SWEEP_MODE_RHI");
+      tt->enum_def.fields[1].val = SWEEP_MODE_RHI;
+      tt->enum_def.fields[2].name = tdrpStrDup("SWEEP_MODE_VERTICAL_POINTING");
+      tt->enum_def.fields[2].val = SWEEP_MODE_VERTICAL_POINTING;
+      tt->enum_def.fields[3].name = tdrpStrDup("SWEEP_MODE_AZIMUTH_SURVEILLANCE");
+      tt->enum_def.fields[3].val = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+      tt->enum_def.fields[4].name = tdrpStrDup("SWEEP_MODE_ELEVATION_SURVEILLANCE");
+      tt->enum_def.fields[4].val = SWEEP_MODE_ELEVATION_SURVEILLANCE;
+      tt->enum_def.fields[5].name = tdrpStrDup("SWEEP_MODE_SUNSCAN");
+      tt->enum_def.fields[5].val = SWEEP_MODE_SUNSCAN;
+      tt->enum_def.fields[6].name = tdrpStrDup("SWEEP_MODE_POINTING");
+      tt->enum_def.fields[6].val = SWEEP_MODE_POINTING;
+      tt->enum_def.fields[7].name = tdrpStrDup("SWEEP_MODE_SUNSCAN_RHI");
+      tt->enum_def.fields[7].val = SWEEP_MODE_SUNSCAN_RHI;
+      tt->enum_def.fields[8].name = tdrpStrDup("SWEEP_MODE_ELECTRONIC_STEERING");
+      tt->enum_def.fields[8].val = SWEEP_MODE_ELECTRONIC_STEERING;
+    tt->single_val.e = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+    tt++;
+    
+    // Parameter 'set_sweep_mode_from_ray_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_sweep_mode_from_ray_angles");
+    tt->descr = tdrpStrDup("Option to set the sweep mode from the ray angles.");
+    tt->help = tdrpStrDup("If TRUE, we look through the scan angles to deduce the sweep modes, and then set this mode for each sweep.");
+    tt->val_offset = (char *) &set_sweep_mode_from_ray_angles - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
