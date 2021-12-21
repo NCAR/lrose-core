@@ -73,17 +73,34 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+void TimeNavController::updateGui() {
+  _setGuiFromArchiveStartTime();
+  _setGuiFromArchiveEndTime();
+}
+
 ////////////////////////////////////////////////////////
 // set times from gui widgets
 
-void TimeNavController::_setArchiveStartTimeFromGui(int year, int month, int day,
-  int hour, int minute, int seconds)
-{
+void TimeNavController::_setArchiveStartEndTimeFromGui(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond) {
 
-  _model->setArchiveStartTime(year, month, day,
-    hour, minute, seconds);
+  _model->setArchiveStartEndTime(startYear, startMonth, startDay,
+    startHour, startMinute, startSecond,
+    endYear, endMonth, endDay,
+    endHour, endMinute, endSecond);
+
+  _setGuiFromSelectedTime();
+
+  _view->setNTicks(_model->getNArchiveFiles());
+  setSliderPosition();
+  _setGuiFromArchiveStartTime();
+  _setGuiFromArchiveEndTime();
+  //_view->showTimeControl();
 }
 
+/*
 void TimeNavController::_setArchiveEndTimeFromGui(int year, int month, int day,
   int hour, int minute, int seconds)
 {
@@ -94,6 +111,7 @@ void TimeNavController::_setArchiveEndTimeFromGui(int year, int month, int day,
   _model->setArchiveEndTime(year, month, day,
     hour, minute, seconds);  
 }
+*/
 
 /*
 void TimeNavController::_acceptGuiTimes()

@@ -33,6 +33,12 @@
 ///////////////////////////////////////////////////////////////
 //
 // Holds the archive file names
+// The time slider uses this class to navigate through the 
+// archive files.
+// The script editor also uses this class to get a list
+// of files on which to run a script.  The script editor
+// sends a start and end time to specify the bounds of the
+// archive data.
 // 
 ///////////////////////////////////////////////////////////////
 
@@ -57,13 +63,27 @@ public:
   void fetchArchiveFiles(string seedPath, string seedFileName);
   string &getSelectedArchiveFile();
 
+  // use this for the script editor ???
+  // Hmmm, the script editor uses the singleton DataModel to 
+  // get data.  The DataModel is the currently selected archive file.
+  // Q: how to apply the script to a list of archive files?
+  // 1. change the DataModel to each file in the list?
+  // 2. maintain a separate DataModel? for working through the archive list???
+  // NOTE: the edited files will go to a temp directory.  How to manage this??
+  // Only one base directory is open/active at a time.
+  string &getArchiveFile(size_t index) {}; 
+  // or
+  vector<string> &getArchiveFileList(string startTime, string endTime);
+
+
+
+  void _setArchiveStartEndTimeFromGui(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond);
+  void updateGui();
+
 private:
-
-  void _setArchiveStartTimeFromGui(int year, int month, int day,
-    int hour, int minute, int seconds);
-  void _setArchiveEndTimeFromGui(int year, int month, int day,
-  int hour, int minute, int seconds);
-
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();

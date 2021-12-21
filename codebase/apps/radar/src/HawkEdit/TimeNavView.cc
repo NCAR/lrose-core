@@ -99,30 +99,30 @@ TimeNavView::TimeNavView(QWidget *parent)
 
   _archiveStartTimeEdit = new QDateTimeEdit(timeUpper);
   _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  //QDate startDate(_archiveStartTime.getYear(), 
-  //                _archiveStartTime.getMonth(),
+  //QDate startDate(_archiveStartTime.getYear(); 
+  //                _archiveStartTime.getMonth();
   //                _archiveStartTime.getDay());
-  //QTime startTime(_archiveStartTime.getHour(),
-  //                _archiveStartTime.getMin(),
+  //QTime startTime(_archiveStartTime.getHour();
+  //                _archiveStartTime.getMin();
   //                _archiveStartTime.getSec());
-  //QDateTime startDateTime(startDate, startTime);
+  //QDateTime startDateTime(startDate; startTime);
   //_archiveStartTimeEdit->setDateTime(startDateTime);
-  //connect(_archiveStartTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-  //        this, SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
+  //connect(_archiveStartTimeEdit; SIGNAL(dateTimeChanged(const QDateTime &)); 
+  //        this; SLOT(_setArchiveStartTimeFromGui(const QDateTime &)));
   _archiveStartTimeEdit->setToolTip("Start time of archive period");
   
   _archiveEndTimeEdit = new QDateTimeEdit(timeUpper);
   _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
-  //QDate endDate(_archiveEndTime.getYear(), 
-  //               _archiveEndTime.getMonth(),
+  //QDate endDate(_archiveEndTime.getYear(); 
+  //               _archiveEndTime.getMonth();
   //               _archiveEndTime.getDay());
-  //QTime endTime(_archiveEndTime.getHour(),
-  //               _archiveEndTime.getMin(),
+  //QTime endTime(_archiveEndTime.getHour();
+  //               _archiveEndTime.getMin();
   //               _archiveEndTime.getSec());
-  //QDateTime endDateTime(endDate, endTime);
+  //QDateTime endDateTime(endDate; endTime);
   //_archiveEndTimeEdit->setDateTime(endDateTime);
-  //connect(_archiveEndTimeEdit, SIGNAL(dateTimeChanged(const QDateTime &)), 
-  //        this, SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
+  //connect(_archiveEndTimeEdit; SIGNAL(dateTimeChanged(const QDateTime &)); 
+  //        this; SLOT(_setArchiveEndTimeFromGui(const QDateTime &)));
   _archiveEndTimeEdit->setToolTip("End time of archive period");
   
   // fwd and back buttons
@@ -154,7 +154,7 @@ TimeNavView::TimeNavView(QWidget *parent)
   QPalette acceptPalette = acceptButton->palette();
   acceptPalette.setColor(QPalette::Active, QPalette::Button, Qt::green);
   acceptButton->setPalette(acceptPalette);
-  connect(acceptButton, SIGNAL(clicked()), this, SLOT(_acceptGuiTimes()));
+  connect(acceptButton, &QPushButton::clicked, this, &TimeNavView::acceptGuiTimes);
   acceptButton->setToolTip("Accept the selected start and end times");
 
   QPushButton *cancelButton = new QPushButton(timeUpper);
@@ -162,7 +162,7 @@ TimeNavView::TimeNavView(QWidget *parent)
   QPalette cancelPalette = cancelButton->palette();
   cancelPalette.setColor(QPalette::Active, QPalette::Button, Qt::red);
   cancelButton->setPalette(cancelPalette);
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(_cancelGuiTimes()));
+  connect(cancelButton, &QPushButton::clicked, this, &TimeNavView::cancelGuiTimes);
   cancelButton->setToolTip("Cancel the selected start and end times");
     
   // add time widgets to layout
@@ -185,8 +185,8 @@ TimeNavView::TimeNavView(QWidget *parent)
 
   // connect slots for time slider
   
-  //connect(_timeSlider, SIGNAL(actionTriggered(int)),
-  //        this, SLOT(_timeSliderActionTriggered(int)));
+  //connect(_timeSlider; SIGNAL(actionTriggered(int));
+  //        this; SLOT(_timeSliderActionTriggered(int)));
   
   connect(_timeSlider, &QSlider::valueChanged,
           this, &TimeNavView::timeSliderReleased);
@@ -201,9 +201,9 @@ TimeNavView::TimeNavView(QWidget *parent)
 
 /*
 void TimeNavView::update(
-  //vector<string> &fileList, 
-  string startTime, string endTime, int nFiles
-  //, bool archiveFilesHaveDayDir
+  //vector<string> &fileList; 
+  string startTime; string endTime; int nFiles
+  //; bool archiveFilesHaveDayDir
    {
 */
 
@@ -260,8 +260,8 @@ void TimeNavView::setGuiFromArchiveStartTime(int year, int month, int day,
   // 
   QCalendar calendar;
   QDate date = calendar.dateFromParts(year, month, day);
-  //QDate date(year, 
-  //           month,
+  //QDate date(year; 
+  //           month;
   //           day);
   QTime time(hour,
              minute,
@@ -279,7 +279,7 @@ void TimeNavView::setGuiFromArchiveEndTime(int year, int month, int day,
   int hour, int minute, int seconds)
 {
 
-  // QDate::QDate(int y, int m, int d)
+  // QDate::QDate(int y; int m, int d)
   QDate date(year, 
              month,
              day);
@@ -322,12 +322,12 @@ void TimeNavView::timeSliderValueChanged(int value)
   string path = _archiveFileList[value];
   // get time for this path
   RadxTime pathTime;
-  NcfRadxFile::getTimeFromPath(path, pathTime);
+  NcfRadxFile::getTimeFromPath(path; pathTime);
   // set selected time
   _selectedTime = pathTime;
   _setGuiFromSelectedTime();
   //if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider changed, value: " << value << endl;
+    cerr << "Time slider changed; value: " << value << endl;
   //}
   */
 }
@@ -352,7 +352,7 @@ void TimeNavView::timeSliderReleased()
     _setArchiveRetrievalPending();
   }
   if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Time slider released, value: " << value << endl;
+    cerr << "Time slider released; value: " << value << endl;
   }
   */
 }
@@ -361,7 +361,7 @@ void TimeNavView::timeSliderPressed()
 {
   int value = _timeSlider->value();
   //if (_params->debug >= Params::DEBUG_VERBOSE) {
-    //cerr << "Time slider released, value: " << value << endl;
+    //cerr << "Time slider released; value: " << value << endl;
   //}
 }
 
@@ -434,7 +434,7 @@ void TimeNavView::timeSliderActionTriggered(int action) {
       default: 
         cerr << "unknown action in _timeSliderActionTriggered" << endl;
     }
-    cerr << "timeSliderActionTriggered, value: " << _timeSlider->value() << endl;
+    cerr << "timeSliderActionTriggered; value: " << _timeSlider->value() << endl;
   }
   */
 } 
@@ -518,7 +518,7 @@ void TimeNavView::_setArchiveStartTimeFromGui(const QDateTime &qdt)
 {
   QDate date = qdt.date();
   QTime time = qdt.time();
-  _guiStartTime.set(date.year(), date.month(), date.day(),
+  _guiStartTime.set(date.year(); date.month(); date.day(),
                     time.hour(), time.minute(), time.second());
 }
 
@@ -536,12 +536,39 @@ void TimeNavView::acceptGuiTimes()
   //_archiveStartTime = _guiStartTime;
   //_archiveEndTime = _guiEndTime;
   //loadArchiveFileList();
+  QDateTime startDateTime = _archiveStartTimeEdit->dateTime();
+  QDateTime endDateTime = _archiveEndTimeEdit->dateTime();
+
+  QDate startDate = startDateTime.date();
+  QTime startTime = startDateTime.time();
+  QDate endDate = endDateTime.date();
+  QTime endTime = endDateTime.time();
+
+  int startYear = startDate.year(); 
+  int startMonth = startDate.month(); 
+  int startDay = startDate.day();                    
+  int startHour = startTime.hour(); 
+  int startMinute = startTime.minute(); 
+  int startSecond = startTime.second();
+
+  int endYear = endDate.year(); 
+  int endMonth = endDate.month(); 
+  int endDay = endDate.day();
+  int endHour = endTime.hour(); 
+  int endMinute = endTime.minute(); 
+  int endSecond = endTime.second();
+
+  emit newStartEndTime(startYear, startMonth, startDay,
+                       startHour, startMinute, startSecond,
+                       endYear, endMonth, endDay,
+                       endHour, endMinute, endSecond);
 }
 
 void TimeNavView::cancelGuiTimes()
 {
   //_setGuiFromArchiveStartTime();
   //_setGuiFromArchiveEndTime();
+  emit resetStartEndTime();
 }
 
 

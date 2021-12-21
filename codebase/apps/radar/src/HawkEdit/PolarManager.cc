@@ -2827,11 +2827,11 @@ void PolarManager::_createTimeControl()
   
   // connect slots for time slider
 
-  //connect(_timeNavView, SIGNAL(endTimeChanged(string)),
-  //        this, SLOT(endTimeChanged(string)));
+  connect(_timeNavView, &TimeNavView::newStartEndTime,
+          this, &PolarManager::startEndTimeChanged);
   
-  //connect(_timeNavView, SIGNAL(startTimeChanged(string)),
-  //        this, SLOT(startTimeChanged(string)));
+  connect(_timeNavView, &TimeNavView::resetStartEndTime,
+          this, &PolarManager::resetStartEndTime);
   
   connect(_timeNavView, &TimeNavView::newTimeIndexSelected,
           this, &PolarManager::newTimeSelected);
@@ -2841,10 +2841,25 @@ void PolarManager::_createTimeControl()
 
 }
 
+void PolarManager::resetStartEndTime() {
+  _timeNavController->updateGui();
+
+}
+
 void PolarManager::newTimeSelected(int index) {
   _timeNavController->timeSliderValueChanged(index);
   _readDataFile2();
   _plotArchiveData();
+}
+
+void PolarManager::startEndTimeChanged(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond) {
+  _timeNavController->_setArchiveStartEndTimeFromGui(startYear, startMonth, startDay,
+                       startHour, startMinute, startSecond,
+                       endYear, endMonth, endDay,
+                       endHour, endMinute, endSecond);
 }
 
 void PolarManager::_showTimeControl()

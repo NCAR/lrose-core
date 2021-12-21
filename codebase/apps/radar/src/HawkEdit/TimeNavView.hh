@@ -100,6 +100,11 @@ signals:
 
   void newTimeIndexSelected(int value);
   void timeSliderMoved(int value);
+  void newStartEndTime(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond);
+  void resetStartEndTime();
 
 public slots:
 

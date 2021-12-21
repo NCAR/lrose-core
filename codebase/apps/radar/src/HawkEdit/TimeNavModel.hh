@@ -41,21 +41,32 @@
 
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
+#include <Radx/RadxPath.hh>
 
 class TimeNavModel {
 
 public:
 
+  TimeNavModel();
+  ~TimeNavModel();
+
   void setArchiveFileList(const vector<string> &list);
 
   int findArchiveFileList(string archiveDataUrl);
+  void findArchiveFileList(RadxTime startTime, RadxTime endTime,
+    const string &absolutePath);
 
   int getNArchiveFiles() { return  (int) _archiveFileList.size(); };
 
-  void setArchiveStartTime(int year, int month, int day,
-    int hour, int minute, int seconds);
-  void setArchiveEndTime(int year, int month, int day,
-    int hour, int minute, int seconds);
+  //void setArchiveStartTime(int year, int month, int day,
+  //  int hour, int minute, int seconds);
+  //void setArchiveEndTime(int year, int month, int day,
+  //  int hour, int minute, int seconds);
+
+  void setArchiveStartEndTime(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond);
 
   void getArchiveStartTime(int *year, int *month, int *day,
     int *hour, int *minute, int *seconds);
@@ -71,19 +82,19 @@ public:
   string &getSelectedArchiveFile();
   int getPositionOfSelection();
 
-  // void DoSomething();
-
 private:
+
+  void changePath(string archiveDataUrl);
 
   RadxTimeList timeList;
 
-  RadxTime _archiveIntermediateTime;
+  //RadxTime _archiveIntermediateTime;
 
-  RadxTime _startDisplayTime;
-  RadxTime _currentDisplayTime;  // is this needed??
-  RadxTime _endDisplayTime;
-  RadxTime _imagesArchiveStartTime;
-  RadxTime _imagesArchiveEndTime;
+  //RadxTime _startDisplayTime;
+  //RadxTime _currentDisplayTime;  // is this needed??
+  //RadxTime _endDisplayTime;
+  //RadxTime _imagesArchiveStartTime;
+  //RadxTime _imagesArchiveEndTime;
 
   RadxTime _archiveStartTime;  
   RadxTime _archiveEndTime;
@@ -95,6 +106,8 @@ private:
   vector<string> _archiveFileList;
 
   bool _archiveFilesHaveDayDir;
+
+  RadxPath *currentPath;
 
 };
 

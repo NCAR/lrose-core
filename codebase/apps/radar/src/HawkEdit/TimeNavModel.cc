@@ -42,6 +42,15 @@
 #include <Radx/NcfRadxFile.hh>
 #include <Radx/RadxPath.hh>
 
+
+TimeNavModel::TimeNavModel() {
+  changePath(".");
+}
+
+TimeNavModel::~TimeNavModel() {
+  if (currentPath != NULL) 
+    delete currentPath;
+}
 //
 // TODO: set the selected time _selectedTime
 //
@@ -105,6 +114,10 @@ void TimeNavModel::setArchiveFileList(const vector<string> &list)
 
 }
 
+void TimeNavModel::changePath(string archiveDataUrl) {
+  currentPath = new RadxPath(archiveDataUrl);
+}
+
 ///////////////////////////////////////////////
 // get archive file list by searching for files
 // starting point is the archiveDataUrl
@@ -123,11 +136,15 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl)
   // then send the string from start to end of pattern
   // to the timeList
   //
-  RadxPath thePath(archiveDataUrl);
-  if (thePath.isDir()) {
+
+  // TODO: save current archiveUrl for use if start and end times change
+  // must open new file to change the path
+  changePath(archiveDataUrl);
+  // RadxPath thePath(archiveDataUrl);
+  if (currentPath->isDir()) {
     timeList.setDir(archiveDataUrl);
   } else {
-    string dir = thePath.getDirectory();
+    string dir = currentPath->getDirectory();
     timeList.setDir(dir);
   }
 
@@ -199,28 +216,29 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl)
 
 }
 
-/*
-void TimeNavModel::DoSomething() { 
 
-  // now update the time controller window
-  QDateTime now = QDateTime::currentDateTime();  
-  //QDateTime epoch(QDate(1970, 1, 1), QTime(0, 0, 0));
-  _setArchiveStartTimeFromGui(now);
-
-  _setArchiveEndTimeFromGui(now);
+void TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
+  const string &absolutePath) {
+  // string startTime, string endTime) { 
   
-  _archiveStartTime = _guiStartTime;
-  _archiveEndTime = _guiEndTime;
-  QFileInfo fileInfo(filename);
-  string absolutePath = fileInfo.absolutePath().toStdString();
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    cerr << "changing to path " << absolutePath << endl;
-  }
+  //_archiveStartTime = _guiStartTime;
+  //_archiveEndTime = _guiEndTime;
+  //QFileInfo fileInfo(filename);
+  //string absolutePath = fileInfo.absolutePath().toStdString();
+  //if (_params->debug >= Params::DEBUG_VERBOSE) {
+  //  cerr << "changing to path " << absolutePath << endl;
+  //}
 //  loadArchiveFileList(dir.absolutePath());
 
   RadxTimeList timeList;
-  timeList.setDir(absolutePath);
-  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+  RadxPath thePath(absolutePath);
+  if (!thePath.isDir()) {
+    // TODO: fix it up
+    // if not fixable, then throw std::invalid_arg...
+    throw std::invalid_argument("TimeNavModel::findArchiveFileList path is NOT a directory");
+  } 
+  timeList.setDir(thePath.getPath());
+  timeList.setModeInterval(startTime, endTime); // (_archiveStartTime, _archiveEndTime);
   if (timeList.compile()) {
     cerr << "ERROR - TimeNavModel::openFile()" << endl;
     cerr << "  " << timeList.getErrStr() << endl;
@@ -239,8 +257,8 @@ void TimeNavModel::DoSomething() {
   //    }
   //    cerr << endl;
   //  }
-  
-    setArchiveFileList(fileList, false); // pathList, false);
+
+  setArchiveFileList(timeList.getPathList());
 
     // now fetch the first time and last time from the directory
     // and set these values in the time controller display
@@ -248,32 +266,34 @@ void TimeNavModel::DoSomething() {
     RadxTime firstTime;
     RadxTime lastTime;
     timeList.getFirstAndLastTime(firstTime, lastTime);
-    if (_params->debug >= Params::DEBUG_VERBOSE) {
-      cerr << "first time " << firstTime << endl;
-      cerr << "last time " << lastTime << endl;
-    }
+    //if (_params->debug >= Params::DEBUG_VERBOSE) {
+    //  cerr << "first time " << firstTime << endl;
+    //  cerr << "last time " << lastTime << endl;
+    //}
     // convert RadxTime to QDateTime 
     _archiveStartTime = firstTime;
     _archiveEndTime = lastTime;
-    _setGuiFromArchiveStartTime();
-    _setGuiFromArchiveEndTime();
+    setSelectedFile(0);
+
   //} // end else pathList is not empty
 
 }
-*/
 
-void TimeNavModel::setArchiveStartTime(int year, int month, int day,
-  int hour, int minute, int seconds) {
+void TimeNavModel::setArchiveStartEndTime(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSeconds,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSeconds) {
 
-  _archiveStartTime.set(year, month, day, hour, minute, seconds);
-
-}
-
-void TimeNavModel::setArchiveEndTime(int year, int month, int day,
-  int hour, int minute, int seconds) {
-
-  _archiveEndTime.set(year, month, day, hour, minute, seconds);
-
+  RadxTime requestStartTime;
+  requestStartTime.set(startYear, startMonth, startDay,
+    startHour, startMinute, startSeconds);  
+  RadxTime requestEndTime;
+  requestEndTime.set(endYear, endMonth, endDay,
+    endHour, endMinute, endSeconds);
+  const string mypath = currentPath->getPath();
+  cerr << "looking in this directory: " << mypath << endl;
+  //std::remove_const<const string>::type mypath;
+  findArchiveFileList(requestStartTime, requestEndTime, mypath);
 }
 
 void TimeNavModel::getArchiveStartTime(int *year, int *month, int *day,
@@ -334,6 +354,9 @@ void TimeNavModel::setSelectedFile(int value)
 
 }
 
+// I think this assumes all files are in the same folder??
+// TODO: check if the folder is different for this file,
+// set the currentPath as needed.
 void TimeNavModel::setSelectedFile(string fileName) 
 {
 

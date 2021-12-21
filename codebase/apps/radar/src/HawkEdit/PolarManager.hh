@@ -257,6 +257,11 @@ public slots:
   void spreadsheetDataChanged();
 
   void newTimeSelected(int value);
+  void startEndTimeChanged(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond);
+  void resetStartEndTime();
 
   void errorMessage(string title, string message);
 
