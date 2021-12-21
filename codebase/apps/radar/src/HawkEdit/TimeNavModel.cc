@@ -233,23 +233,24 @@ void TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
   RadxTimeList timeList;
   RadxPath thePath(absolutePath);
   if (!thePath.isDir()) {
-    // TODO: fix it up
     // if not fixable, then throw std::invalid_arg...
     throw std::invalid_argument("TimeNavModel::findArchiveFileList path is NOT a directory");
   } 
   timeList.setDir(thePath.getPath());
-  timeList.setModeInterval(startTime, endTime); // (_archiveStartTime, _archiveEndTime);
+  timeList.setModeInterval(startTime, endTime);
   if (timeList.compile()) {
-    cerr << "ERROR - TimeNavModel::openFile()" << endl;
-    cerr << "  " << timeList.getErrStr() << endl;
+    string msg = "ERROR - TimeNavModel::findArchiveFileList() ";
+    msg.append(timeList.getErrStr());
+    throw std::invalid_argument(msg);
   }
 
-  //vector<string> pathList = timeList.getPathList();
-  //if (pathList.size() <= 0) {
-  //  cerr << "ERROR - TimeNavModel::openFile()" << endl;
-  //  cerr << "  pathList is empty" << endl;
-  //  cerr << "  " << timeList.getErrStr() << endl;
-  //} else {
+  vector<string> pathList = timeList.getPathList();
+  if (pathList.size() <= 0) {
+    string msg = "ERROR - TimeNavModel::findArchiveFileList()\n";
+    msg.append("  no files found\n");
+    throw std::invalid_argument(msg);
+  } 
+  // else {
   //  if (_params->debug >= Params::DEBUG_VERBOSE) {
   //    cerr << "pathList is NOT empty" << endl;
   //    for(vector<string>::const_iterator i = pathList.begin(); i != pathList.end(); ++i) {

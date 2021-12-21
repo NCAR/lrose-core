@@ -2856,10 +2856,14 @@ void PolarManager::startEndTimeChanged(int startYear, int startMonth, int startD
                        int startHour, int startMinute, int startSecond,
                        int endYear, int endMonth, int endDay,
                        int endHour, int endMinute, int endSecond) {
-  _timeNavController->_setArchiveStartEndTimeFromGui(startYear, startMonth, startDay,
+  try  {
+    _timeNavController->_setArchiveStartEndTimeFromGui(startYear, startMonth, startDay,
                        startHour, startMinute, startSecond,
                        endYear, endMonth, endDay,
                        endHour, endMinute, endSecond);
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
+  }
 }
 
 void PolarManager::_showTimeControl()
