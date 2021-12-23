@@ -66,7 +66,13 @@ public slots:
     void applyChanges();
     void currentSweepClicked(bool checked);
     void allSweepsClicked(bool checked);
+    void currentTimeClicked(bool checked);
+    void timeRangeClicked(bool checked);
 
+
+  void hideTimeRangeEdits();
+  void showTimeRangeEdits();
+  
   //  void printQJSEngineContext();
 
 signals:
@@ -99,6 +105,9 @@ protected:
   void openScriptFile();
   void importScriptFile();
   void saveScriptFile();
+  void saveEditDirectory();
+
+
 
 private:
 
@@ -119,6 +128,12 @@ private:
     QPushButton *currentSweepToggleButton;
     QPushButton *allSweepsToggleButton;
     QGroupBox *scriptModifiers;
+
+    QPushButton *currentTimeToggleButton;
+    QPushButton *timeRangeToggleButton;
+    QDateTimeEdit *_archiveStartTimeEdit;
+    QDateTimeEdit *_archiveEndTimeEdit;
+
     QVBoxLayout *checkBoxLayout;
     QWidget *scriptEditWidget;
 

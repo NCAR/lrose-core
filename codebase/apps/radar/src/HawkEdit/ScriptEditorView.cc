@@ -168,11 +168,34 @@ Q_DECLARE_METATYPE(QVector<double>)
     //vbox->addStretch(1);
     //sweepSelection->setLayout(vbox); 
 
+    currentTimeToggleButton = new QPushButton(tr("&Current Time"));
+    currentTimeToggleButton->setCheckable(true);
+    currentTimeToggleButton->setChecked(true);
+    timeRangeToggleButton = new QPushButton(tr("&Time Range"));
+    timeRangeToggleButton->setCheckable(true);
+    timeRangeToggleButton->setChecked(false);
+
+    
+    // create start, end, and save dir widgets if time range is checked
+    // TODO: maybe initialize the start and end time with info from the time nav?
+    _archiveStartTimeEdit = new QDateTimeEdit(); // timeUpper);
+    _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+    _archiveStartTimeEdit->setToolTip("Start time of archive period");
+    _archiveEndTimeEdit = new QDateTimeEdit(); // timeUpper);
+    _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+    _archiveEndTimeEdit->setToolTip("End time of archive period");
+
+//HERE
+
     scriptModifiers = new QGroupBox("Modifiers", this);
     checkBoxLayout = new QVBoxLayout;
     checkBoxLayout->addWidget(useBoundaryWidget);
     checkBoxLayout->addWidget(currentSweepToggleButton);
     checkBoxLayout->addWidget(allSweepsToggleButton);
+    checkBoxLayout->addWidget(currentTimeToggleButton);
+    checkBoxLayout->addWidget(timeRangeToggleButton);
+    checkBoxLayout->addWidget(_archiveStartTimeEdit);
+    checkBoxLayout->addWidget(_archiveEndTimeEdit);
     checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
     scriptModifiers->setLayout(checkBoxLayout);
 
@@ -181,6 +204,9 @@ Q_DECLARE_METATYPE(QVector<double>)
     // checked is true if the button is checked, or false if the button is unchecked.
     connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
     connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
+
+    connect(currentTimeToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentTimeClicked(bool)));    
+    connect(timeRangeToggleButton,    SIGNAL(clicked(bool)), this, SLOT(timeRangeClicked(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
@@ -356,6 +382,28 @@ float  ScriptEditorView::myPow()
 }
 
 
+void ScriptEditorView::saveEditDirectory() {
+
+  QUrl saveUrl = QFileDialog::getSaveFileUrl(this, 
+    tr("Edited files saved here"), 
+    tr("."), 
+    tr("(*)"));
+
+// default args ...
+//    QString *selectedFilter = nullptr, 
+//    QFileDialog::Options options = Options(), 
+//    const QStringList &supportedSchemes = QStringList());
+
+
+  //QFileDialog::FileMode QFileDialog::Directory
+  //  QString dirNameQ = QFileDialog::getOpenFileName(this,
+  //  tr("Open Script from File"), ".", tr("Script Files (*)"));
+  //string dirName = saveUrl.toStdString();
+  //LOG(DEBUG) << "save edited files to directory: " << dirName;
+
+  // TODO: make sure we can write to this directory ...
+
+}
 
 
 void ScriptEditorView::openScriptFile() {
@@ -923,6 +971,40 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
     currentSweepToggleButton->setChecked(true);    
   }  
   
+}
+
+void ScriptEditorView::currentTimeClicked(bool checked) {
+  
+  if (checked) {
+    timeRangeToggleButton->setChecked(false);
+    hideTimeRangeEdits();
+  } else {
+    timeRangeToggleButton->setChecked(true);  
+    showTimeRangeEdits();  
+  }
+  
+}
+
+void ScriptEditorView::timeRangeClicked(bool checked) {
+
+  if (checked) {
+    currentTimeToggleButton->setChecked(false);
+    showTimeRangeEdits();
+  } else {
+    currentTimeToggleButton->setChecked(true);  
+    hideTimeRangeEdits();  
+  }  
+  
+}
+
+void ScriptEditorView::hideTimeRangeEdits() {
+  _archiveStartTimeEdit->setVisible(false);
+  _archiveEndTimeEdit->setVisible(false);
+}
+
+void ScriptEditorView::showTimeRangeEdits() {
+  _archiveStartTimeEdit->setVisible(true);
+  _archiveEndTimeEdit->setVisible(true);
 }
 
 /*
