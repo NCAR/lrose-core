@@ -95,6 +95,18 @@ public:
   } storm_shape_t;
 
   typedef struct {
+    int nx;
+    int ny;
+    int nz;
+    double minx;
+    double miny;
+    double minz;
+    double dx;
+    double dy;
+    double dz;
+  } cart_grid_t;
+
+  typedef struct {
     double latitudeDeg;
     double longitudeDeg;
     double altitudeKm;
@@ -404,6 +416,8 @@ public:
   storm_shape_t *_storm_shapes;
   int storm_shapes_n;
 
+  cart_grid_t cart_grid;
+
   specify_mode_t specify_mode;
 
   char* specified_file_path;
@@ -442,7 +456,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[25];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

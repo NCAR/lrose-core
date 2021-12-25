@@ -27,7 +27,7 @@ paramdef enum debug_t {
 } debug;
 
 commentdef {
-  p_header = "Specifying the storm shapes";
+  p_header = "STORM SHAPES";
   p_text = "Set an array of storm shapes for the simulation.";
 }
 
@@ -66,6 +66,39 @@ paramdef struct storm_shape_t {
 } storm_shapes[];
 
 commentdef {
+  p_header = "CARTESIAN GRID DETAILS";
+}
+
+typedef struct {
+  int nx;
+  int ny;
+  int nz;
+  double minx;
+  double miny;
+  double minz;
+  double dx;
+  double dy;
+  double dz;
+} cart_grid_t;
+
+paramdef struct cart_grid_t {
+  p_default =
+    {
+     nx = 400,
+     ny = 400,
+     nz = 20,
+     minx = -199.5,
+     miny = -199.5,
+     minz = -1.0,
+     dx = 1.0,
+     dy = 1.0,
+     dz = 1.0
+    };
+  p_descr = "Cartesian grid parameters.";
+  p_help = "For the MDV output file.";
+} cart_grid;
+
+commentdef {
   p_header = "Mode for specifying the radar scan strategy";
   p_text = "Read in a scan file, or specify radar and scan parameters";
 }
@@ -81,7 +114,7 @@ paramdef enum specify_mode_t {
 } specify_mode;
 
 commentdef {
-  p_header = "SPECIFIED FILE";
+  p_header = "SPECIFIED INPUT FILE";
 }
 
 paramdef string {

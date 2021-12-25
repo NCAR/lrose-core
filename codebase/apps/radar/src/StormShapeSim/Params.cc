@@ -599,7 +599,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("Specifying the storm shapes");
+    tt->comment_hdr = tdrpStrDup("STORM SHAPES");
     tt->comment_text = tdrpStrDup("Set an array of storm shapes for the simulation.");
     tt++;
     
@@ -697,6 +697,87 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("CARTESIAN GRID DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'cart_grid'
+    // ctype is '_cart_grid_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("cart_grid");
+    tt->descr = tdrpStrDup("Cartesian grid parameters.");
+    tt->help = tdrpStrDup("For the MDV output file.");
+    tt->val_offset = (char *) &cart_grid - &_start_;
+    tt->struct_def.name = tdrpStrDup("cart_grid_t");
+    tt->struct_def.nfields = 9;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[0].fname = tdrpStrDup("nx");
+      tt->struct_def.fields[0].ptype = INT_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &cart_grid.nx - (char *) &cart_grid;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[1].fname = tdrpStrDup("ny");
+      tt->struct_def.fields[1].ptype = INT_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &cart_grid.ny - (char *) &cart_grid;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[2].fname = tdrpStrDup("nz");
+      tt->struct_def.fields[2].ptype = INT_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &cart_grid.nz - (char *) &cart_grid;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[3].fname = tdrpStrDup("minx");
+      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &cart_grid.minx - (char *) &cart_grid;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("miny");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &cart_grid.miny - (char *) &cart_grid;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[5].fname = tdrpStrDup("minz");
+      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[5].rel_offset = 
+        (char *) &cart_grid.minz - (char *) &cart_grid;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("dx");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &cart_grid.dx - (char *) &cart_grid;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[7].fname = tdrpStrDup("dy");
+      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &cart_grid.dy - (char *) &cart_grid;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[8].fname = tdrpStrDup("dz");
+      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &cart_grid.dz - (char *) &cart_grid;
+    tt->n_struct_vals = 9;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].i = 400;
+      tt->struct_vals[1].i = 400;
+      tt->struct_vals[2].i = 20;
+      tt->struct_vals[3].d = -199.5;
+      tt->struct_vals[4].d = -199.5;
+      tt->struct_vals[5].d = -1;
+      tt->struct_vals[6].d = 1;
+      tt->struct_vals[7].d = 1;
+      tt->struct_vals[8].d = 1;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("Mode for specifying the radar scan strategy");
     tt->comment_text = tdrpStrDup("Read in a scan file, or specify radar and scan parameters");
     tt++;
@@ -721,12 +802,12 @@
     tt->single_val.e = SPECIFY_RADAR_PARAMS;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("SPECIFIED FILE");
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("SPECIFIED INPUT FILE");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -754,11 +835,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("SPECIFIED RADAR PARAMETERS");
     tt->comment_text = tdrpStrDup("Applies to SPECIFY_RADAR_PARAMS mode.");
     tt++;
@@ -964,11 +1045,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("WRITING FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
