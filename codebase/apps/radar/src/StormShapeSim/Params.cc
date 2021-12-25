@@ -969,95 +969,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("DATA AGE ANALYSIS");
+    tt->comment_hdr = tdrpStrDup("WRITING FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'n_bins_age_histogram'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("n_bins_age_histogram");
-    tt->descr = tdrpStrDup("Number of bins in the age histogram");
-    tt->help = tdrpStrDup("Age is expressed as a fraction of the time to complete the volume");
-    tt->val_offset = (char *) &n_bins_age_histogram - &_start_;
-    tt->single_val.i = 51;
-    tt++;
-    
-    // Parameter 'age_hist_max_ht_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("age_hist_max_ht_km");
-    tt->descr = tdrpStrDup("Max heights to be used in age histogram (km)");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_age_hist_max_ht_km - &_start_;
-    tt->array_n_offset = (char *) &age_hist_max_ht_km_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 3;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 5;
-      tt->array_vals[1].d = 10;
-      tt->array_vals[2].d = 20;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("WRITING OUT RANGE-HEIGHT TABLE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'print_range_height_table'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("print_range_height_table");
-    tt->descr = tdrpStrDup("Print range-height table to stdout");
-    tt->help = tdrpStrDup("If TRUE, the height of the sweep elevation angles, vs range, are written to stdout");
-    tt->val_offset = (char *) &print_range_height_table - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("WRITING CFRADIAL FILES TO OUTPUT DIRECTORY");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'write_volume_to_output_file'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_volume_to_output_file");
-    tt->descr = tdrpStrDup("Write the volume to a CfRadial output file");
-    tt->help = tdrpStrDup("If TRUE, the volume is written to output_dir");
-    tt->val_offset = (char *) &write_volume_to_output_file - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_dir'
+    // Parameter 'mdv_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Output directory path.");
+    tt->param_name = tdrpStrDup("mdv_output_dir");
+    tt->descr = tdrpStrDup("Output directory path for Cartesian MDV files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &mdv_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output/StormShapeSim/mdv");
+    tt++;
+    
+    // Parameter 'cfradial_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cfradial_output_dir");
+    tt->descr = tdrpStrDup("Output directory path for polar CfRadial files.");
     tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output/StormShapeSim/");
+    tt->val_offset = (char *) &cfradial_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output/StormShapeSim/cfradial");
     tt++;
     
     // trailing entry has param_name set to NULL

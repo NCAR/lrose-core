@@ -82,15 +82,8 @@ private:
                        double &meanAgeRev,
                        vector<double> &cumFreqFwd,
                        vector<double> &cumFreqRev);
-  void _writeAgeResults(RadxVol &vol,
-                        vector<double> &maxHtKm,
-                        vector<double> &meanAgeFwd,
-                        vector<double> &meanAgeRev,
-                        vector< vector<double> > &cumFreqFwd,
-                        vector< vector<double> > &cumFreqRev);
-  void _setupWrite(RadxFile &file);
-  int _writeVol(RadxVol &vol);
-  void _printRangeHeightTable(RadxVol &vol);
+  void _setupCfRadialWrite(RadxFile &file);
+  int _writeCfRadialVol(RadxVol &vol);
 
 };
 

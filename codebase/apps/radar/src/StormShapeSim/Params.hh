@@ -431,16 +431,9 @@ public:
 
   tdrp_bool_t reverse_sweep_order_in_vol;
 
-  int n_bins_age_histogram;
+  char* mdv_output_dir;
 
-  double *_age_hist_max_ht_km;
-  int age_hist_max_ht_km_n;
-
-  tdrp_bool_t print_range_height_table;
-
-  tdrp_bool_t write_volume_to_output_file;
-
-  char* output_dir;
+  char* cfradial_output_dir;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -449,7 +442,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[30];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

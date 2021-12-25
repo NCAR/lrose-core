@@ -185,43 +185,17 @@ paramdef boolean {
 } reverse_sweep_order_in_vol;
 
 commentdef {
-  p_header = "DATA AGE ANALYSIS";
+  p_header = "WRITING FILES";
 }
-
-paramdef int {
-  p_default = 51;
-  p_descr = "Number of bins in the age histogram";
-  p_help = "Age is expressed as a fraction of the time to complete the volume";
-} n_bins_age_histogram;
-
-paramdef double {
-  p_default = { 5.0, 10.0, 20.0 };
-  p_descr = "Max heights to be used in age histogram (km)";
-} age_hist_max_ht_km[];
-
-commentdef {
-  p_header = "WRITING OUT RANGE-HEIGHT TABLE";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Print range-height table to stdout";
-  p_help = "If TRUE, the height of the sweep elevation angles, vs range, are written to stdout";
-} print_range_height_table;
-
-commentdef {
-  p_header = "WRITING CFRADIAL FILES TO OUTPUT DIRECTORY";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write the volume to a CfRadial output file";
-  p_help = "If TRUE, the volume is written to output_dir";
-} write_volume_to_output_file;
 
 paramdef string {
-  p_default = "./output/StormShapeSim/";
-  p_descr = "Output directory path.";
+  p_default = "./output/StormShapeSim/mdv";
+  p_descr = "Output directory path for Cartesian MDV files.";
+} mdv_output_dir;
+
+paramdef string {
+  p_default = "./output/StormShapeSim/cfradial";
+  p_descr = "Output directory path for polar CfRadial files.";
   p_help = "Files will be written to this directory.";
-} output_dir;
+} cfradial_output_dir;
 

@@ -151,51 +151,11 @@ int StormShapeSim::Run()
 
   // write the file
 
-  if (_params.write_volume_to_output_file) {
-    if (_writeVol(vol)) {
-      cerr << "ERROR - StormShapeSim::_processFile" << endl;
-      cerr << "  Cannot write volume to file" << endl;
-      return -1;
-    }
+  if (_writeCfRadialVol(vol)) {
+    cerr << "ERROR - StormShapeSim::_processFile" << endl;
+    cerr << "  Cannot write volume to file" << endl;
+    return -1;
   }
-
-  // optionally print the range-height table to stdout
-
-  if (_params.print_range_height_table) {
-    _printRangeHeightTable(vol);
-    return 0;
-  }
-
-  // set up results vectors for different max heights
-
-  vector<double> maxHtKm;
-  vector<double> meanAgeFwd, meanAgeRev;
-  vector< vector<double> > cumFreqFwd;
-  vector< vector<double> > cumFreqRev;
-
-  maxHtKm.resize(_params.age_hist_max_ht_km_n);
-  meanAgeFwd.resize(_params.age_hist_max_ht_km_n);
-  meanAgeRev.resize(_params.age_hist_max_ht_km_n);
-  cumFreqFwd.resize(_params.age_hist_max_ht_km_n);
-  cumFreqRev.resize(_params.age_hist_max_ht_km_n);
-  
-  for (int ii = 0; ii < _params.age_hist_max_ht_km_n; ii++) {
-    maxHtKm[ii] = _params._age_hist_max_ht_km[ii];
-  }
-  
-  // compute the age histograms
-  
-  for (int ii = 0; ii < _params.age_hist_max_ht_km_n; ii++) {
-    _computeAgeHist(vol, maxHtKm[ii],
-                    meanAgeFwd[ii], meanAgeRev[ii],
-                    cumFreqFwd[ii], cumFreqRev[ii]);
-  } // ii
-
-  // write results to stdout
-
-  _writeAgeResults(vol, maxHtKm,
-                   meanAgeFwd, meanAgeRev,
-                   cumFreqFwd, cumFreqRev);
   
   return 0;
 
@@ -410,219 +370,10 @@ void StormShapeSim::_addGeomFields(RadxVol &vol)
 
 }
 
-////////////////////////////////////////////////////////////////////
-// compute the age histogram
-
-void StormShapeSim::_computeAgeHist(RadxVol &vol, double maxHtKm,
-                                       double &meanAgeFwd, double &meanAgeRev,
-                                       vector<double> &cumFreqFwd,
-                                       vector<double> &cumFreqRev)
-{
-
-  // get time limits, and vol duration
-  
-  RadxTime startTime = vol.getStartRadxTime();
-  RadxTime endTime = vol.getEndRadxTime();
-  double volDurationSecs = endTime - startTime;
-
-  // initialize counter arrays
-
-  double totalVol = 0.0;
-  double totalWtFwd = 0.0;
-  double totalWtRev = 0.0;
-
-  vector<double> binVolFwd, binVolRev;
-  binVolFwd.resize(_params.n_bins_age_histogram);
-  binVolRev.resize(_params.n_bins_age_histogram);
-  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
-    binVolFwd[ibin] = 0.0;
-    binVolRev[ibin] = 0.0;
-  }
-  
-  // accumulate volume in each bin
-  
-  for (size_t iray = 0; iray < vol.getNRays(); iray++) {
-    
-    // get ray
-    
-    RadxRay *ray = vol.getRays()[iray];
-    int nGates = ray->getNGates();
-    RadxTime rayTime = ray->getRadxTime();
-
-    // compute age as fraction of vol duration
-    
-    double ageFwd = endTime - rayTime;
-    double ageFracFwd = ageFwd / volDurationSecs;
-    if (ageFracFwd < 0.0) {
-      ageFracFwd = 0.0;
-    } else if (ageFracFwd >= 1.0) {
-      ageFracFwd = 0.999999999;
-    }
-    int ageBinFwd = (int) (ageFracFwd * _params.n_bins_age_histogram);
-    
-    double ageRev = rayTime - startTime;
-    double ageFracRev = ageRev / volDurationSecs;
-    if (ageFracRev < 0.0) {
-      ageFracRev = 0.0;
-    } else if (ageFracRev >= 1.0) {
-      ageFracRev = 0.999999999;
-    }
-    int ageBinRev = (int) (ageFracRev * _params.n_bins_age_histogram);
-      
-    // get fields, check they are non-null
-
-    RadxField *sampleVolField = ray->getField("sampleVol");
-    RadxField *heightField = ray->getField("height");
-    
-    assert(sampleVolField);
-    assert(heightField);
-
-    Radx::fl32 *sampleVol = sampleVolField->getDataFl32();
-    Radx::fl32 *height = heightField->getDataFl32();
-
-    // loop through the gates
-
-    for (int igate = 0; igate < nGates; igate++) {
-
-      // check height
-      
-      if (height[igate] > maxHtKm) {
-        continue;
-      }
-
-      // accumulate bin vol
-
-      double vol = sampleVol[igate];
-      binVolFwd[ageBinFwd] += vol;
-      binVolRev[ageBinRev] += vol;
-
-      totalVol += vol;
-      totalWtFwd += vol * ageFracFwd;
-      totalWtRev += vol * ageFracRev;
-
-    } // igate
-
-  } // iray
-
-  // normalize volume by total to get fraction
-
-  vector<double> binFreqFwd;
-  binFreqFwd.resize(_params.n_bins_age_histogram);
-  cumFreqFwd.resize(_params.n_bins_age_histogram + 1);
-  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
-    binFreqFwd[ibin] = binVolFwd[ibin] / totalVol;
-  }
-  cumFreqFwd[0] = 0.0;
-  for (size_t ibin = 0; ibin < binVolFwd.size(); ibin++) {
-    cumFreqFwd[ibin + 1] = cumFreqFwd[ibin] + binFreqFwd[ibin];
-  }
-  meanAgeFwd = totalWtFwd / totalVol;
-
-  vector<double> binFreqRev;
-  binFreqRev.resize(_params.n_bins_age_histogram);
-  cumFreqRev.resize(_params.n_bins_age_histogram + 1);
-  for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
-    binFreqRev[ibin] = binVolRev[ibin] / totalVol;
-  }
-  cumFreqRev[0] = 0.0;
-  for (size_t ibin = 0; ibin < binVolRev.size(); ibin++) {
-    cumFreqRev[ibin + 1] = cumFreqRev[ibin] + binFreqRev[ibin];
-  }
-  meanAgeRev = totalWtRev / totalVol;
-
-}
-
-////////////////////////////////////////////////////////////////////
-// Write out the results to a text file
-
-void StormShapeSim::_writeAgeResults(RadxVol &vol,
-                                        vector<double> &maxHtKm,
-                                        vector<double> &meanAgeFwd,
-                                        vector<double> &meanAgeRev,
-                                        vector< vector<double> > &cumFreqFwd,
-                                        vector< vector<double> > &cumFreqRev)
-  
-{
-
-  // get time limits, and vol duration
-
-  RadxTime startTime = vol.getStartRadxTime();
-  RadxTime endTime = vol.getEndRadxTime();
-  double volDurationSecs = endTime - startTime;
-  int nBins = cumFreqFwd[0].size();
-  int nHts = maxHtKm.size();
-  
-  // print to stdout
-  
-  char scanName[128];
-  if (vol.getScanId() > 0 && string(_params.scan_name) == "Unknown") {
-    snprintf(scanName, 128, "VCP%d", vol.getScanId());
-  } else {
-    snprintf(scanName, 128, "%s", _params.scan_name);
-  }
-
-  // header
-
-  fprintf(stdout, "#########################################################\n");
-  fprintf(stdout, "# scanName   : %s\n", scanName);
-  fprintf(stdout, "# duration   : %.0f\n", volDurationSecs);
-  fprintf(stdout, "# elevs      : ");
-  const vector<RadxSweep *> &sweeps = vol.getSweeps();
-  for (size_t ii = 0; ii < sweeps.size(); ii++) {
-    fprintf(stdout, "%.2f", sweeps[ii]->getFixedAngleDeg());
-    if (ii != sweeps.size()-1) {
-      fprintf(stdout, ",");
-    } else {
-      fprintf(stdout, "\n");
-    }
-  }
-  fprintf(stdout, "# heights    : ");
-  for (int ii = 0; ii < nHts; ii++) {
-    fprintf(stdout, "%g", maxHtKm[ii]);
-    if (ii != nHts-1) {
-      fprintf(stdout, ",");
-    } else {
-      fprintf(stdout, "\n");
-    }
-  }
-  for (int ii = 0; ii < nHts; ii++) {
-    fprintf(stdout, "# meanAgeFwd[%g] : %.3f\n", maxHtKm[ii], meanAgeFwd[ii]);
-    fprintf(stdout, "# meanAgeRev[%g] : %.3f\n", maxHtKm[ii], meanAgeRev[ii]);
-  }
-  
-  fprintf(stdout, 
-          "# %8s %8s %8s",
-          "binNum", "binAge", "binPos");
-
-  for (int ii = 0; ii < nHts; ii++) {
-    char label[128];
-    snprintf(label, 128, "cumFreqFwd[%g]", maxHtKm[ii]);
-    fprintf(stdout, " %14s", label);
-    snprintf(label, 128, "cumFreqRev[%g]", maxHtKm[ii]);
-    fprintf(stdout, " %14s", label);
-  }
-  fprintf(stdout, "\n");
-  
-  fprintf(stdout, "#########################################################\n");
-
-  for (int ibin = 0; ibin < nBins; ibin++) {
-    double binAge = ((double) ibin / (nBins - 1.0)) * volDurationSecs;
-    double binPos = ((double) ibin / (nBins - 1.0));
-    fprintf(stdout, 
-            "  %8d %8.2f %8.3f",
-            ibin, binAge, binPos);
-    for (int ii = 0; ii < nHts; ii++) {
-      fprintf(stdout, " %14.6f %14.6f", cumFreqFwd[ii][ibin], cumFreqRev[ii][ibin]);
-    }
-    fprintf(stdout, "\n");
-  } // ibin
-  
-}
-
 //////////////////////////////////////////////////
-// set up write
+// set up write for polar volume
 
-void StormShapeSim::_setupWrite(RadxFile &file)
+void StormShapeSim::_setupCfRadialWrite(RadxFile &file)
 {
 
   if (_params.debug) {
@@ -641,21 +392,21 @@ void StormShapeSim::_setupWrite(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// write out the volume
+// write out the cfradial volume
 
-int StormShapeSim::_writeVol(RadxVol &vol)
+int StormShapeSim::_writeCfRadialVol(RadxVol &vol)
 {
 
   // output file
 
   GenericRadxFile outFile;
-  _setupWrite(outFile);
+  _setupCfRadialWrite(outFile);
   
   // write to dir
   
-  if (outFile.writeToDir(vol, _params.output_dir, true, false)) {
-    cerr << "ERROR - StormShapeSim::_writeVol" << endl;
-    cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
+  if (outFile.writeToDir(vol, _params.cfradial_output_dir, true, false)) {
+    cerr << "ERROR - StormShapeSim::_writeCfRadialVol" << endl;
+    cerr << "  Cannot write file to dir: " << _params.cfradial_output_dir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
   }
@@ -663,124 +414,5 @@ int StormShapeSim::_writeVol(RadxVol &vol)
 
   return 0;
 
-}
-
-//////////////////////////////////////////////////
-// print the range height table to stdout
-
-void StormShapeSim::_printRangeHeightTable(RadxVol &vol)
-{
-
-  // init for computing heights
-
-  double beamWidthDeg = _params.beam_width_deg;
-  double beamWidthDegH = vol.getRadarBeamWidthDegH();
-  double beamWidthDegV = vol.getRadarBeamWidthDegV();
-
-  if (beamWidthDegH > 0 && beamWidthDegV > 0) {
-    beamWidthDeg = (beamWidthDegH + beamWidthDegV) / 2.0;
-  } else if (beamWidthDegH > 0) {
-    beamWidthDeg = beamWidthDegH;
-  } else if (beamWidthDegV > 0) {
-    beamWidthDeg = beamWidthDegV;
-  }
-
-  const vector<RadxSweep *> &sweeps = vol.getSweeps();
-  BeamHeight beamHt; // default init to get height above radar
-  vol.computeMaxNGates();
-  int nGates = vol.getMaxNGates();
-  vol.remapToPredomGeom();
-  RadxRay *ray0 = vol.getRays()[0];
-  double startRangeKm = ray0->getStartRangeKm();
-  double gateSpacingKm = ray0->getGateSpacingKm();
-  double maxRangeKm = startRangeKm + (nGates - 1) * gateSpacingKm;
-
-  // create set of unique angles, 2 decimal accuracy
-
-  set<double> uniqueElev;
-  for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
-    double elDeg = sweeps[isweep]->getFixedAngleDeg();
-    double elRounded = floor(elDeg * 100.0 + 0.5) / 100.0;
-    uniqueElev.insert(elRounded);
-  }
-  
-  // print to stdout
-  
-  char scanName[128];
-  if (vol.getScanId() > 0 && string(_params.scan_name) == "Unknown") {
-    snprintf(scanName, 128, "VCP%d", vol.getScanId());
-  } else {
-    snprintf(scanName, 128, "%s", _params.scan_name);
-  }
-
-  // metadata headers
-
-  fprintf(stdout, "#########################################################\n");
-  fprintf(stdout, "# scanName   : %s\n", scanName);
-  fprintf(stdout, "# nGates     : %d\n", nGates);
-  fprintf(stdout, "# maxRangeKm : %.0f\n", maxRangeKm);
-  fprintf(stdout, "# beamWidth  : %.2f\n", beamWidthDeg);
-  fprintf(stdout, "# elevs      : ");
-  
-  set<double>::iterator itElev;
-  size_t count = 0;
-  for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++, count++) {
-    double el = *itElev;
-    fprintf(stdout, "%.2f", el);
-    if (count < uniqueElev.size() - 1) {
-      fprintf(stdout, ",");
-    } else {
-      fprintf(stdout, "\n");
-    }
-  }
-
-  // column headers
-  
-  fprintf(stdout, "#%10s %10s", "gateNum", "rangeKm");
-  
-  for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++) {
-    double elDeg = *itElev;
-    char elevText[128];
-    snprintf(elevText, 128, "%.2f", elDeg);
-    string elevStr(elevText);
-    string label = "htKmBot[" + elevStr + "]";
-    fprintf(stdout, " %15s", label.c_str());
-    label = "htKmMid[" + elevStr + "]";
-    fprintf(stdout, " %15s", label.c_str());
-    label = "htKmTop[" + elevStr + "]";
-    fprintf(stdout, " %15s", label.c_str());
-  }
-  fprintf(stdout, "\n");
-
-  fprintf(stdout, "#########################################################\n");
-
-  // loop through gates
-
-  for (int igate = 0; igate < nGates; igate++) {
-    
-    double rangeKm = startRangeKm + igate * gateSpacingKm;
-    
-    fprintf(stdout, " %10d %10.2f", igate, rangeKm);
-  
-    // loop through sweeps
-    
-    for (itElev = uniqueElev.begin(); itElev != uniqueElev.end(); itElev++) {
-      
-      double elMid = *itElev;
-      double elBot = elMid - beamWidthDeg / 2.0;
-      double elTop = elMid + beamWidthDeg / 2.0;
-
-      double htMid = beamHt.computeHtKm(elMid, rangeKm);
-      double htBot = beamHt.computeHtKm(elBot, rangeKm);
-      double htTop = beamHt.computeHtKm(elTop, rangeKm);
-
-      fprintf(stdout, " %15.2f %15.2f %15.2f", htBot, htMid, htTop);
-      
-    } // isweep
-
-    fprintf(stdout, "\n");
-    
-  } // igate
-    
 }
 

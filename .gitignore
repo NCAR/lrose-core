@@ -467,11 +467,6 @@ codebase/apps/radar/src/IpsTsSim/IpsTsSim
 codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
 codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
 
-codebase/apps/radar/src/Sprite/Sprite
-codebase/apps/radar/src/Sprite/Makefile.qmake
-codebase/apps/radar/src/Sprite/moc_*cpp
-codebase/apps/radar/src/Sprite/moc_predefs.h
-
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/HcrVelCorrect/ReadEgm2008/ReadEgm2008
 codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain
@@ -504,6 +499,13 @@ codebase/apps/radar/src/RapMap2Chill/RapMap2Chill
 codebase/apps/radar/src/REPoH/REPoH
 codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
+
+codebase/apps/radar/src/Sprite/Sprite
+codebase/apps/radar/src/Sprite/Makefile.qmake
+codebase/apps/radar/src/Sprite/moc_*cpp
+codebase/apps/radar/src/Sprite/moc_predefs.h
+
+codebase/apps/radar/src/StormShapeSim/StormShapeSim
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
 codebase/apps/radar/src/SunCal/SunCal
 codebase/apps/radar/src/SunCal/testing/sunscan_ael_code
