@@ -1,0 +1,227 @@
+/*********************************************************
+ * parameter definitions for StormShapeSim
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Dec 2021
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "StormShapeSim simulates storm shapes and writes these to a Cartesian MDV file. It then resamples the Cartesian file using a prescribed radar scan strategy, and writes the radar-bases simulation to a CfRadial file.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "Specifying the storm shapes";
+  p_text = "Set an array of storm shapes for the simulation.";
+}
+
+typedef struct {
+  double centroid_x_km;
+  double centroid_y_km;
+  double centroid_z_km;
+  double body_ellipse_radius_x_km;
+  double body_ellipse_radius_y_km;
+  double body_min_z_km;
+  double body_max_z_km;
+  double body_dbz;
+  double dbz_gradient_x;
+  double dbz_gradient_y;
+  double dbz_gradient_z;
+} storm_shape_t;
+
+paramdef struct storm_shape_t {
+  p_default = {
+    {
+     centroid_x_km = 30.0,
+     centroid_y_km = 30.0,
+     centroid_z_km = 5.0,
+     body_ellipse_radius_x_km = 40,
+     body_ellipse_radius_y_km = 20,
+     body_min_z_km = 3,
+     body_max_z_km = 7,
+     body_dbz = 45,
+     dbz_gradient_x = 0.5,
+     dbz_gradient_y = 0.5,
+     dbz_gradient_z = 3.0
+    }
+  };
+  p_descr = "Array of storm shapes.";
+  p_help = "The shape centroid is specified. This body is an ellipse in (x,y) cordinates, with the specified z limits. Within the body dbz is constant. Beyond the body limits the dbz values decrease at the specified gradient. Below the specified minimum, the dbz values will be set to missing.";
+} storm_shapes[];
+
+commentdef {
+  p_header = "Mode for specifying the radar scan strategy";
+  p_text = "Read in a scan file, or specify radar and scan parameters";
+}
+
+typedef enum {
+  SPECIFY_FILE, SPECIFY_RADAR_PARAMS
+} specify_mode_t;
+
+paramdef enum specify_mode_t {
+  p_default = SPECIFY_RADAR_PARAMS;
+  p_descr = "Mode for determining radar parameters";
+  p_help = "\nSPECIFY_FILE: read in a file, and use that volume for computations.\n\nSPECIFY_RADAR_PARAMS: create a volume based on specified parameters in params file.";
+} specify_mode;
+
+commentdef {
+  p_header = "SPECIFIED FILE";
+}
+
+paramdef string {
+  p_default = "./template_cfradial_file.nc";
+  p_descr = "Path for specified file.";
+  p_help = "Applies to SPECIFY_FILE mode.";
+} specified_file_path;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Set the maximum range for file that is read";
+  p_help = "If TRUE, then max_range_km is applied on read";
+} set_max_range;
+
+commentdef {
+  p_header = "SPECIFIED RADAR PARAMETERS";
+  p_text = "Applies to SPECIFY_RADAR_PARAMS mode.";
+}
+
+paramdef string {
+  p_default = "VIRTUAL";
+  p_descr = "Name of radar";
+} radar_name;
+
+typedef struct {
+  double latitudeDeg;
+  double longitudeDeg;
+  double altitudeKm;
+} radar_location_t;
+
+paramdef struct radar_location_t {
+  p_default = { 40.0, -105.0, 0.0 };
+  p_descr = "Radar location";
+  p_help = "Note that the altitude is in meters MSL.";
+} radar_location;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Radar wavelength, cm";
+} radar_wavelength_cm;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Radar beamwidth (deg)";
+} beam_width_deg;
+
+paramdef string {
+  p_default = "Unknown";
+  p_descr = "Volume coverage pattern";
+} scan_name;
+
+paramdef double {
+  p_default = 250;
+  p_descr = "Gate spacing for simulation (m)";
+} gate_spacing_m;
+
+paramdef double {
+  p_default = 225;
+  p_descr = "Max range (km)";
+} max_range_km;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Rate of rotation in elevation (deg/s)";
+} elev_rate_deg_per_sec;
+
+typedef struct {
+  double elev_deg;
+  double az_rate_deg_per_sec;
+} sweep_t;
+
+paramdef struct sweep_t {
+  p_default = {
+    { 0.5, 11.46 },
+    { 0.5, 17.10 },
+    { 0.9, 13.38 },
+    { 0.9, 17.10 },
+    { 1.3, 13.38 },
+    { 1.3, 17.10 },
+    { 1.8, 13.38 },
+    { 2.4, 18.06 },
+    { 3.1, 18.06 },
+    { 4.0, 20.52 },
+    { 5.1, 20.52 },
+    { 6.4, 20.52 },
+    { 8.0, 24.84 },
+    { 10.0, 25.62 },
+    { 12.0, 25.62 },
+    { 14.0, 25.62 },
+    { 16.7, 25.62 },
+    { 19.5, 25.62 }
+  };
+  p_descr = "Definition of each sweep.";
+  p_help = "Elevation angle (deg), azimuth rate (deg/sec).";
+} sweeps[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Reverse the order of the sweeps in the volume, but preserve times.";
+  p_help = "If TRUE, reverse the order in which the sweeps are stored in the volume. But do not change the times on the rays. This is used for testing purposes and checking for bugs in the analysis.";
+} reverse_sweep_order_in_vol;
+
+commentdef {
+  p_header = "DATA AGE ANALYSIS";
+}
+
+paramdef int {
+  p_default = 51;
+  p_descr = "Number of bins in the age histogram";
+  p_help = "Age is expressed as a fraction of the time to complete the volume";
+} n_bins_age_histogram;
+
+paramdef double {
+  p_default = { 5.0, 10.0, 20.0 };
+  p_descr = "Max heights to be used in age histogram (km)";
+} age_hist_max_ht_km[];
+
+commentdef {
+  p_header = "WRITING OUT RANGE-HEIGHT TABLE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Print range-height table to stdout";
+  p_help = "If TRUE, the height of the sweep elevation angles, vs range, are written to stdout";
+} print_range_height_table;
+
+commentdef {
+  p_header = "WRITING CFRADIAL FILES TO OUTPUT DIRECTORY";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write the volume to a CfRadial output file";
+  p_help = "If TRUE, the volume is written to output_dir";
+} write_volume_to_output_file;
+
+paramdef string {
+  p_default = "./output/StormShapeSim/";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
