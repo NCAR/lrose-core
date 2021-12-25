@@ -27,8 +27,13 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2014
+// Dec 2021
 //
+///////////////////////////////////////////////////////////////
+// StormShapeSim simulates storm shapes and writes these to a
+// Cartesian MDV file. It then resamples the Cartesian file
+// using a prescribed radar scan strategy, and writes the
+// radar-bases simulation to a CfRadial file.
 ///////////////////////////////////////////////////////////////
 
 #include "StormShapeSim.hh"

@@ -90,55 +90,17 @@ int Args::parse (const int argc, const char **argv)
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-write_cfradial")) {
-      
-      sprintf(tmp_str, "write_volume_to_output_file = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-print_height_table")) {
-      
-      sprintf(tmp_str, "print_range_height_table = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-
-    } else if (!strcmp(argv[i], "-reverse_sweep_order")) {
-      
-      sprintf(tmp_str, "reverse_sweep_order_in_vol = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-max_ht")) {
+    } else if (!strcmp(argv[i], "-outdir_cfradial")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "age_hist_max_ht_km = %s;", argv[i+1]);
+	sprintf(tmp_str, "output_dir_cfradial = \"%s\";", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
 	
-    } else if (!strcmp(argv[i], "-max_range")) {
-      
-      sprintf(tmp_str, "set_max_range = TRUE;");
-      TDRP_add_override(&override, tmp_str);
-      if (i < argc - 1) {
-	sprintf(tmp_str, "max_range_km = %s;", argv[i+1]);
-	TDRP_add_override(&override, tmp_str);
-      }
-	
-    } else if (!strcmp(argv[i], "-nbins")) {
+    } else if (!strcmp(argv[i], "-outdir_mdv")) {
       
       if (i < argc - 1) {
-	sprintf(tmp_str, "n_bins_age_histogram = %s;", argv[i+1]);
-	TDRP_add_override(&override, tmp_str);
-      }
-	
-    } else if (!strcmp(argv[i], "-outdir")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "output_dir = \"%s\";", argv[i+1]);
-	TDRP_add_override(&override, tmp_str);
-      }
-	
-    } else if (!strcmp(argv[i], "-scan")) {
-      
-      if (i < argc - 1) {
-	sprintf(tmp_str, "scan_name = \"%s\";", argv[i+1]);
+	sprintf(tmp_str, "output_dir_mdv = \"%s\";", argv[i+1]);
 	TDRP_add_override(&override, tmp_str);
       }
 	
@@ -172,15 +134,9 @@ void Args::_usage(ostream &out)
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -debug ] print debug messages\n"
       << "       [ -f ?] path to radar file if specified\n"
-      << "       [ -outdir ?] set the output directory for file\n"
-      << "       [ -max_ht ?] set max ht in km\n"
-      << "       [ -max_range ?] set max range in km\n"
-      << "       [ -nbins ?] set number of bins in histogram\n"
-      << "       [ -print_height_table ] print range-ht table to stdout\n"
-      << "       [ -reverse_sweep_order ] reverse sweep order in volume but\n"
-      << "          preserve times on rays. Used for debugging and testing.\n"
+      << "       [ -outdir_cfradial ?] set the cfradial output directory\n"
+      << "       [ -outdir_mdv ?] set the mdv output directory\n"
       << "       [ -verbose ] print verbose debug messages\n"
-      << "       [ -write_cfradial ] write volume to cfradial file\n"
       << endl;
 
   Params::usage(out);

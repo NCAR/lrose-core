@@ -823,18 +823,6 @@
     tt->single_val.s = tdrpStrDup("./template_cfradial_file.nc");
     tt++;
     
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Set the maximum range for file that is read");
-    tt->help = tdrpStrDup("If TRUE, then max_range_km is applied on read");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1054,27 +1042,27 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'mdv_output_dir'
+    // Parameter 'output_dir_mdv'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("mdv_output_dir");
+    tt->param_name = tdrpStrDup("output_dir_mdv");
     tt->descr = tdrpStrDup("Output directory path for Cartesian MDV files.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &mdv_output_dir - &_start_;
+    tt->val_offset = (char *) &output_dir_mdv - &_start_;
     tt->single_val.s = tdrpStrDup("./output/StormShapeSim/mdv");
     tt++;
     
-    // Parameter 'cfradial_output_dir'
+    // Parameter 'output_dir_cfradial'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("cfradial_output_dir");
+    tt->param_name = tdrpStrDup("output_dir_cfradial");
     tt->descr = tdrpStrDup("Output directory path for polar CfRadial files.");
     tt->help = tdrpStrDup("Files will be written to this directory.");
-    tt->val_offset = (char *) &cfradial_output_dir - &_start_;
+    tt->val_offset = (char *) &output_dir_cfradial - &_start_;
     tt->single_val.s = tdrpStrDup("./output/StormShapeSim/cfradial");
     tt++;
     

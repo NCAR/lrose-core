@@ -123,12 +123,6 @@ paramdef string {
   p_help = "Applies to SPECIFY_FILE mode.";
 } specified_file_path;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Set the maximum range for file that is read";
-  p_help = "If TRUE, then max_range_km is applied on read";
-} set_max_range;
-
 commentdef {
   p_header = "SPECIFIED RADAR PARAMETERS";
   p_text = "Applies to SPECIFY_RADAR_PARAMS mode.";
@@ -224,11 +218,11 @@ commentdef {
 paramdef string {
   p_default = "./output/StormShapeSim/mdv";
   p_descr = "Output directory path for Cartesian MDV files.";
-} mdv_output_dir;
+} output_dir_mdv;
 
 paramdef string {
   p_default = "./output/StormShapeSim/cfradial";
   p_descr = "Output directory path for polar CfRadial files.";
   p_help = "Files will be written to this directory.";
-} cfradial_output_dir;
+} output_dir_cfradial;
 

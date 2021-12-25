@@ -422,8 +422,6 @@ public:
 
   char* specified_file_path;
 
-  tdrp_bool_t set_max_range;
-
   char* radar_name;
 
   radar_location_t radar_location;
@@ -445,9 +443,9 @@ public:
 
   tdrp_bool_t reverse_sweep_order_in_vol;
 
-  char* mdv_output_dir;
+  char* output_dir_mdv;
 
-  char* cfradial_output_dir;
+  char* output_dir_cfradial;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -456,7 +454,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[26];
 
   const char *_className;
 

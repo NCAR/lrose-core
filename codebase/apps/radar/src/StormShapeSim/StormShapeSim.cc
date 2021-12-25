@@ -28,12 +28,13 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// March 2014
+// Dec 2021
 //
 ///////////////////////////////////////////////////////////////
-//
-// StormShapeSim creates a RadxVol object from scratch.
-//
+// StormShapeSim simulates storm shapes and writes these to a
+// Cartesian MDV file. It then resamples the Cartesian file
+// using a prescribed radar scan strategy, and writes the
+// radar-bases simulation to a CfRadial file.
 ///////////////////////////////////////////////////////////////
 
 #include "StormShapeSim.hh"
@@ -273,9 +274,7 @@ int StormShapeSim::_readFile(const string &readPath,
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     inFile.setDebug(true);
   }
-  if (_params.set_max_range) {
-    inFile.setReadMaxRangeKm(_params.max_range_km);
-  }
+  inFile.setReadMaxRangeKm(_params.max_range_km);
   inFile.setReadPreserveSweeps(true);
 
   // read in file
@@ -404,9 +403,9 @@ int StormShapeSim::_writeCfRadialVol(RadxVol &vol)
   
   // write to dir
   
-  if (outFile.writeToDir(vol, _params.cfradial_output_dir, true, false)) {
+  if (outFile.writeToDir(vol, _params.output_dir_cfradial, true, false)) {
     cerr << "ERROR - StormShapeSim::_writeCfRadialVol" << endl;
-    cerr << "  Cannot write file to dir: " << _params.cfradial_output_dir << endl;
+    cerr << "  Cannot write file to dir: " << _params.output_dir_cfradial << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
   }
