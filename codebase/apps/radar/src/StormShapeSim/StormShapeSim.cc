@@ -201,13 +201,13 @@ void StormShapeSim::_createDbzCart()
   }
 
   // loop through the points
-
+  
   size_t index = 0;
   for (int iz = 0; iz < cgrid.nz; iz++) {
     double zz = cgrid.minz + iz * cgrid.dz;
-    for (int iy = 0; iy < cgrid.nz; iy++) {
+    for (int iy = 0; iy < cgrid.ny; iy++) {
       double yy = cgrid.miny + iy * cgrid.dy;
-      for (int ix = 0; ix < cgrid.nz; ix++, index++) {
+      for (int ix = 0; ix < cgrid.nx; ix++, index++) {
         double xx = cgrid.minx + ix * cgrid.dx;
 
         // loop through the shapes
@@ -239,20 +239,36 @@ void StormShapeSim::_createDbzCart()
           // compute the dbz at the grid point
 
           fl32 gridDbz = centroidDbz;
+
+          double aa = ss.body_ellipse_radius_x_km;
+          double bb = ss.body_ellipse_radius_y_km;
+          double cc = (aa + bb) / 2.0;
           
           double xOff = ss.centroid_x_km - xx;
           double yOff = ss.centroid_y_km - yy;
-          double aa = ss.body_ellipse_radius_x_km;
-          double bb = ss.body_ellipse_radius_y_km;
-          double cc = (aa + bb) / 1.0;
           double normDist =
-            sqrt((xOff * xOff / aa * aa) + (yOff * yOff / bb * bb));
+            sqrt(((xOff * xOff) / (aa * aa)) + ((yOff * yOff) / (bb * bb)));
           
           if (normDist > 1.0) {
             gridDbz -= ss.dbz_gradient_horiz * (normDist - 1.0) * cc;
           }
-          
+
           if (gridDbz > _params.min_valid_dbz) {
+
+            // cerr << "1111111111111 aa, bb, cc: "
+            //      << aa << ", " << bb << ", " << cc << endl;
+            
+            // cerr << "zz, yy, xx, xOff, yOff, bodyDbz, centroidDbz, normDist, gridDbz: "
+            //      << zz << ", "
+            //      << yy << ", "
+            //      << xx << ", "
+            //      << xOff << ", "
+            //      << yOff << ", "
+            //      << bodyDbz << ", "
+            //      << centroidDbz << ", "
+            //      << normDist << ", "
+            //      << gridDbz << endl;
+            
             _dbzCart[index] = max(gridDbz, _dbzCart[index]);
           }
           
