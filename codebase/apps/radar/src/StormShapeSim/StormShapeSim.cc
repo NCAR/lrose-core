@@ -229,18 +229,18 @@ void StormShapeSim::_createDbzCart()
             bodyDbz += zFrac * (ss.body_dbz_at_top - ss.body_dbz_at_base);
           }
 
-          // compute dbz at the centroid, at the grid z
+          // compute dbz at the gridLevel, at the grid z
           
-          double centroidDbz = bodyDbz;
+          double gridLevelDbz = bodyDbz;
           if (zz < ss.body_min_z_km) {
-            centroidDbz -= (ss.body_min_z_km - zz) * ss.dbz_gradient_vert;
+            gridLevelDbz -= (ss.body_min_z_km - zz) * ss.dbz_gradient_vert;
           } else if (zz > ss.body_max_z_km) {
-            centroidDbz -= (zz - ss.body_max_z_km) * ss.dbz_gradient_vert;
+            gridLevelDbz -= (zz - ss.body_max_z_km) * ss.dbz_gradient_vert;
           }
 
           // compute the dbz at the grid point
 
-          fl32 gridDbz = centroidDbz;
+          fl32 gridDbz = gridLevelDbz;
 
           double aa = ss.body_ellipse_radius_x_km;
           double bb = ss.body_ellipse_radius_y_km;

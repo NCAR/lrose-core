@@ -81,29 +81,29 @@ data_set_info = "case1";
 
 storm_shapes = {
   {
-    centroid_x_km = 30,
+    centroid_x_km = -30,
     centroid_y_km = 30,
     body_ellipse_radius_x_km = 20,
     body_ellipse_radius_y_km = 15,
     body_min_z_km = 4,
     body_max_z_km = 10,
     body_dbz_at_base = 45,
-    body_dbz_at_top = 25,
-    dbz_gradient_horiz = 1.5,
-    dbz_gradient_vert = 8
+    body_dbz_at_top = 45,
+    dbz_gradient_horiz = 3,
+    dbz_gradient_vert = 3
   }
   ,
   {
-    centroid_x_km = 60,
+    centroid_x_km = 40,
     centroid_y_km = 60,
     body_ellipse_radius_x_km = 80,
-    body_ellipse_radius_y_km = 30,
-    body_min_z_km = 15,
-    body_max_z_km = 15,
+    body_ellipse_radius_y_km = 20,
+    body_min_z_km = 14.5,
+    body_max_z_km = 15.5,
     body_dbz_at_base = 20,
     body_dbz_at_top = 20,
-    dbz_gradient_horiz = 3.5,
-    dbz_gradient_vert = 20
+    dbz_gradient_horiz = 5,
+    dbz_gradient_vert = 30
   }
 };
 
