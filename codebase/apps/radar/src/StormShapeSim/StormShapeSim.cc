@@ -245,11 +245,21 @@ void StormShapeSim::_createDbzCart()
           double aa = ss.body_ellipse_radius_x_km;
           double bb = ss.body_ellipse_radius_y_km;
           double cc = (aa + bb) / 2.0;
+
+          // compute grid offset non-rotated
           
           double xOff = ss.centroid_x_km - xx;
           double yOff = ss.centroid_y_km - yy;
+
+          // computed offset with rotation
+
+          double sinRot = sin(ss.body_ellipse_rotation_deg * DEG_TO_RAD);
+          double cosRot = cos(ss.body_ellipse_rotation_deg * DEG_TO_RAD);
+          double xRot = xOff * cosRot + yOff * sinRot;
+          double yRot = xOff * sinRot + yOff * cosRot;
+
           double normDist =
-            sqrt(((xOff * xOff) / (aa * aa)) + ((yOff * yOff) / (bb * bb)));
+            sqrt(((xRot * xRot) / (aa * aa)) + ((yRot * yRot) / (bb * bb)));
           
           if (normDist > 1.0) {
             gridDbz -= ss.dbz_gradient_horiz * (normDist - 1.0) * cc;

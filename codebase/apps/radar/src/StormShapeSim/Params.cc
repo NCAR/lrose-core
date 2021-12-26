@@ -630,7 +630,7 @@
     tt->array_elem_size = sizeof(storm_shape_t);
     tt->array_n = 1;
     tt->struct_def.name = tdrpStrDup("storm_shape_t");
-    tt->struct_def.nfields = 10;
+    tt->struct_def.nfields = 11;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("double");
@@ -654,48 +654,54 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_storm_shapes->body_ellipse_radius_y_km - (char *) _storm_shapes;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("body_min_z_km");
+      tt->struct_def.fields[4].fname = tdrpStrDup("body_ellipse_rotation_deg");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_storm_shapes->body_min_z_km - (char *) _storm_shapes;
+        (char *) &_storm_shapes->body_ellipse_rotation_deg - (char *) _storm_shapes;
       tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("body_max_z_km");
+      tt->struct_def.fields[5].fname = tdrpStrDup("body_min_z_km");
       tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_storm_shapes->body_max_z_km - (char *) _storm_shapes;
+        (char *) &_storm_shapes->body_min_z_km - (char *) _storm_shapes;
       tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("body_dbz_at_base");
+      tt->struct_def.fields[6].fname = tdrpStrDup("body_max_z_km");
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &_storm_shapes->body_dbz_at_base - (char *) _storm_shapes;
+        (char *) &_storm_shapes->body_max_z_km - (char *) _storm_shapes;
       tt->struct_def.fields[7].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[7].fname = tdrpStrDup("body_dbz_at_top");
+      tt->struct_def.fields[7].fname = tdrpStrDup("body_dbz_at_base");
       tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &_storm_shapes->body_dbz_at_top - (char *) _storm_shapes;
+        (char *) &_storm_shapes->body_dbz_at_base - (char *) _storm_shapes;
       tt->struct_def.fields[8].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[8].fname = tdrpStrDup("dbz_gradient_horiz");
+      tt->struct_def.fields[8].fname = tdrpStrDup("body_dbz_at_top");
       tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[8].rel_offset = 
-        (char *) &_storm_shapes->dbz_gradient_horiz - (char *) _storm_shapes;
+        (char *) &_storm_shapes->body_dbz_at_top - (char *) _storm_shapes;
       tt->struct_def.fields[9].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[9].fname = tdrpStrDup("dbz_gradient_vert");
+      tt->struct_def.fields[9].fname = tdrpStrDup("dbz_gradient_horiz");
       tt->struct_def.fields[9].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[9].rel_offset = 
+        (char *) &_storm_shapes->dbz_gradient_horiz - (char *) _storm_shapes;
+      tt->struct_def.fields[10].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[10].fname = tdrpStrDup("dbz_gradient_vert");
+      tt->struct_def.fields[10].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[10].rel_offset = 
         (char *) &_storm_shapes->dbz_gradient_vert - (char *) _storm_shapes;
-    tt->n_struct_vals = 10;
+    tt->n_struct_vals = 11;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].d = 30;
       tt->struct_vals[1].d = 30;
       tt->struct_vals[2].d = 40;
       tt->struct_vals[3].d = 20;
-      tt->struct_vals[4].d = 3;
-      tt->struct_vals[5].d = 7;
-      tt->struct_vals[6].d = 45;
-      tt->struct_vals[7].d = 25;
-      tt->struct_vals[8].d = 1.5;
-      tt->struct_vals[9].d = 3;
+      tt->struct_vals[4].d = 0;
+      tt->struct_vals[5].d = 3;
+      tt->struct_vals[6].d = 7;
+      tt->struct_vals[7].d = 45;
+      tt->struct_vals[8].d = 25;
+      tt->struct_vals[9].d = 1.5;
+      tt->struct_vals[10].d = 3;
     tt++;
     
     // Parameter 'min_valid_dbz'

@@ -85,6 +85,7 @@ public:
     double centroid_y_km;
     double body_ellipse_radius_x_km;
     double body_ellipse_radius_y_km;
+    double body_ellipse_rotation_deg;
     double body_min_z_km;
     double body_max_z_km;
     double body_dbz_at_base;
