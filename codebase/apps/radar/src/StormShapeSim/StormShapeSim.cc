@@ -220,7 +220,7 @@ void StormShapeSim::_createDbzCart()
           
           double bodyDbz = ss.body_dbz_at_base;
           if (zz > ss.body_max_z_km) {
-            bodyDbz = ss.body_dbz_at_base;
+            bodyDbz = ss.body_dbz_at_top;
           } else if (zz >= ss.body_min_z_km && zz <= ss.body_max_z_km) {
             double zFrac = ((zz - ss.body_min_z_km) /
                             (ss.body_max_z_km - ss.body_min_z_km));
@@ -254,21 +254,6 @@ void StormShapeSim::_createDbzCart()
           }
 
           if (gridDbz > _params.min_valid_dbz) {
-
-            // cerr << "1111111111111 aa, bb, cc: "
-            //      << aa << ", " << bb << ", " << cc << endl;
-            
-            // cerr << "zz, yy, xx, xOff, yOff, bodyDbz, centroidDbz, normDist, gridDbz: "
-            //      << zz << ", "
-            //      << yy << ", "
-            //      << xx << ", "
-            //      << xOff << ", "
-            //      << yOff << ", "
-            //      << bodyDbz << ", "
-            //      << centroidDbz << ", "
-            //      << normDist << ", "
-            //      << gridDbz << endl;
-            
             _dbzCart[index] = max(gridDbz, _dbzCart[index]);
           }
           
