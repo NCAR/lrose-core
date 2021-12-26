@@ -41,6 +41,16 @@ debug = DEBUG_OFF;
 //
 //======================================================================
  
+///////////// data_set_info ///////////////////////////
+//
+// Label to be used in output data, and path.
+//
+//
+// Type: string
+//
+
+data_set_info = "case1";
+
 ///////////// storm_shapes ////////////////////////////
 //
 // Array of storm shapes.
@@ -422,6 +432,18 @@ reverse_sweep_order_in_vol = FALSE;
 //
 //======================================================================
  
+///////////// cart_data_time //////////////////////////
+//
+// Time for Cartesian output volume.
+//
+// The data will be stamped with this time.
+//
+//
+// Type: string
+//
+
+cart_data_time = "2022 01 01 00 00 00";
+
 ///////////// output_dir_mdv //////////////////////////
 //
 // Output directory path for Cartesian MDV files.

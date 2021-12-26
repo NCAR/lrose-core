@@ -189,6 +189,8 @@ int StormShapeSim::Run()
 void StormShapeSim::_createDbzCart()
 {
 
+  _cartDataTime.set(_params.cart_data_time);
+  
   const Params::cart_grid_t &cgrid = _params.cart_grid;
   
   // create grid and initialize
@@ -274,8 +276,7 @@ int StormShapeSim::_writeDbzCart2Mdv()
   // create output file object, initialize master header
   
   DsMdvx mdvx;
-  time_t now = time(NULL);
-  _initMdvMasterHeader(mdvx, now);
+  _initMdvMasterHeader(mdvx, _cartDataTime.utime());
   
   // add the dbz field
   
@@ -283,7 +284,10 @@ int StormShapeSim::_writeDbzCart2Mdv()
   
   // write the file
 
-  if (mdvx.writeToDir(_params.output_dir_mdv)) {
+  string outputDir(_params.output_dir_mdv);
+  outputDir += "/";
+  outputDir += _params.data_set_info;
+  if (mdvx.writeToDir(outputDir)) {
     cerr << "ERROR - SunCal::writeToMdv" << endl;
     cerr << mdvx.getErrStr() << endl;
     return -1;
@@ -330,7 +334,7 @@ void StormShapeSim::_initMdvMasterHeader(DsMdvx &mdvx, time_t dataTime)
   mhdr.sensor_lon = _params.radar_location.longitudeDeg;
   mhdr.sensor_lat = _params.radar_location.latitudeDeg;
   mhdr.sensor_alt = _params.radar_location.altitudeKm;
-  mdvx.setDataSetInfo("Storm shape simulation");
+  mdvx.setDataSetInfo(_params.data_set_info);
   mdvx.setDataSetName("Storm shape simulation");
   mdvx.setDataSetSource("StormShapeSim");
   

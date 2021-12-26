@@ -105,7 +105,7 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ DBZ /tmp/StormShapeSim/mdv&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+DBZ-case1 DBZ-case1 /tmp/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
 
 </GRIDS>
 
@@ -203,7 +203,7 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-cidd.demo_time:  04:30 12/26/2021
+cidd.demo_time:  00:00 01/01/2022
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    300

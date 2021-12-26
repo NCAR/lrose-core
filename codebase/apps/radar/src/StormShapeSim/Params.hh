@@ -412,6 +412,8 @@ public:
 
   debug_t debug;
 
+  char* data_set_info;
+
   storm_shape_t *_storm_shapes;
   int storm_shapes_n;
 
@@ -444,6 +446,8 @@ public:
 
   tdrp_bool_t reverse_sweep_order_in_vol;
 
+  char* cart_data_time;
+
   char* output_dir_mdv;
 
   char* output_dir_cfradial;
@@ -455,7 +459,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[29];
 
   const char *_className;
 

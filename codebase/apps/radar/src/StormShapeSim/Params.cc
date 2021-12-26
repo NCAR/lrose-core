@@ -603,6 +603,18 @@
     tt->comment_text = tdrpStrDup("Set an array of storm shapes for the simulation.");
     tt++;
     
+    // Parameter 'data_set_info'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("data_set_info");
+    tt->descr = tdrpStrDup("Label to be used in output data, and path.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &data_set_info - &_start_;
+    tt->single_val.s = tdrpStrDup("case1");
+    tt++;
+    
     // Parameter 'storm_shapes'
     // ctype is '_storm_shape_t'
     
@@ -1048,6 +1060,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'cart_data_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("cart_data_time");
+    tt->descr = tdrpStrDup("Time for Cartesian output volume.");
+    tt->help = tdrpStrDup("The data will be stamped with this time.");
+    tt->val_offset = (char *) &cart_data_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2022 01 01 00 00 00");
+    tt++;
+    
     // Parameter 'output_dir_mdv'
     // ctype is 'char*'
     
@@ -1057,7 +1081,7 @@
     tt->descr = tdrpStrDup("Output directory path for Cartesian MDV files.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_dir_mdv - &_start_;
-    tt->single_val.s = tdrpStrDup("./output/StormShapeSim/mdv");
+    tt->single_val.s = tdrpStrDup("/tmp/StormShapeSim/mdv");
     tt++;
     
     // Parameter 'output_dir_cfradial'
@@ -1069,7 +1093,7 @@
     tt->descr = tdrpStrDup("Output directory path for polar CfRadial files.");
     tt->help = tdrpStrDup("Files will be written to this directory.");
     tt->val_offset = (char *) &output_dir_cfradial - &_start_;
-    tt->single_val.s = tdrpStrDup("./output/StormShapeSim/cfradial");
+    tt->single_val.s = tdrpStrDup("/tmp/StormShapeSim/cfradial");
     tt++;
     
     // trailing entry has param_name set to NULL

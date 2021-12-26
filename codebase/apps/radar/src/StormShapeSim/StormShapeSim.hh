@@ -42,6 +42,7 @@
 
 #include <tdrp/tdrp.h>
 #include <dataport/port_types.h>
+#include <toolsa/DateTime.hh>
 #include <Mdv/DsMdvx.hh>
 #include <string>
 #include <vector>
@@ -85,6 +86,7 @@ private:
 
   size_t _nptsCart;
   fl32 *_dbzCart;
+  DateTime _cartDataTime;
 
   void _createDbzCart();
   int _writeDbzCart2Mdv();

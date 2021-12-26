@@ -31,6 +31,11 @@ commentdef {
   p_text = "Set an array of storm shapes for the simulation.";
 }
 
+paramdef string {
+  p_default = "case1";
+  p_descr = "Label to be used in output data, and path.";
+} data_set_info;
+
 typedef struct {
   double centroid_x_km;
   double centroid_y_km;
@@ -220,12 +225,18 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "./output/StormShapeSim/mdv";
+  p_default = "2022 01 01 00 00 00";
+  p_descr = "Time for Cartesian output volume.";
+  p_help = "The data will be stamped with this time.";
+} cart_data_time;
+
+paramdef string {
+  p_default = "/tmp/StormShapeSim/mdv";
   p_descr = "Output directory path for Cartesian MDV files.";
 } output_dir_mdv;
 
 paramdef string {
-  p_default = "./output/StormShapeSim/cfradial";
+  p_default = "/tmp/StormShapeSim/cfradial";
   p_descr = "Output directory path for polar CfRadial files.";
   p_help = "Files will be written to this directory.";
 } output_dir_cfradial;
