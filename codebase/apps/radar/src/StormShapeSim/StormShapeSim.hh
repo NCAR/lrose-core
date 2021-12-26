@@ -42,6 +42,7 @@
 
 #include <tdrp/tdrp.h>
 #include <dataport/port_types.h>
+#include <Mdv/DsMdvx.hh>
 #include <string>
 #include <vector>
 
@@ -86,7 +87,14 @@ private:
   fl32 *_dbzCart;
 
   void _createDbzCart();
-  
+  int _writeDbzCart2Mdv();
+  void _initMdvMasterHeader(DsMdvx &mdvx, time_t dataTime);
+  void _addMdvField(DsMdvx &mdvx,
+                    const string &fieldName,
+                    const string &units,
+                    const string &transform,
+                    const fl32 *dbzCart);
+    
   int _readFile(const string &readPath, RadxVol &vol);
   void _createVol(RadxVol &vol);
   void _addGeomFields(RadxVol &vol);

@@ -58,6 +58,8 @@
 #include <Mdv/GenericRadxFile.hh>
 #include <dsserver/DsLdataInfo.hh>
 
+#include <Mdv/MdvxField.hh>
+
 const fl32 StormShapeSim::dbzMiss = -9999.0F;
 
 using namespace std;
@@ -122,6 +124,15 @@ int StormShapeSim::Run()
   // create Cartesian DBZ volume with shapes embedded in the data
 
   _createDbzCart();
+
+  // write the DBZ Cart volume
+
+  if (_writeDbzCart2Mdv()) {
+    cerr << "ERROR - StormShapeSim::Run()" << endl;
+    return -1;
+  }
+
+  return 0;
   
   // create a volume depending on mode
   
@@ -227,7 +238,7 @@ void StormShapeSim::_createDbzCart()
 
           // compute the dbz at the grid point
 
-          double gridDbz = centroidDbz;
+          fl32 gridDbz = centroidDbz;
           
           double xOff = ss.centroid_x_km - xx;
           double yOff = ss.centroid_y_km - yy;
@@ -240,9 +251,9 @@ void StormShapeSim::_createDbzCart()
           if (normDist > 1.0) {
             gridDbz -= ss.dbz_gradient_horiz * (normDist - 1.0) * cc;
           }
-
+          
           if (gridDbz > _params.min_valid_dbz) {
-            _dbzCart[index] = gridDbz;
+            _dbzCart[index] = max(gridDbz, _dbzCart[index]);
           }
           
         } // ishape
@@ -250,6 +261,151 @@ void StormShapeSim::_createDbzCart()
       } // ix
     } // iy
   } // iz
+
+}
+
+//////////////////////////////////////////////////
+// write the dbz cartesian volume to MDV
+
+int StormShapeSim::_writeDbzCart2Mdv()
+{
+
+  // create output file object, initialize master header
+  
+  DsMdvx mdvx;
+  time_t now = time(NULL);
+  _initMdvMasterHeader(mdvx, now);
+  
+  // add the dbz field
+  
+  _addMdvField(mdvx, "DBZ", "dBZ", "", _dbzCart);
+  
+  // write the file
+
+  if (mdvx.writeToDir(_params.output_dir_mdv)) {
+    cerr << "ERROR - SunCal::writeToMdv" << endl;
+    cerr << mdvx.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote file: " << mdvx.getPathInUse() << endl;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////
+// init MDV master header
+
+void StormShapeSim::_initMdvMasterHeader(DsMdvx &mdvx, time_t dataTime)
+
+{
+
+  // set the master header
+  
+  Mdvx::master_header_t mhdr;
+  MEM_zero(mhdr);
+  
+  mhdr.time_begin = dataTime;
+  mhdr.time_end = dataTime;
+  mhdr.time_centroid = dataTime;
+  
+  mhdr.num_data_times = 1;
+  mhdr.data_dimension = 3;
+  
+  mhdr.data_collection_type = Mdvx::DATA_SYNTHESIS;
+  mhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  mhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  mhdr.max_nz = _params.cart_grid.nz;
+  mhdr.vlevel_included = TRUE;
+  mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
+  mhdr.data_ordering = Mdvx::ORDER_XYZ;
+  mhdr.max_nx = _params.cart_grid.nx;
+  mhdr.max_ny = _params.cart_grid.ny;
+  mhdr.n_chunks = 0;
+  mhdr.field_grids_differ = FALSE;
+  mhdr.sensor_lon = _params.radar_location.longitudeDeg;
+  mhdr.sensor_lat = _params.radar_location.latitudeDeg;
+  mhdr.sensor_alt = _params.radar_location.altitudeKm;
+  mdvx.setDataSetInfo("Storm shape simulation");
+  mdvx.setDataSetName("Storm shape simulation");
+  mdvx.setDataSetSource("StormShapeSim");
+  
+  mdvx.setMasterHeader(mhdr);
+  
+}
+
+/////////////////////////////////////////////////////
+// add field to MDV object
+
+void StormShapeSim::_addMdvField(DsMdvx &mdvx,
+                                 const string &fieldName,
+                                 const string &units,
+                                 const string &transform,
+                                 const fl32 *dbzCart)
+  
+{
+
+  // initialize field header and vlevel header
+  
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  
+  // fill out field header
+  
+  fhdr.nx = _params.cart_grid.nx;
+  fhdr.ny = _params.cart_grid.ny;
+  fhdr.nz = _params.cart_grid.nz;
+  
+  fhdr.proj_type = Mdvx::PROJ_FLAT;
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = fhdr.nx * fhdr.ny * fhdr.nz * sizeof(fl32);
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.dz_constant = 1;
+  fhdr.data_dimension = 3;
+
+  fhdr.proj_origin_lat = _params.radar_location.latitudeDeg;
+  fhdr.proj_origin_lon = _params.radar_location.longitudeDeg;
+  
+  fhdr.grid_dx = _params.cart_grid.dx;
+  fhdr.grid_dy = _params.cart_grid.dy;
+  fhdr.grid_dz = _params.cart_grid.dz;
+  
+  fhdr.grid_minx = _params.cart_grid.minx;
+  fhdr.grid_miny = _params.cart_grid.miny;
+  fhdr.grid_minz = _params.cart_grid.minz;
+  
+  fhdr.bad_data_value = dbzMiss;
+  fhdr.missing_data_value = dbzMiss;
+
+  // fill out vlevel header
+
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    vhdr.type[iz] = Mdvx::VERT_TYPE_Z;
+    vhdr.level[iz] = fhdr.grid_minz + iz * fhdr.grid_dz;
+  } // iz
+  
+  // create field
+  
+  MdvxField *field = new MdvxField(fhdr, vhdr, dbzCart);
+
+  // set the names
+  
+  field->setFieldName(fieldName.c_str());
+  field->setFieldNameLong(fieldName.c_str());
+  field->setUnits(units.c_str());
+  field->setTransform(transform.c_str());
+
+  // add field to mdvx object
+
+  mdvx.addField(field);
 
 }
 
