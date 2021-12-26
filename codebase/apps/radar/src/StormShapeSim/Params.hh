@@ -83,15 +83,14 @@ public:
   typedef struct {
     double centroid_x_km;
     double centroid_y_km;
-    double centroid_z_km;
     double body_ellipse_radius_x_km;
     double body_ellipse_radius_y_km;
     double body_min_z_km;
     double body_max_z_km;
-    double body_dbz;
-    double dbz_gradient_x;
-    double dbz_gradient_y;
-    double dbz_gradient_z;
+    double body_dbz_at_base;
+    double body_dbz_at_top;
+    double dbz_gradient_horiz;
+    double dbz_gradient_vert;
   } storm_shape_t;
 
   typedef struct {
@@ -416,6 +415,8 @@ public:
   storm_shape_t *_storm_shapes;
   int storm_shapes_n;
 
+  double min_valid_dbz;
+
   cart_grid_t cart_grid;
 
   specify_mode_t specify_mode;
@@ -454,7 +455,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[26];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

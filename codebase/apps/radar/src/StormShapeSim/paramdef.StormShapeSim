@@ -34,15 +34,14 @@ commentdef {
 typedef struct {
   double centroid_x_km;
   double centroid_y_km;
-  double centroid_z_km;
   double body_ellipse_radius_x_km;
   double body_ellipse_radius_y_km;
   double body_min_z_km;
   double body_max_z_km;
-  double body_dbz;
-  double dbz_gradient_x;
-  double dbz_gradient_y;
-  double dbz_gradient_z;
+  double body_dbz_at_base;
+  double body_dbz_at_top;
+  double dbz_gradient_horiz;
+  double dbz_gradient_vert;
 } storm_shape_t;
 
 paramdef struct storm_shape_t {
@@ -50,20 +49,25 @@ paramdef struct storm_shape_t {
     {
      centroid_x_km = 30.0,
      centroid_y_km = 30.0,
-     centroid_z_km = 5.0,
      body_ellipse_radius_x_km = 40,
      body_ellipse_radius_y_km = 20,
      body_min_z_km = 3,
      body_max_z_km = 7,
-     body_dbz = 45,
-     dbz_gradient_x = 0.5,
-     dbz_gradient_y = 0.5,
-     dbz_gradient_z = 3.0
+     body_dbz_at_base = 45,
+     body_dbz_at_top = 25,
+     dbz_gradient_horiz = 1.5,
+     dbz_gradient_vert = 3.0
     }
   };
   p_descr = "Array of storm shapes.";
   p_help = "The shape centroid is specified. This body is an ellipse in (x,y) cordinates, with the specified z limits. Within the body dbz is constant. Beyond the body limits the dbz values decrease at the specified gradient. Below the specified minimum, the dbz values will be set to missing.";
 } storm_shapes[];
+
+paramdef double {
+  p_default = -30.0;
+  p_descr = "Minimum valid DBZ in Cartesian DBZ volume";
+  p_help = "Values below this will be set to missing.";
+} min_valid_dbz;
 
 commentdef {
   p_header = "CARTESIAN GRID DETAILS";

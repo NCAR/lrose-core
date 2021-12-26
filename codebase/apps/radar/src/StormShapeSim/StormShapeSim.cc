@@ -58,6 +58,8 @@
 #include <Mdv/GenericRadxFile.hh>
 #include <dsserver/DsLdataInfo.hh>
 
+const fl32 StormShapeSim::dbzMiss = -9999.0F;
+
 using namespace std;
 
 // Constructor
@@ -68,6 +70,7 @@ StormShapeSim::StormShapeSim(int argc, char **argv) :
 {
 
   OK = TRUE;
+  _dbzCart = NULL;
 
   // set programe name
 
@@ -104,6 +107,9 @@ StormShapeSim::~StormShapeSim()
 
 {
 
+  if (_dbzCart) {
+    delete[] _dbzCart;
+  }
   
 }
 
@@ -113,6 +119,10 @@ StormShapeSim::~StormShapeSim()
 int StormShapeSim::Run()
 {
 
+  // create Cartesian DBZ volume with shapes embedded in the data
+
+  _createDbzCart();
+  
   // create a volume depending on mode
   
   RadxVol vol;
@@ -159,6 +169,87 @@ int StormShapeSim::Run()
   }
   
   return 0;
+
+}
+
+//////////////////////////////////////////////////
+// create dbz cartesian volume
+
+void StormShapeSim::_createDbzCart()
+{
+
+  const Params::cart_grid_t &cgrid = _params.cart_grid;
+  
+  // create grid and initialize
+  
+  _nptsCart = (cgrid.nz * cgrid.ny * cgrid.nx);
+  _dbzCart = new fl32[_nptsCart];
+
+  for (size_t ii = 0; ii < _nptsCart; ii++) {
+    _dbzCart[ii] = dbzMiss;
+  }
+
+  // loop through the points
+
+  size_t index = 0;
+  for (int iz = 0; iz < cgrid.nz; iz++) {
+    double zz = cgrid.minz + iz * cgrid.dz;
+    for (int iy = 0; iy < cgrid.nz; iy++) {
+      double yy = cgrid.miny + iy * cgrid.dy;
+      for (int ix = 0; ix < cgrid.nz; ix++, index++) {
+        double xx = cgrid.minx + ix * cgrid.dx;
+
+        // loop through the shapes
+
+        for (int ishape = 0; ishape < _params.storm_shapes_n; ishape++) {
+
+          const Params::storm_shape_t &ss = _params._storm_shapes[ishape];
+
+          // compute dbz in shape body
+          
+          double bodyDbz = ss.body_dbz_at_base;
+          if (zz > ss.body_max_z_km) {
+            bodyDbz = ss.body_dbz_at_base;
+          } else if (zz >= ss.body_min_z_km && zz <= ss.body_max_z_km) {
+            double zFrac = ((zz - ss.body_min_z_km) /
+                            (ss.body_max_z_km - ss.body_min_z_km));
+            bodyDbz += zFrac * (ss.body_dbz_at_top - ss.body_dbz_at_base);
+          }
+
+          // compute dbz at the centroid, at the grid z
+          
+          double centroidDbz = bodyDbz;
+          if (zz < ss.body_min_z_km) {
+            centroidDbz -= (ss.body_min_z_km - zz) * ss.dbz_gradient_vert;
+          } else if (zz > ss.body_max_z_km) {
+            centroidDbz -= (zz - ss.body_max_z_km) * ss.dbz_gradient_vert;
+          }
+
+          // compute the dbz at the grid point
+
+          double gridDbz = centroidDbz;
+          
+          double xOff = ss.centroid_x_km - xx;
+          double yOff = ss.centroid_y_km - yy;
+          double aa = ss.body_ellipse_radius_x_km;
+          double bb = ss.body_ellipse_radius_y_km;
+          double cc = (aa + bb) / 1.0;
+          double normDist =
+            sqrt((xOff * xOff / aa * aa) + (yOff * yOff / bb * bb));
+          
+          if (normDist > 1.0) {
+            gridDbz -= ss.dbz_gradient_horiz * (normDist - 1.0) * cc;
+          }
+
+          if (gridDbz > _params.min_valid_dbz) {
+            _dbzCart[index] = gridDbz;
+          }
+          
+        } // ishape
+        
+      } // ix
+    } // iy
+  } // iz
 
 }
 

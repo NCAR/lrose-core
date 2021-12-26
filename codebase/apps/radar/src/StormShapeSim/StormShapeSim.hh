@@ -41,6 +41,7 @@
 #define StormShapeSim_H
 
 #include <tdrp/tdrp.h>
+#include <dataport/port_types.h>
 #include <string>
 #include <vector>
 
@@ -74,11 +75,18 @@ protected:
   
 private:
 
+  static const fl32 dbzMiss;
+  
   string _progName;
   Args _args;
   Params _params;
   char *_paramsPath;
 
+  size_t _nptsCart;
+  fl32 *_dbzCart;
+
+  void _createDbzCart();
+  
   int _readFile(const string &readPath, RadxVol &vol);
   void _createVol(RadxVol &vol);
   void _addGeomFields(RadxVol &vol);
