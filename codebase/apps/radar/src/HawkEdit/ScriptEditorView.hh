@@ -43,6 +43,8 @@ public:
   vector<string> *getVariablesFromScriptEditor();
   vector<float> *getDataForVariableFromScriptEditor(int column, string fieldName);
 
+  string getSaveEditsDirectory();
+  
   //void setSelectionToValue(QString value);
   void closeEvent();
 
@@ -66,13 +68,13 @@ public slots:
     void applyChanges();
     void currentSweepClicked(bool checked);
     void allSweepsClicked(bool checked);
-    void currentTimeClicked(bool checked);
     void timeRangeClicked(bool checked);
+    void changeOutputLocation(bool checked);
 
 
   void hideTimeRangeEdits();
   void showTimeRangeEdits();
-  
+
   //  void printQJSEngineContext();
 
 signals:
@@ -133,6 +135,8 @@ private:
     QPushButton *timeRangeToggleButton;
     QDateTimeEdit *_archiveStartTimeEdit;
     QDateTimeEdit *_archiveEndTimeEdit;
+    QLabel *saveEditsDirectory;
+    QPushButton *browseDirectoryButton;
 
     QVBoxLayout *checkBoxLayout;
     QWidget *scriptEditWidget;

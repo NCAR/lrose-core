@@ -54,6 +54,11 @@ public slots:
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
   void runForEachRayScript(QString script, int currentSweepIndex,
   bool useBoundary, vector<Point> &boundaryPoints);
+  void runMultipleArchiveFiles(vector<string> &archiveFiles, 
+  QString script, bool useBoundary,
+  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
+
 private:
 
 

@@ -73,6 +73,10 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+string TimeNavController::getSelectedArchiveFileName() {
+  return _model->getSelectedArchiveFileName();
+}
+
 void TimeNavController::updateGui() {
   _setGuiFromArchiveStartTime();
   _setGuiFromArchiveEndTime();
@@ -186,6 +190,18 @@ void TimeNavController::_setGuiFromSelectedTime()
   //_selectedTimeLabel->setText(text);
 }
 
+vector<string> &TimeNavController::getArchiveFileList(string path,
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond) {
+  //string startTime, string endTime) {
+  return _model->getArchiveFileListOnly(path, //startTime, endTime);
+      startYear, startMonth, startDay, startHour, startMinute, startSecond,
+      endYear, endMonth, endDay, endHour, endMinute, endSecond);
+
+}
+
 /*
 ////////////////////////////////////////////////////////
 // set archive start time
@@ -273,6 +289,11 @@ void TimeNavController::_goFwdPeriod()
 
 */
 
+void TimeNavController::setTimeSliderPosition(int value) {
+  _model->setSelectedFile(value);
+  _view->setSliderPosition(value);
+}
+
 void TimeNavController::timeSliderValueChanged(int value) 
 {
 
@@ -317,6 +338,10 @@ void TimeNavController::timeSliderReleased(int value)
   }
   */
 
+}
+
+bool TimeNavController::moreFiles() {
+  return _model->moreFiles();
 }
 
 

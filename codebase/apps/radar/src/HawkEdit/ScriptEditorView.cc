@@ -168,14 +168,11 @@ Q_DECLARE_METATYPE(QVector<double>)
     //vbox->addStretch(1);
     //sweepSelection->setLayout(vbox); 
 
-    currentTimeToggleButton = new QPushButton(tr("&Current Time"));
+    currentTimeToggleButton = new QPushButton(tr("Current Archive File Only"));
     currentTimeToggleButton->setCheckable(true);
     currentTimeToggleButton->setChecked(true);
-    timeRangeToggleButton = new QPushButton(tr("&Time Range"));
-    timeRangeToggleButton->setCheckable(true);
-    timeRangeToggleButton->setChecked(false);
 
-    
+    /*
     // create start, end, and save dir widgets if time range is checked
     // TODO: maybe initialize the start and end time with info from the time nav?
     _archiveStartTimeEdit = new QDateTimeEdit(); // timeUpper);
@@ -184,8 +181,11 @@ Q_DECLARE_METATYPE(QVector<double>)
     _archiveEndTimeEdit = new QDateTimeEdit(); // timeUpper);
     _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
     _archiveEndTimeEdit->setToolTip("End time of archive period");
-
-//HERE
+    */
+    saveEditsDirectory = new QLabel("save edited files to: ");
+    saveEditsDirectory->setVisible(false);
+    browseDirectoryButton = new QPushButton(tr("&Change Output Location"));
+    browseDirectoryButton->setVisible(false);
 
     scriptModifiers = new QGroupBox("Modifiers", this);
     checkBoxLayout = new QVBoxLayout;
@@ -193,9 +193,12 @@ Q_DECLARE_METATYPE(QVector<double>)
     checkBoxLayout->addWidget(currentSweepToggleButton);
     checkBoxLayout->addWidget(allSweepsToggleButton);
     checkBoxLayout->addWidget(currentTimeToggleButton);
-    checkBoxLayout->addWidget(timeRangeToggleButton);
-    checkBoxLayout->addWidget(_archiveStartTimeEdit);
-    checkBoxLayout->addWidget(_archiveEndTimeEdit);
+    //checkBoxLayout->addWidget(timeRangeToggleButton);
+    //checkBoxLayout->addWidget(_archiveStartTimeEdit);
+    //checkBoxLayout->addWidget(_archiveEndTimeEdit);
+
+    checkBoxLayout->addWidget(browseDirectoryButton);
+    checkBoxLayout->addWidget(saveEditsDirectory);
     checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
     scriptModifiers->setLayout(checkBoxLayout);
 
@@ -205,8 +208,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
     connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
-    connect(currentTimeToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentTimeClicked(bool)));    
-    connect(timeRangeToggleButton,    SIGNAL(clicked(bool)), this, SLOT(timeRangeClicked(bool)));
+    connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
+    connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
@@ -384,22 +387,10 @@ float  ScriptEditorView::myPow()
 
 void ScriptEditorView::saveEditDirectory() {
 
-  QUrl saveUrl = QFileDialog::getSaveFileUrl(this, 
-    tr("Edited files saved here"), 
-    tr("."), 
-    tr("(*)"));
 
-// default args ...
-//    QString *selectedFilter = nullptr, 
-//    QFileDialog::Options options = Options(), 
-//    const QStringList &supportedSchemes = QStringList());
+  QString outputFolder = QFileDialog::getExistingDirectory(0, 
+    ("Select Output Folder"), QDir::currentPath());
 
-
-  //QFileDialog::FileMode QFileDialog::Directory
-  //  QString dirNameQ = QFileDialog::getOpenFileName(this,
-  //  tr("Open Script from File"), ".", tr("Script Files (*)"));
-  //string dirName = saveUrl.toStdString();
-  //LOG(DEBUG) << "save edited files to directory: " << dirName;
 
   // TODO: make sure we can write to this directory ...
 
@@ -533,6 +524,56 @@ void ScriptEditorView::acceptFormulaInput()
     bool useBoundary = useBoundaryWidget->isChecked(); 
     bool useAllSweeps = allSweepsToggleButton->isChecked();     
 
+    // TODO: should the start and end times be specified in the time nav?
+    // Q: what is the relationship between the time nav and the script start and end times?
+    // TODO: why not emit a signal and have a slot in the PolarManager???
+    if (currentTimeToggleButton->isChecked()) {
+      string saveDirectoryPath = getSaveEditsDirectory();   // "/tmp/HawkEdit";
+
+      /*
+      QDateTime startDateTime = _archiveStartTimeEdit->dateTime();
+      QDateTime endDateTime = _archiveEndTimeEdit->dateTime();
+
+      QDate startDate = startDateTime.date();
+      QTime startTime = startDateTime.time();
+      QDate endDate = endDateTime.date();
+      QTime endTime = endDateTime.time();
+
+      int startYear = startDate.year(); 
+      int startMonth = startDate.month(); 
+      int startDay = startDate.day();                    
+      int startHour = startTime.hour(); 
+      int startMinute = startTime.minute(); 
+      int startSecond = startTime.second();
+
+      int endYear = endDate.year(); 
+      int endMonth = endDate.month(); 
+      int endDay = endDate.day();
+      int endHour = endTime.hour(); 
+      int endMinute = endTime.minute(); 
+      int endSecond = endTime.second();
+      */
+      bool useTimeRange = true;
+
+      try{
+        PolarManager *polarManager = (PolarManager *) parent();
+        polarManager->runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
+          useTimeRange,
+          saveDirectoryPath);
+          //startYear, startMonth, startDay, startHour, startMinute, startSecond,
+          //endYear, endMonth, endDay, endHour, endMinute, endSecond);
+//          startDateTime, endDateTime); 
+      } catch (const std::exception& ex) {
+        criticalMessage(ex.what());
+      } catch (const std::string& ex) {
+        criticalMessage(ex);
+      } catch (const char*  ex) {
+        criticalMessage(ex);
+      } catch (...) {
+        criticalMessage("Error occurred during evaluation");
+      }
+    } else {
+
     // Send the scripts to the controller for processing
     try {
       //emit runOneTimeOnlyScript(oneTimeOnlyScript);
@@ -614,7 +655,7 @@ void ScriptEditorView::acceptFormulaInput()
     } catch (...) {
       criticalMessage("Error occurred during evaluation");
     }
-
+  }
 }
 
 void ScriptEditorView::scriptComplete() {
@@ -973,38 +1014,47 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
   
 }
 
-void ScriptEditorView::currentTimeClicked(bool checked) {
-  
-  if (checked) {
-    timeRangeToggleButton->setChecked(false);
-    hideTimeRangeEdits();
-  } else {
-    timeRangeToggleButton->setChecked(true);  
-    showTimeRangeEdits();  
-  }
-  
-}
-
+// checked = true ==> time range; highlighted
+// checked = false ==> current archive; default; no highlight
 void ScriptEditorView::timeRangeClicked(bool checked) {
 
   if (checked) {
-    currentTimeToggleButton->setChecked(false);
+    currentTimeToggleButton->setChecked(true);
+    currentTimeToggleButton->setText("Time Range from Navigation");
     showTimeRangeEdits();
   } else {
-    currentTimeToggleButton->setChecked(true);  
+    currentTimeToggleButton->setChecked(false);  
+    currentTimeToggleButton->setText("Current Archive File Only");
     hideTimeRangeEdits();  
   }  
   
 }
 
 void ScriptEditorView::hideTimeRangeEdits() {
-  _archiveStartTimeEdit->setVisible(false);
-  _archiveEndTimeEdit->setVisible(false);
+  saveEditsDirectory->setVisible(false);
+  browseDirectoryButton->setVisible(false);
 }
 
 void ScriptEditorView::showTimeRangeEdits() {
-  _archiveStartTimeEdit->setVisible(true);
-  _archiveEndTimeEdit->setVisible(true);
+  saveEditsDirectory->setVisible(true);
+  browseDirectoryButton->setVisible(true);
+}
+
+void ScriptEditorView::changeOutputLocation(bool checked) {
+
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Save Results Directory"),
+                                                "/home",
+                                                QFileDialog::ShowDirsOnly
+                                                | QFileDialog::DontResolveSymlinks);
+
+  string dirName = dir.toStdString();
+  LOG(DEBUG) << "save script results to " << dirName;
+
+  saveEditsDirectory->setText(dir); // "save edited files to: " + dir);
+}
+
+string ScriptEditorView::getSaveEditsDirectory() {
+  return saveEditsDirectory->text().toStdString();
 }
 
 /*

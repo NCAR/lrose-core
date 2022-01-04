@@ -53,8 +53,16 @@ public:
   void setArchiveFileList(const vector<string> &list);
 
   int findArchiveFileList(string archiveDataUrl);
-  void findArchiveFileList(RadxTime startTime, RadxTime endTime,
+
+  const vector<string> &findArchiveFileList(RadxTime startTime, RadxTime endTime,
+  const string &absolutePath);
+  void findAndSetArchiveFileList(RadxTime startTime, RadxTime endTime,
     const string &absolutePath);
+  vector<string> &getArchiveFileListOnly(string path,
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond);
 
   int getNArchiveFiles() { return  (int) _archiveFileList.size(); };
 
@@ -80,7 +88,10 @@ public:
   void setSelectedFile(string fileName);
 
   string &getSelectedArchiveFile();
+  string getSelectedArchiveFileName();
   int getPositionOfSelection();
+
+  bool moreFiles();
 
 private:
 
@@ -108,6 +119,8 @@ private:
   bool _archiveFilesHaveDayDir;
 
   RadxPath *currentPath;
+
+  bool _atEnd;
 
 };
 
