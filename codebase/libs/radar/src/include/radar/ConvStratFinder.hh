@@ -297,6 +297,10 @@ public:
   const vector<double> &getZKm() const { return _zKm; }
   bool getProjIsLatlon() const { return _projIsLatLon; }
 
+  // clumping manager
+  
+  const ClumpingMgr &getClumpingMgr() const { return _clumping; }
+
   // free up arrays when done, if you want to keep memory usage down
 
   void freeArrays();
