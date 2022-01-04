@@ -72,7 +72,7 @@ public slots:
 
   void hideTimeRangeEdits();
   void showTimeRangeEdits();
-  
+
   //  void printQJSEngineContext();
 
 signals:
@@ -133,6 +133,8 @@ private:
     QPushButton *timeRangeToggleButton;
     QDateTimeEdit *_archiveStartTimeEdit;
     QDateTimeEdit *_archiveEndTimeEdit;
+    QTextEdit *saveEditsDirectory;
+    QPushButton *browseDirectoryButton;
 
     QVBoxLayout *checkBoxLayout;
     QWidget *scriptEditWidget;

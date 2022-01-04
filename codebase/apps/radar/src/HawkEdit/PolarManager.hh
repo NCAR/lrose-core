@@ -205,6 +205,21 @@ public:
   void runForEachRayScript(QString script, bool useBoundary,
     bool useAllSweeps);
 
+ // void runScriptBatchMode(QString script, bool useBoundary, 
+ //   bool useAllSweeps, string saveDirectoryPath,
+ //   string startDateTime, string endDateTime);
+
+  void runScriptBatchMode(QString script, bool useBoundary, 
+  bool useAllSweeps, bool useTimeRange, string saveDirectoryPath);
+  /*
+  void runScriptBatchMode(QString script, bool useBoundary, 
+  bool useAllSweeps, string saveDirectoryPath, 
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond);
+  */
+
   void closeEvent(QEvent *event);
 
 public slots:
@@ -504,7 +519,7 @@ private:
   // input data
   
   RadxTime _readerRayTime;
-  RadxVol _vol;
+  //RadxVol _vol;
 
   // sweeps
 
@@ -688,12 +703,12 @@ private:
   //void _handleArchiveData();
   int _getArchiveData();
   void _plotArchiveData();
-  void _updateArchiveData(vector<string> &fieldNames);
-  void _updateArchiveData(QStringList newFieldNames);
+  //void _updateArchiveData(vector<string> &fieldNames);
+  //void _updateArchiveData(QStringList newFieldNames);
   void _setupVolRead(RadxFile &file);
   void _handleColorMapChangeOnRay(RadxPlatform &platform, // RadxRay *ray, 
 				  string fieldName);
-  void _updateColorMap(string fieldName);
+  //void _updateColorMap(string fieldName);
 
   //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
   void _applyDataEdits(); // const RadxVol &editedVol);

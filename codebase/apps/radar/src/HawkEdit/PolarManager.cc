@@ -1287,11 +1287,6 @@ size_t PolarManager::getSelectedFieldIndex() {
 void PolarManager::_applyDataEdits()
 {
   LOG(DEBUG) << "enter";
-  if (0) { // _params->debug) {
-    std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
-    _vol.printWithFieldData(outfile);  
-    outfile << "_vol = " << &_vol << endl;
-  }
   _setupRayLocation();
   _plotArchiveData();
   LOG(DEBUG) << "exit";
@@ -1305,12 +1300,12 @@ void PolarManager::_addNewFields(QStringList  newFieldNames)
 {
   LOG(DEBUG) << "enter";
   LOG(DEBUG) << "all fields in _vol ... ";
-  vector<RadxField *> allFields = _vol.getFields();
-  vector<RadxField *>::iterator it;
-  for (it = allFields.begin(); it != allFields.end(); it++) {
-    RadxField *radxField = *it;
-    LOG(DEBUG) << radxField->getName();
-  }
+  //vector<RadxField *> allFields = _vol.getFields();
+  //vector<RadxField *>::iterator it;
+  //for (it = allFields.begin(); it != allFields.end(); it++) {
+  //  RadxField *radxField = *it;
+  //  LOG(DEBUG) << radxField->getName();
+  //}
 
 
   // TODO: 
@@ -1371,13 +1366,13 @@ void PolarManager::_addNewFields(QStringList  newFieldNames)
 void PolarManager::_addNewFields(vector<string> *newFieldNames)
 {
   LOG(DEBUG) << "enter";
-  LOG(DEBUG) << "all fields in _vol ... ";
-  vector<RadxField *> allFields = _vol.getFields();
-  vector<RadxField *>::iterator it;
-  for (it = allFields.begin(); it != allFields.end(); it++) {
-    RadxField *radxField = *it;
-    LOG(DEBUG) << radxField->getName();
-  }
+  //LOG(DEBUG) << "all fields in _vol ... ";
+  //vector<RadxField *> allFields = _vol.getFields();
+  //vector<RadxField *>::iterator it;
+  //for (it = allFields.begin(); it != allFields.end(); it++) {
+  //  RadxField *radxField = *it;
+  //  LOG(DEBUG) << radxField->getName();
+  //}
 
 
   // TODO: 
@@ -1604,7 +1599,7 @@ void PolarManager::_volumeDataChanged(QStringList newFieldNames)
   //_activateArchiveRendering();
   // _plotArchiveData();
   // TODO: create this ... from plotArchiveData()
-  _updateArchiveData(newFieldNames); 
+  //_updateArchiveData(newFieldNames); 
   //_activateArchiveRendering();
 
   LOG(DEBUG) << "exit"; 
@@ -1672,154 +1667,6 @@ void PolarManager::_plotArchiveData()
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::_updateArchiveData(QStringList newFieldNames)
-{
-
-  vector<string> newFieldNamesConverted;
-  for (int i=0; i < newFieldNames.size(); ++i) {
-    string name = newFieldNames.at(i).toLocal8Bit().constData();
-    newFieldNamesConverted.push_back(name);
-  }
-  _updateArchiveData(newFieldNamesConverted);
- 
-}
-
-void PolarManager::_updateArchiveData(vector<string> &newFieldNamesConverted) 
-{
-
-    LOG(DEBUG) << "Updating archive data";
-    LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
-  
-
-  // initialize plotting
-  //_initialRay = true;
-
-  // handle the rays
-  _vol.loadRaysFromFields();  // this line makes the select field update properly  
-
-  const vector<RadxRay *> &rays = _vol.getRays();
-  if (rays.size() < 1) {
-    cerr << "ERROR - _updateArchiveData" << endl;
-    cerr << "  No rays found" << endl;
-    return;
-  }
-
-  // TODO: make sure we are getting the newFields from the _vol
-  // remember, the reader only reads in the fields specified in the params <======
-  LOG(DEBUG) << "===========  HERE are the fields ";
-  vector<RadxField *> _vol_fields = rays[0]->getFields();
-  vector<RadxField *>::iterator it;
-  for (it=_vol_fields.begin(); it!=_vol_fields.end(); ++it) {
-    LOG(DEBUG) << (*it)->getName();
-  }
-  
-  // TODO: reload the sweeps into the sweepManager?
-  //  I added this ...
-  //_sweepManager.set(_vol);
-
-  //const vector<RadxSweep *> &sweeps = _vol.getSweeps();
-  //if (sweeps.size() < 1) {
-  //  cerr << "ERROR - _plotArchiveData" << endl;
-  //  cerr << "  No sweeps found" << endl;
-  //  return;
-  //}
-
-  // clear the canvas
-  //_clear();
-
-  /*
-  vector<string> newFieldNamesConverted;
-  for (int i=0; i < newFieldNames.size(); ++i) {
-    string name = newFieldNames.at(i).toLocal8Bit().constData();
-    newFieldNamesConverted.push_back(name);
-  }
-  */
-
-  // handle the rays
-/*
-  const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-  for (size_t ii = gsweep.radx->getStartRayIndex();
-       ii <= gsweep.radx->getEndRayIndex(); ii++) {
-    RadxRay *ray = rays[ii];
-    _handleRayUpdate(_platform, ray, newFieldNamesConverted);  // TODO; _handleRay? or a modified version of it?  We just need something to call updateBeam, instead of addBeam ...
-    //if (ii == 0) {
-    //  _updateStatusPanel(ray);
-    //}
-  }
- */ 
-}
-
-void PolarManager::_updateColorMap(string fieldName) 
-{
-
-  
-  //  LOG(DEBUG) << "Updating color map";
-  
-  /*
-  // handle the rays
-  _vol.loadRaysFromFields();  // this line makes the select field update properly  
-
-  const vector<RadxRay *> &rays = _vol.getRays();
-  if (rays.size() < 1) {
-    cerr << "ERROR - _updateArchiveData" << endl;
-    cerr << "  No rays found" << endl;
-    return;
-  }
-
-  // TODO: make sure we are getting the newFields from the _vol
-  // remember, the reader only reads in the fields specified in the params <======
-  //LOG(DEBUG) << "===========  HERE are the fields ";
-  vector<RadxField *> _vol_fields = rays[0]->getFields();
-  vector<RadxField *>::iterator it;
-  //for (it=_vol_fields.begin(); it!=_vol_fields.end(); ++it) {
-  //  LOG(DEBUG) << (*it)->getName();
-  //}
-  
-  // TODO: reload the sweeps into the sweepManager?
-  //  I added this ...
-  _sweepManager.set(_vol);
-
-  // handle the rays
-
-  const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-  //  for (size_t ii = gsweep.radx->getStartRayIndex();
-  //       ii <= gsweep.radx->getEndRayIndex(); ii++) {
-  //    RadxRay *ray = rays[ii];
-  */
-  //  _handleColorMapChangeOnRay(_platform, fieldName); 
-    //}
-  
-}
-
-
-//////////////////////////////////////////////////
-// set up read
-
-/* moved to DataModel
-void PolarManager::_setupVolRead(RadxFile &file)
-{
-
-  if (_params->debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params->debug >= Params::DEBUG_EXTRA) {
-    file.setDebug(true);
-    file.setVerbose(true);
-  }
-
-  vector<string> fieldNames = _displayFieldController->getFieldNames();
-  vector<string>::iterator it;
-  for (it = fieldNames.begin(); it != fieldNames.end(); it++) {
-    file.addReadField(*it);
-  }
-  
-  //  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
-  //    const DisplayField *field = _fields[ifield];
-  //    file.addReadField(field->getName());
-  //  }
-
-}
-*/
 //////////////////////////////////////////////////////////////
 // handle an incoming ray
 
@@ -5587,6 +5434,127 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
     // index is a vector and zero-based 
     scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
      useBoundary, boundaryPoints);
+  }
+}
+
+
+// Q: if running without GUI, how to get the field names? from the command line?
+// from the parameter file? YES, and the command line takes precedence.
+void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
+  bool useAllSweeps, bool useTimeRange, string saveDirectoryPath) {
+   
+  // int startYear, int startMonth, int startDay,
+  // int startHour, int startMinute, int startSecond,
+  // int endYear, int endMonth, int endDay,
+  // int endHour, int endMinute, int endSecond) {
+    
+  //string startDateTime, string endDateTime) {
+  vector<Point> boundaryPoints;
+  if (boundaryPointEditorControl != NULL) {
+    boundaryPoints = boundaryPointEditorControl->getWorldPoints();
+  }
+
+  // get the field names
+  vector<string> fieldNames = _displayFieldController->getFieldNames();
+  if (fieldNames.size() <= 0) {
+    errorMessage("Error", "No field names selected");
+    return;
+  }
+
+  try {
+    // get list of archive files within start and end date/times
+    // make a local version of the time navigation to manage the archive files
+    // NO!!!
+    //
+    // Q: or I could use the timeNavController as a progress bar
+    // indicating which file is in progress? YES!
+    //string inputPath = "";  //_timeNavController->getPath();
+    //TimeNavController myTimeNavController = new TimeNavController();
+    // vector<string> archiveFiles = _timeNavController->getArchiveFileList(
+    //  inputPath,
+    //  startYear, startMonth, startDay, startHour, startMinute, startSecond,
+    //  endYear, endMonth, endDay, endHour, endMinute, endSecond);
+      //startDateTime, endDateTime);
+
+// ---
+
+     // move time nav through each archive file
+     // run script on each file.
+     // run in automatic mode.  
+     // then for command-line mode, we just run the same code?? Yes, ideally.
+
+  // for each archive file 
+  //vector<string>::iterator it;
+  //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
+  int archiveFileIndex = 0;
+  _timeNavController->timeSliderValueChanged(archiveFileIndex);
+
+  while (_timeNavController->moreFiles()) {
+    
+    //   load each archive file
+    // TODO: I don't like accessing the DataModel here.  Who should load
+    // the new data file???? PolarManager?? call to timeNav???
+    //DataModel *dataModel = DataModel::Instance();
+    //dataModel->readData(*it, fieldNames,
+    //  debug_verbose, debug_extra);
+    //cerr << "running script on file " << *it << endl;
+    newTimeSelected(archiveFileIndex);
+    // load/read the next archive file ...
+    //_timeNavController->getSelectedArchiveFile()
+
+    //   runForEachRayScript
+
+    bool debug_verbose = false;
+    bool debug_extra = false;
+    try {  
+      // TODO: use regular forEachRay ...
+      runForEachRayScript(script, useBoundary, useAllSweeps);
+      /*
+      scriptEditorControl->runMultipleArchiveFiles(archiveFiles, 
+        script, useBoundary,
+        boundaryPoints, saveDirectoryPath,
+        fieldNames, debug_verbose, debug_extra); 
+        */
+    //runForEachRayScript(script, useBoundary, boundaryPoints);
+
+    //   save archive file to temp area
+    // TODO: move to a separate method ... _saveFile();
+
+      //LOG(DEBUG) << "writing to file " << name;
+      DataModel *dataModel = DataModel::Instance();
+      string currentPath = saveDirectoryPath;
+      currentPath.append("/");
+      string fileName = _timeNavController->getSelectedArchiveFileName();
+      currentPath.append(fileName);
+      dataModel->writeData(currentPath);
+      _unSavedEdits = false;
+    } catch (FileIException &ex) {
+      this->setCursor(Qt::ArrowCursor);
+      return;
+    }
+    archiveFileIndex += 1;
+    _timeNavController->timeSliderValueChanged(archiveFileIndex);
+  }
+
+// ---
+
+
+
+
+  /*
+    if (useAllSweeps) {
+      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+    } else {
+      // send the current sweep to the script editor controller
+      int currentSweepIndex = _sweepController->getSelectedNumber();
+      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+      // index is a vector and zero-based 
+      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+       useBoundary, boundaryPoints);
+    }
+    */
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
   }
 }
 

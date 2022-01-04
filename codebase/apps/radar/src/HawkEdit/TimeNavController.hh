@@ -54,14 +54,24 @@ class TimeNavController {
 public:
 
   TimeNavController(TimeNavView *view);
+
+  // use this constructor for utility functions, without GUI.
+  //TimeNavController();
+
   ~TimeNavController();
 
   void setSliderPosition();
-  void fetchArchiveFiles(string seedFileName);
+
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);
+
+  void fetchArchiveFiles(string seedFileName);
   void fetchArchiveFiles(string seedPath, string seedFileName);
+
   string &getSelectedArchiveFile();
+  string getSelectedArchiveFileName();
+
+  string &getPath();
 
   // use this for the script editor ???
   // Hmmm, the script editor uses the singleton DataModel to 
@@ -73,7 +83,14 @@ public:
   // Only one base directory is open/active at a time.
   string &getArchiveFile(size_t index) {}; 
   // or
-  vector<string> &getArchiveFileList(string startTime, string endTime);
+  //vector<string> &getArchiveFileList(string path,
+  //  string startTime, string endTime);
+
+  vector<string> &getArchiveFileList(string path,
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond);
 
 
 
@@ -82,6 +99,8 @@ public:
                        int endYear, int endMonth, int endDay,
                        int endHour, int endMinute, int endSecond);
   void updateGui();
+
+  bool moreFiles();
 
 private:
   void _setGuiFromArchiveStartTime();

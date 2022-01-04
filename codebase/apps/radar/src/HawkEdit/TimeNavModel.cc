@@ -45,6 +45,7 @@
 
 TimeNavModel::TimeNavModel() {
   changePath(".");
+  _atEnd = true;
 }
 
 TimeNavModel::~TimeNavModel() {
@@ -54,6 +55,10 @@ TimeNavModel::~TimeNavModel() {
 //
 // TODO: set the selected time _selectedTime
 //
+
+bool TimeNavModel::moreFiles() {
+  return !_atEnd;
+}
 
 ///////////////////////////////////////
 // set input file list for archive mode
@@ -217,7 +222,7 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl)
 }
 
 
-void TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
+void TimeNavModel::findAndSetArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath) {
   // string startTime, string endTime) { 
   
@@ -230,6 +235,7 @@ void TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
   //}
 //  loadArchiveFileList(dir.absolutePath());
 
+  // TODO: NO REPEATED CODE: use findArchiveFileList ... 
   RadxTimeList timeList;
   RadxPath thePath(absolutePath);
   if (!thePath.isDir()) {
@@ -338,8 +344,9 @@ void TimeNavModel::setSelectedFile(int value)
 {
 
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {
-    return;
-  }
+    _atEnd = true;
+  } else {
+    _atEnd = false;
   // get path for this value
   string path = _archiveFileList.at(value);
   // get time for this path
@@ -352,7 +359,7 @@ void TimeNavModel::setSelectedFile(int value)
   //if (_archiveScanIndex != value) {
     _archiveScanIndex = value;
   //}
-
+  }
 }
 
 // I think this assumes all files are in the same folder??
@@ -392,6 +399,88 @@ string &TimeNavModel::getSelectedArchiveFile() {
   }
 }
 
+string TimeNavModel::getSelectedArchiveFileName() { 
+  if (_archiveFileList.size() <= 0) {
+    string empty;
+    return empty;
+  } else {
+    string p = _archiveFileList.at(_archiveScanIndex);
+    size_t idx = p.find_last_of("/\\");
+    
+    if (idx != string::npos) {
+      string result = p.substr(idx+1);
+      return result;
+    } 
+    return p;
+  }
+}
+
 int TimeNavModel::getPositionOfSelection() {
   return _archiveScanIndex;
+}
+
+//--------
+
+//RadxTime &TimeNavModel::convertDateTimePieces(string dateTime) {
+  // ???
+//}
+// fetch the list of archive files only; DOES NOT set any GUI info
+vector<string> &TimeNavModel::getArchiveFileListOnly(string path,
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond) {
+  //string startTime, string endTime) {
+
+
+ //setArchiveStartEndTime(int startYear, int startMonth, int startDay,
+ //                      int startHour, int startMinute, int startSeconds,
+ //                      int endYear, int endMonth, int endDay,
+ //                      int endHour, int endMinute, int endSeconds) {
+
+  RadxTime requestStartTime;
+  requestStartTime.set(startYear, startMonth, startDay,
+    startHour, startMinute, startSecond);  
+  RadxTime requestEndTime;
+  requestEndTime.set(endYear, endMonth, endDay,
+    endHour, endMinute, endSecond);
+
+  if (path.length() <= 0) {
+    path = currentPath->getPath();
+  }
+  cerr << "looking in this directory: " << path << endl;
+  //std::remove_const<const string>::type mypath;
+  vector<string> fileList = findArchiveFileList(requestStartTime, requestEndTime, path);
+
+  return fileList;
+}
+
+const vector<string> &TimeNavModel::findArchiveFileList(RadxTime startTime, RadxTime endTime,
+  const string &absolutePath) {
+
+
+  RadxTimeList timeList;
+  RadxPath thePath(absolutePath);
+  if (!thePath.isDir()) {
+    // if not fixable, then throw std::invalid_arg...
+    throw std::invalid_argument("TimeNavModel::findArchiveFileList path is NOT a directory");
+  } 
+  timeList.setDir(thePath.getPath());
+  timeList.setModeInterval(startTime, endTime);
+  if (timeList.compile()) {
+    string msg = "ERROR - TimeNavModel::findArchiveFileList() ";
+    msg.append(timeList.getErrStr());
+    throw std::invalid_argument(msg);
+  }
+
+  vector<string> pathList = timeList.getPathList();
+  if (pathList.size() <= 0) {
+    string msg = "ERROR - TimeNavModel::findArchiveFileList()\n";
+    msg.append("  no files found\n");
+    throw std::invalid_argument(msg);
+  } 
+
+
+  return timeList.getPathList();
+
 }

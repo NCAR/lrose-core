@@ -704,6 +704,33 @@ uncate(100);
       LOG(DEBUG) << "exit";
 }
 
+// run in batch mode ...
+// TODO: consider this running with separate DataModel, etc.
+// so that current GUI settings are not affected ???
+// TODO: We also need separate command-line access to this function.  
+// separate DataEngine???
+void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFiles, 
+  QString script, bool useBoundary,
+  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
+
+  // for each archive file 
+  //vector<string>::iterator it;
+  //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
+    //   load each archive file
+    // TODO: I don't like accessing the DataModel here.  Who should load
+    // the new data file???? PolarManager?? call to timeNav???
+    //DataModel *dataModel = DataModel::Instance();
+    //dataModel->readData(*it, fieldNames,
+    //  debug_verbose, debug_extra);
+
+    //   runForEachRayScript
+    runForEachRayScript(script, useBoundary, boundaryPoints);
+    //   save archive file to temp area
+    //dataModel->writeData(saveDirectoryPath);
+  //}
+}
+
 
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
   vector<Point> &boundaryPoints)

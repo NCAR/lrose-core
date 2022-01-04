@@ -463,12 +463,19 @@ void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldNam
 
 bool DataModel::fieldExists(size_t rayIdx, string fieldName) {
   RadxRay *ray = getRay(rayIdx);
-  RadxField *field = fetchDataField(ray, fieldName);
-  if (field != NULL) return true;
-  else return false;
+  try {
+    RadxField *field = fetchDataField(ray, fieldName);
+    if (field != NULL) return true;
+    else return false;
+  } catch (std::invalid_argument &ex) {
+    return false;
+  }
 }
 
 RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
+  if (fieldName.length() <= 0) {
+    cerr << "fieldName is empty!!" << endl;
+  }
   _vol->loadRaysFromFields();
   //ray->loadFieldNameMap();
   RadxField *dataField = NULL;
@@ -476,12 +483,12 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
     dataField = ray->getField(fieldName);
   } catch (std::exception &ex) {
     string msg = "DataModel::fetchDataField unknown error occurred: ";
-    msg + fieldName;
+    msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
   if (dataField == NULL) {
     string msg = "DataModel::fetchDataField No field found in ray: ";
-    msg + fieldName;
+    msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
   return dataField; 
@@ -749,8 +756,8 @@ int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
 
   // get the data (in) and create space for new data (out)  
   //  field = ray->getField(fieldName);
-  const RadxField *field;
-  field = fetchDataField(ray, fieldName);
+  //const RadxField *field;
+  //field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
   return nGates;
 }
