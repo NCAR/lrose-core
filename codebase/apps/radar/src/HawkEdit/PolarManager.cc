@@ -5440,6 +5440,8 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
 
 // Q: if running without GUI, how to get the field names? from the command line?
 // from the parameter file? YES, and the command line takes precedence.
+// From the way the saveDirectoryPath is chosen, the path must exist.
+// TODO: when running from the command line, verify the directory exists.
 void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
   bool useAllSweeps, bool useTimeRange, string saveDirectoryPath) {
    
@@ -5487,7 +5489,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //vector<string>::iterator it;
   //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
   int archiveFileIndex = 0;
-  _timeNavController->timeSliderValueChanged(archiveFileIndex);
+  _timeNavController->setTimeSliderPosition(archiveFileIndex);
 
   while (_timeNavController->moreFiles()) {
     
@@ -5498,7 +5500,9 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     //dataModel->readData(*it, fieldNames,
     //  debug_verbose, debug_extra);
     //cerr << "running script on file " << *it << endl;
-    newTimeSelected(archiveFileIndex);
+
+    // TODO: is this needed?
+    //newTimeSelected(archiveFileIndex);   
     // load/read the next archive file ...
     //_timeNavController->getSelectedArchiveFile()
 
@@ -5533,7 +5537,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       return;
     }
     archiveFileIndex += 1;
-    _timeNavController->timeSliderValueChanged(archiveFileIndex);
+    _timeNavController->setTimeSliderPosition(archiveFileIndex);
   }
 
 // ---

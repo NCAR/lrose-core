@@ -64,6 +64,7 @@ public:
 
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);
+  void setTimeSliderPosition(int value);
 
   void fetchArchiveFiles(string seedFileName);
   void fetchArchiveFiles(string seedPath, string seedFileName);

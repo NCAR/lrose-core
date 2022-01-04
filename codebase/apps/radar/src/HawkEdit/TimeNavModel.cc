@@ -300,7 +300,7 @@ void TimeNavModel::setArchiveStartEndTime(int startYear, int startMonth, int sta
   const string mypath = currentPath->getPath();
   cerr << "looking in this directory: " << mypath << endl;
   //std::remove_const<const string>::type mypath;
-  findArchiveFileList(requestStartTime, requestEndTime, mypath);
+  findAndSetArchiveFileList(requestStartTime, requestEndTime, mypath);
 }
 
 void TimeNavModel::getArchiveStartTime(int *year, int *month, int *day,

@@ -289,6 +289,11 @@ void TimeNavController::_goFwdPeriod()
 
 */
 
+void TimeNavController::setTimeSliderPosition(int value) {
+  _model->setSelectedFile(value);
+  _view->setSliderPosition(value);
+}
+
 void TimeNavController::timeSliderValueChanged(int value) 
 {
 

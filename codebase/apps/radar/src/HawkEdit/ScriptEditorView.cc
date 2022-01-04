@@ -168,12 +168,9 @@ Q_DECLARE_METATYPE(QVector<double>)
     //vbox->addStretch(1);
     //sweepSelection->setLayout(vbox); 
 
-    currentTimeToggleButton = new QPushButton(tr("&Selected Archive (Time)"));
+    currentTimeToggleButton = new QPushButton(tr("Current Archive File Only"));
     currentTimeToggleButton->setCheckable(true);
     currentTimeToggleButton->setChecked(true);
-    timeRangeToggleButton = new QPushButton(tr("&Time Range in Navigation"));
-    timeRangeToggleButton->setCheckable(true);
-    timeRangeToggleButton->setChecked(false);
 
     /*
     // create start, end, and save dir widgets if time range is checked
@@ -185,8 +182,10 @@ Q_DECLARE_METATYPE(QVector<double>)
     _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
     _archiveEndTimeEdit->setToolTip("End time of archive period");
     */
-    saveEditsDirectory = new QTextEdit();
-    browseDirectoryButton = new QPushButton(tr("&Save Edits Here"));
+    saveEditsDirectory = new QLabel("save edited files to: ");
+    saveEditsDirectory->setVisible(false);
+    browseDirectoryButton = new QPushButton(tr("&Change Output Location"));
+    browseDirectoryButton->setVisible(false);
 
     scriptModifiers = new QGroupBox("Modifiers", this);
     checkBoxLayout = new QVBoxLayout;
@@ -194,9 +193,10 @@ Q_DECLARE_METATYPE(QVector<double>)
     checkBoxLayout->addWidget(currentSweepToggleButton);
     checkBoxLayout->addWidget(allSweepsToggleButton);
     checkBoxLayout->addWidget(currentTimeToggleButton);
-    checkBoxLayout->addWidget(timeRangeToggleButton);
+    //checkBoxLayout->addWidget(timeRangeToggleButton);
     //checkBoxLayout->addWidget(_archiveStartTimeEdit);
     //checkBoxLayout->addWidget(_archiveEndTimeEdit);
+
     checkBoxLayout->addWidget(browseDirectoryButton);
     checkBoxLayout->addWidget(saveEditsDirectory);
     checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
@@ -208,8 +208,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
     connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
-    connect(currentTimeToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentTimeClicked(bool)));    
-    connect(timeRangeToggleButton,    SIGNAL(clicked(bool)), this, SLOT(timeRangeClicked(bool)));
+    connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
+    connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
@@ -527,8 +527,8 @@ void ScriptEditorView::acceptFormulaInput()
     // TODO: should the start and end times be specified in the time nav?
     // Q: what is the relationship between the time nav and the script start and end times?
     // TODO: why not emit a signal and have a slot in the PolarManager???
-    if (timeRangeToggleButton->isChecked()) {
-      string saveDirectoryPath = "/tmp/HawkEdit";
+    if (currentTimeToggleButton->isChecked()) {
+      string saveDirectoryPath = getSaveEditsDirectory();   // "/tmp/HawkEdit";
 
       /*
       QDateTime startDateTime = _archiveStartTimeEdit->dateTime();
@@ -1014,41 +1014,47 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
   
 }
 
-void ScriptEditorView::currentTimeClicked(bool checked) {
-  
-  if (checked) {
-    timeRangeToggleButton->setChecked(false);
-    hideTimeRangeEdits();
-  } else {
-    timeRangeToggleButton->setChecked(true);  
-    showTimeRangeEdits();  
-  }
-  
-}
-
+// checked = true ==> time range; highlighted
+// checked = false ==> current archive; default; no highlight
 void ScriptEditorView::timeRangeClicked(bool checked) {
 
   if (checked) {
-    currentTimeToggleButton->setChecked(false);
+    currentTimeToggleButton->setChecked(true);
+    currentTimeToggleButton->setText("Time Range from Navigation");
     showTimeRangeEdits();
   } else {
-    currentTimeToggleButton->setChecked(true);  
+    currentTimeToggleButton->setChecked(false);  
+    currentTimeToggleButton->setText("Current Archive File Only");
     hideTimeRangeEdits();  
   }  
   
 }
 
 void ScriptEditorView::hideTimeRangeEdits() {
-  //_archiveStartTimeEdit->setVisible(false);
-  //_archiveEndTimeEdit->setVisible(false);
   saveEditsDirectory->setVisible(false);
   browseDirectoryButton->setVisible(false);
 }
 
 void ScriptEditorView::showTimeRangeEdits() {
-  //_archiveStartTimeEdit->setVisible(true);
-  //_archiveEndTimeEdit->setVisible(true);
+  saveEditsDirectory->setVisible(true);
   browseDirectoryButton->setVisible(true);
+}
+
+void ScriptEditorView::changeOutputLocation(bool checked) {
+
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Save Results Directory"),
+                                                "/home",
+                                                QFileDialog::ShowDirsOnly
+                                                | QFileDialog::DontResolveSymlinks);
+
+  string dirName = dir.toStdString();
+  LOG(DEBUG) << "save script results to " << dirName;
+
+  saveEditsDirectory->setText(dir); // "save edited files to: " + dir);
+}
+
+string ScriptEditorView::getSaveEditsDirectory() {
+  return saveEditsDirectory->text().toStdString();
 }
 
 /*
