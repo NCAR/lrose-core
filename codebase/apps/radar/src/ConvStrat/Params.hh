@@ -85,15 +85,6 @@ public:
     VERT_LEVELS_BY_HT = 1
   } vert_levels_type_t;
 
-  // struct typedefs
-
-  typedef struct {
-    double secondary_threshold;
-    double min_fraction_all_parts;
-    double min_fraction_each_part;
-    double min_size_each_part;
-  } dual_threshold_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -440,11 +431,17 @@ public:
 
   double max_convectivity_for_stratiform;
 
-  int min_overlap_for_convective_clumps;
+  tdrp_bool_t clumping_use_dual_thresholds;
 
-  tdrp_bool_t use_dual_thresholds;
+  double clumping_secondary_convectivity;
 
-  dual_threshold_t dual_threshold;
+  double all_subclumps_min_area_fraction;
+
+  double each_subclump_min_area_fraction;
+
+  double each_subclump_min_area_km2;
+
+  tdrp_bool_t clumping_write_debug_fields;
 
   char* output_url;
 
@@ -475,7 +472,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

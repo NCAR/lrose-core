@@ -117,6 +117,8 @@ private:
                         string longName,
                         string units);
 
+  void _addClumpingDebugFields();
+
 };
 
 #endif

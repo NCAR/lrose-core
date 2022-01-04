@@ -968,79 +968,85 @@
     tt->single_val.d = 0.4;
     tt++;
     
-    // Parameter 'min_overlap_for_convective_clumps'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_overlap_for_convective_clumps");
-    tt->descr = tdrpStrDup("Minimum grid overlap in convective regions.");
-    tt->help = tdrpStrDup("A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.");
-    tt->val_offset = (char *) &min_overlap_for_convective_clumps - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
     // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTIONS TO USE DUAL THRESHOLDS.");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("CLUMPING.");
+    tt->comment_text = tdrpStrDup("We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.");
     tt++;
     
-    // Parameter 'use_dual_thresholds'
+    // Parameter 'clumping_use_dual_thresholds'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_dual_thresholds");
-    tt->descr = tdrpStrDup("Option to use dual thresholds to identify convective clumps.");
-    tt->help = tdrpStrDup("NOTE: this step is performed in 2D. If set, the identification is performed in multiple stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. This is the default method. Then, using the dual_threshold parameters, a search is performed for clumps within the envelope exceeding the min convectivity threshold. If there is only one region at the higher convectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelope, but stop growing where they meet between the higher-convectivity areas. The final clumps are computed by breaking the original clump into regions based upon these secondary areas.");
-    tt->val_offset = (char *) &use_dual_thresholds - &_start_;
+    tt->param_name = tdrpStrDup("clumping_use_dual_thresholds");
+    tt->descr = tdrpStrDup("Option to use dual thresholds to better identify convective clumps.");
+    tt->help = tdrpStrDup("NOTE: this step is performed in 2D. If set, the clumping is performed in two stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. Then, using the parameters below, for each clump a search is performed for sub-clumps within the envelope of the main clump, suing the secondary threshold. If there is only one sub-clump, the original clump is used unchanged. If there are two or more valid sub-clumps, based on the parameters below, these sub-clumps are progrresively grown to where they meet, or to the original clump envelope. The final 3D clumps are computed by breaking the original clump into regions based upon these secondary 2D areas.");
+    tt->val_offset = (char *) &clumping_use_dual_thresholds - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'dual_threshold'
-    // ctype is '_dual_threshold_t'
+    // Parameter 'clumping_secondary_convectivity'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("dual_threshold");
-    tt->descr = tdrpStrDup("Parameters for dual threshold identification. Performed in 2D.");
-    tt->help = tdrpStrDup("See 'use_dual_thresholds'. secondary_threshold: convectivity threshold for this stage. A number of regions may be identified at the higher threshold. min_fraction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_size_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.");
-    tt->val_offset = (char *) &dual_threshold - &_start_;
-    tt->struct_def.name = tdrpStrDup("dual_threshold_t");
-    tt->struct_def.nfields = 4;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("secondary_threshold");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &dual_threshold.secondary_threshold - (char *) &dual_threshold;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("min_fraction_all_parts");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &dual_threshold.min_fraction_all_parts - (char *) &dual_threshold;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("min_fraction_each_part");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &dual_threshold.min_fraction_each_part - (char *) &dual_threshold;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("min_size_each_part");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &dual_threshold.min_size_each_part - (char *) &dual_threshold;
-    tt->n_struct_vals = 4;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 0.65;
-      tt->struct_vals[1].d = 0.33;
-      tt->struct_vals[2].d = 0.02;
-      tt->struct_vals[3].d = 2;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("clumping_secondary_convectivity");
+    tt->descr = tdrpStrDup("Secondary convectivity threshold for clumping.");
+    tt->help = tdrpStrDup("We use the secondary threshold to find sub-clumps within the envelope of each original clump.");
+    tt->val_offset = (char *) &clumping_secondary_convectivity - &_start_;
+    tt->single_val.d = 0.65;
+    tt++;
+    
+    // Parameter 'all_subclumps_min_area_fraction'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("all_subclumps_min_area_fraction");
+    tt->descr = tdrpStrDup("Min area of all sub-clumps, as a fraction of the original clump area.");
+    tt->help = tdrpStrDup("We sum the areas of the sub-clumps, and compute the fraction relative to the area of the original clump. For the sub-clumps to be valid, the computed fraction must exceed this parameter.");
+    tt->val_offset = (char *) &all_subclumps_min_area_fraction - &_start_;
+    tt->single_val.d = 0.33;
+    tt++;
+    
+    // Parameter 'each_subclump_min_area_fraction'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("each_subclump_min_area_fraction");
+    tt->descr = tdrpStrDup("Min area of each valid sub-clump, as a fraction of the original clump.");
+    tt->help = tdrpStrDup("We compute the area of each sub-clump, and compute the fraction relative to the area of the original clump. For a subclump to be valid, the area fraction must exceed this parameter.");
+    tt->val_offset = (char *) &each_subclump_min_area_fraction - &_start_;
+    tt->single_val.d = 0.02;
+    tt++;
+    
+    // Parameter 'each_subclump_min_area_km2'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("each_subclump_min_area_km2");
+    tt->descr = tdrpStrDup("Min area of each valid sub-clump (km2).");
+    tt->help = tdrpStrDup("We compute the area of each sub-clump. For a subclump to be valid, the area must exceed this parameter.");
+    tt->val_offset = (char *) &each_subclump_min_area_km2 - &_start_;
+    tt->single_val.d = 2;
+    tt++;
+    
+    // Parameter 'clumping_write_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("clumping_write_debug_fields");
+    tt->descr = tdrpStrDup("Option to write fields to the output files for debugging the dual threshold clumping.");
+    tt->help = tdrpStrDup("If this is set, the following debug fields are written to the output files: .");
+    tt->val_offset = (char *) &clumping_write_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 9'

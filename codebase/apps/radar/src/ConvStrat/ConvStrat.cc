@@ -125,15 +125,14 @@ ConvStrat::ConvStrat(int argc, char **argv)
   _finder.setMaxValidHtKm(_params.max_valid_height);
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
-  if (_params.use_dual_thresholds) {
-    _finder.setUseDualThresholds(_params.dual_threshold.secondary_threshold,
-                                 _params.dual_threshold.min_fraction_all_parts,
-                                 _params.dual_threshold.min_fraction_each_part,
-                                 _params.dual_threshold.min_size_each_part);
-    
+  if (_params.clumping_use_dual_thresholds) {
+    _finder.setUseDualThresholds(_params.clumping_secondary_convectivity,
+                                 _params.all_subclumps_min_area_fraction,
+                                 _params.each_subclump_min_area_fraction,
+                                 _params.each_subclump_min_area_km2);
   }
   _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
-  _finder.setMinGridOverlapForClumping(_params.min_overlap_for_convective_clumps);
+  _finder.setMinGridOverlapForClumping(1);
   _finder.setTextureRadiusKm(_params.texture_radius_km);
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
@@ -515,6 +514,10 @@ void ConvStrat::_addFields()
                                  ""));
   }
 
+  if (_params.clumping_write_debug_fields) {
+    _addClumpingDebugFields();
+  }
+  
 }
 
 /////////////////////////////////////////////////////////
@@ -808,4 +811,67 @@ MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
   return newField;
 
 }
+
+/////////////////////////////////////////////////////////
+// addClumpingDebugFields()
+//
+// add debug fields for dual threshold clumps
+
+void ConvStrat::_addClumpingDebugFields()
+  
+{
+
+  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+  Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
+  fhdr2d.nz = 1;
+  fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+  size_t planeSize32 = fhdr2d.nx * fhdr2d.ny * sizeof(fl32);
+  fhdr2d.volume_size = planeSize32;
+  fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr2d.data_element_nbytes = 4;
+  fhdr2d.missing_data_value = _missing;
+  fhdr2d.bad_data_value = _missing;
+  fhdr2d.scale = 1.0;
+  fhdr2d.bias = 0.0;
+  
+  Mdvx::vlevel_header_t vhdr2d;
+  MEM_zero(vhdr2d);
+  vhdr2d.level[0] = 0;
+  vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
+
+  // add clump composite reflectivity
+
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshCompFileGrid(),
+                               Mdvx::ENCODING_INT16,
+                               "ClumpsCompDbz",
+                               "ClumpsCompDbz",
+                               "dBZ"));
+
+  // add sub clump grids
+
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshAllFileGrid(),
+                               Mdvx::ENCODING_INT8,
+                               "AllClumps",
+                               "AllClumps",
+                               "count"));
+  
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshValidFileGrid(),
+                               Mdvx::ENCODING_INT8,
+                               "ValidClumps",
+                               "ValidClumps",
+                               "count"));
+  
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshGrownFileGrid(),
+                               Mdvx::ENCODING_INT8,
+                               "GrownClumps",
+                               "GrownClumps",
+                               "count"));
+  
+}
+
+
 

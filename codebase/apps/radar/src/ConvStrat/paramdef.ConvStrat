@@ -210,34 +210,46 @@ paramdef double {
   p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
 } max_convectivity_for_stratiform;
 
-paramdef int {
-  p_default = 1;
-  p_descr = "Minimum grid overlap in convective regions.";
-  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
-} min_overlap_for_convective_clumps;
-
 commentdef {
-  p_header = "OPTIONS TO USE DUAL THRESHOLDS.";
+  p_header = "CLUMPING.";
+  p_text = "We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.";
 }
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "Option to use dual thresholds to identify convective clumps.";
-  p_help = "NOTE: this step is performed in 2D. If set, the identification is performed in multiple stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. This is the default method. Then, using the dual_threshold parameters, a search is performed for clumps within the envelope exceeding the min convectivity threshold. If there is only one region at the higher convectivity, the entire outer envelope is used. If there are two or more regions which meet or exceed the required characteristics, these regions are grown back out to the original envelope, but stop growing where they meet between the higher-convectivity areas. The final clumps are computed by breaking the original clump into regions based upon these secondary areas.";
-} use_dual_thresholds;
+  p_descr = "Option to use dual thresholds to better identify convective clumps.";
+  p_help = "NOTE: this step is performed in 2D. If set, the clumping is performed in two stages. First, an outer convectivity envelope is computed, using min_convectivity_for_convective. Then, using the parameters below, for each clump a search is performed for sub-clumps within the envelope of the main clump, suing the secondary threshold. If there is only one sub-clump, the original clump is used unchanged. If there are two or more valid sub-clumps, based on the parameters below, these sub-clumps are progrresively grown to where they meet, or to the original clump envelope. The final 3D clumps are computed by breaking the original clump into regions based upon these secondary 2D areas.";
+} clumping_use_dual_thresholds;
 
-typedef struct {
-  double secondary_threshold;
-  double min_fraction_all_parts;
-  double min_fraction_each_part;
-  double min_size_each_part;
-} dual_threshold_t;
+paramdef double {
+  p_default = 0.65;
+  p_descr = "Secondary convectivity threshold for clumping.";
+  p_help = "We use the secondary threshold to find sub-clumps within the envelope of each original clump.";
+} clumping_secondary_convectivity;
 
-paramdef struct dual_threshold_t {
-  p_default = { 0.65, 0.33, 0.02, 2.0 };
-  p_descr = "Parameters for dual threshold identification. Performed in 2D.";
-  p_help = "See 'use_dual_thresholds'. secondary_threshold: convectivity threshold for this stage. A number of regions may be identified at the higher threshold. min_fraction_all_parts: we sum the sizes of the parts at the higher threshold, and the sum divided by the original size of the envelope must exceed this fraction. If it does not the original envelope is used. min_fraction_each_part: for any part to be valid its size as a fraction of all of the parts must exceed this value. min_size_each_part: for any part to be valid its area must exceed this value. If it does not the part is ignored. If only 1 part is valid, the entire envelope is used.";
-} dual_threshold;
+paramdef double {
+  p_default = 0.33;
+  p_descr = "Min area of all sub-clumps, as a fraction of the original clump area.";
+  p_help = "We sum the areas of the sub-clumps, and compute the fraction relative to the area of the original clump. For the sub-clumps to be valid, the computed fraction must exceed this parameter.";
+} all_subclumps_min_area_fraction;
+
+paramdef double {
+  p_default = 0.02;
+  p_descr = "Min area of each valid sub-clump, as a fraction of the original clump.";
+  p_help = "We compute the area of each sub-clump, and compute the fraction relative to the area of the original clump. For a subclump to be valid, the area fraction must exceed this parameter.";
+} each_subclump_min_area_fraction;
+
+paramdef double {
+  p_default = 2.0;
+  p_descr = "Min area of each valid sub-clump (km2).";
+  p_help = "We compute the area of each sub-clump. For a subclump to be valid, the area must exceed this parameter.";
+} each_subclump_min_area_km2;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write fields to the output files for debugging the dual threshold clumping.";
+  p_help = "If this is set, the following debug fields are written to the output files: .";
+} clumping_write_debug_fields;
 
 commentdef {
   p_header = "DATA OUTPUT";
