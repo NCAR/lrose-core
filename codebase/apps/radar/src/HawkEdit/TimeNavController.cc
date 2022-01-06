@@ -73,6 +73,10 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+string TimeNavController::getTempDir() {
+  return _model->getTempDir();
+}
+
 string TimeNavController::getSelectedArchiveFileName() {
   return _model->getSelectedArchiveFileName();
 }

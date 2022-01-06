@@ -1242,7 +1242,6 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
-
 void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol

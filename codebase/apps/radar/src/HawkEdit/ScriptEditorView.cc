@@ -89,7 +89,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     cancelAct->setFont(font);
     cancelAct->setStatusTip(tr("cancel changes"));
     // cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
-    connect(cancelAct, &QAction::triggered, this, &ScriptEditorView::cancelFormulaInput);
+    connect(cancelAct, &QAction::triggered, this, &ScriptEditorView::cancelScriptRun);
     toolBar->addAction(cancelAct);
 
     QAction *okAct = new QAction(tr("&Run"), this);
@@ -182,10 +182,12 @@ Q_DECLARE_METATYPE(QVector<double>)
     _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
     _archiveEndTimeEdit->setToolTip("End time of archive period");
     */
+    /*
     saveEditsDirectory = new QLabel("save edited files to: ");
     saveEditsDirectory->setVisible(false);
     browseDirectoryButton = new QPushButton(tr("&Change Output Location"));
     browseDirectoryButton->setVisible(false);
+    */
 
     scriptModifiers = new QGroupBox("Modifiers", this);
     checkBoxLayout = new QVBoxLayout;
@@ -197,8 +199,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     //checkBoxLayout->addWidget(_archiveStartTimeEdit);
     //checkBoxLayout->addWidget(_archiveEndTimeEdit);
 
-    checkBoxLayout->addWidget(browseDirectoryButton);
-    checkBoxLayout->addWidget(saveEditsDirectory);
+    //checkBoxLayout->addWidget(browseDirectoryButton);
+    //checkBoxLayout->addWidget(saveEditsDirectory);
     checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
     scriptModifiers->setLayout(checkBoxLayout);
 
@@ -209,7 +211,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
     connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
-    connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
+    //connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
@@ -515,71 +517,31 @@ void ScriptEditorView::applyChanges()
 
 void ScriptEditorView::acceptFormulaInput()
 {
-    QString oneTimeOnlyScript = formulaInput->getText();
-    cerr << "OneTimeOnly text entered: " << oneTimeOnlyScript.toStdString() << endl;
+  QString oneTimeOnlyScript = formulaInput->getText();
+  cerr << "OneTimeOnly text entered: " << oneTimeOnlyScript.toStdString() << endl;
 
-    QString forEachRayScript = formulaInputForEachRay->getText();
-    cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
-    
-    bool useBoundary = useBoundaryWidget->isChecked(); 
-    bool useAllSweeps = allSweepsToggleButton->isChecked();     
+  QString forEachRayScript = formulaInputForEachRay->getText();
+  cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
+  
+  bool useBoundary = useBoundaryWidget->isChecked(); 
+  bool useAllSweeps = allSweepsToggleButton->isChecked();     
 
-    // TODO: should the start and end times be specified in the time nav?
-    // Q: what is the relationship between the time nav and the script start and end times?
-    // TODO: why not emit a signal and have a slot in the PolarManager???
-    if (currentTimeToggleButton->isChecked()) {
-      string saveDirectoryPath = getSaveEditsDirectory();   // "/tmp/HawkEdit";
-
-      /*
-      QDateTime startDateTime = _archiveStartTimeEdit->dateTime();
-      QDateTime endDateTime = _archiveEndTimeEdit->dateTime();
-
-      QDate startDate = startDateTime.date();
-      QTime startTime = startDateTime.time();
-      QDate endDate = endDateTime.date();
-      QTime endTime = endDateTime.time();
-
-      int startYear = startDate.year(); 
-      int startMonth = startDate.month(); 
-      int startDay = startDate.day();                    
-      int startHour = startTime.hour(); 
-      int startMinute = startTime.minute(); 
-      int startSecond = startTime.second();
-
-      int endYear = endDate.year(); 
-      int endMonth = endDate.month(); 
-      int endDay = endDate.day();
-      int endHour = endTime.hour(); 
-      int endMinute = endTime.minute(); 
-      int endSecond = endTime.second();
-      */
+  // TODO: should the start and end times be specified in the time nav?
+  // Q: what is the relationship between the time nav and the script start and end times?
+  //  emit a signal and have a slot in the PolarManager
+  if (currentTimeToggleButton->isChecked()) {
       bool useTimeRange = true;
+      emit runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
+          useTimeRange);
 
-      try{
-        PolarManager *polarManager = (PolarManager *) parent();
-        polarManager->runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
-          useTimeRange,
-          saveDirectoryPath);
-          //startYear, startMonth, startDay, startHour, startMinute, startSecond,
-          //endYear, endMonth, endDay, endHour, endMinute, endSecond);
-//          startDateTime, endDateTime); 
-      } catch (const std::exception& ex) {
-        criticalMessage(ex.what());
-      } catch (const std::string& ex) {
-        criticalMessage(ex);
-      } catch (const char*  ex) {
-        criticalMessage(ex);
-      } catch (...) {
-        criticalMessage("Error occurred during evaluation");
-      }
-    } else {
+  } else {
 
     // Send the scripts to the controller for processing
-    try {
+    //try {
       //emit runOneTimeOnlyScript(oneTimeOnlyScript);
       //emit runForEachRayScript(forEachRayScript, useBoundary);
-      PolarManager *polarManager = (PolarManager *) parent();
-      polarManager->runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
+      //PolarManager *polarManager = (PolarManager *) parent();
+      emit runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
     /*
     // Grab the context before evaluating the formula
     //  YES! This works.  The new global variables are listed here;
@@ -646,6 +608,7 @@ void ScriptEditorView::acceptFormulaInput()
       }
 
     */
+      /*
     } catch (const std::exception& ex) {
       criticalMessage(ex.what());
     } catch (const std::string& ex) {
@@ -655,11 +618,15 @@ void ScriptEditorView::acceptFormulaInput()
     } catch (...) {
       criticalMessage("Error occurred during evaluation");
     }
+    */
   }
 }
 
 void ScriptEditorView::scriptComplete() {
+  // if not batch mode
+  if (!currentTimeToggleButton->isChecked()) {
     scriptCompleteMessage();
+  }
 }
 
 void ScriptEditorView::cancelFormulaInput()
@@ -682,6 +649,9 @@ void ScriptEditorView::cancelFormulaInput()
     */
 }
 
+void ScriptEditorView::cancelScriptRun() {
+  emit cancelScriptRunRequest();
+}
 
 // TODO: I have to be careful here ...
 // addField will always work, it just renames the field if it already
@@ -1031,13 +1001,13 @@ void ScriptEditorView::timeRangeClicked(bool checked) {
 }
 
 void ScriptEditorView::hideTimeRangeEdits() {
-  saveEditsDirectory->setVisible(false);
-  browseDirectoryButton->setVisible(false);
+  //saveEditsDirectory->setVisible(false);
+  //browseDirectoryButton->setVisible(false);
 }
 
 void ScriptEditorView::showTimeRangeEdits() {
-  saveEditsDirectory->setVisible(true);
-  browseDirectoryButton->setVisible(true);
+  //saveEditsDirectory->setVisible(true);
+  //browseDirectoryButton->setVisible(true);
 }
 
 void ScriptEditorView::changeOutputLocation(bool checked) {

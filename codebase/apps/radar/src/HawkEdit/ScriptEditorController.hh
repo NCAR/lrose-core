@@ -70,6 +70,8 @@ private:
 
   vector<string> *initialFieldNames;
 
+  bool _cancelPressed;
+
   void reset();
 
   void setupBoundaryArray();

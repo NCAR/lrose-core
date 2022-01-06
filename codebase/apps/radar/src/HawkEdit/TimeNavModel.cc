@@ -415,6 +415,28 @@ string TimeNavModel::getSelectedArchiveFileName() {
   }
 }
 
+// return a string composed of the current base directory
+// plus internally named temporary directory .tmp_N
+// where N is the next available sequence number
+string TimeNavModel::getTempDir() {
+  //RadxPath temp;
+  string tmp = ".tmp_1/";
+  tmp.append(_archiveStartTime.getDateStrPlain());
+  //string dir = currentPath->getDirectory();
+  // get list of current .tmp_N directories
+  string path = currentPath->getPath(); // computeTmpPath(yyyymmdd.c_str());
+  path.append("/");
+  path.append(tmp);
+  RadxPath radxPath;
+  radxPath.setDirectory(path);
+  if (radxPath.makeDirRecurse()) {
+    string msg = "cannot create temporary directory ";
+    msg.append(path);
+    throw std::invalid_argument(msg);
+  }
+  return path;
+}
+
 int TimeNavModel::getPositionOfSelection() {
   return _archiveScanIndex;
 }

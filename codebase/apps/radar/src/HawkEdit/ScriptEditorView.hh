@@ -44,7 +44,7 @@ public:
   vector<float> *getDataForVariableFromScriptEditor(int column, string fieldName);
 
   string getSaveEditsDirectory();
-  
+
   //void setSelectionToValue(QString value);
   void closeEvent();
 
@@ -56,6 +56,7 @@ public slots:
     void cancelFormulaInput();
     void displayHelp();
     void scriptComplete();
+    void cancelScriptRun();
     //void clear();
 
     void notImplementedMessage();
@@ -83,7 +84,11 @@ signals:
   //void needDataForField(string fieldName, int r, int c);
   void applyVolumeEdits();
   void runOneTimeOnlyScript(QString oneTimeOnlyScript);
-  void runForEachRayScript(QString forEachRayScript, bool useBoundary);
+  void runForEachRayScript(QString forEachRayScript, bool useBoundary,
+    bool useAllSweeps);
+  void runScriptBatchMode(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);
+  void cancelScriptRunRequest();
   void scriptEditorClosed();
 
 protected:

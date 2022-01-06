@@ -202,15 +202,15 @@ public:
   double worldReleaseX, double worldReleaseY);
   bool evaluateRange(double xRange);
 
-  void runForEachRayScript(QString script, bool useBoundary,
-    bool useAllSweeps);
+  //void runForEachRayScript(QString script, bool useBoundary,
+  //  bool useAllSweeps);
 
  // void runScriptBatchMode(QString script, bool useBoundary, 
  //   bool useAllSweeps, string saveDirectoryPath,
  //   string startDateTime, string endDateTime);
 
-  void runScriptBatchMode(QString script, bool useBoundary, 
-  bool useAllSweeps, bool useTimeRange, string saveDirectoryPath);
+  //void runScriptBatchMode(QString script, bool useBoundary, 
+  //  bool useAllSweeps, bool useTimeRange);
   /*
   void runScriptBatchMode(QString script, bool useBoundary, 
   bool useAllSweeps, string saveDirectoryPath, 
@@ -277,6 +277,11 @@ public slots:
                        int endYear, int endMonth, int endDay,
                        int endHour, int endMinute, int endSecond);
   void resetStartEndTime();
+
+  void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
+  void runScriptBatchMode(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);
+  void cancelScriptRun();
 
   void errorMessage(string title, string message);
 
@@ -581,6 +586,8 @@ private:
   
   bool _archiveMode;
   bool _archiveRetrievalPending;
+
+  bool _cancelled;
 
 /*
   QDateTimeEdit *_archiveStartTimeEdit;

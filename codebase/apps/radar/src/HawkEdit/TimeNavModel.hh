@@ -89,6 +89,7 @@ public:
 
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
+  string getTempDir();
   int getPositionOfSelection();
 
   bool moreFiles();

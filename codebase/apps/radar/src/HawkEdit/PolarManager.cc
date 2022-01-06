@@ -5412,7 +5412,13 @@ void PolarManager::EditRunScript() {
     connect(scriptEditorView, SIGNAL(scriptEditorClosed()), this, SLOT(scriptEditorClosed()));
     //connect scriptEditorView, SIGNAL(runForEachRayScript(), 
     //  this, SLOT(runForEachRayScript()));
-    
+    connect(scriptEditorView, SIGNAL(cancelScriptRunRequest()),
+      this, SLOT(cancelScriptRun()));
+    connect(scriptEditorView, &ScriptEditorView::runScriptBatchMode,
+      this, &PolarManager::runScriptBatchMode);
+    connect(scriptEditorView, &ScriptEditorView::runForEachRayScript,
+      this, &PolarManager::runForEachRayScript);    
+
     scriptEditorView->init();
   }
   scriptEditorView->show();
@@ -5443,14 +5449,20 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
 // From the way the saveDirectoryPath is chosen, the path must exist.
 // TODO: when running from the command line, verify the directory exists.
 void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
-  bool useAllSweeps, bool useTimeRange, string saveDirectoryPath) {
+  bool useAllSweeps, bool useTimeRange) {
+
+  // save to temporary directory .tmp_N in the same directory 
+  // as the current archive files.
+  string saveDirectoryPath;
+  try {
+    saveDirectoryPath = _timeNavController->getTempDir(); 
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
+    return;
+  }
+
+  _cancelled = false;
    
-  // int startYear, int startMonth, int startDay,
-  // int startHour, int startMinute, int startSecond,
-  // int endYear, int endMonth, int endDay,
-  // int endHour, int endMinute, int endSecond) {
-    
-  //string startDateTime, string endDateTime) {
   vector<Point> boundaryPoints;
   if (boundaryPointEditorControl != NULL) {
     boundaryPoints = boundaryPointEditorControl->getWorldPoints();
@@ -5462,7 +5474,8 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     errorMessage("Error", "No field names selected");
     return;
   }
-
+  string fileName;
+  string currentPath;
   try {
     // get list of archive files within start and end date/times
     // make a local version of the time navigation to manage the archive files
@@ -5489,9 +5502,10 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //vector<string>::iterator it;
   //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
   int archiveFileIndex = 0;
-  _timeNavController->setTimeSliderPosition(archiveFileIndex);
 
-  while (_timeNavController->moreFiles()) {
+  _timeNavController->setTimeSliderPosition(archiveFileIndex);
+  //bool cancelled = scriptEditorControl->cancelRequested();
+  while (_timeNavController->moreFiles() && !_cancelled) {
     
     //   load each archive file
     // TODO: I don't like accessing the DataModel here.  Who should load
@@ -5510,38 +5524,37 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
 
     bool debug_verbose = false;
     bool debug_extra = false;
+    bool batchMode = true; // to prevent message box on every file
     try {  
-      // TODO: use regular forEachRay ...
+      // use regular forEachRay ...
       runForEachRayScript(script, useBoundary, useAllSweeps);
-      /*
-      scriptEditorControl->runMultipleArchiveFiles(archiveFiles, 
-        script, useBoundary,
-        boundaryPoints, saveDirectoryPath,
-        fieldNames, debug_verbose, debug_extra); 
-        */
-    //runForEachRayScript(script, useBoundary, boundaryPoints);
+      // check if Cancel requested
 
     //   save archive file to temp area
     // TODO: move to a separate method ... _saveFile();
 
       //LOG(DEBUG) << "writing to file " << name;
       DataModel *dataModel = DataModel::Instance();
-      string currentPath = saveDirectoryPath;
+      currentPath = saveDirectoryPath;
       currentPath.append("/");
-      string fileName = _timeNavController->getSelectedArchiveFileName();
+      fileName = _timeNavController->getSelectedArchiveFileName();
       currentPath.append(fileName);
       dataModel->writeData(currentPath);
       _unSavedEdits = false;
+    
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
       return;
     }
     archiveFileIndex += 1;
     _timeNavController->setTimeSliderPosition(archiveFileIndex);
+    //cancelled = scriptEditorControl->cancelRequested();
   }
 
 // ---
 
+  // TODO: if not cancelled
+  //   move to temporary directory with the new edits
 
 
 
@@ -5560,6 +5573,13 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   } catch (std::invalid_argument &ex) {
     errorMessage("Error", ex.what());
   }
+  _cancelled = false;
+  errorMessage("Done", "moving to edited data");
+  vector<string> archiveFileList;
+  archiveFileList.push_back(currentPath);
+  bool fromCommandLine = false;
+  setArchiveFileList(archiveFileList, fromCommandLine);
+  //_timeNavController->fetchArchiveFiles(saveDirectoryPath, fileName);
 }
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
@@ -5660,6 +5680,11 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     //spreadSheetControl->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
+}
+
+void PolarManager::cancelScriptRun() {
+  _cancelled = true;
+  errorMessage("Information", "Cancelling running script");
 }
 
 void PolarManager::setDataMissing(string fieldName, float missingValue) {

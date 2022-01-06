@@ -71,6 +71,7 @@ public:
 
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
+  string getTempDir();
 
   string &getPath();
 
