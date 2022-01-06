@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// ConvStrat.cc
+// Ecco.cc
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStrat finds stratiform/convective regions in a Cartesian
+// Ecco finds stratiform/convective regions in a Cartesian
 // radar volume
 //
 /////////////////////////////////////////////////////////////////////
@@ -39,14 +39,14 @@
 #include <dataport/bigend.h>
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
-#include "ConvStrat.hh"
+#include "Ecco.hh"
 using namespace std;
 
-const fl32 ConvStrat::_missing = -9999.0;
+const fl32 Ecco::_missing = -9999.0;
 
 // Constructor
 
-ConvStrat::ConvStrat(int argc, char **argv)
+Ecco::Ecco(int argc, char **argv)
 
 {
 
@@ -55,7 +55,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
 
   // set programe name
 
-  _progName = "ConvStrat";
+  _progName = "Ecco";
   ucopyright((char *) _progName.c_str());
 
   // get command line args
@@ -114,7 +114,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
     }
   }
 
-  // set up ConvStratFinder object
+  // set up EccoFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _finder.setVerbose(true);
@@ -148,7 +148,7 @@ ConvStrat::ConvStrat(int argc, char **argv)
 
 // destructor
 
-ConvStrat::~ConvStrat()
+Ecco::~Ecco()
 
 {
 
@@ -161,7 +161,7 @@ ConvStrat::~ConvStrat()
 //////////////////////////////////////////////////
 // Run
 
-int ConvStrat::Run()
+int Ecco::Run()
 {
   
   int iret = 0;
@@ -181,17 +181,17 @@ int ConvStrat::Run()
 
     PMU_auto_register("Before read");
     if (_doRead()) {
-      cerr << "ERROR - ConvStrat::Run()" << endl;
+      cerr << "ERROR - Ecco::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
     }
 
-    // set grid in ConvStratFinder object
+    // set grid in EccoFinder object
 
     MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
     if (dbzField == NULL) {
-      cerr << "ERROR - ConvStrat::Run()" << endl;
+      cerr << "ERROR - Ecco::Run()" << endl;
       cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
       return -1;
     }
@@ -226,7 +226,7 @@ int ConvStrat::Run()
                                     (fl32 *) _deepHtField.getVol(),
                                     fhdr.nx * fhdr.ny);
       } else {
-        cerr << "WARNING - ConvStrat::Run()" << endl;
+        cerr << "WARNING - Ecco::Run()" << endl;
         cerr << "  Cannot read in temperature profile, url: "
              << _params.temp_profile_url << endl;
         cerr << "  Using specifed heights instead" << endl;
@@ -240,7 +240,7 @@ int ConvStrat::Run()
     const fl32 *dbz = (const fl32*) dbzField->getVol();
     fl32 missingDbz = fhdr.missing_data_value;
     if (_finder.computePartition(dbz, missingDbz)) {
-      cerr << "ERROR - ConvStrat::Run()" << endl;
+      cerr << "ERROR - Ecco::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -249,7 +249,7 @@ int ConvStrat::Run()
     // write out
     
     if (_doWrite()) {
-      cerr << "ERROR - ConvStrat::Run()" << endl;
+      cerr << "ERROR - Ecco::Run()" << endl;
       umsleep(1000);
       iret = -1;
       continue;
@@ -272,7 +272,7 @@ int ConvStrat::Run()
 //
 // Returns 0 on success, -1 on failure.
 
-int ConvStrat::_doRead()
+int Ecco::_doRead()
   
 {
   
@@ -293,7 +293,7 @@ int ConvStrat::_doRead()
   PMU_auto_register("Before read");
   
   if (_input.readVolumeNext(_inMdvx)) {
-    cerr << "ERROR - ConvStrat::_doRead" << endl;
+    cerr << "ERROR - Ecco::_doRead" << endl;
     cerr << "  Cannot read in data." << endl;
     cerr << _input.getErrStr() << endl;
     return -1;
@@ -310,7 +310,7 @@ int ConvStrat::_doRead()
 /////////////////////////////////////////////////////////
 // add fields to the output object
 
-void ConvStrat::_addFields()
+void Ecco::_addFields()
   
 {
 
@@ -525,8 +525,8 @@ void ConvStrat::_addFields()
 //
 // Returns 0 on success, -1 on failure.
 
-int ConvStrat::_readTempProfile(time_t dbzTime,
-                                const MdvxField *dbzField)
+int Ecco::_readTempProfile(time_t dbzTime,
+                           const MdvxField *dbzField)
 
 {
 
@@ -538,7 +538,7 @@ int ConvStrat::_readTempProfile(time_t dbzTime,
   _tempMdvx.addReadField(_params.temp_profile_field_name);
   
   if (_tempMdvx.readVolume()) {
-    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "ERROR - Ecco::_readTempProfile" << endl;
     cerr << "  Cannot read temperature profile" << endl;
     cerr << _tempMdvx.getErrStr() << endl;
     return -1;
@@ -546,7 +546,7 @@ int ConvStrat::_readTempProfile(time_t dbzTime,
 
   _tempField = _tempMdvx.getField(_params.temp_profile_field_name);
   if (_tempField == NULL) {
-    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "ERROR - Ecco::_readTempProfile" << endl;
     cerr << "  Cannot find field in temp file: "
          << _params.temp_profile_field_name << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
@@ -567,14 +567,14 @@ int ConvStrat::_readTempProfile(time_t dbzTime,
   MdvxProj proj(dbzField->getFieldHeader());
   MdvxRemapLut lut;
   if (_shallowHtField.remap(lut, proj)) {
-    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "ERROR - Ecco::_readTempProfile" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
     cerr << "  Time: " << DateTime::strm(_tempMdvx.getValidTime()) << endl;
     return -1;
   }
   if (_deepHtField.remap(lut, proj)) {
-    cerr << "ERROR - ConvStrat::_readTempProfile" << endl;
+    cerr << "ERROR - Ecco::_readTempProfile" << endl;
     cerr << "  Cannot convert model temp grid to radar grid" << endl;
     cerr << "  URL: " << _params.temp_profile_url << endl;
     cerr << "  Time: " << DateTime::strm(_tempMdvx.getValidTime()) << endl;
@@ -588,11 +588,11 @@ int ConvStrat::_readTempProfile(time_t dbzTime,
 /////////////////////////////////////////////////////////
 // fill temperature level ht array
 
-void ConvStrat::_computeHts(double tempC,
-                            MdvxField &htField,
-                            const string &fieldName,
-                            const string &longName,
-                            const string &units)
+void Ecco::_computeHts(double tempC,
+                       MdvxField &htField,
+                       const string &fieldName,
+                       const string &longName,
+                       const string &units)
 
 {
 
@@ -709,7 +709,7 @@ void ConvStrat::_computeHts(double tempC,
 //
 // Returns 0 on success, -1 on failure.
 
-int ConvStrat::_doWrite()
+int Ecco::_doWrite()
   
 {
   
@@ -742,7 +742,7 @@ int ConvStrat::_doWrite()
   
   PMU_auto_register("Before write");
   if(_outMdvx.writeToDir(_params.output_url)) {
-    cerr << "ERROR - ConvStrat::Run" << endl;
+    cerr << "ERROR - Ecco::Run" << endl;
     cerr << "  Cannot write data set." << endl;
     cerr << _outMdvx.getErrStr() << endl;
     return -1;
@@ -759,13 +759,13 @@ int ConvStrat::_doWrite()
 /////////////////////////////////////////////////////////
 // create a float field
 
-MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
-                                 Mdvx::vlevel_header_t &vhdr,
-                                 const fl32 *data,
-                                 Mdvx::encoding_type_t outputEncoding,
-                                 string fieldName,
-                                 string longName,
-                                 string units)
+MdvxField *Ecco::_makeField(Mdvx::field_header_t &fhdrTemplate,
+                            Mdvx::vlevel_header_t &vhdr,
+                            const fl32 *data,
+                            Mdvx::encoding_type_t outputEncoding,
+                            string fieldName,
+                            string longName,
+                            string units)
                                  
 {
 
@@ -787,13 +787,13 @@ MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
 /////////////////////////////////////////////////////////
 // create a byte field
 
-MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
-                                 Mdvx::vlevel_header_t &vhdr,
-                                 const ui08 *data,
-                                 Mdvx::encoding_type_t outputEncoding,
-                                 string fieldName,
-                                 string longName,
-                                 string units)
+MdvxField *Ecco::_makeField(Mdvx::field_header_t &fhdrTemplate,
+                            Mdvx::vlevel_header_t &vhdr,
+                            const ui08 *data,
+                            Mdvx::encoding_type_t outputEncoding,
+                            string fieldName,
+                            string longName,
+                            string units)
                                  
 {
   
@@ -817,7 +817,7 @@ MdvxField *ConvStrat::_makeField(Mdvx::field_header_t &fhdrTemplate,
 //
 // add debug fields for dual threshold clumps
 
-void ConvStrat::_addClumpingDebugFields()
+void Ecco::_addClumpingDebugFields()
   
 {
 
@@ -872,6 +872,3 @@ void ConvStrat::_addClumpingDebugFields()
                                "count"));
   
 }
-
-
-

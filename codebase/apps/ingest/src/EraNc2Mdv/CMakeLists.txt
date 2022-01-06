@@ -2,22 +2,25 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: ConvStrat
+# app name: EraNc2Mdv
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/ConvStrat
+# dir: lrose-core/codebase/apps/ingest/src/EraNc2Mdv
 ###############################################################
 
-project (ConvStrat)
+project (EraNc2Mdv)
 
 # source files
 
 set (SRCS
       Params.cc
-      ConvStrat.cc
       Args.cc
-      Main.cc
+      ReadNcFiles.cc
+      HtInterp.cc
+      OutputFile.cc
+      EraNc2Mdv.cc
+      main.cc
     )
 
 # include directories
@@ -125,12 +128,14 @@ link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (shapelib)
 link_libraries (cidd)
+link_libraries (png)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
 link_libraries (pthread)
+link_libraries (m)
 link_libraries (Ncxx)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
@@ -150,7 +155,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (ConvStrat ${SRCS})
+add_executable (EraNc2Mdv ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

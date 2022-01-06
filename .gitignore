@@ -423,7 +423,6 @@ codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
 codebase/apps/radar/src/Colide/Colide
-codebase/apps/radar/src/ConvStrat/ConvStrat
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
 codebase/apps/radar/src/CalCompute/CalCompute
 codebase/apps/radar/src/CartSim/CartSim
@@ -440,6 +439,7 @@ codebase/apps/radar/src/Dsr2CP2Mom/Dsr2CP2Mom
 codebase/apps/radar/src/DsrGrabber/DsrGrabber
 codebase/apps/radar/src/DsrMerge/DsrMerge
 codebase/apps/radar/src/DualDopplerLobes/DualDopplerLobes
+codebase/apps/radar/src/Ecco/Ecco
 
 codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake

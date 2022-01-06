@@ -23,55 +23,59 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for ConvStrat program
+# Makefile for EraNc2Mdv program
 #
-# Mike Dixon, RAP, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# RAP, NCAR, Boulder, CO, 80307, USA
 #
-# June 2014
+# June 2006
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = ConvStrat
+TARGET_FILE = EraNc2Mdv
+MODULE_TYPE = progcpp
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -leuclid \
-	-ldsserver -ldidss -lrapformats -lrapmath -ltoolsa \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lpthread
+LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -ldsserver \
+	-ldidss -lrapformats -lgrib2 -leuclid \
+	-ltoolsa -lphysics $(JASPER_LIBS) -lpng \
+	-ldataport -ltdrp -lrapmath -lNcxx $(NETCDF4_LIBS) \
+	-lbz2 -lz -lpthread -lm
 
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
 
-LOC_CFLAGS =
+LOC_CPPC_CFLAGS =
 
 HDRS = \
 	$(PARAMS_HH) \
-	ConvStrat.hh \
-	Args.hh
+	Args.hh \
+	ReadNcFiles.hh \
+	HtInterp.hh \
+	OutputFile.hh \
+	EraNc2Mdv.hh
+
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
-	ConvStrat.cc \
 	Args.cc \
-	Main.cc 
-
-#
-# tdrp macros
-#
+	ReadNcFiles.cc \
+	HtInterp.cc \
+	OutputFile.cc \
+	EraNc2Mdv.cc \
+	main.cc
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
-# standard C++ targets
+# standard targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
-# tdrp targets
+# tdrp
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
@@ -79,6 +83,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 # local targets
 #
+
+depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

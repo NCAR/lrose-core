@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ////////////////////////////////////////////////////////////////////
 //
-// main for ConvStrat
+// main for Ecco
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,11 +31,11 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStrat finds stratiform regions in a Cartesian radar volume
+// Ecco finds stratiform regions in a Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
 
-#include "ConvStrat.hh"
+#include "Ecco.hh"
 #include <toolsa/str.h>
 #include <toolsa/port.h>
 #include <signal.h>
@@ -46,7 +46,7 @@ using namespace std;
 
 static void tidy_and_exit (int sig);
 static void out_of_store();
-static ConvStrat *_prog;
+static Ecco *_prog;
 static int _argc;
 static char **_argv;
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 
   // create program object
 
-  _prog = new ConvStrat(argc, argv);
+  _prog = new Ecco(argc, argv);
   if (!_prog->isOK) {
     return(-1);
   }
@@ -109,7 +109,7 @@ static void out_of_store()
 
 {
 
-  fprintf(stderr, "FATAL ERROR - program ConvStrat\n");
+  fprintf(stderr, "FATAL ERROR - program Ecco\n");
   fprintf(stderr, "  Operator new failed - out of store\n");
   exit(-1);
 

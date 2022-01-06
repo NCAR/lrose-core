@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// ConvStrat.hh
+// Ecco.hh
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,12 +30,12 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStrat finds stratiform regions in a Cartesian radar volume
+// Ecco finds stratiform regions in a Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
 
-#ifndef ConvStrat_H
-#define ConvStrat_H
+#ifndef Ecco_H
+#define Ecco_H
 
 #include <string>
 #include <Mdv/DsMdvxInput.hh>
@@ -51,17 +51,17 @@ using namespace std;
 ////////////////////////
 // This class
 
-class ConvStrat {
+class Ecco {
   
 public:
 
   // constructor
 
-  ConvStrat (int argc, char **argv);
+  Ecco (int argc, char **argv);
 
   // destructor
   
-  ~ConvStrat();
+  ~Ecco();
 
   // run 
 

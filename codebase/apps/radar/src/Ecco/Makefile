@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for ConvStrat program
+# Makefile for Ecco program
 #
 # Mike Dixon, RAP, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
@@ -34,7 +34,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = ConvStrat
+TARGET_FILE = Ecco
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -49,12 +49,12 @@ LOC_CFLAGS =
 
 HDRS = \
 	$(PARAMS_HH) \
-	ConvStrat.hh \
+	Ecco.hh \
 	Args.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
-	ConvStrat.cc \
+	Ecco.cc \
 	Args.cc \
 	Main.cc 
 

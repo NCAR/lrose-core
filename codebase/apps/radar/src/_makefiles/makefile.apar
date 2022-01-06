@@ -16,11 +16,11 @@ SUB_DIRS = \
 	AparTsPrint \
 	AparTsSim \
 	CalCompute \
-	ConvStrat \
 	Cov2Mom \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \
+	Ecco \
 	HawkEye \
 	HcrVelCorrect \
 	HcrTempRxGain \

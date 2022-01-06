@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// parameter definitions ConvStrat
+// parameter definitions Ecco
 //
 // Mike Dixon, EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
@@ -8,8 +8,8 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Program name: ConvStrat";
-  p_text = "ConvStrat finds convective and stratiform regions within a Cartesian radar volume.";
+  p_header = "Program name: Ecco";
+  p_text = "Ecco finds convective and stratiform regions within a Cartesian radar volume.";
 }
 
 commentdef {
