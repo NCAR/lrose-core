@@ -419,22 +419,43 @@ string TimeNavModel::getSelectedArchiveFileName() {
 // plus internally named temporary directory .tmp_N
 // where N is the next available sequence number
 string TimeNavModel::getTempDir() {
-  //RadxPath temp;
-  string tmp = ".tmp_1/";
-  tmp.append(_archiveStartTime.getDateStrPlain());
+
+  std::stringstream ss;
+
+  string tmp = ".tmp_";
+  //tmp.append(_archiveStartTime.getDateStrPlain());
   //string dir = currentPath->getDirectory();
   // get list of current .tmp_N directories
   string path = currentPath->getPath(); // computeTmpPath(yyyymmdd.c_str());
-  path.append("/");
-  path.append(tmp);
+  //path.append("/");
+  //path.append(tmp);
+  string yyyymmdd = _archiveStartTime.getDateStrPlain();
+
+  int max = 10;
+  int idx = 0;
+  do {
+    idx += 1;
+    ss.str(""); // reset the starting path
+    ss << path << "/" << tmp << idx << "/" << yyyymmdd;
+  } while (RadxPath::exists(ss.str()) && (idx < max));
+
+  if (idx >= max) {
+    string msg = "max temporary directories ";
+    msg.append(std::to_string(max));
+    throw std::invalid_argument(msg);    
+  }
+
+  string workingPath = ss.str();
+
   RadxPath radxPath;
-  radxPath.setDirectory(path);
+  radxPath.setDirectory(workingPath);
+
   if (radxPath.makeDirRecurse()) {
     string msg = "cannot create temporary directory ";
-    msg.append(path);
+    msg.append(workingPath);
     throw std::invalid_argument(msg);
   }
-  return path;
+  return workingPath;
 }
 
 int TimeNavModel::getPositionOfSelection() {
