@@ -281,6 +281,8 @@ public slots:
   void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
+  void undoScriptEdits();
+  void redoScriptEdits();
   void cancelScriptRun();
 
   void errorMessage(string title, string message);

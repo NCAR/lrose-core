@@ -467,7 +467,8 @@ void TimeNavView::showTimeControl()
 
 
     if (isVisible()) {
-      setVisible(false);
+      raise();
+      //setVisible(false);
     } else {
       //if (!_timeControlPlaced) {
       // always place the time navigation view

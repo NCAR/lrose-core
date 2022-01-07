@@ -101,6 +101,22 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(okAct, &QAction::triggered, this, &ScriptEditorView::acceptFormulaInput);
     toolBar->addAction(okAct);
 
+    QAction *undoAct = new QAction(tr("&Undo"), this);
+    font = undoAct->font();
+    font.setPointSize(actionFontSize);
+    undoAct->setFont(font);
+    undoAct->setStatusTip(tr("undo edits"));
+    connect(undoAct, &QAction::triggered, this, &ScriptEditorView::undoEdits);
+    toolBar->addAction(undoAct);    
+
+    QAction *redoAct = new QAction(tr("&Redo"), this);
+    font = redoAct->font();
+    font.setPointSize(actionFontSize);
+    redoAct->setFont(font);
+    redoAct->setStatusTip(tr("redo edits"));
+    connect(redoAct, &QAction::triggered, this, &ScriptEditorView::redoEdits);
+    toolBar->addAction(redoAct);   
+
     QAction *openFileAct = new QAction(tr("&Open"), this);
     font = openFileAct->font();
     font.setPointSize(actionFontSize);
@@ -169,6 +185,9 @@ Q_DECLARE_METATYPE(QVector<double>)
     //sweepSelection->setLayout(vbox); 
 
     currentTimeToggleButton = new QPushButton(tr("Current Archive File Only"));
+    //currentTimeToggleButton->setStatusTip("enter batch mode with time range");
+    currentTimeToggleButton->setText("Individual Scan Mode");
+    currentTimeToggleButton->setStatusTip("Current Archive File Only");
     currentTimeToggleButton->setCheckable(true);
     currentTimeToggleButton->setChecked(true);
 
@@ -386,6 +405,15 @@ float  ScriptEditorView::myPow()
   return(999.9);
 }
 
+void ScriptEditorView::undoEdits() {
+  // signal the PolarManager to undo edits
+  emit undoScriptEdits();
+}
+
+void ScriptEditorView::redoEdits() {
+  // signal the PolarManager to undo edits
+  emit redoScriptEdits();
+}
 
 void ScriptEditorView::saveEditDirectory() {
 
@@ -990,11 +1018,13 @@ void ScriptEditorView::timeRangeClicked(bool checked) {
 
   if (checked) {
     currentTimeToggleButton->setChecked(true);
-    currentTimeToggleButton->setText("Time Range from Navigation");
+    currentTimeToggleButton->setText("Batch Mode");
+    currentTimeToggleButton->setStatusTip("Time Range defined in Navigation");
     showTimeRangeEdits();
   } else {
     currentTimeToggleButton->setChecked(false);  
-    currentTimeToggleButton->setText("Current Archive File Only");
+    currentTimeToggleButton->setText("Individual Scan Mode");
+    currentTimeToggleButton->setStatusTip("Current Archive File Only");
     hideTimeRangeEdits();  
   }  
   

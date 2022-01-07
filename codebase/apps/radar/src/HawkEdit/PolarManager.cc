@@ -2794,9 +2794,11 @@ void PolarManager::_openFile()
     boundaryPointEditorView->setVisible(false);
   }
 
-  // update the time navigation mechanism
+  // update the time navigation mechanism; TODO: move this to signal/slot
   //updateTimeNavigation(fileList, false);
+  // emit fileOpened();
   _timeNavController->setSliderPosition();
+  _timeNavController->fileOpened();
 
   LOG(DEBUG) << "exit";
 }
@@ -5417,7 +5419,11 @@ void PolarManager::EditRunScript() {
     connect(scriptEditorView, &ScriptEditorView::runScriptBatchMode,
       this, &PolarManager::runScriptBatchMode);
     connect(scriptEditorView, &ScriptEditorView::runForEachRayScript,
-      this, &PolarManager::runForEachRayScript);    
+      this, &PolarManager::runForEachRayScript);   
+    connect(scriptEditorView, &ScriptEditorView::undoScriptEdits,
+      this, &PolarManager::undoScriptEdits); 
+    connect(scriptEditorView, &ScriptEditorView::redoScriptEdits,
+      this, &PolarManager::redoScriptEdits); 
 
     scriptEditorView->init();
   }
@@ -5580,6 +5586,58 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   bool fromCommandLine = false;
   setArchiveFileList(archiveFileList, fromCommandLine);
   //_timeNavController->fetchArchiveFiles(saveDirectoryPath, fileName);
+}
+
+void PolarManager::undoScriptEdits() {
+  // we can undo the edits, if the current directory is ./tmp_N where
+  // N = 1 ... 9
+
+  // check the current directory 
+  if (_timeNavController->isSelectedFileInTempDir()) {
+    string previousTempDir = _timeNavController->getPreviousTempDir();
+    if (previousTempDir.size() > 0) {
+      errorMessage("Done", "undoing previous data edits");
+      string currentFileName = _timeNavController->getSelectedArchiveFileName();
+      //vector<string> archiveFileList;
+      //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
+      bool keepTimeRange = true;
+      _timeNavController->fetchArchiveFiles(previousTempDir,
+        currentFileName, keepTimeRange);
+      _timeNavController->setSliderPosition();
+      // keep the time range the same, so grab the time range,
+      // then call fetchArchiveFiles ...
+      //bool fromCommandLine = false;
+      //setArchiveFileList(archiveFileList, fromCommandLine);  
+      } else {
+        errorMessage("Error", "At the end of Undo stack");
+      }
+  }
+}
+
+void PolarManager::redoScriptEdits() {
+  // we can redo the edits, if the current directory is ./tmp_N where
+  // N = 1 ... 9
+
+  // check the current directory 
+  if (_timeNavController->isSelectedFileInTempDir()) {
+    string nextTempDir = _timeNavController->getNextTempDir();
+    if (nextTempDir.size() > 0) {
+      errorMessage("Done", "redoing data edits");
+      string currentFileName = _timeNavController->getSelectedArchiveFileName();
+      //vector<string> archiveFileList;
+      //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
+      bool keepTimeRange = true;
+      _timeNavController->fetchArchiveFiles(nextTempDir,
+        currentFileName, keepTimeRange);
+      _timeNavController->setSliderPosition();
+      // keep the time range the same, so grab the time range,
+      // then call fetchArchiveFiles ...
+      //bool fromCommandLine = false;
+      //setArchiveFileList(archiveFileList, fromCommandLine);  
+      } else {
+        errorMessage("Error", "At the end of Redo stack");
+      }
+  }
 }
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)

@@ -128,7 +128,8 @@ void TimeNavModel::changePath(string archiveDataUrl) {
 // starting point is the archiveDataUrl
 // returns 0 on success, -1 on failure
 
-int TimeNavModel::findArchiveFileList(string archiveDataUrl)
+int TimeNavModel::findArchiveFileList(string archiveDataUrl,
+  bool keepTimeRange)
 {
 
   bool _urlOK;
@@ -153,7 +154,11 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl)
     timeList.setDir(dir);
   }
 
-  timeList.setModeAll();
+  if (keepTimeRange) {
+    timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
+  } else {
+    timeList.setModeAll();
+  }
   timeList.compile();
 
   // TODO: how to report error? throw exception???
@@ -415,6 +420,10 @@ string TimeNavModel::getSelectedArchiveFileName() {
   }
 }
 
+string TimeNavModel::getCurrentPath() {
+  return currentPath->getPath();
+}
+
 // return a string composed of the current base directory
 // plus internally named temporary directory .tmp_N
 // where N is the next available sequence number
@@ -427,6 +436,12 @@ string TimeNavModel::getTempDir() {
   //string dir = currentPath->getDirectory();
   // get list of current .tmp_N directories
   string path = currentPath->getPath(); // computeTmpPath(yyyymmdd.c_str());
+  // if we are in a temp dir, then move up one dir
+  size_t pos = path.find(tmp);
+  if (pos != string::npos) {
+    path = path.substr(0, pos-1);
+  }
+
   //path.append("/");
   //path.append(tmp);
   string yyyymmdd = _archiveStartTime.getDateStrPlain();

@@ -42,16 +42,20 @@ TimeNavController::TimeNavController(TimeNavView *view) {
 
 	_view = view;
 	_model = new TimeNavModel();
+  _tempDirIndex = -1;
 
 }
 
 TimeNavController::~TimeNavController() {
   if (_view != NULL) delete _view;
   if (_model != NULL) delete _model;
+  _clearTempStack();
 }
 
-void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName) {
-  _model->findArchiveFileList(seedPath);
+void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName,
+    bool keepTimeRange) {
+
+  _model->findArchiveFileList(seedPath, keepTimeRange);
   _setGuiFromArchiveStartTime();  
   _setGuiFromArchiveEndTime();
   _model->setSelectedFile(seedFileName);
@@ -73,12 +77,75 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+string TimeNavController::_no_yyyymmdd(string s) {
+  if (s.size() > 8) {
+    return s.substr(0, s.size()-8);
+  }
+}
+
+// push base dir on the stack, and clear the stack when
+// setting a new base dir
+
 string TimeNavController::getTempDir() {
-  return _model->getTempDir();
+  string nextTempDir = _model->getTempDir();
+  _tempDirStack.push_back(_no_yyyymmdd(nextTempDir)); // _model->getCurrentPath());
+  _tempDirIndex += 1;
+  return nextTempDir;
 }
 
 string TimeNavController::getSelectedArchiveFileName() {
   return _model->getSelectedArchiveFileName();
+}
+
+// return true if the current directory is a temp dir
+// i.e. of the form .../.tmp_N/yyyymmdd
+bool TimeNavController::isSelectedFileInTempDir() {
+  return (_tempDirIndex >= 0);
+}
+
+
+// ALWAYS point at current directory!!!
+//
+// return the previous temp directory, or the base
+// directory if we are out of the temp dirs in the stack,
+// i.e. idx < 0; or use a stack????
+// return empty string, if there are no more directories
+// in the stack
+string TimeNavController::getPreviousTempDir() {
+  if (_tempDirIndex <= 0) {
+    return "";
+  } else {
+    _tempDirIndex -= 1;
+    string previousDir = _tempDirStack.at(_tempDirIndex);
+    return previousDir;
+  }
+}
+
+// return the next temp directory, or the
+// empty string if out of the temp dirs in the stack,
+// i.e. idx < 0; or use a stack????
+// return empty string, if there are no more directories
+// in the stack
+string TimeNavController::getNextTempDir() {
+  if (_tempDirIndex >= _tempDirStack.size()-1) {
+    return "";
+  } else {
+    _tempDirIndex += 1;
+    string nextDir = _tempDirStack.at(_tempDirIndex);
+    return nextDir;
+  }
+}
+
+void TimeNavController::fileOpened() {
+
+  // TODO: delete all temporary directories in stack
+
+  // clear the undo/redo stack
+  _tempDirStack.clear();
+
+  // set the base directory for any edits
+  _tempDirIndex = 0;
+  _tempDirStack.push_back(_model->getCurrentPath());
 }
 
 void TimeNavController::updateGui() {
@@ -348,4 +415,15 @@ bool TimeNavController::moreFiles() {
   return _model->moreFiles();
 }
 
+void TimeNavController::_clearTempStack() {
+  vector<string>::iterator it;
+  for (it = _tempDirStack.begin(); it != _tempDirStack.end(); ++it) {
+    //_model->removeTempDirs(); // ?? or in model destructor clear all tmp dirs??
+    // TODO: how to clean up temp dirs???
+    // before changing to a new base directory, prompt to save any temp dirs?
+    // otherwise, the temp dirs will be deleted.
+    // new method ... movingToNewBaseDir ...
+    // if moving to new base dir, clear the stack
+  }
+}
 

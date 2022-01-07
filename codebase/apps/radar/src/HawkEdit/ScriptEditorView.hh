@@ -57,6 +57,8 @@ public slots:
     void displayHelp();
     void scriptComplete();
     void cancelScriptRun();
+    void undoEdits();
+    void redoEdits();
     //void clear();
 
     void notImplementedMessage();
@@ -89,6 +91,8 @@ signals:
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
   void cancelScriptRunRequest();
+  void undoScriptEdits();
+  void redoScriptEdits();  
   void scriptEditorClosed();
 
 protected:

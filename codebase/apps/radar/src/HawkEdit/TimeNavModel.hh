@@ -52,7 +52,7 @@ public:
 
   void setArchiveFileList(const vector<string> &list);
 
-  int findArchiveFileList(string archiveDataUrl);
+  int findArchiveFileList(string archiveDataUrl, bool keepTimeRange = false);
 
   const vector<string> &findArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath);
@@ -87,6 +87,7 @@ public:
   void setSelectedFile(int value);
   void setSelectedFile(string fileName);
 
+  string getCurrentPath();
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   string getTempDir();

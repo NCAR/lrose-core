@@ -67,11 +67,17 @@ public:
   void setTimeSliderPosition(int value);
 
   void fetchArchiveFiles(string seedFileName);
-  void fetchArchiveFiles(string seedPath, string seedFileName);
+  void fetchArchiveFiles(string seedPath, string seedFileName,
+    bool keepTimeRange = false);
 
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   string getTempDir();
+  string getPreviousTempDir();
+  string getNextTempDir();
+  bool isSelectedFileInTempDir();
+
+  void fileOpened();
 
   string &getPath();
 
@@ -109,7 +115,11 @@ private:
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
 
+  void _clearTempStack();
+  string _no_yyyymmdd(string s);
 
+  vector<string> _tempDirStack;
+  int _tempDirIndex;
 
   TimeNavView *_view;
   TimeNavModel *_model;
