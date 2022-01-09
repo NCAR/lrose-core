@@ -105,9 +105,9 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ-case1 DBZ-case1 /tmp/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+DBZ-case1 DBZ-case1 $(HOME)/data/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
 
-DBZ-case1-max DBZ-case1-max /tmp/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
+DBZ-case1-max DBZ-case1-max $(HOME)/data/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
 
 </GRIDS>
 

@@ -454,7 +454,7 @@ cart_data_time = "2022 01 01 00 00 00";
 // Type: string
 //
 
-output_dir_mdv = "/tmp/StormShapeSim/mdv";
+output_dir_mdv = "$(HOME)/data/StormShapeSim/mdv";
 
 ///////////// output_dir_cfradial /////////////////////
 //
@@ -466,5 +466,5 @@ output_dir_mdv = "/tmp/StormShapeSim/mdv";
 // Type: string
 //
 
-output_dir_cfradial = "/tmp/StormShapeSim/cfradial";
+output_dir_cfradial = "$(HOME)/data/StormShapeSim/cfradial";
 
