@@ -433,7 +433,8 @@ void StormShapeSim::_createVol(RadxVol &vol)
 {
   
   vol.clear();
-  RadxTime startTime(RadxTime::NOW);
+  RadxTime startTime(_cartDataTime.utime());
+  
   double timeSinceStart = 0.0;
   double startRangeKm = _params.gate_spacing_m / 2000.0;
   double gateSpacingKm = _params.gate_spacing_m / 1000.0;
@@ -851,10 +852,14 @@ int StormShapeSim::_writeCfRadialVol(RadxVol &vol)
   _setupCfRadialWrite(outFile);
   
   // write to dir
+
+  string outputDir(_params.output_dir_cfradial);
+  outputDir += "/";
+  outputDir += _params.data_set_info;
   
-  if (outFile.writeToDir(vol, _params.output_dir_cfradial, true, false)) {
+  if (outFile.writeToDir(vol, outputDir, true, false)) {
     cerr << "ERROR - StormShapeSim::_writeCfRadialVol" << endl;
-    cerr << "  Cannot write file to dir: " << _params.output_dir_cfradial << endl;
+    cerr << "  Cannot write file to dir: " << outputDir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
   }
