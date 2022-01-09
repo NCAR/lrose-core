@@ -100,6 +100,11 @@ private:
   int _readFile(const string &readPath, RadxVol &vol);
   void _createVol(RadxVol &vol);
   void _addGeomFields(RadxVol &vol);
+  void _addDbzField(RadxVol &vol);
+
+  double _interp1D(int ix, double dx, double minx, double xx,
+                   double val0, double val1);
+                 
   void _computeAgeHist(RadxVol &vol, double maxHtKm,
                        double &meanAgeFwd,
                        double &meanAgeRev,

@@ -132,8 +132,6 @@ int StormShapeSim::Run()
     return -1;
   }
 
-  return 0;
-  
   // create a volume depending on mode
   
   RadxVol vol;
@@ -162,8 +160,12 @@ int StormShapeSim::Run()
   
 
   // add the gate geometry fields
-
+  
   _addGeomFields(vol);
+
+  // add the resampled-dbz field
+  
+  _addDbzField(vol);
 
   // reverse sweep order if requested
 
@@ -631,6 +633,191 @@ void StormShapeSim::_addGeomFields(RadxVol &vol)
 
 }
 
+//////////////////////////////////////////////////
+// add dbz field
+
+void StormShapeSim::_addDbzField(RadxVol &vol)
+{
+
+  
+  RadxTime startTime = vol.getStartRadxTime();
+  BeamHeight beamHt; // default init to get height above radar
+
+  // grid details
+
+  int nx = _params.cart_grid.nx;
+  int ny = _params.cart_grid.ny;
+  int nz = _params.cart_grid.nz;
+  size_t nxy = nx * ny;
+  
+  double dx = _params.cart_grid.dx;
+  double dy = _params.cart_grid.dy;
+  double dz = _params.cart_grid.dz;
+  
+  double minx = _params.cart_grid.minx;
+  double miny = _params.cart_grid.miny;
+  double minz = _params.cart_grid.minz;
+  
+  double maxx = minx + (nx - 1) * dx;
+  double maxy = miny + (ny - 1) * dy;
+  double maxz = minz + (nz - 1) * dz;
+  
+  // loop through rays
+
+  for (size_t iray = 0; iray < vol.getNRays(); iray++) {
+    
+    RadxRay *ray = vol.getRays()[iray];
+    double el = ray->getElevationDeg();
+    double az = ray->getAzimuthDeg();
+    int nGates = ray->getNGates();
+    double startRangeKm = ray->getStartRangeKm();
+    double gateSpacingKm = ray->getGateSpacingKm();
+
+    // dbz field
+    
+    RadxField *dbzField = new RadxField("DBZ", "dBZ");
+    dbzField->setStandardName("radar_equivalent_reflectivity_factor");
+    dbzField->setLongName("reflectivity");
+    dbzField->setMissingFl32(-9999.0);
+    dbzField->copyRangeGeom(*ray);
+    Radx::fl32 *dbzData = new Radx::fl32[nGates];
+    for (int igate = 0; igate < nGates; igate++) {
+
+      // initialize to missing
+
+      dbzData[igate] = -9999.0;
+      
+      // compute grid location
+
+      double slantRangeKm = startRangeKm + igate * gateSpacingKm;
+      double groundRangeKm = slantRangeKm * cos(el * DEG_TO_RAD);
+      double xx = groundRangeKm * sin(az * DEG_TO_RAD);
+      double yy = groundRangeKm * cos(az * DEG_TO_RAD);
+      double zz = beamHt.computeHtKm(el, slantRangeKm);
+
+      // check point is inside grid limits
+
+      if (xx < minx || xx > maxx) {
+        continue;
+      }
+      if (yy < miny || yy > maxy) {
+        continue;
+      }
+      if (zz < minz || zz > maxz) {
+        continue;
+      }
+
+      // compute grid indices, check we are within bounds
+
+      int ix = (int) floor((xx - minx) / dx);
+      if (ix < 0 || ix > nx - 1) {
+        continue;
+      }
+
+      int iy = (int) floor((yy - miny) / dy);
+      if (iy < 0 || iy > ny - 1) {
+        continue;
+      }
+
+      int iz = (int) floor((zz - minz) / dz);
+      if (iz < 0 || iz > nz - 1) {
+        continue;
+      }
+
+      // get dbz values surrounding the point and check for missing vals
+
+      size_t indexBelowLL = iz * nxy + iy * nx + ix;
+      double dbzBelowLL = _dbzCart[indexBelowLL];
+      if (dbzBelowLL < -999.0) {
+        continue;
+      }
+
+      size_t indexBelowLR = indexBelowLL + 1;
+      double dbzBelowLR = _dbzCart[indexBelowLR];
+      if (dbzBelowLR < -999.0) {
+        continue;
+      }
+
+      size_t indexBelowUL = indexBelowLL + nx;
+      double dbzBelowUL = _dbzCart[indexBelowUL];
+      if (dbzBelowUL < -999.0) {
+        continue;
+      }
+
+      size_t indexBelowUR = indexBelowUL + 1;
+      double dbzBelowUR = _dbzCart[indexBelowUR];
+      if (dbzBelowUR < -999.0) {
+        continue;
+      }
+      
+      size_t indexAboveLL = indexBelowLL + nxy;
+      double dbzAboveLL = _dbzCart[indexAboveLL];
+      if (dbzAboveLL < -999.0) {
+        continue;
+      }
+
+      size_t indexAboveLR = indexAboveLL + 1;
+      double dbzAboveLR = _dbzCart[indexAboveLR];
+      if (dbzAboveLR < -999.0) {
+        continue;
+      }
+
+      size_t indexAboveUL = indexAboveLL + nx;
+      double dbzAboveUL = _dbzCart[indexAboveUL];
+      if (dbzAboveUL < -999.0) {
+        continue;
+      }
+
+      size_t indexAboveUR = indexAboveUL + 1;
+      double dbzAboveUR = _dbzCart[indexAboveUR];
+      if (dbzAboveUR < -999.0) {
+        continue;
+      }
+
+      // interpolate
+      
+      double dbzBelowL = _interp1D(ix, dx, minx, xx, dbzBelowLL, dbzBelowLR);
+      double dbzBelowU = _interp1D(ix, dx, minx, xx, dbzBelowUL, dbzBelowUR);
+
+      double dbzAboveL = _interp1D(ix, dx, minx, xx, dbzAboveLL, dbzAboveLR);
+      double dbzAboveU = _interp1D(ix, dx, minx, xx, dbzAboveUL, dbzAboveUR);
+        
+      double dbzBelow = _interp1D(iy, dy, miny, yy, dbzBelowL, dbzBelowU);
+      double dbzAbove = _interp1D(iy, dy, miny, yy, dbzAboveL, dbzAboveU);
+
+      double dbzInterp = _interp1D(iz, dy, minz, zz, dbzBelow, dbzAbove);
+
+      dbzData[igate] = dbzInterp;
+
+    } // igate
+
+    dbzField->addDataFl32(nGates, dbzData);
+    ray->addField(dbzField);
+    
+  } // iray
+  
+  // update metadata from rays
+  
+  vol.loadVolumeInfoFromRays();
+  vol.loadSweepInfoFromRays();
+
+}
+
+///////////////////////////////////////
+// perform 1-D linear interpolation
+
+double StormShapeSim::_interp1D(int ix, double dx, double minx, double xx,
+                                double val0, double val1)
+
+{
+
+  double frac = (xx - (ix * dx + minx)) / dx; 
+  double val = val0 * (1.0 - frac) + val1 * frac;
+  return val;
+
+}
+
+                 
 //////////////////////////////////////////////////
 // set up write for polar volume
 
