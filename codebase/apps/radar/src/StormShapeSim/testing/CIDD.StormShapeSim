@@ -105,11 +105,17 @@ field_list = {
 #Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
 #----------------------------------------------------------------------------------------------------------
 
-DBZ-case1 DBZ-case1 $(HOME)/data/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+DBZ-case1 DBZ-case1 $(HOME)/data/StormShapeSim/mdv/orig/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
 
-DBZ-case1-max DBZ-case1-max $(HOME)/data/StormShapeSim/mdv/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
+DBZ-case1-comp DBZ-case1-comp $(HOME)/data/StormShapeSim/mdv/orig/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
 
-DBZ-radial DBZ-radial $(HOME)/data/StormShapeSim/cfradial/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+DBZ-radial DBZ-radial $(HOME)/data/StormShapeSim/cfradial/resample/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+
+DBZ-radial-comp DBZ-radial-comp $(HOME)/data/StormShapeSim/cfradial/resample/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
+
+DBZ-cart DBZ-cart $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DBZ  dbz.colors      dbz     0 60 10   cart  1 0
+
+DBZ-cart-comp DBZ-cart-comp $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
 
 </GRIDS>
 
@@ -1012,7 +1018,7 @@ cidd.use_local_timestamps: 0
 # Set this parameter to force the field menu pop-up to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 1
+cidd.num_field_menu_cols: 2
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.

@@ -74,7 +74,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-input_dir = ".";
+input_dir = "$(HOME)/data/StormShapeSim/cfradial/resample/case1";
 
 ///////////// mode ////////////////////////////////////
 //
@@ -99,7 +99,7 @@ input_dir = ".";
 //     REALTIME
 //
 
-mode = FILELIST;
+mode = ARCHIVE;
 
 ///////////// max_realtime_data_age_secs //////////////
 //
@@ -124,7 +124,7 @@ max_realtime_data_age_secs = 300;
 // Type: string
 //
 
-start_time = "2015 06 26 00 00 00";
+start_time = "2022 01 01 00 00 00";
 
 ///////////// end_time ////////////////////////////////
 //
@@ -136,7 +136,7 @@ start_time = "2015 06 26 00 00 00";
 // Type: string
 //
 
-end_time = "2015 06 26 12 00 00";
+end_time = "2022 01 01 01 00 00";
 
 //======================================================================
 //
@@ -154,7 +154,7 @@ end_time = "2015 06 26 12 00 00";
 // Type: string
 //
 
-output_dir = ".";
+output_dir = "$(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1";
 
 ///////////// output_format ///////////////////////////
 //
@@ -352,9 +352,9 @@ beam_width_fraction_for_data_limit_extension = 0.5;
 //
 
 grid_z_geom = {
-    nz = 20,
+    nz = 40,
     minz = 0.5,
-    dz = 1
+    dz = 0.5
 };
 
 ///////////// specify_individual_z_levels /////////////
@@ -437,12 +437,12 @@ z_level_array = {
 //
 
 grid_xy_geom = {
-    nx = 400,
-    ny = 400,
-    minx = -199.5,
-    miny = -199.5,
-    dx = 1,
-    dy = 1
+    nx = 800,
+    ny = 800,
+    minx = -199.75,
+    miny = -199.75,
+    dx = 0.5,
+    dy = 0.5
 };
 
 ///////////// center_grid_on_radar ////////////////////
@@ -1067,7 +1067,7 @@ renamed_fields = {
 // Type: boolean
 //
 
-output_angle_fields = FALSE;
+output_angle_fields = TRUE;
 
 ///////////// angle_fields ////////////////////////////
 //
@@ -1110,7 +1110,7 @@ angle_fields = {
 // Type: boolean
 //
 
-output_range_field = FALSE;
+output_range_field = TRUE;
 
 ///////////// range_field_name ////////////////////////
 //
@@ -1134,7 +1134,7 @@ range_field_name = "range";
 // Type: boolean
 //
 
-output_height_field = FALSE;
+output_height_field = TRUE;
 
 ///////////// height_field_name ///////////////////////
 //
