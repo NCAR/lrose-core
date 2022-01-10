@@ -96,7 +96,7 @@ public:
       }
       catch (std::out_of_range &err)
       {
-	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
+	LOG(DEBUG_VERBOSE) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }
@@ -125,7 +125,7 @@ public:
       }
       catch (std::out_of_range &err)
       {
-	LOG(WARNING) << ae.sprint() << " is out of range of mappings";
+	LOG(DEBUG_VERBOSE) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }
