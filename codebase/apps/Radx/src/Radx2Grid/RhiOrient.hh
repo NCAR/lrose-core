@@ -74,6 +74,10 @@ public:
 
   void clear();
 
+  // number of range gates
+  
+  size_t getNRange() const { return _nRange; }
+
   // get sdev values
 
   inline Radx::fl32 getSdevDbzH(size_t rangeIndex, size_t zIndex) const

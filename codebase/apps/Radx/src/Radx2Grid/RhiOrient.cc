@@ -104,33 +104,32 @@ void RhiOrient::computeEchoOrientation()
 
   // load up the synthetic RHI
 
+  _success = false;
+
   if (_loadSyntheticRhi()) {
-    _success = false;
     return;
   }
   
   // load up reflectivity grids in H anv V
 
   if (_loadDbzH()) {
-    _success = false;
     return;
   }
   if (_loadDbzV()) {
-    _success = false;
     return;
   }
 
   // load up standard deviation of DBZ in H and V
 
   if (_loadSdevH()) {
-    _success = false;
     return;
   }
   if (_loadSdevV()) {
-    _success = false;
     return;
   }
 
+  _success = true;
+  
 }
 
 ///////////////////////////////////////////////////////////
@@ -392,7 +391,7 @@ int RhiOrient::_loadDbzH()
         // neither available, set to missing
         _dbzH[zIndex][xIndex] = DBZ_BAD;
       }
-
+      
       // prepare for next level
       
       zIndex++;
@@ -476,11 +475,13 @@ int RhiOrient::_loadDbzV()
       int zIndex = _getZIndex(zz);
       
       // store the dbz in the grid
-
-      if (dbzClosest != dbzMiss) {
-        _dbzV[zIndex][igateClosest] = dbzClosest;
-      } else {
-        _dbzV[zIndex][igateClosest] = DBZ_BAD;
+      
+      if (zIndex >= 0) {
+        if (dbzClosest != dbzMiss) {
+          _dbzV[zIndex][igateClosest] = dbzClosest;
+        } else {
+          _dbzV[zIndex][igateClosest] = DBZ_BAD;
+        }
       }
 
     } // ix
@@ -531,11 +532,11 @@ int RhiOrient::_loadSdevH()
     
     double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
     sdevDbzH.push_back(sdev);
-
+    
     // compute sdev for interior vals
 
     if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 2; ii++) {
+      for (size_t ii = 1; ii < nDbz - 1; ii++) {
         sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
         sdevDbzH.push_back(sdev);
       }
@@ -567,7 +568,7 @@ int RhiOrient::_loadSdevH()
       double sdevDeltaPerGate = sdevDiff / (nMiss + 1.0);
       for (ssize_t jj = 1; jj <= nMiss; jj++) {
         double sdevInterp = sdevDbzH[ii-1] + sdevDeltaPerGate * jj;
-        _sdevDbzH[iz][gateNums[ii+jj]] = sdevInterp;
+        _sdevDbzH[iz][gateLower+jj] = sdevInterp;
       }
     }
 
@@ -621,7 +622,7 @@ int RhiOrient::_loadSdevV()
     // compute sdev for interior vals
 
     if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 2; ii++) {
+      for (size_t ii = 1; ii < nDbz - 1; ii++) {
         sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
         sdevDbzV.push_back(sdev);
       }
@@ -653,7 +654,7 @@ int RhiOrient::_loadSdevV()
       double sdevDeltaPerLevel = sdevDiff / (nMiss + 1.0);
       for (ssize_t jj = 1; jj <= nMiss; jj++) {
         double sdevInterp = sdevDbzV[ii-1] + sdevDeltaPerLevel * jj;
-        _sdevDbzV[levelNums[ii+jj]][irange] = sdevInterp;
+        _sdevDbzV[levelLower+jj][irange] = sdevInterp;
       }
     }
 
