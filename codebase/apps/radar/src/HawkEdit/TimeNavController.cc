@@ -36,6 +36,8 @@
 // 
 ///////////////////////////////////////////////////////////////
 
+// #include <filesystem>
+
 #include "TimeNavController.hh"
 
 TimeNavController::TimeNavController(TimeNavView *view) {
@@ -77,6 +79,10 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+string TimeNavController::getSelectedPath() {
+  return _model->getCurrentPath();
+}
+
 string TimeNavController::_no_yyyymmdd(string s) {
   if (s.size() > 8) {
     return s.substr(0, s.size()-8);
@@ -88,7 +94,7 @@ string TimeNavController::_no_yyyymmdd(string s) {
 
 string TimeNavController::getTempDir() {
   string nextTempDir = _model->getTempDir();
-  _tempDirStack.push_back(_no_yyyymmdd(nextTempDir)); // _model->getCurrentPath());
+  _tempDirStack.push_back(_no_yyyymmdd(nextTempDir)); 
   _tempDirIndex += 1;
   return nextTempDir;
 }
@@ -415,15 +421,41 @@ bool TimeNavController::moreFiles() {
   return _model->moreFiles();
 }
 
+bool TimeNavController::_isTempDir(string *path) {
+  bool found = false;
+  if (path->find(".tmp_") != string::npos) {
+    found = true;
+  } 
+  return found; 
+}
+
+// move/rename the current selected temp directory
+// to the newName
+void TimeNavController::replaceSelectedTempPath(string newName) {
+  _tempDirStack[_tempDirIndex] = newName;
+}
+
+// before changing to a new base directory, prompt to save any temp dirs?
+// otherwise, the temp dirs will be deleted.
+// new method ... movingToNewBaseDir ...
+// if moving to new base dir, clear the stack
 void TimeNavController::_clearTempStack() {
   vector<string>::iterator it;
   for (it = _tempDirStack.begin(); it != _tempDirStack.end(); ++it) {
-    //_model->removeTempDirs(); // ?? or in model destructor clear all tmp dirs??
-    // TODO: how to clean up temp dirs???
-    // before changing to a new base directory, prompt to save any temp dirs?
-    // otherwise, the temp dirs will be deleted.
-    // new method ... movingToNewBaseDir ...
-    // if moving to new base dir, clear the stack
+
+    // clean up temp dirs
+
+/*
+    if (_isTempDir(it)) {
+      try {
+        const std::filesystem::path p(*it);
+        cerr << "removing " << *it;
+        //std::uintmax_t ret = std::filesystem::remove_all(p);
+      } catch (std::filesystem::filesystem_error &ex) {
+        throw ex; // TODO: fix up!!
+      }
+    }
+*/
   }
 }
 

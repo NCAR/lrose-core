@@ -136,6 +136,13 @@ int Orient::findEchoOrientation()
   }
   _rhis.clear();
   
+  // set radar params from volume
+
+  if (_setRadarParams()) {
+    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
+    return -1;
+  }
+
   // create the synthetic RHIs
   
   double azimuth = _startAz;
@@ -145,13 +152,6 @@ int Orient::findEchoOrientation()
                                    _radarAltKm, _gridZLevels);
     _rhis.push_back(rhi);
     azimuth += _deltaAz;
-  }
-
-  // set radar params from volume
-
-  if (_setRadarParams()) {
-    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
-    return -1;
   }
 
   // compute echo orientation in pseudo RHIs
@@ -173,7 +173,6 @@ int Orient::findEchoOrientation()
   for (size_t ii = 0; ii < _rhis.size(); ii++) {
     if (!_rhis[ii]->getSuccess()) {
       iret = -1;
-      break;
     }
   }
 
@@ -202,12 +201,17 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
         double az = loc->az;
         double gndRange = loc->gndRange;
         size_t rhiIndex = (int) ((az - _startAz) / _deltaAz + 0.5);
+        if (rhiIndex >= _rhis.size()) {
+          rhiIndex -= _rhis.size();
+        }
         assert (rhiIndex < _rhis.size());
         int rangeIndex = (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
-        Radx::fl32 sdevH = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
-        Radx::fl32 sdevV = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
-        sdevDbzH->data[ii] = sdevH;
-        sdevDbzV->data[ii] = sdevV;
+        if (rangeIndex < (int) _rhis[rhiIndex]->getNRange()) {
+          Radx::fl32 sdevH = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
+          Radx::fl32 sdevV = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
+          sdevDbzH->data[ii] = sdevH;
+          sdevDbzV->data[ii] = sdevV;
+        }
       } // ix
     } // iy
   } // iz

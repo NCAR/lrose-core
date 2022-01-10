@@ -79,7 +79,7 @@ public:
 
   void fileOpened();
 
-  string &getPath();
+  string getSelectedPath();
 
   // use this for the script editor ???
   // Hmmm, the script editor uses the singleton DataModel to 
@@ -109,6 +109,7 @@ public:
   void updateGui();
 
   bool moreFiles();
+  void replaceSelectedTempPath(string newName);
 
 private:
   void _setGuiFromArchiveStartTime();
@@ -117,6 +118,8 @@ private:
 
   void _clearTempStack();
   string _no_yyyymmdd(string s);
+
+  bool _isTempDir(string *path);
 
   vector<string> _tempDirStack;
   int _tempDirIndex;

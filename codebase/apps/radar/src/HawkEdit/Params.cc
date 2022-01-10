@@ -1217,7 +1217,7 @@
     tt->descr = tdrpStrDup("Radar name if overridden.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'display_site_name'
