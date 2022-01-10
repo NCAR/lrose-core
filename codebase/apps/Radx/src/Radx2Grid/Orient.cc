@@ -217,6 +217,16 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
 }
 
 //////////////////////////////////////////////////
+// clear RHI data
+
+void Orient::clearRhiData()
+{
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    _rhis[ii]->clear();
+  }
+}
+  
+//////////////////////////////////////////////////
 // create the threading objects
 
 void Orient::_createThreads()
@@ -274,6 +284,7 @@ void Orient::_computeOrientMultiThreaded()
     if (thread == NULL) {
       break;
     }
+    thread->setRhiIndex(ii);
     if (isDone) {
       // if it is a done thread, return thread to the available pool
       _threadPoolOrientInRhi.addThreadToAvail(thread);

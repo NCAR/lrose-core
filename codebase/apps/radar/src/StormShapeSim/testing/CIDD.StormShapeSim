@@ -117,6 +117,14 @@ DBZ-cart DBZ-cart $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DBZ  dbz.colors
 
 DBZ-cart-comp DBZ-cart-comp $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DBZ  dbz.colors      dbz     0 60 10   cart,comp  1 0
 
+height height $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&height  heightkm.colors      dbz     0 60 10   cart  1 0
+
+height_2 height_2 $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&height_2  heightkm.colors      dbz     0 60 10   cart  1 0
+
+SdevDbzH SdevDbzH $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&SdevDbzH  dbz.colors      dbz     0 60 10   cart  1 0
+
+SdevDbzV SdevDbzV $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&SdevDbzV  dbz.colors      dbz     0 60 10   cart  1 0
+
 </GRIDS>
 
 <WINDS>

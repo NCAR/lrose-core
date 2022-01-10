@@ -260,6 +260,7 @@ int CartInterp::interpVol()
                               _sdevDbzH,
                               _sdevDbzV);
     }
+    // _orient->clearRhiData();
   }
 
   // interpolate

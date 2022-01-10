@@ -1248,7 +1248,7 @@ interp_time_field = TRUE;
 // Type: boolean
 //
 
-output_debug_fields = FALSE;
+output_debug_fields = TRUE;
 
 //======================================================================
 //
@@ -2857,7 +2857,7 @@ bounded_fields = {
 // Type: boolean
 //
 
-use_echo_orientation = FALSE;
+use_echo_orientation = TRUE;
 
 ///////////// synthetic_rhis_start_az /////////////////
 //

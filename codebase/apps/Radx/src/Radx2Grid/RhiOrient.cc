@@ -139,6 +139,10 @@ void RhiOrient::computeEchoOrientation()
 void RhiOrient::_allocArrays()
 {
 
+  // clear
+
+  _clearArrays();
+
   // allocate
   
   _dbzH.resize(_nZ);
@@ -223,13 +227,14 @@ int RhiOrient::_loadSyntheticRhi()
   // find rays that belong to this RHI
   
   const vector<RadxSweep *> &sweeps = _readVol.getSweeps();
+  const vector<RadxRay *> &volRays = _readVol.getRays();
   for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
     RadxSweep *sweep = sweeps[isweep];
     RadxRay *bestRay = NULL;
     double minDeltaAz = 9999.0;
     for (size_t jray = sweep->getStartRayIndex(); 
          jray <= sweep->getEndRayIndex(); jray++) {
-      RadxRay *ray = _rays[jray];
+      RadxRay *ray = volRays[jray];
       double deltaAz = fabs(_azimuth - ray->getAzimuthDeg());
       if (deltaAz > 180.0) {
         deltaAz = fabs(deltaAz - 360.0);

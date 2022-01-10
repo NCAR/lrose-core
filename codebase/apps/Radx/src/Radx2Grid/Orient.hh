@@ -63,7 +63,7 @@ public:
   // destructor
   
   virtual ~Orient();
-
+  
   // determine the echo orientation
 
   int findEchoOrientation();
@@ -77,6 +77,10 @@ public:
   // set RHI mode
 
   void setRhiMode(bool state) { _rhiMode = state; }
+
+  // clear RHI data
+
+  void clearRhiData();
   
 protected:
 private:
