@@ -94,6 +94,7 @@
 #include <QGraphicsAnchorLayout>
 #include <QGraphicsProxyWidget>
 
+#include <cstdlib>
 #include <fstream>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pmu.h>
@@ -2738,6 +2739,35 @@ void PolarManager::_placeTimeControl()
 }
 */
 
+
+// return true, if ok to proceed; false to Cancel
+bool PolarManager::_checkForUnsavedBatchEdits() {
+  bool okToProceed = true;
+
+  if (_timeNavController->isSelectedFileInTempDir()) {
+
+    int ret = saveDiscardMessage("Archive files have been modified.",
+       "Do you want to save your changes?");
+    switch (ret) {
+      case QMessageBox::Save:
+          okToProceed = false;      
+          _saveTempDir();
+          break;
+      case QMessageBox::Discard:
+          // Don't Save was clicked
+          break;
+      case QMessageBox::Cancel:
+          // Cancel was clicked
+          okToProceed = false;
+          break;
+      default:
+          // should never be reached
+          break;
+    }
+  }
+  return okToProceed;
+}
+
 ////////////////////////////////////////////////////
 // create the file chooser dialog
 //
@@ -2746,6 +2776,10 @@ void PolarManager::_placeTimeControl()
 void PolarManager::_openFile()
 {
   LOG(DEBUG) << "enter";
+
+  bool okToProceed = _checkForUnsavedBatchEdits();
+  if (!okToProceed) return;
+
   // seed with files for the day currently in view
   // generate like this: *yyyymmdd*
   //string pattern = _archiveStartTime.getDateStrPlain();
@@ -2893,7 +2927,10 @@ void PolarManager::closeFieldListDialog(bool clicked) {
 
 void PolarManager::_saveFile()
 {
-  
+  if (_timeNavController->isSelectedFileInTempDir()) {
+    _saveTempDir();
+  }
+
   QString finalPattern = "All files (*.nc)";
 
   QString inputPath = QDir::currentPath();
@@ -2932,6 +2969,70 @@ void PolarManager::_saveFile()
     }
     
   }
+}
+
+void PolarManager::_saveTempDir()
+{
+
+  string oldName = _timeNavController->getSelectedPath();  
+  QDir tempDir(oldName.c_str());
+  tempDir.cdUp();
+  QString baseDir = tempDir.path();
+  QString newName = QFileDialog::getExistingDirectory(this, tr("Save Edits Batch Mode"),
+                                                baseDir,
+                                                QFileDialog::ShowDirsOnly
+                                                | QFileDialog::DontResolveSymlinks);
+
+  string moveCommand = "mv -f ";
+  moveCommand.append(oldName);
+  moveCommand.append("/*  ");
+  moveCommand.append(newName.toStdString());
+  int result = std::system(moveCommand.c_str()); // execute the UNIX command "mv -f oldName newName"
+
+  //  The mv utility exits 0 on success, and >0 if an error occurs.
+  if (result >0) {
+    errorMessage("Error", "Save batch files failed.");
+    // TODO: try "mv -f src dest > test.txt"
+    //  std::cout << std::ifstream("test.txt").rdbuf();
+    // to catch any error information.
+  } else {
+/*
+  QDir newDir(newName);
+  QString newDirName = newDir.dirName();
+  newDir.cdUp();
+  bool successfulRmDir = newDir.rmdir(newDirName);
+  if (!successfulRmDir) {
+    errorMessage("Error", "new location must be empty");
+  }
+
+  // can only rename to a non-existent directory
+  // so remove it then rename will work.
+
+  //string dirName = newName.toStdString();
+  //LOG(DEBUG) << "save script results to " << dirName;
+
+  // ----
+ 
+  //if( !dirName.isNull() )
+  //{
+    //QByteArray qb = filename.toUtf8();
+    //const char *name = qb.constData();
+
+    // QDir to rename a directory? 
+
+    //QString oldName = o.c_str();
+
+    QDir myDir(o.c_str());
+    QString oldName = myDir.dirName();
+    //myDir.cdUp();
+    bool successful = myDir.rename(oldName, newName);
+    if (!successful) {
+      errorMessage("Error", "cannot save batch data");
+    }
+*/ 
+    _timeNavController->replaceSelectedTempPath(newName.toStdString());
+  }
+
 }
 
 void PolarManager::_createFileChooserDialog()
@@ -5851,5 +5952,16 @@ void PolarManager::_about()
 
 void PolarManager::errorMessage(string title, string message) {
   QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+}
+
+int PolarManager::saveDiscardMessage(string text, string question) {
+  QMessageBox msgBox(this);
+  msgBox.setText(QString::fromStdString(text)); // "The document has been modified.");
+  msgBox.setInformativeText(QString::fromStdString(question)); // "Do you want to save your changes?");
+  msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | 
+    QMessageBox::Cancel);
+  msgBox.setDefaultButton(QMessageBox::Save);
+  int ret = msgBox.exec();
+  return ret;
 }
 

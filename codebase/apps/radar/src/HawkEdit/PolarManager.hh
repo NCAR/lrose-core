@@ -286,6 +286,7 @@ public slots:
   void cancelScriptRun();
 
   void errorMessage(string title, string message);
+  int saveDiscardMessage(string text, string question);
 
 signals:
 
@@ -751,6 +752,9 @@ private:
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
   //void _setSweepPanelVisibility();
+
+  bool _checkForUnsavedBatchEdits();
+  void _saveTempDir();
 
   // time slider
 
