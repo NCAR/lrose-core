@@ -77,7 +77,7 @@ public:
   string getNextTempDir();
   bool isSelectedFileInTempDir();
 
-  void fileOpened();
+  void _preFileOpen();
 
   string getSelectedPath();
 
@@ -116,10 +116,14 @@ private:
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
 
-  void _clearTempStack();
+  void _setBaseDirTempStack();
+  void _resetTempStack();
   string _no_yyyymmdd(string s);
 
   bool _isTempDir(string *path);
+
+  bool _isDifferentBaseDir(string nextTempDir);
+  void _removeTempDirs();
 
   vector<string> _tempDirStack;
   int _tempDirIndex;

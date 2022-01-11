@@ -51,7 +51,7 @@ TimeNavController::TimeNavController(TimeNavView *view) {
 TimeNavController::~TimeNavController() {
   if (_view != NULL) delete _view;
   if (_model != NULL) delete _model;
-  _clearTempStack();
+  _removeTempDirs();
 }
 
 void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName,
@@ -89,11 +89,44 @@ string TimeNavController::_no_yyyymmdd(string s) {
   }
 }
 
+
+// compare nextTempDir base directory to the base directory
+// in the temp stack
+bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
+  bool different = true;
+  if (_tempDirStack.size() > 0) {
+    // then there is a previous base directory
+    // TODO: compare up to /.tmp_N of nextTempDir
+    // with _tempDirStack.at(0)
+    string previousBaseDir = _tempDirStack.at(0);
+    // base/Goshen_tornado_2009/DOW6  ==> previous base
+    // base/Goshen_tornado_2009/DOW6/.tmp_N  ==> nextTempDir
+    int result = nextTempDir.compare(0, previousBaseDir.size(),
+      previousBaseDir);
+    if (result == 0) {
+      different = false;
+    } else {
+      different = true;
+    } 
+  }
+  return different;
+}
+
 // push base dir on the stack, and clear the stack when
 // setting a new base dir
 
 string TimeNavController::getTempDir() {
   string nextTempDir = _model->getTempDir();
+
+  if (_tempDirStack.empty()) {
+    _setBaseDirTempStack();
+  } else {
+    // check if the base dirs are different
+    if (_isDifferentBaseDir(nextTempDir)) {
+      _resetTempStack();
+      _setBaseDirTempStack();
+    }
+  }
   _tempDirStack.push_back(_no_yyyymmdd(nextTempDir)); 
   _tempDirIndex += 1;
   return nextTempDir;
@@ -109,6 +142,10 @@ bool TimeNavController::isSelectedFileInTempDir() {
   return (_tempDirIndex >= 0);
 }
 
+// Temp stack for undo/redo 
+// maybe move to a separate class??
+// The bottom of the stack (index = 0)
+// is the base directory for the temp files
 
 // ALWAYS point at current directory!!!
 //
@@ -142,13 +179,15 @@ string TimeNavController::getNextTempDir() {
   }
 }
 
-void TimeNavController::fileOpened() {
+void TimeNavController::_resetTempStack() {
 
-  // TODO: delete all temporary directories in stack
-
+  // delete all temporary directories in stack
+  _removeTempDirs();
   // clear the undo/redo stack
   _tempDirStack.clear();
+}
 
+void TimeNavController::_setBaseDirTempStack() {
   // set the base directory for any edits
   _tempDirIndex = 0;
   _tempDirStack.push_back(_model->getCurrentPath());
@@ -439,23 +478,28 @@ void TimeNavController::replaceSelectedTempPath(string newName) {
 // otherwise, the temp dirs will be deleted.
 // new method ... movingToNewBaseDir ...
 // if moving to new base dir, clear the stack
-void TimeNavController::_clearTempStack() {
-  vector<string>::iterator it;
-  for (it = _tempDirStack.begin(); it != _tempDirStack.end(); ++it) {
+void TimeNavController::_removeTempDirs() {
+  //vector<string>::iterator it;
+  if (_tempDirStack.size() > 1) {
 
     // clean up temp dirs
+    string command = "rm -r ";
+    command.append(_tempDirStack.at(0)); //  getSelectedPath());
+    command.append("/.tmp_*");
 
-/*
-    if (_isTempDir(it)) {
-      try {
-        const std::filesystem::path p(*it);
-        cerr << "removing " << *it;
-        //std::uintmax_t ret = std::filesystem::remove_all(p);
-      } catch (std::filesystem::filesystem_error &ex) {
-        throw ex; // TODO: fix up!!
-      }
+    int result = std::system(command.c_str()); // execute the UNIX command "mv -f oldName newName"
+
+    //  The rm utility exits 0 on success, and >0 if an error occurs.
+    if (result >0) {
+      // TODO: handle error condition ...
+      //errorMessage("Error", "Save batch files failed.");
+      // TODO: try "mv -f src dest > test.txt"
+      //  std::cout << std::ifstream("test.txt").rdbuf();
+      // to catch any error information.
+    } else {
+
     }
-*/
   }
+  //
 }
 

@@ -869,21 +869,6 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
     return;
   } 
 
-/* done in TimeNavMVC classes
-    // determine start and end time from file list
-    RadxTime startTime, endTime;
-    NcfRadxFile::getTimeFromPath(list[0], startTime);
-    NcfRadxFile::getTimeFromPath(list[list.size()-1], endTime);
-    // round to nearest five minutes
-    time_t startTimeSecs = startTime.utime();
-    startTimeSecs =  (startTimeSecs / 300) * 300;
-    time_t endTimeSecs = endTime.utime();
-    endTimeSecs =  (endTimeSecs / 300) * 300 + 300;
-    //_archiveStartTime.set(startTimeSecs);
-    //_archiveEndTime.set(endTimeSecs);
-    //_archiveScanIndex = 0;
-*/
-
   //_archiveFileList = list;
   //_setArchiveRetrievalPending();
 
@@ -902,52 +887,6 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
       //_timeNavController->fetchArchiveFiles
     }
   }
-
-/*
-  if (_archiveScanIndex < 0) {
-    _archiveScanIndex = 0;
-  } else if (_archiveScanIndex > (int) _archiveFileList.size() - 1) {
-    _archiveScanIndex = _archiveFileList.size() - 1;
-  }
-
-  if (_timeSlider) {
-    _timeSlider->setMinimum(0);
-    if (_archiveFileList.size() <= 1)
-      _timeSlider->setMaximum(1);
-    else
-      _timeSlider->setMaximum(_archiveFileList.size() - 1);
-    _timeSlider->setSliderPosition(_archiveScanIndex);
-  }
-
-
-  // check if the paths include a day dir
-
-  _archiveFilesHaveDayDir = false;
-  if (list.size() > 0) {
-    RadxPath path0(list[0]);
-    RadxPath parentPath(path0.getDirectory());
-    string parentDir = parentPath.getFile();
-    int year, month, day;
-    if (sscanf(parentDir.c_str(), "%4d%2d%2d", &year, &month, &day) == 3) {
-      _archiveFilesHaveDayDir = true;
-    }
-  }
-
-  if (_archiveFilesHaveDayDir) {
-    _archiveStartTimeEdit->setEnabled(true);
-    _archiveEndTimeEdit->setEnabled(true);
-    _backPeriod->setEnabled(true);
-    _fwdPeriod->setEnabled(true);
-  } else {
-    _archiveStartTimeEdit->setEnabled(false);
-    _archiveEndTimeEdit->setEnabled(false);
-    _backPeriod->setEnabled(false);
-    _fwdPeriod->setEnabled(false);
-  }
-
-  _setGuiFromArchiveStartTime();
-  _setGuiFromArchiveEndTime();
-*/
 }
   
 ///////////////////////////////////////////////
@@ -2750,8 +2689,8 @@ bool PolarManager::_checkForUnsavedBatchEdits() {
        "Do you want to save your changes?");
     switch (ret) {
       case QMessageBox::Save:
-          okToProceed = false;      
           _saveTempDir();
+          okToProceed = false;   
           break;
       case QMessageBox::Discard:
           // Don't Save was clicked
@@ -2807,6 +2746,12 @@ void PolarManager::_openFile()
     return;
   }
 
+  // update the time navigation mechanism; TODO: move this to signal/slot
+  //updateTimeNavigation(fileList, false);
+  // emit fileOpened();
+  //_timeNavController->fileOpened();  let the timeNav class handle this.
+  // end fileOpened actions.
+
   vector<string> fileList;
   fileList.push_back(filename.toStdString());
 
@@ -2828,11 +2773,7 @@ void PolarManager::_openFile()
     boundaryPointEditorView->setVisible(false);
   }
 
-  // update the time navigation mechanism; TODO: move this to signal/slot
-  //updateTimeNavigation(fileList, false);
-  // emit fileOpened();
   _timeNavController->setSliderPosition();
-  _timeNavController->fileOpened();
 
   LOG(DEBUG) << "exit";
 }
@@ -2974,6 +2915,7 @@ void PolarManager::_saveFile()
 void PolarManager::_saveTempDir()
 {
 
+  // TODO: move this to timeNavController ... 
   string oldName = _timeNavController->getSelectedPath();  
   QDir tempDir(oldName.c_str());
   tempDir.cdUp();
