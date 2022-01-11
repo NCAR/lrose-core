@@ -732,6 +732,11 @@ public:
 
   int censoring_min_valid_run;
 
+  tdrp_bool_t specify_fields_to_be_censored;
+
+  char* *_fields_to_be_censored;
+  int fields_to_be_censored_n;
+
   tdrp_bool_t apply_linear_transforms;
 
   transform_field_t *_transform_fields;
@@ -833,7 +838,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[184];
+  mutable TDRPtable _table[186];
 
   const char *_className;
 

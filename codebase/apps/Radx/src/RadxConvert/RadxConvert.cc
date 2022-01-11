@@ -876,6 +876,11 @@ void RadxConvert::_setupRead(RadxFile &file)
       for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
         file.addReadField(_params._censoring_fields[ii].name);
       }
+      if (_params.specify_fields_to_be_censored) {
+        for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+          file.addReadField(_params._fields_to_be_censored[ii]);
+        }
+      }
     }
     
   }
@@ -1422,7 +1427,9 @@ void RadxConvert::_censorRay(RadxRay *ray)
     RadxField *field = fields[ii];
     Radx::DataType_t dtype = field->getDataType();
     fieldTypes.push_back(dtype);
-    field->convertToFl32();
+    if (_checkFieldForCensoring(field)) {
+      field->convertToFl32();
+    }
   }
 
   // initialize censoring flags to true to
@@ -1544,20 +1551,52 @@ void RadxConvert::_censorRay(RadxRay *ray)
 
   for (size_t ifield = 0; ifield < fields.size(); ifield++) {
     RadxField *field = fields[ifield];
-    Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
-      }
-    } // igate
+    if (_checkFieldForCensoring(field)) {
+      Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+      for (size_t igate = 0; igate < nGates; igate++) {
+        if (censorFlag[igate] == 1) {
+          fdata[igate] = Radx::missingFl32;
+        }
+      } // igate
+    } // if (_checkFieldForCensoring(field))
   } // ifield
 
   // convert back to original types
   
   for (size_t ii = 0; ii < fields.size(); ii++) {
     RadxField *field = fields[ii];
-    field->convertToType(fieldTypes[ii]);
+    if (_checkFieldForCensoring(field)) {
+      field->convertToType(fieldTypes[ii]);
+    }
   }
+
+}
+
+////////////////////////////////////////////////////////////////////
+// check if a field should be censored
+
+bool RadxConvert::_checkFieldForCensoring(const RadxField *field)
+
+{
+
+  if (!_params.apply_censoring) {
+    return false;
+  }
+
+  if (!_params.specify_fields_to_be_censored) {
+    return true;
+  }
+
+  string checkName = field->getName();
+
+  for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+    string specifiedName = _params._fields_to_be_censored[ii];
+    if (checkName == specifiedName) {
+      return true;
+    }
+  }
+    
+  return false;
 
 }
 

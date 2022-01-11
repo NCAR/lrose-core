@@ -903,6 +903,18 @@ paramdef int {
   p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
 } censoring_min_valid_run;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the fields to be censored.";
+  p_help = "If FALSE, all fields are specified based on the censoring rules.";
+} specify_fields_to_be_censored;
+
+paramdef string {
+  p_default = { "LDR" };
+  p_descr = "List of fields to be censored.";
+  p_help = "Applies if 'specify_fields_to_be_censored' is TRUE.";
+} fields_to_be_censored[];
+
 commentdef {
   p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
   p_text = "These transforms are fixed. The same transform is applied to all files.";

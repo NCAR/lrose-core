@@ -2355,6 +2355,37 @@
     tt->single_val.i = 1;
     tt++;
     
+    // Parameter 'specify_fields_to_be_censored'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_fields_to_be_censored");
+    tt->descr = tdrpStrDup("Option to specify the fields to be censored.");
+    tt->help = tdrpStrDup("If FALSE, all fields are specified based on the censoring rules.");
+    tt->val_offset = (char *) &specify_fields_to_be_censored - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fields_to_be_censored'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("fields_to_be_censored");
+    tt->descr = tdrpStrDup("List of fields to be censored.");
+    tt->help = tdrpStrDup("Applies if 'specify_fields_to_be_censored' is TRUE.");
+    tt->array_offset = (char *) &_fields_to_be_censored - &_start_;
+    tt->array_n_offset = (char *) &fields_to_be_censored_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("LDR");
+    tt++;
+    
     // Parameter 'Comment 21'
     
     memset(tt, 0, sizeof(TDRPtable));

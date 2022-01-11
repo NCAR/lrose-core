@@ -41,6 +41,7 @@
 class RadxVol;
 class RadxFile;
 class RadxRay;
+class RadxField;
 class VarTransform;
 using namespace std;
 
@@ -95,7 +96,7 @@ private:
   int _writeVol(RadxVol &vol);
   void _censorFields(RadxVol &vol);
   void _censorRay(RadxRay *ray);
-
+  bool _checkFieldForCensoring(const RadxField *field);
 
 };
 
