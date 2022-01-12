@@ -288,6 +288,8 @@ public slots:
   void errorMessage(string title, string message);
   int saveDiscardMessage(string text, string question);
 
+  //void close();
+
 signals:
 
 // from DisplayManager ...

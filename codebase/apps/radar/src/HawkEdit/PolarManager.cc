@@ -242,6 +242,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   CloseEventFilter *closeFilter = new CloseEventFilter(this);
   installEventFilter(closeFilter);
 
+  setAttribute(Qt::WA_DeleteOnClose);
+
   // set initial field to 0
 
   //_changeField(0, false);
@@ -253,9 +255,9 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 // destructor
 
 PolarManager::~PolarManager()
-
 {
 
+  cerr << "PolarManager destructor called " << endl;
   if (_ppi) {
     delete _ppi;
   }
@@ -268,8 +270,31 @@ PolarManager::~PolarManager()
   //  delete[] _ppiRays;
   //}
   // TODO: delete all controllers
-  if (_timeNavController) delete _timeNavController;
+  if (_timeNavController) {
+    //_timeNavController->~TimeNavController();
+    delete _timeNavController;
+  }
+
+
+/* moved to close()
+  if (_ppi) {
+    delete _ppi;
+  }
+
+  if (_rhi) {
+    delete _rhi;
+  }
+
+  //if (_ppiRays) {
+  //  delete[] _ppiRays;
+  //}
+  // TODO: delete all controllers
+  if (_timeNavController) {
+    _timeNavController->~TimeNavController();
+    delete _timeNavController;
+  }
   if (_timeNavView) delete _timeNavView;
+*/
 }
 
 //////////////////////////////////////////////////
@@ -671,10 +696,12 @@ void PolarManager::_createActions()
   connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
 
   // exit app
-  _exitAct = new QAction(tr("E&xit"), this);
+  _exitAct = new QAction(tr("Q&uit"), this);
   _exitAct->setShortcut(tr("Ctrl+Q"));
   _exitAct->setStatusTip(tr("Exit the application"));
-  connect(_exitAct, SIGNAL(triggered()), this, SLOT(close()));
+  // QWidget::close()
+  connect(_exitAct, &QAction::triggered, this, &QMainWindow::close); // this, SLOT(close()));
+
 
   // file chooser for Open
   _openFileAct = new QAction(tr("O&pen"), this);
@@ -2686,7 +2713,7 @@ bool PolarManager::_checkForUnsavedBatchEdits() {
   if (_timeNavController->isSelectedFileInTempDir()) {
 
     int ret = saveDiscardMessage("Archive files have been modified.",
-       "Do you want to save your changes?");
+       "What do you want to do?");
     switch (ret) {
       case QMessageBox::Save:
           _saveTempDir();
@@ -2697,6 +2724,11 @@ bool PolarManager::_checkForUnsavedBatchEdits() {
           break;
       case QMessageBox::Cancel:
           // Cancel was clicked
+          okToProceed = false;
+          break;
+      case QMessageBox::Apply:
+          // Overwrite original was clicked
+          // _overwriteOriginalWithTempDir();
           okToProceed = false;
           break;
       default:
@@ -4129,284 +4161,6 @@ void PolarManager::_createStatusPanel()
 
 }
 
-/* moved to DisplayFieldView
-//////////////////////////////////////////////
-// create the field panel
-
-void PolarManager::_createFieldPanel()
-{
-  
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignRight(Qt::AlignRight);
-  
-  int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size + 2;
-  int fsize4 = _params->label_font_size + 4;
-  int fsize6 = _params->label_font_size + 6;
-
-  _fieldPanel = new QGroupBox(_main);
-  _fieldGroup = new QButtonGroup;
-  _fieldsLayout = new QGridLayout(_fieldPanel);
-  _fieldsLayout->setVerticalSpacing(5);
-
-  int row = 0;
-  int nCols = 3;
-  if (_haveFilteredFields) {
-    nCols = 4;
-  }
-
-  _displayFieldController->setSelectedField(0);
-  _selectedField = _displayFieldController->getSelectedField(); //_fields[0];
-  _selectedLabel = _selectedField->getLabel(); //_fields[0]->getLabel();
-  _selectedName = _selectedField->getName(); // _fields[0]->getName();
-  //  _selectedField = _fields[0];
-  //_selectedLabel = _fields[0]->getLabel();
-  //_selectedName = _fields[0]->getName();
-  _selectedLabelWidget = new QLabel(_selectedLabel.c_str(), _fieldPanel);
-  QFont font6 = _selectedLabelWidget->font();
-  font6.setPixelSize(fsize6);
-  _selectedLabelWidget->setFont(font6);
-  _fieldsLayout->addWidget(_selectedLabelWidget, row, 0, 1, nCols, alignCenter);
-
-  row++;
-
-
-  QFont font4 = _selectedLabelWidget->font();
-  font4.setPixelSize(fsize4);
-  QFont font2 = _selectedLabelWidget->font();
-  font2.setPixelSize(fsize2);
-  QFont font = _selectedLabelWidget->font();
-  font.setPixelSize(fsize);
-  
-
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont font2 = dummy.font();
-  QFont font4 = dummy.font();
-
-  _valueLabel = new QLabel("", _fieldPanel);
-  _valueLabel->setFont(font);
-  _fieldsLayout->addWidget(_valueLabel, row, 0, 1, nCols, alignCenter);
-  row++;
-
-  QLabel *fieldHeader = new QLabel("FIELD LIST", _fieldPanel);
-  fieldHeader->setFont(font);
-  _fieldsLayout->addWidget(fieldHeader, row, 0, 1, nCols, alignCenter);
-  row++;
-
-  QLabel *nameHeader = new QLabel("Name", _fieldPanel);
-  nameHeader->setFont(font);
-  _fieldsLayout->addWidget(nameHeader, row, 0, alignCenter);
-  QLabel *keyHeader = new QLabel("HotKey", _fieldPanel);
-  keyHeader->setFont(font);
-  _fieldsLayout->addWidget(keyHeader, row, 1, alignCenter);
-  if (_haveFilteredFields) {
-    QLabel *rawHeader = new QLabel("Raw", _fieldPanel);
-    rawHeader->setFont(font);
-    _fieldsLayout->addWidget(rawHeader, row, 2, alignCenter);
-    QLabel *filtHeader = new QLabel("Filt", _fieldPanel);
-    filtHeader->setFont(font);
-    _fieldsLayout->addWidget(filtHeader, row, 3, alignCenter);
-  }
-  row++;
-  _rowOffset = row;
-
-  // add fields, one row at a time
-  // a row can have 1 or 2 buttons, depending on whether the
-  // filtered field is present
-  size_t nFields = _displayFieldController->getNFields();
-  for (size_t ifield = 0; ifield < nFields; ifield++) {
-
-    // get raw field - always present
-    
-    const DisplayField *rawField = _displayFieldController->getField(ifield); // _fields[ifield];
-    int buttonRow = rawField->getButtonRow();
-    
-    // get filt field - may not be present
-    const DisplayField *filtField = _displayFieldController->getFiltered(ifield, buttonRow);
-
-    QLabel *label = new QLabel(_fieldPanel);
-    label->setFont(font);
-    label->setText(rawField->getLabel().c_str());
-    QLabel *key = new QLabel(_fieldPanel);
-    key->setFont(font);
-    if (rawField->getShortcut().size() > 0) {
-      char text[4];
-      text[0] = rawField->getShortcut()[0];
-      text[1] = '\0';
-      key->setText(text);
-      char text2[128];
-      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
-        text, rawField->getName().c_str(), text);
-      label->setToolTip(text2);
-      key->setToolTip(text2);
-    }
-
-    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
-    rawButton->setToolTip(rawField->getName().c_str());
-    if (ifield == 0) {
-      rawButton->click();
-    }
-    _fieldsLayout->addWidget(label, row, 0, alignCenter);
-    _fieldsLayout->addWidget(key, row, 1, alignCenter);
-    _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
-    _fieldGroup->addButton(rawButton, ifield);
-    // connect slot for field change
-    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-
-    _fieldButtons.push_back(rawButton);
-    if (filtField != NULL) {
-      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
-      filtButton->setToolTip(filtField->getName().c_str());
-      _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
-      _fieldGroup->addButton(filtButton, ifield + 1);
-      _fieldButtons.push_back(filtButton);
-      // connect slot for field change
-      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-    }
-
-    _displayFieldController->setVisible(ifield);
-
-    if (filtField != NULL) {
-      ifield++;
-    }
-    _fieldsLayout->setRowStretch(row, 1);
-
-    row++;
-  }
-
-  //QLabel *spacerRow = new QLabel("", _fieldPanel);
-  //_fieldsLayout->addWidget(spacerRow, row, 0);
-  //_fieldsLayout->setRowStretch(row, 1);
-  //row++;
-
-  // HERE <<=== 
-  //  _lastButtonRowFixed = row; // Q: is this just the size of _fieldButtons?
-  // connect slot for field change
-  
-  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
-  //        this, SLOT(_changeField(int)));
-
-}
-
-//////////////////////////////////////////////
-// update the field panel
-
-void PolarManager::_updateFieldPanel(string newFieldName)
-{
-  LOG(DEBUG) << "enter";
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignRight(Qt::AlignRight);
-  
-  int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size + 2;
-  int fsize4 = _params->label_font_size + 4;
-  int fsize6 = _params->label_font_size + 6;
-
-  int row; //  = _rowOffset;
-  int nCols = 3;
-  if (_haveFilteredFields) {
-    nCols = 4;
-  }
-  //QFont font = _selectedLabelWidget->font();
-  QLabel dummy;
-  QFont font = dummy.font();
-  font.setPixelSize(fsize);
-
-
-
-  // a row can have 1 or 2 buttons, depending on whether the
-  // filtered field is present
-
-  size_t nFields = _displayFieldController->getNFields(); // 0 - based index
-  size_t ifield = _displayFieldController->getFieldIndex(newFieldName);
-  //if (ifield < lastButtonRowFixed - 1) {
-    // field already in panel
-  //  return;
-  //}
-
-    // get raw field - always present
-    
-  DisplayField *rawField = _displayFieldController->getField(ifield); //_fields[ifield];
-  if (rawField->isHidden()) {
-    int lastButtonRowFixed = _fieldButtons.size(); // 1 - based index
-
-    row = lastButtonRowFixed + _rowOffset;
-    rawField->setButtonRow(row);
-    
-    // get filt field - may not be present
-    const DisplayField *filtField = _displayFieldController->getFiltered(ifield, -1);
-
-//----
-//    _spolDivColorMapLabel = new ClickableLabel();
-//ColorMapTemplates.cc:    // connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorDialog::pickColorPalette);
-//ColorMapTemplates.cc:    connect(_defaultColorMapLabel,   &ClickableLabel::clicked, this, &ColorMapTemplates::defaultClicked);
-
-//---
-
-    //QLabel *label = new QLabel(_fieldPanel);
-    ClickableLabel *label = new ClickableLabel(_fieldPanel);
-    connect(label, SIGNAL(ClickableLabel::clicked), this, SLOT(contextMenuParameterColors));
-    label->setFont(font);
-    label->setText(rawField->getLabel().c_str());
-    QLabel *key = new QLabel(_fieldPanel);
-    key->setFont(font);
-    if (rawField->getShortcut().size() > 0) {
-      char text[4];
-      text[0] = rawField->getShortcut()[0];
-      text[1] = '\0';
-      key->setText(text);
-      char text2[128];
-      sprintf(text2, "Hit %s for %s, ALT-%s for filtered",
-        text, rawField->getName().c_str(), text);
-      label->setToolTip(text2);
-      key->setToolTip(text2);
-    }
-
-    QRadioButton *rawButton = new QRadioButton(_fieldPanel);
-    rawButton->setToolTip(rawField->getName().c_str());
-    //if (ifield == 0) {
-      rawButton->click();
-    //}
-    //row = buttonRow + 4;
-    _fieldsLayout->addWidget(label, row, 0, alignCenter);
-    _fieldsLayout->addWidget(key, row, 1, alignCenter);
-    _fieldsLayout->addWidget(rawButton, row, 2, alignCenter);
-    _fieldGroup->addButton(rawButton, ifield);
-    // connect slot for field change
-    connect(rawButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-
-    _fieldButtons.push_back(rawButton);
-    if (filtField != NULL) {
-      QRadioButton *filtButton = new QRadioButton(_fieldPanel);
-      filtButton->setToolTip(filtField->getName().c_str());
-      _fieldsLayout->addWidget(filtButton, row, 3, alignCenter);
-      _fieldGroup->addButton(filtButton, ifield + 1);
-      _fieldButtons.push_back(filtButton);
-      // connect slot for field change
-      connect(filtButton, SIGNAL(toggled(bool)), this, SLOT(_changeFieldVariable(bool)));
-    }
-
-    //if (filtField != NULL) {
-    //  ifield++;
-    //}
-
-    //QLabel *spacerRow = new QLabel("", _fieldPanel);
-    //_fieldsLayout->addWidget(spacerRow, row, 0);
-    _fieldsLayout->setRowStretch(row, 1);
-    
-    rawField->setStateVisible();
-    _displayFieldController->setSelectedField(ifield);
-
-  }
-
-  // connect slot for field change
-  
-  //connect(_fieldGroup, SIGNAL(buttonClicked(int)),
-  //        this, SLOT(_changeField(int)));
-  LOG(DEBUG) << "exit";
-}
-*/
 
 void PolarManager::ShowParameterColorDialog(QString fieldName)
 {
@@ -4443,122 +4197,6 @@ void PolarManager::ShowParameterColorDialog(QString fieldName)
   LOG(DEBUG) << "exit ";
   
 }
-
-/*
-// needs PolarManager, DisplayFieldModel access, or DisplayFieldController access
-void PolarManager::contextMenuParameterColors()
-{
-  
-  LOG(DEBUG) << "enter";
-
-  // TODO: parent should be PolarManager ...
-  ParameterColorView *parameterColorView = new ParameterColorView(this);
-  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
-  DisplayField *selectedField = _displayFieldController->getSelectedField();
-  string emphasis_color = "white";
-  string annotation_color = "white";
-
-  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
-
-  FieldColorController *fieldColorController = new FieldColorController(parameterColorView,
-    displayFieldModel);
-  // connect some signals and slots in order to retrieve information
-  // and send changes back to display
-              
-  // TODO: move to PolarManager ...                                                           
-  //  connect(parameterColorView, SIGNAL(retrieveInfo), &_manager, SLOT(InfoRetrieved()));
-  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
-      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
-  //  PolarManager::colorMapRedefineReceived(string, ColorMap)
-  //connect(fieldColorController, SIGNAL(colorMapRedefined(string)),
-  //    this, SLOT(changeToDisplayField(string))); // THIS IS NOT CALLED!!
-
-  // TODO: combine with replot
-  //connect(fieldColorController, SIGNAL(backgroundColorSet(QColor)),
-  //    this, SLOT(backgroundColor(QColor)));
-  //
-
-  fieldColorController->startUp(); 
-
-  //connect(parameterColorView, SIGNAL(needFieldNames()), this, SLOT(getFieldNames()));
-  //connect(this, SIGNAL(fieldNamesSupplied(vector<string>)), 
-  //  parameterColorView, SLOT(fieldNamesSupplied(vector<string>));
-  // TODO: move this call to the controller?                                                                
-    // parameterColorView.exec();
-
-  //  if(parameterColorController.Changes()) {
-    // TODO: what are changes?  new displayField(s)?                                                        
-  //}
- 
-  LOG(DEBUG) << "exit ";
-  
-}
-*/
-
-/* Moved to DisplayFieldView
-void PolarManager::_changeFieldVariable(bool value) {
-
-  LOG(DEBUG) << " field variable changed ";
-
-  if (value) {
-    for (size_t i = 0; i < _fieldButtons.size(); i++) {
-      if (_fieldButtons.at(i)->isChecked()) {
-        LOG(DEBUG) << "_fieldButton " << i
-        << "out of " << _fieldButtons.size() 
-        << " is checked";
-        QString fieldNameQ = _fieldButtons.at(i)->text();
-        LOG(DEBUG) << "fieldname is " << fieldNameQ.toStdString();
-        _changeField(i, true);
-      }
-    }
-  }
-
-}
-*/
-
-/*
-void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
-
-  LOG(DEBUG) << "enter"; 
-  
-  // connect the new color map with the field
-  // find the fieldName in the list of FieldDisplays
-  // This should save/perpetuate the color map in the DisplayField object
-  _displayFieldController->saveColorMap(fieldName, &newColorMap);
-  size_t fieldIndex = _displayFieldController->getFieldIndex(fieldName);
-  _changeField(fieldIndex, true); 
-*/
-  /*
-  bool found = false;
-  vector<DisplayField *>::iterator it;
-  int fieldId = 0;
-
-  it = _fields.begin(); 
-  while ( it != _fields.end() && !found ) {
-    DisplayField *field = *it;
-   
-    string name = field->getName();
-    if (name.compare(fieldName) == 0) {
-      found = true;
-      field->replaceColorMap(newColorMap);
-    }
-    fieldId++;
-    it++;
-  }
-  if (!found) {
-    LOG(ERROR) << fieldName;
-    LOG(ERROR) << "ERROR - field not found; no color map change";
-    // TODO: present error message box 
-  } else {
-    // look up the fieldId from the fieldName
-    // change the field variable
-    _changeField(fieldId, true); 
-  }
-  */
-/*
-  LOG(DEBUG) << "exit";
-}
-*/
 
 
 ///////////////////////////////////////////////////////
@@ -5201,141 +4839,6 @@ void PolarManager::_showClick()
   }
 }
 
-/*
-  //////////////////////////////////////////////////
-// set up field objects, with their color maps
-// use same map for raw and unfiltered fields
-// returns 0 on success, -1 on failure
-HERE ==> call this with the _params->fields at initialization 
-or move to HawkEye.cc  YES! Do this in HawkEye, the code is there, just commented.
-Then, on updateDisplayFields, check if the field is already there, before adding it.
-int PolarManager::_setupDisplayFields(
-  string colorMapDir, //  = _params->color_scale_dir,
-  vector<string> label,
-  vector<string> raw_name,
-  vector<string> filtered_name,
-  vector<string> units,
-  vector<string> color_map_path,
-  vector<string> shortcut,
-  // include in vector: _params->fields_n,
-  //const Params::field_t &pfld = _params->_fields,
-  bool debug = _params->debug,  
-  )
-{
-
-  // check for color map location
-  
-  string colorMapDir = _params->color_scale_dir;
-  Path mapDir(_params->color_scale_dir);
-  if (!mapDir.dirExists()) {
-    colorMapDir = Path::getPathRelToExec(_params->color_scale_dir);
-    mapDir.setPath(colorMapDir);
-    if (!mapDir.dirExists()) {
-      cerr << "ERROR - HawkEye" << endl;
-      cerr << "  Cannot find color scale directory" << endl;
-      cerr << "  Primary is: " << _params->color_scale_dir << endl;
-      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
-      return -1;
-    }
-    if (_params->debug) {
-      cerr << "NOTE - using color scales relative to executable location" << endl;
-      cerr << "  Exec path: " << Path::getExecPath() << endl;
-      cerr << "  Color scale dir:: " << colorMapDir << endl;
-    }
-  }
-
-  // we interleave unfiltered fields and filtered fields
-
-  for (int ifield = 0; ifield < _params->fields_n; ifield++) {
-
-    const Params::field_t &pfld = _params->_fields[ifield];
-
-    // check we have a valid label
-    
-    if (strlen(pfld.label) == 0) {
-      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
-      cerr << "  Empty field label, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-    
-    // check we have a raw field name
-    
-    if (strlen(pfld.raw_name) == 0) {
-      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
-      cerr << "  Empty raw field name, ifield: " << ifield << endl;
-      cerr << "  Ignoring" << endl;
-      continue;
-    }
-
-    // create color map
-    
-    string colorMapPath = colorMapDir;
-    colorMapPath += PATH_DELIM;
-    colorMapPath += pfld.color_map;
-    ColorMap map;
-    map.setName(pfld.label);
-    map.setUnits(pfld.units);
-    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
-
-    bool noColorMap = false;
-
-    if (map.readMap(colorMapPath)) {
-        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
-        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-        cerr << "  Looking for default color map for field " << pfld.label << endl; 
-
-        try {
-          // check here for smart color scale; look up by field name/label and
-          // see if the name is a usual parameter for a known color map
-          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-          cerr << "  found default color map for " <<  pfld.label  << endl;
-          // if (_params->debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
-          map = colorMap;
-          // HERE: What is missing from the ColorMap object??? 
-        } catch (std::out_of_range ex) {
-          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
-    // Just set the colormap to a generic color map
-    // use range to indicate it needs update; update when we have access to the actual data values
-          map = ColorMap(0.0, 1.0);
-    noColorMap = true; 
-          // return -1
-        }
-    }
-
-    // unfiltered field
-
-    DisplayField *field =
-      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
-                       pfld.shortcut, map, ifield, false);
-    if (noColorMap)
-      field->setNoColorMap();
-
-    _displayFields.push_back(field);
-
-    // filtered field
-
-    if (strlen(pfld.filtered_name) > 0) {
-      string filtLabel = string(pfld.label) + "-filt";
-      DisplayField *filt =
-        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
-                         map, ifield, true);
-      _displayFields.push_back(filt);
-    }
-
-  } // ifield
-
-  if (_displayFields.size() < 1) {
-    cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
-    cerr << "  No fields found" << endl;
-    return -1;
-  }
-
-  return 0;
-
-}
-*/
 
 //TODO: change model for displayFieldController
 //_displayFieldController->setModel(new DisplayFieldModel(...))
@@ -5832,9 +5335,57 @@ void PolarManager::closeEvent(QEvent *event)
         }
 
     }  
-    emit close();
-    //QMainWindow::closeEvent(event);
+    event->accept();
+    //emit close();
+
 }
+
+
+/* use the default QWidget::close() slot
+   which first sends the widget a QCloseEvent. 
+   If the widget has the Qt::WA_DeleteOnClose flag, 
+   the widget is also deleted. 
+   A close event is delivered to the widget no matter
+  if the widget is visible or not.
+
+void PolarManager::close(QEvent *event) {
+
+cerr << "PolarManager::close() called" << endl;
+  event->accept();
+
+  QMainWindow::closeEvent(event);
+  if (_ppi) {
+    delete _ppi;
+  }
+
+  if (_rhi) {
+    delete _rhi;
+  }
+
+  //if (_ppiRays) {
+  //  delete[] _ppiRays;
+  //}
+  // TODO: delete all controllers
+  if (_timeNavController) {
+    //_timeNavController->~TimeNavController();
+    delete _timeNavController;
+  }
+  // if (_timeNavView) delete _timeNavView;
+
+}
+*/
+
+/* TODO: save state ... 
+
+void MyMainWindow::closeEvent(QCloseEvent *event)
+{
+    QSettings settings("MyCompany", "MyApp");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    QMainWindow::closeEvent(event);
+}
+*/
+
 
 /////////////////////////////////////////////////////
 // howto help
@@ -5900,10 +5451,24 @@ int PolarManager::saveDiscardMessage(string text, string question) {
   QMessageBox msgBox(this);
   msgBox.setText(QString::fromStdString(text)); // "The document has been modified.");
   msgBox.setInformativeText(QString::fromStdString(question)); // "Do you want to save your changes?");
-  msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | 
+  msgBox.setStandardButtons(QMessageBox::Discard | 
     QMessageBox::Cancel);
-  msgBox.setDefaultButton(QMessageBox::Save);
+
+  QPushButton *saveNewDirectoryButton = msgBox.addButton(tr("Save to new directory"), QMessageBox::YesRole);
+  QPushButton *overwriteOriginalButton = msgBox.addButton(tr("Overwrite original"), QMessageBox::ApplyRole);
+
+  msgBox.setDefaultButton(QMessageBox::Cancel);
+
   int ret = msgBox.exec();
-  return ret;
+
+  if (msgBox.clickedButton() == saveNewDirectoryButton) {
+      return QMessageBox::Save;
+  } else if (msgBox.clickedButton() == overwriteOriginalButton) {
+      return QMessageBox::Apply;
+  } else {
+    return ret;
+  }
+
+  //return ret;
 }
 

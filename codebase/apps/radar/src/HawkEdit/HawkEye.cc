@@ -160,9 +160,10 @@ HawkEye::~HawkEye()
 
 {
 
-  if (_polarManager) {
-    delete _polarManager;
-  }
+  //if (_polarManager) {
+  //  //_polarManager->~PolarManager();
+  //  delete _polarManager;
+  //}
 
   if (_reader) {
     delete _reader;

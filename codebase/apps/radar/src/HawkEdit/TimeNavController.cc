@@ -36,7 +36,7 @@
 // 
 ///////////////////////////////////////////////////////////////
 
-// #include <filesystem>
+ #include <iostream>
 
 #include "TimeNavController.hh"
 
@@ -49,7 +49,11 @@ TimeNavController::TimeNavController(TimeNavView *view) {
 }
 
 TimeNavController::~TimeNavController() {
-  if (_view != NULL) delete _view;
+  cerr << "TimeNavController destructor called" << endl;
+  if (_view != NULL) {
+    _view->close();
+    delete _view;
+  }
   if (_model != NULL) delete _model;
   _removeTempDirs();
 }
