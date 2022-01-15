@@ -239,7 +239,7 @@ int Ecco::Run()
 
     const fl32 *dbz = (const fl32*) dbzField->getVol();
     fl32 missingDbz = fhdr.missing_data_value;
-    if (_finder.computePartition(dbz, missingDbz)) {
+    if (_finder.computeEchoType(dbz, missingDbz)) {
       cerr << "ERROR - Ecco::Run()" << endl;
       umsleep(1000);
       iret = -1;
@@ -341,14 +341,8 @@ void Ecco::_addFields()
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getTexture2D(),
                                  Mdvx::ENCODING_INT16,
-                                 "DbzTexture2D",
-                                 "reflectivity_texture_2D",
-                                 "dBZ"));
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getTextureColMax(),
-                                 Mdvx::ENCODING_INT16,
-                                 "DbzTextureColMax",
-                                 "reflectivity_texture_column_max",
+                                 "DbzTextureComp",
+                                 "reflectivity_texture_composite",
                                  "dBZ"));
   }
   
@@ -357,14 +351,8 @@ void Ecco::_addFields()
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getConvectivity2D(),
                                  Mdvx::ENCODING_INT16,
-                                 "Convectivity2D",
-                                 "likelihood_of_convection_2D",
-                                 ""));
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getConvectivityColMax(),
-                                 Mdvx::ENCODING_INT16,
-                                 "ConvectivityColMax",
-                                 "likelihood_of_convection_column_max",
+                                 "ConvectivityComp",
+                                 "likelihood_of_convection_composite",
                                  ""));
   }
 
@@ -373,8 +361,8 @@ void Ecco::_addFields()
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
                                  _finder.getColMaxDbz(),
                                  Mdvx::ENCODING_INT16,
-                                 "DbzColMax",
-                                 "max_dbz_in_column",
+                                 "DbzComp",
+                                 "dbz_composite",
                                  "dBZ"));
   }
     
@@ -433,20 +421,14 @@ void Ecco::_addFields()
   fhdr2d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
   fhdr2d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
   
-  // partition field
+  // echoType field
   
   if (_params.write_partition) {
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartition2D(),
+                                 _finder.getEchoType2D(),
                                  Mdvx::ENCODING_INT8,
-                                 "Partition2D",
-                                 "convective_stratiform_partition_2D",
-                                 ""));
-    _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getPartitionColMax(),
-                                 Mdvx::ENCODING_INT8,
-                                 "PartitionColMax",
-                                 "convective_stratiform_partition_col_max",
+                                 "EchoTypeComp",
+                                 "convective_stratiform_echo_type_composite",
                                  ""));
   }
   
@@ -463,7 +445,7 @@ void Ecco::_addFields()
                                     _finder.getConvectiveDbz(),
                                     Mdvx::ENCODING_INT16,
                                     "DbzConv",
-                                    "convective_reflectivity",
+                                    "convective_reflectivity_3D",
                                     "dBZ");
     _outMdvx.addField(convDbz);
   }
@@ -484,7 +466,7 @@ void Ecco::_addFields()
                                  _finder.getConvectivity3D(),
                                  Mdvx::ENCODING_INT16,
                                  "Convectivity3D",
-                                 "likelihood_of_convection_2D",
+                                 "likelihood_of_convection_3D",
                                  ""));
   }
 
@@ -499,7 +481,7 @@ void Ecco::_addFields()
   }
   
   if (_params.write_partition) {
-    // partition for full volume
+    // echoType for full volume
     size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
     fhdr3d.volume_size = volSize08;
     fhdr3d.encoding_type = Mdvx::ENCODING_INT8;
@@ -507,10 +489,10 @@ void Ecco::_addFields()
     fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
     fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
     _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                                 _finder.getPartition3D(),
+                                 _finder.getEchoType3D(),
                                  Mdvx::ENCODING_INT8,
-                                 "Partition3D",
-                                 "convective_stratiform_partition_3D",
+                                 "EchoType3D",
+                                 "convective_stratiform_echo_type_3D",
                                  ""));
   }
 

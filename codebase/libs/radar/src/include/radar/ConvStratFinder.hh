@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////
 //
-// ConvStratFinder partitions stratiform and convective regions in a
+// ConvStratFinder echoTypes stratiform and convective regions in a
 // Cartesian radar volume
 //
 /////////////////////////////////////////////////////////////////////
@@ -241,10 +241,10 @@ public:
                bool projIsLatLon = false);
   
   ////////////////////////////////////////////////////////////////////
-  // compute the partition
+  // compute the echoType
   // Returns 0 on success, -1 on failure
 
-  int computePartition(const fl32 *dbz, fl32 dbzMissingVal);
+  int computeEchoType(const fl32 *dbz, fl32 dbzMissingVal);
 
   // get the input fields
   
@@ -255,23 +255,20 @@ public:
   const fl32 *getFractionActive() const { return _fractionActive.dat(); }
   
   ////////////////////////////////////////////////////////////////////
-  // get the resulting partition
+  // get the resulting echoType
   // will be set to the relevant category
 
-  const ui08 *getPartition3D() const { return _partition3D.dat(); }
-  const ui08 *getPartitionColMax() const { return _partitionColMax.dat(); }
-  const ui08 *getPartition2D() const { return _partition2D.dat(); }
+  const ui08 *getEchoType3D() const { return _echoType3D.dat(); }
+  const ui08 *getEchoType2D() const { return _echoType2D.dat(); }
   const fl32 *getConvectiveDbz() const { return _convDbz.dat(); }
 
   ////////////////////////////////////////////////////////////////////
   // get derived fields
   
   const fl32 *getTexture3D() const { return _texture3D.dat(); }
-  const fl32 *getTextureColMax() const { return _textureColMax.dat(); }
   const fl32 *getTexture2D() const { return _texture2D.dat(); }
 
   const fl32 *getConvectivity3D() const { return _convectivity3D.dat(); }
-  const fl32 *getConvectivityColMax() const { return _convectivityColMax.dat(); }
   const fl32 *getConvectivity2D() const { return _convectivity2D.dat(); }
 
   const fl32 *getConvTopKm() const { return _convTopKm.dat(); }
@@ -390,18 +387,15 @@ private:
   // intermediate fields
   
   TaArray<fl32> _texture3D;
-  TaArray<fl32> _textureColMax;
   TaArray<fl32> _texture2D;
 
   TaArray<fl32> _convectivity3D;
-  TaArray<fl32> _convectivityColMax;
   TaArray<fl32> _convectivity2D;
 
-  // partition
+  // echoType
   
-  TaArray<ui08> _partition3D;
-  TaArray<ui08> _partitionColMax;
-  TaArray<ui08> _partition2D;
+  TaArray<ui08> _echoType3D;
+  TaArray<ui08> _echoType2D;
 
   // tops etc
 
@@ -412,21 +406,19 @@ private:
 
   // methods
   
-  int _computePartition2D(const fl32 *dbz, fl32 dbzMissingVal);
+  int _computeEchoType2D(const fl32 *dbz, fl32 dbzMissingVal);
   void _allocArrays();
   void _initToMissing();
   void _initToMissing(TaArray<fl32> &array, fl32 missingVal);
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
-  void _computeColMax();
-  void _finalizePartition();
+  void _computeColMaxDbz();
+  void _finalizeEchoType();
   void _computeTexture();
-  void _computeTextureColMax();
   void _computeConvectivity();
   void _performClumping();
   void _freeClumps();
-  void _setPartition3D();
-  void _setPartitionColMax();
-  void _setPartition2D();
+  void _setEchoType3D();
+  void _setEchoType2D();
   void _set2DFields();
   void _computeKernels();
   void _printSettings(ostream &out);
@@ -533,9 +525,9 @@ private:
     
     void computeGeom();
 
-    // Set the partition based on clump properties
+    // Set the echoType based on clump properties
     
-    void setPartition();
+    void setEchoType();
     
     // check for stratiform below
     
