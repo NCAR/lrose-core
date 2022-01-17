@@ -824,33 +824,40 @@ void Ecco::_addClumpingDebugFields()
   // add clump composite reflectivity
 
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshCompFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshDbzCompOutputGrid(),
                                Mdvx::ENCODING_INT16,
                                "ClumpsCompDbz",
                                "ClumpsCompDbz",
                                "dBZ"));
-
+  
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshLargeClumpsOutputGrid(),
+                               Mdvx::ENCODING_INT8,
+                               "LargeClumps",
+                               "LargeClumps",
+                               "count"));
+  
   // add sub clump grids
 
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshAllFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshAllSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "AllClumps",
-                               "AllClumps",
+                               "AllSubclumps",
+                               "AllSubclumps",
                                "count"));
   
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshValidFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshValidSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "ValidClumps",
-                               "ValidClumps",
+                               "SmallSubclumps",
+                               "SmallSubclumps",
                                "count"));
   
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshGrownFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshGrownSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "GrownClumps",
-                               "GrownClumps",
+                               "GrownSubclumps",
+                               "GrownSubclumps",
                                "count"));
   
 }
