@@ -76,11 +76,12 @@ ClumpingDualThresh::ClumpingDualThresh() :
   _grownWorkGrid = NULL;
   _nPtsWorkGridAlloc = 0;
 
-  _compFileGrid = NULL;
-  _allFileGrid = NULL;
-  _validFileGrid = NULL;
-  _grownFileGrid = NULL;
-  _nPtsFileGridAlloc = 0;
+  _dbzCompOutputGrid = NULL;
+  _largeClumpsOutputGrid = NULL;
+  _allSubclumpsOutputGrid = NULL;
+  _validSubclumpsOutputGrid = NULL;
+  _grownSubclumpsOutputGrid = NULL;
+  _nPtsOutputGridAlloc = 0;
 
   _cIndex = NULL;
   _cIndexAlloc = 0;
@@ -124,20 +125,24 @@ ClumpingDualThresh::~ClumpingDualThresh()
     ufree(_grownWorkGrid);
   }
 
-  if (_compFileGrid) {
-    ufree(_compFileGrid);
+  if (_dbzCompOutputGrid) {
+    ufree(_dbzCompOutputGrid);
   }
 
-  if (_allFileGrid) {
-    ufree(_allFileGrid);
+  if (_largeClumpsOutputGrid) {
+    ufree(_largeClumpsOutputGrid);
   }
 
-  if (_validFileGrid) {
-    ufree(_validFileGrid);
+  if (_allSubclumpsOutputGrid) {
+    ufree(_allSubclumpsOutputGrid);
   }
 
-  if (_grownFileGrid) {
-    ufree(_grownFileGrid);
+  if (_validSubclumpsOutputGrid) {
+    ufree(_validSubclumpsOutputGrid);
+  }
+
+  if (_grownSubclumpsOutputGrid) {
+    ufree(_grownSubclumpsOutputGrid);
   }
 
   if (_cIndex) {
@@ -178,7 +183,7 @@ void ClumpingDualThresh::setInputData(PjgGridGeom &inputGeom,
 
   _nxInput = _inputGeom.nx();
   _nyInput = _inputGeom.ny();
-  _initFileGrids();
+  _initOutputGrids();
   
 }
 
@@ -228,7 +233,7 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
       memset(_allWorkGrid + offset, i + 1, intv->len);
     } // j
   } // i
-  _updateFileComp(primaryClump);
+  _updateClumpGrids(primaryClump);
 
   // loop through the clumps, determining if they are large
   // enough to be valid sub-clumps
@@ -303,7 +308,7 @@ int ClumpingDualThresh::compute(const ClumpProps &primaryClump)
 
   // update the file grids for debugging
 
-  _updateFileGrids(primaryClump);
+  _updateSubclumpGrids(primaryClump);
 
   // compute each sub clump
 
@@ -411,12 +416,12 @@ void ClumpingDualThresh::_initWorkGrids(const ClumpProps &primaryClump)
 }
 
 /////////////////////
-// _initFileGrids()
+// _initOutputGrids()
 //
 // Allocate and initialize grids for MDV output file
 //
 
-void ClumpingDualThresh::_initFileGrids()
+void ClumpingDualThresh::_initOutputGrids()
   
 {
 
@@ -424,35 +429,37 @@ void ClumpingDualThresh::_initFileGrids()
   
   // adjust grid allocation as necessary
   
-  if (_nPtsFileGridAlloc < npts) {
+  if (_nPtsOutputGridAlloc < npts) {
 
-    _compFileGrid = (fl32 *) urealloc (_compFileGrid, npts * sizeof(fl32));
-    _allFileGrid = (ui08 *) urealloc (_allFileGrid, npts);
-    _validFileGrid = (ui08 *) urealloc (_validFileGrid, npts);
-    _grownFileGrid = (ui08 *) urealloc (_grownFileGrid, npts);
+    _dbzCompOutputGrid = (fl32 *) urealloc (_dbzCompOutputGrid, npts * sizeof(fl32));
+    _largeClumpsOutputGrid = (ui08 *) urealloc (_largeClumpsOutputGrid, npts);
+    _allSubclumpsOutputGrid = (ui08 *) urealloc (_allSubclumpsOutputGrid, npts);
+    _validSubclumpsOutputGrid = (ui08 *) urealloc (_validSubclumpsOutputGrid, npts);
+    _grownSubclumpsOutputGrid = (ui08 *) urealloc (_grownSubclumpsOutputGrid, npts);
 
-    _nPtsFileGridAlloc = npts;
+    _nPtsOutputGridAlloc = npts;
 
   }
 
   // initialize grids
   
   for (size_t ii = 0; ii < npts; ii++) {
-    _compFileGrid[ii] = _missing;
+    _dbzCompOutputGrid[ii] = _missing;
   }
-  memset(_allFileGrid, 0, npts);
-  memset(_validFileGrid, 0, npts);
-  memset(_grownFileGrid, 0, npts);
+  memset(_largeClumpsOutputGrid, 0, npts);
+  memset(_allSubclumpsOutputGrid, 0, npts);
+  memset(_validSubclumpsOutputGrid, 0, npts);
+  memset(_grownSubclumpsOutputGrid, 0, npts);
 
 }
 
 //////////////////////
 // _updateFileComp()
 //
-// Update the composite grid in the output file
+// Update the grids for the large clumps
 //
 
-void ClumpingDualThresh::_updateFileComp(const ClumpProps &primaryClump)
+void ClumpingDualThresh::_updateClumpGrids(const ClumpProps &primaryClump)
   
 {
   
@@ -469,11 +476,12 @@ void ClumpingDualThresh::_updateFileComp(const ClumpProps &primaryClump)
     for (size_t ix = 1; ix < _nxWork - 1; ix++, offset++, comp++, all++) {
       
       if (*comp != _missing) {
-	_compFileGrid[offset] = *comp;
+	_dbzCompOutputGrid[offset] = *comp;
+	_largeClumpsOutputGrid[offset] = 1;
       }
 
       if (*all) {
-	_allFileGrid[offset] = *all;
+	_allSubclumpsOutputGrid[offset] = *all;
       }
 
     } // ix
@@ -483,12 +491,12 @@ void ClumpingDualThresh::_updateFileComp(const ClumpProps &primaryClump)
 }
 
 //////////////////////
-// _updateFileGrids()
+// __updateSubclumpGrids()
 //
 // Update the ident grids in the output file
 //
 
-void ClumpingDualThresh::_updateFileGrids(const ClumpProps &primaryClump)
+void ClumpingDualThresh::_updateSubclumpGrids(const ClumpProps &primaryClump)
   
 {
   
@@ -506,11 +514,11 @@ void ClumpingDualThresh::_updateFileGrids(const ClumpProps &primaryClump)
 	 ix++, offset++, valid++, grown++) {
       
       if (*valid) {
-	_validFileGrid[offset] = *valid;
+	_validSubclumpsOutputGrid[offset] = *valid;
       }
 
       if (*grown) {
-	_grownFileGrid[offset] = *grown;
+	_grownSubclumpsOutputGrid[offset] = *grown;
       }
 
     } // ix

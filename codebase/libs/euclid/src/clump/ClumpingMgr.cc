@@ -436,32 +436,39 @@ void ClumpingMgr::loadClumpVector(PjgGridGeom &inputGeom,
 /////////////////////////////////////////////
 // get debug grids from using dual threshold
 
-const fl32 *ClumpingMgr::getDualThreshCompFileGrid() const {
+const fl32 *ClumpingMgr::getDualThreshDbzCompOutputGrid() const {
   if (_dualT == NULL) {
     return NULL;
   }
-  return _dualT->getCompFileGrid();
+  return _dualT->getDbzCompOutputGrid();
 }
 
-const ui08 *ClumpingMgr::getDualThreshAllFileGrid() const {
+const ui08 *ClumpingMgr::getDualThreshLargeClumpsOutputGrid() const {
   if (_dualT == NULL) {
     return NULL;
   }
-  return _dualT->getAllFileGrid();
+  return _dualT->getLargeClumpsOutputGrid();
 }
 
-const ui08 *ClumpingMgr::getDualThreshValidFileGrid() const {
+const ui08 *ClumpingMgr::getDualThreshAllSubclumpsOutputGrid() const {
   if (_dualT == NULL) {
     return NULL;
   }
-  return _dualT->getValidFileGrid();
+  return _dualT->getAllSubclumpsOutputGrid();
 }
 
-const ui08 *ClumpingMgr::getDualThreshGrownFileGrid() const {
+const ui08 *ClumpingMgr::getDualThreshValidSubclumpsOutputGrid() const {
   if (_dualT == NULL) {
     return NULL;
   }
-  return _dualT->getGrownFileGrid();
+  return _dualT->getValidSubclumpsOutputGrid();
+}
+
+const ui08 *ClumpingMgr::getDualThreshGrownSubclumpsOutputGrid() const {
+  if (_dualT == NULL) {
+    return NULL;
+  }
+  return _dualT->getGrownSubclumpsOutputGrid();
 }
 
 

@@ -93,10 +93,21 @@ public:
   // get grids for debug output
 
   const PjgGridGeom &getGridGeom() const { return _inputGeom; }
-  const fl32* getCompFileGrid() const { return _compFileGrid; }
-  const ui08* getAllFileGrid() const { return _allFileGrid; }
-  const ui08* getValidFileGrid() const { return _validFileGrid; }
-  const ui08* getGrownFileGrid() const { return _grownFileGrid; }
+  const fl32* getDbzCompOutputGrid() const {
+    return _dbzCompOutputGrid;
+  }
+  const ui08* getLargeClumpsOutputGrid() const {
+    return _largeClumpsOutputGrid;
+  }
+  const ui08* getAllSubclumpsOutputGrid() const {
+    return _allSubclumpsOutputGrid;
+  }
+  const ui08* getValidSubclumpsOutputGrid() const {
+    return _validSubclumpsOutputGrid;
+  }
+  const ui08* getGrownSubclumpsOutputGrid() const {
+    return _grownSubclumpsOutputGrid;
+  }
 
 protected:
   
@@ -145,11 +156,12 @@ private:
   ui08* _grownWorkGrid;
   size_t _nPtsWorkGridAlloc;
 
-  fl32* _compFileGrid;
-  ui08* _allFileGrid;
-  ui08* _validFileGrid;
-  ui08* _grownFileGrid;
-  size_t _nPtsFileGridAlloc;
+  fl32* _dbzCompOutputGrid;
+  ui08* _largeClumpsOutputGrid;
+  ui08* _allSubclumpsOutputGrid;
+  ui08* _validSubclumpsOutputGrid;
+  ui08* _grownSubclumpsOutputGrid;
+  size_t _nPtsOutputGridAlloc;
 
   int *_cIndex;
   size_t _cIndexAlloc;
@@ -158,10 +170,10 @@ private:
   size_t _nPtsGridMaskAlloc;
 
   void _initWorkGrids(const ClumpProps &primaryClump);
-  void _initFileGrids();
+  void _initOutputGrids();
   void _fillComposite(const ClumpProps &primaryClump);
-  void _updateFileGrids(const ClumpProps &primaryClump);
-  void _updateFileComp(const ClumpProps &primaryClump);
+  void _updateClumpGrids(const ClumpProps &primaryClump);
+  void _updateSubclumpGrids(const ClumpProps &primaryClump);
   void _loadCompIndex();
   void _growSubAreas();
   void _allocSubClumps();
