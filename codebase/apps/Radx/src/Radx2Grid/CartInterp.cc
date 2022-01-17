@@ -2714,7 +2714,7 @@ int CartInterp::_convStratCompute()
 
   // compute the convective/stratiform partition
   
-  if (_convStrat.computePartition(dbzVals, missingFl32)) {
+  if (_convStrat.computeEchoType(dbzVals, missingFl32)) {
     cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;

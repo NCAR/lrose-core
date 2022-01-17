@@ -122,7 +122,7 @@ int ConvectionFinder::run(const DsMdvx &inMdvx,
   
   const fl32 *dbz = (const fl32*) dbzField.getVol();
   fl32 missingDbz = fhdr.missing_data_value;
-  if (_convStrat.computePartition(dbz, missingDbz)) {
+  if (_convStrat.computeEchoType(dbz, missingDbz)) {
     cerr << "ERROR - ConvectionFinder::run()" << endl;
     cerr << "  Cannot compute convective stratiform partition" << endl;
     return -1;
@@ -223,7 +223,7 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t partitionFhdr = fhdr;
   MdvxField *partitionField = new MdvxField(partitionFhdr, vhdr);
-  partitionField->setVolData(_convStrat.getPartition2D(),
+  partitionField->setVolData(_convStrat.getEchoType2D(),
                              volSize08,
                              Mdvx::ENCODING_INT8);
   partitionField->convertType(Mdvx::ENCODING_INT8,
