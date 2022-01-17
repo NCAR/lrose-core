@@ -359,7 +359,7 @@ void Ecco::_addFields()
   if (_params.write_col_max_dbz) {
     // col max dbz
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getColMaxDbz(),
+                                 _finder.getDbzColMax(),
                                  Mdvx::ENCODING_INT16,
                                  "DbzComp",
                                  "dbz_composite",
@@ -496,7 +496,7 @@ void Ecco::_addFields()
                                  ""));
   }
 
-  if (_params.clumping_write_debug_fields) {
+  if (_params.write_clumping_debug_fields) {
     _addClumpingDebugFields();
   }
   
@@ -824,33 +824,40 @@ void Ecco::_addClumpingDebugFields()
   // add clump composite reflectivity
 
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshCompFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshDbzCompOutputGrid(),
                                Mdvx::ENCODING_INT16,
                                "ClumpsCompDbz",
                                "ClumpsCompDbz",
                                "dBZ"));
-
+  
+  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
+                               _finder.getClumpingMgr().getDualThreshLargeClumpsOutputGrid(),
+                               Mdvx::ENCODING_INT8,
+                               "LargeClumps",
+                               "LargeClumps",
+                               "count"));
+  
   // add sub clump grids
 
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshAllFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshAllSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "AllClumps",
-                               "AllClumps",
+                               "AllSubclumps",
+                               "AllSubclumps",
                                "count"));
   
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshValidFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshValidSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "ValidClumps",
-                               "ValidClumps",
+                               "SmallSubclumps",
+                               "SmallSubclumps",
                                "count"));
   
   _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getClumpingMgr().getDualThreshGrownFileGrid(),
+                               _finder.getClumpingMgr().getDualThreshGrownSubclumpsOutputGrid(),
                                Mdvx::ENCODING_INT8,
-                               "GrownClumps",
-                               "GrownClumps",
+                               "GrownSubclumps",
+                               "GrownSubclumps",
                                "count"));
   
 }

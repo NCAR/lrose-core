@@ -111,6 +111,13 @@ public:
   void setMaxValidHtKm(double val) { _maxValidHtKm = val; }
 
   ////////////////////////////////////////////////////////////////////
+  // Use the col max reflectivity for computing the texture,
+  // instead of doing this on each plane.
+  // This uses less CPU.
+  
+  void setUseDbzColMax(bool val) { _useDbzColMax = val; }
+  
+  ////////////////////////////////////////////////////////////////////
   // Minimum reflectivity threshold for this analysis (dBZ).
   // Reflectivity below this threshold is set to missing.
 
@@ -251,7 +258,7 @@ public:
   const fl32 *getDbz3D() const { return _dbz3D.dat(); }
   const fl32 *getShallowHtGrid() const { return _shallowHtGrid.dat(); }
   const fl32 *getDeepHtGrid() const { return _deepHtGrid.dat(); }
-  const fl32 *getColMaxDbz() const { return _colMaxDbz.dat(); }
+  const fl32 *getDbzColMax() const { return _dbzColMax.dat(); }
   const fl32 *getFractionActive() const { return _fractionActive.dat(); }
   
   ////////////////////////////////////////////////////////////////////
@@ -318,6 +325,7 @@ private:
 
   double _minValidHtKm;
   double _maxValidHtKm;
+  bool _useDbzColMax;
   double _minValidDbz;
 
   double _minConvectivityForConvective;
@@ -337,7 +345,6 @@ private:
   double _minValidFractionForFit;
   double _minVolForConvectiveKm3;
   double _minVertExtentForConvectiveKm;
-
 
   // specify freezing level, and divergence level, by ht MSL
   // if this is false, grids for fz and div level must be passed in
@@ -381,14 +388,17 @@ private:
   TaArray<fl32> _dbz3D;
   TaArray<fl32> _shallowHtGrid; // grid for shallow cloud ht threshold
   TaArray<fl32> _deepHtGrid;    // grid for deep cloud ht threshold
-  TaArray<fl32> _colMaxDbz;
+  TaArray<fl32> _dbzColMax;
   TaArray<fl32> _fractionActive;
   
-  // intermediate fields
+  // texture
   
   TaArray<fl32> _texture3D;
   TaArray<fl32> _texture2D;
+  TaArray<fl32> _textureColMax;
 
+  // convectivity
+  
   TaArray<fl32> _convectivity3D;
   TaArray<fl32> _convectivity2D;
 
@@ -411,7 +421,7 @@ private:
   void _initToMissing();
   void _initToMissing(TaArray<fl32> &array, fl32 missingVal);
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
-  void _computeColMaxDbz();
+  void _computeDbzColMax();
   void _finalizeEchoType();
   void _computeTexture();
   void _computeConvectivity();

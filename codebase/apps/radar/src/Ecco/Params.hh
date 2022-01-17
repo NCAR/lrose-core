@@ -441,8 +441,6 @@ public:
 
   double each_subclump_min_area_km2;
 
-  tdrp_bool_t clumping_write_debug_fields;
-
   char* output_url;
 
   tdrp_bool_t write_partition;
@@ -453,9 +451,9 @@ public:
 
   tdrp_bool_t write_3D_dbz;
 
-  tdrp_bool_t write_convective_dbz;
-
   tdrp_bool_t write_col_max_dbz;
+
+  tdrp_bool_t write_convective_dbz;
 
   tdrp_bool_t write_tops;
 
@@ -464,6 +462,8 @@ public:
   tdrp_bool_t write_height_grids;
 
   tdrp_bool_t write_temperature;
+
+  tdrp_bool_t write_clumping_debug_fields;
 
   char _end_; // end of data region
               // needed for zeroing out data

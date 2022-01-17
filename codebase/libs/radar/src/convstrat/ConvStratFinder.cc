@@ -61,14 +61,15 @@ ConvStratFinder::ConvStratFinder()
 
   _minValidHtKm = 0.0;
   _maxValidHtKm = 30.0;
+  _useDbzColMax = false;
   _minValidDbz = 0.0;
-
+  
   _textureRadiusKm = 7.0;
   _minValidFractionForTexture = 0.25; 
   _minValidFractionForFit = 0.67; 
   _minVolForConvectiveKm3 = 20.0; 
   _minVertExtentForConvectiveKm = 1.0; 
-
+  
   _minConvectivityForConvective = 0.5;
   _maxConvectivityForStratiform = 0.4;
   _minOverlapForClumping = 1;
@@ -81,12 +82,12 @@ ConvStratFinder::ConvStratFinder()
 
   _shallowHtKm = 4.5;
   _deepHtKm = 9.0;
-
+  
   _textureLimitLow = 0.0;
   _textureLimitHigh = 30.0;
-
+  
   _dbzForEchoTops = 18.0;
-
+  
   _nx = _ny = 0;
   _dx = _dy = 0.0;
   _dxKm = _dyKm = 0.0;
@@ -261,7 +262,7 @@ int ConvStratFinder::computeEchoType(const fl32 *dbz,
   
   // compute column maximum reflectivity
   
-  _computeColMaxDbz();
+  _computeDbzColMax();
   
   // compute spatial texture of reflectivity
   
@@ -322,7 +323,7 @@ int ConvStratFinder::_computeEchoType2D(const fl32 *dbz,
   // even though this is trivial for 2D data, it still must
   // be called to set certain arrays
 
-  _computeColMaxDbz();
+  _computeDbzColMax();
   
   // compute spatial texture of reflectivity
   
@@ -350,22 +351,23 @@ void ConvStratFinder::_allocArrays()
   _dbz3D.alloc(_nxyz);
   _shallowHtGrid.alloc(_nxy);
   _deepHtGrid.alloc(_nxy);
-  _colMaxDbz.alloc(_nxy);
+  _dbzColMax.alloc(_nxy);
   _fractionActive.alloc(_nxy);
-
-  _echoType3D.alloc(_nxyz);
-  _echoType2D.alloc(_nxy);
-  _convDbz.alloc(_nxyz);
 
   _texture3D.alloc(_nxyz);
   _texture2D.alloc(_nxy);
+  _textureColMax.alloc(_nxy);
 
   _convectivity3D.alloc(_nxyz);
   _convectivity2D.alloc(_nxy);
 
+  _echoType3D.alloc(_nxyz);
+  _echoType2D.alloc(_nxy);
+
   _convTopKm.alloc(_nxy);
   _stratTopKm.alloc(_nxy);
   _echoTopKm.alloc(_nxy);
+  _convDbz.alloc(_nxyz);
   
 }
 
@@ -379,22 +381,23 @@ void ConvStratFinder::_initToMissing()
   _initToMissing(_dbz3D, _missingFl32);
   _initToMissing(_shallowHtGrid, _missingFl32);
   _initToMissing(_deepHtGrid, _missingFl32);
-  _initToMissing(_colMaxDbz, _missingFl32);
+  _initToMissing(_dbzColMax, _missingFl32);
   _initToMissing(_fractionActive, _missingFl32);
-
-  _initToMissing(_echoType3D, _missingUi08);
-  _initToMissing(_echoType2D, _missingUi08);
-  _initToMissing(_convDbz, _missingFl32);
 
   _initToMissing(_texture3D, _missingFl32);
   _initToMissing(_texture2D, _missingFl32);
-
+  _initToMissing(_textureColMax, _missingFl32);
+  
   _initToMissing(_convectivity3D, _missingFl32);
   _initToMissing(_convectivity2D, _missingFl32);
 
+  _initToMissing(_echoType3D, _missingUi08);
+  _initToMissing(_echoType2D, _missingUi08);
+  
   _initToMissing(_convTopKm, _missingFl32);
   _initToMissing(_stratTopKm, _missingFl32);
   _initToMissing(_echoTopKm, _missingFl32);
+  _initToMissing(_convDbz, _missingFl32);
   
 }
 
@@ -426,42 +429,43 @@ void ConvStratFinder::freeArrays()
   _dbz3D.free();
   _shallowHtGrid.free();
   _deepHtGrid.free();
-  _colMaxDbz.free();
+  _dbzColMax.free();
   _fractionActive.free();
-
-  _echoType3D.free();
-  _echoType2D.free();
-  _convDbz.free();
 
   _texture3D.free();
   _texture2D.free();
+  _textureColMax.free();
 
   _convectivity3D.free();
   _convectivity2D.free();
 
+  _echoType3D.free();
+  _echoType2D.free();
+
   _convTopKm.free();
   _stratTopKm.free();
   _echoTopKm.free();
+  _convDbz.free();
   
 }
 
 /////////////////////////////////////////////////////////
 // compute the column maximum DBZ
 
-void ConvStratFinder::_computeColMaxDbz()
+void ConvStratFinder::_computeDbzColMax()
   
 {
 
-  PMU_auto_register("ConvStratFinder::_computeColMaxDbz()");
+  PMU_auto_register("ConvStratFinder::_computeDbzColMax()");
 
   // get data pointers
 
-  fl32 *colMaxDbz = _colMaxDbz.dat();
+  fl32 *dbzColMax = _dbzColMax.dat();
   
   // initialize
 
   for (size_t ii = 0; ii < _nxy; ii++) {
-    colMaxDbz[ii] = _missingFl32;
+    dbzColMax[ii] = _missingFl32;
   }
 
   fl32 *dbz = _dbz3D.dat();
@@ -477,8 +481,8 @@ void ConvStratFinder::_computeColMaxDbz()
         if (dbzVal == _missingFl32) {
           continue;
         }
-        if (dbzVal > colMaxDbz[jj]) {
-          colMaxDbz[jj] = dbzVal;
+        if (dbzVal > dbzColMax[jj]) {
+          dbzColMax[jj] = dbzVal;
         }
         if (dbzVal >= _dbzForEchoTops) {
           topKm[jj] = htKm;
@@ -498,7 +502,7 @@ void ConvStratFinder::_computeColMaxDbz()
       double count = 0;
       for (size_t ii = 0; ii < _textureKernelOffsets.size(); ii++) {
         size_t jj = xycenter + _textureKernelOffsets[ii].offset;
-        double val = colMaxDbz[jj];
+        double val = dbzColMax[jj];
         if (val >= _minValidDbz) {
           count++;
         }
@@ -519,33 +523,38 @@ void ConvStratFinder::_computeTexture()
 
   PMU_auto_register("ConvStratFinder::_computeTexture()");
 
-  // array pointers
-
-  fl32 *volTexture = _texture3D.dat();
-  fl32 *fractionTexture = _fractionActive.dat();
-
-  // initialize
-  
-  for (size_t ii = 0; ii < _nxyz; ii++) {
-    volTexture[ii] = _missingFl32;
-  }
-  
   // set up threads for computing texture at each level
 
-  const fl32 *dbz = _dbz3D.dat();
   vector<ComputeTexture *> threads;
-  for (size_t iz = _minIz; iz <= _maxIz; iz++) {
-    size_t zoffset = iz * _nxy;
-    ComputeTexture *thread = new ComputeTexture(iz);
+
+  if (_useDbzColMax) {
+    // use the col max DBZ, and set
+    // the texture at the lowest plane
+    const fl32 *dbz = _dbzColMax.dat();
+    ComputeTexture *thread = new ComputeTexture(-1);
+    thread->setDbz(dbz, _missingFl32);
+    thread->setTextureArray(_textureColMax.dat());
+    threads.push_back(thread);
+  } else {
+    // 3D texture
+    const fl32 *dbz = _dbz3D.dat();
+    for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+      size_t zoffset = iz * _nxy;
+      ComputeTexture *thread = new ComputeTexture(iz);
+      thread->setDbz(dbz + zoffset, _missingFl32);
+      thread->setTextureArray(_texture3D.dat() + zoffset);
+      threads.push_back(thread);
+    }
+  }
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    ComputeTexture *thread = threads[ii];
     thread->setGridSize(_nx, _ny);
     thread->setKernelSize(_nxTexture, _nyTexture);
     thread->setMinValidFractionForTexture(_minValidFractionForTexture);
     thread->setMinValidFractionForFit(_minValidFractionForFit);
-    thread->setDbz(dbz + zoffset, _missingFl32);
-    thread->setFractionCovered(fractionTexture);
+    thread->setFractionCovered(_fractionActive.dat());
     thread->setKernelOffsets(_textureKernelOffsets);
-    thread->setTextureArray(volTexture + zoffset);
-    threads.push_back(thread);
   }
 
   // set threads going
@@ -579,6 +588,22 @@ void ConvStratFinder::_computeTexture()
   if (_verbose) {
     cerr << "====>> All threads freed" << endl;
   }
+
+  // for col max, copy the col max texture to all planes
+  
+  if (_useDbzColMax) {
+    fl32 *textureColMax = _textureColMax.dat();
+    for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+      size_t zoffset = iz * _nxy;
+      fl32 *texture = _texture3D.dat() + zoffset;
+      fl32 *dbz = _dbz3D.dat() + zoffset;
+      for (size_t ii = 0; ii < _nxy; ii++) {
+        if (dbz[ii] != _missingFl32) {
+          texture[ii] = textureColMax[ii];
+        }
+      } // ii
+    } // iz
+  } // if (_useDbzColMax) 
 
 }
 

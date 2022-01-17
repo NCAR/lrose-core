@@ -144,10 +144,11 @@ public:
 
   // get debug grids from using dual threshold
 
-  const fl32 *getDualThreshCompFileGrid() const;
-  const ui08 *getDualThreshAllFileGrid() const;
-  const ui08 *getDualThreshValidFileGrid() const;
-  const ui08 *getDualThreshGrownFileGrid() const;
+  const fl32 *getDualThreshDbzCompOutputGrid() const;
+  const ui08 *getDualThreshLargeClumpsOutputGrid() const;
+  const ui08 *getDualThreshAllSubclumpsOutputGrid() const;
+  const ui08 *getDualThreshValidSubclumpsOutputGrid() const;
+  const ui08 *getDualThreshGrownSubclumpsOutputGrid() const;
 
 protected:
   
