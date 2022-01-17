@@ -114,7 +114,7 @@ Ecco::Ecco(int argc, char **argv)
     }
   }
 
-  // set up EccoFinder object
+  // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _finder.setVerbose(true);
