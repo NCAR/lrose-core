@@ -245,12 +245,6 @@ paramdef double {
   p_help = "We compute the area of each sub-clump. For a subclump to be valid, the area must exceed this parameter.";
 } each_subclump_min_area_km2;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to write fields to the output files for debugging the dual threshold clumping.";
-  p_help = "If this is set, the following debug fields are written to the output files: .";
-} clumping_write_debug_fields;
-
 commentdef {
   p_header = "DATA OUTPUT";
 }
@@ -287,15 +281,15 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Write out convective dbz field.";
-  p_help = "This will write out the 3D convective DBZ field.";
-} write_convective_dbz;
-
-paramdef boolean {
-  p_default = true;
   p_descr = "Write out column maximum dbz field.";
   p_help = "This is the max reflectivity at any height.";
 } write_col_max_dbz;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Write out convective dbz field.";
+  p_help = "This will write out the 3D convective DBZ field.";
+} write_convective_dbz;
 
 paramdef boolean {
   p_default = true;
@@ -321,3 +315,8 @@ paramdef boolean {
   p_help = "This comes from a model, remapped onto the reflectivity grid.";
 } write_temperature;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to write fields to the output files for debugging the dual threshold clumping.";
+  p_help = "If this is set, the following debug fields are written to the output files: .";
+} write_clumping_debug_fields;

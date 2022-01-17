@@ -359,7 +359,7 @@ void Ecco::_addFields()
   if (_params.write_col_max_dbz) {
     // col max dbz
     _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                                 _finder.getColMaxDbz(),
+                                 _finder.getDbzColMax(),
                                  Mdvx::ENCODING_INT16,
                                  "DbzComp",
                                  "dbz_composite",
@@ -496,7 +496,7 @@ void Ecco::_addFields()
                                  ""));
   }
 
-  if (_params.clumping_write_debug_fields) {
+  if (_params.write_clumping_debug_fields) {
     _addClumpingDebugFields();
   }
   

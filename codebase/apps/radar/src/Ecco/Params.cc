@@ -1037,18 +1037,6 @@
     tt->single_val.d = 2;
     tt++;
     
-    // Parameter 'clumping_write_debug_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("clumping_write_debug_fields");
-    tt->descr = tdrpStrDup("Option to write fields to the output files for debugging the dual threshold clumping.");
-    tt->help = tdrpStrDup("If this is set, the following debug fields are written to the output files: .");
-    tt->val_offset = (char *) &clumping_write_debug_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1118,18 +1106,6 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'write_convective_dbz'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_convective_dbz");
-    tt->descr = tdrpStrDup("Write out convective dbz field.");
-    tt->help = tdrpStrDup("This will write out the 3D convective DBZ field.");
-    tt->val_offset = (char *) &write_convective_dbz - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'write_col_max_dbz'
     // ctype is 'tdrp_bool_t'
     
@@ -1139,6 +1115,18 @@
     tt->descr = tdrpStrDup("Write out column maximum dbz field.");
     tt->help = tdrpStrDup("This is the max reflectivity at any height.");
     tt->val_offset = (char *) &write_col_max_dbz - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_convective_dbz'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_convective_dbz");
+    tt->descr = tdrpStrDup("Write out convective dbz field.");
+    tt->help = tdrpStrDup("This will write out the 3D convective DBZ field.");
+    tt->val_offset = (char *) &write_convective_dbz - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -1188,6 +1176,18 @@
     tt->help = tdrpStrDup("This comes from a model, remapped onto the reflectivity grid.");
     tt->val_offset = (char *) &write_temperature - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'write_clumping_debug_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_clumping_debug_fields");
+    tt->descr = tdrpStrDup("Option to write fields to the output files for debugging the dual threshold clumping.");
+    tt->help = tdrpStrDup("If this is set, the following debug fields are written to the output files: .");
+    tt->val_offset = (char *) &write_clumping_debug_fields - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL
