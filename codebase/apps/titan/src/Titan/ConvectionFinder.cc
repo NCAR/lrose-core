@@ -200,7 +200,7 @@ void ConvectionFinder::_addFields(const MdvxField &dbzField,
   
   Mdvx::field_header_t maxFhdr = fhdr;
   MdvxField *maxField = new MdvxField(maxFhdr, vhdr);
-  maxField->setVolData(_convStrat.getColMaxDbz(),
+  maxField->setVolData(_convStrat.getDbzColMax(),
                        volSize32,
                        Mdvx::ENCODING_FLOAT32);
   maxField->convertType(Mdvx::ENCODING_FLOAT32,

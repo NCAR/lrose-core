@@ -440,7 +440,7 @@ void OutputMdv::addConvStratFields(const ConvStratFinder &convStrat,
              "dBZ",
              Radx::FL32, 1.0, 0.0,
              convStrat.getMissingFl32(),
-             convStrat.getColMaxDbz());
+             convStrat.getDbzColMax());
     
     addField(vol, proj, vlevel2D,
              "FractionActive",

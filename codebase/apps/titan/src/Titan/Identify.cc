@@ -394,7 +394,7 @@ int Identify::_writeDualThreshMdv()
   
 {
 
-  if (_clumping.getDualThreshCompFileGrid() == NULL) {
+  if (_clumping.getDualThreshDbzCompOutputGrid() == NULL) {
     return -1;
   }
 
@@ -422,13 +422,15 @@ int Identify::_writeDualThreshMdv()
   // Add the fields
 
   out.addField("Composite reflectivity", "CompDbz", "dBZ", "dBZ", 
-               _clumping.getDualThreshCompFileGrid());
-  out.addField("All clumps", "All", "count", "none", 1.0, 0.0, 
-               _clumping.getDualThreshAllFileGrid());
-  out.addField("Valid clumps", "Valid", "count", "none", 1.0, 0.0, 
-               _clumping.getDualThreshValidFileGrid());
-  out.addField("Grown clumps", "Grown", "count", "none", 1.0, 0.0, 
-               _clumping.getDualThreshGrownFileGrid());
+               _clumping.getDualThreshDbzCompOutputGrid());
+  out.addField("Large clumps", "LargeClumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshLargeClumpsOutputGrid());
+  out.addField("All subclumps", "AllSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshAllSubclumpsOutputGrid());
+  out.addField("Valid subclumps", "ValidSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshValidSubclumpsOutputGrid());
+  out.addField("Grown subclumps", "GrownSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshGrownSubclumpsOutputGrid());
 
   // write out file
   
