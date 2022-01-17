@@ -440,6 +440,7 @@ codebase/apps/radar/src/DsrGrabber/DsrGrabber
 codebase/apps/radar/src/DsrMerge/DsrMerge
 codebase/apps/radar/src/DualDopplerLobes/DualDopplerLobes
 codebase/apps/radar/src/Ecco/Ecco
+codebase/apps/radar/src/Ecco/ResTestEcco/ResTestEcco
 
 codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake

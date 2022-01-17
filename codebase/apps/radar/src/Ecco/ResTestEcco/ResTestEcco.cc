@@ -38,7 +38,6 @@
 
 #include <algorithm>
 #include <dataport/bigend.h>
-#include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include "ResTestEcco.hh"
 using namespace std;
@@ -104,6 +103,93 @@ ResTestEcco::ResTestEcco(int argc, char **argv)
     }
   }
 
+}
+
+// destructor
+
+ResTestEcco::~ResTestEcco()
+
+{
+
+
+}
+
+//////////////////////////////////////////////////
+// Run
+
+int ResTestEcco::Run()
+{
+  
+  int iret = 0;
+
+  // loop until end of data
+  
+  _input.reset();
+  while (!_input.endOfData()) {
+    
+    // do the read
+
+    if (_doRead()) {
+      cerr << "ERROR - ResTestEcco::Run()" << endl;
+      umsleep(1000);
+      iret = -1;
+      continue;
+    }
+
+    for (int ires = 0; ires < _params.relative_resolution_factors_n; ires++) {
+
+      // process the file for this resolution factor
+
+      double resFactor = _params._relative_resolution_factors[ires];
+
+      if (_params.debug) {
+        cerr << "Processing file for res factor: " << resFactor << endl;
+      }
+
+      if (_processFile(resFactor)) {
+        cerr << "ERROR - ResTestEcco::Run()" << endl;
+        cerr << "  Calling _processFile" << endl;
+        iret = -1;
+      }
+      
+    } // ires
+
+    // clear
+    
+    _inMdvx.clear();
+    _outMdvx.clear();
+    _finder.freeArrays();
+    
+  } // while
+  
+  return iret;
+
+}
+
+////////////////////////////////////////////////////////
+// Process the input file for the given resolion factor
+
+int ResTestEcco::_processFile(double resFactor)
+{
+
+  int iret = 0;
+  
+  // set grid in ConvStratFinder object
+    
+  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
+  if (dbzField == NULL) {
+    cerr << "ERROR - ResTestEcco::_processFile()" << endl;
+    cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
+    return -1;
+  }
+  const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
+  bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
+  vector<double> zLevels;
+  for (int iz = 0; iz < fhdr.nz; iz++) {
+    zLevels.push_back(vhdr.level[iz]);
+  }
+    
   // set up ConvStratFinder object
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -122,104 +208,37 @@ ResTestEcco::ResTestEcco(int argc, char **argv)
   _finder.setTextureLimitLow(_params.texture_limit_low);
   _finder.setTextureLimitHigh(_params.texture_limit_high);
   
-}
+  _finder.setGrid(fhdr.nx,
+                  fhdr.ny,
+                  fhdr.grid_dx, 
+                  fhdr.grid_dy, 
+                  fhdr.grid_minx, 
+                  fhdr.grid_miny,
+                  zLevels,
+                  isLatLon);
 
-// destructor
-
-ResTestEcco::~ResTestEcco()
-
-{
-
-  // unregister process
-
-  PMU_auto_unregister();
-
-}
-
-//////////////////////////////////////////////////
-// Run
-
-int ResTestEcco::Run()
-{
+  _finder.setConstantHtThresholds(4.5, 9.0);
   
-  int iret = 0;
-
-  // register with procmap
+  // compute the convective/stratiform partition
   
-  PMU_auto_register("Run");
-
-  // loop until end of data
+  const fl32 *dbz = (const fl32*) dbzField->getVol();
+  fl32 missingDbz = fhdr.missing_data_value;
+  if (_finder.computeEchoType(dbz, missingDbz)) {
+    cerr << "ERROR - ResTestEcco::Run()" << endl;
+    return -1;
+  }
+    
+  // write out
   
-  _input.reset();
-  while (!_input.endOfData()) {
-    
-    PMU_auto_register("In main loop");
-    
-    // do the read
-
-    PMU_auto_register("Before read");
-    if (_doRead()) {
-      cerr << "ERROR - ResTestEcco::Run()" << endl;
-      umsleep(1000);
-      iret = -1;
-      continue;
-    }
-
-    // set grid in ResTestEccoFinder object
-
-    MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-    if (dbzField == NULL) {
-      cerr << "ERROR - ResTestEcco::Run()" << endl;
-      cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
-      return -1;
-    }
-    const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
-    const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
-    bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
-    vector<double> zLevels;
-    for (int iz = 0; iz < fhdr.nz; iz++) {
-      zLevels.push_back(vhdr.level[iz]);
-    }
-    
-    _finder.setGrid(fhdr.nx,
-                    fhdr.ny,
-                    fhdr.grid_dx, 
-                    fhdr.grid_dy, 
-                    fhdr.grid_minx, 
-                    fhdr.grid_miny,
-                    zLevels,
-                    isLatLon);
-
-    _finder.setConstantHtThresholds(4.5, 9.0);
-    
-    // compute the convective/stratiform partition
-    
-    const fl32 *dbz = (const fl32*) dbzField->getVol();
-    fl32 missingDbz = fhdr.missing_data_value;
-    if (_finder.computeEchoType(dbz, missingDbz)) {
-      cerr << "ERROR - ResTestEcco::Run()" << endl;
-      umsleep(1000);
-      iret = -1;
-      continue;
-    }
-    
-    // write out
-    
-    if (_doWrite()) {
-      cerr << "ERROR - ResTestEcco::Run()" << endl;
-      umsleep(1000);
-      iret = -1;
-      continue;
-    }
-    
-    // clear
-    
-    _inMdvx.clear();
-    _outMdvx.clear();
-    _finder.freeArrays();
-    
-  } // while
+  if (_doWrite()) {
+    cerr << "ERROR - ResTestEcco::Run()" << endl;
+    iret = -1;
+  }
   
+  // clear
+  
+  _finder.freeArrays();
+    
   return iret;
 
 }
@@ -246,8 +265,6 @@ int ResTestEcco::_doRead()
   }
   
   // read in
-  
-  PMU_auto_register("Before read");
   
   if (_input.readVolumeNext(_inMdvx)) {
     cerr << "ERROR - ResTestEcco::_doRead" << endl;
@@ -424,7 +441,6 @@ int ResTestEcco::_doWrite()
   
   // write out
   
-  PMU_auto_register("Before write");
   if(_outMdvx.writeToDir(_params.output_dir)) {
     cerr << "ERROR - ResTestEcco::Run" << endl;
     cerr << "  Cannot write data set." << endl;

@@ -92,6 +92,7 @@ private:
   MdvxField _shallowHtField;
   MdvxField _deepHtField;
 
+  int _processFile(double resFactor);
   int _doRead();
   void _addFields();
   int _doWrite();
