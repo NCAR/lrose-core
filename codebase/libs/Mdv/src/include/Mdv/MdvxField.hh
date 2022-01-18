@@ -751,7 +751,7 @@ public:
                        Mdvx::field_header_t &fhdr);
   static void setTransform(const string &transform, Mdvx::field_header_t &fhdr);
 
-// setting the volume data
+  // setting the volume data
   //
   // The data must be uncompressed.
   // Scaling type, scale and bias only apply to INT8 and INT16 encoding.

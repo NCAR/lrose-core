@@ -381,8 +381,8 @@ public:
 
   char* dbz_field_name;
 
-  double *_relative_resolution_factors;
-  int relative_resolution_factors_n;
+  double *_resolution_reduction_factors;
+  int resolution_reduction_factors_n;
 
   double min_valid_dbz;
 

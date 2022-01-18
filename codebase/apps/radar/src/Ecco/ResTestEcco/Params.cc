@@ -658,16 +658,16 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'relative_resolution_factors'
+    // Parameter 'resolution_reduction_factors'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("relative_resolution_factors");
-    tt->descr = tdrpStrDup("Resolution factors of the test grids, relative to the input grid.");
+    tt->param_name = tdrpStrDup("resolution_reduction_factors");
+    tt->descr = tdrpStrDup("Resolution reduction factors of the test grids, relative to the input grid.");
     tt->help = tdrpStrDup("Array of relative resolutions to test. The absolute resolution of the test grids are the original resolution, multiplied by these factors.");
-    tt->array_offset = (char *) &_relative_resolution_factors - &_start_;
-    tt->array_n_offset = (char *) &relative_resolution_factors_n - &_start_;
+    tt->array_offset = (char *) &_resolution_reduction_factors - &_start_;
+    tt->array_n_offset = (char *) &resolution_reduction_factors_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);

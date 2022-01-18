@@ -57,9 +57,9 @@ commentdef {
 
 paramdef double {
   p_default = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-  p_descr = "Resolution factors of the test grids, relative to the input grid.";	
+  p_descr = "Resolution reduction factors of the test grids, relative to the input grid.";	
   p_help = "Array of relative resolutions to test. The absolute resolution of the test grids are the original resolution, multiplied by these factors.";
-} relative_resolution_factors[];
+} resolution_reduction_factors[];
 
 paramdef double {
   p_default = 0.0;

@@ -92,7 +92,23 @@ private:
   MdvxField _shallowHtField;
   MdvxField _deepHtField;
 
-  int _processFile(double resFactor);
+  // kernel computations
+
+  typedef struct {
+    int jx, jy;
+    double xx;
+    double yy;
+    ssize_t offset;
+  } kernel_t;
+  vector<kernel_t> _kernelOffsets;
+  int _nxKernel, _nyKernel;
+
+  int _processResolution(double resFactor);
+  MdvxField *_createDbzReducedRes(const MdvxField *dbzFieldIn,
+                                  double resFactor);
+  void _computeKernel(const Mdvx::field_header_t &fhdrIn,
+                      double resFactor);
+
   int _doRead();
   void _addFields();
   int _doWrite();

@@ -136,20 +136,20 @@ int ResTestEcco::Run()
       continue;
     }
 
-    for (int ires = 0; ires < _params.relative_resolution_factors_n; ires++) {
+    for (int ires = 0; ires < _params.resolution_reduction_factors_n; ires++) {
 
       // process the file for this resolution factor
 
-      double resFactor = _params._relative_resolution_factors[ires];
-
+      double resFactor = _params._resolution_reduction_factors[ires];
+      
       if (_params.debug) {
-        cerr << "Processing file for res factor: " << resFactor << endl;
+        cerr << "Processing file for res reduction factor: " << resFactor << endl;
       }
 
-      if (_processFile(resFactor)) {
+      if (_processResolution(resFactor)) {
         cerr << "ERROR - ResTestEcco::Run()" << endl;
-        cerr << "  Calling _processFile" << endl;
-        iret = -1;
+        cerr << "  Calling _processResolution" << endl;
+        return -1;
       }
       
     } // ires
@@ -166,24 +166,29 @@ int ResTestEcco::Run()
 
 }
 
-////////////////////////////////////////////////////////
-// Process the input file for the given resolion factor
+////////////////////////////////////////////////////////////
+// Process the input data for the given resolution factor
 
-int ResTestEcco::_processFile(double resFactor)
+int ResTestEcco::_processResolution(double resFactor)
 {
 
   int iret = 0;
   
-  // set grid in ConvStratFinder object
+  // get DBZ field from input file
     
-  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-  if (dbzField == NULL) {
+  const MdvxField *dbzFieldIn = _inMdvx.getField(_params.dbz_field_name);
+  if (dbzFieldIn == NULL) {
     cerr << "ERROR - ResTestEcco::_processFile()" << endl;
     cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
     return -1;
   }
-  const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
-  const Mdvx::vlevel_header_t &vhdr = dbzField->getVlevelHeader();
+
+  // create dbz field with reduced resolution
+
+  MdvxField *dbzFieldReducedRes = _createDbzReducedRes(dbzFieldIn, resFactor);
+  
+  const Mdvx::field_header_t &fhdr = dbzFieldIn->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = dbzFieldIn->getVlevelHeader();
   bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
   vector<double> zLevels;
   for (int iz = 0; iz < fhdr.nz; iz++) {
@@ -221,7 +226,7 @@ int ResTestEcco::_processFile(double resFactor)
   
   // compute the convective/stratiform partition
   
-  const fl32 *dbz = (const fl32*) dbzField->getVol();
+  const fl32 *dbz = (const fl32*) dbzFieldIn->getVol();
   fl32 missingDbz = fhdr.missing_data_value;
   if (_finder.computeEchoType(dbz, missingDbz)) {
     cerr << "ERROR - ResTestEcco::Run()" << endl;
@@ -240,6 +245,128 @@ int ResTestEcco::_processFile(double resFactor)
   _finder.freeArrays();
     
   return iret;
+
+}
+
+////////////////////////////////////////////////////////////
+// Create field at reduced resolution
+
+MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
+                                             double resFactor)
+
+{
+
+  // set headers
+  
+  const Mdvx::field_header_t &fhdrIn = dbzFieldIn->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdrIn = dbzFieldIn->getVlevelHeader();
+  fl32 missingIn = fhdrIn.missing_data_value;
+
+  // modify header for grid resolution
+  
+  Mdvx::field_header_t fhdrOut(fhdrIn);
+  fhdrOut.grid_dx = fhdrIn.grid_dx * resFactor;
+  fhdrOut.grid_dy = fhdrIn.grid_dy * resFactor;
+  fhdrOut.nx = (int) floor(fhdrIn.nx / resFactor);
+  fhdrOut.ny = (int) floor(fhdrIn.ny / resFactor);
+
+  // compute the kernel
+  
+  _computeKernel(fhdrIn, resFactor);
+  
+  // alloc data
+  
+  size_t nxyzOut = fhdrOut.nx * fhdrOut.ny * fhdrOut.nz;
+  MemBuf buf;
+  fl32 *dbzOut = (fl32 *) buf.prepare(nxyzOut * sizeof(fl32));
+  for (size_t ii = 0; ii < nxyzOut; ii++) {
+    dbzOut[ii] = _missing;
+  } // ii
+  
+  // compute the mean dbz data at this resolution
+  
+  const fl32 *dbzIn = (fl32 *) dbzFieldIn->getVol();
+  size_t nxyIn = fhdrIn.nx * fhdrIn.ny;
+  size_t nxyOut = fhdrOut.nx * fhdrOut.ny;
+  
+  for (int iz = 0; iz < fhdrIn.nz; iz++) {
+
+    const fl32 *dbzPlaneIn = dbzIn + iz * nxyIn;
+    fl32 *dbzPlaneOut = dbzOut + iz * nxyOut;
+    
+    for (int iyOut = 0; iyOut < fhdrOut.ny; iyOut++) {
+      for (int ixOut = 0; ixOut < fhdrOut.nx; ixOut++) {
+        int iyIn = (int) floor(iyOut * resFactor + 0.5);
+        int ixIn = (int) floor(ixOut * resFactor + 0.5);
+        if (iyIn >= fhdrIn.ny || ixIn >= fhdrIn.nx) {
+          continue;
+        }
+        size_t xycenterIn = iyIn * fhdrIn.nx +ixIn;
+        double count = 0.0;
+        double sum = 0.0;
+        for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
+          const kernel_t &kern = _kernelOffsets[ii];
+          int jy = iyIn + kern.jy;
+          int jx = ixIn + kern.jx;
+          if (jy < 0 || jy > fhdrIn.ny - 1) {
+            continue;
+          }
+          if (jx < 0 || jx > fhdrIn.nx - 1) {
+            continue;
+          }
+          size_t jj = xycenterIn + _kernelOffsets[ii].offset;
+          assert(jj < nxyIn);
+          fl32 val = dbzPlaneIn[jj];
+          if (val != missingIn) {
+            sum += val;
+            count++;
+          }
+        } // ii
+        if (count > 0) {
+          fl32 mean = sum / count;
+          dbzPlaneOut[iyOut * fhdrOut.nx + ixOut] = mean;
+        }
+      } // ix
+    } // iy
+    
+  } // iz
+
+  MdvxField *outField = new MdvxField(fhdrOut, vhdrIn, dbzOut);
+  return outField;
+
+}
+
+//////////////////////////////////////
+// compute the kernels for this grid
+
+void ResTestEcco::_computeKernel(const Mdvx::field_header_t &fhdrIn,
+                                 double resFactor)
+
+{
+
+  // texture kernel
+
+  _kernelOffsets.clear();
+
+  _nyKernel = (size_t) floor(resFactor + 0.5);
+  _nxKernel = _nyKernel;
+  
+  kernel_t entry;
+  for (int jdy = -_nyKernel; jdy <= _nyKernel; jdy++) {
+    double yy = jdy;
+    for (int jdx = -_nxKernel; jdx <= _nxKernel; jdx++) {
+      double xx = jdx;
+      double radius = sqrt(yy * yy + xx * xx);
+      if (radius <= resFactor * 1.1) {
+        entry.jx = jdx;
+        entry.jy = jdy;
+        entry.xx = xx;
+        entry.yy = yy;
+        entry.offset = jdx + jdy * fhdrIn.nx;
+        _kernelOffsets.push_back(entry);
+      }
+    }
+  }
 
 }
 
