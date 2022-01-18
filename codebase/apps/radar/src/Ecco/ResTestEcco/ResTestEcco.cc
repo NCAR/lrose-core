@@ -242,13 +242,13 @@ int ResTestEcco::_processResolution(int resNum, double resFactor)
   _finder.setConstantHtThresholds(4.5, 9.0);
   
   // compute the convective/stratiform partition
-  
+
   const fl32 *dbz = (const fl32*) _dbzField->getVol();
   if (_finder.computeEchoType(dbz, _missingFloat)) {
     cerr << "ERROR - ResTestEcco::Run()" << endl;
     return -1;
   }
-    
+
   // write out
   
   if (_doWrite(resNum, resFactor)) {
@@ -289,6 +289,8 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   fhdrOut.grid_dy = fhdrIn.grid_dy * resFactor;
   fhdrOut.nx = (int) floor(fhdrIn.nx / resFactor);
   fhdrOut.ny = (int) floor(fhdrIn.ny / resFactor);
+  size_t nxyzOut = fhdrOut.nx * fhdrOut.ny * fhdrOut.nz;
+  fhdrOut.volume_size = nxyzOut * sizeof(fl32);
 
   // compute the kernel
   
@@ -296,7 +298,6 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   
   // alloc data
   
-  size_t nxyzOut = fhdrOut.nx * fhdrOut.ny * fhdrOut.nz;
   MemBuf buf;
   fl32 *dbzOut = (fl32 *) buf.prepare(nxyzOut * sizeof(fl32));
   for (size_t ii = 0; ii < nxyzOut; ii++) {

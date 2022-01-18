@@ -1,0 +1,261 @@
+/**********************************************************************
+ * TDRP params for ResTestEcco
+ **********************************************************************/
+
+//======================================================================
+//
+// Program name: ResTestEcco.
+//
+// ResTestEcco tests Ecco for different grid resolutions. It does so by 
+//   degrading the resolution of the input data set and comparing TDBZ for 
+//   the different grid resolutions.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In ARCHIVE mode, we move through the data between the start and end 
+//   times set on the command line. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data.
+//
+// This is used in ARCHIVE mode. In FILELIST mode, the file paths are 
+//   specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/convstrat/mdv/mrms_3d";
+
+///////////// dbz_field_name //////////////////////////
+//
+// dBZ field name in input MDV files.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+//======================================================================
+//
+// TEST PARAMETERS.
+//
+//======================================================================
+ 
+///////////// resolution_reduction_factors ////////////
+//
+// Resolution reduction factors of the test grids, relative to the input 
+//   grid.
+//
+// Array of relative resolutions to test. The absolute resolution of the 
+//   test grids are the original resolution, multiplied by these factors.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+resolution_reduction_factors = {
+ 1,
+ 2,
+ 3,
+ 4
+};
+
+///////////// min_valid_dbz ///////////////////////////
+//
+// Minimum reflectivity threshold for this analysis (dBZ).
+//
+// Reflectivity below this threshold is set to missing.
+//
+//
+// Type: double
+//
+
+min_valid_dbz = 0;
+
+//======================================================================
+//
+// COMPUTING REFLECTIVITY TEXTURE.
+//
+//======================================================================
+ 
+///////////// texture_radius_km ///////////////////////
+//
+// Radius for texture analysis (km).
+//
+// We determine the reflectivity 'texture' at a point by computing the 
+//   standard deviation of the square of the reflectivity, for all grid 
+//   points within this radius of the central point. We then compute the 
+//   square root of that sdev.
+//
+//
+// Type: double
+//
+
+texture_radius_km = 7;
+
+///////////// min_valid_fraction_for_texture //////////
+//
+// Minimum fraction of surrounding points for texture computations.
+//
+// For a valid computation of texture, we require at least this fraction 
+//   of points around the central point to have valid reflectivity.
+//
+//
+// Type: double
+//
+
+min_valid_fraction_for_texture = 0.25;
+
+///////////// min_valid_fraction_for_fit //////////////
+//
+// Minimum fraction of surrounding points for 2D fit to DBZ.
+//
+// We compute a 2D fit to the reflectivity around a grid point, to 
+//   remove any systematic gradient. For a valid fit, we require at least 
+//   this fraction of points around the central point to have valid 
+//   reflectivity.
+//
+//
+// Type: double
+//
+
+min_valid_fraction_for_fit = 0.67;
+
+//======================================================================
+//
+// CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY.
+//
+// Convectivity ranges from 0 to 1. To convert texture to convectivity, 
+//   we apply a piece-wise linear transfer function. This section defines 
+//   the lower texture limit and the upper texture limit. At or below the 
+//   lower limit convectivity is set to 0. At or above the upper limit 
+//   convectivity is set to 1. Between these two limits convectivity 
+//   varies linearly with texture.
+//
+//======================================================================
+ 
+///////////// texture_limit_low ///////////////////////
+//
+// Lower limit for texture.
+//
+// Below this texture the convectivity is set to 0.
+//
+//
+// Type: double
+//
+
+texture_limit_low = 0;
+
+///////////// texture_limit_high //////////////////////
+//
+// Upper limit for texture.
+//
+// Above this texture the convectivity is set to 1. Between the limits 
+//   convectivity varies linearly with texture.
+//
+//
+// Type: double
+//
+
+texture_limit_high = 30;
+
+//======================================================================
+//
+// SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY.
+//
+// If neither is set, we flag the point as MIXED.
+//
+//======================================================================
+ 
+///////////// min_convectivity_for_convective /////////
+//
+// Minimum convectivity for convective at a point.
+//
+// If the convectivity at a point exceeds this value, we set the 
+//   convective flag at this point.
+//
+//
+// Type: double
+//
+
+min_convectivity_for_convective = 0.5;
+
+///////////// max_convectivity_for_stratiform /////////
+//
+// Maximum convectivity for stratiform at a point.
+//
+// If the convectivity at a point is less than this value, we set the 
+//   stratiform flag at this point. If it is above this but less than 
+//   min_convectivity_for_convective we flag the point as MIXED.
+//
+//
+// Type: double
+//
+
+max_convectivity_for_stratiform = 0.4;
+
+//======================================================================
+//
+// DATA OUTPUT.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output dir.
+//
+// Output files are written to subdirectories of this path.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/convstrat/mdv/ResTestEcco/pecan";
+
