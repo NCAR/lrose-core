@@ -222,7 +222,10 @@ int ResTestEcco::_processResolution(int resNum, double resFactor)
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
   _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
-  _finder.setTextureRadiusKm(_params.texture_radius_km);
+  double textureRadiusKm = _params.texture_radius_km * (log10(resFactor) + 1.0);
+  // double textureRadiusKm = _params.texture_radius_km;
+  _finder.setTextureRadiusKm(textureRadiusKm);
+  cerr << "Using textureRadiusKm: " << textureRadiusKm << endl;
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
   _finder.setMinValidFractionForFit
@@ -311,10 +314,10 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   size_t nxyOut = fhdrOut.nx * fhdrOut.ny;
   
   for (int iz = 0; iz < fhdrIn.nz; iz++) {
-
-    const fl32 *dbzPlaneIn = dbzIn + iz * nxyIn;
-    fl32 *dbzPlaneOut = dbzOut + iz * nxyOut;
     
+    fl32 *dbzPlaneIn = (fl32 *) dbzIn + iz * nxyIn;
+    fl32 *dbzPlaneOut = dbzOut + iz * nxyOut;
+
     for (int iyOut = 0; iyOut < fhdrOut.ny; iyOut++) {
       for (int ixOut = 0; ixOut < fhdrOut.nx; ixOut++) {
         int iyIn = (int) floor(iyOut * resFactor + 0.5);
@@ -322,7 +325,7 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
         if (iyIn >= fhdrIn.ny || ixIn >= fhdrIn.nx) {
           continue;
         }
-        size_t xycenterIn = iyIn * fhdrIn.nx +ixIn;
+        size_t xycenterIn = iyIn * fhdrIn.nx + ixIn;
         double count = 0.0;
         double sum = 0.0;
         for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
@@ -335,12 +338,13 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
           if (jx < 0 || jx > fhdrIn.nx - 1) {
             continue;
           }
-          size_t jj = xycenterIn + _kernelOffsets[ii].offset;
-          assert(jj < nxyIn);
-          fl32 val = dbzPlaneIn[jj];
-          if (val != _missingFloat) {
-            sum += val;
-            count++;
+          size_t jj = xycenterIn + kern.offset;
+          if (jj < nxyIn) {
+            fl32 val = dbzPlaneIn[jj];
+            if (val != _missingFloat) {
+              sum += val;
+              count++;
+            }
           }
         } // ii
         if (count > 0) {
@@ -349,6 +353,29 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
         }
       } // ix
     } // iy
+
+    {
+      // write the kernel into the original DBZ field
+      // with a value of 80 at (100,100)
+      int iyIn = 100;
+      int ixIn = 100;
+      size_t xycenterIn = iyIn * fhdrIn.nx + ixIn;
+      for (size_t ii = 0; ii < _kernelOffsets.size(); ii++) {
+        const kernel_t &kern = _kernelOffsets[ii];
+        int jy = iyIn + kern.jy;
+        int jx = ixIn + kern.jx;
+        if (jy < 0 || jy > fhdrIn.ny - 1) {
+          continue;
+        }
+        if (jx < 0 || jx > fhdrIn.nx - 1) {
+          continue;
+        }
+        size_t jj = xycenterIn + kern.offset;
+        if (jj < nxyIn) {
+          dbzPlaneIn[jj] = 80;
+        }
+      } // ii
+    }
     
   } // iz
 
@@ -369,20 +396,21 @@ void ResTestEcco::_computeKernel(const Mdvx::field_header_t &fhdrIn,
 
   _kernelOffsets.clear();
 
-  _nyKernel = (size_t) floor(resFactor + 0.5);
+  _nyKernel = (size_t) floor(resFactor + 0.5) - 1;
+  if (_nyKernel < 1) {
+    _nyKernel = 1;
+  }
   _nxKernel = _nyKernel;
-  
+
   kernel_t entry;
   for (int jdy = -_nyKernel; jdy <= _nyKernel; jdy++) {
     double yy = jdy;
     for (int jdx = -_nxKernel; jdx <= _nxKernel; jdx++) {
       double xx = jdx;
       double radius = sqrt(yy * yy + xx * xx);
-      if (radius <= resFactor * 1.1) {
+      if (radius <= (resFactor - 1.0) * 1.1) {
         entry.jx = jdx;
         entry.jy = jdy;
-        entry.xx = xx;
-        entry.yy = yy;
         entry.offset = jdx + jdy * fhdrIn.nx;
         _kernelOffsets.push_back(entry);
       }
@@ -556,6 +584,8 @@ void ResTestEcco::_addFields()
                                 "EchoType3D",
                                 "convective_stratiform_echo_type_3D",
                                 ""));
+
+  _outMdvx->addField(_inMdvx.getField(_params.dbz_field_name));
 
 }
 

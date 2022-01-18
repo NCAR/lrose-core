@@ -97,105 +97,121 @@ field_list = {
 
 # ConvStrat for PECAN
 
-Dbz3DMax Dbz3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
-Dbz3D     Dbz3D   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
-FractionActive  FractionActive  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
+Dbz3DMax Dbz3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractionActive  FractionActive  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
 
 ====1====      ====1=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====1====      ====1=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====1====      ====1=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-DbzTexture3DMax DbzTexture3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
-DbzTexture3D    DbzTexture3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
-DbzTextureComp  DbzTextureComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
+DbzTexture3DMax DbzTexture3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
+DbzTexture3D    DbzTexture3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
+DbzTextureComp  DbzTextureComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
 
-Convectivity3DMax Convectivity3DMax  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivity3D    Convectivity3D     $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
-ConvectivityComp  ConvectivityComp   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3DMax Convectivity3DMax  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3D    Convectivity3D     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
+ConvectivityComp  ConvectivityComp   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
 
-EchoType3DMax EchoType3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
-EchoType3D    EchoType3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
-EchoTypeComp  EchoTypeComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+EchoType3DMax EchoType3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
+EchoType3D    EchoType3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
+EchoTypeComp  EchoTypeComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_1.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
 
 ====2====      ====2=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====2====      ====2=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====2====      ====2=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-Dbz3DMax Dbz3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
-Dbz3D     Dbz3D   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
-FractionActive  FractionActive  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
+Dbz3DMax Dbz3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractionActive  FractionActive  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
 
-DbzTexture3DMax DbzTexture3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
-DbzTexture3D    DbzTexture3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
-DbzTextureComp  DbzTextureComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
+DbzTexture3DMax DbzTexture3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
+DbzTexture3D    DbzTexture3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
+DbzTextureComp  DbzTextureComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
 
-Convectivity3DMax Convectivity3DMax  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivity3D    Convectivity3D     $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
-ConvectivityComp  ConvectivityComp   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3DMax Convectivity3DMax  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3D    Convectivity3D     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
+ConvectivityComp  ConvectivityComp   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
 
-EchoType3DMax EchoType3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
-EchoType3D    EchoType3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
-EchoTypeComp  EchoTypeComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+EchoType3DMax EchoType3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
+EchoType3D    EchoType3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
+EchoTypeComp  EchoTypeComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+
+kernel        kernel     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_2.00&DBZ  dbz.colors   dBZ -5 80 5 cart 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
 ====3====      ====3=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====3====      ====3=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====3====      ====3=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-Dbz3DMax Dbz3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
-Dbz3D     Dbz3D   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
-FractionActive  FractionActive  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
+Dbz3DMax Dbz3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractionActive  FractionActive  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
 
-DbzTexture3DMax DbzTexture3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
-DbzTexture3D    DbzTexture3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
-DbzTextureComp  DbzTextureComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
+DbzTexture3DMax DbzTexture3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
+DbzTexture3D    DbzTexture3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
+DbzTextureComp  DbzTextureComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
 
-Convectivity3DMax Convectivity3DMax  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivity3D    Convectivity3D     $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
-ConvectivityComp  ConvectivityComp   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3DMax Convectivity3DMax  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3D    Convectivity3D     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
+ConvectivityComp  ConvectivityComp   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
 
-EchoType3DMax EchoType3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
-EchoType3D    EchoType3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
-EchoTypeComp  EchoTypeComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+EchoType3DMax EchoType3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
+EchoType3D    EchoType3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
+EchoTypeComp  EchoTypeComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+
+kernel        kernel     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_3.00&DBZ  dbz.colors   dBZ -5 80 5 cart 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
 ====4====      ====4=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====4====      ====4=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ====4====      ====4=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-Dbz3DMax Dbz3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
-Dbz3D     Dbz3D   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
-FractionActive  FractionActive  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
+Dbz3DMax Dbz3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractionActive  FractionActive  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
 
-DbzTexture3DMax DbzTexture3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
-DbzTexture3D    DbzTexture3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
-DbzTextureComp  DbzTextureComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
+DbzTexture3DMax DbzTexture3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
+DbzTexture3D    DbzTexture3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
+DbzTextureComp  DbzTextureComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
 
-Convectivity3DMax Convectivity3DMax  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivity3D    Convectivity3D     $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
-ConvectivityComp  ConvectivityComp   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3DMax Convectivity3DMax  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3D    Convectivity3D     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
+ConvectivityComp  ConvectivityComp   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
 
-EchoType3DMax EchoType3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
-EchoType3D    EchoType3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
-EchoTypeComp  EchoTypeComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+EchoType3DMax EchoType3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
+EchoType3D    EchoType3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
+EchoTypeComp  EchoTypeComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
 
-====4.9====      ====4.9=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-====4.9====      ====4.9=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
-====4.9====      ====4.9=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+kernel        kernel     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_4.00&DBZ  dbz.colors   dBZ -5 80 5 cart 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-Dbz3DMax Dbz3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
-Dbz3D     Dbz3D   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
-FractionActive  FractionActive  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&FractionActive  fraction.colors - -5 80 5 cart 1 0
+====5.0====      ====5.0=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+====5.0====      ====5.0=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+====5.0====      ====5.0=====  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
-DbzTexture3DMax DbzTexture3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
-DbzTexture3D    DbzTexture3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
-DbzTextureComp  DbzTextureComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
+Dbz3DMax Dbz3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart,comp 1 0
+Dbz3D     Dbz3D   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&Dbz3D  dbz.colors   dBZ -5 80 5 cart 1 0
+FractionActive  FractionActive  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&FractionActive  fraction.colors - -5 80 5 cart 1 0
 
-Convectivity3DMax Convectivity3DMax  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
-Convectivity3D    Convectivity3D     $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
-ConvectivityComp  ConvectivityComp   $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+DbzTexture3DMax DbzTexture3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&DbzTexture3D   dbz.colors - -5 80 5 cart,comp 1 0
+DbzTexture3D    DbzTexture3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&DbzTexture3D   dbz.colors - -5 80 5 cart 1 0
+DbzTextureComp  DbzTextureComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&DbzTextureComp dbz.colors - -5 80 5 cart 1 0
 
-EchoType3DMax EchoType3DMax $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
-EchoType3D    EchoType3D    $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
-EchoTypeComp  EchoTypeComp  $(HOME)/data/convstrat/mdv/ResTestEcco/pecan/res_factor_4.90&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+Convectivity3DMax Convectivity3DMax  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&Convectivity3D   convectivity.colors - -5 80 5 cart,comp 1 0
+Convectivity3D    Convectivity3D     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&Convectivity3D   convectivity.colors - -5 80 5 cart 1 0
+ConvectivityComp  ConvectivityComp   /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&ConvectivityComp convectivity.colors - -5 80 5 cart,comp 1 0
+
+EchoType3DMax EchoType3DMax /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&EchoType3D   conv_strat4.colors - -5 80 5 cart,comp 1 0
+EchoType3D    EchoType3D    /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&EchoType3D   conv_strat4.colors - -5 80 5 cart 1 0
+EchoTypeComp  EchoTypeComp  /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&EchoTypeComp conv_strat4.colors - -5 80 5 cart 1 0
+
+kernel        kernel     /scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan/res_factor_5.00&DBZ  dbz.colors   dBZ -5 80 5 cart 1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
+========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0
 ========      =========  /tmp/spacer&junk  none.colors   m   -5   80  5  dcont   1 0

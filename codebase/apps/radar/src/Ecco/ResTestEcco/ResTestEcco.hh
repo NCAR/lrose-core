@@ -96,8 +96,6 @@ private:
 
   typedef struct {
     int jx, jy;
-    double xx;
-    double yy;
     ssize_t offset;
   } kernel_t;
   vector<kernel_t> _kernelOffsets;

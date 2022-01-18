@@ -69,7 +69,7 @@ mode = ARCHIVE;
 // Type: string
 //
 
-input_dir = "$(HOME)/data/convstrat/mdv/mrms_3d";
+input_dir = "/scr/cirrus1/rsfdata/projects/pecan/mdv/radarCart/mrms_mosaic";
 
 ///////////// dbz_field_name //////////////////////////
 //
@@ -105,8 +105,13 @@ resolution_reduction_factors = {
  2,
  3,
  4,
- 4.9
+ 5
 };
+
+// resolution_reduction_factors = {
+//  1,
+//  2
+// };
 
 ///////////// min_valid_dbz ///////////////////////////
 //
@@ -258,5 +263,5 @@ max_convectivity_for_stratiform = 0.4;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/convstrat/mdv/ResTestEcco/pecan";
+output_dir = "/scr/cirrus1/rsfdata/projects/convstrat/mdv/ResTestEcco/pecan";
 
