@@ -42,8 +42,6 @@
 #include "ResTestEcco.hh"
 using namespace std;
 
-const fl32 ResTestEcco::_missing = -9999.0;
-
 // Constructor
 
 ResTestEcco::ResTestEcco(int argc, char **argv)
@@ -51,7 +49,8 @@ ResTestEcco::ResTestEcco(int argc, char **argv)
 {
   
   isOK = true;
-  _tempField = NULL;
+  _resReducedField = NULL;
+  _missingFloat = -9999.0;
   
   // set programe name
 
@@ -111,7 +110,12 @@ ResTestEcco::~ResTestEcco()
 
 {
 
+  if (_resReducedField != NULL) {
+    delete _resReducedField;
+  }
 
+  _clearResults();
+  
 }
 
 //////////////////////////////////////////////////
@@ -127,8 +131,10 @@ int ResTestEcco::Run()
   _input.reset();
   while (!_input.endOfData()) {
     
-    // do the read
+    _clearResults();
 
+    // do the read
+    
     if (_doRead()) {
       cerr << "ERROR - ResTestEcco::Run()" << endl;
       umsleep(1000);
@@ -137,19 +143,19 @@ int ResTestEcco::Run()
     }
 
     for (int ires = 0; ires < _params.resolution_reduction_factors_n; ires++) {
-
+      
       // process the file for this resolution factor
-
+      
       double resFactor = _params._resolution_reduction_factors[ires];
       
       if (_params.debug) {
         cerr << "Processing file for res reduction factor: " << resFactor << endl;
       }
 
-      if (_processResolution(resFactor)) {
+      if (_processResolution(ires, resFactor)) {
         cerr << "ERROR - ResTestEcco::Run()" << endl;
         cerr << "  Calling _processResolution" << endl;
-        return -1;
+        iret = -1;
       }
       
     } // ires
@@ -157,7 +163,6 @@ int ResTestEcco::Run()
     // clear
     
     _inMdvx.clear();
-    _outMdvx.clear();
     _finder.freeArrays();
     
   } // while
@@ -169,26 +174,38 @@ int ResTestEcco::Run()
 ////////////////////////////////////////////////////////////
 // Process the input data for the given resolution factor
 
-int ResTestEcco::_processResolution(double resFactor)
+int ResTestEcco::_processResolution(int resNum, double resFactor)
 {
 
   int iret = 0;
   
   // get DBZ field from input file
-    
+  
   const MdvxField *dbzFieldIn = _inMdvx.getField(_params.dbz_field_name);
   if (dbzFieldIn == NULL) {
-    cerr << "ERROR - ResTestEcco::_processFile()" << endl;
+    cerr << "ERROR - ResTestEcco::_processResolution()" << endl;
     cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
     return -1;
   }
+  _missingFloat = dbzFieldIn->getFieldHeader().missing_data_value;
 
-  // create dbz field with reduced resolution
+  // create Mdvx object for results, add to vector
 
-  MdvxField *dbzFieldReducedRes = _createDbzReducedRes(dbzFieldIn, resFactor);
+  _outMdvx = new DsMdvx;
+  _results.push_back(_outMdvx);
   
-  const Mdvx::field_header_t &fhdr = dbzFieldIn->getFieldHeader();
-  const Mdvx::vlevel_header_t &vhdr = dbzFieldIn->getVlevelHeader();
+  // create dbz field with reduced resolution
+  
+  _dbzField = NULL;
+  if (fabs(resFactor - 1.0) < 0.001) {
+    // for unchanged res, use input field
+    _dbzField = dbzFieldIn;
+  } else {
+    _dbzField = _createDbzReducedRes(dbzFieldIn, resFactor);
+  }
+  
+  const Mdvx::field_header_t &fhdr = _dbzField->getFieldHeader();
+  const Mdvx::vlevel_header_t &vhdr = _dbzField->getVlevelHeader();
   bool isLatLon = (fhdr.proj_type == Mdvx::PROJ_LATLON);
   vector<double> zLevels;
   for (int iz = 0; iz < fhdr.nz; iz++) {
@@ -196,7 +213,7 @@ int ResTestEcco::_processResolution(double resFactor)
   }
     
   // set up ConvStratFinder object
-
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _finder.setVerbose(true);
   } else if (_params.debug) {
@@ -226,16 +243,15 @@ int ResTestEcco::_processResolution(double resFactor)
   
   // compute the convective/stratiform partition
   
-  const fl32 *dbz = (const fl32*) dbzFieldIn->getVol();
-  fl32 missingDbz = fhdr.missing_data_value;
-  if (_finder.computeEchoType(dbz, missingDbz)) {
+  const fl32 *dbz = (const fl32*) _dbzField->getVol();
+  if (_finder.computeEchoType(dbz, _missingFloat)) {
     cerr << "ERROR - ResTestEcco::Run()" << endl;
     return -1;
   }
     
   // write out
   
-  if (_doWrite()) {
+  if (_doWrite(resNum, resFactor)) {
     cerr << "ERROR - ResTestEcco::Run()" << endl;
     iret = -1;
   }
@@ -256,11 +272,15 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
 
 {
 
+  if (_resReducedField != NULL) {
+    delete _resReducedField;
+    _resReducedField = NULL;
+  }
+  
   // set headers
   
   const Mdvx::field_header_t &fhdrIn = dbzFieldIn->getFieldHeader();
   const Mdvx::vlevel_header_t &vhdrIn = dbzFieldIn->getVlevelHeader();
-  fl32 missingIn = fhdrIn.missing_data_value;
 
   // modify header for grid resolution
   
@@ -280,7 +300,7 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   MemBuf buf;
   fl32 *dbzOut = (fl32 *) buf.prepare(nxyzOut * sizeof(fl32));
   for (size_t ii = 0; ii < nxyzOut; ii++) {
-    dbzOut[ii] = _missing;
+    dbzOut[ii] = _missingFloat;
   } // ii
   
   // compute the mean dbz data at this resolution
@@ -317,7 +337,7 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
           size_t jj = xycenterIn + _kernelOffsets[ii].offset;
           assert(jj < nxyIn);
           fl32 val = dbzPlaneIn[jj];
-          if (val != missingIn) {
+          if (val != _missingFloat) {
             sum += val;
             count++;
           }
@@ -331,8 +351,8 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
     
   } // iz
 
-  MdvxField *outField = new MdvxField(fhdrOut, vhdrIn, dbzOut);
-  return outField;
+  _resReducedField = new MdvxField(fhdrOut, vhdrIn, dbzOut);
+  return _resReducedField;
 
 }
 
@@ -400,6 +420,13 @@ int ResTestEcco::_doRead()
     return -1;
   }
   
+  if (_inMdvx.getField(_params.dbz_field_name) == NULL) {
+    cerr << "ERROR - ResTestEcco::_doRead()" << endl;
+    cerr << "  no dbz field found: " << _params.dbz_field_name << endl;
+    cerr << "  file path: " << _inMdvx.getPathInUse() << endl;
+    return -1;
+  }
+
   if (_params.debug) {
     cerr << "Read in file: " << _inMdvx.getPathInUse() << endl;
   }
@@ -415,20 +442,19 @@ void ResTestEcco::_addFields()
   
 {
 
-  _outMdvx.clearFields();
+  _outMdvx->clearFields();
 
   // initial fields are float32
 
-  MdvxField *dbzField = _inMdvx.getField(_params.dbz_field_name);
-  Mdvx::field_header_t fhdr2d = dbzField->getFieldHeader();
+  Mdvx::field_header_t fhdr2d = _dbzField->getFieldHeader();
   fhdr2d.nz = 1;
   fhdr2d.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   size_t planeSize32 = fhdr2d.nx * fhdr2d.ny * sizeof(fl32);
   fhdr2d.volume_size = planeSize32;
   fhdr2d.encoding_type = Mdvx::ENCODING_FLOAT32;
   fhdr2d.data_element_nbytes = 4;
-  fhdr2d.missing_data_value = _missing;
-  fhdr2d.bad_data_value = _missing;
+  fhdr2d.missing_data_value = _missingFloat;
+  fhdr2d.bad_data_value = _missingFloat;
   fhdr2d.scale = 1.0;
   fhdr2d.bias = 0.0;
   
@@ -437,36 +463,36 @@ void ResTestEcco::_addFields()
   vhdr2d.level[0] = 0;
   vhdr2d.type[0] = Mdvx::VERT_TYPE_SURFACE;
 
-  // add 2D max texture field
-  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getTexture2D(),
-                               Mdvx::ENCODING_INT16,
-                               "DbzTextureComp",
-                               "reflectivity_texture_composite",
-                               "dBZ"));
+  // add texture field composite
+  _outMdvx->addField(_makeField(fhdr2d, vhdr2d,
+                                _finder.getTexture2D(),
+                                Mdvx::ENCODING_INT16,
+                                "DbzTextureComp",
+                                "reflectivity_texture_composite",
+                                "dBZ"));
 
-  // convectivity max in 2D
-  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getConvectivity2D(),
-                               Mdvx::ENCODING_INT16,
-                               "ConvectivityComp",
-                               "likelihood_of_convection_composite",
-                               ""));
-  // col max dbz
-  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getDbzColMax(),
-                               Mdvx::ENCODING_INT16,
-                               "DbzComp",
-                               "dbz_composite",
-                               "dBZ"));
+  // convectivity composite
+  _outMdvx->addField(_makeField(fhdr2d, vhdr2d,
+                                _finder.getConvectivity2D(),
+                                Mdvx::ENCODING_INT16,
+                                "ConvectivityComp",
+                                "likelihood_of_convection_composite",
+                                ""));
+  // dbz composite
+  _outMdvx->addField(_makeField(fhdr2d, vhdr2d,
+                                _finder.getDbzColMax(),
+                                Mdvx::ENCODING_INT16,
+                                "DbzComp",
+                                "dbz_composite",
+                                "dBZ"));
 
   // load up fraction of texture kernel covered
-  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getFractionActive(),
-                               Mdvx::ENCODING_INT16,
-                               "FractionActive",
-                               "fraction_of_texture_kernel_active",
-                               ""));
+  _outMdvx->addField(_makeField(fhdr2d, vhdr2d,
+                                _finder.getFractionActive(),
+                                Mdvx::ENCODING_INT16,
+                                "FractionActive",
+                                "fraction_of_texture_kernel_active",
+                                ""));
 
   // the following 2d fields are unsigned bytes
   
@@ -479,42 +505,42 @@ void ResTestEcco::_addFields()
   
   // echoType field
   
-  _outMdvx.addField(_makeField(fhdr2d, vhdr2d,
-                               _finder.getEchoType2D(),
-                               Mdvx::ENCODING_INT8,
-                               "EchoTypeComp",
-                               "convective_stratiform_echo_type_composite",
-                               ""));
+  _outMdvx->addField(_makeField(fhdr2d, vhdr2d,
+                                _finder.getEchoType2D(),
+                                Mdvx::ENCODING_INT8,
+                                "EchoTypeComp",
+                                "convective_stratiform_echo_type_composite",
+                                ""));
 
   // the following 3d fields are floats
   
-  Mdvx::field_header_t fhdr3d = dbzField->getFieldHeader();
-  Mdvx::vlevel_header_t vhdr3d = dbzField->getVlevelHeader();
-  fhdr3d.missing_data_value = _missing;
-  fhdr3d.bad_data_value = _missing;
+  Mdvx::field_header_t fhdr3d = _dbzField->getFieldHeader();
+  Mdvx::vlevel_header_t vhdr3d = _dbzField->getVlevelHeader();
+  fhdr3d.missing_data_value = _missingFloat;
+  fhdr3d.bad_data_value = _missingFloat;
 
   // texture in 3D
-  _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                               _finder.getTexture3D(),
-                               Mdvx::ENCODING_INT16,
-                               "DbzTexture3D",
-                               "reflectivity_texture_3D",
-                               "dBZ"));
+  _outMdvx->addField(_makeField(fhdr3d, vhdr3d,
+                                _finder.getTexture3D(),
+                                Mdvx::ENCODING_INT16,
+                                "DbzTexture3D",
+                                "reflectivity_texture_3D",
+                                "dBZ"));
   // convectivity in 3D
-  _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                               _finder.getConvectivity3D(),
-                               Mdvx::ENCODING_INT16,
-                               "Convectivity3D",
-                               "likelihood_of_convection_3D",
-                               ""));
+  _outMdvx->addField(_makeField(fhdr3d, vhdr3d,
+                                _finder.getConvectivity3D(),
+                                Mdvx::ENCODING_INT16,
+                                "Convectivity3D",
+                                "likelihood_of_convection_3D",
+                                ""));
 
   // echo the input DBZ field
-  _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                               _finder.getDbz3D(),
-                               Mdvx::ENCODING_INT16,
-                               "Dbz3D",
-                               "reflectivity_3D",
-                               "dBZ"));
+  _outMdvx->addField(_makeField(fhdr3d, vhdr3d,
+                                _finder.getDbz3D(),
+                                Mdvx::ENCODING_INT16,
+                                "Dbz3D",
+                                "reflectivity_3D",
+                                "dBZ"));
   
   // echoType for full volume
   size_t volSize08 = fhdr3d.nx * fhdr3d.ny * fhdr3d.nz * sizeof(ui08);
@@ -523,43 +549,40 @@ void ResTestEcco::_addFields()
   fhdr3d.data_element_nbytes = 1;
   fhdr3d.missing_data_value = ConvStratFinder::CATEGORY_MISSING;
   fhdr3d.bad_data_value = ConvStratFinder::CATEGORY_MISSING;
-  _outMdvx.addField(_makeField(fhdr3d, vhdr3d,
-                               _finder.getEchoType3D(),
-                               Mdvx::ENCODING_INT8,
-                               "EchoType3D",
-                               "convective_stratiform_echo_type_3D",
-                               ""));
+  _outMdvx->addField(_makeField(fhdr3d, vhdr3d,
+                                _finder.getEchoType3D(),
+                                Mdvx::ENCODING_INT8,
+                                "EchoType3D",
+                                "convective_stratiform_echo_type_3D",
+                                ""));
 
 }
 
 /////////////////////////////////////////////////////////
-// perform the write
-//
+// write out results
 // Returns 0 on success, -1 on failure.
 
-int ResTestEcco::_doWrite()
+int ResTestEcco::_doWrite(int resNum, double resFactor)
   
 {
   
   // create output DsMdvx object
   // copying master header from input object
   
-  _outMdvx.clear();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _outMdvx.setDebug(true);
+    _outMdvx->setDebug(true);
   }
-  _outMdvx.setWriteLdataInfo();
   Mdvx::master_header_t mhdr = _inMdvx.getMasterHeader();
-  _outMdvx.setMasterHeader(mhdr);
+  _outMdvx->setMasterHeader(mhdr);
   string info = _inMdvx.getMasterHeader().data_set_info;
   info += " : Stratfinder used to identify stratiform regions";
-  _outMdvx.setDataSetInfo(info.c_str());
+  _outMdvx->setDataSetInfo(info.c_str());
   
   // copy any chunks
   
   for (size_t i = 0; i < _inMdvx.getNChunks(); i++) {
     MdvxChunk *chunk = new MdvxChunk(*_inMdvx.getChunkByNum(i));
-    _outMdvx.addChunk(chunk);
+    _outMdvx->addChunk(chunk);
   }
   
   // add fields
@@ -567,16 +590,18 @@ int ResTestEcco::_doWrite()
   _addFields();
   
   // write out
-  
-  if(_outMdvx.writeToDir(_params.output_dir)) {
+
+  char outDir[1024];
+  snprintf(outDir, 1024, "%s/res_factor_%.2f", _params.output_dir, resFactor);
+  if(_outMdvx->writeToDir(outDir)) {
     cerr << "ERROR - ResTestEcco::Run" << endl;
     cerr << "  Cannot write data set." << endl;
-    cerr << _outMdvx.getErrStr() << endl;
+    cerr << _outMdvx->getErrStr() << endl;
     return -1;
   }
 
   if (_params.debug) {
-    cerr << "Wrote file: " << _outMdvx.getPathInUse() << endl;
+    cerr << "Wrote file: " << _outMdvx->getPathInUse() << endl;
   }
 
   return 0;
@@ -639,3 +664,16 @@ MdvxField *ResTestEcco::_makeField(Mdvx::field_header_t &fhdrTemplate,
 
 }
 
+/////////////////////////////////////////////////////////
+// clear the results
+
+void ResTestEcco::_clearResults()
+
+{
+
+  for (size_t ii = 0; ii < _results.size(); ii++) {
+    delete _results[ii];
+  }
+  _results.clear();
+
+}

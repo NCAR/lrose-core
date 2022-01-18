@@ -671,7 +671,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
-    tt->array_n = 5;
+    tt->array_n = 6;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].d = 1;
@@ -679,6 +679,7 @@
       tt->array_vals[2].d = 3;
       tt->array_vals[3].d = 4;
       tt->array_vals[4].d = 5;
+      tt->array_vals[5].d = 6;
     tt++;
     
     // Parameter 'min_valid_dbz'

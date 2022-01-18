@@ -77,20 +77,20 @@ protected:
   
 private:
 
-  static const fl32 _missing;
+  fl32 _missingFloat;
 
   string _progName;
   char *_paramsPath;
   Args _args;
   Params _params;
   DsMdvxInput _input;
-  DsMdvx _inMdvx, _outMdvx;
-  DsMdvx _tempMdvx;
+  DsMdvx _inMdvx;
+  const MdvxField *_dbzField;
+  DsMdvx *_outMdvx;
+  vector<DsMdvx *> _results;
   ConvStratFinder _finder;
 
-  MdvxField *_tempField;
-  MdvxField _shallowHtField;
-  MdvxField _deepHtField;
+  MdvxField *_resReducedField;
 
   // kernel computations
 
@@ -103,7 +103,7 @@ private:
   vector<kernel_t> _kernelOffsets;
   int _nxKernel, _nyKernel;
 
-  int _processResolution(double resFactor);
+  int _processResolution(int resNum, double resFactor);
   MdvxField *_createDbzReducedRes(const MdvxField *dbzFieldIn,
                                   double resFactor);
   void _computeKernel(const Mdvx::field_header_t &fhdrIn,
@@ -111,7 +111,7 @@ private:
 
   int _doRead();
   void _addFields();
-  int _doWrite();
+  int _doWrite(int resNum, double resFactor);
 
   MdvxField *_makeField(Mdvx::field_header_t &fhdrTemplate,
                         Mdvx::vlevel_header_t &vhdr,
@@ -128,6 +128,8 @@ private:
                         string fieldName,
                         string longName,
                         string units);
+
+  void _clearResults();
 
 };
 
