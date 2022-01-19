@@ -41,8 +41,6 @@
 #include <toolsa/pmu.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/file_io.h>
-#include <toolsa/TaFile.hh>
-#include <toolsa/TaArray.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <Radx/RadxVol.hh>
