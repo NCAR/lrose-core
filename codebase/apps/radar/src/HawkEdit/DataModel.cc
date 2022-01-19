@@ -550,10 +550,13 @@ const float *DataModel::fetchData(RadxRay *ray, string &fieldName) {
 
 // total number of rays in volume, for all sweeps
 size_t DataModel::getNRays() { // string fieldName, double sweepAngle) {
-  _vol->loadRaysFromFields();
-  //const RadxField *field;
-  vector<RadxRay *>  &rays = _vol->getRays();
-  size_t nRays = rays.size();
+  size_t nRays = 0;
+  if (_vol != NULL) {
+    _vol->loadRaysFromFields();
+    //const RadxField *field;
+    vector<RadxRay *>  &rays = _vol->getRays();
+    nRays = rays.size();
+  }
   return nRays;
 }
 
@@ -814,6 +817,7 @@ void DataModel::getPredomRayGeom(double *startRangeKm, double *gateSpacingKm) {
 
 
 vector<string> *DataModel::getUniqueFieldNameList() {
+    if (_vol == NULL) throw "No open archive file";
     _vol->loadFieldsFromRays();
     LOG(DEBUG) << "enter";
     const vector<string> fieldNames = _vol->getUniqueFieldNameList();

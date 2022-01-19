@@ -58,10 +58,56 @@ TimeNavController::~TimeNavController() {
   _removeTempDirs();
 }
 
-void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName,
-    bool keepTimeRange) {
+// oh, who cares.  Just use default start and end times 
+// end time = today
+// start time = 1970
+/*
+void TimeNavController::extractDateTime(string s) {
+      const std::regex pieces_regex("(remove-ring) in ([_[:alnum:]]+) from[\\s]+([-\\.[:digit:]]+) to ([-\\.[:digit:]]+) km\\.[\\s]"); // ("copy[:space:]+([A-Z]+)[:space:]+to[:space:]+([A-Z]+)");
+      const std::regex yyyymmdd("([_[:alnum:]]8)_to_([_[:alnum:]]8_([_[:alnum:]]6[\\.]))_archiveStartTime")
+      std::smatch pieces_match;
+          string mytest2 = "cfrad.20161006_190650.891_to_20161006_190707.766_KAMX_SUR.nc";
+          if (std::regex_match(line, pieces_match, pieces_regex)) {
+              //std::cout << line << '\n';
+              for (size_t i = 0; i < pieces_match.size(); ++i) {
+                  std::ssub_match sub_match = pieces_match[i];
+                  std::string piece = sub_match.str();
+                  std::cout << "  submatch " << i << ": " << piece << '\n';
+              }   
+              string command = pieces_match[1];
+              format_it(command);
+              string field = pieces_match[2];
+              string from = pieces_match[3];
+              string to = pieces_match[4];
+              cout << command << " ( " << field << "," << from << "," << to << " )" << endl;
+              javascript << command << " ( " << field << "," << from << "," << to << " )" << endl;
+              recognized = true;
+          } else {
+            std::cout << "regex_match returned false\n";
+          }   
+}
+*/
 
-  _model->findArchiveFileList(seedPath, keepTimeRange);
+void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName,
+    string fullUrl, bool keepTimeRange) {
+  
+  int nFilesFound = _model->findArchiveFileList(seedPath, keepTimeRange);
+
+  if (nFilesFound < 1) {
+    _model->recoverFromNoDatDirFormat(fullUrl);
+    /*
+    // recover ...  TODO: this should all go into the model!!!
+    // get the start and end times from the seedFileName
+    _model->setArchiveStartTimeDefault();
+    _model->setArchiveEndTimeDefault();  
+    // put the fullUrl into a list
+    vector<string> list;
+    list.push_back(fullUrl);  
+    _model->setArchiveFileList(list);
+    _model->changePath(fullUrl);
+    */
+  }
+
   _setGuiFromArchiveStartTime();  
   _setGuiFromArchiveEndTime();
   _model->setSelectedFile(seedFileName);
@@ -87,13 +133,6 @@ string TimeNavController::getSelectedPath() {
   return _model->getCurrentPath();
 }
 
-string TimeNavController::_no_yyyymmdd(string s) {
-  if (s.size() > 8) {
-    return s.substr(0, s.size()-8);
-  }
-}
-
-
 // compare nextTempDir base directory to the base directory
 // in the temp stack
 bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
@@ -116,6 +155,27 @@ bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
   return different;
 }
 
+// The undo/redo stack ...
+// 
+// batch mode, the directories are:
+//  base/       yyyymmdd/cfrad.*.nc
+//  base/.tmp_N/yyyymmdd/cfrad.*.nc
+// stack:
+//  base
+//  base/.tmp_N 
+// the stack needs to contain the dir above the yyyymmdd dir
+
+// individual scan mode, i.e. editing just one file, or no day dir
+//  base/         cfrad.*.nc
+//  base/.tmp_N/  cfrad.*.nc 
+
+//  What to keep in the stack?
+//  base
+//  base/.tmp_N
+
+// getArchiveFiles must handle both cases: with dayDir and no dayDir!
+
+
 // push base dir on the stack, and clear the stack when
 // setting a new base dir
 
@@ -131,7 +191,7 @@ string TimeNavController::getTempDir() {
       _setBaseDirTempStack();
     }
   }
-  _tempDirStack.push_back(_no_yyyymmdd(nextTempDir)); 
+  _tempDirStack.push_back(nextTempDir); 
   _tempDirIndex += 1;
   return nextTempDir;
 }
@@ -463,6 +523,18 @@ void TimeNavController::timeSliderReleased(int value)
 bool TimeNavController::moreFiles() {
   return _model->moreFiles();
 }
+
+void TimeNavController::getBounds(bool useTimeRange, int *firstArchiveFileIndex,
+    int *lastArchiveFileIndex) {
+  if (useTimeRange) {
+    *firstArchiveFileIndex = 0;
+    *lastArchiveFileIndex = _model->getNArchiveFiles() - 1;
+  } else {
+    *firstArchiveFileIndex = _model->getPositionOfSelection();
+    *lastArchiveFileIndex = *firstArchiveFileIndex;
+  }
+}
+
 
 bool TimeNavController::_isTempDir(string *path) {
   bool found = false;

@@ -53,6 +53,7 @@ public:
   void setArchiveFileList(const vector<string> &list);
 
   int findArchiveFileList(string archiveDataUrl, bool keepTimeRange = false);
+  void recoverFromNoDatDirFormat(string archiveDataUrl);
 
   const vector<string> &findArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath);
@@ -70,6 +71,9 @@ public:
   //  int hour, int minute, int seconds);
   //void setArchiveEndTime(int year, int month, int day,
   //  int hour, int minute, int seconds);
+
+  void setArchiveStartTimeDefault();
+  void setArchiveEndTimeDefault();
 
   void setArchiveStartEndTime(int startYear, int startMonth, int startDay,
                        int startHour, int startMinute, int startSecond,
@@ -92,6 +96,9 @@ public:
   string getSelectedArchiveFileName();
   string getTempDir();
   int getPositionOfSelection();
+
+  // move to Model!!!
+  string no_yyyymmdd(string s);
 
   bool moreFiles();
 
