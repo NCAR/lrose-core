@@ -263,23 +263,26 @@ int ResTestEcco::_processResolution(int resNum, double resFactor)
 
   const ui08 *ecco = _finder.getEchoType3D();
   size_t npts = fhdr.nx * fhdr.ny * zLevels.size();
-  size_t nconv = 0;
-  size_t nmixed = 0;
-  size_t nstrat = 0;
+  double nconv = 0;
+  double nmixed = 0;
+  double nstrat = 0;
   for (size_t ii = 0; ii < npts; ii++) {
     int etype = ecco[ii];
     if (etype >= ConvStratFinder::CATEGORY_STRATIFORM_LOW &&
         etype <= ConvStratFinder::CATEGORY_STRATIFORM_HIGH) {
       nstrat++;
-    } else if (etype >= ConvStratFinder::CATEGORY_MIXED) {
+    } else if (etype == ConvStratFinder::CATEGORY_MIXED) {
       nmixed++;
     } else if (etype >= ConvStratFinder::CATEGORY_CONVECTIVE_ELEVATED &&
                etype <= ConvStratFinder::CATEGORY_CONVECTIVE_DEEP) {
       nconv++;
     }
   }
-  cerr << "nstrat, nmixed, nconv: "
-       << nstrat << ", " << nmixed << ", " << nconv << endl;
+  double total = nconv + nmixed + nstrat;
+  cerr << "fraction strat, mixed, conv: "
+       << nstrat / total << ", "
+       << nmixed / total << ", "
+       << nconv / total << endl;
 
   // clear
   
