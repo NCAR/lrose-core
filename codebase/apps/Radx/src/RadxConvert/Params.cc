@@ -1337,10 +1337,34 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("apply_georeference_corrections");
-    tt->descr = tdrpStrDup("Option to apply the georeference info for moving platforms.");
-    tt->help = tdrpStrDup("For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.");
+    tt->descr = tdrpStrDup("Option to apply the georeference information and corrections for moving platforms.");
+    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If goereference data ia available, there is an optional corrections block that may also be stored in the file. If this parameter is true, the georeference data is applied and appropriate corrections made if corrections are available. If possible, Earth-centric azimuth and elevation angles will be computed.");
     tt->val_offset = (char *) &apply_georeference_corrections - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'read_georeference_corrections'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_georeference_corrections");
+    tt->descr = tdrpStrDup("Option to read in corrections to the georeference data.");
+    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If this parameter is true, we will read in an ASCII file of correction factors for the georef data, and store those corrections in the file. See also 'apply_georeference_corrections' above.");
+    tt->val_offset = (char *) &read_georeference_corrections - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'georeference_corrections_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("georeference_corrections_path");
+    tt->descr = tdrpStrDup("Path to georeference corrections file.");
+    tt->help = tdrpStrDup("This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above.");
+    tt->val_offset = (char *) &georeference_corrections_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/data/georeference_corrections/cfac.fore");
     tt++;
     
     // Parameter 'Comment 9'

@@ -42,11 +42,15 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxCfactors.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
+#include <toolsa/TaStr.hh>
+#include <toolsa/TaFile.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <cerrno>
 using namespace std;
 
 // Constructor
@@ -551,6 +555,13 @@ int RadxConvert::_readFile(const string &readPath,
       vol.applyGeorefs();
     }
   }
+  if (_params.read_georeference_corrections) {
+    _readGeorefCorrections(vol);
+    // if we change the corrections, we need to reapply the georefs
+    if (_params.apply_georeference_corrections) {
+      vol.applyGeorefs();
+    }
+  }
   if (_params.override_beam_width || _params.override_antenna_gain) {
     RadxPlatform platform = vol.getPlatform();
     if (_params.override_beam_width) {
@@ -569,6 +580,96 @@ int RadxConvert::_readFile(const string &readPath,
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// Read in the georef corrections
+// Returns 0 on success, -1 on failure
+
+int RadxConvert::_readGeorefCorrections(RadxVol &vol)
+  
+{
+
+  // open the file
+  
+  TaFile taFile;
+  FILE *inFile = taFile.fopen(_params.georeference_corrections_path, "r");
+  if (inFile == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxConvert::_readGeorefCorrections" << endl;
+    cerr << "  path: " << _params.georeference_corrections_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // read in the data line by line
+
+  RadxCfactors cfac;
+
+  int iret = 0;
+  while (!feof(inFile)) {
+
+    char line[1024];
+    if (fgets(line, 1024, inFile) == NULL) {
+      continue;
+    }
+
+    // tokenize the line
+    
+    vector<string> toks;
+    TaStr::tokenize(line, " ", toks);
+    
+    if (toks.size() >= 3) {
+      // retrieve the correction value
+      double val = strtod(toks[2].c_str(), NULL);
+      if (errno == ERANGE) {
+        cerr << "ERROR - RadxConvert::_readGeorefCorrections" << endl;
+        cerr << "  reading file: "
+             << _params.georeference_corrections_path << endl;
+        cerr << "  line: " << line;
+        iret = -1;
+      }
+      // store in cfac
+      if (toks[0].find("azimuth") != string::npos) {
+        cfac.setAzimuthCorr(val);
+      } else if (toks[0].find("elevation") != string::npos) {
+        cfac.setElevationCorr(val);
+      } else if (toks[0].find("range") != string::npos) {
+        cfac.setRangeCorr(val);
+      } else if (toks[0].find("longitude") != string::npos) {
+        cfac.setLongitudeCorr(val);
+      } else if (toks[0].find("latitude") != string::npos) {
+        cfac.setLatitudeCorr(val);
+      } else if (toks[0].find("pressure_alt") != string::npos) {
+        cfac.setPressureAltCorr(val);
+      } else if (toks[0].find("radar_alt") != string::npos) {
+        cfac.setAltitudeCorr(val);
+      } else if (toks[0].find("ew_gndspd") != string::npos) {
+        cfac.setEwVelCorr(val);
+      } else if (toks[0].find("ns_gndspd") != string::npos) {
+        cfac.setNsVelCorr(val);
+      } else if (toks[0].find("vert_vel") != string::npos) {
+        cfac.setVertVelCorr(val);
+      } else if (toks[0].find("heading") != string::npos) {
+        cfac.setHeadingCorr(val);
+      } else if (toks[0].find("roll") != string::npos) {
+        cfac.setRollCorr(val);
+      } else if (toks[0].find("pitch") != string::npos) {
+        cfac.setPitchCorr(val);
+      } else if (toks[0].find("drift") != string::npos) {
+        cfac.setDriftCorr(val);
+      } else if (toks[0].find("rot_angle") != string::npos) {
+        cfac.setRotationCorr(val);
+      } else if (toks[0].find("tilt") != string::npos) {
+        cfac.setTiltCorr(val);
+      }
+    }
+    
+  } // while (!feof ...
+
+  vol.setCfactors(cfac);
+  return iret;
+  
 }
 
 //////////////////////////////////////////////////
@@ -935,7 +1036,9 @@ void RadxConvert::_setupRead(RadxFile &file)
     file.setChangeLatitudeSignOnRead(true);
   }
 
-  if (_params.apply_georeference_corrections) {
+  if (_params.apply_georeference_corrections &&
+      !_params.override_primary_axis &&
+      !_params.read_georeference_corrections) {
     file.setApplyGeorefsOnRead(true);
   }
 
