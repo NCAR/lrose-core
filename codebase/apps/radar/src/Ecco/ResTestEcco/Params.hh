@@ -79,6 +79,14 @@ public:
     FILELIST = 1
   } mode_t;
 
+  // struct typedefs
+
+  typedef struct {
+    double res_reduction_factor;
+    double texture_radius_km;
+    double texture_limit_high;
+  } resolution_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -381,8 +389,8 @@ public:
 
   char* dbz_field_name;
 
-  double *_resolution_reduction_factors;
-  int resolution_reduction_factors_n;
+  resolution_t *_resolutions;
+  int resolutions_n;
 
   double min_valid_dbz;
 

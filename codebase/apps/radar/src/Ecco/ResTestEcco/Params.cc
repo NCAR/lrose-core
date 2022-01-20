@@ -658,28 +658,57 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'resolution_reduction_factors'
-    // ctype is 'double'
+    // Parameter 'resolutions'
+    // ctype is '_resolution_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("resolution_reduction_factors");
-    tt->descr = tdrpStrDup("Resolution reduction factors of the test grids, relative to the input grid.");
-    tt->help = tdrpStrDup("Array of relative resolutions to test. The absolute resolution of the test grids are the original resolution, multiplied by these factors.");
-    tt->array_offset = (char *) &_resolution_reduction_factors - &_start_;
-    tt->array_n_offset = (char *) &resolution_reduction_factors_n - &_start_;
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("resolutions");
+    tt->descr = tdrpStrDup("Specify the details to be tested at each resolution.");
+    tt->help = tdrpStrDup("res_reduction_factor is the reduction factors of the test grid, relative to the input grid. The absolute resolution of the test grids are the original resolution, multiplied by these factors. texture_radius_km and texture_limit_high are as specified by Ecco.");
+    tt->array_offset = (char *) &_resolutions - &_start_;
+    tt->array_n_offset = (char *) &resolutions_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 6;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 1;
-      tt->array_vals[1].d = 2;
-      tt->array_vals[2].d = 3;
-      tt->array_vals[3].d = 4;
-      tt->array_vals[4].d = 5;
-      tt->array_vals[5].d = 6;
+    tt->array_elem_size = sizeof(resolution_t);
+    tt->array_n = 5;
+    tt->struct_def.name = tdrpStrDup("resolution_t");
+    tt->struct_def.nfields = 3;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("res_reduction_factor");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_resolutions->res_reduction_factor - (char *) _resolutions;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("texture_radius_km");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_resolutions->texture_radius_km - (char *) _resolutions;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[2].fname = tdrpStrDup("texture_limit_high");
+      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_resolutions->texture_limit_high - (char *) _resolutions;
+    tt->n_struct_vals = 15;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 1;
+      tt->struct_vals[1].d = 7;
+      tt->struct_vals[2].d = 30;
+      tt->struct_vals[3].d = 2;
+      tt->struct_vals[4].d = 9.1;
+      tt->struct_vals[5].d = 30;
+      tt->struct_vals[6].d = 3;
+      tt->struct_vals[7].d = 10.4;
+      tt->struct_vals[8].d = 30;
+      tt->struct_vals[9].d = 4;
+      tt->struct_vals[10].d = 11.2;
+      tt->struct_vals[11].d = 30;
+      tt->struct_vals[12].d = 5;
+      tt->struct_vals[13].d = 11.9;
+      tt->struct_vals[14].d = 30;
     tt++;
     
     // Parameter 'min_valid_dbz'

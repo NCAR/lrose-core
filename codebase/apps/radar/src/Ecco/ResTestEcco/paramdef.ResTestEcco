@@ -55,11 +55,30 @@ commentdef {
   p_header = "TEST PARAMETERS";
 }
 
-paramdef double {
-  p_default = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
-  p_descr = "Resolution reduction factors of the test grids, relative to the input grid.";	
-  p_help = "Array of relative resolutions to test. The absolute resolution of the test grids are the original resolution, multiplied by these factors.";
-} resolution_reduction_factors[];
+typedef struct {
+  double res_reduction_factor;
+  double texture_radius_km;
+  double texture_limit_high;
+} resolution_t;
+
+paramdef struct resolution_t {
+  p_default =
+    {
+     { 1.0, 7.0, 30.0 },
+     { 2.0, 9.1, 30.0 },
+     { 3.0, 10.4, 30.0 },
+     { 4.0, 11.2, 30.0 },
+     { 5.0, 11.9, 30.0 }
+  };
+  p_descr = "Specify the details to be tested at each resolution.";
+  p_help = "res_reduction_factor is the reduction factors of the test grid, relative to the input grid. The absolute resolution of the test grids are the original resolution, multiplied by these factors. texture_radius_km and texture_limit_high are as specified by Ecco.";
+} resolutions[];
+
+// paramdef double {
+//   p_default = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+//   p_descr = "Resolution reduction factors of the test grids, relative to the input grid.";	
+//   p_help = "Array of relative resolutions to test. The absolute resolution of the test grids are the original resolution, multiplied by these factors.";
+// } resolution_reduction_factors[];
 
 paramdef double {
   p_default = 0.0;

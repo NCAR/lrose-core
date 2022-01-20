@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ResTestEcco
+ * TDRP params for ./ResTestEcco
  **********************************************************************/
 
 //======================================================================
@@ -87,31 +87,57 @@ dbz_field_name = "DBZ";
 //
 //======================================================================
  
-///////////// resolution_reduction_factors ////////////
+///////////// resolutions /////////////////////////////
 //
-// Resolution reduction factors of the test grids, relative to the input 
-//   grid.
+// Specify the details to be tested at each resolution.
 //
-// Array of relative resolutions to test. The absolute resolution of the 
-//   test grids are the original resolution, multiplied by these factors.
+// res_reduction_factor is the reduction factors of the test grid, 
+//   relative to the input grid. The absolute resolution of the test grids 
+//   are the original resolution, multiplied by these factors. 
+//   texture_radius_km and texture_limit_high are as specified by Ecco.
 //
 //
-// Type: double
+// Type: struct
+//   typedef struct {
+//      double res_reduction_factor;
+//      double texture_radius_km;
+//      double texture_limit_high;
+//   }
+//
 // 1D array - variable length.
 //
 
-resolution_reduction_factors = {
- 1,
- 2,
- 3,
- 4,
- 5
+resolutions = {
+  {
+    res_reduction_factor = 1,
+    texture_radius_km = 7,
+    texture_limit_high = 30
+  }
+  ,
+  {
+    res_reduction_factor = 2,
+    texture_radius_km = 8.7,
+    texture_limit_high = 30
+  }
+  ,
+  {
+    res_reduction_factor = 3,
+    texture_radius_km = 10.1,
+    texture_limit_high = 30
+  }
+  ,
+  {
+    res_reduction_factor = 4,
+    texture_radius_km = 11.4,
+    texture_limit_high = 30
+  }
+  ,
+  {
+    res_reduction_factor = 5,
+    texture_radius_km = 12.5,
+    texture_limit_high = 30
+  }
 };
-
-// resolution_reduction_factors = {
-//  1,
-//  2
-// };
 
 ///////////// min_valid_dbz ///////////////////////////
 //
