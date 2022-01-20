@@ -171,10 +171,10 @@ Q_DECLARE_METATYPE(QVector<double>)
     //applyToAllSweeps = new QRadioButton("all sweeps", this);
     //applyToCurrentSweep->setChecked(true);
 
-    currentSweepToggleButton = new QPushButton(tr("&Current Sweep"));
+    currentSweepToggleButton = new QPushButton(tr("&Current Angle"));
     currentSweepToggleButton->setCheckable(true);
     currentSweepToggleButton->setChecked(false);
-    allSweepsToggleButton = new QPushButton(tr("&All Sweeps"));
+    allSweepsToggleButton = new QPushButton(tr("&All Angles"));
     allSweepsToggleButton->setCheckable(true);
     allSweepsToggleButton->setChecked(true);
 
