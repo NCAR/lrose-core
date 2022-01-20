@@ -395,9 +395,21 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to apply the georeference info for moving platforms.";
-  p_help = "For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.";
+  p_descr = "Option to apply the georeference information and corrections for moving platforms.";
+  p_help = "For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If goereference data ia available, there is an optional corrections block that may also be stored in the file. If this parameter is true, the georeference data is applied and appropriate corrections made if corrections are available. If possible, Earth-centric azimuth and elevation angles will be computed.";
 } apply_georeference_corrections;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read in corrections to the georeference data.";
+  p_help = "For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If this parameter is true, we will read in an ASCII file of correction factors for the georef data, and store those corrections in the file. See also 'apply_georeference_corrections' above.";
+} read_georeference_corrections;
+
+paramdef string {
+  p_default = "/data/georeference_corrections/cfac.fore";
+  p_descr = "Path to georeference corrections file.";
+  p_help = "This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above.";
+} georeference_corrections_path;
 
 commentdef {
   p_header = "OPTION TO CORRECT TIME";

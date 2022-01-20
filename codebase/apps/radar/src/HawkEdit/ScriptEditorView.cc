@@ -184,10 +184,11 @@ Q_DECLARE_METATYPE(QVector<double>)
     //vbox->addStretch(1);
     //sweepSelection->setLayout(vbox); 
 
-    currentTimeToggleButton = new QPushButton(tr("Current Archive File Only"));
+    //QLabel *batchMode = new QLabel("Batch Mode");
+    currentTimeToggleButton = new QPushButton(tr("On"));
     //currentTimeToggleButton->setStatusTip("enter batch mode with time range");
-    currentTimeToggleButton->setText("Individual Scan Mode");
-    currentTimeToggleButton->setStatusTip("Current Archive File Only");
+    currentTimeToggleButton->setText("Current file");
+    currentTimeToggleButton->setStatusTip("Batch Mode: off");
     currentTimeToggleButton->setCheckable(true);
     currentTimeToggleButton->setChecked(true);
 
@@ -213,6 +214,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     checkBoxLayout->addWidget(useBoundaryWidget);
     checkBoxLayout->addWidget(currentSweepToggleButton);
     checkBoxLayout->addWidget(allSweepsToggleButton);
+    //checkBoxLayout->addWidget(batchMode);
     checkBoxLayout->addWidget(currentTimeToggleButton);
     //checkBoxLayout->addWidget(timeRangeToggleButton);
     //checkBoxLayout->addWidget(_archiveStartTimeEdit);
@@ -557,19 +559,19 @@ void ScriptEditorView::acceptFormulaInput()
   // TODO: should the start and end times be specified in the time nav?
   // Q: what is the relationship between the time nav and the script start and end times?
   //  emit a signal and have a slot in the PolarManager
+  bool useTimeRange = false;
   if (currentTimeToggleButton->isChecked()) {
-      bool useTimeRange = true;
-      emit runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
-          useTimeRange);
-
-  } else {
+    useTimeRange = true;
+  } 
+  emit runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
+    useTimeRange);
 
     // Send the scripts to the controller for processing
     //try {
       //emit runOneTimeOnlyScript(oneTimeOnlyScript);
       //emit runForEachRayScript(forEachRayScript, useBoundary);
       //PolarManager *polarManager = (PolarManager *) parent();
-      emit runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
+      //emit runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
     /*
     // Grab the context before evaluating the formula
     //  YES! This works.  The new global variables are listed here;
@@ -647,7 +649,7 @@ void ScriptEditorView::acceptFormulaInput()
       criticalMessage("Error occurred during evaluation");
     }
     */
-  }
+  
 }
 
 void ScriptEditorView::scriptComplete() {
@@ -1016,16 +1018,17 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
 // checked = false ==> current archive; default; no highlight
 void ScriptEditorView::timeRangeClicked(bool checked) {
 
-  if (checked) {
+  if (currentTimeToggleButton->text().compare("Current file") == 0) {
     currentTimeToggleButton->setChecked(true);
-    currentTimeToggleButton->setText("Batch Mode");
-    currentTimeToggleButton->setStatusTip("Time Range defined in Navigation");
-    showTimeRangeEdits();
+    currentTimeToggleButton->setText("All files");
+    currentTimeToggleButton->setStatusTip("Batch Mode: on");
+
+    //showTimeRangeEdits();
   } else {
     currentTimeToggleButton->setChecked(false);  
-    currentTimeToggleButton->setText("Individual Scan Mode");
-    currentTimeToggleButton->setStatusTip("Current Archive File Only");
-    hideTimeRangeEdits();  
+    currentTimeToggleButton->setText("Current file");
+    currentTimeToggleButton->setStatusTip("Batch Mode: off");
+    //hideTimeRangeEdits();  
   }  
   
 }

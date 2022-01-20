@@ -626,6 +626,10 @@ public:
 
   tdrp_bool_t apply_georeference_corrections;
 
+  tdrp_bool_t read_georeference_corrections;
+
+  char* georeference_corrections_path;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -838,7 +842,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[186];
+  mutable TDRPtable _table[188];
 
   const char *_className;
 
