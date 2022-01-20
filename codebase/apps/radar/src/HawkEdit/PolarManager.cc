@@ -4922,6 +4922,8 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
     return -1;
   }
 
+  _displayFieldController->setSelectedField(0);
+
 
   return 0;
 

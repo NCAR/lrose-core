@@ -332,7 +332,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
   //fieldRenderer->setTransform(zoomTransform);
 
         
-
+  try {
 
   //if (!fieldRenderer->imageReady()) {
     LOG(DEBUG) << "image NOT READY, recreating beams";
@@ -351,15 +351,9 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
     while ((rayIdx < nRayLocations) && (!done)) { // each field ray in sweep) {
       // LOG(DEBUG) << "  rayIdx = " << rayIdx;
       vector<float> *rayData;
-      try {
+
         rayData = rayLocationController->getRayData(rayIdx, fieldName);
-      } catch (std::invalid_argument &ex) {
-        cerr << "Exception: " << ex.what() << endl;
-        cerr << "  setting data to missing; rayIdx = " << rayIdx << endl;
-        throw ex;
-        //rayData = new vector<float>;
-        //rayData->push_back(missingVal);
-      }
+
         if (rayData->size() > 0) {
           takeCareOfMissingValues(rayData, missingVal);
           //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
@@ -397,7 +391,11 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
   //QImage image = fieldRenderer->_image;
   //LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
 
-
+  } catch (std::invalid_argument &ex) {
+    cerr << "Exception: " << ex.what() << endl;
+    //cerr << "  setting data to missing; rayIdx = " << rayIdx << endl;
+    //throw ex;
+  }
   //QImage image("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
   //painter->drawImage(0, 0, image);
   LOG(DEBUG) << "exit";  

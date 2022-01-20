@@ -425,6 +425,21 @@ void DisplayFieldView::contextMenuRemove()
   LOG(DEBUG) << "exit";
 }
 
+void DisplayFieldView::removeField(string fieldName)
+{
+  //LOG(DEBUG) << "enter" << _workingWithField.toStdString();
+  size_t idx = _findFieldIndex(QString(fieldName.c_str())); 
+  QLabel *label = _fieldButtons.at(idx);
+  _fieldButtons.erase(_fieldButtons.begin() + idx);
+  _fieldsLayout->removeWidget(label);
+
+  delete label;
+  show();
+
+  //emit removeField(_workingWithField);
+  LOG(DEBUG) << "exit";
+}
+
 void DisplayFieldView::contextMenuUndo()
 {
 

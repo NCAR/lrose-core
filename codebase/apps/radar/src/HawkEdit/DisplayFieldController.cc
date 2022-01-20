@@ -118,6 +118,7 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
     else {
       LOG(DEBUG) << "displayField not found in list of new fields" << *currentName << " discarding";
       deleteField(*currentName);
+      fieldPanel->removeField(*currentName);
       // TODO how is the field removed from the panel?
       //fieldPanel->delete(*currentName);
     }
@@ -166,6 +167,7 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
 
 void DisplayFieldController::deleteField(string &fieldName) {
   _model->deleteField(fieldName);
+
 }
 
 void DisplayFieldController::dataFileChanged() {
