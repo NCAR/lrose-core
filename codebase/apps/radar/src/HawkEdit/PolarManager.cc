@@ -2341,7 +2341,7 @@ void PolarManager::changeToField(QString newFieldName)
 }
 
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
-// TODO: need to add the background changed, etc. 
+//  add the background changed, etc. 
 void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 					    QColor gridColor,
 					    QColor emphasisColor,
@@ -2359,8 +2359,8 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
     QMessageBox::warning(NULL, "Error changing color map", ex.what());
   } 
-  //_ppi->backgroundColor(backgroundColor);
-  //_ppi->gridRingsColor(gridColor);
+  _ppi->backgroundColor(backgroundColor);
+  _ppi->gridRingsColor(gridColor);
 
   selectedFieldChanged(fieldName);
 
