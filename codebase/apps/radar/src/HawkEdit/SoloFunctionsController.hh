@@ -39,7 +39,7 @@ public:
 
   Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length,
     float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
-  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist,
+  Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist = 0,
     float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
 
  // return the name of the new field that contains the result

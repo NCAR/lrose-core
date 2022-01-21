@@ -846,6 +846,11 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
 
   // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
   
   //==========
 
@@ -881,7 +886,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   cerr << endl;
   */
   
-  Radx::fl32 missingValue = Radx::missingFl32; 
+  //Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
