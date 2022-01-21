@@ -552,14 +552,14 @@ int RadxConvert::_readFile(const string &readPath,
     vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
     // if we change the primary axis, we need to reapply the georefs
     if (_params.apply_georeference_corrections) {
-      vol.applyGeorefs();
+      vol.applyGeorefs(true);
     }
   }
   if (_params.read_georeference_corrections) {
     _readGeorefCorrections(vol);
     // if we change the corrections, we need to reapply the georefs
     if (_params.apply_georeference_corrections) {
-      vol.applyGeorefs();
+      vol.applyGeorefs(true);
     }
   }
   if (_params.override_beam_width || _params.override_antenna_gain) {
@@ -667,6 +667,14 @@ int RadxConvert::_readGeorefCorrections(RadxVol &vol)
     
   } // while (!feof ...
 
+  if (_params.debug) {
+    cerr << "=================================================" << endl;
+    cerr << "Read in georef corrections from file: "
+         << _params.georeference_corrections_path << endl;
+    cfac.print(cerr);
+    cerr << "=================================================" << endl;
+  }
+  
   vol.setCfactors(cfac);
   return iret;
   
