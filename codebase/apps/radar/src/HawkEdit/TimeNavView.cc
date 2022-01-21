@@ -244,6 +244,7 @@ void TimeNavView::setNTicks(int nFiles) {
 
 void TimeNavView::setSliderPosition(int value) {
   _timeSlider->setValue(value);
+  timeSliderReleased();
   // note: this triggers the notifier signal: valueChanged
 }
 

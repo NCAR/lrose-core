@@ -5135,11 +5135,12 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     errorMessage("Error", ex.what());
   }
   _cancelled = false;
-  errorMessage("Done", "moving to edited data");
+  //errorMessage("Done", "moving to edited data");
   vector<string> archiveFileList;
   archiveFileList.push_back(currentPath);
   bool fromCommandLine = false;
   setArchiveFileList(archiveFileList, fromCommandLine);
+  _timeNavController->setSliderPosition();
   //_timeNavController->fetchArchiveFiles(saveDirectoryPath, fileName);
 }
 
