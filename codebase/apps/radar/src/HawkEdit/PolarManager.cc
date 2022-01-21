@@ -5151,7 +5151,7 @@ void PolarManager::undoScriptEdits() {
   if (_timeNavController->isSelectedFileInTempDir()) {
     string previousTempDir = _timeNavController->getPreviousTempDir();
     if (previousTempDir.size() > 0) {
-      errorMessage("Done", "undoing previous data edits");
+      //errorMessage("Done", "undoing previous data edits");
       string currentFileName = _timeNavController->getSelectedArchiveFileName();
       //vector<string> archiveFileList;
       //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
@@ -5178,7 +5178,7 @@ void PolarManager::redoScriptEdits() {
   if (_timeNavController->isSelectedFileInTempDir()) {
     string nextTempDir = _timeNavController->getNextTempDir();
     if (nextTempDir.size() > 0) {
-      errorMessage("Done", "redoing data edits");
+      //errorMessage("Done", "redoing data edits");
       string currentFileName = _timeNavController->getSelectedArchiveFileName();
       //vector<string> archiveFileList;
       //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
