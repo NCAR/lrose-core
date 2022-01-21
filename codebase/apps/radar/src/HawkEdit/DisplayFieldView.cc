@@ -473,6 +473,15 @@ void DisplayFieldView::_changeFieldVariable(bool value) {
 }
 */
 
+bool DisplayFieldView::hasField(string fieldName) {
+  try {
+    size_t idx = _findFieldIndex(QString(fieldName.c_str()));
+    if (idx >=0) return true;
+  } catch (std::invalid_argument &ex) {
+    return false;
+  }
+}
+
 size_t DisplayFieldView::_findFieldIndex(QString fieldName) {
   size_t nFields = _fieldButtons.size();
   size_t i = 0;
