@@ -680,6 +680,11 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 
   // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }  
   
   // perform the function ...
   soloFunctionsApi.Despeckle(data,  newData, nGates, bad_data_value, speckle_length,
@@ -691,7 +696,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
     LOG(DEBUG) << newData[i] << ", ";
 
 
-  Radx::fl32 missingValue = Radx::missingFl32; 
+  // Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
@@ -1112,6 +1117,9 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
   const float *data = field->getDataFl32();
 
   float missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
  
   LOG(DEBUG) << "args: ";
   LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
@@ -1243,7 +1251,10 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
   // and perpetuated for each ray in the sweep
   static float last_good_v0;
   float missingValue = field->getMissingFl32();
- 
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  } 
+
   LOG(DEBUG) << "args: ";
   LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
   LOG(DEBUG) << "dds_radd_eff_unamb_vel=" << dds_radd_eff_unamb_vel;
@@ -2931,7 +2942,12 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, in
 
   // cerr << "there arenGates " << nGates;
   const float *data = fieldData; // field->getDataFl32();
-  
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
+
   // perform the function ...
   //soloFunctionsApi.XorBadFlagsBetween(constantLower, constantUpper,
   //				      data, nGates, bad_data_value, clip_gate,
@@ -2942,7 +2958,7 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, in
 
   bool isLocal = false;
   string field_units = "";
-  Radx::fl32 missingValue = Radx::missingFl32;
+  //Radx::fl32 missingValue = Radx::missingFl32;
   if (field != NULL) {
     field_units = field->getUnits();
     missingValue = field->getMissingFl32();
