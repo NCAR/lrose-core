@@ -190,7 +190,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     currentTimeToggleButton->setText("Current file");
     currentTimeToggleButton->setStatusTip("Batch Mode: off");
     currentTimeToggleButton->setCheckable(true);
-    currentTimeToggleButton->setChecked(true);
+    currentTimeToggleButton->setChecked(false);
 
     /*
     // create start, end, and save dir widgets if time range is checked
