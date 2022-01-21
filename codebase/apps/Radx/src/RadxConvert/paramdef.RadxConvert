@@ -408,7 +408,26 @@ paramdef boolean {
 paramdef string {
   p_default = "/data/georeference_corrections/cfac.fore";
   p_descr = "Path to georeference corrections file.";
-  p_help = "This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above.";
+  p_help = "This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above. The ASCII file has the following format - this is an example:\n"
+  "======================================\n"
+  "\tazimuth_corr           =   0.000\n"
+  "\televation_corr         =   0.000\n"
+  "\trange_delay_corr       = -16.641\n"
+  "\tlongitude_corr         =   0.000\n"
+  "\tlatitude_corr          =   0.000\n"
+  "\tpressure_alt_corr      =   4.969\n"
+  "\tradar_alt_corr         =   0.000\n"
+  "\tew_gndspd_corr         =   0.000\n"
+  "\tns_gndspd_corr         =   0.000\n"
+  "\tvert_vel_corr          =   0.000\n"
+  "\theading_corr           =   0.000\n"
+  "\troll_corr              =   0.000\n"
+  "\tpitch_corr             =   0.009\n"
+  "\tdrift_corr             =   0.119\n"
+  "\trot_angle_corr         =  -0.016\n"
+  "\ttilt_corr              =   0.713\n"
+  "======================================\n"
+  "You can omit the fields that have values of zero.";
 } georeference_corrections_path;
 
 commentdef {
