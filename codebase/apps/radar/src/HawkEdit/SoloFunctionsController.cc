@@ -21,8 +21,11 @@ SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(pare
 
 void SoloFunctionsController::reset() {
   DataModel *dataModel = DataModel::Instance();
+
   _nRays = dataModel->getNRays();
-  _nSweeps = dataModel->getNSweeps();
+  if (_nRays > 0) {
+    _nSweeps = dataModel->getNSweeps();
+  }
 }
 
 

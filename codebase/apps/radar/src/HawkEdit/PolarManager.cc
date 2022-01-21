@@ -910,7 +910,7 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
       QFileInfo fileInfo(fullUrl);
       QString theFile = fileInfo.fileName();
       _timeNavController->fetchArchiveFiles(thePath.toStdString(),
-        theFile.toStdString());
+        theFile.toStdString(), fullUrl.toStdString());
       //_timeNavController->fetchArchiveFiles
     }
   }
@@ -2341,7 +2341,7 @@ void PolarManager::changeToField(QString newFieldName)
 }
 
 // PolarManager::colorMapRedefineReceived(string, ColorMap)
-// TODO: need to add the background changed, etc. 
+//  add the background changed, etc. 
 void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 					    QColor gridColor,
 					    QColor emphasisColor,
@@ -2359,8 +2359,8 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     LOG(ERROR) << ex.what(); // "ERROR - field not found; no color map change";
     QMessageBox::warning(NULL, "Error changing color map", ex.what());
   } 
-  //_ppi->backgroundColor(backgroundColor);
-  //_ppi->gridRingsColor(gridColor);
+  _ppi->backgroundColor(backgroundColor);
+  _ppi->gridRingsColor(gridColor);
 
   selectedFieldChanged(fieldName);
 
@@ -4922,6 +4922,8 @@ int PolarManager::_updateDisplayFields(vector<string> *fieldNames) {
     return -1;
   }
 
+  _displayFieldController->setSelectedField(0);
+
 
   return 0;
 
@@ -4932,6 +4934,8 @@ void PolarManager::_scriptEditorSetup() {
   try {
     EditRunScript();
   } catch (const string& ex) {
+    errorMessage("EditRunScript Error", ex);
+  } catch (const char* ex) {
     errorMessage("EditRunScript Error", ex);
   }  
   LOG(DEBUG) << "exit";  
@@ -5028,6 +5032,11 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   }
   string fileName;
   string currentPath;
+  int firstArchiveFileIndex;
+  int lastArchiveFileIndex;
+  _timeNavController->getBounds(useTimeRange, &firstArchiveFileIndex,
+    &lastArchiveFileIndex);
+
   try {
     // get list of archive files within start and end date/times
     // make a local version of the time navigation to manage the archive files
@@ -5053,11 +5062,11 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   // for each archive file 
   //vector<string>::iterator it;
   //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
-  int archiveFileIndex = 0;
+  int archiveFileIndex = firstArchiveFileIndex;
 
   _timeNavController->setTimeSliderPosition(archiveFileIndex);
   //bool cancelled = scriptEditorControl->cancelRequested();
-  while (_timeNavController->moreFiles() && !_cancelled) {
+  while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
     
     //   load each archive file
     // TODO: I don't like accessing the DataModel here.  Who should load
@@ -5147,8 +5156,9 @@ void PolarManager::undoScriptEdits() {
       //vector<string> archiveFileList;
       //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
       bool keepTimeRange = true;
+      string fullUrl = previousTempDir + "/" + currentFileName;
       _timeNavController->fetchArchiveFiles(previousTempDir,
-        currentFileName, keepTimeRange);
+        currentFileName, fullUrl, keepTimeRange);
       _timeNavController->setSliderPosition();
       // keep the time range the same, so grab the time range,
       // then call fetchArchiveFiles ...
@@ -5173,8 +5183,9 @@ void PolarManager::redoScriptEdits() {
       //vector<string> archiveFileList;
       //archiveFileList.push_back(previousTempDir + "/" + currentFileName);
       bool keepTimeRange = true;
+      string fullUrl = nextTempDir + "/" + currentFileName;
       _timeNavController->fetchArchiveFiles(nextTempDir,
-        currentFileName, keepTimeRange);
+        currentFileName, fullUrl, keepTimeRange);
       _timeNavController->setSliderPosition();
       // keep the time range the same, so grab the time range,
       // then call fetchArchiveFiles ...

@@ -161,71 +161,34 @@ int TimeNavModel::findArchiveFileList(string archiveDataUrl,
   }
   timeList.compile();
 
-  // TODO: how to report error? throw exception???
-  if (timeList.getPathList().size() < 1) {
-    string msg("No archive files found at  ");
-    msg.append(archiveDataUrl);
-    throw std::invalid_argument(msg);
-    //cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
-    //cerr << "  Cannot load file list for url: " 
-    //     << archiveDataUrl << endl;
-    //cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
-    //cerr << "  End time: " << _archiveEndTime.getStr() << endl;
-    //_urlOK = false;
-    //return -1;
-  }
-
-  _archiveStartTime = timeList.getValidTimes().front();
-
-/*
-  // get the last day/time under this starting point 
-  //RadxTimeList timeList;
-  //timeList.setDir(archiveDataUrl);
-  timeList.setModeLast();
-  timeList.compile(); 
-
-  // TODO: how to report error? throw exception???
-  if (timeList.getPathList().size() < 1) {
-    cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
-    cerr << "  Cannot load file list for url: " 
-         << archiveDataUrl << endl;
-    cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
-    cerr << "  End time: " << _archiveEndTime.getStr() << endl;
-    _urlOK = false;
-    return -1;
+  int nFilesFound = (int) timeList.getPathList().size();
+  if (nFilesFound > 0) {
+    _archiveStartTime = timeList.getValidTimes().front();
+    _archiveEndTime = timeList.getValidTimes().back();
+    setArchiveFileList(timeList.getPathList());
   } 
-
-*/
-  _archiveEndTime = timeList.getValidTimes().back();
-
-
-/*
-  // get the last day/time under this starting point 
-  //RadxTimeList timeList;
-  //timeList.setDir(archiveDataUrl);
-  timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
-  timeList.compile();  
-  _urlOK = true;
-
-// TODO: how to report error? throw exception???
-  if (timeList.getPathList().size() < 1) {
-    cerr << "ERROR - TimeNavModel::loadArchiveFileList()" << endl;
-    cerr << "  Cannot load file list for url: " 
-         << archiveDataUrl << endl;
-    cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
-    cerr << "  End time: " << _archiveEndTime.getStr() << endl;
-    _urlOK = false;
-    return -1;
-
-  }
-*/
-
-  setArchiveFileList(timeList.getPathList());
-  
-  return 0;
+  return nFilesFound;
 
 }
 
+void TimeNavModel::recoverFromNoDatDirFormat(string archiveDataUrl) {
+
+    // recover ... 
+    // get the start and end times from the seedFileName
+    setArchiveStartTimeDefault();
+    setArchiveEndTimeDefault();  
+    // put the fullUrl into a list
+    vector<string> list;
+    list.push_back(archiveDataUrl);  
+    setArchiveFileList(list);
+    RadxPath pathSent(archiveDataUrl);
+    if (!pathSent.isDir()) {
+      string dir = pathSent.getDirectory();
+      changePath(dir);
+    } else {
+      changePath(archiveDataUrl);
+    }
+}
 
 void TimeNavModel::findAndSetArchiveFileList(RadxTime startTime, RadxTime endTime,
   const string &absolutePath) {
@@ -289,6 +252,14 @@ void TimeNavModel::findAndSetArchiveFileList(RadxTime startTime, RadxTime endTim
 
   //} // end else pathList is not empty
 
+}
+
+void TimeNavModel::setArchiveStartTimeDefault() {
+  _archiveStartTime = RadxTime(RadxTime::ZERO);
+}
+
+void TimeNavModel::setArchiveEndTimeDefault() {
+  _archiveEndTime = RadxTime(RadxTime::NOW);
 }
 
 void TimeNavModel::setArchiveStartEndTime(int startYear, int startMonth, int startDay,
@@ -420,6 +391,13 @@ string TimeNavModel::getSelectedArchiveFileName() {
   }
 }
 
+// 
+string TimeNavModel::no_yyyymmdd(string s) {
+  if ((s.size() > 8) && _archiveFilesHaveDayDir) {
+    return s.substr(0, s.size()-8);
+  }
+}
+
 string TimeNavModel::getCurrentPath() {
   return currentPath->getPath();
 }
@@ -451,7 +429,10 @@ string TimeNavModel::getTempDir() {
   do {
     idx += 1;
     ss.str(""); // reset the starting path
-    ss << path << "/" << tmp << idx << "/" << yyyymmdd;
+    ss << path << "/" << tmp << idx;
+    if (_archiveFilesHaveDayDir) {
+      ss << "/" << yyyymmdd;
+    }
   } while (RadxPath::exists(ss.str()) && (idx < max));
 
   if (idx >= max) {
@@ -462,13 +443,16 @@ string TimeNavModel::getTempDir() {
 
   string workingPath = ss.str();
 
-  RadxPath radxPath;
-  radxPath.setDirectory(workingPath);
+  RadxPath pathToCreate;
+  pathToCreate.setDirectory(workingPath);
 
-  if (radxPath.makeDirRecurse()) {
+  if (pathToCreate.makeDirRecurse()) {
     string msg = "cannot create temporary directory ";
     msg.append(workingPath);
     throw std::invalid_argument(msg);
+  }
+  if (_archiveFilesHaveDayDir) {
+    workingPath.erase(workingPath.size()-9, 8);
   }
   return workingPath;
 }

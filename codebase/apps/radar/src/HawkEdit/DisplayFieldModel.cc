@@ -75,6 +75,9 @@ void DisplayFieldModel::deleteField(string fieldName) {
 
   size_t index = _lookupFieldIndex(fieldName);
   _fields.erase(_fields.begin() + (int) index);
+  if (index == _selectedFieldIndex) {
+    _selectedFieldIndex = 0;
+  }
 } 
 
 vector<string>  DisplayFieldModel::getFieldNames() {

@@ -142,17 +142,19 @@ int ResTestEcco::Run()
       continue;
     }
 
-    for (int ires = 0; ires < _params.resolution_reduction_factors_n; ires++) {
+    for (int ires = 0; ires < _params.resolutions_n; ires++) {
       
       // process the file for this resolution factor
       
-      double resFactor = _params._resolution_reduction_factors[ires];
+      double resFactor = _params._resolutions[ires].res_reduction_factor;
+      double textureRadiusKm = _params._resolutions[ires].texture_radius_km;
+      double textureLimitHigh = _params._resolutions[ires].texture_limit_high;
       
       if (_params.debug) {
         cerr << "Processing file for res reduction factor: " << resFactor << endl;
       }
 
-      if (_processResolution(ires, resFactor)) {
+      if (_processResolution(ires, resFactor, textureRadiusKm, textureLimitHigh)) {
         cerr << "ERROR - ResTestEcco::Run()" << endl;
         cerr << "  Calling _processResolution" << endl;
         iret = -1;
@@ -174,7 +176,10 @@ int ResTestEcco::Run()
 ////////////////////////////////////////////////////////////
 // Process the input data for the given resolution factor
 
-int ResTestEcco::_processResolution(int resNum, double resFactor)
+int ResTestEcco::_processResolution(int resNum,
+                                    double resFactor,
+                                    double textureRadiusKm,
+                                    double textureLimitHigh)
 {
 
   int iret = 0;
@@ -222,16 +227,18 @@ int ResTestEcco::_processResolution(int resNum, double resFactor)
   _finder.setMinValidDbz(_params.min_valid_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
   _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
-  double textureRadiusKm = _params.texture_radius_km * (log10(resFactor) + 1.0);
-  // double textureRadiusKm = _params.texture_radius_km;
+  // double textureRadiusKm = _params.texture_radius_km * (log10(resFactor) + 1.0);
   _finder.setTextureRadiusKm(textureRadiusKm);
-  cerr << "Using textureRadiusKm: " << textureRadiusKm << endl;
   _finder.setMinValidFractionForTexture
     (_params.min_valid_fraction_for_texture);
   _finder.setMinValidFractionForFit
     (_params.min_valid_fraction_for_fit);
   _finder.setTextureLimitLow(_params.texture_limit_low);
-  _finder.setTextureLimitHigh(_params.texture_limit_high);
+  // _finder.setTextureLimitHigh(_params.texture_limit_high);
+  _finder.setTextureLimitHigh(textureLimitHigh);
+  
+  cerr << "-->> Using textureRadiusKm: " << textureRadiusKm << endl;
+  cerr << "-->> Using textureLimitHigh: " << textureLimitHigh << endl;
   
   _finder.setGrid(fhdr.nx,
                   fhdr.ny,

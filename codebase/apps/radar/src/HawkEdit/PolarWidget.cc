@@ -682,6 +682,8 @@ void PolarWidget::paintEvent(QPaintEvent *event)
       //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
   } catch (std::invalid_argument &ex) {
     _manager->errorMessage("Error", ex.what());
+    _manager->errorMessage("Error", "Field has no data");
+    event->accept();
   }
   LOG(DEBUG) << "exit";
 }
@@ -1264,8 +1266,12 @@ void PolarWidget::drawColorScale(QPainter &painter) {
     //painter.setFont(font);  
 
   DisplayField *field = displayFieldController->getSelectedField();
-  drawColorScaleFromWorldPlot(field->getColorMap(), painter,
+  if (field != NULL) {
+    //if (field->length() > 0) {
+      drawColorScaleFromWorldPlot(field->getColorMap(), painter,
                             _params->label_font_size);
+    //}
+  }
 
   painter.restore();
   delete textTransform;

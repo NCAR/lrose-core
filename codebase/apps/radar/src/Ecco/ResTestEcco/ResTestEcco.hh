@@ -101,7 +101,10 @@ private:
   vector<kernel_t> _kernelOffsets;
   int _nxKernel, _nyKernel;
 
-  int _processResolution(int resNum, double resFactor);
+  int _processResolution(int resNum,
+                         double resFactor,
+                         double textureRadiusKm,
+                         double textureLimitHigh);
   MdvxField *_createDbzReducedRes(const MdvxField *dbzFieldIn,
                                   double resFactor);
   void _computeKernel(const Mdvx::field_header_t &fhdrIn,

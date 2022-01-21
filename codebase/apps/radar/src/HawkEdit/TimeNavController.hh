@@ -68,6 +68,7 @@ public:
 
   void fetchArchiveFiles(string seedFileName);
   void fetchArchiveFiles(string seedPath, string seedFileName,
+    string fullUrl,
     bool keepTimeRange = false);
 
   string &getSelectedArchiveFile();
@@ -109,6 +110,8 @@ public:
   void updateGui();
 
   bool moreFiles();
+  void getBounds(bool useTimeRange, int *firstArchiveFileIndex,
+    int *lastArchiveFileIndex);
   void replaceSelectedTempPath(string newName);
 
 private:

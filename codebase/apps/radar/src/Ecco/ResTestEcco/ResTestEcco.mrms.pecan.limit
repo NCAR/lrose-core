@@ -116,26 +116,26 @@ resolutions = {
   ,
   {
     res_reduction_factor = 2,
-    texture_radius_km = 8.7,
-    texture_limit_high = 30
+    texture_radius_km = 7,
+    texture_limit_high = 28
   }
   ,
   {
     res_reduction_factor = 3,
-    texture_radius_km = 10.1,
-    texture_limit_high = 30
+    texture_radius_km = 7,
+    texture_limit_high = 26
   }
   ,
   {
     res_reduction_factor = 4,
-    texture_radius_km = 11.4,
-    texture_limit_high = 30
+    texture_radius_km = 7,
+    texture_limit_high = 23.7
   }
   ,
   {
     res_reduction_factor = 5,
-    texture_radius_km = 12.5,
-    texture_limit_high = 30
+    texture_radius_km = 8,
+    texture_limit_high = 22
   }
 };
 
