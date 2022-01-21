@@ -99,6 +99,7 @@ public:
 
   // move to Model!!!
   string no_yyyymmdd(string s);
+  bool archiveFilesHaveDayDir();
 
   bool moreFiles();
 

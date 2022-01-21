@@ -191,8 +191,16 @@ string TimeNavController::getTempDir() {
       _setBaseDirTempStack();
     }
   }
-  _tempDirStack.push_back(nextTempDir); 
+
+  // push temp dir WITHOUT day dir, to make save easier (just rename)
+  // and make RadxFileList work because it looks for a day Dir
+  string noDayDir = nextTempDir;
+  if (_model->archiveFilesHaveDayDir()) {
+    noDayDir.erase(noDayDir.size()-9, 9);
+  }
+  _tempDirStack.push_back(noDayDir); 
   _tempDirIndex += 1;
+  // BUT, return path with day Dir if the archive files have it
   return nextTempDir;
 }
 

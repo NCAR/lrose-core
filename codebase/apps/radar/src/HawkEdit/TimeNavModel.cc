@@ -451,10 +451,12 @@ string TimeNavModel::getTempDir() {
     msg.append(workingPath);
     throw std::invalid_argument(msg);
   }
-  if (_archiveFilesHaveDayDir) {
-    workingPath.erase(workingPath.size()-9, 8);
-  }
+
   return workingPath;
+}
+
+bool TimeNavModel::archiveFilesHaveDayDir() {
+  return _archiveFilesHaveDayDir;
 }
 
 int TimeNavModel::getPositionOfSelection() {
