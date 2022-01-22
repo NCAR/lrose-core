@@ -59,9 +59,12 @@ ConvStratFinder::ConvStratFinder()
   _debug = false;
   _verbose = false;
 
+  _useMultipleThreads = true;
+
   _minValidHtKm = 0.0;
   _maxValidHtKm = 30.0;
   _useDbzColMax = false;
+  _baseDbz = 0.0;
   _minValidDbz = 0.0;
   
   _textureRadiusKm = 7.0;
@@ -533,6 +536,7 @@ void ConvStratFinder::_computeTexture()
     const fl32 *dbz = _dbzColMax.dat();
     ComputeTexture *thread = new ComputeTexture(-1);
     thread->setDbz(dbz, _missingFl32);
+    thread->setBaseDbz(_baseDbz);
     thread->setTextureArray(_textureColMax.dat());
     threads.push_back(thread);
   } else {
@@ -542,6 +546,7 @@ void ConvStratFinder::_computeTexture()
       size_t zoffset = iz * _nxy;
       ComputeTexture *thread = new ComputeTexture(iz);
       thread->setDbz(dbz + zoffset, _missingFl32);
+      thread->setBaseDbz(_baseDbz);
       thread->setTextureArray(_texture3D.dat() + zoffset);
       threads.push_back(thread);
     }
@@ -557,38 +562,58 @@ void ConvStratFinder::_computeTexture()
     thread->setKernelOffsets(_textureKernelOffsets);
   }
 
-  // set threads going
-
-  for (size_t ii = 0; ii < threads.size(); ii++) {
-    if (_verbose) {
-      cerr << "====>> starting texture thread: " << ii << endl;
+  if (_useMultipleThreads) {
+    
+    // multi-threading, set threads going in parallel
+    
+    for (size_t ii = 0; ii < threads.size(); ii++) {
+      if (_verbose) {
+        cerr << "====>> starting texture thread: " << ii << endl;
+      }
+      threads[ii]->signalRunToStart();
     }
-    threads[ii]->signalRunToStart();
-  }
-
-  // wait until they are done
-
-  for (size_t ii = 0; ii < threads.size(); ii++) {
-    threads[ii]->waitForRunToComplete();
-    if (_verbose) {
-      cerr << "====>> texture thread complete: " << ii << endl;
+    
+    // wait until they are done
+    
+    for (size_t ii = 0; ii < threads.size(); ii++) {
+      threads[ii]->waitForRunToComplete();
+      if (_verbose) {
+        cerr << "====>> texture thread complete: " << ii << endl;
+      }
     }
-  }
 
+  } else {
+
+    // single threaded, set threads going serially
+    // wait for each thread to complete before running the next one
+
+    for (size_t ii = 0; ii < threads.size(); ii++) {
+      if (_verbose) {
+        cerr << "====>> starting texture thread: " << ii << endl;
+      }
+      threads[ii]->signalRunToStart();
+      threads[ii]->waitForRunToComplete();
+      if (_verbose) {
+        cerr << "====>> texture thread complete: " << ii << endl;
+      }
+    }
+
+  } // if (_useMultipleThreads)
+  
   // delete threads
-
+  
   for (size_t ii = 0; ii < threads.size(); ii++) {
     if (_verbose) {
       cerr << "====>> deleting texture thread: " << ii << endl;
     }
     delete threads[ii];
   }
-
+  
   threads.clear();
   if (_verbose) {
     cerr << "====>> All threads freed" << endl;
   }
-
+  
   // for col max, copy the col max texture to all planes
   
   if (_useDbzColMax) {
@@ -1161,7 +1186,7 @@ void ConvStratFinder::ComputeTexture::run()
         double sum = 0.0;
         double sumSq = 0.0;
         for (size_t ii = 0; ii < dbzVals.size(); ii++) {
-          double val = dbzVals[ii];
+          double val = dbzVals[ii] - _baseDbz;
           // constrain to positive values
           val = max(val, 1.0);
           double dbzSq = val * val;

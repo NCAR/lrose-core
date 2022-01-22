@@ -87,15 +87,23 @@ public:
   ////////////////////////////////////////////////////////////////////
   // Set debugging to on or verbose
 
-  void setDebug(bool state) { _debug = state; }
+  void setDebug(bool val) { _debug = val; }
 
-  void setVerbose(bool state) {
-    _verbose = state;
-    if (state) {
+  void setVerbose(bool val) {
+    _verbose = val;
+    if (val) {
       _debug = true;
     }
   }
-  
+
+  ////////////////////////////////////////////////////////////////////
+  // Set use of multiple threads, default is TRUE
+
+  void setUseMultipleThreads(bool val)
+  {
+    _useMultipleThreads = val;
+  }
+
   // set algorithm parameters
 
   ////////////////////////////////////////////////////////////////////
@@ -120,8 +128,22 @@ public:
   ////////////////////////////////////////////////////////////////////
   // Minimum reflectivity threshold for this analysis (dBZ).
   // Reflectivity below this threshold is set to missing.
+  // This selects the grid points we use for computing the active
+  // fraction within the texture radius.
 
   void setMinValidDbz(double val) { _minValidDbz = val; }
+
+  ////////////////////////////////////////////////////////////////////
+  // Set DBZ base.
+  // Before computing the texture, we subtract the baseDBZ
+  // from the measured DBZ.
+  // This adjusts the DBZ values into the positive range.
+  // For S-, C- and X-band radars, this can be set to
+  // 0 dBZ, which is the default.
+  // For Ka-band radars this should be around -10 dBZ.
+  // For W-band radars -20 dBZ is appropriate.
+  
+  void setBaseDbz(double val) { _baseDbz = val; }
 
   // converting texture to convectivity convectivity
   // these are the limits for mapping texture to convectivity from 0 and 1
@@ -323,10 +345,13 @@ private:
   bool _debug; // Print debug messages
   bool _verbose; // Print verbose debug messages
 
+  bool _useMultipleThreads;
+
   double _minValidHtKm;
   double _maxValidHtKm;
   bool _useDbzColMax;
   double _minValidDbz;
+  double _baseDbz;
 
   double _minConvectivityForConvective;
   double _maxConvectivityForStratiform;
@@ -480,6 +505,11 @@ private:
       _missingVal = missingVal;
     }
     
+    void setBaseDbz(double val)
+    {
+      _baseDbz = val;
+    }
+    
     void setFractionCovered(const fl32 *frac)
     {
       _fractionCovered = frac;
@@ -507,6 +537,7 @@ private:
     double _minValidFractionForTexture;
     double _minValidFractionForFit;
     fl32 _missingVal;
+    double _baseDbz;
     const fl32 *_dbz;
     const fl32 *_fractionCovered;
     fl32 *_texture;
