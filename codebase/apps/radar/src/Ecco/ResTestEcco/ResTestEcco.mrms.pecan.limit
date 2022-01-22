@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./ResTestEcco
+ * TDRP params for ResTestEcco
  **********************************************************************/
 
 //======================================================================
@@ -51,6 +51,22 @@ debug = DEBUG_OFF;
 //
 
 mode = ARCHIVE;
+
+///////////// use_multiple_threads ////////////////////
+//
+// Option to use multiple threads for speed.
+//
+// Computing the texture is the most time consuming step. If this is 
+//   true, then the texture will be computer for each vertical level in a 
+//   separate thread, in parallel. This speeds up the processing. If this 
+//   is false, the threads will be called serially. This is useful for 
+//   debugging.
+//
+//
+// Type: boolean
+//
+
+use_multiple_threads = TRUE;
 
 //======================================================================
 //
@@ -108,33 +124,33 @@ dbz_field_name = "DBZ";
 //
 
 resolutions = {
-  {
-    res_reduction_factor = 1,
-    texture_radius_km = 7,
-    texture_limit_high = 30
-  }
-  ,
-  {
-    res_reduction_factor = 2,
-    texture_radius_km = 7,
-    texture_limit_high = 28
-  }
-  ,
-  {
-    res_reduction_factor = 3,
-    texture_radius_km = 7,
-    texture_limit_high = 26
-  }
-  ,
-  {
-    res_reduction_factor = 4,
-    texture_radius_km = 7,
-    texture_limit_high = 23.7
-  }
-  ,
+  // {
+  //   res_reduction_factor = 1,
+  //   texture_radius_km = 7,
+  //   texture_limit_high = 30
+  // }
+  // ,
+  // {
+  //   res_reduction_factor = 2,
+  //   texture_radius_km = 7,
+  //   texture_limit_high = 28
+  // }
+  // ,
+  // {
+  //   res_reduction_factor = 3,
+  //   texture_radius_km = 7,
+  //   texture_limit_high = 26
+  // }
+  // ,
+  // {
+  //   res_reduction_factor = 4,
+  //   texture_radius_km = 7,
+  //   texture_limit_high = 23.7
+  // }
+  // ,
   {
     res_reduction_factor = 5,
-    texture_radius_km = 8,
+    texture_radius_km = 7,
     texture_limit_high = 22
   }
 };

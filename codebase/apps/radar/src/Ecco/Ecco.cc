@@ -121,9 +121,11 @@ Ecco::Ecco(int argc, char **argv)
   } else if (_params.debug) {
     _finder.setDebug(true);
   }
+  _finder.setUseMultipleThreads(_params.use_multiple_threads);
   _finder.setMinValidHtKm(_params.min_valid_height);
   _finder.setMaxValidHtKm(_params.max_valid_height);
   _finder.setMinValidDbz(_params.min_valid_dbz);
+  _finder.setBaseDbz(_params.base_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
   if (_params.clumping_use_dual_thresholds) {
     _finder.setUseDualThresholds(_params.clumping_secondary_convectivity,

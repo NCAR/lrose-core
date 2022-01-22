@@ -616,6 +616,18 @@
     tt->single_val.e = ARCHIVE;
     tt++;
     
+    // Parameter 'use_multiple_threads'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_multiple_threads");
+    tt->descr = tdrpStrDup("Option to use multiple threads for speed.");
+    tt->help = tdrpStrDup("Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.");
+    tt->val_offset = (char *) &use_multiple_threads - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -720,6 +732,18 @@
     tt->descr = tdrpStrDup("Minimum reflectivity threshold for this analysis (dBZ).");
     tt->help = tdrpStrDup("Reflectivity below this threshold is set to missing.");
     tt->val_offset = (char *) &min_valid_dbz - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'base_dbz'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("base_dbz");
+    tt->descr = tdrpStrDup("Set base DBZ value.");
+    tt->help = tdrpStrDup("Before computing the texture, we subtract the baseDBZ from the measured DBZ. This adjusts the DBZ values into the positive range. For S-, C- and X-band radars, this can be set to 0 dBZ, which is the default. For Ka-band radars this should be around -10 dBZ. For W-band radars -20 dBZ is appropriate.");
+    tt->val_offset = (char *) &base_dbz - &_start_;
     tt->single_val.d = 0;
     tt++;
     

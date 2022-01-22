@@ -42,6 +42,12 @@ paramdef enum mode_t {
   p_help = "In REALTIME mode, the program waits for a new input file. In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
 } mode;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use multiple threads for speed.";
+  p_help = "Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.";
+} use_multiple_threads;
+
 commentdef {
   p_header = "DATA INPUT";
 }
@@ -135,6 +141,12 @@ paramdef double {
   p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
   p_help = "Reflectivity below this threshold is set to missing.";
 } min_valid_dbz;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Set base DBZ value.";
+  p_help = "Before computing the texture, we subtract the baseDBZ from the measured DBZ. This adjusts the DBZ values into the positive range. For S-, C- and X-band radars, this can be set to 0 dBZ, which is the default. For Ka-band radars this should be around -10 dBZ. For W-band radars -20 dBZ is appropriate.";
+} base_dbz;
 
 paramdef double {
   p_default = 30.0;

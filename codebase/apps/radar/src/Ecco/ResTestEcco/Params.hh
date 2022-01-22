@@ -385,6 +385,8 @@ public:
 
   mode_t mode;
 
+  tdrp_bool_t use_multiple_threads;
+
   char* input_dir;
 
   char* dbz_field_name;
@@ -393,6 +395,8 @@ public:
   int resolutions_n;
 
   double min_valid_dbz;
+
+  double base_dbz;
 
   double texture_radius_km;
 
@@ -417,7 +421,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[23];
+  mutable TDRPtable _table[25];
 
   const char *_className;
 

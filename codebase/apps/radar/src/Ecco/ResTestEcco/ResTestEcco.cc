@@ -224,7 +224,9 @@ int ResTestEcco::_processResolution(int resNum,
   } else if (_params.debug) {
     _finder.setDebug(true);
   }
+  _finder.setUseMultipleThreads(_params.use_multiple_threads);
   _finder.setMinValidDbz(_params.min_valid_dbz);
+  _finder.setBaseDbz(_params.base_dbz);
   _finder.setMinConvectivityForConvective(_params.min_convectivity_for_convective);
   _finder.setMaxConvectivityForStratiform(_params.max_convectivity_for_stratiform);
   // double textureRadiusKm = _params.texture_radius_km * (log10(resFactor) + 1.0);
@@ -234,7 +236,6 @@ int ResTestEcco::_processResolution(int resNum,
   _finder.setMinValidFractionForFit
     (_params.min_valid_fraction_for_fit);
   _finder.setTextureLimitLow(_params.texture_limit_low);
-  // _finder.setTextureLimitHigh(_params.texture_limit_high);
   _finder.setTextureLimitHigh(textureLimitHigh);
   
   cerr << "-->> Using textureRadiusKm: " << textureRadiusKm << endl;

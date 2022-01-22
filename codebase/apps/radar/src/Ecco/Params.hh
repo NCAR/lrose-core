@@ -385,6 +385,8 @@ public:
 
   mode_t mode;
 
+  tdrp_bool_t use_multiple_threads;
+
   char* input_url;
 
   char* dbz_field_name;
@@ -410,6 +412,8 @@ public:
   double max_valid_height;
 
   double min_valid_dbz;
+
+  double base_dbz;
 
   double min_valid_volume_for_convective;
 
@@ -472,7 +476,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[54];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 
