@@ -325,7 +325,8 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   fhdrOut.grid_dy = fhdrIn.grid_dy * resFactor;
   fhdrOut.nx = (int) floor(fhdrIn.nx / resFactor);
   fhdrOut.ny = (int) floor(fhdrIn.ny / resFactor);
-  size_t nxyzOut = fhdrOut.nx * fhdrOut.ny * fhdrOut.nz;
+  size_t nxyOut = fhdrOut.nx * fhdrOut.ny;
+  size_t nxyzOut = nxyOut * fhdrOut.nz;
   fhdrOut.volume_size = nxyzOut * sizeof(fl32);
 
   // compute the kernel
@@ -333,9 +334,9 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   _computeKernel(fhdrIn, resFactor);
   
   // alloc data
-  
-  MemBuf buf;
-  fl32 *dbzOut = (fl32 *) buf.prepare(nxyzOut * sizeof(fl32));
+
+  vector<fl32> dbzOut;
+  dbzOut.resize(nxyzOut);
   for (size_t ii = 0; ii < nxyzOut; ii++) {
     dbzOut[ii] = _missingFloat;
   } // ii
@@ -344,15 +345,20 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
   
   const fl32 *dbzIn = (fl32 *) dbzFieldIn->getVol();
   size_t nxyIn = fhdrIn.nx * fhdrIn.ny;
-  size_t nxyOut = fhdrOut.nx * fhdrOut.ny;
+  
+  cerr << "==>> fhdrIn.nx: " << fhdrIn.nx << endl;
+  cerr << "==>> fhdrIn.ny: " << fhdrIn.ny << endl;
+  cerr << "==>> fhdrOut.nx: " << fhdrOut.nx << endl;
+  cerr << "==>> fhdrOut.ny: " << fhdrOut.ny << endl;
+  cerr << "==>> fhdrOut.nz: " << fhdrOut.nz << endl;
   
   for (int iz = 0; iz < fhdrIn.nz; iz++) {
     
     fl32 *dbzPlaneIn = (fl32 *) dbzIn + iz * nxyIn;
-    fl32 *dbzPlaneOut = dbzOut + iz * nxyOut;
+    fl32 *dbzPlaneOut = dbzOut.data() + iz * nxyOut;
 
     for (int iyOut = 0; iyOut < fhdrOut.ny; iyOut++) {
-      for (int ixOut = 0; ixOut < fhdrOut.nx; ixOut++) {
+      for (int ixOut = 0; ixOut < fhdrOut.nx; ixOut++, dbzPlaneOut++) {
         int iyIn = (int) floor(iyOut * resFactor + 0.5);
         int ixIn = (int) floor(ixOut * resFactor + 0.5);
         if (iyIn >= fhdrIn.ny || ixIn >= fhdrIn.nx) {
@@ -382,7 +388,10 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
         } // ii
         if (count > 0) {
           fl32 mean = sum / count;
-          dbzPlaneOut[iyOut * fhdrOut.nx + ixOut] = mean;
+          *dbzPlaneOut = mean;
+          if (isnan(mean)) {
+            cerr << "NAN" << endl;
+          }
         }
       } // ix
     } // iy
@@ -412,7 +421,13 @@ MdvxField *ResTestEcco::_createDbzReducedRes(const MdvxField *dbzFieldIn,
     
   } // iz
 
-  _resReducedField = new MdvxField(fhdrOut, vhdrIn, dbzOut);
+  for (size_t ii = 0; ii < nxyzOut; ii++) {
+    if (isnan(dbzOut[ii])) {
+      cerr << "XXXXXXXXXXXXXX ii: " << endl;
+    }
+  } // ii
+
+  _resReducedField = new MdvxField(fhdrOut, vhdrIn, dbzOut.data());
   return _resReducedField;
 
 }
@@ -618,8 +633,9 @@ void ResTestEcco::_addFields()
                                 "convective_stratiform_echo_type_3D",
                                 ""));
 
-  _outMdvx->addField(_inMdvx.getField(_params.dbz_field_name));
-
+  MdvxField *dbzFieldIn = new MdvxField(*_inMdvx.getField(_params.dbz_field_name));
+  _outMdvx->addField(dbzFieldIn);
+  
 }
 
 /////////////////////////////////////////////////////////
