@@ -448,7 +448,8 @@ private:
   void _initToMissing(TaArray<ui08> &array, ui08 missingVal);
   void _computeDbzColMax();
   void _finalizeEchoType();
-  void _computeTexture();
+  void _computeTextureMultiThreaded();
+  void _computeTextureSingleThreaded();
   void _computeConvectivity();
   void _performClumping();
   void _freeClumps();

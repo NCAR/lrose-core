@@ -269,7 +269,11 @@ int ConvStratFinder::computeEchoType(const fl32 *dbz,
   
   // compute spatial texture of reflectivity
   
-  _computeTexture();
+  if (_useMultipleThreads) {
+    _computeTextureMultiThreaded();
+  } else {
+    _computeTextureSingleThreaded();
+  }
 
   // compute convectivity
   
@@ -330,7 +334,11 @@ int ConvStratFinder::_computeEchoType2D(const fl32 *dbz,
   
   // compute spatial texture of reflectivity
   
-  _computeTexture();
+  if (_useMultipleThreads) {
+    _computeTextureMultiThreaded();
+  } else {
+    _computeTextureSingleThreaded();
+  }
 
   // compute convectivity
   
@@ -518,13 +526,13 @@ void ConvStratFinder::_computeDbzColMax()
 }
 
 /////////////////////////////////////////////////////////
-// compute the spatial texture
+// compute the spatial texture - multi-threaded version
 
-void ConvStratFinder::_computeTexture()
+void ConvStratFinder::_computeTextureMultiThreaded()
   
 {
 
-  PMU_auto_register("ConvStratFinder::_computeTexture()");
+  PMU_auto_register("ConvStratFinder::_computeTextureMultiThreaded()");
 
   // set up threads for computing texture at each level
 
@@ -562,43 +570,23 @@ void ConvStratFinder::_computeTexture()
     thread->setKernelOffsets(_textureKernelOffsets);
   }
 
-  if (_useMultipleThreads) {
-    
-    // multi-threading, set threads going in parallel
-    
-    for (size_t ii = 0; ii < threads.size(); ii++) {
-      if (_verbose) {
-        cerr << "====>> starting texture thread: " << ii << endl;
-      }
-      threads[ii]->signalRunToStart();
+  // multi-threading, set threads going in parallel
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    if (_verbose) {
+      cerr << "====>> starting texture thread: " << ii << endl;
     }
-    
-    // wait until they are done
-    
-    for (size_t ii = 0; ii < threads.size(); ii++) {
-      threads[ii]->waitForRunToComplete();
-      if (_verbose) {
-        cerr << "====>> texture thread complete: " << ii << endl;
-      }
+    threads[ii]->signalRunToStart();
+  }
+  
+  // wait until they are done
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    threads[ii]->waitForRunToComplete();
+    if (_verbose) {
+      cerr << "====>> texture thread complete: " << ii << endl;
     }
-
-  } else {
-
-    // single threaded, set threads going serially
-    // wait for each thread to complete before running the next one
-
-    for (size_t ii = 0; ii < threads.size(); ii++) {
-      if (_verbose) {
-        cerr << "====>> starting texture thread: " << ii << endl;
-      }
-      threads[ii]->signalRunToStart();
-      threads[ii]->waitForRunToComplete();
-      if (_verbose) {
-        cerr << "====>> texture thread complete: " << ii << endl;
-      }
-    }
-
-  } // if (_useMultipleThreads)
+  }
   
   // delete threads
   
@@ -609,6 +597,92 @@ void ConvStratFinder::_computeTexture()
     delete threads[ii];
   }
   
+  threads.clear();
+  if (_verbose) {
+    cerr << "====>> All threads freed" << endl;
+  }
+  
+  // for col max, copy the col max texture to all planes
+  
+  if (_useDbzColMax) {
+    fl32 *textureColMax = _textureColMax.dat();
+    for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+      size_t zoffset = iz * _nxy;
+      fl32 *texture = _texture3D.dat() + zoffset;
+      fl32 *dbz = _dbz3D.dat() + zoffset;
+      for (size_t ii = 0; ii < _nxy; ii++) {
+        if (dbz[ii] != _missingFl32) {
+          texture[ii] = textureColMax[ii];
+        }
+      } // ii
+    } // iz
+  } // if (_useDbzColMax) 
+
+}
+
+/////////////////////////////////////////////////////////
+// compute the spatial texture - single-threaded version
+
+void ConvStratFinder::_computeTextureSingleThreaded()
+  
+{
+
+  PMU_auto_register("ConvStratFinder::_computeTextureSingleThreaded()");
+
+  // set up threads for computing texture at each level
+
+  vector<ComputeTexture *> threads;
+
+  if (_useDbzColMax) {
+    // use the col max DBZ, and set
+    // the texture at the lowest plane
+    const fl32 *dbz = _dbzColMax.dat();
+    ComputeTexture *thread = new ComputeTexture(-1);
+    thread->setDbz(dbz, _missingFl32);
+    thread->setBaseDbz(_baseDbz);
+    thread->setTextureArray(_textureColMax.dat());
+    threads.push_back(thread);
+  } else {
+    // 3D texture
+    const fl32 *dbz = _dbz3D.dat();
+    for (size_t iz = _minIz; iz <= _maxIz; iz++) {
+      size_t zoffset = iz * _nxy;
+      ComputeTexture *thread = new ComputeTexture(iz);
+      thread->setDbz(dbz + zoffset, _missingFl32);
+      thread->setBaseDbz(_baseDbz);
+      thread->setTextureArray(_texture3D.dat() + zoffset);
+      threads.push_back(thread);
+    }
+  }
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    ComputeTexture *thread = threads[ii];
+    thread->setGridSize(_nx, _ny);
+    thread->setKernelSize(_nxTexture, _nyTexture);
+    thread->setMinValidFractionForTexture(_minValidFractionForTexture);
+    thread->setMinValidFractionForFit(_minValidFractionForFit);
+    thread->setFractionCovered(_fractionActive.dat());
+    thread->setKernelOffsets(_textureKernelOffsets);
+  }
+
+  // single threaded, set threads going serially
+  // wait for each thread to complete before running the next one
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    if (_verbose) {
+      cerr << "====>> running thread serially: " << ii << endl;
+    }
+    threads[ii]->run();
+  }
+  
+  // delete threads
+  
+  for (size_t ii = 0; ii < threads.size(); ii++) {
+    if (_verbose) {
+      cerr << "====>> deleting texture thread: " << ii << endl;
+    }
+    delete threads[ii];
+  }
   threads.clear();
   if (_verbose) {
     cerr << "====>> All threads freed" << endl;
@@ -986,8 +1060,14 @@ void ConvStratFinder::_computeKernels()
 
   _textureKernelOffsets.clear();
 
-  _nyTexture = (size_t) floor(_textureRadiusKm / _dyKm + 0.5);
-  _nxTexture = (size_t) floor(_textureRadiusKm / _dxKm + 0.5);
+  double radiusKm = _textureRadiusKm;
+  _nyTexture = (size_t) floor(radiusKm / _dyKm + 0.5);
+  _nxTexture = (size_t) floor(radiusKm / _dxKm + 0.5);
+  while (_nyTexture < 2 || _nxTexture < 2) {
+    radiusKm *= 1.1;
+    _nyTexture = (size_t) floor(radiusKm / _dyKm + 0.5);
+    _nxTexture = (size_t) floor(radiusKm / _dxKm + 0.5);
+  }
   
   if (_verbose) {
     cerr << "Texture kernel size:" << endl;
@@ -995,6 +1075,7 @@ void ConvStratFinder::_computeKernels()
     cerr << "  nx: " << _nxTexture << endl;
     cerr << "  _dyKm: " << _dyKm << endl;
     cerr << "  _dxKm: " << _dxKm << endl;
+    cerr << "  radiusKm: " << radiusKm << endl;
   }
 
   kernel_t entry;
@@ -1002,8 +1083,8 @@ void ConvStratFinder::_computeKernels()
     double yy = jdy * _dyKm;
     for (int jdx = -_nxTexture; jdx <= _nxTexture; jdx++) {
       double xx = jdx * _dxKm;
-      double radius = sqrt(yy * yy + xx * xx);
-      if (radius <= _textureRadiusKm) {
+      double rad = sqrt(yy * yy + xx * xx);
+      if (rad <= radiusKm) {
         entry.jx = jdx;
         entry.jy = jdy;
         entry.xx = xx;
@@ -1209,8 +1290,11 @@ void ConvStratFinder::ComputeTexture::run()
           var = 0.0;
         }
         double sdev = sqrt(var);
-        _texture[icenter] = sqrt(sdev);
-
+        double texture = sqrt(sdev);
+        if (!isnan(texture)) {
+          _texture[icenter] = texture;
+        }
+        
       } // if (count >= minPtsForTexture)
       
     } // ix
