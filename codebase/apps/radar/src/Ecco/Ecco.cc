@@ -710,6 +710,7 @@ int Ecco::_doWrite()
   string info = _inMdvx.getMasterHeader().data_set_info;
   info += " : Stratfinder used to identify stratiform regions";
   _outMdvx.setDataSetInfo(info.c_str());
+  _outMdvx.setMdv2NcfOutput(true, true, true, true);
   
   // copy any chunks
   
