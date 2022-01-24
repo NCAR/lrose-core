@@ -78,6 +78,7 @@ set (SRCS
       ./Solo/ThresholdField.cc
       ./Solo/ForcedUnfolding.cc
       ./Solo/MergeFields.cc
+      ./Solo/NavigationCorrection.cc
       ./Solo/RemoveRing.cc
       ./Solo/RainRate.cc
       ./Solo/Abs.cc
