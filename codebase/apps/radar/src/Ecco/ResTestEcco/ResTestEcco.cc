@@ -102,6 +102,12 @@ ResTestEcco::ResTestEcco(int argc, char **argv)
     }
   }
 
+  // set up sums for different echo types
+
+  _sumCountStrat.resize(_params.resolutions_n, 0.0);
+  _sumCountMixed.resize(_params.resolutions_n, 0.0);
+  _sumCountConv.resize(_params.resolutions_n, 0.0);
+
 }
 
 // destructor
@@ -114,7 +120,7 @@ ResTestEcco::~ResTestEcco()
     delete _resReducedField;
   }
 
-  _clearResults();
+  _clearResultsMdvx();
   
 }
 
@@ -131,7 +137,7 @@ int ResTestEcco::Run()
   _input.reset();
   while (!_input.endOfData()) {
     
-    _clearResults();
+    _clearResultsMdvx();
 
     // do the read
     
@@ -168,7 +174,27 @@ int ResTestEcco::Run()
     _finder.freeArrays();
     
   } // while
-  
+
+  cerr << "============= Totals for data set ============" << endl;
+
+  for (int ires = 0; ires < _params.resolutions_n; ires++) {
+
+    double totalCount =
+      _sumCountConv[ires] + _sumCountMixed[ires] + _sumCountStrat[ires];
+    double fracConv = _sumCountConv[ires] / totalCount;
+    double fracMixed = _sumCountMixed[ires] / totalCount;
+    double fracStrat = _sumCountStrat[ires] / totalCount;
+    
+    cerr << "resNum, fraction strat, mixed, conv: "
+         << ires << ", "
+         << fracConv << ", "
+         << fracMixed << ", "
+         << fracStrat << endl;
+    
+  } // ires
+
+  cerr << "==============================================" << endl;
+
   return iret;
 
 }
@@ -197,7 +223,7 @@ int ResTestEcco::_processResolution(int resNum,
   // create Mdvx object for results, add to vector
 
   _outMdvx = new DsMdvx;
-  _results.push_back(_outMdvx);
+  _resultsMdvx.push_back(_outMdvx);
   
   // create dbz field with reduced resolution
   
@@ -270,27 +296,33 @@ int ResTestEcco::_processResolution(int resNum,
   // count up the categories
 
   const ui08 *ecco = _finder.getEchoType3D();
-  size_t npts = fhdr.nx * fhdr.ny * zLevels.size();
-  double nconv = 0;
-  double nmixed = 0;
-  double nstrat = 0;
-  for (size_t ii = 0; ii < npts; ii++) {
+  size_t nPts = fhdr.nx * fhdr.ny * zLevels.size();
+  double nConv = 0;
+  double nMixed = 0;
+  double nStrat = 0;
+  for (size_t ii = 0; ii < nPts; ii++) {
     int etype = ecco[ii];
     if (etype >= ConvStratFinder::CATEGORY_STRATIFORM_LOW &&
         etype <= ConvStratFinder::CATEGORY_STRATIFORM_HIGH) {
-      nstrat++;
+      nStrat++;
     } else if (etype == ConvStratFinder::CATEGORY_MIXED) {
-      nmixed++;
+      nMixed++;
     } else if (etype >= ConvStratFinder::CATEGORY_CONVECTIVE_ELEVATED &&
                etype <= ConvStratFinder::CATEGORY_CONVECTIVE_DEEP) {
-      nconv++;
+      nConv++;
     }
   }
-  double total = nconv + nmixed + nstrat;
-  cerr << "fraction strat, mixed, conv: "
-       << nstrat / total << ", "
-       << nmixed / total << ", "
-       << nconv / total << endl;
+
+  _sumCountConv[resNum] += nConv;
+  _sumCountMixed[resNum] += nMixed;
+  _sumCountStrat[resNum] += nStrat;
+
+  double total = nConv + nMixed + nStrat;
+  cerr << "resNum, fraction strat, mixed, conv: "
+       << resNum << ", "
+       << nStrat / total << ", "
+       << nMixed / total << ", "
+       << nConv / total << endl;
 
   // clear
   
@@ -707,8 +739,8 @@ MdvxField *ResTestEcco::_makeField(Mdvx::field_header_t &fhdrTemplate,
   MdvxField::setUnits(units, fhdr);
   MdvxField *newField =
     new MdvxField(fhdr, vhdr, NULL, false, false, false);
-  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(fl32);
+  size_t nPts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = nPts * sizeof(fl32);
   newField->setVolData(data, volSize, Mdvx::ENCODING_FLOAT32);
   newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
 
@@ -735,8 +767,8 @@ MdvxField *ResTestEcco::_makeField(Mdvx::field_header_t &fhdrTemplate,
   MdvxField::setUnits(units, fhdr);
   MdvxField *newField =
     new MdvxField(fhdr, vhdr, NULL, false, false, false);
-  size_t npts = fhdr.nx * fhdr.ny * fhdr.nz;
-  size_t volSize = npts * sizeof(ui08);
+  size_t nPts = fhdr.nx * fhdr.ny * fhdr.nz;
+  size_t volSize = nPts * sizeof(ui08);
   newField->setVolData(data, volSize, Mdvx::ENCODING_INT8);
   newField->convertType(outputEncoding, Mdvx::COMPRESSION_GZIP);
   
@@ -747,13 +779,13 @@ MdvxField *ResTestEcco::_makeField(Mdvx::field_header_t &fhdrTemplate,
 /////////////////////////////////////////////////////////
 // clear the results
 
-void ResTestEcco::_clearResults()
+void ResTestEcco::_clearResultsMdvx()
 
 {
 
-  for (size_t ii = 0; ii < _results.size(); ii++) {
-    delete _results[ii];
+  for (size_t ii = 0; ii < _resultsMdvx.size(); ii++) {
+    delete _resultsMdvx[ii];
   }
-  _results.clear();
+  _resultsMdvx.clear();
 
 }

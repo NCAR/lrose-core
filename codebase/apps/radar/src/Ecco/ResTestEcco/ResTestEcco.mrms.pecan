@@ -124,35 +124,35 @@ dbz_field_name = "DBZ";
 //
 
 resolutions = {
-  {
-    res_reduction_factor = 1,
-    texture_radius_km = 7,
-    texture_limit_high = 30
-  }
-  ,
+  // {
+  //   res_reduction_factor = 1,
+  //   texture_radius_km = 7,
+  //   texture_limit_high = 30
+  // }
+  // ,
   {
     res_reduction_factor = 2,
-    texture_radius_km = 8.7,
+    texture_radius_km = 8.8,
     texture_limit_high = 30
   }
-  ,
-  {
-    res_reduction_factor = 3,
-    texture_radius_km = 10.1,
-    texture_limit_high = 30
-  }
-  ,
-  {
-    res_reduction_factor = 4,
-    texture_radius_km = 11.4,
-    texture_limit_high = 30
-  }
-  ,
-  {
-    res_reduction_factor = 5,
-    texture_radius_km = 12.5,
-    texture_limit_high = 30
-  }
+  // ,
+  // {
+  //   res_reduction_factor = 3,
+  //   texture_radius_km = 10.1,
+  //   texture_limit_high = 30
+  // }
+  // ,
+  // {
+  //   res_reduction_factor = 4,
+  //   texture_radius_km = 11.4,
+  //   texture_limit_high = 30
+  // }
+  // ,
+  // {
+  //   res_reduction_factor = 5,
+  //   texture_radius_km = 12.5,
+  //   texture_limit_high = 30
+  // }
 };
 
 ///////////// min_valid_dbz ///////////////////////////

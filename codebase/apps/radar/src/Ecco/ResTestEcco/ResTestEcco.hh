@@ -87,7 +87,10 @@ private:
   DsMdvx _inMdvx;
   const MdvxField *_dbzField;
   DsMdvx *_outMdvx;
-  vector<DsMdvx *> _results;
+  vector<DsMdvx *> _resultsMdvx;
+  vector<double> _sumCountStrat;
+  vector<double> _sumCountMixed;
+  vector<double> _sumCountConv;
   ConvStratFinder _finder;
 
   MdvxField *_resReducedField;
@@ -130,7 +133,7 @@ private:
                         string longName,
                         string units);
 
-  void _clearResults();
+  void _clearResultsMdvx();
 
 };
 
