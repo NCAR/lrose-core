@@ -185,12 +185,13 @@ int ResTestEcco::Run()
     double fracMixed = _sumCountMixed[ires] / totalCount;
     double fracStrat = _sumCountStrat[ires] / totalCount;
     
-    cerr << "resNum, fraction strat, mixed, conv: "
-         << ires << ", "
+    cerr << "resNum, radius, limitHigh, fraction strat, mixed, conv: "
+         << _params._resolutions[ires].texture_radius_km << ", "
+         << _params._resolutions[ires].texture_limit_high << ", "
          << fracConv << ", "
          << fracMixed << ", "
          << fracStrat << endl;
-    
+
   } // ires
 
   cerr << "==============================================" << endl;
@@ -317,12 +318,20 @@ int ResTestEcco::_processResolution(int resNum,
   _sumCountMixed[resNum] += nMixed;
   _sumCountStrat[resNum] += nStrat;
 
-  double total = nConv + nMixed + nStrat;
-  cerr << "resNum, fraction strat, mixed, conv: "
-       << resNum << ", "
-       << nStrat / total << ", "
-       << nMixed / total << ", "
-       << nConv / total << endl;
+  double totalCount = nConv + nMixed + nStrat;
+  if (totalCount > 0) {
+    double fracConv = nConv / totalCount;
+    double fracMixed = nMixed / totalCount;
+    double fracStrat = nStrat / totalCount;
+    cerr << "radius, limitHigh, fraction strat, mixed, conv: "
+         << textureRadiusKm << ", "
+         << textureLimitHigh << ", "
+         << fracConv << ", "
+         << fracMixed << ", "
+         << fracStrat << endl;
+  } else {
+    cerr << "==>> no data found" << endl;
+  }
 
   // clear
   
