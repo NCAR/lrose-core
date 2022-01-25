@@ -146,6 +146,17 @@ Ecco::Ecco(int argc, char **argv)
   _finder.setMinVertExtentForConvectiveKm(_params.min_vert_extent_for_convective);
   _finder.setDbzForEchoTops(_params.dbz_for_echo_tops);
 
+  _finder.setMinConvFractionForDeep
+    (_params.min_conv_fraction_for_deep);
+  _finder.setMinConvFractionForShallow
+    (_params.min_conv_fraction_for_shallow);
+  _finder.setMaxShallowConvFractionForElevated
+    (_params.max_shallow_conv_fraction_for_elevated);
+  _finder.setMaxDeepConvFractionForElevated
+    (_params.max_deep_conv_fraction_for_elevated);
+  _finder.setMinStratFractionForStratBelow
+    (_params.min_strat_fraction_for_strat_below);
+  
 }
 
 // destructor

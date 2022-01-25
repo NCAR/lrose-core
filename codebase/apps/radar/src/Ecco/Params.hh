@@ -391,22 +391,6 @@ public:
 
   char* dbz_field_name;
 
-  vert_levels_type_t vert_levels_type;
-
-  char* temp_profile_url;
-
-  char* temp_profile_field_name;
-
-  int temp_profile_search_margin;
-
-  double shallow_threshold_ht;
-
-  double shallow_threshold_temp;
-
-  double deep_threshold_ht;
-
-  double deep_threshold_temp;
-
   double min_valid_height;
 
   double max_valid_height;
@@ -445,6 +429,32 @@ public:
 
   double each_subclump_min_area_km2;
 
+  vert_levels_type_t vert_levels_type;
+
+  char* temp_profile_url;
+
+  char* temp_profile_field_name;
+
+  int temp_profile_search_margin;
+
+  double shallow_threshold_temp;
+
+  double deep_threshold_temp;
+
+  double shallow_threshold_ht;
+
+  double deep_threshold_ht;
+
+  double min_conv_fraction_for_deep;
+
+  double min_conv_fraction_for_shallow;
+
+  double max_shallow_conv_fraction_for_elevated;
+
+  double max_deep_conv_fraction_for_elevated;
+
+  double min_strat_fraction_for_strat_below;
+
   char* output_url;
 
   tdrp_bool_t write_partition;
@@ -476,7 +486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[62];
 
   const char *_className;
 

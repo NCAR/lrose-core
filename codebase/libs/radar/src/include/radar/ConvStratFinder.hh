@@ -254,6 +254,40 @@ public:
                            size_t nptsPlane);
   
   ////////////////////////////////////////////////////////////////////
+  // Set the fractional limits for convective regions, for
+  // the advanced echo categories, after clumping
+
+  // min convective fraction for deep convection
+  
+  void setMinConvFractionForDeep(double val) {
+    _minConvFractionForDeep = val;
+  }
+
+  // min convective fraction for shallow convection
+  
+  void setMinConvFractionForShallow(double val) {
+    _minConvFractionForShallow = val;
+  }
+  
+  // max shallow convective fraction for elevated convection
+  
+  void setMaxShallowConvFractionForElevated(double val) {
+    _maxShallowConvFractionForElevated = val;
+  }
+
+  // max deep convective fraction for elevated convection
+  
+  void setMaxDeepConvFractionForElevated(double val) {
+    _maxDeepConvFractionForElevated = val;
+  }
+
+  // min stratiform fraction for stratiform below
+  
+  void setMinStratFractionForStratBelow(double val) {
+    _minStratFractionForStratBelow = val;
+  }
+
+  ////////////////////////////////////////////////////////////////////
   // Reflectivity threshold for echo tops (dBZ).
   // Echo tops are defined as the max ht with reflectivity at or
   // above this value.
@@ -371,17 +405,25 @@ private:
   double _minVolForConvectiveKm3;
   double _minVertExtentForConvectiveKm;
 
+  // converting texture to convectivity convectivity
+  // these are the limits mapping to 0 and 1
+  
+  double _textureLimitLow;
+  double _textureLimitHigh;
+
   // specify freezing level, and divergence level, by ht MSL
   // if this is false, grids for fz and div level must be passed in
   
   double _shallowHtKm;
   double _deepHtKm;
 
-  // converting texture to convectivity convectivity
-  // these are the limits mapping to 0 and 1
-  
-  double _textureLimitLow;
-  double _textureLimitHigh;
+  // fractions for determining the advanced echo type categories
+
+  double _minConvFractionForDeep;
+  double _minConvFractionForShallow;
+  double _maxShallowConvFractionForElevated;
+  double _maxDeepConvFractionForElevated;
+  double _minStratFractionForStratBelow;
 
   // grid details
 

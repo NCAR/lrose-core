@@ -91,6 +91,12 @@ ConvStratFinder::ConvStratFinder()
   
   _dbzForEchoTops = 18.0;
   
+  _minConvFractionForDeep = 0.05;
+  _minConvFractionForShallow = 0.95;
+  _maxShallowConvFractionForElevated = 0.05;
+  _maxDeepConvFractionForElevated = 0.25;
+  _minStratFractionForStratBelow = 0.9;
+
   _nx = _ny = 0;
   _dx = _dy = 0.0;
   _dxKm = _dyKm = 0.0;
@@ -1430,15 +1436,16 @@ void ConvStratFinder::StormClump::setEchoType()
     category = CATEGORY_MIXED;
   } else if (_vertExtentKm < _finder->_minVertExtentForConvectiveKm) {
     category = CATEGORY_MIXED;
-  } else if (fracShallow < 0.05 && stratiformBelow()) {
-    if (fracDeep > 0.75) {
-      category = CATEGORY_MIXED;
-    } else {
+  } else if (fracShallow < _finder->_maxShallowConvFractionForElevated &&
+             stratiformBelow()) {
+    if (fracDeep < _finder->_maxDeepConvFractionForElevated) {
       category = CATEGORY_CONVECTIVE_ELEVATED;
+    } else {
+      category = CATEGORY_MIXED;
     }
-  } else if (fracShallow > 0.95) {
+  } else if (fracShallow > _finder->_minConvFractionForShallow) {
     category = CATEGORY_CONVECTIVE_SHALLOW;
-  } else if (fracDeep > 0.05) {
+  } else if (fracDeep > _finder->_minConvFractionForDeep) {
     category = CATEGORY_CONVECTIVE_DEEP;
   } else {
     category = CATEGORY_CONVECTIVE_MID;
@@ -1528,7 +1535,7 @@ bool ConvStratFinder::StormClump::stratiformBelow()
   // if fraction stratiform exceeds 0.5
   // we conclude we have stratiform below
 
-  if (fractionStrat > 0.9) {
+  if (fractionStrat > _finder->_minStratFractionForStratBelow) {
     return true;
   } else {
     return false;

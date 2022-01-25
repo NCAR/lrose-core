@@ -680,119 +680,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("SPECIFYING VERTICAL LEVELS - TEMPERAURE or HEIGHT?");
-    tt->comment_text = tdrpStrDup("We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.");
-    tt++;
-    
-    // Parameter 'vert_levels_type'
-    // ctype is '_vert_levels_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("vert_levels_type");
-    tt->descr = tdrpStrDup("How we specify the vertical levels.");
-    tt->help = tdrpStrDup("If temperatures are used, we need to read in the temperature profile from a model.");
-    tt->val_offset = (char *) &vert_levels_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("vert_levels_type_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("VERT_LEVELS_BY_TEMP");
-      tt->enum_def.fields[0].val = VERT_LEVELS_BY_TEMP;
-      tt->enum_def.fields[1].name = tdrpStrDup("VERT_LEVELS_BY_HT");
-      tt->enum_def.fields[1].val = VERT_LEVELS_BY_HT;
-    tt->single_val.e = VERT_LEVELS_BY_HT;
-    tt++;
-    
-    // Parameter 'temp_profile_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_url");
-    tt->descr = tdrpStrDup("URL for temperature profile data, in MDV/Netcdf-CF format.");
-    tt->help = tdrpStrDup("We read in the model data that is closest in time to the reflectivity data.");
-    tt->val_offset = (char *) &temp_profile_url - &_start_;
-    tt->single_val.s = tdrpStrDup("mdv/model");
-    tt++;
-    
-    // Parameter 'temp_profile_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_field_name");
-    tt->descr = tdrpStrDup("Name of temperature field in the model data. This should be in degrees C.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &temp_profile_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("Temp");
-    tt++;
-    
-    // Parameter 'temp_profile_search_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("temp_profile_search_margin");
-    tt->descr = tdrpStrDup("Search margin for finding the temp profile data (secs).");
-    tt->help = tdrpStrDup("The temp profile must be within this number of seconds of the dbz data.");
-    tt->val_offset = (char *) &temp_profile_search_margin - &_start_;
-    tt->single_val.i = 21600;
-    tt++;
-    
-    // Parameter 'shallow_threshold_ht'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("shallow_threshold_ht");
-    tt->descr = tdrpStrDup("Shallow cloud height threshold (km).");
-    tt->help = tdrpStrDup("Shallow cloud tops are below this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.");
-    tt->val_offset = (char *) &shallow_threshold_ht - &_start_;
-    tt->single_val.d = 4.5;
-    tt++;
-    
-    // Parameter 'shallow_threshold_temp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("shallow_threshold_temp");
-    tt->descr = tdrpStrDup("Shallow cloud temperature threshold (degC).");
-    tt->help = tdrpStrDup("Shallow cloud tops are below this temperature. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
-    tt->val_offset = (char *) &shallow_threshold_temp - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'deep_threshold_ht'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("deep_threshold_ht");
-    tt->descr = tdrpStrDup("Deep cloud height threshold (km).");
-    tt->help = tdrpStrDup("Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.");
-    tt->val_offset = (char *) &deep_threshold_ht - &_start_;
-    tt->single_val.d = 8;
-    tt++;
-    
-    // Parameter 'deep_threshold_temp'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("deep_threshold_temp");
-    tt->descr = tdrpStrDup("Deep cloud temperature threshold (degC).");
-    tt->help = tdrpStrDup("Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
-    tt->val_offset = (char *) &deep_threshold_temp - &_start_;
-    tt->single_val.d = -12;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("ALGORITHM PARAMETERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -881,11 +768,11 @@
     tt->single_val.d = 18;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("COMPUTING REFLECTIVITY TEXTURE");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -926,11 +813,11 @@
     tt->single_val.d = 0.67;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY");
     tt->comment_text = tdrpStrDup("Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.");
     tt++;
@@ -959,11 +846,11 @@
     tt->single_val.d = 30;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY");
     tt->comment_text = tdrpStrDup("If neither is set, we flag the point as MIXED.");
     tt++;
@@ -992,12 +879,12 @@
     tt->single_val.d = 0.4;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("CLUMPING.");
+    tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED ECHO TYPE USING CLUMPING AND TEMPERATURE");
     tt->comment_text = tdrpStrDup("We performing clumping on the convectivity field to identify convective entities as objects. The main threshold used for the clumping is min_convectivity_for_convective. By default a secondary threshold is also used - see below.");
     tt++;
     
@@ -1061,11 +948,193 @@
     tt->single_val.d = 2;
     tt++;
     
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("SPECIFYING VERTICAL LEVELS FOR ADVANCED ECHO TYPE - TEMPERATURE or HEIGHT?");
+    tt->comment_text = tdrpStrDup("We need to specify the vertical separation between shallow, mid-level and high clouds. We use the freezing level to separate warm clouds and cold clouds. And we use the divergence level to separate the mid-level clouds from high-level clouds such as anvil. These vertical limits can be specified as heights MSL (in km), or as temperatures. If temperatures are used, we read in the temperature profile from a model.");
+    tt++;
+    
+    // Parameter 'vert_levels_type'
+    // ctype is '_vert_levels_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("vert_levels_type");
+    tt->descr = tdrpStrDup("How we specify the vertical levels.");
+    tt->help = tdrpStrDup("If temperatures are used, we need to read in the temperature profile from a model.");
+    tt->val_offset = (char *) &vert_levels_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("vert_levels_type_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("VERT_LEVELS_BY_TEMP");
+      tt->enum_def.fields[0].val = VERT_LEVELS_BY_TEMP;
+      tt->enum_def.fields[1].name = tdrpStrDup("VERT_LEVELS_BY_HT");
+      tt->enum_def.fields[1].val = VERT_LEVELS_BY_HT;
+    tt->single_val.e = VERT_LEVELS_BY_HT;
+    tt++;
+    
+    // Parameter 'temp_profile_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_url");
+    tt->descr = tdrpStrDup("URL for temperature profile data, in MDV/Netcdf-CF format.");
+    tt->help = tdrpStrDup("We read in the model data that is closest in time to the reflectivity data.");
+    tt->val_offset = (char *) &temp_profile_url - &_start_;
+    tt->single_val.s = tdrpStrDup("mdv/model");
+    tt++;
+    
+    // Parameter 'temp_profile_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_field_name");
+    tt->descr = tdrpStrDup("Name of temperature field in the model data. This should be in degrees C.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &temp_profile_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Temp");
+    tt++;
+    
+    // Parameter 'temp_profile_search_margin'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("temp_profile_search_margin");
+    tt->descr = tdrpStrDup("Search margin for finding the temp profile data (secs).");
+    tt->help = tdrpStrDup("The temp profile must be within this number of seconds of the dbz data.");
+    tt->val_offset = (char *) &temp_profile_search_margin - &_start_;
+    tt->single_val.i = 21600;
+    tt++;
+    
+    // Parameter 'shallow_threshold_temp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("shallow_threshold_temp");
+    tt->descr = tdrpStrDup("Shallow cloud temperature threshold (degC).");
+    tt->help = tdrpStrDup("Shallow cloud tops are below this temperature. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
+    tt->val_offset = (char *) &shallow_threshold_temp - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'deep_threshold_temp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("deep_threshold_temp");
+    tt->descr = tdrpStrDup("Deep cloud temperature threshold (degC).");
+    tt->help = tdrpStrDup("Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_TEMP.");
+    tt->val_offset = (char *) &deep_threshold_temp - &_start_;
+    tt->single_val.d = -12;
+    tt++;
+    
+    // Parameter 'shallow_threshold_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("shallow_threshold_ht");
+    tt->descr = tdrpStrDup("Shallow cloud height threshold if temperature is not available (km).");
+    tt->help = tdrpStrDup("Shallow cloud tops are below this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.");
+    tt->val_offset = (char *) &shallow_threshold_ht - &_start_;
+    tt->single_val.d = 4.5;
+    tt++;
+    
+    // Parameter 'deep_threshold_ht'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("deep_threshold_ht");
+    tt->descr = tdrpStrDup("Deep cloud height threshold if temperature is not available (km).");
+    tt->help = tdrpStrDup("Deep clouds extend above this height. Used if vert_levels_type = VERT_LEVELS_BY_HT.");
+    tt->val_offset = (char *) &deep_threshold_ht - &_start_;
+    tt->single_val.d = 9;
+    tt++;
+    
     // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("DETERMINING ADVANCED CATEGORY FROM CLUMP PROPERTIES");
+    tt->comment_text = tdrpStrDup("Based on the temp or height criteria above, we compute the deep, mid and shallow convective fractions within each sub-clump. We also determine whether there is stratiform echo below the clump. The following parameters are then used to determine the deep, elevated, mid or shallow echo types for the convection. If a determination is not clear, the overall category is set to mixed.");
+    tt++;
+    
+    // Parameter 'min_conv_fraction_for_deep'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_conv_fraction_for_deep");
+    tt->descr = tdrpStrDup("The minimun convective fraction in the clump for deep convection.");
+    tt->help = tdrpStrDup("The fraction of deep within the clump must exceed this for an echo type of deep.");
+    tt->val_offset = (char *) &min_conv_fraction_for_deep - &_start_;
+    tt->single_val.d = 0.05;
+    tt++;
+    
+    // Parameter 'min_conv_fraction_for_shallow'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_conv_fraction_for_shallow");
+    tt->descr = tdrpStrDup("The minimun convective fraction in the clump for shallow convection.");
+    tt->help = tdrpStrDup("The fraction of shallow within the clump must exceed this for an echo type of shallow.");
+    tt->val_offset = (char *) &min_conv_fraction_for_shallow - &_start_;
+    tt->single_val.d = 0.95;
+    tt++;
+    
+    // Parameter 'max_shallow_conv_fraction_for_elevated'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_shallow_conv_fraction_for_elevated");
+    tt->descr = tdrpStrDup("The maximum shallow convective fraction in the clump for elevated convection.");
+    tt->help = tdrpStrDup("The fraction of shallow within the clump must be less than this for an echo type of elevated.");
+    tt->val_offset = (char *) &max_shallow_conv_fraction_for_elevated - &_start_;
+    tt->single_val.d = 0.05;
+    tt++;
+    
+    // Parameter 'max_deep_conv_fraction_for_elevated'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_deep_conv_fraction_for_elevated");
+    tt->descr = tdrpStrDup("The maximum deep convective fraction in the clump for elevated convection.");
+    tt->help = tdrpStrDup("The fraction of deep within the clump must be less than this for an echo type of elevated.");
+    tt->val_offset = (char *) &max_deep_conv_fraction_for_elevated - &_start_;
+    tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'min_strat_fraction_for_strat_below'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_strat_fraction_for_strat_below");
+    tt->descr = tdrpStrDup("The minimun area fraction of stratiform echo below the clump to determine there is stratiform below.");
+    tt->help = tdrpStrDup("For elevated convection, we need to determine if there is stratiform echo below. For a designation of elevated, this is the minimum fraction of the area below the clump that has stratiform echo in the plane immediately below it.");
+    tt->val_offset = (char *) &min_strat_fraction_for_strat_below - &_start_;
+    tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
