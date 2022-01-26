@@ -1297,7 +1297,7 @@ void ConvStratFinder::ComputeTexture::run()
         }
         double sdev = sqrt(var);
         double texture = sqrt(sdev);
-        if (!isnan(texture)) {
+        if (!std::isnan(texture)) {
           _texture[icenter] = texture;
         }
         
