@@ -83,8 +83,12 @@ public:
   //writeToVersion(currentFile, tempFile_N)
   //set currentVersion for the file.
 
-  string getNextVersion(int fileNum); //  or (path/file)
+  // can save to the file path returned
+  string moveToNextVersion(int fileNum); //  or (path/file)
   //.tmp/file_1/vN
+
+  string getCurrentVersion(int fileNum);
+  int getCurrentVersionNum(int fileNum);
 
   //save(int fileNum)
   //fn = getCurrentVersion(file#) 
@@ -92,6 +96,24 @@ public:
 
   //saveAll(bool overwrite, path)
   //saves current version of all files
+
+  // move all the version numbers from the batch to the currentVersion 
+  void batchUndo();
+  void batchRedo();
+
+  // add another batch to the batches store;
+  // take the current version of every file, and increment by one.
+  // these are the versions to use when writing batch edited files.
+  // call at the end of a batch script edit to record 
+  // the watermark, i.e. the current version of every file.
+  // During batch edit, use moveToNewVersion for each file,
+  // then call this function to save the watermark.
+  void makeNewBatch();
+
+  // get the  version for this file
+  // can save to the file path returned
+  //string batchGetVersion(int fileNum);
+  // may not need this.  just use moveToNextVersion
 
 
 private:
@@ -107,7 +129,9 @@ private:
   void _removeTempDirs();
 
   static const string _tmpDir;
+  static const string _fileDir;
 
+  bool _validFileNum(int fileNum);
   string _constructFullTempPath(int fileNum, int version);
 
   //vector<string> _tempDirStack;
@@ -115,7 +139,9 @@ private:
   //int _tempDirIndex;
 
   // contains watermark of versions for each batch edit
-  vector< vector <int> > batches;
+  vector< vector <int> *> batches;
+
+  int _currentBatchIndex; 
 
   // Keep list (vector) of currentVersion of each file in Time Nav set. 
   // vector <int> currentVersion. 

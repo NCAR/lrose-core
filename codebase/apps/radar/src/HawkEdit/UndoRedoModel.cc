@@ -43,8 +43,10 @@
 #include "UndoRedoModel.hh"
 
 const string UndoRedoModel::_tmpDir = ".tmp_hawkedit";
+const string UndoRedoModel::_fileDir = "file_";
 
 UndoRedoModel::UndoRedoModel() {
+
 
 
 }
@@ -61,10 +63,11 @@ void UndoRedoModel::setBaseDir(string path, int nFiles) {
   baseDir.setDirectory(path);
   currentVersion.clear();
   currentVersion.resize(nFiles);
+
   for (int i=0; i<nFiles; i++) {
     currentVersion.at(i) = 0;
     stringstream ss;
-    ss << path << "/" << _tmpDir << "/file" << i;
+    ss << path << "/" << _tmpDir << "/" << _fileDir << i;
     RadxPath tmpDir;
     tmpDir.setDirectory(ss.str());
     int result = tmpDir.makeDirRecurse();
@@ -72,6 +75,8 @@ void UndoRedoModel::setBaseDir(string path, int nFiles) {
       throw std::invalid_argument("cannot make temporary directory for undo and redo");
     }
   }
+  _currentBatchIndex = -1;
+  //makeNewBatch(); // record the intial watermark
 }
 
 
@@ -84,15 +89,18 @@ void UndoRedoModel::clear() {
 
 string UndoRedoModel::_constructFullTempPath(int fileNum, int version) {
   stringstream ss;
-  ss << baseDir.getDirectory() << "/" << _tmpDir << "/file_" << fileNum << 
+  ss << baseDir.getDirectory() << "/" << _tmpDir << "/" << _fileDir << fileNum << 
     "/v" << version;
   return ss.str();
 }
+
+// version 0 is the original file
 
 string UndoRedoModel::undo(int fileNum) {
   //find the previous version of the file in the temp dir; change to this file.
   int previousN = currentVersion.at(fileNum) - 1;
   if (previousN <= 0) {
+    currentVersion.at(fileNum) = 0;
     return ""; // indicate we are at the end of versions
   } else {
     currentVersion.at(fileNum) = previousN;
@@ -118,11 +126,32 @@ string UndoRedoModel::redo(int fileNum) {
 
 //void UndoRedoModel::moveToNextVersion ???
 
-string UndoRedoModel::getNextVersion(int fileNum) { //  or (path/file)
+string UndoRedoModel::moveToNextVersion(int fileNum) { //  or (path/file)
   //.tmp/file_1/vN
   stringstream ss;
-  int nextN = currentVersion.at(fileNum) + 1;
+  currentVersion.at(fileNum) += 1;
+  int nextN = currentVersion.at(fileNum); 
   return _constructFullTempPath(fileNum, nextN);
+}
+
+bool UndoRedoModel::_validFileNum(int fileNum) {
+  return ((fileNum >= 0) && (fileNum < currentVersion.size()));
+} 
+
+string UndoRedoModel::getCurrentVersion(int fileNum) {
+  if (_validFileNum(fileNum)) {
+    return _constructFullTempPath(fileNum, currentVersion.at(fileNum));
+  } else {
+    return "";
+  }
+}
+
+int UndoRedoModel::getCurrentVersionNum(int fileNum) {
+  if (_validFileNum(fileNum)) {
+    return currentVersion.at(fileNum);
+  } else {
+    return -1;
+  }
 }
   //save(int fileNum)
   //fn = getCurrentVersion(file#) 
@@ -152,8 +181,66 @@ void UndoRedoModel::fetchArchiveFiles(string seedPath, string seedFileName,
   _view->showTimeControl();
 }
 
+*/
 
+// move all the version numbers from the batch to the currentVersion 
+void UndoRedoModel::batchUndo() {
 
+  if (_currentBatchIndex > 0) {
+    _currentBatchIndex -= 1;
+    vector<int> *previousBatch = batches.at(_currentBatchIndex);
+    for (int i=0; i<currentVersion.size(); i++) {
+      currentVersion.at(i) = previousBatch->at(i);
+    }
+  } else {
+    throw std::invalid_argument("no more batch undo");
+  }
+}
+
+void UndoRedoModel::batchRedo() {
+  if (_currentBatchIndex < batches.size() -1) {
+    _currentBatchIndex += 1;
+    vector<int> *previousBatch = batches.at(_currentBatchIndex);
+    for (int i=0; i<currentVersion.size(); i++) {
+      currentVersion.at(i) = previousBatch->at(i);
+    }
+  } else {
+    throw std::invalid_argument("no more batch undo");
+  }
+}
+
+// add another batch to the batches store;
+// take the current version of every file, and increment by one.
+// these are the versions to use when writing batch edited files.
+void UndoRedoModel::makeNewBatch() {
+  size_t nFiles = currentVersion.size();
+  vector<int> *newBatch = new vector<int>;
+  newBatch->resize(nFiles);
+  // push previous versions onto stack
+  // these will always be -1 from the current versions
+  for (int i=0; i<nFiles; i++) {
+    newBatch->at(i) = currentVersion.at(i) -1;
+  }
+  batches.push_back(newBatch);
+  _currentBatchIndex += 1;
+
+  // push the current versions onto the stack
+  newBatch = new vector<int>;
+  newBatch->resize(nFiles);
+  for (int i=0; i<nFiles; i++) {
+    newBatch->at(i) = currentVersion.at(i);
+  }
+  batches.push_back(newBatch);
+  _currentBatchIndex += 1;
+}
+
+// get the  version for this file
+// can save to the file path returned
+//string batchGetVersion(int fileNum) {
+//  return 
+//}
+
+/*
 string &UndoRedoModel::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
