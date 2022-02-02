@@ -94,7 +94,7 @@ public:
   string getCurrentPath();
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
-  string getTempDir();
+  //string getTempDir();
   int getPositionOfSelection();
 
   // move to Model!!!
@@ -124,6 +124,7 @@ private:
 
   int _archiveScanIndex;
 
+  // actual names of the archive files
   vector<string> _archiveFileList;
 
   bool _archiveFilesHaveDayDir;

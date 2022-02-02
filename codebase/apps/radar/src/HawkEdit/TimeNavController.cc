@@ -44,7 +44,7 @@ TimeNavController::TimeNavController(TimeNavView *view) {
 
 	_view = view;
 	_model = new TimeNavModel();
-  _tempDirIndex = -1;
+  //_tempDirIndex = -1;
 
 }
 
@@ -55,7 +55,7 @@ TimeNavController::~TimeNavController() {
     delete _view;
   }
   if (_model != NULL) delete _model;
-  _removeTempDirs();
+  //_removeTempDirs();
 }
 
 // oh, who cares.  Just use default start and end times 
@@ -120,6 +120,10 @@ void TimeNavController::fetchArchiveFiles(string seedPath, string seedFileName,
 }
 
 
+int TimeNavController::getNFiles() {
+  return _model->getNArchiveFiles();
+}
+
 void TimeNavController::setSliderPosition() {
   int value = _model->getPositionOfSelection();
   _view->setSliderPosition(value);
@@ -129,10 +133,15 @@ string &TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 
+int TimeNavController::getSelectedArchiveFileIndex() {
+  return _model->getPositionOfSelection();
+}
+
 string TimeNavController::getSelectedPath() {
   return _model->getCurrentPath();
 }
 
+/*
 // compare nextTempDir base directory to the base directory
 // in the temp stack
 bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
@@ -154,7 +163,7 @@ bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
   }
   return different;
 }
-
+*/
 // The undo/redo stack ...
 // 
 // batch mode, the directories are:
@@ -178,7 +187,7 @@ bool TimeNavController::_isDifferentBaseDir(string nextTempDir) {
 
 // push base dir on the stack, and clear the stack when
 // setting a new base dir
-
+/*
 string TimeNavController::getTempDir() {
   string nextTempDir = _model->getTempDir();
 
@@ -203,11 +212,12 @@ string TimeNavController::getTempDir() {
   // BUT, return path with day Dir if the archive files have it
   return nextTempDir;
 }
-
+*/
 string TimeNavController::getSelectedArchiveFileName() {
   return _model->getSelectedArchiveFileName();
 }
 
+/*
 // return true if the current directory is a temp dir
 // i.e. of the form .../.tmp_N/yyyymmdd
 bool TimeNavController::isSelectedFileInTempDir() {
@@ -264,6 +274,7 @@ void TimeNavController::_setBaseDirTempStack() {
   _tempDirIndex = 0;
   _tempDirStack.push_back(_model->getCurrentPath());
 }
+*/
 
 void TimeNavController::updateGui() {
   _setGuiFromArchiveStartTime();
@@ -543,7 +554,7 @@ void TimeNavController::getBounds(bool useTimeRange, int *firstArchiveFileIndex,
   }
 }
 
-
+/*
 bool TimeNavController::_isTempDir(string *path) {
   bool found = false;
   if (path->find(".tmp_") != string::npos) {
@@ -587,3 +598,4 @@ void TimeNavController::_removeTempDirs() {
   //
 }
 
+*/

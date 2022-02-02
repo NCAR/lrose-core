@@ -106,16 +106,16 @@ Q_DECLARE_METATYPE(QVector<double>)
     font.setPointSize(actionFontSize);
     undoAct->setFont(font);
     undoAct->setStatusTip(tr("undo edits"));
-    connect(undoAct, &QAction::triggered, this, &ScriptEditorView::undoEdits);
-    toolBar->addAction(undoAct);    
+    //connect(undoAct, &QAction::triggered, this, &ScriptEditorView::undoEdits);
+    //toolBar->addAction(undoAct);    
 
     QAction *redoAct = new QAction(tr("&Redo"), this);
     font = redoAct->font();
     font.setPointSize(actionFontSize);
     redoAct->setFont(font);
     redoAct->setStatusTip(tr("redo edits"));
-    connect(redoAct, &QAction::triggered, this, &ScriptEditorView::redoEdits);
-    toolBar->addAction(redoAct);   
+    //connect(redoAct, &QAction::triggered, this, &ScriptEditorView::redoEdits);
+    //toolBar->addAction(redoAct);   
 
     QAction *openFileAct = new QAction(tr("&Open"), this);
     font = openFileAct->font();
@@ -409,12 +409,14 @@ float  ScriptEditorView::myPow()
 
 void ScriptEditorView::undoEdits() {
   // signal the PolarManager to undo edits
-  emit undoScriptEdits();
+  bool batchMode = currentTimeToggleButton->isChecked();
+  emit undoScriptEdits(); // batchMode);
 }
 
 void ScriptEditorView::redoEdits() {
   // signal the PolarManager to undo edits
-  emit redoScriptEdits();
+  bool batchMode = currentTimeToggleButton->isChecked();
+  emit redoScriptEdits(); // batchMode);
 }
 
 void ScriptEditorView::saveEditDirectory() {

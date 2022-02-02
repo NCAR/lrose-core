@@ -617,6 +617,8 @@ void PolarManager::_setupWindows()
 
   _createTimeControl();
   _showTimeControl();
+
+  _createUndoRedoStack();
 }
 
 //////////////////////////////
@@ -778,6 +780,14 @@ void PolarManager::_createActions()
   _editAct->setStatusTip(tr("Solo Edit using (Java)Script"));
   connect(_editAct, SIGNAL(triggered()), this, SLOT(_scriptEditorSetup()));  
 
+  undoAct = new QAction(tr("&Undo"), this);
+  undoAct->setStatusTip(tr("undo edits"));
+  connect(undoAct, &QAction::triggered, this, &PolarManager::undoScriptEdits); 
+
+  redoAct = new QAction(tr("&Redo"), this);
+  redoAct->setStatusTip(tr("redo edits"));
+  connect(redoAct, &QAction::triggered, this, &PolarManager::redoScriptEdits);
+ 
 }
 
 ////////////////
@@ -818,7 +828,9 @@ void PolarManager::_createMenus()
   _editMenu->addSeparator();
   _editMenu->addAction(_examineAct);
   _editMenu->addAction(_editAct);
-
+  // _editMenu->addSeparator();
+  _editMenu->addAction(undoAct);
+  _editMenu->addAction(redoAct);
 
   _helpMenu = menuBar()->addMenu(tr("&Help"));
   _helpMenu->addAction(_howtoAct);
@@ -1147,21 +1159,38 @@ void PolarManager::getFileAndFields() {
         //setArchiveFileList(fileList, false);
 
 }
-/////////////////////////////
-// get data in archive mode
-// returns 0 on success, -1 on failure
-// precondition: assumes setArchiveFileList is called before
 
-int PolarManager::_getArchiveData()
+string PolarManager::_getSelectedFile() {
+      // need to get the current version of the selected file (by index)
+      int selectedArchiveFileIndex = 
+        _timeNavController->getSelectedArchiveFileIndex();
+      string inputPath = 
+        _undoRedoController->getCurrentVersion(selectedArchiveFileIndex);
+      if (inputPath.empty()) {
+        inputPath = _timeNavController->getSelectedArchiveFile();
+      } else {
+        // add the file name to the version path
+        inputPath.append("/");
+        string fileName = _timeNavController->getSelectedArchiveFileName();
+        inputPath.append(fileName);
+      }
+      return inputPath;
+}
 
-{
-/* moved to DataModel::readData()
-  // set up file object for reading
-  
-  RadxFile file;
-  _vol.clear();
-  _setupVolRead(file);
-  */
+string PolarManager::_getFileNewVersion(int archiveFileIndex) {
+  string nextVersionPath = 
+    _undoRedoController->getNewVersion(archiveFileIndex);
+  // add the file name to the version path
+  nextVersionPath.append("/");
+  string fileName = _timeNavController->getSelectedArchiveFileName();
+  nextVersionPath.append(fileName);
+
+  return nextVersionPath;
+
+}
+
+
+int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
   bool debug_verbose = false;
   bool debug_extra = false;
   if (_params->debug >= Params::DEBUG_VERBOSE) {
@@ -1171,29 +1200,43 @@ int PolarManager::_getArchiveData()
     debug_verbose = true;
     debug_extra = true;
   }
-
-  DataModel *dataModel = DataModel::Instance();
-
-  // be sure to call setArchiveFileList before we get here! TODO: TimeNav now manages this;
-  // may be able to remove this restriction
-  //if (_archiveScanIndex >= 0 &&
-  //    _archiveScanIndex < (int) _archiveFileList.size()) {
-    
-    try {
-      string inputPath = _timeNavController->getSelectedArchiveFile();
-      vector<string> fieldNames = _displayFieldController->getFieldNames();
-      dataModel->readData(inputPath, fieldNames,
-        debug_verbose, debug_extra);
-      emit newDataFile();
-    } catch (const string &errMsg) {
-      if (!_params->images_auto_create)  {
-        QErrorMessage errorDialog;
-        errorDialog.setMinimumSize(400, 250);
-        errorDialog.showMessage(errMsg.c_str());
-        errorDialog.exec();
-      }
+  DataModel *dataModel = DataModel::Instance();    
+  try {
+    vector<string> fieldNames = _displayFieldController->getFieldNames();
+    dataModel->readData(inputPath, fieldNames,
+      debug_verbose, debug_extra);
+  } catch (const string &errMsg) {
+    if (!_params->images_auto_create)  {
+      QErrorMessage errorDialog;
+      errorDialog.setMinimumSize(400, 250);
+      errorDialog.showMessage(errMsg.c_str());
+      errorDialog.exec();
     }
-  //}
+  }
+  LOG(DEBUG) << "exit";
+  return 0;
+}
+
+
+/////////////////////////////
+// get data in archive mode
+// returns 0 on success, -1 on failure
+// precondition: assumes setArchiveFileList is called before
+
+int PolarManager::_getArchiveData()
+{
+  string inputPath = _getSelectedFile();
+  return _getArchiveData(inputPath);
+}
+
+int PolarManager::_getArchiveData(string &inputPath)
+{
+
+int result = _getArchiveDataPlainVanilla(inputPath);
+if (result == 0) {
+  emit newDataFile();
+
+  DataModel *dataModel = DataModel::Instance();  
 
   // set plot times
   
@@ -1219,8 +1262,8 @@ int PolarManager::_getArchiveData()
     LOG(DEBUG) << "----------------------------------------------------";
   
   
-  _platform = dataModel->getPlatform();
-
+    _platform = dataModel->getPlatform();
+  }
   LOG(DEBUG) << "exit";
   return 0;
 }
@@ -2631,6 +2674,10 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     
 }
 
+void PolarManager::_createUndoRedoStack() {
+  _undoRedoController = new UndoRedoController();
+}
+
 //////////////////////////////////////////////
 // create the time navigation controller and view
 
@@ -2710,6 +2757,8 @@ void PolarManager::_placeTimeControl()
 bool PolarManager::_checkForUnsavedBatchEdits() {
   bool okToProceed = true;
 
+/*
+  // TODO: how to detect this???
   if (_timeNavController->isSelectedFileInTempDir()) {
 
     int ret = saveDiscardMessage("Archive files have been modified.",
@@ -2736,6 +2785,7 @@ bool PolarManager::_checkForUnsavedBatchEdits() {
           break;
     }
   }
+*/
   return okToProceed;
 }
 
@@ -2806,6 +2856,8 @@ void PolarManager::_openFile()
   }
 
   _timeNavController->setSliderPosition();
+  string path = _timeNavController->getSelectedPath();
+  _undoRedoController->reset(path, _timeNavController->getNFiles());
 
   LOG(DEBUG) << "exit";
 }
@@ -2844,6 +2896,19 @@ void PolarManager::_readDataFile2() {
 
     try {
       _getArchiveData();
+      _setupRayLocation();
+
+    } catch (FileIException &ex) { 
+      this->setCursor(Qt::ArrowCursor);
+      // _timeControl->setCursor(Qt::ArrowCursor);
+      return;
+    }
+}
+
+void PolarManager::_readDataFile2(string &inputPath) {
+
+    try {
+      _getArchiveData(inputPath);
       _setupRayLocation();
 
     } catch (FileIException &ex) { 
@@ -2900,9 +2965,9 @@ void PolarManager::closeFieldListDialog(bool clicked) {
 
 void PolarManager::_saveFile()
 {
-  if (_timeNavController->isSelectedFileInTempDir()) {
-    _saveTempDir();
-  }
+  //if (_timeNavController->isSelectedFileInTempDir()) {
+  //  _saveTempDir();
+  //}
 
   QString finalPattern = "All files (*.nc)";
 
@@ -2942,71 +3007,6 @@ void PolarManager::_saveFile()
     }
     
   }
-}
-
-void PolarManager::_saveTempDir()
-{
-
-  // TODO: move this to timeNavController ... 
-  string oldName = _timeNavController->getSelectedPath();  
-  QDir tempDir(oldName.c_str());
-  tempDir.cdUp();
-  QString baseDir = tempDir.path();
-  QString newName = QFileDialog::getExistingDirectory(this, tr("Save Edits Batch Mode"),
-                                                baseDir,
-                                                QFileDialog::ShowDirsOnly
-                                                | QFileDialog::DontResolveSymlinks);
-
-  string moveCommand = "mv -f ";
-  moveCommand.append(oldName);
-  moveCommand.append("/*  ");
-  moveCommand.append(newName.toStdString());
-  int result = std::system(moveCommand.c_str()); // execute the UNIX command "mv -f oldName newName"
-
-  //  The mv utility exits 0 on success, and >0 if an error occurs.
-  if (result >0) {
-    errorMessage("Error", "Save batch files failed.");
-    // TODO: try "mv -f src dest > test.txt"
-    //  std::cout << std::ifstream("test.txt").rdbuf();
-    // to catch any error information.
-  } else {
-/*
-  QDir newDir(newName);
-  QString newDirName = newDir.dirName();
-  newDir.cdUp();
-  bool successfulRmDir = newDir.rmdir(newDirName);
-  if (!successfulRmDir) {
-    errorMessage("Error", "new location must be empty");
-  }
-
-  // can only rename to a non-existent directory
-  // so remove it then rename will work.
-
-  //string dirName = newName.toStdString();
-  //LOG(DEBUG) << "save script results to " << dirName;
-
-  // ----
- 
-  //if( !dirName.isNull() )
-  //{
-    //QByteArray qb = filename.toUtf8();
-    //const char *name = qb.constData();
-
-    // QDir to rename a directory? 
-
-    //QString oldName = o.c_str();
-
-    QDir myDir(o.c_str());
-    QString oldName = myDir.dirName();
-    //myDir.cdUp();
-    bool successful = myDir.rename(oldName, newName);
-    if (!successful) {
-      errorMessage("Error", "cannot save batch data");
-    }
-*/ 
-    _timeNavController->replaceSelectedTempPath(newName.toStdString());
-  }
-
 }
 
 void PolarManager::_createFileChooserDialog()
@@ -4968,8 +4968,10 @@ void PolarManager::EditRunScript() {
       this, SLOT(cancelScriptRun()));
     connect(scriptEditorView, &ScriptEditorView::runScriptBatchMode,
       this, &PolarManager::runScriptBatchMode);
-    connect(scriptEditorView, &ScriptEditorView::runForEachRayScript,
-      this, &PolarManager::runForEachRayScript);   
+    // do not need this; all scripts are run through batch mode,
+    // by specifying the useTimeRange = true for batch; false for individual scan
+    //connect(scriptEditorView, &ScriptEditorView::runForEachRayScript,
+    //  this, &PolarManager::runForEachRayScript);   
     connect(scriptEditorView, &ScriptEditorView::undoScriptEdits,
       this, &PolarManager::undoScriptEdits); 
     connect(scriptEditorView, &ScriptEditorView::redoScriptEdits,
@@ -5004,9 +5006,12 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
 // from the parameter file? YES, and the command line takes precedence.
 // From the way the saveDirectoryPath is chosen, the path must exist.
 // TODO: when running from the command line, verify the directory exists.
+
+// useTimeRange distinquishes individual vs. batch mode
 void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
   bool useAllSweeps, bool useTimeRange) {
 
+  /*
   // save to temporary directory .tmp_N in the same directory 
   // as the current archive files.
   string saveDirectoryPath;
@@ -5016,7 +5021,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     errorMessage("Error", ex.what());
     return;
   }
-
+*/
   _cancelled = false;
    
   vector<Point> boundaryPoints;
@@ -5068,43 +5073,37 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //bool cancelled = scriptEditorControl->cancelRequested();
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
     
-    //   load each archive file
-    // TODO: I don't like accessing the DataModel here.  Who should load
-    // the new data file???? PolarManager?? call to timeNav???
-    //DataModel *dataModel = DataModel::Instance();
-    //dataModel->readData(*it, fieldNames,
-    //  debug_verbose, debug_extra);
-    //cerr << "running script on file " << *it << endl;
+    // need to get the current version of the file (by index)
+    string inputPath = _getSelectedFile();
+    //  _undoRedoController->getCurrentVersion(archiveFileIndex);
+    _getArchiveDataPlainVanilla(inputPath);
 
-    // TODO: is this needed?
-    //newTimeSelected(archiveFileIndex);   
-    // load/read the next archive file ...
-    //_timeNavController->getSelectedArchiveFile()
-
-    //   runForEachRayScript
-
-    bool debug_verbose = false;
-    bool debug_extra = false;
+    //bool debug_verbose = false;
+    //bool debug_extra = false;
     bool batchMode = true; // to prevent message box on every file
     try {  
       // use regular forEachRay ...
       runForEachRayScript(script, useBoundary, useAllSweeps);
       // check if Cancel requested
-
-    //   save archive file to temp area
-    // TODO: move to a separate method ... _saveFile();
-
+      //   save archive file to temp area
       //LOG(DEBUG) << "writing to file " << name;
       DataModel *dataModel = DataModel::Instance();
-      currentPath = saveDirectoryPath;
-      currentPath.append("/");
-      fileName = _timeNavController->getSelectedArchiveFileName();
-      currentPath.append(fileName);
-      dataModel->writeData(currentPath);
-      _unSavedEdits = false;
+      string nextVersionPath = _getFileNewVersion(archiveFileIndex);
+        // _undoRedoController->getNewVersion(archiveFileIndex);
+
+//      currentPath = saveDirectoryPath;
+//      currentPath.append("/");
+//      fileName = _timeNavController->getSelectedArchiveFileName();
+//      currentPath.append(fileName);
+      dataModel->writeData(nextVersionPath);
+      //_unSavedEdits = false;
     
     } catch (FileIException &ex) {
-      this->setCursor(Qt::ArrowCursor);
+      errorMessage("Error", "FileIException");
+      //this->setCursor(Qt::ArrowCursor);
+      return;
+    } catch (std::invalid_argument &ex) {
+      errorMessage("Error", ex.what());
       return;
     }
     archiveFileIndex += 1;
@@ -5131,20 +5130,24 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
        useBoundary, boundaryPoints);
     }
     */
+
+    _undoRedoController->waterMarkVersion();
   } catch (std::invalid_argument &ex) {
     errorMessage("Error", ex.what());
   }
   _cancelled = false;
   //errorMessage("Done", "moving to edited data");
-  vector<string> archiveFileList;
-  archiveFileList.push_back(currentPath);
-  bool fromCommandLine = false;
-  setArchiveFileList(archiveFileList, fromCommandLine);
-  _timeNavController->setSliderPosition();
+  //vector<string> archiveFileList;
+  //archiveFileList.push_back(currentPath);
+  //bool fromCommandLine = false;
+  //setArchiveFileList(archiveFileList, fromCommandLine);
+  //_timeNavController->setSliderPosition();
   //_timeNavController->fetchArchiveFiles(saveDirectoryPath, fileName);
 }
 
-void PolarManager::undoScriptEdits() {
+void PolarManager::undoScriptEdits() { 
+  bool batchMode = false;
+  /*
   // we can undo the edits, if the current directory is ./tmp_N where
   // N = 1 ... 9
 
@@ -5169,9 +5172,64 @@ void PolarManager::undoScriptEdits() {
         errorMessage("Error", "At the end of Undo stack");
       }
   }
+  */
+
+  // need to get the current version of the selected file (by index)
+  int selectedArchiveFileIndex = 
+    _timeNavController->getSelectedArchiveFileIndex();
+  if (batchMode) {
+    try {
+    // _undoRedoController->undoBatchMode();
+    } catch (std::invalid_argument &ex) {
+      errorMessage("Error", ex.what());
+      return;
+    }
+  } 
+  //string inputPath = 
+    _undoRedoController->getPreviousVersion(selectedArchiveFileIndex);
+  string inputPath = _getSelectedFile();
+  /*bool havePreviousVersion = inputPath.size() > 0;
+  if (havePreviousVersion) {
+    ;
+  } else {
+    // use the original version
+    // undo just moves index
+     use get CurrentVersion?  HERE !!! 
+    //errorMessage("Error", "At the end of Undo stack");
+  }
+  */
+  _readDataFile2(inputPath);
+  _plotArchiveData();
 }
 
-void PolarManager::redoScriptEdits() {
+void PolarManager::redoScriptEdits() { 
+  bool batchMode = false;
+
+  // need to get the current version of the selected file (by index)
+  int selectedArchiveFileIndex = 
+    _timeNavController->getSelectedArchiveFileIndex();
+  if (batchMode) {
+    try {
+      //_undoRedoController->redoBatchMode();
+    } catch (std::invalid_argument &ex) {
+      errorMessage("Error", ex.what());
+      return;
+    }
+  }
+  //string inputPath = 
+    _undoRedoController->getNextVersion(selectedArchiveFileIndex);
+    string inputPath = _getSelectedFile();
+  /*bool haveNextVersion = inputPath.size() > 0;
+  if (haveNextVersion) {
+    _readDataFile2(inputPath);
+    _plotArchiveData();
+  } else {
+    errorMessage("Error", "At the end of Undo stack");
+  }
+  */
+  _readDataFile2(inputPath);
+  _plotArchiveData();
+  /*  
   // we can redo the edits, if the current directory is ./tmp_N where
   // N = 1 ... 9
 
@@ -5196,6 +5254,7 @@ void PolarManager::redoScriptEdits() {
         errorMessage("Error", "At the end of Redo stack");
       }
   }
+  */
 }
 
 void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)

@@ -406,8 +406,16 @@ RadxTime DataModel::getEndTimeSecs() {
 void DataModel::writeData(string path) {
     RadxFile outFile;
 
-      LOG(DEBUG) << "writing to file " << path;
-      outFile.writeToPath(*_vol, path);
+    LOG(DEBUG) << "writing to file " << path;
+    int result = outFile.writeToPath(*_vol, path);
+    // Returns 0 on success, -1 on failure
+    //
+    // Use getErrStr() if error occurs
+    // Use getPathInUse() for path written
+    if (result != 0) {
+      string errStr = outFile.getErrStr();
+      throw std::invalid_argument(errStr);
+    }
 }
 
 void DataModel::update() {

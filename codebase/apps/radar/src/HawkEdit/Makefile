@@ -110,6 +110,8 @@ HDRS = \
 	TimeNavController.hh \
 	TimeNavModel.hh \
 	TimeScaleWidget.hh \
+	UndoRedoController.hh \
+	UndoRedoModel.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
@@ -148,6 +150,8 @@ NORM_SRCS = \
 	SweepController.cc \
 	TimeNavModel.cc \
 	TimeNavController.cc \
+        UndoRedoController.cc \
+        UndoRedoModel.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \

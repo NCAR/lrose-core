@@ -133,6 +133,7 @@ private:
 
   bool _validFileNum(int fileNum);
   string _constructFullTempPath(int fileNum, int version);
+  void _createDirectory(string path);
 
   //vector<string> _tempDirStack;
   vector<int> currentVersion;

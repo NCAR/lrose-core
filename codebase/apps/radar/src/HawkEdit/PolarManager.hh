@@ -64,6 +64,7 @@
 #include "BoundaryPointEditorView.hh"
 #include "TimeNavView.hh"
 #include "TimeNavController.hh"
+#include "UndoRedoController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -281,8 +282,8 @@ public slots:
   void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
-  void undoScriptEdits();
-  void redoScriptEdits();
+  void undoScriptEdits(); // bool batchMode = false);
+  void redoScriptEdits(); // bool batchMode = false);
   void cancelScriptRun();
 
   void errorMessage(string title, string message);
@@ -356,6 +357,8 @@ private:
   BoundaryPointEditorView *boundaryPointEditorView;
   BoundaryView *boundaryView;
 
+  UndoRedoController *_undoRedoController;
+
 
   // windows
 
@@ -373,6 +376,8 @@ private:
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
+  QAction *undoAct;
+  QAction *redoAct;
   //QAction *_openFileAct;
   //QAction *_saveFileAct;
 
@@ -689,6 +694,7 @@ private:
 
   void _readDataFile(vector<string> *selectedFields);
   void _readDataFile2();
+  void _readDataFile2(string &inputPath);
 
   // handleArchiveData calls:
   // getArchiveData
@@ -714,6 +720,8 @@ private:
 
   //void _handleArchiveData();
   int _getArchiveData();
+  int _getArchiveData(string &inputPath);
+  int _getArchiveDataPlainVanilla(string &inputPath);
   void _plotArchiveData();
   //void _updateArchiveData(vector<string> &fieldNames);
   //void _updateArchiveData(QStringList newFieldNames);
@@ -756,13 +764,17 @@ private:
   //void _setSweepPanelVisibility();
 
   bool _checkForUnsavedBatchEdits();
-  void _saveTempDir();
+  //void _saveTempDir();
 
   // time slider
 
   void _createTimeControl();
+  void _createUndoRedoStack();
 
   bool _unSavedEdits = false;
+
+  string _getSelectedFile();
+  string _getFileNewVersion(int archiveFileIndex);
 
 private slots:
 
