@@ -274,6 +274,9 @@ PolarManager::~PolarManager()
     //_timeNavController->~TimeNavController();
     delete _timeNavController;
   }
+  if (_undoRedoController) {
+    delete _undoRedoController;
+  }
 
 
 /* moved to close()
@@ -2120,6 +2123,9 @@ void PolarManager::dataFileChanged() {
 
   _sweepController->clearSweepRadioButtons();
   _sweepController->createSweepRadioButtons();
+  if (sheetView != NULL) {
+    sheetView->applyEdits();
+  }
   _plotArchiveData();
 
 }
@@ -2438,6 +2444,15 @@ void PolarManager::updateVolume(QStringList newFieldNames) {
 
 void PolarManager::spreadsheetDataChanged() {
   _unSavedEdits = true;
+
+  // make a new version
+  // each "Apply" is a step in the undo/redo stack
+
+  int archiveFileIndex = 
+    _timeNavController->getSelectedArchiveFileIndex();
+  string nextVersionPath = _getFileNewVersion(archiveFileIndex);
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->writeData(nextVersionPath);  
 }
 
 ///////////////////////////////////////////////////

@@ -692,11 +692,11 @@ void SpreadSheetView::applyChanges()
     LOG(DEBUG) << "column " << label.toStdString() << ": extracted field " << fieldName
       << ", azimuth " << rayAzimuth; ; 
     emit applyVolumeEdits(fieldName, rayAzimuth, data);
-    emit dataChanged();
+
     _unAppliedEdits = false;
   }
 
-
+  emit dataChanged();
   // emit applyVolumeEdits();
   LOG(DEBUG) << "exit";
 }
@@ -769,6 +769,9 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column) { 
   QString missingQ(_missingDataString.c_str());
 
   for (int r = 0; r < table->rowCount(); r++) {
+    if (r == 468) {
+        cerr << "HERE" << endl;
+    }
     QTableWidgetItem *tableWidgetItem = table->item(r, column);
     QString content = tableWidgetItem->text();
     if (content.contains(missingQ)) {

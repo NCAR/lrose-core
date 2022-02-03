@@ -402,6 +402,7 @@ string TimeNavModel::getCurrentPath() {
   return currentPath->getPath();
 }
 
+/*
 // return a string composed of the current base directory
 // plus internally named temporary directory .tmp_N
 // where N is the next available sequence number
@@ -454,6 +455,7 @@ string TimeNavModel::getTempDir() {
 
   return workingPath;
 }
+*/
 
 bool TimeNavModel::archiveFilesHaveDayDir() {
   return _archiveFilesHaveDayDir;
