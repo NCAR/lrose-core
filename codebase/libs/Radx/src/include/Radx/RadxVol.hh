@@ -1792,15 +1792,25 @@ private:
   };
 
   // class for combining sweeps with same fixed angle but different fields
+  // or discarding redundant doppler sweeps
 
-  class SweepCombo {
+  class NexradSweepAction {
   public:
+    typedef enum {
+      USE_UNCHANGED,
+      PAIR_NONDOP_WITH_DOP,
+      DISCARD_DOP
+    } action_t;
+    action_t action;
     size_t nonDopSweepIndex;
-    size_t dopplerSweepIndex; 
-    SweepCombo(size_t nonDop, size_t doppler) {
-      nonDopSweepIndex = nonDop;
-      dopplerSweepIndex = doppler;
-    }
+    size_t dopSweepIndex;
+    NexradSweepAction(action_t act, 
+                      size_t nonDopIndex,
+                      size_t dopIndex) {
+      action = act;
+      nonDopSweepIndex = nonDopIndex;
+      dopSweepIndex = dopIndex;
+   }
   };
   
   /// sorting rays
@@ -1962,6 +1972,7 @@ private:
   void _computeNRaysTransition();
   void _findTransitions(int nRaysMargin);
   void _setPredomSweepModeFromAngles() const;
+  void _getNexradSweepActions(vector<NexradSweepAction> &actions);
   void _addFieldsFromDopplerSweep(RadxSweep *sweepPower,
                                   RadxSweep *sweepDoppler);
 

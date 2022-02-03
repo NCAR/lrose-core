@@ -730,8 +730,10 @@ void LeoRadxFile::_findFieldsModel200()
 
 void LeoRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnIndex) {
 
-  if ((columnIndex != _timeStampIndex) && (columnIndex != _azimuthIndex)
-    && (columnIndex != _rangeColumnIndex) && (columnIndex != _elevationIndex)) {
+  if (((int) columnIndex != _timeStampIndex) &&
+      ((int) columnIndex != _azimuthIndex) &&
+      ((int) columnIndex != _rangeColumnIndex) &&
+      ((int) columnIndex != _elevationIndex)) {
     // assume it is a field qualifier -- a 1D variable for this ray
 
     Field field;
