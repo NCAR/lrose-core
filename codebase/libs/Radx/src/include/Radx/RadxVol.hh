@@ -1799,8 +1799,7 @@ private:
     typedef enum {
       USE_UNCHANGED,
       PAIR_NONDOP_WITH_DOP,
-      PAIR_DOP_WITH_NONDOP,
-      DISCARD_SWEEP
+      DISCARD_DOP
     } action_t;
     action_t action;
     size_t nonDopSweepIndex;
