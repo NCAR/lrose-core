@@ -829,10 +829,6 @@ int RaxpolNcRadxFile::_createRays(const string &path)
   // create the rays
   
   _rays.clear();
-  RadxTime zeroTime(0, 1, 1, 0, 0, 0);
-  RadxTime jan1970(1970, 1, 0, 0, 0, 0);
-  double jan1970Secs = jan1970 - zeroTime;
-  double jan1970Days = jan1970Secs / 86400.0;
 
   for (size_t iray = 0; iray < _nTimes; iray++) {
     
@@ -842,9 +838,7 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     
     // set time
     
-    double daysSinceZero = _dTimes[iray];
-    double daysSinceJan1970 = daysSinceZero - jan1970Days;
-    double dusecs = daysSinceJan1970 * 86400.0;
+    double dusecs = _dTimes[iray];
     time_t usecs = (time_t) dusecs;
     double subsecs = dusecs - usecs;
     int nanoSecs = (int) (subsecs * 1.0e9);
@@ -860,6 +854,14 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     // copy geom to rays
     
     ray->copyRangeGeom(_geom);
+
+    // ray metadata
+
+    ray->setPrtSec(_prtSec);
+    ray->setNyquistMps(_nyquistMps);
+    ray->setPulseWidthUsec(_pulseWidthUsec);
+    ray->setUnambigRangeKm(_MaximumRange_value_attr);
+    ray->setPolarizationMode(Radx::POL_MODE_HV_SIM);
     
     // add to ray vector
 
@@ -1352,6 +1354,19 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
     delete missingValueAtt;
   }
 
+  // for phidp, convert to degrees
+  
+  string _units = units;
+  if (name == "PHIDP") {
+    _units = "deg";
+    size_t nVals = _nTimes * _nGates;
+    for (size_t ii = 0; ii < nVals; ii++) {
+      if (data[ii] != missingVal) {
+        data[ii] = Radx::toDegrees(data[ii]);
+      }
+    }
+  }
+
   // load field on rays
 
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1362,7 +1377,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
     }
     
     RadxField *field =
-      _rays[iray]->addField(name, units, _nGates,
+      _rays[iray]->addField(name, _units, _nGates,
                             missingVal,
                             rayData,
                             true);
