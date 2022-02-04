@@ -57,6 +57,7 @@
 #include <Radx/NsslMrdRadxFile.hh>
 #include <Radx/OdimHdf5RadxFile.hh>
 #include <Radx/RapicRadxFile.hh>
+#include <Radx/RaxpolNcRadxFile.hh>
 #include <Radx/SigmetRadxFile.hh>
 #include <Radx/TdwrRadxFile.hh>
 #include <Radx/TwolfRadxFile.hh>
@@ -204,6 +205,14 @@ bool RadxFile::_isSupportedNetCDF(const string &path)
   {
     NoxpNcRadxFile file;
     if (file.isNoxpNc(path)) {
+      return true;
+    }
+  }
+  
+  // try RAXPOL netcdf
+  {
+    RaxpolNcRadxFile file;
+    if (file.isRaxpolNc(path)) {
       return true;
     }
   }
@@ -567,6 +576,7 @@ int RadxFile::writeToDir(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_SIGMET_RAW ||
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
+      _fileFormat == FILE_FORMAT_RAXPOL_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
       _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
@@ -863,6 +873,7 @@ int RadxFile::writeToPath(const RadxVol &vol,
       _fileFormat == FILE_FORMAT_SIGMET_RAW ||
       _fileFormat == FILE_FORMAT_DOE_NC ||
       _fileFormat == FILE_FORMAT_NOXP_NC ||
+      _fileFormat == FILE_FORMAT_RAXPOL_NC ||
       _fileFormat == FILE_FORMAT_D3R_NC ||
       _fileFormat == FILE_FORMAT_NOAA_FSL ||
       _fileFormat == FILE_FORMAT_NEXRAD_CMD ||
@@ -1302,6 +1313,29 @@ int RadxFile::_readFromPathNetCDF(const string &path,
         if (_debug) {
           cerr << "INFO: RadxFile::readFromPath" << endl;
           cerr << "  Read NOXP NC file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }
+
+  // try RAXPOL netcdf next
+
+  {
+    RaxpolNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isRaxpolNc(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read RAXPOL NC file, path: " << _pathInUse << endl;
         }
       }
       return iret;
@@ -2681,6 +2715,8 @@ string RadxFile::getFileFormatAsString() const
     return "NOAA_FSL";
   } else if (_fileFormat == FILE_FORMAT_NOXP_NC) {
     return "NOXP_NC";
+  } else if (_fileFormat == FILE_FORMAT_RAXPOL_NC) {
+    return "RAXPOL_NC";
   } else if (_fileFormat == FILE_FORMAT_CFARR) {
     return "CFARR";
   } else if (_fileFormat == FILE_FORMAT_NIMROD) {
@@ -2791,6 +2827,19 @@ int RadxFile::_printNativeNetCDF(const string &path, ostream &out,
     NoxpNcRadxFile file;
     file.copyReadDirectives(*this);
     if (file.isNoxpNc(path)) {
+      int iret = file.printNative(path, out, printRays, printData);
+      if (iret) {
+        _errStr = file.getErrStr();
+      }
+      return iret;
+    }
+  }
+  
+  // try RAXPOL netcdf next
+  {
+    RaxpolNcRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isRaxpolNc(path)) {
       int iret = file.printNative(path, out, printRays, printData);
       if (iret) {
         _errStr = file.getErrStr();
