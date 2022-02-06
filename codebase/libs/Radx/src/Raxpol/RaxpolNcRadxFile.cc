@@ -45,7 +45,9 @@
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxXml.hh>
+#include <Radx/RadxStr.hh>
 #include <Radx/RadxComplex.hh>
+#include <Radx/RadxReadDir.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -85,7 +87,7 @@ void RaxpolNcRadxFile::clear()
 
   _file.close();
 
-  _azDim = NULL;
+  _timeDim = NULL;
   _gateDim = NULL;
 
   _azimuthVar = NULL;
@@ -184,6 +186,12 @@ bool RaxpolNcRadxFile::isRaxpolNc(const string &path)
     return false;
   }
 
+  // read global attributes
+  
+  if (_readGlobalAttributes()) {
+    return -1;
+  }
+  
   // read dimensions
   
   if (_readDimensions()) {
@@ -472,18 +480,18 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
     return -1;
   }
   
-  // read dimensions
-  
-  if (_readDimensions()) {
-    return -1;
-  }
-
   // read global attributes
   
   if (_readGlobalAttributes()) {
     return -1;
   }
   
+  // read dimensions
+  
+  if (_readDimensions()) {
+    return -1;
+  }
+
   // set the times
 
   _setTimes();
@@ -580,9 +588,13 @@ int RaxpolNcRadxFile::_readDimensions()
   // read required dimensions
 
   int iret = 0;
-  iret |= _file.readDim("Azimuth", _azDim);
+  if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+    iret |= _file.readDim("Elevation", _timeDim);
+  } else {
+    iret |= _file.readDim("Azimuth", _timeDim);
+  }
   if (iret == 0) {
-    _nTimes = _azDim->size();
+    _nTimes = _timeDim->size();
   }
 
   _nGates = 0;
@@ -798,13 +810,13 @@ int RaxpolNcRadxFile::_readRayVariables()
   int iret = 0;
   
   _readRayVar(_azimuthVar, "Azimuth", _azimuths);
-  if ((int) _azimuths.size() != _azDim->size()) {
+  if ((int) _azimuths.size() != _timeDim->size()) {
     _addErrStr("ERROR - Azimuth variable required");
     iret = -1;
   }
   
   _readRayVar(_elevationVar, "Elevation", _elevations);
-  if ((int) _elevations.size() != _azDim->size()) {
+  if ((int) _elevations.size() != _timeDim->size()) {
     _addErrStr("ERROR - Elevation variable required");
     iret = -1;
   }
@@ -895,9 +907,9 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
       continue;
     }
     // check that we have the correct dimensions
-    Nc3Dim* azDim = var->get_dim(0);
+    Nc3Dim* timeDim = var->get_dim(0);
     Nc3Dim* gateDim = var->get_dim(1);
-    if (azDim != _azDim || gateDim != _gateDim) {
+    if (timeDim != _timeDim || gateDim != _gateDim) {
       continue;
     }
     
@@ -1229,13 +1241,13 @@ Nc3Var* RaxpolNcRadxFile::_getRayVar(const string &name, bool required)
     }
     return NULL;
   }
-  Nc3Dim *azDim = var->get_dim(0);
-  if (azDim != _azDim) {
+  Nc3Dim *timeDim = var->get_dim(0);
+  if (timeDim != _timeDim) {
     if (required) {
       _addErrStr("ERROR - RaxpolNcRadxFile::_getRayVar");
       _addErrStr("  variable name: ", name);
       _addErrStr("  variable has incorrect dimension, dim name: ", 
-                 azDim->name());
+                 timeDim->name());
       _addErrStr("  should be: ", "time");
     }
     return NULL;
@@ -1716,5 +1728,117 @@ void RaxpolNcRadxFile::_computeFixedAngles()
 
   _readVol->loadFixedAnglesFromSweepsToRays();
 
+}
+
+/////////////////////////////////////////////////////////////////
+// get list of field paths for the volume for the specified path
+
+int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
+                                     vector<string> &fileNames,
+                                     vector<string> &filePaths,
+                                     vector<string> &fieldNames)
+  
+{
+  
+  // init
+
+  fileNames.clear();
+  filePaths.clear();
+  fieldNames.clear();
+
+  // decompose the path to get the date/time prefix for the primary path
+  // tokenize the primary file name
+  // e.g. RAXPOL-20220129-171655-E2.0-Z.nc
+  // or   RAXPOL-20220129-172114-A220.0-V.nc
+
+  RadxPath rpath(primaryPath);
+  const string &dir = rpath.getDirectory();
+  const string &fileName = rpath.getFile();
+  
+  vector<string> primaryToks;
+  RadxStr::tokenize(fileName, "-", primaryToks);
+  if (primaryToks.size() < 5) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::_getFieldPaths");
+    _addErrStr("  Bad file name: ", fileName);
+    return -1;
+  }
+
+  // load up array of file names that match the prefix
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str()) == 0) {
+    
+    // Loop thru directory looking for the data file names
+    // or forecast directories
+    
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      
+      string dName(dp->d_name);
+      
+      // exclude dir entries beginning with '.'
+      
+      if (dName[0] == '.') {
+	continue;
+      }
+
+      // make sure we have RAXPOL files
+      
+      if (dName.find("RAXPOL") == string::npos) {
+	continue;
+      }
+
+      // make sure we have .nc files
+      
+      if (dName.find(".nc") == string::npos) {
+	continue;
+      }
+
+      // tokenize the file name
+
+      vector<string> thisFileToks;
+      RadxStr::tokenize(dName, "-", thisFileToks);
+      if (thisFileToks.size() < 5) {
+        continue;
+      }
+      
+      if (primaryToks[1] == thisFileToks[1] &&
+          primaryToks[2] == thisFileToks[2]) {
+
+        // date matches
+        
+        fileNames.push_back(dName);
+
+      } // if (dStr ...
+      
+    } // dp
+    
+    rdir.close();
+
+  } // if (rdir ...
+
+  // sort the file names
+
+  sort(fileNames.begin(), fileNames.end());
+
+  // load up the paths and field names
+
+  for (size_t ii = 0; ii < fileNames.size(); ii++) {
+
+    const string &fileName = fileNames[ii];
+
+    size_t pos = fileName.find('.', 16);
+    string fieldName = fileName.substr(16, pos - 16);
+    fieldNames.push_back(fieldName);
+    
+    string dPath(dir);
+    dPath += RadxPath::RADX_PATH_DELIM;
+    dPath += fileName;
+    filePaths.push_back(dPath);
+
+  } // ii
+
+  return 0;
+  
 }
 

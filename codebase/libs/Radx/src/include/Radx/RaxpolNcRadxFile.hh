@@ -179,15 +179,15 @@ private:
 
   // dimensions
   
-  Nc3Dim *_azDim;
+  Nc3Dim *_timeDim;
   Nc3Dim *_gateDim;
 
   // times
   
+  size_t _nTimes;
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
-  size_t _nTimes;
   
   // range
 
@@ -359,6 +359,11 @@ private:
 
   int _loadReadVolume();
   void _computeFixedAngles();
+
+  int _getFieldPaths(const string &primaryPath,
+                     vector<string> &fileNames,
+                     vector<string> &filePaths,
+                     vector<string> &fieldNames);
 
 };
 
