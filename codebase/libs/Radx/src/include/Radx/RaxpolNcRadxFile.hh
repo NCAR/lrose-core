@@ -177,6 +177,10 @@ private:
   
   Nc3xFile _file;
 
+  // new sweep?
+
+  bool _newSweep;
+
   // dimensions
   
   Nc3Dim *_timeDim;
@@ -314,7 +318,10 @@ private:
 
   vector<RadxRay *> _rays;
 
+  // methods
+
   int _readDimensions();
+  int _readField(const string &path);
   int _readGlobalAttributes();
   void _setTimes();
   void _setRangeGeometry();

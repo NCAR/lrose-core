@@ -87,6 +87,7 @@ void RaxpolNcRadxFile::clear()
 
   _file.close();
 
+  _newSweep = true;
   _timeDim = NULL;
   _gateDim = NULL;
 
@@ -158,7 +159,7 @@ void RaxpolNcRadxFile::clear()
 bool RaxpolNcRadxFile::isSupported(const string &path)
 
 {
-  
+
   if (isRaxpolNc(path)) {
     return true;
   }
@@ -459,94 +460,47 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   
 {
 
-  _initForRead(path, vol);
-  
   if (_debug) {
     cerr << "Reading path: " << path << endl;
   }
+  
+  // initialize, this calls clear()
 
+  _initForRead(path, vol);
   _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
   _addErrStr("  Path: ", path);
-    
+  
   // clear tmp rays
   
   _nTimes = 0;
   _rays.clear();
 
-  // open file
-
-  if (_file.openRead(path)) {
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
+  // get the list of all files, one field in each, that match this time
   
-  // read global attributes
-  
-  if (_readGlobalAttributes()) {
-    return -1;
-  }
-  
-  // read dimensions
-  
-  if (_readDimensions()) {
+  vector<string> fileNames;
+  vector<string> filePaths;
+  vector<string> fieldNames;
+  _getFieldPaths(path, fileNames, filePaths, fieldNames);
+  if (filePaths.size() < 1) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+    _addErrStr("  No field files found, path: ", path);
     return -1;
   }
 
-  // set the times
-
-  _setTimes();
-
-  // set time variable now if that is all that is needed
-  
-  if (_readTimesOnly) {
-    return 0;
-  }
-  
-  // set position variables - lat/lon/alt
-  
-  _setPositionVariables();
-
-  // set range geometry
-
-  _setRangeGeometry();
-  
-  // read in ray variables
-
-  if (_readRayVariables()) {
-    return -1;
-  }
-
-  if (_readMetadataOnly) {
-
-    // read field variables
-    
-    if (_readFieldVariables(true)) {
-      return -1;
+  int nGood = 0;
+  _newSweep = true;
+  for (size_t ii = 0; ii < filePaths.size(); ii++) {
+    if (_readField(filePaths[ii]) == 0) {
+      nGood++;
+      _newSweep = false;
     }
-    
-  } else {
-
-    // create the rays to be read in, filling out the metadata
-    
-    if (_createRays(path)) {
-      return -1;
-    }
-    
-    // add field variables to file rays
-    
-    if (_readFieldVariables(false)) {
-      return -1;
-    }
-
   }
 
-  // close file
-
-  _file.close();
-
-  // append to read paths
-  
-  _readPaths.push_back(path);
+  if (nGood == 0) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+    _addErrStr("  No good fields found, path: ", path);
+    return -1;
+  }
 
   // check we have at least 1 ray
 
@@ -578,6 +532,108 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
 
 }
 
+////////////////////////////////////////////////////////////
+// Read in field related to specified path
+//
+// Returns 0 on success, -1 on failure
+
+int RaxpolNcRadxFile::_readField(const string &path)
+    
+{
+
+  if (_debug) {
+    cerr << "Reading field from path: " << path << endl;
+  }
+
+  // open file
+
+  if (_file.openRead(path)) {
+    _addErrStr(_file.getErrStr());
+    return -1;
+  }
+  
+  // read global attributes
+  
+  if (_newSweep) {
+    if (_readGlobalAttributes()) {
+      return -1;
+    }
+  }
+  
+  // read dimensions
+  
+  if (_readDimensions()) {
+    return -1;
+  }
+
+  // set the times
+
+  if (_newSweep) {
+    _setTimes();
+  }
+
+  // set time variable now if that is all that is needed
+  
+  if (_readTimesOnly) {
+    return 0;
+  }
+  
+  // set position variables - lat/lon/alt
+  
+  if (_newSweep) {
+    _setPositionVariables();
+  }
+
+  // set range geometry
+
+  if (_newSweep) {
+    _setRangeGeometry();
+  }
+  
+  // read in ray variables
+
+  if (_readRayVariables()) {
+    return -1;
+  }
+
+  if (_readMetadataOnly) {
+
+    // read field variables
+    
+    if (_readFieldVariables(true)) {
+      return -1;
+    }
+    
+  } else {
+
+    // create the rays to be read in, filling out the metadata
+    
+    if (_newSweep) {
+      if (_createRays(path)) {
+        return -1;
+      }
+    }
+    
+    // add field variables to file rays
+    
+    if (_readFieldVariables(false)) {
+      return -1;
+    }
+
+  }
+
+  // close file
+
+  _file.close();
+
+  // append to read paths
+  
+  _readPaths.push_back(path);
+
+  return 0;
+
+}
+
 ///////////////////////////////////
 // read in the dimensions
 
@@ -585,30 +641,47 @@ int RaxpolNcRadxFile::_readDimensions()
 
 {
 
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_readDimensions()" << endl;
+  }
+
   // read required dimensions
 
   int iret = 0;
+
   if (_sweepMode == Radx::SWEEP_MODE_RHI) {
     iret |= _file.readDim("Elevation", _timeDim);
   } else {
     iret |= _file.readDim("Azimuth", _timeDim);
   }
-  if (iret == 0) {
-    _nTimes = _timeDim->size();
-  }
-
-  _nGates = 0;
   iret |= _file.readDim("Gate", _gateDim);
-  if (iret == 0) {
-    _nGates = _gateDim->size();
-  }
-  
+
   if (iret) {
     _addErrStr("ERROR - RaxpolNcRadxFile::_file.readDimensions");
     return -1;
   }
 
-  return 0;
+  // check with previous fields
+  
+  if (_newSweep) {
+    _nTimes = _timeDim->size();
+    _nGates = _gateDim->size();
+  } else {
+    if ((int) _nTimes != _timeDim->size()) {
+      _addErrStr("ERROR - RaxpolNcRadxFile::_file.readDimensions");
+      _addErrInt("  Bad nTimes: ", _timeDim->size());
+      _addErrInt("  should be: ", _nTimes);
+      iret = -1;
+    }
+    if ((int) _nGates != _gateDim->size()) {
+      _addErrStr("ERROR - RaxpolNcRadxFile::_file.readDimensions");
+      _addErrInt("  Bad nGates: ", _gateDim->size());
+      _addErrInt("  should be: ", _nGates);
+      iret = -1;
+    }
+  }
+
+  return iret;
 
 }
 
@@ -618,6 +691,10 @@ int RaxpolNcRadxFile::_readDimensions()
 int RaxpolNcRadxFile::_readGlobalAttributes()
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_readGlobalAttributes()" << endl;
+  }
 
   // string attributes
 
@@ -685,6 +762,23 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
   _file.readGlobAttr("SNRThreshold-dB", _SNRThreshold_dB_attr);
   _file.readGlobAttr("SQIThreshold-dB", _SQIThreshold_dB_attr);
 
+  // set the status XML from the attributes
+  
+  _statusXml.clear();
+  _statusXml += RadxXml::writeStartTag("STATUS", 0);
+  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
+    Nc3Att *att = _file.getNc3File()->get_att(ii);
+    if (att != NULL) {
+      const char* strc = att->as_string(0);
+      string val(strc);
+      delete[] strc;
+      string name(att->name());
+      delete att;
+      _statusXml += RadxXml::writeString(name, 1, val);
+    }
+  }
+  _statusXml += RadxXml::writeEndTag("STATUS", 0);
+
   _title = "RAXPOL radar data";
   _institution = _ContactInformation_attr;
   _references = _attributes_attr;
@@ -715,23 +809,6 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
   _pulseWidthUsec = _PulseWidth_value_attr;
   _nSamples = Radx::missingMetaInt;
   
-  // set the status XML from the attributes
-  
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
-    Nc3Att *att = _file.getNc3File()->get_att(ii);
-    if (att != NULL) {
-      const char* strc = att->as_string(0);
-      string val(strc);
-      delete[] strc;
-      string name(att->name());
-      delete att;
-      _statusXml += RadxXml::writeString(name, 1, val);
-    }
-  }
-  _statusXml += RadxXml::writeEndTag("STATUS", 0);
-
   return 0;
 
 }
@@ -742,6 +819,10 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
 void RaxpolNcRadxFile::_setTimes()
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_setTimes()" << endl;
+  }
 
   _dTimes.resize(_nTimes);
   _refTimeSecsFile = (time_t) _Time_attr;
@@ -762,6 +843,10 @@ void RaxpolNcRadxFile::_setRangeGeometry()
   
 {
 
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_setRangeGeometry()" << endl;
+  }
+
   _startRangeKm = _RangeToFirstGate_attr / 1000.0;
   _gateSpacingKm = _GateSize_attr / 1000.0;
   _gateSpacingIsConstant = true;
@@ -780,6 +865,10 @@ void RaxpolNcRadxFile::_setRangeGeometry()
 void RaxpolNcRadxFile::_setPositionVariables()
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_setPositionVariables()" << endl;
+  }
 
   _latitudeDeg = _LatitudeDouble_attr;
   _longitudeDeg = _LongitudeDouble_attr;
@@ -805,6 +894,10 @@ void RaxpolNcRadxFile::_clearRayVariables()
 int RaxpolNcRadxFile::_readRayVariables()
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_readRayVariables()" << endl;
+  }
 
   _clearRayVariables();
   int iret = 0;
@@ -837,6 +930,10 @@ int RaxpolNcRadxFile::_readRayVariables()
 int RaxpolNcRadxFile::_createRays(const string &path)
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_createRays()" << endl;
+  }
 
   // create the rays
   
@@ -891,6 +988,10 @@ int RaxpolNcRadxFile::_createRays(const string &path)
 int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
 
 {
+
+  if (_verbose) {
+    cerr << "====>> RaxpolNcRadxFile::_readFieldVariables()" << endl;
+  }
 
   // loop through the variables, adding data fields as appropriate
   
