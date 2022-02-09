@@ -531,7 +531,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void _setTransform(const QTransform &transform);
-
+  void _translateTransform(double x, double y);
+  
   /////////////////////////////////
   // Overridden QtWidget methods //
   /////////////////////////////////
@@ -561,6 +562,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void mouseReleaseEvent(QMouseEvent* event) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
   /**
    * @brief The method that is called when a repaint event is triggered.
