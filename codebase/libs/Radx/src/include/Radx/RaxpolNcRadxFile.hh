@@ -321,7 +321,7 @@ private:
   // methods
 
   int _readDimensions();
-  int _readField(const string &path);
+  int _readField(const string &path, const string &fieldNameFromFile);
   int _readGlobalAttributes();
   void _setTimes();
   void _setRangeGeometry();
@@ -329,7 +329,10 @@ private:
   void _clearRayVariables();
   int _readRayVariables();
   int _createRays(const string &path);
-  int _readFieldVariables(bool metaOnly);
+  int _readFieldVariables(bool metaOnly,
+                          string shortName,
+                          string standardName,
+                          string longName);
 
   int _readRayVar(Nc3Var* &var, const string &name, 
                   vector<double> &vals, bool required = true);

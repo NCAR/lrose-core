@@ -490,7 +490,7 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   int nGood = 0;
   _newSweep = true;
   for (size_t ii = 0; ii < filePaths.size(); ii++) {
-    if (_readField(filePaths[ii]) == 0) {
+    if (_readField(filePaths[ii], fieldNames[ii]) == 0) {
       nGood++;
       _newSweep = false;
     }
@@ -517,7 +517,9 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   
   // compute fixed angles as mean angle from sweeps
   
-  _computeFixedAngles();
+  if (_Elevation_attr < -90) {
+    _computeFixedAngles();
+  }
   
   // set format as read
 
@@ -537,12 +539,45 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
 //
 // Returns 0 on success, -1 on failure
 
-int RaxpolNcRadxFile::_readField(const string &path)
+int RaxpolNcRadxFile::_readField(const string &path,
+                                 const string &fieldNameFromFile)
     
 {
 
   if (_debug) {
     cerr << "Reading field from path: " << path << endl;
+    cerr << "   Field name from file: " << fieldNameFromFile << endl;
+  }
+
+  // set standard name etc
+
+  string shortName;
+  string standardName;
+  string longName;
+  if (fieldNameFromFile == "Z") {
+    shortName = "DBZ";
+    standardName = "equivalent_reflectivity_factor";
+    longName = "reflectivity";
+  } else if (fieldNameFromFile == "V") {
+    shortName = "VEL";
+    standardName = "radial_velocity_of_scatterers_away_from_instrument";
+    longName = "radial_velocity";
+  } else if (fieldNameFromFile == "W") {
+    shortName = "WIDTH";
+    standardName = "doppler_spectrum_width";
+    longName = "spectral_width";
+  } else if (fieldNameFromFile == "D") {
+    shortName = "ZDR";
+    standardName = "log_differential_reflecivity_hv";
+    longName = "differential_reflectivity";
+  } else if (fieldNameFromFile == "P") {
+    shortName = "PHIDP";
+    standardName = "differential_phase_hv";
+    longName = "differential_phase_shift";
+  } else if (fieldNameFromFile == "R") {
+    shortName = "RHOHV";
+    standardName = "cross_correlation_hv";
+    longName = "co-polar_cross_correlation_coefficient";
   }
 
   // open file
@@ -600,7 +635,7 @@ int RaxpolNcRadxFile::_readField(const string &path)
 
     // read field variables
     
-    if (_readFieldVariables(true)) {
+    if (_readFieldVariables(true, shortName, standardName, longName)) {
       return -1;
     }
     
@@ -616,7 +651,7 @@ int RaxpolNcRadxFile::_readField(const string &path)
     
     // add field variables to file rays
     
-    if (_readFieldVariables(false)) {
+    if (_readFieldVariables(false, shortName, standardName, longName)) {
       return -1;
     }
 
@@ -737,6 +772,7 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
   _file.readGlobAttr("FractionalTime", _FractionalTime_attr);
   _file.readGlobAttr("Wavelength-value", _Wavelength_value_attr);
   _file.readGlobAttr("Nyquist_Vel-value", _Nyquist_Vel_value_attr);
+  _Elevation_attr = -9999.0;
   _file.readGlobAttr("Elevation", _Elevation_attr);
   _file.readGlobAttr("Azimuth", _Azimuth_attr);
   _file.readGlobAttr("GateSize", _GateSize_attr);
@@ -959,7 +995,8 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     ray->setAzimuthDeg(_azimuths[iray]);
     ray->setElevationDeg(_elevations[iray]);
     ray->setSweepMode(_sweepMode);
-    
+    ray->setFixedAngleDeg(_Elevation_attr);
+
     // copy geom to rays
     
     ray->copyRangeGeom(_geom);
@@ -985,7 +1022,10 @@ int RaxpolNcRadxFile::_createRays(const string &path)
 ////////////////////////////////////////////
 // read the field variables
 
-int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
+int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly,
+                                          string shortName,
+                                          string standardName,
+                                          string longName)
 
 {
 
@@ -1047,25 +1087,26 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
     
     string name = var->name();
     
-    string standardName;
-    Nc3Att *standardNameAtt = var->get_att("standard_name");
-    if (standardNameAtt != NULL) {
-      standardName = Nc3xFile::asString(standardNameAtt);
-      delete standardNameAtt;
-    }
-    
-    string longName;
-    Nc3Att *longNameAtt = var->get_att("long_name");
-    if (longNameAtt != NULL) {
-      longName = Nc3xFile::asString(longNameAtt);
-      delete longNameAtt;
-    }
-    
     string units;
     Nc3Att *unitsAtt = var->get_att("Units");
     if (unitsAtt != NULL) {
       units = Nc3xFile::asString(unitsAtt);
       delete unitsAtt;
+    } else {
+      unitsAtt = var->get_att("units");
+      if (unitsAtt != NULL) {
+        units = Nc3xFile::asString(unitsAtt);
+        delete unitsAtt;
+      }
+    }
+    if (units == "MetersPerSecond") {
+      units = "m/s";
+    } else if (units == "Unitless") {
+      units.clear();
+    }
+
+    if (shortName.size() == 0) {
+      shortName = name;
     }
 
     // folding
@@ -1073,8 +1114,8 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
     bool fieldFolds = false;
     float foldLimitLower = Radx::missingMetaFloat;
     float foldLimitUpper = Radx::missingMetaFloat;
-    if (name.find("VR") != string::npos ||
-        name.find("VEL") != string::npos) {
+    if (shortName.find("VR") != string::npos ||
+        shortName.find("VEL") != string::npos) {
       fieldFolds = true;
       foldLimitLower = _nyquistMps * -1.0;
       foldLimitUpper = _nyquistMps;
@@ -1083,8 +1124,8 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
     // if metadata only, don't read in fields
 
     if (metaOnly) {
-      if (!_readVol->fieldExists(name)) {
-        RadxField *field = new RadxField(name, units);
+      if (!_readVol->fieldExists(shortName)) {
+        RadxField *field = new RadxField(shortName, units);
         field->setLongName(longName);
         field->setStandardName(standardName);
         if (fieldFolds &&
@@ -1102,7 +1143,7 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
 
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, name, units, standardName, longName,
+        if (_addFl64FieldToRays(var, shortName, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
@@ -1110,7 +1151,7 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, name, units, standardName, longName,
+        if (_addFl32FieldToRays(var, shortName, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
@@ -1118,7 +1159,7 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
         break;
       }
       case nc3Int: {
-        if (_addSi32FieldToRays(var, name, units, standardName, longName,
+        if (_addSi32FieldToRays(var, shortName, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
@@ -1126,7 +1167,7 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly)
         break;
       }
       case nc3Short: {
-        if (_addSi16FieldToRays(var, name, units, standardName, longName,
+        if (_addSi16FieldToRays(var, shortName, units, standardName, longName,
                                 isDiscrete, fieldFolds,
                                 foldLimitLower, foldLimitUpper)) {
           iret = -1;
@@ -1396,6 +1437,19 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
     delete missingValueAtt;
   }
   
+  // for phidp, convert to degrees
+  
+  string _units = units;
+  if (_units == "Radians" || _units == "radians") {
+    _units = "deg";
+    size_t nVals = _nTimes * _nGates;
+    for (size_t ii = 0; ii < nVals; ii++) {
+      if (data[ii] != missingVal) {
+        data[ii] = Radx::toDegrees(data[ii]);
+      }
+    }
+  }
+
   // load field on rays
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -1470,7 +1524,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
   // for phidp, convert to degrees
   
   string _units = units;
-  if (name == "PHIDP") {
+  if (_units == "Radians" || _units == "radians") {
     _units = "deg";
     size_t nVals = _nTimes * _nGates;
     for (size_t ii = 0; ii < nVals; ii++) {
@@ -1897,14 +1951,14 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
 
       // tokenize the file name
 
-      vector<string> thisFileToks;
-      RadxStr::tokenize(dName, "-", thisFileToks);
-      if (thisFileToks.size() < 5) {
+      vector<string> toks;
+      RadxStr::tokenize(dName, "-", toks);
+      if (toks.size() < 5) {
         continue;
       }
       
-      if (primaryToks[1] == thisFileToks[1] &&
-          primaryToks[2] == thisFileToks[2]) {
+      if (primaryToks[1] == toks[1] &&
+          primaryToks[2] == toks[2]) {
 
         // date matches
         
@@ -1928,9 +1982,14 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
 
     const string &fileName = fileNames[ii];
 
-    size_t pos = fileName.find('.', 16);
-    string fieldName = fileName.substr(16, pos - 16);
-    fieldNames.push_back(fieldName);
+    vector<string> toks;
+    RadxStr::tokenize(fileName, "-", toks);
+    size_t dotPos = toks[4].find(".");
+    if (dotPos != string::npos) {
+      fieldNames.push_back(toks[4].substr(0, dotPos));
+    } else {
+      fieldNames.push_back(toks[4].substr(0, 1));
+    }
     
     string dPath(dir);
     dPath += RadxPath::RADX_PATH_DELIM;
