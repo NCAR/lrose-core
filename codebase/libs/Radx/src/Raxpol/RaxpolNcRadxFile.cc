@@ -517,10 +517,16 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   
   // compute fixed angles as mean angle from sweeps
   
-  if (_Elevation_attr < -90) {
-    _computeFixedAngles();
+  if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+    if (_Azimuth_attr < -999) {
+      _computeFixedAngles();
+    }
+  } else {
+    if (_Elevation_attr < -999) {
+      _computeFixedAngles();
+    }
   }
-  
+
   // set format as read
 
   _fileFormat = FILE_FORMAT_RAXPOL_NC;
@@ -774,6 +780,7 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
   _file.readGlobAttr("Nyquist_Vel-value", _Nyquist_Vel_value_attr);
   _Elevation_attr = -9999.0;
   _file.readGlobAttr("Elevation", _Elevation_attr);
+  _Azimuth_attr = -9999.0;
   _file.readGlobAttr("Azimuth", _Azimuth_attr);
   _file.readGlobAttr("GateSize", _GateSize_attr);
   _file.readGlobAttr("RangeToFirstGate", _RangeToFirstGate_attr);
@@ -995,7 +1002,11 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     ray->setAzimuthDeg(_azimuths[iray]);
     ray->setElevationDeg(_elevations[iray]);
     ray->setSweepMode(_sweepMode);
-    ray->setFixedAngleDeg(_Elevation_attr);
+    if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+      ray->setFixedAngleDeg(_Azimuth_attr);
+    } else {
+      ray->setFixedAngleDeg(_Elevation_attr);
+    }
 
     // copy geom to rays
     
