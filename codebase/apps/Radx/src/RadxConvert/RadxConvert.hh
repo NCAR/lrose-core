@@ -38,6 +38,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <set>
 class RadxVol;
 class RadxFile;
 class RadxRay;
@@ -72,7 +73,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  vector<string> _readPaths;
+  set<string> _readPaths;
 
   vector<VarTransform *> _varTrans;
 

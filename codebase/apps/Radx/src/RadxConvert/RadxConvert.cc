@@ -51,6 +51,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 #include <cerrno>
+#include <set>
 using namespace std;
 
 // Constructor
@@ -486,22 +487,17 @@ int RadxConvert::_readFile(const string &readPath,
 
   // check we have not already processed this file
   // in the file aggregation step
-  
-  if (_params.aggregate_sweep_files_on_read ||
-      _params.aggregate_all_files_on_read) {
-    RadxPath thisPath(readPath);
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      RadxPath listPath(_readPaths[ii]);
-      if (thisPath.getFile() == listPath.getFile()) {
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "Skipping file: " << readPath << endl;
-          cerr << "  Previously processed in aggregation step" << endl;
-        }
-        return 1;
-      }
+  // if not clear _readPaths
+
+  if (_readPaths.find(readPath) != _readPaths.end()) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Skipping file: " << readPath << endl;
+      cerr << "  Previously processed" << endl;
     }
+    return 1;
   }
-  
+  _readPaths.clear();
+
   if (_params.debug) {
     cerr << "INFO - RadxConvert::Run" << endl;
     cerr << "  Input path: " << readPath << endl;
@@ -533,11 +529,15 @@ int RadxConvert::_readFile(const string &readPath,
     cerr << inFile.getErrStr() << endl;
     return -1;
   }
-  _readPaths = inFile.getReadPaths();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
+
+  // save read paths used
+
+  vector<string> rpaths = inFile.getReadPaths();
+  for (size_t ii = 0; ii < rpaths.size(); ii++) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "  ==>> used file: " << rpaths[ii] << endl;
     }
+    _readPaths.insert(rpaths[ii]);
   }
 
   // if requested, change some of the characteristics
