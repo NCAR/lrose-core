@@ -475,6 +475,19 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   _nTimes = 0;
   _rays.clear();
 
+  // get the list of files, with this field, in the volume
+  
+  vector<string> volFilePaths;
+  _getVolPaths(path, volFilePaths);
+  if (volFilePaths.size() < 1) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+    _addErrStr("  No vol files found, path: ", path);
+    return -1;
+  }
+  for (size_t ii = 0; ii < volFilePaths.size(); ii++) {
+    cerr << "11111111111111 ii, path: " << ii << ", " << volFilePaths[ii] << endl;
+  }
+
   // get the list of all files, one field in each, that match this time
   
   vector<string> fileNames;
@@ -1897,6 +1910,134 @@ void RaxpolNcRadxFile::_computeFixedAngles()
 }
 
 /////////////////////////////////////////////////////////////////
+// get list of vol paths for files containing this field
+
+int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
+                                   vector<string> &volPaths)
+  
+{
+  
+  // init
+  
+  volPaths.clear();
+  
+  // decompose the path to get the field name
+  // tokenize the primary file name
+  // e.g. RAXPOL-20220129-171655-E2.0-Z.nc
+  // or   RAXPOL-20220129-172114-A220.0-V.nc
+
+  RadxPath rpath(primaryPath);
+  const string &dir = rpath.getDirectory();
+  const string &primaryFileName = rpath.getFile();
+  string primaryFieldName = _getFieldName(primaryFileName);
+
+  if (primaryFieldName.size() == 0) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::_getVolPaths");
+    _addErrStr("  Path: ", primaryPath);
+    _addErrStr("  Bad file name: ", primaryFileName);
+    _addErrStr("  Cannot find field name");
+    return -1;
+  }
+
+  bool primaryIsRhi;
+  double primaryFixedAngle;
+  if (_getFixedAngle(primaryFileName, primaryFixedAngle, primaryIsRhi)) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::_getVolPaths");
+    _addErrStr("  Path: ", primaryPath);
+    _addErrStr("  Bad file name: ", primaryFileName);
+    _addErrStr("  Cannot decode fixed angle");
+    return -1;
+  }
+  
+  RadxTime primaryTime;
+  if (getTimeFromPath(primaryPath, primaryTime)) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::_getVolPaths");
+    _addErrStr("  Path: ", primaryPath);
+    _addErrStr("  Bad file name: ", primaryFileName);
+    _addErrStr("  Cannot decode time");
+    return -1;
+  }
+
+  // load up array of file names that match the field
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str()) == 0) {
+    
+    // Loop thru directory looking for the data file names
+    // or forecast directories
+    
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      
+      string dName(dp->d_name);
+      
+      // exclude dir entries beginning with '.'
+      
+      if (dName[0] == '.') {
+	continue;
+      }
+      
+      // make sure we have RAXPOL files
+      
+      if (dName.find("RAXPOL") == string::npos) {
+	continue;
+      }
+
+      // make sure we have .nc files
+      
+      if (dName.find(".nc") == string::npos) {
+	continue;
+      }
+
+      RadxTime thisTime;
+      if (getTimeFromPath(dName, thisTime)) {
+        continue;
+      }
+      if (thisTime < primaryTime) {
+        // ignore files before the primary time
+        continue;
+      }
+
+      bool isRhi;
+      double fixedAngle;
+      if (_getFixedAngle(dName, fixedAngle, isRhi)) {
+        continue;
+      }
+      if (isRhi != primaryIsRhi) {
+        // ignore other scan modes
+        continue;
+      }
+      // break if the fixed angle decreases below the primary
+      if (fixedAngle < primaryFixedAngle) {
+        // end of volume, fixed angle decreased
+        break;
+      }
+      
+      // add vol paths
+
+      string fieldName = _getFieldName(dName);
+      if (fieldName == primaryFieldName) {
+        string dPath(dir);
+        dPath += RadxPath::RADX_PATH_DELIM;
+        dPath += dName;
+        volPaths.push_back(dPath);
+      }
+
+    } // dp
+    
+    rdir.close();
+    
+  } // if (rdir ...
+
+  // sort the paths
+
+  sort(volPaths.begin(), volPaths.end());
+
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////////////////
 // get list of field paths for the volume for the specified path
 
 int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
@@ -1993,23 +2134,81 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
 
     const string &fileName = fileNames[ii];
 
-    vector<string> toks;
-    RadxStr::tokenize(fileName, "-", toks);
-    size_t dotPos = toks[4].find(".");
-    if (dotPos != string::npos) {
-      fieldNames.push_back(toks[4].substr(0, dotPos));
-    } else {
-      fieldNames.push_back(toks[4].substr(0, 1));
-    }
-    
     string dPath(dir);
     dPath += RadxPath::RADX_PATH_DELIM;
     dPath += fileName;
     filePaths.push_back(dPath);
 
+    fieldNames.push_back(_getFieldName(fileName));
+    
   } // ii
 
   return 0;
   
 }
+
+///////////////////////////////////////////////
+// get the field name from a file name
+
+string RaxpolNcRadxFile::_getFieldName(const string &fileName)
+
+{
+
+  string fieldName;
+  vector<string> toks;
+  RadxStr::tokenize(fileName, "-", toks);
+  if (toks.size() < 5) {
+    return fieldName;
+  }
+
+  size_t dotPos = toks[4].find(".");
+  if (dotPos != string::npos) {
+    fieldName = toks[4].substr(0, dotPos);
+  } else {
+    fieldName = toks[4].substr(0, 1);
+  }
+  
+  return fieldName;
+
+}
+
+///////////////////////////////////////////////
+// get the fixed angle from a file name
+// returns -1 on error
+
+int RaxpolNcRadxFile::_getFixedAngle(const string &fileName,
+                                     double &fixedAngle,
+                                     bool &isRhi)
+  
+{
+
+  vector<string> toks;
+  RadxStr::tokenize(fileName, "-", toks);
+  if (toks.size() < 5) {
+    return -1;
+  }
+
+  string angleStr = toks[3];
+  if (angleStr.size() < 2) {
+    return -1;
+  }
+  if (angleStr[0] == 'A') {
+    isRhi = true;
+  } else if (angleStr[0] == 'E') {
+    isRhi = false;
+  } else {
+    return -1;
+  }
+
+  double angle;
+  char cc;
+  if (sscanf(angleStr.c_str(), "%c%lg", &cc, &angle) != 2) {
+    return -1;
+  }
+  fixedAngle = angle;
+
+  return 0;
+
+}
+
 

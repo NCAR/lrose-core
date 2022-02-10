@@ -370,10 +370,19 @@ private:
   int _loadReadVolume();
   void _computeFixedAngles();
 
+  int _getVolPaths(const string &primaryPath,
+                   vector<string> &volPaths);
+
   int _getFieldPaths(const string &primaryPath,
                      vector<string> &fileNames,
                      vector<string> &filePaths,
                      vector<string> &fieldNames);
+
+  string _getFieldName(const string &fileName);
+
+  int _getFixedAngle(const string &fileName,
+                     double &fixedAngle,
+                     bool &isRhi);
 
 };
 
