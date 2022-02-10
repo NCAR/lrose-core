@@ -608,6 +608,82 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   
 }
 
+
+/*************************************************************************
+ * mouseReleaseEvent()
+ */
+
+void PolarWidget::mouseDoubleClickEvent(QMouseEvent *e)
+{
+
+  _pointClicked = false;
+
+  QPointF clickPos(e->pos());
+  
+  _mouseReleaseX = clickPos.x();
+  _mouseReleaseY = clickPos.y();
+
+  mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
+  cerr << "translate to (mouse)" << _mouseReleaseX << ", " << _mouseReleaseY << endl;
+  // get click location in world coords
+  cerr << "translate to (world)" << _worldReleaseX << ", " << _worldReleaseY << endl;
+  _translateTransform(_mouseReleaseX, _mouseReleaseY); //  _worldReleaseY);
+
+  /*
+  // --- if shift key is down, then pass message on to boundary point control
+  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if (isShiftKeyDown) {
+    // ignore
+    return;
+  } else {
+    if (rgeom.width() <= 20) {
+      // If the mouse hasn't moved much, assume we are clicking rather than
+      // zooming
+  
+      double x_km = _worldReleaseX;
+      double y_km = _worldReleaseY;
+      _pointClicked = true;
+      // get ray closest to click point
+      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+      // Emit a signal to indicate that the click location has changed
+      emit locationClicked(x_km, y_km, closestRay);
+    } else {
+      // mouse moved more than 20 pixels, so a zoom occurred
+      // or moving boundary points
+
+      // if mouse was pressed near a boundary point, then move the boundary point
+      // otherwise, this is a zoom
+      if (_boundaryTrackMouseMove) {
+        _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
+          _worldReleaseX, _worldReleaseY);
+      } else {
+
+        // use rgeom
+
+        int xMin, xMax, yMin, yMax;
+        rgeom.getCoords(&xMin, &yMax, &xMax, &yMin);
+
+        double xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+
+        mapPixelToWorld(xMax, yMax, &xMaxWorld, &yMaxWorld);
+        mapPixelToWorld(xMin, yMin, &xMinWorld, &yMinWorld);
+
+        _zoomWorld.set2(xMinWorld, yMinWorld, xMaxWorld, yMaxWorld);
+        _setTransform(_zoomWorld.getTransform());
+
+        _setGridSpacing();
+        _manager->enableZoomButton();        
+      }
+    }
+  }  
+  _rubberBand->hide();
+  _boundaryTrackMouseMove = false;
+  update();
+  */
+
+}
+
+
 //void PolarWidget::imageReady(QImage *image) {
 //  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
 //  update();
@@ -774,7 +850,44 @@ void PolarWidget::_setTransform(const QTransform &transform)
   _zoomTransform = transform;
   
 }
+ 
+void PolarWidget::_translateTransform(double x, double y)
+{
+
+  double m31 = _fullTransform.m31(); 
+  double m32 = _fullTransform.m32();
   
+  double dx = (width()/2) - x; // _fullTransform.m31() - dx;
+  double dy = (height()/2) - y; // _fullTransform.m32() - dy;
+  //_fullTransform.translate(dx, dy);
+
+  double newx = m31 + dx;
+  double newy = m32 + dy;
+  _fullTransform.setMatrix(_fullTransform.m11(), _fullTransform.m12(), 
+    _fullTransform.m13(), _fullTransform.m21(), _fullTransform.m22(), 
+    _fullTransform.m23(), newx, newy, 
+    _fullTransform.m33());
+  
+  //_fullTransform = _fullTransform.translate(-150, 0); // newDx - dx, newDy - dy);
+  cerr << "_fullTransform dx,dy " << _fullTransform.dx()  << ", " << _fullTransform.dy()  << endl;
+
+  m31 = _zoomTransform.m31(); 
+  m32 = _zoomTransform.m32();
+
+  newx = m31 + dx;
+  newy = m32 + dy;
+
+  _zoomTransform.setMatrix(_zoomTransform.m11(), _zoomTransform.m12(), 
+    _zoomTransform.m13(), _zoomTransform.m21(), _zoomTransform.m22(), 
+    _zoomTransform.m23(), newx, newy, 
+    _zoomTransform.m33());
+
+
+  //_zoomTransform = _zoomTransform.translate(-150, 0); //newDx - dx2, newDy - dy2);
+  cerr << "_zoomTransform dx,dy " << _zoomTransform.dx() << ", " << _zoomTransform.dy() << endl;  
+  cerr << endl << endl;
+}
+
 void PolarWidget::informationMessage()
 {
   // QMessageBox::StandardButton reply;
