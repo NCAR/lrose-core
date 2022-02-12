@@ -176,10 +176,12 @@ private:
   // netcdf file
   
   Nc3xFile _file;
+  vector<string> _allPathsInDir;
 
-  // new sweep?
+  // new sweep or vol?
 
   bool _newSweep;
+  bool _newVol;
 
   // dimensions
   
@@ -188,8 +190,8 @@ private:
 
   // times
   
-  size_t _nTimes;
-  vector<double> _dTimes;
+  size_t _nTimesSweep;
+  vector<double> _dTimesSweep;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
   
@@ -370,12 +372,14 @@ private:
   int _loadReadVolume();
   void _computeFixedAngles();
 
+  int _getAllPathsInDir(const string &primaryPath);
+  
   int _getVolPaths(const string &primaryPath,
                    vector<string> &volPaths);
 
   int _getFieldPaths(const string &primaryPath,
                      vector<string> &fileNames,
-                     vector<string> &filePaths,
+                     vector<string> &fieldPaths,
                      vector<string> &fieldNames);
 
   string _getFieldName(const string &fileName);

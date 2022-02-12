@@ -88,6 +88,7 @@ void RaxpolNcRadxFile::clear()
   _file.close();
 
   _newSweep = true;
+  _newVol = true;
   _timeDim = NULL;
   _gateDim = NULL;
 
@@ -117,9 +118,9 @@ void RaxpolNcRadxFile::clear()
   _ContactInformation_attr.clear();
   _NCProperties_attr.clear();
 
-  _dTimes.clear();
+  _dTimesSweep.clear();
   _rayTimesIncrease = true;
-  _nTimes = 0;
+  _nTimesSweep = 0;
   _refTimeSecsFile = 0;
 
   _rangeKm.clear();
@@ -346,53 +347,6 @@ int RaxpolNcRadxFile::writeToPath(const RadxVol &vol,
 
 }
 
-////////////////////////////////////////////////
-// get the date and time from a dorade file path
-// returns 0 on success, -1 on failure
-
-int RaxpolNcRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
-
-{
-
-  RadxPath rpath(path);
-  const string &fileName = rpath.getFile();
-  
-  // find first digit in entry name - if no digits, return now
-
-  const char *start = NULL;
-  for (size_t ii = 0; ii < fileName.size(); ii++) {
-    if (isdigit(fileName[ii])) {
-      start = fileName.c_str() + ii;
-      break;
-    }
-  }
-  if (!start) return -1;
-  const char *end = start + strlen(start);
-  
-  // iteratively try getting the date and time from the string
-  // moving along by one character at a time
-  
-  while (start < end - 6) {
-    int year, month, day, hour, min, sec;
-    char cc;
-    if (sscanf(start, "%4d%2d%2d%1c%2d%2d%2d",
-               &year, &month, &day, &cc, &hour, &min, &sec) == 7) {
-      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-        return -1;
-      }
-      if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
-        return -1;
-      }
-      rtime.set(year, month, day, hour, min, sec);
-      return 0;
-    }
-    start++;
-  }
-  
-  return -1;
-  
-}
-
 /////////////////////////////////////////////////////////
 // print summary after read
 
@@ -455,91 +409,109 @@ int RaxpolNcRadxFile::printNative(const string &path, ostream &out,
 //
 // Use getErrStr() if error occurs
 
-int RaxpolNcRadxFile::readFromPath(const string &path,
+int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
                                    RadxVol &vol)
   
 {
 
   if (_debug) {
-    cerr << "Reading path: " << path << endl;
+    cerr << "Reading primaryPath: " << primaryPath << endl;
   }
   
   // initialize, this calls clear()
 
-  _initForRead(path, vol);
+  _initForRead(primaryPath, vol);
   _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
-  _addErrStr("  Path: ", path);
+  _addErrStr("  PrimaryPath: ", primaryPath);
   
   // clear tmp rays
   
-  _nTimes = 0;
   _rays.clear();
 
+  // get list of all paths in same dir as primaryPath
+
+  if (_getAllPathsInDir(primaryPath)) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+    _addErrStr("  No valid files found in dir, primaryPath: ", primaryPath);
+    return -1;
+  }
+  
   // get the list of files, with this field, in the volume
   
-  vector<string> volFilePaths;
-  _getVolPaths(path, volFilePaths);
-  if (volFilePaths.size() < 1) {
+  vector<string> sweepPaths;
+  _getVolPaths(primaryPath, sweepPaths);
+  if (sweepPaths.size() < 1) {
     _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
-    _addErrStr("  No vol files found, path: ", path);
-    return -1;
-  }
-  for (size_t ii = 0; ii < volFilePaths.size(); ii++) {
-    cerr << "11111111111111 ii, path: " << ii << ", " << volFilePaths[ii] << endl;
-  }
-
-  // get the list of all files, one field in each, that match this time
-  
-  vector<string> fileNames;
-  vector<string> filePaths;
-  vector<string> fieldNames;
-  _getFieldPaths(path, fileNames, filePaths, fieldNames);
-  if (filePaths.size() < 1) {
-    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
-    _addErrStr("  No field files found, path: ", path);
+    _addErrStr("  No vol files found, primaryPath: ", primaryPath);
     return -1;
   }
 
-  int nGood = 0;
-  _newSweep = true;
-  for (size_t ii = 0; ii < filePaths.size(); ii++) {
-    if (_readField(filePaths[ii], fieldNames[ii]) == 0) {
-      nGood++;
-      _newSweep = false;
+  // loop through the primary field sweeps for this volume
+
+  _newVol = true;
+  for (size_t isweep = 0; isweep < sweepPaths.size(); isweep++) {
+    
+    string sweepPath = sweepPaths[isweep];
+    
+    cerr << "8888888888888888888 isweep, sweepPath: " 
+         << isweep << ", " << sweepPath << endl;
+    
+    // get the list of all files, one field in each, that match this time
+    
+    vector<string> fileNames;
+    vector<string> fieldPaths;
+    vector<string> fieldNames;
+    _getFieldPaths(sweepPath, fileNames, fieldPaths, fieldNames);
+    if (fieldPaths.size() < 1) {
+      _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+      _addErrStr("  No field files found, sweepPath: ", sweepPath);
+      return -1;
     }
-  }
-
-  if (nGood == 0) {
-    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
-    _addErrStr("  No good fields found, path: ", path);
-    return -1;
-  }
-
+    
+    _nTimesSweep = 0;
+    _newSweep = true;
+    int nGood = 0;
+    for (size_t ii = 0; ii < fieldPaths.size(); ii++) {
+      if (_readField(fieldPaths[ii], fieldNames[ii]) == 0) {
+        nGood++;
+        _newSweep = false;
+      }
+    }
+    
+    if (nGood == 0) {
+      continue;
+      // _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+      // _addErrStr("  No good fields found, sweepPath: ", sweepPath);
+      // return -1;
+    }
+    
+    // compute fixed angles as mean angle from sweeps
+    
+    if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+      if (_Azimuth_attr < -999) {
+        _computeFixedAngles();
+      }
+    } else {
+      if (_Elevation_attr < -999) {
+        _computeFixedAngles();
+      }
+    }
+    
+  } // isweep
+  
   // check we have at least 1 ray
-
+  
   if (_rays.size() < 1) {
     _addErrStr("  No rays found");
     return -1;
   }
-  
+
   // load the data into the read volume
 
   if (_loadReadVolume()) {
     return -1;
   }
   
-  // compute fixed angles as mean angle from sweeps
-  
-  if (_sweepMode == Radx::SWEEP_MODE_RHI) {
-    if (_Azimuth_attr < -999) {
-      _computeFixedAngles();
-    }
-  } else {
-    if (_Elevation_attr < -999) {
-      _computeFixedAngles();
-    }
-  }
-
   // set format as read
 
   _fileFormat = FILE_FORMAT_RAXPOL_NC;
@@ -547,7 +519,7 @@ int RaxpolNcRadxFile::readFromPath(const string &path,
   // clean up
 
   _clearRayVariables();
-  _dTimes.clear();
+  _dTimesSweep.clear();
 
   return 0;
 
@@ -634,7 +606,7 @@ int RaxpolNcRadxFile::_readField(const string &path,
   
   // set position variables - lat/lon/alt
   
-  if (_newSweep) {
+  if (_newVol) {
     _setPositionVariables();
   }
 
@@ -718,13 +690,13 @@ int RaxpolNcRadxFile::_readDimensions()
   // check with previous fields
   
   if (_newSweep) {
-    _nTimes = _timeDim->size();
+    _nTimesSweep = _timeDim->size();
     _nGates = _gateDim->size();
   } else {
-    if ((int) _nTimes != _timeDim->size()) {
+    if ((int) _nTimesSweep != _timeDim->size()) {
       _addErrStr("ERROR - RaxpolNcRadxFile::_file.readDimensions");
       _addErrInt("  Bad nTimes: ", _timeDim->size());
-      _addErrInt("  should be: ", _nTimes);
+      _addErrInt("  should be: ", _nTimesSweep);
       iret = -1;
     }
     if ((int) _nGates != _gateDim->size()) {
@@ -880,13 +852,13 @@ void RaxpolNcRadxFile::_setTimes()
     cerr << "====>> RaxpolNcRadxFile::_setTimes()" << endl;
   }
 
-  _dTimes.resize(_nTimes);
+  _dTimesSweep.resize(_nTimesSweep);
   _refTimeSecsFile = (time_t) _Time_attr;
-  if (_nTimes > 0) {
+  if (_nTimesSweep > 0) {
     double startTime = _Time_attr + _FractionalTime_attr;
-    for (size_t ii = 0; ii < _nTimes; ii++) {
+    for (size_t ii = 0; ii < _nTimesSweep; ii++) {
       double deltaTime = ii / 180.0;
-      _dTimes[ii] = startTime + deltaTime;
+      _dTimesSweep[ii] = startTime + deltaTime;
     }
   }
   
@@ -995,7 +967,7 @@ int RaxpolNcRadxFile::_createRays(const string &path)
   
   _rays.clear();
 
-  for (size_t iray = 0; iray < _nTimes; iray++) {
+  for (size_t iray = 0; iray < _nTimesSweep; iray++) {
     
     // new ray
     
@@ -1003,7 +975,7 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     
     // set time
     
-    double dusecs = _dTimes[iray];
+    double dusecs = _dTimesSweep[iray];
     time_t usecs = (time_t) dusecs;
     double subsecs = dusecs - usecs;
     int nanoSecs = (int) (subsecs * 1.0e9);
@@ -1233,7 +1205,7 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
   var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -1246,16 +1218,16 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
 
   // load up data
 
-  double *data = new double[_nTimes];
+  double *data = new double[_nTimesSweep];
   double *dd = data;
   int iret = 0;
-  if (var->get(data, _nTimes)) {
-    for (size_t ii = 0; ii < _nTimes; ii++, dd++) {
+  if (var->get(data, _nTimesSweep)) {
+    for (size_t ii = 0; ii < _nTimesSweep; ii++, dd++) {
       vals.push_back(*dd);
     }
   } else {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaDouble);
       }
       clearErrStr();
@@ -1286,7 +1258,7 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
   var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaFloat);
       }
       clearErrStr();
@@ -1299,16 +1271,16 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
 
   // load up data
 
-  float *data = new float[_nTimes];
+  float *data = new float[_nTimesSweep];
   float *dd = data;
   int iret = 0;
-  if (var->get(data, _nTimes)) {
-    for (size_t ii = 0; ii < _nTimes; ii++, dd++) {
+  if (var->get(data, _nTimesSweep)) {
+    for (size_t ii = 0; ii < _nTimesSweep; ii++, dd++) {
       vals.push_back(*dd);
     }
   } else {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaFloat);
       }
       clearErrStr();
@@ -1339,7 +1311,7 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
   var = _getRayVar(name, required);
   if (var == NULL) {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
@@ -1352,16 +1324,16 @@ int RaxpolNcRadxFile::_readRayVar(Nc3Var* &var, const string &name,
 
   // load up data
 
-  int *data = new int[_nTimes];
+  int *data = new int[_nTimesSweep];
   int *dd = data;
   int iret = 0;
-  if (var->get(data, _nTimes)) {
-    for (size_t ii = 0; ii < _nTimes; ii++, dd++) {
+  if (var->get(data, _nTimesSweep)) {
+    for (size_t ii = 0; ii < _nTimesSweep; ii++, dd++) {
       vals.push_back(*dd);
     }
   } else {
     if (!required) {
-      for (size_t ii = 0; ii < _nTimes; ii++) {
+      for (size_t ii = 0; ii < _nTimesSweep; ii++) {
         vals.push_back(Radx::missingMetaInt);
       }
       clearErrStr();
@@ -1442,12 +1414,12 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
   // allocate arrays
 
   RadxArray<Radx::fl64> data_, rayData_;
-  Radx::fl64 *data = data_.alloc(_nTimes * _nGates);
+  Radx::fl64 *data = data_.alloc(_nTimesSweep * _nGates);
   Radx::fl64 *rayData = rayData_.alloc(_nGates);
 
   // get data from array
 
-  int iret = !var->get(data, _nTimes, _nGates);
+  int iret = !var->get(data, _nTimesSweep, _nGates);
   if (iret) {
     return -1;
   }
@@ -1466,7 +1438,7 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
   string _units = units;
   if (_units == "Radians" || _units == "radians") {
     _units = "deg";
-    size_t nVals = _nTimes * _nGates;
+    size_t nVals = _nTimesSweep * _nGates;
     for (size_t ii = 0; ii < nVals; ii++) {
       if (data[ii] != missingVal) {
         data[ii] = Radx::toDegrees(data[ii]);
@@ -1526,12 +1498,12 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
   // allocate arrays
 
   RadxArray<Radx::fl32> data_, rayData_;
-  Radx::fl32 *data = data_.alloc(_nTimes * _nGates);
+  Radx::fl32 *data = data_.alloc(_nTimesSweep * _nGates);
   Radx::fl32 *rayData = rayData_.alloc(_nGates);
 
   // get data from array
   
-  int iret = !var->get(data, _nTimes, _nGates);
+  int iret = !var->get(data, _nTimesSweep, _nGates);
   if (iret) {
     return -1;
   }
@@ -1550,7 +1522,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
   string _units = units;
   if (_units == "Radians" || _units == "radians") {
     _units = "deg";
-    size_t nVals = _nTimes * _nGates;
+    size_t nVals = _nTimesSweep * _nGates;
     for (size_t ii = 0; ii < nVals; ii++) {
       if (data[ii] != missingVal) {
         data[ii] = Radx::toDegrees(data[ii]);
@@ -1610,12 +1582,12 @@ int RaxpolNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
   // allocate arrays
 
   RadxArray<Radx::si32> data_, rayData_;
-  Radx::si32 *data = data_.alloc(_nTimes * _nGates);
+  Radx::si32 *data = data_.alloc(_nTimesSweep * _nGates);
   Radx::si32 *rayData = rayData_.alloc(_nGates);
 
   // get data from array
 
-  int iret = !var->get(data, _nTimes * _nGates);
+  int iret = !var->get(data, _nTimesSweep * _nGates);
   if (iret) {
     return -1;
   }
@@ -1697,12 +1669,12 @@ int RaxpolNcRadxFile::_addSi16FieldToRays(Nc3Var* var,
   // allocate arrays
 
   RadxArray<Radx::si16> data_, rayData_;
-  Radx::si16 *data = data_.alloc(_nTimes * _nGates);
+  Radx::si16 *data = data_.alloc(_nTimesSweep * _nGates);
   Radx::si16 *rayData = rayData_.alloc(_nGates);
 
   // get data from array
 
-  int iret = !var->get(data, _nTimes, _nGates);
+  int iret = !var->get(data, _nTimesSweep, _nGates);
   if (iret) {
     return -1;
   }
@@ -1774,7 +1746,7 @@ int RaxpolNcRadxFile::_loadReadVolume()
 
   // set metadata
 
-  _readVol->setOrigFormat("DOE");
+  _readVol->setOrigFormat("RAXPOL");
   _readVol->setVolumeNumber(_volumeNumber);
   _readVol->setInstrumentType(_instrumentType);
   _readVol->setPlatformType(_platformType);
@@ -1909,6 +1881,122 @@ void RaxpolNcRadxFile::_computeFixedAngles()
 
 }
 
+////////////////////////////////////////////////
+// get the date and time from a dorade file path
+// returns 0 on success, -1 on failure
+
+int RaxpolNcRadxFile::getTimeFromPath(const string &path, RadxTime &rtime)
+
+{
+
+  RadxPath rpath(path);
+  const string &fileName = rpath.getFile();
+  
+  // find first digit in entry name - if no digits, return now
+
+  const char *start = NULL;
+  for (size_t ii = 0; ii < fileName.size(); ii++) {
+    if (isdigit(fileName[ii])) {
+      start = fileName.c_str() + ii;
+      break;
+    }
+  }
+  if (!start) return -1;
+  const char *end = start + strlen(start);
+  
+  // iteratively try getting the date and time from the string
+  // moving along by one character at a time
+  
+  while (start < end - 6) {
+    int year, month, day, hour, min, sec;
+    char cc;
+    if (sscanf(start, "%4d%2d%2d%1c%2d%2d%2d",
+               &year, &month, &day, &cc, &hour, &min, &sec) == 7) {
+      if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+        return -1;
+      }
+      if (hour < 0 || hour > 23 || min < 0 || min > 59 || sec < 0 || sec > 59) {
+        return -1;
+      }
+      rtime.set(year, month, day, hour, min, sec);
+      return 0;
+    }
+    start++;
+  }
+  
+  return -1;
+  
+}
+
+/////////////////////////////////////////////////////////////////
+// get list of all paths in same directory as primary path
+
+int RaxpolNcRadxFile::_getAllPathsInDir(const string &primaryPath)
+  
+{
+
+  // init
+  
+  _allPathsInDir.clear();
+  RadxPath rpath(primaryPath);
+  const string &dir = rpath.getDirectory();
+
+  // load up array of file names that match the field
+  
+  RadxReadDir rdir;
+  if (rdir.open(dir.c_str()) == 0) {
+    
+    // Loop thru directory looking for the data file names
+    // or forecast directories
+    
+    struct dirent *dp;
+    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
+      string dName(dp->d_name);
+      // exclude dir entries beginning with '.'
+      if (dName[0] == '.') {
+	continue;
+      }
+      // make sure we have RAXPOL files
+      if (dName.find("RAXPOL") == string::npos) {
+	continue;
+      }
+      // make sure we have .nc files
+      if (dName.find(".nc") == string::npos) {
+	continue;
+      }
+      // is this a valid file?
+      string fieldName = _getFieldName(dName);
+      if (fieldName.size() == 0) {
+        continue;
+      }
+
+      // add to list
+      string dPath(dir);
+      dPath += RadxPath::RADX_PATH_DELIM;
+      dPath += dName;
+      _allPathsInDir.push_back(dPath);
+
+    } // dp
+    
+    rdir.close();
+    
+  } // if (rdir ...
+
+  if (_allPathsInDir.size() < 1) {
+    _addErrStr("ERROR - RaxpolNcRadxFile::_getAllPaths");
+    _addErrStr("  primaryPath: ", primaryPath);
+    _addErrStr("  No files found in dir: ", dir);
+    return -1;
+  }
+
+  // sort the paths
+  
+  sort(_allPathsInDir.begin(), _allPathsInDir.end());
+  
+  return 0;
+  
+}
+
 /////////////////////////////////////////////////////////////////
 // get list of vol paths for files containing this field
 
@@ -1916,7 +2004,9 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
                                    vector<string> &volPaths)
   
 {
-  
+
+  cerr << "11111111111111111111 primaryPath: " << primaryPath << endl;
+
   // init
   
   volPaths.clear();
@@ -1926,9 +2016,8 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
   // e.g. RAXPOL-20220129-171655-E2.0-Z.nc
   // or   RAXPOL-20220129-172114-A220.0-V.nc
 
-  RadxPath rpath(primaryPath);
-  const string &dir = rpath.getDirectory();
-  const string &primaryFileName = rpath.getFile();
+  RadxPath pPath(primaryPath);
+  const string &primaryFileName = pPath.getFile();
   string primaryFieldName = _getFieldName(primaryFileName);
 
   if (primaryFieldName.size() == 0) {
@@ -1958,81 +2047,66 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
     return -1;
   }
 
-  // load up array of file names that match the field
-  
-  RadxReadDir rdir;
-  if (rdir.open(dir.c_str()) == 0) {
+  cerr << "22222222 primaryFieldName: " << primaryFieldName << endl;
+  cerr << "22222222 primaryFixedAngle: " << primaryFixedAngle << endl;
+  cerr << "22222222 primaryIsRhi: " << primaryIsRhi << endl;
+  cerr << "22222222 primaryTime: " << primaryTime.asString(3) << endl;
+
+  // loop through the paths in this dir
+
+  for (size_t ipath = 0; ipath < _allPathsInDir.size(); ipath++) {
     
-    // Loop thru directory looking for the data file names
-    // or forecast directories
+    string path = _allPathsInDir[ipath];
+    RadxPath pPath(path);
+    const string &fileName = pPath.getFile();
     
-    struct dirent *dp;
-    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-      
-      string dName(dp->d_name);
-      
-      // exclude dir entries beginning with '.'
-      
-      if (dName[0] == '.') {
-	continue;
-      }
-      
-      // make sure we have RAXPOL files
-      
-      if (dName.find("RAXPOL") == string::npos) {
-	continue;
-      }
-
-      // make sure we have .nc files
-      
-      if (dName.find(".nc") == string::npos) {
-	continue;
-      }
-
-      RadxTime thisTime;
-      if (getTimeFromPath(dName, thisTime)) {
-        continue;
-      }
-      if (thisTime < primaryTime) {
-        // ignore files before the primary time
-        continue;
-      }
-
-      bool isRhi;
-      double fixedAngle;
-      if (_getFixedAngle(dName, fixedAngle, isRhi)) {
-        continue;
-      }
-      if (isRhi != primaryIsRhi) {
-        // ignore other scan modes
-        continue;
-      }
-      // break if the fixed angle decreases below the primary
-      if (fixedAngle < primaryFixedAngle) {
-        // end of volume, fixed angle decreased
-        break;
-      }
-      
-      // add vol paths
-
-      string fieldName = _getFieldName(dName);
-      if (fieldName == primaryFieldName) {
-        string dPath(dir);
-        dPath += RadxPath::RADX_PATH_DELIM;
-        dPath += dName;
-        volPaths.push_back(dPath);
-      }
-
-    } // dp
+    RadxTime thisTime;
+    if (getTimeFromPath(fileName, thisTime)) {
+      continue;
+    }
+    // cerr << "33333333 thisTime: " << thisTime.asString(3) << endl;
+    if (thisTime < primaryTime) {
+      // ignore files before the primary time
+      continue;
+    }
     
-    rdir.close();
+    bool isRhi;
+    double fixedAngle;
+    if (_getFixedAngle(fileName, fixedAngle, isRhi)) {
+      continue;
+    }
+    // cerr << "33333333 fixedAngle: " << fixedAngle << endl;
+    // cerr << "33333333 isRhi: " << isRhi << endl;
+    if (isRhi != primaryIsRhi) {
+      // ignore other scan modes
+      continue;
+    }
     
-  } // if (rdir ...
+    string fieldName = _getFieldName(fileName);
+    // cerr << "33333333 fieldName: " << fieldName << endl;
+    
+    // add vol paths
+    
+    if (fieldName != primaryFieldName) {
+      continue;
+    }
+    
+    // break if the fixed angle decreases below the primary
+    if (fixedAngle <= primaryFixedAngle && volPaths.size() > 0) {
+      // end of volume, fixed angle decreased
+      cerr << "99999999999999999 fixedAngle: " << fixedAngle << endl;
+      break;
+    }
+    
+    cerr << "44444444444444444444444444444 path: " << path << endl;
+    volPaths.push_back(path);
 
-  // sort the paths
+  } // ipath
 
-  sort(volPaths.begin(), volPaths.end());
-
+  for (size_t jj = 0; jj < volPaths.size(); jj++) {
+    cerr << "555555555555555 volPath: " << volPaths[jj] << endl;
+  }
+    
   return 0;
   
 }
@@ -2042,7 +2116,7 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
 
 int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
                                      vector<string> &fileNames,
-                                     vector<string> &filePaths,
+                                     vector<string> &fieldPaths,
                                      vector<string> &fieldNames)
   
 {
@@ -2050,7 +2124,7 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
   // init
 
   fileNames.clear();
-  filePaths.clear();
+  fieldPaths.clear();
   fieldNames.clear();
 
   // decompose the path to get the date/time prefix for the primary path
@@ -2058,9 +2132,8 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
   // e.g. RAXPOL-20220129-171655-E2.0-Z.nc
   // or   RAXPOL-20220129-172114-A220.0-V.nc
 
-  RadxPath rpath(primaryPath);
-  const string &dir = rpath.getDirectory();
-  const string &fileName = rpath.getFile();
+  RadxPath pPath(primaryPath);
+  const string &fileName = pPath.getFile();
   
   vector<string> primaryToks;
   RadxStr::tokenize(fileName, "-", primaryToks);
@@ -2070,78 +2143,31 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
     return -1;
   }
 
-  // load up array of file names that match the prefix
+  // loop through the paths in this dir
   
-  RadxReadDir rdir;
-  if (rdir.open(dir.c_str()) == 0) {
+  for (size_t ipath = 0; ipath < _allPathsInDir.size(); ipath++) {
     
-    // Loop thru directory looking for the data file names
-    // or forecast directories
+    string path = _allPathsInDir[ipath];
+    RadxPath pPath(path);
+    const string &fileName = pPath.getFile();
     
-    struct dirent *dp;
-    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-      
-      string dName(dp->d_name);
-      
-      // exclude dir entries beginning with '.'
-      
-      if (dName[0] == '.') {
-	continue;
-      }
-
-      // make sure we have RAXPOL files
-      
-      if (dName.find("RAXPOL") == string::npos) {
-	continue;
-      }
-
-      // make sure we have .nc files
-      
-      if (dName.find(".nc") == string::npos) {
-	continue;
-      }
-
-      // tokenize the file name
-
-      vector<string> toks;
-      RadxStr::tokenize(dName, "-", toks);
-      if (toks.size() < 5) {
-        continue;
-      }
-      
-      if (primaryToks[1] == toks[1] &&
-          primaryToks[2] == toks[2]) {
-
-        // date matches
-        
-        fileNames.push_back(dName);
-
-      } // if (dStr ...
-      
-    } // dp
+    // tokenize the file name
     
-    rdir.close();
-
-  } // if (rdir ...
-
-  // sort the file names
-
-  sort(fileNames.begin(), fileNames.end());
-
-  // load up the paths and field names
-
-  for (size_t ii = 0; ii < fileNames.size(); ii++) {
-
-    const string &fileName = fileNames[ii];
-
-    string dPath(dir);
-    dPath += RadxPath::RADX_PATH_DELIM;
-    dPath += fileName;
-    filePaths.push_back(dPath);
-
-    fieldNames.push_back(_getFieldName(fileName));
+    vector<string> toks;
+    RadxStr::tokenize(fileName, "-", toks);
+    if (toks.size() < 5) {
+      continue;
+    }
     
-  } // ii
+    if (primaryToks[1] == toks[1] &&
+        primaryToks[2] == toks[2]) {
+      // date matches
+      fileNames.push_back(fileName);
+      fieldPaths.push_back(path);
+      fieldNames.push_back(_getFieldName(fileName));
+    }
+    
+  } // ipath
 
   return 0;
   
