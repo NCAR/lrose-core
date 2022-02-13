@@ -318,19 +318,22 @@ private:
 
   // rays to be added to volume
 
-  vector<RadxRay *> _rays;
+  vector<RadxRay *> _sweepRays;
+  vector<RadxRay *> _volRays;
 
   // methods
 
   int _readDimensions();
-  int _readField(const string &path, const string &fieldNameFromFile);
+  int _readSweepField(const string &path,
+                      size_t sweepNum,
+                      const string &fieldNameFromFile);
   int _readGlobalAttributes();
   void _setTimes();
   void _setRangeGeometry();
   void _setPositionVariables();
   void _clearRayVariables();
   int _readRayVariables();
-  int _createRays(const string &path);
+  int _createSweepRays(const string &path, size_t sweepNum);
   int _readFieldVariables(bool metaOnly,
                           string shortName,
                           string standardName,
@@ -374,8 +377,8 @@ private:
 
   int _getAllPathsInDir(const string &primaryPath);
   
-  int _getVolPaths(const string &primaryPath,
-                   vector<string> &volPaths);
+  int _getSweepPrimaryPaths(const string &primaryPath,
+                            vector<string> &sweepPaths);
 
   int _getFieldPaths(const string &primaryPath,
                      vector<string> &fileNames,

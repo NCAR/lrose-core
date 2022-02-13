@@ -426,12 +426,12 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
   
   // clear tmp rays
   
-  _rays.clear();
+  _volRays.clear();
 
   // get list of all paths in same dir as primaryPath
 
   if (_getAllPathsInDir(primaryPath)) {
-    _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
+    _addErrStr("ERROR - RaxpolNcRyadxFile::readFromPath");
     _addErrStr("  No valid files found in dir, primaryPath: ", primaryPath);
     return -1;
   }
@@ -439,7 +439,7 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
   // get the list of files, with this field, in the volume
   
   vector<string> sweepPaths;
-  _getVolPaths(primaryPath, sweepPaths);
+  _getSweepPrimaryPaths(primaryPath, sweepPaths);
   if (sweepPaths.size() < 1) {
     _addErrStr("ERROR - RaxpolNcRadxFile::readFromPath");
     _addErrStr("  No vol files found, primaryPath: ", primaryPath);
@@ -452,9 +452,6 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
   for (size_t isweep = 0; isweep < sweepPaths.size(); isweep++) {
     
     string sweepPath = sweepPaths[isweep];
-    
-    cerr << "8888888888888888888 isweep, sweepPath: " 
-         << isweep << ", " << sweepPath << endl;
     
     // get the list of all files, one field in each, that match this time
     
@@ -472,9 +469,10 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
     _newSweep = true;
     int nGood = 0;
     for (size_t ii = 0; ii < fieldPaths.size(); ii++) {
-      if (_readField(fieldPaths[ii], fieldNames[ii]) == 0) {
+      if (_readSweepField(fieldPaths[ii], isweep, fieldNames[ii]) == 0) {
         nGood++;
         _newSweep = false;
+        _newVol = false;
       }
     }
     
@@ -485,23 +483,18 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
       // return -1;
     }
     
-    // compute fixed angles as mean angle from sweeps
+    // add sweep rays to volume
     
-    if (_sweepMode == Radx::SWEEP_MODE_RHI) {
-      if (_Azimuth_attr < -999) {
-        _computeFixedAngles();
-      }
-    } else {
-      if (_Elevation_attr < -999) {
-        _computeFixedAngles();
-      }
+    for (size_t iray = 0; iray < _sweepRays.size(); iray++) {
+      _volRays.push_back(_sweepRays[iray]);
     }
-    
+    _sweepRays.clear();
+
   } // isweep
   
   // check we have at least 1 ray
   
-  if (_rays.size() < 1) {
+  if (_volRays.size() < 1) {
     _addErrStr("  No rays found");
     return -1;
   }
@@ -525,18 +518,20 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
 
 }
 
-////////////////////////////////////////////////////////////
-// Read in field related to specified path
+/////////////////////////////////////////////////////////////////
+// Read in field, related to specified path, for specified sweep
 //
 // Returns 0 on success, -1 on failure
 
-int RaxpolNcRadxFile::_readField(const string &path,
-                                 const string &fieldNameFromFile)
+int RaxpolNcRadxFile::_readSweepField(const string &path,
+                                      size_t sweepNum,
+                                      const string &fieldNameFromFile)
     
 {
 
   if (_debug) {
-    cerr << "Reading field from path: " << path << endl;
+    cerr << "Reading sweep field from primary path: " << path << endl;
+    cerr << "   sweepNum: " << sweepNum << endl;
     cerr << "   Field name from file: " << fieldNameFromFile << endl;
   }
 
@@ -635,7 +630,7 @@ int RaxpolNcRadxFile::_readField(const string &path,
     // create the rays to be read in, filling out the metadata
     
     if (_newSweep) {
-      if (_createRays(path)) {
+      if (_createSweepRays(path, sweepNum)) {
         return -1;
       }
     }
@@ -790,53 +785,59 @@ int RaxpolNcRadxFile::_readGlobalAttributes()
   _file.readGlobAttr("SNRThreshold-dB", _SNRThreshold_dB_attr);
   _file.readGlobAttr("SQIThreshold-dB", _SQIThreshold_dB_attr);
 
-  // set the status XML from the attributes
-  
-  _statusXml.clear();
-  _statusXml += RadxXml::writeStartTag("STATUS", 0);
-  for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
-    Nc3Att *att = _file.getNc3File()->get_att(ii);
-    if (att != NULL) {
-      const char* strc = att->as_string(0);
-      string val(strc);
-      delete[] strc;
-      string name(att->name());
-      delete att;
-      _statusXml += RadxXml::writeString(name, 1, val);
+  if (_newVol) {
+
+    // set the status XML from the attributes
+
+    _statusXml.clear();
+    _statusXml += RadxXml::writeStartTag("STATUS", 0);
+    for (int ii = 0; ii < _file.getNc3File()->num_atts(); ii++) {
+      Nc3Att *att = _file.getNc3File()->get_att(ii);
+      if (att != NULL) {
+        const char* strc = att->as_string(0);
+        string val(strc);
+        delete[] strc;
+        string name(att->name());
+        delete att;
+        _statusXml += RadxXml::writeString(name, 1, val);
+      }
     }
-  }
-  _statusXml += RadxXml::writeEndTag("STATUS", 0);
-
-  _title = "RAXPOL radar data";
-  _institution = _ContactInformation_attr;
-  _references = _attributes_attr;
-  _source = _CreatedBy_attr;
-  _history = _NCProperties_attr;
-  _comment = "";
+    _statusXml += RadxXml::writeEndTag("STATUS", 0);
+    
+    _title = "RAXPOL radar data";
+    _institution = _ContactInformation_attr;
+    _references = _attributes_attr;
+    _source = _CreatedBy_attr;
+    _history = _NCProperties_attr;
+    _comment = "";
   
-  if (_ScanType_attr.find("RHI") != string::npos) {
-    _sweepMode = Radx::SWEEP_MODE_RHI;
-  } else if (_ScanType_attr.find("PPI") != string::npos) {
-    // _sweepMode = Radx::SWEEP_MODE_SECTOR;
-    _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-  } else {
-    _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-  }
+    _instrumentName = _radarName_value_attr;
+    _siteName = "unknown";
+    _scanName = _ScanType_attr;
+    
+    double wavelengthM = _Wavelength_value_attr;
+    _frequencyHz = Radx::LIGHT_SPEED / wavelengthM;
+    
+    _prfHz = _PRF_value_attr;
+    _prtSec = 1.0 / _prfHz;
+    _nyquistMps = _Nyquist_Vel_value_attr;
+    
+    _pulseWidthUsec = _PulseWidth_value_attr;
+    _nSamples = Radx::missingMetaInt;
 
-  _instrumentName = _radarName_value_attr;
-  _siteName = "unknown";
-  _scanName = _ScanType_attr;
+  } // if (_newVol)
 
-  double wavelengthM = _Wavelength_value_attr;
-  _frequencyHz = Radx::LIGHT_SPEED / wavelengthM;
-  
-  _prfHz = _PRF_value_attr;
-  _prtSec = 1.0 / _prfHz;
-  _nyquistMps = _Nyquist_Vel_value_attr;
+  if (_newSweep) {
+    if (_ScanType_attr.find("RHI") != string::npos) {
+      _sweepMode = Radx::SWEEP_MODE_RHI;
+    } else if (_ScanType_attr.find("PPI") != string::npos) {
+      // _sweepMode = Radx::SWEEP_MODE_SECTOR;
+      _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+    } else {
+      _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+    }
+  } // if (_newSweep)
 
-  _pulseWidthUsec = _PulseWidth_value_attr;
-  _nSamples = Radx::missingMetaInt;
-  
   return 0;
 
 }
@@ -951,21 +952,21 @@ int RaxpolNcRadxFile::_readRayVariables()
 
 }
 
-///////////////////////////////////
-// create the rays to be read in
+///////////////////////////////////////////////////////
+// create the rays to be read in for specified sweep
 // and set meta data
 
-int RaxpolNcRadxFile::_createRays(const string &path)
+int RaxpolNcRadxFile::_createSweepRays(const string &path, size_t sweepNum)
 
 {
 
   if (_verbose) {
-    cerr << "====>> RaxpolNcRadxFile::_createRays()" << endl;
+    cerr << "====>> RaxpolNcRadxFile::_createSweepRays()" << endl;
   }
 
   // create the rays
   
-  _rays.clear();
+  _sweepRays.clear();
 
   for (size_t iray = 0; iray < _nTimesSweep; iray++) {
     
@@ -983,7 +984,7 @@ int RaxpolNcRadxFile::_createRays(const string &path)
 
     // sweep info
     
-    ray->setSweepNumber(0);
+    ray->setSweepNumber(sweepNum);
     ray->setAzimuthDeg(_azimuths[iray]);
     ray->setElevationDeg(_elevations[iray]);
     ray->setSweepMode(_sweepMode);
@@ -1007,7 +1008,7 @@ int RaxpolNcRadxFile::_createRays(const string &path)
     
     // add to ray vector
 
-    _rays.push_back(ray);
+    _sweepRays.push_back(ray);
 
   } // ii
 
@@ -1059,7 +1060,8 @@ int RaxpolNcRadxFile::_readFieldVariables(bool metaOnly,
       if (_verbose) {
         cerr << "DEBUG - RaxpolNcRadxFile::_readFieldVariables" << endl;
         cerr << "  -->> rejecting field: " << fieldName << endl;
-        cerr << "  -->> Should be short, int, float or double: " << fieldName << endl;
+        cerr << "  -->> Should be short, int, float or double: "
+             << fieldName << endl;
       }
       continue;
     }
@@ -1396,7 +1398,7 @@ Nc3Var* RaxpolNcRadxFile::_getRayVar(const string &name, bool required)
 }
 
 //////////////////////////////////////////////////////////////
-// Add fl64 fields to _rays
+// Add fl64 fields to _sweepRays
 // Returns 0 on success, -1 on failure
 
 int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
@@ -1448,7 +1450,7 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
 
   // load field on rays
   
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
+  for (size_t iray = 0; iray < _sweepRays.size(); iray++) {
     
     int index = iray * _nGates;
     for (size_t igate = 0; igate < _nGates; igate++, index++) {
@@ -1456,7 +1458,7 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
     }
     
     RadxField *field =
-      _rays[iray]->addField(name, units, _nGates,
+      _sweepRays[iray]->addField(name, units, _nGates,
                             missingVal,
                             rayData,
                             true);
@@ -1480,7 +1482,7 @@ int RaxpolNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
 }
 
 //////////////////////////////////////////////////////////////
-// Add fl32 fields to _rays
+// Add fl32 fields to _sweepRays
 // Returns 0 on success, -1 on failure
 
 int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
@@ -1532,7 +1534,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
 
   // load field on rays
 
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
+  for (size_t iray = 0; iray < _sweepRays.size(); iray++) {
     
     int index = iray * _nGates;
     for (size_t igate = 0; igate < _nGates; igate++, index++) {
@@ -1540,7 +1542,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
     }
     
     RadxField *field =
-      _rays[iray]->addField(name, _units, _nGates,
+      _sweepRays[iray]->addField(name, _units, _nGates,
                             missingVal,
                             rayData,
                             true);
@@ -1564,7 +1566,7 @@ int RaxpolNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
 }
 
 //////////////////////////////////////////////////////////////
-// Add si32 fields to _rays
+// Add si32 fields to _sweepRays
 // Returns 0 on success, -1 on failure
 
 int RaxpolNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
@@ -1617,7 +1619,7 @@ int RaxpolNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
   
   // load field on rays
 
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
+  for (size_t iray = 0; iray < _sweepRays.size(); iray++) {
     
     int index = iray * _nGates;
     for (size_t igate = 0; igate < _nGates; igate++, index++) {
@@ -1625,7 +1627,7 @@ int RaxpolNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
     }
 
     RadxField *field =
-      _rays[iray]->addField(name, units, _nGates,
+      _sweepRays[iray]->addField(name, units, _nGates,
                             missingVal,
                             rayData,
                             scaleFactor,
@@ -1651,7 +1653,7 @@ int RaxpolNcRadxFile::_addSi32FieldToRays(Nc3Var* var,
 }
 
 //////////////////////////////////////////////////////////////
-// Add si16 fields to _rays
+// Add si16 fields to _sweepRays
 // Returns 0 on success, -1 on failure
 
 int RaxpolNcRadxFile::_addSi16FieldToRays(Nc3Var* var,
@@ -1704,7 +1706,7 @@ int RaxpolNcRadxFile::_addSi16FieldToRays(Nc3Var* var,
   
   // load field on rays
 
-  for (size_t iray = 0; iray < _rays.size(); iray++) {
+  for (size_t iray = 0; iray < _sweepRays.size(); iray++) {
     
     int index = iray * _nGates;
     for (size_t igate = 0; igate < _nGates; igate++, index++) {
@@ -1712,7 +1714,7 @@ int RaxpolNcRadxFile::_addSi16FieldToRays(Nc3Var* var,
     }
 
     RadxField *field =
-      _rays[iray]->addField(name, units, _nGates,
+      _sweepRays[iray]->addField(name, units, _nGates,
                             missingVal,
                             rayData,
                             scaleFactor,
@@ -1779,14 +1781,26 @@ int RaxpolNcRadxFile::_loadReadVolume()
 
   _readVol->copyRangeGeom(_geom);
 
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    _rays[ii]->setVolumeNumber(_volumeNumber);
+  for (int ii = 0; ii < (int) _volRays.size(); ii++) {
+    _volRays[ii]->setVolumeNumber(_volumeNumber);
   }
 
+  // compute fixed angles as mean angle from sweeps
+  
+  if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+    if (_Azimuth_attr < -999) {
+      _computeFixedAngles();
+    }
+  } else {
+    if (_Elevation_attr < -999) {
+      _computeFixedAngles();
+    }
+  }
+  
   // add rays to vol - they will be freed by vol
 
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
-    _readVol->addRay(_rays[ii]);
+  for (size_t ii = 0; ii < _volRays.size(); ii++) {
+    _readVol->addRay(_volRays[ii]);
   }
 
   if (_readSetMaxRange) {
@@ -1796,7 +1810,7 @@ int RaxpolNcRadxFile::_loadReadVolume()
   // memory responsibility has passed to the volume object, so clear
   // the vectors without deleting the objects to which they point
 
-  _rays.clear();
+  _volRays.clear();
   
   // load the sweep information from the rays
 
@@ -1998,18 +2012,21 @@ int RaxpolNcRadxFile::_getAllPathsInDir(const string &primaryPath)
 }
 
 /////////////////////////////////////////////////////////////////
-// get list of vol paths for files containing this field
+// get list of sweep paths for this volume, for files containing
+// the field in the primary path
 
-int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
-                                   vector<string> &volPaths)
+int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
+                                            vector<string> &sweepPaths)
   
 {
 
-  cerr << "11111111111111111111 primaryPath: " << primaryPath << endl;
+  if (_debug) {
+    cerr << "==>> getting sweep paths for primary: " << primaryPath << endl;
+  }
 
   // init
   
-  volPaths.clear();
+  sweepPaths.clear();
   
   // decompose the path to get the field name
   // tokenize the primary file name
@@ -2047,10 +2064,12 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
     return -1;
   }
 
-  cerr << "22222222 primaryFieldName: " << primaryFieldName << endl;
-  cerr << "22222222 primaryFixedAngle: " << primaryFixedAngle << endl;
-  cerr << "22222222 primaryIsRhi: " << primaryIsRhi << endl;
-  cerr << "22222222 primaryTime: " << primaryTime.asString(3) << endl;
+  if (_verbose) {
+    cerr << "========>> primaryFieldName: " << primaryFieldName << endl;
+    cerr << "========>> primaryFixedAngle: " << primaryFixedAngle << endl;
+    cerr << "========>> primaryIsRhi: " << primaryIsRhi << endl;
+    cerr << "========>> primaryTime: " << primaryTime.asString(3) << endl;
+  }
 
   // loop through the paths in this dir
 
@@ -2064,7 +2083,6 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
     if (getTimeFromPath(fileName, thisTime)) {
       continue;
     }
-    // cerr << "33333333 thisTime: " << thisTime.asString(3) << endl;
     if (thisTime < primaryTime) {
       // ignore files before the primary time
       continue;
@@ -2075,15 +2093,12 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
     if (_getFixedAngle(fileName, fixedAngle, isRhi)) {
       continue;
     }
-    // cerr << "33333333 fixedAngle: " << fixedAngle << endl;
-    // cerr << "33333333 isRhi: " << isRhi << endl;
     if (isRhi != primaryIsRhi) {
       // ignore other scan modes
       continue;
     }
     
     string fieldName = _getFieldName(fileName);
-    // cerr << "33333333 fieldName: " << fieldName << endl;
     
     // add vol paths
     
@@ -2092,19 +2107,18 @@ int RaxpolNcRadxFile::_getVolPaths(const string &primaryPath,
     }
     
     // break if the fixed angle decreases below the primary
-    if (fixedAngle <= primaryFixedAngle && volPaths.size() > 0) {
-      // end of volume, fixed angle decreased
-      cerr << "99999999999999999 fixedAngle: " << fixedAngle << endl;
+    if (fixedAngle <= primaryFixedAngle && sweepPaths.size() > 0) {
       break;
     }
     
-    cerr << "44444444444444444444444444444 path: " << path << endl;
-    volPaths.push_back(path);
+    sweepPaths.push_back(path);
 
   } // ipath
 
-  for (size_t jj = 0; jj < volPaths.size(); jj++) {
-    cerr << "555555555555555 volPath: " << volPaths[jj] << endl;
+  if (_debug) {
+    for (size_t jj = 0; jj < sweepPaths.size(); jj++) {
+      cerr << "======>> sweep primary path: " << sweepPaths[jj] << endl;
+    }
   }
     
   return 0;
@@ -2168,6 +2182,17 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
     }
     
   } // ipath
+
+  if (_debug) {
+    cerr << "======== Field paths for this sweep ======" << endl;
+    cerr << "======== primarPath: " << primaryPath << endl;
+    for (size_t ii = 0; ii < fieldPaths.size(); ii++) {
+      cerr << "  field, path: "
+           << fieldNames[ii] << ", "
+           << fieldPaths[ii] << endl;
+    }
+    cerr << "==========================================" << endl;
+  }
 
   return 0;
   
