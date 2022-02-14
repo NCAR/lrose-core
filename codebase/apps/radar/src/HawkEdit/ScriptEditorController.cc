@@ -732,6 +732,34 @@ void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFile
 }
 
 
+string ScriptEditorController::lowerIt(string s) {
+  string lowered = s;
+  for (int i=0; i<s.size(); i++) {
+    lowered[i] = std::tolower(s[i]);
+  }
+  return lowered;
+}
+// returns list of booleans: true if field is referenced in script
+//                     false otherwise.
+
+vector<bool> *ScriptEditorController::getListOfFieldsReferencedInScript(
+  vector<string> &fields, string script) {
+
+  // lower the script
+
+  string loweredScript = lowerIt(script);
+  cout << "lowered script: " << loweredScript << endl;
+
+  vector<bool> *referenced = new vector<bool>(fields.size(), false);
+  for (int i=0; i<fields.size(); i++) {
+    string loweredField = lowerIt(fields.at(i));
+    if (loweredScript.find(loweredField) != string::npos) {
+      referenced->at(i) = true;
+    }
+  }
+  return referenced;
+}
+
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
   vector<Point> &boundaryPoints)
 {
@@ -761,15 +789,24 @@ uncate(100);
     // set initial field names
     initialFieldNames = getFieldNames();
 
+    vector<bool> *referenced = 
+      getListOfFieldsReferencedInScript(*initialFieldNames, script.toStdString());
+
     // add initialFieldNames_v to currentVariableContext!
     //_addFieldNameVectorsToContext(initialFieldNames, &currentVariableContext);
     vector<string>::iterator nameItr;
+    int idx = 0;
     for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
-      QString vectorName(nameItr->c_str());
-      //vectorName.append("_v");  
-      //QString originalName(nameItr->c_str());
-      currentVariableContext[vectorName] = vectorName;
+      if (referenced->at(idx)) {
+        QString vectorName(nameItr->c_str());
+        //vectorName.append("_v");  
+        //QString originalName(nameItr->c_str());
+        currentVariableContext[vectorName] = vectorName;
+      }
+      idx += 1;
     }
+
+    delete referenced;
 
     LOG(DEBUG) << "Context completely set ...";
     printQJSEngineContext();
