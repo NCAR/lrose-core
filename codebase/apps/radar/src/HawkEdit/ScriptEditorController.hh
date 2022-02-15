@@ -88,6 +88,10 @@ private:
   void regularizeRays();
   //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
   //  std::map<QString, QString> *currentVariableContext);
+  vector<bool> *getListOfFieldsReferencedInScript(
+    vector<string> &fields, string script);
+  string lowerIt(string s);
+
 };
 
 
