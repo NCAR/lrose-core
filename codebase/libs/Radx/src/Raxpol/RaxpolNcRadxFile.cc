@@ -514,6 +514,12 @@ int RaxpolNcRadxFile::readFromPath(const string &primaryPath,
   _clearRayVariables();
   _dTimesSweep.clear();
 
+  // check for transition vol
+
+  if (!_readPreserveSweeps && _isTransitionVol(primaryPath)) {
+    return -1;
+  }
+
   return 0;
 
 }
@@ -529,10 +535,10 @@ int RaxpolNcRadxFile::_readSweepField(const string &path,
     
 {
 
-  if (_debug) {
-    cerr << "Reading sweep field from primary path: " << path << endl;
-    cerr << "   sweepNum: " << sweepNum << endl;
-    cerr << "   Field name from file: " << fieldNameFromFile << endl;
+  if (_verbose) {
+    cerr << "Reading sweep field for primary path: " << path << endl;
+    cerr << "   sweepNum, fileFieldName: " 
+         << sweepNum << ", " << fieldNameFromFile << endl;
   }
 
   // set standard name etc
@@ -1869,7 +1875,7 @@ void RaxpolNcRadxFile::_computeFixedAngles()
          iray <= sweep.getEndRayIndex(); iray++) {
       const RadxRay &ray = *_readVol->getRays()[iray];
       double angle = ray.getElevationDeg();
-      if (_sweepMode == Radx::SWEEP_MODE_RHI) {
+      if (sweep.getSweepMode() == Radx::SWEEP_MODE_RHI) {
         angle = ray.getAzimuthDeg();
       }
       double sinVal, cosVal;
@@ -2074,8 +2080,9 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
   // loop through the paths in this dir
 
   for (size_t ipath = 0; ipath < _allPathsInDir.size(); ipath++) {
-    
+
     string path = _allPathsInDir[ipath];
+    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxx path: " << path << endl;
     RadxPath pPath(path);
     const string &fileName = pPath.getFile();
     
@@ -2085,6 +2092,8 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     }
     if (thisTime < primaryTime) {
       // ignore files before the primary time
+      // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa time: "
+      //      << thisTime.asString(3) << endl;
       continue;
     }
     
@@ -2095,6 +2104,8 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     }
     if (isRhi != primaryIsRhi) {
       // ignore other scan modes
+      // cerr << "dddddddddddddddddddddddddddcccccc fixedAngle, isRhi: "
+      //      << fixedAngle << ", " << isRhi << endl;
       continue;
     }
     
@@ -2103,22 +2114,29 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     // add vol paths
     
     if (fieldName != primaryFieldName) {
+      // cerr << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee fieldName: " << fieldName << endl;
       continue;
     }
     
     // break if the fixed angle decreases below the primary
+    // cerr << "ffffffff fixedAngle: " << fixedAngle << endl;
+    // cerr << "ffffffff primaryFixedAngle: " << primaryFixedAngle << endl;
+    // cerr << "ffffffff sweepPaths.size(): " << sweepPaths.size() << endl;
     if (fixedAngle <= primaryFixedAngle && sweepPaths.size() > 0) {
+      // cerr << "fffffffffffffffffffffffffffff" << endl;
       break;
     }
     
     sweepPaths.push_back(path);
-
+    
   } // ipath
 
   if (_debug) {
+    cerr << "======>> sweep primary paths <<======" << endl;
     for (size_t jj = 0; jj < sweepPaths.size(); jj++) {
-      cerr << "======>> sweep primary path: " << sweepPaths[jj] << endl;
+      cerr << "  " << sweepPaths[jj] << endl;
     }
+    cerr << "=====================================" << endl;
   }
     
   return 0;
@@ -2185,7 +2203,7 @@ int RaxpolNcRadxFile::_getFieldPaths(const string &primaryPath,
 
   if (_debug) {
     cerr << "======== Field paths for this sweep ======" << endl;
-    cerr << "======== primarPath: " << primaryPath << endl;
+    cerr << "======== primaryPath: " << primaryPath << endl;
     for (size_t ii = 0; ii < fieldPaths.size(); ii++) {
       cerr << "  field, path: "
            << fieldNames[ii] << ", "
@@ -2259,6 +2277,63 @@ int RaxpolNcRadxFile::_getFixedAngle(const string &fileName,
   fixedAngle = angle;
 
   return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// check volume for validity
+// if a single sweep, ensure the fixed angles do not vary too much
+// if they vary a lot, it is probably a transition volume
+
+bool RaxpolNcRadxFile::_isTransitionVol(const string &primaryPath)
+{
+
+  if (_readVol->getNSweeps() > 1) {
+    // more than 1 sweep
+    return false;
+  }
+  
+  if (_readVol->getNSweeps() == 0) {
+    // no data
+    return false;
+  }
+  
+  RadxSweep &sweep = *_readVol->getSweeps()[0];
+  Radx::SweepMode_t sweepMode = sweep.getSweepMode();
+
+  // find the min and max pointing angle
+
+  double maxAngle = -9999;
+  double minAngle = 9999;
+  
+  for (size_t iray = sweep.getStartRayIndex();
+       iray <= sweep.getEndRayIndex(); iray++) {
+    const RadxRay &ray = *_readVol->getRays()[iray];
+    double angle = ray.getElevationDeg();
+    if (sweepMode == Radx::SWEEP_MODE_RHI) {
+      angle = ray.getAzimuthDeg();
+    }
+    maxAngle = max(maxAngle, angle);
+    minAngle = min(minAngle, angle);
+  } // iray
+
+  double angleRange = fabs(maxAngle - minAngle);
+  if (angleRange > 180.0) {
+    angleRange = fabs(angleRange - 360.0);
+  }
+  
+  if (angleRange > 5.0) {
+    // antenna is slewing, so in transition
+    _addErrStr("DEBUG - RaxpolNcRadxFile::_isTransitionVol");
+    _addErrStr("  Antenna is in transition: ");
+    _addErrStr("  Primary path: ", primaryPath);
+    _addErrDbl("  Min pointing angle: ", minAngle);
+    _addErrDbl("  Max pointing angle: ", maxAngle);
+    _addErrDbl("  Angle range: ", angleRange);
+    return true;
+  }
+
+  return false;
 
 }
 

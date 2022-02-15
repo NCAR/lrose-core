@@ -391,6 +391,8 @@ private:
                      double &fixedAngle,
                      bool &isRhi);
 
+  bool _isTransitionVol(const string &primaryPath);
+
 };
 
 #endif

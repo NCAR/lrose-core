@@ -490,7 +490,7 @@ int RadxConvert::_readFile(const string &readPath,
   // if not clear _readPaths
 
   if (_readPaths.find(readPath) != _readPaths.end()) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
+    if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "Skipping file: " << readPath << endl;
       cerr << "  Previously processed" << endl;
     }
