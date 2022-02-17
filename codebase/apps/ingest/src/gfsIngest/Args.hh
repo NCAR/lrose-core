@@ -90,7 +90,7 @@ class Args
 
   int _nFiles;
   bool _printSummary;
-  char **_fileList;;
+  char **_fileList;
   
  private:
   

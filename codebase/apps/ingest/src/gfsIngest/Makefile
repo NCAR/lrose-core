@@ -39,10 +39,11 @@ MODULE_TYPE = progcpp
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -lgrib -ltoolsa -ldataport \
-	-ltdrp -lrapmath $(NETCDF4_LIBS) -lbz2 \
-	-lz -lpthread -lm
+LOC_LIBS = -lgrib -lMdv -lRadx -lNcxx -ldsserver \
+	-ldidss -lrapformats -lphysics -leuclid \
+	-ltoolsa -ldataport -ltdrp -lrapmath \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
+	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

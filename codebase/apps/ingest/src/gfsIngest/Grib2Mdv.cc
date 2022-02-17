@@ -243,7 +243,7 @@ Grib2Mdv::getData()
             // create Mdvx field header for the first level 
             memset( (void *) &_fieldHeader, (int) 0, sizeof(Mdvx::field_header_t) );
             memset( (void *) &_vlevelHeader, (int) 0, sizeof(Mdvx::vlevel_header_t) );
-            _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE;
+            _vlevelHeader.struct_id = Mdvx::VLEVEL_HEAD_MAGIC_COOKIE_64;
 
             if ( _createFieldHdr(nZlevels) != RI_SUCCESS ) {
               cerr << "WARNING: File " << filePath << " not processed." << endl << flush;
@@ -460,7 +460,7 @@ Grib2Mdv::_createFieldHdr (int numZlevels)
     //
 
     _fieldHeader.record_len1         = sizeof( Mdvx::field_header_t );
-    _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+    _fieldHeader.struct_id           = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
     _fieldHeader.field_code          = _GribRecord->getParameterId();
     _fieldHeader.forecast_delta      = _GribRecord->getForecastTime();
     _fieldHeader.forecast_time       = _GribRecord->getGenerateTime() + _GribRecord->getForecastTime();

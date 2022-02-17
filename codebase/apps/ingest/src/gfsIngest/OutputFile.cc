@@ -31,9 +31,6 @@
 #include <toolsa/str.h>
 #include <toolsa/mem.h>
 #include <toolsa/pmu.h>
-#include <mdv/mdv_write.h>
-#include <mdv/mdv_utils.h>
-#include <mdv/mdv_user.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 
@@ -122,7 +119,7 @@ OutputFile::_setMasterHdr( time_t genTime, time_t leadSecs )
    // Fill the master header
    //
    masterHdr.record_len1     = sizeof( Mdvx::master_header_t );
-   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE;
+   masterHdr.struct_id       = Mdvx::MASTER_HEAD_MAGIC_COOKIE_64;
    masterHdr.revision_number = 1;
    masterHdr.num_data_times  = 1;
    masterHdr.index_number    = 0;
@@ -131,10 +128,10 @@ OutputFile::_setMasterHdr( time_t genTime, time_t leadSecs )
    masterHdr.native_vlevel_type = _verticalType;
    masterHdr.vlevel_type        = _verticalType;
   
-   masterHdr.data_collection_type = MDV_DATA_FORECAST;
+   masterHdr.data_collection_type = Mdvx::DATA_FORECAST;
    masterHdr.vlevel_included      = TRUE;
-   masterHdr.grid_orientation     = MDV_ORIENT_SN_WE;
-   masterHdr.data_ordering        = MDV_ORDER_XYZ;
+   masterHdr.grid_orientation     = Mdvx::ORIENT_SN_WE;
+   masterHdr.data_ordering        = Mdvx::ORDER_XYZ;
    masterHdr.sensor_lon           = 0.0;
    masterHdr.sensor_lat           = 0.0;
    masterHdr.sensor_alt           = 0.0;

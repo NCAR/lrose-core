@@ -1008,7 +1008,9 @@ list <Params::out_field_t>
 
   Params::out_field_t new_field;
   Params::out_field_t last_field;
-
+  MEM_zero(new_field);
+  MEM_zero(last_field);
+  
   _inv = _inventory.begin();
   while (_inv != _inventory.end()) {
     new_field.param_id  =  cnvtParamId2enum((*_inv)->getParameterId());

@@ -48,7 +48,7 @@
 #include <grib/PDS.hh>
 #include <grib/BDS.hh>
 #include <grib/BMS.hh>
-#include <grib/gds.hh>
+#include <grib/gds_.hh>
 #include <grib/gds_equidistant.hh>
 #include <grib/GribVertType.hh>
 
