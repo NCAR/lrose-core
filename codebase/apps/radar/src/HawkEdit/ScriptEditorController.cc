@@ -1279,6 +1279,11 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
+void ScriptEditorController::showProgress(int currentIndex, int lastIndex) {
+  _currentView->showProgress(currentIndex, lastIndex);
+}
+
+
 void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol

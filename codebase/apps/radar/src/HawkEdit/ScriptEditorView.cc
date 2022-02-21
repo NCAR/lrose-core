@@ -731,6 +731,16 @@ vector<string> *ScriptEditorView::getVariablesFromScriptEditor() {
 }
 
 
+void ScriptEditorView::showProgress(int currentIndex, int lastIndex) {
+  //QStatusBar *statusBar = statusBar();
+  stringstream ss;
+  ss << "processing " << currentIndex << " of "  <<
+    lastIndex << " files";
+
+  statusBar()->showMessage(QString::fromStdString(ss.str()));
+}
+
+
 void ScriptEditorView::notImplementedMessage() {
       QMessageBox::information(this, "Not Implemented", "Not Implemented");
 }

@@ -45,6 +45,8 @@ public:
 
   string getSaveEditsDirectory();
 
+  void showProgress(int currentIndex, int lastIndex);
+
   //void setSelectionToValue(QString value);
   void closeEvent();
 

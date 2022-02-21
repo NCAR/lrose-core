@@ -321,8 +321,11 @@ int PolarManager::run(QApplication &app)
   // set timer running
   
   //_beamTimerId = startTimer(2000);
-  
-  return app.exec();
+  try {
+    return app.exec();
+  } catch (const char *msg) {
+    errorMessage("ERROR", msg);
+  }
 
 }
 /*
@@ -3013,8 +3016,11 @@ void PolarManager::_saveFile()
     
     try {
       LOG(DEBUG) << "writing to file " << name;
+      string originalSourcePath = 
+        _timeNavController->getSelectedArchiveFile();
       DataModel *dataModel = DataModel::Instance();
-      dataModel->writeData(name);
+      dataModel->writeWithMergeData(name, originalSourcePath);
+      //dataModel->writeData(name);
       _unSavedEdits = false;
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
@@ -5057,6 +5063,14 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   _timeNavController->getBounds(useTimeRange, &firstArchiveFileIndex,
     &lastArchiveFileIndex);
 
+
+  //QProgressDialog progressBar("Running script ...", "Abort", 
+  //  0, lastArchiveFileIndex, this);
+  //progressBar.setRange(0, lastArchiveFileIndex);
+  //progressBar.setMinimumDuration(0);
+  //progressBar.setValue(0);
+  //progressBar.show();
+
   try {
     // get list of archive files within start and end date/times
     // make a local version of the time navigation to manage the archive files
@@ -5098,6 +5112,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     bool batchMode = true; // to prevent message box on every file
     try {  
       // use regular forEachRay ...
+      scriptEditorControl->showProgress(archiveFileIndex, lastArchiveFileIndex);
       runForEachRayScript(script, useBoundary, useAllSweeps);
       // check if Cancel requested
       //   save archive file to temp area
@@ -5122,7 +5137,9 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       return;
     }
     archiveFileIndex += 1;
+    //progressBar.setValue(archiveFileIndex);
     _timeNavController->setTimeSliderPosition(archiveFileIndex);
+    QCoreApplication::processEvents();
     //cancelled = scriptEditorControl->cancelRequested();
   }
 
@@ -5158,6 +5175,8 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //setArchiveFileList(archiveFileList, fromCommandLine);
   //_timeNavController->setSliderPosition();
   //_timeNavController->fetchArchiveFiles(saveDirectoryPath, fileName);
+  //progressBar.close();
+  //_timeNavController->setTimeSliderPosition(0);
 }
 
 void PolarManager::undoScriptEdits() { 

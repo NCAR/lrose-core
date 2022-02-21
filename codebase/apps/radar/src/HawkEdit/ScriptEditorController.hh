@@ -41,6 +41,8 @@ public:
   void printQJSEngineContext();
   void addVariableToScriptEditor(QString name, QJSValue value);
 
+  void showProgress(int currentIndex, int lastIndex);
+
 signals:
   void scriptChangedVolume(QStringList newFieldNames); // const RadxVol &radarDataVolume);
   void scriptComplete();

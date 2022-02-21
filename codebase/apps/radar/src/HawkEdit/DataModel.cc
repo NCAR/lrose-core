@@ -403,6 +403,60 @@ RadxTime DataModel::getEndTimeSecs() {
   return _vol->getEndTimeSecs();
 }
 
+// TODO: this could be faster
+void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
+  vector<string> *primaryFieldNames = getUniqueFieldNameList();
+  vector<string>::iterator it;
+  for (it = primaryFieldNames->begin(); it != primaryFieldNames->end(); ++it) {
+    int i=0; 
+    bool found = false;
+    while (i<allFieldNames->size() && !found) {
+      if (allFieldNames->at(i).compare(*it) != string::npos) {
+        found = true;
+        // remove from list
+        allFieldNames->erase(allFieldNames->begin()+i);
+        cerr << "not reading " << *it << endl;
+      }
+      i++;
+    }
+  }
+}
+
+// merge edited fields (those read in memory) with
+// those fields in the original data file
+void DataModel::mergeDataFields(string fileName) {
+
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(fileName);
+  _selectFieldsNotInVolume(allPossibleFieldNames);
+
+  // read original file as secondary file
+  // only read those fields NOT in primary vol
+  //RadxVol secondaryVol = ???
+
+  // add fields to vol with more fields
+
+  delete allPossibleFieldNames;
+
+}
+
+void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
+
+    mergeDataFields(originalSourcePath);
+
+    RadxFile outFile;
+
+    LOG(DEBUG) << "writing to file " << outputPath;
+    int result = outFile.writeToPath(*_vol, outputPath);
+    // Returns 0 on success, -1 on failure
+    //
+    // Use getErrStr() if error occurs
+    // Use getPathInUse() for path written
+    if (result != 0) {
+      string errStr = outFile.getErrStr();
+      throw std::invalid_argument(errStr);
+    }
+}
+
 void DataModel::writeData(string path) {
     RadxFile outFile;
 
@@ -484,8 +538,17 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
   if (fieldName.length() <= 0) {
     cerr << "fieldName is empty!!" << endl;
   }
+  const vector<RadxRay *> rays = _vol->getRays();
+  //if ((ray < rays.at(0) || (ray > rays.at(rays.size()-1)))) {
+    //throw std::invalid_argument("ray is out of bounds!");
+  //  cerr << "ray is out of bounds!";
+  //}
   _vol->loadRaysFromFields();
   //ray->loadFieldNameMap();
+  //RadxRay::FieldNameMap fieldNameMap = ray->getFieldNameMap();
+  //if (fieldNameMap.size() <= 0)
+  //  throw std::invalid_argument("fieldNameMap is zero!");
+
   RadxField *dataField = NULL;
   try {
     dataField = ray->getField(fieldName);
@@ -892,6 +955,48 @@ void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
   //    file.addReadField(field->getName());
   //  }
 
+}
+
+vector<string> *DataModel::getPossibleFieldNames(string fileName)
+{
+
+  LOG(DEBUG) << "enter";
+
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol vol;
+
+  vol.clear();
+  //_setupVolRead(file);
+
+  file.setReadMetadataOnly(true);
+      
+    string inputPath = fileName;
+  
+      LOG(DEBUG) << "  reading data file path: " << inputPath;
+      //cerr << "  archive file index: " << _archiveScanIndex << endl;
+    
+    if (file.readFromPath(inputPath, vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "PolarManager::_getFieldsArchiveData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      throw std::invalid_argument(errMsg);
+    } 
+    vol.loadFieldsFromRays();
+    const vector<RadxField *> fields = vol.getFields();
+    vector<string> *allFieldNames = new vector<string>;
+    for (vector<RadxField *>::const_iterator iter = fields.begin(); iter != fields.end(); ++iter)
+    {
+      RadxField *field = *iter;
+      cout << field->getName() << endl;
+      allFieldNames->push_back(field->getName());
+    }
+
+    LOG(DEBUG) << "exit";
+    return allFieldNames;
 }
 
 size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elevation) {
