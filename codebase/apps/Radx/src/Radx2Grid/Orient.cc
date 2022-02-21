@@ -184,6 +184,8 @@ int Orient::findEchoOrientation()
 // load the sdev fields on the cartesian grid
 
 void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
+                            Interp::DerivedField *dbzH,
+                            Interp::DerivedField *dbzV,
                             Interp::DerivedField *sdevDbzH,
                             Interp::DerivedField *sdevDbzV)
 
@@ -205,12 +207,13 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
           rhiIndex -= _rhis.size();
         }
         assert (rhiIndex < _rhis.size());
-        int rangeIndex = (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
+        int rangeIndex =
+          (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
         if (rangeIndex < (int) _rhis[rhiIndex]->getNRange()) {
-          Radx::fl32 sdevH = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
-          Radx::fl32 sdevV = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
-          sdevDbzH->data[ii] = sdevH;
-          sdevDbzV->data[ii] = sdevV;
+          dbzH->data[ii] = _rhis[rhiIndex]->getDbzH(rangeIndex, iz);
+          dbzV->data[ii] = _rhis[rhiIndex]->getDbzV(rangeIndex, iz);
+          sdevDbzH->data[ii] = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
+          sdevDbzV->data[ii] = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
         }
       } // ix
     } // iy

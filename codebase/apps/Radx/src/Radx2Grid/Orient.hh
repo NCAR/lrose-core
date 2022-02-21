@@ -71,6 +71,8 @@ public:
   // load the sdev fields on the cartesian grid
 
   void loadSdevFields(Interp::GridLoc ****gridLoc,
+                      Interp::DerivedField *dbzH,
+                      Interp::DerivedField *dbzV,
                       Interp::DerivedField *sdevDbzH,
                       Interp::DerivedField *sdevDbzV);
 
