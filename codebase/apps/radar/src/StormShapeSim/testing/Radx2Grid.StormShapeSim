@@ -436,13 +436,22 @@ z_level_array = {
 //
 //
 
+// grid_xy_geom = {
+//     nx = 800,
+//     ny = 800,
+//     minx = -199.75,
+//     miny = -199.75,
+//     dx = 0.5,
+//     dy = 0.5
+// };
+
 grid_xy_geom = {
-    nx = 800,
-    ny = 800,
-    minx = -199.75,
-    miny = -199.75,
-    dx = 0.5,
-    dy = 0.5
+    nx = 400,
+    ny = 400,
+    minx = -199.5,
+    miny = -199.5,
+    dx = 1.0,
+    dy = 1.0
 };
 
 ///////////// center_grid_on_radar ////////////////////

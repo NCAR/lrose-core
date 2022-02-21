@@ -121,6 +121,10 @@ height height $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&height  heightkm.co
 
 height_2 height_2 $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&height_2  heightkm.colors      dbz     0 60 10   cart  1 0
 
+DbzH DbzH $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DbzH  dbz.colors      dbz     0 60 10   cart  1 0
+
+DbzV DbzV $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&DbzV  dbz.colors      dbz     0 60 10   cart  1 0
+
 SdevDbzH SdevDbzH $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&SdevDbzH  dbz.colors      dbz     0 60 10   cart  1 0
 
 SdevDbzV SdevDbzV $(HOME)/data/StormShapeSim/mdv/Radx2Grid/case1&SdevDbzV  dbz.colors      dbz     0 60 10   cart  1 0
