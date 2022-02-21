@@ -52,6 +52,8 @@ public:
   void readData(string path, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
   void writeData(string path);
+  vector<string> *getPossibleFieldNames(string fileName);
+  vector<string> *getUniqueFieldNameList();
 
   void update();
   void SetDataByIndex(string &fieldName, 
@@ -110,14 +112,17 @@ public:
 
   void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
   const RadxGeoref *getGeoreference(size_t rayIdx);
-  vector<string> *getUniqueFieldNameList();
 
   int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
 
   size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
   size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
+  void _selectFieldsNotInVolume(vector<string> *allFieldNames);
+  void mergeDataFields(string fileName);
+
   void printAzimuthInRayOrder();
+  void writeWithMergeData(string outputPath, string originalSourcePath);
 
   
 private:
