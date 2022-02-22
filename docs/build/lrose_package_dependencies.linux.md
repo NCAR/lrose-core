@@ -121,39 +121,6 @@ This requires upgrading the compiler toolchain.
   ln -s qmake-qt5 qmake;
 ```
 
-## Manually install packages for CENTOS 8 and RHEL 8
-
-```
-  dnf install -y epel-release ; \
-  dnf install -y 'dnf-command(config-manager)' ; \
-  dnf config-manager --set-enabled powertools ; \
-  dnf install -y python3 ; \
-  dnf install -y python2-devel platform-python-devel ; \
-  dnf install -y \
-    tcsh wget git tk-devel perl-Env \
-    emacs rsync python2 python3 mlocate \
-    m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
-    libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
-    eigen3-devel armadillo-devel \
-    expat-devel libcurl-devel openmpi-devel \
-    flex-devel fftw3-devel \
-    bzip2-devel \
-    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
-    hdf5-devel netcdf-devel \
-    gnuplot ImageMagick-devel ImageMagick-c++-devel \
-    xorg-x11-xauth xorg-x11-apps \
-    rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
-  alternatives --set python /usr/bin/python3
-
-  # create link for qtmake
-
-  cd /usr/bin; \
-  ln -s qmake-qt5 qmake;
-```
-
 ## Manually install packages for CENTOS STREAM (latest)
 
 ```
