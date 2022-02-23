@@ -50,6 +50,7 @@ CPPC_SRCS = \
 	ThresholdField.cc \
 	ForcedUnfolding.cc \
 	MergeFields.cc \
+	NavigationCorrection.cc \
 	RemoveRing.cc \
 	RainRate.cc \
 	Abs.cc \

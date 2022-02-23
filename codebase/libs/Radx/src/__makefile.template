@@ -40,6 +40,7 @@ SUB_DIRS = \
 	Odim \
 	Radx \
 	Rapic \
+	Raxpol \
 	Sigmet \
 	Tdwr \
 	Twolf \
