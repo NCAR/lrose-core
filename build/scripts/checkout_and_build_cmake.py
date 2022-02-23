@@ -646,7 +646,7 @@ def buildPackage():
                             "-Wl,--enable-new-dtags," + \
                             "-rpath," + \
                             "'$$ORIGIN/" + runtimeLibRelDir + \
-                            ":$$ORIGIN/../lib" + \
+#                           ":$$ORIGIN/../lib" + \
                             ":" + prefixLibDir + \
                             ":" + prefixLibDir + "'"
 
