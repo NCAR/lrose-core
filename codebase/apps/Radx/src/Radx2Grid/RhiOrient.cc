@@ -559,7 +559,7 @@ int RhiOrient::_loadSdevH()
     } // irange
     
     size_t nDbz = dbzVals.size();
-    if (nDbz < 2) {
+    if (nDbz < 3) {
       continue;
     }
 
@@ -569,21 +569,22 @@ int RhiOrient::_loadSdevH()
 
     // compute sdev for first val - just use 2 pts
     
-    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    double sdev = _computeSdev3(dbzVals[0], dbzVals[1], dbzVals[2]);
     sdevDbzH.push_back(sdev);
     
     // compute sdev for interior vals
 
-    if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 1; ii++) {
-        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
-        sdevDbzH.push_back(sdev);
-      }
+    // if (nDbz >= 3) {
+    for (size_t ii = 1; ii < nDbz - 1; ii++) {
+      sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+      sdevDbzH.push_back(sdev);
     }
+    // }
     
     // compute sdev for last val - just use 2 pts
     
-    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    // sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdev = _computeSdev3(dbzVals[nDbz-3], dbzVals[nDbz-2], dbzVals[nDbz-1]);
     sdevDbzH.push_back(sdev);
 
     assert(sdevDbzH.size() == nDbz);
@@ -645,7 +646,7 @@ int RhiOrient::_loadSdevV()
     } // irange
     
     size_t nDbz = dbzVals.size();
-    if (nDbz < 2) {
+    if (nDbz < 3) {
       continue;
     }
 
@@ -655,21 +656,23 @@ int RhiOrient::_loadSdevV()
 
     // compute sdev for first val - just use 2 pts
     
-    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    // double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    double sdev = _computeSdev3(dbzVals[0], dbzVals[1], dbzVals[2]);
     sdevDbzV.push_back(sdev);
 
     // compute sdev for interior vals
 
-    if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 1; ii++) {
-        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
-        sdevDbzV.push_back(sdev);
-      }
+    // if (nDbz >= 3) {
+    for (size_t ii = 1; ii < nDbz - 1; ii++) {
+      sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+      sdevDbzV.push_back(sdev);
     }
+    // }
     
     // compute sdev for last val - just use 2 pts
     
-    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    // sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdev = _computeSdev3(dbzVals[nDbz-3], dbzVals[nDbz-2], dbzVals[nDbz-1]);
     sdevDbzV.push_back(sdev);
 
     assert(sdevDbzV.size() == nDbz);
