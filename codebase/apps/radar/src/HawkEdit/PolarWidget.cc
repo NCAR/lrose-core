@@ -629,6 +629,8 @@ void PolarWidget::mouseDoubleClickEvent(QMouseEvent *e)
   cerr << "translate to (world)" << _worldReleaseX << ", " << _worldReleaseY << endl;
   _translateTransform(_mouseReleaseX, _mouseReleaseY); //  _worldReleaseY);
 
+  _manager->enableZoomButton(); // to allow recentering when UnZoom is clicked
+
   /*
   // --- if shift key is down, then pass message on to boundary point control
   bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
