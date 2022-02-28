@@ -325,6 +325,8 @@ int PolarManager::run(QApplication &app)
     return app.exec();
   } catch (const char *msg) {
     errorMessage("ERROR", msg);
+  } catch (const std::out_of_range& ex) {
+    errorMessage("ERROR", ex.what());
   }
 
 }
@@ -1240,7 +1242,12 @@ int PolarManager::_getArchiveData(string &inputPath)
 
 int result = _getArchiveDataPlainVanilla(inputPath);
 if (result == 0) {
-  emit newDataFile();
+  _setupRayLocation();
+  //emit newDataFile();
+  //dataFileChanged();
+
+  // reconcile sweep info; if the sweep angles are the same, then no need for change
+  _sweepController->updateSweepRadioButtons();
 
   DataModel *dataModel = DataModel::Instance();  
 
@@ -2124,12 +2131,13 @@ void PolarManager::_handleColorMapChangeOnRay(RadxPlatform &platform,
 
 void PolarManager::dataFileChanged() {
 
-  _sweepController->clearSweepRadioButtons();
-  _sweepController->createSweepRadioButtons();
+ // _sweepController->clearSweepRadioButtons();
+  //_sweepController->updateSweepRadioButtons();
+
   if (sheetView != NULL) {
     sheetView->applyEdits();
   }
-  _plotArchiveData();
+  //_plotArchiveData();
 
 }
 
@@ -2914,7 +2922,7 @@ void PolarManager::_readDataFile2() {
 
     try {
       _getArchiveData();
-      _setupRayLocation();
+      //_setupRayLocation();
 
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
@@ -2927,13 +2935,15 @@ void PolarManager::_readDataFile2(string &inputPath) {
 
     try {
       _getArchiveData(inputPath);
-      _setupRayLocation();
+      //_setupRayLocation();
+      dataFileChanged();
 
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
       return;
     }
+    //emit newDataFile();
 }
 
 /*
@@ -5010,15 +5020,19 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   if (boundaryPointEditorControl != NULL) {
     boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
-  if (useAllSweeps) {
-    scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
-  } else {
-    // send the current sweep to the script editor controller
-    int currentSweepIndex = _sweepController->getSelectedNumber();
-    currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
-    // index is a vector and zero-based 
-    scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
-     useBoundary, boundaryPoints);
+  try {
+    if (useAllSweeps) {
+      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+    } else {
+      // send the current sweep to the script editor controller
+      int currentSweepIndex = _sweepController->getSelectedNumber();
+      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+      // index is a vector and zero-based 
+      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+       useBoundary, boundaryPoints);
+    }
+  } catch (const std::out_of_range& ex) {
+    errorMessage("ERROR", ex.what());
   }
 }
 
@@ -5098,10 +5112,12 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
   int archiveFileIndex = firstArchiveFileIndex;
 
-  _timeNavController->setTimeSliderPosition(archiveFileIndex);
+
   //bool cancelled = scriptEditorControl->cancelRequested();
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
-    
+
+    _timeNavController->setTimeSliderPosition(archiveFileIndex);
+        
     // need to get the current version of the file (by index)
     string inputPath = _getSelectedFile();
     //  _undoRedoController->getCurrentVersion(archiveFileIndex);
@@ -5135,10 +5151,12 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     } catch (std::invalid_argument &ex) {
       errorMessage("Error", ex.what());
       return;
+    } catch (const std::out_of_range& ex) {
+      errorMessage("ERROR", ex.what());
     }
     archiveFileIndex += 1;
     //progressBar.setValue(archiveFileIndex);
-    _timeNavController->setTimeSliderPosition(archiveFileIndex);
+    //_timeNavController->setTimeSliderPosition(archiveFileIndex);
     QCoreApplication::processEvents();
     //cancelled = scriptEditorControl->cancelRequested();
   }

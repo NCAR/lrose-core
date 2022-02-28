@@ -72,7 +72,7 @@ public slots:
 
     void applyChanges();
     void currentSweepClicked(bool checked);
-    void allSweepsClicked(bool checked);
+    //void allSweepsClicked(bool checked);
     void timeRangeClicked(bool checked);
     void changeOutputLocation(bool checked);
 
@@ -138,7 +138,7 @@ private:
     QTreeView *helpView;
     QHBoxLayout *scriptEditLayout;
 
-    QPushButton *currentSweepToggleButton;
+    //QPushButton *currentSweepToggleButton;
     QPushButton *allSweepsToggleButton;
     QGroupBox *scriptModifiers;
 

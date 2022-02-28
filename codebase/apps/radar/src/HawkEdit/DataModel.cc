@@ -328,7 +328,16 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   LOG(DEBUG) << "enter";
   // set up file object for reading
-  
+
+  cerr << "comparing " << path << " with \n" <<
+          "          " << _currentFilePath << endl;
+
+  if (_currentFilePath.compare(path) == 0) {
+    // don't reread the same file
+    return;
+  }
+
+  cerr << "before " << endl;
   RadxFile file;
   if (_vol != NULL) delete _vol;
   _vol = new RadxVol();
@@ -345,18 +354,20 @@ void DataModel::readData(string path, vector<string> &fieldNames,
       cerr << errMsg;
       throw errMsg;
   } 
+  cerr << "after " << endl;
 
   // check for fields read
-  bool nFieldsConstantPerRay = true;
-  _vol->loadFieldsFromRays(nFieldsConstantPerRay);
+  //bool nFieldsConstantPerRay = true;
+  //_vol->loadFieldsFromRays(nFieldsConstantPerRay);
 
+  /*
   vector<string>::iterator it;
   for (it=fieldNames.begin(); it != fieldNames.end(); ++it) {
     RadxField *field = _vol->getField(*it);
     if (field == NULL) {
         string errMsg = "ERROR - No field read\n";
         errMsg += "DataModel::readData\n";
-        errMsg += fieldNames.at(0) + "\n";
+        errMsg += " field: " + *it + "\n";
         errMsg += "  path: " + path + "\n";
         cerr << errMsg;
         //throw errMsg;
@@ -364,7 +375,8 @@ void DataModel::readData(string path, vector<string> &fieldNames,
       cerr << "read field " << *it << endl;
     }
   }
-  // or if no field found when requrested send error message???
+  // or if no field found when requested send error message???
+  */
 
   _vol->convertToFl32();
 
@@ -387,6 +399,8 @@ void DataModel::readData(string path, vector<string> &fieldNames,
     LOG(DEBUG) << "----------------------------------------------------";
 
   printAzimuthInRayOrder();
+
+  _currentFilePath = path;
 
   LOG(DEBUG) << "exit";
 }
@@ -442,19 +456,7 @@ void DataModel::mergeDataFields(string fileName) {
 void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
 
     mergeDataFields(originalSourcePath);
-
-    RadxFile outFile;
-
-    LOG(DEBUG) << "writing to file " << outputPath;
-    int result = outFile.writeToPath(*_vol, outputPath);
-    // Returns 0 on success, -1 on failure
-    //
-    // Use getErrStr() if error occurs
-    // Use getPathInUse() for path written
-    if (result != 0) {
-      string errStr = outFile.getErrStr();
-      throw std::invalid_argument(errStr);
-    }
+    writeData(outputPath);
 }
 
 void DataModel::writeData(string path) {
@@ -470,6 +472,7 @@ void DataModel::writeData(string path) {
       string errStr = outFile.getErrStr();
       throw std::invalid_argument(errStr);
     }
+    _currentFilePath = path;
 }
 
 void DataModel::update() {
@@ -538,7 +541,7 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
   if (fieldName.length() <= 0) {
     cerr << "fieldName is empty!!" << endl;
   }
-  const vector<RadxRay *> rays = _vol->getRays();
+  //const vector<RadxRay *> rays = _vol->getRays();
   //if ((ray < rays.at(0) || (ray > rays.at(rays.size()-1)))) {
     //throw std::invalid_argument("ray is out of bounds!");
   //  cerr << "ray is out of bounds!";
@@ -548,20 +551,44 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
   //RadxRay::FieldNameMap fieldNameMap = ray->getFieldNameMap();
   //if (fieldNameMap.size() <= 0)
   //  throw std::invalid_argument("fieldNameMap is zero!");
-
-  RadxField *dataField = NULL;
+  vector<RadxField *> fields;
   try {
-    dataField = ray->getField(fieldName);
+    fields = ray->getFields();
+  
+  // dataField = ray->getField(fieldName);  often this doesn't work, and
+  // throws an vector exception that cannot be trapped.  Sometimes the
+  // field name map is built and sometimes not, so avoid using this function.
   } catch (std::exception &ex) {
     string msg = "DataModel::fetchDataField unknown error occurred: ";
     msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
+
+//  if (fields == NULL) {
+//    return NULL;
+//  }
+  if (fields.size() <=0) {
+    return NULL;
+  }
+
+  RadxField *dataField = NULL;
+  vector<RadxField *>::iterator it = fields.begin();
+  bool found = false;
+  while (!found && it != fields.end()) {
+    RadxField *f = *it;
+    if (f->getName().compare(fieldName) == 0) {
+      found = true;
+      dataField = f;
+    }
+    ++it;
+  }
+
   if (dataField == NULL) {
     string msg = "DataModel::fetchDataField No field found in ray: ";
     msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
+
   return dataField; 
 }
 /*

@@ -171,12 +171,13 @@ Q_DECLARE_METATYPE(QVector<double>)
     //applyToAllSweeps = new QRadioButton("all sweeps", this);
     //applyToCurrentSweep->setChecked(true);
 
-    currentSweepToggleButton = new QPushButton(tr("&Current Angle"));
-    currentSweepToggleButton->setCheckable(true);
-    currentSweepToggleButton->setChecked(false);
-    allSweepsToggleButton = new QPushButton(tr("&All Angles"));
+    allSweepsToggleButton = new QPushButton(tr("&Current Angle"));
+    allSweepsToggleButton->setStatusTip("Edit current angle or all angles");
     allSweepsToggleButton->setCheckable(true);
-    allSweepsToggleButton->setChecked(true);
+    allSweepsToggleButton->setChecked(false);
+    //allSweepsToggleButton = new QPushButton(tr("&All Angles"));
+    //allSweepsToggleButton->setCheckable(true);
+    //allSweepsToggleButton->setChecked(true);
 
     //QVBoxLayout *vbox = new QVBoxLayout;
     //vbox->addWidget(currentSweepToggleButton);
@@ -187,8 +188,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     //QLabel *batchMode = new QLabel("Batch Mode");
     currentTimeToggleButton = new QPushButton(tr("On"));
     //currentTimeToggleButton->setStatusTip("enter batch mode with time range");
-    currentTimeToggleButton->setText("Current file");
-    currentTimeToggleButton->setStatusTip("Batch Mode: off");
+    currentTimeToggleButton->setText("Current File");
+    currentTimeToggleButton->setStatusTip("Batch edit all files or current file.");
     currentTimeToggleButton->setCheckable(true);
     currentTimeToggleButton->setChecked(false);
 
@@ -212,8 +213,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     scriptModifiers = new QGroupBox("Modifiers", this);
     checkBoxLayout = new QVBoxLayout;
     checkBoxLayout->addWidget(useBoundaryWidget);
-    checkBoxLayout->addWidget(currentSweepToggleButton);
     checkBoxLayout->addWidget(allSweepsToggleButton);
+    //checkBoxLayout->addWidget(allSweepsToggleButton);
     //checkBoxLayout->addWidget(batchMode);
     checkBoxLayout->addWidget(currentTimeToggleButton);
     //checkBoxLayout->addWidget(timeRangeToggleButton);
@@ -228,8 +229,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     // QAbstractButton::clicked(bool checked = false)
     // If the button is checkable, 
     // checked is true if the button is checked, or false if the button is unchecked.
-    connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
-    connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
+    connect(allSweepsToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+    //connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
     connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
     //connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
@@ -1005,14 +1006,26 @@ void ScriptEditorView::currentSweepClicked(bool checked) {
   //allSweepsToggleButton->setChecked(true);
   //notImplementedMessage();
   
+  if (allSweepsToggleButton->text().compare("Current Angle") == 0) {
+    allSweepsToggleButton->setChecked(true);
+    allSweepsToggleButton->setText("All Angles");
+    //allSweepsToggleButton->setStatusTip("Edit all angles");
+  } else {
+    allSweepsToggleButton->setChecked(false);  
+    allSweepsToggleButton->setText("Current Angle");
+    //allSweepsToggleButton->setStatusTip("Edit selected angle");
+  } 
+
+/*
   if (checked) {
     allSweepsToggleButton->setChecked(false);
   } else {
     allSweepsToggleButton->setChecked(true);    
   }
-  
+*/  
 }
 
+/*
 void ScriptEditorView::allSweepsClicked(bool checked) {
   //currentSweepToggleButton->setChecked(false);
   //allSweepsToggleButton->setChecked(true);
@@ -1025,21 +1038,22 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
   }  
   
 }
+*/
 
 // checked = true ==> time range; highlighted
 // checked = false ==> current archive; default; no highlight
 void ScriptEditorView::timeRangeClicked(bool checked) {
 
-  if (currentTimeToggleButton->text().compare("Current file") == 0) {
+  if (currentTimeToggleButton->text().compare("Current File") == 0) {
     currentTimeToggleButton->setChecked(true);
-    currentTimeToggleButton->setText("All files");
-    currentTimeToggleButton->setStatusTip("Batch Mode: on");
+    currentTimeToggleButton->setText("All Files");
+    //currentTimeToggleButton->setStatusTip("Batch Mode: on");
 
     //showTimeRangeEdits();
   } else {
     currentTimeToggleButton->setChecked(false);  
-    currentTimeToggleButton->setText("Current file");
-    currentTimeToggleButton->setStatusTip("Batch Mode: off");
+    currentTimeToggleButton->setText("Current File");
+    //currentTimeToggleButton->setStatusTip("Batch Mode: off");
     //hideTimeRangeEdits();  
   }  
   

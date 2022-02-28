@@ -164,31 +164,37 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
   vector<float> *dataVector = new vector<float>(0);
 	// get the ray 
   RadxRay *ray = ray_loc.at(rayIdx).ray;
-  if (ray != NULL)  {// throw std::invalid_argument("rayIdx has no ray data");
-  size_t nGates = ray->getNGates(); 
+  if (ray != NULL)  { // throw std::invalid_argument("rayIdx has no ray data");
+    size_t nGates = ray->getNGates(); 
+    //dataVector->resize(nGates);
 
-  // get the field data
-  DataModel *dataModel = DataModel::Instance();
-  //const RadxField *field = NULL;
- // try  {
- RadxField *field = dataModel->fetchDataField(ray, fieldName);
- // } catch (std::invalid_argument &ex) {
+    // get the field data
+    DataModel *dataModel = DataModel::Instance();
+    RadxField *field = NULL;
+    try  {
+      field = dataModel->fetchDataField(ray, fieldName);
+    } catch (std::invalid_argument &ex) {
+      cerr << "RayLocationModel::getRayData catching exception no field found\n";
+      field = NULL;
+    }
+    //const RadxField *field = ray->getField(fieldName);
+    if (field == NULL) {
+      //string msg = "no data for field in ray ";
+      //msg.append(fieldName);
+      //throw std::invalid_argument(msg);
+      delete dataVector;
+      // create vector; initialize to missing
+      dataVector = new vector<float>(nGates, Radx::missingFl32);   //issue with memory!!! who will free?
+    } else {
+      // cerr << "there arenGates " << nGates;
 
- // }
-  //const RadxField *field = ray->getField(fieldName);
-  if (field == NULL) {
-    string msg = "no data for field in ray ";
-    msg.append(fieldName);
-    throw std::invalid_argument(msg);
-  }
-  // cerr << "there arenGates " << nGates;
-
-  //field->convertToFl32();
-  //convertToType(Radx::Fl32);
-  
-  float *data = field->getDataFl32();
-  dataVector->resize(nGates);
-  dataVector->assign(data, data+nGates);
+      //field->convertToFl32();
+      //convertToType(Radx::Fl32);
+    
+      float *data = field->getDataFl32();
+      dataVector->resize(nGates);
+      dataVector->assign(data, data+nGates);
+    }
   }
 // TODO: have calling method free the memory
   return dataVector;

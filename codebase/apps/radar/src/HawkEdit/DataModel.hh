@@ -138,6 +138,8 @@ private:
 //DataModel *DataModel::_instance = NULL;  
   static DataModel *_instance;
 
+  string _currentFilePath;
+  
   RadxVol *_vol;
 
 };

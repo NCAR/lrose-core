@@ -1185,6 +1185,8 @@ uncate(100);
     while (it2.hasNext()) {
       it2.next();
 
+      if (it2.name().compare("BOUNDARY") != 0) {
+
       QJSValue value = it2.value();
       if (value.isArray()) {
 
@@ -1262,6 +1264,7 @@ uncate(100);
 
         }
       }
+    } // not BOUNDARY
     }
 
     volumeUpdated(newFieldNames);

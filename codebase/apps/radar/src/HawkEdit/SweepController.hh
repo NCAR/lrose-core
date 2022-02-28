@@ -121,6 +121,7 @@ public:
 
   void createSweepRadioButtons();
   void clearSweepRadioButtons();
+  void updateSweepRadioButtons();
 
   void dataFileChanged();
 
