@@ -40,8 +40,7 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
                                            int radar_scan_mode,
                                            int radar_type,
                                            float tilt_angle,
-				       float rotation_angle,
-				       bool *boundary_mask_out) {
+				                                   bool *boundary_mask_out) {
 
 /*
   // map flat data to internal data structures ...
@@ -126,7 +125,6 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
              radar_scan_mode,
              radar_type,
              tilt_angle,
-             rotation_angle,
              boundary_mask_out);
   } catch(...) {
     throw "Something bad happened during script evaluation";

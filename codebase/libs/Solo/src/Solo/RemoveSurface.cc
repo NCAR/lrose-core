@@ -1,6 +1,11 @@
 
+
+// adapted from original Soloii code by Richard (Dick) Oye
+
+
 #include <Solo/GeneralDefinitions.hh>
 #include <Solo/dd_math.h>
+#include <Solo/BoundaryPointMap.hh>
 
 double d_angdiff(double a1, double a2)
 {
@@ -14,12 +19,19 @@ double d_angdiff(double a1, double a2)
 }
 
 /* c------------------------------------------------------------------------ */
-/*
+
+// 
+// data are from the DBZ field
+// 
+//       ii = alt_gecho (min_grad, &zmax_cell, elev, data, nGates,
+//          dds_asib_rotation_angle, dds_asib_roll, dds_cfac_rot_angle_corr);
 int alt_gecho(double min_grad,
 	      int *zmax_cell,
 	      double elev,
-	      float *data,
+	      float *DBZ_data,
+        float DBZ_parameter_scale,  // TODO: figure out this ???
 	      size_t nGates,
+        double gate_size,  
 	      double dds_asib_rotation_angle,
 	      double dds_asib_roll,
 	      double dds_cfac_rot_angle_corr)
@@ -40,22 +52,27 @@ int alt_gecho(double min_grad,
     double gs, slope, smin_grad, grad; //  elev = dds->ra->elevation;
     double rot_angle;
 
+    /* must pass in data from DBZ field ... otherwise, don't bother calling!
     if((pn = dd_find_field(dgi, "DBZ")) < 0) {	
-	uii_printf("Source parameter %s not found for surface removal\n"
-		  , "DBZ");
-	return(-1);
+	    uii_printf("Source parameter %s not found for surface removal\n"
+		    , "DBZ");
+	    return(-1);
     }
+    */
     // assume this routine is not called unless the antenna is
      // in a position to see the ground
      //
     // TODO: is gs the distance between gates?
-    gs = dds->celvc->dist_cells[1] - dds->celvc->dist_cells[0];
-    ss = data; // (short *)dds->qdat_ptrs[pn];
+    //gs = dds->celvc->dist_cells[1] - dds->celvc->dist_cells[0];
+    gs = gate_size;
+    ss = DBZ_data; // (short *)dds->qdat_ptrs[pn];
     nn = nGates; // dgi->dds->celvc->number_cells;
     // TODO: what to do about this scaled30?  just set it to 30.0 ?
-    scaled30 = (int)(dgi->dds->parm[pn]->parameter_scale * 30.);
+    //scaled30 = (int)(dgi->dds->parm[pn]->parameter_scale * 30.);
+    scaled30 = (int)(DBZ_parameter_scale                   * 30.);
     // TODO: what to do about this ??
-    smin_grad = min_grad * dgi->dds->parm[pn]->parameter_scale * gs * 2.;
+    //smin_grad = min_grad * dgi->dds->parm[pn]->parameter_scale * gs * 2.;
+    smin_grad = min_grad * DBZ_parameter_scale                 * gs * 2.;
     rot_angle = dds_asib_rotation_angle + dds_asib_roll +
       dds_cfac_rot_angle_corr;
 
@@ -74,19 +91,19 @@ int alt_gecho(double min_grad,
     for (ii=ng_grad+1; ii < nn; ii++) {
        ival = ss[ii];
        if (ival < scaled30)
-	 { continue; }
+	       { continue; }
        
        if (mark_grad < 0) {
-	  for (grad = 0, jj = 0; jj < ng_grad; jj++) {
-	     grad += ss[ii-jj] - ss[ii-jj-1];
-	     if (grad > smin_grad) {
-		mark_grad = ii-jj-1;
-		break;
-	     }
-	  }
+	       for (grad = 0, jj = 0; jj < ng_grad; jj++) {
+	          grad += ss[ii-jj] - ss[ii-jj-1];
+	          if (grad > smin_grad) {
+    		      mark_grad = ii-jj-1;
+    		      break;
+	          }
+	        }
        }
        if (ival > scaled30 && ival > zmax) {
-	  mark_max = ii; zmax = ival;
+	       mark_max = ii; zmax = ival;
        }
     }
 				
@@ -97,7 +114,7 @@ int alt_gecho(double min_grad,
     *zmax_cell = mark_max;
     return (mark_grad);
 }
-*/
+
 
 /* c------------------------------------------------------------------------ */
 
@@ -112,21 +129,34 @@ int alt_gecho(double min_grad,
     only_2_trip = strstr( cmds->uc_text
 			 , "ly-sec") != NULL; // only-second-trip-surface 
 */
-/*
+
+// NOTE: assumes that correction factors have been applied to 
+// az, elev (dds_ra_elevation) for each ray of data sent.
+
 // enum Surface_Type = {SURFACE, ONLY_SURFACE, SECOND_TRIP}; 
-void se_ac_surface_tweak(Surface_Type which_removal,
-			 float optimal_beamwidth,
-			 float vert_beam_width,
-			 float asib_altitude_agl,
-			 float dds_ra_elevation,
-			 bool getenv_ALTERNATE_GECHO,
-			 float d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on function call
+			 float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+       int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+			 float vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+			 float asib_altitude_agl,      // altitude angle ???
+			 float dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                                     // origin dds->ra->elevation, ra = radar_angles
+                                     // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+			 bool getenv_ALTERNATE_GECHO,  // script parameter
+			 double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
 			 // d = ALTERNATE_GECHO environment variable
-			 const float *data,
-			 float *new_data,
-			 size_t nGates,
-			 float bad_data_value,
-			 size_t dgi_clip_gate,
+       double dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+       double dds_asib_roll,            // origin dds->asib->roll
+       double dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+       float radar_latitude,  // radar->latitude 
+			 const float *data,     // internal value
+			 float *new_data,       // internal value
+			 size_t nGates,         // internal value
+       float gate_size,
+       float distance_to_first_gate,
+       double max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+			 float bad_data_value,  // default value
+			 size_t dgi_clip_gate,  // default value
 			 bool *boundary_mask)
 {
   // 
@@ -141,15 +171,15 @@ void se_ac_surface_tweak(Surface_Type which_removal,
     bool only_2_trip = false;
     int zmax_cell,  alt_g1;
     bool alt_gecho_flag = false;
-    char *name, *aa;
-    const float *ss, *zz;
-    float *tt;
+    //char *name, *aa;
+    const float *zz;
+    float *ss;
     bool *bnd;
     float  v0, v4, vx, bad;
     double rot_ang, earthr, deg_elev, bmwidth, elev_limit = -.0001;
-    double range_val, min_range, max_range, alt, range1;
-    double ground_intersect, footprint, surf_shift, fudge=1.;
-    double d, elev, tan_elev, half_vbw, min_grad = .08;	// dBz/meter 
+    double range_val, min_range, alt, range1;
+    double ground_intersect, fudge=1.;
+    double elev, tan_elev, half_vbw, min_grad = .08;	// dBz/meter 
     //struct dd_general_info *dgi, *dd_window_dgi();
     //struct dds_structs *dds;
     //struct platform_i *asib;
@@ -164,7 +194,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,
     switch (which_removal) {
     case SURFACE:
       break;
-    case SURFACE_ONLY:
+    case ONLY_SURFACE:
       // surface_only = strstr( cmds->uc_text
       //			  , "ly-sur") != NULL; // only-surface 
       surface_only = true;
@@ -190,79 +220,85 @@ void se_ac_surface_tweak(Surface_Type which_removal,
     // through half the beam width greater than or equal to the
     // altitude of the aircraft?
     ///
-    bmwidth = RADIANS(seds_optimal_beamwidth ? seds_optimal_beamwidth :
-	  dgi_dds_radd_vert_beam_width);
+    bmwidth = RADIANS(optimal_beamwidth ? optimal_beamwidth : vert_beam_width);
     half_vbw = .5 * bmwidth;
 
     alt = (asib_altitude_agl)*1000.;
-    // TODO: What is this???
-    max_range = dds_celvc_dist_cells[dgi_clip_gate];
-    elev = dds_ra_elevation;
+  
+    //max_range = dds_celvc_dist_cells[dgi_clip_gate];
+    elev = dds_ra_elevation;  // from radar angles
 
     if (surface_only && getenv_ALTERNATE_GECHO) { // (aa = getenv ("ALTERNATE_GECHO"))) {
       if( elev > -.002)	// -.10 degrees 
-	 { return; }
-       alt_gecho_flag = true;
-       if (d > 0)
-	 { min_grad = d; }	// dbz per meter
+	      { return; }
+      alt_gecho_flag = true;
+      if (d > 0)
+	      { min_grad = d; }	// dbz per meter
     }
 
     if( !surface_only && (d = max_range * fudge * bmwidth) >= alt) {
-	d -= alt;
-	elev_limit = atan2(d, (double)max_range);
+	    d -= alt;
+	    elev_limit = atan2(d, (double)max_range);
 
-	if( elev > elev_limit)
-	    return;
+    	if( elev > elev_limit)
+    	    return;
 
-	if(d >= 0 && elev > -fudge * bmwidth) {
-	    only_2_trip = true;
-	    g1 = 0;
-	}
+    	if(d >= 0 && elev > -fudge * bmwidth) {
+    	    only_2_trip = true;
+    	    g1 = 0;
+    	}
     }
 
     if( elev > elev_limit)
-	  return;
+	    return;
 
     if( !only_2_trip ) {
-        earthr = dd_earthr(dd_latitude(dgi));
-	elev -= half_vbw;
-	tan_elev = tan(elev);
-	range1 = ground_intersect = (-(alt)/sin(elev))*
-	      (1.+alt/(2.*earthr*1000.*
-		       tan_elev*tan_elev));
-	if(ground_intersect > max_range || ground_intersect < 0 )
-	      return;
+      earthr = BoundaryPointMap().dd_earthr(radar_latitude); // dd_earthr(dd_latitude(dgi)); 
+    	elev -= half_vbw;
+    	tan_elev = tan(elev);
+    	range1 = ground_intersect = (-(alt)/sin(elev))*
+    	      (1.+alt/(2.*earthr*1000.*
+    		       tan_elev*tan_elev));
+    	if(ground_intersect > max_range || ground_intersect < 0 )
+    	      return;
 	
 	
-	g1 = dd_cell_num(dgi->dds, 0, range1);
+    	// g1 = dd_cell_num(dgi->dds, 0, range1);  // TODO:
+      g1 = BoundaryPointMap().dd_cell_num((int) nGates, // TODO: nGates should be size_t!!
+        gate_size,
+        distance_to_first_gate,  
+        (float) range1);
     }
-    gate_shift = seds->surface_gate_shift;
-
+    gate_shift = seds_surface_gate_shift;  // TODO: input parameter SURFACE_GATE_SHIFT( <integer> gates )
+    float parameter_scale = 1.0; // I'm making this up.  Not sure what this should be.
     if (alt_gecho_flag) {
-      ii = alt_gecho (min_grad, &zmax_cell, elev, data, nGates,
+      ii = alt_gecho (min_grad, &zmax_cell, elev, new_data, 
+        parameter_scale,
+        nGates,
+        gate_size,
 		      dds_asib_rotation_angle, dds_asib_roll, dds_cfac_rot_angle_corr);
 
-       if (ii > 0)
-	 { g1 = ii; gate_shift = 0; }
-       else
-	 { return; }
+      if (ii > 0)
+    	  { g1 = ii; gate_shift = 0; } 
+      else
+    	  { return; }
     }
 
     g1 += gate_shift;
     if(g1 < 0) g1 = 0;
 
-    ss = data;
-    tt = new_data;
+    // ss = data;
+    ss = new_data;
 
     zz = ss + dgi_clip_gate; //  +1;
     ss += g1;
     bad = bad_data_value;
 
     for(; ss < zz;)
-	  *ss++ = bad;
+	    *ss++ = bad;
 
 }
-*/
+
 /* c------------------------------------------------------------------------ */
 
 /* #remove-storm-motion# */

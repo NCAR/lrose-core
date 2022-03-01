@@ -186,6 +186,37 @@ void se_unconditional_delete(const float *data, float *newData, size_t nGates,
       float bad, size_t dgi_clip_gate,
       bool *boundary_mask);
 
+ void dd_radar_angles( 
+     float asib_roll,
+     float asib_pitch,
+     float asib_heading,
+     float asib_drift_angle,
+     float asib_rotation_angle,
+     float asib_tilt,
+
+
+     float cfac_pitch_corr,
+     float cfac_heading_corr,
+     float cfac_drift_corr,
+     float cfac_roll_corr,
+     float cfac_elevation_corr,
+     float cfac_azimuth_corr,
+     float cfac_rot_angle_corr,
+     float cfac_tilt_corr,
+     int radar_type,  // from dgi->dds->radd->radar_type
+     bool use_Wen_Chaus_algorithm,
+    float dgi_dds_ryib_azimuth,
+    float dgi_dds_ryib_elevation,
+     float *ra_x,
+     float *ra_y,
+     float *ra_z,
+     float *ra_rotation_angle,
+     float *ra_tilt,
+     float *ra_azimuth,
+     float *ra_elevation,
+     float *ra_psi
+);
+
 
 // given a list of x, y points, an other geo data,
 // return a mask of booleans where 
@@ -212,7 +243,6 @@ void se_get_boundary_mask(long *xpoints, long *ypoints, int npoints,
              int radar_scan_mode,
              int radar_type,
              float tilt_angle,
-             float rotation_angle,
              bool *boundary_mask);
 
 #endif

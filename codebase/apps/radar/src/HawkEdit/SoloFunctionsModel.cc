@@ -252,7 +252,6 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
   int radar_type = 0; // GROUND; 
  
   float tilt_angle = 0.0; // TODO: It should be this ... ray->getElevationDeg();
-  float rotation_angle = 0.0; 
 
 
   // TODO: need to fix this!  sending bool*, expecting short*
@@ -273,7 +272,6 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
 				   radar_scan_mode,
 				   radar_type,
 				   tilt_angle,
-				   rotation_angle,
 				   _boundaryMask);
  
   printBoundaryMask();
