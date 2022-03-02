@@ -5026,7 +5026,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
     } else {
       // send the current sweep to the script editor controller
       int currentSweepIndex = _sweepController->getSelectedNumber();
-      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+      //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
        useBoundary, boundaryPoints);

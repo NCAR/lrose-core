@@ -684,6 +684,9 @@ size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
 
 // get the first ray for a sweep
 size_t DataModel::getFirstRayIndex(int sweepIndex) {
+  if (sweepIndex < 0) {
+    throw std::invalid_argument("DataModel::getFirstRayIndex bad sweep index < 0");
+  }
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();

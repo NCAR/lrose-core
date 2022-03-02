@@ -661,7 +661,8 @@ void SoloFunctionsController::setCurrentSweepToFirst() {
 
 void SoloFunctionsController::setCurrentSweepTo(int sweepIndex) {
   cerr << "entry setCurrentSweepToFirst" << endl;
-  _currentSweepIdx = (size_t) sweepIndex;
+  if (sweepIndex < 0) _currentSweepIdx = 0;
+  else _currentSweepIdx = (size_t) sweepIndex;
   cerr << "exit setCurrentSweepToFirst" << endl;
 
   //LOG(DEBUG) << "exit";
