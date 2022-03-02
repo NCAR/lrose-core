@@ -111,6 +111,8 @@ public:
   float getAltitudeKm();
 
   void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
+  double getRadarBeamWidthDegV();
+  double getCfactorRotationCorr();
   const RadxGeoref *getGeoreference(size_t rayIdx);
 
   int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);

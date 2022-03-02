@@ -42,6 +42,14 @@ public:
   Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist = 0,
     float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
 
+  Q_INVOKABLE QString REMOVE_ONLY_SURFACE(QString field, 
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     bool getenv_ALTERNATE_GECHO = false,  // script parameter
+     double d = 0.0, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+     float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); 
+
  // return the name of the new field that contains the result
   Q_INVOKABLE QString BB_UNFOLDING_FIRST_GOOD_GATE(QString field, float nyquist,
 						   int max_pos_folds,

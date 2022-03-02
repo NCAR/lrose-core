@@ -8,6 +8,7 @@
 # MULT_FIELDS <field> by <field> put_in <field> ) ; use assignment and *
 # SUBTRACT <field> from <field> put_in <field> ) ; use assignment and -
 ABS(<field>)
+ALTERNATE_GECHO = <bool>
 AND_BAD_FLAGS_ABOVE( <field>, <real>, <bad mask> )
 AND_BAD_FLAGS_BELOW( <field>, <real>, <bad mask> )
 AND_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad mask> )
@@ -70,11 +71,11 @@ RADIAL_SHEAR( <field> put_in <field> )
 RAIN_RATE( <field> by <real> put_in <field> ) - not implemented
 REGULAR_HISTOGRAM_PARAMETERS LOW <real> high <real>(crement <real> ) - not implemented
 REMOVE_AIRCRAFT_MOTION( <field> )
-REMOVE_ONLY_SECOND_TRIP_SURFACE( <field> )
-REMOVE_ONLY_SURFACE( <field> )
+REMOVE_ONLY_SECOND_TRIP_SURFACE( <field>, [OPTIMAL_BEAMWIDTH, SURFACE_GATE_SHIFT] )
+REMOVE_ONLY_SURFACE( <field>, [OPTIMAL_BEAMWIDTH, ALTERNATE_GECHO, SURFACE_GATE_SHIFT] )
 REMOVE_RING( <field>, <from km>, <to km> )
 REMOVE_STORM_MOTION( <field>( <real> deg <real> mps)
-REMOVE_SURFACE( <field>)
+REMOVE_SURFACE( <field>, [OPTIMAL_BEAMWIDTH, SURFACE_GATE_SHIFT] )
 RESCALE_FIELD( <field>, <scale>, <bias> )
 REWRITE - not implemented
 RUN(<starttime>, <stoptime>, <fx>, <boundary>) - not implemented

@@ -177,6 +177,31 @@ void se_remove_storm_motion(float wind, float speed, float dgi_dd_rotation_angle
 			    const float *data, float *new_data, size_t nGates,
 			    float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
+void se_ac_surface_tweak(enum Surface_Type which_removal,  // internal value based on function call
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     float vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+     float asib_altitude_agl,      // altitude angle ???
+     float dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                           // origin dds->ra->elevation, ra = radar_angles
+                           // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+     double dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+     double dds_asib_roll,            // origin dds->asib->roll
+     double dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+     float radar_latitude,  // radar->latitude 
+     const float *data,     // internal value
+     float *new_data,       // internal value
+     size_t nGates,         // internal value
+     float gate_size,
+     float distance_to_first_gate,
+     double max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+     float bad_data_value,  // default value
+     size_t dgi_clip_gate,  // default value
+     bool *boundary_mask);
+
 void se_unconditional_delete(const float *data, float *newData, size_t nGates,
          float bad, size_t dgi_clip_gate, bool *boundary_mask);
 

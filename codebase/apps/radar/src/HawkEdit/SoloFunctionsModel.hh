@@ -32,7 +32,19 @@ public:
 			      size_t clip_gate,
 			      float bad_data_value,
 			      string newFieldName);
+  
+  string RemoveOnlySurface(string fieldName,
+            int rayIdx, int sweepIdx,
 
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+
+            size_t clip_gate,
+            float bad_data_value,
+            string newFieldName);
 
   string ZeroMiddleThird(string fieldName,  //RadxVol *vol,
 			 int rayIdx, int sweepIdx,

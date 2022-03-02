@@ -86,6 +86,28 @@ QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float ny
   return QString::fromStdString(tempFieldName);
 }
 
+QString  SoloFunctionsController::REMOVE_ONLY_SURFACE(QString field, 
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+      float bad_data,
+      size_t clip_gate) { 
+
+  string tempFieldName = soloFunctionsModel.RemoveOnlySurface(field.toStdString(),
+                 _currentRayIdx, _currentSweepIdx,
+                 optimal_beamwidth,
+                 seds_surface_gate_shift,      
+                 getenv_ALTERNATE_GECHO,  
+                  d,
+                  clip_gate,
+                  bad_data,
+                  field.toStdString());
+
+  // returns name of new field in RadxVol
+  return QString::fromStdString(tempFieldName);
+}
 
 QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, float nyquist, 
 							       int max_pos_folds,

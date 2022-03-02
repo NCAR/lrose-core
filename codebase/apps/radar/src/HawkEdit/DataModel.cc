@@ -2,6 +2,7 @@
 #include <toolsa/LogStream.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxSweep.hh>
+#include <Radx/RadxCfactors.hh>
 #include <cmath>
 
 using namespace std;
@@ -940,6 +941,23 @@ float DataModel::getLongitudeDeg() {
 float DataModel::getAltitudeKm() {
   return _vol->getAltitudeKm();
 }
+
+double DataModel::getRadarBeamWidthDegV() {
+  return _vol->getRadarBeamWidthDegV();
+}
+
+double DataModel::getCfactorRotationCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getRotationCorr();
+  else return 0.0;
+}
+
+/*
+double DataModel::getAltitudeKmAgl() {
+
+}
+*/
 
 const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
 
