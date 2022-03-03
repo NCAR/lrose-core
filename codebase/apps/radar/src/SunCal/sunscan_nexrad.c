@@ -852,6 +852,7 @@ static int _addBeamToRawArray(solar_beam_t *beam)
     int newSize = _elevAllocRaw[azIndex] + gridNEl;
     _rawBeamArray[azIndex] =
       realloc(_rawBeamArray[azIndex], newSize * sizeof(solar_beam_t));
+    _elevAllocRaw[azIndex] = newSize;
   }
 
   /* copy beam to the array */
