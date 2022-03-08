@@ -31,7 +31,7 @@ int alt_gecho(double min_grad,
 	      float *DBZ_data,
         float DBZ_parameter_scale,  // TODO: figure out this ???
 	      size_t nGates,
-        double gate_size,  
+        double gate_size_km,  
 	      double dds_asib_rotation_angle,
 	      double dds_asib_roll,
 	      double dds_cfac_rot_angle_corr)
@@ -50,7 +50,7 @@ int alt_gecho(double min_grad,
     float *ss;
     short scaled30;
     double gs, slope, smin_grad, grad; //  elev = dds->ra->elevation;
-    double rot_angle;
+    //double rot_angle;
 
     /* must pass in data from DBZ field ... otherwise, don't bother calling!
     if((pn = dd_find_field(dgi, "DBZ")) < 0) {	
@@ -64,7 +64,7 @@ int alt_gecho(double min_grad,
      //
     // TODO: is gs the distance between gates?
     //gs = dds->celvc->dist_cells[1] - dds->celvc->dist_cells[0];
-    gs = gate_size;
+    gs = gate_size_km;
     ss = DBZ_data; // (short *)dds->qdat_ptrs[pn];
     nn = nGates; // dgi->dds->celvc->number_cells;
     // TODO: what to do about this scaled30?  just set it to 30.0 ?
@@ -73,8 +73,8 @@ int alt_gecho(double min_grad,
     // TODO: what to do about this ??
     //smin_grad = min_grad * dgi->dds->parm[pn]->parameter_scale * gs * 2.;
     smin_grad = min_grad * DBZ_parameter_scale                 * gs * 2.;
-    rot_angle = dds_asib_rotation_angle + dds_asib_roll +
-      dds_cfac_rot_angle_corr;
+    //rot_angle = dds_asib_rotation_angle + dds_asib_roll +
+    //  dds_cfac_rot_angle_corr;
 
     // scaled change in dBz over two gates 
     // min_grad = .08 => ~20 dBz over two gates. 
@@ -133,12 +133,14 @@ int alt_gecho(double min_grad,
 // NOTE: assumes that correction factors have been applied to 
 // az, elev (dds_ra_elevation) for each ray of data sent.
 
+// NOTE: does not use boundary!!!
+
 // enum Surface_Type = {SURFACE, ONLY_SURFACE, SECOND_TRIP}; 
 void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on function call
 			 float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
        int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
 			 float vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
-			 float asib_altitude_agl,      // altitude angle ???
+			 float asib_altitude_agl,      // altitude angle ??? in meters!
 			 float dds_ra_elevation,       // radar angles!! requires cfac values and calculation
                                      // origin dds->ra->elevation, ra = radar_angles
                                      // get this from RadxRay::_elev if RadxRay::_georefApplied == true
@@ -152,9 +154,9 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
 			 const float *data,     // internal value
 			 float *new_data,       // internal value
 			 size_t nGates,         // internal value
-       float gate_size,
-       float distance_to_first_gate,
-       double max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+       float gate_size_km,
+       float distance_to_first_gate_km,
+       double max_range_km,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
 			 float bad_data_value,  // default value
 			 size_t dgi_clip_gate,  // default value
 			 bool *boundary_mask)
@@ -176,10 +178,10 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     float *ss;
     bool *bnd;
     float  v0, v4, vx, bad;
-    double rot_ang, earthr, deg_elev, bmwidth, elev_limit = -.0001;
-    double range_val, min_range, alt, range1;
-    double ground_intersect, fudge=1.;
-    double elev, tan_elev, half_vbw, min_grad = .08;	// dBz/meter 
+    double rot_ang, earthr_in_km, deg_elev, bmwidth_radians, elev_limit = -.0001;
+    double range_val, min_range, alt_km, range1_km;
+    double ground_intersect_km, fudge=1.;
+    double elev_radians, tan_elev, half_vbw_radians, min_grad = .08;	// dBz/meter 
     //struct dd_general_info *dgi, *dd_window_dgi();
     //struct dds_structs *dds;
     //struct platform_i *asib;
@@ -216,72 +218,98 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     //
     // we probably need to make a calculation to determine if
     // the ground echo goes above the aircraft i.e. is the distance
-    // (arc length) defined by a ray of length max_range rotated
+    // (arc length) defined by a ray of length max_range_km rotated
     // through half the beam width greater than or equal to the
     // altitude of the aircraft?
     ///
-    bmwidth = RADIANS(optimal_beamwidth ? optimal_beamwidth : vert_beam_width);
-    half_vbw = .5 * bmwidth;
+    bmwidth_radians= RADIANS(optimal_beamwidth ? optimal_beamwidth : vert_beam_width);
+    half_vbw_radians = .5 * bmwidth_radians;
 
-    alt = (asib_altitude_agl)*1000.;
+    cerr << " bmwidth_radians=" << bmwidth_radians;
+    cerr << " half_vbw_radians=" << half_vbw_radians;
+
+    alt_km = (asib_altitude_agl); //  *1000.;
   
-    //max_range = dds_celvc_dist_cells[dgi_clip_gate];
-    elev = dds_ra_elevation;  // from radar angles
+    //max_range_km = dds_celvc_dist_cells[dgi_clip_gate];
+    elev_radians = dds_ra_elevation;  // from radar angles ALREADY IN RADIANS!
+
+    cerr << " evel=" << elev_radians;
+    cerr << " rot_angle=" << dds_asib_rotation_angle;
+    cerr << " max_range_km=" << max_range_km;
 
     if (surface_only && getenv_ALTERNATE_GECHO) { // (aa = getenv ("ALTERNATE_GECHO"))) {
-      if( elev > -.002)	// -.10 degrees 
-	      { return; }
+      if( elev_radians > -.002)	// -.10 degrees 
+	      { 
+          cerr << endl << "returning elev_radians > -.002" << endl;
+          return; 
+        }
       alt_gecho_flag = true;
       if (d > 0)
 	      { min_grad = d; }	// dbz per meter
     }
 
-    if( !surface_only && (d = max_range * fudge * bmwidth) >= alt) {
-	    d -= alt;
-	    elev_limit = atan2(d, (double)max_range);
+    if( !surface_only && (d = max_range_km * fudge * bmwidth_radians) >= alt_km) {
+	    d -= alt_km;
+	    elev_limit = atan2(d, (double)max_range_km);
+      cerr << " elev_limt=" << elev_limit;
 
-    	if( elev > elev_limit)
+    	if( elev_radians > elev_limit) {
+          cerr << endl << "returning elev_radians > elev_limt" << endl;
     	    return;
+        }
 
-    	if(d >= 0 && elev > -fudge * bmwidth) {
+    	if(d >= 0 && elev_radians > -fudge * bmwidth_radians) {
     	    only_2_trip = true;
     	    g1 = 0;
     	}
     }
 
-    if( elev > elev_limit)
+    if( elev_radians > elev_limit) {
+      cerr << endl << "returning elev_radians > elev_limt" << endl;
 	    return;
+    }
 
     if( !only_2_trip ) {
-      earthr = BoundaryPointMap().dd_earthr(radar_latitude); // dd_earthr(dd_latitude(dgi)); 
-    	elev -= half_vbw;
-    	tan_elev = tan(elev);
-    	range1 = ground_intersect = (-(alt)/sin(elev))*
-    	      (1.+alt/(2.*earthr*1000.*
+      earthr_in_km = BoundaryPointMap().dd_earthr(radar_latitude); // dd_earthr(dd_latitude(dgi)); 
+    	elev_radians -= half_vbw_radians;
+    	tan_elev = tan(elev_radians);
+    	range1_km = ground_intersect_km = (-(alt_km)/sin(elev_radians))*
+    	      (1.+alt_km/(2.*earthr_in_km*  // 1000.*
     		       tan_elev*tan_elev));
-    	if(ground_intersect > max_range || ground_intersect < 0 )
+
+      cerr << " earthr_in_km=" << earthr_in_km;
+      cerr << " elev_radians=" << elev_radians;
+      cerr << " ground_intersect_km=" << ground_intersect_km;
+
+    	if(ground_intersect_km > (max_range_km) || ground_intersect_km < 0 ) {
+        cerr << endl << "returning ground_intersect_in_meters > max_range_km || ground_intersect_in_meters < 0" << endl;
     	      return;
+      }
 	
 	
     	// g1 = dd_cell_num(dgi->dds, 0, range1);  // TODO:
       g1 = BoundaryPointMap().dd_cell_num((int) nGates, // TODO: nGates should be size_t!!
-        gate_size,
-        distance_to_first_gate,  
-        (float) range1);
+        gate_size_km,
+        distance_to_first_gate_km,  
+        (float) range1_km);
+      cerr << " g1=" << g1;
     }
     gate_shift = seds_surface_gate_shift;  // TODO: input parameter SURFACE_GATE_SHIFT( <integer> gates )
     float parameter_scale = 1.0; // I'm making this up.  Not sure what this should be.
     if (alt_gecho_flag) {
-      ii = alt_gecho (min_grad, &zmax_cell, elev, new_data, 
+      ii = alt_gecho (min_grad, &zmax_cell, elev_radians, new_data, 
         parameter_scale,
         nGates,
-        gate_size,
+        gate_size_km,
 		      dds_asib_rotation_angle, dds_asib_roll, dds_cfac_rot_angle_corr);
 
       if (ii > 0)
     	  { g1 = ii; gate_shift = 0; } 
       else
-    	  { return; }
+    	  { 
+          cerr << endl << "returning alt_gecho_flag=true ii=g1 < 0" << endl;
+          return; 
+        }
     }
 
     g1 += gate_shift;
