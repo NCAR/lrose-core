@@ -944,11 +944,17 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
     throw "Ray is null";
   } 
 
-  // make sure the radar angles have been calculated.  
-  if (!ray->getGeorefApplied()) {
+  /* make sure the radar angles have been calculated.  
+  // this does NOT see to be functioning
+  if (!ray->getGeorefApplied()) {  
     LOG(DEBUG) << "ERROR - georefs/cfac have not been applied";
     throw "Georefs have not been applied";
   } 
+  */
+
+  Radx::PrimaryAxis_t primary_axis = dataModel->getPrimaryAxis();
+  bool force = true;
+  ray->applyGeoref(primary_axis, force);
 
   /*
   const RadxGeoref *georef = ray->getGeoreference();
@@ -965,7 +971,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   const RadxGeoref *georef = dataModel->getGeoreference(rayIdx);
   if (georef == NULL) {
-    throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
+    throw "Remove Only Surface: Georef is null. Cannot find asib_altitude_agl.";
   }  
  
 // ----  need these values from cfac/georef
@@ -981,13 +987,13 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
 // ---
 
-  float vert_velocity = georef->getVertVelocity();  // fl32
+  //float vert_velocity = georef->getVertVelocity();  // fl32
 
 
  
   // TODO: elevation changes with different rays/fields how to get the current one???
   float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
-  float dds_ra_elevation = elevation;       // radar angles!! requires cfac values and calculation
+  float dds_ra_elevation = elevation * M_PI / 180.00; // radar angles!! requires cfac values and calculation
                            // origin dds->ra->elevation, ra = radar_angles
                            // get this from RadxRay::_elev if RadxRay::_georefApplied == true
 
@@ -995,10 +1001,9 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   float radar_latitude = dataModel->getLatitudeDeg(); // radar->latitude 
 
   LOG(DEBUG) << "args: ";
-  LOG(DEBUG) << "vert_velocity " << vert_velocity;
-  //LOG(DEBUG) << ""
+  LOG(DEBUG) << "ra_elevation (radians) " << dds_ra_elevation; 
   LOG(DEBUG) <<   "radar_latitude " << radar_latitude;
-  LOG(DEBUG) <<   "elevation " << elevation;
+  LOG(DEBUG) <<   "vert_beam_width (degrees) " << vert_beam_width;
   //LOG(DEBUG) <<   "bad " << bad;
   //  LOG(DEBUG) <<   "parameter_scale " << parameter_scale;
   // LOG(DEBUG) <<   "dgi_clip_gate " << dgi_clip_gate;

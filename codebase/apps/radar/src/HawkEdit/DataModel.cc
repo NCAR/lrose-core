@@ -437,6 +437,10 @@ void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   }
 }
 
+Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
+  return _vol->getPrimaryAxis();
+}
+
 // merge edited fields (those read in memory) with
 // those fields in the original data file
 void DataModel::mergeDataFields(string fileName) {

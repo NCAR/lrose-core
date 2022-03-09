@@ -123,6 +123,8 @@ public:
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void mergeDataFields(string fileName);
 
+  Radx::PrimaryAxis_t getPrimaryAxis();
+
   void printAzimuthInRayOrder();
   void writeWithMergeData(string outputPath, string originalSourcePath);
 

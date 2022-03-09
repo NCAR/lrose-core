@@ -208,6 +208,12 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
       break;
     }
 
+    if ((dgi_clip_gate > nGates) || (dgi_clip_gate < 0)) {
+      nc = nGates;
+    } else {
+      nc = dgi_clip_gate;
+    }
+
     // memcopy data into new_data                                                                     
     memcpy(new_data, data, nGates*sizeof(float));
 
@@ -292,7 +298,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
         gate_size_km,
         distance_to_first_gate_km,  
         (float) range1_km);
-      cerr << " g1=" << g1;
+      cerr << " g1=" << g1 << endl;
     }
     gate_shift = seds_surface_gate_shift;  // TODO: input parameter SURFACE_GATE_SHIFT( <integer> gates )
     float parameter_scale = 1.0; // I'm making this up.  Not sure what this should be.
@@ -318,7 +324,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     // ss = data;
     ss = new_data;
 
-    zz = ss + dgi_clip_gate; //  +1;
+    zz = ss + nc;
     ss += g1;
     bad = bad_data_value;
 
