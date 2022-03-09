@@ -1075,23 +1075,12 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
     clip_gate,  // default value
     _boundaryMask);
 
-
-
-  // insert new field into RadxVol   
-  /*                                                                          
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
-  */
-  
-  //Radx::fl32 missingValue = Radx::missingFl32; 
+  // insert new field into RadxVol     
   bool isLocal = false;
 
-  //RadxField *newField = new RadxField(newFieldName, "m/s");
-  //newField->copyMetaData(*field);
-  //newField->addDataFl32(nGates, newData);
-  RadxField *field1 = ray->addField(newFieldName, "m/s", nGates, missingValue, newData, isLocal);
+  string field_units = field->getUnits();
+
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
 
   string tempFieldName = field1->getName();
   tempFieldName.append("#");

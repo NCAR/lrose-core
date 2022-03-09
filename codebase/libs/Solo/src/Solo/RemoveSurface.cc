@@ -159,7 +159,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
        double max_range_km,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
 			 float bad_data_value,  // default value
 			 size_t dgi_clip_gate,  // default value
-			 bool *boundary_mask)
+			 bool *boundary_mask)   // boundary mask is NOT used!!
 {
   // 
   // #remove-surface#
@@ -218,7 +218,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     memcpy(new_data, data, nGates*sizeof(float));
 
     //    dgi = dd_window_dgi(seds->se_frame);
-    bnd = boundary_mask;
+    //bnd = boundary_mask;
     //dds = dgi->dds;
     //asib = dds->asib;
     //
@@ -231,22 +231,22 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     bmwidth_radians= RADIANS(optimal_beamwidth ? optimal_beamwidth : vert_beam_width);
     half_vbw_radians = .5 * bmwidth_radians;
 
-    cerr << " bmwidth_radians=" << bmwidth_radians;
-    cerr << " half_vbw_radians=" << half_vbw_radians;
+    // cerr << " bmwidth_radians=" << bmwidth_radians;
+    // cerr << " half_vbw_radians=" << half_vbw_radians;
 
     alt_km = (asib_altitude_agl); //  *1000.;
   
     //max_range_km = dds_celvc_dist_cells[dgi_clip_gate];
     elev_radians = dds_ra_elevation;  // from radar angles ALREADY IN RADIANS!
 
-    cerr << " evel=" << elev_radians;
-    cerr << " rot_angle=" << dds_asib_rotation_angle;
-    cerr << " max_range_km=" << max_range_km;
+    // cerr << " evel=" << elev_radians;
+    // cerr << " rot_angle=" << dds_asib_rotation_angle;
+    // cerr << " max_range_km=" << max_range_km;
 
     if (surface_only && getenv_ALTERNATE_GECHO) { // (aa = getenv ("ALTERNATE_GECHO"))) {
       if( elev_radians > -.002)	// -.10 degrees 
 	      { 
-          cerr << endl << "returning elev_radians > -.002" << endl;
+          // cerr << endl << "returning elev_radians > -.002" << endl;
           return; 
         }
       alt_gecho_flag = true;
@@ -257,10 +257,10 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     if( !surface_only && (d = max_range_km * fudge * bmwidth_radians) >= alt_km) {
 	    d -= alt_km;
 	    elev_limit = atan2(d, (double)max_range_km);
-      cerr << " elev_limt=" << elev_limit;
+      // cerr << " elev_limt=" << elev_limit;
 
     	if( elev_radians > elev_limit) {
-          cerr << endl << "returning elev_radians > elev_limt" << endl;
+          // cerr << endl << "returning elev_radians > elev_limt" << endl;
     	    return;
         }
 
@@ -271,7 +271,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     }
 
     if( elev_radians > elev_limit) {
-      cerr << endl << "returning elev_radians > elev_limt" << endl;
+      // cerr << endl << "returning elev_radians > elev_limt" << endl;
 	    return;
     }
 
@@ -283,12 +283,12 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     	      (1.+alt_km/(2.*earthr_in_km*  // 1000.*
     		       tan_elev*tan_elev));
 
-      cerr << " earthr_in_km=" << earthr_in_km;
-      cerr << " elev_radians=" << elev_radians;
-      cerr << " ground_intersect_km=" << ground_intersect_km;
+      // cerr << " earthr_in_km=" << earthr_in_km;
+      // cerr << " elev_radians=" << elev_radians;
+      // cerr << " ground_intersect_km=" << ground_intersect_km;
 
     	if(ground_intersect_km > (max_range_km) || ground_intersect_km < 0 ) {
-        cerr << endl << "returning ground_intersect_in_meters > max_range_km || ground_intersect_in_meters < 0" << endl;
+        // cerr << endl << "returning ground_intersect_in_meters > max_range_km || ground_intersect_in_meters < 0" << endl;
     	      return;
       }
 	
@@ -298,7 +298,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
         gate_size_km,
         distance_to_first_gate_km,  
         (float) range1_km);
-      cerr << " g1=" << g1 << endl;
+      // cerr << " g1=" << g1 << endl;
     }
     gate_shift = seds_surface_gate_shift;  // TODO: input parameter SURFACE_GATE_SHIFT( <integer> gates )
     float parameter_scale = 1.0; // I'm making this up.  Not sure what this should be.
@@ -313,7 +313,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     	  { g1 = ii; gate_shift = 0; } 
       else
     	  { 
-          cerr << endl << "returning alt_gecho_flag=true ii=g1 < 0" << endl;
+          // cerr << endl << "returning alt_gecho_flag=true ii=g1 < 0" << endl;
           return; 
         }
     }
