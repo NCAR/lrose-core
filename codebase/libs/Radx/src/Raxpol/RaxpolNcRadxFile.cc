@@ -2079,10 +2079,11 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
 
   // loop through the paths in this dir
 
+  double prevFixedAngle = -9999.0;
+
   for (size_t ipath = 0; ipath < _allPathsInDir.size(); ipath++) {
 
     string path = _allPathsInDir[ipath];
-    // cerr << "xxxxxxxxxxxxxxxxxxxxxxxx path: " << path << endl;
     RadxPath pPath(path);
     const string &fileName = pPath.getFile();
     
@@ -2092,8 +2093,6 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     }
     if (thisTime < primaryTime) {
       // ignore files before the primary time
-      // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa time: "
-      //      << thisTime.asString(3) << endl;
       continue;
     }
     
@@ -2104,8 +2103,6 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     }
     if (isRhi != primaryIsRhi) {
       // ignore other scan modes
-      // cerr << "dddddddddddddddddddddddddddcccccc fixedAngle, isRhi: "
-      //      << fixedAngle << ", " << isRhi << endl;
       continue;
     }
     
@@ -2114,20 +2111,21 @@ int RaxpolNcRadxFile::_getSweepPrimaryPaths(const string &primaryPath,
     // add vol paths
     
     if (fieldName != primaryFieldName) {
-      // cerr << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee fieldName: " << fieldName << endl;
       continue;
     }
     
-    // break if the fixed angle decreases below the primary
-    // cerr << "ffffffff fixedAngle: " << fixedAngle << endl;
-    // cerr << "ffffffff primaryFixedAngle: " << primaryFixedAngle << endl;
-    // cerr << "ffffffff sweepPaths.size(): " << sweepPaths.size() << endl;
-    if (fixedAngle <= primaryFixedAngle && sweepPaths.size() > 0) {
-      // cerr << "fffffffffffffffffffffffffffff" << endl;
-      break;
+    // break if the fixed angle decreases or repeats
+    if (sweepPaths.size() > 0) {
+      if (fixedAngle <= primaryFixedAngle) {
+        break;
+      }
+      if (fixedAngle <= prevFixedAngle) {
+        break;
+      }
     }
     
     sweepPaths.push_back(path);
+    prevFixedAngle = fixedAngle;
     
   } // ipath
 
