@@ -5033,6 +5033,8 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
     }
   } catch (const std::out_of_range& ex) {
     errorMessage("ERROR", ex.what());
+  } catch (string &msg) {
+    errorMessage("Error", msg);
   }
 }
 
@@ -5153,6 +5155,8 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       return;
     } catch (const std::out_of_range& ex) {
       errorMessage("ERROR", ex.what());
+    } catch (string &msg) {
+      errorMessage("Error", msg);
     }
     archiveFileIndex += 1;
     //progressBar.setValue(archiveFileIndex);

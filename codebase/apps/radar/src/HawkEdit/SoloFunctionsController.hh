@@ -37,6 +37,8 @@ public:
   Q_INVOKABLE QString ZERO_MIDDLE_THIRD(QString field); // return the name of the new field that contains the result
   Q_INVOKABLE QString ZERO_INSIDE_BOUNDARY(QString field); // return the name of the new field that contains the result
 
+  //Q_INVOKABLE QString COPY(QString fromField, QString toField); // returns empty string
+
   Q_INVOKABLE QString DESPECKLE(QString field, size_t speckle_length,
     float bad_data = FLT_MIN, size_t clip_gate = SIZE_MAX); // return the name of the new field that contains the result
   Q_INVOKABLE QString REMOVE_AIRCRAFT_MOTION(QString field, float nyquist = 0,
@@ -196,6 +198,12 @@ public:
   void assign(size_t rayIdx, string tempName, string userDefinedName);
   void assign(string tempName, string userDefinedName,
     size_t sweepIndex);
+
+  void copyField(string tempName, string userDefinedName);
+  void copyField(string tempName, string userDefinedName,
+    size_t sweepIndex);
+  void copyField(size_t rayIdx, string tempName, string userDefinedName);
+  
   const vector<float> *getData(string &fieldName);
   void setData(string &fieldName, vector<float> *fieldData);
 

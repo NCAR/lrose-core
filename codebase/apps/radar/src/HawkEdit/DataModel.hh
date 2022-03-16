@@ -72,6 +72,7 @@ public:
   void renameField(string currentName, string newName);
   void renameField(size_t rayIdx, string currentName, string newName);
   void copyField(size_t rayIdx, string fromFieldName, string toFieldName);
+  void copyField2(size_t rayIdx, string fromFieldName, string toFieldName);
   bool fieldExists(size_t rayIdx, string fieldName);
 
   void regularizeRays();

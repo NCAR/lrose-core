@@ -507,6 +507,7 @@ void DataModel::renameField(size_t rayIdx, string currentName, string newName) {
 }
 
 // copy from one field to another field 
+// overwrite destination
 void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldName) {
   RadxRay *ray = getRay(rayIdx);
   //vector<RadxRay *> rays = _vol->getRays();  
@@ -529,6 +530,17 @@ void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldNam
       memcpy(dst, src, nbytes*sizeof(Radx::fl32));
     }
   //}
+}
+
+// copy from one field to another field 
+void DataModel::copyField2(size_t rayIdx, string fromFieldName, string toFieldName) {
+  RadxRay *ray = getRay(rayIdx);
+  RadxField *srcField = fetchDataField(ray, fromFieldName);
+  if (srcField != NULL) {
+    RadxField *copy = new RadxField(*srcField);
+    copy->setName(toFieldName);
+    ray->addField(copy);
+  }
 }
 
 bool DataModel::fieldExists(size_t rayIdx, string fieldName) {

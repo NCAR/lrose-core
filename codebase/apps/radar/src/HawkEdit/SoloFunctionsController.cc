@@ -246,6 +246,19 @@ QString SoloFunctionsController::ZERO_MIDDLE_THIRD(QString field) {
   return QString::fromStdString(tempFieldName); // QString("zero middle result");
 }
 
+/*
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::COPY(QString fromField, QString toField) { 
+
+  string emptString = soloFunctionsModel.CopyField(fromField.toStdString(),
+                 _currentRayIdx, _currentSweepIdx,
+                 toField.toStdString());
+
+  return QString::fromStdString(emptString);
+}
+*/
+
+
 
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::ZERO_INSIDE_BOUNDARY(QString field) { 
@@ -749,6 +762,18 @@ void SoloFunctionsController::regularizeRays() {
   dataModel->regularizeRays();  
 }
 
+void SoloFunctionsController::copyField(size_t rayIdx, string tempName, string userDefinedName) {
+
+  DataModel *dataModel = DataModel::Instance();
+
+  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+    throw std::invalid_argument("field name exist; cannot rename");
+  }
+  if (dataModel->fieldExists(rayIdx, tempName)) {
+    dataModel->copyField2(rayIdx, tempName, userDefinedName);
+  } 
+}
+
 void SoloFunctionsController::assign(size_t rayIdx, string tempName, string userDefinedName) {
   //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
   // TODO: where are the field names kept? in the table map? can i just change that?
@@ -793,6 +818,28 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName,
   size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
   for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
     assign(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void SoloFunctionsController::copyField(string tempName, string userDefinedName) {
+
+  // for each ray ...
+  DataModel *dataModel = DataModel::Instance();
+  size_t nRays = dataModel->getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void SoloFunctionsController::copyField(string tempName, string userDefinedName,
+  size_t sweepIndex) {
+
+  // for each ray of sweep
+  DataModel *dataModel = DataModel::Instance();
+  size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
+  for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
   }
 }
 
