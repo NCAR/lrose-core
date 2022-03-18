@@ -240,14 +240,18 @@ int GpmHdf5ToMdv::_processFile(const char *input_path)
 
     // open the NS group
     
-    Group ns(root.openGroup("NS"));
-    if (_readMetadata(ns)) {
+    if (!root.nameExists(_params.main_dataset_group_name)) {
+      cerr << "ERROR - group does not exist: " << _params.main_dataset_group_name << endl;
+      return -1;
+    }
+    Group groupMain(root.openGroup(_params.main_dataset_group_name));
+    if (_readMetadata(groupMain)) {
       return -1;
     }
 
     // read in the fields
     
-    if (_readFields(ns)) {
+    if (_readFields(groupMain)) {
       return -1;
     }
 
@@ -358,30 +362,49 @@ string GpmHdf5ToMdv::_readStringAttribute(Group &group,
 //////////////////////////////////////////////
 // read the NS group metadata
 
-int GpmHdf5ToMdv::_readMetadata(Group &ns)
+int GpmHdf5ToMdv::_readMetadata(Group &groupMain)
   
 {
 
-  string swathHeader = _readStringAttribute(ns, "SwathHeader", "ns-attr");
+  string swathHeader = _readStringAttribute(groupMain, "SwathHeader", "MainAttr");
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "SwathHeader: " << endl << "===================" << endl
          << swathHeader << "===================" << endl;
   }
 
-  if (_readTimes(ns)) {
+  if (_readTimes(groupMain)) {
     return -1;
   }
 
-  if (_readLatLon(ns)) {
-    return -1;
-  }
-  
-  if (_readSpaceCraftPos(ns)) {
+  if (_readLatLon(groupMain)) {
     return -1;
   }
 
-  if (_readQcFlags(ns)) {
-    return -1;
+  try {
+    if (_readSpaceCraftPos(groupMain)) {
+      return -1;
+    }
+  } // try
+  catch (H5x::Exception &e) {
+    // no navigation group, set to missing
+    _scLat.clear();
+    _scLon.clear();
+    _scAlt.clear();
+  }
+
+  try {
+    if (_readQcFlags(groupMain)) {
+      return -1;
+    }
+  } // try
+  catch (H5x::Exception &e) {
+    // no qc group, set to missing
+    _dataQuality.clear();
+    _dataWarning.clear();
+    _geoError.clear();
+    _geoWarning.clear();
+    _limitErrorFlag.clear();
+    _missingScan.clear();
   }
 
   return 0;
@@ -391,11 +414,16 @@ int GpmHdf5ToMdv::_readMetadata(Group &ns)
 //////////////////////////////////////////////
 // read the scan times
 
-int GpmHdf5ToMdv::_readTimes(Group &ns)
+int GpmHdf5ToMdv::_readTimes(Group &groupMain)
   
 {
 
-  Group scanTime(ns.openGroup("ScanTime"));
+  string groupName = "ScanTime";
+  if (!groupMain.nameExists(groupName)) {
+    cerr << "ERROR - group does not exist: " << groupName << endl;
+    throw H5x::Exception("no group: " + groupName);
+  }
+  Group scanTime(groupMain.openGroup(groupName));
   vector<size_t> dims;
   string units;
   NcxxPort::si32 missingVal;
@@ -479,21 +507,25 @@ int GpmHdf5ToMdv::_readTimes(Group &ns)
 //////////////////////////////////////////////
 // read the quality flags
 
-int GpmHdf5ToMdv::_readQcFlags(Group &ns)
+int GpmHdf5ToMdv::_readQcFlags(Group &groupMain)
   
 {
 
-  Group scanStatus(ns.openGroup("scanStatus"));
+  string groupName("scanStatus");
+  if (!groupMain.nameExists(groupName)) {
+    throw H5x::Exception("no group: " + groupName);
+  }
+  Group scanStatus(groupMain.openGroup(groupName));
   vector<size_t> dims;
   string units;
   NcxxPort::si32 missingVal;
 
-  _dataQuality.resize(_times.size());
-  _dataWarning.resize(_times.size());
-  _geoError.resize(_times.size());
-  _geoWarning.resize(_times.size());
-  _limitErrorFlag.resize(_times.size());
-  _missingScan.resize(_times.size());
+  _dataQuality.resize(_times.size(), 0);
+  _dataWarning.resize(_times.size(), 0);
+  _geoError.resize(_times.size(), 0);
+  _geoWarning.resize(_times.size(), 0);
+  _limitErrorFlag.resize(_times.size(), 0);
+  _missingScan.resize(_times.size(), 0);
   
   Hdf5xx hdf5;
   if (hdf5.readSi32Array(scanStatus, "dataQuality",
@@ -551,7 +583,7 @@ int GpmHdf5ToMdv::_readQcFlags(Group &ns)
 //////////////////////////////////////////////
 // read the lat/lon arrays
 
-int GpmHdf5ToMdv::_readLatLon(Group &ns)
+int GpmHdf5ToMdv::_readLatLon(Group &groupMain)
   
 {
   
@@ -561,7 +593,7 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   
   vector<size_t> latDims;
   string latUnits;
-  if (hdf5.readFl64Array(ns, "Latitude",
+  if (hdf5.readFl64Array(groupMain, "Latitude",
                          latDims, _missingLat, _lats, latUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Latitude variable" << endl;
@@ -572,7 +604,7 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
   
   vector<size_t> lonDims;
   string lonUnits;
-  if (hdf5.readFl64Array(ns, "Longitude",
+  if (hdf5.readFl64Array(groupMain, "Longitude",
                          lonDims, _missingLon, _lons, lonUnits)) {
     cerr << "ERROR - GpmHdf5ToMdv::_readLatLon()" << endl;
     cerr << "  Cannot read Longitude variable" << endl;
@@ -680,12 +712,16 @@ int GpmHdf5ToMdv::_readLatLon(Group &ns)
 //////////////////////////////////////////////
 // read the spacecraft lat/lon/alt
 
-int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
+int GpmHdf5ToMdv::_readSpaceCraftPos(Group &groupMain)
   
 {
-  
+
+  string groupName("navigation");
+  if (!groupMain.nameExists(groupName)) {
+    throw H5x::Exception("no group: " + groupName);
+  }
   Hdf5xx hdf5;
-  Group nav(ns.openGroup("navigation"));
+  Group nav(groupMain.openGroup(groupName));
 
   // read spacecraft longitude
   
@@ -755,7 +791,7 @@ int GpmHdf5ToMdv::_readSpaceCraftPos(Group &ns)
 //////////////////////////////////////////////
 // read the fields
 
-int GpmHdf5ToMdv::_readFields(Group &ns)
+int GpmHdf5ToMdv::_readFields(Group &groupMain)
   
 {
   
@@ -769,7 +805,15 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
 
     OutputField *fld = new OutputField(fldParams);
 
-    Group grp(ns.openGroup(fld->params.groupName));
+    Group grp(groupMain);
+    if (strlen(fld->params.groupName) > 0) {
+      if (!groupMain.nameExists(fld->params.groupName)) {
+        cerr << "ERROR - group does not exist: " << fld->params.groupName << endl;
+        delete fld;
+        continue;
+      }
+      grp = Group(groupMain.openGroup(fld->params.groupName));
+    }
     if (fld->hdf5.getVarProps(grp, fld->params.gpmName,
                               fld->dims, fld->units, 
                               fld->h5class, fld->h5sign, fld->h5order, fld->h5size)) {
@@ -832,7 +876,7 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
         _zLevels[iz] = _minzKm + iz * _dzKm;
       }
     }
-    
+
   } // ifield
 
   // read in the fields
@@ -840,13 +884,14 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
   for (size_t ifield = 0; ifield < _outputFields.size(); ifield++) {
     
     OutputField *fld = _outputFields[ifield];
+
     if (fld->h5class == H5T_INTEGER && fld->h5size == 2) {
 
       // 16-bit integer
 
       if (fld->dims.size() == 2) {
         // 2D field
-        if (_readField2D(ns,
+        if (_readField2D(groupMain,
                          fld->params.groupName,
                          fld->params.gpmName,
                          fld->si16Input,
@@ -856,7 +901,7 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
         }
       } else {
         // 3D field
-        if (_readField3D(ns,
+        if (_readField3D(groupMain,
                          fld->params.groupName,
                          fld->params.gpmName,
                          fld->si16Input,
@@ -872,7 +917,7 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
 
       if (fld->dims.size() == 2) {
         // 2D field
-        if (_readField2D(ns,
+        if (_readField2D(groupMain,
                          fld->params.groupName,
                          fld->params.gpmName,
                          fld->fl32Input,
@@ -882,7 +927,7 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
         }
       } else {
         // 3D field
-        if (_readField3D(ns,
+        if (_readField3D(groupMain,
                          fld->params.groupName,
                          fld->params.gpmName,
                          fld->fl32Input,
@@ -903,9 +948,9 @@ int GpmHdf5ToMdv::_readFields(Group &ns)
 //////////////////////////////////////////////
 // read 3D float field
 
-int GpmHdf5ToMdv::_readField3D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
+int GpmHdf5ToMdv::_readField3D(Group &groupMain,
+                               string groupName,
+                               string fieldName,
                                vector<NcxxPort::fl32> &vals,
                                NcxxPort::fl32 &missingVal,
                                string &units)
@@ -913,16 +958,36 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 {
   
   Hdf5xx hdf5;
-  
-  // read Latitude
-  
   vector<size_t> dims;
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    return -1;
+  
+  // check for specified group name
+
+  if (groupName.size() > 0) {
+    
+    if (!groupMain.nameExists(groupName)) {
+      cerr << "ERROR - group does not exist: " << groupName << endl;
+      throw H5x::Exception("no group: " + groupName);
+      return -1;
+    }
+    
+    Group grp(groupMain.openGroup(groupName));
+    if (hdf5.readFl32Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
+  } else {
+
+    Group grp(groupMain);
+    if (hdf5.readFl32Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
   }
 
   // check dimensions for consistency
@@ -981,9 +1046,9 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 //////////////////////////////////////////////
 // read 3D int32 field
 
-int GpmHdf5ToMdv::_readField3D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
+int GpmHdf5ToMdv::_readField3D(Group &groupMain,
+                               string groupName,
+                               string fieldName,
                                vector<NcxxPort::si16> &vals,
                                NcxxPort::si16 &missingVal,
                                string &units)
@@ -991,16 +1056,36 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 {
   
   Hdf5xx hdf5;
-  
-  // read Latitude
-  
   vector<size_t> dims;
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readSi16Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    return -1;
+  
+  // check for specified group name
+
+  if (groupName.size() > 0) {
+    
+    if (!groupMain.nameExists(groupName)) {
+      cerr << "ERROR - group does not exist: " << groupName << endl;
+      throw H5x::Exception("no group: " + groupName);
+      return -1;
+    }
+    
+    Group grp(groupMain.openGroup(groupName));
+    if (hdf5.readSi16Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
+  } else {
+
+    Group grp(groupMain);
+    if (hdf5.readSi16Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField3D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
   }
 
   // check dimensions for consistency
@@ -1059,27 +1144,46 @@ int GpmHdf5ToMdv::_readField3D(Group &ns,
 //////////////////////////////////////////////
 // read a 2D field - floats
 
-int GpmHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
+int GpmHdf5ToMdv::_readField2D(Group &groupMain,
+                               string groupName,
+                               string fieldName,
                                vector<NcxxPort::fl32> &vals,
                                NcxxPort::fl32 &missingVal,
                                string &units)
   
 {
-  
-  Hdf5xx hdf5;
 
-  // read Latitude
-  
+  Hdf5xx hdf5;
   vector<size_t> dims;
-  
-  Group grp(ns.openGroup(groupName));
-  if (hdf5.readFl32Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
-    return -1;
+
+  // check for specified group name
+
+  if (groupName.size() > 0) {
+    
+    if (!groupMain.nameExists(groupName)) {
+      cerr << "ERROR - group does not exist: " << groupName << endl;
+      throw H5x::Exception("no group: " + groupName);
+      return -1;
+    }
+    
+    Group grp(groupMain.openGroup(groupName));
+    if (hdf5.readFl32Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
+  } else {
+
+    Group grp(groupMain);
+    if (hdf5.readFl32Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
   }
 
   // check dimensions for consistency
@@ -1130,9 +1234,9 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 //////////////////////////////////////////////
 // read a 2D field - int16s
 
-int GpmHdf5ToMdv::_readField2D(Group &ns,
-                               const string &groupName,
-                               const string &fieldName,
+int GpmHdf5ToMdv::_readField2D(Group &groupMain,
+                               string groupName,
+                               string fieldName,
                                vector<NcxxPort::si16> &vals,
                                NcxxPort::si16 &missingVal,
                                string &units)
@@ -1140,19 +1244,36 @@ int GpmHdf5ToMdv::_readField2D(Group &ns,
 {
   
   Hdf5xx hdf5;
-
-  // read Latitude
-  
   vector<size_t> dims;
-  
-  Group grp(ns.openGroup(groupName));
-  
-  if (hdf5.readSi16Array(grp, fieldName,
-                         dims, missingVal, vals, units)) {
-    cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
-    cerr << "  Cannot read group/field: "
-         << groupName << "/" << fieldName << endl;
-    return -1;
+
+  // check for specified group name
+
+  if (groupName.size() > 0) {
+    
+    if (!groupMain.nameExists(groupName)) {
+      cerr << "ERROR - group does not exist: " << groupName << endl;
+      throw H5x::Exception("no group: " + groupName);
+      return -1;
+    }
+    
+    Group grp(groupMain.openGroup(groupName));
+    if (hdf5.readSi16Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
+  } else {
+
+    Group grp(groupMain);
+    if (hdf5.readSi16Array(grp, fieldName,
+                           dims, missingVal, vals, units)) {
+      cerr << "ERROR - GpmHdf5ToMdv::_readField2D()" << endl;
+      cerr << "  Cannot read group/field: " << groupName << "/" << fieldName << endl;
+      return -1;
+    }
+    
   }
 
   // check dimensions for consistency
@@ -1730,16 +1851,22 @@ Point_d GpmHdf5ToMdv::_getCornerLatLon(int iscan,
 
 {
 
-  // ht as a fraction of the spacecraft height
-  
-  double zFraction = zM / _scAlt[iscan];
-  
   // get the point
   
   Point_d pt = _latLons[iscan][iray];
   if (pt.x == _missingLon || pt.y == _missingLat) {
     return pt;
   }
+  if (_scLat.size() == 0 ||
+      _scLon.size() == 0 ||
+      _scAlt.size() == 0) {
+    // no spacecraft navigation info, use point unchanged
+    return pt;
+  }
+  
+  // ht as a fraction of the spacecraft height
+  
+  double zFraction = zM / _scAlt[iscan];
   
   double cornerLat = pt.y;
   double slantDeltaLat = (_scLat[iscan] - cornerLat) * zFraction;
@@ -1862,9 +1989,11 @@ void GpmHdf5ToMdv::_remapVertLevels(OutputField *fld)
         for (size_t iz = 0; iz < _zLevels.size(); iz++) {
           NcxxPort::fl32 maxVal = fld->fl32Missing;
           for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-            size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
-            if (outputOrig[interpIndex] != fld->fl32Missing) {
-              maxVal = max(maxVal, outputOrig[interpIndex]);
+            if (jz >= 0 && jz < (int) _zLevels.size()) {
+              size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
+              if (outputOrig[interpIndex] != fld->fl32Missing) {
+                maxVal = max(maxVal, outputOrig[interpIndex]);
+              }
             }
           } // jz
           size_t outputIndex = iz * nptsPlane + iy * _nx + ix;

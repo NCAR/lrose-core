@@ -430,6 +430,8 @@ public:
   double *_output_z_levels_km;
   int output_z_levels_km_n;
 
+  char* main_dataset_group_name;
+
   output_field_t *_output_fields;
   int output_fields_n;
 
@@ -456,7 +458,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[34];
+  mutable TDRPtable _table[35];
 
   const char *_className;
 

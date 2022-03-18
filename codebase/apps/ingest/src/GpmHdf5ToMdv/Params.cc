@@ -839,6 +839,18 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
+    // Parameter 'main_dataset_group_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("main_dataset_group_name");
+    tt->descr = tdrpStrDup("Specify the name of the main data group.");
+    tt->help = tdrpStrDup("The groupName params in output_fields will be nested within this group. If the groupName is empty, the parent group will be used instead.");
+    tt->val_offset = (char *) &main_dataset_group_name - &_start_;
+    tt->single_val.s = tdrpStrDup("NS");
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
