@@ -1989,7 +1989,7 @@ void GpmHdf5ToMdv::_remapVertLevels(OutputField *fld)
         for (size_t iz = 0; iz < _zLevels.size(); iz++) {
           NcxxPort::fl32 maxVal = fld->fl32Missing;
           for (int jz = lowIndex[iz]; jz <= highIndex[iz]; jz++) {
-            if (jz >= 0 && jz < (int) _zLevels.size()) {
+            if (jz >= 0 && jz < (int) _nGates) {
               size_t interpIndex = jz * nptsPlane + iy * _nx + ix;
               if (outputOrig[interpIndex] != fld->fl32Missing) {
                 maxVal = max(maxVal, outputOrig[interpIndex]);
