@@ -20,12 +20,6 @@ SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(pare
 }
 
 void SoloFunctionsController::reset() {
-  DataModel *dataModel = DataModel::Instance();
-
-  _nRays = dataModel->getNRays();
-  if (_nRays > 0) {
-    _nSweeps = dataModel->getNSweeps();
-  }
 }
 
 
@@ -701,22 +695,26 @@ void SoloFunctionsController::setCurrentRayToFirstOf(int sweepIndex) {
   DataModel *dataModel = DataModel::Instance();
   //int sweepNumber = dataModel->getSweepNumber(sweepIndex);
   _currentRayIdx = dataModel->getFirstRayIndex(sweepIndex);
-  _nRays = _currentRayIdx + dataModel->getNRaysSweepIndex(sweepIndex);
+  _lastRayIdx = dataModel->getLastRayIndex(sweepIndex);
 }
 
 void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
   _currentRayIdx += 1;
-  if ((_currentRayIdx % 100) == 0) {
-    cerr << "   current ray " << _currentRayIdx << 
-      " current sweep index " << _currentSweepIdx << endl;
-  }
+
 
   DataModel *dataModel = DataModel::Instance();
   size_t lastRayIndex = dataModel->getLastRayIndex(_currentSweepIdx);  
   if (_currentRayIdx > lastRayIndex) {
     _currentSweepIdx += 1;
   } 
+  if ((_currentRayIdx % 100) == 0) {
+      cerr << "   current ray " << _currentRayIdx << 
+        " last ray index " << lastRayIndex;
+      if (moreRays()) 
+         cerr << " az = " << dataModel->getRayAzimuthDeg(_currentRayIdx);
+      cerr << " current sweep index " << _currentSweepIdx << endl;
+  }  
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;
   //LOG(DEBUG) << "exit";
@@ -735,7 +733,7 @@ bool SoloFunctionsController::moreRays() {
   //if (_currentRayIdx >= nRays)
   //  _data->loadFieldsFromRays();
   //return (_currentRayIdx < _data->getNRays()); // nRays);
-  return (_currentRayIdx < _nRays);
+  return (_currentRayIdx <= _lastRayIdx);
 }
 
 void SoloFunctionsController::nextSweep() {
@@ -747,14 +745,9 @@ void SoloFunctionsController::nextSweep() {
 }
 
 bool SoloFunctionsController::moreSweeps() {
-  //  LOG(DEBUG) << "entry";
-  //cerr << "entry moreSweeps" << endl;
-  //  const size_t nSweeps = _data->getNSweeps();
-  //LOG(DEBUG) << " there are " << nSweeps << " sweeps";;
-  //if (_currentSweepIdx >= nSweeps)
-  //  _data->loadFieldsFromRays();
-
-  return (_currentSweepIdx < _nSweeps);
+  DataModel *dataModel = DataModel::Instance();
+  size_t nSweeps = dataModel->getNSweeps();
+  return (_currentSweepIdx < nSweeps);
 }
 
 void SoloFunctionsController::regularizeRays() {
@@ -816,7 +809,7 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName,
   DataModel *dataModel = DataModel::Instance();
   size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
   size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
-  for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
     assign(rayIdx, tempName, userDefinedName);
   }
 }
@@ -838,7 +831,7 @@ void SoloFunctionsController::copyField(string tempName, string userDefinedName,
   DataModel *dataModel = DataModel::Instance();
   size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
   size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
-  for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
     copyField(rayIdx, tempName, userDefinedName);
   }
 }

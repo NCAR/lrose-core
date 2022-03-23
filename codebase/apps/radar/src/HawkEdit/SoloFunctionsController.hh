@@ -80,7 +80,7 @@ public:
   Q_INVOKABLE QString ASSERT_BAD_FLAGS(QString field, float bad_data,
 				       size_t clip_gate, QString badFlagMaskFieldName);
 
-  Q_INVOKABLE QString CLEAR_BAD_FLAGS(QString field);
+  Q_INVOKABLE QString CLEAR_BAD_FLAGS(QString field = "BAD_FLAGS");
 
   Q_INVOKABLE QString COMPLEMENT_BAD_FLAGS(QString field);
 
@@ -203,7 +203,7 @@ public:
   void copyField(string tempName, string userDefinedName,
     size_t sweepIndex);
   void copyField(size_t rayIdx, string tempName, string userDefinedName);
-  
+
   const vector<float> *getData(string &fieldName);
   void setData(string &fieldName, vector<float> *fieldData);
 
@@ -212,8 +212,7 @@ private:
   RadxVol *_data;
   size_t _currentSweepIdx;
   size_t _currentRayIdx;
-  size_t _nRays;
-  size_t _nSweeps;
+  size_t _lastRayIdx;
   SoloFunctionsModel soloFunctionsModel;
 
   template<typename Out>

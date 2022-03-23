@@ -188,7 +188,7 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
     } else {
       // cerr << "there arenGates " << nGates;
 
-      //field->convertToFl32();
+      field->convertToFl32();
       //convertToType(Radx::Fl32);
     
       float *data = field->getDataFl32();
