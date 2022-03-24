@@ -186,12 +186,12 @@ Q_DECLARE_METATYPE(QVector<double>)
     //sweepSelection->setLayout(vbox); 
 
     //QLabel *batchMode = new QLabel("Batch Mode");
-    currentTimeToggleButton = new QPushButton(tr("On"));
+    //currentTimeToggleButton = new QPushButton(tr("On"));
     //currentTimeToggleButton->setStatusTip("enter batch mode with time range");
-    currentTimeToggleButton->setText("Current File");
-    currentTimeToggleButton->setStatusTip("Batch edit all files or current file.");
-    currentTimeToggleButton->setCheckable(true);
-    currentTimeToggleButton->setChecked(false);
+    //currentTimeToggleButton->setText("Current File");
+    //currentTimeToggleButton->setStatusTip("Batch edit all files or current file.");
+    //currentTimeToggleButton->setCheckable(true);
+    //currentTimeToggleButton->setChecked(false);
 
     /*
     // create start, end, and save dir widgets if time range is checked
@@ -216,7 +216,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     checkBoxLayout->addWidget(allSweepsToggleButton);
     //checkBoxLayout->addWidget(allSweepsToggleButton);
     //checkBoxLayout->addWidget(batchMode);
-    checkBoxLayout->addWidget(currentTimeToggleButton);
+    //checkBoxLayout->addWidget(currentTimeToggleButton);
     //checkBoxLayout->addWidget(timeRangeToggleButton);
     //checkBoxLayout->addWidget(_archiveStartTimeEdit);
     //checkBoxLayout->addWidget(_archiveEndTimeEdit);
@@ -232,7 +232,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     connect(allSweepsToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
     //connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
-    connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
+    //connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
     //connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
@@ -407,7 +407,7 @@ float  ScriptEditorView::myPow()
 {
   return(999.9);
 }
-
+/*
 void ScriptEditorView::undoEdits() {
   // signal the PolarManager to undo edits
   bool batchMode = currentTimeToggleButton->isChecked();
@@ -419,7 +419,7 @@ void ScriptEditorView::redoEdits() {
   bool batchMode = currentTimeToggleButton->isChecked();
   emit redoScriptEdits(); // batchMode);
 }
-
+*/
 void ScriptEditorView::saveEditDirectory() {
 
 
@@ -563,9 +563,9 @@ void ScriptEditorView::acceptFormulaInput()
   // Q: what is the relationship between the time nav and the script start and end times?
   //  emit a signal and have a slot in the PolarManager
   bool useTimeRange = false;
-  if (currentTimeToggleButton->isChecked()) {
-    useTimeRange = true;
-  } 
+  //if (currentTimeToggleButton->isChecked()) {
+  //  useTimeRange = true;
+  //} 
   emit runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
     useTimeRange);
 
@@ -657,9 +657,9 @@ void ScriptEditorView::acceptFormulaInput()
 
 void ScriptEditorView::scriptComplete() {
   // if not batch mode
-  if (!currentTimeToggleButton->isChecked()) {
+  //if (!currentTimeToggleButton->isChecked()) {
     scriptCompleteMessage();
-  }
+  //}
 }
 
 void ScriptEditorView::cancelFormulaInput()
@@ -748,6 +748,17 @@ void ScriptEditorView::notImplementedMessage() {
 
 void ScriptEditorView::scriptCompleteMessage() {
 
+//void ScriptEditorView::createStatusBar()
+//{
+
+    QProgressBar *progress = new QProgressBar(this);
+
+    progress->setVisible(true);
+    statusBar()->addWidget(progress);
+
+    //statusBar()->showMessage(tr("Script evaluation complete"));
+//}
+/*
   QMessageBox msgBox;
   msgBox.setText("Script evaluation complete.");
   msgBox.setInformativeText("Results available in editor and field color maps");
@@ -756,6 +767,7 @@ void ScriptEditorView::scriptCompleteMessage() {
   //    QMessageBox::information(this, "Script evaluation complete", 
   //      "Script evaluation complete.\n.",
   //      QMessageBox::NoIcon);
+  */
 }
 
 /*
@@ -1040,6 +1052,7 @@ void ScriptEditorView::allSweepsClicked(bool checked) {
 }
 */
 
+/*
 // checked = true ==> time range; highlighted
 // checked = false ==> current archive; default; no highlight
 void ScriptEditorView::timeRangeClicked(bool checked) {
@@ -1068,6 +1081,7 @@ void ScriptEditorView::showTimeRangeEdits() {
   //saveEditsDirectory->setVisible(true);
   //browseDirectoryButton->setVisible(true);
 }
+*/
 
 void ScriptEditorView::changeOutputLocation(bool checked) {
 

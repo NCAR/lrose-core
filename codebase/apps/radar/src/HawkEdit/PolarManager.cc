@@ -188,6 +188,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   _rhiWindow = NULL;
   _rhi = NULL;
 
+  _operationMode = INDIVIDUAL;
+
   //_sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
 
@@ -480,6 +482,11 @@ void PolarManager::_moveUpDown()
 void PolarManager::_setTitleBar(const string &radarName)
 {
   string windowTitle = "HAWK_EDIT -- " + radarName;
+  if (_operationMode == BATCH) {
+    windowTitle.append(" Batch Mode");
+  } else {
+    windowTitle.append(" Individual Scan Mode");
+  }
   setWindowTitle(tr(windowTitle.c_str()));
 }
   
@@ -796,6 +803,14 @@ void PolarManager::_createActions()
   redoAct->setStatusTip(tr("redo edits"));
   connect(redoAct, &QAction::triggered, this, &PolarManager::redoScriptEdits);
  
+  selectBatchModeAct = new QAction(tr("&Batch Mode"), this);
+  selectBatchModeAct->setStatusTip(tr("edit all files"));
+  connect(selectBatchModeAct, &QAction::triggered, this, &PolarManager::selectBatchMode);
+
+  selectIndividualModeAct = new QAction(tr("&Individual Scan Mode"), this);
+  selectIndividualModeAct->setStatusTip(tr("edit individual scan files"));
+  connect(selectIndividualModeAct, &QAction::triggered, this, &PolarManager::selectIndividualMode);
+
 }
 
 ////////////////
@@ -839,6 +854,9 @@ void PolarManager::_createMenus()
   // _editMenu->addSeparator();
   _editMenu->addAction(undoAct);
   _editMenu->addAction(redoAct);
+  _editMenu->addSeparator();
+  _editMenu->addAction(selectBatchModeAct);
+  _editMenu->addAction(selectIndividualModeAct);
 
   _helpMenu = menuBar()->addMenu(tr("&Help"));
   _helpMenu->addAction(_howtoAct);
@@ -5033,8 +5051,10 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
     }
   } catch (const std::out_of_range& ex) {
     errorMessage("ERROR", ex.what());
+    throw ex;
   } catch (string &msg) {
     errorMessage("Error", msg);
+    throw msg;
   }
 }
 
@@ -5044,21 +5064,10 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
 // From the way the saveDirectoryPath is chosen, the path must exist.
 // TODO: when running from the command line, verify the directory exists.
 
-// useTimeRange distinquishes individual vs. batch mode
+// useTimeRange distinquishes individual vs. batch mode 3/24/2022 NOT USED
 void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
   bool useAllSweeps, bool useTimeRange) {
 
-  /*
-  // save to temporary directory .tmp_N in the same directory 
-  // as the current archive files.
-  string saveDirectoryPath;
-  try {
-    saveDirectoryPath = _timeNavController->getTempDir(); 
-  } catch (std::invalid_argument &ex) {
-    errorMessage("Error", ex.what());
-    return;
-  }
-*/
   _cancelled = false;
    
   vector<Point> boundaryPoints;
@@ -5076,33 +5085,14 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   string currentPath;
   int firstArchiveFileIndex;
   int lastArchiveFileIndex;
-  _timeNavController->getBounds(useTimeRange, &firstArchiveFileIndex,
+
+  bool batchMode = _operationMode==BATCH;
+
+  _timeNavController->getBounds(batchMode, &firstArchiveFileIndex,
     &lastArchiveFileIndex);
-
-
-  //QProgressDialog progressBar("Running script ...", "Abort", 
-  //  0, lastArchiveFileIndex, this);
-  //progressBar.setRange(0, lastArchiveFileIndex);
-  //progressBar.setMinimumDuration(0);
-  //progressBar.setValue(0);
-  //progressBar.show();
 
   try {
     // get list of archive files within start and end date/times
-    // make a local version of the time navigation to manage the archive files
-    // NO!!!
-    //
-    // Q: or I could use the timeNavController as a progress bar
-    // indicating which file is in progress? YES!
-    //string inputPath = "";  //_timeNavController->getPath();
-    //TimeNavController myTimeNavController = new TimeNavController();
-    // vector<string> archiveFiles = _timeNavController->getArchiveFileList(
-    //  inputPath,
-    //  startYear, startMonth, startDay, startHour, startMinute, startSecond,
-    //  endYear, endMonth, endDay, endHour, endMinute, endSecond);
-      //startDateTime, endDateTime);
-
-// ---
 
      // move time nav through each archive file
      // run script on each file.
@@ -5110,10 +5100,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
      // then for command-line mode, we just run the same code?? Yes, ideally.
 
   // for each archive file 
-  //vector<string>::iterator it;
-  //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
   int archiveFileIndex = firstArchiveFileIndex;
-
 
   //bool cancelled = scriptEditorControl->cancelRequested();
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
@@ -5127,10 +5114,10 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
 
     //bool debug_verbose = false;
     //bool debug_extra = false;
-    bool batchMode = true; // to prevent message box on every file
+    //bool batchMode = true; // to prevent message box on every file
     try {  
       // use regular forEachRay ...
-      scriptEditorControl->showProgress(archiveFileIndex, lastArchiveFileIndex);
+      scriptEditorControl->showProgress(archiveFileIndex, lastArchiveFileIndex + 1);
       runForEachRayScript(script, useBoundary, useAllSweeps);
       // check if Cancel requested
       //   save archive file to temp area
@@ -5155,22 +5142,18 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       return;
     } catch (const std::out_of_range& ex) {
       errorMessage("ERROR", ex.what());
+      return;
     } catch (string &msg) {
       errorMessage("Error", msg);
+      return;
     }
     archiveFileIndex += 1;
-    //progressBar.setValue(archiveFileIndex);
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
     QCoreApplication::processEvents();
     //cancelled = scriptEditorControl->cancelRequested();
-  }
+  } // while more archive files
 
 // ---
-
-  // TODO: if not cancelled
-  //   move to temporary directory with the new edits
-
-
 
   /*
     if (useAllSweeps) {
@@ -5184,8 +5167,8 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
        useBoundary, boundaryPoints);
     }
     */
-
-    _undoRedoController->waterMarkVersion();
+    if (batchMode)
+      _undoRedoController->waterMarkVersion();
   } catch (std::invalid_argument &ex) {
     errorMessage("Error", ex.what());
   }
@@ -5201,8 +5184,22 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //_timeNavController->setTimeSliderPosition(0);
 }
 
+void PolarManager::selectBatchMode() {
+  _operationMode = BATCH; 
+  _setTitleBar("");
+}
+
+void PolarManager::selectIndividualMode() {
+  _operationMode = INDIVIDUAL; 
+    _setTitleBar("");
+}
+
+
 void PolarManager::undoScriptEdits() { 
-  bool batchMode = false;
+
+  bool batchMode = true;
+  if (_operationMode == INDIVIDUAL) 
+    batchMode = false;  
   /*
   // we can undo the edits, if the current directory is ./tmp_N where
   // N = 1 ... 9
@@ -5231,18 +5228,19 @@ void PolarManager::undoScriptEdits() {
   */
 
   // need to get the current version of the selected file (by index)
-  int selectedArchiveFileIndex = 
-    _timeNavController->getSelectedArchiveFileIndex();
+
   if (batchMode) {
     try {
-    // _undoRedoController->undoBatchMode();
+      _undoRedoController->undoBatchMode();
     } catch (std::invalid_argument &ex) {
       errorMessage("Error", ex.what());
       return;
     }
-  } 
-  //string inputPath = 
+  } else {
+    int selectedArchiveFileIndex = 
+      _timeNavController->getSelectedArchiveFileIndex();
     _undoRedoController->getPreviousVersion(selectedArchiveFileIndex);
+  }
   string inputPath = _getSelectedFile();
   /*bool havePreviousVersion = inputPath.size() > 0;
   if (havePreviousVersion) {
@@ -5260,20 +5258,23 @@ void PolarManager::undoScriptEdits() {
 
 void PolarManager::redoScriptEdits() { 
   bool batchMode = false;
+  if (_operationMode == INDIVIDUAL) 
+    batchMode = false;  
 
   // need to get the current version of the selected file (by index)
-  int selectedArchiveFileIndex = 
-    _timeNavController->getSelectedArchiveFileIndex();
+
   if (batchMode) {
     try {
-      //_undoRedoController->redoBatchMode();
+      _undoRedoController->redoBatchMode();
     } catch (std::invalid_argument &ex) {
       errorMessage("Error", ex.what());
       return;
     }
-  }
-  //string inputPath = 
+  } else {
+    int selectedArchiveFileIndex = 
+      _timeNavController->getSelectedArchiveFileIndex();
     _undoRedoController->getNextVersion(selectedArchiveFileIndex);
+  }
     string inputPath = _getSelectedFile();
   /*bool haveNextVersion = inputPath.size() > 0;
   if (haveNextVersion) {

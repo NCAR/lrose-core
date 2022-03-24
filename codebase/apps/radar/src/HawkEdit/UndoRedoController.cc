@@ -79,6 +79,14 @@ void UndoRedoController::waterMarkVersion() {
   _model->makeNewBatch();
 }
 
+void UndoRedoController::undoBatchMode() {
+  _model->batchUndo();
+}
+
+void UndoRedoController::redoBatchMode() {
+  _model->batchRedo();
+}
+
 /*
 string &UndoRedoController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();

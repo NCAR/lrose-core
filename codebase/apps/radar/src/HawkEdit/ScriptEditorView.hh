@@ -59,8 +59,8 @@ public slots:
     void displayHelp();
     void scriptComplete();
     void cancelScriptRun();
-    void undoEdits();
-    void redoEdits();
+    //void undoEdits();
+    //void redoEdits();
     //void clear();
 
     void notImplementedMessage();
@@ -73,12 +73,12 @@ public slots:
     void applyChanges();
     void currentSweepClicked(bool checked);
     //void allSweepsClicked(bool checked);
-    void timeRangeClicked(bool checked);
+    //void timeRangeClicked(bool checked);
     void changeOutputLocation(bool checked);
 
 
-  void hideTimeRangeEdits();
-  void showTimeRangeEdits();
+  //void hideTimeRangeEdits();
+  //void showTimeRangeEdits();
 
   //  void printQJSEngineContext();
 
@@ -142,8 +142,8 @@ private:
     QPushButton *allSweepsToggleButton;
     QGroupBox *scriptModifiers;
 
-    QPushButton *currentTimeToggleButton;
-    QPushButton *timeRangeToggleButton;
+    //QPushButton *currentTimeToggleButton;
+    //QPushButton *timeRangeToggleButton;
     QDateTimeEdit *_archiveStartTimeEdit;
     QDateTimeEdit *_archiveEndTimeEdit;
     QLabel *saveEditsDirectory;
