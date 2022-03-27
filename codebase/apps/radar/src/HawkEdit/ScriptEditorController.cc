@@ -276,7 +276,15 @@ void ScriptEditorController::saveFieldArrays(std::map<QString, QString> &previou
   std::map<QString, QString> currentVariableContext;
   QJSValue theGlobalObject = engine->globalObject();
 
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
   QJSValueIterator it2(theGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
     QJSValue value = it2.value();
@@ -324,7 +332,15 @@ void ScriptEditorController::saveFieldVariableAssignments(std::map<QString, QStr
   QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
 
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
   QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
 
@@ -420,8 +436,15 @@ QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString
   // try iterating over the properties of the globalObject to find new variables                       
   QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
 
   QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
     QJSValue value = it2.value();
@@ -482,6 +505,8 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine->globalObject().setProperty("SET_BAD_FLAGS_BELOW", myExt.property("SET_BAD_FLAGS_BELOW"));
   engine->globalObject().setProperty("SET_BAD_FLAGS_BETWEEN", myExt.property("SET_BAD_FLAGS_BETWEEN"));
   engine->globalObject().setProperty("COMPLEMENT_BAD_FLAGS", myExt.property("COMPLEMENT_BAD_FLAGS"));
+  engine->globalObject().setProperty("COPY", myExt.property("COPy"));
+
   engine->globalObject().setProperty("CLEAR_BAD_FLAGS", myExt.property("CLEAR_BAD_FLAGS"));
   engine->globalObject().setProperty("ASSERT_BAD_FLAGS", myExt.property("ASSERT_BAD_FLAGS"));
 
@@ -777,7 +802,15 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine->globalObject();
 
-    QJSValueIterator it(theGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext() && count < 52) {
+    it.next();
+    count += 1;
+  }
+
     while (it.hasNext()) {
       it.next();
       QString theValue = it.value().toString();
@@ -843,7 +876,7 @@ uncate(100);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
       
-      setupFieldArrays(); 
+      //setupFieldArrays(); 
 
       setupBoundaryArray();
 
@@ -924,7 +957,15 @@ uncate(100);
     QJSValue newGlobalObject = engine->globalObject();
     printQJSEngineContext();
 
-    QJSValueIterator it2(newGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count2 = 0;
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count2 < 52) {
+    it2.next();
+    count2 += 1;
+  }
+
     while (it2.hasNext()) {
 	    it2.next();
 
@@ -976,9 +1017,13 @@ uncate(100);
               tempName.resize(length-1);
               //tempName.append("#");
               _assign(tempName, userDefinedName);
-              // add Variable list ToScriptEditor(it2.name(), it2.value());
-              newFieldNames << it2.name();
+            } else {
+              // this may be a copy command (e.g. ZZ = VG)
+              _copy(tempName, userDefinedName);
             }
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+
           }
         } else {
           string originalName = it2.name().toStdString();
@@ -1037,7 +1082,15 @@ void ScriptEditorController::runForEachRayScript(QString script, int currentSwee
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine->globalObject();
 
-    QJSValueIterator it(theGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext() && count < 52) {
+    it.next();
+    count += 1;
+  }
+
     while (it.hasNext()) {
       it.next();
       QString theValue = it.value().toString();
@@ -1094,7 +1147,7 @@ uncate(100);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
       
-      setupFieldArrays(); 
+      //setupFieldArrays(); 
 
       setupBoundaryArray();
 
@@ -1148,7 +1201,7 @@ uncate(100);
 
         // save any field variable assignments 
         // TODO: need to speed this up; also, this is necessary for vector operations
-        //saveFieldVariableAssignments(currentVariableContext);
+        // saveFieldVariableAssignments(currentVariableContext);
   
       }
 
@@ -1183,7 +1236,15 @@ uncate(100);
     QJSValue newGlobalObject = engine->globalObject();
     printQJSEngineContext();
 
-    QJSValueIterator it2(newGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count2 = 0;
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count2 < 52) {
+    it2.next();
+    count2 += 1;
+  }    
+
     while (it2.hasNext()) {
       it2.next();
 
@@ -1237,9 +1298,13 @@ uncate(100);
               tempName.resize(length-1);
               //tempName.append("#");
               _assign(tempName, userDefinedName);
-              // add Variable list ToScriptEditor(it2.name(), it2.value());
-              newFieldNames << it2.name();
-            }
+            } else {
+              // this may be a copy command (e.g. ZZ = VG)
+              _copy(tempName, userDefinedName);
+            }  
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+          
           }
         } else {
           string originalName = it2.name().toStdString();
@@ -1310,6 +1375,20 @@ void ScriptEditorController::_assign(string tempName, string userDefinedName,
     (size_t) sweepIndex);
 }
 
+void ScriptEditorController::_copy(string tempName, string userDefinedName) {
+
+  // copy the field in the RadxVol
+  _soloFunctionsController->copyField(tempName, userDefinedName);
+}
+
+void ScriptEditorController::_copy(string tempName, string userDefinedName,
+  int sweepIndex) {
+
+  // copy the field in the RadxVol; only copy data for a
+  // single sweep
+  _soloFunctionsController->copyField(tempName, userDefinedName, 
+    (size_t) sweepIndex);
+}
 
 void ScriptEditorController::regularizeRays() {
   _soloFunctionsController->regularizeRays();

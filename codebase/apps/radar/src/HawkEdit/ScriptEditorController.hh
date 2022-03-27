@@ -87,6 +87,11 @@ private:
   void _assign(string tempName, string userDefinedName,
     int sweepIndex);
   void _assignByRay(string tempName, string userDefinedName);
+
+  void _copy(string tempName, string userDefinedName);
+  void _copy(string tempName, string userDefinedName,
+    int sweepIndex);
+  
   void regularizeRays();
   //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
   //  std::map<QString, QString> *currentVariableContext);

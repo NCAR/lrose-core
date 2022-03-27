@@ -50,6 +50,10 @@ public:
 			 int rayIdx, int sweepIdx,
 			 string newFieldName);
 
+  string CopyField(string fieldName,
+             int rayIdx, int sweepIdx,
+             string newFieldName);
+
   string ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 			 int rayIdx, int sweepIdx,
 			 string newFieldName);

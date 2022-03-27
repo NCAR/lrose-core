@@ -528,13 +528,14 @@ int RadxConvert::_readFile(const string &readPath,
   
   // read in file
 
+  int iret = 0;
   if (inFile.readFromPath(readPath, vol)) {
     cerr << "ERROR - RadxConvert::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << inFile.getErrStr() << endl;
-    return -1;
+    iret = -1;
   }
-
+  
   // save read paths used
 
   vector<string> rpaths = inFile.getReadPaths();
@@ -543,6 +544,10 @@ int RadxConvert::_readFile(const string &readPath,
       cerr << "  ==>> used file: " << rpaths[ii] << endl;
     }
     _readPaths.insert(rpaths[ii]);
+  }
+
+  if (iret) {
+    return -1;
   }
 
   // if requested, change some of the characteristics

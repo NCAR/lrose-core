@@ -43,7 +43,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "test";
+instance = "latent_heating";
 
 ///////////// register_with_procmap ///////////////////
 //
@@ -281,7 +281,7 @@ output_z_levels_km = {
 // Type: string
 //
 
-main_dataset_group_name = "NS";
+main_dataset_group_name = "Swath";
 
 //======================================================================
 //
@@ -314,98 +314,18 @@ main_dataset_group_name = "NS";
 
 output_fields = {
   {
-    groupName = "SLV",
-    gpmName = "zFactorCorrected",
-    outputName = "DBZ",
-    longName = "reflectivity",
-    encoding = ENCODING_INT16
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "flagAnvil",
-    outputName = "Anvil",
-    longName = "flagForAnvil",
-    encoding = ENCODING_INT8
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "flagBB",
-    outputName = "BB",
-    longName = "flagForBrightBand",
+    groupName = "",
+    gpmName = "latentHeating",
+    outputName = "latentHeating",
+    longName = "latentHeating",
     encoding = ENCODING_FLOAT32
   }
   ,
   {
-    groupName = "CSF",
-    gpmName = "flagHeavyIcePrecip",
-    outputName = "HvyIcePrecip",
-    longName = "flagHeavyIcePrecip",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "flagShallowRain",
-    outputName = "ShallowRain",
-    longName = "flagShallowRain",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "heightBB",
-    outputName = "BBHt",
-    longName = "heightBB",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "widthBB",
-    outputName = "BBWidth",
-    longName = "widthtBB",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "CSF",
-    gpmName = "typePrecip",
-    outputName = "PID",
-    longName = "typePrecip",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "FLG",
-    gpmName = "qualityFlag",
-    outputName = "Qual",
-    longName = "qualityFlag",
-    encoding = ENCODING_INT8
-  }
-  ,
-  {
-    groupName = "PRE",
-    gpmName = "heightStormTop",
-    outputName = "Tops",
-    longName = "heightStormTop",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "SLV",
-    gpmName = "precipRate",
-    outputName = "PrecipRate",
-    longName = "precipRate",
-    encoding = ENCODING_FLOAT32
-  }
-  ,
-  {
-    groupName = "Experimental",
-    gpmName = "precipRateESurface2",
-    outputName = "PrecipRate2",
-    longName = "precipRateESurface2",
+    groupName = "",
+    gpmName = "meltLayerHeight",
+    outputName = "meltLayerHeight",
+    longName = "meltLayerHeight",
     encoding = ENCODING_FLOAT32
   }
 };

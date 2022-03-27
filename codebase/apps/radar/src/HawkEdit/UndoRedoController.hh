@@ -83,6 +83,8 @@ public:
   string getPreviousVersion(int fileIndex);
 
   void waterMarkVersion();
+  void undoBatchMode();
+  void redoBatchMode();
 
   //save(int fileIdx) leave to  DataModel
   //fn = getCurrentVersion(file#) 

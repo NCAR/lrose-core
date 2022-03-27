@@ -289,6 +289,9 @@ public slots:
   void errorMessage(string title, string message);
   int saveDiscardMessage(string text, string question);
 
+  void selectBatchMode();
+  void selectIndividualMode();
+
   //void close();
 
 signals:
@@ -378,6 +381,8 @@ private:
   QAction *_aboutQtAct;
   QAction *undoAct;
   QAction *redoAct;
+  QAction *selectBatchModeAct;
+  QAction *selectIndividualModeAct;
   //QAction *_openFileAct;
   //QAction *_saveFileAct;
 
@@ -751,6 +756,9 @@ private:
   void _setMaxRangeKm();
 
   // modes
+
+  enum EditMode {BATCH, INDIVIDUAL};
+  EditMode _operationMode;
 
   //void _setArchiveMode(bool state);
   //void _activateRealtimeRendering();

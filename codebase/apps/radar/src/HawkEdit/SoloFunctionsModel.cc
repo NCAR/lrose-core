@@ -509,6 +509,60 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
 }
 
 // return the temporary name for the new field in the volume
+string SoloFunctionsModel::CopyField(string fieldName,
+             int rayIdx, int sweepIdx,
+             string newFieldName) {
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+  
+  const RadxField *field;
+
+  DataModel *dataModel = DataModel::Instance();
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = dataModel->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+  
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  const float *data = field->getDataFl32();
+  float *newData = new float[nGates];
+  memcpy(newData, data, nGates*sizeof(float));
+/*
+  for (int i=0; i<10; i++)
+    newData[i] = data[i];   
+  for (int i=10; i<30; i++)
+    newData[i] = 0;
+  for (int i=30; i<nGates; i++)
+    newData[i] = data[i];   
+*/
+  // insert new field into RadxVol                                                                             
+  LOG(DEBUG) << "result = ";
+  for (int i=0; i<50; i++)
+    LOG(DEBUG) << newData[i] << ", ";
+  
+  // I have the ray, can't I just add a field to it?
+                                                                     
+  Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  string field_units = field->getUnits();
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  return ""; // tempFieldName;
+}
+
+
+// return the temporary name for the new field in the volume
 string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 					   int rayIdx, int sweepIdx,
 					   string newFieldName) {

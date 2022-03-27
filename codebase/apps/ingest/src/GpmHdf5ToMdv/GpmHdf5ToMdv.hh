@@ -183,38 +183,38 @@ private:
                               const string &attrName,
                               const string &context);
   
-  int _readMetadata(Group &ns);
-  int _readTimes(Group &ns);
-  int _readLatLon(Group &ns);
-  int _readSpaceCraftPos(Group &ns);
-  int _readQcFlags(Group &ns);
+  int _readMetadata(Group &groupMain);
+  int _readTimes(Group &groupMain);
+  int _readLatLon(Group &groupMain);
+  int _readSpaceCraftPos(Group &groupMain);
+  int _readQcFlags(Group &groupMain);
 
-  int _readFields(Group &ns);
+  int _readFields(Group &groupMain);
 
-  int _readField3D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField3D(Group &groupMain,
+                   string groupName,
+                   string fieldName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
                    string &units);
   
-  int _readField3D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField3D(Group &groupMain,
+                   string groupName,
+                   string fieldName,
                    vector<NcxxPort::si16> &vals,
                    NcxxPort::si16 &missingVal,
                    string &units);
   
-  int _readField2D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField2D(Group &groupMain,
+                   string groupName,
+                   string fieldName,
                    vector<NcxxPort::fl32> &vals,
                    NcxxPort::fl32 &missingVal,
                    string &units);
   
-  int _readField2D(Group &ns,
-                   const string &groupName,
-                   const string &fieldName,
+  int _readField2D(Group &groupMain,
+                   string groupName,
+                   string fieldName,
                    vector<NcxxPort::si16> &vals,
                    NcxxPort::si16 &missingVal,
                    string &units);
