@@ -1091,9 +1091,11 @@ int DoradeRadxFile::_readSweepFile(const string &path)
       _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // handle block
@@ -2754,9 +2756,11 @@ int DoradeRadxFile::printNative(const string &path, ostream &out,
       _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // print block
