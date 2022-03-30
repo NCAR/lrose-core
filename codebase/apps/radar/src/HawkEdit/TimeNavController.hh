@@ -74,6 +74,7 @@ public:
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   int getSelectedArchiveFileIndex();
+  string getArchiveFilePath(int idx);
   //string getTempDir();
   //string getPreviousTempDir();
   //string getNextTempDir();

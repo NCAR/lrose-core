@@ -141,6 +141,10 @@ string TimeNavController::getSelectedPath() {
   return _model->getCurrentPath();
 }
 
+string TimeNavController::getArchiveFilePath(int idx) {
+  return _model->getArchiveFilePath(idx);
+}
+
 /*
 // compare nextTempDir base directory to the base directory
 // in the temp stack

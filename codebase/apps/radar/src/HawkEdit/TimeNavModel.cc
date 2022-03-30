@@ -300,6 +300,15 @@ void TimeNavModel::getSelectedTime(int *year, int *month, int *day,
 
 }
 
+string TimeNavModel::getArchiveFilePath(int idx) {
+  if ((idx < 0) || (idx > _archiveFileList.size())) {
+    stringstream ss;
+    ss << "Error, invalid index " << idx << " TimeNavModel::getArchiveFilePath";
+    throw std::invalid_argument(ss.str());
+  }
+  return _archiveFileList.at(idx);
+}  
+
 /* void TimeNavModel::changeSelectedTime(int value) 
 {
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {

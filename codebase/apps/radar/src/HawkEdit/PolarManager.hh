@@ -227,8 +227,12 @@ public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
 
+  string _fileName(QString path);
+  string _combinePathFile(string path, string file);
+  void _checkForOverwrite(string pathFile);
   void _openFile();
   void _saveFile();
+  void _saveCurrentVersionAllFiles();
   void _howto();   
 
   //void contextMenuParameterColors();

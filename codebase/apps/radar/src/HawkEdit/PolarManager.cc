@@ -3002,18 +3002,38 @@ void PolarManager::closeFieldListDialog(bool clicked) {
   fieldListDialog->close();
 }
 
-
 ////////////////////////////////////////////////////
 // create the file chooser dialog
 //
 // This allows the user to choose the name of a
 // file in which to save Volume data
 
-void PolarManager::_saveFile()
+string PolarManager::_fileName(QString path) {
+  if (path.endsWith(QDir::separator())) {
+    path.chop(1);
+  }
+  QStringList list = path.split(QDir::separator());
+  string fileName = list.last().toStdString();
+  return fileName;
+}
+
+string PolarManager::_combinePathFile(string path, string file) {
+  QString temp(path.c_str());
+  temp.append(QDir::separator());
+  temp.append(file.c_str());
+  return temp.toStdString();
+}
+
+void PolarManager::_checkForOverwrite(string pathFile) {
+    if (QFile(pathFile.c_str()).exists()) {
+    errorMessage("Warning", "file exists overwrite?");
+  }
+}
+
+void PolarManager::_saveCurrentVersionAllFiles()
 {
-  //if (_timeNavController->isSelectedFileInTempDir()) {
-  //  _saveTempDir();
-  //}
+  //_getSaveDirectory();
+
 
   QString finalPattern = "All files (*.nc)";
 
@@ -3025,36 +3045,131 @@ void PolarManager::_saveFile()
     inputPath = temp.absolutePath();
   } 
 
-  QString filename =  QFileDialog::getSaveFileName(
-          this,
-          "Save Radar Volume",
-          inputPath, finalPattern);
- 
-  if( !filename.isNull() )
-  {
-    QByteArray qb = filename.toUtf8();
-    const char *name = qb.constData();
 
-      LOG(DEBUG) << "selected file path : " << name;
+  QFileDialog dialog(this);
+  dialog.setFileMode(QFileDialog::Directory);
 
+  QStringList fileNames;
+  if (dialog.exec())
+    fileNames = dialog.selectedFiles();
 
-    // TODO: hold it! the save message should
-    // go to the Model (Data) level because
-    // we'll be using Radx utilities.
-    
-    try {
-      LOG(DEBUG) << "writing to file " << name;
-      string originalSourcePath = 
-        _timeNavController->getSelectedArchiveFile();
-      DataModel *dataModel = DataModel::Instance();
-      dataModel->writeWithMergeData(name, originalSourcePath);
-      //dataModel->writeData(name);
-      _unSavedEdits = false;
-    } catch (FileIException &ex) {
-      this->setCursor(Qt::ArrowCursor);
-      return;
+  if (fileNames.size() > 0) {
+    cout << "You selected ... " << endl;
+    for (int i = 0; i < fileNames.size(); ++i)
+      cout << fileNames.at(i).toLocal8Bit().constData() << endl;
+
+    cout << "end of list" << endl;
+
+    string saveDirName = fileNames.at(0).toLocal8Bit().toStdString();
+     //  const char *saveDirName = fileNames.at(0).toLocal8Bit().constData();
+    if( !saveDirName.empty() )
+    {
+        LOG(DEBUG) << "selected folder path : " << saveDirName;
+      int nFiles = _timeNavController->getNFiles();
+      // for each file in timeNav ...
+      for (int i=0; i<nFiles; i++) {
+        // hold it! the save message should
+        // go to the Model (Data) level because
+        // we'll be using Radx utilities.
+        try {
+           if (i == _timeNavController->getSelectedArchiveFileIndex()) {
+            //LOG(DEBUG) << "writing to file " << name;
+            //string originalSourcePath = 
+            //  _timeNavController->getSelectedArchiveFile();
+            DataModel *dataModel = DataModel::Instance();
+            string currentFile = _timeNavController->getSelectedArchiveFile();
+            string saveFile = _combinePathFile(saveDirName, _fileName(QString(currentFile.c_str())));
+            _checkForOverwrite(saveFile);
+            //string currentPath = _timeNavController->getSelectedPath();
+            dataModel->writeWithMergeData(saveFile, currentFile);
+            _unSavedEdits = false;
+          }  else {
+            // copy all files except the active one in memory 
+            // as it may have unsaved changes
+            string name = _undoRedoController->getCurrentVersion(i);
+            if (name.empty()) {
+              // this is the original version
+              name = _timeNavController->getArchiveFilePath(i);
+            } 
+            const char *source_path = name.c_str();
+            string savePathFile = _combinePathFile(saveDirName, _fileName(QString(name.c_str())));
+            const char *dest_path = savePathFile.c_str();
+
+            cout << "source_path = " << source_path << endl;
+            cout << "dest_path = " << dest_path << endl;
+
+            _checkForOverwrite(savePathFile);
+            // use toolsa utility
+            // Returns -1 on error, 0 otherwise
+            int return_val = filecopy_by_name(dest_path, source_path);
+            if (return_val != 0) {
+              stringstream ss;
+              ss << "could not save file: " << dest_path;
+              errorMessage("Error", ss.str());
+            }
+          }
+        } catch (FileIException &ex) {
+          this->setCursor(Qt::ArrowCursor);
+          return;
+        }
+      } // end for each file in timeNav
     }
-    
+  }
+}
+
+
+////////////////////////////////////////////////////
+// create the file chooser dialog
+//
+// This allows the user to choose the name of a
+// file in which to save Volume data
+
+void PolarManager::_saveFile()
+{
+  if (_operationMode == BATCH) {
+    _saveCurrentVersionAllFiles();
+  } else {
+
+    QString finalPattern = "All files (*.nc)";
+
+    QString inputPath = QDir::currentPath();
+    // get the path of the current file, if available 
+    string currentFile = _timeNavController->getSelectedArchiveFile();
+    if (!currentFile.empty()) {  
+      QDir temp(currentFile.c_str());
+      inputPath = temp.absolutePath();
+    } 
+
+    QString filename =  QFileDialog::getSaveFileName(
+            this,
+            "Save Radar Volume",
+            inputPath, finalPattern);
+   
+    if( !filename.isNull() )
+    {
+      QByteArray qb = filename.toUtf8();
+      const char *name = qb.constData();
+
+        LOG(DEBUG) << "selected file path : " << name;
+
+      // TODO: hold it! the save message should
+      // go to the Model (Data) level because
+      // we'll be using Radx utilities.
+      
+      try {
+        LOG(DEBUG) << "writing to file " << name;
+        string originalSourcePath = 
+          _timeNavController->getSelectedArchiveFile();
+        DataModel *dataModel = DataModel::Instance();
+        dataModel->writeWithMergeData(name, originalSourcePath);
+        //dataModel->writeData(name);
+        _unSavedEdits = false;
+      } catch (FileIException &ex) {
+        this->setCursor(Qt::ArrowCursor);
+        return;
+      }
+      
+    }
   }
 }
 
