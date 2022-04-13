@@ -274,6 +274,7 @@ void HtInterp::_interpField(MdvxField *fld,
   Mdvx::field_header_t fhdr = fld->getFieldHeader();
 
   int nzOut = (int) htsOut.size();
+  int nzIn = fhdr.nz;
   int ny = fhdr.ny;
   int nx = fhdr.nx;
   int nptsXy = ny * nx;
@@ -295,17 +296,23 @@ void HtInterp::_interpField(MdvxField *fld,
       for (int iz = 0; iz < nzOut; iz++, outZIndex += nptsXy) {
 
         const interp_pt_t &interpPt = interpPts[outZIndex + xyIndex];
+
+        // check for bounds
         
-        int inzLower = interpPt.indexLower * nptsXy + xyIndex;
-        int inzUpper = interpPt.indexUpper * nptsXy + xyIndex;
+        if (interpPt.indexLower < nzIn && interpPt.indexUpper < nzIn) {
+          
+          int inzLower = interpPt.indexLower * nptsXy + xyIndex;
+          int inzUpper = interpPt.indexUpper * nptsXy + xyIndex;
+          
+          fl32 valLower = dataIn[inzLower];
+          fl32 valUpper = dataIn[inzUpper];
+          
+          fl32 valInterp =
+            valLower * interpPt.wtLower + valUpper * interpPt.wtUpper;
+          
+          dataOut[outZIndex + xyIndex] = valInterp;
 
-        fl32 valLower = dataIn[inzLower];
-        fl32 valUpper = dataIn[inzUpper];
-
-        fl32 valInterp =
-          valLower * interpPt.wtLower + valUpper * interpPt.wtUpper;
-
-        dataOut[outZIndex + xyIndex] = valInterp;
+        }
 
       } // iz
 
