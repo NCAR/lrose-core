@@ -300,14 +300,15 @@ void SweepView::updateSweepRadioButtons(vector<double> *sweepAngles)
     setGuiIndex(0);
   }
   
-  /*
+  
   for (it = unusedSweeps->begin(); it != unusedSweeps->end(); ++it) {
-    bool disconnected = 
-      disconnect(*it, &QRadioButton::toggled, this, &SweepView::changeSweep);
-    if (!disconnected) 
-      cerr << "Could NOT disconnect button from signal " << (*it)->text().toStdString() << endl;
+    (*it)->setVisible(false);
+    //bool disconnected = 
+    //  disconnect(*it, &QRadioButton::toggled, this, &SweepView::changeSweep);
+    //if (!disconnected) 
+    //  cerr << "Could NOT disconnect button from signal " << (*it)->text().toStdString() << endl;
   }
-  */
+  
   delete unusedSweeps;
 
 
@@ -368,18 +369,18 @@ void SweepView::createSweepRadioButtons(vector<double> *sweepAngles)
 
 void SweepView::clearSweepRadioButtons() 
 {
-
+/*
   QLayoutItem* child;
   if (_sweepVBoxLayout != NULL) {
     while ((child = _sweepVBoxLayout->takeAt(0)) != nullptr) {
       // delete happens in update of panel
-      //if (child->widget() !=0) {
-      //  delete child->widget();
-      //}
+      if (child->widget() !=0) {
+        child->widget()->setVisible(false);
+      }
       //delete child;
     }
   }
- 
+ */
 } 
 
 
