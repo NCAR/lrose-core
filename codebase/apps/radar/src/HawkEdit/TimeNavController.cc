@@ -145,6 +145,10 @@ string TimeNavController::getArchiveFilePath(int idx) {
   return _model->getArchiveFilePath(idx);
 }
 
+string TimeNavController::getArchiveFileName(int idx) {
+  return _model->getArchiveFileName(idx);
+}
+
 /*
 // compare nextTempDir base directory to the base directory
 // in the temp stack
@@ -492,9 +496,9 @@ void TimeNavController::_goFwdPeriod()
 
 */
 
-void TimeNavController::setTimeSliderPosition(int value) {
+void TimeNavController::setTimeSliderPosition(int value, bool force) {
   int currentPosition = _model->getPositionOfSelection();
-  if (currentPosition != value) {
+  if ( (currentPosition != value) || force ){
     _model->setSelectedFile(value);
     _view->setSliderPosition(value);
   }

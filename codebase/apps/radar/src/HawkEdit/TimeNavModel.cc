@@ -309,6 +309,23 @@ string TimeNavModel::getArchiveFilePath(int idx) {
   return _archiveFileList.at(idx);
 }  
 
+
+string TimeNavModel::getArchiveFileName(int idx) { 
+  if (_archiveFileList.size() <= 0) {
+    string empty;
+    return empty;
+  } else {
+    string p = _archiveFileList.at(idx);
+    size_t idx = p.find_last_of("/\\");
+    
+    if (idx != string::npos) {
+      string result = p.substr(idx+1);
+      return result;
+    } 
+    return p;
+  }
+}
+
 /* void TimeNavModel::changeSelectedTime(int value) 
 {
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {

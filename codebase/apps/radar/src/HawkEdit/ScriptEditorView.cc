@@ -662,6 +662,15 @@ void ScriptEditorView::scriptComplete() {
   //}
 }
 
+void ScriptEditorView::batchEditComplete() {
+
+  progressBar->setVisible(false);
+  if (progressBar != NULL) {
+    delete progressBar;
+    progressBar = NULL;
+  }
+}
+
 void ScriptEditorView::cancelFormulaInput()
 {
   // TODO: what action should cancel be?
@@ -731,33 +740,40 @@ vector<string> *ScriptEditorView::getVariablesFromScriptEditor() {
   return names;
 }
 
-
-void ScriptEditorView::showProgress(int currentIndex, int lastIndex) {
+void ScriptEditorView::initProgress(int nFiles) {
   //QStatusBar *statusBar = statusBar();
-  stringstream ss;
-  ss << "processing " << currentIndex << " of "  <<
-    lastIndex << " files";
+  //stringstream ss;
+  //ss << "processing " << currentIndex << " of "  <<
+  //  lastIndex << " files";
+  progressBar = new QProgressBar(this); // statusBar);
+  progressBar->setRange(1, nFiles);
+  progressBar->setValue(1);
 
-  statusBar()->showMessage(QString::fromStdString(ss.str()));
+  statusBar()->addWidget(progressBar);
+  progressBar->setVisible(true);
+
+//  setStatusBar() ...
+//  statusBar()->showMessage(QString::fromStdString(ss.str()));
+
 }
 
 
-void ScriptEditorView::notImplementedMessage() {
-      QMessageBox::information(this, "Not Implemented", "Not Implemented");
+void ScriptEditorView::updateProgress(int currentIndex, int lastIndex) {
+  //QStatusBar *statusBar = statusBar();
+  //stringstream ss;
+  //ss << "processing " << currentIndex << " of "  <<
+  //  lastIndex << " files";
+
+  progressBar->setValue(currentIndex+1);
+
+  //statusBar()->showMessage(QString::fromStdString(ss.str()));
 }
 
 void ScriptEditorView::scriptCompleteMessage() {
 
-//void ScriptEditorView::createStatusBar()
-//{
+  //if (progressBar != NULL)
+  //  delete progressBar;
 
-    QProgressBar *progress = new QProgressBar(this);
-
-    progress->setVisible(true);
-    statusBar()->addWidget(progress);
-
-    //statusBar()->showMessage(tr("Script evaluation complete"));
-//}
 /*
   QMessageBox msgBox;
   msgBox.setText("Script evaluation complete.");
@@ -768,6 +784,11 @@ void ScriptEditorView::scriptCompleteMessage() {
   //      "Script evaluation complete.\n.",
   //      QMessageBox::NoIcon);
   */
+}
+
+
+void ScriptEditorView::notImplementedMessage() {
+      QMessageBox::information(this, "Not Implemented", "Not Implemented");
 }
 
 /*

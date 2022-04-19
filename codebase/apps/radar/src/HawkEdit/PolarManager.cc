@@ -246,6 +246,8 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   setAttribute(Qt::WA_DeleteOnClose);
 
+  _batchEditing = false;
+
   // set initial field to 0
 
   //_changeField(0, false);
@@ -1208,7 +1210,8 @@ string PolarManager::_getFileNewVersion(int archiveFileIndex) {
     _undoRedoController->getNewVersion(archiveFileIndex);
   // add the file name to the version path
   nextVersionPath.append("/");
-  string fileName = _timeNavController->getSelectedArchiveFileName();
+  // get the fileName from the full path
+  string fileName = _timeNavController->getArchiveFileName(archiveFileIndex);
   nextVersionPath.append(fileName);
 
   return nextVersionPath;
@@ -1238,6 +1241,7 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
       errorDialog.showMessage(errMsg.c_str());
       errorDialog.exec();
     }
+    return -1;
   }
   LOG(DEBUG) << "exit";
   return 0;
@@ -1294,9 +1298,13 @@ if (result == 0) {
   
   
     _platform = dataModel->getPlatform();
+    LOG(DEBUG) << "exit";
+    return 0;
+  } else {
+    LOG(DEBUG) << "exit";
+    return -1;
   }
-  LOG(DEBUG) << "exit";
-  return 0;
+
 }
 
 double PolarManager::getSelectedSweepAngle() {
@@ -2448,12 +2456,8 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
 void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 
   LOG(DEBUG) << "enter";
-
   _applyDataEdits(); // radarDataVolume);
-
   LOG(DEBUG) << "exit";
-
-
 
 }
 
@@ -2462,11 +2466,11 @@ void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 void PolarManager::updateVolume(QStringList newFieldNames) {
 
   LOG(DEBUG) << "enter";
-  _volumeDataChanged(newFieldNames);
+  if (!_batchEditing) {
+    _volumeDataChanged(newFieldNames);
+    vector<DisplayField *> newFields;
+  }
   _unSavedEdits = true;
-  vector<DisplayField *> newFields;
-
-
   LOG(DEBUG) << "exit";
 
 }
@@ -2753,8 +2757,9 @@ void PolarManager::resetStartEndTime() {
 
 void PolarManager::newTimeSelected(int index) {
   _timeNavController->timeSliderValueChanged(index);
-  _readDataFile2();
-  _plotArchiveData();
+  if (_readDataFile2() == 0) {
+    _plotArchiveData();
+  }
 }
 
 void PolarManager::startEndTimeChanged(int startYear, int startMonth, int startDay,
@@ -2936,30 +2941,34 @@ void PolarManager::_readDataFile(vector<string> *selectedFields) {
   }
 }
 
-void PolarManager::_readDataFile2() {
+int PolarManager::_readDataFile2() {
 
     try {
-      _getArchiveData();
+      return _getArchiveData();
       //_setupRayLocation();
 
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
-      return;
+      return -1;
     }
 }
 
-void PolarManager::_readDataFile2(string &inputPath) {
+int PolarManager::_readDataFile2(string &inputPath) {
 
     try {
-      _getArchiveData(inputPath);
-      //_setupRayLocation();
-      dataFileChanged();
+      if (_getArchiveData(inputPath) == 0) {
+        //_setupRayLocation();
+        dataFileChanged();
+        return 0;
+      } else {
+        return -1;
+      }
 
     } catch (FileIException &ex) { 
       this->setCursor(Qt::ArrowCursor);
       // _timeControl->setCursor(Qt::ArrowCursor);
-      return;
+      return  -1;
     }
     //emit newDataFile();
 }
@@ -3030,6 +3039,23 @@ void PolarManager::_checkForOverwrite(string pathFile) {
   }
 }
 
+
+// Returns -1 on error, 0 otherwise
+// filecopy_by_name doesnn't work;
+// also, need to merge the files with the original file,
+// since we have only saved a delta ...
+int PolarManager::_mergeDataFiles(string dest_path, string source_path) {
+
+  // use a Radx utility??
+  DataModel *dataModel = DataModel::Instance();
+  string original_path = "some/path/from/timeNav";
+  dataModel->mergeDataFiles(dest_path, source_path, original_path);
+
+  return 0;
+}
+
+
+
 void PolarManager::_saveCurrentVersionAllFiles()
 {
   //_getSaveDirectory();
@@ -3086,13 +3112,18 @@ void PolarManager::_saveCurrentVersionAllFiles()
           }  else {
             // copy all files except the active one in memory 
             // as it may have unsaved changes
-            string name = _undoRedoController->getCurrentVersion(i);
-            if (name.empty()) {
-              // this is the original version
-              name = _timeNavController->getArchiveFilePath(i);
+
+            string versionName = _undoRedoController->getCurrentVersion(i);
+            string realName = _timeNavController->getArchiveFilePath(i);
+            // versionName is something like v1, or v2, etc.
+            // realName is something like cfrad_yyyymmdd...
+            if (versionName.empty()) {
+              // this is the original version; and the name is NOT v1, v2, etc.
+              versionName = _timeNavController->getArchiveFilePath(i);
+              // TODO: just copy the file to the destination
             } 
-            const char *source_path = name.c_str();
-            string savePathFile = _combinePathFile(saveDirName, _fileName(QString(name.c_str())));
+            const char *source_path = versionName.c_str();
+            string savePathFile = _combinePathFile(saveDirName, _fileName(QString(realName.c_str())));
             const char *dest_path = savePathFile.c_str();
 
             cout << "source_path = " << source_path << endl;
@@ -3101,7 +3132,13 @@ void PolarManager::_saveCurrentVersionAllFiles()
             _checkForOverwrite(savePathFile);
             // use toolsa utility
             // Returns -1 on error, 0 otherwise
-            int return_val = filecopy_by_name(dest_path, source_path);
+            // filecopy_by_name doesnn't work;
+            // also, need to merge the files with the original file,
+            // since we have saved a delta ...
+            string originalPath = _timeNavController->getArchiveFilePath(i);
+
+            DataModel *dataModel = DataModel::Instance();
+            int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
             if (return_val != 0) {
               stringstream ss;
               ss << "could not save file: " << dest_path;
@@ -5158,7 +5195,13 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
     } else {
       // send the current sweep to the script editor controller
-      int currentSweepIndex = _sweepController->getSelectedNumber();
+      
+      // convert the sweep number to an index in the sweep list
+      DataModel *dataModel = DataModel::Instance();
+      //  sweep angle; sweep number; sweep index HOW TO KEEP THEM STRAIGHT?!!
+      double sweepAngle = _sweepController->getSelectedAngle();
+      // int sweepNumber = dataModel->getSweepNumber(sweepAngle);
+      int currentSweepIndex = dataModel->getSweepIndexFromSweepAngle(sweepAngle);
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
@@ -5170,9 +5213,18 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   } catch (string &msg) {
     errorMessage("Error", msg);
     throw msg;
-  }
+  } 
 }
 
+
+void PolarManager::saveCurrentState() {
+  _stateCurrentFileIndex = _timeNavController->getSelectedArchiveFileIndex();
+}
+
+void PolarManager::restoreCurrentState() {
+  bool force = TRUE;
+   _timeNavController->setTimeSliderPosition(_stateCurrentFileIndex, force);
+}
 
 // Q: if running without GUI, how to get the field names? from the command line?
 // from the parameter file? YES, and the command line takes precedence.
@@ -5203,13 +5255,19 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
 
   bool batchMode = _operationMode==BATCH;
 
+  // get list of archive files within start and end date/times
   _timeNavController->getBounds(batchMode, &firstArchiveFileIndex,
     &lastArchiveFileIndex);
 
-  try {
-    // get list of archive files within start and end date/times
+  // save the current state, in order to reconnect the DataModel to the interactive controls? 
+  saveCurrentState();
 
-     // move time nav through each archive file
+  scriptEditorControl->initProgress(lastArchiveFileIndex - firstArchiveFileIndex + 1);
+
+  _batchEditing = true;
+
+  try {
+
      // run script on each file.
      // run in automatic mode.  
      // then for command-line mode, we just run the same code?? Yes, ideally.
@@ -5220,53 +5278,68 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //bool cancelled = scriptEditorControl->cancelRequested();
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
 
-    _timeNavController->setTimeSliderPosition(archiveFileIndex);
+    //_timeNavController->setTimeSliderPosition(archiveFileIndex);
         
     // need to get the current version of the file (by index)
-    string inputPath = _getSelectedFile();
+    string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
     //  _undoRedoController->getCurrentVersion(archiveFileIndex);
-    _getArchiveDataPlainVanilla(inputPath);
+    if (_getArchiveDataPlainVanilla(inputPath) != 0) {
+      // skip this file
+    } else {
+      // ====>
+      // NOTE!!! DataModel is now disconnected from the display and selected field
 
-    //bool debug_verbose = false;
-    //bool debug_extra = false;
-    //bool batchMode = true; // to prevent message box on every file
-    try {  
-      // use regular forEachRay ...
-      scriptEditorControl->showProgress(archiveFileIndex, lastArchiveFileIndex + 1);
-      runForEachRayScript(script, useBoundary, useAllSweeps);
-      // check if Cancel requested
-      //   save archive file to temp area
-      //LOG(DEBUG) << "writing to file " << name;
-      DataModel *dataModel = DataModel::Instance();
-      string nextVersionPath = _getFileNewVersion(archiveFileIndex);
-        // _undoRedoController->getNewVersion(archiveFileIndex);
+      //bool debug_verbose = false;
+      //bool debug_extra = false;
+      //bool batchMode = true; // to prevent message box on every file
+      try {  
+        // use regular forEachRay ...
+        scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
+        runForEachRayScript(script, useBoundary, useAllSweeps);
+        // check if Cancel requested
+        //   save archive file to temp area
+        //LOG(DEBUG) << "writing to file " << name;
+        DataModel *dataModel = DataModel::Instance();
+        string nextVersionPath = _getFileNewVersion(archiveFileIndex);
+          // _undoRedoController->getNewVersion(archiveFileIndex);
 
-//      currentPath = saveDirectoryPath;
-//      currentPath.append("/");
-//      fileName = _timeNavController->getSelectedArchiveFileName();
-//      currentPath.append(fileName);
-      dataModel->writeData(nextVersionPath);
-      //_unSavedEdits = false;
-    
-    } catch (FileIException &ex) {
-      errorMessage("Error", "FileIException");
-      //this->setCursor(Qt::ArrowCursor);
-      return;
-    } catch (std::invalid_argument &ex) {
-      errorMessage("Error", ex.what());
-      return;
-    } catch (const std::out_of_range& ex) {
-      errorMessage("ERROR", ex.what());
-      return;
-    } catch (string &msg) {
-      errorMessage("Error", msg);
-      return;
+  //      currentPath = saveDirectoryPath;
+  //      currentPath.append("/");
+  //      fileName = _timeNavController->getSelectedArchiveFileName();
+  //      currentPath.append(fileName);
+        dataModel->writeData(nextVersionPath);
+        //_unSavedEdits = false;
+      
+      } catch (FileIException &ex) {
+        errorMessage("Error", "FileIException");
+        //this->setCursor(Qt::ArrowCursor);
+        _batchEditing = false;
+        return;
+      } catch (std::invalid_argument &ex) {
+        stringstream ss;
+        ss << "No matching sweep angle, skipping file " << archiveFileIndex << ": " <<
+          inputPath << " " <<
+          ex.what();
+        errorMessage("Error", ss.str());
+        //errorMessage("Error", ex.what());
+        //return;
+      } catch (const std::out_of_range& ex) {
+        errorMessage("ERROR", ex.what());
+        _batchEditing = false;
+        return;
+      } catch (string &msg) {
+        errorMessage("Error", msg);
+        _batchEditing = false;
+        return;
+      }
     }
     archiveFileIndex += 1;
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
     QCoreApplication::processEvents();
     //cancelled = scriptEditorControl->cancelRequested();
   } // while more archive files
+  
+  _batchEditing = false;
 
 // ---
 
@@ -5288,6 +5361,138 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     errorMessage("Error", ex.what());
   }
   _cancelled = false;
+  scriptEditorControl->batchEditComplete();
+  
+  // reconnect the DataModel to the selected time index, etc.
+  restoreCurrentState();
+}
+
+// useTimeRange distinquishes individual vs. batch mode 3/24/2022 NOT USED
+void PolarManager::runScriptBatchModeDebug(QString script, bool useBoundary, 
+  bool useAllSweeps, bool useTimeRange) {
+
+  _cancelled = false;
+   
+  vector<Point> boundaryPoints;
+  if (boundaryPointEditorControl != NULL) {
+    boundaryPoints = boundaryPointEditorControl->getWorldPoints();
+  }
+
+  // get the field names
+  vector<string> fieldNames = _displayFieldController->getFieldNames();
+  if (fieldNames.size() <= 0) {
+    errorMessage("Error", "No field names selected");
+    return;
+  }
+  string fileName;
+  string currentPath;
+  int firstArchiveFileIndex;
+  int lastArchiveFileIndex;
+
+  bool batchMode = _operationMode==BATCH;
+
+  _timeNavController->getBounds(batchMode, &firstArchiveFileIndex,
+    &lastArchiveFileIndex);
+
+  scriptEditorControl->initProgress(lastArchiveFileIndex - firstArchiveFileIndex + 1);
+
+  _batchEditing = true;
+
+  try {
+    // get list of archive files within start and end date/times
+
+     // move time nav through each archive file
+     // run script on each file.
+     // run in automatic mode.  
+     // then for command-line mode, we just run the same code?? Yes, ideally.
+
+  // for each archive file 
+  int archiveFileIndex = firstArchiveFileIndex;
+
+  //bool cancelled = scriptEditorControl->cancelRequested();
+  while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
+
+    _timeNavController->setTimeSliderPosition(archiveFileIndex);
+        
+    // need to get the current version of the file (by index)
+    string inputPath = _getSelectedFile();
+    //  _undoRedoController->getCurrentVersion(archiveFileIndex);
+    if (_getArchiveDataPlainVanilla(inputPath) != 0) {
+      // an error occurred, skip this file
+    } else {
+
+      //bool debug_verbose = false;
+      //bool debug_extra = false;
+      //bool batchMode = true; // to prevent message box on every file
+      try {  
+        // use regular forEachRay ...
+        scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
+        runForEachRayScript(script, useBoundary, useAllSweeps);
+        // check if Cancel requested
+        //   save archive file to temp area
+        //LOG(DEBUG) << "writing to file " << name;
+        DataModel *dataModel = DataModel::Instance();
+        string nextVersionPath = _getFileNewVersion(archiveFileIndex);
+          // _undoRedoController->getNewVersion(archiveFileIndex);
+
+  //      currentPath = saveDirectoryPath;
+  //      currentPath.append("/");
+  //      fileName = _timeNavController->getSelectedArchiveFileName();
+  //      currentPath.append(fileName);
+        dataModel->writeData(nextVersionPath);
+        //_unSavedEdits = false;
+      
+      } catch (FileIException &ex) {
+        errorMessage("Error", "FileIException");
+        //this->setCursor(Qt::ArrowCursor);
+        _batchEditing = false;
+        return;
+      } catch (std::invalid_argument &ex) {
+        stringstream ss;
+        ss << "No matching sweep angle, skipping file" <<
+          ex.what();
+        errorMessage("Error", ss.str());
+        //errorMessage("Error", ex.what());
+        //return;
+      } catch (const std::out_of_range& ex) {
+        errorMessage("ERROR", ex.what());
+        _batchEditing = false;
+        return;
+      } catch (string &msg) {
+        errorMessage("Error", msg);
+        _batchEditing = false;
+        return;
+      }
+    }
+    archiveFileIndex += 1;
+    //_timeNavController->setTimeSliderPosition(archiveFileIndex);
+    QCoreApplication::processEvents();
+    //cancelled = scriptEditorControl->cancelRequested();
+  } // while more archive files
+  
+  _batchEditing = false;
+
+// ---
+
+  /*
+    if (useAllSweeps) {
+      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+    } else {
+      // send the current sweep to the script editor controller
+      int currentSweepIndex = _sweepController->getSelectedNumber();
+      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+      // index is a vector and zero-based 
+      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+       useBoundary, boundaryPoints);
+    }
+    */
+    if (batchMode)
+      _undoRedoController->waterMarkVersion();
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
+  }
+  _cancelled = false;
+  scriptEditorControl->batchEditComplete();
   //errorMessage("Done", "moving to edited data");
   //vector<string> archiveFileList;
   //archiveFileList.push_back(currentPath);
@@ -5367,8 +5572,9 @@ void PolarManager::undoScriptEdits() {
     //errorMessage("Error", "At the end of Undo stack");
   }
   */
-  _readDataFile2(inputPath);
-  _plotArchiveData();
+  if (_readDataFile2(inputPath) == 0) {
+    _plotArchiveData();
+  } 
 }
 
 void PolarManager::redoScriptEdits() { 
@@ -5399,8 +5605,9 @@ void PolarManager::redoScriptEdits() {
     errorMessage("Error", "At the end of Undo stack");
   }
   */
-  _readDataFile2(inputPath);
-  _plotArchiveData();
+  if (_readDataFile2(inputPath) == 0) {
+    _plotArchiveData();
+  }
   /*  
   // we can redo the edits, if the current directory is ./tmp_N where
   // N = 1 ... 9

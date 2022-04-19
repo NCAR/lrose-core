@@ -230,6 +230,7 @@ public slots:
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
   void _checkForOverwrite(string pathFile);
+  int _mergeDataFiles(string dest_path, string source_path);
   void _openFile();
   void _saveFile();
   void _saveCurrentVersionAllFiles();
@@ -286,6 +287,8 @@ public slots:
   void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
+  void runScriptBatchModeDebug(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);  
   void undoScriptEdits(); // bool batchMode = false);
   void redoScriptEdits(); // bool batchMode = false);
   void cancelScriptRun();
@@ -607,6 +610,7 @@ private:
   bool _archiveRetrievalPending;
 
   bool _cancelled;
+  bool _batchEditing;
 
 /*
   QDateTimeEdit *_archiveStartTimeEdit;
@@ -702,8 +706,8 @@ private:
   // data retrieval
 
   void _readDataFile(vector<string> *selectedFields);
-  void _readDataFile2();
-  void _readDataFile2(string &inputPath);
+  int _readDataFile2();
+  int _readDataFile2(string &inputPath);
 
   // handleArchiveData calls:
   // getArchiveData
@@ -787,6 +791,11 @@ private:
 
   string _getSelectedFile();
   string _getFileNewVersion(int archiveFileIndex);
+
+
+  void saveCurrentState();
+  void restoreCurrentState();
+  int _stateCurrentFileIndex;   
 
 private slots:
 
@@ -901,6 +910,8 @@ private slots:
 
   void _scriptEditorSetup();
   void EditRunScript();
+
+ 
 
 };
 

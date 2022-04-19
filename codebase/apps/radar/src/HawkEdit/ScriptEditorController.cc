@@ -1349,10 +1349,17 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
-void ScriptEditorController::showProgress(int currentIndex, int lastIndex) {
-  _currentView->showProgress(currentIndex, lastIndex);
+void ScriptEditorController::initProgress(int nFiles) {
+  _currentView->initProgress(nFiles);
 }
 
+void ScriptEditorController::updateProgress(int currentIndex, int lastIndex) {
+  _currentView->updateProgress(currentIndex, lastIndex);
+}
+
+void ScriptEditorController::batchEditComplete() {
+  _currentView->batchEditComplete();
+}
 
 void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
 

@@ -64,7 +64,7 @@ public:
 
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);
-  void setTimeSliderPosition(int value);
+  void setTimeSliderPosition(int value, bool force = false);
 
   void fetchArchiveFiles(string seedFileName);
   void fetchArchiveFiles(string seedPath, string seedFileName,
@@ -75,6 +75,7 @@ public:
   string getSelectedArchiveFileName();
   int getSelectedArchiveFileIndex();
   string getArchiveFilePath(int idx);
+  string getArchiveFileName(int idx);
   //string getTempDir();
   //string getPreviousTempDir();
   //string getNextTempDir();

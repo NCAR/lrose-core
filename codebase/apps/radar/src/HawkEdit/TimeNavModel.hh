@@ -95,7 +95,8 @@ public:
   string &getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   string getArchiveFilePath(int idx);
-  
+  string getArchiveFileName(int idx);
+
   //string getTempDir();
   int getPositionOfSelection();
 

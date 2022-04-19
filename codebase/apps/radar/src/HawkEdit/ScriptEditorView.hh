@@ -45,7 +45,9 @@ public:
 
   string getSaveEditsDirectory();
 
-  void showProgress(int currentIndex, int lastIndex);
+  void initProgress(int nFiles);
+  void updateProgress(int currentIndex, int lastIndex);
+  void batchEditComplete();
 
   //void setSelectionToValue(QString value);
   void closeEvent();
@@ -158,7 +160,7 @@ private:
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
 
-    //PolarManager *_polarManager;
+    QProgressBar *progressBar;
 };
 
 #endif // SCRIPTEDITORVIEW_H

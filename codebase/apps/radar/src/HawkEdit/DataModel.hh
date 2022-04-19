@@ -52,6 +52,10 @@ public:
   void readData(string path, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
   void writeData(string path);
+  void writeData(string path, RadxVol *vol);
+
+  int mergeDataFiles(string dest_path, string source_path, string original_path);
+
   vector<string> *getPossibleFieldNames(string fileName);
   vector<string> *getUniqueFieldNameList();
 
@@ -92,7 +96,8 @@ public:
   size_t getNRaysSweepIndex(int sweepIndex);
   size_t getFirstRayIndex(int sweepIndex);
   size_t getLastRayIndex(int sweepIndex);  
-  int getSweepNumber(int sweepIndex);
+
+
   vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);
   vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
@@ -103,6 +108,9 @@ public:
   int getNSweeps();
   vector<double> *getSweepAngles();
   int getSweepNumber(float elevation);
+  int getSweepNumber(int sweepIndex);
+  int getSweepIndexFromSweepNumber(int sweepNumber);
+  int getSweepIndexFromSweepAngle(float elevation);
 
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
@@ -121,13 +129,17 @@ public:
   size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
   size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
-  void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void mergeDataFields(string fileName);
+  RadxVol *mergeDataFields(string currentVersionPath, string originalSourcePath);
 
   Radx::PrimaryAxis_t getPrimaryAxis();
 
   void printAzimuthInRayOrder();
   void writeWithMergeData(string outputPath, string originalSourcePath);
+  void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
+
+  RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
+    bool debug_verbose, bool debug_extra);
 
   
 private:
@@ -137,6 +149,10 @@ private:
   void init();
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
+
+  void _selectFieldsNotInVolume(vector<string> *allFieldNames);
+  void _selectFieldsNotInCurrentVersion(
+    vector<string> *currentVersionFieldNames, vector<string> *allFieldNames);
 
   size_t calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset);
 

@@ -324,6 +324,57 @@ void DataModel::regularizeRays() {
   _vol->loadRaysFromFields();
 }
 
+RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
+  bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter";
+  // set up file object for reading
+
+  RadxVol *vol = new RadxVol();
+
+  cerr << "before " << endl;
+  RadxFile file;
+
+  _setupVolRead(file, *fieldNames, debug_verbose, debug_extra);
+   
+  LOG(DEBUG) << "  reading data file path: " << path;    
+    
+  if (file.readFromPath(path, *vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::readData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + path + "\n";
+      cerr << errMsg;
+      throw errMsg;
+  } 
+  cerr << "after " << endl;
+
+  vol->convertToFl32();
+
+  // adjust angles for elevation surveillance if needed
+  
+  vol->setAnglesForElevSurveillance();
+  
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  vol->computeFixedAnglesFromRays();
+
+    LOG(DEBUG) << "----------------------------------------------------";
+    LOG(DEBUG) << "perform archive retrieval";
+    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
+   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
+   //      << _sweepManager.getGuiIndex() << ", "
+   //      << _sweepManager.getSelectedAngle();
+    LOG(DEBUG) << "----------------------------------------------------";
+
+  LOG(DEBUG) << "exit";
+
+  return vol;
+}
+
+
 void DataModel::readData(string path, vector<string> &fieldNames,
 	bool debug_verbose, bool debug_extra) {
 
@@ -437,6 +488,26 @@ void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   }
 }
 
+void DataModel::_selectFieldsNotInCurrentVersion(
+  vector<string> *currentVersionFieldNames, vector<string> *allFieldNames) {
+
+  vector<string>::iterator it;
+  for (it = currentVersionFieldNames->begin(); it != currentVersionFieldNames->end(); ++it) {
+    int i=0; 
+    bool found = false;
+    while (i<allFieldNames->size() && !found) {
+      if (allFieldNames->at(i).compare(*it) != string::npos) {
+        found = true;
+        // remove from list
+        allFieldNames->erase(allFieldNames->begin()+i);
+        cerr << "not reading " << *it << endl;
+      }
+      i++;
+    }
+  }  
+
+}
+
 Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
   return _vol->getPrimaryAxis();
 }
@@ -444,6 +515,11 @@ Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
 // merge edited fields (those read in memory) with
 // those fields in the original data file
 void DataModel::mergeDataFields(string fileName) {
+
+
+  // read the source_path into a separate volume, then merge the fields and 
+  //_volSecondary = read
+  // write to the dest_path
 
   vector<string> *allPossibleFieldNames = getPossibleFieldNames(fileName);
   _selectFieldsNotInVolume(allPossibleFieldNames);
@@ -458,12 +534,70 @@ void DataModel::mergeDataFields(string fileName) {
 
 }
 
+// merge edited fields (those read in memory) with
+// those fields in the original data file
+// returns merged radar volume
+RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSourcePath) {
+
+
+  // read the source_path into a separate volume, then merge the fields and 
+  //_volSecondary = read
+  // write to the dest_path
+  vector<string> *currentVersionFieldNames = getPossibleFieldNames(currentVersionPath);
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
+  _selectFieldsNotInCurrentVersion(currentVersionFieldNames, allPossibleFieldNames);
+
+  bool debug_verbose = false;
+  bool debug_extra = false;
+  
+  RadxVol *primaryVol = getRadarVolume(currentVersionPath, currentVersionFieldNames,
+     debug_verbose, debug_extra);
+
+  RadxVol *secondaryVol = NULL;
+  vector<string>::iterator fieldItr;
+
+  for (fieldItr = allPossibleFieldNames->begin(); fieldItr != allPossibleFieldNames->end();
+    ++fieldItr) {
+    // read original file as secondary file
+    // only read those fields NOT in primary vol
+    // for each field in originalPath, but NOT in currentVersion ...
+
+    vector<string> fields;
+    fields.clear();
+    fields.push_back(*fieldItr);
+
+    secondaryVol = getRadarVolume(originalSourcePath, &fields,
+       debug_verbose, debug_extra);
+    secondaryVol->loadFieldsFromRays();
+    RadxField *field = secondaryVol->getField(*fieldItr);
+    primaryVol->addField(field);
+    delete secondaryVol;
+    secondaryVol = NULL;
+  }
+
+  delete allPossibleFieldNames;
+  delete currentVersionFieldNames;
+
+  return primaryVol;
+
+}
+
+// use to merge data with currently selected data file
 void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
 
     mergeDataFields(originalSourcePath);
     writeData(outputPath);
 }
 
+// use to merge data with a data file NOT currently selected
+void DataModel::writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath) {
+
+    RadxVol *mergedVolume = mergeDataFields(currentVersionPath, originalSourcePath);
+    writeData(outputPath, mergedVolume);
+    delete mergedVolume;
+}
+
+// NOTE: side effect of changing the class variable _currentFilePath
 void DataModel::writeData(string path) {
     RadxFile outFile;
 
@@ -478,6 +612,28 @@ void DataModel::writeData(string path) {
       throw std::invalid_argument(errStr);
     }
     _currentFilePath = path;
+}
+
+// no side effects, just writes the radar volume to the path
+void DataModel::writeData(string path, RadxVol *vol) {
+    RadxFile outFile;
+
+    LOG(DEBUG) << "writing to file " << path;
+    int result = outFile.writeToPath(*vol, path);
+    // Returns 0 on success, -1 on failure
+    //
+    // Use getErrStr() if error occurs
+    // Use getPathInUse() for path written
+    if (result != 0) {
+      string errStr = outFile.getErrStr();
+      throw std::invalid_argument(errStr);
+    }
+}
+
+int DataModel::mergeDataFiles(string dest_path, string source_path, string original_path) {
+
+  writeWithMergeData(dest_path, original_path, original_path);
+
 }
 
 void DataModel::update() {
@@ -680,7 +836,7 @@ size_t DataModel::getNRays(int sweepNumber) {
   _vol->loadRaysFromFields();
   RadxSweep *sweep = _vol->getSweepByNumber(sweepNumber);
   if (sweep == NULL) {
-    throw std::invalid_argument("no sweep found");
+    throw std::invalid_argument("DataModel::getNRays: no sweep found");
   }
   size_t nRays = sweep->getNRays();
   return nRays;
@@ -692,7 +848,7 @@ size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
   RadxSweep *sweep = sweeps.at(sweepIndex); 
   if (sweep == NULL) {
-    throw std::invalid_argument("bad sweep index");
+    throw std::invalid_argument("DataModel::getNRaysSweepIndex: bad sweep index");
   }
   size_t nRays = sweep->getNRays();
   return nRays;
@@ -701,14 +857,17 @@ size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
 // get the first ray for a sweep
 size_t DataModel::getFirstRayIndex(int sweepIndex) {
   if (sweepIndex < 0) {
-    throw std::invalid_argument("DataModel::getFirstRayIndex bad sweep index < 0");
+    throw std::invalid_argument("DataModel::getFirstRayIndex: bad sweep index < 0");
   }
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
+  if (sweepIndex >= sweeps.size()) {
+    throw std::invalid_argument("DataModel::getFirstRayIndex: sweep index > number of sweeps");
+  }
   RadxSweep *sweep = sweeps.at(sweepIndex);  
   if (sweep == NULL) {
-    throw std::invalid_argument("bad sweep index");
+    throw std::invalid_argument("DataModel::getFirstRayIndex: bad sweep index");
   }
   size_t firstRayIndex = sweep->getStartRayIndex();
   return firstRayIndex;
@@ -808,7 +967,7 @@ int DataModel::getSweepNumber(float elevation) {
       i += 1;
     }
   }
-  if (!found) throw std::invalid_argument("no sweep found for elevation");
+  if (!found) throw std::invalid_argument("no sweep found for elevation ");
 
   // use the index, i, to find the sweep number, because
   // the index may be different than the number, which is a label for a sweep.
@@ -818,8 +977,44 @@ int DataModel::getSweepNumber(float elevation) {
   return sweepNumber;
 }
 
+int DataModel::getSweepIndexFromSweepNumber(int sweepNumber) {
+  vector<RadxSweep *> sweeps = _vol->getSweeps();
+  int idx = -1;
+  for (int i = 0; i<sweeps.size(); i++) {
+    if (sweeps.at(i)->getSweepNumber() == sweepNumber) {
+      idx = i;
+    }
+  }
+  if (idx < 0) {
+    stringstream ss;
+    ss << "DataModel::getSweepIndex: no sweep found with sweep number " << sweepNumber << endl;
+    throw std::invalid_argument(ss.str());
+  } else {
+    return idx;
+  }
+  
+}
 
-
+int DataModel::getSweepIndexFromSweepAngle(float elevation) {
+  vector<double> *sweepAngles = getSweepAngles();
+  int i = 0;
+  float delta = 0.01;
+  bool found = false;  
+  while ((i < sweepAngles->size()) && !found) {
+    if (fabs(sweepAngles->at(i) - elevation) < delta) {
+      found = true;
+    } else {
+      i += 1;
+    }
+  }
+  if (!found) {
+    stringstream ss;
+    ss << "DataModel::getSweepIndexFromSweepAngle no sweep found for elevation " <<
+      elevation << endl;
+    throw std::invalid_argument(ss.str());
+  }
+  return i;  
+}
 
 vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
 // TODO: which sweep? the rayIdx considers which sweep.
