@@ -3035,8 +3035,10 @@ string PolarManager::_combinePathFile(string path, string file) {
 
 void PolarManager::_checkForOverwrite(string pathFile) {
     if (QFile(pathFile.c_str()).exists()) {
-    errorMessage("Warning", "file exists overwrite?");
-  }
+      stringstream ss;
+      ss << "file " << pathFile << " exists.  Do you want to overwrite?";
+      errorMessage("Warning", ss.str());
+    }
 }
 
 
@@ -3092,13 +3094,24 @@ void PolarManager::_saveCurrentVersionAllFiles()
     {
         LOG(DEBUG) << "selected folder path : " << saveDirName;
       int nFiles = _timeNavController->getNFiles();
+
+      QProgressDialog progress("Saving files...", "Abort Save", 0, nFiles, this);
+      progress.setWindowModality(Qt::WindowModal);
+
       // for each file in timeNav ...
       for (int i=0; i<nFiles; i++) {
         // hold it! the save message should
         // go to the Model (Data) level because
         // we'll be using Radx utilities.
+
+        progress.setValue(i);
+        if (progress.wasCanceled())
+            break;
+
         try {
-           if (i == _timeNavController->getSelectedArchiveFileIndex()) {
+          // the active one in memory (i.e. the selected file)
+          // may have unsaved changes, so treat it differently.
+          if (i == _timeNavController->getSelectedArchiveFileIndex()) {
             //LOG(DEBUG) << "writing to file " << name;
             //string originalSourcePath = 
             //  _timeNavController->getSelectedArchiveFile();
@@ -3110,8 +3123,6 @@ void PolarManager::_saveCurrentVersionAllFiles()
             dataModel->writeWithMergeData(saveFile, currentFile);
             _unSavedEdits = false;
           }  else {
-            // copy all files except the active one in memory 
-            // as it may have unsaved changes
 
             string versionName = _undoRedoController->getCurrentVersion(i);
             string realName = _timeNavController->getArchiveFilePath(i);
@@ -3122,8 +3133,10 @@ void PolarManager::_saveCurrentVersionAllFiles()
               versionName = _timeNavController->getArchiveFilePath(i);
               // TODO: just copy the file to the destination
             } 
-            const char *source_path = versionName.c_str();
-            string savePathFile = _combinePathFile(saveDirName, _fileName(QString(realName.c_str())));
+            string justTheFileName = _fileName(QString(realName.c_str()));
+            string sourcePathFile = _combinePathFile(versionName, justTheFileName);
+            const char *source_path = sourcePathFile.c_str();
+            string savePathFile = _combinePathFile(saveDirName, justTheFileName);
             const char *dest_path = savePathFile.c_str();
 
             cout << "source_path = " << source_path << endl;
@@ -3150,6 +3163,9 @@ void PolarManager::_saveCurrentVersionAllFiles()
           return;
         }
       } // end for each file in timeNav
+
+      progress.setValue(nFiles);
+
     }
   }
 }

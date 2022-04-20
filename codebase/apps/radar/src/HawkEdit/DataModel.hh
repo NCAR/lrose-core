@@ -129,7 +129,7 @@ public:
   size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
   size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
-  void mergeDataFields(string fileName);
+  RadxVol *mergeDataFields(string originalSourcePath);
   RadxVol *mergeDataFields(string currentVersionPath, string originalSourcePath);
 
   Radx::PrimaryAxis_t getPrimaryAxis();

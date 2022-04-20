@@ -362,8 +362,8 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
 
     LOG(DEBUG) << "----------------------------------------------------";
     LOG(DEBUG) << "perform archive retrieval";
-    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
-    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
+    LOG(DEBUG) << "  read file: " << vol->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << vol->getNSweeps();
    // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
    //      << _sweepManager.getGuiIndex() << ", "
    //      << _sweepManager.getSelectedAngle();
@@ -514,23 +514,63 @@ Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
 
 // merge edited fields (those read in memory) with
 // those fields in the original data file
-void DataModel::mergeDataFields(string fileName) {
+RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
 
 
   // read the source_path into a separate volume, then merge the fields and 
   //_volSecondary = read
   // write to the dest_path
 
-  vector<string> *allPossibleFieldNames = getPossibleFieldNames(fileName);
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
   _selectFieldsNotInVolume(allPossibleFieldNames);
+  // allPossibleFieldNames is now filtered to remove fields in the current selected file
 
-  // read original file as secondary file
-  // only read those fields NOT in primary vol
-  //RadxVol secondaryVol = ???
+  bool debug_verbose = false;
+  bool debug_extra = false;
+  
+  // make a copy of the selected radar volume
+  RadxVol *primaryVol = new RadxVol();
+  *primaryVol = *_vol;
 
-  // add fields to vol with more fields
+  RadxVol *secondaryVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
+     debug_verbose, debug_extra);
+
+  // ----
+    // merge the primary and seconday volumes, using the primary
+    // volume to hold the merged data
+    
+  // add secondary rays to primary vol
+
+  int maxSweepNum = 0;
+  const vector<RadxRay *> &pRays = primaryVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    const RadxRay &pRay = *pRays[iray];
+    if (pRay.getSweepNumber() > maxSweepNum) {
+      maxSweepNum = pRay.getSweepNumber();
+    }
+  } // iray
+
+  const vector<RadxRay *> &sRays = secondaryVol->getRays();
+  for (size_t iray = 0; iray < sRays.size(); iray++) {
+    RadxRay *copyRay = new RadxRay(*sRays[iray]);
+    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
+    copyRay->setSweepNumber(sweepNum);
+    primaryVol->addRay(copyRay);
+  } // iray
+
+  // finalize the volume
+
+  primaryVol->setPackingFromRays();
+  primaryVol->loadVolumeInfoFromRays();
+  primaryVol->loadSweepInfoFromRays();
+  primaryVol->remapToPredomGeom();
+  
+  delete secondaryVol;
 
   delete allPossibleFieldNames;
+  //delete currentVersionFieldNames;
+
+  return primaryVol;
 
 }
 
@@ -547,36 +587,60 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
   vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
   _selectFieldsNotInCurrentVersion(currentVersionFieldNames, allPossibleFieldNames);
 
+  // allPossibleFieldNames now contains only the fields NOT in current version of file
+
   bool debug_verbose = false;
   bool debug_extra = false;
   
   RadxVol *primaryVol = getRadarVolume(currentVersionPath, currentVersionFieldNames,
      debug_verbose, debug_extra);
 
-  RadxVol *secondaryVol = NULL;
-  vector<string>::iterator fieldItr;
+  RadxVol *secondaryVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
+     debug_verbose, debug_extra);
 
-  for (fieldItr = allPossibleFieldNames->begin(); fieldItr != allPossibleFieldNames->end();
-    ++fieldItr) {
-    // read original file as secondary file
-    // only read those fields NOT in primary vol
-    // for each field in originalPath, but NOT in currentVersion ...
+  // ----
+    // merge the primary and seconday volumes, using the primary
+    // volume to hold the merged data
+    
+  // add secondary rays to primary vol
 
-    vector<string> fields;
-    fields.clear();
-    fields.push_back(*fieldItr);
+  int maxSweepNum = 0;
+  const vector<RadxRay *> &pRays = primaryVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    const RadxRay &pRay = *pRays[iray];
+    if (pRay.getSweepNumber() > maxSweepNum) {
+      maxSweepNum = pRay.getSweepNumber();
+    }
+  } // iray
 
-    secondaryVol = getRadarVolume(originalSourcePath, &fields,
-       debug_verbose, debug_extra);
-    secondaryVol->loadFieldsFromRays();
-    RadxField *field = secondaryVol->getField(*fieldItr);
-    primaryVol->addField(field);
-    delete secondaryVol;
-    secondaryVol = NULL;
-  }
+  const vector<RadxRay *> &sRays = secondaryVol->getRays();
+  for (size_t iray = 0; iray < sRays.size(); iray++) {
+    RadxRay *copyRay = new RadxRay(*sRays[iray]);
+    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
+    copyRay->setSweepNumber(sweepNum);
+    primaryVol->addRay(copyRay);
+  } // iray
+
+
+    // --
+
+  // finalize the volume
+
+  primaryVol->setPackingFromRays();
+  primaryVol->loadVolumeInfoFromRays();
+  primaryVol->loadSweepInfoFromRays();
+  primaryVol->remapToPredomGeom();
+  
+  // write out file
+
+  //if (_writeVol(primaryVol)) {
+  //  return -1;
+  //}
+  // ----
 
   delete allPossibleFieldNames;
   delete currentVersionFieldNames;
+  delete secondaryVol;
 
   return primaryVol;
 
@@ -585,8 +649,9 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
 // use to merge data with currently selected data file
 void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
 
-    mergeDataFields(originalSourcePath);
-    writeData(outputPath);
+    RadxVol *mergedVolume = mergeDataFields(originalSourcePath);
+    writeData(outputPath, mergedVolume);
+    delete mergedVolume;
 }
 
 // use to merge data with a data file NOT currently selected
@@ -632,7 +697,7 @@ void DataModel::writeData(string path, RadxVol *vol) {
 
 int DataModel::mergeDataFiles(string dest_path, string source_path, string original_path) {
 
-  writeWithMergeData(dest_path, original_path, original_path);
+  writeWithMergeData(dest_path, source_path, original_path);
 
 }
 
