@@ -585,6 +585,7 @@ private:
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
   QMenu *_editMenu;
+  QMenu *_modeMenu;
   QMenu *_boundaryMenu;
 
   // actions

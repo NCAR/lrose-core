@@ -856,9 +856,10 @@ void PolarManager::_createMenus()
   // _editMenu->addSeparator();
   _editMenu->addAction(undoAct);
   _editMenu->addAction(redoAct);
-  _editMenu->addSeparator();
-  _editMenu->addAction(selectBatchModeAct);
-  _editMenu->addAction(selectIndividualModeAct);
+
+  _modeMenu = menuBar()->addMenu(tr("&Mode"));  
+  _modeMenu->addAction(selectBatchModeAct);
+  _modeMenu->addAction(selectIndividualModeAct);
 
   _helpMenu = menuBar()->addMenu(tr("&Help"));
   _helpMenu->addAction(_howtoAct);
