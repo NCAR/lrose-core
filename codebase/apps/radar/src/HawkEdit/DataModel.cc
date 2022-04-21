@@ -605,6 +605,36 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
   // add secondary rays to primary vol
 
   int maxSweepNum = 0;
+  vector<RadxRay *> &pRays = primaryVol->getRays();
+  const vector<RadxRay *> &sRays = secondaryVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    RadxRay &pRay = *pRays[iray];
+    const RadxRay *sRay = sRays[iray];
+    // for each field in secondary vol
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
+  } // iray
+
+/*
+  for (size_t iray = 0; iray < sRays.size(); iray++) {
+    RadxRay *copyRay = new RadxRay(*sRays[iray]);
+    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
+    copyRay->setSweepNumber(sweepNum);
+    primaryVol->addRay(copyRay);
+  } // iray
+*/
+/*
+  int maxSweepNum = 0;
   const vector<RadxRay *> &pRays = primaryVol->getRays();
   for (size_t iray = 0; iray < pRays.size(); iray++) {
     const RadxRay &pRay = *pRays[iray];
@@ -620,7 +650,7 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
     copyRay->setSweepNumber(sweepNum);
     primaryVol->addRay(copyRay);
   } // iray
-
+*/
 
     // --
 
