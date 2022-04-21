@@ -527,7 +527,7 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
 
   bool debug_verbose = false;
   bool debug_extra = false;
-  
+
   // make a copy of the selected radar volume
   RadxVol *primaryVol = new RadxVol();
   *primaryVol = *_vol;
@@ -542,20 +542,24 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
   // add secondary rays to primary vol
 
   int maxSweepNum = 0;
-  const vector<RadxRay *> &pRays = primaryVol->getRays();
-  for (size_t iray = 0; iray < pRays.size(); iray++) {
-    const RadxRay &pRay = *pRays[iray];
-    if (pRay.getSweepNumber() > maxSweepNum) {
-      maxSweepNum = pRay.getSweepNumber();
-    }
-  } // iray
-
+  vector<RadxRay *> &pRays = primaryVol->getRays();
   const vector<RadxRay *> &sRays = secondaryVol->getRays();
-  for (size_t iray = 0; iray < sRays.size(); iray++) {
-    RadxRay *copyRay = new RadxRay(*sRays[iray]);
-    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
-    copyRay->setSweepNumber(sweepNum);
-    primaryVol->addRay(copyRay);
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    RadxRay &pRay = *pRays[iray];
+    const RadxRay *sRay = sRays[iray];
+    // for each field in secondary vol
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
   } // iray
 
   // finalize the volume
@@ -564,6 +568,8 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
   primaryVol->loadVolumeInfoFromRays();
   primaryVol->loadSweepInfoFromRays();
   primaryVol->remapToPredomGeom();
+
+  // --
   
   delete secondaryVol;
 
@@ -625,35 +631,6 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
     } // ifield
   } // iray
 
-/*
-  for (size_t iray = 0; iray < sRays.size(); iray++) {
-    RadxRay *copyRay = new RadxRay(*sRays[iray]);
-    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
-    copyRay->setSweepNumber(sweepNum);
-    primaryVol->addRay(copyRay);
-  } // iray
-*/
-/*
-  int maxSweepNum = 0;
-  const vector<RadxRay *> &pRays = primaryVol->getRays();
-  for (size_t iray = 0; iray < pRays.size(); iray++) {
-    const RadxRay &pRay = *pRays[iray];
-    if (pRay.getSweepNumber() > maxSweepNum) {
-      maxSweepNum = pRay.getSweepNumber();
-    }
-  } // iray
-
-  const vector<RadxRay *> &sRays = secondaryVol->getRays();
-  for (size_t iray = 0; iray < sRays.size(); iray++) {
-    RadxRay *copyRay = new RadxRay(*sRays[iray]);
-    int sweepNum = copyRay->getSweepNumber() + maxSweepNum + 1;
-    copyRay->setSweepNumber(sweepNum);
-    primaryVol->addRay(copyRay);
-  } // iray
-*/
-
-    // --
-
   // finalize the volume
 
   primaryVol->setPackingFromRays();
@@ -661,13 +638,6 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
   primaryVol->loadSweepInfoFromRays();
   primaryVol->remapToPredomGeom();
   
-  // write out file
-
-  //if (_writeVol(primaryVol)) {
-  //  return -1;
-  //}
-  // ----
-
   delete allPossibleFieldNames;
   delete currentVersionFieldNames;
   delete secondaryVol;
