@@ -129,7 +129,7 @@ def installPackagesCentos6():
              "m4 make cmake libtool autoconf automake " +
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
-             "libpng-devel libtiff-devel zlib-devel " +
+             "libjpeg-devel libpng-devel libtiff-devel zlib-devel " +
              "expat-devel libcurl-devel " +
              "flex-devel fftw3-devel " +
              "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
@@ -144,7 +144,7 @@ def installPackagesCentos6():
         shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 " +
+                 "libtiff-devel.i686 libjpeg-devel.i686 libpng-devel.i686 " +
                  "libstdc++-devel.i686 libgcc.i686 " +
                  "expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
@@ -185,7 +185,8 @@ def installPackagesCentos7():
              "m4 make cmake cmake3 libtool autoconf automake " +
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
-             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "libjpeg-devel libpng-devel " +
+             "libtiff-devel zlib-devel libzip-devel " +
              "eigen3-devel armadillo-devel ")
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
@@ -202,7 +203,8 @@ def installPackagesCentos7():
         shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686" +
+                 "libtiff-devel.i686 libjpeg-devel.i686 " +
+                 "libpng-devel.i686 libcurl-devel.i686" +
                  "libstdc++-devel.i686 libgcc.i686 " +
                  "expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
@@ -238,7 +240,8 @@ def installPackagesCentos8():
 
     shellCmd("dnf install -y --allowerasing " +
              "libX11-devel libXext-devel libcurl-devel " +
-             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "libjpeg-devel libpng-devel " +
+             "libtiff-devel zlib-devel libzip-devel " +
              "eigen3-devel armadillo-devel " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel ")
@@ -257,7 +260,7 @@ def installPackagesCentos8():
                  "xrdb " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
                  "libcurl-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 " +
+                 "libtiff-devel.i686 libjpeg-devel.i686 libpng-devel.i686 " +
                  "libstdc++-devel.i686 libtiff-devel.i686 ")
         shellCmd("dnf install -y --allowerasing " +
                  "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
@@ -295,7 +298,8 @@ def installPackagesAlmalinux8():
 
     shellCmd("dnf install -y --allowerasing " +
              "libX11-devel libXext-devel libcurl-devel " +
-             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "libjpeg-devel libpng-devel " +
+             "libtiff-devel zlib-devel libzip-devel " +
              "eigen3-devel armadillo-devel " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel ")
@@ -314,7 +318,7 @@ def installPackagesAlmalinux8():
                  "xrdb " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
                  "libcurl-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 " +
+                 "libtiff-devel.i686 libjpeg-devel.i686 libpng-devel.i686 " +
                  "libstdc++-devel.i686 libtiff-devel.i686 ")
         shellCmd("dnf install -y --allowerasing " +
                  "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
@@ -342,7 +346,8 @@ def installPackagesFedora():
              "m4 make cmake libtool autoconf automake " +
              "gcc gcc-c++ gcc-gfortran glibc-devel " +
              "libX11-devel libXext-devel " +
-             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "libjpeg-devel libpng-devel " +
+             "libtiff-devel zlib-devel libzip-devel " +
              "eigen3-devel armadillo-devel ")
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
@@ -359,7 +364,8 @@ def installPackagesFedora():
         shellCmd("yum install -y " +
                  "xrdb Xvfb gnuplot " +
                  "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
-                 "libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 " +
+                 "libtiff-devel.i686 libjpeg-devel.i686 " +
+                 "libpng-devel.i686 libcurl-devel.i686 " +
                  "libstdc++-devel.i686 libgcc.i686 " +
                  "expat-devel.i686 flex-devel.i686 " +
                  "fftw-devel.i686 zlib-devel.i686 bzip2-devel.i686 " +
@@ -395,7 +401,8 @@ def installPackagesOracle():
 
     shellCmd("dnf install -y --allowerasing " +
              "libX11-devel libXext-devel libcurl-devel " +
-             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "libjpeg-devel libpng-devel " +
+             "libtiff-devel zlib-devel libzip-devel " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex fftw3-devel ")
 
@@ -425,7 +432,7 @@ def installPackagesDebian():
              "tcsh git gcc g++ gfortran rsync chrpath " +
              "automake make cmake mlocate libtool pkg-config python " +
              "libcurl3-dev curl " +
-             "libfl-dev libbz2-dev libx11-dev libpng-dev " +
+             "libfl-dev libbz2-dev libx11-dev libjpeg-dev libpng-dev " +
              "libfftw3-dev libexpat1-dev " +
              "qtbase5-dev qtdeclarative5-dev " +
              "libeigen3-dev libzip-dev " +
@@ -450,6 +457,7 @@ def installPackagesDebian():
                  "libxext-dev:i386 " +
                  "libfftw3-dev:i386 " +
                  "libexpat-dev:i386 " +
+                 "libjpeg-dev:i386 " +
                  "libpng-dev:i386 " +
                  "libfl-dev:i386 " +
                  "libbz2-dev:i386 " +
@@ -467,7 +475,7 @@ def installPackagesSuse():
              "m4 make cmake libtool autoconf automake " +
              "gcc gcc-c++ gcc-fortran glibc-devel " +
              "libX11-devel libXext-devel " +
-             "libpng-devel libtiff-devel zlib-devel " +
+             "libjpeg-devel libpng-devel libtiff-devel zlib-devel " +
              "libexpat-devel libcurl-devel " +
              "flex fftw3-devel ")
     shellCmd("zypper install -y tcsh wget git " +
@@ -485,7 +493,8 @@ def installPackagesSuse():
         shellCmd("zypper install -y " +
                  "xrdb " +
                  "glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit " +
-                 "libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit " +
+                 "libtiff-devel-32bit libjpeg-devel-32bit " +
+                 "libpng-devel-32bit libcurl-devel-32bit " +
                  "libstdc++-devel-32bit libtiff-devel-32bit " +
                  "zlib-devel-32bit libexpat-devel-32bit flex-32bit " +
                  "libfftw3-3-32bit libbz2-devel-32bit " +

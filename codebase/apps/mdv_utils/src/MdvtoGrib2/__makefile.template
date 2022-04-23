@@ -37,19 +37,17 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-MODULE_TYPE=progcpp
-
 TARGET_FILE = MdvtoGrib2
 
-LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -lgrib2 \
-	-leuclid -ltoolsa -lpthread $(JASPER_LIBS) -lpng \
+	-leuclid -ltoolsa -lpthread -ljpeg -lpng \
 	-ldataport -ltdrp -lrapmath -lz \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 
-LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 

@@ -32,7 +32,7 @@ This requires upgrading the compiler toolchain.
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel \
     expat-devel libcurl-devel \
     flex-devel fftw3-devel \
     bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
@@ -71,7 +71,7 @@ This requires upgrading the compiler toolchain.
     m4 make cmake cmake3 libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel libzip-devel \
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
@@ -102,7 +102,7 @@ This requires upgrading the compiler toolchain.
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel libzip-devel \
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
@@ -135,7 +135,7 @@ This requires upgrading the compiler toolchain.
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel libzip-devel \
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
@@ -177,7 +177,7 @@ and install in
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel libzip-devel \
     eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
@@ -201,7 +201,7 @@ and install in
     tcsh git gcc g++ gfortran rsync chrpath \
     automake make cmake mlocate libtool pkg-config python \
     libcurl3-dev curl \
-    libfl-dev libbz2-dev libx11-dev libpng-dev \
+    libfl-dev libbz2-dev libx11-dev libjpeg-dev libpng-dev \
     libfftw3-dev libexpat1-dev \
     qtbase5-dev qtdeclarative5-dev \
     libeigen3-dev libzip-dev \
@@ -230,7 +230,7 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-fortran glibc-devel \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel \
     libexpat-devel libcurl-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
@@ -260,7 +260,7 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
     m4 make cmake libtool autoconf automake \
     gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
     libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
+    libjpeg-devel libpng-devel libtiff-devel zlib-devel libzip-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex fftw3-devel \
     bzip2-devel \

@@ -34,17 +34,16 @@
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = MrmsGribIngest
-MODULE_TYPE = progcpp
 
-LOC_INCLUDES = $(JASPER_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -ldsdata -lMdv -lRadx -lNcxx -ldsserver \
 	-ldidss -lrapformats -lgrib2 -leuclid \
-	-ltoolsa -lphysics $(JASPER_LIBS) -lpng \
+	-ltoolsa -lphysics -ljpeg -lpng \
 	-ldataport -ltdrp -lrapmath $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread -lm
 
-LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS =
 

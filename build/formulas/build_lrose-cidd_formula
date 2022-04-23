@@ -15,7 +15,7 @@ class cidd < Formula
 
   depends_on :x11
   depends_on 'png'
-  depends_on 'jasper'
+  depends_on 'jpeg'
   depends_on 'expat'
   depends_on 'flex'
   depends_on 'libz'

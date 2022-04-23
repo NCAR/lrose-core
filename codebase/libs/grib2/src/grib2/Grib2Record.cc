@@ -25,10 +25,11 @@
 // Grib2Record - Main class for manipulating GRIB records.
 ////////////////////////////////////////////
 
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
-#include <math.h>
+#include <cmath>
 #include <sys/types.h>
 #include <sys/stat.h>
 

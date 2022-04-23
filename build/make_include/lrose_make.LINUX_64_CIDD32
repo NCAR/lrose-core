@@ -296,6 +296,6 @@ HDF5_LIBS = -lhdf5 -lhdf5_hl
 # Jasper
 #
 
-JASPER_INCLUDES = -I/usr/local/jasper/include
-JASPER_LDFLAGS = -L/usr/local/jasper/lib
-JASPER_LIBS = -ljasper
+#JASPER_INCLUDES = -I/usr/local/jasper/include
+#JASPER_LDFLAGS = -L/usr/local/jasper/lib
+#JASPER_LIBS = -ljasper

@@ -19,7 +19,8 @@ MODULE_NAME = grib2
 LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
-	grib2
+	grib2 \
+	jasper
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 

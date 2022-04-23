@@ -88,10 +88,6 @@ def main():
                       dest='verboseMake', default=False,
                       action="store_true",
                       help='Verbose output for make, default is summary')
-    parser.add_option('--withJasper',
-                      dest='withJasper', default=False,
-                      action="store_true",
-                      help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
     parser.add_option('--iscray',
                       dest='iscray', default=False,
                       action="store_true",
@@ -134,7 +130,6 @@ def main():
         print("  static        : ", options.static, file=sys.stderr)
         print("  m32           : ", options.m32, file=sys.stderr)
         print("  verboseMake   : ", options.verboseMake, file=sys.stderr)
-        print("  withJasper    : ", options.withJasper, file=sys.stderr)
         print("=============================================", file=sys.stderr)
 
     # go to the top level codebase directory
@@ -630,9 +625,9 @@ def writeCMakeListsTop(dir):
     if (options.m32):
         fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 ")\n')
 
-    if (not options.withJasper):
-        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")\n')
-        # fo.write('add_definitions(-DNO_JASPER_LIB )\n')
+#    if (not options.withJasper):
+#        fo.write('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")\n')
+#        # fo.write('add_definitions(-DNO_JASPER_LIB )\n')
 
     fo.write('\n')
 
@@ -1226,12 +1221,13 @@ def getExtendedLibs(linkLibList):
                    'Xext',
                    'pthread',
                    'png',
+                   'jpeg',
                    'z',
                    'bz2',
                    'm' ]
 
-    if (options.withJasper):
-        extendLibs.append('jasper')
+#    if (options.withJasper):
+#        extendLibs.append('jasper')
     
     #if ("radar" in linkLibList and "fftw3" not in linkLibList):
     #    extendLibs.append("fftw3")

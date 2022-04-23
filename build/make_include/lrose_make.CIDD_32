@@ -217,7 +217,7 @@ QT4_LIBS = -lQtCore
 # Jasper
 #
 
-JASPER_INCLUDES = -I/usr/local/jasper/include -I/opt/jasper/include
-JASPER_LDFLAGS = -L/usr/local/jasper/lib -L/opt/jasper/lib
-JASPER_LIBS = -ljasper
+#JASPER_INCLUDES = -I/usr/local/jasper/include -I/opt/jasper/include
+#JASPER_LDFLAGS = -L/usr/local/jasper/lib -L/opt/jasper/lib
+#JASPER_LIBS = -ljasper
 

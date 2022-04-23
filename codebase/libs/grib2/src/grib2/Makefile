@@ -21,20 +21,20 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-# to use the JPEG2000 compression/decompression capability, libjasper.a
-# must be linked in conjuction with libgrib.a
+# we need the JasPer library to handle the JPEG2000
+# compression/decompression capability.
+# A snapshot of this library is included in the grib2 lib.
 
 TARGET_FILE = ../libgrib2.a
 
-LOC_INCLUDES = -I../include $(JASPER_INCLUDES) $(SYS_X_INCLUDES)
-LOC_CPPC_CFLAGS = -DSIZE_MAX=18446744073709551615UL $(JASPER_CPPC_CFLAGS)
+LOC_INCLUDES = -I../include $(SYS_X_INCLUDES)
+LOC_CPPC_CFLAGS = -DSIZE_MAX=18446744073709551615UL
 
 MODULE_TYPE=library
 
 #
 # file lists
 #
-
 
 CPPC_SRCS = \
 	Grib2Record.cc \

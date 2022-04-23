@@ -26,7 +26,8 @@ Then run:
   yum install -y \
     xrdb \
     glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
-    libtiff-devel.i686 libpng-devel.i686 libcurl-devel.i686 \
+    libtiff-devel.i686 libjpeg-devel.i686 \
+    libpng-devel.i686 libcurl-devel.i686 \
     libstdc++-devel.i686 libtiff-devel.i686 \
     zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
     fftw-devel.i686 bzip2-devel.i686 \
@@ -43,7 +44,7 @@ Then run:
     xrdb \
     glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 \
     libcurl-devel.i686 \
-    libtiff-devel.i686 libpng-devel.i686 \
+    libtiff-devel.i686 libjpeg-devel.i686 libpng-devel.i686 \
     libstdc++-devel.i686 libtiff-devel.i686 \
     zlib-devel.i686 expat-devel.i686 flex-devel.i686 \
     fftw-devel.i686 bzip2-devel.i686 \
@@ -63,6 +64,7 @@ Then run:
    libxext-dev:i386 \
    libfftw3-dev:i386 \
    libexpat-dev:i386 \
+   libjpeg-dev.i386 \
    libpng-dev:i386 \
    libfl-dev:i386 \
    libbz2-dev:i386 \
@@ -79,7 +81,8 @@ Use ```zypper``` instead of ```yum```, with the same package list as above.
   zypper install -y \
     xrdb \
     glibc-devel-32bit libX11-devel-32bit libXext-devel-32bit \
-    libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit \
+    libtiff-devel-32bit libjpeg-devel-32bit \
+    libpng-devel-32bit libcurl-devel-32bit \
     libstdc++-devel-32bit libtiff-devel-32bit \
     zlib-devel-32bit libexpat-devel-32bit flex-32bit \
     libfftw3-3-32bit libbz2-devel-32bit \

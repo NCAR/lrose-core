@@ -86,7 +86,8 @@ public:
   } print_sections_t;
 
   /** @details Struct used for summary of a field */  
-  typedef struct {
+  class rec_summary_t {
+  public:
     /** Discipline number of field */
     si32    discipline;
     /** Parameter Category number of field */
@@ -113,10 +114,19 @@ public:
     fl32    levelVal2;
     /** Additional Summary Information */
     string  additional;
-  } rec_summary_t;
+    /** constructor */
+    rec_summary_t() {
+      discipline = 0;
+      category = 0;
+      paramNumber = 0;
+      levelVal = 0;
+      levelVal2 = 0;
+    }
+  };
   
   /** @details Struct used for accessing a single field */
-  typedef struct {
+  class Grib2Sections_t {
+  public:
     /** Section 0, Indicator Section */
     IndicatorSec *is;
     /** Section 1, Identification Section */
@@ -137,7 +147,19 @@ public:
     rec_summary_t *summary;
     /** Section 8, End Section */
     ES   *es;
-  } Grib2Sections_t;
+    Grib2Sections_t() {
+      is = NULL;
+      ids = NULL;
+      lus = NULL;
+      gds = NULL;
+      pds = NULL;
+      drs = NULL;
+      bms = NULL;
+      ds = NULL;
+      summary = NULL;
+      es = NULL;
+    }
+  };
 
   /** @brief Empty constructor */
   Grib2Record();
@@ -329,7 +351,8 @@ private:
   // All sections within such repeated sequences must be present and shall 
   // appear in the numerical order. Unrepeated sections remain in effect 
   // until redefined.
-  typedef struct {
+  class repeatSections_t {
+  public:
     /** Section 2, Local Use Section */
     LocalUseSec *lus;
     /** Section 3, Grid Definition Section  */
@@ -344,7 +367,15 @@ private:
     DS   *ds;
     /** Summary contains record specific product information */
     rec_summary_t summary;
-  } repeatSections_t;
+    repeatSections_t() {
+      lus = NULL;
+      gds = NULL;
+      pds = NULL;
+      drs = NULL;
+      bms = NULL;
+      ds = NULL;
+    }
+  };
 
   /** @brief Vector of repeating sections making up the record */
   vector< repeatSections_t > _repeatSec; 

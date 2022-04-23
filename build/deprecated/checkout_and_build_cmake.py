@@ -152,10 +152,10 @@ def main():
                       dest='no_core_apps', default=False,
                       action="store_true",
                       help='Do not build the lrose core apps')
-    parser.add_option('--withJasper',
-                      dest='withJasper', default=False,
-                      action="store_true",
-                      help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
+#    parser.add_option('--withJasper',
+#                      dest='withJasper', default=False,
+#                      action="store_true",
+#                      help='Set if jasper library is installed. This provides support for jpeg compression in grib files.')
 
 
     (options, args) = parser.parse_args()
@@ -454,9 +454,9 @@ def createCMakeLists():
     if (options.static):
         staticStr = " --static "
     
-    withJasperStr = " "
-    if (options.withJasper):
-        staticStr = " --withJasper "
+#    withJasperStr = " "
+#    if (options.withJasper):
+#        withJasperStr = " --withJasper "
     
     debugStr = " "
     if (options.verbose):
@@ -469,7 +469,8 @@ def createCMakeLists():
         dependDirsStr = " --dependDirs " + scratchBuildDir + " "
 
     shellCmd("../build/cmake/createCMakeLists.py " +
-             debugStr + staticStr + withJasperStr + dependDirsStr +
+#             debugStr + staticStr + withJasperStr + dependDirsStr +
+             debugStr + staticStr + dependDirsStr +
              " --pkg " + package + " --installDir " + scratchBuildDir)
 
 ########################################################################

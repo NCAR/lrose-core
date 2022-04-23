@@ -27,6 +27,11 @@
 // Jason Craig,  Aug 2006
 //
 //////////////////////////////////////////////////
+//
+// The grib2 lib contains a snapshot of the jasper
+// library
+//
+//////////////////////////////////////////////////
 
 #include <cmath>
 
@@ -37,11 +42,9 @@
 #include <grib2/DRS.hh>
 #include <grib2/DataRepTemp.hh>
 #include <grib2/Template5.4000.hh>
-#include <dataport/port_types.h>
+#include <grib2/jasper/jasper.h>
 
-#ifndef NO_JASPER_LIB
-#include <jasper/jasper.h>
-#endif
+#include <dataport/port_types.h>
 
 using namespace std;
 
@@ -88,12 +91,6 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
 // 2004-07-19  Gilbert - Added check on whether the jpeg2000 encoding was
 //                       successful.  If not, try again with different encoder
 //                       options.
-
-#ifdef NO_JASPER_LIB
-  cerr << "ERROR: Template7_pt_4000::pack()" << endl;
-  cerr << " NO_JASPER_LIB installed - cannot encode jpeg2000" << endl;
-  return GRIB_FAILURE;
-#endif
 
   fl32 *pdataPtr = _applyBitMapPack(dataPtr);
   si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
@@ -304,14 +301,6 @@ int Template7_pt_4000::unpack (ui08 *dataPtr)
 int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *output) 
 {
 
-#ifdef NO_JASPER_LIB
-
-  cerr << "ERROR: Template7_pt_4000::decode_jpeg2000()" << endl;
-  cerr << " NO_JASPER_LIB installed - cannot decode jpeg2000" << endl;
-  return GRIB_FAILURE;
-
-#else
-
 // Converted to a C++ method from:
 //  SUBPROGRAM:    decode_jpeg2000      Decodes JPEG2000 code stream
 //   PRGMMR: Gilbert          ORG: W/NP11     DATE: 2002-12-02
@@ -392,9 +381,6 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
 
     return GRIB_SUCCESS;
 
-// ifdef NO_JASPER_LIB
-#endif
-
 }
 
 
@@ -458,14 +444,6 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 *
 *$$$*/
 {
-
-#ifdef NO_JASPER_LIB
-
-  cerr << "ERROR: Template7_pt_4000::encode_jpeg2000()" << endl;
-  cerr << " NO_JASPER_LIB installed - cannot encode jpeg2000" << endl;
-  return GRIB_FAILURE;
-
-#else
 
     int ier,rwcnt;
     jas_image_t image;
@@ -573,12 +551,7 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 //
     return (rwcnt);
 
-// ifdef NO_JASPER_LIB
-#endif
-
 }
-
-
 
 } // namespace Grib2
 

@@ -70,7 +70,6 @@ Run the following ruby script:
   brew install udunits
   brew install fftw
   brew install flex
-  brew install jasper
   brew install jpeg
   brew install libpng
   brew install qt

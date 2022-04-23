@@ -351,8 +351,8 @@ int Template7_pt_41::decode_png (char *input, char *output)
   int interlace, color, compres, filter, bit_depth;
   png_uint_32 width, height;
   /*printf("SAGT:png %d %d %d\n",info_ptr->width,info_ptr->height,info_ptr->bit_depth);*/
-  int ret = png_get_IHDR(png_ptr, info_ptr, &width, &height,
-		     &bit_depth, &color, &interlace, &compres, &filter);
+  png_get_IHDR(png_ptr, info_ptr, &width, &height,
+               &bit_depth, &color, &interlace, &compres, &filter);
   
   /*     Check if image was grayscale      */
   
