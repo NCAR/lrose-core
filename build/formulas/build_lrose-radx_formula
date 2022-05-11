@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 import subprocess
@@ -23,7 +23,6 @@ class LroseCore < Formula
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'szip'
   depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'rsync'
