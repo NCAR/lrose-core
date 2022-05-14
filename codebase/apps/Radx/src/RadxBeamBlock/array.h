@@ -41,7 +41,8 @@ namespace rainfields {
   template <typename T>
   void copy_array(const T* src, size_t count, T* dest)
   {
-    std::copy(src, src + count, dest);
+//     std::copy(src, src + count, dest);
+       std::memcpy(dest, src, count);
   }
 
   template <
