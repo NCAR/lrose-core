@@ -1,0 +1,18 @@
+Large domain:
+
+# define  WIDTH     2001        /* default pixel number */
+# define  HEIGHT    2001        /* default line number */
+# define  LTLON     100.0       /* default left top longitude */
+# define  LTLAT     45.0        /* default left top latitude */
+# define  DLON      0.02        /* default Spatial resolution (longitude) */
+# define  DLAT      0.02        /* default Spatial resolution (latitude) */
+
+WRF domain:
+
+# define  WIDTH     1701        /* default pixel number */
+# define  HEIGHT    1451        /* default line number */
+# define  LTLON     105.0       /* default left top longitude */
+# define  LTLAT     37.0        /* default left top latitude */
+# define  DLON      0.02        /* default Spatial resolution (longitude) */
+# define  DLAT      0.02        /* default Spatial resolution (latitude) */
+
