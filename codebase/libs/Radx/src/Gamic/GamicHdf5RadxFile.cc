@@ -195,7 +195,7 @@ bool GamicHdf5RadxFile::isGamicHdf5(const string &path)
   try {
     how = new Group(file.openGroup("how"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'how' group, not GAMIC file" << endl;
     }
@@ -209,7 +209,7 @@ bool GamicHdf5RadxFile::isGamicHdf5(const string &path)
   try {
     elevBeamWidth = new Attribute(how->openAttribute("elevation_beam"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No how.elevation_beam width attribute, not GAMIC file" << endl;
     }
@@ -223,7 +223,7 @@ bool GamicHdf5RadxFile::isGamicHdf5(const string &path)
   try {
     azBeamWidth = new Attribute(how->openAttribute("azimuth_beam"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No how.azimuth_beam width attribute, not GAMIC file" << endl;
     }
@@ -470,7 +470,7 @@ int GamicHdf5RadxFile::printNative(const string &path, ostream &out,
     Group root(file.openGroup("/"));
     _utils.printGroup(root, "/", out, printRays, printData);
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - trying to read GAMIC HDF5 file");
     return -1;
   }
@@ -541,7 +541,7 @@ int GamicHdf5RadxFile::readFromPath(const string &path,
     
   }
   
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - reading GAMIC HDF5 file");
     return -1;
   }
@@ -794,7 +794,7 @@ int GamicHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
   try {
     extended = new Group(how.openGroup("extended"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No scan 'extended' how group" << endl;
     }
@@ -1126,7 +1126,7 @@ int GamicHdf5RadxFile::_readRays(Group &sweep, int sweepNumber)
   try {
     rayHdrs = new DataSet(sweep.openDataSet("ray_header"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrInt("ERROR - no 'ray_header' data set, sweep number: ", sweepNumber);
     if (rayHdrs) delete rayHdrs;
     return -1;
@@ -1341,7 +1341,7 @@ int GamicHdf5RadxFile::_addFieldToRays(Group &sweep,
   try {
     ds = new DataSet(sweep.openDataSet(momentName));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - GamicHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data set for moment");
     _addErrStr("  Moment name: ", momentName);

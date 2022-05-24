@@ -1,0 +1,26 @@
+                docker pull busybox
+    16	16:03	docker run busybox
+    17	16:03	docker run busybox echo "hello from busybox"
+    18	16:04	docker ps
+    21	16:05	docker run -it busybox sh
+    22	16:06	docker run --help
+    24	16:07	docker rm 6ee63d127ef1 b882e1e8ccff b4d8cd61f488 07521685ec40
+    26	16:17	docker run --rm prakhar1989/static-site
+    28	16:19	docker run -d -P --name static-site prakhar1989/static-site
+    29	16:19	docker port static-site
+    31	16:21	docker stop static-site
+    32	16:21	docker ps -a
+    33	16:23	docker images
+    34	16:24	docker pull ubuntu:12.04
+    35	16:24	docker search
+    36	16:24	docker search centos
+    37	16:25	docker search debian
+    38	16:27	git clone https://github.com/prakhar1989/docker-curriculum
+    39	16:28	cd docker-curriculum/flask-app/
+    40	16:28	ls
+    41	16:28	less Dockerfile
+    42	16:33	docker build -t mikedixon/catnip .
+    45	16:38	docker login
+    46	16:38	docker push mikedixon/catnip
+    48	16:40	https://hub.docker.com/r/mikedixon/catnip/
+    52	16:41	docker run -p 8888:5000 mikedixon/catnip

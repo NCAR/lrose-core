@@ -47,8 +47,8 @@ def main():
                       dest='prefix', default=prefixDirDefault,
                       help='Install directory, default is ~/lrose')
     parser.add_option('--maxAge',
-                      dest='maxAge', default=86400,
-                      help='Max file age in secs')
+                      dest='maxAge', default=-1,
+                      help='Max file age in secs. Check not done if negative (default).')
 
     (options, args) = parser.parse_args()
 
@@ -155,6 +155,7 @@ def checkForLibs():
     oldLibs = []
 
     installLibDir = os.path.join(options.prefix, "lib")
+    maxAge = float(options.maxAge)
     
     for name in requiredLibs:
 
@@ -163,15 +164,22 @@ def checkForLibs():
         if (options.debug == True):
             print("Checking for installed lib: ", path, file=sys.stderr)
 
+        # check .a file
+        found = True
         if (os.path.isfile(path) == False):
-            if (options.debug == True):
-                print("   .... missing", file=sys.stderr)
-            missingLibs.append(name)
-        else:
+            # check .so file
+            path = os.path.splitext(path)[0] + ".so"
+            if (os.path.isfile(path) == False):
+                if (options.debug == True):
+                    print("   .... missing", file=sys.stderr)
+                missingLibs.append(name)
+                found = False
+
+        if (found):
             if (options.debug == True):
                 print("   .... found", file=sys.stderr)
             age = getFileAge(path)
-            if (age > float(options.maxAge)):
+            if (maxAge > 0 and age > maxAge):
                 oldLibs.append(name)
                 if (options.debug == True):
                     print("   file is old, age: ", age, file=sys.stderr)
@@ -183,7 +191,7 @@ def checkForLibs():
 def getFileAge(path):
 
     stats = os.stat(path)
-    age = (time.time() - stats.st_mtime)
+    age = float(time.time() - stats.st_mtime)
     return age
 
 ########################################################################

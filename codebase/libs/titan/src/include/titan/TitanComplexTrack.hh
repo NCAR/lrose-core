@@ -98,6 +98,12 @@ public:
 	     const storm_file_params_t &sparams,
 	     const track_file_params_t &tparams);
   
+  // Convert to xml
+  
+  string convertToXML(int level,
+                      const storm_file_params_t &sparams,
+                      const track_file_params_t &tparams) const;
+  
 protected:
 
   complex_track_params_t _complex_params;

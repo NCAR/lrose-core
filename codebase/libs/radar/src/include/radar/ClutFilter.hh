@@ -58,9 +58,8 @@ public:
   // Inputs:
   //   rawPowerSpec: unfiltered power spectrum
   //   nSamples: number of samples
-  //   maxClutterVel: max velocity of the clutter component
-  //                  of the signal (m/s)
-  //   initNotchWidth: width of first guess notch (m/s)
+  //   clutterWidthMps: spectrum width for clutter model (m/s)
+  //   initNotchWidthMps: width of first guess notch (m/s)
   //   nyquist: unambiguous vel (m/s)
   //   calibratedNoise: noise power at digitizer from calibration (mW)
   //   setNotchToNoise: if true, points within the notch will be
@@ -81,8 +80,8 @@ public:
 
   static void performAdaptive(const double *rawPowerSpec, 
                               int nSamples,
-                              double maxClutterVel,
-                              double initNotchWidth,
+                              double clutterWidthMps,
+                              double initNotchWidthMps,
                               double nyquist,
                               double calibratedNoise,
                               bool setNotchToNoise,
@@ -153,8 +152,8 @@ public:
 
   static void locateWxAndClutter(const double *power,
                                  int nSamples,
-                                 double max_clutter_vel,
-                                 double init_notch_width,
+                                 double clutterWidthMps,
+                                 double initNotchWidthMps,
                                  double nyquist,
                                  int &notchWidth,
                                  bool &clutterFound,
@@ -164,13 +163,15 @@ public:
                                  double &weatherPeak,
                                  double &spectralNoise);
 
-  // estimate the spectral noise
-  //
-  // Divide spectrum into 8 parts, compute power in each part
-  // estimate the spectral noise as the mean of the power
-  // in the lowest 1/8th.
+  // compute half notch using clutter model
+  // we find the spectral points at which the clutter model
+  // crosses 
   
-  static double estimateSpectralNoise(const double *powerSpec, int nSamples);
+  static int computeHalfNotchWidth(const double *power,
+                                   int nSamples,
+                                   double clutterWidthMps,
+                                   double initNotchWidthMps,
+                                   double nyquist);
   
   // fit a gaussian to a spectrum
   //
@@ -189,42 +190,74 @@ public:
                           double spectralNoise,
                           double *gaussian);
   
-  // compute noise of a power spectrum
-  // 
-  // We compute the mean power for 3 regions of the spectrum:
-  //   1. 1/8 at lower end plus 1/8 at upper end
-  //   2. 1/4 at lower end
-  //   3. 1/4 at uppoer end
-  // We estimate the noise to be the least of these 3 values
-  // because if there is a weather echo it will not affect both ends
-  // of the spectrum unless the width is very high, in which case we
-  // probably have a bad signal/noise ratio anyway.
-  //
-  // Inputs:
-  //   powerSpec: power spectrum
-  //   nSamples
-  //
-  // Outputs:
-  //   noiseMean: mean of the noise in the relevant 1/4 of the spectrum
-  //   noiseSdev: standard deviation of the same
-  
-  static void computeSpectralNoise(const double *powerSpec,
-                                   int nSamples,
-                                   double &noiseMean,
-                                   double &noiseSdev);
-  
-  /////////////////////////////////////////////////////
   // Compute noise from a power spectrum
   //
-  // Divide spectrum into sections and compute the mean power
-  // for each section.
+  // Divide spectrum into runs and compute the mean power
+  // for each run, incrementing by one index at a time.
   //
   // The noise power is estimated as the mimumum of the section
   // powers.
   
   static double computeSpectralNoise(const double *powerSpec,
-				     int nSamples);
+                                     int nSamples);
   
+  //////////////////////////////////////////////
+  // Compute a gaussian clutter model, based
+  // on an observed power spectrum.
+  //
+  // Powers are linear - i.e. not dBm.
+  //
+  // Assume:
+  // (a) Spectrum is shifted so DC is centered.
+  // (b) Clutter is centered - i.e. 0 vel.
+  // (c) Clutter width is supplied.
+  //
+  // The model will match the peak of the spectrum at DC.
+  // If the peak is not at DC, the model will be set to missing.
+  // Missing power values are set to 1.0e-12 = -120 dBm. 
+  //
+  // The caller manages the memory for gaussianModel.
+  //
+  // Returns 0 if clutter is found, -1 otherwise.
+  
+  static int computeGaussianClutterModel(const double *powerSpectrum,
+                                         int nSamples, 
+                                         double widthMps,
+                                         double nyquistMps,
+                                         double *gaussianModel);
+  
+  /////////////////////////////////////////////////////////////////
+  // Shift a spectrum, in place, so that DC is in the center.
+  // Swaps left and right sides.
+  // DC location location starts at index 0.
+  // After the shift:
+  //   if n is odd,  the DC location is at the center index
+  //   if n is even, the DC location is at index n/2
+  
+  static void shift(RadarComplex_t *spectrum, int nSamples);
+  static void shift(double *spectrum, int nSamples);
+
+  /////////////////////////////////////////////////////////////////
+  // Unshift a spectrum, in place, to undo a previous shift.
+  // Swaps left and right sides.
+  // After the shift, DC is at index 0.
+  
+  static void unshift(RadarComplex_t *spectrum, int nSamples);
+  static void unshift(double *spectrum, int nSamples);
+  
+  /////////////////////////////////////////////
+  // copy arrays
+  
+  static void copy(RadarComplex_t *dest,
+                   const RadarComplex_t *src,
+                   size_t nSamples);
+
+  static void copy(double *dest,
+                   const double *src,
+                   size_t nSamples);
+  
+  static double MissingPower;
+
 protected:
 private:
   

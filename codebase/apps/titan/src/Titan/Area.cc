@@ -34,11 +34,11 @@
 
 #include "Props.hh"
 #include "Area.hh"
-#include "GridClump.hh"
 #include "InputMdv.hh"
 
 #include <toolsa/umisc.h>
 #include <rapmath/umath.h>
+#include <euclid/ClumpProps.hh>
 using namespace std;
 
 #define MAX_EIG_DIM 3
@@ -129,22 +129,22 @@ Area::~Area()
 // compute()
 //
 
-void Area::compute(const GridClump &grid_clump,
+void Area::compute(const ClumpProps &cprops,
 		   storm_file_global_props_t *gprops,
 		   dbz_hist_entry_t *dbz_hist)
 
 {
 
   _gProps = gprops;
-  _gProps->bounding_min_ix = grid_clump.startIx;
-  _gProps->bounding_min_iy = grid_clump.startIy;
-  _gProps->bounding_max_ix = grid_clump.startIx + grid_clump.nX - 1;
-  _gProps->bounding_max_iy = grid_clump.startIy + grid_clump.nY - 1;
+  _gProps->bounding_min_ix = cprops.minIx();
+  _gProps->bounding_min_iy = cprops.minIy();
+  _gProps->bounding_max_ix = cprops.maxIx();
+  _gProps->bounding_max_iy = cprops.maxIy();
 
   // compute grid sizes, and set grid params
 
-  _nX = grid_clump.nX;
-  _nY = grid_clump.nY;
+  _nX = cprops.nXLocal();
+  _nY = cprops.nYLocal();
   _nPoints = _nX * _nY;
 
   // check memory allocation and zero out grids
@@ -153,15 +153,15 @@ void Area::compute(const GridClump &grid_clump,
 
   // load up composite grid with 1's to indicate projected area
 
-  for (int intv = 0; intv < grid_clump.nIntervals; intv++) {
-    const Interval &intvl = grid_clump.intervals[intv];
+  for (size_t intv = 0; intv < cprops.intvLocal().size(); intv++) {
+    const Interval &intvl = cprops.intvLocal(intv);
     int offset = (intvl.row_in_plane * _nX) + intvl.begin;
     memset((_compGrid + offset), 1, intvl.len);
   }
   
   // projected area comps
   
-  _ellipseCompute(grid_clump,
+  _ellipseCompute(cprops,
 		  _compGrid,
 		  &_gProps->proj_area,
 		  &_gProps->proj_area_centroid_x,
@@ -172,7 +172,7 @@ void Area::compute(const GridClump &grid_clump,
 
   // compute polygon for projected area
   
-  _computeProjPolygon(grid_clump);
+  _computeProjPolygon(cprops);
 
   // precip
 
@@ -180,8 +180,8 @@ void Area::compute(const GridClump &grid_clump,
   
   Params::precip_mode_t precipMode = _params.precip_computation_mode;
   
-  for (int intv = 0; intv < grid_clump.nIntervals; intv++) {
-    const Interval &intvl = grid_clump.intervals[intv];
+  for (size_t intv = 0; intv < cprops.intvLocal().size(); intv++) {
+    const Interval &intvl = cprops.intvLocal(intv);
     int izPlane = intvl.plane + _inputMdv.minValidLayer;
     if (precipMode == Params::PRECIP_FROM_COLUMN_MAX ||
         precipMode == Params::PRECIP_FROM_LOWEST_AVAILABLE_REFL) {
@@ -202,7 +202,7 @@ void Area::compute(const GridClump &grid_clump,
   
   // precip area comps
   
-  _ellipseCompute(grid_clump,
+  _ellipseCompute(cprops,
                   _precipGrid,
                   &_gProps->precip_area,
                   &_gProps->precip_area_centroid_x,
@@ -213,13 +213,13 @@ void Area::compute(const GridClump &grid_clump,
   
   // compute precip and 2D reflectivity histogram
   
-  _computePrecip(grid_clump);
+  _computePrecip(cprops);
   _compute2dDbzHist(dbz_hist);
 
   // compute tops
 
   if (_params.set_dbz_threshold_for_tops) {
-    _computeTops(grid_clump);
+    _computeTops(cprops);
   }
 
 }
@@ -229,7 +229,7 @@ void Area::compute(const GridClump &grid_clump,
 //
 // Store the projected area runs in the storm file handle
 
-int Area::storeProjRuns(const GridClump &grid_clump)
+int Area::storeProjRuns(const ClumpProps &cprops)
 
 {
 
@@ -239,8 +239,8 @@ int Area::storeProjRuns(const GridClump &grid_clump)
   _sfile.AllocHist(_nDbzHistIntervals);
   _sfile.AllocProjRuns(nIntervals);
   
-  int start_ix = grid_clump.startIx;
-  int start_iy = grid_clump.startIy;
+  int start_ix = cprops.minIx();
+  int start_iy = cprops.minIy();
   
   Interval *intvl = _boundary.intervals();
   storm_file_run_t *run = _sfile._proj_runs;
@@ -283,7 +283,7 @@ void Area::_allocGrids()
 //       ellipse_area is in sq grid_units.
 //
 
-void Area::_ellipseCompute(const GridClump &grid_clump,
+void Area::_ellipseCompute(const ClumpProps &cprops,
 			   ui08 *grid,
 			   fl32 *area,
 			   fl32 *area_centroid_x,
@@ -299,17 +299,18 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
    * check coords allocation
    */
 
-  int max_coords = grid_clump.grid.nx * grid_clump.grid.ny;
+  const PjgGridGeom &gridGeom = cprops.gridGeom();
+  int max_coords = gridGeom.nx() * gridGeom.ny();
   _allocCoords(max_coords);
 
   // load up coords
 
   int n_coords = 0;
-  double dy = grid_clump.grid.dy;
-  double dx = grid_clump.grid.dx;
-  double yy = grid_clump.grid.miny + grid_clump.startIy * dy;
+  double dy = gridGeom.dy();
+  double dx = gridGeom.dx();
+  double yy = gridGeom.miny() + cprops.minIy() * dy;
   for (int iy = 0; iy < _nY; iy++, yy += dy) {
-    double xx = grid_clump.grid.minx + grid_clump.startIx * dx;
+    double xx = gridGeom.minx() + cprops.minIx() * dx;
     for (int ix = 0; ix < _nX; ix++, xx += dx) {
       if (*grid) {
 	_areaCoords[n_coords][0] = xx;
@@ -331,9 +332,8 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
     
   } else {
     
-    *area = (double) n_coords * grid_clump.dAreaAtCentroid;  
-    double area_ellipse = (double) n_coords * grid_clump.dAreaEllipse;
-    
+    *area = (double) n_coords * cprops.dAreaAtCentroid();  
+
     // obtain the principal component transformation for the coord data
     // The technique is applicable here because the first principal
     // component will lie along the axis of maximum variance, which
@@ -385,8 +385,10 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
       else
 	area_minor_sd = 0.1;
       
+      double area_ellipse_grid_units = (double) n_coords * gridGeom.dx() * gridGeom.dy();
+
       double scale_factor =
-	sqrt(area_ellipse /
+	sqrt(area_ellipse_grid_units /
 	     (M_PI * area_minor_sd * area_major_sd));
       
       *area_major_radius = area_major_sd * scale_factor;
@@ -397,8 +399,8 @@ void Area::_ellipseCompute(const GridClump &grid_clump,
       
       if (*area_major_radius / *area_minor_radius > 1000.0) {
 	
-	*area_major_radius  = sqrt(area_ellipse / M_PI);
-	*area_minor_radius  = sqrt(area_ellipse / M_PI);
+	*area_major_radius  = sqrt(area_ellipse_grid_units / M_PI);
+	*area_minor_radius  = sqrt(area_ellipse_grid_units / M_PI);
 	
       } // if (*area_major_radius ...
       
@@ -424,7 +426,7 @@ void Area::_allocCoords(const int n_coords)
       (double **) umalloc2 (n_coords, 2, sizeof(double));
     // save size allocated
     _nCoordsAlloc = n_coords;
-  }
+   }
 
 }
 
@@ -432,7 +434,7 @@ void Area::_allocCoords(const int n_coords)
 // _computeProjPolygon
 //
 
-void Area::_computeProjPolygon(const GridClump &grid_clump)
+void Area::_computeProjPolygon(const ClumpProps &cprops)
 
 {
   
@@ -442,16 +444,17 @@ void Area::_computeProjPolygon(const GridClump &grid_clump)
   // other computations are relative to the center of the
   // grid rectangles.
   
-  double dx = grid_clump.grid.dx;
-  double dy = grid_clump.grid.dy;
+  const PjgGridGeom &gridGeom = cprops.gridGeom();
+  double dx = gridGeom.dx();
+  double dy = gridGeom.dy();
 
   double ref_x =
-    (0.5 + ((_gProps->proj_area_centroid_x - grid_clump.grid.minx) / dx) - 
-     grid_clump.startIx);
+    (0.5 + ((_gProps->proj_area_centroid_x - gridGeom.minx()) / dx) - 
+     cprops.minIx());
   
   double ref_y =
-    (0.5 + ((_gProps->proj_area_centroid_y - grid_clump.grid.miny) / dy) - 
-     grid_clump.startIy);
+    (0.5 + ((_gProps->proj_area_centroid_y - gridGeom.miny()) / dy) - 
+     cprops.minIy());
   
   // compute the boundary
 
@@ -468,7 +471,7 @@ void Area::_computeProjPolygon(const GridClump &grid_clump)
 ///////////////////////////////
 // compute precip
 
-void Area::_computePrecip(const GridClump &grid_clump)
+void Area::_computePrecip(const ClumpProps &cprops)
      
 {
 
@@ -484,15 +487,16 @@ void Area::_computePrecip(const GridClump &grid_clump)
 
   // load up dbz grid for precip, depending on mode
 
-  int nPointsPlane = _inputMdv.grid.nx * _inputMdv.grid.ny;
+  const PjgGridGeom &gridGeom = cprops.gridGeom();
+  int nPointsPlane = gridGeom.nx() * gridGeom.ny();
   Params::precip_mode_t precipMode = _params.precip_computation_mode;
-  int nZ = _inputMdv.grid.nz;
+  int nZ = gridGeom.nz();
 
   ii = 0;
   for (int iy = 0; iy < _nY; iy++) {
     
-    int mm = (iy + grid_clump.startIy) * _inputMdv.grid.nx +
-      + grid_clump.startIx;
+    int mm = (iy + cprops.minIy()) * gridGeom.nx() +
+      + cprops.minIx();
     
     for (int ix = 0; ix < _nX; ix++, ii++, mm++) {
 
@@ -556,7 +560,7 @@ void Area::_computePrecip(const GridClump &grid_clump)
   // compute precip flux in m/s
   
   _gProps->precip_flux =
-    ((sum_factor * grid_clump.dAreaAtCentroid * _zFactor) / 3.6);
+    ((sum_factor * cprops.dAreaAtCentroid() * _zFactor) / 3.6);
 
 }
 
@@ -604,16 +608,17 @@ void Area::_compute2dDbzHist(dbz_hist_entry_t *dbz_hist)
 // compute storm tops based on 'tops_dbz_threshold'
 //
 
-void Area::_computeTops(const GridClump &grid_clump)
+void Area::_computeTops(const ClumpProps &cprops)
      
 {
 
   double top = 0.0;
-  int nPointsPlane = _inputMdv.grid.nx * _inputMdv.grid.ny;
+  const PjgGridGeom &gridGeom = cprops.gridGeom();
+  int nPointsPlane = gridGeom.nx() * gridGeom.ny();
   
-  for (int iz = 0; iz < _inputMdv.grid.nz; iz++) {
+  for (size_t iz = 0; iz < gridGeom.nz(); iz++) {
     
-    double ht = _inputMdv.grid.minz + (iz + 0.5) * _inputMdv.grid.dz;
+    double ht = cprops.zKm(iz);
     const fl32 *dbzPlane = _inputMdv.dbzVol + iz * nPointsPlane;
     ui08 *flag = _compGrid;
 
@@ -623,7 +628,8 @@ void Area::_computeTops(const GridClump &grid_clump)
     for (int iy = 0; iy < _nY; iy++) {
 
       int index =
-        (iy + grid_clump.startIy) * _inputMdv.grid.nx + grid_clump.startIx;
+        (iy + cprops.minIy()) * gridGeom.nx() +
+        cprops.minIx();
 
       const fl32 *dbz = dbzPlane + index;
       for (int ix = 0; ix < _nX; ix++, flag++, dbz++) {

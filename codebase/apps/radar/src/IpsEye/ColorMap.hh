@@ -92,7 +92,7 @@ class DLL_EXPORT ColorMap {
 
     // destructor
     
-    ~CmapEntry() {
+    virtual ~CmapEntry() {
       delete brush;
     }
 

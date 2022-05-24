@@ -70,7 +70,7 @@ public:
   
   // destructor
   
-  ~SweepManager();
+  virtual ~SweepManager();
 
   // set from volume
 

@@ -26,25 +26,6 @@
 #include <cstdlib>
 #include <cstring>
 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: Algs.cc,v 1.5 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.5 $
- *  $State: Exp $
- *
- */
-
-# ifndef    lint
-static char RCSid[] = "$Id: ";
-# endif     /* not lint */
-
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Module:	Algs
@@ -62,7 +43,7 @@ Description:   The actual filtering algorithm code for all filters
 /* System include files / Local include files */
 #include <cstdio>
 #include <cmath>
-#include <Algs.hh>
+#include "Algs.hh"
 using namespace std;
 
 /* Constant definitions / Macro definitions / Type definitions */
@@ -71,14 +52,6 @@ using namespace std;
 
 /* External functions / Internal global functions / Internal static functions */
 
-/*----------------------------------------------------------------*/
-# ifndef    lint
-void Algs_rcsprint(void)
-{
-    printf("rcsid=%s\n", RCSid);
-}
-# endif     /* not lint */
-  
 /*----------------------------------------------------------------*/
 //
 // Comparison routine for fl32 in ascending order.

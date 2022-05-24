@@ -33,6 +33,7 @@
 
 #include <euclid/clump.h>
 #include <euclid/alloc.h>
+#include <memory.h>
 
 /*
  *  DESCRIPTION:    
@@ -77,9 +78,19 @@ void EG_alloc_clumps(int n_intervals,
 
 {
 
+  // make sure we allocate for at least 1 interval
+  // so that we don't test (0 == 0)
+  
+  if (n_intervals == 0) {
+    n_intervals = 1;
+  }
+  
   int n_intervals_alloc = *n_intervals_alloc_p;
   Clump_order *clumps = *clumps_p;
   Interval **interval_order = *interval_order_p;
+
+  size_t nbytesClumps = (n_intervals + 2) * sizeof(Clump_order);
+  size_t nbytesIntervals = (n_intervals + 1) * sizeof(Interval *);
   
   if (n_intervals > n_intervals_alloc) {
     
@@ -88,16 +99,10 @@ void EG_alloc_clumps(int n_intervals,
      */
     
     if (clumps == NULL) {
-      
-      clumps = (Clump_order *)
-	EG_malloc((unsigned int) ((n_intervals+2)*sizeof(Clump_order)));
-      
+      clumps = (Clump_order *) EG_malloc(nbytesClumps);
     } else {
-      
-      clumps = (Clump_order *)
-	EG_realloc((char *) clumps,
-		   (unsigned int) ((n_intervals+2)*sizeof(Clump_order)));
-      
+      clumps = (Clump_order *) EG_realloc(clumps,
+                                          nbytesClumps);
     } /* if (clumps == NULL) */
     
     /*
@@ -105,21 +110,18 @@ void EG_alloc_clumps(int n_intervals,
      */
     
     if (interval_order == NULL) {
-      
-      interval_order = (Interval **)
-	EG_malloc((unsigned int) ((n_intervals+1)*sizeof(Interval *)));
-      
+      interval_order = (Interval **) EG_malloc(nbytesIntervals);
     } else {
-      
-      interval_order = (Interval **)
-	EG_realloc((char *) interval_order,
-		   (unsigned int) ((n_intervals+1)*sizeof(Interval *)));
-      
+      interval_order = (Interval **) EG_realloc(interval_order,
+                                                nbytesIntervals);
     }
-
+    
     n_intervals_alloc = n_intervals;
     
   } /* if (n_intervals > n_intervals_alloc) */
+
+  memset(clumps, 0, nbytesClumps);
+  memset(interval_order, 0, nbytesIntervals);
 
   *n_intervals_alloc_p = n_intervals_alloc;
   *clumps_p = clumps;

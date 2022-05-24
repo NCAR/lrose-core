@@ -152,7 +152,7 @@ void OutputMdv::initHeaders(int nx, int ny,
   mhdr.sensor_alt = _sensorAlt;
 
   STRncopy(mhdr.data_set_info,
-           "Nids data remapped using NidsRadial2Mdv", MDV_NAME_LEN);
+           "Nids data remapped using NewNidsRadial2Mdv", MDV_NAME_LEN);
   STRncopy(mhdr.data_set_name, radar_name, MDV_NAME_LEN);
   STRncopy(mhdr.data_set_source, "Nids", MDV_NAME_LEN);
 

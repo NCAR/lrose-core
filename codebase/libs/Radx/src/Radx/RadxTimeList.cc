@@ -176,6 +176,20 @@ void RadxTimeList::setModeFirstAfter(RadxTime search_time,
 }
 
 /////////////////////////////////////////////////////////////////
+// SetModeAll
+//
+// set the time list mode so that it finds all the available data time
+
+void RadxTimeList::setModeAll()
+  
+{
+
+  clearMode();
+  _mode = MODE_ALL;
+
+}
+
+/////////////////////////////////////////////////////////////////
 // clearMode
 //
 // clear out time list mode info
@@ -274,6 +288,9 @@ int RadxTimeList::compile()
       break;
     case MODE_FIRST_AFTER:
       _compileFirstAfter(topDir);
+      break;
+    case MODE_ALL:
+      _compileAll(topDir);
       break;
     case MODE_UNDEFINED:
       break;
@@ -481,6 +498,26 @@ void RadxTimeList::_compileFirstAfter(const string &topDir)
     _fileStartTimes.push_back(best->fileStartTime);
     _pathList.push_back(best->path);
   }
+
+}
+
+///////////////////////////////////////////////////
+// compile all
+
+void RadxTimeList::_compileAll(const string &topDir)
+
+{
+
+  // get the first time
+
+  TimePathSet timePaths;
+  _addAll(topDir, timePaths);
+
+  TimePathSet::iterator ii;
+  for (ii = timePaths.begin(); ii != timePaths.end(); ii++) {
+    _fileStartTimes.push_back(ii->fileStartTime);
+    _pathList.push_back(ii->path);
+  } // ii
 
 }
 
@@ -872,6 +909,45 @@ void RadxTimeList::_addFirst(const string &topDir,
       timePaths.insert(timePaths.end(), *(tmpSet.begin()));
       return;
     }
+    
+  } // ii
+
+}
+
+
+/////////////////////////////////////
+// add all files to the set
+
+void RadxTimeList::_addAll(const string &topDir,
+           TimePathSet &timePaths)
+  
+{
+  
+  // get day dirs in time order
+  
+  TimePathSet dayDirs;
+  _getDayDirs(topDir, dayDirs);
+  
+  // search for interval times in each day
+  // we stop as soon as we find a interval time
+  
+  TimePathSet::iterator ii;
+  for (ii = dayDirs.begin(); ii != dayDirs.end(); ii++) {
+    
+    RadxTime midday(ii->fileStartTime);
+    const string &dayDir = ii->path;
+
+    // look for non-forecast files
+    
+    //TimePathSet tmpSet;
+    _searchDay(dayDir, midday, 0, 0, timePaths); // tmpSet);
+    
+    //if (tmpSet.size() > 0) {
+    //  // times found, insert all into the set
+    //  // and return
+    //  timePaths.insert(timePaths.end(), *(tmpSet.begin()));
+    //  return;
+    //}
     
   } // ii
 

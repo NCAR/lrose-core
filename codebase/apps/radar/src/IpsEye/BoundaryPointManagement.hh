@@ -38,7 +38,7 @@ class BoundaryPointManagement {
 
  public:
   BoundaryPointManagement();
-  ~BoundaryPointManagement();
+  virtual ~BoundaryPointManagement();
 
  private:
 

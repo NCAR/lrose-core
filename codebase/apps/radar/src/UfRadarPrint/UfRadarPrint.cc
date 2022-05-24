@@ -189,7 +189,8 @@ int UfRadarPrint::_processFile(const char *input_path)
           cerr << "  Trailer len: " << nbytesTrailer << endl;
         }
         // seek back since this is not a size record
-        fseek(in, SEEK_CUR, -sizeof(ui32));
+        
+        fseek(in, -sizeof(ui32), SEEK_CUR);
       }
 
     }

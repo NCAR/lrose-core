@@ -1,0 +1,113 @@
+#! /bin/bash
+
+###########################################################
+# in the docker build image,
+# create .deb file, place it in /tmp
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Make .deb package in docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. lrose-core, lrose-radx, lrose-cidd"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. debian, ubuntu"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 9 for debian 9, 18.04 for ubuntu 18.04"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=debian
+os_version=9
+lrose_pkg=lrose-core
+release_date=latest
+debug=true
+
+# Parse command line options.
+while getopts hdt:v:p:r: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  making .deb package in docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    release_date: ${release_date}"
+fi
+
+# create directory that will hold the .deb file
+
+pkgDir=/tmp/pkg.${os_type}_${os_version}.${lrose_pkg}
+/bin/rm -rf $pkgDir
+mkdir -p $pkgDir
+
+# go to scripts dir
+
+scriptsDir=~/git/lrose-core/build/docker/cmake/debian
+cd $scriptsDir
+
+# set the container image to run
+
+image=build.${lrose_pkg}/${os_type}:${os_version}
+
+# run script in container to make the package
+# use -v to cross-mount the tmp directory into the container
+
+docker run \
+    -v ${scriptsDir}:/scripts \
+    -v ${pkgDir}:/pkgDir \
+    $image \
+    /scripts/build_pkg.debian \
+    -t ${os_type} -v ${os_version} \
+    -p ${lrose_pkg} -r ${release_date}
+
+# ensure the release dir exists
+
+releaseDir=${HOME}/releases/${lrose_pkg}
+mkdir -p ${releaseDir}
+
+# copy the package to the release dir
+
+echo rsync -av ${pkgDir}/${lrose_pkg}*${os_type}*${os_version}*deb ${releaseDir}
+rsync -av ${pkgDir}/${lrose_pkg}*${os_type}*${os_version}*deb ${releaseDir}
+

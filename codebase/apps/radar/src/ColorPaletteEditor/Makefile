@@ -38,7 +38,7 @@ DISTNAME      = StandardDialogs1.0.0
 DISTDIR = /Users/dixon/git/lrose-core/codebase/apps/radar/src/ColorPaletteEditor/.tmp/StandardDialogs1.0.0
 LINK          = /Library/Developer/CommandLineTools/usr/bin/clang++
 LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -Wl,-syslibroot,/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -mmacosx-version-min=10.13 -Wl,-rpath,@executable_path/Frameworks
-LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.12.0/lib -L$(HOME)/lrose/lib -L$(LROSE_INSTALL_DIR)/lib -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework QtScript -framework QtQml -framework QtNetwork -framework OpenGL -framework AGL   
+LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/5.12.0/lib -L$(HOME)/lrose/lib -L$(LROSE_INSTALL_DIR)/lib -lFmq -ldsserver -ldidss -lRadx -lradar -lrapformats -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat -lpthread -lm -framework QtWidgets -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework QtScript -framework QtQml -framework QtNetwork -framework OpenGL -framework AGL   
 AR            = /Library/Developer/CommandLineTools/usr/bin/ar cq
 RANLIB        = /Library/Developer/CommandLineTools/usr/bin/ranlib -s
 SED           = sed

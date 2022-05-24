@@ -126,7 +126,7 @@ void AscopePlot::plotBeam(QPainter &painter,
     return;
   }
   
-  if(_params.debug) {
+  if(_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "======== Ascope - plotting beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
@@ -137,6 +137,12 @@ void AscopePlot::plotBeam(QPainter &painter,
   int nGates = beam->getNGates();
   double startRange = beam->getStartRangeKm();
   double gateSpacing = beam->getGateSpacingKm();
+  if (_params.set_max_range) {
+    int nGatesMax = (_params.max_range_km - startRange) / gateSpacing;
+    if (nGatesMax < nGates) {
+      nGates = nGatesMax;
+    }
+  }
 
   // first use filled polygons (trapezia)
   
@@ -438,7 +444,11 @@ void AscopePlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 
   // selected range line
   
-  painter.setPen(_params.ascope_selected_range_color);
+  QPen pen(painter.pen());
+  pen.setColor(_params.ascope_selected_range_color);
+  pen.setStyle(Qt::SolidLine);
+  pen.setWidth(2);
+  painter.setPen(pen);
   _zoomWorld.drawLine(painter,
                       _zoomWorld.getXMinWorld(), selectedRangeKm,
                       _zoomWorld.getXMaxWorld(), selectedRangeKm);

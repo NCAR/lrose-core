@@ -27,7 +27,7 @@
 // Remap the raster data onto a larger/smaller cart grid
 //
 // Marty Petach, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-// Based on Mike Dixon's NidsRadial2Mdv program
+// Based on Mike Dixon's NewNidsRadial2Mdv program
 //
 // April 1999
 //

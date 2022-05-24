@@ -29,44 +29,36 @@
  * April 1998
  */
 
-paramdef enum debug {
+paramdef enum debug_t {
   p_options = {DEBUG_OFF, DEBUG_WARNINGS, DEBUG_NORM, DEBUG_VERBOSE};
-  p_default = {DEBUG_OFF};
+  p_default = DEBUG_OFF;
   p_descr = "Debug option";
   p_help = "If set, debug messages will be printed with the appropriate level of detail.";
 } debug;
 
-paramdef long {
-  p_default = {0};
-  p_min = {0};
-  p_max = {3};
-  p_descr = "Malloc debug level";
-  p_help = "0 - none, 1 - corruption checking, 2 - records all malloc blocks and checks, 3 - printout of all mallocs etc.";
-} malloc_debug_level;
-
 paramdef double {
-  p_default = {0.0};
-  p_min = {-90.0};
-  p_max = {90.0};
+  p_default = 0.0;
+  p_min = -90.0;
+  p_max = 90.0;
   p_descr = "Circle latitude.";
 } circle_lat;
 
 paramdef double {
-  p_default = {0.0};
-  p_min = {-180.0};
-  p_max = {180.0};
+  p_default = 0.0;
+  p_min = -180.0;
+  p_max = 180.0;
   p_descr = "Circle longitude.";
 } circle_lon;
 
 paramdef double {
-  p_default = {1.0};
-  p_min = {0.0};
+  p_default = 1.0;
+  p_min = 0.0;
   p_descr = "Circle radius in km.";
 } circle_radius;
 
-paramdef long {
-  p_default = {36};
-  p_min = {4};
+paramdef int {
+  p_default = 36;
+  p_min = 4;
   p_descr = "Number of points in circle.";
   p_help = "The circle is represented as a polyline. This is the number of segmants in the polyline. In fact there are 2 more points than this, one to close and one to do a pen-up.";
 } circle_npoints;

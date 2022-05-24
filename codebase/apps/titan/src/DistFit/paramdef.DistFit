@@ -1,0 +1,148 @@
+/*********************************************************
+ * parameter definitions for DistFit
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 1998
+ */
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum distribution_name_t {
+  p_options = {DIST_ALL, DIST_NORMAL, DIST_WEIBULL,
+               DIST_EXPONENTIAL, DIST_GAMMA};
+  p_default = DIST_ALL;	
+  p_descr = "Name of distribution";	
+  p_help = "Name of distribution to be fitted to the data. If DIST_ALL, all relevant distributions will be fitted.\n";
+} distribution_name;
+
+paramdef enum distribution_class_t
+{
+  p_options = {UNI_VARIATE, BI_VARIATE};
+  p_default = UNI_VARIATE;	
+  p_descr = "Class of distribution";	
+  p_help = "If UNI_VARIATE, the x data is fitted. If BI_VARIATE, x and y data form the variates.";
+} distribution_class;
+
+paramdef long {
+  p_default = 20;
+  p_min = 2;
+  p_descr = "Number of bins for chisq parameter.";
+  p_help = "When computing the chisq parameter, this is the number of intervals used for binning the data.";
+} chisq_nbins;
+
+paramdef string {
+  p_default = "X";
+  p_descr = "Label for X data";
+  p_help = "Used to identify column for X data.";
+} x_label;
+
+paramdef string {
+  p_default = "Y";
+  p_descr = "Label for Y data";
+  p_help = "Used to identify column for Y data.";
+} y_label;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply conditions to input data.";
+  p_help = "If TRUE, the input data values are conditioned on a given field, which lie in a given intervals - see cond_min, cond_max.";
+} condition_input_data;
+
+paramdef string {
+  p_default = "cond";
+  p_descr = "Label for conditional data";
+  p_help = "Used to identify column for conditional data.";
+} conditional_label;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for conditional field.";
+  p_help = "See condition_input_data.";
+} cond_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for conditional field.";
+  p_help = "See condition_input_data.";
+} cond_max;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Perform attrition on the input data.";
+  p_help = "If TRUE, only every n data points will be used, where n is the attrition_count.";
+} perform_attrition;
+
+paramdef long {
+  p_default = 5;
+  p_min = 2;
+  p_descr = "Attrition count.";
+  p_help = "When perform_attrition is TRUE, this is the count used to save data. Every count point is saved.";
+} attrition_count;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Transform x data using log.";
+  p_help = "If TRUE, x data will become log(x).";
+} log_x_data;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply limits to x data.";
+  p_help = "If TRUE, the input data values are limited to between x_min and x_max.";
+} limit_x_data;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for x field.";
+  p_help = "See limit_x_data.";
+} x_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for x field.";
+  p_help = "See limit_x_data.";
+} x_max;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Transform y data using log.";
+  p_help = "If TRUE, y data will become log(y).";
+} log_y_data;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply limits to y data.";
+  p_help = "If TRUE, the input data values are limited to between y_min and y_max.";
+} limit_y_data;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for y field.";
+  p_help = "See limit_y_data.";
+} y_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for y field.";
+  p_help = "See limit_y_data.";
+} y_max;
+
+
+
+

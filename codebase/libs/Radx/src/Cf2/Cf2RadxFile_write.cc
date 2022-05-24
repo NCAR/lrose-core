@@ -595,39 +595,17 @@ void Cf2RadxFile::_addGlobalAttributes()
 
   // Add required CF global attributes
   
-  _conventions = CfConvention;
-  _subconventions = BaseConvention;
-  // _subconventions += " ";
-  // _subconventions += INSTRUMENT_PARAMETERS;
-  // if (_writeVol->getInstrumentType() == Radx::INSTRUMENT_TYPE_RADAR) {
-  //   _subconventions += " ";
-  //   _subconventions += RADAR_PARAMETERS;
-  //   if (_writeVol->getRcalibs().size() > 0) {
-  //     _subconventions += " ";
-  //     _subconventions += RADAR_CALIBRATION;
-  //   }
-  // } else {
-  //   _subconventions += " ";
-  //   _subconventions += LIDAR_PARAMETERS;
-  // }
-  // if (_writeVol->getPlatformType() != Radx::PLATFORM_TYPE_FIXED) {
-  //   _subconventions += " ";
-  //   _subconventions += PLATFORM_VELOCITY;
-  // }
-  // if (_writeVol->getCfactors() != NULL) {
-  //   _subconventions += " ";
-  //   _subconventions += GEOMETRY_CORRECTION;
-  // }
-
-  _file.addGlobAttr(CONVENTIONS, _conventions);
-  _file.addGlobAttr(SUB_CONVENTIONS, _subconventions);
+  _convention = CfRadial2Conventions;
+  _file.addGlobAttr(CONVENTIONS, _convention);
   
   // Version
 
-  _version = CurrentVersion2;
+  _version = CfRadial2Version;
+
   // if (_writeVol->getVersion().size() > 0) {
   //   _version = _writeVol->getVersion();
   // }
+
   _file.addGlobAttr(VERSION, _version);
   
   // info strings
@@ -2569,6 +2547,10 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
       // invalid field name
       continue;
     }
+    if (isRayMetaName(name)) {
+      // metadata ray variable
+      continue;
+    }
 
     // make copy of the field
 
@@ -2586,7 +2568,13 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
     NcxxVar var;
     try {
       // add field variable
-      var = _createFieldVar(*copy, sweepGroup, timeDim, rangeDim);
+      if (copy->getIsRayQualifier()) {
+        // 1-D qualifier field
+        var = _createFieldVar(*copy, sweepGroup, timeDim);
+      } else {
+        // normal 2-D field
+        var = _createFieldVar(*copy, sweepGroup, timeDim, &rangeDim);
+      }
     } catch (NcxxException& e) {
       _addErrStr("ERROR - Cf2RadxFile::_addSweepFields");
       _addErrStr("  Cannot add field: ", name);
@@ -2622,7 +2610,7 @@ void Cf2RadxFile::_addSweepFields(const RadxSweep *sweep,
 NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
                                      NcxxGroup &sweepGroup,
                                      NcxxDim &timeDim,
-                                     NcxxDim &rangeDim)
+                                     NcxxDim *rangeDim /* = NULL */)
   
 {
   
@@ -2664,7 +2652,9 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
   try {
     vector<NcxxDim> dims;
     dims.push_back(timeDim);
-    dims.push_back(rangeDim);
+    if (rangeDim != NULL) {
+      dims.push_back(*rangeDim);
+    }
     var = sweepGroup.addVar(fieldName, ncType, dims);
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Cf2RadxFile::_addFieldVar");
@@ -2674,8 +2664,10 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     _addErrStr("  NcxxType: ", Ncxx::ncxxTypeToStr(ncType));
     _addErrStr("  Time dim name: ", timeDim.getName());
     _addErrInt("  Time dim size: ", timeDim.getSize());
-    _addErrStr("  Range dim name: ", rangeDim.getName());
-    _addErrInt("  Range dim size: ", rangeDim.getSize());
+    if (rangeDim != NULL) {
+      _addErrStr("  Range dim name: ", rangeDim->getName());
+      _addErrInt("  Range dim size: ", rangeDim->getSize());
+    }
     _addErrStr("  Exception: ", e.what());
     throw(NcxxException(getErrStr(), __FILE__, __LINE__));
   }
@@ -2712,6 +2704,41 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     if (field.getIsDiscrete()) {
       var.putAtt(IS_DISCRETE, "true");
     }
+    if (field.getFlagValues().size() > 0) {
+      const vector<int> &flagValues = field.getFlagValues();
+      switch (ncType.getId()) {
+        case NC_BYTE: {
+          vector<unsigned char> vals;
+          for (size_t ii = 0; ii < flagValues.size(); ii++) {
+            vals.push_back((unsigned char) flagValues[ii]);
+          }
+          var.putAtt(FLAG_VALUES, ncType, vals.size(), vals.data());
+          break;
+        }
+        case NC_SHORT: {
+          vector<short> vals;
+          for (size_t ii = 0; ii < flagValues.size(); ii++) {
+            vals.push_back((short) flagValues[ii]);
+          }
+          var.putAtt(FLAG_VALUES, ncType, vals.size(), vals.data());
+          break;
+        }
+        default: {
+          var.putAtt(FLAG_VALUES, NcxxType::nc_INT, flagValues.size(), flagValues.data());
+        }
+      }
+    } // if (field.getFlagValues().size() > 0) 
+    if (field.getFlagMeanings().size() > 0) {
+      const vector<string> &flagMeanings = field.getFlagMeanings();
+      string flagMeaningsStr;
+      for (size_t ii = 0; ii < flagMeanings.size(); ii++) {
+        flagMeaningsStr += flagMeanings[ii];
+        if (ii != flagMeanings.size() - 1) {
+          flagMeaningsStr += " ";
+        }
+      }
+      var.putAtt(FLAG_MEANINGS, flagMeaningsStr);
+    }
     
     switch (ncType.getTypeClass()) {
       case NcxxType::nc_DOUBLE: {
@@ -2744,7 +2771,11 @@ NcxxVar Cf2RadxFile::_createFieldVar(const RadxField &field,
     } // switch
 
     var.putAtt(GRID_MAPPING, GRID_MAPPING);
-    var.putAtt(COORDINATES, "time range");
+    if (rangeDim != NULL) {
+      var.putAtt(COORDINATES, "time range");
+    } else {
+      var.putAtt(COORDINATES, "time");
+    }
     
     // set compression
     

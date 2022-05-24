@@ -82,6 +82,10 @@ public:
   virtual void setOffsetCoords(double false_northing,
                                double false_easting);
   
+  /// get proj string
+  
+  virtual string getProjStr() const;
+  
 protected:
   
   //double _rotation;     // rotation relative to TN - deg

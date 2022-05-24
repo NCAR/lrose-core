@@ -7,16 +7,19 @@
 #include <QJSValue>
 #include <QJSValueIterator>
 #include <QCheckBox>
+#include <QFile>
+#include <QTreeView>
 #include <vector>
 #include <iostream>
 #include <toolsa/LogStream.hh>
 //#include "TextEdit.hh"
 #include "ScriptEditorView.hh"
-//#include "ScriptEditorDelegate.hh"
+#include "ScriptEditorHelpModel.hh"
 //#include "ScriptEditorItem.hh"
 #include "SoloFunctionsController.hh"
 #include "SoloScriptTranslator.hh"
 #include "DataField.hh"
+#include "PolarManager.hh"
 
 
 using namespace std;
@@ -35,6 +38,9 @@ Q_DECLARE_METATYPE(QVector<double>)
 {
   LOG(DEBUG) << "in ScriptEditorView constructor";
   //  initScriptEditor();
+
+  //_polarManager = (PolarManager *) parent;
+
   int rows;
   int cols;
 
@@ -59,14 +65,14 @@ Q_DECLARE_METATYPE(QVector<double>)
     //cellLabel->setMinimumSize(80, 10);
 
 
-    QHBoxLayout *scriptEditLayout = new QHBoxLayout();
+    scriptEditLayout = new QHBoxLayout();
     QVBoxLayout *forEachLayout = new QVBoxLayout();
     QVBoxLayout *oneTimeOnlyLayout = new QVBoxLayout();
 
     toolBar->addWidget(cellLabel);
     oneTimeOnlyLayout->addWidget(new QLabel("One Time Only"));
     oneTimeOnlyLayout->addWidget(formulaInput);
-    forEachLayout->addWidget(new QLabel("For Each Ray"));
+    forEachLayout->addWidget(new QLabel("Script"));
     forEachLayout->addWidget(formulaInputForEachRay);
 
 
@@ -83,7 +89,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     cancelAct->setFont(font);
     cancelAct->setStatusTip(tr("cancel changes"));
     // cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
-    connect(cancelAct, &QAction::triggered, this, &ScriptEditorView::cancelFormulaInput);
+    connect(cancelAct, &QAction::triggered, this, &ScriptEditorView::cancelScriptRun);
     toolBar->addAction(cancelAct);
 
     QAction *okAct = new QAction(tr("&Run"), this);
@@ -94,6 +100,22 @@ Q_DECLARE_METATYPE(QVector<double>)
     //okAct->setIcon(QIcon(":/images/ok_check.png"));
     connect(okAct, &QAction::triggered, this, &ScriptEditorView::acceptFormulaInput);
     toolBar->addAction(okAct);
+
+    QAction *undoAct = new QAction(tr("&Undo"), this);
+    font = undoAct->font();
+    font.setPointSize(actionFontSize);
+    undoAct->setFont(font);
+    undoAct->setStatusTip(tr("undo edits"));
+    //connect(undoAct, &QAction::triggered, this, &ScriptEditorView::undoEdits);
+    //toolBar->addAction(undoAct);    
+
+    QAction *redoAct = new QAction(tr("&Redo"), this);
+    font = redoAct->font();
+    font.setPointSize(actionFontSize);
+    redoAct->setFont(font);
+    redoAct->setStatusTip(tr("redo edits"));
+    //connect(redoAct, &QAction::triggered, this, &ScriptEditorView::redoEdits);
+    //toolBar->addAction(redoAct);   
 
     QAction *openFileAct = new QAction(tr("&Open"), this);
     font = openFileAct->font();
@@ -138,17 +160,122 @@ Q_DECLARE_METATYPE(QVector<double>)
     toolBar->addAction(applyAct);
 */
 
-    useBoundaryWidget = new QCheckBox("Use Boundary", this);
-    useBoundaryWidget->setChecked(true);
+    useBoundaryWidget = new QPushButton(tr("Use &Boundary"));
+    useBoundaryWidget->setCheckable(true);
+    useBoundaryWidget->setChecked(false);
+
+    //QGroupBox *sweepSelection = new QGroupBox("Select Sweep", this);
+    //sweepSelection->setFlat(true);
+    //sweepSelection->setExclusive(true);
+    //applyToCurrentSweep = new QRadioButton("current sweep", this);
+    //applyToAllSweeps = new QRadioButton("all sweeps", this);
+    //applyToCurrentSweep->setChecked(true);
+
+    allSweepsToggleButton = new QPushButton(tr("&Current Angle"));
+    allSweepsToggleButton->setStatusTip("Edit current angle or all angles");
+    allSweepsToggleButton->setCheckable(true);
+    allSweepsToggleButton->setChecked(false);
+    //allSweepsToggleButton = new QPushButton(tr("&All Angles"));
+    //allSweepsToggleButton->setCheckable(true);
+    //allSweepsToggleButton->setChecked(true);
+
+    //QVBoxLayout *vbox = new QVBoxLayout;
+    //vbox->addWidget(currentSweepToggleButton);
+    //vbox->addWidget(AllSweepsToggleButton);   
+    //vbox->addStretch(1);
+    //sweepSelection->setLayout(vbox); 
+
+    //QLabel *batchMode = new QLabel("Batch Mode");
+    //currentTimeToggleButton = new QPushButton(tr("On"));
+    //currentTimeToggleButton->setStatusTip("enter batch mode with time range");
+    //currentTimeToggleButton->setText("Current File");
+    //currentTimeToggleButton->setStatusTip("Batch edit all files or current file.");
+    //currentTimeToggleButton->setCheckable(true);
+    //currentTimeToggleButton->setChecked(false);
+
+    /*
+    // create start, end, and save dir widgets if time range is checked
+    // TODO: maybe initialize the start and end time with info from the time nav?
+    _archiveStartTimeEdit = new QDateTimeEdit(); // timeUpper);
+    _archiveStartTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+    _archiveStartTimeEdit->setToolTip("Start time of archive period");
+    _archiveEndTimeEdit = new QDateTimeEdit(); // timeUpper);
+    _archiveEndTimeEdit->setDisplayFormat("yyyy/MM/dd hh:mm:ss");
+    _archiveEndTimeEdit->setToolTip("End time of archive period");
+    */
+    /*
+    saveEditsDirectory = new QLabel("save edited files to: ");
+    saveEditsDirectory->setVisible(false);
+    browseDirectoryButton = new QPushButton(tr("&Change Output Location"));
+    browseDirectoryButton->setVisible(false);
+    */
+
+    scriptModifiers = new QGroupBox("Modifiers", this);
+    checkBoxLayout = new QVBoxLayout;
+    checkBoxLayout->addWidget(useBoundaryWidget);
+    checkBoxLayout->addWidget(allSweepsToggleButton);
+    //checkBoxLayout->addWidget(allSweepsToggleButton);
+    //checkBoxLayout->addWidget(batchMode);
+    //checkBoxLayout->addWidget(currentTimeToggleButton);
+    //checkBoxLayout->addWidget(timeRangeToggleButton);
+    //checkBoxLayout->addWidget(_archiveStartTimeEdit);
+    //checkBoxLayout->addWidget(_archiveEndTimeEdit);
+
+    //checkBoxLayout->addWidget(browseDirectoryButton);
+    //checkBoxLayout->addWidget(saveEditsDirectory);
+    checkBoxLayout->addStretch(1);    //checkBoxLayout->addWidget(sweepSelection);
+    scriptModifiers->setLayout(checkBoxLayout);
+
+    // QAbstractButton::clicked(bool checked = false)
+    // If the button is checkable, 
+    // checked is true if the button is checked, or false if the button is unchecked.
+    connect(allSweepsToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+    //connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
+
+    //connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
+    //connect(browseDirectoryButton, SIGNAL(clicked(bool)), this, SLOT(changeOutputLocation(bool)));
 
     //scriptEditLayout->addWidget(actionWidget);
     scriptEditLayout->addWidget(forEachWidget);
     // scriptEditLayout->addWidget(oneTimeWidget);
-    scriptEditLayout->addWidget(useBoundaryWidget);
-    QWidget *scriptEditWidget = new QWidget();
+    scriptEditLayout->addWidget(scriptModifiers);
+    //scriptEditLayout->addWidget(sweepSelection);
+
+    scriptEditWidget = new QWidget();
     scriptEditWidget->setLayout(scriptEditLayout);
 
+      //-------
+    //helpView = NULL;
+    //if (helpView == NULL) {
+    // Q_INIT_RESOURCE(resources);
 
+    // ----
+    QString fileName(":/resources/script_help.txt");
+
+    QFile file(fileName);
+    // ---
+      ScriptEditorHelpModel *model;
+      // QFile file(":/script_help.txt");
+      if (file.open(QIODevice::ReadOnly)) {
+        model = new ScriptEditorHelpModel(file.readAll());
+        file.close();
+      } else {
+        model = new ScriptEditorHelpModel("No help available");
+      }
+      helpView = new QTreeView(this);
+      helpView->setModel(model);
+      //helpView->setWindowTitle(QObject::tr("Script Help"));
+    //}
+    helpViewLayout = new QVBoxLayout();
+    helpViewLayout->addWidget(new QLabel("Script Commands"));
+    helpViewLayout->addWidget(helpView);
+
+    //helpView->setEnabled(true); // TODO: help window not showing. 
+    //scriptEditLayout->addWidget(helpView);
+    helpWidget = new QWidget(); 
+    helpWidget->setLayout(helpViewLayout);
+    //-------    
+      
     createActions();
     LOG(DEBUG) << "Action created\n";
     //updateColor(0);
@@ -162,6 +289,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     //setCentralWidget(table);
     LOG(DEBUG) << "setCentralWidgets";
 
+/*
     QPushButton *firstSweepButton = new QPushButton("First Sweep");
     QPushButton *lastSweepButton = new QPushButton("Last Sweep");
     TextEdit *dateTimeFirstSweepInput = new TextEdit(this);
@@ -185,15 +313,22 @@ Q_DECLARE_METATYPE(QVector<double>)
     QWidget *stopTimeWidget = new QWidget();
     startTimeWidget->setLayout(startTimeLayout);
     stopTimeWidget->setLayout(stopTimeLayout);
-    
+*/    
     //    QVBoxLayout *startStopTimeLayout = new QVBoxLayout();
     //startStopTimeLayout->addWidget(startTimeWidget);
     //startStopTimeLayout->addWidget(stopTimeWidget);
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->addWidget(scriptEditWidget);
-    mainLayout->addWidget(startTimeWidget);
-    mainLayout->addWidget(stopTimeWidget);
+    //mainLayout->addWidget(startTimeWidget);
+    //mainLayout->addWidget(stopTimeWidget);
+
+    //----
+    QDockWidget *dock = new QDockWidget(tr("Help"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dock->setWidget(helpView);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    //----
 
     QWidget *mainWidget = new QWidget();
     mainWidget->setLayout(mainLayout);
@@ -207,6 +342,10 @@ Q_DECLARE_METATYPE(QVector<double>)
 
     LOG(DEBUG) << "after setup";
 
+}
+
+ScriptEditorView::~ScriptEditorView() {
+  if (helpView != NULL) delete helpView;
 }
 
 
@@ -268,8 +407,29 @@ float  ScriptEditorView::myPow()
 {
   return(999.9);
 }
+/*
+void ScriptEditorView::undoEdits() {
+  // signal the PolarManager to undo edits
+  bool batchMode = currentTimeToggleButton->isChecked();
+  emit undoScriptEdits(); // batchMode);
+}
+
+void ScriptEditorView::redoEdits() {
+  // signal the PolarManager to undo edits
+  bool batchMode = currentTimeToggleButton->isChecked();
+  emit redoScriptEdits(); // batchMode);
+}
+*/
+void ScriptEditorView::saveEditDirectory() {
 
 
+  QString outputFolder = QFileDialog::getExistingDirectory(0, 
+    ("Select Output Folder"), QDir::currentPath());
+
+
+  // TODO: make sure we can write to this directory ...
+
+}
 
 
 void ScriptEditorView::openScriptFile() {
@@ -343,7 +503,22 @@ void ScriptEditorView::importScriptFile() {
 }
 
 void ScriptEditorView::displayHelp() {
-  LOG(DEBUG) << "not implemented";
+  //LOG(DEBUG) << "not implemented";
+    //Q_INIT_RESOURCE(resources);
+    if (helpView == NULL) {
+      QFile file(":/script_help.txt");
+      file.open(QIODevice::ReadOnly);
+      ScriptEditorHelpModel model(file.readAll());
+      file.close();
+
+      helpView = new QTreeView(this);
+    
+      helpView->setModel(&model);
+      helpView->setWindowTitle(QObject::tr("Script Help"));
+    }
+
+    helpView->setEnabled(true); // TODO: help window not showing. 
+    scriptEditLayout->addWidget(helpView);
 }
 
 void ScriptEditorView::saveScriptFile() {
@@ -375,18 +550,31 @@ void ScriptEditorView::applyChanges()
 
 void ScriptEditorView::acceptFormulaInput()
 {
-    QString oneTimeOnlyScript = formulaInput->getText();
-    cerr << "OneTimeOnly text entered: " << oneTimeOnlyScript.toStdString() << endl;
+  QString oneTimeOnlyScript = formulaInput->getText();
+  cerr << "OneTimeOnly text entered: " << oneTimeOnlyScript.toStdString() << endl;
 
-    QString forEachRayScript = formulaInputForEachRay->getText();
-    cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
-    
-    bool useBoundary = useBoundaryWidget->isChecked(); 
+  QString forEachRayScript = formulaInputForEachRay->getText();
+  cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
+  
+  bool useBoundary = useBoundaryWidget->isChecked(); 
+  bool useAllSweeps = allSweepsToggleButton->isChecked();     
+
+  // TODO: should the start and end times be specified in the time nav?
+  // Q: what is the relationship between the time nav and the script start and end times?
+  //  emit a signal and have a slot in the PolarManager
+  bool useTimeRange = false;
+  //if (currentTimeToggleButton->isChecked()) {
+  //  useTimeRange = true;
+  //} 
+  emit runScriptBatchMode(forEachRayScript, useBoundary, useAllSweeps,
+    useTimeRange);
 
     // Send the scripts to the controller for processing
-    try {
-      emit runOneTimeOnlyScript(oneTimeOnlyScript);
-      emit runForEachRayScript(forEachRayScript, useBoundary);
+    //try {
+      //emit runOneTimeOnlyScript(oneTimeOnlyScript);
+      //emit runForEachRayScript(forEachRayScript, useBoundary);
+      //PolarManager *polarManager = (PolarManager *) parent();
+      //emit runForEachRayScript(forEachRayScript, useBoundary, useAllSweeps);
     /*
     // Grab the context before evaluating the formula
     //  YES! This works.  The new global variables are listed here;
@@ -453,6 +641,7 @@ void ScriptEditorView::acceptFormulaInput()
       }
 
     */
+      /*
     } catch (const std::exception& ex) {
       criticalMessage(ex.what());
     } catch (const std::string& ex) {
@@ -462,7 +651,24 @@ void ScriptEditorView::acceptFormulaInput()
     } catch (...) {
       criticalMessage("Error occurred during evaluation");
     }
+    */
+  
+}
 
+void ScriptEditorView::scriptComplete() {
+  // if not batch mode
+  //if (!currentTimeToggleButton->isChecked()) {
+    scriptCompleteMessage();
+  //}
+}
+
+void ScriptEditorView::batchEditComplete() {
+
+  progressBar->setVisible(false);
+  if (progressBar != NULL) {
+    delete progressBar;
+    progressBar = NULL;
+  }
 }
 
 void ScriptEditorView::cancelFormulaInput()
@@ -485,6 +691,9 @@ void ScriptEditorView::cancelFormulaInput()
     */
 }
 
+void ScriptEditorView::cancelScriptRun() {
+  emit cancelScriptRunRequest();
+}
 
 // TODO: I have to be careful here ...
 // addField will always work, it just renames the field if it already
@@ -529,6 +738,52 @@ vector<string> *ScriptEditorView::getVariablesFromScriptEditor() {
   */
   names->push_back("TODO: getFieldNames");
   return names;
+}
+
+void ScriptEditorView::initProgress(int nFiles) {
+  //QStatusBar *statusBar = statusBar();
+  //stringstream ss;
+  //ss << "processing " << currentIndex << " of "  <<
+  //  lastIndex << " files";
+  progressBar = new QProgressBar(this); // statusBar);
+  progressBar->setRange(1, nFiles);
+  progressBar->setValue(1);
+
+  statusBar()->addWidget(progressBar);
+  progressBar->setVisible(true);
+
+//  setStatusBar() ...
+//  statusBar()->showMessage(QString::fromStdString(ss.str()));
+
+}
+
+
+void ScriptEditorView::updateProgress(int currentIndex, int lastIndex) {
+  //QStatusBar *statusBar = statusBar();
+  //stringstream ss;
+  //ss << "processing " << currentIndex << " of "  <<
+  //  lastIndex << " files";
+
+  progressBar->setValue(currentIndex+1);
+
+  //statusBar()->showMessage(QString::fromStdString(ss.str()));
+}
+
+void ScriptEditorView::scriptCompleteMessage() {
+
+  //if (progressBar != NULL)
+  //  delete progressBar;
+
+/*
+  QMessageBox msgBox;
+  msgBox.setText("Script evaluation complete.");
+  msgBox.setInformativeText("Results available in editor and field color maps");
+  msgBox.setStandardButtons(QMessageBox::Ok);
+  int ret = msgBox.exec();
+  //    QMessageBox::information(this, "Script evaluation complete", 
+  //      "Script evaluation complete.\n.",
+  //      QMessageBox::NoIcon);
+  */
 }
 
 
@@ -767,6 +1022,104 @@ void ScriptEditorView::criticalMessage(std::string message)
     // criticalLabel->setText("Ignore");
 }
 
+
+void ScriptEditorView::closeEvent() {
+    emit scriptEditorClosed();
+}
+
+
+// QAbstractButton::clicked(bool checked = false)
+// If the button is checkable, 
+// checked is true if the button is checked, or false if the button is unchecked.
+//    connect(currentSweepToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+//    connect(AllSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
+
+void ScriptEditorView::currentSweepClicked(bool checked) {
+  //currentSweepToggleButton->setChecked(false);
+  //allSweepsToggleButton->setChecked(true);
+  //notImplementedMessage();
+  
+  if (allSweepsToggleButton->text().compare("Current Angle") == 0) {
+    allSweepsToggleButton->setChecked(true);
+    allSweepsToggleButton->setText("All Angles");
+    //allSweepsToggleButton->setStatusTip("Edit all angles");
+  } else {
+    allSweepsToggleButton->setChecked(false);  
+    allSweepsToggleButton->setText("Current Angle");
+    //allSweepsToggleButton->setStatusTip("Edit selected angle");
+  } 
+
+/*
+  if (checked) {
+    allSweepsToggleButton->setChecked(false);
+  } else {
+    allSweepsToggleButton->setChecked(true);    
+  }
+*/  
+}
+
+/*
+void ScriptEditorView::allSweepsClicked(bool checked) {
+  //currentSweepToggleButton->setChecked(false);
+  //allSweepsToggleButton->setChecked(true);
+  //notImplementedMessage();
+  
+  if (checked) {
+    currentSweepToggleButton->setChecked(false);
+  } else {
+    currentSweepToggleButton->setChecked(true);    
+  }  
+  
+}
+*/
+
+/*
+// checked = true ==> time range; highlighted
+// checked = false ==> current archive; default; no highlight
+void ScriptEditorView::timeRangeClicked(bool checked) {
+
+  if (currentTimeToggleButton->text().compare("Current File") == 0) {
+    currentTimeToggleButton->setChecked(true);
+    currentTimeToggleButton->setText("All Files");
+    //currentTimeToggleButton->setStatusTip("Batch Mode: on");
+
+    //showTimeRangeEdits();
+  } else {
+    currentTimeToggleButton->setChecked(false);  
+    currentTimeToggleButton->setText("Current File");
+    //currentTimeToggleButton->setStatusTip("Batch Mode: off");
+    //hideTimeRangeEdits();  
+  }  
+  
+}
+
+void ScriptEditorView::hideTimeRangeEdits() {
+  //saveEditsDirectory->setVisible(false);
+  //browseDirectoryButton->setVisible(false);
+}
+
+void ScriptEditorView::showTimeRangeEdits() {
+  //saveEditsDirectory->setVisible(true);
+  //browseDirectoryButton->setVisible(true);
+}
+*/
+
+void ScriptEditorView::changeOutputLocation(bool checked) {
+
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Save Results Directory"),
+                                                "/home",
+                                                QFileDialog::ShowDirsOnly
+                                                | QFileDialog::DontResolveSymlinks);
+
+  string dirName = dir.toStdString();
+  LOG(DEBUG) << "save script results to " << dirName;
+
+  saveEditsDirectory->setText(dir); // "save edited files to: " + dir);
+}
+
+string ScriptEditorView::getSaveEditsDirectory() {
+  return saveEditsDirectory->text().toStdString();
+}
 
 /*
 void ScriptEditorView::printQJSEngineContext() {

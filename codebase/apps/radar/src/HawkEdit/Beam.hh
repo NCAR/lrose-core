@@ -47,13 +47,15 @@
 #include <QRubberBand>
 #include <QPoint>
 #include <QTransform>
-#include <Radx/RadxTime.hh>
-#include <Radx/RadxRay.hh>
+//#include <Radx/RadxTime.hh>
+//#include <Radx/RadxRay.hh>
 
 #include "ScaledLabel.hh"
-#include "DisplayField.hh"
-#include "DisplayFieldController.hh"
-#include "Params.hh"
+#include "ColorMap.hh"
+//#include "DisplayField.hh"
+//#include "DisplayFieldController.hh"
+
+//#include "Params.hh"
 
 //#if defined(OSX_LROSE) && !defined(SINCOS_DEFN)
 //#define SINCOS_DEFN
@@ -98,9 +100,8 @@ public:
    * @param[in] n_fields    Number of fields in the beam.
    */
   
-  Beam(const Params &params,
-       const RadxRay *ray,
-       int n_fields);
+  Beam(size_t nGates); // const RadxRay *ray);
+
   
   /**
    * @brief Destructor
@@ -116,7 +117,7 @@ public:
    * @param[in] brush Brush to use.
    */
   
-  virtual void resetFieldBrush(size_t field, const QBrush *brush);
+  virtual void resetFieldBrush(const QBrush *brush);
 
   /**
    * @brief Apply data and color maps to an existing beam.
@@ -128,34 +129,25 @@ public:
    * @param[in] background_brush Background brush of the display.
    */
   
-  virtual void fillColors(const std::vector<std::vector<double> >& beamData,
-			  //const std::vector<DisplayField*>& fields,
-			  DisplayFieldController *displayFieldController,
-			  size_t nFields,
+  virtual void fillColors(const std::vector<double>& beamData,
 			  const QBrush *background_brush);
 
-  virtual void updateFillColors(const Radx::fl32 *beamData,
+  virtual void updateFillColors(float *beamData,
 				size_t nData,
-				//DisplayFieldController *displayFieldController,
-				size_t displayFieldIdx,
-				size_t nFields,
 				const ColorMap *map,
 				const QBrush *background_brush);
 
   virtual void updateFillColorsSparse(const std::vector<double>& field_data,
-			  DisplayFieldController *displayFieldController,
-			  size_t nFields_expected,
-				      const QBrush *background_brush,
-				      size_t fieldIdx);
+				      const QBrush *background_brush);
 
 
   /**
    * @brief Paint the given field in the given painter.
    */
   
-  virtual void paint(QImage *image,
+  virtual void paint(QPainter &painter, 
+    //QImage *image,
                      const QTransform &transform,
-                     size_t field,
                      bool useHeight = false,
                      bool drawInstHt = false) = 0;
   
@@ -167,7 +159,7 @@ public:
 
   // get ray pointer
   
-  const RadxRay *getRay() const { return _ray; }
+  //const RadxRay *getRay() const { return _ray; }
 
   ////////////////////
   // Access methods //
@@ -183,7 +175,7 @@ public:
    * @return Returns true if the beam is being rendered for this field, false
    *         otherwise.
    */
-
+/*
   inline bool isBeingRendered(int field_num) const
   {
     if (field_num < 0 || field_num >= (int)_nFields) {
@@ -191,7 +183,7 @@ public:
     }
     return _beingRendered[field_num];
   }
-  
+*/  
 
   /**
    * @brief Check to see if the beam is being rendered for any field.
@@ -199,12 +191,12 @@ public:
    * @return Returns true if the beam is being rendered for any field, false
    *         otherwise.
    */
-
+/*
   inline bool isBeingRendered() const
   {
     return _beingRenderedAnywhere;
   }
-  
+ */ 
   /**
    * @brief Set the flags indicating that the beam is being rendered for the
    *        indicated field.  If the field number is set to an invalid value
@@ -213,7 +205,7 @@ public:
    * @param[in] field_num         The index of the field to set.
    * @param[in] being_rendered    The value of the flag.
    */
-
+/*
   inline void setBeingRendered(int field_num, bool being_rendered)
   {
   
@@ -239,11 +231,11 @@ public:
 	  _beingRenderedAnywhere = true;
 	  break;
 	}
-      } /* endfor - i */
+      } // endfor - i 
     }
     
   }
-  
+ */ 
 
   /**
    * @brief Set the flags indicating that the beam is being rendered for all
@@ -251,7 +243,7 @@ public:
    *
    * @param[in] being_rendered    The value of the flag.
    */
-
+/*
   inline void setBeingRendered(bool being_rendered)
   {
     for (size_t i = 0; i < _nFields; ++i) {
@@ -259,7 +251,7 @@ public:
     }
     _beingRenderedAnywhere = being_rendered;
   }
-  
+ */ 
 
   ///////////////////////////////////////////////
   /// \name Memory management:
@@ -270,24 +262,24 @@ public:
   /// add a client - i.e. an object using this ray
   /// returns the number of clients using the ray
   
-  int addClient() const; 
+  //int addClient() const; 
   
   /// client object no longer needs this ray
   /// returns the number of clients using the ray
   
-  int removeClient() const;
+  //int removeClient() const;
   
   // set number of clients to zero
 
-  int removeAllClients() const;
+  //int removeAllClients() const;
 
   /// delete this ray if no longer used by any client
 
-  static void deleteIfUnused(const Beam *beam);
+  //static void deleteIfUnused(const Beam *beam);
 
-  void addFields(const RadxRay *ray, size_t n_fields, size_t nFields_expected);
+  //void addFields(const RadxRay *ray, size_t n_fields, size_t nFields_expected);
 
-  size_t getNFields() {return _nFields;};  
+  //size_t getNFields() {return _nFields;};  
   //@}
 
 
@@ -298,19 +290,19 @@ protected:
   // Protected members //
   ///////////////////////
 
-  const Params &_params;
+  //const Params &_params;
 
   // relevant ray
   // we use reference counting to determine when to delet the object
   
-  const RadxRay *_ray;
+  //const RadxRay *_ray;
   size_t _nGates;
 
   /**
    * @brief Number of fields in this beam.
    */
 
-  size_t _nFields;
+  //size_t _nFields;
 
   /**
    * @brief Flags indicating that this beam is currently in a render list so
@@ -318,7 +310,7 @@ protected:
    *        the beam since the fields are rendered independently.
    */
 
-  vector<bool> _beingRendered;
+  //vector<bool> _beingRendered;
   
   /**
    * @brief Flag indicating whether any field of this beam is currently being
@@ -327,19 +319,22 @@ protected:
    *        through the _beingRendered array.
    */
 
-  bool _beingRenderedAnywhere;
+  //bool _beingRenderedAnywhere;
   
-  /**
+  /** TODO: remove this comment, it is out of data.
    * @brief The brush to use for each gate for each field.  The brush
    *        includes the color to use.
    */
-
-  std::vector< std::vector< const QBrush* > > _brushes;
-
+  /**
+   * @brief The brush to use for each gate.  The brush
+   *        includes the color to use.
+   */
+  //std::vector< std::vector< const QBrush* > > _brushes;
+  std::vector< const QBrush* > _brushes;
   // keeping track of reference counting clients using this object
 
-  mutable int _nClients;
-  mutable pthread_mutex_t _nClientsMutex;
+  //mutable int _nClients;
+  //mutable pthread_mutex_t _nClientsMutex;
 
 };
 

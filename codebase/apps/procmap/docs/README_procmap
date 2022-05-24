@@ -1,0 +1,100 @@
+Title:	README for procmap scripts
+Date:	26-MAR-1998
+Update: 1999
+===========================================================================
+The procmap scripts
+-------------------
+
+NOTE: the scripts reside in lrose-core/codebase/apps/scripts/src.
+
+The procmap scripts are:
+
+procmap_auto_restart	monitors a list of processes and restarts any that
+			are no longer communicating with the 'procmap' process
+
+procmap_list_kill	snuff's a list of processes
+
+procmap_list_start	starts a list of processes
+
+auto_restart		update to procmap_auto_restart to add command line
+			options and file locking
+
+auto_restart_stats	parses output from auto_restart to generate
+			process restart statistics	
+
+These scripts all operate on a process list file ("proc_list_file") which
+contains a list of processes and information about each of the processes.
+
+The proc_list_file
+------------------
+The proc_list_file has a specific syntax which must be followed. The syntax
+is shown in the example below. Comment lines must begin with a leading "#".
+
+#
+# Example proc_list_file entries:
+#
+# process          instance        start script     kill script             host
+# --------	   --------	   ------------	    -----------		    ----
+#
+rdata_to_shmem     rtest           start_ingest     kill_ingest             kodiak
+dobson_from_shmem  rtest           start_ingest     kill_ingest             kodiak
+dobson_server      ReflFcast       start_servers    kill_dobson_servers     kodiak
+dobson_server      rtest           start_servers    kill_dobson_servers     bear
+forecast_monitor   Rtest           start_tracking   kill_forecast_monitor   bear
+precip_map         precip_fcast    start_tracking   kill_precip_maps        bear
+precip_map         precip_accum    start_tracking   kill_precip_maps        bear
+storm_track        rtest           start_tracking   kill_storm_track        kodiak
+storm_ident        rtest           start_tracking   kill_storm_ident        kodiak
+time_hist          rtest           start_display    snuff_inst              kodiak
+rview              rtest           start_display    snuff_inst              kodiak
+
+The process, start script, and kill script must be in the current user's 
+path. 
+
+You can use enviroment variables in any of the fields in the proc_list_file.
+To use environment variables, use the syntax:
+
+$(env-var-string)
+
+For example:
+
+rdata_to_shmem	   rtest           start_ingest     kill_ingest            $(HOST1)
+
+
+You can use "include files" inside your proc_list_file. The included file 
+must be a proc_list_file file and follow the same syntax rules. To include a
+file use the syntax:
+
+include filename
+
+For example:
+
+include $(HOME)/params/proc_file_list.include
+
+
+You can use a special kill script string "snuff_inst" (see the example 
+above) in a proc_list_file. This will snuff the process and instance on 
+that proc_file_list line without requiring a separate kill script. To use 
+snuff_inst, you must have the correct instance in the start script **on the 
+command line**; it must match exactly with the instance listed in the 
+proc_list_file. For example, to use the following line in the 
+proc_file_list:
+
+time_hist          rtest           start_display    snuff_inst              kodiak
+
+you must have the following line in the "start_display" start script:
+
+    time_hist -params time_hist.rtest
+
+or:
+
+    time_hist -params time_hist.params -instance rtest
+
+Installing the procmap scripts
+------------------------------
+The procmap scripts are now in apps/scripts/src.
+When you do a 'make install', the procmap scripts will be installed
+into $LROSE_INSTALL_DIR/bin.
+
+
+

@@ -171,7 +171,10 @@ public:
    */
   inline bool clockwise(void) const {return _mdv.clockwise();}
   
+  bool isCircular(void) const;
+
   inline MdvxProj proj(void) const {return _mdv.proj(); }
+
 
   inline std::vector<double> getVlevel(void) const {return _mdv.getVlevel();}
   
@@ -262,6 +265,7 @@ private:
   static const std::string _verticalClumpFiltStr; /**< Function keyword */
   static const std::string _shapeFiltStr; /**< Function keyword */
   static const std::string _shapeFixedFiltStr; /**< Function keyword */
+  static const std::string _volumeTimeStr; /**< Function keyword */
 
   MathUserData *_computeFuzzyFunction(const std::vector<std::string> &args);
   MathUserData *_computeVerticalConsistency(const std::string &dataStr,

@@ -1087,7 +1087,7 @@ void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
     }
     return;
   }
-      
+
   Nc3Var *coordVar = _ncFile->get_var(dim->name());
   if (coordVar == NULL) {
     if (_debug) {
@@ -1120,7 +1120,7 @@ void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
     arrayDim.xVar = coordVar;
     arrayDim.xDim = dim;
     if (_debug) {
-      cerr << "SUCCESS - FIELD has X coordinate" << endl;
+      cerr << "SUCCESS - var has X coordinate, dim: " << dim->name() << endl;
     }
     return;
   }
@@ -1131,7 +1131,7 @@ void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
     arrayDim.yVar = coordVar;
     arrayDim.yDim = dim;
     if (_debug) {
-      cerr << "SUCCESS - FIELD has Y coordinate" << endl;
+      cerr << "SUCCESS - var has Y coordinate, dim: " << dim->name() << endl;
     }
     return;
   }
@@ -1141,7 +1141,7 @@ void Ncf2MdvTrans::_inspectDim(Nc3Dim *dim, int jdim, ArrayDim &arrayDim)
     arrayDim.zDim = dim;
     delete positiveAtt;
     if (_debug) {
-      cerr << "NOTE - FIELD has Z coordinate" << endl;
+      cerr << "NOTE - var has Z coordinate, dim: " << dim->name() << endl;
     }
     return;
   }

@@ -1,0 +1,112 @@
+#! /bin/bash
+
+###########################################################
+# build custom docker image for redhat, with required packages
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Create custom docker image for lrose"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. centos, fedora"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. 7 for centos 7, 29 for fedora 29"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=centos
+os_version=7
+debug=true
+
+# Parse command line options.
+while getopts hdt:v: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  creating custom docker image for lrose"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+fi
+
+# go to scripts dir
+
+cd ~/git/lrose-core/build/packages/redhat
+
+# set the docker file name
+
+if [ "$os_type" = fedora ]
+then
+    # fedora
+    DockerfileName=Dockerfile.fedora.custom
+else
+    # various version of centos
+    if [ "$os_version" = 6 ] ; then
+        DockerfileName=Dockerfile.centos6.custom
+    elif [ "$os_version" = 7 ] ; then
+        DockerfileName=Dockerfile.centos7.custom
+    else
+        DockerfileName=Dockerfile.centos8.custom
+    fi
+fi
+
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.custom.${os_type}.${os_version}
+echo "  DockerfileName is: " $DockerfileName
+echo "  Creating DockerfilePath: " $DockerfilePath
+mkdir -p /tmp/docker
+echo "####################################################" > $DockerfilePath
+
+# for fedora, create Dockerfile preamble with the FROM command
+
+if [ "$os_type" = fedora ]
+then
+    echo "FROM ${os_type}:${os_version}" >> $DockerfilePath
+    echo "#" >> $DockerfilePath
+fi
+
+# append the body of the Dockerfile
+
+cat $DockerfileName >> $DockerfilePath
+
+# create the custom image
+
+cd /tmp/docker
+
+docker build \
+    --build-arg OS_TYPE=${os_type} \
+    --build-arg OS_VERSION=${os_version} \
+    --tag custom/${os_type}:${os_version} \
+    --file ${DockerfilePath} .

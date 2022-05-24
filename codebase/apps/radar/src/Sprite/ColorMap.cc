@@ -882,7 +882,7 @@ int ColorMap::readXmlMap(const std::string &file_path)
   vector<char> buf;
   buf.reserve(fileSize + 1);
   memset(buf.data(), 0, fileSize + 1);
-  if (colFile.fread(buf.data(), 1, fileSize) != fileSize) {
+  if (colFile.fread(buf.data(), 1, fileSize) != (size_t) fileSize) {
     int errNum = errno;
     cerr << "ERROR - ColorMap::readXmlMap" << endl;
     cerr << "  Cannot read color map file: " << _path << endl;

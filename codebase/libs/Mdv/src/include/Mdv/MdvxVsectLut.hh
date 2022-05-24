@@ -43,7 +43,7 @@ using namespace std;
 
 class MdvxVsectLutEntry {
 public:
-  int offsets[4];
+  int64_t offsets[4];
   double wts[4];
   bool set;
   MdvxVsectLutEntry() {
@@ -127,7 +127,7 @@ public:
   double getDxKm() const { return (_dxKm); }
   double getTotalLength() const { return (_totalLength); }
 
-  const vector<int> &getOffsets() const {
+  const vector<int64_t> &getOffsets() const {
     return (_offsets);
   }
 
@@ -144,7 +144,7 @@ protected:
   double _dxKm;
   double _totalLength;
   MdvxProj _proj;
-  vector<int> _offsets;
+  vector<int64_t> _offsets;
   vector<MdvxVsectLutEntry> _weights;
   bool _offsetsComputed;
   bool _weightsComputed;

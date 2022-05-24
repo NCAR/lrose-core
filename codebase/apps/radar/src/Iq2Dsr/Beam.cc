@@ -580,6 +580,9 @@ void Beam::_prepareForComputeMoments()
     _mom->setMinSnrDbForLdr(_params.min_snr_db_for_ldr);
   }
 
+  _mom->setClutterWidthMps(_params.clutter_model_width_in_adaptive_filter);
+  _mom->setClutterInitNotchWidthMps(_params.init_notch_width_in_adaptive_filter);
+  
   // compute windows for FFTs
 
   _computeWindows();
@@ -1546,23 +1549,6 @@ void Beam::_computeMomDpAltHvCoOnly()
 
 void Beam::_computeMomDpSimHv()
 {
-
-  // staggered PRT is a special case
-
-  if (_isStagPrt) {
-    for (int igate = 0; igate < _nGates; igate++) {
-      GateData *gate = _gateData[igate];
-      MomentsFields &fields = gate->fields;
-      _mom->dpSimHvStagPrt(gate->iqhcOrig,
-                           gate->iqvcOrig,
-                           gate->iqhcPrtShort,
-                           gate->iqvcPrtShort,
-                           gate->iqhcPrtLong,
-                           gate->iqvcPrtLong,
-                           igate, false, fields);
-    }
-    return;
-  }
 
   // copy gate fields to _momFields array
   
@@ -2637,12 +2623,6 @@ void Beam::_filterDpSimHvFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
-    
     // apply the filter ratio to other channel
     
     _mom->applyFilterRatio(_nSamples, *_fft,
@@ -2668,6 +2648,78 @@ void Beam::_filterDpSimHvFixedPrt()
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
+
+    // wind farm test
+
+    if (fields.spectral_snr >= 25.0 &&
+        fields.clut_2_wx_ratio >= 5.0 &&
+        fields.cmd >= 0.5) {
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5) {
+      fields.test2 = 1.0;
+    } else {
+      fields.test2 = MomentsFields::missingDouble;
+    }
+
+    fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
+    
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5) {
+    //   fields.test4 = fieldsF.dbz - fields.spectral_snr;
+    // } else {
+    //   fields.test4 = fieldsF.dbz;
+    // }
+    
+    if (fields.spectral_snr >= 25.0 &&
+        fields.cmd >= 0.5 &&
+        fieldsF.dbz > -99) {
+      double rangeKm = _startRangeKm + igate * _gateSpacingKm;
+      double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
+      double snrLinear = pow(10.0, snrF / 10.0);
+      double pwrLinear = (snrLinear + 1.0) * calibNoise;
+      double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
+      double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
+      double pwrCorrLinear = pwrLinear - specPwrLinear;
+      if (pwrCorrLinear > calibNoise) {
+        fields.test4 = fieldsF.dbz - fields.spectral_snr;
+      }
+    } else {
+      fields.test4 = fieldsF.dbz;
+    }
+    
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.clut_2_wx_ratio >= 5.0 &&
+    //     fields.cmd >= 0.5) {
+    //   fields.test4 = 75;
+    // }
+
+    // if (fields.spectral_snr >= 25.0 &&
+    //     fields.cmd >= 0.5 &&
+    //     fieldsF.dbz > -99) {
+      
+    //   double rangeKm = _startRangeKm + igate * _gateSpacingKm;
+    //   double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
+    //   double snrLinear = pow(10.0, snrF / 10.0);
+    //   double pwrLinear = (snrLinear + 1.0) * calibNoise;
+    //   double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
+    //   double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
+    //   double pwrCorrLinear = pwrLinear - specPwrLinear;
+    //   if (pwrCorrLinear < calibNoise) {
+    //     pwrCorrLinear = calibNoise * 1.1;
+    //   }
+    //   double snrCorrLinear = (pwrCorrLinear - calibNoise) / calibNoise;
+    //   double snrCorrDb = 10.0 * log10(snrCorrLinear);
+    //   double dbzCorr = _calib.getBaseDbz1kmHc() + snrCorrDb + 20.0 * log10(rangeKm);
+      
+    //   fields.test4 = dbzCorr;
+
+    // }
+    
+    // testing csr from 3-order regression filter
+
+    // fields.test3 = _mom->getRegrInterpRatioDb();
+    // fields.test4 = _regr->getPolyOrderInUse();
+    // fields.test5 = _mom->getRegr3CsrDb();
 
   } // igate
 

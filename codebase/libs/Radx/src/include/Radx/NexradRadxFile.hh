@@ -207,6 +207,7 @@ protected:
 
   int _volumeNumber;
   int _vcpNum;
+  int _prevSweepNum;
   Radx::InstrumentType_t _instrumentType;
   Radx::PlatformType_t _platformType;
   NexradData::message_31_vol_t _vol;

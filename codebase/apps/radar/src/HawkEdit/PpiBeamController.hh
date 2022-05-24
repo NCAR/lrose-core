@@ -9,7 +9,7 @@ class PpiBeamController
 public:
 
   PpiBeamController();
-  ~PpiBeamController();
+  virtual ~PpiBeamController();
 
   void add(PpiBeam *);
   

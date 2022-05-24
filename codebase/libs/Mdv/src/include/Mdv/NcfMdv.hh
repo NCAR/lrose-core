@@ -125,11 +125,13 @@ public:
   const static char* longitude_of_prime_meridian;
   const static char* longitude_of_projection_origin;
   const static char* maximum;
+  const static char* max_value;
   const static char* mean;
   const static char* median;
   const static char* mercator;
   const static char* mid_range;
   const static char* minimum;
+  const static char* min_value;
   const static char* missing_value;
   const static char* mode;
   const static char* month_lengths;

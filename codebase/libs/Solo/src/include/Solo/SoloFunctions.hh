@@ -177,5 +177,97 @@ void se_remove_storm_motion(float wind, float speed, float dgi_dd_rotation_angle
 			    const float *data, float *new_data, size_t nGates,
 			    float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
+void se_ac_surface_tweak(enum Surface_Type which_removal,  // internal value based on function call
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     float vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+     float asib_altitude_agl,      // altitude angle ???
+     float dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                           // origin dds->ra->elevation, ra = radar_angles
+                           // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+     double dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+     double dds_asib_roll,            // origin dds->asib->roll
+     double dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+     float radar_latitude,  // radar->latitude 
+     const float *data,     // internal value
+     float *new_data,       // internal value
+     size_t nGates,         // internal value
+     float gate_size,
+     float distance_to_first_gate,
+     double max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+     float bad_data_value,  // default value
+     size_t dgi_clip_gate,  // default value
+     bool *boundary_mask);
+
+void se_unconditional_delete(const float *data, float *newData, size_t nGates,
+         float bad, size_t dgi_clip_gate, bool *boundary_mask);
+
+ void se_hard_zap(
+      const float *data, size_t nGates,
+      float *newData,
+      float bad, size_t dgi_clip_gate,
+      bool *boundary_mask);
+
+ void dd_radar_angles( 
+     float asib_roll,
+     float asib_pitch,
+     float asib_heading,
+     float asib_drift_angle,
+     float asib_rotation_angle,
+     float asib_tilt,
+
+
+     float cfac_pitch_corr,
+     float cfac_heading_corr,
+     float cfac_drift_corr,
+     float cfac_roll_corr,
+     float cfac_elevation_corr,
+     float cfac_azimuth_corr,
+     float cfac_rot_angle_corr,
+     float cfac_tilt_corr,
+     int radar_type,  // from dgi->dds->radd->radar_type
+     bool use_Wen_Chaus_algorithm,
+    float dgi_dds_ryib_azimuth,
+    float dgi_dds_ryib_elevation,
+     float *ra_x,
+     float *ra_y,
+     float *ra_z,
+     float *ra_rotation_angle,
+     float *ra_tilt,
+     float *ra_azimuth,
+     float *ra_elevation,
+     float *ra_psi
+);
+
+
+// given a list of x, y points, an other geo data,
+// return a mask of booleans where 
+//   true is inside the boundary and 
+//   false is outside the boundary
+void se_get_boundary_mask(long *xpoints, long *ypoints, int npoints,
+             //float radar_origin_x,                                                      
+             //  float radar_origin_y,                                                    
+             //  float radar_origin_z,                                                    
+             float radar_origin_latitude,
+             float radar_origin_longitude,
+             float radar_origin_altitude,
+             float boundary_origin_tilt,
+             // float boundary_origin_x,                                                
+             // float boundary_origin_y,                                                
+             // float boundary_origin_z,                                                
+             float boundary_origin_latitude,
+             float boundary_origin_longitude,
+             float boundary_origin_altitude,
+             int nGates,
+             float gateSize,
+             float distanceToCellNInMeters,
+             float azimuth,
+             int radar_scan_mode,
+             int radar_type,
+             float tilt_angle,
+             bool *boundary_mask);
 
 #endif

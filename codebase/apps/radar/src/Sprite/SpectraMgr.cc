@@ -44,6 +44,13 @@
 #include "AllocCheck.hh"
 #include <radar/RadarComplex.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/pmu.h>
+#include <toolsa/DateTime.hh>
+#include <toolsa/Path.hh>
+#include <toolsa/TaXml.hh>
+#include <Radx/RadxFile.hh>
+#include <dsserver/DsLdataInfo.hh>
 
 #include <string>
 #include <cmath>
@@ -73,13 +80,6 @@
 #include <QComboBox>
 #include <QRect>
 
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/pmu.h>
-#include <toolsa/DateTime.hh>
-#include <toolsa/Path.hh>
-#include <Radx/RadxFile.hh>
-#include <dsserver/DsLdataInfo.hh>
-
 using namespace std;
 bool SpectraMgr::_firstTimerEvent = true;
 
@@ -105,7 +105,8 @@ SpectraMgr::SpectraMgr(const Params &params,
 
   _timeSpanSecs = _params.archive_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
-      _params.input_mode == Params::FILE_LIST_MODE) {
+      _params.input_mode == Params::FILE_LIST_MODE ||
+      _params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
     _archiveMode = true;
   } else {
     _archiveMode = false;
@@ -117,10 +118,20 @@ SpectraMgr::SpectraMgr(const Params &params,
 
   _archiveStartTime.set(_params.archive_start_time);
   _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+  _goForward = true;
 
   // set up windows
   
   _setupWindows();
+
+  // initialize the click point FMQ object
+
+  _clickPointFmq.setUrl(_params.click_point_fmq_url);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _clickPointFmq.setVerbose();
+  } else if (_params.debug) {
+    _clickPointFmq.setDebug();
+  }
 
   // set initial field to 0
   
@@ -191,8 +202,8 @@ void SpectraMgr::_setupWindows()
   
   // connect slots for location change
   
-  // connect(_spectra, SIGNAL(locationClicked(double, double, const RadxRay*)),
-  //         this, SLOT(_spectraLocationClicked(double, double, const RadxRay*)));
+  connect(_spectra, SIGNAL(locationClicked(double, int)),
+          this, SLOT(_spectraLocationClicked(double, int)));
   
   // create status panel
 
@@ -472,19 +483,35 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
 
   }
 
-  // handle data
+  // read HawkEye click point info from FMQ
+  
+  bool gotNew = false;
+  if (_readClickPointFmq(gotNew) == 0) {
+    if (gotNew) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "====>> gotNewClickInfo" << endl;
+      }
+      if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+        _followDisplay();
+      }
+    }
+  }
 
+  // handle data
+  
   if (event->timerId() == _dataTimerId) {
-    
     if (_archiveMode) {
       if (_archiveRetrievalPending) {
-        _handleArchiveData();
+        if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+          _followDisplay();
+        } else {
+          _handleArchiveData();
+        }
         _archiveRetrievalPending = false;
       }
     } else {
       _handleRealtimeData();
     }
-    
   }
   
 }
@@ -513,8 +540,7 @@ void SpectraMgr::keyPressEvent(QKeyEvent * e)
   if (mods & Qt::AltModifier) {
     cerr << "!!!!!!!!!!!!" << endl;
   }
-  char keychar = e->text().toLatin1().data()[0];
-  int key = e->key();
+  char keychar = e->text().toLatin1().data()[0];  int key = e->key();
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
@@ -639,7 +665,12 @@ void SpectraMgr::_handleArchiveData()
   
   // read in a beam
 
-  Beam *beam = _tsReader->getNextBeam();
+  Beam *beam = NULL;
+  if (_goForward) {
+    beam = _tsReader->getNextBeam();
+  } else {
+    beam = _tsReader->getPreviousBeam();
+  }
   if (beam == NULL) {
     cerr << "ERROR - end of data in archive mode" << endl;
     // reset cursor
@@ -656,6 +687,70 @@ void SpectraMgr::_handleArchiveData()
   if (beam->computeMoments()) {
 
     cerr << "ERROR - SpectraMgr::_handleArchiveData()" << endl;
+    cerr << "  Cannot compute moments" << endl;
+
+  } else {
+
+    // set cursor to wait cursor
+    
+    this->setCursor(Qt::WaitCursor);
+    
+    // plot the data
+    
+    _spectra->plotBeam(beam);
+    this->setCursor(Qt::ArrowCursor);
+
+  }
+
+  // clean up
+  
+  _manageBeamQueue(beam);
+
+}
+
+///////////////////////////////////////
+// following display click point
+
+void SpectraMgr::_followDisplay()
+
+{
+
+  if (_params.debug) {
+    cerr << "SpectraMgr::_followDisplay()" << endl;
+  }
+  
+  // set cursor to wait cursor
+  
+  this->setCursor(Qt::WaitCursor);
+  
+  // read in a beam
+
+  Beam *beam = _tsReader->getBeamFollowDisplay(_clickPointTime,
+                                               _clickPointElevation,
+                                               _clickPointAzimuth);
+  if (beam == NULL) {
+    cerr << "ERROR - no data in followDisplay mode" << endl;
+    // reset cursor
+    this->setCursor(Qt::ArrowCursor);
+    return;
+  }
+
+  _spectra->setRange(_clickPointRangeKm);
+  _clickPointGateNum = _spectra->getSelectedGateNum();
+  _clickPointTime = beam->getTime();
+  _clickPointElevation = beam->getEl();
+  _clickPointAzimuth = beam->getAz();
+  _clickPointChanged();
+
+  // update status
+
+  _updateStatusPanel(beam);
+
+  // compute the moments
+  
+  if (beam->computeMoments()) {
+
+    cerr << "ERROR - SpectraMgr::_followDisplay()" << endl;
     cerr << "  Cannot compute moments" << endl;
 
   } else {
@@ -708,172 +803,37 @@ void SpectraMgr::_manageBeamQueue(Beam *beam)
 // slots
 
 /////////////////////////////////////////////////////////
-// respond to a change in click location on the BSCAN
+// respond to a change in click location in the widget
 
-void SpectraMgr::_locationClicked(double xsecs, double ykm,
-                                  const RadxRay *closestRay)
+void SpectraMgr::_spectraLocationClicked(double selectedRangeKm,
+                                         int selectedGateNum)
   
 {
   if (_params.debug) {
-    cerr << "====>> location clicked - xsecs, ykm: " << xsecs << ", " << ykm << endl;
+    cerr << "====>> location clicked - range, gateNum: " 
+         << selectedRangeKm << ", "
+         << selectedGateNum << endl;
   }
-  // _xSecsClicked = xsecs;
-  // _yKmClicked = ykm;
-  // _rayClicked = closestRay;
-
-  // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
+  _clickPointRangeKm = selectedRangeKm;
+  _clickPointGateNum = selectedGateNum;
+  _clickPointChanged();
 
 }
 
 //////////////////////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
+// respond to a click point location change
 
-// void SpectraMgr::_locationClicked(double xsecs, double ykm, const RadxRay *ray)
+void SpectraMgr::_clickPointChanged()
 
-// {
+{
 
+  // click point location has changed
+  // send location to other display via FMQ
 
-//   if (_params.debug) {
-//     cerr << "*** Entering SpectraMgr::_locationClicked()" << endl;
-//   }
+  _writeClickPointXml2Fmq();
 
-//   // check the ray
+}
 
-//   if (ray == NULL) {
-//     return;
-//   }
-
-//   double range = 0.0, altitude = 0.0;
-//   double sinEl = sin(ray->getElevationDeg() * DEG_TO_RAD);
-
-//   if (_spectra->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
-    
-//     altitude = ykm;
-//     range = (altitude - _getInstHtKm(ray)) / sinEl;
-    
-//   } else {
-    
-//     range = ykm;
-//     altitude = _getInstHtKm(ray) + range * sinEl;
-    
-//   }
-
-//   int gate = (int) ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm());
-
-//   if (gate < 0 || gate >= (int) ray->getNGates())
-//   {
-//     //user clicked outside of ray
-//     return;
-//   }
-  
-//   if (_params.debug) {
-//     cerr << "Clicked on location: xsecs, ykm: " << xsecs << ", " << ykm << endl;
-//     cerr << "  range start, spacing: " << ray->getStartRangeKm() << ", "
-//          << ray->getGateSpacingKm() << endl;
-//     cerr << "  range, gate: " << range << ", " << gate << endl;
-//     if (_params.debug >= Params::DEBUG_VERBOSE) {
-//       ray->print(cerr);
-//     }
-//   }
-  
-//   DateTime rayTime(ray->getTimeSecs());
-//   char text[256];
-//   sprintf(text, "%.4d/%.2d/%.2d",
-//           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-//   _dateClicked->setText(text);
-
-//   sprintf(text, "%.2d:%.2d:%.2d.%.3d",
-//           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-//           ((int) (ray->getNanoSecs() / 1000000)));
-//   _timeClicked->setText(text);
-
-//   if (fabs(ray->getElevationDeg()) < 10000) {
-//     _setText(text, "%6.2f (deg)", ray->getElevationDeg());
-//     _elevClicked->setText(text);
-//   }
-  
-//   if (fabs(ray->getAzimuthDeg()) < 10000) {
-//     _setText(text, "%6.2f (deg)", ray->getAzimuthDeg());
-//     _azClicked->setText(text);
-//   }
-    
-//   _setText(text, "%d", gate);
-//   _gateNumClicked->setText(text);
-  
-//   _setText(text, "%6.2f (km)", range);
-//   _rangeClicked->setText(text);
-
-//   if (_altitudeInFeet) {
-//     _setText(text, "%6.2f (kft)", altitude * _altitudeUnitsMult);
-//   } else {
-//     _setText(text, "%6.2f (km)", altitude * _altitudeUnitsMult);
-//   }
-//   _altitudeClicked->setText(text);
-  
-//   for (size_t ii = 0; ii < _fields.size(); ii++) {
-//     _fields[ii]->setSelectValue(-9999);
-//     _fields[ii]->setDialogText("----");
-//   }
-  
-//   for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-//     const RadxField *field = ray->getField(ifield);
-//     const string fieldName = field->getName();
-//     if (fieldName.size() == 0) {
-//       continue;
-//     }
-//     Radx::fl32 *data = (Radx::fl32 *) field->getData();
-//     double val = data[gate];
-//     const string fieldUnits = field->getUnits();
-//     if (_params.debug >= Params::DEBUG_VERBOSE) {
-//       cerr << "Field name, selected name: "
-// 	   << fieldName << ", "
-// 	   << _selectedName << endl;
-//     }
-//     if (fieldName == _selectedName) {
-//       char text[128];
-//       if (fabs(val) < 10000) {
-//         sprintf(text, "%g %s", val, fieldUnits.c_str());
-//       } else {
-//         sprintf(text, "%g %s", -9999.0, fieldUnits.c_str());
-//       }
-//       _valueLabel->setText(text);
-//     }
-//     if (_params.debug >= Params::DEBUG_VERBOSE) {
-//       cerr << "Field name, units, val: "
-// 	   << field->getName() << ", "
-// 	   << field->getUnits() << ", "
-// 	   << val << endl;
-//     }
-//     for (size_t ii = 0; ii < _fields.size(); ii++) {
-//       if (_fields[ii]->getName() == fieldName) {
-// 	_fields[ii]->setSelectValue(val);
-//         char text[128];
-//         if (fabs(val) > 10000) {
-//           sprintf(text, "----");
-//         } else if (fabs(val) > 10) {
-//           sprintf(text, "%.2f", val);
-//         } else {
-//           sprintf(text, "%g", val);
-//         }
-//         _fields[ii]->setDialogText(text);
-//       }
-//     } // ii
-
-//   } // ifield
-  
-//   // set altitude rate if possible
-  
-//   if (ray->getGeoreference()) {
-//     _altRateMps = ray->getGeoreference()->getVertVelocity();
-//   } else {
-//     _altRateMps = -9999.0;
-//   }
-    
-// update the status panel
-  
-// _updateStatusPanel(ray);
-    
-// }
 
 ////////////////////////////////
 // unzoom display
@@ -1122,33 +1082,42 @@ void SpectraMgr::_setDataRetrievalMode()
 }
 
 ////////////////////////////////////////////////////////
-// change start time
+// change time or azimuth
 
 void SpectraMgr::_goBack()
 {
-  _tsReader->positionForPreviousBeam();
-  _archiveStartTime -= 1 * _timeSpanSecs;
-  _setGuiFromStartTime();
+  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+    _clickPointAzimuth -= _params.click_point_delta_azimuth_deg;
+    if (_clickPointAzimuth < 0) {
+      _clickPointAzimuth += 360.0;
+    }
+  } else {
+    _goForward = false;
+    _archiveStartTime -= 1 * _timeSpanSecs;
+    _setGuiFromStartTime();
+  }
 }
 
 void SpectraMgr::_goFwd()
 {
-  _archiveStartTime += 1 * _timeSpanSecs;
-  _setGuiFromStartTime();
+  if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
+    _clickPointAzimuth += _params.click_point_delta_azimuth_deg;
+    if (_clickPointAzimuth >= 360.0) {
+      _clickPointAzimuth -= 360.0;
+    }
+  } else {
+    _goForward = true;
+    _archiveStartTime += 1 * _timeSpanSecs;
+    _setGuiFromStartTime();
+  }
 }
 
 void SpectraMgr::_changeRange(int deltaGates)
 {
   _spectra->changeRange(deltaGates);
-  // if (!_spectra->getPointClicked()) {
-  //   return;
-  // }
-  // if (_requestedRangeAxisMode == Params::RANGE_AXIS_DOWN) {
-  //   deltaGates *= -1;
-  // }
-  // _yKmClicked += deltaGates * _rayClicked->getGateSpacingKm();
-  // _locationClicked(_xSecsClicked, _yKmClicked, _rayClicked);
-  // _spectra->setMouseClickPoint(_xSecsClicked, _yKmClicked);
+  _clickPointRangeKm = _spectra->getSelectedRangeKm();
+  _clickPointGateNum = _spectra->getSelectedGateNum();
+  _clickPointChanged();
 }
 
 ////////////////////////////////////////////////////////
@@ -1729,7 +1698,7 @@ void SpectraMgr::_updateStatusPanel(const Beam *beam)
   }
   
   double sunEl, sunAz;
-  _sunPosn.computePosn(beam->getTimeDouble(), sunEl, sunAz);
+  _sunPosn.computePosn(beam->getTime().getTimeAsDouble(), sunEl, sunAz);
   _setText(text, "%.3f", sunEl);
   if (_sunElVal) {
     _sunElVal->setText(text);
@@ -1764,5 +1733,76 @@ void SpectraMgr::_setText(char *text,
   } else {
     sprintf(text, format, -9999.0);
   }
+}
+
+/////////////////////////////////////////////////
+// read click point data from FMQ
+// Returns 0 on success, -1 on failure
+
+int SpectraMgr::_readClickPointFmq(bool &gotNew)
+  
+{
+  
+  // read in a new message
+  
+  if (_clickPointFmq.read(gotNew)) {
+    cerr << "ERROR -  SpectraMgr::_readClickPointFmq" << endl;
+    cerr << "  Cannot read click point info from FMQ" << endl;
+    cerr << "  Fmq: " << _params.click_point_fmq_url << endl;
+    return -1;
+  }
+  
+  if (!gotNew) {
+    // no data
+    return 0;
+  }
+
+  // set the members
+
+  _clickPointTimeSecs = _clickPointFmq.getDataTimeSecs();
+  _clickPointNanoSecs = _clickPointFmq.getDataNanoSecs();
+  _clickPointTime.set(_clickPointTimeSecs, (double) _clickPointNanoSecs * 1.0e-9);
+  _clickPointElevation = _clickPointFmq.getElevation();
+  _clickPointAzimuth = _clickPointFmq.getAzimuth();
+  _clickPointRangeKm = _clickPointFmq.getRangeKm();
+  _clickPointGateNum = _clickPointFmq.getGateNum();
+
+  if (_params.debug) {
+    cerr << "=========== latest click point XML ==================" << endl;
+    cerr << "_clickPointTime: " << _clickPointTime.asString(6) << endl;
+    cerr << "_clickPointElevation: " << _clickPointElevation << endl;
+    cerr << "_clickPointAzimuth: " << _clickPointAzimuth << endl;
+    cerr << "_clickPointRangeKm: " << _clickPointRangeKm << endl;
+    cerr << "_clickPointGateNum: " << _clickPointGateNum << endl;
+    cerr << "=====================================================" << endl;
+  }
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// write click point data, in XML format, to FMQ
+
+int SpectraMgr::_writeClickPointXml2Fmq()
+
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    fprintf(stderr, "DisplayManager::_writeClickPointXml2Fmq() called\n");
+  }
+
+  if (_clickPointFmq.write(_clickPointTimeSecs,
+                           _clickPointNanoSecs,
+                           _clickPointAzimuth,
+                           _clickPointElevation,
+                           _clickPointRangeKm,
+                           _clickPointGateNum)) {
+    cerr << "ERROR - DisplayManager::_writeClickPointXml2Fmq()" << endl;
+    return -1;
+  }
+
+  return 0;
+
 }
 

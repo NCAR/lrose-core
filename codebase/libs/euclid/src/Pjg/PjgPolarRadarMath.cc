@@ -73,6 +73,22 @@ void PjgPolarRadarMath::setOffsetCoords(double false_northing,
 
 }
   
+///////////////////////////////
+/// get proj string
+  
+string PjgPolarRadarMath::getProjStr() const
+
+{
+
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=polar_radar +lon_0=%g +lat_0=%g",
+           _origin_lon, _origin_lat);
+  string str(text);
+  return str;
+
+}
+  
 ///////////////////////
 // LatLon conversions
 

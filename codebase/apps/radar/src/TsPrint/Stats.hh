@@ -65,10 +65,21 @@ public:
                       double gainHx,
                       double gainVx);
 
-  // initialize - set memvbers to 0
+  // initialize - set members to 0
 
   void init();
 
+  // resize arrays for number of gates
+
+  void setNGates(int nGates);
+
+  // sum up summary information
+  
+  void addToSummary(const IwrfTsPulse &pulse,
+                    double ii0, double qq0,
+                    bool haveChan1,
+                    double ii1, double qq1);
+  
   // sum up alternating information
   
   void addToAlternating(const IwrfTsPulse &pulse,
@@ -77,22 +88,15 @@ public:
 			double ii1, double qq1,
 			bool isHoriz);
 
+  // compute summary stats
+  // Assumes data has been added
+  
+  void computeSummary(bool haveChan1);
+
   // compute alternating stats
   // Assumes data has been added
   
   void computeAlternating(bool haveChan1);
-
-  // sum up dual information
-  
-  void addToDual(const IwrfTsPulse &pulse,
-                 double ii0, double qq0,
-                 bool haveChan1,
-                 double ii1, double qq1);
-  
-  // compute dual stats
-  // Assumes data has been added
-  
-  void computeDual(bool haveChan1);
 
   // data
 
@@ -108,6 +112,9 @@ public:
   double meanDbmHc, meanDbmHx;
   double meanDbmVc, meanDbmVx;
 
+  double lag1DbmHc, lag1DbmHx;
+  double lag1DbmVc, lag1DbmVx;
+
   double noiseDbmHc, noiseDbmHx;
   double noiseDbmVc, noiseDbmVx;
   
@@ -120,9 +127,13 @@ public:
   double argH;
   double argV;
 
+  vector<vector<RadarComplex_t> > iqHc, iqVc, iqHx, iqVx;
+
 protected:
   
 private:
+
+  int _nGates;
 
   // calibration
 

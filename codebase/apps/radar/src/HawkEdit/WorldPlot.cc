@@ -38,7 +38,7 @@
 #include <iostream>
 #include <cstdio>
 #include <QtCore/QLineF>
-
+#include <toolsa/LogStream.hh>
 #include <toolsa/toolsa_macros.h>
 #include "WorldPlot.hh"
 #include "ColorMap.hh"
@@ -226,7 +226,6 @@ void WorldPlot::set(double xMinWorld,
                     double yMaxWorld)
 {
 
-  
   if (_xMinWorld < _xMaxWorld) {
     _xMinWorld = MIN(xMinWorld, xMaxWorld);
     _xMaxWorld = MAX(xMinWorld, xMaxWorld);
@@ -242,6 +241,22 @@ void WorldPlot::set(double xMinWorld,
     _yMinWorld = MAX(yMinWorld, yMaxWorld);
     _yMaxWorld = MIN(yMinWorld, yMaxWorld);
   }
+
+  _computeTransform();
+
+}
+
+// REALLY, these are in world coords
+void WorldPlot::set2(double xMinPixel,
+                    double yMinPixel,
+                    double xMaxPixel,
+                    double yMaxPixel)
+{
+
+  _xMaxWorld = xMaxPixel;
+  _xMinWorld = xMinPixel;
+  _yMinWorld = yMinPixel;
+  _yMaxWorld = yMaxPixel;
 
   _computeTransform();
 
@@ -1504,18 +1519,43 @@ void WorldPlot::_computeTransform()
     
   _xMinPixel = _leftMargin;
   _xMaxPixel = _xMinPixel + _plotWidth - 1;
-  _yMinPixel = _topMargin + _plotHeight - 1;
-  _yMaxPixel = _topMargin;
+  // OR ...
+  //_yMinPixel = _topMargin + _plotHeight - 1;
+  //_yMaxPixel = _topMargin;
+
+  _yMinPixel = _topMargin; 
+  _yMaxPixel = _yMinPixel + _plotHeight - 1;
+ 
     
   _xPixelsPerWorld =
-    (_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld);
+    abs((_xMaxPixel - _xMinPixel) / (_xMaxWorld - _xMinWorld));
   _yPixelsPerWorld =
-    (_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld);
+    abs((_yMaxPixel - _yMinPixel) / (_yMaxWorld - _yMinWorld));
     
   _transform.reset();
-  _transform.translate(_xMinPixel, _yMinPixel);
+  /*
+  int centerXPixelSpace = _xMinPixel + _plotWidth/2;
+  //int centerYPixelSpace = _yMinPixel - _plotHeight/2;
+  // OR ...
+  int centerYPixelSpace = _yMinPixel + _plotHeight/2;  
+
+  _transform.translate(centerXPixelSpace, centerYPixelSpace);
+  */
+  qreal dx = _xMinPixel - _xMinWorld * _xPixelsPerWorld;
+  qreal dy = _yMaxPixel + _yMinWorld * _yPixelsPerWorld;
+  //qreal dy = _yMinPixel - _yMinWorld * _yPixelsPerWorld;
+  _transform.translate(dx, dy);
+  //LOG(DEBUG) << "translating to x,y in pixel space " << 
+  //  centerXPixelSpace << ", " << centerYPixelSpace;
+  //_transform.translate(_xMinPixel, _yMinPixel);
+  //_transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
+  // 
+  // OR ...
+
+  //_transform.translate(-_xMinWorld, -_yMinWorld); 
   _transform.scale(_xPixelsPerWorld, _yPixelsPerWorld);
-  _transform.translate(-_xMinWorld, -_yMinWorld);
+  _transform.rotateRadians(M_PI, Qt::XAxis);
+
     
   _xMinWindow = getXWorld(0);
   _yMinWindow = getYWorld(0);

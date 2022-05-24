@@ -270,10 +270,10 @@ void GpmL3Hdf2Mdv::_createMdvHeader(const DateTime &begin_time,
   master_hdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
   master_hdr.vlevel_included = 1;
   master_hdr.data_dimension = 2;
-  strncpy(master_hdr.data_set_info,
-          "GPM satellite data ingested by GpmL3Hdf2Mdv", MDV_INFO_LEN);
-  strncpy(master_hdr.data_set_name, "GpmL3Hdf2Mdv", MDV_NAME_LEN);
-  strncpy(master_hdr.data_set_source, input_path.c_str(), MDV_NAME_LEN);
+  STRncopy(master_hdr.data_set_info,
+           "GPM satellite data ingested by GpmL3Hdf2Mdv", MDV_INFO_LEN);
+  STRncopy(master_hdr.data_set_name, "GpmL3Hdf2Mdv", MDV_NAME_LEN);
+  STRncopy(master_hdr.data_set_source, input_path.c_str(), MDV_NAME_LEN);
 
   mdvx.setMasterHeader(master_hdr);
 }

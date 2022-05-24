@@ -35,10 +35,12 @@
 #include "Identify.hh"
 #include "Props.hh"
 #include "Verify.hh"
-#include "GridClump.hh"
-#include "DualThresh.hh"
 #include "Sounding.hh"
+#include "OutputMdv.hh"
 
+#include <euclid/ClumpProps.hh>
+
+#include <iostream>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
 #include <toolsa/pmu.h>
@@ -53,13 +55,12 @@ Identify::Identify(const string &prog_name, const Params &params,
   Worker(prog_name, params),
   _inputMdv(input_mdv),
   _sfile(storm_file),
-  _clumping(prog_name)
+  _clumping()
 
 {
 
   _props = NULL;
   _verify = NULL;
-  _dualT = NULL;
   
   if (_params.create_verification_files) {
     _verify = new Verify(_progName, _params, _inputMdv);
@@ -67,12 +68,6 @@ Identify::Identify(const string &prog_name, const Params &params,
 
   _props = new Props(_progName, _params, _inputMdv, _sfile, _verify);
 
-  // dual threshold takes precedence over morphology
-
-  if (_params.use_dual_threshold) {
-    _dualT = new DualThresh(_progName, _params, _inputMdv);
-  }
-  
 }
 
 /////////////
@@ -88,9 +83,6 @@ Identify::~Identify()
   }
   if (_props) {
     delete (_props);
-  }
-  if (_dualT) {
-    delete (_dualT);
   }
 
 }
@@ -111,9 +103,8 @@ int Identify::run(int scan_num)
   // initialize
 
   _nStorms = 0;
-  const titan_grid_t &grid = _inputMdv.grid;
-  int nBytesPlane = grid.nx * grid.ny;
-  int nplanes = _inputMdv.nPlanes;
+  const titan_grid_t &tgrid = _inputMdv.grid;
+  int nBytesPlane = tgrid.nx * tgrid.ny;
 
   // prepare verification and morphology objects as required
 
@@ -121,27 +112,91 @@ int Identify::run(int scan_num)
     _verify->prepareGrids();
   }
 
-  if (_dualT) {
-    _dualT->prepare();
+  // initialize grid geometry
+  
+  _gridGeom.setNx(tgrid.nx);
+  _gridGeom.setNy(tgrid.ny);
+  _gridGeom.setDx(tgrid.dx);
+  _gridGeom.setDy(tgrid.dy);
+  _gridGeom.setMinx(tgrid.minx);
+  _gridGeom.setMiny(tgrid.miny);
+  
+  _gridGeom.clearZKm();
+  for (int ii = _inputMdv.minValidLayer; ii < tgrid.nz; ii++) {
+    _gridGeom.addZKm(tgrid.minz + ii * tgrid.dz);
+  }
+
+  _gridGeom.setIsLatLon(false);
+  switch (tgrid.proj_type) {
+    case TITAN_PROJ_LATLON:
+      _gridGeom.setProjType(PjgTypes::PROJ_LATLON);
+      _gridGeom.setIsLatLon(true);
+      break;
+    case TITAN_PROJ_FLAT:
+      _gridGeom.setProjType(PjgTypes::PROJ_FLAT);
+      break;
+    case TITAN_PROJ_STEREOGRAPHIC:
+      _gridGeom.setProjType(PjgTypes::PROJ_STEREOGRAPHIC);
+      break;
+    case TITAN_PROJ_LAMBERT_CONF:
+      _gridGeom.setProjType(PjgTypes::PROJ_LAMBERT_CONF);
+      break;
+    case TITAN_PROJ_MERCATOR:
+      _gridGeom.setProjType(PjgTypes::PROJ_MERCATOR);
+      break;
+    case TITAN_PROJ_POLAR_STEREO:
+      _gridGeom.setProjType(PjgTypes::PROJ_POLAR_STEREO);
+      break;
+    case TITAN_PROJ_POLAR_ST_ELLIP:
+      _gridGeom.setProjType(PjgTypes::PROJ_POLAR_ST_ELLIP);
+      break;
+    case TITAN_PROJ_CYL_EQUIDIST:
+      _gridGeom.setProjType(PjgTypes::PROJ_CYL_EQUIDIST);
+      break;
+    case TITAN_PROJ_OBLIQUE_STEREO:
+      _gridGeom.setProjType(PjgTypes::PROJ_OBLIQUE_STEREO);
+      break;
+    case TITAN_PROJ_TRANS_MERCATOR:
+      _gridGeom.setProjType(PjgTypes::PROJ_TRANS_MERCATOR);
+      break;
+    case TITAN_PROJ_ALBERS:
+      _gridGeom.setProjType(PjgTypes::PROJ_ALBERS);
+      break;
+    case TITAN_PROJ_LAMBERT_AZIM:
+      _gridGeom.setProjType(PjgTypes::PROJ_LAMBERT_AZIM);
+      break;
+  }
+  
+  // set the parameters and input data for dual threshold object
+
+  if (_params.use_dual_threshold) {
+    _clumping.setUseDualThresholds(_params.dual_threshold.dbz_threshold,
+                                   _params.dual_threshold.min_fraction_all_parts,
+                                   _params.dual_threshold.min_fraction_each_part,
+                                   _params.dual_threshold.min_area_each_part,
+                                   _params.min_storm_size,
+                                   _params.max_storm_size,
+                                   (_params.debug >= Params::DEBUG_VERBOSE));
   }
 
   // perform clumping
-
-  fl32 *startDbz = _inputMdv.dbzVol + _inputMdv.minValidLayer * nBytesPlane;
-  _nClumps = _clumping.performClumping(grid.nx, grid.ny, nplanes,
-                                       startDbz,
-                                       _params.min_grid_overlap,
-                                       _params.low_dbz_threshold);
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    fprintf(stderr, "Number of clumps  =  %d\n", _nClumps);
+  fl32 *startDbz = _inputMdv.dbzVol + _inputMdv.minValidLayer * nBytesPlane;
+  vector<ClumpProps> clumpVec;
+  _clumping.loadClumpVector(_gridGeom, startDbz, 
+                            _params.low_dbz_threshold,
+                            _params.min_grid_overlap,
+                            clumpVec);
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    fprintf(stderr, "Number of clumps  =  %ld\n", clumpVec.size());
   }
 
   // update the verification grid
 
   if (_verify) {
-    Clump_order *clump = _clumping.clumps + 1;
-    for (int i = 0; i < _clumping.nClumps; i++, clump++) {
+    const Clump_order *clump = _clumping.getClumps();
+    for (int i = 0; i < _clumping.getNClumps(); i++, clump++) {
       _verify->updateAllStormsGrid(*clump);
     }
   }
@@ -156,7 +211,7 @@ int Identify::run(int scan_num)
 
   // process the clumps found
 
-  if (_processClumps(scan_num)) {
+  if (_processClumps(scan_num, clumpVec)) {
     return (-1);
   }
   
@@ -172,8 +227,8 @@ int Identify::run(int scan_num)
     _verify->writeOutputMdv();
   }
   
-  if (_dualT && _params.create_dual_threshold_files) {
-    _dualT->writeOutputMdv();
+  if (_params.create_dual_threshold_files) {
+    _writeDualThreshMdv();
   }
 
   return (0);
@@ -191,7 +246,8 @@ int Identify::run(int scan_num)
 // Returns 0 on success, -1 on failure
 //
 
-int Identify::_processClumps(int scan_num)
+int Identify::_processClumps(int scan_num,
+                             vector<ClumpProps> &clumpVec)
      
 {
 
@@ -207,45 +263,13 @@ int Identify::_processClumps(int scan_num)
   
   _props->init();
 
-  // loop through the clumps - index starts at 1
-  
-  Clump_order *clump = _clumping.clumps + 1;
-  
-  for (int iclump = 0; iclump < _nClumps; iclump++, clump++) {
-    
-    GridClump gridClump(clump, _inputMdv.grid, 0, 0);
-    
-    // dual threshold takes precedence over morphology
+  // loop through the clumps
 
-    if (_params.use_dual_threshold) {
-      
-      int n_sub_clumps = _dualT->compute(gridClump);
-
-      if (n_sub_clumps == 1) {
-	
-	if (_processThisClump(gridClump)) {
-	  return (-1);
-	}
-
-      } else {
-
-	for (int i = 0; i < n_sub_clumps; i++) {
-	  if (_processThisClump(_dualT->subClumps()[i])) {
-	    return (-1);
-	  }
-	}
-
-      }
-
-    } else {
-      
-      if (_processThisClump(gridClump)) {
-	return (-1);
-      }
-      
+  for (size_t ii = 0; ii < clumpVec.size(); ii++) {
+    if (_processThisClump(clumpVec[ii])) {
+      return (-1);
     }
-
-  } // iclump
+  }
   
   // load up scan structure
   
@@ -320,14 +344,14 @@ int Identify::_processClumps(int scan_num)
 // _processThisClump()
 //
 
-int Identify::_processThisClump(const GridClump &grid_clump)
+int Identify::_processThisClump(const ClumpProps &cprops)
 
 {
 
   // check size
 
-  if (grid_clump.stormSize < _params.min_storm_size ||
-      grid_clump.stormSize > _params.max_storm_size) {
+  if (cprops.clumpSize() < _params.min_storm_size ||
+      cprops.clumpSize() > _params.max_storm_size) {
     return(0);
   }
 
@@ -335,15 +359,15 @@ int Identify::_processThisClump(const GridClump &grid_clump)
     fprintf(stderr,
 	    "Clump: size, startIx, startIy, nx, ny, offsetx, offsety: "
 	    "%g, %d, %d, %d, %d, %g, %g\n",
-	    grid_clump.stormSize,
-	    grid_clump.startIx, grid_clump.startIy,
-	    grid_clump.nX, grid_clump.nY,
-	    grid_clump.offsetX, grid_clump.offsetY);
+	    cprops.clumpSize(),
+	    cprops.minIx(), cprops.minIy(),
+	    cprops.nXLocal(), cprops.nYLocal(),
+	    cprops.offsetX(), cprops.offsetY());
   }
   
   _sfile.AllocGprops(_nStorms + 1);
 
-  if (_props->compute(grid_clump, _nStorms) == 0) {
+  if (_props->compute(cprops, _nStorms) == 0) {
     
     // success - write the storm props to storm file
 
@@ -361,6 +385,63 @@ int Identify::_processThisClump(const GridClump &grid_clump)
 
 }
 
+/////////////////////////////////////////////////////////
+// writeDualThreshMdv()
+//
+// Write out debug fields for dual threshold clumps
+
+int Identify::_writeDualThreshMdv()
+  
+{
+
+  if (_clumping.getDualThreshDbzCompOutputGrid() == NULL) {
+    return -1;
+  }
+
+  // set info str
+  
+  char info[256];
+  
+  sprintf(info,
+	  "\n"
+	  "  Dual threshold analysis: \n"
+ 	  "    dbz_threshold: %g\n"
+ 	  "    min_fraction_all_parts: %g\n"
+ 	  "    min_fraction_each_part: %g\n",
+	  _params.dual_threshold.dbz_threshold,
+	  _params.dual_threshold.min_fraction_all_parts,
+	  _params.dual_threshold.min_fraction_each_part);
+  
+  // create output MDV object
+  
+  OutputMdv out(_progName, _params,
+		_inputMdv, info,
+		"TITAN dual thresholds",
+		_params.dual_threshold_url);
+  
+  // Add the fields
+
+  out.addField("Composite reflectivity", "CompDbz", "dBZ", "dBZ", 
+               _clumping.getDualThreshDbzCompOutputGrid());
+  out.addField("Large clumps", "LargeClumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshLargeClumpsOutputGrid());
+  out.addField("All subclumps", "AllSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshAllSubclumpsOutputGrid());
+  out.addField("Valid subclumps", "ValidSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshValidSubclumpsOutputGrid());
+  out.addField("Grown subclumps", "GrownSubclumps", "count", "none", 1.0, 0.0, 
+               _clumping.getDualThreshGrownSubclumpsOutputGrid());
+
+  // write out file
+  
+  if (out.writeVol()) {
+    cerr << "ERROR - Identify::writeDualThreshMdv()" << endl;
+    return -1;
+  }
+  
+  return 0;
+
+}
 
 
 

@@ -46,18 +46,12 @@
 #include <H5Epublic.h>
 #include <H5Gpublic.h>
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
 using std::cout;
 using std::endl;
-#endif  // H5_NO_STD
-#endif
 
-#include <H5Cpp.h>
+#include <Ncxx/H5x.hh>
 
-#ifndef H5_NO_NAMESPACE
-using namespace H5;
-#endif
+using namespace H5x;
 using namespace std;
 
 
@@ -70,6 +64,16 @@ class Hdf5xx
   
 public:
 
+  // object type
+
+  typedef enum
+    {
+     OBJECT_GROUP,
+     OBJECT_DATASET,
+     OBJECT_NAMED_DATATYPE,
+     OBJECT_UNKNOWN
+    } hdf5_object_t;
+                           
   // class for decoding attributes
   
   class DecodedAttr {
@@ -121,16 +125,6 @@ public:
 
   // HDF5 access
   
-  int loadAttribute(H5Object &obj,
-                    const string &name,
-                    const string &context,
-                    DecodedAttr &decodedAttr);
-  
-  int loadArrayAttribute(H5Object &obj,
-                         const string &name,
-                         const string &context,
-                         ArrayAttr &arrayAttr);
-  
   int loadFloatVar(CompType compType,
                    char *buf,
                    const string &varName,
@@ -155,6 +149,85 @@ public:
                   NcxxPort::si64 &intVal,
                   NcxxPort::fl64 &floatVal,
                   string &stringVal);
+  
+  int loadAttribute(H5Object &obj,
+                    const string &name,
+                    const string &context,
+                    DecodedAttr &decodedAttr);
+  
+  int loadArrayAttribute(H5Object &obj,
+                         const string &name,
+                         const string &context,
+                         ArrayAttr &arrayAttr);
+  
+  // get attributes of various types
+  
+  static string getStringAttribute(H5Object &obj,
+                                   const string &name);
+  
+  static int getIntAttribute(H5Object &obj,
+                             const string &name);
+  
+  static double getDoubleAttribute(H5Object &obj,
+                                   const string &name);
+  
+  // get object type, by index
+  
+  static hdf5_object_t getObjTypeByIdx(Group &group, size_t index);
+  
+  ///////////////////////////////////////////////////////////////////
+  // Enquire about the properties of a variable
+  // Returns 0 on success, -1 on failure
+  // On success, sets the following:
+  //    dims     - dimensions
+  //    units    - string
+  //    h5class  - H5T_INTEGER or H5T_FLOAT
+  //    h5sign   - H5T_SGN_NONE if unsigned integer, otherwise signed
+  //               does not apply to floats of course
+  //    h5order  - H5T_ORDER_LE or H5T_ORDER_BE
+  //    h5size   - length of data type in bytes
+  
+  int getVarProps(Group &group,
+                  const string &dsName,
+                  vector<size_t> &dims,
+                  string &units,
+                  H5T_class_t &h5class,
+                  H5T_sign_t &h5sign,
+                  H5T_order_t &h5order,
+                  size_t &h5size);
+  
+  ///////////////////////////////////////////////////////////////////
+  // Read data set into arrays of various types
+  // Fills in dims, msssingVal, vals, units (if available)
+  // return 0 on success, -1 on failure
+
+  int readSi16Array(Group &group,
+                    const string &dsname,
+                    vector<size_t> &dims,
+                    NcxxPort::si16 &missingVal,
+                    vector<NcxxPort::si16> &vals,
+                    string &units);
+  
+  int readSi32Array(Group &group,
+                    const string &dsname,
+                    vector<size_t> &dims,
+                    NcxxPort::si32 &missingVal,
+                    vector<NcxxPort::si32> &vals,
+                    string &units);
+  
+  int readFl32Array(Group &group,
+                    const string &dsname,
+                    vector<size_t> &dims,
+                    NcxxPort::fl32 &missingVal,
+                    vector<NcxxPort::fl32> &vals,
+                    string &units);
+  
+  int readFl64Array(Group &group,
+                    const string &dsname,
+                    vector<size_t> &dims,
+                    NcxxPort::fl64 &missingVal,
+                    vector<NcxxPort::fl64> &vals,
+                    string &units);
   
   /////////////////////////////////////////////////
   // add a string attribute to an object on write
@@ -188,24 +261,32 @@ public:
   ////////////////////////////////////////////
   /// printing
 
-  void printGroup(Group &group, const string grname,
-                  ostream &out,
-                  bool printRays, bool printData);
+  // print group details
   
-  void printDataSet(DataSet &ds, const string dsname,
-                    ostream &out,
-                    bool printRays, bool printData);
+  static void printGroup(Group &group, const string grname,
+                         ostream &out,
+                         bool printRays, bool printData);
   
-  void printCompoundType(CompType &compType,
-                         int ipoint,
-                         char *buf,
-                         ostream &out);
+  // recursively print the file structure
+
+  static void printFileStructure(Group &grp,
+                                 int level,
+                                 ostream &out);
   
-  void printAttributes(H5Object &obj, ostream &out);
+  static void printDataSet(DataSet &ds, const string dsname,
+                           ostream &out,
+                           bool printRays, bool printData);
   
-  void printAttribute(Attribute &attr, ostream &out);
+  static void printCompoundType(CompType &compType,
+                                int ipoint,
+                                char *buf,
+                                ostream &out);
   
-  void printDataSet(DataSet &ds, ostream &out);
+  static void printAttributes(H5Object &obj, ostream &out, int level = 0);
+  
+  static void printAttribute(Attribute &attr, ostream &out, int level = 0);
+  
+  static void printDataSet(DataSet &ds, ostream &out);
 
   ////////////////////////
   /// \name Error string:
@@ -235,15 +316,15 @@ private:
   bool _debug; ///< normal debug flag
   bool _verbose; ///< verbose debug flag
 
-  void _printDataVals(ostream &out, int nPoints,
-                      NcxxPort::fl64 *vals) const;
+  static void _printDataVals(ostream &out, int nPoints,
+                             NcxxPort::fl64 *vals);
   
-  void _printDataVals(ostream &out, int nPoints,
-                      NcxxPort::si64 *vals) const;
+  static void _printDataVals(ostream &out, int nPoints,
+                             NcxxPort::si64 *vals);
   
-  void _printPacked(NcxxPort::fl64 val, int count, string &outStr) const;
+  static void _printPacked(NcxxPort::fl64 val, int count, string &outStr);
   
-  void _printPacked(NcxxPort::si64 val, int count, string &outStr) const;
+  static void _printPacked(NcxxPort::si64 val, int count, string &outStr);
   
   /// add integer value to error string, with label
   

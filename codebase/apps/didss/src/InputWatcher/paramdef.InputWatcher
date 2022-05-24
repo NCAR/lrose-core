@@ -108,14 +108,20 @@ paramdef boolean {
 paramdef string {
   p_default = "";
   p_descr = "File name extension.";
-  p_help = "If set, only files with this extension will be processed. This can be a comma-delimited list of extensions.";
+  p_help = "If not empty, only files with this extension will be processed. This can be a comma-delimited list of extensions.";
 } search_ext;
 
 paramdef string {
   p_default = "";
   p_descr = "File name sub-string.";
-  p_help = "If set, only files with names containing this sub-string will be processed.";
+  p_help = "If not empty, only files with names containing this sub-string will be processed.";
 } search_substr;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name ignore string.";
+  p_help = "If not empty, only files with names NOT containing this sub-string will be processed.";
+} ignore_substr;
 
 paramdef boolean {
   p_default = FALSE;
@@ -128,8 +134,6 @@ paramdef boolean {
   p_descr = "Option to ignore hidden files.";
   p_help = "If TRUE, all hidden files will be ignored. This is useful when monitoring directories where files are bring copied using the approach of copying as a hidden file, then moving file to is working name.";
 } ignore_hidden;
-
-
 
 commentdef {
   p_header = "CALL SCRIPT WHEN NEW DATA ARRIVES";
@@ -261,7 +265,7 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to copy to a file with name based on the time.";
-  p_help = "If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.";
+  p_help = "If TRUE, the file will be copied to a file, in the directory 'copy_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.";
 } copy_to_time_stamped_file;
 
 paramdef boolean {

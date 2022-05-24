@@ -107,6 +107,10 @@ private:
   double _dewPtC;
   double _rh;
 
+  bool _kmlInTrack;
+  bool _kmlTimeValid;
+  time_t _kmlTime;
+
   int _decodeCommaDelimited(const char *line,
                             time_t &validTime,
                             ac_posn_wmod_t &posn);
@@ -127,10 +131,6 @@ private:
                      time_t &validTime,
                      ac_posn_wmod_t &posn);
   
-  int _decodeCsvGps(const char *line,
-                    time_t &validTime,
-                    ac_posn_wmod_t &posn);
-  
   int _decodePolcast2(const char *line,
                       time_t &validTime,
                       ac_posn_wmod_t &posn);
@@ -146,6 +146,14 @@ private:
   int _decodeIWG1(const char *line,
                   time_t &validTime,
                   ac_posn_wmod_t &posn);
+  
+  int _decodeCsvGps(const char *line,
+                    time_t &validTime,
+                    ac_posn_wmod_t &posn);
+  
+  int _decodeKML(const char *line,
+                 time_t &validTime,
+                 ac_posn_wmod_t &posn);
   
   void _addSpaces (const char *line, char *spaced_line);
 

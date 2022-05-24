@@ -1158,7 +1158,7 @@ void BscanManager::timerEvent(QTimerEvent *event)
   // the widget sizes are off until we get to this point.  There's probably
   // a better way to do this, but I couldn't figure anything out.
   
-  if (_firstTimerEvent) {
+  if (_timerEventCount == 0) {
 
     _bscan->resize(_bscanFrame->width(), _bscanFrame->height());
     
@@ -1179,9 +1179,9 @@ void BscanManager::timerEvent(QTimerEvent *event)
       _archiveRetrievalPending = true;
     }
 
-    _firstTimerEvent = false;
-
   }
+
+  _timerEventCount++;
 
   // check for image creation
 
@@ -1965,24 +1965,24 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
     return;
   }
 
-  double range = 0.0, altitude = 0.0;
+  double rangeKm = 0.0, altitudeKm = 0.0;
   double sinEl = sin(ray->getElevationDeg() * DEG_TO_RAD);
 
   if (_bscan->getRangeAxisMode() == Params::RANGE_AXIS_ALTITUDE) {
     
-    altitude = ykm;
-    range = (altitude - _getInstHtKm(ray)) / sinEl;
+    altitudeKm = ykm;
+    rangeKm = (altitudeKm - _getInstHtKm(ray)) / sinEl;
     
   } else {
     
-    range = ykm;
-    altitude = _getInstHtKm(ray) + range * sinEl;
+    rangeKm = ykm;
+    altitudeKm = _getInstHtKm(ray) + rangeKm * sinEl;
     
   }
 
-  int gate = (int) ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm());
+  int gateNum = (int) ((rangeKm - ray->getStartRangeKm()) / ray->getGateSpacingKm());
 
-  if (gate < 0 || gate >= (int) ray->getNGates())
+  if (gateNum < 0 || gateNum >= (int) ray->getNGates())
   {
     //user clicked outside of ray
     return;
@@ -1992,7 +1992,7 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
     cerr << "Clicked on location: xsecs, ykm: " << xsecs << ", " << ykm << endl;
     cerr << "  range start, spacing: " << ray->getStartRangeKm() << ", "
          << ray->getGateSpacingKm() << endl;
-    cerr << "  range, gate: " << range << ", " << gate << endl;
+    cerr << "  rangeKm, gateNum: " << rangeKm << ", " << gateNum << endl;
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ray->print(cerr);
     }
@@ -2019,16 +2019,16 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
     _azClicked->setText(text);
   }
     
-  _setText(text, "%d", gate);
+  _setText(text, "%d", gateNum);
   _gateNumClicked->setText(text);
   
-  _setText(text, "%6.2f (km)", range);
+  _setText(text, "%6.2f (km)", rangeKm);
   _rangeClicked->setText(text);
 
   if (_altitudeInFeet) {
-    _setText(text, "%6.2f (kft)", altitude * _altitudeUnitsMult);
+    _setText(text, "%6.2f (kft)", altitudeKm * _altitudeUnitsMult);
   } else {
-    _setText(text, "%6.2f (km)", altitude * _altitudeUnitsMult);
+    _setText(text, "%6.2f (km)", altitudeKm * _altitudeUnitsMult);
   }
   _altitudeClicked->setText(text);
   
@@ -2046,7 +2046,7 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
       continue;
     }
     Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gate];
+    double val = data[gateNum];
     const string fieldUnits = field->getUnits();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "Field name, selected name: "
@@ -2097,6 +2097,10 @@ void BscanManager::_locationClicked(double xsecs, double ykm, const RadxRay *ray
   
   _updateStatusPanel(ray);
     
+  // write the click location to FMQ
+
+  _writeClickPointXml2Fmq(ray, rangeKm, gateNum);
+  
 }
 
 /////////////////////////////////////

@@ -55,8 +55,26 @@ public:
   
   #include <radar/RadxAppParmsVirtualMethods.hh>
 
+  /**
+   * Hardwired filter names for volumes
+   */
+  static const std::string _volInitStr;
+  static const std::string _volFinishStr;
+
+  /**
+   * Hardwired filter names for rays
+   */
+  static const std::string _histoAccumStr;
+
+
 protected:
 private:  
+
+  /**
+   * Hardwrired user data names
+   */
+  static const std::string _initStatus;
+  static const std::string _finishStatus;
 
 };
 

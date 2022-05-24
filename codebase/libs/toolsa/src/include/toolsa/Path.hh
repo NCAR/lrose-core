@@ -26,7 +26,7 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: Path.hh,v 1.22 2018/10/13 21:11:29 dixon Exp $
+// $Id: Path.hh,v 1.23 2019/02/28 17:53:40 prestop Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -170,6 +170,18 @@ public:
   
   static string getPathRelToExec(const string &relPath);
 
+  // looks for a directory in the path that is all digits & 8 characters long.
+  // if a dated dir cannot be found, pre, date, and post are set to empty strings.
+  //
+  // e.g. given path="/some/path/to/YYYYMMDD/more/stuff.file"
+  // returns:
+  //          pre="/some/path/to/"
+  //          date="YYYMMDD"
+  //          post="/more/stuff.file"
+
+  static void splitDatedDir(const string &path, string &pre, string &date,
+			    string &post);
+  
 private:
 
    string delimiter;

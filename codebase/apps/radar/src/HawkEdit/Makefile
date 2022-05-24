@@ -40,7 +40,7 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 # Note: QJSENGINE is defined in rap_make.OSX_LINUX
 
-LOC_LIBS = -lSpdb -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
+LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
@@ -56,34 +56,45 @@ HDRS = \
 	Args.hh \
 	Beam.hh \
 	BoundaryPointEditor.hh \
+	BoundaryPointEditorView.hh \
+	BoundaryPointEditorModel.hh \
+	BoundaryPointTool.hh \
+	BoundaryView.hh \
+	CloseEventFilter.hh \
 	ColorBar.hh \
 	ColorMap.hh \
 	ColorTableManager.hh \
-	DisplayManager.hh \
-	FieldRenderer.hh \
+	FieldListView.hh \
+	FieldRendererView.hh \
 	FieldRendererController.hh \
 	FlowLayout.hh \
 	HawkEye.hh \
 	HawkEyeLogger.hh \
 	PaletteManager.hh \
         ParameterColorView.hh \
+	Point.hh \
+	PolygonUtils.hh \
         FieldColorController.hh \
+	DataModel.hh \
         DisplayFieldModel.hh \
         DisplayFieldController.hh \
+        DisplayFieldView.hh \
 	Params.hh \
+	ParamFile.hh \
 	PpiBeam.hh \
 	PolarManager.hh \
 	PolarWidget.hh \
-	PpiWidget.hh \
+	RayLoc.hh \
+	RayLocationController.hh \
+	RayLocationModel.hh \
 	Reader.hh \
-	RhiBeam.hh \
-	RhiWidget.hh \
-	RhiWindow.hh \
 	ScaledLabel.hh \
 	SiiPalette.hh \
 	ScriptEditorController.hh \
 	ScriptEditorModel.hh \
 	ScriptEditorView.hh \
+	ScriptEditorHelpItem.hh \
+	ScriptEditorHelpModel.hh \
 	SoloDefaultColorWrapper.hh \
 	SoloFunctionsController.hh \
 	SoloScriptTranslator.hh \
@@ -92,8 +103,15 @@ HDRS = \
 	SpreadSheetModel.hh \
 	SpreadSheetUtils.hh \
 	SpreadSheetView.hh \
-	SweepManager.hh \
+	SweepView.hh \
+	SweepController.hh \
+	SweepModel.hh \
+	TimeNavView.hh \
+	TimeNavController.hh \
+	TimeNavModel.hh \
 	TimeScaleWidget.hh \
+	UndoRedoController.hh \
+	UndoRedoModel.hh \
 	WorldPlot.hh
 
 NORM_SRCS = \
@@ -101,10 +119,11 @@ NORM_SRCS = \
 	AllocCheck.cc \
 	Args.cc \
 	Beam.cc \
-	BscanBeam.cc \
-	BoundaryPointEditor.cc \
+	BoundaryPointEditorModel.cc \
+	BoundaryView.cc \
 	ColorMap.cc \
 	ColorTableManager.cc \
+	DataModel.cc \
 	DisplayField.cc \
 	DisplayFieldModel.cc \
 	DisplayFieldController.cc \
@@ -113,9 +132,11 @@ NORM_SRCS = \
 	HawkEyeLogger.cc \
 	Main.cc \
 	PaletteManager.cc \
+	ParamFile.cc \
 	PpiBeam.cc \
+	RayLocationController.cc \
+	RayLocationModel.cc \
 	Reader.cc \
-	RhiBeam.cc \
 	ScaledLabel.cc \
 	ScriptEditorModel.cc \
 	SiiPalette.cc \
@@ -125,55 +146,71 @@ NORM_SRCS = \
 	SpreadSheetItem.cc \
 	SpreadSheetModel.cc \
 	SpreadSheetUtils.cc \
-	SweepManager.cc \
+	SweepModel.cc \
+	SweepController.cc \
+	TimeNavModel.cc \
+	TimeNavController.cc \
+        UndoRedoController.cc \
+        UndoRedoModel.cc \
 	WorldPlot.cc 
 
 MOC_SRCS = \
-	DisplayManager.cc \
-	FieldRenderer.cc \
+	FieldRendererView.cc \
+	FieldListView.cc \
 	FieldRendererController.cc \
 	PolarManager.cc \
 	PolarWidget.cc \
-	PpiWidget.cc \
-	RhiWidget.cc \
-	RhiWindow.cc \
 	TimeScaleWidget.cc \
 	ParameterColorView.cc \
         FieldColorController.cc \
+	BoundaryPointEditor.cc \
+	BoundaryPointEditorView.cc \
+	CloseEventFilter.cc \
 	ColorBar.cc \
 	ColorMapTemplates.cc \
 	ClickableLabel.cc \
+	ClickableLabelNamed.cc \
+	DisplayFieldView.cc \
 	ScriptEditorView.cc \
 	ScriptEditorController.cc \
+	ScriptEditorHelpItem.cc \
+	ScriptEditorHelpModel.cc \
 	TextEdit.cc \
 	SoloFunctionsController.cc \
 	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
+	SweepView.cc \
+	TimeNavView.cc \
 	FunctionEditor.cc 
 
 MOC_OUTPUT = \
-	moc_DisplayManager.cpp \
-	moc_FieldRenderer.cpp \
+	moc_BoundaryPointEditorView.cpp \
+	moc_BoundaryPointEditor.cpp \
+	moc_FieldListView.cpp \
+	moc_FieldRendererView.cpp \
 	moc_PolarManager.cpp \
 	moc_PolarWidget.cpp \
-	moc_PpiWidget.cpp \
-	moc_RhiWidget.cpp \
-	moc_RhiWindow.cpp \
 	moc_TimeScaleWidget.cpp \
 	moc_ParameterColorView.cpp \
         moc_FieldColorController.cpp \
+	moc_CloseEventFilter.cpp \
 	moc_ColorBar.cpp \
 	moc_ColorMapTemplates.cpp \
 	moc_ClickableLabel.cpp \
+	moc_ClickableLabelNamed.cpp \
+	moc_DisplayFieldView.cpp \
 	moc_ScriptEditorView.cpp \
 	moc_ScriptEditorController.cpp \
+	moc_ScriptEditorHelpModel.cpp \
 	moc_TextEdit.cpp \
 	moc_SoloFunctionsController.cpp \
 	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
+	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
+	moc_TimeNavView.cpp \
 	qrc_resources.cpp \
 	qrc_customcompleter.cpp
 
@@ -254,37 +291,51 @@ hawkeye_app:
 
 
 DMG_BASE_DIR = /Users/brenda
-hawkeye_edit:
+hawkedit_app:
 	# pulled from circleci.yml
-	echo "building HawkEye.dmg"
-	# cd /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEye
+	echo "building HawkEdit.dmg"
+	# cd /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit
 	# pwd
-	make clean
-	/usr/local/Cellar/qt/5.15.0/bin/qmake -o Makefile.qmake
-	echo " ...  make from_qmake"
+	make clean_all
+	#
+	# in dev area only ...
+	make install  
+	# in circleci area only ...
+	#/usr/local/Cellar/qt/5.15.0/bin/qmake -o Makefile.qmake
+	#echo " ...  make from_qmake"
 	make -f Makefile.qmake
-	echo " ... after qmake"
-	mkdir -p HawkEye_edit.app/Contents/Frameworks
+	#echo " ... after qmake"
+	# end of dev vs. circleci distinction 
+	#
+	mkdir -p HawkEdit.app/Contents/Frameworks
 	echo " ... after mkdir"
-	#cp /usr/lib/libexpat.1.dylib HawkEye_edit.app/Contents/Frameworks/.
-	#cp /usr/lib/libbz2.1.0.dylib HawkEye_edit.app/Contents/Frameworks/.
-	#cp /usr/lib/libz.1.dylib     HawkEye_edit.app/Contents/Frameworks/.
-	#cp /usr/lib/libSystem.B.dylib HawkEye_edit.app/Contents/Frameworks/.
-	mkdir -p HawkEye_edit.app/Contents/MacOS/../share
-	# cp -r /private/tmp/workarea/$SOURCE_DIR/share/color_scales HawkEye-Elle.app/Contents/MacOS/../share/.
-	cp -r ~/git/lrose-displays/color_scales HawkEye_edit.app/Contents/MacOS/../share/.
-	# cp the HawkEye executable to the HawkEye_edit.app area because make doesn't put it there.
-	cp HawkEye.app/Contents/MacOS/HawkEye HawkEye_edit.app/Contents/MacOS/HawkEye_edit
+	# cp /usr/local/Cellar/qt/5.15.0/plugins/platforms/libqcocoa.dylib HawkEdit.app/Contents/Plugins/platforms/.
+	#cp /usr/lib/libexpat.1.dylib HawkEdit.app/Contents/Frameworks/.
+	#cp /usr/lib/libbz2.1.0.dylib HawkEdit.app/Contents/Frameworks/.
+	#cp /usr/lib/libz.1.dylib     HawkEdit.app/Contents/Frameworks/.
+	#cp /usr/lib/libSystem.B.dylib HawkEdit.app/Contents/Frameworks/.
+	#
+	# add the color scales
+	#
+	mkdir -p HawkEdit.app/Contents/MacOS/../share
+	# cp -r /private/tmp/workarea/$SOURCE_DIR/share/color_scales HawkEdit-Elle.app/Contents/MacOS/../share/.
+	cp -r ~/git/lrose-displays/color_scales HawkEdit.app/Contents/MacOS/../share/.
+	#
+	# cp the HawkEdit executable to the HawkEdit.app area because make doesn't put it there.
+	#
+	# cp HawkEdit HawkEdit.app/Contents/MacOS/HawkEdit
+	#
 	echo " ... before calling macdeployqt"
-	# macdeployqt HawkEye.app -dmg -always-overwrite
-	/usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEye_edit.app -no-plugins -dmg -always-overwrite -codesign="${CERT_NAME}"
+	# macdeployqt HawkEdit.app -dmg -always-overwrite
+	# /usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEdit.app -no-plugins -dmg -always-overwrite -codesign="${CERT_NAME}"
+	/usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEdit.app  -dmg -always-overwrite -codesign="${CERT_NAME}"
 	echo " .. before calling hdiutil"
-	hdiutil create -volname HawkEye_edit -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye_edit.app -ov -format UDZO HawkEye_Elle.dmg
-	# hdiutil create -volname HawkEye-Elle_Installer -srcfolder /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEye/HawkEye-Elle.app -ov -format UDZO HawkEye-Elle.dmg
+	#hdiutil create -volname HawkEdit -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEdit/HawkEdit.app -ov -format UDZO HawkEdit_Elle.dmg
+	## hdiutil create -volname HawkEdit-Elle_Installer -srcfolder /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit/HawkEdit-Elle.app -ov -format UDZO HawkEdit-Elle.dmg
 	echo " ... after dmg build"
-	# cp HawkEye.dmg /private/tmp/workspace_macos/releases/lrose-cyclone
-	echo " ... done  building HawkEye"
-#         hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Elle.dmg
+	# cp HawkEdit.dmg /private/tmp/workspace_macos/releases/lrose-cyclone
+	echo " ... done  building HawkEdit"
+#         hdiutil create -volname HawkEdit_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEdit/HawkEdit.app  -ov -format UDZO HawkEdit_Elle.dmg
 
 
 

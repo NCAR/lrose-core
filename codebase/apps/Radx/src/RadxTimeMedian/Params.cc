@@ -563,114 +563,6 @@
     tt->comment_text = tdrpStrDup("Parameters for setting time median of one input field.\nNote that this works only in ARCHIVE or FILELIST modes, with one input field, and gives its output only after the last input is processed.");
     tt++;
     
-    // Parameter 'fixed_const'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("fixed_const");
-    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_fixed_const - &_start_;
-    tt->array_n_offset = (char *) &fixed_const_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'user_data'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("user_data");
-    tt->descr = tdrpStrDup("Non gridded data names");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_user_data - &_start_;
-    tt->array_n_offset = (char *) &user_data_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'volume_before_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_before_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply before doing ray filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_before_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'sweep_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sweep_filter");
-    tt->descr = tdrpStrDup("Sweep filters to apply");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_sweep_filter - &_start_;
-    tt->array_n_offset = (char *) &sweep_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'ray_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ray_filter");
-    tt->descr = tdrpStrDup("Single ray Filters to apply");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_ray_filter - &_start_;
-    tt->array_n_offset = (char *) &ray_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'volume_after_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_after_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply after doing ray filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_after_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
     // Parameter 'input_field'
     // ctype is 'char*'
     
@@ -680,7 +572,7 @@
     tt->descr = tdrpStrDup("input field name");
     tt->help = tdrpStrDup("name of field to take median of from input");
     tt->val_offset = (char *) &input_field - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("DBZ_F");
     tt++;
     
     // Parameter 'output_field'
@@ -704,7 +596,7 @@
     tt->descr = tdrpStrDup("minimum bin value");
     tt->help = tdrpStrDup("The median is in bins from min to max in increments of delta");
     tt->val_offset = (char *) &min_bin - &_start_;
-    tt->single_val.d = -100;
+    tt->single_val.d = -50;
     tt++;
     
     // Parameter 'max_bin'
@@ -716,7 +608,7 @@
     tt->descr = tdrpStrDup("maximum bin value");
     tt->help = tdrpStrDup("The median is in bins from min to max in increments of delta");
     tt->val_offset = (char *) &max_bin - &_start_;
-    tt->single_val.d = 100;
+    tt->single_val.d = 75;
     tt++;
     
     // Parameter 'delta_bin'
@@ -728,7 +620,7 @@
     tt->descr = tdrpStrDup("delta bin value");
     tt->help = tdrpStrDup("The median is in bins from min to max in increments of delta");
     tt->val_offset = (char *) &delta_bin - &_start_;
-    tt->single_val.d = 100;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'fixedElevations'
@@ -744,9 +636,16 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
-    tt->array_n = 0;
+    tt->array_n = 7;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0;
+      tt->array_vals[1].d = 0.5;
+      tt->array_vals[2].d = 1.4;
+      tt->array_vals[3].d = 2.5;
+      tt->array_vals[4].d = 3.7;
+      tt->array_vals[5].d = 5;
+      tt->array_vals[6].d = 20;
     tt++;
     
     // Parameter 'azToleranceDegrees'
@@ -758,7 +657,7 @@
     tt->descr = tdrpStrDup("azimumth tolerance");
     tt->help = tdrpStrDup("allowed degrees difference between azimuth values from different volumese to be considered part of the same ray");
     tt->val_offset = (char *) &azToleranceDegrees - &_start_;
-    tt->single_val.d = 0.1;
+    tt->single_val.d = 0.2;
     tt++;
     
     // Parameter 'elevToleranceDegrees'
@@ -770,7 +669,7 @@
     tt->descr = tdrpStrDup("elevation tolerance");
     tt->help = tdrpStrDup("allowed degrees difference between elevation values from different volumese to be considered part of the same ray");
     tt->val_offset = (char *) &elevToleranceDegrees - &_start_;
-    tt->single_val.d = 0.1;
+    tt->single_val.d = 0.25;
     tt++;
     
     // trailing entry has param_name set to NULL

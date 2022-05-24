@@ -1130,8 +1130,20 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("INITIAL MAX RANGE");
+    tt->comment_hdr = tdrpStrDup("SET MAX RANGE");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'set_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_max_range");
+    tt->descr = tdrpStrDup("Option to set the max range to be used for plotting.");
+    tt->help = tdrpStrDup("If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.");
+    tt->val_offset = (char *) &set_max_range - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'max_range_km'
@@ -1205,7 +1217,7 @@
     tt->descr = tdrpStrDup("Radar name if overridden.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("SPOL");
+    tt->single_val.s = tdrpStrDup("");
     tt++;
     
     // Parameter 'display_site_name'

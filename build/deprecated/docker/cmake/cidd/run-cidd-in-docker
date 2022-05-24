@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# script to run CIDD from a docker container
+#
+# Dependencies:
+#  * docker
+#  * X server
+#
+
+# cidd-docker
+#
+# helper / wrapper script for invoking ncareol/lrose-cidd Docker image,
+# setting up X11 and running cidd in specified directory
+
+_echo_help () {
+    scriptName=`basename $0`
+    echo
+    echo "Usage: $scriptName paramsUrl"
+    echo "       paramsUrl is URL for downloading CIDD parameters"
+    echo
+    echo "For further details on running cidd in docker, see:"
+    echo "       https://github.com/NCAR/lrose-docs/cidd"
+    echo
+}
+
+if [[ "$1" == '-h' ]] || [[ "$1" == '--help' ]]; then
+    _echo_help
+    exit 0
+fi
+
+# check we have docker
+
+docker -v > /dev/null
+docker_exit_code=$?
+if [[ $docker_exit_code != 0 ]]; then
+    echo 'It appears that docker is not installed or in PATH'
+    echo 'Please install docker or add it to PATH'
+    exit $docker_exit_code
+fi
+cidd_docker_image='ncareol/lrose-cidd'
+echo
+echo "cidd_docker_image: " $cidd_docker_image
+
+# check we have a parameter URL
+
+if [[ "$@" = '' ]] ; then
+    echo
+    echo 'ERROR - please specify a URL for the CIDD parameters'
+    _echo_help
+    exit 1
+fi
+cidd_params_url=$1
+echo
+echo "cidd_params_url: " $cidd_params_url
+
+# architecture-independent method to set `docker run` options
+
+lrose_docker_run_options () {
+    lrose_uname=$(uname)
+    if [[ $lrose_uname = 'Darwin' ]]; then
+        lrose_host_ip=$(ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}' |head -1)
+        #
+        # handle case where XQuartz is not running on :0
+        #
+        lrose_display_number=`ps -e | grep 'Xquartz :\d' | grep -v bin\/xinit | awk '{ print substr($5,2); }'`
+        #
+        # if not set or empty, default to 0
+        #
+        [ -z "$lrose_display_number" ] && lrose_display_number='0'
+        #
+        # set DISPLAY to host-ip:display-number
+        #
+        echo "-e DISPLAY=$lrose_host_ip:$lrose_display_number"
+    elif [[ $lrose_uname = 'Linux' ]]; then
+        #
+        # pass through DISPLAY, but specify X11 socket as shared volume
+        #
+        echo "-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix"
+    else
+        echo "This platform is not supported by `basename $0`"
+        exit 1
+    fi
+}
+
+echo "======================================"
+echo "running cmd:"
+echo "  docker run -v $HOME/.Xauthority:/root/.Xauthority $(lrose_docker_run_options) ${cidd_docker_image} /usr/local/cidd/bin/CIDD -font fixed -p $cidd_params_url"
+echo "======================================"
+
+docker run \
+    -v $HOME/.Xauthority:/root/.Xauthority \
+    -v /tmp/cidd_images:/root/images \
+    $(lrose_docker_run_options) \
+    ${cidd_docker_image} \
+    /usr/local/cidd/bin/CIDD -font fixed \
+    -p $cidd_params_url
+

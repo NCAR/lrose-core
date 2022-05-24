@@ -305,12 +305,19 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
     _addOffset = 0.0;
     _scaleFactor = 1.0;
 
-    iret |= !_ncVar->add_att(NcfMdv::valid_min, _minOut);
-    iret |= !_ncVar->add_att(NcfMdv::valid_max, _maxOut);
+    iret |= !_ncVar->add_att(NcfMdv::valid_min, -3.4028e38f);
+    iret |= !_ncVar->add_att(NcfMdv::valid_max, 3.4028e38f);
     iret |= !_ncVar->add_att(NcfMdv::FillValue, _missing);
 
   }
 
+  // min and max values
+
+  iret |= !_ncVar->add_att(NcfMdv::min_value, _fhdrFl32.min_value);
+  iret |= !_ncVar->add_att(NcfMdv::max_value, _fhdrFl32.max_value);
+
+  // name and units
+  
   if ( _ncfStandardName.size() > 0) {
     iret |= !_ncVar->add_att(NcfMdv::standard_name,
                              _ncfStandardName.c_str());
@@ -321,7 +328,11 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
 
   // Add auxiliary variables if necessay
 
-  if (_gridInfo->getProjType() != Mdvx::PROJ_LATLON ) {
+  if (_gridInfo->getProjType() == Mdvx::PROJ_LATLON ) {
+
+    iret |= !_ncVar->add_att(NcfMdv::grid_mapping_name, NcfMdv::latitude_longitude);
+
+  } else {
 
     char auxVarNames[1024];
     
@@ -374,7 +385,7 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
   
   if (_ncFormat == Nc3File::Netcdf4 || _ncFormat == Nc3File::Netcdf4Classic) {
     if (_setChunking(ncFile, errStr)) {
-      cerr << "WARNING: NcfFieldData::addToNcf" << endl;
+      cerr << "WARNING: NcfFieldData::addToNc" << endl;
       cerr << "  Chunking failed" << endl;
       return -1;
     }
@@ -385,7 +396,7 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
   if (_compress &&
       (_ncFormat == Nc3File::Netcdf4 || _ncFormat == Nc3File::Netcdf4Classic)) {
     if (_setCompression(ncFile, errStr)) {
-      cerr << "WARNING: NcfFieldData::addToNcf" << endl;
+      cerr << "WARNING: NcfFieldData::addToNc" << endl;
       cerr << "  Compression will not be used" << endl;
     }
   }

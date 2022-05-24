@@ -47,7 +47,7 @@ Radar *Rsl::new_radar(Radx::si32 nvolumes) {
     radar->v[i] = NULL;
 
   return radar;
-};
+}
 
 Volume *Rsl::new_volume(Radx::si32 max_sweeps) {
   Volume *volume;
@@ -66,7 +66,7 @@ Volume *Rsl::new_volume(Radx::si32 max_sweeps) {
   volume->h.type_str = NULL;
 
   return volume;
-};
+}
 
 Sweep *Rsl::new_sweep(Radx::si32 max_rays) {
   Sweep *sweep;
@@ -84,7 +84,7 @@ Sweep *Rsl::new_sweep(Radx::si32 max_rays) {
     rays[i] = NULL;
 
   return sweep;
-};
+}
 
 Ray *Rsl::new_ray(Radx::si32 max_bins) {
   Ray *ray;
@@ -97,7 +97,7 @@ Ray *Rsl::new_ray(Radx::si32 max_bins) {
   }
 
   return ray;
-};
+}
 
 // the free methods, free the base structure AND
 // every structure embedded in it.  So, free_radar

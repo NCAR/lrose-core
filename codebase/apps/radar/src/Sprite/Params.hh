@@ -79,22 +79,8 @@ public:
     REALTIME_TCP_MODE = 1,
     ARCHIVE_TIME_MODE = 2,
     FILE_LIST_MODE = 3,
-    FOLLOW_MOMENTS_MODE = 4
+    FOLLOW_DISPLAY_MODE = 4
   } input_mode_t;
-
-  typedef enum {
-    SPECTRUM = 0,
-    TIME_SERIES = 1,
-    I_VS_Q = 2,
-    PHASOR = 3
-  } iqplot_type_t;
-
-  typedef enum {
-    LEGEND_TOP_LEFT = 0,
-    LEGEND_TOP_RIGHT = 1,
-    LEGEND_BOTTOM_LEFT = 2,
-    LEGEND_BOTTOM_RIGHT = 3
-  } legend_pos_t;
 
   typedef enum {
     DBZ = 0,
@@ -111,6 +97,56 @@ public:
   } moment_type_t;
 
   typedef enum {
+    FFT_WINDOW_RECT = 0,
+    FFT_WINDOW_VONHANN = 1,
+    FFT_WINDOW_BLACKMAN = 2,
+    FFT_WINDOW_BLACKMAN_NUTTALL = 3,
+    FFT_WINDOW_TUKEY_10 = 4,
+    FFT_WINDOW_TUKEY_20 = 5,
+    FFT_WINDOW_TUKEY_30 = 6,
+    FFT_WINDOW_TUKEY_50 = 7
+  } fft_window_t;
+
+  typedef enum {
+    WATERFALL_HC = 0,
+    WATERFALL_VC = 1,
+    WATERFALL_HX = 2,
+    WATERFALL_VX = 3,
+    WATERFALL_ZDR = 4,
+    WATERFALL_PHIDP = 5,
+    WATERFALL_SDEV_ZDR = 6,
+    WATERFALL_SDEV_PHIDP = 7,
+    WATERFALL_CMD = 8
+  } waterfall_type_t;
+
+  typedef enum {
+    SPECTRAL_POWER = 0,
+    SPECTRAL_PHASE = 1,
+    SPECTRAL_ZDR = 2,
+    SPECTRAL_PHIDP = 3,
+    TS_POWER = 4,
+    TS_PHASE = 5,
+    I_VALS = 6,
+    Q_VALS = 7,
+    I_VS_Q = 8,
+    PHASOR = 9
+  } iq_plot_type_t;
+
+  typedef enum {
+    CHANNEL_HC = 0,
+    CHANNEL_VC = 1,
+    CHANNEL_HX = 2,
+    CHANNEL_VX = 3
+  } rx_channel_t;
+
+  typedef enum {
+    LEGEND_TOP_LEFT = 0,
+    LEGEND_TOP_RIGHT = 1,
+    LEGEND_BOTTOM_LEFT = 2,
+    LEGEND_BOTTOM_RIGHT = 3
+  } legend_pos_t;
+
+  typedef enum {
     WIDTH_METHOD_R0R1 = 0,
     WIDTH_METHOD_R1R2 = 1,
     WIDTH_METHOD_HYBRID = 2
@@ -124,17 +160,6 @@ public:
     FIR_LEN_20 = 4,
     FIR_LEN_10 = 5
   } fir_filter_len_t;
-
-  typedef enum {
-    WINDOW_RECT = 0,
-    WINDOW_VONHANN = 1,
-    WINDOW_BLACKMAN = 2,
-    WINDOW_BLACKMAN_NUTTALL = 3,
-    WINDOW_TUKEY_10 = 4,
-    WINDOW_TUKEY_20 = 5,
-    WINDOW_TUKEY_30 = 6,
-    WINDOW_TUKEY_50 = 7
-  } window_t;
 
   // struct typedefs
 
@@ -165,6 +190,36 @@ public:
     tdrp_bool_t sun_azimuth;
   } show_status_t;
 
+  typedef struct {
+    waterfall_type_t plot_type;
+    fft_window_t fft_window;
+    int median_filter_len;
+    tdrp_bool_t use_adaptive_filter;
+    double clutter_width_mps;
+    tdrp_bool_t use_regression_filter;
+    int regression_order;
+  } waterfall_plot_t;
+
+  typedef struct {
+    iq_plot_type_t plot_type;
+    rx_channel_t rx_channel;
+    fft_window_t fft_window;
+    int median_filter_len;
+    tdrp_bool_t use_adaptive_filter;
+    tdrp_bool_t plot_clutter_model;
+    double clutter_width_mps;
+    tdrp_bool_t use_regression_filter;
+    int regression_order;
+    tdrp_bool_t regression_filter_interp_across_notch;
+    tdrp_bool_t compute_plot_range_dynamically;
+  } iq_plot_t;
+
+  typedef struct {
+    iq_plot_type_t plot_type;
+    double min_val;
+    double max_val;
+  } iq_plot_static_range_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -185,7 +240,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -485,13 +540,17 @@ public:
 
   double min_secs_between_rendering;
 
-  int moments_shmem_key;
+  double start_elevation;
 
-  double moments_max_search_angle_error;
+  double start_azimuth;
 
-  double selected_range_km;
+  double start_range_km;
 
   show_status_t show_status_in_gui;
+
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
 
   int main_window_width;
 
@@ -515,81 +574,14 @@ public:
 
   char* main_window_panel_divider_color;
 
-  int main_color_scale_width;
-
   int click_cross_size;
 
-  int iqplots_n_rows;
-
-  int iqplots_n_columns;
-
-  iqplot_type_t *_iqplot_types;
-  int iqplot_types_n;
-
-  int iqplot_top_margin;
-
-  int iqplot_bottom_margin;
-
-  int iqplot_left_margin;
-
-  int iqplot_right_margin;
-
-  int iqplot_axis_tick_len;
-
-  int iqplot_n_ticks_ideal;
-
-  int iqplot_title_text_margin;
-
-  int iqplot_legend_text_margin;
-
-  int iqplot_axis_text_margin;
-
-  int iqplot_title_font_size;
-
-  int iqplot_axis_label_font_size;
-
-  int iqplot_tick_values_font_size;
-
-  int iqplot_legend_font_size;
-
-  char* iqplot_axis_label_color;
-
-  char* iqplot_title_color;
-
-  char* iqplot_axes_color;
-
-  char* iqplot_grid_color;
-
-  char* iqplot_fill_color;
-
-  char* iqplot_labels_color;
-
-  tdrp_bool_t iqplot_y_grid_lines_on;
-
-  tdrp_bool_t iqplot_x_grid_lines_on;
-
-  tdrp_bool_t iqplot_draw_instrument_height_line;
-
-  tdrp_bool_t iqplot_x_axis_labels_inside;
-
-  tdrp_bool_t iqplot_y_axis_labels_inside;
-
-  legend_pos_t iqplot_main_legend_pos;
-
-  tdrp_bool_t iqplot_plot_legend1;
-
-  legend_pos_t iqplot_legend1_pos;
-
-  legend_pos_t iqplot_legend2_pos;
-
-  tdrp_bool_t iqplot_plot_legend2;
-
-  int ascope_n_panels_in_spectra_window;
+  int ascope_n_panels;
 
   moment_type_t *_ascope_moments;
   int ascope_moments_n;
 
-  int ascope_width_in_spectra_window;
+  int ascope_width;
 
   int ascope_title_font_size;
 
@@ -635,6 +627,167 @@ public:
 
   tdrp_bool_t ascope_y_axis_labels_inside;
 
+  int waterfall_n_panels;
+
+  waterfall_plot_t *_waterfall_plots;
+  int waterfall_plots_n;
+
+  int waterfall_width;
+
+  int waterfall_color_scale_width;
+
+  int waterfall_sdev_zdr_kernel_ngates;
+
+  int waterfall_sdev_zdr_kernel_nsamples;
+
+  int waterfall_sdev_phidp_kernel_ngates;
+
+  int waterfall_sdev_phidp_kernel_nsamples;
+
+  char* color_scale_dir;
+
+  char* waterfall_dbm_color_scale_name;
+
+  char* waterfall_zdr_color_scale_name;
+
+  char* waterfall_phidp_color_scale_name;
+
+  char* waterfall_sdev_zdr_color_scale_name;
+
+  char* waterfall_sdev_phidp_color_scale_name;
+
+  char* waterfall_cmd_color_scale_name;
+
+  int waterfall_title_font_size;
+
+  int waterfall_axis_label_font_size;
+
+  int waterfall_tick_values_font_size;
+
+  int waterfall_legend_font_size;
+
+  int waterfall_color_scale_font_size;
+
+  int waterfall_title_text_margin;
+
+  int waterfall_legend_text_margin;
+
+  int waterfall_axis_text_margin;
+
+  int waterfall_axis_tick_len;
+
+  int waterfall_n_ticks_ideal;
+
+  int waterfall_left_margin;
+
+  int waterfall_bottom_margin;
+
+  tdrp_bool_t waterfall_x_grid_lines_on;
+
+  tdrp_bool_t waterfall_y_grid_lines_on;
+
+  char* waterfall_axis_label_color;
+
+  char* waterfall_axes_color;
+
+  char* waterfall_grid_color;
+
+  char* waterfall_line_color;
+
+  char* waterfall_selected_range_color;
+
+  char* waterfall_fill_color;
+
+  char* waterfall_title_color;
+
+  tdrp_bool_t waterfall_x_axis_labels_inside;
+
+  tdrp_bool_t waterfall_y_axis_labels_inside;
+
+  int iqplots_n_rows;
+
+  int iqplots_n_columns;
+
+  iq_plot_t *_iq_plots;
+  int iq_plots_n;
+
+  iq_plot_static_range_t *_iq_plot_static_ranges;
+  int iq_plot_static_ranges_n;
+
+  int iqplot_top_margin;
+
+  int iqplot_bottom_margin;
+
+  int iqplot_left_margin;
+
+  int iqplot_right_margin;
+
+  int iqplot_axis_tick_len;
+
+  int iqplot_n_ticks_ideal;
+
+  int iqplot_title_text_margin;
+
+  int iqplot_legend_text_margin;
+
+  int iqplot_axis_text_margin;
+
+  int iqplot_title_font_size;
+
+  int iqplot_axis_label_font_size;
+
+  int iqplot_tick_values_font_size;
+
+  int iqplot_legend_font_size;
+
+  char* iqplot_axis_label_color;
+
+  char* iqplot_title_color;
+
+  char* iqplot_axes_color;
+
+  char* iqplot_grid_color;
+
+  char* iqplot_fill_color;
+
+  char* iqplot_labels_color;
+
+  char* iqplot_line_color;
+
+  int iqplot_line_width;
+
+  char* iqplot_adaptive_filtered_color;
+
+  char* iqplot_clutter_model_color;
+
+  char* iqplot_regression_filtered_color;
+
+  char* iqplot_polynomial_fit_color;
+
+  char* iqplot_polynomial_residual_color;
+
+  int iqplot_polynomial_line_width;
+
+  tdrp_bool_t iqplot_y_grid_lines_on;
+
+  tdrp_bool_t iqplot_x_grid_lines_on;
+
+  tdrp_bool_t iqplot_draw_instrument_height_line;
+
+  tdrp_bool_t iqplot_x_axis_labels_inside;
+
+  tdrp_bool_t iqplot_y_axis_labels_inside;
+
+  legend_pos_t iqplot_main_legend_pos;
+
+  tdrp_bool_t iqplot_plot_legend1;
+
+  legend_pos_t iqplot_legend1_pos;
+
+  legend_pos_t iqplot_legend2_pos;
+
+  tdrp_bool_t iqplot_plot_legend2;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
@@ -648,8 +801,6 @@ public:
   double regression_filter_notch_edge_power_ratio_threshold_db;
 
   double regression_filter_min_csr_db;
-
-  tdrp_bool_t regression_filter_interp_across_notch;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
 
@@ -729,11 +880,17 @@ public:
 
   double radar_wavelength_cm;
 
-  window_t window;
+  fft_window_t fft_window;
 
   char* cal_file_path;
 
   tdrp_bool_t use_cal_from_time_series;
+
+  char* click_point_fmq_url;
+
+  double click_point_search_angle_error;
+
+  double click_point_delta_azimuth_deg;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -742,7 +899,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[156];
+  mutable TDRPtable _table[208];
 
   const char *_className;
 

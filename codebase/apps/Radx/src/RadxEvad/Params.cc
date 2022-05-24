@@ -1050,6 +1050,18 @@
     tt->single_val.d = 0.5;
     tt++;
     
+    // Parameter 'compute_profile_spacing_from_data'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_profile_spacing_from_data");
+    tt->descr = tdrpStrDup("If true, the profile_min_height, profile_max_height, and profile_height_interval will be calculated from the data.  Each interval will have a minimum of 3 rings as defined in the Metejka and Srivastava paper.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &compute_profile_spacing_from_data - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -40,6 +40,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view)
     connect(table, &QTableWidget::itemChanged,
             this, &SpreadSheetController::updateLineEdit);
   */
+
+
 }
 
 
@@ -65,8 +67,11 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 	  this, SLOT(needDataForField(string, int, int)));
   connect(_currentView, SIGNAL(needAzimuthForRay(int, int, string)), 
     this, SLOT(needAzimuthForRay(int, int, string)));
-  connect(_currentView, SIGNAL(applyVolumeEdits()), 
-	  this, SLOT(getVolumeChanges()));
+  connect(_currentView, SIGNAL(needNyquistVelocityForRay(int, int, string)), 
+    this, SLOT(needNyquistVelocityForRay(int, int, string)));
+  // TODO: need to know which sweep!!!
+  connect(_currentView, SIGNAL(applyVolumeEdits(string, float, vector<float> *)), 
+	  this, SLOT(getVolumeChanges(string, float, vector<float> *)));
 
   connect(_currentView, SIGNAL(signalRayAzimuthChange(float, float)), this, SLOT(switchRay(float, float)));
 
@@ -88,19 +93,38 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   */
 }
 
+
+void SpreadSheetController::moveToLocation(string fieldName, float elevation,
+    float azimuth) {
+
+  switchRay(azimuth, elevation);
+}
+
+void SpreadSheetController::moveToLocation(string fieldName, float elevation,
+    float azimuth, float range) {
+
+  moveToLocation(fieldName, elevation, azimuth);
+  _currentView->highlightClickedData(fieldName, azimuth, elevation, range);
+}
+
 void SpreadSheetController::switchRay(float azimuth, float elevation) {
   LOG(DEBUG) << "enter";
-  _currentModel->findClosestRay(azimuth, elevation);
-  LOG(DEBUG) << "switching to ray " << azimuth;
-  _currentView->newElevation(elevation);
-  _currentView->newAzimuth(azimuth);
+  //try {
+    _currentModel->setClosestRay(azimuth, elevation);
+    LOG(DEBUG) << "switching to ray " << azimuth;
+    //_currenView->newElevation(elevation);
+    _currentView->updateLocationInVolume(azimuth, elevation);
+  //} catch (std::invalid_argument &ex) {
+  //  LOG(DEBUG) << "ERROR: " << ex.what();
+    //_currentView->criticalMessage(ex.what());
+  //}
   LOG(DEBUG) << "exit";
 }
 
-vector<string>  SpreadSheetController::getFieldNames()
+vector<string>  *SpreadSheetController::getFieldNames()
 {
-  vector<string> names = _currentModel->getFields();
-  cout << " In SpreadSheetController::getFieldNames, there are " << names.size() << " field names" << endl;
+  vector<string> *names = _currentModel->getFields();
+  LOG(DEBUG) << " In SpreadSheetController::getFieldNames, there are " << names->size() << " field names";
   return names;
 }
 
@@ -134,6 +158,18 @@ float SpreadSheetController::getAzimuthForRay(int offsetFromClosest)
  
 }
 
+float SpreadSheetController::getNyquistVelocity(int offsetFromClosest)
+{
+
+  LOG(DEBUG) << "getting nyquist velocity for ray: offset from closest =" << offsetFromClosest;
+  float nyquistVelocity = _currentModel->getNyquistVelocityForRay(offsetFromClosest);
+
+  LOG(DEBUG) << " found: nyq vel =" << nyquistVelocity;
+
+  return nyquistVelocity;
+ 
+}
+
 void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpacingKm)
 {
   _currentModel->getRangeGeom(startingRangeKm, gateSpacingKm);
@@ -141,14 +177,14 @@ void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpac
     << *startingRangeKm << ", gateSpacingKm = " << *gateSpacingKm << endl;
 }
 
-void SpreadSheetController::setData(string fieldName, vector<float> *data)
+void SpreadSheetController::setData(string fieldName, float azimuth, vector<float> *data)
 {
   LOG(DEBUG) << "setting values for " << fieldName;
-  _currentModel->setData(fieldName, data);
+  _currentModel->setData(fieldName, azimuth, data);
 }
 
 void SpreadSheetController::setDataMissing(string fieldName, float missingDataValue) {
-  // _currentModel->setDataMissing(fieldName, missingDataValue);
+  _currentModel->setDataMissing(fieldName, missingDataValue);
 }
 
 void  SpreadSheetController::needFieldNames() {
@@ -169,6 +205,12 @@ void  SpreadSheetController::needAzimuthForRay(int offsetFromClosest,
     fieldIdx, fieldName);
 }
 
+void  SpreadSheetController::needNyquistVelocityForRay(int offsetFromClosest, 
+  int fieldIdx, string fieldName) {
+  _currentView->nyquistVelocitySent(getNyquistVelocity(offsetFromClosest), offsetFromClosest,
+    fieldIdx, fieldName);
+}
+
 void  SpreadSheetController::needRangeData(size_t nGates) {
   float startingKm;
   float gateSpacingKm;
@@ -176,17 +218,22 @@ void  SpreadSheetController::needRangeData(size_t nGates) {
   _currentView->rangeDataSent(nGates, startingKm, gateSpacingKm);
 }
 
-void SpreadSheetController::getVolumeChanges() {
+// persist the changes in the spreadsheet to the model, which is the data volume
+void SpreadSheetController::getVolumeChanges(string fieldName, float azimuth, vector<float> *data) {
 
   LOG(DEBUG) << "enter";
-  vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
-  int column = 0;
-  for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
-    vector<float> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
-    setData(*s, data);
-    column++;
-  }
-  volumeUpdated();
+  //vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
+
+  // update the model
+  //int column = 0;
+  //for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
+  //  vector<float> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
+  setData(fieldName, azimuth, data);
+
+  //  column++;
+  //}
+  // announce changes have been made to the data
+  // volumeUpdated();
   LOG(DEBUG) << "exit";
 }
 

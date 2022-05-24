@@ -947,10 +947,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("dwell_stats_method");
     tt->descr = tdrpStrDup("Method for computing stats on the dwell.");
-    tt->help = tdrpStrDup("MIDDLE refers to the middle ray in the dwell sequence.");
+    tt->help = tdrpStrDup("MIDDLE refers to the middle ray in the dwell sequence. The DISCRETE_MODE computes applies only to discrete (integer) fields, and returns the most common entry in a discrete data set.");
     tt->val_offset = (char *) &dwell_stats_method - &_start_;
     tt->enum_def.name = tdrpStrDup("dwell_stats_method_t");
-    tt->enum_def.nfields = 5;
+    tt->enum_def.nfields = 6;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("DWELL_STATS_MEAN");
@@ -963,6 +963,8 @@
       tt->enum_def.fields[3].val = DWELL_STATS_MINIMUM;
       tt->enum_def.fields[4].name = tdrpStrDup("DWELL_STATS_MIDDLE");
       tt->enum_def.fields[4].val = DWELL_STATS_MIDDLE;
+      tt->enum_def.fields[5].name = tdrpStrDup("DWELL_STATS_DISCRETE_MODE");
+      tt->enum_def.fields[5].val = DWELL_STATS_DISCRETE_MODE;
     tt->single_val.e = DWELL_STATS_MEAN;
     tt++;
     
@@ -1032,7 +1034,7 @@
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_stats_method_fields->stats_method - (char *) _stats_method_fields;
         tt->struct_def.fields[1].enum_def.name = tdrpStrDup("dwell_stats_method_t");
-        tt->struct_def.fields[1].enum_def.nfields = 5;
+        tt->struct_def.fields[1].enum_def.nfields = 6;
         tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("DWELL_STATS_MEAN");
@@ -1045,6 +1047,8 @@
         tt->struct_def.fields[1].enum_def.fields[3].val = DWELL_STATS_MINIMUM;
         tt->struct_def.fields[1].enum_def.fields[4].name = tdrpStrDup("DWELL_STATS_MIDDLE");
         tt->struct_def.fields[1].enum_def.fields[4].val = DWELL_STATS_MIDDLE;
+        tt->struct_def.fields[1].enum_def.fields[5].name = tdrpStrDup("DWELL_STATS_DISCRETE_MODE");
+        tt->struct_def.fields[1].enum_def.fields[5].val = DWELL_STATS_DISCRETE_MODE;
     tt->n_struct_vals = 4;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));

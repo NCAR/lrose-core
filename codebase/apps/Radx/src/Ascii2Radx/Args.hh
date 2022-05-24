@@ -59,7 +59,6 @@ public:
   // public data
   
   tdrp_override_t override;
-  time_t startTime, endTime;
   vector<string> inputFileList;
 
 protected:

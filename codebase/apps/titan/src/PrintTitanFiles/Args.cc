@@ -64,6 +64,7 @@ int Args::parse(int argc, char **argv, string &prog_name)
   printFull = false;
   printSummary = false;
   printCsvTable = false;
+  printAsXml = false;
   csvTableType = 1;
   minDuration = 0;
   trackNum = -1;
@@ -112,6 +113,10 @@ int Args::parse(int argc, char **argv, string &prog_name)
         iret = -1;
       }
 
+    } else if (!strcmp(argv[i], "-xml")) {
+      
+      printAsXml = true;
+      
     } else if (!strcmp(argv[i], "-md")) {
       
       if (i < argc - 1) {
@@ -194,10 +199,12 @@ void Args::_usage(ostream &out)
       << "  [ -tn ? ] print full listing for this track number\n"
       << "     (as applicable)\n"
       << "\n"
+      << "  [ -xml ] print as XML instead of normal ASCII.\n"
+      << "\n"
       << endl;
 
   out << _progName
-      << " produces ASCII output from TITAN binary files." << endl;
+      << " produces ASCII or XML output from TITAN binary files." << endl;
   out << "  Output goes to stdout." << endl << endl;
 
 }

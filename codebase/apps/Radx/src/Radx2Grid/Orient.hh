@@ -63,7 +63,7 @@ public:
   // destructor
   
   virtual ~Orient();
-
+  
   // determine the echo orientation
 
   int findEchoOrientation();
@@ -71,12 +71,18 @@ public:
   // load the sdev fields on the cartesian grid
 
   void loadSdevFields(Interp::GridLoc ****gridLoc,
+                      Interp::DerivedField *dbzH,
+                      Interp::DerivedField *dbzV,
                       Interp::DerivedField *sdevDbzH,
                       Interp::DerivedField *sdevDbzV);
 
   // set RHI mode
 
   void setRhiMode(bool state) { _rhiMode = state; }
+
+  // clear RHI data
+
+  void clearRhiData();
   
 protected:
 private:

@@ -99,7 +99,7 @@ public:
   
   // destructor
   
-  ~PolarManager();
+  virtual ~PolarManager();
 
   // run 
 
@@ -134,7 +134,6 @@ public:
 
 public slots:
 
-  //colorMapRedefineReceived(string, ColorMap)
   void colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 				QColor gridColor,
 				QColor emphasisColor,

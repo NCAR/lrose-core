@@ -32,16 +32,15 @@
 #include <QTimer>
 #include <QBrush>
 #include <QPalette>
-#include <QPaintEngine>
 #include <QPen>
 #include <QResizeEvent>
-#include <QStylePainter>
-#include <QMenu>
+#include <QInputDialog>
 
 #include "SpectraWidget.hh"
 #include "SpectraMgr.hh"
 #include "Beam.hh"
 #include "AscopePlot.hh"
+#include "WaterfallPlot.hh"
 #include "IqPlot.hh"
 
 using namespace std;
@@ -58,35 +57,44 @@ SpectraWidget::SpectraWidget(QWidget* parent,
         _worldReleaseX(0),
         _worldReleaseY(0),
         _rubberBand(0),
-        _currentBeam(NULL)
+        _beam(NULL),
+        _nSamplesPlot(0)
 
 {
 
   // init
 
   _pointClicked = false;
-  _colorScaleWidth = _params.main_color_scale_width;
 
   _titleMargin = _params.main_window_title_margin;
 
-  _nAscopes = _params.ascope_n_panels_in_spectra_window;
-  _ascopeWidth = _params.ascope_width_in_spectra_window; // constant
+  _ascopeStartIx = 0;
+  _nAscopes = _params.ascope_n_panels;
+  _ascopeWidth = _params.ascope_width; // constant
   _ascopeHeight = 100;
   _ascopeGrossWidth = _ascopeWidth * _nAscopes;
 
+  _nWaterfalls = _params.waterfall_n_panels;
+  _waterfallStartIx = _ascopeGrossWidth;
+  _waterfallWidth = _params.waterfall_width; // constant
+  _waterfallHeight = 100;
+  _waterfallGrossWidth = _waterfallWidth * _nWaterfalls;
+
+  _iqStartIx = _ascopeGrossWidth + _waterfallGrossWidth;
   _nIqRows = _params.iqplots_n_rows;
   _nIqCols = _params.iqplots_n_columns;
   _nIqPlots = _nIqRows * _nIqCols;
   
   _iqGrossHeight = height() - _titleMargin;
-  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqGrossWidth = width() - _iqStartIx;
   _iqPlotWidth = _iqGrossWidth / _nIqCols;
   _iqPlotHeight = _iqGrossHeight / _nIqRows;
 
   _ascopesConfigured = false;
+  _waterfallsConfigured = false;
   _iqPlotsConfigured = false;
 
-  _selectedRangeKm = _params.selected_range_km;
+  _selectedRangeKm = _params.start_range_km;
 
   // Set up the background color
 
@@ -121,6 +129,12 @@ SpectraWidget::SpectraWidget(QWidget* parent,
     _createAscope(ii);
   }
 
+  // create waterfalls
+
+  for (int ii = 0; ii < _nWaterfalls; ii++) {
+    _createWaterfall(ii);
+  }
+
   // create iqPlots
 
   for (int ii = 0; ii < _nIqPlots; ii++) {
@@ -146,6 +160,11 @@ SpectraWidget::~SpectraWidget()
     delete _ascopes[ii];
   }
   _ascopes.clear();
+
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    delete _waterfalls[ii];
+  }
+  _waterfalls.clear();
 
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     delete _iqPlots[ii];
@@ -191,9 +210,6 @@ void SpectraWidget::configureAxes(double min_amplitude,
   _fullWorld.setXNTicksIdeal(_params.iqplot_n_ticks_ideal);
   _fullWorld.setYAxisTickLen(_params.iqplot_axis_tick_len);
   _fullWorld.setYNTicksIdeal(_params.iqplot_n_ticks_ideal);
-
-  // _fullWorld.setXAxisLabelsInside(_params.ascope_x_axis_labels_inside);
-  // _fullWorld.setYAxisLabelsInside(_params.ascope_y_axis_labels_inside);
 
   _fullWorld.setTitleFontSize(_params.iqplot_title_font_size);
   _fullWorld.setAxisLabelFontSize(_params.iqplot_axis_label_font_size);
@@ -252,17 +268,20 @@ void SpectraWidget::unzoom()
   _zoomWorld = _fullWorld;
   _isZoomed = false;
   _setTransform(_zoomWorld.getTransform());
-  _refresh();
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->unzoom();
+  }
+
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->unzoom();
   }
 
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->unzoom();
   }
 
-  update();
+  _refresh();
 
 }
 
@@ -276,6 +295,9 @@ void SpectraWidget::setXGridEnabled(bool state)
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setXGridLinesOn(state);
   }
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->setXGridLinesOn(state);
+  }
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->setXGridLinesOn(state);
   }
@@ -287,6 +309,9 @@ void SpectraWidget::setYGridEnabled(bool state)
   _yGridEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
     _ascopes[ii]->setYGridLinesOn(state);
+  }
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->setYGridLinesOn(state);
   }
   for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
     _iqPlots[ii]->setYGridLinesOn(state);
@@ -303,18 +328,33 @@ void SpectraWidget::plotBeam(Beam *beam)
 {
 
   if(_params.debug) {
-    cerr << "======== SpectraWidget plotting beam data ================" << endl;
+    cerr << "======== SpectraWidget handling beam ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
 
-  _currentBeam = beam;
+  _beam = beam;
+  _nSamplesPlot = _beam->getNSamples();
+  iwrf_xmit_rcv_mode_t xmitRcvMode = _beam->getXmitRcvMode();
+  if (xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+      xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
+      xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+    _nSamplesPlot /= 2; // alternating mode
+  }
+
 
   if (_ascopes.size() > 0 && !_ascopesConfigured) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
       _configureAscope(ii);
     }
     _ascopesConfigured = true;
+  }
+  
+  if (_waterfalls.size() > 0 && !_waterfallsConfigured) {
+    for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+      _configureWaterfall(ii);
+    }
+    _waterfallsConfigured = true;
   }
   
   if (_iqPlots.size() > 0 && !_iqPlotsConfigured) {
@@ -443,8 +483,10 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
   
   // save the panel details for the mouse release point
 
-  _identSelectedPanel(_mouseReleaseX, _mouseReleaseY,
-                      _mouseReleasePanelType, _mouseReleasePanelId);
+  _identSelectedPanel(_mouseReleaseX,
+                      _mouseReleaseY,
+                      _mouseReleasePanelType,
+                      _mouseReleasePanelId);
 
   // get click location in world coords
 
@@ -459,40 +501,30 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
       // change ascope range
       AscopePlot *ascope = _ascopes[_mouseReleasePanelId];
       _selectedRangeKm = ascope->getZoomWorld().getYWorld(_mouseReleaseY);
-      if (_currentBeam != NULL) {
-        _selectedRangeKm = _currentBeam->getClosestRange(_selectedRangeKm);
+      if (_beam != NULL) {
+        _selectedRangeKm =
+          _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
+        emit locationClicked(_selectedRangeKm, _selectedGateNum);
+      }
+    } else if (_mousePressPanelType == PANEL_WATERFALL &&
+               _mouseReleasePanelType == PANEL_WATERFALL &&
+               _mousePressPanelId == _mouseReleasePanelId) {
+      // change waterfall range
+      WaterfallPlot *waterfall = _waterfalls[_mouseReleasePanelId];
+      _selectedRangeKm = waterfall->getZoomWorld().getYWorld(_mouseReleaseY);
+      if (_beam != NULL) {
+        _selectedRangeKm =
+          _beam->getClosestRange(_selectedRangeKm, _selectedGateNum);
+        emit locationClicked(_selectedRangeKm, _selectedGateNum);
       }
     } else {
       _pointClicked = true;
     }
     
-    // double x_secs = _worldReleaseX;
-    // RadxTime clickTime(_plotStartTime.utime(), x_secs);
-    
-    // get closest ray to this time
-    
-    // double minDiff = 1.0e99;
-    // const RadxRay *closestRay = NULL;
-    // for (size_t ii = 0; ii < _beams.size(); ii++) {
-    //   const RadxRay *ray = _beams[ii]->getRay();
-    //   RadxTime rayTime(ray->getTimeSecs(), ray->getNanoSecs() / 1.0e9);
-    //   double diff = fabs(rayTime - clickTime);
-    //   if (diff < minDiff) {
-    //     closestRay = ray;
-    //     minDiff = diff;
-    //   }
-    // }
-
-    // Emit a signal to indicate that the click location has changed
-    // _pointClicked = true;
-    // if (closestRay != NULL) {
-    //   emit locationClicked(x_secs, y_km, closestRay);
-    // }
-
   } else {
 
     // mouse moved more than 20 pixels, so a zoom occurred
-
+    
     if (_mousePressPanelType == PANEL_ASCOPE &&
         _mouseReleasePanelType == PANEL_ASCOPE) {
       // ascope zoom
@@ -518,6 +550,31 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
         }
       }
 
+    } else if (_mousePressPanelType == PANEL_WATERFALL &&
+               _mouseReleasePanelType == PANEL_WATERFALL) {
+      // waterfall zoom
+      if (_mousePressPanelId == _mouseReleasePanelId) {
+        // zoom in one panel, reflect the range change in 
+        // other panels
+        for (int ii = 0; ii < (int) _waterfalls.size(); ii++) {
+          WaterfallPlot *waterfall = _waterfalls[ii];
+          if (ii == _mouseReleasePanelId) {
+            // perform 2D zoom
+            waterfall->setZoomLimits(_mousePressX, _mousePressY,
+                                  _mouseReleaseX, _mouseReleaseY);
+          } else {
+            // perform zoom in range only
+            waterfall->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+          }
+        } // ii
+      } else {
+        // zoom box crosses panels, zoom in range only
+        for (int ii = 0; ii < (int) _waterfalls.size(); ii++) {
+          WaterfallPlot *waterfall = _waterfalls[ii];
+          waterfall->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+        }
+      }
+
     } else if (_mousePressPanelType == PANEL_IQPLOT &&
                _mouseReleasePanelType == PANEL_IQPLOT) {
       // iqplot zoom
@@ -530,9 +587,9 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
             // perform 2D zoom
             iqPlot->setZoomLimits(_mousePressX, _mousePressY,
                                   _mouseReleaseX, _mouseReleaseY);
-          // } else {
-          //   // perform zoom in range only
-          //   iqPlot->setZoomLimitsY(_mousePressY, _mouseReleaseY);
+            // } else {
+            //   // perform zoom in range only
+            //   iqPlot->setZoomLimitsY(_mousePressY, _mouseReleaseY);
           }
         } // ii
       }
@@ -590,12 +647,15 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
 
   // render ascopes and iq plots
 
-  if (_currentBeam) {
+  if (_beam) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-      _ascopes[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
+      _ascopes[ii]->plotBeam(painter, _beam, _selectedRangeKm);
+    }
+    for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+      _waterfalls[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
-      _iqPlots[ii]->plotBeam(painter, _currentBeam, _selectedRangeKm);
+      _iqPlots[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
   }
 
@@ -618,6 +678,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 {
 
   _ascopeHeight = height() - _titleMargin;
+  _waterfallHeight = height() - _titleMargin;
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
 
@@ -639,8 +700,28 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 
   }
   
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+
+    int xOffset = _waterfallStartIx + ii * _waterfallWidth;
+    int yOffset = _titleMargin;
+    _waterfalls[ii]->setWindowGeom(_waterfallWidth, _waterfallHeight,
+                                xOffset, yOffset);
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "   waterfallWidth[" << ii << "]: "
+           << _waterfalls[ii]->getWidth() << endl;
+      cerr << "  waterfallHeight[" << ii << "]: "
+           << _waterfalls[ii]->getHeight() << endl;
+      cerr << "       xOffset[" << ii << "]: "
+           << _waterfalls[ii]->getXOffset() << endl;
+      cerr << "       yOffset[" << ii << "]: "
+           << _waterfalls[ii]->getYOffset() << endl;
+    }
+
+  }
+  
   _iqGrossHeight = height() - _titleMargin;
-  _iqGrossWidth = width() - _ascopeGrossWidth;
+  _iqGrossWidth = width() - _iqStartIx;
   _iqPlotWidth = _iqGrossWidth / _nIqCols;
   _iqPlotHeight = _iqGrossHeight / _nIqRows;
 
@@ -648,7 +729,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
 
     int rowNum = ii / _nIqCols;
     int colNum = ii - rowNum * _nIqCols; 
-    int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+    int xOffset = _iqStartIx + colNum * _iqPlotWidth;
     int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
 
     _iqPlots[ii]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
@@ -679,13 +760,10 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
     cerr << "  _iqPlotWidth: " << _iqPlotWidth << endl;
     cerr << "  _iqPlotHeight: " << _iqPlotHeight << endl;
   }
-
-
   
   _resetWorld(width(), height());
 
   _refresh();
-  update();
   
 }
 
@@ -711,7 +789,7 @@ void SpectraWidget::_resetWorld(int width, int height)
   
   _fullWorld.resize(width / 3, height / 3);
 
-  _fullWorld.setWindowOffsets(_ascopeGrossWidth, _titleMargin);
+  _fullWorld.setWindowOffsets(_iqStartIx, _titleMargin);
   
   _zoomWorld = _fullWorld;
   _setTransform(_fullWorld.getTransform());
@@ -749,18 +827,50 @@ void SpectraWidget::setMouseClickPoint(double worldX,
 
 void SpectraWidget::changeRange(int nGatesDelta)
 {
-  if (_currentBeam != NULL) {
-    _selectedRangeKm += nGatesDelta * _currentBeam->getGateSpacingKm();
-    double maxRange = _currentBeam->getMaxRange();
-    if (_selectedRangeKm < _currentBeam->getStartRangeKm()) {
-      _selectedRangeKm = _currentBeam->getStartRangeKm();
+  setRange(_selectedRangeKm + nGatesDelta * _beam->getGateSpacingKm());
+}
+
+/*************************************************************************
+ * set the range in km
+ */
+
+void SpectraWidget::setRange(double rangeKm)
+{
+  if (_beam != NULL) {
+    _selectedRangeKm = rangeKm;
+    double maxRange = _beam->getMaxRange();
+    if (_params.set_max_range) {
+      maxRange = _params.max_range_km;
+    }
+    if (_selectedRangeKm < _beam->getStartRangeKm()) {
+      _selectedRangeKm = _beam->getStartRangeKm();
     } else if (_selectedRangeKm > maxRange) {
       _selectedRangeKm = maxRange;
     }
   }
+  _computeSelectedGateNum();
   update();
 }
 
+/*************************************************************************
+ * compute selected gate num from selected range
+ */
+
+void SpectraWidget::_computeSelectedGateNum()
+{
+  if (_beam != NULL) {
+    _selectedGateNum = 
+      (int) ((_selectedRangeKm - _beam->getStartRangeKm()) /
+             _beam->getGateSpacingKm() + 0.5);
+    if (_selectedGateNum < 0) {
+      _selectedGateNum = 0;
+    } else if (_selectedGateNum > _beam->getNGates() - 1) {
+      _selectedGateNum = _beam->getNGates() - 1;
+    }
+    _selectedRangeKm = _beam->getStartRangeKm() +
+      _selectedGateNum * _beam->getGateSpacingKm();
+  }
+}
 
 /*************************************************************************
  * Protected methods
@@ -801,15 +911,26 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
   // ascope right boundaries
   for (int ii = 0; ii < _nAscopes; ii++) {
-    QLineF ascopeBoundary(_ascopeWidth * (ii+1), _titleMargin,
-                          _ascopeWidth * (ii+1), height());
+    QLineF ascopeBoundary(_ascopeStartIx + _ascopeWidth * (ii+1),
+                          _titleMargin,
+                          _ascopeStartIx + _ascopeWidth * (ii+1),
+                          height());
     painter.drawLine(ascopeBoundary);
+  }
+
+  // waterfall right boundaries
+  for (int ii = 0; ii < _nWaterfalls; ii++) {
+    QLineF waterfallBoundary(_waterfallStartIx + _waterfallWidth * (ii+1),
+                             _titleMargin,
+                             _waterfallStartIx + _waterfallWidth * (ii+1),
+                             height());
+    painter.drawLine(waterfallBoundary);
   }
 
   // iq panels lower boundaries
 
   for (int irow = 1; irow < _nIqRows; irow++) {
-    QLineF lowerBoundary(_ascopeGrossWidth, _titleMargin + irow * _iqPlotHeight,
+    QLineF lowerBoundary(_iqStartIx, _titleMargin + irow * _iqPlotHeight,
                          width(), _titleMargin + irow * _iqPlotHeight);
     painter.drawLine(lowerBoundary);
   }
@@ -817,8 +938,8 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   // iq panels right boundaries
   
   for (int icol = 1; icol < _nIqCols; icol++) {
-    QLineF rightBoundary(_ascopeGrossWidth + icol * _iqPlotWidth, _titleMargin,
-                         _ascopeGrossWidth + icol * _iqPlotWidth, height());
+    QLineF rightBoundary(_iqStartIx + icol * _iqPlotWidth, _titleMargin,
+                         _iqStartIx + icol * _iqPlotWidth, height());
     painter.drawLine(rightBoundary);
   }
   painter.restore();
@@ -855,7 +976,6 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   QFont font(origFont);
   font.setPointSizeF(_params.iqplot_axis_label_font_size);
   painter.setFont(font);
-  // painter.setWindow(0, 0, width(), height());
 
   // axes
 
@@ -868,18 +988,6 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   QFont valuesFont(origFont);
   valuesFont.setPointSizeF(_params.iqplot_tick_values_font_size);
   
-  // _zoomWorld.drawRangeAxes(painter,
-  //                          "xxx", _yGridEnabled,
-  //                          lineColor, gridColor, textColor,
-  //                          labelFont, valuesFont, true);
-  
-  // _zoomWorld.drawTimeAxes(painter,
-  //                         _plotStartTime, _plotEndTime,
-  //                         _xGridEnabled,
-  //                         lineColor, gridColor, textColor,
-  //                         labelFont, valuesFont,
-  //                         false);
-
   _zoomWorld.drawAxisBottom(painter, "xu", true, true, true, _xGridEnabled);
   _zoomWorld.drawAxisLeft(painter, "yu", true, true, true, _yGridEnabled);
 
@@ -942,11 +1050,11 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
   string title;
   title = (radarName + "   SPECTRAL PLOTS   ");
   _zoomWorld.drawTitleTopCenter(painter, title);
-
+  
   _zoomWorld.drawAxesBox(painter);
 
   // draw the color scale
-
+  
   // const DisplayField &field = _manager.getSelectedField();
   // _zoomWorld.drawColorScale(field.getColorMap(), painter,
   //                           _params.iqplot_axis_label_font_size);
@@ -961,43 +1069,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
 
 void SpectraWidget::_refresh()
 {
-
-  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
-
-  //   FieldRenderer *field = _fieldRenderers[ifield];
-
-  //   // If needed, create new image for this field
-    
-  //   if (size() != field->getImage()->size()) {
-  //     field->createImage(width(), height());
-  //   }
-
-  //   // clear image
-    
-  //   field->getImage()->fill(_backgroundBrush.color().rgb());
-    
-  //   // set up rendering details
-
-  //   field->setTransform(_zoomTransform);
-  //   field->setUseHeight(_rangeAxisMode == Params::RANGE_AXIS_ALTITUDE);
-  //   field->setDrawInstHt(_instHtLineEnabled);
-    
-  //   // Add pointers to the beams to be rendered
-
-  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
-
-  //     std::vector< SpectraBeam* >::iterator beam;
-  //     for (beam = _beams.begin(); beam != _beams.end(); ++beam) {
-  //       (*beam)->setBeingRendered(ifield, true);
-  //       field->addBeam(*beam);
-  //     }
-      
-  //   }
-    
-  // } // ifield
-  
   update();
-
 }
 
 
@@ -1012,90 +1084,6 @@ void SpectraWidget::_setTransform(const QTransform &transform)
   
 }
   
-/*************************************************************************
- * update the renderers
- */
-
-void SpectraWidget::_updateRenderers()
-
-{
-  
-  // Update the window in the renderers
-  
-  // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-  //   _fieldRenderers[field]->setTransform(_zoomTransform);
-  // }
-
-  // Refresh the images
-
-  _refresh();
-
-}
-
-//////////////////////////////////
-// initalize the plot start time
-
-void SpectraWidget::setPlotStartTime(const RadxTime &plot_start_time,
-                                     bool clearBeams /* = false */)
-{
-  
-  _plotStartTime = plot_start_time;
-  _plotEndTime = _plotStartTime + _timeSpanSecs;
-  _pointClicked = false;
-
-  // if (clearBeams) {
-  //   for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //     Beam::deleteIfUnused(_beams[ii]);
-  //   }
-  //   _beams.clear();
-  // }
-
-  _refresh();
-
-}
-
-//////////////////////////////
-// reset the plot start time
-
-void SpectraWidget::resetPlotStartTime(const RadxTime &plot_start_time)
-{
-
-  // reset the plot start time
-
-  setPlotStartTime(plot_start_time);
-
-  // find the index for which the time is later than plot start time
-  
-  // vector<SpectraBeam *> toBeKept, toBeErased;
-  // for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //   SpectraBeam *beam = _beams[ii];
-  //   if ((beam->getBeamStartTime() - plot_start_time) >= 0.0) {
-  //     toBeKept.push_back(beam);
-  //   } else {
-  //     toBeErased.push_back(beam);
-  //   }
-  // } // ii
-
-  // erase beams
-  
-  // for (size_t ii = 0; ii < toBeErased.size(); ii++) {
-  //   Beam::deleteIfUnused(toBeErased[ii]);
-  // }
-  // _beams.clear();
-  // _beams = toBeKept;
-  
-  // set plot start time on remaining beams
-  
-  // for (size_t ii = 0; ii < _beams.size(); ii++) {
-  //   _beams[ii]->resetPlotStartTime(_plotStartTime);
-  // }
-
-  // re-render
-
-  _refresh();
-
-}
-
 /////////////////////////////////////////////////////////////	
 // Title
     
@@ -1114,26 +1102,29 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
 
   string title("TIME SERIES PLOTS");
 
-  if (_currentBeam) {
-    string rname(_currentBeam->getInfo().get_radar_name());
+  if (_beam) {
+    string rname(_beam->getInfo().get_radar_name());
     if (_params.override_radar_name) rname = _params.radar_name;
     title.append(":");
     title.append(rname);
     char dateStr[1024];
-    DateTime beamTime(_currentBeam->getTimeSecs());
+    DateTime beamTime(_beam->getTimeSecs());
     snprintf(dateStr, 1024, "%.4d/%.2d/%.2d",
              beamTime.getYear(), beamTime.getMonth(), beamTime.getDay());
     title.append(" ");
     title.append(dateStr);
     char timeStr[1024];
-    int nanoSecs = _currentBeam->getNanoSecs();
+    int nanoSecs = _beam->getNanoSecs();
     snprintf(timeStr, 1024, "%.2d:%.2d:%.2d.%.3d",
              beamTime.getHour(), beamTime.getMin(), beamTime.getSec(),
              (nanoSecs / 1000000));
     title.append("-");
     title.append(timeStr);
+    char rangeStr[1024];
+    snprintf(rangeStr, 1024, "Selected range: %.3fkm  ", _selectedRangeKm);
+    title.append(" ");
+    title.append(rangeStr);
   }
-
 
   // get bounding rectangle
   
@@ -1216,7 +1207,7 @@ void SpectraWidget::_configureAscope(int id)
   _ascopes[id]->setWindowGeom(_ascopeWidth, _ascopeHeight,
                               xOffset, yOffset);
   
-  if (_currentBeam == NULL) {
+  if (_beam == NULL) {
     return;
   }
 
@@ -1224,8 +1215,100 @@ void SpectraWidget::_configureAscope(int id)
   double minVal = AscopePlot::getMinVal(momentType);
   double maxVal = AscopePlot::getMaxVal(momentType);
   
-  _ascopes[id]->setWorldLimits(minVal, 0.0,
-                               maxVal, _currentBeam->getMaxRange());
+  double maxRange = _beam->getMaxRange();
+  if (_params.set_max_range) {
+    maxRange = _params.max_range_km;
+  }
+  
+  _ascopes[id]->setWorldLimits(minVal, 0.0, maxVal, maxRange);
+  
+  update();
+
+}
+
+/*************************************************************************
+ * create waterfall
+ */
+
+void SpectraWidget::_createWaterfall(int id)
+  
+{
+
+  WaterfallPlot *waterfall = new WaterfallPlot(this, _params, id);
+  waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
+  waterfall->setMedianFiltLen(_params._waterfall_plots[id].median_filter_len);
+  waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
+  waterfall->setUseAdaptFilt(_params._waterfall_plots[id].use_adaptive_filter);
+  waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_width_mps);
+  waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
+  waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
+  
+  WorldPlot &waterfallWorld = waterfall->getFullWorld();
+  
+  waterfallWorld.setLeftMargin(_params.waterfall_left_margin);
+  waterfallWorld.setRightMargin(0);
+  waterfallWorld.setTopMargin(0);
+  waterfallWorld.setBottomMargin(_params.waterfall_bottom_margin);
+  waterfallWorld.setTitleTextMargin(_params.waterfall_title_text_margin);
+  waterfallWorld.setLegendTextMargin(_params.waterfall_legend_text_margin);
+  waterfallWorld.setAxisTextMargin(_params.waterfall_axis_text_margin);
+
+  waterfallWorld.setColorScaleWidth(0);
+  
+  waterfallWorld.setXAxisTickLen(_params.waterfall_axis_tick_len);
+  waterfallWorld.setXNTicksIdeal(_params.waterfall_n_ticks_ideal);
+  waterfallWorld.setYAxisTickLen(_params.waterfall_axis_tick_len);
+  waterfallWorld.setYNTicksIdeal(_params.waterfall_n_ticks_ideal);
+
+  waterfallWorld.setXAxisLabelsInside(_params.waterfall_x_axis_labels_inside);
+  waterfallWorld.setYAxisLabelsInside(_params.waterfall_y_axis_labels_inside);
+
+  waterfallWorld.setTitleFontSize(_params.waterfall_title_font_size);
+  waterfallWorld.setAxisLabelFontSize(_params.waterfall_axis_label_font_size);
+  waterfallWorld.setTickValuesFontSize(_params.waterfall_tick_values_font_size);
+  waterfallWorld.setLegendFontSize(_params.waterfall_legend_font_size);
+
+  waterfallWorld.setTitleColor(_params.waterfall_title_color);
+  waterfallWorld.setAxisLineColor(_params.waterfall_axes_color);
+  waterfallWorld.setAxisTextColor(_params.waterfall_axes_color);
+  waterfallWorld.setGridColor(_params.waterfall_grid_color);
+
+  int xOffset = id * _waterfallWidth;
+  int yOffset = _titleMargin;
+  waterfallWorld.setWindowGeom(_waterfallWidth, _waterfallHeight,
+                               xOffset, yOffset);
+  
+  waterfallWorld.setWorldLimits(0.0, 0.0, 1.0, 1.0);
+
+  _waterfalls.push_back(waterfall);
+  
+}
+
+/*************************************************************************
+ * configure waterfall
+ */
+
+void SpectraWidget::_configureWaterfall(int id)
+  
+{
+
+  int xOffset = _waterfallStartIx + id * _waterfallWidth;
+  int yOffset = _titleMargin;
+  _waterfalls[id]->setWindowGeom(_waterfallWidth, _waterfallHeight,
+                                 xOffset, yOffset);
+  
+  if (_beam == NULL) {
+    return;
+  }
+
+  double maxRange = _beam->getMaxRange();
+  if (_params.set_max_range) {
+    maxRange = _params.max_range_km;
+  }
+  
+  _waterfalls[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, maxRange);
+
+  update();
 
 }
 
@@ -1238,8 +1321,19 @@ void SpectraWidget::_createIqPlot(int id)
 {
   
   IqPlot *iqplot = new IqPlot(this, _params, id);
-  Params::iqplot_type_t plotType = _params._iqplot_types[id];
-  iqplot->setPlotType(plotType);
+  iqplot->setPlotType(_params._iq_plots[id].plot_type);
+  iqplot->setRxChannel(_params._iq_plots[id].rx_channel);
+  iqplot->setFftWindow(_params._iq_plots[id].fft_window);
+  iqplot->setMedianFiltLen(_params._iq_plots[id].median_filter_len);
+  iqplot->setUseAdaptFilt(_params._iq_plots[id].use_adaptive_filter);
+  iqplot->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
+  iqplot->setClutWidthMps(_params._iq_plots[id].clutter_width_mps);
+  iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
+  iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
+  iqplot->setRegrFiltInterpAcrossNotch
+    (_params._iq_plots[id].regression_filter_interp_across_notch);
+  iqplot->setComputePlotRangeDynamically
+    (_params._iq_plots[id].compute_plot_range_dynamically);
 
   WorldPlot &iqplotWorld = iqplot->getFullWorld();
   
@@ -1273,7 +1367,7 @@ void SpectraWidget::_createIqPlot(int id)
 
   int rowNum = id / _nIqCols;
   int colNum = id - rowNum * _nIqCols; 
-  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int xOffset = _iqStartIx + colNum * _iqPlotWidth;
   int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
 
   iqplotWorld.setWindowGeom(_iqPlotWidth, _iqPlotHeight,
@@ -1295,35 +1389,32 @@ void SpectraWidget::_configureIqPlot(int id)
 
   int rowNum = id / _nIqCols;
   int colNum = id - rowNum * _nIqCols; 
-  int xOffset = _ascopeGrossWidth + colNum * _iqPlotWidth;
+  int xOffset = _iqStartIx + colNum * _iqPlotWidth;
   int yOffset = _titleMargin + rowNum * _iqPlotHeight; 
   
   _iqPlots[id]->setWindowGeom(_iqPlotWidth, _iqPlotHeight,
                               xOffset, yOffset);
   
-  if (_currentBeam == NULL) {
+  if (_beam == NULL) {
     return;
   }
 
-  Params::iqplot_type_t plotType = _iqPlots[id]->getPlotType();
-  double minVal = IqPlot::getMinVal(plotType);
-  double maxVal = IqPlot::getMaxVal(plotType);
-  
-  _iqPlots[id]->setWorldLimits(0.0, minVal,
-                               _params.n_samples, maxVal);
+  _iqPlots[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, 1.0);
+
+  update();
 
 }
 
 /////////////////////////////////////////////////////////////	
 // determine the selected panel
-    
+
 void SpectraWidget::_identSelectedPanel(int xx, int yy,
                                         panel_type_t &panelType,
                                         int &panelId)
 
 {
 
-  // frist check for clicks in the top title bar
+  // first check for clicks in the top title bar
 
   if (yy < _titleMargin) {
     panelType = PANEL_TITLE;
@@ -1333,20 +1424,35 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 
   // then check for clicks in the ascope panels to the left
 
-  if (xx < _ascopeGrossWidth) {
+  if (xx >= _iqStartIx) {
+
+    // IQ plot
+    
+    panelType = PANEL_IQPLOT;
+    int icol = (xx - _iqStartIx) / _iqPlotWidth;
+    int irow = (yy - _titleMargin) / _iqPlotHeight;
+    panelId = irow * _nIqCols + icol;
+    
+  } else if (xx >= _waterfallStartIx) {
+
+    // waterfall plot
+    
+    panelType = PANEL_WATERFALL;
+    panelId = (xx - _waterfallStartIx) / _waterfallWidth;
+    
+  } else {
+
+    // ascope plot
+    
     panelType = PANEL_ASCOPE;
-    panelId = xx / _ascopeWidth;
-    return;
+    panelId = (xx - _ascopeStartIx) / _ascopeWidth;
+    
   }
 
-  // we must therefore be in the spectra panels
-
-  panelType = PANEL_IQPLOT;
-  int icol = (xx - _ascopeGrossWidth) / _iqPlotWidth;
-  int irow = (yy - _titleMargin) / _iqPlotHeight;
-  panelId = irow * _nIqRows + icol;
-
 }
+
+//////////////////////////////////////////////////////////
+// create and show context menu
 
 void SpectraWidget::showContextMenu(const QPoint &pos) 
 {
@@ -1355,200 +1461,763 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
                       _contextMenuPanelType,
                       _contextMenuPanelId);
 
-  // if (_contextMenuPanelType == PANEL_ASCOPE) {
-  //   cerr << "In ASCOPE, id: " << _contextMenuPanelId << endl;
-  // } else if (_contextMenuPanelType == PANEL_SPECTRA) {
-  //   cerr << "In SPECTRA, id: " << _contextMenuPanelId << endl;
-  // } else {
-  //   cerr << "In title" << endl;
-  // }
-
   if (_contextMenuPanelType == PANEL_ASCOPE) {
-
-    QMenu contextMenu("AscopeMenu", this);
-
-    QAction setToDbz("Set to DBZ", this);
-    connect(&setToDbz, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToDbz()));
-    contextMenu.addAction(&setToDbz);
-  
-    QAction setToVel("Set to VEL", this);
-    connect(&setToVel, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToVel()));
-    contextMenu.addAction(&setToVel);
-  
-    QAction setToWidth("Set to WIDTH", this);
-    connect(&setToWidth, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToWidth()));
-    contextMenu.addAction(&setToWidth);
-  
-    QAction setToNcp("Set to NCP", this);
-    connect(&setToNcp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToNcp()));
-    contextMenu.addAction(&setToNcp);
-  
-    QAction setToSnr("Set to SNR", this);
-    connect(&setToSnr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToSnr()));
-    contextMenu.addAction(&setToSnr);
-  
-    QAction setToDbm("Set to DBM", this);
-    connect(&setToDbm, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToDbm()));
-    contextMenu.addAction(&setToDbm);
-  
-    QAction setToZdr("Set to ZDR", this);
-    connect(&setToZdr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToZdr()));
-    contextMenu.addAction(&setToZdr);
-  
-    QAction setToLdr("Set to LDR", this);
-    connect(&setToLdr, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToLdr()));
-    contextMenu.addAction(&setToLdr);
-  
-    QAction setToRhohv("Set to RHOHV", this);
-    connect(&setToRhohv, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToRhohv()));
-    contextMenu.addAction(&setToRhohv);
-  
-    QAction setToPhidp("Set to PHIDP", this);
-    connect(&setToPhidp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToPhidp()));
-    contextMenu.addAction(&setToPhidp);
-  
-    QAction setToKdp("Set to KDP", this);
-    connect(&setToKdp, SIGNAL(triggered()), this,
-            SLOT(ascopeSetFieldToKdp()));
-    contextMenu.addAction(&setToKdp);
-
-    QAction unzoom("Unzoom", this);
-    connect(&unzoom, SIGNAL(triggered()), this,
-            SLOT(ascopeUnzoom()));
-    if (_ascopes[_contextMenuPanelId]->getIsZoomed()) {
-      contextMenu.addAction(&unzoom);
-    }
-      
-    QAction xGridLinesOn("X grid lines on", this);
-    connect(&xGridLinesOn, SIGNAL(triggered()), this,
-            SLOT(ascopeSetXGridLinesOn()));
-    QAction xGridLinesOff("X grid lines off", this);
-    connect(&xGridLinesOff, SIGNAL(triggered()), this,
-            SLOT(ascopeSetXGridLinesOff()));
-    if (_ascopes[_contextMenuPanelId]->getXGridLinesOn()) {
-      contextMenu.addAction(&xGridLinesOff);
-    } else {
-      contextMenu.addAction(&xGridLinesOn);
-    }
-      
-    QAction yGridLinesOn("Y grid lines on", this);
-    connect(&yGridLinesOn, SIGNAL(triggered()), this,
-            SLOT(ascopeSetYGridLinesOn()));
-    QAction yGridLinesOff("Y grid lines off", this);
-    connect(&yGridLinesOff, SIGNAL(triggered()), this,
-            SLOT(ascopeSetYGridLinesOff()));
-    if (_ascopes[_contextMenuPanelId]->getYGridLinesOn()) {
-      contextMenu.addAction(&yGridLinesOff);
-    } else {
-      contextMenu.addAction(&yGridLinesOn);
-    }
-      
-    contextMenu.exec(this->mapToGlobal(pos));
-
+    _createAscopeContextMenu(pos);
+  } else if (_contextMenuPanelType == PANEL_WATERFALL) {
+    _createWaterfallContextMenu(pos);
+  } else if (_contextMenuPanelType == PANEL_IQPLOT) {
+    _createIqPlotContextMenu(pos);
   }
 
 }
 
-void SpectraWidget::ascopeSetFieldToDbz()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBZ);
-  _configureAscope(_contextMenuPanelId);
-}
+//////////////////////////////////////////////////////////
+// context menu for Ascope
 
-void SpectraWidget::ascopeSetFieldToVel()
+void SpectraWidget::_createAscopeContextMenu(const QPoint &pos) 
 {
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::VEL);
-  _configureAscope(_contextMenuPanelId);
-}
 
-void SpectraWidget::ascopeSetFieldToWidth()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::WIDTH);
-  _configureAscope(_contextMenuPanelId);
-}
+  QMenu contextMenu("AscopeMenu", this);
 
-void SpectraWidget::ascopeSetFieldToSnr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::SNR);
-  _configureAscope(_contextMenuPanelId);
-}
+  // set the field selection menu
 
-void SpectraWidget::ascopeSetFieldToNcp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::NCP);
-  _configureAscope(_contextMenuPanelId);
-}
+  int id = _contextMenuPanelId;
+  QAction setToDbz("Set to DBZ", this);
+  connect(&setToDbz, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::DBZ);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToDbz);
+  
+  QAction setToVel("Set to VEL", this);
+  connect(&setToVel, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::VEL);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToVel);
+  
+  QAction setToWidth("Set to WIDTH", this);
+  connect(&setToWidth, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::WIDTH);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToWidth);
+  
+  QAction setToNcp("Set to NCP", this);
+  connect(&setToNcp, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::NCP);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToNcp);
+  
+  QAction setToSnr("Set to SNR", this);
+  connect(&setToSnr, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::SNR);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToSnr);
+  
+  QAction setToDbm("Set to DBM", this);
+  connect(&setToDbm, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::DBM);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToDbm);
+  
+  QAction setToZdr("Set to ZDR", this);
+  connect(&setToZdr, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::ZDR);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToZdr);
+  
+  QAction setToLdr("Set to LDR", this);
+  connect(&setToLdr, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::LDR);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToLdr);
+  
+  QAction setToRhohv("Set to RHOHV", this);
+  connect(&setToRhohv, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::RHOHV);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToRhohv);
+  
+  QAction setToPhidp("Set to PHIDP", this);
+  connect(&setToPhidp, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::PHIDP);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToPhidp);
+  
+  QAction setToKdp("Set to KDP", this);
+  connect(&setToKdp, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setMomentType(Params::KDP);
+            _configureAscope(id);
+          } );
+  contextMenu.addAction(&setToKdp);
 
-void SpectraWidget::ascopeSetFieldToDbm()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::DBM);
-  _configureAscope(_contextMenuPanelId);
-}
+  // unzoom action
 
-void SpectraWidget::ascopeSetFieldToZdr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::ZDR);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToLdr()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::LDR);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToRhohv()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::RHOHV);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToPhidp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::PHIDP);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeSetFieldToKdp()
-{
-  _ascopes[_contextMenuPanelId]->setMomentType(Params::KDP);
-  _configureAscope(_contextMenuPanelId);
-}
-
-void SpectraWidget::ascopeUnzoom()
-{
-  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-    _ascopes[ii]->unzoom();
+  QAction unzoom("Unzoom", this);
+  connect(&unzoom, &QAction::triggered,
+          [this, id] () {
+            for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+              _ascopes[ii]->unzoom();
+            }
+          } );
+  if (_ascopes[id]->getIsZoomed()) {
+    contextMenu.addAction(&unzoom);
   }
+
+  // X grid lines on/off
+
+  QAction xGridLinesOn("X grid lines on", this);
+  connect(&xGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setXGridLinesOn(true);
+          } );
+  QAction xGridLinesOff("X grid lines off", this);
+  connect(&xGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setXGridLinesOn(false);
+          } );
+  if (_ascopes[id]->getXGridLinesOn()) {
+    contextMenu.addAction(&xGridLinesOff);
+  } else {
+    contextMenu.addAction(&xGridLinesOn);
+  }
+  
+  // Y grid lines on/off
+
+  QAction yGridLinesOn("Y grid lines on", this);
+  connect(&yGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setYGridLinesOn(true);
+          } );
+  QAction yGridLinesOff("Y grid lines off", this);
+  connect(&yGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _ascopes[id]->setYGridLinesOn(false);
+          } );
+  if (_ascopes[id]->getYGridLinesOn()) {
+    contextMenu.addAction(&yGridLinesOff);
+  } else {
+    contextMenu.addAction(&yGridLinesOn);
+  }
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
 }
 
-void SpectraWidget::ascopeSetXGridLinesOn()
+//////////////////////////////////////////////////////////
+// context menu for Waterfall
+
+void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos) 
 {
-  _ascopes[_contextMenuPanelId]->setXGridLinesOn(true);
+
+  QMenu contextMenu("WaterfallMenu", this);
+
+  ///////////////////////////////////////
+  // select plot type sub-menu
+  
+  int id = _contextMenuPanelId;
+  QMenu setPlotTypeMenu("Set Plot Type", &contextMenu);
+  contextMenu.addMenu(&setPlotTypeMenu);
+  
+  QAction plotHc("Plot HC", &contextMenu);
+  connect(&plotHc, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_HC);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotHc);
+  
+  QAction plotVc("Plot VC", &contextMenu);
+  connect(&plotVc, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_VC);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotVc);
+  
+  QAction plotHx("Plot HX", &contextMenu);
+  connect(&plotHx, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_HX);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotHx);
+  
+  QAction plotVx("Plot VX", &contextMenu);
+  connect(&plotVx, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_VX);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotVx);
+  
+  QAction plotZdr("Plot ZDR", &contextMenu);
+  connect(&plotZdr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_ZDR);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotZdr);
+  
+  QAction plotPhidp("Plot PHIDP", &contextMenu);
+  connect(&plotPhidp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_PHIDP);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotPhidp);
+  
+  QAction plotSdevZdr("Plot SDEV_ZDR", &contextMenu);
+  connect(&plotSdevZdr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_ZDR);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevZdr);
+  
+  QAction plotSdevPhidp("Plot SDEV_PHIDP", &contextMenu);
+  connect(&plotSdevPhidp, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_PHIDP);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevPhidp);
+  
+  QAction plotCmd("Plot CMD", &contextMenu);
+  connect(&plotCmd, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_CMD);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotCmd);
+  
+  ///////////////////////////////////////
+  // select FFT window menu
+  
+  QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
+  contextMenu.addMenu(&setFftWindowMenu);
+  
+  QAction setFftWindowRect("Rectangular", &contextMenu);
+  connect(&setFftWindowRect, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_RECT);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowRect);
+
+  QAction setFftWindowVonHann("VonHann", &contextMenu);
+  connect(&setFftWindowVonHann, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_VONHANN);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowVonHann);
+
+  QAction setFftWindowBlackman("Blackman", &contextMenu);
+  connect(&setFftWindowBlackman, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackman);
+
+  QAction setFftWindowBlackmanNuttall("BlackmanNuttall", &contextMenu);
+  connect(&setFftWindowBlackmanNuttall, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN_NUTTALL);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackmanNuttall);
+
+  QAction setFftWindowTukey10("Tukey10", &contextMenu);
+  connect(&setFftWindowTukey10, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_10);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey10);
+
+  QAction setFftWindowTukey20("Tukey20", &contextMenu);
+  connect(&setFftWindowTukey20, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_20);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey20);
+
+  QAction setFftWindowTukey30("Tukey30", &contextMenu);
+  connect(&setFftWindowTukey30, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_30);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey30);
+
+  QAction setFftWindowTukey50("Tukey50", &contextMenu);
+  connect(&setFftWindowTukey50, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_50);
+            _configureWaterfall(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey50);
+
+  ///////////////////////////////////////
+  // filtering details menu
+  
+  QMenu setFilteringMenu("Set Filtering", &contextMenu);
+  contextMenu.addMenu(&setFilteringMenu);
+  
+  QAction setMedianFiltLen("Set median filter len", &contextMenu);
+  connect(&setMedianFiltLen, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int len = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set median filter len:"),
+               _waterfalls[id]->getMedianFiltLen(),
+               1, 100, 1, &ok);
+            _waterfalls[id]->setMedianFiltLen(len);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setMedianFiltLen);
+  
+  QAction useAdaptFilter("Use adaptive filter", &contextMenu);
+  useAdaptFilter.setCheckable(true);
+  useAdaptFilter.setChecked
+    (_waterfalls[id]->getUseAdaptFilt());
+  connect(&useAdaptFilter, &QAction::triggered,
+          [this, id] (bool state) {
+            _waterfalls[id]->setUseAdaptFilt(state);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&useAdaptFilter);
+
+  QAction setClutterWidth("Set clutter width", &contextMenu);
+  connect(&setClutterWidth, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double width = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
+               _waterfalls[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               &ok, Qt::WindowFlags());
+            _waterfalls[id]->setClutWidthMps(width);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setClutterWidth);
+
+  QAction useRegressionFilter("Use regression filter", &contextMenu);
+  useRegressionFilter.setCheckable(true);
+  useRegressionFilter.setChecked
+    (_waterfalls[id]->getUseRegrFilt());
+  connect(&useRegressionFilter, &QAction::triggered,
+          [this, id] (bool state) {
+            _waterfalls[id]->setUseRegrFilt(state);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&useRegressionFilter);
+
+  QAction setRegressionOrder("Set regression order", &contextMenu);
+  connect(&setRegressionOrder, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int order = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               _waterfalls[id]->getRegrOrder(),
+               1, 100, 1, &ok);
+            _waterfalls[id]->setRegrOrder(order);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionOrder);
+  
+  // unzoom action
+
+  QAction unzoom("Unzoom", this);
+  connect(&unzoom, &QAction::triggered,
+          [this, id] () {
+            for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+              _waterfalls[ii]->unzoom();
+            }
+          } );
+  if (_waterfalls[id]->getIsZoomed()) {
+    contextMenu.addAction(&unzoom);
+  }
+
+  // X grid lines on/off
+
+  QAction xGridLinesOn("X grid lines on", this);
+  connect(&xGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setXGridLinesOn(true);
+          } );
+  QAction xGridLinesOff("X grid lines off", this);
+  connect(&xGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setXGridLinesOn(false);
+          } );
+  if (_waterfalls[id]->getXGridLinesOn()) {
+    contextMenu.addAction(&xGridLinesOff);
+  } else {
+    contextMenu.addAction(&xGridLinesOn);
+  }
+  
+  // Y grid lines on/off
+
+  QAction yGridLinesOn("Y grid lines on", this);
+  connect(&yGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setYGridLinesOn(true);
+          } );
+  QAction yGridLinesOff("Y grid lines off", this);
+  connect(&yGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setYGridLinesOn(false);
+          } );
+  if (_waterfalls[id]->getYGridLinesOn()) {
+    contextMenu.addAction(&yGridLinesOff);
+  } else {
+    contextMenu.addAction(&yGridLinesOn);
+  }
+  
+  // show the context menu
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
 }
 
-void SpectraWidget::ascopeSetXGridLinesOff()
+//////////////////////////////////////////////////////////
+// context menu for IqPlot
+
+void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos) 
 {
-  _ascopes[_contextMenuPanelId]->setXGridLinesOn(false);
+
+  ///////////////////////////////////////
+  // context menu
+  
+  QMenu contextMenu("IqPlotMenu", this);
+
+  ///////////////////////////////////////
+  // select plot type sub-menu
+  
+  int id = _contextMenuPanelId;
+  QMenu setPlotTypeMenu("Set Plot Type", &contextMenu);
+  contextMenu.addMenu(&setPlotTypeMenu);
+  
+  QAction plotSpectrumPower("Plot spectral power", &contextMenu);
+  connect(&plotSpectrumPower, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_POWER);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumPower);
+  
+  QAction plotSpectrumPhase("Plot spectral phase", &contextMenu);
+  connect(&plotSpectrumPhase, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_PHASE);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumPhase);
+  
+  QAction plotSpectrumZdr("Plot spectral zdr", &contextMenu);
+  connect(&plotSpectrumZdr, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_ZDR);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumZdr);
+  
+  QAction plotSpectrumPhidp("Plot spectral phidp", &contextMenu);
+  connect(&plotSpectrumPhidp, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_PHIDP);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumPhidp);
+  
+  QAction plotTsPower("Plot TS Power", &contextMenu);
+  connect(&plotTsPower, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::TS_POWER);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotTsPower);
+  
+  QAction plotTsPhase("Plot TS Phase", &contextMenu);
+  connect(&plotTsPhase, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::TS_PHASE);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotTsPhase);
+  
+  QAction plotIVals("Plot I Vals", &contextMenu);
+  connect(&plotIVals, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::I_VALS);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotIVals);
+  
+  QAction plotQVals("Plot Q Vals", &contextMenu);
+  connect(&plotQVals, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::Q_VALS);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotQVals);
+  
+  QAction plotIvsQ("Plot I vs Q", &contextMenu);
+  connect(&plotIvsQ, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::I_VS_Q);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotIvsQ);
+  
+  QAction plotPhasor("PlotPhasor", &contextMenu);
+  connect(&plotPhasor, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::PHASOR);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotPhasor);
+
+  QAction dynamicRange("Compute plot range dynamically", &contextMenu);
+  dynamicRange.setCheckable(true);
+  dynamicRange.setChecked
+    (_iqPlots[id]->getComputePlotRangeDynamically());
+  connect(&dynamicRange, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setComputePlotRangeDynamically(state);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&dynamicRange);
+  
+  ///////////////////////////////////////
+  // set channel sub-menu
+  
+  QMenu setChannelMenu("Set Channel", &contextMenu);
+  contextMenu.addMenu(&setChannelMenu);
+  
+  QAction setChannelHc("Set channel HC", &contextMenu);
+  connect(&setChannelHc, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRxChannel(Params::CHANNEL_HC);
+            _configureIqPlot(id);
+          } );
+  setChannelMenu.addAction(&setChannelHc);
+
+  QAction setChannelVc("Set channel VC", &contextMenu);
+  connect(&setChannelVc, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRxChannel(Params::CHANNEL_VC);
+            _configureIqPlot(id);
+          } );
+  setChannelMenu.addAction(&setChannelVc);
+
+  QAction setChannelHx("Set channel HX", &contextMenu);
+  connect(&setChannelHx, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRxChannel(Params::CHANNEL_HX);
+            _configureIqPlot(id);
+          } );
+  setChannelMenu.addAction(&setChannelHx);
+
+  QAction setChannelVx("Set channel VX", &contextMenu);
+  connect(&setChannelVx, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRxChannel(Params::CHANNEL_VX);
+            _configureIqPlot(id);
+          } );
+  setChannelMenu.addAction(&setChannelVx);
+
+  ///////////////////////////////////////
+  // select FFT window menu
+  
+  QMenu setFftWindowMenu("Set FFT Window", &contextMenu);
+  contextMenu.addMenu(&setFftWindowMenu);
+  
+  QAction setFftWindowRect("Rectangular", &contextMenu);
+  connect(&setFftWindowRect, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_RECT);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowRect);
+
+  QAction setFftWindowVonHann("VonHann", &contextMenu);
+  connect(&setFftWindowVonHann, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_VONHANN);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowVonHann);
+
+  QAction setFftWindowBlackman("Blackman", &contextMenu);
+  connect(&setFftWindowBlackman, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackman);
+
+  QAction setFftWindowBlackmanNuttall("BlackmanNuttall", &contextMenu);
+  connect(&setFftWindowBlackmanNuttall, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_BLACKMAN_NUTTALL);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowBlackmanNuttall);
+
+  QAction setFftWindowTukey10("Tukey10", &contextMenu);
+  connect(&setFftWindowTukey10, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_10);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey10);
+
+  QAction setFftWindowTukey20("Tukey20", &contextMenu);
+  connect(&setFftWindowTukey20, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_20);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey20);
+
+  QAction setFftWindowTukey30("Tukey30", &contextMenu);
+  connect(&setFftWindowTukey30, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_30);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey30);
+
+  QAction setFftWindowTukey50("Tukey50", &contextMenu);
+  connect(&setFftWindowTukey50, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setFftWindow(Params::FFT_WINDOW_TUKEY_50);
+            _configureIqPlot(id);
+          } );
+  setFftWindowMenu.addAction(&setFftWindowTukey50);
+
+  ///////////////////////////////////////
+  // filtering details menu
+  
+  QMenu setFilteringMenu("Set Filtering", &contextMenu);
+  contextMenu.addMenu(&setFilteringMenu);
+  
+  QAction setMedianFiltLen("Set median filter len", &contextMenu);
+  connect(&setMedianFiltLen, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int len = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set median filter len:"),
+               _iqPlots[id]->getMedianFiltLen(),
+               1, 100, 1, &ok);
+            _iqPlots[id]->setMedianFiltLen(len);
+            _configureWaterfall(id);
+          } );
+  setFilteringMenu.addAction(&setMedianFiltLen);
+  
+  QAction useAdaptFilt("Use adaptive filter", &contextMenu);
+  useAdaptFilt.setCheckable(true);
+  useAdaptFilt.setChecked
+    (_iqPlots[id]->getUseAdaptFilt());
+  connect(&useAdaptFilt, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setUseAdaptFilt(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&useAdaptFilt);
+
+  QAction plotClutModel("Plot clutter model", &contextMenu);
+  plotClutModel.setCheckable(true);
+  plotClutModel.setChecked
+    (_iqPlots[id]->getPlotClutModel());
+  connect(&plotClutModel, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setPlotClutModel(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&plotClutModel);
+
+  QAction setClutterWidth("Set clutter width", &contextMenu);
+  connect(&setClutterWidth, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double width = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
+               _iqPlots[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               &ok, Qt::WindowFlags());
+            _iqPlots[id]->setClutWidthMps(width);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setClutterWidth);
+
+  QAction useRegressionFilter("Use regression filter", &contextMenu);
+  useRegressionFilter.setCheckable(true);
+  useRegressionFilter.setChecked
+    (_iqPlots[id]->getUseRegrFilt());
+  connect(&useRegressionFilter, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setUseRegrFilt(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&useRegressionFilter);
+
+  QAction setRegressionOrder("Set regression order", &contextMenu);
+  connect(&setRegressionOrder, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            int order = QInputDialog::getInt
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set regression order:"),
+               _iqPlots[id]->getRegrOrder(),
+               1, 100, 1, &ok);
+            _iqPlots[id]->setRegrOrder(order);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionOrder);
+  
+  QAction regrInterpNotch("Regr interp across notch", &contextMenu);
+  regrInterpNotch.setCheckable(true);
+  regrInterpNotch.setChecked
+    (_iqPlots[id]->getRegrFiltInterpAcrossNotch());
+  connect(&regrInterpNotch, &QAction::triggered,
+          [this, id] (bool state) {
+            _iqPlots[id]->setRegrFiltInterpAcrossNotch(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&regrInterpNotch);
+  
+  // show the context menu
+  
+  contextMenu.exec(this->mapToGlobal(pos));
+  
 }
 
-void SpectraWidget::ascopeSetYGridLinesOn()
-{
-  _ascopes[_contextMenuPanelId]->setYGridLinesOn(true);
-}
-
-void SpectraWidget::ascopeSetYGridLinesOff()
-{
-  _ascopes[_contextMenuPanelId]->setYGridLinesOn(false);
-}
 

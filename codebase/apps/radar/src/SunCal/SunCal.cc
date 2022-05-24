@@ -3413,6 +3413,8 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
 
   int elCentroidIndex =
     (int) ((sunCentroidElOffset - _gridMinEl) /  _gridDeltaEl);
+
+  double dbmAdd = 200.0;
   
   for (int iaz = 0; iaz < _gridNAz; iaz++) {
     MomentsSun *moments = _interpMoments[iaz][elCentroidIndex];
@@ -3426,7 +3428,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
       double az = _gridMinAz + iaz * _gridDeltaAz;
       azArray.push_back(az);
       // add 200 to dbm to ensure real roots
-      azDbm.push_back(dbm + 200);
+      azDbm.push_back(dbm + dbmAdd);
     }
   }
   
@@ -3472,7 +3474,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
       double el = _gridMinEl + iel * _gridDeltaEl;
       elArray.push_back(el);
       // add 200 to dbm to ensure real roots
-      elDbm.push_back(dbm + 200);
+      elDbm.push_back(dbm + dbmAdd);
     }
   }
   
@@ -3533,7 +3535,7 @@ void SunCal::_computeSunCentroid(power_channel_t channel)
     }
   }
 
-  double quadPowerDbm = (_ccAz + _ccEl) / 2.0 - 200.0;
+  double quadPowerDbm = (_ccAz + _ccEl) / 2.0 - dbmAdd;
 
   switch (channel) {
   case channelHc:
@@ -3702,16 +3704,6 @@ void SunCal::_computeSS(const vector<MomentsSun> &selected,
       continue;
     }
 
-    sumRatioDbmVcHc += moments.ratioDbmVcHc;
-    sumRatioDbmVxHx += moments.ratioDbmVxHx;
-    sumRatioDbmVcHx += moments.ratioDbmVcHx;
-    sumRatioDbmVxHc += moments.ratioDbmVxHc;
-
-    sumPowerHc += moments.powerHc;
-    sumPowerVc += moments.powerVc;
-    sumPowerHx += moments.powerHx;
-    sumPowerVx += moments.powerVx;
-
     if (moments.powerHc < minPower) {
       minPower = moments.powerHc;
     }
@@ -3723,8 +3715,12 @@ void SunCal::_computeSS(const vector<MomentsSun> &selected,
       sumRvvhh0 = RadarComplex::complexSum(sumRvvhh0, moments.Rvvhh0);
     }
     
+    sumPowerHc += moments.powerHc;
+    sumPowerVc += moments.powerVc;
     sumRatioDbmVcHc += moments.ratioDbmVcHc;
     if (_alternating) {
+      sumPowerHx += moments.powerHx;
+      sumPowerVx += moments.powerVx;
       sumRatioDbmVxHx += moments.ratioDbmVxHx;
       sumRatioDbmVcHx += moments.ratioDbmVcHx;
       sumRatioDbmVxHc += moments.ratioDbmVxHc;
@@ -3739,7 +3735,7 @@ void SunCal::_computeSS(const vector<MomentsSun> &selected,
     nn++;
 
   }
-  
+
   if (nn < 2) {
     return;
   }
@@ -6080,7 +6076,19 @@ int SunCal::_writeSummaryToSpdb()
   xml += TaXml::writeDouble("centroidElOffsetVc", 1, _sunCentroidElOffsetVc);
   xml += TaXml::writeInt("nXpolPoints", 1, _nXpolPoints);
   xml += TaXml::writeDouble("meanXpolRatioDb", 1, _meanXpolRatioDb);
+
+  xml += TaXml::writeDouble("ratioDbmVcHc", 1, _statsForZdrBias.meanRatioDbmVcHc);
+  xml += TaXml::writeDouble("ratioDbmVxHx", 1, _statsForZdrBias.meanRatioDbmVxHx);
+  xml += TaXml::writeDouble("ratioDbmVcHx", 1, _statsForZdrBias.meanRatioDbmVcHx);
+  xml += TaXml::writeDouble("ratioDbmVxHc", 1, _statsForZdrBias.meanRatioDbmVxHc);
   xml += TaXml::writeDouble("S1S2", 1, _statsForZdrBias.meanS1S2);
+  xml += TaXml::writeDouble("sdevS1S2", 1, _statsForZdrBias.sdevS1S2);
+  xml += TaXml::writeDouble("SS", 1, _statsForZdrBias.meanSS);
+  xml += TaXml::writeDouble("sdevSS", 1, _statsForZdrBias.sdevSS);
+  xml += TaXml::writeDouble("corr00Hc", 1, _statsForZdrBias.meanCorr00Hc);
+  xml += TaXml::writeDouble("corr00Vc", 1, _statsForZdrBias.meanCorr00Vc);
+  xml += TaXml::writeDouble("corr00", 1, _statsForZdrBias.meanCorr00);
+
   xml += TaXml::writeDouble("zdrCorr", 1, _zdrCorr);
   xml += TaXml::writeDouble("meanXmitPowerHDbm", 1, _meanXmitPowerHDbm);
   xml += TaXml::writeDouble("meanXmitPowerVDbm", 1, _meanXmitPowerVDbm);

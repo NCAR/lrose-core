@@ -176,6 +176,8 @@ void SigmetRadxFile::clear()
 
   _hrdSourcesSet = false;
 
+  _recordSaved = false;
+
 }
 
 /////////////////////////////////////////////////////////
@@ -312,7 +314,7 @@ int SigmetRadxFile::readFromPath(const string &path,
   
   int iret = 0;
   while (!feof(_file)) {
-    
+
     if (_readSweepData(false, cerr) == 0) {
       
       if (_nFields > 0) {
@@ -339,7 +341,7 @@ int SigmetRadxFile::readFromPath(const string &path,
 
   // sort rays by time order if we have accurate time
 
-  if (_hasSubsecTime) {
+  if ((_hasSubsecTime) && (!_readPreserveRays)) {
     _readVol->sortRaysByTime();
   }
   
@@ -551,17 +553,41 @@ int SigmetRadxFile::_readRecord()
 
 {
 
-  if (fread(_record, 1, RAW_RECORD_LEN, _file) != RAW_RECORD_LEN) {
-    if (!feof(_file)) {
-      int errNum = errno;
-      _addErrStr("ERROR reading raw record");
-      _addErrStr("  ", strerror(errNum));
+  if (_recordSaved) {
+
+    // use previously saved record
+
+    memcpy(_record, _saved, sizeof(_record));
+    _recordSaved = false;
+
+  } else {
+
+    // read in new record
+
+    if (fread(_record, 1, RAW_RECORD_LEN, _file) != RAW_RECORD_LEN) {
+      if (!feof(_file)) {
+        int errNum = errno;
+        _addErrStr("ERROR reading raw record");
+        _addErrStr("  ", strerror(errNum));
+      }
+      return -1;
     }
-    return -1;
+
   }
-  
+
   return 0;
   
+}
+
+/////////////////////////////////////////
+// save the current record for later use
+// occurs at a sweep change
+
+void SigmetRadxFile::_saveRecord()
+
+{
+  memcpy(_saved, _record, sizeof(_record));
+  _recordSaved = true;
 }
 
 /////////////////////////////////////
@@ -639,7 +665,7 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
   _nyquist = _wavelengthM / (4.0 * _prtSec);
   switch (_prodHdr.end.trig_rate_scheme) {
     case PRF_DUAL_4_5:
-      _prtRatio = 5.0 / 4.0;
+      _prtRatio = 4.0 / 5.0;
       _nyquist *= 4.0;
       _dualPrt = true;
       _prtRatio = 5.0 / 4.0;
@@ -647,12 +673,12 @@ int SigmetRadxFile::_readHeaders(bool doPrint, ostream &out)
     case PRF_DUAL_3_4:
       _nyquist *= 3.0;
       _dualPrt = true;
-      _prtRatio = 4.0 / 3.0;
+      _prtRatio = 3.0 / 4.0;
       break;
     case PRF_DUAL_2_3:
       _nyquist *= 2.0;
       _dualPrt = true;
-      _prtRatio = 3.0 / 2.0;
+      _prtRatio = 2.0 / 3.0;
       break;
     default:
       _dualPrt = false;
@@ -736,7 +762,8 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
   _nRaysSweep = 0;
   _inDatHdrs.clear();
   _nBytesData = 0;
-  while (ptr < (Radx::ui08 *) _record + RAW_RECORD_LEN) {
+  _nRaysPerRevolution = 0;
+  while (ptr < (Radx::ui08 *) _record + RAW_RECORD_LEN - sizeof(ingest_data_header_t)) {
     ingest_data_header_t inDatHdr;
     memcpy(&inDatHdr, ptr, sizeof(inDatHdr));
     _swap(inDatHdr);
@@ -744,6 +771,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
 	inDatHdr.sweep_num != _sweepNumber) {
       break;
     }
+    ptr += sizeof(inDatHdr);
     if (doPrint || _verbose) {
       out << "====>>> field number: " << _inDatHdrs.size() << endl;
       _print(inDatHdr, out);
@@ -758,10 +786,9 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     _nRaysSweep = inDatHdr.n_rays_written;
     int nBytesThisField = inDatHdr.id_hdr.nbytes - sizeof(ingest_data_header_t);
     _nBytesData += nBytesThisField;
-    ptr += sizeof(inDatHdr);
     _inDatHdrs.push_back(inDatHdr);
-    if (_inDatHdrs.size() == 1) {
-      _inDatHdr0 = inDatHdr;
+    if (_nRaysPerRevolution == 0 && inDatHdr.data_code != FIELD_EXT_HDR) {
+      _nRaysPerRevolution = inDatHdr.nrays_per_revolution;
     }
   } // while
 
@@ -778,6 +805,7 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
   if (doPrint || _verbose) {
     out << "==>> nFields: " << _nFields << endl;
     out << "==>> nBytesData: " << _nBytesData << endl;
+    out << "==>> _inDatHdrs.size(): " << _inDatHdrs.size() << endl;
   }
 
   if (_nFields < 1) {
@@ -788,10 +816,14 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     return 0;
   }
   
-  for (size_t ii = 0; ii < _inDatHdrs.size(); ii++) {
-    const ingest_data_header_t &inDatHdr = _inDatHdrs[ii];
+  for (size_t ifield = 0; ifield < _inDatHdrs.size(); ifield++) {
+    const ingest_data_header_t &inDatHdr = _inDatHdrs[ifield];
     int fieldId = inDatHdr.data_code;
-    if (fieldId != FIELD_EXT_HDR) {
+    if (fieldId == FIELD_EXT_HDR) {
+      if (doPrint || (_debug && _sweepIndex == 0) || _verbose) {
+        out << "Found extended header, ifield: " << ifield << endl;
+      }
+    } else {
       string name = _fieldId2Name(fieldId);
       string units = _fieldId2Units(fieldId);
       double scale = 1.0, bias = 0.0;
@@ -809,19 +841,17 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
   // add remaining data to buffer
   
   _inBuf.reset();
-  int nBytesLeft = RAW_RECORD_LEN - (ptr - _record);
+  size_t nBytesRead = ptr - _record;
+  size_t nBytesLeft = RAW_RECORD_LEN - nBytesRead;
   if (doPrint || _verbose) {
-    out << "first record, nBytesLeft: " << nBytesLeft << endl;
+    out << "first record of ray, nBytesRead, nBytesLeft: " 
+        << nBytesRead << ", " << nBytesLeft << endl;
   }
   _inBuf.add(ptr, nBytesLeft);
 
   // read remaining records for this sweep
   
   while (!feof(_file)) {
-
-    // save current position, for stepping back
-
-    long pos = ftell(_file);
 
     // read in next record
 
@@ -837,23 +867,33 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
     // check header for sweep number change
 
     memcpy(&_rawHdr, ptr, sizeof(_rawHdr));
+    _swap(_rawHdr);
     if (doPrint || _verbose) {
       _print(_rawHdr, out);
     }
     ptr += sizeof(_rawHdr);
     
     if (_rawHdr.sweep_num != _sweepNumber) {
-      // gone one record too far, step back, return
-      fseek(_file, pos, SEEK_SET);
+      // gone one record too far, save for next time
+      if (doPrint || _verbose) {
+        out << "===>> one record too far, saving record for next time <<===" << endl;
+        out << "===>> _rawHdr.sweep_num, _sweepNumber: " 
+            << _rawHdr.sweep_num << ", "
+            << _sweepNumber << endl;
+      }
+      _saveRecord();
       break;
     }
     
     // add to in buffer
     
-    int nBytesLeft = RAW_RECORD_LEN - (ptr - _record);
+    size_t nBytesRead = ptr - _record;
+    size_t nBytesLeft = RAW_RECORD_LEN - nBytesRead;
     if (doPrint || _verbose) {
-      out << "later record, nBytesLeft: " << nBytesLeft << endl;
+      out << "later record, nBytesRead, nBytesLeft: " 
+          << nBytesRead << ", " << nBytesLeft << endl;
     }
+    
     _inBuf.add(ptr, nBytesLeft);
 
   } // while
@@ -883,16 +923,17 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
 
   for (int ii = 0; ii < nComp16; ii++) {
     Radx::si16 code = comp[ii];
+    _swap(&code, 1);
     if ((doPrint && _debug) || _verbose) {
-      out << "ii, code, nRayFields: "
-	   << ii << ", " << code <<  ", "
-	   << nRayFieldsFound << " - ";
+      out << "===>> processing _inBuf, ii, code, nRayFields: "
+          << ii << ", " << code <<  ", "
+          << nRayFieldsFound << endl;
     }
     if (code == 1) {
       int nBytesField = (count - prevCount) * 2;
       prevCount = count;
       if ((doPrint && _debug) || _verbose) {
-	out << "  ==>> end of field, nBytesField: " << nBytesField << " <<==";
+	out << "  ==>> end of field, nBytesField: " << nBytesField << " <<==" << endl;
       }
       if (nBytesField > 0) {
         nRayFieldsFound++;
@@ -903,28 +944,25 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
       }
     } else if (code >= 0x0003) {
       Radx::si16 nZeros = code;
-      if ((doPrint && _debug) || _verbose) {
-	out << " " << nZeros << " zeros";
-      }
       count += nZeros;
+      if ((doPrint && _debug) || _verbose) {
+	out << "==>>>> " << nZeros << " zeros, count: " << count << endl;
+      }
       // add zeros to data buffer
       _dataBuf.add(zeros, nZeros * sizeof(Radx::si16));
     } else {
       Radx::si16 nDataWords = (code & 0x7FFF);
       if(nDataWords >= 1) {
-	if ((doPrint && _debug) || _verbose) {
-	  out << " " << nDataWords << "  data words follow";
-	}
-
         // add data to data buffer
 
         _dataBuf.add(comp + ii + 1, nDataWords * sizeof(Radx::si16));
 	ii += nDataWords;
 	count += nDataWords;
+	if ((doPrint && _debug) || _verbose) {
+	  out << "==>>>> " << nDataWords << "  data words follow, count: " << count << endl;
+	}
+
       }
-    }
-    if ((doPrint && _debug) || _verbose) {
-      out << ", count: " << count << endl;
     }
   } // ii
 
@@ -948,6 +986,38 @@ int SigmetRadxFile::_readSweepData(bool doPrint, ostream &out)
 
   return 0;
 
+}
+
+bool SigmetRadxFile::_detectIncreasingTimeElevation() {
+    bool divergence = false;
+    size_t iray = 0;
+    bool equal = true;
+    Radx::ui16 i_sec = 0;
+    Radx::ui16 i1_sec = 0;
+    //cerr << "i_sec " << i_sec << endl;
+    while (iray < _rayInfo.size()-1 && equal) {
+      i_sec = _rayInfo[iray].hdr.seconds;
+      i1_sec = _rayInfo[iray+1].hdr.seconds;      
+      if (i_sec == i1_sec) {
+        iray += 1;
+      } else {
+        equal = false;
+      }
+    }
+    if (i_sec < i1_sec) {
+      // the times are increasing
+      // check the elevation for divergence
+      if (_rayInfo[iray].hdr.start_el < _rayInfo[iray+1].hdr.start_el)
+        divergence = false;
+      else divergence = true;
+    } else {
+      // the times are decreasing
+      // check the elevation for divergence
+      if (_rayInfo[iray].hdr.start_el < _rayInfo[iray+1].hdr.start_el)
+        divergence = true;
+      else divergence = false; 
+    }
+    return divergence;
 }
 
 /////////////////////////////////////
@@ -975,10 +1045,39 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
   // somewhere other than north, so we need to find the starting point
 
   int startIndex = 0;
-  for (size_t iray = 1; iray < _rayInfo.size(); iray++) {
-    if (_rayInfo[iray].hdr.seconds < _rayInfo[iray-1].hdr.seconds) {
-      startIndex = iray;
-      break;
+  if (_readPreserveRays) {
+
+    // always sort by increasing time
+    // then, depending on the elevation rising or falling sort by 
+    // increasing elevation or decreasing elevation.
+    // HOW to detect, elevation rising or falling?
+
+    bool isSweepDiverging = _detectIncreasingTimeElevation();
+
+    struct {
+        bool operator()(RayInfo a, RayInfo b) const { 
+          if (a.hdr.seconds != b.hdr.seconds) return a.hdr.seconds < b.hdr.seconds;
+          else return a.hdr.start_el > b.hdr.start_el; }
+    } diverging;
+
+    struct {
+        bool operator()(RayInfo a, RayInfo b) const { 
+          if (a.hdr.seconds != b.hdr.seconds) return a.hdr.seconds < b.hdr.seconds;
+          else return a.hdr.start_el < b.hdr.start_el; }
+    } increasing;
+
+    if (isSweepDiverging) {
+      std::sort(_rayInfo.begin(), _rayInfo.end(), diverging);
+    } else {
+      std::sort(_rayInfo.begin(), _rayInfo.end(), increasing);
+    }
+  } else {
+
+    for (size_t iray = 1; iray < _rayInfo.size(); iray++) {
+      if (_rayInfo[iray].hdr.seconds < _rayInfo[iray-1].hdr.seconds) {
+        startIndex = iray;
+        break;
+      }
     }
   }
   
@@ -1002,12 +1101,20 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
     int fieldNum = 0;
 
     for (size_t ifield = 0; ifield < _inDatHdrs.size(); ifield++) {
-      
+
       // get ray header
 
       ray_header_t rayHdr;
       memcpy(&rayHdr, rayPtr, sizeof(rayHdr));
       _swap(rayHdr);
+
+      // sanity check
+
+      if (rayHdr.n_gates <= 0 ||
+          rayHdr.seconds < 0 ||
+          rayHdr.seconds > 60) {
+        continue;
+      }
 
       if (doPrint || _verbose) {
         out << "====== rayHdr ======" << endl;
@@ -1169,14 +1276,18 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
       fieldNum++;
       
     } // ifield
-    
+
     if (doPrint || _verbose) {
       ray->print(out);
     }
 
-    // add to vector
+    // add to vector if time is good
 
-    _readVol->addRay(ray);
+    if (ray->getTimeDouble() != 0) {
+      _readVol->addRay(ray);
+    } else {
+      delete ray;
+    }
 
   } // iray
   
@@ -1839,6 +1950,10 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   } 
   _endTimeSecs = raySecs;
   _endNanoSecs = rayNanoSecs;
+  if (_startTimeSecs == 0 && _endTimeSecs != 0) {
+    _startTimeSecs = _endTimeSecs;
+    _startNanoSecs = _endNanoSecs;
+  } 
 
   ray.setTime(raySecs, rayNanoSecs);
   ray.setVolumeNumber(_volumeNumber);
@@ -1886,7 +2001,7 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   ray.setTrueScanRateDegPerSec(Radx::missingMetaDouble);
   ray.setTargetScanRateDegPerSec(Radx::missingMetaDouble);
   ray.setIsIndexed(false);
-  ray.setAngleResDeg(360.0 / (double) _inDatHdr0.nrays_per_revolution);
+  ray.setAngleResDeg(360.0 / (double) _nRaysPerRevolution);
   ray.setAntennaTransition(false);
   ray.setNSamples(_prodHdr.end.nsamples);
   ray.setPulseWidthUsec(_pulseWidthUs);

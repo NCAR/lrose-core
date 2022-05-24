@@ -38,9 +38,11 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <set>
 class RadxVol;
 class RadxFile;
 class RadxRay;
+class RadxField;
 class VarTransform;
 using namespace std;
 
@@ -71,7 +73,7 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  vector<string> _readPaths;
+  set<string> _readPaths;
 
   vector<VarTransform *> _varTrans;
 
@@ -84,6 +86,7 @@ private:
   int _runRealtimeNoLdata();
   int _readFile(const string &filePath,
                 RadxVol &vol);
+  int _readGeorefCorrections(RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
   void _setupRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);
@@ -95,7 +98,7 @@ private:
   int _writeVol(RadxVol &vol);
   void _censorFields(RadxVol &vol);
   void _censorRay(RadxRay *ray);
-
+  bool _checkFieldForCensoring(const RadxField *field);
 
 };
 

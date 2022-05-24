@@ -136,7 +136,7 @@ int RadxDiffVol::Run()
         _outFile.open(_params.output_file_path, ios::out);
       }
     }
-    catch (std::ofstream::failure e) {
+    catch (std::ofstream::failure &e) {
       cerr << "ERROR - RadxDiffVol::Run" << endl;
       cerr << "Exception opening file: " << _params.output_file_path << endl;
       cerr << e.what() << endl;

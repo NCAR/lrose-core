@@ -636,24 +636,22 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("run_mode");
     tt->descr = tdrpStrDup("Run mode");
-    tt->help = tdrpStrDup("PRINT_MODE: print power, averaged over a number of gates, data to the screen, a line at a time.\n\nASCOPE_MODE: print data for a range of gates to the screen.\n\nCAL_MODE: average the powers for a number of gates, and write out in a file suitable for calibration.\n\nSERVER_MODE: listen on a port, and when a connection is established read an incoming set of commands in XML, average power over gates, and respond to the client in XML.\n\nMAX_POWER_MODE: compute the max power at any range within the specified gate limits, and print out the max power and range at which it occurs most often.\n\n\n\nMAX_POWER_SERVER_MODE: compute max power stats, write results to socket.");
+    tt->help = tdrpStrDup("PRINT_MODE: print power, averaged over a number of gates, data to the screen, a line at a time.\n\nASCOPE_MODE: print data for a range of gates to the screen.\n\nSERVER_MODE: listen on a port, and when a connection is established read an incoming set of commands in XML, average power over gates, and respond to the client in XML.\n\nMAX_POWER_MODE: compute the max power at any range within the specified gate limits, and print out the max power and range at which it occurs most often.\n\n\n\nMAX_POWER_SERVER_MODE: compute max power stats, write results to socket.");
     tt->val_offset = (char *) &run_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("run_mode_t");
-    tt->enum_def.nfields = 6;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("PRINT_MODE");
       tt->enum_def.fields[0].val = PRINT_MODE;
       tt->enum_def.fields[1].name = tdrpStrDup("ASCOPE_MODE");
       tt->enum_def.fields[1].val = ASCOPE_MODE;
-      tt->enum_def.fields[2].name = tdrpStrDup("CAL_MODE");
-      tt->enum_def.fields[2].val = CAL_MODE;
-      tt->enum_def.fields[3].name = tdrpStrDup("SERVER_MODE");
-      tt->enum_def.fields[3].val = SERVER_MODE;
-      tt->enum_def.fields[4].name = tdrpStrDup("MAX_POWER_MODE");
-      tt->enum_def.fields[4].val = MAX_POWER_MODE;
-      tt->enum_def.fields[5].name = tdrpStrDup("MAX_POWER_SERVER_MODE");
-      tt->enum_def.fields[5].val = MAX_POWER_SERVER_MODE;
+      tt->enum_def.fields[2].name = tdrpStrDup("SERVER_MODE");
+      tt->enum_def.fields[2].val = SERVER_MODE;
+      tt->enum_def.fields[3].name = tdrpStrDup("MAX_POWER_MODE");
+      tt->enum_def.fields[3].val = MAX_POWER_MODE;
+      tt->enum_def.fields[4].name = tdrpStrDup("MAX_POWER_SERVER_MODE");
+      tt->enum_def.fields[4].val = MAX_POWER_SERVER_MODE;
     tt->single_val.e = PRINT_MODE;
     tt++;
     
@@ -711,6 +709,18 @@
     tt->descr = tdrpStrDup("Print all meta-data headers and pulse headers.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &print_all_headers - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'print_lag1_coherent_power'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_lag1_coherent_power");
+    tt->descr = tdrpStrDup("Print the lag1 (coherent) power in addition to lag0 power.");
+    tt->help = tdrpStrDup("lag1 powers can help to distinguish between noise and coherent signal.");
+    tt->val_offset = (char *) &print_lag1_coherent_power - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -959,30 +969,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &tcp_server_port - &_start_;
     tt->single_val.i = 12000;
-    tt++;
-    
-    // Parameter 'dual_channel'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("dual_channel");
-    tt->descr = tdrpStrDup("Handle dual channels.");
-    tt->help = tdrpStrDup("Normally, only a single channel is used.");
-    tt->val_offset = (char *) &dual_channel - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'fast_alternating'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("fast_alternating");
-    tt->descr = tdrpStrDup("Radar is in fast-alternating mode.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &fast_alternating - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'invert_hv_flag'

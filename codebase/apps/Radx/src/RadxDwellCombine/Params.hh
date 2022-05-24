@@ -86,7 +86,8 @@ public:
     DWELL_STATS_MEDIAN = 1,
     DWELL_STATS_MAXIMUM = 2,
     DWELL_STATS_MINIMUM = 3,
-    DWELL_STATS_MIDDLE = 4
+    DWELL_STATS_MIDDLE = 4,
+    DWELL_STATS_DISCRETE_MODE = 5
   } dwell_stats_method_t;
 
   typedef enum {

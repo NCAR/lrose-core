@@ -29,7 +29,7 @@ public:
   ScriptEditorController(ScriptEditorView *view);
   ScriptEditorController(ScriptEditorView *view, ScriptEditorModel *model);
 
-  vector<string> getFieldNames();
+  vector<string> *getFieldNames();
   // vector<float> *getData(string fieldName);
   //void setData(string fieldName, vector<float> *data);
 
@@ -41,8 +41,13 @@ public:
   void printQJSEngineContext();
   void addVariableToScriptEditor(QString name, QJSValue value);
 
+  void initProgress(int nFiles);
+  void updateProgress(int currentIndex, int lastIndex);
+  void batchEditComplete();
+
 signals:
   void scriptChangedVolume(QStringList newFieldNames); // const RadxVol &radarDataVolume);
+  void scriptComplete();
 
 public slots:
   void needFieldNames();
@@ -50,7 +55,14 @@ public slots:
   void getVolumeChanges();
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
-  void runForEachRayScript(QString script, bool useBoundary);
+  void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
+  void runForEachRayScript(QString script, int currentSweepIndex,
+  bool useBoundary, vector<Point> &boundaryPoints);
+  void runMultipleArchiveFiles(vector<string> &archiveFiles, 
+  QString script, bool useBoundary,
+  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
+
 private:
 
 
@@ -58,18 +70,37 @@ private:
   ScriptEditorView *_currentView;
   SoloFunctionsController *_soloFunctionsController;
 
-  QJSEngine engine;
+  QJSEngine *engine;
 
-  vector<string> initialFieldNames;
+  vector<string> *initialFieldNames;
+
+  bool _cancelPressed;
+
+  void reset();
 
   void setupBoundaryArray();
   void setupFieldArrays();
   void saveFieldArrays(std::map<QString, QString> &previousVariableContext);
+  void saveFieldVariableAssignments(std::map<QString, QString> &previousVariableContext);
+  QStringList *findNewFieldNames(std::map<QString, QString> &previousVariableContext);
   void setupSoloFunctions(SoloFunctionsController *soloFunctions);
-  void fieldNamesProvided(vector<string> fieldNames);
+  void fieldNamesProvided(vector<string> *fieldNames);
   void _assign(string tempName, string userDefinedName);
-  void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
-    std::map<QString, QString> *currentVariableContext);
+  void _assign(string tempName, string userDefinedName,
+    int sweepIndex);
+  void _assignByRay(string tempName, string userDefinedName);
+
+  void _copy(string tempName, string userDefinedName);
+  void _copy(string tempName, string userDefinedName,
+    int sweepIndex);
+  
+  void regularizeRays();
+  //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
+  //  std::map<QString, QString> *currentVariableContext);
+  vector<bool> *getListOfFieldsReferencedInScript(
+    vector<string> &fields, string script);
+  string lowerIt(string s);
+
 };
 
 

@@ -26,7 +26,7 @@ install_doc:
 install: install_bin
 
 clean_lib:
-clean_all: clean clean_lib clean_bin clean_insure
+clean_all: clean clean_lib clean_bin
 
 
 

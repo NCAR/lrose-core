@@ -76,52 +76,26 @@ public:
 
   typedef enum {
     REALTIME = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    FILELIST = 1
   } mode_t;
 
   typedef enum {
-    BUFR_ASCII = 0
+    BUFR_ASCII = 0,
+    ITALY_ASCII = 1,
+    ITALY_ROS2 = 2
   } input_type_t;
 
   typedef enum {
-    ATTR_STRING = 0,
-    ATTR_INT = 1,
-    ATTR_DOUBLE = 2,
-    ATTR_INT_ARRAY = 3,
-    ATTR_DOUBLE_ARRAY = 4
-  } attr_type_t;
-
-  typedef enum {
-    OUTPUT_ENCODING_ASIS = 0,
-    OUTPUT_ENCODING_FLOAT32 = 1,
-    OUTPUT_ENCODING_INT32 = 2,
-    OUTPUT_ENCODING_INT16 = 3,
-    OUTPUT_ENCODING_INT08 = 4
+    OUTPUT_ENCODING_FLOAT32 = 0,
+    OUTPUT_ENCODING_INT16 = 1,
+    OUTPUT_ENCODING_INT08 = 2
   } output_encoding_t;
 
   typedef enum {
-    SCALING_DYNAMIC = 0,
-    SCALING_SPECIFIED = 1
-  } output_scaling_t;
-
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_FORAY = 2,
-    OUTPUT_FORMAT_NEXRAD = 3,
-    OUTPUT_FORMAT_UF = 4,
-    OUTPUT_FORMAT_MDV_RADIAL = 5,
-    OUTPUT_FORMAT_NSSL_MRD = 6,
-    OUTPUT_FORMAT_ODIM_HDF5 = 7
+    OUTPUT_FORMAT_CFRADIAL1 = 0,
+    OUTPUT_FORMAT_CFRADIAL2 = 1,
+    OUTPUT_FORMAT_ODIM_HDF5 = 2
   } output_format_t;
-
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
 
   typedef enum {
     START_AND_END_TIMES = 0,
@@ -133,20 +107,11 @@ public:
   // struct typedefs
 
   typedef struct {
-    char* name;
-    attr_type_t attrType;
-    char* val;
-  } attr_t;
-
-  typedef struct {
-    char* field_name;
+    char* input_field_name;
+    char* output_field_name;
     char* long_name;
     char* standard_name;
     char* units;
-    output_encoding_t encoding;
-    output_scaling_t output_scaling;
-    double output_scale;
-    double output_offset;
   } output_field_t;
 
   ///////////////////////////
@@ -169,7 +134,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -467,45 +432,9 @@ public:
 
   char* search_ext;
 
-  tdrp_bool_t read_set_radar_num;
-
-  int read_radar_num;
-
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
-  tdrp_bool_t aggregate_all_files_on_read;
-
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
-
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
-  tdrp_bool_t set_ngates_constant;
-
-  tdrp_bool_t remap_to_predominant_range_geometry;
-
-  tdrp_bool_t remap_to_finest_range_geometry;
-
-  tdrp_bool_t set_fixed_angle_limits;
-
-  double lower_fixed_angle_limit;
-
-  double upper_fixed_angle_limit;
-
-  tdrp_bool_t set_sweep_num_limits;
-
-  int lower_sweep_num;
-
-  int upper_sweep_num;
-
-  tdrp_bool_t apply_strict_angle_limits;
-
-  tdrp_bool_t override_start_range;
+  tdrp_bool_t override_gate_geometry;
 
   double start_range_km;
-
-  tdrp_bool_t override_gate_spacing;
 
   double gate_spacing_km;
 
@@ -525,25 +454,9 @@ public:
 
   double radar_altitude_meters;
 
-  tdrp_bool_t change_radar_latitude_sign;
-
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
-
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
-  tdrp_bool_t adjust_sweep_limits_using_angles;
-
-  tdrp_bool_t optimize_surveillance_transitions;
-
-  double optimized_transitions_max_elev_error;
 
   char* version;
 
@@ -561,89 +474,28 @@ public:
 
   char* author;
 
-  tdrp_bool_t add_user_specified_global_attributes;
-
-  attr_t *_user_defined_global_attributes;
-  int user_defined_global_attributes_n;
+  tdrp_bool_t set_output_fields;
 
   output_field_t *_output_fields;
   int output_fields_n;
 
+  output_encoding_t output_encoding;
+
   output_format_t output_format;
 
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  tdrp_bool_t output_force_ngates_vary;
-
-  int compression_level;
+  tdrp_bool_t cfradial_force_ngates_vary;
 
   char* output_dir;
 
   filename_mode_t output_filename_mode;
 
-  char* output_filename_prefix;
-
   char* output_filename_suffix;
-
-  tdrp_bool_t include_instrument_name_in_file_name;
-
-  tdrp_bool_t include_site_name_in_file_name;
-
-  tdrp_bool_t include_subsecs_in_file_name;
-
-  tdrp_bool_t include_scan_type_in_file_name;
-
-  tdrp_bool_t include_vol_num_in_file_name;
-
-  tdrp_bool_t use_hyphen_in_file_name_datetime_part;
 
   char* output_filename;
 
-  tdrp_bool_t append_day_dir_to_output_dir;
-
-  tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t write_individual_sweeps;
-
   tdrp_bool_t write_latest_data_info;
 
-  tdrp_bool_t separate_output_dirs_by_scan_type;
-
-  char* surveillance_subdir;
-
-  char* sector_subdir;
-
-  char* rhi_subdir;
-
-  char* vert_subdir;
-
-  char* sun_subdir;
-
-  tdrp_bool_t override_missing_metadata_values;
-
-  double missing_metadata_double;
-
-  float missing_metadata_float;
-
-  int missing_metadata_int;
-
-  int missing_metadata_char;
-
-  tdrp_bool_t override_missing_field_values;
-
-  double missing_field_fl64;
-
-  double missing_field_fl32;
-
-  int missing_field_si32;
-
-  int missing_field_si16;
-
-  int missing_field_si08;
+  tdrp_bool_t print_ros2_to_stdout;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -652,7 +504,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[121];
+  mutable TDRPtable _table[58];
 
   const char *_className;
 

@@ -417,6 +417,11 @@ paramdef string {
 } background_color;
 
 paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of text annotation in main display.";
+} text_color;
+
+paramdef string {
   p_default = "white";
   p_descr = "Color of grids and range rings.";
 } grid_and_range_ring_color;
@@ -426,11 +431,21 @@ paramdef int {
   p_descr = "Font size for labels on range rings (pixels).";
 } range_ring_label_font_size;
 
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of cross at click point.";
+} click_cross_color;
+
 paramdef int {
   p_default = 11;
   p_descr = "Size of cross at click point (pixels).";
   p_help = "Size of cross drawn at click point, to select data.";
 } click_cross_size;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Line width for click cross.";
+} click_cross_line_width;
 
 commentdef {
   p_header = "PPI MODE DISPLAY";
@@ -1034,6 +1049,17 @@ paramdef boolean {
 } images_include_field_label_in_file_name;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan type in the image file name.";
+  p_help = "If TRUE, the scan type will be added to the image file name.";
+} images_include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the image file name.";
+  p_help = "If TRUE, the scan Id will be added to the image file name.";} images_include_scan_id_in_file_name;
+
+paramdef boolean {
   p_default = true;
   p_descr = "Option to write latest_data_info files when an image is created.";
   p_descr = "If true, _latest_data_info files will be written to the output directory, and the file write will be registered with the DataMapper.";
@@ -1128,4 +1154,15 @@ paramdef double {
   p_default = 0.150;
   p_descr = "Gate spacing in simulated mode (km).";
 } sim_gate_spacing_km;
+
+commentdef {
+  p_header = "CLICK POINT DATA MESSAGING";
+  p_text = "Writing the click point location to an FMQ in XML format.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.";
+} click_point_fmq_url;
 

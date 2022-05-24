@@ -22,7 +22,7 @@ AC_CANONICAL_HOST
 AC_CONFIG_HEADERS([config.h])
 
 # initialize automake
-AM_INIT_AUTOMAKE([-Wall foreign])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 # Check for the existance of this file before proceeding.
 AC_CONFIG_SRCDIR([libs/cidd/src/include/cidd/cidd_lib.h])

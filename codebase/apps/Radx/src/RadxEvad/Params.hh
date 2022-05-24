@@ -100,7 +100,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -438,6 +438,8 @@ public:
 
   double profile_height_interval;
 
+  tdrp_bool_t compute_profile_spacing_from_data;
+
   tdrp_bool_t write_results_to_netcdf;
 
   char* output_netcdf_dir;
@@ -461,7 +463,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[54];
 
   const char *_className;
 

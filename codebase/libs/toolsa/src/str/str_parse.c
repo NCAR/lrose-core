@@ -60,9 +60,9 @@ int STRparse(const char *inpstr, char **outstr,int nchars, int max_fields, int m
  
 {
 
-	register const char * instr;
-	register char * tbuf;
-	register int i,end_flag,in_progress;
+	const char * instr;
+	char * tbuf;
+	int i,end_flag,in_progress;
 	int	k = 0;
 	char	tmpbuf[MAX_LINE];
 

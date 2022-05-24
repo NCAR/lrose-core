@@ -9,7 +9,7 @@
 #define PROCESSING_NODE_H
 
 #include <rapmath/Node.hh>
-#include <rapmath/FindSimple.hh>
+#include <rapmath/MathFindSimple.hh>
 
 
 class FunctionDef;
@@ -392,7 +392,7 @@ public:
    * @param[out] assignMissing
    */
   bool getSimpleCompare(std::string &compareName, double &compareV,
-			bool &compareMissing, FindSimple::Compare_t &c,
+			bool &compareMissing, MathFindSimple::Compare_t &c,
 			std::string &assignName, double &assignV,
 			bool &assignMissing) const;
 
@@ -419,7 +419,7 @@ public:
    * @param[out] assignFromName
    */
   bool getSimpleCompare(std::string &compareName, double &compareV,
-			bool &compareMissing, 	FindSimple::Compare_t &c,
+			bool &compareMissing, 	MathFindSimple::Compare_t &c,
 			std::string &assignToName,
 			std::string &assignFromName) const;
 

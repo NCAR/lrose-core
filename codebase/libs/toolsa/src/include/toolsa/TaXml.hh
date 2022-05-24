@@ -119,6 +119,13 @@ public:
     attribute(const string &name,
               const string &val) :
             _name(name), _val(val) {}
+    attribute(const string &name, int val) :
+            _name(name) 
+    {
+      char text[128];
+      snprintf(text, 128, "%d", val);
+      setVal(text);
+    }
     inline const string &getName() const { return _name; }
     inline const string &getVal() const { return _val; }
     inline void setName(const string &name) { _name = name; }
@@ -416,7 +423,7 @@ public:
   static string writeStartTag(const string &tag, int level);
   static string writeEndTag(const string &tag, int level);
 
-  // Write start tage with attributes
+  // Write start tag with attributes
   // New line is appended if requested.
   
   static string writeStartTag(const string &tag,
@@ -424,6 +431,28 @@ public:
                               const vector<attribute> &attrs,
                               bool addNewLine);
 
+  // Write start tag with single attribute
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              const string &attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              bool attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              int attrVal);
+  
+  static string writeStartTag(const string &tag,
+                              int level,
+                              const string &attrName,
+                              double attrVal);
+  
   // write tag with attributes, close tag
   
   static string writeTagClosed(const string &tag,

@@ -770,7 +770,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_ext");
     tt->descr = tdrpStrDup("File name extension.");
-    tt->help = tdrpStrDup("If set, only files with this extension will be processed. This can be a comma-delimited list of extensions.");
+    tt->help = tdrpStrDup("If not empty, only files with this extension will be processed. This can be a comma-delimited list of extensions.");
     tt->val_offset = (char *) &search_ext - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -782,8 +782,20 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("search_substr");
     tt->descr = tdrpStrDup("File name sub-string.");
-    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->help = tdrpStrDup("If not empty, only files with names containing this sub-string will be processed.");
     tt->val_offset = (char *) &search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'ignore_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("ignore_substr");
+    tt->descr = tdrpStrDup("File name ignore string.");
+    tt->help = tdrpStrDup("If not empty, only files with names NOT containing this sub-string will be processed.");
+    tt->val_offset = (char *) &ignore_substr - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
@@ -1035,7 +1047,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("copy_to_time_stamped_file");
     tt->descr = tdrpStrDup("Option to copy to a file with name based on the time.");
-    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.");
+    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'copy_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.");
     tt->val_offset = (char *) &copy_to_time_stamped_file - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

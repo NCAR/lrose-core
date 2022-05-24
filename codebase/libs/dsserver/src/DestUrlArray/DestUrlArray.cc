@@ -144,11 +144,17 @@ int DestUrlArray::load(const string &dest_host_list_file_path,
   GetHost getHost;
   char line[256];
   while (fgets(line, 256, hostFile) != NULL) {
-    
+   
+    size_t len = strlen(line);
+    if(len == 0 || line[len -1] != '\n'){
+      break;
+   }
+ 
+ 
     if (line[0] == '#') continue; // comment line
 
     char hostName[256];
-    if (sscanf(line, "%s", hostName) != 1) continue; // cannot parse
+    if ( snprintf(hostName, 256, "%s", line) < 0 ) continue; // cannot parse
 
     if (strlen(hostName) == 0) continue; // zero-length hostname
 
@@ -225,7 +231,7 @@ int DestUrlArray::load(const string &dest_url_list_file_path)
     if (line[0] == '#') continue; // comment line
     
     char url[256];
-    if (sscanf(line, "%s", url) != 1) continue; // cannot parse
+    if (snprintf(url,256, "%s", line) < 1) continue; // cannot parse
     if (strlen(url) == 0) continue; // zero-length
 
     // add

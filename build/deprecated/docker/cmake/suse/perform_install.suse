@@ -1,0 +1,107 @@
+#! /bin/bash
+
+###########################################################
+# install rpm from within a container and test it
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform lrose rpm install and test"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. lrose-core, lrose-radx, lrose-cidd"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. opensuse"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. leap, latest"
+    echo "  -n ? :  set rpm name"
+    echo "  -l ? :  set log name"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=opensuse
+os_version=latest
+lrose_pkg=lrose-core
+debug=true
+rpm_name=unknown
+log_name=unknown
+
+# Parse command line options.
+while getopts hdt:p:v:n:l: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        n)
+            rpm_name=$OPTARG
+            ;;
+        l)
+            log_name=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  performing rpm install"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    rpm_name: ${rpm_name}"
+  echo "    log_name: ${log_name}"
+fi
+
+# get the rpm
+
+rpmPath=/pkgDir/${rpm_name}
+echo "  ==>>> rpmPath: $rpmPath"
+logPath=/pkgDir/${log_name}
+echo "  ==>>> logPath: $logPath"
+
+# install the rpm
+
+zypper --no-gpg-checks install -y ${rpmPath}
+
+# check that RadxPrint runs
+
+if [ -f "/usr/local/cidd/bin/CIDD" ]
+then
+  /usr/local/cidd/bin/CIDD -h > $logPath 2>&1
+else
+  /usr/local/lrose/bin/RadxPrint -h > $logPath 2>&1
+fi
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R $logPath
+chmod g+w -R $logPath
+

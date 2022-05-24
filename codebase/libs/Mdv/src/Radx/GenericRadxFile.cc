@@ -255,7 +255,7 @@ int GenericRadxFile::readFromPath(const string &path,
   // do not recognize file type
 
   _addErrStr("ERROR - GenericRadxFile::readFromPath");
-  _addErrStr("  File format not recognized: ", path);
+  _addErrStr("  Cannot read path: ", path);
   return -1;
 
 }
@@ -308,7 +308,7 @@ int GenericRadxFile::printNative(const string &path, ostream &out,
   // do not recognize file type
   
   _addErrStr("ERROR - GenericRadxFile::printNative");
-  _addErrStr("  File format not recognized: ", path);
+  _addErrStr("  Cannot read path: ", path);
   return -1;
 
 }

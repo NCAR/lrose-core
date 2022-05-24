@@ -109,6 +109,18 @@ public:
   } primary_axis_t;
 
   typedef enum {
+    SWEEP_MODE_SECTOR = 1,
+    SWEEP_MODE_RHI = 3,
+    SWEEP_MODE_VERTICAL_POINTING = 4,
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+    SWEEP_MODE_SUNSCAN = 11,
+    SWEEP_MODE_POINTING = 12,
+    SWEEP_MODE_SUNSCAN_RHI = 17,
+    SWEEP_MODE_ELECTRONIC_STEERING = 20
+  } sweep_mode_t;
+
+  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -143,14 +155,13 @@ public:
   typedef enum {
     OUTPUT_FORMAT_CFRADIAL = 0,
     OUTPUT_FORMAT_CFRADIAL2 = 1,
-    OUTPUT_FORMAT_NCXX = 2,
-    OUTPUT_FORMAT_DORADE = 3,
-    OUTPUT_FORMAT_FORAY = 4,
-    OUTPUT_FORMAT_NEXRAD = 5,
-    OUTPUT_FORMAT_UF = 6,
-    OUTPUT_FORMAT_MDV_RADIAL = 7,
-    OUTPUT_FORMAT_NSSL_MRD = 8,
-    OUTPUT_FORMAT_ODIM_HDF5 = 9
+    OUTPUT_FORMAT_DORADE = 2,
+    OUTPUT_FORMAT_FORAY = 3,
+    OUTPUT_FORMAT_NEXRAD = 4,
+    OUTPUT_FORMAT_UF = 5,
+    OUTPUT_FORMAT_MDV_RADIAL = 6,
+    OUTPUT_FORMAT_NSSL_MRD = 7,
+    OUTPUT_FORMAT_ODIM_HDF5 = 8
   } output_format_t;
 
   typedef enum {
@@ -567,6 +578,8 @@ public:
 
   tdrp_bool_t preserve_sweeps;
 
+  tdrp_bool_t preserve_rays;
+
   tdrp_bool_t remove_long_range_rays;
 
   tdrp_bool_t remove_short_range_rays;
@@ -613,6 +626,10 @@ public:
 
   tdrp_bool_t apply_georeference_corrections;
 
+  tdrp_bool_t read_georeference_corrections;
+
+  char* georeference_corrections_path;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -658,6 +675,12 @@ public:
   tdrp_bool_t optimize_surveillance_transitions;
 
   double optimized_transitions_max_elev_error;
+
+  tdrp_bool_t override_sweep_mode;
+
+  sweep_mode_t sweep_mode;
+
+  tdrp_bool_t set_sweep_mode_from_ray_angles;
 
   tdrp_bool_t adjust_sweep_limits_using_angles;
 
@@ -713,6 +736,11 @@ public:
 
   int censoring_min_valid_run;
 
+  tdrp_bool_t specify_fields_to_be_censored;
+
+  char* *_fields_to_be_censored;
+  int fields_to_be_censored_n;
+
   tdrp_bool_t apply_linear_transforms;
 
   transform_field_t *_transform_fields;
@@ -752,6 +780,8 @@ public:
   tdrp_bool_t include_scan_type_in_file_name;
 
   tdrp_bool_t include_scan_name_in_file_name;
+
+  tdrp_bool_t include_scan_id_in_file_name;
 
   tdrp_bool_t include_range_resolution_in_file_name;
 
@@ -812,7 +842,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[179];
+  mutable TDRPtable _table[188];
 
   const char *_className;
 

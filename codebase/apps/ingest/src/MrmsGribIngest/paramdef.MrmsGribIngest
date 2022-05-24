@@ -63,13 +63,13 @@ commentdef {
 }
 
 typedef enum {
-  REALTIME, FILELIST
+  REALTIME, ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
   p_default = REALTIME;
   p_descr = "Operating mode for reading in data";
-  p_help = "In REALTIME mode, the program waits for a new input file. We can either scan an input directory for new files, or monitor the latest_data_info. In FILELIST mode, the list of files to be read are provided on the command line.";
+  p_help = "In REALTIME mode, the program waits for a new input file. We can either scan an input directory for new files, or monitor the latest_data_info. In ARCHIVE mode, the files in the input_dir are read for times between te start and end times. In FILELIST mode, the list of files to be read are provided on the command line.";
 } mode;
 
 paramdef string {

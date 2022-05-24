@@ -70,10 +70,10 @@ void Info::clear(void)
 //------------------------------------------------------------------
 void Info::info_print(const LogStream::Log_t e) const
 {
-  LOGT(e) << DateTime::strn(_time);
-  LOGT(e) << "radar:" << _radar_name;
-  LOGT(e) << "      " << _radar_loc;
-  LOGT(e) << "      lat:" << _radar_lat << ", lon:" << _radar_lon 
+  LOGV(e) << DateTime::strn(_time);
+  LOGV(e) << "radar:" << _radar_name;
+  LOGV(e) << "      " << _radar_loc;
+  LOGV(e) << "      lat:" << _radar_lat << ", lon:" << _radar_lon 
 	  << ", alt:" << _radar_alt_km;
   dprint(e);
 }

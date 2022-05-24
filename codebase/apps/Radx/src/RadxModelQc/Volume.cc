@@ -36,9 +36,9 @@ std::vector<FunctionDef> Volume::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
   ret.push_back(FunctionDef(_volAverageStr, "v", "Prt or Nsamples",
-			    "average over volume"));
+			    "Average value over the entire volume"));
   ret.push_back(FunctionDef(_volAzGradientStateStr, "v", "",
-			    "state used in AzGradient filter"));
+			    "Creates the internal state used in AzGradient filter, based on the entire volume"));
   return ret;
 }
 

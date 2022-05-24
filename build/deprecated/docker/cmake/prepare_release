@@ -1,0 +1,57 @@
+#! /bin/bash
+
+# prepare a release - all packages
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Prepare all packages for a release"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo
+}
+
+scriptName=$(basename $0)
+release_date=latest
+
+# Parse command line options.
+while getopts hdr: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+# perform the builds
+
+#perform_builds -p blaze -r ${release_date}
+perform_builds -p core  -r ${release_date}
+#perform_builds -p radx  -r ${release_date}
+
+# make the packages
+
+#make_packages -p blaze -r ${release_date}
+make_packages -p core  -r ${release_date}
+#make_packages -p radx  -r ${release_date}
+

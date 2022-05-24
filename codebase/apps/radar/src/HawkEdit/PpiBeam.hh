@@ -99,10 +99,10 @@ public:
    * @param[in] stop_angle  Stop angle of the beam.
    */
   
-  PpiBeam(const Params &params,
-          const RadxRay *ray,
-          int n_fields,
-          double start_angle, double stop_angle);
+  PpiBeam( // const RadxRay *ray,
+          double start_angle, double stop_angle,
+          double startRangeKm, double gateSpacingKm,
+          size_t nGates);
   
   /**
    * @brief Destructor
@@ -114,9 +114,9 @@ public:
    * @brief Paint the given field in the given painter.
    */
 
-  virtual void paint(QImage *image,
+  virtual void paint(QPainter &painter, 
+    //QImage *image,
                      const QTransform &transform,
-                     size_t field,
                      bool useHeight = false,
                      bool drawInstHt = false);
 

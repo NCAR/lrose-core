@@ -425,7 +425,8 @@ public:
 			Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH,
 			double central_scale = 1.0,
                         double false_northing = 0.0,
-                        double false_easting = 0.0);
+                        double false_easting = 0.0,
+			double lad = 90.0);
 
   // Remap onto an OBLIQUE STEREOGRAPHIC projection.
   // Returns 0 on success, -1 on failure.
@@ -619,13 +620,13 @@ public:
   // by copying from closest available vlevel.
   // dz is computed as the smallest suitable delta z.
   
-  void setDzConstant(int nzMax = 64);
+  void setDzConstant(int nzMax = MDV32_MAX_VLEVELS);
 
   // Set dz, difference between vlevels, to be constant
   // If not already constant, data is remapped onto constant vlevels
   // by copying from closest available vlevel.
   
-  void setDzConstant(double dz, int nzMax = 64);
+  void setDzConstant(double dz, int nzMax = MDV32_MAX_VLEVELS);
 
   // remap vertical levels, using a constant dz.
   // If not already constant, data is remapped onto constant vlevels
@@ -750,7 +751,7 @@ public:
                        Mdvx::field_header_t &fhdr);
   static void setTransform(const string &transform, Mdvx::field_header_t &fhdr);
 
-// setting the volume data
+  // setting the volume data
   //
   // The data must be uncompressed.
   // Scaling type, scale and bias only apply to INT8 and INT16 encoding.
@@ -830,7 +831,7 @@ public:
   // Note: this is automatically done in convert(), so if you call convert()
   // you need not make this call separately
 
-  int computeMinAndMax(bool force = false);
+  int computeMinAndMax(bool force = false) const;
 
   // access to the data as a volume
   
@@ -1053,7 +1054,7 @@ protected:
   
   double _round_dz(double dz);
 
-  void _check_finite( const void *vol_data );
+  void _check_finite(const void *vol_data) const;
 
   // Clearing data
 

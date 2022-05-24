@@ -9,9 +9,6 @@
 #include <rapmath/StatusUserData.hh>
 #include <toolsa/LogStream.hh>
 
-const std::string Volume::_volInitStr = "VolInit";
-const std::string Volume::_volFinishStr = "VolFinish";
-
 //------------------------------------------------------------------
 Volume::Volume(void) :
   RadxAppVolume(), _p(NULL)
@@ -81,9 +78,9 @@ void Volume::setFrom(const Volume &templateVolume)
 std::vector<FunctionDef> Volume::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
-  ret.push_back(FunctionDef(_volInitStr, "v", "", 
+  ret.push_back(FunctionDef(Parms::_volInitStr, "v", "", 
 			    "initialize volume when it is the first one"));
-  ret.push_back(FunctionDef(_volFinishStr, "v", "", "Finish each volume"));
+  ret.push_back(FunctionDef(Parms::_volFinishStr, "v", "", "Finish each volume"));
   return ret;
 }
 
@@ -117,7 +114,7 @@ MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p) //const
   }
   vector<string> args = p.getUnaryNodeArgStrings();
   
-  if (keyword == _volInitStr)
+  if (keyword == Parms::_volInitStr)
   {
     // expect no args
     if (!args.empty())
@@ -128,7 +125,7 @@ MathUserData *Volume::processUserVolumeFunction(const UnaryNode &p) //const
     return _volumeInit();
   }
 
-  if (keyword == _volFinishStr)
+  if (keyword == Parms::_volFinishStr)
   {
     // expect no args
     if (!args.empty())

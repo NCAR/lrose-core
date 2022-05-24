@@ -662,6 +662,7 @@ int ColorMap::readRalMap(const std::string &file_path)
   if (_entries.size() < 1) {
     cerr << "ERROR - ColorMap::readRalMap" << endl;
     cerr << "  No valid entries found in file: " << _path << endl;
+    cerr << "  Color map file: " << _path << endl;
     return -1;
   }
 
@@ -705,6 +706,7 @@ int ColorMap::readRalMap(const std::string &file_path)
 
     cerr << "WARNING - ColorMap::readRalMap" << endl;
     cerr << "  Cannot get RGB values for color: " << entry.colorName << endl;
+    cerr << "  Color map file: " << _path << endl;
     cerr << "  Setting to black" << endl;
     entry.setColor(0, 0, 0);
     

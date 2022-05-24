@@ -29,6 +29,7 @@
 #include <toolsa/LogMsgStreamInit.hh>
 #include <toolsa/LogStreamInit.hh>
 #include <toolsa/LogMsgInit.hh>
+#include <iostream>
 
 
 //----------------------------------------------------------------------
@@ -37,6 +38,24 @@ void LogMsgStreamInit::init(bool debug, bool debugVerbose, bool realtime,
 {
   LogMsgInit::init(debug, debugVerbose, realtime, showFile);
   LogStreamInit::init(debug, debugVerbose, realtime, showFile);
+}
+
+//----------------------------------------------------------------------
+void LogMsgStreamInit::setLogFile(const std::string &app,
+				  const std::string &instance,
+				  const std::string &logPath)
+{
+  // LogMsgInit::setLogFile(app, instance, logPath);
+  std::cerr << "WARNING LogMsg logfile writing is not implemented" << std::endl;
+  std::cerr << "        Consider switching to LogStream" << std::endl;
+  LogStreamInit::setLogFile(app, instance, logPath);
+}
+
+//----------------------------------------------------------------------
+void LogMsgStreamInit::showAllSeverityKeys(bool showAll)
+{
+  LogMsgInit::showAllSeverityKeys(showAll);
+  LogStreamInit::showAllSeverityKeys(showAll);
 }
 
 //----------------------------------------------------------------------

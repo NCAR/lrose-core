@@ -52,7 +52,7 @@ public:
                const ColorMap &colorMap,
                int buttonRow);
 
-  ~DisplayField();
+  virtual ~DisplayField();
 
   const string &getLabel() const { return _label; }
   const string &getName() const { return _name; }

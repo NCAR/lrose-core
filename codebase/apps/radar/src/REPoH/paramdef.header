@@ -1,0 +1,7 @@
+commentdef
+{
+  p_header = "REPoH";
+  p_text = "Radar Estimated Profiles of Humidity. Input is PID and radar data, output is humidity and attenutation grids, and ascii data";
+}
+
+

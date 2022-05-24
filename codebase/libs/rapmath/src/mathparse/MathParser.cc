@@ -132,7 +132,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
   string compareName, assignName;
   double compareV, assignV;
   bool compareMissing, assignMissing;
-  FindSimple::Compare_t c;
+  MathFindSimple::Compare_t c;
   
   if (!filter._filter->getSimpleCompare(compareName, compareV, compareMissing,
 					c, assignName, assignV, assignMissing))
@@ -151,7 +151,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
   if (compareMissing)
   {
     compareV = compareD->getMissingValue();
-    if (c != FindSimple::EQ)
+    if (c != MathFindSimple::EQ)
     {
       LOG(ERROR) << "Only equality for missing comparison";
       return;
@@ -163,7 +163,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
   }
   switch (c)
   {
-  case FindSimple::GT:
+  case MathFindSimple::GT:
     for (int i=0; i<assignD->numData(); ++i)
     {
       double v;
@@ -176,7 +176,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::GE:
+  case MathFindSimple::GE:
     for (int i=0; i<assignD->numData(); ++i)
     {
       double v;
@@ -189,7 +189,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::EQ:
+  case MathFindSimple::EQ:
     for (int i=0; i<assignD->numData(); ++i)
     {
       double v;
@@ -199,7 +199,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::LE:
+  case MathFindSimple::LE:
     for (int i=0; i<assignD->numData(); ++i)
     {
       double v;
@@ -212,7 +212,7 @@ static void _simpleLogicalAssignNumberToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::LT:
+  case MathFindSimple::LT:
     for (int i=0; i<assignD->numData(); ++i)
     {
       double v;
@@ -239,7 +239,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
   string compareName, assignToName, assignFromName;
   double compareV;
   bool compareMissing;
-  FindSimple::Compare_t c;
+  MathFindSimple::Compare_t c;
   
   if (!filter._filter->getSimpleCompare(compareName, compareV, compareMissing,
 					c, assignToName, assignFromName))
@@ -260,7 +260,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
   if (compareMissing)
   {
     compareV = compareD->getMissingValue();
-    if (c != FindSimple::EQ)
+    if (c != MathFindSimple::EQ)
     {
       LOG(ERROR) << "Only equality for missing comparison";
       return;
@@ -268,7 +268,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
   }
   switch (c)
   {
-  case FindSimple::GT:
+  case MathFindSimple::GT:
     for (int i=0; i<assignToD->numData(); ++i)
     {
       double v;
@@ -289,7 +289,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::GE:
+  case MathFindSimple::GE:
     for (int i=0; i<assignToD->numData(); ++i)
     {
       double v;
@@ -310,7 +310,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::EQ:
+  case MathFindSimple::EQ:
     for (int i=0; i<assignToD->numData(); ++i)
     {
       double v;
@@ -328,7 +328,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::LE:
+  case MathFindSimple::LE:
     for (int i=0; i<assignToD->numData(); ++i)
     {
       double v;
@@ -349,7 +349,7 @@ static void _simpleLogicalAssignVarToVar(const Filter &filter,
       }
     }
     break;
-  case FindSimple::LT:
+  case MathFindSimple::LT:
     for (int i=0; i<assignToD->numData(); ++i)
     {
       double v;
@@ -755,6 +755,26 @@ bool MathParser::parse(const std::string &s, Filter_t filterType,
     return false;
   }
   return true;
+}
+
+//-------------------------------------------------------------------
+std::vector<FunctionDef> MathParser::allFunctionDefs(void) const
+{
+  vector<FunctionDef> ret = _binaryOperators;
+  for (size_t i=0; i<_unaryOperators.size(); ++i)
+  {
+    ret.push_back(_unaryOperators[i]);
+  }
+  for (size_t i=0; i<_userUnaryOperators.size(); ++i)
+  {
+    ret.push_back(_userUnaryOperators[i]);
+  }
+  for (size_t i=0; i<_userBinaryOperators.size(); ++i)
+  {
+    ret.push_back(_userBinaryOperators[i]);
+  }
+  sort(ret.begin(), ret.end());
+  return ret;
 }
 
 //-------------------------------------------------------------------

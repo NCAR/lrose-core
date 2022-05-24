@@ -91,38 +91,38 @@ Sprite::Sprite(int argc, char **argv) :
 
   // check params
 
-  if (_params.ascope_n_panels_in_spectra_window != _params.ascope_moments_n) {
+  if (_params.ascope_n_panels != _params.ascope_moments_n) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  Mismatch in number of ascope panels in spectra window" << endl;
     cerr << "  Parameters specify n ascopes: " 
-         << _params.ascope_n_panels_in_spectra_window << endl;
+         << _params.ascope_n_panels << endl;
     cerr << "  Parameters specify n fields for ascopes: " 
          << _params.ascope_moments_n << endl;
     cerr << "  These must be equal, fix params file and try again" << endl;
     OK = false;
   }
 
-  if (_params.iqplot_types_n != _params.iqplots_n_rows * _params.iqplots_n_columns) {
+  if (_params.iq_plots_n != _params.iqplots_n_rows * _params.iqplots_n_columns) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  Mismatch in number of iq panels in spectra window" << endl;
     cerr << "    n_rows: " << _params.iqplots_n_rows << endl;
     cerr << "    n_columns: " << _params.iqplots_n_columns << endl;
     cerr << "  Number of iq_plot_types: " 
-         << _params.iqplot_types_n << endl;
+         << _params.iq_plots_n << endl;
     cerr << "  This must equal n_rows * n_columns" << endl;
     OK = false;
   }
 
   // create CIDD coord shmem 
   
-  _coordShmem = (coord_export_t *)
-    ushm_create(_params.moments_shmem_key, sizeof(coord_export_t), 0666);
-  if (_coordShmem == NULL) {
-    cerr << "ERROR: " << _progName << endl;
-    cerr << "  Could not attach shared memory from moments display app" << endl;
-    cerr << "  shmem key: " << _params.moments_shmem_key << endl;
-    OK = false;
-  }
+  // _coordShmem = (coord_export_t *)
+  //   ushm_create(_params.moments_shmem_key, sizeof(coord_export_t), 0666);
+  // if (_coordShmem == NULL) {
+  //   cerr << "ERROR: " << _progName << endl;
+  //   cerr << "  Could not attach shared memory from moments display app" << endl;
+  //   cerr << "  shmem key: " << _params.moments_shmem_key << endl;
+  //   OK = false;
+  // }
 
   // beam manager
 

@@ -110,6 +110,23 @@ void PjgAzimEquidistMath::printDetails(ostream &out) const
 
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgAzimEquidistMath::getProjStr() const
+
+{
+
+  char text[1024];
+  snprintf(text, 1024,
+           "+proj=aeqd +lon_0=%g +lat_0=%g",
+           _origin_lon, _origin_lat);
+  string str(text);
+  str += _getProjStrFalseOrigin();
+  return str;
+
+}
+
 ///////////////////////
 // LatLon conversions
 

@@ -50,7 +50,7 @@ public:
 
   // destructor
 
-  ~Args ();
+  virtual ~Args ();
 
   // parse command line
   // Returns 0 on success, -1 on failure

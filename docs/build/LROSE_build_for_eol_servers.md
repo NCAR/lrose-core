@@ -40,7 +40,7 @@ Create a working directory, clone lrose-core
 Temporary install in ```/tmp/lrose-core```.
 
 ```
-  cd ~/git/lrose-core/build
+  cd ~/git/lrose-core/build/scripts
   ./checkout_and_build_auto.py --prefix /tmp/lrose-core --fractl --vortrac --samurai --cmake3 --installAllRuntimeLibs
 ```
 
@@ -53,7 +53,7 @@ NOTE - the ```--cmake3``` is only needed for Centos 7, not for Centos 8.
 Temporary install in ```/tmp/lrose-cidd```.
 
 ```
-  cd ~/git/lrose-core/build
+  cd ~/git/lrose-core/build/scripts
   ./build_cidd.py --prefix /tmp/lrose-cidd --installLroseRuntimeLibs
 ```
 

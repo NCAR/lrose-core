@@ -1,0 +1,59 @@
+#===========================================================
+# spec file body for redhat package build for lrose
+# name, version and release are prepended by calling script
+#===========================================================
+
+%define _topdir     /root/rpmbuild
+%define buildroot %{_topdir}/%{name}-%{version}-%{release}-root
+ 
+BuildRoot:      %{_topdir}/installedhere
+Summary:        LROSE
+Name:           %{name}
+Version:        %{version}
+Release:        %{release}
+Prefix:         /usr/local/cidd
+Group:          Scientific Tools
+AutoReqProv:    no
+License:        BSD
+ 
+Requires: glibc-devel.i686
+Requires: libX11-devel.i686
+Requires: libXext-devel.i686
+Requires: libtiff-devel.i686
+Requires: libpng-devel.i686
+Requires: libcurl-devel.i686
+Requires: libstdc++-devel.i686
+Requires: libtiff-devel.i686
+Requires: zlib-devel.i686
+Requires: expat-devel.i686
+Requires: flex-devel.i686
+Requires: fftw-devel.i686
+Requires: bzip2-devel.i686
+Requires: ImageMagick-devel
+Requires: ImageMagick-c++-devel
+Requires: xorg-x11-fonts-100dpi
+Requires: xorg-x11-fonts-ISO8859-1-100dpi
+Requires: xorg-x11-fonts-75dpi
+Requires: xorg-x11-fonts-ISO8859-1-75dpi
+Requires: xorg-x11-fonts-misc
+
+%description
+CIDD - Cartesian Interactive Data Display
+
+# build has been done previously so no compile is needed
+# just copy the files into the correct location
+
+%install
+mkdir -p %{buildroot}%{prefix}
+mkdir -p %{buildroot}%{prefix}/bin
+rsync -a %{prefix}/bin/CIDD %{buildroot}%{prefix}/bin
+rsync -a %{prefix}/lib %{buildroot}%{prefix}
+rsync -a %{prefix}/LICENSE.txt %{buildroot}%{prefix}
+
+# add all files in /usr/local/cidd
+
+%files
+/usr/local/cidd
+
+############################################################
+

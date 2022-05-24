@@ -67,6 +67,7 @@
 #include "Rsl.hh"
 #include <toolsa/DateTime.hh>
 #include <toolsa/mem.h>
+#include "ClassIngest.hh"
 //#include "Params.hh"
 using namespace std;
 
@@ -90,6 +91,8 @@ public:
   bool firstGuess(Volume* soundVolume, time_t volTime);
 
   int loadSoundingData(time_t issueTime);
+
+  ClassIngest *loadSoundingDataText(time_t issueTime);
 
   void outputSoundVolume();
 

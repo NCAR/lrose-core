@@ -58,7 +58,7 @@ SYS_CPPCHECKFLAGS2 = -I$(LOC_INC_DIR)
 
 CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS) -fPIC
-PROFILE_FLAG = -pg -O2
+PROFILE_FLAG = -pg
 DEBUG_FLAG = -g
 OPT_FLAG = -O2
 
@@ -176,7 +176,7 @@ UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/usr/local/udunits2/lib -L/opt/
 
 HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include -I/usr/include/hdf5/serial $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
 HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/usr/local/hdf5/lib -L/opt/hdf5/lib -L/usr/local/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5 -L/usr/lib/x86_64-linux-gnu/hdf5/serial $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS) 
-HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5_cpp -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
+HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
 
 NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf4/include -I/usr/local/netcdf4/include -I/usr/local/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,/usr/local/netcdf4/lib -L/opt/netcdf4/lib -L/usr/local/netcdf4/lib -L/usr/local/lib $(HDF5_LDFLAGS) $(ZLIB_LDFLAGS)
@@ -186,7 +186,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
 NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 NETCDF_INCLUDES=$(NETCDF4_INCS)
 NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
@@ -194,9 +194,9 @@ NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 # QT
 
 PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
-QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network )
+QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
 #QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui )
-QT_LIBS = $(shell pkg-config --libs Qt5Qml Qt5Core Qt5Widgets Qt5Gui Qt5Network)
+QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui Qt5Network Qt5Qml)
 
 QT_CPPC_CFLAGS = -fPIC -std=c++11
 QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)

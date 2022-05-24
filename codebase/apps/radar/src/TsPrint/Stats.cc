@@ -83,6 +83,27 @@ void Stats::init()
   sumConjProdH.im = 0.0;
   sumConjProdV.re = 0.0;
   sumConjProdV.im = 0.0;
+
+  iqHc.clear();
+  iqVc.clear();
+  iqHx.clear();
+  iqVx.clear();
+
+  _nGates = 0;
+
+}
+
+void Stats::setNGates(int nGates)
+  
+{
+
+  if (nGates > _nGates) {
+    _nGates = nGates;
+    iqHc.resize(_nGates);
+    iqVc.resize(_nGates);
+    iqHx.resize(_nGates);
+    iqVx.resize(_nGates);
+  }
   
 }
 
@@ -98,6 +119,49 @@ void Stats::setCalibration(double gainHc,
   _rxGainVc = gainVc;
   _rxGainHx = gainHx;
   _rxGainVx = gainVx;
+}
+
+////////////////////////////////////////////
+// sum up summary information
+
+void Stats::addToSummary(const IwrfTsPulse &pulse,
+                         double ii0, double qq0,
+                         bool haveChan1,
+                         double ii1, double qq1)
+  
+{
+
+  double power0 = ii0 * ii0 + qq0 * qq0;
+  power0 /= _rxGainHc;
+
+  sumPower0 += power0;
+  nn0++;
+  
+  sumPowerHc += power0;
+  nnH++;
+  
+  if (haveChan1) {
+
+    double power1 = ii1 * ii1 + qq1 * qq1;
+    power1 /= _rxGainVc;
+    sumPower1 += power1;
+    nn1++;
+
+    RadarComplex_t c0, c1;
+    c0.re = ii0;
+    c0.im = qq0;
+    c1.re = ii1;
+    c1.im = qq1;
+    RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
+
+    sumConjProdH = RadarComplex::complexSum(sumConjProdH, prod);
+
+    nnV++;
+    sumPowerVc += power1;
+    sumConjProdV = RadarComplex::complexSum(sumConjProdV, prod);
+    
+  } // if (haveChan1)
+    
 }
 
 ////////////////////////////////////////////
@@ -173,55 +237,95 @@ void Stats::addToAlternating(const IwrfTsPulse &pulse,
     
 }
 
-////////////////////////////////////////////
-// sum up dual information
+////////////////////////////
+// compute summary stats
+// Assumes data has been added
 
-void Stats::addToDual(const IwrfTsPulse &pulse,
-                      double ii0, double qq0,
-                      bool haveChan1,
-                      double ii1, double qq1)
-
+void Stats::computeSummary(bool haveChan1)
+  
 {
+  
+  meanDbm0 = -999.9;
+  meanDbm1 = -999.9;
 
-  if (!haveChan1) {
+  meanDbmHc = -999.9;
+  meanDbmVc = -999.9;
 
-    double power0 = ii0 * ii0 + qq0 * qq0;
-    power0 /= _rxGainHc;
-    sumPower0 += power0;
-    nn0++;
-    
-    nnH++;
-    sumPowerHc += power0;
-    
-  } else {
-    
-    double power0 = ii0 * ii0 + qq0 * qq0;
-    power0 /= _rxGainHc;
-    sumPower0 += power0;
-    nn0++;
-    
-    double power1 = ii1 * ii1 + qq1 * qq1;
-    power1 /= _rxGainVc;
-    sumPower1 += power1;
-    nn1++;
-
-    RadarComplex_t c0, c1;
-    c0.re = ii0;
-    c0.im = qq0;
-    c1.re = ii1;
-    c1.im = qq1;
-    RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
-
-    nnH++;
-    sumPowerHc += power0;
-    sumConjProdH = RadarComplex::complexSum(sumConjProdH, prod);
-
-    nnV++;
-    sumPowerVc += power1;
-    sumConjProdV = RadarComplex::complexSum(sumConjProdV, prod);
-
+  lag1DbmHc = -999.9;
+  lag1DbmHx = -999.9;
+  
+  if (nn0 > 0) {
+    double meanPower0 = sumPower0 / nn0;
+    meanDbm0 = 10.0 * log10(meanPower0);
   }
+
+  if (nn1 > 0) {
+    double meanPower1 = sumPower1 / nn1;
+    meanDbm1 = 10.0 * log10(meanPower1);
+  }
+
+  if (nnH > 0) {
+
+    double meanPowerHc = sumPowerHc / nnH;
+    meanDbmHc = 10.0 * log10(meanPowerHc);
+
+    if (haveChan1) {
+      
+      double meanPowerVc = sumPowerVc / nnH;
+      meanDbmVc = 10.0 * log10(meanPowerVc);
+      
+      double corrMagH = RadarComplex::mag(sumConjProdH) / nnH;
+      corrH = corrMagH / sqrt(meanPowerHc * meanPowerVc);
+      argH = RadarComplex::argDeg(sumConjProdH);
+
+    }
+  
+  }
+  
+  if (nnV > 0) {
+
+    double meanPowerVc = sumPowerVc / nnV;
+    meanDbmVc = 10.0 * log10(meanPowerVc);
+
+    if (haveChan1) {
+      
+      double meanPowerHc = sumPowerHc / nnV;
+      meanDbmHc = 10.0 * log10(meanPowerHc);
+      
+      double corrMagV = RadarComplex::mag(sumConjProdV) / nnV;
+      corrV = corrMagV / sqrt(meanPowerVc * meanPowerHc);
+      argV = RadarComplex::argDeg(sumConjProdV);
+
+    }
     
+  }
+  
+  // compute lag1 powers if appropriate
+
+  if (iqHc[0].size() > 0) {
+    double sumCpHc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHc =
+        RadarComplex::meanConjugateProduct(iqHc[ii].data() + 1,
+                                           iqHc[ii].data(),
+                                           iqHc[ii].size() - 1);
+      sumCpHc += RadarComplex::mag(cpHc);
+    }
+    lag1DbmHc = 10.0 * log10(sumCpHc / _nGates);
+  }
+  
+  if (iqVc[0].size() > 0) {
+    double sumCpVc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVc =
+        RadarComplex::meanConjugateProduct(iqVc[ii].data() + 1,
+                                           iqVc[ii].data(),
+                                           iqVc[ii].size() - 1);
+      sumCpVc += RadarComplex::mag(cpVc);
+    }
+    lag1DbmVc = 10.0 * log10(sumCpVc / _nGates);
+  }
+  
 }
 
 ////////////////////////////
@@ -235,10 +339,16 @@ void Stats::computeAlternating(bool haveChan1)
   
   meanDbm0 = -999.9;
   meanDbm1 = -999.9;
+
   meanDbmHc = -999.9;
   meanDbmHx = -999.9;
-  meanDbmVx = -999.9;
   meanDbmVc = -999.9;
+  meanDbmVx = -999.9;
+
+  lag1DbmHc = -999.9;
+  lag1DbmHx = -999.9;
+  lag1DbmVc = -999.9;
+  lag1DbmVx = -999.9;
 
   if (nn0 > 0) {
     double meanPower0 = sumPower0 / nn0;
@@ -286,66 +396,54 @@ void Stats::computeAlternating(bool haveChan1)
     
   }
 
-}
+  // compute lag1 powers if appropriate
 
-////////////////////////////
-// compute dual stats
-//
-// Assumes data has been added
-
-void Stats::computeDual(bool haveChan1)
-  
-{
-  
-  meanDbm0 = -999.9;
-  meanDbm1 = -999.9;
-  meanDbmHc = -999.9;
-  meanDbmVc = -999.9;
-  
-  if (nn0 > 0) {
-    double meanPower0 = sumPower0 / nn0;
-    meanDbm0 = 10.0 * log10(meanPower0);
-  }
-
-  if (nn1 > 0) {
-    double meanPower1 = sumPower1 / nn1;
-    meanDbm1 = 10.0 * log10(meanPower1);
-  }
-
-  if (nnH > 0) {
-
-    double meanPowerHc = sumPowerHc / nnH;
-    meanDbmHc = 10.0 * log10(meanPowerHc);
-
-    if (haveChan1) {
-      
-      double meanPowerVc = sumPowerVc / nnH;
-      meanDbmVc = 10.0 * log10(meanPowerVc);
-      
-      double corrMagH = RadarComplex::mag(sumConjProdH) / nnH;
-      corrH = corrMagH / sqrt(meanPowerHc * meanPowerVc);
-      argH = RadarComplex::argDeg(sumConjProdH);
-
+  if (iqHc[0].size() > 0) {
+    double sumCpHc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHc =
+        RadarComplex::meanConjugateProduct(iqHc[ii].data() + 1,
+                                           iqHc[ii].data(),
+                                           iqHc[ii].size() - 1);
+      sumCpHc += RadarComplex::mag(cpHc);
     }
-  
+    lag1DbmHc = 10.0 * log10(sumCpHc / _nGates);
   }
   
-  if (nnV > 0) {
-
-    double meanPowerVc = sumPowerVc / nnV;
-    meanDbmVc = 10.0 * log10(meanPowerVc);
-
-    if (haveChan1) {
-      
-      double meanPowerHc = sumPowerHc / nnV;
-      meanDbmHc = 10.0 * log10(meanPowerHc);
-      
-      double corrMagV = RadarComplex::mag(sumConjProdV) / nnV;
-      corrV = corrMagV / sqrt(meanPowerVc * meanPowerHc);
-      argV = RadarComplex::argDeg(sumConjProdV);
-
+  if (iqVc[0].size() > 0) {
+    double sumCpVc = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVc =
+        RadarComplex::meanConjugateProduct(iqVc[ii].data() + 1,
+                                           iqVc[ii].data(),
+                                           iqVc[ii].size() - 1);
+      sumCpVc += RadarComplex::mag(cpVc);
     }
-    
+    lag1DbmVc = 10.0 * log10(sumCpVc / _nGates);
+  }
+  
+  if (iqHx[0].size() > 0) {
+    double sumCpHx = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpHx =
+        RadarComplex::meanConjugateProduct(iqHx[ii].data() + 1,
+                                           iqHx[ii].data(),
+                                           iqHx[ii].size() - 1);
+      sumCpHx += RadarComplex::mag(cpHx);
+    }
+    lag1DbmHx = 10.0 * log10(sumCpHx / _nGates);
+  }
+  
+  if (iqVx[0].size() > 0) {
+    double sumCpVx = 0.0;
+    for (int ii = 0; ii < _nGates; ii++) {
+      RadarComplex_t cpVx =
+        RadarComplex::meanConjugateProduct(iqVx[ii].data() + 1,
+                                           iqVx[ii].data(),
+                                           iqVx[ii].size() - 1);
+      sumCpVx += RadarComplex::mag(cpVx);
+    }
+    lag1DbmVx = 10.0 * log10(sumCpVx / _nGates);
   }
   
 }

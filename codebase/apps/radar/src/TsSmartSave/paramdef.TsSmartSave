@@ -106,6 +106,16 @@ paramdef enum output_packing_t {
 } output_packing;
 
 commentdef {
+  p_header = "FILE NAMING";
+};
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to indicate the xmit mode in the file name.";
+  p_help = "If true, then the file name will contain one of the following: alt, sim, stag23, stag34, stag45.";
+} add_xmit_mode_to_file_name;
+
+commentdef {
   p_header = "NORMAL SCAN OUTPUT";
 };
 

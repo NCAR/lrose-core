@@ -20,6 +20,8 @@
 #include <QTableWidgetItem>
 #include <QTableWidget>
 #include <QString>
+#include <QUndoStack>
+#include <QUndoView>
 #include <QJSEngine>
 
 using namespace std;
@@ -31,7 +33,8 @@ class SpreadSheetView : public QMainWindow
 public:
 
   //  SpreadSheetView(std::string fileName, QWidget *parent = 0);
-  SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0);
+  SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0,
+    float elevation = 0.0);
 
   //  void setController(SpreadSheetController *controller);
 
@@ -43,9 +46,14 @@ public:
   float myPow();
 
   vector<string> *getVariablesFromSpreadSheet();
-  vector<float> *getDataForVariableFromSpreadSheet(int column, string fieldName);
+  vector<float> *getDataForVariableFromSpreadSheet(int column); // , string fieldName);
 
-   void setSelectionToValue(QString value);
+  void setSelectionToValue(QString value);
+
+  void highlightClickedData(string fieldName, float azimuth,
+    float elevation, float range);
+
+  void closeEvent();
 
 
 public slots:
@@ -65,7 +73,20 @@ public slots:
   void actionDisplayRayInfo();
   void actionDisplayMetadata();
   void actionDisplayEditHist();
-  void deleteField();
+  void deleteRay();
+  void deleteSelection();
+  void subtractNyquistFromRay();
+  void addNyquistFromRay();
+  void subtractNyquistFromSelection();
+  void addNyquistToSelection();
+  void subtractNyquistFromSelectionToEnd();
+  void addNyquistFromSelectionToEnd();
+  void adjustNyquistFromRay(float factor, int top);
+  void adjustNyquistFromSelection(float factor);
+  void adjustNyquistFromSelectionToEnd(float factor);
+  void adjustNyquistGeneral(float factor, bool fromSelection, int startRow);
+
+  void setRangeToAllSelectedColumns(int startRow, int fromSelection);
 
   void notImplementedMessage();
 
@@ -73,10 +94,12 @@ public slots:
   //  void setupSoloFunctions(SoloFunctions *soloFunctions);
 
   void fieldNamesSelected(vector<string> fieldNames);
-  void fieldNamesProvided(vector<string> fieldNames);
+  void fieldNamesProvided(vector<string> *fieldNames);
   void fieldDataSent(vector<float> *data, int useless, int c);
   void azimuthForRaySent(float azimuth, int offsetFromClosestRay,
     int fieldIdx, string fieldName);
+  void nyquistVelocitySent(float nyquistVelocity, int offsetFromClosestRay,
+    int fieldIdx, string fieldName); 
   void setHeader(int baseColumn, int fieldIdx, float azimuth,
     string fieldName);
 
@@ -84,23 +107,28 @@ public slots:
   void applyEdits();
   void changeAzEl(float azimuth, float elevation);
   void changeMissingValue(float currentMissingValue);
-  void newElevation(float elevation);
-  void newAzimuth(float azimuth);
-  void setTheWindowTitle(float rayAzimuth);
+  void updateLocationInVolume(float azimuth, float elevation);
+  void setTheWindowTitle(float rayAzimuth, float elevation);
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
 
-  void printQJSEngineContext();
+  void columnHeaderClicked(int index);
+
+  void updateNavigation(string fieldName, float azimuth, float elevation);
 
 signals:
 
   void needFieldNames();
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
-  void applyVolumeEdits();
+  void needNyquistVelocityForRay(int rayIdx, int fieldIdx, string fieldName);
+  void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
   void signalRayAzimuthChange(float rayAzimuth, float elevation);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);
+  void replotRequested();
+  void spreadSheetClosed();
+  void dataChanged();
 
 protected:
     void setupContextMenu();
@@ -123,17 +151,24 @@ protected:
 
   void criticalMessage(std::string message);
 
+  string getFieldName(QString text);
+  float getAzimuth(QString text);
+  void replot();
+
+  bool isMissing(QString textValue);
+
 private:
 
   //SpreadSheetController *_controller;
     vector<std::string> _fieldNames;
     //float _currentAzimuth;
-    float _currentElevation;
+    //float _currentElevation;
 
     int _nFieldsToDisplay;
     int _nRays;
     string data_format = "%g";
     float _missingDataValue;
+    string _missingDataString = "--";
 
 
     QToolBar *toolBar;
@@ -148,6 +183,7 @@ private:
     QAction *cell_plusFoldRayAction;
     QAction *cell_negFoldRayGreaterAction;
     QAction *cell_plusFoldRayGreaterAction;
+    QAction *cell_plusFoldRangeAction;
     QAction *cell_zapGndSpdAction;
 
     QAction *secondSeparator;
@@ -155,6 +191,8 @@ private:
     QAction *aboutSpreadSheet;
     QAction *exitAction;
     QAction *openAction;
+    QAction *undoAction = nullptr;
+    QAction *redoAction = nullptr;
 
   QAction *display_cellValuesAction;
   QAction *display_rayInfoAction;
@@ -162,11 +200,20 @@ private:
   QAction *display_editHistAction;
 
   QPushButton *applyEditsButton;
+  QPushButton *refreshButton;
+
   QLineEdit *rayLineEdit;
+  QLineEdit *sweepLineEdit;
   QLineEdit *raysLineEdit;
   QLineEdit *missingDataValueLineEdit;
+  QLabel *rangeLineEdit;
 
     QAction *printAction;
+    QAction *replotAction;
+    QAction *applyEditsAction;
+    QAction *clearEditsAction;
+
+    QLabel *nyquistVelocityLabel;
 
     QLabel *cellLabel;
     QTableWidget *table;
@@ -177,8 +224,12 @@ private:
   // SpreadSheetDelegate *formulaInput;
 
     QListWidget *fieldListWidget;
+    QUndoStack *undoStack = nullptr;
+    QUndoView *undoView = nullptr;
 
-  QJSEngine engine;
+    bool _unAppliedEdits = false;
+
+    float _startGateKm = 0.0;
 
   
   //  const char *LogFileName = "/tmp/HawkEye_log.txt";
@@ -186,13 +237,10 @@ private:
 const char *htmlText =
 "<HTML>"
 "<p><b>"
-"Some useful info .."
+"Help info .."
 "<ul>"
-"<li>Adding two cells.</li>"
-"<li>Subtracting one cell from another.</li>"
-"<li>Multiplying two cells.</li>"
-"<li>Dividing one cell with another.</li>"
-"<li>Summing the contents of an arbitrary number of cells.</li>"
+"<li>Doing something.</li>"
+"<li>number of cells.</li>"
   "</HTML>";
 };
 

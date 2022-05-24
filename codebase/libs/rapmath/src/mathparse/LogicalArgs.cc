@@ -5,7 +5,7 @@
 #include <toolsa/LogStream.hh>
 
 LogicalArg::LogicalArg(const std::string &name, double value, bool missingValue,
-		       const FindSimple::Compare_t &test) :
+		       const MathFindSimple::Compare_t &test) :
   _variableName(name), _value(value), _valueIsMissing(missingValue), _op(test),
   _data(NULL)
 {
@@ -24,15 +24,15 @@ bool LogicalArg::satisfiesCondition(int index) const
     {
       switch (_op)
       {
-      case FindSimple::GT:
+      case MathFindSimple::GT:
 	return v > _value;
-      case FindSimple::GE:
+      case MathFindSimple::GE:
 	return v >= _value;
-      case FindSimple::EQ:
+      case MathFindSimple::EQ:
 	return v == _value;
-      case FindSimple::LE:
+      case MathFindSimple::LE:
 	return v <= _value;
-      case FindSimple::LT:
+      case MathFindSimple::LT:
 	return v < _value;
       default:
 	return false;
@@ -57,7 +57,7 @@ bool LogicalArg::synch(MathData *rdata)
   _data = ldata;
   if (_valueIsMissing)
   {
-    if (_op != FindSimple::EQ)
+    if (_op != MathFindSimple::EQ)
     {
       LOG(ERROR) << "Only equality for missing comparison";
       return false;

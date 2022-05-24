@@ -9,9 +9,6 @@
 #include <rapmath/FunctionDef.hh>
 #include <toolsa/LogStream.hh>
 
-const std::string VolumeBase::_volInitStr = "VolInit";
-const std::string VolumeBase::_volFinishStr = "VolFinish";
-
 //------------------------------------------------------------------
 VolumeBase::VolumeBase(void) :
   RadxAppVolume(), _parms(NULL), _state(FIRST), _converged(false),
@@ -44,12 +41,12 @@ VolumeBase::~VolumeBase(void)
 //------------------------------------------------------------------
 bool VolumeBase::needToSynch(const std::string &userKey) const
 {
-  if (userKey == _volInitStr)
+  if (userKey == Parms::_volInitStr)
   {
     // no args
     return false;
   }
-  else if (userKey == _volFinishStr)
+  else if (userKey == Parms::_volFinishStr)
   {
     // no args
     return false;
@@ -70,10 +67,10 @@ bool VolumeBase::hasData(const std::string &userKey,
 std::vector<FunctionDef> VolumeBase::userUnaryOperators(void) const
 {
   std::vector<FunctionDef> ret;
-  ret.push_back(FunctionDef(_volInitStr, "v", "", 
-			    "initialize volume when it is the first one"));
-  ret.push_back(FunctionDef(_volFinishStr, "v", "", 
-			    "Finishing steps for a volume"));
+  ret.push_back(FunctionDef(Parms::_volInitStr, "v", "", 
+  			    "Change internal state using the input volume, when appropriate"));
+  ret.push_back(FunctionDef(Parms::_volFinishStr, "v", "", 
+  			    "Update state after all rays for a volume have been processed"));
   return ret;
 }
 
@@ -113,7 +110,7 @@ MathUserData *VolumeBase::processUserVolumeFunction(const UnaryNode &p)
   }
   vector<string> args = p.getUnaryNodeArgStrings();
   
-  if (keyword == _volInitStr)
+  if (keyword == Parms::_volInitStr)
   {
     // expect no args
     if (!args.empty())
@@ -124,7 +121,7 @@ MathUserData *VolumeBase::processUserVolumeFunction(const UnaryNode &p)
     return volumeInit();
   }
 
-  if (keyword == _volFinishStr)
+  if (keyword == Parms::_volFinishStr)
   {
     // expect no args
     if (!args.empty())

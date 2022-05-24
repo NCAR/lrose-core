@@ -14,6 +14,7 @@ SUB_DIRS = \
 	Fmq2Fmq \
 	Fmq2MultMsgFmq \
 	FmqMon \
+	FmqTest \
 	GenPt2Spdb \
 	Hiq2Dsr \
 	InputWatcher \

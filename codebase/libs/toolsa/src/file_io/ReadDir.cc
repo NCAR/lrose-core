@@ -103,15 +103,17 @@ struct dirent *ReadDir::read()
   
 {
   
-#if defined(SUNOS5) || defined (SUNOS5_INTEL)
-  return (readdir(_dirp));
-#else
-  struct dirent *result;
-  if (readdir_r(_dirp, (struct dirent *) _buf.getPtr(), &result)) {
-    return NULL;
-  }
-  return result;
-#endif
+  return readdir(_dirp);
+
+  // #if defined(SUNOS5) || defined (SUNOS5_INTEL)
+  //   return (readdir(_dirp));
+  // #else
+  //   struct dirent *result;
+  //   if (readdir_r(_dirp, (struct dirent *) _buf.getPtr(), &result)) {
+  //     return NULL;
+  //   }
+  //   return result;
+  // #endif
 
 }
 

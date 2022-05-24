@@ -1,0 +1,49 @@
+/*********************************************************
+ * parameter definitions for TrackProps
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 1998
+ */
+
+commentdef {
+  p_header = "Prints out summary track properties. Deprecated. Replaced by Tracks2Ascii.";
+}
+
+paramdef enum debug_t
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = DEBUG_OFF;	
+  p_descr = "Debug option";	
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef double {
+  p_default = 6.0;
+  p_min = 0.0;
+  p_max = 30.0;
+  p_descr = "Altitude threshold for computing altitude-thresholded properties.";
+  p_help = "There are a number of properties, e.g. volume, which are computed for the whole storm and for the region above an altitude threshold. This threshold is used for those computations.";
+} altitude_threshold;
+
+paramdef double {
+  p_default = 0.0;
+  p_min = 0.0;
+  p_descr = "Minimum track duration (secs).";
+  p_help = "Only tracks with durations which exceed this value will be processed.";
+} min_duration;
+
+paramdef double {
+  p_default = 86400.0;
+  p_descr = "Maximum track duration (secs).";
+  p_help = "Only tracks with durations which do not exceed this value will be processed.";
+} max_duration;
+
+
+

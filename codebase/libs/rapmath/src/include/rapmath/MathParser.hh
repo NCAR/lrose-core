@@ -120,6 +120,11 @@ public:
   std::vector<std::string> identifyOutputs(void) const;
   
   /**
+   * @return all the function defs, ordered alphabetically
+   */
+  std::vector<FunctionDef> allFunctionDefs(void) const;
+
+  /**
    * Clean out all the pointers owned by the object
    */
   void cleanup(void);

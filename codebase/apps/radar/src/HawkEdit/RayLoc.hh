@@ -35,21 +35,21 @@
 #ifndef RayLoc_HH
 #define RayLoc_HH
 
-class RadxRay;
+#include <Radx/RadxRay.hh>
 
 class RayLoc {
 
 public:
 
-  int startIndex;
-  int endIndex;
+  size_t startIndex;
+  size_t endIndex;
   // bool master;
   bool active;
-  const RadxRay *ray;
+  RadxRay *ray;
 
   RayLoc() {
-    startIndex = -1;
-    endIndex = -1;
+    startIndex = 0;
+    endIndex = 0;
     // master = false;
     active = false;
     ray = NULL;
@@ -57,8 +57,8 @@ public:
 
   void clear() {
     ray = NULL;
-    startIndex = -1;
-    endIndex = -1;
+    startIndex = 0;
+    endIndex = 0;
     // master = false;
     active = false;
   }
@@ -67,9 +67,9 @@ public:
   // we use a locator with data every 1/10th degree
   // around the 360 degree circle
   
-  static const int RAY_LOC_RES = 10;
-  static const int RAY_LOC_N = 4800;
-  static const int RAY_LOC_OFFSET = 600;
+  static const size_t RAY_LOC_RES = 10;
+  static const size_t RAY_LOC_N = 3600; // 4800;
+  static const size_t RAY_LOC_OFFSET = 0; // 600;
   
 };
 

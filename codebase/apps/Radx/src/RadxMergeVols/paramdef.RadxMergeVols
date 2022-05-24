@@ -59,6 +59,37 @@ paramdef int {
   p_help =  "Only data less old than this will be used.";
 } max_realtime_data_age_secs;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Is _latest_data_info file available?";
+  p_help = "If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to recurse to subdirectories while looking for new files.";
+  p_help = "If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE."; 
+} search_recursively;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Maximum depth for recursive directory scan.";
+  p_help = "Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.";
+} max_recursion_depth;
+
+paramdef int {
+  p_default = 2;
+  p_min = 1;
+  p_descr = "Sleep time between checking directory for input - secs.";
+  p_help = "If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.";
+} wait_between_checks;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "File quiescence when checking for files - secs.";
+  p_help = "This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.";
+} file_quiescence;
+
 commentdef {
   p_header = "DATA SOURCE LOCATIONS";
 }
@@ -68,6 +99,24 @@ paramdef string {
   p_descr = "Directory for primary data set.";
   p_help = "The primary files are used to determine the search time. The secondary files are found relative to the primary time.";
 } primary_dataset_dir;
+
+commentdef {
+  p_header = "MERGE_METHOD - parallel or serial";
+}
+
+typedef enum {
+  MERGE_PARALLEL, MERGE_SERIAL
+} merge_method_t;
+
+paramdef enum merge_method_t {
+  p_default = MERGE_PARALLEL;
+  p_descr = "The method for performing the merge - PARALLEL or SERIAL";
+ggre  p_help = "MERGE_PARALLEL: read volumes from different directories, that arrive at similar times. The primary_dataset_dir will be monitored for new file activity. When a new file arrives, the secondary directories will be searched for files at a similar time, and the data from those files will be merged in to the primary data set.\n\nMERGE_SERIAL: we watch a single directory for files that arrive in sequence. We examing the scanName to decide whether the volume belongs in the merged data set. Once all of the required data sets have arrived, in time order, the individual volumes are merged in time sequence, and a single output file is written with the merged volume.";
+} merge_method;
+
+commentdef {
+  p_header = "MERGE_PARALLEL";
+}
 
 typedef enum {
   FIND_CLOSEST, FIND_FIRST_BEFORE, FIND_FIRST_AFTER
@@ -89,6 +138,38 @@ paramdef struct secondary_dataset_t {
   p_descr = "List of directories containing the data files.";
   p_help = "The geometry of secondary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The find_mode indicates how to search in time for the secondary file relative to the primary file.";
 } secondary_datasets[];
+
+commentdef {
+  p_header = "MERGE_SERIAL";
+  p_text = "This was developed for Vaisala volume files, which are sometime split into parts based on the PRF, max range etc. Typically a volume might be split into sub-volumes named, for example, 'VOL_A', 'VOL_B' and 'VOL_C'. The serial ingest allows you to merge these sub-volumes into a single volume, and then write out the combined volume.";
+}
+
+typedef struct {
+  string vol_title;
+  string scan_name;
+} serial_vol_type_t;
+
+paramdef struct serial_vol_type_t {
+  p_default = {
+    { "VOL_A", "VOL_A" },
+    { "VOL_B", "VOL_B" },
+    { "VOL_C", "VOL_C" }
+  };
+  p_descr = "Array of volume types for the volumes to be merged. The volume will only be written when all of the specified input volumes have arrived.";
+  p_help = "If you do not want to specify a particular string property, set it to an empty string.";
+} serial_vol_types[];
+
+paramdef string {
+  p_default = "MERGED";
+  p_descr = "Title for merged volume.";
+  p_help = "The will be applied before the volume is written out.";
+} serial_merge_vol_title;
+
+paramdef string {
+  p_default = "MERGED";
+  p_descr = "Scan name for merged volume.";
+  p_help = "The will be applied before the volume is written out.";
+} serial_merge_scan_name;
 
 commentdef {
   p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";

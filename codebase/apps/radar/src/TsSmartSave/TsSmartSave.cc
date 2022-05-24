@@ -729,6 +729,35 @@ int TsSmartSave::_openNewFile(const IwrfTsPulse &pulse)
     sprintf(movingAngleStr, "_%.3d", (int) (az + 0.5));
   }
 
+  // compute xmit mode string
+
+  string xmitModeStr;
+  if (_params.add_xmit_mode_to_file_name) {
+    const IwrfTsInfo &info = pulse.getTsInfo();
+    const iwrf_ts_processing_t &tsProc = info.getTsProcessing();
+    if (tsProc.prf_mode == IWRF_PRF_MODE_STAGGERED_2_3) {
+      xmitModeStr = ".stag23";
+    } else if (tsProc.prf_mode == IWRF_PRF_MODE_STAGGERED_3_4) {
+      xmitModeStr = ".stag34";
+    } else if (tsProc.prf_mode == IWRF_PRF_MODE_STAGGERED_4_5) {
+      xmitModeStr = ".stag45";
+    } else if (tsProc.xmit_rcv_mode == IWRF_ALT_HV_CO_CROSS ||
+               tsProc.xmit_rcv_mode == IWRF_ALT_HV_CO_ONLY ||
+               tsProc.xmit_rcv_mode == IWRF_ALT_HV_FIXED_HV) {
+      xmitModeStr = ".alt";
+    } else if (tsProc.xmit_rcv_mode == IWRF_SIM_HV_FIXED_HV ||
+               tsProc.xmit_rcv_mode == IWRF_SIM_HV_SWITCHED_HV) {
+      xmitModeStr = ".sim";
+    } else if (tsProc.xmit_rcv_mode == IWRF_SINGLE_POL) {
+      xmitModeStr = ".single";
+    } else if (tsProc.xmit_rcv_mode == IWRF_H_ONLY_FIXED_HV) {
+      xmitModeStr = ".honly";
+    } else if (tsProc.xmit_rcv_mode == IWRF_V_ONLY_FIXED_HV ||
+               tsProc.xmit_rcv_mode == IWRF_SINGLE_POL_V) {
+      xmitModeStr = ".vonly";
+    }
+  }
+
   // compute scan mode string
   
   string scanModeStr;
@@ -827,10 +856,11 @@ int TsSmartSave::_openNewFile(const IwrfTsPulse &pulse)
   }
 
   char name[1024];
-  sprintf(name, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d%s%s%s%s%s",
+  sprintf(name, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d%s%s%s%s%s%s",
           ttime.year, ttime.month, ttime.day,
           ttime.hour, ttime.min, ttime.sec, milliSecs,
-	  fixedAngleStr, movingAngleStr, scanModeStr.c_str(),
+	  fixedAngleStr, movingAngleStr,
+          scanModeStr.c_str(), xmitModeStr.c_str(),
           packing.c_str(), format.c_str());
   _outputName = name;
 

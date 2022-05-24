@@ -252,7 +252,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   // suppress automatic exception printing so we can handle
   // errors appropriately
 
-  H5::Exception::dontPrint();
+  H5x::Exception::dontPrint();
 
   // open file
 
@@ -264,7 +264,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     how = new Group(file.openGroup("how"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'how' group, not ODIM file" << endl;
     }
@@ -279,7 +279,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     what = new Group(file.openGroup("what"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'what' group, not ODIM file" << endl;
     }
@@ -294,7 +294,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     where = new Group(file.openGroup("where"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'where' group, not ODIM file" << endl;
     }
@@ -309,7 +309,7 @@ bool OdimHdf5RadxFile::isOdimHdf5(const string &path)
   try {
     dataset1 = new Group(file.openGroup("dataset1"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "No 'dataset1' group, not ODIM file" << endl;
     }
@@ -461,7 +461,7 @@ int OdimHdf5RadxFile::writeToPath(const RadxVol &vol,
       return -1;
     }
   }
-  catch (H5::Exception &error) {
+  catch (H5x::Exception &error) {
     _addErrStr("ERROR - OdimHdf5RadxFile::writeToPath");
     _addErrStr("  Error in _doWrite()");
     _addErrStr(error.getDetailMsg());
@@ -629,7 +629,7 @@ int OdimHdf5RadxFile::printNative(const string &path, ostream &out,
     Group root(file.openGroup("/"));
     _utils.printGroup(root, "/", out, printRays, printData);
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - trying to read ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -744,7 +744,7 @@ int OdimHdf5RadxFile::_readFromPath(const string &path,
 
   }
 
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - reading ODIM HDF5 file");
     _addErrStr(e.getDetailMsg());
     return -1;
@@ -795,7 +795,7 @@ int OdimHdf5RadxFile::_getNSweeps(Group &root)
     try {
       ds = new Group(root.openGroup(datasetName));
     }
-    catch (H5::Exception &e) {
+    catch (H5x::Exception &e) {
       // data set does not exist
       if (ds) delete ds;
       continue;
@@ -840,7 +840,7 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
     try {
       data = new Group(sweep.openGroup(dataName));
     }
-    catch (H5::Exception &e) {
+    catch (H5x::Exception &e) {
       // data set does not exist
       if (data) delete data;
       continue;
@@ -856,7 +856,7 @@ int OdimHdf5RadxFile::_getNFields(Group &sweep)
     try {
       quality = new Group(sweep.openGroup(qualityName));
     }
-    catch (H5::Exception &e) {
+    catch (H5x::Exception &e) {
       // quality set does not exist
       if (quality) delete quality;
       continue;
@@ -937,7 +937,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for sweep: " << sweepName << endl;
     }
@@ -958,7 +958,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'where' group for sweep: " << sweepName << endl;
     }
@@ -978,7 +978,7 @@ int OdimHdf5RadxFile::_readSweep(Group &root, int sweepNumber)
       return -1;
     }
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for sweep: " << sweepName << endl;
     }
@@ -2100,7 +2100,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     dg = new Group(sweep.openGroup(dataGroupName));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data grop");
     _addErrStr("  Data group name: ", dataGroupName);
@@ -2124,7 +2124,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
       return -1;
     }
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_debug) {
       cerr << "NOTE - no 'what' group for data field: " << dataGroupName << endl;
     }
@@ -2142,7 +2142,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
     label += " how";
     _readHow(*how, label);
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     if (_verbose) {
       cerr << "NOTE - no 'how' group for data field: " << dataGroupName << endl;
     }
@@ -2171,7 +2171,7 @@ int OdimHdf5RadxFile::_addFieldToRays(const char *label,
   try {
     ds = new DataSet(dg->openDataSet("data"));
   }
-  catch (H5::Exception &e) {
+  catch (H5x::Exception &e) {
     _addErrStr("ERROR - OdimHdf5RadxFile::_addFieldToRays");
     _addErrStr("  Cannot open data set for field: ", _fieldName);
     _addErrStr(e.getDetailMsg());
@@ -3008,13 +3008,13 @@ void OdimHdf5RadxFile::_lookupUnitsAndNames(const string &fieldName,
     standardName = "signal_to_noise_ratio";
   }
 
-  if (fieldName == "VRAD") {
+  if (fieldName.find("VRAD") != string::npos) {
     units = "m/s";
     longName = "Radial velocity";
     standardName = "radial_velocity_of_scatterers_away_from_instrument";
   }
 
-  if (fieldName == "WRAD") {
+  if (fieldName.find("WRAD") != string::npos) {
     units = "m/s";
     longName = "Spectral width of radial velocity";
     standardName = "doppler_spectrum_width";
@@ -3398,14 +3398,14 @@ int OdimHdf5RadxFile::_openFileForWriting(const string &writePath)
 
   //  Turn off the auto-printing when failure occurs so that we can
   // handle the errors appropriately
-  H5::Exception::dontPrint();
+  H5x::Exception::dontPrint();
 
   try {
     _file = new H5File(writePath.c_str(), H5F_ACC_TRUNC);
   }
   
   // catch failure caused by the H5File operations
-  catch(H5::Exception &error)
+  catch(H5x::Exception &error)
   {
     _addErrStr("ERROR - OdimHdf5RadxFile::_openFileForWriting");
     _addErrStr("  Cannot open file for writing: ", writePath);
@@ -4235,9 +4235,9 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
   switch (field.getDataType()) {
     case Radx::FL64: {
       Radx::fl32 fillValue = field.getMissingFl64();
-      H5::PredType predType = H5::PredType::IEEE_F64LE;
+      H5x::PredType predType = H5x::PredType::IEEE_F64LE;
       if (ByteOrder::hostIsBigEndian()) {
-        predType = H5::PredType::IEEE_F64BE;
+        predType = H5x::PredType::IEEE_F64BE;
       }
       plist.setFillValue(predType, &fillValue);
       DataSet dset(data.createDataSet("data", predType,
@@ -4249,9 +4249,9 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
     }
     case Radx::FL32: {
       Radx::fl32 fillValue = field.getMissingFl32();
-      H5::PredType predType = H5::PredType::IEEE_F32LE;
+      H5x::PredType predType = H5x::PredType::IEEE_F32LE;
       if (ByteOrder::hostIsBigEndian()) {
-        predType = H5::PredType::IEEE_F32BE;
+        predType = H5x::PredType::IEEE_F32BE;
       }
       plist.setFillValue(predType, &fillValue);
       DataSet dset(data.createDataSet("data", predType,
@@ -4263,9 +4263,9 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
     }
     case Radx::SI32: {
       Radx::si32 fillValue = field.getMissingSi32();
-      H5::PredType predType = H5::PredType::STD_I32LE;
+      H5x::PredType predType = H5x::PredType::STD_I32LE;
       if (ByteOrder::hostIsBigEndian()) {
-        predType = H5::PredType::STD_I32BE;
+        predType = H5x::PredType::STD_I32BE;
       }
       plist.setFillValue(predType, &fillValue);
       DataSet dset(data.createDataSet("data", predType,
@@ -4277,9 +4277,9 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
     }
     case Radx::SI16: {
       Radx::si16 fillValue = field.getMissingSi16();
-      H5::PredType predType = H5::PredType::STD_I16LE;
+      H5x::PredType predType = H5x::PredType::STD_I16LE;
       if (ByteOrder::hostIsBigEndian()) {
-        predType = H5::PredType::STD_I16BE;
+        predType = H5x::PredType::STD_I16BE;
       }
       plist.setFillValue(predType, &fillValue);
       DataSet dset(data.createDataSet("data", predType,
@@ -4292,9 +4292,9 @@ int OdimHdf5RadxFile::_writeField(RadxVol &sweepVol,
     case Radx::SI08:
     default: {
       Radx::si08 fillValue = field.getMissingSi08();
-      H5::PredType predType = H5::PredType::STD_I8LE;
+      H5x::PredType predType = H5x::PredType::STD_I8LE;
       if (ByteOrder::hostIsBigEndian()) {
-        predType = H5::PredType::STD_I8BE;
+        predType = H5x::PredType::STD_I8BE;
       }
       plist.setFillValue(predType, &fillValue);
       DataSet dset(data.createDataSet("data", predType,

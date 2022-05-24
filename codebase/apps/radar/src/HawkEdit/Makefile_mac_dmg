@@ -58,12 +58,9 @@ HawkEyeEdit_Elle:
 	#
 	# add the dependent libs
 	#
-	#cp    ${USR_LIB}/libhdf5_cpp.103.dylib ${STAGING}/${TARGET}.app/Contents/Frameworks
-	#cp    ${USR_LIB}/libudunits2.dylib     ${STAGING}/${TARGET}.app/Contents/Frameworks
 	#cp    ${USR_LIB}/libnetcdf.15.dylib    ${STAGING}/${TARGET}.app/Contents/Frameworks
 	#cp    ${USR_LIB}/libhdf5_hl.100.dylib  ${STAGING}/${TARGET}.app/Contents/Frameworks
 	#cp    ${USR_LIB}/libhdf5.103.dylib     ${STAGING}/${TARGET}.app/Contents/Frameworks
-	#cp    ${USR_LIB}/libnetcdf_c++.4.dylib ${STAGING}/${TARGET}.app/Contents/Frameworks
 	#cp    ${USR_LIB}/libsz.2.dylib         ${STAGING}/${TARGET}.app/Contents/Frameworks
 	#
 	# copy the color scales

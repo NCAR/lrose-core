@@ -56,13 +56,13 @@ typedef enum {
   REALTIME_TCP_MODE, 
   ARCHIVE_TIME_MODE,
   FILE_LIST_MODE,
-  FOLLOW_MOMENTS_MODE
+  FOLLOW_DISPLAY_MODE
 } input_mode_t;
 
 paramdef enum input_mode_t {
   p_default = REALTIME_FMQ_MODE;
   p_descr = "Method for reading the input time series data";
-  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_MOMENTS_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
+  p_help = "\n\nREALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.\n\nREALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP server.\n\nARCHIVE_TIME_MODE: given a time span and data directory, identify the list of files within that time span and read those files.\n\nFILE_LIST_MODE: the list of time series files is specified on the command line.\n\nFOLLOW_DISPLAY_MODE: the user is running a moments display (e.g. HawkEye or CIDD) and clicks on locations of interest. Sprite polls a shared memory segment for information on the user's clicks, and reads in the data for the time and location specified in the latest click.";
 } input_mode;
 
 paramdef string {
@@ -112,30 +112,26 @@ paramdef double {
 } min_secs_between_rendering;
 
 commentdef {
-  p_header = "GETTING CLICK-POINT INFO FROM MOMENTS DISPLAY (CIDD or HawkEye)";
+  p_header = "INITIAL location";
 }
-
-paramdef int {
-  p_default = 61500;
-  p_descr = "The shared memory key for the moments display coordinate struct.";
-  p_help = "When the user clicks in the moments main window, the coordinate struct is updated with the location and time.";
-} moments_shmem_key;
 
 paramdef double {
-  p_default = 10.0;
-  p_descr = "Max angular error when searching for spectra close to the click point (deg).";
-  p_help = "When the user clicks in CIDD, the (x) location is saved. From this, the elevation, elevation and range of the click point can be determined. The data base is then searched for spectra from a beam close to this. This parameter gives the max angular error allowable in this search.";
-} moments_max_search_angle_error;
+  p_default = 0.5;
+  p_descr = "Initial elevation for selecting a radar gate (deg).";
+  p_help = "The display begins using this elevation. The user can then change the elevation either by selecting a point in HawkEye, or by clicking in the ascope plots.";
+} start_elevation;
 
-commentdef {
-  p_header = "INITIAL RANGE";
-}
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Initial azimuth for selecting a radar gate (deg).";
+  p_help = "The display begins using this azimuth. The user can then change the azimuth either by selecting a point in HawkEye, or by clicking in the ascope plots.";
+} start_azimuth;
 
 paramdef double {
   p_default = 50.0;
   p_descr = "Initial range for selecting a radar gate (km).";
   p_help = "The display begins using this range. The user can then change the range either by selecting a point in CIDD or HawkEye, or by clicking in the ascope plots.";
-} selected_range_km;
+} start_range_km;
 
 commentdef {
   p_header = "STATUS TO BE SHOWN IN GUI";
@@ -207,11 +203,26 @@ paramdef struct show_status_t {
 } show_status_in_gui;
 
 commentdef {
+  p_header = "SET MAX RANGE";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the max range to be used for plotting.";
+  p_help = "If FALSE, the max range of the data will be used. If TRUE, max_range_km will override the max range in the data.";
+} set_max_range;
+
+paramdef double {
+  p_default = 120.0;
+  p_descr = "Max range for the display (km).";
+} max_range_km;
+
+commentdef {
   p_header = "MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS";
 }
 
 paramdef int {
-  p_default = 1250;
+  p_default = 1500;
   p_descr = "Startup width of main window (pixels).";
 } main_window_width;
 
@@ -267,213 +278,10 @@ paramdef string {
 } main_window_panel_divider_color;
 
 paramdef int {
-  p_default = 40;
-  p_descr = "Width of color scale (pixels).";
-} main_color_scale_width;
-
-paramdef int {
   p_default = 11;
   p_descr = "Size of cross at click point (pixels).";
   p_help = "Size of cross drawn at click point, to select data.";
 } click_cross_size;
-
-commentdef {
-  p_header = "IQ PLOTS";
-}
-
-paramdef int {
-  p_default = 2;
-  p_descr = "Number of rows of plots in iq plots.";
-  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
-} iqplots_n_rows;
-
-paramdef int {
-  p_default = 2;
-  p_descr = "Number of columns of plots in iq plots.";
-  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
-} iqplots_n_columns;
-
-typedef enum {
-  SPECTRUM,
-  TIME_SERIES,
-  I_VS_Q,
-  PHASOR
-} iqplot_type_t;
-
-paramdef enum iqplot_type_t {
-  p_default = { SPECTRUM, TIME_SERIES, I_VS_Q, PHASOR };
-  p_descr = "Array of types of IQ plots for each sub panel.";
-  p_help = "The array size must match n_rows times n_columns.";
-} iqplot_types[];
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Height of top margin in IQPLOT mode (pixels).";
-  p_help = "Titles go in the top margin.";
-} iqplot_top_margin;
-
-paramdef int {
-  p_default = 18;
-  p_descr = "Height of bottom margin in IQPLOT mode (pixels).";
-  p_help = "Time scale goes in the bottom margin.";
-} iqplot_bottom_margin;
-
-paramdef int {
-  p_default = 20;
-  p_descr = "Width of left margin in IQPLOT mode (pixels).";
-  p_help = "Height scale goes in the left margin.";
-} iqplot_left_margin;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "Width of right margin in IQPLOT mode (pixels).";
-  p_help = "Height scale goes in the right margin.";
-} iqplot_right_margin;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Length of ticks on axes (pixels).";
-} iqplot_axis_tick_len;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Ideal number of ticks on axes.";
-} iqplot_n_ticks_ideal;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Margin around title text (pixels).";
-} iqplot_title_text_margin;
-
-paramdef int {
-  p_default = 3;
-  p_descr = "Margin around legend text (pixels).";
-} iqplot_legend_text_margin;
-
-paramdef int {
-  p_default = 2;
-  p_descr = "Margin around axis text (pixels).";
-} iqplot_axis_text_margin;
-
-commentdef {
-  p_header = "IQPLOT TITLES, LABELS AND AXES";
-}
-
-paramdef int {
-  p_default = 10;
-  p_descr = "Font size of center title (pixels).";
-} iqplot_title_font_size;
-
-paramdef int {
-  p_default = 8;
-  p_descr = "Font size of axis labels in iq plots (pixels).";
-} iqplot_axis_label_font_size;
-
-paramdef int {
-  p_default = 6;
-  p_descr = "Font size of axis tick values (pixels).";
-} iqplot_tick_values_font_size;
-
-paramdef int {
-  p_default = 6;
-  p_descr = "Font size for plot legends (pixels).";
-} iqplot_legend_font_size;
-
-paramdef string {
-  p_default = "white";
-  p_descr = "Color of iqplot axis labels.";
-} iqplot_axis_label_color;
-
-paramdef string {
-  p_default = "orange";
-  p_descr = "Color of plot title.";
-} iqplot_title_color;
-
-paramdef string {
-  p_default = "green";
-  p_descr = "Color of axes in iq plots.";
-} iqplot_axes_color;
-
-paramdef string {
-  p_default = "gray";
-  p_descr = "Color of grid lines on iq plots.";
-} iqplot_grid_color;
-
-paramdef string {
-  p_default = "pink";
-  p_descr = "Color of area fill for IQ plots.";
-} iqplot_fill_color;
-
-paramdef string {
-  p_default = "red";
-  p_descr = "Color of labels in iq plots.";
-} iqplot_labels_color;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the Y direction.";
-} iqplot_y_grid_lines_on;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the X direction.";
-} iqplot_x_grid_lines_on;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw a line for the instrument location.";
-  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
-} iqplot_draw_instrument_height_line;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Location of tick labels, relative to x axis.";
-  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
-} iqplot_x_axis_labels_inside;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Location of tick labels, relative to y axis.";
-  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
-} iqplot_y_axis_labels_inside;
-
-commentdef {
-  p_header = "IQPLOT LEGENDS";
-}
-
-typedef enum {
-  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
-} legend_pos_t;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the IQPLOT plot window";
-  p_help = "This include time, field name and elevation angle.";
-} iqplot_main_legend_pos;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to plot the starting lat/lon position as a legend.";
-  p_help = "This helps in geolocating the data from a mobile system.";
-} iqplot_plot_legend1;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
-} iqplot_legend1_pos;
-
-paramdef enum legend_pos_t {
-  p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of lat/lon legend in plot";
-  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
-} iqplot_legend2_pos;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to plot the starting lat/lon position as a legend.";
-  p_help = "This helps in geolocating the data from a mobile system.";
-} iqplot_plot_legend2;
 
 commentdef {
   p_header = "ASCOPE DISPLAY PANEL";
@@ -481,10 +289,10 @@ commentdef {
 }
 
 paramdef int {
-  p_default = 2;
+  p_default = 1;
   p_descr = "Number of ascope panels in spectra window (pixels).";
   p_help = "The ascopes will be on the left of the plot. Set to 0 for no ASCOPE panel.";
-} ascope_n_panels_in_spectra_window;
+} ascope_n_panels;
 
 typedef enum {
   DBZ,
@@ -501,7 +309,7 @@ typedef enum {
 } moment_type_t;
 
 paramdef enum moment_type_t {
-  p_default = { DBZ, VEL };
+  p_default = { DBZ };
   p_descr = "Moments to be displaed on ascope panels.";
   p_help = "The number of specified moments must match the number of ascope panels.";
 } ascope_moments[];
@@ -510,7 +318,7 @@ paramdef int {
   p_default = 150;
   p_descr = "Width of ASCOPE panel in spectra window (pixels).";
   p_help = "The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE panel.";
-} ascope_width_in_spectra_window;
+} ascope_width;
 
 paramdef int {
   p_default = 10;
@@ -628,6 +436,548 @@ paramdef boolean {
 } ascope_y_axis_labels_inside;
 
 commentdef {
+  p_header = "WATERFALL DISPLAY PANEL";
+  p_text = "The waterfall plots show spectra plotted against range.";
+}
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Number of waterfall panels in spectra window (pixels).";
+  p_help = "The waterfalls will be on the left of the plot. Set to 0 for no WATERFALL panel.";
+} waterfall_n_panels;
+
+typedef enum {
+  FFT_WINDOW_RECT,
+  FFT_WINDOW_VONHANN,
+  FFT_WINDOW_BLACKMAN,
+  FFT_WINDOW_BLACKMAN_NUTTALL,
+  FFT_WINDOW_TUKEY_10,
+  FFT_WINDOW_TUKEY_20,
+  FFT_WINDOW_TUKEY_30,
+  FFT_WINDOW_TUKEY_50
+} fft_window_t;
+
+typedef enum {
+  WATERFALL_HC,
+  WATERFALL_VC,
+  WATERFALL_HX,
+  WATERFALL_VX,
+  WATERFALL_ZDR,
+  WATERFALL_PHIDP,
+  WATERFALL_SDEV_ZDR,
+  WATERFALL_SDEV_PHIDP,
+  WATERFALL_CMD
+} waterfall_type_t;
+
+typedef struct {
+  waterfall_type_t plot_type;
+  fft_window_t fft_window;
+  int median_filter_len;
+  boolean use_adaptive_filter;
+  double clutter_width_mps;
+  boolean use_regression_filter;
+  int regression_order;
+} waterfall_plot_t;
+
+paramdef struct waterfall_plot_t {
+  p_default = {
+    { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 },
+    { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 }
+  };
+  p_descr = "Details of waterfall plots for each sub panel.";
+  p_help = "HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.";
+} waterfall_plots[];
+
+paramdef int {
+  p_default = 200;
+  p_descr = "Width of WATERFALL panel in spectra window (pixels).";
+  p_help = "The WATERFALL will be on the left of the plot. Set to 0 for no WATERFALL panel.";
+} waterfall_width;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Width of color scale in waterfall plots (pixels).";
+  p_help = "The color scale sits to the right of the data.";
+} waterfall_color_scale_width;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.";
+} waterfall_sdev_zdr_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} waterfall_sdev_zdr_kernel_nsamples;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.";
+} waterfall_sdev_phidp_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} waterfall_sdev_phidp_kernel_nsamples;
+
+paramdef string {
+  p_default = "../share/color_scales";
+  p_descr = "Directory for color scales";
+  p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
+} color_scale_dir;
+
+paramdef string {
+  p_default = "dbm_spectra.colors";
+  p_descr = "Color scale name for dbm";
+} waterfall_dbm_color_scale_name;
+
+paramdef string {
+  p_default = "zdr.colors";
+  p_descr = "Color scale name for zdr";
+} waterfall_zdr_color_scale_name;
+
+paramdef string {
+  p_default = "phidp.colors";
+  p_descr = "Color scale name for phidp";
+} waterfall_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "sdzdr_spectra.colors";
+  p_descr = "Color scale name for sdev of zdr";
+} waterfall_sdev_zdr_color_scale_name;
+
+paramdef string {
+  p_default = "sdphidp_spectra.colors";
+  p_descr = "Color scale name for sdev of phidp";
+} waterfall_sdev_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "cmd_spectra.colors";
+  p_descr = "Color scale name for CMD";
+} waterfall_cmd_color_scale_name;
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of center title (pixels).";
+} waterfall_title_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis labels in waterfall (pixels).";
+} waterfall_axis_label_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size of axis tick values (pixels).";
+} waterfall_tick_values_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size for plot legends (pixels).";
+} waterfall_legend_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size for labels in color scales (pixels).";
+} waterfall_color_scale_font_size;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around title text (pixels).";
+} waterfall_title_text_margin;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around legend text (pixels).";
+} waterfall_legend_text_margin;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Margin around axis text (pixels).";
+} waterfall_axis_text_margin;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Length of ticks on axes (pixels).";
+} waterfall_axis_tick_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Ideal number of ticks on axes.";
+} waterfall_n_ticks_ideal;
+
+paramdef int {
+  p_default = 18;
+  p_descr = "Width of left margin for waterfall plot (pixels).";
+  p_help = "The Y axis labels are plotted here.";
+} waterfall_left_margin;
+
+paramdef int {
+  p_default = 18;
+  p_descr = "Height of bottom margin for waterfall plot (pixels).";
+  p_help = "The X axis labels are plotted here.";
+} waterfall_bottom_margin;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} waterfall_x_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} waterfall_y_grid_lines_on;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of waterfall axis labels.";
+} waterfall_axis_label_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of axes in waterfall.";
+} waterfall_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on waterfall.";
+} waterfall_grid_color;
+
+paramdef string {
+  p_default = "lightgray";
+  p_descr = "Color of waterfall line.";
+} waterfall_line_color;
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "Color of line showing currently selected range.";
+  p_help = "The user can double click in the waterfall to move this line.";
+} waterfall_selected_range_color;
+
+paramdef string {
+  p_default = "darkgreen";
+  p_descr = "Color of waterfall fill.";
+} waterfall_fill_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of waterfall title.";
+} waterfall_title_color;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to x axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} waterfall_x_axis_labels_inside;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to y axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} waterfall_y_axis_labels_inside;
+
+commentdef {
+  p_header = "IQ PLOTS";
+}
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Number of rows of plots in iq plots.";
+  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of rows.";
+} iqplots_n_rows;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Number of columns of plots in iq plots.";
+  p_help = "The iq plots are made up of a matrix of plots, n_rows by n_colums. This is the starting value for the number of columns.";
+} iqplots_n_columns;
+
+typedef enum {
+  SPECTRAL_POWER,
+  SPECTRAL_PHASE,
+  SPECTRAL_ZDR,
+  SPECTRAL_PHIDP,
+  TS_POWER,
+  TS_PHASE,
+  I_VALS,
+  Q_VALS,
+  I_VS_Q,
+  PHASOR
+} iq_plot_type_t;
+
+typedef enum {
+  CHANNEL_HC,
+  CHANNEL_VC,
+  CHANNEL_HX,
+  CHANNEL_VX
+} rx_channel_t;
+
+typedef struct {
+  iq_plot_type_t plot_type;
+  rx_channel_t rx_channel;
+  fft_window_t fft_window;
+  int median_filter_len;
+  boolean use_adaptive_filter;
+  boolean plot_clutter_model;
+  double clutter_width_mps;
+  boolean use_regression_filter;
+  int regression_order;
+  boolean regression_filter_interp_across_notch;
+  boolean compute_plot_range_dynamically;
+} iq_plot_t;
+
+paramdef struct iq_plot_t {
+  p_default = {
+    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
+    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true }
+  };
+  p_descr = "Details of IQ plots for each sub panel.";
+  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra.";
+} iq_plots[];
+
+typedef struct {
+  iq_plot_type_t plot_type;
+  double min_val;
+  double max_val;
+} iq_plot_static_range_t;
+
+paramdef struct iq_plot_static_range_t {
+  p_default = {
+    { SPECTRAL_POWER, -120.0, +10.0 },
+    { SPECTRAL_PHASE, -180.0, +180.0 },
+    { SPECTRAL_ZDR, -10.0, +20.0 },
+    { SPECTRAL_PHIDP, -180.0, +180.0 },
+    { TS_POWER, -80, +10.0 },
+    { TS_PHASE, -180.0, +180.0 },
+    { I_VALS, -1.0, +1.0 },
+    { Q_VALS, -1.0, +1.0 },
+    { I_VS_Q, -1.0, +1.0 },
+    { PHASOR, -20.0, +20.0 }
+  };
+  p_descr = "Static plot ranges for the IQ plot types.";
+  p_help = "These are used if compute_plot_range_dynamically is false. Otherwise the plot range is computed from the data. There must be 1 entry for each plot type.";
+} iq_plot_static_ranges[10];
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Height of top margin in IQPLOT mode (pixels).";
+  p_help = "Titles go in the top margin.";
+} iqplot_top_margin;
+
+paramdef int {
+  p_default = 18;
+  p_descr = "Height of bottom margin in IQPLOT mode (pixels).";
+  p_help = "Time scale goes in the bottom margin.";
+} iqplot_bottom_margin;
+
+paramdef int {
+  p_default = 30;
+  p_descr = "Width of left margin in IQPLOT mode (pixels).";
+  p_help = "Height scale goes in the left margin.";
+} iqplot_left_margin;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Width of right margin in IQPLOT mode (pixels).";
+  p_help = "Height scale goes in the right margin.";
+} iqplot_right_margin;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Length of ticks on axes (pixels).";
+} iqplot_axis_tick_len;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Ideal number of ticks on axes.";
+} iqplot_n_ticks_ideal;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around title text (pixels).";
+} iqplot_title_text_margin;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Margin around legend text (pixels).";
+} iqplot_legend_text_margin;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Margin around axis text (pixels).";
+} iqplot_axis_text_margin;
+
+commentdef {
+  p_header = "IQPLOT TITLES, LABELS AND AXES";
+}
+
+paramdef int {
+  p_default = 10;
+  p_descr = "Font size of center title (pixels).";
+} iqplot_title_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size of axis labels in iq plots (pixels).";
+} iqplot_axis_label_font_size;
+
+paramdef int {
+  p_default = 6;
+  p_descr = "Font size of axis tick values (pixels).";
+} iqplot_tick_values_font_size;
+
+paramdef int {
+  p_default = 8;
+  p_descr = "Font size for plot legends (pixels).";
+} iqplot_legend_font_size;
+
+paramdef string {
+  p_default = "white";
+  p_descr = "Color of iqplot axis labels.";
+} iqplot_axis_label_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of plot title.";
+} iqplot_title_color;
+
+paramdef string {
+  p_default = "green";
+  p_descr = "Color of axes in iq plots.";
+} iqplot_axes_color;
+
+paramdef string {
+  p_default = "gray";
+  p_descr = "Color of grid lines on iq plots.";
+} iqplot_grid_color;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "Color of area fill for IQ plots.";
+} iqplot_fill_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of labels in iq plots.";
+} iqplot_labels_color;
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "Color of data lines in iq plots.";
+} iqplot_line_color;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Width of data lines in iq plots.";
+} iqplot_line_width;
+
+paramdef string {
+  p_default = "pink";
+  p_descr = "Color of adaptive filtered lines in spectra plots.";
+} iqplot_adaptive_filtered_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of clutter model iq plots.";
+} iqplot_clutter_model_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of regression filtered lines in spectra plots.";
+} iqplot_regression_filtered_color;
+
+paramdef string {
+  p_default = "orange";
+  p_descr = "Color of polynomial fit in time series.";
+} iqplot_polynomial_fit_color;
+
+paramdef string {
+  p_default = "red";
+  p_descr = "Color of polynomial residuals in time series.";
+} iqplot_polynomial_residual_color;
+
+paramdef int {
+  p_default = 2;
+  p_descr = "Width of data lines in polynomial plots.";
+} iqplot_polynomial_line_width;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} iqplot_y_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} iqplot_x_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw a line for the instrument location.";
+  p_descr = "Applies to RANGE_AXIS_SCALE_ALTITUDE option only.";
+} iqplot_draw_instrument_height_line;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to x axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} iqplot_x_axis_labels_inside;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Location of tick labels, relative to y axis.";
+  p_help = "These can either be outside the axes, or inside - i.e. within the data area of the plot.";
+} iqplot_y_axis_labels_inside;
+
+commentdef {
+  p_header = "IQPLOT LEGENDS";
+}
+
+typedef enum {
+  LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
+} legend_pos_t;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of main legend in the IQPLOT plot window";
+  p_help = "This include time, field name and elevation angle.";
+} iqplot_main_legend_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} iqplot_plot_legend1;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
+} iqplot_legend1_pos;
+
+paramdef enum legend_pos_t {
+  p_default = LEGEND_TOP_LEFT;
+  p_descr = "Position of lat/lon legend in plot";
+  p_help = "The starting latitude/longitude will be plotted as a legend in the location specified. See 'iqplot_plot_starting_latlon_as_legend'.";
+} iqplot_legend2_pos;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to plot the starting lat/lon position as a legend.";
+  p_help = "This helps in geolocating the data from a mobile system.";
+} iqplot_plot_legend2;
+
+commentdef {
   p_header = "CLUTTER FILTERING";
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
@@ -672,12 +1022,6 @@ paramdef double {
   p_descr = "Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).";
   p_help = "As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.";
 } regression_filter_min_csr_db;
-
-paramdef boolean {
-  p_default  = true;
-  p_descr = "For the regression filter, option to interpolate power across the notch.";
-  p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";
-} regression_filter_interp_across_notch;
 
 paramdef boolean {
   p_default = false;
@@ -941,23 +1285,13 @@ paramdef double {
 
 commentdef {
   p_header = "FFT WINDOWING";
+  p_text = "Applies to the general case.";
 }
 
-typedef enum {
-  WINDOW_RECT,
-  WINDOW_VONHANN,
-  WINDOW_BLACKMAN,
-  WINDOW_BLACKMAN_NUTTALL,
-  WINDOW_TUKEY_10,
-  WINDOW_TUKEY_20,
-  WINDOW_TUKEY_30,
-  WINDOW_TUKEY_50
-} window_t;
-
-paramdef enum window_t {
-  p_default = WINDOW_VONHANN;
+paramdef enum fft_window_t {
+  p_default = FFT_WINDOW_VONHANN;
   p_descr = "Window to be applied to time series before computing spectra.";
-} window;
+} fft_window;
 
 commentdef {
   p_header = "RADAR CALIBRATION";
@@ -973,4 +1307,27 @@ paramdef boolean {
   p_descr = "Option to override cal in time series data.";
   p_help = "If false, the cal information in the time series data will be used. If true, the cal info in the param file will be used.";
 } use_cal_from_time_series;
+
+commentdef {
+  p_header = "CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)";
+  p_text = "Reading and writing the click point location to an FMQ in XML format.";
+}
+
+paramdef string {
+  p_default = "/tmp/fmq/click_point";
+  p_descr = "URL for click point URL.";
+  p_help = "If the user clicks on a point in HawkEye, the details of the latest click point are read from the FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the time or range in Sprite, this change will be written to the FMQ.";
+} click_point_fmq_url;
+
+paramdef double {
+  p_default = 10.0;
+  p_descr = "Max angular error when searching for dwell close to the click point (deg).";
+  p_help = "When the user clicks in HawkEye, the (x,y) location is saved. From this, the elevation, azimuth and range of the click point can be determined. This parameter gives the max angular error allowable in this search.";
+} click_point_search_angle_error;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Change in azimuth when clicking left or right keys in follow mode (deg).";
+  p_help = "In display follow mode, you can navigate left and right in azimuth using the arrow keys. This is the requested change in azimuth when navigating.";
+} click_point_delta_azimuth_deg;
 

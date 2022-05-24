@@ -43,7 +43,7 @@
 using namespace std;
 
 class InputMdv;
-class GridClump;
+class ClumpProps;
 class Verify;
 
 // layer statistics
@@ -58,7 +58,7 @@ typedef struct {
   double sum_refl_x;
   double sum_refl_y;
   double sum_refl;
-  double sum_mass;
+  double sum_mass_factor;
   double sum_vel;
   double sum_vel2;
   double sum_vorticity;
@@ -88,7 +88,7 @@ typedef struct {
   int n, n_vorticity;
   int x, y, z;
   double refl, refl_x, refl_y, refl_z;
-  double precip, mass;
+  double precip, mass_factor;
   double vel, vel2, vorticity;
 } sum_stats_t;
 
@@ -115,7 +115,7 @@ public:
   void init();
 
   // compute properties for clump
-  int compute(const GridClump &grid_clump, int storm_num);
+  int compute(const ClumpProps &cprops, int storm_num);
 
   // get methods
   double getMinValidZ() const { return _minValidZ; }
@@ -184,11 +184,11 @@ private:
   // methods
 
   void _alloc(int nz, int nhist);
-  int _computeFirstPass(const GridClump &grid_clump);
-  void _computeSecondPass(const GridClump &grid_clump);
-  int _storeRuns(const GridClump &grid_clump);
-  void _tiltCompute();
-  void _dbzGradientCompute();
+  int _computeFirstPass(const ClumpProps &cprops);
+  void _computeSecondPass(const ClumpProps &cprops);
+  int _storeRuns(const ClumpProps &cprops);
+  void _tiltCompute(const ClumpProps &cprops);
+  void _dbzGradientCompute(const ClumpProps &cprops);
   int _checkSecondTrip();
      
   void _loadGprops(storm_file_global_props_t *gprops,
@@ -207,17 +207,17 @@ private:
   void _loadDbzHist(dbz_hist_entry_t *dbz_hist,
 		    storm_file_dbz_hist_t *hist);
 
-  double _topOfDbz(double dbz, const GridClump &grid_clump);
+  double _topOfDbz(double dbz, const ClumpProps &cprops);
 
   // hail metrics
   
-  void  _computeHailMetrics(const GridClump &grid_clump);
-  int  _getFokrCategory(const GridClump &grid_clump);
-  double _getWaldvogelProbability(const GridClump &grid_clump);
+  void  _computeHailMetrics(const ClumpProps &cprops);
+  int  _getFokrCategory(const ClumpProps &cprops);
+  double _getWaldvogelProbability(const ClumpProps &cprops);
 
   // nexrad hail detection algorithm
 
-  void _computeNexradHda(const GridClump &grid_clump,
+  void _computeNexradHda(const ClumpProps &cprops,
                          double &poh, double &shi,
                          double &posh, double &mehs);
   

@@ -95,6 +95,14 @@ public:
                 int entry_num,
                 const storm_file_params_t &sparams,
                 const track_file_params_t &tparams);
+
+  // Convert to XML
+  
+  string convertToXML(int level,
+                      int entry_num,
+                      const storm_file_params_t &sparams,
+                      const track_file_params_t &tparams) const;
+  
 protected:
 
   track_file_entry_t _entry;

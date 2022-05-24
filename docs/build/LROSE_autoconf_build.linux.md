@@ -1,4 +1,4 @@
-# Clone LROSE from GitHub and build from source using autoconf - LINUX
+# Checkout and build LROSE from source - using autoconf - LINUX
 
 This will checkout and build the latest source from GitHub.
 
@@ -36,16 +36,16 @@ Create a working directory for cloning:
   cd ~/git
 ```
 
-### Clone the current version in GitHub
+### Clone the bootstrap for LROSE
 
 ```
-  git clone https://github.com/ncar/lrose-core 
+  git clone https://github.com/ncar/lrose-bootstrap
 ```
 
-The distribution will be in the lrose-core subdirectory:
+The distribution will be in the lrose-bootstrap subdirectory:
 
 ```
-  cd ~/git/lrose-core
+  cd ~/git/lrose-bootstrap
 ```
 
 <a name="build"/>
@@ -55,7 +55,7 @@ The distribution will be in the lrose-core subdirectory:
 ### Run the build script:
 
 ```
-  cd ~/git/lrose-core/build
+  cd ~/git/lrose-bootstrap/scripts
 ```
 
 To see the usage:

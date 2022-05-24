@@ -8,10 +8,10 @@ TARGETS = $(GENERAL_TARGETS) $(INSTALL_TARGETS)
 
 SUB_DIRS = \
 	CalCompute \
-	ConvStrat \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \
+        Ecco \
 	HawkEye \
 	IntfRemove \
 	Mdv2Vad \

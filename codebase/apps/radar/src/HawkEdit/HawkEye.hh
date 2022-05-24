@@ -44,13 +44,13 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "ParamFile.hh"
 #include <euclid/SunPosn.hh>
 
 class QApplication;
 class DisplayField;
 class Reader;
 class PolarManager;
-class BscanManager;
 
 class HawkEye {
   
@@ -62,7 +62,7 @@ public:
 
   // destructor
   
-  ~HawkEye();
+  virtual ~HawkEye();
 
   // run 
 
@@ -78,7 +78,7 @@ private:
   // basic
 
   string _progName;
-  Params _params;
+  ParamFile *_params;
   Args _args;
 
   // reading data in
@@ -93,7 +93,6 @@ private:
   // managing the rendering objects
 
   PolarManager *_polarManager;
-  BscanManager *_bscanManager;
   
   // methods
 

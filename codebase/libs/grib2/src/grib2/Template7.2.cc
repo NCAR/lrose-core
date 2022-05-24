@@ -537,9 +537,10 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
     lengthLast = template5_2->_lengthOfLastGroup;
     nbitsglen = template5_2->_groupLengthsBits;
     
-    if ( misType == 1 )
+    if ( misType == 1 ) {
       rmiss1 = template5_2->_primaryMissingVal;
-    else if ( misType == 2 ) {
+      rmiss2 = 0;
+    } else if ( misType == 2 ) {
       rmiss1 = template5_2->_primaryMissingVal;
       rmiss2 = template5_2->_secondaryMissingVal;
     }
@@ -558,9 +559,10 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
     lengthLast = template5_3->_lengthOfLastGroup;
     nbitsglen = template5_3->_groupLengthsBits;
     
-    if ( misType == 1 )
+    if ( misType == 1 ) {
       rmiss1 = template5_3->_primaryMissingVal;
-    else if ( misType == 2 ) {
+      rmiss2 = 0;
+    } else if ( misType == 2 ) {
       rmiss1 = template5_3->_primaryMissingVal;
       rmiss2 = template5_3->_secondaryMissingVal;
     }
@@ -570,6 +572,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   } else {
     cerr << "ERROR: Template7_pt_2::unpack()" << endl;
     cerr << "Complex packing only used for templates 2 and 3 not template " << drsConstants.templateNumber << endl;
+    delete[] outputData;
     return GRIB_FAILURE;
   }
   
@@ -687,12 +690,18 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
     totBit += (gwidth[j]*glen[j]);
     totLen += glen[j];
   }
-  if (totLen != gridSz) {
+
+  if (totLen != gridSz || totBit / 8. > _sectionsPtr.ds->_sectionLen) {
+    cerr << "ERROR: Template7_pt_2::unpack()" << endl;
+    cerr << "Complex unpacking failed " << endl;
+    delete[] ifld;
+    delete[] glen;
+    delete[] gref;
+    delete[] gwidth;
+    delete[] outputData;
     return GRIB_FAILURE;
   }
-  if (totBit / 8. > _sectionsPtr.ds->_sectionLen) {
-    return GRIB_FAILURE;
-  }
+
   //
   //  For each group, unpack data values
   //

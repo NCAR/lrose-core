@@ -1,6 +1,7 @@
 ####################################
 # list of RADX applications
 ####################################
+Ascii2Radx
 Dsr2Radx
 FixCfradialPaths
 FixRadxPointing

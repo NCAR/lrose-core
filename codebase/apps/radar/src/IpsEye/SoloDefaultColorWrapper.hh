@@ -56,7 +56,7 @@ public:
 
   /// Destructor
 
-  ~SoloDefaultColorWrapper();
+  virtual ~SoloDefaultColorWrapper();
  
   // Find the ColorMap by the palette name                                                                            
   // e.g. lookupColorTable("carbone17");                                               

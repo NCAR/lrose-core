@@ -88,9 +88,9 @@ TsReader::TsReader(const string &prog_name,
   OK = true;
 
   _pulseReader = NULL;
+  _pulseGetter = NULL;
   _scanType = SCAN_TYPE_UNKNOWN;
   
-  _pulseSeqNum = 0;
   _nPulsesRead = 0;
   
   _nSamples = _params.n_samples;
@@ -101,6 +101,8 @@ TsReader::TsReader(const string &prog_name,
   _time = 0;
   _az = 0.0;
   _el = 0.0;
+  _searchEl = 0.0;
+  _searchAz = 0.0;
 
   _nGates = 0;
 
@@ -139,20 +141,16 @@ TsReader::TsReader(const string &prog_name,
       _timeSpanSecs = _params.archive_time_span_secs;
       _archiveStartTime.set(_params.archive_start_time);
       _archiveEndTime = _archiveStartTime + _timeSpanSecs;
-      DsInputPath input(_progName,
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        _params.archive_data_dir,
-                        _archiveStartTime.utime(),
-                        _archiveEndTime.utime());
-      vector<string> paths = input.getPathList();
-      if (paths.size() < 1) {
-        cerr << "ERROR: " << _progName << " - ARCHIVE mode" << endl;
-        cerr << "  No paths found, dir: " << _params.archive_data_dir << endl;
-        cerr << "  Start time: " << DateTime::strm(_archiveStartTime.utime()) << endl;
-        cerr << "  End time: " << DateTime::strm(_archiveEndTime.utime()) << endl;
-        OK = false;
+      _beamTime = _archiveStartTime;
+      _beamIntervalSecs = 0.0;
+      _pulseGetter = new IwrfTsGet(_iwrfDebug);
+      _pulseGetter->setTopDir(_params.archive_data_dir);
+      if (_params.invert_hv_flag) {
+        _pulseGetter->setInvertHvFlag(true);
       }
-      _pulseReader = new IwrfTsReaderFile(paths, _iwrfDebug);
+      if (!_params.prt_is_for_previous_interval) {
+        _pulseGetter->setPrtIsForNextInterval(true);
+      }
       break;
     }
     case Params::FILE_LIST_MODE: {
@@ -160,8 +158,20 @@ TsReader::TsReader(const string &prog_name,
                                           _iwrfDebug);
       break;
     }
-    case Params::FOLLOW_MOMENTS_MODE: {
-      // leave pulse reader NULL for now
+    case Params::FOLLOW_DISPLAY_MODE: {
+      _timeSpanSecs = _params.archive_time_span_secs;
+      _archiveStartTime.set(_params.archive_start_time);
+      _archiveEndTime = _archiveStartTime + _timeSpanSecs;
+      _beamTime = _archiveStartTime;
+      _beamIntervalSecs = 0.0;
+      _pulseGetter = new IwrfTsGet(_iwrfDebug);
+      _pulseGetter->setTopDir(_params.archive_data_dir);
+      if (_params.invert_hv_flag) {
+        _pulseGetter->setInvertHvFlag(true);
+      }
+      if (!_params.prt_is_for_previous_interval) {
+        _pulseGetter->setPrtIsForNextInterval(true);
+      }
       break;
     }
 
@@ -180,7 +190,12 @@ TsReader::~TsReader()
     delete _pulseReader;
   }
 
-  _clearPulseQueue();
+  if (_pulseGetter) {
+    delete _pulseGetter;
+  }
+
+  _clearPulseGetterQueue();
+  _clearPulseReaderQueue();
 
 }
 
@@ -193,107 +208,186 @@ Beam *TsReader::getNextBeam()
   
 {
   
-  _clearPulseQueue();
-  
-  // read in pulses, load up pulse queue
-  
-  while (true) {
+  if (_pulseGetter != NULL) {
     
-    PMU_auto_register("getNextBeam");
+    // advance beam time
+
+    if (_beamIntervalSecs != 0) {
+      _prevBeamTime = _beamTime;
+    }
+    _beamTime += _beamIntervalSecs;
     
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
-    if (pulse == NULL) {
-      cerr << "ERROR - TsReader::getNextBeam()" << endl;
-      cerr << "  end of data" << endl;
-      _clearPulseQueue();
+    // get IwrfTsGet
+    // pass in missing values for el and az
+
+    return _getBeamViaGetter(_beamTime, -9999.0, -9999.0);
+
+  } else {
+
+    // get IwrfTsReader
+    
+    return _getBeamViaReader();
+
+  }
+
+}
+
+/////////////////////////////////////////////////////////
+// get the previous beam in realtime or archive sequence
+// we need to reset the queue and position to read the 
+// previous beam
+//
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::getPreviousBeam()
+  
+{
+  
+  if (_pulseGetter != NULL) {
+    
+    // go back in time
+    
+    if (_beamIntervalSecs != 0) {
+      _prevBeamTime = _beamTime;
+    }
+    _beamTime -= _beamIntervalSecs;
+    
+    // use IwrfTsGet
+    // pass in missing values for el and az
+    
+    return _getBeamViaGetter(_beamTime, -9999.0, -9999.0);
+
+  } else {
+
+    // position for previous beam
+    
+    if (_positionReaderForPreviousBeam()) {
+      cerr << "ERROR - TsReader::getPreviousBeam()" << endl;
       return NULL;
     }
-    _nPulsesRead++;
+    
+    // use IwrfTsReader
+    
+    return _getBeamViaReader();
 
-    if (_params.invert_hv_flag) {
-      pulse->setInvertHvFlag(true);
-    }
-    
-    if (!_params.prt_is_for_previous_interval) {
-      pulse->swapPrtValues();
-    }
-    
-    // check scan mode and type
-    
-    int scanMode = pulse->getScanMode();
-    if (scanMode == IWRF_SCAN_MODE_RHI) {
-      if (!_isRhi) {
-        // change in scan mode, clear pulse queue
-        _clearPulseQueue();
-      }
-      _isRhi = true;
-      _scanModeStr = "RHI";
-      _scanType = SCAN_TYPE_RHI;
-      _indexedRes = _params.indexed_resolution_rhi;
-    } else {
-      if (_isRhi) {
-        // change in scan mode, clear pulse queue
-        _clearPulseQueue();
-      }
-      _isRhi = false;
-      _scanModeStr = "PPI";
-      _scanType = SCAN_TYPE_PPI;
-      _indexedRes = _params.indexed_resolution_ppi;
-    }
+  }
+}
 
-    // check for missing pulses
-    if (_pulseQueue.size() == 0) {
-      _prevPulseSeqNum = pulse->get_pulse_seq_num();
-    } else {
-      if (pulse->get_pulse_seq_num() != _prevPulseSeqNum + 1) {
-        cerr << "ERROR - TsReader::getNextBeam()" << endl;
-        cerr << "  missing pulses, clearing queue" << endl;
-        _clearPulseQueue();
-      }
-      _prevPulseSeqNum = pulse->get_pulse_seq_num();
-    }
-    
-    // Create a new pulse object and save a pointer to it in the
-    // _pulseQueue.  _pulseQueue is a FIFO, with elements
-    // added at the end and dropped off the beginning. So if we have a
-    // full buffer delete the first element before shifting the
-    // elements to the left.
-    
-    // add pulse to queue, managing memory appropriately
-    
-    _addPulseToQueue(pulse);
+/////////////////////////////////////////////////////////
+// get a beam from the getter, based on the time and
+// location from the display
 
-    if ((int) _pulseQueue.size() == (_nSamples + 4)) {
-      // got the pulses we need
-      break;
-    }
+Beam *TsReader::getBeamFollowDisplay(const DateTime &searchTime,
+                                     double searchEl, 
+                                     double searchAz)
+  
+{
+  
+  if (_pulseGetter == NULL) {
+    cerr << "ERROR - TsReader::getBeamFollowDisplay()" << endl;
+    cerr << "  No IwrfTsGet opened" << endl;
+    return NULL;
+  }
     
-  } // while
+  // set beam time
+  
+  _prevBeamTime = _beamTime;
+  _beamTime = searchTime;
+  _searchEl = searchEl;
+  _searchAz = searchAz;
+    
+  return _getBeamViaGetter(_beamTime, _searchEl, _searchAz);
+
+}
+
+/////////////////////////////////////////////////////////
+// using IwrfTsGet
+// get the next beam in realtime or archive sequence
+// returns Beam object pointer on success, NULL on failure
+// caller must free beam
+
+Beam *TsReader::_getBeamViaGetter(const DateTime &searchTime, 
+                                  double searchEl,
+                                  double searchAz)
+  
+{
+
+  if (_params.debug) {
+    cerr << "Getting beam at time, el, az: "
+         << searchTime.asString(3) << ", "
+         << searchEl << ", " << searchAz << endl;
+  }
+  
+  // retrieve pulses for beam
+
+  vector<IwrfTsPulse *> beamPulses;
+  if (_pulseGetter->retrieveBeam(searchTime,
+                                 searchEl,
+                                 searchAz,
+                                 _nSamples,
+                                 beamPulses)) {
+    // on failure, try previous time
+    if (_prevBeamTime.isValid()) {
+      _beamTime = _prevBeamTime;
+      if (_params.debug) {
+        cerr << "====>> Retry, beam at time: " << _beamTime.asString(3) << endl;
+      }
+      if (_pulseGetter->retrieveBeam(_beamTime,
+                                     searchEl,
+                                     searchAz,
+                                     _nSamples,
+                                     beamPulses)) {
+        cerr << "ERROR - TsReader::_getBeamViaGetter()" << endl;
+        cerr << "  cannot retrieve beam" << endl;
+        return NULL;
+      }
+    }
+  }
+
+  // compute beam interval
+
+  IwrfTsPulse *firstPulse = beamPulses[0];
+  IwrfTsPulse *lastPulse = beamPulses[beamPulses.size() - 1];
+  DateTime beamStartTime(firstPulse->getTime(), true,
+                         (double) firstPulse->getNanoSecs() / 1.0e9);
+  DateTime beamEndTime(lastPulse->getTime(), true,
+                       (double) lastPulse->getNanoSecs() / 1.0e9);
+  _beamIntervalSecs =
+    ((beamEndTime - beamStartTime) *
+     (((double) _nSamples + 1.0) / (double) _nSamples));
+  
+  // set the pulse queue
+  
+  _clearPulseGetterQueue();
+  for (size_t ii = 0; ii < beamPulses.size(); ii++) {
+    _addPulseToGetterQueue(beamPulses[ii]);
+  }
 
   // set prt and nGates, assuming single PRT for now
   
-  _prt = _pulseQueue[0]->getPrt();
-  _nGates = _pulseQueue[0]->getNGates();
+  _prt = _pulseGetter->getPrt();
+  _nGates = _pulseGetter->getNGates();
   
   // check if we have alternating h/v pulses
   
-  _checkIsAlternating();
+  _isAlternating = _pulseGetter->getIsAlternating();
 
   // check if we have staggered PRT pulses - does not apply
   // to alternating mode
 
-  if (_isAlternating) {
-    _isStaggeredPrt = false;
-  } else {
-    _checkIsStaggeredPrt();
-  }
-
+  _isStaggeredPrt = _pulseGetter->getIsStaggeredPrt();
+  _prtShort = _pulseGetter->getPrtShort();
+  _prtLong = _pulseGetter->getPrtLong();
+  _nGatesPrtShort = _pulseGetter->getNGatesPrtShort();
+  _nGatesPrtLong = _pulseGetter->getNGatesPrtLong();
+  
   // in non-staggered mode check we have constant nGates
   
   if (!_isStaggeredPrt) {
-    int nGates0 = _pulseQueue[0]->getNGates();
-    for (int i = 1; i < (int) _pulseQueue.size(); i += 2) {
-      if (_pulseQueue[i]->getNGates() != nGates0) {
+    int nGates0 = _getterQueue[0]->getNGates();
+    for (int i = 1; i < (int) _getterQueue.size(); i += 2) {
+      if (_getterQueue[i]->getNGates() != nGates0) {
         cerr << "ERROR - TsReader::getNextBeam()" << endl;
         cerr << "  nGates varies in non-staggered mode" << endl;
         return NULL;
@@ -319,302 +413,190 @@ Beam *TsReader::getNextBeam()
     }
   }
 
-  _filePath = _pulseReader->getPathInUse();
+  _filePath = _pulseGetter->getPathInUse();
 
-  size_t midIndex = _pulseQueue.size() / 2;
-  _az = _conditionAz(_pulseQueue[midIndex]->getAz());
-  _el = _conditionEl(_pulseQueue[midIndex]->getEl());
+  size_t midIndex = _getterQueue.size() / 2;
+  _az = _conditionAz(_getterQueue[midIndex]->getAz());
+  _el = _conditionEl(_getterQueue[midIndex]->getEl());
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "got beam, _nPulsesRead: " << _nPulsesRead << endl;
   }
 
-  return _makeBeam(midIndex);
+  // create new beam
+  
+  Beam *beam = new Beam(_progName, _params);
+  beam->setPulses(_scanType == SCAN_TYPE_RHI,
+                  _nSamples,
+                  _nGates,
+                  _nGatesPrtLong,
+                  _indexedBeams,
+                  _indexedRes,
+                  _isAlternating,
+                  _isStaggeredPrt,
+                  _prt,
+                  _prtLong,
+                  _pulseGetter->getTsInfo(),
+                  _getterQueue);
+  
+  return beam;
 
 }
 
 /////////////////////////////////////////////////////////
-// get the previous beam in realtime or archive sequence
-// we need to reset the queue and position to read the 
-// previous beam
-//
+// using the IwrfTsReader
+// get the next beam in realtime or archive sequence
 // returns Beam object pointer on success, NULL on failure
 // caller must free beam
 
-Beam *TsReader::getPreviousBeam()
-  
-{
-  
-  // first position for previous beam
-
-  if (positionForPreviousBeam()) {
-    cerr << "ERROR - TsReader::getPreviousBeam()" << endl;
-    return NULL;
-  }
-
-  // then read the next beam
-
-  return getNextBeam();
-
-}
-
-////////////////////////////////////////////////////////////////////
-// position to get the previous beam in realtime or archive sequence
-// we need to reset the queue and position to read the previous beam
-// returns 0 on success, -1 on error
-
-int TsReader::positionForPreviousBeam()
+Beam *TsReader::_getBeamViaReader()
   
 {
 
-  // save the location to which we want to return
-
-  int64_t seekLoc = _nPulsesRead - (_nSamples + 4) * 2;
-  if (seekLoc < 0) {
-    seekLoc = 0;
-  }
-
-  // reset the pulse queue
-
-  _pulseReader->reset();
-
-  // read pulses to move to seek location
-
-  _nPulsesRead = 0;
-  while (_nPulsesRead < seekLoc) {
+  // clear queue and free up pulses
+  
+  _clearPulseReaderQueue();
+  
+  // read in pulses, load up pulse queue
+  
+  while (true) {
+    
+    PMU_auto_register("getNextBeam");
+    
     IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
     if (pulse == NULL) {
-      cerr << "ERROR - TsReader::positionForPreviousBeam()" << endl;
-      cerr << "  Cannot reposition to seekLoc: " << seekLoc << endl;
-      _clearPulseQueue();
-      return -1;
+      cerr << "ERROR - TsReader::getNextBeam()" << endl;
+      cerr << "  end of data" << endl;
+      _clearPulseReaderQueue();
+      return NULL;
     }
-    _prevPulseSeqNum = pulse->get_pulse_seq_num();
     _nPulsesRead++;
-    delete pulse;
-  }
 
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////////
-// position at end of queue
-
-void TsReader::seekToEndOfQueue()
-  
-{
-  _pulseReader->seekToEnd();
-}
-
-/////////////////////////////////////////////////////////
-// get the closest beam to the location specified
-// and within the specified time
-// returns Beam object pointer on success, NULL on failure
-// caller must free beam
-
-Beam *TsReader::getClosestBeam(time_t startTime, time_t endTime,
-                               double az, double el, bool isRhi)
-  
-{
-
-  if (_params.debug) {
-    cerr << "TsReader - finding closest beam" << endl;
-    cerr << "  Data start time: " << DateTime::strm(startTime) << endl;
-    cerr << "  Data end time: " << DateTime::strm(endTime) << endl;
-    cerr << "  Az, el: " << az << ", " << el << endl;
-    cerr << "  isRhi: " << isRhi << endl;
-  }
-
-  // find the best file for the requested time and location
-
-  if (_findBestFile(startTime, endTime, az, el, isRhi)) {
-    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
-    cerr << "  no suitable data found" << endl;
-    _clearPulseQueue();
-    return NULL;
-  }
-  
-  // clear the queue, delete the pulse reader
-
-  if (_pulseReader) {
-    delete _pulseReader;
-  }
-  _clearPulseQueue();
-
-  // create new pulse reader for this file
-
-  vector<string> fileList;
-  fileList.push_back(_filePath);
-  _pulseReader = new IwrfTsReaderFile(fileList, _iwrfDebug);
-
-  // read all pulses in File
-  
-  if (_readFile()) {
-    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
-    cerr << "  cannot read file: " << _filePath << endl;
-    _clearPulseQueue();
-    return NULL;
-  }
-
-  // check we have enough pulses
-
-  if ((int) _pulseQueue.size() < (_nSamples + 4)) {
-    // too few pulses
-    cerr << "ERROR - TsReader::getClosestBeam()" << endl;
-    cerr << "  too few pulses, file: " << _filePath << endl;
-    _clearPulseQueue();
-    return NULL;
-  }
-
-  // for indexing, modify the angles according to scan mode
-
-  if (_indexedBeams) {
-    if (_isRhi) {
-      _el = (int) floor(((el / _indexedRes) + 0.5) * _indexedRes);
+    if (_params.invert_hv_flag) {
+      pulse->setInvertHvFlag(true);
+    }
+    
+    if (!_params.prt_is_for_previous_interval) {
+      pulse->swapPrtValues();
+    }
+    
+    // check scan mode and type
+    
+    int scanMode = pulse->getScanMode();
+    if (scanMode == IWRF_SCAN_MODE_RHI) {
+      if (!_isRhi) {
+        // change in scan mode, clear pulse queue
+        _clearPulseReaderQueue();
+      }
+      _isRhi = true;
+      _scanModeStr = "RHI";
+      _scanType = SCAN_TYPE_RHI;
+      _indexedRes = _params.indexed_resolution_rhi;
     } else {
-      _az = (int) floor(((az / _indexedRes) + 0.5) * _indexedRes);
+      if (_isRhi) {
+        // change in scan mode, clear pulse queue
+        _clearPulseReaderQueue();
+      }
+      _isRhi = false;
+      _scanModeStr = "PPI";
+      _scanType = SCAN_TYPE_PPI;
+      _indexedRes = _params.indexed_resolution_ppi;
     }
+    
+    // check for missing pulses
+    if (_readerQueue.size() == 0) {
+      _prevPulseSeqNum = pulse->get_pulse_seq_num();
+    } else {
+      if (pulse->get_pulse_seq_num() != _prevPulseSeqNum + 1) {
+        cerr << "ERROR - TsReader::getNextBeam()" << endl;
+        cerr << "  missing pulses, clearing queue" << endl;
+        _clearPulseReaderQueue();
+      }
+      _prevPulseSeqNum = pulse->get_pulse_seq_num();
+    }
+    
+    // Create a new pulse object and save a pointer to it in the
+    // _readerQueue.  _readerQueue is a FIFO, with elements
+    // added at the end and dropped off the beginning. So if we have a
+    // full buffer delete the first element before shifting the
+    // elements to the left.
+    
+    // add pulse to queue, managing memory appropriately
+    
+    _addPulseToReaderQueue(pulse);
+
+    if ((int) _readerQueue.size() == (_nSamples + 4)) {
+      // got the pulses we need
+      break;
+    }
+    
+  } // while
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    const IwrfTsPulse *firstPulse = _readerQueue[0];
+    DateTime beamStartTime(firstPulse->getTime(), true,
+                           (double) firstPulse->getNanoSecs() / 1.0e9);
+    cerr << "Read pulse at time: " << beamStartTime.asString(3) << endl;
+  }
+    
+  // set prt and nGates, assuming single PRT for now
+  
+  _prt = _readerQueue[0]->getPrt();
+  _nGates = _readerQueue[0]->getNGates();
+  
+  // check if we have alternating h/v pulses
+  
+  _checkIsAlternating();
+
+  // check if we have staggered PRT pulses - does not apply
+  // to alternating mode
+
+  if (_isAlternating) {
+    _isStaggeredPrt = false;
   } else {
-    _az = az;
-    _el = el;
+    _checkIsStaggeredPrt();
   }
 
-  _az = _conditionAz(_az);
-  _el = _conditionEl(_el);
-
-  if (_isRhi) {
-    return _getBeamRhi();
-  } else {
-    return _getBeamPpi();
-  }
-
-}
-
-//////////////////////////////////////////////////
-// get a beam in PPI
-// returns Beam object pointer on success, NULL on failure
-
-Beam *TsReader::_getBeamPpi()
+  // in non-staggered mode check we have constant nGates
   
-{
-
-  for (size_t ii = 0; ii < _pulseQueue.size() - 1; ii++) {
-    if (_checkIsBeamPpi(ii)) {
-      Beam *beam = _makeBeam(ii);
-      return beam;
+  if (!_isStaggeredPrt) {
+    int nGates0 = _readerQueue[0]->getNGates();
+    for (int i = 1; i < (int) _readerQueue.size(); i += 2) {
+      if (_readerQueue[i]->getNGates() != nGates0) {
+        cerr << "ERROR - TsReader::getNextBeam()" << endl;
+        cerr << "  nGates varies in non-staggered mode" << endl;
+        return NULL;
+      }
+    }
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    if (_isAlternating) {
+      cerr << "==>> Fast alternating mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
+    } else if (_isStaggeredPrt) {
+      cerr << "==>> Staggered PRT mode" << endl;
+      cerr << "     prt short: " << _prtShort << endl;
+      cerr << "     prt long: " << _prtLong << endl;
+      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
+      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
+    } else {
+      cerr << "==>> Single PRT mode" << endl;
+      cerr << "     prt: " << _prt << endl;
+      cerr << "     ngates: " << _nGates << endl;
     }
   }
 
-  return NULL;
+  _filePath = _pulseReader->getPathInUse();
 
-}
+  size_t midIndex = _readerQueue.size() / 2;
+  _az = _conditionAz(_readerQueue[midIndex]->getAz());
+  _el = _conditionEl(_readerQueue[midIndex]->getEl());
 
-//////////////////////////////////////////////////
-// get a beam in RHI
-// returns Beam object pointer on success, NULL on failure
-
-Beam *TsReader::_getBeamRhi()
-  
-{
-  
-  for (size_t ii = 0; ii < _pulseQueue.size() - 1; ii++) {
-    if (_checkIsBeamRhi(ii)) {
-      Beam *beam = _makeBeam(ii);
-      return beam;
-    }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "got beam, _nPulsesRead: " << _nPulsesRead << endl;
   }
-
-  return NULL;
-
-}
-
-/////////////////////////////////////////////////
-// check for a beam at the stated index
-
-bool TsReader::_checkIsBeamPpi(size_t midIndex)
-  
-{
-  
-  // compute azimuths which need to straddle the center of the beam
-  
-  double midAz1 = _conditionAz(_pulseQueue[midIndex]->getAz(), _az);
-  double midAz2 = _conditionAz(_pulseQueue[midIndex+1]->getAz(), midAz1);
-  
-  cerr << "_az, midAz1, midAz2: " << _az << ", " << midAz1 << ", " << midAz2 << endl;
-
-  // Check if the azimuths at the center of the data straddle
-  // the target azimuth
-  
-  if (midAz1 <= _az && midAz2 >= _az) {
-
-    // az1 is below and az2 above - clockwise rotation
-    return true;
-    
-  } else if (midAz1 >= _az && midAz2 <= _az) {
-    
-    // az1 is above and az2 below - counterclockwise rotation
-    return true;
-    
-  } else if (_az == 0.0) {
-    
-    if (midAz1 > 360.0 - _indexedRes && midAz2 < _indexedRes) {
-      
-      // az1 is below 0 and az2 above 0 - clockwise rotation
-      return true;
-	
-    } else if (midAz2 > 360.0 - _indexedRes && midAz1 < _indexedRes) {
-      
-      // az1 is above 0 and az2 below 0 - counterclockwise rotation
-      return true;
-      
-    }
-
-  }
-  
-  return false;
-
-}
-
-/////////////////////////////////////////////////
-// check for a beam at the stated index
-
-bool TsReader::_checkIsBeamRhi(size_t midIndex)
-  
-{
-  
-  // compute elevations which need to straddle the center of the beam
-  
-  double midEl1 = _conditionEl(_pulseQueue[midIndex]->getEl());
-  double midEl2 = _conditionEl(_pulseQueue[midIndex+1]->getEl());
-  
-  // Check if the elevations at the center of the data straddle
-  // the target elevation
-  
-  if (midEl1 <= _el && midEl2 >= _el) {
-
-    // el1 is below and el2 above - el increasing
-    return true;
-      
-  } else if (midEl1 >= _el && midEl2 <= _el) {
-      
-    // el1 is above and el2 below - el decreasing
-    return true;
-
-  }
-
-  return false;
-
-}
-
-//////////////////////////////////////////////////
-// make a beam at the specified index
-// returns Beam object pointer on success, NULL on failure
-// caller must free beam
-
-Beam *TsReader::_makeBeam(size_t midIndex)
-  
-{
 
   // set index limits
   
@@ -622,9 +604,9 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   if (startIndex < 0) {
     startIndex = 0;
   }
-
+  
   int endIndex = startIndex + _nSamples - 1;
-  int qSize = (int) _pulseQueue.size();
+  int qSize = (int) _readerQueue.size();
   if (endIndex > qSize - 4) {
     endIndex = qSize - 4;
     startIndex = endIndex - _nSamples + 1;
@@ -633,14 +615,14 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   // adjust to make sure we start on correct pulse
   
   if (_isAlternating) {
-    bool startsOnHoriz = _pulseQueue[startIndex]->isHoriz();
+    bool startsOnHoriz = _readerQueue[startIndex]->isHoriz();
     if (!startsOnHoriz) {
       startIndex++;
       endIndex++;
     }
   } else if (_isStaggeredPrt) {
-    double prt0 = _pulseQueue[startIndex]->getPrt();
-    double prt1 = _pulseQueue[startIndex+1]->getPrt();
+    double prt0 = _readerQueue[startIndex]->getPrt();
+    double prt1 = _readerQueue[startIndex+1]->getPrt();
     if (prt0 > prt1) {
       startIndex++;
       endIndex++;
@@ -652,9 +634,9 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   
   deque<const IwrfTsPulse *> beamPulses;
   for (int ii = startIndex; ii <= endIndex; ii++) {
-    beamPulses.push_back(_pulseQueue[ii]);
+    beamPulses.push_back(_readerQueue[ii]);
   }
-
+  
   // create new beam
   
   Beam *beam = new Beam(_progName, _params);
@@ -675,354 +657,104 @@ Beam *TsReader::_makeBeam(size_t midIndex)
   
 }
 
-/////////////////////////////////////////////////
-// add the pulse to the pulse queue
-    
-void TsReader::_addPulseToQueue(const IwrfTsPulse *pulse)
+////////////////////////////////////////////////////////////////////
+// position to get the previous beam in realtime or archive sequence
+// we need to reset the queue and position to read the previous beam
+// returns 0 on success, -1 on error
+
+int TsReader::_positionReaderForPreviousBeam()
   
 {
 
-  // push pulse onto back of queue
-  
-  pulse->addClient();
-  _pulseQueue.push_back(pulse);
+  _clearPulseReaderQueue();
+    
+  // save the location to which we want to return
 
-  // print missing pulses in verbose mode
-  
-  if ((int) pulse->getSeqNum() != (int) (_pulseSeqNum + 1)) {
-    if (_params.debug >= Params::DEBUG_VERBOSE && _pulseSeqNum != 0) {
-      cerr << "******** Missing seq num: Expected=" << _pulseSeqNum+1
-	   << " Rx'd=" <<  pulse->getSeqNum() << " ********" << endl;
-    }
+  int64_t seekLoc = _nPulsesRead - (_nSamples + 4) * 2;
+  if (seekLoc < 0) {
+    seekLoc = 0;
   }
 
-  _pulseSeqNum = pulse->getSeqNum();
+  // reset the pulse queue
 
+  _pulseReader->reset();
+
+  // read pulses to move to seek location
+
+  _nPulsesRead = 0;
+  while (_nPulsesRead < seekLoc) {
+    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
+    if (pulse == NULL) {
+      cerr << "ERROR - TsReader::_positionReaderForPreviousBeam()" << endl;
+      cerr << "  Cannot reposition to seekLoc: " << seekLoc << endl;
+      _clearPulseReaderQueue();
+      return -1;
+    }
+    _prevPulseSeqNum = pulse->get_pulse_seq_num();
+    _nPulsesRead++;
+    delete pulse;
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////////////////
+// position at end of queue
+
+void TsReader::seekToEndOfQueue()
+  
+{
+  if (_pulseReader) {
+    _pulseReader->seekToEnd();
+  }
+}
+
+/////////////////////////////////////////////////
+// add the pulse to the pulse queue for the getter
+    
+void TsReader::_addPulseToGetterQueue(const IwrfTsPulse *pulse)
+  
+{
+  _getterQueue.push_back(pulse);
 }
 
 //////////////////////////////////////////////////////////////////
-// clear data
+// clear pulse queue for the getter
+// does not free pulses
 
-void TsReader::_clearPulseQueue()
+void TsReader::_clearPulseGetterQueue()
 
 {
+  _getterQueue.clear();
+}
 
-  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
+/////////////////////////////////////////////////
+// add the pulse to the pulse queue for the reader
+// increments client count
+    
+void TsReader::_addPulseToReaderQueue(const IwrfTsPulse *pulse)
+  
+{
+  // push pulse onto back of queue
+  pulse->addClient();
+  _readerQueue.push_back(pulse);
+}
+
+//////////////////////////////////////////////////////////////////
+// clear pulse queue for the reader
+// frees pulses
+
+void TsReader::_clearPulseReaderQueue()
+
+{
+  for (size_t ii = 0; ii < _readerQueue.size(); ii++) {
     // only delete the pulse object if it is no longer being used
-    if (_pulseQueue[ii]->removeClient() == 0) {
-      delete _pulseQueue[ii];
+    if (_readerQueue[ii]->removeClient() == 0) {
+      delete _readerQueue[ii];
     }
   } // ii
-  _pulseQueue.clear();
-
-}
-
-//////////////////////////////////////////////////////
-// find the files for the requested time and location
-
-int TsReader::_findBestFile(time_t startTime, time_t endTime,
-                            double az, double el, bool isRhi)
-  
-{
-
-  double fixedAngle = el;
-  if (isRhi) {
-    fixedAngle = az;
-  }
-
-  TimePathSet dayDirs;
-  _getDayDirs(_params.archive_data_dir, dayDirs);
-  
-  // check for suitable days
-  
-  TimePathSet filePaths;
-  TimePathSet::iterator ii;
-  for (ii = dayDirs.begin(); ii != dayDirs.end(); ii++) {
-    
-    if (startTime > ii->endTime || endTime < ii->startTime) {
-      // no overlap in time
-      continue;
-    }
-    
-    const string &dayDir = ii->filePath;
-    
-    ReadDir rdir;
-    if (rdir.open(dayDir.c_str())) {
-      return -1;
-    }
-      
-    // Loop thru directory looking for the data file names
-
-    struct dirent *dp;
-    for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-      
-      // exclude dir entries beginning with '.'
-      
-      if (dp->d_name[0] == '.') {
-	continue;
-      }
-
-      // ignore transitional files
-
-      if (strstr(dp->d_name, "_trans.iwrf_ts") != NULL) {
-        continue;
-      }
-      
-      // is this in yyyymmdd_hhmmss format?
-      
-      int year, month, day;
-      int hour, min, sec;
-      if (sscanf(dp->d_name, "%4d%2d%2d_%2d%2d%2d",
-                 &year, &month, &day, &hour, &min, &sec) == 6) {
-	if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59 &&
-	    sec >= 0 && sec <= 59) {
-          DateTime dtime(year, month, day, hour, min, sec);
-          time_t validTime = dtime.utime();
-          string pathStr = dayDir;
-          pathStr += PATH_DELIM;
-          pathStr += dp->d_name;
-          TimePath tpath(validTime, validTime, validTime, 
-                         dp->d_name, pathStr);
-          filePaths.insert(filePaths.end(), tpath);
-        }
-      }
-    } // dp
-    
-    rdir.close();
-    
-  } // ii
-  
-  if (filePaths.size() < 1) {
-    if (_params.debug) {
-      cerr << "No data found" << endl;
-    }
-    return -1;
-  }
-
-  // find file with valid time within start and end times
-  // give 1 seconds leeway
-  
-  TimePathSet::iterator jj;
-  bool fileFound = false;
-  string bestPath = filePaths.begin()->filePath;
-  time_t bestTime = filePaths.begin()->validTime;
-  double minAngleDiff = 1.0e99;
-  for (jj = filePaths.begin(); jj != filePaths.end(); jj++) {
-    string name = jj->fileName;
-    time_t fileTime = jj->validTime;
-    if (fileTime >= startTime && fileTime <= endTime) {
-      double angleDiff = fabs(fixedAngle - jj->fixedAngle);
-      if (angleDiff < minAngleDiff) {
-        bestPath = jj->filePath;
-        bestTime = jj->validTime;
-        minAngleDiff = angleDiff;
-        fileFound = true;
-      }
-    }
-  }
-
-  if (!fileFound) {
-    if (_params.debug) {
-      cerr << "No data found" << endl;
-    }
-    return -1;
-  }
-  _filePath = bestPath;
-  
-  if (_params.debug) {
-    cerr << "Found file, time: "
-         << bestPath << ", "
-         << DateTime::strm(bestTime) << endl;
-  }
-
-  return 0;
-
-}
-  
-/////////////////////////////////////
-// get day dirs for top dir
-
-void TsReader::_getDayDirs(const string &topDir,
-                           TimePathSet &dayDirs)
-  
-{
-  
-  // set up dirs in time order
-  
-  ReadDir rdir;
-  if (rdir.open(topDir.c_str())) {
-    return;
-  }
-  
-  // Loop thru directory looking for subdir names which represent dates
-  
-  struct dirent *dp;
-  for (dp = rdir.read(); dp != NULL; dp = rdir.read()) {
-    
-    // exclude dir entries and files beginning with '.'
-    
-    if (dp->d_name[0] == '.') {
-      continue;
-    }
-
-    // is this a yyyy directory - using extended paths?
-    // if so, call this routine recursively
-
-    if (strlen(dp->d_name) == 4) {
-      int yyyy;
-      if (sscanf(dp->d_name, "%4d", &yyyy) == 1) {
-        // year dir, call this recursively
-        string yyyyDir = topDir;
-        yyyyDir += PATH_DELIM;
-        yyyyDir += dp->d_name;
-        _getDayDirs(yyyyDir, dayDirs);
-      }
-      continue;
-    }
-
-    // exclude dir entries too short for yyyymmdd
-    
-    if (strlen(dp->d_name) < 8 || dp->d_name[0] == '.') {
-      continue;
-    }
-
-    // check that subdir name is in the correct format
-    
-    int year, month, day;
-    if (sscanf(dp->d_name, "%4d%2d%2d", &year, &month, &day) != 3) {
-      continue;
-    }
-    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
-      continue;
-    }
-    
-    DateTime midday(year, month, day, 12, 0, 0);
-    DateTime start(year, month, day, 0, 0, 0);
-    DateTime end(year, month, day, 23, 59, 59);
-    Path dayDirPath(topDir, dp->d_name);
-    string pathStr(dayDirPath.getPath());
-    TimePath tpath(midday.utime(), start.utime(), end.utime(), 
-                   dp->d_name, pathStr);
-    dayDirs.insert(dayDirs.end(), tpath);
-
-  } // for (dp ...
-  
-  rdir.close();
-    
-}
-
-//////////////////////////////////////////////////
-// read all pulses in File
-
-int TsReader::_readFile()
-  
-{
-
-  _clearPulseQueue();
-
-  // read in pulse, load up pulse queue
-
-  while (true) {
-
-    PMU_auto_register("readFile");
-    
-    IwrfTsPulse *pulse = _pulseReader->getNextPulse(true);
-    
-    if (pulse == NULL) {
-      if (_params.debug) {
-        cerr << "TsReader::readFilePulses: found n pulses: "
-             << _pulseQueue.size() << ", scan mode: "
-             << _scanModeStr << endl;
-      }
-      break;
-    }
-    
-    if (_params.invert_hv_flag) {
-      pulse->setInvertHvFlag(true);
-    }
-    
-    if (!_params.prt_is_for_previous_interval) {
-      pulse->swapPrtValues();
-    }
-    
-    // check scan mode and type
-    
-    int scanMode = pulse->getScanMode();
-    if (scanMode == IWRF_SCAN_MODE_RHI) {
-      _isRhi = true;
-      _scanModeStr = "RHI";
-      _scanType = SCAN_TYPE_RHI;
-      _indexedRes = _params.indexed_resolution_rhi;
-    } else {
-      _isRhi = false;
-      _scanModeStr = "PPI";
-      _scanType = SCAN_TYPE_PPI;
-      _indexedRes = _params.indexed_resolution_ppi;
-    }
-    
-    // Create a new pulse object and save a pointer to it in the
-    // _pulseQueue.  _pulseQueue is a FIFO, with elements
-    // added at the end and dropped off the beginning. So if we have a
-    // full buffer delete the first element before shifting the
-    // elements to the left.
-    
-    // add pulse to queue, managing memory appropriately
-
-    _addPulseToQueue(pulse);
-    
-  } // while
-
-  // set prt and nGates, assuming single PRT for now
-  
-  _prt = _pulseQueue[0]->getPrt();
-  _nGates = _pulseQueue[0]->getNGates();
-  
-  // check if we have alternating h/v pulses
-  
-  _checkIsAlternating();
-
-  // check if we have staggered PRT pulses - does not apply
-  // to alternating mode
-
-  if (_isAlternating) {
-    _isStaggeredPrt = false;
-  } else {
-    _checkIsStaggeredPrt();
-  }
-
-  // in non-staggered mode check we have constant nGates
-  
-  if (!_isStaggeredPrt) {
-    int nGates0 = _pulseQueue[0]->getNGates();
-    for (int i = 1; i < (int) _pulseQueue.size(); i += 2) {
-      if (_pulseQueue[i]->getNGates() != nGates0) {
-        cerr << "ERROR - TsReader::readFile()" << endl;
-        cerr << "  nGates varies in non-staggered mode" << endl;
-        return -1;
-      }
-    }
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    if (_isAlternating) {
-      cerr << "==>> Fast alternating mode" << endl;
-      cerr << "     prt: " << _prt << endl;
-      cerr << "     ngates: " << _nGates << endl;
-    } else if (_isStaggeredPrt) {
-      cerr << "==>> Staggered PRT mode" << endl;
-      cerr << "     prt short: " << _prtShort << endl;
-      cerr << "     prt long: " << _prtLong << endl;
-      cerr << "     ngates short PRT: " << _nGatesPrtShort << endl;
-      cerr << "     ngates long PRT: " << _nGatesPrtLong << endl;
-    } else {
-      cerr << "==>> Single PRT mode" << endl;
-      cerr << "     prt: " << _prt << endl;
-      cerr << "     ngates: " << _nGates << endl;
-    }
-  }
-
-  return 0;
-
+  _readerQueue.clear();
 }
 
 ///////////////////////////////////////////      
@@ -1037,9 +769,9 @@ void TsReader::_checkIsAlternating()
   
   _isAlternating = false;
 
-  bool prevHoriz = _pulseQueue[0]->isHoriz();
-  for (int i = 1; i < (int) _pulseQueue.size(); i++) {
-    bool thisHoriz = _pulseQueue[i]->isHoriz();
+  bool prevHoriz = _readerQueue[0]->isHoriz();
+  for (int i = 1; i < (int) _readerQueue.size(); i++) {
+    bool thisHoriz = _readerQueue[i]->isHoriz();
     if (thisHoriz == prevHoriz) {
       return;
     }
@@ -1061,30 +793,30 @@ void TsReader::_checkIsStaggeredPrt()
 
   _isStaggeredPrt = false;
   
-  double prt0 = _pulseQueue[0]->getPrt(); // most recent pulse
-  double prt1 = _pulseQueue[1]->getPrt(); // next most recent pulse
+  double prt0 = _readerQueue[0]->getPrt(); // most recent pulse
+  double prt1 = _readerQueue[1]->getPrt(); // next most recent pulse
 
-  int nGates0 = _pulseQueue[0]->getNGates();
-  int nGates1 = _pulseQueue[1]->getNGates();
+  int nGates0 = _readerQueue[0]->getNGates();
+  int nGates1 = _readerQueue[1]->getNGates();
 
   if (fabs(prt0 - prt1) < 0.00001) {
     return;
   }
 
   for (int ii = 2; ii < _nSamples + 1; ii += 2) {
-    if (fabs(_pulseQueue[ii]->getPrt() - prt0) > 0.00001) {
+    if (fabs(_readerQueue[ii]->getPrt() - prt0) > 0.00001) {
       return;
     }
-    if (_pulseQueue[ii]->getNGates() != nGates0) {
+    if (_readerQueue[ii]->getNGates() != nGates0) {
       return;
     }
   }
 
   for (int ii = 1; ii < _nSamples + 1; ii += 2) {
-    if (fabs(_pulseQueue[ii]->getPrt() - prt1) > 0.00001) {
+    if (fabs(_readerQueue[ii]->getPrt() - prt1) > 0.00001) {
       return;
     }
-    if (_pulseQueue[ii]->getNGates() != nGates1) {
+    if (_readerQueue[ii]->getNGates() != nGates1) {
       return;
     }
   }

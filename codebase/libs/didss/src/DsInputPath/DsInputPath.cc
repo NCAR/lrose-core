@@ -54,7 +54,6 @@
 #include <didss/DataFileNames.hh>
 using namespace std;
 
-
 /////////////////////////////
 // Constructor - Archive mode
 //
@@ -79,7 +78,7 @@ DsInputPath::DsInputPath (const string &prog_name,
     char *path = file_paths[i];
     if (path != NULL) {
       if (ta_stat_exists(path)) {
-        _insertPathPair(path, getDataTime(path));
+        _insertArchivePathPair(path, getDataTime(path));
       } else {
         cerr << "ERROR - DsInputPath::DsInputPath" << endl;
         cerr << "  File does not exist: " << path << endl;
@@ -88,10 +87,11 @@ DsInputPath::DsInputPath (const string &prog_name,
   }
 
   // load up path vector for use in nextArchive() method
+  // we need a vector for random indexing
   
-  for (PathTimeIter ii = _pathTimeList.begin();
-       ii !=  _pathTimeList.end(); ii++) {
-    _pathList.push_back(ii->first);
+  for (PathTimeIter ii = _archivePathMap.begin();
+       ii !=  _archivePathMap.end(); ii++) {
+    _archivePathList.push_back(ii->first);
   }
 
   // initialize posn to start of map
@@ -125,7 +125,7 @@ DsInputPath::DsInputPath (const string &prog_name,
     for (size_t i = 0; i < file_paths.size(); i++) {
       const string &path = file_paths[i];
       if (ta_stat_exists(path.c_str())) {
-        _insertPathPair(path, getDataTime(path));
+        _insertArchivePathPair(path, getDataTime(path));
       } else {
         cerr << "ERROR - DsInputPath::DsInputPath" << endl;
         cerr << "  File does not exist: " << path << endl;
@@ -134,9 +134,9 @@ DsInputPath::DsInputPath (const string &prog_name,
     
     // load up path vector for use in nextArchive() method
     
-    for (PathTimeIter ii = _pathTimeList.begin();
-         ii !=  _pathTimeList.end(); ii++) {
-      _pathList.push_back(ii->first);
+    for (PathTimeIter ii = _archivePathMap.begin();
+         ii !=  _archivePathMap.end(); ii++) {
+      _archivePathList.push_back(ii->first);
     }
 
   } else {
@@ -144,7 +144,7 @@ DsInputPath::DsInputPath (const string &prog_name,
     // load up path vector for use in nextArchive() method
     // use unsorted list
 
-    _pathList = file_paths;
+    _archivePathList = file_paths;
 
   }
 
@@ -174,9 +174,9 @@ DsInputPath::DsInputPath (const string &prog_name,
   _input_dir = input_dir;
 
   if (use_fcst_gentime)
-     _mode = ARCHIVE_FCST_GENTIME_MODE;
+    _mode = ARCHIVE_FCST_GENTIME_MODE;
   else
-     _mode = ARCHIVE_MODE;
+    _mode = ARCHIVE_MODE;
 
   // load by time, if that fails load by day
   
@@ -186,10 +186,10 @@ DsInputPath::DsInputPath (const string &prog_name,
 
   // load up path vector for use in nextArchive() method
   
-  for (PathTimeIter ii = _pathTimeList.begin();
-       ii !=  _pathTimeList.end(); ii++) {
+  for (PathTimeIter ii = _archivePathMap.begin();
+       ii !=  _archivePathMap.end(); ii++) {
     const string &path = ii->first;
-    _pathList.push_back(path);
+    _archivePathList.push_back(path);
   }
 
   // initialize posn to start of map
@@ -245,7 +245,6 @@ DsInputPath::DsInputPath (const string &prog_name,
   _latest_file_only = latest_file_only;
   _file_quiescence_secs = 5;
   _mode = REALTIME_MODE;
-  _timePathPosn = _timePathList.begin();
   reset();
   
 }
@@ -269,7 +268,6 @@ DsInputPath::DsInputPath (const string &prog_name,
   _max_file_age = -1;
   _file_quiescence_secs = 5;
   _mode = TRIGGERED_MODE;
-  _timePathPosn = _timePathList.begin();
   reset();
   
 }
@@ -304,6 +302,7 @@ void DsInputPath::_init()
 {
 
   _check_sub_str = false;
+  _check_ignore_str = false;
   _mode = ARCHIVE_MODE;
   _max_file_age = -1;
   _max_dir_age = 300;
@@ -371,9 +370,7 @@ void DsInputPath::setSearchExt(const string &search_ext)
 // If set, only files with this string in
 // their full path will be returned. Applies
 // only to realtime mode with no ldata_info active.
-// Added by Niles to read MM5 data from a directory in
-// which files for several domains appeared at once.
-//
+
 void DsInputPath::setSubString(const string &subString)
 
 {
@@ -381,6 +378,20 @@ void DsInputPath::setSubString(const string &subString)
   _sub_str = subString;
 }
 
+///////////////////////////////////////
+// set a substring that must NOT be in the filename
+// for it to be considered valid.
+//
+// If set, only files without this string in
+// their full path will be returned. Applies
+// only to realtime mode with no ldata_info active.
+
+void DsInputPath::setIgnoreString(const string &ignoreString)
+
+{
+  _check_ignore_str = true;
+  _ignore_str = ignoreString;
+}
 
 ///////////////////////////////////////////////////////////
 // set the directory scan sleep interval - secs
@@ -413,7 +424,7 @@ void DsInputPath::setDirScanSleep(int dir_scan_sleep_secs /* = 5*/ )
 
 void DsInputPath::setStrictDirScan(bool value /* =  true*/)
 {
-    _strict_scan = value;
+  _strict_scan = value;
 }
 
 ///////////////////////////////////////////////////////////
@@ -459,7 +470,7 @@ void DsInputPath::setMaxDirAge(int age)
 
 void DsInputPath::setRecursion(bool recursionFlag /* = true*/ )
 {
-   _recurse = recursionFlag;
+  _recurse = recursionFlag;
 }
 
 ///////////////////////////////////////////////////////////
@@ -600,35 +611,37 @@ char *DsInputPath::next(bool block /* = true */)
 
     switch(_mode)  {
       
-    case ARCHIVE_MODE:case ARCHIVE_FCST_GENTIME_MODE:
-      if (_nextArchive()) {
-	return NULL;
-      }
-      break;
+      case ARCHIVE_MODE:case ARCHIVE_FCST_GENTIME_MODE:
+        if (_nextArchive()) {
+          return NULL;
+        }
+        break;
       
-    case REALTIME_MODE :
+      case REALTIME_MODE :
       
-      if (_use_ldata_info) {
-	if (_nextRealtimeLdata(block)) {
-	  return NULL;
-	}
-      } else if (_use_inotify) {
-	if (_nextRealtimeInotify(block)) {
-	  return NULL;
-	}
-      } else {
-	if (_nextRealtimeNoLdata(block)) {
-	  return NULL;
-	}
-      }
-      break;
+        if (_use_ldata_info) {
+          if (_nextRealtimeLdata(block)) {
+            return NULL;
+          }
+        } else if (_use_inotify) {
+          if (_nextRealtimeInotify(block)) {
+            return NULL;
+          }
+        } else {
+          if (_nextRealtimeNoLdata(block)) {
+            return NULL;
+          }
+        }
+        break;
       
-    case TRIGGERED_MODE :
-      return NULL;
+      case TRIGGERED_MODE :
+        return NULL;
       
     } //  switch(_mode)
 
-    if (_hasExt(_returned_path) && _hasSubStr(_returned_path)) {
+    if (_hasExt(_returned_path) &&
+        _hasSubStr(_returned_path) &&
+        !_hasIgnoreStr(_returned_path)) {
       return (char *) _returned_path.c_str();
     }
     
@@ -748,19 +761,19 @@ char *DsInputPath::getClosest(time_t search_time,
   
   // no paths found? return error
   
-  if (all._pathTimeList.size() == 0) {
+  if (all._archivePathMap.size() == 0) {
     return NULL;
   }
   
   // find the one closest in time to the search time
   
-  PathTimeIter start = all._pathTimeList.begin();
+  PathTimeIter start = all._archivePathMap.begin();
   _returned_path = (*start).first;
   *data_time = (*start).second;
   int minDiff = abs(search_time - *data_time);
   
   PathTimeIter ii;
-  for (ii = all._pathTimeList.begin(); ii != all._pathTimeList.end(); ii++) {
+  for (ii = all._archivePathMap.begin(); ii != all._archivePathMap.end(); ii++) {
     int diff = abs(search_time - (*ii).second);
     if (diff <= minDiff) {
       _returned_path = (*ii).first;
@@ -813,10 +826,10 @@ char *DsInputPath::getClosest(time_t search_time,
 // the argument list.
 
 char *
-DsInputPath::getClosestBlocking(time_t search_time,
-				int max_time_offset,
-				DsInput_heartbeat_t heartbeat_func,
-				time_t *data_time) const
+  DsInputPath::getClosestBlocking(time_t search_time,
+                                  int max_time_offset,
+                                  DsInput_heartbeat_t heartbeat_func,
+                                  time_t *data_time) const
 {
 
   // can we get closest immediately?
@@ -937,8 +950,8 @@ int DsInputPath::getGenTime(const string& file_path,
 
 
 int DsInputPath::getGenTime(const string& file_path,
-			     time_t &data_time,
-			     bool &date_only)
+                            time_t &data_time,
+                            bool &date_only)
 {
   return DataFileNames::getDataTime(file_path, data_time, date_only,true);
 }
@@ -1011,9 +1024,9 @@ int DsInputPath::_load_pathlist_archive_by_time(const string &input_dir,
     
     // load up file paths for this day
     
-    _load_pathlist_day(input_dir,
-		       iday, start_time, end_time,
-		       haveValidTimeFormat, haveForecastFormat);
+    _load_pathlist_archive_day(input_dir,
+                               iday, start_time, end_time,
+                               haveValidTimeFormat, haveForecastFormat);
     
   } // endfor - iday
 
@@ -1023,16 +1036,16 @@ int DsInputPath::_load_pathlist_archive_by_time(const string &input_dir,
   if (haveForecastFormat) {
     size_t nSoFar = 0;
     int iday = start_day - 1;
-    while ((nSoFar < _pathTimeList.size()) && (iday > start_day - 30)) {
-      nSoFar = _pathTimeList.size();
-      _load_pathlist_day(input_dir,
-			 iday, start_time, end_time,
-			 haveValidTimeFormat, haveForecastFormat);
+    while ((nSoFar < _archivePathMap.size()) && (iday > start_day - 30)) {
+      nSoFar = _archivePathMap.size();
+      _load_pathlist_archive_day(input_dir,
+                                 iday, start_time, end_time,
+                                 haveValidTimeFormat, haveForecastFormat);
       iday--;
     } // while
   } // if (haveForecastFormat)
   
-  if (_pathTimeList.size() > 0 || haveValidTimeFormat || haveForecastFormat) {
+  if (_archivePathMap.size() > 0 || haveValidTimeFormat || haveForecastFormat) {
     return 0;
   } else {
     return -1;
@@ -1094,7 +1107,7 @@ int DsInputPath::_load_pathlist_archive_by_name(const string &input_dir,
 	time_t gen_time;
 	if (getGenTime(path, gen_time) == 0) {
 	  if (gen_time >= start_time && gen_time <= end_time) {
-	    _insertPathPair(path, gen_time);
+	    _insertArchivePathPair(path, gen_time);
 	  }
 	}
       }
@@ -1102,7 +1115,7 @@ int DsInputPath::_load_pathlist_archive_by_name(const string &input_dir,
 	time_t data_time;
 	if (getDataTime(path, data_time) == 0) {
 	  if (data_time >= start_time && data_time <= end_time) {
-	    _insertPathPair(path, data_time);
+	    _insertArchivePathPair(path, data_time);
 	  }
 	}
       }
@@ -1113,7 +1126,7 @@ int DsInputPath::_load_pathlist_archive_by_name(const string &input_dir,
   
   closedir(dirp);
   
-  if (_pathTimeList.size() > 0) {
+  if (_archivePathMap.size() > 0) {
     return 0;
   } else {
     return -1;
@@ -1128,12 +1141,12 @@ int DsInputPath::_load_pathlist_archive_by_name(const string &input_dir,
 // mutually exclusive - we go with the first type we
 // find
 
-void DsInputPath::_load_pathlist_day(const string &input_dir,
-				     int day_num,
-				     time_t start_time,
-				     time_t end_time,
-				     bool &have_valid_time_format,
-				     bool &have_forecast_format)
+void DsInputPath::_load_pathlist_archive_day(const string &input_dir,
+                                             int day_num,
+                                             time_t start_time,
+                                             time_t end_time,
+                                             bool &have_valid_time_format,
+                                             bool &have_forecast_format)
   
 {
 
@@ -1174,7 +1187,7 @@ void DsInputPath::_load_pathlist_day(const string &input_dir,
 	string gendir_path = daydir_path;
 	gendir_path += PATH_DELIM;
 	gendir_path += dp->d_name;
-	_load_gen(gendir_path, start_time, end_time);
+	_load_gen_archive(gendir_path, start_time, end_time);
 	have_forecast_format = true;
 	continue;
       }
@@ -1197,7 +1210,7 @@ void DsInputPath::_load_pathlist_day(const string &input_dir,
 	if (!date_only) {
 	  if (data_time >= start_time && data_time <= end_time) {
 	    // insert in map
-	    _insertPathPair(path, data_time);
+	    _insertArchivePathPair(path, data_time);
 	  }
 	  // set valid format flag, so we don't need to check for
 	  // forecast format in future calls
@@ -1218,9 +1231,9 @@ void DsInputPath::_load_pathlist_day(const string &input_dir,
 //////////////////////////////////////////////////////////////////
 // load up paths for a given gen time, between start and end times
 
-void DsInputPath::_load_gen(const string &gendir_path,
-			    time_t start_time,
-			    time_t end_time)
+void DsInputPath::_load_gen_archive(const string &gendir_path,
+                                    time_t start_time,
+                                    time_t end_time)
   
 {
   
@@ -1254,7 +1267,7 @@ void DsInputPath::_load_gen(const string &gendir_path,
       if (getGenTime(path, gen_time) == 0) {
 	if (gen_time >= start_time && gen_time <= end_time) {
 	  // insert in map
-	  _insertPathPair(path, gen_time);
+	  _insertArchivePathPair(path, gen_time);
 	}
       }
     }
@@ -1263,7 +1276,7 @@ void DsInputPath::_load_gen(const string &gendir_path,
       if (getDataTime(path, data_time) == 0) {
 	if (data_time >= start_time && data_time <= end_time) {
 	  // insert in map
-	  _insertPathPair(path, data_time);
+	  _insertArchivePathPair(path, data_time);
 	}
       }  
     }
@@ -1287,9 +1300,9 @@ int DsInputPath::_nextArchive()
 
   // go through the file name vector
   
-  while (_pathPosn != (int) _pathList.size()) {
+  while (_pathPosn != (int) _archivePathList.size()) {
     
-    const string &path = _pathList[_pathPosn];
+    const string &path = _archivePathList[_pathPosn];
     _pathPosn++;
     
     // Make sure the file exists before returning it
@@ -1419,14 +1432,15 @@ int DsInputPath::_nextRealtimeInotify(bool block)
 
     // first check if we already have files in the queue
 
-    if (_inotifyFileQueue.size() > 0) {
+    if (_realtimePathMap.size() > 0) {
       
-      // take next file in list
+      // next path is at start of list
+
+      TimePathPair nextPath = *_realtimePathMap.begin();
+      _realtimePathMap.erase(_realtimePathMap.begin());
       
-      _returned_path = _inotifyFileQueue.back();
-      _inotifyFileQueue.pop_back();
-      _latest_time_used = (*_timePathPosn).first;
-      _timePathPosn++;
+      _latest_time_used = nextPath.first;
+      _returned_path = nextPath.second;
 
       if (_debug) {
         cerr << "  -->> next path: " << _returned_path << endl;
@@ -1456,13 +1470,13 @@ int DsInputPath::_nextRealtimeInotify(bool block)
       
       return 0;
       
-    } // if (_timePathPosn != _timePathList.end())
+    } // if (_realtimePathMap.size() > 0)
 
     // no files in list, need to watch for new files
     // this will add any new files to the queue
     
     int iret = _loadTimelistInotify(block);
-    if (_inotifyFileQueue.size() > 0) {
+    if (_realtimePathMap.size() > 0) {
       // first time through, we loaded files from scanning dir
       continue;
     }
@@ -1510,18 +1524,20 @@ int DsInputPath::_nextRealtimeNoLdata(bool block)
 
     // first load up list of available files
     
-    if (_timePathPosn == _timePathList.end()) {
+    if (_realtimePathMap.size() == 0) {
       _load_timelist_realtime(_input_dir, 0);
     }
     
-    if (_timePathPosn != _timePathList.end()) {
+    if (_realtimePathMap.size() > 0) {
 
-      // take next file in list
+      // next file is at start of list
 
-      _returned_path = (*_timePathPosn).second;
-      _latest_time_used = (*_timePathPosn).first;
-      _timePathPosn++;
-
+      TimePathPair nextPath = *_realtimePathMap.begin();
+      _realtimePathMap.erase(_realtimePathMap.begin());
+      
+      _latest_time_used = nextPath.first;
+      _returned_path = nextPath.second;
+      
       if (_debug) {
         cerr << "  -->> next path: " << _returned_path << endl;
         cerr << "  -->> latest_time_used: "
@@ -1550,7 +1566,7 @@ int DsInputPath::_nextRealtimeNoLdata(bool block)
 
       return 0;
       
-    } // if (_timePathPosn != _timePathList.end())
+    } // if (_realtimePathMap.size() > 0) 
 
     // return with error now if non-blocking
     
@@ -1559,7 +1575,7 @@ int DsInputPath::_nextRealtimeNoLdata(bool block)
     }
     
     if (_heartbeat_func) {
-         _heartbeat_func("DsInputPath - waiting for files");
+      _heartbeat_func("DsInputPath - waiting for files");
     }
     if (_debug) {
       cerr << "-->> Sleeping between scans, _dir_scan_sleep_secs: "
@@ -1567,7 +1583,7 @@ int DsInputPath::_nextRealtimeNoLdata(bool block)
     }
     for (int ii = 0; ii < _dir_scan_sleep_secs; ii++) {
       if(_heartbeat_func){
-         _heartbeat_func("DsInputPath - waiting for files");
+        _heartbeat_func("DsInputPath - waiting for files");
       }
       umsleep(1000);
     }
@@ -1588,7 +1604,7 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
   // do we have files left from last time
   
   if (depth == 0) {
-    if (_timePathPosn != _timePathList.end()) {
+    if (_realtimePathMap.size() > 0) {
       // still files left in the pathlist from last time
       return;
     }
@@ -1687,6 +1703,10 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     }
 
     if (age > _max_file_age || age < _file_quiescence_secs) {
+      if (_debug) {
+        cerr << "Ignoring file - too old: path, age(secs): "
+             << filePath << ", " << age << endl;
+      }
       continue;
     }
     
@@ -1702,7 +1722,7 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     
     // add to path list
     
-    _insertTimePair(file_time, filePath);
+    _insertRealtimePair(file_time, filePath);
     
   } // dp
   
@@ -1716,10 +1736,12 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     while (!done) {
       TimePathIter ii, jj;
       done = true;
-      for (ii = _timePathList.begin(); ii != _timePathList.end(); ii++) {
-	for (jj = _prevPathTimeList.begin(); jj != _prevPathTimeList.end(); jj++) {
+      for (ii = _realtimePathMap.begin();
+           ii != _realtimePathMap.end(); ii++) {
+	for (jj = _prevRealtimeMap.begin();
+             jj != _prevRealtimeMap.end(); jj++) {
 	  if ((*ii).first == (*jj).first) {
-	    _timePathList.erase(ii);
+	    _realtimePathMap.erase(ii);
 	    done = false;
 	    break; // from jj
 	  } // if
@@ -1735,32 +1757,29 @@ void DsInputPath::_load_timelist_realtime(const string &input_dir,
     // Therefore increment _latest_time_used by 1 so that the previous
     // files are not found again on the next scan
 
-    if (_timePathList.size() == 0 && _prevPathTimeList.size() > 0) {
+    if (_realtimePathMap.size() == 0 && _prevRealtimeMap.size() > 0) {
       _latest_time_used++;
     }
 
     // copy current list to previous list, for checking next time
     
-    _prevPathTimeList = _timePathList;
+    _prevRealtimeMap = _realtimePathMap;
     
     // trim list is required
     
     if (_latest_file_only) {
-      while (_timePathList.size() > 1) {
-	_timePathList.erase(_timePathList.begin());
+      while (_realtimePathMap.size() > 1) {
+	_realtimePathMap.erase(_realtimePathMap.begin());
       }
     }
       
-    // set position to start of pathlist
-    
-    _timePathPosn = _timePathList.begin();
-
     if (_debug) {
       cerr << "DsInputPath completed scan of directory" << endl;
       cerr << "dir: " << input_dir << endl;
-      cerr << "     _timePathList.size(): " << _timePathList.size() << endl;
+      cerr << "     _realtimePathMap.size(): "
+           << _realtimePathMap.size() << endl;
       TimePathIter ii;
-      for (ii = _timePathList.begin(); ii != _timePathList.end(); ii++) {
+      for (ii = _realtimePathMap.begin(); ii != _realtimePathMap.end(); ii++) {
 	cerr << "      path, time: "
 	     << (*ii).second << ", "
 	     << utimstr((*ii).first) << endl;
@@ -1855,7 +1874,7 @@ bool DsInputPath::_hasExt(const string &path, string ext)
       return true;
     }
 
-  } catch (out_of_range err) {
+  } catch (out_of_range &err) {
 
     // extension length exceeds path len
     
@@ -1872,9 +1891,8 @@ bool DsInputPath::_hasExt(const string &path, string ext)
 }
 
 
-//////////////////////////////////////
-// test for file sub string, if set
-//
+///////////////////////////////////////////////
+// test for file path sub string, if requested
 
 bool DsInputPath::_hasSubStr(const string &path)
 
@@ -1893,18 +1911,53 @@ bool DsInputPath::_hasSubStr(const string &path)
   Path pathObj(path);
   string name = pathObj.getFile();
 
-  // does this contain the substr?
+  // does this path contain the substr?
 
   if (name.find(_sub_str) == string::npos) {
     if (_debug) {
       cerr << "DEBUG - DsInputPath::_hasSubStr" << endl;
       cerr << "  Does not contain sub-string: " << _sub_str << endl;
-      cerr << "  Path: " << path << endl;
+      cerr << "  Path will not be used: " << path << endl;
     }
     return false;
   }
 
   return true;
+
+}
+
+/////////////////////////////////////////////////
+// test for file path ignore string, if requested
+
+bool DsInputPath::_hasIgnoreStr(const string &path)
+
+{
+
+  if (!_check_ignore_str) {
+    return false;
+  }
+
+  if (_ignore_str.size() == 0) {
+    return false;
+  }
+
+  // get file name
+  
+  Path pathObj(path);
+  string name = pathObj.getFile();
+
+  // does this contain the ignore str?
+
+  if (name.find(_ignore_str) != string::npos) {
+    if (_debug) {
+      cerr << "DEBUG - DsInputPath::_hasIgnoreStr" << endl;
+      cerr << "  Does contain ignore-string: " << _ignore_str << endl;
+      cerr << "  Path will be ignored: " << path << endl;
+    }
+    return true;
+  }
+
+  return false;
 
 }
 
@@ -1916,6 +1969,10 @@ bool DsInputPath::_scanThisDir(char* name, int age)
 {
 
   if (_max_dir_age > 0 && age > _max_dir_age) {
+    if (_debug) {
+      cerr << "Ignoring dir - too old: path, age(secs): "
+           << name << ", " << age << endl;
+    }
     return false;
   }
 
@@ -1943,12 +2000,9 @@ bool DsInputPath::_scanThisDir(char* name, int age)
     ptr += 2;
   }
 
-  // Throw out short dirs (not needed, next test will find the NULL)
-  // if(strlen(ptr) < 8) {
-  //   return false;
-  // }
-
   // Check to make sure the next 8 chars are digits.
+  // will return early if a NULL is found
+  
   for(int i = 0; i < 8; i++, ptr++) {
     if(! isdigit(*ptr)) {
       return false;
@@ -1967,7 +2021,7 @@ bool DsInputPath::_scanThisDir(char* name, int age)
 // exists and is a plain file or link.
 //
 
-void DsInputPath::_insertPathPair(const string &path, time_t file_time)
+void DsInputPath::_insertArchivePathPair(const string &path, time_t file_time)
   
 {
 
@@ -1977,7 +2031,7 @@ void DsInputPath::_insertPathPair(const string &path, time_t file_time)
     PathTimePair pathTime;
     pathTime.first = path;
     pathTime.second = file_time;
-    _pathTimeList.insert(pathTime);
+    _archivePathMap.insert(pathTime);
   }
 
 }
@@ -1987,7 +2041,7 @@ void DsInputPath::_insertPathPair(const string &path, time_t file_time)
 // exists and is a plain file or link.
 //
 
-void DsInputPath::_insertTimePair(time_t file_time, const string &path)
+void DsInputPath::_insertRealtimePair(time_t file_time, const string &path)
   
 {
 
@@ -1997,7 +2051,7 @@ void DsInputPath::_insertTimePair(time_t file_time, const string &path)
     TimePathPair timePath;
     timePath.first = file_time;
     timePath.second = path;
-    _timePathList.insert(timePath);
+    _realtimePathMap.insert(timePath);
   }
 
 }
@@ -2054,10 +2108,10 @@ int DsInputPath::_loadTimelistInotify(bool block)
 {
   
   if (_inotifyFd < 0) {
-    if (_inotifyInit()) {
+    if (_inotifyInit() == -2) {
       return -2;
     }
-    if (_inotifyFileQueue.size() > 0) {
+    if (_realtimePathMap.size() > 0) {
       // startup files available
       return 0;
     }
@@ -2111,7 +2165,8 @@ int DsInputPath::_loadTimelistInotify(bool block)
       return -2;
     }
     if (_debug) {
-      cerr << "==>> Read " << numRead << " bytes from inotify fd: " << _inotifyFd << endl;
+      cerr << "==>> Read " << numRead
+           << " bytes from inotify fd: " << _inotifyFd << endl;
     }
      
     /* Process all of the events in buffer returned by read() */
@@ -2137,19 +2192,40 @@ int DsInputPath::_inotifyInit()
   
 {
 
-  // create inotify instance
+  // check the dir exists before initializing
+  
+  DIR *dirp;
+  if ((dirp = opendir(_input_dir.c_str())) == NULL) {
+    if (_debug) {
+      int errNum = errno;
+      cerr << "WARNING: DsInputPath::_inotifyInit()" << endl;
+      cerr << "  Cannot open input dir: " << _input_dir << endl;
+      cerr << "  " << strerror(errNum) << endl;
+    }
+    return -1;
+  } else {
+    closedir(dirp);
+  }
 
+  // create inotify instance
+  
   _inotifyFd = inotify_init();
   if (_inotifyFd == -1) {
     int errNum = errno;
     cerr << "ERROR - DsInputPath::_inotifyInit()" << endl;
     cerr << "ERROR in inotify_init()" << endl;
     cerr << "  " << strerror(errNum) << endl;
-    return -1;
+    return -2;
+  }
+  if (_debug) {
+    cerr << "SUCCESS - inotify_init(), _inotifyFd: " << _inotifyFd << endl;
   }
   
   // load up list of dirs to watch
+  // this also loads up any files that are young enough to pass
+  // the age test
 
+  _realtimePathMap.clear();
   vector<string> dirList;
   _loadInotifySubDirs(_input_dir, 0, dirList);
 
@@ -2158,7 +2234,8 @@ int DsInputPath::_inotifyInit()
     int wd = inotify_add_watch(_inotifyFd, dirList[ii].c_str(), watchFlags);
     if (wd >= 0) {
       if (_debug) {
-        cerr << "==>> watching dir: " << dirList[ii] << ", using wd: " << wd << endl;
+        cerr << "==>> watching dir: " << dirList[ii]
+             << ", using wd: " << wd << endl;
       }
       _watchList[wd] = dirList[ii];
     }
@@ -2170,7 +2247,8 @@ int DsInputPath::_inotifyInit()
    
 ////////////////////////////////////////////////////////////
 // load list of directories to watch
-//
+// this also loads up any files that are young enough to pass
+// the age test
 
 void DsInputPath::_loadInotifySubDirs(const string &dir,
                                       int depth,
@@ -2277,21 +2355,12 @@ void DsInputPath::_loadInotifySubDirs(const string &dir,
     
     // add to path list
     
-    _insertTimePair(file_time, entryPath);
+    _insertRealtimePair(file_time, entryPath);
     
   } // dp
   
   closedir(dirp);
 
-  // load up path list for inotify, in time order
-
-  if (depth == 0) {
-    for (TimePathIter ii = _timePathList.begin(); ii != _timePathList.end(); ii++) {
-      string path = ii->second;
-      _inotifyFileQueue.push_front(path);
-    }
-  }
-  
 }
 
 ////////////////////////////////////////////////////////////
@@ -2330,6 +2399,14 @@ void DsInputPath::_handleInotifyEvent(struct inotify_event *event)
       }
       return;
     }
+
+    if (_hasIgnoreStr(fileName)) {
+      if (_debug) {
+        cerr << "Ignoring file with substr, path: "
+             << _ignore_str << ", " << filePath << endl;
+      }
+      return;
+    }
     
     // get file stats
     
@@ -2343,6 +2420,8 @@ void DsInputPath::_handleInotifyEvent(struct inotify_event *event)
       }
       return;
     }
+
+    time_t file_time = fileStat.st_mtime;
 
     // check for links
     
@@ -2370,7 +2449,9 @@ void DsInputPath::_handleInotifyEvent(struct inotify_event *event)
     
     // add to path list
 
-    _inotifyFileQueue.push_front(filePath);
+    _insertRealtimePair(file_time, filePath);
+
+    // _inotifyFileQueue.push_front(filePath);
 
     return;
     
@@ -2426,7 +2507,8 @@ void DsInputPath::_handleInotifyEvent(struct inotify_event *event)
     int wd = inotify_add_watch(_inotifyFd, newDirPath.c_str(), watchFlags);
     if (wd >= 0) {
       if (_debug) {
-        cerr << "==>> watching dir: " << newDirPath << ", using wd: " << wd << endl;
+        cerr << "==>> watching dir: "
+             << newDirPath << ", using wd: " << wd << endl;
       }
       _watchList[wd] = newDirPath;
     }

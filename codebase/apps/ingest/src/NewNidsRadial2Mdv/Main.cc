@@ -23,7 +23,7 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// main for NidsRadial2Mdv
+// main for NewNidsRadial2Mdv
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -31,11 +31,11 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// NidsRadial2Mdv identifies storms in MDV files
+// NewNidsRadial2Mdv identifies storms in MDV files
 //
 ////////////////////////////////////////////////////////////////
 
-#include "NidsRadial2Mdv.hh"
+#include "NewNidsRadial2Mdv.hh"
 #include <toolsa/str.h>
 #include <toolsa/port.h>
 #include <signal.h>
@@ -46,7 +46,7 @@ using namespace std;
 
 static void tidy_and_exit (int sig);
 static void out_of_store();
-static NidsRadial2Mdv *_prog;
+static NewNidsRadial2Mdv *_prog;
 static int _argc;
 static char **_argv;
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 
   // create program object
 
-  _prog = new NidsRadial2Mdv(argc, argv);
+  _prog = new NewNidsRadial2Mdv(argc, argv);
   if (!_prog->isOK) {
     return(-1);
   }
@@ -109,7 +109,7 @@ static void out_of_store()
 
 {
 
-  fprintf(stderr, "FATAL ERROR - program NidsRadial2Mdv\n");
+  fprintf(stderr, "FATAL ERROR - program NewNidsRadial2Mdv\n");
   fprintf(stderr, "  Operator new failed - out of store\n");
   exit(-1);
 

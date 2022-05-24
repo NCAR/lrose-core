@@ -50,9 +50,9 @@ bool HdfFile::init()
     _file.openFile( FILE_NAME, H5F_ACC_RDONLY );
     
   }
-  catch( FileIException error )
+  catch( FileIException &error )
   {
-    error.printError();
+    error.printErrorStack();
 
     return false;
   }
@@ -226,7 +226,7 @@ bool HdfFile::getDataset(const string datasetName, void** mdvData,
     //
     // Get the number of dimensions in the dataspace.
     //
-    int rank = dataspace.getSimpleExtentNdims();
+    dataspace.getSimpleExtentNdims();
     
     //
     // Get the dimension size of each dimension in the dataspace and
@@ -234,7 +234,7 @@ bool HdfFile::getDataset(const string datasetName, void** mdvData,
     //
     hsize_t dims_out[2];
   
-    int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
+    dataspace.getSimpleExtentDims( dims_out, NULL);
    
     int nx = dims_out[0];
 
@@ -320,31 +320,31 @@ bool HdfFile::getDataset(const string datasetName, void** mdvData,
     }
   } // end of try block
   
-  catch( FileIException error )
+  catch( FileIException &error )
   {
-    error.printError();
+    error.printErrorStack();
     return false;
   }
-  catch( DataSetIException error )
+  catch( DataSetIException &error )
   {
-    error.printError();
-    return false;
-  }
-  // catch failure caused by the DataSpace operations
-  catch( DataSpaceIException error )
-  {
-    error.printError();
+    error.printErrorStack();
     return false;
   }
   // catch failure caused by the DataSpace operations
-  catch( DataTypeIException error )
+  catch( DataSpaceIException &error )
   {
-    error.printError();
+    error.printErrorStack();
     return false;
   }
-  catch ( AttributeIException error)
+  // catch failure caused by the DataSpace operations
+  catch( DataTypeIException &error )
+  {
+    error.printErrorStack();
+    return false;
+  }
+  catch ( AttributeIException &error)
   { 
-    error.printError();
+    error.printErrorStack();
     return false;
   }
 

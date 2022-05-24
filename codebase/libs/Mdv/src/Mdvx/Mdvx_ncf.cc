@@ -533,7 +533,7 @@ void Mdvx::clearMdv2Ncf()
   _ncfCompress = true;
   _ncfCompressionLevel = 4;
   _ncfFileFormat = NCF_FORMAT_NETCDF4;
-  _ncfOutputLatlonArrays = true;
+  _ncfOutputLatlonArrays = false;
   _ncfOutputMdvAttr = true;
   _ncfOutputMdvChunks = true;
   _ncfOutputStartEndTimes = true;

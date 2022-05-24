@@ -14,9 +14,13 @@ public:
   DisplayFieldModel(vector<DisplayField *> displayFields, string selectedFieldName,
 		    string gridColor, string emphasisColor,
 		    string annotationColor, string backgroundColor);
-  ~DisplayFieldModel();
+  virtual ~DisplayFieldModel();
 
   void addField(DisplayField *newField);
+  void hideField(DisplayField *field);
+  void setFieldToMissing(DisplayField *field);
+  void deleteFieldFromVolume(DisplayField *field);
+  void deleteField(string fieldName);
 
   vector<string> getFieldNames();
   size_t getNFields();
@@ -30,10 +34,14 @@ public:
 
   string getSelectedFieldName();
   DisplayField *getSelectedField();
-  size_t getSelectedFieldNum() { return _selectedFieldIndex;};
+  size_t getSelectedFieldNum();
+
+  double getMaxRangeKm();
 
   void setSelectedField(string fieldName);
   void setSelectedField(size_t fieldIndex);
+  void setFieldToMissing(const string &fieldName);
+  void deleteFieldFromVolume(const string &fieldName);
 
   DisplayField *getFiltered(size_t ifield, int buttonRow);
 
@@ -81,6 +89,7 @@ private:
   // TODO: only keep one of these ... 
   string _selectedFieldName;
   size_t _selectedFieldIndex;
+  bool _noSelectedField;
   // these define the current state of editing ...
   // each time there is a replot, save the state?
 
@@ -93,6 +102,7 @@ private:
   string _emphasisColor;
   string _annotationColor;
   string _backgroundColor;
+
 };
 
 #endif

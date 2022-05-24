@@ -4,7 +4,7 @@
 #
 ###########################################################################
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
+include $(RAP_MAKE_INC_DIR)/rap_make_macros
 
 MODULE_TYPE=progcpp
 TARGET_FILE=REPoH
@@ -28,6 +28,7 @@ HDRS =
 
 CPPC_SRCS = \
 	RepohParams.cc  \
+	HeaderParams.cc \
 	AsciiOutputs.cc \
 	AsciiOutput.cc \
 	CloudGap.cc \
@@ -57,7 +58,10 @@ CPPC_SRCS = \
 #
 # Standard c++ targets
 #
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
+include $(RAP_MAKE_INC_DIR)/rap_make_c++_targets
+
+HeaderParams.cc: paramdef.header
+	tdrp_gen -f paramdef.header -c++ -class HeaderParams
 
 RepohParams.hh: RepohParams.cc
 

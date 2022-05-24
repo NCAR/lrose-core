@@ -566,46 +566,42 @@ void se_BB_generic_unfold(const float *data, float *newData, size_t nGates,
       vx = newData[ssIdx];
       v4 = sum * rcp_qsize; // running_average(raq0);
       folds = (v4 - vx) * rcp_nyqi;
-      printf("v4 = %f, vx = %f, raw folds = %f ", v4, vx, folds);
+      //printf("v4 = %f, vx = %f, raw folds = %f ", v4, vx, folds);
       if (folds < 0)
-	folds = folds - 0.5;
+	      folds = folds - 0.5;
       else
-	folds = folds + 0.5;
+	      folds = folds + 0.5;
       fold_count = (int) folds;
-      printf("folds = %f, ==> fold_count = %d ", folds, fold_count);
+      //printf("folds = %f, ==> fold_count = %d ", folds, fold_count);
 
       if(fold_count) {
-	if(fold_count > 0) {
+	      if(fold_count > 0) {
           nn = fold_count - BB_max_pos_folds;
-	  if(nn > 0)
-	    fold_count -= nn;
-	}
-	else {
-	  nn = fold_count + BB_max_neg_folds;
+  	      if(nn > 0)
+  	        fold_count -= nn;
+      	} else {
+      	  nn = fold_count + BB_max_neg_folds;
           if(nn < 0) 
-	    fold_count -= nn; // subtracting a negative number
-	}
+      	    fold_count -= nn; // subtracting a negative number
+      	}
       }
-      printf(" limited to %d\n", fold_count);
+      //printf(" limited to %d\n", fold_count);
       vx += fold_count * scaled_nyqi;
-      printf("vx += fold_count(%d) * scaled_nyqi(%d) = %f\n", fold_count, scaled_nyqi, vx);
+      //printf("vx += fold_count(%d) * scaled_nyqi(%d) = %f\n", fold_count, scaled_nyqi, vx);
       // insert new velocity into running average queue
       sum -= raq0.front();
       sum += vx;
       raq0.pop_front();
       raq0.push_back(vx);
-
       newData[ssIdx] = vx;
-
       // What is the difference between last_good_v0 and
       // the running average?  last_good_v0 is actually the first
       // good velocity (maybe unfolded) in this ray.
       if(first_cell) {
-	first_cell = false;
-        // return the last good v0
-	last_good_v0 = vx;
+      	first_cell = false;
+              // return the last good v0
+      	last_good_v0 = vx;
       }
-
     }
     ssIdx += 1;
   }

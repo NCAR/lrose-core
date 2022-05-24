@@ -82,7 +82,8 @@ Mdv2NcfTrans::Mdv2NcfTrans()
   _isPolar = false;
   _isRhi = false;
   _mdv = NULL;
-  _outputLatlonArrays = true;
+  _outputLatlonArrays = false;
+  _outputStartEndTimes = true;
 
   _ncFile = NULL;
   _ncFormat = Nc3File::Netcdf4;
@@ -90,7 +91,6 @@ Mdv2NcfTrans::Mdv2NcfTrans()
   _ncErr = NULL;
 
   _radialFileType = Mdvx::RADIAL_TYPE_CF;
-
 
   _initVars();
   clearErrStr();
@@ -150,6 +150,8 @@ int Mdv2NcfTrans::writeCf(const Mdvx &mdv, const string &ncFilePath)
   if (outputLatlonArraysStr != NULL) {
     if (!strcasecmp(outputLatlonArraysStr, "FALSE")) {
       _outputLatlonArrays = false;
+    } else if (!strcasecmp(outputLatlonArraysStr, "TRUE")) {
+      _outputLatlonArrays = true;
     }
   }
 

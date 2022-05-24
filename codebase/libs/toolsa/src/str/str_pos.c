@@ -32,7 +32,7 @@
 
 int STRpos(const char *s, const char* c)
    {
-      register int i, j, l;
+      int i, j, l;
 
       l = (int) strlen(c);
 

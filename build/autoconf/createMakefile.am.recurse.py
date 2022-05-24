@@ -18,7 +18,6 @@ def main():
 
     global options
     global subdirList
-    global makefileName
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
@@ -39,6 +38,9 @@ def main():
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of directory')
+    parser.add_option('--template',
+                      dest='template', default="unknown",
+                      help='Path of makefile template')
 
     (options, args) = parser.parse_args()
 
@@ -48,32 +50,11 @@ def main():
     if (options.debug == True):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  Dir: ", options.dir, file=sys.stderr)
+        print("  Makefile template: ", options.template, file=sys.stderr)
 
     # go to the dir
 
     os.chdir(options.dir)
-
-    # get makefile name in use
-    # makefile has preference over Makefile
-
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print("ERROR - ", thisScriptName, file=sys.stderr)
-                print("  Cannot find makefile or Makefile", file=sys.stderr)
-                print("  dir: ", options.dir, file=sys.stderr)
-                exit(1)
-
-    # copy makefile in case we rerun this script
-
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug == True):
-        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # load list of subdirs
 
@@ -160,11 +141,11 @@ def getSubdirList():
     
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefileName, "SUB_DIRS")
+    subNameList = getValueListForKey(options.template, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", options.template, file=sys.stderr)
         print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 

@@ -1,6 +1,6 @@
 
 #include "Solo/OneBoundary.hh"
-
+#include <cstdio>
 
 
 OneBoundary::OneBoundary() {

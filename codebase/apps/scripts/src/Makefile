@@ -11,23 +11,11 @@ INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
 #	Script files to be installed
 
 SCRIPTS = \
-	IngestSatMdv \
         RUNtests.sh \
 	TimeCmd.py \
-	check_Janitor_files.pl \
-	check_backup.pl \
-	check_build_status.pl \
-	check_lib_depends \
-	check_lib_includes \
-	check_uparams \
-	checkout_and_build.pl \
 	copyright_prepend \
 	copyright_remove \
-	create_doxygen_apps_html.pl \
-	ipcrm_irix \
-	ipcrm_libc5 \
 	ipcrm_linux \
-	kill_hung_spong_df.sh \
 	ldd_smart \
 	loop_cmd \
 	make_cdrom \
@@ -35,23 +23,15 @@ SCRIPTS = \
 	make_dvd+rw \
 	make_jar \
 	make_unix_cdrom \
-	mm5xfer \
-	mod_c++_to_gcc32.pl \
-	mod_hdr_for_doxygen.pl \
-	monitor_disk.pl \
 	not_running \
 	nuke_ipcs.linux \
         process_maps.csh \
         psinfo2 \
-	pull_files \
 	pull_files_ftp.py \
-	pull_kavltg \
-	push_files_ftp \
 	push_files_ftp.py \
-	push_files_rcp \
 	push_spdb_files_ftp.py \
-	push_spdb_files_rcp.py \
 	rm_baks \
+	rm_CMakeLists \
 	rm_core \
 	rm_junk \
 	rm_ldata_fmq_files \
@@ -63,15 +43,20 @@ SCRIPTS = \
 	running \
 	scrub \
         set_font_path \
-	setupRapDataDirs.py \
 	snuff \
+	hup \
 	snuff_slow \
 	snuff_inst \
 	snuff_usr1 \
 	sync2files \
-	toggle_proc_in_auto_restart.pl \
-	ugen2validtime.pl \
 	utime_decode \
+	auto_restart \
+	auto_restart_stats \
+	DataMapper_list_check \
+	procmap_list_kill \
+	procmap_list_check \
+	procmap_list_start \
+	start_inst
 
 #	Targets
 

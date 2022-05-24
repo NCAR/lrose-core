@@ -557,8 +557,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("VirtVol Parameters");
-    tt->comment_text = tdrpStrDup("Triggering new data, reading in new data, writing data");
+    tt->comment_hdr = tdrpStrDup("VirtVol data handling parameters");
+    tt->comment_text = tdrpStrDup("Params for triggering new data, reading in new data, writing data");
     tt++;
     
     // Parameter 'debug_triggering'
@@ -582,7 +582,7 @@
     tt->descr = tdrpStrDup("trigger url");
     tt->help = tdrpStrDup("URL to trigger off");
     tt->val_offset = (char *) &trigger_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("mdvp:://localhost::myDataPath");
     tt++;
     
     // Parameter 'restrict_vertical_levels'
@@ -603,8 +603,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("vertical_level_range");
-    tt->descr = tdrpStrDup("If restrict_vertical_levels = TRUE, this is the range of vlevels");
-    tt->help = tdrpStrDup("If set to -1, -1 it is not used, and there is no restriction");
+    tt->descr = tdrpStrDup("If restrict_vertical_levels = TRUE, this is the range of vertical levels");
+    tt->help = tdrpStrDup("Units are degrees.  If set to -1, -1 it is not used, and there is no restriction");
     tt->array_offset = (char *) &_vertical_level_range - &_start_;
     tt->array_n_offset = (char *) &vertical_level_range_n - &_start_;
     tt->is_array = TRUE;
@@ -636,7 +636,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("max_range");
     tt->descr = tdrpStrDup("If restrict_max_range = TRUE, this is the max range index");
-    tt->help = tdrpStrDup("Not used when restrict_max_range = FALSE, or if the value is >=0");
+    tt->help = tdrpStrDup("Units are range index (not distance).  Not used when restrict_max_range = FALSE, or if the value is <0");
     tt->val_offset = (char *) &max_range - &_start_;
     tt->single_val.d = -1;
     tt++;
@@ -647,8 +647,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_url");
-    tt->descr = tdrpStrDup("names of param files for input URLS, one per URL");
-    tt->help = tdrpStrDup("The param files are read and parsed.  The names should match filter descriptions");
+    tt->descr = tdrpStrDup("Names of param files for input URLS, one per URL");
+    tt->help = tdrpStrDup("These param files are read and parsed.  The names should match filter descriptions.\nEach file contains information as to the URL name, type, and data content, as well as named data fields\nTo produce an example file, enter the command line option -print_url_params");
     tt->array_offset = (char *) &_input_url - &_start_;
     tt->array_n_offset = (char *) &input_url_n - &_start_;
     tt->is_array = TRUE;
@@ -665,8 +665,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_url");
-    tt->descr = tdrpStrDup("names of param files for output URLS, one per URL");
-    tt->help = tdrpStrDup("The param files are read and parsed.  The names should match filter descriptions");
+    tt->descr = tdrpStrDup("Names of param files for output URLS, one per URL");
+    tt->help = tdrpStrDup("These param files are read and parsed.  The names should match filter descriptions\nEach file contains information as to the URL name, type, and data content, as well as named data fields\nTo produce an example file, enter the command line option -print_url_params");
     tt->array_offset = (char *) &_output_url - &_start_;
     tt->array_n_offset = (char *) &output_url_n - &_start_;
     tt->is_array = TRUE;

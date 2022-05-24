@@ -43,6 +43,7 @@
 using namespace std;
 
 #define KM_PER_DEG_AT_EQUATOR 111.12
+// #define VERBOSE_PRINT 1
 
 //////////////
 // constructor
@@ -1658,10 +1659,12 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   
 {
 
-  // cerr << "====================================================================" << endl;
-  // cerr << "TTTTTTTTTTTTTTTTT stormTime: " << DateTime::strm(sfile.scan().time) << endl;
-  // cerr << "11111111111111111 complex num: " << track.status.complex_track_num << endl;
-  // cerr << "11111111111111111 simple num: " << track.status.simple_track_num << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "====================================================================" << endl;
+  cerr << "TTTTTTTTTTTTTTTTT stormTime: " << DateTime::strm(sfile.scan().time) << endl;
+  cerr << "TTTTTTTTTTTTTTTTT complex num: " << track.status.complex_track_num << endl;
+  cerr << "TTTTTTTTTTTTTTTTT simple num: " << track.status.simple_track_num << endl;
+#endif
 
   // do we need to override for this track?
   // check track age
@@ -1684,8 +1687,10 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   double stormLat, stormLon;
   TITAN_xy2latlon(&titanProj, stormX, stormY, &stormLat, &stormLon);
 
-  // cerr << "3333333333 stormX, stormY: " << stormX << ", " << stormY << endl;
-  // cerr << "3333333333 stormLat, stormLon: " << stormLat << ", " << stormLon << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTT stormX, stormY: " << stormX << ", " << stormY << endl;
+  cerr << "TTTTTTTTTT stormLat, stormLon: " << stormLat << ", " << stormLon << endl;
+#endif
   
   // get search limits in lat/lon
 
@@ -1695,9 +1700,11 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   double maxLat, maxLon;
   PJGLatLonPlusDxDy(stormLat, stormLon, radiusKm, radiusKm, &maxLat, &maxLon);
 
-  // cerr << "4444444444 radiusKm: " << radiusKm << endl;
-  // cerr << "3333333333 minLat, minLon: " << minLat << ", " << minLon << endl;
-  // cerr << "3333333333 maxLat, maxLon: " << maxLat << ", " << maxLon << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTT radiusKm: " << radiusKm << endl;
+  cerr << "TTTTTTTTTT minLat, minLon: " << minLat << ", " << minLon << endl;
+  cerr << "TTTTTTTTTT maxLat, maxLon: " << maxLat << ", " << maxLon << endl;
+#endif
   
   // get field tracker grid search limits
 
@@ -1709,8 +1716,10 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   if (maxIx > nx - 1) maxIx = nx - 1;
   if (maxIy > ny - 1) maxIy = ny - 1;
   
-  // cerr << "3333333333 minIx, minIy: " << minIx << ", " << minIy << endl;
-  // cerr << "3333333333 maxIx, maxIy: " << maxIx << ", " << maxIy << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTT minIx, minIy: " << minIx << ", " << minIy << endl;
+  cerr << "TTTTTTTTTT maxIx, maxIy: " << maxIx << ", " << maxIy << endl;
+#endif
 
   // sum up U and V
 
@@ -1729,18 +1738,10 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
 
     for (int ix = minIx; ix <= maxIx; ix++, uptr++, vptr++) {
       if (*uptr != uMissing) {
-        // cerr << "uuuuuuuuuuuu: " << *uptr << endl;
-        // if (!isfinite(*uptr)) {
-        //   cerr << "UUUUUUUUU iy, ix: " << iy << ", " << ix << endl;
-        // }
         sumU += *uptr;
         countU++;
       }
       if (*vptr != vMissing) {
-        // cerr << "vvvvvvvvvvvv: " << *vptr << endl;
-        // if (!isfinite(*vptr)) {
-        //   cerr << "VVVVVVVVV iy, ix: " << iy << ", " << ix << endl;
-        // }
         sumV += *vptr;
         countV++;
       }
@@ -1761,9 +1762,11 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   meanU *= 3.6;
   meanV *= 3.6;
   
-  // cerr << "11111111111111 sumU, sumV: " << sumU << ", " << sumV << endl;
-  // cerr << "11111111111111 countU, countV: " << countU << ", " << countV << endl;
-  // cerr << "11111111111111 meanU, meanV: " << meanU << ", " << meanV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT sumU, sumV: " << sumU << ", " << sumV << endl;
+  cerr << "TTTTTTTTTTTTTT countU, countV: " << countU << ", " << countV << endl;
+  cerr << "TTTTTTTTTTTTTT meanU, meanV: " << meanU << ", " << meanV << endl;
+#endif
 
   // get titan motion in U and V
   
@@ -1774,8 +1777,10 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
   double titanU = titanSpeed * sinDirn;
   double titanV = titanSpeed * cosDirn;
   
-  // cerr << "11111111111111 titanU, titanV: " << titanU << ", " << titanV << endl;
-  // cerr << "11111111111111 age: " << age << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT titanU, titanV: " << titanU << ", " << titanV << endl;
+  cerr << "TTTTTTTTTTTTTT age: " << age << endl;
+#endif
 
   // compute weight to merge the speeds
 
@@ -1793,16 +1798,20 @@ void TrForecast::_override_motion_using_centroid(TitanStormFile &sfile,
                ((double) _params.field_tracker_transition_period_secs));
   }
 
-  // cerr << "XXXXXXXX titanWt: " << titanWt << endl;
-  // cerr << "11111111111111 meanU, meanV: " << meanU << ", " << meanV << endl;
-  // cerr << "11111111111111 titanU, titanV: " << titanU << ", " << titanV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "XXXXXXXX titanWt: " << titanWt << endl;
+  cerr << "TTTTTTTTTTTTTT meanU, meanV: " << meanU << ", " << meanV << endl;
+  cerr << "TTTTTTTTTTTTTT titanU, titanV: " << titanU << ", " << titanV << endl;
+#endif
   
   // compute merged vector
 
   double combinedU = titanU * titanWt + meanU * (1.0 - titanWt);
   double combinedV = titanV * titanWt + meanV * (1.0 - titanWt);
 
-  // cerr << "11111111111111 combinedU, combinedV: " << combinedU << ", " << combinedV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT combinedU, combinedV: " << combinedU << ", " << combinedV << endl;
+#endif
 
   // compute merged speed and direction
   
@@ -1840,10 +1849,12 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
   
 {
 
-  // cerr << "********************************************************************" << endl;
-  // cerr << "TTTTTTTTTTTTTTTTT stormTime: " << DateTime::strm(sfile.scan().time) << endl;
-  // cerr << "11111111111111111 complex num: " << track.status.complex_track_num << endl;
-  // cerr << "11111111111111111 simple num: " << track.status.simple_track_num << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "********************************************************************" << endl;
+  cerr << "TTTTTTTTTTTTTTTTT stormTime: " << DateTime::strm(sfile.scan().time) << endl;
+  cerr << "TTTTTTTTTTTTTTT11 complex num: " << track.status.complex_track_num << endl;
+  cerr << "TTTTTTTTTTTTTTT11 simple num: " << track.status.simple_track_num << endl;
+#endif
 
   // do we need to override for this track?
   // check track age
@@ -1870,17 +1881,21 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
   double stormLat, stormLon;
   TITAN_xy2latlon(&titanProj, stormX, stormY, &stormLat, &stormLon);
 
-  // cerr << "3333333333 stormX, stormY: " << stormX << ", " << stormY << endl;
-  // cerr << "3333333333 stormLat, stormLon: " << stormLat << ", " << stormLon << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "3333333333 stormX, stormY: " << stormX << ", " << stormY << endl;
+  cerr << "3333333333 stormLat, stormLon: " << stormLat << ", " << stormLon << endl;
+#endif
 
   // get centroid location in grid units (in field tracker grid)
   
   double centroidX, centroidY;
   fieldProj.latlon2xy(stormLat, stormLon, centroidX, centroidY);
-  // cerr << "3333333333 centroidX, centroidY: " << centroidX << ", " << centroidY << endl;
-  // cerr << "3333333333 stormIx, stormIy: "
-  //      << (centroidX - uMinx) / uDx << ", "
-  //      << (centroidY - uMiny) / uDy << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "3333333333 centroidX, centroidY: " << centroidX << ", " << centroidY << endl;
+  cerr << "3333333333 stormIx, stormIy: "
+       << (centroidX - uMinx) / uDx << ", "
+       << (centroidY - uMiny) / uDy << endl;
+#endif
   
   // loop through the points describing the storm polygon
   // sum up U and V
@@ -1940,9 +1955,11 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
   meanU *= 3.6;
   meanV *= 3.6;
   
-  // cerr << "11111111111111 sumU, sumV: " << sumU << ", " << sumV << endl;
-  // cerr << "11111111111111 countU, countV: " << countU << ", " << countV << endl;
-  // cerr << "11111111111111 meanU, meanV: " << meanU << ", " << meanV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT sumU, sumV: " << sumU << ", " << sumV << endl;
+  cerr << "TTTTTTTTTTTTTT countU, countV: " << countU << ", " << countV << endl;
+  cerr << "TTTTTTTTTTTTTT meanU, meanV: " << meanU << ", " << meanV << endl;
+#endif
 
   // get titan motion in U and V
   
@@ -1953,8 +1970,10 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
   double titanU = titanSpeed * sinDirn;
   double titanV = titanSpeed * cosDirn;
   
-  // cerr << "11111111111111 titanU, titanV: " << titanU << ", " << titanV << endl;
-  // cerr << "11111111111111 age: " << age << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT titanU, titanV: " << titanU << ", " << titanV << endl;
+  cerr << "TTTTTTTTTTTTTT age: " << age << endl;
+#endif
 
   // compute weight to merge the speeds
 
@@ -1972,16 +1991,20 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
                ((double) _params.field_tracker_transition_period_secs));
   }
 
-  // cerr << "XXXXXXXX titanWt: " << titanWt << endl;
-  // cerr << "11111111111111 meanU, meanV: " << meanU << ", " << meanV << endl;
-  // cerr << "11111111111111 titanU, titanV: " << titanU << ", " << titanV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "XXXXXXXX titanWt: " << titanWt << endl;
+  cerr << "TTTTTTTTTTTTTT meanU, meanV: " << meanU << ", " << meanV << endl;
+  cerr << "TTTTTTTTTTTTTT titanU, titanV: " << titanU << ", " << titanV << endl;
+#endif
   
   // compute merged vector
   
   double combinedU = titanU * titanWt + meanU * (1.0 - titanWt);
   double combinedV = titanV * titanWt + meanV * (1.0 - titanWt);
 
-  // cerr << "11111111111111 combinedU, combinedV: " << combinedU << ", " << combinedV << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTTTT combinedU, combinedV: " << combinedU << ", " << combinedV << endl;
+#endif
 
   // compute merged speed and direction
   
@@ -1999,8 +2022,10 @@ void TrForecast::_override_motion_using_perimeter(TitanStormFile &sfile,
   track.status.dval_dt.smoothed_speed = combinedSpeed;
   track.status.dval_dt.smoothed_direction = combinedDirn;
 
-  // cerr << "111111111111 combSpeed, combDirn: " << combinedSpeed << ", " << combinedDirn << endl;
-  // cerr << "********************************************************************" << endl;
+#ifdef VERBOSE_PRINT
+  cerr << "TTTTTTTTTTTT combSpeed, combDirn: " << combinedSpeed << ", " << combinedDirn << endl;
+  cerr << "********************************************************************" << endl;
+#endif
 
 }
 

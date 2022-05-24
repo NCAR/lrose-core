@@ -44,7 +44,6 @@ commentdef {
 typedef enum {
   PRINT_MODE,
   ASCOPE_MODE,
-  CAL_MODE,
   SERVER_MODE,
   MAX_POWER_MODE,
   MAX_POWER_SERVER_MODE
@@ -53,7 +52,7 @@ typedef enum {
 paramdef enum run_mode_t {
   p_default = PRINT_MODE;
   p_descr = "Run mode";
-  p_help = "PRINT_MODE: print power, averaged over a number of gates, data to the screen, a line at a time.\n\nASCOPE_MODE: print data for a range of gates to the screen.\n\nCAL_MODE: average the powers for a number of gates, and write out in a file suitable for calibration.\n\nSERVER_MODE: listen on a port, and when a connection is established read an incoming set of commands in XML, average power over gates, and respond to the client in XML.\n\nMAX_POWER_MODE: compute the max power at any range within the specified gate limits, and print out the max power and range at which it occurs most often.\n\n\n\nMAX_POWER_SERVER_MODE: compute max power stats, write results to socket.";
+  p_help = "PRINT_MODE: print power, averaged over a number of gates, data to the screen, a line at a time.\n\nASCOPE_MODE: print data for a range of gates to the screen.\n\nSERVER_MODE: listen on a port, and when a connection is established read an incoming set of commands in XML, average power over gates, and respond to the client in XML.\n\nMAX_POWER_MODE: compute the max power at any range within the specified gate limits, and print out the max power and range at which it occurs most often.\n\n\n\nMAX_POWER_SERVER_MODE: compute max power stats, write results to socket.";
 } run_mode;
 
 commentdef {
@@ -79,6 +78,12 @@ paramdef boolean {
   p_default = FALSE;
   p_descr = "Print all meta-data headers and pulse headers.";
 } print_all_headers;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Print the lag1 (coherent) power in addition to lag0 power.";
+  p_help = "lag1 powers can help to distinguish between noise and coherent signal.";
+} print_lag1_coherent_power;
 
 paramdef boolean {
   p_default = FALSE;
@@ -192,17 +197,6 @@ paramdef int {
   p_default = 12000;
   p_descr = "Port for TCP server. For TS_TCP_INPUT only.";
 } tcp_server_port;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Handle dual channels.";
-  p_help = "Normally, only a single channel is used.";
-} dual_channel;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Radar is in fast-alternating mode.";
-} fast_alternating;
 
 paramdef boolean {
   p_default = false;

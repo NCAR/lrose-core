@@ -1,0 +1,78 @@
+###############################################################
+#
+# CMakeLists for cmake recursion
+#
+# dir: lrose-core/codebase/apps/ingest/src
+#
+# written by script createCMakeLists.py
+#
+###############################################################
+
+project (LROSE-CORE)
+
+# subdirectories
+
+add_subdirectory (AcData2Spdb)
+add_subdirectory (AcTrack2Polygon)
+add_subdirectory (AcarsNc2GenPt)
+add_subdirectory (ArgentineAwsIngest)
+add_subdirectory (Awos2Spdb)
+add_subdirectory (Aws2Spdb)
+add_subdirectory (BomAws2Spdb)
+add_subdirectory (BomSounding2Spdb)
+add_subdirectory (classIngest)
+add_subdirectory (CreateStationList)
+add_subdirectory (CsuSounding2Spdb)
+add_subdirectory (EolMobileKml2Spdb)
+add_subdirectory (EraNc2Mdv)
+add_subdirectory (GemVolXml2Dsr)
+add_subdirectory (Gini2Mdv)
+add_subdirectory (GoesRGLM2Spdb)
+add_subdirectory (GoesRnetCDF2Mdv)
+add_subdirectory (GpmHdf5ToMdv)
+add_subdirectory (Grib2Mdv)
+add_subdirectory (Grib2toMdv)
+add_subdirectory (GtsSockIngest)
+add_subdirectory (LdmDynamic2Static)
+add_subdirectory (LdmMetars2File)
+add_subdirectory (Ltg2Spdb)
+add_subdirectory (Metar2Spdb)
+add_subdirectory (Mrms2Mdv)
+add_subdirectory (MrmsGribIngest)
+add_subdirectory (NWSsoundingIngest)
+add_subdirectory (NcRadar2Dsr)
+add_subdirectory (NcRadarSplit)
+add_subdirectory (NcarAcPosn2Spdb)
+add_subdirectory (NewNidsRadial2Mdv)
+add_subdirectory (NexradBzipDecompress)
+add_subdirectory (Nids2Mdv)
+add_subdirectory (NidsRadial2Mdv)
+add_subdirectory (NidsRaster2Mdv)
+add_subdirectory (NidsVad2Spdb)
+add_subdirectory (PrintNids)
+add_subdirectory (Rdas2Dsr)
+add_subdirectory (SatOrbit2AcPosn)
+add_subdirectory (SawsUm2Mdv)
+add_subdirectory (SerialIngest)
+add_subdirectory (ShipObsIngest)
+add_subdirectory (SigAirMet2Spdb)
+add_subdirectory (SynopObsIngest)
+add_subdirectory (Uf2Dsr)
+add_subdirectory (Usgs2Spdb)
+add_subdirectory (WafsTiled2Mdv)
+add_subdirectory (Wrf2Mdv)
+add_subdirectory (WrfVIL2Mdv)
+add_subdirectory (WsiNidsIngest)
+add_subdirectory (file_repeat_day)
+add_subdirectory (hiResNids2Mdv)
+add_subdirectory (hiResNidsEchoTop2Mdv)
+add_subdirectory (hiResNidsStormPrecip2Mdv)
+add_subdirectory (hiResNidsVil2Mdv)
+add_subdirectory (lowResNids2Mdv)
+add_subdirectory (madis2Spdb)
+add_subdirectory (nexrad2dsr)
+add_subdirectory (noaaportLtg2Spdb)
+add_subdirectory (sndgIngest)
+add_subdirectory (superResNexradII2Dsr)
+add_subdirectory (superResNexradLdmUnzip)
+

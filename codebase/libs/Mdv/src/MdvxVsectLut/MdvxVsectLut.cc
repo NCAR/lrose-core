@@ -162,7 +162,7 @@ void MdvxVsectLut::computeOffsets(const MdvxProj &proj)
   // loop through the sample points
   
   for (size_t i = 0; i < _samplePts.size(); i++) {
-    int offset;
+    int64_t offset;
     if (proj.latlon2arrayIndex(_samplePts[i].lat, _samplePts[i].lon,
 			       offset, true) == 0) {
       _offsets.push_back(offset);
@@ -270,7 +270,7 @@ void MdvxVsectLut::computeWeights(const MdvxProj &proj)
 
 	// load up lut entry
 
-	int index = iy * coord.nx + ix;
+	int64_t index = iy * coord.nx + ix;
 
 	entry.offsets[0] = index;
 	entry.wts[0] = sw_inv / sum_inv;

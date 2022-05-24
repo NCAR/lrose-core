@@ -112,7 +112,7 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL)
   {
-    LOG(WARNING) << "No histo match for az,elev=" << az << "," << elev;
+    LOG(DEBUG_VERBOSE) << "No histo match for az,elev=" << az << "," << elev;
   }
   else
   {
@@ -164,7 +164,7 @@ RayClutterInfo *RadxPersistentClutter::initRay(const RadxRay &ray,
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL)
   {
-    LOG(WARNING) << "No histo match for az,elev= " << az << "," << elev;
+    LOG(DEBUG_VERBOSE) << "No histo match for az,elev= " << az << "," << elev;
   }
   else
   {

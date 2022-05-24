@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdexcept>
 #include "SpreadSheetModel.hh"
+#include "DataModel.hh"
 #include <toolsa/LogStream.hh>
 #include <fstream>
 #include <cmath>
@@ -14,7 +15,7 @@ SpreadSheetModel::SpreadSheetModel()
 
 }
 
-SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume)
+SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay) // , RadxVol *dataVolume)
 {
   _closestRay = closestRay;
   if (_closestRay == NULL) 
@@ -22,34 +23,37 @@ SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay, RadxVol *dataVolume)
   else
    cout << "in SpreadSheetModel, closestRay is NOT  NULL" << endl;
   // closestRay->print(cout);
-  _vol = dataVolume;
-  _vol->loadFieldsFromRays();
+  //_vol = dataVolume;
+  //_vol->loadFieldsFromRays();
 }
 
 void SpreadSheetModel::getRangeGeom(float *startRangeKm, float *gateSpacingKm) { 
   double startRange;
   double gateSpace;
     // TODO: maybe on construction, map to finest range geometry? then we can call 
-  _vol->getPredomRayGeom(startRange, gateSpace);
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->getPredomRayGeom(&startRange, &gateSpace);
   *startRangeKm = startRange;
   *gateSpacingKm = gateSpace;
 }
 
-vector<string> SpreadSheetModel::getFields()
+vector<string> *SpreadSheetModel::getFields()
 {
-  vector<string> fieldNames;
+  vector<string> *fieldNames;
   if (_closestRay != NULL) {
     _closestRay->loadFieldNameMap();
 
     RadxRay::FieldNameMap fieldNameMap = _closestRay->getFieldNameMap();
     RadxRay::FieldNameMapIt it;
+    fieldNames = new vector<string>;
     for (it = fieldNameMap.begin(); it != fieldNameMap.end(); it++) {
-      fieldNames.push_back(it->first);
+      fieldNames->push_back(it->first);
       cout << it->first << ':' << it->second << endl;
     }
   } else {
-    _vol->loadFieldsFromRays();
-    fieldNames = _vol->getUniqueFieldNameList();
+    DataModel *dataModel = DataModel::Instance();
+    fieldNames = dataModel->getUniqueFieldNameList();
+    //fieldNames = const_cast <vector<string>> (fieldNamesC);
   }
   return fieldNames;
 }
@@ -61,15 +65,110 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
   if (offsetFromClosest == 0) {
     azimuth = _closestRay->getAzimuthDeg();
   } else {
-    vector<RadxRay *> rays = _vol->getRays();
-    size_t idx = (_closestRayIdx + offsetFromClosest) % rays.size();
-    cout << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
-      << " idx=" << idx << endl;
-    RadxRay *ray = rays.at(idx);
-    azimuth = ray->getAzimuthDeg(); 
+
+    DataModel *dataModel = DataModel::Instance();
+    /*
+    size_t nRays = dataModel->getNRays();
+    //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    //int closestRay = (int) _closestRayIdx;
+
+    size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
+      offsetFromClosest, _currentSweepNumber); 
+
+    //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " rayIdx=" << rayIdx;
+      */
+    size_t rayIdx = _getRayIdx(offsetFromClosest);      
+    azimuth = dataModel->getRayAzimuthDeg(rayIdx);  
+    //RadxRay *ray = rays.at(idx);
+    //azimuth = ray->getAzimuthDeg(); 
   }
   return azimuth;
 }
+
+float SpreadSheetModel::getNyquistVelocityForRay(int offsetFromClosest) {
+  float nyquistVelocity = -1.0;  // negative value indicates no value found
+  if (offsetFromClosest == 0) {
+    nyquistVelocity = _closestRay->getNyquistMps();
+  } else {
+    
+    DataModel *dataModel = DataModel::Instance();
+    /*
+    size_t nRays = dataModel->getNRays();
+    //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    //int closestRay = (int) _closestRayIdx;
+
+    size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
+      offsetFromClosest, _currentSweepNumber); 
+
+    //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " rayIdx=" << rayIdx;
+      */
+    size_t rayIdx = _getRayIdx(offsetFromClosest);
+    nyquistVelocity = dataModel->getRayNyquistVelocityMps(rayIdx);  
+  }
+  return nyquistVelocity;
+}
+
+size_t SpreadSheetModel::_getRayIdx(int offsetFromClosest) {
+    DataModel *dataModel = DataModel::Instance();
+    size_t nRays = dataModel->getNRays();
+    //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    //int closestRay = (int) _closestRayIdx;
+
+    size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
+      offsetFromClosest, _currentSweepNumber); 
+
+    //if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " rayIdx=" << rayIdx;
+    return rayIdx;
+}
+
+  void SpreadSheetModel::_setSweepNumber(int sweepNumber) {
+    _currentSweepNumber = sweepNumber;
+  }
+
+
+/* moved to DataModel ...
+size_t SpreadSheetModel::calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset) {
+
+  size_t new_idx;
+
+  float raw = (float) idx + offset;
+  if (raw > end) {
+    new_idx = start + (raw - end) - 1;
+  } else if (raw < start) {
+    new_idx = end - (start - raw) + 1;
+  } else {
+    new_idx = raw;
+  }
+  return new_idx;
+}
+*/
+/* not used; does not work
+size_t SpreadSheetModel::getRayIndex(int offsetFromClosest) {
+
+    //  -v- HERE is the problem!! the number of rays is for the entire volume, not just one sweep!!
+    size_t nRays = dataModel->getNRays(_currentSweepNumber);
+    //size_t rayIdx = (_closestRayIdx + offsetFromClosest) % nRays;
+
+    // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
+    int closestRay = (int) _closestRayIdx;
+    int idx = (closestRay + offsetFromClosest) % (int) nRays; // rays.size();
+    if (idx < 0) throw std::invalid_argument("requested ray index < 0"); 
+    LOG(DEBUG) << "closestRayIdx=" << _closestRayIdx << " offsetFromClosest=" << offsetFromClosest 
+      << " idx=" << idx;
+
+
+  return idx;
+}
+*/
 
 // return a list of data values for the given
 // field name
@@ -77,6 +176,21 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
 vector<float> *SpreadSheetModel::getData(string fieldName, int offsetFromClosest)
 {
 
+  LOG(DEBUG) << "enter" << "offsetFromClosest = " << offsetFromClosest;
+  LOG(DEBUG) << "_closestRayIdx = " << _closestRayIdx;
+  DataModel *dataModel = DataModel::Instance();
+  size_t rayIdx;  
+  if (offsetFromClosest == 0) {
+    rayIdx = _closestRayIdx;
+  } else {
+    //size_t nRays = dataModel->getNRays(); // fieldName, sweepAngle);
+    //dataModel->getStartRayIndex
+    rayIdx = dataModel->getRayIndex(_closestRayIdx,
+     offsetFromClosest, _currentSweepNumber); 
+  }
+  vector<float> *dataVector = dataModel->getRayData(rayIdx, fieldName); // , _currentSweepNumber);
+
+/*
   // vector <double> *dataVector = NULL;
   const RadxField *field;
 
@@ -110,7 +224,8 @@ vector<float> *SpreadSheetModel::getData(string fieldName, int offsetFromClosest
     float value = dataVector->at(i);
     LOG(DEBUG) << value;
   }
-
+*/
+  LOG(DEBUG) << "exit";
   return dataVector;
 
 }
@@ -123,20 +238,33 @@ RadxVol SpreadSheetModel::getVolume() {
 */
 
 // set data values for the field in the Volume 
-void SpreadSheetModel::setData(string fieldName, vector<float> *data)
+void SpreadSheetModel::setData(string fieldName, float azimuth, vector<float> *data)
 {
-  LOG(DEBUG) << "fieldName=" << fieldName;
+  LOG(DEBUG) << "fieldName=" << fieldName << ", azimuth = " << azimuth;
 
   // addField just modifies the name if there is a duplicate name,
   // so we can always add the field; we don't need to modify
   // an existing field.
 
   size_t nGates = data->size();
+
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->SetData(fieldName, 
+            azimuth, _currentSweepNumber, data);
+
+  bool debug = true;
+  if (debug) {
+    size_t rayIdx = dataModel->findClosestRay(azimuth, _currentSweepNumber);
+    vector<float> *dataVector = dataModel->getRayData(rayIdx, fieldName); //  _currentSweepNumber);
+  }
+
+  /*
   size_t nGatesInRay = _closestRay->getNGates();
   if (nGates < nGatesInRay) {
     // TODO: expand, filling with missing Value
   }
 
+  // TODO: get the correct azimuth, and sweep number from  elevation
   RadxField *field = _closestRay->getField(fieldName);
 
   if (field == NULL) {
@@ -157,21 +285,29 @@ void SpreadSheetModel::setData(string fieldName, vector<float> *data)
   // again, make sure the data are there
   _closestRay->printWithFieldData(cout);
   
-  _vol->loadRaysFromFields();
+  //_vol->loadRaysFromFields();
   
-  std::ofstream outfile("/tmp/voldebug.txt");
+  //std::ofstream outfile("/tmp/voldebug.txt");
   // finally, make sure the data are there
-  _vol->printWithFieldData(outfile);
+  //_vol->printWithFieldData(outfile);
   
-  outfile << "_vol = " << _vol << endl;
+  //outfile << "_vol = " << _vol << endl;
+  */
+  LOG(DEBUG) << "exit";
+
 }
 
-/* TODO ...
+
 // set data values for the field in the Volume (for all rays? for all sweeps?)
 void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
 {
   LOG(DEBUG) << "fieldName=" << fieldName << " setting to missing value " << missingDataValue;
 
+
+  DataModel *dataModel = DataModel::Instance();
+  float dummy = 0.0;
+  dataModel->SetData(fieldName, dummy);
+/*
   //const RadxField *field;
   //  field = _vol.getFieldFromRay(fieldName);  // <--- Why is this returning NULL
   // because the type is 
@@ -194,8 +330,6 @@ void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
     throw std::invalid_argument("no RadxField found ");
   } 
 
-  //RadxField *fieldCopy = new RadxField(*field);
-
     vector<float> deref = *data;
     const Radx::fl32 *radxData = &deref[0];
     bool isLocal = true;  //?? not sure about this 
@@ -204,52 +338,45 @@ void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
     // make sure the new data are there ...
     field->printWithData(cout);
 
-    //cerr << "replacing data in field " <<  endl;
-    //int result = _closestRay->replaceField(fieldCopy); 
-    //if (result == -1)
-    //  throw "Error replacing Field";
-    //    _closestRay->addField("WIDTH", units, nGates, missingValue, radxData, isLocal);
-    //} else {
-    // replace the data values in the existing field
-  // Radx::fl32 *data = field->getDataFl32();
-  // how may gates?
-  //  size_t nPoints = field->getNPoints();
-  //  field->addDataFl64(nGates, &data[0]);
-  //}
-
     // data should be copied, so free the memory
     // delete data;
 
     // again, make sure the data are there
     _closestRay->printWithFieldData(cout);
 
-    //    _vol.addRay(_closestRay);
-
-
     _vol->loadRaysFromFields();
-    //_vol->loadFieldsFromRays();
-    //_vol->loadSweepInfoFromRays();
 
     std::ofstream outfile("/tmp/voldebug.txt");
     // finally, make sure the data are there
     _vol->printWithFieldData(outfile);
 
     outfile << "_vol = " << _vol << endl;
-}
 */
+}
+
+
+
 
 // find the closest ray in the volume and set the internal variable _closestRay
-void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
+// and the internal variable _closestRayIdx
+//
+void SpreadSheetModel::setClosestRay(float azimuth, float elevation) {
   LOG(DEBUG) << "enter azimuth = " << azimuth;
 
-  vector<RadxRay *> rays = _vol->getRays();
+  DataModel *dataModel = DataModel::Instance();
+  int sweepNumber = dataModel->getSweepNumber(elevation);
+  _setSweepNumber(sweepNumber);
+  size_t closestRayIdx = dataModel->findClosestRay(azimuth, _currentSweepNumber); // elevation);
+
+  /* moved to DataModel ...
+  const vector<RadxRay *> rays = dataModel->getRays();
   // find that ray
   bool foundIt = false;
   double minDiff = 1.0e99;
   int minIdx = 0;
   double delta = 0.1;  // TODO set this to the min diff between elevations/sweeps
   RadxRay *closestRayToEdit = NULL;
-  vector<RadxRay *>::iterator r;
+  vector<RadxRay *>::const_iterator r;
   r=rays.begin();
   int idx = 0;
   while(r<rays.end()) {
@@ -259,7 +386,7 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
       diff = fabs(diff - 360.0);
     }
     if (diff < minDiff) {
-      if (abs(elevation - rayr->getElevationDeg()) <= delta) {
+      if (abs(_currentElevation - rayr->getElevationDeg()) <= delta) {
         foundIt = true;
         closestRayToEdit = *r;
         minDiff = diff;
@@ -270,14 +397,20 @@ void SpreadSheetModel::findClosestRay(float azimuth, float elevation) {
     idx += 1;
   }  
   if (!foundIt || closestRayToEdit == NULL) {
-    throw "could not find closest ray";
+    throw std::invalid_argument("could not find closest ray");
     // errorMessage("ExamineEdit Error", "couldn't find closest ray");
   }
 
   LOG(DEBUG) << "Found closest ray: index = " << minIdx << " min diff = " << minDiff; // " pointer = " << closestRayToEdit;
   closestRayToEdit->print(cout); 
-  _closestRay = closestRayToEdit;
-  _closestRayIdx = minIdx;
+  */
+
+  // _closestRay = const_cast <RadxRay *> (closestRayToEdit);
+  _closestRay = dataModel->getRay(closestRayIdx);
+  _closestRayIdx = closestRayIdx;
+  LOG(DEBUG) << "_closestRayIdx = " << _closestRayIdx 
+    << " azimuth = " << _closestRay->getAzimuthDeg() << " vs. requested az " << azimuth;
+  LOG(DEBUG) << "exit";
 }
 
 

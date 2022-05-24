@@ -376,34 +376,51 @@ int FourDD::findRay (Volume* rvVolume1, Volume* rvVolume2, int sweepIndex1, int
      float minAzDiff;
      int minIndex = index;
      float currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+     //float base360 = 0.0; // keep track of when we cross the 360 -> 0 boundary
+     // Need base360 to increase in order to exit the while loop.
      if (currentAz < targetAz) {
        // move until we cross targetAz in the rays
        minAzDiff = fabs(targetAz - currentAz);
        while (currentAz < targetAz) {
-	 index = (index + sign) % numRays2;
-	 if (index < 0) index = numRays2 + index;
-	 currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         //if (_debug) cout << "currentAz = " << currentAz << " targetAz = " << targetAz << endl;
+	       index = (index + sign) % numRays2;
+	       if (index < 0) {
+           index = numRays2 + index;
+         }
+         float previousAz = currentAz;
+	       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         if (currentAz < previousAz) {
+           currentAz += 360.0;
+         }
          float currentDiff = fabs(targetAz - currentAz);
          if (currentDiff < minAzDiff) {
-	   minAzDiff = currentDiff;
-	   minIndex = index;
-	 }
+	         minAzDiff = currentDiff;
+	         minIndex = index;
+	       }
        }
      } else {
        // move until we cross targetAz
        // move until we cross targetAz in the rays
        minAzDiff = fabs(targetAz - currentAz);
        while (currentAz > targetAz) {
-	 index = (index - sign) % numRays2;
-	 if (index < 0) index = numRays2 + index;
-	 currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         //if (_debug) cout << "currentAz = " << currentAz << " targetAz = " << targetAz << endl;
+	       index = (index - sign) % numRays2;
+	       if (index < 0) { 
+           index = numRays2 + index;
+         }
+         float previousAz = currentAz;
+	       currentAz = rvVolume2->sweep[sweepIndex2]->ray[index]->h.azimuth;
+         if (currentAz > previousAz) {
+           currentAz -= 360.0;
+         }
          float currentDiff = fabs(targetAz - currentAz);
          if (currentDiff < minAzDiff) {
-	   minAzDiff = currentDiff;
-	   minIndex = index;
-	 }
+	         minAzDiff = currentDiff;
+	         minIndex = index;
+	       }
        }
      }
+     if (_debug) cout << "found minIndex=" << minIndex << " az = " << rvVolume2->sweep[sweepIndex2]->ray[minIndex]->h.azimuth << endl;
      return minIndex;
      /*
      // the closest ray will be the estimated index or estimated index +/- 1
@@ -797,15 +814,15 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
       float startingValue = original->sweep[sweepIndex]->ray[rayIndex]->range[i];
 
       if (_isMissing(startingValue, velocityMissingValue)) {
-	STATE[i][rayIndex] = MISSING;
+	      STATE[i][rayIndex] = MISSING;
       } else {  // check the neighborhood for information
-	if (filt) {
-	  STATE[i][rayIndex] = Filter3x3(original, i, rayIndex, sweepIndex,
+	      if (filt) {
+	        STATE[i][rayIndex] = Filter3x3(original, i, rayIndex, sweepIndex,
                                          del_num_bins);
-	} else {
-	  // If no filter is being applied save bin for dealiasing:
-	  STATE[i][rayIndex] = TBD;
-	}
+	    } else {
+	      // If no filter is being applied save bin for dealiasing:
+	      STATE[i][rayIndex] = TBD;
+	    }
       
         if ((STATE[i][rayIndex] == TBD) &&  (fabs(startingValue) > ck_val)) {
             float unfoldedValue;
@@ -831,9 +848,9 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
 	    // NOTE: Special case to seed the subsequent data files ...
 	    // if there is a previously dealiased volume, AND this is the top sweep, 
 	    // use the t-1 velocity value as the above velocity value
-	    if ((sweepIndex == numSweeps-1) && (lastVolume != NULL)) {
-	      aboveVal = prevVal;
-	    }
+	          if ((sweepIndex == numSweeps-1) && (lastVolume != NULL)) {
+	            aboveVal = prevVal;
+	          }
             // TODO: where do we want to get the NyqVelocity? from original? or rvVolume?
             float NyqVelocity = getNyqVelocity(rvVolume, sweepIndex);
             //float fractionNyqVelocity = fraction * NyqVelocity;
@@ -847,9 +864,11 @@ void FourDD::InitialDealiasing(Volume *rvVolume, Volume *lastVolume, Volume *sou
             if (successful) {
               rvVolume->sweep[sweepIndex]->ray[rayIndex]->range[i] = unfoldedValue;
               STATE[i][rayIndex] = DEALIASED;
+              if (_debug) cout << "Dealiased sweep " << sweepIndex << 
+                " ray az " << rvVolume->sweep[sweepIndex]->ray[rayIndex]->h.azimuth << " range " << i << " to " << unfoldedValue << endl;
             }
       
-	} //end if ( STATE[i][rayIndex]==TBD) && (startingValue > _ck_val)
+	      } //end if ( STATE[i][rayIndex]==TBD) && (startingValue > _ck_val)
       } // check neighborhood for information
     } // end for (i=del_num_bins;i<numBins;i++)
                                                                                   
@@ -913,8 +932,8 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
     float diff = cval - potentialUnfoldedValue;
     float fractionNyqVelocity = fraction * NyqVelocity;
 
-        float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
-	float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
+    float v1 = fabs(abValue-potentialUnfoldedValue); // < fractionNyqVelocity
+	  float v2 = fabs(soundValue-potentialUnfoldedValue); //  < fractionNyqVelocity) {
         //printf("v1=%g v2=%g\n", v1, v2);
 
 
@@ -922,25 +941,25 @@ void FourDD::TryToDealiasUsingVerticalAndTemporalContinuity(
     if (diff < fractionNyqVelocity) { //  && fabs(valcheck)>_ck_val) { 
       switch(dcase) {
       case 1: 
-	good = true;
-	break;
+	      good = true;
+	      break;
       case 2: if (fabs(soundValue-potentialUnfoldedValue) < fractionNyqVelocity) {
-	  good = true;
-	}
-	break;
+	        good = true;
+	      }
+	      break;
       case 3: if (fabs(abValue-potentialUnfoldedValue) < fractionNyqVelocity) {
-	  good = true;
-	}
-	break;
+	        good = true;
+	      }
+	      break;
       case 4: 
         if (fabs(abValue-potentialUnfoldedValue) < fractionNyqVelocity
-		  && fabs(soundValue-potentialUnfoldedValue) < fractionNyqVelocity) {
+		     && fabs(soundValue-potentialUnfoldedValue) < fractionNyqVelocity) {
           // case:  strict_first_pass 
-	  good = true;
-	}
-	break;
+	        good = true;
+	      }
+	      break;
       default:
-	good = false;
+	      good = false;
       }
     }
     if (good) {
@@ -1400,6 +1419,8 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
               bool withinNyqVelocity = (in > 0) && (out == 0);
               if (withinNyqVelocity) {
                 rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
+                if (_debug) cout << "Dealiased sweep " << sweepIndex << 
+                  " ray az " <<  rvVolume->sweep[sweepIndex]->ray[currIndex]->h.azimuth << " range " << i << " to " << val << endl;
                 STATE[i][currIndex] = DEALIASED;
                 flag = 1;
               } else { // in == 0 || out != 0
@@ -1408,6 +1429,9 @@ void FourDD::UnfoldTbdBinsAssumingSpatialContinuity(short **STATE,
                     // Keep the value after two passes through data.
                     rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
                     STATE[i][currIndex] = DEALIASED;
+                    if (_debug) cout << "Dealiased sweep " << sweepIndex << 
+                      " ray " <<  rvVolume->sweep[sweepIndex]->ray[currIndex]->h.azimuth << " range " << i << " to " << val << endl;
+
                     flag = 1;
                   } 
                   // end  ((numpos+numneg)<(in+out-(numpos+numneg)))
@@ -1670,6 +1694,8 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
                   if (withinNyqVelocity) {
                     rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
                     STATE[i][currIndex] = DEALIASED;
+                    if (_debug) cout << "Dealiased sweep " << sweepIndex << 
+                      " ray " << rvVolume->sweep[sweepIndex]->ray[currIndex]->h.azimuth << " range " << i << " to " << val << endl;
                   } else { // in == 0 || out != 0
                     // otherwise, try to unfold one NyqInterval
                     if ((numpos+numneg)<(in+out-(numpos+numneg))) {
@@ -1677,6 +1703,8 @@ void FourDD::SecondPassUsingSoundVolumeOnly(short **STATE, Volume *soundVolume, 
                         // Keep the value after two passes through data.
                         rvVolume->sweep[sweepIndex]->ray[currIndex]->range[i] = val;
                         STATE[i][currIndex] = DEALIASED;
+                        if (_debug) cout << "Dealiased sweep " << sweepIndex << 
+                          " ray " << rvVolume->sweep[sweepIndex]->ray[currIndex]->h.azimuth << " range " << i << " to " << val << endl;
                       } else {
                         tryAgainLater = true;
                       }

@@ -34,6 +34,7 @@
 #include "VarTransform.hh"
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Mdv/GenericRadxFile.hh>
@@ -41,11 +42,16 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxCfactors.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
+#include <toolsa/TaStr.hh>
+#include <toolsa/TaFile.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
+#include <cerrno>
+#include <set>
 using namespace std;
 
 // Constructor
@@ -201,6 +207,9 @@ int RadxConvert::_runFilelist()
     // loop through the input file list
     
     RadxVol vol;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      vol.setDebug(true);
+    }
     for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
       string inputPath = _args.inputFileList[ii];
       // read input file
@@ -478,22 +487,22 @@ int RadxConvert::_readFile(const string &readPath,
 
   // check we have not already processed this file
   // in the file aggregation step
-  
-  if (_params.aggregate_sweep_files_on_read ||
-      _params.aggregate_all_files_on_read) {
-    RadxPath thisPath(readPath);
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      RadxPath listPath(_readPaths[ii]);
-      if (thisPath.getFile() == listPath.getFile()) {
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "Skipping file: " << readPath << endl;
-          cerr << "  Previously processed in aggregation step" << endl;
-        }
-        return 1;
+  // if not clear _readPaths
+
+  RadxPath rpath(readPath);
+  for (auto ii = _readPaths.begin(); ii != _readPaths.end(); ii++) {
+    RadxPath tpath(*ii);
+    if (rpath.getFile() == tpath.getFile()) {
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "Skipping file: " << readPath << endl;
+        cerr << "  Previously processed" << endl;
       }
+      return 1;
     }
   }
   
+  _readPaths.clear();
+
   if (_params.debug) {
     cerr << "INFO - RadxConvert::Run" << endl;
     cerr << "  Input path: " << readPath << endl;
@@ -519,17 +528,26 @@ int RadxConvert::_readFile(const string &readPath,
   
   // read in file
 
+  int iret = 0;
   if (inFile.readFromPath(readPath, vol)) {
     cerr << "ERROR - RadxConvert::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << inFile.getErrStr() << endl;
-    return -1;
+    iret = -1;
   }
-  _readPaths = inFile.getReadPaths();
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-      cerr << "  ==>> read in file: " << _readPaths[ii] << endl;
+  
+  // save read paths used
+
+  vector<string> rpaths = inFile.getReadPaths();
+  for (size_t ii = 0; ii < rpaths.size(); ii++) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "  ==>> used file: " << rpaths[ii] << endl;
     }
+    _readPaths.insert(rpaths[ii]);
+  }
+
+  if (iret) {
+    return -1;
   }
 
   // if requested, change some of the characteristics
@@ -544,7 +562,14 @@ int RadxConvert::_readFile(const string &readPath,
     vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
     // if we change the primary axis, we need to reapply the georefs
     if (_params.apply_georeference_corrections) {
-      vol.applyGeorefs();
+      vol.applyGeorefs(true);
+    }
+  }
+  if (_params.read_georeference_corrections) {
+    _readGeorefCorrections(vol);
+    // if we change the corrections, we need to reapply the georefs
+    if (_params.apply_georeference_corrections) {
+      vol.applyGeorefs(true);
     }
   }
   if (_params.override_beam_width || _params.override_antenna_gain) {
@@ -565,6 +590,104 @@ int RadxConvert::_readFile(const string &readPath,
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// Read in the georef corrections
+// Returns 0 on success, -1 on failure
+
+int RadxConvert::_readGeorefCorrections(RadxVol &vol)
+  
+{
+
+  // open the file
+  
+  TaFile taFile;
+  FILE *inFile = taFile.fopen(_params.georeference_corrections_path, "r");
+  if (inFile == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - RadxConvert::_readGeorefCorrections" << endl;
+    cerr << "  path: " << _params.georeference_corrections_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // read in the data line by line
+
+  RadxCfactors cfac;
+
+  int iret = 0;
+  while (!feof(inFile)) {
+
+    char line[1024];
+    if (fgets(line, 1024, inFile) == NULL) {
+      continue;
+    }
+
+    // tokenize the line
+    
+    vector<string> toks;
+    TaStr::tokenize(line, " ", toks);
+    
+    if (toks.size() >= 3) {
+      // retrieve the correction value
+      double val = strtod(toks[2].c_str(), NULL);
+      if (errno == ERANGE) {
+        cerr << "ERROR - RadxConvert::_readGeorefCorrections" << endl;
+        cerr << "  reading file: "
+             << _params.georeference_corrections_path << endl;
+        cerr << "  line: " << line;
+        iret = -1;
+      }
+      // store in cfac
+      if (toks[0].find("azimuth") != string::npos) {
+        cfac.setAzimuthCorr(val);
+      } else if (toks[0].find("elevation") != string::npos) {
+        cfac.setElevationCorr(val);
+      } else if (toks[0].find("range") != string::npos) {
+        cfac.setRangeCorr(val);
+      } else if (toks[0].find("longitude") != string::npos) {
+        cfac.setLongitudeCorr(val);
+      } else if (toks[0].find("latitude") != string::npos) {
+        cfac.setLatitudeCorr(val);
+      } else if (toks[0].find("pressure_alt") != string::npos) {
+        cfac.setPressureAltCorr(val);
+      } else if (toks[0].find("radar_alt") != string::npos) {
+        cfac.setAltitudeCorr(val);
+      } else if (toks[0].find("ew_gndspd") != string::npos) {
+        cfac.setEwVelCorr(val);
+      } else if (toks[0].find("ns_gndspd") != string::npos) {
+        cfac.setNsVelCorr(val);
+      } else if (toks[0].find("vert_vel") != string::npos) {
+        cfac.setVertVelCorr(val);
+      } else if (toks[0].find("heading") != string::npos) {
+        cfac.setHeadingCorr(val);
+      } else if (toks[0].find("roll") != string::npos) {
+        cfac.setRollCorr(val);
+      } else if (toks[0].find("pitch") != string::npos) {
+        cfac.setPitchCorr(val);
+      } else if (toks[0].find("drift") != string::npos) {
+        cfac.setDriftCorr(val);
+      } else if (toks[0].find("rot_angle") != string::npos) {
+        cfac.setRotationCorr(val);
+      } else if (toks[0].find("tilt") != string::npos) {
+        cfac.setTiltCorr(val);
+      }
+    }
+    
+  } // while (!feof ...
+
+  if (_params.debug) {
+    cerr << "=================================================" << endl;
+    cerr << "Read in georef corrections from file: "
+         << _params.georeference_corrections_path << endl;
+    cfac.print(cerr);
+    cerr << "=================================================" << endl;
+  }
+  
+  vol.setCfactors(cfac);
+  return iret;
+  
 }
 
 //////////////////////////////////////////////////
@@ -684,6 +807,21 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
       cerr << "DEBUG - adjusting sweep limits using angles" << endl;
     }
     vol.adjustSweepLimitsUsingAngles();
+  }
+
+  // sweep mode
+
+  if (_params.override_sweep_mode) {
+    vector<RadxRay *> &rays = vol.getRays();
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      rays[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
+    }
+    vector<RadxSweep *> &sweeps = vol.getSweeps();
+    for (size_t ii = 0; ii < sweeps.size(); ii++) {
+      sweeps[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
+    }
+  } else if (_params.set_sweep_mode_from_ray_angles) {
+    vol.setSweepScanModeFromRayAngles();
   }
 
   // set number of gates constant if requested
@@ -857,6 +995,11 @@ void RadxConvert::_setupRead(RadxFile &file)
       for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
         file.addReadField(_params._censoring_fields[ii].name);
       }
+      if (_params.specify_fields_to_be_censored) {
+        for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+          file.addReadField(_params._fields_to_be_censored[ii]);
+        }
+      }
     }
     
   }
@@ -885,6 +1028,12 @@ void RadxConvert::_setupRead(RadxFile &file)
     file.setReadPreserveSweeps(false);
   }
 
+  if (_params.preserve_rays) {
+    file.setReadPreserveRays(true);
+  } else {
+    file.setReadPreserveRays(false);
+  }
+
   if (_params.remove_long_range_rays) {
     file.setReadRemoveLongRange(true);
   } else {
@@ -905,7 +1054,9 @@ void RadxConvert::_setupRead(RadxFile &file)
     file.setChangeLatitudeSignOnRead(true);
   }
 
-  if (_params.apply_georeference_corrections) {
+  if (_params.apply_georeference_corrections &&
+      !_params.override_primary_axis &&
+      !_params.read_georeference_corrections) {
     file.setApplyGeorefsOnRead(true);
   }
 
@@ -1147,9 +1298,9 @@ void RadxConvert::_setupWrite(RadxFile &file)
     case Params::OUTPUT_FORMAT_ODIM_HDF5:
       file.setFileFormat(RadxFile::FILE_FORMAT_ODIM_HDF5);
       break;
-    case Params::OUTPUT_FORMAT_NCXX:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NCXX);
-      break;
+    // case Params::OUTPUT_FORMAT_NCXX:
+    //   file.setFileFormat(RadxFile::FILE_FORMAT_NCXX);
+    //   break;
     case Params::OUTPUT_FORMAT_CFRADIAL2:
       file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL2);
       break;
@@ -1375,7 +1526,6 @@ void RadxConvert::_censorFields(RadxVol &vol)
   for (size_t ii = 0; ii < rays.size(); ii++) {
     _censorRay(rays[ii]);
   }
-  
 
 }
 
@@ -1398,7 +1548,9 @@ void RadxConvert::_censorRay(RadxRay *ray)
     RadxField *field = fields[ii];
     Radx::DataType_t dtype = field->getDataType();
     fieldTypes.push_back(dtype);
-    field->convertToFl32();
+    if (_checkFieldForCensoring(field)) {
+      field->convertToFl32();
+    }
   }
 
   // initialize censoring flags to true to
@@ -1520,20 +1672,52 @@ void RadxConvert::_censorRay(RadxRay *ray)
 
   for (size_t ifield = 0; ifield < fields.size(); ifield++) {
     RadxField *field = fields[ifield];
-    Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
-      }
-    } // igate
+    if (_checkFieldForCensoring(field)) {
+      Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+      for (size_t igate = 0; igate < nGates; igate++) {
+        if (censorFlag[igate] == 1) {
+          fdata[igate] = Radx::missingFl32;
+        }
+      } // igate
+    } // if (_checkFieldForCensoring(field))
   } // ifield
 
   // convert back to original types
   
   for (size_t ii = 0; ii < fields.size(); ii++) {
     RadxField *field = fields[ii];
-    field->convertToType(fieldTypes[ii]);
+    if (_checkFieldForCensoring(field)) {
+      field->convertToType(fieldTypes[ii]);
+    }
   }
+
+}
+
+////////////////////////////////////////////////////////////////////
+// check if a field should be censored
+
+bool RadxConvert::_checkFieldForCensoring(const RadxField *field)
+
+{
+
+  if (!_params.apply_censoring) {
+    return false;
+  }
+
+  if (!_params.specify_fields_to_be_censored) {
+    return true;
+  }
+
+  string checkName = field->getName();
+
+  for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+    string specifiedName = _params._fields_to_be_censored[ii];
+    if (checkName == specifiedName) {
+      return true;
+    }
+  }
+    
+  return false;
 
 }
 

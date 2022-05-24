@@ -141,7 +141,8 @@ public:
     Radx::si16 unused1;
     Radx::si32 millisecs_past_midnight; /* Time - Millisecs of day from midnight
                                          * (GMT) when file was created */
-    Radx::si32 unused2;
+    //Radx::si32 unused2;
+    char site_id[4];
   } vol_title_t;
 
   typedef struct {

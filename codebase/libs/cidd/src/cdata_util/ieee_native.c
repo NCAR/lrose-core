@@ -51,7 +51,7 @@ extern void swab(const void *from, void *to, ssize_t n);
  */
 void ieeei_vaxi(int *dp, int n)
 {
-  register int    i,j,k,l,m;
+  int    i,j,k,l,m;
 
   for(l = 0,m = n;l < m;l++) {
     if((i = *dp) != 0)  {   /* leave zeroes alone! */
@@ -74,7 +74,7 @@ void ieeei_vaxi(int *dp, int n)
 
 void ieeef_vaxf(float *dp, int n)
 {
-  register int    k,l;
+  int    k,l;
   int    *ptr;
 
   ptr = (int *) dp;
@@ -106,8 +106,8 @@ void ieeef_vaxf(float *dp, int n)
 
 void vaxf_ieeef(float *dp, int n)
 {
-  register int    k,l;
-  register int    *ptr;
+  int    k,l;
+  int    *ptr;
 
   ptr = (int *) dp;
     
@@ -142,7 +142,7 @@ void vaxf_ieeef(float *dp, int n)
 
 void ieeed_vaxd(double *dp, int n)
 {
-  register int    k,l;
+  int    k,l;
   unsigned int    *ptr;
   unsigned int    frac;
   unsigned int    exp;    /* exponet */
@@ -178,7 +178,7 @@ void ieeed_vaxd(double *dp, int n)
 
 void vaxd_ieeed(double *dp, int n)
 {
-  register int    k,l;
+  int    k,l;
   unsigned int    *ptr;
   unsigned int    frac;
   unsigned int    exp;    /* exponet */

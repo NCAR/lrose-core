@@ -1,0 +1,116 @@
+#! /bin/bash
+
+###########################################################
+# build lrose in opensuse image
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform lrose build in docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. lrose-core, lrose-radx, lrose-cidd"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. opensuse"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. latest, leap, tumbleweed"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=opensuse
+os_version=latest
+lrose_pkg=lrose-core
+release_date=latest
+debug=true
+
+# Parse command line options.
+while getopts hdp:r:t:v: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" = "true" ]
+then
+  echo "Running $scriptName"
+  echo "  performing lrose build in docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    release_date: ${release_date}"
+fi
+
+# go to scripts dir
+
+cd ~/git/lrose-core/build/docker/cmake/suse
+
+# compute Dockerfile path
+
+DockerfilePath=/tmp/docker/Dockerfile.build.${os_type}.${os_version}.${lrose_pkg}
+echo "Dockerfile path: " $DockerfilePath
+
+# create Dockerfile preamble with the FROM command
+
+mkdir -p /tmp/docker
+echo "####################################################" > ${DockerfilePath}
+echo "FROM custom/${os_type}:${os_version}" >> ${DockerfilePath}
+echo "#" >> ${DockerfilePath}
+
+# append the body of the Dockerfile
+
+if [ "$lrose_pkg" = "cidd" ]
+then
+  cat Dockerfile.suse.build.cidd >> ${DockerfilePath}
+else
+  cat Dockerfile.suse.build >> ${DockerfilePath}
+fi
+
+# remove old image if present
+
+tag=build.${lrose_pkg}/${os_type}:${os_version}
+docker image rm -f ${tag}
+
+# run the build, creating a new image for it
+
+cd /tmp/docker
+
+docker build \
+    --tag ${tag} \
+    --build-arg LROSE_PKG=${lrose_pkg} \
+    --build-arg RELEASE_DATE=${release_date} \
+    --file ${DockerfilePath} .
+

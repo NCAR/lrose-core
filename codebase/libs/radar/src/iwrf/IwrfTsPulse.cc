@@ -142,6 +142,26 @@ void IwrfTsPulse::clear()
 
 }
 
+//////////////////////////////////////////////////////////////////
+// set the ops info
+
+void IwrfTsPulse::setOpsInfo(IwrfTsInfo &info)
+{
+  if (&_info != &info) {
+    _info = info;
+  }
+}
+  
+//////////////////////////////////////////////////////////////////
+// set the ops info except for the metadata queue
+
+void IwrfTsPulse::setOpsInfoExceptMetadataQueue(IwrfTsInfo &info)
+{
+  if (&_info != &info) {
+    _info.copyExceptMetadataQueue(info);
+  }
+}
+  
 ////////////////////////////////////////////////////////////
 // set time
 
@@ -1878,6 +1898,11 @@ void IwrfTsPulse::_deriveFromRvp8Header()
   
   _hdr.burst_arg[0] = (_rvp8_hdr.i_burst_arg[0] / 65536.0) * 360.0;
   _hdr.burst_arg[1] = (_rvp8_hdr.i_burst_arg[1] / 65536.0) * 360.0;
+
+  // copy start range and gate spacing from info
+
+  _hdr.start_range_m = _info.get_proc_start_range_m();
+  _hdr.gate_spacing_m = _info.get_proc_gate_spacing_m();
 
 }
 

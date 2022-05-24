@@ -1,173 +1,28 @@
 /**********************************************************************
-* TDRP params for Params
-**********************************************************************/
+ * TDRP params for HeaderParams
+ **********************************************************************/
 
 //======================================================================
 //
 // RadxMesoCyclone.
 //
-// This program does the algorithm.
+// This program identifies mesocyclones in radar data
+// option -print_operators will show all the filtering options.
 //
 //======================================================================
-
-///////////// fixed_const /////////////////////////////
-//
-// Fixed constant strings that are interpreted by user functions.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-fixed_const = {
-  "NyquistFloor=25.0",
-  "MinRangeKm=2.0",
-  "ShapeComputeModeDiamonds=0",
-  "ShapeComputeModePerimeter=1",
-  "ShapeSizeKm=6"
-};
-
-///////////// user_data ///////////////////////////////
-//
-// Non gridded data names.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-user_data = {
-"Template0", "Template1", "Template2"
-};
-
-///////////// volume_before_filter ////////////////////
-//
-// Volume Filters to apply before the sweep filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_before_filter = {
-"Template0 = ParmsTemplate(10, 8, 2)",
-"Template1 = ParmsTemplate(10, 5, 5)",
-"Template2 = ParmsTemplate(5, 2, 4)",
-"MesoFuzzy = ParmsFuzzy(0, 0, 8, 0.25, 15, 0.5, NyquistFloor, 1)",
-"PcntLessThanNyquistFuzzy = ParmsFuzzy(0.0, 1.0, 0.5, 0.8, 0.7, 0.2, 1.0, 0.0)",
-"LargePosNegFuzzy = ParmsFuzzy(0.0, 1.0, 0.1, 0.8, 0.5, 0.5, 1.0, 0.0)",
-"InvertInterestFuzzy0 = ParmsFuzzy(0.0, 1.0, 0.2, 0.8, 0.3, 0.1, 0.4, 0.0)",
-"CTemplate = ParmsCircularTemplate(5, MinRangeKm)"
-};
-
-///////////// filter //////////////////////////////////
-//
-// Filters (sweep) to apply.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-filter = {
-"PcntNyquist = PercentOfAbsMax($(VEL_NAME), NyquistFloor)",
-"LessThanNy = PercentLessThan(PcntNyquist, CTemplate, 0.9)",
-"PosNegNy = LargePositiveNegative(PcntNyquist, CTemplate, 0.9)",
-"FLessThanNy = VirtVolFuzzy(LessThanNy, PcntLessThanNyquistFuzzy)",
-"FPosNegNy = VirtVolFuzzy(PosNegNy, LargePosNegFuzzy)",
-"AbsNyq = abs(PcntNyquist)",
-"NyqAve = SmoothPolar(AbsNyq, CTemplate)",
-"NyqCalib = FLessThanNy*FPosNegNy",
-"IsNyquist0 = NyqCalib*NyqAve",
-"IsNyquist = DilatePolar(IsNyquist0, CTemplate)",
-"IsNotNyquist = VirtVolFuzzy(IsNyquist, InvertInterestFuzzy0)",
-
-"Meso100 = MesoTemplate($(VEL_NAME), Template0, 0.6, 10, 0.5, MesoFuzzy)",
-"Meso10 = mask(Meso100, -1, 0)",  // maybe don't need these masks
-"Nyq10 = IsNotNyquist*Meso10",
-"Clump10 = ClumpFilt(Nyq10, 0.2, 0.5)",
-"Final10 = mask(Clump10, 0.0, 0.2)",
-
-"Meso200 = MesoTemplate($(VEL_NAME), Template1, 0.6, 10, 0.5, MesoFuzzy)",
-"Meso20 = mask(Meso200, -1, 0)",  // maybe don't need these masks
-"Nyq20 = IsNotNyquist*Meso20",
-"Clump20 = ClumpFilt(Nyq20, 0.2, 0.5)",
-"Final20 = mask(Clump20, 0.0, 0.2)",
-
-"Meso300 = MesoTemplate($(VEL_NAME), Template2, 0.6, 10, 0.5, MesoFuzzy)",
-"Meso30 = mask(Meso300, -1, 0)",  // maybe don't need these masks
-"Nyq30 = IsNotNyquist*Meso30",
-"Clump30 = ClumpFilt(Nyq30, 0.2, 0.5)",
-"Final30 = mask(Clump30, 0.0, 0.2)",
-"Final = maximum(Final10, Final20, Final30)",
-
-"Shear10 = AzShearPolar($(VEL_NAME), 12, 1)",
-"Shear20 = AzShearPolar($(VEL_NAME), 10, 1)",
-"Shear11 = AzShearPolar($(VEL_NAME), 12, 0)",
-"Shear21 = AzShearPolar($(VEL_NAME), 10, 0)"
-};
-
-///////////// volume_after_filter /////////////////////
-//
-// Volume Filters to apply after the sweep filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_after_filter = {
-"Vertical =  VerticalConsistency(Final, IsNyquist, CTemplate)",
-"Vclumps = VerticalDataClumpFilt(Vertical, 0.3, 0.4)",
-"shapes = ComputeFixedSizeShapes(Vclumps, ShapeSizeKm)"
-//"shapes = ComputeShapes(Vclumps, ShapeComputeModeDiamonds)"
-};
-
-///////////// output_url_2d ///////////////////////////
-//
-// Parameter file with 2d output fields.
-//
-//
-// Type: string
-//
-
-output_url_2d = "UrlOutput2d.parms";
-
-///////////// shapes_name /////////////////////////////
-//
-// Name of the shapes data output.
-//
-// This is a special field, not a volume.
-//
-//
-// Type: string
-//
-
-shapes_name = "shapes";
-
-///////////// shapes_url //////////////////////////////
-//
-// URL to output shapes.
-//
-//
-// Type: string
-//
-
-shapes_url = "spdbp:://localhost::$(ALG_SPDB_PATH)";
-
-
+ 
 /**********************************************************************
-* TDRP params for AlgorithmParams
-**********************************************************************/
+ * TDRP params for AlgorithmParams
+ **********************************************************************/
 
 //======================================================================
 //
-// Algorithm Parameters.
+// Common Algorithm Parameters.
 //
-// Parameters used to run the Algorithm class.
+// Parameters that are common to many radar apps.
 //
 //======================================================================
-
+ 
 ///////////// instance ////////////////////////////////
 //
 // instance.
@@ -223,17 +78,17 @@ debug_threads = FALSE;
 num_threads = 6;
 
 /**********************************************************************
-* TDRP params for VirtVolParams
-**********************************************************************/
+ * TDRP params for VirtVolParams
+ **********************************************************************/
 
 //======================================================================
 //
-// VirtVol Parameters.
+// VirtVol data handling parameters.
 //
-// Triggering new data, reading in new data, writing data.
+// Params for triggering new data, reading in new data, writing data.
 //
 //======================================================================
-
+ 
 ///////////// debug_triggering ////////////////////////
 //
 // triggering debug.
@@ -271,9 +126,11 @@ restrict_vertical_levels = TRUE;
 
 ///////////// vertical_level_range ////////////////////
 //
-// If restrict_vertical_levels = TRUE, this is the range of vlevels.
+// If restrict_vertical_levels = TRUE, this is the range of vertical 
+//   levels.
 //
-// If set to -1, -1 it is not used, and there is no restriction.
+// Units are degrees.  If set to -1, -1 it is not used, and there is no 
+//   restriction.
 //
 //
 // Type: double
@@ -281,13 +138,13 @@ restrict_vertical_levels = TRUE;
 //
 
 vertical_level_range = {
-0.3,
-3
+ 0.3,
+ 3
 };
 
 ///////////// restrict_max_range //////////////////////
 //
-// Set TRUE to restrict maximum range to a parameter, FALSE to use all
+// Set TRUE to restrict maximum range to a parameter, FALSE to use all 
 //   the data.
 //
 //
@@ -300,7 +157,8 @@ restrict_max_range = FALSE;
 //
 // If restrict_max_range = TRUE, this is the max range index.
 //
-// Not used when restrict_max_range = FALSE, or if the value is >=0.
+// Units are range index (not distance).  Not used when 
+//   restrict_max_range = FALSE, or if the value is <0.
 //
 //
 // Type: double
@@ -310,10 +168,14 @@ max_range = -1;
 
 ///////////// input_url ///////////////////////////////
 //
-// names of param files for input URLS, one per URL.
+// Names of param files for input URLS, one per URL.
 //
-// The param files are read and parsed.  The names should match filter
+// These param files are read and parsed.  The names should match filter 
 //   descriptions.
+// Each file contains information as to the URL name, type, and data 
+//   content, as well as named data fields
+// To produce an example file, enter the command line option 
+//   -print_url_params.
 //
 //
 // Type: string
@@ -321,15 +183,19 @@ max_range = -1;
 //
 
 input_url = {
-  "UrlRadar.parms"
+ "UrlRadar.parms"
 };
 
 ///////////// output_url //////////////////////////////
 //
-// names of param files for output URLS, one per URL.
+// Names of param files for output URLS, one per URL.
 //
-// The param files are read and parsed.  The names should match filter
-//   descriptions.
+// These param files are read and parsed.  The names should match filter 
+//   descriptions
+// Each file contains information as to the URL name, type, and data 
+//   content, as well as named data fields
+// To produce an example file, enter the command line option 
+//   -print_url_params.
 //
 //
 // Type: string
@@ -337,8 +203,186 @@ input_url = {
 //
 
 output_url = {
-  "UrlMainOutput.parms",
-  "UrlNyquist.parms",
-  "UrlDebug.parms"
+ "UrlMainOutput.parms",
+ "UrlNyquist.parms",
+ "UrlDebug.parms"
 };
+
+/**********************************************************************
+ * TDRP params for Params
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxMesoCyclone.
+//
+// This program identifies mesocyclones in radar data
+// option -print_operators will show all the filtering options.
+//
+//======================================================================
+ 
+///////////// fixed_const /////////////////////////////
+//
+// Fixed constant strings that are used in user functions.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+fixed_const = {
+ "NyquistFloor=25.0",
+ "MinRangeKm=2.0",
+ "ShapeComputeModeDiamonds=0",
+ "ShapeComputeModePerimeter=1",
+ "ShapeSizeKm=6"
+};
+
+///////////// user_data ///////////////////////////////
+//
+// Non gridded data names. These names refer to objects specific to the 
+//   app.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+user_data = {
+ "Template0",
+ "Template1",
+ "Template2"
+};
+
+///////////// volume_before_filter ////////////////////
+//
+// Filters to apply before the sweep filters.
+//
+// -print_operators to see explanations of the filters used.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+volume_before_filter = {
+ "Template0 = ParmsTemplate(10, 8, 2)",
+ "Template1 = ParmsTemplate(10, 5, 5)",
+ "Template2 = ParmsTemplate(5, 2, 4)",
+ "MesoFuzzy = ParmsFuzzy(0, 0, 8, 0.25, 15, 0.5, NyquistFloor, 1)",
+ "PcntLessThanNyquistFuzzy = ParmsFuzzy(0.0, 1.0, 0.5, 0.8, 0.7, 0.2, 1.0, 0.0)",
+ "LargePosNegFuzzy = ParmsFuzzy(0.0, 1.0, 0.1, 0.8, 0.5, 0.5, 1.0, 0.0)",
+ "InvertInterestFuzzy0 = ParmsFuzzy(0.0, 1.0, 0.2, 0.8, 0.3, 0.1, 0.4, 0.0)",
+ "CTemplate = ParmsCircularTemplate(5, MinRangeKm)"
+};
+
+///////////// filter //////////////////////////////////
+//
+// Filters to apply to each sweep.
+//
+// -print_operators to see explanations of the filters used.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+filter = {
+ "PcntNyquist = PercentOfAbsMax($(VEL_NAME), NyquistFloor)",
+ "LessThanNy = PercentLessThan(PcntNyquist, CTemplate, 0.9)",
+ "PosNegNy = LargePositiveNegative(PcntNyquist, CTemplate, 0.9)",
+ "FLessThanNy = VirtVolFuzzy(LessThanNy, PcntLessThanNyquistFuzzy)",
+ "FPosNegNy = VirtVolFuzzy(PosNegNy, LargePosNegFuzzy)",
+ "AbsNyq = abs(PcntNyquist)",
+ "NyqAve = SmoothPolar(AbsNyq, CTemplate)",
+ "NyqCalib = FLessThanNy*FPosNegNy",
+ "IsNyquist0 = NyqCalib*NyqAve",
+ "IsNyquist = DilatePolar(IsNyquist0, CTemplate)",
+ "IsNotNyquist = VirtVolFuzzy(IsNyquist, InvertInterestFuzzy0)",
+ "Meso100 = MesoTemplate($(VEL_NAME), Template0, 0.6, 10, 0.5, MesoFuzzy)",
+ "Meso10 = mask(Meso100, -1, 0)",
+ "Nyq10 = IsNotNyquist*Meso10",
+ "Clump10 = ClumpFilt(Nyq10, 0.2, 0.5)",
+ "Final10 = mask(Clump10, 0.0, 0.2)",
+ "Meso200 = MesoTemplate($(VEL_NAME), Template1, 0.6, 10, 0.5, MesoFuzzy)",
+ "Meso20 = mask(Meso200, -1, 0)",
+ "Nyq20 = IsNotNyquist*Meso20",
+ "Clump20 = ClumpFilt(Nyq20, 0.2, 0.5)",
+ "Final20 = mask(Clump20, 0.0, 0.2)",
+ "Meso300 = MesoTemplate($(VEL_NAME), Template2, 0.6, 10, 0.5, MesoFuzzy)",
+ "Meso30 = mask(Meso300, -1, 0)",
+ "Nyq30 = IsNotNyquist*Meso30",
+ "Clump30 = ClumpFilt(Nyq30, 0.2, 0.5)",
+ "Final30 = mask(Clump30, 0.0, 0.2)",
+ "Final = maximum(Final10, Final20, Final30)",
+ "Shear10 = AzShearPolar($(VEL_NAME), 12, 1)",
+ "Shear20 = AzShearPolar($(VEL_NAME), 10, 1)",
+ "Shear11 = AzShearPolar($(VEL_NAME), 12, 0)",
+ "Shear21 = AzShearPolar($(VEL_NAME), 10, 0)"
+};
+
+///////////// volume_after_filter /////////////////////
+//
+// Volume Filters to apply after the sweep filters.
+//
+// -print_operators to see explanations of the filters used.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+volume_after_filter = {
+ "Vertical =  VerticalConsistency(Final, IsNyquist, CTemplate)",
+ "Vclumps = VerticalDataClumpFilt(Vertical, 0.3, 0.4)",
+ "shapes = ComputeFixedSizeShapes(Vclumps, ShapeSizeKm)"
+};
+
+///////////// output_url_2d ///////////////////////////
+//
+// URL Parameter file with 2d output fields. The other output URL param 
+//   files (output_url array)) have full volume fields.
+//
+// This param file is read and parsed.  The names should match filter 
+//   descriptions
+// Each file contains information as to the URL name, type, and data 
+//   content, as well as named data fields.
+//
+//
+// Type: string
+//
+
+output_url_2d = "UrlOutput2d.parms";
+
+///////////// shapes_name /////////////////////////////
+//
+// Name of the shapes data output.
+//
+// This is a special field, not a volume.
+//
+//
+// Type: string
+//
+
+shapes_name = "shapes";
+
+///////////// shapes_url //////////////////////////////
+//
+// URL where output shapes are written (SPDB).
+//
+//
+// Type: string
+//
+
+shapes_url = "spdbp:://localhost::$(ALG_SPDB_PATH)";
+
+///////////// shapes_expire_seconds ///////////////////
+//
+// Shape expiration seconds. To put into the SPDB data.
+//
+//
+// Type: int
+//
+
+shapes_expire_seconds = 60;
 

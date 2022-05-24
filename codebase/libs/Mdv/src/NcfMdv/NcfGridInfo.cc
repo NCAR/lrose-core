@@ -50,7 +50,7 @@ NcfGridInfo::NcfGridInfo ( Mdvx::field_header_t fHdr) :
   _proj.init(fHdr);
   _coord = _proj.getCoord();
   _isXSect = false;
-  _outputLatlonArrays = true;
+  _outputLatlonArrays = false;
 
   // Initialize netCDF object pointers
 
@@ -162,27 +162,15 @@ int NcfGridInfo::computeCoordinateVars()
   for (int j = 0; j < _coord.ny; j++) {
     _yData[j] = miny + j * dy;
   }
-   
+  
+  // Compute the auxiliary arrays
 
-  // Compute the auxiliary arrays if necessary
-
-  if (_proj.getProjType() != Mdvx::PROJ_LATLON ) {
-    for (int j = 0; j < _coord.ny; j++)  {
-      for (int i = 0; i < _coord.nx; i++) {
-        double lat, lon;
-        _proj.xy2latlon( _xData[i],  _yData[j], lat, lon);
-        _latData[ j * nx + i ] = lat;
-        _lonData[ j * nx + i] = lon;
-      }
-    }
-  } else {
-    if (_latData != NULL) {
-      delete[] _latData;
-      _latData = NULL;
-    }
-    if (_lonData != NULL) {
-      delete[] _lonData;
-      _lonData = NULL;
+  for (int j = 0; j < _coord.ny; j++)  {
+    for (int i = 0; i < _coord.nx; i++) {
+      double lat, lon;
+      _proj.xy2latlon( _xData[i],  _yData[j], lat, lon);
+      _latData[ j * nx + i ] = lat;
+      _lonData[ j * nx + i] = lon;
     }
   }
 

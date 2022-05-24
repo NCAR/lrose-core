@@ -64,7 +64,7 @@ RhiOrient::RhiOrient(const Params &params,
 
   _success = false;
   _nRange = _nGates;
-  DBZ_BAD = -200.0;
+  _dbzMiss = -9999.0;
 
   // initialize beamHeight computations
 
@@ -104,33 +104,32 @@ void RhiOrient::computeEchoOrientation()
 
   // load up the synthetic RHI
 
+  _success = false;
+
   if (_loadSyntheticRhi()) {
-    _success = false;
     return;
   }
   
   // load up reflectivity grids in H anv V
 
   if (_loadDbzH()) {
-    _success = false;
     return;
   }
   if (_loadDbzV()) {
-    _success = false;
     return;
   }
 
   // load up standard deviation of DBZ in H and V
 
   if (_loadSdevH()) {
-    _success = false;
     return;
   }
   if (_loadSdevV()) {
-    _success = false;
     return;
   }
 
+  _success = true;
+  
 }
 
 ///////////////////////////////////////////////////////////
@@ -138,6 +137,10 @@ void RhiOrient::computeEchoOrientation()
 
 void RhiOrient::_allocArrays()
 {
+
+  // clear
+
+  _clearArrays();
 
   // allocate
   
@@ -223,13 +226,14 @@ int RhiOrient::_loadSyntheticRhi()
   // find rays that belong to this RHI
   
   const vector<RadxSweep *> &sweeps = _readVol.getSweeps();
+  const vector<RadxRay *> &volRays = _readVol.getRays();
   for (size_t isweep = 0; isweep < sweeps.size(); isweep++) {
     RadxSweep *sweep = sweeps[isweep];
     RadxRay *bestRay = NULL;
     double minDeltaAz = 9999.0;
     for (size_t jray = sweep->getStartRayIndex(); 
          jray <= sweep->getEndRayIndex(); jray++) {
-      RadxRay *ray = _rays[jray];
+      RadxRay *ray = volRays[jray];
       double deltaAz = fabs(_azimuth - ray->getAzimuthDeg());
       if (deltaAz > 180.0) {
         deltaAz = fabs(deltaAz - 360.0);
@@ -321,6 +325,22 @@ bool RhiOrient::SortByRayElevation::operator()
 int RhiOrient::_loadDbzH()
   
 {
+
+  if (_rays.size() < 1) {
+    return -1;
+  }
+
+  // initialize
+
+  RadxField *dbzField0 =
+    _rays[0]->getField(_params.echo_orientation_dbz_field_name);
+  _dbzMiss = dbzField0->getMissingFl32();
+  for (size_t iz = 0; iz < _nZ; iz++) {
+    for (size_t igate = 0; igate < _nRange; igate++) {
+      _dbzH[iz][igate] = _dbzMiss;
+      _sdevDbzH[iz][igate] = _dbzMiss;
+    }
+  }
   
   // loop through the rays, bottom to top
   
@@ -338,7 +358,6 @@ int RhiOrient::_loadDbzH()
     }
     dbzField->convertToFl32();
     Radx::fl32 *dbz = dbzField->getDataFl32();
-    Radx::fl32 dbzMiss = dbzField->getMissingFl32();
 
     // loop through the gates
     // look for intersection with the grid level in height
@@ -359,8 +378,8 @@ int RhiOrient::_loadDbzH()
       double range = _startRangeKm + igate * _gateSpacingKm;
       double zz = _beamHt.computeHtKm(elev, range);
       double xx = _beamHt.getGndRangeKm();
-      int xIndex = (int) (xx / _gateSpacingKm);
-
+      int xIndex = (int) ((xx - _startRangeKm)/ _gateSpacingKm);
+      
       if (zz < zzGrid) {
         // still below the grid level, continue
         continue;
@@ -370,24 +389,32 @@ int RhiOrient::_loadDbzH()
       // interp to get dbz val or use the non-missing val
       // store the dbz val
 
-      if (dbzVal != dbzMiss && dbzPrev != dbzMiss) {
+      if (dbzVal != _dbzMiss && dbzPrev != _dbzMiss) {
         // both available, interp
         double zzDelta = zz - zzPrev;
-        double wtBelow = (zz - zzGrid) / zzDelta;
-        double wtAbove = 1.0 - wtBelow;
+        double wtBelow = 0.5;
+        double wtAbove = 0.5;
+        if (zzDelta != 0) {
+          wtBelow = (zz - zzGrid) / zzDelta;
+          wtAbove = 1.0 - wtBelow;
+        }
         double dbzInterp = dbzVal * wtAbove + dbzPrev * wtBelow;
+        if (std::isnan(dbzInterp)) {
+          cerr << "*";
+        }
         _dbzH[zIndex][xIndex] = dbzInterp;
-      } else if (dbzVal != dbzMiss) {
+      } else if (dbzVal != _dbzMiss) {
         // use latest dbz
         _dbzH[zIndex][xIndex] = dbzVal;
-      } else if (dbzPrev != dbzMiss) {
+      } else if (dbzPrev != _dbzMiss) {
         // use previous dbz
         _dbzH[zIndex][xIndex] = dbzPrev;
       } else {
         // neither available, set to missing
-        _dbzH[zIndex][xIndex] = DBZ_BAD;
+        // _dbzH[zIndex][xIndex] = DBZ_BAD;
+        _dbzH[zIndex][xIndex] = _dbzMiss;
       }
-
+      
       // prepare for next level
       
       zIndex++;
@@ -418,6 +445,22 @@ int RhiOrient::_loadDbzV()
   
 {
   
+  if (_rays.size() < 1) {
+    return -1;
+  }
+
+  // initialize
+  
+  RadxField *dbzField0 =
+    _rays[0]->getField(_params.echo_orientation_dbz_field_name);
+  _dbzMiss = dbzField0->getMissingFl32();
+  for (size_t iz = 0; iz < _nZ; iz++) {
+    for (size_t igate = 0; igate < _nRange; igate++) {
+      _dbzV[iz][igate] = _dbzMiss;
+      _sdevDbzV[iz][igate] = _dbzMiss;
+    }
+  }
+  
   // loop through the RHI rays, bottom to top
   
   for (size_t iray = 0; iray < _rays.size(); iray++) {
@@ -436,7 +479,6 @@ int RhiOrient::_loadDbzV()
     }
     dbzField->convertToFl32();
     Radx::fl32 *dbz = dbzField->getDataFl32();
-    Radx::fl32 dbzMiss = dbzField->getMissingFl32();
     
     // loop through the grid in range (this is ground range)
     
@@ -471,11 +513,14 @@ int RhiOrient::_loadDbzV()
       int zIndex = _getZIndex(zz);
       
       // store the dbz in the grid
-
-      if (dbzClosest != dbzMiss) {
-        _dbzV[zIndex][igateClosest] = dbzClosest;
-      } else {
-        _dbzV[zIndex][igateClosest] = DBZ_BAD;
+      
+      if (zIndex >= 0) {
+        if (dbzClosest != _dbzMiss) {
+          _dbzV[zIndex][igateClosest] = dbzClosest;
+        } else {
+          // _dbzV[zIndex][igateClosest] = DBZ_BAD;
+          _dbzV[zIndex][igateClosest] = _dbzMiss;
+        }
       }
 
     } // ix
@@ -506,15 +551,15 @@ int RhiOrient::_loadSdevH()
     vector<double> dbzVals;
     vector<int> gateNums;
     for (size_t irange = 0; irange < _nRange; irange++) {
-      double dbzVal = _dbzH[iz][irange];
-      if (!std::isnan(dbzVal)) {
+      Radx::fl32 dbzVal = _dbzH[iz][irange];
+      if (dbzVal != _dbzMiss) {
         dbzVals.push_back(dbzVal);
         gateNums.push_back(irange);
       }
     } // irange
     
     size_t nDbz = dbzVals.size();
-    if (nDbz < 2) {
+    if (nDbz < 3) {
       continue;
     }
 
@@ -524,21 +569,22 @@ int RhiOrient::_loadSdevH()
 
     // compute sdev for first val - just use 2 pts
     
-    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    double sdev = _computeSdev3(dbzVals[0], dbzVals[1], dbzVals[2]);
     sdevDbzH.push_back(sdev);
-
+    
     // compute sdev for interior vals
 
-    if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 2; ii++) {
-        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
-        sdevDbzH.push_back(sdev);
-      }
+    // if (nDbz >= 3) {
+    for (size_t ii = 1; ii < nDbz - 1; ii++) {
+      sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+      sdevDbzH.push_back(sdev);
     }
+    // }
     
     // compute sdev for last val - just use 2 pts
     
-    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    // sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdev = _computeSdev3(dbzVals[nDbz-3], dbzVals[nDbz-2], dbzVals[nDbz-1]);
     sdevDbzH.push_back(sdev);
 
     assert(sdevDbzH.size() == nDbz);
@@ -562,9 +608,9 @@ int RhiOrient::_loadSdevH()
       double sdevDeltaPerGate = sdevDiff / (nMiss + 1.0);
       for (ssize_t jj = 1; jj <= nMiss; jj++) {
         double sdevInterp = sdevDbzH[ii-1] + sdevDeltaPerGate * jj;
-        _sdevDbzH[iz][gateNums[ii+jj]] = sdevInterp;
+        _sdevDbzH[iz][gateLower+jj] = sdevInterp;
       }
-    }
+    } // ii
 
   } // iz
 
@@ -592,15 +638,15 @@ int RhiOrient::_loadSdevV()
     vector<double> dbzVals;
     vector<int> levelNums;
     for (size_t iz = 0; iz < _nZ; iz++) {
-      double dbzVal = _dbzV[iz][irange];
-      if (!std::isnan(dbzVal)) {
+      Radx::fl32 dbzVal = _dbzV[iz][irange];
+      if (dbzVal != _dbzMiss) {
         dbzVals.push_back(dbzVal);
         levelNums.push_back(iz);
       }
     } // irange
     
     size_t nDbz = dbzVals.size();
-    if (nDbz < 2) {
+    if (nDbz < 3) {
       continue;
     }
 
@@ -610,21 +656,23 @@ int RhiOrient::_loadSdevV()
 
     // compute sdev for first val - just use 2 pts
     
-    double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    // double sdev = _computeSdev2(dbzVals[0], dbzVals[1]);
+    double sdev = _computeSdev3(dbzVals[0], dbzVals[1], dbzVals[2]);
     sdevDbzV.push_back(sdev);
 
     // compute sdev for interior vals
 
-    if (nDbz >= 3) {
-      for (size_t ii = 1; ii < nDbz - 2; ii++) {
-        sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
-        sdevDbzV.push_back(sdev);
-      }
+    // if (nDbz >= 3) {
+    for (size_t ii = 1; ii < nDbz - 1; ii++) {
+      sdev = _computeSdev3(dbzVals[ii-1], dbzVals[ii], dbzVals[ii+1]);
+      sdevDbzV.push_back(sdev);
     }
+    // }
     
     // compute sdev for last val - just use 2 pts
     
-    sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    // sdev = _computeSdev2(dbzVals[nDbz-2], dbzVals[nDbz-1]);
+    sdev = _computeSdev3(dbzVals[nDbz-3], dbzVals[nDbz-2], dbzVals[nDbz-1]);
     sdevDbzV.push_back(sdev);
 
     assert(sdevDbzV.size() == nDbz);
@@ -648,7 +696,7 @@ int RhiOrient::_loadSdevV()
       double sdevDeltaPerLevel = sdevDiff / (nMiss + 1.0);
       for (ssize_t jj = 1; jj <= nMiss; jj++) {
         double sdevInterp = sdevDbzV[ii-1] + sdevDeltaPerLevel * jj;
-        _sdevDbzV[levelNums[ii+jj]][irange] = sdevInterp;
+        _sdevDbzV[levelLower+jj][irange] = sdevInterp;
       }
     }
 

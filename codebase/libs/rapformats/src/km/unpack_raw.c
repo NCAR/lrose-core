@@ -143,8 +143,8 @@ ui08 *KM_unpack_raw_line()
 {
   static ui08 lineout[KAV_NLON];
 
-  register ui08 command;
-  register int color = 0, count;
+  ui08 command;
+  int color = 0, count;
   ui08 *out_ptr = lineout;
   int out_pos = 0;
   int done = FALSE;

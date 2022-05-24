@@ -6,7 +6,8 @@ libFmq.a
 libMdv.a
 libNcxx.a
 libRadx.a  # Depends on UCAR/Unidata netcdf library, and NASA hdf5 library
-libCore.a
+libRefract.a
+libSolo.a
 libSpdb.a
 libadvect.a
 libcidd.a

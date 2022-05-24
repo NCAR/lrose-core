@@ -227,26 +227,6 @@ void MercatorProj::print(FILE *stream) const
   fprintf(stream, "Number of points along longitude meridian %d\n", _nj);
   fprintf(stream, "Latitude of first grid point %f\n", _la1);
   fprintf(stream, "Longitude of first grid point %f\n", _lo1);
-  fprintf(stream, "Resolution flag byte %d\n", _resolutionFlag);
-  if ((_resolutionFlag & 32) == 32)
-    fprintf(stream, "    i direction increments given\n");
-  else
-    fprintf(stream, "    i direction increments not given\n");
-
-  if ((_resolutionFlag & 16) == 16)
-    fprintf(stream, "    j direction increments given\n");
-  else
-    fprintf(stream, "    j direction increments not given\n");
-
-  if ((_resolutionFlag & 8) == 8) {
-    fprintf(stream, "    u- and v- components of vector quantities resolved relative to the defined\n");
-    fprintf(stream, "    grid in the direction of increasing x and y (or i and j) coordinates respectively\n");
-  }
-  else {
-    fprintf(stream, "    u- and v- components of vector quantities resolved relative to easterly\n");
-    fprintf(stream, "     and northerly directions\n");
-  }
-
   fprintf(stream, "Latitude where Dx and Dy are specified (lad) %f\n", _lad);
   fprintf(stream, "Latitude of last grid point %f\n", _la2);
   fprintf(stream, "Longitude of last grid point %f\n", _lo2);
@@ -254,36 +234,44 @@ void MercatorProj::print(FILE *stream) const
   fprintf(stream, "Longitudinal Direction Increment %f\n", _di);
   fprintf(stream, "Latitudinal Direction Increment %f\n", _dj);
 
+  fprintf(stream, "Resolution flags %d\n", _resolutionFlag);
+  if ((_resolutionFlag & 32) == 32)
+    fprintf(stream, "    i direction increments not given\n");
+  if ((_resolutionFlag & 16) == 16)
+    fprintf(stream, "    j direction increments not given\n");
+  if ((_resolutionFlag & 8) == 8) {
+    fprintf(stream, "    u- and v- components of vector quantities resolved relative to easterly\n");
+    fprintf(stream, "     and northerly directions\n");
+  }
+
   fprintf(stream, "Scanning mode flags %d\n", _scanModeFlag);
-
-  if ((_scanModeFlag & 16) == 0) {
-    fprintf(stream, "    All rows scan in the same direction\n");
+  if ((_scanModeFlag & 128) == 128) {
+    fprintf(stream, "    !Points of first row or column scan in the -i (-x) direction\n");
   }
-  else {
-    fprintf(stream, "    Adjacent rows scans in the opposite direction\n");
-  }
-
-  if ((_scanModeFlag & 32) == 0) {
-    fprintf(stream, "    Adjacent points in i (x) direction are consecutive\n");
-  }
-  else {
-    fprintf(stream, "    Adjacent points in j (y) direction are consecutive\n");
-  }
-
   if ((_scanModeFlag & 64) == 0) {
-    fprintf(stream, "    Points of first row or column scan in the -j (-y) direction\n");
+    fprintf(stream, "    !Points of first row or column scan in the -j (-y) direction\n");
   }
-  else {
-    fprintf(stream, "    Points of first row or column scan in the +j (+y) direction\n");
+  if ((_scanModeFlag & 32) == 32) {
+    fprintf(stream, "    !Adjacent points in j (y) direction are consecutive\n");
   }
-
-  if ((_scanModeFlag & 128) == 0) {
-    fprintf(stream, "    Points of first row or column scan in the +i (+x) direction\n");
+  if ((_scanModeFlag & 16) == 16) {
+    fprintf(stream, "    !Adjacent rows scans in the opposite direction\n");
   }
-  else {
-    fprintf(stream, "    Points of first row or column scan in the -i (-x) direction\n");
+  if ((_scanModeFlag & 8) == 8) {
+    fprintf(stream, "    !Points within odd rows are offset by Di/2 in i(x) direction\n");
   }
-
+  if ((_scanModeFlag & 4) == 4) {
+    fprintf(stream, "    !Points within even rows are offset by Di/2 in i(x) direction\n");
+  }
+  if ((_scanModeFlag & 2) == 2) {
+    fprintf(stream, "    !Points are offset by Di/2 in j(y) direction\n");
+  }
+  if ((_scanModeFlag & 1) == 1) {
+    fprintf(stream, "    Rows have Ni grid points if points are not offset in i direction\n");
+    fprintf(stream, "    Rows have Ni-1 grid points if points are offset by Di/2 in i direction\n");
+    fprintf(stream, "    Columns have Nj grid points if points are not offset in j direction\n");
+    fprintf(stream, "    Columns have Nj-1 grid points if points are offset by Dj/2 in j direction\n");
+  }
 }
 
 } // namespace Grib2

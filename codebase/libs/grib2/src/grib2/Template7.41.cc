@@ -115,6 +115,8 @@ int Template7_pt_41::pack (fl32 *dataPtr)
   if(width * height != gridSz) {
     cerr << "ERROR: Template7_pt_41::pack()" << endl;
     cerr << "Data width * height != drs.numberPoints" << endl;
+    if(pdataPtr != dataPtr)
+      delete [] pdataPtr;
     return( GRIB_FAILURE );
   }
   fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);
@@ -203,10 +205,12 @@ int Template7_pt_41::pack (fl32 *dataPtr)
     _lcpack = encode_png(ctemp,width,height,nbits, (char*)_pdata);
 
     delete[] ctemp;
+    delete[] ifld;
     if (_lcpack < 0) {
       cerr << "Template7_pt_41::pack()" << endl;
       cerr << "PNG Encoding Failed " << endl;
-
+      if(pdataPtr != dataPtr)
+	delete [] pdataPtr;
       return GRIB_FAILURE;
     }
     
@@ -255,8 +259,8 @@ int Template7_pt_41::unpack (ui08 *dataPtr)
     if(ret != GRIB_SUCCESS) {
       cerr << "Template7_pt_41::unpack()" << endl;
       cerr << "PNG De-Ccoding Failed " << endl;
-      for (int i = 0; i < gridSz; i++)
-	outputData[i] = reference;
+      delete[] tmp_data;
+      delete[] outputData;
       return GRIB_FAILURE;
     }
 
@@ -318,7 +322,12 @@ int Template7_pt_41::decode_png (char *input, char *output)
   
   /*     Set Error callback   */
   
-  if (setjmp(png_jmpbuf(png_ptr)))
+#if (PNG_LIBPNG_VER < 10400 || PNG_LIBPNG_VER >= 10500)
+  if(setjmp(png_jmpbuf(png_ptr)))
+#else
+/* Warning is unavoidable if #define PNG_DEPSTRUCT is not present */
+  if (setjmp(png_ptr->jmpbuf))
+#endif
   {
     png_destroy_read_struct(&png_ptr, &info_ptr,&end_info);
     return (-3);
@@ -342,8 +351,8 @@ int Template7_pt_41::decode_png (char *input, char *output)
   int interlace, color, compres, filter, bit_depth;
   png_uint_32 width, height;
   /*printf("SAGT:png %d %d %d\n",info_ptr->width,info_ptr->height,info_ptr->bit_depth);*/
-  png_get_IHDR(png_ptr, info_ptr, &width, &height,
-               &bit_depth, &color, &interlace, &compres, &filter);
+  int ret = png_get_IHDR(png_ptr, info_ptr, &width, &height,
+		     &bit_depth, &color, &interlace, &compres, &filter);
   
   /*     Check if image was grayscale      */
   
@@ -420,7 +429,12 @@ int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, ch
   }
   
   /*     Set Error callback   */
-  if (setjmp(png_jmpbuf(png_ptr)))
+#if (PNG_LIBPNG_VER < 10400 || PNG_LIBPNG_VER >= 10500)
+  if(setjmp(png_jmpbuf(png_ptr)))
+#else
+/* Warning is unavoidable if #define PNG_DEPSTRUCT is not present */
+  if (setjmp(png_ptr->jmpbuf))
+#endif
   {
     png_destroy_write_struct(&png_ptr, &info_ptr);
     return (-3);

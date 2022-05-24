@@ -164,6 +164,7 @@ void NexradRadxFile::clear()
   _vcpVelRes = 0.5;
   _vcpShortPulse = true;
   _vcpPpis.clear();
+  _prevSweepNum = -1;
 
   _startRangeKmLong = 0.5;
   _gateSpacingKmLong = 1.0;
@@ -503,6 +504,9 @@ int NexradRadxFile::readFromPath(const string &path,
     _volumeNumber = volNum;
   }
 
+  // set site_id if possible
+  _siteName = Radx::makeString(title.site_id, 4);
+
   // if possible initialize position etc from file path
   
   NexradLoc loc;
@@ -573,16 +577,27 @@ int NexradRadxFile::readFromPath(const string &path,
 
         _checkIsLongRange(ray);
         
-        // add ray to vol
+        // add ray to vol, make sure sweep numbers are increasing
         
-        _readVol->addRay(ray);
-        
-        if (_verbose) {
-          cerr << "Adding msg 31 ray, el, az: "
-               << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+        if ((ray->getSweepNumber() >= _prevSweepNum) || _readPreserveSweeps) {
+          _readVol->addRay(ray);
+          _prevSweepNum = ray->getSweepNumber();
+          if (_verbose) {
+            cerr << "Adding msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        } else {
+          if (_verbose) {
+            cerr << "ERROR - sweep number decreased, msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
         }
-
       }
+
     } else if (msgHdr.message_type == NexradData::DIGITAL_RADAR_DATA_1) {
 
       // create ray from message
@@ -593,9 +608,25 @@ int NexradRadxFile::readFromPath(const string &path,
 
         _checkIsLongRange(ray);
 
-        // add ray to vol
+        // add ray to vol, make sure sweep numbers are increasing
         
-        _readVol->addRay(ray);
+        if ((ray->getSweepNumber() >= _prevSweepNum) || _readPreserveSweeps) {
+          _readVol->addRay(ray);
+          _prevSweepNum = ray->getSweepNumber();
+          if (_verbose) {
+            cerr << "Adding msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        } else {
+          if (_verbose) {
+            cerr << "ERROR - sweep number decreased, msg 31 ray, sweepNum, el, az: "
+                 << ray->getSweepNumber() << ", "
+                 << ray->getElevationDeg() << ", "
+                 << ray->getAzimuthDeg() << endl;
+          }
+        }
         
         if (_verbose) {
           cerr << "Adding msg 1 ray, el, az: "
@@ -653,9 +684,9 @@ int NexradRadxFile::readFromPath(const string &path,
     _readVol->remapRangeGeom(_startRangeKmShort, _gateSpacingKmShort, true);
     
     // combine fields as appropriate for sweeps with the same
-    // fixed angle
+    // fixed angle - these are the NEXRAD split cuts
     
-    _readVol->combineSweepsAtSameFixedAngleAndGeom(!_readRemoveLongRange);
+    _readVol->combineNexradSplitCuts(!_readRemoveLongRange);
     
     // remove long or short range data as appropriate
     
@@ -2705,6 +2736,14 @@ int NexradRadxFile::_writeMetaDataHdrs(const RadxVol &vol)
   double msecsInDay = (secsInDay + vol.getEndNanoSecs() / 1.0e9) * 1.0e3;
   title.julian_date = julianDate + 1;
   title.millisecs_past_midnight = (int) (msecsInDay + 0.5);
+  const string site_name = vol.getSiteName();
+  if (site_name.length() >= 4) {
+    text[0] = site_name[0];
+    text[1] = site_name[1];
+    text[2] = site_name[2];
+    text[3] = site_name[3];
+    memcpy(title.site_id, text, 4);
+  }
 
   if (_verbose) {
     NexradData::print(title, cerr);
@@ -2722,6 +2761,10 @@ int NexradRadxFile::_writeMetaDataHdrs(const RadxVol &vol)
   // ADAPTATION DATA HEADER
   if(_adap.beamwidth == 0)
   {
+    const string site_name = vol.getSiteName();
+    for (size_t i=0; i<site_name.size(); i++) {
+      _adap.site_name[i] = site_name[i];
+    }
     _adap.antenna_gain = vol.getRadarAntennaGainDbH();
     _adap.beamwidth = vol.getRadarBeamWidthDegH();
     const vector<double> &freqHz = vol.getFrequencyHz();
@@ -3977,7 +4020,7 @@ RadxField *NexradRadxFile::_createPurpleHaze(const vector<Radx::ui08> &udata08,
       haze.push_back(-127);
     }
   }
-  purp->addDataSi08(udata08.size(), haze.data());
+  purp->addDataSi08(haze.size(), haze.data());
 
   return purp;
   

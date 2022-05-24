@@ -217,10 +217,10 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "netcdf_style = NETCDF4;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-ncxx")) {
+    // } else if (!strcmp(argv[i], "-ncxx")) {
       
-      sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
-      TDRP_add_override(&override, tmp_str);
+    //   sprintf(tmp_str, "output_format = OUTPUT_FORMAT_NCXX;");
+    //   TDRP_add_override(&override, tmp_str);
       
     } else if (!strcmp(argv[i], "-dorade")) {
       
@@ -671,6 +671,36 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-sweep_mode")) {
+      
+      if (i < argc - 1) {
+        i++;
+        sprintf(tmp_str, "override_sweep_mode = TRUE;");
+        TDRP_add_override(&override, tmp_str);
+        if (strstr("sur", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_AZIMUTH_SURVEILLANCE;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("sec", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_SECTOR;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("rhi", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_RHI;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (strstr("sun", argv[i])) {
+          sprintf(tmp_str, "sweep_mode = SWEEP_MODE_SUNSCAN;");
+          TDRP_add_override(&override, tmp_str);
+        } else {
+          OK = false;
+        }
+      } else {
+	OK = false;
+      }
+
+    } else if (!strcmp(argv[i], "-sweep_mode_from_angles")) {
+      
+      sprintf(tmp_str, "set_sweep_mode_from_ray_angles = true;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-relaxed_limits")) {
       
       sprintf(tmp_str, "apply_strict_angle_limits = false;");
@@ -944,8 +974,8 @@ void Args::_usage(ostream &out)
       << "  [ -cfradial ] convert to cfradial (the default)\n"
       << "  [ -cf2 ] convert to cfradial2, forces use of netcdf4\n"
       << "\n"
-      << "  [ -cf_classic ] output classic-style netcdf (the default)\n"
-      << "  [ -cf_netcdf4 ] output netcdf4 style\n"
+      << "  [ -cf_classic ] output classic-style netcdf\n"
+      << "  [ -cf_netcdf4 ] output netcdf4 style (the default)\n"
       << "  [ -cf_classic4 ] output classic-style netcdf4\n"
       << "  [ -cf_nc64bit ] output 64-bit NC netcdf\n"
       << "     The above only apply to cfradial and foray output.\n"
@@ -1027,8 +1057,6 @@ void Args::_usage(ostream &out)
       << "  [ -native ] output in host-native byte ordering\n"
       << "\n"
       << "  [ -name ? ] override instrument name\n"
-      << "\n"
-      << "  [ -ncxx ] convert to cfradial using Ncxx classes\n"
       << "\n"
       << "  [ -nexrad ] convert to NEXRAD archive level 2\n"
       << "\n"
@@ -1125,6 +1153,12 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -sweep_max ? ] set max sweep number\n"
       << "     use '-sweep' for setting minimum\n"
+      << "\n"
+      << "  [ -sweep_mode ? ] set sweep mode\n"
+      << "     Options are: sur, sec, rhi, sunscan\n"
+      << "\n"
+      << "  [ -sweep_mode_from_angles ] set sweep mode from angles\n"
+      << "     Check angles to determine the sweep mode\n"
       << "\n"
       << "  [ -time_offset ? ] set time offset (secs)\n"
       << "\n"

@@ -150,6 +150,10 @@ public:
 
   void setDebug(bool val);
 
+  /// Set the volume convention, if available.
+
+  void setConvention(const string &val) { _convention = val; }
+
   /// Set the volume version, if available. Use this for the project name.
 
   void setVersion(const string &val) { _version = val; }
@@ -987,11 +991,17 @@ public:
   /// Also sets the fixed angle for the rays in the sweep
   
   void setFixedAngleDeg(int sweepNum, double fixedAngle);
-
-  /// combine rays from sweeps with common fixed angle and
-  /// gate geometry, but with different fields
   
-  void combineSweepsAtSameFixedAngleAndGeom(bool keepLongRange = false);
+  /// For NEXRAD volumes, combine fields from consecutive sweeps
+  /// with the same elevation angle.
+  /// These are the so-called split-cut sweeps.
+  /// The non-Doppler sweeps occur first, followed by the Doppler sweep.
+  /// The non-Doppler sweeps have REF, ZDR, RHO, PHI and CDP.
+  /// The Doppler sweeps have REF, VEL and SW.
+  /// We use the REF from the non-Doppler sweeps.
+  /// We copy in VEL and SW from the Doppler sweeps.
+
+  void combineNexradSplitCuts(bool keepLongRange = false);
 
   /// Make fields uniform in the volume.
   /// This ensures that all rays in the volume have the same fields
@@ -1220,6 +1230,10 @@ public:
   //////////////////////////////////////////////////////////////////
   /// \name Get methods - except for platform parameters
   //@{
+
+  /// Get convention. May be used for project name.
+
+  inline const string &getConvention() const { return _convention; }
 
   /// Get version. May be used for project name.
 
@@ -1464,6 +1478,12 @@ public:
   /// Returns true if all rays are indexed, false otherwise.
   
   bool checkForIndexedRays() const;
+  
+  /// Set angles for elevation surveillance mode.
+  /// In SWEEP_MODE_ELEVATION_SURVEILLANCE mode, if georefs are
+  /// available copy rotation to azimuth, and tilt to elevation.
+  
+  void setAnglesForElevSurveillance();
   
   /// check whether volume is predominantly in RHI mode
   ///
@@ -1772,17 +1792,25 @@ private:
   };
 
   // class for combining sweeps with same fixed angle but different fields
+  // or discarding redundant doppler sweeps
 
-  class Combo {
+  class NexradSweepAction {
   public:
-    size_t target;
-    vector<size_t> sources; 
-    Combo() {
-      target = 0;
-    }
-    Combo(size_t index) {
-      target = index;
-    }
+    typedef enum {
+      USE_UNCHANGED,
+      PAIR_NONDOP_WITH_DOP,
+      DISCARD_DOP
+    } action_t;
+    action_t action;
+    size_t nonDopSweepIndex;
+    size_t dopSweepIndex;
+    NexradSweepAction(action_t act, 
+                      size_t nonDopIndex,
+                      size_t dopIndex) {
+      action = act;
+      nonDopSweepIndex = nonDopIndex;
+      dopSweepIndex = dopIndex;
+   }
   };
   
   /// sorting rays
@@ -1828,6 +1856,7 @@ private:
 
   // meta strings
 
+  string _convention;  // from CF
   string _version;     // from CF
   string _title;       // from CF
   string _institution; // from CF
@@ -1943,10 +1972,12 @@ private:
   void _computeNRaysTransition();
   void _findTransitions(int nRaysMargin);
   void _setPredomSweepModeFromAngles() const;
-  void _augmentSweepFields(size_t target, size_t source);
+  void _getNexradSweepActions(vector<NexradSweepAction> &actions);
+  void _addFieldsFromDopplerSweep(RadxSweep *sweepPower,
+                                  RadxSweep *sweepDoppler);
 
   int _loadPseudoFromRealRhis();
-  int _setupAngleSearch(size_t sweepNum);
+  int _setupAngleSearch(const RadxSweep *sweep);
   int _getSearchAngleIndex(double angle);
   double _getSearchAngle(int index);
   void _populateSearchRays(int start, int end);

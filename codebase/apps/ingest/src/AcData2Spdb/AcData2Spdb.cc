@@ -42,6 +42,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/str.h>
 #include <toolsa/Tty.hh>
+#include <toolsa/TaXml.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
 #include <physics/thermo.h>
@@ -145,6 +146,11 @@ int AcData2Spdb::Run ()
   DsSpdb spdb, asciiSpdb;
   time_t prevPutTime = time(NULL);
 
+  // initialize for KML decoding
+
+  _kmlTimeValid = false;
+  _kmlTime = 0;
+
   // create maps for flare counts
 
   flare_count_map_t bipMap;
@@ -247,6 +253,10 @@ int AcData2Spdb::Run ()
         iret = _decodeIWG1(line, validTime, posn);
         break;
         
+      case Params::KML_FORMAT :
+        iret = _decodeKML(line, validTime, posn);
+        break;
+
     } /* endswitch - _params.input_format */
 
     if (_params.override_callsign) {
@@ -1239,7 +1249,7 @@ int AcData2Spdb::_decodeIWG1(const char *line,
 }
 
 /////////////////////////////////////////////////////////////////
-// decode CSV FORMAT 1 - South Africa Weayther Service data system
+// decode CSV FORMAT 1 - South Africa Weather Service data system
 //
 // Data line should contain the following comma-delited list
 //   Time
@@ -1326,6 +1336,83 @@ int AcData2Spdb::_decodeCsvGps(const char *line,
   }
 
   return 0;
+
+}
+  
+/////////////////////////////////////////////////////////////////
+// decode KML
+//
+// Because of the nature of XML, this proceeds on a multi-line basis
+
+int AcData2Spdb::_decodeKML(const char *line,
+                            time_t &validTime,
+                            ac_posn_wmod_t &posn)
+  
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "---> Decoding KML format" << endl;
+  }
+
+  // are we in a track?
+
+  if (strstr(line, "<gx:Track>") != NULL) {
+    _kmlInTrack = true;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "AcData2Spdb::_decodeKML() - start of Track" << endl;
+    }
+    return -1; // no position yet
+  }
+  if (strstr(line, "</gx:Track>") != NULL) {
+    _kmlInTrack = false;
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "AcData2Spdb::_decodeKML() - end of Track" << endl;
+    }
+    return -1; // no position yet
+  }
+  if (!_kmlInTrack) {
+    // not yet in a track block
+    return -1;
+  }
+
+  // get time - this is on a separate line
+  
+  if (strstr(line, "<when>") != NULL) {
+    time_t tval;
+    if (TaXml::readTime(line, "when", tval) == 0) {
+      _kmlTimeValid = true;
+      _kmlTime = tval;
+    }
+    return -1; // no position yet
+  }
+  if (!_kmlTimeValid) {
+    // no time yet
+    return -1;
+  }
+  
+  // get position - this is on a separate line
+
+  if (strstr(line, "<gx:coord>") != NULL) {
+    string posStr;
+    if (TaXml::readString(line, "gx:coord", posStr) == 0) {
+      // got position string
+      double lon, lat, alt;
+      if (sscanf(posStr.c_str(), "%lg %lg %lg", &lon, &lat, &alt) == 3) {
+        // success on reading pos
+        validTime = _kmlTime;
+        posn.lat = lat;
+        posn.lon = lon;
+        posn.alt = alt;
+        STRncopy(posn.callsign, _params.callsign, AC_POSN_N_CALLSIGN);
+        _kmlTimeValid = false;
+        return 0;
+      }
+    }
+  }
+  
+  // still looking
+
+  return -1;
 
 }
   

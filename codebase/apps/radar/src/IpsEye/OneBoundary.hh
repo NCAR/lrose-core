@@ -38,7 +38,7 @@ class OneBoundary {
 
  public:
   OneBoundary();
-  ~OneBoundary();
+  virtual ~OneBoundary();
   void addBoundaryPoint(int x, int y);
 
  private:

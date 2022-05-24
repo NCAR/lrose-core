@@ -227,7 +227,8 @@ typedef enum {
   POLCAST2_FORMAT,
   NOAA_AIRCRAFT_FORMAT,
   NOAA_SHIP_FORMAT,
-  IWG1_FORMAT
+  IWG1_FORMAT,
+  KML_FORMAT
 } input_format_t;
 
 paramdef enum input_format_t {

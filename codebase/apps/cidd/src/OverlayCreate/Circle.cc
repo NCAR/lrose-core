@@ -32,7 +32,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "Circle.h"
+#include "Circle.hh"
+#include <toolsa/mem.h>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>
 using namespace std;
@@ -40,18 +41,17 @@ using namespace std;
 //////////////
 // Constructor
 
-Circle::Circle(char *prog_name,
-	       OverlayCreate_tdrp_struct *params,
+Circle::Circle(const char *prog_name,
+	       const Params &params,
 	       double lat,
 	       double lon,
 	       double radius,
-	       int npoints)
+	       int npoints) :
+        _params(params)
   
 {
 
   _progName = STRdup(prog_name);
-  _params = params;
-
   _lat = lat;
   _lon = lon;
   _radius = radius;

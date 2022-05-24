@@ -127,6 +127,8 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
   if(width * height != gridSz) {
     cerr << "ERROR: Template7_pt_4000::pack()" << endl;
     cerr << "Data width * height != drs.numberPoints" << endl;
+    if(pdataPtr != dataPtr)
+      delete [] pdataPtr;
     return( GRIB_FAILURE );
   }
   fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);

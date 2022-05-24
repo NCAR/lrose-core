@@ -23,12 +23,11 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////
 // Grib2File - Main class for manipulating GRIB files.
-//
-// $Id: Grib2File.cc,v 1.22 2019/01/11 21:08:22 jcraig Exp $
 ////////////////////////////////////////////
 
 #include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -176,7 +175,7 @@ int Grib2File::read(const string &file_path)
     return GRIB_FAILURE;
   }
   
-  ui32 file_size = file_stat.st_size;
+  ui64 file_size = file_stat.st_size;
 
   // Read the input file into a local buffer
 
@@ -235,6 +234,7 @@ int Grib2File::read(const string &file_path)
       cerr << "ERROR: reading edition number " << endl;
       cerr << "       Illegal number is " << (int) edition_num << endl;
       cerr << "       Not a GRIB2 record, exiting " << endl;
+      delete[] grib_contents;
       return GRIB_FAILURE;
     }
     else
@@ -244,7 +244,7 @@ int Grib2File::read(const string &file_path)
     {
       cerr << "ERROR: " << method_name << endl;
       cerr << "Error unpacking record in grib file" << endl;
-      
+      delete[] grib_contents;
       return GRIB_FAILURE;
     }
     

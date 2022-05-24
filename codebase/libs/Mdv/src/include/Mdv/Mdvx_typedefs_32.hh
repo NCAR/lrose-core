@@ -499,12 +499,13 @@ typedef struct {
                                //   are guaranteed to be available to
                                //   users for their own purposes.
 
-  fl32 min_value;              // 27 - min val in data set
-  fl32 max_value;              // 28 - max val in data set
-  fl32 min_value_orig_vol;     // 29 - min val in original vol before 
-                               //      clipping to get data set
-  fl32 max_value_orig_vol;     // 30 - max val in original vol before 
-                               //      clipping to get data set
+  mutable fl32 min_value;          // 27 - min val in data set
+  mutable fl32 max_value;          // 28 - max val in data set
+  mutable fl32 min_value_orig_vol; // 29 - min val in original vol before 
+                                   //      clipping to get data set
+  mutable fl32 max_value_orig_vol; // 30 - max val in original vol before 
+                                   //      clipping to get data set
+
   fl32 unused_fl32;            // 31   Spare, to fill out array 
                                //      to 31 fl32's
 
@@ -690,7 +691,8 @@ typedef struct {
   fl32 tan_lon;
   fl32 central_scale;
   si32 pole_type; // 0 - POLE_NORTH, 1 - POLE_SOUTH
-  fl32 spare[5];
+  fl32 lad;
+  fl32 spare[4];
   
 } ps_params_32_t;
   

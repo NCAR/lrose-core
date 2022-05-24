@@ -38,7 +38,7 @@ Find::Find(const string &sInp)
   _isSimple = nt == 3;
   if (_isSimple)
   {
-    _simple = FindSimple(tokens[0], tokens[1], tokens[2]);
+    _simple = MathFindSimple(tokens[0], tokens[1], tokens[2]);
     if (_simple.isSimpleCompareToNumber())
     {
       _pattern = SIMPLE_COMPARE_TO_NUMBER;
@@ -72,7 +72,7 @@ Find::Find(const vector<string> &token, const int ind0, const int ind1)
   _isSimple = ind1-ind0+1 == 3;
   if (_isSimple)
   {
-    _simple = FindSimple(token[ind0], token[ind0+1], token[ind1]);
+    _simple = MathFindSimple(token[ind0], token[ind0+1], token[ind1]);
     _ok = _simple.ok();
   }
   else
@@ -85,7 +85,7 @@ Find::Find(const vector<string> &token, const int ind0, const int ind1)
 Find::Find(const string &name, const string &comp, const string &value)
 {
   _isSimple = true;
-  _simple = FindSimple(name, comp, value);
+  _simple = MathFindSimple(name, comp, value);
   _ok = _simple.ok();
 }
 
@@ -209,7 +209,7 @@ string Find::logicalString(const Logical_t &l)
 
 //------------------------------------------------------------------
 bool Find::getSimpleCompare(std::string &compareName,
-			    FindSimple::Compare_t &c,
+			    MathFindSimple::Compare_t &c,
 			    double &compareV,
 			    bool &compareMissing) const
 {

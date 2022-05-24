@@ -116,7 +116,7 @@ MdvxField *Ncf2MdvField::createMdvxField()
     cerr << "Adding data field: " << _var4Data->name() << endl;
     cerr << "             time: " << DateTime::strm(_validTime) << endl;
   }
-  
+
   // set name, units
 
   _setNamesAndUnits();
@@ -136,6 +136,7 @@ MdvxField *Ncf2MdvField::createMdvxField()
                   _var4Data->name());
     return NULL;
   }
+
   _proj.syncToFieldHdr(_fhdr);
   _fhdr.proj_type = _projType;
 
@@ -205,6 +206,19 @@ int Ncf2MdvField::_setProjType()
   // init
 
   _projVar = NULL;
+
+  // check for lat/lon from grid mapping name
+  
+  Nc3Att *mappingNameAtt = _var4Data->get_att(NcfMdv::grid_mapping_name);
+  if (mappingNameAtt != NULL) {
+    string mappingNameStr = _asString(mappingNameAtt);
+    delete mappingNameAtt;
+    if (mappingNameStr.compare(NcfMdv::latitude_longitude) == 0) {
+      // lat/lon grid
+      _projType = Mdvx::PROJ_LATLON;
+      return 0;
+    }
+  }
 
   // find the grid mapping variable name
   
@@ -740,6 +754,7 @@ int Ncf2MdvField::_setXYAxis(const string &axisName,
         TaStr::AddStr(_errStr, "  ", axisName, false);
         TaStr::AddStr(_errStr, " dimension is of type ", latlonStdName);
         TaStr::AddStr(_errStr, "  Yet projection type is : ", _projTypeStr);
+        TaStr::AddInt(_errStr, "      projection type id : ", _projType);
         return -1;
       }
     }
@@ -945,7 +960,23 @@ int Ncf2MdvField::_setGridData()
     delete offsetAtt;
   }
 
-  // decode data, fill _flData array
+  // read min and max value if available
+
+  Nc3Att *minValueAtt = _var4Data->get_att(NcfMdv::min_value); 
+  if (minValueAtt != NULL) {
+    _fhdr.min_value = minValueAtt->as_float(0);
+    _fhdr.min_value_orig_vol = _fhdr.min_value;
+    delete minValueAtt;
+  }
+
+  Nc3Att *maxValueAtt = _var4Data->get_att(NcfMdv::max_value); 
+  if (maxValueAtt != NULL) {
+    _fhdr.max_value = maxValueAtt->as_float(0);
+    _fhdr.max_value_orig_vol = _fhdr.max_value;
+    delete maxValueAtt;
+  }
+
+  // decode data, fill _data array
 
   switch (_dataType) {
 

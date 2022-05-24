@@ -29,7 +29,6 @@ SUB_DIRS = \
 	hydro \
 	kd \
         mm5 \
-	perl5 \
 	physics \
 	radar \
 	rapformats \

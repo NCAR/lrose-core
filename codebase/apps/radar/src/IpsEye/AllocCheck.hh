@@ -48,7 +48,7 @@ class AllocCheck
 
 public:
 
-  ~AllocCheck();
+  virtual ~AllocCheck();
   
   ///////////////////////////////////////////////////////////
   // Inst() - Retrieve the singleton instance of this class.

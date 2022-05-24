@@ -10,9 +10,6 @@ AcTrack2Polygon
 AcTrack2Symprod
 Acars2Symprod
 AcarsNc2GenPt
-AparTs2Moments
-AparTsPrint
-AparTsSim
 ArgentineAwsIngest
 AverageFields
 Awos2Spdb
@@ -23,7 +20,7 @@ BomAws2Spdb
 BomSounding2Spdb
 CalCompute
 CalcHumidity
-ConvStrat
+Ecco
 Cov2Mom
 CreateStationList
 CsuSounding2Spdb
@@ -70,7 +67,6 @@ HawkEye
 HcrTempRxGain
 HcrVelCorrect
 HydroStation2Symprod
-IngestSatMdv
 InputWatcher
 IntfRemove
 Iq2Dsr
@@ -183,7 +179,6 @@ PrintTitanFiles
 PrintTitanServer
 Qmap2Cidd
 QuadratureTest
-RUNtests.sh
 RadMon
 RadarCal
 RadarConst
@@ -228,7 +223,6 @@ TdrpTest
 TestDataMap
 ThetaEAdvect
 TimeCalc
-TimeCmd.py
 TimeHist
 Titan
 TitanSelect
@@ -291,12 +285,8 @@ fmq_print
 ipcrm_irix
 ipcrm_libc5
 ipcrm_linux
-kill_hung_spong_df.sh
 ldd_smart
 loop_cmd
-lrose-config
-lrose-config.flags
-lrose-config.template
 madis2Spdb
 make_cdrom
 make_cdrom2
@@ -319,16 +309,13 @@ nuke_ipcs.linux
 print_mdv
 print_procmap
 print_server_mgr
-process_maps.csh
 procmap
 procmap_auto_restart
 procmap_list_check
 procmap_list_kill
 procmap_list_start
-procmap_list_start.lrose
 procmap_register
 procmap_unregister
-psinfo2
 pull_files
 pull_files_ftp.py
 pull_kavltg
@@ -342,7 +329,6 @@ rm_baks
 rm_core
 rm_junk
 rm_ldata_fmq_files
-rm_makefile
 rm_makefile.am
 rm_objs
 rm_wspace

@@ -8,6 +8,8 @@
 //#include "ScriptEditorDelegate.hh"
 #include "SoloFunctionsController.hh"
 
+//#include "PolarManager.hh"
+
 #include <QWidget>
 #include <QAction>
 #include <QLabel>
@@ -15,6 +17,7 @@
 #include <QToolBar>
 #include <QTableWidgetItem>
 #include <QTableWidget>
+#include <QTreeView>
 #include <QString>
 // #include <QJSEngine>
 
@@ -26,6 +29,7 @@ public:
 
   //  ScriptEditorView(std::string fileName, QWidget *parent = 0);
   ScriptEditorView(QWidget *parent = 0);
+  virtual ~ScriptEditorView();
 
   //  void setController(ScriptEditorController *controller);
 
@@ -39,8 +43,14 @@ public:
   vector<string> *getVariablesFromScriptEditor();
   vector<float> *getDataForVariableFromScriptEditor(int column, string fieldName);
 
-  //void setSelectionToValue(QString value);
+  string getSaveEditsDirectory();
 
+  void initProgress(int nFiles);
+  void updateProgress(int currentIndex, int lastIndex);
+  void batchEditComplete();
+
+  //void setSelectionToValue(QString value);
+  void closeEvent();
 
 public slots:
     void updateStatus(QTableWidgetItem *item);
@@ -49,16 +59,28 @@ public slots:
     void acceptFormulaInput();
     void cancelFormulaInput();
     void displayHelp();
-  //void clear();
+    void scriptComplete();
+    void cancelScriptRun();
+    //void undoEdits();
+    //void redoEdits();
+    //void clear();
 
-  void notImplementedMessage();
+    void notImplementedMessage();
 
-  //void setupSoloFunctions(SoloFunctions *soloFunctions);
+    //void setupSoloFunctions(SoloFunctions *soloFunctions);
 
-  void fieldNamesProvided(vector<string> fieldNames);
-  //void fieldDataSent(vector<float> *data, int useless, int c);
+    void fieldNamesProvided(vector<string> fieldNames);
+    //void fieldDataSent(vector<float> *data, int useless, int c);
 
-  void applyChanges();
+    void applyChanges();
+    void currentSweepClicked(bool checked);
+    //void allSweepsClicked(bool checked);
+    //void timeRangeClicked(bool checked);
+    void changeOutputLocation(bool checked);
+
+
+  //void hideTimeRangeEdits();
+  //void showTimeRangeEdits();
 
   //  void printQJSEngineContext();
 
@@ -68,7 +90,14 @@ signals:
   //void needDataForField(string fieldName, int r, int c);
   void applyVolumeEdits();
   void runOneTimeOnlyScript(QString oneTimeOnlyScript);
-  void runForEachRayScript(QString forEachRayScript, bool useBoundary);
+  void runForEachRayScript(QString forEachRayScript, bool useBoundary,
+    bool useAllSweeps);
+  void runScriptBatchMode(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);
+  void cancelScriptRunRequest();
+  void undoScriptEdits();
+  void redoScriptEdits();  
+  void scriptEditorClosed();
 
 protected:
     void setupContextMenu();
@@ -86,10 +115,14 @@ protected:
                         QString *cell1, QString *cell2, QString *outCell);
   */
   void criticalMessage(std::string message);
+  void scriptCompleteMessage();
 
   void openScriptFile();
   void importScriptFile();
   void saveScriptFile();
+  void saveEditDirectory();
+
+
 
 private:
 
@@ -101,28 +134,33 @@ private:
     QLabel *cellLabel;
     TextEdit *formulaInput;
     TextEdit *formulaInputForEachRay;
-    QCheckBox *useBoundaryWidget;
+    QPushButton *useBoundaryWidget;
+    //QRadioButton *applyToCurrentSweep;
+    //QRadioButton *applyToAllSweeps;
+    QTreeView *helpView;
+    QHBoxLayout *scriptEditLayout;
+
+    //QPushButton *currentSweepToggleButton;
+    QPushButton *allSweepsToggleButton;
+    QGroupBox *scriptModifiers;
+
+    //QPushButton *currentTimeToggleButton;
+    //QPushButton *timeRangeToggleButton;
+    QDateTimeEdit *_archiveStartTimeEdit;
+    QDateTimeEdit *_archiveEndTimeEdit;
+    QLabel *saveEditsDirectory;
+    QPushButton *browseDirectoryButton;
+
+    QVBoxLayout *checkBoxLayout;
+    QWidget *scriptEditWidget;
+
+    QVBoxLayout *helpViewLayout;
+    QWidget *helpWidget;
+
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
 
-  //  QJSEngine engine;
-
-  
-  //  const char *LogFileName = "/tmp/HawkEye_log.txt";
- 
-const char *htmlText =
-"<HTML>"
-"<p><b>"
-"Some useful info .."
-"<ul>"
-"<li>Adding two cells.</li>"
-"<li>Subtracting one cell from another.</li>"
-"<li>Multiplying two cells.</li>"
-"<li>Dividing one cell with another.</li>"
-"<li>Summing the contents of an arbitrary number of cells.</li>"
-  "</HTML>";
+    QProgressBar *progressBar;
 };
-
-
 
 #endif // SCRIPTEDITORVIEW_H

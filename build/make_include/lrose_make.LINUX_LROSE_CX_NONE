@@ -176,7 +176,7 @@ UDUNITS_LDFLAGS=$(MY_UDUNITS_LDFLAGS) -Wl,-rpath,/usr/local/udunits2/lib -L/opt/
 
 HDF5_INCLUDES =$(MY_HDF5_INCS) -I/opt/hdf5/include -I/usr/local/hdf5/include -I/usr/include/hdf5/serial $(SZIP_INCLUDES) $(ZLIB_INCLUDES)
 HDF5_LDFLAGS =$(MY_HDF5_LDFLAGS) -Wl,-rpath,/usr/local/hdf5/lib -L/opt/hdf5/lib -L/usr/local/hdf5/lib -L/usr/lib/x86_64-linux-gnu/hdf5 -L/usr/lib/x86_64-linux-gnu/hdf5/serial $(SZIP_LDFLAGS) $(ZLIB_LDFLAGS) 
-HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5_cpp -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
+HDF5_LIBS = $(MY_HDF5_LIBS) -lhdf5 -lhdf5_hl $(SZIP_LIBS) $(ZLIB_LIBS)
 
 NETCDF4_INCS=$(MY_NETCDF4_INCS) -I/opt/netcdf4/include -I/usr/local/netcdf4/include -I/usr/local/include $(HDF5_INCLUDES) $(ZLIB_INCLUDES)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS) -Wl,-rpath,/usr/local/netcdf4/lib -L/opt/netcdf4/lib -L/usr/local/netcdf4/lib -L/usr/local/lib $(HDF5_LDFLAGS) $(ZLIB_LDFLAGS)
@@ -186,7 +186,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf -lnetcdf_c++
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
 NETCDF_LIB_LIST=$(NETCDF4_LIBS)
 NETCDF_INCLUDES=$(NETCDF4_INCS)
 NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)

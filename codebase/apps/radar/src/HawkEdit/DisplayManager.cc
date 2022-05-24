@@ -39,9 +39,12 @@
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
 #include "DisplayElevation.hh"
+#include "ClickableLabel.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "Reader.hh"
+#include "ParameterColorView.hh"
+#include "FieldColorController.hh"
 
 #include <string>
 #include <cmath>
@@ -77,6 +80,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/Path.hh>
 #include <Radx/RadxFile.hh>
 
 using namespace std;
@@ -414,7 +418,7 @@ void DisplayManager::_createFieldPanel()
   if (_haveFilteredFields) {
     nCols = 4;
   }
-
+/*
   _displayFieldController->setSelectedField(0);
   _selectedField = _displayFieldController->getSelectedField(); //_fields[0];
   _selectedLabel = _selectedField->getLabel(); //_fields[0]->getLabel();
@@ -427,7 +431,9 @@ void DisplayManager::_createFieldPanel()
   font6.setPixelSize(fsize6);
   _selectedLabelWidget->setFont(font6);
   _fieldsLayout->addWidget(_selectedLabelWidget, row, 0, 1, nCols, alignCenter);
+
   row++;
+
 
   QFont font4 = _selectedLabelWidget->font();
   font4.setPixelSize(fsize4);
@@ -435,6 +441,12 @@ void DisplayManager::_createFieldPanel()
   font2.setPixelSize(fsize2);
   QFont font = _selectedLabelWidget->font();
   font.setPixelSize(fsize);
+  */
+
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font4 = dummy.font();
 
   _valueLabel = new QLabel("", _fieldPanel);
   _valueLabel->setFont(font);
@@ -560,7 +572,9 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
   if (_haveFilteredFields) {
     nCols = 4;
   }
-  QFont font = _selectedLabelWidget->font();
+  //QFont font = _selectedLabelWidget->font();
+  QLabel dummy;
+  QFont font = dummy.font();
   font.setPixelSize(fsize);
 
 
@@ -587,7 +601,16 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
     // get filt field - may not be present
     const DisplayField *filtField = _displayFieldController->getFiltered(ifield, -1);
 
-    QLabel *label = new QLabel(_fieldPanel);
+//----
+//    _spolDivColorMapLabel = new ClickableLabel();
+//ColorMapTemplates.cc:    // connect(cmapLabel, &ClickableLabel::clicked, this, &ParameterColorDialog::pickColorPalette);
+//ColorMapTemplates.cc:    connect(_defaultColorMapLabel,   &ClickableLabel::clicked, this, &ColorMapTemplates::defaultClicked);
+
+//---
+
+    //QLabel *label = new QLabel(_fieldPanel);
+    ClickableLabel *label = new ClickableLabel(_fieldPanel);
+    connect(label, &ClickableLabel::clicked, this, SLOT(contextMenuParameterColors()));
     label->setFont(font);
     label->setText(rawField->getLabel().c_str());
     QLabel *key = new QLabel(_fieldPanel);
@@ -648,6 +671,36 @@ void DisplayManager::_updateFieldPanel(string newFieldName)
   LOG(DEBUG) << "exit";
 }
 
+void DisplayManager::contextMenuParameterColors()
+{
+  
+  LOG(DEBUG) << "enter";
+
+  //DisplayField selectedField;                                                                             
+
+  // const DisplayField &field = _manager.getSelectedField();
+  // const ColorMap &colorMapForSelectedField = field.getColorMap();
+  ParameterColorView *parameterColorView = new ParameterColorView(this);
+  // vector<DisplayField *> displayFields = displayFieldController->getDisplayFields(); // TODO: I guess, implement this as a signal and a slot? // getDisplayFields();
+  DisplayField *selectedField = _displayFieldController->getSelectedField();
+  string emphasis_color = "white";
+  string annotation_color = "white";
+
+  DisplayFieldModel *displayFieldModel = _displayFieldController->getModel();
+
+  FieldColorController *fieldColorController = new FieldColorController(parameterColorView, displayFieldModel);
+  // connect some signals and slots in order to retrieve information
+  // and send changes back to display
+                                                                         
+  connect(fieldColorController, SIGNAL(colorMapRedefineSent(string, ColorMap, QColor, QColor, QColor, QColor)),
+      this, SLOT(colorMapRedefineReceived(string, ColorMap, QColor, QColor, QColor, QColor))); // THIS IS NOT CALLED!!
+
+  fieldColorController->startUp(); 
+ 
+  LOG(DEBUG) << "exit ";
+  
+}
+
 
 void DisplayManager::_changeFieldVariable(bool value) {
 
@@ -668,6 +721,7 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 }
 
+/*
 void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
 
   LOG(DEBUG) << "enter"; 
@@ -678,7 +732,7 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
   _displayFieldController->saveColorMap(fieldName, &newColorMap);
   size_t fieldIndex = _displayFieldController->getFieldIndex(fieldName);
   _changeField(fieldIndex, true); 
-
+*/
   /*
   bool found = false;
   vector<DisplayField *>::iterator it;
@@ -706,9 +760,10 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
     _changeField(fieldId, true); 
   }
   */
+/*
   LOG(DEBUG) << "exit";
 }
-
+*/
 
 void DisplayManager::_openFile() {
 }
@@ -1353,6 +1408,254 @@ void DisplayManager::_showClick()
   }
 }
 
+  //////////////////////////////////////////////////
+// set up field objects, with their color maps
+// use same map for raw and unfiltered fields
+// returns 0 on success, -1 on failure
+
+//TODO: change model for displayFieldController
+//_displayFieldController->setModel(new DisplayFieldModel(...))
+  
+int DisplayManager::_setupDisplayFields(vector<string> *fieldNames) {
+
+  /*
+  string colorMapDir, //  = _params.color_scale_dir,
+  vector<string> label,
+  vector<string> raw_name,
+  vector<string> filtered_name,
+  vector<string> units,
+  vector<string> color_map_path,
+  vector<string> shortcut,
+  // include in vector: _params.fields_n,
+  //const Params::field_t &pfld = _params._fields,
+  bool debug = _params.debug,  
+  )
+  */
+
+  // check for color map location
+  
+  string colorMapDir = _params.color_scale_dir;
+  Path mapDir(_params.color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - DisplayManager" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params.color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params.debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
+  //vector<DisplayField *> displayFields;
+
+  //for (int ifield = 0; ifield < _params.fields_n; ifield++) {
+  int ifield = (int) _displayFieldController->getNFields() + 1;
+  for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
+    string fieldName = *it;
+
+    //const Params::field_t &pfld = _params._fields[ifield];
+
+    /* create color map
+    
+    string colorMapPath = colorMapDir;
+    colorMapPath += PATH_DELIM;
+    colorMapPath += pfld.color_map;
+    ColorMap map;
+    map.setName(pfld.label);
+    map.setUnits(pfld.units);
+    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    bool noColorMap = false;
+
+    if (map.readMap(colorMapPath)) {
+        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
+        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+
+        try {
+          // check here for smart color scale; look up by field name/label and
+          // see if the name is a usual parameter for a known color map
+          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          cerr << "  found default color map for " <<  pfld.label  << endl;
+          // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
+          map = colorMap;
+          // HERE: What is missing from the ColorMap object??? 
+        } catch (std::out_of_range ex) {
+          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+    // Just set the colormap to a generic color map
+    // use range to indicate it needs update; update when we have access to the actual data values
+          map = ColorMap(0.0, 1.0);
+    noColorMap = true; 
+          // return -1
+        }
+    }
+*/
+    ColorMap map;
+    map = ColorMap(0.0, 1.0);
+    bool noColorMap = true; 
+    // unfiltered field
+    string shortcut = to_string(ifield);
+    DisplayField *field =
+      new DisplayField(fieldName, fieldName, "m/s", 
+                       shortcut, map, ifield, false);
+    if (noColorMap)
+      field->setNoColorMap();
+
+    //displayFields.push_back(field);
+    _displayFieldController->addField(field);
+    //_updateFieldPanel(fieldName);
+    ifield += 1;
+
+  } // ifield
+
+
+  if (fieldNames->size() < 1) {
+    cerr << "ERROR - DisplayManager::_setupDisplayFields()" << endl;
+    cerr << "  No fields found" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/*
+int DisplayManager::_setupDisplayFields(
+  string colorMapDir, //  = _params.color_scale_dir,
+  vector<string> label,
+  vector<string> raw_name,
+  vector<string> filtered_name,
+  vector<string> units,
+  vector<string> color_map_path,
+  vector<string> shortcut,
+  // include in vector: _params.fields_n,
+  //const Params::field_t &pfld = _params._fields,
+  bool debug = _params.debug,  
+  )
+{
+
+  // check for color map location
+  
+  string colorMapDir = _params.color_scale_dir;
+  Path mapDir(_params.color_scale_dir);
+  if (!mapDir.dirExists()) {
+    colorMapDir = Path::getPathRelToExec(_params.color_scale_dir);
+    mapDir.setPath(colorMapDir);
+    if (!mapDir.dirExists()) {
+      cerr << "ERROR - HawkEye" << endl;
+      cerr << "  Cannot find color scale directory" << endl;
+      cerr << "  Primary is: " << _params.color_scale_dir << endl;
+      cerr << "  Secondary is relative to binary: " << colorMapDir << endl;
+      return -1;
+    }
+    if (_params.debug) {
+      cerr << "NOTE - using color scales relative to executable location" << endl;
+      cerr << "  Exec path: " << Path::getExecPath() << endl;
+      cerr << "  Color scale dir:: " << colorMapDir << endl;
+    }
+  }
+
+  // we interleave unfiltered fields and filtered fields
+
+  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
+
+    const Params::field_t &pfld = _params._fields[ifield];
+
+    // check we have a valid label
+    
+    if (strlen(pfld.label) == 0) {
+      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+      cerr << "  Empty field label, ifield: " << ifield << endl;
+      cerr << "  Ignoring" << endl;
+      continue;
+    }
+    
+    // check we have a raw field name
+    
+    if (strlen(pfld.raw_name) == 0) {
+      cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+      cerr << "  Empty raw field name, ifield: " << ifield << endl;
+      cerr << "  Ignoring" << endl;
+      continue;
+    }
+
+    // create color map
+    
+    string colorMapPath = colorMapDir;
+    colorMapPath += PATH_DELIM;
+    colorMapPath += pfld.color_map;
+    ColorMap map;
+    map.setName(pfld.label);
+    map.setUnits(pfld.units);
+    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+
+    bool noColorMap = false;
+
+    if (map.readMap(colorMapPath)) {
+        cerr << "WARNING - HawkEye::_setupDisplayFields()" << endl;
+        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
+        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+
+        try {
+          // check here for smart color scale; look up by field name/label and
+          // see if the name is a usual parameter for a known color map
+          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+          cerr << "  found default color map for " <<  pfld.label  << endl;
+          // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
+          map = colorMap;
+          // HERE: What is missing from the ColorMap object??? 
+        } catch (std::out_of_range ex) {
+          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+    // Just set the colormap to a generic color map
+    // use range to indicate it needs update; update when we have access to the actual data values
+          map = ColorMap(0.0, 1.0);
+    noColorMap = true; 
+          // return -1
+        }
+    }
+
+    // unfiltered field
+
+    DisplayField *field =
+      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
+                       pfld.shortcut, map, ifield, false);
+    if (noColorMap)
+      field->setNoColorMap();
+
+    _displayFields.push_back(field);
+
+    // filtered field
+
+    if (strlen(pfld.filtered_name) > 0) {
+      string filtLabel = string(pfld.label) + "-filt";
+      DisplayField *filt =
+        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+                         map, ifield, true);
+      _displayFields.push_back(filt);
+    }
+
+  } // ifield
+
+  if (_displayFields.size() < 1) {
+    cerr << "ERROR - HawkEye::_setupDisplayFields()" << endl;
+    cerr << "  No fields found" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+*/
+
 /////////////////////////////////////////////////////
 // howto help
 
@@ -1378,11 +1681,11 @@ void DisplayManager::_about()
 		     //tr("HawkEye is an engineering display for beam-by-beam radar data. "));
   string text;
   
-  text += "HawkEye is an LROSE application for engineering and research display of radar data. \n\n";
-  text += "Get help with HawkEye ...  \n ";
+  text += "HawkEdit is an LROSE application for engineering and research display of radar data. \n\n";
+  text += "Get help with HawkEdit ...  \n ";
   text += "\nReport an issue https://github.com/NCAR/lrose-core/issues \n ";
-  text += "\nHawkEye Version ... \n ";  
-  text += "\nCopyright UCAR (c) 1990 - 2018  ";  
+  text += "\nHawkEdit Version ... \n ";  
+  text += "\nCopyright UCAR (c) 2019 - 2021  ";  
   text += "\nUniversity Corporation for Atmospheric Research (UCAR)  ";  
   text += "\nNational Center for Atmospheric Research (NCAR)   ";  
   text += "\nBoulder, Colorado, USA ";  

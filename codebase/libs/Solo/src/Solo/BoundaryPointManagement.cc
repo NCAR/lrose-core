@@ -1,6 +1,7 @@
 
 #include "Solo/dd_math.h"
 #include "Solo/BoundaryPointManagement.hh"
+#include <cstdio>
 
 
 BoundaryPointManagement::BoundaryPointManagement() {

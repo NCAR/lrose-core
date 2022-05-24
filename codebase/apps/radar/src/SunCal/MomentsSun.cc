@@ -397,8 +397,8 @@ void MomentsSun::computeRatios()
     S1S2 = ratioDbmVcHc + ratioDbmVxHx;
   }
 
-  if (ratioDbmVcHc != missing && ratioDbmVcHc != missing) {
-    SS = ratioDbmVcHc + ratioDbmVcHc;
+  if (ratioDbmVcHc != missing) {
+    SS = 2 * ratioDbmVcHc;
   }
 
 }

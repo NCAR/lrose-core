@@ -19,6 +19,8 @@
 
 #include <cmath>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
 #include "Solo/BoundaryPointMap.hh"
 #include "Solo/dd_math.h"
@@ -1451,7 +1453,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
       ob->num_segments = 1;
       ob->r0 = 0;
       ob->r1 = 1.e9;
-      cout << "xse_num_segments: return point 1" << endl;
+      // cout << "xse_num_segments: return point 1" << endl;
       return(1);
     }
     ob->r0 = 0;
@@ -1468,7 +1470,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
       //
       ob->num_segments = nx/2 +1;
     }
-      cout << "xse_num_segments: return point 2" << endl;
+      //cout << "xse_num_segments: return point 2" << endl;
 
     return(ob->num_segments);
   }
@@ -1476,7 +1478,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
    
   if(!nx) {
     ob->num_segments = 0;
-      cout << "xse_num_segments: return point 3" << endl;
+      //cout << "xse_num_segments: return point 3" << endl;
 
     return(ob->num_segments);
   }
@@ -1486,7 +1488,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
     if(nx == 1) {
       ob->num_segments = 1;
       ob->r1 = 1.e9;
-      cout << "xse_num_segments: return point 4" << endl;
+      //cout << "xse_num_segments: return point 4" << endl;
 
       return(1);
     }
@@ -1497,7 +1499,7 @@ int BoundaryPointMap::xse_num_segments(OneBoundary *ob)
   }
   ob->r1 = ob->first_intxn->next_intxn->rx;
   ob->next_segment = ob->first_intxn->next_intxn->next_intxn;
-      cout << "xse_num_segments: return point 5" << endl;
+      //cout << "xse_num_segments: return point 5" << endl;
 
   return(ob->num_segments);
 }
@@ -1738,8 +1740,7 @@ void BoundaryPointMap::get_boundary_mask(
         int radar_scan_mode,
         int radar_type,
         float tilt_angle, 
-        float rotation_angle,
-	bool *boundary_mask) {
+	      bool *boundary_mask) {
 
   OneBoundary *ob;
   //rota = d = dd_rotation_angle(dgi);
@@ -1759,7 +1760,7 @@ void BoundaryPointMap::get_boundary_mask(
       continue;
 
     // print the boundary for debug 
-    ob->print();
+    // ob->print();
         // shift the boundary's points to be relative to current radar represented by "usi"
         se_shift_bnd(ob, boundary_origin, radar_origin,
                      radar_scan_mode,
@@ -1801,7 +1802,7 @@ void BoundaryPointMap::get_boundary_mask(
     xse_find_intxns(azimuth, range, ob);
     xse_num_segments(ob);
     
-    cout << "azimuth=" << azimuth << " r0 = " << ob->r0 << " r1 = " << ob->r1 << endl;
+    // cout << "azimuth=" << azimuth << " r0 = " << ob->r0 << " r1 = " << ob->r1 << endl;
     double range1;
     double range2;
 

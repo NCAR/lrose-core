@@ -53,6 +53,7 @@
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
+#include <radar/ClickPointFmq.hh>
 #include "SweepManager.hh"
 
 class QApplication;
@@ -87,7 +88,7 @@ public:
   
   // destructor
   
-  ~DisplayManager();
+  virtual ~DisplayManager();
 
   // run 
 
@@ -149,7 +150,7 @@ protected:
   
   // beam reading timer
 
-  static bool _firstTimerEvent;
+  static int _timerEventCount;
   int _beamTimerId;
   bool _frozen;
 
@@ -263,6 +264,10 @@ protected:
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
 
+  // click point export fmq
+
+  ClickPointFmq _clickPointFmq;
+
   // set top bar
 
   virtual void _setTitleBar(const string &radarName) = 0;
@@ -311,6 +316,11 @@ protected:
                           int fontSize = 0,
                           QFrame **framePtr = NULL);
 
+  int _writeClickPointXml2Fmq(const RadxRay *ray,
+                              double rangeKm, int gateNum);
+  
+  int _readClickPointFmq(bool &gotNew);
+  
 protected slots:
 
   //////////////

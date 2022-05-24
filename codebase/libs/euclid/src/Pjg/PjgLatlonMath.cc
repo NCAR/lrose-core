@@ -96,6 +96,17 @@ void PjgLatlonMath::printDetails(ostream &out) const
 
 }
 
+///////////////////////////////
+/// get proj string
+  
+string PjgLatlonMath::getProjStr() const
+
+{
+
+  return "+proj=lonlat";
+
+}
+  
 ///////////////////////
 // LatLon conversions
 

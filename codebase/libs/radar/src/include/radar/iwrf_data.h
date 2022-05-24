@@ -155,6 +155,32 @@ typedef si32 iwrf_txrx_state_t;
 #define IWRF_TXRX_SHORT_PRT (1 << 1)
 #define IWRF_TXRX_HPOL_BYPASS (1 << 2)
 
+/********************************************************
+ * RVP8-specific enums
+ * These are for decoding the TsArchive header
+ */
+
+#define RVP8_PRF_MODE_FIXED          0
+#define RVP8_PRF_MODE_STAGGERED_2_3  1
+#define RVP8_PRF_MODE_STAGGERED_3_4  2
+#define RVP8_PRF_MODE_STAGGERED_4_5  3
+
+#define RVP8_SINGLE_POL_H    0
+#define RVP8_SINGLE_POL_V    1
+#define RVP8_HV_ALTERNATING  2
+#define RVP8_HV_SIMULTANEOUS 3
+
+#define RVP8_PHASE_MODE_FIXED   0
+#define RVP8_PHASE_MODE_RANDOM  1
+#define RVP8_PHASE_MODE_CUSTOM  2
+
+#define RVP8_WINDOW_RECT       0
+#define RVP8_WINDOW_HAMMING    1
+#define RVP8_WINDOW_BLACKMAN   2
+#define RVP8_WINDOW_BLKMANEX   3
+#define RVP8_WINDOW_VONHANN    4
+#define RVP8_WINDOW_ADAPTIVE   5
+
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/

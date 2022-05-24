@@ -43,8 +43,6 @@ public:
 protected:
 private:
 
-  static const std::string _accumHistoStr;  /**< User unary */
-
   RadxTimeMedian *_p; /**< Pointer passed in */
 
   bool _processAccumHisto(std::vector<ProcessingNode *> &args) const;

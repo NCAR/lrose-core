@@ -464,6 +464,7 @@ int RadxRay::replaceField(RadxField *newField)
     RadxField *fld = _fields[ii];
     if (fld->getName() == newName) {
       delete fld;
+      newField->remapRayGeom(_nGates, _startRangeKm, _gateSpacingKm, false);
       _fields[ii] = newField;
       loadFieldNameMap();
       return 0;
@@ -990,6 +991,7 @@ void RadxRay::remapRangeGeom(double newStartRangeKm,
   RadxRemap remap;
   if (remap.checkGeometryIsDifferent(_startRangeKm, _gateSpacingKm,
                                      newStartRangeKm, newGateSpacingKm)) {
+
     remap.prepareForInterp(_nGates,
                            _startRangeKm, _gateSpacingKm,
                            newStartRangeKm, newGateSpacingKm);
@@ -1857,6 +1859,36 @@ void RadxRay::incrementGeorefNotMissingCount(RadxGeoref &count)
 {
   if (_georef != NULL) {
     _georef->incrementIfNotMissing(count);
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+/// Set angles for elevation surveillance mode
+/// In SWEEP_MODE_ELEVATION_SURVEILLANCE mode, if georefs are
+/// available copy rotation to azimuth, and tilt to elevation.
+
+void RadxRay::setAnglesForElevSurveillance()
+  
+{
+  
+  if (getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    const RadxGeoref *georef = getGeoreference();
+    if (georef != NULL) {
+      double rollCorr = 0.0;
+      double rotCorr = 0.0;
+      double tiltCorr = 0.0;
+      const RadxCfactors *cfactors = getCfactors();
+      if (cfactors != NULL) {
+        rollCorr = cfactors->getRollCorr();
+        rotCorr = cfactors->getRotationCorr();
+        tiltCorr = cfactors->getTiltCorr();
+      }
+      double rotation = georef->getRotation() + rotCorr;
+      double roll = georef->getRoll() + rollCorr;
+      double tilt = georef->getTilt() + tiltCorr;
+      setAzimuthDeg(rotation + roll);
+      setElevationDeg(tilt);
+    }
   }
 }
 

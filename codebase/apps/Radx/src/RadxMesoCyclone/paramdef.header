@@ -1,0 +1,7 @@
+commentdef
+{
+  p_header = "RadxMesoCyclone";
+  p_text = "This program identifies mesocyclones in radar data\n"
+           "option -print_operators will show all the filtering options";
+};
+

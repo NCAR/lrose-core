@@ -26,8 +26,13 @@ def main():
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
 
-    global options
+    global thisScriptDir
     global runDir
+    thisScriptDir = os.path.dirname(__file__)
+    os.chdir(thisScriptDir)
+    runDir = os.getcwd()
+
+    global options
     global releaseDir
     global buildDir
     global coreDir
@@ -47,13 +52,15 @@ def main():
     global logFp
 
     global ostype
+    global prefixDefault
 
     # parse the command line
 
     usage = "usage: %prog [options]"
     homeDir = os.environ['HOME']
+    prefixDefault = "/tmp/lrose-scratch"
     releaseDirDefault = os.path.join(homeDir, 'releases')
-    logDirDefault = '/tmp/create_bin_release/logs'
+    logDirDefault = '/tmp/logs/create_bin_release'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=False,
@@ -64,14 +71,21 @@ def main():
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--prefix',
-                      dest='prefix', default='not-set',
+                      dest='prefix', default=prefixDefault,
                       help='Temporary directory for build')
     parser.add_option('--releaseDir',
                       dest='releaseTopDir', default=releaseDirDefault,
                       help='Top-level release dir')
+    parser.add_option('--runDir',
+                      dest='runDir', default='.',
+                      help='This script should either be run from the top level of the src tree, or you should specify this location')
     parser.add_option('--logDir',
                       dest='logDir', default=logDirDefault,
                       help='Logging dir')
+    parser.add_option('--automake',
+                      dest='automake', default=False,
+                      action="store_true",
+                      help='Use automake for the build. Default is cmake')
     parser.add_option('--force',
                       dest='force', default=False,
                       action="store_true",
@@ -96,6 +110,10 @@ def main():
     elif (options.debug):
         debugStr = " --debug "
 
+    if (options.runDir != "."):
+        os.chdir(options.runDir)
+        runDir = os.getcwd()
+
     # initialize logging
 
     if (os.path.isdir(options.logDir)):
@@ -113,7 +131,6 @@ def main():
     dateStr = nowTime.strftime("%Y%m%d")
     timeStr = nowTime.strftime("%Y%m%d%H%M%S")
     dateTimeStr = nowTime.strftime("%Y/%m/%d-%H:%M:%S")
-    runDir = os.getcwd()
 
     # read in release info
 
@@ -134,12 +151,12 @@ def main():
     # ensure there is space available for the rename
 
     if (sys.platform == "darwin"):
-        if (options.prefix == "not-set"):
+        if (options.prefix == prefixDefault):
             buildDir = "/usr/local/lrose"
         else:
             buildDir = options.prefix
     else:
-        if (options.prefix == "not-set"):
+        if (options.prefix == prefixDefault):
             buildDir = os.path.join("/tmp", 
                                     package + "_prepare_release_bin_directory")
         else:
@@ -211,7 +228,10 @@ def main():
     # build the package
 
     logPath = prepareLogFile("build-package");
-    buildPackage()
+    if (options.automake):
+        buildPackageAutomake()
+    else:
+        buildPackageCmake()
 
     # detect which dynamic libs are needed
     # copy the dynamic libraries into runtime area:
@@ -404,9 +424,9 @@ def buildNetcdf():
             shellCmd("./build_and_install_netcdf -x " + buildDir)
 
 ########################################################################
-# build package
+# build package using automake
 
-def buildPackage():
+def buildPackageAutomake():
 
     global logPath
 
@@ -461,8 +481,7 @@ def buildPackage():
 
     # install the libraries
 
-    logPath = prepareLogFile("install-libs-to-tmp");
-
+    logPath = prepareLogFile("install-libs");
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
@@ -475,42 +494,99 @@ def buildPackage():
 
     # install the apps
 
-    logPath = prepareLogFile("install-apps-to-tmp");
+    logPath = prepareLogFile("install-apps");
     cmd = "make -k install-strip"
     shellCmd(cmd)
 
     # optionally install the scripts
 
     if (options.installScripts):
+        installScripts()
 
-        logPath = prepareLogFile("install-scripts");
+########################################################################
+# build package using cmake
 
-        # install perl5
-        
-        perl5Dir = os.path.join(prefix, "lib/perl5")
-        try:
-            os.makedirs(perl5Dir)
-        except:
-            print("Dir exists: " + perl5Dir, file=sys.stderr)
+def buildPackageCmake():
 
-        perl5LibDir = os.path.join(codebaseDir, "libs/perl5/src")
-        if (os.path.isdir(perl5LibDir)):
-            os.chdir(os.path.join(baseDir, "libs/perl5/src"))
-            shellCmd("rsync -av *pm " + perl5Dir)
+    global logPath
 
-        # procmap
+    # For Centos 7, use cmake3
 
-        procmapScriptsDir = os.path.join(baseDir, "apps/procmap/src/scripts")
-        if (os.path.isdir(procmapScriptsDir)):
-            os.chdir(procmapScriptsDir)
-            shellCmd("./install_scripts.lrose " + scriptsDir)
+    getOSType()
+    cmakeCmd = "cmake"
+    if (osId == "centos" and osVersion == "7"):
+        cmakeCmd = "cmake3"
 
-        # general
+    # set the environment
 
-        generalScriptsDir = os.path.join(baseDir, "apps/scripts/src")
-        if (os.path.isdir(generalScriptsDir)):
-            os.chdir(generalScriptsDir)
-            shellCmd("./install_scripts.lrose " + scriptsDir)
+    runtimeLibRelDir = package + "_runtime_libs"
+
+    # print out environment
+
+    logPath = prepareLogFile("print-environment");
+    cmd = "env"
+    shellCmd(cmd)
+
+    # the build is done relative to the current dir
+
+    baseDir = os.path.join(runDir, "codebase")
+    cmakeBuildDir = os.path.join(baseDir, "build")
+    cmd = "/bin/rm -rf " + cmakeBuildDir
+    shellCmd(cmd)
+    os.makedirs(cmakeBuildDir)
+    os.chdir(cmakeBuildDir)
+
+    # run cmake
+
+    logPath = prepareLogFile("run-cmake")
+    cmd = cmakeCmd + " -DCMAKE_INSTALL_PREFIX=" + buildDir + " .."
+    shellCmd(cmd)
+
+    # build and install
+
+    logPath = prepareLogFile("build-libs");
+
+    libsBuildDir = os.path.join(runDir, "codebase/build/libs")
+    os.chdir(libsBuildDir)
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    logPath = prepareLogFile("build-tdrp_gen");
+
+    tdrpGenBuildDir = os.path.join(runDir, "codebase/build/apps/tdrp/src/tdrp_gen")
+    os.chdir(tdrpGenBuildDir)
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    logPath = prepareLogFile("build-apps");
+
+    appsBuildDir = os.path.join(runDir, "codebase/build/apps")
+    os.chdir(appsBuildDir)
+    cmd = "make -j 8 install"
+    shellCmd(cmd)
+
+    # optionally install the scripts
+
+    if (options.installScripts):
+        installScripts()
+
+########################################################################
+# install the scripts
+
+def installScripts():
+
+    logPath = prepareLogFile("install-scripts");
+
+    baseDir = os.path.join(runDir, "codebase")
+    os.chdir(baseDir)
+
+    # general
+    
+    installDir = os.path.join(buildDir, "bin")
+    scriptsDir = os.path.join(baseDir, "apps/scripts/src")
+    if (os.path.isdir(scriptsDir)):
+        os.chdir(scriptsDir)
+        shellCmd("./install_scripts.lrose " + installDir)
 
 ########################################################################
 # create the tar file
@@ -565,6 +641,31 @@ def prepareLogFile(logFileName):
     logFp.write("Log file from script: " + thisScriptName + "\n")
 
     return logPath
+
+########################################################################
+# get the OS type from the /etc/os-release file in linux
+
+def getOSType():
+
+    global osId, osVersion
+    osId = "unknown"
+    osVersion = "unknown"
+
+    if sys.platform == "darwin":
+        osId = "darwin"
+        return
+
+    if (os.path.exists("/etc/os-release") == False):
+        return
+
+    osrelease_file = open("/etc/os-release", "rt")
+    lines = osrelease_file.readlines()
+    osrelease_file.close()
+    for line in lines:
+        if (line.find('ID=') == 0):
+            osId = line.split('=')[1].replace('"', '').strip()
+        elif (line.find('VERSION_ID=') == 0):
+            osVersion = line.split('=')[1].replace('"', '').strip()
 
 ########################################################################
 # Run a command in a shell, wait for it to complete

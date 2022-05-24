@@ -1,0 +1,60 @@
+cmake_minimum_required(VERSION 3.5)
+project(GoesRGLM2Spdb)
+
+add_custom_command(
+    OUTPUT Params.hh
+    OUTPUT Params.cc
+    COMMAND $ENV{RAP_BIN_DIR}/tdrp_gen -f ${CMAKE_SOURCE_DIR}/paramdef.GoesRGLM2Spdb -c++ -prog GoesRGLM2Spdb
+    COMMAND cp ${CMAKE_SOURCE_DIR}/Params.cc ${CMAKE_CURRENT_BINARY_DIR}/Params.cc
+    COMMAND cp ${CMAKE_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_BINARY_DIR}/Params.hh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+set(SOURCE_FILES
+    Params.hh
+    Args.hh
+    GoesRGLM2Spdb.hh
+    Params.cc
+    Args.cc
+    GoesRGLM2Spdb.cc
+    Main.cc
+    )
+
+include_directories(
+    $ENV{RAP_INC_DIR}
+    $ENV{RAP_LOCAL_INC_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+link_libraries(netcdf hdf5)
+link_directories(
+    $ENV{RAP_LIB_DIR}
+    $ENV{RAP_LOCAL_LIB_DIR}
+)
+
+add_executable(GoesRGLM2Spdb ${SOURCE_FILES})
+target_link_libraries(GoesRGLM2Spdb
+    libdsdata.a
+    libFmq.a
+    libSpdb.a
+    libMdv.a
+    libRadx.a
+    libNcxx.a
+    libdsserver.a
+    librapformats.a
+    libdidss.a
+    libeuclid.a
+    libtoolsa.a
+    libdataport.a
+    libtdrp.a
+    librapmath.a
+    libz.a
+    libbz2.a
+    libudunits2.a
+    libhdf5_hl.a
+    libhdf5.a
+    libnetcdf.a
+    )

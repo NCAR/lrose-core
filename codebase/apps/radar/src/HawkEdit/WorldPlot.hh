@@ -109,6 +109,11 @@ public:
            double xMaxWorld,
            double yMaxWorld);
 
+  void set2(double xMinPixel,
+                    double yMinPixel,
+                    double xMaxPixel,
+                    double yMaxPixel);
+  
   // resize the plot
   
   void resize(int width, int height);

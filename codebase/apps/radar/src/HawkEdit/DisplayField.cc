@@ -48,7 +48,7 @@ DisplayField::DisplayField(const string &label,
         _units(units),
         _shortcut(shortcut),
         _colorMap(colorMap),
-        _buttonRow(buttonRow),
+        //_buttonRow(buttonRow),
         _isFilt(isFilt),
         _selectValue(0),
         _dialog(NULL),
@@ -58,10 +58,37 @@ DisplayField::DisplayField(const string &label,
   LOG(DEBUG) << "label = " << _label;
   LOG(DEBUG) << "name = " << _name;
   LOG(DEBUG) << "units = " << _units;
-  LOG(DEBUG) << "buttonRow = " << _buttonRow;
+  //LOG(DEBUG) << "buttonRow = " << _buttonRow;
   _haveColorMap = true;
+
+  //_renderer = new FieldRenderer(name);
+  //_image = NULL;  TODO: move to FieldRenderer
 }
 
+
+DisplayField::DisplayField(string &fieldName) {
+      ColorMap map(0.0, 1.0);
+        _label = fieldName;
+        _name = fieldName;
+        _units = "unknown units";
+        _shortcut = fieldName;
+        _colorMap = map;
+        //_buttonRow = (buttonRow),  <== maybe the View needs to create the DisplayField?
+        _isFilt = false;
+        _selectValue = 0;
+        _dialog = NULL;
+        _state = HIDDEN;
+  LOG(DEBUG) << "creating field with ... ";
+  LOG(DEBUG) << "label = " << _label;
+  LOG(DEBUG) << "name = " << _name;
+  LOG(DEBUG) << "units = " << _units;
+  //LOG(DEBUG) << "buttonRow = " << _buttonRow;
+  _haveColorMap = true;
+
+  //_renderer = new FieldRenderer(fieldName);
+  // _image = NULL; TODO: move to FieldRenderer
+
+}
 // destructor
 
 DisplayField::~DisplayField()
@@ -114,7 +141,7 @@ void DisplayField::print(ostream &out)
   out << "  units: " << _units << endl;
   out << "  shortcut: " << _shortcut << endl;
   out << "  colorMap: " << _colorMap.getName() << endl;
-  out << "  buttonRow: " << _buttonRow << endl;
+  //out << "  buttonRow: " << _buttonRow << endl;
   out << "  isFilt: " << _isFilt << endl;
   out << "  selectValue: " << _selectValue << endl;
   out << "  state: ";
@@ -155,3 +182,26 @@ void DisplayField::replaceColorMap(ColorMap newColorMap)
 {
   _colorMap = newColorMap;
 }
+// TODO: move colorMap to FieldRenderer
+/*
+QImage &DisplayField::getImage() {
+  if (_image == NULL) {
+    //render();   HERE still working here ...
+    return *_image;
+  } else {
+    return *_image;  // TODO: emit a signal
+  }
+}
+*/
+/*
+void DisplayField::render() {
+  int _width, _height; // TODO: fix this ...
+  _renderer->createImage(_width, _height);
+  // add Beams for each ray of data ...
+  _renderer->run();
+  return; // send a signal when the image is done.
+}
+*/
+
+
+

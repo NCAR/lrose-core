@@ -1,0 +1,2161 @@
+/**********************************************************************
+ * TDRP params for ./Sprite
+ **********************************************************************/
+
+//======================================================================
+//
+// Sprite is the spectral display for time series data.
+//
+// This is a C++ application based on the QT GUI toolkit.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "kddc";
+
+///////////// check_alloc /////////////////////////////
+//
+// Option to check memory allocations.
+//
+// For debugging memory usage.
+//
+//
+// Type: boolean
+//
+
+check_alloc = FALSE;
+
+//======================================================================
+//
+// DATA INPUT MODE.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Method for reading the input time series data.
+//
+
+//
+// REALTIME_FMQ_MODE: read a real-time IWRF data stream from an FMQ.
+//
+// REALTIME_TCP_MODE: read a real-time IWRF data stream from a TCP 
+//   server.
+//
+// ARCHIVE_TIME_MODE: given a time span and data directory, identify the 
+//   list of files within that time span and read those files.
+//
+// FILE_LIST_MODE: the list of time series files is specified on the 
+//   command line.
+//
+// FOLLOW_DISPLAY_MODE: the user is running a moments display (e.g. 
+//   HawkEye or CIDD) and clicks on locations of interest. Sprite polls a 
+//   shared memory segment for information on the user's clicks, and reads 
+//   in the data for the time and location specified in the latest click.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME_FMQ_MODE
+//     REALTIME_TCP_MODE
+//     ARCHIVE_TIME_MODE
+//     FILE_LIST_MODE
+//     FOLLOW_DISPLAY_MODE
+//
+
+input_mode = FOLLOW_DISPLAY_MODE;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// REALTIME_FMQ_MODE: input URL for moments data from an FMQ.
+//
+// A fully-qualified url is of the form fmqp:://hostname:port:path. The 
+//   path does not include the file extension.
+//
+//
+// Type: string
+//
+
+input_fmq_url = "/tmp/fmq/ts";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+//
+// If TRUE, the program will seek to the start of the fmq and read the 
+//   entire contents at startup. If FALSE, it will read only new data as 
+//   it arrives.
+//
+//
+// Type: boolean
+//
+
+seek_to_start_of_fmq = FALSE;
+
+///////////// input_tcp_address ///////////////////////
+//
+// REALTIME_TCP_MODE: ip address of host running IWRF moments server.
+//
+//
+// Type: string
+//
+
+input_tcp_address = "localhost";
+
+///////////// input_tcp_port //////////////////////////
+//
+// REALTIME_TCP_MODE: TCP port for IWRF moments server.
+//
+//
+// Type: int
+//
+
+input_tcp_port = 11000;
+
+///////////// archive_data_dir ////////////////////////
+//
+// ARCHIVE_TIME_MODE: directory path for time series files.
+//
+// This should point to the top dir of a time series data set. Below 
+//   this will be date directories - i.e. yyyymmdd.
+//
+//
+// Type: string
+//
+
+archive_data_dir = "/scr/sleet1/rsfdata/projects/eolbase/time_series/kddc";
+
+///////////// archive_start_time //////////////////////
+//
+// ARCHIVE_TIME_MODE: start time (yyyy mm dd hh mm ss).
+//
+// Data retrieval starts at this time.
+//
+//
+// Type: string
+//
+
+archive_start_time = "2020 05 25 02 54 00";
+
+///////////// archive_time_span_secs //////////////////
+//
+// ARCHIVE_TIME_MODE: time span (secs).
+//
+// archive_end_time = archive_start_time + archive_time_span.
+//
+//
+// Type: double
+//
+
+archive_time_span_secs = 200;
+
+///////////// min_secs_between_rendering //////////////
+//
+// Min time between rendering (secs).
+//
+// Setting this higher makes the display less smooth, but prevents the 
+//   display from taking up too much CPU.
+//
+//
+// Type: double
+//
+
+min_secs_between_rendering = 0;
+
+//======================================================================
+//
+// INITIAL location.
+//
+//======================================================================
+ 
+///////////// start_elevation /////////////////////////
+//
+// Initial elevation for selecting a radar gate (deg).
+//
+// The display begins using this elevation. The user can then change the 
+//   elevation either by selecting a point in HawkEye, or by clicking in 
+//   the ascope plots.
+//
+//
+// Type: double
+//
+
+start_elevation = 0.5;
+
+///////////// start_azimuth ///////////////////////////
+//
+// Initial azimuth for selecting a radar gate (deg).
+//
+// The display begins using this azimuth. The user can then change the 
+//   azimuth either by selecting a point in HawkEye, or by clicking in the 
+//   ascope plots.
+//
+//
+// Type: double
+//
+
+start_azimuth = 0;
+
+///////////// start_range_km //////////////////////////
+//
+// Initial range for selecting a radar gate (km).
+//
+// The display begins using this range. The user can then change the 
+//   range either by selecting a point in CIDD or HawkEye, or by clicking 
+//   in the ascope plots.
+//
+//
+// Type: double
+//
+
+start_range_km = 30;
+
+//======================================================================
+//
+// STATUS TO BE SHOWN IN GUI.
+//
+//======================================================================
+ 
+///////////// show_status_in_gui //////////////////////
+//
+// Indicate which status items to show in GUI.
+//
+// These items are shown in the left panel in the GUI. Setting an item 
+//   to false will hide it in the GUI.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean azimuth;
+//      boolean elevation;
+//      boolean fixed_angle;
+//      boolean volume_number;
+//      boolean sweep_number;
+//      boolean n_samples;
+//      boolean n_gates;
+//      boolean gate_length;
+//      boolean pulse_width;
+//      boolean prf_mode;
+//      boolean prf;
+//      boolean nyquist;
+//      boolean max_range;
+//      boolean unambiguous_range;
+//      boolean measured_power_h;
+//      boolean measured_power_v;
+//      boolean scan_name;
+//      boolean scan_mode;
+//      boolean polarization_mode;
+//      boolean latitude;
+//      boolean longitude;
+//      boolean altitude;
+//      boolean sun_elevation;
+//      boolean sun_azimuth;
+//   }
+//
+//
+
+show_status_in_gui = {
+    azimuth = TRUE,
+    elevation = TRUE,
+    fixed_angle = TRUE,
+    volume_number = TRUE,
+    sweep_number = TRUE,
+    n_samples = TRUE,
+    n_gates = TRUE,
+    gate_length = TRUE,
+    pulse_width = TRUE,
+    prf_mode = TRUE,
+    prf = TRUE,
+    nyquist = TRUE,
+    max_range = TRUE,
+    unambiguous_range = TRUE,
+    measured_power_h = TRUE,
+    measured_power_v = TRUE,
+    scan_name = TRUE,
+    scan_mode = TRUE,
+    polarization_mode = TRUE,
+    latitude = TRUE,
+    longitude = TRUE,
+    altitude = TRUE,
+    sun_elevation = TRUE,
+    sun_azimuth = TRUE
+};
+
+//======================================================================
+//
+// MAIN WINDOW DIMENSIONS AND PLOTTING DETAILS.
+//
+//======================================================================
+ 
+///////////// main_window_width ///////////////////////
+//
+// Startup width of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_width = 1500;
+
+///////////// main_window_height //////////////////////
+//
+// Startup height of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_height = 800;
+
+///////////// main_window_start_x /////////////////////
+//
+// Startup X for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_x = 0;
+
+///////////// main_window_start_y /////////////////////
+//
+// Startup Y for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_y = 0;
+
+///////////// main_window_title_margin ////////////////
+//
+// Height of top title margin, main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_title_margin = 24;
+
+///////////// main_title_font_size ////////////////////
+//
+// Font size of main title (pixels).
+//
+//
+// Type: int
+//
+
+main_title_font_size = 10;
+
+///////////// main_title_color ////////////////////////
+//
+// Text color for main title.
+//
+//
+// Type: string
+//
+
+main_title_color = "white";
+
+///////////// main_label_font_size ////////////////////
+//
+// Basic font size for labels (pixels).
+//
+// Some of the labels are scaled relative to this size.
+//
+//
+// Type: int
+//
+
+main_label_font_size = 10;
+
+///////////// main_background_color ///////////////////
+//
+// Color of main display background.
+//
+//
+// Type: string
+//
+
+main_background_color = "darkslateblue";
+
+///////////// main_window_panel_divider_line_width ////
+//
+// Width for lines dividing up the main window into panels.
+//
+//
+// Type: int
+//
+
+main_window_panel_divider_line_width = 1;
+
+///////////// main_window_panel_divider_color /////////
+//
+// Color for lines dividing up the main window into panels.
+//
+//
+// Type: string
+//
+
+main_window_panel_divider_color = "yellow";
+
+///////////// main_color_scale_width //////////////////
+//
+// Width of color scale (pixels).
+//
+//
+// Type: int
+//
+
+main_color_scale_width = 40;
+
+///////////// click_cross_size ////////////////////////
+//
+// Size of cross at click point (pixels).
+//
+// Size of cross drawn at click point, to select data.
+//
+//
+// Type: int
+//
+
+click_cross_size = 11;
+
+//======================================================================
+//
+// IQ PLOTS.
+//
+//======================================================================
+ 
+///////////// iqplots_n_rows //////////////////////////
+//
+// Number of rows of plots in iq plots.
+//
+// The iq plots are made up of a matrix of plots, n_rows by n_colums. 
+//   This is the starting value for the number of rows.
+//
+//
+// Type: int
+//
+
+iqplots_n_rows = 2;
+
+///////////// iqplots_n_columns ///////////////////////
+//
+// Number of columns of plots in iq plots.
+//
+// The iq plots are made up of a matrix of plots, n_rows by n_colums. 
+//   This is the starting value for the number of columns.
+//
+//
+// Type: int
+//
+
+iqplots_n_columns = 4;
+
+///////////// iqplots /////////////////////////////////
+//
+// Details of IQ plots for each sub panel.
+//
+// SPECTRUM_POWER: power spectrum, log.
+// SPECTRUM_PHASE: phase in the spectral domain.
+// TS_POWER: time domain power, log.
+// TS_PHASE: time domain phase.
+// I_VALS: I vals of time series.
+// Q_VALS: Q vals of time series.
+// I_VS_Q: I on x axis, Q on y axis.
+// PHASE: sum of I vs sum of Q. I on x axis.
+//
+//
+// Type: struct
+//   typedef struct {
+//      iqplot_type_t plot_type;
+//        Options:
+//          SPECTRUM_POWER
+//          SPECTRUM_PHASE
+//          TS_POWER
+//          TS_PHASE
+//          I_VALS
+//          Q_VALS
+//          I_VS_Q
+//          PHASOR
+//      rx_channel_t rx_channel;
+//        Options:
+//          CHANNEL_HC
+//          CHANNEL_VC
+//          CHANNEL_HX
+//          CHANNEL_VX
+//      fft_window_t fft_window;
+//        Options:
+//          FFT_WINDOW_RECT
+//          FFT_WINDOW_VONHANN
+//          FFT_WINDOW_BLACKMAN
+//          FFT_WINDOW_BLACKMAN_NUTTALL
+//          FFT_WINDOW_TUKEY_10
+//          FFT_WINDOW_TUKEY_20
+//          FFT_WINDOW_TUKEY_30
+//          FFT_WINDOW_TUKEY_50
+//      boolean use_adaptive_filter;
+//      boolean plot_clutter_model;
+//      double clutter_width_mps;
+//      boolean use_regression_filter;
+//      int regression_order;
+//      boolean regression_filter_interp_across_notch;
+//   }
+//
+// 1D array - variable length.
+//
+
+iqplots = {
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.5,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = SPECTRUM_POWER,
+    rx_channel = CHANNEL_VC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = TRUE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  // {
+  //   plot_type = SPECTRUM_PHASE,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
+  // {
+  //   plot_type = TS_POWER,
+  //   rx_channel = CHANNEL_HC,
+  //   fft_window = FFT_WINDOW_VONHANN,
+  //   use_adaptive_filter = TRUE,
+  //   plot_clutter_model = FALSE,
+  //   clutter_width_mps = 0.75,
+  //   use_regression_filter = FALSE,
+  //   regression_order = 3,
+  //   regression_filter_interp_across_notch = TRUE
+  // }
+  // ,
+  {
+    plot_type = I_VALS,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_RECT,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = Q_VALS,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_RECT,
+    use_adaptive_filter = FALSE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = TRUE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = I_VS_Q,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+  ,
+  {
+    plot_type = PHASOR,
+    rx_channel = CHANNEL_HC,
+    fft_window = FFT_WINDOW_VONHANN,
+    use_adaptive_filter = TRUE,
+    plot_clutter_model = FALSE,
+    clutter_width_mps = 0.75,
+    use_regression_filter = FALSE,
+    regression_order = 3,
+    regression_filter_interp_across_notch = TRUE
+  }
+};
+
+///////////// iqplot_top_margin ///////////////////////
+//
+// Height of top margin in IQPLOT mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+iqplot_top_margin = 0;
+
+///////////// iqplot_bottom_margin ////////////////////
+//
+// Height of bottom margin in IQPLOT mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+iqplot_bottom_margin = 18;
+
+///////////// iqplot_left_margin //////////////////////
+//
+// Width of left margin in IQPLOT mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+iqplot_left_margin = 30;
+
+///////////// iqplot_right_margin /////////////////////
+//
+// Width of right margin in IQPLOT mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+iqplot_right_margin = 0;
+
+///////////// iqplot_axis_tick_len ////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_axis_tick_len = 4;
+
+///////////// iqplot_n_ticks_ideal ////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+iqplot_n_ticks_ideal = 5;
+
+///////////// iqplot_title_text_margin ////////////////
+//
+// Margin around title text (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_title_text_margin = 3;
+
+///////////// iqplot_legend_text_margin ///////////////
+//
+// Margin around legend text (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_legend_text_margin = 3;
+
+///////////// iqplot_axis_text_margin /////////////////
+//
+// Margin around axis text (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_axis_text_margin = 2;
+
+//======================================================================
+//
+// IQPLOT TITLES, LABELS AND AXES.
+//
+//======================================================================
+ 
+///////////// iqplot_title_font_size //////////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_title_font_size = 10;
+
+///////////// iqplot_axis_label_font_size /////////////
+//
+// Font size of axis labels in iq plots (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_axis_label_font_size = 8;
+
+///////////// iqplot_tick_values_font_size ////////////
+//
+// Font size of axis tick values (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_tick_values_font_size = 6;
+
+///////////// iqplot_legend_font_size /////////////////
+//
+// Font size for plot legends (pixels).
+//
+//
+// Type: int
+//
+
+iqplot_legend_font_size = 8;
+
+///////////// iqplot_axis_label_color /////////////////
+//
+// Color of iqplot axis labels.
+//
+//
+// Type: string
+//
+
+iqplot_axis_label_color = "white";
+
+///////////// iqplot_title_color //////////////////////
+//
+// Color of plot title.
+//
+//
+// Type: string
+//
+
+iqplot_title_color = "orange";
+
+///////////// iqplot_axes_color ///////////////////////
+//
+// Color of axes in iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_axes_color = "green";
+
+///////////// iqplot_grid_color ///////////////////////
+//
+// Color of grid lines on iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_grid_color = "gray";
+
+///////////// iqplot_fill_color ///////////////////////
+//
+// Color of area fill for IQ plots.
+//
+//
+// Type: string
+//
+
+iqplot_fill_color = "pink";
+
+///////////// iqplot_labels_color /////////////////////
+//
+// Color of labels in iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_labels_color = "red";
+
+///////////// iqplot_line_color ///////////////////////
+//
+// Color of data lines in iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_line_color = "yellow";
+
+///////////// iqplot_line_width ///////////////////////
+//
+// Width of data lines in iq plots.
+//
+//
+// Type: int
+//
+
+iqplot_line_width = 1;
+
+///////////// iqplot_adaptive_filtered_color //////////
+//
+// Color of adaptive filtered lines in spectra plots.
+//
+//
+// Type: string
+//
+
+iqplot_adaptive_filtered_color = "pink";
+
+///////////// iqplot_clutter_model_color //////////////
+//
+// Color of clutter model iq plots.
+//
+//
+// Type: string
+//
+
+iqplot_clutter_model_color = "red";
+
+///////////// iqplot_regression_filtered_color ////////
+//
+// Color of regression filtered lines in spectra plots.
+//
+//
+// Type: string
+//
+
+iqplot_regression_filtered_color = "orange";
+
+///////////// iqplot_polynomial_fit_color /////////////
+//
+// Color of polynomial fit in time series.
+//
+//
+// Type: string
+//
+
+iqplot_polynomial_fit_color = "orange";
+
+///////////// iqplot_polynomial_residual_color ////////
+//
+// Color of polynomial residuals in time series.
+//
+//
+// Type: string
+//
+
+iqplot_polynomial_residual_color = "red";
+
+///////////// iqplot_polynomial_line_width ////////////
+//
+// Width of data lines in polynomial plots.
+//
+//
+// Type: int
+//
+
+iqplot_polynomial_line_width = 2;
+
+///////////// iqplot_y_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the Y direction.
+//
+//
+// Type: boolean
+//
+
+iqplot_y_grid_lines_on = TRUE;
+
+///////////// iqplot_x_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the X direction.
+//
+//
+// Type: boolean
+//
+
+iqplot_x_grid_lines_on = TRUE;
+
+///////////// iqplot_draw_instrument_height_line //////
+//
+// Option to draw a line for the instrument location.
+//
+//
+// Type: boolean
+//
+
+iqplot_draw_instrument_height_line = TRUE;
+
+///////////// iqplot_x_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to x axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+iqplot_x_axis_labels_inside = FALSE;
+
+///////////// iqplot_y_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to y axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+iqplot_y_axis_labels_inside = FALSE;
+
+//======================================================================
+//
+// IQPLOT LEGENDS.
+//
+//======================================================================
+ 
+///////////// iqplot_main_legend_pos //////////////////
+//
+// Position of main legend in the IQPLOT plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+iqplot_main_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// iqplot_plot_legend1 /////////////////////
+//
+// Option to plot the starting lat/lon position as a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+iqplot_plot_legend1 = TRUE;
+
+///////////// iqplot_legend1_pos //////////////////////
+//
+// Position of lat/lon legend in plot.
+//
+// The starting latitude/longitude will be plotted as a legend in the 
+//   location specified. See 'iqplot_plot_starting_latlon_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+iqplot_legend1_pos = LEGEND_TOP_LEFT;
+
+///////////// iqplot_legend2_pos //////////////////////
+//
+// Position of lat/lon legend in plot.
+//
+// The starting latitude/longitude will be plotted as a legend in the 
+//   location specified. See 'iqplot_plot_starting_latlon_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+iqplot_legend2_pos = LEGEND_TOP_LEFT;
+
+///////////// iqplot_plot_legend2 /////////////////////
+//
+// Option to plot the starting lat/lon position as a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+iqplot_plot_legend2 = TRUE;
+
+//======================================================================
+//
+// ASCOPE DISPLAY PANEL.
+//
+// The ascope panel shows the power plotted against range. It can be 
+//   configured for both the spectra plot and the waterfall plot.
+//
+//======================================================================
+ 
+///////////// ascope_n_panels_in_spectra_window ///////
+//
+// Number of ascope panels in spectra window (pixels).
+//
+// The ascopes will be on the left of the plot. Set to 0 for no ASCOPE 
+//   panel.
+//
+//
+// Type: int
+//
+
+ascope_n_panels_in_spectra_window = 2;
+
+///////////// ascope_moments //////////////////////////
+//
+// Moments to be displaed on ascope panels.
+//
+// The number of specified moments must match the number of ascope 
+//   panels.
+//
+//
+// Type: enum
+// Options:
+//     DBZ
+//     VEL
+//     WIDTH
+//     NCP
+//     SNR
+//     DBM
+//     ZDR
+//     LDR
+//     RHOHV
+//     PHIDP
+//     KDP
+// 1D array - variable length.
+//
+
+ascope_moments = {
+ DBZ,
+ VEL
+};
+
+///////////// ascope_width_in_spectra_window //////////
+//
+// Width of ASCOPE panel in spectra window (pixels).
+//
+// The ASCOPE will be on the left of the plot. Set to 0 for no ASCOPE 
+//   panel.
+//
+//
+// Type: int
+//
+
+ascope_width_in_spectra_window = 150;
+
+///////////// ascope_title_font_size //////////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+ascope_title_font_size = 10;
+
+///////////// ascope_axis_label_font_size /////////////
+//
+// Font size of axis labels in ascope (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_label_font_size = 8;
+
+///////////// ascope_tick_values_font_size ////////////
+//
+// Font size of axis tick values (pixels).
+//
+//
+// Type: int
+//
+
+ascope_tick_values_font_size = 6;
+
+///////////// ascope_legend_font_size /////////////////
+//
+// Font size for plot legends (pixels).
+//
+//
+// Type: int
+//
+
+ascope_legend_font_size = 6;
+
+///////////// ascope_title_text_margin ////////////////
+//
+// Margin around title text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_title_text_margin = 3;
+
+///////////// ascope_legend_text_margin ///////////////
+//
+// Margin around legend text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_legend_text_margin = 3;
+
+///////////// ascope_axis_text_margin /////////////////
+//
+// Margin around axis text (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_text_margin = 2;
+
+///////////// ascope_axis_tick_len ////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+ascope_axis_tick_len = 4;
+
+///////////// ascope_n_ticks_ideal ////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+ascope_n_ticks_ideal = 5;
+
+///////////// ascope_left_margin //////////////////////
+//
+// Width of left margin for ascope plot (pixels).
+//
+// The Y axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+ascope_left_margin = 18;
+
+///////////// ascope_bottom_margin ////////////////////
+//
+// Height of bottom margin for ascope plot (pixels).
+//
+// The X axis labels are plotted here.
+//
+//
+// Type: int
+//
+
+ascope_bottom_margin = 18;
+
+///////////// ascope_x_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the X direction.
+//
+//
+// Type: boolean
+//
+
+ascope_x_grid_lines_on = TRUE;
+
+///////////// ascope_y_grid_lines_on //////////////////
+//
+// Option to draw grid lines in the Y direction.
+//
+//
+// Type: boolean
+//
+
+ascope_y_grid_lines_on = TRUE;
+
+///////////// ascope_axis_label_color /////////////////
+//
+// Color of ascope axis labels.
+//
+//
+// Type: string
+//
+
+ascope_axis_label_color = "white";
+
+///////////// ascope_axes_color ///////////////////////
+//
+// Color of axes in ascope.
+//
+//
+// Type: string
+//
+
+ascope_axes_color = "green";
+
+///////////// ascope_grid_color ///////////////////////
+//
+// Color of grid lines on ascope.
+//
+//
+// Type: string
+//
+
+ascope_grid_color = "gray";
+
+///////////// ascope_line_color ///////////////////////
+//
+// Color of ascope line.
+//
+//
+// Type: string
+//
+
+ascope_line_color = "lightgray";
+
+///////////// ascope_selected_range_color /////////////
+//
+// Color of line showing currently selected range.
+//
+// The user can double click in the ascope to move this line.
+//
+//
+// Type: string
+//
+
+ascope_selected_range_color = "cyan";
+
+///////////// ascope_fill_color ///////////////////////
+//
+// Color of ascope fill.
+//
+//
+// Type: string
+//
+
+ascope_fill_color = "darkgreen";
+
+///////////// ascope_title_color //////////////////////
+//
+// Color of ascope title.
+//
+//
+// Type: string
+//
+
+ascope_title_color = "yellow";
+
+///////////// ascope_x_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to x axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+ascope_x_axis_labels_inside = FALSE;
+
+///////////// ascope_y_axis_labels_inside /////////////
+//
+// Location of tick labels, relative to y axis.
+//
+// These can either be outside the axes, or inside - i.e. within the 
+//   data area of the plot.
+//
+//
+// Type: boolean
+//
+
+ascope_y_axis_labels_inside = FALSE;
+
+//======================================================================
+//
+// CLUTTER FILTERING.
+//
+// The default clutter filtering method is the Adaptive Filter, with 
+//   residue correction activated.
+//
+//======================================================================
+ 
+///////////// apply_residue_correction_in_adaptive_filter 
+//
+// Option to apply residue correction to adaptive filter.
+//
+// At some gates, the spectral noise floor may be high. If this 
+//   correction is applied, the spectral noise floor will be reduced to 
+//   the measured noise value.
+//
+//
+// Type: boolean
+//
+
+apply_residue_correction_in_adaptive_filter = TRUE;
+
+///////////// min_snr_db_for_residue_correction ///////
+//
+// Min SNR for applying the residue correction (dB).
+//
+// Spectral residue seems to occur at high powers, when the receiver is 
+//   close to saturated. This is probably related to increased phase 
+//   noise. Only apply residue correction if SNR exceeds this value. 
+//   Otherwise, do not apply a correction.
+//
+//
+// Type: double
+//
+
+min_snr_db_for_residue_correction = 75;
+
+///////////// use_polynomial_regression_clutter_filter 
+//
+// Option to apply a regression clutter filter.
+//
+// For the regression filter, a polynomial fit is performed on the I and 
+//   Q data individually. The filtered time series is computed as the 
+//   original minus the regression fit. If true, this takes preference 
+//   over the notch filter.
+//
+//
+// Type: boolean
+//
+
+use_polynomial_regression_clutter_filter = FALSE;
+
+///////////// regression_filter_polynomial_order //////
+//
+// Order of the polynomial fit for the regression filter.
+//
+//
+// Type: int
+//
+
+regression_filter_polynomial_order = 5;
+
+///////////// regression_filter_determine_order_from_CSR 
+//
+// Option to determine the polynomial order from the 
+//   Clutter-to-Signal-Ratio (CSR).
+//
+// If TRUE, we compute the CSR from the 3 central spectral points. Then, 
+//   using a lookup-table based on CSR, we determine the appropriate order 
+//   of the polynomial fit.
+//
+//
+// Type: boolean
+//
+
+regression_filter_determine_order_from_CSR = FALSE;
+
+///////////// regression_filter_notch_edge_power_ratio_threshold_db 
+//
+// Power ratio threshold to determine the edge of the filtered notch 
+//   (dB).
+//
+// After the initial application of the regression filter, a notch is 
+//   formed around 0. In order to determine the width of this notch, we 
+//   compute the ratio of the filtered power to the original unfiltered 
+//   power. This is the threshold used to determine where the edge of the 
+//   notch occurs.
+//
+//
+// Type: double
+//
+
+regression_filter_notch_edge_power_ratio_threshold_db = -45;
+
+///////////// regression_filter_min_csr_db ////////////
+//
+// Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter 
+//   (dB).
+//
+// As a first step, we compute the CSR using a 3rd order regression fit. 
+//   If the CSR is below this threshold, we do not apply the filter at 
+//   all, and simply return the unfiltered spectrum.
+//
+//
+// Type: double
+//
+
+regression_filter_min_csr_db = -5;
+
+///////////// use_simple_notch_clutter_filter /////////
+//
+// Option to use a simple notch for clutter filtering.
+//
+// If false, spectral adaptive clutter filtering is used. If true, a 
+//   simple notch is used instead. The width is specified in 
+//   notch_filter_width_mps. The depth of the notch is down to the 
+//   calibrated noise floor.
+//
+//
+// Type: boolean
+//
+
+use_simple_notch_clutter_filter = FALSE;
+
+///////////// simple_notch_filter_width_mps ///////////
+//
+// Width of simple clutter notch (m/s).
+//
+// See use_simple_notch_clutter_filter.
+//
+//
+// Type: double
+//
+
+simple_notch_filter_width_mps = 3;
+
+///////////// staggered_prt_median_filter_len /////////
+//
+// Length of median filter applied to unfolding interval for staggered 
+//   PRT.
+//
+// If less than 3, no filtering will be performed.
+//
+//
+// Type: int
+//
+
+staggered_prt_median_filter_len = 1;
+
+//======================================================================
+//
+// SPECTRUM WIDTH METHOD.
+//
+//======================================================================
+ 
+///////////// spectrum_width_method ///////////////////
+//
+// Method for computing spectrum width.
+//
+// R0R1 is the default. For staggered we use R0Rm in this case. 
+//   Otherwise we use R1R2 if applicable. For staggered, we use the hybrid 
+//   if R0R1 is not selected.
+//
+//
+// Type: enum
+// Options:
+//     WIDTH_METHOD_R0R1
+//     WIDTH_METHOD_R1R2
+//     WIDTH_METHOD_HYBRID
+//
+
+spectrum_width_method = WIDTH_METHOD_R0R1;
+
+//======================================================================
+//
+// COMPUTING KDP USING ADAPTIVE FILTER METHOD.
+//
+// Parameters for computing KDP.
+//
+//======================================================================
+ 
+///////////// KDP_fir_filter_len //////////////////////
+//
+// Filter length for the FIR filter for PHIDP (gates).
+//
+// When computing KDP, an FIR filter is first applied to PHIDP to smooth 
+//   it. This is the length of that filter, in gates.
+//
+//
+// Type: enum
+// Options:
+//     FIR_LEN_125
+//     FIR_LEN_60
+//     FIR_LEN_40
+//     FIR_LEN_30
+//     FIR_LEN_20
+//     FIR_LEN_10
+//
+
+KDP_fir_filter_len = FIR_LEN_20;
+
+///////////// KDP_n_filt_iterations_unfolded //////////
+//
+// Sets the number of iterations for the initial FIR filter for unfolded 
+//   PHIDP.
+//
+// After unfolding PHIDP, the FIR filter is applied to the unfolded 
+//   phidp, a number of times, to smooth it. The effect of the filter is a 
+//   combination of the filter length and the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_unfolded = 2;
+
+///////////// KDP_n_filt_iterations_conditioned ///////
+//
+// Sets the number of iterations for the final FIR filter for 
+//   conditioned PHIDP.
+//
+// In order to identify phase shift on backscatter (PSOB), we condition 
+//   the PHIDP to keep it generally increasing with range. The FIR filter 
+//   is applied to the conditioned phidp a number of times, to smooth it. 
+//   The effect of the filter is a combination of the filter length and 
+//   the number of iterations.
+//
+//
+// Type: int
+//
+
+KDP_n_filt_iterations_conditioned = 2;
+
+///////////// KDP_use_iterative_filtering /////////////
+//
+// Perform iterative filtering to locate backscatter phase shift.
+//
+//
+// Type: boolean
+//
+
+KDP_use_iterative_filtering = FALSE;
+
+///////////// KDP_phidp_difference_threshold //////////
+//
+// Difference threshold for the iterative filtering method.
+//
+// The FIR filter is applied successively, 
+//   KDP_n_filt_iterations_conditioned times. After each iteration the 
+//   result is checked against the original. If the difference is less 
+//   than this parameter, the original value at that gate is retained. If 
+//   the difference exceeds this parameter, the new filtered value is 
+//   retained.
+//
+//
+// Type: double
+//
+
+KDP_phidp_difference_threshold = 4;
+
+///////////// KDP_ngates_for_stats ////////////////////
+//
+// Number of gates over which the phidp mean, sdev and jitter are 
+//   computed.
+//
+// The mean, sdev and jitter of phidp are computed over a consecutive 
+//   number of gates in range, centered on the current gate of interest. 
+//   This parameter is the number of gates over which these statistics are 
+//   computed.
+//
+//
+// Type: int
+//
+
+KDP_ngates_for_stats = 9;
+
+///////////// KDP_phidp_sdev_max //////////////////////
+//
+// Sets the threshold for the standard deviation of phidp in range.
+//
+// The sdev of phidp is a good test for valid phidp. The sdev is 
+//   computed in the circle, so that it takes account of folding if 
+//   present. If the sdev is less than this value, it is assumed we are in 
+//   weather. Applies to computation of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_sdev_max = 20;
+
+///////////// KDP_phidp_jitter_max ////////////////////
+//
+// Sets the threshold for the jitter of phidp in range.
+//
+// The jitter of phidp is defined as the mean absolute change in angle 
+//   between successive phidp measurements in range. It is computed on the 
+//   circle to take account of folding. If the jitter is less than this 
+//   value, it is assumed we are in weather. Applies to computation of KDP 
+//   only.
+//
+//
+// Type: double
+//
+
+KDP_phidp_jitter_max = 25;
+
+///////////// KDP_check_snr ///////////////////////////
+//
+// Check the SNR.
+//
+//
+// Type: boolean
+//
+
+KDP_check_snr = FALSE;
+
+///////////// KDP_snr_threshold ///////////////////////
+//
+// Sets the threshold for checking SNR (dB).
+//
+// If the SNR drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_snr_threshold = -6;
+
+///////////// KDP_check_rhohv /////////////////////////
+//
+// Check the RHOHV.
+//
+//
+// Type: boolean
+//
+
+KDP_check_rhohv = TRUE;
+
+///////////// KDP_rhohv_threshold /////////////////////
+//
+// Sets the threshold for checking RHOHV.
+//
+// If the RHOHV drops below this value, KDP will not be computed at this 
+//   gate.
+//
+//
+// Type: double
+//
+
+KDP_rhohv_threshold = 0.95;
+
+///////////// KDP_check_zdr_sdev //////////////////////
+//
+// Check the standard deviation of ZDR in range?.
+//
+//
+// Type: boolean
+//
+
+KDP_check_zdr_sdev = TRUE;
+
+///////////// KDP_zdr_sdev_max ////////////////////////
+//
+// Sets the threshold for the standard deviation of zdr in range.
+//
+// The sdev of zdr is a good test for clutter. If the sdev is less than 
+//   this value, it is assumed we are in weather. Applies to computation 
+//   of KDP only.
+//
+//
+// Type: double
+//
+
+KDP_zdr_sdev_max = 2;
+
+///////////// KDP_min_valid_abs_kdp ///////////////////
+//
+// Sets the min valid KDP value.
+//
+// Values less than this are set to 0.
+//
+//
+// Type: double
+//
+
+KDP_min_valid_abs_kdp = 0.025;
+
+///////////// KDP_debug ///////////////////////////////
+//
+// Option to print debug messages in KDP computation.
+//
+//
+// Type: boolean
+//
+
+KDP_debug = FALSE;
+
+//======================================================================
+//
+// BEAM SAMPLING.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of samples (pulses) per dwell.
+//
+//
+// Type: int
+//
+
+n_samples = 128;
+
+///////////// indexed_beams ///////////////////////////
+//
+// Index the beams on even centers?.
+//
+// If false, the pulses are formed into beams sequentially, with no 
+//   overlap.
+//
+//
+// Type: boolean
+//
+
+indexed_beams = TRUE;
+
+///////////// indexed_resolution_ppi //////////////////
+//
+// Dwell width in azimuth (deg).
+//
+// Applies to PPI mode.
+//
+//
+// Type: double
+//
+
+indexed_resolution_ppi = 0.5;
+
+///////////// indexed_resolution_rhi //////////////////
+//
+// Dwell width in elevation (deg).
+//
+// Applies to RHI mode.
+//
+//
+// Type: double
+//
+
+indexed_resolution_rhi = 0.5;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert the sense of the HV flag in alternating mode.
+//
+// In alternating dual-pol mode, the HV flag indicates whether the pulse 
+//   is horizontally or vertically polarized. Normally 1 indicates H and 0 
+//   V. This parameter allows you to invert the sense of the flag, so that 
+//   1 is interpreted as V and 0 as H.
+//
+//
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// prt_is_for_previous_interval ////////////
+//
+// Does the PRT in the pulse header refer to the previous time 
+//   interval?.
+//
+// If TRUE, the PRT in the pulse header refers to the time from the 
+//   PREVIOUS pulse to THIS pulse. If FALSE, the PRT in the header refers 
+//   to the time from THIS pulse to the NEXT pulse.
+//
+//
+// Type: boolean
+//
+
+prt_is_for_previous_interval = TRUE;
+
+///////////// check_for_missing_pulses ////////////////
+//
+// Option to check for missing pulses in the time series.
+//
+// If missing pulses are found, the beam formed by those pulses will be 
+//   discarded.
+//
+//
+// Type: boolean
+//
+
+check_for_missing_pulses = TRUE;
+
+///////////// swap_receiver_channels //////////////////
+//
+// Option to swap the H and V channels for IQ data from the receiver.
+//
+// It is possible that the receiver was incorrectly connected and the 
+//   channels (H and V for example) are swapped. If this flag is set to 
+//   TRUE, the channels in the data will be swapped before computing the 
+//   moments.
+//
+//
+// Type: boolean
+//
+
+swap_receiver_channels = FALSE;
+
+//======================================================================
+//
+// OVERRIDING RADAR PARAMETERS.
+//
+// Some radar parameters may be included in the time series data. This 
+//   section allows you to optionally override some of those values.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override the radar name.
+//
+// If true, the name in this file will be used. If not, the name in the 
+//   time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_name = FALSE;
+
+///////////// radar_name //////////////////////////////
+//
+// Name of the radar.
+//
+// See 'override_radar_name'.
+//
+//
+// Type: string
+//
+
+radar_name = "SPOL";
+
+///////////// override_radar_location /////////////////
+//
+// Option to override the radar location.
+//
+// If true, the location in this file will be used. If not, the location 
+//   in the time series data will be used.
+//
+//
+// Type: boolean
+//
+
+override_radar_location = FALSE;
+
+///////////// radar_latitude_deg //////////////////////
+//
+// Radar latitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_latitude_deg = 39.9321;
+
+///////////// radar_longitude_deg /////////////////////
+//
+// Radar longitude (deg).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_longitude_deg = -105.182;
+
+///////////// radar_altitude_meters ///////////////////
+//
+// Radar altitude (meters).
+//
+// See override_radar_location.
+//
+//
+// Type: double
+//
+
+radar_altitude_meters = 1742;
+
+///////////// override_gate_geometry //////////////////
+//
+// Option to override the gate geometry.
+//
+// If true, the gate_spacing and start_range in the time series data is 
+//   overridden by the parameters in this file.
+//
+//
+// Type: boolean
+//
+
+override_gate_geometry = FALSE;
+
+///////////// gate_spacing_meters /////////////////////
+//
+// Gate spacing (meters).
+//
+// See override_gate_geometry.
+//
+//
+// Type: double
+//
+
+gate_spacing_meters = 150;
+
+///////////// start_range_meters //////////////////////
+//
+// Start range (meters).
+//
+// See override_gate_geometry.
+//
+//
+// Type: double
+//
+
+start_range_meters = 150;
+
+///////////// override_radar_wavelength ///////////////
+//
+// Option to override the radar wavelength.
+//
+// If true, the radar wavelength in this file will be used. If not, the 
+//   wavelength in the time series data will be used if available.
+//
+//
+// Type: boolean
+//
+
+override_radar_wavelength = FALSE;
+
+///////////// radar_wavelength_cm /////////////////////
+//
+// Radar wavelength (cm).
+//
+// See override_radar_wavelength.
+//
+//
+// Type: double
+//
+
+radar_wavelength_cm = 10;
+
+//======================================================================
+//
+// FFT WINDOWING.
+//
+// Applies to the general case.
+//
+//======================================================================
+ 
+///////////// fft_window //////////////////////////////
+//
+// Window to be applied to time series before computing spectra.
+//
+//
+// Type: enum
+// Options:
+//     FFT_WINDOW_RECT
+//     FFT_WINDOW_VONHANN
+//     FFT_WINDOW_BLACKMAN
+//     FFT_WINDOW_BLACKMAN_NUTTALL
+//     FFT_WINDOW_TUKEY_10
+//     FFT_WINDOW_TUKEY_20
+//     FFT_WINDOW_TUKEY_30
+//     FFT_WINDOW_TUKEY_50
+//
+
+fft_window = FFT_WINDOW_VONHANN;
+
+//======================================================================
+//
+// RADAR CALIBRATION.
+//
+//======================================================================
+ 
+///////////// cal_file_path ///////////////////////////
+//
+// File name for XML calibration file.
+//
+//
+// Type: string
+//
+
+cal_file_path = "./spol_cal.xml";
+
+///////////// use_cal_from_time_series ////////////////
+//
+// Option to override cal in time series data.
+//
+// If false, the cal information in the time series data will be used. 
+//   If true, the cal info in the param file will be used.
+//
+//
+// Type: boolean
+//
+
+use_cal_from_time_series = FALSE;
+
+//======================================================================
+//
+// CLICK POINT DATA MESSAGING from display (HawkEye or CIDD).
+//
+// Reading and writing the click point location to an FMQ in XML format.
+//
+//======================================================================
+ 
+///////////// click_point_fmq_url /////////////////////
+//
+// URL for click point URL.
+//
+// If the user clicks on a point in HawkEye, the details of the latest 
+//   click point are read from the FMQ. The format is XML. You can view 
+//   the FMQ using FmqMon -mode ASCII_PRINT. Also, if the user changes the 
+//   time or range in Sprite, this change will be written to the FMQ.
+//
+//
+// Type: string
+//
+
+click_point_fmq_url = "/tmp/fmq/click_point/kddc";
+
+///////////// click_point_search_angle_error //////////
+//
+// Max angular error when searching for dwell close to the click point 
+//   (deg).
+//
+// When the user clicks in HawkEye, the (x,y) location is saved. From 
+//   this, the elevation, azimuth and range of the click point can be 
+//   determined. This parameter gives the max angular error allowable in 
+//   this search.
+//
+//
+// Type: double
+//
+
+click_point_search_angle_error = 10;
+
+///////////// click_point_delta_azimuth_deg ///////////
+//
+// Change in azimuth when clicking left or right keys in follow mode 
+//   (deg).
+//
+// In display follow mode, you can navigate left and right in azimuth 
+//   using the arrow keys. This is the requested change in azimuth when 
+//   navigating.
+//
+//
+// Type: double
+//
+
+click_point_delta_azimuth_deg = 0.25;
+

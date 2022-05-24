@@ -189,9 +189,15 @@ bool Algorithm::isOutput(const std::string &name) const
 //------------------------------------------------------------------
 void Algorithm::printOperators(void) const
 {
-  std::string s = _p.sprintBinaryOperators();
-  printf("Binary operations:\n%s\n", s.c_str());
+  std::vector<FunctionDef> f = _p.allFunctionDefs();
+  for (size_t i=0; i<f.size(); ++i)
+  {
+    printf("%s:\n%s\n\n", f[i]._name.c_str(), f[i]._description.c_str());
+  }
+  
+  // std::string s = _p.sprintBinaryOperators();
+  // printf("Binary operations:\n%s\n", s.c_str());
 
-  s = _p.sprintUnaryOperators();
-  printf("Unary operations:\n%s\n", s.c_str());
+  // s = _p.sprintUnaryOperators();
+  // printf("Unary operations:\n%s\n", s.c_str());
 }

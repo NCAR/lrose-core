@@ -62,12 +62,14 @@ int Args::parse (int argc, char **argv, const string &prog_name)
 
   int iret = 0;
   char tmp_str[BUFSIZ];
-  
+
   // intialize
   
   _progName = prog_name;
   TDRP_init_override(&override);
   inputFileList.clear();
+  startTime = 0;
+  endTime = 0;
 
   // search for command options
   
@@ -150,6 +152,42 @@ int Args::parse (int argc, char **argv, const string &prog_name)
       sprintf(tmp_str, "print_sections = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+	date_time_t start;
+	if (sscanf(argv[++i], "%d %d %d %d %d %d",
+		   &start.year, &start.month, &start.day,
+		   &start.hour, &start.min, &start.sec) != 6) {
+	  iret = -1;
+	} else {
+	  uconvert_to_utime(&start);
+	  startTime = start.unix_time;
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+	date_time_t end;
+	if (sscanf(argv[++i], "%d %d %d %d %d %d",
+		   &end.year, &end.month, &end.day,
+		   &end.hour, &end.min, &end.sec) != 6) {
+	  iret = -1;
+	} else {
+	  uconvert_to_utime(&end);
+	  endTime = end.unix_time;
+	  sprintf(tmp_str, "mode = ARCHIVE;");
+	  TDRP_add_override(&override, tmp_str);
+	}
+      } else {
+	iret = -1;
+      }
+	
     } else if (!strcmp(argv[i], "-files") ||
                !strcmp(argv[i], "-f")) {
       
@@ -190,6 +228,8 @@ void Args::_usage(ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] end time\n"
+      << "         ARCHIVE mode only\n"
       << "       [ -in_url url] Input URL\n"
       << "       [ -f ?, -files ?] input file list\n"
       << "         Sets mode to FILELIST\n"
@@ -198,6 +238,8 @@ void Args::_usage(ostream &out)
       << "       [ -print_var_list ] print list of variables in the grib files\n"
       << "       [ -print_summary ] print a summary of fields in the grib files\n"
       << "       [ -print_sections ]print the sections in the grib files (can be large)\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] start time\n"
+      << "         ARCHIVE mode only\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;

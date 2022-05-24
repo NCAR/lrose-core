@@ -47,34 +47,37 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
+//#include "DataModel.hh"
 
 class SweepManager {
   
 public:
 
+/*
   class GuiSweep {
   public:
-    RadxSweep *radx;
-    int indexInFile;
+    //RadxSweep *radx;
+    //int indexInFile;
     int indexInGui;
     GuiSweep() {
-      radx = NULL;
-      indexInFile = 0;
+      //radx = NULL;
+      //indexInFile = 0;
       indexInGui = 0;
     }
   };
+*/
 
   // constructor
   
-  SweepManager(const Params &params);
+  SweepManager(); // const Params &params);
   
   // destructor
   
-  ~SweepManager();
+  virtual ~SweepManager();
 
   // set from volume
 
-  void set(const RadxVol &vol);
+  void set(); // const RadxVol &vol);
   
   // set the angle
   // size effect: sets the selected index
@@ -87,7 +90,7 @@ public:
 
   // set the index for the file
 
-  void setFileIndex(int index);
+  //void setFileIndex(int index);
 
   // change selected index by the specified increment
 
@@ -95,28 +98,28 @@ public:
 
   // get methods
 
-  size_t getNSweeps() const { return _sweeps.size(); }
-  const vector<GuiSweep> &getGuiSweeps() const { return _sweeps; }
-  const GuiSweep getSelectedSweep() const { return _sweeps[_guiIndex]; }
+  size_t getNSweeps() const { return 0; } // _sweeps.size(); }
+  //const vector<GuiSweep> &getGuiSweeps() const { return _sweeps; }
+  //const GuiSweep getSelectedSweep() const { return _sweeps[_guiIndex]; }
 
-  int getGuiIndex() const { return _guiIndex; }
-  int getFileIndex() const { return _sweeps[_guiIndex].indexInFile; }
+  //int getGuiIndex() const { return _guiIndex; }
+  //int getFileIndex() const { return _sweeps[_guiIndex].indexInFile; }
   double getSelectedAngle() const { return _selectedAngle; }
-  double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
-  bool getReversedInGui() const { return _reversedInGui; }
+  //double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
+  //bool getReversedInGui() const { return _reversedInGui; }
   
 private:
   
-  const Params &_params;
+  //const Params &_params;
   
   // sweeps
 
-  vector<GuiSweep> _sweeps;
-  bool _reversedInGui;
+  //vector<GuiSweep> _sweeps;
+  //bool _reversedInGui;
 
   // selection
 
-  int _guiIndex;
+  int _guiIndex;  // index of selected sweep
   double _selectedAngle;
 
 };

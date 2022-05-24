@@ -38,7 +38,7 @@ class BoundaryHeader {
 
  public:
   BoundaryHeader();
-  ~BoundaryHeader();
+  virtual ~BoundaryHeader();
 
  private:
 

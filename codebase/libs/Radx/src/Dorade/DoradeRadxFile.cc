@@ -140,6 +140,8 @@ void DoradeRadxFile::clear()
   
   _writeFileNameMode = FILENAME_WITH_START_TIME_ONLY;
 
+  _isTailRadar = false;
+
 }
 
 void DoradeRadxFile::_clearRays()
@@ -1079,17 +1081,21 @@ int DoradeRadxFile::_readSweepFile(const string &path)
 
     // read in block
     
-    if (fread(block, 1, nBytes, _file) != (size_t) nBytes) {
+    size_t nRead = fread(block, 1, nBytes, _file);
+    if (nRead != (size_t) nBytes) {
       int errNum = errno;
       _addErrStr("ERROR - DoradeRadxFile::_readSweepFile()");
       _addErrStr("  Cannot read data block");
       _addErrStr("  ID: ", id);
       _addErrInt("  len: ", nBytes);
+      _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // handle block
@@ -1814,6 +1820,7 @@ int DoradeRadxFile::_handleRay(int nBytes, const char *block)
       break;
     case DoradeData::SCAN_MODE_AIR:
       ray->setSweepMode(Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE);
+      _isTailRadar = true;
       break;
     default:
       ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
@@ -2396,6 +2403,12 @@ int DoradeRadxFile::_loadReadVolume()
   if (_radarName.find("ELDR") != string::npos) {
     _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
   } 
+
+  if (_isTailRadar) {
+    _readVol->setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
+    _readVol->setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+  }
+
   // if the extension_num contains a value
   // override the primary axis. 
   // the primary axis enum type starts at zero, but a zero
@@ -2733,17 +2746,21 @@ int DoradeRadxFile::printNative(const string &path, ostream &out,
 
     // read in block
     
-    if (fread(block, 1, nBytes, _file) != (size_t) nBytes) {
+    size_t nRead = fread(block, 1, nBytes, _file);
+    if (nRead != (size_t) nBytes) {
       int errNum = errno;
       _addErrStr("ERROR - DoradeRadxFile::printNative()");
       _addErrStr("  Cannot read data block");
       _addErrStr("  ID: ", id);
       _addErrInt("  len: ", nBytes);
+      _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // print block
@@ -3872,10 +3889,10 @@ int DoradeRadxFile::_writeRadar()
       // check for missing data values
       double prt2 = ray.getPrtSec();
       if (prt2 != Radx::missingMetaDouble) {
-        _ddRadar.prt2 = prt2 * 1000.0 / ray.getPrtRatio(); // msecs
+        _ddRadar.prt2 = (prt2 * 1000.0) / ray.getPrtRatio(); // msecs
       }
     }
-    //    double pulseWidthUsec = ray.getPulseWidthUsec();
+    //double pulseWidthUsec = ray.getPulseWidthUsec();
     //double pulseWidthMeters = (pulseWidthUsec / 1.0e6) * Radx::LIGHT_SPEED * 0.5;
     //_ddRadar.pulse_width = pulseWidthMeters;
     //double pulseWidthUsec = ray.getPulseWidthUsec();

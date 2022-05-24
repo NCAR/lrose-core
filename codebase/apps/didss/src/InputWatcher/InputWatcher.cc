@@ -133,6 +133,7 @@ int InputWatcher::Run ()
   input.setFileQuiescence(_params.file_quiescence);
   input.setSearchExt(_params.search_ext);
   input.setSubString(_params.search_substr);
+  input.setIgnoreString(_params.ignore_substr);
   input.setRecursion(_params.search_recursively);
   input.setMaxRecursionDepth(_params.max_recursion_depth);
   input.setMaxDirAge(_params.max_dir_age);
@@ -148,8 +149,15 @@ int InputWatcher::Run ()
   if (_params.debug) {
     cerr << "InputWatcher - watching dir: " << _params.input_dir << endl;
     cerr << "  FileQuiescence: " << _params.file_quiescence << endl;
-    cerr << "  SearchExt: " << _params.search_ext << endl;
-    cerr << "  SubString: " << _params.search_substr << endl;
+    if (strlen(_params.search_ext) > 0) {
+      cerr << "  SearchExt: " << _params.search_ext << endl;
+    }
+    if (strlen(_params.search_substr) > 0) {
+      cerr << "  SubString: " << _params.search_substr << endl;
+    }
+    if (strlen(_params.ignore_substr) > 0) {
+      cerr << "  IgnoreString: " << _params.ignore_substr << endl;
+    }
     cerr << "  Recursion: " << _params.search_recursively << endl;
     cerr << "  MaxRecursionDepth: " << _params.max_recursion_depth << endl;
     cerr << "  MaxDirAge: " << _params.max_dir_age << endl;

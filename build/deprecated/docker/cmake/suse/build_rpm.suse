@@ -1,0 +1,134 @@
+#!/bin/bash
+
+#################################################################
+# This script is to be executed inside a docker suse container
+# It assume lrose-base is installed at /usr/local/lrose
+#
+# The package will be built and copied to the cross-mounted dir
+# so it will be visible from outside the container.
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Build the RPM inside the docker container"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  set lrose_pkg"
+    echo "          e.g. lrose-core, lrose-radx, lrose-cidd"
+    echo "  -r ? :  set release_date"
+    echo "          e.g. latest, 20190105"
+    echo "  -t ? :  set os_type"
+    echo "          e.g. opensuse"
+    echo "  -v ? :  set os_version"
+    echo "          e.g. latest, leap, tumbleweed"
+    echo
+}
+
+scriptName=$(basename $0)
+
+os_type=opensuse
+os_version=latest
+lrose_pkg=lrose-core
+debug=true
+release_date=latest
+
+# Parse command line options.
+while getopts hdp:r:t:v: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            lrose_pkg=$OPTARG
+            ;;
+        r)
+            release_date=$OPTARG
+            ;;
+        t)
+            os_type=$OPTARG
+            ;;
+        v)
+            os_version=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [ "$debug" == "true" ]
+then
+  echo "Running $scriptName"
+  echo "  building the RPM inside the docker container"
+  echo "    os_type: ${os_type}"
+  echo "    os_version: ${os_version}"
+  echo "    lrose_pkg: ${lrose_pkg}"
+  echo "    release_date: ${release_date}"
+fi
+
+# create the rpm structure
+
+cd
+mkdir -p rpmbuild
+cd rpmbuild
+mkdir -p BUILD RPMS SOURCES SPECS SRPMS
+
+# create the spec file
+
+echo "==>> creating spec file"
+
+name=${lrose_pkg}
+version=${release_date}
+if [ "$release_date" == "latest" ]
+then
+    version=`date +"%Y%m%d"`
+fi
+
+release=${os_type}_${os_version}
+
+cd SPECS
+echo "############################################################" > rpm.spec
+echo "%define name ${name}" >> rpm.spec
+echo "%define version ${version}" >> rpm.spec
+echo "%define release ${release}" >> rpm.spec
+
+if [ "$lrose_pkg" == "cidd" ]
+then
+  cat /scripts/rpm.spec.body.cidd >> rpm.spec
+else
+  cat /scripts/rpm.spec.body >> rpm.spec
+fi
+
+echo "==>> spec file contents:"
+cat rpm.spec
+
+# build the rpm
+
+echo "==>> building the rpm:"
+cd /root/rpmbuild
+rpmbuild -v -bb ./SPECS/rpm.spec
+
+# copy the rpm to the cross-mounted director
+
+echo "==>> rsync rpm back to /pkgDir"
+
+rsync -av RPMS/*/*rpm /pkgDir
+
+# add write permissions since this is created by root
+# and we need to remove them from the cross-mount later
+
+chmod o+w -R /pkgDir
+chmod g+w -R /pkgDir
+

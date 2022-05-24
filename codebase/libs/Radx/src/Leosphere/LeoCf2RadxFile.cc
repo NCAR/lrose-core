@@ -1037,105 +1037,7 @@ void LeoCf2RadxFile::_close()
   
 }
 
-/*
-/////////////////////////////////////////////////////////
-// load up the read volume with the data from this object
 
-int LeoCf2RadxFile::_loadReadVolume()
-  
-{
-
-  int nRays = _rays.size();
-  if (nRays < 1) {
-    if (_debug) {
-      cerr << "WARNING - LeoCf2RadxFile::_loadReadVolume" << endl;
-      cerr << "  No rays" << endl;
-    }
-    return -1;
-  }
-  
-  _readVol->clear();
-
-  // set meta-data
- 
-  _readVol->setOrigFormat("LEOSPHERE");
-  _readVol->setInstrumentType(Radx::INSTRUMENT_TYPE_LIDAR);
-  _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-  
-  _readVol->setStartTime(_rays[0]->getTimeSecs(),
-                         _rays[0]->getNanoSecs());
-  _readVol->setEndTime(_rays[nRays-1]->getTimeSecs(),
-                       _rays[nRays-1]->getNanoSecs());
-
-  _readVol->setTitle("LEOSPHERE LIDAR");
-  _readVol->setSource(_instrumentName);
-  size_t nameStart = _pathInUse.find_last_of(PATH_SEPARATOR);
-  string fileName = _pathInUse;
-  if (nameStart != string::npos) {
-    fileName = _pathInUse.substr(nameStart + 1);
-  }
-
-  _readVol->setSiteName(_siteName);
-  _readVol->setInstrumentName(_instrumentName);
-  _readVol->setHistory(fileName);
-  _readVol->setComment(_comments);
-  _readVol->setStatusXml(_configXml);
-
-  _readVol->setLatitudeDeg(_latitude);
-  _readVol->setLongitudeDeg(_longitude);
-  _readVol->setAltitudeKm(_altitudeM / 1000.0);
-  _readVol->setSensorHtAglM(0);
-  _readVol->addWavelengthM(_wavelengthM);
-
-  // add rays
-
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    _readVol->addRay(_rays[ii]);
-  }
-
-  // memory allocation for rays has passed to _readVol,
-  // so free up pointer array
-
-  _rays.clear();
-  
-  // load the sweep information from the rays
-
-  _readVol->loadSweepInfoFromRays();
-  
-  // constrain the sweep data as appropriate
-  
-  if (_readFixedAngleLimitsSet) {
-    if (_readVol->constrainByFixedAngle(_readMinFixedAngle, _readMaxFixedAngle,
-                                        _readStrictAngleLimits)) {
-      _addErrStr("ERROR - LeoCf2RadxFile::_loadReadVolume");
-      _addErrStr("  No data found within fixed angle limits");
-      _addErrDbl("  min fixed angle: ", _readMinFixedAngle);
-      _addErrDbl("  max fixed angle: ", _readMaxFixedAngle);
-      return -1;
-    }
-  } else if (_readSweepNumLimitsSet) {
-    if (_readVol->constrainBySweepNum(_readMinSweepNum, _readMaxSweepNum,
-                                        _readStrictAngleLimits)) {
-      _addErrStr("ERROR - LeoCf2RadxFile::_loadReadVolume");
-      _addErrStr("  No data found within sweep num limits");
-      _addErrInt("  min sweep num: ", _readMinSweepNum);
-      _addErrInt("  max sweep num: ", _readMaxSweepNum);
-      return -1;
-    }
-  }
-
-  // check for indexed rays, set info on rays
-  
-  _readVol->checkForIndexedRays();
-
-  // load up volume info from rays
-
-  _readVol->loadVolumeInfoFromRays();
-
-  return 0;
-  
-}
-*/
 /////////////////////////////////////////////////////////
 // Write data from volume to specified directory
 //
@@ -1261,50 +1163,7 @@ int LeoCf2RadxFile::printNative(const string &path, ostream &out,
 {
 
   cout << "Not implemented" << endl;
-  /*
-  clear();
 
-  // is this a Leosphere file?
-  
-  if (!isLeosphereCfRadial2(path)) {
-    _addErrStr("ERROR - LeoCf2RadxFile::printNative");
-    _addErrStr("  Not a leoshpere file: ", path);
-    return -1;
-  }
-
-  // print config
-
-  _printConfig(path, out);
-
-  // open file
-  
-  if (_openRead(path)) {
-    _addErrStr("ERROR - LeoCf2RadxFile::printNative");
-    return -1;
-  }
-  
-  // read through the records in the file
-
-  bool gotData = false;
-  char line[65536];
-  while (!feof(_file)) {
-    if (fgets(line, 65536, _file) == NULL) {
-      if (!gotData) {
-        _addErrStr("ERROR - LeoCf2RadxFile::printNative");
-        _addErrStr("  Premature end of file: ", path);
-        _close();
-        return -1;
-      }
-    }
-    out << line;
-    if (strncmp(line, "Timestamp", 9) == 0) {
-      gotData = true;
-      if (!printRays && !printData) {
-        break;
-      }
-    }
-  } // while
-  */
   _close();
   return 0;
 
@@ -2548,7 +2407,7 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
       err.addErrStr("  Cannot read sweep group, name", _sweepGroupNames[0]);
       throw(NcxxException(err.getErrStr(), __FILE__, __LINE__));
     }
-    int natts = group.getAttCount();
+    // int natts = group.getAttCount();
     const multimap<string, NcxxGroupAtt> &atts = group.getAtts();
 
     for (multimap<string, NcxxGroupAtt>::const_iterator iter = atts.begin();
@@ -2572,7 +2431,8 @@ void LeoCf2RadxFile::_readSweepsMetaAsInFile()
         //_readVol->setPredomSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE); 
      //} else 
      if (name.find("scan_id") != string::npos) {
-       _scanName = value;
+       std::string::size_type sz;   // alias of size_t
+       _scanId = std::stoi (value, &sz);
      } else if (name.find("res_file_name") != string::npos) {
        _rangeResolution = value;
      }
@@ -2691,12 +2551,36 @@ void LeoCf2RadxFile::_readSweepMeta(NcxxGroup &group,
       char *sweepModeVal;
       var.getVal(&sweepModeVal);
       string val(sweepModeVal);
-      if (val.find("ppi") != string::npos) 
+      _scanName = val;
+      // options are 
+      // "sector,coplane,rhi,ppi,vertical_pointing,idle,
+      // azimuth_surveillance,elevation_surveillance,sunscan,
+      // fixed,manual_ppi,manual_rhi,dbs"
+
+      if ((val.find("ppi") != string::npos) || (val.find("sector") != string::npos))
         _sweepMode = Radx::SWEEP_MODE_SECTOR;
       else if (val.find("rhi") != string::npos)
         _sweepMode = Radx::SWEEP_MODE_RHI; 
       else if (val.find("dbs") != string::npos)
         _sweepMode = Radx::SWEEP_MODE_DOPPLER_BEAM_SWINGING;
+      else if (val.find("fixed") != string::npos)
+         _sweepMode = Radx::SWEEP_MODE_POINTING; 
+      else if (val.find("coplane") != string::npos) 
+        _sweepMode = Radx::SWEEP_MODE_COPLANE;
+      else if (val.find("vertical_pointing") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_VERTICAL_POINTING; 
+      else if (val.find("idle") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_IDLE;
+      else if (val.find("azimuth_surveillance") != string::npos)
+         _sweepMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE; 
+      else if (val.find("elevation_surveillance") != string::npos) 
+        _sweepMode = Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE;
+      else if (val.find("sunscan") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_SUNSCAN; 
+      else if (val.find("manual_ppi") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_MANUAL_PPI;
+      else if (val.find("manual_rhi") != string::npos)
+        _sweepMode = Radx::SWEEP_MODE_MANUAL_RHI;
       else 
         _sweepMode = Radx::SWEEP_MODE_NOT_SET;
             //_sweepMode = Radx::sweepModeFromStr(val);
@@ -3054,7 +2938,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
 
    try {
      _file.readDoubleVar(ALTITUDE, _altitudeM, 0.0);
-   } catch (NcxxException e) {
+   } catch (NcxxException &e) {
      _altitudeM = 0.0;
      cerr << "WARNING - LeoCf2RadxFile::_readLocation" << endl;
      cerr << "  No altitude variable" << endl;

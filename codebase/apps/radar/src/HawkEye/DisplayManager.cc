@@ -77,10 +77,11 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
+#include <toolsa/TaXml.hh>
 #include <Radx/RadxFile.hh>
 
 using namespace std;
-bool DisplayManager::_firstTimerEvent = true;
+int DisplayManager::_timerEventCount = 0;
 
 // Constructor
 
@@ -110,6 +111,13 @@ DisplayManager::DisplayManager(const Params &params,
   _altRateMps = 0.0;
 
   _altitudeInFeet = false;
+
+  _clickPointFmq.setUrl(_params.click_point_fmq_url);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _clickPointFmq.setVerbose();
+  } else if (_params.debug) {
+    _clickPointFmq.setDebug();
+  }
 
 }
 
@@ -1277,3 +1285,68 @@ void DisplayManager::_about()
 
   QMessageBox::about(this, tr("About Menu"), tr(text.c_str()));
 }
+
+/////////////////////////////////////////////////////////////////
+// write click point data, in XML format, to FMQ
+
+int DisplayManager::_writeClickPointXml2Fmq(const RadxRay *ray,
+                                            double rangeKm,
+                                            int gateNum)
+
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    fprintf(stderr, "DisplayManager::_writeClickPointXml2Fmq() called\n");
+  }
+
+  if (_clickPointFmq.write(ray->getTimeSecs(),
+                           ray->getNanoSecs(),
+                           ray->getAzimuthDeg(),
+                           ray->getElevationDeg(),
+                           rangeKm,
+                           gateNum)) {
+    cerr << "ERROR - DisplayManager::_writeClickPointXml2Fmq()" << endl;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////
+// read click point data from FMQ
+// Returns 0 on success, -1 on failure
+
+int DisplayManager::_readClickPointFmq(bool &gotNew)
+  
+{
+  
+  // read in a new message
+  
+  if (_clickPointFmq.read(gotNew)) {
+    cerr << "ERROR -  DisplayManager::_readClickPointFmq" << endl;
+    cerr << "  Cannot read click point info from FMQ" << endl;
+    cerr << "  Fmq: " << _params.click_point_fmq_url << endl;
+    return -1;
+  }
+  
+  if (!gotNew) {
+    // no data
+    return 0;
+  }
+
+  if (_params.debug) {
+    cerr << "=========== latest click point XML ==================" << endl;
+    cerr << "_clickPointTime: " << _clickPointFmq.getDataTime().asString(6) << endl;
+    cerr << "_clickPointElevation: " << _clickPointFmq.getElevation() << endl;
+    cerr << "_clickPointAzimuth: " << _clickPointFmq.getAzimuth() << endl;
+    cerr << "_clickPointRangeKm: " << _clickPointFmq.getRangeKm() << endl;
+    cerr << "_clickPointGateNum: " << _clickPointFmq.getGateNum() << endl;
+    cerr << "=====================================================" << endl;
+  }
+  
+  return 0;
+
+}
+
+

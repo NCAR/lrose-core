@@ -79,8 +79,6 @@ TimeScaleWidget::TimeScaleWidget(QWidget* parent,
   
   // qRegisterMetaType<size_t>("size_t");
 
-  cerr << "1111111111111111111111111111" << endl;
-
   setFixedHeight(100);
 
 }

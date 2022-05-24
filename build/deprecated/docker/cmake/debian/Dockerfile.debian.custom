@@ -1,0 +1,46 @@
+#===================================================
+# create a custom Docker image for building lrose
+# start with clean image
+# install the required packages
+#
+# This file will be pre-pended with the FROM command
+
+# install required packages
+
+RUN apt-get update && \
+    apt-get install -y \
+    tcsh git gcc g++ gfortran rsync chrpath \
+    automake make cmake mlocate libtool pkg-config python \
+    libcurl3-dev curl \
+    libfl-dev libbz2-dev libx11-dev libpng-dev \
+    libfftw3-dev libexpat1-dev \
+    qtbase5-dev qtdeclarative5-dev \
+    libgeographic-dev libeigen3-dev libzip-dev \
+    libarmadillo-dev libopenmpi-dev \
+    libcurl4-openssl-dev \
+    libnetcdf-dev libhdf5-dev hdf5-tools
+
+# create link for qmake
+
+RUN \
+    cd /usr/bin; \
+    /bin/rm -f qmake qmake-qt5; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+
+
+# install packages for running CIDD
+
+#RUN \
+#    /usr/bin/dpkg --add-architecture i386 && \
+#    apt-get -y update && \
+#    apt-get install -y \
+#    libx11-dev:i386 \
+#    libxext-dev:i386 \
+#    libfftw3-dev:i386 \
+#    libexpat-dev:i386 \
+#    libpng-dev:i386 \
+#    libfl-dev:i386 \
+#    libbz2-dev:i386 \
+#    libzip-dev:i386
+

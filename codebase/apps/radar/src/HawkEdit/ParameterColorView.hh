@@ -21,7 +21,7 @@ class ParameterColorView : public QDialog
 public:
 
   ParameterColorView(QWidget *parent = 0); // , ColorMap colorMap);
-  ~ParameterColorView();
+  virtual ~ParameterColorView();
   void updateEvent(vector<string> fieldNames, string selectedField);
   bool getChanges();
   string getSelectedFieldName() { return _selectedField; };
@@ -32,6 +32,7 @@ public slots:
   void emphasisColorProvided(QColor color);
   void annotationColorProvided(QColor color);
   void backgroundColorProvided(QColor color);
+  void boundaryColorProvided(QColor color);
 
 signals:
   void getColorMap(string selectedField);
@@ -45,7 +46,7 @@ signals:
   void pickColorPaletteRequest();
   void gridColorChanged(QColor color);  
   //void backgroundColorChanged(QColor color);  
-  //void backgroundColorChanged(QColor color);  
+  void boundaryColorChanged(QColor color);  
   void backgroundColorChanged(QColor color);  
 
 private slots:
@@ -66,6 +67,7 @@ private slots:
     void cancelColorScale();
     void saveColorScale();
     void replotColorScale();
+    void applyChanges();
     void pickColorPalette();
   void fieldSelected(QListWidgetItem *current, QListWidgetItem *previous);
 
@@ -105,6 +107,8 @@ private:
   QWidget *_parent;
 
   string _selectedField;
+
+  QColor getColorOnButton(QPushButton *button);
 
   void errorMessage(string title, string message);
 };

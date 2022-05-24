@@ -72,6 +72,7 @@ public:
   bool readRuns;
   bool readProjRuns;
   bool readCompressed;
+  bool printAsXml;
 
 protected:
   

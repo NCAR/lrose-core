@@ -81,6 +81,11 @@ public:
   } mode_t;
 
   typedef enum {
+    MERGE_PARALLEL = 0,
+    MERGE_SERIAL = 1
+  } merge_method_t;
+
+  typedef enum {
     FIND_CLOSEST = 0,
     FIND_FIRST_BEFORE = 1,
     FIND_FIRST_AFTER = 2
@@ -109,6 +114,11 @@ public:
     int file_match_time_tolerance_sec;
     find_mode_t find_mode;
   } secondary_dataset_t;
+
+  typedef struct {
+    char* vol_title;
+    char* scan_name;
+  } serial_vol_type_t;
 
   ///////////////////////////
   // Member functions
@@ -412,10 +422,29 @@ public:
 
   int max_realtime_data_age_secs;
 
+  tdrp_bool_t latest_data_info_avail;
+
+  tdrp_bool_t search_recursively;
+
+  int max_recursion_depth;
+
+  int wait_between_checks;
+
+  int file_quiescence;
+
   char* primary_dataset_dir;
+
+  merge_method_t merge_method;
 
   secondary_dataset_t *_secondary_datasets;
   int secondary_datasets_n;
+
+  serial_vol_type_t *_serial_vol_types;
+  int serial_vol_types_n;
+
+  char* serial_merge_vol_title;
+
+  char* serial_merge_scan_name;
 
   tdrp_bool_t set_fixed_angle_limits;
 
@@ -478,7 +507,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[45];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

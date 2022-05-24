@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <sys/types.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
 #include <Mdv/MdvxProj.hh>
@@ -48,8 +49,8 @@ class XyLookup {
 public:
   
   typedef struct {
-    unsigned long int sourceIndex;
-    unsigned long int destIndex;
+    uint64_t sourceIndex;
+    uint64_t destIndex;
   } xy_lut_t;
   
   XyLookup(const Params &params,

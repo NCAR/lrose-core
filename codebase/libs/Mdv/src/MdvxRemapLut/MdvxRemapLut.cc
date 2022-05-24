@@ -51,9 +51,6 @@ using namespace std;
 MdvxRemapLut::MdvxRemapLut()
   
 {
-  _nOffsets = 0;
-  _sourceOffsets = NULL;
-  _targetOffsets = NULL;
   _offsetsComputed = false;
 }
 
@@ -64,14 +61,8 @@ MdvxRemapLut::MdvxRemapLut(const MdvxProj &proj_source,
 			   const MdvxProj &proj_target)
   
 {
-  _nOffsets = 0;
-  _sourceOffsets = NULL;
-  _targetOffsets = NULL;
   _offsetsComputed = false;
   computeOffsets(proj_source, proj_target);
-
-  return;
-
 }
 
 /////////////////////////////
@@ -137,41 +128,37 @@ void MdvxRemapLut::computeOffsets(const MdvxProj &proj_source,
 
   // compute lookup offsets
 
-  _sourceOffsetBuf.free();
-  _targetOffsetBuf.free();
-  _nOffsets = 0;
-
+  _sourceOffsets.clear();
+  _targetOffsets.clear();
+  
   // loop through the target
 
   double yy = inTarget.miny;
-  int targetIndex = 0;
-  for (int iy = 0; iy < inTarget.ny; iy++, yy += inTarget.dy) {
+  int64_t targetIndex = 0;
+  for (int64_t iy = 0; iy < inTarget.ny; iy++, yy += inTarget.dy) {
     
     double xx = inTarget.minx;
-    for (int ix = 0; ix < inTarget.nx;
+    for (int64_t ix = 0; ix < inTarget.nx;
 	 ix++, xx += inTarget.dx, targetIndex++) {
-
+      
       // get lat/lon of target point
-
+      
       double lat, lon;
       _projTarget.xy2latlon(xx, yy, lat, lon);
 
       // get index of source point
-
-      int sourceIndex;
+      
+      int64_t sourceIndex;
       if (_projSource.latlon2arrayIndex(lat, lon, sourceIndex) == 0) {
         // add mapping
-	_sourceOffsetBuf.add(&sourceIndex, sizeof(int));
-	_targetOffsetBuf.add(&targetIndex, sizeof(int));
-	_nOffsets++;
+	_sourceOffsets.push_back(sourceIndex);
+	_targetOffsets.push_back(targetIndex);
       }
       
     } // ix
 
   } // iy
 
-  _sourceOffsets = (int *) _sourceOffsetBuf.getPtr();
-  _targetOffsets = (int *) _targetOffsetBuf.getPtr();
   _offsetsComputed = true;
 
   return;

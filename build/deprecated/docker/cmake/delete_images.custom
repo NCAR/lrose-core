@@ -1,0 +1,26 @@
+#! /bin/bash
+
+# delete custom images
+
+docker image rm -f custom/centos:6
+docker image rm -f custom/centos:7
+docker image rm -f custom/centos:8
+docker image rm -f custom/centos:latest
+
+docker image rm -f custom/fedora:29
+docker image rm -f custom/fedora:30
+docker image rm -f custom/fedora:31
+docker image rm -f custom/fedora:32
+docker image rm -f custom/fedora:33
+
+docker image rm -f custom/debian:9
+docker image rm -f custom/debian:10
+
+docker image rm -f custom/ubuntu:16.04
+docker image rm -f custom/ubuntu:18.04
+docker image rm -f custom/ubuntu:20.04
+
+docker image rm -f custom/opensuse:leap
+docker image rm -f custom/opensuse:latest
+
+

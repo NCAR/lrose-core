@@ -52,7 +52,9 @@ RadxNcfStr::RadxNcfStr()
   CfConvention = "CF-1.7";
   BaseConvention = "CF-Radial";
   CurrentVersion = "CF-Radial-1.4";
-  CurrentVersion2 = "CF-Radial-2.0";
+
+  CfRadial2Conventions = "Cf/Radial";
+  CfRadial2Version = "2.0";
 
   // short names
 

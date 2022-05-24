@@ -1,0 +1,14 @@
+#! /bin/bash
+
+# cleanup builds
+# use before calling perform builds
+
+
+delete_images.build -p core
+delete_images.build -p radx
+delete_images.build -p blaze
+
+delete_images.install -p core
+delete_images.install -p radx
+delete_images.install -p blaze
+

@@ -219,6 +219,17 @@ public:
 			bool &archive, bool &error);
 
   /**
+   * Check command line args for help request
+   *
+   * @param[in] argc Number of args
+   * @param[in] argv  Args
+   * 
+   * @return true if args contained a help request:   -h,  --, -?
+   * 
+   */
+  static bool hasHelpArg(int argc, char **argv);
+
+  /**
    * @return a string for the input mode
    * @param[in] t Mode
    */

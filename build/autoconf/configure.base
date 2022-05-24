@@ -22,6 +22,7 @@ AC_CANONICAL_HOST
 AC_CONFIG_HEADERS([config.h])
 
 # initialize automake
+
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 # Fix for automake 1.13

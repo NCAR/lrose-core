@@ -47,6 +47,7 @@
 #include <QRubberBand>
 #include <QPoint>
 #include <QTransform>
+#include <QMenu>
 
 #include "Params.hh"
 #include "ScaledLabel.hh"
@@ -54,6 +55,7 @@
 
 class Beam;
 class AscopePlot;
+class WaterfallPlot;
 class IqPlot;
 class RadxRay;
 class SpectraMgr;
@@ -72,6 +74,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   typedef enum {
     PANEL_TITLE,
     PANEL_ASCOPE,
+    PANEL_WATERFALL,
     PANEL_IQPLOT
   } panel_type_t;
 
@@ -142,15 +145,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   QPixmap *getPixmap();
 		      
-  // initalize the plot start time
-  
-  void setPlotStartTime(const RadxTime &plot_start_time,
-                        bool clearBeams = false);
-
-  // reset the plot start time
-  
-  void resetPlotStartTime(const RadxTime &plot_start_time);
-
   // set mouse click point from external routine, to simulate and actual
   // mouse release event
 
@@ -160,17 +154,26 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   bool getPointClicked() const { return _pointClicked; }
 
+  // set the range
+
+  void setRange(double rangeKm);
+
   // increment/decrement the range in response to up/down arrow keys
 
   void changeRange(int nGatesDelta);
 
+  // get currently selected range
+
+  double getSelectedRangeKm() const { return _selectedRangeKm; }
+  int getSelectedGateNum() const { return _selectedGateNum; }
+  
   ////////////////
   // Qt signals //
   ////////////////
 
  signals:
 
-  void locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void locationClicked(double selectedRangeKm, int selectedGateNum);
 
   //////////////
   // Qt slots //
@@ -216,27 +219,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   void showContextMenu(const QPoint &pos);
 
-  // actions examine the context menu
-
-  void ascopeSetFieldToDbz();
-  void ascopeSetFieldToVel();
-  void ascopeSetFieldToWidth();
-  void ascopeSetFieldToNcp();
-  void ascopeSetFieldToSnr();
-  void ascopeSetFieldToDbm();
-  void ascopeSetFieldToZdr();
-  void ascopeSetFieldToLdr();
-  void ascopeSetFieldToRhohv();
-  void ascopeSetFieldToPhidp();
-  void ascopeSetFieldToKdp();
-
-  void ascopeUnzoom();
-  
-  void ascopeSetXGridLinesOn();
-  void ascopeSetXGridLinesOff();
-  void ascopeSetYGridLinesOn();
-  void ascopeSetYGridLinesOff();
-
  protected:
 
   ///////////////////////
@@ -267,15 +249,21 @@ class DLL_EXPORT SpectraWidget : public QWidget
   int _titleMargin;
 
   int _nAscopes;
+  int _ascopeStartIx;
+  int _ascopeWidth;
+  int _ascopeHeight;
+  int _ascopeGrossWidth;
+
+  int _nWaterfalls;
+  int _waterfallStartIx;
+  int _waterfallWidth;
+  int _waterfallHeight;
+  int _waterfallGrossWidth;
 
   int _nIqRows;
   int _nIqCols;
   int _nIqPlots;
-
-  int _ascopeWidth;
-  int _ascopeHeight;
-  int _ascopeGrossWidth;
-  
+  int _iqStartIx;
   int _iqPlotWidth;
   int _iqPlotHeight;
   int _iqGrossWidth;
@@ -285,6 +273,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   
   vector<AscopePlot *> _ascopes;
   bool _ascopesConfigured;
+
+  // waterfall plots
+  
+  vector<WaterfallPlot *> _waterfalls;
+  bool _waterfallsConfigured;
 
   // IQ plots
   
@@ -301,6 +294,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
   // currently selected range
 
   double _selectedRangeKm;
+  int _selectedGateNum;
   
   // time of plot
 
@@ -330,7 +324,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   panel_type_t _contextMenuPanelType;
   int _contextMenuPanelId;
-
+  
   /**
    * @brief Location world of the latest click point.
    */
@@ -365,23 +359,14 @@ class DLL_EXPORT SpectraWidget : public QWidget
   QTransform _zoomTransform;
   WorldPlot _zoomWorld;
   
-  /**
-   * @brief The width of the color scale
-   */
-
-  int _colorScaleWidth;
-  
-  // vertical scale state
-  
-  // Params::range_axis_mode_t _rangeAxisMode;
-  
   // time since last rendered
   
   RadxTime _timeLastRendered;
 
   // beam data
 
-  Beam *_currentBeam;
+  Beam *_beam;
+  int _nSamplesPlot;
 
   ///////////////////////
   // Protected methods //
@@ -410,10 +395,6 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   void _setTransform(const QTransform &transform);
   
-  // update the renderers
-
-  void _updateRenderers();
-
   /////////////////////////////////
   // Overridden QtWidget methods //
   /////////////////////////////////
@@ -474,6 +455,11 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void _createAscope(int id);
   void _configureAscope(int id);
 
+  // waterfall panels
+
+  void _createWaterfall(int id);
+  void _configureWaterfall(int id);
+
   // iqplots
 
   void _createIqPlot(int id);
@@ -484,6 +470,16 @@ class DLL_EXPORT SpectraWidget : public QWidget
   void _identSelectedPanel(int xx, int yy,
                            panel_type_t &panelType,
                            int &panelId);
+
+  // compute selected gate num from selected range
+
+  void _computeSelectedGateNum();
+
+  // create the context menus
+  
+  void _createAscopeContextMenu(const QPoint &pos);
+  void _createWaterfallContextMenu(const QPoint &pos);
+  void _createIqPlotContextMenu(const QPoint &pos);
 
 };
 

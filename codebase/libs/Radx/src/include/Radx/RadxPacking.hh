@@ -67,6 +67,11 @@ public:
   RadxPacking& operator=(const RadxPacking &rhs);
   
   /////////////////////////////////////////////////////////////////
+  // Check for equality
+  
+  bool operator==(const RadxPacking &rhs);
+
+  /////////////////////////////////////////////////////////////////
   /// copy the geometry from another object
   
   void copyPacking(const RadxPacking &master);

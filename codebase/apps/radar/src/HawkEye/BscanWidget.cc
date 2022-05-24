@@ -946,7 +946,8 @@ void BscanWidget::_drawOverlays(QPainter &painter)
 
   const DisplayField &field = _manager.getSelectedField();
   _zoomWorld.drawColorScale(field.getColorMap(), painter,
-                            _params.bscan_axis_label_font_size);
+                            _params.bscan_axis_label_font_size,
+                            _params.text_color);
   
   return;
   

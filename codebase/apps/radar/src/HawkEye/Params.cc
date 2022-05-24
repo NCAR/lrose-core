@@ -1349,6 +1349,18 @@
     tt->single_val.s = tdrpStrDup("black");
     tt++;
     
+    // Parameter 'text_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("text_color");
+    tt->descr = tdrpStrDup("Color of text annotation in main display.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &text_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
     // Parameter 'grid_and_range_ring_color'
     // ctype is 'char*'
     
@@ -1373,6 +1385,18 @@
     tt->single_val.i = 8;
     tt++;
     
+    // Parameter 'click_cross_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("click_cross_color");
+    tt->descr = tdrpStrDup("Color of cross at click point.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &click_cross_color - &_start_;
+    tt->single_val.s = tdrpStrDup("cyan");
+    tt++;
+    
     // Parameter 'click_cross_size'
     // ctype is 'int'
     
@@ -1383,6 +1407,18 @@
     tt->help = tdrpStrDup("Size of cross drawn at click point, to select data.");
     tt->val_offset = (char *) &click_cross_size - &_start_;
     tt->single_val.i = 11;
+    tt++;
+    
+    // Parameter 'click_cross_line_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("click_cross_line_width");
+    tt->descr = tdrpStrDup("Line width for click cross.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &click_cross_line_width - &_start_;
+    tt->single_val.i = 1;
     tt++;
     
     // Parameter 'Comment 10'
@@ -2678,6 +2714,30 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'images_include_scan_type_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_scan_type_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan type in the image file name.");
+    tt->help = tdrpStrDup("If TRUE, the scan type will be added to the image file name.");
+    tt->val_offset = (char *) &images_include_scan_type_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'images_include_scan_id_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("images_include_scan_id_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan Id in the image file name.");
+    tt->help = tdrpStrDup("If TRUE, the scan Id will be added to the image file name.");
+    tt->val_offset = (char *) &images_include_scan_id_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'images_write_latest_data_info'
     // ctype is 'tdrp_bool_t'
     
@@ -2881,6 +2941,27 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sim_gate_spacing_km - &_start_;
     tt->single_val.d = 0.15;
+    tt++;
+    
+    // Parameter 'Comment 25'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 25");
+    tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING");
+    tt->comment_text = tdrpStrDup("Writing the click point location to an FMQ in XML format.");
+    tt++;
+    
+    // Parameter 'click_point_fmq_url'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("click_point_fmq_url");
+    tt->descr = tdrpStrDup("URL for click point URL.");
+    tt->help = tdrpStrDup("The details of the latest click point are written to an FMQ. The format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.");
+    tt->val_offset = (char *) &click_point_fmq_url - &_start_;
+    tt->single_val.s = tdrpStrDup("/tmp/fmq/click_point");
     tt++;
     
     // trailing entry has param_name set to NULL

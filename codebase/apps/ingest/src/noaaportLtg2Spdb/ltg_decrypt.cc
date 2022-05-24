@@ -52,7 +52,7 @@ int getByte();
 FILE           *source_fd;
 FILE           *logfile;
 char           buffer[LINE_LENGTH];
-char           program_name[12];
+char           program_name[128];
 
 
 int ltg_decrypt(char *inFilename, Params *P){
@@ -116,7 +116,7 @@ int ltg_decrypt(char *inFilename, Params *P){
   char    *inputfile = inFilename;
 
   //time_t time(time_t *tloc);
-  strcpy(program_name, "noaaportLtg2Spdb");
+  STRncopy(program_name, "noaaportLtg2Spdb", 128);
 
 //---------------------------------------------------------------------------
 // process command line arguments

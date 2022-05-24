@@ -1192,41 +1192,6 @@ paramdef double {
 } conv_strat_min_valid_dbz;
 
 paramdef double {
-  p_default = 53;
-  p_descr = "Reflectivity value that indicates definite convection.";
-  p_help = "If the reflectivity exceeds this value at a point, we assume convection is definitely active at that point. To use this, we first compute the column maximum reflectivity. If the column max dbz at a point exceeds this threshold, then we flag that point as convective.";
-} conv_strat_dbz_threshold_for_definite_convection;
-
-paramdef double {
-  p_default = 11.0;
-  p_descr = "Radius for computing background reflectivity (km).";
-  p_help = "The background dbz at a point is the mean within this specified radius of the point.";
-} conv_strat_background_dbz_radius_km;
-
-typedef struct {
-  double min_dbz;
-  double max_dbz;
-  double min_radius_km;
-  double max_radius_km;
-} conv_radius_function_t;
-
-paramdef struct conv_radius_function_t {
-  p_default = { min_dbz = 22.5,
-                max_dbz = 42.5,
-                min_radius_km = 1.0,
-                max_radius_km = 5.0
-  };
-  p_descr = "End points of the linear function to compute the radius from the background reflectivity.";
-  p_help = "The radius function varies linearly between the min and max dbz. For dbz below the min, the min radius applies. For dbz above the max, the max radius applies.";
-} conv_radius_function;
-
-paramdef double {
-  p_default = 5.0;
-  p_descr = "Radius of convective influence (km).";
-  p_help = "Given definite convection at a point (see above), we set all points within this radius to be convective.";
-} conv_strat_convective_radius_km;
-
-paramdef double {
   p_default = 7.0;
   p_descr = "Radius for texture analysis (km).";
   p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
@@ -1239,10 +1204,22 @@ paramdef double {
 } conv_strat_min_valid_fraction_for_texture;
 
 paramdef double {
-  p_default = 15.0;
-  p_descr = "Minimum texture for convection at a point.";
-  p_help = "If the texture at a point exceeds this value, we set the convective flag at this point. We then expand the convective influence around the point using convetive_radius_km.";
-} conv_strat_min_texture_for_convection;
+  p_default = 0.5;
+  p_descr = "Minimum convectivity for convective at a point.";
+  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
+} conv_strat_min_convectivity_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum convectivity for stratiform at a point.";
+  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
+} conv_strat_max_convectivity_for_stratiform;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum grid overlap in convective regions.";
+  p_help = "A convective region is identified as a series of adjacent 'runs' of grid cells data in the EW direction. When testing for overlap, some minimum number of overlap grids must be used. This is that minimum overlap in grid units.";
+} conv_strat_min_overlap_for_convective_clumps;
 
 paramdef boolean {
   p_default = TRUE;
@@ -1252,9 +1229,9 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "Option to write out the mean texture.";
-  p_help = "If true, the mean texture will be written to the outptu file. This is a 2-D field - the mean over height of the 3-D texture fields.";
-} conv_strat_write_mean_texture;
+  p_descr = "Option to write out the max texture.";
+  p_help = "If true, the mean texture will be written to the output file. This is a 2-D field - the max over height of the 3-D texture fields.";
+} conv_strat_write_max_texture;
 
 paramdef boolean {
   p_default = FALSE;

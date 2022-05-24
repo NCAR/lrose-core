@@ -29,6 +29,8 @@ def main():
 
     global thisScriptDir
     thisScriptDir = os.path.dirname(__file__)
+    if (len(thisScriptDir) == 0):
+        thisScriptDir = "."
     os.chdir(thisScriptDir)
     thisScriptDir = os.getcwd()
 
@@ -65,7 +67,7 @@ def main():
 
     usage = "usage: %prog [options]"
     releaseDirDefault = os.path.join(homeDir, 'releases')
-    logDirDefault = '/tmp/create_src_release/logs'
+    logDirDefault = '/tmp/create_vortrac_src_release/logs'
     parser = OptionParser(usage)
     parser.add_option('--debug',
                       dest='debug', default=True,
@@ -363,7 +365,9 @@ class LroseVortrac < Formula
   version '{1}'
   sha256 '{2}'
 
-  depends_on 'qt'
+  depends_on 'libx11'
+  depends_on 'libxext'
+  depends_on 'qt5'
   depends_on 'armadillo'
   depends_on 'libzip'
   depends_on 'cmake'
@@ -373,7 +377,7 @@ class LroseVortrac < Formula
   def install
 
     # Build/install vortrac
-    ENV['LROSE_ROOT_DIR'] = prefix
+    ENV['LROSE_INSTALL_DIR'] = prefix
     system "cmake", "-DCMAKE_INSTALL_PREFIX=#{{prefix}}", "."
     system "make install"
 
@@ -397,8 +401,8 @@ def buildVortracFormula(tar_url, tar_name, formula_name):
     dash = tar_name.find('-')
     period = tar_name.find('.', dash)
     version = tar_name[dash+1:period]
-    result = str(subprocess.check_output(("sha256sum", tar_name), text=True))
-    checksum = result.split()[0]
+    result = subprocess.check_output(("sha256sum", tar_name))
+    checksum = result.split()[0].decode('ascii')
     formula = formulaBody.format(tar_url, version, checksum)
     outf = open(formula_name, 'w')
     outf.write(formula)

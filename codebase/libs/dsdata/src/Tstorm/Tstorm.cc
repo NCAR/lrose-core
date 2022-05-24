@@ -24,7 +24,6 @@
 /////////////////////////////////////////////////////////////////
 // Tstorm class
 // 
-// $Id: Tstorm.cc,v 1.33 2018/10/13 22:12:22 dixon Exp $
 ////////////////////////////////////////////////////////////////
 
 #include <cstdio>
@@ -1449,7 +1448,7 @@ bool Tstorm::getPolygonGridGrowKm(const Pjg &projection,
 
   // Are we on a near global sized grid
   // If so, check for storms passing through the edge
-  if( projection.getProjType() == PjgTypes::PROJ_LATLON &&
+  if( Pjg(projection).getProjType() == PjgTypes::PROJ_LATLON &&
       grid_maxx - grid_minx >= 355) 
   {
     // If the storm has points that stretch across more

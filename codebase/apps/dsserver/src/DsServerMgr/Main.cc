@@ -26,19 +26,12 @@
 #include <toolsa/pmu.h>
 #include <toolsa/port.h>
 #include <signal.h>
+
+#include "Args.hh"
+#include "Params.hh"
+#include "DsServerMgr.hh"
+
 using namespace std;
-
-#ifndef ArgsINCLUDED
-# include <Args.hh>
-#endif
-
-#ifndef Params_hh
-# include <Params.hh>
-#endif
-
-#ifndef DsServerMgrINCLUDED
-# include <DsServerMgr.hh>
-#endif
 
 // file scope
 

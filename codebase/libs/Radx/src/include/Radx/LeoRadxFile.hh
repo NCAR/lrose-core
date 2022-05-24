@@ -171,6 +171,7 @@ private:
   string _configFileName;
   string _configXml;
   string _modelStr;
+  int _modelNum;
 
   // objects to be set on read
   
@@ -195,6 +196,10 @@ private:
   int _timeStampIndex;
   int _elevationIndex;
   int _azimuthIndex;
+  int _rangeColumnIndex;
+
+  double _directionOffset;
+  double _headingAngle;
   
   double _azLimit1, _azLimit2;
   double _elLimit1, _elLimit2;
@@ -211,11 +216,13 @@ private:
     string units;
     bool folds;
     vector<int> index;
+    vector<Radx::fl32> data;    
     Field() {
       folds = false;
     }
   };
   vector<Field> _fields;
+  vector<Field> _fieldQualifiers;
   set<string> _fieldNames;
   map<string, size_t> _fieldCols;
 
@@ -228,12 +235,32 @@ private:
   // private methods
   
   void _clearRays();
+  void _clearHeaderData();
 
   int _readHeaderData(string &xml);
   void _findFieldsModel200();
   void _findFieldsModel70();
+  void _findFieldsModel7();
+  bool _findFieldsModel100();
+  void _findFieldsModel866();
+  void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
+  void _printFieldQualifiers();
+  void _addFieldQualifiers(RadxRay *ray, vector<string> &tok);
+
   int _readRayDataModel200();
   int _readRayDataModel70();
+  int _readRayDataModel866();
+  int _readRayDataModel7();
+  int _readRayDataModel100();
+
+  bool findAzimuthAngle(string &columnLabel);
+  bool findElevationAngle(string &columnLabel);
+  int findTimeStamp();
+  int findAzimuthAngle();
+  int findElevationAngle();
+
+  void identifyModel(string &modelStr, const string &path);
+
   int _openRead(const string &path);
   void _close();
 

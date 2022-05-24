@@ -24,42 +24,49 @@
 #include <toolsa/copyright.h>
 /**
  * @file LogStream.hh
- * @brief Logging of information to a stream
+ * @brief Logging of information to a stream or file
  *
- * Used to log debug or output messages to cout or cerr, with the option
- * of showing real time and/or showing file/line number/class name in addition
- * to the logged message. Each logged message has a type.  Each type can be
- * toggled on or off so that message with the type are output or not.
+ * Used to log debug or output messages to cout or cerr, or to logfiles,
+ * with the option of showing real time and/or showing file/line number/class
+ * name in addition to the logged message. Each logged message has a type.
+ * Each type can be toggled on or off so that message with the type are
+ * output or not.
  *
  * A small set of fixed logging types is provided (DEBUG, ERROR, ...).
+ *
  * Any number of custom logging types can be added by the user. Each custom
  * type is associated with a string, which the user specifies.
  *
  * ---------------------- Typical use -------------------------------------
  * Three main macros are all that is really needed to do logging:
  *
- *    LOG() is used with the fixed log types, for example OUT(DEBUG)
- *    LOGC() is used for custom string types, for example OUTC("MYTYPE")
+ *    LOG() is used with the fixed log types, for example LOG(DEBUG)
+ *    LOGC() is used for custom string types, for example LOGC("MYTYPE")
  *    LOG0   has no arguments, and forces a logged output in all cases.
+ *    LOGPRINT() Formatted printing, with a fixed log type
  *
  * Examples of use:
  *
  *    LOG(FATAL) << "Invalid argument";
  *    LOGC("CUSTOM") << "Message with custom type, value=" << value;
  *    LOG0 << "Message that will always appear, x=" << x << ",y=" << y;
+ *    LOGPRINT(DEBUG, "int arg = %d", i);
+ *    LOGPRINT(ERROR, "It didn't work");
  *
- * Each such logged message will get an endl, so the user does not need to
- * include that at the end.
+ * Each such logged message will get an endl (or '\n'),
+ * so the user does not need to include that at the end.
  *
- * In cases where the log type is a variable, one more macro assumes
- * the argument has its typee in place.
+ * In cases where the log type is a variable instead of an inline enum
+ * you need to use different macros:
  * 
- *    LOGT()
+ *    LOGV()
+ *    LOGPRINTV()
  *
  * Example:
  *
  *    LogStream::Log_t t = LogStream::DEBUG;
- *    LOGT(t) << "message";
+ *    LOGV(t) << "message";
+ *    LOGPRINTV(t, "message");
  *
  * 
  * ---------------------- Fixed types -------------------------------------
@@ -77,6 +84,7 @@
  *                        enabled by default
  *    WARNING             Message is prepended with the word 'WARNING ',
  *                        enabled by default
+ *    TRIGGER             Specific to triggering, disabled by default
  *
  * The fixed types can be individually enabled or disabled by calls to the
  * macros:  LOG_STREAM_ENABLE()  and LOG_STREAM_DISABLE(), LOG_STREAM_SET_TYPE()
@@ -93,7 +101,7 @@
  * If it is already in place, the state of that type is used (enabled or
  * disabled).
  * 
- * Canging the state of a custom type is done with calls to these macros:
+ * Changing the state of a custom type is done with calls to these macros:
  * LOG_STREAM_DISABLE_CUSTOM_TYPE(),  LOG_STREAM_ENABLE_CUSTOM_TYPE(),
  * LOG_STREAM_SET_CUSTOM_TYPE().
  *
@@ -102,9 +110,11 @@
  *               LOG_STREAM_SET_CUSTOM_TYPE("SPECIAL", true);
  *
  * If a custom type is modified, but has not yet been added to
- * state, it is added.
+ * state, it is added. 
  *
- * 
+ * ***Note that formatted output using LOGPRINT or LOGPRINTV
+ *    is not yet supported for custom types.
+ *
  * ---------------------- time stamps -------------------------------------
  * 
  * Logged output can show the real time hour/minute/second at which
@@ -125,30 +135,47 @@
  *
  * ---------------------- severity keys --------- -------------------------
  *
- * By default, logged messages have the severity key as part of the message
+ * By default, logged messages show the severity within the logged message
  * only for WARNING, ERROR, FATAL, SEVERE.
- * To change so all messages have the key (DEBUG, VERBOSE, and custom):
+ * To change so all messages have the key (DEBUG, VERBOSE, etc): 
+ *
  *   LOG_STREAM_SET_SHOW_ALL_SEVERITY_KEYS()
  *
- * --------------------- Initialization macro -----------------------------
+ * --------------------- Initialization macros -----------------------------
  *
  * To initialize commonly configured settings in one call:
  *
  *   LOG_STREAM_INIT(debug,debugVerbose,realtime,showFile)
+ * 
  *
- * --------------------- cout or cerr -------------------------------------
+ * ------------ logged output stream choices -------------------------------
  *
- * The default is to log everything to cout.  To change which stream is
- * logged to:
+ * The default is to log everything to cout.  You can change to log to cerr
+ * or to logfiles:
  *
  *   LOG_STREAM_TO_CERR()
  *   LOG_STREAM_TO_COUT()
  *
+ *   LOG_STREAM_TO_LOGFILE(app,instance,logfilepath)
+ *   LOG_STREAM_TO_DEFAULT_LOGFILE(app,instance)
+ *
+ *       Logfiles are written to yyyymmdd subdirectories of logfilepath,
+ *       with logfile name = <app>.<instance>.log
+ *
+ *       If you use LOG_STREAM_TO_DEFAULT_LOGFILE, it is assumed the logfilepath
+ *       is the environment variable $LOG_DIR
+ *
+ * ---------------------- finishing up ------------------------------------
+ *
+ * To free all internal memory and clean up
+ *
+ *  LOG_STREAM_FINISH()
  */
 
 #ifndef LOG_S_HH
 #define LOG_S_HH
 
+#include <toolsa/LogFile.hh>
 #include <map>
 #include <string>
 #include <sstream>
@@ -167,6 +194,11 @@
 #define LOG_STREAM_INIT(debug,debugVerbose,realtime,showFile) (LogState::getPointer()->init((debug),(debugVerbose),(realtime),(showFile)))
 
 /**
+ * Free memory and delete objects
+ */
+#define LOG_STREAM_FINISH() (LogState::freePointer())
+
+/**
  * Disable putting of real time stamps into logged messages
  */
 #define LOG_STREAM_DISABLE_TIME_STAMP() (LogState::getPointer()->setLoggingTimestamp(false))
@@ -182,6 +214,14 @@
  * @param[in] s  Logging type
  */
 #define LOG_STREAM_DISABLE(s) (LogState::getPointer()->setLogging(LogStream::s,false))
+
+
+/**
+ * Disable a particular logging type, when arg is a variable not an enum
+ *
+ * @param[in] s  Logging t ype
+ */
+#define LOG_STREAM_DISABLEV(s) (LogState::getPointer()->setLogging(s, false))
 
 /**
  * Disable a particular custom logging type. If the type is not present, it
@@ -199,6 +239,13 @@
 #define LOG_STREAM_ENABLE(s) (LogState::getPointer()->setLogging(LogStream::s,true))
 
 /**
+ * Enable a particular logging type, when arg is a variable not an enum
+ *
+ * @param[in] s  Logging t ype
+ */
+#define LOG_STREAM_ENABLEV(s) (LogState::getPointer()->setLogging(s,true))
+
+/**
  * Enable a particular custom logging type. If the type is not present, it is
  * added and then enabled.
  *
@@ -209,26 +256,27 @@
 /**
  * Set type to a status
  *
- * @param[in] s  type
+ * @param[in] s  Log_t type
  * @param[in] v  boolean
  */
 #define LOG_STREAM_SET_TYPE(s,v) (LogState::getPointer()->setLogging(LogStream::s,(v)))
 
 /**
- * Set putting of real time stamps into logged messages to status
- * @param[in] v  boolean
+ * Set putting of real time stamps into logged messages to a status
+ * @param[in] v  boolean status
  */
 #define LOG_STREAM_SET_TIMESTAMP(v) (LogState::getPointer()->setLoggingTimestamp((v)))
 
 /**
- * Set putting file name,line, and class info into logged messages to status
- * @param[in] v  boolean
+ * Set putting file name,line, and class info into logged messages to a status
+ * @param[in] v  boolean status
  */
 #define LOG_STREAM_SET_CLASS_AND_METHOD(v) (LogState::getPointer()->setLoggingClassAndMethod((v)))
 
 /**
  * Set showing all severitys in the messages themselves to flag
- * @param[in] v  boolean
+ * @param[in] v  boolean  True to show all, false to show only the default
+ *                        ones that are shown WARNING, ERRROR, FATAL, SEVERE
  */
 #define LOG_STREAM_SET_SHOW_ALL_SEVERITY_KEYS(v)  (LogState::getPointer()->setLoggingShowAllSeverityKeys((v)))
 
@@ -236,37 +284,71 @@
  * Set custom type to a status
  *
  * @param[in] s  custom type string
- * @param[in] v  boolean
+ * @param[in] v  boolean status
  */
 #define LOG_STREAM_SET_CUSTOM_TYPE(s,v) (LogState::getPointer()->setLogging((s),(v)))
 
 /**
- * Set cerr as stream to use
+ * Set cerr as the stream to use, turns off writing to logfiles
  */
 #define LOG_STREAM_TO_CERR() (LogState::getPointer()->setCerr())
 
 /**
- * Set coutas stream to use
+ * Set cout stream to use, turns off writing to log files
  */
 #define LOG_STREAM_TO_COUT() (LogState::getPointer()->setCout())
 
+/**
+ * Set logfile mode
+ * @param[in] a  App name
+ * @param[in] i  Instance
+ * @param[in] p  Path for logfiles
+ */
+#define LOG_STREAM_TO_LOGFILE(a,i,p) (LogState::getPointer()->setLogFile((a),(i),(p)))
 
 /**
- * Create a LogStream object to stream to. 
+ * Set logfile mode
+ * @param[in] a  App name
+ * @param[in] i  Instance
  *
- * @param[in] s  Logging type
+ * Path for logfiles is $LOG_DIR
+ */
+#define LOG_STREAM_TO_DEFAULT_LOGFILE(a,i) (LogState::getPointer()->setLogFile((a),(i)))
+
+/**
+ * Do formatted logging, with inputs:
+ * @param[in] s  Logging type enum
+ * @param[in] format  a string
+ * @param[in] ... optional additional args to go with the format
+ */
+#define LOGPRINT(s, ...) (LogState::getPointer()->logprint(LogStream::s, PP_NARG(__VA_ARGS__), __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__))
+
+/**
+ * Do formatted logging, with inputs:
+ * @param[in] s  Logging type variable (not represented as an enum)
+ * @param[in] format  a string
+ * @param[in] ... optional additional args to go with the format
+ */
+#define LOGPRINTV(s, ...) (LogState::getPointer()->logprint(s, PP_NARG(__VA_ARGS__), __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__))
+
+
+/**
+ * Create a LogStream object to stream to when input is an enum. 
+ *
+ * @param[in] s  Logging type enum
  */
 #define LOG(s) LogStream(__FILE__, __LINE__, __FUNCTION__, LogStream::s)
 
 /**
- * Create a LogStream object to stream to. 
+ * Create a LogStream object to stream to when input is a variable with
+ *  enum value 
  *
- * @param[in] s  Logging type, format known
+ * @param[in] s  Logging type variable
  */
-#define LOGT(s) LogStream(__FILE__, __LINE__, __FUNCTION__, s)
+#define LOGV(s) LogStream(__FILE__, __LINE__, __FUNCTION__, s)
 
 /**
- * Create a LogStream object to stream to.
+ * Create a LogStream object to stream to for a custom type.
  *
  * @param[in] s  Custom logging string
  *
@@ -275,19 +357,41 @@
 #define LOGC(s) LogStream(__FILE__, __LINE__, __FUNCTION__, s)
 
 /**
- * Create a LogStream object to stream to. 
- *
- * The log type is set to FORCE.
+ * Create a LogStream object to stream to, harwired to type FORCE. 
  */
 #define LOG0  LogStream(__FILE__, __LINE__, __FUNCTION__)
 
 /**
+ * Store a formatted string internally for later logging.
+ *
+ * @param[in] format  The printf style format string
+ * @param[in] ... additional arguments that go with the format
+ *
+ * The remaining args are those that get formatted to produce the stored string.
+ */
+#define LOG_STREAM_ACCUMULATE(format, ...) (LogState::getPointer()->accumulate(PP_NARG(__VA_ARGS__), (format), __VA_ARGS__))
+
+/**
+ * Log the accumulated information that was build up using LOG_STREAM_ACCUMULATE
+ * if the severity level is enabled.  Clear out the state.
+ *
+ * @param[in] severity  Severity level enum
+ *
+ * All the accumulated information is cleared out by this macro
+ */
+#define LOG_STREAM_ACCUM(severity) (LogState::getPointer()->logAccum(__FILE__, __LINE__, __FUNCTION__, (severity)))
+
+/**
  * @class LogStream
- * @brief Logging of information to a stream
+ *
+ * @brief Logging of information to a stream, used for logging to cout or cerr
  */
 class LogStream
 {
 public:
+  /**
+   * The logging types
+   */
   typedef enum
   {
     DEBUG,
@@ -297,10 +401,13 @@ public:
     FORCE,
     PRINT,
     SEVERE,
-    WARNING
+    WARNING,
+    TRIGGER
   } Log_t;
 
+
   /**
+   * Constructor - fixed type
    * @param[in] fname  File name
    * @param[in] line  Line number
    * @param[in] method Method name
@@ -310,6 +417,7 @@ public:
 	    Log_t logT);
 
   /**
+   * Constructor - custom type
    * @param[in] fname  File name
    * @param[in] line  Line number
    * @param[in] method Method name
@@ -321,11 +429,10 @@ public:
 	    const std::string &custom);
 
   /**
+   * Constructor - FORCE type
    * @param[in] fname  File name
    * @param[in] line  Line number
    * @param[in] method Method name
-   *
-   * The Log_t is set to FORCE
    */
   LogStream(const std::string &fname, const int line,
 	    const std::string &method);
@@ -350,6 +457,13 @@ public:
    */
   ~LogStream();
 
+  /**
+   * Method to convert a Log_t to a string
+   * @param[in] logT
+   * @return the string
+   */
+  static std::string setSeverityString(Log_t logT);
+
 private:
 
   std::ostringstream _buf;  /**< String stream storage */
@@ -357,16 +471,16 @@ private:
 
   void _setHeader(const std::string &severityString, const std::string &fname, 
 		  const int line, const std::string &method,
-		  Log_t level);
+		  Log_t logType);
   void _setHeader(const std::string &severityString, const std::string &fname, 
 		  const int line, const std::string &method);
-  std::string _setSeverityString(Log_t logT);
 };
-
 
 /**
  * @class LogState
- * @brief Internal LogS state is kept here
+ *
+ * @brief Internal state is kept here, such as which types are enabled and
+ *        where output is going
  */
 class LogState
 {
@@ -478,7 +592,6 @@ public:
     return _logClassAndMethod;
   }
 
-
   /**
    * Set DEBUG_VERBOSE = true;
    */
@@ -488,7 +601,6 @@ public:
    * Set DEBUG_VERBOSE = false;
    */
   void clearVerbose(void);
-
 
   /**
    * Add a custom type if it is not there.
@@ -518,21 +630,89 @@ public:
    */
   void setCerr(void);
 
-  inline bool isCout(void) const {return _logToCout;}
+  /**
+   * Set to log to a log file
+   * @param[in] app  App name for logfile naming
+   * @param[in] instance  Instance to use in logfile naming
+   * @param[in] logPath  Top path for logfiles, if empty use $LOG_DIR
+   */
+  void setLogFile(const std::string &app, const std::string &instance,
+		  const std::string &logPath="");
+ 
+  /**
+   * @return true if the logging goes to cout
+   */
+  inline bool isCout(void) const {return _logOutputType == COUT;}
 
+  /**
+   * @return true if the logging goes to cerr
+   */
+  inline bool isCerr(void) const {return _logOutputType == CERR;}
+
+  /**
+   * @return true if the logging goes to logfiles
+   */
+  inline bool isLogFile(void) const {return _logOutputType == LOGFILE;}
+
+  /**
+   * Log the input string to the logfile.
+   * @param[in] s  String to log, ready to use as is
+   * @return true if logged to the file, false if not because of error
+   *         or incorrect settings
+   */
+  bool logfileLog(const std::string &s);
+
+  /**
+   * Do formatted logging
+   * @param[in] severity   the logging type
+   * @param[in] nargs  Number of arguments associated with formatted write,
+   *                   including the format string.  Will be 1 if it is a
+   *                   formatted write with no arguments, only a format
+   * @param[in] fname  Source code file name
+   * @param[in] line   Source code line number
+   * @param[in] method Source code method name
+   * @param[in] fmt    format string
+   * @param[in] ... optional additional args to go with the format
+   */
+  void logprint(LogStream::Log_t severity,
+		int nargs, const std::string &fname, const int line,
+		const std::string &method, const std::string &fmt, ...);
+
+  /**
+   * Accumulate input information into a local string without logging, with
+   * a formatted argument list
+   * @param[in] format  The format for the variable args
+   * @param[in] ...   Additional arguments to go with the format
+   */
+  void accumulate(int nargs, std::string format, ...);
+
+  /**
+   * Log info accumulated using the accumulate() method then clear out
+   * the accumulated info 
+   *
+   * @param[in] fname  Source code file name
+   * @param[in] line   Source code line number
+   * @param[in] method Source code method name
+   * @param[in] severity  Logging type
+   */
+  void logAccum(const std::string &fname, const int line, 
+ 		const std::string &method, const LogStream::Log_t severity);
 
 protected:
 private:
 
+  /**
+   * Used to lock/unlock
+   */
   pthread_mutex_t _printMutex;
 
   /**
-   * State for enabling or disabling the various states.
+   * State for enabling or disabling the various states, mapped from the enum.
    */
   std::map<LogStream::Log_t, bool>  _enabled;
 
   /**
-   * State for enabling or disabling custom types
+   * State for enabling or disabling custom types, mapped from strings
    */
   std::map<std::string, bool>  _customEnabled;
 
@@ -552,22 +732,23 @@ private:
   bool _logShowAllSeverityKeys;
 
   /**
-   * True to use cout, false to use cerr
+   * Possible outputs
    */
-  bool _logToCout;
+  typedef enum {COUT, CERR, LOGFILE} Logstream_Output_t;
 
   /**
-   * True to put severity key strings into logged messages for all types
+   * Which output is being done
    */
-  // bool _logShowAllKeys;
+  Logstream_Output_t _logOutputType;
 
   /**
-   * Constructor, no class name (class is the empty string.)
-   *
-   * Logging of all message severities is set to the singleton state,
-   * the initial default state is every severity is enabled.
-   *
-   * Logging does include real time stamp (can be changed)
+   * Buffer to accumulate into using accumulate() and to write from using
+   * logAccum()
+   */
+  std::string _accumBuf;
+
+  /**
+   * Constructor, members set to default values
    */
   LogState(void);
 
@@ -575,40 +756,27 @@ private:
    * Destructor
    */
   ~LogState(void);
+
+  void _log(const std::string &msg);
+
+  /**
+   * Form the header string based on member settings from inputs
+   *
+   * @param[in] fname  Source code file name
+   * @param[in] line   Source code line number
+   * @param[in] method Source code method name
+   * @param[in] severity  Logging type
+   */
+  std::string _header(const std::string &fname, const int line,
+		      const std::string &method,
+		      const LogStream::Log_t severity);
 };
 
 
 /**
- * private macro
+ * Some private macros
  */
 #define LOG_STREAM_IS_ENABLED(s) (LogState::getPointer()->isEnabled((s)))
-
-/**
- * private macro
- */
-#define LOG_STREAM_TIMESTAMP_ENABLED() (LogState::getPointer()->timestampIsEnabled())
-
-/**
- * private macro
- */
-#define LOG_STREAM_CLASSMETHOD_ENABLED() (LogState::getPointer()->classMethodEnabled())
-
-/**
- * private macro
- */
-#define LOG_STREAM_SHOW_ALL_SEVERITY_KEYS_ENABLED()  (LogState::getPointer()->showAllSeverityKeysIsEnabled())
-#define LOG_STREAM_TIMESTAMP_ENABLED() (LogState::getPointer()->timestampIsEnabled())
-
-
-/**
- * private macro
- */
-#define LOG_STREAM_LOCK() (LogState::getPointer()->lock())
-
-/**
- * private macro
- */
-#define LOG_STREAM_UNLOCK() (LogState::getPointer()->unlock())
 
 /**
  * Add a custom logging type if it is not there, and if it was added, disable it
@@ -617,6 +785,49 @@ private:
  */
 #define LOG_STREAM_ADD_CUSTOM_TYPE_IF_NEW(s) (LogState::getPointer()->addCustomTypeIfNew((s)))
 
+#define LOG_STREAM_LOCK() (LogState::getPointer()->lock())
+#define LOG_STREAM_UNLOCK() (LogState::getPointer()->unlock())
 #define LOG_STREAM_IS_COUT() (LogState::getPointer()->isCout())
+#define LOG_STREAM_IS_CERR() (LogState::getPointer()->isCerr())
+#define LOG_STREAM_IS_LOGFILE() (LogState::getPointer()->isLogFile())
+#define LOG_STREAM_LOGFILE_LOG(s) (LOGFILE_LOG(s))
+#define LOG_STREAM_SHOW_ALL_SEVERITY_KEYS_ENABLED()  (LogState::getPointer()->showAllSeverityKeysIsEnabled())
+#define LOG_STREAM_TIMESTAMP_ENABLED() (LogState::getPointer()->timestampIsEnabled())
+#define LOG_STREAM_CLASSMETHOD_ENABLED() (LogState::getPointer()->classMethodEnabled())
+
+/**
+ * Hacky stuff to get number of arguments (needed for formatted prints)
+ * up to 127 arguments
+ */
+#define PP_NARG(...) PP_NARG_(__VA_ARGS__,PP_RSEQ_N())
+#define PP_NARG_(...) PP_ARG_N(__VA_ARGS__)
+#define PP_ARG_N( \
+          _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, \
+         _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, \
+         _21,_22,_23,_24,_25,_26,_27,_28,_29,_30, \
+         _31,_32,_33,_34,_35,_36,_37,_38,_39,_40, \
+         _41,_42,_43,_44,_45,_46,_47,_48,_49,_50, \
+         _51,_52,_53,_54,_55,_56,_57,_58,_59,_60, \
+         _61,_62,_63,_64,_65,_66,_67,_68,_69,_70, \
+         _71,_72,_73,_74,_75,_76,_77,_78,_79,_80, \
+         _81,_82,_83,_84,_85,_86,_87,_88,_89,_90, \
+         _91,_92,_93,_94,_95,_96,_97,_98,_99,_100, \
+         _101,_102,_103,_104,_105,_106,_107,_108,_109,_110, \
+         _111,_112,_113,_114,_115,_116,_117,_118,_119,_120, \
+         _121,_122,_123,_124,_125,_126,_127,N,...) N
+#define PP_RSEQ_N() \
+         127,126,125,124,123,122,121,120, \
+         119,118,117,116,115,114,113,112,111,110, \
+         109,108,107,106,105,104,103,102,101,100, \
+         99,98,97,96,95,94,93,92,91,90, \
+         89,88,87,86,85,84,83,82,81,80, \
+         79,78,77,76,75,74,73,72,71,70, \
+         69,68,67,66,65,64,63,62,61,60, \
+         59,58,57,56,55,54,53,52,51,50, \
+         49,48,47,46,45,44,43,42,41,40, \
+         39,38,37,36,35,34,33,32,31,30, \
+         29,28,27,26,25,24,23,22,21,20, \
+         19,18,17,16,15,14,13,12,11,10, \
+         9,8,7,6,5,4,3,2,1,0
 
 #endif

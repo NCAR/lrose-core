@@ -169,20 +169,26 @@ private:
   static const std::string _percentLessThanStr; /**< Function keyword */
   static const std::string _largePositiveNegativeStr; /**< Function keyword */
   static const std::string _smoothPolarStr; /**< Function keyword */
+  static const std::string _smoothWithThreshPolarStr; /**< Function keyword */
   static const std::string _dilatePolarStr; /**< Function keyword */
+  static const std::string _medianPolarStr; /**< Function keyword */
   static const std::string _percentOfAbsMaxStr; /**< Function keyword */
   static const std::string _azimuthalPolarShearStr; /**< Function keyword */
   static const std::string _clumpFiltStr; /**< Function keyword */
   static const std::string _virtVolFuzzyStr; /**< virtual volume fuzzy function keyword */
+  static const std::string _expandInMaskStr;/**< Function keyword */
 
   bool _processPercentLessThan(std::vector<ProcessingNode *> &args);
   bool _processLargePositiveNegative(std::vector<ProcessingNode *> &args);
   bool _processSmoothPolar(std::vector<ProcessingNode *> &args);
+  bool _processSmoothWithThreshPolar(std::vector<ProcessingNode *> &args);
   bool _processDilatePolar(std::vector<ProcessingNode *> &args);
+  bool _processMedianPolar(std::vector<ProcessingNode *> &args);
   bool _processPercentOfAbsMax(std::vector<ProcessingNode *> &args);
   bool _processAzimuthalPolarShear(std::vector<ProcessingNode *> &args);
   bool _processClumpFilt(std::vector<ProcessingNode *> &args);
   bool _processFuzzy(std::vector<ProcessingNode *> &args);
+  bool _processExpandInMask(std::vector<ProcessingNode *> &args);
 };
 
 #endif

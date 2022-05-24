@@ -106,7 +106,7 @@ Beam &Beam::_copy(const Beam &rhs)
 
   _timeSecs = rhs._timeSecs;
   _nanoSecs = rhs._nanoSecs;
-  _timeDouble = rhs._timeDouble;
+  _time = rhs._time;
 
   _el = rhs._el;
   _az = rhs._az;
@@ -223,6 +223,7 @@ Beam &Beam::_copy(const Beam &rhs)
   // FFT windows
 
   _freeWindows();
+  _fftWindowType = rhs._fftWindowType;
   _computeWindows();
   
   return *this;
@@ -246,24 +247,24 @@ void Beam::_init()
 
   _timeSecs = 0;
   _nanoSecs = 0;
-  _timeDouble = 0;
+  _time.set(DateTime::NEVER);
 
   _az = 0;
   _el = 0;
   _targetAngle = 0;
 
   _scanMode = IWRF_SCAN_MODE_NOT_SET;
-  _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
+  _xmitRcvMode = IWRF_SINGLE_POL;
   _sweepNum = 0;
   _volNum = 0;
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
 
+  
   _beamIsIndexed = true;
   _angularResolution = 1.0;
   _isAlternating = false;
-  _xmitRcvMode = IWRF_SINGLE_POL;
   _dualPol = false;
 
   _prt = 0;
@@ -289,11 +290,12 @@ void Beam::_init()
 
   _mom = NULL;
 
-  _applyFiltering = false;
+  _applyFiltering = true;
+
+  _fftWindowType = Params::FFT_WINDOW_RECT;
 
   _window = NULL;
   _windowHalf = NULL;
-  _windowVonHann = NULL;
 
   _windowR1 = 0;
   _windowR2 = 0;
@@ -351,6 +353,12 @@ void Beam::setPulses(bool isRhi,
   _pulses = pulses;
   _georefActive = false;
 
+  if (_isStagPrt) {
+    _nGatesOut = _nGatesPrtShort;
+  } else {
+    _nGatesOut = _nGates;
+  }
+
   // override OpsInfo time-series values as needed
   
   _overrideOpsInfo();
@@ -403,7 +411,7 @@ void Beam::setPulses(bool isRhi,
 
   _timeSecs = (time_t) midPulse->getTime();
   _nanoSecs = midPulse->getNanoSecs();
-  _timeDouble = midPulse->getFTime();
+  _time.set(_timeSecs, (double) _nanoSecs / 1.0e9);
 
   // select the georeference from the mid pulse
 
@@ -562,14 +570,6 @@ Beam::~Beam()
 
 {
 
-  // if (_outFields) {
-  //   delete[] _outFields;
-  // }
-
-  // if (_outFieldsF) {
-  //   delete[] _outFieldsF;
-  // }
-  
   if (_mom) {
     delete _mom;
   }
@@ -622,11 +622,6 @@ void Beam::_freeWindows()
     _windowHalf = NULL;
   }
 
-  if (_windowVonHann) {
-    delete[] _windowVonHann;
-    _windowVonHann = NULL;
-  }
-
 }
   
 ////////////////////////////////////////////////////
@@ -674,10 +669,16 @@ int Beam::_getSweepNum()
 /////////////////////////////////////////////////
 // compute moments
     
-int Beam::computeMoments()
+int Beam::computeMoments(Params::fft_window_t windowType
+                         /* = Params::FFT_WINDOW_VONHANN */)
   
 {
 
+  // initialize the windows
+
+  _fftWindowType = windowType;
+  _computeWindows();
+  
   // set calibration data on Moments object, ready for computations
 
   string errStr;
@@ -799,10 +800,10 @@ double Beam::getRange(int gateNum) const
 ////////////////////////////////////////////////
 // get closest exact range to a give range
 
-double Beam::getClosestRange(double range) const
+double Beam::getClosestRange(double range, int &gateNum) const
   
 {
-  int gateNum = getGateNum(range);
+  gateNum = getGateNum(range);
   double closestRange = getRange(gateNum);
   return closestRange;
 }
@@ -1097,8 +1098,7 @@ void Beam::_computeMomDpAltHvCoCross()
                                    fields.lag2_vc,
                                    igate, 
                                    fields);
-    
-    
+
   } // igate
 
   // copy back to gate data
@@ -1566,7 +1566,7 @@ void Beam::_filterRegrSpStagPrt()
     double spectralNoise = 1.0e-13;
     double filterRatio = 1.0;
     double spectralSnr = 1.0;
-    bool interpAcrossNotch = _params.regression_filter_interp_across_notch;
+    bool interpAcrossNotch = true;
 
     memcpy(gate->iqhcF, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
 
@@ -2447,7 +2447,7 @@ void Beam::_computeWindows()
       _params.use_polynomial_regression_clutter_filter) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_RECT) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_RECT) {
     if (_applyFiltering) {
       _window = RadarMoments::createWindowVonhann(_nSamples);
       _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
@@ -2455,30 +2455,28 @@ void Beam::_computeWindows()
       _window = RadarMoments::createWindowRect(_nSamples);
       _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
     }
-  } else if (_params.window == Params::WINDOW_VONHANN) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_VONHANN) {
     _window = RadarMoments::createWindowVonhann(_nSamples);
     _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_BLACKMAN) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_BLACKMAN) {
     _window = RadarMoments::createWindowBlackman(_nSamples);
     _windowHalf = RadarMoments::createWindowBlackman(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_BLACKMAN_NUTTALL) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_BLACKMAN_NUTTALL) {
     _window = RadarMoments::createWindowBlackmanNuttall(_nSamples);
     _windowHalf = RadarMoments::createWindowBlackmanNuttall(_nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_10) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_TUKEY_10) {
     _window = RadarMoments::createWindowTukey(0.1, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.1, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_20) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_TUKEY_20) {
     _window = RadarMoments::createWindowTukey(0.2, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.2, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_30) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_TUKEY_30) {
     _window = RadarMoments::createWindowTukey(0.3, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.3, _nSamplesHalf);
-  } else if (_params.window == Params::WINDOW_TUKEY_50) {
+  } else if (_fftWindowType == Params::FFT_WINDOW_TUKEY_50) {
     _window = RadarMoments::createWindowTukey(0.5, _nSamples);
     _windowHalf = RadarMoments::createWindowTukey(0.5, _nSamplesHalf);
   }
-
-  _windowVonHann = RadarMoments::createWindowVonhann(_nSamples);
 
   // compute window R values, used for corrections in Spectrum width
 
@@ -2508,7 +2506,7 @@ void Beam::_initMomentsObject()
     _regrHalf->setup(_nSamplesHalf, order, orderFromCSR);
     _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCSR);
     _mom->setUseRegressionFilter
-      (_params.regression_filter_interp_across_notch,
+      (true,
        _params.regression_filter_notch_edge_power_ratio_threshold_db,
        _params.regression_filter_min_csr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
@@ -2533,9 +2531,11 @@ void Beam::_initMomentsObject()
                       _nGatesPrtLong,
                       _opsInfo);
   } else {
+    
     _mom->init(_prt, _opsInfo);
-  }
   
+  }
+
 }
 
 //////////////////////////////////////
@@ -2749,7 +2749,7 @@ void Beam::_allocGateData(int nGates)
   int nNeeded = nGates - (int) _gateData.size();
   if (nNeeded > 0) {
     for (int ii = 0; ii < nNeeded; ii++) {
-      GateData *gate = new GateData();
+      GateData *gate = new GateData;
       _gateData.push_back(gate);
     }
   }

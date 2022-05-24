@@ -26,7 +26,7 @@
 // Terri L. Betancourt RAP, NCAR, Boulder, CO, 80307, USA
 // January 1998
 //
-// $Id: Path.cc,v 1.32 2018/10/22 19:58:28 dave Exp $
+// $Id: Path.cc,v 1.33 2019/02/28 17:53:40 prestop Exp $
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -615,6 +615,49 @@ string Path::getExecPath()
 #endif
 
 //////////////////////////////////////////////////////////////////
+// STATIC METHOD
+//
+// looks for a directory in the path that is all digits & 8 characters long.
+// if a dated dir cannot be found, pre, date, and post are set to empty strings.
+//
+// e.g. given path="/some/path/to/YYYYMMDD/more/stuff.file"
+// returns:
+//          pre="/some/path/to"
+//          date="YYYMMDD"
+//          post="more/stuff.file" 
+void
+Path::splitDatedDir(const string &path, string &pre, string &date,
+			    string &post)
+{
+
+  date="";
+  pre="";
+  post="";
+  
+  //tokenize
+  string delimiters = "/";
+  size_t current;
+  size_t next = -1;
+  string token;
+  do
+    {
+      current = next + 1;
+      next = path.find_first_of( delimiters, current );
+      token = path.substr( current, next - current );
+
+      //is it 8 characters long and all digits?
+      if ( (token.length() == 8) && (token.find_first_not_of("0123456789") == std::string::npos) ) {
+	date = token;
+	pre = path.substr(0,current);
+	post = path.substr(next);
+	return;
+      }
+    }
+  while (next != string::npos);
+
+}
+
+//////////////////////////////////////////////////////////////////
 // Get the path of a file relative to the
 // executable binary that is running
 
@@ -634,5 +677,6 @@ string Path::getPathRelToExec(const string &relPath)
   return absPath;
 
 }
+
 
 

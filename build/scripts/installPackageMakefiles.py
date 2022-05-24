@@ -39,7 +39,7 @@ def main():
     parser.add_option('--package',
                       dest='package', default="lrose-core",
                       help='Package name. Options are: ' + \
-                      'lrose-core (default), lrose-blaze, lrose-cyclone, lrose-radx, lrose-cidd')
+                      'lrose-core (default), lrose-radx, lrose-cidd')
 
     (options, args) = parser.parse_args()
 

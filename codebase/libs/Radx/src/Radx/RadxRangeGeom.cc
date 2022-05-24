@@ -76,6 +76,24 @@ RadxRangeGeom &RadxRangeGeom::operator=(const RadxRangeGeom &rhs)
   return _copy(rhs);
 }
 
+/////////////////////////////
+// Check for equality
+//
+
+bool RadxRangeGeom::operator==(const RadxRangeGeom &rhs)
+{
+  if (!_rangeGeomSet || !rhs._rangeGeomSet) {
+    return false;
+  }
+  if (fabs(_startRangeKm - rhs._startRangeKm) > 1.0e-5) {
+    return false;
+  }
+  if (fabs(_gateSpacingKm - rhs._gateSpacingKm) > 1.0e-6) {
+    return false;
+  }
+  return true;
+}
+
 /////////////////////////////////////////////////////////
 // initialize data members
 
@@ -89,7 +107,6 @@ void RadxRangeGeom::_init()
 // clear the data in the object
 
 void RadxRangeGeom::clearRangeGeom()
-  
 {
   _rangeGeomSet = false;
   _startRangeKm = 0.0;

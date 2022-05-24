@@ -52,7 +52,23 @@ using namespace std;
 RadxField::RadxField(const string &name /*= "not-set" */,
                      const string &units /* = "" */) :
         _name(name),
-        _units(units)
+        _units(units),
+        _dataType(Radx::FL32),
+        _byteWidth(sizeof(Radx::fl32)),
+        _scale(1.0),
+        _offset(0.0),
+        _samplingRatio(1.0),
+        _fieldFolds(false),
+        _foldLimitLower(0.0),
+        _foldLimitUpper(0.0),
+        _foldRange(0.0),
+        _isDiscrete(false),
+        _isRayQualifier(false),
+        _minVal(Radx::missingMetaDouble),
+        _maxVal(Radx::missingMetaDouble),
+        _data(NULL),
+        _dataIsLocal(true),
+        _thresholdValue(Radx::missingMetaDouble)
   
 {
   _init();
@@ -62,7 +78,23 @@ RadxField::RadxField(const string &name /*= "not-set" */,
 // Copy constructor
 //
 
-RadxField::RadxField(const RadxField &rhs)
+RadxField::RadxField(const RadxField &rhs) :
+        _dataType(Radx::FL32),
+        _byteWidth(sizeof(Radx::fl32)),
+        _scale(1.0),
+        _offset(0.0),
+        _samplingRatio(1.0),
+        _fieldFolds(false),
+        _foldLimitLower(0.0),
+        _foldLimitUpper(0.0),
+        _foldRange(0.0),
+        _isDiscrete(false),
+        _isRayQualifier(false),
+        _minVal(Radx::missingMetaDouble),
+        _maxVal(Radx::missingMetaDouble),
+        _data(NULL),
+        _dataIsLocal(true),
+        _thresholdValue(Radx::missingMetaDouble)
      
 {
   _init();
@@ -87,6 +119,23 @@ RadxField &RadxField::operator=(const RadxField &rhs)
 
 {
   return _copy(rhs);
+}
+
+/////////////////////////////
+/// Check for common geometry with another ray
+
+bool RadxField::checkGeometryIsEqual(const RadxField &rhs)
+{
+  if (_nPoints != rhs._nPoints) {
+    return false;
+  }
+  if (fabs(_startRangeKm - rhs._startRangeKm) > 1.0e-5) {
+    return false;
+  }
+  if (fabs(_gateSpacingKm - rhs._gateSpacingKm) > 1.0e-6) {
+    return false;
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////
@@ -147,6 +196,7 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _legendXml = rhs._legendXml;
   _thresholdingXml = rhs._thresholdingXml;
   _comment = rhs._comment;
+  _ancillaryVariables = rhs._ancillaryVariables;
 
   _dataType = rhs._dataType;
   _byteWidth = rhs._byteWidth;
@@ -162,6 +212,9 @@ RadxField &RadxField::copyMetaData(const RadxField &rhs)
   _foldRange = rhs._foldRange;
 
   _isDiscrete = rhs._isDiscrete;
+  _flagValues = rhs._flagValues;
+  _flagMeanings = rhs._flagMeanings;
+
   _isRayQualifier = rhs._isRayQualifier;
 
   _missingFl64 = rhs._missingFl64;
@@ -1557,23 +1610,61 @@ void RadxField::convertToSi32(double scale,
     return;
   }
 
-  convertToFl32();
-  
-  Radx::fl32 *fdata = (Radx::fl32 *) _data;
   Radx::si32 *idata = new Radx::si32[_nPoints];
-  for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (fdata[ii] == _missingFl32) {
-      idata[ii] = Radx::missingSi32;
-    } else {
-      long long int ival =
-        (long long int) floor((fdata[ii] - offset) / scale + 0.5);
-      if (ival < -2147483647 || ival > 2147483647) {
+
+  if (_dataType == Radx::SI08 &&
+      fabs(scale - _scale) < 0.00001 &&
+      fabs(offset - _offset) < 0.00001) {
+    
+    // integer8 to integer32
+    
+    Radx::si08 *bdata = (Radx::si08 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (bdata[ii] == _missingSi08) {
         idata[ii] = Radx::missingSi32;
       } else {
-        idata[ii] = (Radx::si32) ival;
+        idata[ii] = bdata[ii];
       }
     }
+
+  } else if (_dataType == Radx::SI16 &&
+             fabs(scale - _scale) < 0.00001 &&
+             fabs(offset - _offset) < 0.00001) {
+
+    // integer16 to integer32
+    
+    Radx::si16 *sdata = (Radx::si16 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (sdata[ii] == _missingSi16) {
+        idata[ii] = Radx::missingSi32;
+      } else {
+        idata[ii] = sdata[ii];
+      }
+    }
+
+  } else {
+
+    // convert to floats and then back again
+    
+    convertToFl32();
+    
+    Radx::fl32 *fdata = (Radx::fl32 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (fdata[ii] == _missingFl32) {
+        idata[ii] = Radx::missingSi32;
+      } else {
+        long long int ival =
+          (long long int) floor((fdata[ii] - offset) / scale + 0.5);
+        if (ival < -2147483647 || ival > 2147483647) {
+          idata[ii] = Radx::missingSi32;
+        } else {
+          idata[ii] = (Radx::si32) ival;
+        }
+      }
+    }
+
   }
+
   _buf.clear();
   _data = _buf.add(idata, _nPoints * sizeof(Radx::si32));
   delete[] idata;
@@ -1600,22 +1691,45 @@ void RadxField::convertToSi16(double scale,
     return;
   }
 
-  convertToFl32();
-
-  Radx::fl32 *fdata = (Radx::fl32 *) _data;
   Radx::si16 *sdata = new Radx::si16[_nPoints];
-  for (size_t ii = 0; ii < _nPoints; ii++) {
-    if (fdata[ii] == _missingFl32) {
-      sdata[ii] = Radx::missingSi16;
-    } else {
-      int idata = (int) floor((fdata[ii] - offset) / scale + 0.5);
-      if (idata < -32767 || idata > 32767) {
+
+  if (_dataType == Radx::SI08 &&
+      fabs(scale - _scale) < 0.00001 &&
+      fabs(offset - _offset) < 0.00001) {
+
+    // integer8 to integer16
+    
+    Radx::si08 *bdata = (Radx::si08 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (bdata[ii] == _missingSi08) {
         sdata[ii] = Radx::missingSi16;
       } else {
-        sdata[ii] = (Radx::si16) idata;
+        sdata[ii] = bdata[ii];
       }
     }
+
+  } else {
+
+    // convert to floats and then back again
+    
+    convertToFl32();
+    
+    Radx::fl32 *fdata = (Radx::fl32 *) _data;
+    for (size_t ii = 0; ii < _nPoints; ii++) {
+      if (fdata[ii] == _missingFl32) {
+        sdata[ii] = Radx::missingSi16;
+      } else {
+        int idata = (int) floor((fdata[ii] - offset) / scale + 0.5);
+        if (idata < -32767 || idata > 32767) {
+          sdata[ii] = Radx::missingSi16;
+        } else {
+          sdata[ii] = (Radx::si16) idata;
+        }
+      }
+    }
+
   }
+  
   _buf.clear();
   _data = _buf.add(sdata, _nPoints * sizeof(Radx::si16));
   delete[] sdata;
@@ -1679,7 +1793,11 @@ void RadxField::convertToSi32()
   if (_dataType == Radx::SI32) {
     return;
   }
-  
+
+  if (_dataType == Radx::SI16 || _dataType == Radx::SI08) {
+    convertToSi32(_scale, _offset);
+  }
+
   // convert to fl32s
 
   convertToFl32();
@@ -1724,6 +1842,10 @@ void RadxField::convertToSi16()
     return;
   }
   
+  if (_dataType == Radx::SI08) {
+    convertToSi16(_scale, _offset);
+  }
+
   // convert to fl32s
 
   convertToFl32();
@@ -2458,6 +2580,35 @@ int RadxField::findLastGateNonMissing(size_t rayNum) const
 
 /////////////////////////////////////////////////
 // Remap data for a single ray onto new range
+// Utilizes remap lookup for efficiency
+
+void RadxField::remapRayGeom(size_t nGates,
+                             double newStartRangeKm,
+                             double newGateSpacingKm,
+                             bool interp /* = false */)
+  
+{
+
+  // no data yet?
+  
+  assert(_data != NULL);
+
+  // initialize lookups in case geom has changed
+  
+  if (_remap.checkGeometryIsDifferent(_startRangeKm, _gateSpacingKm,
+                                      newStartRangeKm, newGateSpacingKm)) {
+    _remap.prepareForInterp(_nPoints,
+                            _startRangeKm, _gateSpacingKm,
+                            newStartRangeKm, newGateSpacingKm);
+    remapRayGeom(_remap, interp);
+  }
+  
+  setNGates(nGates);
+    
+}
+
+/////////////////////////////////////////////////
+// Remap data for a single ray onto new range
 // geometry using the remap object.
 // If interp is set, use interpolation if appropriate.
 
@@ -2766,6 +2917,9 @@ void RadxField::print(ostream &out) const
   if (_comment.size() > 0) {
     out << "  comment: " << _comment << endl;
   }
+  if (_ancillaryVariables.size() > 0) {
+    out << "  ancillaryVariables: " << _ancillaryVariables << endl;
+  }
   out << "  units: " << _units << endl;
   out << "  nRays: " << getNRays() << endl;
   out << "  nPoints: " << _nPoints << endl;
@@ -2780,6 +2934,20 @@ void RadxField::print(ostream &out) const
     out << "    foldRange: " << _foldRange << endl;
   }
   out << "  isDiscrete: " << (_isDiscrete? "Y":"N") << endl;
+  if (_flagValues.size() > 0) {
+    out << "  flagValues:";
+    for (size_t ii = 0; ii < _flagValues.size(); ii++) {
+      out << " " << _flagValues[ii];
+    }
+    out << endl;
+  }
+  if (_flagMeanings.size() > 0) {
+    out << "  flagMeanings:";
+    for (size_t ii = 0; ii < _flagMeanings.size(); ii++) {
+      out << " " << _flagMeanings[ii];
+    }
+    out << endl;
+  }
   out << "  isRayQualifier: " << (_isRayQualifier? "Y":"N") << endl;
   if (_minVal!= Radx::missingMetaDouble) {
     out << "  minVal: " << _minVal << endl;
@@ -2822,6 +2990,11 @@ void RadxField::print(ostream &out) const
   if (_comment.size() > 0) {
     out << "----------------- comment -----------------" <<  endl;
     out << _comment << endl;
+    out << "-------------------------------------------" <<  endl;
+  }
+  if (_ancillaryVariables.size() > 0) {
+    out << "----------------- ancillaryVariables -----------------" <<  endl;
+    out << _ancillaryVariables << endl;
     out << "-------------------------------------------" <<  endl;
   }
   out << "=========================================" << endl;
@@ -3027,11 +3200,41 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
   RadxField *stats =
     new RadxField(fieldMid->getName(), fieldMid->getUnits());
   stats->copyMetaData(*fieldMid);
-  stats->setTypeFl64(Radx::missingFl64);
-
+  
   // save the incoming data type
 
   Radx::DataType_t dataTypeIn = fieldMid->getDataType();
+
+  // discrete mode uses integers
+  
+  if (method == STATS_METHOD_DISCRETE_MODE) {
+
+    // create results array, using ints
+    
+    RadxArray<Radx::si32> data_;
+    Radx::si32 *data = data_.alloc(nPoints);
+    for (size_t ipt = 0; ipt < nPoints; ipt++) {
+      data[ipt] = Radx::missingSi32;
+    }
+
+    // compute the discrete mode
+
+    _computeModeDiscrete(nPoints,
+                         fieldsIn,
+                         data,
+                         maxFractionMissing);
+
+    // add data to stats field
+    
+    stats->setTypeSi32(Radx::missingSi32, 1, 0);
+    stats->addDataSi32(nPoints, data);
+  
+    // return integer field
+    // return the created field - must be freed by caller
+    
+    return stats;
+
+  }
 
   // create results array, using doubles
 
@@ -3040,6 +3243,7 @@ RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     data[ipt] = Radx::missingFl64;
   }
+  stats->setTypeFl64(Radx::missingFl64);
 
   // compute the stats
 
@@ -3162,9 +3366,9 @@ void RadxField::_computeMean(size_t nPoints,
     
   } // ifield
 
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] >= minValid) {
+    if (count[ipt] >= minNValid) {
       double mean = sum[ipt] / count[ipt];
       if (convertToLinear) {
         mean = 10.0 * log10(mean);
@@ -3221,9 +3425,9 @@ void RadxField::_computeMeanFolded(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (count[ipt] >= minValid) {
+    if (count[ipt] >= minNValid) {
       double angleMean = atan2(sumy[ipt], sumx[ipt]);
       data[ipt] = _getFoldValue(angleMean, foldLimitLower, foldRange);
     }
@@ -3260,10 +3464,10 @@ void RadxField::_computeMedian(size_t nPoints,
     
   } // ifield
   
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<double> &series = seriesArray[ipt];
-    if ((int) series.size() >= minValid) {
+    if ((int) series.size() >= minNValid) {
       sort(series.begin(), series.end());
       double median = series[series.size()/2];
       data[ipt] = median;
@@ -3273,6 +3477,59 @@ void RadxField::_computeMedian(size_t nPoints,
 }
 
         
+//////////////////////////////////////////////////////////
+// compute mode for discrete data sets
+
+void RadxField::_computeModeDiscrete(size_t nPoints,
+                                     const vector<const RadxField *> &fieldsIn,
+                                     Radx::si32 *data,
+                                     double maxFractionMissing)
+
+{
+
+  // set up vector for storing the valid data at each point
+
+  vector< vector<int> > goodValsVec;
+  goodValsVec.resize(nPoints);
+  
+  // loop through the fields
+  
+  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+
+    // make a copy of the field and convert to ints
+
+    RadxField copy(*fieldsIn[ifield]);
+    copy.convertToSi32(1.0, 0.0);
+    const Radx::si32 *vals = copy.getDataSi32();
+    Radx::si32 miss = copy.getMissingSi32();
+
+    // loop through the points, adding to the goodVals array
+    // if the data is valid at that point
+
+    for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
+      Radx::si32 val = *vals;
+      if (val != miss) {
+        goodValsVec[ipt].push_back(val);
+      }
+    }
+
+  } // ifield
+
+  // compute the mode across all fields
+
+  size_t minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    vector<int> &goodVals = goodValsVec[ipt];
+    if (goodVals.size() >= minNValid) {
+      int mode = _computeMode(goodVals);
+      data[ipt] = mode;
+    } else {
+      data[ipt] = Radx::missingSi32;
+    }
+  }
+
+}
+
 //////////////////////////////////////////////////////////
 // compute maximum
 
@@ -3312,9 +3569,9 @@ void RadxField::_computeMaximum(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (max[ipt] > -1.0e98 && count[ipt] >= minValid) {
+    if (max[ipt] > -1.0e98 && count[ipt] >= minNValid) {
       data[ipt] = max[ipt];
     }
   }
@@ -3361,9 +3618,9 @@ void RadxField::_computeMinimum(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (min[ipt] < 1.0e98 && count[ipt] >= minValid) {
+    if (min[ipt] < 1.0e98 && count[ipt] >= minNValid) {
       data[ipt] = min[ipt];
     }
   }
@@ -3410,9 +3667,9 @@ void RadxField::_computeMiddle(size_t nPoints,
     
   } // ifield
       
-  int minValid = _computeMinValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    if (!std::isnan(mid[ipt]) && count[ipt] >= minValid) {
+    if (!std::isnan(mid[ipt]) && count[ipt] >= minNValid) {
       data[ipt] = mid[ipt];
     }
   }
@@ -3423,18 +3680,18 @@ void RadxField::_computeMiddle(size_t nPoints,
 // compute the minimum number of valid points, given
 // the n and the max missing fraction
 
-int RadxField::_computeMinValid(int nn,
-                                double maxFractionMissing)
+int RadxField::_computeMinNValid(int nn,
+                                 double maxFractionMissing)
 
 {
 
-  int minValid = (int) ((1.0 - maxFractionMissing) * nn + 0.5);
-  if (minValid < 1) {
-    minValid = 1;
-  } else if (minValid > nn) {
-    minValid = nn;
+  int minNValid = (int) ((1.0 - maxFractionMissing) * nn + 0.5);
+  if (minNValid < 1) {
+    minNValid = 1;
+  } else if (minNValid > nn) {
+    minNValid = nn;
   }
-  return minValid;
+  return minNValid;
 
 }
 
@@ -3652,6 +3909,7 @@ void RadxField::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeString("thresholdingXml", level + 1, _thresholdingXml);
   xml += RadxXml::writeString("thresholdFieldName", level + 1, _thresholdFieldName);
   xml += RadxXml::writeString("comment", level + 1, _comment);
+  xml += RadxXml::writeString("ancillaryVariables", level + 1, _ancillaryVariables);
 
   xml += RadxXml::writeEndTag("RadxField", level);
 
@@ -3723,6 +3981,10 @@ int RadxField::_setMetaStringsFromXml(const char *xml,
   }
   if (RadxXml::readString(contents, "comment", _comment)) {
     missingTags.push_back("comment");
+    iret = -1;
+  }
+  if (RadxXml::readString(contents, "ancillaryVariables", _ancillaryVariables)) {
+    missingTags.push_back("ancillaryVariables");
     iret = -1;
   }
 
@@ -3860,4 +4122,51 @@ void RadxField::_swapMetaNumbers(msgMetaNumbers_t &meta)
   ByteOrder::swap32(&meta.missingFl32, 16 * sizeof(Radx::si32));
 }
           
+
+///////////////////////////////////////////////////////////////////////
+// Compute the mode of a discrete data set (integer-based values).
+// The mode is defined as the value with the highest count in the array.
+//
+// Return val:
+//   If there is more that one value with the highest count, the lowest
+//   of those values will be returned.
+
+int RadxField::_computeMode(const vector<int> &vals)
+  
+{
+
+  if (vals.size() < 1) {
+    return 0;
+  }
+
+  if (vals.size() == 1) {
+    return vals[0];
+  }
+
+  // count up the frequency of each value
+  
+  map<int, size_t> num;
+  for (size_t ipt = 0; ipt < vals.size(); ipt++) {
+    int val = vals[ipt];
+    if (num.count(val) == 0) {
+      num[val] = 1;
+    } else {
+      num[val]++;
+    }
+  }
+
+  // find the val with the max count
+  
+  size_t maxCount = 0;
+  int modeVal = 0;
+  for (auto ii = num.begin(); ii != num.end(); ii++) {
+    if (ii->second > maxCount) {
+      modeVal = ii->first;
+      maxCount = ii->second;
+    }
+  }
+
+  return modeVal;
+
+}
 

@@ -2,7 +2,7 @@
 
 #===========================================================================
 #
-# Create makefile.am for a RAL lib
+# Create makefile.am for a LROSE lib
 #
 #===========================================================================
 
@@ -29,7 +29,6 @@ def main():
 
     global options
     global thisLibName
-    global makefileName
     global subDirList
     global compileFileList
     global headerFileList
@@ -64,6 +63,9 @@ def main():
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of lib directory')
+    parser.add_option('--template',
+                      dest='template', default="unknown",
+                      help='Path of makefile template')
     parser.add_option('--libList',
                       dest='libList', default="",
                       help='List of libs in package')
@@ -80,6 +82,7 @@ def main():
     if (options.debug == True):
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  Lib dir: ", options.dir, file=sys.stderr)
+        print("  Makefile template: ", options.template, file=sys.stderr)
         print("  Lib list: ", options.libList, file=sys.stderr)
 
     # set up list of other libs which may be used for include
@@ -114,28 +117,6 @@ def main():
     if (options.debug == True):
         print("src dir: ", srcDir, file=sys.stderr)
     os.chdir(srcDir)
-
-    # get makefile name in use
-    # makefile has preference over Makefile
-
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print("ERROR - ", thisScriptName, file=sys.stderr)
-                print("  Cannot find makefile or Makefile", file=sys.stderr)
-                print("  dir: ", options.dir, file=sys.stderr)
-                exit(1)
-
-    # copy makefile in case we rerun this script
-
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug == True):
-        print("-->> using makefile template: ", makefileName, file=sys.stderr)
 
     # get the lib name
 
@@ -256,7 +237,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the lib name
+# parse the LROSE Makefile to get the lib name
 
 def getLibName():
 
@@ -264,18 +245,18 @@ def getLibName():
 
     # search for MODULE_NAME key in makefile
 
-    valList = getValueListForKey(makefileName, "MODULE_NAME")
+    valList = getValueListForKey(options.template, "MODULE_NAME")
 
     if (len(valList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find MODULE_NAME in ", makefileName, file=sys.stderr)
+        print("  Cannot find MODULE_NAME in ", options.template, file=sys.stderr)
         print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     thisLibName = valList[len(valList)-1]
 
 ########################################################################
-# get list of makefiles - using RAL Makefile to locate subdirs
+# get list of makefiles - using LROSE Makefile to locate subdirs
 
 def getSubDirList():
 
@@ -284,11 +265,11 @@ def getSubDirList():
 
     # search for SUB_DIRS key in makefile
 
-    subNameList = getValueListForKey(makefileName, "SUB_DIRS")
+    subNameList = getValueListForKey(options.template, "SUB_DIRS")
 
     if (len(subNameList) < 1):
         print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot find SUB_DIRS in ", makefileName, file=sys.stderr)
+        print("  Cannot find SUB_DIRS in ", options.template, file=sys.stderr)
         print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
@@ -460,25 +441,23 @@ def writeMakefileAm():
     fo.write("#\n")
     fo.write("###############################################\n")
     fo.write("\n")
-    fo.write("# compile flags - include header subdirectory\n")
+    fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CFLAGS = -I./include\n")
-    fo.write("AM_CFLAGS += -fPIC\n")
-    fo.write("\n")
+    fo.write("AM_CFLAGS = -fPIC\n")
+    fo.write("AM_CFLAGS += -I./include\n")
+    for lib in libList:
+        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
+    fo.write("# add includes already installed in prefix\n")
+    fo.write("AM_CFLAGS += -I${prefix}/include\n")
     if (isDebianBased):
-        fo.write("# NOTE: add in Debian location of HDF5\n")
+        fo.write("# add in Debian location of HDF5\n")
         fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
-    fo.write("# NOTE: add in Mac OSX location of XQuartz\n")
+    fo.write("# add in Mac OSX location of XQuartz\n")
     fo.write("AM_CFLAGS += -I/usr/X11R6/include -I/opt/X11/include\n")
     if (options.shared == True):
         fo.write("ACLOCAL_AMFLAGS = -I m4\n")
-    #    fo.write("AM_CFLAGS += -I$(prefix)/include\n")
-
-    for lib in libList:
-        # if (lib.used):
-        #fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib.name)
-        fo.write("AM_CFLAGS += -I../../%s/src/include\n" % lib)
     fo.write("\n")
+
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
     fo.write("\n")
     fo.write("# target library file\n")
@@ -491,9 +470,9 @@ def writeMakefileAm():
     fo.write("# headers to be installed\n")
     fo.write("\n")
     if (includesInSubDir == True):
-        fo.write("includedir = $(prefix)/include/%s\n" % thisLibName)
+        fo.write("includedir = ${prefix}/include/%s\n" % thisLibName)
     else:
-        fo.write("includedir = $(prefix)/include\n")
+        fo.write("includedir = ${prefix}/include\n")
     fo.write("\n")
 
     fo.write("include_HEADERS = \\\n")

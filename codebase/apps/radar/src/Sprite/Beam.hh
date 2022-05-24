@@ -41,6 +41,7 @@
 #include <vector>
 #include <deque>
 #include <cstdio>
+#include <toolsa/DateTime.hh>
 #include <radar/RadarMoments.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
@@ -94,7 +95,8 @@ public:
 
   // compute moments
   
-  int computeMoments();
+  int computeMoments(Params::fft_window_t windowType
+                     = Params::FFT_WINDOW_VONHANN);
 
   // set methods
 
@@ -122,7 +124,7 @@ public:
   
   time_t getTimeSecs() const { return _timeSecs; }
   time_t getNanoSecs() const { return _nanoSecs; }
-  double getTimeDouble() const { return _timeDouble; }
+  const DateTime &getTime() const { return _time; }
   
   int getScanMode() const;
   int getSweepNumber() const { return _sweepNum; }
@@ -140,7 +142,7 @@ public:
 
   int getGateNum(double range) const;
   double getRange(int gateNum) const;
-  double getClosestRange(double range) const;
+  double getClosestRange(double range, int &gateNum) const;
   double getMaxRange() const;
 
   double getStartRangeKm() const { return _startRangeKm; }
@@ -165,6 +167,8 @@ public:
   const vector<GateData *> getGateData() const { return _gateData; }
   inline const fl32* *getIqChan0() const { return _iqChan0; }
   inline const fl32* *getIqChan1() const { return _iqChan1; }
+
+  const RadarMoments *getMoments() { return _mom; }
 
 protected:
   
@@ -199,7 +203,7 @@ private:
 
   time_t _timeSecs;
   int _nanoSecs;
-  double _timeDouble;
+  DateTime _time;
 
   double _el;
   double _az;
@@ -279,9 +283,9 @@ private:
 
   // window
 
+  Params::fft_window_t _fftWindowType;
   double *_window;
   double *_windowHalf;
-  double *_windowVonHann;
   
   // R values, at various lags, for the windows
   // used to correct R values used in width computations

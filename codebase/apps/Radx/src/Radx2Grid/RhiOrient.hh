@@ -74,6 +74,25 @@ public:
 
   void clear();
 
+  // number of range gates
+  
+  size_t getNRange() const { return _nRange; }
+
+  // get dbz H and V values
+
+  inline Radx::fl32 getDbzH(size_t rangeIndex, size_t zIndex) const
+  {
+    assert(rangeIndex < _nRange);
+    assert(zIndex < _nZ);
+    return _dbzH[zIndex][rangeIndex];
+  }
+  inline Radx::fl32 getDbzV(size_t rangeIndex, size_t zIndex) const
+  {
+    assert(rangeIndex < _nRange);
+    assert(zIndex < _nZ);
+    return _dbzV[zIndex][rangeIndex];
+  }
+
   // get sdev values
 
   inline Radx::fl32 getSdevDbzH(size_t rangeIndex, size_t zIndex) const
@@ -121,7 +140,7 @@ private:
 
   vector<RadxRay *> _rays;
   double _meanAzimuth;
-  double DBZ_BAD;
+  Radx::fl32 _dbzMiss;
 
   // beam height calculations
   

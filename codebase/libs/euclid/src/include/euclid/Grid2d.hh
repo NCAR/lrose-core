@@ -428,6 +428,36 @@ public:
   bool setWithWarnings(int x, int y, double value);
 
   /**
+   * Reduce resolution of the local grid by a factor 
+   *
+   * @param[in] res  Reduction, 1 = no resolution reduction, 2 = 
+   *                 resolution reduction by a factor of 2, and so on.
+   *
+   * @return  True if successful, false if some problem was encountered,
+   *          and in that case no change is made to the grid.
+   *          Problems include res < 2 or res so high that nothing is left.
+   *
+   * @note this method subsamples the original grid
+   */
+  bool reduce(const int f);
+
+  /**
+   * Interpolate a grid from low to higher resolution, with results put into
+   * the local grid. Uses a bilinear interpolation method.
+   *
+   * @param[in] lowres  The low resolution grid to interpolate
+   * @param[in] res  Resolution factor, 1 = no change, 2 = increase resolution
+   *                 by a factor of two, etc.
+   *
+   * @return  True if the interpolation was successful,
+   *          false if inputs were not as expected.
+   *
+   * @note  Expect (local nx) = (input nx)*res, (local ny)=(input ny)*res.
+   *        An error occurs it this is not true.
+   */
+  bool interpolate(const Grid2d &lowres, const int res);
+
+  /**
    * Shorthand for iterator
    */
   typedef std::vector<double>::iterator iterator;
@@ -481,7 +511,6 @@ public:
    * @param[in] y
    */
   double& operator()(size_t x, size_t y)    { return _data[_ipt(x,y)]; }
-
   /**
    * @return const reference to x,y'th data element
    * @param[in] x
@@ -511,6 +540,20 @@ protected:
 
 private:
 
+  /**
+   * Do bilinear interpolation from low to high resolution at a point
+   *
+   * @param[in] ry0  Low resolution point in the input grid
+   * @param[in] rx0  Low resolution point in the input grid
+   * @param[in] res  Factor to convert from low to high resolution 1, 2, ..
+   * @param[in] y   High resolution output point (in the local grid)
+   * @param[in] x   High resolution output point (in the local grid)
+   * @param[in] lowres  The grid with low resolution data
+   *
+   * @return interpolated value for position x, y in the local grid
+   */
+  double _bilinear(int ry0, int rx0, int res, int y, int x,
+		   const Grid2d &lowres) const;
 };
 
 #endif

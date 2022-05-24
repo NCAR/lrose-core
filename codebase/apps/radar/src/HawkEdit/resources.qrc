@@ -1,7 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
-<qresource>
+<qresource  prefix="/">
   <file>images/ok_check.png</file>
   <file>images/cancel_x.png</file>
   <file>images/apply.png</file>
+  <file>script_help.txt</file>
 </qresource>
 </RCC>

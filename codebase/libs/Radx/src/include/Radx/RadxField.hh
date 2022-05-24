@@ -137,6 +137,10 @@ public:
 
   RadxField &copyMetaData(const RadxField &rhs);
   
+  /// Check for common geometry with another ray
+
+  bool checkGeometryIsEqual(const RadxField &rhs);
+
   /// \name Set methods:
   //@{
 
@@ -176,6 +180,11 @@ public:
 
   void setComment(const string &val) { _comment = val; }
 
+  /// Set the ancillary variables attribute
+  /// The ancillary variables are those that qualify this field
+  
+  void setAncillaryVariables(const string &val) { _ancillaryVariables = val; }
+
   /// Set sampling ratio.
   ///
   /// Sometimes the number of samples used to compute different
@@ -203,6 +212,15 @@ public:
   
   void setIsDiscrete(bool val = true) { _isDiscrete = val; }
 
+  /// flags for discrete fields
+  
+  void clearFlagValues() { _flagValues.clear(); }
+  void clearFlagMeanings() { _flagMeanings.clear(); }
+  void addFlagValue(int val) { _flagValues.push_back(val); }
+  void addFlagMeaning(const string &val) { _flagMeanings.push_back(val); }
+  void setFlagValues(const vector<int> &vals) { _flagValues = vals; }
+  void setFlagMeanings(const vector<string> &vals) { _flagMeanings = vals; }
+  
   /// Set whether this is a RayQualifier field. RayQualifier fields have only one
   /// value per ray, instead of a gate-based array.
   
@@ -598,6 +616,15 @@ public:
   //@{
 
   /////////////////////////////////////////////////
+  // Remap data for a single ray onto new range
+  // Utilizes remap lookup for efficiency
+  
+  void remapRayGeom(size_t nGates,
+                    double newStartRangeKm,
+                    double newGateSpacingKm,
+                    bool interp = false);
+  
+  /////////////////////////////////////////////////
   /// Remap data for a single ray onto new range
   /// geometry using lookup table passed in.
   ///
@@ -702,6 +729,11 @@ public:
 
   const string &getComment() const { return _comment; }
 
+  /// Get the ancillary variables attribute
+  /// The ancillary variables are those that qualify this field
+  
+  const string &getAncillaryVariables() const { return _ancillaryVariables; }
+
   /// Get number of rays represented in field data.
   
   size_t getNRays() const { return _rayStartIndex.size(); }
@@ -769,6 +801,11 @@ public:
   
   bool getIsDiscrete() const { return _isDiscrete; }
 
+  /// flags for discrete fields
+
+  const vector<int> &getFlagValues() const { return _flagValues; }
+  const vector<string> &getFlagMeanings() const { return _flagMeanings; }
+  
   /// Is this a RayQualifier field? In other words does it only have
   /// a single value per ray, rather than a gate-based array.
   
@@ -984,7 +1021,8 @@ public:
     STATS_METHOD_MAXIMUM = 2, /**< Computing the maximum of a series */
     STATS_METHOD_MINIMUM = 3, /**< Computing the minumum of a series */
     STATS_METHOD_MIDDLE = 4, /**< Using the middle entry in a series */
-    STATS_METHOD_LAST = 5
+    STATS_METHOD_DISCRETE_MODE = 5, /**< Most frequent entry in a discrete field */
+    STATS_METHOD_LAST = 6
 
   } StatsMethod_t;
 
@@ -1057,6 +1095,7 @@ private:
   string _legendXml;
   string _thresholdingXml;
   string _comment;
+  string _ancillaryVariables;
   
   Radx::DataType_t _dataType;
   int _byteWidth;
@@ -1088,6 +1127,11 @@ private:
   
   bool _isDiscrete;
 
+  // flags for discrete fields
+
+  vector<int> _flagValues;
+  vector<string> _flagMeanings;
+  
   // Is this a RayQualifier field? RayQualifiers store just a
   // single value per ray, instead of gate-based array.
   
@@ -1118,6 +1162,10 @@ private:
 
   string _thresholdFieldName;
   double _thresholdValue;
+
+  // lookup table for remapping
+
+  RadxRemap _remap;
   
   // private methods
   
@@ -1154,6 +1202,11 @@ private:
                       Radx::fl64 *data,
                       double maxFractionMissing);
 
+  void _computeModeDiscrete(size_t nPoints,
+                            const vector<const RadxField *> &fieldsIn,
+                            Radx::si32 *data,
+                            double maxFractionMissing);
+
   void _computeMaximum(size_t nPoints,
                        const vector<const RadxField *> &fieldsIn,
                        Radx::fl64 *data,
@@ -1169,8 +1222,8 @@ private:
                       Radx::fl64 *data,
                       double maxFractionMissing);
 
-  int _computeMinValid(int nn,
-                       double maxFractionMissing);
+  int _computeMinNValid(int nn,
+                        double maxFractionMissing);
   
   /////////////////////////////////////////////////
   // serialization
@@ -1242,7 +1295,11 @@ private:
   /// swap meta numbers
   
   static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
-          
+
+  // compute discrete mode
+
+  int _computeMode(const vector<int> &vals);
+
 };
 
 #endif

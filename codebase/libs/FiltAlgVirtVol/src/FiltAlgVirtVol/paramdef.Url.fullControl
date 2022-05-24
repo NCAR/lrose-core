@@ -1,0 +1,210 @@
+/**********************************************************
+ * paramdef.Url
+ *
+ * This file contains the TDRP parameter definitions for data handling of
+ * for virtual volumes for a particular URL
+ * 
+ */
+
+commentdef
+{
+  p_header = "VirtVol URL Parameters";
+  p_text = "All the data written to a URL, or read from a URL";
+};
+
+typedef enum {VOLUME, DATABASE, ASCII} Url_t;
+typedef enum {MDV_GRID, NCF_GRID, VALUE, NOT_SET} Data_t;
+
+paramdef string
+{
+  p_descr = "The URL";
+  p_default = "unknown";
+} url;
+
+paramdef enum Url_t
+{
+  p_help = "type of url : VOLUME (grids,values),  DATABASE (values), or ASCII (values)";
+  p_default = VOLUME;
+} url_type;
+
+paramdef enum Data_t
+{
+  p_help = "Type of data at the URL, either GRID or VALUE";
+  p_default = MDV_GRID;
+} data_type;
+
+paramdef string
+{
+  p_help = "Names of data associated with this URL, should match something in the filter outputs or inputs";
+  p_default = {};
+} names[];
+
+commentdef
+{
+  p_header = "netCDF output params";
+  p_text = "The remaining params only apply to NCF_GRID URLs that are used for output.  When NCF_GRID the url should be a full path, not a URL";
+};
+
+// strings to be included in NetCDF file
+
+typedef struct {
+  string conventions;
+  string institution;
+  string references;
+  string source;
+  string title;
+  string comment;
+} global_attributes_t;
+
+paramdef struct  global_attributes_t {
+  p_default = {"","UCAR","","","","Created by Mdv2NetCDF"};
+  p_descr = "Global attributes for netCDF file";
+  p_help = "conventions: ignored, set by Ncf2Mdv library.\ninstitution: used.\nreferences: used.\nsource: ignored - will use MDV master header data_set_source.\ntitle: ignored - will use MDV master header data_set_name.\ncomment: used."; 
+} global_attributes;
+
+typedef enum {
+  DATA_PACK_NONE, DATA_PACK_BYTE, DATA_PACK_SHORT
+} data_pack_t;
+
+paramdef enum data_pack_t
+{
+  p_default = DATA_PACK_NONE;
+  p_descr= "Packing of output netCDF data";
+} packed_data_type;
+  
+// typedef enumstruct {
+//          string mdv_field_name;
+// 	 string ncf_field_name;
+//          string ncf_standard_name;
+//          string ncf_long_name;
+//          string ncf_units;
+//          boolean do_linear_transform;
+//          float linear_multiplier;
+//          float linear_const;
+//          data_pack_t packed_data_type;
+// } mdv_ncf_field_t;
+
+// paramdef struct mdv_ncf_field_t {
+//  p_default = {};
+//  p_descr = "field list";
+// } mdv_ncf_fields[];
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress field data. Default is true.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} compress_data;
+
+paramdef int {
+  p_default = 9;
+  p_descr = "Compression level from 1 to 9 with 9 being the greatest compression. Default is 9.";
+  p_help = "Only applies to NETCDF4 and  NETCDF4_CLASSIC files.";
+} compression_level;
+
+paramdef string {
+  p_default = "ncfdata";
+  p_descr = "basename of netCDF file";
+} basename;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to add day dir into the output file path";
+  p_help = "If true, the final output dir will be 'output_dir/yyyymmdd'";
+} write_to_day_dir;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to output files under forecast dir structure";
+  p_help = "If true, the final output dir will be 'output_dir/g_hhmmss'";
+} output_as_forecast;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output filename uses the basename, followed by ISO 8601 timestamp convention";
+  p_help = "eg. basename.2008-05-22T14:00:00.nc";
+} use_iso8601_filename_convention;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output filename uses the basename, followed by a Thredds Data Server "
+    " (TDS) compliant timestamp convention";
+  p_help = "The TDS doesn't like ':', '-' in name (basename.20080522_140000.nc";
+} use_TDS_filename_convention;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true the output_filename is used, otherwise it is created with the baename and a timestamp";
+  p_help = "User specifies the output file name";
+} use_output_filename;
+
+paramdef string {
+  p_default = "outputfile.nc";
+  p_descr = "User-specified output filename";
+} output_filename;
+
+paramdef string {
+  p_default = "";
+  p_descr = "User-specified output file prefix, comes before basename";
+} output_file_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "User-specified output file suffix, comes before the .nc which gets automatically tacked on.";
+} output_file_suffix;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} ncformat_t;
+
+paramdef enum ncformat_t {
+  p_default = "CLASSIC";
+  p_descr = "NetCDF file format";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} file_format;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true latitude and longitude arrays of each grid point are output";
+  p_help = "The CF convention requires that these arrays are present in the netCDF file; however, the information is redundant since the lat and lon arrays could be constructed using the other projection and grid information required with a gridded data field";
+} output_latlon_arrays;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true start_time and end_time are are output";
+  p_help = "Start and end times may provide redundant information in the Mdv file or may not be relevant to the output data";
+} output_start_end_times;
+
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output non-CF compliant MDV attributes.";
+  p_help = "If true, MDV attributes which are not CF compliant will be output. This will facilitate the translation of the data back into MDV with the minimal loss of information.";
+} output_mdv_attributes;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to output non-CF compliant MDV chunks.";
+  p_help = "If true, MDV chunks will be included as byte binary variables.";
+} output_mdv_chunks;
+
+commentdef {
+  p_header = "OUTPUT format options for POLAR RADAR data.";
+}
+
+typedef enum {
+  FILE_TYPE_CF, // basic CF
+  FILE_TYPE_CF_RADIAL, // New CF Radial format
+  FILE_TYPE_DORADE, // NCAR Dorade format
+  FILE_TYPE_UF // universal format
+} radial_file_type_t;
+  
+paramdef enum radial_file_type_t {
+  p_default = FILE_TYPE_CF;
+  p_descr = "Output format for polar radar data.";
+} radial_file_type;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force output ldata info file to use valid time.";
+  p_help = "If true, the ldata info time fields will be generated using the centroid time.  If false, it will determine how to create the time fields based on the collection type and forecast time.";
+} force_ldata_as_valid;

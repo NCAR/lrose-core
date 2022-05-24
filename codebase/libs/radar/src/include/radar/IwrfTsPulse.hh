@@ -76,9 +76,11 @@ public:
 
   // set the ops info
 
-  void setOpsInfo(IwrfTsInfo &info) {
-    if (&_info != &info) _info = info;
-  }
+  void setOpsInfo(IwrfTsInfo &info);
+  
+  // set the ops info except for the metadata queue
+
+  void setOpsInfoExceptMetadataQueue(IwrfTsInfo &info);
   
   // debugging
 

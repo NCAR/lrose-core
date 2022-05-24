@@ -24,8 +24,15 @@ DisplayFieldModel::DisplayFieldModel(vector<DisplayField *> displayFields,
   }
   
   LOG(DEBUG) << "selected field is " << selectedFieldName;
+
   _selectedFieldName = selectedFieldName;
-  _selectedFieldIndex = _lookupFieldIndex(selectedFieldName); 
+  if (!selectedFieldName.empty()) {  
+    _selectedFieldIndex = _lookupFieldIndex(selectedFieldName); 
+    _noSelectedField = false;
+  } else {
+    _selectedFieldIndex = 0;
+    _noSelectedField = true; 
+  }
   _gridColor = gridColor;
   _emphasisColor = emphasisColor;
   _annotationColor = annotationColor;
@@ -40,7 +47,38 @@ DisplayFieldModel::~DisplayFieldModel() {
 
 void DisplayFieldModel::addField(DisplayField *newField) {
   _fields.push_back(newField);
+  if (_fields.size() == 1) {
+    setSelectedField(0);
+  }
 }
+
+void DisplayFieldModel::hideField(DisplayField *field) {
+  //_fields.delete(newField);
+}
+
+/* should this go to SpreadSheetController->SpreadSheetModel???  YES
+void DisplayFieldModel::setFieldToMissing(const string &fieldName) {
+  DataModel *dataModel = DataModel::Instance();
+  float dummy = 0.0;
+  dataModel->SetData(_name, dummy);
+}
+// TODO: or should this go to SpreadSheetController->SpreadSheetModel???
+void DisplayFieldModel::deleteFieldFromVolume(const string &fieldName) {
+  // TODO: or just mark as "do not save" ???
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->RemoveField(_name);
+  deleteField(fieldName);
+}
+*/
+
+void DisplayFieldModel::deleteField(string fieldName) {
+
+  size_t index = _lookupFieldIndex(fieldName);
+  _fields.erase(_fields.begin() + (int) index);
+  if (index == _selectedFieldIndex) {
+    _selectedFieldIndex = 0;
+  }
+} 
 
 vector<string>  DisplayFieldModel::getFieldNames() {
   vector<string> fieldNames;
@@ -67,6 +105,12 @@ DisplayField *DisplayFieldModel::getField(string fieldName) {
 
 size_t DisplayFieldModel::getFieldIndex(string fieldName) {
   return _lookupFieldIndex(fieldName);
+}
+
+size_t DisplayFieldModel::getSelectedFieldNum() { 
+  if (_noSelectedField)
+    throw std::range_error("No DisplayField selected; no display fields");
+  return _selectedFieldIndex;
 }
 
 string DisplayFieldModel::getFieldName(size_t fieldIndex) {
@@ -97,6 +141,7 @@ void DisplayFieldModel::setSelectedField(string fieldName) {
   LOG(DEBUG) << "enter " << fieldName;
   _selectedFieldName = fieldName;
   _selectedFieldIndex = _lookupFieldIndex(fieldName);
+  _noSelectedField = false;
   LOG(DEBUG) << "exit";
 } 
 
@@ -105,6 +150,7 @@ void DisplayFieldModel::setSelectedField(size_t fieldIndex) {
     _selectedFieldIndex = fieldIndex;
     DisplayField *displayField = getField(fieldIndex);
     _selectedFieldName = displayField->getName();
+    _noSelectedField = false;
   }
   else
     throw std::invalid_argument("field index out of bounds");
@@ -425,7 +471,7 @@ void DisplayFieldModel::setForLocationClicked(string fieldName, double value, co
 						   &text) {
   // TODO: use _findFieldByName
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0) {
       _fields[ii]->setSelectValue(value);
       _fields[ii]->setDialogText(text);
     }
@@ -435,7 +481,7 @@ void DisplayFieldModel::setForLocationClicked(string fieldName, double value, co
 DisplayField *DisplayFieldModel::_findFieldByName(string fieldName) {
   DisplayField *theField = NULL;
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0)  {
       theField = _fields[ii];
     }
   }
@@ -444,7 +490,7 @@ DisplayField *DisplayFieldModel::_findFieldByName(string fieldName) {
 
 size_t DisplayFieldModel::_lookupFieldIndex(string fieldName) {
   for (size_t ii = 0; ii < _fields.size(); ii++) {
-    if (fieldName == _fields[ii]->getName()) {
+    if (fieldName.compare(_fields[ii]->getName()) == 0) {
       return ii;
     }
   }

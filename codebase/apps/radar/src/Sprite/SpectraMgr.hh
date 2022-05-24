@@ -49,10 +49,12 @@
 
 #include <QMainWindow>
 
+#include <toolsa/DateTime.hh>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxVol.hh>
+#include <radar/ClickPointFmq.hh>
 
 class TsReader;
 class SpectraWidget;
@@ -126,7 +128,8 @@ private:
   // reading data in
   
   TsReader *_tsReader;
-  
+  bool _goForward;
+
   // beam reading timer
 
   static bool _firstTimerEvent;
@@ -303,6 +306,17 @@ private:
 
   deque<Beam *> _beamQueue;
 
+  // user click Xml FMQ - from HawkEye
+  
+  ClickPointFmq _clickPointFmq;
+  time_t _clickPointTimeSecs;
+  int _clickPointNanoSecs;
+  DateTime _clickPointTime;
+  double _clickPointElevation;
+  double _clickPointAzimuth;
+  double _clickPointRangeKm;
+  int _clickPointGateNum;
+
   // set top bar
 
   virtual void _setTitleBar(const string &radarName);
@@ -370,6 +384,10 @@ private:
   
   void _handleRealtimeData();
   void _handleArchiveData();
+  void _followDisplay();
+
+  int _readClickPointFmq(bool &gotNew);
+  int _writeClickPointXml2Fmq();
 
 private slots:
 
@@ -386,9 +404,11 @@ private slots:
   
   void _manageBeamQueue(Beam *beam);
 
+  void _clickPointChanged();
+
   // local slots
 
-  void _locationClicked(double xkm, double ykm, const RadxRay *closestRay);
+  void _spectraLocationClicked(double selectedRangeKm, int selectedGateNum);
 
   void _setTimeSpan();
   void _resetTimeSpanToDefault();
@@ -402,7 +422,7 @@ private slots:
   void _goBack();
   void _goFwd();
   void _changeRange(int deltaGates);
-
+  
   void _performArchiveRetrieval();
   
 };

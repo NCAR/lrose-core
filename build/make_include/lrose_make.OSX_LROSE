@@ -59,8 +59,8 @@ SYS_LD_LIBRARY_PATH =
 CC = gcc
 SYS_CFLAGS = $(GCC_WARNINGS) -D$(HOST_OS) -D_BSD_TYPES -DF_UNDERSCORE2 $(MY_CFLAGS)
 PROFILE_FLAG = -pg
-DEBUG_FLAG = -g -O2
-OPT_FLAG = -O2
+DEBUG_FLAG = -g 
+OPT_FLAG = -g
 
 #
 # cc
@@ -163,8 +163,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-#NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2 -lexpat
-NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_cpp -lhdf5_hl -lhdf5 -lz -lbz2
+NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2
 
 #
 # Qt

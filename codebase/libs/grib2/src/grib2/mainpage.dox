@@ -10,13 +10,332 @@
 
  External GRIB2 Resources:\n
  From WMO:  http://www.wmo.int/pages/prog/www/WMOCodes.html\n
- From NCEP: http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc.shtml\n
+ From NCEP: https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/\n
 
 \section copyright Copyright
 
  ** *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
- ** (c) Copyright 2015 University Corporation for Atmospheric Research 
- ** (UCAR). All Rights Reserved. For U.S.A. Government Use Only 
+ ** (c) University Corporation for Atmospheric Research (UCAR) 2019.   
+ ** All rights reserved.  This software was developed with United  
+ ** States Government support pursuant to an Indefinite Delivery  
+ ** Indefinite Quantity agreement between UCAR and the Federal Aviation  
+ ** Administration (Contract No. DTFAWA-15-D-00036).   
+ ** The Government is granted a paid up, nonexclusive, irrevocable,  
+ ** worldwide license to reproduce, prepare derivative works, and  
+ ** perform publicly and display publicly (but not to distribute copies  
+ ** to the public), by or on behalf of the Government. 
  ** *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+
+\section gettingStarted Getting Started Reading Grib2 Files
+
+Quick Start example for reading Grib2:
+\code
+#include <string>
+#include <vector>
+#include <list>
+
+#include <grib2/Grib2File.hh>
+#include <grib2/Grib2Record.hh>
+#include <grib2/LatLonProj.hh>
+#include <grib2/LambertConfProj.hh>
+#include <grib2/PolarStereoProj.hh>
+#include <grib2/MercatorProj.hh>
+#include <grib2/GDS.hh>
+#include <grib2/PDS.hh>
+#include <grib2/DRS.hh>
+#include <grib2/DS.hh>
+
+using namespace std;
+
+float *_vol;
+int _nx, _ny, _nz;
+float _minx, _miny, _dx, _dy;
+float _zVal[255];
+float _missing, _secondaryMissing;
+float _proj_origin_lat, _proj_origin_lon;
+float _lat1, _lat2, _tan_lon;
+
+int readFile(char *filePath)
+{
+
+  bool verbose = false;
+  bool debug = false;
+  bool printVarList = false;
+
+  Grib2File grib2File;
+  grib2File.read(filePath);
+  
+  // Print the full contents (by section) of the grib file
+  if(verbose) {
+    Grib2Record::print_sections_t printSec;
+    printSec.is = false;  // Indicator Section
+    printSec.ids = true;  // Identification Section
+    printSec.lus = false; // Local Use Section
+    printSec.gds = true;  // Grid Definition Section
+    printSec.pds = true;  // Product Definition Section
+    printSec.drs = true;  // Data Representation Section
+    printSec.bms = false; // Bit-map Section
+    printSec.ds = false;  // Data Section
+    grib2File.printContents(stdout, printSec);
+  }
+  
+  // Print a detail summary of the grib file
+  // Prints info about every grib2 record found in the file
+  if(debug) grib2File.printSummary(stdout, debug);
+  
+  // Get the list of Fields in the grib file
+  list < pair< const string, const string >> fieldLevelList;
+  list <string> fieldList = grib2File.getFieldList();
+  list <string>::const_iterator field;
+  for (field = fieldList.begin(); field != fieldList.end(); ++field) 
+  {
+    // Get the list of levels for this field in the grib file
+    list <string> levels = grib2File.getFieldLevels(*(field));
+    list <string>::const_iterator level;
+    for (level = levels.begin(); level != levels.end(); ++level) 
+    {
+	
+      // Save all field / level combinations to read an entire file
+      fieldLevelList.push_back( make_pair(*field, *level) );
+      
+      // Print just the list of variables found in the file
+      if(printVarList) {
+	vector<Grib2Record::Grib2Sections_t> gribRecords = grib2File.getRecords(*field, *level);
+	char name[20];
+	sprintf(name, "%s %s", *field, *level);
+	printf("%-20s \t'%s' '%s'\n", name,
+	       gribRecords[0].summary->longName.c_str(), gribRecords[0].summary->levelTypeLong.c_str());
+      }
+    }
+  }
+  
+  // Return if we only wanted to print the list of variables
+  if(printVarList) return -1;
+  
+  // Or Read just a requested Variable
+  //fieldLevelList.clear();
+  //fieldLevelList.push_back( make_pair(fieldName, levelName) );
+
+  // Get a list of forecast times, usually there is just one but not always.
+  list <long int> forecastList = grib2File.getForecastList();
+  list <long int>::const_iterator leadTime;
+  for (leadTime = forecastList.begin(); leadTime != forecastList.end(); ++leadTime) 
+  {
+
+    // Read each field / level combination
+    list< pair< const string, const string > >::const_iterator fieldLevel = fieldLevelList.begin();
+    while (fieldLevel != fieldLevelList.end()) 
+    {
+      cout << "Looking for field " <<  fieldLevel->first << " level  " << fieldLevel->second << endl;
+      
+      vector<Grib2Record::Grib2Sections_t> gribRecords = grib2File.getRecords(fieldLevel->first, fieldLevel->second, *leadTime);
+      
+      // Make sure a 3D field is in correct order
+      if(gribRecords.size() > 1) {
+	_sortByLevel(gribRecords.begin(), gribRecords.end());
+      }
+      if (debug)
+	cout << "Found " << gribRecords.size() << " records." << endl;
+
+      // Loop over each record (level) of the 3D field, only one record for 2D fields
+      int levelIndex = 0;
+      fl32 *currDataPtr = NULL;
+      vector<Grib2Record::Grib2Sections_t>::const_iterator gribRecord = gribRecords.begin();
+      while(gribRecord != gribRecords.end())
+      {
+	
+	if (debug) {
+	  cout <<  gribRecord->summary->name.c_str() << " ";
+	  cout <<  gribRecord->summary->longName.c_str() << " ";
+	  cout <<  gribRecord->summary->units.c_str() << " ";
+	  cout <<  gribRecord->summary->category << " ";
+	  cout <<  gribRecord->summary->paramNumber << " ";
+	  cout <<  gribRecord->summary->levelType.c_str() << " ";
+	  cout <<  gribRecord->summary->levelVal;
+	  cout <<  endl;
+	}
+
+	// Save field info and create volume array for first level only
+	if(gribRecord == gribRecords.begin())
+	{
+          if(_setFieldInfo(gribRecord) != 0)
+	    return -1;
+
+	  _nz = gribRecords.size();
+	  if(_vol)
+	    delete [] _vol;
+	  _vol = new fl32[(size_t)_nz*(size_t)_nx*(size_t)_ny];
+	  currDataPtr = _vol;
+	}
+
+	//
+	// Get and save the data to the volume array
+	fl32 *data = gribRecord->ds->getData();
+	memcpy ( currDataPtr, data, sizeof(fl32)*_nx*_ny );
+	currDataPtr += _nx*_ny;
+	gribRecord->ds->freeData();
+
+	// fill out the vlevel value
+	_zVal[levelIndex] = gribRecord->summary->levelVal;
+	levelIndex++;
+      }
+
+    }
+    
+  }
+
+  if(_vol == NULL) {
+    cerr << "WARNING: No fields found in grib2 file." << endl;
+    return -1;
+  }
+  
+  return 0;
+}
+
+//
+// Sorts a list of Grib2Records by level
+void _sortByLevel(vector<Grib2Record::Grib2Sections_t>::iterator begin, 
+			     vector<Grib2Record::Grib2Sections_t>::iterator end)
+{
+  bool reverse = false;
+  const char *GribLevelCStr = (begin)->summary->levelType.c_str();
+  // Pressure levels go in descending order
+  if(!strcmp(GribLevelCStr, "SPDL") || !strcmp(GribLevelCStr, "ISBL"))
+    reverse = true;
+  vector<Grib2Record::Grib2Sections_t>::iterator IPos;
+  vector<Grib2Record::Grib2Sections_t>::iterator JPos;
+  Grib2Record::Grib2Sections_t temp;
+  for (IPos = end-1; IPos != begin-1; IPos--)
+  {
+    for (JPos = begin+1; JPos != IPos+1; JPos++)
+    {
+      if ((!reverse && (JPos-1)->summary->levelVal > JPos->summary->levelVal) ||
+	  (reverse && (JPos-1)->summary->levelVal < JPos->summary->levelVal))
+      {
+        temp = *(JPos-1);
+        *(JPos-1) = *(JPos);
+        *(JPos) = temp;
+      }
+    }
+  }
+
+}
+
+
+
+//
+// Creates/sets the Field Information from the current gribRecord pointer
+int _setFieldInfo(vector<Grib2Record::Grib2Sections_t>::const_iterator gribRecord)
+{
+
+  // We set nz to zero then count the number of levels we find
+  _nz  = 0;
+
+  DataRepTemp::data_representation_t drsConstants = gribRecord->drs->getDrsConstants();
+  DataRepTemp *drsTemplate = gribRecord->drs->getDrsTemplate();
+
+  // Generic missing values if not specified in Grib
+  _secondaryMissing = -9998.0;
+  _missing          = -9999.0;  
+
+  if(drsConstants.templateNumber == 2) {
+    Template5_pt_2 *Template5_2 = (Template5_pt_2 *)drsTemplate;
+
+    if(Template5_2->_missingType != 0 && Template5_2->_missingType != 255) {
+      _secondaryMissing  = Template5_2->_secondaryMissingVal;
+      _missing           = Template5_2->_primaryMissingVal;
+    }
+
+  } else if(drsConstants.templateNumber == 3) {
+    Template5_pt_3 *Template5_3 = (Template5_pt_3 *)drsTemplate;
+
+    if(Template5_3->_missingType != 0 && Template5_3->_missingType != 255) {
+      _secondaryMissing  = Template5_3->_secondaryMissingVal;
+      _missing           = Template5_3->_primaryMissingVal;
+    }
+
+  }
+
+  si32 projID = gribRecord->gds->getGridID();
+  
+  ui08 scanModeFlag = 0;
+  if(projID == GDS::EQUIDISTANT_CYL_PROJ_ID) {
+    LatLonProj *latlonProj = (LatLonProj *)proj;
+    
+    _nx              = latlonProj->_ni;
+    _ny              = latlonProj->_nj;
+    _minx            = latlonProj->_lo1;
+    _miny            = latlonProj->_la1;
+    _dx              = latlonProj->_di;
+    _dy              = latlonProj->_dj;
+
+    // If _resolutionFlag & 32 == true
+    // i direction increments not given, need to calculate
+    if ((latlonProj->_resolutionFlag & 32) == 0) {
+      _dx = (latlonProj->_lo2 - latlonProj->_lo1) / (latlonProj->_ni -1);
+      if(_dx < 0.0)
+	_dx *= -1.0;
+    }
+    // If _resolutionFlag & 16 == true
+    // j direction increments not given, need to calculate
+    if ((latlonProj->_resolutionFlag & 16) == 0) {
+      _dy = (latlonProj->_la2 - latlonProj->_la1) / (latlonProj->_nj -1);
+      if(_dy < 0.0)
+	_dy *= -1.0;
+    }
+
+    scanModeFlag = latlonProj->_scanModeFlag;
+    // We expect south to north so switch la1 with la2 
+    if ((scanModeFlag & 64) == 0) {
+      _miny = latlonProj->_la2;
+    }
+
+  } else if(projID == GDS::LAMBERT_CONFORMAL_PROJ_ID) {
+    LambertConfProj *lambertProj = (LambertConfProj *)proj;
+
+    _nx          = lambertProj->_nx;
+    _ny          = lambertProj->_ny;
+    _proj_origin_lat = lambertProj->_latin1;
+    _proj_origin_lon = lambertProj->_lov;
+    _dx          = lambertProj->_dx;
+    _dy          = lambertProj->_dy;
+    _lat1        = lambertProj->_latin1;
+    _lat2        = lambertProj->_latin2;
+
+  } else if(projID == GDS::POLAR_STEREOGRAPHIC_PROJ_ID) {
+    PolarStereoProj *polarProj = (PolarStereoProj *)proj;
+
+    _nx              = polarProj->_nx;
+    _ny              = polarProj->_ny;
+    _proj_origin_lat = polarProj->_la1;
+    _proj_origin_lon = polarProj->_lo1;
+
+    double polarStereoAdjustment = 2.0 / (1.0 + sin(polarProj->_lad * M_PI / 180.0));
+
+    _dx = polarProj->_dx;
+    _dy = polarProj->_dy;
+    _tan_lon = polarProj->_lov;
+
+  } else if(projID == GDS::MERCATOR_PROJ_ID) {
+    MercatorProj *mercatorProj = (MercatorProj *)proj;
+      
+    _nx              = mercatorProj->_ni;
+    _ny              = mercatorProj->_nj;
+    _dx              = mercatorProj->_di;
+    _dy              = mercatorProj->_dj;
+    _proj_origin_lat = 0.0;  // mercatorProj->_lad;
+    _proj_origin_lon = mercatorProj->_lo1;
+    _tan_lon         = mercatorProj->_lov;
+
+  } else {
+    cerr << "ERROR: Unimplemented projection type " << projID << endl << flush;
+    return( -1 );
+  }
+  
+  return( 0 );
+}
+
+
+\endcode
 
 */

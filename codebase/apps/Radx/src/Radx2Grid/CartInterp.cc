@@ -123,18 +123,15 @@ CartInterp::CartInterp(const string &progName,
     _convStrat.setMinValidHtKm(_params.conv_strat_min_valid_height);
     _convStrat.setMaxValidHtKm(_params.conv_strat_max_valid_height);
     _convStrat.setMinValidDbz(_params.conv_strat_min_valid_dbz);
-    _convStrat.setDbzForDefiniteConvection
-      (_params.conv_strat_dbz_threshold_for_definite_convection);
-    _convStrat.setComputeConvRadius(_params.conv_radius_function.min_dbz,
-                                    _params.conv_radius_function.max_dbz,
-                                    _params.conv_radius_function.min_radius_km,
-                                    _params.conv_radius_function.max_radius_km,
-                                    _params.conv_strat_background_dbz_radius_km);
     _convStrat.setTextureRadiusKm(_params.conv_strat_texture_radius_km);
     _convStrat.setMinValidFractionForTexture
       (_params.conv_strat_min_valid_fraction_for_texture);
-    _convStrat.setMinTextureForConvection
-      (_params.conv_strat_min_texture_for_convection);
+    _convStrat.setMinConvectivityForConvective
+      (_params.conv_strat_min_convectivity_for_convective);
+    _convStrat.setMaxConvectivityForStratiform
+      (_params.conv_strat_max_convectivity_for_stratiform);
+    _convStrat.setMinGridOverlapForClumping
+      (_params.conv_strat_min_overlap_for_convective_clumps);
   }
   _gotConvStrat = false;
 
@@ -259,10 +256,9 @@ int CartInterp::interpVol()
       _echoOrientationAvailable = false;
     }
     if (_echoOrientationAvailable) {
-      _orient->loadSdevFields(_gridLoc,
-                              _sdevDbzH,
-                              _sdevDbzV);
+      _orient->loadSdevFields(_gridLoc, _dbzH, _dbzV, _sdevDbzH, _sdevDbzV);
     }
+    // _orient->clearRhiData();
   }
 
   // interpolate
@@ -419,9 +415,15 @@ void CartInterp::_createDebugFields()
   _derived3DFields.push_back(_urAzDebug);
 
   if (_params.use_echo_orientation) {
-    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal", "dBZ", true);
+    _dbzH = new DerivedField("DbzH", "dbz_horizontal", "dBZ", true);
+    _derived3DFields.push_back(_dbzH);
+    _dbzV = new DerivedField("DbzV", "dbz_vertical", "dBZ", true);
+    _derived3DFields.push_back(_dbzV);
+    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal",
+                                 "dBZ", true);
     _derived3DFields.push_back(_sdevDbzH);
-    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical", "dBZ", true);
+    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical",
+                                 "dBZ", true);
     _derived3DFields.push_back(_sdevDbzV);
   }
   
@@ -2716,7 +2718,7 @@ int CartInterp::_convStratCompute()
 
   // compute the convective/stratiform partition
   
-  if (_convStrat.computePartition(dbzVals, missingFl32)) {
+  if (_convStrat.computeEchoType(dbzVals, missingFl32)) {
     cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;

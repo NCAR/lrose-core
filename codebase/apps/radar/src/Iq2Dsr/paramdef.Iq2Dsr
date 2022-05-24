@@ -972,6 +972,18 @@ commentdef {
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
 
+paramdef double {
+  p_default = 0.75;
+  p_descr = "Width of clutter, in model used by adaptive filter (m/s).";
+  p_help = "The adaptive filter computes a clutter model with the specified width, and uses that model to determing the width of the initial notch.";
+} clutter_model_width_in_adaptive_filter;
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Width of initial notch in adaptive filter (m/s).";
+  p_help = "This is the initial notch width used if the clutter model does not succeed in providing the notch width.";
+} init_notch_width_in_adaptive_filter;
+
 paramdef boolean {
   p_default = true;
   p_descr = "Option to apply residue correction to adaptive filter.";

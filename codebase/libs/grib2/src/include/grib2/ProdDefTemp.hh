@@ -176,16 +176,16 @@ public:
   static const _GRIB2SurfTable _surface[106];
 
   /** @brief Meteorological products Temperature category. GRIB2 Code table 4.2 : 0.0 */
-  static const _GRIB2ParmTable _meteoTemp[28];
+  static const _GRIB2ParmTable _meteoTemp[30];
 
   /** @brief Meteorological products Moisture category. GRIB2 Code table 4.2 : 0.1 */
-  static const _GRIB2ParmTable _meteoMoist[118];
+  static const _GRIB2ParmTable _meteoMoist[122];
 
   /** @brief Meteorological products Momentum category. GRIB2 Code table 4.2 : 0.2 */
-  static const _GRIB2ParmTable _meteoMoment[45];
+  static const _GRIB2ParmTable _meteoMoment[47];
 
   /** @brief Meteorological products Mass category. GRIB2 Code table 4.2 : 0.3 */
-  static const _GRIB2ParmTable _meteoMass[31];
+  static const _GRIB2ParmTable _meteoMass[32];
 
   /** @brief Meteorological products Short wave radiation category. GRIB2 Code table 4.2 : 0.4 */
   static const _GRIB2ParmTable _meteoShortRadiate[54];
@@ -197,7 +197,7 @@ public:
   static const _GRIB2ParmTable _meteoCloud[50];
 
   /** @brief Meteorological products Thermodynamic stability indices category. GRIB2 Code table 4.2 : 0.7 */
-  static const _GRIB2ParmTable _meteoStability[19];
+  static const _GRIB2ParmTable _meteoStability[20];
 
   /** @brief Meteorological products Aerosols category. GRIB2 Code table 4.2 : 0.13 */
   static const _GRIB2ParmTable _meteoAerosols[1];
@@ -212,13 +212,13 @@ public:
   static const _GRIB2ParmTable _meteoRadarForecast[6];
 
   /** @brief Meteorological products Electrodynamics category. GRIB2 Code table 4.2 : 0.17 */
-  static const _GRIB2ParmTable _meteoElectro[2];
+  static const _GRIB2ParmTable _meteoElectro[5];
 
   /** @brief Meteorological products Nuclear/radiology category. GRIB2 Code table 4.2 : 0.18 */
-  static const _GRIB2ParmTable _meteoNuclear[17];
+  static const _GRIB2ParmTable _meteoNuclear[19];
 
   /** @brief Meteorological products Physical atmospheric properties category. GRIB2 Code table 4.2 : 0.19 */
-  static const _GRIB2ParmTable _meteoAtmos[32];
+  static const _GRIB2ParmTable _meteoAtmos[37];
 
   /** @brief  Meteorological products Atmospheric Chemical Constituents category. GRIB2 Code table 4.2 : 0.20  */
   static const _GRIB2ParmTable _meteoChem[113];
@@ -283,7 +283,7 @@ public:
   static const _GRIB2LocalTable _NCAR_RALlocalTable[ _NCAR_RALlocalTable_numElements ];
 
   /** @brief Size of table _NCEPlocalTable */
-  static const ui32 _NCEPlocalTable_numElements = 369;
+  static const ui32 _NCEPlocalTable_numElements = 388;
   /** @brief NCEP's Local Use table */
   static const _GRIB2LocalTable _NCEPlocalTable[ _NCEPlocalTable_numElements ];
 
@@ -306,6 +306,13 @@ public:
   static const ui32 _MRMSlocalTable_numElements = 110;
   /** @brief NSSL MRMS local use table */
   static const _GRIB2LocalTable _MRMSlocalTable[ _MRMSlocalTable_numElements ];
+
+  /** @brief Size of table _COSMO_localTable */
+  static const ui32 _COSMO_localTable_numElements = 7;
+  /** @brief NCAR / RAL local use table 
+   *
+   * Parameters can be added to this table as needed */
+  static const _GRIB2LocalTable _COSMO_localTable[ _COSMO_localTable_numElements ];
 
   /** @details Struct for optional repeating section */
   typedef struct

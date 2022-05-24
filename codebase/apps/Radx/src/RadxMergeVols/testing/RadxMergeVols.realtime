@@ -1,0 +1,724 @@
+/**********************************************************************
+ * TDRP params for RadxMergeVols
+ **********************************************************************/
+
+//======================================================================
+//
+// Merges volumes from multiple CfRadial files into a single file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "realtime";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.ext will not work as a file path.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = FALSE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it. Only applies if latest_data_info_avail 
+//   is FALSE.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+//======================================================================
+//
+// DATA SOURCE LOCATIONS.
+//
+//======================================================================
+ 
+///////////// primary_dataset_dir /////////////////////
+//
+// Directory for primary data set.
+//
+// The primary files are used to determine the search time. The 
+//   secondary files are found relative to the primary time.
+//
+//
+// Type: string
+//
+
+primary_dataset_dir = "/tmp/incoming";
+
+//======================================================================
+//
+// MERGE_METHOD - parallel or serial.
+//
+//======================================================================
+ 
+///////////// merge_method ////////////////////////////
+//
+// The method for performing the merge - PARALLEL or SERIAL.
+//
+// MERGE_PARALLEL: read volumes from different directories, that arrive 
+//   at similar times. The primary_dataset_dir will be monitored for new 
+//   file activity. When a new file arrives, the secondary directories 
+//   will be searched for files at a similar time, and the data from those 
+//   files will be merged in to the primary data set.
+//
+// MERGE_SERIAL: we watch a single directory for files that arrive in 
+//   sequence. We examing the scanName to decide whether the volume 
+//   belongs in the merged data set. Once all of the required data sets 
+//   have arrived, in time order, the individual volumes are merged in 
+//   time sequence, and a single output file is written with the merged 
+//   volume.
+//
+//
+// Type: enum
+// Options:
+//     MERGE_PARALLEL
+//     MERGE_SERIAL
+//
+
+merge_method = MERGE_SERIAL;
+
+//======================================================================
+//
+// MERGE_PARALLEL.
+//
+//======================================================================
+ 
+///////////// secondary_datasets //////////////////////
+//
+// List of directories containing the data files.
+//
+// The geometry of secondary files will be converted to match the 
+//   primary files. The file_match_time_offset_sec and 
+//   file_match_time_tolerance_sec are used to search for the best 
+//   secondary file to merge. The find_mode indicates how to search in 
+//   time for the secondary file relative to the primary file.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string dir;
+//      int file_match_time_offset_sec;
+//      int file_match_time_tolerance_sec;
+//      find_mode_t find_mode;
+//        Options:
+//          FIND_CLOSEST
+//          FIND_FIRST_BEFORE
+//          FIND_FIRST_AFTER
+//   }
+//
+// 1D array - variable length.
+//
+
+secondary_datasets = {
+  {
+    dir = "/tmp/cfradial/secondary1",
+    file_match_time_offset_sec = 0,
+    file_match_time_tolerance_sec = 60,
+    find_mode = FIND_FIRST_AFTER
+  }
+  ,
+  {
+    dir = "/tmp/cfradial/secondary2",
+    file_match_time_offset_sec = 0,
+    file_match_time_tolerance_sec = 60,
+    find_mode = FIND_FIRST_AFTER
+  }
+  ,
+  {
+    dir = "/tmp/cfradial/secondary3",
+    file_match_time_offset_sec = 0,
+    file_match_time_tolerance_sec = 60,
+    find_mode = FIND_FIRST_AFTER
+  }
+};
+
+//======================================================================
+//
+// MERGE_SERIAL.
+//
+// This was developed for Vaisala volume files, which are sometime split 
+//   into parts based on the PRF, max range etc. Typically a volume might 
+//   be split into sub-volumes named, for example, 'VOL_A', 'VOL_B' and 
+//   'VOL_C'. The serial ingest allows you to merge these sub-volumes into 
+//   a single volume, and then write out the combined volume.
+//
+//======================================================================
+ 
+///////////// serial_vol_types ////////////////////////
+//
+// Array of volume types for the volumes to be merged. The volume will 
+//   only be written when all of the specified input volumes have arrived.
+//
+// If you do not want to specify a particular string property, set it to 
+//   an empty string.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string vol_title;
+//      string scan_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+serial_vol_types = {
+  {
+    vol_title = "VOL_A",
+    scan_name = "VOL_A"
+  }
+  ,
+  {
+    vol_title = "VOL_B",
+    scan_name = "VOL_B"
+  }
+};
+
+///////////// serial_merge_vol_title //////////////////
+//
+// Title for merged volume.
+//
+// The will be applied before the volume is written out.
+//
+//
+// Type: string
+//
+
+serial_merge_vol_title = "MERGED";
+
+///////////// serial_merge_scan_name //////////////////
+//
+// Scan name for merged volume.
+//
+// The will be applied before the volume is written out.
+//
+//
+// Type: string
+//
+
+serial_merge_scan_name = "MERGED";
+
+//======================================================================
+//
+// OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS.
+//
+// Fixed angles are elevation in PPI mode and azimuth in RHI mode.
+//
+//======================================================================
+ 
+///////////// set_fixed_angle_limits //////////////////
+//
+// Option to set fixed angle limits.
+//
+// Only use sweeps within the specified fixed angle limits.
+//
+//
+// Type: boolean
+//
+
+set_fixed_angle_limits = FALSE;
+
+///////////// lower_fixed_angle_limit /////////////////
+//
+// Lower fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+lower_fixed_angle_limit = 0;
+
+///////////// upper_fixed_angle_limit /////////////////
+//
+// Upper fixed angle limit - degrees.
+//
+//
+// Type: double
+//
+
+upper_fixed_angle_limit = 90;
+
+///////////// set_sweep_num_limits ////////////////////
+//
+// Option to set sweep number limits.
+//
+// Only read sweeps within the specified sweep number limits.
+//
+//
+// Type: boolean
+//
+
+set_sweep_num_limits = FALSE;
+
+///////////// lower_sweep_num /////////////////////////
+//
+// Lower sweep number limit.
+//
+//
+// Type: int
+//
+
+lower_sweep_num = 0;
+
+///////////// upper_sweep_num /////////////////////////
+//
+// Upper sweep number limit.
+//
+//
+// Type: int
+//
+
+upper_sweep_num = 0;
+
+//======================================================================
+//
+// OPTION TO CHECK FOR CONSTANT GEOMETRY.
+//
+//======================================================================
+ 
+///////////// check_constant_geometry /////////////////
+//
+// Option to check that the ray geometry does not change.
+//
+// If true, will only merge rays with the same geometry as the primary 
+//   volume. If false, secondary rays will be remapped to the primary ray 
+//   geometry.
+//
+//
+// Type: boolean
+//
+
+check_constant_geometry = FALSE;
+
+//======================================================================
+//
+// SWEEP FILE AGGREGATION.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+//
+// If false, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+//
+//
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CFRADIAL FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+//
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+//
+//
+// Type: boolean
+//
+
+output_force_ngates_vary = TRUE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// OUTPUT DIRECTORY AND FILE NAME.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/outgoing";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+//======================================================================
+//
+// OPTION TO OVERRIDE MISSING VALUES.
+//
+// Missing values are applicable to both metadata and field data. The 
+//   default values should be satisfactory for most purposes. However, you 
+//   can choose to override these if you are careful with the selected 
+//   values.
+//
+// The default values for metadata are:
+// 	missingMetaDouble = -9999.0
+// 	missingMetaFloat = -9999.0
+// 	missingMetaInt = -9999
+// 	missingMetaChar = -128
+//
+// The default values for field data are:
+// 	missingFl64 = -9.0e33
+// 	missingFl32 = -9.0e33
+// 	missingSi32 = -2147483647
+// 	missingSi16 = -32768
+// 	missingSi08 = -128.
+//
+//======================================================================
+ 
+///////////// override_missing_metadata_values ////////
+//
+// Option to override the missing values for meta-data.
+//
+// See following parameter options.
+//
+//
+// Type: boolean
+//
+
+override_missing_metadata_values = FALSE;
+
+///////////// missing_metadata_double /////////////////
+//
+// Missing value for metadata of type double.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_metadata_double = -9999;
+
+///////////// missing_metadata_float //////////////////
+//
+// Missing value for metadata of type float.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: float
+//
+
+missing_metadata_float = -9999;
+
+///////////// missing_metadata_int ////////////////////
+//
+// Missing value for metadata of type int.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_metadata_int = -9999;
+
+///////////// missing_metadata_char ///////////////////
+//
+// Missing value for metadata of type char.
+//
+// Only applies if override_missing_metadata_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_metadata_char = -128;
+
+///////////// override_missing_field_values ///////////
+//
+// Option to override the missing values for field data.
+//
+// See following parameter options.
+//
+//
+// Type: boolean
+//
+
+override_missing_field_values = FALSE;
+
+///////////// missing_field_fl64 //////////////////////
+//
+// Missing value for field data of type 64-bit float.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_field_fl64 = -9e+33;
+
+///////////// missing_field_fl32 //////////////////////
+//
+// Missing value for field data of type 32-bit float.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: double
+//
+
+missing_field_fl32 = -9e+33;
+
+///////////// missing_field_si32 //////////////////////
+//
+// Missing value for field data of type 32-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si32 = -2147483647;
+
+///////////// missing_field_si16 //////////////////////
+//
+// Missing value for field data of type 16-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si16 = -232768;
+
+///////////// missing_field_si08 //////////////////////
+//
+// Missing value for field data of type 8-bit integer.
+//
+// Only applies if override_missing_field_values is TRUE.
+//
+//
+// Type: int
+//
+
+missing_field_si08 = -128;
+

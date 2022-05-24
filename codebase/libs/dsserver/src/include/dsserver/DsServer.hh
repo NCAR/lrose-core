@@ -543,6 +543,21 @@ private:
     int incrementNumClients();
     int decrementNumClients();
 
+    // Change the client count by the indicated amount, without unlocking the mutex.
+    // Method was added to prevent a double unlock in certain circumstances (as
+    // detected by coverity).  Dave Albo
+    //   Note that a mutex lock should be obtained before calling these methods.
+    //   An error will be issued if pthread_mutex_trylock succeeds.
+    // 
+    // Threads: Called by Worker threads.
+    //          Called by Boss thread.
+    // 
+    // Returns: -1 if method is able to obtain lock. This is an error.
+    //           0 otherwise. Success.
+    // 
+    int incrementNumClientsNoUnlock();
+    int decrementNumClientsNoUnlock();
+
     // Private method used to implement increment and decrementNumClients.
     // 
     // Threads: Called indirectly by Worker threads.
@@ -552,6 +567,19 @@ private:
     //             0 otherwise. Success.
     // 
     int changeNumClients(int delta);
+
+    // Private method used to implement increment and decrementNumClients,
+    // with no mutex unlock.
+    // Method was added to prevent a double unlock in certain circumstances (as
+    // detected by coverity).  Dave Albo
+    // 
+    // Threads: Called indirectly by Worker threads.
+    //          Called indirectly by Boss thread.
+    // 
+    //   Returns: -1 if method was able to obtain lock. This is an error.
+    //             0 otherwise. Success.
+    // 
+    int changeNumClientsNoUnlock(int delta);
 
     // Static functions for thread creation.
     //   See implementation for comments regarding behavior.

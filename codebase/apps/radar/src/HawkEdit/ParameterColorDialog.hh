@@ -19,7 +19,7 @@ class ParameterColorDialog : public QDialog
 public:
 
   ParameterColorDialog(QWidget *parent = 0);
-  ~ParameterColorDialog();
+  virtual ~ParameterColorDialog();
   bool getChanges();
 
 private slots:

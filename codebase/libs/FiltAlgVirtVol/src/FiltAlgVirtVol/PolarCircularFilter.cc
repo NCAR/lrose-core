@@ -1,11 +1,14 @@
 #include <FiltAlgVirtVol/PolarCircularFilter.hh>
 #include <FiltAlgVirtVol/PolarCircularTemplate.hh>
+#include <FiltAlgVirtVol/Histo.hh>
 #include <euclid/Grid2d.hh>
+#include <euclid/GridAlgs.hh>
 #include <Mdv/MdvxProj.hh>
+#include <toolsa/LogStream.hh>
 #include <cmath>
 
 //------------------------------------------------------------------
-static bool _percentLessThan(const std::vector<double> dataInBox,
+static bool _percentLessThan(const std::vector<double> &dataInBox,
 			     double min, double &p)
 {
   p = 0.0;
@@ -27,7 +30,7 @@ static bool _percentLessThan(const std::vector<double> dataInBox,
 }
 
 //------------------------------------------------------------------
-static bool _largePosNeg(const std::vector<double> dataInBox,
+static bool _largePosNeg(const std::vector<double> &dataInBox,
 			 double thresh, double &p)
 {
   p = 0.0;
@@ -64,7 +67,7 @@ static bool _largePosNeg(const std::vector<double> dataInBox,
 }
 
 //------------------------------------------------------------------
-static bool _max(const std::vector<double> dataInBox, double &max)
+static bool _max(const std::vector<double> &dataInBox, double &max)
 {
   max=0.0;
   bool first = true;
@@ -84,7 +87,35 @@ static bool _max(const std::vector<double> dataInBox, double &max)
 }
 
 //------------------------------------------------------------------
-static bool _average(const std::vector<double> dataInBox, double &ave)
+static bool _averageAndGeThresh(const std::vector<double> &dataInBox,
+				double thresh, double &ave)
+{
+  double count=0.0;
+  ave = 0.0;
+  bool exceed=false;
+  for (size_t i=0; i<dataInBox.size(); ++i)
+  {
+    count += 1;
+    ave += dataInBox[i];
+    if (dataInBox[i] >= thresh)
+    {
+      exceed = true;
+    }
+  }
+  if (count  > 0 && exceed)
+  {
+    ave /= count;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
+//------------------------------------------------------------------
+static bool _average(const std::vector<double> &dataInBox, double &ave)
 {
   double count=0.0;
   ave = 0.0;
@@ -152,6 +183,35 @@ void PolarCircularFilter::smooth(Grid2d &a, const PolarCircularTemplate &pt)
 }
 
 //------------------------------------------------------------------
+void PolarCircularFilter::smoothWithThresh(Grid2d &a,
+					   const PolarCircularTemplate &pt,
+					   double thresh,
+					   double uninterestingValue)
+{
+  Grid2d out(a);
+  double markerValue = -999;
+  out.setAllToValue(markerValue);
+  for (int y=0; y<out.getNy(); ++y)
+  {
+    for (int x=0; x<out.getNx(); ++x)
+    {
+      if (!a.isMissing(x, y))
+      {
+	vector<double> dataInBox = pt.dataInsideCircle(x, y, a);;
+	double max;
+	if (_averageAndGeThresh(dataInBox, thresh, max))
+	{
+	  out.setValue(x, y, max);
+	}
+      }
+    }
+  }
+  GridAlgs aa(out);
+  aa.change(markerValue, uninterestingValue);
+  a = aa;
+}
+
+//------------------------------------------------------------------
 void PolarCircularFilter::percentLessThan(Grid2d &a, const PolarCircularTemplate &pt, double min)
 {
   Grid2d out(a);
@@ -190,6 +250,44 @@ void PolarCircularFilter::largePosNeg(Grid2d &a, const PolarCircularTemplate &pt
 	if (_largePosNeg(dataInBox, thresh, p))
 	{
 	  out.setValue(x, y, p);
+	}
+      }
+    }
+  }
+  a = out;
+}
+
+//------------------------------------------------------------------
+void PolarCircularFilter::median(Grid2d &a, const PolarCircularTemplate &pt, double binMin,
+				 double binMax, double binDelta)
+{
+  Grid2d out(a);
+  out.setAllMissing();
+  Histo H(binDelta, binMin, binMax);
+  for (int y=0; y<out.getNy(); ++y)
+  {
+    for (int x=0; x<out.getNx(); ++x)
+    {
+      H.clear();
+      vector<double> dataInBox = pt.dataInsideCircle(x, y, a);
+      if (dataInBox.empty())
+      {
+	LOG(DEBUG_VERBOSE) << "No data x=" << x;
+      }
+      else
+      {
+	for (size_t i=0; i<dataInBox.size(); ++i)
+	{
+	  H.addValue(dataInBox[i]);
+	  double m;
+	  if (H.getMedian(m))
+	  {
+	    out.setValue(x, y, m);
+	  }
+	  else
+	  {
+	    LOG(WARNING) << "No median x=" << x;
+	  }
 	}
       }
     }

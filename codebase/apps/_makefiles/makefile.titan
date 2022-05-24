@@ -10,7 +10,6 @@ SUB_DIRS = \
 	tdrp \
 	procmap \
 	titan \
-	titan_analysis \
 	trec \
 	didss \
 	ingest \

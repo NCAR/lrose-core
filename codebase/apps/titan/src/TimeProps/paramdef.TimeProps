@@ -1,0 +1,148 @@
+/*********************************************************
+ * parameter definitions for TimeProps
+ *
+ * Mike Dixon, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * January 1998
+ */
+
+commentdef {
+  p_header = "Computes activity stats.";
+}
+
+paramdef enum debug_t
+{
+  p_options = {DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE};
+  p_default = DEBUG_OFF;	
+  p_descr = "Debug option";	
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+} instance;
+
+paramdef enum distribution_class
+{
+  p_options = {DELTA_TIME_MODE, ACTIVITY_MODE};
+  p_default = DELTA_TIME_MODE;	
+  p_descr = "Mode of operation";	
+  p_help = "If DELTA_TIME, output is a list of time differences between storm starts in a period of activity. In ACTIVITY mode, the output list contains start times, durations for and times between periods of activity. The system is considered active if at least one entry is active at the time. A period of activity will span the activity_gap_max, but no greater gap.";
+} mode;
+
+paramdef int {
+  p_default = 1;
+  p_descr = "Min number of storms to define an activity period.";
+  p_help = "If the number of storms in an active period is less than this number, the period is discarded.";
+} activity_nstorms_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for activity gap (secs).";
+  p_help = "An active period will end if there is a gap in excess of this time.";
+} activity_gap_max;
+
+paramdef int {
+  p_default = 0;
+  p_min = -24;
+  p_max = 24;
+  p_descr = "Offset (hr) applied when computing activity relative to the time of day.";
+  p_help = "When the end of the day in UCT tends to occur during periods of activity, the histogram for time_of_day will be bimodal. To remove this effect, an offset is added to the times so that the mode of the histogram occurs somewhere in the middle of the day, which makes the fitting of a statistical distribution meaningful.";
+} activity_time_of_day_offet;
+
+paramdef string {
+  p_default = "time";
+  p_descr = "Label for time data";
+  p_help = "Used to identify column for time data.";
+} time_label;
+
+paramdef string {
+  p_default = "duration";
+  p_descr = "Label for duration data";
+  p_help = "Used to identify column for duration data.";
+} dur_label;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply conditions to input data.";
+  p_help = "If TRUE, the input data values are conditioned on a given field, which lie in a given intervals - see cond_min, cond_max.";
+} condition_input_data;
+
+paramdef string {
+  p_default = "cond";
+  p_descr = "Label for conditional data";
+  p_help = "Used to identify column for conditional data.";
+} conditional_label;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for conditional field.";
+  p_help = "See condition_input_data.";
+} cond_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for conditional field.";
+  p_help = "See condition_input_data.";
+} cond_max;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply limits to time data.";
+  p_help = "If TRUE, the input data values are limited to between time_min and time_max.";
+} limit_time_data;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for time field.";
+  p_help = "See limit_time_data.";
+} time_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for time field.";
+  p_help = "See limit_time_data.";
+} time_max;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply limits to dur data.";
+  p_help = "If TRUE, the input data values are limited to between dur_min and dur_max.";
+} limit_dur_data;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for dur field.";
+  p_help = "See limit_dur_data.";
+} dur_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for dur field.";
+  p_help = "See limit_dur_data.";
+} dur_max;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "In DELTA_TIME mode, Apply limits to delta time data.";
+  p_help = "If TRUE, the delta time values are limited to between dtime_min and dtime_max.";
+} limit_dtime_data;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Min value for dtime field.";
+  p_help = "See limit_dtime_data.";
+} dtime_min;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Max value for dtime field.";
+  p_help = "See limit_dtime_data.";
+} dtime_max;
+
+
+
+
+

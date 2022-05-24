@@ -538,24 +538,6 @@
     tt->comment_text = tdrpStrDup("Radar Estimated Profiles of Humidity. Input is PID and radar data, output is humidity and attenutation grids, and ascii data");
     tt++;
     
-    // Parameter 'fixed_const'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("fixed_const");
-    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_fixed_const - &_start_;
-    tt->array_n_offset = (char *) &fixed_const_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
     // Parameter 'user_data'
     // ctype is 'char*'
     
@@ -566,24 +548,6 @@
     tt->help = tdrpStrDup("");
     tt->array_offset = (char *) &_user_data - &_start_;
     tt->array_n_offset = (char *) &user_data_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'volume_before_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_before_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply before the sweep filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_before_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(char*);
@@ -610,24 +574,6 @@
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].s = tdrpStrDup("Meso1 = MesoTemplate(VEL, 20, 20, 10, 20)");
       tt->array_vals[1].s = tdrpStrDup("Meso2 = MesoTemplate(VEL, 20, 20, 10, -20)");
-    tt++;
-    
-    // Parameter 'volume_after_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_after_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply after the sweep filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_after_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // Parameter 'pid_weather'

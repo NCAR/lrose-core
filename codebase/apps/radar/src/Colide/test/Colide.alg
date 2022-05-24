@@ -1,4 +1,211 @@
 /**********************************************************************
+ * TDRP params for HeaderParams
+ **********************************************************************/
+
+//======================================================================
+//
+// Colide.
+//
+// This program does the Colide algorithm.
+//
+//======================================================================
+ 
+/**********************************************************************
+ * TDRP params for AlgorithmParams
+ **********************************************************************/
+
+//======================================================================
+//
+// Common Algorithm Parameters.
+//
+// Parameters that are common to many radar apps.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// instance.
+//
+// for PMU.
+//
+//
+// Type: string
+//
+
+instance = "$(INSTANCE)";
+
+///////////// debug_mode //////////////////////////////
+//
+// debugging mode.
+//
+// NONE=as quiet as possible, DEBUG = minimal debug output, 
+//   DEBUG_VERBOSE=more.
+//
+//
+// Type: enum
+// Options:
+//     NONE
+//     DEBUG
+//     DEBUG_VERBOSE
+//
+
+debug_mode = DEBUG;
+
+///////////// debug_threads ///////////////////////////
+//
+// threads debug.
+//
+// set to TRUE to debug threading.
+//
+//
+// Type: boolean
+//
+
+debug_threads = FALSE;
+
+///////////// num_threads /////////////////////////////
+//
+// Number of threads.
+//
+// Threading is done on sweeps. (More than one sweep processed by 
+//   individual threads).  Set to 1 or 0 for no threading.
+//
+//
+// Type: int
+//
+
+num_threads = 3;
+
+/**********************************************************************
+ * TDRP params for VirtVolParams
+ **********************************************************************/
+
+//======================================================================
+//
+// VirtVol data handling parameters.
+//
+// Params for triggering new data, reading in new data, writing data.
+//
+//======================================================================
+ 
+///////////// debug_triggering ////////////////////////
+//
+// triggering debug.
+//
+// set to TRUE to debug triggering.
+//
+//
+// Type: boolean
+//
+
+debug_triggering = FALSE;
+
+///////////// trigger_url /////////////////////////////
+//
+// trigger url.
+//
+// URL to trigger off.
+//
+//
+// Type: string
+//
+
+trigger_url = "mdvp:://$(RADAR_HOST)::front_porch/mdv/radar/$(RADAR)/ppi500m";
+
+///////////// restrict_vertical_levels ////////////////
+//
+// Set TRUE to restrict vertical levels to a range of values, FALSE to 
+//   use all the vertical levels.
+//
+//
+// Type: boolean
+//
+
+restrict_vertical_levels = TRUE;
+
+///////////// vertical_level_range ////////////////////
+//
+// If restrict_vertical_levels = TRUE, this is the range of vertical 
+//   levels.
+//
+// Units are degrees.  If set to -1, -1 it is not used, and there is no 
+//   restriction.
+//
+//
+// Type: double
+// 1D array - fixed length - 2 elements.
+//
+
+vertical_level_range = {
+ 0.3,
+ 1.5
+};
+
+///////////// restrict_max_range //////////////////////
+//
+// Set TRUE to restrict maximum range to a parameter, FALSE to use all 
+//   the data.
+//
+//
+// Type: boolean
+//
+
+restrict_max_range = FALSE;
+
+///////////// max_range ///////////////////////////////
+//
+// If restrict_max_range = TRUE, this is the max range index.
+//
+// Units are range index (not distance).  Not used when 
+//   restrict_max_range = FALSE, or if the value is <0.
+//
+//
+// Type: double
+//
+
+max_range = -1;
+
+///////////// input_url ///////////////////////////////
+//
+// Names of param files for input URLS, one per URL.
+//
+// These param files are read and parsed.  The names should match filter 
+//   descriptions.
+// Each file contains information as to the URL name, type, and data 
+//   content, as well as named data fields
+// To produce an example file, enter the command line option 
+//   -print_url_params.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+input_url = {
+ "UrlInput.parms"
+};
+
+///////////// output_url //////////////////////////////
+//
+// Names of param files for output URLS, one per URL.
+//
+// These param files are read and parsed.  The names should match filter 
+//   descriptions
+// Each file contains information as to the URL name, type, and data 
+//   content, as well as named data fields
+// To produce an example file, enter the command line option 
+//   -print_url_params.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+output_url = {
+ "UrlOutput.parms"
+};
+
+/**********************************************************************
  * TDRP params for Params
  **********************************************************************/
 
@@ -10,42 +217,6 @@
 //
 //======================================================================
  
-///////////// fixed_const /////////////////////////////
-//
-// Fixed constant strings that are interpreted by user functions.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-fixed_const = {
-};
-
-///////////// user_data ///////////////////////////////
-//
-// Non gridded data names.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-user_data = {
-};
-
-///////////// volume_before_filter ////////////////////
-//
-// Volume Filters to apply before the sweep filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_before_filter = {
-};
-
 ///////////// filter //////////////////////////////////
 //
 // Filters (sweep) to apply.
@@ -116,18 +287,6 @@ filter = {
  "expandEof = max_expand(eof, 5, 5)",
  "enhHist = History(expandEof, 300, 0.9, 600, 0.7, 1000, 0.5, 2000, 0.2)",
  "enhMaxAgeHist = MaxAgeMinutes(expandEof)"
-};
-
-///////////// volume_after_filter /////////////////////
-//
-// Volume Filters to apply after the sweep filters.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-volume_after_filter = {
 };
 
 ///////////// line_detect_side_fuzzy //////////////////
@@ -331,653 +490,6 @@ old_data = {
   {
     fieldName = "expandEof",
     maxSecondsBack = 3600
-  }
-};
-
-/**********************************************************************
- * TDRP params for AlgorithmParams
- **********************************************************************/
-
-//======================================================================
-//
-// Algorithm Parameters.
-//
-// Parameters used to run the Algorithm class.
-//
-//======================================================================
- 
-///////////// instance ////////////////////////////////
-//
-// instance.
-//
-// for PMU.
-//
-//
-// Type: string
-//
-
-instance = "$(INSTANCE)";
-
-///////////// debug_mode //////////////////////////////
-//
-// debugging mode.
-//
-// NONE=as quiet as possible, DEBUG = minimal debug output, 
-//   DEBUG_VERBOSE=more.
-//
-//
-// Type: enum
-// Options:
-//     NONE
-//     DEBUG
-//     DEBUG_VERBOSE
-//
-
-debug_mode = DEBUG;
-
-///////////// debug_threads ///////////////////////////
-//
-// threads debug.
-//
-// set to TRUE to debug threading.
-//
-//
-// Type: boolean
-//
-
-debug_threads = FALSE;
-
-///////////// num_threads /////////////////////////////
-//
-// Number of threads.
-//
-// Threading is done on sweeps. (More than one sweep processed by 
-//   individual threads).  Set to 1 or 0 for no threading.
-//
-//
-// Type: int
-//
-
-num_threads = 3;
-
-///////////// input ///////////////////////////////////
-//
-// Inputs to the algorithm.
-//
-// Names of the fields that are inputs to the algorithm.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-// input = {
-//  "$(DBZ_NAME)",
-//  "$(VEL_NAME)"
-// };
-
-///////////// output //////////////////////////////////
-//
-// Fields/values to export from the algorithm.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-// output = {
-//  "line_det",
-//  "line_dir",
-//  "shear_det",
-//  "shear_dir",
-//  "line_ellip",
-//  "line_ellip_conf",
-//  "line_ellip_orient",
-//  "line_ellip_orient2",
-//  "shear_ellip",
-//  "shear_ellip_conf",
-//  "shear_ellip_orient",
-//  "shear_ellip_orient2",
-//  "ellip_comb",
-//  "ellip_orient_comb",
-//  "raw_comb",
-//  "enhanced0",
-//  "enhanced1",
-//  "enhanced0_orient",
-//  "enhanced1_orient",
-//  "enhanced_out",
-//  "ellip_orient",
-//  "ellip",
-//  "ellip_conf",
-//  "dilate",
-//  "line_hotspot",
-//  "line_full",
-//  "shear_hotspot",
-//  "shear_full",
-//  "line_reg",
-//  "shear_reg",
-//  "reg",
-//  "ellip_orient_expand"
-// };
-
-/**********************************************************************
- * TDRP params for VirtVolParams
- **********************************************************************/
-
-//======================================================================
-//
-// VirtVol Parameters.
-//
-// Triggering new data, reading in new data, writing data.
-//
-//======================================================================
- 
-///////////// debug_triggering ////////////////////////
-//
-// triggering debug.
-//
-// set to TRUE to debug triggering.
-//
-//
-// Type: boolean
-//
-
-debug_triggering = FALSE;
-
-///////////// trigger_url /////////////////////////////
-//
-// trigger url.
-//
-// URL to trigger off.
-//
-//
-// Type: string
-//
-
-trigger_url = "mdvp:://$(RADAR_HOST)::front_porch/mdv/radar/$(RADAR)/ppi500m";
-
-///////////// restrict_vertical_levels ////////////////
-//
-// Set TRUE to restrict vertical levels to a range of values, FALSE to 
-//   use all the vertical levels.
-//
-//
-// Type: boolean
-//
-
-restrict_vertical_levels = TRUE;
-
-///////////// vertical_level_range ////////////////////
-//
-// If restrict_vertical_levels = TRUE, this is the range of vlevels.
-//
-// If set to -1, -1 it is not used, and there is no restriction.
-//
-//
-// Type: double
-// 1D array - fixed length - 2 elements.
-//
-
-vertical_level_range = {
- 0.3,
- 1.5
-};
-
-///////////// restrict_max_range //////////////////////
-//
-// Set TRUE to restrict maximum range to a parameter, FALSE to use all
-//   the data.
-//
-//
-// Type: boolean
-//
-
-restrict_max_range = FALSE;
-
-///////////// max_range ///////////////////////////////
-//
-// If restrict_max_range = TRUE, this is the max range index.
-//
-// Not used when restrict_max_range = FALSE, or if the value is >=0.
-//
-//
-// Type: double
-//
-
-max_range = -1;
-
-///////////// input_url ///////////////////////////////
-//
-// names of param files for input URLS, one per URL.
-//
-// The param files are read and parsed.  The names should match filter
-//   descriptions.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-input_url = {
-  "UrlInput.parms"
-};
-
-///////////// output_url //////////////////////////////
-//
-// names of param files for output URLS, one per URL.
-//
-// The param files are read and parsed.  The names should match filter
-//   descriptions.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-output_url = {
-  "UrlOutput.parms"
-};
-
-
-///////////// virtvol_input ///////////////////////////
-//
-// inputs.
-//
-// The fields read in externally
-// internal_name = name used in filtering
-// external_name = external field name.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string internal_name;
-//      string external_name;
-//      string url;
-//      Url_t url_type;
-//        Options:
-//          VIRTUAL_VOLUME
-//          DATABASE
-//          ASCII
-//      Data_t data_type;
-//        Options:
-//          GRID
-//          VALUE
-//          NOT_SET
-//   }
-//
-// 1D array - variable length.
-//
-
-virtvol_input = {
-  {
-    internal_name = "$(DBZ_NAME)",
-    external_name = "$(DBZ_NAME)",
-    url = "mdvp:://$(RADAR_HOST):0:front_porch/mdv/radar/$(RADAR)/ppi500m",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "$(VEL_NAME)",
-    external_name = "$(VEL_NAME)",
-    url = "mdvp:://$(RADAR_HOST):0:front_porch/mdv/radar/$(RADAR)/ppi500m",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-};
-
-///////////// virtvol_output //////////////////////////
-//
-// Fields/values to write out.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string internal_name;
-//      string external_name;
-//      string url;
-//      Url_t url_type;
-//        Options:
-//          VIRTUAL_VOLUME
-//          DATABASE
-//          ASCII
-//      Data_t data_type;
-//        Options:
-//          GRID
-//          VALUE
-//          NOT_SET
-//   }
-//
-// 1D array - variable length.
-//
-
-virtvol_output = {
-  {
-    internal_name = "line_det",
-    external_name = "line_det",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_dir",
-    external_name = "line_dir",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_det",
-    external_name = "shear_det",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_dir",
-    external_name = "shear_dir",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_ellip",
-    external_name = "line_ellip",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_ellip_orient",
-    external_name = "line_ellip_orient",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_ellip_orient2",
-    external_name = "line_ellip_orient2",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_ellip_conf",
-    external_name = "line_ellip_conf",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_ellip",
-    external_name = "shear_ellip",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_ellip_orient",
-    external_name = "shear_ellip_orient",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_ellip_orient2",
-    external_name = "shear_ellip_orient2",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_ellip_conf",
-    external_name = "shear_ellip_conf",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip_comb",
-    external_name = "ellip_comb",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip_orient_comb",
-    external_name = "ellip_orient_comb",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "raw_comb",
-    external_name = "raw_comb",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhanced0",
-    external_name = "enhanced0",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhanced1",
-    external_name = "enhanced1",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhanced0_orient",
-    external_name = "enhanced0_orient",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhanced1_orient",
-    external_name = "enhanced1_orient",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhanced_out",
-    external_name = "enhanced_out",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip",
-    external_name = "ellip",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip_orient",
-    external_name = "ellip_orient",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip_conf",
-    external_name = "ellip_conf",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "dilate",
-    external_name = "dilate",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_hotspot",
-    external_name = "line_hotspot",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_full",
-    external_name = "line_full",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_hotspot",
-    external_name = "shear_hotspot",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_full",
-    external_name = "shear_full",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "hot",
-    external_name = "hot",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "full",
-    external_name = "full",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "shear_reg",
-    external_name = "shear_reg",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "line_reg",
-    external_name = "line_reg",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "reg",
-    external_name = "reg",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellip_orient_expand",
-    external_name = "ellip_orient_expand",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "regComb",
-    external_name = "regComb",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellipHist",
-    external_name = "ellipHist",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellipMaxAgeHist",
-    external_name = "ellipMaxAgeHist",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "ellipD",
-    external_name = "ellipD",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhHist",
-    external_name = "enhHist",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "enhMaxAgeHist",
-    external_name = "enhMaxAgeHist",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
-  }
-  ,
-  {
-    internal_name = "expandEof",
-    external_name = "expandEof",
-    url = "mdvp:://localhost::$(COLIDE_DATA_DIR)/front_porch/mdv/radar/$(RADAR)/$(COLIDE)",
-    url_type = VIRTUAL_VOLUME,
-    data_type = GRID
   }
 };
 

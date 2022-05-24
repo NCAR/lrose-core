@@ -636,16 +636,18 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode for reading in data");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. We can either scan an input directory for new files, or monitor the latest_data_info. In FILELIST mode, the list of files to be read are provided on the command line.");
+    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file. We can either scan an input directory for new files, or monitor the latest_data_info. In ARCHIVE mode, the files in the input_dir are read for times between te start and end times. In FILELIST mode, the list of files to be read are provided on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 2;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
       tt->enum_def.fields[0].val = REALTIME;
-      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[1].val = FILELIST;
+      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[1].val = ARCHIVE;
+      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[2].val = FILELIST;
     tt->single_val.e = REALTIME;
     tt++;
     

@@ -104,7 +104,8 @@ public:
     POLCAST2_FORMAT = 7,
     NOAA_AIRCRAFT_FORMAT = 8,
     NOAA_SHIP_FORMAT = 9,
-    IWG1_FORMAT = 10
+    IWG1_FORMAT = 10,
+    KML_FORMAT = 11
   } input_format_t;
 
   typedef enum {

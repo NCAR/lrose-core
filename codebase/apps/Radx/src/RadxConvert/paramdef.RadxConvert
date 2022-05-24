@@ -240,6 +240,12 @@ paramdef boolean {
 } preserve_sweeps;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Preserve rays just as they are in the file.";
+  p_help = "Applies generally to SIGMET data. If true, the ray details are preserved. If false, we order the rays increasing in time.";
+} preserve_rays;
+
+paramdef boolean {
   p_default = true;
   p_descr = "Option to remove long range rays.";
   p_help = "Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.";
@@ -389,9 +395,40 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to apply the georeference info for moving platforms.";
-  p_help = "For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.";
+  p_descr = "Option to apply the georeference information and corrections for moving platforms.";
+  p_help = "For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If goereference data ia available, there is an optional corrections block that may also be stored in the file. If this parameter is true, the georeference data is applied and appropriate corrections made if corrections are available. If possible, Earth-centric azimuth and elevation angles will be computed.";
 } apply_georeference_corrections;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to read in corrections to the georeference data.";
+  p_help = "For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If this parameter is true, we will read in an ASCII file of correction factors for the georef data, and store those corrections in the file. See also 'apply_georeference_corrections' above.";
+} read_georeference_corrections;
+
+paramdef string {
+  p_default = "/data/georeference_corrections/cfac.fore";
+  p_descr = "Path to georeference corrections file.";
+  p_help = "This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above. The ASCII file has the following format - this is an example:\n"
+  "======================================\n"
+  "\tazimuth_corr           =   0.000\n"
+  "\televation_corr         =   0.000\n"
+  "\trange_delay_corr       = -16.641\n"
+  "\tlongitude_corr         =   0.000\n"
+  "\tlatitude_corr          =   0.000\n"
+  "\tpressure_alt_corr      =   4.969\n"
+  "\tradar_alt_corr         =   0.000\n"
+  "\tew_gndspd_corr         =   0.000\n"
+  "\tns_gndspd_corr         =   0.000\n"
+  "\tvert_vel_corr          =   0.000\n"
+  "\theading_corr           =   0.000\n"
+  "\troll_corr              =   0.000\n"
+  "\tpitch_corr             =   0.009\n"
+  "\tdrift_corr             =   0.119\n"
+  "\trot_angle_corr         =  -0.016\n"
+  "\ttilt_corr              =   0.713\n"
+  "======================================\n"
+  "You can omit the fields that have values of zero.";
+} georeference_corrections_path;
 
 commentdef {
   p_header = "OPTION TO CORRECT TIME";
@@ -589,6 +626,36 @@ paramdef double {
   p_descr = "Max elevation angle error when optimizing surveillance transitions (degrees).";
   p_help = "If the difference between the fixed angle and measured angle exceeds this value, the transition flag will be set. If not, it will be cleared.";
 } optimized_transitions_max_elev_error;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to override the sweep modes in the data.";
+  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
+} override_sweep_mode;
+
+typedef enum {
+  SWEEP_MODE_SECTOR = 1,
+  SWEEP_MODE_RHI = 3,
+  SWEEP_MODE_VERTICAL_POINTING = 4,
+  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+  SWEEP_MODE_SUNSCAN = 11,
+  SWEEP_MODE_POINTING = 12,
+  SWEEP_MODE_SUNSCAN_RHI = 17,
+  SWEEP_MODE_ELECTRONIC_STEERING = 20
+} sweep_mode_t;
+
+paramdef enum sweep_mode_t {
+  p_default = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  p_descr = "Sweep mode for all sweeps.";
+  p_help = "See override_sweep_mode.";
+} sweep_mode;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to set the sweep mode from the ray angles.";
+  p_help = "If TRUE, we look through the scan angles to deduce the sweep modes, and then set this mode for each sweep.";
+} set_sweep_mode_from_ray_angles;
 
 commentdef {
   p_header = "OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES";
@@ -867,6 +934,18 @@ paramdef int {
   p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
 } censoring_min_valid_run;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the fields to be censored.";
+  p_help = "If FALSE, all fields are specified based on the censoring rules.";
+} specify_fields_to_be_censored;
+
+paramdef string {
+  p_default = { "LDR" };
+  p_descr = "List of fields to be censored.";
+  p_help = "Applies if 'specify_fields_to_be_censored' is TRUE.";
+} fields_to_be_censored[];
+
 commentdef {
   p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
   p_text = "These transforms are fixed. The same transform is applied to all files.";
@@ -949,7 +1028,7 @@ commentdef {
 typedef enum {
   OUTPUT_FORMAT_CFRADIAL,
   OUTPUT_FORMAT_CFRADIAL2,
-  OUTPUT_FORMAT_NCXX,
+  // OUTPUT_FORMAT_NCXX,
   OUTPUT_FORMAT_DORADE,
   OUTPUT_FORMAT_FORAY,
   OUTPUT_FORMAT_NEXRAD,
@@ -1070,6 +1149,12 @@ paramdef boolean {
   p_descr = "Option to include the scan name in the file name.";
   p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
 } include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.";
+} include_scan_id_in_file_name;
 
 paramdef boolean {
   p_default = false;

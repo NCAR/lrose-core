@@ -19,17 +19,24 @@ SUB_DIRS = \
 	ChillTsFile2Fmq \
 	ChillTsTcp2Fmq \
 	CmdVerify \
-	ConvStrat \
+	Colide \
 	Cov2Mom \
 	DowSendFreq \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \
+	Ecco \
 	HawkEye \
 	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
 	IntfRemove \
+	IpsEye \
+	IpsTsArchive \
+	IpsTs2Moments \
+	IpsTs2NetCDF \
+	IpsTsPrint \
+	IpsTsSim \
 	Iq2Dsr \
 	KinGin2Ncf \
 	Mdv2Vad \
@@ -40,6 +47,7 @@ SUB_DIRS = \
 	PointingCpCompute \
 	PowerInfo2Spdb \
 	Qmap2Cidd \
+	QpeVerify \
 	QuadratureTest \
 	RadarCal \
 	RadarConst \
@@ -48,6 +56,7 @@ SUB_DIRS = \
 	RapMap2Chill \
 	SimCpCompute \
 	SpectraPrint \
+	Sprite \
 	StaggeredLimits \
 	SunCal \
 	SunCpCompute \

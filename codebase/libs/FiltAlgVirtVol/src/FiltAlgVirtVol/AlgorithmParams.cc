@@ -557,8 +557,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Algorithm Parameters");
-    tt->comment_text = tdrpStrDup("Parameters used to run the Algorithm class");
+    tt->comment_hdr = tdrpStrDup("Common Algorithm Parameters");
+    tt->comment_text = tdrpStrDup("Parameters that are common to many radar apps");
     tt++;
     
     // Parameter 'instance'

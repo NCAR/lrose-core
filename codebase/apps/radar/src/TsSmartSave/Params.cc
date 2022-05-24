@@ -761,6 +761,27 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("FILE NAMING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'add_xmit_mode_to_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_xmit_mode_to_file_name");
+    tt->descr = tdrpStrDup("Option to indicate the xmit mode in the file name.");
+    tt->help = tdrpStrDup("If true, then the file name will contain one of the following: alt, sim, stag23, stag34, stag45.");
+    tt->val_offset = (char *) &add_xmit_mode_to_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("NORMAL SCAN OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -861,11 +882,11 @@
     tt->single_val.s = tdrpStrDup("./tsarchive/save");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("VERTICALLY-POINTING DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -942,11 +963,11 @@
     tt->single_val.s = tdrpStrDup("./tsarchive/vert");
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("SUN-SCAN DATA OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1047,11 +1068,11 @@
     tt->single_val.d = 1.704;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("FLAG FILE OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1092,11 +1113,11 @@
     tt->single_val.s = tdrpStrDup("./tsarchive/flagged");
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("STATIONARY MODE OUTPUT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1149,11 +1170,11 @@
     tt->single_val.s = tdrpStrDup("./tsarchive/stationary");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WRITING LATEST DATA INFO TO PROXY");
     tt->comment_text = tdrpStrDup("");
     tt++;

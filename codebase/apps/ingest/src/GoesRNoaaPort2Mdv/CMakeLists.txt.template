@@ -1,0 +1,61 @@
+cmake_minimum_required(VERSION 3.5)
+project(GoesRNoaaPort2Mdv)
+
+add_custom_command(
+    OUTPUT Params.hh
+    OUTPUT Params.cc
+    COMMAND $ENV{RAP_BIN_DIR}/tdrp_gen -f ${CMAKE_SOURCE_DIR}/paramdef.GoesRNoaaPort2Mdv -c++ -prog GoesRNoaaPort2Mdv
+    COMMAND cp ${CMAKE_SOURCE_DIR}/Params.cc ${CMAKE_CURRENT_BINARY_DIR}/Params.cc
+    COMMAND cp ${CMAKE_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_BINARY_DIR}/Params.hh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+set(SOURCE_FILES
+    Params.hh
+    Args.hh
+    GoesRNoaaPort2Mdv.hh
+    Params.cc
+    Args.cc
+    GoesRNoaaPort2Mdv.cc
+    Main.cc
+    )
+
+include_directories(
+    $ENV{RAP_INC_DIR}
+    $ENV{RAP_LOCAL_INC_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+
+link_libraries(netcdf hdf5)
+link_directories(
+    $ENV{RAP_LIB_DIR}
+    $ENV{RAP_LOCAL_LIB_DIR}
+)
+
+add_executable(GoesRNoaaPort2Mdv ${SOURCE_FILES})
+target_link_libraries(GoesRNoaaPort2Mdv
+    libdsdata.a
+    libFmq.a
+    libSpdb.a
+    libMdv.a
+    libRadx.a
+    libNcxx.a
+    libdsserver.a
+    librapformats.a
+    libdidss.a
+    libeuclid.a
+    libtoolsa.a
+    libdataport.a
+    libtdrp.a
+    librapmath.a
+    libz.a
+    libbz2.a
+    libudunits2.a
+    libhdf5_hl.a
+    libhdf5.a
+    libnetcdf.a
+    )

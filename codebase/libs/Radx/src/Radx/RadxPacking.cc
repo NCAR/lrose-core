@@ -74,6 +74,24 @@ RadxPacking &RadxPacking::operator=(const RadxPacking &rhs)
   return _copy(rhs);
 }
 
+/////////////////////////////
+// Check for equality
+//
+
+bool RadxPacking::operator==(const RadxPacking &rhs)
+{
+  if (_nPoints != rhs._nPoints) {
+    return false;
+  }
+  if (_rayNGates != rhs._rayNGates) {
+    return false;
+  }
+  if (_rayStartIndex != rhs._rayStartIndex) {
+    return false;
+  }
+  return true;
+}
+
 /////////////////////////////////////////////////////////
 // initialize data members
 

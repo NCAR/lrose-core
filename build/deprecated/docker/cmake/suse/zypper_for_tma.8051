@@ -1,0 +1,42 @@
+#==============================================================
+# provision a Docker image for building lrose
+# start with clean image
+# install the required packages
+
+zypper install -y \
+    glibc-devel-32bit \
+    libtiff-devel-32bit libpng-devel-32bit libcurl-devel-32bit \
+    libstdc++-devel-32bit libtiff-devel-32bit \
+    zlib-devel-32bit libexpat-devel-32bit flex-32bit \
+    libfftw3-3-32bit libbz2-devel-32bit \
+    ImageMagick-devel-32bit \
+    xorg-x11 xorg-x11-devel xorg-x11-fonts xorg-x11-fonts-core
+
+zypper install -y \
+ xorg-x11-devel-32bit \
+ xorg-x11-libICE-devel-32bit \
+ xorg-x11-libSM-devel-32bit \
+ xorg-x11-libX11-devel-32bit \
+ xorg-x11-libXau-devel-32bit \
+ xorg-x11-libXdmcp-devel-32bit \
+ xorg-x11-libXext-devel-32bit \
+ xorg-x11-libXext-devel-32bit \
+ xorg-x11-libXfixes-devel-32bit \
+ xorg-x11-libXmu-devel-32bit \
+ xorg-x11-libXp-devel-32bit \
+ xorg-x11-libXpm-devel-32bit \
+ xorg-x11-libXprintUtil-devel-32bit
+ xorg-x11-libXrender-devel-32bit \
+ xorg-x11-libXt-devel-32bit \
+ xorg-x11-libXv-devel-32bit \
+ xorg-x11-libfontenc-devel-32bit \
+ xorg-x11-libxcb-devel-32bit \
+ xorg-x11-libxkbfile-devel-32bit
+
+zypper install -y libstdc++44-devel-32bit
+
+  zypper install -y fftw3-devel 
+
+zypper install libbz2-devel
+ zypper install bzip2
+zypper install libbz2-1-32bit

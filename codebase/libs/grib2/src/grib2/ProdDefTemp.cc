@@ -27,8 +27,6 @@
 //                  objects to represent various product 
 //                  definition templates
 //       
-// $Id: ProdDefTemp.cc,v 1.46 2018/10/13 22:29:11 dixon Exp $    
-//
 ///////////////////////////////////////////////////////////
 
 #include <grib2/ProdDefTemp.hh>
@@ -244,7 +242,7 @@ const ProdDefTemp::_GRIB2SurfTable ProdDefTemp::_surface[] = {
 
 /* GRIB2 Code table 4.2 : 0.0 */
 /* Meteorological products, temperature category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoTemp[28] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoTemp[30] = {
    /* 0 */ {"TMP", "Temperature", "K"},
    /* 1 */ {"VTMP", "Virtual temperature", "K"},
    /* 2 */ {"POT", "Potential temperature", "K"},
@@ -273,11 +271,13 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoTemp[28] = {
    /* 25 */ {"TTLWRCS", "Temperature Tendency due to Long-Wave Radiation, Clear Sky", "K s^-1"},
    /* 26 */ {"TTPARM", "Temperature Tendency due to parameterizations", "K s^-1"},
    /* 27 */ {"WETBT", "Wet Bulb Temperature", "K"},
+   /* 28 */ {"UCTMP", "Unbalanced Component of Temperature", "K"},
+   /* 29 */ {"TMPADV", "Temperature Advection", "K s-1"},
 };
   
 /* GRIB2 Code table 4.2 : 0.1 */
 /* Meteorological products, moisture category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoist[118] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoist[122] = {
    /* 0 */ {"SPFH",   "Specific humidity", "kg kg^-1"},
    /* 1 */ {"RH",     "Relative Humidity", "%"},
    /* 2 */ {"MIXR",   "Humidity mixing ratio", "kg kg^-1"},
@@ -302,10 +302,10 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoist[118] = {
    /* 20 */ {"ILIQW",   "Integrated liquid water", "kg m^-2"},
    /* 21 */ {"COND",  "Condensate", "kg kg^-1"},
    /* 22 */ {"CLWMR", "Cloud Water Mixing Ratio", "kg kg^-1"},
-   /* 23 */ {"IWMR",  "Ice water mixing ratio", "kg kg^-1"},
+   /* 23 */ {"ICMR",  "Ice water mixing ratio", "kg kg^-1"},
    /* 24 */ {"RWMR",  "Rain Water Mixing Ratio", "kg kg^-1"},
    /* 25 */ {"SNMR",  "Snow Water Mixing Ratio", "kg kg^-1"},
-   /* 26 */ {"HMC",   "Horizontal moisture convergence", "kg kg^-1 s^-1"},
+   /* 26 */ {"MCONV",   "Horizontal moisture convergence", "kg kg^-1 s^-1"},
    /* 27 */ {"MAXRH", "Maximum relative humidity", "%"},
    /* 28 */ {"MAXAH", "Maximum absolute humidity", "kg m^-3"},
    /* 29 */ {"ASNOW", "Total snowfall", "m"},
@@ -398,13 +398,17 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoist[118] = {
    /* 115 */ {"MDLWSVA", "Mass Density of Liquid Water Coating on Snow Expressed as Mass of Liquid Water per Unit Volume of Air", "kg m^-3"},
    /* 116 */ {"SMLWSMA", "Specific Mass of Liquid Water Coating on Snow Expressed as Mass of Liquid Water per Unit Mass of Moist Air", "kg kg^-1"},
    /* 117 */ {"MMLWSDA", "Mass Mixing Ratio of Liquid Water Coating on Snow Expressed as Mass of Liquid Water per Unit Mass of Dry Air", "kg kg^-1"},
+   /* 118 */ {"UNCSH", "Unbalanced Component of Specific Humidity", "kg kg-1"},
+   /* 119 */ {"UCSCLW", "Unbalanced Component of Specific Cloud Liquid Water content", "kg kg-1"},
+   /* 120 */ {"UCSCIW", "Unbalanced Component of Specific Cloud Ice Water content", "kg kg-1"},
+   /* 121 */ {"FSNOWC", "Fraction of Snow Cover", "Proportion"},
 
 };
 
 
 /* GRIB2 Code table 4.2 : 0.2 */
 /* Meteorological products, momentum category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoment[45] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoment[47] = {
    /* 0 */ {"WDIR", "Wind direction (from which blowing)", "deg true"},
    /* 1 */ {"WIND", "Wind speed", "m s^-1"},
    /* 2 */ {"UGRD", "u-component of wind", "m s^-1"},
@@ -450,11 +454,13 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMoment[45] = {
    /* 42 */ {"VGWIND", "V-Component of Geostrophic Wind", "m s^-1"},
    /* 43 */ {"GEOWD", "Geostrophic Wind Direction", "degree true"},
    /* 44 */ {"GEOWS", "Geostrophic Wind Speed", "m s^-1"},
+   /* 45 */ {"UNDIV", "Unbalanced Component of Divergence", "s-1"},
+   /* 46 */ {"VORTADV", "Vorticity Advection", "s-2"},
 };
 
 /* GRIB2 Code table 4.2 : 0.3 */
 /* Meteorological products, mass category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMass[31] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMass[32] = {
    /* 0 */ {"PRES", "Pressure", "Pa"},
    /* 1 */ {"PRMSL", "Pressure reduced to MSL", "Pa"},
    /* 2 */ {"PTEND", "Pressure tendency", "Pa s^-1"},
@@ -486,6 +492,7 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoMass[31] = {
    /* 28 */ {"DMFLX", "Downdraught Mass Flux", "kg m^-2 s^-1"},
    /* 29 */ {"UDRATE", "Updraught Detrainment Rate", "kg m^-3 s^-1"},
    /* 30 */ {"DDRATE", "Downdraught Detrainment Rate", "kg m^-3 s^-1"},
+   /* 31 */ {"UCLSPRS", "Unbalanced Component of Logarithm of Surface Pressure", "-"},
 };
 
 /* GRIB2 Code table 4.2 : 0.4 */
@@ -627,7 +634,7 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoCloud[50] = {
 
 /* GRIB2 Code table 4.2 : 0.7 */
 /* Meteorological products, Thermodynamic Stability category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoStability[19] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoStability[20] = {
    /* 0 */ {"PLI", "Parcel lifted index (to 500 hPa)", "K"},
    /* 1 */ {"BLI", "Best lifted index (to 500 hPa)", "K"},
    /* 2 */ {"KX", "K index", "K"},
@@ -647,6 +654,7 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoStability[19] = {
    /* 16 */ {"BLKRN", "Bulk Richardson Number", "numeric"},
    /* 17 */ {"GRDRN", "Gradient Richardson Number", "numeric"},
    /* 18 */ {"FLXRN", "Flux Richardson Number", "numeric"},
+   /* 19 */ {"CONAPES", "Convective Available Potential Energy Shear", "m2 s-2"},
 };
 
 /* GRIB2 Code table 4.2 : 0.8 */
@@ -714,14 +722,17 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoRadarForecast[6] = {
 
 /* GRIB2 Code table 4.2 : 0.17 */
 /* Meteorological products, Electrodynamics category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoElectro[2] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoElectro[5] = {
   /* 0 */ {"LTNGSD", "Lightning Strike Density", "m^-2 s^-1"},
   /* 1 */ {"LTPINX", "Lightning Potential Index", "J kg^-1"},
+  /* 2 */ {"CDGDLTFD", "Cloud-to-Ground Lightning Flash Density", "km-2 day-1"},
+  /* 3 */ {"CDCDLTFD", "Cloud-to-Cloud Lightning Flash Density", "km-2 day-1"},
+  /* 4 */ {"TLGTFD", "Total Lightning Flash Density (see Note 2)", "km-2 day-1"},
 };
 
 /* GRIB2 Code table 4.2 : 0.18 */
 /* Meteorological products, Nuclear/Radiology category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoNuclear[17] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoNuclear[19] = {
    /* 0 */ {"ACCES", "Air concentration of Caesium 137", "Bq m^-3"},
    /* 1 */ {"ACIOD", "Air concentration of Iodine 131", "Bq m^-3"},
    /* 2 */ {"ACRADP ", "Air concentration of radioactive pollutant", "Bq m^-3"},
@@ -742,11 +753,13 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoNuclear[17] = {
    /* 14 */ {"SACON", "Specific Activity Concentration", "Bq kg^-1"},
    /* 15 */ {"MAXACON", "Maximum of Air Concentration in Layer", "Bq m^-3"},
    /* 16 */ {"HMXACON", "Height of Maximum of Air Concentration", "m"},
+   /* 17 */ {"CIAIRC", "Column-Integrated Air Concentration", "Bq m-2"},
+   /* 18 */ {"CAACL", "Column-Averaged Air Concentration in Layer", "Bq m-3"},
 };
 
 /* GRIB2 Code table 4.2 : 0.19 */
 /* Meteorological products, Physical Atmospheric category */
-const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoAtmos[32] = {
+const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoAtmos[37] = {
    /* 0 */ {"VIS", "Visibility", "m"},
    /* 1 */ {"ALBDO", "Albedo", "%"},
    /* 2 */ {"TSTM", "Thunderstorm", "%"},
@@ -769,16 +782,21 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoAtmos[32] = {
    /* 19 */ {"SALBD", "Snow Albedo", "%"},
    /* 20 */ {"ICIP", "Icing", "%"},
    /* 21 */ {"CTP", "In-Cloud Turbulence", "%"},
-   /* 22 */ {"CAT", "Clear Air Turbulence (CAT)", "%"},
+   /* 22 */ {"CAT", "Clear Air Turbulence", "%"},
    /* 23 */ {"SLDP", "Supercooled Large Droplet Probability", "%"},
    /* 24 */ {"CONTKE", "onvective Turbulent Kinetic Energy", "J kg^-1"},
    /* 25 */ {"WIWW", "Weather", "numeric"},
    /* 26 */ {"CONVO", "Convective Outlook", "numeric"},
    /* 27 */ {"ICESC", "Icing Scenario", "numeric"},
    /* 28 */ {"MWTURB", "Mountain Wave Turbulence", "m^2/3 s^-1"},
-   /* 29 */ {"CATEDR", "Clear Air Turbulence (CAT) (Eddy Dissipation Rate)", "m^2/3 s^-1"},
+   /* 29 */ {"CATEDR", "Clear Air Turbulence", "m^2/3 s^-1"},
    /* 30 */ {"EDPARM", "Eddy Dissipation Parameter", "m^2/3 s^-1"},
    /* 31 */ {"MXEDPRM", "Maximum of Eddy Dissipation Parameter in Layer", "m^2/3 s^-1"},
+   /* 32 */ {"HIFREL", "Highest Freezing Level", "m"},
+   /* 33 */ {"VISLFOG", "Visibility Through Liquid Fog", "m"},
+   /* 34 */ {"VISIFOG", "Visibility Through Ice Fog", "m"},
+   /* 35 */ {"VISBSN", "Visibility Through Blowing Snow", "m"},
+   /* 36 */ {"ICESEV", "Icing Severity", "non-dim"},
 };
 
 /* GRIB2 Code table 4.2 : 0.20 */
@@ -844,22 +862,22 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_meteoChem[113] = {
    /* 57 */ {"TYABA", "Total Yearly Average Burden of The Atmosphere", "mol"},
    /* 58 */ {"TYAAL", "Total Yearly Average Atmospheric Loss (See Note 1)", "mol s^-1"},
    /* 59 */ {"ANCON", "Aerosol Number Concentration", "m^-3"},
-   /* 60 */ {"reserved", "Reserved", "-"},
-   /* 61 */ {"reserved", "Reserved", "-"},
-   /* 62 */ {"reserved", "Reserved", "-"},
-   /* 63 */ {"reserved", "Reserved", "-"},
-   /* 64 */ {"reserved", "Reserved", "-"},
-   /* 65 */ {"reserved", "Reserved", "-"},
-   /* 66 */ {"reserved", "Reserved", "-"},
-   /* 67 */ {"reserved", "Reserved", "-"},
-   /* 68 */ {"reserved", "Reserved", "-"},
-   /* 69 */ {"reserved", "Reserved", "-"},
-   /* 70 */ {"reserved", "Reserved", "-"},
-   /* 71 */ {"reserved", "Reserved", "-"},
-   /* 72 */ {"reserved", "Reserved", "-"},
-   /* 73 */ {"reserved", "Reserved", "-"},
-   /* 74 */ {"reserved", "Reserved", "-"},
-   /* 75 */ {"reserved", "Reserved", "-"},
+   /* 60 */ {"ASNCON", "Aerosol Specific Number Concentration", "kg-1"},
+   /* 61 */ {"MXMASSD", "Maximum of Mass Density", "kg m-3"},
+   /* 62 */ {"HGTMD", "Height of Mass Density", "m"},
+   /* 63 */ {"CAVEMDL", "Column-Averaged Mass Density in Layer", "kg m-3"},
+   /* 64 */ {"MOLRDRYA", "Mole fraction with respect to dry air", "mol mol-1"},
+   /* 65 */ {"MOLRWETA", "Mole fraction with respect to wet air", "mol mol-1"},
+   /* 66 */ {"CINCLDSP", "Column-integrated in-cloud scavenging rate by precipitation", "kg m-2 s-1"},
+   /* 67 */ {"CBLCLDSP", "Column-integrated below-cloud scavenging rate by precipitation", "kg m-2 s-1"},
+   /* 68 */ {"CIRELREP", "Column-integrated release rate from evaporating precipitation", "kg m-2 s-1"},
+   /* 69 */ {"CINCSLSP", "Column-integrated in-cloud scavenging rate by large-scale precipitation", "kg m-2 s-1"},
+   /* 70 */ {"CBECSLSP", "Column-integrated below-cloud scavenging rate by large-scale precipitation", "kg m-2 s-1"},
+   /* 71 */ {"CRERELSP", "Column-integrated release rate from evaporating large-scale precipitation", "kg m-2 s-1"},
+   /* 72 */ {"CINCSRCP", "Column-integrated in-cloud scavenging rate by convective precipitation", "kg m-2 s-1"},
+   /* 73 */ {"CBLCSRCP", "Column-integrated below-cloud scavenging rate by convective precipitation", "kg m-2 s-1"},
+   /* 74 */ {"CIRERECP", "Column-integrated release rate from evaporating convective precipitation", "kg m-2 s-1"},
+   /* 75 */ {"WFIREFLX", "Wildfire flux", "kg m-2 s-1"},
    /* 76 */ {"reserved", "Reserved", "-"},
    /* 77 */ {"reserved", "Reserved", "-"},
    /* 78 */ {"reserved", "Reserved", "-"},
@@ -1123,18 +1141,7 @@ const ProdDefTemp::_GRIB2ParmTable ProdDefTemp::_spaceQuantitative[30] = {
    /* 21 */ {"AOT08", "Aerosol Optical Thickness at 0.810 µm", "-"},
    /* 22 */ {"AOT16", "Aerosol Optical Thickness at 1.640 µm", "-"},
    /* 23 */ {"ANGCOE", "Angstrom Coefficient", "-"},
-   /* 24 */ {"JM", "Measurement Cost", "-"},
-//   These have been taken out of Grib2 tables
-//   /* 25 */ {"ULCOT", "Upper Layer Cloud Optical Thickness", "-"},
-//   /* 26 */ {"ULCTP", "Upper Layer Cloud Top Pressure", "Pa"},
-//   /* 27 */ {"ULCRE", "Upper Layer Cloud Effective Radius", "m"},
-//   /* 28 */ {"ERR-ULCOT", "Error In Upper Layer Cloud Optical Thickness", "-"},
-//   /* 29 */ {"ERR-ULCTP", "Error In Upper Layer Cloud  Top Pressure", "Pa"},
-//   /* 30 */ {"ERR-ULCRE", "Error In Upper Layer Cloud Effective Radius", "m"},
-//   /* 31 */ {"LLCOT", "Lower Layer Cloud Optical Thickness", "-"},
-//   /* 32 */ {"LLCTP", "Lower Layer Cloud Top Pressure", "Pa"},
-//   /* 33 */ {"ERR-LLCOT", "Error in Lower Layer Cloud Optical Thickness", "-"},
-//   /* 34 */ {"ERR-LLCTP", "Error in Lower Layer Cloud Top Pressure", "Pa"},  
+   /* 24 */ {"reserved", "reserved", "-"},
    /* 25 */ {"reserved", "reserved", "-"},
    /* 26 */ {"reserved", "reserved", "-"},
    /* 27 */ {"BRFLF", "Bidirectional Reflecance Factor", "numeric"},
@@ -1374,6 +1381,15 @@ const ProdDefTemp::_GRIB2LocalTable ProdDefTemp::_NCEPlocalTable[] = {
   {0, 2, 223, "MAXVW", "V Component of Hourly Maximum 10m Wind Speed", "m s^-1"},
   {0, 2, 224, "VRATE", "Ventilation Rate", "m^2 s^-1"},
 
+  {0, 2, 225, "TRWSPD", "Transport Wind Speed", "m s-1       "},
+  {0, 2, 226, "TRWDIR", "Transport Wind Direction", "Deg     "},
+  {0, 2, 227, "TOA10", "Earliest Reasonable Arrival Time (10% exceedance)", "s      "},
+  {0, 2, 228, "TOA50", "Most Likely Arrival Time (50% exceedance)", "s      "},
+  {0, 2, 229, "TOD50", "Most Likely Departure Time (50% exceedance)", "s    "},
+  {0, 2, 230, "TOD90", "Latest Reasonable Departure Time (90% exceedance)", "s      "},
+  {0, 2, 231, "TPWDIR", "Tropical Wind Direction", "°"},
+  {0, 2, 232, "TPWSPD", "Tropical Wind Speed", "m s-1"},
+
 
   /* 4.2 : 0.3 Meteorological products, mass category */
   {0, 3, 192, "MSLET", "Mean Sea Level Pressure (Eta Reduction)", "Pa"},
@@ -1452,6 +1468,13 @@ const ProdDefTemp::_GRIB2LocalTable ProdDefTemp::_NCEPlocalTable[] = {
   {0, 7, 197, "UPHL", "Updraft Helicity", "m^2 s^-2"},
   {0, 7, 198, "LAI", "Leaf Area Index", "-"},
   {0, 7, 199, "MXUPHL", "Hourly Maximum of Updraft Helicity over Layer 2km to 5 km AGL", "m^2 s^-2"},
+  {0, 7, 200, "MNUPHL", "Hourly Minimum of Updraft Helicity", "m2 s-2"},
+  {0, 7, 201, "BNEGELAY", "Bourgoiun Negative Energy Layer (surface to freezing level)", "J kg-1"},
+  {0, 7, 202, "BPOSELAY", "Bourgoiun Positive Energy Layer (2k ft AGL to 400 hPa)", "J kg-1"},
+  {0, 7, 203, "DCAPE", "Downdraft CAPE", "J kg-1"},
+  {0, 7, 204, "EFHL", "Effective Storm Relative Helicity", "m2 s-2"},
+  {0, 7, 205, "ESP", "Enhanced Stretching Potential", "Numeric"},
+  {0, 7, 206, "CANGLE", "Critical Angle", "Degree"},
 
   /* 4.2 : 0.13 Meteorological products, Aerosols category */
   {0, 13, 192, "PMTC", "Particulate matter (coarse)", "µg m^-3"},
@@ -1537,6 +1560,10 @@ const ProdDefTemp::_GRIB2LocalTable ProdDefTemp::_NCEPlocalTable[] = {
   {0, 19, 232, "VAFTD", "Volcanic Ash Forecast Transport and Dispersion", "log10(kg m^-3)"},
   {0, 19, 233, "ICPRB", "Icing probability", "-"},
   {0, 19, 234, "ICSEV", "Icing severity", "-"},
+  {0, 19, 235, "JFWPRB", "Joint Fire Weather Probability", "%"},
+  {0, 19, 236, "SNOWLVL", "Snow Level", "m"},
+  {0, 19, 237, "DRYTPROB", "Dry Thunderstorm Probability", "%"},
+  {0, 19, 238, "ELLINX", "Ellrod Index", "-"},
 
   /* 4.2 : 0.191 Meteorological products, Miscellaneous category */
   {0, 191, 192, "NLAT", "Latitude (-90 to 90)", "degrees"},
@@ -1972,6 +1999,17 @@ const ProdDefTemp::_GRIB2LocalTable ProdDefTemp::_MRMSlocalTable[] = {
   {209,11,2, "CREF", "Composite Reflectivity Mosaic (max ref)", "dBZ"}
 };
 
+/* COSMO - Local Use Table, Center 250, SubCenter 2 */
+const ProdDefTemp::_GRIB2LocalTable ProdDefTemp::_COSMO_localTable[] = {
+  {192, 0, 0,   "TDEF", "Total Deformation", "s^-1"},
+  {0, 1, 197,   "TUHFLX", "Total Upward Heat Flux", "W m^-2"},
+  {0, 191, 207, "BLH", "Boundary Layer Height", "m"},
+  {2, 0, 203,   "IMOL", "Inverse of Monin-Obukov length", "-"},
+  {0, 2, 207,   "USTAR", "U-star", "-"},
+  {2, 0, 208,   "VOROG", "Variance of Orography", "-"},
+  {2, 0, 206,   "RHEIGHT", "Roughness Height", "-"},
+};
+
 /**************************************************************************
  * Constructor.
  */
@@ -2043,7 +2081,7 @@ void ProdDefTemp::setParamStrings ()
 
   // Parameter categories 192 through 254 are Local Use Only
   // This is constant among the various parameter Disciplines
-  } else if (_paramNumber >= 192 || _parameterCategory >= 192) 
+  } else if (_paramNumber >= 192 || _parameterCategory >= 192 || _disciplineNum >= 192) 
   {
 
      // override defaults with local values where appropriate
@@ -2149,7 +2187,7 @@ void ProdDefTemp::setParamStrings ()
        // Meteorological Service of Canada
        case 54:
 	  // Montreal
-          if (_subCenterId == 2) {
+          if (_subCenterId == 2 || _subCenterId == 0) {
             for (ui32 i = 0; i < _MSC_MONTREAL_localTable_numElements; i++ ) {
 
                if ((_MSC_MONTREAL_localTable[i].prodDiscipline == _disciplineNum) && 
@@ -2237,6 +2275,47 @@ void ProdDefTemp::setParamStrings ()
           else {
 	    cerr << "ERROR: ProdDefTemp::setParamStrings()" << endl;
             cerr << "New sub-center found for NCAR, cannot decode local parameter numbers" << endl;
+	  }
+          break;
+
+        // US NOAA Office of Oceanic and Atmospheric Research
+        case 161:
+	  // Subcenter: 0 (National Severe Storms Lab)
+	  // Operational MRMS GRIB2 Tables
+	  if(_subCenterId == 0) {
+	    for (ui32 i = 0; i < _MRMSlocalTable_numElements; i++ ) {
+	      
+	      if ((_MRMSlocalTable[i].prodDiscipline == _disciplineNum) && 
+		  (_parameterCategory == _MRMSlocalTable[i].category) &&
+		  (_paramNumber == _MRMSlocalTable[i].paramNumber)) {
+		_parameterName = new string (_MRMSlocalTable[i].name);   
+		_parameterLongName = new string (_MRMSlocalTable[i].comment);
+		_parameterUnits = new string (_MRMSlocalTable[i].unit);
+		break;
+	      }
+	    } // for
+	  }
+	  break;
+	  
+        // COSMO local tables
+        case 250:
+	  // COnsortium for Small scall MOdelling (COSMO) local table
+          if (_subCenterId == 2) {
+            for (ui32 i = 0; i < _COSMO_localTable_numElements; i++ ) {
+
+               if ((_COSMO_localTable[i].prodDiscipline == _disciplineNum) && 
+                         (_parameterCategory == _COSMO_localTable[i].category) &&
+                         (_paramNumber == _COSMO_localTable[i].paramNumber)) {
+                    _parameterName = new string (_COSMO_localTable[i].name);   
+                    _parameterLongName = new string (_COSMO_localTable[i].comment);
+                    _parameterUnits = new string (_COSMO_localTable[i].unit);
+                    break;
+               }
+            } // for
+          }
+          else {
+	    cerr << "ERROR: ProdDefTemp::setParamStrings()" << endl;
+            cerr << "New sub-center found for COSMO, cannot decode local parameter numbers" << endl;
 	  }
           break;
 
@@ -2671,31 +2750,6 @@ void ProdDefTemp::setParamStrings ()
 
       break;
 
-      // Product Discipline 209, Reserved for Local Use
-    case 209:
-
-      // Center: 161 = US NOAA Office of Oceanic and Atmospheric Research
-      // Subcenter: 0 (National Severe Storms Lab)
-      // Operational MRMS GRIB2 Tables
-      if(_centerId == 161 && _subCenterId == 0) {
-	for (ui32 i = 0; i < _MRMSlocalTable_numElements; i++ ) {
-
-	  if ((_MRMSlocalTable[i].prodDiscipline == _disciplineNum) && 
-	      (_parameterCategory == _MRMSlocalTable[i].category) &&
-	      (_paramNumber == _MRMSlocalTable[i].paramNumber)) {
-	    _parameterName = new string (_MRMSlocalTable[i].name);   
-	    _parameterLongName = new string (_MRMSlocalTable[i].comment);
-	    _parameterUnits = new string (_MRMSlocalTable[i].unit);
-	    break;
-	  }
-	} // for
-      } else {
-	_parameterName = new string ("Reserved");
-	_parameterLongName = new string ("Reserved Parameter Number");
-	_parameterUnits = new string ("-");
-      }
-      
-      break;
 
     default:
       _parameterName = new string ("Missing");

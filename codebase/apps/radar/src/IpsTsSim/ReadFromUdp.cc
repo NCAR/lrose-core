@@ -66,8 +66,6 @@
 #include "ReadFromUdp.hh"
 #include "IpsTsSim.hh"
 
-using namespace std;
-
 // Constructor
 
 ReadFromUdp::ReadFromUdp(const string &progName,
@@ -434,8 +432,8 @@ int ReadFromUdp::_openUdpForReading()
   localAddr.sin_family = AF_INET;
   localAddr.sin_addr.s_addr = htonl (INADDR_ANY);
   
-  if (bind (_udpFd, (struct sockaddr *) &localAddr, 
-	    sizeof (localAddr)) < 0) {
+  if (::bind(_udpFd, (struct sockaddr *) &localAddr, 
+             sizeof (localAddr)) < 0) {
     perror ("bind error:");
     fprintf(stderr, "Could bind UDP socket, port %d\n", destPort);
     close (_udpFd);

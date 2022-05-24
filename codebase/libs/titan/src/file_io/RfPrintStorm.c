@@ -791,7 +791,13 @@ void RfPrintStormRuns(FILE *out,
     return;
   }
 
-  fprintf(out, "%sRuns\n", spacer);
+  int npts = 0;
+  run = runs;
+  for (irun = 0; irun < gprops->n_runs; irun++, run++) {
+    npts += run->n;
+  } /* irun */
+
+  fprintf(out, "%sRuns - nGridPts: %d\n", spacer, npts);
   fprintf(out, "%s%8s %8s %8s %8s %8s\n", spacer,
 	  "ix", "n", "maxx", "iy", "iz");
   

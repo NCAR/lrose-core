@@ -1530,7 +1530,8 @@ void WorldPlot::_computeTransform()
 
 void WorldPlot::drawColorScale(const ColorMap &colorMap,
                                QPainter &painter,
-                               int unitsFontSize)
+                               int unitsFontSize,
+                               char *textColor)
   
 {
   
@@ -1603,6 +1604,7 @@ void WorldPlot::drawColorScale(const ColorMap &colorMap,
   
   // add labels
 
+  painter.setPen(QColor(textColor)); // Qt::darkCyan); // (QColor(_params.text_color));
   painter.setBrush(Qt::black);
   painter.setBackgroundMode(Qt::OpaqueMode);
   QRect tRect(painter.fontMetrics().tightBoundingRect("1.0"));

@@ -38,6 +38,7 @@
 #include <QDialog>
 #include <iostream>
 #include "ColorMap.hh"
+#include "FieldRendererView.hh"
 
 using namespace std;
 
@@ -52,8 +53,15 @@ public:
                const ColorMap &colorMap,
                int buttonRow,
                bool isFilt);
+  
+  DisplayField(string &fieldName);
 
-  ~DisplayField();
+  virtual ~DisplayField();
+
+  // update
+  void update();  // ??
+  // read
+  void read(size_t sweep); // read data from the volume
 
   const string &getLabel() const { return _label; }
   const string &getName() const { return _name; }
@@ -86,10 +94,12 @@ public:
   bool isHidden() { return _state == HIDDEN; }
   void setStateVisible() { _state = VISIBLE; }
 
+  void render(int width, int height);
+  QImage &getImage();
 private:
 
-  string _label;
-  string _name;
+  string _label; // display name shown in polar display
+  string _name;  // data field name in RadxVol
   string _units;
   string _shortcut;
   ColorMap _colorMap;
@@ -100,6 +110,9 @@ private:
   double _selectValue;
   QLabel *_dialog;
   DisplayFieldState _state;
+  FieldRendererView *_renderer;
+  //QImage *_image;  // TODO: should this go into the FieldRenderer Yes  
+  // TODO: Keep Qt out of this level????
 };
 
 #endif

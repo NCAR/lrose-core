@@ -1,0 +1,160 @@
+//////////////////////////////////////////////////////////////////////
+// parameter definitions ResTestEcco
+//
+// Mike Dixon, EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Jan 2022
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Program name: ResTestEcco";
+  p_text = "ResTestEcco tests Ecco for different grid resolutions. It does so by degrading the resolution of the input data set and comparing TDBZ for the different grid resolutions.";
+}
+
+commentdef {
+  p_header = "PROCESS CONTROL";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In ARCHIVE mode, we move through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+} mode;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to use multiple threads for speed.";
+  p_help = "Computing the texture is the most time consuming step. If this is true, then the texture will be computer for each vertical level in a separate thread, in parallel. This speeds up the processing. If this is false, the threads will be called serially. This is useful for debugging.";
+} use_multiple_threads;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/mdv/input";
+  p_descr = "Dir for input data.";
+  p_help = "This is used in ARCHIVE mode. In FILELIST mode, the file paths are specified on the command line.";
+} input_dir;
+
+paramdef string {
+  p_default = "DBZ";
+  p_descr = "dBZ field name in input MDV files.";
+} dbz_field_name;
+
+commentdef {
+  p_header = "TEST PARAMETERS";
+}
+
+typedef struct {
+  double res_reduction_factor;
+  double texture_radius_km;
+  double texture_limit_high;
+} resolution_t;
+
+paramdef struct resolution_t {
+  p_default =
+    {
+     { 1.0, 7.0, 30.0 },
+     { 2.0, 9.1, 30.0 },
+     { 3.0, 10.4, 30.0 },
+     { 4.0, 11.2, 30.0 },
+     { 5.0, 11.9, 30.0 }
+  };
+  p_descr = "Specify the details to be tested at each resolution.";
+  p_help = "res_reduction_factor is the reduction factors of the test grid, relative to the input grid. The absolute resolution of the test grids are the original resolution, multiplied by these factors. texture_radius_km and texture_limit_high are as specified by Ecco.";
+} resolutions[];
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Minimum reflectivity threshold for this analysis (dBZ).";
+  p_help = "Reflectivity below this threshold is set to missing.";
+} min_valid_dbz;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Set base DBZ value.";
+  p_help = "Before computing the texture, we subtract the baseDBZ from the measured DBZ. This adjusts the DBZ values into the positive range. For S-, C- and X-band radars, this can be set to 0 dBZ, which is the default. For Ka-band radars this should be around -10 dBZ. For W-band radars -20 dBZ is appropriate.";
+} base_dbz;
+
+commentdef {
+  p_header = "COMPUTING REFLECTIVITY TEXTURE";
+}
+
+paramdef double {
+  p_default = 7.0;
+  p_descr = "Radius for texture analysis (km).";
+  p_help = "We determine the reflectivity 'texture' at a point by computing the standard deviation of the square of the reflectivity, for all grid points within this radius of the central point. We then compute the square root of that sdev.";
+} texture_radius_km;
+
+paramdef double {
+  p_default = 0.25;
+  p_descr = "Minimum fraction of surrounding points for texture computations.";
+  p_help = "For a valid computation of texture, we require at least this fraction of points around the central point to have valid reflectivity.";
+} min_valid_fraction_for_texture;
+
+paramdef double {
+  p_default = 0.67;
+  p_descr = "Minimum fraction of surrounding points for 2D fit to DBZ.";
+  p_help = "We compute a 2D fit to the reflectivity around a grid point, to remove any systematic gradient. For a valid fit, we require at least this fraction of points around the central point to have valid reflectivity.";
+} min_valid_fraction_for_fit;
+
+commentdef {
+  p_header = "CONVERTING REFLECTIVITY TEXTURE TO CONVECTIVITY";
+  p_text = "Convectivity ranges from 0 to 1. To convert texture to convectivity, we apply a piece-wise linear transfer function. This section defines the lower texture limit and the upper texture limit. At or below the lower limit convectivity is set to 0. At or above the upper limit convectivity is set to 1. Between these two limits convectivity varies linearly with texture.";
+}
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower limit for texture.";
+  p_help = "Below this texture the convectivity is set to 0.";
+} texture_limit_low;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Upper limit for texture.";
+  p_help = "Above this texture the convectivity is set to 1. Between the limits convectivity varies linearly with texture.";
+} texture_limit_high;
+
+commentdef {
+  p_header = "SETTING CONVECTIVE OR STRATIFORM FLAGS BASED ON CONVECTIVITY";
+  p_text = "If neither is set, we flag the point as MIXED.";
+}
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Minimum convectivity for convective at a point.";
+  p_help = "If the convectivity at a point exceeds this value, we set the convective flag at this point.";
+} min_convectivity_for_convective;
+
+paramdef double {
+  p_default = 0.4;
+  p_descr = "Maximum convectivity for stratiform at a point.";
+  p_help = "If the convectivity at a point is less than this value, we set the stratiform flag at this point. If it is above this but less than min_convectivity_for_convective we flag the point as MIXED.";
+} max_convectivity_for_stratiform;
+
+commentdef {
+  p_header = "DATA OUTPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/mdv/ResTestEcco";
+  p_descr = "Output dir.";
+  p_help = "Output files are written to subdirectories of this path.";
+} output_dir;
+

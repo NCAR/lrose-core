@@ -21,20 +21,6 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
-/*
- * RCS info
- *  $Author: dixon $
- *  $Locker:  $
- *  $Date: 2016/03/04 02:22:12 $
- *  $Id: Data.hh,v 1.2 2016/03/04 02:22:12 dixon Exp $
- *  $Revision: 1.2 $
- *  $State: Exp $
- *
- */
-/**-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-**/
-
-
 /************************************************************************
 
 Header: Data.hh
@@ -53,7 +39,7 @@ Description: Holds data info locally, Data is not created or destroyed locally.
 /* System include files / Local include files */
 #include <Mdv/Mdvx.hh>
 #include <Mdv/MdvxField.hh>
-#include <Params.hh>
+#include "Params.hh"
 using namespace std;
 
 /* Class definition */

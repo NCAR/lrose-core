@@ -364,7 +364,7 @@ int EG_find_intervals_aux_float(int nrows, int ncols, float array[],
  */
 
 int EG_find_intervals_3d_float(int nplanes_in_vol, int nrows_in_vol, int nrows_in_plane,
-			 int ncols, float array[], Interval **intervals_p,
+			 int ncols, const float array[], Interval **intervals_p,
 			 int *n_intv_alloc_p, Row_hdr *row_hdr, float threshold)
 {
 

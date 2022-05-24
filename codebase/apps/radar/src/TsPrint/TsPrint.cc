@@ -69,8 +69,13 @@ TsPrint::TsPrint(int argc, char **argv)
   _printCount = 0;
   _pulseReader = NULL;
   _haveChan1 = false;
+  _fastAlternating = false;
   _prevPulseSeqNum = 0;
 
+  _nPulsesRead = 0;
+  _firstPulse = NULL;
+  _secondPulse = NULL;
+  
   _prevAzimuth = -9999.0;
   _prevElevation = -9999.0;
 
@@ -194,11 +199,6 @@ TsPrint::TsPrint(int argc, char **argv)
   _nSamples = _params.n_samples;
   _startGateRequested = _params.start_gate;
   _nGatesRequested = _params.n_gates;
-  _fastAlternating = _params.fast_alternating;
-  _dualChannel = _params.dual_channel;
-  if (_fastAlternating) {
-    _dualChannel = true;
-  }
 
 }
 
@@ -212,7 +212,7 @@ TsPrint::~TsPrint()
     delete _pulseReader;
   }
 
-  _aStats.clear();
+  _ascopeStats.clear();
 
   PMU_auto_unregister();
 
@@ -233,11 +233,7 @@ int TsPrint::Run ()
     return 0;
   }
 
-  if (_params.run_mode == Params::CAL_MODE) {
-
-    return _runCalMode();
-    
-  } else if (_params.run_mode == Params::ASCOPE_MODE) {
+  if (_params.run_mode == Params::ASCOPE_MODE) {
     
     if (_params.once_only) {
       return _runAscopeMode();
@@ -307,13 +303,7 @@ int TsPrint::_runPrintMode()
       _printRunDetails(cout);
       _printOpsInfo(cout, pulse);
       if (!_params.print_all_headers) {
-        if (_fastAlternating) {
-          _printAlternatingHeading(cout);
-        } else if (_dualChannel) {
-          _printDualHeading(cout);
-        } else {
-          _printSummaryHeading(cout);
-        }
+        _printSummaryHeading(cout);
       }
     }
 
@@ -357,9 +347,9 @@ int TsPrint::_runPrintMode()
     // ops info when it changes
 
     _infoChanged = _checkInfoChanged(*pulse);
-    if (_infoChanged) {
-      _printOpsInfo(cout, pulse);
-      if (_params.print_info_on_change) {
+    if (_params.print_info_on_change) {
+      if (_infoChanged) {
+        _printOpsInfo(cout, pulse);
 	_pulseReader->getOpsInfo().print(stdout);
       }
     }
@@ -382,8 +372,6 @@ int TsPrint::_runPrintMode()
     }
     if (_fastAlternating) {
       _addToAlternating(*pulse);
-    } else if (_dualChannel) {
-      _addToDual(*pulse);
     } else {
       _addToSummary(*pulse);
     }
@@ -397,34 +385,16 @@ int TsPrint::_runPrintMode()
     
     if (_pulseCount == _nSamples) {
       // compute stats
-      if (_fastAlternating) {
-        _computeAlternating();
-      } else if (_dualChannel) {
-        _computeDual();
-      } else {
-        _computeSummary();
-      }
+      _computeStats();
       // compute extra col means
       if (_params.add_cols_from_status_xml) {
         _computeExtraColMeans();
       }
       if (!_params.print_all_headers) {
-        if (_fastAlternating) {
-          if ((_printCount % _params.label_interval) == 0) {
-            _printAlternatingLabels(cout);
-          }
-          _printAlternatingData(stdout);
-        } else if (_dualChannel) {
-          if ((_printCount % _params.label_interval) == 0) {
-            _printDualLabels(cout);
-          }
-          _printDualData(stdout);
-        } else {
-          if ((_printCount % _params.label_interval) == 0) {
-            _printSummaryLabels(cout);
-          }
-          _printSummaryData(stdout);
+        if ((_printCount % _params.label_interval) == 0) {
+          _printSummaryLabels(cout);
         }
+        _printSummaryData(stdout);
         _printCount++;
       }
       _pulseCount = 0;
@@ -557,14 +527,14 @@ int TsPrint::_runAscopeMode()
 
   // allocate vector for Ascope stats
 
-  _aStats.clear();
+  _ascopeStats.clear();
   for (int ii = 0; ii < _nGatesRequested; ii++) {
     Stats stats;
     stats.setCalibration(_rxGainHc,
                          _rxGainVc,
                          _rxGainHx,
                          _rxGainVx);
-    _aStats.push_back(stats);
+    _ascopeStats.push_back(stats);
   }
   _pulseCount = 0;
 
@@ -602,7 +572,7 @@ int TsPrint::_runAscopeMode()
   // compute ascope stats
 
   for (int igate = 0; igate < _nGates; igate++) {
-    _aStats[igate].computeAlternating(_haveChan1);
+    _ascopeStats[igate].computeAlternating(_haveChan1);
   }
     
   time_t midSecs = (time_t) _midTime;
@@ -642,113 +612,19 @@ int TsPrint::_runAscopeMode()
             "%8.3f %8.3f %8.3f %8.3f "
             "%8.3f %8.3f\n",
             gateNum, rangeKm,
-            _aStats[igate].meanDbmHc,
-            _aStats[igate].meanDbmHx,
-            _aStats[igate].corrH,
-            _aStats[igate].argH,
-            _aStats[igate].meanDbmVc,
-            _aStats[igate].meanDbmVx,
-            _aStats[igate].corrV,
-            _aStats[igate].argV,
-            _aStats[igate].meanDbm0,
-            _aStats[igate].meanDbm1);
+            _ascopeStats[igate].meanDbmHc,
+            _ascopeStats[igate].meanDbmHx,
+            _ascopeStats[igate].corrH,
+            _ascopeStats[igate].argH,
+            _ascopeStats[igate].meanDbmVc,
+            _ascopeStats[igate].meanDbmVx,
+            _ascopeStats[igate].corrV,
+            _ascopeStats[igate].argV,
+            _ascopeStats[igate].meanDbm0,
+            _ascopeStats[igate].meanDbm1);
 
   }
 
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// Run in calibration mode
-
-int TsPrint::_runCalMode()
-{
-
-  // get cal name
-
-  fprintf(stdout, "Running TsPrint in calibration mode\n");
-  fprintf(stdout, "=====================================\n");
-  fprintf(stdout, "Enter cal name: ");
-  fflush(stdout);
-  char calName[1024];
-  if (fscanf(stdin, "%s", calName) != 1) {
-    cerr << "ERROR - you must input a cal name for the output file." << endl;
-    return -1;
-  }
-
-  // compute output file name
-
-  DateTime now(time(NULL));
-  char fileName[4096];
-  snprintf(fileName, 4096, "tscal_%.4d%.2d%.2d_%.2d%.2d%2d_%s.txt",
-           now.getYear(), now.getMonth(), now.getDay(),
-           now.getHour(), now.getMin(), now.getSec(),
-           calName);
-
-  // open file
-
-  FILE *calFile;
-  if ((calFile = fopen(fileName, "w")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - cannot open output file: " << fileName << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-
-  fprintf(calFile, "#%10s %10s %10s %10s %10s %10s %10s\n",
-	  "sgdBm", "Hc", "Hx", "Vc", "Vx", "Hc-Vc", "Hx-Vx");
-  
-  while (true) {
-
-    fprintf(stdout, "Siggen setting in dBm, (q to quit): ");
-    fflush(stdout);
-    char input[1024];
-    if (fscanf(stdin, "%s", input) != 1) {
-      cerr << "ERROR - try again ..." << endl;
-      continue;
-    }
-    if (input[0] == 'q') {
-      break;
-    }
-    double sgSetting;
-    if (sscanf(input, "%lg", &sgSetting) != 1) {
-      cerr << "ERROR - enter a number ..." << endl;
-      continue;
-    }
-    
-    _clearStats();
-    _pulseCount = 0;
-
-    while (_pulseCount < _nSamples) {
-      
-      // read next pulse
-      
-      IwrfTsPulse *pulse = _getNextPulse();
-      if (pulse == NULL) {
-        return -1;
-      }
-
-      _addToAlternating(*pulse);
-      _pulseCount++;
-      delete pulse;
-    }
-    
-    _computeAlternating();
-    _printAlternatingLabels(cout);
-    _printAlternatingData(stdout);
-
-    fprintf(calFile, " %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n",
-	    sgSetting,
-	    _stats.meanDbmHc, _stats.meanDbmHx,
-            _stats.meanDbmVc, _stats.meanDbmVx,
-	    _stats.meanDbmHc - _stats.meanDbmVc,
-	    _stats.meanDbmHx - _stats.meanDbmVx);
-    
-  } // while (true)
-  
-  fclose(calFile);
-  
   return 0;
 
 }
@@ -980,26 +856,113 @@ int TsPrint::_runMaxPowerServerMode()
 IwrfTsPulse *TsPrint::_getNextPulse() 
 
 {
+
+  // at the start, check for alternating mode
   
+  if (_nPulsesRead == 0) {
+
+    // read first 2 pulses
+    // use for detecting alternating mode
+
+    _firstPulse = _getNextPulseCheckTimeout();
+    _secondPulse = _getNextPulseCheckTimeout();
+
+    if (_firstPulse == NULL || _secondPulse == NULL) {
+      // failure
+      return NULL;
+    }
+
+    // check for fast alternating mode
+
+    if (_firstPulse->get_hv_flag() == _secondPulse->get_hv_flag()) {
+      _fastAlternating = false;
+    } else {
+      _fastAlternating = true;
+      // in alternating mode, ensure we start on H
+      if (!_firstPulse->get_hv_flag()) {
+        // first pulse is V
+        // discard it, read in another
+        delete _firstPulse;
+        _firstPulse = _secondPulse;
+        _secondPulse = _getNextPulseCheckTimeout();
+        if (_secondPulse == NULL) {
+          return NULL;
+        }
+      }
+    } // if (_firstPulse->get_hv_flag() == _secondPulse->get_hv_flag())
+
+    // return the first pulse, set it to NULL for next time
+    // this is a one-time event
+    
+    IwrfTsPulse *pulse = _firstPulse;
+    _firstPulse = NULL;
+    return pulse;
+
+  } // if (_nPulsesRead == 0) 
+
+  // has the second pulse been read, if so return it now
+  
+  if (_secondPulse != NULL) {
+    // second pulse was read to determine alternating mode
+    // return the second pulse now
+    // this is a one-time event
+    IwrfTsPulse *pulse = _secondPulse;
+    _secondPulse = NULL;
+    return pulse;
+  }
+  
+  // read next pulse
+  
+  IwrfTsPulse *pulse = _getNextPulseCheckTimeout();
+  if (pulse == NULL) {
+    return NULL;
+  }
+
+  // check for missing pulses
+  
+  si64 pulseSeqNum = pulse->getSeqNum();
+  si64 nMissing = (pulseSeqNum - _prevPulseSeqNum) - 1;
+  if ((_prevPulseSeqNum != 0) &&
+      (nMissing != 0) &&
+      _params.print_missing_pulses) {
+    cerr << "WARNING - TsPrint - n missing pulses: " << nMissing << endl;
+    cerr << "  prev pulse seq num: " << _prevPulseSeqNum << endl;
+    cerr << "  this pulse seq num: " << pulseSeqNum << endl;
+    cerr << "  file: " << _pulseReader->getPathInUse() << endl;
+  }
+  _prevPulseSeqNum = pulseSeqNum;
+
+  return pulse;
+
+}
+
+//////////////////////////////////////////////////
+// get next pulse, checking for timeout condition
+// returns NULL on failure
+
+IwrfTsPulse *TsPrint::_getNextPulseCheckTimeout() 
+
+{
+
   IwrfTsPulse *pulse = NULL;
 
   while (pulse == NULL) {
     pulse = _pulseReader->getNextPulse(false);
     if (pulse == NULL) {
       if (_pulseReader->getTimedOut()) {
-	cout << "# NOTE: read timed out, retrying ..." << endl;
+	cout << "# reader timed out, retrying ..." << endl;
 	continue;
       }
       if (_pulseReader->endOfFile()) {
-        cout << "# NOTE: end of file encountered" << endl;
+        cout << "# end of file" << endl;
       }
       return NULL;
     }
   }
-
-  if (_pulseReader->endOfFile()) {
-    cout << "# NOTE: end of file encountered" << endl;
-  }
+  _nPulsesRead++;
+  
+  // check for dual channel mode
+  
   if (pulse->getIq1() != NULL) {
     _haveChan1 = true;
   } else {
@@ -1015,22 +978,8 @@ IwrfTsPulse *TsPrint::_getNextPulse()
   _startRangeM = pulse->get_start_range_m();
   _gateSpacingM = pulse->get_gate_spacing_m();
 
-  // check for missing pulses
-
-  si64 pulseSeqNum = pulse->getSeqNum();
-  si64 nMissing = (pulseSeqNum - _prevPulseSeqNum) - 1;
-  if (_prevPulseSeqNum != 0 && nMissing != 0 && _params.print_missing_pulses) {
-    cerr << "WARNING - TsPrint - n missing pulses: " << nMissing << endl;
-    cerr << "  prev pulse seq num: " << _prevPulseSeqNum << endl;
-    cerr << "  this pulse seq num: " << pulseSeqNum << endl;
-    cerr << "  file: " << _pulseReader->getPathInUse() << endl;
-  }
-  _prevPulseSeqNum = pulseSeqNum;
-
   if (_params.change_packing) {
-
     // reformat pulse as needed
-    
     if (_params.packing_type == Params::PACKING_FL32) {
       pulse->convertToPacked(IWRF_IQ_ENCODING_FL32);
     } else if (_params.packing_type == Params::PACKING_SCALED_SI16) {
@@ -1040,11 +989,14 @@ IwrfTsPulse *TsPrint::_getNextPulse()
     } else if (_params.packing_type == Params::PACKING_SIGMET_FL16) {
       pulse->convertToPacked(IWRF_IQ_ENCODING_SIGMET_FL16);
     }
-
   }
 
+  if (_pulseReader->endOfFile()) {
+    cout << "# end of file" << endl;
+  }
+  
   return pulse;
-
+      
 }
 
 ////////////////////////////////////////////
@@ -1067,12 +1019,14 @@ void TsPrint::_conditionGateRange(const IwrfTsPulse &pulse)
     _nGates = _endGate - _startGate + 1;
   }
 
+  _stats.setNGates(_nGates);
+
 }
     
 ////////////////////////////////////////////
 // set midpoint and other cardinal values
 
-void TsPrint::_saveCardinalValues(const IwrfTsPulse &pulse)
+void TsPrint::_saveMetaData(const IwrfTsPulse &pulse)
 
 {
 
@@ -1093,59 +1047,103 @@ void TsPrint::_saveCardinalValues(const IwrfTsPulse &pulse)
 }
 
 ////////////////////////////////////////////
-// augment summary information
+// add to summary information
 
 void TsPrint::_addToSummary(const IwrfTsPulse &pulse)
 
 {
 
-  _saveCardinalValues(pulse);
+  _saveMetaData(pulse);
+
+  const fl32 *iqChan0 = pulse.getIq0();
+
+  int count = 0;
+  int index = _startGate * 2;
+  for (int igate = _startGate; igate <= _endGate; igate++, count++, index += 2) {
+    
+    double ii0 = iqChan0[index];
+    double qq0 = iqChan0[index + 1];
+    if (_params.print_lag1_coherent_power) {
+      RadarComplex_t iq0(ii0, qq0);
+      _stats.iqHc[count].push_back(iq0);
+    }
+
+    double ii1 = -9999;
+    double qq1 = -9999;
+    if (_haveChan1) {
+      const fl32 *iqChan1 = pulse.getIq1();
+      ii1 = iqChan1[index];
+      qq1 = iqChan1[index + 1];
+      if (_params.print_lag1_coherent_power) {
+        RadarComplex_t iq1(ii1, qq1);
+        _stats.iqVc[count].push_back(iq1);
+      }
+    }
+    _stats.addToSummary(pulse, ii0, qq0, _haveChan1, ii1, qq1);
+    
+  }
+
+}
+
+////////////////////////////////////////////
+// augment alternating information
+
+void TsPrint::_addToAlternating(const IwrfTsPulse &pulse)
+
+{
+
+  _saveMetaData(pulse);
 
   const fl32 *iqChan0 = pulse.getIq0();
   const fl32 *iqChan1 = pulse.getIq1();
+  bool isHoriz = pulse.isHoriz();
 
   int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
+  int count = 0;
+  for (int igate = _startGate; igate <= _endGate; igate++, count++, index += 2) {
 
     double ii0 = iqChan0[index];
     double qq0 = iqChan0[index + 1];
-    double power0 = ii0 * ii0 + qq0 * qq0;
-    power0 /= _rxGainHc;
-    _stats.sumPower0 += power0;
-    _stats.nn0++;
-
-    if (iqChan1) {
-      double ii1 = iqChan1[index];
-      double qq1 = iqChan1[index + 1];
-      double power1 = ii1 * ii1 + qq1 * qq1;
-      power1 /= _rxGainVc;
-      _stats.sumPower1 += power1;
-      _stats.nn1++;
+    if (_params.print_lag1_coherent_power) {
+      RadarComplex_t iq0(ii0, qq0);
+      if (isHoriz) {
+        _stats.iqHc[count].push_back(iq0);
+      } else {
+        _stats.iqVc[count].push_back(iq0);
+      }
     }
-    
+
+    double ii1 = -9999;
+    double qq1 = -9999;
+    if (iqChan1) {
+      ii1 = iqChan1[index];
+      qq1 = iqChan1[index + 1];
+      if (_params.print_lag1_coherent_power) {
+        RadarComplex_t iq1(ii1, qq1);
+        if (isHoriz) {
+          _stats.iqVx[count].push_back(iq1);
+        } else {
+          _stats.iqHx[count].push_back(iq1);
+        }
+      }
+    }
+    _stats.addToAlternating(pulse, ii0, qq0, _haveChan1, ii1, qq1, isHoriz);
+
   }
+
 }
 
 /////////////////////////
 // compute summary stats
 
-void TsPrint::_computeSummary()
+void TsPrint::_computeStats()
   
 {
-  
-  _stats.meanDbm0 = -999.9;
-  _stats.meanDbm1 = -999.9;
-  
-  if (_stats.nn0 > 0) {
-    double meanPower0 = _stats.sumPower0 / _stats.nn0;
-    _stats.meanDbm0 = 10.0 * log10(meanPower0);
+  if (_fastAlternating) {
+    _stats.computeAlternating(_haveChan1);
+  } else {
+    _stats.computeSummary(_haveChan1);
   }
-
-  if (_stats.nn1 > 0) {
-    double meanPower1 = _stats.sumPower1 / _stats.nn1;
-    _stats.meanDbm1 = 10.0 * log10(meanPower1);
-  }
-
 }
 
 ////////////////////////////////////////////
@@ -1156,6 +1154,7 @@ void TsPrint::_clearStats()
 {
 
   _stats.init();
+  _stats.setNGates(_nGates);
     
   _midTime = -999.9;
   _midPrt = -999.9;
@@ -1166,96 +1165,13 @@ void TsPrint::_clearStats()
 }
   
 ////////////////////////////////////////////
-// augment alternating information
-
-void TsPrint::_addToAlternating(const IwrfTsPulse &pulse)
-
-{
-
-  _saveCardinalValues(pulse);
-
-  const fl32 *iqChan0 = pulse.getIq0();
-  const fl32 *iqChan1 = pulse.getIq1();
-  bool isHoriz = pulse.isHoriz();
-
-  int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
-
-    double ii0 = iqChan0[index];
-    double qq0 = iqChan0[index + 1];
-
-    double ii1 = -9999;
-    double qq1 = -9999;
-    if (iqChan1) {
-      ii1 = iqChan1[index];
-      qq1 = iqChan1[index + 1];
-    }
-    _stats.addToAlternating(pulse, ii0, qq0, _haveChan1, ii1, qq1, isHoriz);
-
-  }
-
-}
-
-////////////////////////////////////////////
-// augment dual information
-
-void TsPrint::_addToDual(const IwrfTsPulse &pulse)
-
-{
-
-  _saveCardinalValues(pulse);
-
-  const fl32 *iqChan0 = pulse.getIq0();
-  const fl32 *iqChan1 = pulse.getIq1();
-  
-  int index = _startGate * 2;
-  for (int igate = _startGate; igate <= _endGate; igate++, index += 2) {
-    
-    double ii0 = iqChan0[index];
-    double qq0 = iqChan0[index + 1];
-
-    double ii1 = -9999;
-    double qq1 = -9999;
-    if (iqChan1) {
-      ii1 = iqChan1[index];
-      qq1 = iqChan1[index + 1];
-    }
-    _stats.addToDual(pulse, ii0, qq0, _haveChan1, ii1, qq1);
-
-  }
-
-}
-
-/////////////////////////
-// compute alternating stats
-
-void TsPrint::_computeAlternating()
-  
-{
-
-  _stats.computeAlternating(_haveChan1);
-
-}
-
-/////////////////////////
-// compute dual stats
-
-void TsPrint::_computeDual()
-  
-{
-
-  _stats.computeDual(_haveChan1);
-
-}
-
-////////////////////////////////////////////
 // augment ascope information
 
 void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
 
 {
 
-  _saveCardinalValues(pulse);
+  _saveMetaData(pulse);
   
   const fl32 *iqChan0 = pulse.getIq0();
   const fl32 *iqChan1 = pulse.getIq1();
@@ -1270,15 +1186,15 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       double qq0 = iqChan0[index + 1];
       double power0 = ii0 * ii0 + qq0 * qq0;
       power0 /= _rxGainHc;
-      _aStats[igate].sumPower0 += power0;
-      _aStats[igate].nn0++;
+      _ascopeStats[igate].sumPower0 += power0;
+      _ascopeStats[igate].nn0++;
     
       if (isHoriz) {
-        _aStats[igate].nnH++;
-        _aStats[igate].sumPowerHc += power0;
+        _ascopeStats[igate].nnH++;
+        _ascopeStats[igate].sumPowerHc += power0;
       } else {
-        _aStats[igate].nnV++;
-        _aStats[igate].sumPowerVc += power0;
+        _ascopeStats[igate].nnV++;
+        _ascopeStats[igate].sumPowerVc += power0;
       }
 
     } else {
@@ -1287,15 +1203,15 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       double qq0 = iqChan0[index + 1];
       double power0 = ii0 * ii0 + qq0 * qq0;
       power0 /= _rxGainHc;
-      _aStats[igate].sumPower0 += power0;
-      _aStats[igate].nn0++;
+      _ascopeStats[igate].sumPower0 += power0;
+      _ascopeStats[igate].nn0++;
     
       double ii1 = iqChan1[index];
       double qq1 = iqChan1[index + 1];
       double power1 = ii1 * ii1 + qq1 * qq1;
       power1 /= _rxGainVc;
-      _aStats[igate].sumPower1 += power1;
-      _aStats[igate].nn1++;
+      _ascopeStats[igate].sumPower1 += power1;
+      _ascopeStats[igate].nn1++;
 
       RadarComplex_t c0, c1;
       c0.re = ii0;
@@ -1305,17 +1221,17 @@ void TsPrint::_addToAscope(const IwrfTsPulse &pulse)
       RadarComplex_t prod = RadarComplex::conjugateProduct(c0, c1);
       
       if (isHoriz) {
-        _aStats[igate].nnH++;
-        _aStats[igate].sumPowerHc += power0;
-        _aStats[igate].sumPowerVx += power1;
-        _aStats[igate].sumConjProdH =
-          RadarComplex::complexSum(_aStats[igate].sumConjProdH, prod);
+        _ascopeStats[igate].nnH++;
+        _ascopeStats[igate].sumPowerHc += power0;
+        _ascopeStats[igate].sumPowerVx += power1;
+        _ascopeStats[igate].sumConjProdH =
+          RadarComplex::complexSum(_ascopeStats[igate].sumConjProdH, prod);
       } else {
-        _aStats[igate].nnV++;
-        _aStats[igate].sumPowerVc += power0;
-        _aStats[igate].sumPowerHx += power1;
-        _aStats[igate].sumConjProdV =
-          RadarComplex::complexSum(_aStats[igate].sumConjProdV, prod);
+        _ascopeStats[igate].nnV++;
+        _ascopeStats[igate].sumPowerVc += power0;
+        _ascopeStats[igate].sumPowerHx += power1;
+        _ascopeStats[igate].sumConjProdV =
+          RadarComplex::complexSum(_ascopeStats[igate].sumConjProdV, prod);
       }
 
     }
@@ -1331,7 +1247,7 @@ void TsPrint::_addToMaxPower(const IwrfTsPulse &pulse)
 
 {
 
-  _saveCardinalValues(pulse);
+  _saveMetaData(pulse);
   
   const fl32 *iqChan0 = pulse.getIq0();
   const fl32 *iqChan1 = pulse.getIq1();
@@ -1394,14 +1310,23 @@ bool TsPrint::_checkInfoChanged(const IwrfTsPulse &pulse)
 
   bool changed = false;
   if (iwrf_compare(scan, _scanPrev)) {
+    if (_params.print_info_on_change) {
+      cout << "# scan info changed" << endl;
+    }
     changed = true;
   }
   
   if (iwrf_compare(proc, _procPrev)) {
+    if (_params.print_info_on_change) {
+      cout << "# proc info changed" << endl;
+    }
     changed = true;
   }
   
   if (iwrf_compare(calib, _calibPrev)) {
+    if (_params.print_info_on_change) {
+      cout << "# calibration changed" << endl;
+    }
     changed = true;
   }
 
@@ -1439,7 +1364,7 @@ int TsPrint::_handleClient(Socket *sock)
     cerr << "-->> nSamples: " << _nSamples << endl;
     cerr << "-->> nGatesRequested: " << _nGatesRequested << endl;
     cerr << "-->> startGateRequested: " << _startGateRequested << endl;
-    cerr << "-->> dualChannel: " << _dualChannel << endl;
+    cerr << "-->> dualChannel: " << _haveChan1 << endl;
     cerr << "-->> fastAlternating: " << _fastAlternating << endl;
     cerr << "-->> labviewRequest: " << _labviewRequest << endl;
     cerr << "------------------------------------------------" << endl;
@@ -1474,8 +1399,6 @@ int TsPrint::_handleClient(Socket *sock)
     
     if (_fastAlternating) {
       _addToAlternating(*pulse);
-    } else if (_dualChannel) {
-      _addToDual(*pulse);
     } else {
       _addToSummary(*pulse);
     }
@@ -1490,13 +1413,7 @@ int TsPrint::_handleClient(Socket *sock)
       
   // compute stats
       
-  if (_fastAlternating) {
-    _computeAlternating();
-  } else if (_dualChannel) {
-    _computeDual();
-  } else {
-    _computeSummary();
-  }
+  _computeStats();
   
   // compile XML response
 
@@ -1692,11 +1609,11 @@ int TsPrint::_decodeCommands(string &xmlBuf)
     iret = -1;
   };
   
-  TaXml::readBoolean(xmlBuf, "dualChannel", _dualChannel);
+  TaXml::readBoolean(xmlBuf, "dualChannel", _haveChan1);
 
   TaXml::readBoolean(xmlBuf, "fastAlternating", _fastAlternating);
   if (_fastAlternating) {
-    _dualChannel = true;
+    _haveChan1 = true;
   }
 
   _labviewRequest = false;
@@ -1951,7 +1868,7 @@ void TsPrint::_printOpsInfo(ostream &out, const IwrfTsPulse *pulse)
 
   const IwrfTsInfo &info = _pulseReader->getOpsInfo();
   
-  out << "#";
+  out << "# ";
   out << info.get_radar_site_name() << ","
       << info.get_radar_name() << ","
       << info.get_radar_altitude_m() << ","
@@ -2069,35 +1986,14 @@ void TsPrint::_printSummaryHeading(ostream &out)
   
 {
 
-  out << "# SUMMARY MODE:" << endl;
-  out << "#   Start gate: " << _startGate << endl;
-  out << "#   N gates: " << _nGates << endl;
-  out << "#   N samples: " << _nSamples << endl;
+  if (_fastAlternating) {
+    out << "# ALTERNATING MODE:" << endl;
+  } else if (_haveChan1) {
+    out << "# DUAL CHANNEL MODE:" << endl;
+  } else {
+    out << "# SUMMARY MODE:" << endl;
+  }
 
-}
-
-////////////////////////////////////
-// print alternating heading labels
-
-void TsPrint::_printAlternatingHeading(ostream &out)
-  
-{
-
-  out << "# ALTERNATING MODE:" << endl;
-  out << "#   Start gate: " << _startGate << endl;
-  out << "#   N gates: " << _nGates << endl;
-  out << "#   N samples: " << _nSamples << endl;
-
-}
-
-/////////////////////////////////////
-// print dual channel heading labels
-
-void TsPrint::_printDualHeading(ostream &out)
-  
-{
-
-  out << "# DUAL CHANNEL MODE:" << endl;
   out << "#   Start gate: " << _startGate << endl;
   out << "#   N gates: " << _nGates << endl;
   out << "#   N samples: " << _nSamples << endl;
@@ -2111,12 +2007,31 @@ void TsPrint::_printSummaryLabels(ostream &out)
   
 {
 
-  if (_dualChannel) {
+  if (_fastAlternating) {
     out << "#                  "
-	<< "time           prf      el      az  dbmChan0  dbmChan1";
+        << "time           prf      el      az"
+        << "       Hc       Hx    Hcorr     Harg"
+        << "       Vc       Vx    Vcorr     Varg"
+        << "     IFD0     IFD1";
+  } else if (_haveChan1) {
+    out << "#                  "
+        << "time           prf      el      az"
+        << "       Hc    Hcorr     Harg"
+        << "       Vc    Vcorr     Varg"
+        << "     IFD0     IFD1";
   } else {
     out << "#                  "
-	<< "time           prf      el      az  dbmChan0";
+        << "time           prf      el      az     IFD0";
+  }
+  
+  if (_params.print_lag1_coherent_power) {
+    if (_fastAlternating) {
+      out << "   Lag1Hc   Lag1Hx   Lag1Vc   Lag1Vx";
+    } else if (_haveChan1) {
+      out << "   Lag1Hc   Lag1Vc";
+    } else {
+      out << "   Lag1Hc";
+    }
   }
 
   for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
@@ -2141,161 +2056,74 @@ void TsPrint::_printSummaryData(FILE *out)
   time_t midSecs = (time_t) _midTime;
   int midNanoSecs = (int) ((_midTime - midSecs) * 1.0e9 + 0.5);
   double prf = 1.0 / _midPrt;
-  const char *transStr = "";
-  if (_midTransition) {
-    transStr = " *";
-  }
 
-  if (_dualChannel) {
-    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f %9.3f%s",
-	    DateTime::stru(midSecs).c_str(),
-	    midNanoSecs,
-	    prf, _midEl, _midAz, _stats.meanDbm0, _stats.meanDbm1, transStr);
-  } else {
-    fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f %9.3f%s",
-	    DateTime::stru(midSecs).c_str(),
-	    midNanoSecs,
-	    prf, _midEl, _midAz, _stats.meanDbm0, transStr);
-  }
-  
-  for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
-    fprintf(out, "%12g", _extraColMeans[ii]);
-  }
-
-  fprintf(out, "\n");
-
-}
-
-/////////////////////////////////
-// print alternating labels
-
-void TsPrint::_printAlternatingLabels(ostream &out)
-  
-{
-
-  out << "#                  "
-      << "time           prf      el      az"
-      << "       Hc       Hx    Hcorr     Harg"
-      << "       Vc       Vx    Vcorr     Varg"
-      << "     IFD0     IFD1";
-  
-  for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
-    out << setw(12) << _extraColLabels[ii];
-  }
-
-  out << endl;
-
-}
-
-/////////////////////////////////
-// print dual labels
-
-void TsPrint::_printDualLabels(ostream &out)
-  
-{
-
-  out << "#                  "
-      << "time           prf      el      az"
-      << "       Hc    Hcorr     Harg"
-      << "       Vc    Vcorr     Varg"
-      << "     IFD0     IFD1";
-  
-  for (size_t ii = 0; ii < _extraColLabels.size(); ii++) {
-    out << setw(12) << _extraColLabels[ii];
-  }
-
-  out << endl;
-
-}
-
-/////////////////////////////////
-// print alternating data
-
-void TsPrint::_printAlternatingData(FILE *out)
-  
-{
-  
-  if (_params.debug) {
-    fprintf(out, "Current time: %s\n", DateTime::str().c_str());
-  }
-
-  time_t midSecs = (time_t) _midTime;
-  int midNanoSecs = (int) ((_midTime - midSecs) * 1.0e9 + 0.5);
-  double prf = 1.0 / _midPrt;
-  
-  const char *transStr = "";
-  if (_midTransition) {
-    transStr = " *";
-  }
-
-  fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f "
-          "%8.3f %8.3f %8.3f %8.3f "
-          "%8.3f %8.3f %8.3f %8.3f "
-          "%8.3f %8.3f%s",
+  fprintf(out,
+          "%s.%.9d %7.1f %7.2f %7.2f",
           DateTime::stru(midSecs).c_str(),
           midNanoSecs,
-          prf, _midEl, _midAz,
-          _stats.meanDbmHc,
-          _stats.meanDbmHx,
-          _stats.corrH,
-          _stats.argH,
-          _stats.meanDbmVc,
-          _stats.meanDbmVx,
-          _stats.corrV,
-          _stats.argV,
-          _stats.meanDbm0,
-          _stats.meanDbm1,
-          transStr);
+          prf, _midEl, _midAz);
+
+  if (_fastAlternating) {
+    fprintf(out,
+            " %8.3f %8.3f %8.3f %8.3f "
+            "%8.3f %8.3f %8.3f %8.3f "
+            "%8.3f %8.3f",
+            _stats.meanDbmHc,
+            _stats.meanDbmHx,
+            _stats.corrH,
+            _stats.argH,
+            _stats.meanDbmVc,
+            _stats.meanDbmVx,
+            _stats.corrV,
+            _stats.argV,
+            _stats.meanDbm0,
+            _stats.meanDbm1);
+  } else if (_haveChan1) {
+    fprintf(out,
+            " %8.3f %8.3f %8.3f "
+            "%8.3f %8.3f %8.3f "
+            "%8.3f %8.3f",
+            _stats.meanDbmHc,
+            _stats.corrH,
+            _stats.argH,
+            _stats.meanDbmVc,
+            _stats.corrV,
+            _stats.argV,
+            _stats.meanDbm0,
+            _stats.meanDbm1);
+  } else {
+    fprintf(out, " %8.3f",
+            _stats.meanDbm0);
+  }
+  
+  if (_params.print_lag1_coherent_power) {
+    if (_fastAlternating) {
+      fprintf(out,
+              " %8.3f %8.3f %8.3f %8.3f",
+              _stats.lag1DbmHc,
+              _stats.lag1DbmHx,
+              _stats.lag1DbmVc,
+              _stats.lag1DbmVx);
+    } else if (_haveChan1) {
+      fprintf(out,
+              " %8.3f %8.3f",
+              _stats.lag1DbmHc,
+              _stats.lag1DbmVc);
+    } else {
+      fprintf(out,
+              " %8.3f",
+              _stats.lag1DbmHc);
+    }
+  }
   
   for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
     fprintf(out, "%12g", _extraColMeans[ii]);
   }
 
-  fprintf(out, "\n");
-
-}
-
-/////////////////////////////////
-// print dual data
-
-void TsPrint::_printDualData(FILE *out)
-  
-{
-  
-  if (_params.debug) {
-    fprintf(out, "Current time: %s\n", DateTime::str().c_str());
-  }
-  
-  time_t midSecs = (time_t) _midTime;
-  int midNanoSecs = (int) ((_midTime - midSecs) * 1.0e9 + 0.5);
-  double prf = 1.0 / _midPrt;
-
-  const char *transStr = "";
   if (_midTransition) {
-    transStr = " *";
+    fprintf(out, " *");
   }
-
-  fprintf(out, "%s.%.9d %7.1f %7.2f %7.2f "
-          "%8.3f %8.3f %8.3f "
-          "%8.3f %8.3f %8.3f "
-          "%8.3f %8.3f%s",
-	  DateTime::stru(midSecs).c_str(),
-	  midNanoSecs,
-	  prf, _midEl, _midAz,
-          _stats.meanDbmHc,
-          _stats.corrH,
-          _stats.argH,
-          _stats.meanDbmVc,
-          _stats.corrV,
-          _stats.argV,
-	  _stats.meanDbm0,
-          _stats.meanDbm1,
-          transStr);
-          
-  for (size_t ii = 0; ii < _extraColMeans.size(); ii++) {
-    fprintf(out, "%12g", _extraColMeans[ii]);
-  }
-
+  
   fprintf(out, "\n");
 
 }
@@ -2321,7 +2149,7 @@ void TsPrint::_printMaxPowerLabels(ostream &out)
   
 {
   
-  if (_dualChannel) {
+  if (_haveChan1) {
     if (_params.distance_units == Params::DISTANCE_IN_METERS) {
       out << "#                  "
           << "time     prf      el       az maxDbm0  range0(m) maxDbm1  range1(m)";
@@ -2341,7 +2169,7 @@ void TsPrint::_printMaxPowerLabels(ostream &out)
 
   if (_params.print_radial_velocity) {
     out << "    vel0";
-    if (_dualChannel) {
+    if (_haveChan1) {
       out << "    vel1";
     }
   }
@@ -2561,7 +2389,7 @@ void TsPrint::_printMaxPowerData(FILE *out)
           _midEl, _midAz,
           10.0 * log10(_meanMaxPower0),
           _rangeToMaxPower0);
-  if (_dualChannel) {
+  if (_haveChan1) {
     fprintf(out, " %7.2f %10.0f",
             10.0 * log10(_meanMaxPower1),
             _rangeToMaxPower1);
@@ -2569,7 +2397,7 @@ void TsPrint::_printMaxPowerData(FILE *out)
 
   if (_params.print_radial_velocity) {
     fprintf(out, " %7.2f", _velAtMaxPower0);
-    if (_dualChannel) {
+    if (_haveChan1) {
       fprintf(out, " %7.2f", _velAtMaxPower1);
     }
   }

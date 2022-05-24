@@ -143,6 +143,8 @@ void RadarMoments::_init()
   _computeCpaUsingAlt = false;
 
   _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
+  _clutterWidthMps = 0.75;
+  _clutterInitNotchWidthMps = 1.5;
   _regrNotchEdgePwrRatioThresholdDb = -45;
   _regrMinCsrDb = -5;
   _regrInterpAcrossNotch = true;
@@ -4293,14 +4295,13 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
   double filteredPower = 0.0;
   double powerRemoved = 0.0;
 
-  double maxClutterVel = 1.0;
-  double initNotchWidth = 1.5;
   bool clutterFound = false;
   _notchStart = 0;
   _notchEnd = 0;
   
-  ClutFilter::performAdaptive(powerSpec, nSamples, maxClutterVel,
-                              initNotchWidth, _nyquist, calibratedNoise,
+  ClutFilter::performAdaptive(powerSpec, nSamples,
+                              _clutterWidthMps, _clutterInitNotchWidthMps,
+                              _nyquist, calibratedNoise,
                               false, clutterFound, powerSpecF,
                               _notchStart, _notchEnd,
                               rawPower, filteredPower,
@@ -4309,6 +4310,9 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 
   spectralNoise = _spectralNoise;
   spectralSnr = (spectralNoise - calibratedNoise) / calibratedNoise;
+  if (spectralSnr < 0) {
+    spectralSnr = 1.0e-99;
+  }
   filterRatio = rawPower / filteredPower;
   
   if (powerRemoved > 0) {
@@ -4701,12 +4705,11 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 
   } else {
 
-    double maxClutterVel = 1.0;
-    double initNotchWidth = 1.5;
     bool clutterFound = false;
     
-    ClutFilter::performAdaptive(powerSpec, nSamplesHalf, maxClutterVel,
-				initNotchWidth, nyquist, calibratedNoise,
+    ClutFilter::performAdaptive(powerSpec, nSamplesHalf,
+                                _clutterWidthMps, _clutterInitNotchWidthMps,
+				nyquist, calibratedNoise,
                                 true, clutterFound, powerSpecF,
 				_notchStart, _notchEnd,
 				rawPower, filteredPower,
@@ -5230,7 +5233,7 @@ void RadarMoments::_runRegressionFilter
       // compute the noise in the filtered spectrum, but not the notch
       
       double regrNoise =
-        ClutFilter::estimateSpectralNoise(startNonNotch, nUnfiltered);
+        ClutFilter::computeSpectralNoise(startNonNotch, nUnfiltered);
     
       // find the location of the max power in the filtered spectrum,
       // presumably the weather position
@@ -5299,9 +5302,7 @@ void RadarMoments::_runRegressionFilter
 
   // compute spectral noise value
   
-  double spectalNoiseSdev;
-  ClutFilter::computeSpectralNoise(regrSpec.data(), nSamples,
-                                   spectralNoise, spectalNoiseSdev);
+  spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamples);
   
   // compute SNR based on the spectral noise
 
@@ -5363,9 +5364,7 @@ void RadarMoments::_adjustRegressionFilter
 
   // compute spectral noise value
   
-  double spectalNoiseSdev;
-  ClutFilter::computeSpectralNoise(regrSpec, nSamples,
-                                   spectralNoise, spectalNoiseSdev);
+  spectralNoise = ClutFilter::computeSpectralNoise(regrSpec, nSamples);
   
   // compute SNR based on the spectral noise
 
@@ -6687,6 +6686,12 @@ void RadarMoments::initWindowTukey(double alpha, int nSamples, double *window)
       window[ii] = 0.5 * (1.0 + cos(M_PI * term1));
     } else {
       window[ii] = 1.0;
+    }
+  }
+
+  for (int ii = 0; ii < nSamples; ii++) {
+    if (window[ii] <= 0.0) {
+      window[ii] = 0.0001;
     }
   }
 

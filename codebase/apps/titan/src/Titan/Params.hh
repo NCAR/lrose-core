@@ -545,6 +545,12 @@ public:
 
   double convection_finder_min_texture_value;
 
+  double convection_finder_min_convectivity_for_convective;
+
+  double convection_finder_max_convectivity_for_stratiform;
+
+  int convection_finder_min_overlap_for_convective_clumps;
+
   tdrp_bool_t convection_finder_write_debug_files;
 
   char* convection_finder_output_url;
@@ -702,7 +708,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[151];
+  mutable TDRPtable _table[154];
 
   const char *_className;
 

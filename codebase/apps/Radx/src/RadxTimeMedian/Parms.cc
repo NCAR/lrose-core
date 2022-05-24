@@ -4,9 +4,36 @@
 
 //------------------------------------------------------------------
 #include "Parms.hh"
+#include "HeaderParams.hh"
 #include "Alg.hh"
 #include <toolsa/LogStream.hh>
 #include <vector>
+
+const std::string Parms::_volInitStr = "VolInit";
+const std::string Parms::_volFinishStr = "VolFinish";
+const std::string Parms::_histoAccumStr = "AccumulateHisto";
+const std::string Parms::_initStatus = "statusInit";
+const std::string Parms::_finishStatus = "statusFinish";
+
+static std::string _noArgsFilter(const std::string &lhs, const std::string &func)
+{
+  string ret = lhs;
+  ret = ret + " = ";
+  ret = ret + func;
+  ret = ret + "()";
+  return ret;
+}
+
+static std::string _oneArgFilter(const std::string &lhs, const std::string &func, const std::string &arg)
+{
+  string ret = lhs;
+  ret = ret + " = ";
+  ret = ret + func;
+  ret = ret + "(";
+  ret = ret + arg;
+  ret = ret + ")";
+  return ret;
+}
 
 //------------------------------------------------------------------
 Parms::Parms() : RadxAppParms(), Params()
@@ -83,8 +110,10 @@ Parms::~Parms()
 //------------------------------------------------------------------
 void Parms::printParams(tdrp_print_mode_t printMode)
 {
-  Params::print(stdout, printMode);
+  HeaderParams h;
+  h.print(stdout, printMode);
   RadxAppParms::printParams(printMode);
+  Params::print(stdout, printMode);
 }
 
 //------------------------------------------------------------------
@@ -104,38 +133,21 @@ void Parms::printOperators(void) const
 void Parms::setFiltersFromParms(void)
 {
   _fixedConstants.clear();
-  for (int i=0; i<fixed_const_n; ++i)
-  {
-    _fixedConstants.push_back(_fixed_const[i]);
-  }
-  
   _userData.clear();
-  for (int i=0; i<user_data_n; ++i)
-  {
-    _userData.push_back(_user_data[i]);
-  }
-  
   _volumeBeforeFilters.clear();
-  for (int i=0; i<volume_before_filter_n; ++i)
-  {
-    _volumeBeforeFilters.push_back(_volume_before_filter[i]);
-  }
-  
   _sweepFilters.clear();
-  for (int i=0; i<sweep_filter_n; ++i)
-  {
-    _sweepFilters.push_back(_sweep_filter[i]);
-  }
-  
   _rayFilters.clear();
-  for (int i=0; i<ray_filter_n; ++i)
-  {
-    _rayFilters.push_back(_ray_filter[i]);
-  }
-  
   _volumeAfterFilters.clear();
-  for (int i=0; i<volume_after_filter_n; ++i)
-  {
-    _volumeAfterFilters.push_back(_volume_after_filter[i]);
-  }
+
+  _userData.push_back(_initStatus);
+  _userData.push_back(_finishStatus);
+  string appVolumeBeforeFilter = _noArgsFilter(_initStatus, _volInitStr);
+  string appVolumeAfterFilter = _noArgsFilter(_finishStatus, _volFinishStr);
+  _volumeBeforeFilters.push_back(appVolumeBeforeFilter);
+  _volumeAfterFilters.push_back(appVolumeAfterFilter);
+  string rayFilter = _oneArgFilter("HistoData", _histoAccumStr, input_field);
+  _rayFilters.push_back(rayFilter);
+  LOG(DEBUG) << "Volume before:    " << appVolumeBeforeFilter;
+  LOG(DEBUG) << "Ray filter   :    " << rayFilter;
+  LOG(DEBUG) << "Volume after:     " << appVolumeAfterFilter;
 }

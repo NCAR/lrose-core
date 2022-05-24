@@ -24,14 +24,14 @@
 //////////////////////////////////////////////////////////////////////
 // parameter definitions for ProSensing2Dsr
 //
-// Mike Dixon, RAP, NCAR,
+// Mike Dixon, EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
 //
 // April 2012
 
 commentdef {
   p_header = "Program name: ProSensing2Dsr";
-  p_text = "ProSensing2Dsr reads radar data from the ProSensing xpold server over a socket and writes the data to a DsRadarQueue beam by beam.";
+  p_text = "ProSensing2Dsr reads radar data from the ProSensing xpold server over a socket and writes the data to a DsRadarQueue beam by beam. Mike Dixon, EOL, NCAR, Boulder, CO, USA.";
 }
 
 commentdef {
@@ -58,17 +58,17 @@ commentdef {
   p_header = "DATA INPUT";
 }
 
-paramdef string {
-  p_default = "drx";
-  p_descr = "Host running the xpold server.";
-  p_help = "Communication with xpold is via TCP.";
-} xpold_host;
-
 paramdef int {
   p_default = 3000;
   p_descr = "Port for xpold server.";
   p_help = "Communication with xpold is via TCP.";
 } xpold_port;
+
+paramdef string {
+  p_default = "drx";
+  p_descr = "Host running the xpold server.";
+  p_help = "Communication with xpold is via TCP.";
+} xpold_host;
 
 commentdef {
   p_header = "RADAR CALIBRATION";

@@ -559,116 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter - parameters for setting clutter locations of one input field.");
-    tt->comment_text = tdrpStrDup("Based on paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston: A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.\n");
-    tt++;
-    
-    // Parameter 'fixed_const'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("fixed_const");
-    tt->descr = tdrpStrDup("Fixed constant strings that are interpreted by user functions");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_fixed_const - &_start_;
-    tt->array_n_offset = (char *) &fixed_const_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'user_data'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("user_data");
-    tt->descr = tdrpStrDup("Non gridded data names");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_user_data - &_start_;
-    tt->array_n_offset = (char *) &user_data_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'volume_before_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_before_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply before doing ray filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_before_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_before_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'sweep_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sweep_filter");
-    tt->descr = tdrpStrDup("Sweep filters to apply");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_sweep_filter - &_start_;
-    tt->array_n_offset = (char *) &sweep_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'ray_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("ray_filter");
-    tt->descr = tdrpStrDup("Single ray Filters to apply");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_ray_filter - &_start_;
-    tt->array_n_offset = (char *) &ray_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'volume_after_filter'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("volume_after_filter");
-    tt->descr = tdrpStrDup("Volume Filters to apply after doing ray filters");
-    tt->help = tdrpStrDup("");
-    tt->array_offset = (char *) &_volume_after_filter - &_start_;
-    tt->array_n_offset = (char *) &volume_after_filter_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter Algorithm Specific paramters");
+    tt->comment_text = tdrpStrDup("tbd");
     tt++;
     
     // Parameter 'input_field'
@@ -680,7 +572,7 @@
     tt->descr = tdrpStrDup("input field name");
     tt->help = tdrpStrDup("name of field to find clutter in");
     tt->val_offset = (char *) &input_field - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("DBMVC");
     tt++;
     
     // Parameter 'output_field'
@@ -692,7 +584,7 @@
     tt->descr = tdrpStrDup("output field name");
     tt->help = tdrpStrDup("name to give final output clutter field");
     tt->val_offset = (char *) &output_field - &_start_;
-    tt->single_val.s = tdrpStrDup("clutter");
+    tt->single_val.s = tdrpStrDup("DBMVC");
     tt++;
     
     // Parameter 'threshold'
@@ -704,7 +596,7 @@
     tt->descr = tdrpStrDup("threshold");
     tt->help = tdrpStrDup("If data is always above this value it is a clutter location");
     tt->val_offset = (char *) &threshold - &_start_;
-    tt->single_val.d = 0;
+    tt->single_val.d = -95;
     tt++;
     
     // Parameter 'clutter_percentile'
@@ -732,9 +624,10 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
-    tt->array_n = 0;
+    tt->array_n = 1;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.5;
     tt++;
     
     // Parameter 'azToleranceDegrees'
@@ -782,7 +675,7 @@
     tt->descr = tdrpStrDup("location for main output");
     tt->help = tdrpStrDup("see diagnostic_output description");
     tt->val_offset = (char *) &final_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("/d1/fieldData/rsfdata/clutter_final/sband/sur");
     tt++;
     
     // Parameter 'output_ascii_path'
@@ -794,7 +687,7 @@
     tt->descr = tdrpStrDup("Output ascii file path in which to write plottables");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_ascii_path - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
+    tt->single_val.s = tdrpStrDup("/d1/fieldData/rsfdata/projects/clutter");
     tt++;
     
     // Parameter 'missing_clutter_value'
@@ -806,7 +699,7 @@
     tt->descr = tdrpStrDup("missing clutter value");
     tt->help = tdrpStrDup("value to give clutter estimates when the wanted percentile is the missing data value");
     tt->val_offset = (char *) &missing_clutter_value - &_start_;
-    tt->single_val.d = -25;
+    tt->single_val.d = -115;
     tt++;
     
     // Parameter 'threshold_tolerance'
@@ -830,7 +723,7 @@
     tt->descr = tdrpStrDup("Maximum percent of pixels that can change for convergence");
     tt->help = tdrpStrDup("The percentage of pixels that change from clutter to nonclutter or back should decrease to a minimum for convergence");
     tt->val_offset = (char *) &maximum_percent_change - &_start_;
-    tt->single_val.d = 0.001;
+    tt->single_val.d = 0.02;
     tt++;
     
     // Parameter 'minimum_stable_volumes'

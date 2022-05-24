@@ -93,7 +93,7 @@ static int
   snd_command (char *cmd)
 
 {
-  register int cmdlen;
+  int cmdlen;
   void (*pipe_handler) ();
 
   /* Save the current pipe handler and try to make the request.  */

@@ -1,0 +1,538 @@
+/**********************************************************************
+ * TDRP params for ./StormModel
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "Test";
+
+///////////// nstorms_gen /////////////////////////////
+//
+// Number of storms generated.
+//
+// StormModel generates a number of artificial storms. This is the 
+//   number generated.
+//
+//
+// Type: int
+//
+
+nstorms_gen = 10000;
+
+///////////// random_seed /////////////////////////////
+//
+// Seed for random number generator.
+//
+// If -1, unix time is used as the seed.
+//
+//
+// Type: int
+//
+
+random_seed = -1;
+
+///////////// event_dur_gamma /////////////////////////
+//
+// Gamma distribution parameters for duration of events.
+//
+// This distribution is used to generate the duration of the event 
+//   periods.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double shape;
+//      double scale;
+//   }
+//
+//
+
+event_dur_gamma = {
+    shape = 0,
+    scale = 0
+};
+
+///////////// event_start_tod_hist ////////////////////
+//
+// Density histogram for time-of-day of start of events.
+//
+// This histogram is used to construct a PDF from which to sample the 
+//   start tod. The values are in hours (for time) and density (for 
+//   probability).
+//
+//
+// Type: struct
+//   typedef struct {
+//      double time;
+//      double prob;
+//   }
+//
+// 1D array - variable length.
+//
+
+event_start_tod_hist = {
+  {
+    time = 0,
+    prob = 0
+  }
+};
+
+///////////// event_gap_gamma /////////////////////////
+//
+// Gamma distribution parameters for event gap.
+//
+// Event gap is the number of hours between end of one event period and 
+//   the start of the next. It is gamma distributed.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double shape;
+//      double scale;
+//   }
+//
+//
+
+event_gap_gamma = {
+    shape = 0,
+    scale = 0
+};
+
+///////////// event_gap_min ///////////////////////////
+//
+// Minimum event gap (hr).
+//
+// This is the minimum event gap. It corresponds to the value of 
+//   event_gap_max for the program TimeProps. Any gap less than this time 
+//   is not considered a gap in event, but rather a temporary lull.
+//
+//
+// Type: double
+//
+
+event_gap_min = 3;
+
+///////////// ln_storm_start_gap_norm /////////////////
+//
+// Normal distribution parameters for ln of storm start gap.
+//
+// Storm start gap is the number of hours between the start of one storm 
+//   in an event and the start of the next storm. It is lognormally 
+//   distributed.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double mean;
+//      double sdev;
+//   }
+//
+//
+
+ln_storm_start_gap_norm = {
+    mean = 0,
+    sdev = 0
+};
+
+///////////// storm_start_gap_min /////////////////////
+//
+// Minimum storm start gap (hr).
+//
+// This is the minimum storm start gap. It is set non-zero to prevent 
+//   large numbers of very small start gaps.
+//
+// Maximum val: 0.1
+//
+// Type: double
+//
+
+storm_start_gap_min = 0.05;
+
+///////////// Dm_gamma ////////////////////////////////
+//
+// 3-param Gamma distribution parameters for Dm variate.
+//
+// Dm is the Duration Measure. It is effectively the 'standard 
+//   deviation' of the storm Area-time curve when fitted with a Gaussian.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double shape;
+//      double scale;
+//      double lbound;
+//   }
+//
+//
+
+Dm_gamma = {
+    shape = 0,
+    scale = 0,
+    lbound = 0
+};
+
+///////////// min_duration ////////////////////////////
+//
+// Minimum track duration (hrs).
+//
+// This should match the min_duration value in TrackProps. Note however 
+//   that TrackProps uses secs for units.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+min_duration = 0.5;
+
+///////////// max_duration ////////////////////////////
+//
+// Maximum track duration (hrs).
+//
+// This is the maximum allowable duration. If a longer duration is 
+//   generated it is rejected and the process repeated.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+max_duration = 8;
+
+///////////// max_lnA /////////////////////////////////
+//
+// Maximum log of mean area.
+//
+// This is the maximum allowable lnA. If a greater lnA is generated it 
+//   is rejected and the process repeated.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+max_lnA = 9;
+
+///////////// lnA_vs_Dm ///////////////////////////////
+//
+// Correlation and distribution parameters for ln(A) as a function of 
+//   Dm.
+//
+// The conditional distribution of ln(A), given Dm, is a 3-parameter 
+//   gamma. The lnA_vs_Dm array gives the shape, scale and min values for 
+//   the gamma distribution of ln(A) for set values of Dm. The values for 
+//   an actual Dm are interpolated from this array.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double Dm;
+//      double shape;
+//      double scale;
+//      double lbound;
+//   }
+//
+// 1D array - variable length.
+//
+
+lnA_vs_Dm = {
+  {
+    Dm = 0,
+    shape = 0,
+    scale = 0,
+    lbound = 0
+  }
+};
+
+///////////// area_threshold //////////////////////////
+//
+// Area threshold (km2).
+//
+// This area is used to compute storm duration form the Gaussian which 
+//   relates a(t) = f(A, Dm, t).
+//
+//
+// Type: double
+//
+
+area_threshold = 10;
+
+///////////// dBZmax_vs_Dm ////////////////////////////
+//
+// Correlation and distribution parameters for dBZmax as a function of 
+//   Dm.
+//
+// The conditional distribution of dbzMax, given Dm, is normal. The 
+//   dBZmax_vs_Dm array gives the mean and standard deviation values for 
+//   dbzMax for set values of Dm. The values for an actual Dm are 
+//   interpolated from this array.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double Dm;
+//      double mean;
+//      double sdev;
+//   }
+//
+// 1D array - variable length.
+//
+
+dBZmax_vs_Dm = {
+  {
+    Dm = 0,
+    mean = 0,
+    sdev = 0
+  }
+};
+
+///////////// scan_interval ///////////////////////////
+//
+// Radar vol scan interval (secs).
+//
+// Interval between radar volume scans (secs). Used to compute the 
+//   number of scans for a generated storm.
+//
+// Minimum val: 0
+// Maximum val: 1800
+//
+// Type: double
+//
+
+scan_interval = 360;
+
+///////////// dbz_threshold ///////////////////////////
+//
+// Lower dBZ threshold.
+//
+// This value is added to the dbzMax values (which are relative to the 
+//   threshold) to produce the dbzMax.
+//
+// Minimum val: -30
+// Maximum val: 80
+//
+// Type: double
+//
+
+dbz_threshold = 35;
+
+///////////// mid_point_file_path /////////////////////
+//
+// MDV file path for start point data.
+//
+// The model uses this data for randomly selecting storm start points.
+//
+//
+// Type: string
+//
+
+mid_point_file_path = "none";
+
+///////////// mid_point_field_num /////////////////////
+//
+// Field number for mid_point data in MDV file.
+//
+// See mid_point_file_path.
+//
+//
+// Type: int
+//
+
+mid_point_field_num = 0;
+
+///////////// mid_point_sdev //////////////////////////
+//
+// Standard deviation for start point location.
+//
+// First a mid_point is generated from the MDV cumulative density 
+//   function for mid_point data. Then the position is varied randomly in 
+//   x and y by assuming a normal spread with this sdev.
+//
+//
+// Type: double
+//
+
+mid_point_sdev = 10;
+
+///////////// duration_file_path //////////////////////
+//
+// MDV file path for duration data.
+//
+// The model uses this data for generating storm duration. A duration is 
+//   generated from the Gamma distribution, and the result is scaled by 
+//   the duration at the point over the mean duration for the entire grid.
+//
+//
+// Type: string
+//
+
+duration_file_path = "none";
+
+///////////// duration_field_num //////////////////////
+//
+// Field number for duration data in MDV file.
+//
+// See duration_file_path.
+//
+//
+// Type: int
+//
+
+duration_field_num = 0;
+
+///////////// ln_area_file_path ///////////////////////
+//
+// MDV file path for ln(area) data.
+//
+// The model uses this data for generating storm area. ln(area) is 
+//   generated from a gamma distribution conditioned on the Dm 
+//   variable.The result is scaled by the ratio of ln(area) at the point 
+//   over the mean for the entire grid.
+//
+//
+// Type: string
+//
+
+ln_area_file_path = "none";
+
+///////////// ln_area_field_num ///////////////////////
+//
+// Field number for ln area data in MDV file.
+//
+// See ln_area_file_path.
+//
+//
+// Type: int
+//
+
+ln_area_field_num = 0;
+
+///////////// velocity_file_path //////////////////////
+//
+// MDV file path for mean U and V data.
+//
+// For a given point, selected from the mid_point array, the mean U and 
+//   V data is determined. Then, the model U and V is selected using these 
+//   mean values, and the area-wide standard deviations of the U and V 
+//   fields.
+//
+//
+// Type: string
+//
+
+velocity_file_path = "none";
+
+///////////// u_mean_field_num ////////////////////////
+//
+// Field number for mean U data in MDV file.
+//
+// See velocity_file_path.
+//
+//
+// Type: int
+//
+
+u_mean_field_num = 0;
+
+///////////// v_mean_field_num ////////////////////////
+//
+// Field number for mean V data in MDV file.
+//
+// See velocity_file_path.
+//
+//
+// Type: int
+//
+
+v_mean_field_num = 0;
+
+///////////// u_sdev //////////////////////////////////
+//
+// Standard deviation for U data.
+//
+// See velocity_file_path.
+//
+//
+// Type: double
+//
+
+u_sdev = 0;
+
+///////////// v_sdev //////////////////////////////////
+//
+// Standard deviation for V data.
+//
+// See velocity_file_path.
+//
+//
+// Type: double
+//
+
+v_sdev = 0;
+
+///////////// ln_ellipse_ratio_norm ///////////////////
+//
+// Normal distribution parameters for ln of ellipse ratio.
+//
+// Ellipse ratio is the aspect ratio (major radius / minor radius) of 
+//   the ellipse fitted to the storm shape. It is lognormally distributed.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double mean;
+//      double sdev;
+//   }
+//
+//
+
+ln_ellipse_ratio_norm = {
+    mean = 0,
+    sdev = 0
+};
+
+///////////// ellipse_orientation_norm ////////////////
+//
+// Normal distribution parameters for ellipse orientation.
+//
+// Ellipse orientation is the orientation relative to TN  of the ellipse 
+//   fitted to the storm shape. It is normally distributed.
+//
+//
+// Type: struct
+//   typedef struct {
+//      double mean;
+//      double sdev;
+//   }
+//
+//
+
+ellipse_orientation_norm = {
+    mean = 0,
+    sdev = 0
+};
+

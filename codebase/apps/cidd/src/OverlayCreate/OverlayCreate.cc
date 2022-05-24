@@ -37,8 +37,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "OverlayCreate.h"
-#include "Circle.h"
+#include "OverlayCreate.hh"
+#include "Circle.hh"
 #include <toolsa/str.h>
 using namespace std;
 
@@ -49,53 +49,31 @@ OverlayCreate::OverlayCreate(int argc, char **argv)
 {
 
   OK = TRUE;
-  Done = FALSE;
-
+  
   // set programe name
 
-  _progName = STRdup("OverlayCreate");
-  ucopyright(_progName);
+  _progName = "OverlayCreate";
+  ucopyright(_progName.c_str());
 
-  // get command line args
-
-  _args = new Args(argc, argv, _progName);
-  if (!_args->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with command line args\n");
-    OK = FALSE;
-    return;
-  }
-  if (_args->Done) {
-    Done = TRUE;
+  // parse args
+  
+  if (_args.parse(argc, argv, _progName)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with command line args" << endl;
+    OK = false;
     return;
   }
 
   // get TDRP params
-
-  _Params = new Params(_args->paramsFilePath,
-		       &_args->override,
-		       _progName,
-		       _args->checkParams,
-		       _args->printParams,
-		       _args->printShort);
   
-  if (!_Params->OK) {
-    fprintf(stderr, "ERROR: %s\n", _progName);
-    fprintf(stderr, "Problem with TDRP parameters\n");
-    OK = FALSE;
+  _paramsPath = (char *) "unknown";
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
+    cerr << "ERROR: " << _progName << endl;
+    cerr << "Problem with TDRP parameters" << endl;
+    OK = false;
     return;
   }
-  if (_Params->Done) {
-    Done = TRUE;
-    return;
-  }
-  _params = &_Params->p;
-
-  if (!OK) {
-    return;
-  }
-
-  return;
 
 }
 
@@ -105,11 +83,6 @@ OverlayCreate::~OverlayCreate()
 
 {
 
-  // free up
-
-  delete(_params);
-  delete(_args);
-  STRfree(_progName);
 
 }
 
@@ -119,18 +92,18 @@ OverlayCreate::~OverlayCreate()
 int OverlayCreate::Run ()
 {
 
-  Circle *circ = new Circle(_progName,
+  Circle *circ = new Circle(_progName.c_str(),
 			    _params,
-			    _params->circle_lat,
-			    _params->circle_lon,
-			    _params->circle_radius,
-			    _params->circle_npoints);
+			    _params.circle_lat,
+			    _params.circle_lon,
+			    _params.circle_radius,
+			    _params.circle_npoints);
 
   circ->compute();
   circ->write();
-  delete (circ);
+  delete circ;
 
-  return (0);
+  return 0;
 
 }
 

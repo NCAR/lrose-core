@@ -138,6 +138,7 @@ public:
     double merge_scale;
     double merge_bias;
     encoding_t output_encoding;
+    tdrp_bool_t compute_composite;
   } merge_field_t;
 
   typedef struct {
@@ -549,6 +550,8 @@ public:
 
   output_compression_t output_compression;
 
+  tdrp_bool_t output_composite;
+
   char* output_data_set_name;
 
   char* output_data_set_source;
@@ -565,7 +568,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[44];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

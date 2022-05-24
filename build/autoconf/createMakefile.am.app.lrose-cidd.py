@@ -6,10 +6,12 @@
 #
 #===========================================================================
 
+from __future__ import print_function
 import os
 import sys
 import shutil
 import subprocess
+import platform
 from optparse import OptionParser
 from datetime import datetime
 
@@ -22,19 +24,25 @@ def main():
 
     global options
     global thisAppName
-    global makefileName
     global compileFileList
     global headerFileList
-    global includeList
     global linkOrder
     global compiledLibList
     global orderedLibList
     global makefileLibList
     global loadLibList
     global needQt
+    global isDebianBased
 
     global thisScriptName
     thisScriptName = os.path.basename(__file__)
+
+    osType = getOsType()
+    isDebianBased = False
+    if (osType == "debian"):
+        isDebianBased = True
+    if (osType == "ubuntu"):
+        isDebianBased = True
 
     # parse the command line
 
@@ -42,91 +50,73 @@ def main():
     homeDir = os.environ['HOME']
     parser = OptionParser(usage)
     parser.add_option('--debug',
-                      dest='debug', default='False',
+                      dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
     parser.add_option('--verbose',
-                      dest='verbose', default='False',
+                      dest='verbose', default=False,
                       action="store_true",
                       help='Set verbose debugging on')
     parser.add_option('--osx',
-                      dest='osx', default='False',
+                      dest='osx', default=False,
                       action="store_true",
                       help='Configure for MAC OSX')
     parser.add_option('--dir',
                       dest='dir', default=".",
                       help='Path of app directory')
+    parser.add_option('--template',
+                      dest='template', default="unknown",
+                      help='Path of makefile template')
     parser.add_option('--libList',
                       dest='libList', default="",
                       help='List of libs in package')
 
     (options, args) = parser.parse_args()
 
-    if (options.verbose == True):
+    if (options.verbose):
         options.debug = True
     
     # get the app name
 
     pathParts = options.dir.split('/')
 
-    if (options.debug == True):
-        print >>sys.stderr, "Running %s:" % thisScriptName
-        print >>sys.stderr, "  App dir:", options.dir
-        print >>sys.stderr, "  Lib list: ", options.libList
-        print >>sys.stderr, "  osx: ", options.osx
+    if (options.debug):
+        print("Running %s:" % thisScriptName, file=sys.stderr)
+        print("  App dir:", options.dir, file=sys.stderr)
+        print("  Makefile template: ", options.template, file=sys.stderr)
+        print("  Lib list: ", options.libList, file=sys.stderr)
+        print("  osx: ", options.osx, file=sys.stderr)
 
     # go to the app dir
 
     os.chdir(options.dir)
 
-    # get makefile name in use
-    # makefile has preference over Makefile
-
-    makefileName = '__makefile.template'
-    if (os.path.exists(makefileName) == False):
-        makefileName = 'makefile'
-        if (os.path.exists(makefileName) == False):
-            makefileName = 'Makefile'
-            if (os.path.exists(makefileName) == False):
-                print >>sys.stderr, "ERROR - ", thisScriptName
-                print >>sys.stderr, "  Cannot find makefile or Makefile"
-                print >>sys.stderr, "  dir: ", options.dir
-                exit(1)
-
-    # copy makefile in case we rerun this script
-
-    if (makefileName != "__makefile.template"):
-        shutil.copy(makefileName, "__makefile.template")
-
-    if (options.debug == True):
-        print >>sys.stderr, "-->> using makefile template: ", makefileName
-
-    # parse the RAL Makefile to get the app name
+    # parse the LROSE Makefile to get the app name
 
     getAppName()
-    if (options.debug == True):
-        print >>sys.stderr, "thisAppName: %s" % thisAppName
+    if (options.debug):
+        print("thisAppName: %s" % thisAppName, file=sys.stderr)
 
     # load list of files to be compiled
 
     compileFileList = []
     setCompileList()
 
-    if (options.debug == True):
-        print >>sys.stderr, "======================="
+    if (options.debug):
+        print("=======================", file=sys.stderr)
         for compileFile in compileFileList:
-            print >>sys.stderr, "  compileFile: %s" % (compileFile)
-        print >>sys.stderr, "======================="
+            print("  compileFile: %s" % (compileFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
 
     # set list of header files
 
     headerFileList = []
     setHeaderFileList()
-    if (options.debug == True):
-        print >>sys.stderr, "======================="
+    if (options.debug):
+        print("=======================", file=sys.stderr)
         for headerFile in headerFileList:
-            print >>sys.stderr, "  headerFile: %s" % (headerFile)
-        print >>sys.stderr, "======================="
+            print("  headerFile: %s" % (headerFile), file=sys.stderr)
+        print("=======================", file=sys.stderr)
             
     # get list showing order in which compiled libs need to be linked
 
@@ -146,35 +136,41 @@ def main():
         if (entry in compiledLibList):
             orderedLibList.append(entry)
     # orderedLibList.reverse()
-    if (options.debug == True):
-        print >>sys.stderr, "======== ordered lib list ==================="
+    if (options.debug):
+        print("======== ordered lib list ===================",
+              file=sys.stderr)
         for lib in orderedLibList:
-            print >>sys.stderr, "  ordered lib: %s" % lib
-        print >>sys.stderr, "============================================="
+            print("  ordered lib: %s" % lib, file=sys.stderr)
+        print("=============================================",
+              file=sys.stderr)
 
     # get list of libs listed in makefile
 
     makefileLibList = getMakefileLibList()
-    if (options.debug == True):
-        print >>sys.stderr, "========= makefile lib list =============="
+    if (options.debug):
+        print("========= makefile lib list ==============",
+              file=sys.stderr)
         for lib in makefileLibList:
-            print >>sys.stderr, "  makefile lib: %s" % lib
-        print >>sys.stderr, "=========================================="
+            print("  makefile lib: %s" % lib, file=sys.stderr)
+        print("==========================================",
+              file=sys.stderr)
+
+    # check if we need Qt support
+
+    needQt = checkForQt()
 
     # set list of libs to be loaded
     # this will be the ordered lib list, plus any libs from the makefile
     # that are not included in the ordered libs
 
     loadLibList = getLoadLibList()
-    if (options.debug == True):
-        print >>sys.stderr, "======= load lib list ================"
+    if (options.debug):
+        print("======= load lib list ================",
+              file=sys.stderr)
         for lib in loadLibList:
-            print >>sys.stderr, "  load lib: -l%s" % lib
-        print >>sys.stderr, "======================================"
-
-    # check if we need Qt support
-
-    needQt = checkForQt()
+            print("  load lib: -l%s" % lib, file=sys.stderr)
+        print("======================================",
+              file=sys.stderr)
 
     # write out makefile.am
             
@@ -197,9 +193,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open file:", path
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open file:", path, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         return valueList
 
     lines = fp.readlines()
@@ -216,7 +212,7 @@ def getValueListForKey(path, key):
             multiLine = multiLine + line
             if (line.find("\\") < 0):
                 break;
-        elif (foundKey == True):
+        elif (foundKey):
             if (line[0] == '#'):
                 break
             if (len(line) < 2):
@@ -243,7 +239,7 @@ def getValueListForKey(path, key):
     return valueList
 
 ########################################################################
-# parse the RAL Makefile to get the app name
+# parse the LROSE Makefile to get the app name
 
 def getAppName():
 
@@ -251,12 +247,12 @@ def getAppName():
 
     # search for TARGET_FILE key in makefile
 
-    valList = getValueListForKey(makefileName, "TARGET_FILE")
+    valList = getValueListForKey(options.template, "TARGET_FILE")
 
     if (len(valList) < 1):
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot find TARGET_FILE in ", makefileName
-        print >>sys.stderr, "  dir: ", options.dir
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot find TARGET_FILE in ", options.template, file=sys.stderr)
+        print("  dir: ", options.dir, file=sys.stderr)
         exit(1)
 
     thisAppName = valList[len(valList)-1]
@@ -275,10 +271,10 @@ def setCompileList():
                     'NORM_SRCS', 'MOC_SRCS', "MOC_OUTPUT" ]
 
     try:
-        fp = open(makefileName, 'r')
+        fp = open(options.template, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open: ", makefileName
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", options.template, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -293,10 +289,10 @@ def setCompileList():
 def checkForQt():
                     
     try:
-        fp = open(makefileName, 'r')
+        fp = open(options.template, 'r')
     except IOError as e:
-        print >>sys.stderr, "ERROR - ", thisScriptName
-        print >>sys.stderr, "  Cannot open: ", makefileName
+        print("ERROR - ", thisScriptName, file=sys.stderr)
+        print("  Cannot open: ", options.template, file=sys.stderr)
         exit(1)
 
     lines = fp.readlines()
@@ -379,40 +375,6 @@ def setHeaderFileList():
             headerFileList.append(fileName)
 
 ########################################################################
-# set the list of libs to be used for include
-
-def setIncludeList(sourceFile):
-                    
-    global includeList
-    
-    if (options.verbose == True):
-        print >>sys.stderr, "-->> looking for includes in:", sourceFile
-
-    fp = open(sourceFile, 'r')
-    lines = fp.readlines()
-    
-    for line in lines:
-        if ((line[0] != '#') or
-            (line.find("include") < 0) or
-            (line.find("/") < 0) or
-            (line.find("<") < 0) or
-            (line.find(">") < 0)):
-            continue
-
-        if (options.verbose == True):
-            print >>sys.stderr, "  -->> ", line.strip()
-        
-        for lib in includeList:
-            if (lib.name == thisAppName):
-                # skip this lib
-                continue
-            searchStr = "<%s/" % lib.name
-            if (line.find(searchStr) > 0):
-                if (options.verbose == True):
-                    print >>sys.stderr, "  -->> found lib", lib.name
-                lib.used = True
-            
-########################################################################
 # get link order for libraries
 
 def getLibLinkOrder():
@@ -454,7 +416,7 @@ def getMakefileLibList():
 
     # search for LOC_LIBS key in makefile
 
-    locLibs = getValueListForKey(makefileName, "LOC_LIBS")
+    locLibs = getValueListForKey(options.template, "LOC_LIBS")
     if (len(locLibs) > 0):
         for line in locLibs:
             makeLibList.extend(decodeLibLine(line))
@@ -476,9 +438,7 @@ def decodeLibLine(line):
         elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
               (thisTok.find("NETCDF_LIBS") >= 0)):
             libs.append("Ncxx")
-            # libs.append("netcdf_c++")
             libs.append("netcdf")
-            libs.append("hdf5_cpp")
             libs.append("hdf5_hl")
             libs.append("hdf5")
             libs.append("z")
@@ -515,9 +475,7 @@ def getLoadLibList():
     # extend the lib list with required standard libs
     
     extendLibs = [ 'Ncxx',
-                   # 'netcdf_c++',
                    'netcdf',
-                   'hdf5_cpp',
                    'hdf5_hl',
                    'hdf5',
                    # 'expat',
@@ -557,14 +515,19 @@ def writeMakefileAm():
     fo.write("###############################################\n")
     fo.write("\n")
 
-    fo.write("# compile flags - includes\n")
+    fo.write("# compile flags\n")
     fo.write("\n")
-    fo.write("AM_CFLAGS = -I.\n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
-    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
+    fo.write("AM_CFLAGS = -fPIC\n")
+    fo.write("AM_CFLAGS += -I.\n")
     for lib in compiledLibList:
         fo.write("AM_CFLAGS += -I../../../../libs/%s/src/include\n" % lib)
-    if (needQt == True):
+    fo.write("# add includes already installed in prefix\n")
+    fo.write("AM_CFLAGS += -I${prefix}/include\n")
+    fo.write("# X11R6 is for Mac OSX location of XQuartz\n")
+    fo.write("AM_CFLAGS += -I/usr/X11R6/include\n")
+    fo.write("# add in Debian location of HDF5\n")
+    fo.write("AM_CFLAGS += -I/usr/include/hdf5/serial\n")
+    if (needQt):
         fo.write("AM_CFLAGS += $(QT_CFLAGS)\n")
     fo.write("\n")
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
@@ -573,11 +536,12 @@ def writeMakefileAm():
     fo.write("# load flags\n")
     fo.write("\n")
     fo.write("AM_LDFLAGS = -L. \n")
-    fo.write("# NOTE: X11R6 is for Mac OSX location of XQuartz\n")
+    fo.write("AM_LDFLAGS += -L${prefix}/lib\n")
+    fo.write("# X11R6 is for Mac OSX location of XQuartz\n")
     fo.write("AM_LDFLAGS += -L/usr/X11R6/lib\n")
     for lib in compiledLibList:
         fo.write("AM_LDFLAGS += -L../../../../libs/%s/src\n" % lib)
-    if (needQt == True):
+    if (needQt):
         fo.write("AM_LDFLAGS += $(QT_LIBS)\n")
     fo.write("\n")
 
@@ -610,6 +574,40 @@ def writeMakefileAm():
 
     fo.close
 
+########################################################################                        
+# get the LINUX type from the /etc/os-release file
+# or 'darwin' if OSX
+
+def getOsType():                                                                                  
+
+    # check for Mac OSX
+
+    if sys.platform == "darwin":
+        return "osx"
+    elif sys.platform == "linux":
+        osrelease_file = open("/etc/os-release", "rt")
+        lines = osrelease_file.readlines()
+        osrelease_file.close()
+        osType = "unknown"
+        for line in lines:
+            if (line.find('PRETTY_NAME') == 0):
+                lineParts = line.split('=')
+                osParts = lineParts[1].split('"')
+                osType = osParts[1].lower()
+                if (osType.find("debian") >= 0):
+                    return "debian"
+                if (osType.find("ubuntu") >= 0):
+                    return "ubuntu"
+                if (osType.find("centos") >= 0):
+                    return "centos"
+                if (osType.find("rhel") >= 0):
+                    return "rhel"
+                if (osType.find("opensuse") >= 0):
+                    return "opensuse"
+                
+
+    return "unknown"
+            
 ########################################################################
 # Run - entry point
 

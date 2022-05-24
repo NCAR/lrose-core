@@ -1287,6 +1287,57 @@ string TaXml::writeStartTag(const string &tag,
 }
 
 /////////////////////////////////////////
+// write start tag with single attributes
+
+string TaXml::writeStartTag(const string &tag,
+                            int level,
+                            const string &attrName,
+                            const string &attrVal)
+{
+  vector<attribute> attrs;
+  attrs.push_back(attribute(attrName, attrVal));
+  return writeStartTag(tag, level, attrs, true);
+}
+  
+string TaXml::writeStartTag(const string &tag,
+                            int level,
+                            const string &attrName,
+                            bool attrVal)
+{
+  vector<attribute> attrs;
+  if (attrVal) {
+    attrs.push_back(attribute(attrName, "true"));
+  } else {
+    attrs.push_back(attribute(attrName, "false"));
+  }
+  return writeStartTag(tag, level, attrs, true);
+}
+  
+string TaXml::writeStartTag(const string &tag,
+                            int level,
+                            const string &attrName,
+                            int attrVal)
+{
+  vector<attribute> attrs;
+  char text[128];
+  snprintf(text, 128, "%d", attrVal);
+  attrs.push_back(attribute(attrName, text));
+  return writeStartTag(tag, level, attrs, true);
+}
+  
+string TaXml::writeStartTag(const string &tag,
+                            int level,
+                            const string &attrName,
+                            double attrVal)
+{
+  vector<attribute> attrs;
+  char text[128];
+  snprintf(text, 128, "%g", attrVal);
+  attrs.push_back(attribute(attrName, text));
+  return writeStartTag(tag, level, attrs, true);
+}
+  
+/////////////////////////////////////////
 // write tag with attributes
 // tag is closed
 

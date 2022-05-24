@@ -26,27 +26,25 @@
  * 
  */
 #include <stdio.h>
-
-
-double atof(char *);
+#include <stdlib.h>
+#include <toolsa/str.h>
 
 /******************************************************************************
  * MAIN :   Open files and send the output to STDOUT
  *
  */
-main(argc,argv)
-	int	argc;
-	char	*argv[];
+int main(int argc, const char **argv)
 {
 	int  i,num_fields;
 	char buf[256];
 	FILE *infile;
 	double lon,lat,dist,last_lon;
-	int num_fixed = 0;
-	char    *cfield[8];
+	char *cfield[8];
 
-	for(i=0; i < 8; i++)  cfield[i] = (char *) calloc(1,64); 
-
+	for(i=0; i < 8; i++) {
+          cfield[i] = (char *) calloc(1,64);
+        }
+          
 
 	if(argc != 4) { 	/* take the input from stdin */
 		fprintf(stderr,"Usage: fix_map lat_offset lon_offset file > newfile\n");

@@ -78,6 +78,7 @@ private:
   Grib2Mdv *_grib2Mdv;
   time_t _latestDataTime;
   time_t _prevDataWriteTime;
+  set<time_t> _fileDataTimes;
   
   // map of input levels
 
@@ -93,7 +94,10 @@ private:
   // private methods
   
   void _clearLayers();
-  int _processFile(const string &inputPath);
+  int _processFileRealtime(const string &inputPath);
+  int _processFileArchive(const string &inputPath);
+  int _getInputPathList(const string &inputPath, time_t dataTime,
+                        vector<string> &timedPathList);
   int _combineVolume();
 
   double _getHeightKm(const DsMdvx &mdvx) const;

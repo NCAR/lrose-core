@@ -1,0 +1,292 @@
+/**********************************************************************
+ * TDRP params for DistFit
+ **********************************************************************/
+
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+///////////// distribution_name ///////////////////////
+//
+// Name of distribution.
+//
+// Name of distribution to be fitted to the data. If DIST_ALL, all 
+//   relevant distributions will be fitted.
+//
+//
+// Type: enum
+// Options:
+//     DIST_ALL
+//     DIST_NORMAL
+//     DIST_WEIBULL
+//     DIST_EXPONENTIAL
+//     DIST_GAMMA
+//
+
+distribution_name = DIST_ALL;
+
+///////////// distribution_class //////////////////////
+//
+// Class of distribution.
+//
+// If UNI_VARIATE, the x data is fitted. If BI_VARIATE, x and y data 
+//   form the variates.
+//
+//
+// Type: enum
+// Options:
+//     UNI_VARIATE
+//     BI_VARIATE
+//
+
+distribution_class = UNI_VARIATE;
+
+///////////// chisq_nbins /////////////////////////////
+//
+// Number of bins for chisq parameter.
+//
+// When computing the chisq parameter, this is the number of intervals 
+//   used for binning the data.
+//
+// Minimum val: 2
+//
+// Type: long
+//
+
+chisq_nbins = 20;
+
+///////////// x_label /////////////////////////////////
+//
+// Label for X data.
+//
+// Used to identify column for X data.
+//
+//
+// Type: string
+//
+
+x_label = "X";
+
+///////////// y_label /////////////////////////////////
+//
+// Label for Y data.
+//
+// Used to identify column for Y data.
+//
+//
+// Type: string
+//
+
+y_label = "Y";
+
+///////////// do_statcode_tests ///////////////////////
+//
+// Run statistics code tests.
+//
+// If TRUE, the tests are run.
+//
+//
+// Type: boolean
+//
+
+do_statcode_tests = FALSE;
+
+///////////// condition_input_data ////////////////////
+//
+// Apply conditions to input data.
+//
+// If TRUE, the input data values are conditioned on a given field, 
+//   which lie in a given intervals - see cond_min, cond_max.
+//
+//
+// Type: boolean
+//
+
+condition_input_data = FALSE;
+
+///////////// conditional_label ///////////////////////
+//
+// Label for conditional data.
+//
+// Used to identify column for conditional data.
+//
+//
+// Type: string
+//
+
+conditional_label = "cond";
+
+///////////// cond_min ////////////////////////////////
+//
+// Min value for conditional field.
+//
+// See condition_input_data.
+//
+//
+// Type: double
+//
+
+cond_min = 0;
+
+///////////// cond_max ////////////////////////////////
+//
+// Max value for conditional field.
+//
+// See condition_input_data.
+//
+//
+// Type: double
+//
+
+cond_max = 0;
+
+///////////// perform_attrition ///////////////////////
+//
+// Perform attrition on the input data.
+//
+// If TRUE, only every n data points will be used, where n is the 
+//   attrition_count.
+//
+//
+// Type: boolean
+//
+
+perform_attrition = FALSE;
+
+///////////// attrition_count /////////////////////////
+//
+// Attrition count.
+//
+// When perform_attrition is TRUE, this is the count used to save data. 
+//   Every count point is saved.
+//
+// Minimum val: 2
+//
+// Type: long
+//
+
+attrition_count = 5;
+
+///////////// log_x_data //////////////////////////////
+//
+// Transform x data using log.
+//
+// If TRUE, x data will become log(x).
+//
+//
+// Type: boolean
+//
+
+log_x_data = FALSE;
+
+///////////// limit_x_data ////////////////////////////
+//
+// Apply limits to x data.
+//
+// If TRUE, the input data values are limited to between x_min and 
+//   x_max.
+//
+//
+// Type: boolean
+//
+
+limit_x_data = FALSE;
+
+///////////// x_min ///////////////////////////////////
+//
+// Min value for x field.
+//
+// See limit_x_data.
+//
+//
+// Type: double
+//
+
+x_min = 0;
+
+///////////// x_max ///////////////////////////////////
+//
+// Max value for x field.
+//
+// See limit_x_data.
+//
+//
+// Type: double
+//
+
+x_max = 0;
+
+///////////// log_y_data //////////////////////////////
+//
+// Transform y data using log.
+//
+// If TRUE, y data will become log(y).
+//
+//
+// Type: boolean
+//
+
+log_y_data = FALSE;
+
+///////////// limit_y_data ////////////////////////////
+//
+// Apply limits to y data.
+//
+// If TRUE, the input data values are limited to between y_min and 
+//   y_max.
+//
+//
+// Type: boolean
+//
+
+limit_y_data = FALSE;
+
+///////////// y_min ///////////////////////////////////
+//
+// Min value for y field.
+//
+// See limit_y_data.
+//
+//
+// Type: double
+//
+
+y_min = 0;
+
+///////////// y_max ///////////////////////////////////
+//
+// Max value for y field.
+//
+// See limit_y_data.
+//
+//
+// Type: double
+//
+
+y_max = 0;
+

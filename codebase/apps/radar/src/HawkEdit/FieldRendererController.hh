@@ -31,10 +31,12 @@
 
 #include <deque>
 
-#include "FieldRenderer.hh"
+#include "FieldRendererView.hh"
 #include "Beam.hh"
 #include "PpiBeam.hh"
-#include "RhiBeam.hh"
+#include "RayLocationController.hh"
+#include "DataModel.hh"
+#include <QImage>
 
 class FieldRendererController
 {
@@ -42,38 +44,50 @@ class FieldRendererController
 public:
 
   FieldRendererController();
-  ~FieldRendererController();
+  virtual ~FieldRendererController();
 
   // NOTE: only index by fieldIndex which must match the button row in the field Panel
-
-  void addFieldRenderer(FieldRenderer *);
+  void addField(string &fieldName);
+  void addFieldRenderer(FieldRendererView *);
   void addBeam(Beam *beam);
   void addBeam(size_t fieldIndex, Beam *beam);
   //  void addBeam(string newFieldName, Beam *beam);
   void addBeamToBackgroundRenderedFields(Beam *beam);
-  void selectField(size_t fieldIndex);
-  void unselectField(size_t fieldIndex);
-  FieldRenderer *get(size_t fieldIndex);
-  void activateArchiveRendering();
-  void activateRealtimeRendering(size_t selectedField);
-  void performRendering(size_t selectedField);
-  bool isBackgroundRendered(size_t index);
-  void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
+  //void selectField(size_t fieldIndex);
+  //void unselectField(size_t fieldIndex);
+  FieldRendererView *get(size_t fieldIndex);
+  FieldRendererView *get(string fieldName);
+  //QImage *getImage(string fieldName);
+  //void activateArchiveRendering();
+  //void activateRealtimeRendering(size_t selectedField);
+  QImage *renderImage(QPainter &painter, int width, int height,
+    string fieldName, QTransform zoomTransform, double sweepAngle,
+    RayLocationController *rayLocationController,
+    ColorMap &colorMap,
+    QColor backgroundColor);
+  
+  //void performRendering(size_t selectedField);
+  //bool isBackgroundRendered(size_t index);
+  //void setBackgroundRenderingOn(size_t index) {_fieldRenderers[index]->setBackgroundRenderingOn();;};
+/*
   void refreshImages(int width, int height, QSize image_size,
-					      QRgb background_brush_color_rgb,
-					      QTransform zoomTransform,
-					      size_t selectedField,
-		     vector< PpiBeam* > &Beams);
-
+					      QBrush backgroundColor, // QRgb background_brush_color_rgb,
+					      QTransform zoomTransform);
+					      //size_t selectedField);
+		     //vector< PpiBeam* > &Beams);
+*/
+/*
   void refreshImagesAsDeque(int width, int height, QSize image_size,
 					      QRgb background_brush_color_rgb,
 					      QTransform zoomTransform,
 					      size_t selectedField,
 			    std::deque< RhiBeam* > &Beams);
+          */
+  void takeCareOfMissingValues(vector<float> *rayData, float missingValue);
 
 private:
  
-  vector<FieldRenderer *> _fieldRenderers;
+  vector<FieldRendererView *> _fieldRenderers;
   //  vector<FieldRenderer *> _working;
  
   // size_t _findFieldIndex(string fieldName);

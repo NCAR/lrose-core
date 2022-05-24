@@ -493,7 +493,6 @@ void PolarWidget::smartBrush(int xPixel, int yPixel)
 
   //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
   //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-
   QImage qImage;
   qImage.load("/h/eol/brenda/octopus.jpg");
   // get the Image from somewhere ...   
@@ -623,7 +622,7 @@ void PolarWidget::informationMessage()
   
   // QMessageBox::StandardButton reply;
   // QLabel *informationLabel;
-
+  
   // reply = QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
   QMessageBox::information(this, "QMessageBox::information()", "Not implemented");
   //  if (reply == QMessageBox::Ok)

@@ -21,7 +21,7 @@ class ParameterColorView : public QDialog
 public:
 
   ParameterColorView(QWidget *parent = 0); // , ColorMap colorMap);
-  ~ParameterColorView();
+  virtual ~ParameterColorView();
   void updateEvent(vector<string> fieldNames, string selectedField);
   bool getChanges();
 

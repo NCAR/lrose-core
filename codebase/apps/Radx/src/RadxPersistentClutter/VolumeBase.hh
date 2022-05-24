@@ -110,8 +110,6 @@ protected:
    */
   typedef enum {FIRST, FIRST_PASS, FIRST_SECOND_PASS, SECOND_PASS,DONE} State_t;
 
-  static const std::string _volInitStr;   /**< User unary */
-  static const std::string _volFinishStr; /**< User unary */
 
   const Parms *_parms;  /**< Parameters pointer */
   State_t _state;       /**< current state */

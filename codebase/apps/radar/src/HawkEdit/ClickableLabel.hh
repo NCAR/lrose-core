@@ -11,16 +11,18 @@ class ClickableLabel : public QLabel {
 
 public:
   explicit ClickableLabel(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
-  ~ClickableLabel();
+  virtual ~ClickableLabel();
   //  void setColorBar(ColorBar *colorBar);
 
 signals:
   void clicked();
+  void doubleClicked(QString text);
 
 protected:
   void mousePressEvent(QMouseEvent* event);
   //  void paintEvent(QPaintEvent *e);
 
+  void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
   //  ColorBar *_colorBar;
