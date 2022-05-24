@@ -568,7 +568,7 @@ int SpolWarnSms::_handleNumberEntry(time_t now,
   // check value
 
   if (dval >= entry.valid_lower_limit &&
-      dval <= entry.valid_lower_limit) {
+      dval <= entry.valid_upper_limit) {
     // no problem with this entry
     return 0;
   }
