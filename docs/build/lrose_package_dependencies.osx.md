@@ -1,37 +1,46 @@
 # LROSE-CORE package dependencies - OSX
 
-## Install XCode
+### NOTE: this page requires ```admin``` privileges.
 
-Install either the XCode development environment or a stand-alone version of the
-XCode command line tools.  If you intend to do lots of Apple development and
-want to use an IDE, then install XCode.
+## Install XCode and the Command Line Tools
 
-### Installing complete XCode
+### Get an Apple ID (account)
 
-To install the full XCode package, get an Apple ID and register for the Apple App Store.
+To download the XCode package, get an Apple ID and register for the Apple App Store.
 
-You will need to provide a credit card, so Apple can charge you if you actually buy anything.  
-However, XCode is free.
+You will need to provide a credit card, so that Apple can charge you if you actually buy anything.  
 
-From the App Store, install XCode.
-Start XCode, open the preferences window, select the 'Downloads' tab, and 
-install "Command Line Tools"
+However for our purposes here, XCode is free, so this will not actually cost you anything.
 
-You may also need to run:
+### Download XCode and Command line tools
+
+Go to the developer download page:
+
+* [developer.apple.com/downloads](http://developer.apple.com/downloads)
+
+and you will find the following entries (perhaps with different versions):
+
+<img align="center" width="400" height="200" src="../images/xcode_download.png">
+
+Download both Xcode and the command line tools.
+
+Xcode comes packaged as an ```.xip``` file.
+
+The command line tools are packaged as a ```.dmg``` file.
+
+### Install XCode and Command line tools (requries ```admin``` privileges)
+
+Double-click on the downloaded items (in your browser) or open them in a terminal window. Follow the instructions for installation.
+
+To complete the installation, you will need to have ```admin``` privileges.
+
+### Run xcode-select
+
+Then :
 
 ```
   xcode-select --install
 ```
-
-### Installing XCode command line tools
-
-Install the stand-alone XCode command line tools by downloading "Command Line Tools" from:
-
-```
-  http://developer.apple.com/downloads
-```
-
-You will need to register for a free Apple id, no credit card is required.
 
 ### Reboot after XCode install
 
@@ -39,12 +48,21 @@ You should reboot after installing or upgrading XCode.
 
 The reboot will perform some steps to complete the XCode install.
 
-## Install homebrew
+## Install homebrew (requires ```admin``` privileges)
 
-Run the following ruby script:
+To install brew you will need to run with admin privileges.
+
+The official homebrew install docs are at:
+
+* [docs.brew.sh/Installation](https://docs.brew.sh/Installation)
+
+To install brew, run the following script in a bash shell.
+
+If you are not running bash, execute a bash shell first.
 
 ```
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /bin/bash
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   /usr/local/bin/brew update
 ```
 
@@ -71,11 +89,4 @@ More specifically, you need write permission for the following directories:
 
 WARNING - when using brew to install packages, do not use ```root``` or ```sudo```. This is very important. If you do, it will lead to permissions problems.
 
-## Install required packages using brew
-
-Use Homebrew to install the required packages:
-
-```
-  brew install hdf5 netcdf fftw flex jpeg libpng libzip qt szip pkg-config cmake rsync libx11 libxext
-```
-
+Only use admin privileges for installing brew itself, NOT for USING brew to install other packages.

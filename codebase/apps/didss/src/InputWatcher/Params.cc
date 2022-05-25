@@ -1047,7 +1047,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("copy_to_time_stamped_file");
     tt->descr = tdrpStrDup("Option to copy to a file with name based on the time.");
-    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.");
+    tt->help = tdrpStrDup("If TRUE, the file will be copied to a file, in the directory 'copy_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.");
     tt->val_offset = (char *) &copy_to_time_stamped_file - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

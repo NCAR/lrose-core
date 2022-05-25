@@ -332,7 +332,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
   //fieldRenderer->setTransform(zoomTransform);
 
         
-
+  try {
 
   //if (!fieldRenderer->imageReady()) {
     LOG(DEBUG) << "image NOT READY, recreating beams";
@@ -350,30 +350,33 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
     bool done = false;
     while ((rayIdx < nRayLocations) && (!done)) { // each field ray in sweep) {
       // LOG(DEBUG) << "  rayIdx = " << rayIdx;
-      vector<float> *rayData = rayLocationController->getRayData(rayIdx, fieldName);
-      if (rayData->size() > 0) {
-        takeCareOfMissingValues(rayData, missingVal);
-        //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
-        size_t nData = rayData->size();
-        size_t endIndex = rayLocationController->getEndIndex(rayIdx);
-        double start_angle = rayLocationController->getStartAngle(rayIdx);
-        double stop_angle = rayLocationController->getStopAngle(rayIdx);
-        double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
-        double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
-        // create Beam for ray
-        PpiBeam *beam = new PpiBeam(
-                   start_angle,  stop_angle,
-             startRangeKm,  gateSpacingKm, nData);
-        float *data = &(*rayData)[0];
-        beam->updateFillColors(data, nData, &colorMap, background_brush);  
-        fieldRenderer->addBeam(beam);
-        // rayIdx must be increasing
-        if (endIndex < rayIdx) done = true;
-        rayIdx = endIndex;
-      } else {
-        rayIdx += 1;
-      }
-      delete rayData;
+      vector<float> *rayData;
+
+        rayData = rayLocationController->getRayData(rayIdx, fieldName);
+
+        if (rayData->size() > 0) {
+          takeCareOfMissingValues(rayData, missingVal);
+          //float rayFake[] = {0,1,2,3,4,5,6,7,8,9,10};
+          size_t nData = rayData->size();
+          size_t endIndex = rayLocationController->getEndIndex(rayIdx);
+          double start_angle = rayLocationController->getStartAngle(rayIdx);
+          double stop_angle = rayLocationController->getStopAngle(rayIdx);
+          double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
+          double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
+          // create Beam for ray
+          PpiBeam *beam = new PpiBeam(
+                     start_angle,  stop_angle,
+               startRangeKm,  gateSpacingKm, nData);
+          float *data = &(*rayData)[0];
+          beam->updateFillColors(data, nData, &colorMap, background_brush);  
+          fieldRenderer->addBeam(beam);
+          // rayIdx must be increasing
+          if (endIndex < rayIdx) done = true;
+          rayIdx = endIndex;
+        } else {
+          rayIdx += 1;
+        }
+        delete rayData;
     }
     // add Beam to FieldRenderer
     LOG(DEBUG) << " added all beams to fieldRenderer; before fillBackground";
@@ -388,7 +391,11 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
   //QImage image = fieldRenderer->_image;
   //LOG(DEBUG) << "image width = " << image->width() << " height " << image->height();
 
-
+  } catch (std::invalid_argument &ex) {
+    cerr << "Exception: " << ex.what() << endl;
+    //cerr << "  setting data to missing; rayIdx = " << rayIdx << endl;
+    //throw ex;
+  }
   //QImage image("/Users/brenda/Desktop/LROSE-Gateway-Banner.png");
   //painter->drawImage(0, 0, image);
   LOG(DEBUG) << "exit";  

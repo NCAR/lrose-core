@@ -85,7 +85,10 @@ int main(int argc, char **argv)
     int iret = Prog->Run(*app);
     
     // clean up
-    
+    //if (Prog != NULL) {
+    //  Prog->~HawkEye();
+    //}
+    delete(Prog);
     tidy_and_exit(iret);
     return (iret);
     
@@ -101,7 +104,10 @@ static void tidy_and_exit (int sig)
 
 {
   app->exit();
-  delete(Prog);
+  //if (Prog != NULL) {
+  //  Prog->~HawkEye();
+  //}
+  //delete(Prog);
   umsleep(1000);
   exit(sig);
 }

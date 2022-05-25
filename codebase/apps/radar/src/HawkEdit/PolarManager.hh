@@ -62,6 +62,9 @@
 #include "ScriptEditorView.hh"
 #include "BoundaryPointEditor.hh"
 #include "BoundaryPointEditorView.hh"
+#include "TimeNavView.hh"
+#include "TimeNavController.hh"
+#include "UndoRedoController.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
@@ -139,7 +142,7 @@ public:
   // load archive file list by searching for files
   // returns 0 on success, -1 on failure
   
-  int loadArchiveFileList();
+  //int loadArchiveFileList();
 
 
   //  const RadxVol getDataVolume();
@@ -200,8 +203,23 @@ public:
   double worldReleaseX, double worldReleaseY);
   bool evaluateRange(double xRange);
 
-  void runForEachRayScript(QString script, bool useBoundary,
-    bool useAllSweeps);
+  //void runForEachRayScript(QString script, bool useBoundary,
+  //  bool useAllSweeps);
+
+ // void runScriptBatchMode(QString script, bool useBoundary, 
+ //   bool useAllSweeps, string saveDirectoryPath,
+ //   string startDateTime, string endDateTime);
+
+  //void runScriptBatchMode(QString script, bool useBoundary, 
+  //  bool useAllSweeps, bool useTimeRange);
+  /*
+  void runScriptBatchMode(QString script, bool useBoundary, 
+  bool useAllSweeps, string saveDirectoryPath, 
+  int startYear, int startMonth, int startDay,
+  int startHour, int startMinute, int startSecond,
+  int endYear, int endMonth, int endDay,
+  int endHour, int endMinute, int endSecond);
+  */
 
   void closeEvent(QEvent *event);
 
@@ -209,8 +227,13 @@ public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
 
+  string _fileName(QString path);
+  string _combinePathFile(string path, string file);
+  void _checkForOverwrite(string pathFile);
+  int _mergeDataFiles(string dest_path, string source_path);
   void _openFile();
   void _saveFile();
+  void _saveCurrentVersionAllFiles();
   void _howto();   
 
   //void contextMenuParameterColors();
@@ -254,7 +277,29 @@ public slots:
 
   void spreadsheetDataChanged();
 
+  void newTimeSelected(int value);
+  void startEndTimeChanged(int startYear, int startMonth, int startDay,
+                       int startHour, int startMinute, int startSecond,
+                       int endYear, int endMonth, int endDay,
+                       int endHour, int endMinute, int endSecond);
+  void resetStartEndTime();
+
+  void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
+  void runScriptBatchMode(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);
+  void runScriptBatchModeDebug(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);  
+  void undoScriptEdits(); // bool batchMode = false);
+  void redoScriptEdits(); // bool batchMode = false);
+  void cancelScriptRun();
+
   void errorMessage(string title, string message);
+  int saveDiscardMessage(string text, string question);
+
+  void selectBatchMode();
+  void selectIndividualMode();
+
+  //void close();
 
 signals:
 
@@ -303,8 +348,8 @@ private:
   // beam reading timer
 
   //static bool _firstTimerEvent;
-  int _beamTimerId;
-  bool _frozen;
+  //int _beamTimerId;
+  //bool _frozen;
 
   // data fields
   //  vector <DisplayField *> _fields;
@@ -322,6 +367,8 @@ private:
   BoundaryPointEditorView *boundaryPointEditorView;
   BoundaryView *boundaryView;
 
+  UndoRedoController *_undoRedoController;
+
 
   // windows
 
@@ -330,7 +377,7 @@ private:
   // actions
   
   QAction *_exitAct;
-  QAction *_freezeAct;
+  //QAction *_freezeAct;
   QAction *_clearAct;
   QAction *_unzoomAct;
   QAction *_refreshAct;
@@ -339,6 +386,10 @@ private:
   QAction *_howtoAct;
   QAction *_aboutAct;
   QAction *_aboutQtAct;
+  QAction *undoAct;
+  QAction *redoAct;
+  QAction *selectBatchModeAct;
+  QAction *selectIndividualModeAct;
   //QAction *_openFileAct;
   //QAction *_saveFileAct;
 
@@ -495,7 +546,7 @@ private:
   // input data
   
   RadxTime _readerRayTime;
-  RadxVol _vol;
+  //RadxVol _vol;
 
   // sweeps
 
@@ -534,6 +585,7 @@ private:
   QMenu *_overlaysMenu;
   QMenu *_helpMenu;
   QMenu *_editMenu;
+  QMenu *_modeMenu;
   QMenu *_boundaryMenu;
 
   // actions
@@ -558,6 +610,10 @@ private:
   bool _archiveMode;
   bool _archiveRetrievalPending;
 
+  bool _cancelled;
+  bool _batchEditing;
+
+/*
   QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _guiStartTime;
   RadxTime _archiveStartTime;
@@ -573,6 +629,7 @@ private:
   QPushButton *_fwd1;
   QPushButton *_backPeriod;
   QPushButton *_fwdPeriod;
+  */
   /*
   QPushButton *_boundaryEditorClearBtn;
   QPushButton *_boundaryEditorHelpBtn;
@@ -593,28 +650,32 @@ private:
 
   // time controller settings dialog
   
-  QDialog *_timeControl;
+  TimeNavView *_timeNavView;
+  TimeNavController *_timeNavController;
   bool _timeControlPlaced;
 
-  int _nArchiveScans;
-  vector<string> _archiveFileList;
-  int _archiveScanIndex;
-  bool _archiveFilesHaveDayDir;
+  //int _nArchiveScans;
+  //vector<string> _archiveFileList;
+  //int _archiveScanIndex;
+  //bool _archiveFilesHaveDayDir;
 
   // time slider
 
-  QFrame *_timePanel;
-  QVBoxLayout *_timeLayout;
+  //QFrame *_timePanel;
+  //QVBoxLayout *_timeLayout;
 
-  QSlider *_timeSlider;
-
+  //QSlider *_timeSlider;
+/*
   RadxTime _archiveIntermediateTime;
 
   RadxTime _startDisplayTime;
   RadxTime _currentDisplayTime;  // is this needed??
   RadxTime _endDisplayTime;
+  */
   RadxTime _imagesArchiveStartTime;
   RadxTime _imagesArchiveEndTime;
+  
+
   int _imagesScanIntervalSecs;
 
   // saving images in real time mode
@@ -638,7 +699,7 @@ private:
   
   // local methods
 
-  void _clear();
+  //void _clear();
   void _setupWindows();
   void _createActions();
   void _createMenus();
@@ -646,6 +707,8 @@ private:
   // data retrieval
 
   void _readDataFile(vector<string> *selectedFields);
+  int _readDataFile2();
+  int _readDataFile2(string &inputPath);
 
   // handleArchiveData calls:
   // getArchiveData
@@ -669,15 +732,17 @@ private:
   //       an instance of RayLoc.
 
 
-  void _handleArchiveData();
+  //void _handleArchiveData();
   int _getArchiveData();
+  int _getArchiveData(string &inputPath);
+  int _getArchiveDataPlainVanilla(string &inputPath);
   void _plotArchiveData();
-  void _updateArchiveData(vector<string> &fieldNames);
-  void _updateArchiveData(QStringList newFieldNames);
+  //void _updateArchiveData(vector<string> &fieldNames);
+  //void _updateArchiveData(QStringList newFieldNames);
   void _setupVolRead(RadxFile &file);
   void _handleColorMapChangeOnRay(RadxPlatform &platform, // RadxRay *ray, 
 				  string fieldName);
-  void _updateColorMap(string fieldName);
+  //void _updateColorMap(string fieldName);
 
   //  int _applyDataEdits(RadxVol _editedVol);  // & or * ??
   void _applyDataEdits(); // const RadxVol &editedVol);
@@ -701,22 +766,37 @@ private:
 
   // modes
 
-  void _setArchiveMode(bool state);
+  enum EditMode {BATCH, INDIVIDUAL};
+  EditMode _operationMode;
+
+  //void _setArchiveMode(bool state);
   //void _activateRealtimeRendering();
-  void _activateArchiveRendering();
+  //void _activateArchiveRendering();
 
   // archive mode
 
   void _setGuiFromArchiveStartTime();
   void _setGuiFromArchiveEndTime();
   void _setGuiFromSelectedTime();
-  void _setSweepPanelVisibility();
+  //void _setSweepPanelVisibility();
+
+  bool _checkForUnsavedBatchEdits();
+  //void _saveTempDir();
 
   // time slider
 
   void _createTimeControl();
+  void _createUndoRedoStack();
 
   bool _unSavedEdits = false;
+
+  string _getSelectedFile();
+  string _getFileNewVersion(int archiveFileIndex);
+
+
+  void saveCurrentState();
+  void restoreCurrentState();
+  int _stateCurrentFileIndex;   
 
 private slots:
 
@@ -741,7 +821,7 @@ private slots:
   // end from DisplayManager
 
 
-  void _freeze();
+  //void _freeze();
   void _unzoom();
   void _refresh();
   //void _changeField(int fieldId, bool guiMode = true);
@@ -770,31 +850,31 @@ private slots:
 
   // archive mode
   
-  void _setArchiveStartTime(const RadxTime &rtime);
-  void _setArchiveEndTime(const RadxTime &rtime);
-  void _setArchiveStartTimeFromGui(const QDateTime &qdt);
-  void _setArchiveEndTimeFromGui(const QDateTime &qdt);
-  void _acceptGuiTimes();
-  void _cancelGuiTimes();
+  //void _setArchiveStartTime(const RadxTime &rtime);
+  //void _setArchiveEndTime(const RadxTime &rtime);
+  //void _setArchiveStartTimeFromGui(const QDateTime &qdt);
+  //void _setArchiveEndTimeFromGui(const QDateTime &qdt);
+  //void _acceptGuiTimes();
+  //void _cancelGuiTimes();
 
-  void _goBack1();
-  void _goFwd1();
-  void _goBackPeriod();
-  void _goFwdPeriod();
+  //void _goBack1();
+  //void _goFwd1();
+  //void _goBackPeriod();
+  //void _goFwdPeriod();
 
-  void _setArchiveRetrievalPending();
+  //void _setArchiveRetrievalPending();
 
   // time controller
 
   void _showTimeControl();
-  void _placeTimeControl();
+  //void _placeTimeControl();
 
   // time slider
 
-  void _timeSliderActionTriggered(int action);
-  void _timeSliderValueChanged(int value);
-  void _timeSliderReleased();
-  void _timeSliderPressed();
+  //void _timeSliderActionTriggered(int action);
+  //void _timeSliderValueChanged(int value);
+  //void _timeSliderReleased();
+  //void _timeSliderPressed();
 
   //circle radius slider for BoundaryPointEditor
   //void _circleRadiusSliderValueChanged(int value);
@@ -831,6 +911,8 @@ private slots:
 
   void _scriptEditorSetup();
   void EditRunScript();
+
+ 
 
 };
 

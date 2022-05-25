@@ -1281,7 +1281,7 @@ int RawFile::readGeorefFromSpdb(string georefUrl,
   DsSpdb spdb;
   
   if(spdb.getClosest(georefUrl, searchTime, searchMarginSecs)) {
-    if (debug >= Params::DEBUG_VERBOSE) {
+    if (debug) {
       cerr << "ERROR - Hsrl2Radx::_readGeorefFromSpdb" << endl;
       cerr << "  Cannot read georef data from URL: "
            << georefUrl << endl;

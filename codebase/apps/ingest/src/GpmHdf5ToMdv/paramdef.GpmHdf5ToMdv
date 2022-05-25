@@ -159,6 +159,12 @@ commentdef {
   p_header = "OUTPUT FIELDS";
 }
 
+paramdef string {
+  p_default = "NS";
+  p_descr = "Specify the name of the main data group.";
+  p_help = "The groupName params in output_fields will be nested within this group. If the groupName is empty, the parent group will be used instead.";
+} main_dataset_group_name;
+
 commentdef {
   p_header = "OUTPUT ENCODING AND COMPRESSION";
 }

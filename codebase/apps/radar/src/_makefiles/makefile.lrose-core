@@ -20,12 +20,12 @@ SUB_DIRS = \
 	ChillTsTcp2Fmq \
 	CmdVerify \
 	Colide \
-	ConvStrat \
 	Cov2Mom \
 	DowSendFreq \
 	DsrGrabber \
 	DsrMerge \
 	DualDopplerLobes \
+	Ecco \
 	HawkEye \
 	HcrTempRxGain \
 	HcrVelCorrect \

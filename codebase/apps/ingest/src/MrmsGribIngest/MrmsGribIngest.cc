@@ -34,8 +34,13 @@
 #include <toolsa/pmu.h>
 #include <toolsa/umisc.h>
 #include <toolsa/TaFile.hh>
+#include <toolsa/Path.hh>
+#include <toolsa/DateTime.hh>
 #include <didss/DsInputPath.hh>
+#include <didss/DataFileNames.hh>
 #include <Mdv/MdvxField.hh>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "MrmsGribIngest.hh"
 #include "Grib2Mdv.hh"
@@ -101,6 +106,14 @@ MrmsGribIngest::MrmsGribIngest(int argc, char **argv)
     _input->setLatestFileOnly(_params.latest_file_only);
     _input->setDirScanSleep(_params.data_check_interval_secs);
     _input->setFileQuiescence(_params.data_file_quiescence_secs);
+  } else if (_params.mode == Params::ARCHIVE) {
+    _input = new DsInputPath(_progName.c_str(),
+                             _params.debug >= Params::DEBUG_VERBOSE,
+                             _params.input_dir,
+                             _args.startTime,
+                             _args.endTime);
+    _input->setSearchExt(_params.input_extension);
+    _input->setSubString(_params.input_substring);
   } else {
     _input = new DsInputPath(_progName,
 			     _params.debug >= Params::DEBUG_VERBOSE,
@@ -144,11 +157,19 @@ int MrmsGribIngest::Run()
   while ((inputPath = _input->next()) != NULL) {
     
     PMU_auto_register("Run");
-    
-    if (_processFile(inputPath)) {
-      cerr << "ERROR = MrmsGribIngest::Run" << endl;
-      cerr << "  Processing file: " << inputPath << endl;
-      iret = -1;
+
+    if (_params.mode == Params::REALTIME) {
+      if (_processFileRealtime(inputPath)) {
+        cerr << "ERROR - MrmsGribIngest::Run" << endl;
+        cerr << "  Processing file - realtime: " << inputPath << endl;
+        iret = -1;
+      }
+    } else {
+      if (_processFileArchive(inputPath)) {
+        cerr << "ERROR - MrmsGribIngest::Run" << endl;
+        cerr << "  Processing file - archive: " << inputPath << endl;
+        iret = -1;
+      }
     }
     
   }
@@ -171,13 +192,17 @@ void MrmsGribIngest::_clearLayers()
 }
 
 ///////////////////////////////
-// process file
+// process file - realtime mode
 
-int MrmsGribIngest::_processFile(const string &inputPath)
-
+int MrmsGribIngest::_processFileRealtime(const string &inputPath)
+  
 {
   
-  PMU_auto_register("Processing file");
+  PMU_auto_register("Processing file - realtime");
+  if (_params.debug) {
+    cerr << "--------------------------------------------" << endl;
+    cerr << "Processing file: " << inputPath << endl;
+  }
     
   // uncompress the file if needed
   
@@ -188,9 +213,15 @@ int MrmsGribIngest::_processFile(const string &inputPath)
   }
 
   string uncompressedPath = infile.getUncompressedPath();
-  if (_params.debug) {
-    cerr << "--------------------------------------------" << endl;
-    cerr << "Processing file: " << uncompressedPath << endl;
+  time_t fileDataTime = 0;
+  bool dateOnly = false;
+  if (DataFileNames::getDataTime(uncompressedPath, fileDataTime, dateOnly)) {
+    cerr << "WARNING - _processFileRealtime" << endl;
+    cerr << "  Cannot get time from file: " << uncompressedPath << endl;
+  } else {
+    if (_params.debug) {
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+    }
   }
 
   // create MDV output file
@@ -317,6 +348,227 @@ int MrmsGribIngest::_processFile(const string &inputPath)
   return iret;
 
 }
+
+///////////////////////////////
+// process file - archive mode
+
+int MrmsGribIngest::_processFileArchive(const string &inputPath)
+  
+{
+  
+  PMU_auto_register("Processing file - archive");
+
+  // get time from file name
+  
+  time_t fileDataTime = 0;
+  bool dateOnly = false;
+  if (DataFileNames::getDataTime(inputPath, fileDataTime, dateOnly)) {
+    cerr << "ERROR - _processFileArchive" << endl;
+    cerr << "  Cannot get time from file: " << inputPath << endl;
+    return -1;
+  }
+
+  // check if we have already processed this file
+  
+  if (_fileDataTimes.find(fileDataTime) != _fileDataTimes.end()) {
+    // time previously processed - so ignore
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "--------------------------------------------" << endl;
+      cerr << "Ignoring this file: " << inputPath << endl;
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  Time already processed" << endl;
+    }
+    return 0;
+  }
+
+  // elapsed time since last file
+
+  long secsSinceLatestFile = fileDataTime - _latestDataTime;
+  if (secsSinceLatestFile < _params.min_time_between_output_files_in_secs) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "--------------------------------------------" << endl;
+      cerr << "Ignoring this file: " << inputPath << endl;
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  Secs since last time: " << secsSinceLatestFile << endl;
+    }
+    return 0;
+  }
+  
+  // get list of files at this time
+
+  vector<string> timedPathList;
+  if (_getInputPathList(inputPath, fileDataTime, timedPathList)) {
+    cerr << "ERROR - _processFileArchive" << endl;
+    cerr << "  Cannot get path list for file: " << inputPath << endl;
+    return -1;
+  }
+
+  // loop through the path list
+
+  _clearLayers();
+  _outVol.clear();
+  
+  for (size_t ipath = 0; ipath < timedPathList.size(); ipath++) {
+
+    string timedPath(timedPathList[ipath]);
+    
+    // uncompress the file if needed
+    
+    TaFile infile;
+    if (infile.uncompress(timedPath)) {
+      cerr << "ERROR uncompressing input file: " << timedPath << endl;
+      continue;
+    }
+    
+    string uncompressedPath = infile.getUncompressedPath();
+    if (_params.debug) {
+      cerr << "--------------------------------------------" << endl;
+      cerr << "Processing file: " << uncompressedPath << endl;
+      cerr << "  Data time: " << DateTime::strm(fileDataTime) << endl;
+    }
+    
+    // create MDV output file
+
+    DsMdvx *layer = new DsMdvx;
+    
+    // read in Grib file
+    
+    if (_grib2Mdv->readFile(uncompressedPath, *layer)) {
+      continue;
+    }
+    if (layer->getNFields() == 0) {
+      cerr << "WARNING: No fields found in grib2 file." << endl;
+      cerr << "         No output MDV file created." << endl;
+      continue;
+    }
+    
+    if (_params.debug) {
+      cerr << "Read in layer, height: " << _getHeightKm(*layer) << endl;
+    }
+    
+    // trim horizonal extent if requested
+    
+    if (_params.set_output_bounding_box) {
+      
+      layer->setReadHorizLimits(_params.output_bounding_box.min_lat,
+                                _params.output_bounding_box.min_lon,
+                                _params.output_bounding_box.max_lat,
+                                _params.output_bounding_box.max_lon);
+      layer->constrainHorizontal();
+      
+    }
+    
+    // save layer in layer map
+    LayerPair lp(_getHeightKm(*layer), layer);
+    _layers.insert(lp);
+
+    if (_params.debug) {
+      cerr << "  data time: " << DateTime::strm(fileDataTime) << endl;
+      cerr << "  n layers so far: " << _layers.size() << endl;
+    }
+
+  } // ipath
+
+  _latestDataTime = fileDataTime;
+  _fileDataTimes.insert(fileDataTime);
+  
+  if (_layers.size() < 1) {
+    cerr << "ERROR - no layers found for data time: " << DateTime::strm(fileDataTime) << endl;
+    return -1;
+  }
+  
+  // combine data into volume
+  
+  if (_combineVolume() == 0) {
+    
+    // write data out
+    
+    PMU_auto_register( "Writing mdv file" );
+    if (_params.debug) {
+      cerr << "============================================" << endl;
+      cerr << "Writing output file for time: " << DateTime::strm(_latestDataTime) << endl;
+    }
+    if (_outVol.writeToDir(_params.output_url)) {
+      cerr << "ERROR: Could not write MDV file." << endl;
+      cerr << _outVol.getErrStr() << endl;
+      _clearLayers();
+      _outVol.clear();
+      return -1;
+    }
+    if (_params.debug) {
+      cerr << "Wrote output file: " << _outVol.getPathInUse() << endl;
+      cerr << "============================================" << endl;
+    }
+    
+  }
+  
+  // clear
+  
+  _clearLayers();
+  _outVol.clear();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+// Get input path list for this data time
+// read through all files
+
+int MrmsGribIngest::_getInputPathList(const string &inputPath,
+                                      time_t dataTime,
+                                      vector<string> &timedPathList)
+{
+
+  // get directory
+
+  Path pInput(inputPath);
+  string dirPath = pInput.getDirectory();
+
+  // read through dir
+  
+  DIR *dirp;
+  dirp = opendir(dirPath.c_str());
+  if (dirp == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - MrmsGribIngest::_getInputPathList" << endl;
+    cerr << "  dir: " << dirPath << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+  
+  struct dirent *dp;
+  for (dp = readdir(dirp); dp != NULL; dp = readdir(dirp)){
+
+    // Those files which start with a dot or an underscore, they go
+    // away.
+    
+    if ((dp->d_name[0] == '.') || (dp->d_name[0] == '_')){
+      continue;
+    }
+
+    // only keep those files that match the data time
+    
+    string fileName(dp->d_name);
+    time_t fileDataTime = 0;
+    bool dateOnly = false;
+    if (DataFileNames::getDataTime(fileName, fileDataTime, dateOnly)) {
+      continue;
+    }
+    if (fileDataTime != dataTime) {
+      continue;
+    }
+
+    Path fullPath(dirPath, fileName);
+    timedPathList.push_back(fullPath.getPath());
+
+  } // dp
+    
+  closedir(dirp);
+  return 0;
+  
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // combine layers into single MDV volume

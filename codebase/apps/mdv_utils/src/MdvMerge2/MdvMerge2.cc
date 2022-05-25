@@ -395,7 +395,17 @@ int MdvMerge2::_initGrids()
   
   _outProj.init(coord);
 
-  // alloc gridded arrays
+  // sanity check
+
+ if (coord.nx <= 0 || coord.ny <= 0 || coord.nz <= 0){
+   cerr << "FATAL ERROR: grid dimension <= 0 -- (nx: " 
+        << coord.nx << ", ny: " 
+        << coord.ny << ", nz: " 
+        << coord.nz << ")" << endl;
+   return -1;
+ }
+
+ // alloc gridded arrays
 
   _nz = coord.nz;
   _nxy = coord.nx * coord.ny;

@@ -328,7 +328,11 @@ int NcfFieldData::addToNc(Nc3File *ncFile, Nc3Dim *timeDim,
 
   // Add auxiliary variables if necessay
 
-  if (_gridInfo->getProjType() != Mdvx::PROJ_LATLON ) {
+  if (_gridInfo->getProjType() == Mdvx::PROJ_LATLON ) {
+
+    iret |= !_ncVar->add_att(NcfMdv::grid_mapping_name, NcfMdv::latitude_longitude);
+
+  } else {
 
     char auxVarNames[1024];
     

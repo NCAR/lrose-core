@@ -116,7 +116,8 @@ class DLL_EXPORT PolarWidget : public QWidget
               const RadxPlatform &platform,
               //const vector<DisplayField *> &fields,
 	      DisplayFieldController *displayFieldController,
-              bool haveFilteredFields);
+              bool haveFilteredFields,
+              RayLocationController *rayLocationController);
   
   /**
    * @brief Destructor.
@@ -241,14 +242,14 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   //void displayImage(const size_t field_num);
   void displayImage(string currentFieldName, double currentSweepAngle,
-    RayLocationController *rayLocationController, ColorMap &colorMap,
+    ColorMap &colorMap,
     QColor backgroundColor);
   //void imageReady(QImage *image);
   /**
    * set archive mode
    */
   
-  void setArchiveMode(bool archive_mode);
+  //void setArchiveMode(bool archive_mode);
 
   /**
    * @brief Unzoom the view.
@@ -411,7 +412,7 @@ class DLL_EXPORT PolarWidget : public QWidget
 
   // archive mode
 
-  bool _archiveMode;
+  //bool _archiveMode;
 
   /**
    * @brief Last X,Y location of the mouse during mouse move events; used for
@@ -530,7 +531,8 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void _setTransform(const QTransform &transform);
-
+  void _translateTransform(double x, double y);
+  
   /////////////////////////////////
   // Overridden QtWidget methods //
   /////////////////////////////////
@@ -560,6 +562,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   void mouseReleaseEvent(QMouseEvent* event) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
 
   /**
    * @brief The method that is called when a repaint event is triggered.

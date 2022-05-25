@@ -233,6 +233,7 @@ codebase/apps/ingest/src/CsuSounding2Spdb/CsuSounding2Spdb
 codebase/apps/ingest/src/Dorade2Dsr/Dorade2Dsr
 codebase/apps/ingest/src/Dorade2DsrArchiveDriver/Dorade2DsrArchiveDriver
 codebase/apps/ingest/src/EolMobileKml2Spdb/EolMobileKml2Spdb
+codebase/apps/ingest/src/EraNc2Mdv/EraNc2Mdv
 codebase/apps/ingest/src/GemScan2Dsr/GemScan2Dsr
 codebase/apps/ingest/src/GemVolXml2Dsr/GemVolXml2Dsr
 codebase/apps/ingest/src/Gini2Mdv/Gini2Mdv
@@ -422,7 +423,6 @@ codebase/apps/radar/src/AcGeorefCompare/AcGeorefCompare
 codebase/apps/radar/src/AcGeoref2Spdb/AcGeoref2Spdb
 codebase/apps/radar/src/AltCpCompute/AltCpCompute
 codebase/apps/radar/src/Colide/Colide
-codebase/apps/radar/src/ConvStrat/ConvStrat
 codebase/apps/radar/src/CP2Udp2Fmq/CP2Udp2Fmq
 codebase/apps/radar/src/CalCompute/CalCompute
 codebase/apps/radar/src/CartSim/CartSim
@@ -439,6 +439,8 @@ codebase/apps/radar/src/Dsr2CP2Mom/Dsr2CP2Mom
 codebase/apps/radar/src/DsrGrabber/DsrGrabber
 codebase/apps/radar/src/DsrMerge/DsrMerge
 codebase/apps/radar/src/DualDopplerLobes/DualDopplerLobes
+codebase/apps/radar/src/Ecco/Ecco
+codebase/apps/radar/src/Ecco/ResTestEcco/ResTestEcco
 
 codebase/apps/radar/src/HawkEye/HawkEye
 codebase/apps/radar/src/HawkEye/Makefile.qmake
@@ -466,11 +468,6 @@ codebase/apps/radar/src/IpsTsSim/IpsTsSim
 codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
 codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
 
-codebase/apps/radar/src/Sprite/Sprite
-codebase/apps/radar/src/Sprite/Makefile.qmake
-codebase/apps/radar/src/Sprite/moc_*cpp
-codebase/apps/radar/src/Sprite/moc_predefs.h
-
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/HcrVelCorrect/ReadEgm2008/ReadEgm2008
 codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain
@@ -487,6 +484,7 @@ codebase/apps/radar/src/MdvFold/MdvFold
 codebase/apps/radar/src/MdvPartRain/MdvPartRain
 codebase/apps/radar/src/MdvRadarShear/MdvRadarShear
 codebase/apps/radar/src/MergeHcrAndHsrl/MergeHcrAndHsrl
+codebase/apps/radar/src/Mpd2Radx/Mpd2Radx
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/PartRain/PartRain
 codebase/apps/radar/src/PidZdrStats/PidZdrStats
@@ -502,6 +500,13 @@ codebase/apps/radar/src/RapMap2Chill/RapMap2Chill
 codebase/apps/radar/src/REPoH/REPoH
 codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint
+
+codebase/apps/radar/src/Sprite/Sprite
+codebase/apps/radar/src/Sprite/Makefile.qmake
+codebase/apps/radar/src/Sprite/moc_*cpp
+codebase/apps/radar/src/Sprite/moc_predefs.h
+
+codebase/apps/radar/src/StormShapeSim/StormShapeSim
 codebase/apps/radar/src/StaggeredLimits/StaggeredLimits
 codebase/apps/radar/src/SunCal/SunCal
 codebase/apps/radar/src/SunCal/testing/sunscan_ael_code

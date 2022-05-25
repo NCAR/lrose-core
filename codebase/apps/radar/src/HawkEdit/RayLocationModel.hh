@@ -15,6 +15,7 @@ public:
 RayLocationModel();
 ~RayLocationModel();
 
+void init();
 void sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 	int sweepNumber);
 size_t getNRayLocations();
@@ -27,7 +28,7 @@ double getStopAngle(size_t rayIdx);
 
 vector <float> *getRayData(size_t rayIdx, string fieldName);
 
-const RadxRay *getClosestRay(double azDeg);
+RadxRay *getClosestRay(double azDeg);
 
 private:
 	vector<RayLoc> ray_loc;

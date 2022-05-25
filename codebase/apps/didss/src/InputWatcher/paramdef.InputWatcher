@@ -265,7 +265,7 @@ commentdef {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to copy to a file with name based on the time.";
-  p_help = "If TRUE, the file will be copied to a file, in the directory 'output_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.";
+  p_help = "If TRUE, the file will be copied to a file, in the directory 'copy_dir', with the path based on the file modify time. The path will be: 'copy_dir/yyyymmdd/hhmmss.copy_ext'. This option takes precedence over copy_using_original_name.";
 } copy_to_time_stamped_file;
 
 paramdef boolean {

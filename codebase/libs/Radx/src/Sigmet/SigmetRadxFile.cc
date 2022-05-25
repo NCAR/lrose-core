@@ -992,8 +992,8 @@ bool SigmetRadxFile::_detectIncreasingTimeElevation() {
     bool divergence = false;
     size_t iray = 0;
     bool equal = true;
-    Radx::ui16 i_sec;
-    Radx::ui16 i1_sec;
+    Radx::ui16 i_sec = 0;
+    Radx::ui16 i1_sec = 0;
     //cerr << "i_sec " << i_sec << endl;
     while (iray < _rayInfo.size()-1 && equal) {
       i_sec = _rayInfo[iray].hdr.seconds;

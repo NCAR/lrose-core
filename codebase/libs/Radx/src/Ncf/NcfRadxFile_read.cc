@@ -2531,6 +2531,7 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
                          _fieldName, _fieldUnits,
                          _fieldStandardName, _fieldLongName,
                          _fieldCommentStr,
+                         _fieldAncillaryVariablesStr,
                          _fieldLegendXml, _fieldThresholdingXml,
                          _fieldSamplingRatio,
                          _fieldIsDiscrete,
@@ -2670,6 +2671,7 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
                          _fieldName, _fieldUnits,
                          _fieldStandardName, _fieldLongName,
                          _fieldCommentStr,
+                         _fieldAncillaryVariablesStr,
                          _fieldLegendXml, _fieldThresholdingXml,
                          _fieldSamplingRatio,
                          _fieldIsDiscrete,
@@ -2753,6 +2755,7 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
                                        string &standardName,
                                        string &longName,
                                        string &commentStr,
+                                       string &ancillaryVariablesStr,
                                        string &legendXml,
                                        string &thresholdingXml,
                                        double &samplingRatio,
@@ -2812,6 +2815,15 @@ void NcfRadxFile::_readFieldAttributes(Nc3Var *var,
   if (commentAtt != NULL) {
     commentStr = Nc3xFile::asString(commentAtt);
     delete commentAtt;
+  }
+  
+  // ancillaryVariables
+
+  ancillaryVariablesStr.clear();
+  Nc3Att *ancillaryVariablesAtt = var->get_att(ANCILLARY_VARIABLES);
+  if (ancillaryVariablesAtt != NULL) {
+    ancillaryVariablesStr = Nc3xFile::asString(ancillaryVariablesAtt);
+    delete ancillaryVariablesAtt;
   }
   
   // xml
@@ -2930,6 +2942,9 @@ void NcfRadxFile::_setFieldAttributes(RadxField *field,
   field->setLongName(_fieldLongName);
   if (_fieldCommentStr.size() > 0) {
     field->setComment(_fieldCommentStr);
+  }
+  if (_fieldAncillaryVariablesStr.size() > 0) {
+    field->setAncillaryVariables(_fieldAncillaryVariablesStr);
   }
   if (_fieldLegendXml.size() > 0) {
     field->setLegendXml(_fieldLegendXml);

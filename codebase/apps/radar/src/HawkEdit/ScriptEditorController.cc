@@ -276,7 +276,15 @@ void ScriptEditorController::saveFieldArrays(std::map<QString, QString> &previou
   std::map<QString, QString> currentVariableContext;
   QJSValue theGlobalObject = engine->globalObject();
 
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
   QJSValueIterator it2(theGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
     QJSValue value = it2.value();
@@ -324,7 +332,15 @@ void ScriptEditorController::saveFieldVariableAssignments(std::map<QString, QStr
   QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
 
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
   QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
 
@@ -420,8 +436,15 @@ QStringList *ScriptEditorController::findNewFieldNames(std::map<QString, QString
   // try iterating over the properties of the globalObject to find new variables                       
   QJSValue newGlobalObject = engine->globalObject();
   //printQJSEngineContext();
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
 
   QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count < 52) {
+    it2.next();
+    count += 1;
+  }
+
   while (it2.hasNext()) {
     it2.next();
     QJSValue value = it2.value();
@@ -468,6 +491,8 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   
   engine->globalObject().setProperty("sqrt", myExt.property("sqrt"));
   engine->globalObject().setProperty("REMOVE_AIRCRAFT_MOTION", myExt.property("REMOVE_AIRCRAFT_MOTION"));
+  engine->globalObject().setProperty("REMOVE_ONLY_SURFACE", myExt.property("REMOVE_ONLY_SURFACE"));
+
   engine->globalObject().setProperty("BB_UNFOLDING_FIRST_GOOD_GATE", myExt.property("BB_UNFOLDING_FIRST_GOOD_GATE"));
   engine->globalObject().setProperty("BB_UNFOLDING_LOCAL_WIND", myExt.property("BB_UNFOLDING_LOCAL_WIND"));
   engine->globalObject().setProperty("BB_UNFOLDING_AC_WIND", myExt.property("BB_UNFOLDING_AC_WIND"));
@@ -480,6 +505,8 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine->globalObject().setProperty("SET_BAD_FLAGS_BELOW", myExt.property("SET_BAD_FLAGS_BELOW"));
   engine->globalObject().setProperty("SET_BAD_FLAGS_BETWEEN", myExt.property("SET_BAD_FLAGS_BETWEEN"));
   engine->globalObject().setProperty("COMPLEMENT_BAD_FLAGS", myExt.property("COMPLEMENT_BAD_FLAGS"));
+  engine->globalObject().setProperty("COPY", myExt.property("COPy"));
+
   engine->globalObject().setProperty("CLEAR_BAD_FLAGS", myExt.property("CLEAR_BAD_FLAGS"));
   engine->globalObject().setProperty("ASSERT_BAD_FLAGS", myExt.property("ASSERT_BAD_FLAGS"));
 
@@ -704,6 +731,61 @@ uncate(100);
       LOG(DEBUG) << "exit";
 }
 
+// run in batch mode ...
+// TODO: consider this running with separate DataModel, etc.
+// so that current GUI settings are not affected ???
+// TODO: We also need separate command-line access to this function.  
+// separate DataEngine???
+void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFiles, 
+  QString script, bool useBoundary,
+  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
+
+  // for each archive file 
+  //vector<string>::iterator it;
+  //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
+    //   load each archive file
+    // TODO: I don't like accessing the DataModel here.  Who should load
+    // the new data file???? PolarManager?? call to timeNav???
+    //DataModel *dataModel = DataModel::Instance();
+    //dataModel->readData(*it, fieldNames,
+    //  debug_verbose, debug_extra);
+
+    //   runForEachRayScript
+    runForEachRayScript(script, useBoundary, boundaryPoints);
+    //   save archive file to temp area
+    //dataModel->writeData(saveDirectoryPath);
+  //}
+}
+
+
+string ScriptEditorController::lowerIt(string s) {
+  string lowered = s;
+  for (int i=0; i<s.size(); i++) {
+    lowered[i] = std::tolower(s[i]);
+  }
+  return lowered;
+}
+// returns list of booleans: true if field is referenced in script
+//                     false otherwise.
+
+vector<bool> *ScriptEditorController::getListOfFieldsReferencedInScript(
+  vector<string> &fields, string script) {
+
+  // lower the script
+
+  string loweredScript = lowerIt(script);
+  cout << "lowered script: " << loweredScript << endl;
+
+  vector<bool> *referenced = new vector<bool>(fields.size(), false);
+  for (int i=0; i<fields.size(); i++) {
+    string loweredField = lowerIt(fields.at(i));
+    if (loweredScript.find(loweredField) != string::npos) {
+      referenced->at(i) = true;
+    }
+  }
+  return referenced;
+}
 
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
   vector<Point> &boundaryPoints)
@@ -720,7 +802,15 @@ void ScriptEditorController::runForEachRayScript(QString script, bool useBoundar
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine->globalObject();
 
-    QJSValueIterator it(theGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext() && count < 52) {
+    it.next();
+    count += 1;
+  }
+
     while (it.hasNext()) {
       it.next();
       QString theValue = it.value().toString();
@@ -734,15 +824,24 @@ uncate(100);
     // set initial field names
     initialFieldNames = getFieldNames();
 
+    vector<bool> *referenced = 
+      getListOfFieldsReferencedInScript(*initialFieldNames, script.toStdString());
+
     // add initialFieldNames_v to currentVariableContext!
     //_addFieldNameVectorsToContext(initialFieldNames, &currentVariableContext);
     vector<string>::iterator nameItr;
+    int idx = 0;
     for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
-      QString vectorName(nameItr->c_str());
-      //vectorName.append("_v");  
-      //QString originalName(nameItr->c_str());
-      currentVariableContext[vectorName] = vectorName;
+      if (referenced->at(idx)) {
+        QString vectorName(nameItr->c_str());
+        //vectorName.append("_v");  
+        //QString originalName(nameItr->c_str());
+        currentVariableContext[vectorName] = vectorName;
+      }
+      idx += 1;
     }
+
+    delete referenced;
 
     LOG(DEBUG) << "Context completely set ...";
     printQJSEngineContext();
@@ -777,7 +876,7 @@ uncate(100);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
       
-      setupFieldArrays(); 
+      //setupFieldArrays(); 
 
       setupBoundaryArray();
 
@@ -858,7 +957,15 @@ uncate(100);
     QJSValue newGlobalObject = engine->globalObject();
     printQJSEngineContext();
 
-    QJSValueIterator it2(newGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count2 = 0;
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count2 < 52) {
+    it2.next();
+    count2 += 1;
+  }
+
     while (it2.hasNext()) {
 	    it2.next();
 
@@ -910,9 +1017,13 @@ uncate(100);
               tempName.resize(length-1);
               //tempName.append("#");
               _assign(tempName, userDefinedName);
-              // add Variable list ToScriptEditor(it2.name(), it2.value());
-              newFieldNames << it2.name();
+            } else {
+              // this may be a copy command (e.g. ZZ = VG)
+              _copy(tempName, userDefinedName);
             }
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+
           }
         } else {
           string originalName = it2.name().toStdString();
@@ -971,7 +1082,15 @@ void ScriptEditorController::runForEachRayScript(QString script, int currentSwee
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine->globalObject();
 
-    QJSValueIterator it(theGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext() && count < 52) {
+    it.next();
+    count += 1;
+  }
+
     while (it.hasNext()) {
       it.next();
       QString theValue = it.value().toString();
@@ -1028,7 +1147,7 @@ uncate(100);
 
       // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
       
-      setupFieldArrays(); 
+      //setupFieldArrays(); 
 
       setupBoundaryArray();
 
@@ -1082,7 +1201,7 @@ uncate(100);
 
         // save any field variable assignments 
         // TODO: need to speed this up; also, this is necessary for vector operations
-        //saveFieldVariableAssignments(currentVariableContext);
+        // saveFieldVariableAssignments(currentVariableContext);
   
       }
 
@@ -1117,9 +1236,19 @@ uncate(100);
     QJSValue newGlobalObject = engine->globalObject();
     printQJSEngineContext();
 
-    QJSValueIterator it2(newGlobalObject);
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count2 = 0;
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count2 < 52) {
+    it2.next();
+    count2 += 1;
+  }    
+
     while (it2.hasNext()) {
       it2.next();
+
+      if (it2.name().compare("BOUNDARY") != 0) {
 
       QJSValue value = it2.value();
       if (value.isArray()) {
@@ -1169,9 +1298,13 @@ uncate(100);
               tempName.resize(length-1);
               //tempName.append("#");
               _assign(tempName, userDefinedName);
-              // add Variable list ToScriptEditor(it2.name(), it2.value());
-              newFieldNames << it2.name();
-            }
+            } else {
+              // this may be a copy command (e.g. ZZ = VG)
+              _copy(tempName, userDefinedName);
+            }  
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+          
           }
         } else {
           string originalName = it2.name().toStdString();
@@ -1198,6 +1331,7 @@ uncate(100);
 
         }
       }
+    } // not BOUNDARY
     }
 
     volumeUpdated(newFieldNames);
@@ -1215,6 +1349,17 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
+void ScriptEditorController::initProgress(int nFiles) {
+  _currentView->initProgress(nFiles);
+}
+
+void ScriptEditorController::updateProgress(int currentIndex, int lastIndex) {
+  _currentView->updateProgress(currentIndex, lastIndex);
+}
+
+void ScriptEditorController::batchEditComplete() {
+  _currentView->batchEditComplete();
+}
 
 void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
 
@@ -1237,6 +1382,20 @@ void ScriptEditorController::_assign(string tempName, string userDefinedName,
     (size_t) sweepIndex);
 }
 
+void ScriptEditorController::_copy(string tempName, string userDefinedName) {
+
+  // copy the field in the RadxVol
+  _soloFunctionsController->copyField(tempName, userDefinedName);
+}
+
+void ScriptEditorController::_copy(string tempName, string userDefinedName,
+  int sweepIndex) {
+
+  // copy the field in the RadxVol; only copy data for a
+  // single sweep
+  _soloFunctionsController->copyField(tempName, userDefinedName, 
+    (size_t) sweepIndex);
+}
 
 void ScriptEditorController::regularizeRays() {
   _soloFunctionsController->regularizeRays();

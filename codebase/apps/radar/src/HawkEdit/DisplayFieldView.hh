@@ -85,6 +85,8 @@ public:
   void updateFieldPanel(string rawFieldLabel, string newFieldName,
     string rawFieldShortCut);
   void clear();
+  bool hasField(string fieldName);
+  void removeField(string fieldName);
 
   //QWidget *getViewWidget();
 

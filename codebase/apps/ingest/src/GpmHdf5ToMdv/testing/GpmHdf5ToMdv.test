@@ -270,6 +270,19 @@ output_z_levels_km = {
 //
 //======================================================================
  
+///////////// main_dataset_group_name /////////////////
+//
+// Specify the name of the main data group.
+//
+// The groupName params in output_fields will be nested within this 
+//   group.
+//
+//
+// Type: string
+//
+
+main_dataset_group_name = "NS";
+
 //======================================================================
 //
 // OUTPUT ENCODING AND COMPRESSION.

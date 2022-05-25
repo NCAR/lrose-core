@@ -160,9 +160,10 @@ HawkEye::~HawkEye()
 
 {
 
-  if (_polarManager) {
-    delete _polarManager;
-  }
+  //if (_polarManager) {
+  //  //_polarManager->~PolarManager();
+  //  delete _polarManager;
+  //}
 
   if (_reader) {
     delete _reader;
@@ -215,8 +216,8 @@ int HawkEye::Run(QApplication &app)
       //TDRP_str_replace(&_params.archive_data_url, url.c_str());
       _params->setArchiveDataUrl(url.c_str());
     } else if (_params->begin_in_archive_mode) {
-      if (_polarManager->loadArchiveFileList()) {
-        noFilename = true;
+      //if (_polarManager->loadArchiveFileList()) {
+        //noFilename = true;
         //_polarManager->getFileAndFields();
          // seed with files for the day currently in view
         // generate like this: *yyyymmdd*
@@ -261,7 +262,7 @@ int HawkEye::Run(QApplication &app)
         errorDialog.exec();
         */
         // return -1;
-      }
+      //}
     }
     
     return _polarManager->run(app); // , noFilename);

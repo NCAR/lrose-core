@@ -40,8 +40,7 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
                                            int radar_scan_mode,
                                            int radar_type,
                                            float tilt_angle,
-				       float rotation_angle,
-				       bool *boundary_mask_out) {
+				                                   bool *boundary_mask_out) {
 
 /*
   // map flat data to internal data structures ...
@@ -126,7 +125,6 @@ void SoloFunctionsApi::GetBoundaryMask(long *xpoints, long *ypoints, int npoints
              radar_scan_mode,
              radar_type,
              tilt_angle,
-             rotation_angle,
              boundary_mask_out);
   } catch(...) {
     throw "Something bad happened during script evaluation";
@@ -884,6 +882,62 @@ void SoloFunctionsApi::RemoveStormMotion(float wind, float speed, float dgi_dd_r
 			   data, new_data, nGates,
 			   bad, dgi_clip_gate, boundary_mask);
   } catch(...) {
+    throw "Something bad happened during script evaluation";
+  }
+}
+
+void SoloFunctionsApi::RemoveOnlySurface(
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     float vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+     float asib_altitude_agl,      // altitude angle ???
+     float dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                           // origin dds->ra->elevation, ra = radar_angles
+                           // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+     double dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+     double dds_asib_roll,            // origin dds->asib->roll
+     double dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+     float radar_latitude,  // radar->latitude 
+     const float *data,     // internal value
+     float *new_data,       // internal value
+     size_t nGates,         // internal value
+     float gate_size,
+     float distance_to_first_gate,
+     double max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+     float bad_data_value,  // default value
+     size_t dgi_clip_gate,  // default value
+     bool *boundary_mask) {
+
+  enum Surface_Type which_removal = ONLY_SURFACE;
+  try {
+    se_ac_surface_tweak(which_removal,  // internal value based on function call
+        optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+        seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+        vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+        asib_altitude_agl,      // altitude angle ???
+        dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                             // origin dds->ra->elevation, ra = radar_angles
+                             // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+        getenv_ALTERNATE_GECHO,  // script parameter
+        d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+                 // d = ALTERNATE_GECHO environment variable
+        dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+        dds_asib_roll,            // origin dds->asib->roll
+        dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+        radar_latitude,  // radar->latitude 
+        data,     // internal value
+        new_data,       // internal value
+        nGates,         // internal value
+        gate_size,
+        distance_to_first_gate,
+        max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+        bad_data_value,  // default value
+        dgi_clip_gate,  // default value
+        boundary_mask);
+    } catch(...) {
     throw "Something bad happened during script evaluation";
   }
 }

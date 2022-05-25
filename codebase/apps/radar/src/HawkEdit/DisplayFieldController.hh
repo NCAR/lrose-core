@@ -118,6 +118,7 @@ private:
  
   //DisplayFieldView *_displayFieldView;
   bool _endWithV(string &fieldName); 
+  bool _suspendAccess;
 
 };
 

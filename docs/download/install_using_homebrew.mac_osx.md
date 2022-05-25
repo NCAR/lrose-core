@@ -11,32 +11,35 @@
 
 <a name="prepare"/>
 
-## 1. Prepare
+## 1. Prepare (requires admin privileges)
+
+### Install XCode and the Command Line Tools
 
 Install either the XCode development environment or a stand-alone version of the
 XCode command line tools.  If you intend to do lots of Apple development and
 want to use an IDE, then install XCode.
 
-You also need to install Homebrew.
+You also need to install Homebrew. See:
 
 * [Install XCode and Homebrew](../build/lrose_package_dependencies.osx.md)
 
 ## 2. Download
+
+**NOTE - when using brew, do NOT use admin privileges.**
+**Always run brew as yourself, otherwise you will create permission problems.**
 
 You need to download the brew formula from the lrose repository.
 This formula is used to perform the homebrew build.
 
 Download ```lrose-core.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 Choose the latest version.
 
 <a name="install"/>
 
-## 3. Install
+## 3. Install (DO NOT use admin privileges)
 
 Let us assume you have downloaded the latest core distribution, containing all of the core apps.
 
@@ -106,15 +109,13 @@ You can watch the progress using:
 If the build is successful, lrose will be installed in:
 
 ```
-  /usr/local/opt/lrose/include
-  /usr/local/opt/lrose/lib
-  /usr/local/opt/lrose/bin
+  /usr/local/include
+  /usr/local/lib
+  /usr/local/bin
 ```
 
 In these directories, links will be created that point to the actual files
 in ```/usr/local/Cellar```.
-
-See also: [Homebrew Notes](./homebrew_notes.md)
 
 <a name="verify"/>
 
@@ -122,15 +123,15 @@ See also: [Homebrew Notes](./homebrew_notes.md)
 
 Try the commands:
 ```
-  /usr/local/opt/lrose/bin/RadxPrint -h
-  /usr/local/opt/lrose/bin/RadxConvert -h
-  /usr/local/opt/lrose/bin/Radx2Grid -h
-  /usr/local/opt/lrose/bin/HawkEye
+  /usr/local/bin/RadxPrint -h
+  /usr/local/bin/RadxConvert -h
+  /usr/local/bin/Radx2Grid -h
+  /usr/local/bin/HawkEye
 ```
 
 <a name="upgrade"/>
 
-## 5. Upgrade to a new version
+## 5. Upgrade to a new LROSE version (DO NOT use admin privileges)
 
 When the time comes to upgrade, you will first need to uninstall the current version.
 
@@ -158,9 +159,7 @@ If needed, uninstall fractl, vortrac and samurai:
 
 Next, download the new version of the brew formula, from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 Choose from the appropriate distribution.
 
@@ -175,7 +174,7 @@ See [install](#install) for checking on the install.
 
 <a name="fractl"/>
 
-## 6. Installing fractl
+## 6. Installing fractl (DO NOT use admin privileges)
 
 The ```fractl``` application performs dual-Doppler analysis. It is maintained by CSU. ```fractl``` is dependent on ```lrose-core```.
 
@@ -184,9 +183,7 @@ fractl can be installed using the ```lrose-fractl.rb``` brew formula.
 
 Download ```lrose-fractl.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
@@ -205,6 +202,12 @@ For example you should expect to see:
   Warning: Treating lrose-fractl.rb as a formula.
 ```
 
+fractl will be installed as:
+
+```
+  /usr/local/bin/fractl
+```
+
 To upgrade:
 
 ```
@@ -214,7 +217,7 @@ To upgrade:
 
 <a name="vortrac"/>
 
-## 7. Installing vortrac
+## 7. Installing vortrac (DO NOT use admin privileges)
 
 The ```vortrac``` application analyses rotations in single Doppler data. It is maintained by CSU. ```vortrac``` is dependent on ```lrose-core```.
 
@@ -222,9 +225,7 @@ The ```vortrac``` application analyses rotations in single Doppler data. It is m
 
 Download ```lrose-vortrac.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
@@ -243,6 +244,12 @@ For example you should expect to see:
   Warning: Treating lrose-vortrac.rb as a formula.
 ```
 
+vortrac will be installed as:
+
+```
+  /usr/local/bin/vortrac
+```
+
 To upgrade:
 
 ```
@@ -252,7 +259,7 @@ To upgrade:
 
 <a name="samurai"/>
 
-## 8. Installing samurai
+## 8. Installing samurai (DO NOT use admin privileges)
 
 The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU. ```samurai``` is dependent on ```lrose-core```.
 
@@ -260,9 +267,7 @@ The ```samurai``` performs multi-Doppler retrievals. It is maintained by CSU. ``
 
 Download ```lrose-samurai.rb``` from:
 
-```
-  https://github.com/NCAR/lrose-core/releases 
-```
+* [github.com/NCAR/lrose-core/releases](https://github.com/NCAR/lrose-core/releases)
 
 To perform the install:
 
@@ -279,6 +284,12 @@ For example you should expect to see:
   Error: Failed to load cask: lrose-samurai.rb
   Cask 'lrose-samurai' is unreadable
   Warning: Treating lrose-samurai.rb as a formula.
+```
+
+samurai will be installed as:
+
+```
+  /usr/local/bin/samurai
 ```
 
 To upgrade:

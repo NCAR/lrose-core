@@ -109,6 +109,18 @@ public:
   } primary_axis_t;
 
   typedef enum {
+    SWEEP_MODE_SECTOR = 1,
+    SWEEP_MODE_RHI = 3,
+    SWEEP_MODE_VERTICAL_POINTING = 4,
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
+    SWEEP_MODE_SUNSCAN = 11,
+    SWEEP_MODE_POINTING = 12,
+    SWEEP_MODE_SUNSCAN_RHI = 17,
+    SWEEP_MODE_ELECTRONIC_STEERING = 20
+  } sweep_mode_t;
+
+  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -614,6 +626,10 @@ public:
 
   tdrp_bool_t apply_georeference_corrections;
 
+  tdrp_bool_t read_georeference_corrections;
+
+  char* georeference_corrections_path;
+
   tdrp_bool_t apply_time_offset;
 
   double time_offset_secs;
@@ -659,6 +675,12 @@ public:
   tdrp_bool_t optimize_surveillance_transitions;
 
   double optimized_transitions_max_elev_error;
+
+  tdrp_bool_t override_sweep_mode;
+
+  sweep_mode_t sweep_mode;
+
+  tdrp_bool_t set_sweep_mode_from_ray_angles;
 
   tdrp_bool_t adjust_sweep_limits_using_angles;
 
@@ -713,6 +735,11 @@ public:
   int censoring_fields_n;
 
   int censoring_min_valid_run;
+
+  tdrp_bool_t specify_fields_to_be_censored;
+
+  char* *_fields_to_be_censored;
+  int fields_to_be_censored_n;
 
   tdrp_bool_t apply_linear_transforms;
 
@@ -815,7 +842,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[181];
+  mutable TDRPtable _table[188];
 
   const char *_className;
 

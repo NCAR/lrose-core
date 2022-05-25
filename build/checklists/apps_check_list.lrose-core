@@ -71,6 +71,7 @@ DsrAddSnr
 DsrGrabber
 DsrMerge
 DualDopplerLobes
+Ecco
 EchoTops
 Egm2Mdv
 EolMobileKml2Spdb
@@ -93,6 +94,7 @@ GetPortNumber
 Gini2Mdv
 GoesRGLM2Spdb
 GoesRnetCDF2Mdv
+GpmHdf5ToMdv
 Grib2Mdv
 Grib2toMdv
 GribNc2Mdv

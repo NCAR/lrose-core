@@ -43,6 +43,12 @@ public:
   vector<string> *getVariablesFromScriptEditor();
   vector<float> *getDataForVariableFromScriptEditor(int column, string fieldName);
 
+  string getSaveEditsDirectory();
+
+  void initProgress(int nFiles);
+  void updateProgress(int currentIndex, int lastIndex);
+  void batchEditComplete();
+
   //void setSelectionToValue(QString value);
   void closeEvent();
 
@@ -54,6 +60,9 @@ public slots:
     void cancelFormulaInput();
     void displayHelp();
     void scriptComplete();
+    void cancelScriptRun();
+    //void undoEdits();
+    //void redoEdits();
     //void clear();
 
     void notImplementedMessage();
@@ -65,7 +74,13 @@ public slots:
 
     void applyChanges();
     void currentSweepClicked(bool checked);
-    void allSweepsClicked(bool checked);
+    //void allSweepsClicked(bool checked);
+    //void timeRangeClicked(bool checked);
+    void changeOutputLocation(bool checked);
+
+
+  //void hideTimeRangeEdits();
+  //void showTimeRangeEdits();
 
   //  void printQJSEngineContext();
 
@@ -75,7 +90,13 @@ signals:
   //void needDataForField(string fieldName, int r, int c);
   void applyVolumeEdits();
   void runOneTimeOnlyScript(QString oneTimeOnlyScript);
-  void runForEachRayScript(QString forEachRayScript, bool useBoundary);
+  void runForEachRayScript(QString forEachRayScript, bool useBoundary,
+    bool useAllSweeps);
+  void runScriptBatchMode(QString script, bool useBoundary, 
+    bool useAllSweeps, bool useTimeRange);
+  void cancelScriptRunRequest();
+  void undoScriptEdits();
+  void redoScriptEdits();  
   void scriptEditorClosed();
 
 protected:
@@ -99,6 +120,9 @@ protected:
   void openScriptFile();
   void importScriptFile();
   void saveScriptFile();
+  void saveEditDirectory();
+
+
 
 private:
 
@@ -116,9 +140,17 @@ private:
     QTreeView *helpView;
     QHBoxLayout *scriptEditLayout;
 
-    QPushButton *currentSweepToggleButton;
+    //QPushButton *currentSweepToggleButton;
     QPushButton *allSweepsToggleButton;
     QGroupBox *scriptModifiers;
+
+    //QPushButton *currentTimeToggleButton;
+    //QPushButton *timeRangeToggleButton;
+    QDateTimeEdit *_archiveStartTimeEdit;
+    QDateTimeEdit *_archiveEndTimeEdit;
+    QLabel *saveEditsDirectory;
+    QPushButton *browseDirectoryButton;
+
     QVBoxLayout *checkBoxLayout;
     QWidget *scriptEditWidget;
 
@@ -128,7 +160,7 @@ private:
     //QTextEdit *formulaInput;
   // ScriptEditorDelegate *formulaInput;
 
-    //PolarManager *_polarManager;
+    QProgressBar *progressBar;
 };
 
 #endif // SCRIPTEDITORVIEW_H

@@ -4,6 +4,7 @@
 #include <regex>
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 
 #include "SoloFunctionsModel.hh"
 //#include "RemoveAcMotion.cc" // This comes from an external library
@@ -251,7 +252,6 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
   int radar_type = 0; // GROUND; 
  
   float tilt_angle = 0.0; // TODO: It should be this ... ray->getElevationDeg();
-  float rotation_angle = 0.0; 
 
 
   // TODO: need to fix this!  sending bool*, expecting short*
@@ -272,7 +272,6 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
 				   radar_scan_mode,
 				   radar_type,
 				   tilt_angle,
-				   rotation_angle,
 				   _boundaryMask);
  
   printBoundaryMask();
@@ -510,6 +509,60 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
 }
 
 // return the temporary name for the new field in the volume
+string SoloFunctionsModel::CopyField(string fieldName,
+             int rayIdx, int sweepIdx,
+             string newFieldName) {
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
+       << " sweepIdx=" << sweepIdx;
+  
+  const RadxField *field;
+
+  DataModel *dataModel = DataModel::Instance();
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = dataModel->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+  
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  const float *data = field->getDataFl32();
+  float *newData = new float[nGates];
+  memcpy(newData, data, nGates*sizeof(float));
+/*
+  for (int i=0; i<10; i++)
+    newData[i] = data[i];   
+  for (int i=10; i<30; i++)
+    newData[i] = 0;
+  for (int i=30; i<nGates; i++)
+    newData[i] = data[i];   
+*/
+  // insert new field into RadxVol                                                                             
+  LOG(DEBUG) << "result = ";
+  for (int i=0; i<50; i++)
+    LOG(DEBUG) << newData[i] << ", ";
+  
+  // I have the ray, can't I just add a field to it?
+                                                                     
+  Radx::fl32 missingValue = Radx::missingFl32; 
+  bool isLocal = false;
+  string field_units = field->getUnits();
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  return ""; // tempFieldName;
+}
+
+
+// return the temporary name for the new field in the volume
 string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 					   int rayIdx, int sweepIdx,
 					   string newFieldName) {
@@ -679,6 +732,11 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 
   // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }  
   
   // perform the function ...
   soloFunctionsApi.Despeckle(data,  newData, nGates, bad_data_value, speckle_length,
@@ -690,7 +748,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
     LOG(DEBUG) << newData[i] << ", ";
 
 
-  Radx::fl32 missingValue = Radx::missingFl32; 
+  // Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
@@ -845,6 +903,11 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
 
   // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
   
   //==========
 
@@ -880,7 +943,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   cerr << endl;
   */
   
-  Radx::fl32 missingValue = Radx::missingFl32; 
+  //Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = false;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
@@ -895,6 +958,193 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
 
   return tempFieldName;
 }
+
+string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
+            int rayIdx, int sweepIdx,
+
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+
+            size_t clip_gate,
+            float bad_data_value,
+            string newFieldName) { 
+
+  // What is being returned? the name of the new field in the model that
+  // contains the results.
+
+  LOG(DEBUG) << "entry with fieldName ... ";
+  LOG(DEBUG) << fieldName;
+
+  // gather data from context -- most of the data are in a DoradeRadxFile object
+
+  // TODO: convert the context RadxVol to DoradeRadxFile and DoradeData format;
+  //RadxVol vol = context->_vol;
+
+
+  const RadxField *field;
+  DataModel *dataModel = DataModel::Instance();
+
+  //  get the ray for this field 
+  const vector<RadxRay *>  &rays = dataModel->getRays();
+  if (rays.size() > 1) {
+    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  }
+  RadxRay *ray = rays.at(rayIdx);
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  /* make sure the radar angles have been calculated.  
+  // this does NOT see to be functioning
+  if (!ray->getGeorefApplied()) {  
+    LOG(DEBUG) << "ERROR - georefs/cfac have not been applied";
+    throw "Georefs have not been applied";
+  } 
+  */
+
+  Radx::PrimaryAxis_t primary_axis = dataModel->getPrimaryAxis();
+  bool force = true;
+  ray->applyGeoref(primary_axis, force);
+
+  /*
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef == NULL) {
+    LOG(DEBUG) << "ERROR - georef is NULL";
+    LOG(DEBUG) << "      trying to recover ...";
+    vol->setLocationFromStartRay();
+    georef = ray->getGeoreference();
+    if (georef == NULL) {
+      throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
+    }
+  }
+  */ 
+
+  const RadxGeoref *georef = dataModel->getGeoreference(rayIdx);
+  if (georef == NULL) {
+    throw "Remove Only Surface: Georef is null. Cannot find asib_altitude_agl.";
+  }  
+ 
+// ----  need these values from cfac/georef
+
+  // get from platform
+     double dds_asib_rotation_angle = georef->getRotation(); // origin dds->asib->rotation_angle;  asib is struct platform_i
+     double dds_asib_roll = georef->getRoll();          // origin dds->asib->roll
+     float asib_altitude_agl = georef->getAltitudeKmAgl();     // altitude angle ??? from platform??
+
+  // get from cfac info
+  //const RadxCfactors *cfactors = ray->getCfactors();
+  double dds_cfac_rot_angle_corr = dataModel->getCfactorRotationCorr(); // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+
+// ---
+
+  //float vert_velocity = georef->getVertVelocity();  // fl32
+
+
+ 
+  // TODO: elevation changes with different rays/fields how to get the current one???
+  float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
+  float dds_ra_elevation = elevation * M_PI / 180.00; // radar angles!! requires cfac values and calculation
+                           // origin dds->ra->elevation, ra = radar_angles
+                           // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+
+  float vert_beam_width = dataModel->getRadarBeamWidthDegV(); // from platform radarBeamWidthDegV; origin dgi->dds->radd->vert_beam_width
+  float radar_latitude = dataModel->getLatitudeDeg(); // radar->latitude 
+
+  LOG(DEBUG) << "args: ";
+  LOG(DEBUG) << "ra_elevation (radians) " << dds_ra_elevation; 
+  LOG(DEBUG) <<   "radar_latitude " << radar_latitude;
+  LOG(DEBUG) <<   "vert_beam_width (degrees) " << vert_beam_width;
+  //LOG(DEBUG) <<   "bad " << bad;
+  //  LOG(DEBUG) <<   "parameter_scale " << parameter_scale;
+  // LOG(DEBUG) <<   "dgi_clip_gate " << dgi_clip_gate;
+
+  // get the data (in) and create space for new data (out)  
+  //  field = ray->getField(fieldName);
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  double startRange;
+  double gateSpace;
+  dataModel->getPredomRayGeom(&startRange, &gateSpace);
+
+  float gate_size = gateSpace;
+  float distance_to_first_gate = startRange;
+  double max_range = ray->getMaxRangeKm();    // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+
+  float *newData = new float[nGates];
+
+  if (_boundaryMaskSet) { //  && _boundaryMaskLength >= 3) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+
+  }
+
+  // cerr << "there arenGates " << nGates;
+  const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
+  
+  //==========
+
+  // TODO: data, _boundaryMask, and newData should have all the same dimensions = nGates
+  SoloFunctionsApi soloFunctionsApi;
+
+  //soloFunctionsApi.RemoveAircraftMotion(vert_velocity, ew_velocity, ns_velocity,
+  //        ew_gndspd_corr, tilt, elevation,
+  //        data, newData, nGates,
+  //        bad_data_value, clip_gate,
+  //        dds_radd_eff_unamb_vel, seds_nyquist_velocity,
+  //        _boundaryMask);
+  
+  soloFunctionsApi.RemoveOnlySurface(
+    optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+    seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+    vert_beam_width,        // from radar angles???; origin dgi->dds->radd->vert_beam_width
+    asib_altitude_agl,      // altitude angle ???
+    dds_ra_elevation,       // radar angles!! requires cfac values and calculation
+                           // origin dds->ra->elevation, ra = radar_angles
+                           // get this from RadxRay::_elev if RadxRay::_georefApplied == true
+    getenv_ALTERNATE_GECHO,  // script parameter
+    d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+    dds_asib_rotation_angle,  // origin dds->asib->rotation_angle;  asib is struct platform_i
+    dds_asib_roll,            // origin dds->asib->roll
+    dds_cfac_rot_angle_corr,  // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+    radar_latitude,  // radar->latitude 
+    data,     // internal value
+    newData,       // internal value
+    nGates,         // internal value
+    gate_size,
+    distance_to_first_gate,
+    max_range,      // internal value; origin dds->celvc_dist_cells[dgi_clip_gate];
+    bad_data_value,  // default value
+    clip_gate,  // default value
+    _boundaryMask);
+
+  // insert new field into RadxVol     
+  bool isLocal = false;
+
+  string field_units = field->getUnits();
+
+  RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  LOG(DEBUG) << "exit ";
+
+  return tempFieldName;
+}
+
+
 
 
 string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vol,
@@ -968,6 +1218,11 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
   if (firstRayInSweep) {
     // reset the running average?
     last_good_v0 = missingValue;
+  }
+  // if bad data value is not set, i.e. still the default value
+  // then set the bad data value to the missing value from the data
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
   }
  
   LOG(DEBUG) << "args: ";
@@ -1101,6 +1356,9 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
   const float *data = field->getDataFl32();
 
   float missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
  
   LOG(DEBUG) << "args: ";
   LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
@@ -1232,7 +1490,10 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
   // and perpetuated for each ray in the sweep
   static float last_good_v0;
   float missingValue = field->getMissingFl32();
- 
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  } 
+
   LOG(DEBUG) << "args: ";
   LOG(DEBUG) << "nyquist_velocity=" << nyquist_velocity;
   LOG(DEBUG) << "dds_radd_eff_unamb_vel=" << dds_radd_eff_unamb_vel;
@@ -2920,7 +3181,12 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, in
 
   // cerr << "there arenGates " << nGates;
   const float *data = fieldData; // field->getDataFl32();
-  
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+  if (bad_data_value == FLT_MIN) {
+    bad_data_value = missingValue;
+  }
+
   // perform the function ...
   //soloFunctionsApi.XorBadFlagsBetween(constantLower, constantUpper,
   //				      data, nGates, bad_data_value, clip_gate,
@@ -2931,7 +3197,7 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, in
 
   bool isLocal = false;
   string field_units = "";
-  Radx::fl32 missingValue = Radx::missingFl32;
+  //Radx::fl32 missingValue = Radx::missingFl32;
   if (field != NULL) {
     field_units = field->getUnits();
     missingValue = field->getMissingFl32();

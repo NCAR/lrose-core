@@ -1337,10 +1337,34 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("apply_georeference_corrections");
-    tt->descr = tdrpStrDup("Option to apply the georeference info for moving platforms.");
-    tt->help = tdrpStrDup("For moving platforms, measured georeference information is sometimes available. If this is set to true, the georeference data is applied and appropriate corrections made. If possible, Earth-centric azimuth and elevation angles will be computed.");
+    tt->descr = tdrpStrDup("Option to apply the georeference information and corrections for moving platforms.");
+    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If goereference data ia available, there is an optional corrections block that may also be stored in the file. If this parameter is true, the georeference data is applied and appropriate corrections made if corrections are available. If possible, Earth-centric azimuth and elevation angles will be computed.");
     tt->val_offset = (char *) &apply_georeference_corrections - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'read_georeference_corrections'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("read_georeference_corrections");
+    tt->descr = tdrpStrDup("Option to read in corrections to the georeference data.");
+    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If this parameter is true, we will read in an ASCII file of correction factors for the georef data, and store those corrections in the file. See also 'apply_georeference_corrections' above.");
+    tt->val_offset = (char *) &read_georeference_corrections - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'georeference_corrections_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("georeference_corrections_path");
+    tt->descr = tdrpStrDup("Path to georeference corrections file.");
+    tt->help = tdrpStrDup("This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above. The ASCII file has the following format - this is an example:\n======================================\n\tazimuth_corr           =   0.000\n\televation_corr         =   0.000\n\trange_delay_corr       = -16.641\n\tlongitude_corr         =   0.000\n\tlatitude_corr          =   0.000\n\tpressure_alt_corr      =   4.969\n\tradar_alt_corr         =   0.000\n\tew_gndspd_corr         =   0.000\n\tns_gndspd_corr         =   0.000\n\tvert_vel_corr          =   0.000\n\theading_corr           =   0.000\n\troll_corr              =   0.000\n\tpitch_corr             =   0.009\n\tdrift_corr             =   0.119\n\trot_angle_corr         =  -0.016\n\ttilt_corr              =   0.713\n======================================\nYou can omit the fields that have values of zero.");
+    tt->val_offset = (char *) &georeference_corrections_path - &_start_;
+    tt->single_val.s = tdrpStrDup("/data/georeference_corrections/cfac.fore");
     tt++;
     
     // Parameter 'Comment 9'
@@ -1703,6 +1727,64 @@
     tt->help = tdrpStrDup("If the difference between the fixed angle and measured angle exceeds this value, the transition flag will be set. If not, it will be cleared.");
     tt->val_offset = (char *) &optimized_transitions_max_elev_error - &_start_;
     tt->single_val.d = 0.25;
+    tt++;
+    
+    // Parameter 'override_sweep_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_sweep_mode");
+    tt->descr = tdrpStrDup("Option to override the sweep modes in the data.");
+    tt->help = tdrpStrDup("If TRUE, the mode for all sweeps is set to sweep_mode.");
+    tt->val_offset = (char *) &override_sweep_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'sweep_mode'
+    // ctype is '_sweep_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("sweep_mode");
+    tt->descr = tdrpStrDup("Sweep mode for all sweeps.");
+    tt->help = tdrpStrDup("See override_sweep_mode.");
+    tt->val_offset = (char *) &sweep_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("sweep_mode_t");
+    tt->enum_def.nfields = 9;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("SWEEP_MODE_SECTOR");
+      tt->enum_def.fields[0].val = SWEEP_MODE_SECTOR;
+      tt->enum_def.fields[1].name = tdrpStrDup("SWEEP_MODE_RHI");
+      tt->enum_def.fields[1].val = SWEEP_MODE_RHI;
+      tt->enum_def.fields[2].name = tdrpStrDup("SWEEP_MODE_VERTICAL_POINTING");
+      tt->enum_def.fields[2].val = SWEEP_MODE_VERTICAL_POINTING;
+      tt->enum_def.fields[3].name = tdrpStrDup("SWEEP_MODE_AZIMUTH_SURVEILLANCE");
+      tt->enum_def.fields[3].val = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+      tt->enum_def.fields[4].name = tdrpStrDup("SWEEP_MODE_ELEVATION_SURVEILLANCE");
+      tt->enum_def.fields[4].val = SWEEP_MODE_ELEVATION_SURVEILLANCE;
+      tt->enum_def.fields[5].name = tdrpStrDup("SWEEP_MODE_SUNSCAN");
+      tt->enum_def.fields[5].val = SWEEP_MODE_SUNSCAN;
+      tt->enum_def.fields[6].name = tdrpStrDup("SWEEP_MODE_POINTING");
+      tt->enum_def.fields[6].val = SWEEP_MODE_POINTING;
+      tt->enum_def.fields[7].name = tdrpStrDup("SWEEP_MODE_SUNSCAN_RHI");
+      tt->enum_def.fields[7].val = SWEEP_MODE_SUNSCAN_RHI;
+      tt->enum_def.fields[8].name = tdrpStrDup("SWEEP_MODE_ELECTRONIC_STEERING");
+      tt->enum_def.fields[8].val = SWEEP_MODE_ELECTRONIC_STEERING;
+    tt->single_val.e = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+    tt++;
+    
+    // Parameter 'set_sweep_mode_from_ray_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_sweep_mode_from_ray_angles");
+    tt->descr = tdrpStrDup("Option to set the sweep mode from the ray angles.");
+    tt->help = tdrpStrDup("If TRUE, we look through the scan angles to deduce the sweep modes, and then set this mode for each sweep.");
+    tt->val_offset = (char *) &set_sweep_mode_from_ray_angles - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 13'
@@ -2295,6 +2377,37 @@
     tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
     tt->val_offset = (char *) &censoring_min_valid_run - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'specify_fields_to_be_censored'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_fields_to_be_censored");
+    tt->descr = tdrpStrDup("Option to specify the fields to be censored.");
+    tt->help = tdrpStrDup("If FALSE, all fields are specified based on the censoring rules.");
+    tt->val_offset = (char *) &specify_fields_to_be_censored - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fields_to_be_censored'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("fields_to_be_censored");
+    tt->descr = tdrpStrDup("List of fields to be censored.");
+    tt->help = tdrpStrDup("Applies if 'specify_fields_to_be_censored' is TRUE.");
+    tt->array_offset = (char *) &_fields_to_be_censored - &_start_;
+    tt->array_n_offset = (char *) &fields_to_be_censored_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("LDR");
     tt++;
     
     // Parameter 'Comment 21'

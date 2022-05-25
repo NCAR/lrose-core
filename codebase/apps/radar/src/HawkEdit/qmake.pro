@@ -61,6 +61,11 @@ HEADERS += SweepView.hh
 HEADERS += SweepController.hh
 HEADERS += SweepModel.hh
 HEADERS += TimeScaleWidget.hh
+HEADERS += TimeNavView.hh
+HEADERS += TimeNavController.hh
+HEADERS += TimeNavModel.hh
+HEADERS += UndoRedoController.hh
+HEADERS += UndoRedoModel.hh
 HEADERS += WorldPlot.hh
 
 # for soloii editing 
@@ -159,6 +164,11 @@ SOURCES += FunctionEditor.cc
 SOURCES += SoloFunctionsController.cc
 SOURCES += SoloFunctionsModel.cc
 SOURCES += SoloScriptTranslator.cc
+SOURCES += TimeNavView.cc
+SOURCES += TimeNavController.cc
+SOURCES += TimeNavModel.cc
+SOURCES += UndoRedoController.cc
+SOURCES += UndoRedoModel.cc
 SOURCES += WorldPlot.cc
 
 

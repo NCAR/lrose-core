@@ -394,9 +394,11 @@ int NcfRadxFile::writeToPath(const RadxVol &vol,
   _writeVol->countGeorefsNotMissing(_geoCount);
 
   if (_verbose) {
-    cerr << "============= GEOREF FIELD COUNT ==================" << endl;
-    _geoCount.print(cerr);
-    cerr << "===================================================" << endl;
+    if (_georefsActive) {
+      cerr << "============= GEOREF FIELD COUNT ==================" << endl;
+      _geoCount.print(cerr);
+      cerr << "===================================================" << endl;
+    }
   }
 
   // add attributes, dimensions and variables
@@ -3519,6 +3521,9 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   }
   if (field.getComment().size() > 0) {
     iret |= _file.addAttr(var, COMMENT, field.getComment());
+  }
+  if (field.getAncillaryVariables().size() > 0) {
+    iret |= _file.addAttr(var, ANCILLARY_VARIABLES, field.getAncillaryVariables());
   }
   iret |= _file.addAttr(var, SAMPLING_RATIO, (float) field.getSamplingRatio());
   

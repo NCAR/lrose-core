@@ -299,6 +299,13 @@ void SweepController::createSweepRadioButtons() {
   delete sweepAngles;
 }
 
+void SweepController::updateSweepRadioButtons() {
+ 
+  vector<double> *sweepAngles = _model->getSweepAngles();
+  _view->updateSweepRadioButtons(sweepAngles);
+  delete sweepAngles;
+}
+
 void SweepController::clearSweepRadioButtons() {
  
   _view->clearSweepRadioButtons();

@@ -102,6 +102,9 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")
+  add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )
+endif()
 
 # link libs
 

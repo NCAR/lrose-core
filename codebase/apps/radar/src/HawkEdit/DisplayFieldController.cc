@@ -101,27 +101,17 @@ void DisplayFieldController::updateFieldPanel(string fieldName,
 void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
   DisplayFieldView *fieldPanel) {
 
-  fieldPanel->clear();
+  // add the first field, set it to the selected field
+  // to appease the gods, then we can work through the
+  // reconciliation.
+
+
+  //fieldPanel->clear();
 
     // remove current fields that are no longer needed
   vector<string> currentFieldsNames = getFieldNames();
 
-  for (vector<string>::iterator currentName = currentFieldsNames.begin(); 
-    currentName != currentFieldsNames.end(); ++currentName) {
-  
-    std::vector<string>::iterator it;
 
-    it = std::find(fieldNames->begin(), fieldNames->end(), *currentName);
-    if (it != fieldNames->end()) {
-      LOG(DEBUG) << "displayField found in list of new fields: " << *it << " keep it";
-    }
-    else {
-      LOG(DEBUG) << "displayField not found in list of new fields" << *currentName << " discarding";
-      deleteField(*currentName);
-      // TODO how is the field removed from the panel?
-      //fieldPanel->delete(*currentName);
-    }
-  }
 
 
   //for (int ifield = 0; ifield < _params->fields_n; ifield++) {
@@ -129,7 +119,9 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
   for (vector<string>::iterator it = fieldNames->begin(); it != fieldNames->end(); ++it) {
     string fieldName = *it;
 
-//HERE TODO:
+    updateFieldPanel(fieldName, fieldPanel);
+
+/*  
 //distingquish between add and update on fieldName;
 //then set last field or first field as selected? or do something to render image
 
@@ -159,13 +151,34 @@ void DisplayFieldController::reconcileFields(vector<string> *fieldNames,
     } 
     displayField->setStateVisible();
     fieldPanel->updateFieldPanel(fieldName, fieldName, fieldName);
-
+*/
   } // ifield
+
+  for (vector<string>::iterator currentName = currentFieldsNames.begin(); 
+    currentName != currentFieldsNames.end(); ++currentName) {
+  
+    std::vector<string>::iterator it;
+
+    it = std::find(fieldNames->begin(), fieldNames->end(), *currentName);
+    if (it != fieldNames->end()) {
+      LOG(DEBUG) << "displayField found in list of new fields: " << *it << " keep it";
+    }
+    else {
+      LOG(DEBUG) << "displayField not found in list of new fields" << *currentName << " discarding";
+      if (fieldPanel->hasField(*currentName)) {
+        fieldPanel->removeField(*currentName);
+      }
+      deleteField(*currentName);
+      // TODO how is the field removed from the panel?
+      //fieldPanel->delete(*currentName);
+    }
+  }  
 
 }
 
 void DisplayFieldController::deleteField(string &fieldName) {
   _model->deleteField(fieldName);
+
 }
 
 void DisplayFieldController::dataFileChanged() {

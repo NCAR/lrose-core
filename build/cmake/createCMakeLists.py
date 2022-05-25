@@ -559,6 +559,7 @@ def writeCMakeListsTop(dir):
     fo.write("endif()\n")
     fo.write('find_package (HDF5)\n')
     fo.write('find_package (NETCDF)\n')
+    fo.write('find_package (LROSE)\n')
     fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
     fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")
     fo.write("endif()\n")
@@ -1390,6 +1391,9 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("if(IS_DIRECTORY /usr/local/lib)\n")
     fo.write("  link_directories (/usr/local/lib)\n")
     fo.write("endif()\n")
+    fo.write('if(${CMAKE_VERSION} VERSION_GREATER "3.13.0")\n')
+    fo.write('  add_link_options( -L${CMAKE_INSTALL_PREFIX}/lib )\n')
+    fo.write('endif()\n')
     fo.write("\n")
 
     fo.write("# link libs\n")

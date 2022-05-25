@@ -20,9 +20,6 @@ SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(pare
 }
 
 void SoloFunctionsController::reset() {
-  DataModel *dataModel = DataModel::Instance();
-  _nRays = dataModel->getNRays();
-  _nSweeps = dataModel->getNSweeps();
 }
 
 
@@ -83,6 +80,28 @@ QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float ny
   return QString::fromStdString(tempFieldName);
 }
 
+QString  SoloFunctionsController::REMOVE_ONLY_SURFACE(QString field, 
+     float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
+     int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
+     bool getenv_ALTERNATE_GECHO,  // script parameter
+     double d, // used for min_grad, if getenv_ALTERNATE_GECHO is true
+               // d = ALTERNATE_GECHO environment variable
+      float bad_data,
+      size_t clip_gate) { 
+
+  string tempFieldName = soloFunctionsModel.RemoveOnlySurface(field.toStdString(),
+                 _currentRayIdx, _currentSweepIdx,
+                 optimal_beamwidth,
+                 seds_surface_gate_shift,      
+                 getenv_ALTERNATE_GECHO,  
+                  d,
+                  clip_gate,
+                  bad_data,
+                  field.toStdString());
+
+  // returns name of new field in RadxVol
+  return QString::fromStdString(tempFieldName);
+}
 
 QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, float nyquist, 
 							       int max_pos_folds,
@@ -220,6 +239,19 @@ QString SoloFunctionsController::ZERO_MIDDLE_THIRD(QString field) {
 
   return QString::fromStdString(tempFieldName); // QString("zero middle result");
 }
+
+/*
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::COPY(QString fromField, QString toField) { 
+
+  string emptString = soloFunctionsModel.CopyField(fromField.toStdString(),
+                 _currentRayIdx, _currentSweepIdx,
+                 toField.toStdString());
+
+  return QString::fromStdString(emptString);
+}
+*/
+
 
 
 // return the name of the field in which the result is stored in the RadxVol
@@ -636,7 +668,8 @@ void SoloFunctionsController::setCurrentSweepToFirst() {
 
 void SoloFunctionsController::setCurrentSweepTo(int sweepIndex) {
   cerr << "entry setCurrentSweepToFirst" << endl;
-  _currentSweepIdx = (size_t) sweepIndex;
+  if (sweepIndex < 0) _currentSweepIdx = 0;
+  else _currentSweepIdx = (size_t) sweepIndex;
   cerr << "exit setCurrentSweepToFirst" << endl;
 
   //LOG(DEBUG) << "exit";
@@ -662,21 +695,26 @@ void SoloFunctionsController::setCurrentRayToFirstOf(int sweepIndex) {
   DataModel *dataModel = DataModel::Instance();
   //int sweepNumber = dataModel->getSweepNumber(sweepIndex);
   _currentRayIdx = dataModel->getFirstRayIndex(sweepIndex);
-  _nRays = _currentRayIdx + dataModel->getNRaysSweepIndex(sweepIndex);
+  _lastRayIdx = dataModel->getLastRayIndex(sweepIndex);
 }
 
 void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
   _currentRayIdx += 1;
-  if ((_currentRayIdx % 100) == 0) {
-    cerr << "   current ray " << _currentRayIdx << endl;
-  }
+
 
   DataModel *dataModel = DataModel::Instance();
   size_t lastRayIndex = dataModel->getLastRayIndex(_currentSweepIdx);  
   if (_currentRayIdx > lastRayIndex) {
     _currentSweepIdx += 1;
   } 
+  if ((_currentRayIdx % 100) == 0) {
+      cerr << "   current ray " << _currentRayIdx << 
+        " last ray index " << lastRayIndex;
+      if (moreRays()) 
+         cerr << " az = " << dataModel->getRayAzimuthDeg(_currentRayIdx);
+      cerr << " current sweep index " << _currentSweepIdx << endl;
+  }  
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;
   //LOG(DEBUG) << "exit";
@@ -695,7 +733,7 @@ bool SoloFunctionsController::moreRays() {
   //if (_currentRayIdx >= nRays)
   //  _data->loadFieldsFromRays();
   //return (_currentRayIdx < _data->getNRays()); // nRays);
-  return (_currentRayIdx < _nRays);
+  return (_currentRayIdx <= _lastRayIdx);
 }
 
 void SoloFunctionsController::nextSweep() {
@@ -707,19 +745,26 @@ void SoloFunctionsController::nextSweep() {
 }
 
 bool SoloFunctionsController::moreSweeps() {
-  //  LOG(DEBUG) << "entry";
-  //cerr << "entry moreSweeps" << endl;
-  //  const size_t nSweeps = _data->getNSweeps();
-  //LOG(DEBUG) << " there are " << nSweeps << " sweeps";;
-  //if (_currentSweepIdx >= nSweeps)
-  //  _data->loadFieldsFromRays();
-
-  return (_currentSweepIdx < _nSweeps);
+  DataModel *dataModel = DataModel::Instance();
+  size_t nSweeps = dataModel->getNSweeps();
+  return (_currentSweepIdx < nSweeps);
 }
 
 void SoloFunctionsController::regularizeRays() {
   DataModel *dataModel = DataModel::Instance();
   dataModel->regularizeRays();  
+}
+
+void SoloFunctionsController::copyField(size_t rayIdx, string tempName, string userDefinedName) {
+
+  DataModel *dataModel = DataModel::Instance();
+
+  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+    throw std::invalid_argument("field name exist; cannot rename");
+  }
+  if (dataModel->fieldExists(rayIdx, tempName)) {
+    dataModel->copyField2(rayIdx, tempName, userDefinedName);
+  } 
 }
 
 void SoloFunctionsController::assign(size_t rayIdx, string tempName, string userDefinedName) {
@@ -764,8 +809,30 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName,
   DataModel *dataModel = DataModel::Instance();
   size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
   size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
-  for (size_t rayIdx=firstRayInSweep; rayIdx < lastRayInSweep; rayIdx++) {
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
     assign(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void SoloFunctionsController::copyField(string tempName, string userDefinedName) {
+
+  // for each ray ...
+  DataModel *dataModel = DataModel::Instance();
+  size_t nRays = dataModel->getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void SoloFunctionsController::copyField(string tempName, string userDefinedName,
+  size_t sweepIndex) {
+
+  // for each ray of sweep
+  DataModel *dataModel = DataModel::Instance();
+  size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
   }
 }
 

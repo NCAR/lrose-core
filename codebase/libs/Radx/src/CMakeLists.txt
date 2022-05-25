@@ -146,6 +146,7 @@ set (SRCS
       ./Rapic/RapicRay.cc
       ./Rapic/ScanParams.cc
       ./Rapic/sRadl.cc
+      ./Raxpol/RaxpolNcRadxFile.cc
       ./Sigmet/SigmetRadxFile.cc
       ./Tdwr/TdwrLoc.cc
       ./Tdwr/TdwrRadxFile.cc

@@ -256,10 +256,9 @@ int CartInterp::interpVol()
       _echoOrientationAvailable = false;
     }
     if (_echoOrientationAvailable) {
-      _orient->loadSdevFields(_gridLoc,
-                              _sdevDbzH,
-                              _sdevDbzV);
+      _orient->loadSdevFields(_gridLoc, _dbzH, _dbzV, _sdevDbzH, _sdevDbzV);
     }
+    // _orient->clearRhiData();
   }
 
   // interpolate
@@ -416,9 +415,15 @@ void CartInterp::_createDebugFields()
   _derived3DFields.push_back(_urAzDebug);
 
   if (_params.use_echo_orientation) {
-    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal", "dBZ", true);
+    _dbzH = new DerivedField("DbzH", "dbz_horizontal", "dBZ", true);
+    _derived3DFields.push_back(_dbzH);
+    _dbzV = new DerivedField("DbzV", "dbz_vertical", "dBZ", true);
+    _derived3DFields.push_back(_dbzV);
+    _sdevDbzH = new DerivedField("SdevDbzH", "sdev_of_dbz_horizontal",
+                                 "dBZ", true);
     _derived3DFields.push_back(_sdevDbzH);
-    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical", "dBZ", true);
+    _sdevDbzV = new DerivedField("SdevDbzV", "sdev_of_dbz_vertical",
+                                 "dBZ", true);
     _derived3DFields.push_back(_sdevDbzV);
   }
   
@@ -2713,7 +2718,7 @@ int CartInterp::_convStratCompute()
 
   // compute the convective/stratiform partition
   
-  if (_convStrat.computePartition(dbzVals, missingFl32)) {
+  if (_convStrat.computeEchoType(dbzVals, missingFl32)) {
     cerr << "ERROR - CartInterp::_convStratCompute()" << endl;
     cerr << "  _convStrat.computePartition() failed" << endl;
     return -1;

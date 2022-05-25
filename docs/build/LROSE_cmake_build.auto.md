@@ -35,6 +35,8 @@ This can be changed using the ```--prefix``` argument on the scripts.
 
 ## 2. Prepare
 
+* [Prepare your OS for the build](./prepare_for_build.md)
+
 ### Create a working directory for cloning:
 
 ```
@@ -44,7 +46,7 @@ This can be changed using the ```--prefix``` argument on the scripts.
 
 ### Install required packages
 
-See:
+See also:
 
 * [lrose-core package dependencies](./lrose_package_dependencies.md)
 
@@ -62,47 +64,73 @@ See:
 The distribution will be in the lrose-bootstrap subdirectory:
 
 ```
-  cd ~/git/lrose-bootstrap
+  cd ~/git/lrose-bootstrap/scripts
 ```
 
-### Run the ```checkout_and_build_cmake.py``` script:
+You will see the following scripts:
+
+```
+  do_build_all_cmake.py
+  install_linux_packages.py
+  lrose_checkout_and_build_cmake.py
+```
+
+```do_build_all_cmake.py``` calls ```install_linux_packages.py``` to ensure that all of the required packages are installed, prior to performing the compile. The install script determines the version of LINUX you are running and installs the appropriate dependency packages.
+
+```do_build_all_cmake.py``` then calls ```lrose_checkout_and_build_cmake.py``` to checkout, compile and install lrose-core.
+
+And finally ```do_build_all_cmake.py``` will optionally checkout, compile and install the wind applications ```fractl```, ```vortrac``` and ```samurai```.
+
+### Run the ```do_build_all_cmake.py``` script:
 
 To see the usage:
 
 ```
   cd ~/git/lrose-bootstrap/scripts
-  ./checkout_and_build_cmake.py --help
+  ./do_build_all_cmake.py --help
 ```
 
 ```
-  Usage: checkout_and_build_cmake.py [options]
-  Options:
-    -h, --help            show this help message and exit
-    --clean               Cleanup tmp build dir
-    --debug               Set debugging on
-    --verbose             Set verbose debugging on
-    --package=PACKAGE     Package name. Options are: lrose-core (default),
-                          lrose-radx, lrose-cidd, samurai
-    --releaseDate=RELEASEDATE
-                          Date from which to compute tag for git clone. Applies
-                          if --tag is not used.
-    --tag=TAG             Tag to check out lrose. Overrides --releaseDate
-    --prefix=PREFIX       Install directory, default: ~/lrose
-    --buildDir=BUILDDIR   Temporary build dir, default: /tmp/lrose-build
-    --logDir=LOGDIR       Logging dir, default: /tmp/lrose-build/logs
-    --static              use static linking, default is dynamic
-    --noScripts           Do not install runtime scripts as well as binaries
-    --buildNetcdf         Build netcdf and hdf5 from source
-    --fractl              Checkout and build fractl after core build is complete
-    --vortrac             Checkout and build vortrac after core build is
-                          complete
-    --samurai             Checkout and build samurai after core build is
-                          complete
-    --cmake3              Use cmake3 instead of cmake for samurai
-    --no_core_apps        Do not build the lrose core apps
-    --withJasper          Set if jasper library is installed. This provides
-                          support for jpeg compression in grib files.
-    --verboseMake         Verbose output for make, default is summary
+Usage: do_build_all_cmake.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  --clean               Cleanup tmp build dir
+  --debug               Set debugging on
+  --verbose             Set verbose debugging on
+  --package=PACKAGE     Package name. Options are: lrose-core (default),
+                        lrose-radx, lrose-cidd, apar, samurai
+  --releaseDate=RELEASEDATE
+                        Date from which to compute tag for git clone. Applies
+                        if --tag is not used.
+  --tag=TAG             Tag to check out lrose. Overrides --releaseDate
+  --prefix=PREFIX       Install directory, default: /home/mdtest/lrose
+  --buildDir=BUILDDIR   Temporary build dir, default: /tmp/lrose-build
+  --logDir=LOGDIR       Logging dir, default: /tmp/lrose-build/logs
+  --static              use static linking, default is dynamic
+  --installAllRuntimeLibs
+                        Install dynamic runtime libraries for all binaries, in
+                        a directory relative to the bin dir. System libraries
+                        are included.
+  --installLroseRuntimeLibs
+                        Install dynamic runtime lrose libraries for all
+                        binaries, in a directory relative to the bin dir.
+                        System libraries are not included.
+  --buildNetcdf         Build netcdf and hdf5 from source
+  --netcdfPrefix=NETCDFPREFIX
+                        Netcdf install directory, default: /home/mdtest/lrose
+  --fractl              Checkout and build fractl after core build is complete
+  --vortrac             Checkout and build vortrac after core build is
+                        complete
+  --samurai             Checkout and build samurai after core build is
+                        complete
+  --cmake3              Use cmake3 instead of cmake
+  --noApps              Do not build the lrose core apps
+  --withJasper          Set if jasper library is installed. This provides
+                        support for jpeg compression in grib files.
+  --verboseMake         Verbose output for make, default is summary
+  --iscray              True if the Cray compiler is used
+  --isfujitsu           True if the Fujitsu compiler is used
 ```
 
 For most cases, the defaults work well.
@@ -124,25 +152,25 @@ For older systems, such as centos7, you will need to use ```--cmake3```.
 To build and install the full lrose package into ```~/lrose```:
 
 ```
-  ./checkout_and_build_cmake.py
+  ./do_build_all_cmake.py
 ```
 
 To specify the sub-package, e.g. lrose-radx:
 
 ```
-  ./checkout_and_build_cmake.py --package lrose-radx
+  ./do_build_all_cmake.py --package lrose-radx
 ```
 
 To set the install directory:
 
 ```
-  ./checkout_and_build_cmake.py --prefix /my/install/dir
+  ./do_build_all_cmake.py --prefix /my/install/dir
 ```
 
 To cleanup between builds:
 
 ```
-  ./checkout_and_build_cmake.py --clean
+  ./do_build_all_cmake.py --clean
 ```
 
 <a name="build-using-script"/>

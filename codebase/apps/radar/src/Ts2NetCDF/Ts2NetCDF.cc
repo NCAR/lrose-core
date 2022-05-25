@@ -583,7 +583,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   _nGates = pulse.getNGates();
   _pulseTimeSecs = pulse.getTime();
   _pulseTime = pulse.getFTime();
-  _prt = pulse.get_prt_next();
+  _prt = pulse.get_prt();
   _el = pulse.getEl();
   _az = pulse.getAz();
   _phaseDiff = pulse.getPhaseDiff0();

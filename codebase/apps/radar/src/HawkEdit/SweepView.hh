@@ -86,6 +86,8 @@ public:
 
   void clearSweepRadioButtons();
 
+  void updateSweepRadioButtons(vector<double> *sweepAngles);
+
 signals:
   void selectedSweepChanged(double selectedAngle);
 

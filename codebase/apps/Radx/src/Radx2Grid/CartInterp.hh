@@ -164,6 +164,8 @@ private:
   DerivedField *_urElDebug;
   DerivedField *_urAzDebug;
 
+  DerivedField *_dbzH;
+  DerivedField *_dbzV;
   DerivedField *_sdevDbzH;
   DerivedField *_sdevDbzV;
 

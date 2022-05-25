@@ -1081,17 +1081,21 @@ int DoradeRadxFile::_readSweepFile(const string &path)
 
     // read in block
     
-    if (fread(block, 1, nBytes, _file) != (size_t) nBytes) {
+    size_t nRead = fread(block, 1, nBytes, _file);
+    if (nRead != (size_t) nBytes) {
       int errNum = errno;
       _addErrStr("ERROR - DoradeRadxFile::_readSweepFile()");
       _addErrStr("  Cannot read data block");
       _addErrStr("  ID: ", id);
       _addErrInt("  len: ", nBytes);
+      _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // handle block
@@ -2742,17 +2746,21 @@ int DoradeRadxFile::printNative(const string &path, ostream &out,
 
     // read in block
     
-    if (fread(block, 1, nBytes, _file) != (size_t) nBytes) {
+    size_t nRead = fread(block, 1, nBytes, _file);
+    if (nRead != (size_t) nBytes) {
       int errNum = errno;
       _addErrStr("ERROR - DoradeRadxFile::printNative()");
       _addErrStr("  Cannot read data block");
       _addErrStr("  ID: ", id);
       _addErrInt("  len: ", nBytes);
+      _addErrInt("  nRead: ", nRead);
       _addErrStr("  File path: ", path);
       _addErrStr(strerror(errNum));
-      delete[] block;
-      _close();
-      return -1;
+      if (idStr != "RKTB") {
+        delete[] block;
+        _close();
+        return -1;
+      }
     }
 
     // print block

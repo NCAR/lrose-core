@@ -41,6 +41,10 @@ public:
   void printQJSEngineContext();
   void addVariableToScriptEditor(QString name, QJSValue value);
 
+  void initProgress(int nFiles);
+  void updateProgress(int currentIndex, int lastIndex);
+  void batchEditComplete();
+
 signals:
   void scriptChangedVolume(QStringList newFieldNames); // const RadxVol &radarDataVolume);
   void scriptComplete();
@@ -54,6 +58,11 @@ public slots:
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
   void runForEachRayScript(QString script, int currentSweepIndex,
   bool useBoundary, vector<Point> &boundaryPoints);
+  void runMultipleArchiveFiles(vector<string> &archiveFiles, 
+  QString script, bool useBoundary,
+  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
+
 private:
 
 
@@ -64,6 +73,8 @@ private:
   QJSEngine *engine;
 
   vector<string> *initialFieldNames;
+
+  bool _cancelPressed;
 
   void reset();
 
@@ -78,9 +89,18 @@ private:
   void _assign(string tempName, string userDefinedName,
     int sweepIndex);
   void _assignByRay(string tempName, string userDefinedName);
+
+  void _copy(string tempName, string userDefinedName);
+  void _copy(string tempName, string userDefinedName,
+    int sweepIndex);
+  
   void regularizeRays();
   //void _addFieldNameVectorsToContext(vector<string> &fieldNames, 
   //  std::map<QString, QString> *currentVariableContext);
+  vector<bool> *getListOfFieldsReferencedInScript(
+    vector<string> &fields, string script);
+  string lowerIt(string s);
+
 };
 
 

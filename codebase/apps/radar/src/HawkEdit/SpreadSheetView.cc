@@ -692,11 +692,11 @@ void SpreadSheetView::applyChanges()
     LOG(DEBUG) << "column " << label.toStdString() << ": extracted field " << fieldName
       << ", azimuth " << rayAzimuth; ; 
     emit applyVolumeEdits(fieldName, rayAzimuth, data);
-    emit dataChanged();
+
     _unAppliedEdits = false;
   }
 
-
+  emit dataChanged();
   // emit applyVolumeEdits();
   LOG(DEBUG) << "exit";
 }
@@ -769,6 +769,9 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column) { 
   QString missingQ(_missingDataString.c_str());
 
   for (int r = 0; r < table->rowCount(); r++) {
+    if (r == 468) {
+        cerr << "HERE" << endl;
+    }
     QTableWidgetItem *tableWidgetItem = table->item(r, column);
     QString content = tableWidgetItem->text();
     if (content.contains(missingQ)) {
@@ -1088,8 +1091,8 @@ void SpreadSheetView::setHeader(int baseColumn, int fieldIdx, float azimuth,
 
     char formattedData[250];
     sprintf(formattedData, "%6.2f\n%s", azimuth, fieldName.c_str()); 
-    cout << "formatted header ..." << endl; 
-    cout << formattedData << endl;
+    //cout << "formatted header ..." << endl; 
+    //cout << formattedData << endl;
 
     int column = baseColumn + fieldIdx;
     table->setHorizontalHeaderItem(column, new QTableWidgetItem(formattedData));
@@ -1099,17 +1102,17 @@ void SpreadSheetView::setHeader(int baseColumn, int fieldIdx, float azimuth,
 void SpreadSheetView::azimuthForRaySent(float azimuth, int offsetFromClosestRay,
     int fieldIdx, string fieldName) {
 
-      cout << "--------" << endl;
+      //cout << "--------" << endl;
 
       int nthClosest = offsetFromClosestRay + (_nRays/2);
-      cout << "nthClosest = " << nthClosest << endl;
+      //cout << "nthClosest = " << nthClosest << endl;
       int baseColumn = nthClosest * _nFieldsToDisplay;
-      cout << "baseColumn = " << baseColumn << endl;
+      //cout << "baseColumn = " << baseColumn << endl;
 
       setHeader(baseColumn, fieldIdx, azimuth, fieldName);
       //table->setHorizontalHeaderItem(5, new QTableWidgetItem("ha ha"));
 
-      cout << "++++++++++" << endl;
+      //cout << "++++++++++" << endl;
 }
 
 void SpreadSheetView::applyEdits() {

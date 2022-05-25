@@ -437,7 +437,7 @@ void InputMdv::_removeStratiform()
   const Mdvx::field_header_t &fhdr = dbzField->getFieldHeader();
 
   fl32 *dbz = (fl32 *) dbzField->getVol();
-  const ui08 *partition = _convFinder.getConvStrat().getPartition3D();
+  const ui08 *partition = _convFinder.getConvStrat().getEchoType3D();
   for (int iz = 0; iz < fhdr.nz; iz++) {
     for (int iy = 0; iy < fhdr.ny; iy++) {
       for (int ix = 0; ix < fhdr.nx; ix++, dbz++, partition++) {

@@ -765,7 +765,9 @@ Radx::SweepMode_t RadxVol::getPredomSweepMode() const
       maxCount = count;
     }
   }
-
+  if (predomMode == Radx::SWEEP_MODE_NOT_SET) {
+    predomMode = Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE;
+  }
   return predomMode;
 
 }
@@ -5620,6 +5622,141 @@ bool RadxVol::gateGeomVariesByRay() const
 }
 
 /////////////////////////////////////////////////////////////
+/// Get list of sweeps to be combined for NEXRAD
+
+void RadxVol::_getNexradSweepActions(vector<NexradSweepAction> &actions)
+  
+{
+
+  // is this dual-pol data?
+
+  bool isDualPol = false;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay *ray = _rays[iray];
+    if (ray->getField("ZDR") != NULL) {
+      isDualPol = true;
+      break;
+    }
+  } // iray
+
+  // categorize each sweep
+  
+  typedef enum {
+    RX_MODE_NON_DOP,
+    RX_MODE_DOP,
+    RX_MODE_ALL,
+    RX_MODE_UNKNOWN
+  } receive_mode_t;
+  
+  vector<receive_mode_t> rxModes;
+  vector<double> fixedAngles;
+  
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
+    const RadxSweep *sweep = _sweeps[isweep];
+    size_t startRayIndex = sweep->getStartRayIndex();
+    size_t endRayIndex = sweep->getEndRayIndex();
+    double fixedAngle = sweep->getFixedAngleDeg();
+    fixedAngles.push_back(fixedAngle);
+    
+    double nRays = 0, nREF = 0, nVEL = 0, nZDR = 0;
+    
+    for (size_t iray = startRayIndex; iray <= endRayIndex; iray++) {
+      const RadxRay *ray = _rays[iray];
+      nRays++;
+      if (ray->getField("REF") != NULL) {
+        nREF++;
+      }
+      if (ray->getField("VEL") != NULL) {
+        nVEL++;
+      }
+      if (ray->getField("ZDR") != NULL) {
+        nZDR++;
+      }
+    } // iray
+
+    if (isDualPol) {
+      if (nREF / nRays > 0.5 &&
+          nVEL / nRays > 0.5 &&
+          nZDR / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_ALL);
+      } else if (nREF / nRays > 0.5 &&
+                 nVEL / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_DOP);
+      } else if (nREF / nRays > 0.5 &&
+                 nZDR / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_NON_DOP);
+      } else {
+        rxModes.push_back(RX_MODE_UNKNOWN);
+      }
+    } else {
+      // single pol
+      if (nREF / nRays > 0.5 &&
+          nVEL / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_ALL);
+      } else if (nVEL / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_DOP);
+      } else if (nREF / nRays > 0.5) {
+        rxModes.push_back(RX_MODE_NON_DOP);
+      } else {
+        rxModes.push_back(RX_MODE_UNKNOWN);
+      }
+    }
+    
+  }
+
+  // determine the actions to be taken with each sweep
+  
+  actions.clear();
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    
+    // check for combo pairs
+    
+    bool isCombo = false;
+    if (isweep < _sweeps.size() - 1 &&
+        fabs(fixedAngles[isweep] - fixedAngles[isweep+1] < 0.1)) {
+      // same sweep angle
+      if ((rxModes[isweep] == RX_MODE_NON_DOP) &&
+          (rxModes[isweep+1] == RX_MODE_DOP)) {
+        // combine long range sweep with Doppler sweep
+        actions.push_back
+          (NexradSweepAction(NexradSweepAction::PAIR_NONDOP_WITH_DOP,
+                             isweep,
+                             isweep + 1));
+        isCombo = true;
+      } else if ((rxModes[isweep] == RX_MODE_NON_DOP) &&
+                 (rxModes[isweep+1] == RX_MODE_ALL)) {
+        // combine long range sweep with Doppler sweep
+        rxModes[isweep+1] = RX_MODE_DOP;
+        actions.push_back
+          (NexradSweepAction(NexradSweepAction::PAIR_NONDOP_WITH_DOP,
+                             isweep,
+                             isweep + 1));
+        isCombo = true;
+      }
+    } // if (isweep ...
+
+    // set actions on non-combo sweeps
+    
+    if (!isCombo) {
+      if (rxModes[isweep] == RX_MODE_ALL) {
+        // use sweep as it is
+        actions.push_back
+          (NexradSweepAction(NexradSweepAction::USE_UNCHANGED,
+                             isweep, isweep));
+      } else {
+        // discard this sweep
+        actions.push_back
+          (NexradSweepAction(NexradSweepAction::DISCARD_DOP,
+                             isweep, isweep));
+      }
+    }
+    
+  } // isweep
+
+}
+
+/////////////////////////////////////////////////////////////
 /// For NEXRAD volumes, combine fields from consecutive sweeps
 /// with the same elevation angle.
 /// These are the so-called split-cut sweeps.
@@ -5641,51 +5778,36 @@ void RadxVol::combineNexradSplitCuts(bool keepLongRange /* = false */)
   
   loadSweepInfoFromRays();
   
-  // find consecutive sweeps that should be combined
-  // store these in combos
+  // get the actions to be performed on each sweep
 
-  set<size_t> dopplerIndexes;
-  vector<SweepCombo> combos;
-  for (size_t ii = 0; ii < _sweeps.size() - 1; ii++) {
-    RadxSweep *sweepNonDop = _sweeps[ii];
-    RadxSweep *sweepDoppler = _sweeps[ii + 1];
-    if (fabs(sweepNonDop->getFixedAngleDeg() -
-             sweepDoppler->getFixedAngleDeg()) < 0.01) {
-      combos.push_back(SweepCombo(ii, ii + 1));
-      dopplerIndexes.insert(ii + 1);
-      ii++;
-    } // ii
-  } // ii
+  vector<NexradSweepAction> actions;
+  _getNexradSweepActions(actions);
+  
+  // combine the data from non-doppler and doppler sweeps
+  
+  for (size_t iaction = 0; iaction < actions.size(); iaction++) {
+    const NexradSweepAction &action = actions[iaction];
+    if (action.action == NexradSweepAction::PAIR_NONDOP_WITH_DOP) {
+      if (_debug) {
+        cerr << "==>> combineNexradSplitCuts: iaction, "
+             << "nonDopSweepIndex, dopSweepIndex: "
+             << iaction << ", " 
+             << action.nonDopSweepIndex << ", "
+             << action.dopSweepIndex << endl;
+      } // debug
+      _addFieldsFromDopplerSweep(_sweeps[action.nonDopSweepIndex],
+                                 _sweeps[action.dopSweepIndex]);
+    } // if (action.action ...
+  } // iaction
 
-  // combine the data from the sweeps
-
-  for (size_t ii = 0; ii < combos.size(); ii++) {
-    const SweepCombo &combo = combos[ii];
-    if (_debug) {
-      cerr << "==>> combineNexradSplitCuts: ii, "
-           << "nonDopSweepIndex, dopplerSweepIndex: "
-           << ii << ", " 
-           << combo.nonDopSweepIndex << ", "
-           << combo.dopplerSweepIndex << endl;
-    }
-    _addFieldsFromDopplerSweep(_sweeps[combo.nonDopSweepIndex],
-                               _sweeps[combo.dopplerSweepIndex]);
-  }
-
-  // select the rays to keep
+  // discard rays from doppler-only sweeps
   
   vector<RadxRay *> keepRays;
-  for (int ii = 0; ii < (int) _sweeps.size(); ii++) {
-    if (dopplerIndexes.find(ii) == dopplerIndexes.end()) {
-      // not a doppler, so keep these rays
-      RadxSweep *sweepKeep = _sweeps[ii];
-      for (size_t kk = sweepKeep->getStartRayIndex();
-           kk <= sweepKeep->getEndRayIndex(); kk++) {
-        keepRays.push_back(_rays[kk]);
-      }
-    } else {
-      // discard the doppler sweeps if no longer needed
-      RadxSweep *sweepDoppler = _sweeps[ii];
+  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
+    const NexradSweepAction &action = actions[isweep];
+    if (action.action == NexradSweepAction::DISCARD_DOP) {
+      // discard the doppler rays if no longer needed
+      RadxSweep *sweepDoppler = _sweeps[isweep];
       for (size_t kk = sweepDoppler->getStartRayIndex();
            kk <= sweepDoppler->getEndRayIndex(); kk++) {
         if (keepLongRange && _rays[kk]->getIsLongRange()) {
@@ -5694,8 +5816,16 @@ void RadxVol::combineNexradSplitCuts(bool keepLongRange /* = false */)
           RadxRay::deleteIfUnused(_rays[kk]);
         }
       }
-    }
-  } // ii
+    } else {
+      // keep the rays
+      RadxSweep *sweepKeep = _sweeps[isweep];
+      for (size_t kk = sweepKeep->getStartRayIndex();
+           kk <= sweepKeep->getEndRayIndex(); kk++) {
+        keepRays.push_back(_rays[kk]);
+      }
+    } // if (action.action
+
+  } // isweep
 
   _rays = keepRays;
   _computeNRaysTransition();
@@ -5723,56 +5853,6 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
     // sweep modes do not match
     return;
   }
-
-  // count up non-missing gates in nonDop fields
-
-  // map<string, int> nonDopCounts;
-  // for (size_t iray = sweepNonDop->getStartRayIndex();
-  //      iray <= sweepNonDop->getEndRayIndex(); iray++) {
-  //   RadxRay *ray = _rays[iray];
-  //   vector<RadxField *> flds = ray->getFields();
-  //   for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-  //     RadxField *fld = flds[ifield];
-  //     string name = fld->getName();
-  //     if (iray == sweepNonDop->getStartRayIndex()) {
-  //       // initialize cound
-  //       nonDopCounts[name] = 0;
-  //     }
-  //     nonDopCounts[name] += fld->countNonMissingGates();
-  //   } // ifield
-  // } // iray
-
-  // count up non-missing gates in doppler fields
-  
-  // map<string, int> dopplerCounts;
-  // for (size_t iray = sweepDoppler->getStartRayIndex();
-  //      iray <= sweepDoppler->getEndRayIndex(); iray++) {
-  //   RadxRay *ray = _rays[iray];
-  //   vector<RadxField *> flds = ray->getFields();
-  //   for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-  //     RadxField *fld = flds[ifield];
-  //     string name = fld->getName();
-  //     if (iray == sweepDoppler->getStartRayIndex()) {
-  //       // initialize cound
-  //       dopplerCounts[name] = 0;
-  //     }
-  //     dopplerCounts[name] += fld->countNonMissingGates();
-  //   } // ifield
-  // } // iray
-
-  // if (_debug) {
-  //   cerr << "DEBUG - RadxVol::combineNexradSweeps()" << endl;
-  //   for (map<string, int>::iterator it = nonDopCounts.begin();
-  //        it != nonDopCounts.end(); it++) {
-  //     cerr << "==>> nonDop field: " 
-  //          << it->first << ", count: " << it->second << endl;
-  //   }
-  //   for (map<string, int>::iterator it = dopplerCounts.begin();
-  //        it != dopplerCounts.end(); it++) {
-  //     cerr << "==>> doppler field: " 
-  //          << it->first << ", count: " << it->second << endl;
-  //   }
-  // }
 
   // loop through the nonDop rays
   
@@ -5820,6 +5900,7 @@ void RadxVol::_addFieldsFromDopplerSweep(RadxSweep *sweepNonDop,
       rayNonDop->setPrtSec(rayDoppler->getPrtSec());
       rayNonDop->setPrtRatio(rayDoppler->getPrtRatio());
       rayNonDop->setNyquistMps(rayDoppler->getNyquistMps());
+      rayNonDop->setIsLongRange(false);
       
     } // if (rayDoppler != NULL)
 

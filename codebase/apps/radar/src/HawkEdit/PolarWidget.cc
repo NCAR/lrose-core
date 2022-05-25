@@ -66,7 +66,8 @@ PolarWidget::PolarWidget(QWidget* parent,
                          const RadxPlatform &platform,
 			 DisplayFieldController *displayFieldController,
 			 //                         const vector<DisplayField *> &fields,
-                         bool haveFilteredFields) :
+                         bool haveFilteredFields,
+                         RayLocationController *rayLocationController) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -81,7 +82,8 @@ PolarWidget::PolarWidget(QWidget* parent,
         _scaledLabel(ScaledLabel::DistanceEng),
         _rubberBand(0),
         _ringSpacing(10.0),
-        _boundaryTrackMouseMove(false)
+        _boundaryTrackMouseMove(false),
+        _rayLocationController(rayLocationController)
 
 {
   _params = ParamFile::Instance();
@@ -98,7 +100,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   // mode
 
-  _archiveMode = _params->begin_in_archive_mode;
+//  _archiveMode = _params->begin_in_archive_mode;
 
   // Set up the background color
 
@@ -123,6 +125,7 @@ PolarWidget::PolarWidget(QWidget* parent,
 
   qRegisterMetaType<size_t>("size_t");
 
+  _resetWorld(_manager->height(), _manager->height());
 
   // create the field renderers
   _fieldRendererController = new FieldRendererController();
@@ -291,10 +294,10 @@ QTransform *PolarWidget::computeTextTransform(
  * set archive mode
  */
 
-void PolarWidget::setArchiveMode(bool archive_mode)
-{
-  _archiveMode = archive_mode;
-}
+//void PolarWidget::setArchiveMode(bool archive_mode)
+//{
+//  _archiveMode = archive_mode;
+//}
 
 /*************************************************************************
  * unzoom the view
@@ -374,14 +377,14 @@ void PolarWidget::activateArchiveRendering()
  */
 
 void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle,
-  RayLocationController *rayLocationController, ColorMap &colorMap,
+  ColorMap &colorMap,
   QColor backgroundColor)
 {
   try {
 
     // set the context ...
     _currentSweepAngle = currentSweepAngle;
-    _rayLocationController = rayLocationController;
+    //_rayLocationController = rayLocationController;
     _currentColorMap = colorMap;
     _backgroundColor = backgroundColor;
     
@@ -605,6 +608,84 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
   
 }
 
+
+/*************************************************************************
+ * mouseReleaseEvent()
+ */
+
+void PolarWidget::mouseDoubleClickEvent(QMouseEvent *e)
+{
+
+  _pointClicked = false;
+
+  QPointF clickPos(e->pos());
+  
+  _mouseReleaseX = clickPos.x();
+  _mouseReleaseY = clickPos.y();
+
+  mapPixelToWorld(_mouseReleaseX, _mouseReleaseY, &_worldReleaseX, &_worldReleaseY);
+  cerr << "translate to (mouse)" << _mouseReleaseX << ", " << _mouseReleaseY << endl;
+  // get click location in world coords
+  cerr << "translate to (world)" << _worldReleaseX << ", " << _worldReleaseY << endl;
+  _translateTransform(_mouseReleaseX, _mouseReleaseY); //  _worldReleaseY);
+
+  _manager->enableZoomButton(); // to allow recentering when UnZoom is clicked
+
+  /*
+  // --- if shift key is down, then pass message on to boundary point control
+  bool isShiftKeyDown = (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier) == true);
+  if (isShiftKeyDown) {
+    // ignore
+    return;
+  } else {
+    if (rgeom.width() <= 20) {
+      // If the mouse hasn't moved much, assume we are clicking rather than
+      // zooming
+  
+      double x_km = _worldReleaseX;
+      double y_km = _worldReleaseY;
+      _pointClicked = true;
+      // get ray closest to click point
+      const RadxRay *closestRay = _getClosestRay(x_km, y_km);
+      // Emit a signal to indicate that the click location has changed
+      emit locationClicked(x_km, y_km, closestRay);
+    } else {
+      // mouse moved more than 20 pixels, so a zoom occurred
+      // or moving boundary points
+
+      // if mouse was pressed near a boundary point, then move the boundary point
+      // otherwise, this is a zoom
+      if (_boundaryTrackMouseMove) {
+        _manager->moveBoundaryPoint(_worldPressX, _worldPressY,
+          _worldReleaseX, _worldReleaseY);
+      } else {
+
+        // use rgeom
+
+        int xMin, xMax, yMin, yMax;
+        rgeom.getCoords(&xMin, &yMax, &xMax, &yMin);
+
+        double xMinWorld, yMinWorld, xMaxWorld, yMaxWorld;
+
+        mapPixelToWorld(xMax, yMax, &xMaxWorld, &yMaxWorld);
+        mapPixelToWorld(xMin, yMin, &xMinWorld, &yMinWorld);
+
+        _zoomWorld.set2(xMinWorld, yMinWorld, xMaxWorld, yMaxWorld);
+        _setTransform(_zoomWorld.getTransform());
+
+        _setGridSpacing();
+        _manager->enableZoomButton();        
+      }
+    }
+  }  
+  _rubberBand->hide();
+  _boundaryTrackMouseMove = false;
+  update();
+  */
+
+}
+
+
 //void PolarWidget::imageReady(QImage *image) {
 //  _image = image;  // TODO: make sure this isn't a copy!  just assign a pointer
 //  update();
@@ -631,7 +712,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
     if (selectedField.length() > 0) {
 
         // using a QImage
-        if (1){ // m_buffer.size() != size()) {
+        if (_rayLocationController == NULL) {
+          cerr << "something crazy happened: bailing!" << endl;
+          return;
+        } else { // m_buffer.size() != size()) {
             LOG(DEBUG) << " inside first QImage size = " << width() << " x " << height();
             m_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
             m_base_buffer = QImage(size(), QImage::Format_ARGB32_Premultiplied);
@@ -674,6 +758,10 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   } catch (std::range_error &ex) {
       LOG(ERROR) << ex.what();
       //QMessageBox::warning(NULL, "Error changing field (_changeField):", ex.what());
+  } catch (std::invalid_argument &ex) {
+    _manager->errorMessage("Error", ex.what());
+    _manager->errorMessage("Error", "Field has no data");
+    event->accept();
   }
   LOG(DEBUG) << "exit";
 }
@@ -764,7 +852,44 @@ void PolarWidget::_setTransform(const QTransform &transform)
   _zoomTransform = transform;
   
 }
+ 
+void PolarWidget::_translateTransform(double x, double y)
+{
+
+  double m31 = _fullTransform.m31(); 
+  double m32 = _fullTransform.m32();
   
+  double dx = (width()/2) - x; // _fullTransform.m31() - dx;
+  double dy = (height()/2) - y; // _fullTransform.m32() - dy;
+  //_fullTransform.translate(dx, dy);
+
+  double newx = m31 + dx;
+  double newy = m32 + dy;
+  _fullTransform.setMatrix(_fullTransform.m11(), _fullTransform.m12(), 
+    _fullTransform.m13(), _fullTransform.m21(), _fullTransform.m22(), 
+    _fullTransform.m23(), newx, newy, 
+    _fullTransform.m33());
+  
+  //_fullTransform = _fullTransform.translate(-150, 0); // newDx - dx, newDy - dy);
+  cerr << "_fullTransform dx,dy " << _fullTransform.dx()  << ", " << _fullTransform.dy()  << endl;
+
+  m31 = _zoomTransform.m31(); 
+  m32 = _zoomTransform.m32();
+
+  newx = m31 + dx;
+  newy = m32 + dy;
+
+  _zoomTransform.setMatrix(_zoomTransform.m11(), _zoomTransform.m12(), 
+    _zoomTransform.m13(), _zoomTransform.m21(), _zoomTransform.m22(), 
+    _zoomTransform.m23(), newx, newy, 
+    _zoomTransform.m33());
+
+
+  //_zoomTransform = _zoomTransform.translate(-150, 0); //newDx - dx2, newDy - dy2);
+  cerr << "_zoomTransform dx,dy " << _zoomTransform.dx() << ", " << _zoomTransform.dy() << endl;  
+  cerr << endl << endl;
+}
+
 void PolarWidget::informationMessage()
 {
   // QMessageBox::StandardButton reply;
@@ -893,8 +1018,10 @@ void PolarWidget::drawRings(QPainter &painter)
   qreal htranslate = painter.combinedTransform().m31();
   qreal vtranslate = painter.combinedTransform().m32();
 
+  float width = 1.0/hscale * 2.0;
+  if (width <= 0) width = 1.0;
+  pen.setWidth(width);
 
-  pen.setWidth(1.0/hscale * 2.0);
   painter.setPen(pen);
   
   // Draw rings
@@ -1254,8 +1381,12 @@ void PolarWidget::drawColorScale(QPainter &painter) {
     //painter.setFont(font);  
 
   DisplayField *field = displayFieldController->getSelectedField();
-  drawColorScaleFromWorldPlot(field->getColorMap(), painter,
+  if (field != NULL) {
+    //if (field->length() > 0) {
+      drawColorScaleFromWorldPlot(field->getColorMap(), painter,
                             _params->label_font_size);
+    //}
+  }
 
   painter.restore();
   delete textTransform;

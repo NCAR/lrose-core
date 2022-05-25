@@ -39,7 +39,6 @@ void se_get_boundary_mask(long *xpoints, long *ypoints, int npoints,
              int radar_scan_mode,
              int radar_type,
              float tilt_angle,
-			       float rotation_angle,
 			       bool *boundary_mask_out) {
 
 
@@ -87,7 +86,6 @@ void se_get_boundary_mask(long *xpoints, long *ypoints, int npoints,
     radar_scan_mode,
     radar_type,
     tilt_angle,
-    rotation_angle,
     boundary_mask_out);
 
   delete boundary;

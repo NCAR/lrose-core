@@ -136,6 +136,13 @@ int Orient::findEchoOrientation()
   }
   _rhis.clear();
   
+  // set radar params from volume
+
+  if (_setRadarParams()) {
+    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
+    return -1;
+  }
+
   // create the synthetic RHIs
   
   double azimuth = _startAz;
@@ -145,13 +152,6 @@ int Orient::findEchoOrientation()
                                    _radarAltKm, _gridZLevels);
     _rhis.push_back(rhi);
     azimuth += _deltaAz;
-  }
-
-  // set radar params from volume
-
-  if (_setRadarParams()) {
-    cerr << "ERROR - Orient::findEchoOrientation()" << endl;
-    return -1;
   }
 
   // compute echo orientation in pseudo RHIs
@@ -173,7 +173,6 @@ int Orient::findEchoOrientation()
   for (size_t ii = 0; ii < _rhis.size(); ii++) {
     if (!_rhis[ii]->getSuccess()) {
       iret = -1;
-      break;
     }
   }
 
@@ -185,6 +184,8 @@ int Orient::findEchoOrientation()
 // load the sdev fields on the cartesian grid
 
 void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
+                            Interp::DerivedField *dbzH,
+                            Interp::DerivedField *dbzV,
                             Interp::DerivedField *sdevDbzH,
                             Interp::DerivedField *sdevDbzV)
 
@@ -202,12 +203,18 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
         double az = loc->az;
         double gndRange = loc->gndRange;
         size_t rhiIndex = (int) ((az - _startAz) / _deltaAz + 0.5);
+        if (rhiIndex >= _rhis.size()) {
+          rhiIndex -= _rhis.size();
+        }
         assert (rhiIndex < _rhis.size());
-        int rangeIndex = (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
-        Radx::fl32 sdevH = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
-        Radx::fl32 sdevV = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
-        sdevDbzH->data[ii] = sdevH;
-        sdevDbzV->data[ii] = sdevV;
+        int rangeIndex =
+          (int) ((gndRange - _startRangeKm) / _gateSpacingKm + 0.5);
+        if (rangeIndex < (int) _rhis[rhiIndex]->getNRange()) {
+          dbzH->data[ii] = _rhis[rhiIndex]->getDbzH(rangeIndex, iz);
+          dbzV->data[ii] = _rhis[rhiIndex]->getDbzV(rangeIndex, iz);
+          sdevDbzH->data[ii] = _rhis[rhiIndex]->getSdevDbzH(rangeIndex, iz);
+          sdevDbzV->data[ii] = _rhis[rhiIndex]->getSdevDbzV(rangeIndex, iz);
+        }
       } // ix
     } // iy
   } // iz
@@ -216,6 +223,16 @@ void Orient::loadSdevFields(Interp::GridLoc ****gridLoc,
 
 }
 
+//////////////////////////////////////////////////
+// clear RHI data
+
+void Orient::clearRhiData()
+{
+  for (size_t ii = 0; ii < _rhis.size(); ii++) {
+    _rhis[ii]->clear();
+  }
+}
+  
 //////////////////////////////////////////////////
 // create the threading objects
 
@@ -274,6 +291,7 @@ void Orient::_computeOrientMultiThreaded()
     if (thread == NULL) {
       break;
     }
+    thread->setRhiIndex(ii);
     if (isDone) {
       // if it is a done thread, return thread to the available pool
       _threadPoolOrientInRhi.addThreadToAvail(thread);

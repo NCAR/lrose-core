@@ -393,6 +393,81 @@ QRect WorldPlot::getWorldWindow() const
 }
   
 ///////////////////////////////
+// draw a point in pixel coords
+
+void WorldPlot::drawPixelPoint(QPainter &painter,
+                               double xx, double yy) 
+
+{
+	
+  painter.save();
+  QPointF qpt(xx, yy);
+  painter.drawPoint(qpt);
+  painter.restore();
+
+}
+
+///////////////////////////////
+// draw a point in world coords
+
+void WorldPlot::drawPoint(QPainter &painter,
+                          double xx, double yy) 
+
+{
+	
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+
+  double xxx = getXPixel(xx);
+  double yyy = getYPixel(yy);
+
+  QPointF qpt(xxx, yyy);
+  painter.drawPoint(qpt);
+
+  painter.restore();
+
+}
+
+///////////////////////////////
+// draw points in world coords
+
+void WorldPlot::drawPoints(QPainter &painter,
+                           const QVector<QPointF> &points) 
+
+{
+  
+  painter.save();
+  painter.setClipRect(_xMinPixel, _yMaxPixel, _plotWidth,  _plotHeight);
+
+  QVector<QPointF> pts;
+  for (int ii = 0; ii < points.size(); ii++) {
+    double xxx = getXPixel(points[ii].x());
+    double yyy = getYPixel(points[ii].y());
+    QPointF pt(xxx, yyy);
+    pts.push_back(pt);
+  }
+
+  painter.drawPoints(pts.data(), pts.size());
+
+  painter.restore();
+
+}
+
+///////////////////////////////
+// draw points in pixel coords
+
+void WorldPlot::drawPixelPoints(QPainter &painter,
+                                const QVector<QPointF> &points) 
+
+{
+  
+  painter.save();
+  painter.drawPoints(points.data(), points.size());
+  painter.restore();
+
+}
+
+///////////////////////////////
 // draw a line in pixel coords
 
 void WorldPlot::drawPixelLine(QPainter &painter,
@@ -433,7 +508,7 @@ void WorldPlot::drawLine(QPainter &painter,
 ////////////////////////////////////////////////////////////////////////
 // draw lines between consecutive points, world coords
 
-void WorldPlot::drawLines(QPainter &painter, QVector<QPointF> &points) 
+void WorldPlot::drawLines(QPainter &painter, const QVector<QPointF> &points) 
 
 {
 

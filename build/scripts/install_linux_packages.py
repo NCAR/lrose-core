@@ -88,8 +88,10 @@ def main():
             installPackagesCentos6()
         elif (osVersion == 7):
             installPackagesCentos7()
-        elif (osVersion == 8):
+        else:
             installPackagesCentos8()
+    elif (osType == "almalinux"):
+        installPackagesAlmalinux8()
     elif (osType == "fedora"):
          installPackagesFedora()
     elif (osType == "debian"):
@@ -216,6 +218,63 @@ def installPackagesCentos7():
 # install packages for CENTOS 8
 
 def installPackagesCentos8():
+
+    # install epel
+
+    shellCmd("dnf install -y epel-release python2 python3")
+    shellCmd("dnf install -y 'dnf-command(config-manager)'")
+    shellCmd("dnf config-manager --set-enabled powertools")
+    shellCmd("alternatives --set python /usr/bin/python3")
+
+    # install main packages
+    # break this up into pieces so it does not crash inside docker
+
+    shellCmd("dnf install -y --allowerasing " +
+             "tcsh wget git " +
+             "emacs rsync python2 python3 mlocate " +
+             "python2-devel platform-python-devel " +
+             "m4 make cmake libtool autoconf automake " +
+             "gcc gcc-c++ gcc-gfortran glibc-devel")
+
+    shellCmd("dnf install -y --allowerasing " +
+             "libX11-devel libXext-devel libcurl-devel " +
+             "libpng-devel libtiff-devel zlib-devel libzip-devel " +
+             "eigen3-devel armadillo-devel " +
+             "expat-devel libcurl-devel openmpi-devel " +
+             "flex-devel fftw3-devel ")
+
+    shellCmd("dnf install -y --allowerasing " +
+             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "hdf5-devel netcdf-devel " +
+             "xorg-x11-xauth xorg-x11-apps " +
+             "rpm-build redhat-rpm-config " +
+             "rpm-devel rpmdevtools")
+
+    # install required 32-bit packages for CIDD
+    
+    if (options.cidd32):
+        shellCmd("dnf install -y --allowerasing " +
+                 "xrdb " +
+                 "glibc-devel.i686 libX11-devel.i686 libXext-devel.i686 " +
+                 "libcurl-devel.i686 " +
+                 "libtiff-devel.i686 libpng-devel.i686 " +
+                 "libstdc++-devel.i686 libtiff-devel.i686 ")
+        shellCmd("dnf install -y --allowerasing " +
+                 "zlib-devel.i686 expat-devel.i686 flex-devel.i686 " +
+                 "fftw-devel.i686 bzip2-devel.i686 " +
+                 "gnuplot ImageMagick-devel ImageMagick-c++-devel " +
+                 "xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi " +
+                 "xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi " +
+                 "xorg-x11-fonts-misc")
+
+    # create link for qtmake
+
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    
+########################################################################
+# install packages for ALMALINUX 8
+
+def installPackagesAlmalinux8():
 
     # install epel
 
@@ -485,6 +544,8 @@ def getOsType():
           nameline = line.lower()
           if (nameline.find("centos") >= 0):
             osType = "centos"
+          elif (nameline.find("almalinux") >= 0):
+            osType = "almalinux"
           elif (nameline.find("fedora") >= 0):
             osType = "fedora"
           elif (nameline.find("debian") >= 0):

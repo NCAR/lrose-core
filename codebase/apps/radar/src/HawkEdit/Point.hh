@@ -1,3 +1,4 @@
+#include <cmath>
 
 #ifndef struct_Point_HH
 #define struct_Point_HH
