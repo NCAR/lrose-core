@@ -184,9 +184,13 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   _statsMgr.setEndTime(pulse->getFTime());
 
   // check that we start with a horizontal pulse
-  
-  if (_pulseQueue.size() == 0 && !pulse->isHoriz()) {
-    return;
+
+  if (_xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
+      _xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
+      _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
+    if (_pulseQueue.size() == 0 && !pulse->isHoriz()) {
+      return;
+    }
   }
 
   // add the pulse to the queue
