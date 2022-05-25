@@ -197,7 +197,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   
   _addPulseToQueue(pulse);
   _totalPulseCount++;
-  
+
   // do we have a full pulse queue?
 
   if ((int) _pulseQueue.size() < _nSamples) {
@@ -308,16 +308,24 @@ void TsDataMgr::_addPulseToQueue(const IwrfTsPulse *pulse)
   }
   _pulseSeqNum = pulse->getSeqNum();
 
-  // check number of gates is constant
+  // set _nGates to min number found so far
 
   qSize = (int) _pulseQueue.size();
-  _nGates = _pulseQueue[0]->getNGates();
-  for (int ii = 1; ii < qSize; ii++) {
-    if (_pulseQueue[ii]->getNGates() != _nGates) {
-      _clearPulseQueue();
-      return;
+  if (_nGates != 0) {
+    if (_nGates > _pulseQueue[0]->getNGates()) {
+      _nGates = _pulseQueue[0]->getNGates();
     }
+  } else {
+    _nGates = _pulseQueue[0]->getNGates();
   }
+
+  // _nGates = _pulseQueue[0]->getNGates();
+  // for (int ii = 1; ii < qSize; ii++) {
+  //   if (_pulseQueue[ii]->getNGates() != _nGates) {
+  //     _clearPulseQueue();
+  //     return;
+  //   }
+  // }
 
 }
 
