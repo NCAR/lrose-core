@@ -779,7 +779,7 @@ void Cmd::_computePhidpSdevNew(int nGates)
     }
   
     if (count <= nGatesHalf) {
-      return;
+      continue;
     }
     
     istate.meanxx = sumxx / count;
