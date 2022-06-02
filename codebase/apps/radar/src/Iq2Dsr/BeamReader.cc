@@ -73,6 +73,11 @@ BeamReader::BeamReader(const string &prog_name,
   _endOfSweepFlag = false;
   _endOfVolFlag = false;
   
+  _endOfSweepPending = false;
+  _endOfSweepPulseSeqNum = 0;
+  _endOfVolPending = false;
+  _endOfVolPulseSeqNum = 0;
+
   _pulseSeqNum = 0;
   _prevPulseSeqNum = 0;
   _latestPulse = NULL;
@@ -454,6 +459,10 @@ Beam *BeamReader::getNextBeam()
   // compute effective nsamples 
 
   int nSamplesEffective = _computeNSamplesEffective(_nSamples);
+
+  // check for end of vol and sweep
+
+  _checkForEndFlags(beamPulses);
 
   // initialize the beam
 
@@ -1150,7 +1159,6 @@ IwrfTsPulse *BeamReader::_getNextPulse()
     // get the next pulse
 
     IwrfTsPulse *pulse = _readNextPulse();
-    
     if (pulse == NULL && _params.mode == Params::SIMULATE) {
       // in simulate mode, reset the queue
       _pulseReader->reset();
@@ -1162,16 +1170,20 @@ IwrfTsPulse *BeamReader::_getNextPulse()
       return NULL;
     }
 
-    if (pulse->get_end_of_sweep()) {
-      // set end of sweep flag, used for next beam
-      _endOfSweepFlag = true;
+    // check for pending end of sweep
+
+    if (pulse->get_end_of_sweep() && !_endOfSweepPending) {
+      _endOfSweepPending = true;
+      _endOfSweepPulseSeqNum = pulse->getPulseSeqNum();
     }
     
-    if (pulse->get_end_of_volume()) {
-      // set end of vol flag, used for next beam
-      _endOfVolFlag = true;
+    // check for pending end of vol
+
+    if (pulse->get_end_of_volume() && !_endOfVolPending) {
+      _endOfVolPending = true;
+      _endOfVolPulseSeqNum = pulse->getPulseSeqNum();
     }
-    
+
     if (_params.invert_hv_flag) {
       pulse->setInvertHvFlag(true);
     }
@@ -2728,6 +2740,35 @@ void BeamReader::_computeBeamElRate(int endIndex, int nSamples)
     _beamElRate = deltaEl / deltaTime;
   }
 
+}
+
+////////////////////////////////////////////////////////////////
+// check for end of vol and sweep flags
+
+void BeamReader::_checkForEndFlags(const vector<const IwrfTsPulse *> &beamPulses)
+  
+{
+  
+  si64 firstPulseIndex = beamPulses[0]->getPulseSeqNum();
+
+  // check if the pulses have moved beyond the end of sweep flag
+
+  if (_endOfSweepPending) {
+    if (_endOfSweepPulseSeqNum < firstPulseIndex) {
+      _endOfSweepFlag = true;
+      _endOfSweepPending = false;
+    }
+  }
+    
+  // check if the pulses have moved beyond the end of vol flag
+
+  if (_endOfVolPending) {
+    if (_endOfVolPulseSeqNum < firstPulseIndex) {
+      _endOfVolFlag = true;
+      _endOfVolPending = false;
+    }
+  }
+    
 }
 
 ////////////////////////////////////////////////////////////////
