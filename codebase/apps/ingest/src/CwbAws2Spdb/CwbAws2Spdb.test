@@ -19,8 +19,10 @@
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
+//
 // If set, debug messages will be printed with the appropriate level of 
 //   detail.
+//
 //
 // Type: enum
 // Options:
@@ -34,7 +36,10 @@ debug = DEBUG_OFF;
 ///////////// instance ////////////////////////////////
 //
 // Process instance.
+//
 // Used for registration with procmap.
+//
+//
 // Type: string
 //
 
@@ -49,6 +54,7 @@ instance = "test";
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
+//
 // In REALTIME mode, the program waits for a new input file. In this 
 //   mode it is optional to watch for a latest_data_info file. In ARCHIVE 
 //   mode, it processes all of the data files in the input directory 
@@ -57,6 +63,7 @@ instance = "test";
 //   command line. In FILELIST mode paths must be fully qualified with 
 //   respect to the date and time - so if each date has a separate 
 //   subdirectory the date part of the path must be included.
+//
 //
 // Type: enum
 // Options:
@@ -76,7 +83,10 @@ mode = ARCHIVE;
 ///////////// input_dir ///////////////////////////////
 //
 // Input directory.
+//
 // Directory where input data files can be found.
+//
+//
 // Type: string
 //
 
@@ -86,7 +96,10 @@ input_dir = "./raw/aws";
 //
 // Set to true if there is a latest_data_info file available in the 
 //   input directory.
+//
 // REALTIME mode only.
+//
+//
 // Type: boolean
 //
 
@@ -95,9 +108,12 @@ latest_data_info_avail = FALSE;
 ///////////// max_realtime_valid_age //////////////////
 //
 // Max valid age of rdata input files in realtime mode (secs).
+//
 // This the max valid age for an incoming file. The program will wait 
 //   for a data file more recent than this age.
+//
 // Minimum val: 1
+//
 // Type: int
 //
 
@@ -106,7 +122,10 @@ max_realtime_valid_age = 3600;
 ///////////// strict_subdir_check /////////////////////
 //
 // When set, only checks input_dir for subdirs of the form YYYYMMDD.
+//
 // Only in REALTIME mode with latest_data_info_avail FALSE.
+//
+//
 // Type: boolean
 //
 
@@ -115,7 +134,10 @@ strict_subdir_check = FALSE;
 ///////////// file_name_check /////////////////////////
 //
 // When set, check file name contains specified sub-string.
+//
 // See file_match_string.
+//
+//
 // Type: boolean
 //
 
@@ -124,11 +146,14 @@ file_name_check = FALSE;
 ///////////// file_match_string ///////////////////////
 //
 // Input filename match string.
+//
 // Files must contain this string to be processed.
+//
+//
 // Type: string
 //
 
-file_match_string = "_mes";
+file_match_string = "axf";
 
 //======================================================================
 //
@@ -140,29 +165,39 @@ file_match_string = "_mes";
 //
 // Set to true if the input data is AWS or precip amount.
 //
+// MDF_FILE indicates surface data in .mdf format.
+//
+//
 // Type: enum
 // Options:
 //     PRECIP_STATION
 //     AWS_STATION
+//     MDF_FILE
 //     ONE_MINUTE_AWS
 //
 
-station_type = AWS_STATION;
+station_type = MDF_FILE;
 
 ///////////// output_url //////////////////////////////
 //
 // Output URL for decoded metars.
+//
 // See the DIDSS docs for details on URL usage.
+//
+//
 // Type: string
 //
 
-output_url = "spdbp:://localhost::spdb/cwb/aws";
+output_url = "spdbp:://localhost::spdb/aws";
 
 ///////////// expire_seconds //////////////////////////
 //
 // Expire time in seconds for each metar.
+//
 // This value will be added to the metar time to determine the expire 
 //   time for the metar.
+//
+//
 // Type: int
 //
 

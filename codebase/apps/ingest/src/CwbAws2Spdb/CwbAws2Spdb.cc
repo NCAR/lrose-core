@@ -46,6 +46,7 @@
 #include <toolsa/str.h>
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
+#include <rapformats/WxObs.hh>
 #include <didss/DsInputPath.hh>
 #include <physics/physics.h>
 #include "CwbAws2Spdb.hh"
@@ -168,6 +169,11 @@ int CwbAws2Spdb::Run ()
       if (_processAwsFile(inputPath)) {
 	cerr << "WARNING - CwbAws2Spdb::Run" << endl;
 	cerr << "  Errors in processing aws file: " << inputPath << endl;
+      }
+    } else if (_params.station_type == Params::MDF_FILE) {
+      if (_processMdfFile(inputPath)) {
+	cerr << "WARNING - CwbAws2Spdb::Run" << endl;
+	cerr << "  Errors in processing mdf file: " << inputPath << endl;
       }
     } else if (_params.station_type == Params::ONE_MINUTE_AWS) {
       if (_processOneMinAwsFile(inputPath)) {
@@ -363,6 +369,196 @@ int CwbAws2Spdb::_processAwsFile(const char *file_path)
    
 }
 
+////////////////////
+// process MDF file
+
+int CwbAws2Spdb::_processMdfFile(const char *file_path)
+  
+{
+
+  int iret = 0;
+
+  if (_params.debug) {
+    cerr << "Processing mdf file: " << file_path << endl;
+  }
+
+  // registration
+
+  char procmapString[BUFSIZ];
+  Path path(file_path);
+  sprintf(procmapString, "Processing file <%s>", path.getFile().c_str());
+  PMU_force_register(procmapString);
+
+  // compute the time from the file name
+
+  Path ppath(file_path);
+  string fileName = ppath.getFile();
+
+  int year, month, day, hour, min;
+  if (sscanf(fileName.c_str(), "%4d-%2d-%2d_%2d%2d",
+	     &year, &month, &day, &hour, &min) != 5) {
+    if (sscanf(fileName.c_str(), "%4d%2d%2d%2d%2d",
+               &year, &month, &day, &hour, &min) != 5) {
+      cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
+      cerr << "  Cannot compute time from file name" << endl;
+      cerr << "  File path: " << file_path << endl;
+      cerr << "  File name: " << fileName << endl;
+      return -1;
+    }
+  }
+  DateTime validTime(year, month, day, hour, min, 0);
+
+  // create spdb output object
+  
+  DsSpdb out;
+
+  // read in file, loading up chunks in output object spdb
+
+  FILE *in;
+  if ((in = fopen(file_path, "r")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
+    cerr << "  Cannot open file: " << file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  int nObs = 0;
+  bool gotLabelLine = false;
+  while (!feof(in)) {
+
+    char line[1024];
+
+    if (fgets(line, 1024, in) == NULL) {
+      break;
+    }
+
+    if (strstr(line, "STID") != NULL) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "CwbAws2Spdb::_processMdfFile" << endl;
+        cerr << "  Got label line: " << line;
+      }
+      gotLabelLine = true;
+      continue;
+    }
+    
+    if (!gotLabelLine) {
+      // read in time
+      int id, oyear, omonth, oday, ohour, omin, osec;
+      if (sscanf(line, "%d %d %d %d %d %d %d",
+                 &id, &oyear, &omonth, &oday, &ohour, &omin, &osec) == 7) {
+        validTime.set(oyear, omonth, oday, ohour, omin, osec);
+      }
+      continue;
+    }
+    
+    // read in data
+    
+    char stid[128], stnm[128];
+    int timeOffset = 0;
+    double lat, lon, elev, wdir, wspd, temp, humd, pres;
+    
+    if (sscanf(line, "%s%s%d%lg%lg%lg%lg%lg%lg%lg%lg",
+	       stid, stnm, &timeOffset,
+	       &lat, &lon, &elev, &wdir, &wspd, &temp, &humd, &pres) != 11) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - bad line: " << line;
+        continue;
+      }
+    }
+
+    double rh = humd * 100.0;
+    double dewpt = PHYrhdp(temp, rh);
+    dewpt = ((int) floor (dewpt * 10.0 + 0.5)) / 10.0;
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Read line: " << line;
+      cerr << " stid: " << stid << endl;
+      if (timeOffset != 0) {
+        cerr << " timeOffset: " << timeOffset << endl;
+      }
+      cerr << " lat: " << lat << endl;
+      cerr << " lon: " << lon << endl;
+      cerr << " elev: " << elev << endl;
+      cerr << " wdir: " << wdir << endl;
+      cerr << " wspd: " << wspd << endl;
+      cerr << " temp: " << temp << endl;
+      cerr << " humd: " << humd << endl;
+      cerr << " rh: " << rh << endl;
+      cerr << " dewpt: " << dewpt << endl;
+      cerr << " pres: " << pres << endl;
+    }
+    
+    // fill out station report
+    
+    WxObs obs;
+
+    obs.setStationId(stid);
+    obs.setObservationTime(validTime.utime());
+    obs.setLatitude(lat);
+    obs.setLongitude(lon);
+    obs.setElevationM(elev);
+
+    obs.setTempC(temp);
+    obs.setRhPercent(rh);
+    obs.setDewpointC(dewpt);
+    obs.setWindDirnDegT(wdir);
+    obs.setWindSpeedMps(wspd);
+    obs.setPressureMb(pres);
+
+    // assemble into XML message
+
+    obs.assembleAsXml();
+
+    // add chunk
+    
+    int stationId = Spdb::hash4CharsToInt32(stid + 1);
+    out.addPutChunk(stationId,
+		    validTime.utime(),
+		    validTime.utime() + _params.expire_seconds,
+		    obs.getBufLen(), obs.getBufPtr());
+    
+    nObs++;
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "====== Report XML ======" << endl;
+      cerr << (char *) obs.getBufPtr() << endl;
+      cerr << "========================" << endl;
+    }
+    
+  } // while
+  
+  if (nObs < 0) {
+    cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
+    cerr << "  No valid obs in file: " << file_path << endl;
+    return -1;
+  }
+
+  // put the data
+  
+  if (out.put(_params.output_url,
+	      SPDB_STATION_REPORT_ID,
+	      SPDB_STATION_REPORT_LABEL)) {
+    cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
+    cerr << "  Cannot put station data to: "
+	 << _params.output_url << endl;
+    cerr << "  " << out.getErrStr() << endl;
+    iret = -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Wrote " << nObs << " reports to url: "
+	 << _params.output_url << endl;
+  }
+
+  if (_params.debug) {
+    cerr << "  Done with file: " << file_path << endl;
+  }
+
+  return iret;
+   
+}
+
 ///////////////////////////////
 // process one minute AWS file
 
@@ -434,7 +630,7 @@ int CwbAws2Spdb::_processOneMinAwsFile(const char *file_path)
 	       &precip24hr, &precip1min) != 12) {
       if (strstr(line, "STID") == NULL) {
 	// not first line, print error message
-	cerr << "ERROR - CwbAws2Spdb::_processAwsFile" << endl;
+	cerr << "ERROR - CwbAws2Spdb::_processOneMinAwsFile" << endl;
 	cerr << "  Cannot read line: " << line;
       }
       continue;
@@ -504,7 +700,7 @@ int CwbAws2Spdb::_processOneMinAwsFile(const char *file_path)
   } // while
 
   if (nObs < 0) {
-    cerr << "ERROR - CwbAws2Spdb::_processAwsFile" << endl;
+    cerr << "ERROR - CwbAws2Spdb::_processOneMinAwsFile" << endl;
     cerr << "  No valid obs in file: " << file_path << endl;
     return -1;
   }
@@ -514,7 +710,7 @@ int CwbAws2Spdb::_processOneMinAwsFile(const char *file_path)
   if (out.put(_params.output_url,
 	      SPDB_STATION_REPORT_ID,
 	      SPDB_STATION_REPORT_LABEL)) {
-    cerr << "ERROR - CwbAws2Spdb::_processAwsFile" << endl;
+    cerr << "ERROR - CwbAws2Spdb::_processOneMinAwsFile" << endl;
     cerr << "  Cannot put station data to: "
 	 << _params.output_url << endl;
     cerr << "  " << out.getErrStr() << endl;

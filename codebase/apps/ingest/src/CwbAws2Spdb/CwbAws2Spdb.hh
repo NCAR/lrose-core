@@ -83,6 +83,7 @@ private:
   Params _params;
 
   int _processAwsFile(const char *file_path);
+  int _processMdfFile(const char *file_path);
   int _processOneMinAwsFile(const char *file_path);
   int _processPrecipFile(const char *file_path);
   

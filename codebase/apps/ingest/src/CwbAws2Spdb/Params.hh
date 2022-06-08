@@ -82,7 +82,8 @@ public:
   typedef enum {
     PRECIP_STATION = 0,
     AWS_STATION = 1,
-    ONE_MINUTE_AWS = 2
+    MDF_FILE = 2,
+    ONE_MINUTE_AWS = 3
   } station_type_t;
 
   ///////////////////////////
