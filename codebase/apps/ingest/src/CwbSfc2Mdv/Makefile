@@ -34,17 +34,14 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = CwbSfc2Mdv
 
-LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-ldidss -lrapformats -lphysics -ltoolsa \
-	-ldataport -ltdrp $(NETCDF_C_LIB) $(NETCDF_C++_LIB) \
-	$(NETCDF_LIB_LIST) $(NETCDF4_LIBS) -lbz2 -lz \
-	-lpthread -lm
+	-lrapformats -ldidss -ltoolsa -ldataport \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
+	-lpthread
 
-LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)
-
-LOC_CFLAGS =
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 HDRS = \
         $(PARAMS_HH) \
