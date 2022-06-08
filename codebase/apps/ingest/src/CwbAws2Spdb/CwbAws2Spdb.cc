@@ -338,6 +338,10 @@ int CwbAws2Spdb::_processAwsFile(const char *file_path)
     
   } // while
 
+  // close input file
+
+  fclose(in);
+
   if (nObs < 0) {
     cerr << "ERROR - CwbAws2Spdb::_processAwsFile" << endl;
     cerr << "  No valid obs in file: " << file_path << endl;
@@ -528,6 +532,10 @@ int CwbAws2Spdb::_processMdfFile(const char *file_path)
     
   } // while
   
+  // close input file
+
+  fclose(in);
+
   if (nObs < 0) {
     cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
     cerr << "  No valid obs in file: " << file_path << endl;
@@ -699,6 +707,10 @@ int CwbAws2Spdb::_processOneMinAwsFile(const char *file_path)
     
   } // while
 
+  // close input file
+
+  fclose(in);
+
   if (nObs < 0) {
     cerr << "ERROR - CwbAws2Spdb::_processOneMinAwsFile" << endl;
     cerr << "  No valid obs in file: " << file_path << endl;
@@ -861,6 +873,10 @@ int CwbAws2Spdb::_processPrecipFile(const char *file_path)
     nObs++;
     
   } // while
+
+  // close input file
+
+  fclose(in);
 
   if (nObs < 0) {
     cerr << "ERROR - CwbAws2Spdb::_processPrecipFile" << endl;
