@@ -739,17 +739,19 @@
     tt->help = tdrpStrDup("MDF_FILE indicates surface data in .mdf format.");
     tt->val_offset = (char *) &station_type - &_start_;
     tt->enum_def.name = tdrpStrDup("station_type_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PRECIP_STATION");
-      tt->enum_def.fields[0].val = PRECIP_STATION;
-      tt->enum_def.fields[1].name = tdrpStrDup("AWS_STATION");
-      tt->enum_def.fields[1].val = AWS_STATION;
-      tt->enum_def.fields[2].name = tdrpStrDup("MDF_FILE");
-      tt->enum_def.fields[2].val = MDF_FILE;
-      tt->enum_def.fields[3].name = tdrpStrDup("ONE_MINUTE_AWS");
-      tt->enum_def.fields[3].val = ONE_MINUTE_AWS;
+      tt->enum_def.fields[0].name = tdrpStrDup("AWS_STATION");
+      tt->enum_def.fields[0].val = AWS_STATION;
+      tt->enum_def.fields[1].name = tdrpStrDup("MDF_FILE");
+      tt->enum_def.fields[1].val = MDF_FILE;
+      tt->enum_def.fields[2].name = tdrpStrDup("ONE_MINUTE_AWS");
+      tt->enum_def.fields[2].val = ONE_MINUTE_AWS;
+      tt->enum_def.fields[3].name = tdrpStrDup("PRECIP_STATION");
+      tt->enum_def.fields[3].val = PRECIP_STATION;
+      tt->enum_def.fields[4].name = tdrpStrDup("PRECIP_MDF_FILE");
+      tt->enum_def.fields[4].val = PRECIP_MDF_FILE;
     tt->single_val.e = AWS_STATION;
     tt++;
     

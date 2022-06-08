@@ -181,6 +181,11 @@ int CwbAws2Spdb::Run ()
 	cerr << "  Errors in processing one minute aws file: "
              << inputPath << endl;
       }
+    } else if (_params.station_type == Params::PRECIP_MDF_FILE) {
+      if (_processPrecipMdfFile(inputPath)) {
+	cerr << "WARNING - CwbAws2Spdb::Run" << endl;
+	cerr << "  Errors in processing mdf file: " << inputPath << endl;
+      }
     } else {
       if (_processPrecipFile(inputPath)) {
 	cerr << "WARNING - CwbAws2Spdb::Run" << endl;
@@ -890,6 +895,199 @@ int CwbAws2Spdb::_processPrecipFile(const char *file_path)
 	      SPDB_STATION_REPORT_ID,
 	      SPDB_STATION_REPORT_LABEL)) {
     cerr << "ERROR - CwbAws2Spdb::_processPrecipFile" << endl;
+    cerr << "  Cannot put station data to: "
+	 << _params.output_url << endl;
+    cerr << "  " << out.getErrStr() << endl;
+    iret = -1;
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Wrote " << nObs << " reports to url: "
+	 << _params.output_url << endl;
+  }
+
+  if (_params.debug) {
+    cerr << "  Done with file: " << file_path << endl;
+  }
+
+  return iret;
+   
+}
+
+///////////////////////////
+// process PRECIP MDF file
+
+int CwbAws2Spdb::_processPrecipMdfFile(const char *file_path)
+  
+{
+
+  int iret = 0;
+
+  if (_params.debug) {
+    cerr << "Processing precip mdf file: " << file_path << endl;
+  }
+
+  // registration
+
+  char procmapString[BUFSIZ];
+  Path path(file_path);
+  sprintf(procmapString, "Processing file <%s>", path.getFile().c_str());
+  PMU_force_register(procmapString);
+
+  // compute the time from the file name
+
+  Path ppath(file_path);
+  string fileName = ppath.getFile();
+
+  int year, month, day, hour, min;
+  if (sscanf(fileName.c_str(), "%4d-%2d-%2d_%2d%2d",
+	     &year, &month, &day, &hour, &min) != 5) {
+    if (sscanf(fileName.c_str(), "%4d%2d%2d%2d%2d",
+               &year, &month, &day, &hour, &min) != 5) {
+      cerr << "ERROR - CwbAws2Spdb::_processMdfFile" << endl;
+      cerr << "  Cannot compute time from file name" << endl;
+      cerr << "  File path: " << file_path << endl;
+      cerr << "  File name: " << fileName << endl;
+      return -1;
+    }
+  }
+  DateTime validTime(year, month, day, hour, min, 0);
+
+  // create spdb output object
+  
+  DsSpdb out;
+
+  // read in file, loading up chunks in output object spdb
+
+  FILE *in;
+  if ((in = fopen(file_path, "r")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - CwbAws2Spdb::_processPrecipMdfFile" << endl;
+    cerr << "  Cannot open file: " << file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  int nObs = 0;
+  bool gotLabelLine = false;
+  while (!feof(in)) {
+
+    char line[1024];
+
+    if (fgets(line, 1024, in) == NULL) {
+      break;
+    }
+
+    if (strstr(line, "STID") != NULL) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "CwbAws2Spdb::_processPrecipMdfFile" << endl;
+        cerr << "  Got label line: " << line;
+      }
+      gotLabelLine = true;
+      continue;
+    }
+    
+    if (!gotLabelLine) {
+      // read in time
+      int id, oyear, omonth, oday, ohour, omin, osec;
+      if (sscanf(line, "%d %d %d %d %d %d %d",
+                 &id, &oyear, &omonth, &oday, &ohour, &omin, &osec) == 7) {
+        validTime.set(oyear, omonth, oday, ohour, omin, osec);
+      }
+      continue;
+    }
+    
+    // read in data
+    
+    char stid[128], stnm[128];
+    int timeOffset = 0;
+    double lat, lon, elev;
+    double rainRate, accum10Min, accum03Hour;
+    double accum06Hour, accum12Hour, accum24Hour;
+    
+    if (sscanf(line, "%s%s%d%lg%lg%lg%lg%lg%lg%lg%lg%lg",
+	       stid, stnm, &timeOffset,
+	       &lat, &lon, &elev,
+               &rainRate, &accum10Min, &accum03Hour, 
+               &accum06Hour, &accum12Hour, &accum24Hour) != 12) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "WARNING - bad line: " << line;
+        continue;
+      }
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Read line: " << line;
+      cerr << " stid: " << stid << endl;
+      if (timeOffset != 0) {
+        cerr << " timeOffset: " << timeOffset << endl;
+      }
+      cerr << " lat: " << lat << endl;
+      cerr << " lon: " << lon << endl;
+      cerr << " elev: " << elev << endl;
+      cerr << " rainRate: " << rainRate << endl;
+      cerr << " accum10Min: " << accum10Min << endl;
+      cerr << " accum03Hour: " << accum03Hour << endl;
+      cerr << " accum06Hour: " << accum06Hour << endl;
+      cerr << " accum12Hour: " << accum12Hour << endl;
+      cerr << " accum24Hour: " << accum24Hour << endl;
+    }
+    
+    // fill out station report
+    
+    WxObs obs;
+
+    obs.setStationId(stid);
+    obs.setObservationTime(validTime.utime());
+    obs.setLatitude(lat);
+    obs.setLongitude(lon);
+    obs.setElevationM(elev);
+
+    obs.setPrecipRateMmPerHr(rainRate);
+    obs.addPrecipLiquidMm(accum10Min, 600);
+    obs.addPrecipLiquidMm(accum03Hour, 10800);
+    obs.addPrecipLiquidMm(accum06Hour, 21600);
+    obs.addPrecipLiquidMm(accum12Hour, 43200);
+    obs.addPrecipLiquidMm(accum24Hour, 86400);
+
+    // assemble into XML message
+
+    obs.assembleAsXml();
+
+    // add chunk
+    
+    int stationId = Spdb::hash4CharsToInt32(stid + 1);
+    out.addPutChunk(stationId,
+		    validTime.utime(),
+		    validTime.utime() + _params.expire_seconds,
+		    obs.getBufLen(), obs.getBufPtr());
+    
+    nObs++;
+    
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "====== Report XML ======" << endl;
+      cerr << (char *) obs.getBufPtr() << endl;
+      cerr << "========================" << endl;
+    }
+    
+  } // while
+  
+  // close input file
+
+  fclose(in);
+
+  if (nObs < 0) {
+    cerr << "ERROR - CwbAws2Spdb::_processPrecipMdfFile" << endl;
+    cerr << "  No valid obs in file: " << file_path << endl;
+    return -1;
+  }
+
+  // put the data
+  
+  if (out.put(_params.output_url,
+	      SPDB_STATION_REPORT_ID,
+	      SPDB_STATION_REPORT_LABEL)) {
+    cerr << "ERROR - CwbAws2Spdb::_processPrecipMdfFile" << endl;
     cerr << "  Cannot put station data to: "
 	 << _params.output_url << endl;
     cerr << "  " << out.getErrStr() << endl;

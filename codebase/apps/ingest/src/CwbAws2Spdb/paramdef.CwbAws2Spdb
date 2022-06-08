@@ -111,10 +111,11 @@ commentdef {
 }
 
 typedef enum {
-  PRECIP_STATION,
   AWS_STATION,
   MDF_FILE,
-  ONE_MINUTE_AWS
+  ONE_MINUTE_AWS,
+  PRECIP_STATION,
+  PRECIP_MDF_FILE
 } station_type_t;
 
 paramdef enum station_type_t {

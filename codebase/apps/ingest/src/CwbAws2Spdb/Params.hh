@@ -80,10 +80,11 @@ public:
   } mode_t;
 
   typedef enum {
-    PRECIP_STATION = 0,
-    AWS_STATION = 1,
-    MDF_FILE = 2,
-    ONE_MINUTE_AWS = 3
+    AWS_STATION = 0,
+    MDF_FILE = 1,
+    ONE_MINUTE_AWS = 2,
+    PRECIP_STATION = 3,
+    PRECIP_MDF_FILE = 4
   } station_type_t;
 
   ///////////////////////////

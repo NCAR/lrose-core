@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for CwbAws2Spdb
+ * TDRP params for ./CwbAws2Spdb
  **********************************************************************/
 
 //======================================================================
@@ -170,13 +170,14 @@ file_match_string = "axf";
 //
 // Type: enum
 // Options:
-//     PRECIP_STATION
 //     AWS_STATION
 //     MDF_FILE
 //     ONE_MINUTE_AWS
+//     PRECIP_STATION
+//     PRECIP_MDF_FILE
 //
 
-station_type = MDF_FILE;
+station_type = PRECIP_MDF_FILE;
 
 ///////////// output_url //////////////////////////////
 //
@@ -188,7 +189,7 @@ station_type = MDF_FILE;
 // Type: string
 //
 
-output_url = "spdbp:://localhost::spdb/aws";
+output_url = "spdbp:://localhost::spdb/precip";
 
 ///////////// expire_seconds //////////////////////////
 //
