@@ -921,6 +921,13 @@ void WRFData::_setAttKeys()
     _lonFieldKey = "XLONG_M";
   }
 
+  if (_params.debug) {
+    cerr << "_startDateKey: " << _startDateKey << endl;
+    cerr << "_gridIdKey: " << _gridIdKey << endl;
+    cerr << "_latFieldKey: " << _latFieldKey << endl;
+    cerr << "_lonFieldKey: " << _lonFieldKey << endl;
+  }
+
 }
 
 //////////////////
