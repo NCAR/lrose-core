@@ -46,17 +46,16 @@ The ```lrose-core_runtime_libs``` directory contains most of the 32-bit librarie
 
 To ensure that you have 32-bit runtime support for CIDD, you will need to install the relevant 32-bit packages.
 
-The best way to do that is to run a python script from lrose-core.
+The best way to do that is to run the `install_linux_packages.py` script from the `lrose-core` repository.
 
 ```
-  mkdir ~/git
-  cd ~/git
-  git clone https://github.com/ncar/lrose-core
-  cd lrose-core/build
-  install_linux_packages.py --cidd32
+  wget https://raw.githubusercontent.com/NCAR/lrose-core/master/build/scripts/install_linux_packages.py
+  chmod +x install_linux_packages.py
+  ./install_linux_packages.py --cidd32
+  rm install_linux_packages.py
 ```
 
-```install_linux_packages.py``` will determine the operating system version from the ```/etc/os-release``` file. It will then install the required packages for that version of the OS.
+The script will determine the operating system version from the `/etc/os-release` file and install the required packages for that version.
 
 ## Running CIDD
 
