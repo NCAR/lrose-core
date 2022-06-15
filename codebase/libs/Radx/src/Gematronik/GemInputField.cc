@@ -497,12 +497,13 @@ int GemInputField::_decodeXml(const string &xmlBuf)
     }
 
     if (sweep->decodeInfoXml(tagBufArray[ii])) {
-      RadxStr::addStr(_errStr, "ERROR - GemInputField::_decodeXml");
-      RadxStr::addInt(_errStr, "  Cannot decode XML for sweep: ", ii);
+      cerr << "WARNING - GemInputField::_decodeXml" << endl;
+      cerr << "  Cannot decode info XML for sweep: " << ii << endl;
+      cerr << "  Ignoring sweep: " << ii << endl;
       delete sweep;
-      return -1;
+      continue;
     }
-
+    
     _sweeps.push_back(sweep);
     prevSweep = sweep;
 
