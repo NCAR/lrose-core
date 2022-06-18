@@ -203,7 +203,7 @@ int GemRadxFile::writeToPath(const RadxVol &vol,
 bool GemRadxFile::isSupported(const string &path)
 
 {
-  
+
   if (isGematronik(path)) {
     return true;
   }
@@ -230,17 +230,24 @@ bool GemRadxFile::isGematronik(const string &path)
   
   // read ID of first block
 
-  char id[32];
-  if (fread(id, 1, 32, _file) != 32) {
+  char line[1024];
+  if (fgets(line, 1024, _file) == NULL) {
     _close();
     return false;
   }
+  if (strstr(line, "xml") != NULL) {
+    // first line is xml version, read next line
+    if (fgets(line, 1024, _file) == NULL) {
+      _close();
+      return false;
+    }
+  }
   _close();
 
-  if (strncmp(id, "<volume", 7) == 0) {
+  if (strncmp(line, "<volume", 7) == 0) {
     return true;
   } 
-  if (strncmp(id, "<volfile", 8) == 0) {
+  if (strncmp(line, "<volfile", 8) == 0) {
     return true;
   } 
   
