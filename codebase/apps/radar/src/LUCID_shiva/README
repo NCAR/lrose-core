@@ -1,0 +1,11 @@
+
+eol-albireo:LUCID_shiva brenda$ g++ -g -std=c++11  main.cpp PrintMdv.cc X11ColorMap.cpp -I /Users/brenda/lrose/include -I/usr/local/Cellar/qt/5.15.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtCore.framework/Headers  -L /Users/brenda/lrose/lib -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp -F/usr/local/Cellar/qt/5.15.0/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.15.0/lib -framework QtGui -F/usr/local/Cellar/qt/5.15.0/lib -framework QtCore -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml  -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++   -o main 
+
+
+
+
+$ g++ -g -std=c++11  main.cpp PrintMdv.cc -I /Users/brenda/lrose/include -I/usr/local/Cellar/qt/5.15.0/lib/QtWidgets.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtGui.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtQml.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtNetwork.framework/Headers -I/usr/local/Cellar/qt/5.15.0/lib/QtCore.framework/Headers  -L /Users/brenda/lrose/lib -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp -F/usr/local/Cellar/qt/5.15.0/lib -framework QtWidgets -F/usr/local/Cellar/qt/5.15.0/lib -framework QtGui -F/usr/local/Cellar/qt/5.15.0/lib -framework QtCore -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml  -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++   -o main
+
+without Qt:
+
+gcc main.cpp PrintMdv.cc -I /Users/brenda/lrose/include -L /Users/brenda/lrose/lib -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++   -o main
