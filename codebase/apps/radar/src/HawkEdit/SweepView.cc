@@ -64,7 +64,7 @@ SweepView::SweepView(QWidget *parent)
   //_params = ParamFile::Instance();
   //_reversedInGui = false;
   _guiIndex = 0;
-  _selectedAngle = 0.0;
+  _selectedNumber = 0;
 //  _createSweepPanel(parent);
 //}
 
@@ -99,7 +99,7 @@ SweepView::~SweepView()
 // set angle
 // size effect: sets the selected index
 
-void SweepView::setAngle(double angle)
+void SweepView::setNumber(int selectedNumber)
   
 {
   /*
@@ -137,10 +137,10 @@ void SweepView::setGuiIndex(int index)
     _guiIndex = _sweepRButtons->size() - 1;
   }
   if (_sweepRButtons->size() > 0) {
-    _selectedAngle = _sweepRButtons->at(_guiIndex)->text().toDouble();
+    _selectedNumber = _sweepRButtons->at(_guiIndex)->text().toInt();
     _sweepRButtons->at(_guiIndex)->setChecked(true);
   } else {
-    _selectedAngle = 0;
+    _selectedNumber = 0;
   }
 }
 
@@ -154,7 +154,7 @@ int SweepView::getGuiIndex()
 
 void SweepView::changeSweep(bool value) {
 
-  LOG(DEBUG) << "enter";
+  //LOG(DEBUG) << "enter";
 
 // TODO: fix up ...
   if (!value) {
@@ -162,11 +162,12 @@ void SweepView::changeSweep(bool value) {
   }
 
   for (size_t ii = 0; ii < _sweepRButtons->size(); ii++) {
+    //LOG(DEBUG) << "sweepButton[" << ii << "] text = " << _sweepRButtons->at(ii)->text().toDouble();
     if (_sweepRButtons->at(ii)->isChecked()) {
-      LOG(DEBUG) << "sweepRButton " << ii << " is checked; moving to sweep index " << ii;
-      _selectedAngle = _sweepRButtons->at(ii)->text().toDouble();
+      LOG(DEBUG) << "sweepRButton " << ii << " is checked; emit  selectedSweepChanged " << ii;
+      _selectedNumber = _sweepRButtons->at(ii)->text().toInt();
       _guiIndex = ii;
-      emit selectedSweepChanged(_selectedAngle);
+      emit selectedSweepChanged(_selectedNumber);
       //_sweepManager.setGuiIndex(ii);
       //_ppi->setStartOfSweep(true);
       //_rhi->setStartOfSweep(true);
@@ -192,6 +193,140 @@ void SweepView::changeSelectedIndex(int increment)
   _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
 */
 }
+
+// TODO: show sweep number in the right hand side (sweep panel)
+// show the sweep angle and other sweep info in the left "info" panel
+void SweepView::updateSweepRadioButtons(vector<int> *sweepNumbers) 
+{
+
+  _params = ParamFile::Instance();
+  // fonts
+  
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont fontm2 = dummy.font();
+  int fsize = _params->label_font_size;
+  int fsizem2 = _params->label_font_size - 2;
+  font.setPixelSize(fsize);
+  fontm2.setPixelSize(fsizem2);
+  
+  bool selectedFound = false;
+  
+  char buf[256];
+  vector<QRadioButton *> *mergedList = new vector<QRadioButton *>();
+  vector<QRadioButton *> *unusedSweeps = new vector<QRadioButton *>();
+
+  // merge _sweepRButtons with sweepNumbers into a new list
+  // assume both are sorted in increasing order
+  // create new buttons as needed
+  vector<int>::iterator it_new = sweepNumbers->begin();
+  vector<QRadioButton *>::iterator it_old = _sweepRButtons->begin();
+
+  // for each radio button
+  // convert text to int
+  // find in new sweepNumbers list
+  // if (!found) place in unusedlist
+  // else (found) keep button and remove the sweepNumber from the list
+  // end for
+  // at this point, the remaining sweepNumbers need to be added as buttons
+  // but the numeric order is probably wrong; darn!
+  // sort the sweepNumbers in ascending order
+
+  while (it_new != sweepNumbers->end() && it_old != _sweepRButtons->end()) {
+
+    bool ok;
+    QRadioButton *button = *it_old;
+    int old_value = button->text().toInt(&ok);
+    if (!ok) old_value = -99999; // just set it to something to remove the button
+    int new_value = *it_new;
+    if (new_value == old_value) {
+      // add old to merged list; we can still use this button
+      mergedList->push_back(*it_old);
+      if (button->isChecked()) {
+        selectedFound = true;
+      }
+      ++it_old;
+      ++it_new;
+    } else {
+      if (old_value < new_value) {
+        // move old to unused list
+        unusedSweeps->push_back(*it_old);
+        ++it_old;
+      }
+      if (old_value > new_value) {
+
+        // create new button
+        std::snprintf(buf, 256, "%d", *it_new);
+        QRadioButton *radio1 = new QRadioButton(buf); 
+        radio1->setFont(fontm2);
+        
+        mergedList->push_back(radio1);
+        //_sweepVBoxLayout->addWidget(radio1);
+        
+        // connect slot for sweep change
+        connect(radio1, &QRadioButton::toggled, this, &SweepView::changeSweep);
+
+        ++it_new;
+      }
+    }
+  }
+
+  if (it_new == sweepNumbers->end()) {
+    // push the rest of the previous sweeps to the unused list
+    while (it_old != _sweepRButtons->end()) {
+      unusedSweeps->push_back(*it_old);
+      ++it_old;
+    }
+  } else if (it_old == _sweepRButtons->end()) {
+    // push the rest of the new sweeps to the merged list
+    while (it_new != sweepNumbers->end()) {
+      //create new Radio button
+      std::snprintf(buf, 256, "%d", *it_new);
+      QRadioButton *radio1 = new QRadioButton(buf); 
+      radio1->setFont(fontm2);
+      // add it to the merged list
+      mergedList->push_back(radio1);
+      connect(radio1, &QRadioButton::toggled, this, &SweepView::changeSweep);
+
+      ++it_new;
+    }
+  } else {
+    cerr << "unexpected condition in SweepView: updateSweepRadioButtons" << endl;
+  }
+  //if (_sweepRButtons->size() != 0) {
+  //  cerr << "sweep radio button list NOT EMPTY: SweepView::updateSweepRadioButtons" 
+  //    << endl;
+  //}
+  // remember, all the sweep radio buttons are saved in the merged list or in
+  // the unused list.
+  _sweepRButtons = mergedList;
+  // clear layout
+  clearSweepRadioButtons();
+  // add each radio button to layout
+  vector<QRadioButton *>::iterator it;
+  for (it = mergedList->begin(); it != mergedList->end(); ++it) {
+    _sweepVBoxLayout->addWidget(*it);     
+  }
+ 
+  if (!selectedFound) {
+    setGuiIndex(0);
+  }
+  
+  
+  for (it = unusedSweeps->begin(); it != unusedSweeps->end(); ++it) {
+    (*it)->setVisible(false);
+    //bool disconnected = 
+    //  disconnect(*it, &QRadioButton::toggled, this, &SweepView::changeSweep);
+    //if (!disconnected) 
+    //  cerr << "Could NOT disconnect button from signal " << (*it)->text().toStdString() << endl;
+  }
+  
+  delete unusedSweeps;
+
+
+}
+
+
 
 void SweepView::updateSweepRadioButtons(vector<double> *sweepAngles) 
 {

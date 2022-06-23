@@ -369,32 +369,94 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
    //      << _sweepManager.getSelectedAngle();
     LOG(DEBUG) << "----------------------------------------------------";
 
+  _cacheMetaDataValid = false;
+
   LOG(DEBUG) << "exit";
 
   return vol;
 }
 
+// add a parameter for the sweep number
+RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
+  int sweepNumber,
+  bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter";
+  // set up file object for reading
+
+  RadxVol *vol = new RadxVol();
+
+  cerr << "before " << endl;
+  RadxFile file;
+
+  _setupVolRead(file, *fieldNames, sweepNumber, debug_verbose, debug_extra);
+   
+  LOG(DEBUG) << "  reading data file path: " << path;    
+    
+  if (file.readFromPath(path, *vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::getRadarVolume\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + path + "\n";
+      cerr << errMsg;
+      throw errMsg;
+  } 
+  cerr << "after " << endl;
+
+  vol->convertToFl32();
+
+  // adjust angles for elevation surveillance if needed
+  
+  vol->setAnglesForElevSurveillance();
+  
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  vol->computeFixedAnglesFromRays();
+
+    LOG(DEBUG) << "----------------------------------------------------";
+    LOG(DEBUG) << "perform archive retrieval";
+    LOG(DEBUG) << "  read file: " << vol->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << vol->getNSweeps();
+   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
+   //      << _sweepManager.getGuiIndex() << ", "
+   //      << _sweepManager.getSelectedAngle();
+    LOG(DEBUG) << "----------------------------------------------------";
+
+  _cacheMetaDataValid = false;
+
+  LOG(DEBUG) << "exit";
+
+  return vol;
+}
+
+void DataModel::getRayData(string path, vector<string> &fieldNames,
+  int sweepNumber) {
+  readData(path, fieldNames, sweepNumber);
+}
+
 
 void DataModel::readData(string path, vector<string> &fieldNames,
+  int sweepNumber,
 	bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
-  cerr << "comparing " << path << " with \n" <<
-          "          " << _currentFilePath << endl;
+  //cerr << "comparing " << path << " with \n" <<
+  //        "          " << _currentFilePath << endl;
 
-  if (_currentFilePath.compare(path) == 0) {
-    // don't reread the same file
-    return;
-  }
+  //if (_currentFilePath.compare(path) == 0) {
+  //  // don't reread the same file
+  //  return;
+  //}
 
   cerr << "before " << endl;
   RadxFile file;
   if (_vol != NULL) delete _vol;
   _vol = new RadxVol();
   //_vol->clear();
-  _setupVolRead(file, fieldNames, debug_verbose, debug_extra);
+  _setupVolRead(file, fieldNames, sweepNumber, debug_verbose, debug_extra);
    
   LOG(DEBUG) << "  reading data file path: " << path;    
     
@@ -450,7 +512,7 @@ void DataModel::readData(string path, vector<string> &fieldNames,
    //      << _sweepManager.getSelectedAngle();
     LOG(DEBUG) << "----------------------------------------------------";
 
-  printAzimuthInRayOrder();
+  // printAzimuthInRayOrder();
 
   _currentFilePath = path;
 
@@ -1020,6 +1082,7 @@ void DataModel::printAzimuthInRayOrder() {
 
 
 int DataModel::getSweepNumber(float elevation) {
+  LOG(DEBUG) << "enter: elevation = " << elevation;
   //DataModel *dataModel = DataModel::Instance();
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
@@ -1032,13 +1095,28 @@ int DataModel::getSweepNumber(float elevation) {
       i += 1;
     }
   }
-  if (!found) throw std::invalid_argument("no sweep found for elevation ");
+  delete sweepAngles;
+
+  if (!found) throw std::invalid_argument("DataModel::getSweepNumber no sweep found for elevation ");
 
   // use the index, i, to find the sweep number, because
   // the index may be different than the number, which is a label for a sweep.
-  vector<RadxSweep *> sweeps = _vol->getSweeps();
-  RadxSweep *sweep = sweeps.at(i);
-  int sweepNumber = sweep->getSweepNumber();
+  int sweepNumber = 0;
+  if (_vol == NULL) {
+    if (!_cacheMetaDataValid) {
+      throw std::invalid_argument("DataModel::getSweepNumber _vol is NULL; cache not valid");
+    } 
+    LOG(DEBUG) << "_vol is NULL; cache is valid ";
+    if ((i < 0) || (i >= _cacheSweepNumbers.size())) {
+      throw std::invalid_argument("DataModel::getSweepNumber index out of bounds for cache");
+    }
+    sweepNumber = _cacheSweepNumbers.at(i);
+  } else {
+    vector<RadxSweep *> sweeps = _vol->getSweeps();
+    RadxSweep *sweep = sweeps.at(i);
+    sweepNumber = sweep->getSweepNumber();
+  }
+  LOG(DEBUG) << "exit: sweepNumber is " << sweepNumber;
   return sweepNumber;
 }
 
@@ -1080,6 +1158,30 @@ int DataModel::getSweepIndexFromSweepAngle(float elevation) {
   }
   return i;  
 }
+
+double DataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
+  vector<double> *sweepAngles = getSweepAngles();
+  int i = 0;
+  bool found = false;  
+  vector<int> *sweepNumbers = getSweepNumbers();
+  while ((i < sweepNumbers->size()) && !found) {
+    if (sweepNumbers->at(i) == sweepNumber) {
+      found = true;
+    } else {
+      i += 1;
+    }
+  }
+  if (!found) {
+    stringstream ss;
+    ss << "DataModel::getSweepAngleFromSweepNumber no sweep found for sweep number " <<
+      sweepNumber << endl;
+    throw std::invalid_argument(ss.str());
+  }
+
+  return sweepAngles->at(i);    
+}
+
+
 
 vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
 // TODO: which sweep? the rayIdx considers which sweep.
@@ -1158,6 +1260,7 @@ DataModel::DataModel() {
 
 void DataModel::init() {
   _vol = NULL;
+  _cacheMetaDataValid = false;
 }
 
 
@@ -1169,15 +1272,65 @@ int DataModel::getNSweeps() {
 	return _vol->getNSweeps();
 }
 
+/*
+vector<double> *DataModel::getSweepAngles(string fileName) {
+  if (_vol == NULL) {
+    // we don't have an active volume. read the metadata for the file
+    return getPossibleSweepAngles(fileName);
+  } else {
+    return getSweepAngles();
+  }
+}
+*/
+
 vector<double> *DataModel::getSweepAngles() {
-  vector<RadxSweep *> sweeps = _vol->getSweeps();
+
   vector<double> *sweepAngles = new vector<double>;
-  vector<RadxSweep *>::iterator it;
-  for (it = sweeps.begin(); it != sweeps.end(); ++it) {
-  	RadxSweep *sweep = *it;
-    sweepAngles->push_back(sweep->getFixedAngleDeg());
+  if (_vol == NULL) {
+    // pull info from cache metadata
+    if (!_cacheMetaDataValid) {
+      throw std::invalid_argument("DataModel::getSweepAngles _vol is null; cache is invalid; no info on sweeps");
+    }
+    sweepAngles->reserve(_cacheSweepAngles.size());
+    for (vector<double>::iterator it = _cacheSweepAngles.begin(); it != _cacheSweepAngles.end(); ++it) {
+      sweepAngles->push_back(*it);
+    }
+  } else {
+    vector<RadxSweep *> sweeps;
+    sweeps = _vol->getSweeps();
+    sweepAngles->reserve(sweeps.size());
+    vector<RadxSweep *>::iterator it;
+    for (it = sweeps.begin(); it != sweeps.end(); ++it) {
+    	RadxSweep *sweep = *it;
+      sweepAngles->push_back(sweep->getFixedAngleDeg());  //??? is this the right method??
+    }
   }
   return sweepAngles;
+}
+
+vector<int> *DataModel::getSweepNumbers() {
+
+  vector<int> *sweepNumbers = new vector<int>;
+  if (_vol == NULL) {
+    // pull info from cache metadata
+    if (!_cacheMetaDataValid) {
+      throw std::invalid_argument("DataModel::getSweepNumbers _vol is null; cache is invalid; no info on sweeps");
+    }
+    sweepNumbers->reserve(_cacheSweepNumbers.size());
+    for (vector<int>::iterator it = _cacheSweepNumbers.begin(); it != _cacheSweepNumbers.end(); ++it) {
+      sweepNumbers->push_back(*it);
+    }
+  } else {
+    vector<RadxSweep *> sweeps;
+    sweeps = _vol->getSweeps();
+    sweepNumbers->reserve(sweeps.size());
+    vector<RadxSweep *>::iterator it;
+    for (it = sweeps.begin(); it != sweeps.end(); ++it) {
+      RadxSweep *sweep = *it;
+      sweepNumbers->push_back(sweep->getSweepNumber());  //??? is this the right method??
+    }
+  }
+  return sweepNumbers;
 }
 
 // TODO: remove RadxPlatform and return base types
@@ -1257,6 +1410,7 @@ const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
 }
 
 void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
+  int sweepNumber,
 	bool debug_verbose, bool debug_extra)
 {
 
@@ -1274,12 +1428,121 @@ void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
     file.addReadField(*it);
   }
   
+
+
+// TODO: pre-read sweeps, then only request one sweep at a time
+//----
+    /// Set the sweep number limits to be used on read.
+  ///
+  /// This will limit the sweep data to be read.
+  ///
+  /// If strict limits are not set (see below), 1 sweep is guaranted
+  /// to be returned. Even if no sweep lies within the limits the closest
+  /// sweep will be returned.
+  ///
+  /// If strict limits are set (which is the default), then only data from
+  /// sweeps within the limits will be included.
+
+  //file.setReadSweepNumLimits(int min_sweep_num,
+  //                           int max_sweep_num);
+
+  file.setReadSweepNumLimits(sweepNumber, sweepNumber);
+  file.setReadStrictAngleLimits(false);
+
+  //-----
+
+
   //  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
   //    const DisplayField *field = _fields[ifield];
   //    file.addReadField(field->getName());
   //  }
 
 }
+
+// reads all sweeps
+void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
+  bool debug_verbose, bool debug_extra)
+{
+
+  if (debug_verbose) {
+    file.setDebug(true);
+  }
+  if (debug_extra) {
+    file.setDebug(true);
+    file.setVerbose(true);
+  }
+
+  //vector<string> fieldNames = _displayFieldController->getFieldNames();
+  vector<string>::iterator it;
+  for (it = fieldNames.begin(); it != fieldNames.end(); it++) {
+    file.addReadField(*it);
+  }
+  
+}
+
+/*
+vector<double> *DataModel::getPossibleSweepAngles(string fileName)
+{
+
+  LOG(DEBUG) << "enter";
+
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol vol;
+
+  vol.clear();
+  //_setupVolRead(file);
+
+  file.setReadMetadataOnly(true);
+      
+    string inputPath = fileName;
+  
+    LOG(DEBUG) << "  reading data file path: " << inputPath;
+    
+    if (file.readFromPath(inputPath, vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::getPossibleSweepAngles\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      throw std::invalid_argument(errMsg);
+    } 
+
+  // ---
+
+  vol.print(cerr);
+  // Well, there are two lists for sweeps:
+  // _sweepsAsInFile.size();
+  // and _sweeps 
+  // not sure which to check and when, so let's just check both
+  //const vector<RadxSweep *> sweeps = vol.getSweeps();
+  //if (sweeps.size() <= 0) {
+  _cacheSweeps = vol.getSweepsAsInFile();
+  //}
+  //RadxSweep *sweep = sweeps.at(sweepIndex); 
+  // ----
+  if (_cacheSweeps.size() <= 0) {
+    throw std::invalid_argument("no sweeps found in data file");
+  }
+    //vol.loadFieldsFromRays();  HERE
+    //const vector<RadxField *> fields = vol.getFields();
+    vector<double> *allSweepNumbers = new vector<double>;
+    allSweepNumbers->resize(_cacheSweeps.size());
+    for (int idx = 0; idx < _cacheSweeps.size(); idx++) 
+    //for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+    {
+      //RadxSweep *sweep = *iter;
+      //cout << field->getName() << endl;
+      allSweepNumbers->at(idx) = _cacheSweeps[idx]->getFixedAngleDeg();
+    }
+
+    _cacheMetaDataValid = true;
+
+    LOG(DEBUG) << "exit";
+    return allSweepNumbers;
+}
+*/
 
 vector<string> *DataModel::getPossibleFieldNames(string fileName)
 {
@@ -1303,25 +1566,138 @@ vector<string> *DataModel::getPossibleFieldNames(string fileName)
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "PolarManager::_getFieldsArchiveData\n";
+      errMsg += "DataModel::getPossibleFieldNames\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
       throw std::invalid_argument(errMsg);
     } 
+
+    // since we are only reading the metadata, the rays are NOT filled.
+
+    //vol.loadMetadataFromSweepsToRays();
+
+    // while we are here, load the sweeps into cache
+    //vol.loadSweepInfoFromRays();
+    const vector<RadxSweep *> sweeps = vol.getSweepsAsInFile();
+    if (sweeps.size() <= 0) {
+      throw std::invalid_argument("no sweeps found in data file");
+    }
+    // copy sweep angles to cache
+    // copy sweep numbers to cache    
+    size_t nSweeps = sweeps.size();
+    _cacheSweepNumbers.reserve(nSweeps);
+    _cacheSweepAngles.reserve(nSweeps);
+    for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+    {
+      RadxSweep *sweep = *iter;
+      double sweepAngle = sweep->getFixedAngleDeg();
+      int sweepNumber = sweep->getSweepNumber();
+      cout << "sweep num " << sweepNumber << " angle " << sweepAngle << endl;
+      _cacheSweepAngles.push_back(sweepAngle);
+      _cacheSweepNumbers.push_back(sweepNumber);
+    }   
+
     vol.loadFieldsFromRays();
-    const vector<RadxField *> fields = vol.getFields();
+    _cacheFields = vol.getFields();
     vector<string> *allFieldNames = new vector<string>;
-    for (vector<RadxField *>::const_iterator iter = fields.begin(); iter != fields.end(); ++iter)
+    for (vector<RadxField *>::const_iterator iter = _cacheFields.begin(); iter != _cacheFields.end(); ++iter)
     {
       RadxField *field = *iter;
       cout << field->getName() << endl;
       allFieldNames->push_back(field->getName());
     }
 
+
+    /*DONT NEED THIS HERE ...
+    vector<double> *allSweepNumbers = new vector<double>;
+    allSweepNumbers->resize(_cacheSweeps.size());
+    for (int idx = 0; idx < _cacheSweeps.size(); idx++) 
+    //for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+    {
+      //RadxSweep *sweep = *iter;
+      //cout << field->getName() << endl;
+      allSweepNumbers->at(idx) = _cacheSweeps[idx]->getFixedAngleDeg();
+    }
+    */
+
+    // end load sweeps into cache
+
+    _cacheMetaDataValid = true;
+
     LOG(DEBUG) << "exit";
     return allFieldNames;
 }
+
+
+void DataModel::readFileMetaData(string fileName)
+{
+
+  LOG(DEBUG) << "enter";
+
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol vol;
+
+  vol.clear();
+  //_setupVolRead(file);
+
+  file.setReadMetadataOnly(true);
+      
+    string inputPath = fileName;
+  
+      LOG(DEBUG) << "  reading data file path: " << inputPath;
+      //cerr << "  archive file index: " << _archiveScanIndex << endl;
+    
+    if (file.readFromPath(inputPath, vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::getPossibleFieldNames\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      throw std::invalid_argument(errMsg);
+    } 
+
+    // NOTE: since we are only reading the metadata, the rays are NOT filled.
+
+    // load the sweeps into cache
+    const vector<RadxSweep *> sweeps = vol.getSweepsAsInFile();
+    if (sweeps.size() <= 0) {
+      throw std::invalid_argument("no sweeps found in data file");
+    }
+    // copy sweep angles to cache
+    // copy sweep numbers to cache    
+    size_t nSweeps = sweeps.size();
+    _cacheSweepNumbers.reserve(nSweeps);
+    _cacheSweepAngles.reserve(nSweeps);
+    for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+    {
+      RadxSweep *sweep = *iter;
+      double sweepAngle = sweep->getFixedAngleDeg();
+      int sweepNumber = sweep->getSweepNumber();
+      cout << "sweep num " << sweepNumber << " angle " << sweepAngle << endl;
+      _cacheSweepAngles.push_back(sweepAngle);
+      _cacheSweepNumbers.push_back(sweepNumber);
+    }   
+
+    // end load sweeps into cache
+
+    vol.loadFieldsFromRays();
+    _cacheFields = vol.getFields();
+    vector<string> *allFieldNames = new vector<string>;
+    for (vector<RadxField *>::const_iterator iter = _cacheFields.begin(); iter != _cacheFields.end(); ++iter)
+    {
+      RadxField *field = *iter;
+      cout << field->getName() << endl;
+      allFieldNames->push_back(field->getName());
+    }
+
+    _cacheMetaDataValid = true;
+
+    LOG(DEBUG) << "exit";
+}
+
 
 size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elevation) {
   LOG(DEBUG) << "enter azimuth = " << azimuth << " sweepNumber = " << sweepNumber;

@@ -7,11 +7,13 @@ RayLocationModel::RayLocationModel() {
   //_ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
   //ray_loc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
   ray_loc.resize(RayLoc::RAY_LOC_N);
+  _rayLocationSetup = false;
 }
 
 RayLocationModel::~RayLocationModel() {}
 
 void RayLocationModel::init() {
+  _rayLocationSetup = false;
   for (int ii = 0; ii < RayLoc::RAY_LOC_N; ii++) {
     ray_loc[ii].ray = NULL;
     ray_loc[ii].active = false;
@@ -34,6 +36,8 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 
   DataModel *dataModel = DataModel::Instance();
   vector<RadxRay *> &listOfRays = dataModel->getRays();
+  LOG(DEBUG) << "sorting " << listOfRays.size() << " rays";
+    
   vector<RadxRay *>::const_iterator rayItr;
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
   // for each ray in file,
@@ -101,13 +105,18 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
       }
     }
   }
+  _rayLocationSetup = true;
 
-  for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
+  //for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
   	//LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
   	//LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
-  }
+  //}
 
   LOG(DEBUG) << "exit";
+}
+
+bool RayLocationModel::isRayLocationSetup() {
+  return _rayLocationSetup;
 }
 
 size_t RayLocationModel::getNRayLocations() {

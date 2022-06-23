@@ -257,7 +257,7 @@ public slots:
   void selectedFieldChanged(string fieldName);
   //void _updateField(size_t fieldId);
 
-  void selectedSweepChanged(double);
+  void selectedSweepChanged(int sweepNumber);
   void dataFileChanged();
 
   void spreadSheetClosed();
@@ -706,7 +706,7 @@ private:
 
   // data retrieval
 
-  void _readDataFile(vector<string> *selectedFields);
+  void _readDataFile(); // vector<string> *selectedFields);
   int _readDataFile2();
   int _readDataFile2(string &inputPath);
 

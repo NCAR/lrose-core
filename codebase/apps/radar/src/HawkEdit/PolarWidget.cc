@@ -376,14 +376,14 @@ void PolarWidget::activateArchiveRendering()
  * displayImage()
  */
 
-void PolarWidget::displayImage(string currentFieldName, double currentSweepAngle,
+void PolarWidget::displayImage(string currentFieldName, int currentSweepNUmber,
   ColorMap &colorMap,
   QColor backgroundColor)
 {
   try {
 
     // set the context ...
-    _currentSweepAngle = currentSweepAngle;
+    _currentSweepNumber = currentSweepNUmber;
     //_rayLocationController = rayLocationController;
     _currentColorMap = colorMap;
     _backgroundColor = backgroundColor;
@@ -729,7 +729,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
   
             _fieldRendererController->renderImage(p, 0, 0, // 0 means they aren't used; width(), height(), 
               selectedField, _zoomTransform, 
-              _currentSweepAngle,
+              //_currentSweepNumber,
               _rayLocationController, _currentColorMap, _backgroundBrush.color());
         }
 

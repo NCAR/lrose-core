@@ -304,7 +304,7 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData,
 
 
 QImage *FieldRendererController::renderImage(QPainter &painter, int width, int height,
-  string fieldName, QTransform zoomTransform, double sweepAngle, 
+  string fieldName, QTransform zoomTransform, // double sweepAngle, 
   RayLocationController *rayLocationController,
   ColorMap &colorMap,
   QColor backgroundColor) {

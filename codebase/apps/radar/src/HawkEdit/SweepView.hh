@@ -63,7 +63,7 @@ public:
 
   // set from volume
 
-  void setAngle(double selectedAngle);
+  void setNumber(int selectedNumber);
 
   // set the index for the GUI
 
@@ -78,7 +78,7 @@ public:
 
   size_t getNSweeps() const { return 0; } // _sweeps.size(); }
 
-  double getSelectedAngle() const { return _selectedAngle; }
+  double getSelectedNumber() const { return _selectedNumber; }
 
   //void _createSweepPanel(QWidget *parent);
 
@@ -87,9 +87,10 @@ public:
   void clearSweepRadioButtons();
 
   void updateSweepRadioButtons(vector<double> *sweepAngles);
+  void updateSweepRadioButtons(vector<int> *sweepNumbers);
 
 signals:
-  void selectedSweepChanged(double selectedAngle);
+  void selectedSweepChanged(int selectedNumber);
 
 public slots:
 
@@ -107,7 +108,7 @@ private:
   // selection
 
   int _guiIndex;  // index of selected sweep
-  double _selectedAngle;
+  int _selectedNumber;
 
   QVBoxLayout *_sweepVBoxLayout;
   vector<QRadioButton *> *_sweepRButtons;

@@ -17,6 +17,10 @@ void RayLocationController::sortRaysIntoRayLocations(float ppi_rendering_beam_wi
   _model->sortRaysIntoRayLocations(ppi_rendering_beam_width, sweepNumber);	
 }
 
+bool RayLocationController::isRayLocationSetup() {
+  return _model->isRayLocationSetup();
+}
+
 size_t RayLocationController::getNRayLocations() {
   return _model->getNRayLocations();
 };

@@ -86,6 +86,8 @@ public:
   // size effect: sets the selected index
 
   void setAngle(double selectedAngle);
+  double getSelectedAngle();
+
 
   // set the index for the GUI
 
@@ -108,13 +110,14 @@ public:
 
   //int getGuiIndex() const { return _guiIndex; }
   //int getFileIndex() const { return _sweeps[_guiIndex].indexInFile; }
-  double getSelectedAngle() const { 
+  int getSelectedNumber() const { 
 
     if (_view == NULL) throw "SweepView not set";
-    return _view->getSelectedAngle(); 
+    return _view->getSelectedNumber(); 
   }
 
   int getSelectedNumber();
+  void setSelectedNumber(int sweepNumber);
 
   //double getFixedAngleDeg(ssize_t sweepIndex = -1) const;
   //bool getReversedInGui() const { return _reversedInGui; }
@@ -122,6 +125,7 @@ public:
   void createSweepRadioButtons();
   void clearSweepRadioButtons();
   void updateSweepRadioButtons();
+  //void updateSweepRadioButtons(string inputPath);
 
   void dataFileChanged();
 

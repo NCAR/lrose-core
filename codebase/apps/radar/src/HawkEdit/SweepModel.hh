@@ -71,18 +71,25 @@ public:
 
   // get methods
   vector<double> *getSweepAngles();
+  vector<int> *getSweepNumbers();
+  //vector<double> *getSweepAngles(string filePath);
 
   size_t getNSweeps(); //  const  // _sweeps.size(); }
 
-  //double getSelectedAngle() const { return _selectedAngle; }
+  double getSelectedAngle();
 
   int getSelectedSweepNumber();
   void setSelectedAngle(double value);
+  void setSelectedNumber(int value);
   
 private:
    // vector<double> somevalues = {100, 200, 300};
 
-   float _selectedSweepAngle;
+ 
+   // only use the sweep angle for display!!! 
+   // the sweep angles are usually wonky in the data files
+   float _selectedSweepAngle; 
+
    int _selectedSweepNumber;  
 
 };

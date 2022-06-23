@@ -30,8 +30,15 @@ vector <float> *getRayData(size_t rayIdx, string fieldName);
 
 RadxRay *getClosestRay(double azDeg);
 
+bool isRayLocationSetup();
+
 private:
 	vector<RayLoc> ray_loc;
+
+	// use as a mutex (until a real mutex is necessary)
+	// to prevent access to the rayLocation array until 
+	// the rays have been sorted.
+	bool _rayLocationSetup;
 
 };
 
