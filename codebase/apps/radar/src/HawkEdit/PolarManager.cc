@@ -1672,8 +1672,8 @@ void PolarManager::selectedFieldChanged(QString newFieldName) {
 
 void PolarManager::selectedFieldChanged(string fieldName) {
   _displayFieldController->setSelectedField(fieldName);
-  _plotArchiveData();
   refreshBoundaries();
+  _plotArchiveData();
 }
 
 
@@ -3967,7 +3967,7 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
 
   // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedNumber();
+  int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
   string currentFile = _timeNavController->getSelectedArchiveFile();
   if (!currentFile.empty()) {
 
@@ -3994,7 +3994,7 @@ void PolarManager::loadBoundaryEvent(int boundaryIndex)
     //  saved boundary
     // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedNumber();
+  int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
   string currentFile = _timeNavController->getSelectedArchiveFile();
 
   if (!currentFile.empty()) {
@@ -4025,7 +4025,7 @@ void PolarManager::refreshBoundaries()
 
     // get selected field name
     string currentFieldName = _displayFieldController->getSelectedFieldName();
-    int currentSweepIndex = _sweepController->getSelectedNumber();
+    int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
 
     string currentFile = _timeNavController->getSelectedArchiveFile();
 

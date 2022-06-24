@@ -1126,6 +1126,8 @@ void BoundaryPointEditor::boundaryBrushRadiusChanged(int value)
 
 void BoundaryPointEditor::refreshBoundaries(string &openFilePath,
  string &currentFieldName, int currentSweepIndex) {
+
+ 	_boundaryPointEditorModel->clear();
  	for (int i=_boundaryEditorView->firstBoundaryIndex(); i < _boundaryEditorView->lastBoundaryIndex(); i++) {
  		string boundaryPath = _boundaryPointEditorModel->refreshBoundary(
  			openFilePath, currentFieldName,  currentSweepIndex, i);
