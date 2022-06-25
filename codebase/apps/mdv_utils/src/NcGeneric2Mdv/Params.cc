@@ -758,30 +758,6 @@
     tt->single_val.s = tdrpStrDup("time");
     tt++;
     
-    // Parameter 'netcdf_dim_x'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_x");
-    tt->descr = tdrpStrDup("netCDF dimension name for grid points in longitude.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_x - &_start_;
-    tt->single_val.s = tdrpStrDup("longitude");
-    tt++;
-    
-    // Parameter 'netcdf_dim_y'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_dim_y");
-    tt->descr = tdrpStrDup("netCDF dimension name for grid points in latitude.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &netcdf_dim_y - &_start_;
-    tt->single_val.s = tdrpStrDup("latitude");
-    tt++;
-    
     // Parameter 'netcdf_dim_z'
     // ctype is 'char*'
     
@@ -792,6 +768,30 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &netcdf_dim_z - &_start_;
     tt->single_val.s = tdrpStrDup("altitude");
+    tt++;
+    
+    // Parameter 'netcdf_dim_y'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("netcdf_dim_y");
+    tt->descr = tdrpStrDup("netCDF dimension name for grid points in latitude or y.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &netcdf_dim_y - &_start_;
+    tt->single_val.s = tdrpStrDup("latitude");
+    tt++;
+    
+    // Parameter 'netcdf_dim_x'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("netcdf_dim_x");
+    tt->descr = tdrpStrDup("netCDF dimension name for grid points in longitude or x.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &netcdf_dim_x - &_start_;
+    tt->single_val.s = tdrpStrDup("longitude");
     tt++;
     
     // Parameter 'Comment 4'

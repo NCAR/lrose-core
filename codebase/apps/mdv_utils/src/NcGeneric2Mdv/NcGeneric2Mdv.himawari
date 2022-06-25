@@ -187,31 +187,13 @@ file_name_substr = "himawari";
 //
 // name for netCDF dimension for time.
 //
+// Specify 'none' if there is no time dimension.
+//
 //
 // Type: string
 //
 
 netcdf_dim_time = "none";
-
-///////////// netcdf_dim_x ////////////////////////////
-//
-// netCDF dimension name for grid points in longitude.
-//
-//
-// Type: string
-//
-
-netcdf_dim_x = "longitude";
-
-///////////// netcdf_dim_y ////////////////////////////
-//
-// netCDF dimension name for grid points in latitude.
-//
-//
-// Type: string
-//
-
-netcdf_dim_y = "latitude";
 
 ///////////// netcdf_dim_z ////////////////////////////
 //
@@ -221,7 +203,27 @@ netcdf_dim_y = "latitude";
 // Type: string
 //
 
-netcdf_dim_z = "altitude";
+netcdf_dim_z = "none";
+
+///////////// netcdf_dim_y ////////////////////////////
+//
+// netCDF dimension name for grid points in latitude or y.
+//
+//
+// Type: string
+//
+
+netcdf_dim_y = "latitude";
+
+///////////// netcdf_dim_x ////////////////////////////
+//
+// netCDF dimension name for grid points in longitude or x.
+//
+//
+// Type: string
+//
+
+netcdf_dim_x = "longitude";
 
 //======================================================================
 //
@@ -243,7 +245,7 @@ netcdf_dim_z = "altitude";
 // Type: string
 //
 
-netcdf_var_base_time = "base_time";
+netcdf_var_base_time = "none";
 
 ///////////// base_time_string ////////////////////////
 //
@@ -256,7 +258,7 @@ netcdf_var_base_time = "base_time";
 // Type: string
 //
 
-base_time_string = "1970-01-01T00:00:00Z";
+base_time_string = "1858-11-17T00:00:00Z";
 
 ///////////// netcdf_var_time_offset //////////////////
 //
@@ -267,7 +269,7 @@ base_time_string = "1970-01-01T00:00:00Z";
 // Type: string
 //
 
-netcdf_var_time_offset = "time_offset";
+netcdf_var_time_offset = "start_time";
 
 ///////////// netcdf_var_z ////////////////////////////
 //
@@ -277,7 +279,7 @@ netcdf_var_time_offset = "time_offset";
 // Type: string
 //
 
-netcdf_var_z = "altitude";
+netcdf_var_z = "none";
 
 ///////////// netcdf_var_y ////////////////////////////
 //
@@ -495,7 +497,7 @@ input_proj_persp_radius = 35786;
 // Type: boolean
 //
 
-input_xy_is_latlon = FALSE;
+input_xy_is_latlon = TRUE;
 
 ///////////// resample_latlon_onto_regular_grid ///////
 //

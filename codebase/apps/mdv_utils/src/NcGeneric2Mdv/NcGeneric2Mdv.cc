@@ -436,8 +436,9 @@ int NcGeneric2Mdv::_loadMetaData()
       cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
       return -1;
     }
+  } else {
+    _nTimes = _timeDim->size();
   }
-  _nTimes = _timeDim->size();
 
   if (strcmp(_params.netcdf_dim_z, "none") == 0) {
     _zDim = NULL;

@@ -438,11 +438,11 @@ public:
 
   char* netcdf_dim_time;
 
-  char* netcdf_dim_x;
+  char* netcdf_dim_z;
 
   char* netcdf_dim_y;
 
-  char* netcdf_dim_z;
+  char* netcdf_dim_x;
 
   char* netcdf_var_base_time;
 
