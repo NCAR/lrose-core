@@ -429,9 +429,13 @@ int NcGeneric2Mdv::_loadMetaData()
 
   _timeDim = _ncFile->get_dim(_params.netcdf_dim_time);
   if (_timeDim == NULL) {
-    cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
-    cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
-    return -1;
+    if (strcmp(_params.netcdf_dim_time, "none") == 0) {
+      _nTimes = 1;
+    } else {
+      cerr << "ERROR - NcGeneric2Mdv::_loadMetaData" << endl;
+      cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
+      return -1;
+    }
   }
   _nTimes = _timeDim->size();
 
@@ -789,22 +793,28 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
   for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
 
     Nc3Var *var = _ncFile->get_var(ivar);
-    
-    if (var->get_dim(0) != _timeDim) {
-      continue;
-    }
 
+    int dimStart = 0;
+    if (_timeDim == NULL) {
+      dimStart = 0;
+    } else {
+      if (var->get_dim(0) != _timeDim) {
+        continue;
+      }
+      dimStart = 1;
+    }
+    
     bool xySwapped = false;
     if (_zDim) {
       if (var->num_dims() < 4) {
         continue;
       }
-      if (var->get_dim(1) != _zDim) {
+      if (var->get_dim(dimStart) != _zDim) {
         continue;
       }
-      if (var->get_dim(2) == _yDim && var->get_dim(3) == _xDim) {
+      if (var->get_dim(dimStart+1) == _yDim && var->get_dim(dimStart+2) == _xDim) {
         xySwapped = false;
-      } else if (var->get_dim(3) == _yDim && var->get_dim(2) == _xDim) {
+      } else if (var->get_dim(dimStart+2) == _yDim && var->get_dim(dimStart+1) == _xDim) {
         xySwapped = true;
       } else {
         continue;
@@ -813,9 +823,9 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
       if (var->num_dims() < 3) {
         continue;
       }
-      if (var->get_dim(1) == _yDim && var->get_dim(2) == _xDim) {
+      if (var->get_dim(1) == _yDim && var->get_dim(dimStart+1) == _xDim) {
         xySwapped = false;
-      } else if (var->get_dim(2) == _yDim && var->get_dim(1) == _xDim) {
+      } else if (var->get_dim(dimStart+1) == _yDim && var->get_dim(1) == _xDim) {
         xySwapped = true;
       } else {
         continue;

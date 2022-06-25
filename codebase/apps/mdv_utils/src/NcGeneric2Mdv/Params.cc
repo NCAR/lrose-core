@@ -753,7 +753,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("netcdf_dim_time");
     tt->descr = tdrpStrDup("name for netCDF dimension for time.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("Specify 'none' if there is no time dimension.");
     tt->val_offset = (char *) &netcdf_dim_time - &_start_;
     tt->single_val.s = tdrpStrDup("time");
     tt++;

@@ -133,6 +133,7 @@ commentdef {
 paramdef string {
   p_default = "time";
   p_descr = "name for netCDF dimension for time.";
+  p_help = "Specify 'none' if there is no time dimension.";
 } netcdf_dim_time;
 
 paramdef string {
