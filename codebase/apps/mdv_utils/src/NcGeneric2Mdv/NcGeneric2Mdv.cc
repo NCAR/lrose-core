@@ -806,7 +806,7 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
     
     bool xySwapped = false;
     if (_zDim) {
-      if (var->num_dims() < 4) {
+      if (var->num_dims() < dimStart+3) {
         continue;
       }
       if (var->get_dim(dimStart) != _zDim) {
@@ -820,12 +820,12 @@ int NcGeneric2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
         continue;
       }
     } else {
-      if (var->num_dims() < 3) {
+      if (var->num_dims() < dimStart+2) {
         continue;
       }
-      if (var->get_dim(1) == _yDim && var->get_dim(dimStart+1) == _xDim) {
+      if (var->get_dim(dimStart) == _yDim && var->get_dim(dimStart+1) == _xDim) {
         xySwapped = false;
-      } else if (var->get_dim(dimStart+1) == _yDim && var->get_dim(1) == _xDim) {
+      } else if (var->get_dim(dimStart+1) == _yDim && var->get_dim(dimStart) == _xDim) {
         xySwapped = true;
       } else {
         continue;
