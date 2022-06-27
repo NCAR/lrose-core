@@ -514,8 +514,6 @@ int NcGeneric2Mdv::_loadMetaData()
     return -1;
   }
 
-  cerr << "111111111111111111111 nz, ny, nx: " << _nz << ", " << _ny << ", " << _nx << endl;
-
   // Z coord values
 
   _zArray = (float *) _zArray_.alloc(_nz);
@@ -1290,22 +1288,39 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
       _params.resample_latlon_onto_regular_grid &&
       (!_dxIsConstant || !_dyIsConstant)) {
     
-    // create the field from the remapped
+    // create the field from the remapped grid
     
     MdvxField *field =
       _createRegularLatlonField(fieldName, longName, units, vals);
+
+    // transform the field if required
+
+    if (_params.apply_linear_transforms) {
+      _transformField(field);
+    }
+
     // add to Mdvx, which takes over ownership
+
     mdvx.addField(field);
     
   } else {
   
     // create the field from the netcdf array
+
     MdvxField *field = _createMdvxField(fieldName, longName, units,
                                         _nx, _ny, _nz,
                                         _minx, _miny, _minz,
                                         _dx, _dy, _dz,
                                         vals);
+
+    // transform the field if required
+    
+    if (_params.apply_linear_transforms) {
+      _transformField(field);
+    }
+
     // add to Mdvx, which takes over ownership
+
     mdvx.addField(field);
     
   }
@@ -1393,6 +1408,37 @@ MdvxField *NcGeneric2Mdv::_createMdvxField
   field->setTransform("");
 
   return field;
+
+}
+
+/////////////////////////////////////////////////////////
+// Apply a linear transform to the field if specified
+
+void NcGeneric2Mdv::_transformField(MdvxField *field)
+  
+{
+  
+  if (!_params.apply_linear_transforms) {
+    return;
+  }
+
+  bool doTransform = false;
+  Params::transform_field_t transform;
+  for (int itf = 0; itf < _params.transform_fields_n; itf++) {
+    if (strcmp(_params._transform_fields[itf].input_field_name,
+               field->getFieldName()) == 0) {
+      doTransform = true;
+      transform = _params._transform_fields[itf];
+      break;
+    }
+  }
+
+  if (!doTransform) {
+    return;
+  }
+  
+  field->applyLinearTransform(transform.scale, transform.offset,
+                              transform.output_field_name, transform.output_units);
 
 }
   
@@ -1850,10 +1896,10 @@ void NcGeneric2Mdv::_correctForSunAngle(MdvxField *field)
   fl32 *data = (fl32 *) field->getVol();
 
   // correct for each location
-
+  
   double minVal = _params.corrected_field_min_value;
   double maxVal = _params.corrected_field_max_value;
-
+  
   int pos = 0;
   for (int iy = 0; iy < fhdr.ny; iy++) {
     for (int ix = 0; ix < fhdr.nx; ix++, pos++) {

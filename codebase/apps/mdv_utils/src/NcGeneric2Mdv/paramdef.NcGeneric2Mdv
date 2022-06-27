@@ -444,6 +444,34 @@ paramdef double {
 } remap_offset_origin_longitude;
 
 commentdef {
+  p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
+  p_text = "These transforms are fixed. The same transform is applied to all files.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Apply linear transform to specified fields.";
+  p_help = "If true, we will apply a linear transform to selected fields.";
+} apply_linear_transforms;
+
+typedef struct {
+  string input_field_name; 
+  double scale;
+  double offset;
+  string output_field_name; 
+  string output_units;
+} transform_field_t;
+
+paramdef struct transform_field_t {
+  p_default = {
+    { "albedo", 100.0, 0.0, "albedo", "%"},
+    { "tbb", 1.0, 273.0, "TempC", "C"}
+  };
+  p_descr = "Transform field details.";
+  p_help = "Set the field name, scale and offset to be applied to the selected fields. Also set the ouptut field name and units";
+} transform_fields[];
+
+commentdef {
   p_header = "SUN ANGLE CORRECTION";
   p_text = "Applies only to satellite visible fields.";
 }

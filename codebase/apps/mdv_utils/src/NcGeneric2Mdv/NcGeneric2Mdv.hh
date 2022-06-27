@@ -172,6 +172,8 @@ private:
                               double dx, double dy, double dz,
                               const float *vals);
 
+  void _transformField(MdvxField *field);
+
   MdvxField *_createRegularLatlonField(const string &fieldName,
                                        const string &longName,
                                        const string &units,

@@ -120,6 +120,14 @@ public:
     double dy;
   } grid_params_t;
 
+  typedef struct {
+    char* input_field_name;
+    double scale;
+    double offset;
+    char* output_field_name;
+    char* output_units;
+  } transform_field_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -522,6 +530,11 @@ public:
 
   double remap_offset_origin_longitude;
 
+  tdrp_bool_t apply_linear_transforms;
+
+  transform_field_t *_transform_fields;
+  int transform_fields_n;
+
   tdrp_bool_t perform_sun_angle_correction;
 
   char* *_sun_correction_fields;
@@ -550,7 +563,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[77];
+  mutable TDRPtable _table[80];
 
   const char *_className;
 

@@ -795,6 +795,65 @@ remap_offset_origin_longitude = 0;
 
 //======================================================================
 //
+// OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
+//
+// These transforms are fixed. The same transform is applied to all 
+//   files.
+//
+//======================================================================
+ 
+///////////// apply_linear_transforms /////////////////
+//
+// Apply linear transform to specified fields.
+//
+// If true, we will apply a linear transform to selected fields.
+//
+//
+// Type: boolean
+//
+
+apply_linear_transforms = TRUE;
+
+///////////// transform_fields ////////////////////////
+//
+// Transform field details.
+//
+// Set the field name, scale and offset to be applied to the selected 
+//   fields. Also set the ouptut field name and units.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      double scale;
+//      double offset;
+//      string output_field_name;
+//      string output_units;
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_field_name = "albedo",
+    scale = 100,
+    offset = 0,
+    output_field_name = "albedo",
+    output_units = "%"
+  }
+  ,
+  {
+    input_field_name = "tbb",
+    scale = 1,
+    offset = -273,
+    output_field_name = "tempC",
+    output_units = "C"
+  }
+};
+
+//======================================================================
+//
 // SUN ANGLE CORRECTION.
 //
 // Applies only to satellite visible fields.
@@ -811,7 +870,7 @@ remap_offset_origin_longitude = 0;
 // Type: boolean
 //
 
-perform_sun_angle_correction = FALSE;
+perform_sun_angle_correction = TRUE;
 
 ///////////// sun_correction_fields ///////////////////
 //
@@ -868,7 +927,7 @@ corrected_field_max_value = 1e+12;
 // Type: string
 //
 
-output_url = "mdvp:://localhost::/tmp/mdv/from_netcdf";
+output_url = "mdvp:://localhost::$(HOME)/data/mdv/himawari/ch03";
 
 //======================================================================
 //
