@@ -4181,8 +4181,8 @@ void PolarManager::_createStatusPanel()
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
   int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size + 2;
-  int fsize6 = _params->label_font_size + 6;
+  int fsize2 = _params->label_font_size; //  + 2;
+  int fsize6 = _params->label_font_size; //  + 6;
   font.setPixelSize(fsize);
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);
