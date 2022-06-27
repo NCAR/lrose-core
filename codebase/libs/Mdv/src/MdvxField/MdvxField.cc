@@ -1389,6 +1389,79 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
 }
 
+///////////////////////////////////////////////////////////////////////////
+// Apply a linear transform to the field.
+// Optionall set the field name and units.
+// If newName is not empty, the new name is applied.
+// If newUnits is not empty, the new units string is applied.
+// Returns 0 on success, -1 on failure.
+// On success, the volume data is converted, and the header is adjusted
+// to reflect the changes.
+
+int MdvxField::applyLinearTransform(double scale /* = 1.0 */, 
+                                    double bias /* = 0.0 */,
+                                    const string &newName /* = "" */,
+                                    const string &newUnits /* = "" */)
+     
+{
+
+  clearErrStr();
+  
+  if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+    // no-op
+    return 0;
+  }
+
+  // save current state
+
+  Mdvx::encoding_type_t encoding_type =
+    (Mdvx::encoding_type_t) _fhdr.encoding_type;
+  Mdvx::compression_type_t compression_type =
+    (Mdvx::compression_type_t) _fhdr.compression_type;
+  
+  // transform to float uncompressed
+  
+  if (convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE)) {
+    _errStr += "ERROR - MdvxField::applyLinearTransform\n";
+    _errStr += "  Cannnot convert to fl32 uncompressed.\n";
+    return -1;
+  }
+
+  // compute the new values
+  
+  fl32 missing = _fhdr.missing_data_value;
+  fl32 *ff = (fl32 *) _volBuf.getPtr();
+  int64_t nn = _volBuf.getLen() / sizeof(fl32);
+  for (int64_t i = 0; i < nn; i++, ff++) {
+    fl32 fff = *ff;
+    if (fff != missing) {
+      fff = fff * scale + bias;
+      *ff = fff;
+    }
+  }
+  
+  // set headers accordingly
+  
+  computeMinAndMax(true);
+  if (newName.size() > 0) {
+    setFieldName(newName);
+  }
+  if (newUnits.size() > 0) {
+    setUnits(newUnits);
+  }
+  
+  // convert to original state
+  
+  if (convertType(encoding_type, compression_type)) {
+    _errStr += "ERROR - MdvxField::applyLinearTransform\n";
+    _errStr += "  Cannnot convert to original encoding and compression.\n";
+    return -1;
+  }
+
+  return 0;
+
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Compute the composite (max at multiple levels) given lower and
 // upper vlevel limits.

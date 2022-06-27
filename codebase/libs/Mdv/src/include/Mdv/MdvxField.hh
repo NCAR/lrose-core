@@ -276,9 +276,22 @@ public:
   //
   // On success, the volume data is converted, and the header is adjusted
   // to reflect the changes.
-
+  
   int negate(bool convert_to_linear = false);
-
+  
+  // Apply a linear transform to the field.
+  // Optionall set the field name and units.
+  // If newName is not empty, the new name is applied.
+  // If newUnits is not empty, the new units string is applied.
+  // Returns 0 on success, -1 on failure.
+  // On success, the volume data is converted, and the header is adjusted
+  // to reflect the changes.
+  
+  int applyLinearTransform(double scale = 1.0, 
+                           double bias = 0.0,
+                           const string &newName = "",
+                           const string &newUnits = "");
+     
   // Compute the composite (max at multiple levels) given lower and
   // upper vlevel limits.
   //
