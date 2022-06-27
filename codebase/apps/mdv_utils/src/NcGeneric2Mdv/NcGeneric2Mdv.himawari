@@ -888,7 +888,7 @@ output_url = "mdvp:://localhost::/tmp/mdv/from_netcdf";
 //     ENCODING_FLOAT32
 //
 
-output_encoding_type = ENCODING_INT16;
+output_encoding_type = ENCODING_FLOAT32;
 
 ///////////// output_compression_type /////////////////
 //
