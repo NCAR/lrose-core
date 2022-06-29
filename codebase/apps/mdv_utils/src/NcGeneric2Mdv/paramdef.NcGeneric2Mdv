@@ -485,7 +485,7 @@ paramdef boolean {
 paramdef string {
   p_default = { "VIS" };
   p_descr = "Fields to which sun angle correction will be applied.";
-  p_help = "See 'perform_sun_angle_correction'.";
+  p_help = "The field name is used AFTER the linear transform step. See 'perform_sun_angle_correction'.";
 } sun_correction_fields[];
 
 paramdef double {
