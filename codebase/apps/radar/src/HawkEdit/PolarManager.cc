@@ -5299,7 +5299,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
 
   scriptEditorControl->initProgress(lastArchiveFileIndex - firstArchiveFileIndex + 1);
 
-  _batchEditing = true;
+  _batchEditing = batchMode;
 
   try {
 
