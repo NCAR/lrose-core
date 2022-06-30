@@ -1158,7 +1158,7 @@ void SpreadSheetView::applyEdits() {
   QString elevation = sweepLineEdit->text();
   LOG(DEBUG) << "sweep entered " << elevation.toStdString();
 
-  float currentElevation = elevation.toFloat(&ok);
+  float currentSweepNumber = elevation.toInt(&ok);
 
   if (!ok) {
     criticalMessage("sweep must be greater than 0.0");
@@ -1167,7 +1167,7 @@ void SpreadSheetView::applyEdits() {
 
   if (carryOn) {
     // signal the controller to update the model
-    changeAzEl(currentRayAzimuth, currentElevation);  
+    changeAzEl(currentRayAzimuth, currentSweepNumber);  
   } else {
     criticalMessage("no changes made");
   }
@@ -1177,7 +1177,7 @@ void SpreadSheetView::changeMissingValue(float currentMissingValue) {
     _missingDataValue = currentMissingValue;
 }
 
-void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
+void SpreadSheetView::changeAzEl(float azimuth, int sweepNumber) {
   if ((azimuth < 0) || (azimuth > 360)) {
     criticalMessage("ray azimuth must be between 0.0 and 360.0");
     return;
@@ -1185,7 +1185,7 @@ void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
 
   // signal the controller to update the model
   try {
-    signalRayAzimuthChange(azimuth, elevation);
+    signalRayAzimuthChange(azimuth, sweepNumber);
 
     // model updated; request new data for display
     const QList<QListWidgetItem *> selectedFields = fieldListWidget->selectedItems();
@@ -1197,29 +1197,26 @@ void SpreadSheetView::changeAzEl(float azimuth, float elevation) {
       selectedNames.push_back(theText.toStdString());
     }
     fieldNamesSelected(selectedNames);
-    updateLocationInVolume(azimuth, elevation);
+    updateLocationInVolume(azimuth, sweepNumber);
     //needRangeData();
   } catch (std::invalid_argument &ex) {
     criticalMessage(ex.what());
   }
 }
 
-//void SpreadSheetView::newElevation(float elevation) {
-//    _currentElevation = elevation;
-//}
 // update spreadsheet location in volume
-void SpreadSheetView::updateLocationInVolume(float azimuth, float elevation) {
-//void SpreadSheetView::updateLocationInVolume(float azimuth, float elevation) {
+void SpreadSheetView::updateLocationInVolume(float azimuth, int sweepNumber) {
+
     QString n;
     n.setNum(azimuth);
     rayLineEdit->clear();
     rayLineEdit->insert(n);
 
-    n.setNum(elevation);
+    n.setNum(sweepNumber);
     sweepLineEdit->clear();
     sweepLineEdit->insert(n);
 
-    setTheWindowTitle(azimuth, elevation);    
+    setTheWindowTitle(azimuth, sweepNumber);    
 }
 
 void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,

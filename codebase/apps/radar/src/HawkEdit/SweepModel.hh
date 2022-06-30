@@ -76,7 +76,7 @@ public:
 
   size_t getNSweeps(); //  const  // _sweeps.size(); }
 
-  double getSelectedAngle();
+  //double getSelectedAngle();
 
   int getSelectedSweepNumber();
   void setSelectedAngle(double value);

@@ -105,9 +105,9 @@ public slots:
 
   void applyChanges();
   void applyEdits();
-  void changeAzEl(float azimuth, float elevation);
+  void changeAzEl(float azimuth, int sweepNumber);
   void changeMissingValue(float currentMissingValue);
-  void updateLocationInVolume(float azimuth, float elevation);
+  void updateLocationInVolume(float azimuth, int sweepNumber);
   void setTheWindowTitle(float rayAzimuth, float elevation);
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
@@ -123,7 +123,7 @@ signals:
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
   void needNyquistVelocityForRay(int rayIdx, int fieldIdx, string fieldName);
   void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
-  void signalRayAzimuthChange(float rayAzimuth, float elevation);
+  void signalRayAzimuthChange(float rayAzimuth, int sweepNumber);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);
   void replotRequested();

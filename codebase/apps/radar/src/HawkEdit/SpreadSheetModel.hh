@@ -30,7 +30,7 @@ public:
 
   void setData(string fieldName, float azimuth, vector<float> *data);
   void setDataMissing(string fieldName, float missingDataValue);
-  void setClosestRay(float azimuth, float elevation);
+  void setClosestRay(float azimuth, int sweepNumber);
 
 
 private:

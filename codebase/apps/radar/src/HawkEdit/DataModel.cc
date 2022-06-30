@@ -1097,7 +1097,9 @@ int DataModel::getSweepNumber(float elevation) {
   }
   delete sweepAngles;
 
-  if (!found) throw std::invalid_argument("DataModel::getSweepNumber no sweep found for elevation ");
+  if (!found) {
+    throw std::invalid_argument("DataModel::getSweepNumber no sweep found for elevation ");
+  }
 
   // use the index, i, to find the sweep number, because
   // the index may be different than the number, which is a label for a sweep.

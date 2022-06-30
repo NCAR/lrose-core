@@ -41,9 +41,9 @@ public:
 
   //void newElevation(float elevation);
   //void changeAzEl(float azimuth, float elevation);
-  void moveToLocation(string fieldName, float elevation,
+  void moveToLocation(string fieldName, int sweepNumber,
     float azimuth);
-  void moveToLocation(string fieldName, float elevation,
+  void moveToLocation(string fieldName, int sweepNumber,
     float azimuth, float range);  
 
   SpreadSheetModel *getDataModel() {return _currentModel;};
@@ -60,7 +60,7 @@ public slots:
   void needNyquistVelocityForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needRangeData(size_t nGates);
   void getVolumeChanges(string fieldName, float azimuth, vector<float> *data);
-  void switchRay(float azimuth, float elevation);
+  void switchRay(float azimuth, int sweepNumber);
   
 private:
 

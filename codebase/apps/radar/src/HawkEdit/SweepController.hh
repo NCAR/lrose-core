@@ -86,7 +86,7 @@ public:
   // size effect: sets the selected index
 
   void setAngle(double selectedAngle);
-  double getSelectedAngle();
+  //double getSelectedAngle();
 
 
   // set the index for the GUI

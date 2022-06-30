@@ -1318,10 +1318,12 @@ if (result == 0) {
 
 }
 
+/*
 double PolarManager::getSelectedSweepAngle() {
   double angle = _sweepController->getSelectedAngle();
   return angle;
 }
+*/
 
 size_t PolarManager::getSelectedFieldIndex() {
   size_t selectedFieldIndex = 0;
@@ -5707,10 +5709,10 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
     // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
   //} else {
   try {
-    double elevation = getSelectedSweepAngle();
+    int sweepNumber = _sweepController->getSelectedNumber();  // getSelectedSweepNumber();
     size_t fieldIdx = getSelectedFieldIndex();
-    LOG(DEBUG) << "elevation=" << elevation << ", fieldIdx=" << fieldIdx;
-    ExamineEdit(closestAz, elevation, fieldIdx, range);
+    LOG(DEBUG) << "sweepNumber =" << sweepNumber << ", fieldIdx=" << fieldIdx;
+    ExamineEdit(closestAz, sweepNumber, fieldIdx, range);
   } catch (const string& ex) {
     errorMessage("ExamineEdit Error", ex);
   }
@@ -5718,14 +5720,14 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
 }
 
 
-void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldIndex,
   double range) {   
 
   // get an version of the ray that we can edit
   // we'll need the az, and sweep number to get a list from
   // the volume
 
-  LOG(DEBUG) << "azimuth=" << azimuth << ", elevation=" << elevation << ", fieldIndex=" << fieldIndex;
+  LOG(DEBUG) << "azimuth=" << azimuth << ", sweepNumber=" << sweepNumber << ", fieldIndex=" << fieldIndex;
   // TODO: replace with ...
   const RadxRay *closestRayToEdit = _rayLocationController->getClosestRay(azimuth);
 
@@ -5778,8 +5780,8 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     string currentFieldName = _displayFieldController->getSelectedFieldName();
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
     float azimuth = closestRayToEdit->getAzimuthDeg();
-    float elevation = _sweepController->getSelectedAngle();
-    spreadSheetControl->moveToLocation(currentFieldName, elevation,
+    int sweepNumber = _sweepController->getSelectedNumber();
+    spreadSheetControl->moveToLocation(currentFieldName, sweepNumber,
       azimuth, range);
     //spreadSheetControl->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);   
     // should be called withing Controller ... 

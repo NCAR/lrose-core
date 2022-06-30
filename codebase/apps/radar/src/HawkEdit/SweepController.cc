@@ -353,10 +353,11 @@ void SweepController::setSelectedNumber(int sweepNumber)
   return _model->setSelectedNumber(sweepNumber);
 }
 
+/*
 double SweepController::getSelectedAngle() {
   return _model->getSelectedAngle();
 }
-
+*/
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
 /*

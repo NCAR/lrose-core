@@ -147,7 +147,7 @@ public:
 
   //  const RadxVol getDataVolume();
 
-  double getSelectedSweepAngle();
+  //double getSelectedSweepAngle();
   size_t getSelectedFieldIndex();
 
   vector<string> *getFieldsArchiveData(string fileName);
@@ -875,7 +875,7 @@ private slots:
   //void _saveBoundaryEditorClick();
 
   void _examineSpreadSheetSetup(double  closestAz = 30.0, double range = 0.0);
-  void ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+  void ExamineEdit(double azimuth, int sweepNumber, size_t fieldIndex,
     double range);
 
   void _scriptEditorSetup();

@@ -73,7 +73,7 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(applyVolumeEdits(string, float, vector<float> *)), 
 	  this, SLOT(getVolumeChanges(string, float, vector<float> *)));
 
-  connect(_currentView, SIGNAL(signalRayAzimuthChange(float, float)), this, SLOT(switchRay(float, float)));
+  connect(_currentView, SIGNAL(signalRayAzimuthChange(float, int)), this, SLOT(switchRay(float, int)));
 
     // connect controller slots to model signals 
 
@@ -94,26 +94,26 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 }
 
 
-void SpreadSheetController::moveToLocation(string fieldName, float elevation,
+void SpreadSheetController::moveToLocation(string fieldName, int sweepNumber,
     float azimuth) {
 
-  switchRay(azimuth, elevation);
+  switchRay(azimuth, sweepNumber);
 }
 
-void SpreadSheetController::moveToLocation(string fieldName, float elevation,
+void SpreadSheetController::moveToLocation(string fieldName, int sweepNumber,
     float azimuth, float range) {
 
-  moveToLocation(fieldName, elevation, azimuth);
-  _currentView->highlightClickedData(fieldName, azimuth, elevation, range);
+  moveToLocation(fieldName, sweepNumber, azimuth);
+  _currentView->highlightClickedData(fieldName, azimuth, sweepNumber, range);
 }
 
-void SpreadSheetController::switchRay(float azimuth, float elevation) {
+void SpreadSheetController::switchRay(float azimuth, int sweepNumber) {
   LOG(DEBUG) << "enter";
   //try {
-    _currentModel->setClosestRay(azimuth, elevation);
+    _currentModel->setClosestRay(azimuth, sweepNumber);
     LOG(DEBUG) << "switching to ray " << azimuth;
     //_currenView->newElevation(elevation);
-    _currentView->updateLocationInVolume(azimuth, elevation);
+    _currentView->updateLocationInVolume(azimuth, sweepNumber);
   //} catch (std::invalid_argument &ex) {
   //  LOG(DEBUG) << "ERROR: " << ex.what();
     //_currentView->criticalMessage(ex.what());
