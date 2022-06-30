@@ -1129,11 +1129,11 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
   QGroupBox *viewBox = new QGroupBox(tr("Select fields to import"));
   QDialogButtonBox *buttonBox = new QDialogButtonBox;
   QPushButton *saveButton = buttonBox->addButton(QDialogButtonBox::Apply);
-  QPushButton *closeButton = buttonBox->addButton(QDialogButtonBox::Cancel);
+  QPushButton *cancelButton = buttonBox->addButton(QDialogButtonBox::Cancel);
 
 
   connect(saveButton, SIGNAL(clicked(bool)), listview, SLOT(fieldsSelected(bool)));
-  connect(closeButton, SIGNAL(clicked(bool)), this, SLOT(closeFieldListDialog(bool)));
+  connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(cancelFieldListDialog(bool)));
   connect(listview, SIGNAL(sendSelectedFieldsForImport(vector<string> *)),
     this, SLOT(fieldsSelected(vector<string> *)));
         //lve->show();
@@ -2993,6 +2993,17 @@ void PolarManager::_reconcileDisplayFields() {
   _displayFieldController->deleteFieldFromDisplay(field);
 }
 */
+
+void PolarManager::_notifyDataModelNewFieldsSelected() {
+  // data model does not keep track of which fields are selected;
+  // The DisplayField MVC keeps track of the selected fields.
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->clearVolume();
+  dataModel->moveToLookAhead();
+
+}
+
+
 void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 
 // TODO:
@@ -3008,6 +3019,7 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
       //_displayFieldController->addField(*it);
       //emit addField(*it);
     }
+    _notifyDataModelNewFieldsSelected();
     _addNewFields(selectedFields);
     // reconcile sweep info; if the sweep angles are the same, then no need for change
     //string inputPath = _getSelectedFile();
@@ -3027,6 +3039,12 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 }
 
 void PolarManager::closeFieldListDialog(bool clicked) {
+  fieldListDialog->close();
+}
+
+void PolarManager::cancelFieldListDialog(bool clicked) {
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->deleteLookAhead();
   fieldListDialog->close();
 }
 

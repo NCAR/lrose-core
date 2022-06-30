@@ -226,6 +226,7 @@ public:
 public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
+  void cancelFieldListDialog(bool clicked);
 
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
@@ -613,40 +614,6 @@ private:
   bool _cancelled;
   bool _batchEditing;
 
-/*
-  QDateTimeEdit *_archiveStartTimeEdit;
-  RadxTime _guiStartTime;
-  RadxTime _archiveStartTime;
-  
-  QDateTimeEdit *_archiveEndTimeEdit;
-  RadxTime _guiEndTime;
-  RadxTime _archiveEndTime;
-
-  QPushButton *_selectedTimeLabel;
-  RadxTime _selectedTime;
-
-  QPushButton *_back1;
-  QPushButton *_fwd1;
-  QPushButton *_backPeriod;
-  QPushButton *_fwdPeriod;
-  */
-  /*
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorHelpBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QPushButton *_boundaryEditorPolygonBtn;
-  QPushButton *_boundaryEditorCircleBtn;
-  QPushButton *_boundaryEditorBrushBtn;
-  QListWidget *_boundaryEditorList;
-  QLabel *_boundaryEditorInfoLabel;
-  bool forceHide = true;
-  QSlider *_circleRadiusSlider;
-  QSlider *_brushRadiusSlider;
-
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QListWidget *_boundaryEditorList;
-  */
 
   // time controller settings dialog
   
@@ -763,6 +730,8 @@ private:
 
   void _setupRayLocation();
   void _setMaxRangeKm();
+
+  void _notifyDataModelNewFieldsSelected();
 
   // modes
 

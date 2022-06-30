@@ -1263,7 +1263,92 @@ void DataModel::init() {
   _cacheMetaDataValid = false;
 }
 
+// ----- 
 
+void DataModel::clearVolume() {
+  delete _vol;
+  _vol = NULL;
+  _cacheMetaDataValid = false;
+
+}
+
+void DataModel::getLookAhead(string fileName) {
+
+  LOG(DEBUG) << "enter";
+
+  // set up file object for reading
+  
+  RadxFile file;
+  RadxVol vol;
+
+  vol.clear();
+
+  file.setReadMetadataOnly(true);
+      
+    string inputPath = fileName;
+  
+      LOG(DEBUG) << "  reading data file path: " << inputPath;
+      //cerr << "  archive file index: " << _archiveScanIndex << endl;
+    
+    if (file.readFromPath(inputPath, vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::getLookAhead\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + inputPath + "\n";
+      cerr << errMsg;
+      throw std::invalid_argument(errMsg);
+    } 
+
+    // NOTE: since we are only reading the metadata, the rays are NOT filled.
+
+    // load the sweeps into look ahead
+    const vector<RadxSweep *> sweeps = vol.getSweepsAsInFile();
+    if (sweeps.size() <= 0) {
+      throw std::invalid_argument("no sweeps found in data file");
+    }
+    // copy sweep angles to look ahead
+    // copy sweep numbers to look ahead    
+    size_t nSweeps = sweeps.size();
+    _lookAheadSweepNumbers.reserve(nSweeps);
+    _lookAheadSweepAngles.reserve(nSweeps);
+    for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
+    {
+      RadxSweep *sweep = *iter;
+      double sweepAngle = sweep->getFixedAngleDeg();
+      int sweepNumber = sweep->getSweepNumber();
+      cout << "sweep num " << sweepNumber << " angle " << sweepAngle << endl;
+      _lookAheadSweepAngles.push_back(sweepAngle);
+      _lookAheadSweepNumbers.push_back(sweepNumber);
+    }   
+
+    // end load sweeps into look ahead
+
+    vol.loadFieldsFromRays();
+    _lookAheadFields = vol.getFields();
+
+    LOG(DEBUG) << "exit";
+}  
+
+void DataModel::deleteLookAhead() {
+  _lookAheadSweepNumbers.clear();
+  _lookAheadSweepAngles.clear();
+  _lookAheadFields.clear();    
+}
+
+void DataModel::moveToLookAhead() {
+  // copy lookAhead to cache (only selected fields)
+  _cacheFields.clear();
+  _cacheSweepNumbers.clear();
+  _cacheSweepAngles.clear();
+
+  _cacheFields = _lookAheadFields;
+  _cacheSweepAngles = _lookAheadSweepAngles;
+  _cacheSweepNumbers = _lookAheadSweepNumbers;
+
+  _cacheMetaDataValid = true;
+}
+
+// -----
 const string &DataModel::getPathInUse() {
 	return _vol->getPathInUse();
 }
@@ -1547,89 +1632,26 @@ vector<double> *DataModel::getPossibleSweepAngles(string fileName)
 vector<string> *DataModel::getPossibleFieldNames(string fileName)
 {
 
+  // read meta data
   LOG(DEBUG) << "enter";
 
-  // set up file object for reading
-  
-  RadxFile file;
-  RadxVol vol;
-
-  vol.clear();
-  //_setupVolRead(file);
-
-  file.setReadMetadataOnly(true);
-      
-    string inputPath = fileName;
-  
-      LOG(DEBUG) << "  reading data file path: " << inputPath;
-      //cerr << "  archive file index: " << _archiveScanIndex << endl;
-    
-    if (file.readFromPath(inputPath, vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::getPossibleFieldNames\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + inputPath + "\n";
-      cerr << errMsg;
-      throw std::invalid_argument(errMsg);
-    } 
-
-    // since we are only reading the metadata, the rays are NOT filled.
-
-    //vol.loadMetadataFromSweepsToRays();
-
-    // while we are here, load the sweeps into cache
-    //vol.loadSweepInfoFromRays();
-    const vector<RadxSweep *> sweeps = vol.getSweepsAsInFile();
-    if (sweeps.size() <= 0) {
-      throw std::invalid_argument("no sweeps found in data file");
-    }
-    // copy sweep angles to cache
-    // copy sweep numbers to cache    
-    size_t nSweeps = sweeps.size();
-    _cacheSweepNumbers.reserve(nSweeps);
-    _cacheSweepAngles.reserve(nSweeps);
-    for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
-    {
-      RadxSweep *sweep = *iter;
-      double sweepAngle = sweep->getFixedAngleDeg();
-      int sweepNumber = sweep->getSweepNumber();
-      cout << "sweep num " << sweepNumber << " angle " << sweepAngle << endl;
-      _cacheSweepAngles.push_back(sweepAngle);
-      _cacheSweepNumbers.push_back(sweepNumber);
-    }   
-
-    vol.loadFieldsFromRays();
-    _cacheFields = vol.getFields();
-    vector<string> *allFieldNames = new vector<string>;
-    for (vector<RadxField *>::const_iterator iter = _cacheFields.begin(); iter != _cacheFields.end(); ++iter)
-    {
-      RadxField *field = *iter;
-      cout << field->getName() << endl;
-      allFieldNames->push_back(field->getName());
-    }
-
-
-    /*DONT NEED THIS HERE ...
-    vector<double> *allSweepNumbers = new vector<double>;
-    allSweepNumbers->resize(_cacheSweeps.size());
-    for (int idx = 0; idx < _cacheSweeps.size(); idx++) 
-    //for (vector<RadxSweep *>::const_iterator iter = sweeps.begin(); iter != sweeps.end(); ++iter)
-    {
-      //RadxSweep *sweep = *iter;
-      //cout << field->getName() << endl;
-      allSweepNumbers->at(idx) = _cacheSweeps[idx]->getFixedAngleDeg();
-    }
-    */
-
-    // end load sweeps into cache
-
-    _cacheMetaDataValid = true;
+  deleteLookAhead();
+  getLookAhead(fileName);
+ 
+  vector<string> *allFieldNames = new vector<string>;
+  for (vector<RadxField *>::const_iterator iter = _lookAheadFields.begin(); iter != _lookAheadFields.end(); ++iter)
+  {
+    RadxField *field = *iter;
+    cout << field->getName() << endl;
+    allFieldNames->push_back(field->getName());
+  }
 
     LOG(DEBUG) << "exit";
     return allFieldNames;
 }
 
 
+// may not be used; may be the same as getLookAhead??
 void DataModel::readFileMetaData(string fileName)
 {
 

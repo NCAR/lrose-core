@@ -153,6 +153,11 @@ public:
   RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
     int sweepNumber,
     bool debug_verbose = false, bool debug_extra = false);
+
+  void getLookAhead(string fileName);
+  void deleteLookAhead();
+  void moveToLookAhead();
+  void clearVolume();
   
 private:
   
@@ -180,12 +185,17 @@ private:
   RadxVol *_vol;
 
   // cache stores metadata until the entire data file is read and _vol is filled
+  // cache contains all sweeps but only the selected fields
   bool _cacheMetaDataValid;
   //const 
   vector<int> _cacheSweepNumbers;
   vector<double> _cacheSweepAngles;
- // const 
   vector<RadxField *> _cacheFields;
+
+  // look ahead continas all sweeps and all fields for the next (n+1) file to open
+  vector<int> _lookAheadSweepNumbers;
+  vector<double> _lookAheadSweepAngles;
+  vector<RadxField *> _lookAheadFields;  
 
 };
 

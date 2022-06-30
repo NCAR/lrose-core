@@ -129,11 +129,13 @@ void SweepView::setNumber(int selectedNumber)
 
 void SweepView::setGuiIndex(int index) 
 {
-  _sweepRButtons->at(_guiIndex)->setChecked(false);
-  _guiIndex = index;
-  if (_guiIndex <= 0) {
+  if (_guiIndex < _sweepRButtons->size() && _guiIndex > 0) {
+    _sweepRButtons->at(_guiIndex)->setChecked(false);
+  }
+
+  if (index <= 0) {
     _guiIndex = 0;
-  } else if (_guiIndex > (int) _sweepRButtons->size() - 1) {
+  } else if (index > (int) _sweepRButtons->size() - 1) {
     _guiIndex = _sweepRButtons->size() - 1;
   }
   if (_sweepRButtons->size() > 0) {
