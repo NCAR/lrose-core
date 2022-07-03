@@ -1182,6 +1182,12 @@ int Mdvx::_readAllHeadersRadx(const string &path)
     fhdr.grid_miny = 0.0;
     fhdr.grid_minz = 0.0;
 
+    fhdr.data_element_nbytes = rfld->getByteWidth();
+    if (fhdr.data_element_nbytes > 4) {
+      fhdr.data_element_nbytes = 4;
+    }
+    fhdr.volume_size = fhdr.data_element_nbytes * fhdr.nz * fhdr.ny * fhdr.nx;
+
     if (vol0.getNRays() > 0) {
       const RadxRay *ray0 = vol0.getRays()[0];
       fhdr.grid_dx = ray0->getGateSpacingKm();

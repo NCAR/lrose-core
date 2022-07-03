@@ -467,6 +467,7 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
       _fhdr.data_element_nbytes != 4) {
     cerr << "ERROR - MdvxField::MdvxField" << endl;
     cerr << "  You must set data_element_nbytes to 1, 2 or 4" << endl;
+    cerr << "  fhdr.data_element_nbytes: " << _fhdr.data_element_nbytes << endl;
   }
 
   if (_fhdr.compression_type == Mdvx::COMPRESSION_NONE) {
