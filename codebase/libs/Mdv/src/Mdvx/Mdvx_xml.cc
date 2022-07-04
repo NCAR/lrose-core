@@ -734,7 +734,7 @@ int Mdvx::_readVolumeXml(bool fill_missing,
     MdvxField *field = _fields[ii];
     if (field->_apply_read_constraints(*this, fill_missing,
                                        do_decimate, do_final_convert,
-                                       remapLut, is_vsection,
+                                       remapLut, is_vsection, false,
                                        vsection_min_lon, vsection_max_lon)) {
       _errStr += "ERROR - Mdvx::_readVolumeXml.\n";
       char errstr[128];
