@@ -1471,10 +1471,15 @@ int MdvxField::applyLinearTransform(double scale /* = 1.0 */,
 
 int MdvxField::convert2Composite(double lower_vlevel,
 				 double upper_vlevel)
-
+  
 {
   
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+    // no-op
+    return 0;
+  }
+
+  if (lower_vlevel == upper_vlevel) {
     // no-op
     return 0;
   }
@@ -1506,6 +1511,11 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   clearErrStr();
 
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+    // no-op
+    return 0;
+  }
+
+  if (lower_plane_num == upper_plane_num) {
     // no-op
     return 0;
   }
@@ -1928,7 +1938,7 @@ int MdvxField::convert2SingleRhi(const Mdvx::master_header_t &mhdr,
 				 bool do_final_convert /* = true */)
   
 {
-  
+
   clearErrStr();
 
   // convert to float and uncompress as required
@@ -1953,7 +1963,7 @@ int MdvxField::convert2SingleRhi(const Mdvx::master_header_t &mhdr,
 
   // just get the vlevel we need - this is actually one RHI
   // because the vlevels represent azimuth
-  
+
   convert2Composite(rhiIndex, rhiIndex);
   
   // set the header appropriately
@@ -2012,7 +2022,7 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   // compute sample points
 
   lut.computeSamplePts(waypts, _fhdr.nx);
-
+  
   // just get the vlevel we need - this is actually one RHI
   // because the vlevels represent azimuth
   
@@ -2044,13 +2054,16 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   if (maxHt > 25.0) {
     maxHt = 25.0;
   }
-  double dz = _round_dz((maxHt - sensorHt) / 120.0);
-  int nz = (int) ((maxHt - sensorHt) / dz) + 2;
+  double deltaHt = maxHt - sensorHt;
+  double dz = _round_dz(deltaHt / 240.0);
+  int nz = (int) (deltaHt / dz) + 2;
   if (nz > MDV_MAX_VLEVELS) {
     nz = MDV_MAX_VLEVELS;
+    dz = deltaHt / (nz - 2);
   }
-  double minz = ((int) (sensorHt / dz)) * dz;
   
+  double minz = ((int) (sensorHt / dz)) * dz;
+
   // compute x origin
 
   double minX = _fhdr.grid_minx;
@@ -2062,6 +2075,17 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
     nX += nNeg;
   }
   
+#ifdef DEBUG_PRINT
+  cerr << "DDDDDDDDDDDDDDDD maxRange: " << maxRange << endl;
+  cerr << "DDDDDDDDDDDDDDDD sensorHt: " << sensorHt << endl;
+  cerr << "DDDDDDDDDDDDDDDD maxHt: " << maxHt << endl;
+  cerr << "DDDDDDDDDDDDDDDD dz: " << dz << endl;
+  cerr << "DDDDDDDDDDDDDDDD nz: " << nz << endl;
+  cerr << "DDDDDDDDDDDDDDDD minz: " << minz << endl;
+  cerr << "DDDDDDDDDDDDDDDD minX: " << minX << endl;
+  cerr << "DDDDDDDDDDDDDDDD nX: " << nX << endl;
+#endif
+
   // set up working buffer, initialize to missing vals
   
   MemBuf workBuf;
@@ -2143,7 +2167,7 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   
   // set the header appropriately
 
-  _fhdr.proj_type = Mdvx::PROJ_RHI_RADAR;
+  _fhdr.proj_type = Mdvx::PROJ_VSECTION;
   _fhdr.volume_size = _volBuf.getLen();
 
   _fhdr.ny = 1;
@@ -6542,7 +6566,7 @@ int MdvxField::_read_volume(TaFile &infile,
     _errStr += "\n";
     return -1;
   }
-
+  
   // byte swap as needed
 
   _data_from_BE(_fhdr, _volBuf.getPtr(), _volBuf.getLen());
@@ -6556,7 +6580,7 @@ int MdvxField::_read_volume(TaFile &infile,
 
   if (_apply_read_constraints(mdvx, fill_missing, do_decimate,
                               do_final_convert,
-                              remapLut, is_vsection,
+                              remapLut, is_vsection, false,
                               vsection_min_lon, vsection_max_lon)) {
     _errStr += "ERROR - MdvxField::_read_volume\n";
     return -1;
@@ -6582,6 +6606,7 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
                                        bool do_final_convert,
                                        MdvxRemapLut &remapLut,
                                        bool is_vsection,
+                                       bool is_rhi,
                                        double vsection_min_lon,
                                        double vsection_max_lon)
   
@@ -6598,7 +6623,7 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
   // decompress if it makes sense
   
   if (mdvx._readComposite || mdvx._readHorizLimitsSet || mdvx._readRemapSet ||
-      do_decimate || fill_missing || is_vsection ||
+      do_decimate || fill_missing || is_vsection || is_rhi ||
       (_fhdr.min_value == 0.0 && _fhdr.max_value == 0.0)) {
     if (decompress()) {
       _errStr += "ERROR - MdvxField::_apply_read_constraints\n";
@@ -6611,15 +6636,30 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
 
   computeMinAndMax(true);
     
-  // convert vlevel type if needed
+  if (is_rhi) {
+    if (do_final_convert) {
+      if (convertType(mdvx._readEncodingType,
+                      output_compression,
+                      mdvx._readScalingType,
+                      mdvx._readScale,
+                      mdvx._readBias)) {
+        _errStr += "ERROR - MdvxField::_apply_read_constraints\n";
+        return -1;
+      }
+    }
+    return 0;
+  }
 
+  // convert vlevel type if needed
+  
   if (mdvx._readSpecifyVlevelType) {
     convertVlevelType(mdvx._readVlevelType);
   }
   
   // composite if needed
-
+  
   if (mdvx._readComposite) {
+    
     int iret;
     if (mdvx._readVlevelLimitsSet) {
       iret = convert2Composite(mdvx._readMinVlevel, mdvx._readMaxVlevel);
@@ -6639,11 +6679,11 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
     if (mdvx._readVlevelLimitsSet || mdvx._readPlaneNumLimitsSet) {
       constrainVertical(mdvx);
     }
-
+    
   } // if (mdvx._readComposite) 
-
-  // For latlon grids, might need to shift the lon domain
-
+  
+    // For latlon grids, might need to shift the lon domain
+  
   if (_fhdr.proj_type == Mdvx::PROJ_LATLON) {
     if (is_vsection) {
       _check_lon_domain(vsection_min_lon, vsection_max_lon);
@@ -6651,13 +6691,13 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
       _check_lon_domain(mdvx._readMinLon, mdvx._readMaxLon);
     }
   }
-
+  
   // constrain in the horizontal if needed
   
   if (mdvx._readHorizLimitsSet && !is_vsection) {
     constrainHorizontal(mdvx);
   }
-
+  
   // fill missing value as required
 
   if (fill_missing) {
@@ -6666,9 +6706,9 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
       return -1;
     }
   }
-
+  
   // decimate if required
-
+  
   if (do_decimate) {
     if (decimate(mdvx._readDecimateMaxNxy)) {
       _errStr += "ERROR - MdvxField::_apply_read_constraints.\n";

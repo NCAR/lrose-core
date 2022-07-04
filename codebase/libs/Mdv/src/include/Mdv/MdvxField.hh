@@ -987,6 +987,7 @@ protected:
                               bool do_final_convert,
                               MdvxRemapLut &remapLut,
                               bool is_vsection,
+                              bool is_rhi,
                               double vsection_min_lon,
                               double vsection_max_lon);
   
