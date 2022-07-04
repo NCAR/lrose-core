@@ -912,22 +912,36 @@ int DsMdvServer::_readRhi(DsMdvx &mdvx, time_t searchTime)
   if (mdvx.readVolume()) {
     return -1;
   }
-
+  
   const MdvxField *fld0 = mdvx.getField(0);
   if (fld0 == NULL) {
     return -1;
   }
-
   
-  if (fld0->getFieldHeader().proj_type != Mdvx::PROJ_RHI_RADAR) {
-    if (_isDebug) {
-      cerr << "WARNING: _readRhi, url: " << rhiUrl << endl;
-      cerr << "  Data not in projection PROJ_RHI_RADAR" << endl;
-      cerr << "  projType: " <<
-        Mdvx::projType2Str(fld0->getFieldHeader().proj_type) << endl;
-      cerr << "  Serving out normal vertical section" << endl;
+  if (_params.polar_rhi) {
+    if (fld0->getFieldHeader().proj_type != Mdvx::PROJ_RHI_RADAR) {
+      if (_isDebug) {
+        cerr << "WARNING: _readRhi, url: " << rhiUrl << endl;
+        cerr << "  params.polar_rhi is false" << endl;
+        cerr << "  Data not in PROJ_RHI_RADAR" << endl;
+        cerr << "  projType: " <<
+          Mdvx::projType2Str(fld0->getFieldHeader().proj_type) << endl;
+        cerr << "  Reverting to reconstructed RHI" << endl;
+      }
+      return -1;
     }
-    return -1;
+  } else {
+    if (fld0->getFieldHeader().proj_type != Mdvx::PROJ_VSECTION) {
+      if (_isDebug) {
+        cerr << "WARNING: _readRhi, url: " << rhiUrl << endl;
+        cerr << "  params.polar_rhi is false" << endl;
+        cerr << "  Data not in PROJ_VSECTION" << endl;
+        cerr << "  projType: " <<
+          Mdvx::projType2Str(fld0->getFieldHeader().proj_type) << endl;
+        cerr << "  Reverting to reconstructed RHI" << endl;
+      }
+      return -1;
+    }
   }
 
   _finalizeRhiWaypts(mdvx, bestAz);
