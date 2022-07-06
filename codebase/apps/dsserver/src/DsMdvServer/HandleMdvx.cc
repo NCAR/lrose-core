@@ -380,16 +380,16 @@ int DsMdvServer::_readMdvxAllHeaders(DsMdvx &mdvx)
 
 {
 
+  // set up the read, saving the search time
+
+  time_t searchTime = _setupRead(mdvx, false);
+
   if (_isDebug) {
     cerr << "READ_ALL_HDRS REQUEST" << endl;
     mdvx.printReadRequest(cerr);
   }
 
   int iret = -1;
-
-  // set up the read, saving the search time
-
-  time_t searchTime = _setupRead(mdvx, false);
 
   if (_params.serve_multiple_domains &&
       _params.domains_n > 0) {
@@ -505,17 +505,17 @@ int DsMdvServer::_readMdvxVolume(DsMdvx &mdvx)
 
 {
 
-  if (_isDebug) {
-    cerr << "READ_VOLUME REQUEST" << endl;
-    mdvx.printReadRequest(cerr);
-  }
-  
-  int iret = -1;
-  
   // set up the read, saving the search time
   
   time_t searchTime = _setupRead(mdvx, true);
 
+  if (_isDebug) {
+    cerr << "READ_VOLUME REQUEST" << endl;
+    mdvx.printReadRequest(cerr);
+  }
+
+  int iret = -1;
+  
   if (_params.serve_multiple_domains &&
       _params.domains_n > 0) {
 
@@ -610,7 +610,11 @@ int DsMdvServer::_readMdvxVolume(DsMdvx &mdvx)
     }
     
   }
-  
+
+  if (_params.create_composite_on_read) {
+    mdvx.convertAllFields2Composite();
+  }
+
   if (iret == 0) {
     _adjustTimes(mdvx, searchTime);
     _overrideMasterHeaderInfoOnRead(mdvx);
@@ -629,16 +633,16 @@ int DsMdvServer::_readMdvxVsection(DsMdvx &mdvx)
 
 {
 
+  // set up the read, saving the search time
+
+  time_t searchTime = _setupRead(mdvx, false);
+
   if (_isDebug) {
     cerr << "READ_VSECTION REQUEST" << endl;
     mdvx.printReadRequest(cerr);
   }
 
   int iret = -1;
-
-  // set up the read, saving the search time
-
-  time_t searchTime = _setupRead(mdvx, false);
 
   if (_params.serve_multiple_domains &&
       _params.domains_n > 0) {
@@ -760,6 +764,10 @@ int DsMdvServer::_readVsectionFromRhi(DsMdvx &mdvx)
 
 {
 
+  // set up the read, saving the search time
+  
+  time_t searchTime = _setupRead(mdvx, false);
+  
   if (_isDebug) {
     cerr << "READ_VSECTION REQUEST - AS RHI" << endl;
     mdvx.printReadRequest(cerr);
@@ -769,10 +777,6 @@ int DsMdvServer::_readVsectionFromRhi(DsMdvx &mdvx)
   // save original read object
   
   DsMdvx origMdvx(mdvx);
-  
-  // set up the read, saving the search time
-  
-  time_t searchTime = _setupRead(mdvx, false);
   
   // try reading an RHI
 

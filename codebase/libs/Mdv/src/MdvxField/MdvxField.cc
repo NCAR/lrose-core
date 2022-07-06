@@ -1515,7 +1515,9 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
     return 0;
   }
 
-  if (lower_plane_num == upper_plane_num) {
+  if (lower_plane_num >= 0 &&
+      upper_plane_num >= 0 &&
+      lower_plane_num == upper_plane_num) {
     // no-op
     return 0;
   }
@@ -1526,10 +1528,10 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
     fprintf(stderr, "  _fhdr.nz < 1\n");
     return -1;
   }
-
+  
   int lowerPlaneNum = lower_plane_num;
   int upperPlaneNum = upper_plane_num;
-
+  
   if (lowerPlaneNum < 0) {
     lowerPlaneNum = 0;
   } else if (lowerPlaneNum > _fhdr.nz - 1) {
@@ -1680,9 +1682,9 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   MEM_zero(_vhdr);
   _vhdr.level[0] = _fhdr.grid_minz;
   _vhdr.type[0] = Mdvx::VERT_TYPE_COMPOSITE;
-
+  
   STRconcat(_fhdr.field_name_long, "_composite", MDV_LONG_FIELD_LEN);
-
+  
   if (recompress) {
     requestCompression(compression_type);
   }

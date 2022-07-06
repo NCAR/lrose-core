@@ -323,6 +323,17 @@ Mdvx &Mdvx::_copy(const Mdvx &rhs)
 
 }
 
+////////////////////////////////////
+// Convert all fields to composite
+
+void Mdvx::convertAllFields2Composite()
+
+{
+  for (unsigned int ii = 0; ii < _fields.size(); ii++) {
+    _fields[ii]->convert2Composite();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////
 // add a field
 //
