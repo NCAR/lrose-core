@@ -2039,12 +2039,19 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   double minCosElev = 1.0;
   for (int iy = 0; iy < _fhdr.ny; iy++) {
     elev[iy] = _fhdr.grid_miny + iy * _fhdr.grid_dy;
+    // do not go over center
+    if (elev[iy] >= 89.99) {
+      elev[iy] = 89.99;
+    }
     double rad = elev[iy] * DEG_TO_RAD;
     EG_sincos(rad, &sinElev[iy], &cosElev[iy]);
     if (cosElev[iy] < minCosElev) {
       minCosElev = cosElev[iy];
     }
   }
+  // if (minCosElev) {
+  //   minCosElev = 0.0;
+  // }
 
   // compute the vertical dimensions in km
   
@@ -2056,34 +2063,37 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   if (maxHt > 25.0) {
     maxHt = 25.0;
   }
-  double deltaHt = maxHt - sensorHt;
-  double dz = _round_dz(deltaHt / 240.0);
-  int nz = (int) (deltaHt / dz) + 2;
-  if (nz > MDV_MAX_VLEVELS) {
-    nz = MDV_MAX_VLEVELS;
-    dz = deltaHt / (nz - 2);
+  double htSpan = maxHt - sensorHt;
+  double dZ = _round_dz(htSpan / 240.0);
+  int nZ = (int) (htSpan / dZ) + 2;
+  if (nZ > MDV32_MAX_VLEVELS - 1) {
+    nZ = MDV32_MAX_VLEVELS - 1;
+    dZ = htSpan / (nZ - 2);
   }
-  
-  double minz = ((int) (sensorHt / dz)) * dz;
+  double minZ = ((int) (sensorHt / dZ)) * dZ;
 
   // compute x origin
 
   double minX = _fhdr.grid_minx;
   int nX = _fhdr.nx;
+  int nNeg = 0;
   if (minCosElev < 0) {
     double min_x = maxRange * minCosElev;
-    int nNeg = floor(fabs(min_x) / _fhdr.grid_dx + 1.5);
+    nNeg = floor(fabs(min_x) / _fhdr.grid_dx + 1.5);
     minX -= nNeg * _fhdr.grid_dx;
     nX += nNeg;
   }
   
 #ifdef DEBUG_PRINT
   cerr << "DDDDDDDDDDDDDDDD maxRange: " << maxRange << endl;
+  cerr << "DDDDDDDDDDDDDDDD minCosElev: " << minCosElev << endl;
+  cerr << "DDDDDDDDDDDDDDDD nNeg: " << nNeg << endl;
   cerr << "DDDDDDDDDDDDDDDD sensorHt: " << sensorHt << endl;
   cerr << "DDDDDDDDDDDDDDDD maxHt: " << maxHt << endl;
-  cerr << "DDDDDDDDDDDDDDDD dz: " << dz << endl;
-  cerr << "DDDDDDDDDDDDDDDD nz: " << nz << endl;
-  cerr << "DDDDDDDDDDDDDDDD minz: " << minz << endl;
+  cerr << "DDDDDDDDDDDDDDDD htSpan: " << htSpan << endl;
+  cerr << "DDDDDDDDDDDDDDDD dZ: " << dZ << endl;
+  cerr << "DDDDDDDDDDDDDDDD nZ: " << nZ << endl;
+  cerr << "DDDDDDDDDDDDDDDD minZ: " << minZ << endl;
   cerr << "DDDDDDDDDDDDDDDD minX: " << minX << endl;
   cerr << "DDDDDDDDDDDDDDDD nX: " << nX << endl;
 #endif
@@ -2091,7 +2101,7 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   // set up working buffer, initialize to missing vals
   
   MemBuf workBuf;
-  int64_t nGridOut = nX * nz;
+  int64_t nGridOut = nX * nZ;
   int64_t nBytes = nGridOut * _fhdr.data_element_nbytes;
   workBuf.prepare(nBytes);
   
@@ -2114,9 +2124,9 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   fl32 *in = (fl32 *) _volBuf.getPtr();
   fl32 *out = (fl32 *) workBuf.getPtr();
   
-  for (int iz = 0; iz < nz; iz++) { // height
+  for (int iz = 0; iz < nZ; iz++) { // height
     
-    double ht = minz + iz * dz;
+    double ht = minZ + iz * dZ;
     double gndRange = minX;
     
     for (int ix = 0; ix < nX;
@@ -2176,17 +2186,17 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   _fhdr.grid_dy = 1.0;
   _fhdr.grid_miny = azimuth;
 
-  _fhdr.nz = nz;
-  _fhdr.grid_dz = (fl32) dz;
-  _fhdr.grid_minz = (fl32) minz;
+  _fhdr.nz = nZ;
+  _fhdr.grid_dz = (fl32) dZ;
+  _fhdr.grid_minz = (fl32) minZ;
   _fhdr.dz_constant = true;
 
   _fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   memset(_vhdr.level, 0, MDV_MAX_VLEVELS * sizeof(fl32));
   memset(_vhdr.type, 0, MDV_MAX_VLEVELS * sizeof(si32));
 
-  for (int iz = 0; iz < nz; iz++) {
-    _vhdr.level[iz] = minz + iz * dz;
+  for (int iz = 0; iz < nZ; iz++) {
+    _vhdr.level[iz] = minZ + iz * dZ;
     _vhdr.type[iz] = Mdvx::VERT_TYPE_Z;
   }
   
@@ -8316,6 +8326,10 @@ double MdvxField::_round_dz(double dz)
     return 0.050;
   } else if (dz < 0.1) {
     return 0.1;
+  } else if (dz < 0.16) {
+    return 0.16;
+  } else if (dz < 0.2) {
+    return 0.2;
   } else if (dz < 0.25) {
     return 0.25;
   } else if (dz < 0.5){
