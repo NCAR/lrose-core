@@ -1125,6 +1125,18 @@
     tt->single_val.e = PRINT_MODE_NORM;
     tt++;
     
+    // Parameter 'print_sweep_angles'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_sweep_angles");
+    tt->descr = tdrpStrDup("Option to print angles list for each sweep.");
+    tt->help = tdrpStrDup("The list of angles will be listed for each file or time.");
+    tt->val_offset = (char *) &print_sweep_angles - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'print_rays'
     // ctype is 'tdrp_bool_t'
     
