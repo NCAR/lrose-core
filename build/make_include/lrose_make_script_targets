@@ -10,7 +10,7 @@
 #
 # Makefile targets for script files
 #
-# Deirdre Garvey
+# Mike Dixon
 #
 # EOL,NCAR,Boulder,Colorado,80307,USA
 # 
@@ -20,17 +20,17 @@
 all: install
 
 install: create_subdir
-	if test $(INSTALL_DIR) != . ;\
+	if test $(LROSE_INSTALL_DIR)/bin != . ;\
 	then \
-		cp $(SCRIPTS) $(INSTALL_DIR) ;\
+		rsync -av $(SCRIPTS) $(LROSE_INSTALL_DIR)/bin ;\
 	fi
 
 create_subdir:
-	if test -d $(INSTALL_DIR) ;\
+	if test -d $(LROSE_INSTALL_DIR)/bin ;\
 	then \
 		cd . ;\
 	else \
-		mkdir $(INSTALL_DIR) ;\
+		mkdir $(LROSE_INSTALL_DIR)/bin ;\
 	fi
 
 install_bin: install

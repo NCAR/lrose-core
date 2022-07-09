@@ -4,10 +4,6 @@
 #
 #---------------------------------------------------------------------
 
-#	Default INSTALL_DIR, should be overridden on command line
-
-INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
-
 #	Script files to be installed
 
 SCRIPTS = \
@@ -75,17 +71,17 @@ SCRIPTS = \
 all: install
 
 install: create_subdir
-	if test $(INSTALL_DIR) != . ;\
+	if test $(LROSE_INSTALL_DIR)/bin != . ;\
 	then \
-		cp $(SCRIPTS) $(INSTALL_DIR) ;\
+		cp $(SCRIPTS) $(LROSE_INSTALL_DIR)/bin ;\
 	fi
 
 create_subdir:
-	if test -d $(INSTALL_DIR) ;\
+	if test -d $(LROSE_INSTALL_DIR)/bin ;\
 	then \
 		cd . ;\
 	else \
-		mkdir $(INSTALL_DIR) ;\
+		mkdir $(LROSE_INSTALL_DIR)/bin ;\
 	fi
 
 install_bin: install
