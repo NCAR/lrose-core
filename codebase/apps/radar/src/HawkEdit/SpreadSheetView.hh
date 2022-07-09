@@ -22,7 +22,6 @@
 #include <QString>
 #include <QUndoStack>
 #include <QUndoView>
-#include <QJSEngine>
 
 using namespace std;
 
@@ -42,6 +41,8 @@ public:
 
   void newDataReady();
 
+  int getSweepNumber();
+  float getAzimuth();
 
   float myPow();
 
@@ -54,6 +55,13 @@ public:
     float elevation, float range);
 
   void closeEvent();
+
+  
+  int getNFieldsToDisplay() { return _nFieldsToDisplay; };
+  int getNRaysToDisplay() { return _nRays; };
+  //string data_format = "%g";
+  float getMissingDataValue() { return _missingDataValue; };
+  vector<std::string> getFieldNamesToDisplay() { return _fieldNames; };
 
 
 public slots:
@@ -137,17 +145,7 @@ protected:
     void createActions();
     //void addVariableToSpreadSheet(QString name, QJSValue value);
 
-
-
-    void actionMath_helper(const QString &title, const QString &op);
     bool runFunctionDialog();
-
-    bool runInputDialog(const QString &title,
-                        const QString &c1Text,
-                        const QString &c2Text,
-                        const QString &opText,
-                        const QString &outText,
-                        QString *cell1, QString *cell2, QString *outCell);
 
   void criticalMessage(std::string message);
 

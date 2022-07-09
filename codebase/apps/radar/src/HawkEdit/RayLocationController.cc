@@ -51,9 +51,22 @@ double RayLocationController::getStopAngle(size_t rayIdx) {
 
 vector <float> *RayLocationController::getRayData(size_t rayIdx, string fieldName) {
   return _model->getRayData(rayIdx, fieldName);
-
 }
+
+vector <float> *RayLocationController::getRayDataOffset(float azimuth, 
+  int offsetFromClosest, string fieldName) {
+  return _model->getRayDataOffset(azimuth, offsetFromClosest, fieldName);
+}
+
 
 const RadxRay *RayLocationController::getClosestRay(double azDeg) {
 	return _model->getClosestRay(azDeg);
+}
+
+float RayLocationController::getNyquistVelocityForRay(float azDeg, int offset) {
+  return _model->getNyquistVelocityForRay(azDeg, offset);
+}
+
+float RayLocationController::getAzimuthForRay(float azDeg, int offset) {
+  return _model->getAzimuthForRay(azDeg, offset);
 }

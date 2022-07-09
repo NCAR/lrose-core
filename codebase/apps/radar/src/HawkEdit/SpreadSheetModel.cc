@@ -56,6 +56,7 @@ vector<string> *SpreadSheetModel::getFields()
   return fieldNames;
 }
 
+/*
 // return the azimuth of the ray offset from the closest ray
 float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
 {
@@ -72,8 +73,10 @@ float SpreadSheetModel::getAzimuthForRay(int offsetFromClosest)
   }
   return azimuth;
 }
-
-float SpreadSheetModel::getNyquistVelocityForRay(int offsetFromClosest) {
+*/
+/*
+float SpreadSheetModel::getNyquistVelocityForRay(RayLocationController *rayLocationController,
+  int offsetFromClosest) {
   float nyquistVelocity = -1.0;  // negative value indicates no value found
   if (offsetFromClosest == 0) {
     nyquistVelocity = _closestRay->getNyquistMps();
@@ -86,13 +89,17 @@ float SpreadSheetModel::getNyquistVelocityForRay(int offsetFromClosest) {
   }
   return nyquistVelocity;
 }
+*/
 
+/*
 size_t SpreadSheetModel::_getRayIdx(int offsetFromClosest) {
     DataModel *dataModel = DataModel::Instance();
     size_t nRays = dataModel->getNRays();
     //vector<RadxRay *> rays = const_cast <vector<RadxRay *>> (dataModel->getRays());
     // ( size_t = (size_t + int) % size_t)  ==> TROUBLE!!!
     //int closestRay = (int) _closestRayIdx;
+
+    // Use RayLoc!
 
     size_t rayIdx = dataModel->getRayIndex(_closestRayIdx,
       offsetFromClosest, _currentSweepNumber); 
@@ -102,11 +109,24 @@ size_t SpreadSheetModel::_getRayIdx(int offsetFromClosest) {
       << " rayIdx=" << rayIdx;
     return rayIdx;
 }
+*/
+void SpreadSheetModel::_setSweepNumber(int sweepNumber) {
+  _currentSweepNumber = sweepNumber;
+}
 
-  void SpreadSheetModel::_setSweepNumber(int sweepNumber) {
-    _currentSweepNumber = sweepNumber;
+/*
+// idx is zero based
+void SpreadSheetModel::setRay(int idx, RadxRay *ray) { 
+  if (idx < 0) {}
+  if (idx >= _raysToDisplay.size()) {
+    _raysToDisplay.resize(idx+1);
   }
+  _raysToDisplay.at(idx) = ray;
+}
+*/
 
+// Remember, rayLocation has pointers to the rays in the volume held in the DataModel. 
+/*
 // return a list of data values for the given
 // field name
 // vector<double>
@@ -131,7 +151,7 @@ vector<float> *SpreadSheetModel::getData(string fieldName, int offsetFromClosest
   return dataVector;
 
 }
-
+*/
 // set data values for the field in the Volume 
 void SpreadSheetModel::setData(string fieldName, float azimuth, vector<float> *data)
 {
@@ -171,11 +191,30 @@ void SpreadSheetModel::setDataMissing(string fieldName, float missingDataValue)
 }
 
 
-
+/*
 
 // find the closest ray in the volume and set the internal variable _closestRay
 // and the internal variable _closestRayIdx
 //
+void SpreadSheetModel::setClosestRay(size_t rayIdx, int sweepNumber) {
+  LOG(DEBUG) << "enter azimuth = " << azimuth;
+
+
+// Why not use rayLocation?  It is already sorted by azimuth for the current sweep???
+
+  DataModel *dataModel = DataModel::Instance();
+
+  _setSweepNumber(sweepNumber);
+  size_t closestRayIdx = dataModel->findClosestRay(azimuth, _currentSweepNumber);
+
+  _closestRay = dataModel->getRay(closestRayIdx);
+  _closestRayIdx = closestRayIdx;
+  LOG(DEBUG) << "_closestRayIdx = " << _closestRayIdx 
+    << " azimuth = " << _closestRay->getAzimuthDeg() << " vs. requested az " << azimuth;
+  LOG(DEBUG) << "exit";
+}
+*/
+/*
 void SpreadSheetModel::setClosestRay(float azimuth, int sweepNumber) {
   LOG(DEBUG) << "enter azimuth = " << azimuth;
 
@@ -190,3 +229,4 @@ void SpreadSheetModel::setClosestRay(float azimuth, int sweepNumber) {
     << " azimuth = " << _closestRay->getAzimuthDeg() << " vs. requested az " << azimuth;
   LOG(DEBUG) << "exit";
 }
+*/

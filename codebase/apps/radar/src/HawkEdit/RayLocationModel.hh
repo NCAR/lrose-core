@@ -23,13 +23,19 @@ double getStartRangeKm(size_t rayIdx);
 double getGateSpacingKm(size_t rayIdx);
 double getMaxRangeKm();
 size_t getEndIndex(size_t rayIdx);
+size_t getStartIndex(size_t rayIdx);
 double getStartAngle(size_t rayIdx);
 double getStopAngle(size_t rayIdx);
 
 vector <float> *getRayData(size_t rayIdx, string fieldName);
+vector <float> *getRayDataOffset(float azimuth, 
+  int offsetFromClosest, string fieldName);
 
 RadxRay *getClosestRay(double azDeg);
-
+size_t getClosestRayIdx(double azDeg);
+size_t getClosestRayIdx(float azDeg, int offset);
+float getNyquistVelocityForRay(double azDeg, int offset);
+float getAzimuthForRay(double azDeg, int offset);
 bool isRayLocationSetup();
 
 private:

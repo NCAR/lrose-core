@@ -6,10 +6,7 @@
 #include <QObject>
 #include "SpreadSheetView.hh"
 #include "SpreadSheetModel.hh"
-//#include "SoloFunctionsModel.hh"
-//#include "PolarWidget.hh"
-//#include <Radx/RadxVol.hh>
-//#include "SoloFunctions.hh"
+#include "RayLocationController.hh"
 
 #include <vector>
 
@@ -25,12 +22,13 @@ class SpreadSheetController : public QObject
 public:
 
   SpreadSheetController(SpreadSheetView *view);
-  SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model);
+  SpreadSheetController(SpreadSheetView *view, SpreadSheetModel *model,
+    RayLocationController *rayLocationController);
 
 
 
   vector<string> *getFieldNames();
-  vector<float> *getData(string fieldName, int offsetFromClosest);
+  //vector<float> *getData(string fieldName, int offsetFromClosest);
   float getAzimuthForRay(int offsetFromClosest);
   void getRangeData(float *startingRangeKm, float *gateSpacingKm);
   float getNyquistVelocity(int offsetFromClosest);
@@ -51,22 +49,25 @@ public:
 
 signals:
   void volumeChanged(); // const RadxVol &radarDataVolume);
+  void selectSweep(int sweepNumber);
 
 public slots:
   void setDataMissing(string fieldName, float missingDataValue);
   void needFieldNames();
-  void needDataForField(string fieldName, int r, int c);
+  //void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needNyquistVelocityForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needRangeData(size_t nGates);
   void getVolumeChanges(string fieldName, float azimuth, vector<float> *data);
   void switchRay(float azimuth, int sweepNumber);
+  //void newSweepData(int sweepNumber);
+  void displaySweepData(int sweepNumber);
   
 private:
 
   SpreadSheetModel *_currentModel;
   SpreadSheetView *_currentView;
-  //SoloFunctions *_soloFunctions;
+  RayLocationController *_rayLocationController;
 
 };
 

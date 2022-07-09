@@ -189,108 +189,8 @@ Q_DECLARE_METATYPE(QVector<double>)
     //QDialog *myList = new QDialog(dock);
     dock->setWidget(echoGroup);
     addDockWidget(Qt::RightDockWidgetArea, dock);
-/*
-
-    QListWidget *customerList = new QListWidget(dock);
-    customerList->addItems(QStringList()
-            << "John Doe, Harmony Enterprises, 12 Lakeside, Ambleton"
-            << "Jane Doe, Memorabilia, 23 Watersedge, Beaton"
-            << "Tammy Shea, Tiblanka, 38 Sea Views, Carlton"
-            << "Tim Sheen, Caraba Gifts, 48 Ocean Way, Deal"
-            << "Sol Harvey, Chicos Coffee, 53 New Springs, Eccleston"
-            << "Sally Hobart, Tiroli Tea, 67 Long River, Fedula");
-    dock->setWidget(customerList);
-    addDockWidget(Qt::RightDockWidgetArea, dock);
-*/
-    //viewMenu->addAction(dock->toggleViewAction());
-
-    // -----
-/*
-    toolBar->addWidget(new QLabel("Fields"));
-
-
-    toolBar->addWidget(new QLabel("Format"));   
-    TextEdit *formatInput = new TextEdit(this);
-    //formatInput->L
-    toolBar->addWidget(formatInput);
-
-    TextEdit *rangeInput = new TextEdit(this);
-    toolBar->addWidget(rangeInput);
-
-    TextEdit *nyqVelInput = new TextEdit(this);
-    toolBar->addWidget(nyqVelInput);
-
-    
-    TextEdit *rayInput = new TextEdit(this);
-    toolBar->addWidget(rayInput);
-
-    TextEdit *raysInput = new TextEdit(this);
-    toolBar->addWidget(raysInput);
-
-    TextEdit *cellInput = new TextEdit(this);
-    toolBar->addWidget(cellInput);
-    */
 
     int actionFontSize = 14;
-
-    // =======
-
-    //QPushButton cancelButton(tr("Cancel"), this);
-    //connect(&cancelButton, &QAbstractButton::clicked, &functionDialog, &QDialog::reject);
-
-    //QPushButton okButton(tr("OK"), this);
-    //okButton.setDefault(true);
-    //connect(&okButton, &QAbstractButton::clicked, &functionDialog, &QDialog::accept);
-    //    addWidget(&cancelButton);
-    //addWidget(&okButton);
-    //QAction *cancelAct = new QAction(tr("&Cancel"), this);
-    //cancelAct->setStatusTip(tr("Cancel changes"));
-    //cancelAct->setIcon(QIcon(":/images/cancel_x.png"));
-    //QFont cancelFont = cancelAct->font();
-    //cancelFont.setBold(true);
-    //cancelFont.setPointSize(actionFontSize);
-    //cancelAct->setFont(cancelFont);
-    //connect(cancelAct, &QAction::triggered, this, &SpreadSheetView::cancelFormulaInput);
-    //toolBar->addAction(cancelAct);
-
-    //QAction *okAct = new QAction(tr("&Ok"), this);
-    //okAct->setStatusTip(tr("Accept changes"));
-    //okAct->setIcon(QIcon(":/images/ok_check.png"));
-    //QFont okFont = okAct->font();
-    //okFont.setBold(true);
-    //okFont.setPointSize(actionFontSize);
-    //okAct->setFont(okFont);
-    //connect(okAct, &QAction::triggered, this, &SpreadSheetView::acceptFormulaInput);
-    //toolBar->addAction(okAct);
-/*
-    QAction *applyAct = new QAction(tr("&Apply"), this);
-    applyAct->setStatusTip(tr("Apply changes to display"));
-    applyAct->setIcon(QIcon(":/images/apply.png"));
-    QFont applyFont = applyAct->font();
-    applyFont.setBold(true);
-    applyFont.setPointSize(actionFontSize);
-    applyAct->setFont(applyFont);
-    connect(applyAct, &QAction::triggered, this, &SpreadSheetView::applyChanges);
-    toolBar->addAction(applyAct);
-*/
-    /*
-    toolBar->addAction(okAct);
-    toolBar->addAction(applyAct);
-    toolBar->addAction(cancelAct);
-    */
-
-    /*
-    QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    buttonsLayout->addStretch(1);
-    buttonsLayout->addWidget(&okButton);
-    buttonsLayout->addSpacing(10);
-    buttonsLayout->addWidget(&cancelButton);
-
-    QHBoxLayout *dialogLayout = new QHBoxLayout(&functionDialog);
-    dialogLayout->addWidget(&textEditArea);
-    dialogLayout->addStretch(1);
-    dialogLayout->addItem(buttonsLayout);
-    */
 
     // ============
     table = new QTableWidget(rows, cols, this);
@@ -827,119 +727,6 @@ void SpreadSheetView::setSelectionToValue(QString value)
 }
 
 
-bool SpreadSheetView::runInputDialog(const QString &title,
-                                 const QString &c1Text,
-                                 const QString &c2Text,
-                                 const QString &opText,
-                                 const QString &outText,
-                                 QString *cell1, QString *cell2, QString *outCell)
-{
-    QStringList rows, cols;
-    for (int c = 0; c < table->columnCount(); ++c)
-        cols << QChar('A' + c);
-    for (int r = 0; r < table->rowCount(); ++r)
-        rows << QString::number(1 + r);
-
-    QDialog addDialog(this);
-    addDialog.setWindowTitle(title);
-
-    QGroupBox group(title, &addDialog);
-    group.setMinimumSize(250, 100);
-
-    QLabel cell1Label(c1Text, &group);
-    QComboBox cell1RowInput(&group);
-    int c1Row, c1Col;
-    SpreadSheetUtils::decode_pos(*cell1, &c1Row, &c1Col);
-    cell1RowInput.addItems(rows);
-    cell1RowInput.setCurrentIndex(c1Row);
-
-    QComboBox cell1ColInput(&group);
-    cell1ColInput.addItems(cols);
-    cell1ColInput.setCurrentIndex(c1Col);
-
-    QLabel operatorLabel(opText, &group);
-    operatorLabel.setAlignment(Qt::AlignHCenter);
-
-    QLabel cell2Label(c2Text, &group);
-    QComboBox cell2RowInput(&group);
-    int c2Row, c2Col;
-    SpreadSheetUtils::decode_pos(*cell2, &c2Row, &c2Col);
-    cell2RowInput.addItems(rows);
-    cell2RowInput.setCurrentIndex(c2Row);
-    QComboBox cell2ColInput(&group);
-    cell2ColInput.addItems(cols);
-    cell2ColInput.setCurrentIndex(c2Col);
-
-    QLabel equalsLabel("=", &group);
-    equalsLabel.setAlignment(Qt::AlignHCenter);
-
-    QLabel outLabel(outText, &group);
-    QComboBox outRowInput(&group);
-    int outRow, outCol;
-    SpreadSheetUtils::decode_pos(*outCell, &outRow, &outCol);
-    outRowInput.addItems(rows);
-    outRowInput.setCurrentIndex(outRow);
-    QComboBox outColInput(&group);
-    outColInput.addItems(cols);
-    outColInput.setCurrentIndex(outCol);
-
-    QPushButton cancelButton(tr("Cancel"), &addDialog);
-    connect(&cancelButton, &QAbstractButton::clicked, &addDialog, &QDialog::reject);
-
-    QPushButton okButton(tr("OK"), &addDialog);
-    okButton.setDefault(true);
-    connect(&okButton, &QAbstractButton::clicked, &addDialog, &QDialog::accept);
-
-    QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    buttonsLayout->addStretch(1);
-    buttonsLayout->addWidget(&okButton);
-    buttonsLayout->addSpacing(10);
-    buttonsLayout->addWidget(&cancelButton);
-
-    QVBoxLayout *dialogLayout = new QVBoxLayout(&addDialog);
-    dialogLayout->addWidget(&group);
-    dialogLayout->addStretch(1);
-    dialogLayout->addItem(buttonsLayout);
-
-    QHBoxLayout *cell1Layout = new QHBoxLayout;
-    cell1Layout->addWidget(&cell1Label);
-    cell1Layout->addSpacing(10);
-    cell1Layout->addWidget(&cell1ColInput);
-    cell1Layout->addSpacing(10);
-    cell1Layout->addWidget(&cell1RowInput);
-
-    QHBoxLayout *cell2Layout = new QHBoxLayout;
-    cell2Layout->addWidget(&cell2Label);
-    cell2Layout->addSpacing(10);
-    cell2Layout->addWidget(&cell2ColInput);
-    cell2Layout->addSpacing(10);
-    cell2Layout->addWidget(&cell2RowInput);
-
-    QHBoxLayout *outLayout = new QHBoxLayout;
-    outLayout->addWidget(&outLabel);
-    outLayout->addSpacing(10);
-    outLayout->addWidget(&outColInput);
-    outLayout->addSpacing(10);
-    outLayout->addWidget(&outRowInput);
-
-    QVBoxLayout *vLayout = new QVBoxLayout(&group);
-    vLayout->addItem(cell1Layout);
-    vLayout->addWidget(&operatorLabel);
-    vLayout->addItem(cell2Layout);
-    vLayout->addWidget(&equalsLabel);
-    vLayout->addStretch(1);
-    vLayout->addItem(outLayout);
-
-    if (addDialog.exec()) {
-        *cell1 = cell1ColInput.currentText() + cell1RowInput.currentText();
-        *cell2 = cell2ColInput.currentText() + cell2RowInput.currentText();
-        *outCell = outColInput.currentText() + outRowInput.currentText();
-        return true;
-    }
-
-    return false;
-}
-
 void SpreadSheetView::notImplementedMessage() {
       QMessageBox::information(this, "Not Implemented", "Not Implemented");
 }
@@ -961,23 +748,7 @@ void SpreadSheetView::actionDisplayEditHist()
   notImplementedMessage();
 }
 
-void SpreadSheetView::actionMath_helper(const QString &title, const QString &op)
-{
-    QString cell1 = "C1";
-    QString cell2 = "C2";
-    QString out = "C3";
 
-    QTableWidgetItem *current = table->currentItem();
-    if (current)
-        out = SpreadSheetUtils::encode_pos(table->currentRow(), table->currentColumn());
-
-    if (runInputDialog(title, tr("Cell 1"), tr("Cell 2"), op, tr("Output to:"),
-                       &cell1, &cell2, &out)) {
-        int row, col;
-        SpreadSheetUtils::decode_pos(out, &row, &col);
-        table->item(row, col)->setText(tr("%1 %2 %3").arg(op, cell1, cell2));
-    }
-}
 
 void SpreadSheetView::clear()
 {
@@ -1173,6 +944,36 @@ void SpreadSheetView::applyEdits() {
   }
 }
 
+int SpreadSheetView::getSweepNumber() {
+
+  QString elevation = sweepLineEdit->text();
+  LOG(DEBUG) << "sweep entered " << elevation.toStdString();
+  bool ok;
+  int currentSweepNumber = elevation.toInt(&ok);
+
+  if (!ok) {
+    criticalMessage("sweep must be an integer");
+    return 0; // ??? 
+  } else {
+    return currentSweepNumber;
+  }
+}
+
+float SpreadSheetView::getAzimuth() {
+
+  QString azimuth = rayLineEdit->text();
+  LOG(DEBUG) << "azimuth entered " << azimuth.toStdString();
+  bool ok;
+  float currentAzimuth = azimuth.toFloat(&ok);
+
+  if (!ok) {
+    criticalMessage("set azimuth between 0.0 and 360.0");
+    return 0; // ??? 
+  } else {
+    return currentAzimuth;
+  }
+}
+
 void SpreadSheetView::changeMissingValue(float currentMissingValue) {
     _missingDataValue = currentMissingValue;
 }
@@ -1185,7 +986,6 @@ void SpreadSheetView::changeAzEl(float azimuth, int sweepNumber) {
 
   // signal the controller to update the model
   try {
-    signalRayAzimuthChange(azimuth, sweepNumber);
 
     // model updated; request new data for display
     const QList<QListWidgetItem *> selectedFields = fieldListWidget->selectedItems();
@@ -1198,6 +998,9 @@ void SpreadSheetView::changeAzEl(float azimuth, int sweepNumber) {
     }
     fieldNamesSelected(selectedNames);
     updateLocationInVolume(azimuth, sweepNumber);
+
+    signalRayAzimuthChange(azimuth, sweepNumber);
+
     //needRangeData();
   } catch (std::invalid_argument &ex) {
     criticalMessage(ex.what());
@@ -1332,21 +1135,26 @@ void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
 
   int useless = 0; // this becomes iterator over nRays
   table->clear(); // clearContents(); 
+  _fieldNames.clear();
 
   // fill everything that needs the fieldNames ...
     _nFieldsToDisplay = fieldNames.size();
+    _fieldNames.reserve(_nFieldsToDisplay);
+
     int somethingHideous = 0;
     table->setColumnCount(_nFieldsToDisplay * _nRays + somethingHideous);
     LOG(DEBUG) << "there are " << fieldNames.size() << " field namess";
-    // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
-    for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
-        int fieldIdx = 0;
 
-        vector<string>::iterator it; 
-        for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
-          QString the_name(QString::fromStdString(*it));
-          LOG(DEBUG) << *it;
-          for (int i=0; i<_nRays; i++) {
+    // move the rest of this to the controller to push the data to the view ... 
+    int fieldIdx = 0;    
+    vector<string>::iterator it; 
+    for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
+      QString the_name(QString::fromStdString(*it));
+      LOG(DEBUG) << *it;
+      _fieldNames.push_back(*it);    
+        // rayIdx goes from 0 to nRays; map to -nRays/2 ... 0 ... nRays/2
+        for (int rayIdx= - _nRays/2; rayIdx <= _nRays/2; rayIdx++) {
+          //for (int i=0; i<_nRays; i++) {
             // this ultimately calls setHeader; we need to send the info needed for setHeader
             emit needAzimuthForRay(rayIdx, fieldIdx, *it);
             // needAzimuthForRay(int offsetFromClosest, 
@@ -1354,11 +1162,12 @@ void SpreadSheetView::fieldNamesSelected(vector<string> fieldNames) {
             //table->setHorizontalHeaderItem(c + (i*_nFieldsToDisplay), 
              //   new QTableWidgetItem(the_name));
             // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
-          }
-          emit needDataForField(*it, rayIdx, fieldIdx);
+          //}
+          //emit needDataForField(*it, rayIdx, fieldIdx);  // need to push this, not pull it.
           //emit needAzimuthForRay(rayIdx);     
-          fieldIdx += 1;
+
         }
+        fieldIdx += 1;
     }
 }
 

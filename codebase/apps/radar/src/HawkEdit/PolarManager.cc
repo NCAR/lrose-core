@@ -598,6 +598,8 @@ void PolarManager::_setupWindows()
 
   connect(_sweepPanel, SIGNAL(selectedSweepChanged(int)),
           this, SLOT(selectedSweepChanged(int)));
+ // connect(this, SIGNAL(newSweepData(int)), _sweepController, SLOT(setSelectedNumber(int sweepNumber)));
+
   connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
   //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
 
@@ -1680,14 +1682,25 @@ void PolarManager::selectedFieldChanged(string fieldName) {
 
 
 void PolarManager::selectedSweepChanged(int sweepNumber) {
+  LOG(DEBUG) << "enter"; 
   //string fieldName = newFieldName.toStdString();
   //_displayFieldController->setSelectedField(fieldName);
-  _sweepController->setSelectedNumber(sweepNumber);
-  _readDataFile();
-  selectedFieldChanged(_displayFieldController->getSelectedFieldName());
-  //_setupRayLocation();  // this is done by _getArchiveData
-  //_plotArchiveData();
-  //refreshBoundaries();
+  if (_sweepController->getSelectedNumber() != sweepNumber) {
+    _sweepController->setSelectedNumber(sweepNumber);
+    _readDataFile();
+    // signal polar display to update; which causes rayLocations to update
+    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
+    emit newSweepData(sweepNumber);
+    //processEvents();
+    //_setupRayLocation();  // this is done by _getArchiveData
+    //_plotArchiveData();
+    //refreshBoundaries();
+  } else {
+    if (sheetView != NULL) {
+      spreadSheetControl->displaySweepData(sweepNumber);
+    }
+  }
+  LOG(DEBUG) << "exit";
 }
 
 /*
@@ -5753,7 +5766,7 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
     //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
     
     // create the controller
-    spreadSheetControl = new SpreadSheetController(sheetView, model);
+    spreadSheetControl = new SpreadSheetController(sheetView, model, _rayLocationController);
 
     // finish the other connections ..
     //sheetView->addController(sheetController);
@@ -5773,6 +5786,10 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
 
     connect(sheetView, SIGNAL(dataChanged()), 
       this, SLOT(spreadsheetDataChanged()));
+
+    connect(spreadSheetControl, SIGNAL(selectSweep(int)), this, SLOT(selectedSweepChanged(int)));
+
+    connect(this, SIGNAL(newSweepData(int)), spreadSheetControl, SLOT(displaySweepData(int)));
 
     sheetView->init();
     sheetView->show();

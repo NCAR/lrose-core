@@ -372,7 +372,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
           fieldRenderer->addBeam(beam);
           // rayIdx must be increasing
           if (endIndex < rayIdx) done = true;
-          rayIdx = endIndex;
+          rayIdx = endIndex + 1;
         } else {
           rayIdx += 1;
         }

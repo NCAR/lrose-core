@@ -323,6 +323,8 @@ signals:
 
   void newDataFile();
 
+  void newSweepData(int sweepNumber);
+
 // end from DisplayManager
 
 private:
