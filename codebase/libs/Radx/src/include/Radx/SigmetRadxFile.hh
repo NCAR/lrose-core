@@ -313,6 +313,7 @@ private:
 
   void _setRayInfo();
   void _setVolMetaData();
+  void _setRayTime(RadxRay &ray, double secsSinceSweepStart);
   void _setRayMetadata(RadxRay &ray, const ray_header_t &rayHdr);
 
   double _getFixedAngle(int sweepIndex, double el, double az);
