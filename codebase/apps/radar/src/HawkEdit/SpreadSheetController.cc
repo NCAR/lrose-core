@@ -91,6 +91,7 @@ void SpreadSheetController::switchRay(float azimuth, int sweepNumber) {
   LOG(DEBUG) << "enter";
   //if ()
   emit selectSweep(sweepNumber);
+  // QCoreApplication::processEvents();
   LOG(DEBUG) << "exit";
 }
       
@@ -101,10 +102,11 @@ void SpreadSheetController::switchRay(float azimuth, int sweepNumber) {
 void SpreadSheetController::displaySweepData(int sweepNumber) {
   LOG(DEBUG) << "enter";
 
-  // is this an action that we care about?
-  if (sweepNumber == _currentView->getSweepNumber()) {
+  //if (sweepNumber == _currentView->getSweepNumber()) {
     float azimuth = _currentView->getAzimuth();
     int _nRays = _currentView->getNRaysToDisplay();
+
+    _currentView->updateLocationInVolume(azimuth, sweepNumber);    
 
     //size_t closestRayIdx = _rayLocationController->getRayIdx(azimuth);
     // for each display/selected field 
@@ -132,7 +134,7 @@ void SpreadSheetController::displaySweepData(int sweepNumber) {
     //_currentView->criticalMessage(ex.what());
         _currentView->fieldDataSent(data, offsetFromClosest, fieldIdx); 
       }      
-    }
+    //}
 
 /* ----
 HERE!!!

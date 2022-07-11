@@ -198,7 +198,7 @@ double RayLocationModel::getStopAngle(size_t rayIdx) {
 }
 
 vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
-  cout << "RayLocationModel::getRayData for rayIdx " << rayIdx << endl;
+  //cout << "RayLocationModel::getRayData for rayIdx " << rayIdx << endl;
   vector<float> *dataVector;
 	// get the ray 
   RadxRay *ray = ray_loc.at(rayIdx).ray;

@@ -224,6 +224,8 @@ public:
   void closeEvent(QEvent *event);
 
 public slots:
+
+  void setSweep(int sweepNumber);
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
   void cancelFieldListDialog(bool clicked);

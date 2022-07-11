@@ -100,28 +100,41 @@ SweepView::~SweepView()
 // size effect: sets the selected index
 
 void SweepView::setNumber(int selectedNumber)
-  
 {
-  /*
-  _selectedAngle = angle;
-  _guiIndex = 0;
-  
-  if (_sweeps.size() == 0) {
+  LOG(DEBUG) << "enter";
+  if (_selectedNumber == selectedNumber) {
+    LOG(DEBUG) << "sweep numbers are the same: no change needed";
     return;
   }
 
-  double minDiff = 1.0e99;
-  for (size_t ii = 0; ii < _sweeps.size(); ii++) {
-    double angle = _sweeps[ii].radx->getFixedAngleDeg();
-    double diff = fabs(angle - _selectedAngle);
-    if (diff < minDiff) {
-      _guiIndex = ii;
-      minDiff = diff;
+  bool found = false;
+  for (size_t ii = 0; ii < _sweepRButtons->size(); ii++) {
+    //LOG(DEBUG) << "sweepButton[" << ii << "] text = " << _sweepRButtons->at(ii)->text().toDouble();
+    if (_sweepRButtons->at(ii)->isChecked()) {
+
+      _sweepRButtons->at(ii)->setChecked(false);
+    } else {
+
+      LOG(DEBUG) << "sweepRButton " << ii << " is checked; emit  selectedSweepChanged " << ii;
+      int value = _sweepRButtons->at(ii)->text().toInt();
+      if (value == selectedNumber) {
+        found = true;
+        _sweepRButtons->at(ii)->setChecked(true);
+      }
+      //_guiIndex = ii;
+
+      //emit selectedSweepChanged(_selectedNumber);
+      //_sweepManager.setGuiIndex(ii);
+      //_ppi->setStartOfSweep(true);
+      //_rhi->setStartOfSweep(true);
+      //_moveUpDown();
+      //return;
     }
   } // ii
-
-  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
-*/
+  if (!found) {
+     // TODO: report error Message!!!
+  }
+  LOG(DEBUG) << "exit";
 }
 
 /////////////////////////////////////////////////////////////

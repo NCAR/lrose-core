@@ -63,7 +63,7 @@ public:
 
   // set from volume
 
-  void setNumber(int selectedNumber);
+  //void setNumber(int selectedNumber);
 
   // set the index for the GUI
 
@@ -95,6 +95,7 @@ signals:
 public slots:
 
   void changeSweep(bool value);
+  void setNumber(int selectedNumber);
 
 private:
   

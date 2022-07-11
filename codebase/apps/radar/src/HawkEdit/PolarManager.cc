@@ -598,7 +598,8 @@ void PolarManager::_setupWindows()
 
   connect(_sweepPanel, SIGNAL(selectedSweepChanged(int)),
           this, SLOT(selectedSweepChanged(int)));
- // connect(this, SIGNAL(newSweepData(int)), _sweepController, SLOT(setSelectedNumber(int sweepNumber)));
+  // sweepController does NOT have slots; does NOT derive from QOBJECT
+  //connect(this, SIGNAL(newSweepData(int)), _sweepController, SLOT(setSelectedNumber(int sweepNumber)));
 
   connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
   //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
@@ -5787,7 +5788,8 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
     connect(sheetView, SIGNAL(dataChanged()), 
       this, SLOT(spreadsheetDataChanged()));
 
-    connect(spreadSheetControl, SIGNAL(selectSweep(int)), this, SLOT(selectedSweepChanged(int)));
+    connect(spreadSheetControl, SIGNAL(selectSweep(int)), // _sweepPanel, SLOT(setNumber(int)));
+      this, SLOT(setSweep(int)));
 
     connect(this, SIGNAL(newSweepData(int)), spreadSheetControl, SLOT(displaySweepData(int)));
 
@@ -5806,6 +5808,15 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
     //spreadSheetControl->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
+}
+
+void PolarManager::setSweep(int sweepNumber) {
+  LOG(DEBUG) << "enter";
+  _sweepPanel->setNumber(sweepNumber);
+  if (sheetView != NULL) {
+    spreadSheetControl->displaySweepData(sweepNumber);
+  }  
+  LOG(DEBUG) << "exit";
 }
 
 void PolarManager::cancelScriptRun() {
