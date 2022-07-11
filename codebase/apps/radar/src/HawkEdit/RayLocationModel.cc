@@ -187,13 +187,13 @@ size_t RayLocationModel::getStartIndex(size_t rayIdx) {
 
 double RayLocationModel::getStartAngle(size_t rayIdx) {
 	double resolution = 1.0/(double) RayLoc::RAY_LOC_RES;
-	double az = ray_loc.at(rayIdx).startIndex * resolution;
+	double az = (ray_loc.at(rayIdx).startIndex-0.5) * resolution;
 	return az;
 }
 
 double RayLocationModel::getStopAngle(size_t rayIdx) {
 	double resolution = 1.0/(double) RayLoc::RAY_LOC_RES;
-	double az = ray_loc.at(rayIdx).endIndex * resolution;
+	double az = (ray_loc.at(rayIdx).endIndex+0.5) * resolution;
 	return az;
 }
 

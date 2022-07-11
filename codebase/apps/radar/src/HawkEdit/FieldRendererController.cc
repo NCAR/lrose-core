@@ -361,6 +361,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
           size_t endIndex = rayLocationController->getEndIndex(rayIdx);
           double start_angle = rayLocationController->getStartAngle(rayIdx);
           double stop_angle = rayLocationController->getStopAngle(rayIdx);
+          LOG(DEBUG) << "rayIdx " << rayIdx << "start_angle " << start_angle << " stop_angle " << stop_angle;
           double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
           double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
           // create Beam for ray
