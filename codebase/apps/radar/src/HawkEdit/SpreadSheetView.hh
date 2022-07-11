@@ -43,6 +43,7 @@ public:
 
   int getSweepNumber();
   float getAzimuth();
+  void setAzimuth(float azimuth);
 
   float myPow();
 

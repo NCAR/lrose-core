@@ -74,14 +74,14 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
 
 void SpreadSheetController::moveToLocation(string fieldName, int sweepNumber,
     float azimuth) {
-
+  //_currentView->setAzimuth(azimuth);
   //switchRay(azimuth, sweepNumber);
 }
 
 void SpreadSheetController::moveToLocation(string fieldName, int sweepNumber,
     float azimuth, float range) {
 
-  moveToLocation(fieldName, sweepNumber, azimuth);
+  //moveToLocation(fieldName, sweepNumber, azimuth);
   _currentView->highlightClickedData(fieldName, azimuth, sweepNumber, range);
 }
 
@@ -90,6 +90,8 @@ void SpreadSheetController::moveToLocation(string fieldName, int sweepNumber,
 void SpreadSheetController::switchRay(float azimuth, int sweepNumber) {
   LOG(DEBUG) << "enter";
   //if ()
+
+  //HERE not switching azimuth; the azimuth sent is from the polar manager -- not pulled from dialog!!
   emit selectSweep(sweepNumber);
   // QCoreApplication::processEvents();
   LOG(DEBUG) << "exit";

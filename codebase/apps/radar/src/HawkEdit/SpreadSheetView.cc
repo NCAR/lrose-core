@@ -257,7 +257,7 @@ void SpreadSheetView::setTheWindowTitle(float rayAzimuth, float elevation) {
     title.append(QString::number(rayAzimuth, 'f', 2));
     title.append(" degrees");
     title.append(" sweep ");
-    title.append(QString::number(elevation, 'f', 2));
+    title.append(QString::number(elevation, 'd', 3));
     setWindowTitle(title);
 }
 
@@ -974,6 +974,14 @@ float SpreadSheetView::getAzimuth() {
   }
 }
 
+/*
+void SpreadSheetView::setAzimuth(float azimuth) {
+    QString n;
+    n.setNum(azimuth);
+    rayLineEdit->clear();
+    rayLineEdit->insert(n);
+}*/
+
 void SpreadSheetView::changeMissingValue(float currentMissingValue) {
     _missingDataValue = currentMissingValue;
 }
@@ -1038,7 +1046,8 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
 
     LOG(DEBUG) << "enter";
 
-    updateNavigation(fieldName, azimuth, elevation);
+    updateNavigation(fieldName, azimuth, elevation);  // also selects the field in list
+    updateLocationInVolume(azimuth, elevation);
     applyEdits();
     //return; 
     // find the row
