@@ -392,7 +392,7 @@ void StatsMgr::printResults360(FILE *out)
   fprintf(out, " Vertical-pointing ZDR calibration\n");
   fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
   fprintf(out, "   n samples             : %8d\n", _params.n_samples);
-  fprintf(out, "   n rotations           : %8d\n", (int) (_countZdrm + 0.5));
+  fprintf(out, "   n valid               : %8d\n", (int) (_countZdrm + 0.5));
   fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
   fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
   fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
