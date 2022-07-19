@@ -301,11 +301,26 @@ void SweepController::createSweepRadioButtons() {
 
 void SweepController::updateSweepRadioButtons() {
  
+  vector<int> *sweepNumbers = _model->getSweepNumbers();
+  _view->updateSweepRadioButtons(sweepNumbers);
+  delete sweepNumbers;
+}
+/*
+void SweepController::updateSweepRadioButtons() {
+ 
   vector<double> *sweepAngles = _model->getSweepAngles();
   _view->updateSweepRadioButtons(sweepAngles);
   delete sweepAngles;
 }
-
+*/
+/*
+void SweepController:: updateSweepRadioButtons(string inputPath) {
+ 
+  vector<double> *sweepAngles = _model->getSweepAngles(inputPath);
+  _view->updateSweepRadioButtons(sweepAngles);
+  delete sweepAngles;
+}
+*/
 void SweepController::clearSweepRadioButtons() {
  
   _view->clearSweepRadioButtons();
@@ -333,22 +348,16 @@ int SweepController::getSelectedNumber()
   return _model->getSelectedSweepNumber();
 }
 
-/*  TOTALLY WRONG FUNCTION!
-int SweepController::getSelectedIndex() 
+void SweepController::setSelectedNumber(int sweepNumber) 
 {
-  return _model->getSelectedSweepIndex();
+  return _model->setSelectedNumber(sweepNumber);
+}
 
-  _guiIndex += increment;
-  if (_guiIndex < 0) {
-    _guiIndex = 0;
-  } else if (_guiIndex > (int) _sweeps.size() - 1) {
-    _guiIndex = _sweeps.size() - 1;
-  }
-  _selectedAngle = _sweeps[_guiIndex].radx->getFixedAngleDeg();
-
+/*
+double SweepController::getSelectedAngle() {
+  return _model->getSelectedAngle();
 }
 */
-
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
 /*

@@ -109,6 +109,10 @@ public:
   void clearFields();
   void clearChunks();
 
+  // Convert all fields to composite
+  
+  void convertAllFields2Composite();
+
   // add a field
   //
   // The field must have been created using 'new'.

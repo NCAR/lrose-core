@@ -4,10 +4,6 @@
 #
 #---------------------------------------------------------------------
 
-#	Default INSTALL_DIR, should be overridden on command line
-
-INSTALL_DIR=$(LROSE_INSTALL_DIR)/bin
-
 #	Script files to be installed
 
 SCRIPTS = \

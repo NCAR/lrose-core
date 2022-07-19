@@ -2471,8 +2471,10 @@ void SunCal::_accumForXpol(int startGate, int endGate)
 {
   
   if (!_alternating) {
-    cerr << "WARNING - SunCal::_accumForXpol" << endl;
-    cerr << "  Cross polar method only applicable in alternating mode" << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - SunCal::_accumForXpol" << endl;
+      cerr << "  Cross polar method only applicable in alternating mode" << endl;
+    }
     return;
   }
   
@@ -3906,8 +3908,10 @@ void SunCal::_computeXpolRatio(const vector<Xpol> &xpolMoments)
   _meanXpolRatioDb = MomentsSun::missing;
 
   if (!_alternating) {
-    cerr << "WARNING - SunCal::_computeXpolRatio" << endl;
-    cerr << "  Cross polar method only applicable in alternating mode" << endl;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - SunCal::_computeXpolRatio" << endl;
+      cerr << "  Cross polar method only applicable in alternating mode" << endl;
+    }
     return;
   }
 

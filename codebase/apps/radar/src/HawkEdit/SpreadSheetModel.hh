@@ -20,30 +20,38 @@ public:
     // TODO: maybe on construction, map to finest range geometry? then we can call 
 
   // return lists of data
-  vector<float> *getData(string fieldName, int offsetFromClosest);
+  //vector<float> *getData(string fieldName, int offsetFromClosest);
   vector<string> *getFields();
+
+  void setDisplayFieldNames(vector<string> fieldNames) {_displayFieldNames = fieldNames; };
+  vector<string> getDisplayFieldNames() { return _displayFieldNames; };
+
   float getAzimuthForRay(int offsetFromClosest);
-  float getNyquistVelocityForRay(int offsetFromClosest);
+  //float getNyquistVelocityForRay(int offsetFromClosest);
   //  RadxVol getVolume(); 
+
+
 
 
 
   void setData(string fieldName, float azimuth, vector<float> *data);
   void setDataMissing(string fieldName, float missingDataValue);
-  void setClosestRay(float azimuth, float elevation);
+  //void setClosestRay(float azimuth, int sweepNumber);
 
 
 private:
 
 
-  size_t _getRayIdx(int offsetFromClosest);
+  vector<string> _displayFieldNames; 
+
+  //size_t _getRayIdx(int offsetFromClosest);
   //void _getSweepNumber(float elevation);
   void _setSweepNumber(int sweepNumber);
 
-  //RadxVol *_vol;
+  vector<RadxRay *> _raysToDisplay; 
   RadxRay *_closestRay;
-  size_t _closestRayIdx;
-  float _currentSweepNumber;  
+  // size_t _closestRayIdx;  // Do we need the index?  only needed if we assume the rays are in sorted order, which is risky!
+  int _currentSweepNumber;  
 
   /*
   void _setupVolRead(RadxFile *file);

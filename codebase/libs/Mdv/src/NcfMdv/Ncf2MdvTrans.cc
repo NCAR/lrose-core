@@ -1398,7 +1398,7 @@ int Ncf2MdvTrans::_finalizeFields()
       // apply read constraints, do not compress etc
       
       fld->_apply_read_constraints(*_mdv, false, false, false,
-				   remapLut, true, minLon, maxLon);
+				   remapLut, false, false, minLon, maxLon);
       
       // convert to vert section
       
@@ -1415,8 +1415,8 @@ int Ncf2MdvTrans::_finalizeFields()
       fld->requestCompression(Mdvx::COMPRESSION_GZIP);
 
     } // ifield
-      
-      // add vsect-specific members
+    
+    // add vsect-specific members
     
     _mdv->_vsectWayPts = vsectLut.getWayPts();
     _mdv->_vsectSamplePts = vsectLut.getSamplePts();
@@ -1436,7 +1436,7 @@ int Ncf2MdvTrans::_finalizeFields()
     MdvxField *fld = _mdv->getField(ifield);
     fld->_apply_read_constraints(*_mdv, _mdv->_readFillMissing,
 				 _mdv->_readDecimate, true,
-				 remapLut, false, -360.0, 360.0);
+				 remapLut, false, false, -360.0, 360.0);
     fld->requestCompression(Mdvx::COMPRESSION_GZIP);
   }
 
@@ -1465,18 +1465,20 @@ int Ncf2MdvTrans::_finalizeFieldsRhi(bool respectUserDistance /* = false*/)
       return -1;
     }
   }
-
+  
   // finalize
 
   MdvxRemapLut remapLut;
   for (int ifield = 0; ifield < (int) _mdv->getNFields(); ifield++) {
     MdvxField *fld = _mdv->getField(ifield);
+
     fld->_apply_read_constraints(*_mdv, _mdv->_readFillMissing,
 				 _mdv->_readDecimate, true,
-				 remapLut, false, -360.0, 360.0);
+				 remapLut, false, true, -360.0, 360.0);
     fld->requestCompression(Mdvx::COMPRESSION_GZIP);
-  }
 
+  }
+  
   _mdv->updateMasterHeader();
   return 0;
 

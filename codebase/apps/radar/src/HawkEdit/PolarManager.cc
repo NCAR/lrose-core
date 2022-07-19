@@ -596,8 +596,11 @@ void PolarManager::_setupWindows()
   _sweepController->setView(_sweepPanel);
    mainLayout->addWidget(_sweepPanel);
 
-  connect(_sweepPanel, SIGNAL(selectedSweepChanged(double)),
-          this, SLOT(selectedSweepChanged(double)));
+  connect(_sweepPanel, SIGNAL(selectedSweepChanged(int)),
+          this, SLOT(selectedSweepChanged(int)));
+  // sweepController does NOT have slots; does NOT derive from QOBJECT
+  //connect(this, SIGNAL(newSweepData(int)), _sweepController, SLOT(setSelectedNumber(int sweepNumber)));
+
   connect(this, SIGNAL(newDataFile()), this, SLOT(dataFileChanged()));
   //connect(this, SIGNAL(sweepSelected()), _sweepController, SLOT(sweepSelected()));
 
@@ -1042,11 +1045,14 @@ int PolarManager::loadArchiveFileList()
 /////////////////////////////
 // get data in archive mode
 // returns 0 on success, -1 on failure
-
+/*
 vector<string> *PolarManager::getFieldsArchiveData(string fileName)
 {
 
   LOG(DEBUG) << "enter";
+
+  DataModel *DataModel::Instance();
+  vector<string> *currentVersionFieldNames = getPossibleFieldNames(currentVersionPath);
 
   // set up file object for reading
   
@@ -1091,6 +1097,7 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
     vol.loadFieldsFromRays();
     const vector<RadxField *> fields = vol.getFields();
     vector<string> *allFieldNames = new vector<string>;
+    allFieldNames->reserve(fields.size());
     for (vector<RadxField *>::const_iterator iter = fields.begin(); iter != fields.end(); ++iter)
     {
       RadxField *field = *iter;
@@ -1102,11 +1109,13 @@ vector<string> *PolarManager::getFieldsArchiveData(string fileName)
     return allFieldNames;
   //}
 }
-
+*/
 
 vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
 
-  vector<string> *availableFields = getFieldsArchiveData(fileName);
+  DataModel *dataModel = DataModel::Instance();
+  vector<string> *availableFields = dataModel->getPossibleFieldNames(fileName);
+  //vector<string> *availableFields = getFieldsArchiveData(fileName);
   /*
     QStringListModel model; //  = new QStringListModel();
     QStringList list;
@@ -1123,11 +1132,11 @@ vector<string> *PolarManager::userSelectFieldsForReading(string fileName) {
   QGroupBox *viewBox = new QGroupBox(tr("Select fields to import"));
   QDialogButtonBox *buttonBox = new QDialogButtonBox;
   QPushButton *saveButton = buttonBox->addButton(QDialogButtonBox::Apply);
-  QPushButton *closeButton = buttonBox->addButton(QDialogButtonBox::Cancel);
+  QPushButton *cancelButton = buttonBox->addButton(QDialogButtonBox::Cancel);
 
 
   connect(saveButton, SIGNAL(clicked(bool)), listview, SLOT(fieldsSelected(bool)));
-  connect(closeButton, SIGNAL(clicked(bool)), this, SLOT(closeFieldListDialog(bool)));
+  connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(cancelFieldListDialog(bool)));
   connect(listview, SIGNAL(sendSelectedFieldsForImport(vector<string> *)),
     this, SLOT(fieldsSelected(vector<string> *)));
         //lve->show();
@@ -1221,6 +1230,8 @@ string PolarManager::_getFileNewVersion(int archiveFileIndex) {
 
 
 int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
+  cerr << "_getArchiveDataPlainVanilla enter" <<  inputPath << endl;
+  LOG(DEBUG) << "enter";
   bool debug_verbose = false;
   bool debug_extra = false;
   if (_params->debug >= Params::DEBUG_VERBOSE) {
@@ -1233,7 +1244,8 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
   DataModel *dataModel = DataModel::Instance();    
   try {
     vector<string> fieldNames = _displayFieldController->getFieldNames();
-    dataModel->readData(inputPath, fieldNames,
+    int sweep_number = _sweepController->getSelectedNumber();
+    dataModel->readData(inputPath, fieldNames, sweep_number,
       debug_verbose, debug_extra);
   } catch (const string &errMsg) {
     if (!_params->images_auto_create)  {
@@ -1244,6 +1256,7 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
     }
     return -1;
   }
+  cerr << "_getArchiveDataPlainVanilla exit" << endl;
   LOG(DEBUG) << "exit";
   return 0;
 }
@@ -1270,7 +1283,7 @@ if (result == 0) {
   //dataFileChanged();
 
   // reconcile sweep info; if the sweep angles are the same, then no need for change
-  _sweepController->updateSweepRadioButtons();
+ // _sweepController->updateSweepRadioButtons();
 
   DataModel *dataModel = DataModel::Instance();  
 
@@ -1308,10 +1321,12 @@ if (result == 0) {
 
 }
 
+/*
 double PolarManager::getSelectedSweepAngle() {
   double angle = _sweepController->getSelectedAngle();
   return angle;
 }
+*/
 
 size_t PolarManager::getSelectedFieldIndex() {
   size_t selectedFieldIndex = 0;
@@ -1662,18 +1677,31 @@ void PolarManager::selectedFieldChanged(QString newFieldName) {
 
 void PolarManager::selectedFieldChanged(string fieldName) {
   _displayFieldController->setSelectedField(fieldName);
-  _plotArchiveData();
   refreshBoundaries();
+  _plotArchiveData();
 }
 
 
-void PolarManager::selectedSweepChanged(double angle) {
+void PolarManager::selectedSweepChanged(int sweepNumber) {
+  LOG(DEBUG) << "enter"; 
   //string fieldName = newFieldName.toStdString();
   //_displayFieldController->setSelectedField(fieldName);
-  _sweepController->setAngle(angle);
-  _setupRayLocation();
-  _plotArchiveData();
-  refreshBoundaries();
+  if (_sweepController->getSelectedNumber() != sweepNumber) {
+    _sweepController->setSelectedNumber(sweepNumber);
+    _readDataFile();
+    // signal polar display to update; which causes rayLocations to update
+    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
+    emit newSweepData(sweepNumber);
+    //processEvents();
+    //_setupRayLocation();  // this is done by _getArchiveData
+    //_plotArchiveData();
+    //refreshBoundaries();
+  } else {
+    if (sheetView != NULL) {
+      spreadSheetControl->displaySweepData(sweepNumber);
+    }
+  }
+  LOG(DEBUG) << "exit";
 }
 
 /*
@@ -1691,6 +1719,10 @@ void PolarManager::_plotArchiveData()
     LOG(DEBUG) << "enter";
     LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
   
+  if (!_rayLocationController->isRayLocationSetup()) {
+    errorMessage("Warning", "Ray sorting is still in progress. Try selection again.");
+    return;
+  }
   // initialize plotting
 
   _initialRay = true;
@@ -1701,14 +1733,14 @@ void PolarManager::_plotArchiveData()
 
 
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  double currentSweepAngle = _sweepController->getSelectedAngle();
+  int currentSweepNumber = _sweepController->getSelectedNumber();
 
   ColorMap *colorMap = _displayFieldController->getColorMap(currentFieldName);
   
   string backgroundColorName = _displayFieldController->getBackgroundColor();
   QColor backgroundColor(backgroundColorName.c_str());
   try {
-    _ppi->displayImage(currentFieldName, currentSweepAngle,
+    _ppi->displayImage(currentFieldName, currentSweepNumber,
       *colorMap, backgroundColor); 
   } catch (std::invalid_argument &ex) {
     errorMessage("Error", ex.what());
@@ -1871,6 +1903,10 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 // or when new parameter file is read
 void PolarManager::_setupRayLocation() {
   cerr << "setupRayLocations: enter " << endl;
+
+  // requires ray info
+  // DataModel *dataModel = DataModel::Instance();
+
   float ppi_rendering_beam_width = _platform.getRadarBeamWidthDegH();
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;
@@ -2912,34 +2948,23 @@ void PolarManager::_openFile()
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::_readDataFile(vector<string> *selectedFields) {
+void PolarManager::_readDataFile() { // vector<string> *selectedFields) {
 
   LOG(DEBUG) << "enter";
-  if (selectedFields->size() <= 0) {
-    QMessageBox::information(this, "Status", "No fields selected for import."); 
-  } else {
-    QMessageBox::information(this, "Status", "reading data ...");
+  //if (selectedFields->size() <= 0) {
+  //  QMessageBox::information(this, "Status", "No fields selected for import."); 
+  //} else {
+  //  QMessageBox::information(this, "Status", "reading data ...");
 
-    //_displayFieldController->clearAllFields();
-    _updateDisplayFields(selectedFields);
-  //_setupDisplayFields(allFieldNames);
-     // trying this ... to get the data from the file selected
-    //_setArchiveRetrievalPending();
-    
+
+    //_updateDisplayFields(selectedFields);
+
+    //_sweepController->updateSweepRadioButtons(); 
+
     _readDataFile2();
-    /*
-    try {
-      _getArchiveData();
-      _setupRayLocation();
 
-    } catch (FileIException &ex) { 
-      this->setCursor(Qt::ArrowCursor);
-      // _timeControl->setCursor(Qt::ArrowCursor);
-      return;
-    }
-    */
     LOG(DEBUG) << "exit";
-  }
+  //}
 }
 
 int PolarManager::_readDataFile2() {
@@ -2958,6 +2983,8 @@ int PolarManager::_readDataFile2() {
 int PolarManager::_readDataFile2(string &inputPath) {
 
     try {
+      // reconcile sweep info; if the sweep angles are the same, then no need for change
+      //_sweepController->updateSweepRadioButtons(inputPath);  
       if (_getArchiveData(inputPath) == 0) {
         //_setupRayLocation();
         dataFileChanged();
@@ -2982,6 +3009,17 @@ void PolarManager::_reconcileDisplayFields() {
   _displayFieldController->deleteFieldFromDisplay(field);
 }
 */
+
+void PolarManager::_notifyDataModelNewFieldsSelected() {
+  // data model does not keep track of which fields are selected;
+  // The DisplayField MVC keeps track of the selected fields.
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->clearVolume();
+  dataModel->moveToLookAhead();
+
+}
+
+
 void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 
 // TODO:
@@ -2997,10 +3035,18 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
       //_displayFieldController->addField(*it);
       //emit addField(*it);
     }
+    _notifyDataModelNewFieldsSelected();
     _addNewFields(selectedFields);
+    // reconcile sweep info; if the sweep angles are the same, then no need for change
+    //string inputPath = _getSelectedFile();
+    //_sweepController->updateSweepRadioButtons(inputPath);  
+    //  If volume is empty, then just read meta data and select first sweep number
     // give the selected fields to the volume read ...
-    _readDataFile(selectedFields);
-    
+    _sweepController->updateSweepRadioButtons();
+    // trigger a read of ray data
+    selectedSweepChanged(_sweepController->getSelectedNumber());
+    _updateDisplayFields(selectedFields);
+    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
   }  
   // close the modal dialog box for field selection
   closeFieldListDialog(true);
@@ -3009,6 +3055,12 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
 }
 
 void PolarManager::closeFieldListDialog(bool clicked) {
+  fieldListDialog->close();
+}
+
+void PolarManager::cancelFieldListDialog(bool clicked) {
+  DataModel *dataModel = DataModel::Instance();
+  dataModel->deleteLookAhead();
   fieldListDialog->close();
 }
 
@@ -3949,7 +4001,7 @@ void PolarManager::saveBoundaryEvent(int boundaryIndex)
 
   // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedNumber();
+  int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
   string currentFile = _timeNavController->getSelectedArchiveFile();
   if (!currentFile.empty()) {
 
@@ -3976,7 +4028,7 @@ void PolarManager::loadBoundaryEvent(int boundaryIndex)
     //  saved boundary
     // get selected field name
   string currentFieldName = _displayFieldController->getSelectedFieldName();
-  int currentSweepIndex = _sweepController->getSelectedNumber();
+  int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
   string currentFile = _timeNavController->getSelectedArchiveFile();
 
   if (!currentFile.empty()) {
@@ -4007,7 +4059,7 @@ void PolarManager::refreshBoundaries()
 
     // get selected field name
     string currentFieldName = _displayFieldController->getSelectedFieldName();
-    int currentSweepIndex = _sweepController->getSelectedNumber();
+    int currentSweepIndex = _sweepController->getGuiIndex(); // getSelectedNumber();
 
     string currentFile = _timeNavController->getSelectedArchiveFile();
 
@@ -4163,8 +4215,8 @@ void PolarManager::_createStatusPanel()
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
   int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size + 2;
-  int fsize6 = _params->label_font_size + 6;
+  int fsize2 = _params->label_font_size; //  + 2;
+  int fsize6 = _params->label_font_size; //  + 6;
   font.setPixelSize(fsize);
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);
@@ -5216,9 +5268,9 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       // convert the sweep number to an index in the sweep list
       DataModel *dataModel = DataModel::Instance();
       //  sweep angle; sweep number; sweep index HOW TO KEEP THEM STRAIGHT?!!
-      double sweepAngle = _sweepController->getSelectedAngle();
+      double sweepNumber = _sweepController->getSelectedNumber();
       // int sweepNumber = dataModel->getSweepNumber(sweepAngle);
-      int currentSweepIndex = dataModel->getSweepIndexFromSweepAngle(sweepAngle);
+      int currentSweepIndex = dataModel->getSweepIndexFromSweepNumber(sweepNumber);
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
@@ -5281,7 +5333,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
 
   scriptEditorControl->initProgress(lastArchiveFileIndex - firstArchiveFileIndex + 1);
 
-  _batchEditing = true;
+  _batchEditing = batchMode;
 
   try {
 
@@ -5671,10 +5723,10 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
     // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
   //} else {
   try {
-    double elevation = getSelectedSweepAngle();
+    int sweepNumber = _sweepController->getSelectedNumber();  // getSelectedSweepNumber();
     size_t fieldIdx = getSelectedFieldIndex();
-    LOG(DEBUG) << "elevation=" << elevation << ", fieldIdx=" << fieldIdx;
-    ExamineEdit(closestAz, elevation, fieldIdx, range);
+    LOG(DEBUG) << "sweepNumber =" << sweepNumber << ", fieldIdx=" << fieldIdx;
+    ExamineEdit(closestAz, sweepNumber, fieldIdx, range);
   } catch (const string& ex) {
     errorMessage("ExamineEdit Error", ex);
   }
@@ -5682,14 +5734,14 @@ void PolarManager::_examineSpreadSheetSetup(double  closestAz, double range)
 }
 
 
-void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldIndex,
   double range) {   
 
   // get an version of the ray that we can edit
   // we'll need the az, and sweep number to get a list from
   // the volume
 
-  LOG(DEBUG) << "azimuth=" << azimuth << ", elevation=" << elevation << ", fieldIndex=" << fieldIndex;
+  LOG(DEBUG) << "azimuth=" << azimuth << ", sweepNumber=" << sweepNumber << ", fieldIndex=" << fieldIndex;
   // TODO: replace with ...
   const RadxRay *closestRayToEdit = _rayLocationController->getClosestRay(azimuth);
 
@@ -5701,7 +5753,7 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
   //SpreadSheetView *sheetView;
   if (sheetView == NULL) {
     sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg(),
-      _sweepController->getSelectedAngle());
+      _sweepController->getSelectedNumber());
 
     // install event filter to catch when the spreadsheet is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(sheetView);
@@ -5715,7 +5767,7 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     //SpreadSheetModel *model = new SpreadSheetModel(closestRay, _vol);
     
     // create the controller
-    spreadSheetControl = new SpreadSheetController(sheetView, model);
+    spreadSheetControl = new SpreadSheetController(sheetView, model, _rayLocationController);
 
     // finish the other connections ..
     //sheetView->addController(sheetController);
@@ -5736,14 +5788,19 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     connect(sheetView, SIGNAL(dataChanged()), 
       this, SLOT(spreadsheetDataChanged()));
 
+    connect(spreadSheetControl, SIGNAL(selectSweep(int)), // _sweepPanel, SLOT(setNumber(int)));
+      this, SLOT(setSweep(int)));
+
+    connect(this, SIGNAL(newSweepData(int)), spreadSheetControl, SLOT(displaySweepData(int)));
+
     sheetView->init();
     sheetView->show();
   } else {
     string currentFieldName = _displayFieldController->getSelectedFieldName();
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
     float azimuth = closestRayToEdit->getAzimuthDeg();
-    float elevation = _sweepController->getSelectedAngle();
-    spreadSheetControl->moveToLocation(currentFieldName, elevation,
+    int sweepNumber = _sweepController->getSelectedNumber();
+    spreadSheetControl->moveToLocation(currentFieldName, sweepNumber,
       azimuth, range);
     //spreadSheetControl->changeAzEl(closestRayToEdit->getAzimuthDeg(), elevation);   
     // should be called withing Controller ... 
@@ -5751,6 +5808,15 @@ void PolarManager::ExamineEdit(double azimuth, double elevation, size_t fieldInd
     //spreadSheetControl->highlightClickedData(currentFieldName, azimuth, (float) range);
   }
   
+}
+
+void PolarManager::setSweep(int sweepNumber) {
+  LOG(DEBUG) << "enter";
+  _sweepPanel->setNumber(sweepNumber);
+  if (sheetView != NULL) {
+    spreadSheetControl->displaySweepData(sweepNumber);
+  }  
+  LOG(DEBUG) << "exit";
 }
 
 void PolarManager::cancelScriptRun() {

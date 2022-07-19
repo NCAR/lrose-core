@@ -230,6 +230,9 @@ codebase/apps/ingest/src/Bprp2Dsr/Bprp2Dsr
 codebase/apps/ingest/src/classIngest/classIngest
 codebase/apps/ingest/src/CreateStationList/CreateStationList
 codebase/apps/ingest/src/CsuSounding2Spdb/CsuSounding2Spdb
+codebase/apps/ingest/src/CwbAws2Spdb/CwbAws2Spdb
+codebase/apps/ingest/src/CwbObs2Spdb/CwbObs2Spdb
+codebase/apps/ingest/src/CwbSfc2Mdv/CwbSfc2Mdv
 codebase/apps/ingest/src/Dorade2Dsr/Dorade2Dsr
 codebase/apps/ingest/src/Dorade2DsrArchiveDriver/Dorade2DsrArchiveDriver
 codebase/apps/ingest/src/EolMobileKml2Spdb/EolMobileKml2Spdb

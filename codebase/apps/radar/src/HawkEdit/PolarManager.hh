@@ -147,7 +147,7 @@ public:
 
   //  const RadxVol getDataVolume();
 
-  double getSelectedSweepAngle();
+  //double getSelectedSweepAngle();
   size_t getSelectedFieldIndex();
 
   vector<string> *getFieldsArchiveData(string fileName);
@@ -224,8 +224,11 @@ public:
   void closeEvent(QEvent *event);
 
 public slots:
+
+  void setSweep(int sweepNumber);
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
+  void cancelFieldListDialog(bool clicked);
 
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
@@ -257,7 +260,7 @@ public slots:
   void selectedFieldChanged(string fieldName);
   //void _updateField(size_t fieldId);
 
-  void selectedSweepChanged(double);
+  void selectedSweepChanged(int sweepNumber);
   void dataFileChanged();
 
   void spreadSheetClosed();
@@ -321,6 +324,8 @@ signals:
   void addField(QString fieldName);
 
   void newDataFile();
+
+  void newSweepData(int sweepNumber);
 
 // end from DisplayManager
 
@@ -613,40 +618,6 @@ private:
   bool _cancelled;
   bool _batchEditing;
 
-/*
-  QDateTimeEdit *_archiveStartTimeEdit;
-  RadxTime _guiStartTime;
-  RadxTime _archiveStartTime;
-  
-  QDateTimeEdit *_archiveEndTimeEdit;
-  RadxTime _guiEndTime;
-  RadxTime _archiveEndTime;
-
-  QPushButton *_selectedTimeLabel;
-  RadxTime _selectedTime;
-
-  QPushButton *_back1;
-  QPushButton *_fwd1;
-  QPushButton *_backPeriod;
-  QPushButton *_fwdPeriod;
-  */
-  /*
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorHelpBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QPushButton *_boundaryEditorPolygonBtn;
-  QPushButton *_boundaryEditorCircleBtn;
-  QPushButton *_boundaryEditorBrushBtn;
-  QListWidget *_boundaryEditorList;
-  QLabel *_boundaryEditorInfoLabel;
-  bool forceHide = true;
-  QSlider *_circleRadiusSlider;
-  QSlider *_brushRadiusSlider;
-
-  QPushButton *_boundaryEditorClearBtn;
-  QPushButton *_boundaryEditorSaveBtn;
-  QListWidget *_boundaryEditorList;
-  */
 
   // time controller settings dialog
   
@@ -706,7 +677,7 @@ private:
 
   // data retrieval
 
-  void _readDataFile(vector<string> *selectedFields);
+  void _readDataFile(); // vector<string> *selectedFields);
   int _readDataFile2();
   int _readDataFile2(string &inputPath);
 
@@ -763,6 +734,8 @@ private:
 
   void _setupRayLocation();
   void _setMaxRangeKm();
+
+  void _notifyDataModelNewFieldsSelected();
 
   // modes
 
@@ -906,7 +879,7 @@ private slots:
   //void _saveBoundaryEditorClick();
 
   void _examineSpreadSheetSetup(double  closestAz = 30.0, double range = 0.0);
-  void ExamineEdit(double azimuth, double elevation, size_t fieldIndex,
+  void ExamineEdit(double azimuth, int sweepNumber, size_t fieldIndex,
     double range);
 
   void _scriptEditorSetup();

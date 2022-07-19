@@ -921,6 +921,13 @@ void WRFData::_setAttKeys()
     _lonFieldKey = "XLONG_M";
   }
 
+  if (_params.debug) {
+    cerr << "_startDateKey: " << _startDateKey << endl;
+    cerr << "_gridIdKey: " << _gridIdKey << endl;
+    cerr << "_latFieldKey: " << _latFieldKey << endl;
+    cerr << "_lonFieldKey: " << _lonFieldKey << endl;
+  }
+
 }
 
 //////////////////
@@ -2390,10 +2397,8 @@ void  WRFData::_setProjection()
   if (ncvar == NULL)
   {
     cerr << "WARNING: 'LON_LL_T' unavailable\n";
-
     // If we can't find the variable, get _llLat from the lat grid
-
-    _loadLat();
+    _loadLon();
   }
   else
   {
@@ -2404,10 +2409,8 @@ void  WRFData::_setProjection()
   if (ncvar == NULL)
   {
     cerr << "WARNING: 'LAT_LL_T' unavailable\n";
-
     // If we can't find the variable, get _llLon from the lon grid
-
-    _loadLon();
+    _loadLat();
   }
   else
   {

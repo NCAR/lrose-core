@@ -469,6 +469,8 @@ public:
 
   print_mode_t print_mode;
 
+  tdrp_bool_t print_sweep_angles;
+
   tdrp_bool_t print_rays;
 
   tdrp_bool_t print_ray_summary;
@@ -484,7 +486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 

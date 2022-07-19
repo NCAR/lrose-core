@@ -111,14 +111,17 @@ commentdef {
 }
 
 typedef enum {
-  PRECIP_STATION,
   AWS_STATION,
-  ONE_MINUTE_AWS
+  MDF_FILE,
+  ONE_MINUTE_AWS,
+  PRECIP_STATION,
+  PRECIP_MDF_FILE
 } station_type_t;
-	
+
 paramdef enum station_type_t {
   p_default = AWS_STATION;
   p_descr = "Set to true if the input data is AWS or precip amount.";
+  p_help = "MDF_FILE indicates surface data in .mdf format.";
 } station_type;
 
 paramdef string {

@@ -283,6 +283,12 @@ paramdef enum print_mode_t {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to print angles list for each sweep.";
+  p_help = "The list of angles will be listed for each file or time.";
+} print_sweep_angles;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to print out ray meta data.";
   p_help = "If false, only sweep and calib information will be printed.";
 } print_rays;

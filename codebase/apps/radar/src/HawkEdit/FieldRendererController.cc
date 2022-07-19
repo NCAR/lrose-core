@@ -304,7 +304,7 @@ void FieldRendererController::takeCareOfMissingValues(vector<float> *rayData,
 
 
 QImage *FieldRendererController::renderImage(QPainter &painter, int width, int height,
-  string fieldName, QTransform zoomTransform, double sweepAngle, 
+  string fieldName, QTransform zoomTransform, // double sweepAngle, 
   RayLocationController *rayLocationController,
   ColorMap &colorMap,
   QColor backgroundColor) {
@@ -361,6 +361,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
           size_t endIndex = rayLocationController->getEndIndex(rayIdx);
           double start_angle = rayLocationController->getStartAngle(rayIdx);
           double stop_angle = rayLocationController->getStopAngle(rayIdx);
+          LOG(DEBUG) << "rayIdx " << rayIdx << "start_angle " << start_angle << " stop_angle " << stop_angle;
           double startRangeKm = rayLocationController->getStartRangeKm(rayIdx);
           double gateSpacingKm = rayLocationController->getGateSpacingKm(rayIdx);
           // create Beam for ray
@@ -372,7 +373,7 @@ QImage *FieldRendererController::renderImage(QPainter &painter, int width, int h
           fieldRenderer->addBeam(beam);
           // rayIdx must be increasing
           if (endIndex < rayIdx) done = true;
-          rayIdx = endIndex;
+          rayIdx = endIndex + 1;
         } else {
           rayIdx += 1;
         }

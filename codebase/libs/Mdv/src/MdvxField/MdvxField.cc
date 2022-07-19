@@ -467,6 +467,7 @@ void MdvxField::setHdrsAndVolData(const Mdvx::field_header_t &f_hdr,
       _fhdr.data_element_nbytes != 4) {
     cerr << "ERROR - MdvxField::MdvxField" << endl;
     cerr << "  You must set data_element_nbytes to 1, 2 or 4" << endl;
+    cerr << "  fhdr.data_element_nbytes: " << _fhdr.data_element_nbytes << endl;
   }
 
   if (_fhdr.compression_type == Mdvx::COMPRESSION_NONE) {
@@ -1389,6 +1390,79 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
 }
 
+///////////////////////////////////////////////////////////////////////////
+// Apply a linear transform to the field.
+// Optionall set the field name and units.
+// If newName is not empty, the new name is applied.
+// If newUnits is not empty, the new units string is applied.
+// Returns 0 on success, -1 on failure.
+// On success, the volume data is converted, and the header is adjusted
+// to reflect the changes.
+
+int MdvxField::applyLinearTransform(double scale /* = 1.0 */, 
+                                    double bias /* = 0.0 */,
+                                    const string &newName /* = "" */,
+                                    const string &newUnits /* = "" */)
+     
+{
+
+  clearErrStr();
+  
+  if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+    // no-op
+    return 0;
+  }
+
+  // save current state
+
+  Mdvx::encoding_type_t encoding_type =
+    (Mdvx::encoding_type_t) _fhdr.encoding_type;
+  Mdvx::compression_type_t compression_type =
+    (Mdvx::compression_type_t) _fhdr.compression_type;
+  
+  // transform to float uncompressed
+  
+  if (convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE)) {
+    _errStr += "ERROR - MdvxField::applyLinearTransform\n";
+    _errStr += "  Cannnot convert to fl32 uncompressed.\n";
+    return -1;
+  }
+
+  // compute the new values
+  
+  fl32 missing = _fhdr.missing_data_value;
+  fl32 *ff = (fl32 *) _volBuf.getPtr();
+  int64_t nn = _volBuf.getLen() / sizeof(fl32);
+  for (int64_t i = 0; i < nn; i++, ff++) {
+    fl32 fff = *ff;
+    if (fff != missing) {
+      fff = fff * scale + bias;
+      *ff = fff;
+    }
+  }
+  
+  // set headers accordingly
+  
+  computeMinAndMax(true);
+  if (newName.size() > 0) {
+    setFieldName(newName);
+  }
+  if (newUnits.size() > 0) {
+    setUnits(newUnits);
+  }
+  
+  // convert to original state
+  
+  if (convertType(encoding_type, compression_type)) {
+    _errStr += "ERROR - MdvxField::applyLinearTransform\n";
+    _errStr += "  Cannnot convert to original encoding and compression.\n";
+    return -1;
+  }
+
+  return 0;
+
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Compute the composite (max at multiple levels) given lower and
 // upper vlevel limits.
@@ -1397,10 +1471,15 @@ int MdvxField::negate(bool convert_to_linear /* = false*/ )
 
 int MdvxField::convert2Composite(double lower_vlevel,
 				 double upper_vlevel)
-
+  
 {
   
   if (_fhdr.encoding_type == Mdvx::ENCODING_RGBA32) {
+    // no-op
+    return 0;
+  }
+
+  if (lower_vlevel == upper_vlevel) {
     // no-op
     return 0;
   }
@@ -1436,16 +1515,23 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
     return 0;
   }
 
+  if (lower_plane_num >= 0 &&
+      upper_plane_num >= 0 &&
+      lower_plane_num == upper_plane_num) {
+    // no-op
+    return 0;
+  }
+
   if (_fhdr.nz < 1)
   {
     fprintf(stderr, "ERROR - MdvxField::convert2Composite\n");
     fprintf(stderr, "  _fhdr.nz < 1\n");
     return -1;
   }
-
+  
   int lowerPlaneNum = lower_plane_num;
   int upperPlaneNum = upper_plane_num;
-
+  
   if (lowerPlaneNum < 0) {
     lowerPlaneNum = 0;
   } else if (lowerPlaneNum > _fhdr.nz - 1) {
@@ -1596,9 +1682,9 @@ int MdvxField::convert2Composite(int lower_plane_num /* = -1*/,
   MEM_zero(_vhdr);
   _vhdr.level[0] = _fhdr.grid_minz;
   _vhdr.type[0] = Mdvx::VERT_TYPE_COMPOSITE;
-
+  
   STRconcat(_fhdr.field_name_long, "_composite", MDV_LONG_FIELD_LEN);
-
+  
   if (recompress) {
     requestCompression(compression_type);
   }
@@ -1854,7 +1940,7 @@ int MdvxField::convert2SingleRhi(const Mdvx::master_header_t &mhdr,
 				 bool do_final_convert /* = true */)
   
 {
-  
+
   clearErrStr();
 
   // convert to float and uncompress as required
@@ -1879,7 +1965,7 @@ int MdvxField::convert2SingleRhi(const Mdvx::master_header_t &mhdr,
 
   // just get the vlevel we need - this is actually one RHI
   // because the vlevels represent azimuth
-  
+
   convert2Composite(rhiIndex, rhiIndex);
   
   // set the header appropriately
@@ -1938,7 +2024,7 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   // compute sample points
 
   lut.computeSamplePts(waypts, _fhdr.nx);
-
+  
   // just get the vlevel we need - this is actually one RHI
   // because the vlevels represent azimuth
   
@@ -1953,12 +2039,19 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   double minCosElev = 1.0;
   for (int iy = 0; iy < _fhdr.ny; iy++) {
     elev[iy] = _fhdr.grid_miny + iy * _fhdr.grid_dy;
+    // do not go over center
+    if (elev[iy] >= 89.99) {
+      elev[iy] = 89.99;
+    }
     double rad = elev[iy] * DEG_TO_RAD;
     EG_sincos(rad, &sinElev[iy], &cosElev[iy]);
     if (cosElev[iy] < minCosElev) {
       minCosElev = cosElev[iy];
     }
   }
+  // if (minCosElev) {
+  //   minCosElev = 0.0;
+  // }
 
   // compute the vertical dimensions in km
   
@@ -1970,28 +2063,45 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   if (maxHt > 25.0) {
     maxHt = 25.0;
   }
-  double dz = _round_dz((maxHt - sensorHt) / 120.0);
-  int nz = (int) ((maxHt - sensorHt) / dz) + 2;
-  if (nz > MDV_MAX_VLEVELS) {
-    nz = MDV_MAX_VLEVELS;
+  double htSpan = maxHt - sensorHt;
+  double dZ = _round_dz(htSpan / 240.0);
+  int nZ = (int) (htSpan / dZ) + 2;
+  if (nZ > MDV32_MAX_VLEVELS - 1) {
+    nZ = MDV32_MAX_VLEVELS - 1;
+    dZ = htSpan / (nZ - 2);
   }
-  double minz = ((int) (sensorHt / dz)) * dz;
-  
+  double minZ = ((int) (sensorHt / dZ)) * dZ;
+
   // compute x origin
 
   double minX = _fhdr.grid_minx;
   int nX = _fhdr.nx;
+  int nNeg = 0;
   if (minCosElev < 0) {
     double min_x = maxRange * minCosElev;
-    int nNeg = floor(fabs(min_x) / _fhdr.grid_dx + 1.5);
+    nNeg = floor(fabs(min_x) / _fhdr.grid_dx + 1.5);
     minX -= nNeg * _fhdr.grid_dx;
     nX += nNeg;
   }
   
+#ifdef DEBUG_PRINT
+  cerr << "DDDDDDDDDDDDDDDD maxRange: " << maxRange << endl;
+  cerr << "DDDDDDDDDDDDDDDD minCosElev: " << minCosElev << endl;
+  cerr << "DDDDDDDDDDDDDDDD nNeg: " << nNeg << endl;
+  cerr << "DDDDDDDDDDDDDDDD sensorHt: " << sensorHt << endl;
+  cerr << "DDDDDDDDDDDDDDDD maxHt: " << maxHt << endl;
+  cerr << "DDDDDDDDDDDDDDDD htSpan: " << htSpan << endl;
+  cerr << "DDDDDDDDDDDDDDDD dZ: " << dZ << endl;
+  cerr << "DDDDDDDDDDDDDDDD nZ: " << nZ << endl;
+  cerr << "DDDDDDDDDDDDDDDD minZ: " << minZ << endl;
+  cerr << "DDDDDDDDDDDDDDDD minX: " << minX << endl;
+  cerr << "DDDDDDDDDDDDDDDD nX: " << nX << endl;
+#endif
+
   // set up working buffer, initialize to missing vals
   
   MemBuf workBuf;
-  int64_t nGridOut = nX * nz;
+  int64_t nGridOut = nX * nZ;
   int64_t nBytes = nGridOut * _fhdr.data_element_nbytes;
   workBuf.prepare(nBytes);
   
@@ -2014,9 +2124,9 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   fl32 *in = (fl32 *) _volBuf.getPtr();
   fl32 *out = (fl32 *) workBuf.getPtr();
   
-  for (int iz = 0; iz < nz; iz++) { // height
+  for (int iz = 0; iz < nZ; iz++) { // height
     
-    double ht = minz + iz * dz;
+    double ht = minZ + iz * dZ;
     double gndRange = minX;
     
     for (int ix = 0; ix < nX;
@@ -2069,24 +2179,24 @@ int MdvxField::convertRhi2Vsect(const Mdvx::master_header_t &mhdr,
   
   // set the header appropriately
 
-  _fhdr.proj_type = Mdvx::PROJ_RHI_RADAR;
+  _fhdr.proj_type = Mdvx::PROJ_VSECTION;
   _fhdr.volume_size = _volBuf.getLen();
 
   _fhdr.ny = 1;
   _fhdr.grid_dy = 1.0;
   _fhdr.grid_miny = azimuth;
 
-  _fhdr.nz = nz;
-  _fhdr.grid_dz = (fl32) dz;
-  _fhdr.grid_minz = (fl32) minz;
+  _fhdr.nz = nZ;
+  _fhdr.grid_dz = (fl32) dZ;
+  _fhdr.grid_minz = (fl32) minZ;
   _fhdr.dz_constant = true;
 
   _fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
   memset(_vhdr.level, 0, MDV_MAX_VLEVELS * sizeof(fl32));
   memset(_vhdr.type, 0, MDV_MAX_VLEVELS * sizeof(si32));
 
-  for (int iz = 0; iz < nz; iz++) {
-    _vhdr.level[iz] = minz + iz * dz;
+  for (int iz = 0; iz < nZ; iz++) {
+    _vhdr.level[iz] = minZ + iz * dZ;
     _vhdr.type[iz] = Mdvx::VERT_TYPE_Z;
   }
   
@@ -6468,7 +6578,7 @@ int MdvxField::_read_volume(TaFile &infile,
     _errStr += "\n";
     return -1;
   }
-
+  
   // byte swap as needed
 
   _data_from_BE(_fhdr, _volBuf.getPtr(), _volBuf.getLen());
@@ -6482,7 +6592,7 @@ int MdvxField::_read_volume(TaFile &infile,
 
   if (_apply_read_constraints(mdvx, fill_missing, do_decimate,
                               do_final_convert,
-                              remapLut, is_vsection,
+                              remapLut, is_vsection, false,
                               vsection_min_lon, vsection_max_lon)) {
     _errStr += "ERROR - MdvxField::_read_volume\n";
     return -1;
@@ -6508,6 +6618,7 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
                                        bool do_final_convert,
                                        MdvxRemapLut &remapLut,
                                        bool is_vsection,
+                                       bool is_rhi,
                                        double vsection_min_lon,
                                        double vsection_max_lon)
   
@@ -6524,7 +6635,7 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
   // decompress if it makes sense
   
   if (mdvx._readComposite || mdvx._readHorizLimitsSet || mdvx._readRemapSet ||
-      do_decimate || fill_missing || is_vsection ||
+      do_decimate || fill_missing || is_vsection || is_rhi ||
       (_fhdr.min_value == 0.0 && _fhdr.max_value == 0.0)) {
     if (decompress()) {
       _errStr += "ERROR - MdvxField::_apply_read_constraints\n";
@@ -6537,15 +6648,30 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
 
   computeMinAndMax(true);
     
-  // convert vlevel type if needed
+  if (is_rhi) {
+    if (do_final_convert) {
+      if (convertType(mdvx._readEncodingType,
+                      output_compression,
+                      mdvx._readScalingType,
+                      mdvx._readScale,
+                      mdvx._readBias)) {
+        _errStr += "ERROR - MdvxField::_apply_read_constraints\n";
+        return -1;
+      }
+    }
+    return 0;
+  }
 
+  // convert vlevel type if needed
+  
   if (mdvx._readSpecifyVlevelType) {
     convertVlevelType(mdvx._readVlevelType);
   }
   
   // composite if needed
-
+  
   if (mdvx._readComposite) {
+    
     int iret;
     if (mdvx._readVlevelLimitsSet) {
       iret = convert2Composite(mdvx._readMinVlevel, mdvx._readMaxVlevel);
@@ -6565,11 +6691,11 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
     if (mdvx._readVlevelLimitsSet || mdvx._readPlaneNumLimitsSet) {
       constrainVertical(mdvx);
     }
-
+    
   } // if (mdvx._readComposite) 
-
-  // For latlon grids, might need to shift the lon domain
-
+  
+    // For latlon grids, might need to shift the lon domain
+  
   if (_fhdr.proj_type == Mdvx::PROJ_LATLON) {
     if (is_vsection) {
       _check_lon_domain(vsection_min_lon, vsection_max_lon);
@@ -6577,13 +6703,13 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
       _check_lon_domain(mdvx._readMinLon, mdvx._readMaxLon);
     }
   }
-
+  
   // constrain in the horizontal if needed
   
   if (mdvx._readHorizLimitsSet && !is_vsection) {
     constrainHorizontal(mdvx);
   }
-
+  
   // fill missing value as required
 
   if (fill_missing) {
@@ -6592,9 +6718,9 @@ int MdvxField::_apply_read_constraints(const Mdvx &mdvx,
       return -1;
     }
   }
-
+  
   // decimate if required
-
+  
   if (do_decimate) {
     if (decimate(mdvx._readDecimateMaxNxy)) {
       _errStr += "ERROR - MdvxField::_apply_read_constraints.\n";
@@ -8200,6 +8326,10 @@ double MdvxField::_round_dz(double dz)
     return 0.050;
   } else if (dz < 0.1) {
     return 0.1;
+  } else if (dz < 0.16) {
+    return 0.16;
+  } else if (dz < 0.2) {
+    return 0.2;
   } else if (dz < 0.25) {
     return 0.25;
   } else if (dz < 0.5){

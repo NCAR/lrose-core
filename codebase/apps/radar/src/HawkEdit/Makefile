@@ -44,7 +44,7 @@ LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
-	-lfftw3 -lbz2 -lz -lpthread -lm
+	-lfftw3 -lbz2 -lz -lpthread -lm 
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 

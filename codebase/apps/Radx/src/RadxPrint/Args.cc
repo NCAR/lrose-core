@@ -137,6 +137,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "print_rays = false;");
       TDRP_add_override(&override, tmp_str);
 
+    } else if (!strcmp(argv[i], "-sweep_angles")) {
+      
+      sprintf(tmp_str, "print_sweep_angles = true;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-relaxed_limits")) {
       
       sprintf(tmp_str, "read_apply_strict_angle_limits = false;");
@@ -571,6 +576,8 @@ void Args::_usage(ostream &out)
       << "\n"
       << "  [ -sweep ? ] set single sweep number\n"
       << "               or minimum - see '-sweep_max'\n"
+      << "\n"
+      << "  [ -sweep_angles ] print sweep angles for each time\n"
       << "\n"
       << "  [ -sweep_max ? ] set max sweep number\n"
       << "               use '-sweep' for setting minimum\n"

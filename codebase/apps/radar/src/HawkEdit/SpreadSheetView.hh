@@ -22,7 +22,6 @@
 #include <QString>
 #include <QUndoStack>
 #include <QUndoView>
-#include <QJSEngine>
 
 using namespace std;
 
@@ -42,6 +41,9 @@ public:
 
   void newDataReady();
 
+  int getSweepNumber();
+  float getAzimuth();
+  void setAzimuth(float azimuth);
 
   float myPow();
 
@@ -54,6 +56,13 @@ public:
     float elevation, float range);
 
   void closeEvent();
+
+  
+  int getNFieldsToDisplay() { return _nFieldsToDisplay; };
+  int getNRaysToDisplay() { return _nRays; };
+  //string data_format = "%g";
+  float getMissingDataValue() { return _missingDataValue; };
+  vector<std::string> getFieldNamesToDisplay() { return _fieldNames; };
 
 
 public slots:
@@ -105,9 +114,9 @@ public slots:
 
   void applyChanges();
   void applyEdits();
-  void changeAzEl(float azimuth, float elevation);
+  void changeAzEl(float azimuth, int sweepNumber);
   void changeMissingValue(float currentMissingValue);
-  void updateLocationInVolume(float azimuth, float elevation);
+  void updateLocationInVolume(float azimuth, int sweepNumber);
   void setTheWindowTitle(float rayAzimuth, float elevation);
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
@@ -123,7 +132,7 @@ signals:
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
   void needNyquistVelocityForRay(int rayIdx, int fieldIdx, string fieldName);
   void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
-  void signalRayAzimuthChange(float rayAzimuth, float elevation);
+  void signalRayAzimuthChange(float rayAzimuth, int sweepNumber);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);
   void replotRequested();
@@ -137,17 +146,7 @@ protected:
     void createActions();
     //void addVariableToSpreadSheet(QString name, QJSValue value);
 
-
-
-    void actionMath_helper(const QString &title, const QString &op);
     bool runFunctionDialog();
-
-    bool runInputDialog(const QString &title,
-                        const QString &c1Text,
-                        const QString &c2Text,
-                        const QString &opText,
-                        const QString &outText,
-                        QString *cell1, QString *cell2, QString *outCell);
 
   void criticalMessage(std::string message);
 

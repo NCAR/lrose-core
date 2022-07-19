@@ -994,7 +994,6 @@ bool SigmetRadxFile::_detectIncreasingTimeElevation() {
     bool equal = true;
     Radx::ui16 i_sec = 0;
     Radx::ui16 i1_sec = 0;
-    //cerr << "i_sec " << i_sec << endl;
     while (iray < _rayInfo.size()-1 && equal) {
       i_sec = _rayInfo[iray].hdr.seconds;
       i1_sec = _rayInfo[iray+1].hdr.seconds;      
@@ -1132,6 +1131,7 @@ int SigmetRadxFile::_processSweep(bool doPrint, bool printData, ostream &out)
 
       const ingest_data_header_t &inDatHdr = _inDatHdrs[ifield];
       if (inDatHdr.data_code == FIELD_EXT_HDR) {
+
         // extended header instead of field
         int fieldLen = rayInfo.nBytesField[ifield];
         _handleExtendedHeader(ray, rayIndex, rayInfo, 
@@ -1330,6 +1330,19 @@ int SigmetRadxFile::_handleExtendedHeader(RadxRay *ray,
     out << "  rayHdrLen: " << rayHdrLen << endl;
     out << "  extBufLen: " << extBufLen << endl;
   }
+
+  // get msecs since sweep start - this is common to all extended headers
+  // this will override the ray time set previouly in
+  // _setRayMetaData()
+
+  Radx::ui08 *xhdrPtr = (Radx::ui08 *) rayPtr + rayHdrLen;
+  if (extBufLen >= (int) sizeof(Radx::si32)) {
+    Radx::si32 msecsSinceSweepStart;
+    memcpy(&msecsSinceSweepStart, xhdrPtr, sizeof(Radx::si32));
+    _swap(&msecsSinceSweepStart, 1);
+    double secsSinceSweepStart = msecsSinceSweepStart / 1000.0;
+    _setRayTime(*ray, secsSinceSweepStart);
+  }
   
   // get extended header type
 
@@ -1343,25 +1356,31 @@ int SigmetRadxFile::_handleExtendedHeader(RadxRay *ray,
 
   if (extendedHeaderType == 0) {
 
-    if (extBufLen <= (int) sizeof(ext_header_ver0)) {
+    ext_header_ver0 xh0;
+    int nbytesUsed =
+      sizeof(xh0.msecs_since_sweep_start) + sizeof(xh0.calib_signal_level);
 
-      ext_header_ver0 xh0;
+    if (extBufLen >= nbytesUsed) {
+      
       memset(&xh0, 0, sizeof(xh0));
-      memcpy(&xh0, rayPtr + rayHdrLen, extBufLen);
+      memcpy(&xh0, rayPtr + rayHdrLen, nbytesUsed);
       _swap(xh0);
       if (doPrint || _verbose) {
         _print(xh0, out);
       }
-      
+
     }
 
+    
   } else if (extendedHeaderType == 1) {
 
-    if (extBufLen >= (int) sizeof(ext_header_ver1)) {
+    ext_header_ver1 xh1;
+    int nbytesUsed = sizeof(xh1) - sizeof(xh1.spare);
+    
+    if (extBufLen >= nbytesUsed) {
       
-      ext_header_ver1 xh1;
       memset(&xh1, 0, sizeof(xh1));
-      memcpy(&xh1, rayPtr + rayHdrLen, sizeof(xh1));
+      memcpy(&xh1, rayPtr + rayHdrLen, nbytesUsed);
       _swap(xh1);
       if (doPrint || _verbose) {
         _print(xh1, out);
@@ -1374,10 +1393,10 @@ int SigmetRadxFile::_handleExtendedHeader(RadxRay *ray,
 
   } else if (extendedHeaderType == 2) {
 
-    if (extBufLen == sizeof(hrd_tdr_ext_header_t)) {
-
+    if (extBufLen >= (int) sizeof(hrd_tdr_ext_header_t)) {
+      
       // probably HRD extended header
-
+      
       hrd_tdr_ext_header_t hrd;
       memcpy(&hrd, rayPtr + rayHdrLen, sizeof(hrd));
       _swap(hrd);
@@ -1927,6 +1946,35 @@ void SigmetRadxFile::_setVolMetaData()
 }
 
 /////////////////////////
+// set the ray time
+
+void SigmetRadxFile::_setRayTime(RadxRay &ray,
+                                 double secsSinceSweepStart)
+  
+{
+  
+  RadxTime rayTime = _sweepStartTime + secsSinceSweepStart;
+  time_t raySecs = rayTime.utime();
+  int rayNanoSecs = (int) (rayTime.getSubSec() * 1.0e9 + 0.5);
+
+  if (_startTimeSecs == 0 && _endTimeSecs == 0) {
+    _startTimeSecs = raySecs;
+    _startNanoSecs = rayNanoSecs;
+  } 
+
+  _endTimeSecs = raySecs;
+  _endNanoSecs = rayNanoSecs;
+
+  if (_startTimeSecs == 0 && _endTimeSecs != 0) {
+    _startTimeSecs = _endTimeSecs;
+    _startNanoSecs = _endNanoSecs;
+  } 
+  
+  ray.setTime(raySecs, rayNanoSecs);
+
+}
+
+/////////////////////////
 // set the beam metadata
 // returns the ray time
 
@@ -1938,24 +1986,9 @@ void SigmetRadxFile::_setRayMetadata(RadxRay &ray,
   if (_verbose) {
     _print(rayHdr, cerr);
   }
+
+  _setRayTime(ray, (double) rayHdr.seconds);
     
-  RadxTime rayTime = _sweepStartTime + (double) rayHdr.seconds;
-
-  time_t raySecs = rayTime.utime();
-  int rayNanoSecs = (int) (rayTime.getSubSec() * 1.0e9 + 0.5);
-
-  if (_startTimeSecs == 0 && _endTimeSecs == 0) {
-    _startTimeSecs = raySecs;
-    _startNanoSecs = rayNanoSecs;
-  } 
-  _endTimeSecs = raySecs;
-  _endNanoSecs = rayNanoSecs;
-  if (_startTimeSecs == 0 && _endTimeSecs != 0) {
-    _startTimeSecs = _endTimeSecs;
-    _startNanoSecs = _endNanoSecs;
-  } 
-
-  ray.setTime(raySecs, rayNanoSecs);
   ray.setVolumeNumber(_volumeNumber);
   ray.setSweepNumber(_sweepIndex);
   ray.setCalibIndex(0);

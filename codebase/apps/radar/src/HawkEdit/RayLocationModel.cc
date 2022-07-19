@@ -7,11 +7,13 @@ RayLocationModel::RayLocationModel() {
   //_ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
   //ray_loc = _ppiRays + RayLoc::RAY_LOC_OFFSET;
   ray_loc.resize(RayLoc::RAY_LOC_N);
+  _rayLocationSetup = false;
 }
 
 RayLocationModel::~RayLocationModel() {}
 
 void RayLocationModel::init() {
+  _rayLocationSetup = false;
   for (int ii = 0; ii < RayLoc::RAY_LOC_N; ii++) {
     ray_loc[ii].ray = NULL;
     ray_loc[ii].active = false;
@@ -30,11 +32,37 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 //	_storeRayLoc(const RadxRay *ray, const double az,
 //                                const double beam_width, RayLoc *ray_loc)
 
-  double half_angle = ppi_rendering_beam_width / 2.0;
-
   DataModel *dataModel = DataModel::Instance();
   vector<RadxRay *> &listOfRays = dataModel->getRays();
+
+  // the rendering beam width should be the minimum distance between rays.
+  // this may result in gaps between rays, but at least the rays won't
+  // overlap, and hide data.
+
+  double minDistance = 99999999.0;
+  double previousAz = 0.0;
   vector<RadxRay *>::const_iterator rayItr;
+  for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
+    RadxRay *ray = *rayItr;
+    if (ray->getSweepNumber() == sweepNumber) {   
+      double az = ray->getAzimuthDeg();
+      // what if the rays are NOT in sorted order by az? It will be close enough
+      double distance = fabs(az - previousAz);
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+      previousAz = az;
+    }
+  }
+  LOG(DEBUG) << "using minimum ray distance of " << minDistance;
+  
+  //double half_angle = ppi_rendering_beam_width / 2.0;
+  double half_angle = minDistance / 2.0;
+
+
+  LOG(DEBUG) << "sorting " << listOfRays.size() << " rays";
+
+  // vector<RadxRay *>::const_iterator rayItr;
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
   // for each ray in file,
 	// sort into RayLoc structure based on ray azimuth
@@ -71,14 +99,14 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 
 
       double az = ray->getAzimuthDeg();
-      double startAz = az - half_angle - 0.1;
-      double endAz = az + half_angle + 0.1;
+      double startAz = az - half_angle; // - 0.1;
+      double endAz = az + half_angle; // + 0.1;
 
     // store
       
       int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
-      int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES + 1);
-
+      int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
+      LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
       if (startIndex < 0) startIndex = 0;
       if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
 
@@ -92,7 +120,7 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
       if (endIndex < startIndex) {
       	LOG(DEBUG) << "ERROR endIndex: " << endIndex << " < startIndex: " << startIndex;
       } else {
-  	    for (int ii = startIndex; ii < endIndex; ii++) {
+  	    for (int ii = startIndex; ii <= endIndex; ii++) {
   	      ray_loc[ii].ray = ray;
   	      ray_loc[ii].active = true;
   	      ray_loc[ii].startIndex = startIndex;
@@ -101,13 +129,18 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
       }
     }
   }
+  _rayLocationSetup = true;
 
-  for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
+  //for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
   	//LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
   	//LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
-  }
+  //}
 
   LOG(DEBUG) << "exit";
+}
+
+bool RayLocationModel::isRayLocationSetup() {
+  return _rayLocationSetup;
 }
 
 size_t RayLocationModel::getNRayLocations() {
@@ -148,20 +181,25 @@ size_t RayLocationModel::getEndIndex(size_t rayIdx) {
 	return ray_loc.at(rayIdx).endIndex;
 }
 
+size_t RayLocationModel::getStartIndex(size_t rayIdx) {
+  return ray_loc.at(rayIdx).startIndex;
+}
+
 double RayLocationModel::getStartAngle(size_t rayIdx) {
 	double resolution = 1.0/(double) RayLoc::RAY_LOC_RES;
-	double az = ray_loc.at(rayIdx).startIndex * resolution;
+	double az = (ray_loc.at(rayIdx).startIndex-0.5) * resolution;
 	return az;
 }
 
 double RayLocationModel::getStopAngle(size_t rayIdx) {
 	double resolution = 1.0/(double) RayLoc::RAY_LOC_RES;
-	double az = ray_loc.at(rayIdx).endIndex * resolution;
+	double az = (ray_loc.at(rayIdx).endIndex+0.5) * resolution;
 	return az;
 }
 
 vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
-  vector<float> *dataVector = new vector<float>(0);
+  //cout << "RayLocationModel::getRayData for rayIdx " << rayIdx << endl;
+  vector<float> *dataVector;
 	// get the ray 
   RadxRay *ray = ray_loc.at(rayIdx).ray;
   if (ray != NULL)  { // throw std::invalid_argument("rayIdx has no ray data");
@@ -182,7 +220,7 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
       //string msg = "no data for field in ray ";
       //msg.append(fieldName);
       //throw std::invalid_argument(msg);
-      delete dataVector;
+      //delete dataVector;
       // create vector; initialize to missing
       dataVector = new vector<float>(nGates, Radx::missingFl32);   //issue with memory!!! who will free?
     } else {
@@ -192,12 +230,53 @@ vector <float> *RayLocationModel::getRayData(size_t rayIdx, string fieldName) {
       //convertToType(Radx::Fl32);
     
       float *data = field->getDataFl32();
-      dataVector->resize(nGates);
+      dataVector = new vector<float>(nGates);
       dataVector->assign(data, data+nGates);
     }
+  } else {
+    dataVector = new vector<float>(0);
   }
-// TODO: have calling method free the memory
+  // have calling method free the memory
   return dataVector;
+}
+
+size_t RayLocationModel::getClosestRayIdx(float azDeg, int offset) {
+  int rayIdx = (int) (azDeg * RayLoc::RAY_LOC_RES);
+    if ((rayIdx < 0) || (rayIdx >= RayLoc::RAY_LOC_N)) {
+      throw "azimuth out of range";
+    }
+  // now find the ray that is offset
+  if (offset < 0) { 
+    // move through the startIndex
+    int offsetIdx = offset;
+    while (offsetIdx < 0) {
+      rayIdx = getStartIndex(rayIdx) - 1;
+      if (rayIdx < 0) {
+        rayIdx = RayLoc::RAY_LOC_N - 1;
+      }
+      offsetIdx += 1;
+    }
+  } 
+  if (offset > 0) {
+    // move through the endIndex
+    int offsetIdx = offset;
+    while (offsetIdx > 0) {
+      rayIdx = getEndIndex(rayIdx) + 1;
+      if (rayIdx >= RayLoc::RAY_LOC_N) {
+        rayIdx = 0;
+      }
+      offsetIdx -= 1;
+    }
+  }  
+  return rayIdx;
+}
+
+vector <float> *RayLocationModel::getRayDataOffset(float azimuth, 
+  int offsetFromClosest, string fieldName) {
+  // find the rayIdx
+  size_t rayIdx = getClosestRayIdx(azimuth, offsetFromClosest);
+  return getRayData(rayIdx, fieldName);
+
 }
 
 RadxRay *RayLocationModel::getClosestRay(double azDeg) {
@@ -206,4 +285,28 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
     	throw "azimuth out of range";
     }
 	return ray_loc.at(rayIndex).ray;
+}
+
+size_t RayLocationModel::getClosestRayIdx(double azDeg) {
+  int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
+    if ((rayIndex < 0) || (rayIndex >= RayLoc::RAY_LOC_N)) {
+      throw "azimuth out of range";
+    }
+  return rayIndex;
+}
+
+float RayLocationModel::getNyquistVelocityForRay(double azDeg,
+  int offset) {
+
+  size_t rayIdx = getClosestRayIdx(azDeg, offset);
+  RadxRay *ray = ray_loc.at(rayIdx).ray;
+  return ray->getNyquistMps();;
+}
+
+float RayLocationModel::getAzimuthForRay(double azDeg,
+  int offset) {
+
+  size_t rayIdx = getClosestRayIdx(azDeg, offset);
+  RadxRay *ray = ray_loc.at(rayIdx).ray;
+  return ray->getAzimuthDeg();;
 }

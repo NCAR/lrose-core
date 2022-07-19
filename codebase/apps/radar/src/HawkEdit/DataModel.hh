@@ -50,7 +50,12 @@ public:
 
   //void setData(RadxVol *vol);
   void readData(string path, vector<string> &fieldNames,
-    bool debug_verbose, bool debug_extra);
+    int sweepNumber,
+    bool debug_verbose = false, bool debug_extra = false);
+  void readFileMetaData(string fileName);
+  void getRayData(string path, vector<string> &fieldNames,
+  int sweepNumber);
+
   void writeData(string path);
   void writeData(string path, RadxVol *vol);
 
@@ -107,10 +112,14 @@ public:
 
   int getNSweeps();
   vector<double> *getSweepAngles();
+  vector<int> *getSweepNumbers();
+  //vector<double> *getSweepAngles(string fileName);
+  //vector<double> *getPossibleSweepAngles(string fileName);  // TODO: load sweep angles (cache) when fetching field names
   int getSweepNumber(float elevation);
   int getSweepNumber(int sweepIndex);
   int getSweepIndexFromSweepNumber(int sweepNumber);
   int getSweepIndexFromSweepAngle(float elevation);
+  double getSweepAngleFromSweepNumber(int sweepNumber);
 
   const string &getPathInUse();
   const RadxPlatform &getPlatform();
@@ -138,9 +147,17 @@ public:
   void writeWithMergeData(string outputPath, string originalSourcePath);
   void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
 
-  RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
-    bool debug_verbose, bool debug_extra);
+ RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
+    bool debug_verbose = false, bool debug_extra = false);
 
+  RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
+    int sweepNumber,
+    bool debug_verbose = false, bool debug_extra = false);
+
+  void getLookAhead(string fileName);
+  void deleteLookAhead();
+  void moveToLookAhead();
+  void clearVolume();
   
 private:
   
@@ -148,7 +165,11 @@ private:
 
   void init();
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
+    int fieldNumber,
     bool debug_verbose, bool debug_extra);
+  void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
+    bool debug_verbose, bool debug_extra);
+
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void _selectFieldsNotInCurrentVersion(
@@ -162,6 +183,19 @@ private:
   string _currentFilePath;
   
   RadxVol *_vol;
+
+  // cache stores metadata until the entire data file is read and _vol is filled
+  // cache contains all sweeps but only the selected fields
+  bool _cacheMetaDataValid;
+  //const 
+  vector<int> _cacheSweepNumbers;
+  vector<double> _cacheSweepAngles;
+  vector<RadxField *> _cacheFields;
+
+  // look ahead continas all sweeps and all fields for the next (n+1) file to open
+  vector<int> _lookAheadSweepNumbers;
+  vector<double> _lookAheadSweepAngles;
+  vector<RadxField *> _lookAheadFields;  
 
 };
 

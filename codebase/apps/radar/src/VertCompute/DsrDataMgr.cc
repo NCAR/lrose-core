@@ -430,7 +430,7 @@ void DsrDataMgr::_loadMomentsData(moments_field_t &field)
 
   // allocate data array
 
-  if (_nGates > field.data_.size()) {
+  if (_nGates > (int) field.data_.size()) {
     field.data_.free();
     field.data = (double *) field.data_.alloc(_nGates);
   }

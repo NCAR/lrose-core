@@ -123,6 +123,12 @@ private:
 
   // end of sweep and vol flags
   
+  bool _endOfSweepPending;
+  bool _endOfVolPending;
+
+  si64 _endOfVolPulseSeqNum;
+  si64 _endOfSweepPulseSeqNum;
+
   bool _endOfSweepFlag;
   bool _endOfVolFlag;
 
@@ -308,6 +314,7 @@ private:
   void _computeBeamAzRate(int endIndex, int nSamples);
   void _computeBeamElRate(int endIndex, int nSamples);
 
+  void _checkForEndFlags(const vector<const IwrfTsPulse *> &beamPulses);
   void _checkQueueStatus();
   void _computeWindowFactors();
 

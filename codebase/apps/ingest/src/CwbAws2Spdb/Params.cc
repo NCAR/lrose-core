@@ -1,26 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.cc
 //
@@ -50,8 +50,6 @@
  * @author Automatically generated
  *
  */
-using namespace std;
-
 #include "Params.hh"
 #include <cstring>
 
@@ -280,6 +278,18 @@ using namespace std;
   }
 
   ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  int Params::isArgValidN(const char *arg)
+  {
+    return (tdrpIsArgValidN(arg));
+  }
+
+  ////////////////////////////////////////////
   // load()
   //
   // Loads up TDRP for a given class.
@@ -470,9 +480,9 @@ using namespace std;
   void Params::usage(ostream &out)
   {
     out << "TDRP args: [options as below]\n"
-        << "   [ -params path ] specify params file path\n"
-        << "   [ -check_params] check which params are not set\n"
-        << "   [ -print_params [mode]] print parameters\n"
+        << "   [ -params/--params path ] specify params file path\n"
+        << "   [ -check_params/--check_params] check which params are not set\n"
+        << "   [ -print_params/--print_params [mode]] print parameters\n"
         << "     using following modes, default mode is 'norm'\n"
         << "       short:   main comments only, no help or descr\n"
         << "                structs and arrays on a single line\n"
@@ -726,18 +736,22 @@ using namespace std;
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("station_type");
     tt->descr = tdrpStrDup("Set to true if the input data is AWS or precip amount.");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("MDF_FILE indicates surface data in .mdf format.");
     tt->val_offset = (char *) &station_type - &_start_;
     tt->enum_def.name = tdrpStrDup("station_type_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 5;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PRECIP_STATION");
-      tt->enum_def.fields[0].val = PRECIP_STATION;
-      tt->enum_def.fields[1].name = tdrpStrDup("AWS_STATION");
-      tt->enum_def.fields[1].val = AWS_STATION;
+      tt->enum_def.fields[0].name = tdrpStrDup("AWS_STATION");
+      tt->enum_def.fields[0].val = AWS_STATION;
+      tt->enum_def.fields[1].name = tdrpStrDup("MDF_FILE");
+      tt->enum_def.fields[1].val = MDF_FILE;
       tt->enum_def.fields[2].name = tdrpStrDup("ONE_MINUTE_AWS");
       tt->enum_def.fields[2].val = ONE_MINUTE_AWS;
+      tt->enum_def.fields[3].name = tdrpStrDup("PRECIP_STATION");
+      tt->enum_def.fields[3].val = PRECIP_STATION;
+      tt->enum_def.fields[4].name = tdrpStrDup("PRECIP_MDF_FILE");
+      tt->enum_def.fields[4].val = PRECIP_MDF_FILE;
     tt->single_val.e = AWS_STATION;
     tt++;
     

@@ -18,6 +18,8 @@ RayLocationController();
 void sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 	int sweepNumber);
 
+bool isRayLocationSetup();
+
 size_t getNRayLocations();
 double getStartRangeKm(size_t rayIdx);
 double getGateSpacingKm(size_t rayIdx);
@@ -28,7 +30,12 @@ double getStopAngle(size_t rayIdx);
 
 vector <float> *getRayData(size_t rayIdx, string fieldName);
 
+vector <float> *getRayDataOffset(float azimuth, 
+  int offsetFromClosest, string fieldName); 
 const RadxRay *getClosestRay(double azDeg);
+
+float getNyquistVelocityForRay(float azDeg, int offset);
+float getAzimuthForRay(float azDeg, int offset);
 
 private:
 	RayLocationModel *_model;

@@ -241,7 +241,7 @@ class DLL_EXPORT PolarWidget : public QWidget
    */
 
   //void displayImage(const size_t field_num);
-  void displayImage(string currentFieldName, double currentSweepAngle,
+  void displayImage(string currentFieldName, int currentSweepNUmber,
     ColorMap &colorMap,
     QColor backgroundColor);
   //void imageReady(QImage *image);
@@ -484,7 +484,7 @@ class DLL_EXPORT PolarWidget : public QWidget
   // QImage *_image;
   
 
-  double _currentSweepAngle;
+  int _currentSweepNumber;
   RayLocationController  *_rayLocationController;
   ColorMap  _currentColorMap;
   QColor _backgroundColor;

@@ -1,0 +1,1015 @@
+/**********************************************************************
+ * TDRP params for NcGeneric2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// NcGeneric2Mdv reads generic netCDF files containing gridded data, and 
+//   converts it into MDV format.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "himawari";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with procmap while running.
+//
+// See 'instance'.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = TRUE;
+
+///////////// reg_interval ////////////////////////////
+//
+// Registration interval.
+//
+// The number of seconds between expected procmap registrations.
+//
+//
+// Type: int
+//
+
+reg_interval = 60;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file. In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in FILELIST mode, at 
+//   least) MUST contain a day-directory below the data file -- 
+//   ./data_file.mdv will not work as a file path.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     REALTIME
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data.
+//
+// This is used in REALTIME and ARCHIVE modes only. In FILELIST mode, 
+//   the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "raw/input";
+
+///////////// use_ldata_info_file /////////////////////
+//
+// Option to use _latest_data_info file as input trigger.
+//
+// REALTIME mode only. If true, waits on _latest_data_info file. If 
+//   false, scans the directory for new file.
+//
+//
+// Type: boolean
+//
+
+use_ldata_info_file = FALSE;
+
+///////////// max_realtime_age ////////////////////////
+//
+// Max valid age of rdata input files in realtime mode (secs).
+//
+// This the max valid age for an incoming file. The program will wait 
+//   for a data file more recent than this age.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+max_realtime_age = 3600;
+
+///////////// process_latest_file_only ////////////////
+//
+// Option to use only the latest file to have arrived.
+//
+// REALTIME mode only. If true, will process only the latest file on 
+//   startup, if the file has an age less than max_realtime_age. If false, 
+//   on startup will process all files with age less than 
+//   max_realtime_age.
+//
+//
+// Type: boolean
+//
+
+process_latest_file_only = TRUE;
+
+///////////// file_name_ext ///////////////////////////
+//
+// Specify the extension of the files to be read.
+//
+// If blank, all extensions will be used.
+//
+//
+// Type: string
+//
+
+file_name_ext = "nc";
+
+///////////// file_name_substr ////////////////////////
+//
+// Specify a seach string for the names of the files to be read.
+//
+// If blank, no check will be performed.
+//
+//
+// Type: string
+//
+
+file_name_substr = "himawari";
+
+//======================================================================
+//
+// NETCDF dimensions.
+//
+// Specify the names used in the netCDF file for dimensions, since they 
+//   can vary depending on the application used to create the file.
+//
+//======================================================================
+ 
+///////////// netcdf_dim_time /////////////////////////
+//
+// name for netCDF dimension for time.
+//
+// Specify 'none' if there is no time dimension.
+//
+//
+// Type: string
+//
+
+netcdf_dim_time = "none";
+
+///////////// netcdf_dim_z ////////////////////////////
+//
+// netCDF dimension name for grid points in altitude.
+//
+//
+// Type: string
+//
+
+netcdf_dim_z = "none";
+
+///////////// netcdf_dim_y ////////////////////////////
+//
+// netCDF dimension name for grid points in latitude or y.
+//
+//
+// Type: string
+//
+
+netcdf_dim_y = "latitude";
+
+///////////// netcdf_dim_x ////////////////////////////
+//
+// netCDF dimension name for grid points in longitude or x.
+//
+//
+// Type: string
+//
+
+netcdf_dim_x = "longitude";
+
+//======================================================================
+//
+// NETCDF variables.
+//
+// Specify the names used in the netCDF file for variables, since they 
+//   can vary depending on the application used to create the file.
+//
+//======================================================================
+ 
+///////////// netcdf_var_base_time ////////////////////
+//
+// Data set times are relative to this base time.
+//
+// Specify 'none' if there is no base time variable. In the units of the 
+//   time variable will be used.
+//
+//
+// Type: string
+//
+
+netcdf_var_base_time = "none";
+
+///////////// base_time_string ////////////////////////
+//
+// Base time string - used if netcdf_var_base_time is set to 'none'.
+//
+// Set this to a W3C ISO 8601 time - see 
+//   http://www.w3.org/TR/NOTE-datetime.
+//
+//
+// Type: string
+//
+
+base_time_string = "1858-11-17T00:00:00Z";
+
+///////////// netcdf_var_time_offset //////////////////
+//
+// Time offset relative to base_time, or unix_time if base_time is 
+//   'none'.
+//
+//
+// Type: string
+//
+
+netcdf_var_time_offset = "start_time";
+
+///////////// netcdf_var_z ////////////////////////////
+//
+// Z variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_z = "none";
+
+///////////// netcdf_var_y ////////////////////////////
+//
+// Y variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_y = "latitude";
+
+///////////// netcdf_var_x ////////////////////////////
+//
+// X variable name.
+//
+//
+// Type: string
+//
+
+netcdf_var_x = "longitude";
+
+///////////// treat_ncbyte_as_unsigned ////////////////
+//
+// Option to consider ncbyte fields as unsigned.
+//
+// Normally ncbyte fields are signed. If this field is set to TRUE, they 
+//   are treated as unsigned instead.
+//
+//
+// Type: boolean
+//
+
+treat_ncbyte_as_unsigned = FALSE;
+
+//======================================================================
+//
+// INPUT PROJECTION.
+//
+//======================================================================
+ 
+///////////// input_projection ////////////////////////
+//
+// Projection of grid in x,y.
+//
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+input_projection = PROJ_LATLON;
+
+///////////// input_proj_rotation /////////////////////
+//
+// Projection grid rotation.
+//
+// This applies only to PROJ_FLAT projections.
+//
+//
+// Type: double
+//
+
+input_proj_rotation = 0;
+
+///////////// input_proj_origin_lat ///////////////////
+//
+// Projection grid origin latitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+input_proj_origin_lat = 0;
+
+///////////// input_proj_origin_lon ///////////////////
+//
+// Projection grid origin longitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+input_proj_origin_lon = 0;
+
+///////////// input_proj_lat1 /////////////////////////
+//
+// Projection grid reference latitude 1.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+input_proj_lat1 = 0;
+
+///////////// input_proj_lat2 /////////////////////////
+//
+// Projection grid reference latitude 2.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+input_proj_lat2 = 0;
+
+///////////// input_proj_central_scale ////////////////
+//
+// Central scale for remapped projections.
+//
+// This applies to POLAR_STEREO and TRANSVERSE_MERCATOR projections.
+//
+//
+// Type: double
+//
+
+input_proj_central_scale = 1;
+
+///////////// input_proj_tangent_lat //////////////////
+//
+// Projection tangent latitude (deg).
+//
+// This applies to OBLIQUE_STEREO only.
+//
+//
+// Type: double
+//
+
+input_proj_tangent_lat = 0;
+
+///////////// input_proj_tangent_lon //////////////////
+//
+// Projection tangent longitude (deg).
+//
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+//
+// Type: double
+//
+
+input_proj_tangent_lon = 0;
+
+///////////// input_proj_pole_is_north ////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+//
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+//
+//
+// Type: boolean
+//
+
+input_proj_pole_is_north = TRUE;
+
+///////////// input_proj_persp_radius /////////////////
+//
+// Radius of perspective point (km).
+//
+// This applies to VERT_PERSP.
+//
+//
+// Type: double
+//
+
+input_proj_persp_radius = 35786;
+
+//======================================================================
+//
+// RESAMPLE LAT/LON-based DATA ONTO REGULAR LATLON PROJECTION.
+//
+// Sometimes data in the netcdf file has its extent described by lat/lon 
+//   arrays, but the projection is not known exactly. In that case we have 
+//   the option of resampling this type of data onto the output 
+//   projection.
+//
+//======================================================================
+ 
+///////////// input_xy_is_latlon //////////////////////
+//
+// Indicates that the (x,y) variables indicated by netcdf_dim_x and 
+//   netcdf_dim_y contain (lat/lon) pairs.
+//
+// For some data sets, the (x,y) grid may be specified in lat/lon 
+//   instead of km. In this case, if the input projection is not known, 
+//   you can resample the data onto a regular latlon grid.
+//
+//
+// Type: boolean
+//
+
+input_xy_is_latlon = TRUE;
+
+///////////// resample_latlon_onto_regular_grid ///////
+//
+// Resample the geometry from the lat/lon grid in the input file, onto a 
+//   regular latlon grid.
+//
+// The output grid details will be deduced from the lat/lon arrays in 
+//   the input file.
+//
+//
+// Type: boolean
+//
+
+resample_latlon_onto_regular_grid = FALSE;
+
+//======================================================================
+//
+// REMAP PROJECTION/GRID ON OUTPUT.
+//
+//======================================================================
+ 
+///////////// remap_output_projection /////////////////
+//
+// Option to remap grid in x,y.
+//
+// If true, set the remap parameters below.
+//
+//
+// Type: boolean
+//
+
+remap_output_projection = FALSE;
+
+///////////// auto_remap_to_latlon ////////////////////
+//
+// Option to automatically remap the grid to a lat-lon projection.
+//
+// If true, the data in the file will be remapped to a latlon grid which 
+//   matches the existing grid in resolution and extent. Other remap 
+//   parameters will be ignored.
+//
+//
+// Type: boolean
+//
+
+auto_remap_to_latlon = FALSE;
+
+///////////// remap_projection ////////////////////////
+//
+// Projection for remapping in x,y. See projection param below.
+//
+// 	PROJ_LATLON: simple lat/lon grid (Equidistant Cylindrical)
+// 	PROJ_FLAT: Azimuthal Equidistant (Radar)
+// 	PROJ_LAMBERT_CONF: Lambert Conformal Conic
+// 	PROJ_LAMBERT_AZIM: Lambert Azimuthal Equal Area
+// 	PROJ_MERCATOR: Mercator - EW orientation
+// 	PROJ_TRANS_MERCATOR: Tranverse Mercator - NS orientation
+// 	PROJ_POLAR_STEREO: Stereographic- polar aspect
+// 	PROJ_OBLIQUE_STEREO: Stereographic - oblique aspect
+// 	PROJ_ALBERS: Albers Equal Area Conic
+// 	PROJ_VERT_PERSP: Vertical Perspective (satellite view).
+//
+//
+// Type: enum
+// Options:
+//     PROJ_LATLON
+//     PROJ_LAMBERT_CONF
+//     PROJ_MERCATOR
+//     PROJ_POLAR_STEREO
+//     PROJ_FLAT
+//     PROJ_OBLIQUE_STEREO
+//     PROJ_TRANS_MERCATOR
+//     PROJ_ALBERS
+//     PROJ_LAMBERT_AZIM
+//     PROJ_VERT_PERSP
+//
+
+remap_projection = PROJ_LATLON;
+
+///////////// remap_grid //////////////////////////////
+//
+// Grid parameters for remapping in x,y.
+//
+// Units in km, except for LATLON, which is in degrees.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int nx;
+//      int ny;
+//      double minx;
+//      double miny;
+//      double dx;
+//      double dy;
+//   }
+//
+//
+
+remap_grid = {
+    nx = 1,
+    ny = 1,
+    minx = 0,
+    miny = 0,
+    dx = 1,
+    dy = 1
+};
+
+///////////// remap_rotation //////////////////////////
+//
+// Remapped grid rotation.
+//
+// This applies only to PROJ_FLAT projections.
+//
+//
+// Type: double
+//
+
+remap_rotation = 0;
+
+///////////// remap_origin_lat ////////////////////////
+//
+// Remapped grid origin latitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+remap_origin_lat = 0;
+
+///////////// remap_origin_lon ////////////////////////
+//
+// Remapped grid origin longitude.
+//
+// This applies to all projections except LATLON.
+//
+//
+// Type: double
+//
+
+remap_origin_lon = 0;
+
+///////////// remap_lat1 //////////////////////////////
+//
+// Remapped grid reference latitude 1.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+remap_lat1 = 0;
+
+///////////// remap_lat2 //////////////////////////////
+//
+// Remapped grid reference latitude 2.
+//
+// This applies to LAMBERT_CONF and ALBERS projections.
+//
+//
+// Type: double
+//
+
+remap_lat2 = 0;
+
+///////////// remap_central_scale /////////////////////
+//
+// Central scale for remapped projections.
+//
+// This applies to POLAR_STEREO, OBLIQUE_STEREO and TRANSVERSE_MERCATOR 
+//   projections.
+//
+//
+// Type: double
+//
+
+remap_central_scale = 1;
+
+///////////// remap_tangent_lat ///////////////////////
+//
+// Remapped tangent latitude (deg).
+//
+// This applies to OBLIQUE_STEREO only.
+//
+//
+// Type: double
+//
+
+remap_tangent_lat = 0;
+
+///////////// remap_tangent_lon ///////////////////////
+//
+// Remapped tangent longitude (deg).
+//
+// This applies to OBLIQUE_STEREO and POLAR_STEREO.
+//
+//
+// Type: double
+//
+
+remap_tangent_lon = 0;
+
+///////////// remap_pole_is_north /////////////////////
+//
+// Flag indicating stereogtraphic is over the NORTH pole.
+//
+// This applies to POLAR_STEREO. If false, the projection is over the 
+//   south pole.
+//
+//
+// Type: boolean
+//
+
+remap_pole_is_north = TRUE;
+
+///////////// remap_persp_radius //////////////////////
+//
+// Radius of perspective point (km).
+//
+// This applies to VERT_PERSP.
+//
+//
+// Type: double
+//
+
+remap_persp_radius = 35786;
+
+///////////// remap_false_northing ////////////////////
+//
+// Remapped false northing correction.
+//
+// Occasionally, this is added to the Y coordinate so that all 
+//   coordinates are positive. Normally 0. As an alternative to 
+//   false_northing and false_easting, you can set the offset_latitude and 
+//   offset_longitude.
+//
+//
+// Type: double
+//
+
+remap_false_northing = 0;
+
+///////////// remap_false_easting /////////////////////
+//
+// Remapped false easting correction.
+//
+// Occasionally, this is added to the X coordinate so that all 
+//   coordinates are positive. Normally 0.
+//
+//
+// Type: double
+//
+
+remap_false_easting = 0;
+
+///////////// remap_set_offset_origin /////////////////
+//
+// Do you want to specify an offset origin using lat/lon instead of 
+//   false_northing and false_easting?.
+//
+// If true, set remap_offset_origin_latitude and 
+//   remap_offset_origin_longitude.
+//
+//
+// Type: boolean
+//
+
+remap_set_offset_origin = FALSE;
+
+///////////// remap_offset_origin_latitude ////////////
+//
+// Latitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+//
+// Type: double
+//
+
+remap_offset_origin_latitude = 0;
+
+///////////// remap_offset_origin_longitude ///////////
+//
+// Longitude of offset origin.
+//
+// See remap_set_offset_origin.
+//
+//
+// Type: double
+//
+
+remap_offset_origin_longitude = 0;
+
+//======================================================================
+//
+// OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
+//
+// These transforms are fixed. The same transform is applied to all 
+//   files.
+//
+//======================================================================
+ 
+///////////// apply_linear_transforms /////////////////
+//
+// Apply linear transform to specified fields.
+//
+// If true, we will apply a linear transform to selected fields.
+//
+//
+// Type: boolean
+//
+
+apply_linear_transforms = TRUE;
+
+///////////// transform_fields ////////////////////////
+//
+// Transform field details.
+//
+// Set the field name, scale and offset to be applied to the selected 
+//   fields. Also set the ouptut field name and units.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      double scale;
+//      double offset;
+//      string output_field_name;
+//      string output_units;
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_field_name = "albedo",
+    scale = 100,
+    offset = 0,
+    output_field_name = "albedo",
+    output_units = "%"
+  }
+  ,
+  {
+    input_field_name = "tbb",
+    scale = 1,
+    offset = -273,
+    output_field_name = "tempC",
+    output_units = "C"
+  }
+};
+
+//======================================================================
+//
+// SUN ANGLE CORRECTION.
+//
+// Applies only to satellite visible fields.
+//
+//======================================================================
+ 
+///////////// perform_sun_angle_correction ////////////
+//
+// Option to perform sun angle correction on satellite visible fields.
+//
+// If true, the albedo will be corrected for sun angle.
+//
+//
+// Type: boolean
+//
+
+perform_sun_angle_correction = TRUE;
+
+///////////// sun_correction_fields ///////////////////
+//
+// Fields to which sun angle correction will be applied.
+//
+// See 'perform_sun_angle_correction'.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+sun_correction_fields = {
+ "VIS"
+};
+
+///////////// corrected_field_min_value ///////////////
+//
+// Minimum value limit for field corrected for sun angle.
+//
+// For albedo, the field should have limits of 0 and 100. Set to a large 
+//   negative number if you do not want to limit the data range.
+//
+//
+// Type: double
+//
+
+corrected_field_min_value = -1e+12;
+
+///////////// corrected_field_max_value ///////////////
+//
+// Mxaimum value limit for field corrected for sun angle.
+//
+// For albedo, the field should have limits of 0 and 100. Set this to a 
+//   large positive number if you do not want to limit the data range.
+//
+//
+// Type: double
+//
+
+corrected_field_max_value = 1e+12;
+
+//======================================================================
+//
+// OUTPUT LOCATION.
+//
+//======================================================================
+ 
+///////////// output_url //////////////////////////////
+//
+// URL for writing output files.
+//
+//
+// Type: string
+//
+
+output_url = "mdvp:://localhost::$(HOME)/data/mdv/himawari/ch03";
+
+//======================================================================
+//
+// OUTPUT ENCODING AND COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_encoding_type ////////////////////
+//
+// Set output encoding type.
+//
+//
+// Type: enum
+// Options:
+//     ENCODING_INT8
+//     ENCODING_INT16
+//     ENCODING_FLOAT32
+//
+
+output_encoding_type = ENCODING_FLOAT32;
+
+///////////// output_compression_type /////////////////
+//
+// Set output compression type.
+//
+// See <toolsa/compress> for details on the compression types.
+//
+//
+// Type: enum
+// Options:
+//     COMPRESSION_NONE
+//     COMPRESSION_RLE
+//     COMPRESSION_LZO
+//     COMPRESSION_ZLIB
+//     COMPRESSION_BZIP
+//     COMPRESSION_GZIP
+//     COMPRESSION_GZIP_VOL
+//
+
+output_compression_type = COMPRESSION_GZIP;
+
+//======================================================================
+//
+// OUTPUT METADATA STRINGS.
+//
+// These will be used if the file does not contain suitable information.
+//
+//======================================================================
+ 
+///////////// data_set_name ///////////////////////////
+//
+// Name of data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_name = "TRMM";
+
+///////////// data_set_source /////////////////////////
+//
+// Source of data.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_source = "Texas Tech University";
+
+///////////// data_set_info ///////////////////////////
+//
+// Info for data set.
+//
+// Appears in Mdv master header.
+//
+//
+// Type: string
+//
+
+data_set_info = "Created by NcGeneric2Mdv";
+

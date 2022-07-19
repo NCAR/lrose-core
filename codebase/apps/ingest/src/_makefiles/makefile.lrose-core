@@ -18,6 +18,9 @@ SUB_DIRS = \
 	classIngest \
 	CreateStationList \
 	CsuSounding2Spdb \
+	CwbAws2Spdb \
+	CwbObs2Spdb \
+	CwbSfc2Mdv \
 	EolMobileKml2Spdb \
 	EraNc2Mdv \
 	GemVolXml2Dsr \

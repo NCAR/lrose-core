@@ -234,9 +234,32 @@ vector<double> *SweepModel::getSweepAngles() {
   return sweepAngles;
 }
 
+vector<int> *SweepModel::getSweepNumbers() {
+  // connect to DataModel to get the sweep numbers.
+  DataModel *dataModel = DataModel::Instance();
+  vector<int> *sweepNumbers = dataModel->getSweepNumbers();
+  return sweepNumbers;
+}
+
+/*
+vector<double> *SweepModel::getSweepAngles(string filePath) {
+  // connect to DataModel to get the sweep angles.
+  DataModel *dataModel = DataModel::Instance();
+  vector<double> *sweepAngles = dataModel->getSweepAngles(filePath);
+  return sweepAngles;
+}
+*/
 int SweepModel::getSelectedSweepNumber() {
   return _selectedSweepNumber;
 }
+
+/*
+double SweepModel::getSelectedAngle() {
+  DataModel *dataModel = DataModel::Instance();
+  _selectedSweepNumber = dataModel->getSweepAngleFromSweepNumber(_selectedSweepNumber);
+  LOG(DEBUG) << "exit _selectedSweepNumber = " << _selectedSweepNumber;
+}
+*/
 
 void SweepModel::setSelectedAngle(double value) {
   LOG(DEBUG) << "enter angle = " << value;
@@ -266,6 +289,11 @@ void SweepModel::setSelectedAngle(double value) {
   LOG(DEBUG) << "exit _selectedSweepNumber = " << _selectedSweepNumber;
 }
 
+void SweepModel::setSelectedNumber(int value) {
+  LOG(DEBUG) << "enter _selectedSweepNumber = " << _selectedSweepNumber;
+  _selectedSweepNumber = value;
+  LOG(DEBUG) << "exit _selectedSweepNumber = " << _selectedSweepNumber;
+}
 
 /////////////////////////////////////////////////////////////
 // get the fixed angle, optionally specifying an index
