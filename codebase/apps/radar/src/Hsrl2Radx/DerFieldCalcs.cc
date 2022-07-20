@@ -36,9 +36,9 @@
 #include "FullCals.hh"
 #include <Radx/RadxArray.hh>
 #include <assert.h>
+#include <cmath>
 #include <math.h>
 #include <iostream>
-#include <cmath>
 #include <cassert>
 #include <algorithm>
 
@@ -921,7 +921,7 @@ double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
   }
 
   double val = _BmsFactor * ((pressHpa * 100.0) / (tempK * _BoltzmannConst));
-  if (!finite(val)) {
+  if (!std::isfinite(val)) {
     return NAN;
   }
   
