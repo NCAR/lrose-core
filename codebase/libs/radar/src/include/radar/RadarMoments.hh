@@ -1665,7 +1665,7 @@ private:
 
   inline static double _constrain(double xx, double min, double max)
   {
-    if (!isfinite(xx)) return min;
+    if (!std::isfinite(xx)) return min;
     if (xx < min) return min;
     if (xx > max) return max;
     return xx;

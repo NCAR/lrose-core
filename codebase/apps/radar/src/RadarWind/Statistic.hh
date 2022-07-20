@@ -59,13 +59,13 @@ void addOb(
   double val)
 {
   numTot++;
-  if (isnan(val)) numNaN++;
-  else if (isinf(val) == -1) numNegInf++;
-  else if (isinf(val) == 1) numPosInf++;
+  if (std::isnan(val)) numNaN++;
+  else if (std::isinf(val) == -1) numNegInf++;
+  else if (std::isinf(val) == 1) numPosInf++;
   else {
     numGood++;
-    if (isnan( dmin) || val < dmin) dmin = val;
-    if (isnan( dmax) || val > dmax) dmax = val;
+    if (std::isnan( dmin) || val < dmin) dmin = val;
+    if (std::isnan( dmax) || val > dmax) dmax = val;
     dsum += val;
     dsumsq += val * val;
   }

@@ -1126,7 +1126,7 @@ const void *IwrfTsPulse::getPackedData() const
 // get elevation and azimuth
 
 double IwrfTsPulse::getEl() const {
-  if (isnan(_hdr.elevation)) {
+  if (std::isnan(_hdr.elevation)) {
     return _hdr.elevation;
   }
   if (_hdr.elevation <= 180) {
@@ -1137,7 +1137,7 @@ double IwrfTsPulse::getEl() const {
 }
 
 double IwrfTsPulse::getAz() const {
-  if (isnan(_hdr.azimuth)) {
+  if (std::isnan(_hdr.azimuth)) {
     return _hdr.azimuth;
   }
   if (_hdr.azimuth >= 0) {
@@ -1157,7 +1157,7 @@ double IwrfTsPulse::getFixedAngle() const {
 }
 
 double IwrfTsPulse::getFixedEl() const {
-  if (isnan(_hdr.fixed_el)) {
+  if (std::isnan(_hdr.fixed_el)) {
     return _hdr.fixed_el;
   }
   if (_hdr.fixed_el <= 180) {
@@ -1168,7 +1168,7 @@ double IwrfTsPulse::getFixedEl() const {
 }
 
 double IwrfTsPulse::getFixedAz() const {
-  if (isnan(_hdr.fixed_az)) {
+  if (std::isnan(_hdr.fixed_az)) {
     return _hdr.fixed_az;
   }
   if (_hdr.fixed_az >= 0) {

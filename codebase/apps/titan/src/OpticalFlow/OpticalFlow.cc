@@ -360,7 +360,7 @@ int OpticalFlow::_processTimeStep(DsMdvx &previous, DsMdvx &current)
   
   for (size_t ii = 0; ii < ny * nx; ii++) {
     fl32 val = prevData[ii];
-    if (isnan(val)) {
+    if (std::isnan(val)) {
       continue;
     }
     if (val < minVal) {
@@ -373,7 +373,7 @@ int OpticalFlow::_processTimeStep(DsMdvx &previous, DsMdvx &current)
 
   for (size_t ii = 0; ii < ny * nx; ii++) {
     fl32 val = currData[ii];
-    if (isnan(val)) {
+    if (std::isnan(val)) {
       continue;
     }
     if (val < minVal) {
@@ -391,13 +391,13 @@ int OpticalFlow::_processTimeStep(DsMdvx &previous, DsMdvx &current)
 
   for (size_t ii = 0; ii < ny * nx; ii++) {
     fl32 val = prevData[ii];
-    if (isfinite(val)) {
+    if (std::isfinite(val)) {
       prevData[ii] = (val - minVal) * scale + offset;
     }
   }
   for (size_t ii = 0; ii < ny * nx; ii++) {
     fl32 val = currData[ii];
-    if (isfinite(val)) {
+    if (std::isfinite(val)) {
       currData[ii] = (val - minVal) * scale + offset;
     }
   }
@@ -472,7 +472,7 @@ int OpticalFlow::_processTimeStep(DsMdvx &previous, DsMdvx &current)
       ii = yindex * nx + xindex;
 
       fl32 velx = uu[ii];
-      if (isfinite(velx)) {
+      if (std::isfinite(velx)) {
 	velx *= xscale;
 	if (fabs(velx) < 1.0e-3) {
 	  velx = 0.0;
@@ -483,7 +483,7 @@ int OpticalFlow::_processTimeStep(DsMdvx &previous, DsMdvx &current)
       }
 
       fl32 vely = vv[ii];
-      if (isfinite(vely)) {
+      if (std::isfinite(vely)) {
 	vely *= yscale;
 	if (fabs(vely) < 1.0e-3) {
 	  vely = 0.0;

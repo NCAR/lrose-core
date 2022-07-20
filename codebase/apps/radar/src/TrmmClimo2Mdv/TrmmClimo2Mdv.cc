@@ -394,7 +394,7 @@ int TrmmClimo2Mdv::_writeAsSingleFile()
 
   float *dataPtr = data;
   for (int ii = 0; ii < ndata; ii++, dataPtr++) {
-    if (!isfinite(*dataPtr)) {
+    if (!std::isfinite(*dataPtr)) {
       *dataPtr = _missingFloat;
     }
   }
@@ -561,7 +561,7 @@ int TrmmClimo2Mdv::_writeAsMultFiles()
 
   float *dataPtr = data;
   for (int ii = 0; ii < ndata; ii++, dataPtr++) {
-    if (!isfinite(*dataPtr)) {
+    if (!std::isfinite(*dataPtr)) {
       *dataPtr = _missingFloat;
     }
   }

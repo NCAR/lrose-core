@@ -475,7 +475,7 @@ void RadxBeamBlock::_addTerrainMdvField(DsMdvx &mdv,
       alon.set_degrees(lonDeg);
       latlon loc(alat, alon);
       double ht = _dem.getElevation(loc);
-      if (!isfinite(ht)) {
+      if (!std::isfinite(ht)) {
         ht = missingVal;
       }
       height[ii] = ht;

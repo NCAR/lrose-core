@@ -910,7 +910,7 @@ const void *IpsTsPulse::getPackedData() const
 // get elevation and azimuth
 
 double IpsTsPulse::getElevation() const {
-  if (isnan(_hdr.elevation)) {
+  if (std::isnan(_hdr.elevation)) {
     return _hdr.elevation;
   }
   // if (_hdr.elevation <= 180) {
@@ -922,7 +922,7 @@ double IpsTsPulse::getElevation() const {
 }
 
 double IpsTsPulse::getAzimuth() const {
-  if (isnan(_hdr.azimuth)) {
+  if (std::isnan(_hdr.azimuth)) {
     return _hdr.azimuth;
   }
   // if (_hdr.azimuth >= 0) {
@@ -934,7 +934,7 @@ double IpsTsPulse::getAzimuth() const {
 }
 
 double IpsTsPulse::getFixedAngle() const {
-  if (isnan(_hdr.fixed_angle)) {
+  if (std::isnan(_hdr.fixed_angle)) {
     return _hdr.fixed_angle;
   }
   if (_hdr.fixed_angle <= 180) {

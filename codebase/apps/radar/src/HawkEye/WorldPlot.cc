@@ -1339,7 +1339,7 @@ void WorldPlot::drawDistanceTicks(QPainter &painter,
     const RadxTime &tickTime = tickTimes[i];
     double distVal = tickDists[i];
     
-    if (!isfinite(distVal)) {
+    if (!std::isfinite(distVal)) {
       continue;
     }
 

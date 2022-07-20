@@ -69,7 +69,6 @@ extern "C" {
  */
 
 #include <dataport/port_types.h>
-#include <math.h>
 
 #define IWRF_MAX_CHAN 4  /**< Max number of channels<br>Normal dual-pol operation uses 2 channels */
 #define IWRF_MAX_RADAR_NAME 32  /**< Max length of radar name */

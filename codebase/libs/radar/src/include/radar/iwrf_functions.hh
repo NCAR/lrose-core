@@ -40,6 +40,7 @@
 #define _IWRF_FUNCTIONS_HH_
 
 #include <cstdio>
+#include <cmath>
 #include <string>
 #include <radar/iwrf_data.h>
 #include <radar/iwrf_user_interface.h>

@@ -689,7 +689,7 @@ void RadxDiffFields::_loadDiffs(FieldDiff &fieldDiff,
 
     if (cData != NULL) {
       Radx::fl32 cVal = cData[ii];
-      if (!isfinite(cVal) ||
+      if (!std::isfinite(cVal) ||
           cVal == cMiss ||
           cVal < _params.condition_field_min_value ||
           cVal > _params.condition_field_max_value) {
@@ -700,7 +700,7 @@ void RadxDiffFields::_loadDiffs(FieldDiff &fieldDiff,
     Radx::fl32 pVal = pData[ii];
     Radx::fl32 sVal = sData[ii];
 
-    if (isfinite(pVal) && isfinite(sVal) &&
+    if (std::isfinite(pVal) && std::isfinite(sVal) &&
         pVal != pMiss && sVal != sMiss) {
       double diff = pVal - sVal;
       fieldDiff.diffs.push_back(diff);

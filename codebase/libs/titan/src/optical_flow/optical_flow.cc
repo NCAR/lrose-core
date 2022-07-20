@@ -155,7 +155,7 @@ auto optical_flow::determine_velocities(
   array2<fl32> lag0_copy;
 
   // do we need to make copies of the inputs?
-  if (!isnan(background))
+  if (!std::isnan(background))
   {
     lag1_copy = array2<fl32>{dims_};
     lag0_copy = array2<fl32>{dims_};
@@ -164,13 +164,13 @@ auto optical_flow::determine_velocities(
     array_utils::remove_nans(lag0_copy, lag0, background);
 
     // need to apply a signal threshold?
-    if (!isnan(threshold))
+    if (!std::isnan(threshold))
     {
       array_utils::threshold_min(lag1_copy, lag1_copy, threshold, background);
       array_utils::threshold_min(lag0_copy, lag0_copy, threshold, background);
     }
 
-    if (!isnan(gain))
+    if (!std::isnan(gain))
     {
       array_utils::multiply(lag1_copy, lag1_copy, gain);
       array_utils::multiply(lag0_copy, lag0_copy, gain);
@@ -793,7 +793,7 @@ auto optical_flow::interpolate_gaps(
         {
           auto val_u = velocity_u[yy][xx];
           auto val_v = velocity_v[yy][xx];
-          if (!isnan(val_u))
+          if (!std::isnan(val_u))
           {
             ++count;
             sum_u += val_u;
@@ -826,7 +826,7 @@ auto optical_flow::interpolate_gaps(
       auto& out_u = velocity_u[yo][x * spacing + half_spacing];
       auto& out_v = velocity_v[yo][x * spacing + half_spacing];
 
-      if (isnan(out_u))
+      if (std::isnan(out_u))
       {
         double ac_weight = 0.0;
         double ac_val_u = 0.0;
@@ -840,7 +840,7 @@ auto optical_flow::interpolate_gaps(
           {
             auto vv_u = grid_u[yy][xx];
             auto vv_v = grid_v[yy][xx];
-            if (!isnan(vv_u))
+            if (!std::isnan(vv_u))
             {
               double weight = 1.0 / std::pow((double(xx) - x) * (double(xx) - x) + (double(yy) - y) * (double(yy) - y), pwr);
               ac_val_u += vv_u * weight;
@@ -871,7 +871,7 @@ auto optical_flow::interpolate_gaps(
   {
     for (size_t x = 0; x < velocity_u.cols(); ++x)
     {
-      if (!isnan(ref_u[y][x]))
+      if (!std::isnan(ref_u[y][x]))
         continue;
 
       double ac_weight = 0.0;
@@ -887,7 +887,7 @@ auto optical_flow::interpolate_gaps(
         {
           const auto& vv_u = ref_u[yy][xx];
           const auto& vv_v = ref_v[yy][xx];
-          if (!isnan(vv_u))
+          if (!std::isnan(vv_u))
           {
             double weight = 1.0 / std::pow((double(xx) - x) * (double(xx) - x) + (double(yy) - y) * (double(yy) - y), pwr);
             ac_val_u += vv_u * weight;

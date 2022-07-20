@@ -512,7 +512,7 @@ void IwrfTsInfo::setAntennaCorrection(const iwrf_antenna_correction_t &corr,
 void IwrfTsInfo::setTsProcessing(const iwrf_ts_processing_t &proc,
                                  bool addToMetaQueue /* = true */) {
   _proc = proc;
-  if (isnan(_proc.start_range_m)) {
+  if (std::isnan(_proc.start_range_m)) {
     _proc.start_range_m = 0.0;
   }
   _proc.packet.id = IWRF_TS_PROCESSING_ID;

@@ -58,7 +58,7 @@ bool ips_ts_int_is_missing(si32 val)
 
 bool ips_ts_float_is_missing(fl32 val)
 {
-  if (isnan(val)) {
+  if (std::isnan(val)) {
     return true;
   } else if (fabs(val - IPS_TS_MISSING_FLOAT) < 0.001)  {
     return true;

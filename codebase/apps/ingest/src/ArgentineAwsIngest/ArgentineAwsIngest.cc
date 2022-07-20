@@ -34,6 +34,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <cerrno>
+#include <cmath>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/file_io.h>
@@ -216,21 +217,21 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
       switch (ftype) {
         case Params::FIELD_LATITUDE: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setLatitude(val);
           }
           break;
         }
         case Params::FIELD_LONGITUDE: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setLongitude(val);
           }
           break;
         }
         case Params::FIELD_ALTITUDE: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setElevationM(val);
           }
           obs->setElevationM(_decodeFloatField(tok));
@@ -246,21 +247,21 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
         }
         case Params::FIELD_TEMPERATURE_C: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setTempC(val);
           }
           break;
         }
         case Params::FIELD_RH_PERCENT: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setRhPercent(val);
           }
           break;
         }
         case Params::FIELD_DEWPOINT_C: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setDewpointC(val);
           }
           break;
@@ -275,35 +276,35 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
         }
         case Params::FIELD_PRESSURE_HPA: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->setPressureMb(val);
           }
           break;
         }
         case Params::FIELD_PRECIP_10MIN_MM: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->addPrecipLiquidMm(val, 600);
           }
           break;
         }
         case Params::FIELD_PRECIP_1HR_MM: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->addPrecipLiquidMm(val, 3600);
           }
           break;
         }
         case Params::FIELD_RAIN_4HR_MM: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->addPrecipLiquidMm(val, 4 * 3600);
           }
           break;
         }
         case Params::FIELD_RAIN_6HR_MM: {
           double val = _decodeFloatField(tok);
-          if (!isnan(val)) {
+          if (!std::isnan(val)) {
             obs->addPrecipLiquidMm(val, 6 * 3600);
           }
           break;
@@ -316,7 +317,7 @@ int ArgentineAwsIngest::_processFile(const char *file_path)
 
     // set wind fields
 
-    if (!isnan(windSpeedKph) && !isnan(windDirnTrue)) {
+    if (!std::isnan(windSpeedKph) && !std::isnan(windDirnTrue)) {
       obs->setWindSpeedMps(windSpeedKph / MPERSEC_TO_KMPERHOUR);
       obs->setWindDirnDegT(windDirnTrue);
     }

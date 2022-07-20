@@ -323,7 +323,7 @@ void adjointDump2mdv::adjointDump2mdvFile( char *FilePath ){
       if (
 	  (*val < _params->range.min) ||
 	  (*val > _params->range.max) ||
-	  (isnan(*val))
+	  (std::isnan(*val))
 	  ){
 	*val = fhdr.missing_data_value;
       }

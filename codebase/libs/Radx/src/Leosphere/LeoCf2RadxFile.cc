@@ -1356,9 +1356,9 @@ void LeoCf2RadxFile::_setAnglesFromXml(const string &xml)
   _rhiMode = false;
 
   #if defined(PGI)
-  if (!isnan(_elLimit1) && isnan(_elLimit2)) {
+  if (!std::isnan(_elLimit1) && std::isnan(_elLimit2)) {
     _fixedAngle = _elLimit1;
-  } else if (!isnan(_azLimit1) && isnan(_azLimit2)) {
+  } else if (!std::isnan(_azLimit1) && std::isnan(_azLimit2)) {
     _fixedAngle = _azLimit1;
     _rhiMode = true;
   }
@@ -4869,7 +4869,7 @@ void LeoCf2RadxFile::_readFrequency(NcxxGroup &group)
    // reset nans to missing
 
    for (size_t ii = 0; ii < nVals; ii++) {
-     if (!isfinite(data[ii])) {
+     if (!std::isfinite(data[ii])) {
        data[ii] = missingVal;
      }
    }
@@ -4967,7 +4967,7 @@ void LeoCf2RadxFile::_addFl32FieldToRays(NcxxVar &var,
   // reset nans to missing
   
   for (size_t ii = 0; ii < nVals; ii++) {
-    if (!isfinite(data[ii])) {
+    if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
     }
   }

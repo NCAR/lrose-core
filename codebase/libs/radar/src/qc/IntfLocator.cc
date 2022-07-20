@@ -640,7 +640,7 @@ void IntfLocator::_computeDeltaMode(const double *vals,
   double maxVal = -1.0e99;
   for (int igate = 0; igate < _nGates; igate++) {
     double val = vals[igate];
-    if (!isfinite(val)) {
+    if (!std::isfinite(val)) {
       return;
     }
     if (val != _fieldMissingVal) {

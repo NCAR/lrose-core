@@ -52,7 +52,7 @@ bool iwrf_int_is_missing(si32 val)
 
 bool iwrf_float_is_missing(fl32 val)
 {
-  if (isnan(val)) {
+  if (std::isnan(val)) {
     return true;
   } else if (fabs(val - IWRF_MISSING_FLOAT) < 0.001)  {
     return true;

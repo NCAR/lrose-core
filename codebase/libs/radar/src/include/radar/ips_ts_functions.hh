@@ -41,6 +41,7 @@
 
 #include <cstdio>
 #include <string>
+#include <cmath>
 #include <radar/ips_ts_data.h>
 using namespace std;
 

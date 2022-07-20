@@ -69,12 +69,12 @@ void addOb(
   double coordx)
 {
   nob++;
-  if (isnan( coordzMin) || coordz < coordzMin) coordzMin = coordz;
-  if (isnan( coordzMax) || coordz > coordzMax) coordzMax = coordz;
-  if (isnan( coordyMin) || coordy < coordyMin) coordyMin = coordy;
-  if (isnan( coordyMax) || coordy > coordyMax) coordyMax = coordy;
-  if (isnan( coordxMin) || coordx < coordxMin) coordxMin = coordx;
-  if (isnan( coordxMax) || coordx > coordxMax) coordxMax = coordx;
+  if (std::isnan( coordzMin) || coordz < coordzMin) coordzMin = coordz;
+  if (std::isnan( coordzMax) || coordz > coordzMax) coordzMax = coordz;
+  if (std::isnan( coordyMin) || coordy < coordyMin) coordyMin = coordy;
+  if (std::isnan( coordyMax) || coordy > coordyMax) coordyMax = coordy;
+  if (std::isnan( coordxMin) || coordx < coordxMin) coordxMin = coordx;
+  if (std::isnan( coordxMax) || coordx > coordxMax) coordxMax = coordx;
 } // end addOb
 
 

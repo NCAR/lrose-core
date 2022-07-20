@@ -47,7 +47,7 @@
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>
 #include <euclid/PjgMath.hh>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -6360,8 +6360,8 @@ int MdvxField::computeMinAndMax(bool force /* = false*/ ) const
   if (!force) {
     if ((_fhdr.min_value != 0.0 || _fhdr.max_value != 0.0) && 
         (_fhdr.min_value != _fhdr.max_value) &&
-        !isfinite(_fhdr.min_value) &&
-        !isfinite(_fhdr.max_value)) {
+        !std::isfinite(_fhdr.min_value) &&
+        !std::isfinite(_fhdr.max_value)) {
       return 0;
     }
   }
@@ -8371,7 +8371,7 @@ void MdvxField::_check_finite(const void *vol_data) const
     // neither infinite nor a "not-a-number" (NaN) value,  and  0
     // otherwise.
 
-    if (!isfinite(*floatData)) {
+    if (!std::isfinite(*floatData)) {
       numNans++;
       *floatData = bad;
     }

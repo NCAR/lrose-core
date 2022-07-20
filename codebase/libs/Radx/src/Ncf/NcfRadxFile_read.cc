@@ -3641,7 +3641,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
   // reset nans to missing
   
   for (size_t ii = 0; ii < nData; ii++) {
-    if (!isfinite(data[ii])) {
+    if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
     }
   }
@@ -3740,7 +3740,7 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
   // reset nans to missing
   
   for (size_t ii = 0; ii < nData; ii++) {
-    if (!isfinite(data[ii])) {
+    if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
     }
   }

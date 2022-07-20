@@ -364,7 +364,7 @@ void UnitedEdrReport::setAndBufferEdr(DateTime msgTime, bool buffer_data)
 
               PjgCalc::latlonPlusRTheta(lat, lon, dist, theta, lat2, lon2);
 
-	      if (isnan(lat2) || isnan(lon2))
+	      if (std::isnan(lat2) || std::isnan(lon2))
 	      {
                  edrData.lat = Edr::VALUE_UNKNOWN;
                  edrData.lon = Edr::VALUE_UNKNOWN;

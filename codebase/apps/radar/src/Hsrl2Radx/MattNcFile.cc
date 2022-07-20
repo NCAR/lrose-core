@@ -830,7 +830,7 @@ int MattNcFile::_createRays(const string &path)
           ray->setElevationDeg(94.0);
           if (_params.correct_elevation_angle_for_roll) {
             float roll = geo.getRoll();
-            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
+            if (std::isfinite(roll) && roll > -45.0 && roll < 45.0) {
               ray->setElevationDeg(94.0 - roll);
             }
           }
@@ -841,7 +841,7 @@ int MattNcFile::_createRays(const string &path)
           ray->setElevationDeg(-94.0);
           if (_params.correct_elevation_angle_for_roll) {
             float roll = geo.getRoll();
-            if (isfinite(roll) && roll > -45.0 && roll < 45.0) {
+            if (std::isfinite(roll) && roll > -45.0 && roll < 45.0) {
               ray->setElevationDeg(-94.0 - geo.getRoll());
             }
           }

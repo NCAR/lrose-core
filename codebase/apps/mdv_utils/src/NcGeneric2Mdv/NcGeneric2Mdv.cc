@@ -37,6 +37,7 @@
 //
 ////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/umisc.h>
 #include <toolsa/pmu.h>
@@ -935,7 +936,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     
     float missing = missingAtt->as_float(0);
     for (int ii = 0; ii < npts; ii++) {
-      if (isnan(fvals[ii]) || fvals[ii] == missing) {
+      if (std::isnan(fvals[ii]) || fvals[ii] == missing) {
         vals[ii] = _missingFloat;
       } else {
         vals[ii] = fvals[ii];
@@ -992,7 +993,7 @@ int NcGeneric2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
     
     double missing = missingAtt->as_double(0);
     for (int ii = 0; ii < npts; ii++) {
-      if (isnan(dvals[ii]) || dvals[ii] == missing) {
+      if (std::isnan(dvals[ii]) || dvals[ii] == missing) {
         vals[ii] = _missingFloat;
       } else {
         vals[ii] = dvals[ii];

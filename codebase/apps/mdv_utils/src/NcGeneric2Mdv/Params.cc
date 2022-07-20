@@ -1495,7 +1495,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("sun_correction_fields");
     tt->descr = tdrpStrDup("Fields to which sun angle correction will be applied.");
-    tt->help = tdrpStrDup("See 'perform_sun_angle_correction'.");
+    tt->help = tdrpStrDup("The field name is used AFTER the linear transform step. See 'perform_sun_angle_correction'.");
     tt->array_offset = (char *) &_sun_correction_fields - &_start_;
     tt->array_n_offset = (char *) &sun_correction_fields_n - &_start_;
     tt->is_array = TRUE;

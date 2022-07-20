@@ -1718,7 +1718,7 @@ int D3rNcRadxFile::_addFl64FieldToRays(Nc3Var* var,
     delete missingValueAtt;
   } else {
     for (size_t ii = 0; ii < nGatesTot; ii++) {
-      if (!isfinite(data[ii])) {
+      if (!std::isfinite(data[ii])) {
         data[ii] = missingVal;
       }
     }
@@ -1804,7 +1804,7 @@ int D3rNcRadxFile::_addFl32FieldToRays(Nc3Var* var,
     delete missingValueAtt;
   } else {
     for (size_t ii = 0; ii < nGatesTot; ii++) {
-      if (!isfinite(data[ii])) {
+      if (!std::isfinite(data[ii])) {
         data[ii] = missingVal;
       }
     }

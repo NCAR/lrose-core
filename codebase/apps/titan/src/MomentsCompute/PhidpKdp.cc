@@ -306,7 +306,7 @@ double pac_unfold_phidp(int gates,
 		}
 		/* Check if the detected system phase has wrapped around compared to the estimate,
 		if so, unwrap it */
-		if (!isnan(system_phase) && (fabs(internal_system_phase - system_phase) > wrap_threshold)) {
+		if (!std::isnan(system_phase) && (fabs(internal_system_phase - system_phase) > wrap_threshold)) {
 			init_phase_wrapped = 1;
 			if (internal_system_phase > system_phase) {
 				internal_system_phase -= wrap_threshold * 2;
@@ -641,7 +641,7 @@ int pac_smooth_phidp(int gates,
 			datamask_ptr = datamask + gate * datamask_stride;
 			PHIDP_ptr = PHIDP + gate * PHIDP_stride;
 			range_ptr = range + gate * range_stride;
-			if ((!isnan(*PHIDP_ptr)) && (*datamask_ptr != PAC_DATAMASK_BAD)) {
+			if ((!std::isnan(*PHIDP_ptr)) && (*datamask_ptr != PAC_DATAMASK_BAD)) {
 				PHIDP_save_ptr = PHIDP + save_gate * PHIDP_stride;
 				start_phidp = gsl_stats_double_mean((PHIDP_save_ptr - n_bad * PHIDP_stride), PHIDP_stride, n_bad);
 				end_phidp = gsl_stats_double_mean(PHIDP_ptr, PHIDP_stride, n_bad);

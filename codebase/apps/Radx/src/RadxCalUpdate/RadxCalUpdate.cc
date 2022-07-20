@@ -36,6 +36,7 @@
 //
 ////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
@@ -659,7 +660,7 @@ int RadxCalUpdate::_correctHcrVRxGainForTemp(time_t timeSecs)
   double deltaGainVc =
     _getDeltaGainFromXml(_deltaGainXml, _params.hcr_v_rx_delta_gain_tag_list);
   
-  if (isnan(deltaGainVc)) {
+  if (std::isnan(deltaGainVc)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - RadxCalUpdate::_correctHcrVRxGainForTemp()" << endl;
       cerr << "  Cannot find deltaGain in XML: " << _deltaGainXml << endl;

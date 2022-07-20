@@ -1722,7 +1722,7 @@ void TrForecast::_override_speed_and_dirn(TitanStormFile &sfile,
     for (int ix = minIx; ix <= maxIx; ix++, uptr++, vptr++) {
       if (*uptr != uMissing) {
         // cerr << "uuuuuuuuuuuu: " << *uptr << endl;
-        // if (!isfinite(*uptr)) {
+        // if (!std::isfinite(*uptr)) {
         //   cerr << "UUUUUUUUU iy, ix: " << iy << ", " << ix << endl;
         // }
         sumU += *uptr;
@@ -1730,7 +1730,7 @@ void TrForecast::_override_speed_and_dirn(TitanStormFile &sfile,
       }
       if (*vptr != vMissing) {
         // cerr << "vvvvvvvvvvvv: " << *vptr << endl;
-        // if (!isfinite(*vptr)) {
+        // if (!std::isfinite(*vptr)) {
         //   cerr << "VVVVVVVVV iy, ix: " << iy << ", " << ix << endl;
         // }
         sumV += *vptr;
@@ -1904,7 +1904,7 @@ void TrForecast::_override_speed_and_dirn2(TitanStormFile &sfile,
       
       if (*uptr != uMissing) {
         // cerr << "uuuuuuuuuuuu: " << *uptr << endl;
-        // if (!isfinite(*uptr)) {
+        // if (!std::isfinite(*uptr)) {
         //   cerr << "UUUUUUUUU iy, ix: " << iy << ", " << ix << endl;
         // }
         sumU += *uptr;
@@ -1912,7 +1912,7 @@ void TrForecast::_override_speed_and_dirn2(TitanStormFile &sfile,
       }
       if (*vptr != vMissing) {
         // cerr << "vvvvvvvvvvvv: " << *vptr << endl;
-        // if (!isfinite(*vptr)) {
+        // if (!std::isfinite(*vptr)) {
         //   cerr << "VVVVVVVVV iy, ix: " << iy << ", " << ix << endl;
         // }
         sumV += *vptr;

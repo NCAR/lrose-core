@@ -381,7 +381,7 @@ void IpsTsInfo::setScanSegment(const ips_ts_scan_segment_t &seg,
 void IpsTsInfo::setTsProcessing(const ips_ts_processing_t &proc,
                                 bool addToMetaQueue /* = true */) {
   _proc = proc;
-  if (isnan(_proc.start_range_m)) {
+  if (std::isnan(_proc.start_range_m)) {
     _proc.start_range_m = 0.0;
   }
   _proc.packet.id = IPS_TS_PROCESSING_ID;

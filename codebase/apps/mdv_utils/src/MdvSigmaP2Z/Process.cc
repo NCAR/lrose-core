@@ -399,7 +399,7 @@ int Process::Derive(Params *P, time_t T){
       double min=0.0; double max = min;
       for (int i=0; i < InFhdr.nx*InFhdr.ny*P->outputHeights_n; i++){
 	if (OutData[i] == OutBadValue) continue;
-	if (isnan(OutData[i])){
+	if (std::isnan(OutData[i])){
 	  cerr << "NAN!!" << endl;
 	  exit(0);
 	}
@@ -600,7 +600,7 @@ void Process::_interpPower(fl32 height, fl32 heightAbove,
 	      
   *OutData = k*log(a*desiredHeight);
 
-  if (isnan(*OutData)){
+  if (std::isnan(*OutData)){
     cerr << "NAN " << endl;
     cerr << height << " " << desiredHeight << " " << heightAbove << endl;
     cerr << logA << endl;

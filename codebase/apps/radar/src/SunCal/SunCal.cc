@@ -5410,7 +5410,7 @@ void SunCal::_appendFloatToFile(FILE *out, double val, int width /* = 10 */)
 {
   char format[32];
   sprintf(format, " %%%d.4f", width);
-  if (isfinite(val)) {
+  if (std::isfinite(val)) {
     fprintf(out, format, val);
   } else {
     fprintf(out, format, -9999.0);

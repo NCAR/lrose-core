@@ -3492,7 +3492,7 @@ int NcxxRadxFile::_addFl64FieldToRays(NcxxVar &var,
   // reset nans to missing
   
   for (int ii = 0; ii < _nPoints; ii++) {
-    if (!isfinite(data[ii])) {
+    if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
     }
   }
@@ -3604,7 +3604,7 @@ int NcxxRadxFile::_addFl32FieldToRays(NcxxVar &var,
   // reset nans to missing
   
   for (int ii = 0; ii < _nPoints; ii++) {
-    if (!isfinite(data[ii])) {
+    if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
     }
   }

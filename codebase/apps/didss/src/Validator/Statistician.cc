@@ -305,7 +305,7 @@ Statistician::~Statistician(){
 
 double Statistician::NoNaN(double val){
 
-  if (isnan(val)){
+  if (std::isnan(val)){
     return -1000.0;
   }
   return val;
