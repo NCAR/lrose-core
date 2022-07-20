@@ -181,6 +181,11 @@ public:
   // struct typedefs
 
   typedef struct {
+    char* field_name;
+    double nyquist_mps;
+  } nyquist_field_t;
+
+  typedef struct {
     char* name;
     attr_type_t attrType;
     char* val;
@@ -666,6 +671,11 @@ public:
 
   double antenna_gain_db_v;
 
+  tdrp_bool_t set_nyquist_velocity;
+
+  nyquist_field_t *_nyquist_fields;
+  int nyquist_fields_n;
+
   tdrp_bool_t reload_sweep_info_from_rays;
 
   tdrp_bool_t reload_volume_info_from_rays;
@@ -842,7 +852,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[188];
+  mutable TDRPtable _table[191];
 
   const char *_className;
 

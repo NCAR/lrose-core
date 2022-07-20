@@ -594,6 +594,30 @@ paramdef double {
 } antenna_gain_db_v;
 
 commentdef {
+  p_header = "OPTION TO SET NYQUIST VELOCITY FOR SPECIFIED FIELDS.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the nyquist velocity for selected fields.";
+  p_help = "Each ray has a nyquist value that may be set. Plus the folding velocity can be set on each of multiple fields. If more than 1 nyquist is specified - i.e. on different fields - the nyquist from the first field will be applied to the ray as a whole. So make sure the first field is the primary velocity field.";
+} set_nyquist_velocity;
+
+typedef struct {
+  string field_name; 
+  double nyquist_mps;
+} nyquist_field_t;
+
+paramdef struct nyquist_field_t {
+  p_default = {
+    { "VEL", 25.0},
+    { "VEL_F", 25.0}
+  };
+  p_descr = "Fields on which nyquist should be set.";
+  p_help = "Set the folding velocity for the specified fields. If more than 1 field is specified, the first nyquist value in the list will be used for the ray as a whole.";
+} nyquist_fields[];
+
+commentdef {
   p_header = "OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.";
 }
 

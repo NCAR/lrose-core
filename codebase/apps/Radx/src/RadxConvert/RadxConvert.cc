@@ -774,6 +774,27 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     vol.applyTimeOffsetSecs(_params.time_offset_secs);
   }
 
+  // set nyquist
+  
+  if (_params.set_nyquist_velocity) {
+    set<string> fieldSet = vol.getUniqueFieldNameSet();
+    int count = 0;
+    for (int ii = 0; ii < _params.nyquist_fields_n; ii++) {
+      const Params::nyquist_field_t &nField = _params._nyquist_fields[ii];
+      string fieldName = nField.field_name;
+      if (fieldSet.find(fieldName) != fieldSet.end()) {
+        if (count == 0) {
+          vol.setNyquistMps(nField.nyquist_mps);
+        }
+        vol.setFieldFolds(fieldName, true,
+                          -1.0 * nField.nyquist_mps, nField.nyquist_mps);
+        count++;
+      } else {
+        cerr << "WARNING: field not found for setting nyquist: " << fieldName << endl;
+      }
+    } // ii
+  }
+
   // apply angle offsets
 
   if (_params.apply_azimuth_offset) {
