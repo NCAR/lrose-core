@@ -265,6 +265,8 @@ public:
   inline void setPrtRatio(double val) { _prtRatio = val; }
 
   /// Set the nyquist velocity, in m/s, for this ray, if known.
+  /// This should be the nyquist for the primary velocity field
+  /// if there are more than 1 velocity field.
 
   inline void setNyquistMps(double val) { _nyquistMps = val; }
 

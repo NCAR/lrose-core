@@ -2235,10 +2235,10 @@ int RadxField::computeMinAndMax() const
 
   // all missing?
 
-  if (!isfinite(_minVal)) {
+  if (!std::isfinite(_minVal)) {
     _minVal = 1.0e99;
   }
-  if (!isfinite(_maxVal)) {
+  if (!std::isfinite(_maxVal)) {
     _maxVal = -1.0e99;
   }
 

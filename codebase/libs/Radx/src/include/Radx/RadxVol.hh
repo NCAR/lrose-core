@@ -40,6 +40,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <Radx/Radx.hh>
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxField.hh>
@@ -608,6 +609,12 @@ public:
 
   int renameField(const string &oldName, const string &newName);
   
+  /// Set the nyquist velocity, in m/s, for this ray, if known.
+  /// This should be the nyquist for the primary velocity field
+  /// if there are more than 1 velocity field.
+
+  void setNyquistMps(double val);
+
   /// Set folding behavior on for the specified field.
   /// If the field folds, then when the value exceeds foldLimitUpper,
   /// it wraps to foldLimitLower, and vice versa.
@@ -1386,6 +1393,12 @@ public:
 
   vector<string> 
     getUniqueFieldNameList(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA) const;
+
+  /// Get the set of unique field names, compiled by
+  /// searching through all rays.
+  
+  set<string>
+    getUniqueFieldNameSet(Radx::FieldRetrieval_t rtype = Radx::FIELD_RETRIEVAL_DATA) const;
 
   /// convert all fields to same data type
   /// widening as required

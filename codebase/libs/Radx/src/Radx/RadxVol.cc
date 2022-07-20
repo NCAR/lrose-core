@@ -51,7 +51,6 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
-#include <set>
 #include <map>
 #include <iostream>
 #include <sys/stat.h>
@@ -846,6 +845,30 @@ vector<string> RadxVol::getUniqueFieldNameList(Radx::FieldRetrieval_t rtype) con
 
 }
 
+//////////////////////////////////////////////////////////////////
+/// Get the set of unique field names, compiled by
+/// searching through all rays.
+
+set<string> RadxVol::getUniqueFieldNameSet(Radx::FieldRetrieval_t rtype) const
+
+{
+  
+  // find the set of field names
+
+  set<string> nameSet;
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    const RadxRay &ray = *_rays[iray];
+    vector<RadxField *> flds = ray.getFields(rtype);
+    for (size_t ifield = 0; ifield < flds.size(); ifield++) {
+      string name = flds[ifield]->getName();
+      nameSet.insert(name);
+    }
+  }
+
+  return nameSet;
+
+}
+
 /////////////////////////////////////////////////////////////////////////////
 /// Get vector of field pointers for this ray.
   
@@ -1454,6 +1477,20 @@ int RadxVol::renameField(const string &oldName, const string &newName)
 
   return iret;
   
+}
+
+/////////////////////////////////////////////////////////////////////
+/// Set the nyquist velocity, in m/s, for this ray, if known.
+/// This should be the nyquist for the primary velocity field
+/// if there are more than 1 velocity field.
+
+void RadxVol::setNyquistMps(double val)
+
+{
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    RadxRay &ray = *_rays[iray];
+    ray.setNyquistMps(val);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////
