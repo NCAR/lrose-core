@@ -141,8 +141,20 @@ paramdef string {
     
 commentdef {
   p_header = "COMPUTING KDP";
+  p_text = "KDP will be computed if KDP_available is FALSE.";
 }
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is KDP data available?";
+  p_help = "If KDP is available, then it is not computed. Instead KDP_field_name will be read in.";
+} KDP_available;
+
+paramdef string {
+  p_default = "KDP";
+  p_descr = "Field name for KDP.";
+} KDP_field_name;
+    
 paramdef string {
   p_default = "use-defaults";
   p_descr = "Path for parameters for computing KDP.";

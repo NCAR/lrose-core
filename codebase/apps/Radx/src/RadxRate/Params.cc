@@ -833,7 +833,31 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COMPUTING KDP");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("KDP will be computed if KDP_available is FALSE.");
+    tt++;
+    
+    // Parameter 'KDP_available'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("KDP_available");
+    tt->descr = tdrpStrDup("Is KDP data available?");
+    tt->help = tdrpStrDup("If KDP is available, then it is not computed. Instead KDP_field_name will be read in.");
+    tt->val_offset = (char *) &KDP_available - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'KDP_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("KDP_field_name");
+    tt->descr = tdrpStrDup("Field name for KDP.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &KDP_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("KDP");
     tt++;
     
     // Parameter 'KDP_params_file_path'

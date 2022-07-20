@@ -463,6 +463,10 @@ public:
 
   char* LDR_field_name;
 
+  tdrp_bool_t KDP_available;
+
+  char* KDP_field_name;
+
   char* KDP_params_file_path;
 
   char* PID_params_file_path;
@@ -518,7 +522,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

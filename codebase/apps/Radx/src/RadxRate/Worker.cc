@@ -163,9 +163,11 @@ RadxRay *Worker::compute(RadxRay *inputRay,
   RadxRay *outputRay = new RadxRay;
   outputRay->copyMetaData(*inputRay);
   
-  // compute kdp
+  // compute kdp if not passed in
 
-  _kdpCompute();
+  if (!_params.KDP_available) {
+    _kdpCompute();
+  }
 
   // compute pid
 
@@ -432,6 +434,21 @@ int Worker::_loadInputArrays(RadxRay *inputRay)
   if (_loadFieldArray(inputRay, _params.RHOHV_field_name,
                       true, _rhohvArray)) {
     return -1;
+  }
+  
+  if (_params.KDP_available) {
+    // load in KDP
+    if (_loadFieldArray(inputRay, _params.KDP_field_name,
+                        true, _kdpArray)) {
+      return -1;
+    }
+    memcpy(_kdpScArray, _kdpArray, _nGates * sizeof(double));
+  } else {
+    // prepare to compute KDP
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      _kdpArray[igate] = missingDbl;
+      _kdpScArray[igate] = missingDbl;
+    }
   }
   
   if (_params.LDR_available) {
