@@ -445,6 +445,10 @@ public:
 
   char* end_time;
 
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -522,7 +526,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[57];
+  mutable TDRPtable _table[60];
 
   const char *_className;
 

@@ -629,6 +629,12 @@ void RadxRate::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
+  // max range
+  
+  if (_params.set_max_range) {
+    file.setReadMaxRangeKm(_params.max_range_km);
+  }
+
   // field names
 
   if (_params.SNR_available) {
