@@ -445,10 +445,6 @@ public:
 
   char* end_time;
 
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
   tdrp_bool_t SNR_available;
 
   char* SNR_field_name;
@@ -508,6 +504,10 @@ public:
   tdrp_bool_t append_year_dir_to_output_dir;
 
   output_format_t output_format;
+
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
 

@@ -119,6 +119,20 @@ RadxPid::RadxPid(int argc, char **argv)
     exit(0);
   }
 
+  // check params for consistency
+
+  if (_params.KDP_available) {
+    if (_params.PID_use_attenuation_corrected_fields) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "  Inconsistent parameters set in params file: " << _paramsPath << endl;
+      cerr << "  KDP_available is TRUE" << endl;
+      cerr << "  PID_use_attenuation_corrected_fields is TRUE" << endl;
+      cerr << "  You must compute KDP to use atten-corrected fields" << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
   // read params for KdpFilt
 
   if (!_params.KDP_available) {
