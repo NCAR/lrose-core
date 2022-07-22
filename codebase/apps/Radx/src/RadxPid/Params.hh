@@ -454,6 +454,10 @@ public:
 
   char* LDR_field_name;
 
+  tdrp_bool_t KDP_available;
+
+  char* KDP_field_name;
+
   char* KDP_params_file_path;
 
   char* PID_params_file_path;
@@ -486,6 +490,10 @@ public:
 
   output_format_t output_format;
 
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
   tdrp_bool_t override_standard_pseudo_earth_radius;
 
   double pseudo_earth_radius_ratio;
@@ -503,7 +511,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[51];
+  mutable TDRPtable _table[56];
 
   const char *_className;
 

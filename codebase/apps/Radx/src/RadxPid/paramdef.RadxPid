@@ -143,6 +143,17 @@ commentdef {
   p_header = "COMPUTING KDP";
 }
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Is KDP data available?";
+  p_help = "If KDP is available, then it is not computed. Instead KDP_field_name will be read in.";
+} KDP_available;
+
+paramdef string {
+  p_default = "KDP";
+  p_descr = "Field name for KDP.";
+} KDP_field_name;
+    
 paramdef string {
   p_default = "use-defaults";
   p_descr = "Path for parameters for computing KDP.";
@@ -394,6 +405,22 @@ paramdef enum output_format_t {
   p_default = OUTPUT_FORMAT_CFRADIAL;
   p_descr = "Format for the output files.";
 } output_format;
+
+commentdef {
+  p_header = "SET MAX RANGE - OPTIONAL";
+  p_text = "If set, all rays will be truncated at this range.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
 
 commentdef {
   p_header = "SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";

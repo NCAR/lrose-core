@@ -119,6 +119,22 @@ RadxPid::RadxPid(int argc, char **argv)
     exit(0);
   }
 
+  // read params for KdpFilt
+
+  if (!_params.KDP_available) {
+    if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
+      // not using defaults
+      if (_kdpFiltParams.load(_params.KDP_params_file_path,
+                              NULL, true, _args.tdrpDebug)) {
+        cerr << "ERROR: " << _progName << endl;
+        cerr << "Cannot read params file for KdpFilt: "
+             << _params.KDP_params_file_path << endl;
+        OK = FALSE;
+        return;
+      }
+    }
+  } // if (!_params.KDP_available)
+
   // read params for Ncar PID
 
   if (strstr(_params.PID_params_file_path, "use-defaults") == NULL) {
@@ -128,20 +144,6 @@ RadxPid::RadxPid(int argc, char **argv)
       cerr << "ERROR: " << _progName << endl;
       cerr << "Cannot read params file for NcarPid: "
            << _params.PID_params_file_path << endl;
-      OK = FALSE;
-      return;
-    }
-  }
-
-  // read params for KdpFilt
-
-  if (strstr(_params.KDP_params_file_path, "use-defaults") == NULL) {
-    // not using defaults
-    if (_kdpFiltParams.load(_params.KDP_params_file_path,
-                            NULL, true, _args.tdrpDebug)) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for KdpFilt: "
-           << _params.KDP_params_file_path << endl;
       OK = FALSE;
       return;
     }
@@ -568,6 +570,12 @@ void RadxPid::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
+  // max range
+  
+  if (_params.set_max_range) {
+    file.setReadMaxRangeKm(_params.max_range_km);
+  }
+
   // field names
 
   if (_params.SNR_available) {
@@ -579,6 +587,9 @@ void RadxPid::_setupRead(RadxFile &file)
   file.addReadField(_params.RHOHV_field_name);
   if (_params.LDR_available) {
     file.addReadField(_params.LDR_field_name);
+  }
+  if (_params.KDP_available) {
+    file.addReadField(_params.KDP_field_name);
   }
   if (_params.copy_selected_input_fields_to_output) {
     for (int ii = 0; ii < _params.copy_fields_n; ii++) {
