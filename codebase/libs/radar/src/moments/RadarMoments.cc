@@ -7774,7 +7774,7 @@ double RadarMoments::_adjustDbzForPwrH(double dbz)
     return dbz;
   }
 
-  if (_measXmitPowerDbmH < -9990 || _calibXmitPowerDbmH < -9990) {
+  if (_measXmitPowerDbmH <= 0 || _calibXmitPowerDbmH <= 0) {
     return dbz;
   }
     
@@ -7799,7 +7799,7 @@ double RadarMoments::_adjustDbzForPwrV(double dbz)
     return dbz;
   }
 
-  if (_measXmitPowerDbmV < -9990 || _calibXmitPowerDbmV < -9990) {
+  if (_measXmitPowerDbmV <= 0 || _calibXmitPowerDbmV <= 0) {
     return dbz;
   }
     
@@ -7824,8 +7824,8 @@ double RadarMoments::_adjustZdrForPwr(double zdr)
     return zdr;
   }
 
-  if (_measXmitPowerDbmH < -9990 || _calibXmitPowerDbmH < -9990 ||
-      _measXmitPowerDbmV < -9990 || _calibXmitPowerDbmV < -9990) {
+  if (_measXmitPowerDbmH <= 0 || _calibXmitPowerDbmH <= 0 ||
+      _measXmitPowerDbmV <= 0 || _calibXmitPowerDbmV <= 0) {
     return zdr;
   }
     
