@@ -140,7 +140,7 @@ RadxRate::RadxRate(int argc, char **argv)
         return;
       }
     }
-  }
+  } // if (!_params.KDP_available)
 
   // read params for Ncar PID
 

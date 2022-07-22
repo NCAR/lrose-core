@@ -401,7 +401,7 @@ void Worker::_allocArrays()
 }
 
 /////////////////////////////////////////////////////
-// load input arrays ready for KDP
+// load input arrays ready for computations
   
 int Worker::_loadInputArrays(RadxRay *inputRay)
   
