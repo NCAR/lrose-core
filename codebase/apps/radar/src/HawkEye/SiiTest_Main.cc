@@ -31,7 +31,6 @@
 //
 ///////////////////////////////////////////////////////////////
 
-//#include "ColorMap.hh"
 #include "SoloDefaultColorWrapper.hh"
 #include "SiiPalette.hh"
 

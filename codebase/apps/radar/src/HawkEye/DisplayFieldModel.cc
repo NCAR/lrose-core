@@ -2,7 +2,7 @@
 #include "toolsa/LogStream.hh"
 #include "DisplayFieldModel.hh"
 #include "DisplayField.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "ColorBar.hh"
 
 

@@ -29,7 +29,7 @@
 #include <string>
 #include <iostream>
 #include "SiiPalette.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "ColorTableManager.hh"
 
 using namespace std;

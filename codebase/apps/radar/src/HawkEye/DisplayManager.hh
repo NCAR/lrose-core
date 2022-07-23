@@ -44,7 +44,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include <QMainWindow>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxTime.hh>

@@ -3,7 +3,7 @@
 
 #include "DisplayFieldModel.hh"
 #include "DisplayManager.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 //#include "../HawkEye/ColorBar.hh"
 
 

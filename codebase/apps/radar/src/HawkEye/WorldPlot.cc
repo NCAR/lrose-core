@@ -42,7 +42,7 @@
 
 #include <toolsa/toolsa_macros.h>
 #include "WorldPlot.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 using namespace std;
 
 ////////////////////////////////////////

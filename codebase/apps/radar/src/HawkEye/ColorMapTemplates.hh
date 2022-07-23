@@ -8,7 +8,7 @@
 // #include "Dialog.hh"
 //#include "ParameterColorDialog.hh"
 #include "ClickableLabel.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 // #include "../HawkEye/ColorBar.hh"
 
 

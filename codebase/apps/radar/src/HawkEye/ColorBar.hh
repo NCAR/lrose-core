@@ -24,7 +24,7 @@
 #ifndef COLORBAR_HH
 #define COLORBAR_HH
 
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 
 #include <QWidget>
 #include <QLayout>

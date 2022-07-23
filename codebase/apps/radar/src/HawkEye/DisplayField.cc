@@ -32,7 +32,7 @@
 
 #include "DisplayField.hh"
 #include "SoloDefaultColorWrapper.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 
 // constructor
 

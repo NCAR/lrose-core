@@ -8,7 +8,7 @@
 #include "ParameterColorView.hh"
 // #include "ClickableLabel.hh"
 #include "toolsa/LogStream.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "ColorBar.hh"
 
 ParameterColorView::ParameterColorView(QWidget *parent) :

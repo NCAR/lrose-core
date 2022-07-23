@@ -39,7 +39,7 @@
 #include "DisplayManager.hh"
 #include "DisplayField.hh"
 #include "DisplayElevation.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "Params.hh"
 #include "Reader.hh"
 

@@ -42,7 +42,7 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 LOC_LIBS = \
           -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
+          -lRadx -lNcxx -lrapformats -leuclid -lrapmath -lqtplot \
           -lphysics -ltoolsa -ldataport -ltdrp \
           $(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
           -lfftw3 -lbz2 -lz -lpthread
@@ -60,7 +60,6 @@ HDRS = \
 	BscanManager.hh \
 	BscanWidget.hh \
 	ColorBar.hh \
-	ColorMap.hh \
 	ColorTableManager.hh \
 	DisplayManager.hh \
 	FieldRenderer.hh \
@@ -100,7 +99,6 @@ NORM_SRCS = \
 	BoundaryPointEditor.cc \
 	Beam.cc \
 	BscanBeam.cc \
-	ColorMap.cc \
 	ColorTableManager.cc \
 	DisplayField.cc \
 	DisplayFieldModel.cc \

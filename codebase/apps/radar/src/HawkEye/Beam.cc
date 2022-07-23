@@ -36,7 +36,7 @@
 #include <QStylePainter>
 
 #include "Beam.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "AllocCheck.hh"
 
 using namespace std;

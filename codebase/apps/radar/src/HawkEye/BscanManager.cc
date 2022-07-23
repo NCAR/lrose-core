@@ -39,7 +39,7 @@
 #include "BscanManager.hh"
 #include "DisplayField.hh"
 #include "BscanWidget.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"

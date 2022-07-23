@@ -37,7 +37,7 @@
 #include <QLabel>
 #include <QDialog>
 #include <iostream>
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 
 using namespace std;
 

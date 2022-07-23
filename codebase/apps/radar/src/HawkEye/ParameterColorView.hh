@@ -9,7 +9,7 @@
 #include "FlowLayout.hh"
 //#include "ParameterColorDialog.hh"
 #include "ColorMapTemplates.hh"
-#include "ColorMap.hh"
+#include <qtplot/ColorMap.hh>
 #include "ColorBar.hh"
 
 class DialogOptionsWidget;
