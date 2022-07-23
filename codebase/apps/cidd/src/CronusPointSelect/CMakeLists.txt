@@ -2,80 +2,24 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: HawkEye
+# app name: CronusPointSelect
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/HawkEye
+# dir: lrose-core/codebase/apps/cidd/src/CronusPointSelect
 ###############################################################
 
-project (HawkEye)
+project (CronusPointSelect)
 
 # source files
 
 set (SRCS
       Params.cc
-      AllocCheck.cc
       Args.cc
-      BoundaryPointEditor.cc
-      Beam.cc
-      BscanBeam.cc
-      ColorTableManager.cc
-      DisplayField.cc
-      DisplayFieldModel.cc
-      FlowLayout.cc
-      HawkEye.cc
-      HawkEyeLogger.cc
       Main.cc
-      PaletteManager.cc
-      PpiBeam.cc
-      Reader.cc
-      RhiBeam.cc
-      ScaledLabel.cc
-      SiiPalette.cc
-      SoloDefaultColorWrapper.cc
-      SoloFunctionsModel.cc
-      SpreadSheetItem.cc
-      SpreadSheetModel.cc
-      SpreadSheetUtils.cc
-      SweepManager.cc
-      WorldPlot.cc
-      BscanManager.cc
-      BscanWidget.cc
-      ClickableLabel.cc
-      ColorBar.cc
-      ColorMapTemplates.cc
-      DisplayManager.cc
-      FieldColorController.cc
-      FieldRenderer.cc
-      FunctionEditor.cc
-      ParameterColorView.cc
-      PolarManager.cc
-      PolarWidget.cc
-      PpiWidget.cc
-      RhiWidget.cc
-      RhiWindow.cc
-      SoloFunctions.cc
-      SpreadSheetController.cc
-      SpreadSheetDelegate.cc
-      SpreadSheetView.cc
-      TextEdit.cc
-      TimeScaleWidget.cc
+      CronusPointSelect.cc
+      doPrint.cc
     )
-
-# QT5
-
-set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_AUTOMOC ON)
-set (CMAKE_AUTORCC ON)
-set (CMAKE_AUTOUIC ON)
-find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-
-pkg_search_module(Qt5Core REQUIRED)
-pkg_search_module(Qt5Gui REQUIRED)
-pkg_search_module(Qt5Widgets REQUIRED)
-pkg_search_module(Qt5Network REQUIRED)
-pkg_search_module(Qt5Qml REQUIRED)
 
 # include directories
 
@@ -125,12 +69,6 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
-
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${Qt5Gui_INCLUDE_DIRS})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-include_directories(${Qt5Network_INCLUDE_DIRS})
-include_directories(${Qt5Qml_INCLUDE_DIRS})
 
 # link directories
 
@@ -188,14 +126,13 @@ link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (shapelib)
 link_libraries (cidd)
-link_libraries (qtplot)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (fftw3)
 link_libraries (pthread)
+link_libraries (m)
 link_libraries (Ncxx)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
@@ -208,11 +145,6 @@ link_libraries (png)
 link_libraries (z)
 link_libraries (bz2)
 link_libraries (m)
-link_libraries (${Qt5Core_LIBRARIES})
-link_libraries (${Qt5Gui_LIBRARIES})
-link_libraries (${Qt5Widgets_LIBRARIES})
-link_libraries (${Qt5Network_LIBRARIES})
-link_libraries (${Qt5Qml_LIBRARIES})
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -220,7 +152,7 @@ link_libraries (${Qt5Qml_LIBRARIES})
 makeTdrpParams()
 # application
 
-add_executable (HawkEye ${SRCS})
+add_executable (CronusPointSelect ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

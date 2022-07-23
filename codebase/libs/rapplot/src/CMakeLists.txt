@@ -72,8 +72,6 @@ set (SRCS
       ./xutils/xrs.c
       ./xutils/xudr.c
       ./xutils/X_Resource.cc
-      ./FirLoc/FirLoc.cc
-      ./StationLoc/StationLoc.cc
    )
 
 if(APPLE)

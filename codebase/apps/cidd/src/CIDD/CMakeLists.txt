@@ -2,80 +2,144 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: HawkEye
+# app name: CIDD
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/HawkEye
+# dir: lrose-core/codebase/apps/cidd/src/CIDD
 ###############################################################
 
-project (HawkEye)
+project (CIDD)
 
 # source files
 
 set (SRCS
-      Params.cc
-      AllocCheck.cc
-      Args.cc
-      BoundaryPointEditor.cc
-      Beam.cc
-      BscanBeam.cc
-      ColorTableManager.cc
-      DisplayField.cc
-      DisplayFieldModel.cc
-      FlowLayout.cc
-      HawkEye.cc
-      HawkEyeLogger.cc
-      Main.cc
-      PaletteManager.cc
-      PpiBeam.cc
-      Reader.cc
-      RhiBeam.cc
-      ScaledLabel.cc
-      SiiPalette.cc
-      SoloDefaultColorWrapper.cc
-      SoloFunctionsModel.cc
-      SpreadSheetItem.cc
-      SpreadSheetModel.cc
-      SpreadSheetUtils.cc
-      SweepManager.cc
-      WorldPlot.cc
-      BscanManager.cc
-      BscanWidget.cc
-      ClickableLabel.cc
-      ColorBar.cc
-      ColorMapTemplates.cc
-      DisplayManager.cc
-      FieldColorController.cc
-      FieldRenderer.cc
-      FunctionEditor.cc
-      ParameterColorView.cc
-      PolarManager.cc
-      PolarWidget.cc
-      PpiWidget.cc
-      RhiWidget.cc
-      RhiWindow.cc
-      SoloFunctions.cc
-      SpreadSheetController.cc
-      SpreadSheetDelegate.cc
-      SpreadSheetView.cc
-      TextEdit.cc
-      TimeScaleWidget.cc
+      Csyprod_P.cc
+      Cdraw_P.cc
+      Cgui_P.cc
+      Cimages_P.cc
+      Cterrain_P.cc
+      Croutes_P.cc
+      Product.cc
+      ProductMgr.cc
+      RenderContext.cc
+      SymprodRender.cc
+      SymprodRenderObj.cc
+      TimeList.cc
+      TimePlot.cc
+      cidd_coords.cc
+      cidd_font.cc
+      cidd_init.cc
+      cidd_main.cc
+      cidd_params.cc
+      cidd_remote_commands.cc
+      cidd_reset.cc
+      cidd_signals.cc
+      cmd_pu_proc.cc
+      colorscales.cc
+      contours.cc
+      data_gather.cc
+      data_init.cc
+      data_io.cc
+      data_pu_proc.cc
+      draw_export_init.cc
+      draw_pu_proc.cc
+      past_pu_proc.cc
+      page_pu_proc.cc
+      prod_pu_proc.cc
+      fcast_pu_proc.cc
+      fields_pu_proc.cc
+      gen_time_pu_proc.cc
+      graphic_canvas_events.cc
+      graphic_canvas_events_bkwd.cc
+      graphic_check.cc
+      graphic_compute.cc
+      graphic_cross_section.cc
+      graphic_dump_image.cc
+      graphic_manage.cc
+      graphic_margin_events.cc
+      graphic_panel.cc
+      graphic_reset.cc
+      graphic_resize.cc
+      graphic_xsect_canvas_events.cc
+      graphic_xsect_resize.cc
+      graphic_zoom.cc
+      gui_destroy.cc
+      gui_init.cc
+      gui_label_frame.cc
+      gui_modify.cc
+      h_win_proc.cc
+      mdvx_data_request.cc
+      movie_control.cc
+      movie_frame_retrieve.cc
+      movie_frame_save.cc
+      movie_pu_proc.cc
+      overlay_init.cc
+      over_pu_proc.cc
+      process_args.cc
+      render_azimuths.cc
+      render_bottom_margin.cc
+      render_cart_grid.cc
+      render_cbar.cc
+      render_click_marks.cc
+      render_control.cc
+      render_distorted_grid.cc
+      render_filled_contours.cc
+      render_filled_image.cc
+      render_grids.cc
+      render_ht_sel.cc
+      render_left_margin.cc
+      render_legends.cc
+      render_line_contours.cc
+      render_margins.cc
+      render_movie_frame.cc
+      render_overlays.cc
+      render_polar_grid.cc
+      render_products.cc
+      render_range_rings.cc
+      render_right_margin.cc
+      render_route_winds.cc
+      render_terrain.cc
+      render_top_layers.cc
+      render_top_margin.cc
+      render_winds.cc
+      render_xsect_control.cc
+      render_xsect_grids.cc
+      render_xsect_line_contours.cc
+      render_xsect_margins.cc
+      render_xsect_products.cc
+      render_xsect_top_layers.cc
+      render_xsect_winds.cc
+      route_pu_proc.cc
+      route_winds_init.cc
+      save_pu_proc.cc
+      shmem_init.cc
+      status_pu_proc.cc
+      symprod_init.cc
+      timer_control.cc
+      v_win_proc.cc
+      winds_init.cc
+      xview_file_access.cc
+      zoom_pu_proc.cc
+      cmd_pu_ui.cc
+      data_pu_ui.cc
+      draw_pu_ui.cc
+      fcast_pu_ui.cc
+      fields_pu_ui.cc
+      gen_time_pu_ui.cc
+      h_win_ui.cc
+      movie_pu_ui.cc
+      over_pu_ui.cc
+      past_pu_ui.cc
+      page_pu_ui.cc
+      prod_pu_ui.cc
+      route_pu_ui.cc
+      save_pu_ui.cc
+      status_pu_ui.cc
+      v_win_ui.cc
+      zoom_pu_ui.cc
+      Uparams.cc
     )
-
-# QT5
-
-set (CMAKE_INCLUDE_CURRENT_DIR ON)
-set (CMAKE_AUTOMOC ON)
-set (CMAKE_AUTORCC ON)
-set (CMAKE_AUTOUIC ON)
-find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
-
-pkg_search_module(Qt5Core REQUIRED)
-pkg_search_module(Qt5Gui REQUIRED)
-pkg_search_module(Qt5Widgets REQUIRED)
-pkg_search_module(Qt5Network REQUIRED)
-pkg_search_module(Qt5Qml REQUIRED)
 
 # include directories
 
@@ -125,12 +189,6 @@ endif()
 if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
-
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${Qt5Gui_INCLUDE_DIRS})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-include_directories(${Qt5Network_INCLUDE_DIRS})
-include_directories(${Qt5Qml_INCLUDE_DIRS})
 
 # link directories
 
@@ -188,13 +246,17 @@ link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (shapelib)
 link_libraries (cidd)
-link_libraries (qtplot)
+link_libraries (devguide)
+link_libraries (xview)
+link_libraries (olgx)
+link_libraries (X11)
+link_libraries (Xext)
+link_libraries (png)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (fftw3)
 link_libraries (pthread)
 link_libraries (Ncxx)
 link_libraries (netcdf)
@@ -208,11 +270,6 @@ link_libraries (png)
 link_libraries (z)
 link_libraries (bz2)
 link_libraries (m)
-link_libraries (${Qt5Core_LIBRARIES})
-link_libraries (${Qt5Gui_LIBRARIES})
-link_libraries (${Qt5Widgets_LIBRARIES})
-link_libraries (${Qt5Network_LIBRARIES})
-link_libraries (${Qt5Qml_LIBRARIES})
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
@@ -220,7 +277,7 @@ link_libraries (${Qt5Qml_LIBRARIES})
 makeTdrpParams()
 # application
 
-add_executable (HawkEye ${SRCS})
+add_executable (CIDD ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

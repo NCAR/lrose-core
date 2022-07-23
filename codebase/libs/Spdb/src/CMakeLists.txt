@@ -72,12 +72,14 @@ set (SRCS
       ./FltRoute/FltRoute.cc
       ./FltRoute/PosnRpt.cc
       ./FltRoute/WayPoint.cc
+      ./FirLoc/FirLoc.cc
       ./ltg/LtgSpdbBuffer.cc
       ./Sounding/Sounding.cc
       ./Sounding/SoundingUtils.cc
       ./Sounding/SoundingGet.cc
       ./Sounding/SoundingPut.cc
       ./Spdb/Spdb.cc
+      ./StationLoc/StationLoc.cc
       ./StormThresholds/ThresholdBiasMapping.cc
       ./StormThresholds/MultiThreshBiasMapping.cc
       ./Symprod/Symprod.cc

@@ -23,9 +23,11 @@ SUB_DIRS = \
 	DsSpdb \
 	DsSymprodServer \
 	FltRoute \
+	FirLoc \
 	ltg \
 	Sounding \
 	Spdb \
+	StationLoc \
 	StormThresholds \
 	Symprod \
 	WxHazards
