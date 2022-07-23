@@ -39,7 +39,7 @@ TARGET_FILE = Taf2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lrapplot -ldataport -leuclid \
+	-ldataport -leuclid \
 	-ltdrp -ltoolsa $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 

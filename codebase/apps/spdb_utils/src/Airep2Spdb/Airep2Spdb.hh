@@ -40,7 +40,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 using namespace std;
 
 class DsInputPath;

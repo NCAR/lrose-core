@@ -38,7 +38,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <toolsa/toolsa_macros.h>
-#include <rapplot/FirLoc.hh>
+#include <Spdb/FirLoc.hh>
 using namespace std;
 
 // constructor

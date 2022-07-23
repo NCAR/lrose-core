@@ -50,9 +50,9 @@
 #include <vector>
 
 // System/RAP include files
-#include <os_config.h>
-#include <dataport/port_types.h>
+#include <toolsa/os_config.h>
 #include <toolsa/DateTime.hh>
+#include <dataport/port_types.h>
 
 /////////////////////////
 // Forward declarations

@@ -40,8 +40,8 @@
 #include <vector>
 #include <didss/DsInputPath.hh>
 #include <rapformats/SigAirMet.hh>
-#include <rapplot/StationLoc.hh>
-#include <rapplot/FirLoc.hh>
+#include <Spdb/StationLoc.hh>
+#include <Spdb/FirLoc.hh>
 #include "ReadStates.hh"
 #include "Args.hh"
 #include "Params.hh"

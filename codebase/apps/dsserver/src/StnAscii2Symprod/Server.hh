@@ -43,7 +43,7 @@
 #include <Spdb/Symprod.hh>
 #include <toolsa/MemBuf.hh>
 #include <rapformats/SigAirMet.hh>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 
 #include "Params.hh"
 

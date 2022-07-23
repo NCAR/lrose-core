@@ -45,7 +45,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pjg_flat.h>
 #include <toolsa/http.h>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 
 using namespace std;
 

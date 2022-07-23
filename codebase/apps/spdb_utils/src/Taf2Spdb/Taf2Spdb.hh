@@ -39,7 +39,7 @@
 #include <string>
 #include <dataport/port_types.h>
 #include <didss/DsInputPath.hh>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;

@@ -8,7 +8,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Jame's StationLoc class in rapplot library.
+# Makefile for Jame's StationLoc class
 #
 #
 # May 2000
@@ -20,10 +20,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 LOC_INCLUDES = -I../include
 LOC_CFLAGS = 
 
-TARGET_FILE = ../librapplot.a
+TARGET_FILE = ../libSpdb.a
 
 HDRS = \
-	../include/rapplot/StationLoc.hh
+	../include/Spdb/StationLoc.hh
 
 CPPC_SRCS = \
 	StationLoc.cc

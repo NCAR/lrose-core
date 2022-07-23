@@ -43,7 +43,7 @@
 #include <vector>
 #include <didss/DsInputPath.hh>
 #include <rapformats/Taf.hh>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 #include <toolsa/DateTime.hh>
 #include "Args.hh"
 #include "Params.hh"

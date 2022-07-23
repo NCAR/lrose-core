@@ -53,7 +53,7 @@
 
 #include <rapplot/xrs.h>
 #include <rapplot/xutils.h>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 #include <toolsa/port.h>
 #include <toolsa/pmu.h>    
 #include <toolsa/mem.h>    

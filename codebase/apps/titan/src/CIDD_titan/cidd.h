@@ -92,7 +92,7 @@
 #include <toolsa/umisc.h>
 #include <toolsa/xdru.h>
 #include <rapplot/xrs.h>
-#include <rapplot/StationLoc.hh>  // Station locator class 
+#include <Spdb/StationLoc.hh>  // Station locator class 
 #include <rapplot/xutils.h> // X Windows related  support functions 
 
 // MDVX support classes

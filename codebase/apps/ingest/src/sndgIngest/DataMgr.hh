@@ -39,7 +39,7 @@
 #include <didss/LdataInfo.hh>
 #include <toolsa/DateTime.hh>
 #include <rapformats/Sndg.hh>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 #include <Spdb/DsSpdb.hh>
 
 //

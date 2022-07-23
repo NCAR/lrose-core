@@ -21,9 +21,7 @@ LIBNAME = lib$(MODULE_NAME).a
 
 SUB_DIRS = \
 	gplot \
-	xutils \
-	FirLoc \
-	StationLoc
+	xutils
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets
 

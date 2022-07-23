@@ -192,6 +192,7 @@ codebase/apps/dsserver/src/ResolveUrl/ResolveUrl
 codebase/apps/dsserver/src/Rhi2Symprod/Rhi2Symprod
 codebase/apps/dsserver/src/SigAirMet2Symprod/SigAirMet2Symprod
 codebase/apps/dsserver/src/SpdbQuery/SpdbQuery
+codebase/apps/dsserver/src/StnAscii2Symprod/StnAscii2Symprod
 codebase/apps/dsserver/src/SunCal2Symprod/SunCal2Symprod
 codebase/apps/dsserver/src/SyncDataMap/SyncDataMap
 codebase/apps/dsserver/src/TestDataMap/TestDataMap
@@ -220,6 +221,7 @@ codebase/apps/hydro/src/Shape2Map/Shape2Map
 codebase/apps/ingest/src/AcData2Spdb/AcData2Spdb
 codebase/apps/ingest/src/AcTrack2Polygon/AcTrack2Polygon
 codebase/apps/ingest/src/AcarsNc2GenPt/AcarsNc2GenPt
+codebase/apps/ingest/src/Amdar2Spdb/Amdar2Spdb
 codebase/apps/ingest/src/ArgentineAwsIngest/ArgentineAwsIngest
 codebase/apps/ingest/src/AsciiPosn2Spdb/AsciiPosn2Spdb
 codebase/apps/ingest/src/Awos2Spdb/Awos2Spdb
@@ -252,6 +254,7 @@ codebase/apps/ingest/src/LdmMetars2File/LdmMetars2File
 codebase/apps/ingest/src/Ltg2Spdb/Ltg2Spdb
 codebase/apps/ingest/src/madis2Spdb/madis2Spdb
 codebase/apps/ingest/src/Metar2Spdb/Metar2Spdb
+codebase/apps/ingest/src/Metreport2Spdb/Metreport2Spdb
 codebase/apps/ingest/src/Mrms2Mdv/Mrms2Mdv
 codebase/apps/ingest/src/MrmsGribIngest/MrmsGribIngest
 codebase/apps/ingest/src/NWSsoundingIngest/NWSsoundingIngest
@@ -575,6 +578,7 @@ codebase/apps/spdb_utils/src/Sigmet2Mdv/Sigmet2Mdv
 codebase/apps/spdb_utils/src/Sndg2Ascii/Sndg2Ascii
 codebase/apps/spdb_utils/src/SpdbBdry2Axf/SpdbBdry2Axf
 codebase/apps/spdb_utils/src/SpdbMultSim/SpdbMultSim
+codebase/apps/spdb_utils/src/SpdbXmlPut/SpdbXmlPut
 codebase/apps/spdb_utils/src/StationCompare/StationCompare
 codebase/apps/spdb_utils/src/Taf2Spdb/Taf2Spdb
 codebase/apps/spdb_utils/src/WxStn2Table/WxStn2Table

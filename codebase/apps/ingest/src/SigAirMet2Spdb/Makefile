@@ -39,7 +39,7 @@ TARGET_FILE = SigAirMet2Spdb
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-lrapplot -ltoolsa -ldataport -leuclid \
+	-ltoolsa -ldataport -leuclid \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
 	-lpthread -lm
 

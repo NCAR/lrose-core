@@ -43,7 +43,7 @@
 //
 //
 
-#include <os_config.h>
+#include <toolsa/os_config.h>
 #include <toolsa/str.h>
 #include <toolsa/umisc.h>
 #include <cstring>

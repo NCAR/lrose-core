@@ -37,7 +37,7 @@ TARGET_FILE = sndgIngest
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapplot -lSpdb -ldsserver -ldidss \
+LOC_LIBS = -lSpdb -ldsserver -ldidss \
 	-ltoolsa -lpthread -ldataport -ltdrp -lrapformats \
 	$(NETCDF4_LIBS) -lbz2 -lz
 

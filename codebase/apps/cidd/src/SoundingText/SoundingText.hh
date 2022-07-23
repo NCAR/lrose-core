@@ -39,7 +39,7 @@
 #include <string>
 #include <rapformats/coord_export.h>
 #include <Mdv/DsMdvx.hh>
-#include <rapplot/StationLoc.hh>
+#include <Spdb/StationLoc.hh>
 #include <toolsa/MsgLog.hh>
 #include "Args.hh"
 #include "Params.hh"

@@ -35,7 +35,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapplot \
+LOC_LIBS = -lSpdb -ldsserver -ldidss \
 	-lrapformats -ltoolsa -lpthread -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lm
 

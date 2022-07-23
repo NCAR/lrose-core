@@ -45,7 +45,7 @@ using namespace std;
 #include <string>
 
 #include <rapformats/coord_export.h>
-#include <rapplot/StationLoc.hh> 
+#include <Spdb/StationLoc.hh> 
 #include <toolsa/pmu.h>
 
 
