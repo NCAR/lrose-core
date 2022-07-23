@@ -24,6 +24,7 @@ set ( LROSE_LIBRARIES
         Mdv
         advect
         rapplot
+        qtplot
         Radx
         Ncxx
         rapformats

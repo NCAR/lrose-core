@@ -414,6 +414,7 @@ def getLibLinkOrder():
                   'Mdv',
                   'advect',
                   'rapplot',
+                  'qtplot',
                   'Radx',
                   'Ncxx',
                   'rapformats',

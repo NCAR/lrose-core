@@ -95,7 +95,7 @@ def main():
                     'euclid', 'forayRal', 'grib', 'grib2', 'hydro',
                     'mdv', 'niwot_basic', 'niwot_util', 
                     'olgx', 'physics', 'radar',
-                    'rapformats', 'rapmath', 'rapplot', 'rdi', 'shapelib',
+                    'rapformats', 'rapmath', 'rapplot', 'qtplot', 'rdi', 'shapelib',
                     'spdb', 'spdbFormats', 'symprod', 'tdrp', 'titan',
                     'toolsa', 'trmm_rsl', 'xview' ]
     else:

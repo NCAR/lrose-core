@@ -14,5 +14,6 @@ libradar.a
 librapformats.a
 librapmath.a
 librapplot.a
+libqtplot.a
 libtdrp.a
 libtoolsa.a

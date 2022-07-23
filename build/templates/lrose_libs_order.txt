@@ -11,6 +11,7 @@
  -ladvect
  -lphysics
  -lrapplot  (X11/Xlib.h, X11/Xutil.h, X11/Xatom.h, X11/Xresource.h, X11/Xos.h)
+ -lqtplot
  -lRadx
  -lNcxx
  -lrapformats

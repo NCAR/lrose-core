@@ -1185,6 +1185,7 @@ def getLroseLinkOrder():
                   'Mdv',
                   'advect',
                   'rapplot',
+                  'qtplot',
                   'Radx',
                   'Ncxx',
                   'rapformats',

@@ -25,6 +25,7 @@ libradar.a   # Depends on fftw3 library
 librapformats.a
 librapmath.a
 librapplot.a
+libqtplot.a
 libshapelib.a
 libtdrp.a
 libtitan.a
