@@ -911,7 +911,18 @@ int Ncf2MdvTrans::_addDataFields()
   }
   if (_mdv->getNFields() < 1) {
     TaStr::AddStr(_errStr, "ERROR - Ncf2MdvTrans::_addDataFields");
-    TaStr::AddStr(_errStr, "  No fields found");
+    TaStr::AddStr(_errStr, "  No matching fields found");
+    TaStr::AddStr(_errStr, "  Trying to read fields:");
+    for (int kk = 0; kk < (int) _mdv->_readFieldNames.size(); kk++) {
+      TaStr::AddStr(_errStr, "    -->> ", _mdv->_readFieldNames[kk]);
+    } // kk
+    TaStr::AddStr(_errStr, "  Available fields are:");
+    for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
+      int numDims = _ncFile->get_var(ivar)->num_dims();
+      if (numDims >= 2 && numDims <= 4) {
+        TaStr::AddStr(_errStr, "    -->> ", _ncFile->get_var(ivar)->name());
+      }
+    }
     return -1;
   }
 
