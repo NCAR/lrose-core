@@ -1,4 +1,4 @@
-#include "X11ColorMap.h"
+#include <qtplot/X11ColorMap.hh>
 #include <algorithm>
 #include <cctype>
 #include <string>

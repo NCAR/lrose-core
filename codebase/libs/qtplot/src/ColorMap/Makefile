@@ -18,16 +18,29 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-LOC_INCLUDES = -I../include
-LOC_CFLAGS =
+LOC_INCLUDES = -I../include $(QT_INCLUDES)
+LOC_CFLAGS = $(QT_LDFLAGS)
+
+LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
+	-ldsserver -ldidss -leuclid -lphysics \
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	$(QT_LIBS)  \
+	-lz -lpthread -lm 
+
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) 
+
+LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
+
 
 TARGET_FILE = ../libqtplot.a
 
 HDRS = \
-	../include/qtplot/ColorMap.hh
+	../include/qtplot/ColorMap.hh \
+	../include/qtplot/X11ColorMap.hh
 
 CPPC_SRCS = \
-	ColorMap.cc
+	ColorMap.cc \
+	X11ColorMap.cc
 
 #
 # general targets

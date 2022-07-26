@@ -1,4 +1,19 @@
 
+#ifndef X11COLORMAP_H
+#define X11COLORMAP_H
+
+#ifndef DLL_EXPORT
+#ifdef WIN32
+#ifdef QT_PLUGIN
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+#else
+#define DLL_EXPORT
+#endif
+#endif
+
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
@@ -13,7 +28,7 @@ using namespace std;
 #define MAX_X11_COLOR_TABLE_ENTRY_LENGTH 580
 #define NUMBER_OF_ENTRIES_X11_COLOR_MAP 753
 
-class X11ColorMap {
+class DLL_EXPORT X11ColorMap {
 
 
   public:
@@ -45,7 +60,6 @@ class X11ColorMap {
 	int countLines(char *fileName);
 	void readX11ColorTables();
 
-
-
-
 };
+
+#endif

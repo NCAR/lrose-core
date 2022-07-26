@@ -221,7 +221,7 @@ LUCID_app:
 	hdiutil create -volname LUCID_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/LUCID/LUCID.app  -ov -format UDZO LUCID_Cyclone.dmg
 
 
-LOC_LIBS1 = -L /Users/brenda/lrose/lib -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp
+LOC_LIBS1 = -L /Users/brenda/lrose/lib -lqtplot -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp
 LOC_LIBS2 = -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++
 
 # make the simple cartesian image generator
@@ -247,8 +247,10 @@ simple_cart_gen:
 	-ldataport $(NETCDF4_LIBS) -lfftw3 -lbz2 -lz -lpthread -lm
 
 
+# 	g++ -g -std=c++11  main.cpp PrintMdv.cc X11ColorMap.cpp \
+
 simple_cart_gen2:
-	g++ -g -std=c++11  main.cpp PrintMdv.cc X11ColorMap.cpp \
+	g++ -g -std=c++11  main.cpp PrintMdv.cc \
 	-I /Users/brenda/lrose/include \
 	$(LOC_INCLUDES) \
 	$(LOC_LIBS1) \
