@@ -8,6 +8,7 @@
 
 SCRIPTS = \
         RUNtests.sh \
+	GetAwsRadar.py \
 	TimeCmd.py \
 	copyright_prepend \
 	copyright_remove \
