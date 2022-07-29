@@ -41,7 +41,7 @@
 #include <Mdv/MdvxProj.hh>
 #include <Mdv/MdvxRadar.hh>
 #include <Mdv/MdvxTimeStamp.hh>
-#include "X11ColorMap.h"
+#include "qtplot/X11ColorMap.hh"
 
 #include <QImage>
 #include <QColor>
@@ -983,6 +983,7 @@ static string colorName[] =
   _colorMapRGB = new unsigned int[_nbins];
   // need a color scale 
   // TODO: integrate with color scale class
+  // TODO: make color scale class a library? since it is now used by HawkEye, HawkEdit, and now LUCID??
   try {
     for (int i=0; i<_nbins; i++) {
       _colorMapRGB[i] = X11ColorMap::instance()->x11Name2Rgb(colorName[i]);

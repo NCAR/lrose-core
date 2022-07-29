@@ -13,6 +13,9 @@
 
 using namespace std;
 
+// args should be ...
+// BestLittleCartImageGenerator  input-file output-file color-scale-[file? or name?]
+
 int main(int argc, char *argv[])
 {
 
