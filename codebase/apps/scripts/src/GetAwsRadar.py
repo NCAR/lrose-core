@@ -21,7 +21,7 @@ from optparse import OptionParser
 import urllib
 from xml.dom import minidom
 from sys import stdin
-from urllib import urlopen
+from urllib.request import urlopen
 from subprocess import call
 
 def main():
@@ -244,7 +244,7 @@ def doDownload(radarName, fileTime, fileEntry, fileName):
     tmpPath = os.path.join(options.tmpDir, fileName)
     try:
         tmpFile = open(tmpPath, 'wb')
-        opener = urllib.URLopener()
+        opener = urllib.request.URLopener()
         myfile = opener.open(os.path.join(dataURL,fileEntry))
         tmpFile.write(myfile.read())
         tmpFile.close()
