@@ -696,6 +696,30 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'print_sweep_angle_table'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_sweep_angle_table");
+    tt->descr = tdrpStrDup("Option to print out sweep angle table.");
+    tt->help = tdrpStrDup("If true, the sweep angles for each file will be printed to stdout.");
+    tt->val_offset = (char *) &print_sweep_angle_table - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'field_for_stats'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("field_for_stats");
+    tt->descr = tdrpStrDup("Field to read, for stats.");
+    tt->help = tdrpStrDup("If set, only this single field will be read in. That will speed up gathering the stats.");
+    tt->val_offset = (char *) &field_for_stats - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

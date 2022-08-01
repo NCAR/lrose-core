@@ -81,6 +81,16 @@ paramdef boolean {
   p_help = "If true, print out message for if ngates do NOT vary.";
 } check_ngates_vary;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print out sweep angle table.";
+  p_help = "If true, the sweep angles for each file will be printed to stdout.";
+} print_sweep_angle_table;
 
+paramdef string {
+  p_default = "";
+  p_descr = "Field to read, for stats.";
+  p_help = "If set, only this single field will be read in. That will speed up gathering the stats.";
+} field_for_stats;
 
 

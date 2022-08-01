@@ -36,6 +36,7 @@
 
 #include "RadxStats.hh"
 #include <Radx/RadxVol.hh>
+#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/NcfRadxFile.hh>
@@ -261,6 +262,12 @@ int RadxStats::_processFile(const string &filePath)
     }
   }
 
+  // print stats
+  
+  if (_params.print_sweep_angle_table) {
+    _printSweepAngleTable(inFile, vol, cout);
+  }
+
   return 0;
 
 }
@@ -279,12 +286,48 @@ void RadxStats::_setupRead(RadxFile &file)
   }
 
   file.setReadAggregateSweeps(false);
-
-  file.setReadMetadataOnly(true);
-    
+  
+  if (_params.print_sweep_angle_table) {
+    file.setReadPreserveSweeps(true);
+    string fieldForStats = _params.field_for_stats;
+    if (fieldForStats.size() > 0) {
+      file.addReadField(fieldForStats);
+    }
+  } else {
+    file.setReadMetadataOnly(true);
+  }
+  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
+  
+}
+
+//////////////////////////////////////////////////
+// print sweep angle table
+
+void RadxStats::_printSweepAngleTable(RadxFile &file,
+                                      const RadxVol &vol,
+                                      ostream &out)
+{
+
+  cerr << "1111111111111111111111111111111" << file.getPathInUse() << endl;
+
+  const vector<RadxSweep *> sweeps = vol.getSweeps();
+
+  cerr << "aaaaaaaaaaaaaaaaaa nsweeps: " << sweeps.size() << endl;
+  
+  for (size_t ii = 0; ii < sweeps.size(); ii++) {
+    const RadxSweep *sweep = sweeps[ii];
+    out << sweep->getFixedAngleDeg();
+    if (ii == sweeps.size() - 1) {
+      out << endl;
+    } else {
+      out << ", ";
+    }
+  }
+  
+  out.flush();
   
 }
 

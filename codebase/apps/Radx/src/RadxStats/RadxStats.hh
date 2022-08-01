@@ -43,6 +43,7 @@
 #include "Params.hh"
 #include <string>
 class RadxFile;
+class RadxVol;
 using namespace std;
 
 class RadxStats {
@@ -79,6 +80,8 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   int _processFile(const string &filePath);
+
+  void _printSweepAngleTable(RadxFile &file, const RadxVol &vol, ostream &out);
 
 };
 

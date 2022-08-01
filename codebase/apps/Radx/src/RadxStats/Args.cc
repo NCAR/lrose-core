@@ -108,6 +108,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "check_ngates_vary = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-print_sweep_angle_table")) {
+      
+      sprintf(tmp_str, "print_sweep_angle_table = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -163,6 +168,15 @@ int Args::parse (int argc, char **argv, string &prog_name)
 	OK = false;
       }
 	
+    } else if (!strcmp(argv[i], "-field_for_stats")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "field_for_stats = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
     }
     
   } // i
@@ -202,7 +216,13 @@ void Args::_usage(ostream &out)
       << "  [ -f, -paths ? ] set file paths\n"
       << "     Sets mode to FILELIST\n"
       << "\n"
+      << "  [ -field_for_stats ? ] set field for stats\n"
+      << "    Setting this will speed up reading the data for stats\n"
+      << "\n"
       << "  [ -indir ? ] set input directory\n"
+      << "\n"
+      << "  [ -print_sweep_angle_table] print out sweep angles\n"
+      << "     A table will be printed to stdout\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "     Sets mode to ARCHIVE\n"

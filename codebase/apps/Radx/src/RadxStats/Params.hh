@@ -388,6 +388,10 @@ public:
 
   tdrp_bool_t check_ngates_vary;
 
+  tdrp_bool_t print_sweep_angle_table;
+
+  char* field_for_stats;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -395,7 +399,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[12];
+  mutable TDRPtable _table[14];
 
   const char *_className;
 
