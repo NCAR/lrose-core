@@ -311,11 +311,15 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
                                       ostream &out)
 {
 
-  cerr << "1111111111111111111111111111111" << file.getPathInUse() << endl;
-
+  RadxTime startTime = vol.getStartRadxTime();
   const vector<RadxSweep *> sweeps = vol.getSweeps();
 
-  cerr << "aaaaaaaaaaaaaaaaaa nsweeps: " << sweeps.size() << endl;
+  out << startTime.getW3cStr();
+  out << ", ";
+  out << vol.getScanName();
+  out << ", ";
+  out << sweeps.size();
+  out << ", ";
   
   for (size_t ii = 0; ii < sweeps.size(); ii++) {
     const RadxSweep *sweep = sweeps[ii];
