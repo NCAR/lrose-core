@@ -19,6 +19,7 @@ SUB_DIRS = \
 	dsserver \
         dsdata \
 	rapformats \
+	qtplot \
 	rapplot \
 	rapmath \
         titan \

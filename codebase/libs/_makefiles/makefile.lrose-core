@@ -29,6 +29,7 @@ SUB_DIRS = \
 	hydro \
 	kd \
 	physics \
+        qtplot \
 	radar \
 	rapformats \
 	rapmath \
