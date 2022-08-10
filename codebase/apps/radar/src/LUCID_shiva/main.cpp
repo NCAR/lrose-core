@@ -14,17 +14,31 @@
 using namespace std;
 
 // args should be ...
-// BestLittleCartImageGenerator  input-file output-file color-scale-[file? or name?]
+//   CartIG -input input_filename -output output_filename -field field_name -color_scale colorscale -field field_name -color_scale colorscale ....
 
+// i.e. the normal unix convention.
+
+// RadxPrint is an example of an app that supports multiple fields on the command line
+
+
+// CartIG <data file name> <output base dir> <field1> <color_scale1> <field2> <color_scale2> ...
 int main(int argc, char *argv[])
 {
-
+    char *inputFile;
+    char *outputDir;
+    char *fieldName;
+    char *colorScaleFileOrName;
     
-    //readX11ColorTables();
-    PrintMdv printMdv(argv[1]);
-    printMdv.Run();
+    // TODO: integrate the tdrp args, etc.
+    if (argc < 3) {
+        cout << "wrong usage" << endl;
+    } 
 
-    return 0;
+  inputFile = argv[1];
+  outputDir = argv[2];
+
+
+
 
     /*
     QApplication a(argc, argv);
@@ -71,4 +85,26 @@ int main(int argc, char *argv[])
     // std::cout << _params. << std::endl;
 
     //return a.exec();
+    PrintMdv printMdv(inputFile, outputDir);
+
+    // or construct two lists color scale name, field name;
+    // then send both lists??
+    // if we had the list of field names when we are reading ..
+    // or just open the file, read the field, plot it.
+    if (argc > 3) {
+        // generate images for the specified fields
+        for (int i = 3; i < argc; i+=2 ) {
+            fieldName = argv[i];
+            colorScaleFileOrName = argv[i+1]; 
+            printMdv.plotField(fieldName, colorScaleFileOrName);       
+        }
+        
+    } else {
+        // generate images for all the fields
+        printMdv.plotAllFields();
+    }
+
+ 
+
+    return 0;    
 }

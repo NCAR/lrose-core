@@ -36,6 +36,7 @@
 #define PrintMdv_H
 
 #include <Mdv/DsMdvxThreaded.hh>
+#include "qtplot/ColorMap.hh"
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
@@ -47,19 +48,23 @@ public:
 
   // constructor
 
-  PrintMdv (char *filePath); // int argc, char **argv);
+  PrintMdv(char *inputFile, char *outputDir);
+//  PrintMdv(char *inputFile, char *outputDir, char *fieldName, 
+//    char *colorScaleFileOrName);  
 
   // destructor
   
   ~PrintMdv();
 
-  int Run();
+  int plotAllFields();
+  int plotField(char *fieldName, char *colorScaleFileOrName);
 
   // data members
 
   int OK;
 
   void readColorMap();
+  void readColorMap(char *colorScaleFileOrName);
 
 protected:
 
@@ -91,8 +96,16 @@ protected:
   void _printVsection(const DsMdvx *mdvx) const;
   void _doPrintVol(const DsMdvx *mdvx) const;
 
-  void _plotVolume(const DsMdvx *mdvx);
+  int _plotVolume(DsMdvx *mdvx);
+  int _plotVolume(DsMdvx *mdvx, char *fieldName);
+  void _plotField(const DsMdvx *mdvx, char *plotFieldName);
+  void _plotAllFields(const DsMdvx *mdvx);
+
   unsigned int _mapToColorScale(float value, float range, float min);
+  unsigned int _mapToColorScale(float value);
+
+  void _generateImage(DsMdvx *mdvx, char *fieldName);
+  QImage *_generateQtImage(int width, int height, const float* plane2);
 
   int _doTest(DsMdvx *mdvx);
   void _printSizes(ostream &out);
@@ -199,8 +212,17 @@ constexpr static float cmax[] = {
 };
 
 
-int _nbins;
-unsigned int *_colorMapRGB;
+  int _nbins;
+  unsigned int *_colorMapRGB;
+
+  bool _printAllFields;
+  DsMdvx *_mdvx;
+
+  char *_outputDir;
+
+  ColorMap *_colorMap;
+
+  int init(char *filePath, char *outputDir);
 
 };
 

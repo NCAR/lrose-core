@@ -222,7 +222,7 @@ LUCID_app:
 
 
 LOC_LIBS1 = -L /Users/brenda/lrose/lib -lqtplot -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx -ldsserver -ldidss -leuclid -lphysics -lrapmath -ltoolsa -ldataport -ltdrp
-LOC_LIBS2 = -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++
+LOC_LIBS2 = -lqtplot -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2 -lfftw3 -lbz2 -lz -lpthread -lrapmath  -lm -lstdc++
 
 # make the simple cartesian image generator
 simple_cart_gen:
@@ -249,7 +249,7 @@ simple_cart_gen:
 
 # 	g++ -g -std=c++11  main.cpp PrintMdv.cc X11ColorMap.cpp \
 
-simple_cart_gen2:
+PlotMdv::
 	g++ -g -std=c++11  main.cpp PrintMdv.cc \
 	-I /Users/brenda/lrose/include \
 	$(LOC_INCLUDES) \
@@ -261,7 +261,7 @@ simple_cart_gen2:
 	-F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml  \
 	$(LOC_CPPC_CFLAGS) \
 	$(LOC_LIBS2) \
-	-o simple_cart_gen
+	-o PlotMdv
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

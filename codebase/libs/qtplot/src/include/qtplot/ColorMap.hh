@@ -41,6 +41,7 @@
 #include <iostream>
 
 #include <QtGui/QBrush>
+#include <QtGui/QPainter>
 
 using namespace std;
 
@@ -259,6 +260,7 @@ class DLL_EXPORT ColorMap {
 
   const string &getName() const { return _name; }
   const string &getUnits() const { return _units; }
+  int getNEntries() { return (int) _entries.size(); }
   
   /**
    * @returns the color table
@@ -311,7 +313,10 @@ class DLL_EXPORT ColorMap {
   /// @param red value returned here.
   /// @param green value returned here.
   /// @param blue value returned here.
-  void dataColor(double data, float& red, float& green, float& blue) const ;
+  void dataColor(double data, float& red, float& green, float& blue) const;
+
+  /// Map the data value to an RBG color as an int.
+  unsigned int dataColor(double data) const;  
 
   /// @return The minimum range value
   double rangeMin() const;
@@ -341,6 +346,8 @@ class DLL_EXPORT ColorMap {
   // is this a default map
 
   bool isDefault() const { return _isDefault; }
+
+  QImage *getColorScaleLegend();
 
  protected:
 

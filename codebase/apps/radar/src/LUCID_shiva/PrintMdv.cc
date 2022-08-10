@@ -42,6 +42,7 @@
 #include <Mdv/MdvxRadar.hh>
 #include <Mdv/MdvxTimeStamp.hh>
 #include "qtplot/X11ColorMap.hh"
+#include "qtplot/ColorBar.hh"
 
 #include <QImage>
 #include <QColor>
@@ -50,11 +51,9 @@ using namespace std;
 
 // Constructor
 
-PrintMdv::PrintMdv(char *filePath)
-  
-{
-  int size = strlen(filePath);
-  _filePath.assign(filePath, size);
+PrintMdv::PrintMdv(char *inputFile, char *outputDir) {
+
+  init(inputFile, outputDir);
 /*
   OK = TRUE;
 
@@ -145,32 +144,44 @@ PrintMdv::PrintMdv(char *filePath)
 */
 }
 
+/*
+PrintMdv::PrintMdv(char *inputFile, char *outputDir, char *fieldName, 
+    char *colorScaleFileOrName) {
+  int ret = init(inputFile, outputDir, colorScaleFileOrName);
+
+  if (ret != 0) {
+    cerr < "exiting with error" << endl;
+    exit(ret);
+  }
+}
+*/
 // destructor
 
 PrintMdv::~PrintMdv()
-
 {
-
+  delete _mdvx;
 }
 
-//////////////////////////////////////////////////
-// Run
+int PrintMdv::init(char *filePath, char *outputDir) {
+  
+  int size = strlen(filePath);
+  _filePath.assign(filePath, size);
+  _outputDir = outputDir;
 
-int PrintMdv::Run()
-{
+  _printAllFields = false;
 
   // set up Mdvx object
 
-  DsMdvx *mdvx;
+
   //if (_params.threaded) {
   //  mdvx = new DsMdvxThreaded;
   //} else {
-    mdvx = new DsMdvx;
+  _mdvx = new DsMdvx;
   //}
 
   // set up the read specs
 
-  _setupRead(mdvx, _filePath);
+  _setupRead(_mdvx, _filePath);
 
   // testing
   /*
@@ -189,53 +200,91 @@ int PrintMdv::Run()
   int iret = 0;
 
   //if (_params.debug >= Params::DEBUG_VERBOSE) {
-    mdvx->setDebug();
+  _mdvx->setDebug();
   //}
   //if (_params.debug) {
-    mdvx->printReadRequest(cerr);
-  //}
+  _mdvx->printReadRequest(cerr);
+  //}  
 
+  // read the volume
+
+  if (_getVolume(_mdvx)) {
+    cerr << "could not read volume\n";
+    return -1;
+  }
+}
+
+//////////////////////////////////////////////////
+//  int plotAllFields();
+//  int plotField(char *fieldName, char *colorScaleFileOrName);
+
+int PrintMdv::plotAllFields()
+{
+  int iret = 0;
+
+  _printAllFields = true;
+  // for each field in volume ...
+  //Run(fieldName);
+  readColorMap();  
+  if (_plotVolume(_mdvx)) {
+    iret = -1;
+  }  
+
+  return iret;
+}
+
+int PrintMdv::plotField(char *fieldName, char *colorScaleFileOrName)
+{
+
+  int iret = 0;
+
+  if (colorScaleFileOrName == NULL) {
+    readColorMap();
+  } else {
+    readColorMap(colorScaleFileOrName);
+  }
 
 /*
   if (_params.get_mode == Params::GET_VOLUME ||
       _params.get_mode == Params::GET_GIS ||
       _params.get_mode == Params::GET_TABLE) {
 */
-    if (_handleVolume(mdvx)) {
+    // generates the image
+    if (_plotVolume(_mdvx, fieldName)) {
       iret = -1;
     }
 /*
   } else if (_params.get_mode == Params::GET_VSECTION) {
 
     // vert section
-*/
+
     if (_handleVsection(mdvx)) {
       iret = -1;
     }
-/*
+
   } else if (_params.get_mode == Params::GET_ALL_HEADERS) {
 
     // all headers
-*/
+
     if (_handleAllHeaders(mdvx)) {
       iret = -1;
     }
-/*
+
   } else if (_params.get_mode == Params::GET_TIME_LIST) {
-*/
+
     if (_handleTimeList(mdvx)) {
       iret = -1;
     }
-/*
+
   } else if (_params.get_mode == Params::GET_TIME_HEIGHT) {
-*/    
+    
     if (_handleTimeHeight(mdvx)) {
       iret = -1;
     }
-
+*/
  // }
   
-  delete mdvx;
+
   return iret;
 
 }
@@ -427,22 +476,24 @@ void PrintMdv::_setupRead(DsMdvx *mdvx, string filePath)
 
 ////////////////////////
 // handle volume
+int PrintMdv::_plotVolume(DsMdvx *mdvx)
+{
+  char *fieldName = NULL;
+  _generateImage(mdvx, fieldName);
+  //readColorMap();
+  //_plotVolume(mdvx);
+  return 0;
+}
 
-int PrintMdv::_handleVolume(DsMdvx *mdvx)
-
+int PrintMdv::_plotVolume(DsMdvx *mdvx, char *fieldName)
 {
 
-  if (!_needData()) {
-    // just read all headers
-    return _handleAllHeaders(mdvx);
-  }
+  //if (!_needData()) {
+  //  // just read all headers
+  //  return _handleAllHeaders(mdvx);
+  //}
 
-  // read the volume
 
-  if (_getVolume(mdvx)) {
-    cerr << "could not read volume\n";
-    return -1;
-  }
 /*  
   if (_params.save_to_file) {
 
@@ -523,10 +574,31 @@ int PrintMdv::_handleVolume(DsMdvx *mdvx)
 */
 
   //_printVolume(mdvx);
-  readColorMap();
-  _plotVolume(mdvx);
+
+  // generates image for every field, for every z-plane.
+  // 
+  
+  _generateImage(mdvx, fieldName);
+  //readColorMap();
+  //_plotVolume(mdvx);
   return 0;
 
+}
+
+// send the fieldName to plot
+// if fieldName == NULL, or fieldName length <=0 then plot all fields
+void PrintMdv::_generateImage(DsMdvx *mdvx, char *fieldName) {
+  // generates image for  field, and z-plane.
+  // 
+  //readColorMap(colorScaleFileOrName);
+  if (fieldName == NULL) {
+    _plotAllFields(mdvx);
+  }
+  else if (strlen(fieldName) <= 0) {
+    _plotAllFields(mdvx);
+  } else {
+    _plotField(mdvx, fieldName);
+  }
 }
 
 ///////////////////////////////////
@@ -946,6 +1018,20 @@ void PrintMdv::_setTimeListMode(DsMdvx *mdvx)
 
 void PrintMdv::readColorMap() {
 
+  // color scales are connected to particular fields
+  // an mdv file can have multiple fields, how to specify
+  // which color scale for each field???
+  // List of name value pairs on the command line?
+  // < field name > < color scale > 
+
+  // try to read a color scale file with the name specified
+  //
+
+  // check for internal color scale name
+
+  // otherwise, use default colorscale
+
+
 
 static string colorName[] =
 {
@@ -995,6 +1081,37 @@ static string colorName[] =
 
 }
 
+
+void PrintMdv::readColorMap(char *colorScaleFileOrName) {
+
+  // color scales are connected to particular fields
+  // an mdv file can have multiple fields, how to specify
+  // which color scale for each field???
+  // List of name value pairs on the command line?
+  // < field name > < color scale > 
+
+  // try to read a color scale file with the name specified
+  //
+
+  // check for internal color scale name
+
+  // otherwise, use default colorscale
+  
+  _colorMap = new ColorMap(colorScaleFileOrName);
+
+}
+
+unsigned int PrintMdv::_mapToColorScale(float value) {
+  // unsigned int dataColor(double data) const ; 
+  if (_colorMap == NULL) {
+    return _mapToColorScale(value, 0, 0);
+  } else {
+    unsigned int rgb = _colorMap->dataColor((double) value);
+    return rgb;
+  }
+}
+
+
 unsigned int PrintMdv::_mapToColorScale(float value, float range, float minArg) {
 
   unsigned int rgb;
@@ -1035,7 +1152,161 @@ unsigned int PrintMdv::_mapToColorScale(float value, float range, float minArg) 
   return rgb;
 }
 
-void PrintMdv::_plotVolume(const DsMdvx *mdvx) {
+QImage *PrintMdv::_generateQtImage(int width, int height, const float* plane2) {
+  QImage *image;
+
+  int bytesPerLine;
+  bytesPerLine = width * sizeof(unsigned int); 
+
+  cout << "sizeof unsigned long " << sizeof(unsigned long);  // 8 bytes
+  cout << "sizeof unsigned int" << sizeof(unsigned int) << endl; 
+
+  unsigned int *data = new unsigned int[width*height]; // [width*height*sizeof(unsigned int)];
+  //for (int r = 0; r<height; r++) {
+  //  for (int c = 0; c<width; c++) {
+  // int idx = r*width + c;
+  for (int idx = 0; idx < width*height; idx++) {
+    //cout << "idx = " << idx << endl;
+      data[idx] = _mapToColorScale(plane2[idx]); // ,3,3); // 0xff76F2E5; // 0xffRRGGBB;
+    //}
+  }
+  cout << "after filling data array" << endl;
+
+  image = new QImage( (unsigned char *) data, 
+    width, 
+    height, 
+    bytesPerLine, 
+    QImage::Format_RGB32); // QImage::Format format, 
+    //QImageCleanupFunction cleanupFunction = nullptr, 
+    //void *cleanupInfo = nullptr);
+
+  return image;
+}
+
+
+
+
+// _plotAllFields
+void PrintMdv::_plotField(const DsMdvx *mdvx, char *plotFieldName) {
+
+  bool found = false;
+  size_t ifld = 0; 
+  while (ifld < mdvx->getNFields() && !found) {
+
+    MdvxField *field = mdvx->getField(ifld);
+    Mdvx::field_header_t fhdr = field->getFieldHeader();
+    char *fieldName = fhdr.field_name;
+
+    if (strcmp(plotFieldName, fieldName) == 0) {
+
+      field->convertType(Mdvx::ENCODING_FLOAT32, Mdvx::COMPRESSION_NONE); 
+      field->setPlanePtrs();
+      
+      int planeSize = field->getPlaneSize(0);
+      int volumeSize = planeSize*fhdr.nz;
+      ui08 *tmpVol = new ui08[volumeSize];
+      Mdvx::vlevel_header_t vh = field->getVlevelHeader();    
+      Mdvx::vlevel_header_t tmpvh(vh);
+
+      for(int iv = 0; iv < fhdr.nz; iv++) {
+          const void* plane = field->getPlane(iv);  // what does this do? what does it return? A pointer to the data
+          int planeOffset = field->getPlaneOffset(fhdr.nz-iv-1);
+          
+          const float* plane2 = (const float*) field->getPlane(iv);
+          cerr << "first values ";
+          for (int idx = 0; idx < 10; idx++) {
+            cerr << plane2[idx] << " ";
+          }
+          cerr << endl;
+
+          int width = fhdr.nx;
+          int height = fhdr.ny;           
+
+          // make the data image
+          QImage *image = _generateQtImage(width, height, plane2);
+
+          // slam in the color bar/scale
+          float golden_ratio = (float) width / 1.618;
+          QImage *colorBar = _colorMap->getColorScaleLegend();
+          //ColorBar *colorBar = new ColorBar((int) golden_ratio, _colorMap);
+          //QImage *colorScale = colorBar->getImage();
+
+
+
+          /* ------
+
+          QImage *image;
+
+          int width = fhdr.nx;
+          int height = fhdr.ny; 
+          int bytesPerLine;
+          bytesPerLine = width * sizeof(unsigned int); 
+
+          cout << "sizeof unsigned long " << sizeof(unsigned long);  // 8 bytes
+          cout << "sizeof unsigned int" << sizeof(unsigned int) << endl; 
+
+          unsigned int *data = new unsigned int[width*height]; // [width*height*sizeof(unsigned int)];
+          //for (int r = 0; r<height; r++) {
+          //  for (int c = 0; c<width; c++) {
+          // int idx = r*width + c;
+          for (int idx = 0; idx < width*height; idx++) {
+            //cout << "idx = " << idx << endl;
+              data[idx] = _mapToColorScale(plane2[idx]); // ,3,3); // 0xff76F2E5; // 0xffRRGGBB;
+            //}
+          }
+          cout << "after filling data array" << endl;
+          
+          image = new QImage( (unsigned char *) data, 
+            width, 
+            height, 
+            bytesPerLine, 
+            QImage::Format_RGB32); // QImage::Format format, 
+            //QImageCleanupFunction cleanupFunction = nullptr, 
+            //void *cleanupInfo = nullptr);
+
+          */
+
+          // bool QImage::save ( const QString & fileName, const char * format = 0, int quality = -1 ) const
+          char outFileName[150];
+
+          bool successful;           
+
+
+          sprintf(outFileName, "%s_%s_colorbar_%1d%s", "/tmp/testImage", fieldName, iv, ".png");
+          successful = colorBar->save(QString(outFileName), "PNG", 50);
+          if (!successful) {
+            cerr << "ERROR: could not save colorBar" << endl;
+          }     
+
+          QPainter *painter = new QPainter(image);
+          painter->setBackgroundMode(Qt::TransparentMode);
+          int x = image->width()/2;
+          int y = image->height()/2;
+          painter->drawImage(x, y, *colorBar);
+
+          sprintf(outFileName, "%s_%s_%1d%s", "/tmp/testImage", fieldName, iv, ".png");
+          successful = image->save(QString(outFileName), "PNG", 50);
+          if (!successful) {
+            cerr << "ERROR: could not save image" << endl;
+          }
+
+          delete image;             
+          delete colorBar;          
+          //memcpy(&tmpVol[planeOffset], plane, planeSize);
+          //tmpvh.level[fhdr.nz-iv-1] = vh.level[iv];
+      }
+
+      //field->setVolData(tmpVol,volumeSize, Mdvx::ENCODING_FLOAT32);
+      //field->setVlevelHeader(tmpvh);  
+    }
+
+    ifld++;
+  }  // end while
+
+}
+
+
+void PrintMdv::_plotAllFields(const DsMdvx *mdvx) {
 
 
   for (size_t ifld = 0; ifld < mdvx->getNFields(); ifld++) {
@@ -1064,9 +1335,12 @@ void PrintMdv::_plotVolume(const DsMdvx *mdvx) {
         }
         cerr << endl;
 
+        int width = fhdr.nx;
+        int height = fhdr.ny; 
 
+        QImage *image = _generateQtImage(width, height, plane2);
 
-        // ------
+        /* ------
 
         QImage *image;
 
@@ -1084,7 +1358,7 @@ void PrintMdv::_plotVolume(const DsMdvx *mdvx) {
         // int idx = r*width + c;
         for (int idx = 0; idx < width*height; idx++) {
           //cout << "idx = " << idx << endl;
-            data[idx] = _mapToColorScale(plane2[idx],3,3); // 0xff76F2E5; // 0xffRRGGBB;
+            data[idx] = _mapToColorScale(plane2[idx]); // ,3,3); // 0xff76F2E5; // 0xffRRGGBB;
           //}
         }
         cout << "after filling data array" << endl;
@@ -1096,12 +1370,14 @@ void PrintMdv::_plotVolume(const DsMdvx *mdvx) {
           QImage::Format_RGB32); // QImage::Format format, 
           //QImageCleanupFunction cleanupFunction = nullptr, 
           //void *cleanupInfo = nullptr);
+        */
 
         // bool QImage::save ( const QString & fileName, const char * format = 0, int quality = -1 ) const
         char outFileName[150];
         sprintf(outFileName, "%s_%s_%1d%s", "/tmp/testImage", fieldName, iv, ".png");
           image->save(QString(outFileName), "PNG", 50);
 
+        delete image;
 
         //memcpy(&tmpVol[planeOffset], plane, planeSize);
         //tmpvh.level[fhdr.nz-iv-1] = vh.level[iv];
