@@ -298,8 +298,8 @@ def getLocalFileList(date, radarName):
             print("  exception: ", exc, file = sys.stderr)
 
     # get local file list - i.e. those which have already been downloaded
-    
-    os.chdir(dayDir)
+
+    # os.chdir(dayDir)
     localFileList = os.listdir(dayDir)
     localFileList.reverse()
 
