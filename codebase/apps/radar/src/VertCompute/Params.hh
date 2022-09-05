@@ -463,6 +463,10 @@ public:
 
   double max_ht_for_stats;
 
+  tdrp_bool_t monitor_noise_power;
+
+  double min_height_for_noise_power;
+
   char* output_dir;
 
   tdrp_bool_t write_global_stats_to_text_file;
@@ -484,7 +488,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[45];
 
   const char *_className;
 

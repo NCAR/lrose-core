@@ -274,6 +274,22 @@ paramdef double {
 } max_ht_for_stats;
 
 commentdef {
+  p_header = "MONITORING NOISE POWER";
+};
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to compute noise power for each channel.";
+  p_help = "If true, the per-channel noise power will be computed for gates above the minimum specified height.";
+} monitor_noise_power;
+
+paramdef double {
+  p_default = 30.0;
+  p_descr = "Minimum height for computing the noise power (km).";
+  p_help = "Only gates with heights above this minimum will be used.";
+} min_height_for_noise_power;
+
+commentdef {
   p_header = "OUTPUT RESULTS";
 };
 
