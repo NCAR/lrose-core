@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <cstring>
 //#include <QApplication>
 //#include <cstdio>
 //#include <iostream>
@@ -145,7 +146,7 @@ void X11ColorMap::readX11ColorTables() {
                 // remove white space
                 int start = RGB_NUMBER_LENGTH;
                 bool done = false;
-                while ( start<strlen(line) && !done ) {
+                while ( start<(int)strlen(line) && !done ) {
                   if (line[start] == ' ' || line[start]=='\t') {
                    start++;
                   } else {
