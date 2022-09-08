@@ -1067,39 +1067,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("MONITORING NOISE POWER");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'monitor_noise_power'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("monitor_noise_power");
-    tt->descr = tdrpStrDup("Option to compute noise power for each channel.");
-    tt->help = tdrpStrDup("If true, the per-channel noise power will be computed for gates above the minimum specified height.");
-    tt->val_offset = (char *) &monitor_noise_power - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'min_height_for_noise_power'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_height_for_noise_power");
-    tt->descr = tdrpStrDup("Minimum height for computing the noise power (km).");
-    tt->help = tdrpStrDup("Only gates with heights above this minimum will be used.");
-    tt->val_offset = (char *) &min_height_for_noise_power - &_start_;
-    tt->single_val.d = 30;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OUTPUT RESULTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
