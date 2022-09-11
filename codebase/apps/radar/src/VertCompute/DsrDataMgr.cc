@@ -30,14 +30,15 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// Data manager for time series data
-// DsrDataMgr analyses time series data from vertical scans
+// Data manager for Dsr moments data.
 //
 ////////////////////////////////////////////////////////////////
 
 #include "DsrDataMgr.hh"
 
 #include <toolsa/toolsa_macros.h>
+#include <toolsa/pmu.h>
+#include <toolsa/uusleep.h>
 
 using namespace std;
 
@@ -86,9 +87,6 @@ DsrDataMgr::~DsrDataMgr()
 
 {
 
-  if (_reader) {
-    delete _reader;
-  }
 
 }
 
@@ -411,7 +409,6 @@ void DsrDataMgr::_loadMomentsData()
   _loadMomentsData(_dbz);
   _loadMomentsData(_vel);
   _loadMomentsData(_width);
-  _loadMomentsData(_zdrc);
   _loadMomentsData(_zdrm);
   _loadMomentsData(_ldrh);
   _loadMomentsData(_ldrv);

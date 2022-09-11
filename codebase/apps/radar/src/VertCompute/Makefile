@@ -56,6 +56,7 @@ CPPC_SRCS = \
 	LayerStats.cc \
 	Main.cc \
 	MomentData.cc \
+	RadxDataMgr.cc \
 	StatsMgr.cc \
 	TsDataMgr.cc \
 	VertCompute.cc

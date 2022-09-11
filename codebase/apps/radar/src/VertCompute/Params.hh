@@ -75,9 +75,10 @@ public:
   } debug_t;
 
   typedef enum {
-    DSR_MOMENTS_INPUT = 0,
-    TS_FILE_INPUT = 1,
-    TS_FMQ_INPUT = 2
+    RADX_MOMENTS_INPUT = 0,
+    DSR_MOMENTS_INPUT = 1,
+    TS_FILE_INPUT = 2,
+    TS_FMQ_INPUT = 3
   } input_mode_t;
 
   typedef enum {
@@ -422,6 +423,12 @@ public:
 
   tdrp_bool_t seek_to_start_of_input;
 
+  char* input_dir;
+
+  char* start_time;
+
+  char* end_time;
+
   int n_samples;
 
   tdrp_bool_t invert_hv_flag;
@@ -484,7 +491,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[47];
 
   const char *_className;
 

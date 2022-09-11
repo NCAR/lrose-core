@@ -639,16 +639,27 @@
     tt->help = tdrpStrDup("DSR_MOMENTS_INPUT: read moments data in DSR format. TS_FMQ_INPUT: read time series from a file message queue and process the pulses as they come in. TS_FILE_INPUT: read time series from files specified on the command line.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DSR_MOMENTS_INPUT");
-      tt->enum_def.fields[0].val = DSR_MOMENTS_INPUT;
-      tt->enum_def.fields[1].name = tdrpStrDup("TS_FILE_INPUT");
-      tt->enum_def.fields[1].val = TS_FILE_INPUT;
-      tt->enum_def.fields[2].name = tdrpStrDup("TS_FMQ_INPUT");
-      tt->enum_def.fields[2].val = TS_FMQ_INPUT;
+      tt->enum_def.fields[0].name = tdrpStrDup("RADX_MOMENTS_INPUT");
+      tt->enum_def.fields[0].val = RADX_MOMENTS_INPUT;
+      tt->enum_def.fields[1].name = tdrpStrDup("DSR_MOMENTS_INPUT");
+      tt->enum_def.fields[1].val = DSR_MOMENTS_INPUT;
+      tt->enum_def.fields[2].name = tdrpStrDup("TS_FILE_INPUT");
+      tt->enum_def.fields[2].val = TS_FILE_INPUT;
+      tt->enum_def.fields[3].name = tdrpStrDup("TS_FMQ_INPUT");
+      tt->enum_def.fields[3].val = TS_FMQ_INPUT;
     tt->single_val.e = DSR_MOMENTS_INPUT;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("REALTIME - DSR_MOMENTS_INPUT, TS_FMQ_INPUT");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'input_fmq_name'
@@ -670,16 +681,61 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("seek_to_start_of_input");
     tt->descr = tdrpStrDup("Option to seek to the start of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.");
+    tt->help = tdrpStrDup("Applies to DSR_MOMENTS_INPUT and TS_FMQ_INPUT. If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.");
     tt->val_offset = (char *) &seek_to_start_of_input - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("ARCHIVE - RADX_MOMENTS_INPUT, TS_FILE_INPUT");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'input_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory for searching for files between start_time and end_time.");
+    tt->help = tdrpStrDup("RADX_MOMENTS_INPUT, TS_FILE_INPUT: files will be searched for in this directory. This is ignored if the list of files is  specified on the command line using the -f option.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Set the start time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup(" Applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT. Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("Set the end time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup(" Applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT. Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("1970 01 01 00 00 00");
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("COMPUTING MOMENTS FROM TIME SERIES");
     tt->comment_text = tdrpStrDup("TS_FILE_INPUT and TS_FMQ_INPUT modes");
     tt++;
@@ -770,11 +826,11 @@
     tt->single_val.e = DP_ALT_HV_CO_CROSS;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("READING MOMENTS FROM FMQ");
     tt->comment_text = tdrpStrDup("DSR_MOMENTS_INPUT mode only.");
     tt++;
@@ -797,8 +853,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("input_fields");
-    tt->descr = tdrpStrDup("List of input field from moments FMQ.");
-    tt->help = tdrpStrDup("Only applies to DSR_MOMENTS_INPUT.");
+    tt->descr = tdrpStrDup("List of input fields for moments.");
+    tt->help = tdrpStrDup("Applies to RADX_MOMENTS_INPUT and DSR_MOMENTS_INPUT.");
     tt->array_offset = (char *) &_input_fields - &_start_;
     tt->array_n_offset = (char *) &input_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -900,11 +956,11 @@
       tt->struct_vals[35].s = tdrpStrDup("RHOHV");
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("VERTICAL LAYERS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -945,11 +1001,11 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("ANALYSIS DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1062,11 +1118,11 @@
     tt->single_val.d = 3.75;
     tt++;
     
-    // Parameter 'Comment 7'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT RESULTS");
     tt->comment_text = tdrpStrDup("");
     tt++;

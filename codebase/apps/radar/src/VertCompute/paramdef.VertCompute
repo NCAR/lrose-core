@@ -43,7 +43,7 @@ commentdef {
 };
 
 typedef enum {
-  DSR_MOMENTS_INPUT, TS_FILE_INPUT, TS_FMQ_INPUT
+  RADX_MOMENTS_INPUT, DSR_MOMENTS_INPUT, TS_FILE_INPUT, TS_FMQ_INPUT
 } input_mode_t;
 
 paramdef enum input_mode_t {
@@ -51,6 +51,10 @@ paramdef enum input_mode_t {
   p_descr = "Input mode - files or time series API.";
   p_help = "DSR_MOMENTS_INPUT: read moments data in DSR format. TS_FMQ_INPUT: read time series from a file message queue and process the pulses as they come in. TS_FILE_INPUT: read time series from files specified on the command line.";
 } input_mode;
+
+commentdef {
+  p_header = "REALTIME - DSR_MOMENTS_INPUT, TS_FMQ_INPUT";
+};
 
 paramdef string {
   p_default = "/tmp/fmq/ts";
@@ -61,8 +65,30 @@ paramdef string {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to seek to the start of the input FMQ.";
-  p_help = "If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.";
+  p_help = "Applies to DSR_MOMENTS_INPUT and TS_FMQ_INPUT. If TRUE, the program will seek to the start of the fmq and read in data from the entire queue. If FALSE, it will only read new data as it is added to the FMQ.";
 } seek_to_start_of_input;
+
+commentdef {
+  p_header = "ARCHIVE - RADX_MOMENTS_INPUT, TS_FILE_INPUT";
+};
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files between start_time and end_time.";
+  p_help = "RADX_MOMENTS_INPUT, TS_FILE_INPUT: files will be searched for in this directory. This is ignored if the list of files is  specified on the command line using the -f option.";
+} input_dir;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = " Applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT. Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "1970 01 01 00 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = " Applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT. Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
 
 commentdef {
   p_header = "COMPUTING MOMENTS FROM TIME SERIES";
@@ -192,8 +218,8 @@ paramdef struct input_field_t {
     { PHIDP, "PHIDP" },
     { RHOHV, "RHOHV" }
   };
-  p_descr = "List of input field from moments FMQ.";
-  p_help = "Only applies to DSR_MOMENTS_INPUT.";
+  p_descr = "List of input fields for moments.";
+  p_help = "Applies to RADX_MOMENTS_INPUT and DSR_MOMENTS_INPUT.";
 } input_fields[];
 
 commentdef {

@@ -120,6 +120,24 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+	iret = -1;
+      }
+	
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {

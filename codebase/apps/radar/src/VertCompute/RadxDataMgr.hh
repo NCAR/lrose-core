@@ -22,50 +22,53 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// DsrDataMgr.hh
+// RadxDataMgr.hh
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// May 2008
+// Sept 2022
 //
 ///////////////////////////////////////////////////////////////
 //
-// Data manager for Dsr moments data
+// Data manager for Radx moments data
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef DsrDataMgr_H
-#define DsrDataMgr_H
+#ifndef RadxDataMgr_H
+#define RadxDataMgr_H
 
 #include <string>
 #include <vector>
-#include <deque>
+#include <map>
 #include <cstdio>
 
+#include "Args.hh"
 #include "Params.hh"
 #include "StatsMgr.hh"
+#include <Radx/RadxFile.hh>
+#include <Radx/RadxVol.hh>
 #include <toolsa/TaArray.hh>
-#include <Fmq/DsRadarQueue.hh>
 
 using namespace std;
 
 ////////////////////////
 // This class
 
-class DsrDataMgr {
+class RadxDataMgr {
   
 public:
 
   // constructor
 
-  DsrDataMgr(const string &prog_name,
-	     const Params &params,
-	     StatsMgr &statsMgr);
-
+  RadxDataMgr(const string &prog_name,
+              const Args &args,
+              const Params &params,
+              StatsMgr &statsMgr);
+  
   // destructor
   
-  ~DsrDataMgr();
+  ~RadxDataMgr();
 
   // run 
 
@@ -77,17 +80,21 @@ private:
 
   static const double _missingDouble;
   static const double _missingTest;
-
+  
   string _progName;
   char *_paramsPath;
-
-  Params _params;
+  
+  const Args &_args;
+  const Params &_params;
+  const vector<string> _inputFileList;
   StatsMgr &_statsMgr;
 
-  // FMQ input
+  // data input
+
+  RadxVol _readVol;
   
-  DsRadarQueue *_inputQueue;
-  DsRadarMsg _inputMsg;
+  // DsRadarQueue *_inputQueue;
+  // DsRadarMsg _inputMsg;
   int _inputContents;
   int _inputNFail;
   int _nFieldsIn;
@@ -95,19 +102,19 @@ private:
 
   int _volNum;
 
-  DsRadarParams _inputRadarParams;
-  vector<DsFieldParams*> _inputFieldParams;
-  DsRadarCalib _inputRadarCalib;
+  // DsRadarParams _inputRadarParams;
+  // vector<DsFieldParams*> _inputFieldParams;
+  // DsRadarCalib _inputRadarCalib;
 
-  int _totalBeamCount;
+  int _totalRayCount;
 
   // input moments data
+  
+  map<int, string> _fieldNameMap;
 
   typedef struct {
     int id;
     string dsrName;
-    int paramsIndex;
-    int dataIndex;
     TaArray<double> data_;
     double *data;
   } moments_field_t;
@@ -115,7 +122,6 @@ private:
   moments_field_t _snr;
   moments_field_t _snrhc;
   moments_field_t _snrhx;
-
   moments_field_t _snrvc;
   moments_field_t _snrvx;
   moments_field_t _dbm;
@@ -134,30 +140,15 @@ private:
 
   // methods
 
-  int _openInputQueue();
-  int _processInputMessage();
-  void _processBeam();
-  void _processMoments();
+  int _processFile(const string &filePath);
+  int _readFile(const string &filePath);
+  void _setupRead(RadxFile &file);
 
-  void _setMomentsIndices(Params::moments_id_t paramId,
-			  moments_field_t &field);
-
-  void _setMomentsParamsIndex(Params::moments_id_t paramId,
-			      moments_field_t &field);
-
-  void _setMomentsDataIndex(moments_field_t &field);
-
-  string _getMomentsParamsName(Params::moments_id_t paramId);
-
-  int _getMomentsParamsIndex(const string &dsrName);
-
-  int _getInputDataIndex(const string &dsrName);
-
-  void _loadMomentsData();
-
-  void _loadMomentsData(moments_field_t &field);
-
-  void _loadInputField(const DsRadarBeam &beam, int index, double *fldData);
+  void _processRay(const RadxRay *ray);
+  void _loadMomentsData(const RadxRay *ray,
+                        Params::moments_id_t id,
+                        moments_field_t &field);
+  void _processMoments(const RadxRay *ray);
 
 };
 

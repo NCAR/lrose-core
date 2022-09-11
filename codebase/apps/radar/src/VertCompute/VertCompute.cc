@@ -52,6 +52,7 @@
 #include "VertCompute.hh"
 #include "TsDataMgr.hh"
 #include "DsrDataMgr.hh"
+#include "RadxDataMgr.hh"
 
 using namespace std;
 
@@ -124,7 +125,14 @@ int VertCompute::Run ()
 
   int iret = 0;
   
-  if (_params.input_mode == Params::DSR_MOMENTS_INPUT) {
+  if (_params.input_mode == Params::RADX_MOMENTS_INPUT) {
+    
+    RadxDataMgr mgr(_progName, _args, _params, *_statsMgr);
+    if (mgr.run()) {
+      iret = -1;
+    }
+
+  } else if (_params.input_mode == Params::DSR_MOMENTS_INPUT) {
     
     DsrDataMgr mgr(_progName, _params, *_statsMgr);
     if (mgr.run()) {
