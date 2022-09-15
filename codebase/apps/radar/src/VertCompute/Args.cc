@@ -158,8 +158,13 @@ int Args::parse(int argc, char **argv, string &prog_name)
         cerr << "ERROR - with -f you must specify files to be read" << endl;
         iret = -1;
       } else {
-        sprintf(tmp_str, "input_mode = TS_FILE_INPUT;");
-        TDRP_add_override(&override, tmp_str);
+        if (inputFileList[0].find("iwrf_ts") != string::npos) {
+          sprintf(tmp_str, "input_mode = TS_FILE_INPUT;");
+          TDRP_add_override(&override, tmp_str);
+        } else if (inputFileList[0].find(".nc") != string::npos) {
+          sprintf(tmp_str, "input_mode = RADX_MOMENTS_INPUT;");
+          TDRP_add_override(&override, tmp_str);
+        }
       }
 
     } // if
