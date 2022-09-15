@@ -249,7 +249,7 @@ void DsrDataMgr::_processBeam()
     elev = 180.0 - elev;
   }
   if (elev < _params.min_elevation) {
-    _statsMgr.clearStats360();
+    // _statsMgr.clearStats();
     return;
   }
 
@@ -337,7 +337,7 @@ string DsrDataMgr::_getMomentsParamsName(Params::moments_id_t paramId)
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
     if (_params._input_fields[ii].id == paramId) {
-      return _params._input_fields[ii].dsr_name;
+      return _params._input_fields[ii].moments_name;
     }
   } // ii 
 
@@ -356,7 +356,7 @@ int DsrDataMgr::_getMomentsParamsIndex(const string &dsrName)
   // find the params index of a moments field
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    string paramName = _params._input_fields[ii].dsr_name;
+    string paramName = _params._input_fields[ii].moments_name;
     if (paramName == dsrName) {
       return ii;
     }

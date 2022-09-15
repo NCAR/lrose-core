@@ -141,7 +141,7 @@ int VertCompute::Run ()
 
   } else {
 
-    TsDataMgr mgr(_progName, _params, _args.inputFileList, *_statsMgr);
+    TsDataMgr mgr(_progName, _args, _params, *_statsMgr);
     if (mgr.run()) {
       iret = -1;
     }
@@ -149,8 +149,8 @@ int VertCompute::Run ()
   }
   
   _statsMgr->computeGlobalStats();
-  if (_params.write_global_stats_to_text_file) {
-    _statsMgr->writeGlobalResults();
+  if (_params.write_stats_to_text_file) {
+    _statsMgr->writeGlobalStats();
   }
   if (_params.write_zdr_point_values_to_text_file) {
     _statsMgr->writeZdrPoints();

@@ -911,10 +911,10 @@
         tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("RHOHV");
         tt->struct_def.fields[0].enum_def.fields[17].val = RHOHV;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("dsr_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("moments_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_input_fields->dsr_name - (char *) _input_fields;
+        (char *) &_input_fields->moments_name - (char *) _input_fields;
     tt->n_struct_vals = 36;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
@@ -1006,8 +1006,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("ANALYSIS DETAILS");
+    tt->comment_hdr = tdrpStrDup("COMPUTING STATISTICS");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'cumulative_azimuth_moved_for_stats'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cumulative_azimuth_moved_for_stats");
+    tt->descr = tdrpStrDup("Cumulative delta az for stats (deg).");
+    tt->help = tdrpStrDup("We only compute stats after the antenna has scanned this number of degrees.");
+    tt->val_offset = (char *) &cumulative_azimuth_moved_for_stats - &_start_;
+    tt->single_val.d = 1080;
+    tt++;
+    
+    // Parameter 'max_time_gap_for_stats'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_time_gap_for_stats");
+    tt->descr = tdrpStrDup("Max time gap in data for stats (s).");
+    tt->help = tdrpStrDup("If we find a gap that exceeds this, we clear the stats and start again.");
+    tt->val_offset = (char *) &max_time_gap_for_stats - &_start_;
+    tt->single_val.d = 3600;
     tt++;
     
     // Parameter 'min_snr'
@@ -1123,44 +1147,32 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT RESULTS");
+    tt->comment_hdr = tdrpStrDup("OUTPUT STATISTICS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'write_stats_to_text_file'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_stats_to_text_file");
+    tt->descr = tdrpStrDup("Option to write statistics to a text file.");
+    tt->help = tdrpStrDup("If true, stats for the entire run will be writted to a text file.");
+    tt->val_offset = (char *) &write_stats_to_text_file - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'text_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
-    tt->descr = tdrpStrDup("Dir for output files.");
+    tt->param_name = tdrpStrDup("text_output_dir");
+    tt->descr = tdrpStrDup("Dir for output text files.");
     tt->help = tdrpStrDup("The results will be written to sub-directories named from the data time.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("./output");
-    tt++;
-    
-    // Parameter 'write_global_stats_to_text_file'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_global_stats_to_text_file");
-    tt->descr = tdrpStrDup("Option to write global statistics to a text file.");
-    tt->help = tdrpStrDup("If true, stats for the entire run will be writted to a text file.");
-    tt->val_offset = (char *) &write_global_stats_to_text_file - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'write_360deg_stats_to_text_file'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_360deg_stats_to_text_file");
-    tt->descr = tdrpStrDup("Option to write statistics for each rotation to a text file.");
-    tt->help = tdrpStrDup("If true, stats for each rotation will be writted to a text file.");
-    tt->val_offset = (char *) &write_360deg_stats_to_text_file - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &text_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output/text");
     tt++;
     
     // Parameter 'write_zdr_point_values_to_text_file'
@@ -1175,16 +1187,28 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_results_to_spdb'
+    // Parameter 'zdr_points_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("zdr_points_output_dir");
+    tt->descr = tdrpStrDup("Dir for output text files.");
+    tt->help = tdrpStrDup("The results will be written to sub-directories named from the data time.");
+    tt->val_offset = (char *) &zdr_points_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output/zdr_points");
+    tt++;
+    
+    // Parameter 'write_stats_to_spdb'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_results_to_spdb");
-    tt->descr = tdrpStrDup("Option to write out results to SPDB.");
+    tt->param_name = tdrpStrDup("write_stats_to_spdb");
+    tt->descr = tdrpStrDup("Option to write out stats results to SPDB.");
     tt->help = tdrpStrDup("The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.");
-    tt->val_offset = (char *) &write_results_to_spdb - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->val_offset = (char *) &write_stats_to_spdb - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'spdb_output_url'
@@ -1196,18 +1220,18 @@
     tt->descr = tdrpStrDup("URL for SPDB XML.");
     tt->help = tdrpStrDup("For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir");
     tt->val_offset = (char *) &spdb_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/tmp/spdb/vert");
+    tt->single_val.s = tdrpStrDup("./output/spdb");
     tt++;
     
-    // Parameter 'radar_name'
+    // Parameter 'radar_name_for_spdb'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name");
+    tt->param_name = tdrpStrDup("radar_name_for_spdb");
     tt->descr = tdrpStrDup("Radar name for tagging SPDB output data.");
     tt->help = tdrpStrDup("This is used to set the data_type in SPDB.");
-    tt->val_offset = (char *) &radar_name - &_start_;
+    tt->val_offset = (char *) &radar_name_for_spdb - &_start_;
     tt->single_val.s = tdrpStrDup("SPOL");
     tt++;
     

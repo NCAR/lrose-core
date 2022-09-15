@@ -73,7 +73,7 @@ public:
 
   void print(ostream &out) const;
 
-  double start; // used for computing fields offsets
+  // double start; // used for computing fields offsets
 
   // public data
 

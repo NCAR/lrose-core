@@ -65,7 +65,7 @@ RadxDataMgr::RadxDataMgr(const string &prog_name,
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
     Params::input_field_t &infield = _params._input_fields[ii];
-    _fieldNameMap[infield.id] = infield.dsr_name;
+    _fieldNameMap[infield.id] = infield.moments_name;
   }
 
 }
@@ -88,8 +88,6 @@ int RadxDataMgr::run ()
     cerr << "Running VertCompute in RADX_MOMENTS_INPUT mode" << endl;
   }
 
-  vector<string> paths = _args.inputFileList;
-  
   // check if start and end times are set
 
   bool startTimeSet = true;
@@ -104,6 +102,7 @@ int RadxDataMgr::run ()
     endTimeSet = false;
   }
   
+  vector<string> paths = _args.inputFileList;
   if (paths.size() == 0) {
 
     if (startTimeSet && endTimeSet) {
@@ -238,7 +237,7 @@ void RadxDataMgr::_setupRead(RadxFile &file)
   }
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    file.addReadField(_params._input_fields[ii].dsr_name);
+    file.addReadField(_params._input_fields[ii].moments_name);
   } // ii 
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -263,7 +262,7 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
     elev = 180.0 - elev;
   }
   if (elev < _params.min_elevation) {
-    _statsMgr.clearStats360();
+    // _statsMgr.clearStats();
     return;
   }
 
@@ -454,7 +453,7 @@ string RadxDataMgr::_getMomentsParamsName(Params::moments_id_t paramId)
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
     if (_params._input_fields[ii].id == paramId) {
-      return _params._input_fields[ii].dsr_name;
+      return _params._input_fields[ii].moments_name;
     }
   } // ii 
 
@@ -473,7 +472,7 @@ int RadxDataMgr::_getMomentsParamsIndex(const string &dsrName)
   // find the params index of a moments field
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    string paramName = _params._input_fields[ii].dsr_name;
+    string paramName = _params._input_fields[ii].moments_name;
     if (paramName == dsrName) {
       return ii;
     }

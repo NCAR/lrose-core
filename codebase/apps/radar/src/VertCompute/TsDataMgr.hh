@@ -43,6 +43,7 @@
 #include <deque>
 #include <cstdio>
 
+#include "Args.hh"
 #include "Params.hh"
 #include "StatsMgr.hh"
 #include <radar/IwrfTsReader.hh>
@@ -62,8 +63,8 @@ public:
   // constructor
 
   TsDataMgr(const string &prog_name,
+            const Args &args,
 	    const Params &params,
-	    const vector<string> &input_file_list,
 	    StatsMgr &statsMgr);
 
   // destructor
@@ -80,8 +81,8 @@ private:
 
   string _progName;
   char *_paramsPath;
-  Params _params;
-  const vector<string> _inputFileList;
+  const Args &_args;
+  const Params &_params;
   IwrfTsReader *_reader;
   StatsMgr &_statsMgr;
 

@@ -86,7 +86,6 @@ private:
   
   const Args &_args;
   const Params &_params;
-  const vector<string> _inputFileList;
   StatsMgr &_statsMgr;
 
   // data input

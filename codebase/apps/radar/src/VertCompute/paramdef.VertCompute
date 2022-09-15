@@ -193,7 +193,7 @@ typedef enum {
 typedef struct {
 
   moments_id_t id;
-  string dsr_name;
+  string moments_name;
     
 } input_field_t;
 
@@ -242,8 +242,20 @@ paramdef double {
 } start_height;
 
 commentdef {
-  p_header = "ANALYSIS DETAILS";
+  p_header = "COMPUTING STATISTICS";
 };
+
+paramdef double {
+  p_default = 1080;
+  p_descr = "Cumulative delta az for stats (deg).";
+  p_help = "We only compute stats after the antenna has scanned this number of degrees.";
+} cumulative_azimuth_moved_for_stats;
+
+paramdef double {
+  p_default = 3600;
+  p_descr = "Max time gap in data for stats (s).";
+  p_help = "If we find a gap that exceeds this, we clear the stats and start again.";
+} max_time_gap_for_stats;
 
 paramdef double {
   p_default = 10.0;
@@ -300,26 +312,20 @@ paramdef double {
 } max_ht_for_stats;
 
 commentdef {
-  p_header = "OUTPUT RESULTS";
+  p_header = "OUTPUT STATISTICS";
 };
-
-paramdef string {
-  p_default = "./output";
-  p_descr = "Dir for output files.";
-  p_help = "The results will be written to sub-directories named from the data time.";
-} output_dir;
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Option to write global statistics to a text file.";
+  p_descr = "Option to write statistics to a text file.";
   p_help = "If true, stats for the entire run will be writted to a text file.";
-} write_global_stats_to_text_file;
+} write_stats_to_text_file;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write statistics for each rotation to a text file.";
-  p_help = "If true, stats for each rotation will be writted to a text file.";
-} write_360deg_stats_to_text_file;
+paramdef string {
+  p_default = "./output/text";
+  p_descr = "Dir for output text files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} text_output_dir;
 
 paramdef boolean {
   p_default = false;
@@ -327,14 +333,20 @@ paramdef boolean {
   p_help = "If true, the individual zdrm values, plus metadata such as height, is written to a text file.";
 } write_zdr_point_values_to_text_file;
 
+paramdef string {
+  p_default = "./output/zdr_points";
+  p_descr = "Dir for output text files.";
+  p_help = "The results will be written to sub-directories named from the data time.";
+} zdr_points_output_dir;
+
 paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out results to SPDB.";
+  p_default = true;
+  p_descr = "Option to write out stats results to SPDB.";
   p_help = "The results will be written in XML, stored in SPDB. The data can then be retrieved for plotting or other purposes.";
-} write_results_to_spdb;
+} write_stats_to_spdb;
 
 paramdef string {
-  p_default = "/tmp/spdb/vert";
+  p_default = "./output/spdb";
   p_descr = "URL for SPDB XML.";
   p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
 } spdb_output_url;
@@ -343,5 +355,5 @@ paramdef string {
   p_default = "SPOL";
   p_descr = "Radar name for tagging SPDB output data.";
   p_help = "This is used to set the data_type in SPDB.";
-} radar_name;
+} radar_name_for_spdb;
 

@@ -61,8 +61,8 @@ public:
 
   // set methods
 
-  void setStartTime(double start_time) { _startTime = start_time; }
-  void setEndTime(double end_time) { _endTime = end_time; }
+  void setStartTime(double start_time);
+  void setEndTime(double latest_time);
   void setPrt(double prt) { _prt = prt; }
   void setEl(double el);
   void setAz(double az);
@@ -78,20 +78,21 @@ public:
 
   // compute methods
   
-  void clearStats360();
-  void computeStats360();
+  void clearStats();
+  void computeStats();
   void computeGlobalStats();
-  int writeResults360ToSpdb();
   
-  // print methods
+  // write methods
   
-  int writeResults360();
-  void printResults360(FILE *out);
+  int writeStats();
+  void printStats(FILE *out);
 
-  int writeGlobalResults();
-  void printGlobalResults(FILE *out);
+  int writeGlobalStats();
+  void printGlobalStats(FILE *out);
 
   int writeZdrPoints();
+
+  int writeStatsToSpdb();
 
 protected:
   
@@ -106,9 +107,11 @@ private:
 
   // analysis
 
-  double _startTime;
-  double _endTime;
-  double _startTime360;
+  double _startTimeGlobal;
+  double _endTimeGlobal;
+  double _startTimeStats;
+  double _endTimeStats;
+  double _prevTime;
   double _prt;
   double _el;
   double _az;

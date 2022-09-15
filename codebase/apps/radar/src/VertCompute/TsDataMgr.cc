@@ -38,22 +38,23 @@
 #include "TsDataMgr.hh"
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
+#include <Radx/RadxTime.hh>
 
 using namespace std;
 
 // Constructor
 
 TsDataMgr::TsDataMgr(const string &prog_name,
+                     const Args &args,
 		     const Params &params,
-		     const vector<string> &input_file_list,
 		     StatsMgr &statsMgr) :
   _progName(prog_name),
+  _args(args),
   _params(params),
-  _inputFileList(input_file_list),
   _statsMgr(statsMgr)
   
 {
-  
+
   _pulseSeqNum = 0;
   _totalPulseCount = 0;
   _reader = NULL;
@@ -70,19 +71,6 @@ TsDataMgr::TsDataMgr(const string &prog_name,
   double startHt = _params.start_height;
   double deltaHt = _params.delta_height;
   _maxHt = startHt + (nLayers + 1) * deltaHt;
-
-  // create reader
-
-  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug) {
-    iwrfDebug = IWRF_DEBUG_NORM;
-  }
-  if (_params.input_mode == Params::TS_FILE_INPUT) {
-    _reader = new IwrfTsReaderFile(_inputFileList, iwrfDebug);
-  } else {
-    _reader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug,
-				   _params.seek_to_start_of_input);
-  }
 
   switch (_params.xmit_rcv_mode) {
     
@@ -147,6 +135,64 @@ int TsDataMgr::run ()
     cerr << "  Cannot decode cal file: "
 	 << _params.cal_xml_file_path << endl;
     return -1;
+  }
+
+  // create reader
+
+  IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
+  if (_params.debug) {
+    iwrfDebug = IWRF_DEBUG_NORM;
+  }
+  
+  if (_params.input_mode == Params::TS_FILE_INPUT) {
+    
+    // check if start and end times are set
+    
+    bool startTimeSet = true;
+    time_t startTime = RadxTime::parseDateTime(_params.start_time);
+    if (startTime == RadxTime::NEVER || startTime < 1) {
+      startTimeSet = false;
+    }
+    
+    bool endTimeSet = true;
+    time_t endTime = RadxTime::parseDateTime(_params.end_time);
+    if (endTime == RadxTime::NEVER || endTime < 1) {
+      endTimeSet = false;
+    }
+    
+    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+    
+    vector<string> paths = _args.inputFileList;
+    if (paths.size() == 0) {
+      if (startTimeSet && endTimeSet) {
+        if (_params.debug) {
+          cerr << "  Input dir: " << _params.input_dir << endl;
+          cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+          cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+        }
+        DsInputPath dsInput(_progName, _params.debug >= Params::DEBUG_VERBOSE,
+                            _params.input_dir,
+                            startTime, endTime);
+        paths = dsInput.getPathList();
+      } // if (startTimeSet && endTimeSet)
+      
+    }
+    
+    if (paths.size() < 1) {
+      cerr << "ERROR - VertCompute::RadxDataMgr::run()" << endl;
+      cerr << "  No files found, dir: " << _params.input_dir << endl;
+      return -1;
+    }
+
+    _reader = new IwrfTsReaderFile(paths, iwrfDebug);
+    
+  } else {
+
+    _reader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug,
+				   _params.seek_to_start_of_input);
+
   }
 
   int iret = 0;
