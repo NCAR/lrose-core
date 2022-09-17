@@ -38,6 +38,7 @@
 #include <vector>
 #include <cstdio>
 
+#include "Args.hh"
 #include "Params.hh"
 #include "LayerStats.hh"
 
@@ -53,11 +54,16 @@ public:
   // constructor
 
   StatsMgr(const string &prog_name,
+           const Args &args,
 	   const Params &params);
 
   // destructor
   
-  ~StatsMgr();
+  virtual ~StatsMgr();
+
+  // run 
+
+  virtual int run() = 0;
 
   // set methods
 
@@ -96,10 +102,9 @@ public:
 
 protected:
   
-private:
-
   string _progName;
-  Params _params;
+  const Args &_args;
+  const Params &_params;
 
   // moments data
   
@@ -149,6 +154,8 @@ private:
   double _globalMeanZdrm;
   double _globalSdevZdrm;
   double _globalMeanOfSdevZdrm;
+
+private:
 
 };
 

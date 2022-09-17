@@ -63,7 +63,6 @@ VertCompute::VertCompute(int argc, char **argv)
 {
 
   isOK = true;
-  _statsMgr = NULL;
 
   // set programe name
   
@@ -89,10 +88,6 @@ VertCompute::VertCompute(int argc, char **argv)
     return;
   }
 
-  // set up stats manager
-
-  _statsMgr = new StatsMgr(_progName, _params);
-
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -111,10 +106,6 @@ VertCompute::~VertCompute()
 
 {
 
-  if (_statsMgr) {
-    delete _statsMgr;
-  }
-
 }
 
 //////////////////////////////////////////////////
@@ -123,40 +114,36 @@ VertCompute::~VertCompute()
 int VertCompute::Run ()
 {
 
-  int iret = 0;
-
+  // create stats manager object, based on type of input data
+  
+  StatsMgr *statsMgr = NULL;
   if (_params.input_mode == Params::RADX_MOMENTS_INPUT) {
-
-    RadxDataMgr mgr(_progName, _args, _params, *_statsMgr);
-    if (mgr.run()) {
-      iret = -1;
-    }
-
+    statsMgr = new RadxDataMgr(_progName, _args, _params);
   } else if (_params.input_mode == Params::DSR_MOMENTS_INPUT) {
-    
-    DsrDataMgr mgr(_progName, _params, *_statsMgr);
-    if (mgr.run()) {
-      iret = -1;
-    }
-
+    statsMgr = new DsrDataMgr(_progName, _args, _params);
   } else {
+    statsMgr = new TsDataMgr(_progName, _args, _params);
+  }
+  if (statsMgr == NULL) {
+    return -1;
+  }
 
-    TsDataMgr mgr(_progName, _args, _params, *_statsMgr);
-    if (mgr.run()) {
-      iret = -1;
-    }
-
+  // read in the data and run
+  
+  if (statsMgr->run()) {
+    return -1;
   }
   
-  _statsMgr->computeGlobalStats();
+  statsMgr->computeGlobalStats();
   if (_params.write_stats_to_text_file) {
-    _statsMgr->writeGlobalStats();
+    statsMgr->writeGlobalStats();
   }
   if (_params.write_zdr_point_values_to_text_file) {
-    _statsMgr->writeZdrPoints();
+    statsMgr->writeZdrPoints();
   }
 
-  return iret;
+  delete statsMgr;
+  return 0;
 
 }
 

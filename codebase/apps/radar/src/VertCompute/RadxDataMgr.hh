@@ -43,8 +43,6 @@
 #include <map>
 #include <cstdio>
 
-#include "Args.hh"
-#include "Params.hh"
 #include "StatsMgr.hh"
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
@@ -55,24 +53,23 @@ using namespace std;
 ////////////////////////
 // This class
 
-class RadxDataMgr {
+class RadxDataMgr : public StatsMgr {
   
 public:
 
   // constructor
-
+  
   RadxDataMgr(const string &prog_name,
               const Args &args,
-              const Params &params,
-              StatsMgr &statsMgr);
+              const Params &params);
   
   // destructor
   
-  ~RadxDataMgr();
+  virtual ~RadxDataMgr();
 
   // run 
 
-  int run();
+  virtual int run();
 
 protected:
   
@@ -81,13 +78,6 @@ private:
   static const double _missingDouble;
   static const double _missingTest;
   
-  string _progName;
-  char *_paramsPath;
-  
-  const Args &_args;
-  const Params &_params;
-  StatsMgr &_statsMgr;
-
   // data input
 
   RadxVol _readVol;

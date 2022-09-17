@@ -50,12 +50,8 @@ const double RadxDataMgr::_missingTest = -9998.0;
 
 RadxDataMgr::RadxDataMgr(const string &prog_name,
                          const Args &args,
-                         const Params &params,
-                         StatsMgr &statsMgr) :
-        _progName(prog_name),
-        _args(args),
-        _params(params),
-        _statsMgr(statsMgr)
+                         const Params &params) :
+        StatsMgr(prog_name, args, params)
   
 {
   
@@ -262,7 +258,7 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
     elev = 180.0 - elev;
   }
   if (elev < _params.min_elevation) {
-    // _statsMgr.clearStats();
+    // clearStats();
     return;
   }
 
@@ -270,14 +266,14 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
   
   double rayTime = ray->getTimeDouble();
   if (_totalRayCount == 0) {
-    _statsMgr.setStartTime(rayTime);
+    setStartTime(rayTime);
   }
-  _statsMgr.setEndTime(rayTime);
+  setEndTime(rayTime);
   _totalRayCount++;
   
-  _statsMgr.setPrt(ray->getPrtSec());
-  _statsMgr.setEl(ray->getElevationDeg());
-  _statsMgr.setAz(ray->getAzimuthDeg());
+  setPrt(ray->getPrtSec());
+  setEl(ray->getElevationDeg());
+  setAz(ray->getAzimuthDeg());
 
   // load up the moments data for each field
 
@@ -306,7 +302,7 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
 
   // if we have done a full rotation, process the data
 
-  _statsMgr.checkCompute();
+  checkCompute();
 
 }
 
@@ -384,7 +380,7 @@ void RadxDataMgr::_processMoments(const RadxRay *ray)
 
     // add to layer statss
 
-    _statsMgr.addDataPoint(range, mdata);
+    addDataPoint(range, mdata);
     
   } // igate
 

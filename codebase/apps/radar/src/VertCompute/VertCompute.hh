@@ -76,7 +76,6 @@ private:
   char *_paramsPath;
   Args _args;
   Params _params;
-  StatsMgr *_statsMgr;
   int _nGates;
 
 };

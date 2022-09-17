@@ -43,7 +43,6 @@
 #include <deque>
 #include <cstdio>
 
-#include "Params.hh"
 #include "StatsMgr.hh"
 #include <toolsa/TaArray.hh>
 #include <Fmq/DsRadarQueue.hh>
@@ -53,23 +52,23 @@ using namespace std;
 ////////////////////////
 // This class
 
-class DsrDataMgr {
+class DsrDataMgr : public StatsMgr {
   
 public:
 
   // constructor
 
   DsrDataMgr(const string &prog_name,
-	     const Params &params,
-	     StatsMgr &statsMgr);
+             const Args &args,
+	     const Params &params);
 
   // destructor
   
-  ~DsrDataMgr();
+  virtual ~DsrDataMgr();
 
   // run 
 
-  int run();
+  virtual int run();
 
 protected:
   
@@ -77,12 +76,6 @@ private:
 
   static const double _missingDouble;
   static const double _missingTest;
-
-  string _progName;
-  char *_paramsPath;
-
-  Params _params;
-  StatsMgr &_statsMgr;
 
   // FMQ input
   

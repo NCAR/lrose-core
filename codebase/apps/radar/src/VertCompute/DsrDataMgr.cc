@@ -48,11 +48,9 @@ const double DsrDataMgr::_missingTest = -9998.0;
 // Constructor
 
 DsrDataMgr::DsrDataMgr(const string &prog_name,
-		       const Params &params,
-		       StatsMgr &statsMgr) :
-  _progName(prog_name),
-  _params(params),
-  _statsMgr(statsMgr)
+                       const Args &args,
+		       const Params &params) :
+        StatsMgr(prog_name, args, params)
   
 {
   
@@ -256,14 +254,14 @@ void DsrDataMgr::_processBeam()
   // at start, print headers
 
   if (_totalBeamCount == 0) {
-    _statsMgr.setStartTime(beamFTime);
+    setStartTime(beamFTime);
   }
-  _statsMgr.setEndTime(beamFTime);
+  setEndTime(beamFTime);
   _totalBeamCount++;
   
-  _statsMgr.setPrt(1.0 / _inputRadarParams.pulseRepFreq);
-  _statsMgr.setEl(beam.elevation);
-  _statsMgr.setAz(beam.azimuth);
+  setPrt(1.0 / _inputRadarParams.pulseRepFreq);
+  setEl(beam.elevation);
+  setAz(beam.azimuth);
 
   // process the moments
   
@@ -272,7 +270,7 @@ void DsrDataMgr::_processBeam()
 
   // if we have done a full rotation, process the data
 
-  _statsMgr.checkCompute();
+  checkCompute();
 
 }
 
@@ -522,7 +520,7 @@ void DsrDataMgr::_processMoments()
 
     // add to layer statss
 
-    _statsMgr.addDataPoint(range, mdata);
+    addDataPoint(range, mdata);
     
   } // igate
 

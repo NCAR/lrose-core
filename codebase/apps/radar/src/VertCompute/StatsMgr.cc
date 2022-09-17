@@ -59,8 +59,10 @@ using namespace std;
 // Constructor
 
 StatsMgr::StatsMgr(const string &prog_name,
+                   const Args &args,
 		   const Params &params) :
   _progName(prog_name),
+  _args(args),
   _params(params)
   
 {

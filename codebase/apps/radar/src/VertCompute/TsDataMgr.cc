@@ -46,13 +46,9 @@ using namespace std;
 
 TsDataMgr::TsDataMgr(const string &prog_name,
                      const Args &args,
-		     const Params &params,
-		     StatsMgr &statsMgr) :
-  _progName(prog_name),
-  _args(args),
-  _params(params),
-  _statsMgr(statsMgr)
-  
+		     const Params &params) :
+        StatsMgr::StatsMgr(prog_name, args, params)
+    
 {
 
   _pulseSeqNum = 0;
@@ -225,9 +221,9 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   // at start, print headers
 
   if (_totalPulseCount == 0) {
-    _statsMgr.setStartTime(pulse->getFTime());
+    setStartTime(pulse->getFTime());
   }
-  _statsMgr.setEndTime(pulse->getFTime());
+  setEndTime(pulse->getFTime());
 
   // check that we start with a horizontal pulse
 
@@ -274,9 +270,9 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   
   int midIndex = _nSamples / 2;
   const IwrfTsPulse *midPulse = _pulseQueue[midIndex];
-  _statsMgr.setPrt(midPulse->getPrt());
-  _statsMgr.setEl(midPulse->getEl());
-  _statsMgr.setAz(midPulse->getAz());
+  setPrt(midPulse->getPrt());
+  setEl(midPulse->getEl());
+  setAz(midPulse->getAz());
 
   // transmitter power
 
@@ -289,7 +285,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // if we have done a full rotation, process the data
 
-  _statsMgr.checkCompute();
+  checkCompute();
 
   // clear time series data queue
 
@@ -447,7 +443,7 @@ void TsDataMgr::_computeMoments()
     mdata.ldrv = flds.ldrv;
     mdata.phidp = flds.phidp;
     mdata.rhohv = flds.rhohv;
-    _statsMgr.addDataPoint(range, mdata);
+    addDataPoint(range, mdata);
   } // igate
 
 }
