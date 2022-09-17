@@ -121,8 +121,8 @@ protected:
   double _el;
   double _az;
   double _prevAz;
-  double _azMoved;
-  int _nRotations;
+  double _azMovedStats;
+  double _azMovedPrint;
 
   // elevation
 

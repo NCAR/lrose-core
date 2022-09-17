@@ -76,8 +76,8 @@ StatsMgr::StatsMgr(const string &prog_name,
   _el = 0;
   _az = 0;
   _prevAz = -999;
-  _azMoved = 0;
-  _nRotations = 0;
+  _azMovedStats = 0;
+  _azMovedPrint = 0;
 
   _sumEl = 0.0;
   _nEl = 0.0;
@@ -169,8 +169,11 @@ void StatsMgr::setAz(double az) {
   if (_prevAz < -900) {
     _prevAz = _az;
   } else {
-    double azDiff = RadarComplex::diffDeg(_prevAz, _az);
-    _azMoved += fabs(azDiff);
+    double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
+    if (azDiff < 10.0) {
+      _azMovedStats += azDiff;
+      _azMovedPrint += azDiff;
+    }
     _prevAz = _az;
   }
   
@@ -181,7 +184,13 @@ void StatsMgr::setAz(double az) {
 
 void StatsMgr::checkCompute() {
 
-  if (_azMoved > _params.cumulative_azimuth_moved_for_stats) {
+  if (_azMovedPrint > _params.cumulative_azimuth_moved_for_debug_print) {
+    computeStats();
+    printStats(stderr);
+    _azMovedPrint = 0.0;
+  }
+  
+  if (_azMovedStats > _params.cumulative_azimuth_moved_for_stats) {
 
     computeStats();
     if (_params.write_stats_to_text_file) {
@@ -191,8 +200,7 @@ void StatsMgr::checkCompute() {
       writeStatsToSpdb();
     }
     clearStats();
-    _azMoved = 0;
-    _nRotations++;
+    _azMovedStats = 0;
     _startTimeStats = _endTimeStats;
 
   }
@@ -405,7 +413,7 @@ void StatsMgr::printStats(FILE *out)
           "============================================\n");
   fprintf(out, " Vertical-pointing ZDR calibration\n");
   fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
-  fprintf(out, "   az moved (deg)        : %8g\n", _azMoved);
+  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedStats);
   fprintf(out, "   n samples             : %8d\n", _params.n_samples);
   fprintf(out, "   n valid               : %8d\n", (int) (_countZdrm + 0.5));
   fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
@@ -605,9 +613,8 @@ void StatsMgr::printGlobalStats(FILE *out)
   fprintf(out, " Vertical-pointing ZDR calibration - global\n");
   fprintf(out, " Start time: %s\n", DateTime::strm(startTime).c_str());
   fprintf(out, " End time  : %s\n", DateTime::strm(endTime).c_str());
-  fprintf(out, "   az moved (deg)        : %8g\n", _azMoved);
+  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedStats);
   fprintf(out, "   n samples             : %8d\n", _params.n_samples);
-  fprintf(out, "   n complete rotations  : %8d\n", _nRotations);
   fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
   fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
   fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);

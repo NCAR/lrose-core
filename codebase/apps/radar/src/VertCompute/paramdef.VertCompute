@@ -247,9 +247,14 @@ commentdef {
 
 paramdef double {
   p_default = 1080;
-  p_descr = "Cumulative delta az for stats (deg).";
+  p_descr = "Cumulative delta az for computing stats (deg).";
   p_help = "We only compute stats after the antenna has scanned this number of degrees.";
 } cumulative_azimuth_moved_for_stats;
+
+paramdef double {
+  p_default = 360;
+  p_descr = "Cumulative delta az for printing debug stats (deg).";
+} cumulative_azimuth_moved_for_debug_print;
 
 paramdef double {
   p_default = 3600;

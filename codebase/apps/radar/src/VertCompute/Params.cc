@@ -1016,10 +1016,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("cumulative_azimuth_moved_for_stats");
-    tt->descr = tdrpStrDup("Cumulative delta az for stats (deg).");
+    tt->descr = tdrpStrDup("Cumulative delta az for computing stats (deg).");
     tt->help = tdrpStrDup("We only compute stats after the antenna has scanned this number of degrees.");
     tt->val_offset = (char *) &cumulative_azimuth_moved_for_stats - &_start_;
     tt->single_val.d = 1080;
+    tt++;
+    
+    // Parameter 'cumulative_azimuth_moved_for_debug_print'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cumulative_azimuth_moved_for_debug_print");
+    tt->descr = tdrpStrDup("Cumulative delta az for printing debug stats (deg).");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &cumulative_azimuth_moved_for_debug_print - &_start_;
+    tt->single_val.d = 360;
     tt++;
     
     // Parameter 'max_time_gap_for_stats'

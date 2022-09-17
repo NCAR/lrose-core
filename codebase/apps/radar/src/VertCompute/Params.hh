@@ -454,6 +454,8 @@ public:
 
   double cumulative_azimuth_moved_for_stats;
 
+  double cumulative_azimuth_moved_for_debug_print;
+
   double max_time_gap_for_stats;
 
   double min_snr;
@@ -495,7 +497,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 
