@@ -487,26 +487,26 @@ int StatsMgr::writeStatsToSpdb()
   xml += TaXml::writeStartTag("VertPointingStats", 0);
 
   xml += TaXml::writeDouble("meanElevation", 1, _meanEl);
-  xml += TaXml::writeDouble("meanZdrm", 1, _meanZdrm);
-  xml += TaXml::writeDouble("sdevZdrm", 1, _sdevZdrm);
-  xml += TaXml::writeDouble("countZdrm", 1, _countZdrm);
+  xml += TaXml::writeDouble("meanZdrmVol", 1, _meanZdrm);
+  xml += TaXml::writeDouble("sdevZdrmVol", 1, _sdevZdrm);
+  xml += TaXml::writeDouble("countZdrmVol", 1, _countZdrm);
 
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
     // if (layer.getMean().snr > -9990) {
 
       xml += TaXml::writeStartTag("LayerStats", 1);
-      xml += TaXml::writeDouble("meanHt", 2, layer.getMeanHt());
-      xml += TaXml::writeInt("nValid", 2, layer.getNValid());
-      xml += TaXml::writeDouble("meanSnr", 2, layer.getMean().snr);
-      xml += TaXml::writeDouble("meanDbz", 2, layer.getMean().dbz);
-      xml += TaXml::writeDouble("meanVel", 2, layer.getMean().vel);
-      xml += TaXml::writeDouble("meanZdrm", 2, layer.getMean().zdrm);
-      xml += TaXml::writeDouble("sdevZdrm", 2, layer.getSdev().zdrm);
-      xml += TaXml::writeDouble("meanLdrh", 2, layer.getMean().ldrh);
-      xml += TaXml::writeDouble("meanLdrv", 2, layer.getMean().ldrv);
-      xml += TaXml::writeDouble("meanRhohv", 2, layer.getMean().rhohv);
-      xml += TaXml::writeEndTag("LayerStats", 1);
+      xml += TaXml::writeDouble("meanHtLayer", 2, layer.getMeanHt());
+      xml += TaXml::writeInt("nValidLayer", 2, layer.getNValid());
+      xml += TaXml::writeDouble("meanSnrLayer", 2, layer.getMean().snr);
+      xml += TaXml::writeDouble("meanDbzLayer", 2, layer.getMean().dbz);
+      xml += TaXml::writeDouble("meanVelLayer", 2, layer.getMean().vel);
+      xml += TaXml::writeDouble("meanZdrmLayer", 2, layer.getMean().zdrm);
+      xml += TaXml::writeDouble("sdevZdrmLayer", 2, layer.getSdev().zdrm);
+      xml += TaXml::writeDouble("meanLdrhLayer", 2, layer.getMean().ldrh);
+      xml += TaXml::writeDouble("meanLdrvLayer", 2, layer.getMean().ldrv);
+      xml += TaXml::writeDouble("meanRhohvLayer", 2, layer.getMean().rhohv);
+      xml += TaXml::writeEndTag("LayerStatsLayer", 1);
 
       // }
   }
