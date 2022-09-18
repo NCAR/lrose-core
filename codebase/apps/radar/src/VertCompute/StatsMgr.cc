@@ -76,8 +76,9 @@ StatsMgr::StatsMgr(const string &prog_name,
   _el = 0;
   _az = 0;
   _prevAz = -999;
-  _azMovedStats = 0;
-  _azMovedPrint = 0;
+  _azMovedGlobal = 0.0;
+  _azMovedStats = 0.0;
+  _azMovedPrint = 0.0;
 
   _sumEl = 0.0;
   _nEl = 0.0;
@@ -91,7 +92,6 @@ StatsMgr::StatsMgr(const string &prog_name,
   _globalSumSqZdrm = 0;
   _globalMeanZdrm = -9999;
   _globalSdevZdrm = -9999;
-  _globalMeanOfSdevZdrm = -9999;
 
   // set up layers
   
@@ -171,6 +171,7 @@ void StatsMgr::setAz(double az) {
   } else {
     double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
     if (azDiff < 10.0) {
+      _azMovedGlobal += azDiff;
       _azMovedStats += azDiff;
       _azMovedPrint += azDiff;
     }
@@ -182,26 +183,32 @@ void StatsMgr::setAz(double az) {
 /////////////////////////////////
 // check and compute when ready
 
-void StatsMgr::checkCompute() {
+void StatsMgr::checkCompute()
+{
 
-  if (_azMovedPrint > _params.cumulative_azimuth_moved_for_debug_print) {
-    computeStats();
-    printStats(stderr);
-    _azMovedPrint = 0.0;
-  }
-  
   if (_azMovedStats > _params.cumulative_azimuth_moved_for_stats) {
 
-    computeStats();
-    if (_params.write_stats_to_text_file) {
-      writeStats();
+    if (computeStats() == 0) {
+    
+      if (_params.write_stats_to_text_file) {
+        writeStats();
+      }
+      if (_params.write_stats_to_spdb) {
+        writeStatsToSpdb();
+      }
+
     }
-    if (_params.write_stats_to_spdb) {
-      writeStatsToSpdb();
-    }
+    
     clearStats();
     _azMovedStats = 0;
     _startTimeStats = _endTimeStats;
+    
+  } else if (_azMovedPrint > _params.cumulative_azimuth_moved_for_debug_print) {
+
+    if (computeStats() == 0) {
+      printStats(stderr);
+    }
+    _azMovedPrint = 0.0;
 
   }
   
@@ -242,7 +249,7 @@ void StatsMgr::clearStats()
 //////////////////////////////////////
 // compute stats for az moved so far
 
-void StatsMgr::computeStats()
+int StatsMgr::computeStats()
   
 {
   
@@ -255,7 +262,7 @@ void StatsMgr::computeStats()
 
   double sumValid = 0.0;
   double sumZdrm = 0.0;
-  double sum2Zdrm = 0.0;
+  double sumSqZdrm = 0.0;
 
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     LayerStats &layer = *(_layers[ii]);
@@ -266,7 +273,7 @@ void StatsMgr::computeStats()
         snr >= _params.min_snr) {
       sumValid += layer.getNValid();
       sumZdrm += layer.getSum().zdrm;
-      sum2Zdrm += layer.getSum2().zdrm;
+      sumSqZdrm += layer.getSumSq().zdrm;
     }
   }
 
@@ -278,18 +285,25 @@ void StatsMgr::computeStats()
 
   if (_countZdrm > 0) {
     _meanZdrm = sumZdrm / _countZdrm;
-    _globalCountZdrm++;
-    _globalSumZdrm += _meanZdrm;
-    _globalSumSqZdrm += _meanZdrm * _meanZdrm;
+    _globalCountZdrm += _countZdrm;
+    _globalSumZdrm += sumZdrm;
+    _globalSumSqZdrm += sumSqZdrm;
   }
+
   if (_countZdrm > 2) {
     _meanZdrm = sumZdrm / _countZdrm;
     double variance =
-      (sum2Zdrm - (sumZdrm * sumZdrm) / _countZdrm) / (_countZdrm - 1.0);
+      (sumSqZdrm - (sumZdrm * sumZdrm) / _countZdrm) / (_countZdrm - 1.0);
     _sdevZdrm = 0.000001;
     if (variance >= 0.0) {
       _sdevZdrm = sqrt(variance);
     }
+  }
+
+  if (_countZdrm < _params.min_valid_count_for_stats) {
+    return -1;
+  } else {
+    return 0;
   }
 
 }
@@ -297,7 +311,7 @@ void StatsMgr::computeStats()
 /////////////////////////
 // compute global stats
 
-void StatsMgr::computeGlobalStats()
+int StatsMgr::computeGlobalStats()
   
 {
 
@@ -313,15 +327,20 @@ void StatsMgr::computeGlobalStats()
     _globalMeanZdrm = _globalSumZdrm / _globalCountZdrm;
   }
   if (_globalCountZdrm > 2) {
-    _globalMeanZdrm = _globalSumZdrm / _globalCountZdrm;
     double variance =
-      (_globalSumSqZdrm - (_globalSumZdrm * _globalSumZdrm) / 
-       _globalCountZdrm) / (_globalCountZdrm - 1.0);
+      (_globalSumSqZdrm -
+       (_globalSumZdrm * _globalSumZdrm) / _globalCountZdrm) /
+      (_globalCountZdrm - 1.0);
     _globalSdevZdrm = 0.000001;
     if (variance >= 0.0) {
       _globalSdevZdrm = sqrt(variance);
     }
-    _globalMeanOfSdevZdrm = _globalSdevZdrm / sqrt(_globalCountZdrm);
+  }
+
+  if (_globalCountZdrm < _params.min_valid_count_for_stats) {
+    return -1;
+  } else {
+    return 0;
   }
 
 }
@@ -409,7 +428,7 @@ void StatsMgr::printStats(FILE *out)
   time_t startTime = (time_t) _startTimeStats;
   
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
   fprintf(out, " Vertical-pointing ZDR calibration\n");
   fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
@@ -430,7 +449,7 @@ void StatsMgr::printStats(FILE *out)
   fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _sdevZdrm);
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _meanZdrm * -1.0);
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
   fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
@@ -454,7 +473,7 @@ void StatsMgr::printStats(FILE *out)
     }
   }
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
   
 }
@@ -524,7 +543,7 @@ int StatsMgr::writeStatsToSpdb()
   spdb.addPutChunk(dataType, validTime, validTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
-    cerr << "ERROR - StatsMgr::writeStats360ToSpdb" << endl;
+    cerr << "ERROR - StatsMgr::writeStatsToSpdb" << endl;
     cerr << spdb.getErrStr() << endl;
     return -1;
   }
@@ -608,13 +627,14 @@ void StatsMgr::printGlobalStats(FILE *out)
   time_t endTime = (time_t) _endTimeGlobal;
 
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
   fprintf(out, " Vertical-pointing ZDR calibration - global\n");
   fprintf(out, " Start time: %s\n", DateTime::strm(startTime).c_str());
   fprintf(out, " End time  : %s\n", DateTime::strm(endTime).c_str());
-  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedStats);
+  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedGlobal);
   fprintf(out, "   n samples             : %8d\n", _params.n_samples);
+  fprintf(out, "   n valid               : %8g\n", _globalCountZdrm);
   fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
   fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
   fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
@@ -628,14 +648,14 @@ void StatsMgr::printGlobalStats(FILE *out)
   fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _globalSdevZdrm);
   fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _globalMeanZdrm * -1.0);
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
   fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
           "Ht", "npts", "snr", "dBZ", "vel",
           "ldr", "rhohv", "zdrMean", "zdrSdev", "gof", "rmse");
   for (int ii = 0; ii < (int) _layers.size(); ii++) {
     const LayerStats &layer = *(_layers[ii]);
-    if (layer.getMean().snr > -9990) {
+    if (layer.getGlobalMean().snr > -9990) {
       fprintf(out,
               " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %7.3f %7.3f %6.3f %6.3f\n",
               layer.getMeanHt(),
@@ -652,7 +672,7 @@ void StatsMgr::printGlobalStats(FILE *out)
     }
   } // ii
   fprintf(out,
-          " ===================================="
+          " ====================================="
           "============================================\n");
 
 }
@@ -666,7 +686,7 @@ int StatsMgr::writeZdrPoints()
   
   if (ta_makedir_recurse(_params.zdr_points_output_dir)) {
     int errNum = errno;
-    cerr << "ERROR - StatsMgr::_writeStats";
+    cerr << "ERROR - StatsMgr::_writeZdrPoints";
     cerr << "  Cannot create output dir: " << _params.zdr_points_output_dir << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;

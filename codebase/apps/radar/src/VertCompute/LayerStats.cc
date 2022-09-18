@@ -48,7 +48,7 @@ LayerStats::LayerStats(const Params &params, double min_ht, double max_ht) :
 
   _globalNValid = 0;
   _globalSum.zeroOut();
-  _globalSum2.zeroOut();
+  _globalSumSq.zeroOut();
 
 }
 
@@ -66,8 +66,8 @@ void LayerStats::clearData()
 
 {
   _nValid = 0;
- _momentData.clear();
- _dist.clearValues();
+  _momentData.clear();
+  _dist.clearValues();
 }
 
 // add a zdr value
@@ -135,7 +135,7 @@ void LayerStats::computeStats()
   // zero out sums
 
   _sum.zeroOut();
-  _sum2.zeroOut();
+  _sumSq.zeroOut();
 
   // accumulate
 
@@ -144,7 +144,7 @@ void LayerStats::computeStats()
     if (_momentData[ii].valid) {
       const MomentData &mdata = _momentData[ii];
       _sum.add(mdata);
-      _sum2.addSquared(mdata);
+      _sumSq.addSquared(mdata);
       _nValid++;
       _dist.addValue(mdata.zdrm);
       _globalDist.addValue(mdata.zdrm);
@@ -153,11 +153,11 @@ void LayerStats::computeStats()
 
   _globalNValid += _nValid;
   _globalSum.add(_sum);
-  _globalSum2.add(_sum2);
+  _globalSumSq.add(_sumSq);
 
   // compute mean and sdev
 
-  MomentData::computeMeanSdev(_nValid, _sum, _sum2, _mean, _sdev);
+  MomentData::computeMeanSdev(_nValid, _sum, _sumSq, _mean, _sdev);
 
   _dist.computeBasicStats();
   _dist.setHistRangeFromSdev(3.0);
@@ -177,7 +177,7 @@ void LayerStats::computeGlobalStats()
 
 {
   MomentData::computeMeanSdev(_globalNValid,
-                              _globalSum, _globalSum2,
+                              _globalSum, _globalSumSq,
                               _globalMean, _globalSdev);
   _globalDist.computeBasicStats();
   _globalDist.setHistRangeFromSdev(3.0);
@@ -201,7 +201,7 @@ void LayerStats::_computeZdrmMeanSdev(double &mean, double &sdev)
   sdev = MomentData::missingVal;
   
   double sum = 0;
-  double sum2 = 0;
+  double sumSq = 0;
   double dn = 0;
   
   for (int ii = 0; ii < (int) _momentData.size(); ii++) {
@@ -209,7 +209,7 @@ void LayerStats::_computeZdrmMeanSdev(double &mean, double &sdev)
     if (data.valid) {
       double val = data.zdrm;
       sum += val;
-      sum2 += val * val;
+      sumSq += val * val;
       dn++;
     }
   } // ii
@@ -219,7 +219,7 @@ void LayerStats::_computeZdrmMeanSdev(double &mean, double &sdev)
   }
   
   if (dn > 2) {
-    double var = (sum2 - (sum * sum) / dn) / (dn - 1.0);
+    double var = (sumSq - (sum * sum) / dn) / (dn - 1.0);
     if (var >= 0.0) {
       sdev = sqrt(var);
     } else {

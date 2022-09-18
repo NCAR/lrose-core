@@ -252,8 +252,9 @@ paramdef double {
 } cumulative_azimuth_moved_for_stats;
 
 paramdef double {
-  p_default = 360;
+  p_default = 1080;
   p_descr = "Cumulative delta az for printing debug stats (deg).";
+  p_help = "If not needed, set equal to cumulative_azimuth_moved_for_stats.";
 } cumulative_azimuth_moved_for_debug_print;
 
 paramdef double {
@@ -261,6 +262,12 @@ paramdef double {
   p_descr = "Max time gap in data for stats (s).";
   p_help = "If we find a gap that exceeds this, we clear the stats and start again.";
 } max_time_gap_for_stats;
+
+paramdef double {
+  p_default = 2000;
+  p_descr = "Min number of valid points for stats.";
+  p_help = "A valid point is a range gate that satisfies the thresholds below.";
+} min_valid_count_for_stats;
 
 paramdef double {
   p_default = 10.0;

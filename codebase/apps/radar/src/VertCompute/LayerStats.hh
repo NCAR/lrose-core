@@ -87,7 +87,7 @@ public:
   const MomentData &getMean() const { return _mean; }
   const MomentData &getSdev() const { return _sdev; }
   const MomentData &getSum() const { return _sum; }
-  const MomentData &getSum2() const { return _sum2; }
+  const MomentData &getSumSq() const { return _sumSq; }
   const MomentData &getGlobalMean() const { return _globalMean; }
   const MomentData &getGlobalSdev() const { return _globalSdev; }
 
@@ -113,13 +113,13 @@ private:
   MomentData _mean;
   MomentData _sdev;
   MomentData _sum;
-  MomentData _sum2;
+  MomentData _sumSq;
 
   int _globalNValid;
   MomentData _globalMean;
   MomentData _globalSdev;
   MomentData _globalSum;
-  MomentData _globalSum2;
+  MomentData _globalSumSq;
 
   double _meanZdr, _sdevZdr;
   

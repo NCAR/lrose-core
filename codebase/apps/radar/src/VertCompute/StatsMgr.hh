@@ -85,8 +85,8 @@ public:
   // compute methods
   
   void clearStats();
-  void computeStats();
-  void computeGlobalStats();
+  int computeStats();
+  int computeGlobalStats();
   
   // write methods
   
@@ -121,6 +121,7 @@ protected:
   double _el;
   double _az;
   double _prevAz;
+  double _azMovedGlobal;
   double _azMovedStats;
   double _azMovedPrint;
 
@@ -153,7 +154,6 @@ protected:
   double _globalCountZdrm;
   double _globalMeanZdrm;
   double _globalSdevZdrm;
-  double _globalMeanOfSdevZdrm;
 
 private:
 

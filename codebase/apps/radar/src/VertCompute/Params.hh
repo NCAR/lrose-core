@@ -458,6 +458,8 @@ public:
 
   double max_time_gap_for_stats;
 
+  double min_valid_count_for_stats;
+
   double min_snr;
 
   double max_snr;
@@ -497,7 +499,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[50];
+  mutable TDRPtable _table[51];
 
   const char *_className;
 

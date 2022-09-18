@@ -1029,9 +1029,9 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("cumulative_azimuth_moved_for_debug_print");
     tt->descr = tdrpStrDup("Cumulative delta az for printing debug stats (deg).");
-    tt->help = tdrpStrDup("");
+    tt->help = tdrpStrDup("If not needed, set equal to cumulative_azimuth_moved_for_stats.");
     tt->val_offset = (char *) &cumulative_azimuth_moved_for_debug_print - &_start_;
-    tt->single_val.d = 360;
+    tt->single_val.d = 1080;
     tt++;
     
     // Parameter 'max_time_gap_for_stats'
@@ -1044,6 +1044,18 @@
     tt->help = tdrpStrDup("If we find a gap that exceeds this, we clear the stats and start again.");
     tt->val_offset = (char *) &max_time_gap_for_stats - &_start_;
     tt->single_val.d = 3600;
+    tt++;
+    
+    // Parameter 'min_valid_count_for_stats'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_count_for_stats");
+    tt->descr = tdrpStrDup("Min number of valid points for stats.");
+    tt->help = tdrpStrDup("A valid point is a range gate that satisfies the thresholds below.");
+    tt->val_offset = (char *) &min_valid_count_for_stats - &_start_;
+    tt->single_val.d = 2000;
     tt++;
     
     // Parameter 'min_snr'
