@@ -341,9 +341,13 @@ void RadxDataMgr::_loadMomentsData(const RadxRay *ray,
     return;
   }
   
+  Radx::fl32 missingFl32 = radxField->getMissingFl32();
   const Radx::fl32 *fvals = radxField->getDataFl32();
   for (int ii = 0; ii < _nGates; ii++) {
-    field.data[ii] = fvals[ii];
+    Radx::fl32 fval = fvals[ii];
+    if (fval != missingFl32) {
+      field.data[ii] = fvals[ii];
+    }
   }
 
 }
