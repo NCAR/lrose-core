@@ -351,23 +351,20 @@ void TsDataMgr::_addPulseToQueue(const IwrfTsPulse *pulse)
   _pulseSeqNum = pulse->getSeqNum();
 
   // set _nGates to min number found so far
+  // for staggered PRT we want to use the shorter number of gates
 
   qSize = (int) _pulseQueue.size();
-  if (_nGates != 0) {
-    if (_nGates > _pulseQueue[0]->getNGates()) {
-      _nGates = _pulseQueue[0]->getNGates();
-    }
-  } else {
+  if (qSize < 1) {
+    return;
+  }
+  if (_nGates == 0) {
     _nGates = _pulseQueue[0]->getNGates();
   }
-
-  // _nGates = _pulseQueue[0]->getNGates();
-  // for (int ii = 1; ii < qSize; ii++) {
-  //   if (_pulseQueue[ii]->getNGates() != _nGates) {
-  //     _clearPulseQueue();
-  //     return;
-  //   }
-  // }
+  for (int ii = 1; ii < qSize; ii++) {
+    if (_pulseQueue[ii]->getNGates() < _nGates) {
+      _nGates = _pulseQueue[ii]->getNGates();
+    }
+  }
 
 }
 
