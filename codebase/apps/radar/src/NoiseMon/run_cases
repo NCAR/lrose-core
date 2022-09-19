@@ -1,0 +1,25 @@
+#! /bin/csh
+
+NoiseMon -params NoiseMon.test -nsamples 512 -f ~/data/time_series/tsarchive/spol/vert/20060709/20060709_* -debug
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060720/20060720_*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060725/20060725_*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060726/20060726_01*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060802/20060802_235*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060814/20060814_2*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060818/20060818_213*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060831/20060831_*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_17*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_19*
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20061009/20061009_21*
+
+

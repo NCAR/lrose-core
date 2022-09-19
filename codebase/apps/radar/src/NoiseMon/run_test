@@ -1,0 +1,6 @@
+#! /bin/csh
+
+NoiseMon -params NoiseMon.test -nsamples 512 -f ~/data/time_series/tsarchive/spol/vert/20060709/20060709_* -debug
+
+
+NoiseMon -params NoiseMon.test -debug -f /iris/raid/operator/data/time_series/tsarchive/vert/20060818/20060818_213*
