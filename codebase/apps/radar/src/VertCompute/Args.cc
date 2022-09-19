@@ -186,6 +186,8 @@ void Args::usage(string &prog_name, ostream &out)
       << "options:\n"
       << "       [ --, -h, -help, -man ] produce this list.\n"
       << "       [ -d, -debug ] print debug messages\n"
+      << "       [ -end \"yyyy mm dd hh mm ss\"] set end time\n"
+      << "          applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT only\n"
       << "       [ -f files ] specify input time series file list.\n"
       << "         Read files instead of TsApi.\n"
       << "       [ -nrevs_global ?] number of revs for global stats\n"
@@ -193,6 +195,8 @@ void Args::usage(string &prog_name, ostream &out)
       << "       [ -instance ?] instance for procmap\n"
       << "         Forces register with procmap\n"
       << "       [ -nsamples ?] specify number of samples\n"
+      << "       [ -start \"yyyy mm dd hh mm ss\"] set start time\n"
+      << "          applies to RADX_MOMENTS_INPUT and TS_FILE_INPUT only\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
       << endl;
