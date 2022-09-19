@@ -86,18 +86,11 @@ public:
   
   void clearStats();
   int computeStats();
-  int computeGlobalStats();
   
   // write methods
   
   int writeStats();
   void printStats(FILE *out);
-
-  int writeGlobalStats();
-  void printGlobalStats(FILE *out);
-
-  int writeZdrPoints();
-
   int writeStatsToSpdb();
 
 protected:
@@ -112,8 +105,6 @@ protected:
 
   // analysis
 
-  double _startTimeGlobal;
-  double _endTimeGlobal;
   double _startTimeStats;
   double _endTimeStats;
   double _prevTime;
@@ -121,7 +112,6 @@ protected:
   double _el;
   double _az;
   double _prevAz;
-  double _azMovedGlobal;
   double _azMovedStats;
   double _azMovedPrint;
 
@@ -130,31 +120,15 @@ protected:
   double _sumEl;
   double _nEl;
   double _meanEl;
-  double _globalSumEl;
-  double _globalNEl;
-  double _globalMeanEl;
 
-  // layers
+  // sums etc
 
-  int _nLayers;
-  double _startHt, _deltaHt;
-  double _maxHt;
-  vector<LayerStats *> _layers;
-
-  // 360 deg values for ZDRm
-
-  double _countZdrm;
-  double _meanZdrm;
-  double _sdevZdrm;
+  double _count;
+  double _sumDbmHc;
+  double _sumDbmVc;
+  double _sumDbmHx;
+  double _sumDbmVx;
   
-  // global values for ZDRm and ZDRc
-  
-  double _globalSumZdrm;
-  double _globalSumSqZdrm;
-  double _globalCountZdrm;
-  double _globalMeanZdrm;
-  double _globalSdevZdrm;
-
 private:
 
 };
