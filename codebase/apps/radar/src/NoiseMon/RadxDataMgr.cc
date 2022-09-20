@@ -57,13 +57,6 @@ RadxDataMgr::RadxDataMgr(const string &prog_name,
   
   _totalRayCount = 0;
 
-  // set up field name map
-
-  for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    Params::input_field_t &infield = _params._input_fields[ii];
-    _fieldNameMap[infield.id] = infield.moments_name;
-  }
-
 }
 
 // destructor
@@ -185,7 +178,7 @@ int RadxDataMgr::_processFile(const string &filePath)
 
   const vector<RadxRay *> &rays = _readVol.getRays();
   for (size_t ii = 0; ii < rays.size(); ii++) {
-    _processRay(rays[ii]);
+    processRay(_readVol.getPlatform(), rays[ii]);
   }
 
   // free up
@@ -233,7 +226,9 @@ void RadxDataMgr::_setupRead(RadxFile &file)
   }
 
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    file.addReadField(_params._input_fields[ii].moments_name);
+    if (string(_params._input_fields[ii].moments_name) != "missing") {
+      file.addReadField(_params._input_fields[ii].moments_name);
+    }
   } // ii 
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -288,9 +283,6 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
   _loadMomentsData(ray, Params::DBZ, _dbz);
   _loadMomentsData(ray, Params::VEL, _vel);
   _loadMomentsData(ray, Params::WIDTH, _width);
-  _loadMomentsData(ray, Params::ZDRM, _zdrm);
-  _loadMomentsData(ray, Params::LDRH, _ldrh);
-  _loadMomentsData(ray, Params::LDRV, _ldrv);
   _loadMomentsData(ray, Params::PHIDP, _phidp);
   _loadMomentsData(ray, Params::RHOHV, _rhohv);
 
@@ -388,202 +380,3 @@ void RadxDataMgr::_processMoments(const RadxRay *ray)
 
 }
 
-#ifdef JUNK
-
-////////////////////////////////////////////////////////////////
-// set indices for for a specified field
-// Sets indices to -1 if field is not in params list.
-
-void RadxDataMgr::_setMomentsIndices(Params::moments_id_t paramId,
-                                     moments_field_t &field)
-  
-{
-  
-  _setMomentsParamsIndex(paramId, field);
-  _setMomentsDataIndex(field);
-  
-}
-
-////////////////////////////////////////////////////////////////
-// set index in param file for a specified field
-// Sets indices to -1 if field is not in params list.
-
-void RadxDataMgr::_setMomentsParamsIndex(Params::moments_id_t paramId,
-                                         moments_field_t &field)
-
-{
-  
-  field.id = paramId;
-  
-  // get the DsrName
-
-  field.dsrName = _getMomentsParamsName(paramId);
-  
-  // is this field in the param file?
-  
-  if (field.dsrName.size() < 1) {
-    field.paramsIndex = -1;
-    field.dataIndex = -1;
-  }
-  
-  field.paramsIndex = _getMomentsParamsIndex(field.dsrName);
-
-}
-
-////////////////////////////////////////////////////////////////
-// set index for a specified field in input data
-// Sets data index to -1 if field is not in data
-
-void RadxDataMgr::_setMomentsDataIndex(moments_field_t &field)
-
-{
-  
-  field.dataIndex = _getInputDataIndex(field.dsrName);
-}
-
-////////////////////////////////////////////////////////////////
-// get Dsr field name for specified moments ID
-// Returns empty string on failure
-
-string RadxDataMgr::_getMomentsParamsName(Params::moments_id_t paramId)
-  
-{
-
-  for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    if (_params._input_fields[ii].id == paramId) {
-      return _params._input_fields[ii].moments_name;
-    }
-  } // ii 
-
-  return "";
-  
-}
-
-////////////////////////////////////////////////////////////////
-// get params ID for specified moments name
-// Returns -1 on failure
-
-int RadxDataMgr::_getMomentsParamsIndex(const string &dsrName)
-  
-{
-
-  // find the params index of a moments field
-
-  for (int ii = 0; ii < _params.input_fields_n; ii++) {
-    string paramName = _params._input_fields[ii].moments_name;
-    if (paramName == dsrName) {
-      return ii;
-    }
-  } // ii 
-
-  return -1;
-  
-}
-
-////////////////////////////////////////////////////////////////
-// get data index for a specified field name
-// Returns -1 on failure
-
-int RadxDataMgr::_getInputDataIndex(const string &dsrName)
-
-{
-
-  // compute the indices of each input field in the Dsr beam
-  
-  const vector<DsFieldParams*> &fieldParams = _inputMsg.getFieldParams();
-  for (int ii = 0; ii < (int) fieldParams.size(); ii++) {
-    if (dsrName == fieldParams[ii]->name) {
-      return ii;
-    }
-  }
-
-  return -1;
-
-}
-
-////////////////////////////////////////////////////////////////
-// set indices for for a specified field
-// Sets indices to -1 if field is not in params list.
-
-void RadxDataMgr::_setMomentsIndices(Params::moments_id_t paramId,
-                                     moments_field_t &field)
-  
-{
-  
-  _setMomentsParamsIndex(paramId, field);
-  _setMomentsDataIndex(field);
-  
-}
-
-////////////////////////////////////////////////////////////////
-// set index in param file for a specified field
-// Sets indices to -1 if field is not in params list.
-
-void RadxDataMgr::_setMomentsParamsIndex(Params::moments_id_t paramId,
-                                         moments_field_t &field)
-
-{
-  
-  field.id = paramId;
-  
-  // get the DsrName
-
-  field.dsrName = _getMomentsParamsName(paramId);
-  
-  // is this field in the param file?
-  
-  if (field.dsrName.size() < 1) {
-    field.paramsIndex = -1;
-    field.dataIndex = -1;
-  }
-  
-  field.paramsIndex = _getMomentsParamsIndex(field.dsrName);
-
-}
-
-////////////////////////////////////////////////////////////////
-// set index for a specified field in input data
-// Sets data index to -1 if field is not in data
-
-void RadxDataMgr::_setMomentsDataIndex(moments_field_t &field)
-
-{
-  
-  field.dataIndex = _getInputDataIndex(field.dsrName);
-}
-
-////////////////////////////////////////////////////////////////
-// get Dsr field name for specified moments ID
-// Returns empty string on failure
-
-string RadxDataMgr::_getMomentsParamsName(Params::moments_id_t paramId)
-  
-)
-
-{
-
-  // load up the moments data for each field
-
-  _loadMomentsData(_snr);
-  _loadMomentsData(_snrhc);
-  _loadMomentsData(_snrhx);
-  _loadMomentsData(_snrvc);
-  _loadMomentsData(_snrvx);
-  _loadMomentsData(_dbm);
-  _loadMomentsData(_dbmhc);
-  _loadMomentsData(_dbmhx);
-  _loadMomentsData(_dbmvc);
-  _loadMomentsData(_dbmvx);
-  _loadMomentsData(_dbz);
-  _loadMomentsData(_vel);
-  _loadMomentsData(_width);
-  _loadMomentsData(_zdrc);
-  _loadMomentsData(_zdrm);
-  _loadMomentsData(_ldrh);
-  _loadMomentsData(_ldrv);
-  _loadMomentsData(_phidp);
-  _loadMomentsData(_rhohv);
-
-}
-
-#endif

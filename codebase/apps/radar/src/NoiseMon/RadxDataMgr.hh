@@ -82,8 +82,6 @@ private:
 
   RadxVol _readVol;
   
-  // DsRadarQueue *_inputQueue;
-  // DsRadarMsg _inputMsg;
   int _inputContents;
   int _inputNFail;
   int _nFieldsIn;
@@ -91,16 +89,12 @@ private:
 
   int _volNum;
 
-  // DsRadarParams _inputRadarParams;
-  // vector<DsFieldParams*> _inputFieldParams;
-  // DsRadarCalib _inputRadarCalib;
-
   int _totalRayCount;
 
   // input moments data
   
-  map<int, string> _fieldNameMap;
-
+  // map<int, string> _fieldNameMap;
+  
   typedef struct {
     int id;
     string dsrName;

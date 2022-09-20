@@ -91,21 +91,18 @@ public:
 
   typedef enum {
     SNRHC = 0,
-    SNRHX = 1,
-    SNRVC = 2,
+    SNRVC = 1,
+    SNRHX = 2,
     SNRVX = 3,
     DBMHC = 4,
-    DBMHX = 5,
-    DBMVC = 6,
+    DBMVC = 5,
+    DBMHX = 6,
     DBMVX = 7,
     DBZ = 8,
     VEL = 9,
     WIDTH = 10,
-    ZDRM = 11,
-    LDRH = 12,
-    LDRV = 13,
-    PHIDP = 14,
-    RHOHV = 15
+    PHIDP = 11,
+    RHOHV = 12
   } moments_id_t;
 
   // struct typedefs

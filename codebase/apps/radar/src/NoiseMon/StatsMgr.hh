@@ -36,9 +36,12 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <cstdio>
 
 #include <Radx/RadxTime.hh>
+#include <Radx/RadxRay.hh>
+#include <Radx/RadxPlatform.hh>
 
 #include "Args.hh"
 #include "Params.hh"
@@ -81,6 +84,9 @@ public:
                     double range,
 		    MomentData mdata);
 
+  void processRay(const RadxPlatform &radar,
+                  RadxRay *ray);
+
   // check and compute when ready
   
   void checkCompute(const RadxTime &mtime);
@@ -101,6 +107,10 @@ protected:
   string _progName;
   const Args &_args;
   const Params &_params;
+
+  // map of field ids to names
+  
+  map<int, string> _fieldNameMap;
 
   // moments data
   
@@ -130,10 +140,10 @@ protected:
   // sums etc
 
   double _count;
-  double _sumDbmHc;
-  double _sumDbmVc;
-  double _sumDbmHx;
-  double _sumDbmVx;
+  double _sumDbmhc;
+  double _sumDbmvc;
+  double _sumDbmhx;
+  double _sumDbmvx;
   
 private:
 

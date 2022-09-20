@@ -166,23 +166,18 @@ paramdef double {
 typedef enum {
 
   SNRHC,
-  SNRHX,
   SNRVC,
+  SNRHX,
   SNRVX,
 
   DBMHC,
-  DBMHX,
   DBMVC,
+  DBMHX,
   DBMVX,
 
   DBZ,
   VEL,
   WIDTH,
-
-  ZDRM,
-
-  LDRH,
-  LDRV,
 
   PHIDP,
   RHOHV
@@ -199,19 +194,16 @@ typedef struct {
 paramdef struct input_field_t {
   p_default = {
     { SNRHC, "SNRHC" },
-    { SNRHX, "SNRHX" },
     { SNRVC, "SNRVC" },
-    { SNRVX, "SNRVX" },
+    { SNRHX, "missing" },
+    { SNRVX, "missing" },
     { DBMHC, "DBMHC" },
-    { DBMHX, "DBMHX" },
     { DBMVC, "DBMVC" },
-    { DBMVX, "DBMVX" },
+    { DBMHX, "missing" },
+    { DBMVX, "missing" },
     { DBZ, "DBZ" },
     { VEL, "VEL" },
     { WIDTH, "WIDTH" },
-    { ZDRM, "ZDRM" },
-    { LDRH, "LDRH" },
-    { LDRV, "LDRV" },
     { PHIDP, "PHIDP" },
     { RHOHV, "RHOHV" }
   };

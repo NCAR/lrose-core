@@ -52,6 +52,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/TaXml.hh>
 #include <radar/RadarComplex.hh>
+#include <radar/BeamHeight.hh>
 #include <Spdb/DsSpdb.hh>
 
 using namespace std;
@@ -76,9 +77,14 @@ StatsMgr::StatsMgr(const string &prog_name,
   _prevAz = -999;
   _azMovedStats = 0.0;
 
-  _sumEl = 0.0;
-  _nEl = 0.0;
-  _meanEl = 0.0;
+  clearStats();
+  
+  // set up field name map
+
+  for (int ii = 0; ii < _params.input_fields_n; ii++) {
+    Params::input_field_t &infield = _params._input_fields[ii];
+    _fieldNameMap[infield.id] = infield.moments_name;
+  }
 
 }
 
@@ -195,19 +201,136 @@ void StatsMgr::addDataPoint(RadxTime mtime,
 
 }
  
+/////////////////////////////////
+// process a ray of data
+
+void StatsMgr::processRay(const RadxPlatform &radar,
+                          RadxRay *ray)
+
+{
+
+  if (!_nextStartTime.isValid()) {
+    // first data point
+    time_t initTime = ray->getRadxTime().utime();
+    _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
+    _nextStartTime = _thisStartTime + _params.stats_interval_secs;
+  }
+
+  // make sure they are floats
+  
+  ray->convertToFl32();
+
+  // get the fields
+  
+  RadxField *dbmhcField = ray->getField(_fieldNameMap[Params::DBMHC]);
+  Radx::fl32 dbmhcMiss = -9999.0;
+  Radx::fl32 *dbmhcData = NULL;
+  if (dbmhcField != NULL) {
+    dbmhcMiss = dbmhcField->getMissingFl32();
+    dbmhcData = dbmhcField->getDataFl32();
+  }
+
+  RadxField *dbmvcField = ray->getField(_fieldNameMap[Params::DBMVC]);
+  Radx::fl32 dbmvcMiss = -9999.0;
+  Radx::fl32 *dbmvcData = NULL;
+  if (dbmvcField != NULL) {
+    dbmvcMiss = dbmvcField->getMissingFl32();
+    dbmvcData = dbmvcField->getDataFl32();
+  }
+
+  if (dbmhcField == NULL || dbmvcField == NULL) {
+    return;
+  }
+  
+  RadxField *dbmhxField = ray->getField(_fieldNameMap[Params::DBMHX]);
+  Radx::fl32 dbmhxMiss = -9999.0;
+  Radx::fl32 *dbmhxData = NULL;
+  if (dbmhxField != NULL) {
+    dbmhxMiss = dbmhxField->getMissingFl32();
+    dbmhxData = dbmhxField->getDataFl32();
+  }
+
+  RadxField *dbmvxField = ray->getField(_fieldNameMap[Params::DBMVX]);
+  Radx::fl32 dbmvxMiss = -9999.0;
+  Radx::fl32 *dbmvxData = NULL;
+  if (dbmvxField != NULL) {
+    dbmvxMiss = dbmvxField->getMissingFl32();
+    dbmvxData = dbmvxField->getDataFl32();
+  }
+
+  // set up geometry
+
+  double elDeg = ray->getElevationDeg();
+  BeamHeight beamHt;
+  beamHt.setInstrumentHtKm(radar.getAltitudeKm());
+
+  // loop through the gates
+  
+  double rangeKm = ray->getStartRangeKm();
+  
+  size_t nGates = ray->getNGates();
+  for (size_t ii = 0; ii < nGates; ii++, rangeKm += ray->getGateSpacingKm()) {
+    
+    if (rangeKm < _params.min_range_km || rangeKm > _params.max_range_km) {
+      continue;
+    }
+    
+    double htKm = beamHt.computeHtKm(elDeg, rangeKm);
+    if (htKm < _params.min_height_km) {
+      continue;
+    }
+    
+    if (dbmhcData[ii] == dbmhcMiss || dbmvcData[ii] == dbmvcMiss) {
+      continue;
+    }
+
+    _count++;
+    _sumDbmhc += dbmhcData[ii];
+    _sumDbmvc += dbmvcData[ii];
+
+    if (dbmhxData == NULL || dbmvxData == NULL ||
+        dbmhxData[ii] == dbmhxMiss || dbmvxData[ii] == dbmvxMiss) {
+      continue;
+    }
+
+    _sumDbmhx += dbmhxData[ii];
+    _sumDbmvx += dbmvxData[ii];
+
+  } // ii
+
+  
+}
+ 
 ////////////////////////////////////////////
 // clear stats info
 
 void StatsMgr::clearStats()
 
 {
+
+  _sumEl = 0.0;
+  _nEl = 0.0;
+  _meanEl = 0.0;
+
+  _sumDbmhc = 0.0;
+  _sumDbmvc = 0.0;
+  _sumDbmhx = 0.0;
+  _sumDbmvx = 0.0;
+
   // for (int ii = 0; ii < (int) _layers.size(); ii++) {
   //   _layers[ii]->clearData();
   // }
+
   _sumEl = 0.0;
   _nEl = 0.0;
   _startTimeStats = _endTimeStats;
   _prevTime = _endTimeStats;
+
+  _sumDbmhc = 0.0;
+  _sumDbmvc = 0.0;
+  _sumDbmhx = 0.0;
+  _sumDbmvx = 0.0;
+
 }
   
 //////////////////////////////////////

@@ -1,0 +1,589 @@
+/**********************************************************************
+ * TDRP params for VertCompute
+ **********************************************************************/
+
+//======================================================================
+//
+// VertCompute analyses data from tsarchive time series files taken 
+//   during vertical pointing scans.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_NORM;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "sband.sim";
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register with the process mapper.
+//
+// If true, this application will try to register with procmap once per 
+//   minute. (If unable to do so, no error occurs.).
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Input mode - files or time series API.
+//
+// DSR_MOMENTS_INPUT: read moments data in DSR format. TS_FMQ_INPUT: 
+//   read time series from a file message queue and process the pulses as 
+//   they come in. TS_FILE_INPUT: read time series from files specified on 
+//   the command line.
+//
+//
+// Type: enum
+// Options:
+//     DSR_MOMENTS_INPUT
+//     TS_FILE_INPUT
+//     TS_FMQ_INPUT
+//
+
+input_mode = TS_FILE_INPUT;
+
+///////////// input_fmq_name //////////////////////////
+//
+// FMQ name. For DSR_MOMENTS_INPUT and TS_FMQ_INPUT.
+//
+// Path to FMQ files. There are 2 files, one with a .buf extension and 
+//   one with a .stat extention. This path does not include the 
+//   extensions.
+//
+//
+// Type: string
+//
+
+input_fmq_name = "$(DATA_DIR)/fmq/moments/sband/shmem_20000";
+
+///////////// seek_to_start_of_input //////////////////
+//
+// Option to seek to the start of the input FMQ.
+//
+// If TRUE, the program will seek to the start of the fmq and read in 
+//   data from the entire queue. If FALSE, it will only read new data as 
+//   it is added to the FMQ.
+//
+//
+// Type: boolean
+//
+
+seek_to_start_of_input = FALSE;
+
+//======================================================================
+//
+// COMPUTING MOMENTS FROM TIME SERIES.
+//
+// TS_FILE_INPUT and TS_FMQ_INPUT modes.
+//
+//======================================================================
+ 
+///////////// n_samples ///////////////////////////////
+//
+// Number of pulse samples in a beam.
+//
+//
+// Type: int
+//
+
+n_samples = 128;
+
+///////////// invert_hv_flag //////////////////////////
+//
+// Option to invert H/V flag in pulse data.
+//
+// Normally, the HV flag is set to 1 for H, 0 for V. If the flag in the 
+//   data has the opposite sense, set this to true.
+//
+//
+// Type: boolean
+//
+
+invert_hv_flag = FALSE;
+
+///////////// cal_xml_file_path ///////////////////////
+//
+// Path for XML calibration file.
+//
+// At a minimum, the calibration file should contain noiseDbm, 
+//   receiverGainDbm, dbz0 and radarConstant values for each channel.
+//
+//
+// Type: string
+//
+
+cal_xml_file_path = "$(HOME)/git/spol-configuration/projDir/mgen/params/sband_cal.xml";
+
+///////////// adjust_dbz_for_measured_xmit_power //////
+//
+// Option to adjust DBZ based on measured transmitter power.
+//
+// If true, and the measured transmitter power is available, the 
+//   difference between the measured power and calibration power will be 
+//   used to adjust the computed DBZ fields.
+//
+//
+// Type: boolean
+//
+
+adjust_dbz_for_measured_xmit_power = FALSE;
+
+///////////// adjust_zdr_for_measured_xmit_power //////
+//
+// Option to adjust ZDR based on measured transmitter power.
+//
+// If true, and the measured transmitter power is available, the 
+//   difference between the measured power and calibration power will be 
+//   used to adjust the computed ZDR fields.
+//
+//
+// Type: boolean
+//
+
+adjust_zdr_for_measured_xmit_power = FALSE;
+
+///////////// xmit_rcv_mode ///////////////////////////
+//
+// Transmit/Receive mode for radar.
+//
+// Mode for xmit and receive for polarization diversity
+// DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar 
+//   receiver only (e.g. CP2 S-band)
+//  DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and 
+//   cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in 
+//   switching mode, CHILL)
+//  DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and 
+//   V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)
+//  DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and 
+//   V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed 
+//   mode)
+//  DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, 
+//   switching H and V receivers (e.g. SPOL with T and receivers in 
+//   switching mode).
+//
+//
+// Type: enum
+// Options:
+//     DP_ALT_HV_CO_ONLY
+//     DP_ALT_HV_CO_CROSS
+//     DP_ALT_HV_FIXED_HV
+//     DP_SIM_HV_FIXED_HV
+//     DP_SIM_HV_SWITCHED_HV
+//
+
+xmit_rcv_mode = DP_SIM_HV_FIXED_HV;
+
+//======================================================================
+//
+// READING MOMENTS FROM FMQ.
+//
+// DSR_MOMENTS_INPUT mode only.
+//
+//======================================================================
+ 
+///////////// min_elevation ///////////////////////////
+//
+// Minimum elevation angle (deg).
+//
+// Beams below this elevation angle will be ignored.
+//
+//
+// Type: double
+//
+
+min_elevation = 88;
+
+///////////// input_fields ////////////////////////////
+//
+// List of input field from moments FMQ.
+//
+// Only applies to DSR_MOMENTS_INPUT.
+//
+//
+// Type: struct
+//   typedef struct {
+//      moments_id_t id;
+//        Options:
+//          SNR
+//          SNRHC
+//          SNRHX
+//          SNRVC
+//          SNRVX
+//          DBM
+//          DBMHC
+//          DBMHX
+//          DBMVC
+//          DBMVX
+//          DBZ
+//          VEL
+//          WIDTH
+//          ZDRM
+//          LDRH
+//          LDRV
+//          PHIDP
+//          RHOHV
+//      string dsr_name;
+//   }
+//
+// 1D array - variable length.
+//
+
+input_fields = {
+  {
+    id = SNR,
+    dsr_name = "SNR"
+  }
+  ,
+  {
+    id = SNRHC,
+    dsr_name = "SNRHC"
+  }
+  ,
+  {
+    id = SNRVC,
+    dsr_name = "SNRVC"
+  }
+  ,
+  {
+    id = DBM,
+    dsr_name = "DBM"
+  }
+  ,
+  {
+    id = DBMHC,
+    dsr_name = "DBMHC"
+  }
+  ,
+  {
+    id = DBMVC,
+    dsr_name = "DBMVC"
+  }
+  ,
+  {
+    id = DBZ,
+    dsr_name = "DBZ"
+  }
+  ,
+  {
+    id = VEL,
+    dsr_name = "VEL"
+  }
+  ,
+  {
+    id = WIDTH,
+    dsr_name = "WIDTH"
+  }
+  ,
+  {
+    id = ZDRM,
+    dsr_name = "ZDRM"
+  }
+  ,
+  {
+    id = LDRH,
+    dsr_name = "LDRH"
+  }
+  ,
+  {
+    id = LDRV,
+    dsr_name = "LDRV"
+  }
+  ,
+  {
+    id = PHIDP,
+    dsr_name = "PHIDP"
+  }
+  ,
+  {
+    id = RHOHV,
+    dsr_name = "RHOHV"
+  }
+};
+
+//======================================================================
+//
+// VERTICAL LAYERS.
+//
+//======================================================================
+ 
+///////////// n_layers ////////////////////////////////
+//
+// Number of layers for analysis.
+//
+//
+// Type: int
+//
+
+n_layers = 16;
+
+///////////// delta_height ////////////////////////////
+//
+// Height of each layer (km).
+//
+//
+// Type: double
+//
+
+delta_height = 0.5;
+
+///////////// start_height ////////////////////////////
+//
+// Start height of lowest layer (km).
+//
+//
+// Type: double
+//
+
+start_height = 0.5;
+
+//======================================================================
+//
+// ANALYSIS DETAILS.
+//
+//======================================================================
+ 
+///////////// min_snr /////////////////////////////////
+//
+// Minimum SNR for analysis.
+//
+// Gates with SNR below this will be ignored.
+//
+//
+// Type: double
+//
+
+min_snr = 15;
+
+///////////// max_snr /////////////////////////////////
+//
+// Maximum SNR for analysis.
+//
+// Gates with SNR above this will be ignored.
+//
+//
+// Type: double
+//
+
+max_snr = 70;
+
+///////////// min_vel /////////////////////////////////
+//
+// Minimum VEL for analysis.
+//
+// Gates with VEL below this will be ignored.
+//
+//
+// Type: double
+//
+
+min_vel = -100;
+
+///////////// max_vel /////////////////////////////////
+//
+// Maximum VEL for analysis.
+//
+// Gates with VEL above this will be ignored.
+//
+//
+// Type: double
+//
+
+max_vel = 100;
+
+///////////// min_rhohv ///////////////////////////////
+//
+// Minimum RHOHV for analysis.
+//
+// Gates with RHOHV below this will be ignored.
+//
+//
+// Type: double
+//
+
+min_rhohv = 0.99;
+
+///////////// max_ldr /////////////////////////////////
+//
+// Max LDR for analysis.
+//
+// Gates with LDR above this will be ignored.
+//
+//
+// Type: double
+//
+
+max_ldr = 9999.0;
+
+///////////// zdr_n_sdev //////////////////////////////
+//
+// Number of standard deviations for data QA purposes.
+//
+// QA is applied to the ZDR data by ignoring values outside a certain 
+//   range around the mean. This is the number of standard deviations 
+//   within which data is accepted.
+//
+//
+// Type: double
+//
+
+zdr_n_sdev = 2;
+
+///////////// min_ht_for_stats ////////////////////////
+//
+// Min ht for computing stats (km).
+//
+// A minimum ht is required to be clear of problems caused by 
+//   differential recovery of the TR limiters.
+//
+//
+// Type: double
+//
+
+min_ht_for_stats = 2.4;
+
+///////////// max_ht_for_stats ////////////////////////
+//
+// Max ht for computing stats (km).
+//
+// A max ht is sometimes required to be below bright band.
+//
+//
+// Type: double
+//
+
+max_ht_for_stats = 6.1;
+
+//======================================================================
+//
+// OUTPUT RESULTS.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Dir for output files.
+//
+// The results will be written to sub-directories named from the data 
+//   time.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/cal/vert/sband.sim.field";
+
+///////////// write_global_stats_to_text_file /////////
+//
+// Option to write global statistics to a text file.
+//
+// If true, stats for the entire run will be writted to a text file.
+//
+//
+// Type: boolean
+//
+
+write_global_stats_to_text_file = TRUE;
+
+///////////// write_360deg_stats_to_text_file /////////
+//
+// Option to write statistics for each rotation to a text file.
+//
+// If true, stats for each rotation will be writted to a text file.
+//
+//
+// Type: boolean
+//
+
+write_360deg_stats_to_text_file = FALSE;
+
+///////////// write_zdr_point_values_to_text_file /////
+//
+// Option to write individual ZDR values to a text file.
+//
+// If true, the individual zdrm values, plus metadata such as height, is 
+//   written to a text file.
+//
+//
+// Type: boolean
+//
+
+write_zdr_point_values_to_text_file = FALSE;
+
+///////////// write_results_to_spdb ///////////////////
+//
+// Option to write out results to SPDB.
+//
+// The results will be written in XML, stored in SPDB. The data can then 
+//   be retrieved for plotting or other purposes.
+//
+//
+// Type: boolean
+//
+
+write_results_to_spdb = FALSE;
+
+///////////// spdb_output_url /////////////////////////
+//
+// URL for SPDB XML.
+//
+// For local writes, specify the directory. For remote writes, specify 
+//   the full url: spdbp:://host::dir.
+//
+//
+// Type: string
+//
+
+spdb_output_url = "/tmp/spdb/vert/sband.sim";
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name for tagging SPDB output data.
+//
+// This is used to set the data_type in SPDB.
+//
+//
+// Type: string
+//
+
+radar_name = "SPOL";
+

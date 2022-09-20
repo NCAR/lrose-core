@@ -69,9 +69,6 @@ DsrDataMgr::DsrDataMgr(const string &prog_name,
   _setMomentsParamsIndex(Params::DBZ, _dbz);
   _setMomentsParamsIndex(Params::VEL, _vel);
   _setMomentsParamsIndex(Params::WIDTH, _width);
-  _setMomentsParamsIndex(Params::ZDRM, _zdrm);
-  _setMomentsParamsIndex(Params::LDRH, _ldrh);
-  _setMomentsParamsIndex(Params::LDRV, _ldrv);
   _setMomentsParamsIndex(Params::PHIDP, _phidp);
   _setMomentsParamsIndex(Params::RHOHV, _rhohv);
 
