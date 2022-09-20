@@ -957,15 +957,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'time_interval_secs'
+    // Parameter 'stats_interval_secs'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("time_interval_secs");
+    tt->param_name = tdrpStrDup("stats_interval_secs");
     tt->descr = tdrpStrDup("Time interval for statistics (s).");
     tt->help = tdrpStrDup("The statistics are computed at this interval, achored at the top of the hour. The interval should divide into 3600 without a remainder.");
-    tt->val_offset = (char *) &time_interval_secs - &_start_;
+    tt->val_offset = (char *) &stats_interval_secs - &_start_;
     tt->single_val.i = 300;
     tt++;
     

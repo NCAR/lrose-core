@@ -63,10 +63,10 @@ TsDataMgr::TsDataMgr(const string &prog_name,
 
   // set up max ht
 
-  int nLayers = _params.n_layers;
-  double startHt = _params.start_height;
-  double deltaHt = _params.delta_height;
-  _maxHt = startHt + (nLayers + 1) * deltaHt;
+  // int nLayers = _params.n_layers;
+  // double startHt = _params.start_height;
+  // double deltaHt = _params.delta_height;
+  // _maxHt = startHt + (nLayers + 1) * deltaHt;
 
   switch (_params.xmit_rcv_mode) {
     
@@ -224,6 +224,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
     setStartTime(pulse->getFTime());
   }
   setEndTime(pulse->getFTime());
+  _pulseTime.set(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
 
   // check that we start with a horizontal pulse
 
@@ -285,7 +286,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // if we have done a full rotation, process the data
 
-  checkCompute();
+  checkCompute(_pulseTime);
 
   // clear time series data queue
 
@@ -440,7 +441,7 @@ void TsDataMgr::_computeMoments()
     mdata.ldrv = flds.ldrv;
     mdata.phidp = flds.phidp;
     mdata.rhohv = flds.rhohv;
-    addDataPoint(range, mdata);
+    addDataPoint(_pulseTime, range, mdata);
   } // igate
 
 }

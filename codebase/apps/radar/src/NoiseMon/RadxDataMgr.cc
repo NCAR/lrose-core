@@ -277,12 +277,10 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
 
   // load up the moments data for each field
 
-  _loadMomentsData(ray, Params::SNR, _snr);
   _loadMomentsData(ray, Params::SNRHC, _snrhc);
   _loadMomentsData(ray, Params::SNRHX, _snrhx);
   _loadMomentsData(ray, Params::SNRVC, _snrvc);
   _loadMomentsData(ray, Params::SNRVX, _snrvx);
-  _loadMomentsData(ray, Params::DBM, _dbm);
   _loadMomentsData(ray, Params::DBMHC, _dbmhc);
   _loadMomentsData(ray, Params::DBMHX, _dbmhx);
   _loadMomentsData(ray, Params::DBMVC, _dbmvc);
@@ -302,7 +300,7 @@ void RadxDataMgr::_processRay(const RadxRay *ray)
 
   // if we have done a full rotation, process the data
 
-  checkCompute();
+  checkCompute(ray->getRadxTime());
 
 }
 
@@ -384,7 +382,7 @@ void RadxDataMgr::_processMoments(const RadxRay *ray)
 
     // add to layer statss
 
-    addDataPoint(range, mdata);
+    addDataPoint(ray->getRadxTime(), range, mdata);
     
   } // igate
 

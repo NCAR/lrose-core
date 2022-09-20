@@ -227,7 +227,7 @@ paramdef int {
   p_default = 300;
   p_descr = "Time interval for statistics (s).";
   p_help = "The statistics are computed at this interval, achored at the top of the hour. The interval should divide into 3600 without a remainder.";
-} time_interval_secs;
+} stats_interval_secs;
 
 paramdef double {
   p_default = 5.0;

@@ -67,8 +67,6 @@ StatsMgr::StatsMgr(const string &prog_name,
   
 {
 
-  _startTimeGlobal = 0;
-  _endTimeGlobal = 0;
   _startTimeStats = 0;
   _endTimeStats = 0;
   _prevTime = 0;
@@ -76,36 +74,11 @@ StatsMgr::StatsMgr(const string &prog_name,
   _el = 0;
   _az = 0;
   _prevAz = -999;
-  _azMovedGlobal = 0.0;
   _azMovedStats = 0.0;
-  _azMovedPrint = 0.0;
 
   _sumEl = 0.0;
   _nEl = 0.0;
   _meanEl = 0.0;
-  _globalSumEl = 0.0;
-  _globalNEl = 0.0;
-  _globalMeanEl = -9999;
-
-  _globalCountZdrm = 0;
-  _globalSumZdrm = 0;
-  _globalSumSqZdrm = 0;
-  _globalMeanZdrm = -9999;
-  _globalSdevZdrm = -9999;
-
-  // set up layers
-  
-  _nLayers = _params.n_layers;
-  _startHt = _params.start_height;
-  _deltaHt = _params.delta_height;
-
-  for (int ii = 0; ii < _nLayers; ii++) {
-    double minHt = _startHt + (ii - 0.5) * _deltaHt;
-    double maxHt = minHt + _deltaHt;
-    LayerStats *layer = new LayerStats(_params, minHt, maxHt);
-    _layers.push_back(layer);
-    _maxHt = maxHt;
-  }
 
 }
 
@@ -115,10 +88,6 @@ StatsMgr::~StatsMgr()
 
 {
 
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    delete _layers[ii];
-  }
-
 }
 
 ///////////////////////////////
@@ -127,18 +96,14 @@ StatsMgr::~StatsMgr()
 void StatsMgr::setStartTime(double start_time)
 {
   _startTimeStats = start_time;
-  if (_startTimeGlobal == 0.0) {
-    _startTimeGlobal = start_time;
-  }
 }
 
 void StatsMgr::setEndTime(double latest_time)
 {
   _endTimeStats = latest_time;
-  _endTimeGlobal = latest_time;
   if (_prevTime != 0) {
     double timeGap = _endTimeStats - _prevTime;
-    if (timeGap > _params.max_time_gap_for_stats) {
+    if (timeGap > _params.max_time_gap_secs) {
       clearStats();
     }
   }
@@ -154,9 +119,6 @@ void StatsMgr::setEl(double el) {
   _sumEl += _el;
   _nEl++;
 
-  _globalSumEl += _el;
-  _globalNEl++;
-
 }
  
 ////////////////////
@@ -171,9 +133,7 @@ void StatsMgr::setAz(double az) {
   } else {
     double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
     if (azDiff < 10.0) {
-      _azMovedGlobal += azDiff;
       _azMovedStats += azDiff;
-      _azMovedPrint += azDiff;
     }
     _prevAz = _az;
   }
@@ -183,13 +143,13 @@ void StatsMgr::setAz(double az) {
 /////////////////////////////////
 // check and compute when ready
 
-void StatsMgr::checkCompute()
+void StatsMgr::checkCompute(const RadxTime &mtime)
 {
 
-  if (_azMovedStats > _params.cumulative_azimuth_moved_for_stats) {
-
-    if (computeStats() == 0) {
+  if (mtime >= _nextStartTime) {
     
+    if (computeStats() == 0) {
+      
       if (_params.write_stats_to_text_file) {
         writeStats();
       }
@@ -202,14 +162,10 @@ void StatsMgr::checkCompute()
     clearStats();
     _azMovedStats = 0;
     _startTimeStats = _endTimeStats;
+
+    _thisStartTime = _nextStartTime;
+    _nextStartTime += _params.stats_interval_secs;
     
-  } else if (_azMovedPrint > _params.cumulative_azimuth_moved_for_debug_print) {
-
-    if (computeStats() == 0) {
-      printStats(stderr);
-    }
-    _azMovedPrint = 0.0;
-
   }
   
 }
@@ -217,18 +173,26 @@ void StatsMgr::checkCompute()
 /////////////////////////////////
 // add data to layer
 
-void StatsMgr::addDataPoint(double range,
+void StatsMgr::addDataPoint(RadxTime mtime,
+                            double range,
 			    MomentData mdata)
 
 {
+
+  if (!_nextStartTime.isValid()) {
+    // first data point
+    time_t initTime = mtime.utime();
+    _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
+    _nextStartTime = _thisStartTime + _params.stats_interval_secs;
+  }
   
   double sinEl = sin(_el * DEG_TO_RAD);
   double ht = (range * sinEl);
-  int layer = (int) ((ht - _startHt) / _deltaHt);
   mdata.height = ht;
-  if (layer >= 0 && layer < _nLayers) {
-    _layers[layer]->addData(mdata);
-  }
+  // if (layer >= 0 && layer < _nLayers) {
+  //   _layers[layer]->addData(mdata);
+  // }
+
 }
  
 ////////////////////////////////////////////
@@ -237,9 +201,9 @@ void StatsMgr::addDataPoint(double range,
 void StatsMgr::clearStats()
 
 {
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    _layers[ii]->clearData();
-  }
+  // for (int ii = 0; ii < (int) _layers.size(); ii++) {
+  //   _layers[ii]->clearData();
+  // }
   _sumEl = 0.0;
   _nEl = 0.0;
   _startTimeStats = _endTimeStats;
@@ -252,10 +216,12 @@ void StatsMgr::clearStats()
 int StatsMgr::computeStats()
   
 {
+
+  #ifdef NOTNOW
   
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    _layers[ii]->computeStats();
-  }
+  // for (int ii = 0; ii < (int) _layers.size(); ii++) {
+  //   _layers[ii]->computeStats();
+  // }
 
   // compute Zdr for this rotation
   // and accumulate stats for computing mean Zdr
@@ -306,42 +272,9 @@ int StatsMgr::computeStats()
     return 0;
   }
 
-}
+#endif
 
-/////////////////////////
-// compute global stats
-
-int StatsMgr::computeGlobalStats()
-  
-{
-
-  _globalMeanEl = _globalSumEl / _globalNEl;
-
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    _layers[ii]->computeGlobalStats();
-  }
-
-  // compute global Zdrm stats
-
-  if (_globalCountZdrm > 0) {
-    _globalMeanZdrm = _globalSumZdrm / _globalCountZdrm;
-  }
-  if (_globalCountZdrm > 2) {
-    double variance =
-      (_globalSumSqZdrm -
-       (_globalSumZdrm * _globalSumZdrm) / _globalCountZdrm) /
-      (_globalCountZdrm - 1.0);
-    _globalSdevZdrm = 0.000001;
-    if (variance >= 0.0) {
-      _globalSdevZdrm = sqrt(variance);
-    }
-  }
-
-  if (_globalCountZdrm < _params.min_valid_count_for_stats) {
-    return -1;
-  } else {
-    return 0;
-  }
+  return 0;
 
 }
 
@@ -411,6 +344,8 @@ void StatsMgr::printStats(FILE *out)
 
 {
 
+#ifdef JUNK
+  
   // check we have some valid stats to print
 
   bool statsFound = false;
@@ -475,6 +410,9 @@ void StatsMgr::printStats(FILE *out)
   fprintf(out,
           " ====================================="
           "============================================\n");
+
+
+#endif
   
 }
 
@@ -485,6 +423,8 @@ int StatsMgr::writeStatsToSpdb()
 
 {
 
+#ifdef JUNK
+  
   // check we have some valid stats to print
 
   bool statsFound = false;
@@ -553,218 +493,11 @@ int StatsMgr::writeStatsToSpdb()
     cerr << "  Valid time: " << DateTime::strm(validTime) << endl;
   }
 
+#endif
+  
   return 0;
 
 }
 
-///////////////////////////////
-// write out stats to files
 
-int StatsMgr::writeGlobalStats()
-
-{
-
-  printGlobalStats(stdout);
-
-  // create the directory for the output files, if needed
-
-  if (ta_makedir_recurse(_params.text_output_dir)) {
-    int errNum = errno;
-    cerr << "ERROR - StatsMgr::writeGlobalStats";
-    cerr << "  Cannot create output dir: " << _params.text_output_dir << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-  
-  // compute output file path
-
-  time_t startTime = (time_t) _startTimeGlobal;
-  DateTime ftime(startTime);
-  char outPath[1024];
-  sprintf(outPath, "%s/vert_zdr_global_cal_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
-          _params.text_output_dir,
-          ftime.getYear(),
-          ftime.getMonth(),
-          ftime.getDay(),
-          ftime.getHour(),
-          ftime.getMin(),
-          ftime.getSec());
-  
-  // open file
-  
-  FILE *out;
-  if ((out = fopen(outPath, "w")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - StatsMgr::_writeFile";
-    cerr << "  Cannot create file: " << outPath << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // print to file
-
-  printGlobalStats(out);
-
-  if (_params.debug) {
-    cerr << "-->> Writing global stats file: " << outPath << endl;
-  }
-
-  // close file
-
-  fclose(out);
-  return 0;
-
-}
-
-///////////////////////////////
-// print global stats
-
-void StatsMgr::printGlobalStats(FILE *out)
-
-{
-  
-  time_t startTime = (time_t) _startTimeGlobal;
-  time_t endTime = (time_t) _endTimeGlobal;
-
-  fprintf(out,
-          " ====================================="
-          "============================================\n");
-  fprintf(out, " Vertical-pointing ZDR calibration - global\n");
-  fprintf(out, " Start time: %s\n", DateTime::strm(startTime).c_str());
-  fprintf(out, " End time  : %s\n", DateTime::strm(endTime).c_str());
-  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedGlobal);
-  fprintf(out, "   n samples             : %8d\n", _params.n_samples);
-  fprintf(out, "   n valid               : %8g\n", _globalCountZdrm);
-  fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
-  fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
-  fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
-  fprintf(out, "   max vel (m/s)         : %8.3f\n", _params.max_vel);
-  fprintf(out, "   min rhohv             : %8.3f\n", _params.min_rhohv);
-  fprintf(out, "   max ldr               : %8.3f\n", _params.max_ldr);
-  fprintf(out, "   min ht for stats (km) : %8.3f\n", _params.min_ht_for_stats);
-  fprintf(out, "   max ht for stats (km) : %8.3f\n", _params.max_ht_for_stats);
-  fprintf(out, "   mean elevation (deg)  : %8.3f\n", _globalMeanEl);
-  fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _globalMeanZdrm);
-  fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _globalSdevZdrm);
-  fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _globalMeanZdrm * -1.0);
-  fprintf(out,
-          " ====================================="
-          "============================================\n");
-  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
-          "Ht", "npts", "snr", "dBZ", "vel",
-          "ldr", "rhohv", "zdrMean", "zdrSdev", "gof", "rmse");
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    if (layer.getGlobalMean().snr > -9990) {
-      fprintf(out,
-              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %7.3f %7.3f %6.3f %6.3f\n",
-              layer.getMeanHt(),
-              layer.getGlobalNValid(),
-              layer.getGlobalMean().snr,
-              layer.getGlobalMean().dbz,
-              layer.getGlobalMean().vel,
-              layer.getGlobalMean().ldrh,
-              layer.getGlobalMean().rhohv,
-              layer.getGlobalMean().zdrm,
-              layer.getGlobalSdev().zdrm,
-              layer.getGlobalDist().getGof(),
-              layer.getGlobalDist().getRmsePdf());
-    }
-  } // ii
-  fprintf(out,
-          " ====================================="
-          "============================================\n");
-
-}
-
-////////////////////////////////////////////////////////
-// write out zdr and height data for individual points
-
-int StatsMgr::writeZdrPoints()
-
-{
-  
-  if (ta_makedir_recurse(_params.zdr_points_output_dir)) {
-    int errNum = errno;
-    cerr << "ERROR - StatsMgr::_writeZdrPoints";
-    cerr << "  Cannot create output dir: " << _params.zdr_points_output_dir << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-  
-  // compute output file path
-
-  time_t startTime = (time_t) _startTimeGlobal;
-  time_t endTime = (time_t) _endTimeGlobal;
-  DateTime ftime(startTime);
-  char outPath[1024];
-  sprintf(outPath, "%s/zdr_points_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
-          _params.zdr_points_output_dir,
-          ftime.getYear(),
-          ftime.getMonth(),
-          ftime.getDay(),
-          ftime.getHour(),
-          ftime.getMin(),
-          ftime.getSec());
-  
-  // open file
-  
-  FILE *out;
-  if ((out = fopen(outPath, "w")) == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - StatsMgr::_writeFile";
-    cerr << "  Cannot create file: " << outPath << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // write header
-
-  fprintf(out, "# height snr dbz vel zdrm ldr rhohv\n");
-  fprintf(out, "#============================================\n");
-  fprintf(out, "# Table produced by NoiseMon\n");
-  fprintf(out, "# Start time: %s\n", DateTime::strm(startTime).c_str());
-  fprintf(out, "# End time  : %s\n", DateTime::strm(endTime).c_str());
-  fprintf(out, "#------------ Table column list -------------\n");
-  fprintf(out, "#    col 000: height\n");
-  fprintf(out, "#    col 001: snr\n");
-  fprintf(out, "#    col 002: dbz\n");
-  fprintf(out, "#    col 003: vel\n");
-  fprintf(out, "#    col 004: zdrm\n");
-  fprintf(out, "#    col 005: ldr\n");
-  fprintf(out, "#    col 006: rhohv\n");
-  fprintf(out, "#--------------------------------------------\n");
-  fprintf(out, "#============================================\n");
-
-  // write 
-
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    const vector<MomentData> &momentData = layer.getMomentData();
-    for (size_t jj = 0; jj < momentData.size(); jj++) {
-      const MomentData &mdata = momentData[jj];
-      if (mdata.snr > -9990) {
-        fprintf(out,
-                "%9.3f %9.3f %9.3f %9.3f %9.3f %9.3f %9.3f\n",
-                mdata.height,
-                mdata.snr,
-                mdata.dbz,
-                mdata.vel,
-                mdata.zdrm,
-                (mdata.ldrh + mdata.ldrv) / 2.0,
-                mdata.rhohv);
-      }
-    } // jj
-  } // ii
-
-  if (_params.debug) {
-    cerr << "-->> Wrote zdr points file: " << outPath << endl;
-  }
-
-  // close file
-
-  fclose(out);
-  return 0;
-
-}
 

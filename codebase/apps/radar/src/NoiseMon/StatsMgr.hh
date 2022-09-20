@@ -38,9 +38,11 @@
 #include <vector>
 #include <cstdio>
 
+#include <Radx/RadxTime.hh>
+
 #include "Args.hh"
 #include "Params.hh"
-#include "LayerStats.hh"
+#include "MomentData.hh"
 
 using namespace std;
 
@@ -75,12 +77,13 @@ public:
 
   // add data for a point
   
-  void addDataPoint(double range,
+  void addDataPoint(RadxTime mtime,
+                    double range,
 		    MomentData mdata);
 
   // check and compute when ready
   
-  void checkCompute();
+  void checkCompute(const RadxTime &mtime);
 
   // compute methods
   
@@ -105,6 +108,9 @@ protected:
 
   // analysis
 
+  RadxTime _thisStartTime;
+  RadxTime _nextStartTime;
+  
   double _startTimeStats;
   double _endTimeStats;
   double _prevTime;

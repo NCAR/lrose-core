@@ -444,7 +444,7 @@ public:
   input_field_t *_input_fields;
   int input_fields_n;
 
-  int time_interval_secs;
+  int stats_interval_secs;
 
   double min_elevation_deg;
 

@@ -130,7 +130,7 @@ private:
   int _openInputQueue();
   int _processInputMessage();
   void _processBeam();
-  void _processMoments();
+  void _processMoments(const RadxTime &beamTime);
 
   void _setMomentsIndices(Params::moments_id_t paramId,
 			  moments_field_t &field);

@@ -58,12 +58,10 @@ DsrDataMgr::DsrDataMgr(const string &prog_name,
 
   // set up params indices
 
-  _setMomentsParamsIndex(Params::SNR, _snr);
   _setMomentsParamsIndex(Params::SNRHC, _snrhc);
   _setMomentsParamsIndex(Params::SNRHX, _snrhx);
   _setMomentsParamsIndex(Params::SNRVC, _snrvc);
   _setMomentsParamsIndex(Params::SNRVX, _snrvx);
-  _setMomentsParamsIndex(Params::DBM, _dbm);
   _setMomentsParamsIndex(Params::DBMHC, _dbmhc);
   _setMomentsParamsIndex(Params::DBMHX, _dbmhx);
   _setMomentsParamsIndex(Params::DBMVC, _dbmvc);
@@ -240,6 +238,8 @@ void DsrDataMgr::_processBeam()
   const DsRadarBeam &beam = _inputMsg.getRadarBeam();
   double beamFTime = beam.dataTime + beam.nanoSecs / 1.0e9;
 
+  RadxTime beamTime(beam.dataTime, beam.nanoSecs / 1.0e9);
+
   // check elevation angle
 
   double elev = beam.elevation;
@@ -266,11 +266,12 @@ void DsrDataMgr::_processBeam()
   // process the moments
   
   _loadMomentsData();
-  _processMoments();
+
+  _processMoments(beamTime);
 
   // if we have done a full rotation, process the data
 
-  checkCompute();
+  checkCompute(beamTime);
 
 }
 
@@ -491,7 +492,7 @@ void DsrDataMgr::_loadInputField(const DsRadarBeam &beam, int index, double *fld
 ////////////////////////////////////////////
 // process the moments data in the beam
 
-void DsrDataMgr::_processMoments()
+void DsrDataMgr::_processMoments(const RadxTime &beamTime)
 
 {
   
@@ -520,7 +521,7 @@ void DsrDataMgr::_processMoments()
 
     // add to layer statss
 
-    addDataPoint(range, mdata);
+    addDataPoint(beamTime, range, mdata);
     
   } // igate
 

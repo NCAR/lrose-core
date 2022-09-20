@@ -81,6 +81,7 @@ private:
   // pulse queue
   
   deque<const IwrfTsPulse *> _pulseQueue;
+  RadxTime _pulseTime;
   int _maxPulseQueueSize;
   long _pulseSeqNum;
   int _totalPulseCount;
