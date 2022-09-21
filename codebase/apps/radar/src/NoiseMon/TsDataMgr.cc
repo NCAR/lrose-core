@@ -132,7 +132,7 @@ int TsDataMgr::run ()
   // create reader
 
   IwrfDebug_t iwrfDebug = IWRF_DEBUG_OFF;
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     iwrfDebug = IWRF_DEBUG_NORM;
   }
   
@@ -201,7 +201,7 @@ int TsDataMgr::run ()
     }
     _processPulse(pulse);
     
-  }
+  } // while (true)
 
   return iret;
 
@@ -214,6 +214,8 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
 {
 
+  // cerr << ".";
+  
   // at start, print headers
 
   // if (_totalPulseCount == 0) {
@@ -239,6 +241,8 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // do we have a full pulse queue?
 
+  // cerr << "0000000000000000 _pulseQueue.size(): " << _pulseQueue.size() << endl;
+  
   if ((int) _pulseQueue.size() < _nSamples) {
     return;
   }
@@ -253,11 +257,12 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
     
   double azDiff = RadarComplex::diffDeg(azStart, azEnd);
   double elDiff = RadarComplex::diffDeg(elStart, elEnd);
-  if (fabs(azDiff) > 5 || fabs(elDiff) > 0.2) {
+  if (fabs(azDiff) > 5 || fabs(elDiff) > 5) {
     if (_params.debug >= Params::DEBUG_EXTRA) {
       cerr << "====>> Clearing pulse queue" << endl;
       cerr << "  azStart, azEnd: " << azStart << ", " << azEnd << endl;
       cerr << "  elStart, elEnd: " << elStart << ", " << elEnd << endl;
+      cerr << "  elDiff, azDiff: " << elDiff << ", " << azDiff << endl;
     }
     _clearPulseQueue();
     return;
@@ -275,6 +280,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // compute the moments
   
+  // cerr << "444444444444444444444 _pulseQueue.size(): " << _pulseQueue.size() << endl;
   _computeMoments(midPulse);
 
   // clear time series data queue
@@ -562,12 +568,12 @@ void TsDataMgr::_initForMoments()
                             _params.debug >= Params::DEBUG_NORM,
                             _params.debug >= Params::DEBUG_VERBOSE);
 
-    if (_params.adjust_dbz_for_measured_xmit_power) {
-      _mom->setAdjustDbzForMeasXmitPower();
-    }
-    if (_params.adjust_zdr_for_measured_xmit_power) {
-      _mom->setAdjustZdrForMeasXmitPower();
-    }
+    // if (_params.adjust_dbz_for_measured_xmit_power) {
+    //   _mom->setAdjustDbzForMeasXmitPower();
+    // }
+    // if (_params.adjust_zdr_for_measured_xmit_power) {
+    //   _mom->setAdjustZdrForMeasXmitPower();
+    // }
 
     _mom->setMeasXmitPowerDbmH(_measXmitPowerDbmH);
     _mom->setMeasXmitPowerDbmV(_measXmitPowerDbmV);

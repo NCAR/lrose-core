@@ -76,6 +76,9 @@ StatsMgr::StatsMgr(const string &prog_name,
   }
 
   // initialize for stats
+
+  _thisStartTime.set(RadxTime::NEVER);
+  _nextStartTime.set(RadxTime::NEVER);
   
   clearStats();
   
@@ -198,7 +201,7 @@ void StatsMgr::processRay(const RadxPlatform &radar,
                           RadxRay *ray)
 
 {
-
+  
   if (!_nextStartTime.isValid()) {
     // first data point
     time_t initTime = ray->getRadxTime().utime();
@@ -293,7 +296,7 @@ void StatsMgr::processRay(const RadxPlatform &radar,
 
   // check if we should compute the stats at this stage
 
-  
+  checkCompute(ray->getRadxTime());
   
 }
  
@@ -433,9 +436,11 @@ void StatsMgr::printStats(FILE *out)
   fprintf(out, " Noise Monitoring\n");
   fprintf(out, "   Start time: %s\n", _thisStartTime.asString().c_str());
   fprintf(out, "   End   time: %s\n", _nextStartTime.asString().c_str());
+  fprintf(out, "   count copol           : %8.0f\n", _countCoPol);
   fprintf(out, "   mean dbmhc (dBm)      : %8.3f\n", _meanDbmhc);
   fprintf(out, "   mean dbmvc (dBm)      : %8.3f\n", _meanDbmvc);
   if (_meanDbmhx > -9990) {
+    fprintf(out, "   count crosspol        : %8.0f\n", _countCrossPol);
     fprintf(out, "   mean dbmhx (dBm)      : %8.3f\n", _meanDbmhx);
     fprintf(out, "   mean dbmvx (dBm)      : %8.3f\n", _meanDbmvx);
   }
@@ -460,11 +465,13 @@ int StatsMgr::writeStatsToSpdb()
 
   xml += TaXml::writeStartTag("NoiseMonitoring", 0);
 
+  xml += TaXml::writeDouble("countCoPol", 1, _countCoPol);
   xml += TaXml::writeDouble("meanHtKm", 1, _meanHtKm);
   xml += TaXml::writeDouble("meanNoiseZdr", 1, _meanNoiseZdr);
   xml += TaXml::writeDouble("meanDbmhc", 1, _meanDbmhc);
   xml += TaXml::writeDouble("meanDbmvc", 1, _meanDbmvc);
   if (_meanDbmhx > -9990) {
+    xml += TaXml::writeDouble("countCrossPol", 1, _countCrossPol);
     xml += TaXml::writeDouble("meanDbmhx", 1, _meanDbmhx);
     xml += TaXml::writeDouble("meanDbmvx", 1, _meanDbmvx);
   }

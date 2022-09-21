@@ -430,10 +430,6 @@ public:
 
   char* cal_xml_file_path;
 
-  tdrp_bool_t adjust_dbz_for_measured_xmit_power;
-
-  tdrp_bool_t adjust_zdr_for_measured_xmit_power;
-
   xmit_rcv_mode_t xmit_rcv_mode;
 
   double min_elevation;
@@ -470,7 +466,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

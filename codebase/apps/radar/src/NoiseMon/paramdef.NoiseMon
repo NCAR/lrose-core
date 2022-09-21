@@ -113,17 +113,17 @@ paramdef string {
   p_help = "At a minimum, the calibration file should contain noiseDbm, receiverGainDbm, dbz0 and radarConstant values for each channel.";
 } cal_xml_file_path;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to adjust DBZ based on measured transmitter power.";
-  p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.";
-} adjust_dbz_for_measured_xmit_power;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to adjust DBZ based on measured transmitter power.";
+//   p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.";
+// } adjust_dbz_for_measured_xmit_power;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to adjust ZDR based on measured transmitter power.";
-  p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.";
-} adjust_zdr_for_measured_xmit_power;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to adjust ZDR based on measured transmitter power.";
+//   p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.";
+// } adjust_zdr_for_measured_xmit_power;
 
 typedef enum {
 

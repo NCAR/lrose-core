@@ -776,30 +776,6 @@
     tt->single_val.s = tdrpStrDup("./spol_cal.xml");
     tt++;
     
-    // Parameter 'adjust_dbz_for_measured_xmit_power'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("adjust_dbz_for_measured_xmit_power");
-    tt->descr = tdrpStrDup("Option to adjust DBZ based on measured transmitter power.");
-    tt->help = tdrpStrDup("If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.");
-    tt->val_offset = (char *) &adjust_dbz_for_measured_xmit_power - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'adjust_zdr_for_measured_xmit_power'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("adjust_zdr_for_measured_xmit_power");
-    tt->descr = tdrpStrDup("Option to adjust ZDR based on measured transmitter power.");
-    tt->help = tdrpStrDup("If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.");
-    tt->val_offset = (char *) &adjust_zdr_for_measured_xmit_power - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'xmit_rcv_mode'
     // ctype is '_xmit_rcv_mode_t'
     
