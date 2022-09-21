@@ -1005,18 +1005,6 @@
     tt->single_val.d = 140;
     tt++;
     
-    // Parameter 'max_time_gap_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_time_gap_secs");
-    tt->descr = tdrpStrDup("Max time gap in data for stats (s).");
-    tt->help = tdrpStrDup("If we find a gap that exceeds this, we clear the stats and start again.");
-    tt->val_offset = (char *) &max_time_gap_secs - &_start_;
-    tt->single_val.d = 3600;
-    tt++;
-    
     // Parameter 'min_valid_count'
     // ctype is 'double'
     
@@ -1027,18 +1015,6 @@
     tt->help = tdrpStrDup("A valid point is a range gate that satisfies the thresholds below.");
     tt->val_offset = (char *) &min_valid_count - &_start_;
     tt->single_val.d = 2000;
-    tt++;
-    
-    // Parameter 'max_rhohv'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_rhohv");
-    tt->descr = tdrpStrDup("Maximum RHOHV for analysis.");
-    tt->help = tdrpStrDup("Gates with RHOHV above this will be ignored.");
-    tt->val_offset = (char *) &max_rhohv - &_start_;
-    tt->single_val.d = 0.25;
     tt++;
     
     // Parameter 'Comment 8'

@@ -245,23 +245,17 @@ paramdef double {
   p_help = "This is important if there is a test pulse in the data at long range. If so, set this just short of the test pulse range.";
 } max_range_km;
 
-paramdef double {
-  p_default = 3600;
-  p_descr = "Max time gap in data for stats (s).";
-  p_help = "If we find a gap that exceeds this, we clear the stats and start again.";
-} max_time_gap_secs;
+// paramdef double {
+//   p_default = 3600;
+//   p_descr = "Max time gap in data for stats (s).";
+//   p_help = "If we find a gap that exceeds this, we clear the stats and start again.";
+// } max_time_gap_secs;
 
 paramdef double {
   p_default = 2000;
   p_descr = "Min number of valid points for stats.";
   p_help = "A valid point is a range gate that satisfies the thresholds below.";
 } min_valid_count;
-
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Maximum RHOHV for analysis.";
-  p_help = "Gates with RHOHV above this will be ignored.";
-} max_rhohv; 
 
 commentdef {
   p_header = "OUTPUT STATISTICS";

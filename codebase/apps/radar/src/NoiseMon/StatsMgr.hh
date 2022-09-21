@@ -124,26 +124,35 @@ protected:
   // double _startTimeStats;
   // double _endTimeStats;
   // double _prevTime;
-  double _prt;
-  double _el;
-  double _az;
+  // double _prt;
+  // double _el;
+  // double _az;
   // double _prevAz;
   // double _azMovedStats;
   // double _azMovedPrint;
 
   // elevation
 
-  double _sumEl;
-  double _nEl;
-  double _meanEl;
+  // double _sumEl;
+  // double _nEl;
+  // double _meanEl;
 
   // sums etc
 
-  double _count;
+  double _countCoPol;
+  double _countCrossPol;
   double _sumDbmhc;
   double _sumDbmvc;
   double _sumDbmhx;
   double _sumDbmvx;
+  double _sumHtKm;
+
+  double _meanDbmhc;
+  double _meanDbmvc;
+  double _meanDbmhx;
+  double _meanDbmvx;
+  double _meanNoiseZdr;
+  double _meanHtKm;
   
 private:
 

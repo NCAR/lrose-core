@@ -451,11 +451,7 @@ public:
 
   double max_range_km;
 
-  double max_time_gap_secs;
-
   double min_valid_count;
-
-  double max_rhohv;
 
   tdrp_bool_t write_stats_to_text_file;
 
@@ -474,7 +470,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[40];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

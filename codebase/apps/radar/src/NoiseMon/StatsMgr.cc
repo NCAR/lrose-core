@@ -68,24 +68,17 @@ StatsMgr::StatsMgr(const string &prog_name,
   
 {
 
-  // _startTimeStats = 0;
-  // _endTimeStats = 0;
-  // _prevTime = 0;
-  _prt = 0;
-  _el = 0;
-  _az = 0;
-  // _prevAz = -999;
-  // _azMovedStats = 0.0;
-
-  clearStats();
-  
   // set up field name map
-
+  
   for (int ii = 0; ii < _params.input_fields_n; ii++) {
     Params::input_field_t &infield = _params._input_fields[ii];
     _fieldNameMap[infield.id] = infield.moments_name;
   }
 
+  // initialize for stats
+  
+  clearStats();
+  
 }
 
 // destructor
@@ -282,18 +275,20 @@ void StatsMgr::processRay(const RadxPlatform &radar,
       continue;
     }
 
-    _count++;
+    _countCoPol++;
     _sumDbmhc += dbmhcData[ii];
     _sumDbmvc += dbmvcData[ii];
-
+    _sumHtKm += htKm;
+    
     if (dbmhxData == NULL || dbmvxData == NULL ||
         dbmhxData[ii] == dbmhxMiss || dbmvxData[ii] == dbmvxMiss) {
       continue;
     }
 
+    _countCrossPol++;
     _sumDbmhx += dbmhxData[ii];
     _sumDbmvx += dbmvxData[ii];
-
+    
   } // ii
 
   // check if we should compute the stats at this stage
@@ -309,28 +304,33 @@ void StatsMgr::clearStats()
 
 {
 
-  _sumEl = 0.0;
-  _nEl = 0.0;
-  _meanEl = 0.0;
+  // _sumEl = 0.0;
+  // _nEl = 0.0;
+  // _meanEl = 0.0;
 
+  _countCoPol = 0.0;
+  _countCrossPol = 0.0;
   _sumDbmhc = 0.0;
   _sumDbmvc = 0.0;
   _sumDbmhx = 0.0;
   _sumDbmvx = 0.0;
+  _sumHtKm = 0.0;
+
+  _meanDbmhc = -9999.0;
+  _meanDbmvc = -9999.0;
+  _meanDbmhx = -9999.0;
+  _meanDbmvx = -9999.0;
+  _meanNoiseZdr = -9999.0;
+  _meanHtKm = -9999.0;
 
   // for (int ii = 0; ii < (int) _layers.size(); ii++) {
   //   _layers[ii]->clearData();
   // }
 
-  _sumEl = 0.0;
-  _nEl = 0.0;
+  // _sumEl = 0.0;
+  // _nEl = 0.0;
   // _startTimeStats = _endTimeStats;
   // _prevTime = _endTimeStats;
-
-  _sumDbmhc = 0.0;
-  _sumDbmvc = 0.0;
-  _sumDbmhx = 0.0;
-  _sumDbmvx = 0.0;
 
 }
   
@@ -341,69 +341,28 @@ int StatsMgr::computeStats()
   
 {
 
-  #ifdef NOTNOW
-  
-  // for (int ii = 0; ii < (int) _layers.size(); ii++) {
-  //   _layers[ii]->computeStats();
-  // }
-
-  // compute Zdr for this rotation
-  // and accumulate stats for computing mean Zdr
-
-  double sumValid = 0.0;
-  double sumZdrm = 0.0;
-  double sumSqZdrm = 0.0;
-
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    LayerStats &layer = *(_layers[ii]);
-    double ht = layer.getMeanHt();
-    double snr = layer.getMean().snr;
-    if (ht >= _params.min_ht_for_stats &&
-	ht <= _params.max_ht_for_stats &&
-        snr >= _params.min_snr) {
-      sumValid += layer.getNValid();
-      sumZdrm += layer.getSum().zdrm;
-      sumSqZdrm += layer.getSumSq().zdrm;
-    }
-  }
-
-  _meanEl = _sumEl / _nEl;
-
-  _countZdrm = sumValid;
-  _meanZdrm = -9999;
-  _sdevZdrm = -9999;
-
-  if (_countZdrm > 0) {
-    _meanZdrm = sumZdrm / _countZdrm;
-    _globalCountZdrm += _countZdrm;
-    _globalSumZdrm += sumZdrm;
-    _globalSumSqZdrm += sumSqZdrm;
-  }
-
-  if (_countZdrm > 2) {
-    _meanZdrm = sumZdrm / _countZdrm;
-    double variance =
-      (sumSqZdrm - (sumZdrm * sumZdrm) / _countZdrm) / (_countZdrm - 1.0);
-    _sdevZdrm = 0.000001;
-    if (variance >= 0.0) {
-      _sdevZdrm = sqrt(variance);
-    }
-  }
-
-  if (_countZdrm < _params.min_valid_count_for_stats) {
+  if (_countCoPol < _params.min_valid_count) {
     return -1;
-  } else {
+  }
+
+  _meanHtKm = _sumHtKm / _countCoPol;
+
+  _meanDbmhc = _sumDbmhc / _countCoPol;
+  _meanDbmvc = _sumDbmvc / _countCoPol;
+  _meanNoiseZdr = _meanDbmhc - _meanDbmvc;
+  
+  if (_countCrossPol < _params.min_valid_count) {
     return 0;
   }
-
-#endif
-
+  _meanDbmhx = _sumDbmhx / _countCrossPol;
+  _meanDbmvx = _sumDbmvx / _countCrossPol;
+  
   return 0;
 
 }
 
 //////////////////////////////////////
-// write out 360 deg stats to files
+// write out stats to files
 
 int StatsMgr::writeStats()
 
@@ -417,7 +376,7 @@ int StatsMgr::writeStats()
 
   if (ta_makedir_recurse(_params.text_output_dir)) {
     int errNum = errno;
-    cerr << "ERROR - StatsMgr::_writeStats";
+    cerr << "ERROR - NoiseMon::StatsMgr::_writeStats";
     cerr << "  Cannot create output dir: " << _params.text_output_dir << endl;
     cerr << "  " << strerror(errNum) << endl;
     return -1;
@@ -428,7 +387,7 @@ int StatsMgr::writeStats()
   time_t fileTime = _thisStartTime.utime();
   DateTime ftime(fileTime);
   char outPath[1024];
-  sprintf(outPath, "%s/vert_zdr_cal_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
+  sprintf(outPath, "%s/NoiseMon_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",
           _params.text_output_dir,
           ftime.getYear(),
           ftime.getMonth(),
@@ -468,76 +427,24 @@ void StatsMgr::printStats(FILE *out)
 
 {
 
-#ifdef JUNK
-  
-  // check we have some valid stats to print
-
-  bool statsFound = false;
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    if (layer.getMean().snr > -9990) {
-      statsFound = true;
-      break;
-    }
-  }
-  if (!statsFound) {
-    return;
-  }
-  
-  time_t startTime = (time_t) _startTimeStats;
-  
   fprintf(out,
           " ====================================="
           "============================================\n");
-  fprintf(out, " Vertical-pointing ZDR calibration\n");
-  fprintf(out, "   Time: %s\n", DateTime::strm(startTime).c_str());
-  fprintf(out, "   az moved (deg)        : %8g\n", _azMovedStats);
-  fprintf(out, "   n samples             : %8d\n", _params.n_samples);
-  fprintf(out, "   n valid               : %8d\n", (int) (_countZdrm + 0.5));
-  fprintf(out, "   min snr (dB)          : %8.3f\n", _params.min_snr);
-  fprintf(out, "   max snr (dB)          : %8.3f\n", _params.max_snr);
-  fprintf(out, "   min vel (m/s)         : %8.3f\n", _params.min_vel);
-  fprintf(out, "   max vel (m/s)         : %8.3f\n", _params.max_vel);
-  fprintf(out, "   min rhohv             : %8.3f\n", _params.min_rhohv);
-  fprintf(out, "   max ldr               : %8.3f\n", _params.max_ldr);
-  fprintf(out, "   zdr_n_sdev            : %8.3f\n", _params.zdr_n_sdev);
-  fprintf(out, "   min ht for stats (km) : %8.3f\n", _params.min_ht_for_stats);
-  fprintf(out, "   max ht for stats (km) : %8.3f\n", _params.max_ht_for_stats);
-  fprintf(out, "   mean elevation (deg)  : %8.3f\n", _meanEl);
-  fprintf(out, "   mean ZDRm (dB)        : %8.3f\n", _meanZdrm);
-  fprintf(out, "   sdev ZDRm (dB)        : %8.3f\n", _sdevZdrm);
-  fprintf(out, "   ZDR correction (dB)   : %8.3f\n", _meanZdrm * -1.0);
-  fprintf(out,
-          " ====================================="
-          "============================================\n");
-  fprintf(out, " %5s %7s %7s %7s %5s %8s %6s %7s %7s %6s %6s\n",
-          "Ht", "npts", "snr", "dBZ", "vel",
-          "ldr", "rhohv", "zdrMean", "zdrSdev", "gof", "rmse");
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    if (layer.getMean().snr > -9990) {
-      fprintf(out,
-              " %5.2f %7d %7.3f %7.3f %5.1f %8.3f %6.3f %7.3f %7.3f %6.3f %6.3f\n",
-              layer.getMeanHt(),
-              layer.getNValid(),
-              layer.getMean().snr,
-              layer.getMean().dbz,
-              layer.getMean().vel,
-              layer.getMean().ldrh,
-              layer.getMean().rhohv,
-              layer.getMean().zdrm,
-              layer.getSdev().zdrm,
-              layer.getDist().getGof(),
-              layer.getDist().getRmsePdf());
-    }
+  fprintf(out, " Noise Monitoring\n");
+  fprintf(out, "   Start time: %s\n", _thisStartTime.asString().c_str());
+  fprintf(out, "   End   time: %s\n", _nextStartTime.asString().c_str());
+  fprintf(out, "   mean dbmhc (dBm)      : %8.3f\n", _meanDbmhc);
+  fprintf(out, "   mean dbmvc (dBm)      : %8.3f\n", _meanDbmvc);
+  if (_meanDbmhx > -9990) {
+    fprintf(out, "   mean dbmhx (dBm)      : %8.3f\n", _meanDbmhx);
+    fprintf(out, "   mean dbmvx (dBm)      : %8.3f\n", _meanDbmvx);
   }
+  fprintf(out, "   meanNoiseZdr (dB)     : %8.3f\n", _meanNoiseZdr);
+  fprintf(out, "   meanHeight   (km)     : %8.3f\n", _meanHtKm);
   fprintf(out,
           " ====================================="
           "============================================\n");
 
-
-#endif
-  
 }
 
 ///////////////////////////////
@@ -547,54 +454,22 @@ int StatsMgr::writeStatsToSpdb()
 
 {
 
-#ifdef JUNK
-  
-  // check we have some valid stats to print
-
-  bool statsFound = false;
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    if (layer.getMean().snr > -9990) {
-      statsFound = true;
-      break;
-    }
-  }
-  if (!statsFound) {
-    return 0;
-  }
-
   // create XML string
 
   string xml;
 
-  xml += TaXml::writeStartTag("VertPointingStats", 0);
+  xml += TaXml::writeStartTag("NoiseMonitoring", 0);
 
-  xml += TaXml::writeDouble("meanElevation", 1, _meanEl);
-  xml += TaXml::writeDouble("meanZdrmVol", 1, _meanZdrm);
-  xml += TaXml::writeDouble("sdevZdrmVol", 1, _sdevZdrm);
-  xml += TaXml::writeDouble("countZdrmVol", 1, _countZdrm);
-
-  for (int ii = 0; ii < (int) _layers.size(); ii++) {
-    const LayerStats &layer = *(_layers[ii]);
-    // if (layer.getMean().snr > -9990) {
-
-      xml += TaXml::writeStartTag("LayerStats", 1);
-      xml += TaXml::writeDouble("meanHtLayer", 2, layer.getMeanHt());
-      xml += TaXml::writeInt("nValidLayer", 2, layer.getNValid());
-      xml += TaXml::writeDouble("meanSnrLayer", 2, layer.getMean().snr);
-      xml += TaXml::writeDouble("meanDbzLayer", 2, layer.getMean().dbz);
-      xml += TaXml::writeDouble("meanVelLayer", 2, layer.getMean().vel);
-      xml += TaXml::writeDouble("meanZdrmLayer", 2, layer.getMean().zdrm);
-      xml += TaXml::writeDouble("sdevZdrmLayer", 2, layer.getSdev().zdrm);
-      xml += TaXml::writeDouble("meanLdrhLayer", 2, layer.getMean().ldrh);
-      xml += TaXml::writeDouble("meanLdrvLayer", 2, layer.getMean().ldrv);
-      xml += TaXml::writeDouble("meanRhohvLayer", 2, layer.getMean().rhohv);
-      xml += TaXml::writeEndTag("LayerStatsLayer", 1);
-
-      // }
+  xml += TaXml::writeDouble("meanHtKm", 1, _meanHtKm);
+  xml += TaXml::writeDouble("meanNoiseZdr", 1, _meanNoiseZdr);
+  xml += TaXml::writeDouble("meanDbmhc", 1, _meanDbmhc);
+  xml += TaXml::writeDouble("meanDbmvc", 1, _meanDbmvc);
+  if (_meanDbmhx > -9990) {
+    xml += TaXml::writeDouble("meanDbmhx", 1, _meanDbmhx);
+    xml += TaXml::writeDouble("meanDbmvx", 1, _meanDbmvx);
   }
   
-  xml += TaXml::writeEndTag("VertPointingStats", 0);
+  xml += TaXml::writeEndTag("NoiseMonitoring", 0);
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Writing XML stats to SPDB:" << endl;
@@ -602,9 +477,10 @@ int StatsMgr::writeStatsToSpdb()
   }
 
   DsSpdb spdb;
-  time_t validTime = (time_t) _startTimeStats;
-  si32 dataType = Spdb::hash4CharsToInt32(_params.radar_name_for_spdb);
-  spdb.addPutChunk(dataType, validTime, validTime, xml.size() + 1, xml.c_str());
+  time_t validTime = _thisStartTime.utime();
+  time_t expireTime = _nextStartTime.utime();
+  si32 dataType = Spdb::hash4CharsToInt32(_params.radar_name);
+  spdb.addPutChunk(dataType, validTime, expireTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.spdb_output_url,
                SPDB_XML_ID, SPDB_XML_LABEL)) {
     cerr << "ERROR - StatsMgr::writeStatsToSpdb" << endl;
@@ -617,8 +493,6 @@ int StatsMgr::writeStatsToSpdb()
     cerr << "  Valid time: " << DateTime::strm(validTime) << endl;
   }
 
-#endif
-  
   return 0;
 
 }
