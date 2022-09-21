@@ -69,27 +69,29 @@ TsDataMgr::TsDataMgr(const string &prog_name,
   // double deltaHt = _params.delta_height;
   // _maxHt = startHt + (nLayers + 1) * deltaHt;
 
-  switch (_params.xmit_rcv_mode) {
+  _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
+
+  // switch (_params.xmit_rcv_mode) {
     
-    case Params::DP_ALT_HV_CO_ONLY:
-      _xmitRcvMode = IWRF_ALT_HV_CO_ONLY;
-      break;
-    case Params::DP_ALT_HV_CO_CROSS:
-      _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
-      break;
-    case Params::DP_ALT_HV_FIXED_HV:
-      _xmitRcvMode = IWRF_ALT_HV_FIXED_HV;
-      break;
-    case Params::DP_SIM_HV_FIXED_HV:
-      _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
-      break;
-    case Params::DP_SIM_HV_SWITCHED_HV:
-      _xmitRcvMode = IWRF_SIM_HV_SWITCHED_HV;
-      break;
-    default:
-      _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
+  //   case Params::DP_ALT_HV_CO_ONLY:
+  //     _xmitRcvMode = IWRF_ALT_HV_CO_ONLY;
+  //     break;
+  //   case Params::DP_ALT_HV_CO_CROSS:
+  //     _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
+  //     break;
+  //   case Params::DP_ALT_HV_FIXED_HV:
+  //     _xmitRcvMode = IWRF_ALT_HV_FIXED_HV;
+  //     break;
+  //   case Params::DP_SIM_HV_FIXED_HV:
+  //     _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
+  //     break;
+  //   case Params::DP_SIM_HV_SWITCHED_HV:
+  //     _xmitRcvMode = IWRF_SIM_HV_SWITCHED_HV;
+  //     break;
+  //   default:
+  //     _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
       
-  } // switch
+  // } // switch
 
   _mom = NULL;
 
@@ -214,18 +216,16 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
 {
 
-  // cerr << ".";
+  const IwrfTsInfo &opsInfo = _reader->getOpsInfo();
+  if (_xmitRcvMode == IWRF_XMIT_RCV_MODE_NOT_SET) {
+    _xmitRcvMode = (iwrf_xmit_rcv_mode) opsInfo.get_proc_xmit_rcv_mode();
+  }
+  if (_xmitRcvMode != opsInfo.get_proc_xmit_rcv_mode()) {
+    _clearPulseQueue();
+  }
   
-  // at start, print headers
-
-  // if (_totalPulseCount == 0) {
-  //   setStartTime(pulse->getFTime());
-  // }
-  // setEndTime(pulse->getFTime());
-  _pulseTime.set(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
-
   // check that we start with a horizontal pulse
-
+  
   if (_xmitRcvMode == IWRF_ALT_HV_CO_ONLY ||
       _xmitRcvMode == IWRF_ALT_HV_CO_CROSS ||
       _xmitRcvMode == IWRF_ALT_HV_FIXED_HV) {
@@ -234,6 +234,8 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
     }
   }
 
+  _pulseTime.set(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
+
   // add the pulse to the queue
   
   _addPulseToQueue(pulse);
@@ -241,8 +243,6 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // do we have a full pulse queue?
 
-  // cerr << "0000000000000000 _pulseQueue.size(): " << _pulseQueue.size() << endl;
-  
   if ((int) _pulseQueue.size() < _nSamples) {
     return;
   }

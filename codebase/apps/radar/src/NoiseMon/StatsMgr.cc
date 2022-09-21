@@ -465,6 +465,9 @@ int StatsMgr::writeStatsToSpdb()
 
   xml += TaXml::writeStartTag("NoiseMonitoring", 0);
 
+  xml += TaXml::writeTime("intervalStartTime", 1, _thisStartTime.utime());
+  xml += TaXml::writeTime("intervalEndTime", 1, _nextStartTime.utime());
+
   xml += TaXml::writeDouble("countCoPol", 1, _countCoPol);
   xml += TaXml::writeDouble("meanHtKm", 1, _meanHtKm);
   xml += TaXml::writeDouble("meanNoiseZdr", 1, _meanNoiseZdr);
@@ -484,8 +487,8 @@ int StatsMgr::writeStatsToSpdb()
   }
 
   DsSpdb spdb;
-  time_t validTime = _thisStartTime.utime();
-  time_t expireTime = _nextStartTime.utime();
+  time_t validTime = _thisStartTime.utime() + _params.stats_interval_secs / 2;
+  time_t expireTime = _nextStartTime.utime() + _params.stats_interval_secs / 2;
   si32 dataType = Spdb::hash4CharsToInt32(_params.radar_name);
   spdb.addPutChunk(dataType, validTime, expireTime, xml.size() + 1, xml.c_str());
   if (spdb.put(_params.spdb_output_url,
