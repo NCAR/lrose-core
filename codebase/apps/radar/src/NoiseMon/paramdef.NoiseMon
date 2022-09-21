@@ -295,5 +295,5 @@ paramdef string {
   p_default = "SPOL";
   p_descr = "Radar name for tagging SPDB output data.";
   p_help = "This is used to set the data_type in SPDB.";
-} radar_name_for_spdb;
+} radar_name;
 

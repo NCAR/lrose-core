@@ -75,7 +75,6 @@ protected:
 private:
 
   static const double _missingDouble;
-  static const double _missingTest;
 
   // FMQ input
   
@@ -86,13 +85,13 @@ private:
   int _nFieldsIn;
   int _nGates;
 
-  int _volNum;
-
   DsRadarParams _inputRadarParams;
   vector<DsFieldParams*> _inputFieldParams;
   DsRadarCalib _inputRadarCalib;
 
-  int _totalBeamCount;
+  double _startRangeKm, _gateSpacingKm;
+  
+  // int _totalBeamCount;
 
   // input moments data
 
@@ -105,32 +104,17 @@ private:
     double *data;
   } moments_field_t;
 
-  moments_field_t _snr;
-  moments_field_t _snrhc;
-  moments_field_t _snrhx;
-
-  moments_field_t _snrvc;
-  moments_field_t _snrvx;
-  moments_field_t _dbm;
   moments_field_t _dbmhc;
   moments_field_t _dbmhx;
   moments_field_t _dbmvc;
   moments_field_t _dbmvx;
-  moments_field_t _dbz;
-  moments_field_t _vel;
-  moments_field_t _width;
-  moments_field_t _zdrm;
-  moments_field_t _ldrh;
-  moments_field_t _ldrv;
-  moments_field_t _phidp;
-  moments_field_t _rhohv;
 
   // methods
 
   int _openInputQueue();
   int _processInputMessage();
   void _processBeam();
-  void _processMoments(const RadxTime &beamTime);
+  // void _processMoments(const RadxTime &beamTime);
 
   void _setMomentsIndices(Params::moments_id_t paramId,
 			  moments_field_t &field);

@@ -95,16 +95,18 @@ private:
   vector<GateData *> _gateData;
   iwrf_xmit_rcv_mode_t _xmitRcvMode;
   RadarMoments *_mom;
-  MomentsFields *_fields;
 
   // geometry
 
   double _maxHt;
 
-  // range geometry
+  // geometry
   
   double _startRange;
   double _gateSpacing;
+  double _latitudeDeg;
+  double _longitudeDeg;
+  double _altitudeKm;
   
   // calibration
 
@@ -122,7 +124,7 @@ private:
   void _clearPulseQueue();
   
   void _initForMoments();
-  void _computeMoments();
+  void _computeMoments(const IwrfTsPulse *midPulse);
   void _computeDpAltHvCoCross();
   void _computeDpAltHvCoOnly();
   void _computeDpSimHv();

@@ -72,11 +72,11 @@ public:
 
   // set methods
 
-  void setStartTime(double start_time);
-  void setEndTime(double latest_time);
-  void setPrt(double prt) { _prt = prt; }
-  void setEl(double el);
-  void setAz(double az);
+  // void setStartTime(double start_time);
+  // void setEndTime(double latest_time);
+  // void setPrt(double prt) { _prt = prt; }
+  // void setEl(double el);
+  // void setAz(double az);
 
   // add data for a point
   
@@ -121,15 +121,15 @@ protected:
   RadxTime _thisStartTime;
   RadxTime _nextStartTime;
   
-  double _startTimeStats;
-  double _endTimeStats;
-  double _prevTime;
+  // double _startTimeStats;
+  // double _endTimeStats;
+  // double _prevTime;
   double _prt;
   double _el;
   double _az;
-  double _prevAz;
-  double _azMovedStats;
-  double _azMovedPrint;
+  // double _prevAz;
+  // double _azMovedStats;
+  // double _azMovedPrint;
 
   // elevation
 

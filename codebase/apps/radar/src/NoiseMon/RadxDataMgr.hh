@@ -82,56 +82,11 @@ private:
 
   RadxVol _readVol;
   
-  int _inputContents;
-  int _inputNFail;
-  int _nFieldsIn;
-  int _nGates;
-
-  int _volNum;
-
-  int _totalRayCount;
-
-  // input moments data
-  
-  // map<int, string> _fieldNameMap;
-  
-  typedef struct {
-    int id;
-    string dsrName;
-    TaArray<double> data_;
-    double *data;
-  } moments_field_t;
-
-  moments_field_t _snr;
-  moments_field_t _snrhc;
-  moments_field_t _snrhx;
-  moments_field_t _snrvc;
-  moments_field_t _snrvx;
-  moments_field_t _dbm;
-  moments_field_t _dbmhc;
-  moments_field_t _dbmhx;
-  moments_field_t _dbmvc;
-  moments_field_t _dbmvx;
-  moments_field_t _dbz;
-  moments_field_t _vel;
-  moments_field_t _width;
-  moments_field_t _zdrm;
-  moments_field_t _ldrh;
-  moments_field_t _ldrv;
-  moments_field_t _phidp;
-  moments_field_t _rhohv;
-
   // methods
 
   int _processFile(const string &filePath);
   int _readFile(const string &filePath);
   void _setupRead(RadxFile &file);
-
-  void _processRay(const RadxRay *ray);
-  void _loadMomentsData(const RadxRay *ray,
-                        Params::moments_id_t id,
-                        moments_field_t &field);
-  void _processMoments(const RadxRay *ray);
 
 };
 

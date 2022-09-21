@@ -43,7 +43,6 @@
 using namespace std;
 
 const double DsrDataMgr::_missingDouble = -9999.0;
-const double DsrDataMgr::_missingTest = -9998.0;
 
 // Constructor
 
@@ -54,23 +53,23 @@ DsrDataMgr::DsrDataMgr(const string &prog_name,
   
 {
   
-  _totalBeamCount = 0;
+  // _totalBeamCount = 0;
 
   // set up params indices
 
-  _setMomentsParamsIndex(Params::SNRHC, _snrhc);
-  _setMomentsParamsIndex(Params::SNRHX, _snrhx);
-  _setMomentsParamsIndex(Params::SNRVC, _snrvc);
-  _setMomentsParamsIndex(Params::SNRVX, _snrvx);
+  // _setMomentsParamsIndex(Params::SNRHC, _snrhc);
+  // _setMomentsParamsIndex(Params::SNRHX, _snrhx);
+  // _setMomentsParamsIndex(Params::SNRVC, _snrvc);
+  // _setMomentsParamsIndex(Params::SNRVX, _snrvx);
   _setMomentsParamsIndex(Params::DBMHC, _dbmhc);
   _setMomentsParamsIndex(Params::DBMHX, _dbmhx);
   _setMomentsParamsIndex(Params::DBMVC, _dbmvc);
   _setMomentsParamsIndex(Params::DBMVX, _dbmvx);
-  _setMomentsParamsIndex(Params::DBZ, _dbz);
-  _setMomentsParamsIndex(Params::VEL, _vel);
-  _setMomentsParamsIndex(Params::WIDTH, _width);
-  _setMomentsParamsIndex(Params::PHIDP, _phidp);
-  _setMomentsParamsIndex(Params::RHOHV, _rhohv);
+  // _setMomentsParamsIndex(Params::DBZ, _dbz);
+  // _setMomentsParamsIndex(Params::VEL, _vel);
+  // _setMomentsParamsIndex(Params::WIDTH, _width);
+  // _setMomentsParamsIndex(Params::PHIDP, _phidp);
+  // _setMomentsParamsIndex(Params::RHOHV, _rhohv);
 
 }
 
@@ -201,6 +200,8 @@ int DsrDataMgr::_processInputMessage()
     _nFieldsIn = _inputRadarParams.numFields;
     _nGates = _inputRadarParams.numGates;
     DsRadarParams outputParams = _inputRadarParams;
+    _startRangeKm = _inputRadarParams.startRange;
+    _gateSpacingKm = _inputRadarParams.gateSpacing;
   }
 
   // write fields params to output queue
@@ -232,43 +233,124 @@ void DsrDataMgr::_processBeam()
 
 {
   
+  // load up the moments data for each field
+  
+  _loadMomentsData(_dbmhc);
+  _loadMomentsData(_dbmhx);
+  _loadMomentsData(_dbmvc);
+  _loadMomentsData(_dbmvx);
+
+  // get the metadata
+  
   const DsRadarBeam &beam = _inputMsg.getRadarBeam();
-  double beamFTime = beam.dataTime + beam.nanoSecs / 1.0e9;
-
+  // double beamFTime = beam.dataTime + beam.nanoSecs / 1.0e9;
   RadxTime beamTime(beam.dataTime, beam.nanoSecs / 1.0e9);
-
-  // check elevation angle
-
-  double elev = beam.elevation;
-  if (elev > 90) {
-    elev = 180.0 - elev;
-  }
-  if (elev < _params.min_elevation) {
-    // _statsMgr.clearStats();
-    return;
-  }
-
+  
   // at start, print headers
+  
+  // if (_totalBeamCount == 0) {
+  //   setStartTime(beamFTime);
+  // }
+  // setEndTime(beamFTime);
+  // _totalBeamCount++;
+  
+  // setPrt(1.0 / _inputRadarParams.pulseRepFreq);
+  // setEl(beam.elevation);
+  // setAz(beam.azimuth);
 
-  if (_totalBeamCount == 0) {
-    setStartTime(beamFTime);
+  // create the fields
+
+  Radx::fl32 missingFl32 = MomentData::missingVal;
+  
+  RadxField *dbmhcField = new RadxField(_fieldNameMap[Params::DBMHC], "dBm");
+  dbmhcField->setRangeGeom(_startRangeKm, _gateSpacingKm);
+  dbmhcField->setMissingFl32(missingFl32);
+
+  RadxField *dbmvcField = new RadxField(_fieldNameMap[Params::DBMVC], "dBm");
+  dbmvcField->setRangeGeom(_startRangeKm, _gateSpacingKm);
+  dbmvcField->setMissingFl32(missingFl32);
+
+  RadxField *dbmhxField = new RadxField(_fieldNameMap[Params::DBMHX], "dBm");
+  dbmhxField->setRangeGeom(_startRangeKm, _gateSpacingKm);
+  dbmhxField->setMissingFl32(missingFl32);
+
+  RadxField *dbmvxField = new RadxField(_fieldNameMap[Params::DBMVX], "dBm");
+  dbmvxField->setRangeGeom(_startRangeKm, _gateSpacingKm);
+  dbmvxField->setMissingFl32(missingFl32);
+
+  // fill with data
+  
+  vector<Radx::fl32> dbmhcData, dbmvcData, dbmhxData, dbmvxData;
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+
+    // GateData *gate = _gateData[igate];
+    // const MomentsFields &flds = gate->fields;
+
+    double dbmhc = _dbmhc.data[igate];
+    if (dbmhc == _missingDouble) {
+      dbmhcData.push_back(missingFl32);
+    } else {
+      dbmhcData.push_back(dbmhc);
+    }
+    
+    double dbmvc = _dbmvc.data[igate];
+    if (dbmvc == _missingDouble) {
+      dbmvcData.push_back(missingFl32);
+    } else {
+      dbmvcData.push_back(dbmvc);
+    }
+    
+    double dbmhx = _dbmhx.data[igate];
+    if (dbmhx == _missingDouble) {
+      dbmhxData.push_back(missingFl32);
+    } else {
+      dbmhxData.push_back(dbmhx);
+    }
+    
+    double dbmvx = _dbmhx.data[igate];
+    if (dbmvx == _missingDouble) {
+      dbmvxData.push_back(missingFl32);
+    } else {
+      dbmvxData.push_back(dbmvx);
+    }
+
   }
-  setEndTime(beamFTime);
-  _totalBeamCount++;
+    
+  dbmhcField->setDataFl32(_nGates, dbmhcData.data(), true);
+  dbmvcField->setDataFl32(_nGates, dbmvcData.data(), true);
+  dbmhxField->setDataFl32(_nGates, dbmhxData.data(), true);
+  dbmvxField->setDataFl32(_nGates, dbmvxData.data(), true);
+
+  // create a RadxRay, containing these fields
+
+  RadxRay ray;
+
+  ray.setTime(beamTime);
+  ray.setRangeGeom(_startRangeKm, _gateSpacingKm);
   
-  setPrt(1.0 / _inputRadarParams.pulseRepFreq);
-  setEl(beam.elevation);
-  setAz(beam.azimuth);
+  ray.setAzimuthDeg(beam.azimuth);
+  ray.setElevationDeg(beam.elevation);
 
-  // process the moments
+  ray.setNSamples(_inputRadarParams.samplesPerBeam);
+  ray.setPrtSec(_inputRadarParams.prt);
   
-  _loadMomentsData();
+  ray.addField(dbmhcField);
+  ray.addField(dbmvcField);
+  ray.addField(dbmhxField);
+  ray.addField(dbmvxField);
 
-  _processMoments(beamTime);
+  // create RadxPlatform for radar location
 
-  // if we have done a full rotation, process the data
+  RadxPlatform platform;
+  platform.setInstrumentName(_params.radar_name);
+  platform.setLatitudeDeg(_inputRadarParams.latitude);
+  platform.setLongitudeDeg(_inputRadarParams.longitude);
+  platform.setAltitudeKm(_inputRadarParams.altitude);
 
-  checkCompute(beamTime);
+  // process this ray
+  
+  processRay(platform, &ray);
 
 }
 
@@ -392,24 +474,10 @@ void DsrDataMgr::_loadMomentsData()
 
   // load up the moments data for each field
 
-  _loadMomentsData(_snr);
-  _loadMomentsData(_snrhc);
-  _loadMomentsData(_snrhx);
-  _loadMomentsData(_snrvc);
-  _loadMomentsData(_snrvx);
-  _loadMomentsData(_dbm);
   _loadMomentsData(_dbmhc);
   _loadMomentsData(_dbmhx);
   _loadMomentsData(_dbmvc);
   _loadMomentsData(_dbmvx);
-  _loadMomentsData(_dbz);
-  _loadMomentsData(_vel);
-  _loadMomentsData(_width);
-  _loadMomentsData(_zdrm);
-  _loadMomentsData(_ldrh);
-  _loadMomentsData(_ldrv);
-  _loadMomentsData(_phidp);
-  _loadMomentsData(_rhohv);
 
 }
 
@@ -446,8 +514,10 @@ void DsrDataMgr::_loadInputField(const DsRadarBeam &beam, int index, double *fld
 
 {
 
-  // start by filling with missing values
+  const DsFieldParams *fparams = _inputFieldParams[index];
 
+  // start by filling with missing values
+  
   for (int ii = 0; ii < _nGates; ii++) {
     fldData[ii] = _missingDouble;
   }
@@ -456,30 +526,39 @@ void DsrDataMgr::_loadInputField(const DsRadarBeam &beam, int index, double *fld
     // field not in input data
     return;
   }
-
+  
   if (beam.byteWidth == 4) {
 
+    fl32 missingVal = (fl32) fparams->missingDataValue;
     fl32 *fval = (fl32 *) beam.getData() + index;
     for (int ii = 0; ii < _nGates; ii++, fval += _nFieldsIn) {
-      fldData[ii] = *fval;
+      if (*fval != missingVal) {
+        fldData[ii] = *fval;
+      }
     }
 
   } else if (beam.byteWidth == 2) {
 
+    ui16 missingVal = (ui16) fparams->missingDataValue;
     double scale = _inputFieldParams[index]->scale;
     double bias = _inputFieldParams[index]->bias;
     ui16 *sval = (ui16 *) beam.getData() + index;
     for (int ii = 0; ii < _nGates; ii++, sval += _nFieldsIn) {
-      fldData[ii] = *sval * scale + bias;
+      if (*sval != missingVal) {
+        fldData[ii] = *sval * scale + bias;
+      }
     }
 
   } else {
-
+    
+    ui08 missingVal = (ui08) fparams->missingDataValue;
     double scale = _inputFieldParams[index]->scale;
     double bias = _inputFieldParams[index]->bias;
     ui08 *bval = (ui08 *) beam.getData() + index;
     for (int ii = 0; ii < _nGates; ii++, bval += _nFieldsIn) {
-      fldData[ii] = *bval * scale + bias;
+      if (*bval != missingVal) {
+        fldData[ii] = *bval * scale + bias;
+      }
     }
 
   }
@@ -489,39 +568,39 @@ void DsrDataMgr::_loadInputField(const DsRadarBeam &beam, int index, double *fld
 ////////////////////////////////////////////
 // process the moments data in the beam
 
-void DsrDataMgr::_processMoments(const RadxTime &beamTime)
+// void DsrDataMgr::_processMoments(const RadxTime &beamTime)
 
-{
+// {
   
-  double range = _inputRadarParams.startRange;
-  for (int igate = 0; igate < _nGates; igate++, range += _inputRadarParams.gateSpacing) {
+//   double range = _inputRadarParams.startRange;
+//   for (int igate = 0; igate < _nGates; igate++, range += _inputRadarParams.gateSpacing) {
     
-    MomentData mdata;
-    mdata.snr = _snr.data[igate];
-    mdata.snrhc = _snrhc.data[igate];
-    mdata.snrhx = _snrhx.data[igate];
-    mdata.snrvc = _snrvc.data[igate];
-    mdata.snrvx = _snrvx.data[igate];
-    mdata.dbm = _dbm.data[igate];
-    mdata.dbmhc = _dbmhc.data[igate];
-    mdata.dbmhx = _dbmhx.data[igate];
-    mdata.dbmvc = _dbmvc.data[igate];
-    mdata.dbmvx = _dbmvx.data[igate];
-    mdata.dbz = _dbz.data[igate];
-    mdata.vel = _vel.data[igate];
-    mdata.width = _width.data[igate];
-    mdata.zdrm = mdata.dbmhc - mdata.dbmvc;
-    mdata.ldrh = _ldrh.data[igate];
-    mdata.ldrv = _ldrv.data[igate];
-    mdata.phidp = _phidp.data[igate];
-    mdata.rhohv = _rhohv.data[igate];
+//     MomentData mdata;
+//     mdata.snr = _snr.data[igate];
+//     mdata.snrhc = _snrhc.data[igate];
+//     mdata.snrhx = _snrhx.data[igate];
+//     mdata.snrvc = _snrvc.data[igate];
+//     mdata.snrvx = _snrvx.data[igate];
+//     mdata.dbm = _dbm.data[igate];
+//     mdata.dbmhc = _dbmhc.data[igate];
+//     mdata.dbmhx = _dbmhx.data[igate];
+//     mdata.dbmvc = _dbmvc.data[igate];
+//     mdata.dbmvx = _dbmvx.data[igate];
+//     mdata.dbz = _dbz.data[igate];
+//     mdata.vel = _vel.data[igate];
+//     mdata.width = _width.data[igate];
+//     mdata.zdrm = mdata.dbmhc - mdata.dbmvc;
+//     mdata.ldrh = _ldrh.data[igate];
+//     mdata.ldrv = _ldrv.data[igate];
+//     mdata.phidp = _phidp.data[igate];
+//     mdata.rhohv = _rhohv.data[igate];
 
-    // add to layer statss
+//     // add to layer statss
 
-    addDataPoint(beamTime, range, mdata);
+//     addDataPoint(beamTime, range, mdata);
     
-  } // igate
+//   } // igate
 
-}
+// }
 
 

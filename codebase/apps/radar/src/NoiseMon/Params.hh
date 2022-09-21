@@ -465,7 +465,7 @@ public:
 
   char* spdb_output_url;
 
-  char* radar_name_for_spdb;
+  char* radar_name;
 
   char _end_; // end of data region
               // needed for zeroing out data

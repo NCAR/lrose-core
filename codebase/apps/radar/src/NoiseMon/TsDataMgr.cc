@@ -39,6 +39,7 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <Radx/RadxTime.hh>
+#include <radar/MomentsFields.hh>
 
 using namespace std;
 
@@ -91,7 +92,6 @@ TsDataMgr::TsDataMgr(const string &prog_name,
   } // switch
 
   _mom = NULL;
-  _fields = NULL;
 
 }
 
@@ -107,10 +107,6 @@ TsDataMgr::~TsDataMgr()
 
   if (_mom) {
     delete _mom;
-  }
-
-  if (_fields) {
-    delete _fields;
   }
 
   _clearPulseQueue();
@@ -220,10 +216,10 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // at start, print headers
 
-  if (_totalPulseCount == 0) {
-    setStartTime(pulse->getFTime());
-  }
-  setEndTime(pulse->getFTime());
+  // if (_totalPulseCount == 0) {
+  //   setStartTime(pulse->getFTime());
+  // }
+  // setEndTime(pulse->getFTime());
   _pulseTime.set(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
 
   // check that we start with a horizontal pulse
@@ -271,9 +267,6 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   
   int midIndex = _nSamples / 2;
   const IwrfTsPulse *midPulse = _pulseQueue[midIndex];
-  setPrt(midPulse->getPrt());
-  setEl(midPulse->getEl());
-  setAz(midPulse->getAz());
 
   // transmitter power
 
@@ -282,11 +275,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // compute the moments
   
-  _computeMoments();
-
-  // if we have done a full rotation, process the data
-
-  checkCompute(_pulseTime);
+  _computeMoments(midPulse);
 
   // clear time series data queue
 
@@ -388,14 +377,14 @@ void TsDataMgr::_clearPulseQueue()
 ////////////////////////////////////////////
 // compute properties using pulses in queue
 
-void TsDataMgr::_computeMoments()
+void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
 
 {
 
   // initialize
 
   _initForMoments();
-
+  
   // compute the moments
 
   switch (_xmitRcvMode) {
@@ -416,33 +405,100 @@ void TsDataMgr::_computeMoments()
       
   }
 
-  // add to stats
+  // create the fields
 
+  Radx::fl32 missingFl32 = MomentData::missingVal;
+  
+  RadxField *dbmhcField = new RadxField(_fieldNameMap[Params::DBMHC], "dBm");
+  dbmhcField->setRangeGeom(_startRange, _gateSpacing);
+  dbmhcField->setMissingFl32(missingFl32);
+
+  RadxField *dbmvcField = new RadxField(_fieldNameMap[Params::DBMVC], "dBm");
+  dbmvcField->setRangeGeom(_startRange, _gateSpacing);
+  dbmvcField->setMissingFl32(missingFl32);
+
+  RadxField *dbmhxField = new RadxField(_fieldNameMap[Params::DBMHX], "dBm");
+  dbmhxField->setRangeGeom(_startRange, _gateSpacing);
+  dbmhxField->setMissingFl32(missingFl32);
+
+  RadxField *dbmvxField = new RadxField(_fieldNameMap[Params::DBMVX], "dBm");
+  dbmvxField->setRangeGeom(_startRange, _gateSpacing);
+  dbmvxField->setMissingFl32(missingFl32);
+
+  // fill with data
+  
+  vector<Radx::fl32> dbmhcData, dbmvcData, dbmhxData, dbmvxData;
+  
   for (int igate = 0; igate < _nGates; igate++) {
-    double range = _startRange + igate * _gateSpacing;
+
     GateData *gate = _gateData[igate];
     const MomentsFields &flds = gate->fields;
-    MomentData mdata;
-    mdata.snr = flds.snr;
-    mdata.snrhc = flds.snrhc;
-    mdata.snrhx = flds.snrhx;
-    mdata.snrvc = flds.snrvc;
-    mdata.snrvx = flds.snrvx;
-    mdata.dbm = flds.dbm;
-    mdata.dbmhc = flds.dbmhc;
-    mdata.dbmhx = flds.dbmhx;
-    mdata.dbmvc = flds.dbmvc;
-    mdata.dbmvx = flds.dbmvx;
-    mdata.dbz = flds.dbz;
-    mdata.vel = flds.vel;
-    mdata.width = flds.width;
-    mdata.zdrm = flds.zdrm;
-    mdata.ldrh = flds.ldrh;
-    mdata.ldrv = flds.ldrv;
-    mdata.phidp = flds.phidp;
-    mdata.rhohv = flds.rhohv;
-    addDataPoint(_pulseTime, range, mdata);
-  } // igate
+
+    if (flds.dbmhc == MomentsFields::missingDouble) {
+      dbmhcData.push_back(missingFl32);
+    } else {
+      dbmhcData.push_back(flds.dbmhc);
+    }
+    
+    if (flds.dbmvc == MomentsFields::missingDouble) {
+      dbmvcData.push_back(missingFl32);
+    } else {
+      dbmvcData.push_back(flds.dbmvc);
+    }
+    
+    if (flds.dbmhx == MomentsFields::missingDouble) {
+      dbmhxData.push_back(missingFl32);
+    } else {
+      dbmhxData.push_back(flds.dbmhx);
+    }
+    
+    if (flds.dbmvx == MomentsFields::missingDouble) {
+      dbmvxData.push_back(missingFl32);
+    } else {
+      dbmvxData.push_back(flds.dbmvx);
+    }
+
+  }
+    
+  dbmhcField->setDataFl32(_nGates, dbmhcData.data(), true);
+  dbmvcField->setDataFl32(_nGates, dbmvcData.data(), true);
+  dbmhxField->setDataFl32(_nGates, dbmhxData.data(), true);
+  dbmvxField->setDataFl32(_nGates, dbmvxData.data(), true);
+
+  // create a RadxRay, containing these fields
+
+  RadxRay ray;
+
+  RadxTime momentsTime;
+  momentsTime.set(midPulse->getTime(), midPulse->getNanoSecs() / 1.0e9);
+  ray.setTime(momentsTime);
+  ray.setRangeGeom(_startRange, _gateSpacing);
+  
+  ray.setAzimuthDeg(midPulse->getAz());
+  ray.setElevationDeg(midPulse->getEl());
+
+  ray.setNSamples(_nSamples);
+  ray.setPrtSec(midPulse->getPrt());
+
+  ray.setMeasXmitPowerDbmH(_measXmitPowerDbmH);
+  ray.setMeasXmitPowerDbmV(_measXmitPowerDbmV);
+
+  ray.addField(dbmhcField);
+  ray.addField(dbmvcField);
+  ray.addField(dbmhxField);
+  ray.addField(dbmvxField);
+
+  // create RadxPlatform for radar location
+
+  RadxPlatform platform;
+  platform.setInstrumentName(_params.radar_name);
+  platform.setLatitudeDeg(_latitudeDeg);
+  platform.setLongitudeDeg(_longitudeDeg);
+  platform.setAltitudeKm(_altitudeKm);
+
+  // process this ray
+  
+  processRay(platform, &ray);
 
 }
 
@@ -525,11 +581,15 @@ void TsDataMgr::_initForMoments()
 
   const IwrfTsInfo &opsInfo = _reader->getOpsInfo();
 
-  // set range geometry
+  // set geometry
   
   _startRange = opsInfo.get_proc_start_range_km();
   _gateSpacing = opsInfo.get_proc_gate_spacing_km();
 
+  _latitudeDeg = opsInfo.get_radar_latitude_deg();
+  _longitudeDeg = opsInfo.get_radar_longitude_deg();
+  _altitudeKm = opsInfo.get_radar_altitude_m() / 1000.0;
+  
   // set moments object
 
   double prt = _pulseQueue[0]->getPrt();

@@ -68,14 +68,14 @@ StatsMgr::StatsMgr(const string &prog_name,
   
 {
 
-  _startTimeStats = 0;
-  _endTimeStats = 0;
-  _prevTime = 0;
+  // _startTimeStats = 0;
+  // _endTimeStats = 0;
+  // _prevTime = 0;
   _prt = 0;
   _el = 0;
   _az = 0;
-  _prevAz = -999;
-  _azMovedStats = 0.0;
+  // _prevAz = -999;
+  // _azMovedStats = 0.0;
 
   clearStats();
   
@@ -99,52 +99,52 @@ StatsMgr::~StatsMgr()
 ///////////////////////////////
 // set the start and end time
 
-void StatsMgr::setStartTime(double start_time)
-{
-  _startTimeStats = start_time;
-}
+// void StatsMgr::setStartTime(double start_time)
+// {
+//   _startTimeStats = start_time;
+// }
 
-void StatsMgr::setEndTime(double latest_time)
-{
-  _endTimeStats = latest_time;
-  if (_prevTime != 0) {
-    double timeGap = _endTimeStats - _prevTime;
-    if (timeGap > _params.max_time_gap_secs) {
-      clearStats();
-    }
-  }
-}
+// void StatsMgr::setEndTime(double latest_time)
+// {
+//   _endTimeStats = latest_time;
+//   if (_prevTime != 0) {
+//     double timeGap = _endTimeStats - _prevTime;
+//     if (timeGap > _params.max_time_gap_secs) {
+//       clearStats();
+//     }
+//   }
+// }
 
 ////////////////////
 // set the elevation
 
-void StatsMgr::setEl(double el) {
+// void StatsMgr::setEl(double el) {
 
-  _el = el;
+//   _el = el;
 
-  _sumEl += _el;
-  _nEl++;
+//   _sumEl += _el;
+//   _nEl++;
 
-}
+// }
  
-////////////////////
-// set the azimuth
+// ////////////////////
+// // set the azimuth
 
-void StatsMgr::setAz(double az) {
+// void StatsMgr::setAz(double az) {
 
-  _az = az;
+//   _az = az;
 
-  if (_prevAz < -900) {
-    _prevAz = _az;
-  } else {
-    double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
-    if (azDiff < 10.0) {
-      _azMovedStats += azDiff;
-    }
-    _prevAz = _az;
-  }
+//   if (_prevAz < -900) {
+//     _prevAz = _az;
+//   } else {
+//     double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
+//     if (azDiff < 10.0) {
+//       _azMovedStats += azDiff;
+//     }
+//     _prevAz = _az;
+//   }
   
-}
+// }
  
 /////////////////////////////////
 // check and compute when ready
@@ -166,8 +166,8 @@ void StatsMgr::checkCompute(const RadxTime &mtime)
     }
     
     clearStats();
-    _azMovedStats = 0;
-    _startTimeStats = _endTimeStats;
+    // _azMovedStats = 0;
+    // _startTimeStats = _endTimeStats;
 
     _thisStartTime = _nextStartTime;
     _nextStartTime += _params.stats_interval_secs;
@@ -179,27 +179,24 @@ void StatsMgr::checkCompute(const RadxTime &mtime)
 /////////////////////////////////
 // add data to layer
 
-void StatsMgr::addDataPoint(RadxTime mtime,
-                            double range,
-			    MomentData mdata)
+// void StatsMgr::addDataPoint(RadxTime mtime,
+//                             double range,
+// 			    MomentData mdata)
 
-{
+// {
 
-  if (!_nextStartTime.isValid()) {
-    // first data point
-    time_t initTime = mtime.utime();
-    _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
-    _nextStartTime = _thisStartTime + _params.stats_interval_secs;
-  }
+//   if (!_nextStartTime.isValid()) {
+//     // first data point
+//     time_t initTime = mtime.utime();
+//     _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
+//     _nextStartTime = _thisStartTime + _params.stats_interval_secs;
+//   }
   
-  double sinEl = sin(_el * DEG_TO_RAD);
-  double ht = (range * sinEl);
-  mdata.height = ht;
-  // if (layer >= 0 && layer < _nLayers) {
-  //   _layers[layer]->addData(mdata);
-  // }
+//   double sinEl = sin(_el * DEG_TO_RAD);
+//   double ht = (range * sinEl);
+//   mdata.height = ht;
 
-}
+// }
  
 /////////////////////////////////
 // process a ray of data
@@ -212,7 +209,8 @@ void StatsMgr::processRay(const RadxPlatform &radar,
   if (!_nextStartTime.isValid()) {
     // first data point
     time_t initTime = ray->getRadxTime().utime();
-    _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
+    _thisStartTime =
+      (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
     _nextStartTime = _thisStartTime + _params.stats_interval_secs;
   }
 
@@ -298,6 +296,9 @@ void StatsMgr::processRay(const RadxPlatform &radar,
 
   } // ii
 
+  // check if we should compute the stats at this stage
+
+  
   
 }
  
@@ -323,8 +324,8 @@ void StatsMgr::clearStats()
 
   _sumEl = 0.0;
   _nEl = 0.0;
-  _startTimeStats = _endTimeStats;
-  _prevTime = _endTimeStats;
+  // _startTimeStats = _endTimeStats;
+  // _prevTime = _endTimeStats;
 
   _sumDbmhc = 0.0;
   _sumDbmvc = 0.0;
@@ -424,7 +425,7 @@ int StatsMgr::writeStats()
   
   // compute output file path
 
-  time_t fileTime = (time_t) _startTimeStats;
+  time_t fileTime = _thisStartTime.utime();
   DateTime ftime(fileTime);
   char outPath[1024];
   sprintf(outPath, "%s/vert_zdr_cal_%.4d%.2d%.2d_%.2d%.2d%.2d.txt",

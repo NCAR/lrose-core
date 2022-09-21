@@ -1098,15 +1098,15 @@
     tt->single_val.s = tdrpStrDup("./output/spdb");
     tt++;
     
-    // Parameter 'radar_name_for_spdb'
+    // Parameter 'radar_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name_for_spdb");
+    tt->param_name = tdrpStrDup("radar_name");
     tt->descr = tdrpStrDup("Radar name for tagging SPDB output data.");
     tt->help = tdrpStrDup("This is used to set the data_type in SPDB.");
-    tt->val_offset = (char *) &radar_name_for_spdb - &_start_;
+    tt->val_offset = (char *) &radar_name - &_start_;
     tt->single_val.s = tdrpStrDup("SPOL");
     tt++;
     
