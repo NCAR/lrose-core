@@ -44,6 +44,7 @@ SUB_DIRS = \
 	MdvRadarShear \
         MergeHcrAndHsrl \
 	NexradPowerStats \
+	NoiseMon \
 	PointingCpCompute \
 	PowerInfo2Spdb \
 	Qmap2Cidd \
