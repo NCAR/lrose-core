@@ -2,19 +2,27 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: WorldTerrain
+# app name: NoiseMon
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/mdv_utils/src/WorldTerrain
+# dir: lrose-core/codebase/apps/radar/src/NoiseMon
 ###############################################################
 
-project (WorldTerrain)
+project (NoiseMon)
 
 # source files
 
 set (SRCS
-      WorldTerrain.cc
+      Params.cc
+      Args.cc
+      DsrDataMgr.cc
+      Main.cc
+      MomentData.cc
+      RadxDataMgr.cc
+      StatsMgr.cc
+      TsDataMgr.cc
+      NoiseMon.cc
     )
 
 # include directories
@@ -129,8 +137,8 @@ link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
+link_libraries (fftw3)
 link_libraries (pthread)
-link_libraries (m)
 link_libraries (Ncxx)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
@@ -150,7 +158,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (WorldTerrain ${SRCS})
+add_executable (NoiseMon ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

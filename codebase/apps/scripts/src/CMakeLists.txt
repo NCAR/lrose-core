@@ -13,6 +13,7 @@ project (scripts)
 # install
 
 install(PROGRAMS RUNtests.sh DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(PROGRAMS GetAwsRadar.py DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS TimeCmd.py DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS copyright_prepend DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(PROGRAMS copyright_remove DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

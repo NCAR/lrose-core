@@ -23,18 +23,18 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for VertCompute program
+# Makefile for NoiseMon program
 #
-# Mike Dixon, RAP, NCAR
+# Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# Sept 2007
+# Sept 2022
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = VertCompute
+TARGET_FILE = NoiseMon
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -53,13 +53,12 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	DsrDataMgr.cc \
-	LayerStats.cc \
 	Main.cc \
 	MomentData.cc \
 	RadxDataMgr.cc \
 	StatsMgr.cc \
 	TsDataMgr.cc \
-	VertCompute.cc
+	NoiseMon.cc
 
 #
 # tdrp macros
