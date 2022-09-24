@@ -1456,7 +1456,11 @@ void RadxField::convertToFl64()
         if (idata[ii] == _missingSi32) {
           ddata[ii] = Radx::missingFl64;
         } else {
-          ddata[ii] = idata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            ddata[ii] = idata[ii] * _scale + _offset;
+          } else {
+            ddata[ii] = idata[ii];
+          }
         }
       }
       _buf.clear();
@@ -1471,7 +1475,11 @@ void RadxField::convertToFl64()
         if (sdata[ii] == _missingSi16) {
           ddata[ii] = Radx::missingFl64;
         } else {
-          ddata[ii] = sdata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            ddata[ii] = sdata[ii] * _scale + _offset;
+          } else {
+            ddata[ii] = sdata[ii];
+          }
         }
       }
       _buf.clear();
@@ -1486,7 +1494,11 @@ void RadxField::convertToFl64()
         if (bdata[ii] == _missingSi08) {
           ddata[ii] = Radx::missingFl64;
         } else {
-          ddata[ii] = bdata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            ddata[ii] = bdata[ii] * _scale + _offset;
+          } else {
+            ddata[ii] = bdata[ii];
+          }
         }
       }
       _buf.clear();
@@ -1545,7 +1557,11 @@ void RadxField::convertToFl32()
         if (idata[ii] == _missingSi32) {
           fdata[ii] = Radx::missingFl32;
         } else {
-          fdata[ii] = idata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            fdata[ii] = idata[ii] * _scale + _offset;
+          } else {
+            fdata[ii] = idata[ii];
+          }
         }
       }
       _buf.clear();
@@ -1560,7 +1576,11 @@ void RadxField::convertToFl32()
         if (sdata[ii] == _missingSi16) {
           fdata[ii] = Radx::missingFl32;
         } else {
-          fdata[ii] = sdata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            fdata[ii] = sdata[ii] * _scale + _offset;
+          } else {
+            fdata[ii] = sdata[ii];
+          }
         }
       }
       _buf.clear();
@@ -1575,7 +1595,11 @@ void RadxField::convertToFl32()
         if (bdata[ii] == _missingSi08) {
           fdata[ii] = Radx::missingFl32;
         } else {
-          fdata[ii] = bdata[ii] * _scale + _offset;
+          if (_scale != 1.0 || _offset != 0.0) {
+            fdata[ii] = bdata[ii] * _scale + _offset;
+          } else {
+            fdata[ii] = bdata[ii];
+          }
         }
       }
       _buf.clear();

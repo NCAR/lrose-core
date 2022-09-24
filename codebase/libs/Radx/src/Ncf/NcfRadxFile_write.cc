@@ -3584,20 +3584,26 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
     }
     case nc3Int: {
       iret |= _file.addAttr(var, FILL_VALUE, (int) field.getMissingSi32());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      if (field.getScale() != 1.0 || field.getOffset() != 0.0) {
+        iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
+        iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      }
       break;
     }
     case nc3Short: {
       iret |= _file.addAttr(var, FILL_VALUE, (short) field.getMissingSi16());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      if (field.getScale() != 1.0 || field.getOffset() != 0.0) {
+        iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
+        iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      }
       break;
     }
     case nc3Byte: {
       iret |= _file.addAttr(var, FILL_VALUE, (ncbyte) field.getMissingSi08());
-      iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
-      iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      if (field.getScale() != 1.0 || field.getOffset() != 0.0) {
+        iret |= _file.addAttr(var, SCALE_FACTOR, (float) field.getScale());
+        iret |= _file.addAttr(var, ADD_OFFSET, (float) field.getOffset());
+      }
       break;
     }
   } // switch
