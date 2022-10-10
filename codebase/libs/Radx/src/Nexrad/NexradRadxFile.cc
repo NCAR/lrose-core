@@ -516,7 +516,7 @@ int NexradRadxFile::readFromPath(const string &path,
     _altitudeM = loc.getHtMeters();
     _instrumentName = loc.getName();
   }
-  
+
   // loop looking for message headers
 
   RadxBuf buf;
@@ -1192,54 +1192,44 @@ int NexradRadxFile::_handleAdaptationData(const RadxBuf &msgBuf)
   NexradData::swap(_adap);
 
   if (_adap.beamwidth < 0.25 || _adap.beamwidth > 5) {
-    // TODO - fix adaptation data from ICD - dixon
-    _antGainHDb = 46.0;
-    _antGainVDb = 46.0;
     _beamWidthH = 0.89;
     _beamWidthV = 0.89;
-    return -1;
+  } else {
+    _beamWidthH = _adap.beamwidth;
+    _beamWidthV = _adap.beamwidth;
   }
 
-  _antGainHDb = _adap.antenna_gain;
-  _antGainVDb = _adap.antenna_gain;
 
-  _beamWidthH = _adap.beamwidth;
-  _beamWidthV = _adap.beamwidth;
+  if (_adap.antenna_gain < 40 || _adap.antenna_gain > 50) {
+    _antGainHDb = 45.5;
+    _antGainVDb = 45.5;
+  } else {
+    _antGainHDb = _adap.antenna_gain;
+    _antGainVDb = _adap.antenna_gain;
+  }
 
   _xmitFreqGhz = _adap.tfreq_mhz / 1000.0;
   _prtIndex = _adap.deltaprf - 1;
 
   _siteName = Radx::makeString(_adap.site_name, 4);
 
-  _latitude = _adap.slatdeg + _adap.slatmin / 60.0 + _adap.slatsec / 3600.0;
+  double latitude = _adap.slatdeg + _adap.slatmin / 60.0 + _adap.slatsec / 3600.0;
   if (_adap.slatdir[0] == 'S') {
-    _latitude *= -1.0;
+    latitude *= -1.0;
   }
-
-  _longitude = _adap.slondeg + _adap.slonmin / 60.0 + _adap.slonsec / 3600.0;
+  if (latitude >= -90.0 && latitude <= 90.0) {
+    _latitude = latitude;
+  }
+  
+  double longitude = _adap.slondeg + _adap.slonmin / 60.0 + _adap.slonsec / 3600.0;
   if (_adap.slondir[0] == 'W') {
-    _longitude *= -1.0;
+    longitude *= -1.0;
+  }
+  if (longitude >= -180.0 && longitude <= 360.0) {
+    _longitude = longitude;
   }
 
-  int iret = 0;
-  
-  if (_adap.antenna_gain < 30 || _adap.antenna_gain > 50) {
-    _addErrStr("ERROR - NexradRadxFile::_handleAdaptationData");
-    _addErrStr("  bad value for antenna gain");
-    _addErrDbl("  antenna_gain: ", _adap.antenna_gain, "%lg", false);
-    _addErrStr("  bad adaptation data");
-    iret = -1;
-  }
-  
-  if (_adap.beamwidth < 0.25 || _adap.beamwidth > 5) {
-    _addErrStr("ERROR - NexradRadxFile::_handleAdaptationData");
-    _addErrStr("  bad value for beam width");
-    _addErrDbl("  beam_width: ", _adap.beamwidth, "%lg", false);
-    _addErrStr("  bad adaptation data");
-    iret = -1;
-  }
-
-  return iret;
+  return 0;
 
 }
 
