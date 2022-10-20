@@ -5261,6 +5261,11 @@ void RadxVol::convertField(const string &name,
 }
 
 ///////////////////////////////////////////////////////////////////
+/// computeFieldStats is used to combine data from multiple rays
+/// into a combined dwell. The fields from the individual rays
+/// will have been added into a volume, just for the purpose
+/// of this combination step.
+///
 /// compute field stats for all fields
 /// for all rays currently in the volume
 ///
@@ -5315,14 +5320,17 @@ RadxRay *RadxVol::computeFieldStats
   // get the field name list, and loop through them
   
   vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
+  if (fieldNames.size() << 1) {
+    return NULL;
+  }
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
 
     string fieldName = fieldNames[ifield];
 
     // assemble vector of this field on the ray
 
-    RadxField *field = _rays[0]->getField(fieldName);
-    if (field == NULL) {
+    RadxField *fieldRay0 = _rays[0]->getField(fieldName);
+    if (fieldRay0 == NULL) {
       // field missing, so don't add this field
       continue;
     }
@@ -5346,7 +5354,7 @@ RadxRay *RadxVol::computeFieldStats
       }
     }
     RadxField *statsField = 
-      field->computeStats(method, rayFields, maxFractionMissing);
+      fieldRay0->computeDwellField(method, rayFields, maxFractionMissing);
     if (statsField != NULL) {
       result->addField(statsField);
     }
