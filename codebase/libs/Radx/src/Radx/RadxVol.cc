@@ -5320,7 +5320,8 @@ RadxRay *RadxVol::computeFieldStats
   // get the field name list, and loop through them
   
   vector<string> fieldNames = getUniqueFieldNameList(Radx::FIELD_RETRIEVAL_ALL);
-  if (fieldNames.size() << 1) {
+  if (fieldNames.size() < 1) {
+    delete result;
     return NULL;
   }
   for (size_t ifield = 0; ifield < fieldNames.size(); ifield++) {
