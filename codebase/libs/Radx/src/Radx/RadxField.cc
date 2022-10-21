@@ -1826,27 +1826,26 @@ void RadxField::convertToSi32()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 32.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 32.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
@@ -1874,13 +1873,11 @@ void RadxField::convertToSi16()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  // compute the min and max, except if this is a discrete field
-  
   if (!_isDiscrete) {
     if (computeMinAndMax() == 0) {
       // compute scale and offset
@@ -1919,27 +1916,26 @@ void RadxField::convertToSi08()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 8.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 8.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
