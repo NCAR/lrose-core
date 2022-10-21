@@ -499,6 +499,9 @@ void RadxField::setTypeSi32(Radx::si32 missingValue,
   }
   _setMissingToDefaults();
   _missingSi32 = missingValue;
+  // if (_name == "ECHO_TYPE_2D") {
+  //   cerr << "aaaaaaaaaa fieldName, setTypeSi32 miss, scale, offset: " << _name << "," << _missingSi32 << ", " << _scale << ", " << _offset << endl;
+  // }
 }
 
 /////////////////////////////////////////////////////////
@@ -520,6 +523,9 @@ void RadxField::setTypeSi16(Radx::si16 missingValue,
   }
   _setMissingToDefaults();
   _missingSi16 = missingValue;
+  // if (_name == "ECHO_TYPE_2D") {
+  //   cerr << "bbbbbbbbbbb fieldName, setTypeSi16 miss, scale, offset: " << _name << ", " << _missingSi16 << ", " << _scale << ", " << _offset << endl;
+  // }
 }
 
 /////////////////////////////////////////////////////////
@@ -541,6 +547,9 @@ void RadxField::setTypeSi08(Radx::si08 missingValue,
   }
   _setMissingToDefaults();
   _missingSi08 = missingValue;
+  // if (_name == "ECHO_TYPE_2D") {
+  //   cerr << "cccccccccccc fieldName, setTypeSi08 miss, scale, offset: " << _name << "," << _missingSi08 << ", " << _scale << ", " << _offset << endl;
+  // }
 }
 
 /////////////////////////////////////////////////////////
@@ -1763,6 +1772,10 @@ void RadxField::convertToSi16(double scale,
   _scale = scale;
   _offset = offset;
 
+  // if (_name == "ECHO_TYPE_2D") {
+  //   cerr << "ddddddddddd fieldName, convertToSi16 miss, scale, offset: " << _name << ", " << _missingSi16 << ", " << _scale << ", " << _offset << endl;
+  // }
+
 }
 
 /////////////////////////////////////////////////////////
@@ -1879,25 +1892,31 @@ void RadxField::convertToSi16()
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 16.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 16.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+      // if (_name == "ECHO_TYPE_2D") {
+      //   cerr << "gggggggggggggggggggggggg" << endl;
+      // }
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
+  // if (_name == "ECHO_TYPE_2D") {
+  //   cerr << "ffffffffff convertToSi16: scale, offset: " << scale << ", " << offset << endl;
+  // }
+  
   convertToSi16(scale, offset);
 
 }
