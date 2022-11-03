@@ -365,12 +365,9 @@ int CwbAws2Spdb::_processAwsFile(const char *file_path)
     iret = -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "Wrote " << nObs << " reports to url: "
 	 << _params.output_url << endl;
-  }
-
-  if (_params.debug) {
     cerr << "  Done with file: " << file_path << endl;
   }
 
@@ -559,7 +556,7 @@ int CwbAws2Spdb::_processMdfFile(const char *file_path)
     iret = -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "Wrote " << nObs << " reports to url: "
 	 << _params.output_url << endl;
   }
@@ -734,12 +731,9 @@ int CwbAws2Spdb::_processOneMinAwsFile(const char *file_path)
     iret = -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "Wrote " << nObs << " reports to url: "
 	 << _params.output_url << endl;
-  }
-
-  if (_params.debug) {
     cerr << "  Done with file: " << file_path << endl;
   }
 
@@ -901,12 +895,9 @@ int CwbAws2Spdb::_processPrecipFile(const char *file_path)
     iret = -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "Wrote " << nObs << " reports to url: "
 	 << _params.output_url << endl;
-  }
-
-  if (_params.debug) {
     cerr << "  Done with file: " << file_path << endl;
   }
 
@@ -1094,12 +1085,9 @@ int CwbAws2Spdb::_processPrecipMdfFile(const char *file_path)
     iret = -1;
   }
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug) {
     cerr << "Wrote " << nObs << " reports to url: "
 	 << _params.output_url << endl;
-  }
-
-  if (_params.debug) {
     cerr << "  Done with file: " << file_path << endl;
   }
 
