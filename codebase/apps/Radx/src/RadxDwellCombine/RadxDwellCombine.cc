@@ -1077,14 +1077,16 @@ int RadxDwellCombine::_combineDwellsCentered(RadxVol &vol)
       RadxRay *dwellRay =
         _dwellVol.computeFieldStats(_globalMethod, _namedMethods,
                                     _params.dwell_stats_max_fraction_missing);
-      dwellRay->setTime(_dwellMidTime);
 
       // add it to the combination
 
-      if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
-        combRays.push_back(dwellRay);
-      } else {
-        RadxRay::deleteIfUnused(dwellRay);
+      if (dwellRay) {
+        if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
+          dwellRay->setTime(_dwellMidTime);
+          combRays.push_back(dwellRay);
+        } else {
+          RadxRay::deleteIfUnused(dwellRay);
+        }
       }
 
       // clear out stats vol

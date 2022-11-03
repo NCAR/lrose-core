@@ -1207,6 +1207,11 @@ public:
                     const string &standardName,
                     const string &longName);
   
+  /// computeFieldStats is used to combine data from multiple rays
+  /// into a combined dwell. The fields from the individual rays
+  /// will have been added into a volume, just for the purpose
+  /// of this combination step.
+  ///
   /// compute field stats for all field for
   /// all rays currently in the volume
   ///

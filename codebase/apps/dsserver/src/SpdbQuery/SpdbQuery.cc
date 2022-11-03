@@ -183,12 +183,25 @@ int SpdbQuery::_doDataType(int dataType,
     spdb->setCheckWriteTimeOnGet(_args.latestWriteTime);
   }
 
+  if (_args.verbose) {
+    cerr << "====>> SpdbQuery, request details <<====" << endl;
+    cerr << "  url: " << _args.urlStr << endl;
+    cerr << "  dataType: " << dataType << endl;
+    cerr << "  dataType2: " << _args.dataType2 << endl;
+    cerr << "  refsOnly: " << _args.refsOnly << endl;
+    cerr << "  respectZeroTypes: " << _args.respectZeroTypes << endl;
+  }
+
   switch (_args.mode) {
 
   case Args::exactMode:
+    if (_args.verbose) {
+      cerr << "  mode: exact" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+    }
     if (spdb->getExact(_args.urlStr, _args.requestTime,
-		      dataType, _args.dataType2,
-		      _args.refsOnly, _args.respectZeroTypes)) {
+                       dataType, _args.dataType2,
+                       _args.refsOnly, _args.respectZeroTypes)) {
       cerr << "ERROR - " << _progName << ":Run" << endl;
       cerr << "  Calling getExact for url: " << _args.urlStr << endl;
       cerr << spdb->getErrStr() << endl;
@@ -197,10 +210,15 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::closestMode:
+    if (_args.verbose) {
+      cerr << "  mode: closest" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+      cerr << "  timeMargin: " << _args.timeMargin << endl;
+    }
     if (spdb->getClosest(_args.urlStr,
-			_args.requestTime, _args.timeMargin,
-			dataType, _args.dataType2,
-			_args.refsOnly, _args.respectZeroTypes)) {
+                         _args.requestTime, _args.timeMargin,
+                         dataType, _args.dataType2,
+                         _args.refsOnly, _args.respectZeroTypes)) {
       cerr << "ERROR - " << _progName << ":Run" << endl;
       cerr << "  Calling getClosest for url: " << _args.urlStr << endl;
       cerr << spdb->getErrStr() << endl;
@@ -209,10 +227,15 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::intervalMode:
+    if (_args.verbose) {
+      cerr << "  mode: interval" << endl;
+      cerr << "  startTime: " << DateTime::strm(_args.startTime) << endl;
+      cerr << "  endTime: " << DateTime::strm(_args.endTime) << endl;
+    }
     if (spdb->getInterval(_args.urlStr,
-			 _args.startTime, _args.endTime,
-			 dataType, _args.dataType2,
-			 _args.refsOnly, _args.respectZeroTypes)) {
+                          _args.startTime, _args.endTime,
+                          dataType, _args.dataType2,
+                          _args.refsOnly, _args.respectZeroTypes)) {
       cerr << "ERROR - " << _progName << ":Run" << endl;
       cerr << "  Calling getInterval for url: " << _args.urlStr << endl;
       cerr << spdb->getErrStr() << endl;
@@ -221,6 +244,10 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::validMode:
+    if (_args.verbose) {
+      cerr << "  mode: valid" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+    }
     if (spdb->getValid(_args.urlStr, _args.requestTime,
 		      dataType, _args.dataType2,
 		      _args.refsOnly, _args.respectZeroTypes)) {
@@ -232,6 +259,10 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::latestMode:
+    if (_args.verbose) {
+      cerr << "  mode: latest" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+    }
     if (spdb->getLatest(_args.urlStr, _args.timeMargin,
 		       dataType, _args.dataType2,
 		       _args.refsOnly, _args.respectZeroTypes)) {
@@ -243,6 +274,11 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::firstBeforeMode:
+    if (_args.verbose) {
+      cerr << "  mode: firstBefore" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+      cerr << "  timeMargin: " << _args.timeMargin << endl;
+    }
     if (spdb->getFirstBefore(_args.urlStr,
 			    _args.requestTime, _args.timeMargin,
 			    dataType, _args.dataType2,
@@ -255,6 +291,11 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::firstAfterMode:
+    if (_args.verbose) {
+      cerr << "  mode: firstAfter" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+      cerr << "  timeMargin: " << _args.timeMargin << endl;
+    }
     if (spdb->getFirstAfter(_args.urlStr,
 			   _args.requestTime, _args.timeMargin,
 			   dataType, _args.dataType2,
@@ -267,6 +308,10 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::headerMode:
+    if (_args.verbose) {
+      cerr << "  mode: header" << endl;
+      cerr << "  requestTime: " << DateTime::strm(_args.requestTime) << endl;
+    }
     if (spdb->printHeader(_args.urlStr,
 			 _args.requestTime, cout)) {
       cerr << "ERROR - " << _progName << ":Run" << endl;
@@ -280,6 +325,12 @@ int SpdbQuery::_doDataType(int dataType,
     break;
     
   case Args::timeListMode:
+    if (_args.verbose) {
+      cerr << "  mode: timeList" << endl;
+      cerr << "  startTime: " << DateTime::strm(_args.startTime) << endl;
+      cerr << "  endTime: " << DateTime::strm(_args.endTime) << endl;
+      cerr << "  minInterval: " << _args.timeListMinInterval << endl;
+    }
     if (spdb->compileTimeList(_args.urlStr,
 			     _args.startTime, _args.endTime,
 			     _args.timeListMinInterval)) {
