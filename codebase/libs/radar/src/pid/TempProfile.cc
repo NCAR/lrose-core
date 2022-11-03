@@ -317,12 +317,20 @@ int TempProfile::_getTempProfile(time_t searchTime)
 
   IcaoStdAtmos stdAtmos;
 
-  // read in sounding
+  // set the data type if specified
 
   int dataType = 0;
   if (_soundingLocationName.size() > 0) {
-    dataType = Spdb::hash4CharsToInt32(_soundingLocationName.c_str());
+    if (sscanf(_soundingLocationName.c_str(), "%d", &dataType) != 1) {
+      if(_soundingLocationName.size() == 4) {
+        dataType = Spdb::hash4CharsToInt32(_soundingLocationName.c_str());
+      } else {
+        dataType = Spdb::hash5CharsToInt32(_soundingLocationName.c_str());
+      }
+    }
   }
+
+  // read in sounding
 
   DsSpdb spdb;
   if (spdb.getClosest(_soundingSpdbUrl,
@@ -339,9 +347,11 @@ int TempProfile::_getTempProfile(time_t searchTime)
   
   if (_verbose) {
     cerr << "=======>> Got spdb sounding" << endl;
+    cerr << "  url: " << _soundingSpdbUrl << endl;
     cerr << "  Search time: " << DateTime::strm(searchTime) << endl;
     cerr << "  margin (secs): " << _soundingSearchTimeMarginSecs << endl;
-    cerr << "  url: " << _soundingSpdbUrl << endl;
+    cerr << "  location: " << _soundingLocationName << endl;
+    cerr << "  dataType: " << dataType << endl;
     cerr << "  Prod label: " << spdb.getProdLabel() << endl;
     cerr << "  Prod id:    " << spdb.getProdId() << endl;
     cerr << "  N Chunks:   " << spdb.getNChunks() << endl;
