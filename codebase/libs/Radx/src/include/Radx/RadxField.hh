@@ -1030,25 +1030,27 @@ public:
 
   typedef pair<string, StatsMethod_t> NamedStatsMethod;
 
-  /// compute stats from a series of fields
+  /// compute a field for a dwell, based on the rays that are merged
+  /// into that combined dwell.
   ///
-  /// Pass in a method type, and a vector of fields
+  /// Pass in a method type, and a vector of fields for rays comprising
+  /// the dwell.
   ///
-  /// Compute the requested stats on those fields, on a point-by-point basis.
+  /// Compute the requested stats, on a gate-by-gate basis.
   /// Create a field, fill it with the results, and return it.
   ///
-  /// If the number of points in the field is not constant, use the minumum number
+  /// If the number of gates in the rays is not constant, use the minumum number
   /// of points in the supplied fields.
   ///
   /// maxFractionMissing indicates the maximum fraction of the input data field
   /// that can be missing for valid statistics. Should be between 0 and 1.
   ///
   /// Returns NULL if fieldIn.size() == 0.
-  /// Otherwise, returns field containing results.
+  /// Otherwise, returns field for combined dwell.
   
-  RadxField *computeStats(RadxField::StatsMethod_t method,
-                          const vector<const RadxField *> &fieldsIn,
-                          double maxFractionMissing = 0.25);
+  RadxField *computeDwellField(RadxField::StatsMethod_t method,
+                               const vector<const RadxField *> &rayFieldsIn,
+                               double maxFractionMissing = 0.25);
 
   /// convert enums to strings
 
@@ -1185,43 +1187,43 @@ private:
   static double _getFoldAngle(double val, double foldLimitLower, double foldRange);
   static double _getFoldValue(double angle, double foldLimitLower, double foldRange);
 
-  void _computeMean(size_t nPoints,
-                    const vector<const RadxField *> &fieldsIn,
-                    Radx::fl64 *data,
-                    double maxFractionMissing);
+  void _computeDwellMean(size_t nPoints,
+                         const vector<const RadxField *> &rayFieldsIn,
+                         RadxField *dwellField,
+                         double maxFractionMissing);
   
-  void _computeMeanFolded(size_t nPoints,
-                          double foldLimitLower,
-                          double foldRange,
-                          const vector<const RadxField *> &fieldsIn,
-                          Radx::fl64 *data,
-                          double maxFractionMissing);
+  void _computeDwellMeanFolded(size_t nPoints,
+                               double foldLimitLower,
+                               double foldRange,
+                               const vector<const RadxField *> &rayFieldsIn,
+                               RadxField *dwellField,
+                               double maxFractionMissing);
   
-  void _computeMedian(size_t nPoints,
-                      const vector<const RadxField *> &fieldsIn,
-                      Radx::fl64 *data,
-                      double maxFractionMissing);
-
-  void _computeModeDiscrete(size_t nPoints,
-                            const vector<const RadxField *> &fieldsIn,
-                            Radx::si32 *data,
+  void _computeDwellMedian(size_t nPoints,
+                           const vector<const RadxField *> &rayFieldsIn,
+                           RadxField *dwellField,
+                           double maxFractionMissing);
+  
+  void _computeDwellMaximum(size_t nPoints,
+                            const vector<const RadxField *> &rayFieldsIn,
+                            RadxField *dwellField,
                             double maxFractionMissing);
-
-  void _computeMaximum(size_t nPoints,
-                       const vector<const RadxField *> &fieldsIn,
-                       Radx::fl64 *data,
-                       double maxFractionMissing);
-
-  void _computeMinimum(size_t nPoints,
-                       const vector<const RadxField *> &fieldsIn,
-                       Radx::fl64 *data,
-                       double maxFractionMissing);
-
-  void _computeMiddle(size_t nPoints,
-                      const vector<const RadxField *> &fieldsIn,
-                      Radx::fl64 *data,
-                      double maxFractionMissing);
-
+  
+  void _computeDwellMinimum(size_t nPoints,
+                            const vector<const RadxField *> &rayFieldsIn,
+                            RadxField *dwellField,
+                            double maxFractionMissing);
+  
+  void _computeDwellMiddle(size_t nPoints,
+                           const vector<const RadxField *> &rayFieldsIn,
+                           RadxField *dwellField,
+                           double maxFractionMissing);
+  
+  void _computeDwellModeDiscrete(size_t nPoints,
+                                 const vector<const RadxField *> &rayFieldsIn,
+                                 RadxField *dwellField,
+                                 double maxFractionMissing);
+  
   int _computeMinNValid(int nn,
                         double maxFractionMissing);
   

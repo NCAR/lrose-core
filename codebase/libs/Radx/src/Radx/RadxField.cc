@@ -1826,27 +1826,26 @@ void RadxField::convertToSi32()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 32.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 32.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
@@ -1874,27 +1873,26 @@ void RadxField::convertToSi16()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 16.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 16.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
@@ -1918,27 +1916,26 @@ void RadxField::convertToSi08()
 
   convertToFl32();
 
-  // compute min and max
-
+  // compute the min and max, except if this is a discrete field
+  
   double scale = 1.0;
   double offset = 0.0;
 
-  if (computeMinAndMax() == 0) {
-
-    // compute scale and offset
-    //
-    // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
-    // and leave -2^(n-1) for the fill value.
-    //
-    // add_offset = (_maxVal + _minVal)/2
-    // scale_factor = (_maxVal - _minVal)/(2^n - 2)
-    // packedVal = (unpacked - offset)/scaleFactor
-    // where n is the number of bits of the packed (integer) data type
-    
-    scale = (_maxVal - _minVal) / (pow(2.0, 8.0) - 2);
-    offset = (_maxVal + _minVal) / 2.0;
-
-  }
+  if (!_isDiscrete) {
+    if (computeMinAndMax() == 0) {
+      // compute scale and offset
+      //
+      // We map the valid range (_minVal, _maxVal) to ( -2^(n-1)+ 1, 2^(n-1) -1)
+      // and leave -2^(n-1) for the fill value.
+      //
+      // add_offset = (_maxVal + _minVal)/2
+      // scale_factor = (_maxVal - _minVal)/(2^n - 2)
+      // packedVal = (unpacked - offset)/scaleFactor
+      // where n is the number of bits of the packed (integer) data type
+      scale = (_maxVal - _minVal) / (pow(2.0, 8.0) - 2);
+      offset = (_maxVal + _minVal) / 2.0;
+    }
+  } // if (!_isDiscrete)
 
   // perform conversion
 
@@ -3179,175 +3176,147 @@ double RadxField::_getFoldValue(double angle,
 }
 
 /////////////////////////////////////////////////////////////////
-/// compute stats from a series of fields
+/// compute a field for a dwell, based on the rays that are merged
+/// into that combined dwell.
 ///
-/// Pass in a method type, and a vector of fields
+/// Pass in a method type, and a vector of fields for rays comprising
+/// the dwell.
 ///
-/// Compute the requested stats on those fields, on a point-by-point basis.
+/// Compute the requested stats, on a gate-by-gate basis.
 /// Create a field, fill it with the results, and return it.
 ///
-/// If the number of points in the field is not constant, use the minumum number
+/// If the number of gates in the rays is not constant, use the minumum number
 /// of points in the supplied fields.
 ///
 /// maxFractionMissing indicates the maximum fraction of the input data field
 /// that can be missing for valid statistics. Should be between 0 and 1.
 ///
 /// Returns NULL if fieldIn.size() == 0.
-/// Otherwise, returns field containing results.
+/// Otherwise, returns field for combined dwell.
 
-RadxField *RadxField::computeStats(RadxField::StatsMethod_t method,
-                                   const vector<const RadxField *> &fieldsIn,
-                                   double maxFractionMissing /* = 0.25 */)
-
+RadxField *RadxField::computeDwellField(RadxField::StatsMethod_t method,
+                                        const vector<const RadxField *> &rayFieldsIn,
+                                        double maxFractionMissing /* = 0.25 */)
+  
 {
 
-  if (fieldsIn.size() == 0) {
+  if (rayFieldsIn.size() == 0) {
     return NULL;
   }
 
   // get the mid field
 
-  size_t iMid = fieldsIn.size() / 2;
-  const RadxField *fieldMid = fieldsIn[iMid];
+  size_t iMid = rayFieldsIn.size() / 2;
+  const RadxField *fieldMid = rayFieldsIn[iMid];
 
   // compute the number of points to use
 
-  size_t nPoints = fieldsIn[iMid]->getNPoints();
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
-    if (fieldsIn[ifield]->getNPoints() < nPoints) {
-      nPoints = fieldsIn[ifield]->getNPoints();
+  size_t nPoints = rayFieldsIn[iMid]->getNPoints();
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
+    if (rayFieldsIn[ifield]->getNPoints() < nPoints) {
+      nPoints = rayFieldsIn[ifield]->getNPoints();
     }
   }
 
   // create the return field, copying over the metadata
   
-  RadxField *stats =
+  RadxField *dwellField =
     new RadxField(fieldMid->getName(), fieldMid->getUnits());
-  stats->copyMetaData(*fieldMid);
+  dwellField->copyMetaData(*fieldMid);
   
-  // save the incoming data type
-
-  Radx::DataType_t dataTypeIn = fieldMid->getDataType();
-
   // discrete mode uses integers
   
-  if (method == STATS_METHOD_DISCRETE_MODE) {
-
-    // create results array, using ints
-    
-    RadxArray<Radx::si32> data_;
-    Radx::si32 *data = data_.alloc(nPoints);
-    for (size_t ipt = 0; ipt < nPoints; ipt++) {
-      data[ipt] = Radx::missingSi32;
-    }
-
-    // compute the discrete mode
-
-    _computeModeDiscrete(nPoints,
-                         fieldsIn,
-                         data,
-                         maxFractionMissing);
-
-    // add data to stats field
-    
-    stats->setTypeSi32(Radx::missingSi32, 1, 0);
-    stats->addDataSi32(nPoints, data);
-  
-    // return integer field
-    // return the created field - must be freed by caller
-    
-    return stats;
-
-  }
-
-  // create results array, using doubles
-
-  RadxArray<Radx::fl64> data_;
-  Radx::fl64 *data = data_.alloc(nPoints);
-  for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    data[ipt] = Radx::missingFl64;
-  }
-  stats->setTypeFl64(Radx::missingFl64);
-
   // compute the stats
 
   switch (method) {
 
     case STATS_METHOD_MEAN:
-      if (stats->getIsDiscrete()) {
-        _computeMedian(nPoints,
-                       fieldsIn, 
-                       data,
-                       maxFractionMissing);
-      } else if (stats->getFieldFolds()) {
-        _computeMeanFolded(nPoints,
-                           stats->getFoldLimitLower(),
-                           stats->getFoldRange(),
-                           fieldsIn,
-                           data,
-                           maxFractionMissing);
+      if (dwellField->getIsDiscrete()) {
+        _computeDwellMedian(nPoints,
+                            rayFieldsIn, 
+                            dwellField,
+                            maxFractionMissing);
+      } else if (dwellField->getFieldFolds()) {
+        _computeDwellMeanFolded(nPoints,
+                                dwellField->getFoldLimitLower(),
+                                dwellField->getFoldRange(),
+                                rayFieldsIn,
+                                dwellField,
+                                maxFractionMissing);
       } else {
-        _computeMean(nPoints,
-                     fieldsIn,
-                     data,
-                     maxFractionMissing);
+        _computeDwellMean(nPoints,
+                          rayFieldsIn,
+                          dwellField,
+                          maxFractionMissing);
       }
       break;
       
     case STATS_METHOD_MEDIAN:
-      _computeMedian(nPoints,
-                     fieldsIn,
-                     data,
-                     maxFractionMissing);
+      _computeDwellMedian(nPoints,
+                          rayFieldsIn,
+                          dwellField,
+                          maxFractionMissing);
       break;
 
     case STATS_METHOD_MAXIMUM:
-      _computeMaximum(nPoints,
-                      fieldsIn,
-                      data,
-                      maxFractionMissing);
+      _computeDwellMaximum(nPoints,
+                           rayFieldsIn,
+                           dwellField,
+                           maxFractionMissing);
       break;
 
     case STATS_METHOD_MINIMUM:
-      _computeMinimum(nPoints, 
-                      fieldsIn,
-                      data,
-                      maxFractionMissing);
+      _computeDwellMinimum(nPoints, 
+                           rayFieldsIn,
+                           dwellField,
+                           maxFractionMissing);
+      break;
+      
+    case STATS_METHOD_DISCRETE_MODE:
+      _computeDwellModeDiscrete(nPoints,
+                                rayFieldsIn,
+                                dwellField,
+                                maxFractionMissing);
       break;
       
     case STATS_METHOD_MIDDLE:
     default:
-      _computeMiddle(nPoints, 
-                     fieldsIn,
-                     data,
-                     maxFractionMissing);
+      _computeDwellMiddle(nPoints, 
+                          rayFieldsIn,
+                          dwellField,
+                          maxFractionMissing);
 
   } // switch
-
-  // add data to stats field
-
-  stats->addDataFl64(nPoints, data);
-  
-  // convert to incoming data type
-  
-  stats->convertToType(dataTypeIn);
-  
+      
   // return the created field - must be freed by caller
 
-  return stats;
+  return dwellField;
 
 }
 
 //////////////////////////////////////////////////////////
 // compute mean
 
-void RadxField::_computeMean(size_t nPoints,
-                             const vector<const RadxField *> &fieldsIn,
-                             Radx::fl64 *data,
-                             double maxFractionMissing)
+void RadxField::_computeDwellMean(size_t nPoints,
+                                  const vector<const RadxField *> &rayFieldsIn,
+                                  RadxField *dwellField,
+                                  double maxFractionMissing)
 
 {
 
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
+  
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> meanVals_;
+  Radx::fl64 *meanVals = meanVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    meanVals[ipt] = missingIn;
+  }
+  
   // for fields in dB space, convert to linear, compute the
   // mean, and convert back
 
@@ -3370,9 +3339,9 @@ void RadxField::_computeMean(size_t nPoints,
   Radx::fl64 *count = count_.alloc(nPoints);
   memset(count, 0, nPoints * sizeof(Radx::fl64));
   
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
         
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3390,31 +3359,55 @@ void RadxField::_computeMean(size_t nPoints,
     
   } // ifield
 
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (count[ipt] >= minNValid) {
       double mean = sum[ipt] / count[ipt];
       if (convertToLinear) {
         mean = 10.0 * log10(mean);
       }
-      data[ipt] = mean;
+      meanVals[ipt] = mean;
     }
   }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, meanVals);
+
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  dwellField->convertToType(dataTypeIn);
 
 }
 
 //////////////////////////////////////////////////////////
 // compute mean for folded data
 
-void RadxField::_computeMeanFolded(size_t nPoints,
-                                   double foldLimitLower,
-                                   double foldRange,
-                                   const vector<const RadxField *> &fieldsIn,
-                                   Radx::fl64 *data,
-                                   double maxFractionMissing)
+void RadxField::_computeDwellMeanFolded(size_t nPoints,
+                                        double foldLimitLower,
+                                        double foldRange,
+                                        const vector<const RadxField *> &rayFieldsIn,
+                                        RadxField *dwellField,
+                                        double maxFractionMissing)
 
 {
                              
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
+  
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> meanVals_;
+  Radx::fl64 *meanVals = meanVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    meanVals[ipt] = missingIn;
+  }
+  
   RadxArray<Radx::fl64> sumx_;
   Radx::fl64 *sumx = sumx_.alloc(nPoints);
   memset(sumx, 0, nPoints * sizeof(Radx::fl64));
@@ -3427,9 +3420,9 @@ void RadxField::_computeMeanFolded(size_t nPoints,
   Radx::fl64 *count = count_.alloc(nPoints);
   memset(count, 0, nPoints * sizeof(Radx::fl64));
   
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
         
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3449,32 +3442,56 @@ void RadxField::_computeMeanFolded(size_t nPoints,
     
   } // ifield
       
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (count[ipt] >= minNValid) {
       double angleMean = atan2(sumy[ipt], sumx[ipt]);
-      data[ipt] = _getFoldValue(angleMean, foldLimitLower, foldRange);
+      meanVals[ipt] = _getFoldValue(angleMean, foldLimitLower, foldRange);
     }
   }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, meanVals);
+  
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  dwellField->convertToType(dataTypeIn);
 
 }
 
 //////////////////////////////////////////////////////////
 // compute median
 
-void RadxField::_computeMedian(size_t nPoints,
-                               const vector<const RadxField *> &fieldsIn,
-                               Radx::fl64 *data,
-                               double maxFractionMissing)
+void RadxField::_computeDwellMedian(size_t nPoints,
+                                    const vector<const RadxField *> &rayFieldsIn,
+                                    RadxField *dwellField,
+                                    double maxFractionMissing)
 
 {
 
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
+  
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> medianVals_;
+  Radx::fl64 *medianVals = medianVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    medianVals[ipt] = missingIn;
+  }
+  
   vector< vector<double> > seriesArray;
   seriesArray.resize(nPoints);
 
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
     
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3488,81 +3505,52 @@ void RadxField::_computeMedian(size_t nPoints,
     
   } // ifield
   
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     vector<double> &series = seriesArray[ipt];
     if ((int) series.size() >= minNValid) {
       sort(series.begin(), series.end());
       double median = series[series.size()/2];
-      data[ipt] = median;
+      medianVals[ipt] = median;
     }
   } // ipt
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, medianVals);
+
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  dwellField->convertToType(dataTypeIn);
 
 }
 
         
 //////////////////////////////////////////////////////////
-// compute mode for discrete data sets
+// compute maximum
 
-void RadxField::_computeModeDiscrete(size_t nPoints,
-                                     const vector<const RadxField *> &fieldsIn,
-                                     Radx::si32 *data,
+void RadxField::_computeDwellMaximum(size_t nPoints,
+                                     const vector<const RadxField *> &rayFieldsIn,
+                                     RadxField *dwellField,
                                      double maxFractionMissing)
 
 {
-
-  // set up vector for storing the valid data at each point
-
-  vector< vector<int> > goodValsVec;
-  goodValsVec.resize(nPoints);
   
-  // loop through the fields
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
   
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
-
-    // make a copy of the field and convert to ints
-
-    RadxField copy(*fieldsIn[ifield]);
-    copy.convertToSi32(1.0, 0.0);
-    const Radx::si32 *vals = copy.getDataSi32();
-    Radx::si32 miss = copy.getMissingSi32();
-
-    // loop through the points, adding to the goodVals array
-    // if the data is valid at that point
-
-    for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
-      Radx::si32 val = *vals;
-      if (val != miss) {
-        goodValsVec[ipt].push_back(val);
-      }
-    }
-
-  } // ifield
-
-  // compute the mode across all fields
-
-  size_t minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> maxVals_;
+  Radx::fl64 *maxVals = maxVals_.alloc(nPoints);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
-    vector<int> &goodVals = goodValsVec[ipt];
-    if (goodVals.size() >= minNValid) {
-      int mode = _computeMode(goodVals);
-      data[ipt] = mode;
-    } else {
-      data[ipt] = Radx::missingSi32;
-    }
+    maxVals[ipt] = missingIn;
   }
-
-}
-
-//////////////////////////////////////////////////////////
-// compute maximum
-
-void RadxField::_computeMaximum(size_t nPoints,
-                                const vector<const RadxField *> &fieldsIn,
-                                Radx::fl64 *data,
-                                double maxFractionMissing)
-
-{
   
   RadxArray<Radx::fl64> max_;
   Radx::fl64 *max = max_.alloc(nPoints);
@@ -3574,9 +3562,9 @@ void RadxField::_computeMaximum(size_t nPoints,
   Radx::fl64 *count = count_.alloc(nPoints);
   memset(count, 0, nPoints * sizeof(Radx::fl64));
   
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
     
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3593,12 +3581,23 @@ void RadxField::_computeMaximum(size_t nPoints,
     
   } // ifield
       
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (max[ipt] > -1.0e98 && count[ipt] >= minNValid) {
-      data[ipt] = max[ipt];
+      maxVals[ipt] = max[ipt];
     }
   }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, maxVals);
+
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  dwellField->convertToType(dataTypeIn);
 
 }
 
@@ -3606,13 +3605,26 @@ void RadxField::_computeMaximum(size_t nPoints,
 //////////////////////////////////////////////////////////
 // compute minimum
 
-void RadxField::_computeMinimum(size_t nPoints,
-                                const vector<const RadxField *> &fieldsIn,
-                                Radx::fl64 *data,
-                                double maxFractionMissing)
+void RadxField::_computeDwellMinimum(size_t nPoints,
+                                     const vector<const RadxField *> &rayFieldsIn,
+                                     RadxField *dwellField,
+                                     double maxFractionMissing)
 
 {
                              
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
+  
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> minVals_;
+  Radx::fl64 *minVals = minVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    minVals[ipt] = missingIn;
+  }
+  
   RadxArray<Radx::fl64> min_;
   Radx::fl64 *min = min_.alloc(nPoints);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
@@ -3623,9 +3635,9 @@ void RadxField::_computeMinimum(size_t nPoints,
   Radx::fl64 *count = count_.alloc(nPoints);
   memset(count, 0, nPoints * sizeof(Radx::fl64));
   
-  for (size_t ifield = 0; ifield < fieldsIn.size(); ifield++) {
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
     
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3642,25 +3654,49 @@ void RadxField::_computeMinimum(size_t nPoints,
     
   } // ifield
       
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (min[ipt] < 1.0e98 && count[ipt] >= minNValid) {
-      data[ipt] = min[ipt];
+      minVals[ipt] = min[ipt];
     }
   }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, minVals);
+  
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+  
+  dwellField->convertToType(dataTypeIn);
 
 }
 
 //////////////////////////////////////////////////////////
 // compute middle value
 
-void RadxField::_computeMiddle(size_t nPoints,
-                               const vector<const RadxField *> &fieldsIn,
-                               Radx::fl64 *data,
-                               double maxFractionMissing)
+void RadxField::_computeDwellMiddle(size_t nPoints,
+                                    const vector<const RadxField *> &rayFieldsIn,
+                                    RadxField *dwellField,
+                                    double maxFractionMissing)
 
 {
                              
+  // save input type and missing value
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  double missingIn = getMissing();
+  
+  // create mean array, using doubles
+  
+  RadxArray<Radx::fl64> midVals_;
+  Radx::fl64 *midVals = midVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    midVals[ipt] = missingIn;
+  }
+  
   RadxArray<Radx::fl64> mid_;
   Radx::fl64 *mid = mid_.alloc(nPoints);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
@@ -3671,10 +3707,10 @@ void RadxField::_computeMiddle(size_t nPoints,
   Radx::fl64 *count = count_.alloc(nPoints);
   memset(count, 0, nPoints * sizeof(Radx::fl64));
   
-  int midIndex = (int) fieldsIn.size() / 2;
-  for (int ifield = 0; ifield < (int) fieldsIn.size(); ifield++) {
+  int midIndex = (int) rayFieldsIn.size() / 2;
+  for (int ifield = 0; ifield < (int) rayFieldsIn.size(); ifield++) {
     
-    RadxField copy(*fieldsIn[ifield]);
+    RadxField copy(*rayFieldsIn[ifield]);
     copy.convertToFl64();
     const Radx::fl64 *vals = copy.getDataFl64();
     Radx::fl64 miss = copy.getMissingFl64();
@@ -3691,12 +3727,97 @@ void RadxField::_computeMiddle(size_t nPoints,
     
   } // ifield
       
-  int minNValid = _computeMinNValid(fieldsIn.size(), maxFractionMissing);
+  int minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
   for (size_t ipt = 0; ipt < nPoints; ipt++) {
     if (!std::isnan(mid[ipt]) && count[ipt] >= minNValid) {
-      data[ipt] = mid[ipt];
+      midVals[ipt] = mid[ipt];
     }
   }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeFl64(missingIn);
+  dwellField->addDataFl64(nPoints, midVals);
+
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  dwellField->convertToType(dataTypeIn);
+
+}
+
+//////////////////////////////////////////////////////////
+// compute mode for discrete data sets
+// returns new field containing the mode
+
+void RadxField::_computeDwellModeDiscrete(size_t nPoints,
+                                          const vector<const RadxField *> &rayFieldsIn,
+                                          RadxField *dwellField,
+                                          double maxFractionMissing)
+
+{
+
+  // create array for resulting si32 mode values
+  
+  RadxArray<Radx::si32> modeVals_;
+  Radx::si32 *modeVals = modeVals_.alloc(nPoints);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    modeVals[ipt] = Radx::missingSi32;
+  }
+  
+  // set up vector for storing the valid data at each point
+
+  vector< vector<Radx::si32> > goodValsVec;
+  goodValsVec.resize(nPoints);
+  
+  // loop through the fields
+  
+  for (size_t ifield = 0; ifield < rayFieldsIn.size(); ifield++) {
+
+    // make a copy of the field and convert to ints
+    
+    RadxField copy(*rayFieldsIn[ifield]);
+    copy.convertToSi32(1.0, 0.0);
+    const Radx::si32 *vals = copy.getDataSi32();
+    Radx::si32 miss = copy.getMissingSi32();
+    
+    // loop through the points, adding to the goodVals array
+    // if the data is valid at that point
+
+    for (size_t ipt = 0; ipt < nPoints; ipt++, vals++) {
+      Radx::si32 val = *vals;
+      if (val != miss) {
+        goodValsVec[ipt].push_back(val);
+      }
+    }
+
+  } // ifield
+
+  // compute the mode across all fields
+
+  size_t minNValid = _computeMinNValid(rayFieldsIn.size(), maxFractionMissing);
+  for (size_t ipt = 0; ipt < nPoints; ipt++) {
+    vector<int> &goodVals = goodValsVec[ipt];
+    if (goodVals.size() >= minNValid) {
+      int mode = _computeMode(goodVals);
+      modeVals[ipt] = mode;
+    } else {
+      modeVals[ipt] = Radx::missingSi32;
+    }
+  }
+
+  // add mode vals to dwell field
+  
+  dwellField->setTypeSi32(Radx::missingSi32, 1, 0);
+  dwellField->addDataSi32(nPoints, modeVals);
+
+  // convert the dwellField to the original data type
+  // Note: the object being used has that type because it is the
+  // field of the first ray in the dwell
+
+  Radx::DataType_t dataTypeIn = getDataType();
+  dwellField->convertToType(dataTypeIn);
 
 }
 
