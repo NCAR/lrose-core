@@ -1,0 +1,14 @@
+#! /bin/bash
+
+#
+# remove all _latest_data_info.buf and _latest_data_info.stat files
+# from this directory downwards.
+#
+
+nice find . '(' -name core -o -name '_latest_data_info' \
+     -o -name '_latest_data_info.stat' \
+     -o -name '_latest_data_info.buf' \
+     -o -name '_latest_data_info.xml' \
+     -o -name '_latest_data_info.lock' ')' \
+     -user $USER -type f -print -exec \rm '{}' \;
+

@@ -31,6 +31,7 @@ SCRIPTS = \
 	rm_CMakeLists \
 	rm_core \
 	rm_junk \
+	rm_latest_data_info_files \
 	rm_ldata_fmq_files \
 	rm_makefile \
 	rm_makefile.am \
