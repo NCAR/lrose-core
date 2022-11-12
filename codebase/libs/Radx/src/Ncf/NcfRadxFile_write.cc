@@ -659,13 +659,13 @@ int NcfRadxFile::_addGlobalAttributes()
   _file.addGlobAttr(START_DATETIME, startTime.getW3cStr());
   _file.addGlobAttr(TIME_COVERAGE_START, startTime.getW3cStr());
   startTime += _writeVol->getStartNanoSecs() / 1.0e9;
-  _file.addGlobAttr("start_time", startTime.asStringDashed(3));
+  _file.addGlobAttr(START_TIME, startTime.asStringDashed(3));
 
   RadxTime endTime(_writeVol->getEndTimeSecs());
   _file.addGlobAttr(END_DATETIME, endTime.getW3cStr());
   _file.addGlobAttr(TIME_COVERAGE_END, endTime.getW3cStr());
   endTime += _writeVol->getEndNanoSecs() / 1.0e9;
-  _file.addGlobAttr("end_time", endTime.asStringDashed(3));
+  _file.addGlobAttr(END_TIME, endTime.asStringDashed(3));
 
   // names
 
