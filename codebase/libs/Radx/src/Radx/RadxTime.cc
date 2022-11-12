@@ -1179,6 +1179,10 @@ int RadxTime::_scanW3c(const string &strWhen)
     // no non-digits, cannot be w3c
     return -1;
   }
+  if (digits.size() < 1) {
+    // no digits, cannot be w3c
+    return -1;
+  }
 
   int year = 0;
   int month = 0;
