@@ -954,6 +954,12 @@ int NcfRadxFile::_readTimes(int pathNum)
   // parse the time units reference time
 
   RadxTime stime(units);
+  if (stime.utime() == RadxTime::NEVER) {
+    // units not good, try startTimeStr
+    if (_startTimeStr.size() > 0) {
+      stime.set(_startTimeStr);
+    }
+  }
   _refTimeSecsFile = stime.utime();
   
   // set the time array
@@ -1125,6 +1131,19 @@ int NcfRadxFile::_readScalarVariables()
                            _volumeNumber, Radx::missingMetaInt);
 
   string pstring;
+
+  if (_file.readStringVar(_startTimeVar, START_TIME, pstring) == 0) {
+    _startTimeStr = pstring;
+  } else if (_file.readStringVar(_startTimeVar, TIME_COVERAGE_START, pstring) == 0) {
+    _startTimeStr = pstring;
+  }
+
+  if (_file.readStringVar(_endTimeVar, END_TIME, pstring) == 0) {
+    _endTimeStr = pstring;
+  } else if (_file.readStringVar(_endTimeVar, TIME_COVERAGE_END, pstring) == 0) {
+    _endTimeStr = pstring;
+  }
+
   _instrumentType = Radx::INSTRUMENT_TYPE_RADAR;
   if (_file.readStringVar(_instrumentTypeVar, INSTRUMENT_TYPE, pstring) == 0) {
     _instrumentType = Radx::instrumentTypeFromStr(pstring);

@@ -427,6 +427,8 @@ private:
   vector<double> _dTimes;
   time_t _refTimeSecsFile;
   bool _rayTimesIncrease;
+  string _startTimeStr;
+  string _endTimeStr;
 
   int _volumeNumber;
   Radx::InstrumentType_t _instrumentType;
