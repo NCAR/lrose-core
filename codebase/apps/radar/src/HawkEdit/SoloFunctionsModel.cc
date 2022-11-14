@@ -136,9 +136,9 @@ void SoloFunctionsModel::SetDefaultMask(size_t rayIdx) {
   //  throw "Ray is null";
   //} 
 
-  if (rayIdx == 720) {
-    cerr << "HERE!!! " << endl;
-  }
+  //if (rayIdx == 720) {
+  //  cerr << "HERE!!! " << endl;
+  //}
 
   //field = ray->getField(fieldName);
   size_t nGates = _scriptsDataController->getNGates(rayIdx); 
@@ -412,7 +412,7 @@ void SoloFunctionsModel::SetData(string &fieldName, RadxVol *vol,
   // cerr << "there arenGates " << nGates;
 
   Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
   const float *flatData = fieldData->data();
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
@@ -517,7 +517,7 @@ string SoloFunctionsModel::CopyField(string fieldName,
   // I have the ray, can't I just add a field to it?
                                                                      
   Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   RadxField *field1 = ray->addField(newFieldName, field_units, nGates, missingValue, newData, isLocal);
 
@@ -660,7 +660,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 
 
   // Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -855,7 +855,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   */
   
   //Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -1041,7 +1041,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
     _boundaryMask);
 
   // insert new field into RadxVol     
-  bool isLocal = false;
+  bool isLocal = true;
 
   string field_units = field->getUnits();
 
@@ -1165,7 +1165,7 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
     LOG(DEBUG) << newData[i] << ", ";
 
   //Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -1303,7 +1303,7 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
     LOG(DEBUG) << newData[i] << ", ";
 
   //Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -1436,7 +1436,7 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
     LOG(DEBUG) << newData[i] << ", ";
 
   //Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -1516,7 +1516,7 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vo
   // insert new field into RadxVol        
   string field_units = field->getUnits();
   Radx::fl32 missingValue = field->getMissingFl32();
-  bool isLocal = false;
+  bool isLocal = true;
 
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
 
@@ -1607,13 +1607,13 @@ string SoloFunctionsModel::SetBadFlagsAbove(string fieldName,  // RadxVol *vol,
   // something else, then the mask can be a variable just like any other data vector?
   // Yes, the bad_flag_mask is a boolean variable like any other field vector.
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << bad_flag_mask[i] << ", ";
-  cerr << endl;
+  //cerr << "result = ";
+  //for (int i=0; i<50; i++)
+  //  cerr << bad_flag_mask[i] << ", ";
+  //cerr << endl;
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //badFlagMaskFieldName.append("_BAD");
   // I suppose the boolean mask should probably be kept as a Si08
@@ -1685,13 +1685,13 @@ string SoloFunctionsModel::SetBadFlagsBelow(string fieldName,  //RadxVol *vol,
   // something else, then the mask can be a variable just like any other data vector?
   // Yes, the bad_flag_mask is a boolean variable like any other field vector.
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << bad_flag_mask[i] << ", ";
-  cerr << endl;
+  //cerr << "result = ";
+  //for (int i=0; i<50; i++)
+  //  cerr << bad_flag_mask[i] << ", ";
+  //cerr << endl;
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // badFlagMaskFieldName.append("_BAD");
   // I suppose the boolean mask should probably be kept as a Si08
@@ -1764,13 +1764,13 @@ string SoloFunctionsModel::SetBadFlagsBetween(string fieldName,  // RadxVol *vol
   // something else, then the mask can be a variable just like any other data vector?
   // Yes, the bad_flag_mask is a boolean variable like any other field vector.
   // insert new field into RadxVol                                                                             
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << bad_flag_mask[i] << ", ";
-  cerr << endl;
+  //cerr << "result = ";
+  //for (int i=0; i<50; i++)
+  //  cerr << bad_flag_mask[i] << ", ";
+  //cerr << endl;
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //badFlagMaskFieldName.append("_BAD");
   // I suppose the boolean mask should probably be kept as a Si08
@@ -1869,7 +1869,7 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
               _boundaryMask);
 
   //Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //RadxField *newField = new RadxField(newFieldName, "m/s");
   //newField->copyMetaData(*field);
@@ -1949,7 +1949,7 @@ string SoloFunctionsModel::AssertBadFlags(string fieldName,  // RadxVol *vol,
 
   string field_units = field->getUnits();
   Radx::fl32 missingValue = field->getMissingFl32();
-  bool isLocal = false;
+  bool isLocal = true;
 
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, 
 				    missingValue, newData, isLocal);
@@ -2010,7 +2010,7 @@ string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  // RadxVo
   soloFunctionsApi.ClearBadFlags(bad_flag_mask, nGates);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   //badFlagMaskFieldName.append("_BAD");
   // I suppose the boolean mask should probably be kept as a Si08
@@ -2079,7 +2079,7 @@ string SoloFunctionsModel::ComplementBadFlags(string fieldName,  // RadxVol *vol
   soloFunctionsApi.ComplementBadFlags(bad_flag_mask, complement_mask, nGates);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(fieldName, "units", nGates, missingValue,
@@ -2153,13 +2153,13 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
   // something else, then the mask can be a variable just like any other data vector?
   // Yes, the bad_flag_mask is a boolean variable like any other field vector.
   // insert new field into RadxVol                                                                      */
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << bad_flag_mask[i] << ", ";
-  cerr << endl;
+  //cerr << "result = ";
+  //for (int i=0; i<50; i++)
+  //  cerr << bad_flag_mask[i] << ", ";
+  //cerr << endl;
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // badFlagMaskFieldName.append("_BAD");
   //RadxField *newField = new RadxField(newFieldName, "m/s");
@@ -2349,7 +2349,7 @@ void CopyBadFlags(const float *data, size_t nGates,
 // TODO: should all of this work with the Radx stuff be via the _scriptsDataController??
   // AND ISLOCAL NEEDS TO BE TRUE
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(fieldName, "units", nGates, missingValue,
@@ -2416,7 +2416,7 @@ string SoloFunctionsModel::FlaggedAssign(string fieldName,  size_t rayIdx, //int
 				_boundaryMask, bad_flag_mask);
 
   Radx::fl32 missingValue = field->getMissingFl32(); 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
 
@@ -2480,7 +2480,7 @@ string SoloFunctionsModel::FlaggedCopy(string fieldName,  size_t rayIdx, //int s
 				_boundaryMask, bad_flag_mask);
 
   Radx::fl32 missingValue = field->getMissingFl32(); 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
 
@@ -2538,7 +2538,7 @@ string SoloFunctionsModel::FlagFreckles(string fieldName,   size_t rayIdx, //int
 				_boundaryMask, new_mask);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(fieldName, "units", nGates, missingValue,
@@ -2601,7 +2601,7 @@ string SoloFunctionsModel::FlagGlitches(string fieldName,   size_t rayIdx, //int
 				_boundaryMask, new_mask);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(fieldName, "units", nGates, missingValue,
@@ -2707,7 +2707,7 @@ string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  size_t rayId
 					 newData, bad_data_value, thr_bad_data_value,
 					 clip_gate, _boundaryMask, bad_flag_mask);
 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   Radx::fl32 missingValue = field->getMissingFl32();
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
@@ -2776,7 +2776,7 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,   size_t rayIdx, //i
   for (int i=0; i<10; i++)
     LOG(DEBUG) << newData[i] << ", ";
 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
   Radx::fl32 missingValue = field->getMissingFl32();
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
@@ -2832,7 +2832,7 @@ string SoloFunctionsModel::UnconditionalDelete(string fieldName,  size_t rayIdx,
           (float) missingValue, 
           clip_gate, _boundaryMask);
 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = field->getUnits();
 
   RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
@@ -2900,7 +2900,7 @@ string SoloFunctionsModel::_generalLogicalFx(string fieldName,   size_t rayIdx, 
   (api.*function)(constant, data, nGates, bad_data_value, clip_gate, _boundaryMask, bad_flag_mask, new_mask);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(maskFieldName, "units", nGates, missingValue,
@@ -2967,7 +2967,7 @@ string SoloFunctionsModel::_generalLogicalFx2(string fieldName,   size_t rayIdx,
   (api.*function)(constantLower, constantUpper, data, nGates, bad_data_value, clip_gate, _boundaryMask, bad_flag_mask, new_mask);
 
   Radx::fl32 missingValue = Radx::missingSi08; 
-  bool isLocal = false;
+  bool isLocal = true;
 
   // I suppose the boolean mask should probably be kept as a Si08
   RadxField *field1 = ray->addField(maskFieldName, "units", nGates, missingValue,
@@ -3055,7 +3055,7 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  size_t rayIdx,
 		  newData, bad_data_value, thr_bad_data_value, 
 		  clip_gate, _boundaryMask, bad_flag_mask);
 
-  bool isLocal = false;
+  bool isLocal = true;
   string field_units = "";
   //Radx::fl32 missingValue = Radx::missingFl32;
   if (field != NULL) {
