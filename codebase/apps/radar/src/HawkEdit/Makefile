@@ -76,6 +76,8 @@ HDRS = \
 	PolygonUtils.hh \
         FieldColorController.hh \
 	DataModel.hh \
+	ScriptsDataModel.hh \
+	ScriptsDataController.hh \
         DisplayFieldModel.hh \
         DisplayFieldController.hh \
         DisplayFieldView.hh \
@@ -124,6 +126,8 @@ NORM_SRCS = \
 	ColorMap.cc \
 	ColorTableManager.cc \
 	DataModel.cc \
+	ScriptsDataModel.cc \
+	ScriptsDataController.cc \
 	DisplayField.cc \
 	DisplayFieldModel.cc \
 	DisplayFieldController.cc \

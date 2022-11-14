@@ -5254,14 +5254,16 @@ void PolarManager::EditRunScript() {
   LOG(DEBUG) << "exit";
 }
 
-void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps) {
+void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps,
+  string dataFileName) {
   vector<Point> boundaryPoints;
   if (boundaryPointEditorControl != NULL) {
     boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
   try {
     if (useAllSweeps) {
-      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
+        dataFileName);
     } else {
       // send the current sweep to the script editor controller
       
@@ -5274,8 +5276,9 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
-       useBoundary, boundaryPoints);
+       useBoundary, boundaryPoints, dataFileName);
     }
+    // TODO: signal read of current data file, to get any updates the script made to the data
   } catch (const std::out_of_range& ex) {
     errorMessage("ERROR", ex.what());
     throw ex;
@@ -5352,9 +5355,11 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     // need to get the current version of the file (by index)
     string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
     //  _undoRedoController->getCurrentVersion(archiveFileIndex);
-    if (_getArchiveDataPlainVanilla(inputPath) != 0) {
+    //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
+    //if (_getArchiveDataPlainVanilla(inputPath) != 0) { 
+    //if (scriptEditorControl->openData(inputPath) != 0) {       
       // skip this file
-    } else {
+    //} else {
       // ====>
       // NOTE!!! DataModel is now disconnected from the display and selected field
 
@@ -5364,11 +5369,11 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       try {  
         // use regular forEachRay ...
         scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
-        runForEachRayScript(script, useBoundary, useAllSweeps);
+        runForEachRayScript(script, useBoundary, useAllSweeps, inputPath);
         // check if Cancel requested
         //   save archive file to temp area
         //LOG(DEBUG) << "writing to file " << name;
-        DataModel *dataModel = DataModel::Instance();
+
         string nextVersionPath = _getFileNewVersion(archiveFileIndex);
           // _undoRedoController->getNewVersion(archiveFileIndex);
 
@@ -5376,7 +5381,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //      currentPath.append("/");
   //      fileName = _timeNavController->getSelectedArchiveFileName();
   //      currentPath.append(fileName);
-        dataModel->writeData(nextVersionPath);
+        scriptEditorControl->writeData(nextVersionPath);
         //_unSavedEdits = false;
       
       } catch (FileIException &ex) {
@@ -5401,7 +5406,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
         _batchEditing = false;
         return;
       }
-    }
+    //}
     archiveFileIndex += 1;
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
     QCoreApplication::processEvents();
@@ -5436,6 +5441,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   restoreCurrentState();
 }
 
+/* I don't think this method is used ...
 // useTimeRange distinquishes individual vs. batch mode 3/24/2022 NOT USED
 void PolarManager::runScriptBatchModeDebug(QString script, bool useBoundary, 
   bool useAllSweeps, bool useTimeRange) {
@@ -5496,7 +5502,7 @@ void PolarManager::runScriptBatchModeDebug(QString script, bool useBoundary,
       try {  
         // use regular forEachRay ...
         scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
-        runForEachRayScript(script, useBoundary, useAllSweeps);
+        runForEachRayScript(script, useBoundary, useAllSweeps, inputPath);
         // check if Cancel requested
         //   save archive file to temp area
         //LOG(DEBUG) << "writing to file " << name;
@@ -5543,18 +5549,18 @@ void PolarManager::runScriptBatchModeDebug(QString script, bool useBoundary,
 
 // ---
 
-  /*
-    if (useAllSweeps) {
-      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
-    } else {
-      // send the current sweep to the script editor controller
-      int currentSweepIndex = _sweepController->getSelectedNumber();
-      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
-      // index is a vector and zero-based 
-      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
-       useBoundary, boundaryPoints);
-    }
-    */
+
+    //if (useAllSweeps) {
+    //  scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+    //} else {
+    //  // send the current sweep to the script editor controller
+    //  int currentSweepIndex = _sweepController->getSelectedNumber();
+    //  currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+    //  // index is a vector and zero-based 
+    //  scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+    //   useBoundary, boundaryPoints);
+    //}
+    
     if (batchMode)
       _undoRedoController->waterMarkVersion();
   } catch (std::invalid_argument &ex) {
@@ -5572,6 +5578,7 @@ void PolarManager::runScriptBatchModeDebug(QString script, bool useBoundary,
   //progressBar.close();
   //_timeNavController->setTimeSliderPosition(0);
 }
+*/
 
 void PolarManager::selectBatchMode() {
   _operationMode = BATCH; 

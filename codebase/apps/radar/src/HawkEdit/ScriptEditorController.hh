@@ -33,7 +33,8 @@ public:
   // vector<float> *getData(string fieldName);
   //void setData(string fieldName, vector<float> *data);
 
-  void open(string fileName);
+  void openData(string fileName);
+  void writeData(string &path);
 
   ScriptEditorModel *getDataModel() {return _currentModel;};
   void volumeUpdated(QStringList newFieldNames);
@@ -45,6 +46,8 @@ public:
   void updateProgress(int currentIndex, int lastIndex);
   void batchEditComplete();
 
+
+
 signals:
   void scriptChangedVolume(QStringList newFieldNames); // const RadxVol &radarDataVolume);
   void scriptComplete();
@@ -55,13 +58,18 @@ public slots:
   void getVolumeChanges();
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
-  void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints);
+  void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints,
+    string dataFileName);  
   void runForEachRayScript(QString script, int currentSweepIndex,
-  bool useBoundary, vector<Point> &boundaryPoints);
+    bool useBoundary, vector<Point> &boundaryPoints,
+    string dataFileName); 
+  void runForEachRayScriptOLD(QString script, int currentSweepIndex,
+    bool useBoundary, vector<Point> &boundaryPoints, string dataFileName);
+
   void runMultipleArchiveFiles(vector<string> &archiveFiles, 
-  QString script, bool useBoundary,
-  vector<Point> &boundaryPoints, string saveDirectoryPath,
-  vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
+    QString script, bool useBoundary,
+    vector<Point> &boundaryPoints, string saveDirectoryPath,
+    vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
 
 private:
 
@@ -70,6 +78,8 @@ private:
   ScriptEditorView *_currentView;
   SoloFunctionsController *_soloFunctionsController;
 
+  ScriptsDataController *_scriptsDataController;
+
   QJSEngine *engine;
 
   vector<string> *initialFieldNames;
@@ -77,6 +87,11 @@ private:
   bool _cancelPressed;
 
   void reset();
+  void _resetDataFile(string &dataFileName, bool debug_verbose, bool debug_extra);
+  void _resetDataFile(string &dataFileName, bool debug_verbose, bool debug_extra,
+    vector<string> &fieldNamesInScript);
+  void _resetDataFile(string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+    vector<string> &fieldNamesInScript);
 
   void setupBoundaryArray();
   void setupFieldArrays();

@@ -8,7 +8,7 @@
 
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
-#include "DataModel.hh"
+#include "ScriptsDataModel.hh"
 
 #include "SoloFunctionsController.hh"
 // #include "SpreadSheetModel.hh"
@@ -16,13 +16,32 @@
 using namespace std;
 
 SoloFunctionsController::SoloFunctionsController(QObject *parent) : QObject(parent) {
-  reset();
+  //reset();
 }
 
-void SoloFunctionsController::reset() {
+//void SoloFunctionsController::reset() {}
+
+void SoloFunctionsController::reset(ScriptsDataController *scriptsDataController) {
+  _scriptsDataController = scriptsDataController;
+  soloFunctionsModel.reset(scriptsDataController);
+  /*
+  try {
+    soloFunctionsModel.reset(inputPath, *fieldNames, debug_verbose, debug_extra);
+
+    // create the ScriptsDataModel, read the data, etc. 
+    //_scriptsDataModel.readData(inputPath, *fieldNames, debug_verbose, debug_extra);
+    _lastRayIdx = soloFunctionsModel.getNRays();
+  } catch (std::invalid_argument &ex) {
+    std::cout << ex.what() << std::endl;
+  }  
+  */
+
 }
-
-
+/*
+void SoloFunctionsController::writeData(string &path) {
+  soloFunctionsModel.writeData(path);
+}
+*/
 
 template<typename Out>
 void SoloFunctionsController::split(const string &s, char delim, Out result) {
@@ -68,9 +87,9 @@ QVector<double> add(QVector<double> v, QVector<double> v2) {
 
 QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data,
 					   size_t clip_gate) { 
-
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), //_data,
-						     _currentRayIdx, _currentSweepIdx,
+						     currentRayIdx, // _currentSweepIdx,
 						      nyquist,
 						      clip_gate,
 						      bad_data,
@@ -89,8 +108,9 @@ QString  SoloFunctionsController::REMOVE_ONLY_SURFACE(QString field,
       float bad_data,
       size_t clip_gate) { 
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.RemoveOnlySurface(field.toStdString(),
-                 _currentRayIdx, _currentSweepIdx,
+                 currentRayIdx, //_currentSweepIdx,
                  optimal_beamwidth,
                  seds_surface_gate_shift,      
                  getenv_ALTERNATE_GECHO,  
@@ -110,8 +130,9 @@ QString  SoloFunctionsController::BB_UNFOLDING_FIRST_GOOD_GATE(QString field, fl
 							       float bad_data,
 							       size_t clip_gate) {
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.BBUnfoldFirstGoodGate(field.toStdString(), //_data,
-								 _currentRayIdx, _currentSweepIdx,
+								 currentRayIdx, //_currentSweepIdx,
 								 nyquist,
 								 max_pos_folds,
 								 max_neg_folds,
@@ -134,8 +155,9 @@ QString  SoloFunctionsController::BB_UNFOLDING_LOCAL_WIND(QString field,
                      float bad_data,
                      size_t clip_gate) {
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.BBUnfoldLocalWind(field.toStdString(), //_data,
-                 _currentRayIdx, _currentSweepIdx,
+                 currentRayIdx, //_currentSweepIdx,
                  nyquist,
                  max_pos_folds,
                  max_neg_folds,
@@ -171,8 +193,9 @@ QString  SoloFunctionsController::BB_UNFOLDING_AC_WIND(QString field,
                      float bad_data,
                      size_t clip_gate) {
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.BBUnfoldAircraftWind(field.toStdString(), //_data,
-                 _currentRayIdx, _currentSweepIdx,
+                 currentRayIdx, //_currentSweepIdx,
                  nyquist,
                  max_pos_folds,
                  max_neg_folds,
@@ -202,7 +225,7 @@ QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field) {
   								  _currentRayIdx, _currentSweepIdx);
  // ,
 								  //								  _currentSweep, _currentRay);
-  //  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, dataModel);
+  //  vector<double> result = soloFunctionsModel.RemoveAircraftMotion(x, ScriptsDataModel);
 
   // TODO: what is being returned? the name of the new field in the model that
   // contains the results.
@@ -211,7 +234,7 @@ QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field) {
   // maybe return a pointer to std::vector<double> ?? then when presenting the data, we can convert it to string,
   // but maintain the precision in the model (RadxVol)??
   //QString newFieldName = field + "2";
-  // TODO: dataModel->addField(newFieldName.toStdString(), result);
+  // TODO: ScriptsDataModel->addField(newFieldName.toStdString(), result);
 
   QString newData;
   cerr << "list of result values: " << endl;
@@ -230,10 +253,10 @@ QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field) {
 QString SoloFunctionsController::ZERO_MIDDLE_THIRD(QString field) { 
 
   //SoloFunctionsModel soloFunctionsModel;
-
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.ZeroMiddleThird(field.toStdString(), //_data,
-						     _currentRayIdx, _currentSweepIdx,
-						     field.toStdString()); // "VEL_xyz");
+						     currentRayIdx, // _currentSweepIdx,
+						     field.toStdString());
 
   // TODO: returns name of new field in RadxVol
 
@@ -258,9 +281,9 @@ QString SoloFunctionsController::COPY(QString fromField, QString toField) {
 QString SoloFunctionsController::ZERO_INSIDE_BOUNDARY(QString field) { 
 
   //SoloFunctionsModel soloFunctionsModel;
-
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.ZeroInsideBoundary(field.toStdString(), //_data,
-						     _currentRayIdx, _currentSweepIdx,
+						     currentRayIdx, // _currentSweepIdx,
 						     field.toStdString()); // "VEL_xyz");
 
   // TODO: returns name of new field in RadxVol
@@ -274,9 +297,9 @@ QString SoloFunctionsController::DESPECKLE(QString field, size_t speckle_length,
 					   size_t clip_gate) { 
 
   //SoloFunctionsModel soloFunctionsModel;
-
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.Despeckle(field.toStdString(), //_data,
-						     _currentRayIdx, _currentSweepIdx,
+						     currentRayIdx, //_currentSweepIdx,
 						      speckle_length,
 						      clip_gate,
 						      bad_data,
@@ -290,9 +313,10 @@ QString SoloFunctionsController::DESPECKLE(QString field, size_t speckle_length,
 QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, float bad_data,
 					     size_t clip_gate, QString bad_flag_field) { 
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // updated bad_flag_field is returned in tempFieldName
   string tempFieldName = soloFunctionsModel.FlaggedAdd(field.toStdString(), //_data,
-						       _currentRayIdx, _currentSweepIdx,
+						       currentRayIdx, //_currentSweepIdx,
 						       constant,
 						       clip_gate,
 						       bad_data,
@@ -304,8 +328,9 @@ QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, floa
 QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, float constant, float bad_data,
 					   size_t clip_gate, QString bad_flag_field) { 
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.FlaggedMultiply(field.toStdString(), //_data,
-						     _currentRayIdx, _currentSweepIdx,
+						     currentRayIdx, //_currentSweepIdx,
 						      constant,
 						      clip_gate,
 						      bad_data,
@@ -320,9 +345,10 @@ QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, float constant,
 QString SoloFunctionsController::AND_BAD_FLAGS_ABOVE(QString field, float constant, 
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
+    size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -333,9 +359,10 @@ QString SoloFunctionsController::AND_BAD_FLAGS_ABOVE(QString field, float consta
 QString SoloFunctionsController::AND_BAD_FLAGS_BELOW(QString field, float constant, 
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
+    size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -347,9 +374,10 @@ QString SoloFunctionsController::AND_BAD_FLAGS_BETWEEN(QString field, float cons
                                                        float constantUpper, 
 						       QString mask_field, float bad_data,
 					               size_t clip_gate) {
+    size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.AndBadFlagsBetween(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
 							     bad_data,
@@ -361,9 +389,11 @@ QString SoloFunctionsController::AND_BAD_FLAGS_BETWEEN(QString field, float cons
 QString SoloFunctionsController::OR_BAD_FLAGS_ABOVE(QString field, float constant, 
 						    QString mask_field, float bad_data,
 						    size_t clip_gate) {
+
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx(); 
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.AndBadFlagsAbove(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -374,9 +404,10 @@ QString SoloFunctionsController::OR_BAD_FLAGS_ABOVE(QString field, float constan
 QString SoloFunctionsController::OR_BAD_FLAGS_BELOW(QString field, float constant, 
 						    QString mask_field, float bad_data,
 						    size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.AndBadFlagsBelow(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -388,9 +419,10 @@ QString SoloFunctionsController::OR_BAD_FLAGS_BETWEEN(QString field, float const
 						      float constantUpper,
 						      QString mask_field, float bad_data,
 						      size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.OrBadFlagsBetween(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
 							     bad_data,
@@ -402,9 +434,10 @@ QString SoloFunctionsController::OR_BAD_FLAGS_BETWEEN(QString field, float const
 QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float constant, 
 						     QString mask_field, float bad_data,
 						     size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.XorBadFlagsAbove(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -416,9 +449,10 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_BELOW(QString field, float consta
 						     QString mask_field, 
 						     float bad_data,
 						     size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.XorBadFlagsBelow(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -432,9 +466,10 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_BETWEEN(QString field,
 						       QString mask_field,
 						       float bad_data,
 					               size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.XorBadFlagsBetween(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constantLower, constantUpper,
 							     clip_gate,
 							     bad_data,
@@ -455,8 +490,9 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float consta
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
 						  size_t clip_gate, QString badFlagMaskFieldName) { 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(), //_data,
-							   _currentRayIdx, _currentSweepIdx,
+							   currentRayIdx, //_currentSweepIdx,
 							   clip_gate, bad_data,
 							   badFlagMaskFieldName.toStdString());
 							  
@@ -473,8 +509,9 @@ QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::CLEAR_BAD_FLAGS(QString field) { //float constant, float bad_data,
   // size_t clip_gate) { 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.ClearBadFlags(field.toStdString(), //_data,
-							  _currentRayIdx, _currentSweepIdx);
+							  currentRayIdx); //, _currentSweepIdx);
 							  
   return QString::fromStdString(tempFieldName);
 } 
@@ -482,8 +519,9 @@ QString SoloFunctionsController::CLEAR_BAD_FLAGS(QString field) { //float consta
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::COMPLEMENT_BAD_FLAGS(QString field) { 
 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.ComplementBadFlags(field.toStdString(), //_data,
-							  _currentRayIdx, _currentSweepIdx);
+							  currentRayIdx); //, _currentSweepIdx);
 							  
   return QString::fromStdString(tempFieldName);
 } 
@@ -491,8 +529,10 @@ QString SoloFunctionsController::COMPLEMENT_BAD_FLAGS(QString field) {
 
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::COPY_BAD_FLAGS(QString field, float bad_data, size_t clip_gate) {
+
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.CopyBadFlags(field.toStdString(), //_data,
-							 _currentRayIdx, _currentSweepIdx,
+							 currentRayIdx, //_currentSweepIdx,
 							 clip_gate, bad_data); 
   return QString::fromStdString(tempFieldName);
 } 
@@ -519,9 +559,10 @@ QString SoloFunctionsController::COPY_BAD_FLAGS(QString field, float bad_data, s
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::SET_BAD_FLAGS_ABOVE(QString field, float constant, float bad_data,
 					   size_t clip_gate) { 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.SetBadFlagsAbove(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -533,9 +574,10 @@ QString SoloFunctionsController::SET_BAD_FLAGS_ABOVE(QString field, float consta
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::SET_BAD_FLAGS_BELOW(QString field, float constant, float bad_data,
 					   size_t clip_gate) { 
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.SetBadFlagsBelow(field.toStdString(), //_data,
-							     _currentRayIdx, _currentSweepIdx,
+							     currentRayIdx, //_currentSweepIdx,
 							     constant,
 							     clip_gate,
 							     bad_data,
@@ -548,9 +590,10 @@ QString SoloFunctionsController::SET_BAD_FLAGS_BELOW(QString field, float consta
 QString SoloFunctionsController::SET_BAD_FLAGS_BETWEEN(QString field, float lower_threshold,
 						       float upper_threshold, float bad_data,
 						       size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.SetBadFlagsBetween(field.toStdString(), //_data,
-							       _currentRayIdx, _currentSweepIdx,
+							       currentRayIdx, //_currentSweepIdx,
 							       lower_threshold, upper_threshold,
 							       clip_gate,
 							       bad_data,
@@ -562,9 +605,10 @@ QString SoloFunctionsController::SET_BAD_FLAGS_BETWEEN(QString field, float lowe
 QString SoloFunctionsController::REMOVE_RING(QString field, float lower_threshold,
                    float upper_threshold, float bad_data,
                    size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.RemoveRing(field.toStdString(), //_data,
-                     _currentRayIdx, _currentSweepIdx,
+                     currentRayIdx, //_currentSweepIdx,
                      lower_threshold, upper_threshold,
                      clip_gate,
                      bad_data,
@@ -578,9 +622,10 @@ QString SoloFunctionsController::THRESHOLD_ABOVE(QString field,
                   int first_good_gate, float bad_data_value,
                   float threshold_bad_data_value,
                   size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.ThresholdFieldAbove(field.toStdString(), //_data, 
-                     _currentRayIdx, _currentSweepIdx,
+                     currentRayIdx, //_currentSweepIdx,
                      threshold, first_good_gate, threshold_field.toStdString(),
                      threshold_bad_data_value,
                      clip_gate,
@@ -600,9 +645,10 @@ QString SoloFunctionsController::THRESHOLD_BELOW(QString field,
                   int first_good_gate, float bad_data_value,
                   float threshold_bad_data_value,
                   size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.ThresholdFieldBelow(field.toStdString(), //_data, 
-                     _currentRayIdx, _currentSweepIdx,
+                     currentRayIdx, //_currentSweepIdx,
                      threshold, first_good_gate, threshold_field.toStdString(),
                      threshold_bad_data_value,
                      clip_gate,
@@ -615,9 +661,10 @@ QString SoloFunctionsController::THRESHOLD_BELOW(QString field,
 QString SoloFunctionsController::UNCONDITIONAL_DELETE(QString field, 
                   float bad_data_value,
                   size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // last arg is field name, which will be used to create  bad_flag_field returned in tempFieldName
   string tempFieldName = soloFunctionsModel.UnconditionalDelete(field.toStdString(),
-                     _currentRayIdx, _currentSweepIdx,
+                     currentRayIdx, //_currentSweepIdx,
                      clip_gate,
                      bad_data_value);
 
@@ -648,7 +695,9 @@ void SoloFunctionsController::applyBoundary(bool useBoundaryMask,
   vector<Point> &boundaryPoints) {
 
   //SoloFunctionsModel soloFunctionsModel;
-  soloFunctionsModel.SetBoundaryMask(_currentRayIdx, _currentSweepIdx,
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
+  soloFunctionsModel.SetBoundaryMask(currentRayIdx, 
+    //_currentSweepIdx,
 				     useBoundaryMask, boundaryPoints);
 }
 
@@ -657,6 +706,7 @@ void SoloFunctionsController::clearBoundary() {
   soloFunctionsModel.ClearBoundaryMask();
 }
 
+/*
 void SoloFunctionsController::setCurrentSweepToFirst() {
   cerr << "entry setCurrentSweepToFirst" << endl;
   _currentSweepIdx = 0;
@@ -680,6 +730,7 @@ void SoloFunctionsController::setCurrentSweepTo(int sweepIndex) {
 void SoloFunctionsController::setCurrentRayToFirst() {
   //cerr << "entry setCurrentRayToFirst" << endl;
   _currentRayIdx = 0;
+  _lastRayIdx = soloFunctionsModel->getNRays();
   //applyBoundary();
   //cerr << "exit setCurrentRayToFirst" << endl;
 
@@ -692,19 +743,30 @@ void SoloFunctionsController::setCurrentRayToFirst() {
 void SoloFunctionsController::setCurrentRayToFirstOf(int sweepIndex) {
   // find the first ray of this sweep
   // find the last ray of this sweep
-  DataModel *dataModel = DataModel::Instance();
-  //int sweepNumber = dataModel->getSweepNumber(sweepIndex);
-  _currentRayIdx = dataModel->getFirstRayIndex(sweepIndex);
-  _lastRayIdx = dataModel->getLastRayIndex(sweepIndex);
+
+  //int sweepNumber = ScriptsDataModel->getSweepNumber(sweepIndex);
+  _currentRayIdx = soloFunctionsModel->getFirstRayIndex(sweepIndex);
+  _lastRayIdx = soloFunctionsModel->getLastRayIndex(sweepIndex);
+}
+
+void SoloFunctionsController::nextRayIndependentOfSweep() {
+  //LOG(DEBUG) << "entry";
+  _currentRayIdx += 1;
+
+  if ((_currentRayIdx % 100) == 0) {
+      cerr << "   current ray " << _currentRayIdx << 
+        " last ray index " << _lastRayIdx;
+      if (moreRays()) 
+         cerr << " az = " << soloFunctionsModel->getRayAzimuthDeg(_currentRayIdx);
+      cerr << " current sweep index " << _currentSweepIdx << endl;
+  }  
 }
 
 void SoloFunctionsController::nextRay() {
   //LOG(DEBUG) << "entry";
   _currentRayIdx += 1;
 
-
-  DataModel *dataModel = DataModel::Instance();
-  size_t lastRayIndex = dataModel->getLastRayIndex(_currentSweepIdx);  
+  size_t lastRayIndex = soloFunctionsModel->getLastRayIndex(_currentSweepIdx);  
   if (_currentRayIdx > lastRayIndex) {
     _currentSweepIdx += 1;
   } 
@@ -712,7 +774,7 @@ void SoloFunctionsController::nextRay() {
       cerr << "   current ray " << _currentRayIdx << 
         " last ray index " << lastRayIndex;
       if (moreRays()) 
-         cerr << " az = " << dataModel->getRayAzimuthDeg(_currentRayIdx);
+         cerr << " az = " << soloFunctionsModel->getRayAzimuthDeg(_currentRayIdx);
       cerr << " current sweep index " << _currentSweepIdx << endl;
   }  
   //  applyBoundary();
@@ -733,7 +795,8 @@ bool SoloFunctionsController::moreRays() {
   //if (_currentRayIdx >= nRays)
   //  _data->loadFieldsFromRays();
   //return (_currentRayIdx < _data->getNRays()); // nRays);
-  return (_currentRayIdx <= _lastRayIdx);
+
+  return (_currentRayIdx < _lastRayIdx);
 }
 
 void SoloFunctionsController::nextSweep() {
@@ -745,25 +808,23 @@ void SoloFunctionsController::nextSweep() {
 }
 
 bool SoloFunctionsController::moreSweeps() {
-  DataModel *dataModel = DataModel::Instance();
-  size_t nSweeps = dataModel->getNSweeps();
+  
+  size_t nSweeps = soloFunctionsModel->getNSweeps();
   return (_currentSweepIdx < nSweeps);
 }
-
+*/
+/*
 void SoloFunctionsController::regularizeRays() {
-  DataModel *dataModel = DataModel::Instance();
-  dataModel->regularizeRays();  
+  soloFunctionsModel->regularizeRays();  
 }
 
 void SoloFunctionsController::copyField(size_t rayIdx, string tempName, string userDefinedName) {
 
-  DataModel *dataModel = DataModel::Instance();
-
-  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+  if (soloFunctionsModel->fieldExists(rayIdx, userDefinedName)) {
     throw std::invalid_argument("field name exist; cannot rename");
   }
-  if (dataModel->fieldExists(rayIdx, tempName)) {
-    dataModel->copyField2(rayIdx, tempName, userDefinedName);
+  if (soloFunctionsModel->fieldExists(rayIdx, tempName)) {
+    soloFunctionsModel->copyField2(rayIdx, tempName, userDefinedName);
   } 
 }
 
@@ -773,18 +834,17 @@ void SoloFunctionsController::assign(size_t rayIdx, string tempName, string user
   // Because each RadxRay holds its own FieldNameMap,
   // TODO: maybe ... no longer relavant?
 
-  // Let the DataModel handle the changes? the renaming?
+  // Let the ScriptsDataModel handle the changes? the renaming?
   // But, decide here if this is a rename or a copy 
-  DataModel *dataModel = DataModel::Instance();
 
-  if (dataModel->fieldExists(rayIdx, userDefinedName)) {
+  if (soloFunctionsModel->fieldExists(rayIdx, userDefinedName)) {
     // copy temp data into existing field data
     // delete temp field and data
-    dataModel->copyField(rayIdx, tempName, userDefinedName);
-    dataModel->RemoveField(rayIdx, tempName);
+    soloFunctionsModel->copyField(rayIdx, tempName, userDefinedName);
+    soloFunctionsModel->RemoveField(rayIdx, tempName);
   } else {
     // rename the temp field 
-    dataModel->renameField(rayIdx, tempName, userDefinedName);
+    soloFunctionsModel->renameField(rayIdx, tempName, userDefinedName);
   }
 }
 
@@ -795,8 +855,7 @@ void SoloFunctionsController::assignByRay(string tempName, string userDefinedNam
 void SoloFunctionsController::assign(string tempName, string userDefinedName) {
 
   // for each ray ...
-  DataModel *dataModel = DataModel::Instance();
-  size_t nRays = dataModel->getNRays();
+  size_t nRays = soloFunctionsModel->getNRays();
   for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
     assign(rayIdx, tempName, userDefinedName);
   }
@@ -806,9 +865,8 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName,
   size_t sweepIndex) {
 
   // for each ray of sweep
-  DataModel *dataModel = DataModel::Instance();
-  size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
-  size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
+  size_t firstRayInSweep = soloFunctionsModel->getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = soloFunctionsModel->getLastRayIndex(sweepIndex);
   for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
     assign(rayIdx, tempName, userDefinedName);
   }
@@ -817,8 +875,7 @@ void SoloFunctionsController::assign(string tempName, string userDefinedName,
 void SoloFunctionsController::copyField(string tempName, string userDefinedName) {
 
   // for each ray ...
-  DataModel *dataModel = DataModel::Instance();
-  size_t nRays = dataModel->getNRays();
+  size_t nRays = soloFunctionsModel->getNRays();
   for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
     copyField(rayIdx, tempName, userDefinedName);
   }
@@ -828,28 +885,29 @@ void SoloFunctionsController::copyField(string tempName, string userDefinedName,
   size_t sweepIndex) {
 
   // for each ray of sweep
-  DataModel *dataModel = DataModel::Instance();
-  size_t firstRayInSweep = dataModel->getFirstRayIndex(sweepIndex);
-  size_t lastRayInSweep = dataModel->getLastRayIndex(sweepIndex);
+  size_t firstRayInSweep = soloFunctionsModel->getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = soloFunctionsModel->getLastRayIndex(sweepIndex);
   for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
     copyField(rayIdx, tempName, userDefinedName);
   }
 }
 
+*/
+/*
 // Return data for the field, at the current sweep and ray indexes.
 const vector<float> *SoloFunctionsController::getData(string &fieldName) {
 
   //return soloFunctionsModel.GetData(fieldName, _data, _currentRayIdx, _currentSweepIdx);
-  DataModel *dataModel = DataModel::Instance();
-  return dataModel->GetData(fieldName, _currentRayIdx, _currentSweepIdx);
+  return soloFunctionsModel->GetData(fieldName, _currentRayIdx, _currentSweepIdx);
 
 }
 
 void SoloFunctionsController::setData(string &fieldName, vector<float> *fieldData) {
         //soloFunctionsModel.SetData(fieldName, _data, _currentRayIdx, _currentSweepIdx, fieldData); 
-  DataModel *dataModel = DataModel::Instance();
-  dataModel->SetDataByIndex(fieldName, _currentRayIdx, _currentSweepIdx, fieldData); 
+
+  soloFunctionsModel->SetDataByIndex(fieldName, _currentRayIdx, _currentSweepIdx, fieldData); 
 }
+*/
 
 /*
 SoloFunctions::SoloFunctions() // SpreadSheetController *controller) 

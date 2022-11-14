@@ -22,7 +22,7 @@ public:
   // return lists of data
   //vector<float> *getData(string fieldName);
   //vector<float> getSampleData();
-  vector<string> *getFields();
+  //vector<string> *getFields();
   //  RadxVol getVolume(); 
 
   //void setData(string fieldName, vector<float> *data);

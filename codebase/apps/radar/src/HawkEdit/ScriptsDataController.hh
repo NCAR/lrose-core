@@ -35,19 +35,20 @@
 // can I write a partial volume?
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _ScriptsDataModel_HH
-#define _ScriptsDataModel_HH
+#ifndef _ScriptsDataController_HH
+#define _ScriptsDataController_HH
 
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
+#include "ScriptsDataModel.hh"
 
 #include <vector>
 
 using namespace std;
 
 
-class ScriptsDataModel {
+class ScriptsDataController {
 
 public:
 
@@ -55,39 +56,39 @@ public:
   // CRUD: Create, Read, Update, Delete fields one ray at a time
   //
 
-  ScriptsDataModel();
-  ~ScriptsDataModel();
+  ScriptsDataController(string &dataFileName, bool debug_verbose, bool debug_extra);
+  ScriptsDataController(string &dataFileName, bool debug_verbose, bool debug_extra,
+    vector<string> &fieldNamesInScript);
+  ScriptsDataController(string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+    vector<string> &fieldNamesInScript);
 
-  // every method needs:
-  // string &inputPath, 
-  // bool debug_verbose, 
-  // bool debug_extra,
-  // string fieldName,
-  // size_t rayIdx,
-  // size_t sweepNumber (optional)
+  ~ScriptsDataController();
 
-  bool okToStream();
-
+  // most of these pass through to the model for action ...
+  int openRead(string &inputPath,
+    bool debug_verbose = false, 
+    bool debug_extra = false);
+  int openRead(string &inputPath,
+    vector<string> &fieldNames, bool debug_verbose = false, 
+    bool debug_extra = false);
   int openRead(string &inputPath, int sweepNumber,
-    vector<string> *fieldNames, bool debug_verbose = false, 
+    vector<string> &fieldNames, bool debug_verbose = false, 
     bool debug_extra = false);
 
-  //void setData(RadxVol *vol);
-  void readData(string path, 
-    bool debug_verbose = false, bool debug_extra = false);
   void readData(string path, vector<string> &fieldNames,
     bool debug_verbose = false, bool debug_extra = false);
   void readData(string path, vector<string> &fieldNames,
     int sweepNumber,
     bool debug_verbose = false, bool debug_extra = false);
   void readFileMetaData(string fileName);
+
   void getRayData(string path, vector<string> &fieldNames,
   int sweepNumber);
 
   void writeData(string path);
   void writeData(string path, RadxVol *vol);
 
-  int mergeDataFiles(string dest_path, string source_path, string original_path);
+  //int mergeDataFiles(string dest_path, string source_path, string original_path);
 
   vector<string> *getPossibleFieldNames(string fileName);
   vector<string> *getUniqueFieldNameList();
@@ -95,14 +96,16 @@ public:
   const RadxVol& getVolume();
 
   void update();
-  void SetDataByIndex(string &fieldName, 
+
+  void setDataByIndex(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData);
-  void SetData(string &fieldName, 
+  void setData(string &fieldName, vector<float> *fieldData);  
+  void setData(string &fieldName, 
             float azimuth, float sweepAngle, vector<float> *fieldData);
-  void SetData(string &fieldName, 
+  void setData(string &fieldName, 
             int rayIdx, RadxSweep *sweep, vector<float> *fieldData);
 
-  void SetData(string &fieldName, float value);
+  void setData(string &fieldName, float value);
 
   // remove field from volume
   void RemoveField(string &fieldName); 
@@ -110,15 +113,9 @@ public:
 
   void renameField(string currentName, string newName);
   void renameField(size_t rayIdx, string currentName, string newName);
-  void copyField(size_t rayIdx, string fromFieldName, string toFieldName);
-  void copyField2(size_t rayIdx, string fromFieldName, string toFieldName);
+  //void copyField(size_t rayIdx, string fromFieldName, string toFieldName);
+  //void copyField2(size_t rayIdx, string fromFieldName, string toFieldName);
   bool fieldExists(size_t rayIdx, string fieldName);
-
-  void regularizeRays();
-
-  void get();
-  const vector<float> *GetData(string fieldName,
-              int rayIdx, int sweepIdx);
 
   RadxTime getStartTimeSecs();
   RadxTime getEndTimeSecs();
@@ -133,9 +130,17 @@ public:
   size_t getLastRayIndex(int sweepIndex);  
 
 
+
+
   vector<RadxRay *> &getRays();
   RadxRay *getRay(size_t rayIdx);
-  vector<float> *getRayData(size_t rayIdx, string fieldName); // , double sweepHeight);
+  //RadxRay *getCurrentRay();
+  size_t getCurrentRayIdx();
+
+  const vector<float> *GetData_NOTUSED(string fieldName,
+              int rayIdx, int sweepIdx);  
+  vector<float> *getRayData(string fieldName);
+  vector<float> *getRayData(size_t rayIdx, string fieldName);
   float getMissingFl32(string fieldName);
   double getRayAzimuthDeg(size_t rayIdx);
   double getRayNyquistVelocityMps(size_t rayIdx);
@@ -169,14 +174,14 @@ public:
   size_t findClosestRay(float azimuth, int sweepNumber); // float elevation);
   size_t getRayIndex(size_t baseIndex, int offset, int sweepNumber);
 
-  RadxVol *mergeDataFields(string originalSourcePath);
-  RadxVol *mergeDataFields(string currentVersionPath, string originalSourcePath);
+  //RadxVol *mergeDataFields(string originalSourcePath);
+  //RadxVol *mergeDataFields(string currentVersionPath, string originalSourcePath);
 
   Radx::PrimaryAxis_t getPrimaryAxis();
 
   void printAzimuthInRayOrder();
-  void writeWithMergeData(string outputPath, string originalSourcePath);
-  void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
+  //void writeWithMergeData(string outputPath, string originalSourcePath);
+  //void writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath);
 
   RadxVol *getRadarVolume(string path, vector<string> *fieldNames,
      bool debug_verbose = false, bool debug_extra = false);
@@ -193,13 +198,38 @@ public:
   bool sweepRaysAreIndexed(size_t sweepIndex);
   double getSweepAngleResDeg(size_t sweepIndex);
 
+
+
+  // from SoloFunctionsController ... managed by the controller
+  // the current Ray index and the current sweep index
+  void setCurrentRayToFirst();
+  void setCurrentRayToFirstOf(int sweepIndex);
+  bool moreRays();
+  void nextRay();
+  void nextRayIndependentOfSweep();
+  void setCurrentRayTo(size_t rayIdx);
+
+  void setCurrentSweepToFirst();
+  void setCurrentSweepTo(int sweepIndex);
+  bool moreSweeps();
+  void nextSweep();  
+
+  // may or may not pass through to model ...
+  void regularizeRays();
+  void assignByRay(string tempName, string userDefinedName);
+  void assign(string tempName, string userDefinedName);
+  void assign(size_t rayIdx, string tempName, string userDefinedName);
+  void assign(string tempName, string userDefinedName,
+    size_t sweepIndex);
+
+  void copyField(string tempName, string userDefinedName);
+  void copyField(string tempName, string userDefinedName,
+    size_t sweepIndex);
+  void copyField(size_t rayIdx, string tempName, string userDefinedName);  
+
 private:
   
-
-
   void init();
-  void _initForRead();
-  void _readData(RadxFile &file, string path);
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     int sweepNumber,
     bool debug_verbose, bool debug_extra);
@@ -214,14 +244,14 @@ private:
 
   size_t calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset);
 
-//ScriptsDataModel *ScriptsDataModel::_instance = NULL;  
-//  static ScriptsDataModel *_instance;
+//ScriptsDataController *ScriptsDataController::_instance = NULL;  
+//  static ScriptsDataController *_instance;
 
   string _currentFilePath;
-  
-  RadxVol *_vol;
-  //NcfRadxStream *_vol;
-  bool _okToStream;
+
+  size_t _currentSweepIdx;
+  size_t _currentRayIdx;
+  size_t _lastRayIdx;
 
   // cache stores metadata until the entire data file is read and _vol is filled
   // cache contains all sweeps but only the selected fields
@@ -235,6 +265,8 @@ private:
   vector<int> _lookAheadSweepNumbers;
   vector<double> _lookAheadSweepAngles;
   vector<RadxField *> _lookAheadFields;  
+
+  ScriptsDataModel _scriptsDataModel;
 
 };
 

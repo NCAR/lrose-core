@@ -9,7 +9,7 @@
 #include "SoloFunctionsModel.hh"
 //#include "RemoveAcMotion.cc" // This comes from an external library
 #include "BoundaryPointEditor.hh"
-#include "DataModel.hh"
+#include "ScriptsDataController.hh"
 
 
 #include <Radx/RadxField.hh>
@@ -28,6 +28,31 @@ SoloFunctionsModel::SoloFunctionsModel() {
   _boundaryMaskLength = 0;
 }
 
+void SoloFunctionsModel::reset(ScriptsDataController *scriptsDataController) {
+  _scriptsDataController = scriptsDataController;
+}
+
+/*
+void SoloFunctionsModel::reset(string &inputPath, bool debug_verbose, bool debug_extra,
+  vector<string> *fieldNames) {
+  try {
+    // create the ScriptsDataModel, read the data, etc. 
+    _scriptsDataController->readData(inputPath, *fieldNames, debug_verbose, debug_extra);
+    //_lastRayIdx = _scriptsDataController->getNRays();
+  } catch (std::invalid_argument &ex) {
+    std::cout << ex.what() << std::endl;
+  }  
+
+}
+
+void SoloFunctionsModel::writeData(string &path) {
+  try {
+    _scriptsDataController->writeData(path);
+  } catch (std::invalid_argument &ex) {
+    std::cout << ex.what() << std::endl;
+  }  
+}
+*/
 void SoloFunctionsModel::ClearBoundaryMask() {
   delete[] _boundaryMask;
   _boundaryMask = NULL;
@@ -36,7 +61,8 @@ void SoloFunctionsModel::ClearBoundaryMask() {
 
 // call this for each new ray, since the azimuth changes each time the ray changes
 void SoloFunctionsModel::SetBoundaryMask(//RadxVol *vol,
-					 int rayIdx, int sweepIdx, bool useBoundaryMask,
+					 size_t rayIdx, //int sweepIdx, 
+           bool useBoundaryMask,
            vector<Point> &boundaryPoints) {
 
   _boundaryMaskSet = true;
@@ -45,7 +71,8 @@ void SoloFunctionsModel::SetBoundaryMask(//RadxVol *vol,
   if (useBoundaryMask)
     determineMask = true;
 
-  CheckForDefaultMask(rayIdx, sweepIdx, determineMask, boundaryPoints);
+  CheckForDefaultMask(rayIdx, //sweepIdx, 
+    determineMask, boundaryPoints);
   //  SetBoundaryMaskOriginal(vol, rayIdx, sweepIdx);
 }
 
@@ -56,13 +83,14 @@ const vector<bool> *SoloFunctionsModel::GetBoundaryMask() {
 }
 
 
-void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool determineMask,
+void SoloFunctionsModel::CheckForDefaultMask(size_t rayIdx, //int sweepIdx, 
+  bool determineMask,
   vector<Point> &boundaryPoints) {
 
   
   LOG(DEBUG) << "enter";
-  LOG(DEBUG) << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << " radIdx=" << rayIdx;
+	     //<< " sweepIdx=" << sweepIdx;
  
   short *boundary;
 
@@ -82,14 +110,14 @@ void SoloFunctionsModel::CheckForDefaultMask(int rayIdx, int sweepIdx, bool dete
   // if we have less than three points, then it is NOT a boundary
   if ((nBoundaryPoints < 3) || !determineMask) { 
     // set default (all true) boundary mask; 
-    SetDefaultMask(rayIdx, sweepIdx);
+    SetDefaultMask(rayIdx);
   } else {
-    DetermineBoundaryMask(rayIdx, sweepIdx, boundaryPoints);
+    DetermineBoundaryMask(rayIdx, boundaryPoints);
   } 
-
+  LOG(DEBUG) << "exit";
 }
 
-void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
+void SoloFunctionsModel::SetDefaultMask(size_t rayIdx) {
   //vol->loadRaysFromFields();
 
   const RadxField *field;
@@ -97,8 +125,8 @@ void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
   //  get the ray for this field 
   // for the boundary mask, all we care about is the geometry of the ray,
   // NOT the data values for each field.
-  DataModel *dataModel = DataModel::Instance();
-  //const vector<RadxRay *>  &rays = dataModel->getRays();
+
+  //const vector<RadxRay *>  &rays = ScriptsDataModel->getRays();
   //if (rays.size() > 1) {
   //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   //}
@@ -108,12 +136,12 @@ void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
   //  throw "Ray is null";
   //} 
 
-  if (rayIdx == 5298) {
+  if (rayIdx == 720) {
     cerr << "HERE!!! " << endl;
   }
 
   //field = ray->getField(fieldName);
-  size_t nGates = dataModel->getNGates(rayIdx); 
+  size_t nGates = _scriptsDataController->getNGates(rayIdx); 
   LOG(DEBUG) << "there are nGates " << nGates;
 
   //if (nGates != _boundaryMaskLength) {
@@ -133,19 +161,18 @@ void SoloFunctionsModel::SetDefaultMask(int rayIdx, int sweepIdx) {
 }
 
 
-void SoloFunctionsModel::DetermineBoundaryMask(int rayIdx, int sweepIdx,
+void SoloFunctionsModel::DetermineBoundaryMask(size_t rayIdx, //int sweepIdx,
   vector<Point> &boundaryPoints) {
-  SetBoundaryMaskOriginal(rayIdx, sweepIdx, boundaryPoints);
+  SetBoundaryMaskOriginal(rayIdx, boundaryPoints);
 }
 
 
 // call this for each new ray, since the azimuth changes each time the ray changes
-void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
+void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   vector<Point> &boundaryPoints) {
   
   LOG(DEBUG) << "enter";
-  LOG(DEBUG) << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << " radIdx=" << rayIdx;
  
   short *boundary;
 
@@ -199,10 +226,10 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
   // can be used with multiple functions ?? maybe NOT!
 
   // wrestle this information out of the ray and radar volume ...
-  DataModel *dataModel = DataModel::Instance();
-  float radar_origin_latitude = dataModel->getLatitudeDeg();
-  float radar_origin_longitude = dataModel->getLongitudeDeg();
-  float radar_origin_altitude = dataModel->getAltitudeKm() * 1000.0;
+
+  float radar_origin_latitude = _scriptsDataController->getLatitudeDeg();
+  float radar_origin_longitude = _scriptsDataController->getLongitudeDeg();
+  float radar_origin_altitude = _scriptsDataController->getAltitudeKm() * 1000.0;
   float boundary_origin_tilt = 0.0;
   float boundary_origin_latitude = radar_origin_latitude; // 0.0;
   float boundary_origin_longitude = radar_origin_longitude; // 0.0;
@@ -225,11 +252,7 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
   // for the boundary mask, all we care about is the geometry of the ray,
   // NOT the data values for each field.
 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -283,7 +306,7 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(int rayIdx, int sweepIdx,
 
 }
 
-// Should this move to DataModel???  Yes.
+// Should this move to ScriptsDataModel???  Yes.
 /*
 // return data for the field, at the sweep and ray index
 const vector<float> *SoloFunctionsModel::GetData(string fieldName,  RadxVol *vol,
@@ -405,45 +428,28 @@ void SoloFunctionsModel::SetData(string &fieldName, RadxVol *vol,
 }
 */
 
+//
+// When a new field or ray is added, 
+// isLocal = true, to manage the memory in this class.
+// once, the script is complete, use loadFieldsFromRays (in ScriptsDataModel::writeData)
+// to move all the new fields to the volume for writing.
+//
+
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
-					   int rayIdx, int sweepIdx,
+					   size_t rayIdx, // int sweepIdx,
 					   string newFieldName) {
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName;
+  // << " radIdx=" << rayIdx
+	//     << " sweepIdx=" << sweepIdx;
 
-  // gather data from context -- most of the data are in a DoradeRadxFile object
-
-  // TODO: convert the context RadxVol to DoradeRadxFile and DoradeData format;
-  //RadxVol vol = context->_vol;
-  // make sure the radar angles have been calculated.
-
-  //  vol->loadFieldsFromRays();
-  //vol->loadRaysFromFields();
-
-  
-  const RadxField *field;
-  /*
-  field = vol->getFieldFromRay(fieldName);
-  if (field == NULL) {
-    LOG(DEBUG) << "no RadxField found in volume";
-    throw "No data field with name " + fieldName;;
-  }
-  */
-  DataModel *dataModel = DataModel::Instance();
-  //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
   } 
-  
-  // field = ray->getField(fieldName);
-  field = fetchDataField(ray, fieldName);
+
+  const RadxField *field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
   // cerr << "there arenGates " << nGates;
   const float *data = field->getDataFl32();
@@ -460,70 +466,30 @@ string SoloFunctionsModel::ZeroMiddleThird(string fieldName,  // RadxVol *vol,
   for (int i=0; i<50; i++)
     LOG(DEBUG) << newData[i] << ", ";
   
-
   // I have the ray, can't I just add a field to it?
+                                                                  
+  Radx::fl32 missingValue = Radx::missingFl32;
+  bool isLocal = true;
 
-  // ========
-  /*
-  RadxRay *newRay = new RadxRay();
-
-  newRay->setVolumeNumber(1);
-  newRay->setSweepNumber(sweepIdx);
-  newRay->setRayNumber(rayIdx);
-  */
-  //      const string name = "VEL";                                                                  
-  //const string units = "m/s";                                                                       
-  Radx::fl32 missingValue = Radx::missingFl32; // -999;
-  //      const Radx::si16 *data = &rawData[0];                                                       
-  //  double scale = 1.0;
-  //double offset = 0.0;
-  bool isLocal = false;
-
-  //RadxField *newField = new RadxField(newFieldName, "m/s");
-  //newField->copyMetaData(*field);
-  //newField->addDataFl32(nGates, newData);
   RadxField *field1 = ray->addField(newFieldName, "m/s", nGates, missingValue, newData, isLocal);
-  //  RadxField *field1 = newRay->addField(newFieldName, "m/s", nGates, missingValue, newData, scale, offset, isLocal);
 
   string tempFieldName = field1->getName();
   tempFieldName.append("#");
-
-  /*
-  // to avoid this warning ...                                                                        
-  // WARNING - Range geom has not been set on ray                                                     
-  double startRangeKm = 3.0;
-  double gateSpacingKm = 5.0;
-  newRay->setRangeGeom(startRangeKm, gateSpacingKm);
-  */
-
-  //vol->addRay?Field?();  // apparently this is not needed!
-
-  // STOPPED HERE ...  Kinda close ... adds fields VEL_xyz, VEL_xyz2, ... VEL_xyz4 one for each sweep, 
-  // and the missing value is wonky 
-
-  // ============
-
-  //  return newData;
 
   return tempFieldName;
 }
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::CopyField(string fieldName,
-             int rayIdx, int sweepIdx,
+             size_t rayIdx, // int sweepIdx,
              string newFieldName) {
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-       << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+     //  << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
-  DataModel *dataModel = DataModel::Instance();
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -561,25 +527,13 @@ string SoloFunctionsModel::CopyField(string fieldName,
   return ""; // tempFieldName;
 }
 
-
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
-					   int rayIdx, int sweepIdx,
+					   size_t rayIdx, // int sweepIdx,
 					   string newFieldName) {
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName; 
 
-  //vol->loadRaysFromFields();
-  
-  const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
-
-  //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -587,7 +541,7 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 
   // get the data (in) and create space for new data (out)  
   //  field = ray->getField(fieldName);
-  field = fetchDataField(ray, fieldName);
+  const RadxField *field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
 
   float *newData = new float[nGates];
@@ -595,11 +549,6 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
   // =======
   // data, _boundaryMask, and newData should have all the same dimensions = nGates
   SoloFunctionsApi soloFunctionsApi;
-
-  //  if (!_boundaryMaskSet) 
-  //  _boundaryMask = NULL;
-
-  // =======
 
   if (_boundaryMaskSet) {
 
@@ -623,64 +572,24 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
     }
   */
   } else {  // no _boundaryMaskSet
-    // cerr << "there arenGates " << nGates;
+
     const float *data = field->getDataFl32();
-
-  
-    /*  This is for a fixed boundary; and it works fine!
-    short *fixedBnd = new short[nGates];
-    for (size_t i = 0; i<nGates; i++)
-      fixedBnd[i] = 0;
-    for (size_t i = 500; i<nGates; i++)
-      fixedBnd[i] = 1;
-    soloFunctionsApi.ZeroInsideBoundary(data, fixedBnd, newData, nGates);
-    delete[] fixedBnd;
-    */
-
     soloFunctionsApi.ZeroInsideBoundary(data, NULL, newData, nGates);
 
-
-    /*
-    for (int i=0; i<nGates; i++) {
-	newData[i] = 0.0;
-    }
-    */
   }
-  /*
-  for (int i=0; i<10; i++)
-    newData[i] = data[i];   
-  for (int i=10; i<30; i++)
-    newData[i] = 0;
-  for (int i=30; i<nGates; i++)
-    newData[i] = data[i];   
-  */
-
-
 
   // insert new field into RadxVol                                                                             
   LOG(DEBUG) << "result = ";
   for (int i=0; i<50; i++)
     LOG(DEBUG) << newData[i] << ", ";
   
-
   Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
+  bool isLocal = true;
 
-  //RadxField *newField = new RadxField(newFieldName, "m/s");
-  //newField->copyMetaData(*field);
-  //newField->addDataFl32(nGates, newData);
   RadxField *field1 = ray->addField(newFieldName, "m/s", nGates, missingValue, newData, isLocal);
 
   string tempFieldName = field1->getName();
   tempFieldName.append("#");
-
-  /*
-  // to avoid this warning ...                                                                        
-  // WARNING - Range geom has not been set on ray                                                     
-  double startRangeKm = 3.0;
-  double gateSpacingKm = 5.0;
-  newRay->setRangeGeom(startRangeKm, gateSpacingKm);
-  */
 
   return tempFieldName;
 }
@@ -688,25 +597,27 @@ string SoloFunctionsModel::ZeroInsideBoundary(string fieldName,  //RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
-				     int rayIdx, int sweepIdx,
+				     size_t rayIdx, //int sweepIdx,
 				     size_t speckle_length,
 				     size_t clip_gate,
 				     float bad_data_value,
 				     string newFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName;
+  //  << " radIdx=" << rayIdx
+	//     << " sweepIdx=" << sweepIdx;
 
   //vol->loadRaysFromFields();
   
   const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
+
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = ScriptsDataModel->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -763,7 +674,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 }
 
 string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol,
-						int rayIdx, int sweepIdx,
+						size_t rayIdx, // int sweepIdx,
 						float nyquist_velocity,
 						size_t clip_gate,
 						float bad_data_value,
@@ -784,7 +695,6 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   //vol->loadRaysFromFields(); // loadFieldsFromRays();
 
   const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
 
   //  field = vol->getFieldFromRay(fieldName);
   //  if (field == NULL) {
@@ -793,11 +703,12 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   //  }
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -816,7 +727,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   }
   */ 
 
-  const RadxGeoref *georef = dataModel->getGeoreference(rayIdx);
+  const RadxGeoref *georef = _scriptsDataController->getGeoreference(rayIdx);
   if (georef == NULL) {
     throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
   }  
@@ -960,7 +871,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
 }
 
 string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
-            int rayIdx, int sweepIdx,
+            size_t rayIdx, //int sweepIdx,
 
      float optimal_beamwidth,      // script parameter; origin seds->optimal_beamwidth
      int seds_surface_gate_shift,       // script parameter; origin seds->surface_gate_shift
@@ -985,14 +896,14 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
 
   const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1006,7 +917,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   } 
   */
 
-  Radx::PrimaryAxis_t primary_axis = dataModel->getPrimaryAxis();
+  Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
   bool force = true;
   ray->applyGeoref(primary_axis, force);
 
@@ -1023,7 +934,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   }
   */ 
 
-  const RadxGeoref *georef = dataModel->getGeoreference(rayIdx);
+  const RadxGeoref *georef = _scriptsDataController->getGeoreference(rayIdx);
   if (georef == NULL) {
     throw "Remove Only Surface: Georef is null. Cannot find asib_altitude_agl.";
   }  
@@ -1037,7 +948,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   // get from cfac info
   //const RadxCfactors *cfactors = ray->getCfactors();
-  double dds_cfac_rot_angle_corr = dataModel->getCfactorRotationCorr(); // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
+  double dds_cfac_rot_angle_corr = _scriptsDataController->getCfactorRotationCorr(); // origin dds->cfac->rot_angle_corr; cfac is struct correction_d
 
 // ---
 
@@ -1051,8 +962,8 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
                            // origin dds->ra->elevation, ra = radar_angles
                            // get this from RadxRay::_elev if RadxRay::_georefApplied == true
 
-  float vert_beam_width = dataModel->getRadarBeamWidthDegV(); // from platform radarBeamWidthDegV; origin dgi->dds->radd->vert_beam_width
-  float radar_latitude = dataModel->getLatitudeDeg(); // radar->latitude 
+  float vert_beam_width = _scriptsDataController->getRadarBeamWidthDegV(); // from platform radarBeamWidthDegV; origin dgi->dds->radd->vert_beam_width
+  float radar_latitude = _scriptsDataController->getLatitudeDeg(); // radar->latitude 
 
   LOG(DEBUG) << "args: ";
   LOG(DEBUG) << "ra_elevation (radians) " << dds_ra_elevation; 
@@ -1069,7 +980,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   double startRange;
   double gateSpace;
-  dataModel->getPredomRayGeom(&startRange, &gateSpace);
+  _scriptsDataController->getPredomRayGeom(&startRange, &gateSpace);
 
   float gate_size = gateSpace;
   float distance_to_first_gate = startRange;
@@ -1148,7 +1059,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
 
 string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vol,
-						int rayIdx, int sweepIdx,
+						size_t rayIdx, //int sweepIdx,
 						float nyquist_velocity,
 						int max_pos_folds,
 						int max_neg_folds,
@@ -1170,7 +1081,7 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
   //vol->loadRaysFromFields(); // loadFieldsFromRays();
 
   const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
+
   //  field = vol->getFieldFromRay(fieldName);
   //  if (field == NULL) {
   //    LOG(DEBUG) << "no RadxField found in volume";
@@ -1178,11 +1089,12 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
   //  }
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1270,7 +1182,7 @@ string SoloFunctionsModel::BBUnfoldFirstGoodGate(string fieldName, //RadxVol *vo
 }
 
 string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol,
-            int rayIdx, int sweepIdx,
+            size_t rayIdx, //int sweepIdx,
             float nyquist_velocity,
             int max_pos_folds,
             int max_neg_folds,
@@ -1292,12 +1204,12 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
   //vol->loadRaysFromFields(); // loadFieldsFromRays();
 
   const RadxField *field;
-  DataModel *dataModel = DataModel::Instance();
-  RadxRay *ray = dataModel->getRay(rayIdx);
+
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);
 
   /*
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
+  const vector<RadxRay *>  &rays = ScriptsDataModel->getRays();
   if (rays.size() > 1) {
     LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
   }
@@ -1314,18 +1226,18 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
   float elevation_angle_degrees = ray->getElevationDeg();
   float azimuth_angle_degrees = ray->getAzimuthDeg();
 
-  const RadxGeoref *georef = dataModel->getGeoreference(rayIdx);
+  const RadxGeoref *georef = _scriptsDataController->getGeoreference(rayIdx);
   if (georef == NULL) {
     throw "BBUnfoldAircraftWind: Georef is null. Cannot find ew_wind, ns_wind, vert_wind";
   }
   /* ---
   // get the winds from the aircraft platform
   const RadxGeoref *georef = ray->getGeoreference();
-  move this to DataModel?
+  move this to ScriptsDataModel?
   if (georef == NULL) {
     LOG(DEBUG) << "ERROR - georef is NULL";
     LOG(DEBUG) << "      trying to recover ...";
-    dataModel->setLocationFromStartRay();
+    ScriptsDataModel->setLocationFromStartRay();
     georef = ray->getGeoreference();
     if (georef == NULL) {
       throw "BBUnfoldAircraftWind: Georef is null. Cannot find ew_wind, ns_wind, vert_wind";
@@ -1408,7 +1320,7 @@ string SoloFunctionsModel::BBUnfoldAircraftWind(string fieldName, //RadxVol *vol
 }
 
 string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
-            int rayIdx, int sweepIdx,
+            size_t rayIdx, //int sweepIdx,
             float nyquist_velocity,
             int max_pos_folds,
             int max_neg_folds,
@@ -1428,8 +1340,6 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
   LOG(DEBUG) << "entry with fieldName ... ";
   LOG(DEBUG) << fieldName;
 
-  DataModel *dataModel = DataModel::Instance();
-
   const RadxField *field;
   //  field = vol->getFieldFromRay(fieldName);
   //  if (field == NULL) {
@@ -1438,11 +1348,12 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
   //  }
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "WARNING - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1550,26 +1461,25 @@ string SoloFunctionsModel::BBUnfoldLocalWind(string fieldName, // RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vol,
-				     int rayIdx, int sweepIdx,
+				     size_t rayIdx, //int sweepIdx,
 				      bool multiply,
 				     float constant,
 				     size_t clip_gate,
 				     float bad_data_value,
 				     string flagFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
   //if (rays.size() > 1) {
   //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
   //}
-  RadxRay *ray = rays.at(rayIdx);
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1618,49 +1528,48 @@ string SoloFunctionsModel::_flaggedAddMultiply(string fieldName,  // RadxVol *vo
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::FlaggedAdd(string fieldName,  // RadxVol *vol,
-				      int rayIdx, int sweepIdx,
+				      size_t rayIdx, //int sweepIdx,
 				      float constant,
 				      size_t clip_gate,
 				      float bad_data_value,
 				      string flagFieldName) {
   bool multiply = false;
-  return _flaggedAddMultiply(fieldName, rayIdx, sweepIdx, multiply, constant,
+  return _flaggedAddMultiply(fieldName, rayIdx, multiply, constant,
 			    clip_gate, bad_data_value, flagFieldName);
 }
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::FlaggedMultiply(string fieldName,  // RadxVol *vol,
-				      int rayIdx, int sweepIdx,
+				      size_t rayIdx, //int sweepIdx,
 				      float constant,
 				      size_t clip_gate,
 				      float bad_data_value,
 				      string flagFieldName) {
   bool multiply = true;
-  return _flaggedAddMultiply(fieldName, rayIdx, sweepIdx, multiply, constant,
+  return _flaggedAddMultiply(fieldName, rayIdx, multiply, constant,
 			    clip_gate, bad_data_value, flagFieldName);
 }
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::SetBadFlagsAbove(string fieldName,  // RadxVol *vol,
-					    int rayIdx, int sweepIdx,
+					    size_t rayIdx, //int sweepIdx,
 					    float lower_threshold, 
 					    size_t clip_gate,
 					    float bad_data_value,
 					    string badFlagMaskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-   DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1721,25 +1630,24 @@ string SoloFunctionsModel::SetBadFlagsAbove(string fieldName,  // RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::SetBadFlagsBelow(string fieldName,  //RadxVol *vol,
-					    int rayIdx, int sweepIdx,
+					    size_t rayIdx, //int sweepIdx,
 					    float lower_threshold, 
 					    size_t clip_gate,
 					    float bad_data_value,
 					    string badFlagMaskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1800,26 +1708,25 @@ string SoloFunctionsModel::SetBadFlagsBelow(string fieldName,  //RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::SetBadFlagsBetween(string fieldName,  // RadxVol *vol,
-					      int rayIdx, int sweepIdx,
+					      size_t rayIdx, //int sweepIdx,
 					      float lower_threshold,
 					      float upper_threshold,
 					      size_t clip_gate,
 					      float bad_data_value,
 					      string badFlagMaskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1881,26 +1788,25 @@ string SoloFunctionsModel::SetBadFlagsBetween(string fieldName,  // RadxVol *vol
 // ---- REMOVE RING ------
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
-                int rayIdx, int sweepIdx,
+                size_t rayIdx, //int sweepIdx,
                 float lower_threshold, // in km
                 float upper_threshold, // in km
                 size_t clip_gate,
                 float bad_data_value,
                 string newFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-       << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//       << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -1924,7 +1830,7 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
   // translate upper and lower threshold from km to a gate index
   double startRange;
   double gateSpace;
-  dataModel->getPredomRayGeom(&startRange, &gateSpace);
+  _scriptsDataController->getPredomRayGeom(&startRange, &gateSpace);
   size_t from_gate = 0;
   if (lower_threshold > startRange) {
     from_gate = ceil((lower_threshold - startRange) / gateSpace);
@@ -1982,24 +1888,23 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::AssertBadFlags(string fieldName,  // RadxVol *vol,
-					      int rayIdx, int sweepIdx,
+					      size_t rayIdx, //int sweepIdx,
 					      size_t clip_gate,
 					      float bad_data_value,
 					      string badFlagMaskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2060,21 +1965,20 @@ string SoloFunctionsModel::AssertBadFlags(string fieldName,  // RadxVol *vol,
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  // RadxVol *vol,
-					 int rayIdx, int sweepIdx) {
+					 size_t rayIdx) { // , int sweepIdx) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << badFlagMaskFieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << badFlagMaskFieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2123,21 +2027,20 @@ string SoloFunctionsModel::ClearBadFlags(string badFlagMaskFieldName,  // RadxVo
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::ComplementBadFlags(string fieldName,  // RadxVol *vol,
-					      int rayIdx, int sweepIdx) {
+					      size_t rayIdx){ // , int sweepIdx) {
 			
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2194,26 +2097,25 @@ string SoloFunctionsModel::ComplementBadFlags(string fieldName,  // RadxVol *vol
 
 // return the temporary name for the new field in the volume
 string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
-				       int rayIdx, int sweepIdx,
+				       size_t rayIdx, //int sweepIdx,
 				       string where,
 				       float lower_threshold, float upper_threshold,
 				       size_t clip_gate,
 				       float bad_data_value,
 				       string badFlagMaskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2275,11 +2177,11 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 
 // ----
   string SoloFunctionsModel::AndBadFlagsAbove(string fieldName,  //RadxVol *vol, 
-                         int rayIdx, int sweepIdx,
+                         size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
@@ -2287,22 +2189,22 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 
  }
   string SoloFunctionsModel::AndBadFlagsBelow(string fieldName,  //RadxVol *vol, 
-                         int rayIdx, int sweepIdx,
+                         size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) { 
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
 			     &SoloFunctionsApi::AndBadFlagsBelow, api);
 
   }
-  string SoloFunctionsModel::AndBadFlagsBetween(string fieldName,  int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::AndBadFlagsBetween(string fieldName,  size_t rayIdx, //int sweepIdx,
                          float constantLower, float constantUpper, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx2(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx2(fieldName, rayIdx, //sweepIdx,
 			     constantLower, constantUpper,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
@@ -2310,33 +2212,33 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 
   }
 
-  string SoloFunctionsModel::OrBadFlagsAbove(string fieldName,  int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::OrBadFlagsAbove(string fieldName,  size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
 			     &SoloFunctionsApi::OrBadFlagsAbove, api);
 
   }
-  string SoloFunctionsModel::OrBadFlagsBelow(string fieldName, int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::OrBadFlagsBelow(string fieldName, size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
 			     &SoloFunctionsApi::OrBadFlagsBelow, api);
 
   }
-  string SoloFunctionsModel::OrBadFlagsBetween(string fieldName,  int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::OrBadFlagsBetween(string fieldName,  size_t rayIdx, //int sweepIdx,
                          float constantLower, float constantUpper, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx2(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx2(fieldName, rayIdx, //sweepIdx,
 			      constantLower, constantUpper,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
@@ -2344,35 +2246,35 @@ string SoloFunctionsModel::SetBadFlags(string fieldName,  // RadxVol *vol,
 
   }
 
-  string SoloFunctionsModel::XorBadFlagsAbove(string fieldName,  int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::XorBadFlagsAbove(string fieldName,  size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
 
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
 			     &SoloFunctionsApi::XorBadFlagsAbove, api);
   }
-  string SoloFunctionsModel::XorBadFlagsBelow(string fieldName,   int rayIdx, int sweepIdx,
+  string SoloFunctionsModel::XorBadFlagsBelow(string fieldName,   size_t rayIdx, //int sweepIdx,
                          float constant, size_t clip_gate, float bad_data_value,
                          string maskFieldName) {
 
     SoloFunctionsApi api;
-    return _generalLogicalFx(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx(fieldName, rayIdx, //sweepIdx,
 			     constant,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
 			     &SoloFunctionsApi::XorBadFlagsBelow, api);
  }
 
- string SoloFunctionsModel::XorBadFlagsBetween(string fieldName,  int rayIdx, int sweepIdx,
+ string SoloFunctionsModel::XorBadFlagsBetween(string fieldName,  size_t rayIdx, //int sweepIdx,
 					      float constantLower, float constantUpper, 
 					      size_t clip_gate, float bad_data_value,
 					      string maskFieldName) {
     SoloFunctionsApi api;
-    return _generalLogicalFx2(fieldName, rayIdx, sweepIdx,
+    return _generalLogicalFx2(fieldName, rayIdx, //sweepIdx,
 			      constantLower, constantUpper,
 			     clip_gate, bad_data_value,
 			     maskFieldName,
@@ -2385,22 +2287,21 @@ void CopyBadFlags(const float *data, size_t nGates,
 		  float bad, size_t dgi_clip_gate,
 		  bool *boundary_mask, bool *bad_flag_mask);
 */
- string SoloFunctionsModel::CopyBadFlags(string fieldName,  int rayIdx, int sweepIdx,
+ string SoloFunctionsModel::CopyBadFlags(string fieldName,  size_t rayIdx, //int sweepIdx,
 					 size_t clip_gate, float bad_data_value) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2445,6 +2346,8 @@ void CopyBadFlags(const float *data, size_t nGates,
   // --
   */
 
+// TODO: should all of this work with the Radx stuff be via the _scriptsDataController??
+  // AND ISLOCAL NEEDS TO BE TRUE
   Radx::fl32 missingValue = Radx::missingSi08; 
   bool isLocal = false;
 
@@ -2460,23 +2363,22 @@ void CopyBadFlags(const float *data, size_t nGates,
   return tempFieldName;
 }
 
-string SoloFunctionsModel::FlaggedAssign(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::FlaggedAssign(string fieldName,  size_t rayIdx, //int sweepIdx,
 					 float constant,
 					 size_t clip_gate, string maskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+	 //    << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2526,22 +2428,21 @@ string SoloFunctionsModel::FlaggedAssign(string fieldName,  int rayIdx, int swee
 
 }
 
-string SoloFunctionsModel::FlaggedCopy(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::FlaggedCopy(string fieldName,  size_t rayIdx, //int sweepIdx,
 		   size_t clip_gate, string maskFieldName) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2591,23 +2492,22 @@ string SoloFunctionsModel::FlaggedCopy(string fieldName,  int rayIdx, int sweepI
 
 }
 
-string SoloFunctionsModel::FlagFreckles(string fieldName,   int rayIdx, int sweepIdx,
+string SoloFunctionsModel::FlagFreckles(string fieldName,   size_t rayIdx, //int sweepIdx,
 		    float freckle_threshold, size_t freckle_avg_count,
 		    size_t clip_gate, float bad_data_value) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2654,23 +2554,22 @@ string SoloFunctionsModel::FlagFreckles(string fieldName,   int rayIdx, int swee
 }
 
 
-string SoloFunctionsModel::FlagGlitches(string fieldName,   int rayIdx, int sweepIdx,
+string SoloFunctionsModel::FlagGlitches(string fieldName,   size_t rayIdx, //int sweepIdx,
 		    float deglitch_threshold, int deglitch_radius,
 		    int deglitch_min_gates,
 					size_t clip_gate, float bad_data_value) {
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+//	     << " sweepIdx=" << sweepIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  //const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
+  //if (rays.size() > 1) {
+  //  LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+  //}
+  //RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2717,7 +2616,7 @@ string SoloFunctionsModel::FlagGlitches(string fieldName,   int rayIdx, int swee
 }
 
 // TODO: remove bad_flag_mask_field_name because it is not used 
-string SoloFunctionsModel::ThresholdFieldAbove(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::ThresholdFieldAbove(string fieldName,  size_t rayIdx, //int sweepIdx,
 					       float scaled_thr,
 					       int first_good_gate, string threshold_field,
 					       float threshold_bad_data_value,
@@ -2725,7 +2624,7 @@ string SoloFunctionsModel::ThresholdFieldAbove(string fieldName,  int rayIdx, in
 					       // string bad_flag_mask_field_name) {
   SoloFunctionsApi api;
   string bad_flag_mask_field_name = "";
-  return _generalThresholdFx(fieldName, rayIdx, sweepIdx,
+  return _generalThresholdFx(fieldName, rayIdx, //sweepIdx,
 			      scaled_thr,
 			      first_good_gate, threshold_field,
 			      threshold_bad_data_value,
@@ -2734,14 +2633,14 @@ string SoloFunctionsModel::ThresholdFieldAbove(string fieldName,  int rayIdx, in
 			      &SoloFunctionsApi::ThresholdFieldAbove, api);
 }
 
-string SoloFunctionsModel::ThresholdFieldBelow(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::ThresholdFieldBelow(string fieldName,  size_t rayIdx, //int sweepIdx,
 					       float scaled_thr,
 					       int first_good_gate, string threshold_field,
 					       float threshold_bad_data_value,
 					       size_t clip_gate, float bad_data_value) {
   SoloFunctionsApi api;
   string bad_flag_mask_field_name = "";
-  return _generalThresholdFx(fieldName, rayIdx, sweepIdx,
+  return _generalThresholdFx(fieldName, rayIdx, //sweepIdx,
 			      scaled_thr,
 			      first_good_gate, threshold_field,
 			      threshold_bad_data_value,
@@ -2750,7 +2649,7 @@ string SoloFunctionsModel::ThresholdFieldBelow(string fieldName,  int rayIdx, in
 			      &SoloFunctionsApi::ThresholdFieldBelow, api);
 }
 
-string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  size_t rayIdx, //int sweepIdx,
 						 float lower_threshold, float upper_threshold,
 						 int first_good_gate, string threshold_field,
 						 float threshold_bad_data_value,
@@ -2759,19 +2658,12 @@ string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  int rayIdx, 
 
    SoloFunctionsApi api;
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2830,7 +2722,7 @@ string SoloFunctionsModel::ThresholdFieldBetween(string fieldName,  int rayIdx, 
 
 
 
-string SoloFunctionsModel::ForceUnfolding(string fieldName,   int rayIdx, int sweepIdx,
+string SoloFunctionsModel::ForceUnfolding(string fieldName,   size_t rayIdx, //int sweepIdx,
 		      float nyquist_velocity,
 		      float center,
 		      float bad_data_value, size_t dgi_clip_gate) {
@@ -2838,14 +2730,10 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,   int rayIdx, int sw
   LOG(DEBUG) << "entry with fieldName ... ";
   LOG(DEBUG) << fieldName;
 
-  DataModel *dataModel = DataModel::Instance();
-
   const RadxField *field;
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2902,24 +2790,17 @@ string SoloFunctionsModel::ForceUnfolding(string fieldName,   int rayIdx, int sw
 
 }
 
-string SoloFunctionsModel::UnconditionalDelete(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::UnconditionalDelete(string fieldName,  size_t rayIdx, //int sweepIdx,
              size_t clip_gate, float bad_data_value) {
 
    SoloFunctionsApi api;
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-       << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -2967,25 +2848,18 @@ string SoloFunctionsModel::UnconditionalDelete(string fieldName,  int rayIdx, in
 
 // Private methods 
 
-string SoloFunctionsModel::_generalLogicalFx(string fieldName,   int rayIdx, int sweepIdx,
+string SoloFunctionsModel::_generalLogicalFx(string fieldName,   size_t rayIdx, //int sweepIdx,
 					     float constant, 
 					      size_t clip_gate, float bad_data_value,
 					     string maskFieldName,
 					     void (SoloFunctionsApi::*function) (float, const float *, size_t, float, size_t, bool *, const bool *, bool *), SoloFunctionsApi& api) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx);   
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -3041,25 +2915,18 @@ string SoloFunctionsModel::_generalLogicalFx(string fieldName,   int rayIdx, int
 }
 
 // for upper and lower thresholds
-string SoloFunctionsModel::_generalLogicalFx2(string fieldName,   int rayIdx, int sweepIdx,
+string SoloFunctionsModel::_generalLogicalFx2(string fieldName,   size_t rayIdx, //int sweepIdx,
 					      float constantLower, float constantUpper, 
 					      size_t clip_gate, float bad_data_value,
 					      string maskFieldName,
 					      void (SoloFunctionsApi::*function) (float, float, const float *, size_t, float, size_t, bool *, const bool *, bool *), SoloFunctionsApi& api) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
   
   const RadxField *field;
 
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -3115,7 +2982,7 @@ string SoloFunctionsModel::_generalLogicalFx2(string fieldName,   int rayIdx, in
 }
 
 // for upper and lower thresholds
-string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, int sweepIdx,
+string SoloFunctionsModel::_generalThresholdFx(string fieldName,  size_t rayIdx, //int sweepIdx,
 						float threshold, 
 						int first_good_gate, string threshold_field,
 						float threshold_bad_data_value,
@@ -3123,17 +2990,10 @@ string SoloFunctionsModel::_generalThresholdFx(string fieldName,  int rayIdx, in
 						string maskFieldName,
 					       void (SoloFunctionsApi::*function) (float, int,  const float *, const float *, size_t, float *, float, float, size_t, bool *, const bool *), SoloFunctionsApi& api) {
 
-  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
-	     << " sweepIdx=" << sweepIdx;
-
-  DataModel *dataModel = DataModel::Instance();
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(rayIdx);
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
   if (ray == NULL) {
     LOG(DEBUG) << "ERROR - ray is NULL";
     throw "Ray is null";
@@ -3250,10 +3110,9 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data) { /
     throw "No data field with name " + fieldName;;
   }
   */
-  DataModel *dataModel = DataModel::Instance();
 
   // TODO: get the ray for this field 
-  const vector<RadxRay *>  &rays = dataModel->getRays();
+  const vector<RadxRay *>  &rays = _scriptsDataController->getRays();
   if (rays.size() > 1) {
     cerr << "ERROR - more than one ray; expected only one\n";
   }

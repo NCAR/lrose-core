@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <Radx/RadxVol.hh>
+#include "ScriptsDataController.hh"
 #include "SoloFunctionsModel.hh"
 
 //#include "HawkEyeLogger.hh"
@@ -25,6 +26,7 @@ class SoloFunctionsController : public QObject
 public:
   //  SoloFunctions(SpreadSheetController *controller);
   SoloFunctionsController(QObject *parent = nullptr);
+  //void writeData(string &path);
   //SoloFunctions(QObject *parent = nullptr) : QObject(parent) { }
 
 
@@ -178,20 +180,26 @@ public:
   */
   Q_INVOKABLE QVector<int> addI(QVector<int> v, QVector<int> v2) { QVector<int> v3(3); for (int i=0; i<3; i++) v3[i]=v[i]+v2[i]; return v3; }
 
-  void reset();
+  void reset(ScriptsDataController *scriptsDataController);
+
+  /* moved to ScriptsDataController ...  
   void setCurrentRayToFirst();
   void setCurrentRayToFirstOf(int sweepIndex);
   bool moreRays();
   void nextRay();
+  void nextRayIndependentOfSweep();
 
   void setCurrentSweepToFirst();
   void setCurrentSweepTo(int sweepIndex);
   bool moreSweeps();
   void nextSweep();
+   end moved to ScriptsDataController
+  */
 
   void applyBoundary(bool useBoundaryMask, vector<Point> &boundaryPoints);
   void clearBoundary();
   const vector<bool> *GetBoundaryMask();
+  /* moved to ScriptsDataController ...
   void regularizeRays();
   void assignByRay(string tempName, string userDefinedName);
   void assign(string tempName, string userDefinedName);
@@ -204,22 +212,31 @@ public:
     size_t sweepIndex);
   void copyField(size_t rayIdx, string tempName, string userDefinedName);
 
-  const vector<float> *getData(string &fieldName);
-  void setData(string &fieldName, vector<float> *fieldData);
+  //const vector<float> *getData(string &fieldName);
+  //void setData(string &fieldName, vector<float> *fieldData);
+    end moved to ScriptsDataController 
+  */
 
 private:
 
+  ScriptsDataController *_scriptsDataController;
+
   RadxVol *_data;
-  size_t _currentSweepIdx;
-  size_t _currentRayIdx;
-  size_t _lastRayIdx;
+//  size_t _currentSweepIdx;
+//  size_t _currentRayIdx;
+//  size_t _lastRayIdx;
   SoloFunctionsModel soloFunctionsModel;
 
   template<typename Out>
   void split(const string &s, char delim, Out result);
   vector<string> split(const string &s, char delim);
   vector<double> splitDouble(const string &s, char delim);
- 
+
+  // Either this class has the ScriptDataModel, or it sends a path to the Model??
+  // the Model has to retrieve the data, given a ray index; so ...
+  // The model needs the ScriptsDataModel!!!
+  // Maybe the SoloFunctionsController sends the path to the SoloFunctionsModel,
+  // and then queries the SoloFunctionsModel for the first ray, last ray, etc.??? 
 
 };
 

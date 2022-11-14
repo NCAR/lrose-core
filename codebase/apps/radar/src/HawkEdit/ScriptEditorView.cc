@@ -351,9 +351,9 @@ ScriptEditorView::~ScriptEditorView() {
 
 void ScriptEditorView::init()
 {
-  LOG(DEBUG) << "emitting signal to get field names";
+  //LOG(DEBUG) << "emitting signal to get field names";
   //  emit a signal to the controller to get the data for display
-  emit needFieldNames();
+  //emit needFieldNames();
   
   //setupSoloFunctions();
 }

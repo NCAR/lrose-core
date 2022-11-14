@@ -1,4 +1,4 @@
-#include "DataModel.hh"  
+#include "ScriptsDataController.hh"  
 #include <toolsa/LogStream.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxSweep.hh>
@@ -7,29 +7,95 @@
 
 using namespace std;
 
-DataModel *DataModel::_instance = NULL;
-
-DataModel *DataModel::Instance() {
-  	if (_instance == NULL) {
-  		_instance = new DataModel();
-  	}
-  	return _instance;
+// read all fields and all sweeps
+ScriptsDataController::ScriptsDataController(
+  string &dataFileName, bool debug_verbose, bool debug_extra) {
+  init();
+  openRead(dataFileName, debug_verbose, debug_extra);
 }
 
-DataModel::~DataModel() {}
-
-/*
-void DataModel::setData(RadxVol *vol) {
-  _vol = vol;
+ScriptsDataController::ScriptsDataController(
+  string &dataFileName, bool debug_verbose, bool debug_extra,
+  vector<string> &fieldNamesInScript) {
+  init();
+  openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
 }
-*/
+
+ScriptsDataController::ScriptsDataController(
+  string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  vector<string> &fieldNamesInScript) {
+  init();
+  openRead(dataFileName, sweepNumber, fieldNamesInScript, debug_verbose, debug_extra);
+}
+
+ScriptsDataController::~ScriptsDataController() {}
+
+void ScriptsDataController::init() {
+  //_vol = NULL;
+  _cacheMetaDataValid = false;
+  // TODO: set all indexes to zero ...
+}
+
+int ScriptsDataController::openRead(string &inputPath,
+ bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter " << inputPath;
+   
+  try {
+    _scriptsDataModel.readData(inputPath, 
+      debug_verbose, debug_extra);
+  } catch (const string &errMsg) {
+    return -1;
+  }
+  init();
+  LOG(DEBUG) << "exit";
+  return 0;
+}
+
+int ScriptsDataController::openRead(string &inputPath, 
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter " << inputPath;
+   
+  try {
+    //int sweep_number = _sweepController->getSelectedNumber();
+    _scriptsDataModel.readData(inputPath, fieldNames, 
+      debug_verbose, debug_extra);
+  } catch (const string &errMsg) {
+    return -1;
+  }
+  init();
+  LOG(DEBUG) << "exit";
+  return 0;
+}
+
+int ScriptsDataController::openRead(string &inputPath, int sweepNumber,
+  vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter " << inputPath;
+   
+  try {
+    //int sweep_number = _sweepController->getSelectedNumber();
+    _scriptsDataModel.readData(inputPath, fieldNames, sweepNumber,
+      debug_verbose, debug_extra);
+  } catch (const string &errMsg) {
+    return -1;
+  }
+  init(); 
+  LOG(DEBUG) << "exit";
+  return 0;
+}
+
 
 // return data for the field, at the sweep and ray index
-const vector<float> *DataModel::GetData(string fieldName,
+const vector<float> *ScriptsDataController::GetData_NOTUSED(string fieldName,
               int rayIdx, int sweepIdx)  {
 
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
        << " sweepIdx=" << sweepIdx;
+
+  return _scriptsDataModel.GetData(fieldName, rayIdx, sweepIdx);
+  /*
 
   // sweep numbers are 1-based in RadxVol, not zero based, so, add one to the index.
   //sweepIdx += 1;
@@ -54,7 +120,7 @@ const vector<float> *DataModel::GetData(string fieldName,
   
   if ((rayIdx > sweep->getEndRayIndex()) ||
       (rayIdx < startRayIndex)) {
-    string msg = "DataModel::GetData rayIdx outside sweep ";
+    string msg = "ScriptsDataController::GetData rayIdx outside sweep ";
     msg.append(std::to_string(rayIdx));
     throw msg;
   }
@@ -78,10 +144,11 @@ const vector<float> *DataModel::GetData(string fieldName,
   dataVector->assign(data, data+nGates);
 
   return dataVector;
+  */
 }
 
 /*
-const vector<float> *DataModel::GetData(string fieldName,
+const vector<float> *ScriptsDataController::GetData(string fieldName,
               int rayIdx, int sweepIdx)  {
 
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx
@@ -117,7 +184,7 @@ const vector<float> *DataModel::GetData(string fieldName,
 }
 */
 
-void DataModel::SetDataByIndex(string &fieldName, 
+void ScriptsDataController::setDataByIndex(string &fieldName, 
             int rayIdx, int sweepIdx, vector<float> *fieldData) { 
 
   // What is being returned? the name of the new field in the model that
@@ -126,8 +193,9 @@ void DataModel::SetDataByIndex(string &fieldName,
   LOG(DEBUG) << "entry with fieldName ... ";
   LOG(DEBUG) << fieldName;
 
+  _scriptsDataModel.SetDataByIndex(fieldName, rayIdx, sweepIdx, fieldData);
 
-
+/*
   _vol->loadRaysFromFields(); // loadFieldsFromRays();
 
 
@@ -141,129 +209,26 @@ void DataModel::SetDataByIndex(string &fieldName,
 
 
   SetData(fieldName, rayIdx, sweep, fieldData);
-  /* 
-  if (sweep == NULL)
-    throw std::invalid_argument("bad sweep index");
-
-  size_t startRayIndex = sweep->getStartRayIndex();
-
-  const RadxField *field;
-
-  //  get the ray for this field 
-  const vector<RadxRay *>  &rays = _vol->getRays();
-  if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
-  }
-  RadxRay *ray = rays.at(startRayIndex + rayIdx);
-  if (ray == NULL) {
-    LOG(DEBUG) << "ERROR - ray is NULL";
-    throw "Ray is null";
-  } 
-
-  // get the data (in) and create space for new data (out)  
-  //  field = ray->getField(fieldName);
-  field = fetchDataField(ray, fieldName);
-  size_t nGates = ray->getNGates(); 
-
-  int nGates = fieldData->size();
-
-  Radx::fl32 missingValue = Radx::missingFl32; 
-  bool isLocal = false;
-  const string units = field->getUnits();
-
-  ray->removeField(fieldName);
-
-  const float *flatData = fieldData->data();
-  RadxField *field1 = ray->addField(fieldName, units, nGates, missingValue, flatData, isLocal);
-*/
+  */
   LOG(DEBUG) << "exit ";
 }
 
-void DataModel::SetData(string &fieldName, 
+void ScriptsDataController::setData(string &fieldName, vector<float> *fieldData) { 
+
+  _scriptsDataModel.SetData(fieldName, _currentRayIdx, _currentSweepIdx, fieldData);
+
+  LOG(DEBUG) << "exit ";
+}
+
+void ScriptsDataController::setData(string &fieldName, 
             int rayIdx, RadxSweep *sweep, vector<float> *fieldData) { 
 
-  // What is being returned? the name of the new field in the model that
-  // contains the results.
-
-  LOG(DEBUG) << "entry with fieldName ... ";
-  LOG(DEBUG) << fieldName;
-
-  _vol->loadRaysFromFields(); // loadFieldsFromRays();
-
-    LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
-
-  //if (sweep == NULL)
-  //  throw std::invalid_argument("bad sweep index");
-
-  //size_t startRayIndex = sweep->getStartRayIndex();
-
-  //const 
-  RadxField *field;
-
-  //  get the ray for this field 
-  const vector<RadxRay *>  &rays = _vol->getRays();
-  if (rays.size() <= 0) {
-    LOG(DEBUG) <<  "ERROR - no rays found";
-  }
-  RadxRay *ray = rays.at(rayIdx); // startRayIndex + rayIdx);
-  if (ray == NULL) {
-    LOG(DEBUG) << "ERROR - ray is NULL";
-    throw "no ray found";
-  } 
-
-  // get the data (in) and create space for new data (out)  
-  //  field = ray->getField(fieldName);
-  field = fetchDataField(ray, fieldName);
-  size_t nGates = ray->getNGates(); 
-
-  //int nGates = fieldData->size();
-
-//  Radx::fl32 missingValue = Radx::missingFl32; 
-//  bool isLocal = false;
-//  const string units = field->getUnits();
-
-//  ray->removeField(fieldName);
-
-//  const float *flatData = fieldData->data();
-//  RadxField *field1 = ray->addField(fieldName, units, nGates, missingValue, flatData, isLocal);
-
-//  LOG(DEBUG) << "ray after change ...";
-//  ray->print(cerr);
-
-//--- here ...
-    // TODO: get the correct azimuth, and sweep number from  elevation
-//  RadxField *field = _closestRay->getField(fieldName);
-
-  if (field == NULL) {
-    throw std::invalid_argument("no RadxField found ");
-  } 
-
-  vector<float> deref = *fieldData;
-  const Radx::fl32 *radxData = &deref[0];
-  bool isLocal = true;  //?? not sure about this 
-  field->setDataFl32(nGates, radxData, isLocal);
-  
-  // make sure the new data are there ...
-  // field->printWithData(cout);
-  
-  // data should be copied, so free the memory
-  // delete data;
-  
-  // again, make sure the data are there
-//  _closestRay->printWithFieldData(cout);
-  
-  //_vol->loadRaysFromFields();
-  
-  //std::ofstream outfile("/tmp/voldebug.txt");
-  // finally, make sure the data are there
-  //_vol->printWithFieldData(outfile);
-
-  // end here 
+  _scriptsDataModel.SetData(fieldName, rayIdx, sweep, fieldData);
 
   LOG(DEBUG) << "exit ";
 }
 
-void DataModel::SetData(string &fieldName, 
+void ScriptsDataController::setData(string &fieldName, 
             float azimuth, float sweepAngle, vector<float> *fieldData) {
 
   LOG(DEBUG) << "entry with fieldName ... " << fieldName << " ray =" << azimuth
@@ -276,11 +241,11 @@ void DataModel::SetData(string &fieldName,
   //RadxSweep *sweep = _vol->getSweepByFixedAngle(sweepAngle);
   RadxSweep *dummyValue = nullptr;
 
-  SetData(fieldName, rayIdx, dummyValue, fieldData);
+  setData(fieldName, rayIdx, dummyValue, fieldData);
   LOG(DEBUG) << "exit";
 }
 
-void DataModel::SetData(string &fieldName, float value) {
+void ScriptsDataController::setData(string &fieldName, float value) {
   RadxField *field;
   RadxRay *ray;
 
@@ -296,17 +261,20 @@ void DataModel::SetData(string &fieldName, float value) {
 }
 
 // remove field from volume
-void DataModel::RemoveField(string &fieldName) {
+void ScriptsDataController::RemoveField(string &fieldName) {
+  _scriptsDataModel.RemoveField(fieldName);
+  /*
   int result = _vol->removeField(fieldName);
   if (result != 0) {
     string msg = "failed to remove field: ";
     msg.append(fieldName); 
     throw std::invalid_argument(msg);
   }
+  */
 }
 
 // remove field from ray
-void DataModel::RemoveField(size_t rayIdx, string &fieldName) {
+void ScriptsDataController::RemoveField(size_t rayIdx, string &fieldName) {
   RadxRay *ray = getRay(rayIdx);
   if (ray != NULL) {
     int result = ray->removeField(fieldName);
@@ -318,13 +286,7 @@ void DataModel::RemoveField(size_t rayIdx, string &fieldName) {
   }
 }
 
-void DataModel::regularizeRays() {
-  bool nFieldsConstantPerRay = true;
-  _vol->loadFieldsFromRays(nFieldsConstantPerRay);
-  _vol->loadRaysFromFields();
-}
-
-RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
+RadxVol *ScriptsDataController::getRadarVolume(string path, vector<string> *fieldNames,
   bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
@@ -341,7 +303,7 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
     
   if (file.readFromPath(path, *vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::readData\n";
+      errMsg += "ScriptsDataController::readData\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + path + "\n";
       cerr << errMsg;
@@ -377,7 +339,7 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
 }
 
 // add a parameter for the sweep number
-RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
+RadxVol *ScriptsDataController::getRadarVolume(string path, vector<string> *fieldNames,
   int sweepNumber,
   bool debug_verbose, bool debug_extra) {
 
@@ -395,7 +357,7 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
     
   if (file.readFromPath(path, *vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::getRadarVolume\n";
+      errMsg += "ScriptsDataController::getRadarVolume\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + path + "\n";
       cerr << errMsg;
@@ -430,109 +392,42 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
   return vol;
 }
 
-void DataModel::getRayData(string path, vector<string> &fieldNames,
+void ScriptsDataController::getRayData(string path, vector<string> &fieldNames,
   int sweepNumber) {
   readData(path, fieldNames, sweepNumber);
 }
 
-
-void DataModel::readData(string path, vector<string> &fieldNames,
-  int sweepNumber,
-	bool debug_verbose, bool debug_extra) {
+void ScriptsDataController::readData(string path, vector<string> &fieldNames,
+  bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
-  // set up file object for reading
-
-  //cerr << "comparing " << path << " with \n" <<
-  //        "          " << _currentFilePath << endl;
-
-  //if (_currentFilePath.compare(path) == 0) {
-  //  // don't reread the same file
-  //  return;
-  //}
-
-  cerr << "before " << endl;
-  RadxFile file;
-  if (_vol != NULL) delete _vol;
-  _vol = new RadxVol();
-  //_vol->clear();
-  _setupVolRead(file, fieldNames, sweepNumber, debug_verbose, debug_extra);
-   
-  LOG(DEBUG) << "  reading data file path: " << path;    
-    
-  if (file.readFromPath(path, *_vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::readData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + path + "\n";
-      cerr << errMsg;
-      throw errMsg;
-  } 
-  cerr << "after " << endl;
-
-  // check for fields read
-  //bool nFieldsConstantPerRay = true;
-  //_vol->loadFieldsFromRays(nFieldsConstantPerRay);
-
-  /*
-  vector<string>::iterator it;
-  for (it=fieldNames.begin(); it != fieldNames.end(); ++it) {
-    RadxField *field = _vol->getField(*it);
-    if (field == NULL) {
-        string errMsg = "ERROR - No field read\n";
-        errMsg += "DataModel::readData\n";
-        errMsg += " field: " + *it + "\n";
-        errMsg += "  path: " + path + "\n";
-        cerr << errMsg;
-        //throw errMsg;
-    } else {
-      cerr << "read field " << *it << endl;
-    }
-  }
-  // or if no field found when requested send error message???
-  */
-
-  _vol->convertToFl32();
-
-  // adjust angles for elevation surveillance if needed
-  
-  _vol->setAnglesForElevSurveillance();
-  
-  // compute the fixed angles from the rays
-  // so that we reflect reality
-  
-  _vol->computeFixedAnglesFromRays();
-
-    LOG(DEBUG) << "----------------------------------------------------";
-    LOG(DEBUG) << "perform archive retrieval";
-    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
-    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
-   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
-   //      << _sweepManager.getGuiIndex() << ", "
-   //      << _sweepManager.getSelectedAngle();
-    LOG(DEBUG) << "----------------------------------------------------";
-
-  // printAzimuthInRayOrder();
-
-  _currentFilePath = path;
+  _scriptsDataModel.readData(path, fieldNames, debug_verbose, debug_extra);
 
   LOG(DEBUG) << "exit";
 }
 
 
-// TODO: Do I need a DataController? to switch between Radx* data types and
-// standard C++/Qt data types?
 
-RadxTime DataModel::getStartTimeSecs() {
-	return _vol->getStartTimeSecs();
+void ScriptsDataController::readData(string path, vector<string> &fieldNames,
+  int sweepNumber,
+	bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter";
+  _scriptsDataModel.readData(path, fieldNames, sweepNumber, debug_verbose, debug_extra);
+
+  LOG(DEBUG) << "exit";
 }
 
-RadxTime DataModel::getEndTimeSecs() {
-  return _vol->getEndTimeSecs();
+RadxTime ScriptsDataController::getStartTimeSecs() {
+	return _scriptsDataModel.getStartTimeSecs();
+}
+
+RadxTime ScriptsDataController::getEndTimeSecs() {
+  return _scriptsDataModel.getEndTimeSecs();
 }
 
 // TODO: this could be faster
-void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
+void ScriptsDataController::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   vector<string> *primaryFieldNames = getUniqueFieldNameList();
   vector<string>::iterator it;
   for (it = primaryFieldNames->begin(); it != primaryFieldNames->end(); ++it) {
@@ -550,7 +445,7 @@ void DataModel::_selectFieldsNotInVolume(vector<string> *allFieldNames) {
   }
 }
 
-void DataModel::_selectFieldsNotInCurrentVersion(
+void ScriptsDataController::_selectFieldsNotInCurrentVersion(
   vector<string> *currentVersionFieldNames, vector<string> *allFieldNames) {
 
   vector<string>::iterator it;
@@ -570,13 +465,89 @@ void DataModel::_selectFieldsNotInCurrentVersion(
 
 }
 
-Radx::PrimaryAxis_t DataModel::getPrimaryAxis() {
-  return _vol->getPrimaryAxis();
+Radx::PrimaryAxis_t ScriptsDataController::getPrimaryAxis() {
+  return _scriptsDataModel.getPrimaryAxis();
 }
 
+
+/* append the edited sweep (those fields read in memory) to
+// tho current version of the data file
+// Q: What if the fields are different? maybe merge fields before calling append??
+void ScriptsDataController::appendSweep(string currentVersionPath) {
+
+
+  // open currentVersionPath
+  // read metadata, and verify current sweep is compatible, geom, fields, etc.
+  // update metadata as needed???
+  // seek to end of file,
+  // write sweep
+
+  // read the source_path into a separate volume, then merge the fields and 
+  //_volSecondary = read
+  // write to the dest_path
+  vector<string> *currentVersionFieldNames = getPossibleFieldNames(currentVersionPath);
+  vector<string> *allPossibleFieldNames = getPossibleFieldNames(originalSourcePath);
+  _selectFieldsNotInCurrentVersion(currentVersionFieldNames, allPossibleFieldNames);
+
+  // allPossibleFieldNames now contains only the fields NOT in current version of file
+
+  bool debug_verbose = false;
+  bool debug_extra = false;
+  
+  RadxVol *primaryVol = getRadarVolume(currentVersionPath, currentVersionFieldNames,
+     debug_verbose, debug_extra);
+
+  RadxVol *secondaryVol = getRadarVolume(originalSourcePath, allPossibleFieldNames,
+     debug_verbose, debug_extra);
+
+  // ----
+    // merge the primary and seconday volumes, using the primary
+    // volume to hold the merged data
+    
+  // add secondary rays to primary vol
+
+  int maxSweepNum = 0;
+  vector<RadxRay *> &pRays = primaryVol->getRays();
+  const vector<RadxRay *> &sRays = secondaryVol->getRays();
+  for (size_t iray = 0; iray < pRays.size(); iray++) {
+    RadxRay &pRay = *pRays[iray];
+    const RadxRay *sRay = sRays[iray];
+    // for each field in secondary vol
+    for (size_t ifield = 0; ifield < allPossibleFieldNames->size(); ifield++) {
+      string fieldName = allPossibleFieldNames->at(ifield);
+      const RadxField *sfield = sRay->getField(fieldName);
+      RadxField *copyField = new RadxField();
+      *copyField = *sfield;
+      // Add a previously-created field to the ray. The field must have
+      // been dynamically allocted using new(). Memory management for
+      //  this field passes to the ray, which will free the field object
+      // using delete().
+      // void addField(RadxField *field);
+      pRay.addField(copyField);
+    } // ifield
+  } // iray
+
+  // finalize the volume
+
+  primaryVol->setPackingFromRays();
+  primaryVol->loadVolumeInfoFromRays();
+  primaryVol->loadSweepInfoFromRays();
+  primaryVol->remapToPredomGeom();
+  
+  delete allPossibleFieldNames;
+  delete currentVersionFieldNames;
+  delete secondaryVol;
+
+  return primaryVol;
+
+}
+*/
+
+
+/*
 // merge edited fields (those read in memory) with
 // those fields in the original data file
-RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
+RadxVol *ScriptsDataController::mergeDataFields(string originalSourcePath) {
 
 
   // read the source_path into a separate volume, then merge the fields and 
@@ -645,7 +616,7 @@ RadxVol *DataModel::mergeDataFields(string originalSourcePath) {
 // merge edited fields (those read in memory) with
 // those fields in the original data file
 // returns merged radar volume
-RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSourcePath) {
+RadxVol *ScriptsDataController::mergeDataFields(string currentVersionPath, string originalSourcePath) {
 
 
   // read the source_path into a separate volume, then merge the fields and 
@@ -709,7 +680,7 @@ RadxVol *DataModel::mergeDataFields(string currentVersionPath, string originalSo
 }
 
 // use to merge data with currently selected data file
-void DataModel::writeWithMergeData(string outputPath, string originalSourcePath) {
+void ScriptsDataController::writeWithMergeData(string outputPath, string originalSourcePath) {
 
     RadxVol *mergedVolume = mergeDataFields(originalSourcePath);
     writeData(outputPath, mergedVolume);
@@ -717,15 +688,23 @@ void DataModel::writeWithMergeData(string outputPath, string originalSourcePath)
 }
 
 // use to merge data with a data file NOT currently selected
-void DataModel::writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath) {
+void ScriptsDataController::writeWithMergeData(string outputPath, string currentVersionPath, string originalSourcePath) {
 
     RadxVol *mergedVolume = mergeDataFields(currentVersionPath, originalSourcePath);
     writeData(outputPath, mergedVolume);
     delete mergedVolume;
 }
+*/
 
 // NOTE: side effect of changing the class variable _currentFilePath
-void DataModel::writeData(string path) {
+void ScriptsDataController::writeData(string path) {
+    _scriptsDataModel.writeData(path);
+    /* KEEP  THIS ... BECAUSE IT WORKS!!!
+
+    // move the data for each ray,  so that each field variable has contiguous memory.
+    bool nFieldsConstantPerRay = true;
+    _vol->loadFieldsFromRays(nFieldsConstantPerRay);
+
     RadxFile outFile;
 
     LOG(DEBUG) << "writing to file " << path;
@@ -739,10 +718,11 @@ void DataModel::writeData(string path) {
       throw std::invalid_argument(errStr);
     }
     _currentFilePath = path;
+    */
 }
 
 // no side effects, just writes the radar volume to the path
-void DataModel::writeData(string path, RadxVol *vol) {
+void ScriptsDataController::writeData(string path, RadxVol *vol) {
     RadxFile outFile;
 
     LOG(DEBUG) << "writing to file " << path;
@@ -757,29 +737,23 @@ void DataModel::writeData(string path, RadxVol *vol) {
     }
 }
 
-int DataModel::mergeDataFiles(string dest_path, string source_path, string original_path) {
+/*
+int ScriptsDataController::mergeDataFiles(string dest_path, string source_path, string original_path) {
 
   writeWithMergeData(dest_path, source_path, original_path);
+  return 0;
+}
+*/
+
+void ScriptsDataController::update() {
 
 }
 
-void DataModel::update() {
-
+void ScriptsDataController::renameField(string currentName, string newName) {
+  _scriptsDataModel.renameField(currentName, newName);
 }
 
-void DataModel::renameField(string currentName, string newName) {
-  vector<RadxRay *> rays = _vol->getRays();	
-  // for each ray, 
-  vector<RadxRay *>::iterator it;
-  for (it=rays.begin(); it != rays.end(); ++it) {
-     // renameField(oldName, newName);
-    (*it)->renameField(currentName, newName);
-    // loadFieldNameMap
-    (*it)->loadFieldNameMap();
-  }
-}
-
-void DataModel::renameField(size_t rayIdx, string currentName, string newName) {
+void ScriptsDataController::renameField(size_t rayIdx, string currentName, string newName) {
   RadxRay *ray = getRay(rayIdx);
 
   // renameField(oldName, newName);
@@ -789,9 +763,10 @@ void DataModel::renameField(size_t rayIdx, string currentName, string newName) {
 
 }
 
+/* move to ScriptDataModel
 // copy from one field to another field 
 // overwrite destination
-void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldName) {
+void ScriptsDataController::copyField(size_t rayIdx, string fromFieldName, string toFieldName) {
   RadxRay *ray = getRay(rayIdx);
   //vector<RadxRay *> rays = _vol->getRays();  
   // for each ray, 
@@ -816,7 +791,7 @@ void DataModel::copyField(size_t rayIdx, string fromFieldName, string toFieldNam
 }
 
 // copy from one field to another field 
-void DataModel::copyField2(size_t rayIdx, string fromFieldName, string toFieldName) {
+void ScriptsDataController::copyField2(size_t rayIdx, string fromFieldName, string toFieldName) {
   RadxRay *ray = getRay(rayIdx);
   RadxField *srcField = fetchDataField(ray, fromFieldName);
   if (srcField != NULL) {
@@ -825,8 +800,9 @@ void DataModel::copyField2(size_t rayIdx, string fromFieldName, string toFieldNa
     ray->addField(copy);
   }
 }
+*/
 
-bool DataModel::fieldExists(size_t rayIdx, string fieldName) {
+bool ScriptsDataController::fieldExists(size_t rayIdx, string fieldName) {
   RadxRay *ray = getRay(rayIdx);
   try {
     RadxField *field = fetchDataField(ray, fieldName);
@@ -837,7 +813,9 @@ bool DataModel::fieldExists(size_t rayIdx, string fieldName) {
   }
 }
 
-RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
+RadxField *ScriptsDataController::fetchDataField(RadxRay *ray, string &fieldName) {
+  return _scriptsDataModel.fetchDataField(ray, fieldName);
+  /*
   if (fieldName.length() <= 0) {
     cerr << "fieldName is empty!!" << endl;
   }
@@ -859,7 +837,7 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
   // throws an vector exception that cannot be trapped.  Sometimes the
   // field name map is built and sometimes not, so avoid using this function.
   } catch (std::exception &ex) {
-    string msg = "DataModel::fetchDataField unknown error occurred: ";
+    string msg = "ScriptsDataController::fetchDataField unknown error occurred: ";
     msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
@@ -884,15 +862,16 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
   }
 
   if (dataField == NULL) {
-    string msg = "DataModel::fetchDataField No field found in ray: ";
+    string msg = "ScriptsDataController::fetchDataField No field found in ray: ";
     msg.append(fieldName);
     throw std::invalid_argument(msg);
   }
 
   return dataField; 
+  */
 }
 /*
-const RadxField *DataModel::fetchDataField(const RadxRay *ray, string &fieldName) {
+const RadxField *ScriptsDataController::fetchDataField(const RadxRay *ray, string &fieldName) {
   ray->loadFieldNameMap();
   RadxField *foundField = NULL;
   vector<RadxField *> fields = ray->getFields();
@@ -902,7 +881,7 @@ const RadxField *DataModel::fetchDataField(const RadxRay *ray, string &fieldName
        foundField = fields[ii];
    }
    if (foundField == NULL) {
-      string msg = "DataModel::fetchDataField No field found in ray: ";
+      string msg = "ScriptsDataController::fetchDataField No field found in ray: ";
       msg + fieldName;
       throw std::invalid_argument(msg);
    }
@@ -923,12 +902,12 @@ const RadxField *DataModel::fetchDataField(const RadxRay *ray, string &fieldName
   try {
     dataField = ray2->getField(fieldName);
   } catch (std::exception &ex) {
-    string msg = "DataModel::fetchDataField unknown error occurred: ";
+    string msg = "ScriptsDataController::fetchDataField unknown error occurred: ";
     msg + fieldName;
     throw std::invalid_argument(msg);
   }
   if (dataField == NULL) {
-    string msg = "DataModel::fetchDataField No field found in ray: ";
+    string msg = "ScriptsDataController::fetchDataField No field found in ray: ";
     msg + fieldName;
     throw std::invalid_argument(msg);
   }
@@ -937,7 +916,7 @@ const RadxField *DataModel::fetchDataField(const RadxRay *ray, string &fieldName
 }
 */
 
-const float *DataModel::fetchData(RadxRay *ray, string &fieldName) {
+const float *ScriptsDataController::fetchData(RadxRay *ray, string &fieldName) {
 
     RadxField *dataField = fetchDataField(ray, fieldName);
     if (dataField != NULL)
@@ -947,7 +926,9 @@ const float *DataModel::fetchData(RadxRay *ray, string &fieldName) {
 }
 
 // total number of rays in volume, for all sweeps
-size_t DataModel::getNRays() { // string fieldName, double sweepAngle) {
+size_t ScriptsDataController::getNRays() { // string fieldName, double sweepAngle) {
+  return _scriptsDataModel.getNRays();
+  /*
   size_t nRays = 0;
   if (_vol != NULL) {
     _vol->loadRaysFromFields();
@@ -956,57 +937,69 @@ size_t DataModel::getNRays() { // string fieldName, double sweepAngle) {
     nRays = rays.size();
   }
   return nRays;
+  */
 }
 
 // get the number of rays for a sweep
-size_t DataModel::getNRays(int sweepNumber) {
+size_t ScriptsDataController::getNRays(int sweepNumber) {
+  return _scriptsDataModel.getNRays(sweepNumber);
+  /*
   _vol->loadRaysFromFields();
   RadxSweep *sweep = _vol->getSweepByNumber(sweepNumber);
   if (sweep == NULL) {
-    throw std::invalid_argument("DataModel::getNRays: no sweep found");
+    throw std::invalid_argument("ScriptsDataController::getNRays: no sweep found");
   }
   size_t nRays = sweep->getNRays();
   return nRays;
+  */
 }
 
 // get the number of rays for a sweep
-size_t DataModel::getNRaysSweepIndex(int sweepIndex) {
+size_t ScriptsDataController::getNRaysSweepIndex(int sweepIndex) {
+  return _scriptsDataModel.getNRaysSweepIndex(sweepIndex);
+  /*
   _vol->loadRaysFromFields();
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
   RadxSweep *sweep = sweeps.at(sweepIndex); 
   if (sweep == NULL) {
-    throw std::invalid_argument("DataModel::getNRaysSweepIndex: bad sweep index");
+    throw std::invalid_argument("ScriptsDataController::getNRaysSweepIndex: bad sweep index");
   }
   size_t nRays = sweep->getNRays();
   return nRays;
+  */
 }
 
 // get the first ray for a sweep
-size_t DataModel::getFirstRayIndex(int sweepIndex) {
+size_t ScriptsDataController::getFirstRayIndex(int sweepIndex) {
+  return _scriptsDataModel.getFirstRayIndex(sweepIndex);
+  /*
   if (sweepIndex < 0) {
-    throw std::invalid_argument("DataModel::getFirstRayIndex: bad sweep index < 0");
+    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: bad sweep index < 0");
   }
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
   if (sweepIndex >= sweeps.size()) {
-    throw std::invalid_argument("DataModel::getFirstRayIndex: sweep index > number of sweeps");
+    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: sweep index > number of sweeps");
   }
   RadxSweep *sweep = sweeps.at(sweepIndex);  
   if (sweep == NULL) {
-    throw std::invalid_argument("DataModel::getFirstRayIndex: bad sweep index");
+    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: bad sweep index");
   }
   size_t firstRayIndex = sweep->getStartRayIndex();
   return firstRayIndex;
+  */
 }
 
 // get the last ray for a sweep
-size_t DataModel::getLastRayIndex(int sweepIndex) {
+size_t ScriptsDataController::getLastRayIndex(int sweepIndex) {
+  return _scriptsDataModel.getLastRayIndex(sweepIndex);
+  /*
   _vol->loadRaysFromFields();
   
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
   if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
-    string msg = "DataModel::getLastRayIndex sweepIndex out of bounds ";
+    string msg = "ScriptsDataController::getLastRayIndex sweepIndex out of bounds ";
     msg.append(std::to_string(sweepIndex));
     throw std::invalid_argument(msg);
   }
@@ -1016,10 +1009,11 @@ size_t DataModel::getLastRayIndex(int sweepIndex) {
   }
   size_t lastRayIndex = sweep->getEndRayIndex();
   return lastRayIndex;
+  */
 }
 
 /*
-int DataModel::getSweepNumber(int sweepIndex) {
+int ScriptsDataController::getSweepNumber(int sweepIndex) {
 
   const vector<RadxSweep *> sweeps = _vol->getSweeps();
   try {
@@ -1032,26 +1026,39 @@ int DataModel::getSweepNumber(int sweepIndex) {
 }
 */
 
-double DataModel::getRayAzimuthDeg(size_t rayIdx) {
+double ScriptsDataController::getRayAzimuthDeg(size_t rayIdx) {
+  return _scriptsDataModel.getRayAzimuthDeg(rayIdx);
+  /*
   _vol->loadRaysFromFields();
   const vector<RadxRay *>  &rays = _vol->getRays();
   RadxRay *ray = rays.at(rayIdx);
   return ray->getAzimuthDeg();
+  */
 }
 
-double DataModel::getRayNyquistVelocityMps(size_t rayIdx) {
+double ScriptsDataController::getRayNyquistVelocityMps(size_t rayIdx) {
+  return _scriptsDataModel.getRayNyquistVelocityMps(rayIdx);
+  /*
   _vol->loadRaysFromFields();
   const vector<RadxRay *>  &rays = _vol->getRays();
   RadxRay *ray = rays.at(rayIdx);
   return ray->getNyquistMps();
+  */
 }
 
-vector<RadxRay *> &DataModel::getRays() {
+vector<RadxRay *> &ScriptsDataController::getRays() {
   //const vector<RadxRay *>  &rays = vol->getRays();
-	return _vol->getRays();
+	return _scriptsDataModel.getRays();
 }
 
-RadxRay *DataModel::getRay(size_t rayIdx) {
+RadxRay *ScriptsDataController::getRay(size_t rayIdx) {
+  return _scriptsDataModel.getRay(rayIdx);
+}
+
+size_t ScriptsDataController::getCurrentRayIdx() {
+  return _currentRayIdx;
+}
+  /*
   _vol->loadRaysFromFields();
   
   //  get the ray for this field 
@@ -1066,9 +1073,12 @@ RadxRay *DataModel::getRay(size_t rayIdx) {
   } else {
   	return ray;
   }
-}
+  */
 
-void DataModel::printAzimuthInRayOrder() {
+
+void ScriptsDataController::printAzimuthInRayOrder() {
+  _scriptsDataModel.printAzimuthInRayOrder();
+  /*
   _vol->loadRaysFromFields();
   
   //  get the ray for this field 
@@ -1078,12 +1088,15 @@ void DataModel::printAzimuthInRayOrder() {
     RadxRay *ray = rays.at(i);
     LOG(DEBUG) << "ray Az = " << ray->getAzimuthDeg();
   }
+  */
 }
 
 
-int DataModel::getSweepNumber(float elevation) {
+int ScriptsDataController::getSweepNumber(float elevation) {
   LOG(DEBUG) << "enter: elevation = " << elevation;
-  //DataModel *dataModel = DataModel::Instance();
+  return _scriptsDataModel.getSweepNumber(elevation);
+  /*
+  //ScriptsDataController *ScriptsDataController = ScriptsDataController::Instance();
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
   float delta = 0.01;
@@ -1098,7 +1111,7 @@ int DataModel::getSweepNumber(float elevation) {
   delete sweepAngles;
 
   if (!found) {
-    throw std::invalid_argument("DataModel::getSweepNumber no sweep found for elevation ");
+    throw std::invalid_argument("ScriptsDataController::getSweepNumber no sweep found for elevation ");
   }
 
   // use the index, i, to find the sweep number, because
@@ -1106,11 +1119,11 @@ int DataModel::getSweepNumber(float elevation) {
   int sweepNumber = 0;
   if (_vol == NULL) {
     if (!_cacheMetaDataValid) {
-      throw std::invalid_argument("DataModel::getSweepNumber _vol is NULL; cache not valid");
+      throw std::invalid_argument("ScriptsDataController::getSweepNumber _vol is NULL; cache not valid");
     } 
     LOG(DEBUG) << "_vol is NULL; cache is valid ";
     if ((i < 0) || (i >= _cacheSweepNumbers.size())) {
-      throw std::invalid_argument("DataModel::getSweepNumber index out of bounds for cache");
+      throw std::invalid_argument("ScriptsDataController::getSweepNumber index out of bounds for cache");
     }
     sweepNumber = _cacheSweepNumbers.at(i);
   } else {
@@ -1118,11 +1131,15 @@ int DataModel::getSweepNumber(float elevation) {
     RadxSweep *sweep = sweeps.at(i);
     sweepNumber = sweep->getSweepNumber();
   }
+
   LOG(DEBUG) << "exit: sweepNumber is " << sweepNumber;
   return sweepNumber;
+  */
 }
 
-int DataModel::getSweepIndexFromSweepNumber(int sweepNumber) {
+int ScriptsDataController::getSweepIndexFromSweepNumber(int sweepNumber) {
+  return _scriptsDataModel.getSweepIndexFromSweepNumber(sweepNumber);
+  /*
   vector<RadxSweep *> sweeps = _vol->getSweeps();
   int idx = -1;
   for (int i = 0; i<sweeps.size(); i++) {
@@ -1132,15 +1149,16 @@ int DataModel::getSweepIndexFromSweepNumber(int sweepNumber) {
   }
   if (idx < 0) {
     stringstream ss;
-    ss << "DataModel::getSweepIndex: no sweep found with sweep number " << sweepNumber << endl;
+    ss << "ScriptsDataController::getSweepIndex: no sweep found with sweep number " << sweepNumber << endl;
     throw std::invalid_argument(ss.str());
   } else {
     return idx;
   }
-  
+  */
 }
 
-int DataModel::getSweepIndexFromSweepAngle(float elevation) {
+/*
+int ScriptsDataController::getSweepIndexFromSweepAngle(float elevation) {
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
   float delta = 0.01;
@@ -1154,14 +1172,14 @@ int DataModel::getSweepIndexFromSweepAngle(float elevation) {
   }
   if (!found) {
     stringstream ss;
-    ss << "DataModel::getSweepIndexFromSweepAngle no sweep found for elevation " <<
+    ss << "ScriptsDataController::getSweepIndexFromSweepAngle no sweep found for elevation " <<
       elevation << endl;
     throw std::invalid_argument(ss.str());
   }
   return i;  
 }
 
-double DataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
+double ScriptsDataController::getSweepAngleFromSweepNumber(int sweepNumber) {
   vector<double> *sweepAngles = getSweepAngles();
   int i = 0;
   bool found = false;  
@@ -1175,18 +1193,24 @@ double DataModel::getSweepAngleFromSweepNumber(int sweepNumber) {
   }
   if (!found) {
     stringstream ss;
-    ss << "DataModel::getSweepAngleFromSweepNumber no sweep found for sweep number " <<
+    ss << "ScriptsDataController::getSweepAngleFromSweepNumber no sweep found for sweep number " <<
       sweepNumber << endl;
     throw std::invalid_argument(ss.str());
   }
 
   return sweepAngles->at(i);    
 }
+*/
+
+vector<float> *ScriptsDataController::getRayData(string fieldName) {
+  return _scriptsDataModel.getRayData(_currentRayIdx, fieldName);
+}
 
 
+vector<float> *ScriptsDataController::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
 
-vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int sweepHeight) {
-// TODO: which sweep? the rayIdx considers which sweep.
+  return _scriptsDataModel.getRayData(rayIdx, fieldName);
+  /*
 
   LOG(DEBUG) << "enter" << " rayIdx = " << rayIdx 
     << " fieldName = " << fieldName;
@@ -1219,16 +1243,18 @@ vector<float> *DataModel::getRayData(size_t rayIdx, string fieldName) { // , int
     << "data[0-5] = " << data[0] << ", "  << data[1] << ", "  << data[2] << ", "  << data[3] << ", "  << data[4];
 
   return dataVector;
+  */
 }
 
-int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
+int ScriptsDataController::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
 
-// TODO: which sweep? 
+  return _scriptsDataModel.getNGates(rayIdx, fieldName, sweepHeight);
+  /*
   _vol->loadRaysFromFields();
   
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol->getRays();
-  if (rayIdx >= rays.size()) {
+  if (rayIdx > rays.size()) {
     string msg = "rayIdx is out of bounds: ";
     msg.append(std::to_string(rayIdx));
     throw std::invalid_argument(msg);
@@ -1245,39 +1271,34 @@ int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
   //field = fetchDataField(ray, fieldName);
   size_t nGates = ray->getNGates(); 
   return nGates;
+  */
 }
 
-float DataModel::getMissingFl32(string fieldName) {
+float ScriptsDataController::getMissingFl32(string fieldName) {
+  return _scriptsDataModel.getMissingFl32(fieldName);
+  /*
   //_vol->loadFieldsFromRays();
   const RadxField *field = _vol->getFieldFromRay(fieldName);
   if (field == NULL) return Radx::missingFl32;
   
   Radx::fl32 missingValue = field->getMissingFl32();
   return (float) missingValue;
-}
-  
-DataModel::DataModel() {
-	init();
-}
-
-void DataModel::init() {
-  _vol = NULL;
-  _cacheMetaDataValid = false;
+  */
 }
 
 // ----- 
 
-void DataModel::clearVolume() {
-  delete _vol;
-  _vol = NULL;
-  _cacheMetaDataValid = false;
-
+void ScriptsDataController::clearVolume() {
+  _scriptsDataModel.clearVolume();
 }
 
-void DataModel::getLookAhead(string fileName) {
+void ScriptsDataController::getSweepsAndFields(string fileName) {
 
   LOG(DEBUG) << "enter";
 
+  _scriptsDataModel.getSweepsAndFields(fileName);
+
+/*
   // set up file object for reading
   
   RadxFile file;
@@ -1294,7 +1315,7 @@ void DataModel::getLookAhead(string fileName) {
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::getLookAhead\n";
+      errMsg += "ScriptsDataController::getSweepsAndFields\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
@@ -1328,16 +1349,22 @@ void DataModel::getLookAhead(string fileName) {
     vol.loadFieldsFromRays();
     _lookAheadFields = vol.getFields();
 
+    //if (file.getFileFormat() == RadxFile::FILE_FORMAT_NEXRAD_AR2)
+    //  _okToStream = true;
+    //else
+    //  _okToStream = false;   
+    */ 
+
     LOG(DEBUG) << "exit";
 }  
 
-void DataModel::deleteLookAhead() {
+void ScriptsDataController::deleteLookAhead() {
   _lookAheadSweepNumbers.clear();
   _lookAheadSweepAngles.clear();
   _lookAheadFields.clear();    
 }
 
-void DataModel::moveToLookAhead() {
+void ScriptsDataController::moveToLookAhead() {
   // copy lookAhead to cache (only selected fields)
   _cacheFields.clear();
   _cacheSweepNumbers.clear();
@@ -1351,32 +1378,27 @@ void DataModel::moveToLookAhead() {
 }
 
 // -----
-const string &DataModel::getPathInUse() {
-	return _vol->getPathInUse();
+const string &ScriptsDataController::getPathInUse() {
+	return _scriptsDataModel.getPathInUse();
 }
 
-int DataModel::getNSweeps() {
-	return _vol->getNSweeps();
+int ScriptsDataController::getNSweeps() {
+	return _scriptsDataModel.getNSweeps();
 }
 
-/*
-vector<double> *DataModel::getSweepAngles(string fileName) {
-  if (_vol == NULL) {
-    // we don't have an active volume. read the metadata for the file
-    return getPossibleSweepAngles(fileName);
-  } else {
-    return getSweepAngles();
-  }
+const RadxSweep &ScriptsDataController::getSweep(size_t sweepIndex) {
+  return _scriptsDataModel.getSweep(sweepIndex);
 }
-*/
 
-vector<double> *DataModel::getSweepAngles() {
+vector<double> *ScriptsDataController::getSweepAngles() {
 
+  return _scriptsDataModel.getSweepAngles();
+  /*
   vector<double> *sweepAngles = new vector<double>;
   if (_vol == NULL) {
     // pull info from cache metadata
     if (!_cacheMetaDataValid) {
-      throw std::invalid_argument("DataModel::getSweepAngles _vol is null; cache is invalid; no info on sweeps");
+      throw std::invalid_argument("ScriptsDataController::getSweepAngles _vol is null; cache is invalid; no info on sweeps");
     }
     sweepAngles->reserve(_cacheSweepAngles.size());
     for (vector<double>::iterator it = _cacheSweepAngles.begin(); it != _cacheSweepAngles.end(); ++it) {
@@ -1393,15 +1415,18 @@ vector<double> *DataModel::getSweepAngles() {
     }
   }
   return sweepAngles;
+  */
 }
 
-vector<int> *DataModel::getSweepNumbers() {
+vector<int> *ScriptsDataController::getSweepNumbers() {
 
+  return _scriptsDataModel.getSweepNumbers();
+  /*
   vector<int> *sweepNumbers = new vector<int>;
   if (_vol == NULL) {
     // pull info from cache metadata
     if (!_cacheMetaDataValid) {
-      throw std::invalid_argument("DataModel::getSweepNumbers _vol is null; cache is invalid; no info on sweeps");
+      throw std::invalid_argument("ScriptsDataController::getSweepNumbers _vol is null; cache is invalid; no info on sweeps");
     }
     sweepNumbers->reserve(_cacheSweepNumbers.size());
     for (vector<int>::iterator it = _cacheSweepNumbers.begin(); it != _cacheSweepNumbers.end(); ++it) {
@@ -1418,23 +1443,26 @@ vector<int> *DataModel::getSweepNumbers() {
     }
   }
   return sweepNumbers;
+  */
 }
 
 // TODO: remove RadxPlatform and return base types
-const RadxPlatform &DataModel::getPlatform() {
-  return _vol->getPlatform();
+const RadxPlatform &ScriptsDataController::getPlatform() {
+  return _scriptsDataModel.getPlatform();
 } 
 
-void DataModel::getPredomRayGeom(double *startRangeKm, double *gateSpacingKm) {
-  double startRange;
-  double gateSpace;
-  _vol->getPredomRayGeom(startRange, gateSpace);
-  *startRangeKm = startRange;
-  *gateSpacingKm = gateSpace;  
+void ScriptsDataController::getPredomRayGeom(double *startRangeKm, double *gateSpacingKm) {
+  //double startRange;
+  //double gateSpace;
+  _scriptsDataModel.getPredomRayGeom(startRangeKm, gateSpacingKm);
+  //*startRangeKm = startRange;
+  //*gateSpacingKm = gateSpace;  
 }
 
 
-vector<string> *DataModel::getUniqueFieldNameList() {
+vector<string> *ScriptsDataController::getUniqueFieldNameList() {
+  return _scriptsDataModel.getUniqueFieldNameList();
+  /*
     if (_vol == NULL) throw "No open archive file";
     _vol->loadFieldsFromRays();
     LOG(DEBUG) << "enter";
@@ -1447,39 +1475,48 @@ vector<string> *DataModel::getUniqueFieldNameList() {
     LOG(DEBUG) << "there are " << fieldNamesCopy->size() << " fieldNames";
     LOG(DEBUG) << "exit";
     return fieldNamesCopy;
+    */
 }
 
-float DataModel::getLatitudeDeg() {
-  return _vol->getLatitudeDeg();
+//const RadxVol& ScriptsDataController::getVolume() {
+//  return *_vol;
+//}
+
+float ScriptsDataController::getLatitudeDeg() {
+  return _scriptsDataModel.getLatitudeDeg();
 }
 
-float DataModel::getLongitudeDeg() {
-  return _vol->getLongitudeDeg();
+float ScriptsDataController::getLongitudeDeg() {
+  return _scriptsDataModel.getLongitudeDeg();
 }
 
-float DataModel::getAltitudeKm() {
-  return _vol->getAltitudeKm();
+float ScriptsDataController::getAltitudeKm() {
+  return _scriptsDataModel.getAltitudeKm();
 }
 
-double DataModel::getRadarBeamWidthDegV() {
-  return _vol->getRadarBeamWidthDegV();
+double ScriptsDataController::getRadarBeamWidthDegV() {
+  return _scriptsDataModel.getRadarBeamWidthDegV();
 }
 
-double DataModel::getCfactorRotationCorr() {
+double ScriptsDataController::getCfactorRotationCorr() {
+  return _scriptsDataModel.getCfactorRotationCorr();
+  /*
   RadxCfactors *cfactors;
   if ((cfactors = _vol->getCfactors()) != NULL)
     return cfactors->getRotationCorr();
   else return 0.0;
+  */
 }
 
 /*
-double DataModel::getAltitudeKmAgl() {
+double ScriptsDataController::getAltitudeKmAgl() {
 
 }
 */
 
-const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
-
+const RadxGeoref *ScriptsDataController::getGeoreference(size_t rayIdx) {
+  return _scriptsDataModel.getGeoreference(rayIdx);
+  /*
   RadxRay *ray = getRay(rayIdx);
   // get the winds from the aircraft platform
   const RadxGeoref *georef = ray->getGeoreference();
@@ -1494,9 +1531,10 @@ const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
     }
   } 
   return georef;
+  */
 }
 
-void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
+void ScriptsDataController::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
   int sweepNumber,
 	bool debug_verbose, bool debug_extra)
 {
@@ -1546,8 +1584,216 @@ void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
 
 }
 
+bool ScriptsDataController::sweepRaysAreIndexed(size_t sweepIndex) {
+
+  const RadxSweep &sweep = getSweep(sweepIndex);
+  //if (sweep == NULL) {
+  //  throw invalid_argument("ScriptsDataController::sweepRaysAreIndexed: no sweep for index ");
+  //}
+  return sweep.getRaysAreIndexed(); 
+}
+
+double ScriptsDataController::getSweepAngleResDeg(size_t sweepIndex) {
+  const RadxSweep &sweep = getSweep(sweepIndex);
+  //if (sweep == NULL) {
+  //  throw invalid_argument("ScriptsDataController::getSweepAngleResDeg: no sweep for index ");
+  //}  
+  return sweep.getAngleResDeg();
+}
+
+void ScriptsDataController::setCurrentSweepToFirst() {
+  cerr << "entry setCurrentSweepToFirst" << endl;
+  _currentSweepIdx = 0;
+  cerr << "exit setCurrentSweepToFirst" << endl;
+
+  //LOG(DEBUG) << "exit";
+
+}
+
+void ScriptsDataController::setCurrentSweepTo(int sweepIndex) {
+  cerr << "entry setCurrentSweepToFirst" << endl;
+  if (sweepIndex < 0) _currentSweepIdx = 0;
+  else _currentSweepIdx = (size_t) sweepIndex;
+  cerr << "exit setCurrentSweepToFirst" << endl;
+
+  //LOG(DEBUG) << "exit";
+
+}
+
+
+void ScriptsDataController::setCurrentRayToFirst() {
+  //cerr << "entry setCurrentRayToFirst" << endl;
+  _currentRayIdx = 0;
+  _lastRayIdx = _scriptsDataModel.getNRays();
+  //applyBoundary();
+  //cerr << "exit setCurrentRayToFirst" << endl;
+
+  //LOG(DEBUG) << "exit";
+
+}
+
+// BE CAREFUL!! SweepIndex (int) vs. SweepNumber (int)
+//              size_t vs. int
+void ScriptsDataController::setCurrentRayToFirstOf(int sweepIndex) {
+  // find the first ray of this sweep
+  // find the last ray of this sweep
+
+  //int sweepNumber = ScriptsDataModel->getSweepNumber(sweepIndex);
+  _currentRayIdx = _scriptsDataModel.getFirstRayIndex(sweepIndex);
+  _lastRayIdx = _scriptsDataModel.getLastRayIndex(sweepIndex);
+}
+
+void ScriptsDataController::setCurrentRayTo(size_t rayIdx) {
+  _currentRayIdx = rayIdx;
+}
+
+void ScriptsDataController::nextRayIndependentOfSweep() {
+  //LOG(DEBUG) << "entry";
+  _currentRayIdx += 1;
+
+  if ((_currentRayIdx % 100) == 0) {
+      cerr << "   current ray " << _currentRayIdx << 
+        " last ray index " << _lastRayIdx;
+      if (moreRays()) 
+         cerr << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
+      cerr << " current sweep index " << _currentSweepIdx << endl;
+  }  
+}
+
+void ScriptsDataController::nextRay() {
+  //LOG(DEBUG) << "entry";
+  _currentRayIdx += 1;
+
+  size_t lastRayIndex = _scriptsDataModel.getLastRayIndex(_currentSweepIdx);  
+  if (_currentRayIdx > lastRayIndex) {
+    _currentSweepIdx += 1;
+  } 
+  if ((_currentRayIdx % 100) == 0) {
+      cerr << "   current ray " << _currentRayIdx << 
+        " last ray index " << lastRayIndex;
+      if (moreRays()) 
+         cerr << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
+      cerr << " current sweep index " << _currentSweepIdx << endl;
+  }  
+  //  applyBoundary();
+  //cerr << "exit nextRay" << endl;
+  //LOG(DEBUG) << "exit";
+
+}
+
+bool ScriptsDataController::moreRays() {
+  //  LOG(DEBUG) << "entry";
+  //cerr << "entry moreRays" << endl;
+  //  vector<RadxRay *> rays = _data->getRays();
+  //size_t 
+  // THIS DOES NOT WORK; it changes memory outside of its bounds
+  //  const size_t nRays = _data->getNRays();
+
+  //LOG(DEBUG) << "There are " <<  nRays << " rays";;
+  //if (_currentRayIdx >= nRays)
+  //  _data->loadFieldsFromRays();
+  //return (_currentRayIdx < _data->getNRays()); // nRays);
+
+  return (_currentRayIdx < _lastRayIdx);
+}
+
+void ScriptsDataController::nextSweep() {
+  //LOG(DEBUG) << "entry" << " _currentSweepIdx = " << _currentSweepIdx;
+  _currentSweepIdx += 1;
+  cerr << "current sweep " <<  _currentSweepIdx << endl;
+  //cerr << "exit nextSweep" << endl;
+  //LOG(DEBUG) << "exit";
+}
+
+bool ScriptsDataController::moreSweeps() {
+  
+  size_t nSweeps = _scriptsDataModel.getNSweeps();
+  return (_currentSweepIdx < nSweeps);
+}
+
+
+
+void ScriptsDataController::regularizeRays() {
+  _scriptsDataModel.regularizeRays();  
+}
+
+void ScriptsDataController::copyField(size_t rayIdx, string tempName, string userDefinedName) {
+
+  if (_scriptsDataModel.fieldExists(rayIdx, userDefinedName)) {
+    throw std::invalid_argument("field name exist; cannot rename");
+  }
+  if (_scriptsDataModel.fieldExists(rayIdx, tempName)) {
+    _scriptsDataModel.copyField2(rayIdx, tempName, userDefinedName);
+  } 
+}
+
+void ScriptsDataController::assign(size_t rayIdx, string tempName, string userDefinedName) {
+  //_data->loadFieldsFromRays(); // TODO: this is a costly function as it moves the data/or pointers
+  // TODO: where are the field names kept? in the table map? can i just change that?
+  // Because each RadxRay holds its own FieldNameMap,
+  // TODO: maybe ... no longer relavant?
+
+  // Let the ScriptsDataModel handle the changes? the renaming?
+  // But, decide here if this is a rename or a copy 
+
+  if (_scriptsDataModel.fieldExists(rayIdx, userDefinedName)) {
+    // copy temp data into existing field data
+    // delete temp field and data
+    _scriptsDataModel.copyField(rayIdx, tempName, userDefinedName);
+    _scriptsDataModel.RemoveField(rayIdx, tempName);
+  } else {
+    // rename the temp field 
+    _scriptsDataModel.renameField(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void ScriptsDataController::assignByRay(string tempName, string userDefinedName) {
+  assign(_currentRayIdx, tempName, userDefinedName);
+}
+
+void ScriptsDataController::assign(string tempName, string userDefinedName) {
+
+  // for each ray ...
+  size_t nRays = _scriptsDataModel.getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    assign(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void ScriptsDataController::assign(string tempName, string userDefinedName,
+  size_t sweepIndex) {
+
+  // for each ray of sweep
+  size_t firstRayInSweep = _scriptsDataModel.getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = _scriptsDataModel.getLastRayIndex(sweepIndex);
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
+    assign(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void ScriptsDataController::copyField(string tempName, string userDefinedName) {
+
+  // for each ray ...
+  size_t nRays = _scriptsDataModel.getNRays();
+  for (size_t rayIdx=0; rayIdx < nRays; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
+  }
+}
+
+void ScriptsDataController::copyField(string tempName, string userDefinedName,
+  size_t sweepIndex) {
+
+  // for each ray of sweep
+  size_t firstRayInSweep = _scriptsDataModel.getFirstRayIndex(sweepIndex);
+  size_t lastRayInSweep = _scriptsDataModel.getLastRayIndex(sweepIndex);
+  for (size_t rayIdx=firstRayInSweep; rayIdx <= lastRayInSweep; rayIdx++) {
+    copyField(rayIdx, tempName, userDefinedName);
+  }
+}
+
+
 // reads all sweeps
-void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
+void ScriptsDataController::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
   bool debug_verbose, bool debug_extra)
 {
 
@@ -1568,7 +1814,7 @@ void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
 }
 
 /*
-vector<double> *DataModel::getPossibleSweepAngles(string fileName)
+vector<double> *ScriptsDataController::getPossibleSweepAngles(string fileName)
 {
 
   LOG(DEBUG) << "enter";
@@ -1589,7 +1835,7 @@ vector<double> *DataModel::getPossibleSweepAngles(string fileName)
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::getPossibleSweepAngles\n";
+      errMsg += "ScriptsDataController::getPossibleSweepAngles\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
@@ -1631,14 +1877,14 @@ vector<double> *DataModel::getPossibleSweepAngles(string fileName)
 }
 */
 
-vector<string> *DataModel::getPossibleFieldNames(string fileName)
+vector<string> *ScriptsDataController::getPossibleFieldNames(string fileName)
 {
 
   // read meta data
   LOG(DEBUG) << "enter";
 
   deleteLookAhead();
-  getLookAhead(fileName);
+  getSweepsAndFields(fileName);
  
   vector<string> *allFieldNames = new vector<string>;
   for (vector<RadxField *>::const_iterator iter = _lookAheadFields.begin(); iter != _lookAheadFields.end(); ++iter)
@@ -1654,7 +1900,7 @@ vector<string> *DataModel::getPossibleFieldNames(string fileName)
 
 
 // may not be used; may be the same as getLookAhead??
-void DataModel::readFileMetaData(string fileName)
+void ScriptsDataController::readFileMetaData(string fileName)
 {
 
   LOG(DEBUG) << "enter";
@@ -1676,7 +1922,7 @@ void DataModel::readFileMetaData(string fileName)
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "DataModel::getPossibleFieldNames\n";
+      errMsg += "ScriptsDataController::getPossibleFieldNames\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
@@ -1723,11 +1969,11 @@ void DataModel::readFileMetaData(string fileName)
 }
 
 
-size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elevation) {
+size_t ScriptsDataController::findClosestRay(float azimuth, int sweepNumber) { // float elevation) {
   LOG(DEBUG) << "enter azimuth = " << azimuth << " sweepNumber = " << sweepNumber;
+  return _scriptsDataModel.findClosestRay(azimuth, sweepNumber);
 
-  DataModel *dataModel = DataModel::Instance();
-
+/*
   _vol->loadRaysFromFields();
 
   // NOTE! Sweep Number, NOT Sweep Index!!!
@@ -1743,7 +1989,7 @@ size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elev
   //  throw std::invalid_argument("unknown sweep elevation");
   //int requestedSweepNumber = sweep->getSweepNumber();
 
-  const vector<RadxRay *> rays = dataModel->getRays();
+  const vector<RadxRay *> rays = getRays();
   // find that ray
   bool foundIt = false;
   double minDiff = 1.0e99;
@@ -1787,7 +2033,7 @@ size_t DataModel::findClosestRay(float azimuth, int sweepNumber) { // float elev
   return closestRayIdx;
 }
 
-size_t DataModel::getRayIndex(size_t baseIndex, int offset, int sweepNumber) {
+size_t ScriptsDataController::getRayIndex(size_t baseIndex, int offset, int sweepNumber) {
   RadxSweep *sweep = _vol->getSweepByNumber(sweepNumber);
   size_t startRayIndex = sweep->getStartRayIndex();
   size_t endRayIndex = sweep->getEndRayIndex();
@@ -1811,9 +2057,10 @@ size_t DataModel::getRayIndex(size_t baseIndex, int offset, int sweepNumber) {
   
 
   return idx;
+  */
 }
 
-size_t DataModel::calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset) {
+size_t ScriptsDataController::calculateRayIndex_f(size_t idx, size_t start, size_t end, int offset) {
 
   size_t new_idx;
 

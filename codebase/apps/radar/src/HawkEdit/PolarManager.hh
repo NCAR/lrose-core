@@ -287,11 +287,12 @@ public slots:
                        int endHour, int endMinute, int endSecond);
   void resetStartEndTime();
 
-  void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps);
+  void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps,
+    string dataFileName);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
-  void runScriptBatchModeDebug(QString script, bool useBoundary, 
-    bool useAllSweeps, bool useTimeRange);  
+  //void runScriptBatchModeDebug(QString script, bool useBoundary, 
+  //  bool useAllSweeps, bool useTimeRange);  
   void undoScriptEdits(); // bool batchMode = false);
   void redoScriptEdits(); // bool batchMode = false);
   void cancelScriptRun();

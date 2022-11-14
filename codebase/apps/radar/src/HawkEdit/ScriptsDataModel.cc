@@ -26,6 +26,53 @@ void ScriptsDataModel::setData(RadxVol *vol) {
 */
 
 
+void ScriptsDataModel::_initForRead() {
+  if (_vol != NULL) delete _vol;
+  _vol = new RadxVol();
+} 
+
+void ScriptsDataModel::_readData(RadxFile &file, string path) {
+
+  LOG(DEBUG) << "  reading data file path: " << path;    
+    
+  if (file.readFromPath(path, *_vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "ScriptsDataModel::readData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + path + "\n";
+      cerr << errMsg;
+      throw errMsg;
+  } 
+  cerr << "after " << endl;
+
+  _vol->convertToFl32();
+
+  // adjust angles for elevation surveillance if needed
+  // TODO: this step takes FOREVER! See if it can be skipped
+  // maybe needed to fix for airborne data
+  //_vol->setAnglesForElevSurveillance();
+  
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  _vol->computeFixedAnglesFromRays();
+
+    LOG(DEBUG) << "----------------------------------------------------";
+    LOG(DEBUG) << "perform archive retrieval";
+    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
+   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
+   //      << _sweepManager.getGuiIndex() << ", "
+   //      << _sweepManager.getSelectedAngle();
+    LOG(DEBUG) << "----------------------------------------------------";
+
+  // printAzimuthInRayOrder();
+
+  _currentFilePath = path;
+
+  LOG(DEBUG) << "exit";
+}
+
 int ScriptsDataModel::openRead(string &inputPath, int sweepNumber,
   vector<string> *fieldNames, bool debug_verbose, bool debug_extra) {
 
@@ -43,10 +90,84 @@ int ScriptsDataModel::openRead(string &inputPath, int sweepNumber,
   return 0;
 }
 
+void ScriptsDataModel::readData(string path,
+  bool debug_verbose, bool debug_extra) {
 
-bool ScriptsDataModel::okToStream() {
-  return _okToStream;
+  LOG(DEBUG) << "enter";
+  // set up file object for reading
+
+  cerr << "before " << endl;
+  RadxFile file;
+  _initForRead();
+  _readData(file, path);
 }
+
+void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
+  bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter";
+  // set up file object for reading
+
+  cerr << "before " << endl;
+  RadxFile file;
+  _initForRead();
+  _setupVolRead(file, fieldNames, debug_verbose, debug_extra);
+  _readData(file, path);
+} 
+
+void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
+  int sweepNumber,
+  bool debug_verbose, bool debug_extra) {
+
+  LOG(DEBUG) << "enter";
+
+  cerr << "before " << endl;
+  RadxFile file;
+  _initForRead();
+  _setupVolRead(file, fieldNames, sweepNumber, debug_verbose, debug_extra);
+  _readData(file, path);
+}
+
+/*   
+  LOG(DEBUG) << "  reading data file path: " << path;    
+    
+  if (file.readFromPath(path, *_vol)) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "ScriptsDataModel::readData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + path + "\n";
+      cerr << errMsg;
+      throw errMsg;
+  } 
+  cerr << "after " << endl;
+
+  _vol->convertToFl32();
+
+  // adjust angles for elevation surveillance if needed
+  
+  _vol->setAnglesForElevSurveillance();
+  
+  // compute the fixed angles from the rays
+  // so that we reflect reality
+  
+  _vol->computeFixedAnglesFromRays();
+
+    LOG(DEBUG) << "----------------------------------------------------";
+    LOG(DEBUG) << "perform archive retrieval";
+    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
+    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
+   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
+   //      << _sweepManager.getGuiIndex() << ", "
+   //      << _sweepManager.getSelectedAngle();
+    LOG(DEBUG) << "----------------------------------------------------";
+
+  // printAzimuthInRayOrder();
+
+  _currentFilePath = path;
+
+  LOG(DEBUG) << "exit";
+}
+*/
 
 // return data for the field, at the sweep and ray index
 const vector<float> *ScriptsDataModel::GetData(string fieldName,
@@ -457,175 +578,6 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
 void ScriptsDataModel::getRayData(string path, vector<string> &fieldNames,
   int sweepNumber) {
   readData(path, fieldNames, sweepNumber);
-}
-
-void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
-  bool debug_verbose, bool debug_extra) {
-
-  LOG(DEBUG) << "enter";
-  // set up file object for reading
-
-  cerr << "before " << endl;
-  RadxFile file;
-  if (_vol != NULL) delete _vol;
-  _vol = new RadxVol();
-  //_vol->clear();
-  _setupVolRead(file, fieldNames, debug_verbose, debug_extra);
-   
-  LOG(DEBUG) << "  reading data file path: " << path;    
-    
-  if (file.readFromPath(path, *_vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "ScriptsDataModel::readData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + path + "\n";
-      cerr << errMsg;
-      throw errMsg;
-  } 
-  cerr << "after " << endl;
-
-  //if (file.getFileFormat() == RadxFile::FILE_FORMAT_NEXRAD_AR2)
-  //  _okToStream = true;
-  //else
-  //  _okToStream = false;
-
-  // check for fields read
-  //bool nFieldsConstantPerRay = true;
-  //_vol->loadFieldsFromRays(nFieldsConstantPerRay);
-
-  /*
-  vector<string>::iterator it;
-  for (it=fieldNames.begin(); it != fieldNames.end(); ++it) {
-    RadxField *field = _vol->getField(*it);
-    if (field == NULL) {
-        string errMsg = "ERROR - No field read\n";
-        errMsg += "ScriptsDataModel::readData\n";
-        errMsg += " field: " + *it + "\n";
-        errMsg += "  path: " + path + "\n";
-        cerr << errMsg;
-        //throw errMsg;
-    } else {
-      cerr << "read field " << *it << endl;
-    }
-  }
-  // or if no field found when requested send error message???
-  */
-
-  _vol->convertToFl32();
-
-  // adjust angles for elevation surveillance if needed
-  // TODO: this step takes FOREVER! See if it can be skipped
-  //_vol->setAnglesForElevSurveillance();
-  
-  // compute the fixed angles from the rays
-  // so that we reflect reality
-  
-  _vol->computeFixedAnglesFromRays();
-
-    LOG(DEBUG) << "----------------------------------------------------";
-    LOG(DEBUG) << "perform archive retrieval";
-    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
-    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
-   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
-   //      << _sweepManager.getGuiIndex() << ", "
-   //      << _sweepManager.getSelectedAngle();
-    LOG(DEBUG) << "----------------------------------------------------";
-
-  // printAzimuthInRayOrder();
-
-  _currentFilePath = path;
-
-  LOG(DEBUG) << "exit";
-}
-
-
-
-void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
-  int sweepNumber,
-	bool debug_verbose, bool debug_extra) {
-
-  LOG(DEBUG) << "enter";
-  // set up file object for reading
-
-  //cerr << "comparing " << path << " with \n" <<
-  //        "          " << _currentFilePath << endl;
-
-  //if (_currentFilePath.compare(path) == 0) {
-  //  // don't reread the same file
-  //  return;
-  //}
-
-  cerr << "before " << endl;
-  RadxFile file;
-  if (_vol != NULL) delete _vol;
-  _vol = new RadxVol();
-  //_vol->clear();
-  _setupVolRead(file, fieldNames, sweepNumber, debug_verbose, debug_extra);
-   
-  LOG(DEBUG) << "  reading data file path: " << path;    
-    
-  if (file.readFromPath(path, *_vol)) {
-      string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "ScriptsDataModel::readData\n";
-      errMsg += file.getErrStr() + "\n";
-      errMsg += "  path: " + path + "\n";
-      cerr << errMsg;
-      throw errMsg;
-  } 
-  cerr << "after " << endl;
-
-  //if (file.getFileFormat() == RadxFile::FILE_FORMAT_NEXRAD_AR2)
-  //  _okToStream = true;
-  //else
-  //  _okToStream = false;
-
-  // check for fields read
-  //bool nFieldsConstantPerRay = true;
-  //_vol->loadFieldsFromRays(nFieldsConstantPerRay);
-
-  /*
-  vector<string>::iterator it;
-  for (it=fieldNames.begin(); it != fieldNames.end(); ++it) {
-    RadxField *field = _vol->getField(*it);
-    if (field == NULL) {
-        string errMsg = "ERROR - No field read\n";
-        errMsg += "ScriptsDataModel::readData\n";
-        errMsg += " field: " + *it + "\n";
-        errMsg += "  path: " + path + "\n";
-        cerr << errMsg;
-        //throw errMsg;
-    } else {
-      cerr << "read field " << *it << endl;
-    }
-  }
-  // or if no field found when requested send error message???
-  */
-
-  _vol->convertToFl32();
-
-  // adjust angles for elevation surveillance if needed
-  
-  _vol->setAnglesForElevSurveillance();
-  
-  // compute the fixed angles from the rays
-  // so that we reflect reality
-  
-  _vol->computeFixedAnglesFromRays();
-
-    LOG(DEBUG) << "----------------------------------------------------";
-    LOG(DEBUG) << "perform archive retrieval";
-    LOG(DEBUG) << "  read file: " << _vol->getPathInUse();
-    LOG(DEBUG) << "  nSweeps: " << _vol->getNSweeps();
-   // LOG(DEBUG) << "  guiIndex, fixedAngle: " 
-   //      << _sweepManager.getGuiIndex() << ", "
-   //      << _sweepManager.getSelectedAngle();
-    LOG(DEBUG) << "----------------------------------------------------";
-
-  // printAzimuthInRayOrder();
-
-  _currentFilePath = path;
-
-  LOG(DEBUG) << "exit";
 }
 
 
@@ -1245,11 +1197,16 @@ RadxRay *ScriptsDataModel::getRay(size_t rayIdx) {
   
   //  get the ray for this field 
   const vector<RadxRay *>  &rays = _vol->getRays();
-
+  if (rayIdx >= rays.size()) {
+    LOG(DEBUG) << "ScriptsDataModel::getRay ERROR - ray index >= number of rays";
+    string msg = "ScriptsDataModel::getRay bad ray index ";
+    msg.append(to_string(rayIdx));
+    throw std::invalid_argument(msg);    
+  }
   RadxRay *ray = rays.at(rayIdx);
   if (ray == NULL) {
-    LOG(DEBUG) << "ERROR - ray is NULL";
-    string msg = "bad ray index ";
+    LOG(DEBUG) << "ScriptsDataModel::getRay ERROR - ray is NULL";
+    string msg = "ScriptsDataModel::getRay bad ray index ";
     msg.append(to_string(rayIdx));
     throw std::invalid_argument(msg);
   } else {
@@ -1463,7 +1420,7 @@ void ScriptsDataModel::clearVolume() {
 
 }
 
-void ScriptsDataModel::getLookAhead(string fileName) {
+void ScriptsDataModel::getSweepsAndFields(string fileName) {
 
   LOG(DEBUG) << "enter";
 
@@ -1483,7 +1440,7 @@ void ScriptsDataModel::getLookAhead(string fileName) {
     
     if (file.readFromPath(inputPath, vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "ScriptsDataModel::getLookAhead\n";
+      errMsg += "ScriptsDataModel::getSweepsAndFields\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
@@ -1856,7 +1813,7 @@ vector<string> *ScriptsDataModel::getPossibleFieldNames(string fileName)
   LOG(DEBUG) << "enter";
 
   deleteLookAhead();
-  getLookAhead(fileName);
+  getSweepsAndFields(fileName);
  
   vector<string> *allFieldNames = new vector<string>;
   for (vector<RadxField *>::const_iterator iter = _lookAheadFields.begin(); iter != _lookAheadFields.end(); ++iter)

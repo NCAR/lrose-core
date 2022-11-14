@@ -24,6 +24,7 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view)
 
   _currentView = view;
   _currentModel = new ScriptEditorModel();
+  _scriptsDataController = NULL;
 
   //  functionsModel = new SoloFunctionsModel(_currentModel);
 
@@ -48,13 +49,9 @@ ScriptEditorController::ScriptEditorController(ScriptEditorView *view)
 
 ScriptEditorController::ScriptEditorController(ScriptEditorView *view, ScriptEditorModel *model)
 {
-  // int rows;
-  // int cols;
-
-
   _currentView = view;
-
   _currentModel = model;
+  _scriptsDataController = NULL;
 
   //  functionsModel = new SoloFunctionsModel(_currentModel);
   _soloFunctionsController = new SoloFunctionsController(); // _currentModel->_vol);
@@ -109,7 +106,7 @@ void ScriptEditorController::reset() {
 
 vector<string> *ScriptEditorController::getFieldNames()
 {
-  vector<string> *names = _currentModel->getFields();
+  vector<string> *names = _scriptsDataController->getUniqueFieldNameList(); // _currentModel->getFields();
   LOG(DEBUG) << " In ScriptEditorController::getFieldNames, there are " << names->size() << " field names";
   return names;
 }
@@ -140,6 +137,7 @@ void ScriptEditorController::setData(string fieldName, vector<float> *data)
 }
 */
 
+// I don't think this is used; or at least should NOT be used
 void  ScriptEditorController::needFieldNames() {
   fieldNamesProvided(getFieldNames());
 }
@@ -173,7 +171,7 @@ void ScriptEditorController::volumeUpdated(QStringList newFieldNames) {
 }
 
 
-void ScriptEditorController::open(string fileName)
+void ScriptEditorController::openData(string fileName)
 {
 
   // _currentModel->initData(fileName);
@@ -222,7 +220,8 @@ void ScriptEditorController::setupFieldArrays() {
           // ===== set field to array of numbers; begin =====
             // get the field data, for the current (sweep, ray)
       try {
-        const vector<float> *fieldData = _soloFunctionsController->getData(*it);  
+        // TODO: should this be _scriptsDataController->getData??? YES! probably!!!
+        const vector<float> *fieldData = _scriptsDataController->getRayData(*it);  
 
         QJSValue fieldArray = engine->newArray(fieldData->size());
         QString vectorName = fieldName.append("_V");    
@@ -307,7 +306,7 @@ void ScriptEditorController::saveFieldArrays(std::map<QString, QString> &previou
             float theValue = (float) jsArray.property(i).toNumber();
             floatData->at(i) = theValue;
         }
-        _soloFunctionsController->setData(fieldName, floatData); 
+        _scriptsDataController->setData(fieldName, floatData); 
 
         // just some debugging stuff
         QString resultString = it2.value().toString();
@@ -732,7 +731,7 @@ uncate(100);
 }
 
 // run in batch mode ...
-// TODO: consider this running with separate DataModel, etc.
+// TODO: consider this running with separate ScriptsDataModel, etc.
 // so that current GUI settings are not affected ???
 // TODO: We also need separate command-line access to this function.  
 // separate DataEngine???
@@ -742,22 +741,25 @@ void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFile
   vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
 
   // for each archive file 
-  //vector<string>::iterator it;
-  //for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
+  vector<string>::iterator it;
+  for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
     //   load each archive file
-    // TODO: I don't like accessing the DataModel here.  Who should load
-    // the new data file???? PolarManager?? call to timeNav???
-    //DataModel *dataModel = DataModel::Instance();
-    //dataModel->readData(*it, fieldNames,
+    // I don't like accessing the ScriptsDataModel here.  Who should load
+    // the new data file???? PolarManager?? call to timeNav??? No, the ScriptsDataModel
+    //ScriptsDataModel *ScriptsDataModel = ScriptsDataModel::Instance();
+    //ScriptsDataModel->readData(*it, fieldNames,
     //  debug_verbose, debug_extra);
 
     //   runForEachRayScript
-    runForEachRayScript(script, useBoundary, boundaryPoints);
+    runForEachRayScript(script, useBoundary, boundaryPoints, *it);
     //   save archive file to temp area
-    //dataModel->writeData(saveDirectoryPath);
-  //}
+    //ScriptsDataModel->writeData(saveDirectoryPath);
+  }
 }
 
+void ScriptEditorController::writeData(string &path) {
+  _scriptsDataController->writeData(path);
+}
 
 string ScriptEditorController::lowerIt(string s) {
   string lowered = s;
@@ -787,8 +789,41 @@ vector<bool> *ScriptEditorController::getListOfFieldsReferencedInScript(
   return referenced;
 }
 
+// FIGURE OUT THE RESET! Need to switch the data file for each file in archive file list 
+//  Just have on scriptsDataController and then call reset for each new file?
+//  This avoids allocating a new class each time???
+
+// read all fields; all sweeps
+void ScriptEditorController::_resetDataFile(
+  string &dataFileName, bool debug_verbose, bool debug_extra) {
+    
+  if (_scriptsDataController != NULL) delete _scriptsDataController;
+  _scriptsDataController = new ScriptsDataController(dataFileName, debug_verbose, debug_extra);
+  //_scriptsDataController.openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
+  _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
+}
+
+void ScriptEditorController::_resetDataFile(
+  string &dataFileName, bool debug_verbose, bool debug_extra,
+  vector<string> &fieldNamesInScript) {
+    
+  if (_scriptsDataController != NULL) delete _scriptsDataController;
+  _scriptsDataController = new ScriptsDataController(dataFileName, debug_verbose, debug_extra, fieldNamesInScript);
+  //_scriptsDataController.openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
+  _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
+}
+
+void ScriptEditorController::_resetDataFile(
+  string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  vector<string> &fieldNamesInScript) {
+    
+  if (_scriptsDataController != NULL) delete _scriptsDataController;
+  _scriptsDataController = new ScriptsDataController(dataFileName, sweepNumber, debug_verbose, debug_extra, fieldNamesInScript);
+  _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
+}
+
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
-  vector<Point> &boundaryPoints)
+  vector<Point> &boundaryPoints, string dataFileName)
 {
   LOG(DEBUG) << "enter";
 
@@ -821,8 +856,13 @@ uncate(100);
       currentVariableContext[it.name()] = it.value().toString();
     }
 
+    bool debug = false;
+     // well, we need to merge the fields so, just read all the fields!!
+    _resetDataFile(dataFileName, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
+
     // set initial field names
     initialFieldNames = getFieldNames();
+    vector<string> fieldNamesInScript;
 
     vector<bool> *referenced = 
       getListOfFieldsReferencedInScript(*initialFieldNames, script.toStdString());
@@ -837,6 +877,7 @@ uncate(100);
         //vectorName.append("_v");  
         //QString originalName(nameItr->c_str());
         currentVariableContext[vectorName] = vectorName;
+        fieldNamesInScript.push_back(nameItr->c_str());
       }
       idx += 1;
     }
@@ -850,24 +891,24 @@ uncate(100);
     // TODO: free initialFieldNames they are a copy of the unique fieldNames
       // ======                                                                                            
     //    try {
-    _soloFunctionsController->reset();
-    // for each sweep
-   _soloFunctionsController->setCurrentSweepToFirst();
 
-   //while (_soloFunctionsController->moreSweeps()) {
+    // loop over all the rays, independent of the sweeps, because we need
+    // to apply the script to ALL the rays.
+   //_soloFunctionsController->setCurrentSweepToFirst();
+
     // for each ray
-    _soloFunctionsController->setCurrentRayToFirst();
+    // should this be _scriptsDataController->setCurrentRayTOFirst???? YES!
+    _scriptsDataController->setCurrentRayToFirst();
 
     // TODO: edit script to insert _V for all predefined Soloii functions.
     // this allows the context of the field reference to determine if
     // passed by value or passed by reference. _V is by reference. 
   
-    while (_soloFunctionsController->moreRays()) {
+    while (_scriptsDataController->moreRays()) {
       LOG(DEBUG) << "more rays ...";
 
       // reset all field names defined in the global context
-      //needFieldNames();
-      fieldNamesProvided(initialFieldNames);
+      fieldNamesProvided(&fieldNamesInScript);
 
       // calculate boundary mask for each ray? 
       // Yes, when the ray index changes a new boundary mask is calculated 
@@ -930,7 +971,7 @@ uncate(100);
 
       _soloFunctionsController->clearBoundary();
 
-      _soloFunctionsController->nextRay();
+      _scriptsDataController->nextRayIndependentOfSweep();
     } // end while more rays
 
     //_soloFunctionsController->nextSweep();
@@ -1002,7 +1043,7 @@ uncate(100);
         //LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
         std::map<QString, QString>::iterator itv = currentVariableContext.find(it2.name());
         if (itv == currentVariableContext.end()) {
-        //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+          
           // we have a newly defined variable                                                            
           LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
           // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
@@ -1068,7 +1109,7 @@ uncate(100);
 }
 
 void ScriptEditorController::runForEachRayScript(QString script, int currentSweepIndex,
-  bool useBoundary, vector<Point> &boundaryPoints)
+  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName)
 {
   LOG(DEBUG) << "enter";
 
@@ -1103,6 +1144,7 @@ uncate(100);
 
     // set initial field names
     initialFieldNames = getFieldNames();
+    vector<string> fieldNamesInScript;
 
     // add initialFieldNames_v to currentVariableContext!
     //_addFieldNameVectorsToContext(initialFieldNames, &currentVariableContext);
@@ -1112,6 +1154,7 @@ uncate(100);
       //vectorName.append("_v");  
       //QString originalName(nameItr->c_str());
       currentVariableContext[vectorName] = vectorName;
+      fieldNamesInScript.push_back(nameItr->c_str());
     }
 
     LOG(DEBUG) << "Context completely set ...";
@@ -1121,24 +1164,29 @@ uncate(100);
     // TODO: free initialFieldNames they are a copy of the unique fieldNames
       // ======                                                                                            
     //    try {
-    _soloFunctionsController->reset();
+    //_soloFunctionsController->reset();
+    bool debug = false;
+    _resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
     // for each sweep
-    _soloFunctionsController->setCurrentSweepTo(currentSweepIndex);
+    //_scriptsDataController->setCurrentSweepTo(currentSweepIndex);
 
     //while (_soloFunctionsController->moreSweeps()) {
     // for each ray
-    _soloFunctionsController->setCurrentRayToFirstOf(currentSweepIndex);
+    //_scriptsDataController->setCurrentRayToFirstOf(currentSweepIndex);
 
     // TODO: edit script to insert _V for all predefined?? Soloii functions.
     // this allows the context of the field reference to determine if
     // passed by value or passed by reference. _V is by value. 
   
-    while (_soloFunctionsController->moreRays()) {
-      LOG(DEBUG) << "more rays ...";
+    size_t nRays = _scriptsDataController->getNRays();
 
+    for (size_t rayIdx = 0; rayIdx < nRays; rayIdx++) {
+    // while (_scriptsDataController->moreRays()) {
+      // LOG(DEBUG) << "more rays ...";
+      _scriptsDataController->setCurrentRayTo(rayIdx);
       // reset all field names defined in the global context
       //needFieldNames();
-      fieldNamesProvided(initialFieldNames);
+      fieldNamesProvided(&fieldNamesInScript);
 
       // calculate boundary mask for each ray? 
       // Yes, when the ray index changes a new boundary mask is calculated 
@@ -1207,10 +1255,12 @@ uncate(100);
 
       _soloFunctionsController->clearBoundary();
 
-      _soloFunctionsController->nextRay();
+      //_scriptsDataController->nextRay();
     } // end while more rays
 
-    _soloFunctionsController->regularizeRays();  // make sure all rays have the same fields.
+    // if the script didn't modify all rays in the file
+    // make sure all rays have the same fields.
+    //_scriptsDataController->regularizeRays();  
 
     //_soloFunctionsController->nextSweep();
     
@@ -1349,6 +1399,294 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
+
+void ScriptEditorController::runForEachRayScriptOLD(QString script, int currentSweepIndex,
+  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName)
+{
+  LOG(DEBUG) << "enter";
+
+  try {
+  
+    // Grab the context before evaluating the formula                                                      
+    //  YES! This works.  The new global variables are listed here;                                        
+    // just find them and add them to the spreadsheet and to the Model??                                   
+    // HERE!!!                                                                                             
+    // try iterating over the properties of the globalObject to find new variables                         
+    std::map<QString, QString> currentVariableContext;
+    QJSValue theGlobalObject = engine->globalObject();
+
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count = 0;
+
+  QJSValueIterator it(theGlobalObject);
+  while (it.hasNext() && count < 52) {
+    it.next();
+    count += 1;
+  }
+
+    while (it.hasNext()) {
+      it.next();
+      QString theValue = it.value().toString();
+      theValue.truncate(100);
+
+      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().tr\
+uncate(100);                                                                                               
+      currentVariableContext[it.name()] = it.value().toString();
+    }
+
+    // set initial field names
+    initialFieldNames = getFieldNames();
+    vector<string> fieldNamesInScript;
+
+    // add initialFieldNames_v to currentVariableContext!
+    //_addFieldNameVectorsToContext(initialFieldNames, &currentVariableContext);
+    vector<string>::iterator nameItr;
+    for (nameItr = initialFieldNames->begin(); nameItr != initialFieldNames->end(); ++nameItr) {
+      QString vectorName(nameItr->c_str());
+      //vectorName.append("_v");  
+      //QString originalName(nameItr->c_str());
+      currentVariableContext[vectorName] = vectorName;
+      fieldNamesInScript.push_back(nameItr->c_str());
+    }
+
+    LOG(DEBUG) << "Context completely set ...";
+    printQJSEngineContext();
+    LOG(DEBUG) << " ... end of Context";
+
+    // TODO: free initialFieldNames they are a copy of the unique fieldNames
+      // ======                                                                                            
+    //    try {
+    //_soloFunctionsController->reset();
+    bool debug = false;
+    _resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
+    // for each sweep
+    _scriptsDataController->setCurrentSweepTo(currentSweepIndex);
+
+    //while (_soloFunctionsController->moreSweeps()) {
+    // for each ray
+    _scriptsDataController->setCurrentRayToFirstOf(currentSweepIndex);
+
+    // TODO: edit script to insert _V for all predefined?? Soloii functions.
+    // this allows the context of the field reference to determine if
+    // passed by value or passed by reference. _V is by value. 
+  
+    while (_scriptsDataController->moreRays()) {
+      LOG(DEBUG) << "more rays ...";
+
+      // reset all field names defined in the global context
+      //needFieldNames();
+      fieldNamesProvided(&fieldNamesInScript);
+
+      // calculate boundary mask for each ray? 
+      // Yes, when the ray index changes a new boundary mask is calculated 
+      // in the SoloFunctionsController
+      _soloFunctionsController->applyBoundary(useBoundary, boundaryPoints);
+
+      // TODO: set field values in javascript array? by (sweep, ray) would we apply boundary?
+      
+      //setupFieldArrays(); 
+
+      setupBoundaryArray();
+
+      QJSValue result;
+      try {
+        result = engine->evaluate(script);
+      } catch (const char *msg) {
+        QString message;
+        message.append("ERROR from engine->evaluate: ");
+        message.append(msg);
+        LOG(DEBUG) << message.toStdString();
+        throw std::invalid_argument(message.toStdString());
+      } catch (const std::exception& ex) {
+        QString message;
+        message.append("ERROR from engine->evaluate 2: ");
+        message.append(ex.what());
+        LOG(DEBUG) << message.toStdString();
+        throw message.toStdString();
+      }
+      if (result.isError()) {
+        QString message;
+        message.append(result.toString());
+        message.append(" on line number ");
+        message.append(result.property("lineNumber").toString());
+        LOG(DEBUG)
+          << "Uncaught exception at line"
+          << result.property("lineNumber").toInt()
+          << ":" << result.toString().toStdString();
+        throw message.toStdString();
+
+      } else {
+        QString resultString = result.toString();
+        resultString.truncate(25);
+        //if (resultString.toStdString().find("undefined") != string::npos) {
+        //  cerr << "HERE !!!<" << endl;
+        //}
+        LOG(DEBUG) << " the result is " << resultString.toStdString();
+
+        if (result.isArray()) {
+          cerr << " the result is an array\n";
+    //vector<int> myvector;                                                                            
+    //myvector = engine->fromScriptValue(result);                                                       
+        }
+        if (result.isNumber()) {
+          cerr << " the result is a number " << result.toString().toStdString() << endl;
+          //setSelectionToValue(result.toString());                                                        
+        }
+  
+        // TODO: fix up later 
+        //saveFieldArrays(currentVariableContext);
+
+        // save any field variable assignments 
+        // TODO: need to speed this up; also, this is necessary for vector operations
+        // saveFieldVariableAssignments(currentVariableContext);
+  
+      }
+
+      _soloFunctionsController->clearBoundary();
+
+      _scriptsDataController->nextRay();
+    } // end while more rays
+
+    _scriptsDataController->regularizeRays();  // make sure all rays have the same fields.
+
+    //_soloFunctionsController->nextSweep();
+    
+    //}
+      /*
+    } catch (const std::exception& ex) {
+      criticalMessage(ex.what());
+    } catch (const std::string& ex) {
+      criticalMessage(ex);
+    } catch (...) {
+      criticalMessage("Error occurred during evaluation");
+    }
+      */
+    QStringList newFieldNames;
+    //QStringList *newFieldNames;
+    //newFieldNames = findNewFieldNames(currentVariableContext);
+
+  // ======                                                                                            
+  //  YES! This works.  The new global variables are listed here;                                      
+  // just find them and add them to the spreadsheet and to the Model??                                 
+  // HERE!!!                                                                                           
+  // try iterating over the properties of the globalObject to find new variables                       
+    QJSValue newGlobalObject = engine->globalObject();
+    printQJSEngineContext();
+
+  // skip the first 52 elements of the context, trust me, they are system dependent
+  int count2 = 0;
+
+  QJSValueIterator it2(newGlobalObject);
+  while (it2.hasNext() && count2 < 52) {
+    it2.next();
+    count2 += 1;
+  }    
+
+    while (it2.hasNext()) {
+      it2.next();
+
+      if (it2.name().compare("BOUNDARY") != 0) {
+
+      QJSValue value = it2.value();
+      if (value.isArray()) {
+
+        QString theValue = it2.value().toString();
+        theValue.truncate(100);
+        LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+        if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+          // we have a newly defined variable                                                            
+          LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+          // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
+          // so we can do an assignment now.
+          string tempName = it2.name().toStdString();
+          string userDefinedName = it2.name().toStdString();
+          // only assign the ray data if this is a Solo Function, f(x)
+          //size_t length = tempName.length();
+          //if (length > 0) {
+            //if (tempName[length-1] == '#') {
+              //tempName.resize(length-1);
+            tempName.append("#");
+            _assign(tempName, userDefinedName);
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+            //}
+          //}
+        }
+      }
+      if (value.isString()) {
+
+        QString theValue = it2.value().toString();
+        //theValue.truncate(100);
+        //LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+        std::map<QString, QString>::iterator itv = currentVariableContext.find(it2.name());
+        if (itv == currentVariableContext.end()) {
+        //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
+          // we have a newly defined variable                                                            
+          LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+          // COOL! at this point, we have the new field name AND the temporary field name in the RadxVol,
+          // so we can do an assignment now.
+          string tempName = theValue.toStdString();
+          string userDefinedName = it2.name().toStdString();
+          // only assign the ray data if this is a Solo Function, f(x)
+          // remove the ending # because it is not in the RadxVol
+          size_t length = tempName.length();
+          if (length > 0) {
+            if (tempName[length-1] == '#') {
+              tempName.resize(length-1);
+              //tempName.append("#");
+              _assign(tempName, userDefinedName);
+            } else {
+              // this may be a copy command (e.g. ZZ = VG)
+              _copy(tempName, userDefinedName);
+            }  
+            // add Variable list ToScriptEditor(it2.name(), it2.value());
+            newFieldNames << it2.name();
+          
+          }
+        } else {
+          string originalName = it2.name().toStdString();
+          LOG(DEBUG) << "OLD VARIABLE " << originalName;        
+          // previous variable, but check for new values
+          QString originalValueQ = itv->second;
+          QString currentValueQ = it2.value().toString(); 
+          if (currentValueQ.compare(originalValueQ) != 0) {
+            // new value; make assignment
+            // remove the ending # because it is not in the RadxVol
+            string currentValue = currentValueQ.toStdString();
+            size_t length = currentValue.length();
+            if (length > 0) {
+              if (currentValue[length-1] == '#') {
+                currentValue.resize(length-1);
+                //tempName.append("#");
+                _assign(currentValue, originalName, currentSweepIndex);
+                // add Variable list ToScriptEditor(it2.name(), it2.value());
+                //newFieldNames << it2.name();
+              }
+            }
+          }
+
+
+        }
+      }
+    } // not BOUNDARY
+    }
+
+    volumeUpdated(newFieldNames);
+    //volumeUpdated(*newFieldNames);
+    //delete newFieldNames;
+    emit scriptComplete();
+  } catch (std::invalid_argument &ex) {
+    LOG(DEBUG) << "ERROR running script: " << ex.what();
+    QMessageBox::warning(NULL, "Error running script", ex.what());
+  }
+
+
+  reset(); 
+
+  LOG(DEBUG) << "exit";
+}
+
+
 void ScriptEditorController::initProgress(int nFiles) {
   _currentView->initProgress(nFiles);
 }
@@ -1364,13 +1702,13 @@ void ScriptEditorController::batchEditComplete() {
 void ScriptEditorController::_assignByRay(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol
-  _soloFunctionsController->assignByRay(tempName, userDefinedName);
+  _scriptsDataController->assignByRay(tempName, userDefinedName);
 }
 
 void ScriptEditorController::_assign(string tempName, string userDefinedName) {
 
   // rename the field in the RadxVol
-  _soloFunctionsController->assign(tempName, userDefinedName);
+  _scriptsDataController->assign(tempName, userDefinedName);
 }
 
 void ScriptEditorController::_assign(string tempName, string userDefinedName,
@@ -1378,14 +1716,14 @@ void ScriptEditorController::_assign(string tempName, string userDefinedName,
 
   // rename the field in the RadxVol; only copy data for a
   // single sweep
-  _soloFunctionsController->assign(tempName, userDefinedName, 
+  _scriptsDataController->assign(tempName, userDefinedName, 
     (size_t) sweepIndex);
 }
 
 void ScriptEditorController::_copy(string tempName, string userDefinedName) {
 
   // copy the field in the RadxVol
-  _soloFunctionsController->copyField(tempName, userDefinedName);
+  _scriptsDataController->copyField(tempName, userDefinedName);
 }
 
 void ScriptEditorController::_copy(string tempName, string userDefinedName,
@@ -1393,12 +1731,12 @@ void ScriptEditorController::_copy(string tempName, string userDefinedName,
 
   // copy the field in the RadxVol; only copy data for a
   // single sweep
-  _soloFunctionsController->copyField(tempName, userDefinedName, 
+  _scriptsDataController->copyField(tempName, userDefinedName, 
     (size_t) sweepIndex);
 }
 
 void ScriptEditorController::regularizeRays() {
-  _soloFunctionsController->regularizeRays();
+  _scriptsDataController->regularizeRays();
 }
 
 
