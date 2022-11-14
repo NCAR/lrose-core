@@ -5353,18 +5353,18 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
         
     // need to get the current version of the file (by index)
-    string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
-    //  _undoRedoController->getCurrentVersion(archiveFileIndex);
-    //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
-    //if (_getArchiveDataPlainVanilla(inputPath) != 0) { 
-    //if (scriptEditorControl->openData(inputPath) != 0) {       
-      // skip this file
-    //} else {
-      // ====>
-      // NOTE!!! DataModel is now disconnected from the display and selected field
 
-      //bool debug_verbose = false;
-      //bool debug_extra = false;
+    string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
+    string versionPath = _undoRedoController->getCurrentVersion(archiveFileIndex);
+    if (versionPath.size() <= 0) {
+      // use original data file
+    } else {
+      // add the filename to the versionPath
+      versionPath.append("/");
+      string fileName = _timeNavController->getArchiveFileName(archiveFileIndex);
+      inputPath = versionPath.append(fileName);      
+    }
+    //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
       //bool batchMode = true; // to prevent message box on every file
       try {  
         // use regular forEachRay ...
