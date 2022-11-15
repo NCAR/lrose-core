@@ -2944,6 +2944,7 @@ void PolarManager::_openFile()
   _timeNavController->setSliderPosition();
   string path = _timeNavController->getSelectedPath();
   _undoRedoController->reset(path, _timeNavController->getNFiles());
+  _undoRedoController->waterMarkVersion();
 
   LOG(DEBUG) << "exit";
 }
@@ -5654,7 +5655,7 @@ void PolarManager::undoScriptEdits() {
 }
 
 void PolarManager::redoScriptEdits() { 
-  bool batchMode = false;
+  bool batchMode = true;
   if (_operationMode == INDIVIDUAL) 
     batchMode = false;  
 

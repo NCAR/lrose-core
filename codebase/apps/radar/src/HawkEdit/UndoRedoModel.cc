@@ -46,7 +46,7 @@ const string UndoRedoModel::_tmpDir = ".tmp_hawkedit";
 const string UndoRedoModel::_fileDir = "file_";
 
 UndoRedoModel::UndoRedoModel() {
-
+  reset();
 
 
 }
@@ -57,6 +57,9 @@ UndoRedoModel::~UndoRedoModel() {
   _removeTempDirs();
 }
 
+void UndoRedoModel::reset() {
+    _currentBatchIndex = -1; // original version of data file
+}
 
 void UndoRedoModel::_createDirectory(string path) {
     RadxPath tmpDir;
@@ -85,7 +88,8 @@ void UndoRedoModel::setBaseDir(string path, int nFiles) {
 //      throw std::invalid_argument("cannot make temporary directory for undo and redo");
 //    }
   }
-  _currentBatchIndex = -1;
+  reset();
+  //_currentBatchIndex = -1; // original version of data file
   //makeNewBatch(); // record the intial watermark
 }
 
@@ -203,8 +207,8 @@ void UndoRedoModel::fetchArchiveFiles(string seedPath, string seedFileName,
 // move all the version numbers from the batch to the currentVersion 
 void UndoRedoModel::batchUndo() {
 
-  if (_currentBatchIndex > 0) {
-    _currentBatchIndex -= 1;
+  if (_currentBatchIndex-1 >= 0) {
+    _currentBatchIndex -= 1;    
     vector<int> *previousBatch = batches.at(_currentBatchIndex);
     for (int i=0; i<currentVersion.size(); i++) {
       currentVersion.at(i) = previousBatch->at(i);
@@ -215,14 +219,15 @@ void UndoRedoModel::batchUndo() {
 }
 
 void UndoRedoModel::batchRedo() {
-  if (_currentBatchIndex < batches.size() -1) {
-    _currentBatchIndex += 1;
+
+  if (_currentBatchIndex+1 < batches.size()) {
+    _currentBatchIndex += 1;    
     vector<int> *previousBatch = batches.at(_currentBatchIndex);
     for (int i=0; i<currentVersion.size(); i++) {
       currentVersion.at(i) = previousBatch->at(i);
     }
   } else {
-    throw std::invalid_argument("no more batch undo");
+    throw std::invalid_argument("no more batch redo");
   }
 }
 
@@ -236,19 +241,34 @@ void UndoRedoModel::makeNewBatch() {
   // push previous versions onto stack
   // these will always be -1 from the current versions
   for (int i=0; i<nFiles; i++) {
-    newBatch->at(i) = currentVersion.at(i) -1;
+    newBatch->at(i) = currentVersion.at(i); // -1;
   }
   batches.push_back(newBatch);
   _currentBatchIndex += 1;
 
   // push the current versions onto the stack
-  newBatch = new vector<int>;
-  newBatch->resize(nFiles);
-  for (int i=0; i<nFiles; i++) {
-    newBatch->at(i) = currentVersion.at(i);
+  //newBatch = new vector<int>;
+  //newBatch->resize(nFiles);
+  //for (int i=0; i<nFiles; i++) {
+  //  newBatch->at(i) = currentVersion.at(i);
+  //}
+  //batches.push_back(newBatch);
+  //_currentBatchIndex += 1;
+  _printBatchStack();
+}
+
+void UndoRedoModel::_printBatchStack() {
+
+  cerr << "_currentBatchIndex = " << _currentBatchIndex << endl;
+  for (int i=0; i<batches.size(); i++) {
+    cerr << "batch[" << i << "]:  ";
+    vector<int> *batch = batches.at(i);
+    for (int b=0; b<batch->size(); b++) {
+      cerr << batch->at(b) << " ";
+    }
+    cerr << endl;
   }
-  batches.push_back(newBatch);
-  _currentBatchIndex += 1;
+
 }
 
 // get the  version for this file

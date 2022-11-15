@@ -118,7 +118,7 @@ public:
 
 private:
 
-
+  void reset();
   //void _setBaseDirTempStack();
   //void _resetTempStack();
   //string _no_yyyymmdd(string s);
@@ -134,6 +134,7 @@ private:
   bool _validFileNum(int fileNum);
   string _constructFullTempPath(int fileNum, int version);
   void _createDirectory(string path);
+  void _printBatchStack();
 
   //vector<string> _tempDirStack;
   vector<int> currentVersion;
