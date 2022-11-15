@@ -288,7 +288,7 @@ public slots:
   void resetStartEndTime();
 
   void runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps,
-    string dataFileName);
+    string dataFileName, bool notifyListenersWhenVolumeChanges);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
   //void runScriptBatchModeDebug(QString script, bool useBoundary, 

@@ -59,10 +59,10 @@ public slots:
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints,
-    string dataFileName);  
+    string dataFileName, bool updateVolume);  
   void runForEachRayScript(QString script, int currentSweepIndex,
     bool useBoundary, vector<Point> &boundaryPoints,
-    string dataFileName); 
+    string dataFileName, bool updateVolume); 
   void runForEachRayScriptOLD(QString script, int currentSweepIndex,
     bool useBoundary, vector<Point> &boundaryPoints, string dataFileName);
 

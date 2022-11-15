@@ -740,6 +740,8 @@ void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFile
   vector<Point> &boundaryPoints, string saveDirectoryPath,
   vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
 
+  // update the listeners on volume changes only for the first archive file
+  bool updateVolume = true;
   // for each archive file 
   vector<string>::iterator it;
   for (it = archiveFiles.begin(); it != archiveFiles.end(); ++it) {
@@ -751,7 +753,8 @@ void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFile
     //  debug_verbose, debug_extra);
 
     //   runForEachRayScript
-    runForEachRayScript(script, useBoundary, boundaryPoints, *it);
+    runForEachRayScript(script, useBoundary, boundaryPoints, *it, updateVolume);
+    updateVolume = false;
     //   save archive file to temp area
     //ScriptsDataModel->writeData(saveDirectoryPath);
   }
@@ -823,7 +826,7 @@ void ScriptEditorController::_resetDataFile(
 }
 
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
-  vector<Point> &boundaryPoints, string dataFileName)
+  vector<Point> &boundaryPoints, string dataFileName, bool updateVolume)
 {
   LOG(DEBUG) << "enter";
 
@@ -1093,9 +1096,10 @@ uncate(100);
       }
     }
 
-    volumeUpdated(newFieldNames);
-    //volumeUpdated(*newFieldNames);
-    //delete newFieldNames;
+    // only call this if NOT batch editing, or batch editing and this is the last file!!
+    if (updateVolume) 
+      volumeUpdated(newFieldNames);
+
     emit scriptComplete();
   } catch (std::invalid_argument &ex) {
     LOG(DEBUG) << "ERROR running script: " << ex.what();
@@ -1109,7 +1113,7 @@ uncate(100);
 }
 
 void ScriptEditorController::runForEachRayScript(QString script, int currentSweepIndex,
-  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName)
+  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName, bool updateVolume)
 {
   LOG(DEBUG) << "enter";
 
@@ -1383,10 +1387,9 @@ uncate(100);
       }
     } // not BOUNDARY
     }
+    if (updateVolume)
+      volumeUpdated(newFieldNames);
 
-    volumeUpdated(newFieldNames);
-    //volumeUpdated(*newFieldNames);
-    //delete newFieldNames;
     emit scriptComplete();
   } catch (std::invalid_argument &ex) {
     LOG(DEBUG) << "ERROR running script: " << ex.what();

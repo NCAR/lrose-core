@@ -2503,10 +2503,10 @@ void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 void PolarManager::updateVolume(QStringList newFieldNames) {
 
   LOG(DEBUG) << "enter";
-  if (!_batchEditing) {
+  //if (!_batchEditing) {
     _volumeDataChanged(newFieldNames);
     vector<DisplayField *> newFields;
-  }
+  //}
   _unSavedEdits = true;
   LOG(DEBUG) << "exit";
 
@@ -5256,15 +5256,16 @@ void PolarManager::EditRunScript() {
 }
 
 void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps,
-  string dataFileName) {
+  string dataFileName, bool notifyListenersWhenVolumeChanges) {
   vector<Point> boundaryPoints;
   if (boundaryPointEditorControl != NULL) {
     boundaryPoints = boundaryPointEditorControl->getWorldPoints();
   }
+  //bool notifyListenersWhenVolumeChanges = true;
   try {
     if (useAllSweeps) {
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
-        dataFileName);
+        dataFileName, notifyListenersWhenVolumeChanges);
     } else {
       // send the current sweep to the script editor controller
       
@@ -5277,7 +5278,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
-       useBoundary, boundaryPoints, dataFileName);
+       useBoundary, boundaryPoints, dataFileName, notifyListenersWhenVolumeChanges);
     }
     // TODO: signal read of current data file, to get any updates the script made to the data
   } catch (const std::out_of_range& ex) {
@@ -5348,6 +5349,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   // for each archive file 
   int archiveFileIndex = firstArchiveFileIndex;
 
+  bool updateListenersOnVolumeChanged = true;
   //bool cancelled = scriptEditorControl->cancelRequested();
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
 
@@ -5370,7 +5372,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
       try {  
         // use regular forEachRay ...
         scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
-        runForEachRayScript(script, useBoundary, useAllSweeps, inputPath);
+        runForEachRayScript(script, useBoundary, useAllSweeps, inputPath, updateListenersOnVolumeChanged);
         // check if Cancel requested
         //   save archive file to temp area
         //LOG(DEBUG) << "writing to file " << name;
@@ -5408,6 +5410,7 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
         return;
       }
     //}
+    updateListenersOnVolumeChanged = false;  
     archiveFileIndex += 1;
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
     QCoreApplication::processEvents();
