@@ -108,14 +108,14 @@ private:
   moments_field_t _dbmhx;
   moments_field_t _dbmvc;
   moments_field_t _dbmvx;
+  moments_field_t _dbz;
 
   // methods
 
   int _openInputQueue();
   int _processInputMessage();
-  void _processBeam();
-  // void _processMoments(const RadxTime &beamTime);
-
+  void _processRay();
+  
   void _setMomentsIndices(Params::moments_id_t paramId,
 			  moments_field_t &field);
 

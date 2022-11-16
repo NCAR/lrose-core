@@ -776,32 +776,6 @@
     tt->single_val.s = tdrpStrDup("./spol_cal.xml");
     tt++;
     
-    // Parameter 'xmit_rcv_mode'
-    // ctype is '_xmit_rcv_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("xmit_rcv_mode");
-    tt->descr = tdrpStrDup("Transmit/Receive mode for radar");
-    tt->help = tdrpStrDup("Mode for xmit and receive for polarization diversity\nDP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n");
-    tt->val_offset = (char *) &xmit_rcv_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("xmit_rcv_mode_t");
-    tt->enum_def.nfields = 5;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DP_ALT_HV_CO_ONLY");
-      tt->enum_def.fields[0].val = DP_ALT_HV_CO_ONLY;
-      tt->enum_def.fields[1].name = tdrpStrDup("DP_ALT_HV_CO_CROSS");
-      tt->enum_def.fields[1].val = DP_ALT_HV_CO_CROSS;
-      tt->enum_def.fields[2].name = tdrpStrDup("DP_ALT_HV_FIXED_HV");
-      tt->enum_def.fields[2].val = DP_ALT_HV_FIXED_HV;
-      tt->enum_def.fields[3].name = tdrpStrDup("DP_SIM_HV_FIXED_HV");
-      tt->enum_def.fields[3].val = DP_SIM_HV_FIXED_HV;
-      tt->enum_def.fields[4].name = tdrpStrDup("DP_SIM_HV_SWITCHED_HV");
-      tt->enum_def.fields[4].val = DP_SIM_HV_SWITCHED_HV;
-    tt->single_val.e = DP_ALT_HV_CO_CROSS;
-    tt++;
-    
     // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -829,14 +803,14 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("input_fields");
-    tt->descr = tdrpStrDup("List of input fields for moments.");
+    tt->descr = tdrpStrDup("Lookup table for field names in moments.");
     tt->help = tdrpStrDup("Applies to RADX_MOMENTS_INPUT and DSR_MOMENTS_INPUT.");
     tt->array_offset = (char *) &_input_fields - &_start_;
     tt->array_n_offset = (char *) &input_fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(input_field_t);
-    tt->array_n = 13;
+    tt->array_n = 5;
     tt->struct_def.name = tdrpStrDup("input_field_t");
     tt->struct_def.nfields = 2;
     tt->struct_def.fields = (struct_field_t *)
@@ -847,69 +821,37 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_input_fields->id - (char *) _input_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("moments_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 13;
+        tt->struct_def.fields[0].enum_def.nfields = 5;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SNRHC");
-        tt->struct_def.fields[0].enum_def.fields[0].val = SNRHC;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("SNRVC");
-        tt->struct_def.fields[0].enum_def.fields[1].val = SNRVC;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("SNRHX");
-        tt->struct_def.fields[0].enum_def.fields[2].val = SNRHX;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SNRVX");
-        tt->struct_def.fields[0].enum_def.fields[3].val = SNRVX;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("DBMHC");
-        tt->struct_def.fields[0].enum_def.fields[4].val = DBMHC;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("DBMVC");
-        tt->struct_def.fields[0].enum_def.fields[5].val = DBMVC;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("DBMHX");
-        tt->struct_def.fields[0].enum_def.fields[6].val = DBMHX;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("DBMVX");
-        tt->struct_def.fields[0].enum_def.fields[7].val = DBMVX;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("DBZ");
-        tt->struct_def.fields[0].enum_def.fields[8].val = DBZ;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("VEL");
-        tt->struct_def.fields[0].enum_def.fields[9].val = VEL;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("WIDTH");
-        tt->struct_def.fields[0].enum_def.fields[10].val = WIDTH;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[11].val = PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[12].val = RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBMHC");
+        tt->struct_def.fields[0].enum_def.fields[0].val = DBMHC;
+        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("DBMVC");
+        tt->struct_def.fields[0].enum_def.fields[1].val = DBMVC;
+        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("DBMHX");
+        tt->struct_def.fields[0].enum_def.fields[2].val = DBMHX;
+        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("DBMVX");
+        tt->struct_def.fields[0].enum_def.fields[3].val = DBMVX;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("DBZ");
+        tt->struct_def.fields[0].enum_def.fields[4].val = DBZ;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("moments_name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
         (char *) &_input_fields->moments_name - (char *) _input_fields;
-    tt->n_struct_vals = 26;
+    tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = SNRHC;
-      tt->struct_vals[1].s = tdrpStrDup("SNRHC");
-      tt->struct_vals[2].e = SNRVC;
-      tt->struct_vals[3].s = tdrpStrDup("SNRVC");
-      tt->struct_vals[4].e = SNRHX;
+      tt->struct_vals[0].e = DBMHC;
+      tt->struct_vals[1].s = tdrpStrDup("DBMHC");
+      tt->struct_vals[2].e = DBMVC;
+      tt->struct_vals[3].s = tdrpStrDup("DBMVC");
+      tt->struct_vals[4].e = DBMHX;
       tt->struct_vals[5].s = tdrpStrDup("missing");
-      tt->struct_vals[6].e = SNRVX;
+      tt->struct_vals[6].e = DBMVX;
       tt->struct_vals[7].s = tdrpStrDup("missing");
-      tt->struct_vals[8].e = DBMHC;
-      tt->struct_vals[9].s = tdrpStrDup("DBMHC");
-      tt->struct_vals[10].e = DBMVC;
-      tt->struct_vals[11].s = tdrpStrDup("DBMVC");
-      tt->struct_vals[12].e = DBMHX;
-      tt->struct_vals[13].s = tdrpStrDup("missing");
-      tt->struct_vals[14].e = DBMVX;
-      tt->struct_vals[15].s = tdrpStrDup("missing");
-      tt->struct_vals[16].e = DBZ;
-      tt->struct_vals[17].s = tdrpStrDup("DBZ");
-      tt->struct_vals[18].e = VEL;
-      tt->struct_vals[19].s = tdrpStrDup("VEL");
-      tt->struct_vals[20].e = WIDTH;
-      tt->struct_vals[21].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[22].e = PHIDP;
-      tt->struct_vals[23].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[24].e = RHOHV;
-      tt->struct_vals[25].s = tdrpStrDup("RHOHV");
+      tt->struct_vals[8].e = DBZ;
+      tt->struct_vals[9].s = tdrpStrDup("DBZ");
     tt++;
     
     // Parameter 'Comment 7'
@@ -917,6 +859,84 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
+    tt->comment_hdr = tdrpStrDup("AVOIDING THE SUN");
+    tt->comment_text = tdrpStrDup("We want to avoid rays with angles close to the sun, since these will have elevated white noise.");
+    tt++;
+    
+    // Parameter 'avoid_the_sun'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("avoid_the_sun");
+    tt->descr = tdrpStrDup("Option to avoid rays close to the sun.");
+    tt->help = tdrpStrDup("If true we will not include angles within 'sun_avoidance_angle_margin_deg' of the sun.");
+    tt->val_offset = (char *) &avoid_the_sun - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'sun_avoidance_angle_margin_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("sun_avoidance_angle_margin_deg");
+    tt->descr = tdrpStrDup("Angular margin for avoiding the sun (deg).");
+    tt->help = tdrpStrDup("We only consider rays that are outside this margin relative to the sun.");
+    tt->val_offset = (char *) &sun_avoidance_angle_margin_deg - &_start_;
+    tt->single_val.d = 3;
+    tt++;
+    
+    // Parameter 'Comment 8'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("AVOIDING STRONG ECHO");
+    tt->comment_text = tdrpStrDup("We want to avoid rays with strong echo, since this raises the noise floor with thermal emissions.");
+    tt++;
+    
+    // Parameter 'avoid_strong_echo'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("avoid_strong_echo");
+    tt->descr = tdrpStrDup("Option to avoid rays with strong echo.");
+    tt->help = tdrpStrDup("If true we will not include rays with strong echo.");
+    tt->val_offset = (char *) &avoid_strong_echo - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'strong_echo_dbz_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("strong_echo_dbz_threshold");
+    tt->descr = tdrpStrDup("Threshold for considering echo at a gate as strong (dBZ).");
+    tt->help = tdrpStrDup("In computing the strong echo sum, we only include gates with reflectivity in excess of this threshold.");
+    tt->val_offset = (char *) &strong_echo_dbz_threshold - &_start_;
+    tt->single_val.d = 35;
+    tt++;
+    
+    // Parameter 'strong_echo_dbz_sum_max'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("strong_echo_dbz_sum_max");
+    tt->descr = tdrpStrDup("Upper limit of reflectivity sum (dBZ).");
+    tt->help = tdrpStrDup("We add up the reflectivity at all gates with values in excess of 'strong_echo_dbz_threshold'. If the sum exceeds this max, we discard the ray.");
+    tt->val_offset = (char *) &strong_echo_dbz_sum_max - &_start_;
+    tt->single_val.d = 250;
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("COMPUTING STATISTICS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -993,11 +1013,11 @@
     tt->single_val.d = 2000;
     tt++;
     
-    // Parameter 'Comment 8'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT STATISTICS");
     tt->comment_text = tdrpStrDup("");
     tt++;

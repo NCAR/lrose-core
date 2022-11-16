@@ -82,27 +82,11 @@ public:
   } input_mode_t;
 
   typedef enum {
-    DP_ALT_HV_CO_ONLY = 1,
-    DP_ALT_HV_CO_CROSS = 2,
-    DP_ALT_HV_FIXED_HV = 3,
-    DP_SIM_HV_FIXED_HV = 4,
-    DP_SIM_HV_SWITCHED_HV = 5
-  } xmit_rcv_mode_t;
-
-  typedef enum {
-    SNRHC = 0,
-    SNRVC = 1,
-    SNRHX = 2,
-    SNRVX = 3,
-    DBMHC = 4,
-    DBMVC = 5,
-    DBMHX = 6,
-    DBMVX = 7,
-    DBZ = 8,
-    VEL = 9,
-    WIDTH = 10,
-    PHIDP = 11,
-    RHOHV = 12
+    DBMHC = 0,
+    DBMVC = 1,
+    DBMHX = 2,
+    DBMVX = 3,
+    DBZ = 4
   } moments_id_t;
 
   // struct typedefs
@@ -430,12 +414,20 @@ public:
 
   char* cal_xml_file_path;
 
-  xmit_rcv_mode_t xmit_rcv_mode;
-
   double min_elevation;
 
   input_field_t *_input_fields;
   int input_fields_n;
+
+  tdrp_bool_t avoid_the_sun;
+
+  double sun_avoidance_angle_margin_deg;
+
+  tdrp_bool_t avoid_strong_echo;
+
+  double strong_echo_dbz_threshold;
+
+  double strong_echo_dbz_sum_max;
 
   int stats_interval_secs;
 
@@ -466,7 +458,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

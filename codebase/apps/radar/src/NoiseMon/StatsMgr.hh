@@ -42,10 +42,10 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxPlatform.hh>
+#include <euclid/SunPosn.hh>
 
 #include "Args.hh"
 #include "Params.hh"
-#include "MomentData.hh"
 
 using namespace std;
 
@@ -70,20 +70,8 @@ public:
 
   virtual int run() = 0;
 
-  // set methods
-
-  // void setStartTime(double start_time);
-  // void setEndTime(double latest_time);
-  // void setPrt(double prt) { _prt = prt; }
-  // void setEl(double el);
-  // void setAz(double az);
-
-  // add data for a point
+  // process a ray
   
-  void addDataPoint(RadxTime mtime,
-                    double range,
-		    MomentData mdata);
-
   void processRay(const RadxPlatform &radar,
                   RadxRay *ray);
 
@@ -102,6 +90,10 @@ public:
   void printStats(FILE *out);
   int writeStatsToSpdb();
 
+  // missing value
+  
+  static const double missingVal;
+
 protected:
   
   string _progName;
@@ -116,28 +108,18 @@ protected:
   
   int _nGates;
 
+  // sun location
+
+  RadxTime _sunTime;
+  SunPosn _sunPosn;
+  double _elSun, _azSun;
+
   // analysis
 
   RadxTime _thisStartTime;
   RadxTime _nextStartTime;
   
-  // double _startTimeStats;
-  // double _endTimeStats;
-  // double _prevTime;
-  // double _prt;
-  // double _el;
-  // double _az;
-  // double _prevAz;
-  // double _azMovedStats;
-  // double _azMovedPrint;
-
-  // elevation
-
-  // double _sumEl;
-  // double _nEl;
-  // double _meanEl;
-
-  // sums etc
+  // sums and means
 
   double _countCoPol;
   double _countCrossPol;
@@ -154,6 +136,8 @@ protected:
   double _meanNoiseZdr;
   double _meanHtKm;
   
+  double _computeStrongEchoDbzSum(RadxRay *ray);
+    
 private:
 
 };

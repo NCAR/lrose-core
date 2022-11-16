@@ -57,6 +57,8 @@
 
 using namespace std;
 
+const double StatsMgr::missingVal = -9999.0;
+
 // Constructor
 
 StatsMgr::StatsMgr(const string &prog_name,
@@ -82,6 +84,8 @@ StatsMgr::StatsMgr(const string &prog_name,
   
   clearStats();
   
+  _sunTime.set(RadxTime::ZERO);
+
 }
 
 // destructor
@@ -92,56 +96,6 @@ StatsMgr::~StatsMgr()
 
 }
 
-///////////////////////////////
-// set the start and end time
-
-// void StatsMgr::setStartTime(double start_time)
-// {
-//   _startTimeStats = start_time;
-// }
-
-// void StatsMgr::setEndTime(double latest_time)
-// {
-//   _endTimeStats = latest_time;
-//   if (_prevTime != 0) {
-//     double timeGap = _endTimeStats - _prevTime;
-//     if (timeGap > _params.max_time_gap_secs) {
-//       clearStats();
-//     }
-//   }
-// }
-
-////////////////////
-// set the elevation
-
-// void StatsMgr::setEl(double el) {
-
-//   _el = el;
-
-//   _sumEl += _el;
-//   _nEl++;
-
-// }
- 
-// ////////////////////
-// // set the azimuth
-
-// void StatsMgr::setAz(double az) {
-
-//   _az = az;
-
-//   if (_prevAz < -900) {
-//     _prevAz = _az;
-//   } else {
-//     double azDiff = fabs(RadarComplex::diffDeg(_prevAz, _az));
-//     if (azDiff < 10.0) {
-//       _azMovedStats += azDiff;
-//     }
-//     _prevAz = _az;
-//   }
-  
-// }
- 
 /////////////////////////////////
 // check and compute when ready
 
@@ -173,34 +127,67 @@ void StatsMgr::checkCompute(const RadxTime &mtime)
 }
  
 /////////////////////////////////
-// add data to layer
-
-// void StatsMgr::addDataPoint(RadxTime mtime,
-//                             double range,
-// 			    MomentData mdata)
-
-// {
-
-//   if (!_nextStartTime.isValid()) {
-//     // first data point
-//     time_t initTime = mtime.utime();
-//     _thisStartTime = (initTime / _params.stats_interval_secs) * _params.stats_interval_secs;
-//     _nextStartTime = _thisStartTime + _params.stats_interval_secs;
-//   }
-  
-//   double sinEl = sin(_el * DEG_TO_RAD);
-//   double ht = (range * sinEl);
-//   mdata.height = ht;
-
-// }
- 
-/////////////////////////////////
 // process a ray of data
 
 void StatsMgr::processRay(const RadxPlatform &radar,
                           RadxRay *ray)
 
 {
+
+  // update sun posn every 10 secs
+
+  RadxTime rayTime = ray->getRadxTime();
+  if (rayTime - _sunTime > 10) {
+    // recompute every 10 secs
+    _sunPosn.setLocation(radar.getLatitudeDeg(),
+                         radar.getLongitudeDeg(),
+                         radar.getAltitudeKm() * 1000.0);
+    _sunPosn.computePosnNova(rayTime.asDouble(), _elSun, _azSun);
+    _sunTime = rayTime;
+  }
+
+  // check ray is not close to sun
+
+  if (_params.avoid_the_sun) {
+
+    double deltaAz = fabs(ray->getAzimuthDeg() - _azSun);
+    if (deltaAz > 180.0) {
+      deltaAz -= 360.0;
+    }
+    double deltaEl = fabs(ray->getElevationDeg() - _elSun);
+
+    if (deltaAz < _params.sun_avoidance_angle_margin_deg &&
+        deltaEl < _params.sun_avoidance_angle_margin_deg) {
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "StatsMgr::processRay() - avoiding ray close to sun" << endl;
+        cerr << "  sun el, az: " << _elSun << ", " << _azSun << endl;
+        cerr << "  ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+      }
+      return;
+    }
+    
+  } // if (_params.avoid_the_sun)
+
+  // check ray does not have strong echo
+
+  if (_params.avoid_strong_echo) {
+
+    double strongEchoDbzSum = _computeStrongEchoDbzSum(ray);
+    // cerr << "111111111 el, az, dbzSum: "
+    //      << ray->getElevationDeg() << ", "
+    //      << ray->getAzimuthDeg() << ", "
+    //      << strongEchoDbzSum << endl;
+    if (strongEchoDbzSum > _params.strong_echo_dbz_sum_max) {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "StatsMgr::processRay() - avoiding ray with strong echo" << endl;
+        cerr << "  strongEchoDbzSum: " << strongEchoDbzSum << endl;
+      }
+      return;
+    }
+    
+  } // if (_params.avoid_strong_echo) 
+
+  // check time relative to processing interval
   
   if (!_nextStartTime.isValid()) {
     // first data point
@@ -300,16 +287,49 @@ void StatsMgr::processRay(const RadxPlatform &radar,
   
 }
  
+/////////////////////////////////
+// compute sum of strong echo dbz
+
+double StatsMgr::_computeStrongEchoDbzSum(RadxRay *ray)
+{
+
+  // get the DBZ field
+  
+  RadxField *dbzField = ray->getField(_fieldNameMap[Params::DBZ]);
+  if (dbzField == NULL) {
+    cerr << "ERROR - StatsMgr::_computeStrongEchoDbzSum" << endl;
+    cerr << "  Cannot find DBZ field, name: " << _fieldNameMap[Params::DBZ] << endl;
+    cerr << "  Cannot check for strong echo" << endl;
+    return 0.0;
+  }
+
+  Radx::fl32 dbzMiss = dbzField->getMissingFl32();
+  Radx::fl32 *dbzData = dbzField->getDataFl32();
+
+  // loop through the gates
+  
+  double dbzSum = 0.0;
+  size_t nGates = ray->getNGates();
+  for (size_t ii = 0; ii < nGates; ii++) {
+    if (dbzData[ii] == dbzMiss) {
+      continue;
+    }
+    double dbz = dbzData[ii];
+    if (dbz > _params.strong_echo_dbz_threshold) {
+      dbzSum += dbz;
+    }
+  }
+
+  return dbzSum;
+
+}
+
 ////////////////////////////////////////////
 // clear stats info
 
 void StatsMgr::clearStats()
 
 {
-
-  // _sumEl = 0.0;
-  // _nEl = 0.0;
-  // _meanEl = 0.0;
 
   _countCoPol = 0.0;
   _countCrossPol = 0.0;
@@ -325,15 +345,6 @@ void StatsMgr::clearStats()
   _meanDbmvx = -9999.0;
   _meanNoiseZdr = -9999.0;
   _meanHtKm = -9999.0;
-
-  // for (int ii = 0; ii < (int) _layers.size(); ii++) {
-  //   _layers[ii]->clearData();
-  // }
-
-  // _sumEl = 0.0;
-  // _nEl = 0.0;
-  // _startTimeStats = _endTimeStats;
-  // _prevTime = _endTimeStats;
 
 }
   

@@ -54,7 +54,6 @@ CPPC_SRCS = \
 	Args.cc \
 	DsrDataMgr.cc \
 	Main.cc \
-	MomentData.cc \
 	RadxDataMgr.cc \
 	StatsMgr.cc \
 	TsDataMgr.cc \

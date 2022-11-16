@@ -113,45 +113,6 @@ paramdef string {
   p_help = "At a minimum, the calibration file should contain noiseDbm, receiverGainDbm, dbz0 and radarConstant values for each channel.";
 } cal_xml_file_path;
 
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to adjust DBZ based on measured transmitter power.";
-//   p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.";
-// } adjust_dbz_for_measured_xmit_power;
-
-// paramdef boolean {
-//   p_default = false;
-//   p_descr = "Option to adjust ZDR based on measured transmitter power.";
-//   p_help = "If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.";
-// } adjust_zdr_for_measured_xmit_power;
-
-typedef enum {
-
-  /// Dual pol, alternating transmission, copolar receiver only
-  /// (CP2 SBand)
-  DP_ALT_HV_CO_ONLY = 1, 
-  /// Dual pol, alternating transmission, co-polar and cross-polar
-  ///receivers (SPOL with Mitch Switch and receiver in 
-  /// switching mode, CHILL)
-  DP_ALT_HV_CO_CROSS = 2,
-  /// Dual pol, alternating transmission, fixed H and V receivers (SPOL
-  /// with Mitch Switch and receivers in fixed mode)
-  DP_ALT_HV_FIXED_HV = 3,
-  /// Dual pol, simultaneous transmission, fixed H and V receivers (NEXRAD
-  /// upgrade, SPOL with T and receivers in fixed mode)
-  DP_SIM_HV_FIXED_HV = 4,
-  /// Dual pol, simultaneous transmission, switching H and V receivers
-  /// (SPOL with T and receivers in switching mode)
-  DP_SIM_HV_SWITCHED_HV = 5
-
-} xmit_rcv_mode_t;
-
-paramdef enum xmit_rcv_mode_t {
-  p_default = DP_ALT_HV_CO_CROSS;
-  p_descr = "Transmit/Receive mode for radar";
-  p_help = "Mode for xmit and receive for polarization diversity\nDP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n";
-} xmit_rcv_mode;
-
 commentdef {
   p_header = "READING MOMENTS FROM FMQ";
   p_text = "DSR_MOMENTS_INPUT mode only.";
@@ -165,22 +126,11 @@ paramdef double {
 
 typedef enum {
 
-  SNRHC,
-  SNRVC,
-  SNRHX,
-  SNRVX,
-
   DBMHC,
   DBMVC,
   DBMHX,
   DBMVX,
-
-  DBZ,
-  VEL,
-  WIDTH,
-
-  PHIDP,
-  RHOHV
+  DBZ
 
 } moments_id_t;
 
@@ -193,23 +143,55 @@ typedef struct {
 
 paramdef struct input_field_t {
   p_default = {
-    { SNRHC, "SNRHC" },
-    { SNRVC, "SNRVC" },
-    { SNRHX, "missing" },
-    { SNRVX, "missing" },
     { DBMHC, "DBMHC" },
     { DBMVC, "DBMVC" },
     { DBMHX, "missing" },
     { DBMVX, "missing" },
-    { DBZ, "DBZ" },
-    { VEL, "VEL" },
-    { WIDTH, "WIDTH" },
-    { PHIDP, "PHIDP" },
-    { RHOHV, "RHOHV" }
+    { DBZ, "DBZ" }
   };
-  p_descr = "List of input fields for moments.";
+  p_descr = "Lookup table for field names in moments.";
   p_help = "Applies to RADX_MOMENTS_INPUT and DSR_MOMENTS_INPUT.";
 } input_fields[];
+
+commentdef {
+  p_header = "AVOIDING THE SUN";
+  p_text = "We want to avoid rays with angles close to the sun, since these will have elevated white noise.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to avoid rays close to the sun.";
+  p_help = "If true we will not include angles within 'sun_avoidance_angle_margin_deg' of the sun.";
+} avoid_the_sun;
+
+paramdef double {
+  p_default = 3.0;
+  p_descr = "Angular margin for avoiding the sun (deg).";
+  p_help = "We only consider rays that are outside this margin relative to the sun.";
+} sun_avoidance_angle_margin_deg;
+
+commentdef {
+  p_header = "AVOIDING STRONG ECHO";
+  p_text = "We want to avoid rays with strong echo, since this raises the noise floor with thermal emissions.";
+}
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to avoid rays with strong echo.";
+  p_help = "If true we will not include rays with strong echo.";
+} avoid_strong_echo;
+
+paramdef double {
+  p_default = 35.0;
+  p_descr = "Threshold for considering echo at a gate as strong (dBZ).";
+  p_help = "In computing the strong echo sum, we only include gates with reflectivity in excess of this threshold.";
+} strong_echo_dbz_threshold;
+
+paramdef double {
+  p_default = 250.0;
+  p_descr = "Upper limit of reflectivity sum (dBZ).";
+  p_help = "We add up the reflectivity at all gates with values in excess of 'strong_echo_dbz_threshold'. If the sum exceeds this max, we discard the ray.";
+} strong_echo_dbz_sum_max;
 
 commentdef {
   p_header = "COMPUTING STATISTICS";
@@ -244,12 +226,6 @@ paramdef double {
   p_descr = "Maximum range for estimating noise (km).";
   p_help = "This is important if there is a test pulse in the data at long range. If so, set this just short of the test pulse range.";
 } max_range_km;
-
-// paramdef double {
-//   p_default = 3600;
-//   p_descr = "Max time gap in data for stats (s).";
-//   p_help = "If we find a gap that exceeds this, we clear the stats and start again.";
-// } max_time_gap_secs;
 
 paramdef double {
   p_default = 2000;

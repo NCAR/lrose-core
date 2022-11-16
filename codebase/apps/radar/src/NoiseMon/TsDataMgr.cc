@@ -62,36 +62,7 @@ TsDataMgr::TsDataMgr(const string &prog_name,
   _nGates = 0;
   _nGatesAlloc = 0;
 
-  // set up max ht
-
-  // int nLayers = _params.n_layers;
-  // double startHt = _params.start_height;
-  // double deltaHt = _params.delta_height;
-  // _maxHt = startHt + (nLayers + 1) * deltaHt;
-
   _xmitRcvMode = IWRF_XMIT_RCV_MODE_NOT_SET;
-
-  // switch (_params.xmit_rcv_mode) {
-    
-  //   case Params::DP_ALT_HV_CO_ONLY:
-  //     _xmitRcvMode = IWRF_ALT_HV_CO_ONLY;
-  //     break;
-  //   case Params::DP_ALT_HV_CO_CROSS:
-  //     _xmitRcvMode = IWRF_ALT_HV_CO_CROSS;
-  //     break;
-  //   case Params::DP_ALT_HV_FIXED_HV:
-  //     _xmitRcvMode = IWRF_ALT_HV_FIXED_HV;
-  //     break;
-  //   case Params::DP_SIM_HV_FIXED_HV:
-  //     _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
-  //     break;
-  //   case Params::DP_SIM_HV_SWITCHED_HV:
-  //     _xmitRcvMode = IWRF_SIM_HV_SWITCHED_HV;
-  //     break;
-  //   default:
-  //     _xmitRcvMode = IWRF_SIM_HV_FIXED_HV;
-      
-  // } // switch
 
   _mom = NULL;
 
@@ -413,7 +384,7 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
 
   // create the fields
 
-  Radx::fl32 missingFl32 = MomentData::missingVal;
+  Radx::fl32 missingFl32 = StatsMgr::missingVal;
   
   RadxField *dbmhcField = new RadxField(_fieldNameMap[Params::DBMHC], "dBm");
   dbmhcField->setRangeGeom(_startRange, _gateSpacing);
@@ -431,9 +402,13 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
   dbmvxField->setRangeGeom(_startRange, _gateSpacing);
   dbmvxField->setMissingFl32(missingFl32);
 
+  RadxField *dbzField = new RadxField(_fieldNameMap[Params::DBZ], "dBZ");
+  dbzField->setRangeGeom(_startRange, _gateSpacing);
+  dbzField->setMissingFl32(missingFl32);
+
   // fill with data
   
-  vector<Radx::fl32> dbmhcData, dbmvcData, dbmhxData, dbmvxData;
+  vector<Radx::fl32> dbmhcData, dbmvcData, dbmhxData, dbmvxData, dbzData;
   
   for (int igate = 0; igate < _nGates; igate++) {
 
@@ -464,12 +439,19 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
       dbmvxData.push_back(flds.dbmvx);
     }
 
+    if (flds.dbz == MomentsFields::missingDouble) {
+      dbzData.push_back(missingFl32);
+    } else {
+      dbzData.push_back(flds.dbz);
+    }
+
   }
     
   dbmhcField->setDataFl32(_nGates, dbmhcData.data(), true);
   dbmvcField->setDataFl32(_nGates, dbmvcData.data(), true);
   dbmhxField->setDataFl32(_nGates, dbmhxData.data(), true);
   dbmvxField->setDataFl32(_nGates, dbmvxData.data(), true);
+  dbzField->setDataFl32(_nGates, dbzData.data(), true);
 
   // create a RadxRay, containing these fields
 
@@ -493,6 +475,7 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
   ray.addField(dbmvcField);
   ray.addField(dbmhxField);
   ray.addField(dbmvxField);
+  ray.addField(dbzField);
 
   // create RadxPlatform for radar location
 
@@ -567,13 +550,6 @@ void TsDataMgr::_initForMoments()
     _mom = new RadarMoments(_nGates,
                             _params.debug >= Params::DEBUG_NORM,
                             _params.debug >= Params::DEBUG_VERBOSE);
-
-    // if (_params.adjust_dbz_for_measured_xmit_power) {
-    //   _mom->setAdjustDbzForMeasXmitPower();
-    // }
-    // if (_params.adjust_zdr_for_measured_xmit_power) {
-    //   _mom->setAdjustZdrForMeasXmitPower();
-    // }
 
     _mom->setMeasXmitPowerDbmH(_measXmitPowerDbmH);
     _mom->setMeasXmitPowerDbmV(_measXmitPowerDbmV);
