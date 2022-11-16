@@ -96,7 +96,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     font = okAct->font();
     font.setPointSize(actionFontSize);
     okAct->setFont(font);
-    okAct->setStatusTip(tr("run script"));
+    //okAct->setStatusTip(tr("run script"));
     //okAct->setIcon(QIcon(":/images/ok_check.png"));
     connect(okAct, &QAction::triggered, this, &ScriptEditorView::acceptFormulaInput);
     toolBar->addAction(okAct);
@@ -746,8 +746,8 @@ void ScriptEditorView::initProgress(int nFiles) {
   //ss << "processing " << currentIndex << " of "  <<
   //  lastIndex << " files";
   progressBar = new QProgressBar(this); // statusBar);
-  progressBar->setRange(1, nFiles);
-  progressBar->setValue(1);
+  progressBar->setRange(0, nFiles);
+  progressBar->setValue(0);
 
   statusBar()->addWidget(progressBar);
   progressBar->setVisible(true);
@@ -764,7 +764,8 @@ void ScriptEditorView::updateProgress(int currentIndex, int lastIndex) {
   //ss << "processing " << currentIndex << " of "  <<
   //  lastIndex << " files";
 
-  progressBar->setValue(currentIndex+1);
+  cerr << "progress update " << currentIndex << "/" << lastIndex << endl;
+  progressBar->setValue(currentIndex);
 
   //statusBar()->showMessage(QString::fromStdString(ss.str()));
 }

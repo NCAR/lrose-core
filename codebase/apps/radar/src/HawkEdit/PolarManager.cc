@@ -332,7 +332,7 @@ int PolarManager::run(QApplication &app)
   } catch (const std::out_of_range& ex) {
     errorMessage("ERROR", ex.what());
   }
-
+  return 0;
 }
 /*
 void PolarManager::setParamsFile() {
@@ -3892,6 +3892,8 @@ bool PolarManager::evaluateRange(double xRange) {
     //doUpdate = BoundaryPointEditor::Instance()->updateScale(xRange);
   if (boundaryPointEditorControl != NULL) {
     return boundaryPointEditorControl->updateScale(xRange);
+  } else {
+    return false;
   }
 }
 
@@ -5336,7 +5338,11 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   // save the current state, in order to reconnect the DataModel to the interactive controls? 
   saveCurrentState();
 
-  scriptEditorControl->initProgress(lastArchiveFileIndex - firstArchiveFileIndex + 1);
+  // update the progress of each file in three stages, so multiply by 3
+  int nProgressStagesPerFile = 3;
+  int nProgressSteps = (lastArchiveFileIndex - firstArchiveFileIndex + 1) * nProgressStagesPerFile;
+  scriptEditorControl->initProgress(nProgressSteps);
+  QCoreApplication::processEvents();  // let the progress bar update
 
   _batchEditing = batchMode;
 
@@ -5370,12 +5376,19 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
     //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
       //bool batchMode = true; // to prevent message box on every file
       try {  
-        // use regular forEachRay ...
-        scriptEditorControl->updateProgress(archiveFileIndex, lastArchiveFileIndex + 1);
+
+        int currentProgressStep = (archiveFileIndex - firstArchiveFileIndex) * nProgressStagesPerFile;
+        scriptEditorControl->updateProgress(currentProgressStep, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
+
+        // use regular forEachRay ...        
         runForEachRayScript(script, useBoundary, useAllSweeps, inputPath, updateListenersOnVolumeChanged);
         // check if Cancel requested
         //   save archive file to temp area
         //LOG(DEBUG) << "writing to file " << name;
+
+        scriptEditorControl->updateProgress(currentProgressStep+1, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
 
         string nextVersionPath = _getFileNewVersion(archiveFileIndex);
           // _undoRedoController->getNewVersion(archiveFileIndex);
@@ -5386,6 +5399,9 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
   //      currentPath.append(fileName);
         scriptEditorControl->writeData(nextVersionPath);
         //_unSavedEdits = false;
+
+        scriptEditorControl->updateProgress(currentProgressStep+2, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
       
       } catch (FileIException &ex) {
         errorMessage("Error", "FileIException");

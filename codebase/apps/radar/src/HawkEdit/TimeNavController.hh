@@ -95,7 +95,7 @@ public:
   // 2. maintain a separate DataModel? for working through the archive list???
   // NOTE: the edited files will go to a temp directory.  How to manage this??
   // Only one base directory is open/active at a time.
-  string &getArchiveFile(size_t index) {}; 
+  //string &getArchiveFile(size_t index) {}; 
   // or
   //vector<string> &getArchiveFileList(string path,
   //  string startTime, string endTime);
