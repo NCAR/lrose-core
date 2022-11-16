@@ -222,6 +222,7 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
   }
   if (_xmitRcvMode != opsInfo.get_proc_xmit_rcv_mode()) {
     _clearPulseQueue();
+    _xmitRcvMode = (iwrf_xmit_rcv_mode) opsInfo.get_proc_xmit_rcv_mode();
   }
   
   // check that we start with a horizontal pulse
@@ -280,7 +281,6 @@ void TsDataMgr::_processPulse(const IwrfTsPulse *pulse)
 
   // compute the moments
   
-  // cerr << "444444444444444444444 _pulseQueue.size(): " << _pulseQueue.size() << endl;
   _computeMoments(midPulse);
 
   // clear time series data queue
