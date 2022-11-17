@@ -5276,10 +5276,10 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       //  sweep angle; sweep number; sweep index HOW TO KEEP THEM STRAIGHT?!!
       double sweepNumber = _sweepController->getSelectedNumber();
       // int sweepNumber = dataModel->getSweepNumber(sweepAngle);
-      int currentSweepIndex = dataModel->getSweepIndexFromSweepNumber(sweepNumber);
+      //int currentSweepIndex = dataModel->getSweepIndexFromSweepNumber(sweepNumber);
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
-      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+      scriptEditorControl->runForEachRayScript(script, (int) sweepNumber,
        useBoundary, boundaryPoints, dataFileName, notifyListenersWhenVolumeChanges);
     }
     // TODO: signal read of current data file, to get any updates the script made to the data

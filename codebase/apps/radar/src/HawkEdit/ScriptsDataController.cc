@@ -972,44 +972,11 @@ size_t ScriptsDataController::getNRaysSweepIndex(int sweepIndex) {
 // get the first ray for a sweep
 size_t ScriptsDataController::getFirstRayIndex(int sweepIndex) {
   return _scriptsDataModel.getFirstRayIndex(sweepIndex);
-  /*
-  if (sweepIndex < 0) {
-    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: bad sweep index < 0");
-  }
-  _vol->loadRaysFromFields();
-  
-  const vector<RadxSweep *> sweeps = _vol->getSweeps();
-  if (sweepIndex >= sweeps.size()) {
-    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: sweep index > number of sweeps");
-  }
-  RadxSweep *sweep = sweeps.at(sweepIndex);  
-  if (sweep == NULL) {
-    throw std::invalid_argument("ScriptsDataController::getFirstRayIndex: bad sweep index");
-  }
-  size_t firstRayIndex = sweep->getStartRayIndex();
-  return firstRayIndex;
-  */
 }
 
 // get the last ray for a sweep
 size_t ScriptsDataController::getLastRayIndex(int sweepIndex) {
   return _scriptsDataModel.getLastRayIndex(sweepIndex);
-  /*
-  _vol->loadRaysFromFields();
-  
-  const vector<RadxSweep *> sweeps = _vol->getSweeps();
-  if ((sweepIndex < 0) || (sweepIndex >= sweeps.size())) {
-    string msg = "ScriptsDataController::getLastRayIndex sweepIndex out of bounds ";
-    msg.append(std::to_string(sweepIndex));
-    throw std::invalid_argument(msg);
-  }
-  RadxSweep *sweep = sweeps.at(sweepIndex);  
-  if (sweep == NULL) {
-    throw std::invalid_argument("bad sweep index");
-  }
-  size_t lastRayIndex = sweep->getEndRayIndex();
-  return lastRayIndex;
-  */
 }
 
 /*

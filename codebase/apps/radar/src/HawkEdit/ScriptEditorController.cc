@@ -1112,7 +1112,7 @@ uncate(100);
   LOG(DEBUG) << "exit";
 }
 
-void ScriptEditorController::runForEachRayScript(QString script, int currentSweepIndex,
+void ScriptEditorController::runForEachRayScript(QString script, int currentSweepNumber,
   bool useBoundary, vector<Point> &boundaryPoints, string dataFileName, bool updateVolume)
 {
   LOG(DEBUG) << "enter";
@@ -1146,6 +1146,10 @@ uncate(100);
       currentVariableContext[it.name()] = it.value().toString();
     }
 
+    bool debug = false;
+     // well, we need to merge the fields so, just read all the fields!!
+    _resetDataFile(dataFileName, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
+
     // set initial field names
     initialFieldNames = getFieldNames();
     vector<string> fieldNamesInScript;
@@ -1169,8 +1173,8 @@ uncate(100);
       // ======                                                                                            
     //    try {
     //_soloFunctionsController->reset();
-    bool debug = false;
-    _resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
+    //bool debug = false;
+    //_resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
     // for each sweep
     //_scriptsDataController->setCurrentSweepTo(currentSweepIndex);
 
@@ -1182,9 +1186,14 @@ uncate(100);
     // this allows the context of the field reference to determine if
     // passed by value or passed by reference. _V is by value. 
   
-    size_t nRays = _scriptsDataController->getNRays();
+    // TODO: set the scriptsDataController to process the rays for the selected sweep ...
+    // _scriptsDataController->setCurrentSweepTo(currentSweepIndex);
+    int currentSweepIndex = _scriptsDataController->getSweepIndexFromSweepNumber(currentSweepNumber);
+    size_t firstRayOfSweep = _scriptsDataController->getFirstRayIndex(currentSweepIndex);
+    size_t lastRayOfSweep = _scriptsDataController->getLastRayIndex(currentSweepIndex);
+    //size_t nRays = _scriptsDataController->getNRays();
 
-    for (size_t rayIdx = 0; rayIdx < nRays; rayIdx++) {
+    for (size_t rayIdx = firstRayOfSweep; rayIdx <= lastRayOfSweep; rayIdx++) {
     // while (_scriptsDataController->moreRays()) {
       // LOG(DEBUG) << "more rays ...";
       _scriptsDataController->setCurrentRayTo(rayIdx);
@@ -1437,6 +1446,9 @@ uncate(100);
       currentVariableContext[it.name()] = it.value().toString();
     }
 
+    bool debug = false;
+    //_resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
+
     // set initial field names
     initialFieldNames = getFieldNames();
     vector<string> fieldNamesInScript;
@@ -1460,9 +1472,10 @@ uncate(100);
       // ======                                                                                            
     //    try {
     //_soloFunctionsController->reset();
-    bool debug = false;
-    _resetDataFile(dataFileName, currentSweepIndex, debug, debug, fieldNamesInScript);
+
     // for each sweep
+
+    //TODO: set the scriptsDataController to process the rays for the selected sweep ...
     _scriptsDataController->setCurrentSweepTo(currentSweepIndex);
 
     //while (_soloFunctionsController->moreSweeps()) {

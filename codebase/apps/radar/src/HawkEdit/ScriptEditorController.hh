@@ -60,7 +60,7 @@ public slots:
   void runOneTimeOnlyScript(QString script);
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints,
     string dataFileName, bool updateVolume);  
-  void runForEachRayScript(QString script, int currentSweepIndex,
+  void runForEachRayScript(QString script, int currentSweepNumber,
     bool useBoundary, vector<Point> &boundaryPoints,
     string dataFileName, bool updateVolume); 
   void runForEachRayScriptOLD(QString script, int currentSweepIndex,
