@@ -160,7 +160,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     toolBar->addAction(applyAct);
 */
 
-    useBoundaryWidget = new QPushButton(tr("Use &Boundary"));
+    useBoundaryWidget = new QCheckBox(tr("Use &Boundary"));
     useBoundaryWidget->setCheckable(true);
     useBoundaryWidget->setChecked(false);
 
@@ -171,13 +171,20 @@ Q_DECLARE_METATYPE(QVector<double>)
     //applyToAllSweeps = new QRadioButton("all sweeps", this);
     //applyToCurrentSweep->setChecked(true);
 
-    allSweepsToggleButton = new QPushButton(tr("&Current Angle"));
-    allSweepsToggleButton->setStatusTip("Edit current angle or all angles");
-    allSweepsToggleButton->setCheckable(true);
-    allSweepsToggleButton->setChecked(false);
+    //allSweepsToggleButton = new QPushButton(tr("&Current Angle"));
+    //allSweepsToggleButton->setStatusTip("Edit current angle or all angles");
+    //allSweepsToggleButton->setCheckable(true);
+    //allSweepsToggleButton->setChecked(false);
     //allSweepsToggleButton = new QPushButton(tr("&All Angles"));
     //allSweepsToggleButton->setCheckable(true);
     //allSweepsToggleButton->setChecked(true);
+
+    currentSweepButton = new QRadioButton(tr("&Current Angle"), this);
+    allSweepsButton = new QRadioButton(tr("&All Angles"), this);
+    currentSweepButton->setChecked(true);
+    //QButtonGroup useAllSweepsGroup; //  = new QButtonGroup(this);
+    //useAllSweepsGroup.addButton(allSweepsButton);
+    //useAllSweepsGroup.addButton(currentSweepButton);
 
     //QVBoxLayout *vbox = new QVBoxLayout;
     //vbox->addWidget(currentSweepToggleButton);
@@ -210,10 +217,18 @@ Q_DECLARE_METATYPE(QVector<double>)
     browseDirectoryButton->setVisible(false);
     */
 
-    scriptModifiers = new QGroupBox("Modifiers", this);
+    scriptModifiers = new QGroupBox("Options", this);
     checkBoxLayout = new QVBoxLayout;
     checkBoxLayout->addWidget(useBoundaryWidget);
-    checkBoxLayout->addWidget(allSweepsToggleButton);
+
+QFrame* line = new QFrame();
+line->setFrameShape(QFrame::HLine);
+line->setFrameShadow(QFrame::Sunken);
+checkBoxLayout->addWidget(line);
+
+    //checkBoxLayout->insertSpacing(2, 20);
+    checkBoxLayout->addWidget(currentSweepButton);
+    checkBoxLayout->addWidget(allSweepsButton);
     //checkBoxLayout->addWidget(allSweepsToggleButton);
     //checkBoxLayout->addWidget(batchMode);
     //checkBoxLayout->addWidget(currentTimeToggleButton);
@@ -229,7 +244,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     // QAbstractButton::clicked(bool checked = false)
     // If the button is checkable, 
     // checked is true if the button is checked, or false if the button is unchecked.
-    connect(allSweepsToggleButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
+//    connect(allSweepsButton, SIGNAL(clicked(bool)), this, SLOT(currentSweepClicked(bool)));    
     //connect(allSweepsToggleButton,    SIGNAL(clicked(bool)), this, SLOT(allSweepsClicked(bool))); 
 
     //connect(currentTimeToggleButton, SIGNAL(toggled(bool)), this, SLOT(timeRangeClicked(bool)));    
@@ -557,7 +572,7 @@ void ScriptEditorView::acceptFormulaInput()
   cerr << "ForEachRay text entered: " << forEachRayScript.toStdString() << endl;
   
   bool useBoundary = useBoundaryWidget->isChecked(); 
-  bool useAllSweeps = allSweepsToggleButton->isChecked();     
+  bool useAllSweeps = allSweepsButton->isChecked();     
 
   // TODO: should the start and end times be specified in the time nav?
   // Q: what is the relationship between the time nav and the script start and end times?
@@ -1039,7 +1054,7 @@ void ScriptEditorView::currentSweepClicked(bool checked) {
   //currentSweepToggleButton->setChecked(false);
   //allSweepsToggleButton->setChecked(true);
   //notImplementedMessage();
-  
+  /*
   if (allSweepsToggleButton->text().compare("Current Angle") == 0) {
     allSweepsToggleButton->setChecked(true);
     allSweepsToggleButton->setText("All Angles");
@@ -1049,14 +1064,14 @@ void ScriptEditorView::currentSweepClicked(bool checked) {
     allSweepsToggleButton->setText("Current Angle");
     //allSweepsToggleButton->setStatusTip("Edit selected angle");
   } 
-
+*/
 /*
   if (checked) {
-    allSweepsToggleButton->setChecked(false);
+    allSweepsToggleButton->setChecked(true);
   } else {
-    allSweepsToggleButton->setChecked(true);    
+    allSweepsToggleButton->setChecked(false);    
   }
-*/  
+ */
 }
 
 /*

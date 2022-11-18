@@ -134,7 +134,7 @@ private:
     QLabel *cellLabel;
     TextEdit *formulaInput;
     TextEdit *formulaInputForEachRay;
-    QPushButton *useBoundaryWidget;
+    QCheckBox *useBoundaryWidget;
     //QRadioButton *applyToCurrentSweep;
     //QRadioButton *applyToAllSweeps;
     QTreeView *helpView;
@@ -142,6 +142,9 @@ private:
 
     //QPushButton *currentSweepToggleButton;
     QPushButton *allSweepsToggleButton;
+
+    QRadioButton *allSweepsButton;
+    QRadioButton *currentSweepButton;
     QGroupBox *scriptModifiers;
 
     //QPushButton *currentTimeToggleButton;
