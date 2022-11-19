@@ -390,7 +390,11 @@ int RadxSunMon::_processVol()
 
   if (_momentsVol.getNRcalibs() > 0) {
     const vector<RadxRcalib *> rcalibs = _momentsVol.getRcalibs();
-    RadarCalib::copyRadxToIwrf(*(rcalibs[0]), _calib);
+    RadarCalib::copyRadxToIwrf(*(rcalibs[rcalibs.size()-1]), _calib);
+    // cerr << "11111111111111111111111111111111" << endl;
+    // cerr << "111111111111 _momentsVol.getNRcalibs(): " << _momentsVol.getNRcalibs() << endl;
+    // rcalibs[rcalibs.size()-1]->print(cerr);
+    // cerr << "11111111111111111111111111111111" << endl;
   }
 
   _radarConstDb = _params.radar_constant_db;

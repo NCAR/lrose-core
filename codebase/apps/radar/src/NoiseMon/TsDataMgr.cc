@@ -418,25 +418,25 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
     if (flds.dbmhc == MomentsFields::missingDouble) {
       dbmhcData.push_back(missingFl32);
     } else {
-      dbmhcData.push_back(flds.dbmhc);
+      dbmhcData.push_back(flds.dbmhc + _calib.getReceiverGainDbHc());
     }
     
     if (flds.dbmvc == MomentsFields::missingDouble) {
       dbmvcData.push_back(missingFl32);
     } else {
-      dbmvcData.push_back(flds.dbmvc);
+      dbmvcData.push_back(flds.dbmvc + _calib.getReceiverGainDbVc());
     }
     
     if (flds.dbmhx == MomentsFields::missingDouble) {
       dbmhxData.push_back(missingFl32);
     } else {
-      dbmhxData.push_back(flds.dbmhx);
+      dbmhxData.push_back(flds.dbmhx + _calib.getReceiverGainDbHx());
     }
     
     if (flds.dbmvx == MomentsFields::missingDouble) {
       dbmvxData.push_back(missingFl32);
     } else {
-      dbmvxData.push_back(flds.dbmvx);
+      dbmvxData.push_back(flds.dbmvx + _calib.getReceiverGainDbVx());
     }
 
     if (flds.dbz == MomentsFields::missingDouble) {
