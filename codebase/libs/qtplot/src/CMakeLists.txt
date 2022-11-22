@@ -11,6 +11,8 @@
 
 project (libqtplot)
 
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+
 # include directories
 
 include_directories (./include)
@@ -45,6 +47,7 @@ include_directories (../../shapelib/src/include)
 include_directories (../../tdrp/src/include)
 include_directories (../../titan/src/include)
 include_directories (../../toolsa/src/include)
+include_directories (${Qt5Widgets_INCLUDE_DIRS})
 include_directories (${CMAKE_INSTALL_PREFIX}/include)
 if (DEFINED X11_X11_INCLUDE_PATH)
   include_directories (${X11_X11_INCLUDE_PATH})
@@ -77,6 +80,8 @@ else(APPLE)
 # build shared library
   add_library (qtplot SHARED ${SRCS})
 endif(APPLE)
+
+target_link_libraries(Qt::Widgets)
 
 # install
 
