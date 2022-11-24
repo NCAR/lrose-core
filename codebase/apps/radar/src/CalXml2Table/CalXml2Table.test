@@ -1,0 +1,146 @@
+/**********************************************************************
+ * TDRP params for ./CalXml2Table
+ **********************************************************************/
+
+//======================================================================
+//
+// CalXml2Table reads radar calibration files in XML format, and writes 
+//   these out into a comma or space delimited text table.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Directory for calibration files.
+//
+// This dir should contain the .xml files.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/cirrus3/rsfdata/projects/precip/calibration/spol/for_eric/engcals/cal.sband.1.5us.sim/";
+
+///////////// start_time //////////////////////////////
+//
+// The start time for extracting the data.
+//
+// Can be overridden by specifying -start on the command line.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+start_time = {
+    year = 2022,
+    month = 05,
+    day = 25,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
+
+///////////// end_time ////////////////////////////////
+//
+// The end time for extracting the data.
+//
+// Can be overridden by specifying -end on the command line.
+//
+//
+// Type: struct
+//   typedef struct {
+//      int year;
+//      int month;
+//      int day;
+//      int hour;
+//      int min;
+//      int sec;
+//   }
+//
+//
+
+end_time = {
+    year = 2022,
+    month = 08,
+    day = 12,
+    hour = 0,
+    min = 0,
+    sec = 0
+};
+
+//======================================================================
+//
+// OUTPUT DETAILS.
+//
+//======================================================================
+ 
+///////////// add_commented_header ////////////////////
+//
+// If true, write a commented header at the start of the output.
+//
+//
+// Type: boolean
+//
+
+add_commented_header = TRUE;
+
+///////////// comment_character ///////////////////////
+//
+// Character at start of comment lines.
+//
+// Each comment line will be start with this character.
+//
+//
+// Type: string
+//
+
+comment_character = "#";
+
+///////////// column_delimiter ////////////////////////
+//
+// Delimiter between columns.
+//
+//
+// Type: string
+//
+
+column_delimiter = ",";
+

@@ -1,0 +1,103 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+//////////////////////////////////////////////////////////////////////
+// parameter definitions CalXml2Table
+//
+// EOL, NCAR,
+// P.O.Box 3000, Boulder, CO, USA, 80307-3000
+//
+// Dec 2022
+//
+//////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "CalXml2Table reads radar calibration files in XML format, and writes these out into a comma or space delimited text table.";
+}
+
+commentdef {
+  p_header = "DEBUGGING AND PROCESS CONTROL.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+commentdef {
+  p_header = "DATA INPUT";
+};
+
+paramdef string {
+  p_default = "/tmp/calibration";
+  p_descr = "Directory for calibration files.";
+  p_help = "This dir should contain the .xml files.";
+} input_dir;
+
+typedef struct {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int min;
+  int sec;
+} date_time_t;
+
+paramdef struct date_time_t {
+  p_default = { 2011, 01, 01, 00, 00, 00 };
+  p_descr = "The start time for extracting the data";
+  p_help = "Can be overridden by specifying -start on the command line.";
+} start_time;
+
+paramdef struct date_time_t {
+  p_default = { 2011, 01, 01, 00, 00, 00 };
+  p_descr = "The end time for extracting the data";
+  p_help = "Can be overridden by specifying -end on the command line.";
+} end_time;
+
+commentdef {
+  p_header = "OUTPUT DETAILS";
+};
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "If true, write a commented header at the start of the output.";
+} add_commented_header;
+
+paramdef string {
+  p_default = "#";
+  p_descr = "Character at start of comment lines.";
+  p_help = "Each comment line will be start with this character.";
+} comment_character;
+
+paramdef string {
+  p_default = ",";
+  p_descr = "Delimiter between columns.";
+} column_delimiter;
+
+
