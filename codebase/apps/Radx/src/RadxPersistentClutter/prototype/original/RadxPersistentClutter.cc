@@ -36,7 +36,7 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
-TaThread *RadxPersistentClutter::RadxThreads::clone(int index)
+TaThread *RadxPersistentClutter::ComputeThread::clone(int index)
 {
   TaThreadSimple *t = new TaThreadSimple(index);
   t->setThreadContext(this);

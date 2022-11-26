@@ -288,7 +288,7 @@ int RadxPersistentClutterFirstPass::_computeHistoCutoff(void) const
   double muT = _mu(p, T);
 
   int maxk = -1;
-  double maxphisq;
+  double maxphisq = 0.0;
 
   for (int i=0; i<T; ++i)
   {

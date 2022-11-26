@@ -102,7 +102,7 @@ public:
       {
 	return dynamic_cast<const RayClutterInfo *>(&store.at(ae));
       }
-      catch (std::out_of_range err)
+      catch (const std::out_of_range &err)
       {
 	printf("%s is out of range of mappings\n", ae.sprint().c_str());
 	return NULL;
@@ -131,7 +131,7 @@ public:
       {
 	return dynamic_cast<RayClutterInfo *>(&store.at(ae));
       }
-      catch (std::out_of_range err)
+      catch (const std::out_of_range &err)
       {
 	printf("%s is out of range of mappings\n", ae.sprint().c_str());
 	return NULL;
@@ -147,20 +147,20 @@ public:
 protected:
 
   /**
-   * @class RadxThreads
+   * @class ComputeThread
    * @brief Instantiate TaThreadDoubleQue by implementing clone() method
    */
-  class RadxThreads : public TaThreadDoubleQue
+  class ComputeThread : public TaThreadDoubleQue
   {
   public:
     /**
      * Trivial constructor
      */
-    inline RadxThreads(void) : TaThreadDoubleQue() {}
+    inline ComputeThread(void) : TaThreadDoubleQue() {}
     /**
      * Trivial destructor
      */
-    inline virtual ~RadxThreads(void) {}
+    inline virtual ~ComputeThread(void) {}
 
     /**
      * @return pointer to TaThread created in the method
@@ -184,7 +184,7 @@ protected:
   time_t _final_t;    /**< Last time processed, which is the time at which
 		       *   results converged */
 
-  RadxThreads _thread;  /**< Threading */
+  ComputeThread _thread;  /**< Threading */
 
   /**
    * Initialize a RadxRay by converting it into RayxData, and pointing to
