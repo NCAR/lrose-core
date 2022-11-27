@@ -1,16 +1,19 @@
-/**********************************************************
- * paramdef.RadxPersistentClutter
- *
- * This file contains the TDRP parameter definitions for setting the clutter
- * pixels by processing a sufficient quantity of input data using a statistical
- * approach
- * 
- */
+//////////////////////////////////////////////////////////////////////////////////
+//
+// paramdef.RadxPersistentClutter
+//
+// This file contains the TDRP parameter definitions for setting the clutter
+// pixels by processing a sufficient quantity of input data using a statistical
+// approach
+//
+//////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+commentdef {
+  p_header = "RadxPersistentClutter app";
+  p_text = "RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.\n";
+};
 
-commentdef
-{
+commentdef {
   p_header = "RadxApp";
   p_text = "Parameters for general algorithm data filtering for Radx format input data";
 };
@@ -59,19 +62,11 @@ paramdef enum mode_t
 
 paramdef string
 {
-  p_descr = "trigger url";
-  p_help = "URL to trigger off";
-  p_default = "";
-} trigger_url;
-
-paramdef string
-{
   p_descr = "output for Algorithm results";
   p_default = "";
 } output_url;
-  
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 commentdef {
   p_header =
@@ -94,7 +89,7 @@ paramdef boolean
   p_default = FALSE;
 } thread_debug;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 commentdef {
   p_header =
@@ -112,8 +107,6 @@ typedef struct
   double ray_match_elevation_tolerance_deg;
   double ray_match_azimuth_tolerance_deg;
   double ray_match_time_tolerance_sec;
-  boolean is_climo;
-  string climo_file;
 } input_t;
 
 paramdef struct input_t
@@ -122,7 +115,7 @@ paramdef struct input_t
   p_help =
     "index = numerical value to refer to this elsewhere\n"
     "path = where the data is\n"
-    "The first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file";
+    "The first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.";
   p_default = {};
 } input[];
 
@@ -146,14 +139,12 @@ paramdef struct field_map_t
   p_default = {};
 } field_mapping[];
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 commentdef
 {
-  p_header =
-    "Data Read Parameters";
-  p_text =
-    " Parameters that control the reading of input data ";
+  p_header = "Data Read Parameters";
+  p_text = " Parameters that control the reading of input data ";
 };
 
 paramdef double
@@ -187,16 +178,10 @@ paramdef double {
 } read_upper_fixed_angle;
 
 paramdef boolean {
-  p_default = false;
+  p_default = true;
   p_descr = "Option to ignore rays with antenna transition flag set.";
   p_help = "The transition flag is set when the antenna is moving between sweeps. If this parameter is true, rays containing the transition flag will not be read in.";
 } ignore_antenna_transitions;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to ignore data taken in IDLE mode.";
-  p_help = "If true, on read will ignore files with an IDLE scan mode.";
-} ignore_idle_scan_mode_on_read;
 
 paramdef boolean {
   p_default = false;
@@ -209,7 +194,7 @@ paramdef double {
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 commentdef
 {
@@ -328,76 +313,4 @@ paramdef double
   p_help = "Histograms are used to set clutter value. This is the maximum bin";
   p_default = 50.0;
 } histogram_max;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-commentdef {
-  p_header =
-    "Data Write Parameters";
-  p_text =
-    " Parameters that control the writing of output data ";
-}
-
-typedef enum {
-  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
-} netcdf_style_t;
-
-paramdef enum netcdf_style_t {
-  p_default = "CLASSIC";
-  p_descr = "NetCDF style - if output_format is CFRADIAL";
-  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
-} netcdf_style;
-
-commentdef {
-  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to leave data in native byte order.";
-  p_help = "If false, data will be byte-swapped as appropriate on output.";
-} output_native_byte_order;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to compress data fields on output.";
-  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
-} output_compressed;
-
-paramdef int {
-  p_default = 5;
-  p_descr = "Compression level for output, if compressed.";
-  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
-} compression_level;
-
-typedef enum {
-  START_AND_END_TIMES,
-  START_TIME_ONLY,
-  END_TIME_ONLY
-} filename_mode_t;
-
-paramdef enum filename_mode_t {
-  p_default = START_AND_END_TIMES;
-  p_descr = "Mode for computing output file name.";
-  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
-} output_filename_mode;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Add the day directory to the output directory.";
-  p_help = "Path will be output_dir/yyyymmdd/filename.";
-} append_day_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Add the year directory to the output directory.";
-  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
-} append_year_dir_to_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
-
 

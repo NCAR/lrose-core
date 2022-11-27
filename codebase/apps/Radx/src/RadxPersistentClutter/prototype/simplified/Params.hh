@@ -79,19 +79,6 @@ public:
     FILELIST = 2
   } mode_t;
 
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
-
-  typedef enum {
-    START_AND_END_TIMES = 0,
-    START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2
-  } filename_mode_t;
-
   // struct typedefs
 
   typedef struct {
@@ -102,8 +89,6 @@ public:
     double ray_match_elevation_tolerance_deg;
     double ray_match_azimuth_tolerance_deg;
     double ray_match_time_tolerance_sec;
-    tdrp_bool_t is_climo;
-    char* climo_file;
   } input_t;
 
   typedef struct {
@@ -413,8 +398,6 @@ public:
 
   mode_t mode;
 
-  char* trigger_url;
-
   char* output_url;
 
   int num_threads;
@@ -438,8 +421,6 @@ public:
   double read_upper_fixed_angle;
 
   tdrp_bool_t ignore_antenna_transitions;
-
-  tdrp_bool_t ignore_idle_scan_mode_on_read;
 
   tdrp_bool_t set_max_range;
 
@@ -478,22 +459,6 @@ public:
 
   double histogram_max;
 
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  int compression_level;
-
-  filename_mode_t output_filename_mode;
-
-  tdrp_bool_t append_day_dir_to_output_dir;
-
-  tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t write_latest_data_info;
-
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -501,7 +466,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[52];
+  mutable TDRPtable _table[41];
 
   const char *_className;
 

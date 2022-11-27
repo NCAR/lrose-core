@@ -559,6 +559,15 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
+    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter app");
+    tt->comment_text = tdrpStrDup("RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.\n");
+    tt++;
+    
+    // Parameter 'Comment 1'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 1");
     tt->comment_hdr = tdrpStrDup("RadxApp");
     tt->comment_text = tdrpStrDup("Parameters for general algorithm data filtering for Radx format input data");
     tt++;
@@ -631,18 +640,6 @@
     tt->single_val.e = FILELIST;
     tt++;
     
-    // Parameter 'trigger_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("trigger_url");
-    tt->descr = tdrpStrDup("trigger url");
-    tt->help = tdrpStrDup("URL to trigger off");
-    tt->val_offset = (char *) &trigger_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'output_url'
     // ctype is 'char*'
     
@@ -655,11 +652,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 1'
+    // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 1");
+    tt->param_name = tdrpStrDup("Comment 2");
     tt->comment_hdr = tdrpStrDup("Threading");
     tt->comment_text = tdrpStrDup("Optional threading of beams, depends on app whether params are used or not");
     tt++;
@@ -688,11 +685,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 2'
+    // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
+    tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("Input paths");
     tt->comment_text = tdrpStrDup("Inputs can come from one or more location, a primary source, and any number of secondary sources.");
     tt++;
@@ -704,7 +701,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("input");
     tt->descr = tdrpStrDup("inputs");
-    tt->help = tdrpStrDup("index = numerical value to refer to this elsewhere\npath = where the data is\nThe first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file");
+    tt->help = tdrpStrDup("index = numerical value to refer to this elsewhere\npath = where the data is\nThe first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.");
     tt->array_offset = (char *) &_input - &_start_;
     tt->array_n_offset = (char *) &input_n - &_start_;
     tt->is_array = TRUE;
@@ -712,7 +709,7 @@
     tt->array_elem_size = sizeof(input_t);
     tt->array_n = 0;
     tt->struct_def.name = tdrpStrDup("input_t");
-    tt->struct_def.nfields = 9;
+    tt->struct_def.nfields = 7;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("int");
@@ -750,26 +747,16 @@
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
         (char *) &_input->ray_match_time_tolerance_sec - (char *) _input;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[7].fname = tdrpStrDup("is_climo");
-      tt->struct_def.fields[7].ptype = BOOL_TYPE;
-      tt->struct_def.fields[7].rel_offset = 
-        (char *) &_input->is_climo - (char *) _input;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[8].fname = tdrpStrDup("climo_file");
-      tt->struct_def.fields[8].ptype = STRING_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
-        (char *) &_input->climo_file - (char *) _input;
     tt->n_struct_vals = 0;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
     tt++;
     
-    // Parameter 'Comment 3'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("Mapping from input field to path");
     tt->comment_text = tdrpStrDup("For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).");
     tt++;
@@ -807,11 +794,11 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("Data Read Parameters");
     tt->comment_text = tdrpStrDup(" Parameters that control the reading of input data ");
     tt++;
@@ -885,18 +872,6 @@
     tt->descr = tdrpStrDup("Option to ignore rays with antenna transition flag set.");
     tt->help = tdrpStrDup("The transition flag is set when the antenna is moving between sweeps. If this parameter is true, rays containing the transition flag will not be read in.");
     tt->val_offset = (char *) &ignore_antenna_transitions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'ignore_idle_scan_mode_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ignore_idle_scan_mode_on_read");
-    tt->descr = tdrpStrDup("Option to ignore data taken in IDLE mode.");
-    tt->help = tdrpStrDup("If true, on read will ignore files with an IDLE scan mode.");
-    tt->val_offset = (char *) &ignore_idle_scan_mode_on_read - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
@@ -924,11 +899,11 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("RadxPersistentClutter");
     tt->comment_text = tdrpStrDup("Parameters for setting clutter locations of one input field.\n");
     tt++;
@@ -1129,142 +1104,6 @@
     tt->help = tdrpStrDup("Histograms are used to set clutter value. This is the maximum bin");
     tt->val_offset = (char *) &histogram_max - &_start_;
     tt->single_val.d = 50;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("Data Write Parameters");
-    tt->comment_text = tdrpStrDup(" Parameters that control the writing of output data ");
-    tt++;
-    
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = CLASSIC;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_native_byte_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_native_byte_order");
-    tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
-    tt->val_offset = (char *) &output_native_byte_order - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compressed'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compressed");
-    tt->descr = tdrpStrDup("Option to compress data fields on output.");
-    tt->help = tdrpStrDup("Applies to netCDF and Dorade. UF does not support compression.");
-    tt->val_offset = (char *) &output_compressed - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'compression_level'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("compression_level");
-    tt->descr = tdrpStrDup("Compression level for output, if compressed.");
-    tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
-    tt->val_offset = (char *) &compression_level - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'output_filename_mode'
-    // ctype is '_filename_mode_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_filename_mode");
-    tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.");
-    tt->val_offset = (char *) &output_filename_mode - &_start_;
-    tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
-      tt->enum_def.fields[0].val = START_AND_END_TIMES;
-      tt->enum_def.fields[1].name = tdrpStrDup("START_TIME_ONLY");
-      tt->enum_def.fields[1].val = START_TIME_ONLY;
-      tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
-      tt->enum_def.fields[2].val = END_TIME_ONLY;
-    tt->single_val.e = START_AND_END_TIMES;
-    tt++;
-    
-    // Parameter 'append_day_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_day_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the day directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_day_dir_to_output_dir - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'append_year_dir_to_output_dir'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("append_year_dir_to_output_dir");
-    tt->descr = tdrpStrDup("Add the year directory to the output directory.");
-    tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
-    tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // trailing entry has param_name set to NULL

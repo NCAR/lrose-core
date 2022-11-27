@@ -233,9 +233,6 @@ protected:
      */
     double rayTimeTolerance;
 
-    bool isClimo;  /**< If true fixed file is used no matter what */
-    string climoFile; /**< Fixed file to use if isClimo = true */
-
     /**
      * The field names for inputs in a group
      */
