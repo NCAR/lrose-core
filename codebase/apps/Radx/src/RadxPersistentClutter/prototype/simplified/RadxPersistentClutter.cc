@@ -630,9 +630,6 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
   
   
   LOG(DEBUG_VERBOSE) << "===== SETTING UP READ FOR PRIMARY FILES =====";
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE)) {
-    file.printReadRequest(cerr);
-  }
   LOG(DEBUG_VERBOSE) << "=============================================";
 }
 
