@@ -53,10 +53,7 @@ HDRS = \
 
 CPPC_SRCS = \
 	Params.cc \
-	App.cc \
-	AppArgs.cc \
-	AppConfig.cc \
-	AppParams.cc \
+	Args.cc \
 	FrequencyCount.cc \
 	Info.cc \
 	Histo.cc \

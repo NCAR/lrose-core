@@ -42,10 +42,10 @@ RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
   }
 
   // rewind for reprocessing
-  _alg.rewind();
+  RadxPersistentClutter::rewind();
 
   // redo the threading
-  _thread.reinit(_alg.parmRef().num_threads, _alg.parmRef().thread_debug);
+  _thread.reinit(_params.num_threads, _params.thread_debug);
 }
 
 //------------------------------------------------------------------
@@ -66,7 +66,7 @@ void RadxPersistentClutterSecondPass::finishLastTimeGood(const time_t &t,
 							 RadxVol &vol)
 {
   // The input volume and time are what is to be written out, do so now
-  _alg.write(vol, t, _params.final_output_url);
+  RadxPersistentClutter::write(vol, t, _params.final_output_url);
   LOG(LogMsg::DEBUG, "Successful second pass");
 }
 
@@ -132,8 +132,8 @@ bool RadxPersistentClutterSecondPass::setRayForOutput(const RayClutterInfo *h,
 			   _params.missing_clutter_value);
 
   // prepare for output
-  App::modifyRayForOutput(clutter, _params.output_field);
-  App::updateRay(clutter, ray);
+  modifyRayForOutput(clutter, _params.output_field);
+  updateRay(clutter, ray);
   return stat;
 }
 

@@ -28,27 +28,27 @@
  * @brief Command line argument handler
  */
 
-#ifndef RADX_APP_ARGS_HH
-#define RADX_APP_ARGS_HH
+#ifndef ARGS_HH
+#define ARGS_HH
 
 #include <tdrp/tdrp.h>
 #include <string>
 #include <vector>
 #include <iostream>
 
-class AppArgs {
+class Args {
   
 public:
 
   /**
    * Constructor
    */
-  AppArgs(void);
+  Args();
 
   /**
    * Destructor
    */
-  virtual ~AppArgs(void);
+  virtual ~Args();
   
   /**
    * parse the command line

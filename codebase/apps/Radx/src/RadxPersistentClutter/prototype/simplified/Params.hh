@@ -1,26 +1,26 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-// ** Copyright UCAR (c) 1990 - 2016                                         
-// ** University Corporation for Atmospheric Research (UCAR)                 
-// ** National Center for Atmospheric Research (NCAR)                        
-// ** Boulder, Colorado, USA                                                 
-// ** BSD licence applies - redistribution and use in source and binary      
-// ** forms, with or without modification, are permitted provided that       
-// ** the following conditions are met:                                      
-// ** 1) If the software is modified to produce derivative works,            
-// ** such modified software should be clearly marked, so as not             
-// ** to confuse it with the version available from UCAR.                    
-// ** 2) Redistributions of source code must retain the above copyright      
-// ** notice, this list of conditions and the following disclaimer.          
-// ** 3) Redistributions in binary form must reproduce the above copyright   
-// ** notice, this list of conditions and the following disclaimer in the    
-// ** documentation and/or other materials provided with the distribution.   
-// ** 4) Neither the name of UCAR nor the names of its contributors,         
-// ** if any, may be used to endorse or promote products derived from        
-// ** this software without specific prior written permission.               
-// ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  
-// ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
-// ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR                                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 ////////////////////////////////////////////
 // Params.hh
 //
@@ -49,8 +49,6 @@
 #ifndef Params_hh
 #define Params_hh
 
-using namespace std;
-
 #include <tdrp/tdrp.h>
 #include <iostream>
 #include <cstdio>
@@ -59,11 +57,59 @@ using namespace std;
 #include <climits>
 #include <cfloat>
 
+using namespace std;
+
 // Class definition
 
 class Params {
 
 public:
+
+  // enum typedefs
+
+  typedef enum {
+    NONE = 0,
+    DEBUG = 1,
+    DEBUG_VERBOSE = 2
+  } debug_e;
+
+  typedef enum {
+    REALTIME = 0,
+    ARCHIVE = 1,
+    FILELIST = 2
+  } mode_t;
+
+  typedef enum {
+    CLASSIC = 0,
+    NC64BIT = 1,
+    NETCDF4 = 2,
+    NETCDF4_CLASSIC = 3
+  } netcdf_style_t;
+
+  typedef enum {
+    START_AND_END_TIMES = 0,
+    START_TIME_ONLY = 1,
+    END_TIME_ONLY = 2
+  } filename_mode_t;
+
+  // struct typedefs
+
+  typedef struct {
+    int index;
+    char* path;
+    double file_match_time_offset_sec;
+    double file_match_time_tolerance_sec;
+    double ray_match_elevation_tolerance_deg;
+    double ray_match_azimuth_tolerance_deg;
+    double ray_match_time_tolerance_sec;
+    tdrp_bool_t is_climo;
+    char* climo_file;
+  } input_t;
+
+  typedef struct {
+    char* field;
+    int index;
+  } field_map_t;
 
   ///////////////////////////
   // Member functions
@@ -85,7 +131,7 @@ public:
   // Destructor
   //
 
-  ~Params ();
+  virtual ~Params ();
 
   ////////////////////////////////////////////
   // Assignment
@@ -167,6 +213,15 @@ public:
   //
 
   static bool isArgValid(const char *arg);
+
+  ////////////////////////////////////////////
+  // isArgValid()
+  // 
+  // Check if a command line arg is a valid TDRP arg.
+  // return number of args consumed.
+  //
+
+  static int isArgValidN(const char *arg);
 
   ////////////////////////////////////////////
   // load()
@@ -350,6 +405,46 @@ public:
                 // needed for zeroing out data
                 // and computing offsets
 
+  char* instance;
+
+  debug_e debug_mode;
+
+  tdrp_bool_t debug_triggering;
+
+  mode_t mode;
+
+  char* trigger_url;
+
+  char* output_url;
+
+  int num_threads;
+
+  tdrp_bool_t thread_debug;
+
+  input_t *_input;
+  int input_n;
+
+  field_map_t *_field_mapping;
+  int field_mapping_n;
+
+  double max_wait_minutes;
+
+  int max_realtime_data_age_secs;
+
+  tdrp_bool_t read_set_fixed_angle_limits;
+
+  double read_lower_fixed_angle;
+
+  double read_upper_fixed_angle;
+
+  tdrp_bool_t ignore_antenna_transitions;
+
+  tdrp_bool_t ignore_idle_scan_mode_on_read;
+
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
   char* input_field;
 
   char* output_field;
@@ -383,6 +478,22 @@ public:
 
   double histogram_max;
 
+  netcdf_style_t netcdf_style;
+
+  tdrp_bool_t output_native_byte_order;
+
+  tdrp_bool_t output_compressed;
+
+  int compression_level;
+
+  filename_mode_t output_filename_mode;
+
+  tdrp_bool_t append_day_dir_to_output_dir;
+
+  tdrp_bool_t append_year_dir_to_output_dir;
+
+  tdrp_bool_t write_latest_data_info;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -390,7 +501,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[18];
+  mutable TDRPtable _table[52];
 
   const char *_className;
 

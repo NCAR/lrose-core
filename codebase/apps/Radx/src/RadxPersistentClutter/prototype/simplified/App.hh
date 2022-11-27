@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 #include <Radx/RayxData.hh>
-#include "AppArgs.hh"
+#include "Args.hh"
 #include "AppConfig.hh"
 #include <didss/LdataInfo.hh>
 class RadxVol;
@@ -64,7 +64,7 @@ public:
    * @param[in] parmPath  Not used
    * @param[in] p  Parameter object copied into local state
    */
-  void setValues(const AppArgs &a, const std::string &appName, 
+  void setValues(const Args &a, const std::string &appName, 
 		 const std::string &parmPath, const AppParams &p);
 
   /**
@@ -79,8 +79,7 @@ public:
    *
    * @return true unless inputFields are not all found in param groups
    */
-  bool init(void cleanup(int), void outOfStore(void),
-	    const std::vector<std::string> &inputFields);
+  bool init(const std::vector<std::string> &inputFields);
 
   /**
    * Inform any monitoring software that the app is terminating.

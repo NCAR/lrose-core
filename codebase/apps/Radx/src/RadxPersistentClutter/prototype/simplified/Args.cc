@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 //////////////////////////////////////////////////////////
-// AppArgs.cc : command line args for generalized Radx application
+// Args.cc : command line args for generalized Radx application
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,14 +32,14 @@
 
 #include <string>
 #include <iostream>
-#include "AppArgs.hh"
-#include "AppParams.hh"
+#include "Args.hh"
+#include "Params.hh"
 #include <Radx/RadxTime.hh>
 using namespace std;
 
 // Constructor
 
-AppArgs::AppArgs ()
+Args::Args ()
 {
   TDRP_init_override(&override);
   startTime = 0;
@@ -49,7 +49,7 @@ AppArgs::AppArgs ()
 
 // Destructor
 
-AppArgs::~AppArgs ()
+Args::~Args ()
 
 {
   TDRP_free_override(&override);
@@ -59,7 +59,7 @@ AppArgs::~AppArgs ()
 //
 // returns 0 on success, -1 on failure  
 
-int AppArgs::parse (int argc, char **argv, string &prog_name)
+int Args::parse (int argc, char **argv, string &prog_name)
 
 {
 
@@ -173,7 +173,7 @@ int AppArgs::parse (int argc, char **argv, string &prog_name)
     
 }
 
-void AppArgs::_usage(ostream &out)
+void Args::_usage(ostream &out)
 {
 
   out << "Usage: " << _progName << " [args as below]\n"
@@ -200,6 +200,6 @@ void AppArgs::_usage(ostream &out)
       << "\n"
       << endl;
   
-  AppParams::usage(out);
+  Params::usage(out);
   
 }

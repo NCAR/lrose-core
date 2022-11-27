@@ -31,12 +31,15 @@
 #ifndef RADXPERSISTENTCLUTTER_H
 #define RADXPERSISTENTCLUTTER_H
 
+#include "Args.hh"
 #include "Params.hh"
 #include "RayClutterInfo.hh"
-#include "App.hh"
+// #include "App.hh"
+#include <Radx/RadxFile.hh>
 #include <Radx/RadxAzElev.hh>
 #include <Radx/RayxMapping.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
+#include <didss/LdataInfo.hh>
 #include <map>
 #include <stdexcept>
 
@@ -54,8 +57,7 @@ public:
    * @param[in] cleanup  Method to call on exit
    * @param[in] outOfStore  Method to call  when not enough memory
    */
-  RadxPersistentClutter (int argc, char **argv, void cleanup(int),
-			 void outOfStore(void));
+  RadxPersistentClutter (int argc, char **argv);
 
   /**
    * Destructor
@@ -170,11 +172,84 @@ protected:
   };
 
 
-  App _alg;      /**< generic algorithm object */
-  Params _params;        /**< The parameters */
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
+
+  // App _alg;      /**< generic algorithm object */
   bool _first;           /**< True for first volume */
   RayxMapping _rayMap;
 
+  time_t _start;         /**< Start time in ARCHIVE mode */
+  time_t _end;           /**< End time in ARCHIVE mode */
+  std::vector<std::string> _fileList; /**< paths in FILELIST mode from args */
+
+  /**
+   * @return true if input field names are in either the primary or one of
+   * the secondary groups
+   *
+   * @param[in] inputs  The field names
+   */
+  bool inputsAccountedFor(const std::vector<std::string> &inputs) const;
+
+  /**
+   * @class Group
+   * @brief  Specifiation for on input source
+   */
+  class Group
+  {
+  public:
+    string dir;        /**< path for data */
+    int index;         /**< numerical value to refer to this elsewhere */
+
+    /** 
+     * Ignored for primary, for secondary used to search for best time match to
+     * primary (seconds)
+     */
+    double fileTimeOffset; 
+
+    /** 
+     * Ignored for primary, for secondary used to search for best time match to
+     * primary (seconds)
+     */
+    double fileTimeTolerance;
+
+    /** 
+     * Ignored for primary, for secondary used to search for best matching ray
+     * in primary (degrees)
+     */
+    double rayElevTolerance;
+
+    /** 
+     * Ignored for primary, for secondary used to search for best matching ray
+     * in primary (degrees)
+     */
+    double rayAzTolerance;
+
+    /** 
+     * Ignored for primary, for secondary used to search for best matching ray
+     * in primary (seconds)
+     */
+    double rayTimeTolerance;
+
+    bool isClimo;  /**< If true fixed file is used no matter what */
+    string climoFile; /**< Fixed file to use if isClimo = true */
+
+    /**
+     * The field names for inputs in a group
+     */
+    std::vector<std::string> names;
+  };
+  
+  Group _primaryGroup;   /**< The main input */
+  std::vector<Group> _secondaryGroups;  /**< any number of secondary inputs */
+
+  std::vector<std::string> _paths; /**< paths in ARCHIVE or FILELIST mode*/
+  int _pathIndex;  /**< Next file to process (index) (ARCHIVE or FILELIST) */
+  LdataInfo _ldata;  /**< Triggering mechanism for REALTIME */
+  Group _activeGroup;  /**< Used when reading stuff */
+  
   /**
    * The storage of all info needed to do the computations, one object per
    * az/elev
@@ -185,6 +260,10 @@ protected:
 		       *   results converged */
 
   ComputeThread _thread;  /**< Threading */
+
+  // set up derived params
+  
+  int _initDerivedParams();
 
   /**
    * Initialize a RadxRay by converting it into RayxData, and pointing to
@@ -221,8 +300,6 @@ protected:
    * @return number of points at which clutter yes/no toggled
    */
   int _updateClutterState(const int kstar, FrequencyCount &F);
-
-private:
 
   /**
    * Process inputs
@@ -264,6 +341,154 @@ private:
    * @return the matching pointer, or NULL for error
    */
   RayClutterInfo *_initRay(const RadxRay &ray, RayxData &r);
+
+
+  /**
+   * default triggering method. Waits till new data triggers a return.
+   *
+   * @param[out] v   Volume of Radx data that was read in
+   * @param[out] t   time that was triggered.
+   * @param[out] last  true if this is the last data
+   *
+   * @return true if a time was triggered, false for no more triggering.
+   */
+  bool trigger(RadxVol &v, time_t &t, bool &last);
+
+  /**
+   * Rewind so next call to trigger() will return the first file
+   * @return true if successful
+   */
+  bool rewind(void);
+
+  /**
+   * Write volume to input url.
+   * @param[in] vol Volume to write
+   * @param[in] t  Time to write
+   * @param[in] url  The url to write to
+   *
+   * @return true if successful
+   */
+  bool write(RadxVol &vol, const time_t &t, const std::string &url);
+
+  /**
+   * Write volume to parameterized url.
+   * @param[in] vol Volume to write
+   * @param[in] t  Time to write
+   *
+   * @return true if successful
+   */
+  bool write(RadxVol &vol, const time_t &t);
+
+  /**
+   * @return portion of input string past the last '/'
+   * @param[in] name  Full path
+   */
+  static std::string nameWithoutPath(const std::string &name);
+
+  /**
+   * return RadxData of a particular name
+   * @param[in] name  The name to match
+   * @param[in] ray  Input data ray (which might have the named data)
+   * @param[in] data Zero or more RadxData objects, one of which might have the
+   *                 name
+   * @param[out] r  The data (a fresh copy)
+   * @return true if found the named data in either the ray or in the data
+   */
+  static bool retrieveRay(const std::string &name, const RadxRay &ray,
+			  std::vector<RayxData> &data, RayxData &r);
+
+  /**
+   * return RayxData of a particular name
+   * @param[in] name  The name to match
+   * @param[in] ray  Input data ray (which might have the named data)
+   * @param[out] r  The data (a fresh copy)
+   * @param[in] showError  If true, lack of data generates a printed error
+   *
+   * @return true if found the named data in the ray
+   */
+  static bool retrieveRay(const std::string &name, const RadxRay &ray,
+			  RayxData &r, const bool showError=true);
+
+  /**
+   * Take some RayxData and modify it based on other inputs
+   * @param[in,out] r  RayxData to be modified
+   * @param[in] name  Name to give the data
+   * @param[in] units  Units to give the data (if non empty)
+   * @param[in] missing  Missing data value to give the dat (if units non empty)
+   */
+  static void modifyRayForOutput(RayxData &r, const std::string &name,
+				 const std::string &units="", 
+				 const double missing=0);
+
+
+  /**
+   * add data for some RayxData to a RadxRay, then clear out all other fields
+   * 
+   * @param[in] r  Data to add
+   * @param[in,out] ray  Object to add to
+   */
+  static void updateRay(const RayxData &r, RadxRay &ray);
+
+  /**
+   * add data for multiple RayxData's to a RadxRay, clearing out all other fields
+   * 
+   * @param[in] r  Data to add
+   * @param[in,out] ray  Object to add to
+   */
+  static void updateRay(const vector<RayxData> &r, RadxRay &ray);
+
+  /**
+   * Process one file to create a volume
+   * @param[in] path  File to process
+   * @param[out] vol The volume
+   * @param[out] t
+   *
+   * @return true for success
+   */
+  bool _processFile(const std::string &path, RadxVol &vol, time_t &t);
+
+  /**
+   * Set read request for primary data into the RadxFile object
+   * @param[in] file  Object to modify
+   */
+  void _setupRead(RadxFile &file);
+
+  /**
+   * Set read request for secondary data into the RadxFile object
+   * @param[in] file  Object to modify
+   */
+  void _setupSecondaryRead(RadxFile &file);
+
+  /**
+   * Set write request into the RadxFile object
+   * @param[in] file  Object to modify
+   */
+  void _setupWrite(RadxFile &file);
+
+  /**
+   * Merge the primary and seconday volumes, using the primary
+   * volume to hold the merged data
+   * 
+   * @param[in,out] primaryVol
+   * @param[in] secondaryVol
+   *
+   * @return true for success
+   */
+  bool _mergeVol(RadxVol &primaryVol, const RadxVol &secondaryVol);
+
+  /**
+   * Merge the primary and seconday rays, using the primary
+   * ray to hold the merged data
+   * 
+   * @param[in,out] primaryRay
+   * @param[in] secondaryRay
+   *
+   * @return true for success
+   */
+  void _mergeRay(RadxRay &primaryRay, const RadxRay &secondaryRay);
+
+private:
+
 };
 
 #endif

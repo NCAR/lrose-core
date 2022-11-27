@@ -49,13 +49,12 @@ public:
    * @param[in] cleanup  Method to call on exit
    * @param[in] outOfStore  Method to call  when not enough memory
    */
-  RadxPersistentClutterFirstPass(int argc, char **argv, void cleanup(int),
-				 void outOfStore(void));
+  RadxPersistentClutterFirstPass(int argc, char **argv);
 
   /**
    * Destructor
    */
-  virtual ~RadxPersistentClutterFirstPass(void);
+  virtual ~RadxPersistentClutterFirstPass();
 
   #include "RadxPersistentClutterVirtualMethods.hh"
 

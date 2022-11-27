@@ -58,14 +58,11 @@ static double _omega(const vector<double> &p, const int k)
 
 //------------------------------------------------------------------
 RadxPersistentClutterFirstPass::
-RadxPersistentClutterFirstPass(int argc, char **argv, void cleanup(int),
-			       void outOfStore(void)) :
-  RadxPersistentClutter(argc, argv, cleanup, outOfStore)
+RadxPersistentClutterFirstPass(int argc, char **argv) :
+  RadxPersistentClutter(argc, argv)
 {
   _nvolume = 0;
   _total_pixels = 0;
-  // _ascii_output = NULL;
-  // _freq_output = NULL;
 }
 
 //------------------------------------------------------------------
@@ -74,21 +71,31 @@ RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
   if (!_ascii_output.empty())
   {
     FILE *fp = fopen(_ascii_fname.c_str(), "w");
-    for (size_t i=0; i<_ascii_output.size(); ++i)
-    {
-      fprintf(fp, "%s\n", _ascii_output[i].c_str());
+    if (fp) {
+      for (size_t i=0; i<_ascii_output.size(); ++i) {
+        fprintf(fp, "%s\n", _ascii_output[i].c_str());
+      }
+      fclose(fp);
+    } else {
+      int errNum = errno;
+      cerr << "ERROR - cannot open _ascii_fname: " << _ascii_fname << endl;
+      cerr << "  " << strerror(errNum) << endl;
     }
-    fclose(fp);
   }
 
   if (!_freq_output.empty())
   {
     FILE *fp = fopen(_freq_fname.c_str(), "w");
-    for (size_t i=0; i<_freq_output.size(); ++i)
-    {
-      fprintf(fp, "%s\n", _freq_output[i].c_str());
+    if (fp) {
+      for (size_t i=0; i<_freq_output.size(); ++i) {
+        fprintf(fp, "%s\n", _freq_output[i].c_str());
+      }
+      fclose(fp);
+    } else {
+      int errNum = errno;
+      cerr << "ERROR - cannot open _freq_fname: " << _freq_fname << endl;
+      cerr << "  " << strerror(errNum) << endl;
     }
-    fclose(fp);
   }
 }
 
@@ -152,7 +159,7 @@ bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
   {
     // prepare this volume for output, and write it out
     _processForOutput(vol);
-    _alg.write(vol, t);
+    RadxPersistentClutter::write(vol, t);
   }
   return ret;
 }
@@ -198,7 +205,7 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
 
   // make a copy of that data to store frequency data, and initialize
   RayxData rfreq(r);
-  App::modifyRayForOutput(rfreq, "NormFreqCount", "none", -99.99);
+  modifyRayForOutput(rfreq, "NormFreqCount", "none", -99.99);
   rfreq.setAllToValue(0.0);
 
   // set values in the cluter to 1 or 0
@@ -208,11 +215,11 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
     if (h->loadNormalizedFrequency(rfreq, _nvolume))
     {
       // prepare for output (put stuff into ray)
-      App::modifyRayForOutput(clutter, _params.output_field);
+      modifyRayForOutput(clutter, _params.output_field);
       vector<RayxData> vr;
       vr.push_back(r);
       vr.push_back(rfreq);
-      App::updateRay(vr, ray);
+      updateRay(vr, ray);
       return true;
     }
   }

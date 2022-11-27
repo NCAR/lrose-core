@@ -71,7 +71,7 @@ using std::string;
 template <class T>
 bool parmAppInit(T &appParams, App &r, int argc, char **argv)
 {
-  AppArgs a;
+  Args a;
   std::string appName;
   if (a.parse(argc, argv, appName))
   {

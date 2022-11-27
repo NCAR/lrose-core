@@ -41,62 +41,72 @@ int main(int argc, char **argv)
 
 {
 
-  // create program object
+  // set signal handling
+  
+  signal(SIGINT, tidy_and_exit);
+  signal(SIGHUP, tidy_and_exit);
+  signal(SIGTERM, tidy_and_exit);
+  signal(SIGPIPE, SIG_IGN);
 
-  Prog = new RadxPersistentClutterFirstPass(argc, argv, tidy_and_exit,
-					    out_of_store);
-  if (!Prog->OK)
-  {
+  // set new() memory failure handler function
+
+  set_new_handler(out_of_store);
+  
+  // create program object
+  
+  Prog = new RadxPersistentClutterFirstPass(argc, argv);
+  if (!Prog->OK) {
     LOG(LogMsg::FATAL,
 	"Could not create RadxPersistentClutterFirstPass object.");
-    return(1);
+    return 1;
   }
 
-  int iret = 0;
-  if (!Prog->run())
-  {
+  // run the first pass
+  
+  if (!Prog->run()) {
     LOG(LogMsg::ERROR, "running RadxPersistentClutter First pass");
+    tidy_and_exit(-1);
+    return 1;
+  }
+
+  // create second pass object
+  
+  Prog2 = new RadxPersistentClutterSecondPass(*Prog);
+  delete Prog;
+  Prog = NULL;
+  if (!Prog2->OK) {
+    LOG(LogMsg::FATAL,
+        "Could not create RadxPersistentClutterSecondPass object.");
+    return 1;
+  }
+
+  // run the second pass
+  
+  int iret = 0;
+  if (!Prog2->run()) {
+    iret = 0;
+  } else {
+    LOG(LogMsg::ERROR, "running RadxPersistentClutter Second pass");
     iret = 1;
   }
-  else
-  {
-    Prog2 = new RadxPersistentClutterSecondPass(*Prog);
-    delete Prog;
-    Prog = NULL;
-    if (!Prog2->OK)
-    {
-      LOG(LogMsg::FATAL,
-	  "Could not create RadxPersistentClutterSecondPass object.");
-      return(1);
-    }
-    if (Prog2->run())
-    {
-      iret = 0;
-    }
-    else
-    {
-      LOG(LogMsg::ERROR, "running RadxPersistentClutter Second pass");
-      iret = 1;
-    }
-  }
+
   // clean up
+
   tidy_and_exit(iret);
-  return (iret);
-  
+  return iret;
+
 }
 
 //----------------------------------------------------------------------
 // tidy up on exit
 static void tidy_and_exit (int sig)
 {
-  if (Prog)
-  {
+  if (Prog) {
     delete Prog;
     Prog = NULL;
   }
   if (Prog2)
-  {
-    delete Prog2;
+  { delete Prog2;
     Prog2 = NULL;
   }
   exit(sig);

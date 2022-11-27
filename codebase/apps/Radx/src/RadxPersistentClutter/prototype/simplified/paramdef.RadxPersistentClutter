@@ -8,6 +8,209 @@
  */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "RadxApp";
+  p_text = "Parameters for general algorithm data filtering for Radx format input data";
+};
+
+paramdef string
+{
+  p_descr = "instance";
+  p_help = "for PMU";
+  p_default = "test";
+} instance;
+
+typedef enum
+{NONE, DEBUG, DEBUG_VERBOSE} debug_e;
+
+paramdef enum debug_e
+{
+  p_descr = "debugging mode";
+  p_help = "NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more";
+  p_default = DEBUG;
+} debug_mode;
+
+paramdef boolean
+{
+  p_descr = "triggering debug";
+  p_help = "set to TRUE to debug triggering";
+  p_default = FALSE;
+} debug_triggering;
+
+typedef enum {
+  REALTIME, ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t
+{
+  p_default = FILELIST;
+  p_descr = "Operating mode";
+  p_help = "In REALTIME mode, the program waits for a new input file.  "
+           "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef string
+{
+  p_descr = "trigger url";
+  p_help = "URL to trigger off";
+  p_default = "";
+} trigger_url;
+
+paramdef string
+{
+  p_descr = "output for Algorithm results";
+  p_default = "";
+} output_url;
+  
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header =
+    "Threading";
+  p_text =
+    "Optional threading of beams, depends on app whether params are used or not";
+}
+
+paramdef int
+{
+  p_descr = "Number of threads";
+  p_help = "set to 1 or 0 for no threading";
+  p_default = 0;
+} num_threads;
+
+paramdef boolean
+{
+  p_descr = "Thread debugging";
+  p_help = "TRUE to see thread related debugging";
+  p_default = FALSE;
+} thread_debug;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header =
+    "Input paths";
+  p_text =
+    "Inputs can come from one or more location, a primary source, and any number of secondary sources.";
+}
+
+typedef struct 
+{
+  int index;
+  string path;
+  double file_match_time_offset_sec;
+  double file_match_time_tolerance_sec;
+  double ray_match_elevation_tolerance_deg;
+  double ray_match_azimuth_tolerance_deg;
+  double ray_match_time_tolerance_sec;
+  boolean is_climo;
+  string climo_file;
+} input_t;
+
+paramdef struct input_t
+{
+  p_descr = "inputs";
+  p_help =
+    "index = numerical value to refer to this elsewhere\n"
+    "path = where the data is\n"
+    "The first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.  If is_climo=true, a fixed file is used no matter what the request, specified by path/climo_file";
+  p_default = {};
+} input[];
+
+commentdef {
+  p_header =
+    "Mapping from input field to path";
+  p_text =
+    "For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).";
+}
+
+typedef struct
+{
+  string field;
+  int index;
+} field_map_t;
+
+paramdef struct field_map_t
+{
+  p_descr = "mapping from field to url";
+  p_help = "for each input field, the index to the path of that data";
+  p_default = {};
+} field_mapping[];
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header =
+    "Data Read Parameters";
+  p_text =
+    " Parameters that control the reading of input data ";
+};
+
+paramdef double
+{
+  p_descr = "max wait";
+  p_help = "maximum wait time (minutes) for realtime=TRUE and multiple input URLs. Not used in archive mode";
+  p_default = 1.0;
+} max_wait_minutes;
+
+paramdef int
+{
+  p_descr = "max_realtime_data_age_secs";
+  p_help = "maximum allowed difference (seconds) between read request time and data time";
+  p_default = 120;
+} max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} read_set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} read_lower_fixed_angle;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} read_upper_fixed_angle;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to ignore rays with antenna transition flag set.";
+  p_help = "The transition flag is set when the antenna is moving between sweeps. If this parameter is true, rays containing the transition flag will not be read in.";
+} ignore_antenna_transitions;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to ignore data taken in IDLE mode.";
+  p_help = "If true, on read will ignore files with an IDLE scan mode.";
+} ignore_idle_scan_mode_on_read;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 commentdef
 {
   p_header = "RadxPersistentClutter";
@@ -125,4 +328,76 @@ paramdef double
   p_help = "Histograms are used to set clutter value. This is the maximum bin";
   p_default = 50.0;
 } histogram_max;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+commentdef {
+  p_header =
+    "Data Write Parameters";
+  p_text =
+    " Parameters that control the writing of output data ";
+}
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = "CLASSIC";
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+commentdef {
+  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to leave data in native byte order.";
+  p_help = "If false, data will be byte-swapped as appropriate on output.";
+} output_native_byte_order;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+} output_filename_mode;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
 

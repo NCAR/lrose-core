@@ -52,9 +52,9 @@ App::~App(void)
 }
 
 //------------------------------------------------------------------
-void App::setValues(const AppArgs &a, const std::string &appName, 
-                        const std::string &parmPath,
-                        const AppParams &p)
+void App::setValues(const Args &a, const std::string &appName, 
+                    const std::string &parmPath,
+                    const AppParams &p)
 {
   _start = a.startTime;
   _end = a.endTime;
@@ -64,13 +64,8 @@ void App::setValues(const AppArgs &a, const std::string &appName,
 }
 
 //------------------------------------------------------------------
-bool App::init(void cleanup(int), void outOfStore(void),
-                   const vector<string> &inputFields)
+bool App::init(const vector<string> &inputFields)
 {
-  PORTsignal(SIGQUIT, cleanup);
-  PORTsignal(SIGTERM, cleanup);
-  PORTsignal(SIGINT, cleanup);
-  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
   // set up debugging state for logging  using params
   LogMsgStreamInit::init(_params.debug_mode == AppParams::DEBUG ||
@@ -127,7 +122,7 @@ bool App::init(void cleanup(int), void outOfStore(void),
   PMU_auto_init(_appName.c_str(), _params.instance, 60);
 
   // set the out of storage handler 
-  set_new_handler(outOfStore);
+  // set_new_handler(outOfStore);
 	      
   
   // check the inputs to make sure on the list somewhere
