@@ -54,7 +54,7 @@ instance = "sband";
 //     DEBUG_VERBOSE
 //
 
-debug_mode = DEBUG;
+debug_mode = NONE;
 
 //======================================================================
 //
@@ -197,7 +197,7 @@ max_range_km = 60;
 // Type: int
 //
 
-num_threads = 16;
+num_threads = 0;
 
 ///////////// thread_debug ////////////////////////////
 //
@@ -367,7 +367,7 @@ maximum_percent_change = 0.005;
 // Type: double
 //
 
-minimum_stable_volumes = 10;
+minimum_stable_volumes = 5;
 
 ///////////// histogram_resolution ////////////////////
 //

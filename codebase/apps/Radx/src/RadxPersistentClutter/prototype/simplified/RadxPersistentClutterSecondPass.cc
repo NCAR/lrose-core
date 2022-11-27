@@ -26,7 +26,7 @@
  */
 #include "RadxPersistentClutterSecondPass.hh"
 #include <Radx/RadxRay.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
 RadxPersistentClutterSecondPass::
@@ -67,13 +67,13 @@ void RadxPersistentClutterSecondPass::finishLastTimeGood(const time_t &t,
 {
   // The input volume and time are what is to be written out, do so now
   RadxPersistentClutter::_write(vol, t, _params.clutter_stats_output_dir);
-  LOG(LogMsg::DEBUG, "Successful second pass");
+  LOG(LogStream::DEBUG) << "Successful second pass";
 }
 
 //------------------------------------------------------------------
 void RadxPersistentClutterSecondPass::finishBad(void)
 {
-  LOG(LogMsg::ERROR, "Never matched last time. No output");
+  LOG(LogStream::ERROR) << "Never matched last time. No output";
 }
 
 //------------------------------------------------------------------

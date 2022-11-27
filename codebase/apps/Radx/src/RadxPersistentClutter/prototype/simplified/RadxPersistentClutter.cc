@@ -21,6 +21,15 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+//////////////////////////////////////////////////////////////////////////
+// Based on following paper:
+// Lakshmanan V., J. Zhang, K. Hondl and C. Langston.
+// A Statistical Approach to Mitigating Persistent Clutter in
+// Radar Reflectivity Data.
+// IEEE Journal of Selected Topics in Applied Earth Observations
+// and Remote Sensing, Vol. 5, No. 2, April 2012.
+///////////////////////////////////////////////////////////////////////////
+
 /**
  * @file RadxPersistentClutter.cc
  */
@@ -35,7 +44,7 @@
 #include <toolsa/pmu.h>
 #include <toolsa/TaThreadSimple.hh>
 #include <toolsa/LogStream.hh>
-#include <toolsa/LogMsgStreamInit.hh>
+#include <toolsa/LogStreamInit.hh>
 #include <didss/DataFileNames.hh>
 #include <algorithm>
 
@@ -84,12 +93,12 @@ RadxPersistentClutter::RadxPersistentClutter(int argc, char **argv)
   }
 
   // set up debugging state for logging  using params
-  LogMsgStreamInit::init(_params.debug_mode == Params::DEBUG ||
-			 _params.debug_mode == Params::DEBUG_VERBOSE,
-			 _params.debug_mode == Params::DEBUG_VERBOSE,
-			 true, true);
+  LogStreamInit::init(_params.debug_mode == Params::DEBUG ||
+                      _params.debug_mode == Params::DEBUG_VERBOSE,
+                      _params.debug_mode == Params::DEBUG_VERBOSE,
+                      true, true);
   if (_params.debug_triggering) {
-    LogMsgStreamInit::setThreading(true);
+    LogStreamInit::setThreading(true);
   }
 
   // initialize the derived paramaters
@@ -177,6 +186,8 @@ bool RadxPersistentClutter::run(void)
     // process the vol
     bool done = _process(t, vol);
 
+    cerr << "1111111111111111 done: " << done << endl;
+    
     if (done) {
       // it has converged
       _thread.waitForThreads();
@@ -563,13 +574,13 @@ bool RadxPersistentClutter::_processFile(const string &path,
 {
   string name = nameWithoutPath(path);
 
-  LOG(DEBUG) << "Primary file: " <<  name;
+  LOG(DEBUG) << "Reading file: " <<  path;
   
   RadxFile primaryFile;
   _setupRead(primaryFile);
 
   if (primaryFile.readFromPath(path, vol)) {
-    LOG(ERROR) << "Cannot read in primary file: " << name;
+    LOG(ERROR) << "Cannot read in file: " << path;
     LOG(ERROR) << primaryFile.getErrStr();
     return false;
   }
@@ -577,11 +588,11 @@ bool RadxPersistentClutter::_processFile(const string &path,
   t = vol.getEndTimeSecs();
   bool dateOnly;
   if (DataFileNames::getDataTime(path, t, dateOnly)) {
-    LOG(ERROR) << "Cannot get time from file path: " << name;
+    LOG(ERROR) << "Cannot get time from file name: " << name;
     return false;
   }
 
-  LOG(DEBUG) << "Time for primary file: " << RadxTime::strm(t);
+  LOG(DEBUG) << "Time for file: " << RadxTime::strm(t);
 
   // remove some bad stuff we never will want
   vol.removeTransitionRays();

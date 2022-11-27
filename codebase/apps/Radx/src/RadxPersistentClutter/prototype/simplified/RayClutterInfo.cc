@@ -28,7 +28,7 @@
 #include "RayClutterInfo.hh"
 #include "FrequencyCount.hh"
 #include <Radx/RayxData.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
 RayClutterInfo::RayClutterInfo(void) :
@@ -76,12 +76,12 @@ bool RayClutterInfo::update(const RayxData &r, const double threshold)
       {
 	if (v >= threshold)
 	{
-	  LOGF(LogMsg::DEBUG_VERBOSE, "beam[%d]=%lf YES", i, v);
+	  LOG(LogStream::DEBUG_VERBOSE) << "beam[" << i << "]=" << v << " YES";
 	  _counts.incAtPoint(i, 1.0);
 	}
 	else
 	{
-	  LOGF(LogMsg::DEBUG_VERBOSE, "beam[%d]=%lf", i, v);
+	  LOG(LogStream::DEBUG_VERBOSE) << "beam[" << i << "]=" << v << " NO";
 	}
       }
       else
@@ -242,7 +242,7 @@ int RayClutterInfo::_initNpt(const RayxData &r) const
   }
   else
   {
-    LOG(LogMsg::WARNING, "No beam match for a ray");
+    LOG(LogStream::WARNING) << "No beam match for a ray";
     return -1;
   }
 }

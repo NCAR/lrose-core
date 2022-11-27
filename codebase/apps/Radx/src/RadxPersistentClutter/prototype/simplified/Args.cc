@@ -52,7 +52,7 @@ Args::Args ()
 Args::~Args ()
 
 {
-  TDRP_free_override(&override);
+  // TDRP_free_override(&override);
 }
 
 // parse the command line

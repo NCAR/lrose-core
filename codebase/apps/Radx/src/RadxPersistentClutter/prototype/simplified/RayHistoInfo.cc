@@ -27,7 +27,7 @@
 #include <cstdio>
 #include "RayHistoInfo.hh"
 #include "Params.hh"
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
 RayHistoInfo::RayHistoInfo(void) : RayClutterInfo()
@@ -140,7 +140,7 @@ const Histo *RayHistoInfo::_histoForIndex(const int i) const
       return &j->second;
     }
   }
-  LOGF(LogMsg::ERROR, "Index %d never found in map", i);
+  LOG(LogStream::ERROR) << "Index " << i << " never found in map";
   return NULL;
 }
       

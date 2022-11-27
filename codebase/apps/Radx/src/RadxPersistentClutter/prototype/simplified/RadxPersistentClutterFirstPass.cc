@@ -28,7 +28,7 @@
 #include "RadxPersistentClutterFirstPass.hh"
 #include "FrequencyCount.hh"
 #include <Radx/RadxRay.hh>
-#include <toolsa/LogMsg.hh>
+#include <toolsa/LogStream.hh>
 #include <toolsa/DateTime.hh>
 #include <algorithm>
 
@@ -130,7 +130,7 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
 void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
 							RadxVol &vol)
 {
-  LOG(LogMsg::DEBUG, "Finished, with convergence");
+  LOG(LogStream::DEBUG) << "Finished, with convergence";
   // set last time member value
   _final_t = t;
 }
@@ -138,7 +138,7 @@ void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
 //------------------------------------------------------------------
 void RadxPersistentClutterFirstPass::finishBad(void)
 {
-  LOG(LogMsg::WARNING, "Never converged");  
+  LOG(LogStream::WARNING) << "Never converged";
 }
 
 //------------------------------------------------------------------
@@ -254,8 +254,8 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
     RadxAzElev ae = _rayMap.match(az, elev);
     if (_rayMap.isMulti(ae))
     {
-      LOGF(LogMsg::WARNING, "Multiple az,elev in volume %s",
-	      ae.sprint().c_str());
+      LOG(LogStream::DEBUG_VERBOSE) << "Multiple az,elev in volume "
+                                    <<  ae.sprint();
     }
     else
     {
@@ -267,8 +267,8 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
   }
   else
   {
-    LOGF(LogMsg::ERROR, "Elevation %lf not configured within tolerance\n",
-	    elev);
+    LOG(LogStream::DEBUG_VERBOSE) << "Elevation " << elev
+                                  << " not configured within tolerance";
     return false;
 
   }
@@ -353,6 +353,8 @@ RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
   _threshold.push_back(thr);
   _change.push_back(ch);
 
+  cerr << "33333333333333 threshold.size, change.size: " << _threshold.size() << ", " << _change.size() << endl;
+
   // see if things are stable, based on params, return true if so
   return _check_convergence();
 }
@@ -367,6 +369,8 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
     return false;
   }
 
+  cerr << "444444444444444444444" << endl;
+  
   // get the last threshold
   double thresh = _threshold[n-1];
   double tave = 0.0;
@@ -379,6 +383,8 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
     double thr = _threshold[j];
     double ch = _change[j];
 
+    cerr << "222222222 i, thr, ch: " << i << ", " << thr << ", " << ch << endl;
+    
     if (ch > _params.maximum_percent_change)
     {
       return false;
