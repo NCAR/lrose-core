@@ -104,7 +104,7 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
 						   const RadxVol &vol)
 {
   // build path
-  _ascii_fname = _params.output_ascii_path;
+  _ascii_fname = _params.diagnostic_ascii_dir;
   _ascii_fname += "/scan";
   DateTime dt(t);
   char buf[1000];
@@ -115,7 +115,7 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
   _ascii_output.clear();
 
   // build other path
-  _freq_fname = _params.output_ascii_path;
+  _freq_fname = _params.diagnostic_ascii_dir;
   _freq_fname += "/frequency";
   _freq_fname += buf;
   _freq_fname += ".out";
@@ -131,7 +131,6 @@ void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
 							RadxVol &vol)
 {
   LOG(LogMsg::DEBUG, "Finished, with convergence");
-
   // set last time member value
   _final_t = t;
 }
@@ -155,11 +154,11 @@ bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
   // output some ASCII stuff that can be graphed later
   bool ret = _output_for_graphics(t);
 
-  if (_params.diagnostic_output)
+  if (_params.write_diagnostic_output)
   {
     // prepare this volume for output, and write it out
     _processForOutput(vol);
-    RadxPersistentClutter::write(vol, t);
+    RadxPersistentClutter::_write(vol, t, _params.diagnostic_volume_dir);
   }
   return ret;
 }
@@ -215,7 +214,7 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
     if (h->loadNormalizedFrequency(rfreq, _nvolume))
     {
       // prepare for output (put stuff into ray)
-      modifyRayForOutput(clutter, _params.output_field);
+      modifyRayForOutput(clutter, _params.output_field_name);
       vector<RayxData> vr;
       vr.push_back(r);
       vr.push_back(rfreq);

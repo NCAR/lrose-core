@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxPersistentClutter
+ * TDRP params for RadxPersistentClutter
  **********************************************************************/
 
 //======================================================================
@@ -20,11 +20,18 @@
 //
 //======================================================================
  
+//======================================================================
+//
+// Debugging and process control.
+//
+//======================================================================
+ 
 ///////////// instance ////////////////////////////////
 //
-// instance.
+// Program instance for process registration.
 //
-// for PMU.
+// This application registers with procmap. This is the instance used 
+//   for registration.
 //
 //
 // Type: string
@@ -49,6 +56,14 @@ instance = "sband";
 
 debug_mode = DEBUG;
 
+//======================================================================
+//
+// Data input.
+//
+//  Parameters that control the reading of input data .
+//
+//======================================================================
+ 
 ///////////// debug_triggering ////////////////////////
 //
 // triggering debug.
@@ -83,150 +98,17 @@ debug_triggering = FALSE;
 
 mode = ARCHIVE;
 
-///////////// output_url //////////////////////////////
+///////////// input_dir ///////////////////////////////
 //
-// output for Algorithm results.
+// input directory name.
+//
+// Location of input data in CfRadial format.
 //
 //
 // Type: string
 //
 
-output_url = "/data/dixon/precip/grids/spol/radarPolar/clutter/sband/sur";
-
-//======================================================================
-//
-// Threading.
-//
-// Optional threading of beams, depends on app whether params are used 
-//   or not.
-//
-//======================================================================
- 
-///////////// num_threads /////////////////////////////
-//
-// Number of threads.
-//
-// set to 1 or 0 for no threading.
-//
-//
-// Type: int
-//
-
-num_threads = 16;
-
-///////////// thread_debug ////////////////////////////
-//
-// Thread debugging.
-//
-// TRUE to see thread related debugging.
-//
-//
-// Type: boolean
-//
-
-thread_debug = FALSE;
-
-//======================================================================
-//
-// Input paths.
-//
-// Inputs can come from one or more location, a primary source, and any 
-//   number of secondary sources.
-//
-//======================================================================
- 
-///////////// input ///////////////////////////////////
-//
-// inputs.
-//
-// index = numerical value to refer to this elsewhere
-// path = where the data is
-// The first thing on this list is the primary data source. The geometry 
-//   of non-primary files will be converted to match the primary files. 
-//   The file_match_time_offset_sec and file_match_time_tolerance_sec are 
-//   used to search for the best secondary file to merge. The offset is 
-//   ignored for the primary field. The ray tolerances are used to match 
-//   rays in the secondary file with those in the primary file.
-//
-//
-// Type: struct
-//   typedef struct {
-//      int index;
-//      string path;
-//      double file_match_time_offset_sec;
-//      double file_match_time_tolerance_sec;
-//      double ray_match_elevation_tolerance_deg;
-//      double ray_match_azimuth_tolerance_deg;
-//      double ray_match_time_tolerance_sec;
-//   }
-//
-// 1D array - variable length.
-//
-
-input = {
-  {
-    index = 1,
-    path = "/data/dixon/precip/grids/spol/radarPolar/field/moments/sband/sur",
-    file_match_time_offset_sec = 60,
-    file_match_time_tolerance_sec = 60,
-    ray_match_elevation_tolerance_deg = 0.1,
-    ray_match_azimuth_tolerance_deg = 0.1,
-    ray_match_time_tolerance_sec = 10
-  }
-};
-
-//======================================================================
-//
-// Mapping from input field to path.
-//
-// For each field that is an input to the app, it is associated with an 
-//   input path using this mapping (index/field name).
-//
-//======================================================================
- 
-///////////// field_mapping ///////////////////////////
-//
-// mapping from field to url.
-//
-// for each input field, the index to the path of that data.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string field;
-//      int index;
-//   }
-//
-// 1D array - variable length.
-//
-
-field_mapping = {
-  {
-    field = "DBMVC",
-    index = 1
-  }
-};
-
-//======================================================================
-//
-// Data Read Parameters.
-//
-//  Parameters that control the reading of input data .
-//
-//======================================================================
- 
-///////////// max_wait_minutes ////////////////////////
-//
-// max wait.
-//
-// maximum wait time (minutes) for realtime=TRUE and multiple input 
-//   URLs. Not used in archive mode.
-//
-//
-// Type: double
-//
-
-max_wait_minutes = 1;
+input_dir = "/data/dixon/precip/grids/spol/radarPolar/field/moments/sband/sur";
 
 ///////////// max_realtime_data_age_secs //////////////
 //
@@ -274,20 +156,6 @@ read_lower_fixed_angle = 0.3;
 
 read_upper_fixed_angle = 3.1;
 
-///////////// ignore_antenna_transitions //////////////
-//
-// Option to ignore rays with antenna transition flag set.
-//
-// The transition flag is set when the antenna is moving between sweeps. 
-//   If this parameter is true, rays containing the transition flag will 
-//   not be read in.
-//
-//
-// Type: boolean
-//
-
-ignore_antenna_transitions = TRUE;
-
 ///////////// set_max_range ///////////////////////////
 //
 // Option to set the max range for any ray.
@@ -312,13 +180,46 @@ max_range_km = 60;
 
 //======================================================================
 //
+// Threading.
+//
+// Optional threading of beams, depends on app whether params are used 
+//   or not.
+//
+//======================================================================
+ 
+///////////// num_threads /////////////////////////////
+//
+// Number of threads.
+//
+// set to 1 or 0 for no threading.
+//
+//
+// Type: int
+//
+
+num_threads = 16;
+
+///////////// thread_debug ////////////////////////////
+//
+// Thread debugging.
+//
+// TRUE to see thread related debugging.
+//
+//
+// Type: boolean
+//
+
+thread_debug = FALSE;
+
+//======================================================================
+//
 // RadxPersistentClutter.
 //
 // Parameters for setting clutter locations of one input field.
 //
 //======================================================================
  
-///////////// input_field /////////////////////////////
+///////////// input_field_name ////////////////////////
 //
 // input field name.
 //
@@ -328,9 +229,9 @@ max_range_km = 60;
 // Type: string
 //
 
-input_field = "DBMVC";
+input_field_name = "DBMVC";
 
-///////////// output_field ////////////////////////////
+///////////// output_field_name ///////////////////////
 //
 // output field name.
 //
@@ -340,7 +241,7 @@ input_field = "DBMVC";
 // Type: string
 //
 
-output_field = "DBMVC";
+output_field_name = "DBMVC";
 
 ///////////// threshold ///////////////////////////////
 //
@@ -413,44 +314,6 @@ azToleranceDegrees = 0.1;
 //
 
 elevToleranceDegrees = 0.1;
-
-///////////// diagnostic_output ///////////////////////
-//
-// diagnostic_output.
-//
-// If true, output from each volume is done, to show the build up of 
-//   skill through time, to the output location. Typically this is a 
-//   diagnostic mode.  If false, output is only at the end of a processing 
-//   phase, with output time equal to the time of the first volume 
-//   processed, and output written to the final_output_url.
-//
-//
-// Type: boolean
-//
-
-diagnostic_output = TRUE;
-
-///////////// final_output_url ////////////////////////
-//
-// location for main output.
-//
-// see diagnostic_output description.
-//
-//
-// Type: string
-//
-
-final_output_url = "/data/dixon/precip/grids/spol/radarPolar/clutter/sband/sur";
-
-///////////// output_ascii_path ///////////////////////
-//
-// Output ascii file path in which to write plottables.
-//
-//
-// Type: string
-//
-
-output_ascii_path = "/data/dixon/precip/grids/spol/radarPolar/clutter/sband/diag";
 
 ///////////// missing_clutter_value ///////////////////
 //
@@ -529,4 +392,58 @@ histogram_resolution = 0.2;
 //
 
 histogram_max = 50;
+
+//======================================================================
+//
+// Data output.
+//
+// Parameters for writing results.
+//
+//======================================================================
+ 
+///////////// clutter_stats_output_dir ////////////////
+//
+// Location for final clutter statistics.
+//
+// Final output is only written at the end of a processing phase, with 
+//   the output time equal to the time of the first volume processed.
+//
+//
+// Type: string
+//
+
+clutter_stats_output_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/sur";
+
+///////////// write_diagnostic_output /////////////////
+//
+// Write out diagnostic output.
+//
+//
+// Type: boolean
+//
+
+write_diagnostic_output = TRUE;
+
+///////////// diagnostic_volume_dir ///////////////////
+//
+// Dir for diagnostic output.
+//
+// If true, output from each volume is written, to show the build up of 
+//   skill through time.
+//
+//
+// Type: string
+//
+
+diagnostic_volume_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
+
+///////////// diagnostic_ascii_dir ////////////////////
+//
+// Output ascii dir to which to write plottables.
+//
+//
+// Type: string
+//
+
+diagnostic_ascii_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
 

@@ -121,81 +121,13 @@ RadxPersistentClutter::~RadxPersistentClutter(void)
 int RadxPersistentClutter::_initDerivedParams()
 {
 
-  bool status = true;
-  if (_params.mode != Params::REALTIME) {
-    _params.max_wait_minutes = 0;
-  }
-  
-  // Build up the single primary URL and the secondary URLs
-  int primaryIndex = -1;
-  for (int i=0; i<_params.input_n; ++i) {
-    if (i == 0) {
-      primaryIndex = _params._input[i].index;
-      _primaryGroup.index = _params._input[i].index;
-      _primaryGroup.dir = _params._input[i].path;
-      _primaryGroup.fileTimeOffset = _params._input[i].file_match_time_offset_sec;
-      _primaryGroup.fileTimeTolerance =
-	_params._input[i].file_match_time_tolerance_sec;
-      _primaryGroup.rayElevTolerance = 
-	_params._input[i].ray_match_elevation_tolerance_deg;
-      _primaryGroup.rayAzTolerance =
-	_params._input[i].ray_match_azimuth_tolerance_deg;
-      _primaryGroup.rayTimeTolerance =
-	_params._input[i].ray_match_time_tolerance_sec;
-    } else {
-      Group G;
-      G.dir = _params._input[i].path;
-      G.index = _params._input[i].index;
-      G.fileTimeOffset = _params._input[i].file_match_time_offset_sec;
-      G.fileTimeTolerance =
-	_params._input[i].file_match_time_tolerance_sec;
-      G.rayElevTolerance = 
-	_params._input[i].ray_match_elevation_tolerance_deg;
-      G.rayAzTolerance =
-	_params._input[i].ray_match_azimuth_tolerance_deg;
-      G.rayTimeTolerance =
-	_params._input[i].ray_match_time_tolerance_sec;
-      _secondaryGroups.push_back(G);
-    }
-  }
-
-  for (int i=0; i<_params.field_mapping_n; ++i) {
-    if (_params._field_mapping[i].index == primaryIndex) {
-      _primaryGroup.names.push_back(_params._field_mapping[i].field);
-    } else {
-      bool found = false;
-      for (int j=0; j<(int)_secondaryGroups.size(); ++j) {
-	if (_secondaryGroups[j].index == _params._field_mapping[i].index) {
-	  _secondaryGroups[j].names.push_back(_params._field_mapping[i].field);
-	  found = true;
-	  break;
-	}
-      }
-      if (!found) {
-	LOG(ERROR) << "Never found index " << _params._field_mapping[i].index
-		   << " in mappings, not used";
-	status = false;
-      }
-    }
-  }
-
-  if (_primaryGroup.names.empty())
-  {
-    LOG(ERROR) << "Primary URL not used in a mapping";
-    status = false;
-  }
-
-  if (!status) {
-    return -1;
-  }
-  
   if (_params.mode == Params::ARCHIVE) {
     RadxTimeList tlist;
-    tlist.setDir(_primaryGroup.dir);
+    tlist.setDir(_params.input_dir);
     tlist.setModeInterval(_start, _end);
     if (tlist.compile()) {
       LOG(ERROR) << "Cannot compile time list, dir: " 
-		 << _primaryGroup.dir;
+		 << _params.input_dir;
       LOG(ERROR) << "   Start time: " << RadxTime::strm(_start);
       LOG(ERROR) << "   End time: " << RadxTime::strm(_end);
       LOG(ERROR) << tlist.getErrStr();
@@ -204,7 +136,7 @@ int RadxPersistentClutter::_initDerivedParams()
     _paths = tlist.getPathList();
     _pathIndex = 0;
     if (_paths.size() < 1) {
-      LOG(ERROR) << "No files found, dir: " << _primaryGroup.dir;
+      LOG(ERROR) << "No files found, dir: " << _params.input_dir;
       return -1;
     }
   } else if (_params.mode == Params::FILELIST) {
@@ -213,18 +145,11 @@ int RadxPersistentClutter::_initDerivedParams()
     _pathIndex = 0;
   } else {
     // set the LdataInfo object for REALTIME
-    _ldata = LdataInfo(_primaryGroup.dir, _params.debug_triggering);
+    _ldata = LdataInfo(_params.input_dir, _params.debug_triggering);
     PMU_auto_init(_progName.c_str(), _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
   }
   
-  // check the inputs to make sure on the list somewhere
-  vector<string> input;
-  input.push_back(_params.input_field);
-  if (!inputsAccountedFor(input)) {
-    return -1;
-  }
-
   return 0;
 
 }
@@ -240,7 +165,7 @@ bool RadxPersistentClutter::run(void)
   bool first = true;
 
   // trigger at time
-  while (trigger(vol, t, last)) {
+  while (_trigger(vol, t, last)) {
 
     if (first) {
       // virtual method
@@ -291,7 +216,7 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
 {
   // lock because the method can change ray, in spite of the const!
   _thread.lockForIO();
-  if (!retrieveRay(_params.input_field, ray, r))
+  if (!retrieveRay(_params.input_field_name, ray, r))
   {
     _thread.unlockAfterIO();
     return NULL;
@@ -411,7 +336,7 @@ bool RadxPersistentClutter::_processRayForOutput(RadxRay &ray)
 RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
 						RayxData &r)
 {
-  if (!retrieveRay(_params.input_field, ray, r)) {
+  if (!retrieveRay(_params.input_field_name, ray, r)) {
     return NULL;
   }
 
@@ -428,7 +353,7 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::trigger(RadxVol &v, time_t &t, bool &last)
+bool RadxPersistentClutter::_trigger(RadxVol &v, time_t &t, bool &last)
 {
 
   LOG(DEBUG) << "------before trigger-----";
@@ -452,7 +377,7 @@ bool RadxPersistentClutter::trigger(RadxVol &v, time_t &t, bool &last)
 }
 
 //---------------------------------------------------------------
-bool RadxPersistentClutter::rewind(void)
+bool RadxPersistentClutter::_rewind(void)
 {
   bool ret = true;
   if (_params.mode == Params::ARCHIVE) {
@@ -467,8 +392,8 @@ bool RadxPersistentClutter::rewind(void)
 }
 
 //---------------------------------------------------------------
-bool RadxPersistentClutter::write(RadxVol &vol, const time_t &t,
-                                  const std::string &url)
+bool RadxPersistentClutter::_write(RadxVol &vol, const time_t &t,
+                                   const std::string &dir)
 {
   vol.loadVolumeInfoFromRays();
   vol.loadSweepInfoFromRays();
@@ -480,8 +405,8 @@ bool RadxPersistentClutter::write(RadxVol &vol, const time_t &t,
 
   _setupWrite(*outFile);
 
-  if (outFile->writeToDir(vol, url, true, false)) {
-    LOG(ERROR) << "Cannot write file to dir: " <<  url;
+  if (outFile->writeToDir(vol, dir, true, false)) {
+    LOG(ERROR) << "Cannot write file to dir: " <<  dir;
     LOG(ERROR) << outFile->getErrStr();
     delete outFile;
     return false;
@@ -495,7 +420,7 @@ bool RadxPersistentClutter::write(RadxVol &vol, const time_t &t,
   // in realtime mode, write latest data info file
 
   if (_params.mode == Params::REALTIME) {
-    LdataInfo ldata(url);
+    LdataInfo ldata(dir);
     if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE)) {
       ldata.setDebug(true);
     }
@@ -503,16 +428,10 @@ bool RadxPersistentClutter::write(RadxVol &vol, const time_t &t,
     ldata.setRelDataPath(rpath.getFile());
     ldata.setWriter(_progName);
     if (ldata.write(vol.getEndTimeSecs())) {
-      LOG(WARNING) << "Cannot write latest data info file to dir: " << url;
+      LOG(WARNING) << "Cannot write latest data info file to dir: " << dir;
     }
   }
   return true;
-}
-
-//---------------------------------------------------------------
-bool RadxPersistentClutter::write(RadxVol &vol, const time_t &t)
-{
-  return write(vol, t, _params.output_url);
 }
 
 //------------------------------------------------------------------
@@ -664,63 +583,6 @@ bool RadxPersistentClutter::_processFile(const string &path,
 
   LOG(DEBUG) << "Time for primary file: " << RadxTime::strm(t);
 
-  // Search for secondary files
-
-  for (size_t igroup = 0; igroup < _secondaryGroups.size(); igroup++) {
-    
-    _activeGroup = _secondaryGroups[igroup];
-    
-    string secondaryPath;
-    time_t searchTime = t + _activeGroup.fileTimeOffset;
-    
-    RadxTimeList tlist;
-    tlist.setDir(_activeGroup.dir);
-    tlist.setModeClosest(searchTime, _activeGroup.fileTimeTolerance);
-    
-    if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE)) {
-      tlist.printRequest(cerr);
-    }
-    
-    if (tlist.compile()) {
-      LOG(ERROR) << "Cannot compile secondary file time list";
-      LOG(ERROR) << tlist.getErrStr().c_str();
-      return false;
-    }
-    const vector<string> &pathList = tlist.getPathList();
-    if (pathList.size() < 1) {
-      LOG(WARNING) << "No suitable secondary file found, " 
-                   << "Primary file:" << path << ", Secondary path:"
-                   << _activeGroup.dir;
-      return false;
-    } else {
-      secondaryPath = pathList[0];
-    }
-    
-    string secondaryName = nameWithoutPath(secondaryPath);
-    LOG(DEBUG) << "Found secondary file: " << secondaryName;
-
-    RadxFile secondaryFile;
-    _setupSecondaryRead(secondaryFile);
-    
-    RadxVol secondaryVol;
-    if (secondaryFile.readFromPath(secondaryPath, secondaryVol)) {
-      LOG(ERROR) << "Cannot read in secondary file: " << secondaryName;
-      LOG(ERROR) << secondaryFile.getErrStr();
-      return false;
-    }
-
-    // merge the primary and seconday volumes, using the primary
-    // volume to hold the merged data
-    
-    if (!_mergeVol(vol, secondaryVol)) {
-      LOG(ERROR) << "Merge failed, primary:" << name
-		 << "secondary:" << secondaryName;
-      return false;
-    }
-    
-  } // igroup
-  
-  
   // remove some bad stuff we never will want
   vol.removeTransitionRays();
   vol.trimSurveillanceSweepsTo360Deg();
@@ -746,14 +608,9 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
                                  _params.read_upper_fixed_angle);
   }
   
-  for (size_t ii = 0; ii < _primaryGroup.names.size(); ii++) {
-    file.addReadField(_primaryGroup.names[ii]);
-  }
+  file.addReadField(_params.input_field_name);
 
-  if (_params.ignore_antenna_transitions) {
-    file.setReadIgnoreTransitions(true);
-  }
-
+  file.setReadIgnoreTransitions(true);
   file.setReadAggregateSweeps(false);
   
   if (_params.set_max_range) {
@@ -769,39 +626,6 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
 }
 
 
-
-//------------------------------------------------------------------
-void RadxPersistentClutter::_setupSecondaryRead(RadxFile &file)
-{
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
-  {
-    file.setDebug(true);
-  }
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
-  {
-    file.setVerbose(true);
-  }
-
-  if (_params.read_set_fixed_angle_limits)
-  {
-    file.setReadFixedAngleLimits(_params.read_lower_fixed_angle,
-                                 _params.read_upper_fixed_angle);
-  }
-
-  for (size_t ii = 0; ii < _activeGroup.names.size(); ii++)
-  {
-    file.addReadField(_activeGroup.names[ii]);
-  }
-
-  file.setReadAggregateSweeps(false);
-
-  LOG(DEBUG_VERBOSE) << "===== SETTING UP READ FOR SECONDARY FILES =====";
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
-  {
-    file.printReadRequest(cerr);
-  }
-  LOG(DEBUG_VERBOSE) << "===============================================";
-}
 
 //------------------------------------------------------------------
 void RadxPersistentClutter::_setupWrite(RadxFile &file)
@@ -825,219 +649,3 @@ void RadxPersistentClutter::_setupWrite(RadxFile &file)
 
 }
 
-//------------------------------------------------------------------
-bool RadxPersistentClutter::_mergeVol(RadxVol &primaryVol,
-                                      const RadxVol &secondaryVol)
-{
-  // loop through all rays in primary vol
-
-  const vector<RadxRay *> &pRays = primaryVol.getRays();
-  int searchStart = 0;
-
-  for (size_t ii = 0; ii < pRays.size(); ii++) {
-
-    RadxRay *pRay = pRays[ii];
-    double pTime = (double) pRay->getTimeSecs() + pRay->getNanoSecs() / 1.0e9;
-    double pAz = pRay->getAzimuthDeg();   
-    double pEl = pRay->getElevationDeg();
-
-    int pMilli = pRay->getNanoSecs() / 1.0e6;
-    char pMStr[16];
-    sprintf(pMStr, "%.3d", pMilli);
-
-    // find matching ray in secondary volume
-
-    const vector<RadxRay *> &sRays = secondaryVol.getRays();
-    bool found = false;
-    for (size_t jj = searchStart; jj < sRays.size(); jj++)
-    {
-      RadxRay *sRay = sRays[jj];
-      double sTime = (double) sRay->getTimeSecs() + sRay->getNanoSecs() / 1.0e9;
-      double sAz = sRay->getAzimuthDeg();   
-      double sEl = sRay->getElevationDeg();
-      
-      int sMilli = sRay->getNanoSecs() / 1.0e6;
-      char sMStr[16];
-      sprintf(sMStr, "%.3d", sMilli);
-
-      double diffTime;
-      diffTime = fabs(pTime - sTime);
-      double dAz = pAz - sAz;
-      if (dAz < -180)
-      {
-        dAz += 360.0;
-      }
-      else if (dAz > 180)
-      {
-        dAz -= 360.0;
-      }
-      double diffAz = fabs(dAz);
-      double diffEl = fabs(pEl - sEl);
-
-      if (diffTime <= _activeGroup.rayTimeTolerance &&
-          diffAz <= _activeGroup.rayAzTolerance &&
-          diffEl <= _activeGroup.rayElevTolerance)
-      {
-        // same ray, merge the rays
-        _mergeRay(*pRay, *sRay);
-        found = true;
-	LOG(DEBUG_VERBOSE) << "Matched ray - time "
-			   << RadxTime::strm((time_t)pTime) + "." + pMStr
-			   << " az,el=" << pAz << "," << pEl 
-			   << " az2,el2=" << sAz << "," << sEl
-			   << " dEl=" << diffEl
-			   << " dAz=" << diffAz
-			   << " dTime=" << diffTime;
-	break;
-      }
-    } // jj
-
-    if (!found)
-    {
-      LOG(DEBUG_VERBOSE) << "===>>> missed merge, time="
-			 << RadxTime::strm((time_t) pTime) + "." + pMStr
-			 << " az,el:" << pAz << "," << pEl;
-    }
-  } // ii
-
-  return true;
-
-}
-
-//------------------------------------------------------------------
-void RadxPersistentClutter::_mergeRay(RadxRay &primaryRay,
-                                      const RadxRay &secondaryRay)
-{
-
-  primaryRay.loadFieldNameMap();
-
-  // compute lookup in case geometry differs
-  RadxRemap remap;
-  bool geomDiffers =
-    remap.checkGeometryIsDifferent(secondaryRay.getStartRangeKm(),
-                                   secondaryRay.getGateSpacingKm(),
-                                   primaryRay.getStartRangeKm(),
-                                   primaryRay.getGateSpacingKm());
-  if (geomDiffers) {
-    remap.prepareForInterp(secondaryRay.getNGates(),
-                           secondaryRay.getStartRangeKm(),
-                           secondaryRay.getGateSpacingKm(),
-                           primaryRay.getStartRangeKm(),
-                           primaryRay.getGateSpacingKm());
-  }
-  
-  const vector<RadxField *> &sFields = secondaryRay.getFields();
-  int nGatesPrimary = primaryRay.getNGates();
-
-  for (size_t ifield = 0; ifield < sFields.size(); ifield++) {
-    
-    RadxField sField(*sFields[ifield]);
-
-    // get output field name
-
-    string outputName = sField.getName();
-
-    // ensure geometry is correct
-
-    if (geomDiffers)
-    {
-      sField.remapRayGeom(remap);
-    }
-    sField.setNGates(nGatesPrimary);
-
-    Radx::DataType_t dType = sField.getDataType();
-    switch (dType) {
-      case Radx::UI08:
-      case Radx::SI08: {
-        primaryRay.addField(outputName,
-                            sField.getUnits(),
-                            sField.getNPoints(),
-                            sField.getMissingSi08(),
-                            (const Radx::si08 *) sField.getData(),
-                            sField.getScale(),
-                            sField.getOffset(),
-                            true);
-        break;
-      }
-      case Radx::UI32:
-      case Radx::SI32: {
-        primaryRay.addField(outputName,
-                            sField.getUnits(),
-                            sField.getNPoints(),
-                            sField.getMissingSi32(),
-                            (const Radx::si32 *) sField.getData(),
-                            sField.getScale(),
-                            sField.getOffset(),
-                            true);
-        break;
-      }
-      case Radx::FL32: {
-        primaryRay.addField(outputName,
-                            sField.getUnits(),
-                            sField.getNPoints(),
-                            sField.getMissingFl32(),
-                            (const Radx::fl32 *) sField.getData(),
-                            true);
-        break;
-      }
-      case Radx::FL64: {
-        primaryRay.addField(outputName,
-                            sField.getUnits(),
-                            sField.getNPoints(),
-                            sField.getMissingFl64(),
-                            (const Radx::fl64 *) sField.getData(),
-                            true);
-        break;
-      }
-      case Radx::UI16:
-      case Radx::SI16:
-      default: {
-        primaryRay.addField(outputName,
-                            sField.getUnits(),
-                            sField.getNPoints(),
-                            sField.getMissingSi16(),
-                            (const Radx::si16 *) sField.getData(),
-                            sField.getScale(),
-                            sField.getOffset(),
-                            true);
-      }
-    } // switch
-  } // ifield
-
-}
-
-//------------------------------------------------------------------
-bool RadxPersistentClutter::inputsAccountedFor(const vector<string> &inputs) const
-{
-  bool status = true;
-  for (int i=0; i<(int)inputs.size(); ++i) {
-    string name = inputs[i];
-    bool found = false;
-    for (int j=0; j<(int)_primaryGroup.names.size(); ++j) {
-      string n2 = _primaryGroup.names[j];
-      if (n2 == name) {
-	found = true;
-	break;
-      }
-    }
-    if (!found) {
-      for (int j=0; j<(int)_secondaryGroups.size(); ++j) {
-	for (int k=0; k<(int)_secondaryGroups[j].names.size(); ++k) {
-	  string n2 = _secondaryGroups[j].names[k];
-	  if (n2 == name) {
-	    found = true;
-	    break;
-	  }
-	}
-	if (found) {
-	  break;
-	}
-      }
-    }
-    if (!found) {
-      LOG(ERROR) << "Never found input " << name << " in indexing";
-      status = false;
-    }
-  }
-  return status;
-}

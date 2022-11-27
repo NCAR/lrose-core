@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "RadxPersistentClutter app";
-  p_text = "RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.\n";
+  p_text = "RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.";
 };
 
 commentdef {
@@ -18,15 +18,20 @@ commentdef {
   p_text = "Parameters for general algorithm data filtering for Radx format input data";
 };
 
-paramdef string
-{
-  p_descr = "instance";
-  p_help = "for PMU";
+commentdef {
+  p_header = "Debugging and process control";
+};
+
+paramdef string {
   p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
 } instance;
 
 typedef enum
-{NONE, DEBUG, DEBUG_VERBOSE} debug_e;
+  {
+   NONE, DEBUG, DEBUG_VERBOSE
+  } debug_e;
 
 paramdef enum debug_e
 {
@@ -34,6 +39,11 @@ paramdef enum debug_e
   p_help = "NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more";
   p_default = DEBUG;
 } debug_mode;
+
+commentdef {
+  p_header = "Data input";
+  p_text = " Parameters that control the reading of input data ";
+};
 
 paramdef boolean
 {
@@ -62,9 +72,44 @@ paramdef enum mode_t
 
 paramdef string
 {
-  p_descr = "output for Algorithm results";
-  p_default = "";
-} output_url;
+  p_descr = "input directory name";
+  p_help = "Location of input data in CfRadial format";
+  p_default = "unknown";
+} input_dir;
+
+paramdef int
+{
+  p_descr = "max_realtime_data_age_secs";
+  p_help = "maximum allowed difference (seconds) between read request time and data time";
+  p_default = 120;
+} max_realtime_data_age_secs;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} read_set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} read_lower_fixed_angle;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} read_upper_fixed_angle;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -91,115 +136,10 @@ paramdef boolean
 
 //////////////////////////////////////////////////////////////////////////////////
 
-commentdef {
-  p_header =
-    "Input paths";
-  p_text =
-    "Inputs can come from one or more location, a primary source, and any number of secondary sources.";
-}
-
-typedef struct 
-{
-  int index;
-  string path;
-  double file_match_time_offset_sec;
-  double file_match_time_tolerance_sec;
-  double ray_match_elevation_tolerance_deg;
-  double ray_match_azimuth_tolerance_deg;
-  double ray_match_time_tolerance_sec;
-} input_t;
-
-paramdef struct input_t
-{
-  p_descr = "inputs";
-  p_help =
-    "index = numerical value to refer to this elsewhere\n"
-    "path = where the data is\n"
-    "The first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.";
-  p_default = {};
-} input[];
-
-commentdef {
-  p_header =
-    "Mapping from input field to path";
-  p_text =
-    "For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).";
-}
-
-typedef struct
-{
-  string field;
-  int index;
-} field_map_t;
-
-paramdef struct field_map_t
-{
-  p_descr = "mapping from field to url";
-  p_help = "for each input field, the index to the path of that data";
-  p_default = {};
-} field_mapping[];
-
-//////////////////////////////////////////////////////////////////////////////////
-
-commentdef
-{
-  p_header = "Data Read Parameters";
-  p_text = " Parameters that control the reading of input data ";
-};
-
-paramdef double
-{
-  p_descr = "max wait";
-  p_help = "maximum wait time (minutes) for realtime=TRUE and multiple input URLs. Not used in archive mode";
-  p_default = 1.0;
-} max_wait_minutes;
-
-paramdef int
-{
-  p_descr = "max_realtime_data_age_secs";
-  p_help = "maximum allowed difference (seconds) between read request time and data time";
-  p_default = 120;
-} max_realtime_data_age_secs;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set fixed angle limits";
-  p_help = "Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
-} read_set_fixed_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Lower fixed angle limit - degrees.";
-} read_lower_fixed_angle;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Upper fixed angle limit - degrees.";
-} read_upper_fixed_angle;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to ignore rays with antenna transition flag set.";
-  p_help = "The transition flag is set when the antenna is moving between sweeps. If this parameter is true, rays containing the transition flag will not be read in.";
-} ignore_antenna_transitions;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
-
-//////////////////////////////////////////////////////////////////////////////////
-
 commentdef
 {
   p_header = "RadxPersistentClutter";
-  p_text = "Parameters for setting clutter locations of one input field.\n";
+  p_text = "Parameters for setting clutter locations of one input field.";
 };
 
 paramdef string
@@ -207,14 +147,14 @@ paramdef string
   p_descr = "input field name";
   p_help = "name of field to find clutter in";
   p_default = "unknown";
-} input_field;
+} input_field_name;
 
 paramdef string
 {
   p_descr = "output field name";
   p_help = "name to give final output clutter field";
   p_default = "clutter";
-} output_field;
+} output_field_name;
 
 paramdef double
 {
@@ -250,27 +190,6 @@ paramdef double
   p_help = "allowed degrees difference between elevation values from different volumes to be considered part of the same ray";
   p_default = 0.1;
 } elevToleranceDegrees;
-
-paramdef boolean
-{
-  p_descr = "diagnostic_output";
-  p_help = "If true, output from each volume is done, to show the build up of skill through time, to the output location. Typically this is a diagnostic mode.  If false, output is only at the end of a processing phase, with output time equal to the time of the first volume processed, and output written to the final_output_url";
-  p_default = FALSE;
-} diagnostic_output;
-
-paramdef string
-{
-  p_descr = "location for main output";
-  p_help = "see diagnostic_output description";
-  p_default = "unknown";
-} final_output_url;
-
-paramdef string
-{
-  p_descr = "Output ascii file path in which to write plottables";
-  p_help = "";
-  p_default = ".";
-} output_ascii_path;
 
 paramdef double
 {
@@ -313,4 +232,39 @@ paramdef double
   p_help = "Histograms are used to set clutter value. This is the maximum bin";
   p_default = 50.0;
 } histogram_max;
+
+//////////////////////////////////////////////////////////////////////////////////
+
+commentdef
+{
+  p_header = "Data output";
+  p_text = "Parameters for writing results";
+};
+
+paramdef string
+{
+  p_descr = "Location for final clutter statistics.";
+  p_help = "Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.";
+  p_default = "unknown";
+} clutter_stats_output_dir;
+
+paramdef boolean
+{
+  p_descr = "Write out diagnostic output";
+  p_default = FALSE;
+} write_diagnostic_output;
+
+paramdef string
+{
+  p_descr = "Dir for diagnostic output";
+  p_help = "If true, output from each volume is written, to show the build up of skill through time.";
+  p_default = "unknown";
+} diagnostic_volume_dir;
+
+paramdef string
+{
+  p_descr = "Output ascii dir to which to write plottables";
+  p_help = "";
+  p_default = "unknown";
+} diagnostic_ascii_dir;
 

@@ -79,23 +79,6 @@ public:
     FILELIST = 2
   } mode_t;
 
-  // struct typedefs
-
-  typedef struct {
-    int index;
-    char* path;
-    double file_match_time_offset_sec;
-    double file_match_time_tolerance_sec;
-    double ray_match_elevation_tolerance_deg;
-    double ray_match_azimuth_tolerance_deg;
-    double ray_match_time_tolerance_sec;
-  } input_t;
-
-  typedef struct {
-    char* field;
-    int index;
-  } field_map_t;
-
   ///////////////////////////
   // Member functions
   //
@@ -398,19 +381,7 @@ public:
 
   mode_t mode;
 
-  char* output_url;
-
-  int num_threads;
-
-  tdrp_bool_t thread_debug;
-
-  input_t *_input;
-  int input_n;
-
-  field_map_t *_field_mapping;
-  int field_mapping_n;
-
-  double max_wait_minutes;
+  char* input_dir;
 
   int max_realtime_data_age_secs;
 
@@ -420,15 +391,17 @@ public:
 
   double read_upper_fixed_angle;
 
-  tdrp_bool_t ignore_antenna_transitions;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
 
-  char* input_field;
+  int num_threads;
 
-  char* output_field;
+  tdrp_bool_t thread_debug;
+
+  char* input_field_name;
+
+  char* output_field_name;
 
   double threshold;
 
@@ -440,12 +413,6 @@ public:
   double azToleranceDegrees;
 
   double elevToleranceDegrees;
-
-  tdrp_bool_t diagnostic_output;
-
-  char* final_output_url;
-
-  char* output_ascii_path;
 
   double missing_clutter_value;
 
@@ -459,6 +426,14 @@ public:
 
   double histogram_max;
 
+  char* clutter_stats_output_dir;
+
+  tdrp_bool_t write_diagnostic_output;
+
+  char* diagnostic_volume_dir;
+
+  char* diagnostic_ascii_dir;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -466,7 +441,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

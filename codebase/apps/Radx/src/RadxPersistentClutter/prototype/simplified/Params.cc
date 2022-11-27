@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("RadxPersistentClutter app");
-    tt->comment_text = tdrpStrDup("RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.\n");
+    tt->comment_text = tdrpStrDup("RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -572,14 +572,23 @@
     tt->comment_text = tdrpStrDup("Parameters for general algorithm data filtering for Radx format input data");
     tt++;
     
+    // Parameter 'Comment 2'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 2");
+    tt->comment_hdr = tdrpStrDup("Debugging and process control");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'instance'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("instance");
-    tt->help = tdrpStrDup("for PMU");
+    tt->descr = tdrpStrDup("Program instance for process registration.");
+    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
     tt->val_offset = (char *) &instance - &_start_;
     tt->single_val.s = tdrpStrDup("test");
     tt++;
@@ -604,6 +613,15 @@
       tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
       tt->enum_def.fields[2].val = DEBUG_VERBOSE;
     tt->single_val.e = DEBUG;
+    tt++;
+    
+    // Parameter 'Comment 3'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("Data input");
+    tt->comment_text = tdrpStrDup(" Parameters that control the reading of input data ");
     tt++;
     
     // Parameter 'debug_triggering'
@@ -640,179 +658,16 @@
     tt->single_val.e = FILELIST;
     tt++;
     
-    // Parameter 'output_url'
+    // Parameter 'input_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_url");
-    tt->descr = tdrpStrDup("output for Algorithm results");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 2'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("Threading");
-    tt->comment_text = tdrpStrDup("Optional threading of beams, depends on app whether params are used or not");
-    tt++;
-    
-    // Parameter 'num_threads'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("num_threads");
-    tt->descr = tdrpStrDup("Number of threads");
-    tt->help = tdrpStrDup("set to 1 or 0 for no threading");
-    tt->val_offset = (char *) &num_threads - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'thread_debug'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("thread_debug");
-    tt->descr = tdrpStrDup("Thread debugging");
-    tt->help = tdrpStrDup("TRUE to see thread related debugging");
-    tt->val_offset = (char *) &thread_debug - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 3'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("Input paths");
-    tt->comment_text = tdrpStrDup("Inputs can come from one or more location, a primary source, and any number of secondary sources.");
-    tt++;
-    
-    // Parameter 'input'
-    // ctype is '_input_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("input");
-    tt->descr = tdrpStrDup("inputs");
-    tt->help = tdrpStrDup("index = numerical value to refer to this elsewhere\npath = where the data is\nThe first thing on this list is the primary data source. The geometry of non-primary files will be converted to match the primary files. The file_match_time_offset_sec and file_match_time_tolerance_sec are used to search for the best secondary file to merge. The offset is ignored for the primary field. The ray tolerances are used to match rays in the secondary file with those in the primary file.");
-    tt->array_offset = (char *) &_input - &_start_;
-    tt->array_n_offset = (char *) &input_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(input_t);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("input_t");
-    tt->struct_def.nfields = 7;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("index");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_input->index - (char *) _input;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("path");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_input->path - (char *) _input;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("file_match_time_offset_sec");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_input->file_match_time_offset_sec - (char *) _input;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("file_match_time_tolerance_sec");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_input->file_match_time_tolerance_sec - (char *) _input;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("ray_match_elevation_tolerance_deg");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_input->ray_match_elevation_tolerance_deg - (char *) _input;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("ray_match_azimuth_tolerance_deg");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &_input->ray_match_azimuth_tolerance_deg - (char *) _input;
-      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("ray_match_time_tolerance_sec");
-      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[6].rel_offset = 
-        (char *) &_input->ray_match_time_tolerance_sec - (char *) _input;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("Mapping from input field to path");
-    tt->comment_text = tdrpStrDup("For each field that is an input to the app, it is associated with an input path using this mapping (index/field name).");
-    tt++;
-    
-    // Parameter 'field_mapping'
-    // ctype is '_field_map_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("field_mapping");
-    tt->descr = tdrpStrDup("mapping from field to url");
-    tt->help = tdrpStrDup("for each input field, the index to the path of that data");
-    tt->array_offset = (char *) &_field_mapping - &_start_;
-    tt->array_n_offset = (char *) &field_mapping_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(field_map_t);
-    tt->array_n = 0;
-    tt->struct_def.name = tdrpStrDup("field_map_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("field");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_field_mapping->field - (char *) _field_mapping;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("index");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_field_mapping->index - (char *) _field_mapping;
-    tt->n_struct_vals = 0;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("Data Read Parameters");
-    tt->comment_text = tdrpStrDup(" Parameters that control the reading of input data ");
-    tt++;
-    
-    // Parameter 'max_wait_minutes'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_wait_minutes");
-    tt->descr = tdrpStrDup("max wait");
-    tt->help = tdrpStrDup("maximum wait time (minutes) for realtime=TRUE and multiple input URLs. Not used in archive mode");
-    tt->val_offset = (char *) &max_wait_minutes - &_start_;
-    tt->single_val.d = 1;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("input directory name");
+    tt->help = tdrpStrDup("Location of input data in CfRadial format");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
     // Parameter 'max_realtime_data_age_secs'
@@ -863,18 +718,6 @@
     tt->single_val.d = 90;
     tt++;
     
-    // Parameter 'ignore_antenna_transitions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ignore_antenna_transitions");
-    tt->descr = tdrpStrDup("Option to ignore rays with antenna transition flag set.");
-    tt->help = tdrpStrDup("The transition flag is set when the antenna is moving between sweeps. If this parameter is true, rays containing the transition flag will not be read in.");
-    tt->val_offset = (char *) &ignore_antenna_transitions - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'set_max_range'
     // ctype is 'tdrp_bool_t'
     
@@ -899,36 +742,69 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter");
-    tt->comment_text = tdrpStrDup("Parameters for setting clutter locations of one input field.\n");
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("Threading");
+    tt->comment_text = tdrpStrDup("Optional threading of beams, depends on app whether params are used or not");
     tt++;
     
-    // Parameter 'input_field'
+    // Parameter 'num_threads'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("num_threads");
+    tt->descr = tdrpStrDup("Number of threads");
+    tt->help = tdrpStrDup("set to 1 or 0 for no threading");
+    tt->val_offset = (char *) &num_threads - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'thread_debug'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("thread_debug");
+    tt->descr = tdrpStrDup("Thread debugging");
+    tt->help = tdrpStrDup("TRUE to see thread related debugging");
+    tt->val_offset = (char *) &thread_debug - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter");
+    tt->comment_text = tdrpStrDup("Parameters for setting clutter locations of one input field.");
+    tt++;
+    
+    // Parameter 'input_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_field");
+    tt->param_name = tdrpStrDup("input_field_name");
     tt->descr = tdrpStrDup("input field name");
     tt->help = tdrpStrDup("name of field to find clutter in");
-    tt->val_offset = (char *) &input_field - &_start_;
+    tt->val_offset = (char *) &input_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
-    // Parameter 'output_field'
+    // Parameter 'output_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_field");
+    tt->param_name = tdrpStrDup("output_field_name");
     tt->descr = tdrpStrDup("output field name");
     tt->help = tdrpStrDup("name to give final output clutter field");
-    tt->val_offset = (char *) &output_field - &_start_;
+    tt->val_offset = (char *) &output_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("clutter");
     tt++;
     
@@ -996,42 +872,6 @@
     tt->help = tdrpStrDup("allowed degrees difference between elevation values from different volumes to be considered part of the same ray");
     tt->val_offset = (char *) &elevToleranceDegrees - &_start_;
     tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'diagnostic_output'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("diagnostic_output");
-    tt->descr = tdrpStrDup("diagnostic_output");
-    tt->help = tdrpStrDup("If true, output from each volume is done, to show the build up of skill through time, to the output location. Typically this is a diagnostic mode.  If false, output is only at the end of a processing phase, with output time equal to the time of the first volume processed, and output written to the final_output_url");
-    tt->val_offset = (char *) &diagnostic_output - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'final_output_url'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("final_output_url");
-    tt->descr = tdrpStrDup("location for main output");
-    tt->help = tdrpStrDup("see diagnostic_output description");
-    tt->val_offset = (char *) &final_output_url - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'output_ascii_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_ascii_path");
-    tt->descr = tdrpStrDup("Output ascii file path in which to write plottables");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_ascii_path - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
     tt++;
     
     // Parameter 'missing_clutter_value'
@@ -1104,6 +944,63 @@
     tt->help = tdrpStrDup("Histograms are used to set clutter value. This is the maximum bin");
     tt->val_offset = (char *) &histogram_max - &_start_;
     tt->single_val.d = 50;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("Data output");
+    tt->comment_text = tdrpStrDup("Parameters for writing results");
+    tt++;
+    
+    // Parameter 'clutter_stats_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("clutter_stats_output_dir");
+    tt->descr = tdrpStrDup("Location for final clutter statistics.");
+    tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
+    tt->val_offset = (char *) &clutter_stats_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'write_diagnostic_output'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_diagnostic_output");
+    tt->descr = tdrpStrDup("Write out diagnostic output");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &write_diagnostic_output - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'diagnostic_volume_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("diagnostic_volume_dir");
+    tt->descr = tdrpStrDup("Dir for diagnostic output");
+    tt->help = tdrpStrDup("If true, output from each volume is written, to show the build up of skill through time.");
+    tt->val_offset = (char *) &diagnostic_volume_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'diagnostic_ascii_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("diagnostic_ascii_dir");
+    tt->descr = tdrpStrDup("Output ascii dir to which to write plottables");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &diagnostic_ascii_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
     // trailing entry has param_name set to NULL
