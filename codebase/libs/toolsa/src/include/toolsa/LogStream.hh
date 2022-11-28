@@ -71,8 +71,9 @@
  * 
  * ---------------------- Fixed types -------------------------------------
  * The fixed logging types that are supported:
- *    DEBUG               Normal debugging messages, enabled by default
- *    DEBUG_VERBOSE       Extra debugging messages, disabled by default
+ *    DEBUG               Normal debugging messages, disabled by default
+ *    DEBUG_VERBOSE       Verbose debugging messages, disabled by default
+ *    DEBUG_EXTRA         Extra verbose debugging messages, disabled by default
  *    ERROR               Message is prepended with the word 'ERROR ',
  *                        enabled by default
  *    FATAL               Message is prepended witht the word 'FATAL ',
@@ -394,17 +395,20 @@ public:
    */
   typedef enum
   {
-    DEBUG,
-    DEBUG_VERBOSE,
-    ERROR,
-    FATAL,
-    FORCE,
-    PRINT,
-    SEVERE,
-    WARNING,
-    TRIGGER
+    FORCE=0,              /**< Force (must display this one no matter what) */
+    PRINT=1,              /**< Force,but with no extra header information */
+    DEBUG=2,              /**< Debugging */
+    DEBUG_VERBOSE=3,      /**< Verbose debugging */
+    TRIGGER=4,            /**< Triggering specific messages */
+    THREAD=5,             /**< Threading specific messages */
+    SPECIAL=6,            /**< Special (for any customized use) */
+    WARNING=7,            /**< Warning message */
+    ERROR=8,              /**< Error message */
+    SEVERE=9,             /**< Severe error message */
+    FATAL=10,             /**< Fatal error */
+    DEBUG_EXTRA=11,       /**< Extra verbose debugging */
+    NUM=12                /**< Number of severity states */
   } Log_t;
-
 
   /**
    * Constructor - fixed type
@@ -601,6 +605,16 @@ public:
    * Set DEBUG_VERBOSE = false;
    */
   void clearVerbose(void);
+
+  /**
+   * Set DEBUG_EXTRA = true;
+   */
+  void setExtra(void);
+
+  /**
+   * Set DEBUG_EXTRA = false;
+   */
+  void clearExtra(void);
 
   /**
    * Add a custom type if it is not there.

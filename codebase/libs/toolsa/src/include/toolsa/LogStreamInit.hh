@@ -75,6 +75,11 @@ public:
   static void setDebugVerbose(bool state);
 
   /**
+   * Set DEBUG_EXTRA flag to input
+   */
+  static void setDebugExtra(bool state);
+
+  /**
    * Set custom triggering flag TaTriggerLog::name() to input
    */
   static void setTrigger(bool state);

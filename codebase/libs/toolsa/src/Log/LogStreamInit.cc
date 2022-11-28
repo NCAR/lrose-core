@@ -59,6 +59,11 @@ void LogStreamInit::setDebugVerbose(bool state)
   LOG_STREAM_SET_TYPE(DEBUG_VERBOSE, state);
 }
 
+void LogStreamInit::setDebugExtra(bool state)
+{
+  LOG_STREAM_SET_TYPE(DEBUG_EXTRA, state);
+}
+
 //----------------------------------------------------------------------
 void LogStreamInit::setTrigger(bool state)
 {

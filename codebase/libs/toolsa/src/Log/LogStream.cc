@@ -120,6 +120,9 @@ std::string LogStream::setSeverityString(Log_t logT)
     case DEBUG_VERBOSE:
       ret =   "VERBOSE ";
       break;
+    case DEBUG_EXTRA:
+      ret =   "EXTRA ";
+      break;
     case TRIGGER:
       ret =   "TRIGGER ";
       break;
@@ -146,6 +149,8 @@ std::string LogStream::setSeverityString(Log_t logT)
     case DEBUG:
       break;
     case DEBUG_VERBOSE:
+      break;
+    case DEBUG_EXTRA:
       break;
     case TRIGGER:
       break;
@@ -237,8 +242,9 @@ LogState::LogState() :
   _logOutputType(COUT),
   _accumBuf("")
 {
-  _enabled[LogStream::DEBUG] = true;
+  _enabled[LogStream::DEBUG] = false;
   _enabled[LogStream::DEBUG_VERBOSE] = false;
+  _enabled[LogStream::DEBUG_EXTRA] = false;
   _enabled[LogStream::ERROR] = true;
   _enabled[LogStream::WARNING] = true;
   _enabled[LogStream::FATAL] = true;
@@ -461,6 +467,18 @@ void LogState::setVerbose(void)
 void LogState::clearVerbose(void)
 {
   _enabled[LogStream::DEBUG_VERBOSE] = false;
+}
+
+//----------------------------------------------------------------
+void LogState::setExtra(void)
+{
+  _enabled[LogStream::DEBUG_EXTRA] = true;
+}
+
+//----------------------------------------------------------------
+void LogState::clearExtra(void)
+{
+  _enabled[LogStream::DEBUG_EXTRA] = false;
 }
 
 //----------------------------------------------------------------
