@@ -352,8 +352,11 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
   vol->convertToFl32();
 
   // adjust angles for elevation surveillance if needed
+    //  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    //  ray->setAnglesForElevSurveillance();
+    //}
   
-  vol->setAnglesForElevSurveillance();
+  //vol->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -407,7 +410,10 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
 
   // adjust angles for elevation surveillance if needed
   
-  vol->setAnglesForElevSurveillance();
+   //   if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+   //   ray->setAnglesForElevSurveillance();
+   // }
+  //vol->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -433,6 +439,59 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
 void DataModel::getRayData(string path, vector<string> &fieldNames,
   int sweepNumber) {
   readData(path, fieldNames, sweepNumber);
+}
+
+
+void DataModel::_adjustAnglesForElevationSurveillance(RadxVol *_vol) {
+
+  // adjust angles for elevation surveillance if needed
+  RadxRay *ray = getRay(0);
+  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    size_t nRays = getNRays();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      RadxRay *ray = getRay(iray);
+      cerr << iray << ": adjusting az " << ray->getAzimuthDeg() << " to "; 
+      //ray->setAnglesForElevSurveillance();
+
+//----  copied this code from ray->setAnglesForElevSurveillance();
+      // because the cfactors were always NULL for the ray,
+      // but not for the volume.
+   
+    const RadxGeoref *georef = ray->getGeoreference();
+    if (georef != NULL) {
+      double rollCorr = 0.0;
+      double rotCorr = 0.0;
+      double tiltCorr = 0.0;
+      const RadxCfactors *cfactors = _vol->getCfactors();
+      if (cfactors != NULL) {
+        rollCorr = cfactors->getRollCorr();
+        rotCorr = cfactors->getRotationCorr();
+        tiltCorr = cfactors->getTiltCorr();
+      }
+      double rotation = georef->getRotation() + rotCorr;
+      double roll = georef->getRoll() + rollCorr;
+      double tilt = georef->getTilt() + tiltCorr;
+      double newAz = rotation + roll;
+      while (newAz < 0) {
+        newAz += 360.0;
+      }
+      while (newAz > 360.0) {
+        newAz -= 360.0;
+      }
+      //TODO: where to handle this?? when making mods for survellance? or somehwere else??
+      //  mod everything by 360?
+      ray->setAzimuthDeg(newAz);
+      ray->setElevationDeg(tilt);
+      cerr << ray->getAzimuthDeg() << endl;
+    }
+//----
+
+
+     // loadSweepInfoFromRays();
+    }
+    //_vol->setAnglesForElevSurveillance();
+      //ray->setAnglesForElevSurveillance();
+  }
 }
 
 
@@ -494,9 +553,15 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   _vol->convertToFl32();
 
+  _adjustAnglesForElevationSurveillance(_vol);
+
   // adjust angles for elevation surveillance if needed
+  //if (_vol->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+  //    _vol->setAnglesForElevSurveillance();
+      //ray->setAnglesForElevSurveillance();
+  //}
   
-  _vol->setAnglesForElevSurveillance();
+
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -1055,7 +1120,7 @@ RadxRay *DataModel::getRay(size_t rayIdx) {
   _vol->loadRaysFromFields();
   
   //  get the ray for this field 
-  const vector<RadxRay *>  &rays = _vol->getRays();
+  vector<RadxRay *>  &rays = _vol->getRays();
 
   RadxRay *ray = rays.at(rayIdx);
   if (ray == NULL) {

@@ -41,21 +41,29 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 
   double minDistance = 99999999.0;
   double previousAz = 0.0;
+  size_t minDistanceRayIdx = 0;
   vector<RadxRay *>::const_iterator rayItr;
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
     RadxRay *ray = *rayItr;
     if (ray->getSweepNumber() == sweepNumber) {   
       double az = ray->getAzimuthDeg();
-      // what if the rays are NOT in sorted order by az? It will be close enough
-      double distance = fabs(az - previousAz);
-      if (distance < minDistance) {
-        minDistance = distance;
+      if (rayItr != listOfRays.begin()) { 
+        // what if the rays are NOT in sorted order by az? It will be close enough
+        double distance = fabs(az - previousAz);
+        cerr << "az= " << az << " distance=" << distance << endl;
+        if (distance < minDistance) {
+          minDistance = distance;
+          minDistanceRayIdx = rayItr - listOfRays.begin();
+        }
       }
       previousAz = az;
     }
   }
   LOG(DEBUG) << "using minimum ray distance of " << minDistance;
-  
+  if (minDistance < 1) {
+    minDistance = 1.0;
+    cerr << "min ray distance less than 1.0, setting to 1.0" << endl;
+  }
   //double half_angle = ppi_rendering_beam_width / 2.0;
   double half_angle = minDistance / 2.0;
 
@@ -99,11 +107,21 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 
 
       double az = ray->getAzimuthDeg();
+      while (az < 0) {
+        az += 360.0;  
+        //TODO: where to handle this?? when making mods for survellance? or somehwere else??
+        // mod everything by 360?
+      }
+      while (az > 360) {
+        az = az - 360;
+      }
       double startAz = az - half_angle; // - 0.1;
       double endAz = az + half_angle; // + 0.1;
 
     // store
-      
+      if (az < 0) {
+        cerr << "HERE!!!" << endl;
+      }
       int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
       int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
       LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
@@ -281,10 +299,47 @@ vector <float> *RayLocationModel::getRayDataOffset(float azimuth,
 
 RadxRay *RayLocationModel::getClosestRay(double azDeg) {
 	int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
-    if ((rayIndex < 0) || (rayIndex >= RayLoc::RAY_LOC_N)) {
-    	throw "azimuth out of range";
+
+  // find the closest ray_loc that is active
+  // search in positive direction first
+  bool activeFound = false;
+  int indexPlus = rayIndex;
+  while ((indexPlus >= 0) && (indexPlus < RayLoc::RAY_LOC_N)
+    && !activeFound) {
+    if (ray_loc.at(indexPlus).active) {
+      activeFound = true;
+    } else {
+      indexPlus += 1;
+      if (indexPlus >= RayLoc::RAY_LOC_N)
+        indexPlus = 0; 
     }
-	return ray_loc.at(rayIndex).ray;
+  }
+
+  // search in the negative direction
+  activeFound = false;
+  int indexNeg = rayIndex;
+  while ((indexNeg >= 0) && (indexNeg < RayLoc::RAY_LOC_N)
+    && !activeFound) {
+    if (ray_loc.at(indexNeg).active) {
+      activeFound = true;
+    } else {
+      indexNeg -= 1;
+      if (indexNeg < 0)
+        indexNeg = RayLoc::RAY_LOC_N-1; 
+    }
+  }
+
+  int distPlus = abs(indexPlus - rayIndex);
+  int distNeg = abs(indexNeg - rayIndex);
+  int closestIdx = indexNeg;
+  if (distPlus < distNeg) {
+    closestIdx =  indexPlus;
+  }
+
+    //if ((rayIndex < 0) || (rayIndex >= RayLoc::RAY_LOC_N)) {
+    //	throw "azimuth out of range";
+    //}
+	return ray_loc.at(closestIdx).ray;
 }
 
 size_t RayLocationModel::getClosestRayIdx(double azDeg) {
@@ -308,5 +363,5 @@ float RayLocationModel::getAzimuthForRay(double azDeg,
 
   size_t rayIdx = getClosestRayIdx(azDeg, offset);
   RadxRay *ray = ray_loc.at(rayIdx).ray;
-  return ray->getAzimuthDeg();;
+  return ray->getAzimuthDeg();
 }
