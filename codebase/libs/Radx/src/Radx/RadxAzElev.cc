@@ -87,6 +87,6 @@ bool RadxAzElev::operator<(const RadxAzElev &a1) const
 std::string RadxAzElev::sprint(void) const
 {
   char buf[1000];
-  sprintf(buf, "(%lf,%lf)", _az, _elev);
+  sprintf(buf, "(%.3lf,%.3lf)", _az, _elev);
   return buf;
 }

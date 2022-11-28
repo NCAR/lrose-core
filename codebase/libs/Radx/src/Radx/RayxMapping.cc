@@ -79,8 +79,6 @@ bool RayxMapping::add(const RadxRay &ray)
     RadxAzElev ae(az, elev_match);
     if (find(_azelev.begin(), _azelev.end(), ae) != _azelev.end())
     {
-      cerr << "WARNING - Multiple az,elev in volume(" << az << "," 
-	   << elev_match << ")" << endl;
       _azelevMulti.push_back(ae);
     }
     else
@@ -91,7 +89,6 @@ bool RayxMapping::add(const RadxRay &ray)
   }
   else
   {
-    cerr << "ERROR - Elevation " << elev << " not configured within tolerance" << endl;
     return false;
   }
 }
