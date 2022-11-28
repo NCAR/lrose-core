@@ -91,6 +91,12 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug_mode = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-vv") ||
+               !strcmp(argv[i], "-extra")) {
+      
+      sprintf(tmp_str, "debug_mode = DEBUG_EXTRA;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -183,12 +189,14 @@ void Args::_usage(ostream &out)
       << "  [ -f, -paths ? ] set file paths\n"
       << "           Sets mode to FILELIST\n"
       << "\n"
+      << "  [ -print_fuzzy2d ] print an example of the Fuzzy2d parameters\n"
+      << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"
       << "           Sets mode to ARCHIVE\n"
       << "\n"
       << "  [ -v, -verbose ] print verbose debug messages\n"
       << "\n"
-      << "  [ -print_fuzzy2d ] print an example of the Fuzzy2d parameters\n"
+      << "  [ -vv, -extra ] print extra verbose debug messages\n"
       << "\n"
       << endl;
   

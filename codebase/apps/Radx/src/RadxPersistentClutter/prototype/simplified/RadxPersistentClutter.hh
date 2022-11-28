@@ -38,6 +38,7 @@
 #include <Radx/RadxAzElev.hh>
 #include <Radx/RayxMapping.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
+#include <toolsa/LogStream.hh>
 #include <didss/LdataInfo.hh>
 #include <map>
 #include <stdexcept>
@@ -103,7 +104,7 @@ public:
       }
       catch (const std::out_of_range &err)
       {
-	printf("%s is out of range of mappings\n", ae.sprint().c_str());
+        LOG(DEBUG_EXTRA) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }
@@ -132,7 +133,7 @@ public:
       }
       catch (const std::out_of_range &err)
       {
-	printf("%s is out of range of mappings\n", ae.sprint().c_str());
+        LOG(DEBUG_EXTRA) << ae.sprint() << " is out of range of mappings";
 	return NULL;
       }
     }

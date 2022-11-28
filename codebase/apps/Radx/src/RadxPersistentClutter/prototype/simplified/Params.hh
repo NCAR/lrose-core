@@ -70,7 +70,8 @@ public:
   typedef enum {
     NONE = 0,
     DEBUG = 1,
-    DEBUG_VERBOSE = 2
+    DEBUG_VERBOSE = 2,
+    DEBUG_EXTRA = 3
   } debug_e;
 
   typedef enum {

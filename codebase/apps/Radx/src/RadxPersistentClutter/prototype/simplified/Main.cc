@@ -29,7 +29,6 @@
 #include <csignal>
 #include <new>
 #include <iostream>
-#include <toolsa/LogMsg.hh>
 
 static void tidy_and_exit (int sig);
 static void out_of_store(void);
@@ -56,17 +55,17 @@ int main(int argc, char **argv)
   
   Prog = new RadxPersistentClutterFirstPass(argc, argv);
   if (!Prog->OK) {
-    LOG(LogMsg::FATAL,
-	"Could not create RadxPersistentClutterFirstPass object.");
+    cerr << "ERROR - main" << endl;
+    cerr << "  Could not create RadxPersistentClutterFirstPass object" << endl;
     return 1;
   }
 
   // run the first pass
   
   if (!Prog->run()) {
-    LOG(LogMsg::ERROR, "running RadxPersistentClutter First pass");
+    cerr << "ERROR - main" << endl;
+    cerr << "  Running RadxPersistentClutterFirstPass object" << endl;
     tidy_and_exit(-1);
-    return 1;
   }
 
   // create second pass object
@@ -75,8 +74,8 @@ int main(int argc, char **argv)
   delete Prog;
   Prog = NULL;
   if (!Prog2->OK) {
-    LOG(LogMsg::FATAL,
-        "Could not create RadxPersistentClutterSecondPass object.");
+    cerr << "ERROR - main" << endl;
+    cerr << "  Could not create RadxPersistentClutterSecondPass object" << endl;
     return 1;
   }
 
@@ -86,7 +85,8 @@ int main(int argc, char **argv)
   if (!Prog2->run()) {
     iret = 0;
   } else {
-    LOG(LogMsg::ERROR, "running RadxPersistentClutter Second pass");
+    cerr << "ERROR - main" << endl;
+    cerr << "  Running RadxPersistentClutterSecondPass object" << endl;
     iret = 1;
   }
 
@@ -116,6 +116,6 @@ static void tidy_and_exit (int sig)
 // Handle out-of-memory conditions
 static void out_of_store(void)
 {
-  LOG(LogMsg::FATAL, "Operator new failed - out of store");
+  cerr << "ERROR - operator new failed - out of store" << endl;
   exit(-1);
 }

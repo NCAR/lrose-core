@@ -603,7 +603,7 @@
     tt->help = tdrpStrDup("NONE=as quiet as possible, DEBUG = minimal debug output, DEBUG_VERBOSE=more");
     tt->val_offset = (char *) &debug_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("debug_e");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("NONE");
@@ -612,6 +612,8 @@
       tt->enum_def.fields[1].val = DEBUG;
       tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
       tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_EXTRA");
+      tt->enum_def.fields[3].val = DEBUG_EXTRA;
     tt->single_val.e = DEBUG;
     tt++;
     

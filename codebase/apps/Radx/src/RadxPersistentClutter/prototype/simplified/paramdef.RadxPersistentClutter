@@ -30,7 +30,7 @@ paramdef string {
 
 typedef enum
   {
-   NONE, DEBUG, DEBUG_VERBOSE
+   NONE, DEBUG, DEBUG_VERBOSE, DEBUG_EXTRA
   } debug_e;
 
 paramdef enum debug_e

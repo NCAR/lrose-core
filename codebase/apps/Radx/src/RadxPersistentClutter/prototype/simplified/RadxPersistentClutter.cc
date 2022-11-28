@@ -93,10 +93,22 @@ RadxPersistentClutter::RadxPersistentClutter(int argc, char **argv)
   }
 
   // set up debugging state for logging  using params
-  LogStreamInit::init(_params.debug_mode == Params::DEBUG ||
-                      _params.debug_mode == Params::DEBUG_VERBOSE,
-                      _params.debug_mode == Params::DEBUG_VERBOSE,
-                      true, true);
+  LogStreamInit::init(false, false, true, true);
+  LOG_STREAM_DISABLE(LogStream::WARNING);
+  LOG_STREAM_DISABLE(LogStream::DEBUG);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_VERBOSE);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_EXTRA);
+  if (_params.debug_mode >= Params::DEBUG_EXTRA) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_EXTRA);
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug_mode >= Params::DEBUG_VERBOSE) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug_mode >= Params::DEBUG) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+    LOG_STREAM_ENABLE(LogStream::WARNING);
+  }
   if (_params.debug_triggering) {
     LogStreamInit::setThreading(true);
   }
@@ -239,9 +251,9 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL) {
-    LOG(WARNING) << "No histo match for az=" << az << " elev=" << elev;
+    LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
   } else {
-    LOG(DEBUG_VERBOSE) << "Updating ray az=" << az << " elev=" << elev;
+    LOG(DEBUG_EXTRA) << "Updating ray az=" << az << " elev=" << elev;
   }
   return h;
 }
@@ -356,9 +368,9 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
   if (h == NULL) {
-    LOG(WARNING) << "No histo match for az=" << az << " elev=" << elev;
+    LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
   } else {
-    LOG(DEBUG_VERBOSE) << "Updating ray az:" << az << " elev:" << elev;
+    LOG(DEBUG_EXTRA) << "Updating ray az:" << az << " elev:" << elev;
   }
   return h;
 }

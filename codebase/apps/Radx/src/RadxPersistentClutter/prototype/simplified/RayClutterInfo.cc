@@ -76,12 +76,12 @@ bool RayClutterInfo::update(const RayxData &r, const double threshold)
       {
 	if (v >= threshold)
 	{
-	  LOG(LogStream::DEBUG_VERBOSE) << "beam[" << i << "]=" << v << " YES";
+	  // LOG(LogStream::DEBUG_EXTRA) << "beam[" << i << "]=" << v << " YES";
 	  _counts.incAtPoint(i, 1.0);
 	}
 	else
 	{
-	  LOG(LogStream::DEBUG_VERBOSE) << "beam[" << i << "]=" << v << " NO";
+	  // LOG(LogStream::DEBUG_EXTRA) << "beam[" << i << "]=" << v << " NO";
 	}
       }
       else
