@@ -534,7 +534,7 @@ void Path::stripDir(const string &dir, const string &path, string &file)
       file = path;
     }
     
-  } catch (out_of_range err) {
+  } catch (out_of_range &err) {
 
     // delim longer than path
 
