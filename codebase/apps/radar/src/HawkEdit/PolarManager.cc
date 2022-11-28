@@ -1875,9 +1875,9 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     // check for elevation surveillance sweep mode
     // in this case, set azimuth to rotation if georef is available
     
-    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-      ray->setAnglesForElevSurveillance();
-    }
+    //if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    //  ray->setAnglesForElevSurveillance();
+    //}
 
     // Store the ray location using the azimuth angle and the PPI location
     // table

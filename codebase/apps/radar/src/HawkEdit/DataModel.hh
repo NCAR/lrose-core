@@ -56,6 +56,8 @@ public:
   void getRayData(string path, vector<string> &fieldNames,
   int sweepNumber);
 
+  void _adjustAnglesForElevationSurveillance(RadxVol *_vol);
+
   void writeData(string path);
   void writeData(string path, RadxVol *vol);
 
