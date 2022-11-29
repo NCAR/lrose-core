@@ -2555,24 +2555,6 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
 
   //  LOG(DEBUG) << "    rayIndex = " << rayIndex;
   
-  const RadxRay *ray = _rayLocationController->getClosestRay(azDeg);
-  //const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
-  if (ray == NULL) {
-    // no ray data yet
-
-      LOG(DEBUG) << "    No ray data yet...";
-      errorMessage("Error", "No ray data found at " + to_string(azDeg));
-      //LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
-      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
-      //LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
-      //LOG(DEBUG) << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex;
-    
-    return;
-  }
-
-  // notify the status display area to update
-  _locationClicked(xkm, ykm, ray);
-
   // first right of refusal is the boundary editor, if a polygon is not complete
   // TODO:  moved to BPE
     //BoundaryPointEditor *editor = boundaryPointEditorControl;
@@ -2610,6 +2592,25 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
       _examineSpreadSheetSetup(azDeg, range);
     }
   }
+
+  // last chance is the lefthand status panel
+  const RadxRay *ray = _rayLocationController->getClosestRay(azDeg);
+  //const RadxRay *ray = _ppiRayLoc[rayIndex].ray;
+  if (ray == NULL) {
+    // no ray data yet
+
+      LOG(DEBUG) << "    No ray data yet...";
+      errorMessage("Error", "No ray data found at " + to_string(azDeg));
+      //LOG(DEBUG) << "      active = " << _ppiRayLoc[rayIndex].active;
+      // cerr << "      master = " << _ppiRayLoc[rayIndex].master << endl;
+      //LOG(DEBUG) << "      startIndex = " << _ppiRayLoc[rayIndex].startIndex;
+      //LOG(DEBUG) << "      endIndex = " << _ppiRayLoc[rayIndex].endIndex;
+    
+    return;
+  }
+
+  // notify the status display area to update
+  _locationClicked(xkm, ykm, ray);  
 
 }
 
