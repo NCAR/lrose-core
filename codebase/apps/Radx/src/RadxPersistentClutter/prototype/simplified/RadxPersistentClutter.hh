@@ -34,9 +34,9 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "RayClutterInfo.hh"
+#include "RayMapping.hh"
+#include "RayAzElev.hh"
 #include <Radx/RadxFile.hh>
-#include <Radx/RadxAzElev.hh>
-#include <Radx/RayxMapping.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
 #include <toolsa/LogStream.hh>
 #include <didss/LdataInfo.hh>
@@ -91,11 +91,11 @@ public:
    * @return pointer to something from store, or NULL
    */
   template <class T>
-  const RayClutterInfo *matchInfoConst(const map<RadxAzElev, T> &store,
+  const RayClutterInfo *matchInfoConst(const map<RayAzElev, T> &store,
 				       const double az,
 				       const double elev) const
   {
-    RadxAzElev ae = _rayMap.match(az, elev);
+    RayAzElev ae = _rayMap.match(az, elev);
     if (ae.ok())
     {
       try
@@ -121,10 +121,10 @@ public:
    * @return pointer to something from store, or NULL
    */
   template <class T>
-  RayClutterInfo *matchInfo(map<RadxAzElev, T> &store, const double az,
+  RayClutterInfo *matchInfo(map<RayAzElev, T> &store, const double az,
 			    const double elev)
   {
-    RadxAzElev ae = _rayMap.match(az, elev);
+    RayAzElev ae = _rayMap.match(az, elev);
     if (ae.ok())
     {
       try
@@ -156,10 +156,10 @@ public:
    * @return true if found the named data in either the ray or in the data
    */
   static bool retrieveRay(const std::string &name, const RadxRay &ray,
-			  std::vector<RayxData> &data, RayxData &r);
+			  std::vector<RayData> &data, RayData &r);
 
   /**
-   * return RayxData of a particular name
+   * return RayData of a particular name
    * @param[in] name  The name to match
    * @param[in] ray  Input data ray (which might have the named data)
    * @param[out] r  The data (a fresh copy)
@@ -168,34 +168,34 @@ public:
    * @return true if found the named data in the ray
    */
   static bool retrieveRay(const std::string &name, const RadxRay &ray,
-			  RayxData &r, const bool showError=true);
+			  RayData &r, const bool showError=true);
 
   /**
-   * Take some RayxData and modify it based on other inputs
-   * @param[in,out] r  RayxData to be modified
+   * Take some RayData and modify it based on other inputs
+   * @param[in,out] r  RayData to be modified
    * @param[in] name  Name to give the data
    * @param[in] units  Units to give the data (if non empty)
    * @param[in] missing  Missing data value to give the dat (if units non empty)
    */
-  static void modifyRayForOutput(RayxData &r, const std::string &name,
+  static void modifyRayForOutput(RayData &r, const std::string &name,
 				 const std::string &units="", 
 				 const double missing=0);
 
   /**
-   * add data for some RayxData to a RadxRay, then clear out all other fields
+   * add data for some RayData to a RadxRay, then clear out all other fields
    * 
    * @param[in] r  Data to add
    * @param[in,out] ray  Object to add to
    */
-  static void updateRay(const RayxData &r, RadxRay &ray);
+  static void updateRay(const RayData &r, RadxRay &ray);
 
   /**
-   * add data for multiple RayxData's to a RadxRay, clearing out all other fields
+   * add data for multiple RayData's to a RadxRay, clearing out all other fields
    * 
    * @param[in] r  Data to add
    * @param[in,out] ray  Object to add to
    */
-  static void updateRay(const vector<RayxData> &r, RadxRay &ray);
+  static void updateRay(const vector<RayData> &r, RadxRay &ray);
 
   bool OK;
 
@@ -232,7 +232,7 @@ protected:
 
   // App _alg;      /**< generic algorithm object */
   bool _first;           /**< True for first volume */
-  RayxMapping _rayMap;
+  RayMapping _rayMap;
 
   time_t _start;         /**< Start time in ARCHIVE mode */
   time_t _end;           /**< End time in ARCHIVE mode */
@@ -246,7 +246,7 @@ protected:
    * The storage of all info needed to do the computations, one object per
    * az/elev
    */
-  std::map<RadxAzElev, RayClutterInfo> _store; 
+  std::map<RayAzElev, RayClutterInfo> _store; 
   time_t _first_t;    /**< First time */
   time_t _final_t;    /**< Last time processed, which is the time at which
 		       *   results converged */
@@ -258,7 +258,7 @@ protected:
   int _initDerivedParams();
 
   /**
-   * Initialize a RadxRay by converting it into RayxData, and pointing to
+   * Initialize a RadxRay by converting it into RayData, and pointing to
    * the matchiing element of _store
    *
    * @param[in] ray  The data
@@ -266,7 +266,7 @@ protected:
    *
    * @return the matching pointer, or NULL for error
    */
-  RayClutterInfo *_initRayThreaded(const RadxRay &ray, RayxData &r);
+  RayClutterInfo *_initRayThreaded(const RadxRay &ray, RayData &r);
 
   /**
    * Process to set things for output into vol
@@ -324,7 +324,7 @@ protected:
   bool _processRayForOutput(RadxRay &ray);
 
   /**
-   * Initialize a RadxRay by converting it into RayxData, and pointing to
+   * Initialize a RadxRay by converting it into RayData, and pointing to
    * the matchiing element of _store
    *
    * @param[in] ray  The data
@@ -332,7 +332,7 @@ protected:
    *
    * @return the matching pointer, or NULL for error
    */
-  RayClutterInfo *_initRay(const RadxRay &ray, RayxData &r);
+  RayClutterInfo *_initRay(const RadxRay &ray, RayData &r);
 
 
   /**
@@ -363,14 +363,14 @@ protected:
   bool _write(RadxVol &vol, const time_t &t, const std::string &dir);
 
   /**
-   * Process one file to create a volume
+   * Read one file to create a volume
    * @param[in] path  File to process
    * @param[out] vol The volume
    * @param[out] t
    *
    * @return true for success
    */
-  bool _processFile(const std::string &path, RadxVol &vol, time_t &t);
+  bool _readFile(const std::string &path, RadxVol &vol, time_t &t);
 
   /**
    * Set read request for primary data into the RadxFile object

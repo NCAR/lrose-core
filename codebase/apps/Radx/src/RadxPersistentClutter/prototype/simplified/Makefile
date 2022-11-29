@@ -61,8 +61,11 @@ CPPC_SRCS = \
 	RadxPersistentClutter.cc \
 	RadxPersistentClutterFirstPass.cc \
 	RadxPersistentClutterSecondPass.cc \
+        RayAzElev.cc \
         RayClutterInfo.cc \
-	RayHistoInfo.cc
+        RayData.cc \
+	RayHistoInfo.cc \
+	RayMapping.cc
 
 #
 # tdrp macros

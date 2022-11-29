@@ -37,7 +37,7 @@
 
 #include <string>
 #include <vector>
-#include <Radx/RayxData.hh>
+#include "RayData.hh"
 
 class FrequencyCount;
 
@@ -86,10 +86,10 @@ public:
    * @return true if input ray matched local ray information, and internal
    * state has been updated (_counts)
    */
-  bool update(const RayxData &r, const double threshold);
+  bool update(const RayData &r, const double threshold);
 
   /**
-   * At all points where _counts >= k, set value in RayxData to 1, at all other
+   * At all points where _counts >= k, set value in RayData to 1, at all other
    * points set value to 0
    *
    * @param[in] r  Data to fill in
@@ -98,7 +98,7 @@ public:
    * @return true if input ray matched local ray information, and r has been
    * been updated
    */
-  bool equalOrExceed(RayxData &r, const int k) const;
+  bool equalOrExceed(RayData &r, const int k) const;
 
   /**
    * At each point in r, set the value to the count/n (normalized counts)
@@ -109,7 +109,7 @@ public:
    * @return true if input ray matched local ray information, and r has been
    * been updated
    */
-  bool loadNormalizedFrequency(RayxData &r, const int n) const;
+  bool loadNormalizedFrequency(RayData &r, const int n) const;
 
   /** 
    * Debug print 
@@ -143,7 +143,7 @@ protected:
   /**
    * Clutter yes/no values using current best threshold and _counts
    */
-  RayxData _clutter;
+  RayData _clutter;
 
   /**
    * Determine number of effective points by comparing input ray with
@@ -154,7 +154,7 @@ protected:
    * @return Number of points to analyze, -1 for a mis match between input
    *         and local state.
    */
-  int _initNpt(const RayxData &r) const;
+  int _initNpt(const RayData &r) const;
 
 private:  
   
@@ -164,7 +164,7 @@ private:
   /**
    * Number of scans with data >= clutter threshold 
    */
-  RayxData _counts;
+  RayData _counts;
 
 };
 

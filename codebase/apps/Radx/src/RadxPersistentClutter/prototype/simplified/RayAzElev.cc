@@ -22,54 +22,71 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterSecondPass.hh
- * @brief The second pass algorithm
- * @class RadxPersistentClutterSecondPass
- * @brief The second pass algorithm
- *
- * The algorithm uses the internal state to go back through the data and
- * create histograms at each point with clutter, which are then used to
- * estimate a clutter value, which is output.
+ * @file RayAzElev.cc
  */
+#include "RayAzElev.hh"
+#include <cstdio>
 
-#ifndef RADXPERSISTENTCLUTTERSECONDPASS_H
-#define RADXPERSISTENTCLUTTERSECONDPASS_H
-
-#include "RadxPersistentClutter.hh"
-#include "RayHistoInfo.hh"
-#include <Radx/RadxVol.hh>
-#include <map>
-
-class RadxPersistentClutterSecondPass : public RadxPersistentClutter
+//------------------------------------------------------------------
+RayAzElev::RayAzElev(void) :
+  _az(-1),
+  _elev(-1),
+  _ok(false)
 {
-  
-public:
+}
 
-  /**
-   * Constructor
-   * @param[in] p  Object to use as base class
-   *
-   * Input contains the results of the first pass
-   */
-  RadxPersistentClutterSecondPass (const RadxPersistentClutter &p);
+//------------------------------------------------------------------
+RayAzElev::RayAzElev(const double az, const double elev) :
+  _az(az),
+  _elev(elev),
+  _ok(true)
+{
+}
 
-  /**
-   * Destructor
-   */
-  virtual ~RadxPersistentClutterSecondPass(void);
+//------------------------------------------------------------------
+RayAzElev::~RayAzElev()
+{
+}
 
-  #include "RadxPersistentClutterVirtualMethods.hh"
+//------------------------------------------------------------------
+bool RayAzElev::operator==(const RayAzElev &a1) const
+{
+  return _elev == a1._elev && _az == a1._az;
+}
 
-protected:
-private:
+//------------------------------------------------------------------
+bool RayAzElev::operator<(const RayAzElev &a1) const
+{
+  if (_elev < a1._elev)
+  {
+    return true;
+  }
+  else if (_elev == a1._elev)
+  {
+    if (_az < a1._az)
+    {
+      return true;
+    }
+    else if (_az == a1._az)
+    {
+      return false;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
+}
 
-  RadxVol _templateVol;  /**< Saved volume used to form output */
 
-  std::map<RayAzElev, RayHistoInfo> _histo; /**< The storage of all info needed to
-                                             * do the computations, running counts 
-                                             * and histograms through time, one 
-                                             * object per az/elev */
-
-};
-
-#endif
+//------------------------------------------------------------------
+std::string RayAzElev::sprint(void) const
+{
+  char buf[1000];
+  sprintf(buf, "(%.3lf,%.3lf)", _az, _elev);
+  return buf;
+}

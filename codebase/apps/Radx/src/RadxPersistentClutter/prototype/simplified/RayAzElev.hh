@@ -22,54 +22,82 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterSecondPass.hh
- * @brief The second pass algorithm
- * @class RadxPersistentClutterSecondPass
- * @brief The second pass algorithm
- *
- * The algorithm uses the internal state to go back through the data and
- * create histograms at each point with clutter, which are then used to
- * estimate a clutter value, which is output.
+ * @file AzElev.hh
+ * @brief Azimuth elevation pair, used as key for mapping
+ * @class AzElev
+ * @brief Azimuth elevation pair, used as key for mapping
  */
 
-#ifndef RADXPERSISTENTCLUTTERSECONDPASS_H
-#define RADXPERSISTENTCLUTTERSECONDPASS_H
+# ifndef    RAY_AZ_ELEV_HH
+# define    RAY_AZ_ELEV_HH
 
-#include "RadxPersistentClutter.hh"
-#include "RayHistoInfo.hh"
-#include <Radx/RadxVol.hh>
-#include <map>
+#include <string>
 
-class RadxPersistentClutterSecondPass : public RadxPersistentClutter
+//------------------------------------------------------------------
+class RayAzElev
 {
-  
 public:
 
   /**
-   * Constructor
-   * @param[in] p  Object to use as base class
-   *
-   * Input contains the results of the first pass
+   * constructor
    */
-  RadxPersistentClutterSecondPass (const RadxPersistentClutter &p);
+  RayAzElev(void);
 
   /**
-   * Destructor
+   * constructor
+   * @param[in] az  Angle degrees
+   * @param[in] elev  Elevation angle degrees 
    */
-  virtual ~RadxPersistentClutterSecondPass(void);
+  RayAzElev(const double az, const double elev);
 
-  #include "RadxPersistentClutterVirtualMethods.hh"
+  /**
+   *  destructor
+   */
+  virtual ~RayAzElev(void);
+  
+  /**
+   * @return true if a1 is at a higher elevation
+   * than local object, or the same elevation angle
+   * and a larger azimuth value
+   *
+   * @param[in] a1
+   */
+  bool operator<(const RayAzElev &a1) const;
+
+  /**
+   * @return true if a1 has same azimuth and elevation
+   * as local object.
+   *
+   * @param[in] a
+   */
+  bool operator==(const RayAzElev &a) const;
+
+  /**
+   * @return true if object is good
+   */
+  inline bool ok(void) const {return _ok;}
+
+  /**
+   * Print contents to a string
+   */
+  std::string sprint(void) const;
+
+  /**
+   * @return azimuth
+   */
+  inline double getAz(void) const {return _az; }
+
+  /**
+   * @return elevation
+   */
+  inline double getElev(void) const {return _elev; }
 
 protected:
-private:
-
-  RadxVol _templateVol;  /**< Saved volume used to form output */
-
-  std::map<RayAzElev, RayHistoInfo> _histo; /**< The storage of all info needed to
-                                             * do the computations, running counts 
-                                             * and histograms through time, one 
-                                             * object per az/elev */
-
+private:  
+  
+  double _az;   /**< Az degrees */
+  double _elev; /**< Elev angle degrees */
+  bool _ok;     /**< Object is set flag */
 };
 
-#endif
+# endif

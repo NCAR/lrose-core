@@ -84,7 +84,7 @@ virtual bool preProcessRay(const RadxRay &ray) = 0;
  * 
  * @return true for success
  */
-virtual bool processRay(const RayxData &r,
+virtual bool processRay(const RayData &r,
 			RayClutterInfo *i) const = 0;
 
 /**
@@ -96,7 +96,7 @@ virtual bool processRay(const RayxData &r,
  *
  * @return true for success
  */
-virtual bool setRayForOutput(const RayClutterInfo *h, const RayxData &r,
+virtual bool setRayForOutput(const RayClutterInfo *h, const RayData &r,
 			     RadxRay &ray) = 0;
 
 /**
@@ -178,7 +178,7 @@ virtual bool preProcessRay(const RadxRay &ray);
  * 
  * @return true for success
  */
-virtual bool processRay(const RayxData &r, RayClutterInfo *i) const;
+virtual bool processRay(const RayData &r, RayClutterInfo *i) const;
 
 /**
  * Modify a ray prior to output
@@ -189,7 +189,7 @@ virtual bool processRay(const RayxData &r, RayClutterInfo *i) const;
  *
  * @return true for success
  */
-virtual bool setRayForOutput(const RayClutterInfo *h, const RayxData &r,
+virtual bool setRayForOutput(const RayClutterInfo *h, const RayData &r,
 			     RadxRay &ray);
 
 /**

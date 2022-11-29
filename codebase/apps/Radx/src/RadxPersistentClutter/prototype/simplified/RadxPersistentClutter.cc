@@ -120,9 +120,9 @@ RadxPersistentClutter::RadxPersistentClutter(int argc, char **argv)
     return;
   }
   
-  _rayMap = RayxMapping(_params.fixedElevations_n, _params._fixedElevations,
-                        _params.azToleranceDegrees,
-                        _params.elevToleranceDegrees);
+  _rayMap = RayMapping(_params.fixedElevations_n, _params._fixedElevations,
+                       _params.azToleranceDegrees,
+                       _params.elevToleranceDegrees);
   
   _thread.init(_params.num_threads, _params.thread_debug);
 
@@ -242,7 +242,7 @@ void RadxPersistentClutter::compute(void *ti)
     return;
   }
 
-  RayxData r;
+  RayData r;
   RayClutterInfo *h = alg->_initRayThreaded(*info->_ray, r);
   if (h != NULL) {
     // call a virtual method
@@ -253,7 +253,7 @@ void RadxPersistentClutter::compute(void *ti)
 
 //------------------------------------------------------------------
 RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
-							RayxData &r)
+							RayData &r)
 {
   // lock because the method can change ray, in spite of the const!
   _thread.lockForIO();
@@ -291,7 +291,7 @@ void RadxPersistentClutter::_processForOutput(RadxVol &vol)
 double RadxPersistentClutter::_countOfScans(const int number) const
 {
   double ret = 0.0;
-  for (std::map<RadxAzElev, RayClutterInfo>::const_iterator ii = _store.begin();
+  for (std::map<RayAzElev, RayClutterInfo>::const_iterator ii = _store.begin();
        ii!=_store.end(); ++ii) {
     ret += ii->second.numWithMatchingCount(number);
   }
@@ -305,7 +305,7 @@ int RadxPersistentClutter::_updateClutterState(const int kstar,
   int nchange = 0;
   int nclutter = 0;
   // count up changes in clutter value, and update _store internal state
-  for (std::map<RadxAzElev, RayClutterInfo>::iterator ii = _store.begin();
+  for (std::map<RayAzElev, RayClutterInfo>::iterator ii = _store.begin();
        ii!=_store.end(); ++ii) {
     nchange += ii->second.updateClutter(kstar, nclutter, F);
   }
@@ -360,7 +360,7 @@ void RadxPersistentClutter::_processRay(const time_t &t, const RadxRay *ray)
 //------------------------------------------------------------------
 bool RadxPersistentClutter::_processRayForOutput(RadxRay &ray)
 {
-  RayxData r;
+  RayData r;
 
   // initialization
   RayClutterInfo *h = _initRay(ray, r);
@@ -375,7 +375,7 @@ bool RadxPersistentClutter::_processRayForOutput(RadxRay &ray)
 
 //------------------------------------------------------------------
 RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
-						RayxData &r)
+						RayData &r)
 {
   if (!retrieveRay(_params.input_field_name, ray, r)) {
     return NULL;
@@ -408,7 +408,7 @@ bool RadxPersistentClutter::_trigger(RadxVol &v, time_t &t, bool &done)
       return true;
     }
     string inputPath = _paths[_pathIndex++];
-    if (_processFile(inputPath, v, t)) {
+    if (_readFile(inputPath, v, t)) {
       return true;
     } else {
       return false;
@@ -417,7 +417,7 @@ bool RadxPersistentClutter::_trigger(RadxVol &v, time_t &t, bool &done)
     _ldata.readBlocking(_params.max_realtime_data_age_secs,  1000,
 			PMU_auto_register);
     string inputPath = _ldata.getDataPath();
-    if (_processFile(inputPath, v, t)) {
+    if (_readFile(inputPath, v, t)) {
       return true;
     } else {
       return false;
@@ -495,8 +495,8 @@ string RadxPersistentClutter::nameWithoutPath(const string &name)
 //---------------------------------------------------------------
 bool RadxPersistentClutter::retrieveRay(const std::string &name,
                                         const RadxRay &ray,
-                                        std::vector<RayxData> &data,
-                                        RayxData &r)
+                                        std::vector<RayData> &data,
+                                        RayData &r)
 {
   // try to find the field in the ray first
   if (retrieveRay(name, ray, r, false)) {
@@ -519,7 +519,7 @@ bool RadxPersistentClutter::retrieveRay(const std::string &name,
 //---------------------------------------------------------------
 bool RadxPersistentClutter::retrieveRay(const std::string &name,
                                         const RadxRay &ray,
-                                        RayxData &r,
+                                        RayData &r,
                                         const bool showError)
 {
   // try to find the field in the ray
@@ -531,7 +531,7 @@ bool RadxPersistentClutter::retrieveRay(const std::string &name,
 	// need this to pull out values
 	fields[ifield]->convertToFl32();
       }
-      r = RayxData(name, fields[ifield]->getUnits(),
+      r = RayData(name, fields[ifield]->getUnits(),
                    fields[ifield]->getNPoints(), fields[ifield]->getMissing(),
                    ray.getAzimuthDeg(), ray.getElevationDeg(),
                    ray.getGateSpacingKm(), ray.getStartRangeKm(),
@@ -546,7 +546,7 @@ bool RadxPersistentClutter::retrieveRay(const std::string &name,
 }
 
 //---------------------------------------------------------------
-void RadxPersistentClutter::modifyRayForOutput(RayxData &r,
+void RadxPersistentClutter::modifyRayForOutput(RayData &r,
                                                const std::string &name,
                                                const std::string &units,
                                                const double missing)
@@ -560,9 +560,9 @@ void RadxPersistentClutter::modifyRayForOutput(RayxData &r,
 }
 
 //---------------------------------------------------------------
-void RadxPersistentClutter::updateRay(const RayxData &r, RadxRay &ray)
+void RadxPersistentClutter::updateRay(const RayData &r, RadxRay &ray)
 {
-  // add in the one RayxData, then clear out everything else
+  // add in the one RayData, then clear out everything else
     
   int nGatesPrimary = ray.getNGates();
   Radx::fl32 *data = new Radx::fl32[nGatesPrimary];
@@ -577,7 +577,7 @@ void RadxPersistentClutter::updateRay(const RayxData &r, RadxRay &ray)
 }
 
 //---------------------------------------------------------------
-void RadxPersistentClutter::updateRay(const vector<RayxData> &raydata,
+void RadxPersistentClutter::updateRay(const vector<RayData> &raydata,
                                       RadxRay &ray)
 {
   // take all the data and add to the ray.
@@ -608,8 +608,8 @@ void RadxPersistentClutter::updateRay(const vector<RayxData> &raydata,
 }
 
 //---------------------------------------------------------------
-bool RadxPersistentClutter::_processFile(const string &path,
-                                         RadxVol &vol, time_t &t)
+bool RadxPersistentClutter::_readFile(const string &path,
+                                      RadxVol &vol, time_t &t)
 {
   string name = nameWithoutPath(path);
 
@@ -617,19 +617,19 @@ bool RadxPersistentClutter::_processFile(const string &path,
   
   RadxFile primaryFile;
   _setupRead(primaryFile);
-
+  
   if (primaryFile.readFromPath(path, vol)) {
     LOG(ERROR) << "Cannot read in file: " << path;
     LOG(ERROR) << primaryFile.getErrStr();
     return false;
   }
 
-  t = vol.getEndTimeSecs();
-  bool dateOnly;
-  if (DataFileNames::getDataTime(path, t, dateOnly)) {
-    LOG(ERROR) << "Cannot get time from file name: " << name;
-    return false;
-  }
+  t = vol.getStartTimeSecs();
+  // bool dateOnly;
+  // if (DataFileNames::getDataTime(path, t, dateOnly)) {
+  //   LOG(ERROR) << "Cannot get time from file name: " << name;
+  //   return false;
+  // }
 
   LOG(DEBUG) << "Time for file: " << RadxTime::strm(t);
 
@@ -648,7 +648,7 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
     file.setDebug(true);
   }
 
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE)) {
+  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_EXTRA)) {
     file.setVerbose(true);
     file.printReadRequest(cerr);
   }
@@ -666,7 +666,6 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
-  
   
   LOG(DEBUG_VERBOSE) << "===== SETTING UP READ FOR PRIMARY FILES =====";
   LOG(DEBUG_VERBOSE) << "=============================================";

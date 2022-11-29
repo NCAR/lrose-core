@@ -27,7 +27,7 @@
 #include <cstdio>
 #include <cmath>
 #include "FrequencyCount.hh"
-#include <Radx/RayxData.hh>
+#include "RayData.hh"
 #include <toolsa/LogMsg.hh>
 
 //------------------------------------------------------------------

@@ -186,24 +186,24 @@ bool RadxPersistentClutterFirstPass::preProcessRay(const RadxRay &ray)
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::processRay(const RayxData &r,
+bool RadxPersistentClutterFirstPass::processRay(const RayData &r,
 						RayClutterInfo *h) const
 {
-  // Update the input RayClutterInfo object using the RayxData
+  // Update the input RayClutterInfo object using the RayData
   return h->update(r, _params.threshold);
 }
 
 //------------------------------------------------------------------
 bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
-						     const RayxData &r,
+						     const RayData &r,
 						     RadxRay &ray)
 
 {
   // make a copy of the data to store binary values
-  RayxData clutter(r);
+  RayData clutter(r);
 
   // make a copy of that data to store frequency data, and initialize
-  RayxData rfreq(r);
+  RayData rfreq(r);
   modifyRayForOutput(rfreq, "NormFreqCount", "none", -99.99);
   rfreq.setAllToValue(0.0);
 
@@ -215,7 +215,7 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
     {
       // prepare for output (put stuff into ray)
       modifyRayForOutput(clutter, _params.output_field_name);
-      vector<RayxData> vr;
+      vector<RayData> vr;
       vr.push_back(r);
       vr.push_back(rfreq);
       updateRay(vr, ray);
@@ -251,7 +251,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
 {
   if (_rayMap.add(ray))
   {
-    RadxAzElev ae = _rayMap.match(az, elev);
+    RayAzElev ae = _rayMap.match(az, elev);
     if (_rayMap.isMulti(ae))
     {
       LOG(DEBUG_EXTRA) << "Multiple az,elev in volume "

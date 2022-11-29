@@ -60,7 +60,7 @@ RayHistoInfo::~RayHistoInfo()
 }
 
 //-----------------------------------------------------------------
-bool RayHistoInfo::updateSecondPass(const RayxData &r)
+bool RayHistoInfo::updateSecondPass(const RayData &r)
 {
   int n = _initNpt(r);
   if (n > 0)
@@ -97,7 +97,7 @@ bool RayHistoInfo::updateSecondPass(const RayxData &r)
 
 
 //------------------------------------------------------------------
-bool RayHistoInfo::setClutter(RayxData &r, const double percentile,
+bool RayHistoInfo::setClutter(RayData &r, const double percentile,
 			      const double missingClutterValue) const
 {
   int n = _initNpt(r);

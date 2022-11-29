@@ -34,7 +34,7 @@ RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
   RadxPersistentClutter(p)
 {
   // For each base class store element, create a RayHistoInfo element
-  for (std::map<RadxAzElev, RayClutterInfo>::iterator ii = _store.begin();
+  for (std::map<RayAzElev, RayClutterInfo>::iterator ii = _store.begin();
        ii!=_store.end(); ++ii)
   {
     RayHistoInfo h(ii->second, _params);
@@ -97,7 +97,7 @@ bool RadxPersistentClutterSecondPass::processFinishVolume(const time_t &t,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::processRay(const RayxData &r,
+bool RadxPersistentClutterSecondPass::processRay(const RayData &r,
 						 RayClutterInfo *h) const
 {
   // cast input pointer to what we want (a little dangerous perhaps!)
@@ -116,18 +116,18 @@ bool RadxPersistentClutterSecondPass::preProcessRay(const RadxRay &ray)
 
 //------------------------------------------------------------------
 bool RadxPersistentClutterSecondPass::setRayForOutput(const RayClutterInfo *h,
-						      const RayxData &r,
+						      const RayData &r,
 						      RadxRay &ray)
 {
   // make a copy of the ray
-  RayxData clutter(r);
+  RayData clutter(r);
 
   // cast the input point to what we want (again, dangerous design)
   const RayHistoInfo *histo = dynamic_cast<const RayHistoInfo *>(h);
 
   bool stat;
 
-  // put values into the clutter RayxData
+  // put values into the clutter RayData
   stat = histo->setClutter(clutter, _params.clutter_percentile,
 			   _params.missing_clutter_value);
 

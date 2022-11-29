@@ -27,7 +27,7 @@
 #include <cstdio>
 #include "RayClutterInfo.hh"
 #include "FrequencyCount.hh"
-#include <Radx/RayxData.hh>
+#include "RayData.hh"
 #include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
@@ -38,8 +38,8 @@ RayClutterInfo::RayClutterInfo(void) :
   _az(0),
   _elev(0)
 {
-  _counts = RayxData();
-  _clutter = RayxData();
+  _counts = RayData();
+  _clutter = RayData();
 }
 
 //------------------------------------------------------------------
@@ -51,10 +51,10 @@ RayClutterInfo::RayClutterInfo(const double az, const double elev,
   _az(az),
   _elev(elev)
 {
-  _counts = RayxData("counts", "none", _nx, -1.0, _az, _elev, _dx, _x0);
+  _counts = RayData("counts", "none", _nx, -1.0, _az, _elev, _dx, _x0);
   _counts.setAllToValue(0.0);
 
-  _clutter = RayxData("clutter", "none", _nx, -1.0, _az, _elev, _dx, _x0);
+  _clutter = RayData("clutter", "none", _nx, -1.0, _az, _elev, _dx, _x0);
   _clutter.setAllToValue(0.0);
 }
 
@@ -64,7 +64,7 @@ RayClutterInfo::~RayClutterInfo()
 }
 
 //------------------------------------------------------------------
-bool RayClutterInfo::update(const RayxData &r, const double threshold)
+bool RayClutterInfo::update(const RayData &r, const double threshold)
 {
   int n = _initNpt(r);
   if (n >0)
@@ -98,7 +98,7 @@ bool RayClutterInfo::update(const RayxData &r, const double threshold)
 }
 
 //------------------------------------------------------------------
-bool RayClutterInfo::equalOrExceed(RayxData &r, const int k) const
+bool RayClutterInfo::equalOrExceed(RayData &r, const int k) const
 {
   int n = _initNpt(r);
   if (n > 0)
@@ -127,7 +127,7 @@ bool RayClutterInfo::equalOrExceed(RayxData &r, const int k) const
 }
 
 //------------------------------------------------------------------
-bool RayClutterInfo::loadNormalizedFrequency(RayxData &r, const int num) const
+bool RayClutterInfo::loadNormalizedFrequency(RayData &r, const int num) const
 {
   int n = _initNpt(r);
   if (n > 0)
@@ -225,7 +225,7 @@ int RayClutterInfo::updateClutter(const int number, int &nclutter,
 }
 
 //------------------------------------------------------------------
-int RayClutterInfo::_initNpt(const RayxData &r) const
+int RayClutterInfo::_initNpt(const RayData &r) const
 {
   int n;
   if (_nx > r.getNpoints())

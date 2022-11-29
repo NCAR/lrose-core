@@ -72,7 +72,7 @@ public:
    * At clutter points (determined by base class), the histograms are
    * updated to include the data value from the input
    */
-  bool updateSecondPass(const RayxData &r);
+  bool updateSecondPass(const RayData &r);
 
   /**
    * Store clutter values into the input ray data
@@ -86,7 +86,7 @@ public:
    *                                 situation.  Typically this is a very low
    *                                 value
    */
-  bool setClutter(RayxData &r, const double percentile,
+  bool setClutter(RayData &r, const double percentile,
 		  const double missingClutterValue) const;
 
   /** 
