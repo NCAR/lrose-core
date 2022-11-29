@@ -86,22 +86,6 @@ paramdef int
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to set fixed angle limits";
-  p_help = "Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
-} read_set_fixed_angle_limits;
-
-paramdef double {
-  p_default = 0;
-  p_descr = "Lower fixed angle limit - degrees.";
-} read_lower_fixed_angle;
-
-paramdef double {
-  p_default = 90;
-  p_descr = "Upper fixed angle limit - degrees.";
-} read_upper_fixed_angle;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Option to set the max range for any ray.";
 } set_max_range;
 
@@ -172,24 +156,24 @@ paramdef double
 
 paramdef double
 {
-  p_descr = "Fixed storage elevation values";
-  p_help = "List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params";
-  p_default = {};
-} fixedElevations[];
+  p_descr = "List of fixed angles for desired sweeps (deg)";
+  p_help = "SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.";
+  p_default = { 0.5 };
+} sweep_fixed_angles[];
 
 paramdef double
 {
   p_descr = "azimumth tolerance";
   p_help = "allowed degrees difference between azimuth values from different volumes to be considered part of the same ray";
   p_default = 0.1;
-} azToleranceDegrees;
+} az_tolerance_degrees;
 
 paramdef double
 {
   p_descr = "elevation tolerance";
   p_help = "allowed degrees difference between elevation values from different volumes to be considered part of the same ray";
   p_default = 0.1;
-} elevToleranceDegrees;
+} elev_tolerance_degrees;
 
 paramdef double
 {

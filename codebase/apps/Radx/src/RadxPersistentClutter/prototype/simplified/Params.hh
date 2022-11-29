@@ -386,12 +386,6 @@ public:
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t read_set_fixed_angle_limits;
-
-  double read_lower_fixed_angle;
-
-  double read_upper_fixed_angle;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -408,12 +402,12 @@ public:
 
   double clutter_percentile;
 
-  double *_fixedElevations;
-  int fixedElevations_n;
+  double *_sweep_fixed_angles;
+  int sweep_fixed_angles_n;
 
-  double azToleranceDegrees;
+  double az_tolerance_degrees;
 
-  double elevToleranceDegrees;
+  double elev_tolerance_degrees;
 
   double missing_clutter_value;
 
@@ -442,7 +436,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[35];
 
   const char *_className;
 

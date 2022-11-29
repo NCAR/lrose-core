@@ -684,42 +684,6 @@
     tt->single_val.i = 120;
     tt++;
     
-    // Parameter 'read_set_fixed_angle_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("read_set_fixed_angle_limits");
-    tt->descr = tdrpStrDup("Option to set fixed angle limits");
-    tt->help = tdrpStrDup("Only read sweeps within the specified fixed angle limits. Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
-    tt->val_offset = (char *) &read_set_fixed_angle_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'read_lower_fixed_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("read_lower_fixed_angle");
-    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &read_lower_fixed_angle - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'read_upper_fixed_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("read_upper_fixed_angle");
-    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &read_upper_fixed_angle - &_start_;
-    tt->single_val.d = 90;
-    tt++;
-    
     // Parameter 'set_max_range'
     // ctype is 'tdrp_bool_t'
     
@@ -834,45 +798,46 @@
     tt->single_val.d = 0.5;
     tt++;
     
-    // Parameter 'fixedElevations'
+    // Parameter 'sweep_fixed_angles'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("fixedElevations");
-    tt->descr = tdrpStrDup("Fixed storage elevation values");
-    tt->help = tdrpStrDup("List of target elevation angles (the angles seem to wobble a lot). Inputs are mapped to one of these using tolerance params");
-    tt->array_offset = (char *) &_fixedElevations - &_start_;
-    tt->array_n_offset = (char *) &fixedElevations_n - &_start_;
+    tt->param_name = tdrpStrDup("sweep_fixed_angles");
+    tt->descr = tdrpStrDup("List of fixed angles for desired sweeps (deg)");
+    tt->help = tdrpStrDup("SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.");
+    tt->array_offset = (char *) &_sweep_fixed_angles - &_start_;
+    tt->array_n_offset = (char *) &sweep_fixed_angles_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
-    tt->array_n = 0;
+    tt->array_n = 1;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.5;
     tt++;
     
-    // Parameter 'azToleranceDegrees'
+    // Parameter 'az_tolerance_degrees'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azToleranceDegrees");
+    tt->param_name = tdrpStrDup("az_tolerance_degrees");
     tt->descr = tdrpStrDup("azimumth tolerance");
     tt->help = tdrpStrDup("allowed degrees difference between azimuth values from different volumes to be considered part of the same ray");
-    tt->val_offset = (char *) &azToleranceDegrees - &_start_;
+    tt->val_offset = (char *) &az_tolerance_degrees - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'elevToleranceDegrees'
+    // Parameter 'elev_tolerance_degrees'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elevToleranceDegrees");
+    tt->param_name = tdrpStrDup("elev_tolerance_degrees");
     tt->descr = tdrpStrDup("elevation tolerance");
     tt->help = tdrpStrDup("allowed degrees difference between elevation values from different volumes to be considered part of the same ray");
-    tt->val_offset = (char *) &elevToleranceDegrees - &_start_;
+    tt->val_offset = (char *) &elev_tolerance_degrees - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     

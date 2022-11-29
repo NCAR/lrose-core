@@ -119,10 +119,8 @@ RadxPersistentClutter::RadxPersistentClutter(int argc, char **argv)
     OK = false;
     return;
   }
-  
-  _rayMap = RayMapping(_params.fixedElevations_n, _params._fixedElevations,
-                       _params.azToleranceDegrees,
-                       _params.elevToleranceDegrees);
+
+  // initialize threading
   
   _thread.init(_params.num_threads, _params.thread_debug);
 
@@ -170,6 +168,19 @@ int RadxPersistentClutter::_initDerivedParams()
     PMU_auto_init(_progName.c_str(), _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
   }
+
+  // ray maps
+  
+  _rayMap = RayMapping(_params.sweep_fixed_angles_n, _params._sweep_fixed_angles,
+                       _params.az_tolerance_degrees,
+                       _params.elev_tolerance_degrees);
+  
+  // fixed angles
+
+  for (int ii = 0; ii < _params.sweep_fixed_angles_n; ii++) {
+    _fixedAngles.push_back(_params._sweep_fixed_angles[ii]);
+  }
+  sort(_fixedAngles.begin(), _fixedAngles.end());
   
   return 0;
 
@@ -633,9 +644,33 @@ bool RadxPersistentClutter::_readFile(const string &path,
 
   LOG(DEBUG) << "Time for file: " << RadxTime::strm(t);
 
-  // remove some bad stuff we never will want
-  vol.removeTransitionRays();
+  // check if this is an RHI
+  
+  _isRhi = vol.checkIsRhi();
+
+  // set each full PPI to 360 deg if appropriate
+  
   vol.trimSurveillanceSweepsTo360Deg();
+  
+  // remove transition rays and optimize the 
+  
+  vol.removeTransitionRays();
+
+  // remove sweeps we do not want, and set the sweep angles
+  // to the selected ones
+
+  if (!_isRhi) {
+    vol.optimizeSurveillanceTransitions(_params.elev_tolerance_degrees);
+  }
+
+  // remove sweeps we do not want, and set the sweep angles
+  // to the selected ones
+
+  if (_isRhi) {
+    vol.trimSweepsToSelectedAngles(_fixedAngles, _params.az_tolerance_degrees);
+  } else {
+    vol.trimSweepsToSelectedAngles(_fixedAngles, _params.elev_tolerance_degrees);
+  }
 
   LOG(DEBUG) << "-------Triggered " << RadxTime::strm(t) << " ----------";
   return true;
@@ -653,15 +688,8 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
     file.printReadRequest(cerr);
   }
 
-  if (_params.read_set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.read_lower_fixed_angle,
-                                 _params.read_upper_fixed_angle);
-  }
-  
   file.addReadField(_params.input_field_name);
-
   file.setReadIgnoreTransitions(true);
-  file.setReadAggregateSweeps(false);
   
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);

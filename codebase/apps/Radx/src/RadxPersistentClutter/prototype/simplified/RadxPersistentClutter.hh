@@ -230,10 +230,9 @@ protected:
   Args _args;
   Params _params;
 
-  // App _alg;      /**< generic algorithm object */
   bool _first;           /**< True for first volume */
   RayMapping _rayMap;
-
+  
   time_t _start;         /**< Start time in ARCHIVE mode */
   time_t _end;           /**< End time in ARCHIVE mode */
   std::vector<std::string> _fileList; /**< paths in FILELIST mode from args */
@@ -241,6 +240,9 @@ protected:
   std::vector<std::string> _paths; /**< paths in ARCHIVE or FILELIST mode*/
   int _pathIndex;  /**< Next file to process (index) (ARCHIVE or FILELIST) */
   LdataInfo _ldata;  /**< Triggering mechanism for REALTIME */
+
+  vector<double> _fixedAngles;
+  bool _isRhi;
   
   /**
    * The storage of all info needed to do the computations, one object per
@@ -252,7 +254,7 @@ protected:
 		       *   results converged */
 
   ComputeThread _thread;  /**< Threading */
-
+  
   // set up derived params
   
   int _initDerivedParams();

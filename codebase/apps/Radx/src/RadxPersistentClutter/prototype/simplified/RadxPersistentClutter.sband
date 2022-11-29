@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxPersistentClutter
+ * TDRP params for ./RadxPersistentClutter
  **********************************************************************/
 
 //======================================================================
@@ -37,7 +37,7 @@
 // Type: string
 //
 
-instance = "sband";
+instance = "precip.sband";
 
 ///////////// debug_mode //////////////////////////////
 //
@@ -52,6 +52,7 @@ instance = "sband";
 //     NONE
 //     DEBUG
 //     DEBUG_VERBOSE
+//     DEBUG_EXTRA
 //
 
 debug_mode = NONE;
@@ -108,7 +109,7 @@ mode = ARCHIVE;
 // Type: string
 //
 
-input_dir = "/data/dixon/precip/grids/spol/radarPolar/field/moments/sband/sur";
+input_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/field/moments/sband/sur";
 
 ///////////// max_realtime_data_age_secs //////////////
 //
@@ -122,39 +123,6 @@ input_dir = "/data/dixon/precip/grids/spol/radarPolar/field/moments/sband/sur";
 //
 
 max_realtime_data_age_secs = 120;
-
-///////////// read_set_fixed_angle_limits /////////////
-//
-// Option to set fixed angle limits.
-//
-// Only read sweeps within the specified fixed angle limits. Fixed 
-//   angles are elevation in PPI mode and azimuth in RHI mode.
-//
-//
-// Type: boolean
-//
-
-read_set_fixed_angle_limits = TRUE;
-
-///////////// read_lower_fixed_angle //////////////////
-//
-// Lower fixed angle limit - degrees.
-//
-//
-// Type: double
-//
-
-read_lower_fixed_angle = 0.3;
-
-///////////// read_upper_fixed_angle //////////////////
-//
-// Upper fixed angle limit - degrees.
-//
-//
-// Type: double
-//
-
-read_upper_fixed_angle = 3.1;
 
 ///////////// set_max_range ///////////////////////////
 //
@@ -229,7 +197,7 @@ thread_debug = FALSE;
 // Type: string
 //
 
-input_field_name = "DBMVC";
+input_field_name = "DBZ";
 
 ///////////// output_field_name ///////////////////////
 //
@@ -241,7 +209,7 @@ input_field_name = "DBMVC";
 // Type: string
 //
 
-output_field_name = "DBMVC";
+output_field_name = "DBZ";
 
 ///////////// threshold ///////////////////////////////
 //
@@ -253,7 +221,7 @@ output_field_name = "DBMVC";
 // Type: double
 //
 
-threshold = -95;
+threshold = 10;
 
 ///////////// clutter_percentile //////////////////////
 //
@@ -268,28 +236,23 @@ threshold = -95;
 
 clutter_percentile = 0.5;
 
-///////////// fixedElevations /////////////////////////
+///////////// sweep_fixed_angles //////////////////////
 //
-// Fixed storage elevation values.
+// List of fixed angles for desired sweeps (deg).
 //
-// List of target elevation angles (the angles seem to wobble a lot). 
-//   Inputs are mapped to one of these using tolerance params.
+// SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.
 //
 //
 // Type: double
 // 1D array - variable length.
 //
 
-fixedElevations = {
- 0.5,
- 1,
- 1.5,
- 2,
- 3,
- 4
-};
+sweep_fixed_angles =
+  {
+   0.5, 1.0 1.5, 2.0, 3.0, 4.0
+  };
 
-///////////// azToleranceDegrees //////////////////////
+///////////// az_tolerance_degrees ////////////////////
 //
 // azimumth tolerance.
 //
@@ -300,9 +263,9 @@ fixedElevations = {
 // Type: double
 //
 
-azToleranceDegrees = 0.1;
+az_tolerance_degrees = 0.1;
 
-///////////// elevToleranceDegrees ////////////////////
+///////////// elev_tolerance_degrees //////////////////
 //
 // elevation tolerance.
 //
@@ -313,7 +276,7 @@ azToleranceDegrees = 0.1;
 // Type: double
 //
 
-elevToleranceDegrees = 0.1;
+elev_tolerance_degrees = 0.2;
 
 ///////////// missing_clutter_value ///////////////////
 //
@@ -353,7 +316,7 @@ threshold_tolerance = 0.025;
 // Type: double
 //
 
-maximum_percent_change = 0.005;
+maximum_percent_change = 0.01;
 
 ///////////// minimum_stable_volumes //////////////////
 //
@@ -367,7 +330,7 @@ maximum_percent_change = 0.005;
 // Type: double
 //
 
-minimum_stable_volumes = 5;
+minimum_stable_volumes = 25;
 
 ///////////// histogram_resolution ////////////////////
 //
@@ -391,7 +354,7 @@ histogram_resolution = 0.2;
 // Type: double
 //
 
-histogram_max = 50;
+histogram_max = 75;
 
 //======================================================================
 //
@@ -412,7 +375,7 @@ histogram_max = 50;
 // Type: string
 //
 
-clutter_stats_output_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/sur";
+clutter_stats_output_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/clutter_stats/sband/sur";
 
 ///////////// write_diagnostic_output /////////////////
 //
@@ -435,7 +398,7 @@ write_diagnostic_output = TRUE;
 // Type: string
 //
 
-diagnostic_volume_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
+diagnostic_volume_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
 
 ///////////// diagnostic_ascii_dir ////////////////////
 //
@@ -445,5 +408,5 @@ diagnostic_volume_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/
 // Type: string
 //
 
-diagnostic_ascii_dir = "/data/dixon/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
+diagnostic_ascii_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/clutter_stats/sband/diag";
 
