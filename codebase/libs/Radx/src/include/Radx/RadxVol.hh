@@ -975,6 +975,12 @@ public:
 
   void reverseSweepOrder();
 
+  /// trim to selected sweep angles
+  /// also rounds the sweep angles to match the selected angles
+  
+  void trimSweepsToSelectedAngles(vector<double> &selectedAngles,
+                                  double angleTolerance);
+
   /// Apply a time offset, in seconds to all rays in the volume
   /// This applies to the rays currently in the volume, not to
   /// any future reads.

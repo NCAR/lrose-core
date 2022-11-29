@@ -2946,35 +2946,70 @@ void RadxVol::reverseSweepOrder()
 }
 
 //////////////////////////////////////////////////////////////////
-/// Apply a time offset, in seconds to all rays in the volume
-/// This applies to the rays currently in the volume, not to
-/// any future reads.
-/// The offset is ADDED to the ray times.
+/// trim to selected sweep angles
+/// also rounds the sweep angles to match the selected angles
 
-void RadxVol::applyTimeOffsetSecs(double offsetSecs)
+void RadxVol::trimSweepsToSelectedAngles(vector<double> &selectedAngles,
+                                         double angleTolerance)
 
 {
+  
+  vector<RadxRay *> keepRays;
+  vector<RadxRay *> discardRays;
+  
+  vector<RadxSweep *> &sweeps = getSweeps();
+  for (size_t ii = 0; ii < sweeps.size(); ii++) {
+    
+    RadxSweep *sweep = sweeps[ii];
+    double fixedAngle = sweep->getFixedAngleDeg();
 
-  for (size_t ii = 0; ii < _rays.size(); ii++) {
-    RadxRay *ray = _rays[ii];
-    RadxTime rayTime = ray->getRadxTime();
-    RadxTime newTime = rayTime + offsetSecs;
-    ray->setTime(newTime);
+    bool keepSweep = false;
+    for (size_t jj = 0; jj < selectedAngles.size(); jj++) {
+      double deltaAngle = fabs(fixedAngle - selectedAngles[jj]);
+      if (deltaAngle > 180.0) {
+        deltaAngle = fabs(deltaAngle - 360.0);
+      }
+      if (deltaAngle < angleTolerance) {
+        keepSweep = true;
+        break;
+      }
+    } // jj
+
+    size_t startRayIndex = sweep->getStartRayIndex();
+    size_t endRayIndex = sweep->getEndRayIndex();
+    if (keepSweep) {
+
+      // keep rays in sweep
+      for (size_t iray = startRayIndex; iray <= endRayIndex; iray++) {
+        RadxRay *ray = _rays[iray];
+        ray->setFixedAngleDeg(fixedAngle);
+        keepRays.push_back(ray);
+      }
+
+    } else {
+
+      // remove rays in sweep
+      for (size_t iray = startRayIndex; iray <= endRayIndex; iray++) {
+        RadxRay *ray = _rays[iray];
+        discardRays.push_back(ray);
+      }
+      // update history
+      char note[1024];
+      sprintf(note, "Removing sweep fixed angle: %g\n", fixedAngle);
+      _history += note;
+      
+    } // if (deltaAngle < angleTolerance)
+    
   } // ii
 
-  // reload sweep info and volume info,
-  // since these are affected by the times
+  // discard the unwanted rays
+  
+  removeBadRays(keepRays, discardRays);
+
+  // reload sweep metadata
   
   loadSweepInfoFromRays();
   loadVolumeInfoFromRays();
-
-  // update history
-
-  time_t now = time(NULL);
-  char note[1024];
-  sprintf(note, "Applying time offset (secs): %g, mod time %s\n",
-          offsetSecs, RadxTime::strm(now).c_str());
-  _history += note;
 
 }
 
