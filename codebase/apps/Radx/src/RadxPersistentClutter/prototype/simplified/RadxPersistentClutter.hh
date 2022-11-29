@@ -69,7 +69,7 @@ public:
    *
    * @return true for success
    */
-  bool run(void);
+  bool run(const string &label);
 
   /**
    * Compute method needed by threading
@@ -342,9 +342,9 @@ protected:
    * @param[out] t   time that was triggered.
    * @param[out] last  true if this is the last data
    *
-   * @return true if a time was triggered, false for no more triggering.
+   * @return true if file was read properly, false if read error occurred.
    */
-  bool _trigger(RadxVol &v, time_t &t, bool &last);
+  bool _trigger(RadxVol &v, time_t &t, bool &done);
 
   /**
    * Rewind so next call to trigger() will return the first file

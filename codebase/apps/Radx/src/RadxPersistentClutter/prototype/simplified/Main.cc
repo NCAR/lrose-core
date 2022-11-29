@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
   // run the first pass
   
-  if (!Prog->run()) {
+  if (!Prog->run("FirstPass")) {
     cerr << "ERROR - main" << endl;
     cerr << "  Running RadxPersistentClutterFirstPass object" << endl;
     tidy_and_exit(-1);
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   // run the second pass
   
   int iret = 0;
-  if (!Prog2->run()) {
+  if (!Prog2->run("SecondPass")) {
     iret = 0;
   } else {
     cerr << "ERROR - main" << endl;

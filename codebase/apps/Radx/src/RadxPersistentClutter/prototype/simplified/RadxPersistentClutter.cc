@@ -176,18 +176,28 @@ int RadxPersistentClutter::_initDerivedParams()
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::run(void)
+bool RadxPersistentClutter::run(const string &label)
 {
 
+  LOG(DEBUG) << "=============>> run() - starting " << label << " <<================";
+  
   RadxVol vol;
   time_t t;
-  bool last;
 
   bool first = true;
-
+  bool filesDone = false;
+  
   // trigger at time
-  while (_trigger(vol, t, last)) {
+  while (true) {
 
+    if (!_trigger(vol, t, filesDone)) {
+      if (filesDone) {
+        return false;
+      } else {
+        continue;
+      }
+    }
+    
     if (first) {
       // virtual method
       initFirstTime(t, vol);
@@ -196,21 +206,29 @@ bool RadxPersistentClutter::run(void)
     }
     
     // process the vol
-    bool done = _process(t, vol);
+    bool algDone = _process(t, vol);
 
-    cerr << "1111111111111111 done: " << done << endl;
+    if (algDone) {
+      LOG(DEBUG) << "=========================================================";
+      LOG(DEBUG) << "=============>> algorithm has converged <<===============";
+      LOG(DEBUG) << "=========================================================";
+    } else {
+      LOG(DEBUG) << "=========>> algorithm has NOT converged yet <<===========";
+    }
     
-    if (done) {
+    if (algDone) {
       // it has converged
       _thread.waitForThreads();
       // virtual method
       finishLastTimeGood(t, vol);
       return true;
     }
-  }
-  // virtual method
+  } // while
+
+  // did not converge
   finishBad();
   return false;
+
 }
 
 //----------------------------------------------------------------
@@ -376,27 +394,36 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::_trigger(RadxVol &v, time_t &t, bool &last)
+bool RadxPersistentClutter::_trigger(RadxVol &v, time_t &t, bool &done)
 {
 
   LOG(DEBUG) << "------before trigger-----";
 
+  done = false;
   if (_params.mode == Params::ARCHIVE ||
       _params.mode == Params::FILELIST) {
     if (_pathIndex >= (int)_paths.size()) {
       LOG(DEBUG) << "---No more files to process--";
-      return false;
+      done = true;
+      return true;
     }
     string inputPath = _paths[_pathIndex++];
-    last = _pathIndex == (int)_paths.size();
-    return _processFile(inputPath, v, t);
+    if (_processFile(inputPath, v, t)) {
+      return true;
+    } else {
+      return false;
+    }
   } else {
     _ldata.readBlocking(_params.max_realtime_data_age_secs,  1000,
 			PMU_auto_register);
     string inputPath = _ldata.getDataPath();
-    last = false;
-    return _processFile(inputPath, v, t);
+    if (_processFile(inputPath, v, t)) {
+      return true;
+    } else {
+      return false;
+    }
   }
+  return false;
 }
 
 //---------------------------------------------------------------
@@ -438,7 +465,7 @@ bool RadxPersistentClutter::_write(RadxVol &vol, const time_t &t,
   delete outFile;
 
   string name = nameWithoutPath(outputPath);
-  LOG(DEBUG) << "Wrote output file: " << name;
+  LOG(DEBUG) << "==>> Wrote output path: " << outputPath << " <<==";
 
   // in realtime mode, write latest data info file
 

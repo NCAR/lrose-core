@@ -353,8 +353,6 @@ RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
   _threshold.push_back(thr);
   _change.push_back(ch);
 
-  cerr << "33333333333333 threshold.size, change.size: " << _threshold.size() << ", " << _change.size() << endl;
-
   // see if things are stable, based on params, return true if so
   return _check_convergence();
 }
@@ -369,8 +367,6 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
     return false;
   }
 
-  cerr << "444444444444444444444" << endl;
-  
   // get the last threshold
   double thresh = _threshold[n-1];
   double tave = 0.0;
@@ -383,7 +379,7 @@ bool RadxPersistentClutterFirstPass::_check_convergence(void)
     double thr = _threshold[j];
     double ch = _change[j];
 
-    cerr << "222222222 i, thr, ch: " << i << ", " << thr << ", " << ch << endl;
+    LOG(DEBUG_VERBOSE) << "Current results, i, thr, ch: " << i << ", " << thr << ", " << ch;
     
     if (ch > _params.maximum_percent_change)
     {
