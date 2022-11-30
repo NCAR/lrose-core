@@ -279,11 +279,11 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
-  if (h == NULL) {
-    LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
-  } else {
-    LOG(DEBUG_EXTRA) << "Updating ray az=" << az << " elev=" << elev;
-  }
+  // if (h == NULL) {
+  //   LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
+  // } else {
+  //   LOG(DEBUG_EXTRA) << "Updating ray az=" << az << " elev=" << elev;
+  // }
   return h;
 }
 
@@ -396,11 +396,11 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
-  if (h == NULL) {
-    LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
-  } else {
-    LOG(DEBUG_EXTRA) << "Updating ray az:" << az << " elev:" << elev;
-  }
+  // if (h == NULL) {
+  //   LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
+  // } else {
+  //   LOG(DEBUG_EXTRA) << "Updating ray az:" << az << " elev:" << elev;
+  // }
   return h;
 }
 
@@ -648,6 +648,13 @@ bool RadxPersistentClutter::_readFile(const string &path,
   
   _isRhi = vol.checkIsRhi();
 
+  // remove sweeps we do not want, and set the sweep angles
+  // to the selected ones
+
+  if (!_isRhi) {
+    vol.optimizeSurveillanceTransitions(_params.elev_tolerance_degrees);
+  }
+
   // set each full PPI to 360 deg if appropriate
   
   vol.trimSurveillanceSweepsTo360Deg();
@@ -659,19 +666,23 @@ bool RadxPersistentClutter::_readFile(const string &path,
   // remove sweeps we do not want, and set the sweep angles
   // to the selected ones
 
-  if (!_isRhi) {
-    vol.optimizeSurveillanceTransitions(_params.elev_tolerance_degrees);
-  }
-
-  // remove sweeps we do not want, and set the sweep angles
-  // to the selected ones
-
   if (_isRhi) {
     vol.trimSweepsToSelectedAngles(_fixedAngles, _params.az_tolerance_degrees);
   } else {
     vol.trimSweepsToSelectedAngles(_fixedAngles, _params.elev_tolerance_degrees);
   }
 
+  vector<RadxRay *> &rays = vol.getRays();
+  for (size_t ii = 0; ii < rays.size(); ii++) {
+    RadxRay *ray = rays[ii];
+    if (_isRhi) {
+      ray->setAzimuthDeg(ray->getFixedAngleDeg());
+    } else {
+      ray->setElevationDeg(ray->getFixedAngleDeg());
+    }
+  }
+
+  
   LOG(DEBUG) << "-------Triggered " << RadxTime::strm(t) << " ----------";
   return true;
 }
@@ -679,12 +690,8 @@ bool RadxPersistentClutter::_readFile(const string &path,
 //------------------------------------------------------------------
 void RadxPersistentClutter::_setupRead(RadxFile &file)
 {
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE)) {
-    file.setDebug(true);
-  }
-
   if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_EXTRA)) {
-    file.setVerbose(true);
+    file.setDebug(true);
     file.printReadRequest(cerr);
   }
 
@@ -704,14 +711,10 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
 //------------------------------------------------------------------
 void RadxPersistentClutter::_setupWrite(RadxFile &file)
 {
-  if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
-  {
-    file.setDebug(true);
-  }
 
   if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG_VERBOSE))
   {
-    file.setVerbose(true);
+    file.setDebug(true);
   }
   
   file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);

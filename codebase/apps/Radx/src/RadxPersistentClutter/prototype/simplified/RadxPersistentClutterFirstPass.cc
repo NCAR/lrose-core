@@ -255,7 +255,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
     if (_rayMap.isMulti(ae))
     {
       LOG(DEBUG_EXTRA) << "Multiple az,elev in volume "
-                       <<  ae.sprint();
+                       <<  ae.sprint() << " elev: " << elev;
     }
     else
     {
@@ -267,7 +267,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
   }
   else
   {
-    LOG(DEBUG_EXTRA) << "Elevation " << elev
+    LOG(DEBUG_EXTRA) << "Az " << az << ",elev " << elev
                      << " not configured within tolerance";
     return false;
 
