@@ -1075,10 +1075,10 @@ void RadxClutMon::_printStats(ostream &out)
   out << "   nZdr, meanZdr: " << _nZdrWeak << ", " << _meanZdrWeak << endl;
   out << "   nXpolr, meanXpolr: " << _nXpolrWeak << ", " << _meanXpolrWeak << endl;
 
-  cerr << "  nGatesStrong: " << _nGatesStrong << endl;
-  cerr << "  nGatesWeak: " << _nGatesWeak << endl;
-  cerr << "  nWxWeak: " << _nWxWeak << endl;
-  cerr << "  fractionWxWeak: " << _fractionWxWeak << endl;
+  out << "  nGatesStrong: " << _nGatesStrong << endl;
+  out << "  nGatesWeak: " << _nGatesWeak << endl;
+  out << "  nWxWeak: " << _nWxWeak << endl;
+  out << "  fractionWxWeak: " << _fractionWxWeak << endl;
 
   if (_fractionWxWeak > _params.min_fraction_for_wx_contamination) {
     out << "   weather contamination: TRUE" << endl;
@@ -1086,6 +1086,12 @@ void RadxClutMon::_printStats(ostream &out)
     out << "   weather contamination: FALSE" << endl;
   }
   
+  if (_params.monitor_transmit_power) {
+    out << "    xmitPowerDbmBoth: " << _xmitPowerDbmBoth << endl;
+    out << "    xmitPowerDbmH: " << _xmitPowerDbmH << endl;
+    out << "    xmitPowerDbmV: " << _xmitPowerDbmV << endl;
+  }
+
   out << "==========================================" << endl;
 
 }
