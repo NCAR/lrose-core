@@ -110,6 +110,8 @@ private:
   int _nGatesWeak, _nWxWeak;
   double _fractionWxWeak;
 
+  double _xmitPowerDbmH, _xmitPowerDbmV, _xmitPowerDbmBoth;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtime();

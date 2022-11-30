@@ -897,6 +897,22 @@ void RadxClutMon::_initForStats()
   _nWxWeak = 0;
   _fractionWxWeak = NAN;
 
+  _xmitPowerDbmH = _xmitPowerDbmV = _xmitPowerDbmBoth = NAN;
+
+  if (_params.monitor_transmit_power) {
+    string statusXml = _momentsVol.getStatusXml();
+    double val;
+    if (RadxXml::readDouble(statusXml, _params.xmit_power_key_both, val) == 0) {
+      _xmitPowerDbmBoth = val;   
+    }
+    if (RadxXml::readDouble(statusXml, _params.xmit_power_key_h, val) == 0) {
+      _xmitPowerDbmH = val;   
+    }
+    if (RadxXml::readDouble(statusXml, _params.xmit_power_key_v, val) == 0) {
+      _xmitPowerDbmV = val;   
+    }
+  }
+
 }
 
 //////////////////////////////////////////////////////
@@ -1113,6 +1129,12 @@ int RadxClutMon::_writeStatsToSpdb()
     xml += RadxXml::writeBoolean("weatherContamination", 1, true);
   } else {
     xml += RadxXml::writeBoolean("weatherContamination", 1, false);
+  }
+
+  if (_params.monitor_transmit_power) {
+    xml += RadxXml::writeDouble("XmitPowerDbmBoth", 1, _xmitPowerDbmBoth);
+    xml += RadxXml::writeDouble("XmitPowerDbmH", 1, _xmitPowerDbmH);
+    xml += RadxXml::writeDouble("XmitPowerDbmV", 1, _xmitPowerDbmV);
   }
 
   xml += RadxXml::writeEndTag("ClutterStats", 0);

@@ -312,6 +312,34 @@ paramdef double {
 } clutter_min_cpa;
 
 commentdef {
+  p_header = "OPTION TO MONITOR TRANSMIT POWER";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to monitor the transmit power in the CfRadial files.";
+  p_help = "If true, we will read the transmit power in the status XML of the CfRadial file, and write these out as part of the SPDB data results.";
+} monitor_transmit_power;
+
+paramdef string {
+  p_default = "XmitPowerDbmTop";
+  p_descr = "XML key for both channels combined.";
+  p_help = "This XML key is used to extract the transmit power for both channels from the CfRadial status XML.";
+} xmit_power_key_both;
+
+paramdef string {
+  p_default = "XmitPowerDbmH";
+  p_descr = "XML key for H channel.";
+  p_help = "This XML key is used to extract the H transmit power from the CfRadial status XML.";
+} xmit_power_key_h;
+
+paramdef string {
+  p_default = "XmitPowerDbmH";
+  p_descr = "XML key for V channel.";
+  p_help = "This XML key is used to extract the V transmit power from the CfRadial status XML.";
+} xmit_power_key_v;
+
+commentdef {
   p_header = "WRITE RESULTS";
 }
 

@@ -467,6 +467,14 @@ public:
 
   double clutter_min_cpa;
 
+  tdrp_bool_t monitor_transmit_power;
+
+  char* xmit_power_key_both;
+
+  char* xmit_power_key_h;
+
+  char* xmit_power_key_v;
+
   tdrp_bool_t write_results_to_spdb;
 
   char* spdb_output_url;
@@ -478,7 +486,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[53];
+  mutable TDRPtable _table[58];
 
   const char *_className;
 

@@ -1187,6 +1187,63 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
+    tt->comment_hdr = tdrpStrDup("OPTION TO MONITOR TRANSMIT POWER");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'monitor_transmit_power'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("monitor_transmit_power");
+    tt->descr = tdrpStrDup("Option to monitor the transmit power in the CfRadial files.");
+    tt->help = tdrpStrDup("If true, we will read the transmit power in the status XML of the CfRadial file, and write these out as part of the SPDB data results.");
+    tt->val_offset = (char *) &monitor_transmit_power - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'xmit_power_key_both'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("xmit_power_key_both");
+    tt->descr = tdrpStrDup("XML key for both channels combined.");
+    tt->help = tdrpStrDup("This XML key is used to extract the transmit power for both channels from the CfRadial status XML.");
+    tt->val_offset = (char *) &xmit_power_key_both - &_start_;
+    tt->single_val.s = tdrpStrDup("XmitPowerDbmTop");
+    tt++;
+    
+    // Parameter 'xmit_power_key_h'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("xmit_power_key_h");
+    tt->descr = tdrpStrDup("XML key for H channel.");
+    tt->help = tdrpStrDup("This XML key is used to extract the H transmit power from the CfRadial status XML.");
+    tt->val_offset = (char *) &xmit_power_key_h - &_start_;
+    tt->single_val.s = tdrpStrDup("XmitPowerDbmH");
+    tt++;
+    
+    // Parameter 'xmit_power_key_v'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("xmit_power_key_v");
+    tt->descr = tdrpStrDup("XML key for V channel.");
+    tt->help = tdrpStrDup("This XML key is used to extract the V transmit power from the CfRadial status XML.");
+    tt->val_offset = (char *) &xmit_power_key_v - &_start_;
+    tt->single_val.s = tdrpStrDup("XmitPowerDbmH");
+    tt++;
+    
+    // Parameter 'Comment 9'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("WRITE RESULTS");
     tt->comment_text = tdrpStrDup("");
     tt++;
