@@ -221,10 +221,10 @@ bool RadxPersistentClutter::run(const string &label)
 
     if (algDone) {
       LOG(DEBUG) << "=========================================================";
-      LOG(DEBUG) << "=============>> algorithm has converged <<===============";
+      LOG(DEBUG) << label << " has converged <<===============";
       LOG(DEBUG) << "=========================================================";
     } else {
-      LOG(DEBUG) << "=========>> algorithm has NOT converged yet <<===========";
+      LOG(DEBUG) << label << " has NOT converged <<===============";
     }
     
     if (algDone) {

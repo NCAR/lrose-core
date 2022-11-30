@@ -2962,6 +2962,7 @@ void RadxVol::trimSweepsToSelectedAngles(vector<double> &selectedAngles,
     
     RadxSweep *sweep = sweeps[ii];
     double fixedAngle = sweep->getFixedAngleDeg();
+    double selectedAngle = fixedAngle;
 
     bool keepSweep = false;
     for (size_t jj = 0; jj < selectedAngles.size(); jj++) {
@@ -2971,6 +2972,7 @@ void RadxVol::trimSweepsToSelectedAngles(vector<double> &selectedAngles,
       }
       if (deltaAngle < angleTolerance) {
         keepSweep = true;
+        selectedAngle = selectedAngles[jj];
         break;
       }
     } // jj
@@ -2982,7 +2984,7 @@ void RadxVol::trimSweepsToSelectedAngles(vector<double> &selectedAngles,
       // keep rays in sweep
       for (size_t iray = startRayIndex; iray <= endRayIndex; iray++) {
         RadxRay *ray = _rays[iray];
-        ray->setFixedAngleDeg(fixedAngle);
+        ray->setFixedAngleDeg(selectedAngle);
         keepRays.push_back(ray);
       }
 

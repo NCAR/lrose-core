@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for RadxPersistentClutter
+ * TDRP params for ./RadxPersistentClutter
  **********************************************************************/
 
 //======================================================================
@@ -52,6 +52,7 @@ instance = "precip.sband";
 //     NONE
 //     DEBUG
 //     DEBUG_VERBOSE
+//     DEBUG_EXTRA
 //
 
 debug_mode = NONE;
@@ -122,39 +123,6 @@ input_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/field/mo
 //
 
 max_realtime_data_age_secs = 120;
-
-///////////// read_set_fixed_angle_limits /////////////
-//
-// Option to set fixed angle limits.
-//
-// Only read sweeps within the specified fixed angle limits. Fixed 
-//   angles are elevation in PPI mode and azimuth in RHI mode.
-//
-//
-// Type: boolean
-//
-
-read_set_fixed_angle_limits = TRUE;
-
-///////////// read_lower_fixed_angle //////////////////
-//
-// Lower fixed angle limit - degrees.
-//
-//
-// Type: double
-//
-
-read_lower_fixed_angle = 0.3;
-
-///////////// read_upper_fixed_angle //////////////////
-//
-// Upper fixed angle limit - degrees.
-//
-//
-// Type: double
-//
-
-read_upper_fixed_angle = 3.1;
 
 ///////////// set_max_range ///////////////////////////
 //
@@ -268,28 +236,20 @@ threshold = 10;
 
 clutter_percentile = 0.5;
 
-///////////// fixedElevations /////////////////////////
+///////////// sweep_fixed_angles //////////////////////
 //
-// Fixed storage elevation values.
+// List of fixed angles for desired sweeps (deg).
 //
-// List of target elevation angles (the angles seem to wobble a lot). 
-//   Inputs are mapped to one of these using tolerance params.
+// SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.
 //
 //
 // Type: double
 // 1D array - variable length.
 //
 
-fixedElevations = {
- 0.5,
- 1,
- 1.5,
- 2,
- 3,
- 4
-};
+sweep_fixed_angles = { 0.5, 1.0, 1.5, 2.0, 3.0, 4.0 };
 
-///////////// azToleranceDegrees //////////////////////
+///////////// az_tolerance_degrees ////////////////////
 //
 // azimumth tolerance.
 //
@@ -300,9 +260,9 @@ fixedElevations = {
 // Type: double
 //
 
-azToleranceDegrees = 0.1;
+az_tolerance_degrees = 0.1;
 
-///////////// elevToleranceDegrees ////////////////////
+///////////// elev_tolerance_degrees //////////////////
 //
 // elevation tolerance.
 //
@@ -313,7 +273,7 @@ azToleranceDegrees = 0.1;
 // Type: double
 //
 
-elevToleranceDegrees = 0.1;
+elev_tolerance_degrees = 0.2;
 
 ///////////// missing_clutter_value ///////////////////
 //
