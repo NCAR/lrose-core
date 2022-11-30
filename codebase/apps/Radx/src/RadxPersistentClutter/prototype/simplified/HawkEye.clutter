@@ -344,11 +344,11 @@ color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
 
 fields = {
   {
-    label = "DBMVC_CLUT",
-    raw_name = "DBMVC_CLUT",
-    filtered_name = "",
-    units = "dBm",
-    color_map = "dbm.colors",
+    label = "DBZ",
+    raw_name = "DBZ",
+    filtered_name = "DBZ_F",
+    units = "dBZ",
+    color_map = "dbz.colors",
     shortcut = "1"
   }
   ,
@@ -357,17 +357,8 @@ fields = {
     raw_name = "NormFreqCount",
     filtered_name = "",
     units = "",
-    color_map = "count.colors",
+    color_map = "fraction.colors",
     shortcut = "2"
-  }
-  ,
-  {
-    label = "DBZ",
-    raw_name = "DBZ",
-    filtered_name = "DBZ_F",
-    units = "dBZ",
-    color_map = "dbz.colors",
-    shortcut = "1"
   }
   ,
   {

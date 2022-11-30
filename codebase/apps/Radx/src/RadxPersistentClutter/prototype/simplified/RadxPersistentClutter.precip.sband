@@ -247,7 +247,8 @@ clutter_percentile = 0.5;
 // 1D array - variable length.
 //
 
-sweep_fixed_angles = { 0.5, 1.0, 1.5, 2.0, 3.0, 4.0 };
+// sweep_fixed_angles = { 0.5, 1.0, 1.5, 2.0, 3.0, 4.0 };
+sweep_fixed_angles = { 1.5 };
 
 ///////////// az_tolerance_degrees ////////////////////
 //
@@ -327,7 +328,7 @@ maximum_percent_change = 0.01;
 // Type: double
 //
 
-minimum_stable_volumes = 25;
+minimum_stable_volumes = 30;
 
 ///////////// histogram_resolution ////////////////////
 //
