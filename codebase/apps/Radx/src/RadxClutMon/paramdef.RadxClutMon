@@ -185,6 +185,26 @@ paramdef boolean {
 } apply_strict_angle_limits;
 
 commentdef {
+  p_header = "OPTIONAL AZIMUTH LIMITS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to limits on azimuth range used.";
+  p_help = "Only use rays between these azimuths.";
+} set_azimuth_limits;
+
+paramdef double {
+  p_default = 0.0;
+  p_descr = "Lower azimuth limit - degrees.";
+} lower_azimuth_limit;
+
+paramdef double {
+  p_default = 359.99;
+  p_descr = "Upper azimuth limit - degrees.";
+} upper_azimuth_limit;
+
+commentdef {
   p_header = "READ OPTIONS";
 }
 

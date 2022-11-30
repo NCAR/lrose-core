@@ -429,6 +429,12 @@ public:
 
   tdrp_bool_t apply_strict_angle_limits;
 
+  tdrp_bool_t set_azimuth_limits;
+
+  double lower_azimuth_limit;
+
+  double upper_azimuth_limit;
+
   tdrp_bool_t remove_rays_with_antenna_transitions;
 
   tdrp_bool_t trim_surveillance_sweeps_to_360deg;
@@ -486,7 +492,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[58];
+  mutable TDRPtable _table[62];
 
   const char *_className;
 

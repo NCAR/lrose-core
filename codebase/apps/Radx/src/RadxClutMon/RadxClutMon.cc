@@ -383,6 +383,14 @@ int RadxClutMon::_processVol()
     RadxRay *cRay = cRays[ii];
     double cAz = cRay->getAzimuthDeg();   
     double cEl = cRay->getElevationDeg();
+
+    // check azimuth if requested
+
+    if (_params.set_azimuth_limits) {
+      if (!_azWithinLimits(cAz)) {
+        continue;
+      }
+    }
     
     // find matching ray in moments volume
     
@@ -438,6 +446,36 @@ int RadxClutMon::_processVol()
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////////////////
+// check az is within limits
+
+bool RadxClutMon::_azWithinLimits(double az)
+
+{
+
+  double minAz = _params.lower_azimuth_limit;
+  double maxAz = _params.upper_azimuth_limit;
+
+  if (minAz < maxAz) {
+
+    if (az >= minAz && az <= maxAz) {
+      return true;
+    } else {
+      return false;
+    }
+
+  } else {
+
+    if (az > maxAz && az < minAz) {
+      return false;
+    } else {
+      return true;
+    }
+
+  }
+  
 }
 
 //////////////////////////////////////////////////////////////

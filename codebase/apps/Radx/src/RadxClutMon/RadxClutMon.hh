@@ -120,6 +120,7 @@ private:
   int _readClutterMap();
 
   int _processVol();
+  bool _azWithinLimits(double az);
   
   int _processRay(const RadxRay &clutMapRay,
                   const RadxRay &momentsRay);
