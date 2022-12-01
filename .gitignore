@@ -504,6 +504,7 @@ codebase/apps/radar/src/RadarCal/RadarCal
 codebase/apps/radar/src/RadarConst/RadarConst
 codebase/apps/radar/src/RadarMdvCompare/RadarMdvCompare
 codebase/apps/radar/src/RapMap2Chill/RapMap2Chill
+codebase/apps/radar/src/RcalXml2Table/RcalXml2Table
 codebase/apps/radar/src/REPoH/REPoH
 codebase/apps/radar/src/SimCpCompute/SimCpCompute
 codebase/apps/radar/src/SpectraPrint/SpectraPrint

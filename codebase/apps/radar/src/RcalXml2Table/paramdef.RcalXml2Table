@@ -22,7 +22,7 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 //////////////////////////////////////////////////////////////////////
-// parameter definitions CalXml2Table
+// parameter definitions RcalXml2Table
 //
 // EOL, NCAR,
 // P.O.Box 3000, Boulder, CO, USA, 80307-3000
@@ -32,7 +32,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "CalXml2Table reads radar calibration files in XML format, and writes these out into a comma or space delimited text table.";
+  p_header = "RcalXml2Table reads radar calibration files in XML format, and writes these out into a comma or space delimited text table.";
 }
 
 commentdef {

@@ -55,6 +55,7 @@ SUB_DIRS = \
 	RadarMdvCompare \
 	RadxDealias \
 	RapMap2Chill \
+	RcalXml2Table \
 	SimCpCompute \
 	SpectraPrint \
 	Sprite \

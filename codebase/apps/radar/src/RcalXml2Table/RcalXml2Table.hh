@@ -21,92 +21,81 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// RcalXml2Table.hh
 //
-// main driver for CalXml2Table
-//
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR
+// P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Dec 2022
 //
 ///////////////////////////////////////////////////////////////
 //
-// CalXml2Table reads radar calibration files in XML format
+// RcalXml2Table reads radar calibration files in XML format
 // and writes out the data into a comma or space delimited
 // text table.
 //
 ////////////////////////////////////////////////////////////////
 
-#include "CalXml2Table.hh"
-#include <csignal>
-#include <new>
-#include <cstdio>
+#ifndef RcalXml2Table_HH
+#define RcalXml2Table_HH
+
+#include <string>
+#include <vector>
+#include <toolsa/DateTime.hh>
+#include <Radx/RadxRcalib.hh>
+#include <didss/DsInputPath.hh>
+
+#include "Args.hh"
+#include "Params.hh"
+
 using namespace std;
 
-// file scope
+////////////////////////
+// This class
 
-static void tidy_and_exit(int sig);
-static void out_of_store();
-static CalXml2Table *_prog;
-
-// main
-
-int main(int argc, char **argv)
+class RcalXml2Table {
   
-{
+public:
 
-  // create program object
+  // constructor
 
-  _prog = new CalXml2Table(argc, argv);
-  if (!_prog->isOK) {
-    return(-1);
-  }
+  RcalXml2Table(int argc, char **argv);
 
-  // set signal handling
+  // destructor
   
-  signal(SIGINT, tidy_and_exit);
-  signal(SIGHUP, tidy_and_exit);
-  signal(SIGTERM, tidy_and_exit);
-  signal(SIGPIPE, SIG_IGN);
+  ~RcalXml2Table();
 
-  // set new() memory failure handler function
+  // run 
 
-  set_new_handler(out_of_store);
-
-  // run it
-
-  int iret = _prog->Run();
-
-  // clean up
-
-  tidy_and_exit(iret);
-  return (iret);
+  int Run();
   
-}
+  // data members
 
-///////////////////
-// tidy up on exit
+  bool isOK;
 
-static void tidy_and_exit (int sig)
+protected:
+  
+private:
 
-{
+  string _progName;
+  char *_paramsPath;
+  Args _args;
+  Params _params;
 
-  delete(_prog);
-  exit(sig);
+  DsInputPath *_inputPath;
+  DateTime _startTime;
+  DateTime _endTime;
 
-}
-////////////////////////////////////
-// out_of_store()
-//
-// Handle out-of-memory conditions
-//
+  vector<string> _fieldList;
+  size_t _lineCount;
 
-static void out_of_store()
+  // functions
 
-{
+  void _createFieldList();
+  void _printComments(FILE *out);
+  void _printLine(FILE *out, const RadxRcalib &cal);
 
-  fprintf(stderr, "FATAL ERROR - program CalXml2Table\n");
-  fprintf(stderr, "  Operator new failed - out of store\n");
-  exit(-1);
+};
 
-}
+#endif

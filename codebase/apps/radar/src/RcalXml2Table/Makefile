@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for CalXml2Table program
+# Makefile for RcalXml2Table program
 #
 # Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
@@ -34,11 +34,11 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = CalXml2Table
+TARGET_FILE = RcalXml2Table
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lFmq -ldsserver \
+LOC_LIBS = -lSpdb -lRadx -lradar -lFmq -ldsserver \
 	-ldidss -lrapformats -ltoolsa -lpthread -ldataport \
 	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
@@ -49,12 +49,12 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	CalXml2Table.hh
+	RcalXml2Table.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	CalXml2Table.cc \
+	RcalXml2Table.cc \
 	Main.cc
 
 #

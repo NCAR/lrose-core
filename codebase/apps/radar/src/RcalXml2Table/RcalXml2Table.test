@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for ./CalXml2Table
+ * TDRP params for ./RcalXml2Table
  **********************************************************************/
 
 //======================================================================
 //
-// CalXml2Table reads radar calibration files in XML format, and writes 
+// RcalXml2Table reads radar calibration files in XML format, and writes 
 //   these out into a comma or space delimited text table.
 //
 //======================================================================
