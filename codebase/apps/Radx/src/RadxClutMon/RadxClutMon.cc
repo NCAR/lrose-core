@@ -587,6 +587,12 @@ int RadxClutMon::_processRay(const RadxRay &clutMapRay,
     cpaMiss = cpaFld->getMissingFl32();
   }
 
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "==>> processing ray clut az, moments az: "
+         << clutMapRay.getAzimuthDeg() << ", "
+         << momentsRay.getAzimuthDeg() << endl;
+  }
+  
   // loop though the gates
 
   double range = _momentsVol.getStartRangeKm();
@@ -644,7 +650,6 @@ int RadxClutMon::_processRay(const RadxRay &clutMapRay,
         continue;
       }
     }
-
 
     // get gate fields
 
