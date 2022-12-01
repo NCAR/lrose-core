@@ -3087,13 +3087,48 @@ string PolarManager::_combinePathFile(string path, string file) {
   temp.append(file.c_str());
   return temp.toStdString();
 }
-
+/*
 void PolarManager::_checkForOverwrite(string pathFile) {
+  if (QFile(pathFile.c_str()).exists()) {
+    stringstream ss;
+    ss << "file " << pathFile << " exists.  Do you want to overwrite?";
+    errorMessage("Warning", ss.str());
+  }
+}
+*/
+
+void PolarManager::_checkForOverwrite(string pathFile, bool *overwriteOnce,
+  bool *overwriteAll, bool *discard, bool *cancel) {
     if (QFile(pathFile.c_str()).exists()) {
       stringstream ss;
-      ss << "file " << pathFile << " exists.  Do you want to overwrite?";
-      errorMessage("Warning", ss.str());
-    }
+      ss << "file " << pathFile << " exists.";
+
+      int ret = overwriteOnceOrAllMessage(ss.str(), "What do you want to do?");
+      switch (ret) {
+        case QMessageBox::Save:
+            *overwriteOnce = true;  
+            break;
+        case QMessageBox::Discard:
+            // Don't Save was clicked
+            *discard = true;
+            break;
+        case QMessageBox::Cancel:
+            // Cancel was clicked
+            *cancel = true;
+            break;
+        case QMessageBox::Apply:
+            // save all was clicked
+            *overwriteAll = true;
+            break;
+        default:
+            // should never be reached
+            break;
+      }
+  } else {
+    // we can write the file, because it doesn't exist yet.
+    *overwriteOnce = true;
+  }
+
 }
 
 
@@ -3145,24 +3180,29 @@ void PolarManager::_saveCurrentVersionAllFiles()
 
     string saveDirName = fileNames.at(0).toLocal8Bit().toStdString();
      //  const char *saveDirName = fileNames.at(0).toLocal8Bit().constData();
-    if( !saveDirName.empty() )
-    {
-        LOG(DEBUG) << "selected folder path : " << saveDirName;
-      int nFiles = _timeNavController->getNFiles();
 
-      QProgressDialog progress("Saving files...", "Abort Save", 0, nFiles, this);
-      progress.setWindowModality(Qt::WindowModal);
+    bool overwriteAll = false;
+    if( saveDirName.empty() ) {
+      overwriteAll = true;
+    } else {
+      overwriteAll = false;
+    }    
 
-      // for each file in timeNav ...
-      for (int i=0; i<nFiles; i++) {
-        // hold it! the save message should
-        // go to the Model (Data) level because
-        // we'll be using Radx utilities.
+    LOG(DEBUG) << "selected folder path : " << saveDirName;
+    int nFiles = _timeNavController->getNFiles();
 
-        progress.setValue(i);
-        if (progress.wasCanceled())
-            break;
+    //QProgressDialog progress("Saving files...", "Abort Save", 0, nFiles, this);
+    //progress.setWindowModality(Qt::WindowModal);
 
+    // for each file in timeNav ...
+    int i=0;
+    bool cancel = false;
+    bool overwriteOnce = false;
+    bool discard = false; // TODO: may not need this
+    while (i<nFiles && !cancel) {
+        //progress.setValue(i);
+        //if (progress.wasCanceled())
+        //    break;
         try {
           // the active one in memory (i.e. the selected file)
           // may have unsaved changes, so treat it differently.
@@ -3173,10 +3213,17 @@ void PolarManager::_saveCurrentVersionAllFiles()
             DataModel *dataModel = DataModel::Instance();
             string currentFile = _timeNavController->getSelectedArchiveFile();
             string saveFile = _combinePathFile(saveDirName, _fileName(QString(currentFile.c_str())));
-            _checkForOverwrite(saveFile);
-            //string currentPath = _timeNavController->getSelectedPath();
-            dataModel->writeWithMergeData(saveFile, currentFile);
-            _unSavedEdits = false;
+            //_checkForOverwrite(saveFile);
+            if (!overwriteAll) {
+              overwriteOnce = false;
+              discard = false;
+              _checkForOverwrite(saveFile, &overwriteOnce,
+                  &overwriteAll, &discard, &cancel); 
+            }
+            if (overwriteOnce || overwriteAll) {
+              //string currentPath = _timeNavController->getSelectedPath();
+              dataModel->writeWithMergeData(saveFile, currentFile);
+            }
           }  else {
 
             string versionName = _undoRedoController->getCurrentVersion(i);
@@ -3197,31 +3244,36 @@ void PolarManager::_saveCurrentVersionAllFiles()
             cout << "source_path = " << source_path << endl;
             cout << "dest_path = " << dest_path << endl;
 
-            _checkForOverwrite(savePathFile);
-            // use toolsa utility
-            // Returns -1 on error, 0 otherwise
-            // filecopy_by_name doesnn't work;
-            // also, need to merge the files with the original file,
-            // since we have saved a delta ...
-            string originalPath = _timeNavController->getArchiveFilePath(i);
-
-            DataModel *dataModel = DataModel::Instance();
-            int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
-            if (return_val != 0) {
-              stringstream ss;
-              ss << "could not save file: " << dest_path;
-              errorMessage("Error", ss.str());
+            if (!overwriteAll) {
+              overwriteOnce = false;
+              discard = false;
+              _checkForOverwrite(savePathFile, &overwriteOnce,
+                  &overwriteAll, &discard, &cancel); 
             }
+            if (overwriteOnce || overwriteAll) {
+              // use toolsa utility
+              // Returns -1 on error, 0 otherwise
+              // filecopy_by_name doesnn't work;
+              // also, need to merge the files with the original file,
+              // since we have saved a delta ...
+              string originalPath = _timeNavController->getArchiveFilePath(i);
+
+              DataModel *dataModel = DataModel::Instance();
+              int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
+              if (return_val != 0) {
+                stringstream ss;
+                ss << "could not save file: " << dest_path;
+                errorMessage("Error", ss.str());
+              }
+            } // end if overwrite ...
           }
         } catch (FileIException &ex) {
           this->setCursor(Qt::ArrowCursor);
           return;
         }
-      } // end for each file in timeNav
-
-      progress.setValue(nFiles);
-
-    }
+        i+= 1;
+              //progress.setValue(nFiles);
+    } // end while loop each file in timeNav and !cancel
   }
 }
 
@@ -3236,6 +3288,7 @@ void PolarManager::_saveFile()
 {
   if (_operationMode == BATCH) {
     _saveCurrentVersionAllFiles();
+    _unSavedEdits = false;
   } else {
 
     QString finalPattern = "All files (*.nc)";
@@ -6025,6 +6078,31 @@ int PolarManager::saveDiscardMessage(string text, string question) {
   if (msgBox.clickedButton() == saveNewDirectoryButton) {
       return QMessageBox::Save;
   } else if (msgBox.clickedButton() == overwriteOriginalButton) {
+      return QMessageBox::Apply;
+  } else {
+    return ret;
+  }
+
+  //return ret;
+}
+
+int PolarManager::overwriteOnceOrAllMessage(string text, string question) {
+  QMessageBox msgBox(this);
+  msgBox.setText(QString::fromStdString(text)); 
+  msgBox.setInformativeText(QString::fromStdString(question));
+  msgBox.setStandardButtons(QMessageBox::Discard | 
+    QMessageBox::Cancel);
+
+  QPushButton *overwriteOnceButton = msgBox.addButton(tr("Overwrite"), QMessageBox::YesRole);
+  QPushButton *overwriteAllButton = msgBox.addButton(tr("Overwrite All Files"), QMessageBox::ApplyRole);
+
+  msgBox.setDefaultButton(overwriteOnceButton);
+
+  int ret = msgBox.exec();
+
+  if (msgBox.clickedButton() == overwriteOnceButton) {
+      return QMessageBox::Save;
+  } else if (msgBox.clickedButton() == overwriteAllButton) {
       return QMessageBox::Apply;
   } else {
     return ret;

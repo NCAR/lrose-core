@@ -232,7 +232,9 @@ public slots:
 
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
-  void _checkForOverwrite(string pathFile);
+  //void _checkForOverwrite(string pathFile);
+  void _checkForOverwrite(string pathFile, bool *overwriteOnce,
+  bool *overwriteAll, bool *discard, bool *cancel);
   int _mergeDataFiles(string dest_path, string source_path);
   void _openFile();
   void _saveFile();
@@ -299,6 +301,7 @@ public slots:
 
   void errorMessage(string title, string message);
   int saveDiscardMessage(string text, string question);
+  int overwriteOnceOrAllMessage(string text, string question);
 
   void selectBatchMode();
   void selectIndividualMode();
