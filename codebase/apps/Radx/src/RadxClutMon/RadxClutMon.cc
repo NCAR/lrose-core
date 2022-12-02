@@ -941,6 +941,8 @@ void RadxClutMon::_initForStats()
   _fractionWxWeak = NAN;
 
   _xmitPowerDbmH = _xmitPowerDbmV = _xmitPowerDbmBoth = NAN;
+  _pulseWidthUsec = NAN;
+  _receiverGainDbHc = _receiverGainDbVc = _receiverGainDbHx = _receiverGainDbVx = 0.0;
 
   if (_params.monitor_transmit_power) {
     string statusXml = _momentsVol.getStatusXml();
@@ -956,6 +958,16 @@ void RadxClutMon::_initForStats()
     }
   }
 
+  size_t ncal = _momentsVol.getNRcalibs();
+  if (ncal > 0) {
+    const RadxRcalib *calib = _momentsVol.getRcalibs()[ncal-1];
+    _pulseWidthUsec = calib->getPulseWidthUsec();
+    _receiverGainDbHc = calib->getReceiverGainDbHc();
+    _receiverGainDbVc = calib->getReceiverGainDbVc();
+    _receiverGainDbHx = calib->getReceiverGainDbHx();
+    _receiverGainDbVx = calib->getReceiverGainDbVx();
+  }
+  
 }
 
 //////////////////////////////////////////////////////
@@ -965,20 +977,8 @@ void RadxClutMon::_computeStats()
   
 {
 
-  // adjust powers for calibrated receiver gains
+  // Note adjust powers for calibrated receiver gains
 
-  double receiverGainDbHc = 0.0;
-  double receiverGainDbVc = 0.0;
-  double receiverGainDbHx = 0.0;
-  double receiverGainDbVx = 0.0;
-  if (_momentsVol.getNRcalibs() > 0) {
-    const RadxRcalib *calib = _momentsVol.getRcalibs()[0];
-    receiverGainDbHc = calib->getReceiverGainDbHc();
-    receiverGainDbVc = calib->getReceiverGainDbVc();
-    receiverGainDbHx = calib->getReceiverGainDbHx();
-    receiverGainDbVx = calib->getReceiverGainDbVx();
-  }
-  
   if (_nDbzStrong > 0) {
     _meanDbzStrong = _sumDbzStrong / (double) _nDbzStrong;
   }
@@ -988,56 +988,56 @@ void RadxClutMon::_computeStats()
 
   if (_nDbmhcStrong > 0) {
     _meanDbmhcStrong = _sumDbmhcStrong / (double) _nDbmhcStrong;
-    _meanDbmhcStrong += receiverGainDbHc;
+    _meanDbmhcStrong += _receiverGainDbHc;
   }
   if (_nDbmhcWeak > 0) {
     _meanDbmhcWeak = _sumDbmhcWeak / (double) _nDbmhcWeak;
-    _meanDbmhcWeak += receiverGainDbHc;
+    _meanDbmhcWeak += _receiverGainDbHc;
   }
 
   if (_nDbmvcStrong > 0) {
     _meanDbmvcStrong = _sumDbmvcStrong / (double) _nDbmvcStrong;
-    _meanDbmvcStrong += receiverGainDbVc;
+    _meanDbmvcStrong += _receiverGainDbVc;
   }
   if (_nDbmvcWeak > 0) {
     _meanDbmvcWeak = _sumDbmvcWeak / (double) _nDbmvcWeak;
-    _meanDbmvcWeak += receiverGainDbVc;
+    _meanDbmvcWeak += _receiverGainDbVc;
   }
 
   if (_nDbmhxStrong > 0) {
     _meanDbmhxStrong = _sumDbmhxStrong / (double) _nDbmhxStrong;
-    _meanDbmhxStrong += receiverGainDbHx;
+    _meanDbmhxStrong += _receiverGainDbHx;
   }
   if (_nDbmhxWeak > 0) {
     _meanDbmhxWeak = _sumDbmhxWeak / (double) _nDbmhxWeak;
-    _meanDbmhxWeak += receiverGainDbHx;
+    _meanDbmhxWeak += _receiverGainDbHx;
   }
 
   if (_nDbmvxStrong > 0) {
     _meanDbmvxStrong = _sumDbmvxStrong / (double) _nDbmvxStrong;
-    _meanDbmvxStrong += receiverGainDbVx;
+    _meanDbmvxStrong += _receiverGainDbVx;
   }
   if (_nDbmvxWeak > 0) {
     _meanDbmvxWeak = _sumDbmvxWeak / (double) _nDbmvxWeak;
-    _meanDbmvxWeak += receiverGainDbVx;
+    _meanDbmvxWeak += _receiverGainDbVx;
   }
 
   if (_nZdrStrong > 0) {
     _meanZdrStrong = _sumZdrStrong / (double) _nZdrStrong;
-    _meanZdrStrong += (receiverGainDbHc - receiverGainDbVc);
+    _meanZdrStrong += (_receiverGainDbHc - _receiverGainDbVc);
   }
   if (_nZdrWeak > 0) {
     _meanZdrWeak = _sumZdrWeak / (double) _nZdrWeak;
-    _meanZdrWeak += (receiverGainDbHc - receiverGainDbVc);
+    _meanZdrWeak += (_receiverGainDbHc - _receiverGainDbVc);
   }
 
   if (_nXpolrStrong > 0) {
     _meanXpolrStrong = _sumXpolrStrong / (double) _nXpolrStrong;
-    _meanXpolrStrong += (receiverGainDbHx - receiverGainDbVx);
+    _meanXpolrStrong += (_receiverGainDbHx - _receiverGainDbVx);
   }
   if (_nXpolrWeak > 0) {
     _meanXpolrWeak = _sumXpolrWeak / (double) _nXpolrWeak;
-    _meanXpolrWeak += (receiverGainDbHx - receiverGainDbVx);
+    _meanXpolrWeak += (_receiverGainDbHx - _receiverGainDbVx);
   }
 
   _fractionWxWeak = (double) _nWxWeak / _nGatesWeak;
@@ -1096,6 +1096,11 @@ void RadxClutMon::_printStats(ostream &out)
     out << "    xmitPowerDbmH: " << _xmitPowerDbmH << endl;
     out << "    xmitPowerDbmV: " << _xmitPowerDbmV << endl;
   }
+  out << "    pulseWidthUsec: " << _pulseWidthUsec << endl;
+  out << "    receiverGainDbHc: " << _receiverGainDbHc << endl;
+  out << "    receiverGainDbVc: " << _receiverGainDbVc << endl;
+  out << "    receiverGainDbHx: " << _receiverGainDbHx << endl;
+  out << "    receiverGainDbVx: " << _receiverGainDbVx << endl;
 
   out << "==========================================" << endl;
 
@@ -1185,6 +1190,11 @@ int RadxClutMon::_writeStatsToSpdb()
     xml += RadxXml::writeDouble("XmitPowerDbmH", 1, _xmitPowerDbmH);
     xml += RadxXml::writeDouble("XmitPowerDbmV", 1, _xmitPowerDbmV);
   }
+  xml += RadxXml::writeDouble("pulseWidthUsec", 1, _pulseWidthUsec);
+  xml += RadxXml::writeDouble("receiverGainDbHc", 1, _receiverGainDbHc);
+  xml += RadxXml::writeDouble("receiverGainDbVc", 1, _receiverGainDbVc);
+  xml += RadxXml::writeDouble("receiverGainDbHx", 1, _receiverGainDbHx);
+  xml += RadxXml::writeDouble("receiverGainDbVx", 1, _receiverGainDbVx);
 
   xml += RadxXml::writeEndTag("ClutterStats", 0);
   
