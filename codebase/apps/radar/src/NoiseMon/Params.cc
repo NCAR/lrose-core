@@ -1013,6 +1013,18 @@
     tt->single_val.d = 2000;
     tt++;
     
+    // Parameter 'max_valid_noise_power_dbm'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_valid_noise_power_dbm");
+    tt->descr = tdrpStrDup("Maximum valid noise power (dBm).");
+    tt->help = tdrpStrDup("If either H or V noise power exceeds this, the point is discarded.");
+    tt->val_offset = (char *) &max_valid_noise_power_dbm - &_start_;
+    tt->single_val.d = -70;
+    tt++;
+    
     // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));

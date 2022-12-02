@@ -264,6 +264,10 @@ void StatsMgr::processRay(const RadxPlatform &radar,
     if (dbmhcData[ii] == dbmhcMiss || dbmvcData[ii] == dbmvcMiss) {
       continue;
     }
+    if (dbmhcData[ii] > _params.max_valid_noise_power_dbm ||
+        dbmvcData[ii] > _params.max_valid_noise_power_dbm) {
+      continue;
+    }
 
     _countCoPol++;
     _sumDbmhc += dbmhcData[ii];

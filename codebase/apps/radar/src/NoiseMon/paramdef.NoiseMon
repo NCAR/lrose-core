@@ -233,6 +233,12 @@ paramdef double {
   p_help = "A valid point is a range gate that satisfies the thresholds below.";
 } min_valid_count;
 
+paramdef double {
+  p_default = -70.0;
+  p_descr = "Maximum valid noise power (dBm).";
+  p_help = "If either H or V noise power exceeds this, the point is discarded.";
+} max_valid_noise_power_dbm;
+
 commentdef {
   p_header = "OUTPUT STATISTICS";
 };

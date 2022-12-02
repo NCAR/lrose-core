@@ -441,6 +441,8 @@ public:
 
   double min_valid_count;
 
+  double max_valid_noise_power_dbm;
+
   tdrp_bool_t write_stats_to_text_file;
 
   char* text_output_dir;
@@ -458,7 +460,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[43];
 
   const char *_className;
 
