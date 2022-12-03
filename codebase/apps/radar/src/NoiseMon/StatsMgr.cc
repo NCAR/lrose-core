@@ -152,7 +152,7 @@ void StatsMgr::processRay(const RadxPlatform &radar,
 
     double deltaAz = fabs(ray->getAzimuthDeg() - _azSun);
     if (deltaAz > 180.0) {
-      deltaAz -= 360.0;
+      deltaAz = fabs(deltaAz - 360.0);
     }
     double deltaEl = fabs(ray->getElevationDeg() - _elSun);
 
@@ -162,6 +162,7 @@ void StatsMgr::processRay(const RadxPlatform &radar,
         cerr << "StatsMgr::processRay() - avoiding ray close to sun" << endl;
         cerr << "  sun el, az: " << _elSun << ", " << _azSun << endl;
         cerr << "  ray el, az: " << ray->getElevationDeg() << ", " << ray->getAzimuthDeg() << endl;
+        cerr << "  deltaEl, deltaAz: " << deltaEl << ", " << deltaAz << endl; 
       }
       return;
     }
