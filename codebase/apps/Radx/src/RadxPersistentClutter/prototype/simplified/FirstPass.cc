@@ -22,10 +22,10 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterFirstPass.cc
+ * @file FirstPass.cc
  */
 
-#include "RadxPersistentClutterFirstPass.hh"
+#include "FirstPass.hh"
 #include "FrequencyCount.hh"
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
@@ -57,16 +57,16 @@ static double _omega(const vector<double> &p, const int k)
 }
 
 //------------------------------------------------------------------
-RadxPersistentClutterFirstPass::
-RadxPersistentClutterFirstPass(int argc, char **argv) :
-  RadxPersistentClutter(argc, argv)
+FirstPass::
+  FirstPass(int argc, char **argv) :
+          RadxPersistentClutter(argc, argv)
 {
   _nvolume = 0;
   _total_pixels = 0;
 }
 
 //------------------------------------------------------------------
-RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
+FirstPass::~FirstPass(void)
 {
   if (!_ascii_output.empty())
   {
@@ -100,8 +100,8 @@ RadxPersistentClutterFirstPass::~RadxPersistentClutterFirstPass(void)
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
-						   const RadxVol &vol)
+void FirstPass::initFirstTime(const time_t &t,
+                              const RadxVol &vol)
 {
   // build path
   _ascii_fname = _params.diagnostic_ascii_dir;
@@ -127,8 +127,8 @@ void RadxPersistentClutterFirstPass::initFirstTime(const time_t &t,
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
-							RadxVol &vol)
+void FirstPass::finishLastTimeGood(const time_t &t,
+                                   RadxVol &vol)
 {
   LOG(LogStream::DEBUG) << "Finished, with convergence";
   // set last time member value
@@ -136,14 +136,14 @@ void RadxPersistentClutterFirstPass::finishLastTimeGood(const time_t &t,
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterFirstPass::finishBad(void)
+void FirstPass::finishBad(void)
 {
   LOG(LogStream::WARNING) << "Never converged";
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
-							 RadxVol &vol)
+bool FirstPass::processFinishVolume(const time_t &t,
+                                    RadxVol &vol)
 {
   // Up the volume count
   ++_nvolume;
@@ -164,7 +164,7 @@ bool RadxPersistentClutterFirstPass::processFinishVolume(const time_t &t,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::preProcessRay(const RadxRay &ray)
+bool FirstPass::preProcessRay(const RadxRay &ray)
 {
   // first time through, pull out values and initialize state
   double az = ray.getAzimuthDeg();
@@ -186,17 +186,17 @@ bool RadxPersistentClutterFirstPass::preProcessRay(const RadxRay &ray)
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::processRay(const RayData &r,
-						RayClutterInfo *h) const
+bool FirstPass::processRay(const RayData &r,
+                           RayClutterInfo *h) const
 {
   // Update the input RayClutterInfo object using the RayData
   return h->update(r, _params.threshold);
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
-						     const RayData &r,
-						     RadxRay &ray)
+bool FirstPass::setRayForOutput(const RayClutterInfo *h,
+                                const RayData &r,
+                                RadxRay &ray)
 
 {
   // make a copy of the data to store binary values
@@ -227,27 +227,27 @@ bool RadxPersistentClutterFirstPass::setRayForOutput(const RayClutterInfo *h,
 
 //------------------------------------------------------------------
 RayClutterInfo *
-RadxPersistentClutterFirstPass::matchingClutterInfo(const double az,
-						    const double elev)
+  FirstPass::matchingClutterInfo(const double az,
+                                 const double elev)
 {
   return matchInfo(_store, az, elev);
 }
 
 //------------------------------------------------------------------
-const RayClutterInfo * RadxPersistentClutterFirstPass::
-matchingClutterInfoConst(const double az,
-			 const double elev) const
+const RayClutterInfo * FirstPass::
+  matchingClutterInfoConst(const double az,
+                           const double elev) const
 {
   return matchInfoConst(_store, az, elev);
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
-						      const double az,
-						      const double elev,
-						      const double x0,
-						      const double dx,
-						      const int nx)
+bool FirstPass::_processFirstRay(const RadxRay &ray,
+                                 const double az,
+                                 const double elev,
+                                 const double x0,
+                                 const double dx,
+                                 const int nx)
 {
   if (_rayMap.add(ray))
   {
@@ -275,7 +275,7 @@ bool RadxPersistentClutterFirstPass::_processFirstRay(const RadxRay &ray,
 }
 
 //------------------------------------------------------------------
-int RadxPersistentClutterFirstPass::_computeHistoCutoff(void) const
+int FirstPass::_computeHistoCutoff(void) const
 {
 
   // compute p[i] for all i (# of points with exactly i scans indicating
@@ -320,7 +320,7 @@ int RadxPersistentClutterFirstPass::_computeHistoCutoff(void) const
 
 //------------------------------------------------------------------
 bool
-RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
+  FirstPass::_output_for_graphics(const time_t &t)
 
 {
   // create a FrequencyCount object
@@ -358,7 +358,7 @@ RadxPersistentClutterFirstPass::_output_for_graphics(const time_t &t)
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterFirstPass::_check_convergence(void)
+bool FirstPass::_check_convergence(void)
 {
   // need at least a minimum number of volumes
   int n = static_cast<int>(_threshold.size());

@@ -59,8 +59,8 @@ CPPC_SRCS = \
 	Histo.cc \
 	Main.cc \
 	RadxPersistentClutter.cc \
-	RadxPersistentClutterFirstPass.cc \
-	RadxPersistentClutterSecondPass.cc \
+	FirstPass.cc \
+	SecondPass.cc \
         RayAzElev.cc \
         RayClutterInfo.cc \
         RayData.cc \

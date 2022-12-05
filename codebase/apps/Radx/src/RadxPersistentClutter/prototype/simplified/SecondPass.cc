@@ -22,16 +22,16 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterSecondPass.cc
+ * @file SecondPass.cc
  */
-#include "RadxPersistentClutterSecondPass.hh"
+#include "SecondPass.hh"
 #include <Radx/RadxRay.hh>
 #include <toolsa/LogStream.hh>
 
 //------------------------------------------------------------------
-RadxPersistentClutterSecondPass::
-RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
-  RadxPersistentClutter(p)
+SecondPass::
+  SecondPass(const RadxPersistentClutter &p) :
+          RadxPersistentClutter(p)
 {
   // For each base class store element, create a RayHistoInfo element
   for (std::map<RayAzElev, RayClutterInfo>::iterator ii = _store.begin();
@@ -49,21 +49,21 @@ RadxPersistentClutterSecondPass(const RadxPersistentClutter &p) :
 }
 
 //------------------------------------------------------------------
-RadxPersistentClutterSecondPass::~RadxPersistentClutterSecondPass(void)
+SecondPass::~SecondPass(void)
 {
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::initFirstTime(const time_t &t,
-						    const RadxVol &vol)
+void SecondPass::initFirstTime(const time_t &t,
+                               const RadxVol &vol)
 {
   // Save this volume, will use its time information later
   _templateVol = vol;
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::finishLastTimeGood(const time_t &t,
-							 RadxVol &vol)
+void SecondPass::finishLastTimeGood(const time_t &t,
+                                    RadxVol &vol)
 {
   // The input volume and time are what is to be written out, do so now
   RadxPersistentClutter::_write(vol, t, _params.clutter_stats_output_dir);
@@ -71,14 +71,14 @@ void RadxPersistentClutterSecondPass::finishLastTimeGood(const time_t &t,
 }
 
 //------------------------------------------------------------------
-void RadxPersistentClutterSecondPass::finishBad(void)
+void SecondPass::finishBad(void)
 {
   LOG(LogStream::ERROR) << "Never matched last time. No output";
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::processFinishVolume(const time_t &t,
-							  RadxVol &vol)
+bool SecondPass::processFinishVolume(const time_t &t,
+                                     RadxVol &vol)
 {
   if (t == _final_t)
   {
@@ -97,8 +97,8 @@ bool RadxPersistentClutterSecondPass::processFinishVolume(const time_t &t,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::processRay(const RayData &r,
-						 RayClutterInfo *h) const
+bool SecondPass::processRay(const RayData &r,
+                            RayClutterInfo *h) const
 {
   // cast input pointer to what we want (a little dangerous perhaps!)
   RayHistoInfo *histo = dynamic_cast<RayHistoInfo *>(h);
@@ -108,16 +108,16 @@ bool RadxPersistentClutterSecondPass::processRay(const RayData &r,
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::preProcessRay(const RadxRay &ray)
+bool SecondPass::preProcessRay(const RadxRay &ray)
 {
   // nothing to do
   return true;
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutterSecondPass::setRayForOutput(const RayClutterInfo *h,
-						      const RayData &r,
-						      RadxRay &ray)
+bool SecondPass::setRayForOutput(const RayClutterInfo *h,
+                                 const RayData &r,
+                                 RadxRay &ray)
 {
   // make a copy of the ray
   RayData clutter(r);
@@ -139,8 +139,8 @@ bool RadxPersistentClutterSecondPass::setRayForOutput(const RayClutterInfo *h,
 
 //------------------------------------------------------------------
 RayClutterInfo *
-RadxPersistentClutterSecondPass::matchingClutterInfo(const double az,
-						     const double elev)
+  SecondPass::matchingClutterInfo(const double az,
+                                  const double elev)
 {
   // we match off of _histo, not the base class _store.
   // note this is what makes processRay and setRayForOutput work o.k.
@@ -148,9 +148,9 @@ RadxPersistentClutterSecondPass::matchingClutterInfo(const double az,
 }
 
 //------------------------------------------------------------------
-const RayClutterInfo * RadxPersistentClutterSecondPass::
-matchingClutterInfoConst(const double az,
-			 const double elev) const
+const RayClutterInfo * SecondPass::
+  matchingClutterInfoConst(const double az,
+                           const double elev) const
 {
   // we match off of _histo, not the base class _store.
   // note this is what makes processRay and setRayForOutput work o.k.

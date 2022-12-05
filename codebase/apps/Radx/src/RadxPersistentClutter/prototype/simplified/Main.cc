@@ -24,16 +24,16 @@
 /**
  * @file Main.cc
  */
-#include "RadxPersistentClutterFirstPass.hh"
-#include "RadxPersistentClutterSecondPass.hh"
+#include "FirstPass.hh"
+#include "SecondPass.hh"
 #include <csignal>
 #include <new>
 #include <iostream>
 
 static void tidy_and_exit (int sig);
 static void out_of_store(void);
-static RadxPersistentClutterFirstPass *Prog = NULL;
-static RadxPersistentClutterSecondPass *Prog2 = NULL;
+static FirstPass *Prog = NULL;
+static SecondPass *Prog2 = NULL;
 
 //----------------------------------------------------------------------
 int main(int argc, char **argv)
@@ -53,10 +53,10 @@ int main(int argc, char **argv)
   
   // create program object
   
-  Prog = new RadxPersistentClutterFirstPass(argc, argv);
+  Prog = new FirstPass(argc, argv);
   if (!Prog->OK) {
     cerr << "ERROR - main" << endl;
-    cerr << "  Could not create RadxPersistentClutterFirstPass object" << endl;
+    cerr << "  Could not create FirstPass object" << endl;
     return 1;
   }
 
@@ -64,18 +64,18 @@ int main(int argc, char **argv)
   
   if (!Prog->run("FirstPass")) {
     cerr << "ERROR - main" << endl;
-    cerr << "  Running RadxPersistentClutterFirstPass object" << endl;
+    cerr << "  Running FirstPass object" << endl;
     tidy_and_exit(-1);
   }
 
   // create second pass object
   
-  Prog2 = new RadxPersistentClutterSecondPass(*Prog);
+  Prog2 = new SecondPass(*Prog);
   delete Prog;
   Prog = NULL;
   if (!Prog2->OK) {
     cerr << "ERROR - main" << endl;
-    cerr << "  Could not create RadxPersistentClutterSecondPass object" << endl;
+    cerr << "  Could not create SecondPass object" << endl;
     return 1;
   }
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     iret = 0;
   } else {
     cerr << "ERROR - main" << endl;
-    cerr << "  Running RadxPersistentClutterSecondPass object" << endl;
+    cerr << "  Running SecondPass object" << endl;
     iret = 1;
   }
 

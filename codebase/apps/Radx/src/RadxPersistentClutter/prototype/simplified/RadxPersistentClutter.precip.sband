@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./RadxPersistentClutter
+ * TDRP params for RadxPersistentClutter
  **********************************************************************/
 
 //======================================================================
@@ -124,28 +124,6 @@ input_dir = "/scr/cirrus3/rsfdata/projects/precip/grids/spol/radarPolar/field/mo
 
 max_realtime_data_age_secs = 120;
 
-///////////// set_max_range ///////////////////////////
-//
-// Option to set the max range for any ray.
-//
-//
-// Type: boolean
-//
-
-set_max_range = TRUE;
-
-///////////// max_range_km ////////////////////////////
-//
-// Specified maximim range - km.
-//
-// Gates beyond this range are removed.
-//
-//
-// Type: double
-//
-
-max_range_km = 60;
-
 //======================================================================
 //
 // Threading.
@@ -181,6 +159,98 @@ thread_debug = FALSE;
 
 //======================================================================
 //
+// Scan details.
+//
+// We specify the scan angles for which the clutter will be analyzed. 
+//   This is the 'ideal'. The actual measurements are mapped onto this 
+//   ideal scan.
+//
+//======================================================================
+ 
+///////////// scan_mode ///////////////////////////////
+//
+// Scan mode.
+//
+// PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning.
+//
+//
+// Type: enum
+// Options:
+//     PPI
+//     RHI
+//
+
+scan_mode = PPI;
+
+///////////// starting_ray_angle //////////////////////
+//
+// Starting scan angle for rays (deg).
+//
+// In PPI mode, this is the starting azimuth. In RHI mode, this is the 
+//   starting elevation.
+//
+//
+// Type: double
+//
+
+starting_ray_angle = 0;
+
+///////////// delta_ray_angle /////////////////////////
+//
+// Delta scan angle between consecutive rays (deg).
+//
+// In PPI mode, this is the azimuth difference between rays. In RHI 
+//   mode, this is the elevation difference between rays.
+//
+//
+// Type: double
+//
+
+delta_ray_angle = 1;
+
+///////////// sweep_fixed_angles //////////////////////
+//
+// List of fixed angles for desired sweeps (deg).
+//
+// PPI mode: elevations. RHIs: azimuths.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+sweep_fixed_angles = {
+ 1.5
+};
+
+///////////// az_tolerance_degrees ////////////////////
+//
+// Azimumth tolerance.
+//
+// Allowed degrees difference between azimuth values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+az_tolerance_degrees = 0.1;
+
+///////////// elev_tolerance_degrees //////////////////
+//
+// Elevation tolerance.
+//
+// Allowed degrees difference between elevation values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+elev_tolerance_degrees = 0.2;
+
+//======================================================================
+//
 // RadxPersistentClutter.
 //
 // Parameters for setting clutter locations of one input field.
@@ -211,6 +281,28 @@ input_field_name = "DBZ";
 
 output_field_name = "DBZ";
 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = TRUE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 60;
+
 ///////////// threshold ///////////////////////////////
 //
 // threshold.
@@ -235,46 +327,6 @@ threshold = 10;
 //
 
 clutter_percentile = 0.5;
-
-///////////// sweep_fixed_angles //////////////////////
-//
-// List of fixed angles for desired sweeps (deg).
-//
-// SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.
-//
-//
-// Type: double
-// 1D array - variable length.
-//
-
-// sweep_fixed_angles = { 0.5, 1.0, 1.5, 2.0, 3.0, 4.0 };
-sweep_fixed_angles = { 1.5 };
-
-///////////// az_tolerance_degrees ////////////////////
-//
-// azimumth tolerance.
-//
-// allowed degrees difference between azimuth values from different 
-//   volumes to be considered part of the same ray.
-//
-//
-// Type: double
-//
-
-az_tolerance_degrees = 0.1;
-
-///////////// elev_tolerance_degrees //////////////////
-//
-// elevation tolerance.
-//
-// allowed degrees difference between elevation values from different 
-//   volumes to be considered part of the same ray.
-//
-//
-// Type: double
-//
-
-elev_tolerance_degrees = 0.2;
 
 ///////////// missing_clutter_value ///////////////////
 //

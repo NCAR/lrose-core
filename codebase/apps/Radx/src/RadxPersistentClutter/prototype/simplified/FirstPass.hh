@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterFirstPass.hh
+ * @file FirstPass.hh
  * @brief The first pass algorithm
- * @class RadxPersistentClutterFirstPass
+ * @class FirstPass
  * @brief The first pass algorithm
  *
  * The algorithm builds up the internal state and goes for convergence into
@@ -37,7 +37,7 @@
 
 #include "RadxPersistentClutter.hh"
 
-class RadxPersistentClutterFirstPass : public RadxPersistentClutter
+class FirstPass : public RadxPersistentClutter
 {
   
 public:
@@ -49,12 +49,12 @@ public:
    * @param[in] cleanup  Method to call on exit
    * @param[in] outOfStore  Method to call  when not enough memory
    */
-  RadxPersistentClutterFirstPass(int argc, char **argv);
+  FirstPass(int argc, char **argv);
 
   /**
    * Destructor
    */
-  virtual ~RadxPersistentClutterFirstPass();
+  virtual ~FirstPass();
 
   #include "RadxPersistentClutterVirtualMethods.hh"
 

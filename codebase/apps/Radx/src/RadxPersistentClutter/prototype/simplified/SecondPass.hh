@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /**
- * @file RadxPersistentClutterSecondPass.hh
+ * @file SecondPass.hh
  * @brief The second pass algorithm
- * @class RadxPersistentClutterSecondPass
+ * @class SecondPass
  * @brief The second pass algorithm
  *
  * The algorithm uses the internal state to go back through the data and
@@ -40,7 +40,7 @@
 #include <Radx/RadxVol.hh>
 #include <map>
 
-class RadxPersistentClutterSecondPass : public RadxPersistentClutter
+class SecondPass : public RadxPersistentClutter
 {
   
 public:
@@ -51,12 +51,12 @@ public:
    *
    * Input contains the results of the first pass
    */
-  RadxPersistentClutterSecondPass (const RadxPersistentClutter &p);
+  SecondPass (const RadxPersistentClutter &p);
 
   /**
    * Destructor
    */
-  virtual ~RadxPersistentClutterSecondPass(void);
+  virtual ~SecondPass(void);
 
   #include "RadxPersistentClutterVirtualMethods.hh"
 

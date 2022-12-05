@@ -173,7 +173,7 @@ virtual bool preProcessRay(const RadxRay &ray);
 
 /**
  * Normal ray processing
- * @param[in] r   The ray data
+ * @param[in] r   The ra y data
  * @param[in,out]  Pointer to the storage object, updated
  * 
  * @return true for success
