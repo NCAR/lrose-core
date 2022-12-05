@@ -80,6 +80,11 @@ public:
     FILELIST = 2
   } mode_t;
 
+  typedef enum {
+    PPI = 0,
+    RHI = 1
+  } scan_mode_t;
+
   ///////////////////////////
   // Member functions
   //
@@ -386,21 +391,15 @@ public:
 
   int max_realtime_data_age_secs;
 
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
-
   int num_threads;
 
   tdrp_bool_t thread_debug;
 
-  char* input_field_name;
+  scan_mode_t scan_mode;
 
-  char* output_field_name;
+  double starting_ray_angle;
 
-  double threshold;
-
-  double clutter_percentile;
+  double delta_ray_angle;
 
   double *_sweep_fixed_angles;
   int sweep_fixed_angles_n;
@@ -408,6 +407,18 @@ public:
   double az_tolerance_degrees;
 
   double elev_tolerance_degrees;
+
+  char* input_field_name;
+
+  char* output_field_name;
+
+  tdrp_bool_t set_max_range;
+
+  double max_range_km;
+
+  double threshold;
+
+  double clutter_percentile;
 
   double missing_clutter_value;
 
@@ -436,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 

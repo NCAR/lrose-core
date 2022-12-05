@@ -684,30 +684,6 @@
     tt->single_val.i = 120;
     tt++;
     
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Specified maximim range - km.");
-    tt->help = tdrpStrDup("Gates beyond this range are removed.");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 9999;
-    tt++;
-    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -746,6 +722,102 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("Scan details");
+    tt->comment_text = tdrpStrDup("We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.");
+    tt++;
+    
+    // Parameter 'scan_mode'
+    // ctype is '_scan_mode_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("scan_mode");
+    tt->descr = tdrpStrDup("Scan mode");
+    tt->help = tdrpStrDup("PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning");
+    tt->val_offset = (char *) &scan_mode - &_start_;
+    tt->enum_def.name = tdrpStrDup("scan_mode_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PPI");
+      tt->enum_def.fields[0].val = PPI;
+      tt->enum_def.fields[1].name = tdrpStrDup("RHI");
+      tt->enum_def.fields[1].val = RHI;
+    tt->single_val.e = PPI;
+    tt++;
+    
+    // Parameter 'starting_ray_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("starting_ray_angle");
+    tt->descr = tdrpStrDup("Starting scan angle for rays (deg).");
+    tt->help = tdrpStrDup("In PPI mode, this is the starting azimuth. In RHI mode, this is the starting elevation.");
+    tt->val_offset = (char *) &starting_ray_angle - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'delta_ray_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("delta_ray_angle");
+    tt->descr = tdrpStrDup("Delta scan angle between consecutive rays (deg).");
+    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In RHI mode, this is the elevation difference between rays.");
+    tt->val_offset = (char *) &delta_ray_angle - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'sweep_fixed_angles'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("sweep_fixed_angles");
+    tt->descr = tdrpStrDup("List of fixed angles for desired sweeps (deg)");
+    tt->help = tdrpStrDup("PPI mode: elevations. RHIs: azimuths.");
+    tt->array_offset = (char *) &_sweep_fixed_angles - &_start_;
+    tt->array_n_offset = (char *) &sweep_fixed_angles_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 1;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0.5;
+    tt++;
+    
+    // Parameter 'az_tolerance_degrees'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("az_tolerance_degrees");
+    tt->descr = tdrpStrDup("Azimumth tolerance");
+    tt->help = tdrpStrDup("Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->val_offset = (char *) &az_tolerance_degrees - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'elev_tolerance_degrees'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("elev_tolerance_degrees");
+    tt->descr = tdrpStrDup("Elevation tolerance");
+    tt->help = tdrpStrDup("Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->val_offset = (char *) &elev_tolerance_degrees - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("RadxPersistentClutter");
     tt->comment_text = tdrpStrDup("Parameters for setting clutter locations of one input field.");
     tt++;
@@ -774,6 +846,30 @@
     tt->single_val.s = tdrpStrDup("clutter");
     tt++;
     
+    // Parameter 'set_max_range'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("set_max_range");
+    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &set_max_range - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range_km");
+    tt->descr = tdrpStrDup("Specified maximim range - km.");
+    tt->help = tdrpStrDup("Gates beyond this range are removed.");
+    tt->val_offset = (char *) &max_range_km - &_start_;
+    tt->single_val.d = 9999;
+    tt++;
+    
     // Parameter 'threshold'
     // ctype is 'double'
     
@@ -796,49 +892,6 @@
     tt->help = tdrpStrDup("percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity");
     tt->val_offset = (char *) &clutter_percentile - &_start_;
     tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'sweep_fixed_angles'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("sweep_fixed_angles");
-    tt->descr = tdrpStrDup("List of fixed angles for desired sweeps (deg)");
-    tt->help = tdrpStrDup("SURVEILLANCE and PPI mode: elevations. RHIs: azimuth angles.");
-    tt->array_offset = (char *) &_sweep_fixed_angles - &_start_;
-    tt->array_n_offset = (char *) &sweep_fixed_angles_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 1;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 0.5;
-    tt++;
-    
-    // Parameter 'az_tolerance_degrees'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("az_tolerance_degrees");
-    tt->descr = tdrpStrDup("azimumth tolerance");
-    tt->help = tdrpStrDup("allowed degrees difference between azimuth values from different volumes to be considered part of the same ray");
-    tt->val_offset = (char *) &az_tolerance_degrees - &_start_;
-    tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'elev_tolerance_degrees'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elev_tolerance_degrees");
-    tt->descr = tdrpStrDup("elevation tolerance");
-    tt->help = tdrpStrDup("allowed degrees difference between elevation values from different volumes to be considered part of the same ray");
-    tt->val_offset = (char *) &elev_tolerance_degrees - &_start_;
-    tt->single_val.d = 0.1;
     tt++;
     
     // Parameter 'missing_clutter_value'
@@ -913,11 +966,11 @@
     tt->single_val.d = 50;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("Data output");
     tt->comment_text = tdrpStrDup("Parameters for writing results");
     tt++;
