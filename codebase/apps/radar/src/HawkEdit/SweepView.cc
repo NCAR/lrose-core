@@ -76,7 +76,7 @@ SweepView::SweepView(QWidget *parent)
 //{
   
 //  _sweepPanel = new QGroupBox("Sweeps", parent);
-  setTitle("Scan Angles");
+  setTitle("Scan Numbers");
   _sweepVBoxLayout = new QVBoxLayout;
   setLayout(_sweepVBoxLayout);
   setAlignment(Qt::AlignHCenter);
