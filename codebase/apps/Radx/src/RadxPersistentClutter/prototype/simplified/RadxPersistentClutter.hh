@@ -266,8 +266,24 @@ protected:
   RadxVol _templateVol;
 
   /**< Threading */
+
   ComputeThread _thread;
+
+  // from FirstPass
   
+  double _nvolume;       /**< The number of volumes processed so far */
+
+  std::string _ascii_fname;  /**< Name of ascii file to write to */
+  std::string _freq_fname;   /**< Name of other ascii file to write to */
+  std::vector<std::string> _ascii_output;  /**< The ascii output */
+  std::vector<std::string> _freq_output;  /**< More ascii output */
+
+  std::vector<double> _threshold;  /**< The threshold for each volume,
+				    *   in increasing volume order */
+  std::vector<double> _change;     /**< percent of points that change status 
+				    *   in increasing volume order */
+  int _kstar;                      /**< K* value from paper */
+
   // set up derived params
   
   int _initDerivedParams();
@@ -411,6 +427,38 @@ protected:
   //------------------------------------------------------------------
   // from the paper, omega(k) = sum of p[i] up to k
   static double _omega(const vector<double> &p, const int k);
+
+  // from FirstPass
+  
+  /**
+   * Initializes using a ray, updating _az, and _store members
+   *
+   * @param[in] ray  The ray
+   * @param[in] az  Azimuth of some data
+   * @param[in] elev  Elevation of some data
+   * @param[in] x0  Ray smallest value
+   * @param[in] dx  Ray delta value
+   * @param[in] nx  Ray number of elements
+   */
+  bool _processFirstRay(const RadxRay &ray, const double az, const double elev,
+			const double x0, const double dx, const int nx);
+
+  /**
+   *
+   * Compute and return kstar value
+   */
+  int _computeHistoCutoff(void) const;
+
+  /**
+   * Return true if clutter detection has converged
+   * @param[in] t  Time value
+   */
+  bool _output_for_graphics(const time_t &t);
+
+  /**
+   * Return true if clutter detection has converged
+   */
+  bool _check_convergence(void);
 
   private:
 
