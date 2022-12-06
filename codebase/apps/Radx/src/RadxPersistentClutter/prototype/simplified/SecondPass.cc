@@ -148,12 +148,12 @@ RayClutterInfo *
 }
 
 //------------------------------------------------------------------
-const RayClutterInfo * SecondPass::
-  matchingClutterInfoConst(const double az,
-                           const double elev) const
-{
-  // we match off of _histo, not the base class _store.
-  // note this is what makes processRay and setRayForOutput work o.k.
-  return matchInfoConst(_histo, az, elev);
-}
+// const RayClutterInfo * SecondPass::
+//   matchingClutterInfoConst(const double az,
+//                            const double elev) const
+// {
+//   // we match off of _histo, not the base class _store.
+//   // note this is what makes processRay and setRayForOutput work o.k.
+//   return matchInfoConst(_histo, az, elev);
+// }
 

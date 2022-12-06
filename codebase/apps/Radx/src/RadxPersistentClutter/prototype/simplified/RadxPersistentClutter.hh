@@ -36,6 +36,7 @@
 #include "RayClutterInfo.hh"
 #include "RayMapping.hh"
 #include "RayAzElev.hh"
+#include "RayHistoInfo.hh"
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxVol.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
@@ -91,26 +92,26 @@ public:
    *
    * @return pointer to something from store, or NULL
    */
-  template <class T>
-  const RayClutterInfo *matchInfoConst(const map<RayAzElev, T> &store,
-				       const double az,
-				       const double elev) const
-  {
-    RayAzElev ae = _rayMap.match(az, elev);
-    if (ae.ok())
-    {
-      try
-      {
-	return dynamic_cast<const RayClutterInfo *>(&store.at(ae));
-      }
-      catch (const std::out_of_range &err)
-      {
-        LOG(DEBUG_EXTRA) << ae.sprint() << " is out of range of mappings";
-	return NULL;
-      }
-    }
-    return NULL;
-  }
+  // template <class T>
+  // const RayClutterInfo *matchInfoConst(const map<RayAzElev, T> &store,
+  //       			       const double az,
+  //       			       const double elev) const
+  // {
+  //   RayAzElev ae = _rayMap.match(az, elev);
+  //   if (ae.ok())
+  //   {
+  //     try
+  //     {
+  //       return dynamic_cast<const RayClutterInfo *>(&store.at(ae));
+  //     }
+  //     catch (const std::out_of_range &err)
+  //     {
+  //       LOG(DEBUG_EXTRA) << ae.sprint() << " is out of range of mappings";
+  //       return NULL;
+  //     }
+  //   }
+  //   return NULL;
+  // }
 
   /**
    * Template method to find matching az/elev and return CONST pointer
@@ -250,14 +251,22 @@ protected:
    * The storage of all info needed to do the computations, one object per
    * az/elev
    */
+
   std::map<RayAzElev, RayClutterInfo> _store; 
   time_t _first_t;    /**< First time */
   time_t _final_t;    /**< Last time processed, which is the time at which
 		       *   results converged */
+  
+  // The storage of all info needed to do the computations, running counts 
+  // and histograms through time, one object per az/elev */
+  
+  std::map<RayAzElev, RayHistoInfo> _histo;
 
-  RadxVol _templateVol;  /**< Saved volume used to form output */
+  /**< Saved volume used to form output */
+  RadxVol _templateVol;
 
-  ComputeThread _thread;  /**< Threading */
+  /**< Threading */
+  ComputeThread _thread;
   
   // set up derived params
   
@@ -395,7 +404,15 @@ protected:
    */
   void _setupWrite(RadxFile &file);
 
-private:
+  //------------------------------------------------------------------
+  // from the paper, mu(k) = sum of i*p[i] up to k
+  static double _mu(const vector<double> &p, const int k);
+
+  //------------------------------------------------------------------
+  // from the paper, omega(k) = sum of p[i] up to k
+  static double _omega(const vector<double> &p, const int k);
+
+  private:
 
 };
 

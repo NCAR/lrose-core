@@ -872,3 +872,27 @@ void RadxPersistentClutter::_setupWrite(RadxFile &file)
 
 }
 
+//------------------------------------------------------------------
+// from the paper, mu(k) = sum of i*p[i] up to k
+double RadxPersistentClutter::_mu(const vector<double> &p, const int k)
+{
+  double ret = 0.0;
+  for (int i=0; i<=k; ++i)
+  {
+    ret += static_cast<double>(i+1)*p[i];
+  }
+  return ret;
+}
+
+//------------------------------------------------------------------
+// from the paper, omega(k) = sum of p[i] up to k
+double RadxPersistentClutter::_omega(const vector<double> &p, const int k)
+{
+  double ret = 0.0;
+  for (int i=0; i<=k; ++i)
+  {
+    ret += p[i];
+  }
+  return ret;
+}
+

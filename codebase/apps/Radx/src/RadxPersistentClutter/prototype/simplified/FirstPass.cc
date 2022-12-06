@@ -33,30 +33,6 @@
 #include <algorithm>
 
 //------------------------------------------------------------------
-// from the paper, mu(k) = sum of i*p[i] up to k
-static double _mu(const vector<double> &p, const int k)
-{
-  double ret = 0.0;
-  for (int i=0; i<=k; ++i)
-  {
-    ret += static_cast<double>(i+1)*p[i];
-  }
-  return ret;
-}
-
-//------------------------------------------------------------------
-// from the paper, omega(k) = sum of p[i] up to k
-static double _omega(const vector<double> &p, const int k)
-{
-  double ret = 0.0;
-  for (int i=0; i<=k; ++i)
-  {
-    ret += p[i];
-  }
-  return ret;
-}
-
-//------------------------------------------------------------------
 FirstPass::
   FirstPass(int argc, char **argv) :
           RadxPersistentClutter(argc, argv)
@@ -234,12 +210,12 @@ RayClutterInfo *
 }
 
 //------------------------------------------------------------------
-const RayClutterInfo * FirstPass::
-  matchingClutterInfoConst(const double az,
-                           const double elev) const
-{
-  return matchInfoConst(_store, az, elev);
-}
+// const RayClutterInfo * FirstPass::
+//   matchingClutterInfoConst(const double az,
+//                            const double elev) const
+// {
+//   return matchInfoConst(_store, az, elev);
+// }
 
 //------------------------------------------------------------------
 bool FirstPass::_processFirstRay(const RadxRay &ray,

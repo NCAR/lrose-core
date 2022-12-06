@@ -36,7 +36,6 @@
 #define RADXPERSISTENTCLUTTERSECONDPASS_H
 
 #include "RadxPersistentClutter.hh"
-#include "RayHistoInfo.hh"
 #include <map>
 
 class SecondPass : public RadxPersistentClutter
@@ -61,11 +60,6 @@ public:
 
 protected:
 private:
-
-  std::map<RayAzElev, RayHistoInfo> _histo; /**< The storage of all info needed to
-                                             * do the computations, running counts 
-                                             * and histograms through time, one 
-                                             * object per az/elev */
 
 };
 

@@ -113,9 +113,9 @@ virtual RayClutterInfo *matchingClutterInfo(const double az,
  * @param[in] az   Ray azimuth
  * @param[in] elev  Ray elevation
  */
-virtual const
-RayClutterInfo * matchingClutterInfoConst(const double az,
-					  const double elev) const = 0;
+// virtual const
+// RayClutterInfo * matchingClutterInfoConst(const double az,
+// 					  const double elev) const = 0;
 
 
 #else
@@ -206,7 +206,7 @@ virtual RayClutterInfo *matchingClutterInfo(const double az,
  * @param[in] az   Ray azimuth
  * @param[in] elev  Ray elevation
  */
-virtual const
-RayClutterInfo * matchingClutterInfoConst(const double az,
-					  const double elev) const;
+// virtual const
+// RayClutterInfo * matchingClutterInfoConst(const double az,
+// 					  const double elev) const;
 #endif
