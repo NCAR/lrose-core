@@ -209,8 +209,6 @@ RayClutterInfo *
   return matchInfo(_store, az, elev);
 }
 
-#ifdef NOTNOW
-
 //------------------------------------------------------------------
 // const RayClutterInfo * FirstPass::
 //   matchingClutterInfoConst(const double az,
@@ -374,5 +372,3 @@ bool FirstPass::_check_convergence(void)
   // it shows stability, we have converged.
   return true;
 }
-
-#endif

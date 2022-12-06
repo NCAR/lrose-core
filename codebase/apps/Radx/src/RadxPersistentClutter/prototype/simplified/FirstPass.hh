@@ -61,7 +61,6 @@ public:
 protected:
 private:
 
-#ifdef NOTNOW
   double _nvolume;       /**< The number of volumes processed so far */
 
   std::string _ascii_fname;  /**< Name of ascii file to write to */
@@ -104,7 +103,6 @@ private:
    * Return true if clutter detection has converged
    */
   bool _check_convergence(void);
-#endif
 
 };
 
