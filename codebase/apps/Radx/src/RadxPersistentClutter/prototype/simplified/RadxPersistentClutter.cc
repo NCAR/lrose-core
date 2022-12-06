@@ -41,6 +41,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/NcfRadxFile.hh>
+#include <Radx/RadxComplex.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/TaThreadSimple.hh>
 #include <toolsa/LogStream.hh>
@@ -171,7 +172,8 @@ int RadxPersistentClutter::_initDerivedParams()
 
   // ray maps
   
-  _rayMap = RayMapping(_params.sweep_fixed_angles_n, _params._sweep_fixed_angles,
+  _rayMap = RayMapping(_params.sweep_fixed_angles_n,
+                       _params._sweep_fixed_angles,
                        _params.az_tolerance_degrees,
                        _params.elev_tolerance_degrees);
   
@@ -187,10 +189,12 @@ int RadxPersistentClutter::_initDerivedParams()
 }
 
 //------------------------------------------------------------------
-bool RadxPersistentClutter::run(const string &label)
+bool RadxPersistentClutter::run(const string &label,
+                                bool firstPass)
 {
 
-  LOG(DEBUG) << "=============>> run() - starting " << label << " <<================";
+  LOG(DEBUG) << "=============>> run() - starting "
+             << label << " <<================";
   
   RadxVol vol;
   time_t t;
@@ -209,10 +213,10 @@ bool RadxPersistentClutter::run(const string &label)
       }
     }
     
-    if (first) {
+    if (first && firstPass) {
       // virtual method
       initFirstTime(t, vol);
-      _processFirst(t, vol);
+      _initRayMapping(t, vol);
       first = false;
     }
     
@@ -352,6 +356,127 @@ void RadxPersistentClutter::_processFirst(const time_t t, const RadxVol &vol)
     // virtual method to pre-process each ray, done first volume only
     preProcessRay(*ray);
   }
+}
+
+//------------------------------------------------------------------
+void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
+{
+
+  // initialize the ray mapping for the clutter volume
+  
+  const vector<RadxRay *> &rays = vol.getRays();
+  LOG(DEBUG_VERBOSE) << "Nrays=" << rays.size();
+  RadxRay ray0(*rays[0]);
+  double x0 = ray0.getStartRangeKm();
+  double dx = ray0.getGateSpacingKm();
+  int nx = ray0.getNGates();
+  _total_pixels = 0;
+
+  // create template vol for output
+  
+  _templateVol = vol;
+  _templateVol.clearRays();
+
+  if (_params.scan_mode == Params::PPI) {
+    
+    // PPI clutter scan
+    
+    double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
+    if (_params.first_ray_angle < _params.last_ray_angle) {
+      sectorDelta += 360.0;
+    }
+
+    double sumDelta = 0.0;
+    for (int isweep = 0; isweep < _params.sweep_fixed_angles_n; isweep++) {
+
+      double elev = _params._sweep_fixed_angles[isweep];
+      double az = _params.first_ray_angle;
+
+      RadxRay *ray = new RadxRay(ray0);
+      ray->setFixedAngleDeg(elev);
+      ray->setElevationDeg(elev);
+      ray->setAzimuthDeg(az);
+      _templateVol.addRay(ray);
+      
+      while (sumDelta < sectorDelta) {
+
+        if (_rayMap.addRayPpi(az, elev)) {
+          RayAzElev ae = _rayMap.match(az, elev);
+          if (_rayMap.isMulti(ae)) {
+            LOG(DEBUG_EXTRA) << "Multiple PPI az, elev in volume "
+                             <<  ae.sprint() << " elev: " << elev;
+          } else {
+            // start up a new RayHisto for this az, elev_match pair
+            RayClutterInfo h(ae.getAz(), ae.getElev(), x0, dx, nx);
+            _store[ae] = h;
+          }
+          // return true;
+        } else {
+          LOG(DEBUG_EXTRA) << "PPI az " << az << ",elev " << elev
+                           << " not configured within tolerance";
+          // return false;
+        } // if (_rapMap.addRayPpi(az, elev))
+
+        az = RadxComplex::computeSumDeg(az, _params.delta_ray_angle);
+        if (az < 0) {
+          az += 360.0;
+        }
+                   
+        sumDelta += fabs(_params.delta_ray_angle);
+        
+      } // while (sumDelta < sectorDelta)
+
+    } // isweep
+
+  } else {
+
+    // RHI clutter scan
+    
+    double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
+
+    double sumDelta = 0.0;
+    for (int isweep = 0; isweep < _params.sweep_fixed_angles_n; isweep++) {
+
+      double az = _params._sweep_fixed_angles[isweep];
+      double elev = _params.first_ray_angle;
+      
+      RadxRay *ray = new RadxRay(ray0);
+      ray->setFixedAngleDeg(az);
+      ray->setElevationDeg(elev);
+      ray->setAzimuthDeg(az);
+      _templateVol.addRay(ray);
+      
+      while (sumDelta < sectorDelta) {
+
+        if (_rayMap.addRayPpi(az, elev)) {
+          RayAzElev ae = _rayMap.match(az, elev);
+          if (_rayMap.isMulti(ae)) {
+            LOG(DEBUG_EXTRA) << "Multiple az, elev in volume "
+                             <<  ae.sprint() << " az: " << az;
+          } else {
+            // start up a new RayHisto for this az, elev_match pair
+            RayClutterInfo h(ae.getAz(), ae.getElev(), x0, dx, nx);
+            _store[ae] = h;
+          }
+          // return true;
+        } else {
+          LOG(DEBUG_EXTRA) << "Az " << az << ",elev " << elev
+                           << " not configured within tolerance";
+          // return false;
+        } // if (_rapMap.addRayPpi(az, elev))
+
+        elev = RadxComplex::computeSumDeg(elev, _params.delta_ray_angle);
+        sumDelta += fabs(_params.delta_ray_angle);
+      
+      } // while (sumDelta < sectorDelta)
+
+    } // isweep
+
+  } // if (_params.scan_mode == Params::PPI)
+
+  _templateVol.loadSweepInfoFromRays();
+  _templateVol.loadVolumeInfoFromRays();
+
 }
 
 //------------------------------------------------------------------
@@ -647,10 +772,21 @@ bool RadxPersistentClutter::_readFile(const string &path,
   // check if this is an RHI
   
   _isRhi = vol.checkIsRhi();
+  if (_params.scan_mode == Params::PPI) {
+    if (_isRhi) {
+      LOG(ERROR) << "Scan mode is not PPI, ignoring file: " << path;
+      return false;
+    }
+  } else {
+    if (!_isRhi) {
+      LOG(ERROR) << "Scan mode is not RHI, ignoring file: " << path;
+      return false;
+    }
+  }
 
   // remove sweeps we do not want, and set the sweep angles
   // to the selected ones
-
+  
   if (!_isRhi) {
     vol.optimizeSurveillanceTransitions(_params.elev_tolerance_degrees);
   }
@@ -662,7 +798,7 @@ bool RadxPersistentClutter::_readFile(const string &path,
   // remove transition rays and optimize the 
   
   vol.removeTransitionRays();
-
+  
   // remove sweeps we do not want, and set the sweep angles
   // to the selected ones
 
@@ -672,15 +808,27 @@ bool RadxPersistentClutter::_readFile(const string &path,
     vol.trimSweepsToSelectedAngles(_fixedAngles, _params.elev_tolerance_degrees);
   }
 
-  vector<RadxRay *> &rays = vol.getRays();
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    RadxRay *ray = rays[ii];
-    if (_isRhi) {
-      ray->setAzimuthDeg(ray->getFixedAngleDeg());
-    } else {
-      ray->setElevationDeg(ray->getFixedAngleDeg());
-    }
+  // convert gate geometry to the finest in the volume
+  
+  vol.remapToFinestGeom();
+
+  int nRays = vol.getNRays();
+  if (nRays < _params.sweep_fixed_angles_n) {
+    LOG(ERROR) << "Too few rays in volume: " << path;
+    LOG(ERROR) << "  nRays: " << nRays;
+    return false;
   }
+
+
+  // vector<RadxRay *> &rays = vol.getRays();
+  // for (size_t ii = 0; ii < rays.size(); ii++) {
+  //   RadxRay *ray = rays[ii];
+  //   if (_isRhi) {
+  //     ray->setAzimuthDeg(ray->getFixedAngleDeg());
+  //   } else {
+  //     ray->setElevationDeg(ray->getFixedAngleDeg());
+  //   }
+  // }
 
   
   LOG(DEBUG) << "-------Triggered " << RadxTime::strm(t) << " ----------";
@@ -698,9 +846,7 @@ void RadxPersistentClutter::_setupRead(RadxFile &file)
   file.addReadField(_params.input_field_name);
   file.setReadIgnoreTransitions(true);
   
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
+  file.setReadMaxRangeKm(_params.max_range_km);
   
   LOG(DEBUG_VERBOSE) << "===== SETTING UP READ FOR PRIMARY FILES =====";
   LOG(DEBUG_VERBOSE) << "=============================================";

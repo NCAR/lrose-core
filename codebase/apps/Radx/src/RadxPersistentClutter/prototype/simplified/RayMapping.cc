@@ -44,8 +44,8 @@ RayMapping::RayMapping(void) :
 
 //------------------------------------------------------------------
 RayMapping::RayMapping(const int nelev, const double *elev,
-                         const double az_tolerance_degrees,
-                         const double elev_tolerance_degrees) :
+                       const double az_tolerance_degrees,
+                       const double elev_tolerance_degrees) :
         _az_tolerance_degrees(az_tolerance_degrees),
         _elev_tolerance_degrees(elev_tolerance_degrees)
 {
@@ -91,6 +91,52 @@ bool RayMapping::add(const RadxRay &ray)
   {
     return false;
   }
+}
+
+bool RayMapping::addRayPpi(double az, double elev)
+{
+
+  if (find(_az.begin(), _az.end(), az) == _az.end()) {
+    _az.push_back(az);
+  }
+
+  // map the elev to a mapped to one
+  double elev_match;
+  if (_match(elev, _elev, _elev_tolerance_degrees, elev_match)) {
+    RayAzElev ae(az, elev_match);
+    if (find(_azelev.begin(), _azelev.end(), ae) != _azelev.end()) {
+      _azelevMulti.push_back(ae);
+    } else {
+      _azelev.push_back(ae);
+    }
+    return true;
+  } else {
+    return false;
+  }
+  
+}
+
+bool RayMapping::addRayRhi(double az, double elev)
+{
+
+  if (find(_elev.begin(), _elev.end(), elev) == _elev.end()) {
+    _elev.push_back(elev);
+  }
+
+  // map the az to a mapped to one
+  double az_match;
+  if (_match(az, _az, _az_tolerance_degrees, az_match)) {
+    RayAzElev ae(az, az_match);
+    if (find(_azelev.begin(), _azelev.end(), ae) != _azelev.end()) {
+      _azelevMulti.push_back(ae);
+    } else {
+      _azelev.push_back(ae);
+    }
+    return true;
+  } else {
+    return false;
+  }
+  
 }
 
 //------------------------------------------------------------------

@@ -81,6 +81,9 @@ public:
    * @return true unless elev not found
    */
   bool add(const RadxRay &ray);
+  bool addRayPpi(double az, double elev);
+  bool addRayRhi(double az, double elev);
+
 
   /**
    * @return true if this az/elev is shared by more than one beam in volume

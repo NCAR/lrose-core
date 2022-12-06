@@ -37,6 +37,7 @@
 #include "RayMapping.hh"
 #include "RayAzElev.hh"
 #include <Radx/RadxFile.hh>
+#include <Radx/RadxVol.hh>
 #include <toolsa/TaThreadDoubleQue.hh>
 #include <toolsa/LogStream.hh>
 #include <didss/LdataInfo.hh>
@@ -69,7 +70,7 @@ public:
    *
    * @return true for success
    */
-  bool run(const string &label);
+  bool run(const string &label, bool firstPass);
 
   /**
    * Compute method needed by threading
@@ -243,6 +244,7 @@ protected:
 
   vector<double> _fixedAngles;
   bool _isRhi;
+  double _total_pixels;  /**< Number of gates (pixels) in the clutter volume */
   
   /**
    * The storage of all info needed to do the computations, one object per
@@ -252,6 +254,8 @@ protected:
   time_t _first_t;    /**< First time */
   time_t _final_t;    /**< Last time processed, which is the time at which
 		       *   results converged */
+
+  RadxVol _templateVol;  /**< Saved volume used to form output */
 
   ComputeThread _thread;  /**< Threading */
   
@@ -310,6 +314,11 @@ protected:
    * @param[in] vol The data
    */
   void _processFirst(const time_t t, const RadxVol &vol);
+
+  /**
+   * Initialize the ray mapping for the specified clutter scans
+   */
+  void _initRayMapping(const time_t t, const RadxVol &vol);
 
   /**
    * Process inputs

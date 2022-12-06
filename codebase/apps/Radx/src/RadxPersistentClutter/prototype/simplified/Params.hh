@@ -397,24 +397,24 @@ public:
 
   scan_mode_t scan_mode;
 
-  double starting_ray_angle;
-
-  double delta_ray_angle;
-
   double *_sweep_fixed_angles;
   int sweep_fixed_angles_n;
+
+  double first_ray_angle;
+
+  double last_ray_angle;
+
+  double delta_ray_angle;
 
   double az_tolerance_degrees;
 
   double elev_tolerance_degrees;
 
+  double max_range_km;
+
   char* input_field_name;
 
   char* output_field_name;
-
-  tdrp_bool_t set_max_range;
-
-  double max_range_km;
 
   double threshold;
 

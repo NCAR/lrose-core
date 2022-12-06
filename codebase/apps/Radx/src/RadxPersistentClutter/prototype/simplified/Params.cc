@@ -746,30 +746,6 @@
     tt->single_val.e = PPI;
     tt++;
     
-    // Parameter 'starting_ray_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("starting_ray_angle");
-    tt->descr = tdrpStrDup("Starting scan angle for rays (deg).");
-    tt->help = tdrpStrDup("In PPI mode, this is the starting azimuth. In RHI mode, this is the starting elevation.");
-    tt->val_offset = (char *) &starting_ray_angle - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'delta_ray_angle'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("delta_ray_angle");
-    tt->descr = tdrpStrDup("Delta scan angle between consecutive rays (deg).");
-    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In RHI mode, this is the elevation difference between rays.");
-    tt->val_offset = (char *) &delta_ray_angle - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
     // Parameter 'sweep_fixed_angles'
     // ctype is 'double'
     
@@ -787,6 +763,42 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].d = 0.5;
+    tt++;
+    
+    // Parameter 'first_ray_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("first_ray_angle");
+    tt->descr = tdrpStrDup("Starting scan angle for rays (deg).");
+    tt->help = tdrpStrDup("In PPI mode, this is the first azimuth in a clockwise sweep. In RHI mode, this is the lowest elevation in a sweep.");
+    tt->val_offset = (char *) &first_ray_angle - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'last_ray_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("last_ray_angle");
+    tt->descr = tdrpStrDup("Ending scan angle for rays (deg).");
+    tt->help = tdrpStrDup("In PPI mode, this is the last azimuth in a clockwise sweep. In RHI mode, this is the highest elevation in a sweep.");
+    tt->val_offset = (char *) &last_ray_angle - &_start_;
+    tt->single_val.d = 359.99;
+    tt++;
+    
+    // Parameter 'delta_ray_angle'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("delta_ray_angle");
+    tt->descr = tdrpStrDup("Delta scan angle between consecutive rays (deg).");
+    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays.");
+    tt->val_offset = (char *) &delta_ray_angle - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'az_tolerance_degrees'
@@ -811,6 +823,18 @@
     tt->help = tdrpStrDup("Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids");
     tt->val_offset = (char *) &elev_tolerance_degrees - &_start_;
     tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'max_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_range_km");
+    tt->descr = tdrpStrDup("Specified maximim range - km.");
+    tt->help = tdrpStrDup("Gates beyond this range are removed.");
+    tt->val_offset = (char *) &max_range_km - &_start_;
+    tt->single_val.d = 100;
     tt++;
     
     // Parameter 'Comment 6'
@@ -844,30 +868,6 @@
     tt->help = tdrpStrDup("name to give final output clutter field");
     tt->val_offset = (char *) &output_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("clutter");
-    tt++;
-    
-    // Parameter 'set_max_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_max_range");
-    tt->descr = tdrpStrDup("Option to set the max range for any ray.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &set_max_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'max_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_range_km");
-    tt->descr = tdrpStrDup("Specified maximim range - km.");
-    tt->help = tdrpStrDup("Gates beyond this range are removed.");
-    tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 9999;
     tt++;
     
     // Parameter 'threshold'

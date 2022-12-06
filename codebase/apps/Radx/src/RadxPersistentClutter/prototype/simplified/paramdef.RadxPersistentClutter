@@ -127,24 +127,31 @@ paramdef enum scan_mode_t
 
 paramdef double
 {
-  p_descr = "Starting scan angle for rays (deg).";
-  p_help = "In PPI mode, this is the starting azimuth. In RHI mode, this is the starting elevation.";
-  p_default = 0.0;
-} starting_ray_angle;
-
-paramdef double
-{
-  p_descr = "Delta scan angle between consecutive rays (deg).";
-  p_help = "In PPI mode, this is the azimuth difference between rays. In RHI mode, this is the elevation difference between rays.";
-  p_default = 1.0;
-} delta_ray_angle;
-
-paramdef double
-{
   p_descr = "List of fixed angles for desired sweeps (deg)";
   p_help = "PPI mode: elevations. RHIs: azimuths.";
   p_default = { 0.5 };
 } sweep_fixed_angles[];
+
+paramdef double
+{
+  p_descr = "Starting scan angle for rays (deg).";
+  p_help = "In PPI mode, this is the first azimuth in a clockwise sweep. In RHI mode, this is the lowest elevation in a sweep.";
+  p_default = 0.0;
+} first_ray_angle;
+
+paramdef double
+{
+  p_descr = "Ending scan angle for rays (deg).";
+  p_help = "In PPI mode, this is the last azimuth in a clockwise sweep. In RHI mode, this is the highest elevation in a sweep.";
+  p_default = 359.99;
+} last_ray_angle;
+
+paramdef double
+{
+  p_descr = "Delta scan angle between consecutive rays (deg).";
+  p_help = "In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays.";
+  p_default = 1.0;
+} delta_ray_angle;
 
 paramdef double
 {
@@ -159,6 +166,12 @@ paramdef double
   p_help = "Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids";
   p_default = 0.1;
 } elev_tolerance_degrees;
+
+paramdef double {
+  p_default = 100.0;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -181,17 +194,6 @@ paramdef string
   p_help = "name to give final output clutter field";
   p_default = "clutter";
 } output_field_name;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to set the max range for any ray.";
-} set_max_range;
-
-paramdef double {
-  p_default = 9999;
-  p_descr = "Specified maximim range - km.";
-  p_help = "Gates beyond this range are removed.";
-} max_range_km;
 
 paramdef double
 {

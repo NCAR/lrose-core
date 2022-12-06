@@ -62,7 +62,6 @@ protected:
 private:
 
   double _nvolume;       /**< The number of volumes processed so far */
-  double _total_pixels;  /**< Number of gates (pixels) in the volume */
 
   std::string _ascii_fname;  /**< Name of ascii file to write to */
   std::string _freq_fname;   /**< Name of other ascii file to write to */
