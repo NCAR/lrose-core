@@ -52,6 +52,7 @@
 #include "ContextEditingView.hh"
 #include "ClickableLabel.hh"
 #include "ParameterColorView.hh"
+#include "BatchFileSaveView.hh"
 #include "FieldColorController.hh"
 #include "SweepView.hh"
 #include "SweepController.hh"
@@ -76,6 +77,7 @@ class QActionGroup;
 class QButtonGroup;
 class QRadioButton;
 class QPushButton;
+class QProgressDialog;
 class QListWidget;
 class QFrame;
 class QDialog;
@@ -234,11 +236,14 @@ public slots:
   string _combinePathFile(string path, string file);
   //void _checkForOverwrite(string pathFile);
   void _checkForOverwrite(string pathFile, bool *overwriteOnce,
-  bool *overwriteAll, bool *discard, bool *cancel);
+    bool *overwriteAll, bool *discard, bool *cancel);
+  void _checkForOverwrite2(string pathFile, bool *overwriteOnce,
+    bool *overwriteAll, bool *discard, bool *cancel);  
   int _mergeDataFiles(string dest_path, string source_path);
   void _openFile();
   void _saveFile();
   void _saveCurrentVersionAllFiles();
+  void _goHere(int nFiles, string saveDirName);
   void _howto();   
 
   //void contextMenuParameterColors();
@@ -302,6 +307,7 @@ public slots:
   void errorMessage(string title, string message);
   int saveDiscardMessage(string text, string question);
   int overwriteOnceOrAllMessage(string text, string question);
+  int overwriteOnceOrAllMessage2(string text, string question);  
 
   void selectBatchMode();
   void selectIndividualMode();
