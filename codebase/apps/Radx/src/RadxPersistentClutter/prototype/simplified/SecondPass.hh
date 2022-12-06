@@ -56,7 +56,87 @@ public:
    */
   virtual ~SecondPass(void);
 
-  #include "RadxPersistentClutterVirtualMethods.hh"
+  // virtual methods overridden here
+  
+  /**
+   * Initialization step.
+   *
+   * @param[in] t   First processing time
+   * @param[in] vol  First volume of data at the processing time
+   *
+   * These are actions to take only on the first data 
+   */
+  virtual void initFirstTime(const time_t &t, const RadxVol &vol);
+
+  /**
+   * Completion step (good)
+   *
+   * @param[in] t   Last processing time
+   * @param[in] vol  Last volume of data at the processing time
+   *
+   * These are actions to take only on the last data, after it is processed
+   */
+  virtual void finishLastTimeGood(const time_t &t, RadxVol &vol);
+
+  /**
+   * Completion step (bad)
+   *
+   * Actions to take when the 'good' state was never achieved
+   */
+  virtual void finishBad(void);
+
+  /**
+   * Complete the processing of a volume of data.
+   *
+   * @param[in] t   volume time
+   * @param[in] vol  volume of data at t
+   *
+   * @return true for success
+   *
+   * These are the steps taken after each ray has been processed
+   */
+  virtual bool processFinishVolume(const time_t &t, RadxVol &vol);
+
+  /**
+   * Pre-process a ray.
+   *
+   * @param[in] ray   The data
+   *
+   * @return true if successful
+   *
+   * These are actions taken prior to normal ray processing
+   */
+  virtual bool preProcessRay(const RadxRay &ray);
+
+  /**
+   * Normal ray processing
+   * @param[in] r   The ra y data
+   * @param[in,out]  Pointer to the storage object, updated
+   * 
+   * @return true for success
+   */
+  virtual bool processRay(const RayData &r, RayClutterInfo *i) const;
+
+  /**
+   * Modify a ray prior to output
+   *
+   * @param[in] h  Pointer to storage object (state)
+   * @param[in] r  The data
+   * @param[in,out]  ray  The object that is updated
+   *
+   * @return true for success
+   */
+  virtual bool setRayForOutput(const RayClutterInfo *h, const RayData &r,
+                               RadxRay &ray);
+
+  /**
+   * @return non-const pointer to the storage object state for the input location,
+   *         NULL for no match.
+   * @param[in] az   Ray azimuth
+   * @param[in] elev  Ray elevation
+   */
+  virtual RayClutterInfo *matchingClutterInfo(const double az,
+                                              const double elev);
 
 protected:
 private:

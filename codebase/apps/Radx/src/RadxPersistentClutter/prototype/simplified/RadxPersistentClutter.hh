@@ -79,40 +79,88 @@ public:
    */
   static void compute(void *info);
 
-  #define MAIN
-  #include "RadxPersistentClutterVirtualMethods.hh"
-  #undef MAIN
+  // pure virtual methods - to be overridden in FirstPass and Second Pass
+  
+  /**
+   * Initialization step.
+   *
+   * @param[in] t   First processing time
+   * @param[in] vol  First volume of data at the processing time
+   *
+   * These are actions to take only on the first data 
+   */
+  virtual void initFirstTime(const time_t &t, const RadxVol &vol) = 0;
 
   /**
-   * Template method to find matching az/elev and return pointer
-   * @tparam[in] T  Class with RayClutterInfo as a base class
-   * @param[in] store  Vector of T objects
-   * @param[in] az  Azimuth to match
-   * @param[in] elev  Elevation to match
+   * Completion step (good)
    *
-   * @return pointer to something from store, or NULL
+   * @param[in] t   Last processing time
+   * @param[in] vol  Last volume of data at the processing time
+   *
+   * These are actions to take only on the last data, after it is processed
    */
-  // template <class T>
-  // const RayClutterInfo *matchInfoConst(const map<RayAzElev, T> &store,
-  //       			       const double az,
-  //       			       const double elev) const
-  // {
-  //   RayAzElev ae = _rayMap.match(az, elev);
-  //   if (ae.ok())
-  //   {
-  //     try
-  //     {
-  //       return dynamic_cast<const RayClutterInfo *>(&store.at(ae));
-  //     }
-  //     catch (const std::out_of_range &err)
-  //     {
-  //       LOG(DEBUG_EXTRA) << ae.sprint() << " is out of range of mappings";
-  //       return NULL;
-  //     }
-  //   }
-  //   return NULL;
-  // }
+  virtual void finishLastTimeGood(const time_t &t, RadxVol &vol) = 0;
 
+  /**
+   * Completion step (bad)
+   *
+   * Actions to take when the 'good' state was never achieved
+   */
+  virtual void finishBad(void) = 0;
+
+  /**
+   * Complete the processing of a volume of data.
+   *
+   * @param[in] t   volume time
+   * @param[in] vol  volume of data at t
+   *
+   * @return true for success
+   *
+   * These are the steps taken after each ray has been processed
+   */
+  virtual bool processFinishVolume(const time_t &t, RadxVol &vol) = 0;
+
+  /**
+   * Pre-process a ray.
+   *
+   * @param[in] ray   The data
+   *
+   * @return true if successful
+   *
+   * These are actions taken prior to normal ray processing
+   */
+  virtual bool preProcessRay(const RadxRay &ray) = 0;
+
+  /**
+   * Normal ray processing
+   * @param[in] r   The ray data
+   * @param[in,out]  Pointer to the storage object, updated
+   * 
+   * @return true for success
+   */
+  virtual bool processRay(const RayData &r,
+                          RayClutterInfo *i) const = 0;
+
+  /**
+   * Modify a ray prior to output
+   *
+   * @param[in] h  Pointer to storage object (state)
+   * @param[in] r  The data
+   * @param[in,out]  ray  The object that is updated
+   *
+   * @return true for success
+   */
+  virtual bool setRayForOutput(const RayClutterInfo *h, const RayData &r,
+                               RadxRay &ray) = 0;
+
+  /**
+   * @return non-const pointer to the storage object state for the input location,
+   *         NULL for no match.
+   * @param[in] az   Ray azimuth
+   * @param[in] elev  Ray elevation
+   */
+  virtual RayClutterInfo *matchingClutterInfo(const double az,
+                                              const double elev) = 0;
   /**
    * Template method to find matching az/elev and return CONST pointer
    * @tparam[in] T  Class with RayClutterInfo as a base class
