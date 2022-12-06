@@ -3222,7 +3222,10 @@ void PolarManager::_saveCurrentVersionAllFiles()
      //  const char *saveDirName = fileNames.at(0).toLocal8Bit().constData();
 
     bool overwriteAll = false;
-    if( saveDirName.empty() ) {
+    QDir fileSystemDir(fileNames.at(0));
+    QDir::Filters filters(QDir::AllEntries | QDir::NoDotAndDotDot);
+    if (fileSystemDir.isEmpty(filters)) { // check if the directory is empty
+    //if( saveDirName.empty() ) {  
       overwriteAll = true;
     } else {
       overwriteAll = false;
@@ -3323,10 +3326,13 @@ void PolarManager::_saveCurrentVersionAllFiles()
 // no prompting, and use a progress bar ...
 void PolarManager::_goHere(int nFiles, string saveDirName) {
 
-    QProgressDialog progress("Saving files...", "Cancel", 1, nFiles+1, this);
+    QProgressDialog progress("Saving files...", "Cancel", 0, nFiles, this);
     progress.setWindowModality(Qt::WindowModal);
-    progress.show();
+    progress.setAutoReset(false); 
+    progress.setAutoClose(false);
     progress.setValue(1);
+    progress.show();
+
     //progress.exec();
     
     // for each file in timeNav ...
@@ -3392,11 +3398,17 @@ void PolarManager::_goHere(int nFiles, string saveDirName) {
           return;
         }
         i+= 1;
-        progress.setValue(i+1);
+        progress.setValue(i);
+        stringstream m;
+        m << i+1 << " of " << nFiles;
+        QString QStr = QString::fromStdString(m.str());
+        progress.setLabelText(QStr);
+        QCoreApplication::processEvents();
     } // end while loop each file in timeNav and !cancel
-    //if (!cancel) {
-    //  progress.setValue(nFiles);
-    //}
+    if (cancel) {
+      progress.setLabelText("cancelling ...");
+      QCoreApplication::processEvents();
+    }
 }
 
 
