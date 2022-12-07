@@ -816,6 +816,9 @@ void PolarManager::_createActions()
   selectIndividualModeAct->setStatusTip(tr("edit individual scan files"));
   connect(selectIndividualModeAct, &QAction::triggered, this, &PolarManager::selectIndividualMode);
 
+
+  connect(_applyCfacToggle, &QCheckBox::stateChanged, this, &PolarManager::_applyCfac);
+
 }
 
 ////////////////
@@ -4615,6 +4618,15 @@ void PolarManager::_createStatusPanel()
     _sunAzVal = NULL;
   }
 
+  _geoRefRotationVal = _createStatusVal("Georef Rot (deg)", "0.0", row++, fsize);
+  _geoRefRollVal = _createStatusVal("Georef Roll (deg)", "0.0", row++, fsize);
+  _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize);
+  _cfacRotationVal = _createStatusVal("Cfac Rot (deg)", "0.0", row++, fsize);
+  _cfacRollVal = _createStatusVal("Cfac Roll (deg)", "", row++, fsize);
+  _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize);
+                            
+  _applyCfacToggle = new QCheckBox("Apply Correction Factors", this);
+  _statusLayout->addWidget(_applyCfacToggle, row++, 0, 1, 2, alignCenter);
   QLabel *spacerRow = new QLabel("", _statusPanel);
   _statusLayout->addWidget(spacerRow, row, 0);
   _statusLayout->setRowStretch(row, 1);
@@ -6041,6 +6053,19 @@ void PolarManager::cancelScriptRun() {
 
 void PolarManager::setDataMissing(string fieldName, float missingValue) {
   spreadSheetControl->setDataMissing(fieldName, missingValue);
+  _applyDataEdits();
+}
+
+void PolarManager::_applyCfac() {
+
+  DataModel *dataModel = DataModel::Instance();
+  if (_applyCfacToggle->isChecked()) {
+    // apply the correction factors
+    dataModel->applyCorrectionFactors();
+  } else {
+    // withdraw the correction factor
+    dataModel->withdrawCorrectionFactors();
+  }
   _applyDataEdits();
 }
 

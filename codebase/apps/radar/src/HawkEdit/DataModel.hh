@@ -56,7 +56,8 @@ public:
   void getRayData(string path, vector<string> &fieldNames,
   int sweepNumber);
 
-  void _adjustAnglesForElevationSurveillance(RadxVol *_vol);
+  void applyCorrectionFactors();
+  void withdrawCorrectionFactors();
 
   void writeData(string path);
   void writeData(string path, RadxVol *vol);
@@ -172,6 +173,8 @@ private:
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
 
+  void adjustAnglesForElevationSurveillance(RadxVol *_vol);
+  void resetAnglesForElevationSurveillance(RadxVol *_vol);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void _selectFieldsNotInCurrentVersion(

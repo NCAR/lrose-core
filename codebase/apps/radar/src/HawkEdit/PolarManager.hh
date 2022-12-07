@@ -69,6 +69,7 @@
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <QStringList>
+#include <QCheckBox>
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
@@ -460,6 +461,14 @@ private:
   QLabel *_sunElVal;
   QLabel *_sunAzVal;
 
+  QLabel *_geoRefRotationVal;
+  QLabel *_geoRefRollVal;
+  QLabel *_geoRefTiltVal;
+  QLabel *_cfacRotationVal;
+  QLabel *_cfacRollVal;
+  QLabel *_cfacTiltVal;
+  
+
   bool _altitudeInFeet;
 
   vector<QLabel *> _valsRight;
@@ -489,6 +498,8 @@ private:
   QLabel *_gateNumClicked;
   QLabel *_rangeClicked;
   QLabel *_altitudeClicked;
+
+  QCheckBox *_applyCfacToggle;
   
   // sun position calculator
   double _radarLat, _radarLon, _radarAltKm;
@@ -508,6 +519,8 @@ private:
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
 
+  void _applyCfac();
+  
   // setting text
 
   void _setText(char *text, const char *format, int val);
