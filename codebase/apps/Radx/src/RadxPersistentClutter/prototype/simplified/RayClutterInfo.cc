@@ -66,6 +66,7 @@ RayClutterInfo::~RayClutterInfo()
 //------------------------------------------------------------------
 bool RayClutterInfo::update(const RayData &r, const double threshold)
 {
+  // cerr << "uuuuuuuuuuuuuuuuuuuu el, az: " << r.getElevation() << ", " << r.getAzimuth() << endl;
   int n = _initNpt(r);
   if (n >0)
   {

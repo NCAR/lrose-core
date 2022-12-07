@@ -195,29 +195,30 @@ bool RadxPersistentClutter::run(const string &label,
 
   LOG(DEBUG) << "=============>> run() - starting "
              << label << " <<================";
+
+  _firstPass = firstPass;
+  _firstVol = true;
+  _filesDone = false;
   
   RadxVol vol;
   time_t t;
 
-  bool first = true;
-  bool filesDone = false;
-  
   // trigger at time
   while (true) {
 
-    if (!_trigger(vol, t, filesDone)) {
-      if (filesDone) {
+    if (!_trigger(vol, t, _filesDone)) {
+      if (_filesDone) {
         return false;
       } else {
         continue;
       }
     }
     
-    if (first && firstPass) {
+    if (_firstVol && _firstPass) {
       // virtual method
-      initFirstTime(t, vol);
+      initFirstVol(t, vol);
       _initRayMapping(t, vol);
-      first = false;
+      _firstVol = false;
     }
     
     // process the vol
@@ -283,11 +284,6 @@ RayClutterInfo *RadxPersistentClutter::_initRayThreaded(const RadxRay &ray,
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
-  // if (h == NULL) {
-  //   LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
-  // } else {
-  //   LOG(DEBUG_EXTRA) << "Updating ray az=" << az << " elev=" << elev;
-  // }
   return h;
 }
 
@@ -370,7 +366,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
   double x0 = ray0.getStartRangeKm();
   double dx = ray0.getGateSpacingKm();
   int nx = ray0.getNGates();
-  _total_pixels = 0;
+  _sumNGates = 0;
 
   // create template vol for output
   
@@ -382,11 +378,10 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
     // PPI clutter scan
     
     double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
-    if (_params.first_ray_angle < _params.last_ray_angle) {
+    if (_params.first_ray_angle > _params.last_ray_angle) {
       sectorDelta += 360.0;
     }
 
-    double sumDelta = 0.0;
     for (int isweep = 0; isweep < _params.sweep_fixed_angles_n; isweep++) {
 
       double elev = _params._sweep_fixed_angles[isweep];
@@ -398,6 +393,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
       ray->setAzimuthDeg(az);
       _templateVol.addRay(ray);
       
+      double sumDelta = 0.0;
       while (sumDelta < sectorDelta) {
 
         if (_rayMap.addRayPpi(az, elev)) {
@@ -410,6 +406,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
             RayClutterInfo h(ae.getAz(), ae.getElev(), x0, dx, nx);
             _store[ae] = h;
           }
+          _sumNGates += nx;
           // return true;
         } else {
           LOG(DEBUG_EXTRA) << "PPI az " << az << ",elev " << elev
@@ -423,7 +420,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
         }
                    
         sumDelta += fabs(_params.delta_ray_angle);
-        
+
       } // while (sumDelta < sectorDelta)
 
     } // isweep
@@ -434,7 +431,6 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
     
     double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
 
-    double sumDelta = 0.0;
     for (int isweep = 0; isweep < _params.sweep_fixed_angles_n; isweep++) {
 
       double az = _params._sweep_fixed_angles[isweep];
@@ -446,6 +442,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
       ray->setAzimuthDeg(az);
       _templateVol.addRay(ray);
       
+      double sumDelta = 0.0;
       while (sumDelta < sectorDelta) {
 
         if (_rayMap.addRayPpi(az, elev)) {
@@ -458,6 +455,7 @@ void RadxPersistentClutter::_initRayMapping(const time_t t, const RadxVol &vol)
             RayClutterInfo h(ae.getAz(), ae.getElev(), x0, dx, nx);
             _store[ae] = h;
           }
+          _sumNGates += nx;
           // return true;
         } else {
           LOG(DEBUG_EXTRA) << "Az " << az << ",elev " << elev
@@ -521,6 +519,9 @@ RayClutterInfo *RadxPersistentClutter::_initRay(const RadxRay &ray,
   double az = ray.getAzimuthDeg();
   double elev = ray.getElevationDeg();
   RayClutterInfo *h = matchingClutterInfo(az, elev);
+
+  // cerr << "QQQQQQQQQQQ el, az: " << elev << ", " << az << ", "
+  //      << r.getElevation() << ", " << r.getAzimuth() << endl;
   // if (h == NULL) {
   //   LOG(DEBUG_EXTRA) << "No histo match for az=" << az << " elev=" << elev;
   // } else {
@@ -581,6 +582,7 @@ bool RadxPersistentClutter::_rewind(void)
 bool RadxPersistentClutter::_write(RadxVol &vol, const time_t &t,
                                    const std::string &dir)
 {
+
   vol.loadVolumeInfoFromRays();
   vol.loadSweepInfoFromRays();
   vol.setPackingFromRays();
@@ -709,6 +711,9 @@ void RadxPersistentClutter::updateRay(const RayData &r, RadxRay &ray)
   vector<string> wanted;
   wanted.push_back(name);
   ray.trimToWantedFields(wanted);
+  // ray.setElevationDeg(r.getElevation());
+  // ray.setAzimuthDeg(r.getAzimuth());
+  // cerr << "aaaaaaaaaaaaaaaa el, az: " << ray.getElevationDeg() << ", " << ray.getAzimuthDeg() << endl;
   delete [] data;
 }
 
@@ -740,6 +745,9 @@ void RadxPersistentClutter::updateRay(const vector<RayData> &raydata,
 		 raydata[i].getNpoints(),
 		 raydata[i].getMissing(), data, true);
   }
+  // ray.setElevationDeg(raydata[0].getElevation());
+  // ray.setAzimuthDeg(raydata[0].getAzimuth());
+  // cerr << "bbbbbbbbbbbbbbbbbbbbb el, az: " << ray.getElevationDeg() << ", " << ray.getAzimuthDeg() << endl;
   delete [] data;
 }
 
@@ -818,18 +826,6 @@ bool RadxPersistentClutter::_readFile(const string &path,
     LOG(ERROR) << "  nRays: " << nRays;
     return false;
   }
-
-
-  // vector<RadxRay *> &rays = vol.getRays();
-  // for (size_t ii = 0; ii < rays.size(); ii++) {
-  //   RadxRay *ray = rays[ii];
-  //   if (_isRhi) {
-  //     ray->setAzimuthDeg(ray->getFixedAngleDeg());
-  //   } else {
-  //     ray->setElevationDeg(ray->getFixedAngleDeg());
-  //   }
-  // }
-
   
   LOG(DEBUG) << "-------Triggered " << RadxTime::strm(t) << " ----------";
   return true;

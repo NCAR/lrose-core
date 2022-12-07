@@ -134,6 +134,16 @@ public:
    */
   int updateClutter(const int number, int &nclutter, FrequencyCount &F);
 
+  /**
+   * @return elevation degrees
+   */
+  inline double getElevation() const {return _elev;}
+
+  /**
+   * @return azimuth degrees
+   */
+  inline double getAzimuth() const {return _az;}
+
 protected:
 
   double _x0;  /**<  Ray first gate */

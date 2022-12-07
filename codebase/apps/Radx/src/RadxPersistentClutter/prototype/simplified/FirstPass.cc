@@ -38,7 +38,7 @@ FirstPass::
           RadxPersistentClutter(argc, argv)
 {
   _nvolume = 0;
-  _total_pixels = 0;
+  _sumNGates = 0;
 }
 
 //------------------------------------------------------------------
@@ -76,8 +76,8 @@ FirstPass::~FirstPass(void)
 }
 
 //------------------------------------------------------------------
-void FirstPass::initFirstTime(const time_t &t,
-                              const RadxVol &vol)
+void FirstPass::initFirstVol(const time_t &t,
+                             const RadxVol &vol)
 {
   // build path
   _ascii_fname = _params.diagnostic_ascii_dir;
@@ -149,10 +149,10 @@ bool FirstPass::preProcessRay(const RadxRay &ray)
   double dx = ray.getGateSpacingKm();
   int nx = ray.getNGates();
 
-  if (_processFirstRay(ray, az, elev, x0, dx, nx))
+  if (_addRayFirstVol(ray, az, elev, x0, dx, nx))
   {
     // add these pixels to the state count total
-    _total_pixels += nx;
+    _sumNGates += nx;
     return true;
   }
   else
@@ -175,11 +175,33 @@ bool FirstPass::setRayForOutput(const RayClutterInfo *h,
                                 RadxRay &ray)
 
 {
+
+  // cerr << "OOOOOOOOOOOOOOOOOOOO elev, az: "
+  //      << h->getElevation() << ", "
+  //      << h->getAzimuth() << ", "
+  //      << r.getElevation() << ", "
+  //      << r.getAzimuth() << endl;
+
+  ray.setElevationDeg(h->getElevation());
+  ray.setAzimuthDeg(h->getAzimuth());
+  if (_isRhi) {
+    ray.setFixedAngleDeg(h->getAzimuth());
+  } else {
+    ray.setFixedAngleDeg(h->getElevation());
+  }
+  // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  // ray.print(cerr);
+  // cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+
   // make a copy of the data to store binary values
   RayData clutter(r);
+  clutter.setElevation(h->getElevation());
+  clutter.setAzimuth(h->getAzimuth());
 
   // make a copy of that data to store frequency data, and initialize
   RayData rfreq(r);
+  rfreq.setElevation(h->getElevation());
+  rfreq.setAzimuth(h->getAzimuth());
   modifyRayForOutput(rfreq, "NormFreqCount", "none", -99.99);
   rfreq.setAllToValue(0.0);
 
@@ -210,20 +232,12 @@ RayClutterInfo *
 }
 
 //------------------------------------------------------------------
-// const RayClutterInfo * FirstPass::
-//   matchingClutterInfoConst(const double az,
-//                            const double elev) const
-// {
-//   return matchInfoConst(_store, az, elev);
-// }
-
-//------------------------------------------------------------------
-bool FirstPass::_processFirstRay(const RadxRay &ray,
-                                 const double az,
-                                 const double elev,
-                                 const double x0,
-                                 const double dx,
-                                 const int nx)
+bool FirstPass::_addRayFirstVol(const RadxRay &ray,
+                                const double az,
+                                const double elev,
+                                const double x0,
+                                const double dx,
+                                const int nx)
 {
   if (_rayMap.add(ray))
   {
@@ -260,7 +274,7 @@ int FirstPass::_computeHistoCutoff(void) const
   for (int i=0; i<=_nvolume; ++i)
   {
     double nn = _countOfScans(i);
-    p.push_back(nn/_total_pixels);
+    p.push_back(nn/_sumNGates);
   }
 
   // do the maximization as in the paper
@@ -314,7 +328,7 @@ bool
 
   // percentage values for kstar and nchange = threshold and change%
   double thr = static_cast<double>(_kstar)/_nvolume;
-  double ch = static_cast<double>(nchange)/_total_pixels;
+  double ch = static_cast<double>(nchange)/_sumNGates;
   
   // write out time,threshold,change%
   char buf[1000];

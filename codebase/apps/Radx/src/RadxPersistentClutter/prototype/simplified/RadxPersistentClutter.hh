@@ -89,7 +89,7 @@ public:
    *
    * These are actions to take only on the first data 
    */
-  virtual void initFirstTime(const time_t &t, const RadxVol &vol) = 0;
+  virtual void initFirstVol(const time_t &t, const RadxVol &vol) = 0;
 
   /**
    * Completion step (good)
@@ -280,7 +280,9 @@ protected:
   Args _args;
   Params _params;
 
-  bool _first;           /**< True for first volume */
+  bool _firstPass;          /**< True for first pass */
+  bool _firstVol;           /**< True for first volume */
+  bool _filesDone;          /**< True if on last file */
   RayMapping _rayMap;
   
   time_t _start;         /**< Start time in ARCHIVE mode */
@@ -293,7 +295,7 @@ protected:
 
   vector<double> _fixedAngles;
   bool _isRhi;
-  double _total_pixels;  /**< Number of gates (pixels) in the clutter volume */
+  double _sumNGates;  /**< Number of gates (pixels) in the clutter volume */
   
   /**
    * The storage of all info needed to do the computations, one object per

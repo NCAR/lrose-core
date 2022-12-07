@@ -371,7 +371,7 @@ threshold_tolerance = 0.025;
 // Type: double
 //
 
-maximum_percent_change = 0.01;
+maximum_percent_change = 0.05;
 
 ///////////// minimum_stable_volumes //////////////////
 //

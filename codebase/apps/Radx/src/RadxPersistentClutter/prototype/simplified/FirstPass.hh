@@ -66,7 +66,7 @@ public:
    *
    * These are actions to take only on the first data 
    */
-  virtual void initFirstTime(const time_t &t, const RadxVol &vol);
+  virtual void initFirstVol(const time_t &t, const RadxVol &vol);
 
   /**
    * Completion step (good)
@@ -164,8 +164,8 @@ private:
    * @param[in] dx  Ray delta value
    * @param[in] nx  Ray number of elements
    */
-  bool _processFirstRay(const RadxRay &ray, const double az, const double elev,
-			const double x0, const double dx, const int nx);
+  bool _addRayFirstVol(const RadxRay &ray, const double az, const double elev,
+                       const double x0, const double dx, const int nx);
 
   /**
    *

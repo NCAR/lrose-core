@@ -152,6 +152,16 @@ public:
   void storeData(const Radx::fl32 *data, const int npt);
 
   /**
+   * set elevation degrees
+   */
+  inline void setElevation(double val) { _elev = val; }
+
+  /**
+   * set azimuth degrees
+   */
+  inline void setAzimuth(double val) { _az = val; }
+
+  /**
    * Set the data value at an index
    * @param[in] index  The index into the data
    * @param[in] value  The data value to set
@@ -300,6 +310,11 @@ public:
    * @return the missing data value
    */
   inline double getMissing() const {return _missing;}
+
+  /**
+   * @return elevation degrees
+   */
+  inline double getElevation() const {return _elev;}
 
   /**
    * @return azimuth degrees

@@ -54,8 +54,8 @@ SecondPass::~SecondPass(void)
 }
 
 //------------------------------------------------------------------
-void SecondPass::initFirstTime(const time_t &t,
-                               const RadxVol &vol)
+void SecondPass::initFirstVol(const time_t &t,
+                              const RadxVol &vol)
 {
   // Save this volume, will use its time information later
   // _templateVol = vol;

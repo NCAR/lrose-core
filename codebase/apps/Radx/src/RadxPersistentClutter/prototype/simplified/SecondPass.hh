@@ -66,7 +66,7 @@ public:
    *
    * These are actions to take only on the first data 
    */
-  virtual void initFirstTime(const time_t &t, const RadxVol &vol);
+  virtual void initFirstVol(const time_t &t, const RadxVol &vol);
 
   /**
    * Completion step (good)
