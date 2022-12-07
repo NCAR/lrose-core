@@ -33,7 +33,7 @@ public:
 
   //  SpreadSheetView(std::string fileName, QWidget *parent = 0);
   SpreadSheetView(QWidget *parent = 0, float rayAzimuth = 0.0,
-    float elevation = 0.0);
+    int sweepNumber = 0);
 
   //  void setController(SpreadSheetController *controller);
 
@@ -53,7 +53,7 @@ public:
   void setSelectionToValue(QString value);
 
   void highlightClickedData(string fieldName, float azimuth,
-    float elevation, float range);
+    int sweepNumber, float range);
 
   void closeEvent();
 
@@ -117,13 +117,13 @@ public slots:
   void changeAzEl(float azimuth, int sweepNumber);
   void changeMissingValue(float currentMissingValue);
   void updateLocationInVolume(float azimuth, int sweepNumber);
-  void setTheWindowTitle(float rayAzimuth, float elevation);
+  void setTheWindowTitle(float rayAzimuth, int sweepNumber);
 
   void rangeDataSent(size_t nGates, float startingKm, float gateSize);
 
   void columnHeaderClicked(int index);
 
-  void updateNavigation(string fieldName, float azimuth, float elevation);
+  void updateNavigation(string fieldName, float azimuth, int sweepNumber);
 
 signals:
 
@@ -131,7 +131,7 @@ signals:
   void needDataForField(string fieldName, int r, int c);
   void needAzimuthForRay(int offsetFromClosestRay, int fieldIdx, string fieldName);
   void needNyquistVelocityForRay(int rayIdx, int fieldIdx, string fieldName);
-  void applyVolumeEdits(string fieldName, float rayAzimuth, vector<float> *data);
+  void applyVolumeEdits(string fieldName, float rayAzimuth, int sweepNumber, vector<float> *data);
   void signalRayAzimuthChange(float rayAzimuth, int sweepNumber);
   void needRangeData(size_t nPoints);
   void setDataMissing(string fieldName, float missingDataValue);

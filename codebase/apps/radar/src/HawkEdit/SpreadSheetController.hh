@@ -33,7 +33,8 @@ public:
   void getRangeData(float *startingRangeKm, float *gateSpacingKm);
   float getNyquistVelocity(int offsetFromClosest);
 
-  void setData(string fieldName, float azimuth, vector<float> *data);
+  void setData(string fieldName, float azimuth, 
+    int sweepNumber, vector<float> *data);
 
   void open(string fileName);
 
@@ -58,7 +59,8 @@ public slots:
   void needAzimuthForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needNyquistVelocityForRay(int offsetFromClosest, int fieldIdx, string fieldName);
   void needRangeData(size_t nGates);
-  void getVolumeChanges(string fieldName, float azimuth, vector<float> *data);
+  void getVolumeChanges(string fieldName, float azimuth, 
+    int sweepNumber, vector<float> *data);
   void switchRay(float azimuth, int sweepNumber);
   //void newSweepData(int sweepNumber);
   void displaySweepData(int sweepNumber);

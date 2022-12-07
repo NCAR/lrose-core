@@ -5968,7 +5968,7 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
   //SpreadSheetView *sheetView;
   if (sheetView == NULL) {
     sheetView = new SpreadSheetView(this, closestRayToEdit->getAzimuthDeg(),
-      _sweepController->getSelectedNumber());
+      (int) _sweepController->getSelectedNumber());
 
     // install event filter to catch when the spreadsheet is closed
     CloseEventFilter *closeFilter = new CloseEventFilter(sheetView);

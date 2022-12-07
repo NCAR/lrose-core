@@ -34,7 +34,7 @@ public:
 
 
 
-  void setData(string fieldName, float azimuth, vector<float> *data);
+  void setData(string fieldName, float azimuth, int sweepNumber, vector<float> *data);
   void setDataMissing(string fieldName, float missingDataValue);
   //void setClosestRay(float azimuth, int sweepNumber);
 
@@ -46,12 +46,12 @@ private:
 
   //size_t _getRayIdx(int offsetFromClosest);
   //void _getSweepNumber(float elevation);
-  void _setSweepNumber(int sweepNumber);
+  //void _setSweepNumber(int sweepNumber);
 
   vector<RadxRay *> _raysToDisplay; 
   RadxRay *_closestRay;
   // size_t _closestRayIdx;  // Do we need the index?  only needed if we assume the rays are in sorted order, which is risky!
-  int _currentSweepNumber;  
+  //int _currentSweepNumber;  
 
   /*
   void _setupVolRead(RadxFile *file);

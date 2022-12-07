@@ -36,7 +36,7 @@ Q_DECLARE_METATYPE(QVector<double>)
 // Create a separate window that contains the spreadsheet 
 
   SpreadSheetView::SpreadSheetView(QWidget *parent, 
-    float rayAzimuth, float elevation)
+    float rayAzimuth, int sweepNumber)
   : QMainWindow(parent)
 {
   LOG(DEBUG) << "in SpreadSheetView constructor";
@@ -126,7 +126,7 @@ Q_DECLARE_METATYPE(QVector<double>)
     //echoLayout->addWidget(logDirDialog, 5, 1);
 
     sweepLineEdit = new QLineEdit;
-    QString sweepString = QString::number(elevation);
+    QString sweepString = QString::number(sweepNumber);
     echoLayout->addWidget(new QLabel(tr("Sweep")), 0, 2);
     echoLayout->addWidget(sweepLineEdit, 0, 3);
 
@@ -247,17 +247,17 @@ Q_DECLARE_METATYPE(QVector<double>)
     //        this, &SpreadSheetView::updateTextEdit);
 
     // setTheWindowTitle(rayAzimuth);
-    updateLocationInVolume(rayAzimuth, elevation);
+    updateLocationInVolume(rayAzimuth, sweepNumber);
 }
 
 
 
-void SpreadSheetView::setTheWindowTitle(float rayAzimuth, float elevation) {
+void SpreadSheetView::setTheWindowTitle(float rayAzimuth, int sweepNumber) {
     QString title("Spreadsheet Editor for Ray ");
     title.append(QString::number(rayAzimuth, 'f', 2));
     title.append(" degrees");
-    title.append(" sweep ");
-    title.append(QString::number(elevation, 'd', 3));
+    title.append(" sweep number");
+    title.append(QString::number(sweepNumber, 'd', 0));
     setWindowTitle(title);
 }
 
@@ -477,7 +477,7 @@ void SpreadSheetView::updateStatus(QTableWidgetItem *item)
 
 // TODO: this is the same as updateLocation?? may not need this ... 
 // but updateLocation only changes az and el, not the selected field
-void SpreadSheetView::updateNavigation(string fieldName, float azimuth, float elevation) {
+void SpreadSheetView::updateNavigation(string fieldName, float azimuth, int sweepNumber) {
 
     // set selected field
     QList<QListWidgetItem *> matchingFields = 
@@ -590,8 +590,9 @@ void SpreadSheetView::applyChanges()
 
     float rayAzimuth = getAzimuth(label);
     LOG(DEBUG) << "column " << label.toStdString() << ": extracted field " << fieldName
-      << ", azimuth " << rayAzimuth; ; 
-    emit applyVolumeEdits(fieldName, rayAzimuth, data);
+      << ", azimuth " << rayAzimuth; 
+    int sweepNumber = getSweepNumber(); 
+    emit applyVolumeEdits(fieldName, rayAzimuth, sweepNumber, data);
 
     _unAppliedEdits = false;
   }
@@ -925,14 +926,14 @@ void SpreadSheetView::applyEdits() {
     carryOn = false;
   }
 
-  // get a new elevation if needed
-  QString elevation = sweepLineEdit->text();
-  LOG(DEBUG) << "sweep entered " << elevation.toStdString();
+  // get a new sweep number if needed
+  QString sweepNumber = sweepLineEdit->text();
+  LOG(DEBUG) << "sweep entered " << sweepNumber.toStdString();
 
-  float currentSweepNumber = elevation.toInt(&ok);
+  float currentSweepNumber = sweepNumber.toInt(&ok);
 
   if (!ok) {
-    criticalMessage("sweep must be greater than 0.0");
+    criticalMessage("sweep number not recognized");
     carryOn = false;
   }
 
@@ -1031,7 +1032,7 @@ void SpreadSheetView::updateLocationInVolume(float azimuth, int sweepNumber) {
 }
 
 void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
-    float elevation, float range) {
+    int sweepNumber, float range) {
     // map the fieldName, azimuth, and range to a cell in the table
     // get the column labels, find the fieldName, then the azimuth
     // get the row labels, find the closest range
@@ -1046,8 +1047,8 @@ void SpreadSheetView::highlightClickedData(string fieldName, float azimuth,
 
     LOG(DEBUG) << "enter";
 
-    updateNavigation(fieldName, azimuth, elevation);  // also selects the field in list
-    updateLocationInVolume(azimuth, elevation);
+    updateNavigation(fieldName, azimuth, sweepNumber);  // also selects the field in list
+    updateLocationInVolume(azimuth, sweepNumber);
     applyEdits();
     //return; 
     // find the row

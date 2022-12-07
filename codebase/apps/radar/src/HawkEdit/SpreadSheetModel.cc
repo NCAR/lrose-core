@@ -110,9 +110,9 @@ size_t SpreadSheetModel::_getRayIdx(int offsetFromClosest) {
     return rayIdx;
 }
 */
-void SpreadSheetModel::_setSweepNumber(int sweepNumber) {
-  _currentSweepNumber = sweepNumber;
-}
+//void SpreadSheetModel::_setSweepNumber(int sweepNumber) {
+//  _currentSweepNumber = sweepNumber;
+//}
 
 /*
 // idx is zero based
@@ -153,7 +153,7 @@ vector<float> *SpreadSheetModel::getData(string fieldName, int offsetFromClosest
 }
 */
 // set data values for the field in the Volume 
-void SpreadSheetModel::setData(string fieldName, float azimuth, vector<float> *data)
+void SpreadSheetModel::setData(string fieldName, float azimuth, int sweepNumber, vector<float> *data)
 {
   LOG(DEBUG) << "fieldName=" << fieldName << ", azimuth = " << azimuth;
 
@@ -165,11 +165,11 @@ void SpreadSheetModel::setData(string fieldName, float azimuth, vector<float> *d
 
   DataModel *dataModel = DataModel::Instance();
   dataModel->SetData(fieldName, 
-            azimuth, _currentSweepNumber, data);
+            azimuth, sweepNumber, data);
 
-  bool debug = true;
+  bool debug = false;
   if (debug) {
-    size_t rayIdx = dataModel->findClosestRay(azimuth, _currentSweepNumber);
+    size_t rayIdx = dataModel->findClosestRay(azimuth, sweepNumber);
     vector<float> *dataVector = dataModel->getRayData(rayIdx, fieldName); //  _currentSweepNumber);
   }
 

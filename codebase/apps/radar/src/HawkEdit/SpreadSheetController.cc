@@ -46,8 +46,8 @@ SpreadSheetController::SpreadSheetController(SpreadSheetView *view, SpreadSheetM
   connect(_currentView, SIGNAL(needNyquistVelocityForRay(int, int, string)), 
     this, SLOT(needNyquistVelocityForRay(int, int, string)));
   // TODO: need to know which sweep!!!
-  connect(_currentView, SIGNAL(applyVolumeEdits(string, float, vector<float> *)), 
-	  this, SLOT(getVolumeChanges(string, float, vector<float> *)));
+  connect(_currentView, SIGNAL(applyVolumeEdits(string, float, int, vector<float> *)), 
+	  this, SLOT(getVolumeChanges(string, float, int, vector<float> *)));
 
   connect(_currentView, SIGNAL(signalRayAzimuthChange(float, int)), this, SLOT(switchRay(float, int)));
 
@@ -232,10 +232,11 @@ void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpac
     << *startingRangeKm << ", gateSpacingKm = " << *gateSpacingKm << endl;
 }
 
-void SpreadSheetController::setData(string fieldName, float azimuth, vector<float> *data)
+void SpreadSheetController::setData(string fieldName, float azimuth, 
+  int sweepNumber, vector<float> *data)
 {
   LOG(DEBUG) << "setting values for " << fieldName;
-  _currentModel->setData(fieldName, azimuth, data);
+  _currentModel->setData(fieldName, azimuth, sweepNumber, data);
 }
 
 void SpreadSheetController::setDataMissing(string fieldName, float missingDataValue) {
@@ -276,7 +277,8 @@ void  SpreadSheetController::needRangeData(size_t nGates) {
 }
 
 // persist the changes in the spreadsheet to the model, which is the data volume
-void SpreadSheetController::getVolumeChanges(string fieldName, float azimuth, vector<float> *data) {
+void SpreadSheetController::getVolumeChanges(string fieldName, float azimuth, 
+  int sweepNumber, vector<float> *data) {
 
   LOG(DEBUG) << "enter";
   //vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
@@ -285,7 +287,7 @@ void SpreadSheetController::getVolumeChanges(string fieldName, float azimuth, ve
   //int column = 0;
   //for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
   //  vector<float> *data = _currentView->getDataForVariableFromSpreadSheet(column, *s);
-  setData(fieldName, azimuth, data);
+  setData(fieldName, azimuth, sweepNumber, data);
 
   //  column++;
   //}
