@@ -69,6 +69,18 @@ instance = "test";
 
 input_dir = "$(HOME)/data/precip/grids/spol/radarPolar/field/moments/sband/sur";
 
+///////////// file_name_substr ////////////////////////
+//
+// Substring that needs to exist in the file name.
+//
+// Set to empty to avoid this check.
+//
+//
+// Type: string
+//
+
+file_name_substr = "Sur1";
+
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
@@ -139,10 +151,12 @@ scan_mode = PPI;
 // 1D array - variable length.
 //
 
-sweep_fixed_angles =
-  {
-   0.5, 1.0, 1.5, 2.0
-  };
+sweep_fixed_angles = {
+ 0.5,
+ 1,
+ 1.5,
+ 2
+};
 
 ///////////// first_ray_angle /////////////////////////
 //
@@ -184,7 +198,7 @@ last_ray_angle = 359.99;
 
 delta_ray_angle = 0.75;
 
-///////////// az_tolerance_degrees ////////////////////
+///////////// az_tolerance_deg ////////////////////////
 //
 // Azimumth tolerance.
 //
@@ -195,9 +209,9 @@ delta_ray_angle = 0.75;
 // Type: double
 //
 
-az_tolerance_degrees = 0.1;
+az_tolerance_deg = 0.1;
 
-///////////// elev_tolerance_degrees //////////////////
+///////////// elev_tolerance_deg //////////////////////
 //
 // Elevation tolerance.
 //
@@ -208,7 +222,7 @@ az_tolerance_degrees = 0.1;
 // Type: double
 //
 
-elev_tolerance_degrees = 0.1;
+elev_tolerance_deg = 0.1;
 
 ///////////// max_range_km ////////////////////////////
 //

@@ -629,6 +629,18 @@
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
+    // Parameter 'file_name_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("file_name_substr");
+    tt->descr = tdrpStrDup("Substring that needs to exist in the file name.");
+    tt->help = tdrpStrDup("Set to empty to avoid this check.");
+    tt->val_offset = (char *) &file_name_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'mode'
     // ctype is '_mode_t'
     

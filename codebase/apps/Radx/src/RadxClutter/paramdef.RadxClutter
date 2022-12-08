@@ -53,6 +53,13 @@ paramdef string {
   p_help = "Files will be searched for in this directory.";
 } input_dir;
 
+paramdef string
+  {
+   p_default = "";
+   p_descr = "Substring that needs to exist in the file name.";
+   p_help = "Set to empty to avoid this check.";
+  } file_name_substr;
+
 typedef enum {
   REALTIME, ARCHIVE, FILELIST
 } mode_t;

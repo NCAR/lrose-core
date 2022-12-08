@@ -349,6 +349,19 @@ int RadxClutter::_readFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
 
+  // check for substr
+
+  string subStr = _params.file_name_substr;
+  if (subStr.size() > 0) {
+    RadxPath rpath(filePath);
+    string fileName = rpath.getFile();
+    if (fileName.find(subStr) == string::npos) {
+      LOG(DEBUG) << "Looking for substr: " << subStr;
+      LOG(DEBUG) << "No substr found, ignoring file: " << filePath;
+      return -1;
+    }
+  }
+  
   // convert to floats
   
   _readVol.convertToFl32();
