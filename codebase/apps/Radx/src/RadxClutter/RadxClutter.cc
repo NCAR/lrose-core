@@ -138,7 +138,7 @@ int RadxClutter::Run()
   // set up angle list
 
   _initAngleList();
-  
+
   // run based on mode
   
   if (_params.mode == Params::ARCHIVE) {
@@ -279,6 +279,10 @@ int RadxClutter::_processFile(const string &filePath)
     return -1;
   }
   
+  // initialize the histogram for the clutter frequency
+  
+  _clutFreqHist.init(0.0, 0.02, 1.0);
+
   // analyze this data set
   
   if (_analyzeClutter()) {
@@ -448,6 +452,19 @@ int RadxClutter::_analyzeClutter()
     
   } // iray
 
+  // compute the clutter frequency histogram
+  
+  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+    Radx::fl32 *clutFreq = _clutFreq[iray];
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      _clutFreqHist.update(clutFreq[igate]);
+    }
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _clutFreqHist.print(stderr);
+  }
+  
   return 0;
 
 }

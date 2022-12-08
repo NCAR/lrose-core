@@ -48,6 +48,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "Histo.hh"
 #include <string>
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
@@ -133,6 +134,10 @@ private:
 
   TaArray2D<Radx::fl32> _clutFreqArray;
   Radx::fl32 **_clutFreq;
+
+  // clutter frequency histogram
+
+  Histo _clutFreqHist;
 
   // methods
   

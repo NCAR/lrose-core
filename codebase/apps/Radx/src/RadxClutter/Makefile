@@ -51,11 +51,13 @@ LOC_CFLAGS =
 HDRS = \
 	Params.hh \
 	Args.hh \
+	Histo.hh \
 	RadxClutter.hh
 
 CPPC_SRCS = \
 	Params.cc \
 	Args.cc \
+	Histo.cc \
 	Main.cc \
 	RadxClutter.cc
 
