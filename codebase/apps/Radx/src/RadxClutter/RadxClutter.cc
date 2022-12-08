@@ -113,6 +113,12 @@ RadxClutter::~RadxClutter()
 int RadxClutter::Run()
 {
 
+  // set up angle list
+
+  _initAngleList();
+  
+  // run based on mode
+  
   if (_params.mode == Params::ARCHIVE) {
     return _runArchive();
   } else if (_params.mode == Params::FILELIST) {
@@ -215,6 +221,59 @@ int RadxClutter::_runRealtime()
 
   return iret;
 
+}
+
+//////////////////////////////////////////////////
+// Initialize the angle list
+// Returns 0 on success, -1 on failure
+
+void RadxClutter::_initAngleList()
+{
+
+  _fixedAngles.clear();
+  _scanAngles.clear();
+  
+  for (int ii = 0; ii < _params.sweep_fixed_angles_n; ii++) {
+    _fixedAngles.push_back(_params._sweep_fixed_angles[ii]);
+  }
+  sort(_fixedAngles.begin(), _fixedAngles.end());
+
+  if (_params.scan_mode == Params::PPI) {
+    
+    // PPI clutter scan - compute azimuths
+    
+    double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
+    if (_params.first_ray_angle > _params.last_ray_angle) {
+      sectorDelta += 360.0;
+    }
+
+    double az = _params.first_ray_angle;
+    double sumDelta = 0.0;
+    while (sumDelta < sectorDelta) {
+      _scanAngles.push_back(az);
+      az = RadxComplex::computeSumDeg(az, _params.delta_ray_angle);
+      if (az < 0) {
+        az += 360.0;
+      }
+      sumDelta += fabs(_params.delta_ray_angle);
+    } // while (sumDelta < sectorDelta)
+    
+  } else {
+
+    // RHI clutter scan - compute RHI elevations
+    
+    double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
+
+    double elev = _params.first_ray_angle;
+    double sumDelta = 0.0;
+    while (sumDelta < sectorDelta) {
+      _scanAngles.push_back(elev);
+      elev = RadxComplex::computeSumDeg(elev, _params.delta_ray_angle);
+      sumDelta += fabs(_params.delta_ray_angle);
+    } // while (sumDelta < sectorDelta)
+
+  } // if (_params.scan_mode == Params::PPI)
+  
 }
 
 //////////////////////////////////////////////////

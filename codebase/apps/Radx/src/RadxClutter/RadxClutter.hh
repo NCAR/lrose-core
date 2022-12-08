@@ -89,7 +89,9 @@ private:
   // input data
 
   RadxVol _readVol;
-
+  vector<double> _fixedAngles;
+  vector<double> _scanAngles;
+  
   int _nGates;
   double _radxStartRange;
   double _radxGateSpacing;
@@ -112,6 +114,7 @@ private:
   int _runArchive();
   int _runRealtime();
   void _setupRead(RadxFile &file);
+  void _initAngleList();
   int _processFile(const string &filePath);
 
   int _processDataSet();
