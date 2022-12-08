@@ -58,7 +58,7 @@ typedef enum {
 } mode_t;
 
 paramdef enum mode_t {
-  p_default = REALTIME;
+  p_default = ARCHIVE;
   p_descr = "Operating mode";
   p_help = "In REALTIME mode, the program waits for a new input file.  "
            "In ARCHIVE mode, it moves through the data between the start "

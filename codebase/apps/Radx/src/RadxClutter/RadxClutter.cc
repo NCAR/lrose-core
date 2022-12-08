@@ -226,23 +226,8 @@ int RadxClutter::_processFile(const string &filePath)
 
   int iret = 0;
   
-  // check we have not already processed this file
-  // in the file aggregation step
-
-  RadxPath thisPath(filePath);
-  for (size_t ii = 0; ii < _readPaths.size(); ii++) {
-    RadxPath rpath(_readPaths[ii]);
-    if (thisPath.getFile() == rpath.getFile()) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "Skipping file: " << filePath << endl;
-        cerr << "  Previously processed in aggregation step" << endl;
-      }
-      return 0;
-    }
-  }
-  
   if (_params.debug) {
-    cerr << "INFO - RadxClutter::Run" << endl;
+    cerr << "INFO - RadxClutter::_processFile" << endl;
     cerr << "  Input path: " << filePath << endl;
   }
   

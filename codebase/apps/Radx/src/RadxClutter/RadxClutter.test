@@ -1,0 +1,412 @@
+/**********************************************************************
+ * TDRP params for RadxClutter
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxPersistentClutter identifies persistent clutter in polar radar 
+//   data, flags it, and writes out the statistics to a CfRadial file.
+//
+// This method is based on the following paper: Lakshmanan V., J. Zhang, 
+//   K. Hondl and C. Langston. A Statistical Approach to Mitigating 
+//   Persistent Clutter in Radar Reflectivity Data. IEEE Journal of 
+//   Selected Topics in Applied Earth Observations and Remote Sensing, 
+//   Vol. 5, No. 2, April 2012.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Debugging and process control.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/precip/grids/spol/radarPolar/field/moments/sband/sur";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// SCAN DETAILS.
+//
+// We specify the scan angles for which the clutter will be analyzed. 
+//   This is the 'ideal'. The actual measurements are mapped onto this 
+//   ideal scan.
+//
+//======================================================================
+ 
+///////////// scan_mode ///////////////////////////////
+//
+// Scan mode.
+//
+// PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning.
+//
+//
+// Type: enum
+// Options:
+//     PPI
+//     RHI
+//
+
+scan_mode = PPI;
+
+///////////// sweep_fixed_angles //////////////////////
+//
+// List of fixed angles for desired sweeps (deg).
+//
+// PPI mode: elevations. RHIs: azimuths.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+sweep_fixed_angles = {
+ 0.5
+};
+
+///////////// first_ray_angle /////////////////////////
+//
+// Starting scan angle for rays (deg).
+//
+// In PPI mode, this is the first azimuth in a clockwise sweep. In RHI 
+//   mode, this is the lowest elevation in a sweep.
+//
+//
+// Type: double
+//
+
+first_ray_angle = 0;
+
+///////////// last_ray_angle //////////////////////////
+//
+// Ending scan angle for rays (deg).
+//
+// In PPI mode, this is the last azimuth in a clockwise sweep. In RHI 
+//   mode, this is the highest elevation in a sweep.
+//
+//
+// Type: double
+//
+
+last_ray_angle = 359.99;
+
+///////////// delta_ray_angle /////////////////////////
+//
+// Delta scan angle between consecutive rays (deg).
+//
+// In PPI mode, this is the azimuth difference between rays. In PPI mode 
+//   the delta should be positive, i.e. for a clockwise sweep. In RHI 
+//   mode, this is the elevation difference between rays.
+//
+//
+// Type: double
+//
+
+delta_ray_angle = 1;
+
+///////////// az_tolerance_degrees ////////////////////
+//
+// Azimumth tolerance.
+//
+// Allowed degrees difference between azimuth values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+az_tolerance_degrees = 0.1;
+
+///////////// elev_tolerance_degrees //////////////////
+//
+// Elevation tolerance.
+//
+// Allowed degrees difference between elevation values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+elev_tolerance_degrees = 0.1;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 60;
+
+//======================================================================
+//
+// ALGORITHM DETAILS.
+//
+//======================================================================
+ 
+///////////// dbz_field_name //////////////////////////
+//
+// Input field name.
+//
+// Name of field on which clutter will be based.
+//
+//
+// Type: string
+//
+
+dbz_field_name = "DBZ";
+
+///////////// output_field_name ///////////////////////
+//
+// Output field name.
+//
+// Name to give final output clutter field.
+//
+//
+// Type: string
+//
+
+output_field_name = "clutter";
+
+///////////// threshold ///////////////////////////////
+//
+// Clutter field threshold.
+//
+// If data is persistently above this value it is a clutter location.
+//
+//
+// Type: double
+//
+
+threshold = 0;
+
+///////////// clutter_percentile //////////////////////
+//
+// Clutter percentile.
+//
+// Percentile to use in clutter value determination (see the paper, 
+//   section III. Correction of Radar Reflectivity.
+//
+//
+// Type: double
+//
+
+clutter_percentile = 0.5;
+
+///////////// missing_clutter_value ///////////////////
+//
+// Missing clutter value.
+//
+// Value to assign to clutter estimates when the wanted percentile is 
+//   the missing data value.
+//
+//
+// Type: double
+//
+
+missing_clutter_value = -25;
+
+///////////// threshold_tolerance /////////////////////
+//
+// Variation in threshold for convergence.
+//
+// The threshold as percent of total number of scans to identify a point 
+//   as clutter should converge to a stable value.  This value is the 
+//   allowed tolerance (change) to be considered stable.
+//
+//
+// Type: double
+//
+
+threshold_tolerance = 0.025;
+
+///////////// maximum_percent_change //////////////////
+//
+// Maximum percent of pixels that can change for convergence.
+//
+// The percentage of pixels that change from clutter to nonclutter or 
+//   back should decrease to a minimum for convergence.
+//
+//
+// Type: double
+//
+
+maximum_percent_change = 0.001;
+
+///////////// minimum_stable_volumes //////////////////
+//
+// Number of volumes that show stablity prior to considering the 
+//   situation stable.
+//
+// The threshold converges, and needs to stay converged for this many 
+//   volumes before giving the thumbs up.
+//
+//
+// Type: double
+//
+
+minimum_stable_volumes = 10;
+
+///////////// histogram_resolution ////////////////////
+//
+// Resolution of histogram for analysis.
+//
+// Histograms are used to determine the statistics of the clutter 
+//   properties. See the paper.
+//
+//
+// Type: double
+//
+
+histogram_resolution = 0.2;
+
+///////////// histogram_max ///////////////////////////
+//
+// Histogram maximum bin value.
+//
+// Histograms are used to determine the statistics of the clutter 
+//   properties. See the paper.
+//
+//
+// Type: double
+//
+
+histogram_max = 50;
+
+//======================================================================
+//
+// Data output.
+//
+// Parameters for writing results.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Location for final clutter statistics.
+//
+// Final output is only written at the end of a processing phase, with 
+//   the output time equal to the time of the first volume processed.
+//
+//
+// Type: string
+//
+
+output_dir = "unknown";
+
+///////////// write_diagnostic_output /////////////////
+//
+// Write out diagnostic output.
+//
+//
+// Type: boolean
+//
+
+write_diagnostic_output = FALSE;
+
+///////////// diagnostic_volume_dir ///////////////////
+//
+// Dir for diagnostic output.
+//
+// If true, output from each volume is written, to show the build up of 
+//   skill through time.
+//
+//
+// Type: string
+//
+
+diagnostic_volume_dir = "unknown";
+
+///////////// diagnostic_ascii_dir ////////////////////
+//
+// Output ascii dir to which to write plottables.
+//
+//
+// Type: string
+//
+
+diagnostic_ascii_dir = "unknown";
+

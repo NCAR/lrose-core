@@ -648,7 +648,7 @@
       tt->enum_def.fields[1].val = ARCHIVE;
       tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
       tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = REALTIME;
+    tt->single_val.e = ARCHIVE;
     tt++;
     
     // Parameter 'max_realtime_data_age_secs'
