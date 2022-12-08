@@ -125,8 +125,10 @@ private:
   int _initClutterVol();
   void _initAngleList();
 
-  int _processDataSet();
+  int _analyzeClutter();
 
+  void _setupWrite(RadxFile &file);
+  int _writeClutterVol();
   void _writeLdataInfo(const string &outputPath);
 
 

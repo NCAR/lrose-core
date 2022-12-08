@@ -277,11 +277,19 @@ int RadxClutter::_processFile(const string &filePath)
     return -1;
   }
   
-  // process this data set
+  // analyze this data set
   
-  if (_processDataSet()) {
+  if (_analyzeClutter()) {
     LOG(ERROR) << "ERROR - RadxClutter::Run";
     LOG(ERROR) << "  Cannot process data in file: " << filePath;
+    return -1;
+  }
+
+  // write out the results
+
+  if (_writeClutterVol()) {
+    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "  Cannot write out clutter volume";
     return -1;
   }
 
@@ -381,7 +389,7 @@ int RadxClutter::_readFile(const string &filePath)
 ///////////////////////////////////////////
 // process this data set
 
-int RadxClutter::_processDataSet()
+int RadxClutter::_analyzeClutter()
   
 {
 
@@ -568,6 +576,8 @@ int RadxClutter::_initClutterVol()
       } else {
         clutRay->setFixedAngleDeg(clutEl);
       }
+      clutRay->clearEventFlags();
+      clutRay->setSweepNumber(isweep);
       
       // add to the clutter vol
 
@@ -576,8 +586,86 @@ int RadxClutter::_initClutterVol()
     } // iang
   } // isweep
 
+  _clutterVol.loadSweepInfoFromRays();
+  _clutterVol.loadVolumeInfoFromRays();
+  
   return 0;
   
+}
+
+//////////////////////////////////////////////////
+// set up write
+
+void RadxClutter::_setupWrite(RadxFile &file)
+{
+
+  if (_params.debug) {
+    file.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.setVerbose(true);
+  }
+
+  file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
+
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
+
+}
+
+//////////////////////////////////////
+// Write the clutter volume
+
+int RadxClutter::_writeClutterVol()
+
+{
+
+  // output file
+
+  GenericRadxFile outFile;
+  _setupWrite(outFile);
+  
+  string outputDir = _params.output_dir;
+  
+  // write to dir
+  
+  if (outFile.writeToDir(_clutterVol, outputDir, true, false)) {
+    LOG(ERROR) << "ERROR - RadxConvert::_writeVol";
+    LOG(ERROR) << "  Cannot write file to dir: " << outputDir;
+    LOG(ERROR) << outFile.getErrStr();
+    return -1;
+  }
+
+  string outputPath = outFile.getPathInUse();
+
+  // write latest data info file if requested 
+  
+  if (_params.write_latest_data_info) {
+    DsLdataInfo ldata(outputDir);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      ldata.setDebug(true);
+    }
+    string relPath;
+    RadxPath::stripDir(outputDir, outputPath, relPath);
+    ldata.setRelDataPath(relPath);
+    ldata.setWriter(_progName);
+    ldata.setDataFileExt("nc");
+    ldata.setDataType("netCDF");
+    
+    string fileName;
+    Path::stripDir(_params.output_dir, outputPath, fileName);
+    ldata.setRelDataPath(fileName);
+    
+    ldata.setIsFcast(false);
+    ldata.write(_readVol.getStartTimeSecs());
+    
+    LOG(DEBUG) << "RadxClutter::_writeClutterVol(): Data written to "
+               << outputPath;
+    
+  }
+
+  return 0;
+
 }
 
 //////////////////////////////////////
@@ -588,19 +676,5 @@ void RadxClutter::_writeLdataInfo(const string &outputPath)
 
   DsLdataInfo ldata(_params.output_dir, _params.debug);
   
-  ldata.setWriter("RadxClutter");
-  ldata.setDataFileExt("nc");
-  ldata.setDataType("netCDF");
-
-  string fileName;
-  Path::stripDir(_params.output_dir, outputPath, fileName);
-  ldata.setRelDataPath(fileName);
-  
-  ldata.setIsFcast(false);
-  ldata.write(_readVol.getStartTimeSecs());
-  
-  LOG(DEBUG) << "RadxClutter::_writeLdataInfo(): Data written to "
-             << outputPath;
-
 }
 

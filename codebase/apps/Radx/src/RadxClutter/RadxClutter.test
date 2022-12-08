@@ -390,7 +390,7 @@ histogram_max = 50;
 // Type: string
 //
 
-output_dir = "unknown";
+output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/clutter/sband/sur";
 
 ///////////// write_diagnostic_output /////////////////
 //

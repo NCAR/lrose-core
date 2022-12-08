@@ -240,6 +240,12 @@ paramdef string
   p_default = "unknown";
 } output_dir;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
 paramdef boolean
 {
   p_descr = "Write out diagnostic output";

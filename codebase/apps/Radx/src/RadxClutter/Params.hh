@@ -430,6 +430,8 @@ public:
 
   char* output_dir;
 
+  tdrp_bool_t write_latest_data_info;
+
   tdrp_bool_t write_diagnostic_output;
 
   char* diagnostic_volume_dir;
@@ -443,7 +445,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[35];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

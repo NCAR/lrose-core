@@ -945,6 +945,18 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
+    // Parameter 'write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
+    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
+    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'write_diagnostic_output'
     // ctype is 'tdrp_bool_t'
     
