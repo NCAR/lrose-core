@@ -109,6 +109,10 @@ private:
   const Radx::fl32 *_dbz;
   Radx::fl32 _dbzMiss;
 
+  // clutter volume, derived from the volume read in
+
+  RadxVol _clutterVol;
+
   // methods
   
   int _runFilelist();

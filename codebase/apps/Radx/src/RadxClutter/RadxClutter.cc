@@ -357,7 +357,11 @@ int RadxClutter::_readFile(const string &filePath)
   
   _readVol.setNGatesConstant();
 
-  return 0;
+  if (_readVol.getNRays() < 3) {
+    return -1;
+  } else {
+    return 0;
+  }
   
 }
 
@@ -446,11 +450,34 @@ void RadxClutter::_initAngleList()
 int RadxClutter::_initClutterVol()
 {
 
-  cerr << "11111111111 file: " << _readVol.getPathInUse() << endl;
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  if (rays.size() < 1) {
+    return -1;
+  }
+
+  // initialize the clutter volume with the read volume,
+  // and then clear out the rays
+
+  _clutterVol.clear();
+  _clutterVol = _readVol;
+  _clutterVol.clearRays();
+
+  // create empty ray with all gates missing
+  
+  RadxRay emptyRay(*rays[0]);
+  RadxField *dbzFld = emptyRay.getField(_params.dbz_field_name);
+  if (dbzFld == NULL) {
+    LOG(ERROR) << "DBZ field name not found in ray: " << _params.dbz_field_name;
+    return -1;
+  }
+  dbzFld->setGatesToMissing(0, dbzFld->getNPoints() - 1);
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    cerr << "==>> looking for rays that match clutter volume <<==" << endl;
+  }
   
   // loop through the sweeps and scan angles
 
-  const vector<RadxRay *> &rays = _readVol.getRays();
   for (size_t isweep = 0; isweep < _fixedAngles.size(); isweep++) {
     for (size_t iang = 0; iang < _scanAngles.size(); iang++) {
 
@@ -466,9 +493,10 @@ int RadxClutter::_initClutterVol()
       // find the closest ray in the measured volume
       
       double minAngDist = 1.0e6;
-      size_t matchRayIndex = 0;
       double matchAz = -9999;
       double matchEl = -9999;
+      size_t matchRayIndex = 0;
+      RadxRay *matchRay = NULL;
       bool matchFound = false;
       
       for (size_t ii = 0; ii < rays.size(); ii++) {
@@ -484,29 +512,54 @@ int RadxClutter::_initClutterVol()
         double angDist = sqrt(dEl * dEl + dAz * dAz);
         if (angDist < minAngDist) {
           minAngDist = angDist;
-          matchRayIndex = ii;
           matchEl = rayEl;
           matchAz = rayAz;
+          matchRay = ray;
+          matchRayIndex = ii;
           matchFound = true;
         }
       } // ii
 
-#ifdef JUNK
-      if (matchFound) {
-        fprintf(stderr, "1111111111 isweep, iang, index, rayEl, matchEl, rayAz, matchAz, dEl, dAz: %3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
-                isweep, iang, matchRayIndex,
-                clutEl, matchEl, clutAz, matchAz,
-                fabs(clutEl - matchEl),
-                fabs(clutAz - matchAz));
-      } else {
-        fprintf(stderr, "0000000000 isweep, iang, index, rayEl, matchEl, rayAz, matchAz, dEl, dAz: %3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
-                isweep, iang, matchRayIndex,
-                clutEl, matchEl, clutAz, matchAz,
-                fabs(clutEl - matchEl),
-                fabs(clutAz - matchAz));
-      }
-#endif
+      // create the clutter ray
       
+      RadxRay *clutRay = NULL;
+      if (matchFound) {
+        clutRay = new RadxRay(*matchRay);
+        if (_params.debug >= Params::DEBUG_EXTRA) {
+          fprintf(stderr,
+                  "====>> isweep, iang, index, rayEl, matchEl, "
+                  "rayAz, matchAz, dEl, dAz: "
+                  "%3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
+                  isweep, iang, matchRayIndex,
+                  clutEl, matchEl, clutAz, matchAz,
+                  fabs(clutEl - matchEl),
+                  fabs(clutAz - matchAz));
+        }
+      } else {
+        clutRay = new RadxRay(emptyRay);
+        if (_params.debug >= Params::DEBUG_EXTRA) {
+          fprintf(stderr,
+                  "====>> isweep, iang, index, rayEl, matchEl, "
+                  "rayAz, matchAz, dEl, dAz: "
+                  "%3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
+                  isweep, iang, matchRayIndex,
+                  clutEl, matchEl, clutAz, matchAz,
+                  fabs(clutEl - matchEl),
+                  fabs(clutAz - matchAz));
+        }
+      }
+      clutRay->setElevationDeg(clutEl);
+      clutRay->setAzimuthDeg(clutAz);
+      if (_isRhi) {
+        clutRay->setFixedAngleDeg(clutAz);
+      } else {
+        clutRay->setFixedAngleDeg(clutEl);
+      }
+      
+      // add to the clutter vol
+
+      _clutterVol.addRay(clutRay);
+
     } // iang
   } // isweep
 
