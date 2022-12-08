@@ -19,6 +19,7 @@ SUB_DIRS = \
 	RadxCalUpdate \
 	RadxCheck \
 	RadxClutMon \
+	RadxClutter \
 	RadxConvert \
 	RadxCov2Mom \
 	RadxCreateVol \
@@ -35,7 +36,6 @@ SUB_DIRS = \
 	RadxModelQc \
 	RadxMon \
 	RadxPartRain \
-	RadxPersistentClutter \
 	RadxPid \
 	RadxPrint \
 	RadxQc \

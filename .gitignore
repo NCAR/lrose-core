@@ -682,6 +682,7 @@ codebase/apps/Radx/src/RadxBufr/RadxBufr
 codebase/apps/Radx/src/RadxCalUpdate/RadxCalUpdate
 codebase/apps/Radx/src/RadxCheck/RadxCheck
 codebase/apps/Radx/src/RadxClutMon/RadxClutMon
+codebase/apps/Radx/src/RadxClutter/RadxClutter
 codebase/apps/Radx/src/RadxConvert/RadxConvert
 codebase/apps/Radx/src/RadxCov2Mom/RadxCov2Mom
 codebase/apps/Radx/src/RadxCreateVol/RadxCreateVol
@@ -699,7 +700,6 @@ codebase/apps/Radx/src/RadxMon/RadxMon
 codebase/apps/Radx/src/RadxModelQc/RadxModelQc
 codebase/apps/Radx/src/RadxPartRain/RadxPartRain
 codebase/apps/Radx/src/RadxPid/RadxPid
-codebase/apps/Radx/src/RadxPersistentClutter/RadxPersistentClutter
 codebase/apps/Radx/src/RadxPrint/RadxPrint
 codebase/apps/Radx/src/RadxQpe/RadxQpe
 codebase/apps/Radx/src/RadxQc/RadxQc
