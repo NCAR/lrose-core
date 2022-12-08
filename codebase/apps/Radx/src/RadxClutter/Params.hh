@@ -410,8 +410,6 @@ public:
 
   char* dbz_field_name;
 
-  char* output_field_name;
-
   double threshold;
 
   double clutter_percentile;
@@ -437,6 +435,8 @@ public:
   char* diagnostic_volume_dir;
 
   char* diagnostic_ascii_dir;
+
+  char* dbz_mean_field_name;
 
   char _end_; // end of data region
               // needed for zeroing out data

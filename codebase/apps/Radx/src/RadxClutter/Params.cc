@@ -816,18 +816,6 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'output_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_field_name");
-    tt->descr = tdrpStrDup("Output field name.");
-    tt->help = tdrpStrDup("Name to give final output clutter field.");
-    tt->val_offset = (char *) &output_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("clutter");
-    tt++;
-    
     // Parameter 'threshold'
     // ctype is 'double'
     
@@ -991,6 +979,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &diagnostic_ascii_dir - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'dbz_mean_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_mean_field_name");
+    tt->descr = tdrpStrDup("Field name for mean dbz.");
+    tt->help = tdrpStrDup("The dbz mean field will be added to the output data set.");
+    tt->val_offset = (char *) &dbz_mean_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMean");
     tt++;
     
     // trailing entry has param_name set to NULL

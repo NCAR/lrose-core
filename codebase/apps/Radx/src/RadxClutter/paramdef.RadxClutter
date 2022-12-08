@@ -162,13 +162,6 @@ paramdef string
   p_default = "DBZ";
 } dbz_field_name;
 
-paramdef string
-{
-  p_descr = "Output field name.";
-  p_help = "Name to give final output clutter field.";
-  p_default = "clutter";
-} output_field_name;
-
 paramdef double
 {
   p_descr = "Clutter field threshold.";
@@ -265,4 +258,11 @@ paramdef string
   p_help = "";
   p_default = "unknown";
 } diagnostic_ascii_dir;
+
+paramdef string
+{
+  p_descr = "Field name for mean dbz.";
+  p_help = "The dbz mean field will be added to the output data set.";
+  p_default = "dbzMean";
+} dbz_mean_field_name;
 

@@ -51,6 +51,7 @@
 #include <string>
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
+#include <toolsa/TaArray2D.hh>
 class RadxFile;
 using namespace std;
 
@@ -93,7 +94,7 @@ private:
   vector<double> _fixedAngles;
   vector<double> _scanAngles;
   
-  int _nGates;
+  size_t _nGates;
   double _radxStartRange;
   double _radxGateSpacing;
 
@@ -101,6 +102,8 @@ private:
   double _radarLatitude;
   double _radarLongitude;
   double _radarAltitude;
+  
+  size_t _nVols;
   
   // These are pointers into the input Radx object.
   // This memory is managed by the Radx class and should not be freed
@@ -112,6 +115,18 @@ private:
   // clutter volume, derived from the volume read in
 
   RadxVol _clutterVol;
+  size_t _nRaysClutter;
+
+  // statistics volume to store the results
+
+  TaArray2D<Radx::fl32> _dbzSumArray;
+  Radx::fl32 **_dbzSum;
+
+  TaArray2D<Radx::fl32> _dbzCountArray;
+  Radx::fl32 **_dbzCount;
+
+  TaArray2D<Radx::fl32> _dbzMeanArray;
+  Radx::fl32 **_dbzMean;
 
   // methods
   

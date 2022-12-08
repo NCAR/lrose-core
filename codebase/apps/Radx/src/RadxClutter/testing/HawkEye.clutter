@@ -346,7 +346,16 @@ fields = {
   {
     label = "DBZ",
     raw_name = "DBZ",
-    filtered_name = "DBZ_F",
+        filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "dbzMean",
+    raw_name = "dbzMean",
+    filtered_name = "",
     units = "dBZ",
     color_map = "dbz.colors",
     shortcut = "1"

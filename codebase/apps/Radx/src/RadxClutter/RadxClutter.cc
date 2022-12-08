@@ -62,7 +62,9 @@ RadxClutter::RadxClutter(int argc, char **argv)
 {
 
   OK = TRUE;
-
+  _nVols = 0;
+  _nGates = 0;
+  
   // set programe name
 
   _progName = "RadxClutter";
@@ -395,16 +397,40 @@ int RadxClutter::_analyzeClutter()
 
   LOG(DEBUG) << "Processing data set ...";
 
-  // set up geom
+  // add to DBZ sum and compute mean
 
-  _nGates = _readVol.getMaxNGates();
-  _radxStartRange = _readVol.getStartRangeKm();
-  _radxGateSpacing = _readVol.getGateSpacingKm();
-  
-  _radarName = _readVol.getInstrumentName();
-  _radarLatitude = _readVol.getLatitudeDeg();
-  _radarLongitude = _readVol.getLongitudeDeg();
-  _radarAltitude = _readVol.getAltitudeKm();
+  vector<RadxRay *> &rays = _clutterVol.getRays();
+  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+    RadxRay *ray = rays[iray];
+
+    RadxField *dbzFld = ray->getField(_params.dbz_field_name);
+    if (dbzFld == NULL) {
+      continue;
+    }
+    Radx::fl32 dbzMiss = dbzFld->getMissingFl32();
+
+    Radx::fl32 *dbzVals = dbzFld->getDataFl32();
+    Radx::fl32 *dbzCount = _dbzCount[iray];
+    Radx::fl32 *dbzSum = _dbzSum[iray];
+    Radx::fl32 *dbzMean = _dbzMean[iray];
+    
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      if (dbzVals[igate] != dbzMiss) {
+        dbzSum[igate] += dbzVals[igate];
+        dbzCount[igate] += 1.0;
+      }
+      dbzMean[igate] = dbzSum[igate] / dbzCount[igate];
+    } // igate
+
+    // add mean field to ray
+
+    RadxField *dbzMeanFldOut = new RadxField(*dbzFld);
+    dbzMeanFldOut->setName(_params.dbz_mean_field_name);
+    dbzMeanFldOut->setDataFl32(_nGates, dbzMean, true);
+
+    ray->addField(dbzMeanFldOut);
+    
+  } // iray
 
   return 0;
 
@@ -588,7 +614,44 @@ int RadxClutter::_initClutterVol()
 
   _clutterVol.loadSweepInfoFromRays();
   _clutterVol.loadVolumeInfoFromRays();
+  _nRaysClutter = _clutterVol.getNRays();
   
+  // set up geom
+
+  if (_nVols == 0) {
+    
+    _nGates = _clutterVol.getMaxNGates();
+    _radxStartRange = _clutterVol.getStartRangeKm();
+    _radxGateSpacing = _clutterVol.getGateSpacingKm();
+    
+    _radarName = _clutterVol.getInstrumentName();
+    _radarLatitude = _clutterVol.getLatitudeDeg();
+    _radarLongitude = _clutterVol.getLongitudeDeg();
+    _radarAltitude = _clutterVol.getAltitudeKm();
+
+    // allocate arrays for analysis
+    
+    _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
+    _dbzCount = _dbzCountArray.alloc(_nRaysClutter, _nGates);
+    _dbzMean = _dbzMeanArray.alloc(_nRaysClutter, _nGates);
+
+    // initialize to 0
+    
+    Radx::fl32 *dbzSum1D = _dbzSumArray.dat1D();
+    memset(dbzSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *dbzCount1D = _dbzCountArray.dat1D();
+    memset(dbzCount1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *dbzMean1D = _dbzMeanArray.dat1D();
+    memset(dbzMean1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+
+  } else {
+    
+    _clutterVol.setNGates(_nGates);
+    
+  }
+
+  _nVols++;
+
   return 0;
   
 }
