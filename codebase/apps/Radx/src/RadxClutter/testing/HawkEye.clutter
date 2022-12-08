@@ -362,6 +362,15 @@ fields = {
   }
   ,
   {
+    label = "clutFreq",
+    raw_name = "clutFreq",
+    filtered_name = "",
+    units = "",
+    color_map = "fraction.colors",
+    shortcut = "1"
+  }
+  ,
+  {
     label = "NormFreqCount",
     raw_name = "NormFreqCount",
     filtered_name = "",

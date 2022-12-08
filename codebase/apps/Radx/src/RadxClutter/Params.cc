@@ -816,15 +816,15 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'threshold'
+    // Parameter 'dbz_clutter_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("threshold");
-    tt->descr = tdrpStrDup("Clutter field threshold.");
+    tt->param_name = tdrpStrDup("dbz_clutter_threshold");
+    tt->descr = tdrpStrDup("DBZ threshold for a clutter gate.");
     tt->help = tdrpStrDup("If data is persistently above this value it is a clutter location.");
-    tt->val_offset = (char *) &threshold - &_start_;
+    tt->val_offset = (char *) &dbz_clutter_threshold - &_start_;
     tt->single_val.d = 0;
     tt++;
     
@@ -991,6 +991,18 @@
     tt->help = tdrpStrDup("The dbz mean field will be added to the output data set.");
     tt->val_offset = (char *) &dbz_mean_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMean");
+    tt++;
+    
+    // Parameter 'clut_freq_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("clut_freq_field_name");
+    tt->descr = tdrpStrDup("Field name for clutter frequency.");
+    tt->help = tdrpStrDup("This is the fraction of time that a gate has dbz above the threshold.");
+    tt->val_offset = (char *) &clut_freq_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("clutFreq");
     tt++;
     
     // trailing entry has param_name set to NULL

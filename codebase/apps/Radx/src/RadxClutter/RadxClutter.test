@@ -254,21 +254,9 @@ max_range_km = 60;
 
 dbz_field_name = "DBZ";
 
-///////////// output_field_name ///////////////////////
+///////////// dbz_clutter_threshold ///////////////////
 //
-// Output field name.
-//
-// Name to give final output clutter field.
-//
-//
-// Type: string
-//
-
-output_field_name = "clutter";
-
-///////////// threshold ///////////////////////////////
-//
-// Clutter field threshold.
+// DBZ threshold for a clutter gate.
 //
 // If data is persistently above this value it is a clutter location.
 //
@@ -276,7 +264,7 @@ output_field_name = "clutter";
 // Type: double
 //
 
-threshold = 0;
+dbz_clutter_threshold = 30;
 
 ///////////// clutter_percentile //////////////////////
 //
@@ -392,6 +380,19 @@ histogram_max = 50;
 
 output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/clutter/sband/sur";
 
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
 ///////////// write_diagnostic_output /////////////////
 //
 // Write out diagnostic output.
@@ -424,4 +425,28 @@ diagnostic_volume_dir = "unknown";
 //
 
 diagnostic_ascii_dir = "unknown";
+
+///////////// dbz_mean_field_name /////////////////////
+//
+// Field name for mean dbz.
+//
+// The dbz mean field will be added to the output data set.
+//
+//
+// Type: string
+//
+
+dbz_mean_field_name = "dbzMean";
+
+///////////// clut_freq_field_name ////////////////////
+//
+// Field name for clutter frequency.
+//
+// This is the fraction of time that a gate has dbz above the threshold.
+//
+//
+// Type: string
+//
+
+clut_freq_field_name = "clutFreq";
 

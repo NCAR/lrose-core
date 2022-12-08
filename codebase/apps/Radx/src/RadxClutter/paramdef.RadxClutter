@@ -164,10 +164,10 @@ paramdef string
 
 paramdef double
 {
-  p_descr = "Clutter field threshold.";
+  p_descr = "DBZ threshold for a clutter gate.";
   p_help = "If data is persistently above this value it is a clutter location.";
   p_default = 0.0;
-} threshold;
+} dbz_clutter_threshold;
 
 paramdef double
 {
@@ -265,4 +265,11 @@ paramdef string
   p_help = "The dbz mean field will be added to the output data set.";
   p_default = "dbzMean";
 } dbz_mean_field_name;
+
+paramdef string
+{
+  p_descr = "Field name for clutter frequency.";
+  p_help = "This is the fraction of time that a gate has dbz above the threshold.";
+  p_default = "clutFreq";
+} clut_freq_field_name;
 

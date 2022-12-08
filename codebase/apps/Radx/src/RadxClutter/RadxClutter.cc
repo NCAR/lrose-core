@@ -413,22 +413,38 @@ int RadxClutter::_analyzeClutter()
     Radx::fl32 *dbzCount = _dbzCount[iray];
     Radx::fl32 *dbzSum = _dbzSum[iray];
     Radx::fl32 *dbzMean = _dbzMean[iray];
+    Radx::fl32 *clutSum = _clutSum[iray];
+    Radx::fl32 *clutFreq = _clutFreq[iray];
     
     for (size_t igate = 0; igate < _nGates; igate++) {
-      if (dbzVals[igate] != dbzMiss) {
-        dbzSum[igate] += dbzVals[igate];
+      Radx::fl32 dbzVal = dbzVals[igate];
+      if (dbzVal != dbzMiss) {
+        dbzSum[igate] += dbzVal;
         dbzCount[igate] += 1.0;
+        if (dbzVal >= _params.dbz_clutter_threshold) {
+          clutSum[igate] += 1.0;
+        }
       }
-      dbzMean[igate] = dbzSum[igate] / dbzCount[igate];
+      if (dbzCount[igate] > 0) {
+        dbzMean[igate] = dbzSum[igate] / dbzCount[igate];
+        clutFreq[igate] = clutSum[igate] / dbzCount[igate];
+      }
     } // igate
 
-    // add mean field to ray
+    // add output fields to ray
 
     RadxField *dbzMeanFldOut = new RadxField(*dbzFld);
     dbzMeanFldOut->setName(_params.dbz_mean_field_name);
     dbzMeanFldOut->setDataFl32(_nGates, dbzMean, true);
+    
+    RadxField *clutFreqFldOut = new RadxField(*dbzFld);
+    clutFreqFldOut->setName(_params.clut_freq_field_name);
+    clutFreqFldOut->setLongName("ClutterTimeFraction");
+    clutFreqFldOut->setUnits("");
+    clutFreqFldOut->setDataFl32(_nGates, clutFreq, true);
 
     ray->addField(dbzMeanFldOut);
+    ray->addField(clutFreqFldOut);
     
   } // iray
 
@@ -634,6 +650,8 @@ int RadxClutter::_initClutterVol()
     _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
     _dbzCount = _dbzCountArray.alloc(_nRaysClutter, _nGates);
     _dbzMean = _dbzMeanArray.alloc(_nRaysClutter, _nGates);
+    _clutSum = _clutSumArray.alloc(_nRaysClutter, _nGates);
+    _clutFreq = _clutFreqArray.alloc(_nRaysClutter, _nGates);
 
     // initialize to 0
     
@@ -643,6 +661,11 @@ int RadxClutter::_initClutterVol()
     memset(dbzCount1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
     Radx::fl32 *dbzMean1D = _dbzMeanArray.dat1D();
     memset(dbzMean1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+
+    Radx::fl32 *clutSum1D = _clutSumArray.dat1D();
+    memset(clutSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *clutFreq1D = _clutFreqArray.dat1D();
+    memset(clutFreq1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
 
   } else {
     

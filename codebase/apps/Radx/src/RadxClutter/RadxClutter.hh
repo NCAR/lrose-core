@@ -117,7 +117,7 @@ private:
   RadxVol _clutterVol;
   size_t _nRaysClutter;
 
-  // statistics volume to store the results
+  // analysis results - statistics
 
   TaArray2D<Radx::fl32> _dbzSumArray;
   Radx::fl32 **_dbzSum;
@@ -127,6 +127,12 @@ private:
 
   TaArray2D<Radx::fl32> _dbzMeanArray;
   Radx::fl32 **_dbzMean;
+
+  TaArray2D<Radx::fl32> _clutSumArray;
+  Radx::fl32 **_clutSum;
+
+  TaArray2D<Radx::fl32> _clutFreqArray;
+  Radx::fl32 **_clutFreq;
 
   // methods
   
