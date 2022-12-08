@@ -139,9 +139,10 @@ scan_mode = PPI;
 // 1D array - variable length.
 //
 
-sweep_fixed_angles = {
- 0.5
-};
+sweep_fixed_angles =
+  {
+   0.5, 1.0, 1.5, 2.0
+  };
 
 ///////////// first_ray_angle /////////////////////////
 //
@@ -181,7 +182,7 @@ last_ray_angle = 359.99;
 // Type: double
 //
 
-delta_ray_angle = 1;
+delta_ray_angle = 0.75;
 
 ///////////// az_tolerance_degrees ////////////////////
 //

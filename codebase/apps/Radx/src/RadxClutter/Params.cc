@@ -747,27 +747,27 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'az_tolerance_degrees'
+    // Parameter 'az_tolerance_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("az_tolerance_degrees");
+    tt->param_name = tdrpStrDup("az_tolerance_deg");
     tt->descr = tdrpStrDup("Azimumth tolerance");
     tt->help = tdrpStrDup("Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids");
-    tt->val_offset = (char *) &az_tolerance_degrees - &_start_;
+    tt->val_offset = (char *) &az_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     
-    // Parameter 'elev_tolerance_degrees'
+    // Parameter 'elev_tolerance_deg'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elev_tolerance_degrees");
+    tt->param_name = tdrpStrDup("elev_tolerance_deg");
     tt->descr = tdrpStrDup("Elevation tolerance");
     tt->help = tdrpStrDup("Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids");
-    tt->val_offset = (char *) &elev_tolerance_degrees - &_start_;
+    tt->val_offset = (char *) &elev_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     

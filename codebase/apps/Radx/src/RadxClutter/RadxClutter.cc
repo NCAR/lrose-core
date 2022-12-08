@@ -47,6 +47,8 @@
 #include <toolsa/TaArray.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/file_io.h>
+#include <toolsa/LogStream.hh>
+#include <toolsa/LogStreamInit.hh>
 #include <algorithm>
 
 using namespace std;
@@ -91,6 +93,24 @@ RadxClutter::RadxClutter(int argc, char **argv)
     PMU_auto_init( _progName.c_str(),
                   _params.instance,
                   PROCMAP_REGISTER_INTERVAL);
+  }
+
+  // initialize logging
+  LogStreamInit::init(false, false, true, true);
+  LOG_STREAM_DISABLE(LogStream::WARNING);
+  LOG_STREAM_DISABLE(LogStream::DEBUG);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_VERBOSE);
+  LOG_STREAM_DISABLE(LogStream::DEBUG_EXTRA);
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_EXTRA);
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG_VERBOSE);
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+  } else if (_params.debug) {
+    LOG_STREAM_ENABLE(LogStream::DEBUG);
+    LOG_STREAM_ENABLE(LogStream::WARNING);
   }
 
 }
@@ -163,18 +183,18 @@ int RadxClutter::_runArchive()
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(_args.startTime, _args.endTime);
   if (tlist.compile()) {
-    cerr << "ERROR - RadxClutter::_runFilelist()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
-    cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
-    cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
-    cerr << tlist.getErrStr() << endl;
+    LOG(ERROR) << "ERROR - RadxClutter::_runFilelist()";
+    LOG(ERROR) << "  Cannot compile time list, dir: " << _params.input_dir;
+    LOG(ERROR) << "  Start time: " << RadxTime::strm(_args.startTime);
+    LOG(ERROR) << "  End time: " << RadxTime::strm(_args.endTime);
+    LOG(ERROR) << tlist.getErrStr();
     return -1;
   }
 
   const vector<string> &paths = tlist.getPathList();
   if (paths.size() < 1) {
-    cerr << "ERROR - RadxClutter::_runFilelist()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir << endl;
+    LOG(ERROR) << "ERROR - RadxClutter::_runFilelist()";
+    LOG(ERROR) << "  No files found, dir: " << _params.input_dir;
     return -1;
   }
   
@@ -224,6 +244,148 @@ int RadxClutter::_runRealtime()
 }
 
 //////////////////////////////////////////////////
+// Process a file
+// Returns 0 on success, -1 on failure
+
+int RadxClutter::_processFile(const string &filePath)
+{
+
+  // read in the file
+
+  if (_readFile(filePath)) {
+    return -1;
+  }
+
+  // check if this is an RHI
+  
+  _isRhi = _readVol.checkIsRhi();
+  if (_params.scan_mode == Params::PPI) {
+    if (_isRhi) {
+      LOG(ERROR) << "Scan mode is not PPI, ignoring file: " << filePath;
+      return -1;
+    }
+  } else {
+    if (!_isRhi) {
+      LOG(ERROR) << "Scan mode is not RHI, ignoring file: " << filePath;
+      return -1;
+    }
+  }
+
+  // initialize the clutter volume from the relevant scans in the file
+
+  if (_initClutterVol()) {
+    return -1;
+  }
+  
+  // process this data set
+  
+  if (_processDataSet()) {
+    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "  Cannot process data in file: " << filePath;
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// set up read
+
+void RadxClutter::_setupRead(RadxFile &file)
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    file.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.setVerbose(true);
+  }
+
+  file.setReadIgnoreTransitions(true);
+  file.setReadMaxRangeKm(_params.max_range_km);
+
+  file.addReadField(_params.dbz_field_name);
+
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.printReadRequest(cerr);
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Process in a file
+// Returns 0 on success, -1 on failure
+
+int RadxClutter::_readFile(const string &filePath)
+{
+
+  // check we have not already processed this file
+  // in the file aggregation step
+  
+  RadxPath thisPath(filePath);
+  for (size_t ii = 0; ii < _readPaths.size(); ii++) {
+    RadxPath rpath(_readPaths[ii]);
+    if (thisPath.getFile() == rpath.getFile()) {
+      LOG(DEBUG_VERBOSE) << "Skipping file: " << filePath;
+      LOG(DEBUG_VERBOSE) << "  Previously processed in aggregation step";
+      return 0;
+    }
+  }
+  
+  LOG(DEBUG) << "INFO - RadxClutter::_readFile";
+  LOG(DEBUG) << "  Input path: " << filePath;
+  
+  GenericRadxFile inFile;
+  _setupRead(inFile);
+  
+  // read in file
+  
+  _readVol.clear();
+  if (inFile.readFromPath(filePath, _readVol)) {
+    LOG(ERROR) << "ERROR - RadxClutter::_readFile";
+    LOG(ERROR) << inFile.getErrStr();
+    return -1;
+  }
+  _readPaths = inFile.getReadPaths();
+
+  // convert to floats
+  
+  _readVol.convertToFl32();
+  
+  // set number of gates constant
+  
+  _readVol.setNGatesConstant();
+
+  return 0;
+  
+}
+
+///////////////////////////////////////////
+// process this data set
+
+int RadxClutter::_processDataSet()
+  
+{
+
+  LOG(DEBUG) << "Processing data set ...";
+
+  // set up geom
+
+  _nGates = _readVol.getMaxNGates();
+  _radxStartRange = _readVol.getStartRangeKm();
+  _radxGateSpacing = _readVol.getGateSpacingKm();
+  
+  _radarName = _readVol.getInstrumentName();
+  _radarLatitude = _readVol.getLatitudeDeg();
+  _radarLongitude = _readVol.getLongitudeDeg();
+  _radarAltitude = _readVol.getAltitudeKm();
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
 // Initialize the angle list
 // Returns 0 on success, -1 on failure
 
@@ -264,11 +426,11 @@ void RadxClutter::_initAngleList()
     
     double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
 
-    double elev = _params.first_ray_angle;
+    double el = _params.first_ray_angle;
     double sumDelta = 0.0;
     while (sumDelta < sectorDelta) {
-      _scanAngles.push_back(elev);
-      elev = RadxComplex::computeSumDeg(elev, _params.delta_ray_angle);
+      _scanAngles.push_back(el);
+      el = RadxComplex::computeSumDeg(el, _params.delta_ray_angle);
       sumDelta += fabs(_params.delta_ray_angle);
     } // while (sumDelta < sectorDelta)
 
@@ -276,98 +438,80 @@ void RadxClutter::_initAngleList()
   
 }
 
-//////////////////////////////////////////////////
-// Process a file
-// Returns 0 on success, -1 on failure
+/////////////////////////////////////////////////////////////
+// initialize the clutter volume from the selected angles
+// this is not optimized for speed, but is simple and
+// performance is not limiting here.
 
-int RadxClutter::_processFile(const string &filePath)
+int RadxClutter::_initClutterVol()
 {
 
-  int iret = 0;
+  cerr << "11111111111 file: " << _readVol.getPathInUse() << endl;
   
-  if (_params.debug) {
-    cerr << "INFO - RadxClutter::_processFile" << endl;
-    cerr << "  Input path: " << filePath << endl;
-  }
-  
-  GenericRadxFile inFile;
-  _setupRead(inFile);
-  
-  // read in file
-  
-  _readVol.clear();
-  if (inFile.readFromPath(filePath, _readVol)) {
-    cerr << "ERROR - RadxClutter::Run" << endl;
-    cerr << inFile.getErrStr() << endl;
-    return -1;
-  }
-  _readPaths = inFile.getReadPaths();
+  // loop through the sweeps and scan angles
 
-  // set number of gates constant
-  
-  _readVol.setNGatesConstant();
-  
-  // convert to floats
-  
-  _readVol.convertToFl32();
-  
-  // process this data set
-  
-  if (_processDataSet()) {
-    cerr << "ERROR - RadxClutter::Run" << endl;
-    cerr << "  Cannot process data in file: " << filePath << endl;
-    return -1;
-  }
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  for (size_t isweep = 0; isweep < _fixedAngles.size(); isweep++) {
+    for (size_t iang = 0; iang < _scanAngles.size(); iang++) {
 
-  return iret;
+      // get the clutter angle
+      
+      double clutEl = _fixedAngles[isweep];
+      double clutAz = _scanAngles[iang];
+      if (_isRhi) {
+        clutEl = _scanAngles[iang];
+        clutAz = _fixedAngles[isweep];
+      }
 
-}
+      // find the closest ray in the measured volume
+      
+      double minAngDist = 1.0e6;
+      size_t matchRayIndex = 0;
+      double matchAz = -9999;
+      double matchEl = -9999;
+      bool matchFound = false;
+      
+      for (size_t ii = 0; ii < rays.size(); ii++) {
+        RadxRay *ray = rays[ii];
+        double rayEl = ray->getElevationDeg();
+        double rayAz = ray->getAzimuthDeg();
+        double dEl = fabs(rayEl - clutEl);
+        double dAz = fabs(rayAz - clutAz);
+        if (dEl > _params.elev_tolerance_deg ||
+            dAz > _params.az_tolerance_deg) {
+          continue;
+        }
+        double angDist = sqrt(dEl * dEl + dAz * dAz);
+        if (angDist < minAngDist) {
+          minAngDist = angDist;
+          matchRayIndex = ii;
+          matchEl = rayEl;
+          matchAz = rayAz;
+          matchFound = true;
+        }
+      } // ii
 
-//////////////////////////////////////////////////
-// set up read
-
-void RadxClutter::_setupRead(RadxFile &file)
-{
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    file.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.setVerbose(true);
-  }
-
-  file.addReadField(_params.dbz_field_name);
-
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    file.printReadRequest(cerr);
-  }
-
-}
-
-///////////////////////////////////////////
-// process this data set
-
-int RadxClutter::_processDataSet()
-  
-{
-
-  if (_params.debug) {
-    cerr << "Processing data set ..." << endl;
-  }
-
-  // set up geom
-
-  _nGates = _readVol.getMaxNGates();
-  _radxStartRange = _readVol.getStartRangeKm();
-  _radxGateSpacing = _readVol.getGateSpacingKm();
-  
-  _radarName = _readVol.getInstrumentName();
-  _radarLatitude = _readVol.getLatitudeDeg();
-  _radarLongitude = _readVol.getLongitudeDeg();
-  _radarAltitude = _readVol.getAltitudeKm();
+#ifdef JUNK
+      if (matchFound) {
+        fprintf(stderr, "1111111111 isweep, iang, index, rayEl, matchEl, rayAz, matchAz, dEl, dAz: %3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
+                isweep, iang, matchRayIndex,
+                clutEl, matchEl, clutAz, matchAz,
+                fabs(clutEl - matchEl),
+                fabs(clutAz - matchAz));
+      } else {
+        fprintf(stderr, "0000000000 isweep, iang, index, rayEl, matchEl, rayAz, matchAz, dEl, dAz: %3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
+                isweep, iang, matchRayIndex,
+                clutEl, matchEl, clutAz, matchAz,
+                fabs(clutEl - matchEl),
+                fabs(clutAz - matchAz));
+      }
+#endif
+      
+    } // iang
+  } // isweep
 
   return 0;
-
+  
 }
 
 //////////////////////////////////////
@@ -389,10 +533,8 @@ void RadxClutter::_writeLdataInfo(const string &outputPath)
   ldata.setIsFcast(false);
   ldata.write(_readVol.getStartTimeSecs());
   
-  if (_params.debug) {
-    cerr << "RadxClutter::_writeLdataInfo(): Data written to "
-         << outputPath << endl;
-  }
+  LOG(DEBUG) << "RadxClutter::_writeLdataInfo(): Data written to "
+             << outputPath;
 
 }
 

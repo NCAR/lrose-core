@@ -126,14 +126,14 @@ paramdef double
   p_descr = "Azimumth tolerance";
   p_help = "Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids";
   p_default = 0.1;
-} az_tolerance_degrees;
+} az_tolerance_deg;
 
 paramdef double
 {
   p_descr = "Elevation tolerance";
   p_help = "Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids";
   p_default = 0.1;
-} elev_tolerance_degrees;
+} elev_tolerance_deg;
 
 paramdef double {
   p_default = 60.0;

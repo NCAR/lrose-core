@@ -89,6 +89,7 @@ private:
   // input data
 
   RadxVol _readVol;
+  bool _isRhi;
   vector<double> _fixedAngles;
   vector<double> _scanAngles;
   
@@ -114,8 +115,11 @@ private:
   int _runArchive();
   int _runRealtime();
   void _setupRead(RadxFile &file);
-  void _initAngleList();
+  int _readFile(const string &filePath);
   int _processFile(const string &filePath);
+
+  int _initClutterVol();
+  void _initAngleList();
 
   int _processDataSet();
 

@@ -400,9 +400,9 @@ public:
 
   double delta_ray_angle;
 
-  double az_tolerance_degrees;
+  double az_tolerance_deg;
 
-  double elev_tolerance_degrees;
+  double elev_tolerance_deg;
 
   double max_range_km;
 
