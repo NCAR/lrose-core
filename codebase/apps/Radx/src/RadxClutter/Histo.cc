@@ -52,9 +52,14 @@ Histo::Histo(const double minBin, const double deltaBin,
 {
   _nbin = (_maxBin-_minBin)/_deltaBin + 1;
   _counts.resize(_nbin);
-  for (int i=0; i<_nbin; ++i)
-  {
+  _freq.resize(_nbin);
+  _omega.resize(_nbin);
+  _mu.resize(_nbin);
+  _var.resize(_nbin);
+
+  for (int i=0; i<_nbin; ++i) {
     _counts[i] = 0;
+    _freq[i] = 0;
   }
 }
 
@@ -77,9 +82,14 @@ void Histo::init(const double minBin, const double deltaBin,
 
   _nbin = (_maxBin-_minBin)/_deltaBin + 1;
   _counts.resize(_nbin);
-  for (int i=0; i<_nbin; ++i)
-  {
+  _freq.resize(_nbin);
+  _omega.resize(_nbin);
+  _mu.resize(_nbin);
+  _var.resize(_nbin);
+
+  for (int i=0; i<_nbin; ++i) {
     _counts[i] = 0;
+    _freq[i] = 0;
   }
 }
 
@@ -154,21 +164,70 @@ bool Histo::computePercentile(const double pct, double &v) const
 }
 
 //------------------------------------------------------------------
-void Histo::print(FILE *out) const
+void Histo::computeFreq()
 {
-  fprintf(out, "Nmissing:%d NbelowMin:%d, Ntotal:%d\n",
-          _nmissing, _countBelowMin,
-          _ntotal);
   for (int i=0; i<_nbin; ++i) {
-    fprintf(out, "bin[%lf]:%d\n",
-            _minBin+_deltaBin*static_cast<double>(i),
-            _counts[i]);
+    _freq[i] = (double) _counts[i] / (double) _ntotal;
   }
 }
 
 //------------------------------------------------------------------
-void Histo::print(FILE *out, const double x) const
+void Histo::computeVariance()
+{
+
+  // first compute the zeroth and first cumulative moments
+  
+  double omega = 0.0;
+  double mu = 0.0;
+  for (int i=0; i<_nbin; ++i) {
+    omega += _freq[i];
+    mu += (_freq[i] * i);
+    _omega[i] = omega;
+    _mu[i] = mu;
+  }
+
+  // now compute the variance
+
+  for (int i=0; i<_nbin; ++i) {
+    double fac1 = _mu[_nbin-1] * _omega[i] - _mu[i];
+    double fac2 = _omega[i] * (1.0 - _omega[i]);
+    _var[i] = (fac1 * fac1) / fac2;
+  }
+
+}
+
+//------------------------------------------------------------------
+void Histo::print(FILE *out)
+{
+  computeFreq();
+  fprintf(out, "Nmissing:%d NbelowMin:%d, Ntotal:%d\n",
+          _nmissing, _countBelowMin,
+          _ntotal);
+  for (int i=0; i<_nbin; ++i) {
+    fprintf(out, "bin[%lf] %10d %10.3f\n",
+            _minBin+_deltaBin*static_cast<double>(i),
+            _counts[i], _freq[i]);
+  }
+}
+
+//------------------------------------------------------------------
+void Histo::print(FILE *out, const double x)
 {
   fprintf(out, "x=%lf ", x);
   print(out);
 }
+
+//------------------------------------------------------------------
+void Histo::printVariance(FILE *out)
+{
+  computeFreq();
+  computeVariance();
+  fprintf(out, "%10s %10s %10s %10s\n",
+          "bin", "omega", "mu", "var");
+  for (int i=0; i<_nbin; ++i) {
+    fprintf(out, "bin[%10lf] %10.3f %10.3f %10.3f\n",
+            _minBin+_deltaBin*static_cast<double>(i),
+            _omega[i], _mu[i], _var[i]);
+  }
+}
+

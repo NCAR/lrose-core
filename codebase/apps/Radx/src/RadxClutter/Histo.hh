@@ -93,16 +93,27 @@ public:
   bool computePercentile(const double pct, double &v) const;
   
   /**
+   * Compute frequency per bin
+   */
+  void computeFreq();
+
+  /**
+   * Compute variance per bin
+   */
+  void computeVariance();
+
+  /**
    * Debug print 
    */
-  void print(FILE *out) const;
+  void print(FILE *out);
 
   /**
    * Debug print with an x=input value  prior
    *
    * @param[in] x  The value to print out before debug print
    */
-  void print(FILE *out, const double x) const;
+  void print(FILE *out, const double x);
+  void printVariance(FILE *out);
 
 protected:
 private:  
@@ -116,7 +127,12 @@ private:
   int _countBelowMin;    /**< number of points below the minimum bin */
   int _ntotal;           /**< number of points total */
 
-  std::vector<int> _counts;  /**< The bin contents */
+  std::vector<int>  _counts;  /**< The bin contents */
+  std::vector<double> _freq;  /**< The bin frequency */
+  std::vector<double> _omega; /**< zero-th cumulative moment */
+  std::vector<double> _mu;    /**< first cumulative moment */
+  std::vector<double> _var;   /**< interclass variance */
+  
 };
 
 # endif

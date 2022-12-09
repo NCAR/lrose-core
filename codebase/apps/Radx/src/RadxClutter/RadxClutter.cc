@@ -258,6 +258,19 @@ int RadxClutter::_processFile(const string &filePath)
     return -1;
   }
 
+  // check for substr
+  
+  string subStr = _params.file_name_substr;
+  if (subStr.size() > 0) {
+    RadxPath rpath(filePath);
+    string fileName = rpath.getFile();
+    if (fileName.find(subStr) == string::npos) {
+      LOG(DEBUG) << "Looking for substr: " << subStr;
+      LOG(DEBUG) << "No substr found, ignoring file: " << filePath;
+      return 0;
+    }
+  }
+  
   // check if this is an RHI
   
   _isRhi = _readVol.checkIsRhi();
@@ -363,19 +376,6 @@ int RadxClutter::_readFile(const string &filePath)
   }
   _readPaths = inFile.getReadPaths();
 
-  // check for substr
-
-  string subStr = _params.file_name_substr;
-  if (subStr.size() > 0) {
-    RadxPath rpath(filePath);
-    string fileName = rpath.getFile();
-    if (fileName.find(subStr) == string::npos) {
-      LOG(DEBUG) << "Looking for substr: " << subStr;
-      LOG(DEBUG) << "No substr found, ignoring file: " << filePath;
-      return -1;
-    }
-  }
-  
   // convert to floats
   
   _readVol.convertToFl32();
@@ -463,6 +463,7 @@ int RadxClutter::_analyzeClutter()
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _clutFreqHist.print(stderr);
+    _clutFreqHist.printVariance(stderr);
   }
   
   return 0;
