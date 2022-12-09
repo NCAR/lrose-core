@@ -362,6 +362,15 @@ fields = {
   }
   ,
   {
+    label = "dbzSdev",
+    raw_name = "dbzSdev",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
+  }
+  ,
+  {
     label = "clutFreq",
     raw_name = "clutFreq",
     filtered_name = "",

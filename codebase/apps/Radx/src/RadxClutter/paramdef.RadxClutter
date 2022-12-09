@@ -262,9 +262,16 @@ paramdef string
 paramdef string
 {
   p_descr = "Field name for mean dbz.";
-  p_help = "The dbz mean field will be added to the output data set.";
+  p_help = "The dbz mean field is added to the output data set.";
   p_default = "dbzMean";
 } dbz_mean_field_name;
+
+paramdef string
+{
+  p_descr = "Field name for standard deviation of dbz.";
+  p_help = "The dbz sdev field is added to the output data set.";
+  p_default = "dbzSdev";
+} dbz_sdev_field_name;
 
 paramdef string
 {

@@ -416,7 +416,9 @@ int RadxClutter::_analyzeClutter()
     Radx::fl32 *dbzVals = dbzFld->getDataFl32();
     Radx::fl32 *dbzCount = _dbzCount[iray];
     Radx::fl32 *dbzSum = _dbzSum[iray];
+    Radx::fl32 *dbzSqSum = _dbzSqSum[iray];
     Radx::fl32 *dbzMean = _dbzMean[iray];
+    Radx::fl32 *dbzSdev = _dbzSdev[iray];
     Radx::fl32 *clutSum = _clutSum[iray];
     Radx::fl32 *clutFreq = _clutFreq[iray];
     
@@ -424,14 +426,27 @@ int RadxClutter::_analyzeClutter()
       Radx::fl32 dbzVal = dbzVals[igate];
       if (dbzVal != dbzMiss) {
         dbzSum[igate] += dbzVal;
+        dbzSqSum[igate] += (dbzVal * dbzVal);
         dbzCount[igate] += 1.0;
         if (dbzVal >= _params.dbz_clutter_threshold) {
           clutSum[igate] += 1.0;
         }
       }
-      if (dbzCount[igate] > 0) {
-        dbzMean[igate] = dbzSum[igate] / dbzCount[igate];
-        clutFreq[igate] = clutSum[igate] / dbzCount[igate];
+      double count = dbzCount[igate];
+      if (count > 0) {
+        dbzMean[igate] = dbzSum[igate] / count;
+        clutFreq[igate] = clutSum[igate] / count;
+      }
+      if (count > 1) {
+        double sum = dbzSum[igate];
+        double sumSq = dbzSqSum[igate];
+        double var =
+          (sumSq - (sum * sum) / count) / (count - 1.0);
+        if (var > 0.0) {
+          dbzSdev[igate] = sqrt(var);
+        } else {
+          dbzSdev[igate] = 0.0;
+        }
       }
     } // igate
 
@@ -441,6 +456,10 @@ int RadxClutter::_analyzeClutter()
     dbzMeanFldOut->setName(_params.dbz_mean_field_name);
     dbzMeanFldOut->setDataFl32(_nGates, dbzMean, true);
     
+    RadxField *dbzSdevFldOut = new RadxField(*dbzFld);
+    dbzSdevFldOut->setName(_params.dbz_sdev_field_name);
+    dbzSdevFldOut->setDataFl32(_nGates, dbzSdev, true);
+    
     RadxField *clutFreqFldOut = new RadxField(*dbzFld);
     clutFreqFldOut->setName(_params.clut_freq_field_name);
     clutFreqFldOut->setLongName("ClutterTimeFraction");
@@ -448,6 +467,7 @@ int RadxClutter::_analyzeClutter()
     clutFreqFldOut->setDataFl32(_nGates, clutFreq, true);
 
     ray->addField(dbzMeanFldOut);
+    ray->addField(dbzSdevFldOut);
     ray->addField(clutFreqFldOut);
     
   } // iray
@@ -704,8 +724,10 @@ int RadxClutter::_initClutterVol()
     // allocate arrays for analysis
     
     _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
+    _dbzSqSum = _dbzSqSumArray.alloc(_nRaysClutter, _nGates);
     _dbzCount = _dbzCountArray.alloc(_nRaysClutter, _nGates);
     _dbzMean = _dbzMeanArray.alloc(_nRaysClutter, _nGates);
+    _dbzSdev = _dbzSdevArray.alloc(_nRaysClutter, _nGates);
     _clutSum = _clutSumArray.alloc(_nRaysClutter, _nGates);
     _clutFreq = _clutFreqArray.alloc(_nRaysClutter, _nGates);
     _clutFlag = _clutFlagArray.alloc(_nRaysClutter, _nGates);
@@ -714,10 +736,14 @@ int RadxClutter::_initClutterVol()
     
     Radx::fl32 *dbzSum1D = _dbzSumArray.dat1D();
     memset(dbzSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *dbzSqSum1D = _dbzSqSumArray.dat1D();
+    memset(dbzSqSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
     Radx::fl32 *dbzCount1D = _dbzCountArray.dat1D();
     memset(dbzCount1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
     Radx::fl32 *dbzMean1D = _dbzMeanArray.dat1D();
     memset(dbzMean1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *dbzSdev1D = _dbzSdevArray.dat1D();
+    memset(dbzSdev1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
 
     Radx::fl32 *clutSum1D = _clutSumArray.dat1D();
     memset(clutSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));

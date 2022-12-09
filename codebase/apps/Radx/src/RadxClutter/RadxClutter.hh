@@ -123,11 +123,17 @@ private:
   TaArray2D<Radx::fl32> _dbzSumArray;
   Radx::fl32 **_dbzSum;
 
+  TaArray2D<Radx::fl32> _dbzSqSumArray;
+  Radx::fl32 **_dbzSqSum;
+
   TaArray2D<Radx::fl32> _dbzCountArray;
   Radx::fl32 **_dbzCount;
 
   TaArray2D<Radx::fl32> _dbzMeanArray;
   Radx::fl32 **_dbzMean;
+
+  TaArray2D<Radx::fl32> _dbzSdevArray;
+  Radx::fl32 **_dbzSdev;
 
   TaArray2D<Radx::fl32> _clutSumArray;
   Radx::fl32 **_clutSum;

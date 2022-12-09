@@ -988,9 +988,21 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_mean_field_name");
     tt->descr = tdrpStrDup("Field name for mean dbz.");
-    tt->help = tdrpStrDup("The dbz mean field will be added to the output data set.");
+    tt->help = tdrpStrDup("The dbz mean field is added to the output data set.");
     tt->val_offset = (char *) &dbz_mean_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMean");
+    tt++;
+    
+    // Parameter 'dbz_sdev_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("dbz_sdev_field_name");
+    tt->descr = tdrpStrDup("Field name for standard deviation of dbz.");
+    tt->help = tdrpStrDup("The dbz sdev field is added to the output data set.");
+    tt->val_offset = (char *) &dbz_sdev_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzSdev");
     tt++;
     
     // Parameter 'clut_freq_field_name'

@@ -438,6 +438,8 @@ public:
 
   char* dbz_mean_field_name;
 
+  char* dbz_sdev_field_name;
+
   char* clut_freq_field_name;
 
   char* clut_flag_field_name;
@@ -449,7 +451,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 
