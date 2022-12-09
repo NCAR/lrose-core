@@ -460,12 +460,50 @@ int RadxClutter::_analyzeClutter()
       _clutFreqHist.update(clutFreq[igate]);
     }
   }
-
+  _clutFreqHist.computeVariance();
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _clutFreqHist.print(stderr);
     _clutFreqHist.printVariance(stderr);
   }
+
+  // set the clutter flag
+
+  double maxVariance;
+  double freqForMax = _clutFreqHist.getFreqForMaxVar(maxVariance);
+
+  LOG(DEBUG) << "  Freq histogram stats - maxVar, freqForMax: "
+             << maxVariance << ", " << freqForMax;
   
+  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+    Radx::fl32 *clutFreq = _clutFreq[iray];
+    Radx::fl32 *clutFlag = _clutFlag[iray];
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      if (clutFreq[igate] > freqForMax) {
+        clutFlag[igate] = 1.0;
+      } else {
+        clutFlag[igate] = 0.0;
+      }
+    } // igate
+  } // iray
+
+  // add the clutter flag to the output
+  
+  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+    RadxRay *ray = rays[iray];
+    RadxField *dbzFld = ray->getField(_params.dbz_field_name);
+    if (dbzFld == NULL) {
+      continue;
+    }
+    Radx::fl32 *clutFlag = _clutFlag[iray];
+    RadxField *clutFlagFldOut = new RadxField(*dbzFld);
+    clutFlagFldOut->setName(_params.clut_flag_field_name);
+    clutFlagFldOut->setLongName("ClutterFlag");
+    clutFlagFldOut->setUnits("");
+    clutFlagFldOut->setDataFl32(_nGates, clutFlag, true);
+    ray->addField(clutFlagFldOut);
+  } // iray
+
   return 0;
 
 }
@@ -670,6 +708,7 @@ int RadxClutter::_initClutterVol()
     _dbzMean = _dbzMeanArray.alloc(_nRaysClutter, _nGates);
     _clutSum = _clutSumArray.alloc(_nRaysClutter, _nGates);
     _clutFreq = _clutFreqArray.alloc(_nRaysClutter, _nGates);
+    _clutFlag = _clutFlagArray.alloc(_nRaysClutter, _nGates);
 
     // initialize to 0
     
@@ -684,6 +723,8 @@ int RadxClutter::_initClutterVol()
     memset(clutSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
     Radx::fl32 *clutFreq1D = _clutFreqArray.dat1D();
     memset(clutFreq1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *clutFlag1D = _clutFlagArray.dat1D();
+    memset(clutFlag1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
 
   } else {
     

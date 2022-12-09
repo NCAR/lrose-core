@@ -264,7 +264,7 @@ dbz_field_name = "DBZ";
 // Type: double
 //
 
-dbz_clutter_threshold = 30;
+dbz_clutter_threshold = 10;
 
 ///////////// clutter_percentile //////////////////////
 //
@@ -449,4 +449,16 @@ dbz_mean_field_name = "dbzMean";
 //
 
 clut_freq_field_name = "clutFreq";
+
+///////////// clut_flag_field_name ////////////////////
+//
+// Field name for clutter flag.
+//
+// This flag indicates that the gate has persistent clutter.
+//
+//
+// Type: string
+//
+
+clut_flag_field_name = "clutFlag";
 

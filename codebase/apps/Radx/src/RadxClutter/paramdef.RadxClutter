@@ -273,3 +273,10 @@ paramdef string
   p_default = "clutFreq";
 } clut_freq_field_name;
 
+paramdef string
+{
+  p_descr = "Field name for clutter flag.";
+  p_help = "This flag indicates that the gate has persistent clutter.";
+  p_default = "clutFlag";
+} clut_flag_field_name;
+

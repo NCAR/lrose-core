@@ -103,6 +103,11 @@ public:
   void computeVariance();
 
   /**
+   * get the frequency value for max variance
+   */
+  double getFreqForMaxVar(double &maxVar);
+
+  /**
    * Debug print 
    */
   void print(FILE *out);

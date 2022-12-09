@@ -135,6 +135,9 @@ private:
   TaArray2D<Radx::fl32> _clutFreqArray;
   Radx::fl32 **_clutFreq;
 
+  TaArray2D<Radx::fl32> _clutFlagArray;
+  Radx::fl32 **_clutFlag;
+
   // clutter frequency histogram
 
   Histo _clutFreqHist;

@@ -371,11 +371,11 @@ fields = {
   }
   ,
   {
-    label = "NormFreqCount",
-    raw_name = "NormFreqCount",
+    label = "clutFlag",
+    raw_name = "clutFlag",
     filtered_name = "",
     units = "",
-    color_map = "fraction.colors",
+    color_map = "cmd_flag_xml.colors",
     shortcut = "2"
   }
   ,

@@ -1005,6 +1005,18 @@
     tt->single_val.s = tdrpStrDup("clutFreq");
     tt++;
     
+    // Parameter 'clut_flag_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("clut_flag_field_name");
+    tt->descr = tdrpStrDup("Field name for clutter flag.");
+    tt->help = tdrpStrDup("This flag indicates that the gate has persistent clutter.");
+    tt->val_offset = (char *) &clut_flag_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("clutFlag");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

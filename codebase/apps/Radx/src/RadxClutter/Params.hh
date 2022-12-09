@@ -440,6 +440,8 @@ public:
 
   char* clut_freq_field_name;
 
+  char* clut_flag_field_name;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -447,7 +449,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[37];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

@@ -25,7 +25,10 @@
  * @file Histo.cc
  */
 #include <cstdio>
+#include <iostream>
 #include "Histo.hh"
+
+using namespace std;
 
 //------------------------------------------------------------------
 Histo::Histo() :
@@ -194,6 +197,23 @@ void Histo::computeVariance()
     _var[i] = (fac1 * fac1) / fac2;
   }
 
+}
+
+//------------------------------------------------------------------
+double Histo::getFreqForMaxVar(double &maxVar)
+{
+  computeFreq();
+  computeVariance();
+  double maxV = -1.0e9;
+  double valForMax = 0.0;
+  for (int i=0; i<_nbin; ++i) {
+    if (_var[i] > maxV) {
+      maxV = _var[i];
+      valForMax = _minBin + i * _deltaBin;
+    }
+  }
+  maxVar = maxV;
+  return valForMax;
 }
 
 //------------------------------------------------------------------
