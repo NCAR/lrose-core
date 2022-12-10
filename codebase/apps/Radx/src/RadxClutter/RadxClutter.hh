@@ -76,8 +76,6 @@ public:
 
   int OK;
   
-  const static double missingVal;
-  
 protected:
 private:
 
@@ -99,7 +97,6 @@ private:
   double _radxStartRange;
   double _radxGateSpacing;
 
-  string _radarName;
   double _radarLatitude;
   double _radarLongitude;
   double _radarAltitude;
@@ -157,6 +154,7 @@ private:
   int _readFile(const string &filePath);
   int _processFile(const string &filePath);
 
+  int _checkGeom();
   int _initClutterVol();
   void _initAngleList();
 

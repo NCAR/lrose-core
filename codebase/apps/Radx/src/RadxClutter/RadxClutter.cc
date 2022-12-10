@@ -31,29 +31,20 @@
 ///////////////////////////////////////////////////////////////
 
 #include "RadxClutter.hh"
-#include <Radx/RadxSweep.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/RadxField.hh>
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxComplex.hh>
-#include <Ncxx/Nc3xFile.hh>
 #include <Mdv/GenericRadxFile.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <toolsa/pmu.h>
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/sincos.h>
-#include <toolsa/TaArray.hh>
-#include <toolsa/Path.hh>
-#include <toolsa/file_io.h>
 #include <toolsa/LogStream.hh>
 #include <toolsa/LogStreamInit.hh>
 #include <algorithm>
 
 using namespace std;
-
-const double RadxClutter::missingVal = -9999.0;
 
 // Constructor
 
@@ -286,11 +277,19 @@ int RadxClutter::_processFile(const string &filePath)
     }
   }
 
+  // check the geometry has not changed
+
+  if (_checkGeom()) {
+    return -1;
+  }
+
   // initialize the clutter volume from the relevant scans in the file
 
   if (_initClutterVol()) {
     return -1;
   }
+
+  _nVols++;
   
   // initialize the histogram for the clutter frequency
   
@@ -609,6 +608,90 @@ void RadxClutter::_initAngleList()
 }
 
 /////////////////////////////////////////////////////////////
+// check ray geometry in volume
+
+int RadxClutter::_checkGeom()
+{
+  
+  const vector<RadxRay *> &rays = _readVol.getRays();
+  if (rays.size() < 1) {
+    return -1;
+  }
+  
+  if (_nVols == 0) {
+
+    // initialize geom
+    
+    _nGates = _readVol.getMaxNGates();
+    _radxStartRange = _readVol.getStartRangeKm();
+    _radxGateSpacing = _readVol.getGateSpacingKm();
+    
+    _radarLatitude = _readVol.getLatitudeDeg();
+    _radarLongitude = _readVol.getLongitudeDeg();
+    _radarAltitude = _readVol.getAltitudeKm();
+    
+  } else {
+
+    // check geom
+
+    size_t nGates = _readVol.getMaxNGates();
+    if (nGates != _nGates) {
+      _readVol.setNGates(_nGates);
+    }
+
+    double radxStartRange = _readVol.getStartRangeKm();
+    double radxGateSpacing = _readVol.getGateSpacingKm();
+    
+    double radarLatitude = _readVol.getLatitudeDeg();
+    double radarLongitude = _readVol.getLongitudeDeg();
+    double radarAltitude = _readVol.getAltitudeKm();
+
+    int iret = 0;
+
+    if (fabs(_radxStartRange - radxStartRange) > 0.0001) {
+      LOG(ERROR) << "ERROR - RadxClutter::_checkGeom()";
+      LOG(ERROR) << "  startRange changed: " << radxStartRange;
+      LOG(ERROR) << "      previous value: " << _radxStartRange;
+      iret = -1;
+    }
+
+    if (fabs(_radxGateSpacing - radxGateSpacing) > 0.0001) {
+      LOG(ERROR) << "ERROR - RadxClutter::_checkGeom()";
+      LOG(ERROR) << "  gateSpacing changed: " << radxGateSpacing;
+      LOG(ERROR) << "      previous value: " << _radxGateSpacing;
+      iret = -1;
+    }
+    
+    if (fabs(_radarLatitude - radarLatitude) > 0.0001) {
+      LOG(ERROR) << "ERROR - RadxClutter::_checkGeom()";
+      LOG(ERROR) << "  radarLatitude changed: " << radarLatitude;
+      LOG(ERROR) << "        previous value: " << _radarLatitude;
+      iret = -1;
+    }
+
+    if (fabs(_radarLongitude - radarLongitude) > 0.0001) {
+      LOG(ERROR) << "ERROR - RadxClutter::_checkGeom()";
+      LOG(ERROR) << "  radarLongitude changed: " << radarLongitude;
+      LOG(ERROR) << "        previous value: " << _radarLongitude;
+      iret = -1;
+    }
+    
+    if (fabs(_radarAltitude - radarAltitude) > 0.0001) {
+      LOG(ERROR) << "ERROR - RadxClutter::_checkGeom()";
+      LOG(ERROR) << "  radarAltitude changed: " << radarAltitude;
+      LOG(ERROR) << "        previous value: " << _radarAltitude;
+      iret = -1;
+    }
+
+    return iret;
+
+  }
+
+  return 0;
+  
+}
+
+/////////////////////////////////////////////////////////////
 // initialize the clutter volume from the selected angles
 // this is not optimized for speed, but is simple and
 // performance is not limiting here.
@@ -735,19 +818,10 @@ int RadxClutter::_initClutterVol()
   _clutterVol.loadVolumeInfoFromRays();
   _nRaysClutter = _clutterVol.getNRays();
   
-  // set up geom
+  // allocate
 
   if (_nVols == 0) {
     
-    _nGates = _clutterVol.getMaxNGates();
-    _radxStartRange = _clutterVol.getStartRangeKm();
-    _radxGateSpacing = _clutterVol.getGateSpacingKm();
-    
-    _radarName = _clutterVol.getInstrumentName();
-    _radarLatitude = _clutterVol.getLatitudeDeg();
-    _radarLongitude = _clutterVol.getLongitudeDeg();
-    _radarAltitude = _clutterVol.getAltitudeKm();
-
     // allocate arrays for analysis
     
     _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
@@ -779,13 +853,7 @@ int RadxClutter::_initClutterVol()
     Radx::fl32 *clutFlag1D = _clutFlagArray.dat1D();
     memset(clutFlag1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
 
-  } else {
-    
-    _clutterVol.setNGates(_nGates);
-    
   }
-
-  _nVols++;
 
   return 0;
   
@@ -851,7 +919,7 @@ int RadxClutter::_writeClutterVol()
     ldata.setDataType("netCDF");
     
     string fileName;
-    Path::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
+    RadxPath::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
     ldata.setRelDataPath(fileName);
     
     ldata.setIsFcast(false);
