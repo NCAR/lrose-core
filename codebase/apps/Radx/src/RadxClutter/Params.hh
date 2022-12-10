@@ -81,6 +81,11 @@ public:
   } mode_t;
 
   typedef enum {
+    CLUTTER_ANALYSIS = 0,
+    CLUTTER_REMOVAL = 1
+  } action_t;
+
+  typedef enum {
     PPI = 0,
     RHI = 1
   } scan_mode_t;
@@ -391,6 +396,8 @@ public:
 
   int max_realtime_data_age_secs;
 
+  action_t action;
+
   scan_mode_t scan_mode;
 
   double *_sweep_fixed_angles;
@@ -443,7 +450,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[36];
+  mutable TDRPtable _table[38];
 
   const char *_className;
 

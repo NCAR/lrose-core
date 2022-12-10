@@ -84,6 +84,23 @@ paramdef int {
 } max_realtime_data_age_secs;
 
 commentdef {
+  p_header = "ACTION";
+  p_text = "There are 2 possible actions: (a) analyze the clutter from a number of volumes, and store the results in a CfRadial file; or (b) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.";
+};
+
+typedef enum
+  {
+   CLUTTER_ANALYSIS, CLUTTER_REMOVAL
+  } action_t;
+
+paramdef enum action_t
+  {
+   p_default = CLUTTER_ANALYSIS;
+   p_descr = "Action to be performed";
+   p_help = "CLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the cliutter statistics in CfRadialFiles. CLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.";
+  } action;
+
+commentdef {
   p_header = "SCAN DETAILS";
   p_text = "We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.";
 };

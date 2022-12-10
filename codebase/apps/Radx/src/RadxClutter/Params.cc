@@ -680,6 +680,35 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
+    tt->comment_hdr = tdrpStrDup("ACTION");
+    tt->comment_text = tdrpStrDup("There are 2 possible actions: (a) analyze the clutter from a number of volumes, and store the results in a CfRadial file; or (b) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.");
+    tt++;
+    
+    // Parameter 'action'
+    // ctype is '_action_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("action");
+    tt->descr = tdrpStrDup("Action to be performed");
+    tt->help = tdrpStrDup("CLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the cliutter statistics in CfRadialFiles. CLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
+    tt->val_offset = (char *) &action - &_start_;
+    tt->enum_def.name = tdrpStrDup("action_t");
+    tt->enum_def.nfields = 2;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_ANALYSIS");
+      tt->enum_def.fields[0].val = CLUTTER_ANALYSIS;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_REMOVAL");
+      tt->enum_def.fields[1].val = CLUTTER_REMOVAL;
+    tt->single_val.e = CLUTTER_ANALYSIS;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("SCAN DETAILS");
     tt->comment_text = tdrpStrDup("We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.");
     tt++;
@@ -798,11 +827,11 @@
     tt->single_val.d = 60;
     tt++;
     
-    // Parameter 'Comment 4'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("ALGORITHM DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -891,11 +920,11 @@
     tt->single_val.d = 0.95;
     tt++;
     
-    // Parameter 'Comment 5'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("Clutter statistics output");
     tt->comment_text = tdrpStrDup("Writing out the results of identifying clutter");
     tt++;
@@ -972,11 +1001,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("Clutter-removed output");
     tt->comment_text = tdrpStrDup("Writing out volumes with clutter removed.");
     tt++;
