@@ -368,7 +368,7 @@ int RadxClutter::_performFiltering()
 
   if (_writeFiltVol()) {
     LOG(ERROR) << "ERROR - RadxClutter::Run";
-    LOG(ERROR) << "  Cannot write out clutter-removed volume";
+    LOG(ERROR) << "  Cannot write out filtered volume";
     return -1;
   }
 
@@ -392,10 +392,19 @@ void RadxClutter::_setupRead(RadxFile &file)
   file.setReadIgnoreTransitions(true);
   file.setReadMaxRangeKm(_params.max_range_km);
 
-  file.addReadField(_params.dbz_field_name);
 
-  if (_params.use_vel_field) {
-    file.addReadField(_params.vel_field_name);
+  if (_params.action == Params::ANALYZE_CLUTTER) {
+    file.addReadField(_params.dbz_field_name);
+    if (_params.use_vel_field) {
+      file.addReadField(_params.vel_field_name);
+    }
+  } else {
+    if (_params.specify_output_fields) {
+      file.addReadField(_params.dbz_field_name);
+      for (int ii = 0; ii < _params.output_fields_n; ii++) {
+        file.addReadField(_params._output_fields[ii]);
+      }
+    }
   }
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -1076,7 +1085,7 @@ RadxRay *RadxClutter::_getClutRay(RadxRay *ray)
     double angDist = sqrt(dEl * dEl + dAz * dAz);
     if (angDist < minAngDist) {
       minAngDist = angDist;
-      matchRay = ray;
+      matchRay = clutRay;
     }
   } // ii
   
@@ -1091,7 +1100,7 @@ int RadxClutter::_filterClutter()
   
 {
 
-  LOG(DEBUG) << "Removing clutter from volume ..." << _readPath;
+  LOG(DEBUG) << "Filtering clutter from volume ..." << _readPath;
   
   // copy the read volume
   
@@ -1136,26 +1145,26 @@ void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
 
   // get the clutter stats
   
-  RadxField *dbzMeanFld = ray->getField(_params.dbz_mean_field_name);
+  const RadxField *dbzMeanFld = clutRay->getField(_params.dbz_mean_field_name);
   if (dbzMeanFld == NULL) {
     return;
   }
   Radx::fl32 dbzMeanMiss = dbzMeanFld->getMissingFl32();
-  Radx::fl32 *dbzMeanVals = dbzMeanFld->getDataFl32();
+  const Radx::fl32 *dbzMeanVals = dbzMeanFld->getDataFl32();
 
-  RadxField *dbzSdevFld = ray->getField(_params.dbz_sdev_field_name);
+  const RadxField *dbzSdevFld = clutRay->getField(_params.dbz_sdev_field_name);
   if (dbzSdevFld == NULL) {
     return;
   }
   Radx::fl32 dbzSdevMiss = dbzSdevFld->getMissingFl32();
-  Radx::fl32 *dbzSdevVals = dbzSdevFld->getDataFl32();
+  const Radx::fl32 *dbzSdevVals = dbzSdevFld->getDataFl32();
 
-  RadxField *clutFlagFld = ray->getField(_params.clut_flag_field_name);
+  const RadxField *clutFlagFld = clutRay->getField(_params.clut_flag_field_name);
   if (clutFlagFld == NULL) {
     return;
   }
   Radx::fl32 clutFlagMiss = clutFlagFld->getMissingFl32();
-  Radx::fl32 *clutFlagVals = clutFlagFld->getDataFl32();
+  const Radx::fl32 *clutFlagVals = clutFlagFld->getDataFl32();
 
   // create the filt dbz field
   
@@ -1189,11 +1198,12 @@ void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
       continue;
     }
 
-    double dbzThreshold = dbzMean + dbzSdev * _params.n_sdev_for_clut_threshold;
-    if (dbz >= dbzThreshold) {
-      filtVals[ii] = dbz;
-    } else {
-      filtVals[ii] = _params.min_dbz_filt;
+    double clutThreshold = dbzMean + dbzSdev * _params.n_sdev_for_clut_threshold;
+    filtVals[ii] = dbz;
+    if (clutFlag > 0) {
+      if (dbz < clutThreshold) {
+        filtVals[ii] = _params.min_dbz_filt;
+      }
     }
 
   } // ii

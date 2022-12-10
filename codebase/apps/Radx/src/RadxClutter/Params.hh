@@ -451,6 +451,11 @@ public:
 
   char* filt_output_dir;
 
+  tdrp_bool_t specify_output_fields;
+
+  char* *_output_fields;
+  int output_fields_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -458,7 +463,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

@@ -306,3 +306,16 @@ paramdef string
   p_default = "unknown";
 } filt_output_dir;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the fields to be written out with the filtered data.";
+  p_help = "If false all fields will be copied through. If true, only the specified fields will be copied through.";
+} specify_output_fields;
+
+paramdef string
+{
+  p_descr = "Output fields to be copied through.";
+  p_help = "These fields will be copied, along with the unfiltered and filtered reflectivity.";
+  p_default = { "DBZ", "VEL", "WIDTH", "ZDR", "PHIDP", "RHOHV" };
+} output_fields[];
+

@@ -346,7 +346,7 @@ fields = {
   {
     label = "DBZ",
     raw_name = "DBZ",
-        filtered_name = "",
+    filtered_name = "DBZ_F",
     units = "dBZ",
     color_map = "dbz.colors",
     shortcut = "1"
@@ -395,6 +395,15 @@ fields = {
     units = "",
     color_map = "cmd_flag_xml.colors",
     shortcut = "2"
+  }
+  ,
+  {
+    label = "dbzFilt",
+    raw_name = "dbzFilt",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
   }
   // ,
   // {

@@ -1070,6 +1070,42 @@
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
+    // Parameter 'specify_output_fields'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_output_fields");
+    tt->descr = tdrpStrDup("Option to specify the fields to be written out with the filtered data.");
+    tt->help = tdrpStrDup("If false all fields will be copied through. If true, only the specified fields will be copied through.");
+    tt->val_offset = (char *) &specify_output_fields - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_fields'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_fields");
+    tt->descr = tdrpStrDup("Output fields to be copied through.");
+    tt->help = tdrpStrDup("These fields will be copied, along with the unfiltered and filtered reflectivity.");
+    tt->array_offset = (char *) &_output_fields - &_start_;
+    tt->array_n_offset = (char *) &output_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(char*);
+    tt->array_n = 6;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].s = tdrpStrDup("DBZ");
+      tt->array_vals[1].s = tdrpStrDup("VEL");
+      tt->array_vals[2].s = tdrpStrDup("WIDTH");
+      tt->array_vals[3].s = tdrpStrDup("ZDR");
+      tt->array_vals[4].s = tdrpStrDup("PHIDP");
+      tt->array_vals[5].s = tdrpStrDup("RHOHV");
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

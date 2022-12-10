@@ -49,7 +49,7 @@ debug = DEBUG_OFF;
 // Type: string
 //
 
-instance = "test";
+instance = "filter";
 
 //======================================================================
 //
@@ -147,7 +147,7 @@ max_realtime_data_age_secs = 300;
 //     FILTER_CLUTTER
 //
 
-action = ANALYZE_CLUTTER;
+action = FILTER_CLUTTER;
 
 //======================================================================
 //
@@ -268,7 +268,7 @@ elev_tolerance_deg = 0.1;
 // Type: double
 //
 
-max_range_km = 60;
+max_range_km = 240;
 
 //======================================================================
 //
@@ -477,7 +477,7 @@ dbz_filt_field_name = "dbzFilt";
 // Type: string
 //
 
-clutter_stats_path = "unknown";
+clutter_stats_path = "/home/dixon/data/precip/grids/spol/radarPolar/clutter/sband/sur/20220605/cfrad.20220605_234850.147_to_20220605_235447.517_SPOL_SUR.nc";
 
 ///////////// n_sdev_for_clut_threshold ///////////////
 //
@@ -494,7 +494,7 @@ clutter_stats_path = "unknown";
 // Type: double
 //
 
-n_sdev_for_clut_threshold = 1;
+n_sdev_for_clut_threshold = 2;
 
 ///////////// min_dbz_filt ////////////////////////////
 //
@@ -520,5 +520,41 @@ min_dbz_filt = -20;
 // Type: string
 //
 
-filt_output_dir = "unknown";
+filt_output_dir = "/home/dixon/data/precip/grids/spol/radarPolar/filtered/sband/sur";
+
+///////////// specify_output_fields ///////////////////
+//
+// Option to specify the fields to be written out with the filtered 
+//   data.
+//
+// If false all fields will be copied through. If true, only the 
+//   specified fields will be copied through.
+//
+//
+// Type: boolean
+//
+
+specify_output_fields = TRUE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output fields to be copied through.
+//
+// These fields will be copied, along with the unfiltered and filtered 
+//   reflectivity.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+output_fields = {
+ "DBZ",
+ "DBZ_F",
+ "VEL",
+ "WIDTH",
+ "ZDR",
+ "PHIDP",
+ "RHOHV"
+};
 
