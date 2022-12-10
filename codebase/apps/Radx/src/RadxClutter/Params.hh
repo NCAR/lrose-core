@@ -81,8 +81,8 @@ public:
   } mode_t;
 
   typedef enum {
-    CLUTTER_ANALYSIS = 0,
-    CLUTTER_REMOVAL = 1
+    ANALYZE_CLUTTER = 0,
+    FILTER_CLUTTER = 1
   } action_t;
 
   typedef enum {
@@ -441,7 +441,15 @@ public:
 
   tdrp_bool_t write_latest_data_info;
 
-  char* clutter_removed_output_dir;
+  char* dbz_filt_field_name;
+
+  char* clutter_stats_path;
+
+  double n_sdev_for_clut_threshold;
+
+  double min_dbz_filt;
+
+  char* filt_output_dir;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -450,7 +458,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

@@ -116,6 +116,10 @@ private:
   RadxVol _clutterVol;
   size_t _nRaysClutter;
 
+  // volume with clutter filtered
+
+  RadxVol _filtVol;
+
   // analysis results - statistics
 
   bool _allocNeeded;
@@ -155,10 +159,11 @@ private:
   int _runRealtime();
   void _setupRead(RadxFile &file);
   int _readFile(const string &filePath);
+  int _readClutterFile(const string &clutterPath);
   int _processFile(const string &filePath);
 
   int _performAnalysis();
-  int _performRemoval();
+  int _performFiltering();
   
   int _checkGeom();
   int _initClutterVol();
@@ -169,6 +174,10 @@ private:
   void _setupWrite(RadxFile &file);
   int _writeClutterVol();
 
+  RadxRay *_getClutRay(RadxRay *ray);
+  int _filterClutter();
+  void _filterRay(RadxRay *ray, const RadxRay *clutRay);
+  int _writeFiltVol();
 
 };
 

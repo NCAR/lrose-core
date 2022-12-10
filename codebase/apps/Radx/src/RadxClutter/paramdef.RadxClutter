@@ -90,14 +90,14 @@ commentdef {
 
 typedef enum
   {
-   CLUTTER_ANALYSIS, CLUTTER_REMOVAL
+   ANALYZE_CLUTTER, FILTER_CLUTTER
   } action_t;
 
 paramdef enum action_t
   {
-   p_default = CLUTTER_ANALYSIS;
+   p_default = ANALYZE_CLUTTER;
    p_descr = "Action to be performed";
-   p_help = "\nCLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nCLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.";
+   p_help = "\nANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.";
   } action;
 
 commentdef {
@@ -269,14 +269,40 @@ paramdef boolean {
 
 commentdef
 {
-  p_header = "Clutter-removed output";
-  p_text = "Writing out volumes with clutter removed.";
+  p_header = "FILTERED OUTPUT";
+  p_text = "Writing out volumes with clutter filtered.";
 };
 
 paramdef string
 {
-  p_descr = "Location for final clutter statistics.";
-  p_help = "Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.";
+  p_descr = "Field name for filtered dbz.";
+  p_help = "The filtered dbz field is added to the output data set.";
+  p_default = "dbzFilt";
+} dbz_filt_field_name;
+
+paramdef string
+{
+ p_descr = "Path to volume containing the clutter statistics.";
+ p_help = "This volume is created by this app in ANALYZE_CLUTTER action. Select a volume towards at end of the analysis sequence.";
+ p_default = "unknown";
+} clutter_stats_path;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "The number of standard deviations above the mean for the clutter threshold.";
+  p_help = "For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.";
+} n_sdev_for_clut_threshold;
+
+paramdef double {
+  p_default = -20;
+  p_descr = "The dbz value used to store filtered reflectivity.";
+  p_help = "For filtered gates, we store this value in place of the original measured value.";
+} min_dbz_filt;
+
+paramdef string
+{
+  p_descr = "Directory for filtered output volumes.";
+  p_help = "These volumes have a filtered reflectivity field, with the clutter in the stats volume removed.";
   p_default = "unknown";
-} clutter_removed_output_dir;
+} filt_output_dir;
 

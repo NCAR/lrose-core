@@ -131,20 +131,20 @@ max_realtime_data_age_secs = 300;
 // Action to be performed.
 //
 
-// CLUTTER_ANALYSIS: given a series of volumes containing clutter, 
+// ANALYZE_CLUTTER: given a series of volumes containing clutter, 
 //   analyze the clutter and store the clutter statistics in 
 //   CfRadialFiles.
 //
-// CLUTTER_REMOVAL: using the clutter statistics analyzed in the first 
-//   step, remove reflectivity power from those clutter gates that are not 
+// FILTER_CLUTTER: using the clutter statistics analyzed in the first 
+//   step, filter reflectivity power from those clutter gates that are not 
 //   overridden by weather. If the weather echo is stronger that the mean 
 //   clutter, it is left unchanged.
 //
 //
 // Type: enum
 // Options:
-//     CLUTTER_ANALYSIS
-//     CLUTTER_REMOVAL
+//     ANALYZE_CLUTTER
+//     FILTER_CLUTTER
 //
 
 action = ANALYZE_CLUTTER;
@@ -448,35 +448,77 @@ write_latest_data_info = FALSE;
 
 //======================================================================
 //
-// Clutter-removed output.
+// FILTERED OUTPUT.
 //
-// Writing out volumes with clutter removed.
+// Writing out volumes with clutter filtered.
 //
 //======================================================================
  
-///////////// clutter_volume_path /////////////////////
+///////////// dbz_filt_field_name /////////////////////
 //
-// Path to clutter volume.
+// Field name for filtered dbz.
 //
-// This volume is created by this app in CLUTTER_ANALYSIS action. Select 
+// The filtered dbz field is added to the output data set.
+//
+//
+// Type: string
+//
+
+dbz_filt_field_name = "dbzFilt";
+
+///////////// clutter_stats_path //////////////////////
+//
+// Path to volume containing the clutter statistics.
+//
+// This volume is created by this app in ANALYZE_CLUTTER action. Select 
 //   a volume towards at end of the analysis sequence.
 //
 //
 // Type: string
 //
 
-clutter_volume_path = "$(HOME)/data/precip/grids/spol/radarPolar/clutter/sband/sur/20220605/cfrad.20220605_234850.147_to_20220605_235112.709_SPOL_SUR.nc";
+clutter_stats_path = "unknown";
 
-///////////// clutter_removed_output_dir //////////////
+///////////// n_sdev_for_clut_threshold ///////////////
 //
-// Location for final clutter statistics.
+// The number of standard deviations above the mean for the clutter 
+//   threshold.
 //
-// Final output is only written at the end of a processing phase, with 
-//   the output time equal to the time of the first volume processed.
+// For each gate we compare the measured dbz with the clutter dbz. The 
+//   clutter threshold is computed as the mean dbz plus the dbz sdev 
+//   multipled by this parameter. If the measured dbz exceeds this 
+//   threshold it is preserved. Otherwise the reflectivity at the gate is 
+//   set to a low value.
+//
+//
+// Type: double
+//
+
+n_sdev_for_clut_threshold = 1;
+
+///////////// min_dbz_filt ////////////////////////////
+//
+// The dbz value used to store filtered reflectivity.
+//
+// For filtered gates, we store this value in place of the original 
+//   measured value.
+//
+//
+// Type: double
+//
+
+min_dbz_filt = -20;
+
+///////////// filt_output_dir /////////////////////////
+//
+// Directory for filtered output volumes.
+//
+// These volumes have a filtered reflectivity field, with the clutter in 
+//   the stats volume removed.
 //
 //
 // Type: string
 //
 
-clutter_removed_output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/no_clutter/sband/sur";
+filt_output_dir = "unknown";
 

@@ -127,10 +127,28 @@ RadxClutter::~RadxClutter()
 int RadxClutter::Run()
 {
 
-  // set up angle list
+  // initialize
+  
+  if (_params.action == Params::ANALYZE_CLUTTER) {
 
-  _initAngleList();
+    // ANALYZE_CLUTTER
+    // set up angle list
+    
+    _initAngleList();
+    
+  } else {
 
+    // CLUTTER_REMOVAL
+    // read in the clutter volume
+    
+    if (_readClutterFile(_params.clutter_stats_path)) {
+      return -1;
+    }
+
+  } // if (_params.action == Params::ANALYZE_CLUTTER)
+
+
+  
   // run based on mode
   
   if (_params.mode == Params::ARCHIVE) {
@@ -286,10 +304,10 @@ int RadxClutter::_processFile(const string &filePath)
   }
   _nVols++;
   
-  if (_params.action == Params::CLUTTER_ANALYSIS) {
+  if (_params.action == Params::ANALYZE_CLUTTER) {
     return _performAnalysis();
   } else {
-    return _performRemoval();
+    return _performFiltering();
   }
 
 }
@@ -314,7 +332,7 @@ int RadxClutter::_performAnalysis()
   // analyze this data set
   
   if (_analyzeClutter()) {
-    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "ERROR - RadxClutter::_performAnalysis()";
     LOG(ERROR) << "  Cannot process data in file: " << _readPath;
     return -1;
   }
@@ -322,7 +340,7 @@ int RadxClutter::_performAnalysis()
   // write out the results
 
   if (_writeClutterVol()) {
-    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "ERROR - RadxClutter::_performAnalysis()";
     LOG(ERROR) << "  Cannot write out clutter volume";
     return -1;
   }
@@ -335,26 +353,22 @@ int RadxClutter::_performAnalysis()
 // Remove clutter from a file
 // Returns 0 on success, -1 on failure
 
-int RadxClutter::_performRemoval()
+int RadxClutter::_performFiltering()
 {
-
-  // initialize the histogram for the clutter frequency
-  
-  _clutFreqHist.init(0.0, 0.02, 1.0);
 
   // analyze this data set
   
-  if (_analyzeClutter()) {
-    LOG(ERROR) << "ERROR - RadxClutter::Run";
+  if (_filterClutter()) {
+    LOG(ERROR) << "ERROR - RadxClutter::_performFiltering";
     LOG(ERROR) << "  Cannot process data in file: " << _readPath;
     return -1;
   }
 
   // write out the results
 
-  if (_writeClutterVol()) {
+  if (_writeFiltVol()) {
     LOG(ERROR) << "ERROR - RadxClutter::Run";
-    LOG(ERROR) << "  Cannot write out clutter volume";
+    LOG(ERROR) << "  Cannot write out clutter-removed volume";
     return -1;
   }
 
@@ -391,7 +405,7 @@ void RadxClutter::_setupRead(RadxFile &file)
 }
 
 //////////////////////////////////////////////////
-// Process in a file
+// Read in a file
 // Returns 0 on success, -1 on failure
 
 int RadxClutter::_readFile(const string &filePath)
@@ -435,6 +449,51 @@ int RadxClutter::_readFile(const string &filePath)
   _readVol.setNGatesConstant();
 
   if (_readVol.getNRays() < 3) {
+    return -1;
+  } else {
+    return 0;
+  }
+  
+}
+
+//////////////////////////////////////////////////
+// Read in the process clutter file
+// Returns 0 on success, -1 on failure
+
+int RadxClutter::_readClutterFile(const string &clutterPath)
+{
+
+  GenericRadxFile inFile;
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    inFile.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    inFile.setVerbose(true);
+    inFile.printReadRequest(cerr);
+  }
+  
+  // read in file
+  
+  _clutterVol.clear();
+  if (inFile.readFromPath(clutterPath, _clutterVol)) {
+    LOG(ERROR) << "ERROR - RadxClutter::_readClutterFile";
+    LOG(ERROR) << inFile.getErrStr();
+    return -1;
+  }
+  
+  // convert to floats
+  
+  _clutterVol.convertToFl32();
+  
+  // set number of gates constant
+  
+  _readVol.setNGatesConstant();
+
+  LOG(DEBUG) << "INFO - RadxClutter::_readClutterFile";
+  LOG(DEBUG) << "  Read in clutter path: " << clutterPath;
+  
+  if (_clutterVol.getNRays() < 3) {
     return -1;
   } else {
     return 0;
@@ -983,3 +1042,218 @@ int RadxClutter::_writeClutterVol()
 
 }
 
+///////////////////////////////////////////
+// get matching ray from clutter volume
+
+RadxRay *RadxClutter::_getClutRay(RadxRay *ray)
+{
+
+  const vector<RadxRay *> &clutRays = _clutterVol.getRays();
+  if (clutRays.size() < 1) {
+    return NULL;
+  }
+
+  // get the el/az for this ray
+  
+  double el = ray->getElevationDeg();
+  double az = ray->getAzimuthDeg();
+
+  // find the closest ray
+  
+  double minAngDist = 1.0e6;
+  RadxRay *matchRay = NULL;
+  
+  for (size_t iray = 0; iray < clutRays.size(); iray++) {
+    RadxRay *clutRay = clutRays[iray];
+    double clutEl = clutRay->getElevationDeg();
+    double clutAz = clutRay->getAzimuthDeg();
+    double dEl = fabs(el - clutEl);
+    double dAz = fabs(az - clutAz);
+    if (dEl > _params.elev_tolerance_deg ||
+        dAz > _params.az_tolerance_deg) {
+      continue;
+    }
+    double angDist = sqrt(dEl * dEl + dAz * dAz);
+    if (angDist < minAngDist) {
+      minAngDist = angDist;
+      matchRay = ray;
+    }
+  } // ii
+  
+  return matchRay;
+  
+}
+
+///////////////////////////////////////////
+// remove clutter from the volume
+
+int RadxClutter::_filterClutter()
+  
+{
+
+  LOG(DEBUG) << "Removing clutter from volume ..." << _readPath;
+  
+  // copy the read volume
+  
+  _filtVol = _readVol;
+  
+  // loop through the rays in the read volume
+  
+  const vector<RadxRay *> &rays = _filtVol.getRays();
+  if (rays.size() < 1) {
+    return -1;
+  }
+
+  for (size_t iray = 0; iray < rays.size(); iray++) {
+    
+    RadxRay *ray = rays[iray];
+    RadxRay *clutRay = _getClutRay(ray);
+    if (clutRay != NULL) {
+      _filterRay(ray, clutRay);
+    }
+
+  } // iray
+  
+  return 0;
+  
+}
+
+//////////////////////////////////////
+// Filter a ray based on a clutter ray
+
+void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
+
+{
+
+  // get the dbz field
+  
+  RadxField *dbzFld = ray->getField(_params.dbz_field_name);
+  if (dbzFld == NULL) {
+    return;
+  }
+  Radx::fl32 dbzMiss = dbzFld->getMissingFl32();
+  Radx::fl32 *dbzVals = dbzFld->getDataFl32();
+
+  // get the clutter stats
+  
+  RadxField *dbzMeanFld = ray->getField(_params.dbz_mean_field_name);
+  if (dbzMeanFld == NULL) {
+    return;
+  }
+  Radx::fl32 dbzMeanMiss = dbzMeanFld->getMissingFl32();
+  Radx::fl32 *dbzMeanVals = dbzMeanFld->getDataFl32();
+
+  RadxField *dbzSdevFld = ray->getField(_params.dbz_sdev_field_name);
+  if (dbzSdevFld == NULL) {
+    return;
+  }
+  Radx::fl32 dbzSdevMiss = dbzSdevFld->getMissingFl32();
+  Radx::fl32 *dbzSdevVals = dbzSdevFld->getDataFl32();
+
+  RadxField *clutFlagFld = ray->getField(_params.clut_flag_field_name);
+  if (clutFlagFld == NULL) {
+    return;
+  }
+  Radx::fl32 clutFlagMiss = clutFlagFld->getMissingFl32();
+  Radx::fl32 *clutFlagVals = clutFlagFld->getDataFl32();
+
+  // create the filt dbz field
+  
+  RadxField *filtFld = new RadxField(*dbzFld);
+  Radx::fl32 filtMiss = filtFld->getMissingFl32();
+  filtFld->setName(_params.dbz_filt_field_name);
+  filtFld->setLongName("Filtered-reflectivity");
+  Radx::fl32 *filtVals = filtFld->getDataFl32();
+
+  for (size_t ii = 0; ii < _nGates; ii++) {
+    
+    filtVals[ii] = filtMiss;
+    
+    Radx::fl32 dbz = dbzVals[ii];
+    if (dbz == dbzMiss) {
+      continue;
+    }
+
+    Radx::fl32 dbzMean = dbzMeanVals[ii];
+    if (dbzMean == dbzMeanMiss) {
+      continue;
+    }
+
+    Radx::fl32 dbzSdev = dbzSdevVals[ii];
+    if (dbzSdev == dbzSdevMiss) {
+      continue;
+    }
+
+    Radx::fl32 clutFlag = clutFlagVals[ii];
+    if (clutFlag == clutFlagMiss) {
+      continue;
+    }
+
+    double dbzThreshold = dbzMean + dbzSdev * _params.n_sdev_for_clut_threshold;
+    if (dbz >= dbzThreshold) {
+      filtVals[ii] = dbz;
+    } else {
+      filtVals[ii] = _params.min_dbz_filt;
+    }
+
+  } // ii
+  
+  ray->addField(filtFld);
+
+}
+
+
+//////////////////////////////////////
+// Write the clutter-removed volume
+
+int RadxClutter::_writeFiltVol()
+
+{
+
+  // output file
+
+  GenericRadxFile outFile;
+  _setupWrite(outFile);
+  
+  string outputDir = _params.filt_output_dir;
+  
+  // write to dir
+  
+  if (outFile.writeToDir(_filtVol, outputDir, true, false)) {
+    LOG(ERROR) << "ERROR - RadxConvert::_writeClutterRemovedVol";
+    LOG(ERROR) << "  Cannot write file to dir: " << outputDir;
+    LOG(ERROR) << outFile.getErrStr();
+    return -1;
+  }
+
+  string outputPath = outFile.getPathInUse();
+  
+  // write latest data info file if requested 
+  
+  if (_params.write_latest_data_info) {
+    DsLdataInfo ldata(outputDir);
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      ldata.setDebug(true);
+    }
+    string relPath;
+    RadxPath::stripDir(outputDir, outputPath, relPath);
+    ldata.setRelDataPath(relPath);
+    ldata.setWriter(_progName);
+    ldata.setDataFileExt("nc");
+    ldata.setDataType("netCDF");
+    
+    string fileName;
+    RadxPath::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
+    ldata.setRelDataPath(fileName);
+    
+    ldata.setIsFcast(false);
+    ldata.write(_readVol.getStartTimeSecs());
+    
+    LOG(DEBUG) << "RadxClutter::_writeClutterRemovedVol(): Data written to "
+               << outputPath;
+    
+  }
+
+  return 0;
+
+}

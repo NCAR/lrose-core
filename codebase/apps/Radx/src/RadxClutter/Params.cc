@@ -691,17 +691,17 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("action");
     tt->descr = tdrpStrDup("Action to be performed");
-    tt->help = tdrpStrDup("\nCLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nCLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
+    tt->help = tdrpStrDup("\nANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
     tt->val_offset = (char *) &action - &_start_;
     tt->enum_def.name = tdrpStrDup("action_t");
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_ANALYSIS");
-      tt->enum_def.fields[0].val = CLUTTER_ANALYSIS;
-      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_REMOVAL");
-      tt->enum_def.fields[1].val = CLUTTER_REMOVAL;
-    tt->single_val.e = CLUTTER_ANALYSIS;
+      tt->enum_def.fields[0].name = tdrpStrDup("ANALYZE_CLUTTER");
+      tt->enum_def.fields[0].val = ANALYZE_CLUTTER;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILTER_CLUTTER");
+      tt->enum_def.fields[1].val = FILTER_CLUTTER;
+    tt->single_val.e = ANALYZE_CLUTTER;
     tt++;
     
     // Parameter 'Comment 4'
@@ -1006,19 +1006,67 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("Clutter-removed output");
-    tt->comment_text = tdrpStrDup("Writing out volumes with clutter removed.");
+    tt->comment_hdr = tdrpStrDup("FILTERED OUTPUT");
+    tt->comment_text = tdrpStrDup("Writing out volumes with clutter filtered.");
     tt++;
     
-    // Parameter 'clutter_removed_output_dir'
+    // Parameter 'dbz_filt_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("clutter_removed_output_dir");
-    tt->descr = tdrpStrDup("Location for final clutter statistics.");
-    tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
-    tt->val_offset = (char *) &clutter_removed_output_dir - &_start_;
+    tt->param_name = tdrpStrDup("dbz_filt_field_name");
+    tt->descr = tdrpStrDup("Field name for filtered dbz.");
+    tt->help = tdrpStrDup("The filtered dbz field is added to the output data set.");
+    tt->val_offset = (char *) &dbz_filt_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzFilt");
+    tt++;
+    
+    // Parameter 'clutter_stats_path'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("clutter_stats_path");
+    tt->descr = tdrpStrDup("Path to volume containing the clutter statistics.");
+    tt->help = tdrpStrDup("This volume is created by this app in ANALYZE_CLUTTER action. Select a volume towards at end of the analysis sequence.");
+    tt->val_offset = (char *) &clutter_stats_path - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
+    tt++;
+    
+    // Parameter 'n_sdev_for_clut_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("n_sdev_for_clut_threshold");
+    tt->descr = tdrpStrDup("The number of standard deviations above the mean for the clutter threshold.");
+    tt->help = tdrpStrDup("For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.");
+    tt->val_offset = (char *) &n_sdev_for_clut_threshold - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'min_dbz_filt'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_dbz_filt");
+    tt->descr = tdrpStrDup("The dbz value used to store filtered reflectivity.");
+    tt->help = tdrpStrDup("For filtered gates, we store this value in place of the original measured value.");
+    tt->val_offset = (char *) &min_dbz_filt - &_start_;
+    tt->single_val.d = -20;
+    tt++;
+    
+    // Parameter 'filt_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("filt_output_dir");
+    tt->descr = tdrpStrDup("Directory for filtered output volumes.");
+    tt->help = tdrpStrDup("These volumes have a filtered reflectivity field, with the clutter in the stats volume removed.");
+    tt->val_offset = (char *) &filt_output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
