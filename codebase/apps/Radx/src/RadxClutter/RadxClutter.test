@@ -117,6 +117,40 @@ max_realtime_data_age_secs = 300;
 
 //======================================================================
 //
+// ACTION.
+//
+// There are 2 possible actions: (a) analyze the clutter from a number 
+//   of volumes, and store the results in a CfRadial file; or (b) use the 
+//   clutter statistics file in the analysis step to remove clutter from 
+//   files containing clutter.
+//
+//======================================================================
+ 
+///////////// action //////////////////////////////////
+//
+// Action to be performed.
+//
+
+// CLUTTER_ANALYSIS: given a series of volumes containing clutter, 
+//   analyze the clutter and store the clutter statistics in 
+//   CfRadialFiles.
+//
+// CLUTTER_REMOVAL: using the clutter statistics analyzed in the first 
+//   step, remove reflectivity power from those clutter gates that are not 
+//   overridden by weather. If the weather echo is stronger that the mean 
+//   clutter, it is left unchanged.
+//
+//
+// Type: enum
+// Options:
+//     CLUTTER_ANALYSIS
+//     CLUTTER_REMOVAL
+//
+
+action = CLUTTER_ANALYSIS;
+
+//======================================================================
+//
 // SCAN DETAILS.
 //
 // We specify the scan angles for which the clutter will be analyzed. 

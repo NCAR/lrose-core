@@ -691,7 +691,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("action");
     tt->descr = tdrpStrDup("Action to be performed");
-    tt->help = tdrpStrDup("CLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the cliutter statistics in CfRadialFiles. CLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
+    tt->help = tdrpStrDup("\nCLUTTER_ANALYSIS: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nCLUTTER_REMOVAL: using the clutter statistics analyzed in the first step, remove reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
     tt->val_offset = (char *) &action - &_start_;
     tt->enum_def.name = tdrpStrDup("action_t");
     tt->enum_def.nfields = 2;
