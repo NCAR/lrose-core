@@ -629,8 +629,8 @@ int RadxClutter::_analyzeClutter()
 
   double maxVariance;
   double clutFracThreshold = _clutFreqHist.getFreqForMaxVar(maxVariance);
-  if (_params.specify_clutter_fraction_threshold) {
-    clutFracThreshold = _params.clutter_fraction_threshold;
+  if (_params.specify_clutter_frequency_threshold) {
+    clutFracThreshold = _params.clutter_frequency_threshold;
   }
   
   LOG(DEBUG) << "  Freq histogram stats - maxVar, clutFracThreshold: "
@@ -1159,6 +1159,13 @@ void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
   Radx::fl32 dbzSdevMiss = dbzSdevFld->getMissingFl32();
   const Radx::fl32 *dbzSdevVals = dbzSdevFld->getDataFl32();
 
+  const RadxField *clutFreqFld = clutRay->getField(_params.clut_freq_field_name);
+  if (clutFreqFld == NULL) {
+    return;
+  }
+  Radx::fl32 clutFreqMiss = clutFreqFld->getMissingFl32();
+  const Radx::fl32 *clutFreqVals = clutFreqFld->getDataFl32();
+
   const RadxField *clutFlagFld = clutRay->getField(_params.clut_flag_field_name);
   if (clutFlagFld == NULL) {
     return;
@@ -1193,11 +1200,27 @@ void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
       continue;
     }
 
+    // check if we have clutter
+    
     Radx::fl32 clutFlag = clutFlagVals[ii];
     if (clutFlag == clutFlagMiss) {
       continue;
     }
 
+    if (_params.specify_filter_frequency_threshold) {
+      Radx::fl32 clutFreq = clutFreqVals[ii];
+      if (clutFreq == clutFreqMiss) {
+        continue;
+      }
+      if (clutFreq < _params.filter_frequency_threshold) {
+        clutFlag = false;
+      } else {
+        clutFlag = true;
+      }
+    }
+
+    // compute filtered value
+    
     double clutThreshold = dbzMean + dbzSdev * _params.n_sdev_for_clut_threshold;
     filtVals[ii] = dbz;
     if (clutFlag > 0) {

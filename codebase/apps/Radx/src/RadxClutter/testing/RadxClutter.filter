@@ -337,32 +337,32 @@ vel_field_name = "VEL";
 
 max_abs_vel = 1;
 
-///////////// specify_clutter_fraction_threshold //////
+///////////// specify_clutter_frequency_threshold /////
 //
-// Option to specify the clutter threshold write out _latest_data_info 
-//   files.
+// Option to specify the clutter frequency threshold.
 //
-// If true, the _latest_data_info files will be written after the 
-//   converted file is written.
+// If true, the clutter_frequency_threshold will be used. If false, the 
+//   algorithm will determine the optimum frequency threshold for 
+//   separating clutter from non-clutter.
 //
 //
 // Type: boolean
 //
 
-specify_clutter_fraction_threshold = TRUE;
+specify_clutter_frequency_threshold = FALSE;
 
-///////////// clutter_fraction_threshold //////////////
+///////////// clutter_frequency_threshold /////////////
 //
-// Clutter percentile.
+// Clutter frequency threshold.
 //
-// Percentile to use in clutter value determination (see the paper, 
-//   section III. Correction of Radar Reflectivity.
+// Gates with a clutter frequency fraction in excess of this number will 
+//   be flagged as clutter.
 //
 //
 // Type: double
 //
 
-clutter_fraction_threshold = 0.97;
+clutter_frequency_threshold = 0.95;
 
 //======================================================================
 //
@@ -495,6 +495,32 @@ clutter_stats_path = "/home/dixon/data/precip/grids/spol/radarPolar/clutter/sban
 //
 
 n_sdev_for_clut_threshold = 2;
+
+///////////// specify_filter_frequency_threshold //////
+//
+// Option to specify the clutter frequency threshold for filtering.
+//
+// If true, the filter_frequency_threshold will be used. If false, the 
+//   clutter flag field in the clutter statistics will be used.
+//
+//
+// Type: boolean
+//
+
+specify_filter_frequency_threshold = TRUE;
+
+///////////// filter_frequency_threshold //////////////
+//
+// Filter frequency threshold.
+//
+// Gates with a filter frequency fraction in excess of this number will 
+//   be filtered. See 'specify_filter_frequency_threshold'.
+//
+//
+// Type: double
+//
+
+filter_frequency_threshold = 0.97;
 
 ///////////// min_dbz_filt ////////////////////////////
 //

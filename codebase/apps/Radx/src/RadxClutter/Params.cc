@@ -896,27 +896,27 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'specify_clutter_fraction_threshold'
+    // Parameter 'specify_clutter_frequency_threshold'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_clutter_fraction_threshold");
-    tt->descr = tdrpStrDup("Option to specify the clutter threshold write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &specify_clutter_fraction_threshold - &_start_;
+    tt->param_name = tdrpStrDup("specify_clutter_frequency_threshold");
+    tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold.");
+    tt->help = tdrpStrDup("If true, the clutter_frequency_threshold will be used. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.");
+    tt->val_offset = (char *) &specify_clutter_frequency_threshold - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'clutter_fraction_threshold'
+    // Parameter 'clutter_frequency_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("clutter_fraction_threshold");
-    tt->descr = tdrpStrDup("Clutter percentile");
-    tt->help = tdrpStrDup("Percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity.");
-    tt->val_offset = (char *) &clutter_fraction_threshold - &_start_;
+    tt->param_name = tdrpStrDup("clutter_frequency_threshold");
+    tt->descr = tdrpStrDup("Clutter frequency threshold");
+    tt->help = tdrpStrDup("Gates with a clutter frequency fraction in excess of this number will be flagged as clutter.");
+    tt->val_offset = (char *) &clutter_frequency_threshold - &_start_;
     tt->single_val.d = 0.95;
     tt++;
     
@@ -1044,6 +1044,30 @@
     tt->help = tdrpStrDup("For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.");
     tt->val_offset = (char *) &n_sdev_for_clut_threshold - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'specify_filter_frequency_threshold'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_filter_frequency_threshold");
+    tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold for filtering.");
+    tt->help = tdrpStrDup("If true, the filter_frequency_threshold will be used. If false, the clutter flag field in the clutter statistics will be used.");
+    tt->val_offset = (char *) &specify_filter_frequency_threshold - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'filter_frequency_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("filter_frequency_threshold");
+    tt->descr = tdrpStrDup("Filter frequency threshold");
+    tt->help = tdrpStrDup("Gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.");
+    tt->val_offset = (char *) &filter_frequency_threshold - &_start_;
+    tt->single_val.d = 0.97;
     tt++;
     
     // Parameter 'min_dbz_filt'

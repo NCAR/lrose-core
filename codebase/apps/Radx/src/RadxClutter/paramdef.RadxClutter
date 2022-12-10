@@ -207,16 +207,16 @@ paramdef double
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to specify the clutter threshold write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} specify_clutter_fraction_threshold;
+  p_descr = "Option to specify the clutter frequency threshold.";
+  p_help = "If true, the clutter_frequency_threshold will be used. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.";
+} specify_clutter_frequency_threshold;
 
 paramdef double
 {
-  p_descr = "Clutter percentile";
-  p_help = "Percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity.";
+  p_descr = "Clutter frequency threshold";
+  p_help = "Gates with a clutter frequency fraction in excess of this number will be flagged as clutter.";
   p_default = 0.95;
-} clutter_fraction_threshold;
+} clutter_frequency_threshold;
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -292,6 +292,19 @@ paramdef double {
   p_descr = "The number of standard deviations above the mean for the clutter threshold.";
   p_help = "For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.";
 } n_sdev_for_clut_threshold;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the clutter frequency threshold for filtering.";
+  p_help = "If true, the filter_frequency_threshold will be used. If false, the clutter flag field in the clutter statistics will be used.";
+} specify_filter_frequency_threshold;
+
+paramdef double
+{
+  p_descr = "Filter frequency threshold";
+  p_help = "Gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.";
+  p_default = 0.97;
+} filter_frequency_threshold;
 
 paramdef double {
   p_default = -20;

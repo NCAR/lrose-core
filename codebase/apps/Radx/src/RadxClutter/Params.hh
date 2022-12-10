@@ -425,9 +425,9 @@ public:
 
   double max_abs_vel;
 
-  tdrp_bool_t specify_clutter_fraction_threshold;
+  tdrp_bool_t specify_clutter_frequency_threshold;
 
-  double clutter_fraction_threshold;
+  double clutter_frequency_threshold;
 
   char* clutter_stats_output_dir;
 
@@ -447,6 +447,10 @@ public:
 
   double n_sdev_for_clut_threshold;
 
+  tdrp_bool_t specify_filter_frequency_threshold;
+
+  double filter_frequency_threshold;
+
   double min_dbz_filt;
 
   char* filt_output_dir;
@@ -463,7 +467,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[44];
+  mutable TDRPtable _table[46];
 
   const char *_className;
 
