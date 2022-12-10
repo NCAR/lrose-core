@@ -55,6 +55,7 @@ RadxClutter::RadxClutter(int argc, char **argv)
   OK = TRUE;
   _nVols = 0;
   _nGates = 0;
+  _allocNeeded = true;
   
   // set programe name
 
@@ -245,7 +246,8 @@ int RadxClutter::_processFile(const string &filePath)
 
   // read in the file
 
-  if (_readFile(filePath)) {
+  _readPath = filePath;
+  if (_readFile(_readPath)) {
     return -1;
   }
 
@@ -253,11 +255,11 @@ int RadxClutter::_processFile(const string &filePath)
   
   string subStr = _params.file_name_substr;
   if (subStr.size() > 0) {
-    RadxPath rpath(filePath);
+    RadxPath rpath(_readPath);
     string fileName = rpath.getFile();
     if (fileName.find(subStr) == string::npos) {
       LOG(DEBUG) << "Looking for substr: " << subStr;
-      LOG(DEBUG) << "No substr found, ignoring file: " << filePath;
+      LOG(DEBUG) << "No substr found, ignoring file: " << _readPath;
       return 0;
     }
   }
@@ -267,12 +269,12 @@ int RadxClutter::_processFile(const string &filePath)
   _isRhi = _readVol.checkIsRhi();
   if (_params.scan_mode == Params::PPI) {
     if (_isRhi) {
-      LOG(ERROR) << "Scan mode is not PPI, ignoring file: " << filePath;
+      LOG(ERROR) << "Scan mode is not PPI, ignoring file: " << _readPath;
       return -1;
     }
   } else {
     if (!_isRhi) {
-      LOG(ERROR) << "Scan mode is not RHI, ignoring file: " << filePath;
+      LOG(ERROR) << "Scan mode is not RHI, ignoring file: " << _readPath;
       return -1;
     }
   }
@@ -282,6 +284,22 @@ int RadxClutter::_processFile(const string &filePath)
   if (_checkGeom()) {
     return -1;
   }
+  _nVols++;
+  
+  if (_params.action == Params::CLUTTER_ANALYSIS) {
+    return _performAnalysis();
+  } else {
+    return _performRemoval();
+  }
+
+}
+
+//////////////////////////////////////////////////
+// Run analysis on this file
+// Returns 0 on success, -1 on failure
+
+int RadxClutter::_performAnalysis()
+{
 
   // initialize the clutter volume from the relevant scans in the file
 
@@ -289,8 +307,6 @@ int RadxClutter::_processFile(const string &filePath)
     return -1;
   }
 
-  _nVols++;
-  
   // initialize the histogram for the clutter frequency
   
   _clutFreqHist.init(0.0, 0.02, 1.0);
@@ -299,7 +315,38 @@ int RadxClutter::_processFile(const string &filePath)
   
   if (_analyzeClutter()) {
     LOG(ERROR) << "ERROR - RadxClutter::Run";
-    LOG(ERROR) << "  Cannot process data in file: " << filePath;
+    LOG(ERROR) << "  Cannot process data in file: " << _readPath;
+    return -1;
+  }
+
+  // write out the results
+
+  if (_writeClutterVol()) {
+    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "  Cannot write out clutter volume";
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Remove clutter from a file
+// Returns 0 on success, -1 on failure
+
+int RadxClutter::_performRemoval()
+{
+
+  // initialize the histogram for the clutter frequency
+  
+  _clutFreqHist.init(0.0, 0.02, 1.0);
+
+  // analyze this data set
+  
+  if (_analyzeClutter()) {
+    LOG(ERROR) << "ERROR - RadxClutter::Run";
+    LOG(ERROR) << "  Cannot process data in file: " << _readPath;
     return -1;
   }
 
@@ -820,9 +867,9 @@ int RadxClutter::_initClutterVol()
   
   // allocate
 
-  if (_nVols == 0) {
+  if (_allocNeeded) {
     
-    // allocate arrays for analysis
+    // first time, allocate arrays for analysis
     
     _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
     _dbzSqSum = _dbzSqSumArray.alloc(_nRaysClutter, _nGates);
@@ -852,6 +899,8 @@ int RadxClutter::_initClutterVol()
     memset(clutFreq1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
     Radx::fl32 *clutFlag1D = _clutFlagArray.dat1D();
     memset(clutFlag1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+
+    _allocNeeded = false;
 
   }
 
@@ -896,7 +945,7 @@ int RadxClutter::_writeClutterVol()
   // write to dir
   
   if (outFile.writeToDir(_clutterVol, outputDir, true, false)) {
-    LOG(ERROR) << "ERROR - RadxConvert::_writeVol";
+    LOG(ERROR) << "ERROR - RadxConvert::_writeClutterVol";
     LOG(ERROR) << "  Cannot write file to dir: " << outputDir;
     LOG(ERROR) << outFile.getErrStr();
     return -1;

@@ -84,6 +84,7 @@ private:
   Args _args;
   Params _params;
   vector<string> _readPaths;
+  string _readPath;
 
   /////////////////////////////////////////
   // input data
@@ -117,6 +118,8 @@ private:
 
   // analysis results - statistics
 
+  bool _allocNeeded;
+  
   TaArray2D<Radx::fl32> _dbzSumArray;
   Radx::fl32 **_dbzSum;
 
@@ -154,6 +157,9 @@ private:
   int _readFile(const string &filePath);
   int _processFile(const string &filePath);
 
+  int _performAnalysis();
+  int _performRemoval();
+  
   int _checkGeom();
   int _initClutterVol();
   void _initAngleList();
