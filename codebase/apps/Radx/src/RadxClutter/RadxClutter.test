@@ -101,7 +101,7 @@ file_name_substr = "Sur1";
 //     FILELIST
 //
 
-mode = REALTIME;
+mode = ARCHIVE;
 
 ///////////// max_realtime_data_age_secs //////////////
 //
@@ -244,7 +244,7 @@ max_range_km = 60;
  
 ///////////// dbz_field_name //////////////////////////
 //
-// Input field name.
+// Reflectivity field name.
 //
 // Name of field on which clutter will be based.
 //
@@ -254,19 +254,70 @@ max_range_km = 60;
 
 dbz_field_name = "DBZ";
 
-///////////// dbz_clutter_threshold ///////////////////
+///////////// clutter_dbz_threshold ///////////////////
 //
-// DBZ threshold for a clutter gate.
+// DBZ threshold for clutter at a gate.
 //
-// If data is persistently above this value it is a clutter location.
+// If data is persistently above this value then the gate is a clutter 
+//   location.
 //
 //
 // Type: double
 //
 
-dbz_clutter_threshold = 10;
+clutter_dbz_threshold = 10;
 
-///////////// clutter_percentile //////////////////////
+///////////// use_vel_field ///////////////////////////
+//
+// Option to make use of the velocity field to identify clutter.
+//
+// If true, then we check the absolute value of velocity. If it is 
+//   outside the limit we do not treat the point as clutter.
+//
+//
+// Type: boolean
+//
+
+use_vel_field = TRUE;
+
+///////////// vel_field_name //////////////////////////
+//
+// Velocity field name.
+//
+//
+// Type: string
+//
+
+vel_field_name = "VEL";
+
+///////////// max_abs_vel /////////////////////////////
+//
+// Maximimum absolute radial velocity for clutter (m/s).
+//
+// If the absolute velocity at a gate exceeds this, the point cannot be 
+//   clutter.
+//
+//
+// Type: double
+//
+
+max_abs_vel = 1;
+
+///////////// specify_clutter_fraction_threshold //////
+//
+// Option to specify the clutter threshold write out _latest_data_info 
+//   files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+specify_clutter_fraction_threshold = TRUE;
+
+///////////// clutter_fraction_threshold //////////////
 //
 // Clutter percentile.
 //
@@ -277,97 +328,17 @@ dbz_clutter_threshold = 10;
 // Type: double
 //
 
-clutter_percentile = 0.5;
-
-///////////// missing_clutter_value ///////////////////
-//
-// Missing clutter value.
-//
-// Value to assign to clutter estimates when the wanted percentile is 
-//   the missing data value.
-//
-//
-// Type: double
-//
-
-missing_clutter_value = -25;
-
-///////////// threshold_tolerance /////////////////////
-//
-// Variation in threshold for convergence.
-//
-// The threshold as percent of total number of scans to identify a point 
-//   as clutter should converge to a stable value.  This value is the 
-//   allowed tolerance (change) to be considered stable.
-//
-//
-// Type: double
-//
-
-threshold_tolerance = 0.025;
-
-///////////// maximum_percent_change //////////////////
-//
-// Maximum percent of pixels that can change for convergence.
-//
-// The percentage of pixels that change from clutter to nonclutter or 
-//   back should decrease to a minimum for convergence.
-//
-//
-// Type: double
-//
-
-maximum_percent_change = 0.001;
-
-///////////// minimum_stable_volumes //////////////////
-//
-// Number of volumes that show stablity prior to considering the 
-//   situation stable.
-//
-// The threshold converges, and needs to stay converged for this many 
-//   volumes before giving the thumbs up.
-//
-//
-// Type: double
-//
-
-minimum_stable_volumes = 10;
-
-///////////// histogram_resolution ////////////////////
-//
-// Resolution of histogram for analysis.
-//
-// Histograms are used to determine the statistics of the clutter 
-//   properties. See the paper.
-//
-//
-// Type: double
-//
-
-histogram_resolution = 0.2;
-
-///////////// histogram_max ///////////////////////////
-//
-// Histogram maximum bin value.
-//
-// Histograms are used to determine the statistics of the clutter 
-//   properties. See the paper.
-//
-//
-// Type: double
-//
-
-histogram_max = 50;
+clutter_fraction_threshold = 0.97;
 
 //======================================================================
 //
-// Data output.
+// Clutter statistics output.
 //
-// Parameters for writing results.
+// Writing out the results of identifying clutter.
 //
 //======================================================================
  
-///////////// output_dir //////////////////////////////
+///////////// clutter_stats_output_dir ////////////////
 //
 // Location for final clutter statistics.
 //
@@ -378,65 +349,31 @@ histogram_max = 50;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/clutter/sband/sur";
-
-///////////// write_latest_data_info //////////////////
-//
-// Option to write out _latest_data_info files.
-//
-// If true, the _latest_data_info files will be written after the 
-//   converted file is written.
-//
-//
-// Type: boolean
-//
-
-write_latest_data_info = FALSE;
-
-///////////// write_diagnostic_output /////////////////
-//
-// Write out diagnostic output.
-//
-//
-// Type: boolean
-//
-
-write_diagnostic_output = FALSE;
-
-///////////// diagnostic_volume_dir ///////////////////
-//
-// Dir for diagnostic output.
-//
-// If true, output from each volume is written, to show the build up of 
-//   skill through time.
-//
-//
-// Type: string
-//
-
-diagnostic_volume_dir = "unknown";
-
-///////////// diagnostic_ascii_dir ////////////////////
-//
-// Output ascii dir to which to write plottables.
-//
-//
-// Type: string
-//
-
-diagnostic_ascii_dir = "unknown";
+clutter_stats_output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/clutter/sband/sur";
 
 ///////////// dbz_mean_field_name /////////////////////
 //
 // Field name for mean dbz.
 //
-// The dbz mean field will be added to the output data set.
+// The dbz mean field is added to the output data set.
 //
 //
 // Type: string
 //
 
 dbz_mean_field_name = "dbzMean";
+
+///////////// dbz_sdev_field_name /////////////////////
+//
+// Field name for standard deviation of dbz.
+//
+// The dbz sdev field is added to the output data set.
+//
+//
+// Type: string
+//
+
+dbz_sdev_field_name = "dbzSdev";
 
 ///////////// clut_freq_field_name ////////////////////
 //
@@ -461,4 +398,38 @@ clut_freq_field_name = "clutFreq";
 //
 
 clut_flag_field_name = "clutFlag";
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// Clutter-removed output.
+//
+// Writing out volumes with clutter removed.
+//
+//======================================================================
+ 
+///////////// clutter_removed_output_dir //////////////
+//
+// Location for final clutter statistics.
+//
+// Final output is only written at the end of a processing phase, with 
+//   the output time equal to the time of the first volume processed.
+//
+//
+// Type: string
+//
+
+clutter_removed_output_dir = "unknown";
 

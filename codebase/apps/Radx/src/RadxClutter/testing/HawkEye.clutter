@@ -353,6 +353,15 @@ fields = {
   }
   ,
   {
+    label = "VEL",
+    raw_name = "VEL",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "vel.colors",
+    shortcut = "3"
+  }
+  ,
+  {
     label = "dbzMean",
     raw_name = "dbzMean",
     filtered_name = "",
@@ -387,60 +396,51 @@ fields = {
     color_map = "cmd_flag_xml.colors",
     shortcut = "2"
   }
-  ,
-  {
-    label = "CLUT",
-    raw_name = "CLUT",
-    filtered_name = "",
-    units = "dBZ",
-    color_map = "dbz.colors",
-    shortcut = "1"
-  }
-  ,
-  {
-    label = "VEL",
-    raw_name = "VEL",
-    filtered_name = "VEL_F",
-    units = "m/s",
-    color_map = "vel.colors",
-    shortcut = "3"
-  }
-  ,
-  {
-    label = "WIDTH",
-    raw_name = "WIDTH",
-    filtered_name = "WIDTH_F",
-    units = "m/s",
-    color_map = "width.colors",
-    shortcut = "4"
-  }
-  ,
-  {
-    label = "ZDR",
-    raw_name = "ZDR",
-    filtered_name = "ZDR_F",
-    units = "dB",
-    color_map = "zdr.colors",
-    shortcut = "6"
-  }
-  ,
-  {
-    label = "PHIDP",
-    raw_name = "PHIDP",
-    filtered_name = "PHIDP_F",
-    units = "deg",
-    color_map = "phidp.colors",
-    shortcut = "7"
-  }
-  ,
-  {
-    label = "RHOHV",
-    raw_name = "RHOHV",
-    filtered_name = "RHOHV_F",
-    units = "unitless",
-    color_map = "rhohv.colors",
-    shortcut = "8"
-  }
+  // ,
+  // {
+  //   label = "CLUT",
+  //   raw_name = "CLUT",
+  //   filtered_name = "",
+  //   units = "dBZ",
+  //   color_map = "dbz.colors",
+  //   shortcut = "1"
+  // }
+  // ,
+  // {
+  //   label = "WIDTH",
+  //   raw_name = "WIDTH",
+  //   filtered_name = "WIDTH_F",
+  //   units = "m/s",
+  //   color_map = "width.colors",
+  //   shortcut = "4"
+  // }
+  // ,
+  // {
+  //   label = "ZDR",
+  //   raw_name = "ZDR",
+  //   filtered_name = "ZDR_F",
+  //   units = "dB",
+  //   color_map = "zdr.colors",
+  //   shortcut = "6"
+  // }
+  // ,
+  // {
+  //   label = "PHIDP",
+  //   raw_name = "PHIDP",
+  //   filtered_name = "PHIDP_F",
+  //   units = "deg",
+  //   color_map = "phidp.colors",
+  //   shortcut = "7"
+  // }
+  // ,
+  // {
+  //   label = "RHOHV",
+  //   raw_name = "RHOHV",
+  //   filtered_name = "RHOHV_F",
+  //   units = "unitless",
+  //   color_map = "rhohv.colors",
+  //   shortcut = "8"
+  // }
 };
 
 ///////////// background_render_mins //////////////////

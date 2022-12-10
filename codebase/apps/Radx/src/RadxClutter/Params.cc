@@ -717,10 +717,13 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(double);
-    tt->array_n = 1;
+    tt->array_n = 4;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].d = 0.5;
+      tt->array_vals[1].d = 1;
+      tt->array_vals[2].d = 1.5;
+      tt->array_vals[3].d = 2;
     tt++;
     
     // Parameter 'first_ray_angle'
@@ -810,106 +813,82 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_field_name");
-    tt->descr = tdrpStrDup("Input field name.");
+    tt->descr = tdrpStrDup("Reflectivity field name.");
     tt->help = tdrpStrDup("Name of field on which clutter will be based.");
     tt->val_offset = (char *) &dbz_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'dbz_clutter_threshold'
+    // Parameter 'clutter_dbz_threshold'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dbz_clutter_threshold");
-    tt->descr = tdrpStrDup("DBZ threshold for a clutter gate.");
-    tt->help = tdrpStrDup("If data is persistently above this value it is a clutter location.");
-    tt->val_offset = (char *) &dbz_clutter_threshold - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'clutter_percentile'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("clutter_percentile");
-    tt->descr = tdrpStrDup("Clutter percentile");
-    tt->help = tdrpStrDup("Percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity.");
-    tt->val_offset = (char *) &clutter_percentile - &_start_;
-    tt->single_val.d = 0.5;
-    tt++;
-    
-    // Parameter 'missing_clutter_value'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("missing_clutter_value");
-    tt->descr = tdrpStrDup("Missing clutter value.");
-    tt->help = tdrpStrDup("Value to assign to clutter estimates when the wanted percentile is the missing data value");
-    tt->val_offset = (char *) &missing_clutter_value - &_start_;
-    tt->single_val.d = -25;
-    tt++;
-    
-    // Parameter 'threshold_tolerance'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("threshold_tolerance");
-    tt->descr = tdrpStrDup("Variation in threshold for convergence.");
-    tt->help = tdrpStrDup("The threshold as percent of total number of scans to identify a point as clutter should converge to a stable value.  This value is the allowed tolerance (change) to be considered stable.");
-    tt->val_offset = (char *) &threshold_tolerance - &_start_;
-    tt->single_val.d = 0.025;
-    tt++;
-    
-    // Parameter 'maximum_percent_change'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("maximum_percent_change");
-    tt->descr = tdrpStrDup("Maximum percent of pixels that can change for convergence.");
-    tt->help = tdrpStrDup("The percentage of pixels that change from clutter to nonclutter or back should decrease to a minimum for convergence.");
-    tt->val_offset = (char *) &maximum_percent_change - &_start_;
-    tt->single_val.d = 0.001;
-    tt++;
-    
-    // Parameter 'minimum_stable_volumes'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("minimum_stable_volumes");
-    tt->descr = tdrpStrDup("Number of volumes that show stablity prior to considering the situation stable");
-    tt->help = tdrpStrDup("The threshold converges, and needs to stay converged for this many volumes before giving the thumbs up.");
-    tt->val_offset = (char *) &minimum_stable_volumes - &_start_;
+    tt->param_name = tdrpStrDup("clutter_dbz_threshold");
+    tt->descr = tdrpStrDup("DBZ threshold for clutter at a gate.");
+    tt->help = tdrpStrDup("If data is persistently above this value then the gate is a clutter location.");
+    tt->val_offset = (char *) &clutter_dbz_threshold - &_start_;
     tt->single_val.d = 10;
     tt++;
     
-    // Parameter 'histogram_resolution'
-    // ctype is 'double'
+    // Parameter 'use_vel_field'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("histogram_resolution");
-    tt->descr = tdrpStrDup("Resolution of histogram for analysis.");
-    tt->help = tdrpStrDup("Histograms are used to determine the statistics of the clutter properties. See the paper.");
-    tt->val_offset = (char *) &histogram_resolution - &_start_;
-    tt->single_val.d = 0.2;
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_vel_field");
+    tt->descr = tdrpStrDup("Option to make use of the velocity field to identify clutter.");
+    tt->help = tdrpStrDup("If true, then we check the absolute value of velocity. If it is outside the limit we do not treat the point as clutter.");
+    tt->val_offset = (char *) &use_vel_field - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'histogram_max'
+    // Parameter 'vel_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("vel_field_name");
+    tt->descr = tdrpStrDup("Velocity field name.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &vel_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("VEL");
+    tt++;
+    
+    // Parameter 'max_abs_vel'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("histogram_max");
-    tt->descr = tdrpStrDup("Histogram maximum bin value.");
-    tt->help = tdrpStrDup("Histograms are used to determine the statistics of the clutter properties. See the paper.");
-    tt->val_offset = (char *) &histogram_max - &_start_;
-    tt->single_val.d = 50;
+    tt->param_name = tdrpStrDup("max_abs_vel");
+    tt->descr = tdrpStrDup("Maximimum absolute radial velocity for clutter (m/s).");
+    tt->help = tdrpStrDup("If the absolute velocity at a gate exceeds this, the point cannot be clutter.");
+    tt->val_offset = (char *) &max_abs_vel - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'specify_clutter_fraction_threshold'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_clutter_fraction_threshold");
+    tt->descr = tdrpStrDup("Option to specify the clutter threshold write out _latest_data_info files.");
+    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
+    tt->val_offset = (char *) &specify_clutter_fraction_threshold - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'clutter_fraction_threshold'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("clutter_fraction_threshold");
+    tt->descr = tdrpStrDup("Clutter percentile");
+    tt->help = tdrpStrDup("Percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity.");
+    tt->val_offset = (char *) &clutter_fraction_threshold - &_start_;
+    tt->single_val.d = 0.95;
     tt++;
     
     // Parameter 'Comment 5'
@@ -917,67 +896,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("Data output");
-    tt->comment_text = tdrpStrDup("Parameters for writing results");
+    tt->comment_hdr = tdrpStrDup("Clutter statistics output");
+    tt->comment_text = tdrpStrDup("Writing out the results of identifying clutter");
     tt++;
     
-    // Parameter 'output_dir'
+    // Parameter 'clutter_stats_output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_dir");
+    tt->param_name = tdrpStrDup("clutter_stats_output_dir");
     tt->descr = tdrpStrDup("Location for final clutter statistics.");
     tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
-    tt->val_offset = (char *) &output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_diagnostic_output'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_diagnostic_output");
-    tt->descr = tdrpStrDup("Write out diagnostic output");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &write_diagnostic_output - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'diagnostic_volume_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("diagnostic_volume_dir");
-    tt->descr = tdrpStrDup("Dir for diagnostic output");
-    tt->help = tdrpStrDup("If true, output from each volume is written, to show the build up of skill through time.");
-    tt->val_offset = (char *) &diagnostic_volume_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'diagnostic_ascii_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("diagnostic_ascii_dir");
-    tt->descr = tdrpStrDup("Output ascii dir to which to write plottables");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &diagnostic_ascii_dir - &_start_;
+    tt->val_offset = (char *) &clutter_stats_output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
@@ -1027,6 +958,39 @@
     tt->help = tdrpStrDup("This flag indicates that the gate has persistent clutter.");
     tt->val_offset = (char *) &clut_flag_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("clutFlag");
+    tt++;
+    
+    // Parameter 'write_latest_data_info'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("write_latest_data_info");
+    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
+    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
+    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("Clutter-removed output");
+    tt->comment_text = tdrpStrDup("Writing out volumes with clutter removed.");
+    tt++;
+    
+    // Parameter 'clutter_removed_output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("clutter_removed_output_dir");
+    tt->descr = tdrpStrDup("Location for final clutter statistics.");
+    tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
+    tt->val_offset = (char *) &clutter_removed_output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("unknown");
     tt++;
     
     // trailing entry has param_name set to NULL

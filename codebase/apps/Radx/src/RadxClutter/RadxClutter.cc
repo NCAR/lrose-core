@@ -334,6 +334,10 @@ void RadxClutter::_setupRead(RadxFile &file)
 
   file.addReadField(_params.dbz_field_name);
 
+  if (_params.use_vel_field) {
+    file.addReadField(_params.vel_field_name);
+  }
+
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -412,8 +416,18 @@ int RadxClutter::_analyzeClutter()
       continue;
     }
     Radx::fl32 dbzMiss = dbzFld->getMissingFl32();
-
     Radx::fl32 *dbzVals = dbzFld->getDataFl32();
+    
+    RadxField *velFld = ray->getField(_params.vel_field_name);
+    Radx::fl32 velMiss = Radx::missingFl32;
+    if (velFld != NULL) {
+      velMiss = velFld->getMissingFl32();
+    }
+    Radx::fl32 *velVals = NULL;
+    if (velFld) {
+      velVals = velFld->getDataFl32();
+    }
+    
     Radx::fl32 *dbzCount = _dbzCount[iray];
     Radx::fl32 *dbzSum = _dbzSum[iray];
     Radx::fl32 *dbzSqSum = _dbzSqSum[iray];
@@ -428,7 +442,17 @@ int RadxClutter::_analyzeClutter()
         dbzSum[igate] += dbzVal;
         dbzSqSum[igate] += (dbzVal * dbzVal);
         dbzCount[igate] += 1.0;
-        if (dbzVal >= _params.dbz_clutter_threshold) {
+        bool isClutter = false;
+        if (dbzVal >= _params.clutter_dbz_threshold) {
+          isClutter = true; // dbz exceeds threshold - could be clutter
+        }
+        if (velVals) {
+          Radx::fl32 velVal = velVals[igate];
+          if (velVal != velMiss && fabs(velVal) > _params.max_abs_vel) {
+            isClutter = false; // vel exceeds threshold - not clutter
+          }
+        }
+        if (isClutter) {
           clutSum[igate] += 1.0;
         }
       }
@@ -490,16 +514,19 @@ int RadxClutter::_analyzeClutter()
   // set the clutter flag
 
   double maxVariance;
-  double freqForMax = _clutFreqHist.getFreqForMaxVar(maxVariance);
-
-  LOG(DEBUG) << "  Freq histogram stats - maxVar, freqForMax: "
-             << maxVariance << ", " << freqForMax;
+  double clutFracThreshold = _clutFreqHist.getFreqForMaxVar(maxVariance);
+  if (_params.specify_clutter_fraction_threshold) {
+    clutFracThreshold = _params.clutter_fraction_threshold;
+  }
+  
+  LOG(DEBUG) << "  Freq histogram stats - maxVar, clutFracThreshold: "
+             << maxVariance << ", " << clutFracThreshold;
   
   for (size_t iray = 0; iray < _nRaysClutter; iray++) {
     Radx::fl32 *clutFreq = _clutFreq[iray];
     Radx::fl32 *clutFlag = _clutFlag[iray];
     for (size_t igate = 0; igate < _nGates; igate++) {
-      if (clutFreq[igate] > freqForMax) {
+      if (clutFreq[igate] > clutFracThreshold) {
         clutFlag[igate] = 1.0;
       } else {
         clutFlag[igate] = 0.0;
@@ -796,7 +823,7 @@ int RadxClutter::_writeClutterVol()
   GenericRadxFile outFile;
   _setupWrite(outFile);
   
-  string outputDir = _params.output_dir;
+  string outputDir = _params.clutter_stats_output_dir;
   
   // write to dir
   
@@ -824,7 +851,7 @@ int RadxClutter::_writeClutterVol()
     ldata.setDataType("netCDF");
     
     string fileName;
-    Path::stripDir(_params.output_dir, outputPath, fileName);
+    Path::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
     ldata.setRelDataPath(fileName);
     
     ldata.setIsFcast(false);
@@ -837,15 +864,5 @@ int RadxClutter::_writeClutterVol()
 
   return 0;
 
-}
-
-//////////////////////////////////////
-// Write LdataInfo file
-
-void RadxClutter::_writeLdataInfo(const string &outputPath)
-{
-
-  DsLdataInfo ldata(_params.output_dir, _params.debug);
-  
 }
 

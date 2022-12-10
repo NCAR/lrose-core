@@ -164,7 +164,6 @@ private:
 
   void _setupWrite(RadxFile &file);
   int _writeClutterVol();
-  void _writeLdataInfo(const string &outputPath);
 
 
 };

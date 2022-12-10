@@ -410,31 +410,19 @@ public:
 
   char* dbz_field_name;
 
-  double dbz_clutter_threshold;
+  double clutter_dbz_threshold;
 
-  double clutter_percentile;
+  tdrp_bool_t use_vel_field;
 
-  double missing_clutter_value;
+  char* vel_field_name;
 
-  double threshold_tolerance;
+  double max_abs_vel;
 
-  double maximum_percent_change;
+  tdrp_bool_t specify_clutter_fraction_threshold;
 
-  double minimum_stable_volumes;
+  double clutter_fraction_threshold;
 
-  double histogram_resolution;
-
-  double histogram_max;
-
-  char* output_dir;
-
-  tdrp_bool_t write_latest_data_info;
-
-  tdrp_bool_t write_diagnostic_output;
-
-  char* diagnostic_volume_dir;
-
-  char* diagnostic_ascii_dir;
+  char* clutter_stats_output_dir;
 
   char* dbz_mean_field_name;
 
@@ -444,6 +432,10 @@ public:
 
   char* clut_flag_field_name;
 
+  tdrp_bool_t write_latest_data_info;
+
+  char* clutter_removed_output_dir;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -451,7 +443,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[39];
+  mutable TDRPtable _table[36];
 
   const char *_className;
 

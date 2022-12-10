@@ -104,7 +104,7 @@ paramdef double
 {
   p_descr = "List of fixed angles for desired sweeps (deg)";
   p_help = "PPI mode: elevations. RHIs: azimuths.";
-  p_default = { 0.5 };
+  p_default = { 0.5, 1.0, 1.5, 2.0 };
 } sweep_fixed_angles[];
 
 paramdef double
@@ -157,73 +157,56 @@ commentdef
 
 paramdef string
 {
-  p_descr = "Input field name.";
+  p_descr = "Reflectivity field name.";
   p_help = "Name of field on which clutter will be based.";
   p_default = "DBZ";
 } dbz_field_name;
 
 paramdef double
 {
-  p_descr = "DBZ threshold for a clutter gate.";
-  p_help = "If data is persistently above this value it is a clutter location.";
-  p_default = 0.0;
-} dbz_clutter_threshold;
+  p_descr = "DBZ threshold for clutter at a gate.";
+  p_help = "If data is persistently above this value then the gate is a clutter location.";
+  p_default = 10.0;
+} clutter_dbz_threshold;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to make use of the velocity field to identify clutter.";
+  p_help = "If true, then we check the absolute value of velocity. If it is outside the limit we do not treat the point as clutter.";
+} use_vel_field;
+
+paramdef string
+{
+  p_descr = "Velocity field name.";
+  p_default = "VEL";
+} vel_field_name;
+
+paramdef double
+{
+  p_descr = "Maximimum absolute radial velocity for clutter (m/s).";
+  p_help = "If the absolute velocity at a gate exceeds this, the point cannot be clutter.";
+  p_default = 1.0;
+} max_abs_vel;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the clutter threshold write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} specify_clutter_fraction_threshold;
 
 paramdef double
 {
   p_descr = "Clutter percentile";
   p_help = "Percentile to use in clutter value determination (see the paper, section III. Correction of Radar Reflectivity.";
-  p_default = 0.5;
-} clutter_percentile;
-
-paramdef double
-{
-  p_descr = "Missing clutter value.";
-  p_help = "Value to assign to clutter estimates when the wanted percentile is the missing data value";
-  p_default = -25.0;
-} missing_clutter_value;
-
-paramdef double
-{
-  p_descr = "Variation in threshold for convergence.";
-  p_help = "The threshold as percent of total number of scans to identify a point as clutter should converge to a stable value.  This value is the allowed tolerance (change) to be considered stable.";
-  p_default = 0.025;
-} threshold_tolerance;
-
-paramdef double
-{
-  p_descr = "Maximum percent of pixels that can change for convergence.";
-  p_help = "The percentage of pixels that change from clutter to nonclutter or back should decrease to a minimum for convergence.";
-  p_default = 0.001;
-} maximum_percent_change;
-
-paramdef double
-{
-  p_descr = "Number of volumes that show stablity prior to considering the situation stable";
-  p_help = "The threshold converges, and needs to stay converged for this many volumes before giving the thumbs up.";
-  p_default = 10;
-} minimum_stable_volumes;
-
-paramdef double
-{
-  p_descr = "Resolution of histogram for analysis.";
-  p_help = "Histograms are used to determine the statistics of the clutter properties. See the paper.";
-  p_default = 0.2;
-} histogram_resolution;
-
-paramdef double
-{
-  p_descr = "Histogram maximum bin value.";
-  p_help = "Histograms are used to determine the statistics of the clutter properties. See the paper.";
-  p_default = 50.0;
-} histogram_max;
+  p_default = 0.95;
+} clutter_fraction_threshold;
 
 //////////////////////////////////////////////////////////////////////////////////
 
 commentdef
 {
-  p_header = "Data output";
-  p_text = "Parameters for writing results";
+  p_header = "Clutter statistics output";
+  p_text = "Writing out the results of identifying clutter";
 };
 
 paramdef string
@@ -231,33 +214,7 @@ paramdef string
   p_descr = "Location for final clutter statistics.";
   p_help = "Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.";
   p_default = "unknown";
-} output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
-
-paramdef boolean
-{
-  p_descr = "Write out diagnostic output";
-  p_default = FALSE;
-} write_diagnostic_output;
-
-paramdef string
-{
-  p_descr = "Dir for diagnostic output";
-  p_help = "If true, output from each volume is written, to show the build up of skill through time.";
-  p_default = "unknown";
-} diagnostic_volume_dir;
-
-paramdef string
-{
-  p_descr = "Output ascii dir to which to write plottables";
-  p_help = "";
-  p_default = "unknown";
-} diagnostic_ascii_dir;
+} clutter_stats_output_dir;
 
 paramdef string
 {
@@ -286,4 +243,23 @@ paramdef string
   p_help = "This flag indicates that the gate has persistent clutter.";
   p_default = "clutFlag";
 } clut_flag_field_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef
+{
+  p_header = "Clutter-removed output";
+  p_text = "Writing out volumes with clutter removed.";
+};
+
+paramdef string
+{
+  p_descr = "Location for final clutter statistics.";
+  p_help = "Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.";
+  p_default = "unknown";
+} clutter_removed_output_dir;
 
