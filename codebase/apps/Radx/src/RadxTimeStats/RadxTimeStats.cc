@@ -156,15 +156,29 @@ int RadxTimeStats::Run()
     inputPaths = _args.inputFileList;
 
   }
-    
+
+  // check for substr
+  
+  vector<string> goodPaths;
+  string subStr = _params.file_name_substr;
+  if (subStr.size() == 0) {
+    goodPaths = inputPaths;
+  } else {
+    for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+      if (inputPaths[ii].find(subStr) != string::npos) {
+        goodPaths.push_back(inputPaths[ii]);
+      }
+    }
+  }
+  
   // loop through the input file list
   
   int iret = 0;
-  for (size_t ii = 0; ii < inputPaths.size(); ii++) {
-    if (ii == inputPaths.size() - 1) {
+  for (size_t ii = 0; ii < goodPaths.size(); ii++) {
+    if (ii == goodPaths.size() - 1) {
       _finalFile = true;
     }
-    if (_processFile(inputPaths[ii])) {
+    if (_processFile(goodPaths[ii])) {
       iret = -1;
     }
   }
@@ -186,19 +200,6 @@ int RadxTimeStats::_processFile(const string &filePath)
     return -1;
   }
 
-  // check for substr
-  
-  string subStr = _params.file_name_substr;
-  if (subStr.size() > 0) {
-    RadxPath rpath(_readPath);
-    string fileName = rpath.getFile();
-    if (fileName.find(subStr) == string::npos) {
-      LOG(DEBUG) << "Looking for substr: " << subStr;
-      LOG(DEBUG) << "No substr found, ignoring file: " << _readPath;
-      return 0;
-    }
-  }
-  
   // check if this is an RHI
   
   _isRhi = _readVol.checkIsRhi();

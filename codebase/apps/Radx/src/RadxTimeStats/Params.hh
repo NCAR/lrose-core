@@ -380,8 +380,6 @@ public:
 
   debug_t debug;
 
-  char* instance;
-
   char* input_dir;
 
   char* file_name_substr;
@@ -438,7 +436,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[33];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

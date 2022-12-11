@@ -120,6 +120,8 @@ void Stats::init(double minVal, double maxVal, size_t nBins)
     _histX.push_back(_histMin + ii * _histDelta);
     _histCount.push_back(0.0);
   } // ii
+
+  _initDone = true;
   
 }
   

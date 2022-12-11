@@ -1,0 +1,365 @@
+/**********************************************************************
+ * TDRP params for RadxTimeStats
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxTimeStats computes time-based statistics, gate-by-gate, on a 
+//   series of Radx files, and stores those stats as fields in a CfRadial 
+//   output file.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// Debugging and process control.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "$(HOME)/data/precip/grids/spol/radarPolar/field/moments/sband/sur";
+
+///////////// file_name_substr ////////////////////////
+//
+// Substring that needs to exist in the file name.
+//
+// Set to empty to avoid this check.
+//
+//
+// Type: string
+//
+
+file_name_substr = "Sur1";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In ARCHIVE mode, it moves through the data between the start and end 
+//   times set on the command line. In FILELIST mode, it moves through the 
+//   list of file names specified on the command line.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+//======================================================================
+//
+// SCAN DETAILS.
+//
+// Because we are computing gate-by-gate statistics in time, we need to 
+//   ensure that the scan geometry is constant over time. Therefore we 
+//   need to specify the scan angles which will be analyzed. This is the 
+//   'ideal'. The actual radar measurements are mapped onto this ideal 
+//   scan.
+//
+//======================================================================
+ 
+///////////// scan_mode ///////////////////////////////
+//
+// Scan mode.
+//
+// PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning.
+//
+//
+// Type: enum
+// Options:
+//     PPI
+//     RHI
+//
+
+scan_mode = PPI;
+
+///////////// sweep_fixed_angles //////////////////////
+//
+// List of fixed angles for desired sweeps (deg).
+//
+// PPI mode: elevations. RHIs: azimuths.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+sweep_fixed_angles = {
+ 0.5,
+ 1,
+ 1.5,
+ 2,
+ 3,
+ 4,
+ 5,
+ 7,
+ 9,
+ 11
+};
+
+///////////// first_ray_angle /////////////////////////
+//
+// Starting scan angle for rays (deg).
+//
+// In PPI mode, this is the first azimuth in a clockwise sweep. In RHI 
+//   mode, this is the lowest elevation in a sweep.
+//
+//
+// Type: double
+//
+
+first_ray_angle = 0;
+
+///////////// last_ray_angle //////////////////////////
+//
+// Ending scan angle for rays (deg).
+//
+// In PPI mode, this is the last azimuth in a clockwise sweep. In RHI 
+//   mode, this is the highest elevation in a sweep.
+//
+//
+// Type: double
+//
+
+last_ray_angle = 359.99;
+
+///////////// delta_ray_angle /////////////////////////
+//
+// Delta scan angle between consecutive rays (deg).
+//
+// In PPI mode, this is the azimuth difference between rays. In PPI mode 
+//   the delta should be positive, i.e. for a clockwise sweep. In RHI 
+//   mode, this is the elevation difference between rays.
+//
+//
+// Type: double
+//
+
+delta_ray_angle = 0.75;
+
+///////////// az_tolerance_deg ////////////////////////
+//
+// Azimumth tolerance.
+//
+// Allowed degrees difference between azimuth values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+az_tolerance_deg = 0.1;
+
+///////////// elev_tolerance_deg //////////////////////
+//
+// Elevation tolerance.
+//
+// Allowed degrees difference between elevation values for rays from 
+//   measured volumes to be mapped onto the clutter grids.
+//
+//
+// Type: double
+//
+
+elev_tolerance_deg = 0.1;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 150;
+
+//======================================================================
+//
+// ALGORITHM DETAILS.
+//
+//======================================================================
+ 
+///////////// stats_field_name ////////////////////////
+//
+// Name of the field for which the statistics are required.
+//
+//
+// Type: string
+//
+
+stats_field_name = "DBZ";
+
+///////////// min_expected_value //////////////////////
+//
+// Minimum expected value in the field to be analyzed.
+//
+// We need to constuct a histogram at each gate location. This is the 
+//   lower bound of that histogram.
+//
+//
+// Type: double
+//
+
+min_expected_value = -30;
+
+///////////// max_expected_value //////////////////////
+//
+// Maximum expected value in the field to be analyzed.
+//
+// We need to constuct a histogram at each gate location. This is the 
+//   upper bound of that histogram.
+//
+//
+// Type: double
+//
+
+max_expected_value = 70;
+
+//======================================================================
+//
+// RESULTS OUTPUT.
+//
+// Writing out the statitics to CfRadial files.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Directory for output files.
+//
+//
+// Type: string
+//
+
+output_dir = "$(HOME)/data/precip/grids/spol/radarPolar/stats/sband/sur";
+
+///////////// mean_field_name /////////////////////////
+//
+// Field name for mean.
+//
+//
+// Type: string
+//
+
+mean_field_name = "dbzMean";
+
+///////////// sdev_field_name /////////////////////////
+//
+// Field name for standard deviation.
+//
+//
+// Type: string
+//
+
+sdev_field_name = "dbzSdev";
+
+///////////// skewness_field_name /////////////////////
+//
+// Field name for skewness.
+//
+//
+// Type: string
+//
+
+skewness_field_name = "dbzSkewness";
+
+///////////// kurtosis_field_name /////////////////////
+//
+// Field name for kurtosis.
+//
+//
+// Type: string
+//
+
+kurtosis_field_name = "dbzKurtosis";
+
+///////////// mode_field_name /////////////////////////
+//
+// Field name for mode.
+//
+//
+// Type: string
+//
+
+mode_field_name = "dbzMode";
+
+///////////// median_field_name ///////////////////////
+//
+// Field name for median.
+//
+//
+// Type: string
+//
+
+median_field_name = "dbzMedian";
+
+///////////// max_field_name //////////////////////////
+//
+// Field name for measured maximum value.
+//
+//
+// Type: string
+//
+
+max_field_name = "dbzMax";
+
+///////////// min_field_name //////////////////////////
+//
+// Field name for measured minimum value.
+//
+//
+// Type: string
+//
+
+min_field_name = "dbzMin";
+
+///////////// write_intermediate_files ////////////////
+//
+// Option to write stats files for each time step.
+//
+// Normally only one stats file is written - at the end of the data set. 
+//   If this is set to true, intermediate files will be written for each 
+//   data time.
+//
+//
+// Type: boolean
+//
+
+write_intermediate_files = FALSE;
+

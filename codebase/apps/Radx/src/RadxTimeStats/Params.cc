@@ -596,18 +596,6 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Program instance for process registration.");
-    tt->help = tdrpStrDup("This application registers with procmap. This is the instance used for registration.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
     // Parameter 'Comment 2'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -826,7 +814,7 @@
     tt->descr = tdrpStrDup("Maximum expected value in the field to be analyzed.");
     tt->help = tdrpStrDup("We need to constuct a histogram at each gate location. This is the upper bound of that histogram.");
     tt->val_offset = (char *) &max_expected_value - &_start_;
-    tt->single_val.d = -30;
+    tt->single_val.d = 70;
     tt++;
     
     // Parameter 'Comment 5'

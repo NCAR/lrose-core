@@ -30,12 +30,6 @@ paramdef enum debug_t {
   p_help = "If set, debug messages will be printed appropriately";
 } debug;
 
-paramdef string {
-  p_default = "test";
-  p_descr = "Program instance for process registration.";
-  p_help = "This application registers with procmap. This is the instance used for registration.";
-} instance;
-
 commentdef {
   p_header = "DATA INPUT";
 }
@@ -150,7 +144,7 @@ paramdef double
 {
   p_descr = "Maximum expected value in the field to be analyzed.";
   p_help = "We need to constuct a histogram at each gate location. This is the upper bound of that histogram.";
-  p_default = -30.0;
+  p_default = 70.0;
 } max_expected_value;
 
 //////////////////////////////////////////////////////////////////////////////////
