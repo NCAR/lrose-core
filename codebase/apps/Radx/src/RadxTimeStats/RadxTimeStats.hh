@@ -26,7 +26,7 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2023
+// Dec 2022
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -111,74 +111,58 @@ private:
   const Radx::fl32 *_dbz;
   Radx::fl32 _dbzMiss;
 
-  // clutter volume, derived from the volume read in
-
-  RadxVol _clutterVol;
-  size_t _nRaysClutter;
-
-  // volume with clutter filtered
-
-  RadxVol _filtVol;
+  // stats volume, derived from the volume read in
+  
+  RadxVol _statsVol;
+  size_t _nRaysStats;
 
   // analysis results - statistics
 
   bool _allocNeeded;
   
-  TaArray2D<Radx::fl32> _dbzSumArray;
-  Radx::fl32 **_dbzSum;
+  TaArray2D<Radx::fl32> _sumArray;
+  Radx::fl32 **_sum;
 
-  TaArray2D<Radx::fl32> _dbzSqSumArray;
-  Radx::fl32 **_dbzSqSum;
+  TaArray2D<Radx::fl32> _sqSumArray;
+  Radx::fl32 **_sqSum;
 
-  TaArray2D<Radx::fl32> _dbzCountArray;
-  Radx::fl32 **_dbzCount;
+  TaArray2D<Radx::fl32> _countArray;
+  Radx::fl32 **_count;
+  
+  TaArray2D<Radx::fl32> _meanArray;
+  Radx::fl32 **_mean;
 
-  TaArray2D<Radx::fl32> _dbzMeanArray;
-  Radx::fl32 **_dbzMean;
-
-  TaArray2D<Radx::fl32> _dbzSdevArray;
-  Radx::fl32 **_dbzSdev;
-
-  TaArray2D<Radx::fl32> _clutSumArray;
-  Radx::fl32 **_clutSum;
-
-  TaArray2D<Radx::fl32> _clutFreqArray;
-  Radx::fl32 **_clutFreq;
-
-  TaArray2D<Radx::fl32> _clutFlagArray;
-  Radx::fl32 **_clutFlag;
-
-  // clutter frequency histogram
-
-  Histo _clutFreqHist;
+  TaArray2D<Radx::fl32> _sdevArray;
+  Radx::fl32 **_sdev;
+  
+  TaArray2D<Radx::fl32> _modeArray;
+  Radx::fl32 **_mode;
+  
+  TaArray2D<Radx::fl32> _medianArray;
+  Radx::fl32 **_median;
+  
+  TaArray2D<Histo> _histoArray;
+  Histo **_histo;
 
   // methods
   
-  int _runFilelist();
-  int _runArchive();
-  int _runRealtime();
   void _setupRead(RadxFile &file);
   int _readFile(const string &filePath);
-  int _readClutterFile(const string &clutterPath);
   int _processFile(const string &filePath);
 
-  int _performAnalysis();
-  int _performFiltering();
+  void _initAngleList();
   
   int _checkGeom();
-  int _initClutterVol();
-  void _initAngleList();
-
-  int _analyzeClutter();
-
+  int _initStatsVol();
+  
+  int _analyzeVol();
+  
   void _setupWrite(RadxFile &file);
-  int _writeClutterVol();
+  int _writeStatsVol();
+  
+  RadxRay *_getStatsRay(RadxRay *ray);
 
-  RadxRay *_getClutRay(RadxRay *ray);
-  int _filterClutter();
-  void _filterRay(RadxRay *ray, const RadxRay *clutRay);
-  int _writeFiltVol();
-
+  
 };
 
 #endif

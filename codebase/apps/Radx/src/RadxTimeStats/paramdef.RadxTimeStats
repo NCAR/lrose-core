@@ -2,25 +2,18 @@
 //
 // paramdef.RadxTimeStats
 //
-// This file contains the TDRP parameter definitions for setting the clutter
-// pixels by processing a sufficient quantity of input data using a statistical
-// approach.
-//
-// This cleaned-up app is based on the original RadxPersistentClutter.
-//
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
-// Based on following paper:
-// Lakshmanan V., J. Zhang, K. Hondl and C. Langston.
-// A Statistical Approach to Mitigating Persistent Clutter in
-// Radar Reflectivity Data.
-// IEEE Journal of Selected Topics in Applied Earth Observations
-// and Remote Sensing, Vol. 5, No. 2, April 2012.
+//
+// RadxTimeStats computes time-based statistics, gate-by-gate,
+// on a series of Radx files, and stores those stats as fields
+// in a CfRadial output file.
+// 
 //////////////////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.";
-  p_text = "This method is based on the following paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston. A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.";
+  p_header = "RadxTimeStats computes time-based statistics, gate-by-gate, on a series of Radx files, and stores those stats as fields in a CfRadial output file.";
+  p_text = "";
 };
 
 commentdef {
@@ -53,62 +46,30 @@ paramdef string {
   p_help = "Files will be searched for in this directory.";
 } input_dir;
 
-paramdef string
-  {
-   p_default = "";
-   p_descr = "Substring that needs to exist in the file name.";
-   p_help = "Set to empty to avoid this check.";
-  } file_name_substr;
+paramdef string {
+ p_default = "";
+ p_descr = "Substring that needs to exist in the file name.";
+ p_help = "Set to empty to avoid this check.";
+} file_name_substr;
 
 typedef enum {
-  REALTIME, ARCHIVE, FILELIST
+  ARCHIVE, FILELIST
 } mode_t;
 
 paramdef enum mode_t {
   p_default = ARCHIVE;
   p_descr = "Operating mode";
-  p_help = "In REALTIME mode, the program waits for a new input file.  "
-           "In ARCHIVE mode, it moves through the data between the start "
-           "and end times set on the command line. "
-           "In FILELIST mode, it moves through the list of file names "
-           "specified on the command line. "
-           "Paths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+  p_help = "In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
 } mode;
-
-paramdef int {
-  p_default = 300;
-  p_descr = "Maximum age of realtime data (secs)";
-  p_help =  "Only data less old than this will be used.";
-} max_realtime_data_age_secs;
-
-commentdef {
-  p_header = "ACTION";
-  p_text = "There are 2 possible actions: (a) analyze the clutter from a number of volumes, and store the results in a CfRadial file; or (b) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.";
-};
-
-typedef enum
-  {
-   ANALYZE_CLUTTER, FILTER_CLUTTER
-  } action_t;
-
-paramdef enum action_t
-  {
-   p_default = ANALYZE_CLUTTER;
-   p_descr = "Action to be performed";
-   p_help = "\nANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.";
-  } action;
 
 commentdef {
   p_header = "SCAN DETAILS";
-  p_text = "We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.";
+  p_text = "Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan.";
 };
 
-typedef enum
-  {
-   PPI, RHI
-  } scan_mode_t;
+typedef enum {
+ PPI, RHI
+} scan_mode_t;
 
 paramdef enum scan_mode_t
 {
@@ -160,7 +121,7 @@ paramdef double
 } elev_tolerance_deg;
 
 paramdef double {
-  p_default = 60.0;
+  p_default = 230.0;
   p_descr = "Specified maximim range - km.";
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
@@ -174,161 +135,78 @@ commentdef
 
 paramdef string
 {
-  p_descr = "Reflectivity field name.";
-  p_help = "Name of field on which clutter will be based.";
+  p_descr = "Name of the field for which the statistics are required.";
   p_default = "DBZ";
-} dbz_field_name;
+} stats_field_name;
 
 paramdef double
 {
-  p_descr = "DBZ threshold for clutter at a gate.";
-  p_help = "If data is persistently above this value then the gate is a clutter location.";
-  p_default = 10.0;
-} clutter_dbz_threshold;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to make use of the velocity field to identify clutter.";
-  p_help = "If true, then we check the absolute value of velocity. If it is outside the limit we do not treat the point as clutter.";
-} use_vel_field;
-
-paramdef string
-{
-  p_descr = "Velocity field name.";
-  p_default = "VEL";
-} vel_field_name;
+  p_descr = "Minimum expected value in the field to be analyzed.";
+  p_help = "We need to constuct a histogram at each gate location. This is the lower bound of that histogram.";
+  p_default = -30.0;
+} min_expected_value;
 
 paramdef double
 {
-  p_descr = "Maximimum absolute radial velocity for clutter (m/s).";
-  p_help = "If the absolute velocity at a gate exceeds this, the point cannot be clutter.";
-  p_default = 1.0;
-} max_abs_vel;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the clutter frequency threshold.";
-  p_help = "If true, the clutter_frequency_threshold will be used. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.";
-} specify_clutter_frequency_threshold;
-
-paramdef double
-{
-  p_descr = "Clutter frequency threshold";
-  p_help = "Gates with a clutter frequency fraction in excess of this number will be flagged as clutter.";
-  p_default = 0.95;
-} clutter_frequency_threshold;
+  p_descr = "Maximum expected value in the field to be analyzed.";
+  p_help = "We need to constuct a histogram at each gate location. This is the upper bound of that histogram.";
+  p_default = -30.0;
+} max_expected_value;
 
 //////////////////////////////////////////////////////////////////////////////////
 
 commentdef
 {
-  p_header = "Clutter statistics output";
-  p_text = "Writing out the results of identifying clutter";
+  p_header = "RESULTS OUTPUT";
+  p_text = "Writing out the statitics to CfRadial files";
 };
 
 paramdef string
 {
-  p_descr = "Location for final clutter statistics.";
-  p_help = "Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.";
-  p_default = "unknown";
-} clutter_stats_output_dir;
+  p_descr = "Directory for output files.";
+  p_default = "output";
+} output_dir;
 
 paramdef string
 {
-  p_descr = "Field name for mean dbz.";
-  p_help = "The dbz mean field is added to the output data set.";
+  p_descr = "Field name for mean.";
   p_default = "dbzMean";
-} dbz_mean_field_name;
+} mean_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for standard deviation of dbz.";
-  p_help = "The dbz sdev field is added to the output data set.";
+  p_descr = "Field name for standard deviation.";
   p_default = "dbzSdev";
-} dbz_sdev_field_name;
+} sdev_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for clutter frequency.";
-  p_help = "This is the fraction of time that a gate has dbz above the threshold.";
-  p_default = "clutFreq";
-} clut_freq_field_name;
+  p_descr = "Field name for mode.";
+  p_default = "dbzMode";
+} mode_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for clutter flag.";
-  p_help = "This flag indicates that the gate has persistent clutter.";
-  p_default = "clutFlag";
-} clut_flag_field_name;
+  p_descr = "Field name for median.";
+  p_default = "dbzMedian";
+} median_field_name;
+
+paramdef string
+{
+  p_descr = "Field name for measured maximum value.";
+  p_default = "dbzMode";
+} measured_max_field_name;
+
+paramdef string
+{
+  p_descr = "Field name for measured minimum value.";
+  p_default = "dbzMode";
+} measured_min_field_name;
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to write out _latest_data_info files.";
-  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
-} write_latest_data_info;
+  p_descr = "Option to write stats files for each time step.";
+  p_help = "Normally only one stats file is written - at the end of the data set. If this is set to true, intermediate files will be written for each data time.";
+} write_intermediate_files;
 
-commentdef
-{
-  p_header = "FILTERED OUTPUT";
-  p_text = "Writing out volumes with clutter filtered.";
-};
-
-paramdef string
-{
-  p_descr = "Field name for filtered dbz.";
-  p_help = "The filtered dbz field is added to the output data set.";
-  p_default = "dbzFilt";
-} dbz_filt_field_name;
-
-paramdef string
-{
- p_descr = "Path to volume containing the clutter statistics.";
- p_help = "This volume is created by this app in ANALYZE_CLUTTER action. Select a volume towards at end of the analysis sequence.";
- p_default = "unknown";
-} clutter_stats_path;
-
-paramdef double {
-  p_default = 1.0;
-  p_descr = "The number of standard deviations above the mean for the clutter threshold.";
-  p_help = "For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.";
-} n_sdev_for_clut_threshold;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the clutter frequency threshold for filtering.";
-  p_help = "If true, the filter_frequency_threshold will be used. If false, the clutter flag field in the clutter statistics will be used.";
-} specify_filter_frequency_threshold;
-
-paramdef double
-{
-  p_descr = "Filter frequency threshold";
-  p_help = "Gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.";
-  p_default = 0.97;
-} filter_frequency_threshold;
-
-paramdef double {
-  p_default = -20;
-  p_descr = "The dbz value used to store filtered reflectivity.";
-  p_help = "For filtered gates, we store this value in place of the original measured value.";
-} min_dbz_filt;
-
-paramdef string
-{
-  p_descr = "Directory for filtered output volumes.";
-  p_help = "These volumes have a filtered reflectivity field, with the clutter in the stats volume removed.";
-  p_default = "unknown";
-} filt_output_dir;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to specify the fields to be written out with the filtered data.";
-  p_help = "If false all fields will be copied through. If true, only the specified fields will be copied through.";
-} specify_output_fields;
-
-paramdef string
-{
-  p_descr = "Output fields to be copied through.";
-  p_help = "These fields will be copied, along with the unfiltered and filtered reflectivity.";
-  p_default = { "DBZ", "VEL", "WIDTH", "ZDR", "PHIDP", "RHOHV" };
-} output_fields[];
 

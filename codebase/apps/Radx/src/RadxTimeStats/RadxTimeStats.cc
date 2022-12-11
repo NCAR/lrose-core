@@ -24,7 +24,7 @@
 ///////////////////////////////////////////////////////////////
 // RadxTimeStats.cc
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Feb 2013
 //
@@ -81,14 +81,6 @@ RadxTimeStats::RadxTimeStats(int argc, char **argv)
     return;
   }
 
-  // init process mapper registration
-
-  if (_params.mode == Params::REALTIME) {
-    PMU_auto_init( _progName.c_str(),
-                  _params.instance,
-                  PROCMAP_REGISTER_INTERVAL);
-  }
-
   // initialize logging
   LogStreamInit::init(false, false, true, true);
   LOG_STREAM_DISABLE(LogStream::WARNING);
@@ -127,130 +119,51 @@ RadxTimeStats::~RadxTimeStats()
 int RadxTimeStats::Run()
 {
 
-  // initialize
+  // set up angle list
   
-  if (_params.action == Params::ANALYZE_CLUTTER) {
-
-    // ANALYZE_CLUTTER
-    // set up angle list
+  _initAngleList();
     
-    _initAngleList();
-    
-  } else {
-
-    // CLUTTER_REMOVAL
-    // read in the clutter volume
-    
-    if (_readClutterFile(_params.clutter_stats_path)) {
-      return -1;
-    }
-
-  } // if (_params.action == Params::ANALYZE_CLUTTER)
-
-
+  // get the input paths based on mode
   
-  // run based on mode
+  vector<string> inputPaths;
   
   if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
-    return _runFilelist();
-  } else {
-    return _runRealtime();
-  }
-}
-
-//////////////////////////////////////////////////
-// Run in filelist mode
-
-int RadxTimeStats::_runFilelist()
-{
-
-  // loop through the input file list
-
-  int iret = 0;
-
-  for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
-    string inputPath = _args.inputFileList[ii];
-    if (_processFile(inputPath)) {
-      iret = -1;
-    }
-
-  }
-
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in archive mode
-
-int RadxTimeStats::_runArchive()
-{
-
-  // get the files to be processed
-
-  RadxTimeList tlist;
-  tlist.setDir(_params.input_dir);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (tlist.compile()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_runFilelist()";
-    LOG(ERROR) << "  Cannot compile time list, dir: " << _params.input_dir;
-    LOG(ERROR) << "  Start time: " << RadxTime::strm(_args.startTime);
-    LOG(ERROR) << "  End time: " << RadxTime::strm(_args.endTime);
-    LOG(ERROR) << tlist.getErrStr();
-    return -1;
-  }
-
-  const vector<string> &paths = tlist.getPathList();
-  if (paths.size() < 1) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_runFilelist()";
-    LOG(ERROR) << "  No files found, dir: " << _params.input_dir;
-    return -1;
-  }
-  
-  // loop through the input file list
-  
-  int iret = 0;
-  for (size_t ii = 0; ii < paths.size(); ii++) {
-    if (_processFile(paths[ii])) {
-      iret = -1;
-    }
-  }
-
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in realtime mode
-
-int RadxTimeStats::_runRealtime()
-{
-
-  // init process mapper registration
-
-  PMU_auto_init(_progName.c_str(), _params.instance,
-                PROCMAP_REGISTER_INTERVAL);
-
-  // watch for new data to arrive
-
-  LdataInfo ldata(_params.input_dir,
-                  _params.debug >= Params::DEBUG_VERBOSE);
-  
-  int iret = 0;
-
-  while (true) {
-    ldata.readBlocking(_params.max_realtime_data_age_secs,
-                       1000, PMU_auto_register);
     
-    const string path = ldata.getDataPath();
-    if (_processFile(path)) {
+    // get the files to be processed
+    
+    RadxTimeList tlist;
+    tlist.setDir(_params.input_dir);
+    tlist.setModeInterval(_args.startTime, _args.endTime);
+    if (tlist.compile()) {
+      LOG(ERROR) << "ERROR - RadxTimeStats::_runFilelist()";
+      LOG(ERROR) << "  Cannot compile time list, dir: " << _params.input_dir;
+      LOG(ERROR) << "  Start time: " << RadxTime::strm(_args.startTime);
+      LOG(ERROR) << "  End time: " << RadxTime::strm(_args.endTime);
+      LOG(ERROR) << tlist.getErrStr();
+      return -1;
+    }
+    
+    inputPaths = tlist.getPathList();
+    if (inputPaths.size() < 1) {
+      LOG(ERROR) << "ERROR - RadxTimeStats - ARCHIVE mode";
+      LOG(ERROR) << "  No files found, dir: " << _params.input_dir;
+      return -1;
+    }
+    
+  } else {
+    
+    inputPaths = _args.inputFileList;
+
+  }
+    
+  // loop through the input file list
+  
+  int iret = 0;
+  for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+    if (_processFile(inputPaths[ii])) {
       iret = -1;
     }
   }
-
   return iret;
 
 }
@@ -304,71 +217,25 @@ int RadxTimeStats::_processFile(const string &filePath)
   }
   _nVols++;
   
-  if (_params.action == Params::ANALYZE_CLUTTER) {
-    return _performAnalysis();
-  } else {
-    return _performFiltering();
-  }
-
-}
-
-//////////////////////////////////////////////////
-// Run analysis on this file
-// Returns 0 on success, -1 on failure
-
-int RadxTimeStats::_performAnalysis()
-{
-
-  // initialize the clutter volume from the relevant scans in the file
-
-  if (_initClutterVol()) {
+  // initialize the stats volume from the relevant scans in the file
+  
+  if (_initStatsVol()) {
     return -1;
   }
-
-  // initialize the histogram for the clutter frequency
   
-  _clutFreqHist.init(0.0, 0.02, 1.0);
-
-  // analyze this data set
+  // analyze this volume data set
   
-  if (_analyzeClutter()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_performAnalysis()";
+  if (_analyzeVol()) {
+    LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
     LOG(ERROR) << "  Cannot process data in file: " << _readPath;
     return -1;
   }
 
   // write out the results
 
-  if (_writeClutterVol()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_performAnalysis()";
+  if (_writeStatsVol()) {
+    LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
     LOG(ERROR) << "  Cannot write out clutter volume";
-    return -1;
-  }
-
-  return 0;
-
-}
-
-//////////////////////////////////////////////////
-// Remove clutter from a file
-// Returns 0 on success, -1 on failure
-
-int RadxTimeStats::_performFiltering()
-{
-
-  // analyze this data set
-  
-  if (_filterClutter()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_performFiltering";
-    LOG(ERROR) << "  Cannot process data in file: " << _readPath;
-    return -1;
-  }
-
-  // write out the results
-
-  if (_writeFiltVol()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::Run";
-    LOG(ERROR) << "  Cannot write out filtered volume";
     return -1;
   }
 
@@ -393,20 +260,8 @@ void RadxTimeStats::_setupRead(RadxFile &file)
   file.setReadMaxRangeKm(_params.max_range_km);
 
 
-  if (_params.action == Params::ANALYZE_CLUTTER) {
-    file.addReadField(_params.dbz_field_name);
-    if (_params.use_vel_field) {
-      file.addReadField(_params.vel_field_name);
-    }
-  } else {
-    if (_params.specify_output_fields) {
-      file.addReadField(_params.dbz_field_name);
-      for (int ii = 0; ii < _params.output_fields_n; ii++) {
-        file.addReadField(_params._output_fields[ii]);
-      }
-    }
-  }
-
+  file.addReadField(_params.stats_field_name);
+  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -465,55 +320,10 @@ int RadxTimeStats::_readFile(const string &filePath)
   
 }
 
-//////////////////////////////////////////////////
-// Read in the process clutter file
-// Returns 0 on success, -1 on failure
-
-int RadxTimeStats::_readClutterFile(const string &clutterPath)
-{
-
-  GenericRadxFile inFile;
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    inFile.setDebug(true);
-  }
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    inFile.setVerbose(true);
-    inFile.printReadRequest(cerr);
-  }
-  
-  // read in file
-  
-  _clutterVol.clear();
-  if (inFile.readFromPath(clutterPath, _clutterVol)) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_readClutterFile";
-    LOG(ERROR) << inFile.getErrStr();
-    return -1;
-  }
-  
-  // convert to floats
-  
-  _clutterVol.convertToFl32();
-  
-  // set number of gates constant
-  
-  _readVol.setNGatesConstant();
-
-  LOG(DEBUG) << "INFO - RadxTimeStats::_readClutterFile";
-  LOG(DEBUG) << "  Read in clutter path: " << clutterPath;
-  
-  if (_clutterVol.getNRays() < 3) {
-    return -1;
-  } else {
-    return 0;
-  }
-  
-}
-
 ///////////////////////////////////////////
 // process this data set
 
-int RadxTimeStats::_analyzeClutter()
+int RadxTimeStats::_analyzeVol()
   
 {
 
@@ -521,110 +331,80 @@ int RadxTimeStats::_analyzeClutter()
 
   // add to DBZ sum and compute mean
 
-  vector<RadxRay *> &rays = _clutterVol.getRays();
-  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+  vector<RadxRay *> &rays = _statsVol.getRays();
+  for (size_t iray = 0; iray < _nRaysStats; iray++) {
     RadxRay *ray = rays[iray];
 
-    RadxField *dbzFld = ray->getField(_params.dbz_field_name);
-    if (dbzFld == NULL) {
+    RadxField *inputFld = ray->getField(_params.stats_field_name);
+    if (inputFld == NULL) {
       continue;
     }
-    Radx::fl32 dbzMiss = dbzFld->getMissingFl32();
-    Radx::fl32 *dbzVals = dbzFld->getDataFl32();
+    Radx::fl32 inputMiss = inputFld->getMissingFl32();
+    Radx::fl32 *inputVals = inputFld->getDataFl32();
     
-    RadxField *velFld = ray->getField(_params.vel_field_name);
-    Radx::fl32 velMiss = Radx::missingFl32;
-    if (velFld != NULL) {
-      velMiss = velFld->getMissingFl32();
-    }
-    Radx::fl32 *velVals = NULL;
-    if (velFld) {
-      velVals = velFld->getDataFl32();
-    }
-    
-    Radx::fl32 *dbzCount = _dbzCount[iray];
-    Radx::fl32 *dbzSum = _dbzSum[iray];
-    Radx::fl32 *dbzSqSum = _dbzSqSum[iray];
-    Radx::fl32 *dbzMean = _dbzMean[iray];
-    Radx::fl32 *dbzSdev = _dbzSdev[iray];
-    Radx::fl32 *clutSum = _clutSum[iray];
-    Radx::fl32 *clutFreq = _clutFreq[iray];
+    Radx::fl32 *count = _count[iray];
+    Radx::fl32 *sum = _sum[iray];
+    Radx::fl32 *sqSum = _sqSum[iray];
+    Radx::fl32 *mean = _mean[iray];
+    Radx::fl32 *sdev = _sdev[iray];
+    // Radx::fl32 *mode = _mode[iray];
+    // Radx::fl32 *median = _median[iray];
     
     for (size_t igate = 0; igate < _nGates; igate++) {
-      Radx::fl32 dbzVal = dbzVals[igate];
-      if (dbzVal != dbzMiss) {
-        dbzSum[igate] += dbzVal;
-        dbzSqSum[igate] += (dbzVal * dbzVal);
-        dbzCount[igate] += 1.0;
-        bool isClutter = false;
-        if (dbzVal >= _params.clutter_dbz_threshold) {
-          isClutter = true; // dbz exceeds threshold - could be clutter
-        }
-        if (velVals) {
-          Radx::fl32 velVal = velVals[igate];
-          if (velVal != velMiss && fabs(velVal) > _params.max_abs_vel) {
-            isClutter = false; // vel exceeds threshold - not clutter
-          }
-        }
-        if (isClutter) {
-          clutSum[igate] += 1.0;
-        }
+      Radx::fl32 inputVal = inputVals[igate];
+      if (inputVal != inputMiss) {
+        sum[igate] += inputVal;
+        sqSum[igate] += (inputVal * inputVal);
+        count[igate] += 1.0;
       }
-      double count = dbzCount[igate];
-      if (count > 0) {
-        dbzMean[igate] = dbzSum[igate] / count;
-        clutFreq[igate] = clutSum[igate] / count;
+      double countVal = count[igate];
+      if (countVal > 0) {
+        mean[igate] = sum[igate] / countVal;
       }
-      if (count > 1) {
-        double sum = dbzSum[igate];
-        double sumSq = dbzSqSum[igate];
-        double var =
-          (sumSq - (sum * sum) / count) / (count - 1.0);
-        if (var > 0.0) {
-          dbzSdev[igate] = sqrt(var);
+      if (countVal > 1) {
+        double sumVal = sum[igate];
+        double sqSumVal = sqSum[igate];
+        double varVal =
+          (sqSumVal - (sumVal * sumVal) / countVal) / (countVal - 1.0);
+        if (varVal > 0.0) {
+          sdev[igate] = sqrt(varVal);
         } else {
-          dbzSdev[igate] = 0.0;
+          sdev[igate] = 0.0;
         }
       }
     } // igate
 
     // add output fields to ray
 
-    RadxField *dbzMeanFldOut = new RadxField(*dbzFld);
-    dbzMeanFldOut->setName(_params.dbz_mean_field_name);
-    dbzMeanFldOut->setDataFl32(_nGates, dbzMean, true);
+    RadxField *meanFldOut = new RadxField(*inputFld);
+    meanFldOut->setName(_params.mean_field_name);
+    meanFldOut->setDataFl32(_nGates, mean, true);
     
-    RadxField *dbzSdevFldOut = new RadxField(*dbzFld);
-    dbzSdevFldOut->setName(_params.dbz_sdev_field_name);
-    dbzSdevFldOut->setDataFl32(_nGates, dbzSdev, true);
+    RadxField *sdevFldOut = new RadxField(*inputFld);
+    sdevFldOut->setName(_params.sdev_field_name);
+    sdevFldOut->setDataFl32(_nGates, sdev, true);
     
-    RadxField *clutFreqFldOut = new RadxField(*dbzFld);
-    clutFreqFldOut->setName(_params.clut_freq_field_name);
-    clutFreqFldOut->setLongName("ClutterTimeFraction");
-    clutFreqFldOut->setUnits("");
-    clutFreqFldOut->setDataFl32(_nGates, clutFreq, true);
-
-    ray->addField(dbzMeanFldOut);
-    ray->addField(dbzSdevFldOut);
-    ray->addField(clutFreqFldOut);
+    ray->addField(meanFldOut);
+    ray->addField(sdevFldOut);
     
   } // iray
 
   // compute the clutter frequency histogram
   
-  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
-    Radx::fl32 *clutFreq = _clutFreq[iray];
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      _clutFreqHist.update(clutFreq[igate]);
-    }
-  }
+  // for (size_t iray = 0; iray < _nRaysStats; iray++) {
+  //   Radx::fl32 *clutFreq = _clutFreq[iray];
+  //   for (size_t igate = 0; igate < _nGates; igate++) {
+  //     _clutFreqHist.update(clutFreq[igate]);
+  //   }
+  // }
   // _clutFreqHist.computeVariance();
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _clutFreqHist.print(stderr);
-    // _clutFreqHist.printVariance(stderr);
-  }
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //   _clutFreqHist.print(stderr);
+  //   // _clutFreqHist.printVariance(stderr);
+  // }
 
+#ifdef JUNK  
   // set the clutter flag
 
   double maxVariance;
@@ -636,7 +416,7 @@ int RadxTimeStats::_analyzeClutter()
   LOG(DEBUG) << "  Freq histogram stats - maxVar, clutFracThreshold: "
              << maxVariance << ", " << clutFracThreshold;
   
-  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+  for (size_t iray = 0; iray < _nRaysStats; iray++) {
     Radx::fl32 *clutFreq = _clutFreq[iray];
     Radx::fl32 *clutFlag = _clutFlag[iray];
     for (size_t igate = 0; igate < _nGates; igate++) {
@@ -650,9 +430,9 @@ int RadxTimeStats::_analyzeClutter()
 
   // add the clutter flag to the output
   
-  for (size_t iray = 0; iray < _nRaysClutter; iray++) {
+  for (size_t iray = 0; iray < _nRaysStats; iray++) {
     RadxRay *ray = rays[iray];
-    RadxField *dbzFld = ray->getField(_params.dbz_field_name);
+    RadxField *dbzFld = ray->getField(_params.stats_field_name);
     if (dbzFld == NULL) {
       continue;
     }
@@ -664,6 +444,7 @@ int RadxTimeStats::_analyzeClutter()
     clutFlagFldOut->setDataFl32(_nGates, clutFlag, true);
     ray->addField(clutFlagFldOut);
   } // iray
+#endif
 
   return 0;
 
@@ -807,11 +588,11 @@ int RadxTimeStats::_checkGeom()
 }
 
 /////////////////////////////////////////////////////////////
-// initialize the clutter volume from the selected angles
+// initialize the stats volume from the selected angles
 // this is not optimized for speed, but is simple and
 // performance is not limiting here.
 
-int RadxTimeStats::_initClutterVol()
+int RadxTimeStats::_initStatsVol()
 {
 
   const vector<RadxRay *> &rays = _readVol.getRays();
@@ -822,16 +603,16 @@ int RadxTimeStats::_initClutterVol()
   // initialize the clutter volume with the read volume,
   // and then clear out the rays
 
-  _clutterVol.clear();
-  _clutterVol = _readVol;
-  _clutterVol.clearRays();
+  _statsVol.clear();
+  _statsVol = _readVol;
+  _statsVol.clearRays();
 
   // create empty ray with all gates missing
   
   RadxRay emptyRay(*rays[0]);
-  RadxField *dbzFld = emptyRay.getField(_params.dbz_field_name);
+  RadxField *dbzFld = emptyRay.getField(_params.stats_field_name);
   if (dbzFld == NULL) {
-    LOG(ERROR) << "DBZ field name not found in ray: " << _params.dbz_field_name;
+    LOG(ERROR) << "Input field name not found in ray: " << _params.stats_field_name;
     return -1;
   }
   dbzFld->setGatesToMissing(0, dbzFld->getNPoints() - 1);
@@ -924,14 +705,14 @@ int RadxTimeStats::_initClutterVol()
       
       // add to the clutter vol
 
-      _clutterVol.addRay(clutRay);
+      _statsVol.addRay(clutRay);
 
     } // iang
   } // isweep
 
-  _clutterVol.loadSweepInfoFromRays();
-  _clutterVol.loadVolumeInfoFromRays();
-  _nRaysClutter = _clutterVol.getNRays();
+  _statsVol.loadSweepInfoFromRays();
+  _statsVol.loadVolumeInfoFromRays();
+  _nRaysStats = _statsVol.getNRays();
   
   // allocate
 
@@ -939,34 +720,43 @@ int RadxTimeStats::_initClutterVol()
     
     // first time, allocate arrays for analysis
     
-    _dbzSum = _dbzSumArray.alloc(_nRaysClutter, _nGates);
-    _dbzSqSum = _dbzSqSumArray.alloc(_nRaysClutter, _nGates);
-    _dbzCount = _dbzCountArray.alloc(_nRaysClutter, _nGates);
-    _dbzMean = _dbzMeanArray.alloc(_nRaysClutter, _nGates);
-    _dbzSdev = _dbzSdevArray.alloc(_nRaysClutter, _nGates);
-    _clutSum = _clutSumArray.alloc(_nRaysClutter, _nGates);
-    _clutFreq = _clutFreqArray.alloc(_nRaysClutter, _nGates);
-    _clutFlag = _clutFlagArray.alloc(_nRaysClutter, _nGates);
+    _sum = _sumArray.alloc(_nRaysStats, _nGates);
+    _sqSum = _sqSumArray.alloc(_nRaysStats, _nGates);
+    _count = _countArray.alloc(_nRaysStats, _nGates);
+    _mean = _meanArray.alloc(_nRaysStats, _nGates);
+    _sdev = _sdevArray.alloc(_nRaysStats, _nGates);
+    _mode = _modeArray.alloc(_nRaysStats, _nGates);
+    _median = _medianArray.alloc(_nRaysStats, _nGates);
+    _histo = _histoArray.alloc(_nRaysStats, _nGates);
 
     // initialize to 0
     
-    Radx::fl32 *dbzSum1D = _dbzSumArray.dat1D();
-    memset(dbzSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *dbzSqSum1D = _dbzSqSumArray.dat1D();
-    memset(dbzSqSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *dbzCount1D = _dbzCountArray.dat1D();
-    memset(dbzCount1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *dbzMean1D = _dbzMeanArray.dat1D();
-    memset(dbzMean1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *dbzSdev1D = _dbzSdevArray.dat1D();
-    memset(dbzSdev1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *sum1D = _sumArray.dat1D();
+    memset(sum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *sqSum1D = _sqSumArray.dat1D();
+    memset(sqSum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *count1D = _countArray.dat1D();
+    memset(count1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *mean1D = _meanArray.dat1D();
+    memset(mean1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *sdev1D = _sdevArray.dat1D();
+    memset(sdev1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *mode1D = _modeArray.dat1D();
+    memset(mode1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    Radx::fl32 *median1D = _medianArray.dat1D();
+    memset(median1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
 
-    Radx::fl32 *clutSum1D = _clutSumArray.dat1D();
-    memset(clutSum1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *clutFreq1D = _clutFreqArray.dat1D();
-    memset(clutFreq1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *clutFlag1D = _clutFlagArray.dat1D();
-    memset(clutFlag1D, 0, _nRaysClutter * _nGates * sizeof(Radx::fl32));
+    double maxVal = _params.max_expected_value;
+    double minVal = _params.min_expected_value;
+    double range = maxVal - minVal;
+    double nbins = 50.0;
+    double deltaVal = range / nbins;
+    for (size_t iray = 0; iray < _nRaysStats; iray++) {
+      for (size_t igate = 0; igate < _nGates; igate++) {
+        Histo &hist = _histo[iray][igate];
+        hist.init(minVal, deltaVal, maxVal);
+      } // igate
+    } // iray
 
     _allocNeeded = false;
 
@@ -997,9 +787,9 @@ void RadxTimeStats::_setupWrite(RadxFile &file)
 }
 
 //////////////////////////////////////
-// Write the clutter volume
+// Write the stats volume
 
-int RadxTimeStats::_writeClutterVol()
+int RadxTimeStats::_writeStatsVol()
 
 {
 
@@ -1008,43 +798,15 @@ int RadxTimeStats::_writeClutterVol()
   GenericRadxFile outFile;
   _setupWrite(outFile);
   
-  string outputDir = _params.clutter_stats_output_dir;
+  string outputDir = _params.output_dir;
   
   // write to dir
   
-  if (outFile.writeToDir(_clutterVol, outputDir, true, false)) {
-    LOG(ERROR) << "ERROR - RadxConvert::_writeClutterVol";
+  if (outFile.writeToDir(_statsVol, outputDir, true, false)) {
+    LOG(ERROR) << "ERROR - RadxConvert::_writeStatsVol";
     LOG(ERROR) << "  Cannot write file to dir: " << outputDir;
     LOG(ERROR) << outFile.getErrStr();
     return -1;
-  }
-
-  string outputPath = outFile.getPathInUse();
-
-  // write latest data info file if requested 
-  
-  if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(outputDir);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ldata.setDebug(true);
-    }
-    string relPath;
-    RadxPath::stripDir(outputDir, outputPath, relPath);
-    ldata.setRelDataPath(relPath);
-    ldata.setWriter(_progName);
-    ldata.setDataFileExt("nc");
-    ldata.setDataType("netCDF");
-    
-    string fileName;
-    RadxPath::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
-    ldata.setRelDataPath(fileName);
-    
-    ldata.setIsFcast(false);
-    ldata.write(_readVol.getStartTimeSecs());
-    
-    LOG(DEBUG) << "RadxTimeStats::_writeClutterVol(): Data written to "
-               << outputPath;
-    
   }
 
   return 0;
@@ -1052,12 +814,12 @@ int RadxTimeStats::_writeClutterVol()
 }
 
 ///////////////////////////////////////////
-// get matching ray from clutter volume
+// get matching ray from stats volume
 
-RadxRay *RadxTimeStats::_getClutRay(RadxRay *ray)
+RadxRay *RadxTimeStats::_getStatsRay(RadxRay *ray)
 {
 
-  const vector<RadxRay *> &clutRays = _clutterVol.getRays();
+  const vector<RadxRay *> &clutRays = _statsVol.getRays();
   if (clutRays.size() < 1) {
     return NULL;
   }
@@ -1093,200 +855,3 @@ RadxRay *RadxTimeStats::_getClutRay(RadxRay *ray)
   
 }
 
-///////////////////////////////////////////
-// remove clutter from the volume
-
-int RadxTimeStats::_filterClutter()
-  
-{
-
-  LOG(DEBUG) << "Filtering clutter from volume ..." << _readPath;
-  
-  // copy the read volume
-  
-  _filtVol = _readVol;
-  
-  // loop through the rays in the read volume
-  
-  const vector<RadxRay *> &rays = _filtVol.getRays();
-  if (rays.size() < 1) {
-    return -1;
-  }
-
-  for (size_t iray = 0; iray < rays.size(); iray++) {
-    
-    RadxRay *ray = rays[iray];
-    RadxRay *clutRay = _getClutRay(ray);
-    if (clutRay != NULL) {
-      _filterRay(ray, clutRay);
-    }
-
-  } // iray
-  
-  return 0;
-  
-}
-
-//////////////////////////////////////
-// Filter a ray based on a clutter ray
-
-void RadxTimeStats::_filterRay(RadxRay *ray, const RadxRay *clutRay)
-
-{
-
-  // get the dbz field
-  
-  RadxField *dbzFld = ray->getField(_params.dbz_field_name);
-  if (dbzFld == NULL) {
-    return;
-  }
-  Radx::fl32 dbzMiss = dbzFld->getMissingFl32();
-  Radx::fl32 *dbzVals = dbzFld->getDataFl32();
-
-  // get the clutter stats
-  
-  const RadxField *dbzMeanFld = clutRay->getField(_params.dbz_mean_field_name);
-  if (dbzMeanFld == NULL) {
-    return;
-  }
-  Radx::fl32 dbzMeanMiss = dbzMeanFld->getMissingFl32();
-  const Radx::fl32 *dbzMeanVals = dbzMeanFld->getDataFl32();
-
-  const RadxField *dbzSdevFld = clutRay->getField(_params.dbz_sdev_field_name);
-  if (dbzSdevFld == NULL) {
-    return;
-  }
-  Radx::fl32 dbzSdevMiss = dbzSdevFld->getMissingFl32();
-  const Radx::fl32 *dbzSdevVals = dbzSdevFld->getDataFl32();
-
-  const RadxField *clutFreqFld = clutRay->getField(_params.clut_freq_field_name);
-  if (clutFreqFld == NULL) {
-    return;
-  }
-  Radx::fl32 clutFreqMiss = clutFreqFld->getMissingFl32();
-  const Radx::fl32 *clutFreqVals = clutFreqFld->getDataFl32();
-
-  const RadxField *clutFlagFld = clutRay->getField(_params.clut_flag_field_name);
-  if (clutFlagFld == NULL) {
-    return;
-  }
-  Radx::fl32 clutFlagMiss = clutFlagFld->getMissingFl32();
-  const Radx::fl32 *clutFlagVals = clutFlagFld->getDataFl32();
-
-  // create the filt dbz field
-  
-  RadxField *filtFld = new RadxField(*dbzFld);
-  Radx::fl32 filtMiss = filtFld->getMissingFl32();
-  filtFld->setName(_params.dbz_filt_field_name);
-  filtFld->setLongName("Filtered-reflectivity");
-  Radx::fl32 *filtVals = filtFld->getDataFl32();
-
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    
-    filtVals[ii] = filtMiss;
-    
-    Radx::fl32 dbz = dbzVals[ii];
-    if (dbz == dbzMiss) {
-      continue;
-    }
-
-    Radx::fl32 dbzMean = dbzMeanVals[ii];
-    if (dbzMean == dbzMeanMiss) {
-      continue;
-    }
-
-    Radx::fl32 dbzSdev = dbzSdevVals[ii];
-    if (dbzSdev == dbzSdevMiss) {
-      continue;
-    }
-
-    // check if we have clutter
-    
-    Radx::fl32 clutFlag = clutFlagVals[ii];
-    if (clutFlag == clutFlagMiss) {
-      continue;
-    }
-
-    if (_params.specify_filter_frequency_threshold) {
-      Radx::fl32 clutFreq = clutFreqVals[ii];
-      if (clutFreq == clutFreqMiss) {
-        continue;
-      }
-      if (clutFreq < _params.filter_frequency_threshold) {
-        clutFlag = false;
-      } else {
-        clutFlag = true;
-      }
-    }
-
-    // compute filtered value
-    
-    double clutThreshold = dbzMean + dbzSdev * _params.n_sdev_for_clut_threshold;
-    filtVals[ii] = dbz;
-    if (clutFlag > 0) {
-      if (dbz < clutThreshold) {
-        filtVals[ii] = _params.min_dbz_filt;
-      }
-    }
-
-  } // ii
-  
-  ray->addField(filtFld);
-
-}
-
-
-//////////////////////////////////////
-// Write the clutter-removed volume
-
-int RadxTimeStats::_writeFiltVol()
-
-{
-
-  // output file
-
-  GenericRadxFile outFile;
-  _setupWrite(outFile);
-  
-  string outputDir = _params.filt_output_dir;
-  
-  // write to dir
-  
-  if (outFile.writeToDir(_filtVol, outputDir, true, false)) {
-    LOG(ERROR) << "ERROR - RadxConvert::_writeClutterRemovedVol";
-    LOG(ERROR) << "  Cannot write file to dir: " << outputDir;
-    LOG(ERROR) << outFile.getErrStr();
-    return -1;
-  }
-
-  string outputPath = outFile.getPathInUse();
-  
-  // write latest data info file if requested 
-  
-  if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(outputDir);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ldata.setDebug(true);
-    }
-    string relPath;
-    RadxPath::stripDir(outputDir, outputPath, relPath);
-    ldata.setRelDataPath(relPath);
-    ldata.setWriter(_progName);
-    ldata.setDataFileExt("nc");
-    ldata.setDataType("netCDF");
-    
-    string fileName;
-    RadxPath::stripDir(_params.clutter_stats_output_dir, outputPath, fileName);
-    ldata.setRelDataPath(fileName);
-    
-    ldata.setIsFcast(false);
-    ldata.write(_readVol.getStartTimeSecs());
-    
-    LOG(DEBUG) << "RadxTimeStats::_writeClutterRemovedVol(): Data written to "
-               << outputPath;
-    
-  }
-
-  return 0;
-
-}

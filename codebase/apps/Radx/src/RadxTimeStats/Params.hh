@@ -75,15 +75,9 @@ public:
   } debug_t;
 
   typedef enum {
-    REALTIME = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    ARCHIVE = 0,
+    FILELIST = 1
   } mode_t;
-
-  typedef enum {
-    ANALYZE_CLUTTER = 0,
-    FILTER_CLUTTER = 1
-  } action_t;
 
   typedef enum {
     PPI = 0,
@@ -394,10 +388,6 @@ public:
 
   mode_t mode;
 
-  int max_realtime_data_age_secs;
-
-  action_t action;
-
   scan_mode_t scan_mode;
 
   double *_sweep_fixed_angles;
@@ -415,50 +405,27 @@ public:
 
   double max_range_km;
 
-  char* dbz_field_name;
+  char* stats_field_name;
 
-  double clutter_dbz_threshold;
+  double min_expected_value;
 
-  tdrp_bool_t use_vel_field;
+  double max_expected_value;
 
-  char* vel_field_name;
+  char* output_dir;
 
-  double max_abs_vel;
+  char* mean_field_name;
 
-  tdrp_bool_t specify_clutter_frequency_threshold;
+  char* sdev_field_name;
 
-  double clutter_frequency_threshold;
+  char* mode_field_name;
 
-  char* clutter_stats_output_dir;
+  char* median_field_name;
 
-  char* dbz_mean_field_name;
+  char* measured_max_field_name;
 
-  char* dbz_sdev_field_name;
+  char* measured_min_field_name;
 
-  char* clut_freq_field_name;
-
-  char* clut_flag_field_name;
-
-  tdrp_bool_t write_latest_data_info;
-
-  char* dbz_filt_field_name;
-
-  char* clutter_stats_path;
-
-  double n_sdev_for_clut_threshold;
-
-  tdrp_bool_t specify_filter_frequency_threshold;
-
-  double filter_frequency_threshold;
-
-  double min_dbz_filt;
-
-  char* filt_output_dir;
-
-  tdrp_bool_t specify_output_fields;
-
-  char* *_output_fields;
-  int output_fields_n;
+  tdrp_bool_t write_intermediate_files;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -467,7 +434,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

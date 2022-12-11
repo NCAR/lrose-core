@@ -25,9 +25,9 @@
 #
 # Makefile for RadxTimeStats program
 #
-# Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
+# Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
-# Feb 2013
+# Dec 2022
 #
 ###########################################################################
 

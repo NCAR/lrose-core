@@ -559,8 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.");
-    tt->comment_text = tdrpStrDup("This method is based on the following paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston. A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.");
+    tt->comment_hdr = tdrpStrDup("RadxTimeStats computes time-based statistics, gate-by-gate, on a series of Radx files, and stores those stats as fields in a CfRadial output file.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'Comment 1'
@@ -648,31 +648,17 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[0].val = REALTIME;
-      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
-      tt->enum_def.fields[1].val = ARCHIVE;
-      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[2].val = FILELIST;
+      tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[0].val = ARCHIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[1].val = FILELIST;
     tt->single_val.e = ARCHIVE;
-    tt++;
-    
-    // Parameter 'max_realtime_data_age_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
-    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("Only data less old than this will be used.");
-    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
-    tt->single_val.i = 300;
     tt++;
     
     // Parameter 'Comment 3'
@@ -680,37 +666,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("ACTION");
-    tt->comment_text = tdrpStrDup("There are 2 possible actions: (a) analyze the clutter from a number of volumes, and store the results in a CfRadial file; or (b) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.");
-    tt++;
-    
-    // Parameter 'action'
-    // ctype is '_action_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("action");
-    tt->descr = tdrpStrDup("Action to be performed");
-    tt->help = tdrpStrDup("\nANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
-    tt->val_offset = (char *) &action - &_start_;
-    tt->enum_def.name = tdrpStrDup("action_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("ANALYZE_CLUTTER");
-      tt->enum_def.fields[0].val = ANALYZE_CLUTTER;
-      tt->enum_def.fields[1].name = tdrpStrDup("FILTER_CLUTTER");
-      tt->enum_def.fields[1].val = FILTER_CLUTTER;
-    tt->single_val.e = ANALYZE_CLUTTER;
-    tt++;
-    
-    // Parameter 'Comment 4'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("SCAN DETAILS");
-    tt->comment_text = tdrpStrDup("We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.");
+    tt->comment_text = tdrpStrDup("Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan.");
     tt++;
     
     // Parameter 'scan_mode'
@@ -824,7 +781,52 @@
     tt->descr = tdrpStrDup("Specified maximim range - km.");
     tt->help = tdrpStrDup("Gates beyond this range are removed.");
     tt->val_offset = (char *) &max_range_km - &_start_;
-    tt->single_val.d = 60;
+    tt->single_val.d = 230;
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("ALGORITHM DETAILS");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'stats_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("stats_field_name");
+    tt->descr = tdrpStrDup("Name of the field for which the statistics are required.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &stats_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
+    // Parameter 'min_expected_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_expected_value");
+    tt->descr = tdrpStrDup("Minimum expected value in the field to be analyzed.");
+    tt->help = tdrpStrDup("We need to constuct a histogram at each gate location. This is the lower bound of that histogram.");
+    tt->val_offset = (char *) &min_expected_value - &_start_;
+    tt->single_val.d = -30;
+    tt++;
+    
+    // Parameter 'max_expected_value'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_expected_value");
+    tt->descr = tdrpStrDup("Maximum expected value in the field to be analyzed.");
+    tt->help = tdrpStrDup("We need to constuct a histogram at each gate location. This is the upper bound of that histogram.");
+    tt->val_offset = (char *) &max_expected_value - &_start_;
+    tt->single_val.d = -30;
     tt++;
     
     // Parameter 'Comment 5'
@@ -832,302 +834,104 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("ALGORITHM DETAILS");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_hdr = tdrpStrDup("RESULTS OUTPUT");
+    tt->comment_text = tdrpStrDup("Writing out the statitics to CfRadial files");
     tt++;
     
-    // Parameter 'dbz_field_name'
+    // Parameter 'output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dbz_field_name");
-    tt->descr = tdrpStrDup("Reflectivity field name.");
-    tt->help = tdrpStrDup("Name of field on which clutter will be based.");
-    tt->val_offset = (char *) &dbz_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("DBZ");
-    tt++;
-    
-    // Parameter 'clutter_dbz_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("clutter_dbz_threshold");
-    tt->descr = tdrpStrDup("DBZ threshold for clutter at a gate.");
-    tt->help = tdrpStrDup("If data is persistently above this value then the gate is a clutter location.");
-    tt->val_offset = (char *) &clutter_dbz_threshold - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'use_vel_field'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_vel_field");
-    tt->descr = tdrpStrDup("Option to make use of the velocity field to identify clutter.");
-    tt->help = tdrpStrDup("If true, then we check the absolute value of velocity. If it is outside the limit we do not treat the point as clutter.");
-    tt->val_offset = (char *) &use_vel_field - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'vel_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vel_field_name");
-    tt->descr = tdrpStrDup("Velocity field name.");
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Directory for output files.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vel_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("VEL");
+    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("output");
     tt++;
     
-    // Parameter 'max_abs_vel'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("max_abs_vel");
-    tt->descr = tdrpStrDup("Maximimum absolute radial velocity for clutter (m/s).");
-    tt->help = tdrpStrDup("If the absolute velocity at a gate exceeds this, the point cannot be clutter.");
-    tt->val_offset = (char *) &max_abs_vel - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'specify_clutter_frequency_threshold'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_clutter_frequency_threshold");
-    tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold.");
-    tt->help = tdrpStrDup("If true, the clutter_frequency_threshold will be used. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.");
-    tt->val_offset = (char *) &specify_clutter_frequency_threshold - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'clutter_frequency_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("clutter_frequency_threshold");
-    tt->descr = tdrpStrDup("Clutter frequency threshold");
-    tt->help = tdrpStrDup("Gates with a clutter frequency fraction in excess of this number will be flagged as clutter.");
-    tt->val_offset = (char *) &clutter_frequency_threshold - &_start_;
-    tt->single_val.d = 0.95;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("Clutter statistics output");
-    tt->comment_text = tdrpStrDup("Writing out the results of identifying clutter");
-    tt++;
-    
-    // Parameter 'clutter_stats_output_dir'
+    // Parameter 'mean_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("clutter_stats_output_dir");
-    tt->descr = tdrpStrDup("Location for final clutter statistics.");
-    tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
-    tt->val_offset = (char *) &clutter_stats_output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'dbz_mean_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dbz_mean_field_name");
-    tt->descr = tdrpStrDup("Field name for mean dbz.");
-    tt->help = tdrpStrDup("The dbz mean field is added to the output data set.");
-    tt->val_offset = (char *) &dbz_mean_field_name - &_start_;
+    tt->param_name = tdrpStrDup("mean_field_name");
+    tt->descr = tdrpStrDup("Field name for mean.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &mean_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMean");
     tt++;
     
-    // Parameter 'dbz_sdev_field_name'
+    // Parameter 'sdev_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dbz_sdev_field_name");
-    tt->descr = tdrpStrDup("Field name for standard deviation of dbz.");
-    tt->help = tdrpStrDup("The dbz sdev field is added to the output data set.");
-    tt->val_offset = (char *) &dbz_sdev_field_name - &_start_;
+    tt->param_name = tdrpStrDup("sdev_field_name");
+    tt->descr = tdrpStrDup("Field name for standard deviation.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &sdev_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzSdev");
     tt++;
     
-    // Parameter 'clut_freq_field_name'
+    // Parameter 'mode_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("clut_freq_field_name");
-    tt->descr = tdrpStrDup("Field name for clutter frequency.");
-    tt->help = tdrpStrDup("This is the fraction of time that a gate has dbz above the threshold.");
-    tt->val_offset = (char *) &clut_freq_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("clutFreq");
+    tt->param_name = tdrpStrDup("mode_field_name");
+    tt->descr = tdrpStrDup("Field name for mode.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &mode_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMode");
     tt++;
     
-    // Parameter 'clut_flag_field_name'
+    // Parameter 'median_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("clut_flag_field_name");
-    tt->descr = tdrpStrDup("Field name for clutter flag.");
-    tt->help = tdrpStrDup("This flag indicates that the gate has persistent clutter.");
-    tt->val_offset = (char *) &clut_flag_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("clutFlag");
+    tt->param_name = tdrpStrDup("median_field_name");
+    tt->descr = tdrpStrDup("Field name for median.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &median_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMedian");
     tt++;
     
-    // Parameter 'write_latest_data_info'
+    // Parameter 'measured_max_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("measured_max_field_name");
+    tt->descr = tdrpStrDup("Field name for measured maximum value.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &measured_max_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMode");
+    tt++;
+    
+    // Parameter 'measured_min_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("measured_min_field_name");
+    tt->descr = tdrpStrDup("Field name for measured minimum value.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &measured_min_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMode");
+    tt++;
+    
+    // Parameter 'write_intermediate_files'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->param_name = tdrpStrDup("write_intermediate_files");
+    tt->descr = tdrpStrDup("Option to write stats files for each time step.");
+    tt->help = tdrpStrDup("Normally only one stats file is written - at the end of the data set. If this is set to true, intermediate files will be written for each data time.");
+    tt->val_offset = (char *) &write_intermediate_files - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("FILTERED OUTPUT");
-    tt->comment_text = tdrpStrDup("Writing out volumes with clutter filtered.");
-    tt++;
-    
-    // Parameter 'dbz_filt_field_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("dbz_filt_field_name");
-    tt->descr = tdrpStrDup("Field name for filtered dbz.");
-    tt->help = tdrpStrDup("The filtered dbz field is added to the output data set.");
-    tt->val_offset = (char *) &dbz_filt_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("dbzFilt");
-    tt++;
-    
-    // Parameter 'clutter_stats_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("clutter_stats_path");
-    tt->descr = tdrpStrDup("Path to volume containing the clutter statistics.");
-    tt->help = tdrpStrDup("This volume is created by this app in ANALYZE_CLUTTER action. Select a volume towards at end of the analysis sequence.");
-    tt->val_offset = (char *) &clutter_stats_path - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'n_sdev_for_clut_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("n_sdev_for_clut_threshold");
-    tt->descr = tdrpStrDup("The number of standard deviations above the mean for the clutter threshold.");
-    tt->help = tdrpStrDup("For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.");
-    tt->val_offset = (char *) &n_sdev_for_clut_threshold - &_start_;
-    tt->single_val.d = 1;
-    tt++;
-    
-    // Parameter 'specify_filter_frequency_threshold'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_filter_frequency_threshold");
-    tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold for filtering.");
-    tt->help = tdrpStrDup("If true, the filter_frequency_threshold will be used. If false, the clutter flag field in the clutter statistics will be used.");
-    tt->val_offset = (char *) &specify_filter_frequency_threshold - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'filter_frequency_threshold'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("filter_frequency_threshold");
-    tt->descr = tdrpStrDup("Filter frequency threshold");
-    tt->help = tdrpStrDup("Gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.");
-    tt->val_offset = (char *) &filter_frequency_threshold - &_start_;
-    tt->single_val.d = 0.97;
-    tt++;
-    
-    // Parameter 'min_dbz_filt'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_dbz_filt");
-    tt->descr = tdrpStrDup("The dbz value used to store filtered reflectivity.");
-    tt->help = tdrpStrDup("For filtered gates, we store this value in place of the original measured value.");
-    tt->val_offset = (char *) &min_dbz_filt - &_start_;
-    tt->single_val.d = -20;
-    tt++;
-    
-    // Parameter 'filt_output_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("filt_output_dir");
-    tt->descr = tdrpStrDup("Directory for filtered output volumes.");
-    tt->help = tdrpStrDup("These volumes have a filtered reflectivity field, with the clutter in the stats volume removed.");
-    tt->val_offset = (char *) &filt_output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'specify_output_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_output_fields");
-    tt->descr = tdrpStrDup("Option to specify the fields to be written out with the filtered data.");
-    tt->help = tdrpStrDup("If false all fields will be copied through. If true, only the specified fields will be copied through.");
-    tt->val_offset = (char *) &specify_output_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output fields to be copied through.");
-    tt->help = tdrpStrDup("These fields will be copied, along with the unfiltered and filtered reflectivity.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 6;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBZ");
-      tt->array_vals[1].s = tdrpStrDup("VEL");
-      tt->array_vals[2].s = tdrpStrDup("WIDTH");
-      tt->array_vals[3].s = tdrpStrDup("ZDR");
-      tt->array_vals[4].s = tdrpStrDup("PHIDP");
-      tt->array_vals[5].s = tdrpStrDup("RHOHV");
     tt++;
     
     // trailing entry has param_name set to NULL

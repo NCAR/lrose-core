@@ -26,12 +26,13 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2023
+// Dec 2022
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxTimeStats identifies persistent clutter in polar radar data,
-// flags it, and writes out the statistics to a CfRadial file.
+// RadxTimeStats compute time-based statistics, gate-by-gate,
+// on a series of Radx files, and stores those stats as fields
+// in a CfRadial output file.
 //
 ////////////////////////////////////////////////////////////////
 
