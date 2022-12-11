@@ -874,6 +874,30 @@
     tt->single_val.s = tdrpStrDup("dbzSdev");
     tt++;
     
+    // Parameter 'skewness_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("skewness_field_name");
+    tt->descr = tdrpStrDup("Field name for skewness.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &skewness_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzSkewness");
+    tt++;
+    
+    // Parameter 'kurtosis_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("kurtosis_field_name");
+    tt->descr = tdrpStrDup("Field name for kurtosis.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &kurtosis_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzKurtosis");
+    tt++;
+    
     // Parameter 'mode_field_name'
     // ctype is 'char*'
     
@@ -898,28 +922,28 @@
     tt->single_val.s = tdrpStrDup("dbzMedian");
     tt++;
     
-    // Parameter 'measured_max_field_name'
+    // Parameter 'max_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("measured_max_field_name");
+    tt->param_name = tdrpStrDup("max_field_name");
     tt->descr = tdrpStrDup("Field name for measured maximum value.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &measured_max_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("dbzMode");
+    tt->val_offset = (char *) &max_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMax");
     tt++;
     
-    // Parameter 'measured_min_field_name'
+    // Parameter 'min_field_name'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("measured_min_field_name");
+    tt->param_name = tdrpStrDup("min_field_name");
     tt->descr = tdrpStrDup("Field name for measured minimum value.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &measured_min_field_name - &_start_;
-    tt->single_val.s = tdrpStrDup("dbzMode");
+    tt->val_offset = (char *) &min_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbzMin");
     tt++;
     
     // Parameter 'write_intermediate_files'

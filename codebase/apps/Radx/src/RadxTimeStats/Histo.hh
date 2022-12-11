@@ -82,6 +82,14 @@ public:
    */
   bool computeMedian(double &v) const;
 
+  /**
+   * Compute the mode and return result
+   * @param[out] v  Mode
+   * @return true if successful, false if over half the data
+   *              was missing, or no data, or error
+   */
+  bool computeMode(double &v) const;
+
   /** 
    * Debug print 
    */

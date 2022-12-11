@@ -181,6 +181,18 @@ paramdef string
 
 paramdef string
 {
+  p_descr = "Field name for skewness.";
+  p_default = "dbzSkewness";
+} skewness_field_name;
+
+paramdef string
+{
+  p_descr = "Field name for kurtosis.";
+  p_default = "dbzKurtosis";
+} kurtosis_field_name;
+
+paramdef string
+{
   p_descr = "Field name for mode.";
   p_default = "dbzMode";
 } mode_field_name;
@@ -194,14 +206,14 @@ paramdef string
 paramdef string
 {
   p_descr = "Field name for measured maximum value.";
-  p_default = "dbzMode";
-} measured_max_field_name;
+  p_default = "dbzMax";
+} max_field_name;
 
 paramdef string
 {
   p_descr = "Field name for measured minimum value.";
-  p_default = "dbzMode";
-} measured_min_field_name;
+  p_default = "dbzMin";
+} min_field_name;
 
 paramdef boolean {
   p_default = false;

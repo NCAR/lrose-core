@@ -53,12 +53,13 @@ RadxTimeStats::RadxTimeStats(int argc, char **argv)
 {
 
   OK = TRUE;
+  _finalFile = false;
   _nVols = 0;
   _nGates = 0;
   _allocNeeded = true;
   
   // set programe name
-
+ 
   _progName = "RadxTimeStats";
   
   // parse command line args
@@ -160,6 +161,9 @@ int RadxTimeStats::Run()
   
   int iret = 0;
   for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+    if (ii == inputPaths.size() - 1) {
+      _finalFile = true;
+    }
     if (_processFile(inputPaths[ii])) {
       iret = -1;
     }
@@ -222,23 +226,27 @@ int RadxTimeStats::_processFile(const string &filePath)
   if (_initStatsVol()) {
     return -1;
   }
+
+  // augment the stats with data from this volume
+
+  _augmentStats();
   
   // analyze this volume data set
   
-  if (_analyzeVol()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
-    LOG(ERROR) << "  Cannot process data in file: " << _readPath;
-    return -1;
-  }
+  if (_finalFile || _params.write_intermediate_files) {
+    
+    _addStatsFieldsToVol();
+    
+    // write out the results
+    
+    if (_writeStatsVol()) {
+      LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
+      LOG(ERROR) << "  Cannot write out clutter volume";
+      return -1;
+    }
 
-  // write out the results
-
-  if (_writeStatsVol()) {
-    LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
-    LOG(ERROR) << "  Cannot write out clutter volume";
-    return -1;
-  }
-
+  } // if (_finalFile ....
+    
   return 0;
 
 }
@@ -321,132 +329,175 @@ int RadxTimeStats::_readFile(const string &filePath)
 }
 
 ///////////////////////////////////////////
-// process this data set
+// augment the stats with this volume
 
-int RadxTimeStats::_analyzeVol()
+void RadxTimeStats::_augmentStats()
   
 {
 
-  LOG(DEBUG) << "Processing data set ...";
+  // loop through rays in vol
+  
+  vector<RadxRay *> &rays = _statsVol.getRays();
+  for (size_t iray = 0; iray < _nRaysStats; iray++) {
+
+    RadxRay *ray = rays[iray];
+
+    // get data field
+    
+    RadxField *inputFld = ray->getField(_params.stats_field_name);
+    if (inputFld == NULL) {
+      continue;
+    }
+    Radx::fl32 miss = inputFld->getMissingFl32();
+    Radx::fl32 *inputVals = inputFld->getDataFl32();
+
+    // loop through gates
+    
+    for (size_t igate = 0; igate < _nGates; igate++) {
+      Radx::fl32 inputVal = inputVals[igate];
+      if (inputVal != miss) {
+        _stats[iray][igate].addValue(inputVal);
+      }
+    } // igate
+
+  } // iray
+
+}
+
+///////////////////////////////////////////
+// add the stats fields to the volume
+
+void RadxTimeStats::_addStatsFieldsToVol()
+  
+{
 
   // add to DBZ sum and compute mean
 
   vector<RadxRay *> &rays = _statsVol.getRays();
   for (size_t iray = 0; iray < _nRaysStats; iray++) {
+
+    // get input field
+    
     RadxRay *ray = rays[iray];
-
     RadxField *inputFld = ray->getField(_params.stats_field_name);
-    if (inputFld == NULL) {
-      continue;
-    }
-    Radx::fl32 inputMiss = inputFld->getMissingFl32();
-    Radx::fl32 *inputVals = inputFld->getDataFl32();
-    
-    Radx::fl32 *count = _count[iray];
-    Radx::fl32 *sum = _sum[iray];
-    Radx::fl32 *sqSum = _sqSum[iray];
-    Radx::fl32 *mean = _mean[iray];
-    Radx::fl32 *sdev = _sdev[iray];
-    // Radx::fl32 *mode = _mode[iray];
-    // Radx::fl32 *median = _median[iray];
-    
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      Radx::fl32 inputVal = inputVals[igate];
-      if (inputVal != inputMiss) {
-        sum[igate] += inputVal;
-        sqSum[igate] += (inputVal * inputVal);
-        count[igate] += 1.0;
-      }
-      double countVal = count[igate];
-      if (countVal > 0) {
-        mean[igate] = sum[igate] / countVal;
-      }
-      if (countVal > 1) {
-        double sumVal = sum[igate];
-        double sqSumVal = sqSum[igate];
-        double varVal =
-          (sqSumVal - (sumVal * sumVal) / countVal) / (countVal - 1.0);
-        if (varVal > 0.0) {
-          sdev[igate] = sqrt(varVal);
-        } else {
-          sdev[igate] = 0.0;
-        }
-      }
-    } // igate
+    Radx::fl32 miss = inputFld->getMissingFl32();
 
-    // add output fields to ray
-
+    // create stats fields as copies of input field
+    
     RadxField *meanFldOut = new RadxField(*inputFld);
     meanFldOut->setName(_params.mean_field_name);
-    meanFldOut->setDataFl32(_nGates, mean, true);
+    meanFldOut->setLongName("Mean of input field");
+    meanFldOut->setStandardName("");
+    Radx::fl32 *meanVals = meanFldOut->getDataFl32();
     
     RadxField *sdevFldOut = new RadxField(*inputFld);
     sdevFldOut->setName(_params.sdev_field_name);
-    sdevFldOut->setDataFl32(_nGates, sdev, true);
+    sdevFldOut->setLongName("Standard deviation of input field");
+    sdevFldOut->setStandardName("");
+    Radx::fl32 *sdevVals = sdevFldOut->getDataFl32();
+    
+    RadxField *skewnessFldOut = new RadxField(*inputFld);
+    skewnessFldOut->setName(_params.skewness_field_name);
+    skewnessFldOut->setLongName("Skewness of input field");
+    skewnessFldOut->setStandardName("");
+    Radx::fl32 *skewnessVals = skewnessFldOut->getDataFl32();
+    
+    RadxField *kurtosisFldOut = new RadxField(*inputFld);
+    kurtosisFldOut->setName(_params.kurtosis_field_name);
+    kurtosisFldOut->setLongName("Kurtosis of input field");
+    kurtosisFldOut->setStandardName("");
+    Radx::fl32 *kurtosisVals = kurtosisFldOut->getDataFl32();
+    
+    RadxField *modeFldOut = new RadxField(*inputFld);
+    modeFldOut->setName(_params.mode_field_name);
+    modeFldOut->setLongName("Mode of input field");
+    modeFldOut->setStandardName("");
+    Radx::fl32 *modeVals = modeFldOut->getDataFl32();
+    
+    RadxField *medianFldOut = new RadxField(*inputFld);
+    medianFldOut->setName(_params.median_field_name);
+    medianFldOut->setLongName("Median of input field");
+    medianFldOut->setStandardName("");
+    Radx::fl32 *medianVals = medianFldOut->getDataFl32();
+    
+    RadxField *minFldOut = new RadxField(*inputFld);
+    minFldOut->setName(_params.min_field_name);
+    minFldOut->setLongName("Min of input field");
+    minFldOut->setStandardName("");
+    Radx::fl32 *minVals = minFldOut->getDataFl32();
+    
+    RadxField *maxFldOut = new RadxField(*inputFld);
+    maxFldOut->setName(_params.max_field_name);
+    maxFldOut->setLongName("Max of input field");
+    maxFldOut->setStandardName("");
+    Radx::fl32 *maxVals = maxFldOut->getDataFl32();
+
+    for (size_t igate = 0; igate < _nGates; igate++) {
+
+      Stats &stats = _stats[iray][igate];
+
+      Radx::fl32 meanVal = stats.getMean();
+      if (!isfinite(meanVal)) {
+        meanVal = miss;
+      }
+      meanVals[igate] = meanVal;
+      
+      Radx::fl32 sdevVal = stats.getSdev();
+      if (!isfinite(sdevVal)) {
+        sdevVal = miss;
+      }
+      sdevVals[igate] = sdevVal;
+      
+      Radx::fl32 skewnessVal = stats.getSkewness();
+      if (!isfinite(skewnessVal)) {
+        skewnessVal = miss;
+      }
+      skewnessVals[igate] = skewnessVal;
+      
+      Radx::fl32 kurtosisVal = stats.getKurtosis();
+      if (!isfinite(kurtosisVal)) {
+        kurtosisVal = miss;
+      }
+      kurtosisVals[igate] = kurtosisVal;
+      
+      Radx::fl32 modeVal = stats.getMode();
+      if (!isfinite(modeVal)) {
+        modeVal = miss;
+      }
+      modeVals[igate] = modeVal;
+      
+      Radx::fl32 medianVal = stats.getMedian();
+      if (!isfinite(medianVal)) {
+        medianVal = miss;
+      }
+      medianVals[igate] = medianVal;
+      
+      Radx::fl32 minVal = stats.getMin();
+      if (!isfinite(minVal)) {
+        minVal = miss;
+      }
+      minVals[igate] = minVal;
+      
+      Radx::fl32 maxVal = stats.getMax();
+      if (!isfinite(maxVal)) {
+        maxVal = miss;
+      }
+      maxVals[igate] = maxVal;
+      
+    } // igate
+
+    // add output fields to ray
     
     ray->addField(meanFldOut);
     ray->addField(sdevFldOut);
+    ray->addField(skewnessFldOut);
+    ray->addField(kurtosisFldOut);
+    ray->addField(modeFldOut);
+    ray->addField(medianFldOut);
+    ray->addField(minFldOut);
+    ray->addField(maxFldOut);
     
   } // iray
-
-  // compute the clutter frequency histogram
-  
-  // for (size_t iray = 0; iray < _nRaysStats; iray++) {
-  //   Radx::fl32 *clutFreq = _clutFreq[iray];
-  //   for (size_t igate = 0; igate < _nGates; igate++) {
-  //     _clutFreqHist.update(clutFreq[igate]);
-  //   }
-  // }
-  // _clutFreqHist.computeVariance();
-  
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   _clutFreqHist.print(stderr);
-  //   // _clutFreqHist.printVariance(stderr);
-  // }
-
-#ifdef JUNK  
-  // set the clutter flag
-
-  double maxVariance;
-  double clutFracThreshold = 0.0;
-  if (_params.specify_clutter_frequency_threshold) {
-    clutFracThreshold = _params.clutter_frequency_threshold;
-  }
-  
-  LOG(DEBUG) << "  Freq histogram stats - maxVar, clutFracThreshold: "
-             << maxVariance << ", " << clutFracThreshold;
-  
-  for (size_t iray = 0; iray < _nRaysStats; iray++) {
-    Radx::fl32 *clutFreq = _clutFreq[iray];
-    Radx::fl32 *clutFlag = _clutFlag[iray];
-    for (size_t igate = 0; igate < _nGates; igate++) {
-      if (clutFreq[igate] > clutFracThreshold) {
-        clutFlag[igate] = 1.0;
-      } else {
-        clutFlag[igate] = 0.0;
-      }
-    } // igate
-  } // iray
-
-  // add the clutter flag to the output
-  
-  for (size_t iray = 0; iray < _nRaysStats; iray++) {
-    RadxRay *ray = rays[iray];
-    RadxField *dbzFld = ray->getField(_params.stats_field_name);
-    if (dbzFld == NULL) {
-      continue;
-    }
-    Radx::fl32 *clutFlag = _clutFlag[iray];
-    RadxField *clutFlagFldOut = new RadxField(*dbzFld);
-    clutFlagFldOut->setName(_params.clut_flag_field_name);
-    clutFlagFldOut->setLongName("ClutterFlag");
-    clutFlagFldOut->setUnits("");
-    clutFlagFldOut->setDataFl32(_nGates, clutFlag, true);
-    ray->addField(clutFlagFldOut);
-  } // iray
-#endif
-
-  return 0;
 
 }
 
@@ -665,11 +716,11 @@ int RadxTimeStats::_initStatsVol()
         }
       } // ii
 
-      // create the clutter ray
+      // create the stats ray
       
-      RadxRay *clutRay = NULL;
+      RadxRay *statsRay = NULL;
       if (matchFound) {
-        clutRay = new RadxRay(*matchRay);
+        statsRay = new RadxRay(*matchRay);
         if (_params.debug >= Params::DEBUG_EXTRA) {
           fprintf(stderr,
                   "====>> isweep, iang, index, rayEl, matchEl, "
@@ -681,7 +732,7 @@ int RadxTimeStats::_initStatsVol()
                   fabs(clutAz - matchAz));
         }
       } else {
-        clutRay = new RadxRay(emptyRay);
+        statsRay = new RadxRay(emptyRay);
         if (_params.debug >= Params::DEBUG_EXTRA) {
           fprintf(stderr,
                   "====>> isweep, iang, index, rayEl, matchEl, "
@@ -693,19 +744,19 @@ int RadxTimeStats::_initStatsVol()
                   fabs(clutAz - matchAz));
         }
       }
-      clutRay->setElevationDeg(clutEl);
-      clutRay->setAzimuthDeg(clutAz);
+      statsRay->setElevationDeg(clutEl);
+      statsRay->setAzimuthDeg(clutAz);
       if (_isRhi) {
-        clutRay->setFixedAngleDeg(clutAz);
+        statsRay->setFixedAngleDeg(clutAz);
       } else {
-        clutRay->setFixedAngleDeg(clutEl);
+        statsRay->setFixedAngleDeg(clutEl);
       }
-      clutRay->clearEventFlags();
-      clutRay->setSweepNumber(isweep);
+      statsRay->clearEventFlags();
+      statsRay->setSweepNumber(isweep);
       
       // add to the clutter vol
 
-      _statsVol.addRay(clutRay);
+      _statsVol.addRay(statsRay);
 
     } // iang
   } // isweep
@@ -718,43 +769,41 @@ int RadxTimeStats::_initStatsVol()
 
   if (_allocNeeded) {
     
-    // first time, allocate arrays for analysis
+    // first time, allocate arrays for stats
     
-    _sum = _sumArray.alloc(_nRaysStats, _nGates);
-    _sqSum = _sqSumArray.alloc(_nRaysStats, _nGates);
-    _count = _countArray.alloc(_nRaysStats, _nGates);
-    _mean = _meanArray.alloc(_nRaysStats, _nGates);
-    _sdev = _sdevArray.alloc(_nRaysStats, _nGates);
-    _mode = _modeArray.alloc(_nRaysStats, _nGates);
-    _median = _medianArray.alloc(_nRaysStats, _nGates);
-    _histo = _histoArray.alloc(_nRaysStats, _nGates);
+    // _sum = _sumArray.alloc(_nRaysStats, _nGates);
+    // _sqSum = _sqSumArray.alloc(_nRaysStats, _nGates);
+    // _count = _countArray.alloc(_nRaysStats, _nGates);
+    // _mean = _meanArray.alloc(_nRaysStats, _nGates);
+    // _sdev = _sdevArray.alloc(_nRaysStats, _nGates);
+    // _mode = _modeArray.alloc(_nRaysStats, _nGates);
+    // _median = _medianArray.alloc(_nRaysStats, _nGates);
+    _stats = _statsArray.alloc(_nRaysStats, _nGates);
 
     // initialize to 0
     
-    Radx::fl32 *sum1D = _sumArray.dat1D();
-    memset(sum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *sqSum1D = _sqSumArray.dat1D();
-    memset(sqSum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *count1D = _countArray.dat1D();
-    memset(count1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *mean1D = _meanArray.dat1D();
-    memset(mean1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *sdev1D = _sdevArray.dat1D();
-    memset(sdev1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *mode1D = _modeArray.dat1D();
-    memset(mode1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    Radx::fl32 *median1D = _medianArray.dat1D();
-    memset(median1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *sum1D = _sumArray.dat1D();
+    // memset(sum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *sqSum1D = _sqSumArray.dat1D();
+    // memset(sqSum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *count1D = _countArray.dat1D();
+    // memset(count1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *mean1D = _meanArray.dat1D();
+    // memset(mean1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *sdev1D = _sdevArray.dat1D();
+    // memset(sdev1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *mode1D = _modeArray.dat1D();
+    // memset(mode1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
+    // Radx::fl32 *median1D = _medianArray.dat1D();
+    // memset(median1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
 
-    double maxVal = _params.max_expected_value;
-    double minVal = _params.min_expected_value;
-    double range = maxVal - minVal;
+    double expectedMax = _params.max_expected_value;
+    double expectedMin = _params.min_expected_value;
     double nbins = 50.0;
-    double deltaVal = range / nbins;
     for (size_t iray = 0; iray < _nRaysStats; iray++) {
       for (size_t igate = 0; igate < _nGates; igate++) {
-        Histo &hist = _histo[iray][igate];
-        hist.init(minVal, deltaVal, maxVal);
+        Stats &stats = _stats[iray][igate];
+        stats.init(expectedMin, expectedMax, nbins);
       } // igate
     } // iray
 

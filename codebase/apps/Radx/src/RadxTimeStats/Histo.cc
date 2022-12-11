@@ -74,64 +74,108 @@ void Histo::updateMissing(void)
 //------------------------------------------------------------------
 bool Histo::computeMedian(double &v) const
 {
-  if (_data.empty())
-  {
+
+  if (_data.empty()) {
     return false;
   }
-  if (_nmissing >= static_cast<int>(_data.size())/2)
-  {
+
+  if (_nmissing >= static_cast<int>(_data.size())/2) {
     return false;
   }
-  else
-  {
-    int nBin = 0;
-    int npt = 0;
-    std::vector<double> bin;
-    for (double x=_minBin; x<=_maxBin; x+= _deltaBin)
-    {
-      bin.push_back(0);
-      ++nBin;
+
+  int nBin = 0;
+  int npt = 0;
+  std::vector<double> bin;
+  for (double x=_minBin; x<=_maxBin; x+= _deltaBin) {
+    bin.push_back(0);
+    ++nBin;
+  }
+
+  for (int i=0; i<static_cast<int>(_data.size()); ++i) {
+    int ind;
+    ind = static_cast<int>((_data[i] - _minBin)/_deltaBin + _deltaBin/2.0);
+    if (ind < 0) {
+      ind = 0;
+    } else if (ind >= nBin) {
+      ind = nBin-1;
     }
-    for (int i=0; i<static_cast<int>(_data.size()); ++i)
-    {
-      int ind;
-      ind = static_cast<int>((_data[i] - _minBin)/_deltaBin + _deltaBin/2.0);
-      if (ind < 0)
-      {
-	ind = 0;
+    bin[ind]++;
+    npt++;
+  }
+
+  // start count out assuming missing values are 'minimum'
+  int count = _nmissing;
+  for (int j=0; j<nBin; ++j) {
+    count += bin[j];
+    if (count > npt/2) {
+      v = _minBin + static_cast<double>(j)*_deltaBin;
+      if (v > 30) {
+        v = v;
       }
-      else if (ind >= nBin)
-      {
-	ind = nBin-1;
-      }
-      bin[ind]++;
-      npt++;
-    }
-    // start count out assuming missing values are 'minimum'
-    int count = _nmissing;
-    for (int j=0; j<nBin; ++j)
-    {
-      count += bin[j];
-      if (count > npt/2)
-      {
-	v = _minBin + static_cast<double>(j)*_deltaBin;
-	if (v > 30)
-	{
-	  v = v;
-	}
-	return true;
-      }
-    }
-    if (count == 0)
-    {
-      return false;
-    }
-    else
-    {
-      v = _maxBin;
       return true;
     }
   }
+
+  if (count == 0) {
+    return false;
+  } else {
+    v = _maxBin;
+    return true;
+  }
+
+}
+
+//------------------------------------------------------------------
+bool Histo::computeMode(double &v) const
+{
+  if (_data.empty()) {
+    return false;
+  }
+  
+  if (_nmissing >= static_cast<int>(_data.size())/2) {
+    return false;
+  }
+
+  int nBin = 0;
+  int npt = 0;
+  std::vector<double> bin;
+  for (double x=_minBin; x<=_maxBin; x+= _deltaBin) {
+    bin.push_back(0);
+    ++nBin;
+  }
+
+  for (int i=0; i<static_cast<int>(_data.size()); ++i) {
+    int ind;
+    ind = static_cast<int>((_data[i] - _minBin)/_deltaBin + _deltaBin/2.0);
+    if (ind < 0) {
+      ind = 0;
+    } else if (ind >= nBin) {
+      ind = nBin-1;
+    }
+    bin[ind]++;
+    npt++;
+  }
+  
+  // start count out assuming missing values are 'minimum'
+  int count = _nmissing;
+  for (int j=0; j<nBin; ++j) {
+    count += bin[j];
+    if (count > npt/2) {
+      v = _minBin + static_cast<double>(j)*_deltaBin;
+      if (v > 30) {
+        v = v;
+      }
+      return true;
+    }
+  }
+
+  if (count == 0) {
+    return false;
+  } else {
+    v = _maxBin;
+    return true;
+  }
+  
 }
 
 //------------------------------------------------------------------

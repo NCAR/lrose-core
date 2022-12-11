@@ -417,13 +417,17 @@ public:
 
   char* sdev_field_name;
 
+  char* skewness_field_name;
+
+  char* kurtosis_field_name;
+
   char* mode_field_name;
 
   char* median_field_name;
 
-  char* measured_max_field_name;
+  char* max_field_name;
 
-  char* measured_min_field_name;
+  char* min_field_name;
 
   tdrp_bool_t write_intermediate_files;
 
@@ -434,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

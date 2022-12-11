@@ -48,7 +48,7 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include "Histo.hh"
+#include "Stats.hh"
 #include <string>
 #include <Radx/Radx.hh>
 #include <Radx/RadxVol.hh>
@@ -85,7 +85,7 @@ private:
   Params _params;
   vector<string> _readPaths;
   string _readPath;
-
+  
   /////////////////////////////////////////
   // input data
 
@@ -102,6 +102,7 @@ private:
   double _radarLongitude;
   double _radarAltitude;
   
+  bool _finalFile;
   size_t _nVols;
   
   // These are pointers into the input Radx object.
@@ -120,29 +121,29 @@ private:
 
   bool _allocNeeded;
   
-  TaArray2D<Radx::fl32> _sumArray;
-  Radx::fl32 **_sum;
+  // TaArray2D<Radx::fl32> _sumArray;
+  // Radx::fl32 **_sum;
 
-  TaArray2D<Radx::fl32> _sqSumArray;
-  Radx::fl32 **_sqSum;
+  // TaArray2D<Radx::fl32> _sqSumArray;
+  // Radx::fl32 **_sqSum;
 
-  TaArray2D<Radx::fl32> _countArray;
-  Radx::fl32 **_count;
+  // TaArray2D<Radx::fl32> _countArray;
+  // Radx::fl32 **_count;
   
-  TaArray2D<Radx::fl32> _meanArray;
-  Radx::fl32 **_mean;
+  // TaArray2D<Radx::fl32> _meanArray;
+  // Radx::fl32 **_mean;
 
-  TaArray2D<Radx::fl32> _sdevArray;
-  Radx::fl32 **_sdev;
+  // TaArray2D<Radx::fl32> _sdevArray;
+  // Radx::fl32 **_sdev;
   
-  TaArray2D<Radx::fl32> _modeArray;
-  Radx::fl32 **_mode;
+  // TaArray2D<Radx::fl32> _modeArray;
+  // Radx::fl32 **_mode;
   
-  TaArray2D<Radx::fl32> _medianArray;
-  Radx::fl32 **_median;
+  // TaArray2D<Radx::fl32> _medianArray;
+  // Radx::fl32 **_median;
   
-  TaArray2D<Histo> _histoArray;
-  Histo **_histo;
+  TaArray2D<Stats> _statsArray;
+  Stats **_stats;
 
   // methods
   
@@ -155,7 +156,9 @@ private:
   int _checkGeom();
   int _initStatsVol();
   
-  int _analyzeVol();
+  void _augmentStats();
+  
+  void _addStatsFieldsToVol();
   
   void _setupWrite(RadxFile &file);
   int _writeStatsVol();
