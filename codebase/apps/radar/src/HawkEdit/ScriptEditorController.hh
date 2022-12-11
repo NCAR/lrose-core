@@ -59,16 +59,19 @@ public slots:
   bool notDefined(QString &fieldName, std::map<QString, QString> &previousVariableContext);
   void runOneTimeOnlyScript(QString script);
   void runForEachRayScript(QString script, bool useBoundary, vector<Point> &boundaryPoints,
-    string dataFileName, bool updateVolume);  
+    bool applyCfactors, string dataFileName, bool updateVolume);  
   void runForEachRayScript(QString script, int currentSweepNumber,
     bool useBoundary, vector<Point> &boundaryPoints,
+    bool applyCfactors, 
     string dataFileName, bool updateVolume); 
   void runForEachRayScriptOLD(QString script, int currentSweepIndex,
-    bool useBoundary, vector<Point> &boundaryPoints, string dataFileName);
+    bool useBoundary, vector<Point> &boundaryPoints, 
+    bool applyCfactors, string dataFileName);
 
   void runMultipleArchiveFiles(vector<string> &archiveFiles, 
     QString script, bool useBoundary,
-    vector<Point> &boundaryPoints, string saveDirectoryPath,
+    vector<Point> &boundaryPoints, 
+    bool applyCfactors, string saveDirectoryPath,
     vector<string> &fieldNames, bool debug_verbose, bool debug_extra);
 
 private:
@@ -87,10 +90,13 @@ private:
   bool _cancelPressed;
 
   void reset();
-  void _resetDataFile(string &dataFileName, bool debug_verbose, bool debug_extra);
-  void _resetDataFile(string &dataFileName, bool debug_verbose, bool debug_extra,
+  void _resetDataFile(string &dataFileName, bool applyCorrectionFactors,
+    bool debug_verbose, bool debug_extra);
+  void _resetDataFile(string &dataFileName, 
+    bool applyCorrectionFactors,bool debug_verbose, bool debug_extra,
     vector<string> &fieldNamesInScript);
-  void _resetDataFile(string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  void _resetDataFile(string &dataFileName, bool applyCorrectionFactors,
+    int sweepNumber, bool debug_verbose, bool debug_extra,
     vector<string> &fieldNamesInScript);
 
   void setupBoundaryArray();

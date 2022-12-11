@@ -461,6 +461,7 @@ private:
   QLabel *_sunElVal;
   QLabel *_sunAzVal;
 
+  QLabel *_georefsApplied;
   QLabel *_geoRefRotationVal;
   QLabel *_geoRefRollVal;
   QLabel *_geoRefTiltVal;
@@ -520,7 +521,7 @@ private:
   double _getInstHtKm(const RadxRay *ray);
 
   void _applyCfac();
-  
+
   // setting text
 
   void _setText(char *text, const char *format, int val);

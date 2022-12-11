@@ -56,34 +56,41 @@ public:
   // CRUD: Create, Read, Update, Delete fields one ray at a time
   //
 
-  ScriptsDataController(string &dataFileName, bool debug_verbose, bool debug_extra);
-  ScriptsDataController(string &dataFileName, bool debug_verbose, bool debug_extra,
+  ScriptsDataController(string &dataFileName, bool applyCorrectionFactors, 
+    bool debug_verbose, bool debug_extra);
+  ScriptsDataController(string &dataFileName, bool applyCorrectionFactors, 
+    bool debug_verbose, bool debug_extra,
     vector<string> &fieldNamesInScript);
-  ScriptsDataController(string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  ScriptsDataController(string &dataFileName, bool applyCorrectionFactors, 
+    int sweepNumber, bool debug_verbose, bool debug_extra,
     vector<string> &fieldNamesInScript);
 
   ~ScriptsDataController();
 
   // most of these pass through to the model for action ...
-  int openRead(string &inputPath,
+  int openRead(string &inputPath, bool applyCorrectionFactors, 
     bool debug_verbose = false, 
     bool debug_extra = false);
-  int openRead(string &inputPath,
+  int openRead(string &inputPath, bool applyCorrectionFactors, 
     vector<string> &fieldNames, bool debug_verbose = false, 
     bool debug_extra = false);
-  int openRead(string &inputPath, int sweepNumber,
+  int openRead(string &inputPath, bool applyCorrectionFactors, 
+    int sweepNumber,
     vector<string> &fieldNames, bool debug_verbose = false, 
     bool debug_extra = false);
 
-  void readData(string path, vector<string> &fieldNames,
+  void readData(string path, bool applyCorrectionFactors,
+    vector<string> &fieldNames,
     bool debug_verbose = false, bool debug_extra = false);
-  void readData(string path, vector<string> &fieldNames,
+  void readData(string path, bool applyCorrectionFactors,
+    vector<string> &fieldNames,
     int sweepNumber,
     bool debug_verbose = false, bool debug_extra = false);
   void readFileMetaData(string fileName);
 
-  void getRayData(string path, vector<string> &fieldNames,
-  int sweepNumber);
+  void getRayData(string path, bool applyCorrectionFactors,
+    vector<string> &fieldNames,
+    int sweepNumber);
 
   void writeData(string path);
   void writeData(string path, RadxVol *vol);

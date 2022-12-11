@@ -4618,6 +4618,7 @@ void PolarManager::_createStatusPanel()
     _sunAzVal = NULL;
   }
 
+  _georefsApplied = _createStatusVal("Georefs applied?", "T/F", row++, fsize);
   _geoRefRotationVal = _createStatusVal("Georef Rot (deg)", "0.0", row++, fsize);
   _geoRefRollVal = _createStatusVal("Georef Roll (deg)", "0.0", row++, fsize);
   _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize);
@@ -5467,6 +5468,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   try {
     if (useAllSweeps) {
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
+        _applyCfacToggle->isChecked(),
         dataFileName, notifyListenersWhenVolumeChanges);
     } else {
       // send the current sweep to the script editor controller
@@ -5480,7 +5482,9 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       //currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, (int) sweepNumber,
-       useBoundary, boundaryPoints, dataFileName, notifyListenersWhenVolumeChanges);
+       useBoundary, boundaryPoints, 
+       _applyCfacToggle->isChecked(), dataFileName, 
+       notifyListenersWhenVolumeChanges);
     }
     // TODO: signal read of current data file, to get any updates the script made to the data
   } catch (const std::out_of_range& ex) {

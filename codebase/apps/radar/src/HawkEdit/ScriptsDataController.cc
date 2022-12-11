@@ -9,23 +9,29 @@ using namespace std;
 
 // read all fields and all sweeps
 ScriptsDataController::ScriptsDataController(
-  string &dataFileName, bool debug_verbose, bool debug_extra) {
+  string &dataFileName, bool applyCorrectionFactors,
+  bool debug_verbose, bool debug_extra) {
   init();
-  openRead(dataFileName, debug_verbose, debug_extra);
+  openRead(dataFileName, applyCorrectionFactors,
+   debug_verbose, debug_extra);
 }
 
 ScriptsDataController::ScriptsDataController(
-  string &dataFileName, bool debug_verbose, bool debug_extra,
+  string &dataFileName, bool applyCorrectionFactors,
+  bool debug_verbose, bool debug_extra,
   vector<string> &fieldNamesInScript) {
   init();
-  openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
+  openRead(dataFileName, applyCorrectionFactors,
+   fieldNamesInScript, debug_verbose, debug_extra);
 }
 
 ScriptsDataController::ScriptsDataController(
-  string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  string &dataFileName, bool applyCorrectionFactors,
+  int sweepNumber, bool debug_verbose, bool debug_extra,
   vector<string> &fieldNamesInScript) {
   init();
-  openRead(dataFileName, sweepNumber, fieldNamesInScript, debug_verbose, debug_extra);
+  openRead(dataFileName, applyCorrectionFactors,
+   sweepNumber, fieldNamesInScript, debug_verbose, debug_extra);
 }
 
 ScriptsDataController::~ScriptsDataController() {}
@@ -37,12 +43,14 @@ void ScriptsDataController::init() {
 }
 
 int ScriptsDataController::openRead(string &inputPath,
- bool debug_verbose, bool debug_extra) {
+  bool applyCorrectionFactors,
+  bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter " << inputPath;
    
   try {
     _scriptsDataModel.readData(inputPath, 
+      applyCorrectionFactors,
       debug_verbose, debug_extra);
   } catch (const string &errMsg) {
     return -1;
@@ -53,13 +61,15 @@ int ScriptsDataController::openRead(string &inputPath,
 }
 
 int ScriptsDataController::openRead(string &inputPath, 
+  bool applyCorrectionFactors,
   vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter " << inputPath;
    
   try {
     //int sweep_number = _sweepController->getSelectedNumber();
-    _scriptsDataModel.readData(inputPath, fieldNames, 
+    _scriptsDataModel.readData(inputPath, 
+      applyCorrectionFactors, fieldNames, 
       debug_verbose, debug_extra);
   } catch (const string &errMsg) {
     return -1;
@@ -69,14 +79,16 @@ int ScriptsDataController::openRead(string &inputPath,
   return 0;
 }
 
-int ScriptsDataController::openRead(string &inputPath, int sweepNumber,
+int ScriptsDataController::openRead(string &inputPath, 
+  bool applyCorrectionFactors, int sweepNumber,
   vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter " << inputPath;
    
   try {
     //int sweep_number = _sweepController->getSelectedNumber();
-    _scriptsDataModel.readData(inputPath, fieldNames, sweepNumber,
+    _scriptsDataModel.readData(inputPath, 
+      applyCorrectionFactors, fieldNames, sweepNumber,
       debug_verbose, debug_extra);
   } catch (const string &errMsg) {
     return -1;
@@ -315,7 +327,7 @@ RadxVol *ScriptsDataController::getRadarVolume(string path, vector<string> *fiel
 
   // adjust angles for elevation surveillance if needed
   
-  vol->setAnglesForElevSurveillance();
+  //vol->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -392,28 +404,33 @@ RadxVol *ScriptsDataController::getRadarVolume(string path, vector<string> *fiel
   return vol;
 }
 
-void ScriptsDataController::getRayData(string path, vector<string> &fieldNames,
+void ScriptsDataController::getRayData(string path,  bool applyCorrectionFactors, 
+  vector<string> &fieldNames,
   int sweepNumber) {
-  readData(path, fieldNames, sweepNumber);
+  readData(path, applyCorrectionFactors, fieldNames, sweepNumber);
 }
 
-void ScriptsDataController::readData(string path, vector<string> &fieldNames,
+void ScriptsDataController::readData(string path, 
+  bool applyCorrectionFactors, vector<string> &fieldNames,
   bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
-  _scriptsDataModel.readData(path, fieldNames, debug_verbose, debug_extra);
+  _scriptsDataModel.readData(path, applyCorrectionFactors,
+    fieldNames, debug_verbose, debug_extra);
 
   LOG(DEBUG) << "exit";
 }
 
 
 
-void ScriptsDataController::readData(string path, vector<string> &fieldNames,
+void ScriptsDataController::readData(string path, 
+  bool applyCorrectionFactors, vector<string> &fieldNames,
   int sweepNumber,
 	bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
-  _scriptsDataModel.readData(path, fieldNames, sweepNumber, debug_verbose, debug_extra);
+  _scriptsDataModel.readData(path, applyCorrectionFactors,
+    fieldNames, sweepNumber, debug_verbose, debug_extra);
 
   LOG(DEBUG) << "exit";
 }

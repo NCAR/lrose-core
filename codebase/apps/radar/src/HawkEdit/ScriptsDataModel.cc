@@ -72,7 +72,7 @@ void ScriptsDataModel::_readData(RadxFile &file, string path) {
 
   LOG(DEBUG) << "exit";
 }
-
+/*
 int ScriptsDataModel::openRead(string &inputPath, int sweepNumber,
   vector<string> *fieldNames, bool debug_verbose, bool debug_extra) {
 
@@ -89,25 +89,29 @@ int ScriptsDataModel::openRead(string &inputPath, int sweepNumber,
   LOG(DEBUG) << "exit";
   return 0;
 }
-
+*/
 void ScriptsDataModel::readData(string path,
+  bool applyCorrectionFactors,
   bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
+  _applyCorrectionFactors = applyCorrectionFactors;
   cerr << "before " << endl;
   RadxFile file;
   _initForRead();
   _readData(file, path);
 }
 
-void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
+void ScriptsDataModel::readData(string path, 
+  bool applyCorrectionFactors, vector<string> &fieldNames,
   bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
+  _applyCorrectionFactors = applyCorrectionFactors;
   cerr << "before " << endl;
   RadxFile file;
   _initForRead();
@@ -115,12 +119,15 @@ void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
   _readData(file, path);
 } 
 
-void ScriptsDataModel::readData(string path, vector<string> &fieldNames,
+void ScriptsDataModel::readData(string path, 
+  bool applyCorrectionFactors,
+  vector<string> &fieldNames,
   int sweepNumber,
   bool debug_verbose, bool debug_extra) {
 
   LOG(DEBUG) << "enter";
 
+  _applyCorrectionFactors = applyCorrectionFactors;
   cerr << "before " << endl;
   RadxFile file;
   _initForRead();
@@ -575,9 +582,10 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
   return vol;
 }
 
+
 void ScriptsDataModel::getRayData(string path, vector<string> &fieldNames,
   int sweepNumber) {
-  readData(path, fieldNames, sweepNumber);
+  readData(path, _applyCorrectionFactors, fieldNames, sweepNumber);
 }
 
 
@@ -1192,6 +1200,43 @@ vector<RadxRay *> &ScriptsDataModel::getRays() {
 	return _vol->getRays();
 }
 
+void ScriptsDataModel::applyCorrectionFactors(RadxRay *ray) {
+
+  // adjust angles for elevation surveillance if needed
+  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+
+//----  copied this code from ray->setAnglesForElevSurveillance();
+      // because the cfactors were always NULL for the ray,
+      // but not for the volume.
+   
+    const RadxGeoref *georef = ray->getGeoreference();
+    if (georef != NULL) {
+      double rollCorr = 0.0;
+      double rotCorr = 0.0;
+      double tiltCorr = 0.0;
+      const RadxCfactors *cfactors = _vol->getCfactors();
+      if (cfactors != NULL) {
+        rollCorr = cfactors->getRollCorr();
+        rotCorr = cfactors->getRotationCorr();
+        tiltCorr = cfactors->getTiltCorr();
+      }
+      double rotation = georef->getRotation() + rotCorr;
+      double roll = georef->getRoll() + rollCorr;
+      double tilt = georef->getTilt() + tiltCorr;
+      double newAz = rotation + roll;
+      while (newAz < 0) {
+        newAz += 360.0;
+      }
+      while (newAz > 360.0) {
+        newAz -= 360.0;
+      }
+      ray->setAzimuthDeg(newAz);
+      ray->setElevationDeg(tilt);
+      cerr << ray->getAzimuthDeg() << endl;
+    }
+  }
+}
+
 RadxRay *ScriptsDataModel::getRay(size_t rayIdx) {
   _vol->loadRaysFromFields();
   
@@ -1210,6 +1255,9 @@ RadxRay *ScriptsDataModel::getRay(size_t rayIdx) {
     msg.append(to_string(rayIdx));
     throw std::invalid_argument(msg);
   } else {
+    if (_applyCorrectionFactors) {
+      applyCorrectionFactors(ray);
+    }
   	return ray;
   }
 }

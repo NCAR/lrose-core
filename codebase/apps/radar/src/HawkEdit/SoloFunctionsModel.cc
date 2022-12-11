@@ -225,6 +225,9 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   // because the boundary is for a particular ray; then the boundary
   // can be used with multiple functions ?? maybe NOT!
 
+// TODO: we need the cfactors applied BEFORE accessing this info!!!
+
+
   // wrestle this information out of the ray and radar volume ...
 
   float radar_origin_latitude = _scriptsDataController->getLatitudeDeg();

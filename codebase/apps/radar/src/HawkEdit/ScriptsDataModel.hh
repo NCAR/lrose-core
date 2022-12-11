@@ -67,17 +67,19 @@ public:
   // size_t sweepNumber (optional)
 
   bool okToStream();
-
+/*
   int openRead(string &inputPath, int sweepNumber,
     vector<string> *fieldNames, bool debug_verbose = false, 
     bool debug_extra = false);
-
+*/
   //void setData(RadxVol *vol);
-  void readData(string path, 
+  void readData(string path, bool applyCorrectionFactors,
     bool debug_verbose = false, bool debug_extra = false);
-  void readData(string path, vector<string> &fieldNames,
+  void readData(string path, bool applyCorrectionFactors,
+    vector<string> &fieldNames,
     bool debug_verbose = false, bool debug_extra = false);
-  void readData(string path, vector<string> &fieldNames,
+  void readData(string path, bool applyCorrectionFactors,
+    vector<string> &fieldNames,
     int sweepNumber,
     bool debug_verbose = false, bool debug_extra = false);
   void readFileMetaData(string fileName);
@@ -206,7 +208,7 @@ private:
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
 
-
+  void applyCorrectionFactors(RadxRay *ray);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void _selectFieldsNotInCurrentVersion(
@@ -220,6 +222,9 @@ private:
   string _currentFilePath;
   
   RadxVol *_vol;
+
+  bool _applyCorrectionFactors;
+
   //NcfRadxStream *_vol;
   bool _okToStream;
 

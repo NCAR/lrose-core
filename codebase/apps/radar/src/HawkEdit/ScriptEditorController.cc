@@ -210,8 +210,9 @@ void ScriptEditorController::setupBoundaryArray() {
   delete boundaryMaskForRay;
 } 
 
+
 void ScriptEditorController::setupFieldArrays() {
-    
+
     vector<string>::iterator it;
 
     for(it = initialFieldNames->begin(); it != initialFieldNames->end(); it++) {
@@ -247,7 +248,9 @@ void ScriptEditorController::setupFieldArrays() {
         throw msg;
       }
     } 
+    
 }
+
 
 /* this function is not used; TODO: remove it
 void ScriptEditorController::_addFieldNameVectorsToContext(vector<string> &fieldNames, 
@@ -737,7 +740,7 @@ uncate(100);
 // separate DataEngine???
 void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFiles, 
   QString script, bool useBoundary,
-  vector<Point> &boundaryPoints, string saveDirectoryPath,
+  vector<Point> &boundaryPoints, bool applyCfactors, string saveDirectoryPath,
   vector<string> &fieldNames, bool debug_verbose, bool debug_extra) {
 
   // update the listeners on volume changes only for the first archive file
@@ -753,7 +756,8 @@ void ScriptEditorController::runMultipleArchiveFiles(vector<string> &archiveFile
     //  debug_verbose, debug_extra);
 
     //   runForEachRayScript
-    runForEachRayScript(script, useBoundary, boundaryPoints, *it, updateVolume);
+    runForEachRayScript(script, useBoundary, boundaryPoints, 
+      applyCfactors, *it, updateVolume);
     updateVolume = false;
     //   save archive file to temp area
     //ScriptsDataModel->writeData(saveDirectoryPath);
@@ -798,35 +802,40 @@ vector<bool> *ScriptEditorController::getListOfFieldsReferencedInScript(
 
 // read all fields; all sweeps
 void ScriptEditorController::_resetDataFile(
-  string &dataFileName, bool debug_verbose, bool debug_extra) {
+  string &dataFileName, bool applyCorrectionFactors, 
+  bool debug_verbose, bool debug_extra) {
     
   if (_scriptsDataController != NULL) delete _scriptsDataController;
-  _scriptsDataController = new ScriptsDataController(dataFileName, debug_verbose, debug_extra);
+  _scriptsDataController = new ScriptsDataController(dataFileName, 
+    applyCorrectionFactors, debug_verbose, debug_extra);
   //_scriptsDataController.openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
   _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
 }
 
 void ScriptEditorController::_resetDataFile(
-  string &dataFileName, bool debug_verbose, bool debug_extra,
+  string &dataFileName, bool applyCorrectionFactors, bool debug_verbose, bool debug_extra,
   vector<string> &fieldNamesInScript) {
     
   if (_scriptsDataController != NULL) delete _scriptsDataController;
-  _scriptsDataController = new ScriptsDataController(dataFileName, debug_verbose, debug_extra, fieldNamesInScript);
+  _scriptsDataController = new ScriptsDataController(dataFileName, applyCorrectionFactors,
+     debug_verbose, debug_extra, fieldNamesInScript);
   //_scriptsDataController.openRead(dataFileName, fieldNamesInScript, debug_verbose, debug_extra);
   _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
 }
 
 void ScriptEditorController::_resetDataFile(
-  string &dataFileName, int sweepNumber, bool debug_verbose, bool debug_extra,
+  string &dataFileName, bool applyCorrectionFactors, int sweepNumber, bool debug_verbose, bool debug_extra,
   vector<string> &fieldNamesInScript) {
     
   if (_scriptsDataController != NULL) delete _scriptsDataController;
-  _scriptsDataController = new ScriptsDataController(dataFileName, sweepNumber, debug_verbose, debug_extra, fieldNamesInScript);
+  _scriptsDataController = new ScriptsDataController(dataFileName, applyCorrectionFactors,
+     sweepNumber, debug_verbose, debug_extra, fieldNamesInScript);
   _soloFunctionsController->reset(_scriptsDataController);  //?? do i need to send the controller? doesn't it already have it? // <<=== send the data file name, sweep number, rays, etc. this function should create the Scripts Data Model
 }
 
 void ScriptEditorController::runForEachRayScript(QString script, bool useBoundary,
-  vector<Point> &boundaryPoints, string dataFileName, bool updateVolume)
+  vector<Point> &boundaryPoints, 
+  bool applyCFactors, string dataFileName, bool updateVolume)
 {
   LOG(DEBUG) << "enter";
 
@@ -861,7 +870,7 @@ uncate(100);
 
     bool debug = false;
      // well, we need to merge the fields so, just read all the fields!!
-    _resetDataFile(dataFileName, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
+    _resetDataFile(dataFileName, applyCFactors, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
 
     // set initial field names
     initialFieldNames = getFieldNames();
@@ -1113,7 +1122,8 @@ uncate(100);
 }
 
 void ScriptEditorController::runForEachRayScript(QString script, int currentSweepNumber,
-  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName, bool updateVolume)
+  bool useBoundary, vector<Point> &boundaryPoints, 
+  bool applyCfactors, string dataFileName, bool updateVolume)
 {
   LOG(DEBUG) << "enter";
 
@@ -1148,7 +1158,7 @@ uncate(100);
 
     bool debug = false;
      // well, we need to merge the fields so, just read all the fields!!
-    _resetDataFile(dataFileName, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
+    _resetDataFile(dataFileName, applyCfactors, debug, debug); // fieldNamesInScript);  chicken and egg issue with fieldNames
 
     // set initial field names
     initialFieldNames = getFieldNames();
@@ -1413,7 +1423,8 @@ uncate(100);
 
 
 void ScriptEditorController::runForEachRayScriptOLD(QString script, int currentSweepIndex,
-  bool useBoundary, vector<Point> &boundaryPoints, string dataFileName)
+  bool useBoundary, vector<Point> &boundaryPoints, 
+  bool applyCfactors, string dataFileName)
 {
   LOG(DEBUG) << "enter";
 
