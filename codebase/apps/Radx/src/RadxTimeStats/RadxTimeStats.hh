@@ -90,6 +90,9 @@ private:
   // input data
 
   RadxVol _readVol;
+
+  // prescribed scan
+  
   bool _isRhi;
   vector<double> _fixedAngles;
   vector<double> _scanAngles;
@@ -105,14 +108,8 @@ private:
   bool _finalFile;
   size_t _nVols;
   
-  // These are pointers into the input Radx object.
-  // This memory is managed by the Radx class and should not be freed
-  // by the calling class.
-
-  const Radx::fl32 *_dbz;
-  Radx::fl32 _dbzMiss;
-
-  // stats volume, derived from the volume read in
+  // volume for stats, derived from the volume read in
+  // using the prescribed scan angles
   
   RadxVol _statsVol;
   size_t _nRaysStats;
@@ -120,28 +117,6 @@ private:
   // analysis results - statistics
 
   bool _allocNeeded;
-  
-  // TaArray2D<Radx::fl32> _sumArray;
-  // Radx::fl32 **_sum;
-
-  // TaArray2D<Radx::fl32> _sqSumArray;
-  // Radx::fl32 **_sqSum;
-
-  // TaArray2D<Radx::fl32> _countArray;
-  // Radx::fl32 **_count;
-  
-  // TaArray2D<Radx::fl32> _meanArray;
-  // Radx::fl32 **_mean;
-
-  // TaArray2D<Radx::fl32> _sdevArray;
-  // Radx::fl32 **_sdev;
-  
-  // TaArray2D<Radx::fl32> _modeArray;
-  // Radx::fl32 **_mode;
-  
-  // TaArray2D<Radx::fl32> _medianArray;
-  // Radx::fl32 **_median;
-  
   TaArray2D<Stats> _statsArray;
   Stats **_stats;
 

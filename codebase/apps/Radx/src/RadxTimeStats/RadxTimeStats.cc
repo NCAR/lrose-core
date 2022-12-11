@@ -241,7 +241,7 @@ int RadxTimeStats::_processFile(const string &filePath)
     
     if (_writeStatsVol()) {
       LOG(ERROR) << "ERROR - RadxTimeStats::_processFile()";
-      LOG(ERROR) << "  Cannot write out clutter volume";
+      LOG(ERROR) << "  Cannot write out stats volume";
       return -1;
     }
 
@@ -518,7 +518,7 @@ void RadxTimeStats::_initAngleList()
 
   if (_params.scan_mode == Params::PPI) {
     
-    // PPI clutter scan - compute azimuths
+    // PPI stats scan - compute azimuths
     
     double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
     if (_params.first_ray_angle > _params.last_ray_angle) {
@@ -538,7 +538,7 @@ void RadxTimeStats::_initAngleList()
     
   } else {
 
-    // RHI clutter scan - compute RHI elevations
+    // RHI stats scan - compute RHI elevations
     
     double sectorDelta = _params.last_ray_angle - _params.first_ray_angle;
 
@@ -651,7 +651,7 @@ int RadxTimeStats::_initStatsVol()
     return -1;
   }
 
-  // initialize the clutter volume with the read volume,
+  // initialize the stats volume with the read volume,
   // and then clear out the rays
 
   _statsVol.clear();
@@ -669,7 +669,7 @@ int RadxTimeStats::_initStatsVol()
   dbzFld->setGatesToMissing(0, dbzFld->getNPoints() - 1);
   
   if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "==>> looking for rays that match clutter volume <<==" << endl;
+    cerr << "==>> looking for rays that match stats volume <<==" << endl;
   }
   
   // loop through the sweeps and scan angles
@@ -677,13 +677,13 @@ int RadxTimeStats::_initStatsVol()
   for (size_t isweep = 0; isweep < _fixedAngles.size(); isweep++) {
     for (size_t iang = 0; iang < _scanAngles.size(); iang++) {
 
-      // get the clutter angle
+      // get the stats angle
       
-      double clutEl = _fixedAngles[isweep];
-      double clutAz = _scanAngles[iang];
+      double statsEl = _fixedAngles[isweep];
+      double statsAz = _scanAngles[iang];
       if (_isRhi) {
-        clutEl = _scanAngles[iang];
-        clutAz = _fixedAngles[isweep];
+        statsEl = _scanAngles[iang];
+        statsAz = _fixedAngles[isweep];
       }
 
       // find the closest ray in the measured volume
@@ -699,8 +699,8 @@ int RadxTimeStats::_initStatsVol()
         RadxRay *ray = rays[ii];
         double rayEl = ray->getElevationDeg();
         double rayAz = ray->getAzimuthDeg();
-        double dEl = fabs(rayEl - clutEl);
-        double dAz = fabs(rayAz - clutAz);
+        double dEl = fabs(rayEl - statsEl);
+        double dAz = fabs(rayAz - statsAz);
         if (dEl > _params.elev_tolerance_deg ||
             dAz > _params.az_tolerance_deg) {
           continue;
@@ -727,9 +727,9 @@ int RadxTimeStats::_initStatsVol()
                   "rayAz, matchAz, dEl, dAz: "
                   "%3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
                   isweep, iang, matchRayIndex,
-                  clutEl, matchEl, clutAz, matchAz,
-                  fabs(clutEl - matchEl),
-                  fabs(clutAz - matchAz));
+                  statsEl, matchEl, statsAz, matchAz,
+                  fabs(statsEl - matchEl),
+                  fabs(statsAz - matchAz));
         }
       } else {
         statsRay = new RadxRay(emptyRay);
@@ -739,22 +739,22 @@ int RadxTimeStats::_initStatsVol()
                   "rayAz, matchAz, dEl, dAz: "
                   "%3ld %3ld %5ld %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",
                   isweep, iang, matchRayIndex,
-                  clutEl, matchEl, clutAz, matchAz,
-                  fabs(clutEl - matchEl),
-                  fabs(clutAz - matchAz));
+                  statsEl, matchEl, statsAz, matchAz,
+                  fabs(statsEl - matchEl),
+                  fabs(statsAz - matchAz));
         }
       }
-      statsRay->setElevationDeg(clutEl);
-      statsRay->setAzimuthDeg(clutAz);
+      statsRay->setElevationDeg(statsEl);
+      statsRay->setAzimuthDeg(statsAz);
       if (_isRhi) {
-        statsRay->setFixedAngleDeg(clutAz);
+        statsRay->setFixedAngleDeg(statsAz);
       } else {
-        statsRay->setFixedAngleDeg(clutEl);
+        statsRay->setFixedAngleDeg(statsEl);
       }
       statsRay->clearEventFlags();
       statsRay->setSweepNumber(isweep);
       
-      // add to the clutter vol
+      // add to the stats vol
 
       _statsVol.addRay(statsRay);
 
@@ -769,34 +769,10 @@ int RadxTimeStats::_initStatsVol()
 
   if (_allocNeeded) {
     
-    // first time, allocate arrays for stats
-    
-    // _sum = _sumArray.alloc(_nRaysStats, _nGates);
-    // _sqSum = _sqSumArray.alloc(_nRaysStats, _nGates);
-    // _count = _countArray.alloc(_nRaysStats, _nGates);
-    // _mean = _meanArray.alloc(_nRaysStats, _nGates);
-    // _sdev = _sdevArray.alloc(_nRaysStats, _nGates);
-    // _mode = _modeArray.alloc(_nRaysStats, _nGates);
-    // _median = _medianArray.alloc(_nRaysStats, _nGates);
     _stats = _statsArray.alloc(_nRaysStats, _nGates);
 
-    // initialize to 0
+    // initialize histograms at each gate
     
-    // Radx::fl32 *sum1D = _sumArray.dat1D();
-    // memset(sum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *sqSum1D = _sqSumArray.dat1D();
-    // memset(sqSum1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *count1D = _countArray.dat1D();
-    // memset(count1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *mean1D = _meanArray.dat1D();
-    // memset(mean1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *sdev1D = _sdevArray.dat1D();
-    // memset(sdev1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *mode1D = _modeArray.dat1D();
-    // memset(mode1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-    // Radx::fl32 *median1D = _medianArray.dat1D();
-    // memset(median1D, 0, _nRaysStats * _nGates * sizeof(Radx::fl32));
-
     double expectedMax = _params.max_expected_value;
     double expectedMin = _params.min_expected_value;
     double nbins = 50.0;
@@ -868,8 +844,8 @@ int RadxTimeStats::_writeStatsVol()
 RadxRay *RadxTimeStats::_getStatsRay(RadxRay *ray)
 {
 
-  const vector<RadxRay *> &clutRays = _statsVol.getRays();
-  if (clutRays.size() < 1) {
+  const vector<RadxRay *> &statsRays = _statsVol.getRays();
+  if (statsRays.size() < 1) {
     return NULL;
   }
 
@@ -883,12 +859,12 @@ RadxRay *RadxTimeStats::_getStatsRay(RadxRay *ray)
   double minAngDist = 1.0e6;
   RadxRay *matchRay = NULL;
   
-  for (size_t iray = 0; iray < clutRays.size(); iray++) {
-    RadxRay *clutRay = clutRays[iray];
-    double clutEl = clutRay->getElevationDeg();
-    double clutAz = clutRay->getAzimuthDeg();
-    double dEl = fabs(el - clutEl);
-    double dAz = fabs(az - clutAz);
+  for (size_t iray = 0; iray < statsRays.size(); iray++) {
+    RadxRay *statsRay = statsRays[iray];
+    double statsEl = statsRay->getElevationDeg();
+    double statsAz = statsRay->getAzimuthDeg();
+    double dEl = fabs(el - statsEl);
+    double dAz = fabs(az - statsAz);
     if (dEl > _params.elev_tolerance_deg ||
         dAz > _params.az_tolerance_deg) {
       continue;
@@ -896,7 +872,7 @@ RadxRay *RadxTimeStats::_getStatsRay(RadxRay *ray)
     double angDist = sqrt(dEl * dEl + dAz * dAz);
     if (angDist < minAngDist) {
       minAngDist = angDist;
-      matchRay = clutRay;
+      matchRay = statsRay;
     }
   } // ii
   
