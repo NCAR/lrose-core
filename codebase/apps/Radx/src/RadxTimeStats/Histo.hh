@@ -21,57 +21,86 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
-//
-// main for RadxVolTimeStats
-//
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// March 2014
-//
-///////////////////////////////////////////////////////////////
+/**
+ * @file Histo.hh
+ * @brief Histogram
+ * @class Histo
+ * @brief Histogram
+ */
 
-#include "RadxVolTimeStats.hh"
-#include <toolsa/str.h>
-#include <cstdlib>
+# ifndef    HISTO_HH
+# define    HISTO_HH
 
-// file scope
+#include <vector>
 
-static void tidy_and_exit (int sig);
-static RadxVolTimeStats *Prog = NULL;
-
-// main
-
-int main(int argc, char **argv)
-
+//------------------------------------------------------------------
+class Histo
 {
+public:
 
-  // create program object
+  /**
+   * constructor
+   */
+  Histo();
 
-  Prog = new RadxVolTimeStats(argc, argv);
-  if (!Prog->OK) {
-    return(-1);
-  }
+  /**
+   * constructor
+   * Set member values to inputs
+   * @param[in]  minBin  Center of smallest bin 
+   * @param[in] deltaBin Distance between bin centers
+   * @param[in]  maxBin  Center of largest bin 
+   */
+  Histo(const double minBin, const double deltaBin, const double maxBin);
 
-  // run it
+  /**
+   *  Dstructor
+   */
+  virtual ~Histo();
 
-  int iret = Prog->Run();
+  /**
+   * init
+   */
+  void init(const double minBin, const double deltaBin, const double maxBin);
 
-  // clean up
+  /**
+   * Add input value to data vector
+   * @param[in] v  Value
+   */
+  void update(const double v);
 
-  tidy_and_exit(iret);
-  return (iret);
+  /**
+   * Add missing data value to histograms state
+   * 
+   */
+  void updateMissing();
+
+  /**
+   * Compute the median and return result
+   * @param[out] v  Median
+   * @return true if successful, false if over half the data
+   *              was missing, or no data, or error
+   */
+  bool computeMedian(double &v) const;
+
+  /** 
+   * Debug print 
+   */
+  void print(FILE *out) const;
+
+  /**
+   * Print out input value, then debug print
+   * @param[in] x  Value
+   */
+  void print(FILE *out, const double x) const;
+
+protected:
+private:  
   
-}
+  std::vector<double> _data;  /**< The data */
+  int _nmissing;              /**< Number of missing data points*/
+  double _minBin;             /**< Histogram min bin center */
+  double _deltaBin;           /**< Histogram bin seperation */
+  double _maxBin;             /**< Histogram max bin center */
+};
 
-// tidy up on exit
-
-static void tidy_and_exit (int sig)
-
-{
-  if (Prog) {
-    delete Prog;
-    Prog = NULL;
-  }
-  exit(sig);
-}
+# endif

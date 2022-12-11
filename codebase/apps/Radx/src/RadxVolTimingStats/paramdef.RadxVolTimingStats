@@ -1,5 +1,5 @@
 /*********************************************************
- * parameter definitions for RadxVolTimeStats
+ * parameter definitions for RadxVolTimingStats
  *
  * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
  *
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxVolTimeStats compute timing statistics for (a) an example Radx volume or (b) a scan strategy specified in the parameter file. The statistics are aimed at understanding the age of fractions of the measured volume.";
+  p_header = "RadxVolTimingStats compute timing statistics for (a) an example Radx volume or (b) a scan strategy specified in the parameter file. The statistics are aimed at understanding the age of fractions of the measured volume.";
 }
 
 commentdef {
@@ -181,7 +181,7 @@ paramdef boolean {
 } write_volume_to_output_file;
 
 paramdef string {
-  p_default = "./output/RadxVolTimeStats/";
+  p_default = "./output/RadxVolTimingStats/";
   p_descr = "Output directory path.";
   p_help = "Files will be written to this directory.";
 } output_dir;

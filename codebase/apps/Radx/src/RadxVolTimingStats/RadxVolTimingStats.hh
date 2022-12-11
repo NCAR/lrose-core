@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadxVolTimeStats.h
+// RadxVolTimingStats.h
 //
-// RadxVolTimeStats object
+// RadxVolTimingStats object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,8 +32,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadxVolTimeStats_H
-#define RadxVolTimeStats_H
+#ifndef RadxVolTimingStats_H
+#define RadxVolTimingStats_H
 
 #include <tdrp/tdrp.h>
 #include <string>
@@ -45,17 +45,17 @@
 class RadxFile;
 class RadxVol;
 
-class RadxVolTimeStats {
+class RadxVolTimingStats {
   
 public:
 
   // constructor
 
-  RadxVolTimeStats (int argc, char **argv);
+  RadxVolTimingStats (int argc, char **argv);
 
   // destructor
   
-  ~RadxVolTimeStats();
+  ~RadxVolTimingStats();
 
   // run 
 

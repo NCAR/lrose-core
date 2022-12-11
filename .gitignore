@@ -707,8 +707,8 @@ codebase/apps/Radx/src/RadxRate/RadxRate
 codebase/apps/Radx/src/RadxStats/RadxStats
 codebase/apps/Radx/src/RadxSunMon/RadxSunMon
 codebase/apps/Radx/src/RadxTest/RadxTest
-codebase/apps/Radx/src/RadxTimeMedian/RadxTimeMedian
-codebase/apps/Radx/src/RadxVolTimeStats/RadxVolTimeStats
+codebase/apps/Radx/src/RadxTimeStats/RadxTimeStats
+codebase/apps/Radx/src/RadxVolTimingStats/RadxVolTimingStats
 codebase/apps/Radx/src/RadxBeamBlock/RadxBeamBlock
 codebase/apps/Radx/src/TestRadxMsg/TestRadxMsg
 

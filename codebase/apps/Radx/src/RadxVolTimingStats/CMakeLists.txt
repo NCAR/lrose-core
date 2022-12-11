@@ -2,14 +2,14 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: RadxVolTimeStats
+# app name: RadxVolTimingStats
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/Radx/src/RadxVolTimeStats
+# dir: lrose-core/codebase/apps/Radx/src/RadxVolTimingStats
 ###############################################################
 
-project (RadxVolTimeStats)
+project (RadxVolTimingStats)
 
 # source files
 
@@ -17,7 +17,7 @@ set (SRCS
       Params.cc
       Args.cc
       Main.cc
-      RadxVolTimeStats.cc
+      RadxVolTimingStats.cc
     )
 
 # include directories
@@ -153,7 +153,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (RadxVolTimeStats ${SRCS})
+add_executable (RadxVolTimingStats ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

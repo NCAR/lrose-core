@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RadxVolTimeStats.cc
+// RadxVolTimingStats.cc
 //
-// RadxVolTimeStats object
+// RadxVolTimingStats object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,11 +32,11 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadxVolTimeStats creates a RadxVol object from scratch.
+// RadxVolTimingStats creates a RadxVol object from scratch.
 //
 ///////////////////////////////////////////////////////////////
 
-#include "RadxVolTimeStats.hh"
+#include "RadxVolTimingStats.hh"
 #include <string>
 #include <vector>
 #include <set>
@@ -61,8 +61,8 @@ using namespace std;
 
 // Constructor
 
-RadxVolTimeStats::RadxVolTimeStats(int argc, char **argv) :
-        _args("RadxVolTimeStats")
+RadxVolTimingStats::RadxVolTimingStats(int argc, char **argv) :
+        _args("RadxVolTimingStats")
 
 {
 
@@ -70,7 +70,7 @@ RadxVolTimeStats::RadxVolTimeStats(int argc, char **argv) :
 
   // set programe name
 
-  _progName = strdup("RadxVolTimeStats");
+  _progName = strdup("RadxVolTimingStats");
 
   // get command line args
   
@@ -99,7 +99,7 @@ RadxVolTimeStats::RadxVolTimeStats(int argc, char **argv) :
 
 // destructor
 
-RadxVolTimeStats::~RadxVolTimeStats()
+RadxVolTimingStats::~RadxVolTimingStats()
 
 {
 
@@ -109,7 +109,7 @@ RadxVolTimeStats::~RadxVolTimeStats()
 //////////////////////////////////////////////////
 // Run
 
-int RadxVolTimeStats::Run()
+int RadxVolTimingStats::Run()
 {
 
   // create a volume depending on mode
@@ -153,7 +153,7 @@ int RadxVolTimeStats::Run()
 
   if (_params.write_volume_to_output_file) {
     if (_writeVol(vol)) {
-      cerr << "ERROR - RadxVolTimeStats::_processFile" << endl;
+      cerr << "ERROR - RadxVolTimingStats::_processFile" << endl;
       cerr << "  Cannot write volume to file" << endl;
       return -1;
     }
@@ -204,7 +204,7 @@ int RadxVolTimeStats::Run()
 //////////////////////////////////////////////////
 // create a volume from specified params
 
-void RadxVolTimeStats::_createVol(RadxVol &vol)
+void RadxVolTimingStats::_createVol(RadxVol &vol)
 {
   
   vol.clear();
@@ -272,9 +272,9 @@ void RadxVolTimeStats::_createVol(RadxVol &vol)
 
   // set vol metadata
   
-  vol.setTitle("RadxVolTimeStats");
+  vol.setTitle("RadxVolTimingStats");
   vol.setInstitution("NCAR/EOL");
-  vol.setSource("Written by RadxVolTimeStats");
+  vol.setSource("Written by RadxVolTimingStats");
   vol.setComment("Stores geometry and time-based fields");
 
   vol.setInstrumentName(_params.radar_name);
@@ -296,8 +296,8 @@ void RadxVolTimeStats::_createVol(RadxVol &vol)
 // Returns 0 on success
 //         -1 on failure
 
-int RadxVolTimeStats::_readFile(const string &readPath,
-                                RadxVol &vol)
+int RadxVolTimingStats::_readFile(const string &readPath,
+                                  RadxVol &vol)
 {
   
   // clear all data on volume object
@@ -305,7 +305,7 @@ int RadxVolTimeStats::_readFile(const string &readPath,
   vol.clear();
   
   if (_params.debug) {
-    cerr << "INFO - RadxVolTimeStats::Run" << endl;
+    cerr << "INFO - RadxVolTimingStats::Run" << endl;
     cerr << "  Input path: " << readPath << endl;
   }
   
@@ -321,7 +321,7 @@ int RadxVolTimeStats::_readFile(const string &readPath,
   // read in file
 
   if (inFile.readFromPath(readPath, vol)) {
-    cerr << "ERROR - RadxVolTimeStats::_readFile" << endl;
+    cerr << "ERROR - RadxVolTimingStats::_readFile" << endl;
     cerr << "  path: " << readPath << endl;
     cerr << inFile.getErrStr() << endl;
     return -1;
@@ -337,7 +337,7 @@ int RadxVolTimeStats::_readFile(const string &readPath,
 //////////////////////////////////////////////////
 // add geometry fields
 
-void RadxVolTimeStats::_addGeomFields(RadxVol &vol)
+void RadxVolTimingStats::_addGeomFields(RadxVol &vol)
 {
 
   
@@ -413,10 +413,10 @@ void RadxVolTimeStats::_addGeomFields(RadxVol &vol)
 ////////////////////////////////////////////////////////////////////
 // compute the age histogram
 
-void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
-                                       double &meanAgeFwd, double &meanAgeRev,
-                                       vector<double> &cumFreqFwd,
-                                       vector<double> &cumFreqRev)
+void RadxVolTimingStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
+                                         double &meanAgeFwd, double &meanAgeRev,
+                                         vector<double> &cumFreqFwd,
+                                         vector<double> &cumFreqRev)
 {
 
   // get time limits, and vol duration
@@ -535,12 +535,12 @@ void RadxVolTimeStats::_computeAgeHist(RadxVol &vol, double maxHtKm,
 ////////////////////////////////////////////////////////////////////
 // Write out the results to a text file
 
-void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
-                                        vector<double> &maxHtKm,
-                                        vector<double> &meanAgeFwd,
-                                        vector<double> &meanAgeRev,
-                                        vector< vector<double> > &cumFreqFwd,
-                                        vector< vector<double> > &cumFreqRev)
+void RadxVolTimingStats::_writeAgeResults(RadxVol &vol,
+                                          vector<double> &maxHtKm,
+                                          vector<double> &meanAgeFwd,
+                                          vector<double> &meanAgeRev,
+                                          vector< vector<double> > &cumFreqFwd,
+                                          vector< vector<double> > &cumFreqRev)
   
 {
 
@@ -622,7 +622,7 @@ void RadxVolTimeStats::_writeAgeResults(RadxVol &vol,
 //////////////////////////////////////////////////
 // set up write
 
-void RadxVolTimeStats::_setupWrite(RadxFile &file)
+void RadxVolTimingStats::_setupWrite(RadxFile &file)
 {
 
   if (_params.debug) {
@@ -643,7 +643,7 @@ void RadxVolTimeStats::_setupWrite(RadxFile &file)
 //////////////////////////////////////////////////
 // write out the volume
 
-int RadxVolTimeStats::_writeVol(RadxVol &vol)
+int RadxVolTimingStats::_writeVol(RadxVol &vol)
 {
 
   // output file
@@ -654,7 +654,7 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
   // write to dir
   
   if (outFile.writeToDir(vol, _params.output_dir, true, false)) {
-    cerr << "ERROR - RadxVolTimeStats::_writeVol" << endl;
+    cerr << "ERROR - RadxVolTimingStats::_writeVol" << endl;
     cerr << "  Cannot write file to dir: " << _params.output_dir << endl;
     cerr << outFile.getErrStr() << endl;
     return -1;
@@ -668,7 +668,7 @@ int RadxVolTimeStats::_writeVol(RadxVol &vol)
 //////////////////////////////////////////////////
 // print the range height table to stdout
 
-void RadxVolTimeStats::_printRangeHeightTable(RadxVol &vol)
+void RadxVolTimingStats::_printRangeHeightTable(RadxVol &vol)
 {
 
   // init for computing heights

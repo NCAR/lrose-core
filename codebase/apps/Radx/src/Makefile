@@ -42,7 +42,7 @@ SUB_DIRS = \
 	RadxQpe \
 	RadxRate \
 	RadxSunMon \
-        RadxTimeMedian \
-        RadxVolTimeStats
+        RadxTimeStats \
+        RadxVolTimingStats
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_recursive_dir_targets

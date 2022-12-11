@@ -23,17 +23,17 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for RadxVolTimeStats program
+# Makefile for RadxTimeStats program
 #
 # Mike Dixon, RAP, NCAR, Boulder, CO, 80307, USA
 #
-# March 2011
+# Feb 2013
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = RadxVolTimeStats
+TARGET_FILE = RadxTimeStats
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -49,15 +49,17 @@ LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 LOC_CFLAGS =
 
 HDRS = \
-	$(PARAMS_HH) \
 	Params.hh \
-	RadxVolTimeStats.hh
+	Args.hh \
+	Histo.hh \
+	RadxTimeStats.hh
 
 CPPC_SRCS = \
-	$(PARAMS_CC) \
+	Params.cc \
 	Args.cc \
+	Histo.cc \
 	Main.cc \
-	RadxVolTimeStats.cc
+	RadxTimeStats.cc
 
 #
 # tdrp macros

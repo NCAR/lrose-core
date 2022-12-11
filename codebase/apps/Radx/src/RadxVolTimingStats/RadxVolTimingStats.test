@@ -1,10 +1,10 @@
 /**********************************************************************
- * TDRP params for RadxVolTimeStats
+ * TDRP params for RadxVolTimingStats
  **********************************************************************/
 
 //======================================================================
 //
-// RadxVolTimeStats compute timing statistics for (a) an example Radx 
+// RadxVolTimingStats compute timing statistics for (a) an example Radx 
 //   volume or (b) a scan strategy specified in the parameter file. The 
 //   statistics are aimed at understanding the age of fractions of the 
 //   measured volume.
@@ -366,5 +366,5 @@ write_volume_to_output_file = FALSE;
 // Type: string
 //
 
-output_dir = "./output/RadxVolTimeStats/";
+output_dir = "./output/RadxVolTimingStats/";
 

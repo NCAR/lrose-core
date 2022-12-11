@@ -3,7 +3,7 @@
 
 #===========================================================================
 #
-# Plot range-height results from RadxVolTimeStats
+# Plot results from RadxVolTimingStats
 #
 #===========================================================================
 
@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 from optparse import OptionParser
 import subprocess
-import math
 
 def main():
 
@@ -27,7 +26,8 @@ def main():
     appName = os.path.basename(__file__)
 
     global options
-    global scanName, elevList, elevs, colHeaders, colData
+    global scanName, colHeaders, colData
+    global heights, elevs, meanAgeFwd, meanAgeRev, volDuration
 
 # parse the command line
 
@@ -37,17 +37,13 @@ def main():
                       dest='debug', default=False,
                       action="store_true",
                       help='Set debugging on')
-    parser.add_option('--verbose',
-                      dest='verbose', default=False,
-                      action="store_true",
-                      help='Set verbose debugging on')
     parser.add_option('--file',
                       dest='file',
-                      default='CAN-VOL_height_table.txt',
+                      default='CAS2_timing.txt',
                       help='File path for timing data')
     parser.add_option('--title',
                       dest='title',
-                      default='Range-Height Plot',
+                      default='Volume Age Stats',
                       help='Title for plot')
     parser.add_option('--width',
                       dest='figWidthMm',
@@ -57,14 +53,10 @@ def main():
                       dest='figHeightMm',
                       default=125,
                       help='Height of figure in mm')
-    parser.add_option('--maxHtKm',
-                      dest='maxHtKm',
-                      default=20,
-                      help='Max height to be plotted in km')
     (options, args) = parser.parse_args()
     
     if (options.debug):
-        print("Running ", appName, file=sys.stderr)
+        print("Running: ", appName, file=sys.stderr)
         print("  data file: ", options.file, file=sys.stderr)
 
     # read in headers
@@ -72,13 +64,6 @@ def main():
     iret = readColumnHeaders(options.file)
     if (iret != 0):
         sys.exit(1)
-
-    if (options.debug):
-        print("nGates: ", nGates, file=sys.stderr)
-        print("maxRangeKm: ", maxRangeKm, file=sys.stderr)
-        print("beamWidth: ", beamWidth, file=sys.stderr)
-        print("elevs: ", elevs, file=sys.stderr)
-        print("colHeaders: ", colHeaders, file=sys.stderr)
 
     # read in data
 
@@ -97,9 +82,11 @@ def main():
 
 def readColumnHeaders(filePath):
 
-    global scanName, nGates, elevList, elevs, beamWidth, maxRangeKm, colHeaders
+    global scanName, heights, elevs, meanAgeFwd, meanAgeRev, volDuration, colHeaders
     colHeaders = []
-    elevs = []
+    heights = []
+    meanAgeFwd = []
+    meanAgeRev = []
 
     fp = open(filePath, 'r')
     lines = fp.readlines()
@@ -124,33 +111,46 @@ def readColumnHeaders(filePath):
             scanName = parts[-1]
             continue
 
-        # max range
-        if (line.find("nGates") > 0):
+        # volume duration
+        if (line.find("duration") > 0):
             parts = line.strip().split()
-            nGates = parts[-1]
-            continue
-
-        # max range
-        if (line.find("maxRangeKm") > 0):
-            parts = line.strip().split()
-            maxRangeKm = parts[-1]
-            continue
-
-        # beam width
-        if (line.find("beamWidth") > 0):
-            parts = line.strip().split()
-            beamWidth = parts[-1]
+            volDuration = parts[-1]
             continue
 
         # elevations
         if (line.find("elevs") > 0):
             parts = line.strip().split()
-            elevList = parts[-1]
-            elevs = elevList.split(',')
+            elevs = parts[-1]
             continue
 
+        # analysis heights
+        if (line.find("heights") > 0):
+            parts = line.strip().split()
+            heightList = parts[-1]
+            heights = heightList.split(',')
+            continue
+
+        # mean age - by height
+
+        if (len(heights) > 0):
+            for ht in heights:
+
+                fwdLabel = "meanAgeFwd[" + ht + "]"
+                if (line.find(fwdLabel) > 0):
+                    parts = line.strip().split()
+                    ageFwd = parts[-1]
+                    meanAgeFwd.append(ageFwd)
+                    continue
+
+                revLabel = "meanAgeRev[" + ht + "]"
+                if (line.find(revLabel) > 0):
+                    parts = line.strip().split()
+                    ageRev = parts[-1]
+                    meanAgeRev.append(ageRev)
+                    continue
+                    
         # col headers?
-        if (line.find("gateNum") > 0):
+        if (line.find("binNum") > 0):
             colHeaders = line.lstrip("# ").rstrip("\n").split()
             gotHeaders = True
 
@@ -197,7 +197,7 @@ def readInputData(filePath):
             colData[var].append(float(data[index]))
 
 
-    if (options.verbose):
+    if (options.debug):
         print("colData: ", colData, file=sys.stderr)
 
     return 0
@@ -207,84 +207,75 @@ def readInputData(filePath):
 
 def doPlot():
 
-    rangeKm = np.array(colData["rangeKm"]).astype(np.double)
-    
+    binPos = np.array(colData["binPos"]).astype(np.double)
+
     widthIn = float(options.figWidthMm) / 25.4
     htIn = float(options.figHeightMm) / 25.4
     
     fig1 = plt.figure(1, (widthIn, htIn))
-    title = (options.title + ' for scan: ' + scanName + '  beam width = ' + beamWidth + ' deg')
+    title = (options.title + ' for scan: ' + scanName + ', vol duration: ' + volDuration + ' sec')
     fig1.suptitle(title, fontsize=11)
     ax1 = fig1.add_subplot(1,1,1,xmargin=0.0)
+    # ax2 = ax1.twinx() # instantiate a second axes that shares the same x-axis
 
-    ax1.set_xlim([0.0, float(maxRangeKm)])
-    ax1.set_ylim([0.0, float(options.maxHtKm)])
+    ax1.set_xlim([0.0, 1.0])
+    ax1.set_ylim([0.0, 1.0])
+    # ax2.set_ylim([0.0, 0.2])
 
-    # plot the heights for each elevation angle
+    # plot the frequency, for each ht limit
 
-    colors = [ 'red', 'blue', 'orange', 'green' ]
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+
     count = 0
-    elevsUsed = []
+    dash = 10
+    space = 0
+    for ht in heights:
 
-    for elev in elevs:
+        nameFwd = "cumFreqFwd[" + ht + "]"
+        nameRev = "cumFreqRev[" + ht + "]"
 
-        if elev in elevsUsed:
-            continue
+        if (len(ht) == 1):
+            ht = ' ' + ht
 
-        elevsUsed.append(elev)
+        cumFreqFwd = np.array(colData[nameFwd]).astype(np.double)
+        cumFreqRev = np.array(colData[nameRev]).astype(np.double)
 
-        gndRange = rangeKm * math.cos(math.radians(float(elev)))
+        meanAgeFwdFloat = float(meanAgeFwd[count])
+        meanAgeRevFloat = float(meanAgeRev[count])
 
-        htBotLabel = "htKmBot[" + elev + "]"
-        htMidLabel = "htKmMid[" + elev + "]"
-        htTopLabel = "htKmTop[" + elev + "]"
+        meanAgeFwdSecs = int(meanAgeFwdFloat * float(volDuration) + 0.5)
+        meanAgeRevSecs = int(meanAgeRevFloat * float(volDuration) + 0.5)
 
-        htKmBot = np.array(colData[htBotLabel]).astype(np.double)
-        htKmMid = np.array(colData[htMidLabel]).astype(np.double)
-        htKmTop = np.array(colData[htTopLabel]).astype(np.double)
+        labelFwd = "Fwd " + ht + "km meanAge: " + meanAgeFwd[count] + " = " + str(meanAgeFwdSecs) + " s"
+        labelRev = "Rev " + ht + "km meanAge: " + meanAgeRev[count] + " = " + str(meanAgeRevSecs) + " s"
 
-        col = colors[count % 4]
-
-        x = []
-        y = []
-        
-        for igate in range(0, int(nGates) - 1, 1):
-            x.append(gndRange[igate])
-            y.append(htKmBot[igate])
-
-        for igate in range(int(nGates) - 1, 0, -1):
-            x.append(gndRange[igate])
-            y.append(htKmTop[igate])
-
-        ax1.fill(x, y, color = col, alpha = 0.2)
-
-        ax1.plot(gndRange, htKmBot, linewidth=1, color = col)
-        ax1.plot(gndRange, htKmMid, linewidth=1, dashes = [4, 4], color = col)
-        ax1.plot(gndRange, htKmTop, linewidth=1, color = col)
+        if (count < 4):
+            ax1.plot(binPos, cumFreqFwd, \
+                     linewidth=1, linestyle = linestyles[count], label = labelFwd, color = 'red')
+            ax1.plot(binPos, cumFreqRev, \
+                     linewidth=1, linestyle = linestyles[count], label = labelRev, color = 'blue')
+        else:
+            ax1.plot(binPos, cumFreqFwd, \
+                     linewidth=1, dashes = [dash, space], label = labelFwd, color = 'red')
+            ax1.plot(binPos, cumFreqRev, \
+                     linewidth=1, dashes = [dash, space], label = labelRev, color = 'blue')
 
         count = count + 1
+        dash = dash - 2
+        space = space + 2
 
-    ax1.set_ylabel('Height above radar (km)')
-    ax1.set_xlabel('Ground range (km)')
-    ax1.set_title('Elevs: ' + elevList, fontsize=8)
+    ax1.set_ylabel('Fraction of volume')
+    ax1.set_xlabel('Normalized age at end of volume - cumulative')
+    ax1.set_title('Elevs: ' + elevs, fontsize=8)
     ax1.grid(True)
     
-    #ax1.grid(which='minor', alpha=0.1)
-    #ax1.grid(which='major', alpha=0.2)
-    #major_ticks = np.arange(0, 1, 0.2)
-    #minor_ticks = np.arange(0.1, 0.9, 0.2)
-    #ax1.set_xticks(major_ticks)
-    #ax1.set_xticks(minor_ticks, minor=True)
-    #ax1.set_yticks(major_ticks)
-    #ax1.set_yticks(minor_ticks, minor=True)
-
-    #legend1 = ax1.legend(loc='upper left', ncol=3, framealpha=0.5, fancybox=True)
-    #for label in legend1.get_texts():
-    #    label.set_fontsize('x-small')
+    legend1 = ax1.legend(loc='upper left', ncol=1, framealpha=0.5, fancybox=True)
+    for label in legend1.get_texts():
+        label.set_fontsize('x-small')
 
     homeDir = os.environ['HOME']
     downloadsDir = os.path.join(homeDir, 'Downloads')
-    savePath = os.path.join(downloadsDir, "range_height." + scanName + ".png")
+    savePath = os.path.join(downloadsDir, "vol_timing_stats." + scanName + ".png")
     fig1.savefig(savePath)
 
    # show
