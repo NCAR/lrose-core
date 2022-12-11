@@ -346,7 +346,7 @@ fields = {
   {
     label = "DBZ",
     raw_name = "DBZ",
-    filtered_name = "DBZ_F",
+    filtered_name = "",
     units = "dBZ",
     color_map = "dbz.colors",
     shortcut = "1"
@@ -416,8 +416,8 @@ fields = {
   }
   ,
   {
-    label = "dbzMaz",
-    raw_name = "dbzMaz",
+    label = "dbzMax",
+    raw_name = "dbzMax",
     filtered_name = "",
     units = "dBZ",
     color_map = "dbz.colors",

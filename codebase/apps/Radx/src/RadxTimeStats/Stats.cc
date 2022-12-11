@@ -206,7 +206,7 @@ void Stats::computeStats()
   for (size_t jj = 0; jj < _histNBins; jj++) {
     double xx = _histX[jj] - _mean;
     sum3 += (pow(xx, 3.0) * _histCount[jj]);
-    sum3 += (pow(xx, 4.0) * _histCount[jj]);
+    sum4 += (pow(xx, 4.0) * _histCount[jj]);
   }
 
   _skewness = ((sum3 / _nVals) / pow(_sdev, 3.0));

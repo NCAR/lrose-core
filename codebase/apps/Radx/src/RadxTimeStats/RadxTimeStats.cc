@@ -436,6 +436,7 @@ void RadxTimeStats::_addStatsFieldsToVol()
     for (size_t igate = 0; igate < _nGates; igate++) {
 
       Stats &stats = _stats[iray][igate];
+      stats.computeStats();
 
       Radx::fl32 meanVal = stats.getMean();
       if (!isfinite(meanVal)) {
