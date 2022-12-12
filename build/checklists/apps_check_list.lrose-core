@@ -266,14 +266,14 @@ RadxMesoCyclone
 RadxModelQc
 RadxMon
 RadxPartRain
-RadxPersistentClutter
+RadxClutter
 RadxPid
 RadxPrint
 RadxQc
 RadxQpe
 RadxRate
 RadxSunMon
-RadxTimeMedian
+RadxTimeStats
 RadxVolTimeStats
 RainGage
 RapMap2Chill
