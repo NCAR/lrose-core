@@ -1548,6 +1548,20 @@ double DataModel::getCfactorRotationCorr() {
   else return 0.0;
 }
 
+void DataModel::getCfactors(double *rollCorr, double *rotCorr, 
+  double *tiltCorr) {
+
+  *rollCorr = 0.0;
+  *rotCorr = 0.0;
+  *tiltCorr = 0.0;
+  const RadxCfactors *cfactors = _vol->getCfactors();
+  if (cfactors != NULL) {
+    *rollCorr = cfactors->getRollCorr();
+    *rotCorr = cfactors->getRotationCorr();
+    *tiltCorr = cfactors->getTiltCorr();
+  }
+}
+
 /*
 double DataModel::getAltitudeKmAgl() {
 
