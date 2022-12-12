@@ -5250,6 +5250,40 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     _sunAzVal->setText(text);
   }
 
+  // if airborne data ...
+  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    const RadxGeoref *georef = ray->getGeoreference();
+    if (georef != NULL) {
+
+
+      if (ray->getGeorefApplied()) {
+        _georefsApplied->setText("true");       
+      } else {
+        _georefsApplied->setText("false");          
+      }
+
+      _setText(text, "%.3f", georef->getRotation());  
+      _geoRefRotationVal->setText(text); 
+      _setText(text, "%.3f", georef->getRoll());  
+      _geoRefRollVal->setText(text); 
+      _setText(text, "%.3f", georef->getTilt());  
+      _geoRefTiltVal->setText(text);
+
+      double rollCorr = 0.0;
+      double rotCorr = 0.0;
+      double tiltCorr = 0.0;
+      DataModel *dataModel = DataModel::Instance();
+      dataModel->getCfactors(&rollCorr, &rotCorr, &tiltCorr);
+      _setText(text, "%.3f", rollCorr);
+      _cfacRollVal->setText(text);
+      _setText(text, "%.3f", rotCorr);
+      _cfacRotationVal->setText(text);   
+      _setText(text, "%.3f", tiltCorr);    
+      _cfacTiltVal->setText(text);
+
+    }
+  }
+
 }
 
 ///////////////////////////////////////////
