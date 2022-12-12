@@ -53,9 +53,11 @@ RadxClutter::RadxClutter(int argc, char **argv)
 {
 
   OK = TRUE;
+  _finalFile = false;
   _nVols = 0;
   _nGates = 0;
   _allocNeeded = true;
+  _sourceString = "These stats were created from the following files: ";
   
   // set programe name
 
@@ -166,17 +168,31 @@ int RadxClutter::Run()
 int RadxClutter::_runFilelist()
 {
 
-  // loop through the input file list
+  // check for substr
+
+  vector<string> inputPaths = _args.inputFileList; 
+  vector<string> goodPaths;
+  string subStr = _params.file_name_substr;
+  if (subStr.size() == 0) {
+    goodPaths = inputPaths;
+  } else {
+    for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+      if (inputPaths[ii].find(subStr) != string::npos) {
+        goodPaths.push_back(inputPaths[ii]);
+      }
+    }
+  }
+  
+  // loop through the good file list
 
   int iret = 0;
-
-  for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-
-    string inputPath = _args.inputFileList[ii];
-    if (_processFile(inputPath)) {
+  for (size_t ii = 0; ii < goodPaths.size(); ii++) {
+    if (ii == goodPaths.size() - 1) {
+      _finalFile = true;
+    }
+    if (_processFile(goodPaths[ii])) {
       iret = -1;
     }
-
   }
 
   return iret;
@@ -203,18 +219,35 @@ int RadxClutter::_runArchive()
     return -1;
   }
 
-  const vector<string> &paths = tlist.getPathList();
-  if (paths.size() < 1) {
+  vector<string> inputPaths = tlist.getPathList();
+  if (inputPaths.size() < 1) {
     LOG(ERROR) << "ERROR - RadxClutter::_runFilelist()";
     LOG(ERROR) << "  No files found, dir: " << _params.input_dir;
     return -1;
   }
   
-  // loop through the input file list
+  // check for substr
+
+  vector<string> goodPaths;
+  string subStr = _params.file_name_substr;
+  if (subStr.size() == 0) {
+    goodPaths = inputPaths;
+  } else {
+    for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+      if (inputPaths[ii].find(subStr) != string::npos) {
+        goodPaths.push_back(inputPaths[ii]);
+      }
+    }
+  }
   
+  // loop through the good file list
+
   int iret = 0;
-  for (size_t ii = 0; ii < paths.size(); ii++) {
-    if (_processFile(paths[ii])) {
+  for (size_t ii = 0; ii < goodPaths.size(); ii++) {
+    if (ii == goodPaths.size() - 1) {
+      _finalFile = true;
+    }
+    if (_processFile(goodPaths[ii])) {
       iret = -1;
     }
   }
@@ -269,19 +302,6 @@ int RadxClutter::_processFile(const string &filePath)
     return -1;
   }
 
-  // check for substr
-  
-  string subStr = _params.file_name_substr;
-  if (subStr.size() > 0) {
-    RadxPath rpath(_readPath);
-    string fileName = rpath.getFile();
-    if (fileName.find(subStr) == string::npos) {
-      LOG(DEBUG) << "Looking for substr: " << subStr;
-      LOG(DEBUG) << "No substr found, ignoring file: " << _readPath;
-      return 0;
-    }
-  }
-  
   // check if this is an RHI
   
   _isRhi = _readVol.checkIsRhi();
@@ -339,10 +359,16 @@ int RadxClutter::_performAnalysis()
 
   // write out the results
 
-  if (_writeClutterVol()) {
-    LOG(ERROR) << "ERROR - RadxClutter::_performAnalysis()";
-    LOG(ERROR) << "  Cannot write out clutter volume";
-    return -1;
+  if (_params.mode == Params::REALTIME ||
+      _finalFile ||
+      _params.write_intermediate_files) {
+    
+    if (_writeClutterVol()) {
+      LOG(ERROR) << "ERROR - RadxClutter::_performAnalysis()";
+      LOG(ERROR) << "  Cannot write out clutter volume";
+      return -1;
+    }
+
   }
 
   return 0;
@@ -697,11 +723,11 @@ void RadxClutter::_initAngleList()
     double sumDelta = 0.0;
     while (sumDelta < sectorDelta) {
       _scanAngles.push_back(az);
-      az = RadxComplex::computeSumDeg(az, _params.delta_ray_angle);
+      az = RadxComplex::computeSumDeg(az, _params.ray_angle_resolution);
       if (az < 0) {
         az += 360.0;
       }
-      sumDelta += fabs(_params.delta_ray_angle);
+      sumDelta += fabs(_params.ray_angle_resolution);
     } // while (sumDelta < sectorDelta)
     
   } else {
@@ -714,8 +740,8 @@ void RadxClutter::_initAngleList()
     double sumDelta = 0.0;
     while (sumDelta < sectorDelta) {
       _scanAngles.push_back(el);
-      el = RadxComplex::computeSumDeg(el, _params.delta_ray_angle);
-      sumDelta += fabs(_params.delta_ray_angle);
+      el = RadxComplex::computeSumDeg(el, _params.ray_angle_resolution);
+      sumDelta += fabs(_params.ray_angle_resolution);
     } // while (sumDelta < sectorDelta)
 
   } // if (_params.scan_mode == Params::PPI)
@@ -1023,7 +1049,7 @@ int RadxClutter::_writeClutterVol()
 
   // write latest data info file if requested 
   
-  if (_params.write_latest_data_info) {
+  if (_params.mode == Params::REALTIME) {
     DsLdataInfo ldata(outputDir);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ldata.setDebug(true);
@@ -1225,7 +1251,7 @@ void RadxClutter::_filterRay(RadxRay *ray, const RadxRay *clutRay)
     filtVals[ii] = dbz;
     if (clutFlag > 0) {
       if (dbz < clutThreshold) {
-        filtVals[ii] = _params.min_dbz_filt;
+        filtVals[ii] = _params.dbz_filt;
       }
     }
 
@@ -1263,7 +1289,7 @@ int RadxClutter::_writeFiltVol()
   
   // write latest data info file if requested 
   
-  if (_params.write_latest_data_info) {
+  if (_params.mode == Params::REALTIME) {
     DsLdataInfo ldata(outputDir);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       ldata.setDebug(true);

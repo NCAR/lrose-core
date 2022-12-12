@@ -559,8 +559,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxPersistentClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file.");
-    tt->comment_text = tdrpStrDup("This method is based on the following paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston. A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.");
+    tt->comment_hdr = tdrpStrDup("RadxClutter identifies persistent clutter in polar radar data, flags it, and writes out the statistics to a CfRadial file. This is the 'first pass'. Those statistics can then be used to censor clutter gates in a subsequent 'second pass'.");
+    tt->comment_text = tdrpStrDup("This method is partially based on the following paper: Lakshmanan V., J. Zhang, K. Hondl and C. Langston. A Statistical Approach to Mitigating Persistent Clutter in Radar Reflectivity Data. IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, Vol. 5, No. 2, April 2012.\n\nRadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as extra fields added to the CfRadial output file.\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\nGenerally the reflectivity (DBZ) field will be used for the clutter identification. You are asked to select a reflectivty threshold that will be consistently exceeded by the presence of clutter. Reading data from a time period of a number of hours (at least) we compute the fraction of time that the reflectivity at each gate, in each ray, exceeds that threshold. Since non-AP clutter is a persistent phenomenon, the presence of clutter will yield a high time fraction for clutter gates.\n\nTo perform this analysis, you should choose a period of a number of hours, say at least 6, during which there is not significant weather activity. It does not matter if there are some weather echoes, but generally it should be reasonably clear most of the time.\n\nThe technique described in the paper referenced above allows us to automatically determine a minimum fraction of the time that echo should be present for the identification of clutter gates. Experience shows that this fraction is normally around 0.5. However, this tends to include gates that have only marginal clutter, leading to holes in the data if you use those results for clutter removal. Therefore you have the option, in this parameter file, to override this automatic threshold and specify the threshold you want to use instead. A value of 0.95 or higher seems to work quite well.\n\nIn addition the time fraction field, we also compute and store the mean and standard deviation of the input field (probably reflectivity) and a flag that indicates that the algorithm has identified clutter at a gate. Each field is computed and written out for every gate for every ray, given the specified scan strategy.\n\nThe input field for the latest time period will also be copied to the output file.\n\nThe default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.\n\nThe identification step is the 'first pass' of this procedure. This will save out the clutter statistics as a CfRadial file to the output directory.\n\nIn the optional 'second pass', you can read the clutter statistics, and then use those to censor clutter from any series of CfRadial files that have a matching scan strategy. The rule for censoring is as follows: If a gate is flagged as having clutter in the statistics volume, the reflectivity in the measured volume will be compared to the statitics. If the measured reflectivity exceeds the mean reflectivity, plus a specified multiple of the standard deviation, weather is likely to be present at that gate and it will not be censored. If the reflectivity does not pass this test it will be censored - i.e. it will be set to a specified low value. The use of X times the standard deviation above the mean allows us to account for variability in the clutter reflectivity from one time to the next. 'X' is the parameter 'n_sdev_for_clut_threshold'.");
     tt++;
     
     // Parameter 'Comment 1'
@@ -648,7 +648,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.\n\nIn ARCHIVE mode, it moves through the data between the start and end times set on the command line.\n\nIn FILELIST mode, it moves through the list of file names specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 3;
@@ -680,8 +680,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("ACTION");
-    tt->comment_text = tdrpStrDup("There are 2 possible actions: (a) analyze the clutter from a number of volumes, and store the results in a CfRadial file; or (b) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.");
+    tt->comment_hdr = tdrpStrDup("ACTION - first or second pass.");
+    tt->comment_text = tdrpStrDup("There are 2 possible actions:\n\n(1) first pass - analyze the clutter from a number of volumes, and store the results in a CfRadial file; or\n\n(2) use the clutter statistics file in the analysis step to remove clutter from files containing clutter.");
     tt++;
     
     // Parameter 'action'
@@ -691,7 +691,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("action");
     tt->descr = tdrpStrDup("Action to be performed");
-    tt->help = tdrpStrDup("\nANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
+    tt->help = tdrpStrDup("ANALYZE_CLUTTER: given a series of volumes containing clutter, analyze the clutter and store the clutter statistics in CfRadialFiles.\n\nFILTER_CLUTTER: using the clutter statistics analyzed in the first step, filter reflectivity power from those clutter gates that are not overridden by weather. If the weather echo is stronger that the mean clutter, it is left unchanged.");
     tt->val_offset = (char *) &action - &_start_;
     tt->enum_def.name = tdrpStrDup("action_t");
     tt->enum_def.nfields = 2;
@@ -710,7 +710,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("SCAN DETAILS");
-    tt->comment_text = tdrpStrDup("We specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.");
+    tt->comment_text = tdrpStrDup("We need to make sure that the geometry of the scan does not change through the analysis period. Therefore we specify the scan angles for which the clutter will be analyzed. This is the 'ideal'. The actual measurements are mapped onto this ideal scan.");
     tt++;
     
     // Parameter 'scan_mode'
@@ -719,8 +719,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("scan_mode");
-    tt->descr = tdrpStrDup("Scan mode");
-    tt->help = tdrpStrDup("PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning");
+    tt->descr = tdrpStrDup("Scan mode. PPI - horizontal scanning, e.g. surveillance. RHI - vertical scanning");
+    tt->help = tdrpStrDup("We need to specify the scan mode to make sure the geometry does not change through the analysis.");
     tt->val_offset = (char *) &scan_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("scan_mode_t");
     tt->enum_def.nfields = 2;
@@ -779,15 +779,15 @@
     tt->single_val.d = 359.99;
     tt++;
     
-    // Parameter 'delta_ray_angle'
+    // Parameter 'ray_angle_resolution'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("delta_ray_angle");
+    tt->param_name = tdrpStrDup("ray_angle_resolution");
     tt->descr = tdrpStrDup("Delta scan angle between consecutive rays (deg).");
-    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays.");
-    tt->val_offset = (char *) &delta_ray_angle - &_start_;
+    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays. If your radar data is not saved on a regular grid, you should set the resolution to a value finer than the measured angular resolution, so as to over-sample the input data.");
+    tt->val_offset = (char *) &ray_angle_resolution - &_start_;
     tt->single_val.d = 1;
     tt++;
     
@@ -798,7 +798,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("az_tolerance_deg");
     tt->descr = tdrpStrDup("Azimumth tolerance");
-    tt->help = tdrpStrDup("Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->help = tdrpStrDup("We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for azimuth values to match.");
     tt->val_offset = (char *) &az_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
@@ -810,7 +810,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("elev_tolerance_deg");
     tt->descr = tdrpStrDup("Elevation tolerance");
-    tt->help = tdrpStrDup("Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->help = tdrpStrDup("We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for elevation values to match.");
     tt->val_offset = (char *) &elev_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
@@ -843,7 +843,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_field_name");
     tt->descr = tdrpStrDup("Reflectivity field name.");
-    tt->help = tdrpStrDup("Name of field on which clutter will be based.");
+    tt->help = tdrpStrDup("Name of field on which clutter will be based. This does not have to be the reflectivity field - for example SNR could be used. But since DBZ is the most common field used we label it as such.");
     tt->val_offset = (char *) &dbz_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
@@ -866,8 +866,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_vel_field");
-    tt->descr = tdrpStrDup("Option to make use of the velocity field to identify clutter.");
-    tt->help = tdrpStrDup("If true, then we check the absolute value of velocity. If it is outside the limit we do not treat the point as clutter.");
+    tt->descr = tdrpStrDup("Option to make use of the velocity field to confirm the identification of clutter.");
+    tt->help = tdrpStrDup("Since persistent clutter does not move, the radial velocity will be close to 0. This is a useful quality control field for clutter. If this parameter is set to true, we check the absolute value of velocity. If it is outside the limit we discard the gate as having clutter.");
     tt->val_offset = (char *) &use_vel_field - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -903,7 +903,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("specify_clutter_frequency_threshold");
     tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold.");
-    tt->help = tdrpStrDup("If true, the clutter_frequency_threshold will be used. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.");
+    tt->help = tdrpStrDup("In the algorithm, we compute the fraction of time that reflectivity at a gate exceeds the 'clutter_dbz_threshold'. Based on the frequency distribition of these fractions we can compute, in an automated manner, a theoretical optimum threshold for separating clutter from weather. This is the default option. However, if you are going to use a second pass to censor the clutter, this tends to over-identify the number of gates at which clutter is present. If you set this parameter to true, you can use the parameter 'clutter_frequency_threshold' to override the algorithm. If false, the algorithm will determine the optimum frequency threshold for separating clutter from non-clutter.");
     tt->val_offset = (char *) &specify_clutter_frequency_threshold - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -915,7 +915,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("clutter_frequency_threshold");
     tt->descr = tdrpStrDup("Clutter frequency threshold");
-    tt->help = tdrpStrDup("Gates with a clutter frequency fraction in excess of this number will be flagged as clutter.");
+    tt->help = tdrpStrDup("If activated, gates with a clutter frequency fraction in excess of this number will be flagged as clutter. See 'specify_clutter_frequency_threshold'.");
     tt->val_offset = (char *) &clutter_frequency_threshold - &_start_;
     tt->single_val.d = 0.95;
     tt++;
@@ -935,10 +935,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("clutter_stats_output_dir");
-    tt->descr = tdrpStrDup("Location for final clutter statistics.");
+    tt->descr = tdrpStrDup("Location for clutter statistics.");
     tt->help = tdrpStrDup("Final output is only written at the end of a processing phase, with the output time equal to the time of the first volume processed.");
     tt->val_offset = (char *) &clutter_stats_output_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
+    tt->single_val.s = tdrpStrDup("./output");
     tt++;
     
     // Parameter 'dbz_mean_field_name'
@@ -948,7 +948,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_mean_field_name");
     tt->descr = tdrpStrDup("Field name for mean dbz.");
-    tt->help = tdrpStrDup("The dbz mean field is added to the output data set.");
+    tt->help = tdrpStrDup("This is the mean of the reflectivity at each gate.");
     tt->val_offset = (char *) &dbz_mean_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMean");
     tt++;
@@ -960,7 +960,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_sdev_field_name");
     tt->descr = tdrpStrDup("Field name for standard deviation of dbz.");
-    tt->help = tdrpStrDup("The dbz sdev field is added to the output data set.");
+    tt->help = tdrpStrDup("This is the standard deviation of the reflectivity at each gate.");
     tt->val_offset = (char *) &dbz_sdev_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzSdev");
     tt++;
@@ -972,7 +972,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("clut_freq_field_name");
     tt->descr = tdrpStrDup("Field name for clutter frequency.");
-    tt->help = tdrpStrDup("This is the fraction of time that a gate has dbz above the threshold.");
+    tt->help = tdrpStrDup("This is the fraction of time that a gate has dbz above the 'clutter_dbz_threshold'.");
     tt->val_offset = (char *) &clut_freq_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("clutFreq");
     tt++;
@@ -989,15 +989,15 @@
     tt->single_val.s = tdrpStrDup("clutFlag");
     tt++;
     
-    // Parameter 'write_latest_data_info'
+    // Parameter 'write_intermediate_files'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
+    tt->param_name = tdrpStrDup("write_intermediate_files");
+    tt->descr = tdrpStrDup("Option to write stats files for each time step.");
+    tt->help = tdrpStrDup("Normally only one stats file is written - at the end of the data set. If this is set to true, intermediate files will be written for each data time. In REALTIME mode, intermediate files are always written.");
+    tt->val_offset = (char *) &write_intermediate_files - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1017,7 +1017,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("dbz_filt_field_name");
     tt->descr = tdrpStrDup("Field name for filtered dbz.");
-    tt->help = tdrpStrDup("The filtered dbz field is added to the output data set.");
+    tt->help = tdrpStrDup("The filtered dbz field is censored if the measured reflectivity does not exceed the mean reflectivity at a gate by 'n_sdev_for_clut_threshold' time the standard deviation.");
     tt->val_offset = (char *) &dbz_filt_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzFilt");
     tt++;
@@ -1029,7 +1029,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("clutter_stats_path");
     tt->descr = tdrpStrDup("Path to volume containing the clutter statistics.");
-    tt->help = tdrpStrDup("This volume is created by this app in ANALYZE_CLUTTER action. Select a volume towards at end of the analysis sequence.");
+    tt->help = tdrpStrDup("This volume is created by this app in the ANALYZE_CLUTTER 'first pass' action. It is best to select the volume at end of the analysis sequence.");
     tt->val_offset = (char *) &clutter_stats_path - &_start_;
     tt->single_val.s = tdrpStrDup("unknown");
     tt++;
@@ -1041,7 +1041,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("n_sdev_for_clut_threshold");
     tt->descr = tdrpStrDup("The number of standard deviations above the mean for the clutter threshold.");
-    tt->help = tdrpStrDup("For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to a low value.");
+    tt->help = tdrpStrDup("For each gate we compare the measured dbz with the clutter dbz. The clutter threshold is computed as the mean dbz plus the dbz sdev multipled by this parameter. If the measured dbz exceeds this threshold it is preserved. Otherwise the reflectivity at the gate is set to 'dbz_filt'.");
     tt->val_offset = (char *) &n_sdev_for_clut_threshold - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -1053,7 +1053,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("specify_filter_frequency_threshold");
     tt->descr = tdrpStrDup("Option to specify the clutter frequency threshold for filtering.");
-    tt->help = tdrpStrDup("If true, the filter_frequency_threshold will be used. If false, the clutter flag field in the clutter statistics will be used.");
+    tt->help = tdrpStrDup("If true, the 'filter_frequency_threshold' will be used. If false, the clutter flag field in the clutter statistics will be used.");
     tt->val_offset = (char *) &specify_filter_frequency_threshold - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -1065,20 +1065,20 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("filter_frequency_threshold");
     tt->descr = tdrpStrDup("Filter frequency threshold");
-    tt->help = tdrpStrDup("Gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.");
+    tt->help = tdrpStrDup("Optionally gates with a filter frequency fraction in excess of this number will be filtered. See 'specify_filter_frequency_threshold'.");
     tt->val_offset = (char *) &filter_frequency_threshold - &_start_;
-    tt->single_val.d = 0.97;
+    tt->single_val.d = 0.95;
     tt++;
     
-    // Parameter 'min_dbz_filt'
+    // Parameter 'dbz_filt'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("min_dbz_filt");
+    tt->param_name = tdrpStrDup("dbz_filt");
     tt->descr = tdrpStrDup("The dbz value used to store filtered reflectivity.");
     tt->help = tdrpStrDup("For filtered gates, we store this value in place of the original measured value.");
-    tt->val_offset = (char *) &min_dbz_filt - &_start_;
+    tt->val_offset = (char *) &dbz_filt - &_start_;
     tt->single_val.d = -20;
     tt++;
     
@@ -1128,6 +1128,18 @@
       tt->array_vals[3].s = tdrpStrDup("ZDR");
       tt->array_vals[4].s = tdrpStrDup("PHIDP");
       tt->array_vals[5].s = tdrpStrDup("RHOHV");
+    tt++;
+    
+    // Parameter 'output_comment'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_comment");
+    tt->descr = tdrpStrDup("Comment in the NetCDF global attributes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_comment - &_start_;
+    tt->single_val.s = tdrpStrDup("The statistics in this file are computed over a series of CfRadial files.");
     tt++;
     
     // trailing entry has param_name set to NULL

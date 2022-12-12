@@ -102,6 +102,7 @@ private:
   double _radarLongitude;
   double _radarAltitude;
   
+  bool _finalFile;
   size_t _nVols;
   
   // These are pointers into the input Radx object.
@@ -151,6 +152,11 @@ private:
   // clutter frequency histogram
 
   Histo _clutFreqHist;
+
+  // source string, to be inserted into the output file
+  // global attributes
+
+  string _sourceString;
 
   // methods
   

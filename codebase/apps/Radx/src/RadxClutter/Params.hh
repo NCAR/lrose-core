@@ -407,7 +407,7 @@ public:
 
   double last_ray_angle;
 
-  double delta_ray_angle;
+  double ray_angle_resolution;
 
   double az_tolerance_deg;
 
@@ -439,7 +439,7 @@ public:
 
   char* clut_flag_field_name;
 
-  tdrp_bool_t write_latest_data_info;
+  tdrp_bool_t write_intermediate_files;
 
   char* dbz_filt_field_name;
 
@@ -451,7 +451,7 @@ public:
 
   double filter_frequency_threshold;
 
-  double min_dbz_filt;
+  double dbz_filt;
 
   char* filt_output_dir;
 
@@ -460,6 +460,8 @@ public:
   char* *_output_fields;
   int output_fields_n;
 
+  char* output_comment;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -467,7 +469,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[46];
+  mutable TDRPtable _table[47];
 
   const char *_className;
 
