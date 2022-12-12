@@ -386,5 +386,15 @@ min_field_name = "dbzMin";
 // Type: boolean
 //
 
-write_intermediate_files = FALSE;
+write_intermediate_files = false;
+
+///////////// output_comment //////////////////////////
+//
+// Comment in the NetCDF global attributes.
+//
+//
+// Type: string
+//
+
+output_comment = "The statistics in this file are computed over a series of CfRadial files.";
 

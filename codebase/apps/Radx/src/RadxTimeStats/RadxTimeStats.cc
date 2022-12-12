@@ -57,6 +57,7 @@ RadxTimeStats::RadxTimeStats(int argc, char **argv)
   _nVols = 0;
   _nGates = 0;
   _allocNeeded = true;
+  _sourceString = "These stats were created from the following files: ";
   
   // set programe name
  
@@ -231,6 +232,12 @@ int RadxTimeStats::_processFile(const string &filePath)
   // augment the stats with data from this volume
 
   _augmentStats();
+
+  // add to the stats string
+
+  RadxPath rpath(filePath);
+  _sourceString += " ";
+  _sourceString += rpath.getFile();
   
   // analyze this volume data set
   
@@ -820,15 +827,20 @@ int RadxTimeStats::_writeStatsVol()
 
 {
 
+  // comments in the volume
+
+  _statsVol.setDriver(_progName);
+  _statsVol.setComment(_params.output_comment);
+  _statsVol.setSource(_sourceString);
+  
   // output file
 
   GenericRadxFile outFile;
   _setupWrite(outFile);
   
-  string outputDir = _params.output_dir;
-  
   // write to dir
   
+  string outputDir = _params.output_dir;
   if (outFile.writeToDir(_statsVol, outputDir, true, false)) {
     LOG(ERROR) << "ERROR - RadxConvert::_writeStatsVol";
     LOG(ERROR) << "  Cannot write file to dir: " << outputDir;

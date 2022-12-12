@@ -16,6 +16,7 @@ commentdef {
     "RadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as additional fields in a CfRadial output file."
     "\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\n"
     "The computed statistical fields are: mean, standard deviation, skewness, kurtosis, mode, median, minimum and maximum. Each of these is computed and written out for every gate for every ray in the specified scan strategy.\n\n"
+    "The input field for the latest time period will also be copied to the output file.\n\n"
     "The default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.";
   p_text = "";
 };
@@ -218,5 +219,11 @@ paramdef boolean {
   p_descr = "Option to write stats files for each time step.";
   p_help = "Normally only one stats file is written - at the end of the data set. If this is set to true, intermediate files will be written for each data time.";
 } write_intermediate_files;
+
+paramdef string
+{
+  p_descr = "Comment in the NetCDF global attributes.";
+  p_default = "The statistics in this file are computed over a series of CfRadial files.";
+} output_comment;
 
 

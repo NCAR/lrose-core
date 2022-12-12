@@ -120,6 +120,11 @@ private:
   TaArray2D<Stats> _statsArray;
   Stats **_stats;
 
+  // source string, to be inserted into the output file
+  // global attributes
+
+  string _sourceString;
+
   // methods
   
   void _setupRead(RadxFile &file);

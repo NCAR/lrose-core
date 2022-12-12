@@ -429,6 +429,8 @@ public:
 
   tdrp_bool_t write_intermediate_files;
 
+  char* output_comment;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -436,7 +438,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

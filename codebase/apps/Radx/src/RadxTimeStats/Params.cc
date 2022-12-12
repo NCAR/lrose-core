@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as additional fields in a CfRadial output file.\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\nThe computed statistical fields are: mean, standard deviation, skewness, kurtosis, mode, median, minimum and maximum. Each of these is computed and written out for every gate for every ray in the specified scan strategy.\n\nThe default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.");
+    tt->comment_hdr = tdrpStrDup("RadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as additional fields in a CfRadial output file.\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\nThe computed statistical fields are: mean, standard deviation, skewness, kurtosis, mode, median, minimum and maximum. Each of these is computed and written out for every gate for every ray in the specified scan strategy.\n\nThe input field for the latest time period will also be copied to the output file.\n\nThe default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -944,6 +944,18 @@
     tt->help = tdrpStrDup("Normally only one stats file is written - at the end of the data set. If this is set to true, intermediate files will be written for each data time.");
     tt->val_offset = (char *) &write_intermediate_files - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_comment'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_comment");
+    tt->descr = tdrpStrDup("Comment in the NetCDF global attributes.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_comment - &_start_;
+    tt->single_val.s = tdrpStrDup("The statistics in this file are computed over a series of CfRadial files.");
     tt++;
     
     // trailing entry has param_name set to NULL
