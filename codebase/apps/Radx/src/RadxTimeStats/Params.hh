@@ -395,7 +395,7 @@ public:
 
   double last_ray_angle;
 
-  double delta_ray_angle;
+  double ray_angle_resolution;
 
   double az_tolerance_deg;
 

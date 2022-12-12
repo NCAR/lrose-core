@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("RadxTimeStats computes time-based statistics, gate-by-gate, on a series of Radx files, and stores those stats as fields in a CfRadial output file.");
+    tt->comment_hdr = tdrpStrDup("RadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as additional fields in a CfRadial output file.\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\nThe computed statistical fields are: mean, standard deviation, skewness, kurtosis, mode, median, minimum and maximum. Each of these is computed and written out for every gate for every ray in the specified scan strategy.\n\nThe default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -579,7 +579,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("debug");
     tt->descr = tdrpStrDup("Debug option");
-    tt->help = tdrpStrDup("If set, debug messages will be printed appropriately");
+    tt->help = tdrpStrDup("Debug messages will be printed appropriate to the level selected.");
     tt->val_offset = (char *) &debug - &_start_;
     tt->enum_def.name = tdrpStrDup("debug_t");
     tt->enum_def.nfields = 4;
@@ -611,8 +611,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir");
-    tt->descr = tdrpStrDup("Input directory for searching for files.");
-    tt->help = tdrpStrDup("Files will be searched for in this directory.");
+    tt->descr = tdrpStrDup("Input directory for searching for input files.");
+    tt->help = tdrpStrDup("This is used in ARCHIVE mode. If you specify file with -f on the command line, the paths specified should be absolute, or relative to your current directory.");
     tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup(".");
     tt++;
@@ -623,8 +623,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("file_name_substr");
-    tt->descr = tdrpStrDup("Substring that needs to exist in the file name.");
-    tt->help = tdrpStrDup("Set to empty to avoid this check.");
+    tt->descr = tdrpStrDup("Substring to check in the file name.");
+    tt->help = tdrpStrDup("This string must exist in the file name for it to be used. Set this to an empty string to avoid this check.");
     tt->val_offset = (char *) &file_name_substr - &_start_;
     tt->single_val.s = tdrpStrDup("");
     tt++;
@@ -636,7 +636,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, we search input_dir for files between the start and end times set on the command line. In FILELIST mode, we process through the list of file paths specified on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 2;
@@ -655,7 +655,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
     tt->comment_hdr = tdrpStrDup("SCAN DETAILS");
-    tt->comment_text = tdrpStrDup("Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan.");
+    tt->comment_text = tdrpStrDup("Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan for the purpose of computing the statistics.");
     tt++;
     
     // Parameter 'scan_mode'
@@ -685,7 +685,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("sweep_fixed_angles");
     tt->descr = tdrpStrDup("List of fixed angles for desired sweeps (deg)");
-    tt->help = tdrpStrDup("PPI mode: elevations. RHIs: azimuths.");
+    tt->help = tdrpStrDup("PPI mode: elevations. RHIs: azimuths. We will search for sweeps that match these angles, and ignore those that do not.");
     tt->array_offset = (char *) &_sweep_fixed_angles - &_start_;
     tt->array_n_offset = (char *) &sweep_fixed_angles_n - &_start_;
     tt->is_array = TRUE;
@@ -724,15 +724,15 @@
     tt->single_val.d = 359.99;
     tt++;
     
-    // Parameter 'delta_ray_angle'
+    // Parameter 'ray_angle_resolution'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("delta_ray_angle");
+    tt->param_name = tdrpStrDup("ray_angle_resolution");
     tt->descr = tdrpStrDup("Delta scan angle between consecutive rays (deg).");
-    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays.");
-    tt->val_offset = (char *) &delta_ray_angle - &_start_;
+    tt->help = tdrpStrDup("In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays. If your radar data is not saved on a regular grid, you should set the resolution to a value finer than the measured angular resolution, so as to over-sample the input data.");
+    tt->val_offset = (char *) &ray_angle_resolution - &_start_;
     tt->single_val.d = 1;
     tt++;
     
@@ -743,7 +743,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("az_tolerance_deg");
     tt->descr = tdrpStrDup("Azimumth tolerance");
-    tt->help = tdrpStrDup("Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->help = tdrpStrDup("We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for azimuth values to match.");
     tt->val_offset = (char *) &az_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
@@ -755,7 +755,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("elev_tolerance_deg");
     tt->descr = tdrpStrDup("Elevation tolerance");
-    tt->help = tdrpStrDup("Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids");
+    tt->help = tdrpStrDup("We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for elevation values to match.");
     tt->val_offset = (char *) &elev_tolerance_deg - &_start_;
     tt->single_val.d = 0.1;
     tt++;
@@ -800,7 +800,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("min_expected_value");
     tt->descr = tdrpStrDup("Minimum expected value in the field to be analyzed.");
-    tt->help = tdrpStrDup("We need to constuct a histogram at each gate location. This is the lower bound of that histogram.");
+    tt->help = tdrpStrDup("To perform the analysis, we need to constuct a histogram at each gate location. This is the lower bound of that histogram.");
     tt->val_offset = (char *) &min_expected_value - &_start_;
     tt->single_val.d = -30;
     tt++;
@@ -812,7 +812,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("max_expected_value");
     tt->descr = tdrpStrDup("Maximum expected value in the field to be analyzed.");
-    tt->help = tdrpStrDup("We need to constuct a histogram at each gate location. This is the upper bound of that histogram.");
+    tt->help = tdrpStrDup("To perform the analysis, we need to constuct a histogram at each gate location. This is the upper bound of that histogram.");
     tt->val_offset = (char *) &max_expected_value - &_start_;
     tt->single_val.d = 70;
     tt++;
@@ -844,7 +844,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("mean_field_name");
-    tt->descr = tdrpStrDup("Field name for mean.");
+    tt->descr = tdrpStrDup("Name for mean output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &mean_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMean");
@@ -856,7 +856,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("sdev_field_name");
-    tt->descr = tdrpStrDup("Field name for standard deviation.");
+    tt->descr = tdrpStrDup("Name for standard deviation output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &sdev_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzSdev");
@@ -868,7 +868,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("skewness_field_name");
-    tt->descr = tdrpStrDup("Field name for skewness.");
+    tt->descr = tdrpStrDup("Name for skewness output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &skewness_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzSkewness");
@@ -880,7 +880,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("kurtosis_field_name");
-    tt->descr = tdrpStrDup("Field name for kurtosis.");
+    tt->descr = tdrpStrDup("Name for kurtosis output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &kurtosis_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzKurtosis");
@@ -892,7 +892,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("mode_field_name");
-    tt->descr = tdrpStrDup("Field name for mode.");
+    tt->descr = tdrpStrDup("Name for mode output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &mode_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMode");
@@ -904,7 +904,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("median_field_name");
-    tt->descr = tdrpStrDup("Field name for median.");
+    tt->descr = tdrpStrDup("Name for median output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &median_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMedian");
@@ -916,7 +916,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("max_field_name");
-    tt->descr = tdrpStrDup("Field name for measured maximum value.");
+    tt->descr = tdrpStrDup("Name for measured maximum value output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMax");
@@ -928,7 +928,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("min_field_name");
-    tt->descr = tdrpStrDup("Field name for measured minimum value.");
+    tt->descr = tdrpStrDup("Name for measured minimum value output field.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &min_field_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbzMin");

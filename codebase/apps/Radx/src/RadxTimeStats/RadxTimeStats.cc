@@ -531,11 +531,11 @@ void RadxTimeStats::_initAngleList()
     double sumDelta = 0.0;
     while (sumDelta < sectorDelta) {
       _scanAngles.push_back(az);
-      az = RadxComplex::computeSumDeg(az, _params.delta_ray_angle);
+      az = RadxComplex::computeSumDeg(az, _params.ray_angle_resolution);
       if (az < 0) {
         az += 360.0;
       }
-      sumDelta += fabs(_params.delta_ray_angle);
+      sumDelta += fabs(_params.ray_angle_resolution);
     } // while (sumDelta < sectorDelta)
     
   } else {
@@ -548,8 +548,8 @@ void RadxTimeStats::_initAngleList()
     double sumDelta = 0.0;
     while (sumDelta < sectorDelta) {
       _scanAngles.push_back(el);
-      el = RadxComplex::computeSumDeg(el, _params.delta_ray_angle);
-      sumDelta += fabs(_params.delta_ray_angle);
+      el = RadxComplex::computeSumDeg(el, _params.ray_angle_resolution);
+      sumDelta += fabs(_params.ray_angle_resolution);
     } // while (sumDelta < sectorDelta)
 
   } // if (_params.scan_mode == Params::PPI)

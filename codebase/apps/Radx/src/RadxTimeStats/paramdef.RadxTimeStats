@@ -12,7 +12,11 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "RadxTimeStats computes time-based statistics, gate-by-gate, on a series of Radx files, and stores those stats as fields in a CfRadial output file.";
+  p_header =
+    "RadxTimeStats computes time-based statistics, gate-by-gate, on a time series of Radx files. It stores those statistics as additional fields in a CfRadial output file."
+    "\n\nSince we are computing statistics over a time period, we need to ensure that the ray geometry is consistent from one time to the next. Therefore in this parameter file you will need to specify the scan strategy that you expect to find consistently in the measured data.\n\n"
+    "The computed statistical fields are: mean, standard deviation, skewness, kurtosis, mode, median, minimum and maximum. Each of these is computed and written out for every gate for every ray in the specified scan strategy.\n\n"
+    "The default behavior is to write a single file, containing the statistics fields, at the end of the processing. As an option you can write an output file for each input file that is processed. In this latter mode the statistics will improved as each input data file is added.";
   p_text = "";
 };
 
@@ -27,7 +31,7 @@ typedef enum {
 paramdef enum debug_t {
   p_default = DEBUG_OFF;
   p_descr = "Debug option";
-  p_help = "If set, debug messages will be printed appropriately";
+  p_help = "Debug messages will be printed appropriate to the level selected.";
 } debug;
 
 commentdef {
@@ -36,14 +40,14 @@ commentdef {
 
 paramdef string {
   p_default = ".";
-  p_descr = "Input directory for searching for files.";
-  p_help = "Files will be searched for in this directory.";
+  p_descr = "Input directory for searching for input files.";
+  p_help = "This is used in ARCHIVE mode. If you specify file with -f on the command line, the paths specified should be absolute, or relative to your current directory.";
 } input_dir;
 
 paramdef string {
  p_default = "";
- p_descr = "Substring that needs to exist in the file name.";
- p_help = "Set to empty to avoid this check.";
+ p_descr = "Substring to check in the file name.";
+ p_help = "This string must exist in the file name for it to be used. Set this to an empty string to avoid this check.";
 } file_name_substr;
 
 typedef enum {
@@ -53,12 +57,12 @@ typedef enum {
 paramdef enum mode_t {
   p_default = ARCHIVE;
   p_descr = "Operating mode";
-  p_help = "In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line.";
+  p_help = "In ARCHIVE mode, we search input_dir for files between the start and end times set on the command line. In FILELIST mode, we process through the list of file paths specified on the command line.";
 } mode;
 
 commentdef {
   p_header = "SCAN DETAILS";
-  p_text = "Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan.";
+  p_text = "Because we are computing gate-by-gate statistics in time, we need to ensure that the scan geometry is constant over time. Therefore we need to specify the scan angles which will be analyzed. This is the 'ideal'. The actual radar measurements are mapped onto this ideal scan for the purpose of computing the statistics.";
 };
 
 typedef enum {
@@ -75,7 +79,7 @@ paramdef enum scan_mode_t
 paramdef double
 {
   p_descr = "List of fixed angles for desired sweeps (deg)";
-  p_help = "PPI mode: elevations. RHIs: azimuths.";
+  p_help = "PPI mode: elevations. RHIs: azimuths. We will search for sweeps that match these angles, and ignore those that do not.";
   p_default = { 0.5, 1.0, 1.5, 2.0 };
 } sweep_fixed_angles[];
 
@@ -96,21 +100,21 @@ paramdef double
 paramdef double
 {
   p_descr = "Delta scan angle between consecutive rays (deg).";
-  p_help = "In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays.";
+  p_help = "In PPI mode, this is the azimuth difference between rays. In PPI mode the delta should be positive, i.e. for a clockwise sweep. In RHI mode, this is the elevation difference between rays. If your radar data is not saved on a regular grid, you should set the resolution to a value finer than the measured angular resolution, so as to over-sample the input data.";
   p_default = 1.0;
-} delta_ray_angle;
+} ray_angle_resolution;
 
 paramdef double
 {
   p_descr = "Azimumth tolerance";
-  p_help = "Allowed degrees difference between azimuth values for rays from measured volumes to be mapped onto the clutter grids";
+  p_help = "We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for azimuth values to match.";
   p_default = 0.1;
 } az_tolerance_deg;
 
 paramdef double
 {
   p_descr = "Elevation tolerance";
-  p_help = "Allowed degrees difference between elevation values for rays from measured volumes to be mapped onto the clutter grids";
+  p_help = "We search for rays, in the measured volumes, that match the specified scan stategy for the statistics. This is the allowed difference for elevation values to match.";
   p_default = 0.1;
 } elev_tolerance_deg;
 
@@ -136,14 +140,14 @@ paramdef string
 paramdef double
 {
   p_descr = "Minimum expected value in the field to be analyzed.";
-  p_help = "We need to constuct a histogram at each gate location. This is the lower bound of that histogram.";
+  p_help = "To perform the analysis, we need to constuct a histogram at each gate location. This is the lower bound of that histogram.";
   p_default = -30.0;
 } min_expected_value;
 
 paramdef double
 {
   p_descr = "Maximum expected value in the field to be analyzed.";
-  p_help = "We need to constuct a histogram at each gate location. This is the upper bound of that histogram.";
+  p_help = "To perform the analysis, we need to constuct a histogram at each gate location. This is the upper bound of that histogram.";
   p_default = 70.0;
 } max_expected_value;
 
@@ -163,49 +167,49 @@ paramdef string
 
 paramdef string
 {
-  p_descr = "Field name for mean.";
+  p_descr = "Name for mean output field.";
   p_default = "dbzMean";
 } mean_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for standard deviation.";
+  p_descr = "Name for standard deviation output field.";
   p_default = "dbzSdev";
 } sdev_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for skewness.";
+  p_descr = "Name for skewness output field.";
   p_default = "dbzSkewness";
 } skewness_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for kurtosis.";
+  p_descr = "Name for kurtosis output field.";
   p_default = "dbzKurtosis";
 } kurtosis_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for mode.";
+  p_descr = "Name for mode output field.";
   p_default = "dbzMode";
 } mode_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for median.";
+  p_descr = "Name for median output field.";
   p_default = "dbzMedian";
 } median_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for measured maximum value.";
+  p_descr = "Name for measured maximum value output field.";
   p_default = "dbzMax";
 } max_field_name;
 
 paramdef string
 {
-  p_descr = "Field name for measured minimum value.";
+  p_descr = "Name for measured minimum value output field.";
   p_default = "dbzMin";
 } min_field_name;
 
