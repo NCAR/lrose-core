@@ -23,18 +23,17 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for NoiseMon program
+# Makefile for RadxClutter program
 #
-# Mike Dixon, EOL, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
-# Sept 2022
+# Dec 2022
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = NoiseMon
+TARGET_FILE = RadxClutter
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
@@ -47,17 +46,20 @@ LOC_LIBS = \
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS =
+LOC_CFLAGS =
+
+HDRS = \
+	Params.hh \
+	Args.hh \
+	Histo.hh \
+	RadxClutter.hh
 
 CPPC_SRCS = \
-	$(PARAMS_CC) \
+	Params.cc \
 	Args.cc \
-	DsrDataMgr.cc \
+	Histo.cc \
 	Main.cc \
-	RadxDataMgr.cc \
-	StatsMgr.cc \
-	TsDataMgr.cc \
-	NoiseMon.cc
+	RadxClutter.cc
 
 #
 # tdrp macros
@@ -66,7 +68,7 @@ CPPC_SRCS = \
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
-# standard C++ targets
+# C++ targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
@@ -80,6 +82,8 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 # local targets
 #
+
+depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

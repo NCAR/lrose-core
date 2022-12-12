@@ -2,26 +2,22 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: NoiseMon
+# app name: RcalXml2Table
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/NoiseMon
+# dir: lrose-core/codebase/apps/radar/src/RcalXml2Table
 ###############################################################
 
-project (NoiseMon)
+project (RcalXml2Table)
 
 # source files
 
 set (SRCS
       Params.cc
       Args.cc
-      DsrDataMgr.cc
+      RcalXml2Table.cc
       Main.cc
-      RadxDataMgr.cc
-      StatsMgr.cc
-      TsDataMgr.cc
-      NoiseMon.cc
     )
 
 # include directories
@@ -131,13 +127,12 @@ link_libraries (dataport)
 link_libraries (tdrp)
 link_libraries (shapelib)
 link_libraries (cidd)
+link_libraries (pthread)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
 link_libraries (hdf5)
 link_libraries (z)
 link_libraries (bz2)
-link_libraries (fftw3)
-link_libraries (pthread)
 link_libraries (Ncxx)
 link_libraries (netcdf)
 link_libraries (hdf5_hl)
@@ -157,7 +152,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (NoiseMon ${SRCS})
+add_executable (RcalXml2Table ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)

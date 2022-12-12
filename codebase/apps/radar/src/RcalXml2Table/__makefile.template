@@ -23,41 +23,39 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for NoiseMon program
+# Makefile for RcalXml2Table program
 #
 # Mike Dixon, EOL, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# Sept 2022
+# April 2011
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = NoiseMon
+TARGET_FILE = RcalXml2Table
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = \
-          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath \
-          -lphysics -ltoolsa -ldataport -ltdrp \
-          $(NETCDF4_LIBS) \
-          -lfftw3 -lbz2 -lz -lpthread
+LOC_LIBS = -lSpdb -lRadx -lradar -lFmq -ldsserver \
+	-ldidss -lrapformats -ltoolsa -lpthread -ldataport \
+	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS =
 
+HDRS = \
+	$(PARAMS_HH) \
+	Args.hh \
+	RcalXml2Table.hh
+
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	DsrDataMgr.cc \
-	Main.cc \
-	RadxDataMgr.cc \
-	StatsMgr.cc \
-	TsDataMgr.cc \
-	NoiseMon.cc
+	RcalXml2Table.cc \
+	Main.cc
 
 #
 # tdrp macros

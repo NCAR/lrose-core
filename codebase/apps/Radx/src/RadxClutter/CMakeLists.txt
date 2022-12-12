@@ -2,26 +2,23 @@
 #
 # CMakeLists.txt file for cmake
 #
-# app name: NoiseMon
+# app name: RadxClutter
 #
 # written by script createCMakeLists.py
 #
-# dir: lrose-core/codebase/apps/radar/src/NoiseMon
+# dir: lrose-core/codebase/apps/Radx/src/RadxClutter
 ###############################################################
 
-project (NoiseMon)
+project (RadxClutter)
 
 # source files
 
 set (SRCS
       Params.cc
       Args.cc
-      DsrDataMgr.cc
+      Histo.cc
       Main.cc
-      RadxDataMgr.cc
-      StatsMgr.cc
-      TsDataMgr.cc
-      NoiseMon.cc
+      RadxClutter.cc
     )
 
 # include directories
@@ -157,7 +154,7 @@ link_libraries (m)
 makeTdrpParams()
 # application
 
-add_executable (NoiseMon ${SRCS})
+add_executable (RadxClutter ${SRCS})
 
 # add tdrp_gen as a dependency
 add_dependencies(${PROJECT_NAME} tdrp_gen)
