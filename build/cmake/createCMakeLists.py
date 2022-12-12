@@ -730,11 +730,16 @@ def createCMakeListsLib(libDir, libList):
             print("==>> subDir: %s" % subDirName, file=sys.stderr)
 
     # load list of files to be compiled
+    # plus the makefiles in the subdirs
 
     libCompileFileList = []
+    subDirMakefilePaths = []
     for subDirName in libSubDirNames:
         subDirPath = os.path.join(libSrcDir, subDirName)
         srcNames = getLibSrcNames(subDirPath)
+        subDirMakefilePath = getMakefilePath(subDirPath)
+        if (subDirMakefilePath.find('not_found') != 0):
+            subDirMakefilePaths.append(subDirMakefilePath)
         for srcName in srcNames:
             relPath = os.path.join('.', subDirName)
             relPath = os.path.join(relPath, srcName)
@@ -746,6 +751,13 @@ def createCMakeListsLib(libDir, libList):
             print("  compileFile: %s" % (compileFile), file=sys.stderr)
         print("-----------------------------------------", file=sys.stderr)
 
+    # check if we need Qt support
+
+    needQt = False
+    for subDirMakefilePath in subDirMakefilePaths:
+        if (checkMakefileForQt(subDirMakefilePath)):
+            needQt = True
+            
     # determine the lib list to use
 
     libListInUse = libList
@@ -754,7 +766,7 @@ def createCMakeListsLib(libDir, libList):
 
     # write out CMakeLists.txt
 
-    writeCMakeListsLib(libName, libSrcDir, libListInUse, libCompileFileList)
+    writeCMakeListsLib(libName, libSrcDir, libListInUse, libCompileFileList, needQt)
 
 ########################################################################
 # parse the LROSE Makefile to get the lib name
@@ -852,7 +864,7 @@ def getLibSrcNamesByType(makefileLines, srcType):
 ########################################################################
 # Write out CMakeLists.txt
 
-def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
+def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList, needQt):
 
     cmakePath = os.path.join(libSrcDir, 'CMakeLists.txt')
 
@@ -878,6 +890,23 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("project (lib%s)\n" % libName)
     fo.write("\n")
     
+    if (needQt):
+        fo.write("# QT5\n")
+        fo.write("\n")
+        fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
+        fo.write("set (CMAKE_AUTOMOC ON)\n")
+        fo.write("set (CMAKE_AUTORCC ON)\n")
+        fo.write("set (CMAKE_AUTOUIC ON)\n")
+        fo.write("find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)\n")
+        fo.write("\n")
+
+        fo.write("pkg_search_module(Qt5Core REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Gui REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Widgets REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Network REQUIRED)\n")
+        fo.write("pkg_search_module(Qt5Qml REQUIRED)\n")
+        fo.write("\n")
+
     fo.write("# include directories\n")
     fo.write("\n")
     fo.write("include_directories (./include)\n")
@@ -902,6 +931,14 @@ def writeCMakeListsLib(libName, libSrcDir, libList, compileFileList):
     fo.write("  include_directories (/usr/local/include)\n")
     fo.write("endif()\n")
     fo.write("\n")
+
+    if (needQt):
+        fo.write("include_directories(${Qt5Core_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Gui_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Widgets_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Network_INCLUDE_DIRS})\n")
+        fo.write("include_directories(${Qt5Qml_INCLUDE_DIRS})\n")
+        fo.write("\n")
 
     fo.write("# source files\n")
     fo.write("\n")
@@ -997,8 +1034,8 @@ def createCMakeListsApp(appDir, libList):
                 
     # check if we need Qt support
 
-    needQt = checkForQt(makefilePath)
-    needX11 = checkForX11(makefilePath)
+    needQt = checkMakefileForQt(makefilePath)
+    needX11 = checkMakefileForX11(makefilePath)
     
     # determine the lib list to use
 
@@ -1240,9 +1277,9 @@ def getExtendedLibs(linkLibList):
     return extendLibs
 
 ########################################################################
-# check for dependence on QT
+# check makefile for dependence on QT
 
-def checkForQt(makefilePath):
+def checkMakefileForQt(makefilePath):
                     
     try:
         fp = open(makefilePath, 'r')
@@ -1261,9 +1298,9 @@ def checkForQt(makefilePath):
     return False
     
 ########################################################################
-# check for dependence on X11
+# check makefile for dependence on X11
 
-def checkForX11(makefilePath):
+def checkMakefileForX11(makefilePath):
                     
     try:
         fp = open(makefilePath, 'r')
