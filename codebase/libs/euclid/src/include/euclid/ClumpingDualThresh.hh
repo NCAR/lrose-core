@@ -38,12 +38,13 @@
 #ifndef ClumpingDualThresh_HH
 #define ClumpingDualThresh_HH
 
-#include <dataport/port_types.h>
-#include <rapformats/titan_grid.h>
 #include <euclid/PjgGridGeom.hh>
 class ClumpingMgr;
 class ClumpProps;
 using namespace std;
+
+typedef unsigned char   ui08;
+typedef float	        fl32; 
 
 ////////////////////////////////
 // ClumpingDualThresh

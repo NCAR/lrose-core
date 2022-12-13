@@ -40,9 +40,10 @@
 #include <cstdio>
 #include <vector>
 
-#include <dataport/port_types.h>
 #include <euclid/Pjg.hh>
 #include <euclid/WorldPoint2D.hh>
+
+typedef float	        fl32; 
 
 using namespace std;
 

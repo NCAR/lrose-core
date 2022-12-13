@@ -41,11 +41,13 @@
 
 #include <string>
 #include <euclid/clump.h>
-#include <dataport/port_types.h>
 #include <euclid/PjgGridGeom.hh>
 class ClumpingDualThresh;
 class ClumpProps;
 using namespace std;
+
+typedef unsigned char   ui08;
+typedef float	        fl32; 
 
 ////////////////////////////////
 // ClumpingMgr

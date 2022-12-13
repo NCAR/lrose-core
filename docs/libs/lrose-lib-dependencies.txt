@@ -21,14 +21,14 @@ didss           dataport, toolsa
 grib            euclid, toolsa, dataport
 grib2           dataport (port_types, could be fixed), jasper
 contour         euclid
-euclid          toolsa (GridAlgs), boost (check), dataport, rapformats, rapmath
+euclid          toolsa, rapmath
 rapmath         toolsa, tdrp
-physics         dataport toolsa (minor for both)
+physics         dataport, toolsa (minor for both)
 toolsa          dataport (bigend.h, port_types.h)
 dataport        none
+tdrp            none
 Radx            Ncxx
 Ncxx            none
-tdrp            none
 shapelib        none
 kd              none
 devguide        xview
@@ -36,4 +36,3 @@ xview           olgx
 olgx            none
 trmm_rsl        none
 forayRal        none
-
