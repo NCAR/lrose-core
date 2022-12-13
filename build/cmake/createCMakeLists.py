@@ -1022,15 +1022,15 @@ def createCMakeListsApp(appDir, libList):
         # order the list
         linkOrder = getLroseLinkOrder()
         linkLibList = []
-        for lib in linkOrder:
-            if (lib in libList):
-                linkLibList.append(lib)
+        #for lib in linkOrder:
+        #    if (lib in libList):
+        #        linkLibList.append(lib)
         for lib in makefileLibList:
             if (lib not in linkLibList):
                 linkLibList.append(lib)
 
-    extendedLibs = getExtendedLibs(linkLibList)
-    linkLibList.extend(extendedLibs)
+    #extendedLibs = getExtendedLibs(linkLibList)
+    #linkLibList.extend(extendedLibs)
                 
     # check if we need Qt support
 
@@ -1255,8 +1255,7 @@ def getExtendedLibs(linkLibList):
 
     # extend the lib list with required standard libs
 
-    extendLibs = [ 'Ncxx',
-                   'netcdf',
+    extendLibs = [ 'netcdf',
                    'hdf5_hl',
                    'hdf5',
                    'fftw3',
