@@ -55,7 +55,7 @@ public:
    *  @param[in] decimalScaleFactor Floating point precision to use in simple packing
    *  @param[in] origFieldTypes Original data type,
    * 0 = Floating point data, 1 = Integer data */
-  Template5_pt_2(si32 decimalScaleFactor, si32 origFieldTypes = 0);
+  Template5_pt_2(g2_si32 decimalScaleFactor, g2_si32 origFieldTypes = 0);
 
   /** 
    * @brief Internal constructor used during grib2 decoding
@@ -70,61 +70,61 @@ public:
   /** @brief Unpack a Data Representation Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *projPtr);
+  int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Data Representation Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (ui08 *projPtr);
+  int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   void print (FILE *) const;
 
   /** @brief Group Splitting method, 0 = Row by Row Splitting, 1 = General Group Splitting */
-  si32 _splittingMethod;
+  g2_si32 _splittingMethod;
 
   /** @brief Included Missing values, 
    * 0 = No explicit missing values included 
    * 1 = Primary missing values included 
    * 2 = Primary and secondary missing values included */
-  si32 _missingType;
+  g2_si32 _missingType;
 
   /** @brief Primary missing value */
-  fl32 _primaryMissingVal;
+  g2_fl32 _primaryMissingVal;
 
   /** @brief Secondary missing value */
-  fl32 _secondaryMissingVal;
+  g2_fl32 _secondaryMissingVal;
 
   /** @brief Number of groups of data values */
-  si32 _numberGroups;
+  g2_si32 _numberGroups;
 
   /** @brief Reference value for group widths */
-  si32 _groupWidths;
+  g2_si32 _groupWidths;
 
   /** @brief Number of bits used for the group widths */
-  si32 _groupWidthsBits;
+  g2_si32 _groupWidthsBits;
 
   /** @brief Reference value for group lengths */
-  si32 _groupLength;
+  g2_si32 _groupLength;
 
   /** @brief Length increment for the group lengths */
-  si32 _lengthIncrement;
+  g2_si32 _lengthIncrement;
 
   /** @brief Length of the last group */
-  si32 _lengthOfLastGroup;
+  g2_si32 _lengthOfLastGroup;
 
   /** @brief Number of bits used for the group length */
-  si32 _groupLengthsBits;
+  g2_si32 _groupLengthsBits;
 
   /** @brief Get the size of the packed template */
-  virtual si32 getTemplateSize() { return TEMPLATE5_PT_2_SIZE; };
+  virtual g2_si32 getTemplateSize() { return TEMPLATE5_PT_2_SIZE; };
 
 
 protected:
 
 
 private: 
-  static const si32 TEMPLATE5_PT_2_SIZE;
+  static const g2_si32 TEMPLATE5_PT_2_SIZE;
 
 };
 

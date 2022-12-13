@@ -65,7 +65,7 @@ public:
   /**
    * @brief This constructor is generally only used from Grib2::Grib2Record::addField() for creating a Grib2File
    */
-  DRS(Grib2Record::Grib2Sections_t sectionsPtr, si32 dataRepNum, 
+  DRS(Grib2Record::Grib2Sections_t sectionsPtr, g2_si32 dataRepNum, 
       DataRepTemp *dataRepTemplate);
 
   ~DRS();
@@ -73,12 +73,12 @@ public:
   /** @brief Unpacks the whole Data Representation Section
    *  @param[in] drsPtr Pointer to start of the DRS section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *drsPtr );
+  int unpack( g2_ui08 *drsPtr );
 
   /** @brief Packs up the Data Representation Section
    *  @param[in] drsPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *drsPtr );
+  int pack( g2_ui08 *drsPtr );
 
   /** @brief Print to stream/file all information contained in the DRS section */
   void  print(FILE *) const;
@@ -89,7 +89,7 @@ public:
   inline DataRepTemp *getDrsTemplate() { return _dataRepresentation; };
 
   /** @brief Get the number of data points after packing */
-  inline si32 getNumPackedDataPoints() { return _numPackedDataPoints; };
+  inline g2_si32 getNumPackedDataPoints() { return _numPackedDataPoints; };
 
   /** @brief Get the data constants struct */
   inline DataRepTemp::data_representation_t getDrsConstants() 
@@ -102,7 +102,7 @@ public:
     { _dataRepresentation->setDrsConstants(dataRep); };
 
   /** @brief Set the number of data points after applying the packing method */
-  inline void setNumPackedDataPoints(si32 numPackedDataPoints ) 
+  inline void setNumPackedDataPoints(g2_si32 numPackedDataPoints ) 
     { _numPackedDataPoints = numPackedDataPoints; };
 
 private:
@@ -115,10 +115,10 @@ private:
    *
    * If there is a bitMap this is the number of data points defined in the bitmap
    * When there is no bitMap this is the total number of data points */
-  si32 _numPackedDataPoints;
+  g2_si32 _numPackedDataPoints;
 
   /** @briefTemplate number of DataRepTemp */
-  si32 _dataTemplateNum;
+  g2_si32 _dataTemplateNum;
 
   /** @brief Pointer to the Data Representation Template
    *

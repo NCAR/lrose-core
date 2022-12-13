@@ -59,7 +59,7 @@ Template7_pt_2::~Template7_pt_2 ()
 
 void Template7_pt_2::print(FILE *stream) const
 {
-  si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+  g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
   fprintf(stream, "DS length: %d\n", gridSz);
   if(_data) {
     for (int i = 0; i < gridSz; i++) {
@@ -69,7 +69,7 @@ void Template7_pt_2::print(FILE *stream) const
   }
 }
 
-int Template7_pt_2::pack (fl32 *dataPtr)
+int Template7_pt_2::pack (g2_fl32 *dataPtr)
 {
 // SUBPROGRAM:    compack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-11-07
@@ -91,32 +91,32 @@ int Template7_pt_2::pack (fl32 *dataPtr)
   cerr << "Complex packing not fully implemented." << endl;
   return GRIB_FAILURE;
 
-  fl32 *pdataPtr = _applyBitMapPack(dataPtr);
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_fl32 *pdataPtr = _applyBitMapPack(dataPtr);
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
 
   if(_pdata)
     delete[] _pdata;
-  _pdata = new fl32[gridSz];
+  _pdata = new g2_fl32[gridSz];
 
-  si32 zero = 0;
-  si32 simple_alg = 0;
-  fl32 alog2 = 0.69314718;       //  ln(2.0)
-  si32 one = 1;
+  g2_si32 zero = 0;
+  g2_si32 simple_alg = 0;
+  g2_fl32 alog2 = 0.69314718;       //  ln(2.0)
+  g2_si32 one = 1;
 
-  si32 nbitsd = 0, nbitsgwidth = 0, ngwidthref = 0;
-  si32 nglenref = 0, nglenlast = 0, nbitsglen = 0;
-  si32 ival1, ival2, nbitsgref;
-  si32 iofst, ngroups;
+  g2_si32 nbitsd = 0, nbitsgwidth = 0, ngwidthref = 0;
+  g2_si32 nglenref = 0, nglenlast = 0, nbitsglen = 0;
+  g2_si32 ival1, ival2, nbitsgref;
+  g2_si32 iofst, ngroups;
 
-  fl32 bscale = pow(2.0, -drsConstants.binaryScaleFactor);
-  fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
+  g2_fl32 bscale = pow(2.0, -drsConstants.binaryScaleFactor);
+  g2_fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
 
   //
   //  Find max and min values in the data
   //
-  fl32 rmax = pdataPtr[0];
-  fl32 rmin = pdataPtr[0];
+  g2_fl32 rmax = pdataPtr[0];
+  g2_fl32 rmin = pdataPtr[0];
   for (int j = 1; j < gridSz; j++) {
     if (pdataPtr[j] > rmax) rmax = pdataPtr[j];
     if (pdataPtr[j] < rmin) rmin = pdataPtr[j];
@@ -130,15 +130,15 @@ int Template7_pt_2::pack (fl32 *dataPtr)
   //
   if (rmin != rmax) {
     iofst = 0;
-    si32 *ifld = (si32 *)calloc(gridSz, sizeof(si32));
-    si32 *gref = (si32 *)calloc(gridSz, sizeof(si32));
-    si32 *gwidth = (si32 *)calloc(gridSz, sizeof(si32));
-    si32 *glen = (si32 *)calloc(gridSz, sizeof(si32));
+    g2_si32 *ifld = (g2_si32 *)calloc(gridSz, sizeof(g2_si32));
+    g2_si32 *gref = (g2_si32 *)calloc(gridSz, sizeof(g2_si32));
+    g2_si32 *gwidth = (g2_si32 *)calloc(gridSz, sizeof(g2_si32));
+    g2_si32 *glen = (g2_si32 *)calloc(gridSz, sizeof(g2_si32));
     //
     //  Scale original data
     //
     if (drsConstants.binaryScaleFactor == 0) {        //  No binary scaling
-      si32 imin = (int)(rmin*dscale + .5);
+      g2_si32 imin = (int)(rmin*dscale + .5);
       //imax = (int)(rmax*dscale + .5);
       rmin = (float)imin;
       for (int j = 0; j < gridSz; j++) 
@@ -177,8 +177,8 @@ int Template7_pt_2::pack (fl32 *dataPtr)
       //
       //  subtract min value from spatial diff field
       //
-      si32 isd = template5_3->_spatialDifferenceOrder;
-      si32 minsd = ifld[isd];
+      g2_si32 isd = template5_3->_spatialDifferenceOrder;
+      g2_si32 minsd = ifld[isd];
       for (int j = isd; j < gridSz; j++)  
 	if ( ifld[j] < minsd ) 
 	  minsd = ifld[j];
@@ -188,17 +188,17 @@ int Template7_pt_2::pack (fl32 *dataPtr)
       //   find num of bits need to store minsd and add 1 extra bit
       //   to indicate sign
       //
-      fl32 temp = log((double)(abs((double)minsd)+1))/alog2;
-      nbitsd = (si32)ceil(temp)+1;
+      g2_fl32 temp = log((double)(abs((double)minsd)+1))/alog2;
+      nbitsd = (g2_si32)ceil(temp)+1;
       //
       //   find num of bits need to store ifld[0] ( and ifld[1]
       //   if using 2nd order differencing )
       //
-      si32 maxorig = ival1;
+      g2_si32 maxorig = ival1;
       if (template5_3->_spatialDifferenceOrder == 2 && ival2 > ival1) 
 	maxorig = ival2;
       temp = log((double)(maxorig+1))/alog2;
-      si32 nbitorig = (si32)ceil(temp)+1;
+      g2_si32 nbitorig = (g2_si32)ceil(temp)+1;
       if (nbitorig > nbitsd) 
 	nbitsd = nbitorig;
       //   increase number of bits to even multiple of 8 ( octet )
@@ -211,40 +211,40 @@ int Template7_pt_2::pack (fl32 *dataPtr)
       if (nbitsd != 0) {
 	//   pack first original value
 	if (ival1 >= 0) {
-	  DS::sbit((ui08 *)_pdata,&ival1,iofst,nbitsd);
+	  DS::sbit((g2_ui08 *)_pdata,&ival1,iofst,nbitsd);
 	  iofst = iofst+nbitsd;
 	}
 	else {
-	  DS::sbit((ui08 *)_pdata,&one,iofst,1);
+	  DS::sbit((g2_ui08 *)_pdata,&one,iofst,1);
 	  iofst = iofst+1;
-	  si32 itemp = abs(ival1);
-	  DS::sbit((ui08 *)_pdata,&itemp,iofst,nbitsd-1);
+	  g2_si32 itemp = abs(ival1);
+	  DS::sbit((g2_ui08 *)_pdata,&itemp,iofst,nbitsd-1);
 	  iofst = iofst+nbitsd-1;
 	}
 	if (template5_3->_spatialDifferenceOrder == 2) {
 	  //  pack second original value
 	  if (ival2 >= 0) {
-	    DS::sbit((ui08 *)_pdata,&ival2,iofst,nbitsd);
+	    DS::sbit((g2_ui08 *)_pdata,&ival2,iofst,nbitsd);
 	    iofst = iofst+nbitsd;
 	  }
 	  else {
-	    DS::sbit((ui08 *)_pdata,&one,iofst,1);
+	    DS::sbit((g2_ui08 *)_pdata,&one,iofst,1);
 	    iofst = iofst+1;
-	    si32 itemp = abs(ival2);
-	    DS::sbit((ui08 *)_pdata,&itemp,iofst,nbitsd-1);
+	    g2_si32 itemp = abs(ival2);
+	    DS::sbit((g2_ui08 *)_pdata,&itemp,iofst,nbitsd-1);
 	    iofst = iofst+nbitsd-1;
 	  }
 	}
 	//  pack overall min of spatial differences
 	if (minsd >= 0) {
-	  DS::sbit((ui08 *)_pdata,&minsd,iofst,nbitsd);
+	  DS::sbit((g2_ui08 *)_pdata,&minsd,iofst,nbitsd);
 	  iofst = iofst+nbitsd;
 	}
 	else {
-	  DS::sbit((ui08 *)_pdata,&one,iofst,1);
+	  DS::sbit((g2_ui08 *)_pdata,&one,iofst,1);
 	  iofst = iofst+1;
-	  si32 itemp = abs(minsd);
-	  DS::sbit((ui08 *)_pdata,&itemp,iofst,nbitsd-1);
+	  g2_si32 itemp = abs(minsd);
+	  DS::sbit((g2_ui08 *)_pdata,&itemp,iofst,nbitsd-1);
 	  iofst = iofst+nbitsd-1;
 	}
       }
@@ -256,10 +256,10 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     if ( simple_alg == 1 ) {
       //  set group length to 10;  calculate number of groups
       //  and length of last group
-      si32 ngroups = gridSz/10;
+      g2_si32 ngroups = gridSz/10;
       for (int j=0; j < ngroups;j++)
 	glen[j] = 10;
-      si32 itemp = gridSz%10;
+      g2_si32 itemp = gridSz%10;
       if (itemp != 0) {
 	ngroups = ngroups+1;
 	glen[ngroups-1] = itemp;
@@ -268,16 +268,16 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     else {
       // Use Dr. Glahn's algorithm for determining grouping.
       //
-//      si32 kfildo = 6;
-      si32 minpk = 10;
-//      si32 inc = 1;
-      si32 maxgrps = (gridSz/minpk)+1;
-      si32 *jmin = (si32 *)calloc(maxgrps,sizeof(si32));
-      si32 *jmax = (si32 *)calloc(maxgrps,sizeof(si32));
-      si32 *lbit = (si32 *)calloc(maxgrps,sizeof(si32));
-//      si32 missopt=0;
-//      si32 ibit, jbit, kbit, lbitref, miss1, miss2, ier;
-      si32 novref;
+//      g2_si32 kfildo = 6;
+      g2_si32 minpk = 10;
+//      g2_si32 inc = 1;
+      g2_si32 maxgrps = (gridSz/minpk)+1;
+      g2_si32 *jmin = (g2_si32 *)calloc(maxgrps,sizeof(g2_si32));
+      g2_si32 *jmax = (g2_si32 *)calloc(maxgrps,sizeof(g2_si32));
+      g2_si32 *lbit = (g2_si32 *)calloc(maxgrps,sizeof(g2_si32));
+//      g2_si32 missopt=0;
+//      g2_si32 ibit, jbit, kbit, lbitref, miss1, miss2, ier;
+      g2_si32 novref;
       //pack_gp(&kfildo,ifld,&gridSz,&missopt,&minpk,&inc,&miss1,&miss2,
       //      jmin,jmax,lbit,glen,&maxgrps,&ngroups,&ibit,&jbit,
       //      &kbit,&novref,&lbitref,&ier);
@@ -296,7 +296,7 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     for (int ng = 0; ng < ngroups; ng++) {
       //    find max and min values of group
       gref[ng] = ifld[n];
-      si32 imax = ifld[n];
+      g2_si32 imax = ifld[n];
       int j = n+1;
       for (int lg = 1; lg < glen[ng]; lg++) {
 	if (ifld[j] < gref[ng]) 
@@ -307,8 +307,8 @@ int Template7_pt_2::pack (fl32 *dataPtr)
       }
       //   calc num of bits needed to hold data
       if ( gref[ng] != imax ) {
-	fl32 temp = log((double)(imax-gref[ng]+1))/alog2;
-	gwidth[ng] = (si32)ceil(temp);
+	g2_fl32 temp = log((double)(imax-gref[ng]+1))/alog2;
+	gwidth[ng] = (g2_si32)ceil(temp);
       }
       else 
 	gwidth[ng] = 0;
@@ -326,20 +326,20 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     //  to pack each groups reference value, then
     //  pack up group reference values
     //
-    si32 igmax = gref[0];
+    g2_si32 igmax = gref[0];
     for (int j = 1; j < ngroups; j++) 
       if (gref[j] > igmax) 
 	igmax = gref[j];
     if (igmax != 0) {
-      fl32 temp = log((double)(igmax+1))/alog2;
-      nbitsgref = (si32)ceil(temp);
-      DS::sbits((ui08 *)_pdata,gref,iofst,nbitsgref,0,ngroups);
-      si32 itemp = nbitsgref*ngroups;
+      g2_fl32 temp = log((double)(igmax+1))/alog2;
+      nbitsgref = (g2_si32)ceil(temp);
+      DS::sbits((g2_ui08 *)_pdata,gref,iofst,nbitsgref,0,ngroups);
+      g2_si32 itemp = nbitsgref*ngroups;
       iofst = iofst+itemp;
       //         Pad last octet with Zeros, if necessary,
       if ( (itemp%8) != 0) {
-	si32 left = 8-(itemp%8);
-	DS::sbit((ui08 *)_pdata,&zero,iofst,left);
+	g2_si32 left = 8-(itemp%8);
+	DS::sbit((g2_ui08 *)_pdata,&zero,iofst,left);
 	iofst=iofst+left;
       }
     }
@@ -350,7 +350,7 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     //  to pack each groups width value, then
     //  pack up group width values
     //
-    si32 iwmax = gwidth[0];
+    g2_si32 iwmax = gwidth[0];
     ngwidthref = gwidth[0];
     for (int j = 1; j < ngroups; j++) {
       if (gwidth[j] > iwmax) 
@@ -359,17 +359,17 @@ int Template7_pt_2::pack (fl32 *dataPtr)
 	ngwidthref=gwidth[j];
     }
     if (iwmax != ngwidthref) {
-      fl32 temp = log((double)(iwmax-ngwidthref+1))/alog2;
-      nbitsgwidth = (si32)ceil(temp);
+      g2_fl32 temp = log((double)(iwmax-ngwidthref+1))/alog2;
+      nbitsgwidth = (g2_si32)ceil(temp);
       for (int i = 0; i < ngroups; i++) 
 	gwidth[i] = gwidth[i]-ngwidthref;
-      DS::sbits((ui08 *)_pdata,gwidth,iofst,nbitsgwidth,0,ngroups);
-      si32 itemp = nbitsgwidth*ngroups;
+      DS::sbits((g2_ui08 *)_pdata,gwidth,iofst,nbitsgwidth,0,ngroups);
+      g2_si32 itemp = nbitsgwidth*ngroups;
       iofst = iofst+itemp;
       //         Pad last octet with Zeros, if necessary,
       if ( (itemp%8) != 0) {
-	si32 left = 8-(itemp%8);
-	DS::sbit((ui08 *)_pdata,&zero,iofst,left);
+	g2_si32 left = 8-(itemp%8);
+	DS::sbit((g2_ui08 *)_pdata,&zero,iofst,left);
 	iofst = iofst+left;
       }
     }
@@ -383,7 +383,7 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     //  to pack each groups length value, then
     //  pack up group length values
     //
-    si32 ilmax = glen[0];
+    g2_si32 ilmax = glen[0];
     nglenref = glen[0];
     for (int j = 1; j < ngroups-1; j++) {
       if (glen[j] > ilmax) 
@@ -393,17 +393,17 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     }
     nglenlast = glen[ngroups-1];
     if (ilmax != nglenref) {
-      fl32 temp = log((double)(ilmax-nglenref+1))/alog2;
-      nbitsglen = (si32)ceil(temp);
+      g2_fl32 temp = log((double)(ilmax-nglenref+1))/alog2;
+      nbitsglen = (g2_si32)ceil(temp);
       for (int i = 0; i < ngroups-1; i++)  
 	glen[i] = glen[i]-nglenref;
-      DS::sbits((ui08 *)_pdata,glen,iofst,nbitsglen,0,ngroups);
-      si32 itemp = nbitsglen*ngroups;
+      DS::sbits((g2_ui08 *)_pdata,glen,iofst,nbitsglen,0,ngroups);
+      g2_si32 itemp = nbitsglen*ngroups;
       iofst = iofst+itemp;
       //         Pad last octet with Zeros, if necessary,
       if ( (itemp%8) != 0) {
-	si32 left = 8-(itemp%8);
-	DS::sbit((ui08 *)_pdata,&zero,iofst,left);
+	g2_si32 left = 8-(itemp%8);
+	DS::sbit((g2_ui08 *)_pdata,&zero,iofst,left);
 	iofst = iofst+left;
       }
     }
@@ -416,19 +416,19 @@ int Template7_pt_2::pack (fl32 *dataPtr)
     //
     n = 0;
     for (int ng = 0; ng < ngroups; ng++) {
-      si32 glength = glen[ng]+nglenref;
+      g2_si32 glength = glen[ng]+nglenref;
       if (ng == (ngroups-1) ) glength=nglenlast;
-      si32 grpwidth = gwidth[ng] + ngwidthref;
+      g2_si32 grpwidth = gwidth[ng] + ngwidthref;
       if ( grpwidth != 0 ) {
-	DS::sbits((ui08 *)_pdata,ifld+n,iofst,grpwidth,0,glength);
+	DS::sbits((g2_ui08 *)_pdata,ifld+n,iofst,grpwidth,0,glength);
 	iofst = iofst+(grpwidth*glength);
       }
       n = n + glength;
     }
     //         Pad last octet with Zeros, if necessary,
     if ( (iofst%8) != 0) {
-      si32 left = 8-(iofst%8);
-      DS::sbit((ui08 *)_pdata,&zero,iofst,left);
+      g2_si32 left = 8-(iofst%8);
+      DS::sbit((g2_ui08 *)_pdata,&zero,iofst,left);
       iofst = iofst+left;
     }
     _lcpack = iofst/8;
@@ -490,10 +490,10 @@ int Template7_pt_2::pack (fl32 *dataPtr)
   return GRIB_SUCCESS;
 }
 
-int Template7_pt_2::unpack (ui08 *dataPtr) 
+int Template7_pt_2::unpack (g2_ui08 *dataPtr) 
 {
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
-  fl32 *outputData = new fl32[gridSz];
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_fl32 *outputData = new g2_fl32[gridSz];
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
 // SUBPROGRAM:    comunpack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-10-29
@@ -510,14 +510,14 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
 //                         to verify that group widths and lengths are
 //                         consistent with section length.
 
-  si32 nbitsd, iofst, j, k, l, n, non = 0;
-  si32 isign, ival1, ival2, minsd, totBit, totLen;
-  si32 nbitsgref, misType, nbitsgwidth, nbitsglen;
-  si32 gwidths, spatialOrder, itemp;
-  si32 lengthIncrement;
-  si32 ngroups, glength, lengthLast;
-  fl32 msng1, msng2;
-  fl32 bscale, dscale, reference, rmiss1 = 0.0, rmiss2 = 0.0;
+  g2_si32 nbitsd, iofst, j, k, l, n, non = 0;
+  g2_si32 isign, ival1, ival2, minsd, totBit, totLen;
+  g2_si32 nbitsgref, misType, nbitsgwidth, nbitsglen;
+  g2_si32 gwidths, spatialOrder, itemp;
+  g2_si32 lengthIncrement;
+  g2_si32 ngroups, glength, lengthLast;
+  g2_fl32 msng1, msng2;
+  g2_fl32 bscale, dscale, reference, rmiss1 = 0.0, rmiss2 = 0.0;
   
   bscale = pow(2.0, drsConstants.binaryScaleFactor);
   dscale = pow(10.0, -drsConstants.decimalScaleFactor);
@@ -586,10 +586,10 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   }
   
 
-  si32 *ifld = new si32 [gridSz];
-  si32 *gref = new si32 [ngroups];
-  si32 *gwidth = new si32 [ngroups];
-  si32 *ifldmiss = NULL;
+  g2_si32 *ifld = new g2_si32 [gridSz];
+  g2_si32 *gref = new g2_si32 [ngroups];
+  g2_si32 *gwidth = new g2_si32 [ngroups];
+  g2_si32 *ifldmiss = NULL;
 
   iofst=0;      
   
@@ -662,7 +662,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   //
   //  Extract Each Group's length (number of values in each group)
   //
-  si32 *glen = new si32 [ngroups];
+  g2_si32 *glen = new g2_si32 [ngroups];
 
   //printf("ALLOC glen: %d %x\n",(int)ngroups,glen);
   //printf("SAG3: %ld %ld %ld %ld %ld \n",nbitsglen,ngroups,iofst,idrstmpl[13],idrstmpl[12]);
@@ -725,7 +725,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   }
   else if ( misType == 1 || misType == 2 ) {
     // missing values included
-    ifldmiss = new si32[gridSz];
+    ifldmiss = new g2_si32[gridSz];
     
     //printf("ALLOC ifldmiss: %d %x\n",(int)gridSz,ifldmiss);
     //for (j=0;j < gridSz;j++) ifldmiss[j]=0;
@@ -815,7 +815,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
   //printf("SAGT: %f %f %f\n",reference,bscale,dscale);
   if ( misType == 0 ) {        // no missing values
     for (n=0;n < gridSz;n++) {
-      outputData[n]=(( (fl32) ifld[n] * bscale) + reference) * dscale;
+      outputData[n]=(( (g2_fl32) ifld[n] * bscale) + reference) * dscale;
     }
   }
   else if ( misType == 1 || misType == 2 ) {
@@ -823,7 +823,7 @@ int Template7_pt_2::unpack (ui08 *dataPtr)
     non=0;
     for (n=0; n < gridSz; n++) {
       if ( ifldmiss[n] == 0 ) {
-	outputData[n] = (( (fl32) ifld[non++] * bscale) + reference) * dscale;
+	outputData[n] = (( (g2_fl32) ifld[non++] * bscale) + reference) * dscale;
 	//printf(" SAG %d %f %d %f %f %f\n",n,fld[n],ifld[non-1],bscale,reference,dscale);
       }
       else if ( ifldmiss[n] == 1 ) 

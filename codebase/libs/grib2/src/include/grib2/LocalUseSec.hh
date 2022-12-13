@@ -59,40 +59,40 @@ public:
    * @param[in] dataSize Size of the local use data, in bytes
    * @param[in] localUseData Pointer to the local use data to save
    */
-  LocalUseSec(si32 dataSize, ui08 *localUseData);
+  LocalUseSec(g2_si32 dataSize, g2_ui08 *localUseData);
 
   ~LocalUseSec();
   
   /** @brief Unpacks the Local Use Section
    *  @param[in] idPtr Pointer to start of the section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *idPtr );
+  int unpack( g2_ui08 *idPtr );
 
   /** @brief Packs up the Local Use Section
    *  @param[in] idPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *idPtr );
+  int pack( g2_ui08 *idPtr );
 
   /** @brief Print to stream/file all information contained in the Local Use Section */
   void print(FILE *) const;
 
   /** @brief Get the size of the Local Use data block 
    *  @return Size of data block in bytes */    
-  inline si32 getLocalUseLength() { return( _sectionLen - 5); };
+  inline g2_si32 getLocalUseLength() { return( _sectionLen - 5); };
 
   /** @brief Get a pointer to the local use data block */
-  inline ui08 *getLocalUse() { return( _localUse ); }
+  inline g2_ui08 *getLocalUse() { return( _localUse ); }
 
   /** @brief Sets the block of data in the local use section
    *  @param[in] dataSize Size of the local use data, in bytes
    *  @param[in] data Pointer to the local use data to save
    */
-  void setLocalUse (const si32 dataSize, ui08 *data);
+  void setLocalUse (const g2_si32 dataSize, g2_ui08 *data);
   
 private:
 
   /** @brief Pointer containing the local use data block if used */
-  ui08 *_localUse;
+  g2_ui08 *_localUse;
 
 };
 

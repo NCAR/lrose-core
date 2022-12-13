@@ -129,13 +129,13 @@ void DS::freeData()
     _dataTemp->freeData();
 }
 
-int DS::unpack(ui08 *dsPtr)
+int DS::unpack(g2_ui08 *dsPtr)
 {
   // Length of section in octets
   _sectionLen = _upkUnsigned4 (dsPtr[0], dsPtr[1], dsPtr[2], dsPtr[3]);
 
   // Number of section ("7")
-  _sectionNum = (si32) dsPtr[4];
+  _sectionNum = (g2_si32) dsPtr[4];
 
   if (_sectionNum != 7) {
      cerr << "ERROR: DS::unpack()" << endl;
@@ -150,7 +150,7 @@ int DS::unpack(ui08 *dsPtr)
   if(_readDataPtr != NULL)
     delete[] _readDataPtr;
 
-  _readDataPtr = new ui08[_sectionLen - 4];
+  _readDataPtr = new g2_ui08[_sectionLen - 4];
   memcpy(_readDataPtr, &(dsPtr[5]), _sectionLen -4);
 
   _data_status = READ;
@@ -158,9 +158,9 @@ int DS::unpack(ui08 *dsPtr)
   return GRIB_SUCCESS;
 }
 
-fl32 *DS::getData()
+g2_fl32 *DS::getData()
 {
-  ui08 *dataPtr = NULL;
+  g2_ui08 *dataPtr = NULL;
   if(_data_status == READ) {
     dataPtr = _readDataPtr;
   } else if(_data_status == ENCODE || 
@@ -188,7 +188,7 @@ fl32 *DS::getData()
   return _dataTemp->getData();
 }
 
-int DS::encode(fl32 *dataPtr)
+int DS::encode(g2_fl32 *dataPtr)
 {
   if(_dataTemp == NULL)
     return GRIB_FAILURE;
@@ -249,14 +249,14 @@ int DS::encode(fl32 *dataPtr)
   return GRIB_FAILURE;
 }
 
-int DS::pack(ui08 *dsPtr)
+int DS::pack(g2_ui08 *dsPtr)
 {
   if(_dataTemp == NULL)
     return GRIB_FAILURE;
 
-  dsPtr[4] = (ui08) _sectionNum;
+  dsPtr[4] = (g2_ui08) _sectionNum;
 
-  ui08 *pdata = _dataTemp->getPackedData();
+  g2_ui08 *pdata = _dataTemp->getPackedData();
   int lcpack = _dataTemp->getPackedDataSize();
   if (pdata != 0) {
     for(int j = 0; j < lcpack; j++)
@@ -296,11 +296,11 @@ void DS::print(FILE *stream) const
 /            n     = number of iterations
 / v1.1
 */
-void DS::gbits (ui08 *in, si32 *iout, si32 iskip, si32 bitsPerVal, si32 nskip, si32 n)
+void DS::gbits (g2_ui08 *in, g2_si32 *iout, g2_si32 iskip, g2_si32 bitsPerVal, g2_si32 nskip, g2_si32 n)
 { 
-  si32 i,tbit,bitcnt,ibit,itmp;
-  si32 nbit,index;
-  static si32 ones[]={1,3,7,15,31,63,127,255};
+  g2_si32 i,tbit,bitcnt,ibit,itmp;
+  g2_si32 nbit,index;
+  static g2_si32 ones[]={1,3,7,15,31,63,127,255};
   
   //     nbit is the start position of the field in bits
   nbit = iskip;
@@ -334,7 +334,7 @@ void DS::gbits (ui08 *in, si32 *iout, si32 iskip, si32 bitsPerVal, si32 nskip, s
 }
 
 
-void DS::sbits (ui08 *out, si32 *in, si32 iskip, si32 bitsPerVal, si32 nskip, si32 n)
+void DS::sbits (g2_ui08 *out, g2_si32 *in, g2_si32 iskip, g2_si32 bitsPerVal, g2_si32 nskip, g2_si32 n)
 {
 //          Store bits - pack bits:  Put arbitrary size values into a
 //          packed bit string, taking the low order bits from each value
@@ -348,10 +348,10 @@ void DS::sbits (ui08 *out, si32 *in, si32 iskip, si32 bitsPerVal, si32 nskip, si
 // v1.1
 //
   
-  si32 bitcnt, tbit, nbit, itmp, index;
-  si32 ibit, imask, itmp2, itmp3;
+  g2_si32 bitcnt, tbit, nbit, itmp, index;
+  g2_si32 ibit, imask, itmp2, itmp3;
 
-  const si32 ones[]={1,3,7,15,31,63,127,255};
+  const g2_si32 ones[]={1,3,7,15,31,63,127,255};
 
   //     number bits from zero to ...
   //     nbit is the last bit of the field to be filled

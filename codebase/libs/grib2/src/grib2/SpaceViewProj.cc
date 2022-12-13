@@ -53,20 +53,20 @@ SpaceViewProj::~SpaceViewProj() {
 }
 
 
-int SpaceViewProj::pack (ui08 *projPtr) 
+int SpaceViewProj::pack (g2_ui08 *projPtr) 
 {
 
-  projPtr[0] = (ui08) _earthShape;
+  projPtr[0] = (g2_ui08) _earthShape;
 
-  projPtr[1] = (ui08) _radiusScaleFactor;
+  projPtr[1] = (g2_ui08) _radiusScaleFactor;
 
   GribSection::_pkUnsigned4(_radiusScaleValue, &(projPtr[2]));
 
-  projPtr[6] = (ui08) _majorAxisScaleFactor;
+  projPtr[6] = (g2_ui08) _majorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_majorAxisScaleValue, &(projPtr[7]));
 
-  projPtr[11] = (ui08) _minorAxisScaleFactor;
+  projPtr[11] = (g2_ui08) _minorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_minorAxisScaleValue, &(projPtr[12]));
 
@@ -78,7 +78,7 @@ int SpaceViewProj::pack (ui08 *projPtr)
 
   GribSection::_pkSigned4((int)(_lop / GDS::GRID_SCALE_FACTOR), &(projPtr[28]));
 
-  projPtr[32] = (ui08) _resolutionFlag;
+  projPtr[32] = (g2_ui08) _resolutionFlag;
 
   GribSection::_pkUnsigned4(_dx, &(projPtr[33]));
 
@@ -88,7 +88,7 @@ int SpaceViewProj::pack (ui08 *projPtr)
 
   GribSection::_pkUnsigned4((int)(_yp / 0.001), &(projPtr[45]));
 
-  projPtr[49] = (ui08) _scanModeFlag;
+  projPtr[49] = (g2_ui08) _scanModeFlag;
 
   GribSection::_pkUnsigned4((int)(_lov / GDS::GRID_SCALE_FACTOR), &(projPtr[50]));
 
@@ -101,28 +101,28 @@ int SpaceViewProj::pack (ui08 *projPtr)
   return( GRIB_SUCCESS );
 }
 
-int SpaceViewProj::unpack (ui08 *projPtr) 
+int SpaceViewProj::unpack (g2_ui08 *projPtr) 
 {
 
   // Shape of the earth (see Code Table 3.2)
-  _earthShape = (si32) projPtr[0]; 
+  _earthShape = (g2_si32) projPtr[0]; 
 
   // Scale factor of radius of spherical earth
-  _radiusScaleFactor = (si32) projPtr[1]; 
+  _radiusScaleFactor = (g2_si32) projPtr[1]; 
 
   // Scaled value of radius of spherical earth
   _radiusScaleValue 
             = GribSection::_upkUnsigned4 (projPtr[2], projPtr[3], projPtr[4], projPtr[5]);
 
   // Scale factor of major axis of oblate spheroid earth
-  _majorAxisScaleFactor = (si32) projPtr[6]; 
+  _majorAxisScaleFactor = (g2_si32) projPtr[6]; 
 
   // Scaled value of major axis of oblate spheroid earth
   _majorAxisScaleValue =
            GribSection::_upkUnsigned4 (projPtr[7], projPtr[8], projPtr[9], projPtr[10]);
 
   // Scale factor of minor axis of oblate spheroid earth
-  _minorAxisScaleFactor = (si32) projPtr[11]; 
+  _minorAxisScaleFactor = (g2_si32) projPtr[11]; 
 
   //Scaled value of minor axis of oblate spheroid earth
   _minorAxisScaleValue = 
@@ -135,25 +135,25 @@ int SpaceViewProj::unpack (ui08 *projPtr)
   _ny = GribSection::_upkUnsigned4 (projPtr[20], projPtr[21], projPtr[22], projPtr[23]);
 
   // Latitude of sub-satellite point
-  _lap = GDS::GRID_SCALE_FACTOR * (fl32) GribSection::_upkSigned4(projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
+  _lap = GDS::GRID_SCALE_FACTOR * (g2_fl32) GribSection::_upkSigned4(projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
 
   // Longitude of sub-satellite point
-  _lop = GDS::GRID_SCALE_FACTOR * (fl32) GribSection::_upkSigned4(projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
+  _lop = GDS::GRID_SCALE_FACTOR * (g2_fl32) GribSection::_upkSigned4(projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
 
   // Resolution and component flags
   _resolutionFlag = projPtr[32];
 
   // Apparent diameter of Earth in grid lengths, in x-direction
-  _dx = (fl32) GribSection::_upkUnsigned4(projPtr[33], projPtr[34], projPtr[35],  projPtr[36]);
+  _dx = (g2_fl32) GribSection::_upkUnsigned4(projPtr[33], projPtr[34], projPtr[35],  projPtr[36]);
 
   // Apparent diameter of Earth in grid lengths, in y-direction 
-  _dy = (fl32) GribSection::_upkUnsigned4(projPtr[37], projPtr[38], projPtr[39],  projPtr[40]);
+  _dy = (g2_fl32) GribSection::_upkUnsigned4(projPtr[37], projPtr[38], projPtr[39],  projPtr[40]);
 
   // X-coordinate of sub-satellite point (in units of 10-3 grid length expressed as an integer)
-  _xp = 0.001 * (fl32) GribSection::_upkUnsigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
+  _xp = 0.001 * (g2_fl32) GribSection::_upkUnsigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
 
   // Y-coordinate of sub-satellite point (in units of 10-3 grid length expressed as an integer)
-  _yp = 0.001 * (fl32) GribSection::_upkUnsigned4(projPtr[45], projPtr[46], projPtr[47],  projPtr[48]);
+  _yp = 0.001 * (g2_fl32) GribSection::_upkUnsigned4(projPtr[45], projPtr[46], projPtr[47],  projPtr[48]);
 
   // Scanning mode flags
   _scanModeFlag = projPtr[49];
@@ -161,18 +161,18 @@ int SpaceViewProj::unpack (ui08 *projPtr)
   // Orientation of the grid
   // the angle between the increasing y-axis and the meridian of the sub-satellite 
   // point in the direction of increasing latitude
-  _lov = GDS::GRID_SCALE_FACTOR * (fl32) GribSection::_upkUnsigned4(projPtr[50], projPtr[51], projPtr[52], projPtr[53]);
+  _lov = GDS::GRID_SCALE_FACTOR * (g2_fl32) GribSection::_upkUnsigned4(projPtr[50], projPtr[51], projPtr[52], projPtr[53]);
 
   // Altitude of the camera from the Earth's centre, measured in units of the Earth's (equatorial)
   // radius multiplied by a scale factor of 10^6  (missing = all bits set to 1 = infinite distance)
   // The apparent angular size of the Earth will be given by 2 × arcsin ((10^6 )/Nr). 
-  _nr = GDS::GRID_SCALE_FACTOR * (fl32) GribSection::_upkUnsigned4(projPtr[54], projPtr[55], projPtr[56], projPtr[57]);
+  _nr = GDS::GRID_SCALE_FACTOR * (g2_fl32) GribSection::_upkUnsigned4(projPtr[54], projPtr[55], projPtr[56], projPtr[57]);
 
   // X-coordinate of origin of sector image
-  _xo = (fl32) GribSection::_upkUnsigned4(projPtr[58], projPtr[59], projPtr[60], projPtr[61]);
+  _xo = (g2_fl32) GribSection::_upkUnsigned4(projPtr[58], projPtr[59], projPtr[60], projPtr[61]);
 
   // Y-coordinate of origin of sector i
-  _yo = (fl32) GribSection::_upkUnsigned4(projPtr[62], projPtr[63], projPtr[64], projPtr[65]);
+  _yo = (g2_fl32) GribSection::_upkUnsigned4(projPtr[62], projPtr[63], projPtr[64], projPtr[65]);
 
 
   return( GRIB_SUCCESS );

@@ -36,7 +36,7 @@
 #include <grib2/GribSection.hh>
 #include <grib2/Grib2Record.hh>
 #include <grib2/DataTemp.hh>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/Template7.41.hh>
 #include <grib2/Template7.4000.hh>
 #include <grib2/Template7.0.hh>
@@ -71,24 +71,24 @@ public:
   /** @brief Unpack the Data Section
    *  @param[in] dsPtr Pointer to start of section
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack( ui08 *dsPtr );
+  int unpack( g2_ui08 *dsPtr );
 
   /** @brief Encodes a data set and stores it internally
    *  @param[in] dataPtr Pointer to data set to encode
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int encode( fl32 *dataPtr );
+  int encode( g2_fl32 *dataPtr );
 
   /** @brief Pack up the Data Section
    *  @param[in] dsPtr Pointer to start of location to pack to
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack( ui08 *dsPtr );
+  int pack( g2_ui08 *dsPtr );
 
   /** @brief Print to stream/file all information in the data section */
   void print(FILE *) const;
 
   /** @brief Returns the unpacked-unbitmaped data 
    * This operation will unpack the data.  Use freeData() to reclaim memory. */
-  fl32 *getData();
+  g2_fl32 *getData();
   
   /** @brief Deletes internal data object, should be used after pack() or getData() */
   void freeData();
@@ -98,7 +98,7 @@ public:
    *  @param[out] iout Pointer to output
    *  @param[in] iskip Initial number of bits to skip
    *  @param[in] bitsPerVal Number of bits to take */
-  static inline void gbit  (ui08 *in, si32 *iout, si32 iskip, si32 bitsPerVal)
+  static inline void gbit  (g2_ui08 *in, g2_si32 *iout, g2_si32 iskip, g2_si32 bitsPerVal)
   { gbits(in, iout, iskip, bitsPerVal, 0, 1); }
 
   /** @brief Extract arbitrary size values from a packed bit string,
@@ -109,14 +109,14 @@ public:
    *  @param[in] bitsPerVal Number of bits to take
    *  @param[in] nskip Additional number of bits to skip on each iteration
    *  @param[in] n Number of iterations */
-  static void gbits (ui08 *in, si32 *iout, si32 iskip, si32 bitsPerVal, si32 nskip, si32 n);
+  static void gbits (g2_ui08 *in, g2_si32 *iout, g2_si32 iskip, g2_si32 bitsPerVal, g2_si32 nskip, g2_si32 n);
 
   /** @brief Put a single value into a packed bit string 
    *  @param[out] out Pointer to output location
    *  @param[in] in Pointer to input
    *  @param[in] iskip Initial number of bits to skip
    *  @param[in] bitsPerVal Number of bits to take */
-  static inline void sbit  (ui08 *out, si32 *in, si32 iskip, si32 bitsPerVal)
+  static inline void sbit  (g2_ui08 *out, g2_si32 *in, g2_si32 iskip, g2_si32 bitsPerVal)
   { sbits(out, in, iskip, bitsPerVal, 0, 1); }
 
   /** @brief Put arbitrary size values into a packed bit string,
@@ -127,7 +127,7 @@ public:
    *  @param[in] bitsPerVal Number of bits to take
    *  @param[in] nskip Additional number of bits to skip on each iteration
    *  @param[in] n Number of iterations */
-  static void sbits (ui08 *out, si32 *in, si32 iskip, si32 bitsPerVal, si32 nskip, si32 n);
+  static void sbits (g2_ui08 *out, g2_si32 *in, g2_si32 iskip, g2_si32 bitsPerVal, g2_si32 nskip, g2_si32 n);
   
   
 private:
@@ -137,10 +137,10 @@ private:
   Grib2Record::Grib2Sections_t _sectionsPtr;
 
   /** @brief Template number of DataTemp */
-  si32 _drsTemplateNum;
+  g2_si32 _drsTemplateNum;
 
   /** @brief The unpacked unbitmaped data */
-  // fl32 *_data;
+  // g2_fl32 *_data;
 
   /** @brief The DataTemp stores additional infromation needed for the encoding type */
   DataTemp *_dataTemp;
@@ -162,7 +162,7 @@ private:
   data_status_t _data_status;
 
   /** @brief Pointer to read data before being decoded */
-  ui08 *_readDataPtr;
+  g2_ui08 *_readDataPtr;
 
 };
 

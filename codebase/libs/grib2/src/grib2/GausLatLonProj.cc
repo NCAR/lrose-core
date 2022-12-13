@@ -56,20 +56,20 @@ GausLatLonProj::~GausLatLonProj()
 }
 
 
-int GausLatLonProj::pack (ui08 *projPtr) 
+int GausLatLonProj::pack (g2_ui08 *projPtr) 
 {
 
-  projPtr[0] = (ui08) _earthShape;
+  projPtr[0] = (g2_ui08) _earthShape;
 
-  projPtr[1] = (ui08) _radiusScaleFactor;
+  projPtr[1] = (g2_ui08) _radiusScaleFactor;
 
   GribSection::_pkUnsigned4(_radiusScaleValue, &(projPtr[2]));
 
-  projPtr[6] = (ui08) _majorAxisScaleFactor;
+  projPtr[6] = (g2_ui08) _majorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_majorAxisScaleValue, &(projPtr[7]));
 
-  projPtr[11] = (ui08) _minorAxisScaleFactor;
+  projPtr[11] = (g2_ui08) _minorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_minorAxisScaleValue, &(projPtr[12]));
 
@@ -85,7 +85,7 @@ int GausLatLonProj::pack (ui08 *projPtr)
 
   GribSection::_pkSigned4((int)(_lo1 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[36]));
 
-  projPtr[40] = (ui08) _resolutionFlag;
+  projPtr[40] = (g2_ui08) _resolutionFlag;
 
   GribSection::_pkSigned4((int)(_la2 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[41]));
 
@@ -95,33 +95,33 @@ int GausLatLonProj::pack (ui08 *projPtr)
 
   GribSection::_pkUnsigned4(_nParalells, &(projPtr[53]));
 
-  projPtr[57] = (ui08) _scanModeFlag;
+  projPtr[57] = (g2_ui08) _scanModeFlag;
 
   return( GRIB_SUCCESS );
 }
 
-int GausLatLonProj::unpack (ui08 *projPtr) 
+int GausLatLonProj::unpack (g2_ui08 *projPtr) 
 {
 
   // Shape of the earth (see Code Table 3.2)
-  _earthShape = (si32) projPtr[0]; 
+  _earthShape = (g2_si32) projPtr[0]; 
 
   // Scale factor of radius of spherical earth
-  _radiusScaleFactor = (si32) projPtr[1]; 
+  _radiusScaleFactor = (g2_si32) projPtr[1]; 
 
   //Scaled value of radius of spherical earth
   _radiusScaleValue 
             = GribSection::_upkUnsigned4 (projPtr[2], projPtr[3], projPtr[4], projPtr[5]);
 
   // Scale factor of major axis of oblate spheroid earth
-  _majorAxisScaleFactor = (si32) projPtr[6]; 
+  _majorAxisScaleFactor = (g2_si32) projPtr[6]; 
 
   // Scaled value of major axis of oblate spheroid earth
   _majorAxisScaleValue =
            GribSection::_upkUnsigned4 (projPtr[7], projPtr[8], projPtr[9], projPtr[10]);
 
   // Scale factor of minor axis of oblate spheroid earth
-  _minorAxisScaleFactor = (si32) projPtr[11]; 
+  _minorAxisScaleFactor = (g2_si32) projPtr[11]; 
 
   //Scaled value of minor axis of oblate spheroid earth
   _minorAxisScaleValue = 
@@ -135,34 +135,34 @@ int GausLatLonProj::unpack (ui08 *projPtr)
 
   // Basic angle of the initial production domain (see Note 1)
   _basicAngleProdDomain = GDS::DEGREES_SCALE_FACTOR *
-           (fl32) GribSection::_upkUnsigned4 (projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
+           (g2_fl32) GribSection::_upkUnsigned4 (projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
 
   // Subdivisions of basic angle used to define extreme longitudes and latitudes, 
   // and direction increments(see Note 1)
   _basicAngleSubdivisions = GDS::DEGREES_SCALE_FACTOR *
-           (fl32) GribSection::_upkUnsigned4 (projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
+           (g2_fl32) GribSection::_upkUnsigned4 (projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
 
   float units = GDS::DEGREES_SCALE_FACTOR;
   if(_basicAngleProdDomain != 0.0)
     units = _basicAngleProdDomain / _basicAngleSubdivisions;
 
   // Latitude of first grid point (leftmost bit set for south latitude)
-  _la1 = units * (fl32) GribSection::_upkSigned4(projPtr[32], projPtr[33], projPtr[34], projPtr[35]);
+  _la1 = units * (g2_fl32) GribSection::_upkSigned4(projPtr[32], projPtr[33], projPtr[34], projPtr[35]);
 
   // Longitude of first grid point (leftmost bit set for west longitude)
-  _lo1 = units * (fl32) GribSection::_upkSigned4(projPtr[36], projPtr[37], projPtr[38], projPtr[39]);
+  _lo1 = units * (g2_fl32) GribSection::_upkSigned4(projPtr[36], projPtr[37], projPtr[38], projPtr[39]);
 
   // Resolution and component flags
   _resolutionFlag = projPtr[40];
 
   // Latitude of last grid point (leftmost bit set for south latitude
-  _la2 = units * (fl32) GribSection::_upkSigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
+  _la2 = units * (g2_fl32) GribSection::_upkSigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
 
   // Longitude of last grid point (leftmost bit set for west longitude
-  _lo2 = units * (fl32) GribSection::_upkSigned4(projPtr[45], projPtr[46], projPtr[47],  projPtr[48]);
+  _lo2 = units * (g2_fl32) GribSection::_upkSigned4(projPtr[45], projPtr[46], projPtr[47],  projPtr[48]);
 
   // Longitudinal Direction Increment  (undefined - all bits set to 1)
-  _di = (fl32) GribSection::_upkUnsigned4(projPtr[49], projPtr[50], projPtr[51], projPtr[52]);
+  _di = (g2_fl32) GribSection::_upkUnsigned4(projPtr[49], projPtr[50], projPtr[51], projPtr[52]);
   if(_di != GribSection::S4MISSING)
      _di *= units;
 
@@ -172,7 +172,7 @@ int GausLatLonProj::unpack (ui08 *projPtr)
   // Scanning mode flags
   _scanModeFlag = projPtr[57];
   
-  if((si32)_nj != _nParalells * 2)
+  if((g2_si32)_nj != _nParalells * 2)
   {
      cerr << "ERROR: GausLatLonProj::unpack()" << endl;
      cerr << "Quasi-regular Lat/Lon sub grid is unimplemented" << endl;
@@ -193,9 +193,9 @@ int GausLatLonProj::unpack (ui08 *projPtr)
     int numDataPoints = GribSection::_upkUnsigned4 (projPtr[-8], projPtr[-7], projPtr[-6], projPtr[-5]);
     int totalPoints = 0;
     int intSize = (int) projPtr[-4];
-    _pointsList = new si32[_nj];
+    _pointsList = new g2_si32[_nj];
     int loc = 58;
-    for(ui32 a = 0; a < _nj; a++) {
+    for(g2_ui32 a = 0; a < _nj; a++) {
       if(intSize == 1)
 	_pointsList[a] = (int) projPtr[loc];
       else if(intSize == 2)
@@ -203,7 +203,7 @@ int GausLatLonProj::unpack (ui08 *projPtr)
       else if(intSize == 4)
 	_pointsList[a] = GribSection::_upkUnsigned4(projPtr[loc], projPtr[loc+1], projPtr[loc+2], projPtr[loc+3]);
       totalPoints += _pointsList[a];
-      if(_pointsList[a] > (si32)_maxNi)
+      if(_pointsList[a] > (g2_si32)_maxNi)
 	_maxNi = _pointsList[a];
       loc += intSize;
     }
@@ -214,10 +214,10 @@ int GausLatLonProj::unpack (ui08 *projPtr)
     }
   }
   /*
-  fl32 *lats;
+  g2_fl32 *lats;
   getGaussianLats(&lats);
 
-  fl32 *lons;
+  g2_fl32 *lons;
   for(int i = 0; i < _nParalells*2; i++) {
     cout << lats[i] << " : ";
 
@@ -344,7 +344,7 @@ void GausLatLonProj::print(FILE *stream) const
 /*  
 
  */
-int GausLatLonProj::getQuasiLons(fl32 **lons, int rowIndex)
+int GausLatLonProj::getQuasiLons(g2_fl32 **lons, int rowIndex)
 {
   int nlon = -1;
   if(_pointsList == NULL && _ni == GribSection::U4MISSING)
@@ -356,7 +356,7 @@ int GausLatLonProj::getQuasiLons(fl32 **lons, int rowIndex)
 
   double d = _lo2 + (_lo2 / (double)(_maxNi-1)) - _lo1;
 
-  (*lons) = new fl32[nlon];
+  (*lons) = new g2_fl32[nlon];
 
   if(d < 0.0) {
     d += 360.;
@@ -379,10 +379,10 @@ int GausLatLonProj::getQuasiLons(fl32 **lons, int rowIndex)
  *  http://www.mathworks.com/matlabcentral/fileexchange/2586-gauss2lats/content/gauss2lats.m
  *
  */
-void GausLatLonProj::getGaussianLats(fl32 **lats)
+void GausLatLonProj::getGaussianLats(g2_fl32 **lats)
 {
   int nlat = _nParalells * 2;
-  (*lats) = new fl32[nlat];
+  (*lats) = new g2_fl32[nlat];
 
   double acon = 180.0/M_PI;
 
@@ -457,8 +457,8 @@ void GausLatLonProj::getGaussianLats(fl32 **lats)
   }
 
   int reverse = 0;
-  fl32 la1 = _la1;
-  fl32 la2 = _la2;
+  g2_fl32 la1 = _la1;
+  g2_fl32 la2 = _la2;
   if(_la1 < _la2) {
     reverse = 1;
     la1 = _la2;
@@ -466,7 +466,7 @@ void GausLatLonProj::getGaussianLats(fl32 **lats)
   }
 
   // calculate latitudes and latitude spacing
-  ui32 count = 0;
+  g2_ui32 count = 0;
   //double ylat = 90.;
   for(int i = 1; i <= nlat; i++)
   {
@@ -486,7 +486,7 @@ void GausLatLonProj::getGaussianLats(fl32 **lats)
   }
 
   if(reverse) {
-    for(ui32 i = 0; i < count/2; i++) {
+    for(g2_ui32 i = 0; i < count/2; i++) {
       double tmp = (*lats)[i];
       (*lats)[i] = (*lats)[count-i];
       (*lats)[count-i] = tmp;

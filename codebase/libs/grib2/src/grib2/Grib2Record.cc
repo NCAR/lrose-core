@@ -50,9 +50,9 @@ Grib2Record::Grib2Record()
 
 }
 
-Grib2Record::Grib2Record(si32 disciplineNumber, time_t referenceTime, si32 referenceTimeType, 
-			 si32 typeOfData, si32 generatingSubCentreID, si32 generatingCentreID, 
-			 si32 productionStatus, si32 localTablesVersion, si32 masterTablesVersion)
+Grib2Record::Grib2Record(g2_si32 disciplineNumber, time_t referenceTime, g2_si32 referenceTimeType, 
+			 g2_si32 typeOfData, g2_si32 generatingSubCentreID, g2_si32 generatingCentreID, 
+			 g2_si32 productionStatus, g2_si32 localTablesVersion, g2_si32 masterTablesVersion)
 {
   _is.setEditionNum(2);
   _is.setDisciplineNum(disciplineNumber);
@@ -136,12 +136,12 @@ Grib2Record::~Grib2Record()
 }
 
 
-int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
+int Grib2Record::unpack(g2_ui08 **file_ptr, g2_ui64 file_size)
 {
-  ui08 *section_ptr = *file_ptr;
+  g2_ui08 *section_ptr = *file_ptr;
 
   int return_value;
-  ui64 current_len = 0;
+  g2_ui64 current_len = 0;
 
   // Unpack the Indicator Section
   if ((return_value = _is.unpack(section_ptr))
@@ -173,15 +173,15 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
   section_ptr += _ids.getSize();
   current_len += _ids.getSize();
 
-  si32 lus_size = 0;
-  si32 gds_size = 0;
-  si32 pds_size = 0;
-  si32 drs_size = 0;
-  si32 bms_size = 0;
-  si32 ds_size = 0;
+  g2_si32 lus_size = 0;
+  g2_si32 gds_size = 0;
+  g2_si32 pds_size = 0;
+  g2_si32 drs_size = 0;
+  g2_si32 bms_size = 0;
+  g2_si32 ds_size = 0;
 
-  si32 *prevBitMap = NULL;
-  si32 prevBitMapSize = 0;
+  g2_si32 *prevBitMap = NULL;
+  g2_si32 prevBitMapSize = 0;
 
   repeatSections_t last_RS;
   last_RS.lus = NULL;
@@ -208,7 +208,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
     // RS contains LocalUseSec, GDS, PDS, DRS, BMS and DS
     repeatSections_t RS = last_RS;
 
-    if ((si32) section_ptr[4] == 2) {
+    if ((g2_si32) section_ptr[4] == 2) {
       RS.lus = new LocalUseSec();
       // unpack the Local Use Section  -> optional
       if ((return_value = RS.lus->unpack(section_ptr)) != GRIB_SUCCESS) {
@@ -223,7 +223,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
 
     } 
 
-    if ((si32) section_ptr[4] == 3) {
+    if ((g2_si32) section_ptr[4] == 3) {
       RS.gds = new GDS();
       // unpack the Grid Definition Section
       if ((return_value = RS.gds->unpack(section_ptr)) != GRIB_SUCCESS) {
@@ -238,7 +238,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
       gds_size++;
     }
   
-    if ((si32) section_ptr[4] == 4) {
+    if ((g2_si32) section_ptr[4] == 4) {
       RS.pds = new PDS(sectionsPtr);
       // Unpack the Product Definition Section
       if ((return_value = RS.pds->unpack(section_ptr)) != GRIB_SUCCESS) {
@@ -253,7 +253,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
       pds_size++;
     }
 
-    if ((si32) section_ptr[4] == 5) {
+    if ((g2_si32) section_ptr[4] == 5) {
       RS.drs = new DRS(sectionsPtr);
       // Unpack the Data Representation Section
       if ((return_value = RS.drs->unpack(section_ptr)) != GRIB_SUCCESS) {
@@ -269,7 +269,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
 
     }
 
-    if ((si32) section_ptr[4] == 6) {
+    if ((g2_si32) section_ptr[4] == 6) {
       RS.bms = new BMS(254, prevBitMapSize, prevBitMap);
       // Unpack the Bit-map section
       if ((return_value = RS.bms->unpack(section_ptr)) != GRIB_SUCCESS) {   
@@ -284,7 +284,7 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
       bms_size++;
     }
 
-    if ((si32) section_ptr[4] == 7) {
+    if ((g2_si32) section_ptr[4] == 7) {
       RS.ds = new DS(sectionsPtr);
       // Unpack the data section
       if ((return_value = RS.ds->unpack(section_ptr)) != GRIB_SUCCESS) {   
@@ -326,10 +326,10 @@ int Grib2Record::unpack(ui08 **file_ptr, ui64 file_size)
   return GRIB_SUCCESS;
 }
 
-ui08 *Grib2Record::pack()
+g2_ui08 *Grib2Record::pack()
 // The caller is responsible for freeing the memory allocated here.
 {
-  ui64 total_len = 0;
+  g2_ui64 total_len = 0;
   total_len += _is.getSize();
   total_len += _ids.getSize();
 
@@ -348,9 +348,9 @@ ui08 *Grib2Record::pack()
   total_len += _es.getSize();
 
 
-  ui08 *grib_contents = new ui08[total_len];
-  ui08 *section_ptr = grib_contents;
-  ui64 current_len = 0;
+  g2_ui08 *grib_contents = new g2_ui08[total_len];
+  g2_ui08 *section_ptr = grib_contents;
+  g2_ui64 current_len = 0;
 
   _is.setTotalSize(total_len);
   if(_is.pack(section_ptr) != GRIB_SUCCESS) {
@@ -702,7 +702,7 @@ int Grib2Record::print(FILE *stream, print_sections_t printSec)
   return fields_num;
 }
 
-void Grib2Record::setLocalUse(si32 dataSize, ui08 *localUseData)
+void Grib2Record::setLocalUse(g2_si32 dataSize, g2_ui08 *localUseData)
 {
   repeatSections_t RS;
   RS.gds = NULL;
@@ -715,7 +715,7 @@ void Grib2Record::setLocalUse(si32 dataSize, ui08 *localUseData)
 
 }
 
-void Grib2Record::setGrid(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate)
+void Grib2Record::setGrid(g2_si32 numberDataPoints, g2_si32 gridDefNum, GribProj *projectionTemplate)
 {
   if(!_repeatSec.empty()) {
     repeatSections_t &RS = _repeatSec[_repeatSec.size()-1];
@@ -734,9 +734,9 @@ void Grib2Record::setGrid(si32 numberDataPoints, si32 gridDefNum, GribProj *proj
   _repeatSec.push_back(RS);
 }
 
-int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
-			   si32 dataRepNum, DataRepTemp *dataRepTemplate,
-			   fl32 *data, si32 bitMapType, si32 *bitMap)
+int Grib2Record::addField(g2_si32 prodDefNum, ProdDefTemp *productTemplate, 
+			   g2_si32 dataRepNum, DataRepTemp *dataRepTemplate,
+			   g2_fl32 *data, g2_si32 bitMapType, g2_si32 *bitMap)
 {
   // If the repeatSec vector is empty caller didnt call setGrid first.
   if(!_repeatSec.empty()) 
@@ -773,7 +773,7 @@ int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
       sectionsPtr.es = &_es;
       sectionsPtr.summary = NULL;
 
-      si32 numDataPoints = RS.gds->getNumDataPoints();
+      g2_si32 numDataPoints = RS.gds->getNumDataPoints();
 
       RS.pds = new PDS(sectionsPtr, prodDefNum, productTemplate);
       productTemplate->setParamStrings();
@@ -787,8 +787,8 @@ int Grib2Record::addField(si32 prodDefNum, ProdDefTemp *productTemplate,
 	if(_repeatSec.size() > 1)
 	{
 	  repeatSections_t &prev_RS = _repeatSec[_repeatSec.size()-2];
-	  si32 *prevBitMap = prev_RS.bms->getBitMap();
-	  si32  prevBitMapSize = prev_RS.bms->getBitMapSize();
+	  g2_si32 *prevBitMap = prev_RS.bms->getBitMap();
+	  g2_si32  prevBitMapSize = prev_RS.bms->getBitMapSize();
 	  if(prevBitMapSize == numDataPoints) 
 	  {
 	    RS.bms = new BMS(bitMapType, numDataPoints, prevBitMap);

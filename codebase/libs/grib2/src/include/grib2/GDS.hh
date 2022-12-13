@@ -57,19 +57,19 @@ public:
   /**
    * @brief This constructor is generally only used from Grib2::Grib2Record::addField() for creating a Grib2File
    */
-  GDS(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate);
+  GDS(g2_si32 numberDataPoints, g2_si32 gridDefNum, GribProj *projectionTemplate);
 
   ~GDS();
 
   /** @brief Unpacks the whole Grid Definition Section
    *  @param[in] gdsPtr Pointer to start of the GDS section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *gdsPtr );
+  int unpack( g2_ui08 *gdsPtr );
 
   /** @brief Packs up the Grid Definition Section
    *  @param[in] gdsPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *gdsPtr );
+  int pack( g2_ui08 *gdsPtr );
 
   /** @brief Print to stream/file all information contained in the GDS section */
   virtual void print(FILE *stream) const;
@@ -80,31 +80,31 @@ public:
    *  @param[out] major_axis earth major axis in m if earth assumed oblate spheriod, 0 otherwise
    *  @param[out] minor_axis earth minor axis in m if earth assumed oblate spheriod, 0 otherwise
    *  @return earth radius in m if earth assumed spherical, 0 otherwise */
-  fl32 getEarthRadius(fl32 &major_axis, fl32 &minor_axis);
+  g2_fl32 getEarthRadius(g2_fl32 &major_axis, g2_fl32 &minor_axis);
 
   /** @brief Get the number of data points in the grid */
-  inline si32 getNumDataPoints() { return _numDataPoints; };
+  inline g2_si32 getNumDataPoints() { return _numDataPoints; };
 
   /** @brief Get the grid definition source */
-  inline si32 getGriDefSource() {return _gridDefSource; };
+  inline g2_si32 getGriDefSource() {return _gridDefSource; };
 
   /** @brief Get optional list size of number of grid points */
-  inline si32 getListSize() { return _listSize; };
+  inline g2_si32 getListSize() { return _listSize; };
 
   /** @brief Get interpretation of optiona list of number of grid points */
-  inline si32 getListInterpretation() { return _quasi_regularListInterp; };
+  inline g2_si32 getListInterpretation() { return _quasi_regularListInterp; };
 
   /** @brief Get grid template number */
-  inline si32 getGridID() { return _gridTemplateNum; };
+  inline g2_si32 getGridID() { return _gridTemplateNum; };
 
   /** @brief Get width of grid */
-  inline si32 getWidth() { return _projection->getWidth(); };
+  inline g2_si32 getWidth() { return _projection->getWidth(); };
 
   /** @brief Get height of grid */
-  inline si32 getHeight() { return _projection->getHeight(); };
+  inline g2_si32 getHeight() { return _projection->getHeight(); };
 
   /** @brief Get data scanning mode */
-  inline si32 getIscan() { return _projection->getIscan(); };
+  inline g2_si32 getIscan() { return _projection->getIscan(); };
 
   /** @brief Get the grid projection pointer */
   inline GribProj *getProjection() { return _projection; };
@@ -112,46 +112,46 @@ public:
   // Set Functions
 
   /** @brief Set the number of data points in grid */
-  inline void setNumDataPoints(si32 numDataPoints) { _numDataPoints = numDataPoints; };
+  inline void setNumDataPoints(g2_si32 numDataPoints) { _numDataPoints = numDataPoints; };
 
   /** @brief Set the grid definition source */
-  inline void setGridDefSource(si32 gridDefSource) { _gridDefSource = gridDefSource; };
+  inline void setGridDefSource(g2_si32 gridDefSource) { _gridDefSource = gridDefSource; };
 
   /** @brief Set optional list of numbers defining number of points */
-  inline void setListSize(si32 listSize = 0) { _listSize = listSize; };
+  inline void setListSize(g2_si32 listSize = 0) { _listSize = listSize; };
 
   /** @brief Set optional list interpretation */
-  inline void setListInterpretation(si32 quasi_regularListInterp = 0) { _quasi_regularListInterp = quasi_regularListInterp; };
+  inline void setListInterpretation(g2_si32 quasi_regularListInterp = 0) { _quasi_regularListInterp = quasi_regularListInterp; };
 
   /** @brief Set the grid template number */
-  inline void setGridID(si32 gridTemplateNum) { _gridTemplateNum = gridTemplateNum; _gridDefSource = 0; };
+  inline void setGridID(g2_si32 gridTemplateNum) { _gridTemplateNum = gridTemplateNum; _gridDefSource = 0; };
 
   /** @brief Set the grid projection pointer */
   inline void setProjection(GribProj *projection) { _projection = projection; };
 
   // Implemented projection IDs
   /** @brief Projection ID 0, Lat/Lon Projection */
-  static const si32 EQUIDISTANT_CYL_PROJ_ID;
+  static const g2_si32 EQUIDISTANT_CYL_PROJ_ID;
   /** @brief Projection ID 1, Rotated Lat/Lon Projection */
-  static const si32 ROT_EQUIDISTANT_CYL_PROJ_ID;
+  static const g2_si32 ROT_EQUIDISTANT_CYL_PROJ_ID;
   /** @brief Projection ID 10, Mercator Projection */
-  static const si32 MERCATOR_PROJ_ID;
+  static const g2_si32 MERCATOR_PROJ_ID;
   /** @brief Projection ID 20, Polar Sterographic Projection */
-  static const si32 POLAR_STEREOGRAPHIC_PROJ_ID;
+  static const g2_si32 POLAR_STEREOGRAPHIC_PROJ_ID;
   /** @brief Projection ID 30, Lambert Conformal Projection */
-  static const si32 LAMBERT_CONFORMAL_PROJ_ID;
+  static const g2_si32 LAMBERT_CONFORMAL_PROJ_ID;
   /** @brief Projection ID 40, Gaussian Lat/Lon Projection */
-  static const si32 GAUSSIAN_LAT_LON_PROJ_ID;
+  static const g2_si32 GAUSSIAN_LAT_LON_PROJ_ID;
   /** @brief Projection ID 90, Space View or Orthographic Projection */
-  static const si32 SPACE_VIEW_PROJ_ID;
+  static const g2_si32 SPACE_VIEW_PROJ_ID;
   /** @brief Projection ID 32769, Rotated Latitude/Longitude (Arakawa Non-E Staggered grid) */
-  static const si32 ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID;
+  static const g2_si32 ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID;
 
   // All degree values stored in grib2 are stored with this scale factor 
   /** @brief Grib2 Degree scale factor */
-  static const fl32 DEGREES_SCALE_FACTOR;
+  static const g2_fl32 DEGREES_SCALE_FACTOR;
   /** @brief Grib2 Grid scale factor */
-  static const fl32 GRID_SCALE_FACTOR;
+  static const g2_fl32 GRID_SCALE_FACTOR;
 
 protected:
 
@@ -159,22 +159,22 @@ protected:
    *
    * Currently only pre-defined grid definitions are implemented
    * and thus this value will always be 0 */
-  si32 _gridDefSource;
+  g2_si32 _gridDefSource;
 
   /** @brief Total number of data points in the grid */
-  si32 _numDataPoints;
+  g2_si32 _numDataPoints;
   
   /** @brief Size of optional list of numbers of points in the grid.  
    * Used for quasi-regular grids.
    *
    * Optional list is unimplemented and should not be used */
-  si32 _listSize;
+  g2_si32 _listSize;
 
   /** @brief Interpretation of optional list of numbers of points in the grid. */
-  si32 _quasi_regularListInterp;
+  g2_si32 _quasi_regularListInterp;
 
   /** @brief Template number of GribProj */
-  si32 _gridTemplateNum;
+  g2_si32 _gridTemplateNum;
 
   /** @brief GribProj pointers stores additional projection specific information */
   GribProj *_projection;

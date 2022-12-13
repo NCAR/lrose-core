@@ -59,12 +59,12 @@ public:
   /** @brief Unpacks the Indicator Section
    *  @param[in] idPtr Pointer to start of the section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *idPtr );
+  int unpack( g2_ui08 *idPtr );
 
   /** @brief Packs up the Indicator Section
    *  @param[in] idPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *idPtr );
+  int pack( g2_ui08 *idPtr );
 
   /** @brief Print to stream/file all information contained in the Indicator Section */
   void print(FILE *) const;  
@@ -72,35 +72,35 @@ public:
   // Get Functions
 
   /** @brief Get the total size of the packed grib message */
-  inline ui64 getTotalSize() { return( _numMsgBytes ); }
+  inline g2_ui64 getTotalSize() { return( _numMsgBytes ); }
 
   /**  @brief Get the grib edition number (Should be number 2) */
-  inline si32 getEditionNum() { return( _editionNum ); }
+  inline g2_si32 getEditionNum() { return( _editionNum ); }
 
   /** @brief Get the discipline number of the processed data.
    *
    *  See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table0-0.shtml */
-  inline si32 getDisciplineNum() { return( _disciplineNum ); }
+  inline g2_si32 getDisciplineNum() { return( _disciplineNum ); }
 
   // Set Functions
 
   /** @brief Set the total size of this grib message */
-  inline void setTotalSize (const ui64 new_size) { _numMsgBytes = new_size; }
+  inline void setTotalSize (const g2_ui64 new_size) { _numMsgBytes = new_size; }
 
   /** @brief Set the grib edition number for this message */
-  inline void setEditionNum (const si32 edition_num) { _editionNum = edition_num; }
+  inline void setEditionNum (const g2_si32 edition_num) { _editionNum = edition_num; }
 
   /** @brief Set the discipline number of the processed data.
    *
    *  See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table0-0.shtml */
-  inline void setDisciplineNum (const si32 discipline) { _disciplineNum = discipline; }
+  inline void setDisciplineNum (const g2_si32 discipline) { _disciplineNum = discipline; }
   
 private:
   /** @brief Total length of GRIB message in octets (including Section 0) */
-  ui64 _numMsgBytes;
+  g2_ui64 _numMsgBytes;
 
   /** @brief GRIB Edition Number (2) */
-  si32 _editionNum;
+  g2_si32 _editionNum;
 
   /** @brief Discipline - GRIB Master Table Number
    *
@@ -109,7 +109,7 @@ private:
    * 2  = Land Surface Products
    * 3  = Space Products
    * 10 = Oceanographic Products  */
-  si32 _disciplineNum;
+  g2_si32 _disciplineNum;
 
 };
 

@@ -31,7 +31,7 @@
 #ifndef _GRIB2_GRIB_PROJECTION
 #define _GRIB2_GRIB_PROJECTION
 
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/GribSection.hh>
 
 using namespace std;
@@ -65,27 +65,27 @@ public:
   /** @brief Unpack a GribProj template
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack( ui08 *projPtr ) = 0;
+  virtual int unpack( g2_ui08 *projPtr ) = 0;
 
   /** @brief Pack up this GribProj template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack( ui08 *projPtr ) = 0;
+  virtual int pack( g2_ui08 *projPtr ) = 0;
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const = 0;
 
   /** @brief Get the width of data in this projection */
-  virtual si32 getWidth() = 0;
+  virtual g2_si32 getWidth() = 0;
 
   /** @brief Get the height of data in this projection */
-  virtual si32 getHeight() = 0;
+  virtual g2_si32 getHeight() = 0;
 
   /** @brief Get the scanning mode of data */
-  virtual si32 getIscan() = 0;
+  virtual g2_si32 getIscan() = 0;
 
   /** @brief Get the packed data template size */
-  virtual si32 getTemplateSize() = 0;
+  virtual g2_si32 getTemplateSize() = 0;
 
 protected:
 

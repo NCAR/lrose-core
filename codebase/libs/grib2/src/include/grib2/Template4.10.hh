@@ -30,7 +30,7 @@
 #ifndef _GRIB2_TEMPLATE_4_PT_10 
 #define _GRIB2_TEMPLATE_4_PT_10
 
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/ProdDefTemp.hh>
 #include <grib2/constants.h>
 
@@ -71,12 +71,12 @@ public:
   /** @brief Unpack a Product Definition Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *projPtr);
+  int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Product Definition Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (ui08 *projPtr);
+  int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   void print (FILE *) const;
@@ -91,51 +91,51 @@ public:
 
   /** @brief Get the size of the packed derived template class. 
    *  @return Size of packed template in bytes */ 
-  virtual si32 getTemplateSize() { return TEMPLATE4_PT_10_BASE_SIZE + (_numTimeIntervals * 12); };
+  virtual g2_si32 getTemplateSize() { return TEMPLATE4_PT_10_BASE_SIZE + (_numTimeIntervals * 12); };
 
   /** @brief Type of generating process */
-  si32 _processType;             
+  g2_si32 _processType;             
   /** @brief Background generating process identifier */
-  si32 _backgrdProcessId;        
+  g2_si32 _backgrdProcessId;        
   /** @brief Hours of observational data cutoff after reference time */
-  si32 _hoursObsDataCutoff;      
+  g2_si32 _hoursObsDataCutoff;      
   /** @brief Minutes of observational data cutoff after reference time */
-  si32 _minutesObsDataCutoff;    
+  g2_si32 _minutesObsDataCutoff;    
   /** @brief Indicator of unit of time range  */
-  si32 _timeRangeUnit;           
+  g2_si32 _timeRangeUnit;           
   /** @brief In units defined by _timeUintRange */
-  si32 _forecastTime;            
+  g2_si32 _forecastTime;            
   /** @brief Type of first fixed surface */
-  si32 _firstSurfaceType;       
+  g2_si32 _firstSurfaceType;       
   /** @brief Scale factor of first fixed surface */
-  si32 _scaleFactorFirstSurface; 
+  g2_si32 _scaleFactorFirstSurface; 
   /** @brief Scale value of first fixed surface */
-  si32 _scaleValFirstSurface;    
+  g2_si32 _scaleValFirstSurface;    
   /** @brief Type of second fixed surface */
-  si32 _secondSurfaceType;      
+  g2_si32 _secondSurfaceType;      
   /** @brief Scale factor of second fixed surface */
-  si32 _scaleFactorSecondSurface;
+  g2_si32 _scaleFactorSecondSurface;
   /** @brief Scale value of second fixed surface */
-  si32 _scaleValSecondSurface;   
+  g2_si32 _scaleValSecondSurface;   
   /** @brief Percentile value (from 100% to 0%) */
-  si32 _percentileValue;         
+  g2_si32 _percentileValue;         
   /** @brief Year of end of overall time interval */
-  si32 _year;                    
+  g2_si32 _year;                    
   /** @brief Month of end of overall time interval */
-  si32 _month;                   
+  g2_si32 _month;                   
   /** @brief Day of end of overall time interval */
-  si32 _day;                     
+  g2_si32 _day;                     
   /** @brief Hour of end of overall time interval */
-  si32 _hour;                    
+  g2_si32 _hour;                    
   /** @brief Minute of end of overall time interval */
-  si32 _minute;                  
+  g2_si32 _minute;                  
   /** @brief Second of end of overall time interval */
-  si32 _second;                  
+  g2_si32 _second;                  
   /** @brief Number of time range specifications describing
    * the time intervals used to calculate the statistically processed field */
-  si32 _numTimeIntervals;
+  g2_si32 _numTimeIntervals;
   /** @brief Total number of data values missing in the statistical process */
-  si64 _numMissingVals;
+  g2_si64 _numMissingVals;
   /** @brief 1 or more repeating intervals based on _numTimeIntervals.
    * See Grib2::ProdDefTemp::interval_t */
   vector <interval_t> _interval;
@@ -144,7 +144,7 @@ protected:
 
 private: 
   
-  static const si32 TEMPLATE4_PT_10_BASE_SIZE;
+  static const g2_si32 TEMPLATE4_PT_10_BASE_SIZE;
 
 };
 

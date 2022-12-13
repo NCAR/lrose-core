@@ -329,42 +329,42 @@ IdSec::IdSec() :
   _sectionLen = 21;
 }
 
-int IdSec::pack( ui08 *idPtr ) 
+int IdSec::pack( g2_ui08 *idPtr ) 
 {
   _pkUnsigned4(_sectionLen, &(idPtr[0]));
 
-  idPtr[4] = (ui08) _sectionNum;
+  idPtr[4] = (g2_ui08) _sectionNum;
 
   _pkUnsigned2(_generatingCenter, &(idPtr[5]));
 
   _pkUnsigned2(_subCenter, &(idPtr[7]));
 
-  idPtr[9] = (ui08) _masterTableVer;
+  idPtr[9] = (g2_ui08) _masterTableVer;
 
-  idPtr[10] = (ui08) _localTableVer;
+  idPtr[10] = (g2_ui08) _localTableVer;
 
-  idPtr[11] = (ui08) _referenceTimeSig;
+  idPtr[11] = (g2_ui08) _referenceTimeSig;
 
   _pkUnsigned2(_year, &(idPtr[12]));
 
-  idPtr[14] = (ui08) _month;
+  idPtr[14] = (g2_ui08) _month;
 
-  idPtr[15] = (ui08) _day;
+  idPtr[15] = (g2_ui08) _day;
 
-  idPtr[16] = (ui08) _hour;
+  idPtr[16] = (g2_ui08) _hour;
 
-  idPtr[17] = (ui08) _min;
+  idPtr[17] = (g2_ui08) _min;
 
-  idPtr[18] = (ui08) _sec;
+  idPtr[18] = (g2_ui08) _sec;
 
-  idPtr[19] = (ui08) _productionStatus;
+  idPtr[19] = (g2_ui08) _productionStatus;
 
-  idPtr[20] = (ui08) _proccesedDataType;
+  idPtr[20] = (g2_ui08) _proccesedDataType;
 
    return (GRIB_SUCCESS );
 }
 
-int IdSec::unpack( ui08 *idPtr ) 
+int IdSec::unpack( g2_ui08 *idPtr ) 
 {
    
    // bytes 1-4 -> Length of section (21 or nn)
@@ -436,7 +436,7 @@ string IdSec::getGeneratingCenterName()
   if(_generatingCenter > 0 && _generatingCenter < 255) 
   {
     name = _centers[_generatingCenter];
-    for (ui32 i = 0; i < _subCenters_numElements; i++ ) {
+    for (g2_ui32 i = 0; i < _subCenters_numElements; i++ ) {
       if(_subCenters[i].center == _generatingCenter &&
 	 _subCenters[i].subCenter == _subCenter) {
 	name.append(" - ");

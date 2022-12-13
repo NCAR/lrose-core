@@ -54,20 +54,20 @@ LambertConfProj::~LambertConfProj() {
 }
 
 
-int LambertConfProj::pack (ui08 *projPtr) 
+int LambertConfProj::pack (g2_ui08 *projPtr) 
 {
 
-  projPtr[0] = (ui08) _earthShape;
+  projPtr[0] = (g2_ui08) _earthShape;
 
-  projPtr[1] = (ui08) _radiusScaleFactor;
+  projPtr[1] = (g2_ui08) _radiusScaleFactor;
 
   GribSection::_pkUnsigned4(_radiusScaleValue, &(projPtr[2]));
 
-  projPtr[6] = (ui08) _majorAxisScaleFactor;
+  projPtr[6] = (g2_ui08) _majorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_majorAxisScaleValue, &(projPtr[7]));
 
-  projPtr[11] = (ui08) _minorAxisScaleFactor;
+  projPtr[11] = (g2_ui08) _minorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_minorAxisScaleValue, &(projPtr[12]));
 
@@ -79,7 +79,7 @@ int LambertConfProj::pack (ui08 *projPtr)
 
   GribSection::_pkSigned4((int)(_lo1 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[28]));
 
-  projPtr[32] = (ui08) _resolutionFlag;
+  projPtr[32] = (g2_ui08) _resolutionFlag;
 
   GribSection::_pkSigned4((int)(_lad / GDS::DEGREES_SCALE_FACTOR), &(projPtr[33]));
 
@@ -89,9 +89,9 @@ int LambertConfProj::pack (ui08 *projPtr)
 
   GribSection::_pkUnsigned4((int)(_dy / GDS::DEGREES_SCALE_FACTOR), &(projPtr[45]));
 
-  projPtr[49] = (ui08) _projCtrFlag;
+  projPtr[49] = (g2_ui08) _projCtrFlag;
 
-  projPtr[50] = (ui08)_scanModeFlag;
+  projPtr[50] = (g2_ui08)_scanModeFlag;
 
   GribSection::_pkSigned4((int)(_latin1 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[51]));
 
@@ -104,28 +104,28 @@ int LambertConfProj::pack (ui08 *projPtr)
   return GRIB_SUCCESS;
 }
 
-int LambertConfProj::unpack (ui08 *projPtr) {
+int LambertConfProj::unpack (g2_ui08 *projPtr) {
 
 
   // Shape of the earth (see Code Table 3.2)
-  _earthShape = (si32) projPtr[0]; 
+  _earthShape = (g2_si32) projPtr[0]; 
 
   // Scale factor of radius of spherical earth
-  _radiusScaleFactor = (si32) projPtr[1]; 
+  _radiusScaleFactor = (g2_si32) projPtr[1]; 
 
   //Scaled value of radius of spherical earth
   _radiusScaleValue 
             = GribSection::_upkUnsigned4 (projPtr[2], projPtr[3], projPtr[4], projPtr[5]);
 
   // Scale factor of major axis of oblate spheroid earth
-  _majorAxisScaleFactor = (si32) projPtr[6]; 
+  _majorAxisScaleFactor = (g2_si32) projPtr[6]; 
 
   // Scaled value of major axis of oblate spheroid earth
   _majorAxisScaleValue =
            GribSection::_upkUnsigned4 (projPtr[7], projPtr[8], projPtr[9], projPtr[10]);
 
   // Scale factor of minor axis of oblate spheroid earth
-  _minorAxisScaleFactor = (si32) projPtr[11]; 
+  _minorAxisScaleFactor = (g2_si32) projPtr[11]; 
 
   // Scaled value of minor axis of oblate spheroid earth
   _minorAxisScaleValue = 

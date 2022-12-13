@@ -52,7 +52,7 @@ public:
    *  @param[in] decimalScaleFactor Floating point precision to use in simple packing
    *  @param[in] origFieldTypes Original data type,
    * 0 = Floating point data, 1 = Integer data */
-  Template5_pt_0(si32 decimalScaleFactor, si32 origFieldTypes = 0);
+  Template5_pt_0(g2_si32 decimalScaleFactor, g2_si32 origFieldTypes = 0);
 
   /** 
    * @brief Internal constructor used during grib2 decoding
@@ -67,25 +67,25 @@ public:
   /** @brief Unpack a Data Representation Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *projPtr);
+  int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Data Representation Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (ui08 *projPtr);
+  int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   void print (FILE *) const;
 
   /** @brief Get the size of the packed template */
-  virtual si32 getTemplateSize() { return TEMPLATE5_PT_0_SIZE; };
+  virtual g2_si32 getTemplateSize() { return TEMPLATE5_PT_0_SIZE; };
 
 
 protected:
 
 
 private: 
-    static const si32 TEMPLATE5_PT_0_SIZE;
+    static const g2_si32 TEMPLATE5_PT_0_SIZE;
 
 };
 

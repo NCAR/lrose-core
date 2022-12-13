@@ -43,7 +43,7 @@ PDS::PDS(Grib2Record::Grib2Sections_t sectionsPtr) :
   _prodDefinition = NULL;
 }
 
-PDS::PDS(Grib2Record::Grib2Sections_t sectionsPtr, si32 prodDefNum, ProdDefTemp *productTemplate) :
+PDS::PDS(Grib2Record::Grib2Sections_t sectionsPtr, g2_si32 prodDefNum, ProdDefTemp *productTemplate) :
   GribSection()
 {
   _sectionLen = 0;
@@ -84,7 +84,7 @@ PDS::~PDS()
     delete  _prodDefinition;
 }
 
-int PDS::unpack( ui08 *pdsPtr)
+int PDS::unpack( g2_ui08 *pdsPtr)
 {
   // reinitialize variables 
 
@@ -96,7 +96,7 @@ int PDS::unpack( ui08 *pdsPtr)
    //
    // Various identification numbers - See Grib docmumentation
    //
-   _sectionNum = (si32) pdsPtr[4];
+   _sectionNum = (g2_si32) pdsPtr[4];
 
    if (_sectionNum != 4) {
      cerr << "ERROR: PDS::unpack()" << endl;
@@ -105,14 +105,14 @@ int PDS::unpack( ui08 *pdsPtr)
      return( GRIB_FAILURE );
    }
 
-   _coordinateValsize = (si32) _upkUnsigned2 (pdsPtr[5], pdsPtr[6]);
+   _coordinateValsize = (g2_si32) _upkUnsigned2 (pdsPtr[5], pdsPtr[6]);
 
    if(_coordinateValsize != 0) {
      cerr << "WARNING: PDS::unpack()" << endl;
      cerr << "Additional coordinate values are present, reading additional values is not implemented" << endl;
    }
 
-   _prodDefTempNum = (si32) _upkUnsigned2 (pdsPtr[7], pdsPtr[8]);
+   _prodDefTempNum = (g2_si32) _upkUnsigned2 (pdsPtr[7], pdsPtr[8]);
 
    switch (_prodDefTempNum) {  
      case 0:
@@ -165,11 +165,11 @@ int PDS::unpack( ui08 *pdsPtr)
    return( GRIB_SUCCESS );
 }
 
-int PDS::pack(ui08 *pdsPtr) 
+int PDS::pack(g2_ui08 *pdsPtr) 
 {
   _pkUnsigned4(_sectionLen, &(pdsPtr[0]));
 
-  pdsPtr[4] = (ui08) _sectionNum;
+  pdsPtr[4] = (g2_ui08) _sectionNum;
 
   _pkUnsigned2(_coordinateValsize, &(pdsPtr[5]));
 

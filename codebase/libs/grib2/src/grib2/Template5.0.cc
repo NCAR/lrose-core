@@ -36,9 +36,9 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template5_pt_0::TEMPLATE5_PT_0_SIZE = 21;
+const g2_si32 Template5_pt_0::TEMPLATE5_PT_0_SIZE = 21;
 
-Template5_pt_0::Template5_pt_0(si32 decimalScaleFactor, si32 origFieldTypes)
+Template5_pt_0::Template5_pt_0(g2_si32 decimalScaleFactor, g2_si32 origFieldTypes)
 : DataRepTemp()
 {
   _dataRepresentation.templateNumber = 0;
@@ -59,26 +59,26 @@ Template5_pt_0::~Template5_pt_0 () {
 }
 
 
-int Template5_pt_0::pack (ui08 *templatePtr)
+int Template5_pt_0::pack (g2_ui08 *templatePtr)
 {
-  si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
+  g2_si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
   GribSection::_pkUnsigned4(tmp, &(templatePtr[0]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.binaryScaleFactor, &(templatePtr[4]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.decimalScaleFactor, &(templatePtr[6]));
 
-  templatePtr[8] = (ui08) _dataRepresentation.numberOfBits;
+  templatePtr[8] = (g2_ui08) _dataRepresentation.numberOfBits;
 
-  templatePtr[9] = (ui08) _dataRepresentation.origFieldTypes;
+  templatePtr[9] = (g2_ui08) _dataRepresentation.origFieldTypes;
 
   return GRIB_SUCCESS;
 
 }
 
-int Template5_pt_0::unpack (ui08 *templatePtr) 
+int Template5_pt_0::unpack (g2_ui08 *templatePtr) 
 {
-  si32 tmp;
+  g2_si32 tmp;
 
   _dataRepresentation.templateNumber = 0;
 
@@ -95,10 +95,10 @@ int Template5_pt_0::unpack (ui08 *templatePtr)
             GribSection::_upkSigned2 (templatePtr[6], templatePtr[7]);
 
   // Number of bits holding scaled and referenced data values.  (i.e. greyscale image depth.) 
-  _dataRepresentation.numberOfBits = (si32) templatePtr[8]; 
+  _dataRepresentation.numberOfBits = (g2_si32) templatePtr[8]; 
 
   // Type of original field values (see Code Table 5.1) 
-  _dataRepresentation.origFieldTypes = (si32) templatePtr[9]; 
+  _dataRepresentation.origFieldTypes = (g2_si32) templatePtr[9]; 
 
   return( GRIB_SUCCESS );
 }

@@ -42,7 +42,7 @@ using namespace std;
 
 namespace Grib2 {
 
-BMS::BMS (si32 bitMapType, si32 grid_size, si32 *bit_map) :
+BMS::BMS (g2_si32 bitMapType, g2_si32 grid_size, g2_si32 *bit_map) :
   GribSection()
 {
   _bitMapIndicator = bitMapType;
@@ -68,7 +68,7 @@ BMS::BMS (si32 bitMapType, si32 grid_size, si32 *bit_map) :
    switch (_bitMapIndicator) {
      case 0:
        if (_gridSz > 0 ) {
-          _bitMap = new si32[_gridSz];
+          _bitMap = new g2_si32[_gridSz];
 	  for(int a = 0; a < _gridSz; a++)
 	    _bitMap[a] = bit_map[a];
 	  _sectionLen = 6 + (int)ceil(_gridSz / 8.0);
@@ -98,14 +98,14 @@ BMS::~BMS()
 }
 
   
-int BMS::unpack( ui08 *bmsPtr ) 
+int BMS::unpack( g2_ui08 *bmsPtr ) 
 {
    // 
    // Length in bytes of section 
    //
    _sectionLen = _upkUnsigned4( bmsPtr[0], bmsPtr[1], bmsPtr[2], bmsPtr[3] );
 
-   _sectionNum = (si32 ) bmsPtr[4];
+   _sectionNum = (g2_si32 ) bmsPtr[4];
 
    if (_sectionNum != 6) {
      cerr << "ERROR: BMS::unpack()" << endl;
@@ -113,7 +113,7 @@ int BMS::unpack( ui08 *bmsPtr )
      return( GRIB_FAILURE );
    }
 
-   si32 nBitMapBytes = _sectionLen - 6;
+   g2_si32 nBitMapBytes = _sectionLen - 6;
 
    int bitMapIndicator = (int) bmsPtr[5];
 
@@ -128,7 +128,7 @@ int BMS::unpack( ui08 *bmsPtr )
 	 if( _bitMapIndicator == 0 && _bitMap )
 	   delete[] _bitMap;
 
-	 _bitMap = new si32[_gridSz];
+	 _bitMap = new g2_si32[_gridSz];
 	 DS::gbits (bmsPtr + 6, _bitMap, 0, 1, 0, _gridSz);
 
        }
@@ -156,13 +156,13 @@ int BMS::unpack( ui08 *bmsPtr )
 }
 
 
-int BMS::pack(ui08 *bmsPtr)
+int BMS::pack(g2_ui08 *bmsPtr)
 {
   _pkUnsigned4(_sectionLen, &(bmsPtr[0]));
 
-  bmsPtr[4] = (ui08) _sectionNum;
+  bmsPtr[4] = (g2_ui08) _sectionNum;
 
-  bmsPtr[5] = (ui08) _bitMapIndicator;
+  bmsPtr[5] = (g2_ui08) _bitMapIndicator;
 
 
   // Bit-map present and specified in this section

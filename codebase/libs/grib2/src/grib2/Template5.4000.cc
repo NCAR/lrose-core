@@ -36,10 +36,10 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template5_pt_4000::TEMPLATE5_PT_4000_SIZE = 23;
+const g2_si32 Template5_pt_4000::TEMPLATE5_PT_4000_SIZE = 23;
 
-Template5_pt_4000::Template5_pt_4000(si32 decimalScaleFactor, si32 origFieldTypes,
-				     si32 compressionType, si32 targetCompressionRatio)
+Template5_pt_4000::Template5_pt_4000(g2_si32 decimalScaleFactor, g2_si32 origFieldTypes,
+				     g2_si32 compressionType, g2_si32 targetCompressionRatio)
   : DataRepTemp()
 {
   _dataRepresentation.templateNumber = 40;
@@ -62,30 +62,30 @@ Template5_pt_4000::~Template5_pt_4000 () {
 }
 
 
-int Template5_pt_4000::pack (ui08 *templatePtr) 
+int Template5_pt_4000::pack (g2_ui08 *templatePtr) 
 {
-  si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
+  g2_si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
   GribSection::_pkUnsigned4(tmp, &(templatePtr[0]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.binaryScaleFactor, &(templatePtr[4]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.decimalScaleFactor, &(templatePtr[6]));
 
-  templatePtr[8] = (ui08) _dataRepresentation.numberOfBits;
+  templatePtr[8] = (g2_ui08) _dataRepresentation.numberOfBits;
 
-  templatePtr[9] = (ui08) _dataRepresentation.origFieldTypes;
+  templatePtr[9] = (g2_ui08) _dataRepresentation.origFieldTypes;
 
-  templatePtr[10] = (ui08) _compressionType;
+  templatePtr[10] = (g2_ui08) _compressionType;
 
-  templatePtr[11] = (ui08) _targetCompressionRatio;
+  templatePtr[11] = (g2_ui08) _targetCompressionRatio;
 
   return GRIB_SUCCESS;
 
 }
 
-int Template5_pt_4000::unpack (ui08 *templatePtr) 
+int Template5_pt_4000::unpack (g2_ui08 *templatePtr) 
 {
-  si32 tmp;
+  g2_si32 tmp;
 
   _dataRepresentation.templateNumber = 4000;
 
@@ -102,17 +102,17 @@ int Template5_pt_4000::unpack (ui08 *templatePtr)
             GribSection::_upkSigned2 (templatePtr[6], templatePtr[7]);
 
   // Number of bits holding scaled and referenced data values.  (i.e. greyscale image depth.) 
-  _dataRepresentation.numberOfBits = (si32) templatePtr[8]; 
+  _dataRepresentation.numberOfBits = (g2_si32) templatePtr[8]; 
 
   // Type of original field values (see Code Table 5.1) 
-  _dataRepresentation.origFieldTypes = (si32) templatePtr[9]; 
+  _dataRepresentation.origFieldTypes = (g2_si32) templatePtr[9]; 
 
   // Type of Compression used. (see Code Table 5.40000) 
-  _compressionType = (si32) templatePtr[10]; 
+  _compressionType = (g2_si32) templatePtr[10]; 
 
   // Target compression ratio, M:1 (with respect to the bit-depth specified in octet 20), 
   //  when octet 22 indicates Lossy Compression.   Otherwise, set to missing. (see Note 3)
-  _targetCompressionRatio = (si32) templatePtr[11]; 
+  _targetCompressionRatio = (g2_si32) templatePtr[11]; 
 
   return( GRIB_SUCCESS );
 }

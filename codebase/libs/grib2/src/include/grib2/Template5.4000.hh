@@ -57,8 +57,8 @@ public:
    *   1 = Lossy Compression
    *  @param[in] targetCompressionRatio The maximum compression ratio M:1 (e.g. 20:1),
    *   Only used if compressionType is Lossy */
-  Template5_pt_4000(si32 decimalScaleFactor, si32 origFieldTypes = 0,
-		    si32 compressionType = 0, si32 targetCompressionRatio = 255);
+  Template5_pt_4000(g2_si32 decimalScaleFactor, g2_si32 origFieldTypes = 0,
+		    g2_si32 compressionType = 0, g2_si32 targetCompressionRatio = 255);
 
   /** 
    * @brief Internal constructor used during grib2 decoding
@@ -73,32 +73,32 @@ public:
   /** @brief Unpack a Data Representation Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack (ui08 *projPtr);
+  virtual int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Data Representation Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack (ui08 *projPtr);
+  virtual int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const;
 
   /** @brief Get the jpeg Compression type */
-  si32 getCompresssionType() { return _compressionType; };
+  g2_si32 getCompresssionType() { return _compressionType; };
 
   /** @brief Get the maximum compression ratio */
-  si32 getTargetCompresssionRatio() { return _targetCompressionRatio; };
+  g2_si32 getTargetCompresssionRatio() { return _targetCompressionRatio; };
 
   /** @brief Get the size of the packed template */
-  virtual si32 getTemplateSize() { return TEMPLATE5_PT_4000_SIZE; };
+  virtual g2_si32 getTemplateSize() { return TEMPLATE5_PT_4000_SIZE; };
 
   /** @brief Set the compression type,  0 = Lossless Compression,
    *   1 = Lossy Compression */
-  void setCompresssionType(si32 compressionType) { _compressionType = compressionType; };
+  void setCompresssionType(g2_si32 compressionType) { _compressionType = compressionType; };
 
   /** @brief The maximum compression ratio M:1 (e.g. 20:1),
    *   Only used if compressionType is Lossy */
-  void setTargetCompresssionRatio(si32 targetCompressionRatio) { _targetCompressionRatio = targetCompressionRatio; };
+  void setTargetCompresssionRatio(g2_si32 targetCompressionRatio) { _targetCompressionRatio = targetCompressionRatio; };
 
 protected:
 
@@ -107,12 +107,12 @@ private:
   
   /** @brief Compression type 
    * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table5-40.shtml */
-  si32 _compressionType;
+  g2_si32 _compressionType;
   /** @brief The maximum compression ratio M:1 (e.g. 20:1),
    *   Only used if compressionType is Lossy */
-  si32 _targetCompressionRatio;
+  g2_si32 _targetCompressionRatio;
 
-  static const si32 TEMPLATE5_PT_4000_SIZE;
+  static const g2_si32 TEMPLATE5_PT_4000_SIZE;
 
 };
 

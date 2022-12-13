@@ -60,12 +60,12 @@ public:
   /** @brief Unpacks the Id Section
    *  @param[in] idPtr Pointer to start of the Id section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *idPtr );
+  int unpack( g2_ui08 *idPtr );
 
   /** @brief Packs up the Id Section
    *  @param[in] idPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *idPtr );
+  int pack( g2_ui08 *idPtr );
 
   /** @brief Print to stream/file all information contained in the Id section */
   void print (FILE *);
@@ -73,74 +73,74 @@ public:
   // Get Functions
 
   /** @brief Get the reference year */
-  inline si32 getYear() { return _year; };
+  inline g2_si32 getYear() { return _year; };
 
   /** @brief Get the reference month */
-  inline si32 getMonth() { return _month; };
+  inline g2_si32 getMonth() { return _month; };
 
   /** @brief Get the reference day */
-  inline si32 getDay() { return _day; };
+  inline g2_si32 getDay() { return _day; };
 
   /** @brief Get the reference hour */
-  inline si32 getHour() { return _hour; };
+  inline g2_si32 getHour() { return _hour; };
 
   /** @brief Get the reference min */
-  inline si32 getMin() { return _min; };
+  inline g2_si32 getMin() { return _min; };
 
   /** @brief Get the reference sec */
-  inline si32 getSec() { return _sec; };
+  inline g2_si32 getSec() { return _sec; };
 
   /** @brief Get the generating center and subCenter name */
   string getGeneratingCenterName();
 
   /** @brief Get the generating center id number */
-  inline si32 getCenterId() { return _generatingCenter; };
+  inline g2_si32 getCenterId() { return _generatingCenter; };
 
   /** @brief Get the generating sub-center id number */
-  inline si32 getSubCenterId() { return _subCenter; };
+  inline g2_si32 getSubCenterId() { return _subCenter; };
 
   /** @brief Get the reference unix time */
   time_t getGenerateTime() const;
 
   /** @brief Get the data type */
-  inline si32 getProcessedDataType() { return _proccesedDataType; };
+  inline g2_si32 getProcessedDataType() { return _proccesedDataType; };
 
   /** @brief Get the production status */
-  inline si32 getProductionStatus() { return _productionStatus; };
+  inline g2_si32 getProductionStatus() { return _productionStatus; };
 
   /**  @brief Get the local table version number */
-  inline si32 getLocalTableVersion() { return _localTableVer; };
+  inline g2_si32 getLocalTableVersion() { return _localTableVer; };
   
   /** @brief Get the Signifigance of the Reference time */
-  inline si32 getGenerateTimeType() { return _referenceTimeSig; };
+  inline g2_si32 getGenerateTimeType() { return _referenceTimeSig; };
   
 
 
   // Set Functions
 
   /** @brief Set the generating center id number */
-  inline void setCenterId(si32 generatingCenter) { _generatingCenter = generatingCenter; };
+  inline void setCenterId(g2_si32 generatingCenter) { _generatingCenter = generatingCenter; };
 
   /** @brief Set the generation sub-centre id number */
-  inline void setSubCenterId(si32 subCenter) { _subCenter = subCenter; };
+  inline void setSubCenterId(g2_si32 subCenter) { _subCenter = subCenter; };
 
   /** @brief Set the reference unix time */
   void setGenerateTime(time_t generateTime);
 
   /** @brief Set the Signifigance of the Reference time */
-  inline void setGenerateTimeType(si32 referenceTimeSig) { _referenceTimeSig = referenceTimeSig; };
+  inline void setGenerateTimeType(g2_si32 referenceTimeSig) { _referenceTimeSig = referenceTimeSig; };
 
   /** @brief Set the production status code */
-  inline void setProductionStatus(si32 productionStatus) { _productionStatus = productionStatus; };
+  inline void setProductionStatus(g2_si32 productionStatus) { _productionStatus = productionStatus; };
 
   /** @brief Set the processed data type code */
-  inline void setProccesedDataType(si32 proccesedDataType) { _proccesedDataType = proccesedDataType; };
+  inline void setProccesedDataType(g2_si32 proccesedDataType) { _proccesedDataType = proccesedDataType; };
 
   /**  @brief Set the local table version number */
-  inline void setLocalTableVersion(si32 localTableVer) { _localTableVer = localTableVer; };
+  inline void setLocalTableVersion(g2_si32 localTableVer) { _localTableVer = localTableVer; };
 
   /**  @brief Set the Master table version number */
-  inline void setMasterTableVersion(si32 masterTableVer) { _masterTableVer = masterTableVer; };
+  inline void setMasterTableVersion(g2_si32 masterTableVer) { _masterTableVer = masterTableVer; };
 
 
 private:
@@ -150,29 +150,29 @@ private:
 
   /** @details Struct used for subCenter names, centerNumber is index in _centers */
   typedef struct {
-    si32 center;
-    si32 subCenter;
+    g2_si32 center;
+    g2_si32 subCenter;
     string name;
   } _GRIB2SubCenter;
 
   /** @brief Size of table _subCenters */
-  static const ui32 _subCenters_numElements = 16;
+  static const g2_ui32 _subCenters_numElements = 16;
   /** @brief Generating SubCenter table */
   static const _GRIB2SubCenter _subCenters[_subCenters_numElements];
 
   /** @brief Originating/generating center
    *
    * See http://www.nco.ncep.noaa.gov/pmb/docs/on388/table0.html */
-  si32 _generatingCenter;
+  g2_si32 _generatingCenter;
 
   /** @brief Originating/generating sub-center (allocated by generating centre) */
-  si32 _subCenter;
+  g2_si32 _subCenter;
 
   /** @brief Grib2 Master tales version */
-  si32 _masterTableVer;
+  g2_si32 _masterTableVer;
 
   /** @brief Local tables version  0 = local tables not used */
-  si32 _localTableVer;
+  g2_si32 _localTableVer;
 
   /** @brief Signifigance of Reference time
    *
@@ -180,25 +180,25 @@ private:
    * 1 = Start of Forecast
    * 2 = Verifying Time of Forecast
    * 3 = Observation Time */
-  si32 _referenceTimeSig;
+  g2_si32 _referenceTimeSig;
 
   /** @brief Reference Time year */          
-  si32 _year;
+  g2_si32 _year;
 
   /** @brief Reference Time month */
-  si32 _month;
+  g2_si32 _month;
 
   /** @brief Reference Time day */
-  si32 _day;
+  g2_si32 _day;
 
   /** @brief Reference Time hour */
-  si32 _hour;
+  g2_si32 _hour;
 
   /** @brief Reference Time minute */
-  si32 _min;
+  g2_si32 _min;
 
   /** @brief Reference Time second */
-  si32 _sec;
+  g2_si32 _sec;
 
   /** @brief Production status of data
    *
@@ -206,7 +206,7 @@ private:
    * 1 = Operational Test Products
    * 2 = Research Products
    * 3 = Re-Analysis Products */
-  si32 _productionStatus;
+  g2_si32 _productionStatus;
 
   /** @brief Type of processed data 
    *
@@ -218,7 +218,7 @@ private:
    * 5 = Control and Perturbed Forecast Products
    * 6 = Processed Satellite Observations
    * 7 = Processed Radar Observations */
-  si32 _proccesedDataType;
+  g2_si32 _proccesedDataType;
 
 
 };

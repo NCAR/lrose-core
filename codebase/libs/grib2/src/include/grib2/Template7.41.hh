@@ -63,12 +63,12 @@ public:
   /** @brief Unpack the data
    *  @param[in] dataPtr Pointer to start of packed data
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *dataPtr);
+  int unpack (g2_ui08 *dataPtr);
 
   /** @brief Pack up this data
    *  @param[in] dataPtr Pointer to start of location to pack data to
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (fl32 *dataPtr);
+  int pack (g2_fl32 *dataPtr);
 
   /** @brief Print to stream/file the data */
   virtual void print(FILE *output) const;
@@ -94,14 +94,14 @@ private:
   int decode_png (char *input, char *output);
 
   /** @brief Encode a png data stream */
-  int encode_png (ui08 *cin,int width,int height,int nbits, char *out);
+  int encode_png (g2_ui08 *cin,int width,int height,int nbits, char *out);
   
   /** @details Struct for representing a png stream */
   struct png_stream {
     /** location to write PNG stream  */
     char *stream_ptr;
     /**  number of bytes written       */
-    si32 stream_len;
+    g2_si32 stream_len;
   };
   typedef struct png_stream png_stream;
 

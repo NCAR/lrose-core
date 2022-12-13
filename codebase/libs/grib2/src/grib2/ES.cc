@@ -45,7 +45,7 @@ ES::~ES()
 {
 }
 
-int ES::unpack(ui08 *esPtr)
+int ES::unpack(g2_ui08 *esPtr)
 {
   // If the "7777" keyword is not there, there is a problem
 
@@ -61,7 +61,7 @@ int ES::unpack(ui08 *esPtr)
   return GRIB_SUCCESS;
 }
 
-int ES::pack(ui08 *esPtr)
+int ES::pack(g2_ui08 *esPtr)
 {
   // Pack the "7777" keyword
 

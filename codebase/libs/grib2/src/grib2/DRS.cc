@@ -48,7 +48,7 @@ DRS::DRS(Grib2Record::Grib2Sections_t sectionsPtr) :
   _numPackedDataPoints = -1;
 }
 
-DRS::DRS(Grib2Record::Grib2Sections_t sectionsPtr, si32 dataRepNum, 
+DRS::DRS(Grib2Record::Grib2Sections_t sectionsPtr, g2_si32 dataRepNum, 
 	 DataRepTemp *dataRepTemplate)
 {
   _sectionNum = 5;
@@ -83,11 +83,11 @@ DRS::~DRS()
     delete _dataRepresentation;
 }
 
-int DRS::pack(ui08 *drsPtr)
+int DRS::pack(g2_ui08 *drsPtr)
 {
   _pkUnsigned4(_sectionLen, &(drsPtr[0]));
 
-  drsPtr[4] = (ui08) _sectionNum;
+  drsPtr[4] = (g2_ui08) _sectionNum;
 
   _pkUnsigned4(_numPackedDataPoints, &(drsPtr[5]));
 
@@ -116,7 +116,7 @@ int DRS::pack(ui08 *drsPtr)
    }
 }
 
-int DRS::unpack( ui08 *drsPtr ) 
+int DRS::unpack( g2_ui08 *drsPtr ) 
 {
    // 
    // Length in bytes of section 
@@ -125,7 +125,7 @@ int DRS::unpack( ui08 *drsPtr )
 
    //
    // Number of section ("5")
-   _sectionNum = (si32) drsPtr[4];
+   _sectionNum = (g2_si32) drsPtr[4];
 
 
    if (_sectionNum != 5) {

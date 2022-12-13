@@ -52,20 +52,20 @@ MercatorProj::~MercatorProj() {
 }
 
 
-int MercatorProj::pack (ui08 *projPtr) 
+int MercatorProj::pack (g2_ui08 *projPtr) 
 {
 
-  projPtr[0] = (ui08) _earthShape;
+  projPtr[0] = (g2_ui08) _earthShape;
 
-  projPtr[1] = (ui08) _radiusScaleFactor;
+  projPtr[1] = (g2_ui08) _radiusScaleFactor;
 
   GribSection::_pkUnsigned4(_radiusScaleValue, &(projPtr[2]));
 
-  projPtr[6] = (ui08) _majorAxisScaleFactor;
+  projPtr[6] = (g2_ui08) _majorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_majorAxisScaleValue, &(projPtr[7]));
 
-  projPtr[11] = (ui08) _minorAxisScaleFactor;
+  projPtr[11] = (g2_ui08) _minorAxisScaleFactor;
 
   GribSection::_pkUnsigned4(_minorAxisScaleValue, &(projPtr[12]));
 
@@ -77,7 +77,7 @@ int MercatorProj::pack (ui08 *projPtr)
 
   GribSection::_pkSigned4((int)(_lo1 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[28]));
 
-  projPtr[32] = (ui08) _resolutionFlag;
+  projPtr[32] = (g2_ui08) _resolutionFlag;
 
   GribSection::_pkSigned4((int)(_lad / GDS::DEGREES_SCALE_FACTOR), &(projPtr[33]));
 
@@ -85,7 +85,7 @@ int MercatorProj::pack (ui08 *projPtr)
 
   GribSection::_pkSigned4((int)(_lo2 / GDS::DEGREES_SCALE_FACTOR), &(projPtr[41]));
 
-  projPtr[45] = (ui08) _scanModeFlag;
+  projPtr[45] = (g2_ui08) _scanModeFlag;
 
   GribSection::_pkSigned4((int)(_lov / GDS::DEGREES_SCALE_FACTOR), &(projPtr[46]));
 
@@ -96,28 +96,28 @@ int MercatorProj::pack (ui08 *projPtr)
   return( GRIB_SUCCESS );
 }
 
-int MercatorProj::unpack (ui08 *projPtr) 
+int MercatorProj::unpack (g2_ui08 *projPtr) 
 {
 
   // Shape of the earth (see Code Table 3.2)
-  _earthShape = (si32) projPtr[0]; 
+  _earthShape = (g2_si32) projPtr[0]; 
 
   // Scale factor of radius of spherical earth
-  _radiusScaleFactor = (si32) projPtr[1]; 
+  _radiusScaleFactor = (g2_si32) projPtr[1]; 
 
   //Scaled value of radius of spherical earth
   _radiusScaleValue 
             = GribSection::_upkUnsigned4 (projPtr[2], projPtr[3], projPtr[4], projPtr[5]);
 
   // Scale factor of major axis of oblate spheroid earth
-  _majorAxisScaleFactor = (si32) projPtr[6]; 
+  _majorAxisScaleFactor = (g2_si32) projPtr[6]; 
 
   // Scaled value of major axis of oblate spheroid earth
   _majorAxisScaleValue =
            GribSection::_upkUnsigned4 (projPtr[7], projPtr[8], projPtr[9], projPtr[10]);
 
   // Scale factor of minor axis of oblate spheroid earth
-  _minorAxisScaleFactor = (si32) projPtr[11]; 
+  _minorAxisScaleFactor = (g2_si32) projPtr[11]; 
 
   //Scaled value of minor axis of oblate spheroid earth
   _minorAxisScaleValue = 
@@ -131,41 +131,41 @@ int MercatorProj::unpack (ui08 *projPtr)
 
   // Latitude of first grid point (leftmost bit set for south latitude)
   _la1 = GDS::DEGREES_SCALE_FACTOR * 
-           (fl32) GribSection::_upkSigned4(projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[24], projPtr[25], projPtr[26], projPtr[27]);
 
   // Longitude of first grid point (leftmost bit set for west longitude)
   _lo1 = GDS::DEGREES_SCALE_FACTOR *
-           (fl32) GribSection::_upkSigned4(projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[28], projPtr[29], projPtr[30], projPtr[31]);
 
   // Resolution and component flags
   _resolutionFlag = projPtr[32];
 
   // Latitude where Dx and Dy are specified (leftmost bit set for south latitude
   _lad = GDS::DEGREES_SCALE_FACTOR * 
-           (fl32) GribSection::_upkSigned4(projPtr[33], projPtr[34], projPtr[35],  projPtr[36]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[33], projPtr[34], projPtr[35],  projPtr[36]);
 
   // Latitude of last grid point (leftmost bit set for south latitude)
   _la2 = GDS::DEGREES_SCALE_FACTOR * 
-           (fl32) GribSection::_upkSigned4(projPtr[37], projPtr[38], projPtr[39],  projPtr[40]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[37], projPtr[38], projPtr[39],  projPtr[40]);
 
   // Longitude of last grid point (leftmost bit set for west longitude)
   _lo2 = GDS::DEGREES_SCALE_FACTOR * 
-           (fl32) GribSection::_upkSigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[41], projPtr[42], projPtr[43],  projPtr[44]);
 
   // Scanning mode flags
   _scanModeFlag = projPtr[45];
 
   // orientation of the grid
   _lov = GDS::DEGREES_SCALE_FACTOR * 
-           (fl32) GribSection::_upkSigned4(projPtr[46], projPtr[47], projPtr[48],  projPtr[49]);
+           (g2_fl32) GribSection::_upkSigned4(projPtr[46], projPtr[47], projPtr[48],  projPtr[49]);
 
   // Longitudinal Direction Increment  (undefined - all bits set to 1)
   _di = GDS::GRID_SCALE_FACTOR * 
-           (fl32) GribSection::_upkUnsigned4(projPtr[50], projPtr[51], projPtr[52], projPtr[53]);
+           (g2_fl32) GribSection::_upkUnsigned4(projPtr[50], projPtr[51], projPtr[52], projPtr[53]);
 
   // Latitudinal Direction Increment (undefined - all bits set to 1)
   _dj = GDS::GRID_SCALE_FACTOR * 
-           (fl32) GribSection::_upkUnsigned4(projPtr[54], projPtr[55], projPtr[56], projPtr[57]);
+           (g2_fl32) GribSection::_upkUnsigned4(projPtr[54], projPtr[55], projPtr[56], projPtr[57]);
 
   if(_ni == GribSection::U4MISSING || _nj == GribSection::U4MISSING ||
      _di == GribSection::S4MISSING || _dj == GribSection::S4MISSING)

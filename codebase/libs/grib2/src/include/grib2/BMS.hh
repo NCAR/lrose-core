@@ -57,32 +57,32 @@ public:
    *    255   = No BitMap
    *  @param[in] grid_size Size of the data / BitMap
    *  @param[in] bit_map Pointer to the BitMap, NULL if bitMapType != 0 */
-  BMS(si32 bitMapType = 255, si32 grid_size = 0, si32 *bit_map = NULL);
+  BMS(g2_si32 bitMapType = 255, g2_si32 grid_size = 0, g2_si32 *bit_map = NULL);
 
   ~BMS();
    
   /** @brief Unpacks the Bit Map
    *  @param[in] bmsPtr Pointer to start of the BMS section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *bmsPtr );
+  int unpack( g2_ui08 *bmsPtr );
 
   /** @brief Packs up the Bit Map
    *  @param[in] bmsPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *bmsPtr );
+  int pack( g2_ui08 *bmsPtr );
   
   /** @brief Get pointer to the bit map */
-  inline si32* getBitMap() { return _bitMap; };
+  inline g2_si32* getBitMap() { return _bitMap; };
 
   /** @brief Get the bit map indicator 
    *     0     = BitMap present and defined
    *     1-254 = Predefined BitMaps
    *     255   = No BitMap */
   
-  inline si32 getBitMapIndicator() { return _bitMapIndicator; };
+  inline g2_si32 getBitMapIndicator() { return _bitMapIndicator; };
   
   /** @brief Get the size of the bit map */
-  inline si32 getBitMapSize() { return _sectionLen - 6; };
+  inline g2_si32 getBitMapSize() { return _sectionLen - 6; };
   
   /** @brief Print to stream/file all information contained in the BMS section */
   void print(FILE *, const bool print_bitmap = false) const;
@@ -90,13 +90,13 @@ public:
 private:
 
   /** @brief Pre-defined bitmap / bitmap present / no bitmap */
-  si32 _bitMapIndicator;
+  g2_si32 _bitMapIndicator;
 
   /** @brief Size of the bitmap */
-  si32 _gridSz;
+  g2_si32 _gridSz;
 
   /** @brief Pointer to the bitmap */
-  si32 *_bitMap;
+  g2_si32 *_bitMap;
    
 };
 

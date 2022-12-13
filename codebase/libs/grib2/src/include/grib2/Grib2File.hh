@@ -29,8 +29,8 @@
  * @date   Aug 2006
  */
 
-#ifndef Grib2_Grib2File_HH
-#define Grib2_Grib2File_HH
+#ifndef Grib2File_HH
+#define Grib2File_HH
 
 #include <string>
 #include <vector>
@@ -176,9 +176,9 @@ public:
    * - 1 = Initial operational version number
    * - 2 = Current operational version number  (Default value)
    */
-  int create(si32 disciplineNumber, time_t referenceTime, si32 referenceTimeType, 
-	      si32 typeOfData = 0, si32 generatingSubCentreID = 0, si32 generatingCentreID = 60, 
-	      si32 productionStatus = 2, si32 localTablesVersion = 0, si32 masterTablesVersion = 2);
+  int create(g2_si32 disciplineNumber, time_t referenceTime, g2_si32 referenceTimeType, 
+	      g2_si32 typeOfData = 0, g2_si32 generatingSubCentreID = 0, g2_si32 generatingCentreID = 60, 
+	      g2_si32 productionStatus = 2, g2_si32 localTablesVersion = 0, g2_si32 masterTablesVersion = 2);
 
   /** @brief Optional call to store a char array in the local use section.
    *
@@ -187,7 +187,7 @@ public:
    * @param[in] dataSize Size of the char array
    * @param[in] localUseData pointer to the char array
    */
-  int addLocalUse(si32 dataSize, ui08 *localUseData);
+  int addLocalUse(g2_si32 dataSize, g2_ui08 *localUseData);
 
   /** @brief Defines the geometry of the the data values in the fields that follow it
    *
@@ -200,7 +200,7 @@ public:
    * - 30 = LambertConfProj = Lambert conformal projection
    * @param[in] projectionTemplate Pointer to projection class (this class will now be owned by the library)
    */
-  int addGrid(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate);
+  int addGrid(g2_si32 numberDataPoints, g2_si32 gridDefNum, GribProj *projectionTemplate);
 
 
   /** @brief Add a data field to the grib2 record
@@ -233,9 +233,9 @@ public:
    *
    * @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE
    */
-  int addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
-		si32 dataRepNum, DataRepTemp *dataRepTemplate,
-		fl32 *data, si32 bitMapType, si32 *bitMap = NULL);
+  int addField(g2_si32 prodDefNum, ProdDefTemp *productTemplate, 
+		g2_si32 dataRepNum, DataRepTemp *dataRepTemplate,
+		g2_fl32 *data, g2_si32 bitMapType, g2_si32 *bitMap = NULL);
 
   /** @brief Write out all grib2 records stored within this class
    *  @param[in] file_path Full path to location to write grib2 file */

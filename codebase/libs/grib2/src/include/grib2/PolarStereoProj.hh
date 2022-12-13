@@ -32,7 +32,7 @@
 #define _GRIB2_POLARSTEREO_PROJ
 
 #include <cstdio>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/GribProj.hh>
 #include <grib2/constants.h>
 
@@ -65,27 +65,27 @@ public:
   /** @brief Unpack a PolarStereo Projection Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack (ui08 *projPtr);
+  virtual int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this PolarStero Projection Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack (ui08 *projPtr);
+  virtual int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const;
 
   /** @brief Get the width of data in this projection */
-  virtual si32 getWidth() { return _nx; };
+  virtual g2_si32 getWidth() { return _nx; };
 
   /** @brief Get the height of data in this projection */
-  virtual si32 getHeight() { return _ny; };
+  virtual g2_si32 getHeight() { return _ny; };
 
   /** @brief Get the scanning mode of data */
-  virtual si32 getIscan() { return _scanModeFlag; };
+  virtual g2_si32 getIscan() { return _scanModeFlag; };
 
   /** @brief Get the packed data template size */
-  virtual si32 getTemplateSize() { return POLAR_STEREO_SIZE; };
+  virtual g2_si32 getTemplateSize() { return POLAR_STEREO_SIZE; };
 
 
   /** @brief Shape of the Earth
@@ -97,59 +97,59 @@ public:
    // 3 to define oblate spheriod with _majorAxisScaleValue and _minorAxisScaleValue
    // 4 for oblate spheriod with major axis 6378.1370 km, minor axis 6356.752314 km
    // 6 for spherical earth with radius = 6371.2290 km
-  si32 _earthShape;
+  g2_si32 _earthShape;
 
   /** @brief Scale Factor for _radiusScaleValue      (0 if _earthShape != 1) */
-  si32 _radiusScaleFactor;
+  g2_si32 _radiusScaleFactor;
 
   /** @brief Spherical earth value * _radiusScaleFactor in km (0 if _earthShape != 1) */
-  si32 _radiusScaleValue;
+  g2_si32 _radiusScaleValue;
 
   /** @brief Scale Factor for _majorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _majorAxisScaleFactor;
+  g2_si32 _majorAxisScaleFactor;
 
   /** @brief Earth Major axis value * _majorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _majorAxisScaleValue;
+  g2_si32 _majorAxisScaleValue;
 
   /** @brief Scale Factor for _minorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _minorAxisScaleFactor;
+  g2_si32 _minorAxisScaleFactor;
 
   /** @brief Earth Minor axis value * _minorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _minorAxisScaleValue;
+  g2_si32 _minorAxisScaleValue;
 
   /** @brief Points along X-axis */
-  ui32 _nx;
+  g2_ui32 _nx;
 
   /** @brief Points along Y-axis */
-  ui32 _ny;
+  g2_ui32 _ny;
 
   /** @brief Latitude of first point */
-  fl32 _la1;
+  g2_fl32 _la1;
 
   /** @brief Longitude of first point */
-  fl32 _lo1;
+  g2_fl32 _lo1;
 
   /** @brief i and j direction flags and u and v component directions 
    *
    * The resolution flags (bits 3-4 Flag table 3.3) are not applicable
    * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-3.shtml */
-  ui08 _resolutionFlag;
+  g2_ui08 _resolutionFlag;
 
   /** @brief LaD - latitude where Dx and Dy are specified */
-  fl32 _lad;
+  g2_fl32 _lad;
 
   /** @brief lov - Orientation of the grid
    *
    * LoV is the longitude value of the meridian which is parallel to the y-axis 
    * (or columns of the grid) along which latitude increases as the y-coordinate increases 
    * (the orientation longitude may or may not appear on a  particular grid). */
-  fl32 _lov;
+  g2_fl32 _lov;
 
   /** @brief X-direction grid length */
-  fl32 _dx;
+  g2_fl32 _dx;
 
   /** @brief Y-direction grid length */
-  fl32 _dy;
+  g2_fl32 _dy;
 
   /** @brief Projection center
    *
@@ -160,7 +160,7 @@ public:
   //            1       South Pole is on the projection plane
   // 2          0       Only one projection centre is used
   //            1       Projection is bi-polar and symmetric
-  ui08 _projCtrFlag;
+  g2_ui08 _projCtrFlag;
 
   /** @brief Scanning mode flag
    *
@@ -172,14 +172,14 @@ public:
    //            1       Points scan in -j direction, from east to west
    // 3          0       Adjacent points in i direction are consecutive
    //            1       Adjacent points in j direction are consecutive
-  ui08 _scanModeFlag;
+  g2_ui08 _scanModeFlag;
 
 protected:
 
 
 private: 
 
-  static const si32 POLAR_STEREO_SIZE;
+  static const g2_si32 POLAR_STEREO_SIZE;
 
 };
 

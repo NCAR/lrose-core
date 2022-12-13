@@ -32,7 +32,7 @@
 #define _GRIB2_LAMBERT_CONF_PROJ
 
 #include <cstdio>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/GribProj.hh>
 #include <grib2/constants.h>
 
@@ -65,27 +65,27 @@ public:
   /** @brief Unpack a Lambert Projection Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack (ui08 *projPtr);
+  virtual int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Lambert Projection Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack (ui08 *projPtr);
+  virtual int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const;
 
   /** @brief Get the width of data in this projection */
-  virtual si32 getWidth() { return _nx; };
+  virtual g2_si32 getWidth() { return _nx; };
 
   /** @brief Get the height of data in this projection */
-  virtual si32 getHeight() { return _ny; };
+  virtual g2_si32 getHeight() { return _ny; };
 
   /** @brief Get the scanning mode of data */
-  virtual si32 getIscan() { return _scanModeFlag; };
+  virtual g2_si32 getIscan() { return _scanModeFlag; };
 
   /** @brief Get the packed data template size */
-  virtual si32 getTemplateSize() { return LAMBERT_CONFORMAL_SIZE; };
+  virtual g2_si32 getTemplateSize() { return LAMBERT_CONFORMAL_SIZE; };
 
   /** @brief Shape of the Earth
    *
@@ -96,59 +96,59 @@ public:
    // 3 to define oblate spheriod with _majorAxisScaleValue and _minorAxisScaleValue
    // 4 for oblate spheriod with major axis 6378.1370 km, minor axis 6356.752314 km
    // 6 for spherical earth with radius = 6371.2290 km
-  si32 _earthShape;
+  g2_si32 _earthShape;
 
   /** @brief Scale Factor for _radiusScaleValue      (0 if _earthShape != 1) */
-  si32 _radiusScaleFactor;
+  g2_si32 _radiusScaleFactor;
 
   /** @brief Spherical earth value * _radiusScaleFactor in km (0 if _earthShape != 1) */
-  si32 _radiusScaleValue;
+  g2_si32 _radiusScaleValue;
 
   /** @brief Scale Factor for _majorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _majorAxisScaleFactor;
+  g2_si32 _majorAxisScaleFactor;
 
   /** @brief Earth Major axis value * _majorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _majorAxisScaleValue;
+  g2_si32 _majorAxisScaleValue;
 
   /** @brief Scale Factor for _minorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _minorAxisScaleFactor;
+  g2_si32 _minorAxisScaleFactor;
 
   /** @brief Earth Minor axis value * _minorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _minorAxisScaleValue;
+  g2_si32 _minorAxisScaleValue;
 
   /** @brief Points along X-axis */
-  ui32 _nx;
+  g2_ui32 _nx;
 
   /** @brief Points along Y-axis */
-  ui32 _ny;
+  g2_ui32 _ny;
 
   /** @brief Latitude of first point */
-  fl32 _la1;
+  g2_fl32 _la1;
 
   /** @brief Longitude of first point */
-  fl32 _lo1;
+  g2_fl32 _lo1;
 
   /** @brief i and j direction flags and u and v component directions 
    *
    * The resolution flags (bits 3-4 of Flag table 3.3) are not applicable.
    * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-3.shtml */
-  ui08 _resolutionFlag;
+  g2_ui08 _resolutionFlag;
 
   /** @brief LaD - latitude where Dx and Dy are specified */
-  fl32 _lad;
+  g2_fl32 _lad;
 
   /** @brief LoV - longitude of meridian parallel to Y-axis along which lat increases 
    *
    * LoV is the longitude value of the meridian which is parallel to the y-axis 
    * (or columns of the grid) along which latitude increases as the y-coordinate 
    * increase (the orientation longitude may or may not appear on a particular grid). */
-  fl32 _lov;
+  g2_fl32 _lov;
 
   /** @brief X-direction grid length */
-  fl32 _dx;
+  g2_fl32 _dx;
 
   /** @brief Y-direction grid length */
-  fl32 _dy;
+  g2_fl32 _dy;
 
   /** @brief Projection center
    *
@@ -158,7 +158,7 @@ public:
   //            1       South Pole is on the projection plane
   // 2          0       Only one projection centre is used
   //            1       Projection is bi-polar and symmetric
-  ui08 _projCtrFlag;
+  g2_ui08 _projCtrFlag;
 
   /** @brief Scanning mode flag
    *
@@ -170,28 +170,28 @@ public:
    //            1       Points scan in -j direction, from east to west
    // 3          0       Adjacent points in i direction are consecutive
    //            1       Adjacent points in j direction are consecutive
-  ui08 _scanModeFlag;
+  g2_ui08 _scanModeFlag;
 
   /** @brief First lat from the pole at which the secant cone cuts the sphere */
-  fl32 _latin1;
+  g2_fl32 _latin1;
 
   /** @brief Second lat from the pole at which the secant cone cuts the sphere 
    *
    * If Latin 1 = Latin 2, then the projection is on a tangent cone. */
-  fl32 _latin2;
+  g2_fl32 _latin2;
 
   /** @brief Latitude of the southern pole of projection */
-  fl32 _las;
+  g2_fl32 _las;
 
   /** @brief Longitude of the southern pole of projection */
-  fl32 _los;
+  g2_fl32 _los;
 
 protected:
 
 
 private: 
 
-  static const si32 LAMBERT_CONFORMAL_SIZE;
+  static const g2_si32 LAMBERT_CONFORMAL_SIZE;
 
 };
 

@@ -41,7 +41,7 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template4_pt_7::TEMPLATE4_PT_7_SIZE = 34;
+const g2_si32 Template4_pt_7::TEMPLATE4_PT_7_SIZE = 34;
 
 Template4_pt_7::Template4_pt_7()
 : ProdDefTemp()
@@ -62,35 +62,35 @@ Template4_pt_7::~Template4_pt_7 () {
 }
 
 
-int Template4_pt_7::pack (ui08 *templatePtr) 
+int Template4_pt_7::pack (g2_ui08 *templatePtr) 
 {
-  templatePtr[0] = (ui08) _parameterCategory;
+  templatePtr[0] = (g2_ui08) _parameterCategory;
 
-  templatePtr[1] = (ui08) _paramNumber;
+  templatePtr[1] = (g2_ui08) _paramNumber;
 
-  templatePtr[2] = (ui08) _processType;
+  templatePtr[2] = (g2_ui08) _processType;
 
-  templatePtr[3] = (ui08) _backgrdProcessId;
+  templatePtr[3] = (g2_ui08) _backgrdProcessId;
 
-  templatePtr[4] = (ui08) _processID;
+  templatePtr[4] = (g2_ui08) _processID;
 
   GribSection::_pkUnsigned2(_hoursObsDataCutoff, &(templatePtr[5]));
 
-  templatePtr[7] = (ui08) _minutesObsDataCutoff;
+  templatePtr[7] = (g2_ui08) _minutesObsDataCutoff;
 
-  templatePtr[8] = (ui08) _timeRangeUnit;
+  templatePtr[8] = (g2_ui08) _timeRangeUnit;
 
   GribSection::_pkUnsigned4(_forecastTime, &(templatePtr[9]));
 
-  templatePtr[13] = (ui08) _firstSurfaceType;
+  templatePtr[13] = (g2_ui08) _firstSurfaceType;
 
-  templatePtr[14] = (ui08) _scaleFactorFirstSurface;
+  templatePtr[14] = (g2_ui08) _scaleFactorFirstSurface;
 
   GribSection::_pkUnsigned4(_scaleValFirstSurface, &(templatePtr[15]));
 
-  templatePtr[19] = (ui08) _secondSurfaceType;
+  templatePtr[19] = (g2_ui08) _secondSurfaceType;
 
-  templatePtr[20] = (ui08) _scaleFactorSecondSurface;
+  templatePtr[20] = (g2_ui08) _scaleFactorSecondSurface;
 
   GribSection::_pkUnsigned4(_scaleValSecondSurface, &(templatePtr[21]));
 
@@ -98,44 +98,44 @@ int Template4_pt_7::pack (ui08 *templatePtr)
 
 }
 
-int Template4_pt_7::unpack (ui08 *templatePtr) 
+int Template4_pt_7::unpack (g2_ui08 *templatePtr) 
 {
 
-  _parameterCategory = (si32) templatePtr[0]; 
+  _parameterCategory = (g2_si32) templatePtr[0]; 
   
-  _paramNumber = (si32) templatePtr[1]; 
+  _paramNumber = (g2_si32) templatePtr[1]; 
 
   // set strings for parameter, longParameter and units
   setParamStrings();
 
   // Type of generating process
-  _processType = (si32) templatePtr[2]; 
+  _processType = (g2_si32) templatePtr[2]; 
 
   // Background generating process identifier 
-  _backgrdProcessId = (si32) templatePtr[3]; 
+  _backgrdProcessId = (g2_si32) templatePtr[3]; 
 
   // Analysis or forecast generating processes identifier 
-  _processID = (si32) templatePtr[4]; 
+  _processID = (g2_si32) templatePtr[4]; 
 
   // Hours of observational data cutoff after reference time
   _hoursObsDataCutoff 
             = GribSection::_upkUnsigned2 (templatePtr[5], templatePtr[6]);
 
   // Minutes of observational data cutoff after reference time
-  _minutesObsDataCutoff = (si32) templatePtr[7]; 
+  _minutesObsDataCutoff = (g2_si32) templatePtr[7]; 
 
   // Indicator of unit of time range
-  _timeRangeUnit = (si32) templatePtr[8]; 
+  _timeRangeUnit = (g2_si32) templatePtr[8]; 
 
   // Forecast Time, In units defined by _timeRangeUnit
   _forecastTime =
        GribSection::_upkUnsigned4 (templatePtr[9], templatePtr[10], templatePtr[11], templatePtr[12]);
 
   // Type of first fixed surface
-  _firstSurfaceType = (si32) templatePtr[13]; 
+  _firstSurfaceType = (g2_si32) templatePtr[13]; 
 
   // Scale factor of first fixed surface
-  _scaleFactorFirstSurface = (si32) templatePtr[14];
+  _scaleFactorFirstSurface = (g2_si32) templatePtr[14];
 
   // Scale value of first fixed surface
   _scaleValFirstSurface =
@@ -146,10 +146,10 @@ int Template4_pt_7::unpack (ui08 *templatePtr)
       GribSection::_upkSigned4 (templatePtr[15], templatePtr[16], templatePtr[17], templatePtr[18]);
 
   // Type of second fixed surface
-  _secondSurfaceType = (si32) templatePtr[19]; 
+  _secondSurfaceType = (g2_si32) templatePtr[19]; 
 
   // Scale factor of second fixed surface
-  _scaleFactorSecondSurface = (si32) templatePtr[20];
+  _scaleFactorSecondSurface = (g2_si32) templatePtr[20];
 
   // Scale value of second fixed surface
   _scaleValSecondSurface =

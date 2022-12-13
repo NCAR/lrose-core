@@ -61,12 +61,12 @@ public:
   /** @brief Unpack the data
    *  @param[in] dataPtr Pointer to start of packed data
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *dataPtr);
+  int unpack (g2_ui08 *dataPtr);
 
   /** @brief Pack up this data
    *  @param[in] dataPtr Pointer to start of location to pack data to
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (fl32 *dataPtr);
+  int pack (g2_fl32 *dataPtr);
 
   /** @brief Print to stream/file the data */
   virtual void print(FILE *output) const;

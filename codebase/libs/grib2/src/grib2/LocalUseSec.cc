@@ -44,13 +44,13 @@ LocalUseSec::LocalUseSec() :
   _localUse = NULL;
 }
 
-LocalUseSec::LocalUseSec(si32 dataSize, ui08 *localUseData) :
+LocalUseSec::LocalUseSec(g2_si32 dataSize, g2_ui08 *localUseData) :
   GribSection()
 {
   _sectionLen = dataSize + 5;
   _sectionNum = 2;
 
-  _localUse = new ui08[dataSize];
+  _localUse = new g2_ui08[dataSize];
   for(int j = 0; j < dataSize; j++)
     _localUse[j] = localUseData[j];
 }
@@ -61,19 +61,19 @@ LocalUseSec::~LocalUseSec()
     delete[] _localUse;
 }
 
-void LocalUseSec::setLocalUse(const si32 dataSize, ui08 *data)
+void LocalUseSec::setLocalUse(const g2_si32 dataSize, g2_ui08 *data)
 {
   _sectionLen = dataSize + 5;
 
   if(_localUse != NULL)
     delete[] _localUse;
 
-  _localUse = new ui08[dataSize];
+  _localUse = new g2_ui08[dataSize];
   for(int j = 0; j < dataSize; j++)
     _localUse[j] = data[j];
 }
 
-int LocalUseSec::unpack( ui08 *idPtr)
+int LocalUseSec::unpack( g2_ui08 *idPtr)
 {
    
    //
@@ -92,7 +92,7 @@ int LocalUseSec::unpack( ui08 *idPtr)
    //
    _sectionLen = _upkUnsigned4(idPtr[0], idPtr[1], idPtr[2], idPtr[3]);
 
-   _localUse = new ui08[_sectionLen - 5];
+   _localUse = new g2_ui08[_sectionLen - 5];
 
    // Local use array
     for(int j = 0; j < _sectionLen - 5; j++)
@@ -101,14 +101,14 @@ int LocalUseSec::unpack( ui08 *idPtr)
    return( GRIB_SUCCESS );
 }
 
-int LocalUseSec::pack(ui08 *idPtr)
+int LocalUseSec::pack(g2_ui08 *idPtr)
 {
   if(_sectionLen > 0 && _localUse != NULL) {
     // The total number of bytes in this section 
     _pkUnsigned4(_sectionLen, &(idPtr[0]));
     
     // Section Number
-    idPtr[4] = (ui08)_sectionNum;
+    idPtr[4] = (g2_ui08)_sectionNum;
     
     // Local use array
     for(int j = 0; j < _sectionLen - 5; j++)

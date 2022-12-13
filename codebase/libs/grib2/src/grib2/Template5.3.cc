@@ -37,10 +37,10 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template5_pt_3::TEMPLATE5_PT_3_SIZE = 49;
+const g2_si32 Template5_pt_3::TEMPLATE5_PT_3_SIZE = 49;
 
-Template5_pt_3::Template5_pt_3(si32 decimalScaleFactor, si32 spatialDifferenceOrder,
-			       si32 origFieldTypes)
+Template5_pt_3::Template5_pt_3(g2_si32 decimalScaleFactor, g2_si32 spatialDifferenceOrder,
+			       g2_si32 origFieldTypes)
 : DataRepTemp()
 {
   _dataRepresentation.templateNumber = 3;
@@ -62,22 +62,22 @@ Template5_pt_3::~Template5_pt_3 () {
 }
 
 
-int Template5_pt_3::pack (ui08 *templatePtr) 
+int Template5_pt_3::pack (g2_ui08 *templatePtr) 
 {
-  si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
+  g2_si32 tmp = GribSection::mkIeee(_dataRepresentation.referenceValue);
   GribSection::_pkUnsigned4(tmp, &(templatePtr[0]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.binaryScaleFactor, &(templatePtr[4]));
 
   GribSection::_pkUnsigned2(_dataRepresentation.decimalScaleFactor, &(templatePtr[6]));
 
-  templatePtr[8] = (ui08) _dataRepresentation.numberOfBits;
+  templatePtr[8] = (g2_ui08) _dataRepresentation.numberOfBits;
 
-  templatePtr[9] = (ui08) _dataRepresentation.origFieldTypes;
+  templatePtr[9] = (g2_ui08) _dataRepresentation.origFieldTypes;
 
-  templatePtr[10] = (ui08) _splittingMethod;
+  templatePtr[10] = (g2_ui08) _splittingMethod;
 
-  templatePtr[11] = (ui08) _missingType;
+  templatePtr[11] = (g2_ui08) _missingType;
 
   if(_dataRepresentation.origFieldTypes == 0)
     tmp = GribSection::mkIeee(_primaryMissingVal);
@@ -93,29 +93,29 @@ int Template5_pt_3::pack (ui08 *templatePtr)
 
   GribSection::_pkUnsigned4(_numberGroups, &(templatePtr[20]));
 
-  templatePtr[24] = (ui08) _groupWidths;
+  templatePtr[24] = (g2_ui08) _groupWidths;
 
-  templatePtr[25] = (ui08) _groupWidthsBits;
+  templatePtr[25] = (g2_ui08) _groupWidthsBits;
 
   GribSection::_pkUnsigned4(_groupLength, &(templatePtr[26]));
 
-  templatePtr[30] = (ui08) _lengthIncrement;
+  templatePtr[30] = (g2_ui08) _lengthIncrement;
 
   GribSection::_pkUnsigned4(_lengthOfLastGroup, &(templatePtr[31]));
 
-  templatePtr[35] = (ui08) _groupLengthsBits;
+  templatePtr[35] = (g2_ui08) _groupLengthsBits;
 
-  templatePtr[36] = (ui08) _spatialDifferenceOrder;
+  templatePtr[36] = (g2_ui08) _spatialDifferenceOrder;
 
-  templatePtr[37] = (ui08) _octetsRequired;
+  templatePtr[37] = (g2_ui08) _octetsRequired;
 
   return GRIB_SUCCESS;
 
 }
 
-int Template5_pt_3::unpack (ui08 *templatePtr) 
+int Template5_pt_3::unpack (g2_ui08 *templatePtr) 
 {
-  si32 tmp;
+  g2_si32 tmp;
 
   _dataRepresentation.templateNumber = 3;
 
@@ -132,16 +132,16 @@ int Template5_pt_3::unpack (ui08 *templatePtr)
             GribSection::_upkSigned2 (templatePtr[6], templatePtr[7]);
 
   // Number of bits holding scaled and referenced data values.  (i.e. greyscale image depth.) 
-  _dataRepresentation.numberOfBits = (si32) templatePtr[8]; 
+  _dataRepresentation.numberOfBits = (g2_si32) templatePtr[8]; 
 
   // Type of original field values (see Code Table 5.1) 
-  _dataRepresentation.origFieldTypes = (si32) templatePtr[9]; 
+  _dataRepresentation.origFieldTypes = (g2_si32) templatePtr[9]; 
 
   // Group splitting method used (see Code Table 5.4)
-  _splittingMethod = (si32) templatePtr[10];
+  _splittingMethod = (g2_si32) templatePtr[10];
 
   // Missing value management used (see Code Table 5.5) 
-  _missingType = (si32) templatePtr[11];
+  _missingType = (g2_si32) templatePtr[11];
 
   // Primary missing value substitute
   tmp= GribSection::_upkUnsigned4 (templatePtr[12], templatePtr[13], templatePtr[14], templatePtr[15]);
@@ -162,17 +162,17 @@ int Template5_pt_3::unpack (ui08 *templatePtr)
 
   // Reference for group widths
   // The group width is the number of bits used for every value in a group.
-  _groupWidths = (si32) templatePtr[24];
+  _groupWidths = (g2_si32) templatePtr[24];
 
   // Number of bits used for the group widths (after the reference value (_groupWidths) has been removed)
-  _groupWidthsBits = (si32) templatePtr[25];
+  _groupWidthsBits = (g2_si32) templatePtr[25];
 
   // Reference for group lengths
   // The group length (L) is the number of values in a group.
   _groupLength = GribSection::_upkUnsigned4 (templatePtr[26], templatePtr[27], templatePtr[28], templatePtr[29]);
 
   // Length increment for the group lengths
-  _lengthIncrement = (si32) templatePtr[30];
+  _lengthIncrement = (g2_si32) templatePtr[30];
 
   // True length of last group
   _lengthOfLastGroup = GribSection::_upkUnsigned4 (templatePtr[31], templatePtr[32], templatePtr[33], templatePtr[34]);
@@ -180,14 +180,14 @@ int Template5_pt_3::unpack (ui08 *templatePtr)
   // Number of bits used for the scaled group lengths 
   // (after subtraction of the reference value given in octets 38-41 
   //  and division by the length increment given in octet 42)
-  _groupLengthsBits = (si32) templatePtr[35];
+  _groupLengthsBits = (g2_si32) templatePtr[35];
 
   // Order of spatial difference (see Code Table 5.6) 
-  _spatialDifferenceOrder = (si32) templatePtr[36];
+  _spatialDifferenceOrder = (g2_si32) templatePtr[36];
 
   // Number of octets required in the data section to specify extra 
   // descriptors needed for spatial differencing (octets 6-ww in data template 7.3)
-  _octetsRequired = (si32) templatePtr[37];
+  _octetsRequired = (g2_si32) templatePtr[37];
 
   return( GRIB_SUCCESS );
 }

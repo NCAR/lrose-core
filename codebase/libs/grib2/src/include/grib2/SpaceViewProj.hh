@@ -31,7 +31,7 @@
 #define _GRIB2_SPACEVIEW_PROJ
 
 #include <cstdio>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/GribProj.hh>
 #include <grib2/constants.h>
 
@@ -64,27 +64,27 @@ public:
   /** @brief Unpack a SpaceView Projection Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack (ui08 *projPtr);
+  virtual int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this SpaceView Projection Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack (ui08 *projPtr);
+  virtual int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const;
 
   /** @brief Get the width of data in this projection */
-  virtual si32 getWidth() { return _nx; };
+  virtual g2_si32 getWidth() { return _nx; };
 
   /** @brief Get the height of data in this projection */
-  virtual si32 getHeight() { return _ny; };
+  virtual g2_si32 getHeight() { return _ny; };
 
   /** @brief Get the scanning mode of data */
-  virtual si32 getIscan() { return _scanModeFlag; };
+  virtual g2_si32 getIscan() { return _scanModeFlag; };
 
   /** @brief Get the packed data template size */
-  virtual si32 getTemplateSize() { return LAT_LON_SIZE; };
+  virtual g2_si32 getTemplateSize() { return LAT_LON_SIZE; };
 
   /** @brief Shape of the Earth
    *
@@ -95,54 +95,54 @@ public:
    // 3 to define oblate spheriod with _majorAxisScaleValue and _minorAxisScaleValue
    // 4 for oblate spheriod with major axis 6378.1370 km, minor axis 6356.752314 km
    // 6 for spherical earth with radius = 6371.2290 km
-  si32 _earthShape;
+  g2_si32 _earthShape;
 
   /** @brief Scale Factor for _radiusScaleValue      (0 if _earthShape != 1) */
-  si32 _radiusScaleFactor;
+  g2_si32 _radiusScaleFactor;
 
   /** @brief Spherical earth value * _radiusScaleFactor in km (0 if _earthShape != 1) */
-  si32 _radiusScaleValue;
+  g2_si32 _radiusScaleValue;
 
   /** @brief Scale Factor for _majorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _majorAxisScaleFactor;
+  g2_si32 _majorAxisScaleFactor;
 
   /** @brief Earth Major axis value * _majorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _majorAxisScaleValue;
+  g2_si32 _majorAxisScaleValue;
 
   /** @brief Scale Factor for _minorAxisScaleValue   (0 if _earthShape != 3) */
-  si32 _minorAxisScaleFactor;
+  g2_si32 _minorAxisScaleFactor;
 
   /** @brief Earth Minor axis value * _minorAxisScaleFactor in km (0 if _earthShape != 3) */
-  si32 _minorAxisScaleValue;
+  g2_si32 _minorAxisScaleValue;
 
   /** @brief Number of points along x-axis (columns) */
-  ui32 _nx;
+  g2_ui32 _nx;
 
   /** @brief Number of points along y-axis (rows or lines) */
-  ui32 _ny;
+  g2_ui32 _ny;
 
   /** @brief Latitude of sub-satellite point */
-  fl32 _lap;
+  g2_fl32 _lap;
 
   /** @brief Longitude of sub-satellite point */
-  fl32 _lop;
+  g2_fl32 _lop;
 
   /** @brief i and j direction flags and u and v component directions 
    *
    * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table3-3.shtml */
-  ui08 _resolutionFlag;
+  g2_ui08 _resolutionFlag;
 
   /** @brief Apparent diameter of Earth in grid lengths, in x-direction */
-  ui32 _dx;
+  g2_ui32 _dx;
 
   /** @brief Apparent diameter of Earth in grid lengths, in y-direction */
-  ui32 _dy;
+  g2_ui32 _dy;
 
   /** @brief X-coordinate of sub-satellite point */
-  ui32 _xp;
+  g2_ui32 _xp;
 
   /** @brief Y-coordinate of sub-satellite point */
-  ui32 _yp;
+  g2_ui32 _yp;
 
   /** @brief Scanning mode flag
    *
@@ -154,26 +154,26 @@ public:
    //            1       Points scan in -j direction, from east to west
    // 3          0       Adjacent points in i direction are consecutive
    //            1       Adjacent points in j direction are consecutive
-  ui08 _scanModeFlag;
+  g2_ui08 _scanModeFlag;
 
   /** @brief Orientation of the grid 
    *  The angle between the increasing y-axis and the meridian of the sub-satellite 
    *  point in the direction of increasing latitude
    **/
-  fl32 _lov;
+  g2_fl32 _lov;
 
   /** @brief Altitude of the camera from the Earth's centre
    * Measured in units of the Earth's (equatorial)
    * radius multiplied by a scale factor of 10^6  (missing = all bits set to 1 = infinite distance)
    * The apparent angular size of the Earth will be given by 2 × arcsin ((10^6 )/Nr). 
    **/
-  fl32 _nr;
+  g2_fl32 _nr;
 
   /** @brief X-coordinate of origin of sector image **/
-  ui32 _xo;
+  g2_ui32 _xo;
 
   /** @brief Y-coordinate of origin of sector i **/
-  ui32 _yo;
+  g2_ui32 _yo;
 
 
 protected:
@@ -181,7 +181,7 @@ protected:
 
 private: 
 
-  static const si32 LAT_LON_SIZE;
+  static const g2_si32 LAT_LON_SIZE;
 
 };
 

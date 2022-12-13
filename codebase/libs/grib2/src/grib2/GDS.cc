@@ -54,8 +54,8 @@ const int GDS::LAMBERT_CONFORMAL_PROJ_ID = 30;
 const int GDS::GAUSSIAN_LAT_LON_PROJ_ID = 40;
 const int GDS::SPACE_VIEW_PROJ_ID = 90;
 const int GDS::ROT_LAT_LON_ARAKAWA_NON_E_PROJ_ID = 32769;
-const fl32 GDS::DEGREES_SCALE_FACTOR = 0.000001;
-const fl32 GDS::GRID_SCALE_FACTOR =    0.000001;
+const g2_fl32 GDS::DEGREES_SCALE_FACTOR = 0.000001;
+const g2_fl32 GDS::GRID_SCALE_FACTOR =    0.000001;
 
 
 GDS::GDS() :
@@ -71,7 +71,7 @@ GDS::GDS() :
   _projection = NULL;
 }
 
-GDS::GDS(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate) :
+GDS::GDS(g2_si32 numberDataPoints, g2_si32 gridDefNum, GribProj *projectionTemplate) :
   GribSection()
 {
   _sectionLen = 0;
@@ -235,7 +235,7 @@ void GDS::print(FILE *stream) const
 }
 
 
-int GDS::unpack(ui08 *gdsPtr)
+int GDS::unpack(g2_ui08 *gdsPtr)
 {
 
    //
@@ -318,12 +318,12 @@ int GDS::unpack(ui08 *gdsPtr)
 }
 
 
-int GDS::pack(ui08 *gdsPtr)
+int GDS::pack(g2_ui08 *gdsPtr)
 {
 
   _pkUnsigned4(_sectionLen, &(gdsPtr[0]));
 
-  gdsPtr[4] = (ui08) _sectionNum;
+  gdsPtr[4] = (g2_ui08) _sectionNum;
 
   if(_gridDefSource != 0) {
     cerr << "ERROR: GDS::pack()" << endl;
@@ -331,7 +331,7 @@ int GDS::pack(ui08 *gdsPtr)
     return (GRIB_FAILURE);
   }
 
-  gdsPtr[5] = (ui08) _gridDefSource;
+  gdsPtr[5] = (g2_ui08) _gridDefSource;
 
   _pkUnsigned4(_numDataPoints, &(gdsPtr[6]));
 
@@ -341,9 +341,9 @@ int GDS::pack(ui08 *gdsPtr)
     return (GRIB_FAILURE);
   }
 
-  gdsPtr[10] = (ui08) _listSize;
+  gdsPtr[10] = (g2_ui08) _listSize;
 
-  gdsPtr[11] = (ui08) _quasi_regularListInterp;
+  gdsPtr[11] = (g2_ui08) _quasi_regularListInterp;
 
   _pkUnsigned2(_gridTemplateNum, &(gdsPtr[12]));
 
@@ -368,15 +368,15 @@ int GDS::pack(ui08 *gdsPtr)
 
 }
 
-fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
+g2_fl32 GDS::getEarthRadius(g2_fl32 &major_axis, g2_fl32 &minor_axis)
 {
-  si32 earth_shape = 255;
-  si32 earth_factor = 0;
-  si32 earth_value = 0;
-  si32 major_factor = 0;
-  si32 major_value = 0;
-  si32 minor_factor = 0;
-  si32 minor_value = 0;
+  g2_si32 earth_shape = 255;
+  g2_si32 earth_factor = 0;
+  g2_si32 earth_value = 0;
+  g2_si32 major_factor = 0;
+  g2_si32 major_value = 0;
+  g2_si32 minor_factor = 0;
+  g2_si32 minor_value = 0;
   major_axis = 0;
   minor_axis = 0;
   switch (_gridTemplateNum) {
@@ -461,22 +461,22 @@ fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
      return 6367470.0;
    case 1:
      if(earth_factor == 0)
-       return (fl32)earth_value;
+       return (g2_fl32)earth_value;
      else
-       return (fl32)earth_value / (float)pow((float)10.0, (float)earth_factor);
+       return (g2_fl32)earth_value / (float)pow((float)10.0, (float)earth_factor);
    case 2:
      major_axis = 6378160.0;
      minor_axis = 6356775.0;
      return 0;
    case 3:
      if(major_factor == 0)
-       major_axis = (fl32)major_value * 1000.0;
+       major_axis = (g2_fl32)major_value * 1000.0;
      else
-       major_axis = (fl32)major_value / ((float)pow((float)10.0, (float)major_factor) / 1000.0);
+       major_axis = (g2_fl32)major_value / ((float)pow((float)10.0, (float)major_factor) / 1000.0);
      if(minor_factor == 0)
-       minor_axis = (fl32)minor_value * 1000.0;
+       minor_axis = (g2_fl32)minor_value * 1000.0;
      else
-       minor_axis = (fl32)minor_value / ((float)pow((float)10.0, (float)minor_factor) / 1000.0);
+       minor_axis = (g2_fl32)minor_value / ((float)pow((float)10.0, (float)minor_factor) / 1000.0);
      return 0;
    case 4:
      major_axis = 6378137.0;
@@ -490,13 +490,13 @@ fl32 GDS::getEarthRadius(fl32 &major_axis, fl32 &minor_axis)
      return 6371229.0;
    case 7:
      if(major_factor == 0)
-       major_axis = (fl32)major_value;
+       major_axis = (g2_fl32)major_value;
      else
-       major_axis = (fl32)major_value / (float)pow((float)10.0, (float)major_factor);
+       major_axis = (g2_fl32)major_value / (float)pow((float)10.0, (float)major_factor);
      if(minor_factor == 0)
-       minor_axis = (fl32)minor_value;
+       minor_axis = (g2_fl32)minor_value;
      else
-       minor_axis = (fl32)minor_value / (float)pow((float)10.0, (float)minor_factor);
+       minor_axis = (g2_fl32)minor_value / (float)pow((float)10.0, (float)minor_factor);
      return 0;
    case 8:
      return 6371200.0;

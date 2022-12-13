@@ -40,8 +40,8 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template4_pt_30::TEMPLATE4_PT_30_SIZE = 34;
-const si32 Template4_pt_30::BandInfo::BAND_INFO_SIZE = 10;
+const g2_si32 Template4_pt_30::TEMPLATE4_PT_30_SIZE = 34;
+const g2_si32 Template4_pt_30::BandInfo::BAND_INFO_SIZE = 10;
 
 Template4_pt_30::Template4_pt_30()
 : ProdDefTemp()
@@ -62,21 +62,21 @@ Template4_pt_30::~Template4_pt_30 () {
 }
 
 
-int Template4_pt_30::pack (ui08 *templatePtr) 
+int Template4_pt_30::pack (g2_ui08 *templatePtr) 
 {
-  templatePtr[0] = (ui08) _parameterCategory;
+  templatePtr[0] = (g2_ui08) _parameterCategory;
 
-  templatePtr[1] = (ui08) _paramNumber;
+  templatePtr[1] = (g2_ui08) _paramNumber;
 
-  templatePtr[2] = (ui08) _processType;
+  templatePtr[2] = (g2_ui08) _processType;
 
-  templatePtr[3] = (ui08) _obsProcessId;
+  templatePtr[3] = (g2_ui08) _obsProcessId;
 
-  templatePtr[4] = (ui08) _numBands;
+  templatePtr[4] = (g2_ui08) _numBands;
 
   // Pack the repeating band information
 
-  ui08 *band_info_ptr = &templatePtr[5];
+  g2_ui08 *band_info_ptr = &templatePtr[5];
   
   for (size_t i = 0; i < _numBands; ++i)
   {
@@ -88,12 +88,12 @@ int Template4_pt_30::pack (ui08 *templatePtr)
 
 }
 
-int Template4_pt_30::unpack (ui08 *templatePtr) 
+int Template4_pt_30::unpack (g2_ui08 *templatePtr) 
 {
 
-  _parameterCategory = (si32) templatePtr[0]; 
+  _parameterCategory = (g2_si32) templatePtr[0]; 
   
-  _paramNumber = (si32) templatePtr[1]; 
+  _paramNumber = (g2_si32) templatePtr[1]; 
 
   // set strings for parameter, longParameter and units
   setParamStrings();
@@ -109,7 +109,7 @@ int Template4_pt_30::unpack (ui08 *templatePtr)
   
   // Unpack the repeating band information
 
-  ui08 *band_info_ptr = &templatePtr[5];
+  g2_ui08 *band_info_ptr = &templatePtr[5];
   
   for (size_t i = 0; i < _numBands; ++i)
   {
@@ -170,15 +170,15 @@ void Template4_pt_30::print(FILE *stream) const
 // BandInfo methods
 //////////////////////////////////////////////////////////////
 
-int Template4_pt_30::BandInfo::pack (ui08 *templatePtr) 
+int Template4_pt_30::BandInfo::pack (g2_ui08 *templatePtr) 
 {
   GribSection::_pkUnsigned2(_satelliteSeries1, &(templatePtr[0]));
   
   GribSection::_pkUnsigned2(_satelliteSeries2, &(templatePtr[2]));
   
-  templatePtr[4] = (ui08) _instrumentType;
+  templatePtr[4] = (g2_ui08) _instrumentType;
   
-  templatePtr[5] = (ui08) _centralWaveNumScaleFactor;
+  templatePtr[5] = (g2_ui08) _centralWaveNumScaleFactor;
   
   GribSection::_pkUnsigned4(_centralWaveNumScaled, &(templatePtr[6]));
   
@@ -186,16 +186,16 @@ int Template4_pt_30::BandInfo::pack (ui08 *templatePtr)
 
 }
 
-int Template4_pt_30::BandInfo::unpack (ui08 *templatePtr) 
+int Template4_pt_30::BandInfo::unpack (g2_ui08 *templatePtr) 
 {
 
   _satelliteSeries1 = GribSection::_upkUnsigned2(templatePtr[0], templatePtr[1]);
   
   _satelliteSeries2 = GribSection::_upkUnsigned2(templatePtr[2], templatePtr[3]);
   
-  _instrumentType = (si32) templatePtr[4];
+  _instrumentType = (g2_si32) templatePtr[4];
   
-  _centralWaveNumScaleFactor = (si32) templatePtr[5];
+  _centralWaveNumScaleFactor = (g2_si32) templatePtr[5];
   
   _centralWaveNumScaled = GribSection::_upkUnsigned4(templatePtr[6], templatePtr[7],
 						   templatePtr[8], templatePtr[9]);

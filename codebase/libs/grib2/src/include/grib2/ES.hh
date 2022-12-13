@@ -60,12 +60,12 @@ public:
   /** @brief Unpacks the End Section
    *  @param[in] esPtr Pointer to start of the ES section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *esPtr );
+  int unpack( g2_ui08 *esPtr );
 
   /** @brief Packs up the End Section
    *  @param[in] esPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *esPtr );
+  int pack( g2_ui08 *esPtr );
   
   /** @brief Print to stream/file all information contained in the ES section */
   void print(FILE *) const;

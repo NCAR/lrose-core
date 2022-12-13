@@ -42,7 +42,7 @@ using namespace std;
 
 namespace Grib2 {
 
-const si32 Template4_pt_5::TEMPLATE4_PT_5_SIZE = 47;
+const g2_si32 Template4_pt_5::TEMPLATE4_PT_5_SIZE = 47;
 
 Template4_pt_5::Template4_pt_5()
 : ProdDefTemp()
@@ -63,49 +63,49 @@ Template4_pt_5::~Template4_pt_5 () {
 }
 
 
-int Template4_pt_5::pack (ui08 *templatePtr) 
+int Template4_pt_5::pack (g2_ui08 *templatePtr) 
 {
-  templatePtr[0] = (ui08) _parameterCategory;
+  templatePtr[0] = (g2_ui08) _parameterCategory;
 
-  templatePtr[1] = (ui08) _paramNumber;
+  templatePtr[1] = (g2_ui08) _paramNumber;
 
-  templatePtr[2] = (ui08) _processType;
+  templatePtr[2] = (g2_ui08) _processType;
 
-  templatePtr[3] = (ui08) _backgrdProcessId;
+  templatePtr[3] = (g2_ui08) _backgrdProcessId;
 
-  templatePtr[4] = (ui08) _processID;
+  templatePtr[4] = (g2_ui08) _processID;
 
   GribSection::_pkUnsigned2(_hoursObsDataCutoff, &(templatePtr[5]));
 
-  templatePtr[7] = (ui08) _minutesObsDataCutoff;
+  templatePtr[7] = (g2_ui08) _minutesObsDataCutoff;
 
-  templatePtr[8] = (ui08) _timeRangeUnit;
+  templatePtr[8] = (g2_ui08) _timeRangeUnit;
 
   GribSection::_pkUnsigned4(_forecastTime, &(templatePtr[9]));
 
-  templatePtr[13] = (ui08) _firstSurfaceType;
+  templatePtr[13] = (g2_ui08) _firstSurfaceType;
 
-  templatePtr[14] = (ui08) _scaleFactorFirstSurface;
+  templatePtr[14] = (g2_ui08) _scaleFactorFirstSurface;
 
   GribSection::_pkUnsigned4(_scaleValFirstSurface, &(templatePtr[15]));
 
-  templatePtr[19] = (ui08) _secondSurfaceType;
+  templatePtr[19] = (g2_ui08) _secondSurfaceType;
 
-  templatePtr[20] = (ui08) _scaleFactorSecondSurface;
+  templatePtr[20] = (g2_ui08) _scaleFactorSecondSurface;
 
   GribSection::_pkUnsigned4(_scaleValSecondSurface, &(templatePtr[21]));
 
-  templatePtr[25] = (ui08) _forecastProbability;
+  templatePtr[25] = (g2_ui08) _forecastProbability;
 
-  templatePtr[26] = (ui08) _numberOfForcastProbs;
+  templatePtr[26] = (g2_ui08) _numberOfForcastProbs;
 
-  templatePtr[27] = (ui08) _proababilityType;
+  templatePtr[27] = (g2_ui08) _proababilityType;
 
-  templatePtr[28] = (ui08) _scaleFactorLowerLimit;
+  templatePtr[28] = (g2_ui08) _scaleFactorLowerLimit;
 
   GribSection::_pkUnsigned4(_scaleValLowerLimit, &(templatePtr[29]));
 
-  templatePtr[33] = (ui08) _scaleFactorUpperLimit;
+  templatePtr[33] = (g2_ui08) _scaleFactorUpperLimit;
 
   GribSection::_pkUnsigned4(_scaleValUpperLimit, &(templatePtr[34]));
 
@@ -113,44 +113,44 @@ int Template4_pt_5::pack (ui08 *templatePtr)
 
 }
 
-int Template4_pt_5::unpack (ui08 *templatePtr) 
+int Template4_pt_5::unpack (g2_ui08 *templatePtr) 
 {
 
-  _parameterCategory = (si32) templatePtr[0]; 
+  _parameterCategory = (g2_si32) templatePtr[0]; 
   
-  _paramNumber = (si32) templatePtr[1]; 
+  _paramNumber = (g2_si32) templatePtr[1]; 
 
   // set strings for parameter, longParameter and units
   setParamStrings();
 
   // Type of generating process
-  _processType = (si32) templatePtr[2]; 
+  _processType = (g2_si32) templatePtr[2]; 
 
   // Background generating process identifier 
-  _backgrdProcessId = (si32) templatePtr[3]; 
+  _backgrdProcessId = (g2_si32) templatePtr[3]; 
 
   // Analysis or forecast generating processes identifier 
-  _processID = (si32) templatePtr[4]; 
+  _processID = (g2_si32) templatePtr[4]; 
 
   // Hours of observational data cutoff after reference time
   _hoursObsDataCutoff 
             = GribSection::_upkUnsigned2 (templatePtr[5], templatePtr[6]);
 
   // Minutes of observational data cutoff after reference time
-  _minutesObsDataCutoff = (si32) templatePtr[7]; 
+  _minutesObsDataCutoff = (g2_si32) templatePtr[7]; 
 
   // Indicator of unit of time range
-  _timeRangeUnit = (si32) templatePtr[8]; 
+  _timeRangeUnit = (g2_si32) templatePtr[8]; 
 
   // Forecast Time, In units defined by _timeRangeUnit
   _forecastTime =
        GribSection::_upkUnsigned4 (templatePtr[9], templatePtr[10], templatePtr[11], templatePtr[12]);
 
   // Type of first fixed surface
-  _firstSurfaceType = (si32) templatePtr[13]; 
+  _firstSurfaceType = (g2_si32) templatePtr[13]; 
 
   // Scale factor of first fixed surface
-  _scaleFactorFirstSurface = (si32) templatePtr[14];
+  _scaleFactorFirstSurface = (g2_si32) templatePtr[14];
 
   // Scale value of first fixed surface
   _scaleValFirstSurface =
@@ -161,26 +161,26 @@ int Template4_pt_5::unpack (ui08 *templatePtr)
       GribSection::_upkSigned4 (templatePtr[15], templatePtr[16], templatePtr[17], templatePtr[18]);
 
   // Type of second fixed surface
-  _secondSurfaceType = (si32) templatePtr[19]; 
+  _secondSurfaceType = (g2_si32) templatePtr[19]; 
 
   // Scale factor of second fixed surface
-  _scaleFactorSecondSurface = (si32) templatePtr[20];
+  _scaleFactorSecondSurface = (g2_si32) templatePtr[20];
 
   // Scale value of second fixed surface
   _scaleValSecondSurface =
        GribSection::_upkUnsigned4 (templatePtr[21], templatePtr[22], templatePtr[23], templatePtr[24]);
 
   // Forecast probability number
-  _forecastProbability = (si32) templatePtr[25];
+  _forecastProbability = (g2_si32) templatePtr[25];
 
   // Total number of forecast probabilities
-  _numberOfForcastProbs = (si32) templatePtr[26];
+  _numberOfForcastProbs = (g2_si32) templatePtr[26];
 
   // Probability type (see Code Table 4.9)
-  _proababilityType = (si32) templatePtr[27];
+  _proababilityType = (g2_si32) templatePtr[27];
 
   // Scale factor of lower limit
-  _scaleFactorLowerLimit = (si32) templatePtr[28];
+  _scaleFactorLowerLimit = (g2_si32) templatePtr[28];
 
   // Scaled value of lower limit
   _scaleValLowerLimit =
@@ -188,7 +188,7 @@ int Template4_pt_5::unpack (ui08 *templatePtr)
 
 
   // Scale factor of upper limit
-  _scaleFactorUpperLimit = (si32) templatePtr[33];
+  _scaleFactorUpperLimit = (g2_si32) templatePtr[33];
 
   // Scaled value of upper limit
   _scaleValUpperLimit = 

@@ -43,18 +43,18 @@ namespace Grib2 {
 //     a 32 bit number unpacked from 4 bytes into
 //     an ieee 32 bit floating point number
 
-const fl64 GribSection::TWO_POWER_MINUS_23   = 0.00000011920928955078125;
-const fl64 GribSection::TWO_POWER_MINUS_126  
+const g2_fl64 GribSection::TWO_POWER_MINUS_23   = 0.00000011920928955078125;
+const g2_fl64 GribSection::TWO_POWER_MINUS_126  
                    = 0.0000000000000000000000000000000000000117549435082228750796873654;
-const fl64 GribSection::TWO_POWER_23   = 8388608;
-const fl64 GribSection::TWO_POWER_126  = 8.507059173+37;  //?
+const g2_fl64 GribSection::TWO_POWER_23   = 8388608;
+const g2_fl64 GribSection::TWO_POWER_126  = 8.507059173+37;  //?
 
-const ui32 GribSection::MASK_ONE       = 0x80000000;  // 10000000000000000000000000000000 binary
-const si32 GribSection::MASK_TWO       = 0x7F800000;  // 01111111100000000000000000000000 binary
-const si32 GribSection::MASK_THREE     = 0x007FFFFF;  // 00000000011111111111111111111111 binary
+const g2_ui32 GribSection::MASK_ONE       = 0x80000000;  // 10000000000000000000000000000000 binary
+const g2_si32 GribSection::MASK_TWO       = 0x7F800000;  // 01111111100000000000000000000000 binary
+const g2_si32 GribSection::MASK_THREE     = 0x007FFFFF;  // 00000000011111111111111111111111 binary
 
-const ui32 GribSection::U4MISSING = 0xFFFFFFFF;  // 11111111111111111111111111111111 binary
-const si32 GribSection::S4MISSING = 0xFFFFFFFF;  // 11111111111111111111111111111111 binary
+const g2_ui32 GribSection::U4MISSING = 0xFFFFFFFF;  // 11111111111111111111111111111111 binary
+const g2_si32 GribSection::S4MISSING = 0xFFFFFFFF;  // 11111111111111111111111111111111 binary
 
 GribSection::GribSection() 
 {
@@ -68,7 +68,7 @@ GribSection::~GribSection()
 }
 
 
-fl32 GribSection::rdIeee (si32 ieee)
+g2_fl32 GribSection::rdIeee (g2_si32 ieee)
 // SUBPROGRAM:    rdieee 
 //   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-09
 //
@@ -77,12 +77,12 @@ fl32 GribSection::rdIeee (si32 ieee)
 //
 {
 
-  fl32 val = 0.0;
-  fl32 temp;
-  si32 sign_bit = 0;
-  fl32 sign = 0.0;
-  si32 exponent = 0;
-  si32 mantissa = 0;
+  g2_fl32 val = 0.0;
+  g2_fl32 temp;
+  g2_si32 sign_bit = 0;
+  g2_fl32 sign = 0.0;
+  g2_si32 exponent = 0;
+  g2_si32 mantissa = 0;
 
 
   // Extract sign bit, exponent, and mantissa
@@ -116,7 +116,7 @@ fl32 GribSection::rdIeee (si32 ieee)
 
 }
 
-si32 GribSection::mkIeee (fl32 a)
+g2_si32 GribSection::mkIeee (g2_fl32 a)
 // SUBPROGRAM:    mkieee 
 //   PRGMMR: Gilbert         ORG: W/NP11    DATE: 2000-05-09
 //
@@ -124,11 +124,11 @@ si32 GribSection::mkIeee (fl32 a)
 //   32-bit IEEE floating point format.
 //
 {
-  si32 sign = 0;
-  si32 exponent = 0;
-  si32 mantissa = 0;
-  fl32 alog2 = log(2.0);
-  fl32 atemp;
+  g2_si32 sign = 0;
+  g2_si32 exponent = 0;
+  g2_si32 mantissa = 0;
+  g2_fl32 alog2 = log(2.0);
+  g2_fl32 atemp;
 
   if (a == 0) {
     return(0);
@@ -169,32 +169,32 @@ si32 GribSection::mkIeee (fl32 a)
   return(sign | exponent | mantissa);
 }
 
-int GribSection::_upkUnsigned2( ui08 a, ui08 b ) 
+int GribSection::_upkUnsigned2( g2_ui08 a, g2_ui08 b ) 
 { return ((int) ( (a << 8) + b) ); }
 
-int GribSection::_upkSigned2( ui08 a, ui08 b )
+int GribSection::_upkSigned2( g2_ui08 a, g2_ui08 b )
 { return ( (a & 128 ? -1 : 1) *
 	   (int) (((a & 127) << 8) + b) ); }
 
-int GribSection::_upkSigned3( ui08 a, ui08 b, ui08 c ) 
+int GribSection::_upkSigned3( g2_ui08 a, g2_ui08 b, g2_ui08 c ) 
 { return( (a & 128 ? -1 : 1) * 
 	  (int) (((a & 127) << 16) + (b << 8) + c) ); }
 
-int GribSection::_upkSigned4( ui08 a, ui08 b, ui08 c, ui08 d )
-{ return ( (a & 128 ? -1 : 1) * (ui32) ( ((a & 127) << 24) + (b << 16) + (c << 8) + d )); }
+int GribSection::_upkSigned4( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d )
+{ return ( (a & 128 ? -1 : 1) * (g2_ui32) ( ((a & 127) << 24) + (b << 16) + (c << 8) + d )); }
 
-int GribSection::_upkUnsigned4( ui08 a, ui08 b, ui08 c, ui08 d )
-{ return ((ui32) ( (a << 24) + (b << 16) + (c << 8) + d )); }
+int GribSection::_upkUnsigned4( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d )
+{ return ((g2_ui32) ( (a << 24) + (b << 16) + (c << 8) + d )); }
 
-ui64 GribSection::_upkUnsigned5( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e )
+g2_ui64 GribSection::_upkUnsigned5( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e )
 { 
-  ui64 aa;
+  g2_ui64 aa;
   
-  aa = (ui64) a;
-  return ((ui64) ( (aa << 32) +  (b << 24) + (c << 16) + (d << 8) + e )); 
+  aa = (g2_ui64) a;
+  return ((g2_ui64) ( (aa << 32) +  (b << 24) + (c << 16) + (d << 8) + e )); 
 }
 
-void GribSection::_pkSigned2( const int value, ui08 *buffer ) 
+void GribSection::_pkSigned2( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -206,7 +206,7 @@ void GribSection::_pkSigned2( const int value, ui08 *buffer )
   
 }
 
-void GribSection::_pkUnsigned2( const int value, ui08 *buffer ) 
+void GribSection::_pkUnsigned2( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -217,7 +217,7 @@ void GribSection::_pkUnsigned2( const int value, ui08 *buffer )
 }
 
 
-void GribSection::_pkSigned3( const int value, ui08 *buffer ) 
+void GribSection::_pkSigned3( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -231,10 +231,10 @@ void GribSection::_pkSigned3( const int value, ui08 *buffer )
   
 }
 
-int GribSection::_upkUnsigned3( ui08 a, ui08 b, ui08 c )
+int GribSection::_upkUnsigned3( g2_ui08 a, g2_ui08 b, g2_ui08 c )
 { return ((int) ( (a << 16) + (b << 8) + c )); }
 
-void GribSection::_pkUnsigned3( const int value, ui08 *buffer ) 
+void GribSection::_pkUnsigned3( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -253,7 +253,7 @@ void GribSection::_pkUnsigned3( const int value, ui08 *buffer )
   buffer[2] = (value      ) & 255;
 }
 
-void GribSection::_pkSigned4( const int value, ui08 *buffer ) 
+void GribSection::_pkSigned4( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -269,7 +269,7 @@ void GribSection::_pkSigned4( const int value, ui08 *buffer )
 }
 
 
-void GribSection::_pkUnsigned4( const int value, ui08 *buffer ) 
+void GribSection::_pkUnsigned4( const int value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -283,7 +283,7 @@ void GribSection::_pkUnsigned4( const int value, ui08 *buffer )
   buffer[3] = (value      ) & 255;
 }
 
-void GribSection::_pkUnsigned5( const ui64 value, ui08 *buffer ) 
+void GribSection::_pkUnsigned5( const g2_ui64 value, g2_ui08 *buffer ) 
 {
   // Clear out the original byte values
   buffer[0] = 0;
@@ -299,9 +299,9 @@ void GribSection::_pkUnsigned5( const ui64 value, ui08 *buffer )
   buffer[4] = (value      ) & 255;
 }
 
-ui64 GribSection::_upkUnsigned8( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f, ui08 g, ui08 h)
+g2_ui64 GribSection::_upkUnsigned8( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e, g2_ui08 f, g2_ui08 g, g2_ui08 h)
 { 
-  ui64 aa, bb, cc, dd;
+  g2_ui64 aa, bb, cc, dd;
   //, bb, cc, dd;
   
   aa =  a;
@@ -309,12 +309,12 @@ ui64 GribSection::_upkUnsigned8( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f,
   cc = c;
   dd = d;
   
-  return ((ui64) ( (aa << 56) + (bb << 48) + (cc << 40) + (dd << 32) + (e << 24) + (f << 16) + (g << 8) + h )); 
+  return ((g2_ui64) ( (aa << 56) + (bb << 48) + (cc << 40) + (dd << 32) + (e << 24) + (f << 16) + (g << 8) + h )); 
 }
 
-ui64 GribSection::_upkUnsigned6( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f )
+g2_ui64 GribSection::_upkUnsigned6( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e, g2_ui08 f )
 { 
-  ui64 aa, bb;
+  g2_ui64 aa, bb;
   //, bb, cc, dd;
   //bb = b;
   //cc = c;
@@ -323,7 +323,7 @@ ui64 GribSection::_upkUnsigned6( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f 
   aa =  a;
   bb =  b;
   
-  return ((ui64) ( (aa << 32) +  (bb << 24) + (c << 16) + (d << 8) + e )); 
+  return ((g2_ui64) ( (aa << 32) +  (bb << 24) + (c << 16) + (d << 8) + e )); 
 }
 
 } // namespace

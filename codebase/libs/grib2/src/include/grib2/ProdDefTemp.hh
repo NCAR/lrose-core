@@ -31,7 +31,7 @@
 #ifndef _GRIB2_PROD_DEF_TEMPLATE
 #define _GRIB2_PROD_DEF_TEMPLATE
 
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/Grib2Record.hh>
 #include <grib2/GribSection.hh>
 #include <grib2/constants.h>
@@ -79,12 +79,12 @@ public:
   /** @brief Unpack a Product Definition Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack( ui08 *projPtr ) = 0;
+  virtual int unpack( g2_ui08 *projPtr ) = 0;
 
   /** @brief Pack up this Product Definition Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack( ui08 *projPtr ) = 0;
+  virtual int pack( g2_ui08 *projPtr ) = 0;
 
   /** @brief Print to stream/file all information for this template */
   virtual void print (FILE *) const = 0;
@@ -107,14 +107,14 @@ public:
 
   /** @brief Get the size of the packed derived template class. 
    *  @return Size of packed template in bytes */ 
-  virtual si32 getTemplateSize() = 0;
+  virtual g2_si32 getTemplateSize() = 0;
 
   /** Set Functions, used when creating a grib file */
 
   /** @brief Set the Parameters category and number 
    *  @param[in] category The grib2 Parameter Category, 0-255
    *  @param[in] number The grib2 Parameter number, 0-255 */
-  inline void setParamNumbers(si32 category, si32 number) {_parameterCategory = category; _paramNumber = number; };
+  inline void setParamNumbers(g2_si32 category, g2_si32 number) {_parameterCategory = category; _paramNumber = number; };
 
   /** @brief Used internally to set pointers to other sections of the grib file.
    *  @param[in] sectionsPtr Sections pointer struct */
@@ -123,7 +123,7 @@ public:
   /** @brief Set the Generating process ID number
    *  See http://www.nco.ncep.noaa.gov/pmb/docs/on388/tablea.html
    *  @param[in] generatingProcessID The process ID number, 0-255 */
-  inline void setProcessID(si32 generatingProcessID) { _processID = generatingProcessID; };
+  inline void setProcessID(g2_si32 generatingProcessID) { _processID = generatingProcessID; };
 
   /** @brief Returns the Generating Process Name 
    *  @return A string with name of the generating process */
@@ -136,12 +136,12 @@ public:
   typedef struct {
     /** Product Discipline 
      * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table0-0.shtml */
-    si32 prodDiscipline;
+    g2_si32 prodDiscipline;
     /** Product Category 
      * See http://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_table4-1.shtml */
-    si32 category;
+    g2_si32 category;
     /** Parameter Number within the category */
-    si32 paramNumber;
+    g2_si32 paramNumber;
     /** Official Abbreviation for the parameter */
     string name;
     /** Official Name for the parameter */
@@ -276,39 +276,39 @@ public:
 
   /* LOCAL TABLES */
   /** @brief Size of table _NCAR_RALlocalTable */
-  static const ui32 _NCAR_RALlocalTable_numElements = 8;
+  static const g2_ui32 _NCAR_RALlocalTable_numElements = 8;
   /** @brief NCAR / RAL local use table 
    *
    * Parameters can be added to this table as needed */
   static const _GRIB2LocalTable _NCAR_RALlocalTable[ _NCAR_RALlocalTable_numElements ];
 
   /** @brief Size of table _NCEPlocalTable */
-  static const ui32 _NCEPlocalTable_numElements = 388;
+  static const g2_ui32 _NCEPlocalTable_numElements = 388;
   /** @brief NCEP's Local Use table */
   static const _GRIB2LocalTable _NCEPlocalTable[ _NCEPlocalTable_numElements ];
 
   /** @brief Size of table _SPClocalTable */
-  static const ui32 _SPClocalTable_numElements = 27;
+  static const g2_ui32 _SPClocalTable_numElements = 27;
   /** @brief NCEP's Local Use table */
   static const _GRIB2LocalTable _SPClocalTable[ _SPClocalTable_numElements ];
 
   /** @brief Size of table _MSC_MONTREAL_localTable */
-  static const ui32 _MSC_MONTREAL_localTable_numElements = 4;
+  static const g2_ui32 _MSC_MONTREAL_localTable_numElements = 4;
   /** @brief Meteorological Service of Canada (MSC) - Montreal - local use table */
   static const _GRIB2LocalTable _MSC_MONTREAL_localTable[ _MSC_MONTREAL_localTable_numElements ];
 
   /** @brief Size of table _NOAA_FSLlocalTable */
-  static const ui32 _NOAA_FSLlocalTable_numElements = 45;
+  static const g2_ui32 _NOAA_FSLlocalTable_numElements = 45;
   /** @brief NOAA Forecast Systems Lab local use table */
   static const _GRIB2LocalTable _NOAA_FSLlocalTable[ _NOAA_FSLlocalTable_numElements ];
 
   /** @brief Size of table _MRMSlocalTable */
-  static const ui32 _MRMSlocalTable_numElements = 110;
+  static const g2_ui32 _MRMSlocalTable_numElements = 110;
   /** @brief NSSL MRMS local use table */
   static const _GRIB2LocalTable _MRMSlocalTable[ _MRMSlocalTable_numElements ];
 
   /** @brief Size of table _COSMO_localTable */
-  static const ui32 _COSMO_localTable_numElements = 7;
+  static const g2_ui32 _COSMO_localTable_numElements = 7;
   /** @brief NCAR / RAL local use table 
    *
    * Parameters can be added to this table as needed */
@@ -319,22 +319,22 @@ public:
   {
     /** Statistical process used to calculate the processed field from
      * the field at each time increment during the time range (see Code Table 4.10) */
-    si32 _processId;
+    g2_si32 _processId;
     /** Type of time increment between successive fields used in the statistical
      * processing (See Code Table 4.11) */
-    si32 _timeIncrementType;
+    g2_si32 _timeIncrementType;
     /** Indicator of unit of time for time range over which statistical processing
      * is done (See Code Table 4.3) */
-    si32 _timeRangeUnit;
+    g2_si32 _timeRangeUnit;
     /** Length of the time range over which statistical processing is done, in units
      * defined by the _timeRangeUnit */
-    si32 _timeRangeLen;
+    g2_si32 _timeRangeLen;
     /** Indicator of unit of time for the increment between the successive 
      * fields used (See Code Table 4.3) */
-    si32 _timeIncrUnit;
+    g2_si32 _timeIncrUnit;
     /** Time increment between successive fields, in units defined by the
      *_timeIncrUnit */
-    si32 _timeIncrement;
+    g2_si32 _timeIncrement;
   } interval_t;
 
 protected:
@@ -391,19 +391,19 @@ protected:
   Grib2Record::Grib2Sections_t _sectionsPtr;
 
   /** @brief The parameter category number */
-  si32 _parameterCategory;
+  g2_si32 _parameterCategory;
   /** @brief The parameter number */
-  si32 _paramNumber;
+  g2_si32 _paramNumber;
 
   /** @brief The Generating processes identifier */
-  si32 _processID; 
+  g2_si32 _processID; 
   /** @brief The ceter id number from the IDS section */
-  si32 _centerId;
+  g2_si32 _centerId;
   /** @brief The sub center id number for the IDS section */
-  si32 _subCenterId;
+  g2_si32 _subCenterId;
 
   /** @brief The discipline number from the IS section */
-  si32 _disciplineNum;
+  g2_si32 _disciplineNum;
 
   /** @brief the Paramenter name */
   string *_parameterLongName;

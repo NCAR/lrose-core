@@ -71,7 +71,7 @@ public:
   /**
    * @brief This constructor is generally only used from Grib2::Grib2Record::addField() for creating a Grib2File
    */
-  PDS(Grib2Record::Grib2Sections_t sectionsPtr, si32 prodDefNum,
+  PDS(Grib2Record::Grib2Sections_t sectionsPtr, g2_si32 prodDefNum,
       ProdDefTemp *productTemplate);
 
   ~PDS();
@@ -79,12 +79,12 @@ public:
   /** @brief Unpacks the whole Product Definition Section
    *  @param[in] pdsPtr Pointer to start of the PDS section
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack( ui08 *pdsPtr );
+  int unpack( g2_ui08 *pdsPtr );
 
   /** @brief Packs up the Product Definition Section
    *  @param[in] pdsPtr Pointer to start of location to pack to
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int pack( ui08 *pdsPtr ) ;
+  int pack( g2_ui08 *pdsPtr ) ;
 
   /** @brief Print to stream/file all information contained in the PDS section */
   void print(FILE *) const;
@@ -98,7 +98,7 @@ public:
   long int getForecastTime() const;
 
   /** @brief Get the Product Definition Template number */
-  inline ui32 getProdDefTempNum () {return _prodDefTempNum; };
+  inline g2_ui32 getProdDefTempNum () {return _prodDefTempNum; };
 
   /** @brief Get the Product Definition Template */
   inline ProdDefTemp *getProdDefTemp () { return _prodDefinition; };
@@ -118,10 +118,10 @@ private:
 
   /** @brief Number of optional list of coordinate values 
    * (this is currently unimplemented and is set to 0) */
-  ui32 _coordinateValsize;
+  g2_ui32 _coordinateValsize;
 
   /** @brief Template number of ProdDefTemp */
-  ui32 _prodDefTempNum;
+  g2_ui32 _prodDefTempNum;
 
   /** @brief The ProdDefTemp stores additional infromation needed for the product type */
   ProdDefTemp *_prodDefinition;

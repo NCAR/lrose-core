@@ -71,9 +71,9 @@ void DataTemp::freeData()
   _data = NULL;
 }
 
-void DataTemp::_applyBitMapUnpack(fl32 *data) 
+void DataTemp::_applyBitMapUnpack(g2_fl32 *data) 
 {
-  si32 *bitMap = _sectionsPtr.bms->getBitMap();
+  g2_si32 *bitMap = _sectionsPtr.bms->getBitMap();
   //
   // Apply the bitmap if one exists
   // Adding 0 value where bitmap = 0
@@ -81,11 +81,11 @@ void DataTemp::_applyBitMapUnpack(fl32 *data)
   if (bitMap == NULL)
     _data = data;
   else {
-    si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+    g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
 
     if(_data)
       delete [] _data;
-    _data = new fl32[gridSz];
+    _data = new g2_fl32[gridSz];
     
     int n = 0;
     for (int i = 0; i < gridSz; i++) {
@@ -93,7 +93,7 @@ void DataTemp::_applyBitMapUnpack(fl32 *data)
         _data[i] = data[n++];
       }
       else
-        _data[i] = -9999.0;//FLT_MAX; //pow(2.0, (sizeof(fl32) * 8.0)) - 1;   //  MAX_INT;
+        _data[i] = -9999.0;//FLT_MAX; //pow(2.0, (sizeof(g2_fl32) * 8.0)) - 1;   //  MAX_INT;
     }
     delete [] data;
     if(n != _sectionsPtr.drs->getNumPackedDataPoints()) {
@@ -103,21 +103,21 @@ void DataTemp::_applyBitMapUnpack(fl32 *data)
 
 }
 
-fl32 *DataTemp::_applyBitMapPack(fl32 *data)
+g2_fl32 *DataTemp::_applyBitMapPack(g2_fl32 *data)
 {
-  si32 *bitMap = _sectionsPtr.bms->getBitMap();
-  si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+  g2_si32 *bitMap = _sectionsPtr.bms->getBitMap();
+  g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
   //
   // Apply the bitmap if one exists
   // Removing data where bitmap = 0
   //
-  fl32 *pdata;
+  g2_fl32 *pdata;
   if(bitMap == NULL) {
     pdata = data;
     _sectionsPtr.drs->setNumPackedDataPoints(gridSz);
   } else {
 
-    pdata = new fl32[gridSz];
+    pdata = new g2_fl32[gridSz];
     int ndpts = 0;
     for(int j = 0; j < gridSz; j++)
       if(bitMap[j]) {

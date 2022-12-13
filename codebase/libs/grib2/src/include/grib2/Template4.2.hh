@@ -30,7 +30,7 @@
 #ifndef _GRIB2_TEMPLATE_4_PT_2 
 #define _GRIB2_TEMPLATE_4_PT_2
 
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/ProdDefTemp.hh>
 #include <grib2/constants.h>
 
@@ -71,12 +71,12 @@ public:
   /** @brief Unpack a Product Definition Template 
    *  @param[in] projPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *projPtr);
+  int unpack (g2_ui08 *projPtr);
 
   /** @brief Pack up this Product Definition Template
    *  @param[in] projPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (ui08 *projPtr);
+  int pack (g2_ui08 *projPtr);
 
   /** @brief Print to stream/file all information for this template */
   void print (FILE *) const;
@@ -91,42 +91,42 @@ public:
 
   /** @brief Get the size of the packed derived template class. 
    *  @return Size of packed template in bytes */ 
-  virtual si32 getTemplateSize() { return TEMPLATE4_PT_2_SIZE; };
+  virtual g2_si32 getTemplateSize() { return TEMPLATE4_PT_2_SIZE; };
 
   /** @brief Type of generating process */
-  si32 _processType;             
+  g2_si32 _processType;             
   /** @brief Background generating process identifier */
-  si32 _backgrdProcessId;        
+  g2_si32 _backgrdProcessId;        
   /** @brief Hours of observational data cutoff after reference time */
-  si32 _hoursObsDataCutoff;      
+  g2_si32 _hoursObsDataCutoff;      
   /** @brief Minutes of observational data cutoff after reference time */
-  si32 _minutesObsDataCutoff;    
+  g2_si32 _minutesObsDataCutoff;    
   /** @brief Indicator of unit of time range  */
-  si32 _timeRangeUnit;           
+  g2_si32 _timeRangeUnit;           
   /** @brief In units defined by _timeUintRange */
-  si32 _forecastTime;            
+  g2_si32 _forecastTime;            
   /** @brief Type of first fixed surface */
-  si32 _firstSurfaceType;       
+  g2_si32 _firstSurfaceType;       
   /** @brief Scale factor of first fixed surface */
-  si32 _scaleFactorFirstSurface; 
+  g2_si32 _scaleFactorFirstSurface; 
   /** @brief Scale value of first fixed surface */
-  si32 _scaleValFirstSurface;    
+  g2_si32 _scaleValFirstSurface;    
   /** @brief Type of second fixed surface */
-  si32 _secondSurfaceType;      
+  g2_si32 _secondSurfaceType;      
   /** @brief Scale factor of second fixed surface */
-  si32 _scaleFactorSecondSurface;
+  g2_si32 _scaleFactorSecondSurface;
   /** @brief Scale value of second fixed surface */
-  si32 _scaleValSecondSurface;   
+  g2_si32 _scaleValSecondSurface;   
   /** @brief Derived forecast (see Code Table 4.7) */
-  si32 _derivedForecastType;     
+  g2_si32 _derivedForecastType;     
   /** @brief Number of forecasts in ensemble */
-  si32 _numForecasts;            
+  g2_si32 _numForecasts;            
 
 protected:
 
 private: 
   
-  static const si32 TEMPLATE4_PT_2_SIZE;
+  static const g2_si32 TEMPLATE4_PT_2_SIZE;
 
 };
 

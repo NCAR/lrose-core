@@ -37,7 +37,7 @@
 #include <grib2/DRS.hh>
 #include <grib2/DataRepTemp.hh>
 #include <grib2/Template5.4000.hh>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 
 #ifndef NO_JASPER_LIB
 #include <jasper/jasper.h>
@@ -62,7 +62,7 @@ Template7_pt_4000::~Template7_pt_4000 ()
 
 void Template7_pt_4000::print(FILE *stream) const
 {
-  si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+  g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
   fprintf(stream, "DS length: %d\n", gridSz);
   if(_data) {
     for (int i = 0; i < gridSz; i++) {
@@ -72,7 +72,7 @@ void Template7_pt_4000::print(FILE *stream) const
   }
 }
 
-int Template7_pt_4000::pack (fl32 *dataPtr)
+int Template7_pt_4000::pack (g2_fl32 *dataPtr)
 {
 // SUBPROGRAM:    jpcpack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-12-17
@@ -95,18 +95,18 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
   return GRIB_FAILURE;
 #endif
 
-  fl32 *pdataPtr = _applyBitMapPack(dataPtr);
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_fl32 *pdataPtr = _applyBitMapPack(dataPtr);
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
 
-  si32 maxdif;
+  g2_si32 maxdif;
 
   int width = gridSz;
   int height = 1;
 
   Template5_pt_4000 *template5_pt_4000 = (Template5_pt_4000 *)_sectionsPtr.drs->getDrsTemplate();
 
-  si32 bitMapIndicator = _sectionsPtr.bms->getBitMapIndicator();
+  g2_si32 bitMapIndicator = _sectionsPtr.bms->getBitMapIndicator();
 
   if(bitMapIndicator == 255) {
     width = _sectionsPtr.gds->getWidth();
@@ -131,8 +131,8 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
       delete [] pdataPtr;
     return( GRIB_FAILURE );
   }
-  fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);
-  fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
+  g2_fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);
+  g2_fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
   //
   //  Find max and min values in the data
   //
@@ -170,7 +170,7 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
       int imin = int(rmin*dscale +.5);
       int imax = int(rmax*dscale + .5);
       int maxdif = imax-imin;
-      fl32 temp = log(float(maxdif+1))/log(2.0);
+      g2_fl32 temp = log(float(maxdif+1))/log(2.0);
       nbits = (int)ceil(temp);
       rmin = float(imin);
       //   scale data
@@ -185,7 +185,7 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
       rmin = rmin*dscale;
       rmax = rmax*dscale;
       maxdif = int((rmax-rmin)*bscale + .5);
-      fl32 temp = log(float(maxdif+1))/log(2.0);
+      g2_fl32 temp = log(float(maxdif+1))/log(2.0);
       nbits = (int)ceil(temp);
       //   scale data
       for(int j = 0; j < gridSz; j++)
@@ -197,21 +197,21 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
     //
     int retry = 0;
     nbytes = (nbits+7)/8;
-    ui08 *ctemp = (ui08 *)calloc(gridSz,nbytes);
+    g2_ui08 *ctemp = (g2_ui08 *)calloc(gridSz,nbytes);
 
     int jpclen = gridSz;
       if(jpclen < jpcminlen)
 	 jpclen = jpcminlen;
     if(_pdata)
       delete[] _pdata;
-    _pdata = new fl32[jpclen];
+    _pdata = new g2_fl32[jpclen];
     
     DS::sbits(ctemp,ifld,0,nbytes*8,0,gridSz);
     delete[] ifld;
 
     _lcpack = encode_jpeg2000(ctemp,width,height,nbits,template5_pt_4000->getCompresssionType(),
 			     template5_pt_4000->getTargetCompresssionRatio(),
-			     retry, (char *)_pdata, jpclen * sizeof(fl32));
+			     retry, (char *)_pdata, jpclen * sizeof(g2_fl32));
 
     if (_lcpack < 0) {
       cerr << "Template7_pt_4000::pack()" << endl;
@@ -221,7 +221,7 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
 	cerr << "Retrying Encoding...." << endl;
 	_lcpack = encode_jpeg2000(ctemp,width,height,nbits,template5_pt_4000->getCompresssionType(),
 				 template5_pt_4000->getTargetCompresssionRatio(),	 
-				 retry,(char *)_pdata, gridSz * sizeof(fl32));
+				 retry,(char *)_pdata, gridSz * sizeof(g2_fl32));
 	if (_lcpack < 0) {
 	  cerr << "ERROR: Template7_pt_4000::pack()" << endl;
 	  cerr << "Retry Failed" << endl;
@@ -264,21 +264,21 @@ int Template7_pt_4000::pack (fl32 *dataPtr)
   return GRIB_SUCCESS;
 }
 
-int Template7_pt_4000::unpack (ui08 *dataPtr) 
+int Template7_pt_4000::unpack (g2_ui08 *dataPtr) 
 {
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
-  fl32 *outputData = new fl32[gridSz];
+  g2_fl32 *outputData = new g2_fl32[gridSz];
 
-  fl32 bscale = pow(2.0, drsConstants.binaryScaleFactor);
-  fl32 dscale = pow(10.0, -drsConstants.decimalScaleFactor);   
-  fl32 reference = drsConstants.referenceValue;
+  g2_fl32 bscale = pow(2.0, drsConstants.binaryScaleFactor);
+  g2_fl32 dscale = pow(10.0, -drsConstants.decimalScaleFactor);   
+  g2_fl32 reference = drsConstants.referenceValue;
   
   int nbits = drsConstants.numberOfBits;
   if (nbits != 0) {
     
-    si32 *tmp_data = new si32 [gridSz];
-    si32 compressed_len = _sectionsPtr.ds->getSize() - 5;
+    g2_si32 *tmp_data = new g2_si32 [gridSz];
+    g2_si32 compressed_len = _sectionsPtr.ds->getSize() - 5;
 
     if(decode_jpeg2000 ((char *) dataPtr, compressed_len, tmp_data) == GRIB_FAILURE) {
       delete [] tmp_data;
@@ -286,7 +286,7 @@ int Template7_pt_4000::unpack (ui08 *dataPtr)
     }
     
     for (int i = 0; i < gridSz; i++) {
-      outputData[i] = (((fl32) tmp_data[i] * bscale) + reference) * dscale;
+      outputData[i] = (((g2_fl32) tmp_data[i] * bscale) + reference) * dscale;
     }
     delete [] tmp_data;
     
@@ -301,7 +301,7 @@ int Template7_pt_4000::unpack (ui08 *dataPtr)
   return GRIB_SUCCESS;
 }
 
-int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *output) 
+int Template7_pt_4000::decode_jpeg2000 (char *input, g2_si32 inputSize, g2_si32 *output) 
 {
 
 #ifdef NO_JASPER_LIB
@@ -322,7 +322,7 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
 //    Columbia and Image Power Inc, and others.
 //    JasPer is available at http://www.ece.uvic.ca/~mdadams/jasper/.
 //
-// USAGE:     int dec_jpeg2000(char *injpc,si32 bufsize,si32 *outfld)
+// USAGE:     int dec_jpeg2000(char *injpc,g2_si32 bufsize,g2_si32 *outfld)
 //
 //   INPUT ARGUMENTS:
 //      input   - Input JPEG2000 code stream.
@@ -380,9 +380,9 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
                                                jas_image_height(image), matrixData);
 
     //    Copy data matrix to output integer array.
-    si32 k = 0;
-    for (si32 i = 0; i < componentInfo->height_; i++) 
-      for (si32 j=0; j < componentInfo->width_; j++) 
+    g2_si32 k = 0;
+    for (g2_si32 i = 0; i < componentInfo->height_; i++) 
+      for (g2_si32 j=0; j < componentInfo->width_; j++) 
         output[k++]=matrixData->rows_[i][j];
 
     //  
@@ -398,7 +398,7 @@ int Template7_pt_4000::decode_jpeg2000 (char *input, si32 inputSize, si32 *outpu
 }
 
 
-int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnbits,
+int Template7_pt_4000::encode_jpeg2000 (g2_ui08 *cin,int pwidth,int pheight,int pnbits,
 					int ltype, int ratio, int retry, char *outjpc, 
 					int jpclen) 
 /*$$$  SUBPROGRAM DOCUMENTATION BLOCK
@@ -474,7 +474,7 @@ int Template7_pt_4000::encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnb
 #define MAXOPTSSIZE 1024
     char opts[MAXOPTSSIZE];
 
-    si32 width,height,nbits;
+    g2_si32 width,height,nbits;
     width = pwidth;
     height = pheight;
     nbits = pnbits;

@@ -57,7 +57,7 @@ Template7_pt_0::~Template7_pt_0 ()
 
 void Template7_pt_0::print(FILE *stream) const
 {
-  si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+  g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
   fprintf(stream, "DS length: %d\n", gridSz);
   if(_data) {
     for (int i = 0; i < gridSz; i++) {
@@ -67,7 +67,7 @@ void Template7_pt_0::print(FILE *stream) const
   }
 }
 
-int Template7_pt_0::pack (fl32 *dataPtr)
+int Template7_pt_0::pack (g2_fl32 *dataPtr)
 {
 // SUBPROGRAM:    simpack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-11-06
@@ -80,20 +80,20 @@ int Template7_pt_0::pack (fl32 *dataPtr)
 // PROGRAM HISTORY LOG:
 // 2002-11-06  Gilbert
 
-  fl32 *pdataPtr = _applyBitMapPack(dataPtr);
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_fl32 *pdataPtr = _applyBitMapPack(dataPtr);
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
 
   if(_pdata)
     delete[] _pdata;
-  _pdata = new fl32[gridSz];
+  _pdata = new g2_fl32[gridSz];
 
-  si32 zero = 0;
-  fl32 alog2 = 0.69314718;  //  ln(2.0)
+  g2_si32 zero = 0;
+  g2_fl32 alog2 = 0.69314718;  //  ln(2.0)
 
-  si32 nbits,imin,imax,maxdif,left;    
-  fl32 bscale = pow(2.0, -drsConstants.binaryScaleFactor);
-  fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
+  g2_si32 nbits,imin,imax,maxdif,left;    
+  g2_fl32 bscale = pow(2.0, -drsConstants.binaryScaleFactor);
+  g2_fl32 dscale = pow(10.0, drsConstants.decimalScaleFactor);
 
   if (drsConstants.numberOfBits <= 0 || drsConstants.numberOfBits > 31)
     nbits = 0;
@@ -102,14 +102,14 @@ int Template7_pt_0::pack (fl32 *dataPtr)
   //
   //  Find max and min values in the data
   //
-  fl32 rmax = pdataPtr[0];
-  fl32 rmin = pdataPtr[0];
+  g2_fl32 rmax = pdataPtr[0];
+  g2_fl32 rmin = pdataPtr[0];
   for (int j = 1; j < gridSz; j++) {
     if (pdataPtr[j] > rmax) rmax = pdataPtr[j];
     if (pdataPtr[j] < rmin) rmin = pdataPtr[j];
   }
      
-  si32 *ifld = (si32 *)calloc(gridSz,sizeof(si32));
+  g2_si32 *ifld = (g2_si32 *)calloc(gridSz,sizeof(g2_si32));
   //
   //  If max and min values are not equal, pack up field.
   //  If they are equal, we have a constant field, and the reference
@@ -129,7 +129,7 @@ int Template7_pt_0::pack (fl32 *dataPtr)
       imin = (int)(rmin*dscale + .5);
       imax = (int)(rmax*dscale + .5);
       maxdif = imax-imin;
-      fl32 temp = log((double)(maxdif+1))/alog2;
+      g2_fl32 temp = log((double)(maxdif+1))/alog2;
       nbits = (int)ceil(temp);
       rmin = (float)imin;
       //   scale data
@@ -144,7 +144,7 @@ int Template7_pt_0::pack (fl32 *dataPtr)
       rmin = rmin*dscale;
       rmax = rmax*dscale;
       double maxnum = pow(2.0,nbits)-1;
-      fl32 temp = log(maxnum/(rmax-rmin))/alog2;
+      g2_fl32 temp = log(maxnum/(rmax-rmin))/alog2;
       drsConstants.binaryScaleFactor = (int)ceil(-1.0*temp);
       bscale = pow(2.0,-drsConstants.binaryScaleFactor);
       //   scale data
@@ -159,7 +159,7 @@ int Template7_pt_0::pack (fl32 *dataPtr)
       rmin = rmin*dscale;
       rmax = rmax*dscale;
       maxdif = (int)((rmax-rmin)*bscale + .5);
-      fl32 temp = log((double)(maxdif+1))/alog2;
+      g2_fl32 temp = log((double)(maxdif+1))/alog2;
       nbits = (int)ceil(temp);
       //   scale data
       for (int j = 0; j < gridSz; j++)
@@ -181,11 +181,11 @@ int Template7_pt_0::pack (fl32 *dataPtr)
     //  Pack data, Pad last octet with Zeros, if necessary,
     //  and calculate the length of the packed data in bytes
     //
-    DS::sbits((ui08 *)_pdata,ifld+0,0,nbits,0,gridSz);
-    si32 nbittot = nbits*gridSz;
+    DS::sbits((g2_ui08 *)_pdata,ifld+0,0,nbits,0,gridSz);
+    g2_si32 nbittot = nbits*gridSz;
     left = 8-(nbittot%8);
     if (left != 8) {
-      DS::sbit((ui08 *)_pdata,&zero,nbittot,left);   // Pad with zeros to fill Octet
+      DS::sbit((g2_ui08 *)_pdata,&zero,nbittot,left);   // Pad with zeros to fill Octet
       nbittot = nbittot+left;
     }
     _lcpack = nbittot/8;
@@ -212,7 +212,7 @@ int Template7_pt_0::pack (fl32 *dataPtr)
 }
 
 
-int Template7_pt_0::unpack (ui08 *dataPtr) 
+int Template7_pt_0::unpack (g2_ui08 *dataPtr) 
 {
 // SUBPROGRAM:    simunpack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-10-29
@@ -227,17 +227,17 @@ int Template7_pt_0::unpack (ui08 *dataPtr)
 //   INPUT ARGUMENT LIST:
 //     dataPtr     - pointer to the packed data field.
 //
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
-  fl32 *outputData = new fl32[gridSz];
-  si32  j;
-  fl32 bscale, dscale, reference;
+  g2_fl32 *outputData = new g2_fl32[gridSz];
+  g2_si32  j;
+  g2_fl32 bscale, dscale, reference;
 
   bscale = pow(2.0, drsConstants.binaryScaleFactor);
   dscale = pow(10.0, -drsConstants.decimalScaleFactor);
   reference = drsConstants.referenceValue;
  
-  si32 *tmp_data = new si32 [gridSz];
+  g2_si32 *tmp_data = new g2_si32 [gridSz];
 
 //
 //  if drsConstants.numberOfBits equals 0, we have a constant field where the reference value
@@ -246,7 +246,7 @@ int Template7_pt_0::unpack (ui08 *dataPtr)
   if (drsConstants.numberOfBits != 0) {
     DS::gbits (dataPtr, tmp_data, 0, drsConstants.numberOfBits, 0, gridSz);
     for (j = 0; j < gridSz; j++) {
-      outputData[j] = (((fl32) tmp_data[j] * bscale) 
+      outputData[j] = (((g2_fl32) tmp_data[j] * bscale) 
 		       + reference) * dscale;
     }
   }

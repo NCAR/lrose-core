@@ -32,7 +32,7 @@
 
 #include <string>
 #include <cstdio>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 
 using namespace std;
 
@@ -64,113 +64,113 @@ public:
   // IEEE Conversion Routines
 
   /** @brief Read an ieee 32-bit floating point number */
-  static fl32 rdIeee (si32 ieee);
+  static g2_fl32 rdIeee (g2_si32 ieee);
 
   /** @brief Create an ieee 32-bit floating point value */
-  static si32 mkIeee (fl32 a);
+  static g2_si32 mkIeee (g2_fl32 a);
 
   // UnPack Routines
 
   /** @brief Unpack two bytes into a unsigned value. 
    * Store it as an integer. */
-  static int _upkUnsigned2( ui08 a, ui08 b );
+  static int _upkUnsigned2( g2_ui08 a, g2_ui08 b );
 
   /** @brief Unpack two bytes into a signed value.
    * Store it as an integer. */
-  static int _upkSigned2( ui08 a, ui08 b );
+  static int _upkSigned2( g2_ui08 a, g2_ui08 b );
 
   /** @brief Unpack three bytes into a unsigned value. 
    * Store it as an integer. */
-  static int _upkUnsigned3( ui08 a, ui08 b, ui08 c );
+  static int _upkUnsigned3( g2_ui08 a, g2_ui08 b, g2_ui08 c );
  
   /** @brief Unpack three bytes into a signed value.
    * Store it as an integer. */
-  static int _upkSigned3( ui08 a, ui08 b, ui08 c );
+  static int _upkSigned3( g2_ui08 a, g2_ui08 b, g2_ui08 c );
 
   /** Unpack four bytes into an unsigned value.
    * Store it as an integer. */
-  static int _upkUnsigned4( ui08 a, ui08 b, ui08 c, ui08 d );
+  static int _upkUnsigned4( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d );
 
   /** @brief Unpack four bytes into an signed value.
    * Store it as an integer. */
-  static int _upkSigned4( ui08 a, ui08 b, ui08 c, ui08 d );
+  static int _upkSigned4( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d );
 
   /** @brief Unpack five bytes into an unsigned 64 bit value.
-   * Store it as an ui64. */
-  static ui64 _upkUnsigned5( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e );
+   * Store it as an g2_ui64. */
+  static g2_ui64 _upkUnsigned5( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e );
 
   /** @brief Unpack six bytes into an unsigned 64 bit value.
-   * Store it as an ui64. */
-  static ui64 _upkUnsigned6( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f );
+   * Store it as an g2_ui64. */
+  static g2_ui64 _upkUnsigned6( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e, g2_ui08 f );
 
   /** @brief Unpack eight bytes into an unsigned 64 bit value.
-   * Store it as an ui64. */
-  static ui64 _upkUnsigned8( ui08 a, ui08 b, ui08 c, ui08 d, ui08 e, ui08 f, ui08 g, ui08 h);
+   * Store it as an g2_ui64. */
+  static g2_ui64 _upkUnsigned8( g2_ui08 a, g2_ui08 b, g2_ui08 c, g2_ui08 d, g2_ui08 e, g2_ui08 f, g2_ui08 g, g2_ui08 h);
 
   // Pack Routines
 
   /** Pack a signed integer into two bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkSigned2( const int value, ui08 *buffer );
+  static void _pkSigned2( const int value, g2_ui08 *buffer );
 
   /** Pack a unsigned integer into two bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkUnsigned2( const int value, ui08 *buffer );
+  static void _pkUnsigned2( const int value, g2_ui08 *buffer );
 
   /** Pack a signed integer into three bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkSigned3( const int value, ui08 *buffer );
+  static void _pkSigned3( const int value, g2_ui08 *buffer );
 
   /** Pack a unsigned integer into three bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkUnsigned3( const int value, ui08 *buffer );
+  static void _pkUnsigned3( const int value, g2_ui08 *buffer );
 
   /** Pack a signed integer into four bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkSigned4( const int value, ui08 *buffer );
+  static void _pkSigned4( const int value, g2_ui08 *buffer );
 
   /** Pack a unsigned integer into four bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkUnsigned4( const int value, ui08 *buffer );
+  static void _pkUnsigned4( const int value, g2_ui08 *buffer );
 
   /** Pack a unsigned integer into five bytes.
    * @param[in] value Integer to pack.
    * @param[out] buffer Pointer to the space where the integer should be written. */
-  static void _pkUnsigned5( const ui64 value, ui08 *buffer );
+  static void _pkUnsigned5( const g2_ui64 value, g2_ui08 *buffer );
 
   /** @brief 2^-23 as a float */
-  static const fl64 TWO_POWER_MINUS_23;
+  static const g2_fl64 TWO_POWER_MINUS_23;
   /** @brief 2^-126 as a float */
-  static const fl64 TWO_POWER_MINUS_126;
+  static const g2_fl64 TWO_POWER_MINUS_126;
   /** @brief 2^23 as a float */
-  static const fl64 TWO_POWER_23;
+  static const g2_fl64 TWO_POWER_23;
   /** @brief 2^126 as a float */
-  static const fl64 TWO_POWER_126;
+  static const g2_fl64 TWO_POWER_126;
   /** @brief Mask of the Sign bit in a IEEE value */
-  static const ui32 MASK_ONE;
+  static const g2_ui32 MASK_ONE;
   /** @brief Mask of the exponent bits in a IEEE value */
-  static const si32 MASK_TWO;
+  static const g2_si32 MASK_TWO;
   /** @brief Mask of the mantissa bits in a IEEE value */
-  static const si32 MASK_THREE;
+  static const g2_si32 MASK_THREE;
   /** @brief Unsigned 4 byte missing value (all bits 1's) */
-  static const ui32 U4MISSING;
+  static const g2_ui32 U4MISSING;
   /** @brief Signed 4 byte missing value (all bits 1's) */
-  static const si32 S4MISSING;
+  static const g2_si32 S4MISSING;
 
 protected:
 
   friend class Template7_pt_2;
 
   /** @brief This sections packed length */
-  si32 _sectionLen;
+  g2_si32 _sectionLen;
   /** @brief This sections Grib2 section number */
-  si32 _sectionNum;
+  g2_si32 _sectionNum;
 
   /** @brief Set the section length of this section
    *  @param[in] size  Size of section in bytes */

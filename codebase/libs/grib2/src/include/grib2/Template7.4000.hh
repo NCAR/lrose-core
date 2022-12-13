@@ -64,12 +64,12 @@ public:
   /** @brief Unpack the data
    *  @param[in] dataPtr Pointer to start of packed data
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int unpack (ui08 *dataPtr);
+  int unpack (g2_ui08 *dataPtr);
 
   /** @brief Pack up this data
    *  @param[in] dataPtr Pointer to start of location to pack data to
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  int pack (fl32 *dataPtr);
+  int pack (g2_fl32 *dataPtr);
 
   /** @brief Print to stream/file the data */
   virtual void print(FILE *output) const;
@@ -79,10 +79,10 @@ protected:
 
 private: 
   /** @brief Decode a Jpeg2000 data stream */
-  int decode_jpeg2000 (char *input, si32 inputSize, si32 *output);
+  int decode_jpeg2000 (char *input, g2_si32 inputSize, g2_si32 *output);
 
   /** @brief Encode a Jpeg2000 data stream */
-  int encode_jpeg2000 (ui08 *cin,int pwidth,int pheight,int pnbits,
+  int encode_jpeg2000 (g2_ui08 *cin,int pwidth,int pheight,int pnbits,
 		       int ltype, int ratio, int retry, char *outjpc, 
 		       int jpclen);
 

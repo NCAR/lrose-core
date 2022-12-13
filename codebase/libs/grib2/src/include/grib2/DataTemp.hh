@@ -31,7 +31,7 @@
 #ifndef _GRIB2_DATA_TEMPLATE
 #define _GRIB2_DATA_TEMPLATE
 
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 #include <grib2/GribSection.hh>
 #include <grib2/Grib2Record.hh>
 #include <grib2/DataRepTemp.hh>
@@ -71,12 +71,12 @@ public:
   /** @brief Unpack a Data Template 
    *  @param[in] dataPtr Pointer to start of template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int unpack( ui08 *dataPtr ) = 0;
+  virtual int unpack( g2_ui08 *dataPtr ) = 0;
 
   /** @brief Pack up this Data Template
    *  @param[in] dataPtr Pointer to start of location to pack template
    *  @return Either GRIB_SUCCESS or GRIB_FAILURE */
-  virtual int pack( fl32 *dataPtr ) = 0;
+  virtual int pack( g2_fl32 *dataPtr ) = 0;
 
   /** @brief Print to stream/file all information for this template */
   virtual void print(FILE *output) const = 0;
@@ -85,40 +85,40 @@ public:
   void freeData();
 
   /** @brief Get the unpacked data pointer */
-  inline fl32 *getData() { return _data; };
+  inline g2_fl32 *getData() { return _data; };
 
   /** @brief Get the packed data pointer, Packed data is of variable number of bits */
-  inline ui08 *getPackedData() { return (ui08 *)_pdata; };
+  inline g2_ui08 *getPackedData() { return (g2_ui08 *)_pdata; };
 
   /** @brief Get the packed data size in bytes */
-  inline si32 getPackedDataSize() { return _lcpack; };
+  inline g2_si32 getPackedDataSize() { return _lcpack; };
 
   /** @brief Get the size of the packed template */
-  inline si32 getTemplateSize() { return _lcpack + 5; };
+  inline g2_si32 getTemplateSize() { return _lcpack + 5; };
 
 protected:
 
   /** @brief Apply the Bit map to unpack the data pointer. Data will be saved to _data */
-  void _applyBitMapUnpack(fl32 *data);
+  void _applyBitMapUnpack(g2_fl32 *data);
 
   /** @brief Apply the Bit map to pack up the data pointer 
    *
    * The return pointer must be freed by the caller. UNLESS 
    * the return pointer equals the input pointer in which no bit map was applied. */
-  fl32 *_applyBitMapPack(fl32 *data);
+  g2_fl32 *_applyBitMapPack(g2_fl32 *data);
 
   /** @brief Struct containing pointers to other parts of this grib file 
    *  @note Only sections appearing before the DS will have valid pointers */
   Grib2Record::Grib2Sections_t _sectionsPtr;
 
   /** @brief Uncompressed data pointer */
-  fl32 *_data;
+  g2_fl32 *_data;
 
   /** @brief Size (bytes) of compressed data */
-  si32 _lcpack;
+  g2_si32 _lcpack;
 
   /** @brief Compressed data pointer */
-  fl32 *_pdata;
+  g2_fl32 *_pdata;
 
 };
 

@@ -44,7 +44,7 @@ IndicatorSec::IndicatorSec() :
   _sectionLen = 16;
 }
 
-int IndicatorSec::unpack( ui08 *idPtr)
+int IndicatorSec::unpack( g2_ui08 *idPtr)
 {
    
    //
@@ -78,7 +78,7 @@ int IndicatorSec::unpack( ui08 *idPtr)
    return( GRIB_SUCCESS );
 }
 
-int IndicatorSec::pack(ui08 *idPtr)
+int IndicatorSec::pack(g2_ui08 *idPtr)
 {
   // Pack the "GRIB" keyword into the buffer
   
@@ -92,10 +92,10 @@ int IndicatorSec::pack(ui08 *idPtr)
   _pkUnsigned4(_numMsgBytes, &(idPtr[12]));
    
   // Discipline - GRIB Master Table Number
-  idPtr[6] = (ui08)_disciplineNum;
+  idPtr[6] = (g2_ui08)_disciplineNum;
 
   // Edition number
-  idPtr[7] = (ui08)_editionNum;
+  idPtr[7] = (g2_ui08)_editionNum;
 
   return GRIB_SUCCESS;
 }

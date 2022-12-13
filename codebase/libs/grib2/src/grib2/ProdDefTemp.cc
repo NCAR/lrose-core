@@ -2108,7 +2108,7 @@ void ProdDefTemp::setParamStrings ()
           if (_subCenterId == 0 || _subCenterId == 1 ||_subCenterId == 2 || _subCenterId == 3) {
             // set local parameter information
 
-            for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 
                if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NCEPlocalTable[i].category) &&
@@ -2121,7 +2121,7 @@ void ProdDefTemp::setParamStrings ()
             } // for
           }  // NCEP / Environmental Modeling Center (EMC), for now same as basic NCEP local tables
 	  else if (_subCenterId == 4) {
-            for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 
                if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NCEPlocalTable[i].category) &&
@@ -2134,7 +2134,7 @@ void ProdDefTemp::setParamStrings ()
             } // for
           }  // NCEP / Aviation Weather Center (AWC) local tables, for now same as basic NCEP local tables
 	  else if (_subCenterId == 8) {
-            for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 
                if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NCEPlocalTable[i].category) &&
@@ -2147,7 +2147,7 @@ void ProdDefTemp::setParamStrings ()
             } // for
 	  } // NCEP / MDL (Meteorological Developmental Lab) local tables, for now same as basic NCEP local tables
 	  else if (_subCenterId == 14) {
-            for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 
                if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NCEPlocalTable[i].category) &&
@@ -2160,7 +2160,7 @@ void ProdDefTemp::setParamStrings ()
             } // for
 	  } // SPC (Storm Prediction Center) local tables
 	  else if (_subCenterId == 9 || _subCenterId == 255) {
-            for (ui32 i = 0; i < _SPClocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _SPClocalTable_numElements; i++ ) {
 
                if ((_SPClocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _SPClocalTable[i].category) &&
@@ -2188,7 +2188,7 @@ void ProdDefTemp::setParamStrings ()
        case 54:
 	  // Montreal
           if (_subCenterId == 2 || _subCenterId == 0) {
-            for (ui32 i = 0; i < _MSC_MONTREAL_localTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _MSC_MONTREAL_localTable_numElements; i++ ) {
 
                if ((_MSC_MONTREAL_localTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _MSC_MONTREAL_localTable[i].category) &&
@@ -2200,7 +2200,7 @@ void ProdDefTemp::setParamStrings ()
                }
             } // for
 	    if(_parameterName == NULL) {
-	      for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+	      for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 		if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
 		    (_parameterCategory == _NCEPlocalTable[i].category) &&
 		    (_paramNumber == _NCEPlocalTable[i].paramNumber)) {
@@ -2225,7 +2225,7 @@ void ProdDefTemp::setParamStrings ()
         case 59:
 	  // Global Systems Division (GSD)
           if (_subCenterId == 0) {
-            for (ui32 i = 0; i < _NOAA_FSLlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NOAA_FSLlocalTable_numElements; i++ ) {
 
                if ((_NOAA_FSLlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NOAA_FSLlocalTable[i].category) &&
@@ -2237,7 +2237,7 @@ void ProdDefTemp::setParamStrings ()
                }
             } // for
 	    if(_parameterName == NULL) {
-	      for (ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
+	      for (g2_ui32 i = 0; i < _NCEPlocalTable_numElements; i++ ) {
 		if ((_NCEPlocalTable[i].prodDiscipline == _disciplineNum) && 
 		    (_parameterCategory == _NCEPlocalTable[i].category) &&
 		    (_paramNumber == _NCEPlocalTable[i].paramNumber)) {
@@ -2260,7 +2260,7 @@ void ProdDefTemp::setParamStrings ()
         case 60:
 	  // Research Aplications Laboratory local table
           if (_subCenterId == 0) {
-            for (ui32 i = 0; i < _NCAR_RALlocalTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _NCAR_RALlocalTable_numElements; i++ ) {
 
                if ((_NCAR_RALlocalTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _NCAR_RALlocalTable[i].category) &&
@@ -2283,7 +2283,7 @@ void ProdDefTemp::setParamStrings ()
 	  // Subcenter: 0 (National Severe Storms Lab)
 	  // Operational MRMS GRIB2 Tables
 	  if(_subCenterId == 0) {
-	    for (ui32 i = 0; i < _MRMSlocalTable_numElements; i++ ) {
+	    for (g2_ui32 i = 0; i < _MRMSlocalTable_numElements; i++ ) {
 	      
 	      if ((_MRMSlocalTable[i].prodDiscipline == _disciplineNum) && 
 		  (_parameterCategory == _MRMSlocalTable[i].category) &&
@@ -2301,7 +2301,7 @@ void ProdDefTemp::setParamStrings ()
         case 250:
 	  // COnsortium for Small scall MOdelling (COSMO) local table
           if (_subCenterId == 2) {
-            for (ui32 i = 0; i < _COSMO_localTable_numElements; i++ ) {
+            for (g2_ui32 i = 0; i < _COSMO_localTable_numElements; i++ ) {
 
                if ((_COSMO_localTable[i].prodDiscipline == _disciplineNum) && 
                          (_parameterCategory == _COSMO_localTable[i].category) &&
@@ -2346,7 +2346,7 @@ void ProdDefTemp::setParamStrings ()
       case 0:
         // GRIB2 Code table 4.2 : 0.0
  	// parameterCategory is temperature
-        if (_paramNumber < (si32) sizeof (_meteoTemp) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoTemp) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_meteoTemp[_paramNumber].name);
 	  _parameterLongName = new string (_meteoTemp[_paramNumber].comment);
 	  _parameterUnits = new string (_meteoTemp[_paramNumber].unit);
@@ -2356,7 +2356,7 @@ void ProdDefTemp::setParamStrings ()
       case 1:
         // GRIB2 Code table 4.2 : 0.1 
  	// parameterCategory is Moisture
-        if (_paramNumber < (si32) sizeof (_meteoMoist) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoMoist) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoMoist[_paramNumber].name);
           _parameterLongName = new string (_meteoMoist[_paramNumber].comment);
           _parameterUnits = new string (_meteoMoist[_paramNumber].unit);
@@ -2366,7 +2366,7 @@ void ProdDefTemp::setParamStrings ()
       case 2:
         // GRIB2 Code table 4.2 : 0.2         
  	// parameterCategory is Momentum
-        if (_paramNumber < (si32) sizeof (_meteoMoment) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoMoment) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoMoment[_paramNumber].name);
           _parameterLongName = new string (_meteoMoment[_paramNumber].comment);
           _parameterUnits = new string (_meteoMoment[_paramNumber].unit);
@@ -2376,7 +2376,7 @@ void ProdDefTemp::setParamStrings ()
      case 3:
         // GRIB2 Code table 4.2 : 0.3
  	// parameterCategory is Mass
-        if (_paramNumber < (si32) sizeof (_meteoMass) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoMass) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoMass[_paramNumber].name);
           _parameterLongName = new string (_meteoMass[_paramNumber].comment);
           _parameterUnits = new string (_meteoMass[_paramNumber].unit);
@@ -2386,7 +2386,7 @@ void ProdDefTemp::setParamStrings ()
      case 4:
         // GRIB2 Code table 4.2 : 0.4
  	// parameterCategory is Short-wave Radiation
-        if (_paramNumber < (si32) sizeof (_meteoShortRadiate) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoShortRadiate) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoShortRadiate[_paramNumber].name);
           _parameterLongName =new string (_meteoShortRadiate[_paramNumber].comment);
           _parameterUnits = new string (_meteoShortRadiate[_paramNumber].unit);
@@ -2396,7 +2396,7 @@ void ProdDefTemp::setParamStrings ()
      case 5:
         // GRIB2 Code table 4.2 : 0.5
  	// parameterCategory is Long-wave Radiation
-        if (_paramNumber < (si32) sizeof (_meteoLongRadiate) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoLongRadiate) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoLongRadiate[_paramNumber].name);
           _parameterLongName =new string (_meteoLongRadiate[_paramNumber].comment);
           _parameterUnits = new string (_meteoLongRadiate[_paramNumber].unit);
@@ -2406,7 +2406,7 @@ void ProdDefTemp::setParamStrings ()
      case 6:
         // GRIB2 Code table 4.2 : 0.6 
  	// parameterCategory is Cloud
-        if (_paramNumber < (si32) sizeof (_meteoCloud) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoCloud) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoCloud[_paramNumber].name);
           _parameterLongName =new string (_meteoCloud[_paramNumber].comment);
           _parameterUnits = new string (_meteoCloud[_paramNumber].unit);
@@ -2416,7 +2416,7 @@ void ProdDefTemp::setParamStrings ()
      case 7:
         // GRIB2 Code table 4.2 : 0.7
  	// parameterCategory is Thermodynamic Stability indices
-        if (_paramNumber < (si32) sizeof (_meteoStability) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoStability) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoStability[_paramNumber].name);
           _parameterLongName =new string (_meteoStability[_paramNumber].comment);
           _parameterUnits = new string (_meteoStability[_paramNumber].unit);
@@ -2448,7 +2448,7 @@ void ProdDefTemp::setParamStrings ()
      case 13:
         // GRIB2 Code table 4.2 : 0.13
  	// parameterCategory is Aerosols
-        if (_paramNumber < (si32) sizeof (_meteoAerosols) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoAerosols) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoAerosols[_paramNumber].name);
           _parameterLongName =new string (_meteoAerosols[_paramNumber].comment);
           _parameterUnits = new string (_meteoAerosols[_paramNumber].unit);
@@ -2458,7 +2458,7 @@ void ProdDefTemp::setParamStrings ()
      case 14:
         // GRIB2 Code table 4.2 : 0.14
  	// parameterCategory is Trace gases (e.g., ozone, CO2)
-        if (_paramNumber < (si32) sizeof (_meteoGases) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoGases) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoGases[_paramNumber].name);
           _parameterLongName =new string (_meteoGases[_paramNumber].comment);
           _parameterUnits = new string (_meteoGases[_paramNumber].unit);
@@ -2468,7 +2468,7 @@ void ProdDefTemp::setParamStrings ()
      case 15:
         // GRIB2 Code table 4.2 : 0.15
  	// parameterCategory is Radar
-        if (_paramNumber < (si32) sizeof (_meteoRadar) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoRadar) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoRadar[_paramNumber].name);
           _parameterLongName =new string (_meteoRadar[_paramNumber].comment);
           _parameterUnits = new string (_meteoRadar[_paramNumber].unit);
@@ -2478,7 +2478,7 @@ void ProdDefTemp::setParamStrings ()
      case 16:
         // GRIB2 Code table 4.2 : 0.16
  	// parameterCategory is Forecast Radar Imagery
-        if (_paramNumber < (si32) sizeof (_meteoRadarForecast) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoRadarForecast) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoRadarForecast[_paramNumber].name);
           _parameterLongName =new string (_meteoRadarForecast[_paramNumber].comment);
           _parameterUnits = new string (_meteoRadarForecast[_paramNumber].unit);
@@ -2488,7 +2488,7 @@ void ProdDefTemp::setParamStrings ()
      case 17:
         // GRIB2 Code table 4.2 : 0.17
  	// parameterCategory is Electro-dynamics
-        if (_paramNumber < (si32) sizeof (_meteoElectro) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoElectro) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoElectro[_paramNumber].name);
           _parameterLongName =new string (_meteoElectro[_paramNumber].comment);
           _parameterUnits = new string (_meteoElectro[_paramNumber].unit);
@@ -2498,7 +2498,7 @@ void ProdDefTemp::setParamStrings ()
      case 18:
         // GRIB2 Code table 4.2 : 0.18
  	// parameterCategory is Nuclear/radiology
-        if (_paramNumber < (si32) sizeof (_meteoNuclear) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoNuclear) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoNuclear[_paramNumber].name);
           _parameterLongName =new string (_meteoNuclear[_paramNumber].comment);
           _parameterUnits = new string (_meteoNuclear[_paramNumber].unit);
@@ -2508,7 +2508,7 @@ void ProdDefTemp::setParamStrings ()
      case 19:
         // GRIB2 Code table 4.2 : 0.19 
  	// parameterCategory is Physical atmospheric properties
-        if (_paramNumber < (si32) sizeof (_meteoAtmos) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoAtmos) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoAtmos[_paramNumber].name);
           _parameterLongName =new string (_meteoAtmos[_paramNumber].comment);
           _parameterUnits = new string (_meteoAtmos[_paramNumber].unit);
@@ -2518,7 +2518,7 @@ void ProdDefTemp::setParamStrings ()
      case 20:
         // GRIB2 Code table 4.2 : 0.20 
  	// parameterCategory is Atmospheric Chemical Constituents
-        if (_paramNumber < (si32) sizeof (_meteoChem) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoChem) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoChem[_paramNumber].name);
           _parameterLongName =new string (_meteoChem[_paramNumber].comment);
           _parameterUnits = new string (_meteoChem[_paramNumber].unit);
@@ -2528,7 +2528,7 @@ void ProdDefTemp::setParamStrings ()
      case 190:
         // GRIB2 Code table 4.2 : 0.190 
  	// parameterCategory is Arbitrary text string
-        if (_paramNumber < (si32) sizeof (_meteoText) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoText) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoText[_paramNumber].name);
           _parameterLongName =new string (_meteoText[_paramNumber].comment);
           _parameterUnits = new string (_meteoText[_paramNumber].unit);
@@ -2538,7 +2538,7 @@ void ProdDefTemp::setParamStrings ()
      case 191:
         // GRIB2 Code table 4.2 : 0.191 
  	// parameterCategory is Miscellaneous
-        if (_paramNumber < (si32) sizeof (_meteoMisc) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_meteoMisc) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_meteoMisc[_paramNumber].name);
           _parameterLongName =new string (_meteoMisc[_paramNumber].comment);
           _parameterUnits = new string (_meteoMisc[_paramNumber].unit);
@@ -2568,7 +2568,7 @@ void ProdDefTemp::setParamStrings ()
       case 0:
         // GRIB2 Code table 4.2 : 1.0
  	// Hydrology basic products
-        if (_paramNumber < (si32) sizeof (_hydroBasic) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_hydroBasic) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_hydroBasic[_paramNumber].name);
 	  _parameterLongName = new string (_hydroBasic[_paramNumber].comment);
 	  _parameterUnits = new string (_hydroBasic[_paramNumber].unit);
@@ -2578,7 +2578,7 @@ void ProdDefTemp::setParamStrings ()
       case 1:
         // GRIB2 Code table 4.2 : 1.1 
  	// Hydrology probabilities
-        if (_paramNumber < (si32) sizeof (_hydroProb) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_hydroProb) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_hydroProb[_paramNumber].name);
           _parameterLongName = new string (_hydroProb[_paramNumber].comment);
           _parameterUnits = new string (_hydroProb[_paramNumber].unit);
@@ -2588,7 +2588,7 @@ void ProdDefTemp::setParamStrings ()
       case 2:
         // GRIB2 Code table 4.2 : 1.2
  	// Hydrology Inland water and sediment properties
-        if (_paramNumber < (si32) sizeof (_hydroWaterSediment) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_hydroWaterSediment) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_hydroWaterSediment[_paramNumber].name);
           _parameterLongName = new string (_hydroWaterSediment[_paramNumber].comment);
           _parameterUnits = new string (_hydroWaterSediment[_paramNumber].unit);
@@ -2610,7 +2610,7 @@ void ProdDefTemp::setParamStrings ()
       case 0:
         // GRIB2 Code table 4.2 : 2.0
  	// Vegetation/Biomass
-        if (_paramNumber < (si32) sizeof (_landVeg) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_landVeg) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_landVeg[_paramNumber].name);
 	  _parameterLongName = new string (_landVeg[_paramNumber].comment);
 	  _parameterUnits = new string (_landVeg[_paramNumber].unit);
@@ -2620,7 +2620,7 @@ void ProdDefTemp::setParamStrings ()
       case 3:
         // GRIB2 Code table 4.2 : 2.3 
  	// Soil products
-        if (_paramNumber < (si32) sizeof (_landSoil) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_landSoil) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_landSoil[_paramNumber].name);
           _parameterLongName = new string (_landSoil[_paramNumber].comment);
           _parameterUnits = new string (_landSoil[_paramNumber].unit);
@@ -2630,7 +2630,7 @@ void ProdDefTemp::setParamStrings ()
       case 4:
         // GRIB2 Code table 4.2 : 2.4 
  	// Fire Weather products
-        if (_paramNumber < (si32) sizeof (_landFire) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_landFire) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_landFire[_paramNumber].name);
           _parameterLongName = new string (_landFire[_paramNumber].comment);
           _parameterUnits = new string (_landFire[_paramNumber].unit);
@@ -2652,7 +2652,7 @@ void ProdDefTemp::setParamStrings ()
       case 0:
         // GRIB2 Code table 4.2 : 3.0
  	// Image format products
-        if (_paramNumber < (si32) sizeof (_spaceImage) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_spaceImage) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_spaceImage[_paramNumber].name);
 	  _parameterLongName = new string (_spaceImage[_paramNumber].comment);
 	  _parameterUnits = new string (_spaceImage[_paramNumber].unit);
@@ -2662,7 +2662,7 @@ void ProdDefTemp::setParamStrings ()
       case 1:
         // GRIB2 Code table 4.2 : 3.1 
  	// Quantitative products
-        if (_paramNumber < (si32) sizeof (_spaceQuantitative) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_spaceQuantitative) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_spaceQuantitative[_paramNumber].name);
           _parameterLongName = new string (_spaceQuantitative[_paramNumber].comment);
           _parameterUnits = new string (_spaceQuantitative[_paramNumber].unit);
@@ -2685,7 +2685,7 @@ void ProdDefTemp::setParamStrings ()
       case 0:
         // GRIB2 Code table 4.2 : 10.0
  	// Waves
-        if (_paramNumber < (si32) sizeof (_oceanWaves) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanWaves) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_oceanWaves[_paramNumber].name);
 	  _parameterLongName = new string (_oceanWaves[_paramNumber].comment);
 	  _parameterUnits = new string (_oceanWaves[_paramNumber].unit);
@@ -2695,7 +2695,7 @@ void ProdDefTemp::setParamStrings ()
       case 1:
         // GRIB2 Code table 4.2 : 10.1 
  	// Currents
-        if (_paramNumber < (si32) sizeof (_oceanCurrents) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanCurrents) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_oceanCurrents[_paramNumber].name);
           _parameterLongName = new string (_oceanCurrents[_paramNumber].comment);
           _parameterUnits = new string (_oceanCurrents[_paramNumber].unit);
@@ -2705,7 +2705,7 @@ void ProdDefTemp::setParamStrings ()
       case 2:
         // GRIB2 Code table 4.2 : 10.2
  	// Ice
-        if (_paramNumber < (si32) sizeof (_oceanIce) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanIce) / (g2_si32)sizeof(_GRIB2ParmTable)) {
 	  _parameterName = new string (_oceanIce[_paramNumber].name);
 	  _parameterLongName = new string (_oceanIce[_paramNumber].comment);
 	  _parameterUnits = new string (_oceanIce[_paramNumber].unit);
@@ -2715,7 +2715,7 @@ void ProdDefTemp::setParamStrings ()
       case 3:
         // GRIB2 Code table 4.2 : 10.3 
  	// Surface properties
-        if (_paramNumber < (si32) sizeof (_oceanSurface) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanSurface) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_oceanSurface[_paramNumber].name);
           _parameterLongName = new string (_oceanSurface[_paramNumber].comment);
           _parameterUnits = new string (_oceanSurface[_paramNumber].unit);
@@ -2725,7 +2725,7 @@ void ProdDefTemp::setParamStrings ()
       case 4:
         // GRIB2 Code table 4.2 : 10.4
  	// Sub-surface properties
-        if (_paramNumber < (si32) sizeof (_oceanSubSurface) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanSubSurface) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_oceanSubSurface[_paramNumber].name);
           _parameterLongName = new string (_oceanSubSurface[_paramNumber].comment);
           _parameterUnits = new string (_oceanSubSurface[_paramNumber].unit);
@@ -2735,7 +2735,7 @@ void ProdDefTemp::setParamStrings ()
      case 191:
         // GRIB2 Code table 4.2 : 10.191 
  	//  Miscellaneous
-        if (_paramNumber < (si32) sizeof (_oceanMisc) / (si32)sizeof(_GRIB2ParmTable)) {
+        if (_paramNumber < (g2_si32) sizeof (_oceanMisc) / (g2_si32)sizeof(_GRIB2ParmTable)) {
           _parameterName = new string (_oceanMisc[_paramNumber].name);
           _parameterLongName =new string (_oceanMisc[_paramNumber].comment);
           _parameterUnits = new string (_oceanMisc[_paramNumber].unit);

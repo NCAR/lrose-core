@@ -39,7 +39,7 @@
 #include <grib2/DRS.hh>
 #include <grib2/DataRepTemp.hh>
 #include <grib2/Template5.41.hh>
-#include <dataport/port_types.h>
+#include <grib2/PortTypes.hh>
 
 
 using namespace std;
@@ -60,7 +60,7 @@ Template7_pt_41::~Template7_pt_41 ()
 
 void Template7_pt_41::print(FILE *stream) const
 {
-  si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
+  g2_si32 gridSz = _sectionsPtr.gds->getNumDataPoints();
   fprintf(stream, "DS length: %d\n", gridSz);
   if(_data) {
     for (int i = 0; i < gridSz; i++) {
@@ -70,7 +70,7 @@ void Template7_pt_41::print(FILE *stream) const
   }
 }
 
-int Template7_pt_41::pack (fl32 *dataPtr)
+int Template7_pt_41::pack (g2_fl32 *dataPtr)
 {
 // SUBPROGRAM:    pngpack
 //   PRGMMR: Gilbert          ORG: W/NP11    DATE: 2002-12-21
@@ -85,11 +85,11 @@ int Template7_pt_41::pack (fl32 *dataPtr)
 // 2002-12-21  Gilbert
 
 
-  fl32 *pdataPtr = _applyBitMapPack(dataPtr);
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_fl32 *pdataPtr = _applyBitMapPack(dataPtr);
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
 
-  si32 maxdif;
+  g2_si32 maxdif;
 
   int width = gridSz;
   int height = 1;
@@ -119,7 +119,7 @@ int Template7_pt_41::pack (fl32 *dataPtr)
       delete [] pdataPtr;
     return( GRIB_FAILURE );
   }
-  fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);
+  g2_fl32 bscale = pow(2.0 , -drsConstants.binaryScaleFactor);
   double dscale = pow(10.0, drsConstants.decimalScaleFactor);
 
   //
@@ -159,7 +159,7 @@ int Template7_pt_41::pack (fl32 *dataPtr)
       int imin = int(rmin*dscale +.5);
       int imax = int(rmax*dscale + .5);
       int maxdif = imax-imin;
-      fl32 temp = log(float(maxdif+1))/log(2.0);
+      g2_fl32 temp = log(float(maxdif+1))/log(2.0);
       nbits = (int)ceil(temp);
       rmin = float(imin);
       //   scale data
@@ -174,7 +174,7 @@ int Template7_pt_41::pack (fl32 *dataPtr)
       rmin = rmin*dscale;
       rmax = rmax*dscale;
       maxdif = int((rmax-rmin)*bscale + .5);
-      fl32 temp = log(float(maxdif+1))/log(2.0);
+      g2_fl32 temp = log(float(maxdif+1))/log(2.0);
       nbits = (int)ceil(temp);
       //   scale data
       for(int j = 0; j < gridSz; j++)
@@ -195,11 +195,11 @@ int Template7_pt_41::pack (fl32 *dataPtr)
       nbits = 32;
     }
     nbytes = (nbits+7)/8;
-    ui08 *ctemp = (ui08 *)calloc(gridSz,nbytes);
+    g2_ui08 *ctemp = (g2_ui08 *)calloc(gridSz,nbytes);
 
     if(_pdata)
       delete[] _pdata;
-    _pdata = new fl32[gridSz];
+    _pdata = new g2_fl32[gridSz];
     
     DS::sbits(ctemp,ifld,0,nbytes*8,0,gridSz);
     _lcpack = encode_png(ctemp,width,height,nbits, (char*)_pdata);
@@ -237,17 +237,17 @@ int Template7_pt_41::pack (fl32 *dataPtr)
   return GRIB_SUCCESS;
 }
 
-int Template7_pt_41::unpack (ui08 *dataPtr) 
+int Template7_pt_41::unpack (g2_ui08 *dataPtr) 
 {
-  si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
+  g2_si32 gridSz = _sectionsPtr.drs->getNumPackedDataPoints();
   DataRepTemp::data_representation_t drsConstants = _sectionsPtr.drs->getDrsConstants();
-  fl32 *outputData = new fl32[gridSz];
+  g2_fl32 *outputData = new g2_fl32[gridSz];
 
-  fl32 bscale = pow(2.0, drsConstants.binaryScaleFactor);
+  g2_fl32 bscale = pow(2.0, drsConstants.binaryScaleFactor);
   double dscale = pow(10.0, -drsConstants.decimalScaleFactor);   
   if(drsConstants.decimalScaleFactor == 1)
     dscale = 0.1;
-  fl32 reference = drsConstants.referenceValue;
+  g2_fl32 reference = drsConstants.referenceValue;
   
   int nbits = drsConstants.numberOfBits;
   if (nbits != 0) {
@@ -264,12 +264,12 @@ int Template7_pt_41::unpack (ui08 *dataPtr)
       return GRIB_FAILURE;
     }
 
-    si32 *ifld = new si32[gridSz];
+    g2_si32 *ifld = new g2_si32[gridSz];
 
-    DS::gbits ((ui08 *) tmp_data, ifld, 0, nbits, 0, gridSz);
+    DS::gbits ((g2_ui08 *) tmp_data, ifld, 0, nbits, 0, gridSz);
 
     for (int i = 0; i < gridSz; i++) {
-      outputData[i] = (((fl32) ifld[i] * bscale) + reference) * dscale;
+      outputData[i] = (((g2_fl32) ifld[i] * bscale) + reference) * dscale;
     }
 
     delete[] tmp_data;
@@ -372,11 +372,11 @@ int Template7_pt_41::decode_png (char *input, char *output)
     return -4;
 
   /*     Copy image data to output string   */  
-  si32 n = 0;
-  si32 bytes = bit_depth/8;
-  si32 clen = width * bytes;
-  for(si32 j = 0; j < (int) height; j++) {
-    for(si32 k = 0; k < clen; k++) {
+  g2_si32 n = 0;
+  g2_si32 bytes = bit_depth/8;
+  g2_si32 clen = width * bytes;
+  for(g2_si32 j = 0; j < (int) height; j++) {
+    for(g2_si32 k = 0; k < clen; k++) {
       output[n] = *(row_pointers[j]+k);
       n++;
     }
@@ -394,7 +394,7 @@ int Template7_pt_41::decode_png (char *input, char *output)
 void Template7_pt_41::user_read_data(png_structp png_ptr, png_bytep data, png_uint_32 length)
 {
      char *ptr;
-     si32 offset;
+     g2_si32 offset;
      png_stream *mem;
 
      mem = (png_stream *)png_get_io_ptr(png_ptr);
@@ -406,7 +406,7 @@ void Template7_pt_41::user_read_data(png_structp png_ptr, png_bytep data, png_ui
 }
 
 
-int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, char *out)
+int Template7_pt_41::encode_png (g2_ui08 *cin, int width, int height, int nbits, char *out)
   //int SUB_NAME(char *data,g2int *width,g2int *height,g2int *nbits,char *pngbuf)
 {
   png_structp png_ptr;
@@ -454,8 +454,8 @@ int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, ch
   /*     Set the image size, colortype, filter type, etc...      */
   
   /*    printf("SAGTsettingIHDR %d %d %d\n",width,height,bit_depth); */
-  si32 bit_depth = nbits;
-  si32 color_type = PNG_COLOR_TYPE_GRAY;
+  g2_si32 bit_depth = nbits;
+  g2_si32 color_type = PNG_COLOR_TYPE_GRAY;
   if (nbits == 24 ) {
     bit_depth=8;
     color_type=PNG_COLOR_TYPE_RGB;
@@ -471,9 +471,9 @@ int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, ch
   /*     Put image data into the PNG info structure    */
   
   /*bytes=bit_depth/8;*/
-  si32 bytes = nbits/8;
+  g2_si32 bytes = nbits/8;
   row_pointers = (png_bytep **) malloc((height)*sizeof(png_bytep));
-  for(si32 j = 0; j < height; j++) 
+  for(g2_si32 j = 0; j < height; j++) 
     row_pointers[j] = (png_bytep *)(cin+(j*(width)*bytes));
   png_set_rows(png_ptr, info_ptr, (png_bytepp)row_pointers);
   
@@ -486,7 +486,7 @@ int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, ch
   png_destroy_write_struct(&png_ptr, &info_ptr);
   free(row_pointers);
   
-  si32 pnglen = write_io_ptr.stream_len;
+  g2_si32 pnglen = write_io_ptr.stream_len;
   return pnglen;
 }
 
@@ -495,7 +495,7 @@ int Template7_pt_41::encode_png (ui08 *cin, int width, int height, int nbits, ch
 void Template7_pt_41::user_write_data(png_structp png_ptr, png_bytep data, png_uint_32 length)
 {
   char *ptr;
-  si32 offset;
+  g2_si32 offset;
   png_stream *mem;
   
   mem = (png_stream *)png_get_io_ptr(png_ptr);

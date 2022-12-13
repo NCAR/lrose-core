@@ -28,8 +28,8 @@
  * @date   Aug 2006
  */
 
-#ifndef Grib2_Grib2Record_HH
-#define Grib2_Grib2Record_HH
+#ifndef Grib2Record_HH
+#define Grib2Record_HH
 
 #include <grib2/IndicatorSec.hh>
 #include <grib2/IdSec.hh>
@@ -88,11 +88,11 @@ public:
   /** @details Struct used for summary of a field */  
   typedef struct {
     /** Discipline number of field */
-    si32    discipline;
+    g2_si32    discipline;
     /** Parameter Category number of field */
-    si32    category;
+    g2_si32    category;
     /** Parameter number of field */
-    si32    paramNumber;
+    g2_si32    paramNumber;
     /** Forecast time of field, with units */
     string forecastTime;
     /** Short or Abbreviated Name of field */
@@ -108,9 +108,9 @@ public:
     /** Level Units of field */
     string  levelUnits;
     /** Horizontal Level, or Top of level if level has a range */
-    fl32    levelVal;
+    g2_fl32    levelVal;
     /** Bottom of level */
-    fl32    levelVal2;
+    g2_fl32    levelVal2;
     /** Additional Summary Information */
     string  additional;
   } rec_summary_t;
@@ -184,9 +184,9 @@ public:
    * - 1 = Initial operational version number
    * - 2 = Current operational version number 
    */
-  Grib2Record(si32 disciplineNumber, time_t referenceTime, si32 referenceTimeType, 
-	      si32 typeOfData, si32 generatingSubCentreID, si32 generatingCentreID, 
-	      si32 productionStatus, si32 localTablesVersion, si32 masterTablesVersion);
+  Grib2Record(g2_si32 disciplineNumber, time_t referenceTime, g2_si32 referenceTimeType, 
+	      g2_si32 typeOfData, g2_si32 generatingSubCentreID, g2_si32 generatingCentreID, 
+	      g2_si32 productionStatus, g2_si32 localTablesVersion, g2_si32 masterTablesVersion);
 
   ~Grib2Record();
 
@@ -194,12 +194,12 @@ public:
    *  @param[in] filePtr Pointer to start of record
    *  @param[in] file_size Size of filePtr
    *  @return Either Grib2::GRIB_SUCCESS or Grib2::GRIB_FAILURE */
-  int unpack(ui08 **filePtr, ui64 file_size);
+  int unpack(g2_ui08 **filePtr, g2_ui64 file_size);
 
   /** @brief Packs all the data of this record into a byte array.
-   *  @return A ui08 array with the data of this record into it.
+   *  @return A g2_ui08 array with the data of this record into it.
    *   The caller is responsible for delete[] ing the returned array. */
-  ui08 *pack();
+  g2_ui08 *pack();
   
   /** @brief Print this records Indicator Section */
   void printIs (FILE *);
@@ -267,7 +267,7 @@ public:
    * @param[in] dataSize Size of the char array
    * @param[in] localUseData pointer to the char array
    */
-  void setLocalUse(si32 dataSize, ui08 *localUseData);
+  void setLocalUse(g2_si32 dataSize, g2_ui08 *localUseData);
 
   /** @brief set the Grid Definition
    *
@@ -279,7 +279,7 @@ public:
    * - 30 = LambertConfProj = Lambert conformal projection
    * @param[in] projectionTemplate Pointer to projection class (this class will now be owned by the library)
    */
-  void setGrid(si32 numberDataPoints, si32 gridDefNum, GribProj *projectionTemplate);
+  void setGrid(g2_si32 numberDataPoints, g2_si32 gridDefNum, GribProj *projectionTemplate);
   
   /** @brief Add a data field to the record
    *
@@ -312,9 +312,9 @@ public:
    * -   255   = Bit map does not apply to this product
    * @param[in] bitMap Pointer to the bitmap if bitMapType = 0, NULL otherwise
    */
-  int addField(si32 prodDefNum, ProdDefTemp *productTemplate, 
-		si32 dataRepNum, DataRepTemp *dataRepTemplate,
-		fl32 *data, si32 bitMapType, si32 *bitMap);
+  int addField(g2_si32 prodDefNum, ProdDefTemp *productTemplate, 
+		g2_si32 dataRepNum, DataRepTemp *dataRepTemplate,
+		g2_fl32 *data, g2_si32 bitMapType, g2_si32 *bitMap);
 
 private:
   
