@@ -19,16 +19,16 @@ cidd            dataport, toolsa, dsserver
 dsserver        dataport, toolsa, didss, pthread
 didss           dataport, toolsa
 grib            euclid, toolsa, dataport
-grib2           dataport (port_types, could be fixed), jasper
+grib2           jasper
 contour         euclid
 euclid          toolsa, rapmath
 rapmath         toolsa, tdrp
-physics         dataport, toolsa (minor for both)
 toolsa          dataport (bigend.h, port_types.h)
 dataport        none
 tdrp            none
 Radx            Ncxx
 Ncxx            none
+physics         none
 shapelib        none
 kd              none
 devguide        xview

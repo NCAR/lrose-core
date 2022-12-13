@@ -52,8 +52,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <sys/stat.h>
 #include <physics/AdiabatTempLookupTable.hh>
-#include <toolsa/file_io.h>
 using namespace std;
 
 
@@ -185,6 +185,189 @@ double AdiabatTempLookupTable::getTemperature(const double pressure,
  *              Private Member Functions                              *
  **********************************************************************/
 
+static char *STRdup(const char *s)
+ 
+{
+  char *ret_string = (char *) malloc(strlen(s) + 1);
+  strcpy(ret_string, s);
+  return(ret_string);
+}
+
+#ifndef EOS
+#define EOS ((char) 0)
+#endif
+
+static char *STRncopy(char *s1, const char *s2, int maxs1)
+{
+  if (!s1 || !s2)
+    return NULL;
+  
+  if (maxs1 > 0)
+  {
+    strncpy(s1, s2, (size_t) (maxs1-1));
+    s1[maxs1-1] = EOS;
+  }
+  return(s1);
+}
+
+static char *STRconcat(char *s1, const char *s2, int maxs1)
+{
+  int maxc; /* maximum chars to append */
+  
+  maxc = maxs1 - (int) strlen(s1) - 1;
+  
+  return strncat(s1, s2,  (size_t) maxc);
+}
+
+/*******************************************************
+ *
+ * file_uncompress()
+ *
+ * Uncompresses file if:
+ *  (a) file is compressed and
+ *  (b) the uncompressed file doesn't already exist.
+ *
+ * Search is done for compressed or gzipped files.
+ *
+ * Returns 1 if uncompression done, 0 if not, -1 if error
+ */
+
+#define MAX_PATH_LEN 1024
+
+int AdiabatTempLookupTable::_file_uncompress(const char *path)
+
+{
+
+  char compressed_path[MAX_PATH_LEN];
+  char call_str[BUFSIZ];
+  struct stat file_stat;
+  int iret;
+
+  /*
+   * if file uncompressed file exists, return now
+   */
+
+  if (stat(path, &file_stat) == 0) {
+    return (0);
+  }
+    
+  /*
+   * Check if the compressed file exists.
+   * If this is the case, uncompress the file.
+   */
+
+  STRncopy(compressed_path, path, MAX_PATH_LEN);
+  STRconcat(compressed_path, ".Z", MAX_PATH_LEN);
+
+  if (stat(compressed_path, &file_stat) == 0) {
+    
+    /*
+     * uncompress file
+     */
+    
+    sprintf(call_str, "uncompress -f %s", compressed_path);
+
+    iret = system (call_str);
+
+    if (iret) {
+      fprintf(stderr, "WARNING - could not uncompress file\n");
+      fprintf(stderr, "  Return from %s: iret = %d\n",
+	      call_str, iret);
+      return -1;
+    } else {
+      return 0;
+    }
+
+  }
+
+  /*
+   * Check if the gzipped file exists.
+   * If this is the case, gunzip the file.
+   */
+
+  STRncopy(compressed_path, path, MAX_PATH_LEN);
+  STRconcat(compressed_path, ".gz", MAX_PATH_LEN);
+  
+  if (stat(compressed_path, &file_stat) == 0) {
+
+    /*
+     * gunzip file
+     */
+    
+    sprintf(call_str, "gunzip -f %s", compressed_path);
+
+    iret = system (call_str);
+
+    if (iret) {
+      fprintf(stderr, "WARNING - could not gunzip file\n");
+      fprintf(stderr, "  Return from %s: iret = %d\n",
+	      call_str, iret);
+      return -1;
+    } else {
+      return 0;
+    }
+    
+  }
+
+  /*
+   * Check if the bzipped file exists.
+   * If this is the case, gunzip the file.
+   */
+
+  STRncopy(compressed_path, path, MAX_PATH_LEN);
+  STRconcat(compressed_path, ".bz2", MAX_PATH_LEN);
+  
+  if (stat(compressed_path, &file_stat) == 0) {
+
+    /*
+     * gunzip file
+     */
+    
+    snprintf(call_str, BUFSIZ, "bunzip2 -f %s", compressed_path);
+
+    iret = system (call_str);
+
+    if (iret) {
+      fprintf(stderr, "WARNING - could not bunzip2 file\n");
+      fprintf(stderr, "  Return from %s: iret = %d\n",
+	      call_str, iret);
+      return -1;
+    } else {
+      return 0;
+    }
+    
+  }
+
+  /*
+   * file does not exist
+   */
+
+  return 0;
+
+}
+
+/*********************************************************
+ * _fopen_uncompress()
+ *
+ * Uncompresses the file if necessary, then opens it
+ *
+ * Return is identical to fopen()
+ */
+
+FILE* AdiabatTempLookupTable::_fopen_uncompress(const char *filename, const char *type)
+
+{
+  FILE *local_file;
+  char *filename_copy = STRdup(filename);
+  
+  _file_uncompress(filename_copy);
+  local_file = fopen(filename_copy, type);
+
+  free(filename_copy);
+  
+  return local_file;
+}
+
 /*********************************************************************
  * _loadTableFromFile() - Load the lookup table from the file.
  *
@@ -224,7 +407,7 @@ bool AdiabatTempLookupTable::_loadTableFromFile()
     return false;
   }
   
-  if ((lookup_table_file = ta_fopen_uncompress(uncompressed_filename, "r"))
+  if ((lookup_table_file = _fopen_uncompress(uncompressed_filename, "r"))
       == 0)
   {
     cerr << "ERROR: " << method_name << endl;
@@ -245,7 +428,7 @@ bool AdiabatTempLookupTable::_loadTableFromFile()
   
   // Read in the table dimensions
 
-  if (fscanf(lookup_table_file, "%d %d",
+  if (fscanf(lookup_table_file, "%u %u",
 	     &_numThetaELevels, &_numPressureLevels) != 2)
   {
     cerr << "ERROR: " << method_name << endl;

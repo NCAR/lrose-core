@@ -50,12 +50,11 @@
 // C++ include files
 #include <cmath>
 
-// System/RAP include files
-#include <dataport/port_types.h>
-
 // Local include files
-
 #include <physics/AdiabatTempLookupTable.hh>
+
+// define 32-bit float
+typedef float fl32;
 
 using namespace std;
 

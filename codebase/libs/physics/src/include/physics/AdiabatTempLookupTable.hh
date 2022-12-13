@@ -164,6 +164,9 @@ class AdiabatTempLookupTable
    * Returns true if the table was loaded successfully, false otherwise.
    */
 
+  int _file_uncompress(const char *path);
+  FILE* _fopen_uncompress(const char *filename, const char *type);
+
   bool _loadTableFromFile();
 
   void _freeArrays();
