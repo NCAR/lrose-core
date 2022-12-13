@@ -2,28 +2,28 @@ LROSE library dependencies
 
 mm5             dataport, toolsa, physics, Mdv
 Refract         tdrp, dataport, toolsa, dsdata, rapmath, Mdv
-FiltAlgVirtVol  tdrp, toolsa, dsdata, rapmath, rapformats, euclid, radar, Mdv, Spdb,  
-FiltAlg         tdrp, toolsa, cospa??, niwot_util??, euclid, rapmath, rapformats, dsdata, Mdv, Spdb,  
+FiltAlgVirtVol  tdrp, toolsa, dsdata, rapmath, rapformats, euclid, radar, Mdv, Spdb
+FiltAlg         tdrp, toolsa, euclid, rapmath, rapformats, dsdata, Mdv, Spdb
 dsdata          dataport, toolsa, didss, dsserver, euclid, rapformats, rapmath, Spdb, Mdv, Fmq
 radar           tdrp, dataport, toolsa, didss, rapformats, rapmath, physics, Mdv, Fmq, Spdb, Radx, Ncxx
 hydro           dataport, toolsa, euclid, Mdv, shapelib
-titan           dataport, toolsa, didss, dsserver, rapformats, rapmath, Mdv, 
-Fmq             dataport, toolsa, didss, dsserver, rapformats
+titan           dataport, toolsa, didss, dsserver, rapformats, rapmath, Mdv
+Mdv             dataport, toolsa, didss, dsserver, rapformats, euclid, Radx, Ncxx
 Spdb            dataport, toolsa, didss, dsserver, rapformats, euclid
-Mdv             dataport, toolsa, didss, dsserver, Radx, Ncxx, euclid, rapformats
+Fmq             dataport, toolsa, didss, dsserver, rapformats
+rapformats      dataport, toolsa, didss, euclid, physics
 advect          dataport, toolsa, euclid
-rapplot         toolsa, X11
-qtplot          toolsa
-rapformats      dataport, toolsa, didss, euclid (minor), physics (minor)
 cidd            dataport, toolsa, dsserver
-dsserver        dataport, toolsa, didss, pthread
+dsserver        dataport, toolsa, didss
 didss           dataport, toolsa
+contour         euclid
 grib            euclid, toolsa, dataport
 grib2           jasper
-contour         euclid
 euclid          toolsa, rapmath
 rapmath         toolsa, tdrp
-toolsa          dataport (bigend.h, port_types.h)
+rapplot         toolsa
+qtplot          toolsa
+toolsa          dataport
 dataport        none
 tdrp            none
 Radx            Ncxx
