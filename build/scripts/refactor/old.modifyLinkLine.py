@@ -53,8 +53,8 @@ def main():
         options.debug = True
     
     if (options.debug):
-        print("Running %s:" % thisScriptName, file=sys.stderr)
-        print("  Top level dir: ", options.dir, file=sys.stderr)
+        print >>sys.stderr, "Running %s:" % thisScriptName
+        print >>sys.stderr, "  Top level dir: ", options.dir
 
     # search recursively for Makefile from dir down
 
@@ -63,7 +63,7 @@ def main():
 
     if (options.debug):
         for path in makefileList:
-            print("  Makefile: ", path, file=sys.stderr)
+            print >>sys.stderr, "  Makefile: ", path
 
     # process each Makefile
 
@@ -80,27 +80,27 @@ def processDir(dir):
     global makefileList
 
     if (options.debug):
-        print("  Searching dir: ", dir, file=sys.stderr)
+        print >>sys.stderr, "  Searching dir: ", dir
 
     # check if this dir has a makefile or Makefile
 
     makefilePath = getMakefilePath(dir)
     if (os.path.exists(makefilePath) == False):
         if (options.verbose):
-            print("  No Makefile or makefile found", file=sys.stderr)
+            print >>sys.stderr, "  No Makefile or makefile found"
         return
         
     # detect which type of directory we are in
     
     if (options.verbose):
-        print("  Found makefile: ", makefilePath, file=sys.stderr)
+        print >>sys.stderr, "  Found makefile: ", makefilePath
 
     pathToks = dir.split("/")
     nToks = len(pathToks)
 
     if (options.verbose):
-        print("  pathToks: ", pathToks, file=sys.stderr)
-        print("  nToks: ", nToks, file=sys.stderr)
+        print >>sys.stderr, "  pathToks: ", pathToks
+        print >>sys.stderr, "  nToks: ", nToks
     
     if ((nToks > 4) and
         (pathToks[-4] == "apps") and
@@ -118,7 +118,7 @@ def processDir(dir):
             # get list from makefiles
             subDirPaths = getMakefileSubdirPaths(dir)
 
-        print("  subDirPaths: ", subDirPaths, file=sys.stderr)
+        print >>sys.stderr, "  subDirPaths: ", subDirPaths
 
         # process sub dirs
 
@@ -136,15 +136,15 @@ def getMakefileSubdirPaths(dir):
     makefilePath = getMakefilePath(dir)
 
     if (options.debug):
-        print("Found makefile: ", makefilePath, file=sys.stderr)
+        print >>sys.stderr, "Found makefile: ", makefilePath
 
     try:
         fp = open(makefilePath, 'r')
     except IOError as e:
         if (options.verbose):
-            print("ERROR - ", thisScriptName, file=sys.stderr)
-            print("  Cannot find makefile or Makefile", file=sys.stderr)
-            print("  dir: ", options.dir, file=sys.stderr)
+            print >>sys.stderr, "ERROR - ", thisScriptName
+            print >>sys.stderr, "  Cannot find makefile or Makefile"
+            print >>sys.stderr, "  dir: ", options.dir
         return subDirPaths
 
     lines = fp.readlines()
@@ -183,7 +183,7 @@ def getMakefileSubdirPaths(dir):
 
 def getAllSubDirPaths(dir):
 
-    subDirPaths = list(filter(os.path.isdir, [os.path.join(dir,f) for f in os.listdir(dir)]))
+    subDirPaths = filter(os.path.isdir, [os.path.join(dir,f) for f in os.listdir(dir)])
     return subDirPaths
 
 ########################################################################
@@ -210,11 +210,11 @@ def fixMakefile(makefilePath):
 
     (libsList, lines, lineNumsLibs) = getValueListForKey(makefilePath, "LOC_LIBS")
 
-    print("=============================", file=sys.stderr)
-    print("  path: ", makefilePath, file=sys.stderr)
-    print("  libsList: ", libsList, file=sys.stderr)
-    print("  lines: ", lines, file=sys.stderr)
-    print("  lineNumsLibs: ", lineNumsLibs, file=sys.stderr)
+    print >>sys.stderr, "============================="
+    print >>sys.stderr, "  path: ", makefilePath
+    print >>sys.stderr, "  libsList: ", libsList
+    print >>sys.stderr, "  lines: ", lines
+    print >>sys.stderr, "  lineNumsLibs: ", lineNumsLibs
 
     # check for NETCDF_LIBS and NETCDF4_LIBS
 
@@ -223,17 +223,17 @@ def fixMakefile(makefilePath):
         if (libs3 >= 0):
             modLine = line[:libs3] + 'NETCDF_LDFLAGS' + line[libs3 + len('NETCDF_LIBS'):]
             modified = True
-            print("====>> REPLACING NETCDF_LIBS with NETCDF_LDFLAGS", file=sys.stderr)
-            print("  old line: ", line, file=sys.stderr)
-            print("  mod line: ", modLine, file=sys.stderr)
+            print >>sys.stderr, "====>> REPLACING NETCDF_LIBS with NETCDF_LDFLAGS"
+            print >>sys.stderr, "  old line: ", line
+            print >>sys.stderr, "  mod line: ", modLine
             lines[index] = modLine
         libs4 = line.find('NETCDF4_LIBS')
         if (libs4 >= 0):
             modLine = line[:libs4] + 'NETCDF4_LDFLAGS' + line[libs4 + len('NETCDF4_LIBS'):]
             modified = True
-            print("====>> REPLACING NETCDF4_LIBS with NETCDF4_LDFLAGS", file=sys.stderr)
-            print("  old line: ", line, file=sys.stderr)
-            print("  mod line: ", modLine, file=sys.stderr)
+            print >>sys.stderr, "====>> REPLACING NETCDF4_LIBS with NETCDF4_LDFLAGS"
+            print >>sys.stderr, "  old line: ", line
+            print >>sys.stderr, "  mod line: ", modLine
             lines[index] = modLine
 
     # detect if various libs are used / to be used
@@ -389,9 +389,9 @@ def getValueListForKey(path, key):
     try:
         fp = open(path, 'r')
     except IOError as e:
-        print("ERROR - ", thisScriptName, file=sys.stderr)
-        print("  Cannot open file:", path, file=sys.stderr)
-        print("  dir: ", options.dir, file=sys.stderr)
+        print >>sys.stderr, "ERROR - ", thisScriptName
+        print >>sys.stderr, "  Cannot open file:", path
+        print >>sys.stderr, "  dir: ", options.dir
         return valueList
 
     lines = fp.readlines()
@@ -443,8 +443,8 @@ def getValueListForKey(path, key):
 def overwriteMakefile(makefilePath, libsList, lines, lineNumsLibs):
 
     if (options.debug):
-                print("  overwriting makefile: ", makefilePath, file=sys.stderr)
-                print("  lines: ", lines, file=sys.stderr)
+                print >>sys.stderr, "  overwriting makefile: ", makefilePath
+                print >>sys.stderr, "  lines: ", lines
 
     out = open(makefilePath, "w")
     libListWritten = False
@@ -486,18 +486,18 @@ def writeLibsList(out, libsList):
 def runCommand(cmd):
 
     if (options.debug):
-        print("running cmd:",cmd, file=sys.stderr)
+        print >>sys.stderr, "running cmd:",cmd
     
     try:
         retcode = subprocess.check_call(cmd, shell=True)
         if retcode != 0:
-            print("Child exited with code: ", retcode, file=sys.stderr)
+            print >>sys.stderr, "Child exited with code: ", retcode
             exit(1)
         else:
             if (options.verbose):
-                print("Child returned code: ", retcode, file=sys.stderr)
-    except OSError as e:
-        print("Execution failed:", e, file=sys.stderr)
+                print >>sys.stderr, "Child returned code: ", retcode
+    except OSError, e:
+        print >>sys.stderr, "Execution failed:", e
         exit(1)
 
 ########################################################################
