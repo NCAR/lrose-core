@@ -39,7 +39,6 @@
 #include <map>
 
 #include <contour/ContourLevel.hh>
-#include <dataport/port_types.h>
 
 class BinarySmoother;
 class ContourSmoother;

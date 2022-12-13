@@ -1,0 +1,39 @@
+LROSE library dependencies
+
+mm5             dataport, toolsa, physics, Mdv
+Refract         tdrp, dataport, toolsa, dsdata, rapmath, Mdv
+FiltAlgVirtVol  tdrp, toolsa, dsdata, rapmath, rapformats, euclid, radar, Mdv, Spdb,  
+FiltAlg         tdrp, toolsa, cospa??, niwot_util??, euclid, rapmath, rapformats, dsdata, Mdv, Spdb,  
+dsdata          dataport, toolsa, didss, dsserver, euclid, rapformats, rapmath, Spdb, Mdv, Fmq
+radar           tdrp, dataport, toolsa, didss, rapformats, rapmath, physics, Mdv, Fmq, Spdb, Radx, Ncxx
+hydro           dataport, toolsa, euclid, Mdv, shapelib
+titan           dataport, toolsa, didss, dsserver, rapformats, rapmath, Mdv, 
+Fmq             dataport, toolsa, didss, dsserver, rapformats
+Spdb            dataport, toolsa, didss, dsserver, rapformats, euclid
+Mdv             dataport, toolsa, didss, dsserver, Radx, Ncxx, euclid, rapformats
+advect          dataport, toolsa, euclid
+rapplot         toolsa, X11
+qtplot          toolsa
+rapformats      dataport, toolsa, didss, euclid (minor), physics (minor)
+cidd            dataport, toolsa, dsserver
+dsserver        dataport, toolsa, didss, pthread
+didss           dataport, toolsa
+grib            euclid, toolsa, dataport
+grib2           dataport (port_types, could be fixed), jasper
+contour         euclid
+euclid          toolsa (GridAlgs), boost (check), dataport, rapformats, rapmath
+rapmath         toolsa, tdrp
+physics         dataport toolsa (minor for both)
+toolsa          dataport (bigend.h, port_types.h)
+dataport        none
+Radx            Ncxx
+Ncxx            none
+tdrp            none
+shapelib        none
+kd              none
+devguide        xview
+xview           olgx
+olgx            none
+trmm_rsl        none
+forayRal        none
+

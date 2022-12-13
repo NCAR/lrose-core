@@ -12,9 +12,9 @@ LOC_INCLUDES = -I. $(NETCDF4_INCS)
 LOC_LIBS = -lFiltAlgVirtVol -lradar -lphysics \
 	-ldsdata -lSpdb -lMdv -lRadx -lNcxx \
 	-ldsserver -ldidss -lrapformats -leuclid \
-	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lrapmath -lFmq -ltoolsa -ldataport -ltdrp \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
-	-lm
+	-lfftw3 -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

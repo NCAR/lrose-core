@@ -35,7 +35,7 @@
 #include <dataport/bigend.h>
 #include <euclid/Pjg.hh>
 #include <rapformats/BdryPolyline.hh>
-#include <rapmath/math_macros.h>
+#include <toolsa/toolsa_macros.h>
 #include <toolsa/str.h>
 
 using namespace std;

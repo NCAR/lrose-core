@@ -47,9 +47,6 @@
 // C++ include files
 #include <iostream>
 
-// System/RAP include files
-#include <toolsa/os_config.h>
-
 // Local include files
 #include <contour/SimpleBoundaryContourAlg.hh>
 #include <contour/ContourAlg.hh>

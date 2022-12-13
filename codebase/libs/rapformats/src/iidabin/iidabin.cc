@@ -31,8 +31,8 @@
 #include <sys/file.h>
 #include <fcntl.h>
 
-#include "toolsa/cal.hh"
-#include "rapformats/iidabin.h"
+#include <toolsa/cal.hh>
+#include <rapformats/iidabin.h>
 
 using namespace std;
 

@@ -38,10 +38,10 @@
  *********************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include <physics/density.h>
-#include <toolsa/mem.h>
 
 #ifndef TEMP_C_TO_K
 #define TEMP_C_TO_K(c)   (c + 273.15)
@@ -1852,7 +1852,7 @@ double PHYdenZ(double pt, double *p, double *t, double *td, int n)
   double a2;
   double z;
   
-  tk = umalloc(n * sizeof(double));
+  tk = malloc(n * sizeof(double));
   
   for (i = 0; i < n; ++i)
   {

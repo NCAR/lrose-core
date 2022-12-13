@@ -33,8 +33,6 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/DateTime.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <didss/DsInputPath.hh>
-#include <didss/DataFileNames.hh>
 using namespace std;
 
 // Constructor

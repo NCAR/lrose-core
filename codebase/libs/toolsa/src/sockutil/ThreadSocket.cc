@@ -38,7 +38,6 @@
 #include <cerrno>
 #include <netinet/in.h>
 #include <pthread.h>
-#include <dataport/bigend.h>
 #include <toolsa/IpCache.hh>
 #include <toolsa/ThreadSocket.hh>
 #include <toolsa/GetHost.hh>
