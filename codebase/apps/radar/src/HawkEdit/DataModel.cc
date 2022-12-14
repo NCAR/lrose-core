@@ -461,7 +461,7 @@ void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
     size_t nRays = getNRays();
     for (size_t iray = 0; iray < nRays; iray++) {
       RadxRay *ray = getRay(iray);
-      cerr << iray << ": adjusting az " << ray->getAzimuthDeg() << " to "; 
+      LOG(DEBUG) << iray << ": adjusting az " << ray->getAzimuthDeg() << " to "; 
       //ray->setAnglesForElevSurveillance();
 
 //----  copied this code from ray->setAnglesForElevSurveillance();
@@ -493,7 +493,7 @@ void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
       //  mod everything by 360?
       ray->setAzimuthDeg(newAz);
       ray->setElevationDeg(tilt);
-      cerr << ray->getAzimuthDeg() << endl;
+      // cerr << ray->getAzimuthDeg() << endl;
     }
 //----
 

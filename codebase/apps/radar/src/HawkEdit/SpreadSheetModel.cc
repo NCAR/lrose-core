@@ -19,9 +19,9 @@ SpreadSheetModel::SpreadSheetModel(RadxRay *closestRay)
 {
   _closestRay = closestRay;
   if (_closestRay == NULL) 
-    cout << "in SpreadSheetModel, closestRay is NULL" << endl;
+    LOG(DEBUG) << "in SpreadSheetModel, closestRay is NULL";
   else
-   cout << "in SpreadSheetModel, closestRay is NOT  NULL" << endl;
+   LOG(DEBUG) << "in SpreadSheetModel, closestRay is NOT  NULL";
 
 }
 
@@ -46,7 +46,7 @@ vector<string> *SpreadSheetModel::getFields()
     fieldNames = new vector<string>;
     for (it = fieldNameMap.begin(); it != fieldNameMap.end(); it++) {
       fieldNames->push_back(it->first);
-      cout << it->first << ':' << it->second << endl;
+      LOG(DEBUG) << it->first << ':' << it->second;
     }
   } else {
     DataModel *dataModel = DataModel::Instance();
