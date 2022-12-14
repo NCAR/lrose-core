@@ -236,33 +236,14 @@ def fixMakefile(makefilePath):
     for libName in orderedLibList:
         if (libName in extendedList):
             goodList.append(libName)
-            print("3333333333333333333333333333", file=sys.stderr)
-            print("  adding libName: ", libName, file=sys.stderr)
-            print("3333333333333333333333333333", file=sys.stderr)
-    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", file=sys.stderr)
-    print("  goodList: ", goodList, file=sys.stderr)
-    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", file=sys.stderr)
 
     # add in libs not in lrose
 
     for libName in libsList:
         if (libName not in goodList):
             goodList.append(libName)
-            print("4444444444444444444444444444", file=sys.stderr)
-            print("  adding libName: ", libName, file=sys.stderr)
-            print("4444444444444444444444444444", file=sys.stderr)
         
-    print("1111111111111111111111111111111111111111", file=sys.stderr)
-    print("  libsList: ", libsList, file=sys.stderr)
-    print("  extendedList: ", extendedList, file=sys.stderr)
-    print("  goodList: ", goodList, file=sys.stderr)
-    print("1111111111111111111111111111111111111111", file=sys.stderr)
-
     # write out amended makefile
-
-    print("88888888888888888888888888", file=sys.stderr)
-    print("  len(goodList): ", len(goodList), file=sys.stderr)
-    print("  len(libsList): ", len(libsList), file=sys.stderr)
 
     modified = False
     if (len(goodList) != len(libsList)):
@@ -278,10 +259,6 @@ def fixMakefile(makefilePath):
             if (libName != libsList[index]):
                 modified = True
                 
-    print("  goodList: ", goodList, file=sys.stderr)
-    print("  libsList: ", libsList, file=sys.stderr)
-    print("  modified: ", modified, file=sys.stderr)
-
     if (modified):
         overwriteMakefile(makefilePath, goodList, lines, lineNumsLibs)
 
