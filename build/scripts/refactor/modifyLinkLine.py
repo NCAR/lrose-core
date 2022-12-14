@@ -237,11 +237,30 @@ def fixMakefile(makefilePath):
         if (libName in extendedList):
             goodList.append(libName)
 
+    print("  goodList: ", goodList, file=sys.stderr)
+    
     # add in libs not in lrose
 
     for libName in libsList:
         if (libName not in goodList):
             goodList.append(libName)
+
+    # added fftw3 as a dependency for radar
+    
+    if '-lradar' in goodList:
+        if '-lfftw3' not in goodList:
+            goodList.append('-lfftw3')
+
+    # add pthread
+        
+    if '-lpthread' not in goodList:
+        goodList.append('-lpthread')
+
+    # add netcdf
+    
+    if '-lNcxx' in goodList:
+        if '$(NETCDF4_LIBS)' not in goodList:
+            goodList.append('$(NETCDF4_LIBS)')
         
     # write out amended makefile
 
