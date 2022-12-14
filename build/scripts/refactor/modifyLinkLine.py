@@ -56,6 +56,13 @@ def main():
         print("Running %s:" % thisScriptName, file=sys.stderr)
         print("  Top level dir: ", options.dir, file=sys.stderr)
 
+    # created ordered lib list for correct dependencies
+    
+    createOrderedLibList()
+    print("6666666666666666666666666666666666", file=sys.stderr)
+    print("  orderedLibList: ", orderedLibList, file=sys.stderr)
+    print("6666666666666666666666666666666666", file=sys.stderr)
+
     # search recursively for Makefile from dir down
 
     makefileList = []
@@ -205,7 +212,7 @@ def getMakefilePath(dir):
 def fixMakefile(makefilePath):
 
     modified = False
-
+    
     # parse make file for local libs
 
     (libsList, lines, lineNumsLibs) = getValueListForKey(makefilePath, "LOC_LIBS")
@@ -216,25 +223,66 @@ def fixMakefile(makefilePath):
     print("  lines: ", lines, file=sys.stderr)
     print("  lineNumsLibs: ", lineNumsLibs, file=sys.stderr)
 
-    # check for NETCDF_LIBS and NETCDF4_LIBS
+    # augment the libsList with dependencies that are not already included
 
-    for index, line in enumerate(lines):
-        libs3 = line.find('NETCDF_LIBS')
-        if (libs3 >= 0):
-            modLine = line[:libs3] + 'NETCDF_LDFLAGS' + line[libs3 + len('NETCDF_LIBS'):]
-            modified = True
-            print("====>> REPLACING NETCDF_LIBS with NETCDF_LDFLAGS", file=sys.stderr)
-            print("  old line: ", line, file=sys.stderr)
-            print("  mod line: ", modLine, file=sys.stderr)
-            lines[index] = modLine
-        libs4 = line.find('NETCDF4_LIBS')
-        if (libs4 >= 0):
-            modLine = line[:libs4] + 'NETCDF4_LDFLAGS' + line[libs4 + len('NETCDF4_LIBS'):]
-            modified = True
-            print("====>> REPLACING NETCDF4_LIBS with NETCDF4_LDFLAGS", file=sys.stderr)
-            print("  old line: ", line, file=sys.stderr)
-            print("  mod line: ", modLine, file=sys.stderr)
-            lines[index] = modLine
+    extendedList = libsList
+    for libName in libsList:
+        dependList = getDependentLibs(libName)
+        for dependName in dependList:
+            if dependName not in extendedList:
+                extendedList.append(dependName)
+                print("2222222222222222222222222222", file=sys.stderr)
+                print("  libName: ", libName, file=sys.stderr)
+                print("  dependName: ", dependName, file=sys.stderr)
+                print("2222222222222222222222222222", file=sys.stderr)
+    print("2222222222222222222222222222", file=sys.stderr)
+    print("  libsList: ", libsList, file=sys.stderr)
+    print("  extendedList: ", extendedList, file=sys.stderr)
+    print("  orderedLibList: ", orderedLibList, file=sys.stderr)
+    print("2222222222222222222222222222", file=sys.stderr)
+
+    # create lrose libs list in the correct order
+
+    goodList = []
+    for libName in orderedLibList:
+        entry = "-l" + libName
+        if (entry in extendedList):
+            goodList.append(entry)
+            print("3333333333333333333333333333", file=sys.stderr)
+            print("  adding libName: ", libName, file=sys.stderr)
+            print("3333333333333333333333333333", file=sys.stderr)
+    print("3333333333333333333333333333", file=sys.stderr)
+    print("  goodList: ", goodList, file=sys.stderr)
+    print("3333333333333333333333333333", file=sys.stderr)
+
+    # add in libs not in lrose
+
+    for libName in libsList:
+        if (libName not in goodList):
+            goodList.append(libName)
+            print("4444444444444444444444444444", file=sys.stderr)
+            print("  adding libName: ", libName, file=sys.stderr)
+            print("4444444444444444444444444444", file=sys.stderr)
+        
+    print("1111111111111111111111111111111111111111", file=sys.stderr)
+    print("  libsList: ", libsList, file=sys.stderr)
+    print("  extendedList: ", extendedList, file=sys.stderr)
+    print("  goodList: ", goodList, file=sys.stderr)
+    print("1111111111111111111111111111111111111111", file=sys.stderr)
+
+    # sys.exit(1)
+    
+    # check for NETCDF4_LIBS
+
+    #for index, line in enumerate(lines):
+    #    libs4 = line.find('NETCDF4_LIBS')
+    #    if (libs4 >= 0):
+    #        modLine = line[:libs4] + 'NETCDF4_LDFLAGS' + line[libs4 + len('NETCDF4_LIBS'):]
+    #        modified = True
+    #        print("====>> REPLACING NETCDF4_LIBS with NETCDF4_LDFLAGS", file=sys.stderr)
+    #        print("  old line: ", line, file=sys.stderr)
+    #        print("  mod line: ", modLine, file=sys.stderr)
+    #        lines[index] = modLine
 
     # detect if various libs are used / to be used
 
@@ -373,6 +421,168 @@ def fixMakefile(makefilePath):
 
     return
                     
+########################################################################
+# create the list of ordered libraries
+
+def createOrderedLibList():
+
+    global orderedLibList
+    orderedLibList = []
+
+    orderedLibList.append('mm5')
+    orderedLibList.append('Refract')
+    orderedLibList.append('FiltAlgVirtVol')
+    orderedLibList.append('FiltAlg')
+    orderedLibList.append('dsdata')
+    orderedLibList.append('radar')
+    orderedLibList.append('hydro')
+    orderedLibList.append('titan')
+    orderedLibList.append('Mdv')
+    orderedLibList.append('Spdb')
+    orderedLibList.append('Fmq')
+    orderedLibList.append('rapformats')
+    orderedLibList.append('advect')
+    orderedLibList.append('cidd')
+    orderedLibList.append('dsserver')
+    orderedLibList.append('didss')
+    orderedLibList.append('contour')
+    orderedLibList.append('grib')
+    orderedLibList.append('grib2')
+    orderedLibList.append('euclid')
+    orderedLibList.append('rapmath')
+    orderedLibList.append('rapplot')
+    orderedLibList.append('qtplot')
+    orderedLibList.append('toolsa')
+    orderedLibList.append('dataport')
+    orderedLibList.append('tdrp')
+    orderedLibList.append('Radx')
+    orderedLibList.append('Ncxx')
+    orderedLibList.append('physics')
+    orderedLibList.append('shapelib')
+    orderedLibList.append('kd')
+    orderedLibList.append('devguide')
+    orderedLibList.append('xview')
+    orderedLibList.append('olgx')
+    orderedLibList.append('trmm_rsl')
+    orderedLibList.append('forayRal')
+
+    
+########################################################################
+# get dependent libs for a specified library
+
+def getDependentLibs(libName):
+
+    if (libName == 'mm5'):
+        return ['Mdv', 'toolsa', 'dataport', 'physics']
+    
+    if (libName == 'Refract'):
+        return ['dsdata', 'Mdv', 'rapmath', 'toolsa', 'dataport', 'tdrp']
+    
+    if (libName == 'FiltAlgVirtVol'):
+        return ['dsdata', 'radar', 'Mdv', 'Spdb', 'rapformats', 'euclid', 'rapmath', 'toolsa', 'tdrp']
+    
+    if (libName == 'FiltAlg'):
+        return ['dsdata', 'Mdv', 'Spdb', 'rapformats', 'euclid', 'rapmath', 'toolsa', 'tdrp']
+    
+    if (libName == 'dsdata'):
+        return ['Mdv', 'Spdb', 'Fmq', 'rapformats', 'dsserver', 'didss', 'euclid', 'rapmath', 'toolsa', 'dataport']
+    
+    if (libName == 'radar'):
+        return ['Mdv', 'Spdb', 'Fmq', 'rapformats', 'didss', 'rapmath', 'toolsa', 'dataport', 'tdrp', 'Radx', 'Ncxx', 'physics']
+    
+    if (libName == 'hydro'):
+        return ['Mdv', 'euclid', 'toolsa', 'dataport', 'shapelib']
+    
+    if (libName == 'titan'):
+        return ['Mdv', 'rapformats', 'dsserver', 'didss', 'rapmath', 'toolsa', 'dataport']
+    
+    if (libName == 'Mdv'):
+        return ['rapformats', 'dsserver', 'didss', 'euclid', 'toolsa', 'dataport', 'Radx', 'Ncxx']
+    
+    if (libName == 'Spdb'):
+        return ['rapformats', 'dsserver', 'didss', 'euclid', 'toolsa', 'dataport']
+    
+    if (libName == 'Fmq'):
+        return ['rapformats', 'dsserver', 'didss', 'toolsa', 'dataport']
+    
+    if (libName == 'rapformats'):
+        return ['didss', 'euclid', 'toolsa', 'dataport', 'physics']
+    
+    if (libName == 'advect'):
+        return ['euclid', 'toolsa', 'dataport']
+    
+    if (libName == 'cidd'):
+        return ['dsserver', 'toolsa', 'dataport']
+    
+    if (libName == 'dsserver'):
+        return ['didss', 'toolsa', 'dataport']
+    
+    if (libName == 'didss'):
+        return ['toolsa', 'dataport']
+
+    if (libName == 'contour'):
+        return ['euclid']
+    
+    if (libName == 'grib'):
+        return ['euclid', 'toolsa', 'dataport']
+    
+    if (libName == 'grib2'):
+        # return ['jasper']
+        return []
+    
+    if (libName == 'euclid'):
+        return ['rapmath', 'toolsa']
+    
+    if (libName == 'rapmath'):
+        return ['toolsa', 'tdrp']
+    
+    if (libName == 'rapplot'):
+        return ['toolsa']
+    
+    if (libName == 'qtplot'):
+        return ['toolsa']
+    
+    if (libName == 'toolsa'):
+        return ['dataport']
+    
+    if (libName == 'dataport'):
+        return []
+    
+    if (libName == 'tdrp'):
+        return []
+    
+    if (libName == 'Radx'):
+        return ['Ncxx']
+    
+    if (libName == 'Ncxx'):
+        return []
+
+    if (libName == 'physics'):
+        return []
+
+    if (libName == 'shapelib'):
+        return []
+
+    if (libName == 'kd'):
+        return []
+
+    if (libName == 'devguide'):
+        return ['xview']
+    
+    if (libName == 'xview'):
+        return ['olgx']
+    
+    if (libName == 'olgx'):
+        return []
+    
+    if (libName == 'trmm_rsl'):
+        return []
+    
+    if (libName == 'forayRal'):
+        return []
+
+    return []
+
 ########################################################################
 # get string value based on search key
 # the string may span multiple lines
