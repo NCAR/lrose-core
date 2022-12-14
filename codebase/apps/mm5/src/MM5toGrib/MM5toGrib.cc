@@ -93,7 +93,7 @@ MM5toGrib::MM5toGrib(int argc, char **argv)
   switch (_params.output_levels) {
 
   case Params::FLIGHT_LEVELS: {
-    double levels[_params.flight_levels_n];
+    double *levels = new double[_params.flight_levels_n];
     for (int i = 0; i < _params.flight_levels_n; i++) {
       levels[i] = _params._flight_levels[i];
     }
@@ -101,11 +101,12 @@ MM5toGrib::MM5toGrib(int argc, char **argv)
     if (_params.debug) {
       _sigmaInterp.printPressureArray(cerr);
     }
+    delete[] levels;
     break;
   }
 
   case Params::PRESSURE_LEVELS: {
-    double levels[_params.pressure_levels_n];
+    double *levels = new double[_params.pressure_levels_n];
     for (int i = 0; i < _params.pressure_levels_n; i++) {
       levels[i] = _params._pressure_levels[i];
     }
@@ -113,11 +114,12 @@ MM5toGrib::MM5toGrib(int argc, char **argv)
     if (_params.debug) {
       _sigmaInterp.printPressureArray(cerr);
     }
+    delete[] levels;
     break;
   }
 
   case Params::HEIGHT_LEVELS: {
-    double levels[_params.height_levels_n];
+    double *levels = new double[_params.height_levels_n];
     for (int i = 0; i < _params.height_levels_n; i++) {
       levels[i] = _params._height_levels[i] * 1000.0;
     }
@@ -125,6 +127,7 @@ MM5toGrib::MM5toGrib(int argc, char **argv)
     if (_params.debug) {
       _sigmaInterp.printPressureArray(cerr);
     }
+    delete[] levels;
     break;
   }
 

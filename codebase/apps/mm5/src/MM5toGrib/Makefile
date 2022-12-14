@@ -37,11 +37,13 @@ TARGET_FILE = MM5toGrib
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -lmm5 \
-	-lrapformats -ldidss -lphysics -ltoolsa \
-	-ldataport -ltdrp -lgrib -leuclid \
-	-ltoolsa -lpthread -lz $(NETCDF4_LIBS) -lbz2 \
-	-lz -lm
+LOC_LIBS = \
+	-lmm5 -lMdv -lSpdb \
+	-lFmq -lrapformats -lgrib -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	$(NETCDF4_LIBS) -lbz2 \
+	-lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 

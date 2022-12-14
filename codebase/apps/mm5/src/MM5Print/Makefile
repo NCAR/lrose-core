@@ -37,10 +37,13 @@ TARGET_FILE = MM5Print
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lmm5 \
-	-lrapformats -ldidss -lphysics -ltoolsa -lpthread \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lm
+LOC_LIBS = \
+	-lmm5 -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	$(NETCDF4_LIBS) -lbz2 \
+	-lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
