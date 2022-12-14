@@ -125,16 +125,16 @@ protected:
   long _offset2d(int field_num_2d);
 
   int _read2dField(int field_num_2d,
-		   char *field_name, fl32 ***field_p);
+		   const char *field_name, fl32 ***field_p);
 
   int _read3dField(int field_num_3d,
-		   char *field_name, fl32 ****field_p);
+		   const char *field_name, fl32 ****field_p);
 
   int _readUv2dot(int field_num_3d,
-		  char *field_name, fl32 ****field_p);
+		  const char *field_name, fl32 ****field_p);
   
   int _read2dField2dot(int field_num_2d,
-		       char *field_name, fl32 ***field_p);
+		       const char *field_name, fl32 ***field_p);
 
   int _readwField();
 

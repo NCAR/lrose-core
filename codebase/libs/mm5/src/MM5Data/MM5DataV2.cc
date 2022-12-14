@@ -1304,7 +1304,7 @@ long MM5DataV2::_offset2d(int field_num_2d)
 //
 
 int MM5DataV2::_read3dField(int field_num_3d,
-			    char *field_name, fl32 ****field_p)
+			    const char *field_name, fl32 ****field_p)
 
 {
   
@@ -1382,7 +1382,7 @@ int MM5DataV2::_read3dField(int field_num_3d,
 //
 
 int MM5DataV2::_readUv2dot(int field_num_3d,
-			   char *field_name, fl32 ****field_p)
+			   const char *field_name, fl32 ****field_p)
 
 {
   
@@ -1494,7 +1494,7 @@ int MM5DataV2::_readUv2dot(int field_num_3d,
 //
 
 int MM5DataV2::_read2dField(int field_num_2d,
-			    char *field_name, fl32 ***field_p)
+			    const char *field_name, fl32 ***field_p)
 
 {
 
@@ -1555,7 +1555,7 @@ int MM5DataV2::_read2dField(int field_num_2d,
 // read in a 2D dot field, leave on dot grid
 
 int MM5DataV2::_read2dField2dot(int field_num_2d,
-				char *field_name, fl32 ***field_p)
+				const char *field_name, fl32 ***field_p)
 
 {
 

@@ -1838,7 +1838,7 @@ void ItfaIndices::write_data_ascii(int I, int J,
 //
 
 void ItfaIndices::write_field(fl32*** field,
-			      char* filename_base,
+			      const char* filename_base,
 			      int *dim_array){
 
   char filename[25];
@@ -1906,7 +1906,7 @@ void ItfaIndices::write_field(fl32*** field,
 //
 //
 void ItfaIndices::write_field(fl32** field,
-			      char* filename_base,
+			      const char* filename_base,
 			      int *dim_array)
 
 {

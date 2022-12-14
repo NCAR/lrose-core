@@ -99,8 +99,8 @@ public:
   void test_indices();
   void write_data_ascii(int, int, const char *proj_type = NULL);
   void write_latlon();
-  void write_field(fl32***, char*, int *);
-  void write_field(fl32**, char*, int *);
+  void write_field(fl32***, const char*, int *);
+  void write_field(fl32**, const char*, int *);
   void printInternals(ostream &out);
   void printFields(ostream &out);
   void printField(ostream &out, const string &name, fl32 ***field);
