@@ -228,8 +228,8 @@ float SpreadSheetController::getNyquistVelocity(int offsetFromClosest)
 void SpreadSheetController::getRangeData(float *startingRangeKm, float *gateSpacingKm)
 {
   _currentModel->getRangeGeom(startingRangeKm, gateSpacingKm);
-  cout << " In SpreadSheetController::getRangeGeom, startingRangeKm = " 
-    << *startingRangeKm << ", gateSpacingKm = " << *gateSpacingKm << endl;
+  LOG(DEBUG) << " In SpreadSheetController::getRangeGeom, startingRangeKm = " 
+    << *startingRangeKm << ", gateSpacingKm = " << *gateSpacingKm;
 }
 
 void SpreadSheetController::setData(string fieldName, float azimuth, 

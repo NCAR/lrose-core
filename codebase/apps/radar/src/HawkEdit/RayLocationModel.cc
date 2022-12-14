@@ -50,7 +50,7 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
       if (rayItr != listOfRays.begin()) { 
         // what if the rays are NOT in sorted order by az? It will be close enough
         double distance = fabs(az - previousAz);
-        cerr << "az= " << az << " distance=" << distance << endl;
+        LOG(DEBUG) << "az= " << az << " distance=" << distance;
         if (distance < minDistance) {
           minDistance = distance;
           minDistanceRayIdx = rayItr - listOfRays.begin();
@@ -119,9 +119,7 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
       double endAz = az + half_angle; // + 0.1;
 
     // store
-      if (az < 0) {
-        cerr << "HERE!!!" << endl;
-      }
+
       int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
       int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
       LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
@@ -268,10 +266,14 @@ size_t RayLocationModel::getClosestRayIdx(float azDeg, int offset) {
     // move through the startIndex
     int offsetIdx = offset;
     while (offsetIdx < 0) {
-      rayIdx = getStartIndex(rayIdx) - 1;
-      if (rayIdx < 0) {
-        rayIdx = RayLoc::RAY_LOC_N - 1;
-      }
+      rayIdx = getStartIndex(rayIdx);
+      // move to next active ray
+      do {
+        rayIdx -= 1;
+        if (rayIdx < 0) {
+          rayIdx = RayLoc::RAY_LOC_N - 1;
+        }
+      } while (!ray_loc.at(rayIdx).active);      
       offsetIdx += 1;
     }
   } 
@@ -279,10 +281,14 @@ size_t RayLocationModel::getClosestRayIdx(float azDeg, int offset) {
     // move through the endIndex
     int offsetIdx = offset;
     while (offsetIdx > 0) {
-      rayIdx = getEndIndex(rayIdx) + 1;
-      if (rayIdx >= RayLoc::RAY_LOC_N) {
-        rayIdx = 0;
-      }
+      rayIdx = getEndIndex(rayIdx);
+      // move to next active ray
+      do {
+        rayIdx += 1;
+        if (rayIdx >= RayLoc::RAY_LOC_N) {
+          rayIdx = 0;
+        }
+      } while (!ray_loc.at(rayIdx).active);
       offsetIdx -= 1;
     }
   }  
@@ -363,5 +369,8 @@ float RayLocationModel::getAzimuthForRay(double azDeg,
 
   size_t rayIdx = getClosestRayIdx(azDeg, offset);
   RadxRay *ray = ray_loc.at(rayIdx).ray;
+  if (ray == NULL) {
+    throw std::invalid_argument("RayLocationModel::getAzimuthForRay - closest ray is NULL");
+  }
   return ray->getAzimuthDeg();
 }

@@ -272,6 +272,9 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   float gateSize = ray->getGateSpacingKm() * 1000.0;
   float distanceToCellNInMeters = ray->getStartRangeKm() * 1000.0;
   float azimuth = ray->getAzimuthDeg();
+  if ((azimuth > 180) && (azimuth < 350)) {
+     cerr << "HERE: azimuth = " << azimuth << endl;
+  }
   // need to do some conversions here ...
   // TODO: get these from SoloLibrary::dd_math.h
   int radar_scan_mode = 1; // PPI;
