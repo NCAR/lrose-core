@@ -59,9 +59,6 @@ def main():
     # created ordered lib list for correct dependencies
     
     createOrderedLibList()
-    print("6666666666666666666666666666666666", file=sys.stderr)
-    print("  orderedLibList: ", orderedLibList, file=sys.stderr)
-    print("6666666666666666666666666666666666", file=sys.stderr)
 
     # search recursively for Makefile from dir down
 
@@ -211,8 +208,6 @@ def getMakefilePath(dir):
 
 def fixMakefile(makefilePath):
 
-    modified = False
-    
     # parse make file for local libs
 
     (libsList, lines, lineNumsLibs) = getValueListForKey(makefilePath, "LOC_LIBS")
@@ -220,8 +215,11 @@ def fixMakefile(makefilePath):
     print("=============================", file=sys.stderr)
     print("  path: ", makefilePath, file=sys.stderr)
     print("  libsList: ", libsList, file=sys.stderr)
-    print("  lines: ", lines, file=sys.stderr)
     print("  lineNumsLibs: ", lineNumsLibs, file=sys.stderr)
+    if (options.verbose):
+        print("  makefile contents: ", file=sys.stderr)
+        for line in lines:
+            print(line.rstrip(), file=sys.stderr)
 
     # augment the libsList with dependencies that are not already included
 
@@ -231,29 +229,19 @@ def fixMakefile(makefilePath):
         for dependName in dependList:
             if dependName not in extendedList:
                 extendedList.append(dependName)
-                print("2222222222222222222222222222", file=sys.stderr)
-                print("  libName: ", libName, file=sys.stderr)
-                print("  dependName: ", dependName, file=sys.stderr)
-                print("2222222222222222222222222222", file=sys.stderr)
-    print("2222222222222222222222222222", file=sys.stderr)
-    print("  libsList: ", libsList, file=sys.stderr)
-    print("  extendedList: ", extendedList, file=sys.stderr)
-    print("  orderedLibList: ", orderedLibList, file=sys.stderr)
-    print("2222222222222222222222222222", file=sys.stderr)
 
     # create lrose libs list in the correct order
 
     goodList = []
     for libName in orderedLibList:
-        entry = "-l" + libName
-        if (entry in extendedList):
-            goodList.append(entry)
+        if (libName in extendedList):
+            goodList.append(libName)
             print("3333333333333333333333333333", file=sys.stderr)
             print("  adding libName: ", libName, file=sys.stderr)
             print("3333333333333333333333333333", file=sys.stderr)
-    print("3333333333333333333333333333", file=sys.stderr)
+    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", file=sys.stderr)
     print("  goodList: ", goodList, file=sys.stderr)
-    print("3333333333333333333333333333", file=sys.stderr)
+    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", file=sys.stderr)
 
     # add in libs not in lrose
 
@@ -270,154 +258,32 @@ def fixMakefile(makefilePath):
     print("  goodList: ", goodList, file=sys.stderr)
     print("1111111111111111111111111111111111111111", file=sys.stderr)
 
-    # sys.exit(1)
-    
-    # check for NETCDF4_LIBS
-
-    #for index, line in enumerate(lines):
-    #    libs4 = line.find('NETCDF4_LIBS')
-    #    if (libs4 >= 0):
-    #        modLine = line[:libs4] + 'NETCDF4_LDFLAGS' + line[libs4 + len('NETCDF4_LIBS'):]
-    #        modified = True
-    #        print("====>> REPLACING NETCDF4_LIBS with NETCDF4_LDFLAGS", file=sys.stderr)
-    #        print("  old line: ", line, file=sys.stderr)
-    #        print("  mod line: ", modLine, file=sys.stderr)
-    #        lines[index] = modLine
-
-    # detect if various libs are used / to be used
-
-    useNcfMdv = False
-    useMdv = False
-    useSpdb = False
-    useNetcdf4 = False
-    useToolsa = False
-    useZlib = False
-    useBzip2 = False
-    usePthread = False
-    useMath = False
-    useRadx = False
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lNcfMdv'):
-            useNcfMdv = True
-            useNetcdf4 = True
-            useZlib = True
-            useBzip2 = True
-        if (lib == '-lRadx'):
-            useRadx = True
-        elif (lib == '-lMdv'):
-            useMdv = True
-            useNetcdf4 = True
-            useZlib = True
-            useBzip2 = True
-        elif (lib == '-lSpdb'):
-            useSpdb = True
-            useNetcdf4 = True
-            useZlib = True
-            useBzip2 = True
-        elif (lib == '$(NETCDF4_LIB_LIST)'):
-            useNetcdf4 = True
-            useZlib = True
-            useBzip2 = True
-        elif (lib == '-lm'):
-            useMath = True
-        elif (lib == '-lz'):
-            useZlib = True
-        elif (lib == '-lbz2'):
-            useBzip2 = True
-        elif (lib == '-ltoolsa'):
-            useToolsa = True
-            useLibz = True
-            useBzip2 = True
-        elif (lib == '-lpthread'):
-            usePthread = True
-
-    # remove certain libs or change vals
-
-    for index, lib in enumerate(libsList):
-        if (lib == '$(TDRP_LIBS)'):
-            libsList[index] = '-ltdrp'
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lNcfMdv'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lRadx'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '$(NETCDF4_LIB_LIST)'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lm'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lz'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lbz2'):
-            del libsList[index]
-            modified = True
-            break
-
-    for index, lib in enumerate(libsList):
-        if (lib == '-lpthread'):
-            del libsList[index]
-            modified = True
-            break
-
-    # append to list in correct order
-
-    if (useMdv):
-        libsList.append('-lMdv')
-        libsList.append('-lRadx')
-        libsList.append('-lNcxx')
-        modified = True
-    elif (useRadx):
-        libsList.append('-lRadx')
-        libsList.append('-lNcxx')
-        modified = True
-
-    if (useNetcdf4):
-        libsList.append('$(NETCDF4_LIBS)')
-        modified = True
-
-    if (useBzip2):
-        libsList.append('-lbz2')
-        modified = True
-
-    if (useZlib):
-        libsList.append('-lz')
-        modified = True
-
-    if (usePthread):
-        libsList.append('-lpthread')
-        modified = True
-
-    if (useMath):
-        libsList.append('-lm')
-        modified = True
-
     # write out amended makefile
 
+    print("88888888888888888888888888", file=sys.stderr)
+    print("  len(goodList): ", len(goodList), file=sys.stderr)
+    print("  len(libsList): ", len(libsList), file=sys.stderr)
+
+    modified = False
+    if (len(goodList) != len(libsList)):
+        modified = True
+
+    if (len(goodList) >= len(libsList)):
+        for index, libName in enumerate(libsList):
+            if (libName != goodList[index]):
+                modified = True
+                
+    if (len(libsList) >= len(goodList)):
+        for index, libName in enumerate(goodList):
+            if (libName != libsList[index]):
+                modified = True
+                
+    print("  goodList: ", goodList, file=sys.stderr)
+    print("  libsList: ", libsList, file=sys.stderr)
+    print("  modified: ", modified, file=sys.stderr)
+
     if (modified):
-        overwriteMakefile(makefilePath, libsList, lines, lineNumsLibs)
+        overwriteMakefile(makefilePath, goodList, lines, lineNumsLibs)
 
     return
                     
@@ -429,42 +295,42 @@ def createOrderedLibList():
     global orderedLibList
     orderedLibList = []
 
-    orderedLibList.append('mm5')
-    orderedLibList.append('Refract')
-    orderedLibList.append('FiltAlgVirtVol')
-    orderedLibList.append('FiltAlg')
-    orderedLibList.append('dsdata')
-    orderedLibList.append('radar')
-    orderedLibList.append('hydro')
-    orderedLibList.append('titan')
-    orderedLibList.append('Mdv')
-    orderedLibList.append('Spdb')
-    orderedLibList.append('Fmq')
-    orderedLibList.append('rapformats')
-    orderedLibList.append('advect')
-    orderedLibList.append('cidd')
-    orderedLibList.append('dsserver')
-    orderedLibList.append('didss')
-    orderedLibList.append('contour')
-    orderedLibList.append('grib')
-    orderedLibList.append('grib2')
-    orderedLibList.append('euclid')
-    orderedLibList.append('rapmath')
-    orderedLibList.append('rapplot')
-    orderedLibList.append('qtplot')
-    orderedLibList.append('toolsa')
-    orderedLibList.append('dataport')
-    orderedLibList.append('tdrp')
-    orderedLibList.append('Radx')
-    orderedLibList.append('Ncxx')
-    orderedLibList.append('physics')
-    orderedLibList.append('shapelib')
-    orderedLibList.append('kd')
-    orderedLibList.append('devguide')
-    orderedLibList.append('xview')
-    orderedLibList.append('olgx')
-    orderedLibList.append('trmm_rsl')
-    orderedLibList.append('forayRal')
+    orderedLibList.append('-lmm5')
+    orderedLibList.append('-lRefract')
+    orderedLibList.append('-lFiltAlgVirtVol')
+    orderedLibList.append('-lFiltAlg')
+    orderedLibList.append('-ldsdata')
+    orderedLibList.append('-lradar')
+    orderedLibList.append('-lhydro')
+    orderedLibList.append('-ltitan')
+    orderedLibList.append('-lMdv')
+    orderedLibList.append('-lSpdb')
+    orderedLibList.append('-lFmq')
+    orderedLibList.append('-lrapformats')
+    orderedLibList.append('-ladvect')
+    orderedLibList.append('-lcidd')
+    orderedLibList.append('-ldsserver')
+    orderedLibList.append('-ldidss')
+    orderedLibList.append('-lcontour')
+    orderedLibList.append('-lgrib')
+    orderedLibList.append('-lgrib2')
+    orderedLibList.append('-leuclid')
+    orderedLibList.append('-lrapmath')
+    orderedLibList.append('-lrapplot')
+    orderedLibList.append('-lqtplot')
+    orderedLibList.append('-ltoolsa')
+    orderedLibList.append('-ldataport')
+    orderedLibList.append('-ltdrp')
+    orderedLibList.append('-lRadx')
+    orderedLibList.append('-lNcxx')
+    orderedLibList.append('-lphysics')
+    orderedLibList.append('-lshapelib')
+    orderedLibList.append('-lkd')
+    orderedLibList.append('-ldevguide')
+    orderedLibList.append('-lxview')
+    orderedLibList.append('-lolgx')
+    orderedLibList.append('-ltrmm_rsl')
+    orderedLibList.append('-lforayRal')
 
     
 ########################################################################
@@ -472,113 +338,113 @@ def createOrderedLibList():
 
 def getDependentLibs(libName):
 
-    if (libName == 'mm5'):
-        return ['Mdv', 'toolsa', 'dataport', 'physics']
+    if (libName == '-lmm5'):
+        return ['-lMdv', '-ltoolsa', '-ldataport', '-lphysics']
     
-    if (libName == 'Refract'):
-        return ['dsdata', 'Mdv', 'rapmath', 'toolsa', 'dataport', 'tdrp']
+    if (libName == '-lRefract'):
+        return ['-ldsdata', '-lMdv', '-lrapmath', '-ltoolsa', '-ldataport', '-ltdrp']
     
-    if (libName == 'FiltAlgVirtVol'):
-        return ['dsdata', 'radar', 'Mdv', 'Spdb', 'rapformats', 'euclid', 'rapmath', 'toolsa', 'tdrp']
+    if (libName == '-lFiltAlgVirtVol'):
+        return ['-ldsdata', '-lradar', '-lMdv', '-lSpdb', '-lrapformats', '-leuclid', '-lrapmath', '-ltoolsa', '-ltdrp']
     
-    if (libName == 'FiltAlg'):
-        return ['dsdata', 'Mdv', 'Spdb', 'rapformats', 'euclid', 'rapmath', 'toolsa', 'tdrp']
+    if (libName == '-lFiltAlg'):
+        return ['-ldsdata', '-lMdv', '-lSpdb', '-lrapformats', '-leuclid', '-lrapmath', '-ltoolsa', '-ltdrp']
     
-    if (libName == 'dsdata'):
-        return ['Mdv', 'Spdb', 'Fmq', 'rapformats', 'dsserver', 'didss', 'euclid', 'rapmath', 'toolsa', 'dataport']
+    if (libName == '-ldsdata'):
+        return ['-lMdv', '-lSpdb', '-lFmq', '-lrapformats', '-ldsserver', '-ldidss', '-leuclid', '-lrapmath', '-ltoolsa', '-ldataport']
     
-    if (libName == 'radar'):
-        return ['Mdv', 'Spdb', 'Fmq', 'rapformats', 'didss', 'rapmath', 'toolsa', 'dataport', 'tdrp', 'Radx', 'Ncxx', 'physics']
+    if (libName == '-lradar'):
+        return ['-lMdv', '-lSpdb', '-lFmq', '-lrapformats', '-ldidss', '-lrapmath', '-ltoolsa', '-ldataport', '-ltdrp', '-lRadx', '-lNcxx', '-lphysics']
     
-    if (libName == 'hydro'):
-        return ['Mdv', 'euclid', 'toolsa', 'dataport', 'shapelib']
+    if (libName == '-lhydro'):
+        return ['-lMdv', '-leuclid', '-ltoolsa', '-ldataport', '-lshapelib']
     
-    if (libName == 'titan'):
-        return ['Mdv', 'rapformats', 'dsserver', 'didss', 'rapmath', 'toolsa', 'dataport']
+    if (libName == '-ltitan'):
+        return ['-lMdv', '-lrapformats', '-ldsserver', '-ldidss', '-lrapmath', '-ltoolsa', '-ldataport']
     
-    if (libName == 'Mdv'):
-        return ['rapformats', 'dsserver', 'didss', 'euclid', 'toolsa', 'dataport', 'Radx', 'Ncxx']
+    if (libName == '-lMdv'):
+        return ['-lrapformats', '-ldsserver', '-ldidss', '-leuclid', '-ltoolsa', '-ldataport', '-lRadx', '-lNcxx']
     
-    if (libName == 'Spdb'):
-        return ['rapformats', 'dsserver', 'didss', 'euclid', 'toolsa', 'dataport']
+    if (libName == '-lSpdb'):
+        return ['-lrapformats', '-ldsserver', '-ldidss', '-leuclid', '-ltoolsa', '-ldataport']
     
-    if (libName == 'Fmq'):
-        return ['rapformats', 'dsserver', 'didss', 'toolsa', 'dataport']
+    if (libName == '-lFmq'):
+        return ['-lrapformats', '-ldsserver', '-ldidss', '-ltoolsa', '-ldataport']
     
-    if (libName == 'rapformats'):
-        return ['didss', 'euclid', 'toolsa', 'dataport', 'physics']
+    if (libName == '-lrapformats'):
+        return ['-ldidss', '-leuclid', '-ltoolsa', '-ldataport', '-lphysics']
     
-    if (libName == 'advect'):
-        return ['euclid', 'toolsa', 'dataport']
+    if (libName == '-ladvect'):
+        return ['-leuclid', '-ltoolsa', '-ldataport']
     
-    if (libName == 'cidd'):
-        return ['dsserver', 'toolsa', 'dataport']
+    if (libName == '-lcidd'):
+        return ['-ldsserver', '-ltoolsa', '-ldataport']
     
-    if (libName == 'dsserver'):
-        return ['didss', 'toolsa', 'dataport']
+    if (libName == '-ldsserver'):
+        return ['-ldidss', '-ltoolsa', '-ldataport']
     
-    if (libName == 'didss'):
-        return ['toolsa', 'dataport']
+    if (libName == '-ldidss'):
+        return ['-ltoolsa', '-ldataport']
 
-    if (libName == 'contour'):
-        return ['euclid']
+    if (libName == '-lcontour'):
+        return ['-leuclid']
     
-    if (libName == 'grib'):
-        return ['euclid', 'toolsa', 'dataport']
+    if (libName == '-lgrib'):
+        return ['-leuclid', '-ltoolsa', '-ldataport']
     
-    if (libName == 'grib2'):
-        # return ['jasper']
+    if (libName == '-lgrib2'):
+        # return ['-ljasper']
         return []
     
-    if (libName == 'euclid'):
-        return ['rapmath', 'toolsa']
+    if (libName == '-leuclid'):
+        return ['-lrapmath', '-ltoolsa']
     
-    if (libName == 'rapmath'):
-        return ['toolsa', 'tdrp']
+    if (libName == '-lrapmath'):
+        return ['-ltoolsa', '-ltdrp']
     
-    if (libName == 'rapplot'):
-        return ['toolsa']
+    if (libName == '-lrapplot'):
+        return ['-ltoolsa']
     
-    if (libName == 'qtplot'):
-        return ['toolsa']
+    if (libName == '-lqtplot'):
+        return ['-ltoolsa']
     
-    if (libName == 'toolsa'):
-        return ['dataport']
+    if (libName == '-ltoolsa'):
+        return ['-ldataport']
     
-    if (libName == 'dataport'):
+    if (libName == '-ldataport'):
         return []
     
-    if (libName == 'tdrp'):
+    if (libName == '-ltdrp'):
         return []
     
-    if (libName == 'Radx'):
-        return ['Ncxx']
+    if (libName == '-lRadx'):
+        return ['-lNcxx']
     
-    if (libName == 'Ncxx'):
-        return []
-
-    if (libName == 'physics'):
+    if (libName == '-lNcxx'):
         return []
 
-    if (libName == 'shapelib'):
+    if (libName == '-lphysics'):
         return []
 
-    if (libName == 'kd'):
+    if (libName == '-lshapelib'):
         return []
 
-    if (libName == 'devguide'):
-        return ['xview']
+    if (libName == '-lkd'):
+        return []
+
+    if (libName == '-ldevguide'):
+        return ['-lxview']
     
-    if (libName == 'xview'):
-        return ['olgx']
+    if (libName == '-lxview'):
+        return ['-lolgx']
     
-    if (libName == 'olgx'):
+    if (libName == '-lolgx'):
         return []
     
-    if (libName == 'trmm_rsl'):
+    if (libName == '-ltrmm_rsl'):
         return []
     
-    if (libName == 'forayRal'):
+    if (libName == '-lforayRal'):
         return []
 
     return []
@@ -653,8 +519,11 @@ def getValueListForKey(path, key):
 def overwriteMakefile(makefilePath, libsList, lines, lineNumsLibs):
 
     if (options.debug):
-                print("  overwriting makefile: ", makefilePath, file=sys.stderr)
-                print("  lines: ", lines, file=sys.stderr)
+        print("  overwriting makefile: ", makefilePath, file=sys.stderr)
+    if (options.verbose):
+        print("  makefile contents: ", file=sys.stderr)
+        for line in lines:
+            print(line.rstrip(), file=sys.stderr)
 
     out = open(makefilePath, "w")
     libListWritten = False
