@@ -1,25 +1,25 @@
 LROSE library dependencies
 
-mm5             dataport, toolsa, physics, Mdv
-Refract         tdrp, dataport, toolsa, dsdata, rapmath, Mdv
-FiltAlgVirtVol  tdrp, toolsa, dsdata, rapmath, rapformats, euclid, radar, Mdv, Spdb
-FiltAlg         tdrp, toolsa, euclid, rapmath, rapformats, dsdata, Mdv, Spdb
-dsdata          dataport, toolsa, didss, dsserver, euclid, rapformats, rapmath, Spdb, Mdv, Fmq
-radar           tdrp, dataport, toolsa, didss, rapformats, rapmath, physics, Mdv, Fmq, Spdb, Radx, Ncxx
-hydro           dataport, toolsa, euclid, Mdv, shapelib
-titan           dataport, toolsa, didss, dsserver, rapformats, rapmath, Mdv
-Mdv             dataport, toolsa, didss, dsserver, rapformats, euclid, Radx, Ncxx
-Spdb            dataport, toolsa, didss, dsserver, rapformats, euclid
-Fmq             dataport, toolsa, didss, dsserver, rapformats
-rapformats      dataport, toolsa, didss, euclid, physics
-advect          dataport, toolsa, euclid
-cidd            dataport, toolsa, dsserver
-dsserver        dataport, toolsa, didss
-didss           dataport, toolsa
+mm5             Mdv, toolsa, dataport, physics
+Refract         dsdata, Mdv, rapmath, toolsa, dataport, tdrp
+FiltAlgVirtVol  dsdata, radar, Mdv, Spdb, rapformats, euclid, rapmath, toolsa, tdrp
+FiltAlg         dsdata, Mdv, Spdb, rapformats, euclid, rapmath, toolsa, tdrp
+dsdata          Mdv, Spdb, Fmq, rapformats, dsserver, didss, euclid, rapmath, toolsa, dataport
+radar           Mdv, Spdb, Fmq, rapformats, didss, rapmath, toolsa, dataport, tdrp, Radx, Ncxx, physics
+hydro           Mdv, euclid, toolsa, dataport, shapelib
+titan           Mdv, rapformats, dsserver, didss, rapmath, toolsa, dataport
+Mdv             rapformats, dsserver, didss, euclid, toolsa, dataport, Radx, Ncxx
+Spdb            rapformats, dsserver, didss, euclid, toolsa, dataport 
+Fmq             rapformats, dsserver, didss, toolsa, dataport
+rapformats      didss, euclid, toolsa, dataport, physics
+advect          euclid, toolsa, dataport
+cidd            dsserver, toolsa, dataport
+dsserver        didss, toolsa, dataport
+didss           toolsa, dataport
 contour         euclid
 grib            euclid, toolsa, dataport
 grib2           jasper
-euclid          toolsa, rapmath
+euclid          rapmath, toolsa
 rapmath         toolsa, tdrp
 rapplot         toolsa
 qtplot          toolsa
