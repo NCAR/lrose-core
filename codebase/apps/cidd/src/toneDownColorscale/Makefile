@@ -33,7 +33,8 @@ TARGET_FILE = toneDownColorscale
 LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
-LOC_LIBS =
+LOC_LIBS = \
+	-lpthread
 
 HDRS = \
 
@@ -63,6 +64,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
 
 

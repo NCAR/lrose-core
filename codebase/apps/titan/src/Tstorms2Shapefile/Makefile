@@ -36,9 +36,11 @@ TARGET_FILE = Tstorms2Shapefile
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ltitan \
-	-lSpdb -lrapformats -ldsserver -ldidss \
-	-ltoolsa -lpthread -ldataport -ltdrp -lshapelib \
+LOC_LIBS = \
+	-ltitan -lMdv -lSpdb -lrapformats \
+	-ldsserver -ldidss -leuclid -lrapmath \
+	-ltoolsa -ldataport -ltdrp -lRadx \
+	-lNcxx -lphysics -lshapelib -lpthread \
 	$(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -79,4 +81,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

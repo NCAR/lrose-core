@@ -37,9 +37,12 @@ TARGET_FILE = StormModel
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapmath -lMdv -lRadx -lNcxx -lrapformats \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
-	-lpthread -lbz2 -lz -lm
+LOC_LIBS = \
+	-lMdv -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	$(NETCDF4_LIBS) -lpthread -lbz2 -lz \
+	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -89,4 +92,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

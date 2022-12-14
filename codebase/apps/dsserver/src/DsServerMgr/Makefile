@@ -30,8 +30,8 @@ LOC_INCLUDES = -I.
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ldsserver -ltdrp -ldidss -ltoolsa \
-	-ldataport -lbz2 -lz -lpthread
+	-ldsserver -ldidss -ltoolsa -ldataport \
+	-ltdrp -lbz2 -lz -lpthread
 
 MODULE_TYPE = progcpp
 
@@ -64,6 +64,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
 
 

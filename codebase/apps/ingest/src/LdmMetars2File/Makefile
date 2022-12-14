@@ -40,8 +40,9 @@ LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 
 LOC_LIBS = \
-	-ldsserver -ldidss -lrapformats -ltoolsa -lpthread \
-	-ltdrp -ldataport -lbz2 -lz \
+	-lrapformats -ldsserver -ldidss -leuclid \
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lphysics -lpthread -lbz2 -lz \
 	-lm
 
 MODULE_TYPE=progcpp 
@@ -81,4 +82,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

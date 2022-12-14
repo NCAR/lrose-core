@@ -38,8 +38,9 @@ TARGET_FILE = DistFit
 LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
-LOC_LIBS = -lrapmath -ltoolsa -lpthread -ldataport -ltdrp \
-	-lbz2 -lz
+LOC_LIBS = \
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lpthread -lbz2 -lz
 
 HDRS = \
 	Params.hh \
@@ -71,4 +72,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

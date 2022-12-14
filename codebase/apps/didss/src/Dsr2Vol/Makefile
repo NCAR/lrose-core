@@ -38,10 +38,12 @@ TARGET_FILE = Dsr2Vol
 
 LOC_INCLUDES = $(NETCDF4_INCS) -I/usr/local/udunits2/include
 
-LOC_LIBS = -lFmq -lMdv -lRadx -lNcxx -leuclid -lrapmath \
-	-ldsserver -lrapformats -ldidss -ltoolsa \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lpthread
+LOC_LIBS = \
+	-lMdv -lFmq -lrapformats -ldsserver \
+	-ldidss -leuclid -lrapmath -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics $(NETCDF4_LIBS) -lbz2 -lz \
+	-lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS) -L/usr/local/udunits2/lib
 
@@ -105,4 +107,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

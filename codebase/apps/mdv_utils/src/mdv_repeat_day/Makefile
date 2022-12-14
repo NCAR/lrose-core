@@ -37,9 +37,12 @@ TARGET_FILE = mdv_repeat_day
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -ldsserver -ldidss \
-	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
-	-lbz2 -lz -lm -ltdrp
+LOC_LIBS = \
+	-lMdv -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz \
+	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -78,4 +81,5 @@ depend: depend_generic
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

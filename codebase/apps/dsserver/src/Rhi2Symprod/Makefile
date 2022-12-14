@@ -37,9 +37,11 @@ TARGET_FILE = Rhi2Symprod
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -lrapformats \
-	-ltoolsa -ldataport -ltdrp $(NETCDF4_LIBS) \
-	-lbz2 -lz -lpthread -lm
+LOC_LIBS = \
+	-lSpdb -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lphysics $(NETCDF4_LIBS) -lbz2 \
+	-lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -81,4 +83,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

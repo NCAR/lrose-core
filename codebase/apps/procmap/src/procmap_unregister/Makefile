@@ -37,7 +37,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -lpthread -ldataport -lz -lbz2 -lm
+	-ltoolsa -ldataport -lpthread -lz \
+	-lbz2 -lm
 
 TARGET_FILE = procmap_unregister
 
@@ -60,4 +61,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c_targets
 clean_tdrp:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

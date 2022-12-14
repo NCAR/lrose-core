@@ -39,9 +39,11 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -ldsserver -ldidss -lrapformats \
-	-ltoolsa -lpthread -ldataport -lbz2 -lz \
-	-lm
+	-ltitan -lMdv -lrapformats -ldsserver \
+	-ldidss -leuclid -lrapmath -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lpthread -lbz2 -lz \
+	-lm $(NETCDF4_LIBS)
 
 HDRS = \
 	Args.hh \
@@ -65,5 +67,6 @@ clean_tdrp:
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
 

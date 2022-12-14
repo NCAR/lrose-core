@@ -38,7 +38,8 @@ TARGET_FILE = tdrp_test
 LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
-LOC_LIBS = -ltdrp
+LOC_LIBS = \
+	-ltdrp -lpthread
 
 HDRS = $(_TDRP_H)
 
@@ -73,3 +74,4 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+

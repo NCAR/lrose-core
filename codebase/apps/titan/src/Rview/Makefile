@@ -37,11 +37,12 @@ TARGET_FILE = Rview
 
 LOC_INCLUDES = $(SYS_X_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -lrapplot -lSpdb -lMdv -lRadx -lNcxx \
-	-ltitan -ldsserver -ldidss -lrapformats \
-	-leuclid -lrapmath -ltoolsa -lpthread -ldataport \
-	-ltdrp -lX11 $(NETCDF4_LIBS) -lbz2 \
-	-lz
+LOC_LIBS = \
+	-ltitan -lMdv -lSpdb -lrapformats \
+	-ldsserver -ldidss -leuclid -lrapmath \
+	-lrapplot -ltoolsa -ldataport -ltdrp \
+	-lRadx -lNcxx -lphysics -lpthread \
+	-lX11 $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
 
@@ -126,4 +127,5 @@ clean_tdrp:
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

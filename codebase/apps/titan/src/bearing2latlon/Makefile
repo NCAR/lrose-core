@@ -40,8 +40,11 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltitan -ltoolsa -lpthread -ltdrp -lbz2 \
-	-lz -lm
+	-ltitan -lMdv -lrapformats -ldsserver \
+	-ldidss -leuclid -lrapmath -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lpthread -lbz2 -lz \
+	-lm $(NETCDF4_LIBS)
 
 HDRS = bearing2latlon.h
 
@@ -89,4 +92,5 @@ clean_tdrp::
 	$(RM) $(TDRP_HDRS) $(TDRP_C)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

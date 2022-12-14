@@ -37,10 +37,12 @@ TARGET_FILE = RefractCompute
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lRefract -ldsdata -lFmq -lSpdb -lMdv \
-	-lRadx  -lNcxx -ldsserver -ldidss -lrapformats \
-	-leuclid -lrapmath -ltoolsa -lpthread -ldataport \
-	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = \
+	-lRefract -ldsdata -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -91,4 +93,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

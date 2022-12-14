@@ -41,11 +41,12 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 # Note: QJSENGINE is defined in lrose_make.OSX_LINUX
 
 LOC_LIBS = \
-          -ldsdata -lradar -lFmq -lSpdb -lMdv  -ldsserver -ldidss \
-          -lRadx -lNcxx -lrapformats -leuclid -lrapmath -lqtplot \
-          -lphysics -ltoolsa -ldataport -ltdrp \
-          $(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
-          -lfftw3 -lbz2 -lz -lpthread
+	-ldsdata -lradar -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -lqtplot -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics $(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
+	-lfftw3 -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
@@ -226,4 +227,5 @@ hawkeye_app:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

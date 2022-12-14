@@ -38,8 +38,10 @@ TARGET_FILE = NewNidsRadial2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -lrapformats \
-	-ldsserver -ldidss -ltoolsa -ldataport -ltdrp \
+LOC_LIBS = \
+	-lMdv -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
 	-lm
 
@@ -89,4 +91,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

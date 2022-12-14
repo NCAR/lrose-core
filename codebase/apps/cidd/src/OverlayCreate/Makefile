@@ -39,8 +39,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lrapmath -ltoolsa -ltdrp -lbz2 \
-	-lz -lm
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lbz2 -lz -lm -lpthread
 
 HDRS = \
 	Args.h \
@@ -74,4 +74,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

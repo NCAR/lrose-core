@@ -40,8 +40,8 @@ LOC_CFLAGS =
 LOC_CPPC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltdrp -ltoolsa -lpthread -ldataport -lbz2 \
-	-lz -lm
+	-ltoolsa -ldataport -ltdrp -lpthread \
+	-lbz2 -lz -lm
 
 HDRS = fs.h
 
@@ -71,4 +71,5 @@ depend: $(TDRP_C) depend_generic
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

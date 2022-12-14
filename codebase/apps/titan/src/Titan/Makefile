@@ -37,11 +37,13 @@ TARGET_FILE = Titan
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lradar -lMdv -lRadx -lNcxx -lSpdb -ldsserver \
-	-ldidss -ltitan -lrapmath -leuclid \
-	-lrapformats -lphysics -ltoolsa -ldataport \
-	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
-	-lpthread
+LOC_LIBS = \
+	-lradar -ltitan -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread \
+	-lfftw3
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -121,4 +123,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

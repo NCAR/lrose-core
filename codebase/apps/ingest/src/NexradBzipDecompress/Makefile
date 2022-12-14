@@ -30,7 +30,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS = -L/usr/local/lib
 LOC_LIBS = \
-	-ldataport -ltoolsa -lpthread -lbz2 -lz
+	-ltoolsa -ldataport -lpthread -lbz2 \
+	-lz
 
 HDRS = \
 
@@ -61,4 +62,5 @@ clean_tdrp:
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

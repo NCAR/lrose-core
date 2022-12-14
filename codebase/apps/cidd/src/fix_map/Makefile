@@ -39,7 +39,8 @@ LOC_INCLUDES =
 #LOC_CFLAGS =  -g -DDBG
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -lbz2 -lz
+	-ltoolsa -ldataport -lbz2 -lz \
+	-lpthread
 
 HDRS =  
 SRCS =  fix_map.c 
@@ -56,4 +57,5 @@ depend: depend_generic
 clean_tdrp:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
