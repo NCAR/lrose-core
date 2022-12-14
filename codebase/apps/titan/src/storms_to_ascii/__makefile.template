@@ -37,9 +37,12 @@ TARGET_FILE = storms_to_ascii
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ltitan -lrapmath -lMdv -lRadx -lNcxx \
-	-lrapformats -ltoolsa -lpthread -ldataport $(NETCDF4_LIBS) \
-	-lbz2 -lz -lm
+LOC_LIBS = \
+	-ltitan -lMdv -lrapformats -ldsserver \
+	-ldidss -leuclid -lrapmath -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lpthread $(NETCDF4_LIBS) -lbz2 \
+	-lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -73,4 +76,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

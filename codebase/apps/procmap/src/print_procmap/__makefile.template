@@ -39,8 +39,8 @@ LOC_INCLUDES = -I../include
 LOC_CFLAGS =
 LOC_LDFLAGS = -L..
 LOC_LIBS = \
-	-ldsserver -ldidss -ltoolsa -lpthread -ldataport \
-	-lbz2 -lz
+	-ldsserver -ldidss -ltoolsa -ldataport \
+	-lpthread -lbz2 -lz
 
 HDRS = \
 	Args.hh \
@@ -65,4 +65,5 @@ depend: depend_generic
 clean_tdrp:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

@@ -40,7 +40,8 @@ LOC_CFLAGS =
 LOC_CPPC_CFLAGS = 
 LOC_LDFLAGS = 
 LOC_LIBS = \
-	-ltoolsa -ltdrp -lbz2 -lz
+	-ltoolsa -ldataport -ltdrp -lbz2 \
+	-lz -lpthread
 
 HDRS = \
 	Params.hh \
@@ -76,4 +77,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

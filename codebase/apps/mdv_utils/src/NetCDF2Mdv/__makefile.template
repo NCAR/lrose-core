@@ -37,10 +37,11 @@ TARGET_FILE = NetCDF2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS) $(HDF5_INCLUDES)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -lrapformats -ldsserver \
-	-ldidss -ltdrp -ldataport \
-	-leuclid -ltoolsa -lpthread $(NETCDF4_LIBS) -lbz2 \
-	-lz
+LOC_LIBS = \
+	-lMdv -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS) $(HDF5_LDFLAGS)
 
@@ -83,4 +84,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

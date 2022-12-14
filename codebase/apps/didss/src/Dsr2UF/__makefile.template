@@ -39,9 +39,10 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-lFmq -ldsserver -lrapformats -lrapmath \
-	-ldidss -ltoolsa -ldataport -ltdrp \
-	-lbz2 -lz -lpthread
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lphysics -lbz2 -lz \
+	-lpthread
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -90,4 +91,5 @@ clean_show:
 	/bin/rm -f ufshow ufshow_be
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

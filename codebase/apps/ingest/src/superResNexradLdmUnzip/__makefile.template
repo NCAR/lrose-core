@@ -30,8 +30,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS = -L/usr/local/lib
 LOC_LIBS = \
-	-ldidss -ltoolsa -lpthread -ldataport -ltdrp \
-	-lbz2 -lz
+	-ldidss -ltoolsa -ldataport -ltdrp \
+	-lpthread -lbz2 -lz
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -67,4 +67,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

@@ -37,10 +37,12 @@ TARGET_FILE = MdvContour
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
-	-ldsserver -ldidss -lrapformats -lcontour \
-	-leuclid -ltoolsa -lpthread -ldataport -ltdrp \
-	-lrapmath $(NETCDF4_LIBS) -lbz2 -lz \
+LOC_LIBS = \
+	-ldsdata -lMdv -lSpdb -lFmq \
+	-lrapformats -ldsserver -ldidss -lcontour \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -78,4 +80,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

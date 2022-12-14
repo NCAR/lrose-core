@@ -34,10 +34,11 @@ TARGET_FILE = madis2Spdb
 
 LOC_INCLUDES = $(NETCDF_INCS) $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lnetcdf -lrapformats -ldsserver \
-	-ldidss -lrapformats -lphysics -ltoolsa \
-	-ldataport -ltdrp $(NETCDF4_LIBS) -lbz2 \
-	-lz -lpthread -lm
+LOC_LIBS = \
+	-lSpdb -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lphysics -lnetcdf $(NETCDF4_LIBS) \
+	-lbz2 -lz -lpthread -lm
 
 LOC_LDFLAGS = $(NETCDF_LDFLAGS) $(NETCDF4_LDFLAGS)
 
@@ -77,4 +78,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

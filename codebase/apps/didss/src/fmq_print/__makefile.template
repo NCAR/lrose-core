@@ -39,8 +39,9 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ldidss -lrapformats -ltoolsa -lpthread -lrapmath \
-	-ldataport -lbz2 -lz -lm
+	-lrapformats -ldidss -leuclid -lrapmath \
+	-ltoolsa -ldataport -ltdrp -lphysics \
+	-lpthread -lbz2 -lz -lm
 
 MODULE_TYPE = program
 
@@ -68,4 +69,5 @@ depend: depend_generic
 clean_tdrp:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

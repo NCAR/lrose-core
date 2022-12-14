@@ -42,9 +42,11 @@ LOC_INCLUDES = $(SYS_X_INCLUDES)
 LOC_CFLAGS = 
 LOC_LDFLAGS = $(SYS_X_LDFLAGS)
 LOC_LIBS = \
-	-ltitan -ldsserver -ldidss -lrapformats \
-	-lrapplot -lphysics -lrapmath -ltoolsa -lpthread \
-	-ldataport -lX11 -lbz2 -lz
+	-ltitan -lMdv -lrapformats -ldsserver \
+	-ldidss -leuclid -lrapmath -lrapplot \
+	-ltoolsa -ldataport -ltdrp -lRadx \
+	-lNcxx -lphysics -lpthread -lX11 \
+	-lbz2 -lz $(NETCDF4_LIBS)
 
 HDRS = TimeHist.hh
 
@@ -100,4 +102,5 @@ clean_tdrp:
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

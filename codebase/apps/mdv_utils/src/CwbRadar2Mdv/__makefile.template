@@ -14,9 +14,11 @@ TARGET_FILE = CwbRadar2Mdv
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lMdv -lRadx -lNcxx -leuclid -ldsserver \
-	-lrapformats -ldidss -ltoolsa -lpthread -ldataport \
-	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz \
+LOC_LIBS = \
+	-lMdv -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz \
 	-lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -63,4 +65,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

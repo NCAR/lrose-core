@@ -38,10 +38,12 @@ TARGET_FILE = ModelDerive
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
-	-leuclid -ldsserver -ldidss -lrapformats \
-	-ltoolsa -lpthread -lgrib2 -ldataport -ltdrp \
-	$(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = \
+	-ldsdata -lMdv -lSpdb -lFmq \
+	-lrapformats -ldsserver -ldidss -lgrib2 \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(NETCDF4_LIBS) -lbz2 -lz -lpng
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -96,4 +98,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

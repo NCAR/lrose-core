@@ -37,8 +37,8 @@ LOC_INCLUDES =
 LOC_CFLAGS =
 LOC_LDFLAGS =
 LOC_LIBS = \
-	-ltoolsa -lpthread -ldataport $(SYS_LIBS) -lbz2 \
-	-lz
+	-ltoolsa -ldataport -lpthread $(SYS_LIBS) \
+	-lbz2 -lz
 
 TARGET_FILE = LogFilter
 
@@ -62,4 +62,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 clean_tdrp:
+
 

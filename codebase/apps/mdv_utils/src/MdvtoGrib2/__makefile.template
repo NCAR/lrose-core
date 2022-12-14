@@ -43,11 +43,13 @@ TARGET_FILE = MdvtoGrib2
 
 LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
 
-LOC_LIBS = -ldsdata -lSpdb -lMdv -lRadx -lNcxx \
-	-ldsserver -ldidss -lrapformats -lgrib2 \
-	-leuclid -ltoolsa -lpthread $(JASPER_LIBS) -lpng \
-	-ldataport -ltdrp -lrapmath -lz \
-	$(NETCDF4_LIBS) -lbz2 -lz -lm
+LOC_LIBS = \
+	-ldsdata -lMdv -lSpdb -lFmq \
+	-lrapformats -ldsserver -ldidss -lgrib2 \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lpthread $(JASPER_LIBS) -lpng -lz \
+	$(NETCDF4_LIBS) -lbz2 -lm
 
 LOC_LDFLAGS = $(JASPER_LDFLAGS) $(NETCDF4_LDFLAGS)
 
@@ -90,4 +92,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 depend: depend_generic
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

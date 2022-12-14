@@ -38,9 +38,12 @@ TARGET_FILE = SpdbXml2Table
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -lradar -lFmq -ldsserver \
-	-ldidss -lrapformats -ltoolsa -lpthread -ldataport \
-	-ltdrp $(NETCDF4_LIBS) -lbz2 -lz
+LOC_LIBS = \
+	-lradar -lMdv -lSpdb -lFmq \
+	-lrapformats -ldsserver -ldidss -leuclid \
+	-lrapmath -ltoolsa -ldataport -ltdrp \
+	-lRadx -lNcxx -lphysics -lpthread \
+	$(NETCDF4_LIBS) -lbz2 -lz -lfftw3
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -80,4 +83,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 

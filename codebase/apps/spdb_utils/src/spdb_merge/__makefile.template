@@ -34,9 +34,11 @@ TARGET_FILE = spdb_merge
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -lSpdb -ldsserver -ldidss -ltoolsa -lpthread \
-	-ldataport $(NETCDF4_LIBS) -lbz2 -lz \
-	-lm
+LOC_LIBS = \
+	-lSpdb -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lphysics -lpthread $(NETCDF4_LIBS) \
+	-lbz2 -lz -lm
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -71,4 +73,5 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 #
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
 
