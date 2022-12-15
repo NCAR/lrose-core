@@ -156,7 +156,7 @@ def main():
         print("=============================================", file=sys.stderr)
         print("Getting lib list from dir: ", libsDir, file=sys.stderr)
 
-    libList = getLibList(libsDir)
+    lroseLibList = getLroseLibList(libsDir)
 
     # recursively search libs and apps for makefiles
 
@@ -164,13 +164,13 @@ def main():
         print("#############################################", file=sys.stderr)
         print("Searching libs, dir: ", libsDir, file=sys.stderr)
 
-    searchDirRecurse(libsDir, libList)
+    searchDirRecurse(libsDir, lroseLibList)
 
     if (options.debug):
         print("#############################################", file=sys.stderr)
         print("Searching apps, dir: ", appsDir, file=sys.stderr)
 
-    searchDirRecurse(appsDir, libList)
+    searchDirRecurse(appsDir, lroseLibList)
 
     nTotal = nRecurse + nLibs + nApps + nOther
     if (options.debug):
@@ -190,9 +190,9 @@ def main():
 ########################################################################
 # search libs directory to compile libs list
 
-def getLibList(dir):
+def getLroseLibList(dir):
                     
-    libList = []
+    lroseLibList = []
 
     # check if this dir has a makefile or Makefile
 
@@ -219,17 +219,17 @@ def getLibList(dir):
         subPath = os.path.join(dir, subName)
         if (os.path.isdir(subPath)):
             if (subName.find("perl5") < 0):
-                libList.append(subName)
+                lroseLibList.append(subName)
 
     if (options.debug):
-        print("libList: ", libList, file=sys.stderr)
+        print("lroseLibList: ", lroseLibList, file=sys.stderr)
 
-    return libList
+    return lroseLibList
 
 ########################################################################
 # search directory and subdirectories
 
-def searchDirRecurse(dir, libList):
+def searchDirRecurse(dir, lroseLibList):
                     
     global nLibs, nApps, nRecurse
 
@@ -262,7 +262,7 @@ def searchDirRecurse(dir, libList):
         # src level of lib - create CMakeLists.txt for lib
 
         libDir = dir[:-4]
-        createCMakeListsLib(libDir, libList)
+        createCMakeListsLib(libDir, lroseLibList)
         nLibs = nLibs + 1
 
     elif ((pathToks[ntoks-4] == "apps") and
@@ -270,7 +270,7 @@ def searchDirRecurse(dir, libList):
 
         # app directory - create CMakeLists.txt for app
 
-        createCMakeListsApp(dir, libList)
+        createCMakeListsApp(dir, lroseLibList)
         nApps = nApps + 1
 
     elif ((pathToks[ntoks-3] == "apps") and
@@ -291,7 +291,7 @@ def searchDirRecurse(dir, libList):
         subdirList = getSubdirList(dir)
         for subdir in subdirList:
             subdirPath = os.path.join(dir, subdir)
-            searchDirRecurse(subdirPath, libList)
+            searchDirRecurse(subdirPath, lroseLibList)
 
     return
 
@@ -696,7 +696,7 @@ def writeCMakeListsRecurse(dir, subdirList):
 #
 #===========================================================================
 
-def createCMakeListsLib(libDir, libList):
+def createCMakeListsLib(libDir, lroseLibList):
 
     # compute the src dir
 
@@ -760,7 +760,7 @@ def createCMakeListsLib(libDir, libList):
             
     # determine the lib list to use
 
-    libListInUse = libList
+    libListInUse = lroseLibList
     if (libName == 'tdrp'):
         libListInUse = [ 'tdrp' ]
 
@@ -1018,19 +1018,20 @@ def createCMakeListsApp(appDir, libList):
         # for static libs, use libs from makefile
         linkLibList = makefileLibList
     else:
+        linkLibList = makefileLibList
         # for shared libs, we need to link with all lib
         # order the list
-        linkOrder = getLroseLinkOrder()
-        linkLibList = []
-        for lib in linkOrder:
-            if (lib in libList):
-                linkLibList.append(lib)
-        for lib in makefileLibList:
-            if (lib not in linkLibList):
-                linkLibList.append(lib)
+        #linkOrder = getLroseLinkOrder()
+        #linkLibList = []
+        #for lib in linkOrder:
+        #    if (lib in libList):
+        #        linkLibList.append(lib)
+        #for lib in makefileLibList:
+        #    if (lib not in linkLibList):
+        #        linkLibList.append(lib)
 
-    extendedLibs = getExtendedLibs(linkLibList)
-    linkLibList.extend(extendedLibs)
+    #extendedLibs = getExtendedLibs(linkLibList)
+    #linkLibList.extend(extendedLibs)
                 
     # check if we need Qt support
 
@@ -1175,25 +1176,23 @@ def decodeLibLine(line):
         thisTok = tok.strip(" \t\n\r")
         if (thisTok.find("-l") == 0):
             libs.append(thisTok[2:]) # strip off '-l'
-        elif ((thisTok.find("NETCDF4_LIBS") >= 0) or
-              (thisTok.find("NETCDF_LIBS") >= 0)):
-            libs.append("Ncxx")
+        elif ((thisTok.find("NETCDF4_LIBS") >= 0)):
             libs.append("netcdf")
             libs.append("hdf5_hl")
             libs.append("hdf5")
             libs.append("z")
             libs.append("bz2")
-        elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
-            libs.append("netcdf")
-        elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
-            libs.append("netcdff")
-            libs.append("netcdf")
-        elif (thisTok.find("NETCDF_C_LIB") >= 0):
-            libs.append("netcdf")
-        elif (thisTok.find("NETCDF_FF_LIB") >= 0):
-            libs.append("netcdff")
-        elif (thisTok.find("TDRP_LIBS") >= 0):
-            libs.append("tdrp")
+        #elif (thisTok.find("NETCDF_C_AND_C++_LIBS") >= 0):
+        #    libs.append("netcdf")
+        #elif (thisTok.find("NETCDF_C_AND_F_LIBS") >= 0):
+        #    libs.append("netcdff")
+        #    libs.append("netcdf")
+        #elif (thisTok.find("NETCDF_C_LIB") >= 0):
+        #    libs.append("netcdf")
+        #elif (thisTok.find("NETCDF_FF_LIB") >= 0):
+        #    libs.append("netcdff")
+        #elif (thisTok.find("TDRP_LIBS") >= 0):
+        #    libs.append("tdrp")
         #elif (thisTok.find("QT_LIBS") >= 0):
         #    libs.append("Qt5Core")
         #    libs.append("Qt5Gui")
@@ -1212,34 +1211,34 @@ def getLroseLinkOrder():
     
     linkOrder = [ 'mm5',
                   'Refract',
+                  'FiltAlgVirtVol',
                   'FiltAlg',
                   'dsdata',
                   'radar',
                   'hydro',
                   'titan',
-                  'Fmq',
-                  'Spdb',
                   'Mdv',
-                  'advect',
-                  'rapplot',
-                  'qtplot',
-                  'Radx',
-                  'Ncxx',
+                  'Spdb',
+                  'Fmq',
                   'rapformats',
+                  'advect',
+                  'cidd',
                   'dsserver',
                   'didss',
+                  'contour',
                   'grib',
                   'grib2',
-                  'contour',
                   'euclid',
                   'rapmath',
-                  'kd',
-                  'physics',
+                  'rapplot',
+                  'qtplot',
                   'toolsa',
                   'dataport',
-                  'tdrp',
+                  'Radx',
+                  'Ncxx',
+                  'physics',
                   'shapelib',
-                  'cidd',
+                  'kd',
                   'devguide',
                   'xview',
                   'olgx',
@@ -1255,8 +1254,7 @@ def getExtendedLibs(linkLibList):
 
     # extend the lib list with required standard libs
 
-    extendLibs = [ 'Ncxx',
-                   'netcdf',
+    extendLibs = [ 'netcdf',
                    'hdf5_hl',
                    'hdf5',
                    'fftw3',
