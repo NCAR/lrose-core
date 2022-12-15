@@ -44,6 +44,7 @@ SUB_DIRS = \
 	MdvRadarShear \
         MergeHcrAndHsrl \
 	NexradPowerStats \
+	NoiseMon \
 	PointingCpCompute \
 	PowerInfo2Spdb \
 	Qmap2Cidd \
@@ -54,6 +55,7 @@ SUB_DIRS = \
 	RadarMdvCompare \
 	RadxDealias \
 	RapMap2Chill \
+	RcalXml2Table \
 	SimCpCompute \
 	SpectraPrint \
 	Sprite \
