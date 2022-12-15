@@ -163,7 +163,7 @@ NETCDF_C++_LIB=-lnetcdf_c++
 NETCDF_FF_LIB=-lnetcdff
 NETCDF_C_AND_C++_LIBS=-lnetcdf
 NETCDF_C_AND_F_LIBS=-lnetcdff -lnetcdf
-NETCDF4_LIBS=-lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2
+NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2
 
 #
 # Qt
