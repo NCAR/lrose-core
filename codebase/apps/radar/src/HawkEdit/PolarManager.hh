@@ -468,6 +468,14 @@ private:
   QLabel *_cfacRotationVal;
   QLabel *_cfacRollVal;
   QLabel *_cfacTiltVal;
+
+  QLabel *_georefsAppliedLabel;
+  QLabel *_geoRefRotationLabel;
+  QLabel *_geoRefRollLabel;
+  QLabel *_geoRefTiltLabel;
+  QLabel *_cfacRotationLabel;
+  QLabel *_cfacRollLabel;
+  QLabel *_cfacTiltLabel;  
   
 
   bool _altitudeInFeet;
@@ -521,6 +529,7 @@ private:
   double _getInstHtKm(const RadxRay *ray);
 
   void _applyCfac();
+  void hideCfacs();
 
   // setting text
 

@@ -2918,6 +2918,9 @@ void PolarManager::_openFile()
   _undoRedoController->reset(path, _timeNavController->getNFiles());
   _undoRedoController->waterMarkVersion();
 
+  DataModel *dataModel = DataModel::Instance();
+  const RadxRay *ray = dataModel->getRay(0);
+  _updateStatusPanel(ray);
   LOG(DEBUG) << "exit";
 }
 
@@ -4586,13 +4589,20 @@ void PolarManager::_createStatusPanel()
     _sunAzVal = NULL;
   }
 
-  _georefsApplied = _createStatusVal("Georefs applied?", "T/F", row++, fsize);
-  _geoRefRotationVal = _createStatusVal("Georef Rot (deg)", "0.0", row++, fsize);
-  _geoRefRollVal = _createStatusVal("Georef Roll (deg)", "0.0", row++, fsize);
-  _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize);
-  _cfacRotationVal = _createStatusVal("Cfac Rot (deg)", "0.0", row++, fsize);
-  _cfacRollVal = _createStatusVal("Cfac Roll (deg)", "", row++, fsize);
-  _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize);
+  _georefsApplied = _createStatusVal("Georefs applied?", "T/F", row++, fsize,
+    &_georefsAppliedLabel);
+  _geoRefRotationVal = _createStatusVal("Georef Rot (deg)", "0.0", row++, fsize,
+    &_geoRefRotationLabel);
+  _geoRefRollVal = _createStatusVal("Georef Roll (deg)", "0.0", row++, fsize,
+    &_geoRefRollLabel);
+  _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize,
+    &_geoRefTiltLabel);
+  _cfacRotationVal = _createStatusVal("Cfac Rot (deg)", "0.0", row++, fsize,
+    &_cfacRotationLabel);
+  _cfacRollVal = _createStatusVal("Cfac Roll (deg)", "", row++, fsize,
+    &_cfacRollLabel);
+  _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize,
+    &_cfacTiltLabel);
                             
   _applyCfacToggle = new QCheckBox("Apply Correction Factors", this);
   _statusLayout->addWidget(_applyCfacToggle, row++, 0, 1, 2, alignCenter);
@@ -4601,14 +4611,7 @@ void PolarManager::_createStatusPanel()
   _statusLayout->setRowStretch(row, 1);
   row++;
 
-  _georefsApplied->hide(); 
-  _geoRefRotationVal->hide(); 
-  _geoRefRollVal->hide(); 
-  _geoRefTiltVal->hide(); 
-  _cfacRotationVal->hide(); 
-  _cfacRollVal->hide(); 
-  _cfacTiltVal->hide();                           
-  _applyCfacToggle->hide();  
+  hideCfacs(); 
 
 }
 
@@ -5239,6 +5242,14 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     _cfacTiltVal->show();     
     _applyCfacToggle->show();
 
+    _georefsAppliedLabel->show(); 
+    _geoRefRotationLabel->show(); 
+    _geoRefRollLabel->show(); 
+    _geoRefTiltLabel->show(); 
+    _cfacRotationLabel->show(); 
+    _cfacRollLabel->show(); 
+    _cfacTiltLabel->show();     
+
     const RadxGeoref *georef = ray->getGeoreference();
     if (georef != NULL) {
 
@@ -5268,8 +5279,30 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
       _cfacTiltVal->setText(text);
 
     }
+  } else {
+    hideCfacs();
   }
 
+}
+
+void PolarManager::hideCfacs() {
+  _georefsApplied->hide(); 
+  _geoRefRotationVal->hide(); 
+  _geoRefRollVal->hide(); 
+  _geoRefTiltVal->hide(); 
+  _cfacRotationVal->hide(); 
+  _cfacRollVal->hide(); 
+  _cfacTiltVal->hide(); 
+
+  _georefsAppliedLabel->hide(); 
+  _geoRefRotationLabel->hide(); 
+  _geoRefRollLabel->hide(); 
+  _geoRefTiltLabel->hide(); 
+  _cfacRotationLabel->hide(); 
+  _cfacRollLabel->hide(); 
+  _cfacTiltLabel->hide(); 
+
+  _applyCfacToggle->hide();  
 }
 
 ///////////////////////////////////////////
