@@ -309,6 +309,7 @@ public slots:
   int saveDiscardMessage(string text, string question);
   int overwriteOnceOrAllMessage(string text, string question);
   int overwriteOnceOrAllMessage2(string text, string question);  
+  int resetDataMessage(string text, string question);
 
   void selectBatchMode();
   void selectIndividualMode();

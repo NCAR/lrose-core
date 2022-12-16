@@ -2920,6 +2920,7 @@ void PolarManager::_openFile()
 
   DataModel *dataModel = DataModel::Instance();
   const RadxRay *ray = dataModel->getRay(0);
+  _applyCfacToggle->setCheckState(Qt::Checked);
   _updateStatusPanel(ray);
   LOG(DEBUG) << "exit";
 }
@@ -6121,7 +6122,14 @@ void PolarManager::_applyCfac() {
     dataModel->applyCorrectionFactors();
   } else {
     // withdraw the correction factor
-    dataModel->withdrawCorrectionFactors();
+    int result = resetDataMessage("Removing the correction factors will reset the data. \
+      All changes will be discarded", "Do you want to continue?");
+    if (result == QMessageBox::Reset) {
+      string currentFile = _timeNavController->getSelectedArchiveFile();
+      _readDataFile2(currentFile);
+    } else {
+      _applyCfacToggle->setCheckState(Qt::Checked);
+    }
   }
   _applyDataEdits();
 }
@@ -6349,4 +6357,17 @@ int PolarManager::overwriteOnceOrAllMessage2(string text, string question) {
   }
 
   //return ret;
+}
+
+int PolarManager::resetDataMessage(string text, string question) {
+  QMessageBox msgBox(this);
+  msgBox.setIcon(QMessageBox::Question);
+  msgBox.setText(QString::fromStdString(text)); 
+  msgBox.setInformativeText(QString::fromStdString(question));
+  msgBox.setStandardButtons(QMessageBox::Reset | 
+    QMessageBox::Cancel);
+
+  int ret = msgBox.exec();
+
+  return ret;
 }
