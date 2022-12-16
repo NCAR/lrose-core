@@ -2633,14 +2633,10 @@ void PolarManager::_rhiLocationClicked(double xkm, double ykm,
 // respond to a change in click location on one of the windows
 
 void PolarManager::_locationClicked(double xkm, double ykm,
-                                    // RayLoc *ray_loc, 
                                     const RadxRay *ray)
-  
 {
 
-
-    LOG(DEBUG) << "*** Entering PolarManager::_locationClicked()";
-  
+  LOG(DEBUG) << "*** Entering PolarManager::_locationClicked()";
   
   double range = sqrt(xkm * xkm + ykm * ykm);
   int gate = (int) 
@@ -2658,24 +2654,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     LOG(DEBUG) << "  az, el from ray: "
          << ray->getAzimuthDeg() << ", "
          << ray->getElevationDeg();
-    //if (_params->debug >= Params::DEBUG_VERBOSE) {
-    //  ray->print(cerr);
-    //}
   }
-
-  //**** testing ****
-  //  QToolTip::showText(this->mapToGlobal(QPoint(xkm, ykm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "cindy");
-  //QToolTip::showText(mapToGlobal(QPoint(xkm, ykm)), "louise");
-  //QToolTip::showText(QPoint(xkm, ykm), "jay");
-  //int xp = _ppi->_zoomWorld.getIxPixel(xkm);
-  //int yp = _ppi->_zoomWorld.getIyPixel(ykm);
-  //QToolTip::showText(_ppi->mapToGlobal(QPoint(xp, yp)), "louigi");
-
-  //_ppi->smartBrush(xkm, ykm);
-  //qImage->convertToFormat(QImage::Format_RGB32);
-  //qImage->invertPixels()
-  // ****** end testing *****
 
   DateTime rayTime(ray->getTimeSecs());
   char text[256];
@@ -2701,17 +2680,11 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   _rangeClicked->setText(text);
 
   _displayFieldController->setForLocationClicked(-9999.0, "----");  
-  //for (size_t ii = 0; ii < nFields; ii++) {
-  //  _fields[ii]->setSelectValue(-9999.0);
-  //  _fields[ii]->setDialogText("----");
-  //}
   
   vector<RadxField *> flds = ray->getFields();
   for (size_t ifield = 0; ifield < flds.size(); ifield++) {
     const RadxField *field = flds[ifield];
 
-    //  for (size_t ifield = 0; ifield < ray->getNFields(); ifield++) {
-    //const RadxField *field = ray->getField(ifield);
     const string fieldName = field->getName();
     if (fieldName.size() == 0) {
       continue;
@@ -2720,7 +2693,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
     double val = data[gate];
     const string fieldUnits = field->getUnits();
 
-      LOG(DEBUG) << "Field name, selected name: "
+    LOG(DEBUG) << "Field name, selected name: "
 	   << fieldName << ", "
 	   << _selectedName;
     
@@ -2734,25 +2707,20 @@ void PolarManager::_locationClicked(double xkm, double ykm,
       _valueLabel->setText(text);
     }
 
-      LOG(DEBUG) << "Field name, units, val: "
+    LOG(DEBUG) << "Field name, units, val: "
 	   << field->getName() << ", "
 	   << field->getUnits() << ", "
 	   << val;
     
-    //for (size_t ii = 0; ii < _fields.size(); ii++) {
-    //  if (_fields[ii]->getName() == fieldName) {
-    //_fields[ii]->setSelectValue(val);
-        char text[128];
-        if (fabs(val) > 10000) {
-          sprintf(text, "----");
-        } else if (fabs(val) > 10) {
-          sprintf(text, "%.2f", val);
-        } else {
-          sprintf(text, "%.3f", val);
-        }
-	//  _fields[ii]->setDialogText(text);
-	//  }
-	//}
+    char text[128];
+    if (fabs(val) > 10000) {
+      sprintf(text, "----");
+    } else if (fabs(val) > 10) {
+      sprintf(text, "%.2f", val);
+    } else {
+      sprintf(text, "%.3f", val);
+    }
+
     _displayFieldController->setForLocationClicked(fieldName, val, text);
 
   } // ifield
@@ -4633,6 +4601,15 @@ void PolarManager::_createStatusPanel()
   _statusLayout->setRowStretch(row, 1);
   row++;
 
+  _georefsApplied->hide(); 
+  _geoRefRotationVal->hide(); 
+  _geoRefRollVal->hide(); 
+  _geoRefTiltVal->hide(); 
+  _cfacRotationVal->hide(); 
+  _cfacRollVal->hide(); 
+  _cfacTiltVal->hide();                           
+  _applyCfacToggle->hide();  
+
 }
 
 
@@ -5252,9 +5229,18 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
 
   // if airborne data ...
   if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    
+    _georefsApplied->show();
+    _geoRefRotationVal->show();
+    _geoRefRollVal->show();
+    _geoRefTiltVal->show();
+    _cfacRotationVal->show();
+    _cfacRollVal->show();
+    _cfacTiltVal->show();     
+    _applyCfacToggle->show();
+
     const RadxGeoref *georef = ray->getGeoreference();
     if (georef != NULL) {
-
 
       if (ray->getGeorefApplied()) {
         _georefsApplied->setText("true");       

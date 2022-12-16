@@ -1232,7 +1232,7 @@ void ScriptsDataModel::applyCorrectionFactors(RadxRay *ray) {
       }
       ray->setAzimuthDeg(newAz);
       ray->setElevationDeg(tilt);
-      cerr << ray->getAzimuthDeg() << endl;
+      // cerr << ray->getAzimuthDeg() << endl;
     }
   }
 }
