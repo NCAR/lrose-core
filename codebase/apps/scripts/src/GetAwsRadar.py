@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #=====================================================================
 #
@@ -244,8 +244,8 @@ def doDownload(radarName, fileTime, fileEntry, fileName):
     tmpPath = os.path.join(options.tmpDir, fileName)
     try:
         tmpFile = open(tmpPath, 'wb')
-        opener = urllib.request.URLopener()
-        myfile = opener.open(os.path.join(dataURL,fileEntry))
+        urlPath = os.path.join(dataURL,fileEntry);
+        myfile = urllib.request.urlopen(urlPath)
         tmpFile.write(myfile.read())
         tmpFile.close()
         fileCount = fileCount + 1
