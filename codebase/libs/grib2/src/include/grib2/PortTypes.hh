@@ -84,7 +84,7 @@ typedef unsigned int	g2_ui32;
 typedef signed int	g2_ti32; /* time */
 typedef float		g2_fl32; 
 typedef double		g2_fl64; 
-typedef signed long long int g2_g2_si64;
+typedef signed long long int g2_si64;
 typedef unsigned long long int g2_ui64;
 typedef signed long long int g2_ti64; /* time */
 
