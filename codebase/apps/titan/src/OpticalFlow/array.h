@@ -27,6 +27,7 @@
 #include <cstring> // for memcpy
 #include <iterator>
 #include <memory>
+#include <algorithm>
 
 namespace ancilla {
   template <typename T>
