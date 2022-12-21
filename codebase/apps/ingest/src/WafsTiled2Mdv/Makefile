@@ -94,6 +94,4 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
-
 
