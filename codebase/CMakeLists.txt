@@ -40,7 +40,7 @@ find_package(PkgConfig REQUIRED)
 # Finding Qt on mac OSX
 
 if(APPLE)
-find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt@5/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
+find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt@5/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt@5/*/lib/cmake/Qt5 NO_DEFAULT_PATH)
 endif(APPLE)
 find_package (X11)
 if (DEFINED X11_X11_LIB)
