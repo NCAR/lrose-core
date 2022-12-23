@@ -921,7 +921,7 @@ double DerFieldCalcs::_computeBetaMSonde(double pressHpa, double tempK)
   }
 
   double val = _BmsFactor * ((pressHpa * 100.0) / (tempK * _BoltzmannConst));
-  if (!finite(val)) {
+  if (!std::isfinite(val)) {
     return NAN;
   }
   
