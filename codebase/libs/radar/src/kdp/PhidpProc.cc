@@ -50,6 +50,7 @@ PhidpProc::PhidpProc()
 
   _startRangeKm = 0.0;
   _gateSpacingKm = 0.0;
+  _missingVal = -9999.0;
   
 }
 
@@ -92,8 +93,8 @@ void PhidpProc::computePhidpSdev(int nGatesData,
 
   // compute number of gates in kernel
   
-  int nGatesKernel = _nGatesSdev;
-  int nGatesHalf = nGatesKernel / 2;
+  int nKernel = _nGatesSdev;
+  int nKernelHalf = nKernel / 2;
   
   // save phidp to states array
   
@@ -103,6 +104,9 @@ void PhidpProc::computePhidpSdev(int nGatesData,
     PhidpState &state = _phidpStates[igate];
     state.init(_missingVal);
     state.phidp = _phidp[igate];
+    if (fabs(state.phidp) > 360.0) {
+      state.phidp = _missingVal;
+    }
     if (state.phidp != _missingVal) {
       state.missing = false;
     }
@@ -151,13 +155,12 @@ void PhidpProc::computePhidpSdev(int nGatesData,
     double sumxx = 0.0;
     double sumyy = 0.0;
     
-    for (int jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (int jj = igate - nKernelHalf; jj <= igate + nKernelHalf; jj++) {
       if (jj < 0 || jj >= _nGatesData) {
         continue;
       }
       PhidpState &jstate = _phidpStates[jj];
       if (jstate.missing) {
-        cerr << "-";
         continue;
       }
       double xx = jstate.xx;
@@ -167,18 +170,20 @@ void PhidpProc::computePhidpSdev(int nGatesData,
       count++;
     }
   
-    // if (count <= nGatesHalf) {
-    //   return;
-    // }
-    
-    istate.meanxx = sumxx / count;
-    istate.meanyy = sumyy / count;
-    
-    double phase = atan2(istate.meanyy, istate.meanxx) * RAD_TO_DEG;
-    if (_phidpFoldsAt90) {
-      phase *= 0.5;
+    if (count < 2) {
+      // missing
+      istate.meanxx = 0.0;
+      istate.meanyy = 0.0;
+      istate.phidpMean = 0.0;
+    } else {
+      istate.meanxx = sumxx / count;
+      istate.meanyy = sumyy / count;
+      double phase = atan2(istate.meanyy, istate.meanxx) * RAD_TO_DEG;
+      if (_phidpFoldsAt90) {
+        phase *= 0.5;
+      }
+      istate.phidpMean = phase;
     }
-    istate.phidpMean = phase;
 
   } // igate
   
@@ -186,14 +191,14 @@ void PhidpProc::computePhidpSdev(int nGatesData,
   // we center on the mean value
   
   for (int igate = 0; igate < _nGatesData; igate++) {
-    
+
     PhidpState &istate = _phidpStates[igate];
     
     double count = 0.0;
     double sum = 0.0;
     double sumSq = 0.0;
     
-    for (int jj = igate - nGatesHalf; jj <= igate + nGatesHalf; jj++) {
+    for (int jj = igate - nKernelHalf; jj <= igate + nKernelHalf; jj++) {
       
       if (jj < 0 || jj >= _nGatesData) {
         continue;
@@ -207,14 +212,16 @@ void PhidpProc::computePhidpSdev(int nGatesData,
       // compute difference between this value and the mean
 
       double diff = jstate.phidp - istate.phidpMean;
-
+      
       // constrain diff
       
-      while (diff < -_phidpFoldVal) {
-        diff += 2 * _phidpFoldVal;
-      }
-      while (diff > _phidpFoldVal) {
-        diff -= 2 * _phidpFoldVal;
+      if (fabs(diff) < 720.0) {
+        while (diff < -_phidpFoldVal) {
+          diff += 2 * _phidpFoldVal;
+        }
+        while (diff > _phidpFoldVal) {
+          diff -= 2 * _phidpFoldVal;
+        }
       }
 
       // sum up
@@ -225,7 +232,7 @@ void PhidpProc::computePhidpSdev(int nGatesData,
       
     }
 
-    if (count <= nGatesHalf || count < 3) {
+    if (count <= nKernelHalf || count < 3) {
       istate.phidpSdev = _missingVal;
     } else {
       double meanDiff = sum / count;
