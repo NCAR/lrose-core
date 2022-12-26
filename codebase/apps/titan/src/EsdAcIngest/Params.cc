@@ -678,7 +678,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("optional_field_names");
     tt->descr = tdrpStrDup("Array of variable fields following fixed fields.");
-    tt->help = tdrpStrDup("Used for comma-delimited format only. The comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt. These are followed by optional fields. This array specifies the optional field list.");
+    tt->help = tdrpStrDup("Used for comma-delimited format only.\n\nThe comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt.\n\nThese are followed by optional fields. This array specifies the optional field list.\n\n\tGS: ground speed(kts or m/s).\n\tTAS: true airspeed (kts or m/s).\n\tTEMP: air temp C.\n\tDEW_PT: dew point C.\n\tLW: liquid water concentration (g/m3).\n\tFSSP_CONC: particle concentration from FSSP.\n\tHEADING_DEG: heading deg T.\n\tVERT_VEL_MPS: vertical velocity in m/s.\n\tERROR_FLAGS: bit-wise error flags.\n\tR_BURN: flag to show right-wing burn on.\n\tL_BURN: flag to show left-wing burn on.\n\tBURN_IN_PLACE: flag to show burn in place flares running.\n\tEJECTABLE: flag to show ejectable flares dispensed.\n\tN_BURN_IN_PLACE: number of flares burning.\n\tN_EJECTABLE: number of ejectable flares dispensed.\n\tDRY_ICE: dry ice pellets dispensed.");
     tt->array_offset = (char *) &_optional_field_names - &_start_;
     tt->array_n_offset = (char *) &optional_field_names_n - &_start_;
     tt->is_array = TRUE;
@@ -686,7 +686,7 @@
     tt->array_elem_size = sizeof(field_name_t);
     tt->array_n = 8;
     tt->enum_def.name = tdrpStrDup("field_name_t");
-    tt->enum_def.nfields = 13;
+    tt->enum_def.nfields = 16;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("GS");
@@ -699,22 +699,28 @@
       tt->enum_def.fields[3].val = DEW_PT;
       tt->enum_def.fields[4].name = tdrpStrDup("LW");
       tt->enum_def.fields[4].val = LW;
-      tt->enum_def.fields[5].name = tdrpStrDup("ERROR_FLAGS");
-      tt->enum_def.fields[5].val = ERROR_FLAGS;
-      tt->enum_def.fields[6].name = tdrpStrDup("R_BURN");
-      tt->enum_def.fields[6].val = R_BURN;
-      tt->enum_def.fields[7].name = tdrpStrDup("L_BURN");
-      tt->enum_def.fields[7].val = L_BURN;
-      tt->enum_def.fields[8].name = tdrpStrDup("BURN_IN_PLACE");
-      tt->enum_def.fields[8].val = BURN_IN_PLACE;
-      tt->enum_def.fields[9].name = tdrpStrDup("EJECTABLE");
-      tt->enum_def.fields[9].val = EJECTABLE;
-      tt->enum_def.fields[10].name = tdrpStrDup("N_BURN_IN_PLACE");
-      tt->enum_def.fields[10].val = N_BURN_IN_PLACE;
-      tt->enum_def.fields[11].name = tdrpStrDup("N_EJECTABLE");
-      tt->enum_def.fields[11].val = N_EJECTABLE;
-      tt->enum_def.fields[12].name = tdrpStrDup("DRY_ICE");
-      tt->enum_def.fields[12].val = DRY_ICE;
+      tt->enum_def.fields[5].name = tdrpStrDup("FSSP_CONC");
+      tt->enum_def.fields[5].val = FSSP_CONC;
+      tt->enum_def.fields[6].name = tdrpStrDup("HEADING_DEG");
+      tt->enum_def.fields[6].val = HEADING_DEG;
+      tt->enum_def.fields[7].name = tdrpStrDup("VERT_VEL_MPS");
+      tt->enum_def.fields[7].val = VERT_VEL_MPS;
+      tt->enum_def.fields[8].name = tdrpStrDup("ERROR_FLAGS");
+      tt->enum_def.fields[8].val = ERROR_FLAGS;
+      tt->enum_def.fields[9].name = tdrpStrDup("R_BURN");
+      tt->enum_def.fields[9].val = R_BURN;
+      tt->enum_def.fields[10].name = tdrpStrDup("L_BURN");
+      tt->enum_def.fields[10].val = L_BURN;
+      tt->enum_def.fields[11].name = tdrpStrDup("BURN_IN_PLACE");
+      tt->enum_def.fields[11].val = BURN_IN_PLACE;
+      tt->enum_def.fields[12].name = tdrpStrDup("EJECTABLE");
+      tt->enum_def.fields[12].val = EJECTABLE;
+      tt->enum_def.fields[13].name = tdrpStrDup("N_BURN_IN_PLACE");
+      tt->enum_def.fields[13].val = N_BURN_IN_PLACE;
+      tt->enum_def.fields[14].name = tdrpStrDup("N_EJECTABLE");
+      tt->enum_def.fields[14].val = N_EJECTABLE;
+      tt->enum_def.fields[15].name = tdrpStrDup("DRY_ICE");
+      tt->enum_def.fields[15].val = DRY_ICE;
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].e = GS;
@@ -908,7 +914,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
+    tt->comment_hdr = tdrpStrDup("CHECKS FOR VALID DATA.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -941,6 +947,75 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].s = tdrpStrDup("UND");
+    tt++;
+    
+    // Parameter 'check_ground_speed'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_ground_speed");
+    tt->descr = tdrpStrDup("Option to check ground speed.");
+    tt->help = tdrpStrDup("If TRUE, data will only be stored if the ground speed exceeds the specified min_valid_ground_speed.");
+    tt->val_offset = (char *) &check_ground_speed - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_valid_ground_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_ground_speed");
+    tt->descr = tdrpStrDup("Minimum valid ground speed - should match the units of the input data.");
+    tt->help = tdrpStrDup("If check_ground_speed is true, data will only be stored if the ground speed exceeds this value.");
+    tt->val_offset = (char *) &min_valid_ground_speed - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'check_air_speed'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_air_speed");
+    tt->descr = tdrpStrDup("Option to check air speed.");
+    tt->help = tdrpStrDup("If TRUE, data will only be stored if the air speed exceeds the specified min_valid_air_speed.");
+    tt->val_offset = (char *) &check_air_speed - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_valid_air_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_air_speed");
+    tt->descr = tdrpStrDup("Minimum valid air speed - should match the units of the input data.");
+    tt->help = tdrpStrDup("If check_air_speed is true, data will only be stored if the air speed exceeds this value.");
+    tt->val_offset = (char *) &min_valid_air_speed - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'compute_dew_pt'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_dew_pt");
+    tt->descr = tdrpStrDup("Option to compute dew point from temp, rh and altitude.");
+    tt->help = tdrpStrDup("If TRUE, dew point will be computed if temp, rh and altitude are available.");
+    tt->val_offset = (char *) &compute_dew_pt - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
+    tt->comment_hdr = tdrpStrDup("DATA OUTPUT.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'echo'
@@ -1041,11 +1116,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("TEST SETUP.");
     tt->comment_text = tdrpStrDup("");
     tt++;
