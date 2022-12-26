@@ -145,6 +145,10 @@ private:
   
   bool _acceptCallsign(ac_posn_wmod_t &posn);
 
+  void _computeDewPoint(ac_posn_wmod_t &ac_posn);
+
+  void _computeRh(ac_posn_wmod_t &ac_posn);
+
 };
 
 #endif

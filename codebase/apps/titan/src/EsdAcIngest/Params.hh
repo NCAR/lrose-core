@@ -96,18 +96,19 @@ public:
     TAS = 1,
     TEMP = 2,
     DEW_PT = 3,
-    LW = 4,
-    FSSP_CONC = 5,
-    HEADING_DEG = 6,
-    VERT_VEL_MPS = 7,
-    ERROR_FLAGS = 8,
-    R_BURN = 9,
-    L_BURN = 10,
-    BURN_IN_PLACE = 11,
-    EJECTABLE = 12,
-    N_BURN_IN_PLACE = 13,
-    N_EJECTABLE = 14,
-    DRY_ICE = 15
+    RH = 4,
+    LW = 5,
+    FSSP_CONC = 6,
+    HEADING_DEG = 7,
+    VERT_VEL_MPS = 8,
+    ERROR_FLAGS = 9,
+    R_BURN = 10,
+    L_BURN = 11,
+    BURN_IN_PLACE = 12,
+    EJECTABLE = 13,
+    N_BURN_IN_PLACE = 14,
+    N_EJECTABLE = 15,
+    DRY_ICE = 16
   } field_name_t;
 
   typedef enum {
@@ -477,7 +478,9 @@ public:
 
   double min_valid_air_speed;
 
-  tdrp_bool_t compute_dew_pt;
+  tdrp_bool_t compute_dew_point;
+
+  tdrp_bool_t compute_rh;
 
   tdrp_bool_t echo;
 
@@ -505,7 +508,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[41];
+  mutable TDRPtable _table[42];
 
   const char *_className;
 

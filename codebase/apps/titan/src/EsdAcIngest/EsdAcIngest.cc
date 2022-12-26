@@ -44,6 +44,7 @@
 #include <toolsa/Tty.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/DateTime.hh>
+#include <physics/physics.h>
 #include "EsdAcIngest.hh"
 using namespace std;
 
@@ -244,8 +245,15 @@ int EsdAcIngest::Run ()
           continue;
         }
       }
+      
+      // compute dew point or rh if applicable
 
-      // compute dew point if applicable
+      if (_params.compute_dew_point) {
+        _computeDewPoint(posn);
+      }
+      if (_params.compute_rh) {
+        _computeRh(posn);
+      }
       
       // success
 
@@ -425,6 +433,9 @@ int EsdAcIngest::_decodeCommaDelimited(const char *line,
         break;
       case Params::DEW_PT:
         posn.dew_pt = atof(tokens[ii].c_str());
+        break;
+      case Params::RH:
+        posn.rh = atof(tokens[ii].c_str());
         break;
       case Params::LW:
         posn.lw = atof(tokens[ii].c_str());
@@ -1263,6 +1274,28 @@ void EsdAcIngest::_computeBipFlares(time_t validTime,
 
   posn.n_burn_in_place = count;
 
+}
+
+///////////////////////////////////////////////////////////////
+// Compute dew point from temp and rh if available
+
+void EsdAcIngest::_computeDewPoint(ac_posn_wmod_t &ac_posn)
+{
+  if (ac_posn.temp != AC_POSN_MISSING_FLOAT &&
+      ac_posn.rh != AC_POSN_MISSING_FLOAT) {
+    ac_posn.dew_pt = PHYrhdp(ac_posn.temp, ac_posn.rh);
+  }
+}
+
+///////////////////////////////////////////////////////////////
+// Compute rh from temp and dew point if available
+
+void EsdAcIngest::_computeRh(ac_posn_wmod_t &ac_posn)
+{
+  if (ac_posn.temp != AC_POSN_MISSING_FLOAT &&
+      ac_posn.dew_pt != AC_POSN_MISSING_FLOAT) {
+    ac_posn.rh = PHYrelh(ac_posn.temp, ac_posn.dew_pt);
+  }
 }
 
 #ifdef JUNK
