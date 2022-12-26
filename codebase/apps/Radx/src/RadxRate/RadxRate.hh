@@ -149,6 +149,7 @@ private:
   void _addExtraFieldsToOutput();
 
   int _compute();
+  int _computeNonThreaded();
   int _storeDerivedRay(WorkerThread *thread);
 
   int _writeVol();

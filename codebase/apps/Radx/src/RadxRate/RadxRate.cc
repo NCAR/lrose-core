@@ -184,21 +184,23 @@ RadxRate::RadxRate(int argc, char **argv)
   pthread_mutex_init(&_debugPrintMutex, NULL);
   
   // set up compute thread pool
-  
-  for (int ii = 0; ii < _params.n_compute_threads; ii++) {
-    WorkerThread *thread =
-      new WorkerThread(this, _params, 
-                       _kdpFiltParams,
-                       _ncarPidParams,
-                       _precipRateParams,
-                       ii);
-    if (!thread->OK) {
-      delete thread;
-      OK = FALSE;
-      return;
+
+  if (_params.n_compute_threads > 1) {
+    for (int ii = 0; ii < _params.n_compute_threads; ii++) {
+      WorkerThread *thread =
+        new WorkerThread(this, _params, 
+                         _kdpFiltParams,
+                         _ncarPidParams,
+                         _precipRateParams,
+                         ii);
+      if (!thread->OK) {
+        delete thread;
+        OK = FALSE;
+        return;
+      }
+      _threadPool.addThreadToMain(thread);
+      _workers.push_back(thread->getWorker());
     }
-    _threadPool.addThreadToMain(thread);
-    _workers.push_back(thread->getWorker());
   }
   
 }
@@ -616,11 +618,21 @@ int RadxRate::_processFile(const string &filePath)
   _addExtraFieldsToInput();
 
   // compute the derived fields
-  
-  if (_compute()) {
-    cerr << "ERROR - RadxRate::Run" << endl;
-    cerr << "  Cannot compute derived fields" << endl;
-    return -1;
+
+  if (_params.n_compute_threads < 2) {
+    if (_computeNonThreaded()) {
+      cerr << "ERROR - RadxRate::Run" << endl;
+      cerr << "  Computing non threaded" << endl;
+      cerr << "  Cannot compute derived fields" << endl;
+      return -1;
+    }
+  } else {
+    if (_compute()) {
+      cerr << "ERROR - RadxRate::Run" << endl;
+      cerr << "  Computing threaded" << endl;
+      cerr << "  Cannot compute derived fields" << endl;
+      return -1;
+    }
   }
 
   // add extra fields to output
@@ -788,15 +800,17 @@ void RadxRate::_addExtraFieldsToInput()
     
     double rangeKm = startRangeKm;
     double elevationDeg = ray->getElevationDeg();
-    const TempProfile &profile = _workers[0]->getTempProfile();
-    for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
-      double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
-      double tempC = profile.getTempForHtKm(htKm);
-      elev[igate] = elevationDeg;
-      rng[igate] = rangeKm;
-      ht[igate] = htKm;
-      temp[igate] = tempC;
-    } // igate
+    if (_workers.size() > 0) {
+      const TempProfile &profile = _workers[0]->getTempProfile();
+      for (size_t igate = 0; igate < nGates; igate++, rangeKm += gateSpacingKm) {
+        double htKm = beamHt.computeHtKm(elevationDeg, rangeKm);
+        double tempC = profile.getTempForHtKm(htKm);
+        elev[igate] = elevationDeg;
+        rng[igate] = rangeKm;
+        ht[igate] = htKm;
+        temp[igate] = tempC;
+      } // igate
+    }
 
     smoothDbzFld->setTypeFl32(-9999.0);
     smoothRhohvFld->setTypeFl32(-9999.0);
@@ -933,6 +947,54 @@ int RadxRate::_compute()
     }
   } // while
 
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////
+// compute non threaded
+
+int RadxRate::_computeNonThreaded()
+{
+
+  // initialize the volume with ray numbers
+  
+  _vol.setRayNumbersInOrder();
+
+  // initialize derived
+
+  _derivedRays.clear();
+
+  // create the worker
+  
+  Worker *worker = new Worker(_params,
+                              _kdpFiltParams,
+                              _ncarPidParams,
+                              _precipRateParams,
+                              0);
+
+  if (worker == NULL) {
+    return -1;
+  }
+  
+  // loop through the input rays,
+  // computing the derived fields
+
+  const vector<RadxRay *> &inputRays = _vol.getRays();
+  for (size_t iray = 0; iray < inputRays.size(); iray++) {
+    RadxRay *inputRay = inputRays[iray];
+    RadxRay *outputRay = worker->compute(inputRay,
+                                         getRadarHtKm(),
+                                         getWavelengthM());
+    if (outputRay != NULL) {
+      _derivedRays.push_back(outputRay);
+    }
+  } // iray
+  
+  // clean up
+
+  delete worker;
+  
   return 0;
 
 }
