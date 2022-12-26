@@ -153,7 +153,7 @@ void ac_posn_wmod_init(ac_posn_wmod_t *ac_posn)
   ac_posn->rosemount = AC_POSN_MISSING_FLOAT;
   ac_posn->headingDeg = AC_POSN_MISSING_FLOAT;
   ac_posn->vertVelMps = AC_POSN_MISSING_FLOAT;
-  ac_posn->spareFl32 = AC_POSN_MISSING_FLOAT;
+  ac_posn->rh = AC_POSN_MISSING_FLOAT;
   
 }
 
@@ -195,6 +195,9 @@ void ac_posn_wmod_print(FILE *out,
   }
   if (ac_posn->dew_pt != missing) {
     fprintf(out, "%s   dew_pt: %g\n", spacer, ac_posn->dew_pt);
+  }
+  if (ac_posn->rh != missing) {
+    fprintf(out, "%s   rh: %g\n", spacer, ac_posn->rh);
   }
   if (ac_posn->lw != missing) {
     fprintf(out, "%s   lw: %g\n", spacer, ac_posn->lw);

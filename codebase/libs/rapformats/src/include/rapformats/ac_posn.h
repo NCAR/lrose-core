@@ -92,7 +92,7 @@ typedef struct {
   fl32 rosemount;
   fl32 headingDeg;
   fl32 vertVelMps;
-  fl32 spareFl32;
+  fl32 rh;
   
   si32 flare_flags;      /* bit-wise flag for flare activity */
   si32 n_ejectable;      /* number of ejectables so far */
