@@ -98,6 +98,20 @@ void BE_to_ac_posn_wmod(ac_posn_wmod_t *posn)
   BE_to_array_32(&posn->tas, AC_POSN_WMOD_N_32 * sizeof(fl32));
 }
 
+/****************************
+ * ac_posn_init
+ *
+ * Initialize an ac_posn struct
+ */
+
+void ac_posn_init(ac_posn_t *ac_posn)
+
+{
+  memset(ac_posn, 0, sizeof(ac_posn_t));
+  ac_posn->lat = AC_POSN_MISSING_FLOAT;
+  ac_posn->lon = AC_POSN_MISSING_FLOAT;
+  ac_posn->alt = AC_POSN_MISSING_FLOAT;
+}
 
 /****************************
  * ac_posn_print
@@ -115,6 +129,32 @@ void ac_posn_print(FILE *out,
 	  ac_posn->lat, ac_posn->lon,
 	  ac_posn->alt, ac_posn->callsign);
 
+}
+
+/****************************
+ * ac_posn_wmod_init
+ *
+ * Initialize an ac_posn_wmod struct
+ */
+
+void ac_posn_wmod_init(ac_posn_wmod_t *ac_posn)
+
+{
+  memset(ac_posn, 0, sizeof(ac_posn_wmod_t));
+  ac_posn->lat = AC_POSN_MISSING_FLOAT;
+  ac_posn->lon = AC_POSN_MISSING_FLOAT;
+  ac_posn->alt = AC_POSN_MISSING_FLOAT;
+  ac_posn->tas = AC_POSN_MISSING_FLOAT;
+  ac_posn->gs = AC_POSN_MISSING_FLOAT;
+  ac_posn->temp = AC_POSN_MISSING_FLOAT;
+  ac_posn->dew_pt = AC_POSN_MISSING_FLOAT;
+  ac_posn->lw = AC_POSN_MISSING_FLOAT;
+  ac_posn->fssp = AC_POSN_MISSING_FLOAT;
+  ac_posn->rosemount = AC_POSN_MISSING_FLOAT;
+  ac_posn->headingDeg = AC_POSN_MISSING_FLOAT;
+  ac_posn->vertVelMps = AC_POSN_MISSING_FLOAT;
+  ac_posn->spareFl32 = AC_POSN_MISSING_FLOAT;
+  
 }
 
 /****************************
@@ -167,6 +207,9 @@ void ac_posn_wmod_print(FILE *out,
   }
   if (ac_posn->headingDeg != missing) {
     fprintf(out, "%s   headingDeg: %g\n", spacer, ac_posn->headingDeg);
+  }
+  if (ac_posn->vertVelMps != missing) {
+    fprintf(out, "%s   vertVelMps: %g\n", spacer, ac_posn->vertVelMps);
   }
   if (ac_posn->flare_flags & RIGHT_BURN_FLAG) {
     fprintf(out, "%s   right_burn: ON\n", spacer);

@@ -91,7 +91,8 @@ typedef struct {
   fl32 fssp;
   fl32 rosemount;
   fl32 headingDeg;
-  fl32 spare_fl32[2];
+  fl32 vertVelMps;
+  fl32 spareFl32;
   
   si32 flare_flags;      /* bit-wise flag for flare activity */
   si32 n_ejectable;      /* number of ejectables so far */
@@ -112,10 +113,14 @@ extern void BE_from_ac_posn_wmod(ac_posn_wmod_t *posn);
 
 extern void BE_to_ac_posn_wmod(ac_posn_wmod_t *posn);
 
+extern void ac_posn_init(ac_posn_t *ac_posn);
+
 extern void ac_posn_print(FILE *out,
 			  const char *spacer,
 			  ac_posn_t *ac_posn);
 
+
+extern void ac_posn_wmod_init(ac_posn_wmod_t *ac_posn);
 
 extern void ac_posn_wmod_print(FILE *out,
 			       const char *spacer,
