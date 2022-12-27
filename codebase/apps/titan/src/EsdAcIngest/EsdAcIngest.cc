@@ -248,13 +248,17 @@ int EsdAcIngest::Run ()
       
       // compute dew point or rh if applicable
 
-      if (_params.compute_dew_point) {
-        _computeDewPoint(posn);
+      if (posn.temp != AC_POSN_MISSING_FLOAT) {
+        if (posn.dew_pt == AC_POSN_MISSING_FLOAT &&
+            posn.rh != AC_POSN_MISSING_FLOAT) {
+          _computeDewPoint(posn);
+        } else if (posn.rh == AC_POSN_MISSING_FLOAT &&
+                   posn.dew_pt != AC_POSN_MISSING_FLOAT) {
+          _computeRh(posn);
+        }
+        
       }
-      if (_params.compute_rh) {
-        _computeRh(posn);
-      }
-      
+
       // success
 
       // compute the flare count

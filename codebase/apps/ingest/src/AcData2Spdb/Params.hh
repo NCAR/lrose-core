@@ -512,10 +512,6 @@ public:
 
   double min_valid_air_speed;
 
-  tdrp_bool_t compute_dew_point;
-
-  tdrp_bool_t compute_rh;
-
   int output_interval;
 
   char* output_url;
@@ -537,7 +533,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[53];
 
   const char *_className;
 

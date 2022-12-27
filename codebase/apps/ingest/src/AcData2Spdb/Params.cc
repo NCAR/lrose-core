@@ -1355,30 +1355,6 @@
     tt->single_val.d = 20;
     tt++;
     
-    // Parameter 'compute_dew_point'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_dew_point");
-    tt->descr = tdrpStrDup("Option to compute dew point from temp and rh.");
-    tt->help = tdrpStrDup("If TRUE, dew point will be computed if temp and rh are available.");
-    tt->val_offset = (char *) &compute_dew_point - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'compute_rh'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_rh");
-    tt->descr = tdrpStrDup("Option to compute relative humidity from temp and dew point.");
-    tt->help = tdrpStrDup("If TRUE, rh will be computed if temp and dew point are available.");
-    tt->val_offset = (char *) &compute_rh - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -678,7 +678,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("optional_field_names");
     tt->descr = tdrpStrDup("Array of variable fields following fixed fields.");
-    tt->help = tdrpStrDup("Used for comma-delimited format only.\n\nThe comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt.\n\nThese are followed by optional fields. This array specifies the optional field list.\n\n\tGS: ground speed(kts or m/s).\n\tTAS: true airspeed (kts or m/s).\n\tTEMP: air temp C.\n\tDEW_PT: dew point C.\n\tRH: relative humidity %.\n\tLW: liquid water concentration (g/m3).\n\tFSSP_CONC: particle concentration from FSSP.\n\tHEADING_DEG: heading deg T.\n\tVERT_VEL_MPS: vertical velocity in m/s.\n\tERROR_FLAGS: bit-wise error flags.\n\tR_BURN: flag to show right-wing burn on.\n\tL_BURN: flag to show left-wing burn on.\n\tBURN_IN_PLACE: flag to show burn in place flares running.\n\tEJECTABLE: flag to show ejectable flares dispensed.\n\tN_BURN_IN_PLACE: number of flares burning.\n\tN_EJECTABLE: number of ejectable flares dispensed.\n\tDRY_ICE: dry ice pellets dispensed.");
+    tt->help = tdrpStrDup("Used for comma-delimited format only.\n\nThe comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt.\n\nThese are followed by optional fields. This array specifies the optional field list.\n\n\tGS: ground speed(kts).\n\tTAS: true airspeed (kts).\n\tTEMP: air temp C.\n\tDEW_PT: dew point C.\n\tRH: relative humidity %.\n\tLW: liquid water concentration (g/m3).\n\tFSSP_CONC: particle concentration from FSSP (g/m3).\n\tHEADING_DEG: heading deg T.\n\tVERT_VEL_MPS: vertical velocity in m/s.\n\tERROR_FLAGS: bit-wise error flags.\n\tR_BURN: flag to show right-wing burn on.\n\tL_BURN: flag to show left-wing burn on.\n\tBURN_IN_PLACE: flag to show burn in place flares running.\n\tEJECTABLE: flag to show ejectable flares dispensed.\n\tN_BURN_IN_PLACE: number of flares burning.\n\tN_EJECTABLE: number of ejectable flares dispensed.\n\tDRY_ICE: dry ice pellets dispensed.");
     tt->array_offset = (char *) &_optional_field_names - &_start_;
     tt->array_n_offset = (char *) &optional_field_names_n - &_start_;
     tt->is_array = TRUE;
@@ -997,30 +997,6 @@
     tt->help = tdrpStrDup("If check_air_speed is true, data will only be stored if the air speed exceeds this value.");
     tt->val_offset = (char *) &min_valid_air_speed - &_start_;
     tt->single_val.d = 20;
-    tt++;
-    
-    // Parameter 'compute_dew_point'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_dew_point");
-    tt->descr = tdrpStrDup("Option to compute dew point from temp and rh.");
-    tt->help = tdrpStrDup("If TRUE, dew point will be computed if temp and rh are available.");
-    tt->val_offset = (char *) &compute_dew_point - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'compute_rh'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("compute_rh");
-    tt->descr = tdrpStrDup("Option to compute relative humidity from temp and dew point.");
-    tt->help = tdrpStrDup("If TRUE, rh will be computed if temp and dew point are available.");
-    tt->val_offset = (char *) &compute_rh - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 6'

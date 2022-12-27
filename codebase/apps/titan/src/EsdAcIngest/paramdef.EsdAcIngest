@@ -354,18 +354,6 @@ paramdef double {
   p_help = "If check_air_speed is true, data will only be stored if the air speed exceeds this value.";
 } min_valid_air_speed;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to compute dew point from temp and rh.";
-  p_help = "If TRUE, dew point will be computed if temp and rh are available.";
-} compute_dew_point;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to compute relative humidity from temp and dew point.";
-  p_help = "If TRUE, rh will be computed if temp and dew point are available.";
-} compute_rh;
-
 commentdef {
   p_header = "DATA OUTPUT.";
 }

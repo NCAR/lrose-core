@@ -478,10 +478,6 @@ public:
 
   double min_valid_air_speed;
 
-  tdrp_bool_t compute_dew_point;
-
-  tdrp_bool_t compute_rh;
-
   tdrp_bool_t echo;
 
   tdrp_bool_t new_line_on_echo;
@@ -508,7 +504,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[42];
+  mutable TDRPtable _table[40];
 
   const char *_className;
 
