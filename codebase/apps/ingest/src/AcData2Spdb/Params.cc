@@ -1048,7 +1048,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("comma_delimited_optional_fields");
     tt->descr = tdrpStrDup("Array of optional fields for COMMA_DELIMITED_FORMAT.");
-    tt->help = tdrpStrDup("The field_pos is 0-based, and refers to the position from the start of the line. The comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt. These are followed by optional fields. This array specifies the optional field list. The starting field_pos for the optional fields is 10.");
+    tt->help = tdrpStrDup("The field_pos is 0-based, and refers to the position from the start of the line.\n\nThe comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt.\n\nThese are followed by optional fields.\n\nThis array specifies the optional field list.\n\nThe starting field_pos for the optional fields is 10.\n\n\n\n\tGS_KTS: ground speed(kts).\n\tTAS_KTS: true airspeed (kts).\n\tTEMP_C: air temp C.\n\tDEW_PT_C: dew point C.\n\tRH_PERCENT: relative humidity %.\n\tLW_G_PER_M3: liquid water concentration (g/m3).\n\tROSEMOUNT_TOTAL_TEMP_C: total temperature from the rosemount probe.\n\tFSSP_CONC_G_PER_M3: particle concentration from FSSP (g/m3).\n\tHEADING_DEG: heading deg T.\n\tVERT_VEL_MPS: vertical velocity in m/s.\n\tFLARE_BURN_L_FLAG: flag to show left-wing burn on.\n\tFLARE_BURN_R_FLAG: flag to show right-wing burn on.\n\tFLARE_BURN_IN_PLACE_FLAG: flag to show burn in place flares running.\n\tFLARE_EJECTABLE_FLAG: flag to show ejectable flares dispensed.\n\tFLARE_N_BURN_IN_PLACE: number of flares burning.\n\tFLARE_N_EJECTABLE: number of ejectable flares dispensed.\n\tERROR_FLAGS: bit-wise error flag.");
     tt->array_offset = (char *) &_comma_delimited_optional_fields - &_start_;
     tt->array_n_offset = (char *) &comma_delimited_optional_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1065,7 +1065,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_comma_delimited_optional_fields->field_type - (char *) _comma_delimited_optional_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 16;
+        tt->struct_def.fields[0].enum_def.nfields = 18;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PRESSURE_HPA");
@@ -1086,20 +1086,24 @@
         tt->struct_def.fields[0].enum_def.fields[7].val = ROSEMOUNT_TOTAL_TEMP_C;
         tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("FSSP_CONC_G_PER_M3");
         tt->struct_def.fields[0].enum_def.fields[8].val = FSSP_CONC_G_PER_M3;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("FLARE_BURN_L_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[9].val = FLARE_BURN_L_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("FLARE_BURN_R_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[10].val = FLARE_BURN_R_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("FLARE_BURN_IN_PLACE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[11].val = FLARE_BURN_IN_PLACE_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("FLARE_EJECTABLE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[12].val = FLARE_EJECTABLE_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("FLARE_N_BURN_IN_PLACE");
-        tt->struct_def.fields[0].enum_def.fields[13].val = FLARE_N_BURN_IN_PLACE;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("FLARE_N_EJECTABLE");
-        tt->struct_def.fields[0].enum_def.fields[14].val = FLARE_N_EJECTABLE;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("ERROR_FLAGS");
-        tt->struct_def.fields[0].enum_def.fields[15].val = ERROR_FLAGS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("HEADING_DEG");
+        tt->struct_def.fields[0].enum_def.fields[9].val = HEADING_DEG;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("VERT_VEL_MPS");
+        tt->struct_def.fields[0].enum_def.fields[10].val = VERT_VEL_MPS;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("FLARE_BURN_L_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[11].val = FLARE_BURN_L_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("FLARE_BURN_R_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[12].val = FLARE_BURN_R_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("FLARE_BURN_IN_PLACE_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[13].val = FLARE_BURN_IN_PLACE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("FLARE_EJECTABLE_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[14].val = FLARE_EJECTABLE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("FLARE_N_BURN_IN_PLACE");
+        tt->struct_def.fields[0].enum_def.fields[15].val = FLARE_N_BURN_IN_PLACE;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("FLARE_N_EJECTABLE");
+        tt->struct_def.fields[0].enum_def.fields[16].val = FLARE_N_EJECTABLE;
+        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("ERROR_FLAGS");
+        tt->struct_def.fields[0].enum_def.fields[17].val = ERROR_FLAGS;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("field_pos");
       tt->struct_def.fields[1].ptype = INT_TYPE;
@@ -1142,7 +1146,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_noaa_aircraft_optional_fields->field_type - (char *) _noaa_aircraft_optional_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("field_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 16;
+        tt->struct_def.fields[0].enum_def.nfields = 18;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("PRESSURE_HPA");
@@ -1163,20 +1167,24 @@
         tt->struct_def.fields[0].enum_def.fields[7].val = ROSEMOUNT_TOTAL_TEMP_C;
         tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("FSSP_CONC_G_PER_M3");
         tt->struct_def.fields[0].enum_def.fields[8].val = FSSP_CONC_G_PER_M3;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("FLARE_BURN_L_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[9].val = FLARE_BURN_L_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("FLARE_BURN_R_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[10].val = FLARE_BURN_R_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("FLARE_BURN_IN_PLACE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[11].val = FLARE_BURN_IN_PLACE_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("FLARE_EJECTABLE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[12].val = FLARE_EJECTABLE_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("FLARE_N_BURN_IN_PLACE");
-        tt->struct_def.fields[0].enum_def.fields[13].val = FLARE_N_BURN_IN_PLACE;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("FLARE_N_EJECTABLE");
-        tt->struct_def.fields[0].enum_def.fields[14].val = FLARE_N_EJECTABLE;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("ERROR_FLAGS");
-        tt->struct_def.fields[0].enum_def.fields[15].val = ERROR_FLAGS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("HEADING_DEG");
+        tt->struct_def.fields[0].enum_def.fields[9].val = HEADING_DEG;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("VERT_VEL_MPS");
+        tt->struct_def.fields[0].enum_def.fields[10].val = VERT_VEL_MPS;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("FLARE_BURN_L_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[11].val = FLARE_BURN_L_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("FLARE_BURN_R_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[12].val = FLARE_BURN_R_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("FLARE_BURN_IN_PLACE_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[13].val = FLARE_BURN_IN_PLACE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("FLARE_EJECTABLE_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[14].val = FLARE_EJECTABLE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("FLARE_N_BURN_IN_PLACE");
+        tt->struct_def.fields[0].enum_def.fields[15].val = FLARE_N_BURN_IN_PLACE;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("FLARE_N_EJECTABLE");
+        tt->struct_def.fields[0].enum_def.fields[16].val = FLARE_N_EJECTABLE;
+        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("ERROR_FLAGS");
+        tt->struct_def.fields[0].enum_def.fields[17].val = ERROR_FLAGS;
       tt->struct_def.fields[1].ftype = tdrpStrDup("int");
       tt->struct_def.fields[1].fname = tdrpStrDup("field_pos");
       tt->struct_def.fields[1].ptype = INT_TYPE;
@@ -1264,7 +1272,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("CHECK CALLSIGNS");
+    tt->comment_hdr = tdrpStrDup("CHECK FOR VALID DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1297,6 +1305,78 @@
     tt->array_vals = (tdrpVal_t *)
         tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
       tt->array_vals[0].s = tdrpStrDup("UND");
+    tt++;
+    
+    // Parameter 'check_ground_speed'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_ground_speed");
+    tt->descr = tdrpStrDup("Option to check ground speed.");
+    tt->help = tdrpStrDup("If TRUE, data will only be stored if the ground speed exceeds the specified min_valid_ground_speed.");
+    tt->val_offset = (char *) &check_ground_speed - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_valid_ground_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_ground_speed");
+    tt->descr = tdrpStrDup("Minimum valid ground speed - should match the units of the input data.");
+    tt->help = tdrpStrDup("If check_ground_speed is true, data will only be stored if the ground speed exceeds this value.");
+    tt->val_offset = (char *) &min_valid_ground_speed - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'check_air_speed'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_air_speed");
+    tt->descr = tdrpStrDup("Option to check air speed.");
+    tt->help = tdrpStrDup("If TRUE, data will only be stored if the air speed exceeds the specified min_valid_air_speed.");
+    tt->val_offset = (char *) &check_air_speed - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_valid_air_speed'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_valid_air_speed");
+    tt->descr = tdrpStrDup("Minimum valid air speed - should match the units of the input data.");
+    tt->help = tdrpStrDup("If check_air_speed is true, data will only be stored if the air speed exceeds this value.");
+    tt->val_offset = (char *) &min_valid_air_speed - &_start_;
+    tt->single_val.d = 20;
+    tt++;
+    
+    // Parameter 'compute_dew_point'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_dew_point");
+    tt->descr = tdrpStrDup("Option to compute dew point from temp and rh.");
+    tt->help = tdrpStrDup("If TRUE, dew point will be computed if temp and rh are available.");
+    tt->val_offset = (char *) &compute_dew_point - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'compute_rh'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_rh");
+    tt->descr = tdrpStrDup("Option to compute relative humidity from temp and dew point.");
+    tt->help = tdrpStrDup("If TRUE, rh will be computed if temp and dew point are available.");
+    tt->val_offset = (char *) &compute_rh - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 11'

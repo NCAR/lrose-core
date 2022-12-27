@@ -51,6 +51,7 @@
 using namespace std;
 
 const float AcData2Spdb::POLCAST2_MISSING_VALUE = 999999.9999;
+const double AcData2Spdb::_missingDbl = -9999.0;
 
 
 // Constructor
@@ -181,17 +182,7 @@ int AcData2Spdb::Run ()
   
     int iret = 0;
     ac_posn_wmod_t posn;
-    MEM_zero(posn);
-    posn.lat = AC_POSN_MISSING_FLOAT;
-    posn.lon = AC_POSN_MISSING_FLOAT;
-    posn.alt = AC_POSN_MISSING_FLOAT;
-    posn.tas = AC_POSN_MISSING_FLOAT;
-    posn.gs = AC_POSN_MISSING_FLOAT;
-    posn.temp = AC_POSN_MISSING_FLOAT;
-    posn.dew_pt = AC_POSN_MISSING_FLOAT;
-    posn.lw = AC_POSN_MISSING_FLOAT;
-    posn.fssp = AC_POSN_MISSING_FLOAT;
-    posn.rosemount = AC_POSN_MISSING_FLOAT;
+    ac_posn_wmod_init(&posn);
 
     time_t validTime;
 
@@ -277,6 +268,20 @@ int AcData2Spdb::Run ()
 
       if (!_acceptCallsign(posn)) {
         continue;
+      }
+      
+      // check for valid speeds
+      
+      if (_params.check_ground_speed) {
+        if (posn.gs < _params.min_valid_ground_speed) {
+          continue;
+        }
+      }
+      
+      if (_params.check_air_speed) {
+        if (posn.tas < _params.min_valid_air_speed) {
+          continue;
+        }
       }
       
       // success
@@ -423,10 +428,6 @@ int AcData2Spdb::_decodeCommaDelimited(const char *line,
 
   // decode optional fields
 
-  _tempC = -9999;
-  _dewPtC = -9999;
-  _rh = -9999;
-
   for (int ii = 0; ii < _params.comma_delimited_optional_fields_n; ii++) {
 
     const Params::optional_field_t &optional =
@@ -447,10 +448,14 @@ int AcData2Spdb::_decodeCommaDelimited(const char *line,
     
   } // ii
 
-  // compute dew pt from RH if available
+  // compute dew pt from RH if available, and vice versa
   
-  _computeDewPt();
-  posn.dew_pt = _dewPtC;
+  if (posn.dew_pt == AC_POSN_MISSING_FLOAT) {
+    _computeDewPt(posn);
+  }
+  if (posn.rh == AC_POSN_MISSING_FLOAT) {
+    _computeRh(posn);
+  }
 
   return 0;
 
@@ -950,10 +955,6 @@ int AcData2Spdb::_decodeNoaaAircraft(const char *line,
 
   // decode optional fields
 
-  _tempC = -9999;
-  _dewPtC = -9999;
-  _rh = -9999;
-
   for (int ii = 0; ii < _params.noaa_aircraft_optional_fields_n; ii++) {
 
     const Params::optional_field_t &optional =
@@ -976,8 +977,12 @@ int AcData2Spdb::_decodeNoaaAircraft(const char *line,
 
   // compute dew pt from RH if available
   
-  _computeDewPt();
-  posn.dew_pt = _dewPtC;
+  if (posn.dew_pt == AC_POSN_MISSING_FLOAT) {
+    _computeDewPt(posn);
+  }
+  if (posn.rh == AC_POSN_MISSING_FLOAT) {
+    _computeRh(posn);
+  }
 
   return 0;
   
@@ -1130,19 +1135,22 @@ int AcData2Spdb::_decodeIWG1(const char *line,
   
   // lat, lon
 
-  double lat = -9999.0;
-  double lon = -9999.0;
+  double lat = _missingDbl;
+  double lon = _missingDbl;
 
   if (toks[1].size() > 0) {
     lat = atof(toks[1].c_str());
   }
+  posn.lat = lat;
+
   if (toks[2].size() > 0) {
     lon = atof(toks[2].c_str());
   }
+  posn.lon = lon;
   
   // altitude
 
-  double altM = -9999.0;
+  double altM = _missingDbl;
   if (toks[3].size() > 0) {
     altM = atof(toks[3].c_str());
   } else if (toks[4].size() > 0) {
@@ -1150,6 +1158,7 @@ int AcData2Spdb::_decodeIWG1(const char *line,
   } else if (toks[5].size() > 0) {
     altM = atof(toks[5].c_str()) * 0.3048;
   }
+  posn.alt = altM;
 
   // speed
   
@@ -1157,15 +1166,18 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     return 0;
   }
 
-  double groundSpeedMps = -9999.0;
-  double tasMps = -9999.0;
+  double groundSpeedMps = _missingDbl;
+  double tasMps = _missingDbl;
 
   if (toks[7].size() > 0) {
     groundSpeedMps = atof(toks[7].c_str());
   }
+  posn.gs = groundSpeedMps;
+
   if (toks[8].size() > 0) {
     tasMps = atof(toks[8].c_str());
   }
+  posn.tas = tasMps;
 
   // heading
   
@@ -1173,11 +1185,11 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     return 0;
   }
 
-  double headingDeg = -9999.0;
-
+  double headingDeg = _missingDbl;
   if (toks[12].size() > 0) {
     headingDeg = atof(toks[12].c_str());
   }
+  posn.headingDeg = headingDeg;
 
   // temp, dewpt
   
@@ -1185,20 +1197,18 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     return 0;
   }
 
-  double tempC = -9999.0;
-  double dewptC = -9999.0;
+  double tempC = _missingDbl;
+  double dewptC = _missingDbl;
 
   if (toks[19].size() > 0) {
     tempC = atof(toks[19].c_str());
+    posn.temp = tempC;
   }
   if (toks[20].size() > 0) {
     dewptC = atof(toks[20].c_str());
+    posn.dew_pt = dewptC;
+    _computeRh(posn);
   }
-
-  // double rh = -9999.0;
-  // if (tempC > -9990.0 && dewptC > -9990.0) {
-  //   rh = PHYrelh(tempC, dewptC);
-  // }
 
   // wind
 
@@ -1206,8 +1216,8 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     return 0;
   }
 
-  double windSpeedMps = -9999.0;
-  double windDirnDegT = -9999.0;
+  double windSpeedMps = _missingDbl;
+  double windDirnDegT = _missingDbl;
 
   if (toks[25].size() > 0) {
     windSpeedMps = atof(toks[25].c_str());
@@ -1216,8 +1226,13 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     windDirnDegT = atof(toks[26].c_str());
   }
 
-  // double uu = -9999.0;
-  // double vv = -9999.0;
+  // save wind speed and dirn as lw and fssp
+  
+  posn.lw = windSpeedMps;
+  posn.fssp = windDirnDegT;
+
+  // double uu = _missingDbl;
+  // double vv = _missingDbl;
   
   // if (windSpeedMps > -9990.0 && windDirnDegT > -9990.0) {
   //   uu = PHYwind_u(windSpeedMps, windDirnDegT);
@@ -1231,19 +1246,6 @@ int AcData2Spdb::_decodeIWG1(const char *line,
     STRncopy(posn.callsign, _params.callsign, AC_POSN_N_CALLSIGN);
   }
 
-  posn.lat = lat;
-  posn.lon = lon;
-  posn.alt = altM;
-
-  posn.tas = tasMps;
-  posn.gs = groundSpeedMps;
-  posn.temp = tempC;
-  posn.dew_pt = dewptC;
-  posn.headingDeg = headingDeg;
-
-  posn.lw = windSpeedMps;
-  posn.fssp = windDirnDegT;
-  
   return 0;
   
 }
@@ -1684,6 +1686,10 @@ string AcData2Spdb::_fieldType2Str(int fieldType)
       return "ROSEMOUNT_TOTAL_TEMP_C";
     case Params::FSSP_CONC_G_PER_M3:
       return "FSSP_CONC_G_PER_M3";
+    case Params::HEADING_DEG:
+      return "HEADING_DEG";
+    case Params::VERT_VEL_MPS:
+      return "VERT_VEL_MPS";
     case Params::FLARE_BURN_L_FLAG:
       return "FLARE_BURN_L_FLAG";
     case Params::FLARE_BURN_R_FLAG:
@@ -1726,18 +1732,28 @@ void AcData2Spdb::_loadOptionalField(const Params::optional_field_t &optional,
       posn.tas = atof(toks[index].c_str());
       break;
     case Params::TEMP_C:
-      _tempC = atof(toks[index].c_str());
-      posn.temp = _tempC;
+      posn.temp = atof(toks[index].c_str());
       break;
     case Params::DEW_PT_C:
-      _dewPtC = atof(toks[index].c_str());
-      posn.dew_pt = _dewPtC;
+      posn.dew_pt = atof(toks[index].c_str());
       break;
     case Params::RH_PERCENT:
-      _rh = atof(toks[index].c_str());
+      posn.rh = atof(toks[index].c_str());
       break;
     case Params::LW_G_PER_M3:
       posn.lw = atof(toks[index].c_str());
+      break;
+    case Params::ROSEMOUNT_TOTAL_TEMP_C:
+      posn.rosemount = atof(toks[index].c_str());
+      break;
+    case Params::FSSP_CONC_G_PER_M3:
+      posn.fssp = atof(toks[index].c_str());
+      break;
+    case Params::HEADING_DEG:
+      posn.headingDeg = atof(toks[index].c_str());
+      break;
+    case Params::VERT_VEL_MPS:
+      posn.vertVelMps = atof(toks[index].c_str());
       break;
     case Params::ERROR_FLAGS: {}
       break;
@@ -1774,19 +1790,29 @@ void AcData2Spdb::_loadOptionalField(const Params::optional_field_t &optional,
   
 }
 
-////////////////////////////
-// compute dewpt if possible
+///////////////////////////////////////////////////////////////
+// Compute dew point from temp and rh if available
 
-void AcData2Spdb::_computeDewPt()
-  
+void AcData2Spdb::_computeDewPt(ac_posn_wmod_t &ac_posn)
 {
-
-  if (_dewPtC < -9990) {
-    // dew pt not set
-    if (_tempC > -9990 && _rh > -9990) {
-      _dewPtC= PHYrhdp(_tempC, _rh);
+  if (ac_posn.dew_pt == AC_POSN_MISSING_FLOAT) {
+    if (ac_posn.temp != AC_POSN_MISSING_FLOAT &&
+        ac_posn.rh != AC_POSN_MISSING_FLOAT) {
+      ac_posn.dew_pt = PHYrhdp(ac_posn.temp, ac_posn.rh);
     }
   }
+}
 
+///////////////////////////////////////////////////////////////
+// Compute rh from temp and dew point if available
+
+void AcData2Spdb::_computeRh(ac_posn_wmod_t &ac_posn)
+{
+  if (ac_posn.rh == AC_POSN_MISSING_FLOAT) {
+    if (ac_posn.temp != AC_POSN_MISSING_FLOAT &&
+        ac_posn.dew_pt != AC_POSN_MISSING_FLOAT) {
+      ac_posn.rh = PHYrelh(ac_posn.temp, ac_posn.dew_pt);
+    }
+  }
 }
 

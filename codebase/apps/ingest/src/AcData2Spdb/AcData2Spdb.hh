@@ -96,16 +96,13 @@ protected:
 private:
 
   static const float POLCAST2_MISSING_VALUE;
+  static const double _missingDbl;
   
   string _progName;
   char *_paramsPath;
   Args _args;
   Params _params;
   Input *_input;
-
-  double _tempC;
-  double _dewPtC;
-  double _rh;
 
   bool _kmlInTrack;
   bool _kmlTimeValid;
@@ -176,7 +173,8 @@ private:
                           const vector<string> &toks,
                           int index);
 
-  void _computeDewPt();
+  void _computeDewPt(ac_posn_wmod_t &posn);
+  void _computeRh(ac_posn_wmod_t &posn);
 
 };
 

@@ -18,7 +18,9 @@
 ///////////// debug ///////////////////////////////////
 //
 // Debug option.
+//
 // If set, debug messages will be printed appropriately.
+//
 //
 // Type: enum
 // Options:
@@ -33,7 +35,10 @@ debug = DEBUG_OFF;
 ///////////// instance ////////////////////////////////
 //
 // Process instance.
+//
 // Used for registration with procmap.
+//
+//
 // Type: string
 //
 
@@ -42,6 +47,7 @@ instance = "test";
 ///////////// mode ////////////////////////////////////
 //
 // Operating mode.
+//
 // 	REALTIME: files are read and processed as they arrive in the 
 //   input_dir. 
 // 	ARCHIVE: files between the start and end times are read in and 
@@ -51,6 +57,7 @@ instance = "test";
 // 	SERIAL: the aircraft data is read in from the serial connection. 
 // 	TCP: reads data from a TCP server. 
 // 	SIM: aircraft data is generated for simulation putposes.
+//
 //
 // Type: enum
 // Options:
@@ -62,7 +69,7 @@ instance = "test";
 //     SIM
 //
 
-mode = REALTIME;
+mode = FILELIST;
 
 //======================================================================
 //
@@ -73,28 +80,37 @@ mode = REALTIME;
 ///////////// input_dir ///////////////////////////////
 //
 // Input directory.
+//
 // Directory where input data files can be found.
+//
+//
 // Type: string
 //
 
-input_dir = "./raw/acdata";
+input_dir = "/data/raw/ac_posn_bak";
 
 ///////////// latest_data_info_avail //////////////////
 //
 // Set to true if there is a latest_data_info file available in the 
 //   input directory.
+//
 // REALTIME mode only.
+//
+//
 // Type: boolean
 //
 
-latest_data_info_avail = TRUE;
+latest_data_info_avail = FALSE;
 
 ///////////// max_realtime_valid_age //////////////////
 //
 // Max valid age of rdata input files in realtime mode (secs).
+//
 // This the max valid age for an incoming file. The program will wait 
 //   for a data file more recent than this age.
+//
 // Minimum val: 1
+//
 // Type: int
 //
 
@@ -103,7 +119,10 @@ max_realtime_valid_age = 3600;
 ///////////// strict_dir_scan /////////////////////////
 //
 // When set, only checks input_dir for subdirs of the form YYYYMMDD.
+//
 // Only in REALTIME mode with latest_data_info_avail FALSE.
+//
+//
 // Type: boolean
 //
 
@@ -112,7 +131,10 @@ strict_dir_scan = FALSE;
 ///////////// file_name_substr ////////////////////////
 //
 // Input filename match sub-string.
+//
 // If not empty, file names must contain this string to be processed.
+//
+//
 // Type: string
 //
 
@@ -127,9 +149,12 @@ file_name_substr = "";
 ///////////// input_device ////////////////////////////
 //
 // Name of input serial port device.
+//
 // Normally /dev/ttyS0 (COM1) or /dev/ttyS1 (COM2). Check that you set 
 //   the permissions on the serial device to rw-rw-rw-, (666), so that we 
 //   have read-write permissions for the port.
+//
+//
 // Type: string
 //
 
@@ -138,7 +163,9 @@ input_device = "/dev/ttyS1";
 ///////////// baud_rate ///////////////////////////////
 //
 // Baud rate.
+//
 // Baud rate for incoming serial data port.
+//
 //
 // Type: enum
 // Options:
@@ -156,7 +183,10 @@ baud_rate = BAUD_9600;
 ///////////// data_is_7_bit ///////////////////////////
 //
 // Flag for 7-bit data.
+//
 // Set TRUE for 7-bit data, FALSE for 8-bit data.
+//
+//
 // Type: boolean
 //
 
@@ -165,7 +195,10 @@ data_is_7_bit = FALSE;
 ///////////// two_stop_bits ///////////////////////////
 //
 // Flag for two stop bits.
+//
 // If TRUE, 2 stop bits. If FALSE, 1 stop bit.
+//
+//
 // Type: boolean
 //
 
@@ -174,9 +207,12 @@ two_stop_bits = FALSE;
 ///////////// enable_parity ///////////////////////////
 //
 // Flag for enabling parity checking.
+//
 // If TRUE, parity generation is enabled for outgoing characters, and 
 //   checking enabled for incoming characters. If FALSE, parity generation 
 //   and checking is off.
+//
+//
 // Type: boolean
 //
 
@@ -185,8 +221,11 @@ enable_parity = FALSE;
 ///////////// odd_parity //////////////////////////////
 //
 // Flag for parity type.
+//
 // If TRUE, odd parity. If FALSE, even parity. Only applies if 
 //   enableParity is TRUE.
+//
+//
 // Type: boolean
 //
 
@@ -201,7 +240,10 @@ odd_parity = FALSE;
 ///////////// tcp_server_host_name ////////////////////
 //
 // Name of TCP server host.
+//
 // For connection TCP. The name of the host for the TCP server.
+//
+//
 // Type: string
 //
 
@@ -210,7 +252,10 @@ tcp_server_host_name = "192.168.1.1";
 ///////////// tcp_server_port /////////////////////////
 //
 // TCP server port number.
+//
 // For connection TCP. The number of the port for the TCP server.
+//
+//
 // Type: int
 //
 
@@ -220,8 +265,11 @@ tcp_server_port = 2003;
 //
 // Option to send TCP handshake sequence to the server to trigger the 
 //   data flow.
+//
 // If true, a sequence of bytes will be sent to the server to trigger 
 //   the data flow. See 'tcp_handshape_bytes'.
+//
+//
 // Type: boolean
 //
 
@@ -230,14 +278,20 @@ send_tcp_handshake = FALSE;
 ///////////// tcp_handshake_bytes /////////////////////
 //
 // List of bytes to be sent to server for handshaking.
+//
 // This array of decimal integers is interpreted as a sequence of 
 //   individual bytes which are to be sent to the server to trigger the 
 //   data flow.
+//
+//
 // Type: int
 // 1D array - variable length.
 //
 
-tcp_handshake_bytes = { 13, 10 };
+tcp_handshake_bytes = {
+ 13,
+ 10
+};
 
 //======================================================================
 //
@@ -248,6 +302,7 @@ tcp_handshake_bytes = { 13, 10 };
 ///////////// sim_aircraft ////////////////////////////
 //
 // Details of aircraft for SIM mode.
+//
 // The test aircraft have a starting location, speed (knots) and 
 //   altitude (ft). They wander randomly around. If they go further that 
 //   100 km from their starting location they are brought back to the 
@@ -257,6 +312,7 @@ tcp_handshake_bytes = { 13, 10 };
 //   indicates the time between starting burn_in_place flares - set to -1 
 //   for no burn_in_place flares. n_bip_at_a_time indictes the number of 
 //   burn_in_place flares to start at a time.
+//
 //
 // Type: struct
 //   typedef struct {
@@ -276,9 +332,44 @@ tcp_handshake_bytes = { 13, 10 };
 //
 
 sim_aircraft = {
-  { "JRA", -27.43, 28.87, 9500, 150, TRUE, TRUE, -1, -1, 0},
-  { "JRB", -28.57, 28.86, 10500, 250, FALSE, FALSE, 10, -1, 0},
-  { "CAN", -28.19, 27.76, 11500, 150, FALSE, FALSE, -1, 60, 2}
+  {
+    callsign = "JRA",
+    start_lat = -27.43,
+    start_lon = 28.87,
+    altitude = 9500,
+    speed = 150,
+    right_burn = TRUE,
+    left_burn = TRUE,
+    ejectable_interval = -1,
+    burn_in_place_interval = -1,
+    n_bip_at_a_time = 0
+  }
+  ,
+  {
+    callsign = "JRB",
+    start_lat = -28.57,
+    start_lon = 28.86,
+    altitude = 10500,
+    speed = 250,
+    right_burn = FALSE,
+    left_burn = FALSE,
+    ejectable_interval = 10,
+    burn_in_place_interval = -1,
+    n_bip_at_a_time = 0
+  }
+  ,
+  {
+    callsign = "CAN",
+    start_lat = -28.19,
+    start_lon = 27.76,
+    altitude = 11500,
+    speed = 150,
+    right_burn = FALSE,
+    left_burn = FALSE,
+    ejectable_interval = -1,
+    burn_in_place_interval = 60,
+    n_bip_at_a_time = 2
+  }
 };
 
 //======================================================================
@@ -294,15 +385,23 @@ sim_aircraft = {
 ///////////// input_format ////////////////////////////
 //
 // Data input format.
-// 	AUTOMATIC_FORMAT - The program automatically determine the data 
-//   format. This can only be done if the data is in one of the following 
+//
+
+// AUTOMATIC_FORMAT
+// ----------------
+//   The program automatically determine the data format.
+//   This can only be done if the data is in one of the following 
 //   formats:
 // 		COMMA_DELIMITED_FORMAT
 // 		LONG_FIXED_STRING_FORMAT
 // 		WMI_LONG_STRING_FORMAT
 // 		WMI_STRING_FORMAT
-// 	COMMA_DELIMITED_FORMAT - The fields in the data are delimited by 
-//   commas. The line begins with the following fields:
+//
+//
+// COMMA_DELIMITED_FORMAT
+// ----------------------
+//   The fields in the data are delimited by commas.
+//   The line begins with the following fields:
 // 		call sign
 // 		year
 // 		month
@@ -315,8 +414,11 @@ sim_aircraft = {
 // 		altitude
 // These fields are followed by the optional fields specified in the 
 //   optional_field_names parameter.
-// 	LONG_FIXED_STRING_FORMAT - The data is in a white-space delimited 
-//   format. The fields appear in the following order:
+//
+// LONG_FIXED_STRING_FORMAT
+// ------------------------
+//   The data is in a white-space delimited format.
+//   The fields appear in the following order:
 // 		hour
 // 		minute
 // 		second
@@ -335,7 +437,10 @@ sim_aircraft = {
 //   in the callsigns parameter is used as the call sign for this data. If 
 //   the callsigns parameter is empty, the resulting AC position record 
 //   won't have a call sign associated with it.
-// 	WMI_LONG_STRING_FORMAT - The data is in the WMI long string format. 
+//
+// WMI_LONG_STRING_FORMAT
+// ----------------------
+//   The data is in the WMI long string format.
 //   In this format, the data is all in a long line with no delimiters 
 //   with the following fields:
 // 		call sign
@@ -359,9 +464,12 @@ sim_aircraft = {
 // 		GPS var
 // 		GPS error
 // 		GPS warn
-// 	WMI_STRING_FORMAT - The data is received in the old WMI string 
-//   format. In this format, the data is all in a long line with no 
-//   delimiters with the following fields:
+//
+// WMI_STRING_FORMAT
+// -----------------
+//   The data is received in the old WMI string format.   In this 
+//   format, the data is all in a long line with no delimiters with the 
+//   following fields:
 // 		call sign
 // 		latitude
 // 		longitude
@@ -384,8 +492,11 @@ sim_aircraft = {
 // 		GPS var
 // 		GPS error
 // 		airnav warn
-// 	SEA_M300_FORMAT - This data is in white-space delimited files and 
-//   contains the following fields:
+//
+// SEA_M300_FORMAT
+// ---------------
+//   This data is in white-space delimited files and contains the 
+//   following fields:
 // 		time in hh:mm:ss format
 // 		date in m/dd/yyyy format
 // 		latitude
@@ -412,8 +523,11 @@ sim_aircraft = {
 // 		2DCshad
 // 		2DPshad
 // 		S1 - S20
-// 	POLCAST2_FORMAT - This data is in white-space delimited files and 
-//   contains the following fields:
+//
+// POLCAST2_FORMAT
+// ---------------
+//   This data is in white-space
+//   delimited files and contains the following fields:
 // 		tail number
 // 		year
 // 		month
@@ -425,7 +539,71 @@ sim_aircraft = {
 // 		longitude (deg)
 // 		altitude (m)
 // 		ground speed (knots)
-// 		flare voltage (volts).
+// 		flare voltage (volts)
+//
+// NOAA_AIRCRAFT_FORMAT
+// --------------------
+//   This data is in comma-delimited files and contains the following 
+//   fields:
+// 		tail number
+// 		time (yyyymmddThhmmss)
+// 		latitude (deg)
+// 		longitude (deg)
+// 		altitude (m)
+//   These fields may be followed by optional fields. See below for 
+//   details.
+//
+// NOAA_SHIP_FORMAT
+// ----------------
+//   This data is in comma-delimited files and contains the following 
+//   fields:
+// 		date (yyyymmdd)
+// 		time (hhmm)
+// 		latitude (deg) - always positive
+// 		hemisphere - 'N' or 'S'
+// 		longitude (deg) - always positive
+// 		hemisphere - 'E' or 'W'
+//
+// IWG1_FORMAT
+// ----------------
+//   This data is in comma-delimited files and contains the following 
+//   fields:
+//   0  Date/Time UTC  ISO-8601 formatted date and time
+//   1  Lat degree_N (dec) -90 to 90 Platform Latitude
+//   2  Lon degree_E (dec) -180 to 179.9999 Platform Longitude
+//   3  GPS_MSL_Alt m  GPS Altitude, Mean Sea Level (MSL)
+//   4  WGS_84_Alt m  WGS 84 Geoid Altitude
+//   5  Press_Alt feet  Pressure Altitude
+//   6  Radar_Alt feet Zero or greater Radar Altimeter Altitude
+//   7  Grnd_Spd m/s  Ground Speed
+//   8  True_Airspeed m/s  True Airspeed
+//   9  Indicated_Airspeed knots  Indicated Airspeed
+//  10  Mach_Number   Aircraft Mach Number
+//  11  Vert_Velocity m/s [3] Aircraft Vertical Velocity
+//  12  True_Hdg degrees_true 0 to 359.9999 True Heading
+//  13  Track degrees_true 0 to 359.9999 Track Angle
+//  14  Drift degrees  Drift Angle
+//  15  Pitch degrees -90 to 90 [1] Pitch
+//  16  Roll degrees -90 to 90 [2] Roll
+//  17  Side_slip degrees  Side Slip Angle
+//  18  Angle_of_Attack degrees -90 to 90 [1] Angle of Attack
+//  19  Ambient_Temp degrees_C  Ambient Temperature
+//  20  Dew_Point degrees_C  Dew Point
+//  21  Total_Temp degrees_C  Total Temperature
+//  22  Static_Press mbar  Static Pressure
+//  23  Dynamic_Press mbar  Dynamic Pressure (total minus static)
+//  24  Cabin_Pressure mbar  Cabin Pressure / Altitude
+//  25  Wind_Speed m/s Zero or greater Wind Speed
+//  26  Wind_Dir degrees_true 0 to 359.9999 Wind Direction
+//  27  Vert_Wind_Spd m/s [3] Vertical Wind Speed
+//  28  Solar_Zenith degrees  Solar Zenith Angle
+//  29  Sun_Elev_AC degrees  Sun Elevation from Aircraft
+//  30  Sun_Az_Grd degrees_true 0 to 359.9999 Sun Azimuth from Ground
+//  31  Sun_Az_AC degrees_true 0 to 359.9999 Sun Azimuth from Aircraft
+//
+// -------------------------------------------------------------
+// .
+//
 //
 // Type: enum
 // Options:
@@ -437,47 +615,207 @@ sim_aircraft = {
 //     SEA_M300_FORMAT
 //     CSV_GPS_FORMAT
 //     POLCAST2_FORMAT
+//     NOAA_AIRCRAFT_FORMAT
+//     NOAA_SHIP_FORMAT
+//     IWG1_FORMAT
+//     KML_FORMAT
 //
 
-input_format = AUTOMATIC_FORMAT;
-
-///////////// optional_field_names ////////////////////
-//
-// Array of variable fields following fixed fields.
-// Used for comma-delimited format only. The comma-delimited format has 
-//   10 fixed fields: callsign, year, month, day, hour, min, sec, lat, 
-//   lon, alt. These are followed by optional fields. This array specifies 
-//   the optional field list.
-//
-// Type: enum
-// Options:
-//     GS
-//     TAS
-//     TEMP
-//     DEW_PT
-//     LW
-//     ERROR_FLAGS
-//     R_BURN
-//     L_BURN
-//     BURN_IN_PLACE
-//     EJECTABLE
-//     N_BURN_IN_PLACE
-//     N_EJECTABLE
-// 1D array - variable length.
-//
-
-optional_field_names = { GS, TAS, TEMP, DEW_PT };
+input_format = COMMA_DELIMITED_FORMAT;
 
 //======================================================================
 //
-// DATA QUALIFICATION.
+// OPTIONAL FIELDS.
+//
+// For some of the formats, optional fields may be available.
+//
+//======================================================================
+ 
+///////////// comma_delimited_optional_fields /////////
+//
+// Array of optional fields for COMMA_DELIMITED_FORMAT.
+//
+// The field_pos is 0-based, and refers to the position from the start 
+//   of the line.
+//
+// The comma-delimited format has 10 fixed fields: callsign, year, 
+//   month, day, hour, min, sec, lat, lon, alt.
+//
+// These are followed by optional fields.
+//
+// This array specifies the optional field list.
+//
+// The starting field_pos for the optional fields is 10.
+//
+//
+//
+// 	GS_KTS: ground speed(kts).
+// 	TAS_KTS: true airspeed (kts).
+// 	TEMP_C: air temp C.
+// 	DEW_PT_C: dew point C.
+// 	RH_PERCENT: relative humidity %.
+// 	LW_G_PER_M3: liquid water concentration (g/m3).
+// 	ROSEMOUNT_TOTAL_TEMP_C: total temperature from the rosemount probe.
+// 	FSSP_CONC_G_PER_M3: particle concentration from FSSP (g/m3).
+// 	HEADING_DEG: heading deg T.
+// 	VERT_VEL_MPS: vertical velocity in m/s.
+// 	FLARE_BURN_L_FLAG: flag to show left-wing burn on.
+// 	FLARE_BURN_R_FLAG: flag to show right-wing burn on.
+// 	FLARE_BURN_IN_PLACE_FLAG: flag to show burn in place flares running.
+// 	FLARE_EJECTABLE_FLAG: flag to show ejectable flares dispensed.
+// 	FLARE_N_BURN_IN_PLACE: number of flares burning.
+// 	FLARE_N_EJECTABLE: number of ejectable flares dispensed.
+// 	ERROR_FLAGS: bit-wise error flag.
+//
+//
+// Type: struct
+//   typedef struct {
+//      field_type_t field_type;
+//        Options:
+//          PRESSURE_HPA
+//          GS_KTS
+//          TAS_KTS
+//          TEMP_C
+//          DEW_PT_C
+//          RH_PERCENT
+//          LW_G_PER_M3
+//          ROSEMOUNT_TOTAL_TEMP_C
+//          FSSP_CONC_G_PER_M3
+//          HEADING_DEG
+//          VERT_VEL_MPS
+//          FLARE_BURN_L_FLAG
+//          FLARE_BURN_R_FLAG
+//          FLARE_BURN_IN_PLACE_FLAG
+//          FLARE_EJECTABLE_FLAG
+//          FLARE_N_BURN_IN_PLACE
+//          FLARE_N_EJECTABLE
+//          ERROR_FLAGS
+//      int field_pos;
+//   }
+//
+// 1D array - variable length.
+//
+
+comma_delimited_optional_fields = {
+  {
+    field_type = GS_KTS,
+    field_pos = 10
+  }
+  ,
+  {
+    field_type = ERROR_FLAGS,
+    field_pos = 11
+  }
+  ,
+  {
+    field_type = FLARE_BURN_R_FLAG,
+    field_pos = 12
+  }
+  ,
+  {
+    field_type = FLARE_BURN_L_FLAG,
+    field_pos = 13
+  }
+  ,
+  {
+    field_type = FLARE_BURN_IN_PLACE_FLAG,
+    field_pos = 14
+  }
+  ,
+  {
+    field_type = FLARE_EJECTABLE_FLAG,
+    field_pos = 15
+  }
+  ,
+  {
+    field_type = FLARE_N_BURN_IN_PLACE,
+    field_pos = 16
+  }
+  ,
+  {
+    field_type = FLARE_N_EJECTABLE,
+    field_pos = 17
+  }
+  ,
+  {
+    field_type = TAS_KTS,
+    field_pos = 18
+  }
+  ,
+  {
+    field_type = TEMP_C,
+    field_pos = 19
+  }
+};
+
+///////////// noaa_aircraft_optional_fields ///////////
+//
+// Array of optional fields for NOAA_AIRCRAFT_FORMAT.
+//
+// Used for NOAA_AIRCRAFT_FORMAT only. This format has 5 fixed fields: 
+//   callsign, yyyymmddThhmmss, lat, lon, alt. These are followed by any 
+//   optional fields. This array specifies the optional field list. The 
+//   starting field_pos for the optional fields is 5.
+//
+//
+// Type: struct
+//   typedef struct {
+//      field_type_t field_type;
+//        Options:
+//          PRESSURE_HPA
+//          GS_KTS
+//          TAS_KTS
+//          TEMP_C
+//          DEW_PT_C
+//          RH_PERCENT
+//          LW_G_PER_M3
+//          ROSEMOUNT_TOTAL_TEMP_C
+//          FSSP_CONC_G_PER_M3
+//          HEADING_DEG
+//          VERT_VEL_MPS
+//          FLARE_BURN_L_FLAG
+//          FLARE_BURN_R_FLAG
+//          FLARE_BURN_IN_PLACE_FLAG
+//          FLARE_EJECTABLE_FLAG
+//          FLARE_N_BURN_IN_PLACE
+//          FLARE_N_EJECTABLE
+//          ERROR_FLAGS
+//      int field_pos;
+//   }
+//
+// 1D array - variable length.
+//
+
+noaa_aircraft_optional_fields = {
+  {
+    field_type = GS_KTS,
+    field_pos = 8
+  }
+  ,
+  {
+    field_type = TAS_KTS,
+    field_pos = 9
+  }
+  ,
+  {
+    field_type = RH_PERCENT,
+    field_pos = 64
+  }
+};
+
+//======================================================================
+//
+// DATA QUALITY.
 //
 //======================================================================
  
 ///////////// change_lat_sign /////////////////////////
 //
 // Change the latitude sign.
+//
 // Use if southern latitudes are positive.
+//
+//
 // Type: boolean
 //
 
@@ -486,13 +824,158 @@ change_lat_sign = FALSE;
 ///////////// burn_in_place_time //////////////////////
 //
 // Nominal burn time for burn-in-place flares (secs).
+//
 // It is assumed that all burn-in-place flares will burn for this length 
 //   of time. The program will keep track of how many flares are burning 
 //   on each aircraft, and store that number in SPDB.
+//
+//
 // Type: int
 //
 
-burn_in_place_time = 240;
+burn_in_place_time = 180;
+
+//======================================================================
+//
+// OVERRIDE CALLSIGN.
+//
+//======================================================================
+ 
+///////////// override_callsign ///////////////////////
+//
+// Option to override the callsign in the data.
+//
+// If TRUE, the callsign in the data, if set, will be overridden by the 
+//   'callsign' parameter below.
+//
+//
+// Type: boolean
+//
+
+override_callsign = FALSE;
+
+///////////// callsign ////////////////////////////////
+//
+// Callsign to be used for override.
+//
+// See 'override_callsign'.
+//
+//
+// Type: string
+//
+
+callsign = "REVELLE";
+
+//======================================================================
+//
+// CHECK FOR VALID DATA.
+//
+//======================================================================
+ 
+///////////// check_callsigns /////////////////////////
+//
+// Option to check callsigns.
+//
+// If TRUE, only aircraft in the callsigns array are stored. If FALSE, 
+//   data from all aircraft is stored.
+//
+//
+// Type: boolean
+//
+
+check_callsigns = FALSE;
+
+///////////// valid_callsigns /////////////////////////
+//
+// Callsign array.
+//
+// Array of valid callsigns.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+valid_callsigns = {
+ "UND"
+};
+
+///////////// check_ground_speed //////////////////////
+//
+// Option to check ground speed.
+//
+// If TRUE, data will only be stored if the ground speed exceeds the 
+//   specified min_valid_ground_speed.
+//
+//
+// Type: boolean
+//
+
+check_ground_speed = TRUE;
+
+///////////// min_valid_ground_speed //////////////////
+//
+// Minimum valid ground speed - should match the units of the input 
+//   data.
+//
+// If check_ground_speed is true, data will only be stored if the ground 
+//   speed exceeds this value.
+//
+//
+// Type: double
+//
+
+min_valid_ground_speed = 20;
+
+///////////// check_air_speed /////////////////////////
+//
+// Option to check air speed.
+//
+// If TRUE, data will only be stored if the air speed exceeds the 
+//   specified min_valid_air_speed.
+//
+//
+// Type: boolean
+//
+
+check_air_speed = TRUE;
+
+///////////// min_valid_air_speed /////////////////////
+//
+// Minimum valid air speed - should match the units of the input data.
+//
+// If check_air_speed is true, data will only be stored if the air speed 
+//   exceeds this value.
+//
+//
+// Type: double
+//
+
+min_valid_air_speed = 20;
+
+///////////// compute_dew_point ///////////////////////
+//
+// Option to compute dew point from temp and rh.
+//
+// If TRUE, dew point will be computed if temp and rh are available.
+//
+//
+// Type: boolean
+//
+
+compute_dew_point = FALSE;
+
+///////////// compute_rh //////////////////////////////
+//
+// Option to compute relative humidity from temp and dew point.
+//
+// If TRUE, rh will be computed if temp and dew point are available.
+//
+//
+// Type: boolean
+//
+
+compute_rh = FALSE;
 
 //======================================================================
 //
@@ -500,41 +983,39 @@ burn_in_place_time = 240;
 //
 //======================================================================
  
-///////////// check_callsigns /////////////////////////
+///////////// output_interval /////////////////////////
 //
-// Option to check callsigns.
-// If TRUE, only aircraft in the callsigns array are stored. If FALSE, 
-//   data from all aircraft is stored.
-// Type: boolean
+// Interval at which the data is written to the data base (secs).
 //
-
-check_callsigns = FALSE;
-
-///////////// callsigns ///////////////////////////////
+// This prevents extremely rapid updates to the data base.
 //
-// Callsign array.
-// Array of valid callsigns.
-// Type: string
-// 1D array - variable length.
+//
+// Type: int
 //
 
-callsigns = { "UND" };
+output_interval = 2;
 
 ///////////// output_url //////////////////////////////
 //
 // Output SPDB URL.
+//
 // This is the path to the output data directory. You can use full URL 
 //   sytnax and optionally put the data to a remote machine.
+//
+//
 // Type: string
 //
 
-output_url = "$(RAP_DATA_DIR)/spdb/ac_posn";
+output_url = "$(HOME)/data/uae/EsdAcIngest/spdb/ac_posn_full";
 
 ///////////// valid_period ////////////////////////////
 //
 // Valid period (secs).
+//
 // Time period over which the aircraft position is considered valid.
+//
 // Minimum val: 1
+//
 // Type: int
 //
 
@@ -543,30 +1024,27 @@ valid_period = 120;
 ///////////// output_ascii ////////////////////////////
 //
 // Option to output ASCII to separate SPDB data base.
+//
 // If TRUE, the incoming data strings will be stored as ASCII in a 
 //   separate SPDB dir.
+//
+//
 // Type: boolean
 //
 
-output_ascii = FALSE;
+output_ascii = TRUE;
 
 ///////////// ascii_url ///////////////////////////////
 //
 // ASCII SPDB URL.
+//
 // Use if 'output_ascii' is TRUE.
+//
+//
 // Type: string
 //
 
-ascii_url = "$(RAP_DATA_DIR)/spdb/ascii_ac_posn";
-
-///////////// output_interval /////////////////////////
-//
-// Interval at which the data is written to the data base (secs).
-// This prevents extremely rapid updates to the data base.
-// Type: int
-//
-
-output_interval = 2;
+ascii_url = "$(HOME)/data/uae/EsdAcIngest/spdb/ascii_ac_posn_full";
 
 //======================================================================
 //
@@ -577,7 +1055,10 @@ output_interval = 2;
 ///////////// echo ////////////////////////////////////
 //
 // Option to echo incoming data string.
+//
 // If TRUE, the incoming strings are echoed to stdout.
+//
+//
 // Type: boolean
 //
 
@@ -586,7 +1067,10 @@ echo = FALSE;
 ///////////// new_line_on_echo ////////////////////////
 //
 // Option to add new line to echo output.
+//
 // If FALSE, carriage return is used instead of new line.
+//
+//
 // Type: boolean
 //
 

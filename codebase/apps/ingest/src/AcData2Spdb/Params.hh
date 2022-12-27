@@ -118,13 +118,15 @@ public:
     LW_G_PER_M3 = 6,
     ROSEMOUNT_TOTAL_TEMP_C = 7,
     FSSP_CONC_G_PER_M3 = 8,
-    FLARE_BURN_L_FLAG = 9,
-    FLARE_BURN_R_FLAG = 10,
-    FLARE_BURN_IN_PLACE_FLAG = 11,
-    FLARE_EJECTABLE_FLAG = 12,
-    FLARE_N_BURN_IN_PLACE = 13,
-    FLARE_N_EJECTABLE = 14,
-    ERROR_FLAGS = 15
+    HEADING_DEG = 9,
+    VERT_VEL_MPS = 10,
+    FLARE_BURN_L_FLAG = 11,
+    FLARE_BURN_R_FLAG = 12,
+    FLARE_BURN_IN_PLACE_FLAG = 13,
+    FLARE_EJECTABLE_FLAG = 14,
+    FLARE_N_BURN_IN_PLACE = 15,
+    FLARE_N_EJECTABLE = 16,
+    ERROR_FLAGS = 17
   } field_type_t;
 
   // struct typedefs
@@ -502,6 +504,18 @@ public:
   char* *_valid_callsigns;
   int valid_callsigns_n;
 
+  tdrp_bool_t check_ground_speed;
+
+  double min_valid_ground_speed;
+
+  tdrp_bool_t check_air_speed;
+
+  double min_valid_air_speed;
+
+  tdrp_bool_t compute_dew_point;
+
+  tdrp_bool_t compute_rh;
+
   int output_interval;
 
   char* output_url;
@@ -523,7 +537,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[49];
+  mutable TDRPtable _table[55];
 
   const char *_className;
 

@@ -466,6 +466,8 @@ typedef enum {
   LW_G_PER_M3,
   ROSEMOUNT_TOTAL_TEMP_C,
   FSSP_CONC_G_PER_M3,
+  HEADING_DEG,
+  VERT_VEL_MPS,
   FLARE_BURN_L_FLAG,
   FLARE_BURN_R_FLAG,
   FLARE_BURN_IN_PLACE_FLAG,
@@ -488,7 +490,7 @@ paramdef struct optional_field_t {
     { DEW_PT_C, 13 }
   };
   p_descr = "Array of optional fields for COMMA_DELIMITED_FORMAT.";
-  p_help = "The field_pos is 0-based, and refers to the position from the start of the line. The comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt. These are followed by optional fields. This array specifies the optional field list. The starting field_pos for the optional fields is 10.";
+  p_help = "The field_pos is 0-based, and refers to the position from the start of the line.\n\nThe comma-delimited format has 10 fixed fields: callsign, year, month, day, hour, min, sec, lat, lon, alt.\n\nThese are followed by optional fields.\n\nThis array specifies the optional field list.\n\nThe starting field_pos for the optional fields is 10.\n\n\n\n\tGS_KTS: ground speed(kts).\n\tTAS_KTS: true airspeed (kts).\n\tTEMP_C: air temp C.\n\tDEW_PT_C: dew point C.\n\tRH_PERCENT: relative humidity %.\n\tLW_G_PER_M3: liquid water concentration (g/m3).\n\tROSEMOUNT_TOTAL_TEMP_C: total temperature from the rosemount probe.\n\tFSSP_CONC_G_PER_M3: particle concentration from FSSP (g/m3).\n\tHEADING_DEG: heading deg T.\n\tVERT_VEL_MPS: vertical velocity in m/s.\n\tFLARE_BURN_L_FLAG: flag to show left-wing burn on.\n\tFLARE_BURN_R_FLAG: flag to show right-wing burn on.\n\tFLARE_BURN_IN_PLACE_FLAG: flag to show burn in place flares running.\n\tFLARE_EJECTABLE_FLAG: flag to show ejectable flares dispensed.\n\tFLARE_N_BURN_IN_PLACE: number of flares burning.\n\tFLARE_N_EJECTABLE: number of ejectable flares dispensed.\n\tERROR_FLAGS: bit-wise error flag.";
 } comma_delimited_optional_fields[];
 
 paramdef struct optional_field_t {
@@ -534,7 +536,7 @@ paramdef string {
 } callsign;
 
 commentdef {
-  p_header = "CHECK CALLSIGNS";
+  p_header = "CHECK FOR VALID DATA";
 }
 
 paramdef boolean {
@@ -548,6 +550,42 @@ paramdef string {
   p_descr = "Callsign array";
   p_help = "Array of valid callsigns";
 } valid_callsigns[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check ground speed.";
+  p_help = "If TRUE, data will only be stored if the ground speed exceeds the specified min_valid_ground_speed.";
+} check_ground_speed;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum valid ground speed - should match the units of the input data.";
+  p_help = "If check_ground_speed is true, data will only be stored if the ground speed exceeds this value.";
+} min_valid_ground_speed;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check air speed.";
+  p_help = "If TRUE, data will only be stored if the air speed exceeds the specified min_valid_air_speed.";
+} check_air_speed;
+
+paramdef double {
+  p_default = 20.0;
+  p_descr = "Minimum valid air speed - should match the units of the input data.";
+  p_help = "If check_air_speed is true, data will only be stored if the air speed exceeds this value.";
+} min_valid_air_speed;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute dew point from temp and rh.";
+  p_help = "If TRUE, dew point will be computed if temp and rh are available.";
+} compute_dew_point;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to compute relative humidity from temp and dew point.";
+  p_help = "If TRUE, rh will be computed if temp and dew point are available.";
+} compute_rh;
 
 commentdef {
   p_header = "DATA OUTPUT";
