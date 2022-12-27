@@ -23,6 +23,10 @@ endif()
 set(CMAKE_C_COMPILER_NAMES clang gcc icc cc fcc)
 set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)
 
+# do not scan anaconda directories
+set(CMAKE_IGNORE_PREFIX_PATH "$ENV{HOME}/anaconda3;$ENV{HOME}/anaconda2")
+message("CMAKE_IGNORE_PREFIX_PATH: ${CMAKE_IGNORE_PREFIX_PATH}")
+
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../build/cmake/"
