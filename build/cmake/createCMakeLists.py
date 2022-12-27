@@ -523,6 +523,11 @@ def writeCMakeListsTop(dir):
     fo.write('set(CMAKE_CXX_COMPILER_NAMES clang++ g++ icpc c++ cxx FCC CC)\n')
     fo.write('\n')
 
+    fo.write('# do not scan anaconda directories\n')
+    fo.write('set(CMAKE_IGNORE_PREFIX_PATH "$ENV{HOME}/anaconda3;$ENV{HOME}/anaconda2")\n')
+    fo.write('message("CMAKE_IGNORE_PREFIX_PATH: ${CMAKE_IGNORE_PREFIX_PATH}")\n')
+    fo.write('\n')
+
     if (options.verboseMake):
         fo.write('set(CMAKE_VERBOSE_MAKEFILE ON)\n')
     else:
