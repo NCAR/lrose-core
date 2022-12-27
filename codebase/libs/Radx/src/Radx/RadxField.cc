@@ -1515,7 +1515,7 @@ void RadxField::convertToFl64()
   _byteWidth = sizeof(Radx::fl64);
   _scale = 1.0;
   _offset = 0.0;
-  _setMissingToDefaults();
+  _missingFl64 = Radx::missingFl64;
 
 }
 
@@ -1616,7 +1616,7 @@ void RadxField::convertToFl32()
   _byteWidth = sizeof(Radx::fl32);
   _scale = 1.0;
   _offset = 0.0;
-  _setMissingToDefaults();
+  _missingFl32 = Radx::missingFl32;
 
 }
 
@@ -1697,6 +1697,7 @@ void RadxField::convertToSi32(double scale,
   _byteWidth = sizeof(Radx::si32);
   _scale = scale;
   _offset = offset;
+  _missingSi32 = Radx::missingSi32;
 
 }
 
@@ -1762,6 +1763,7 @@ void RadxField::convertToSi16(double scale,
   _byteWidth = sizeof(Radx::si16);
   _scale = scale;
   _offset = offset;
+  _missingSi16 = Radx::missingSi16;
 
 }
 
@@ -1803,6 +1805,7 @@ void RadxField::convertToSi08(double scale,
   _byteWidth = sizeof(Radx::si08);
   _scale = scale;
   _offset = offset;
+  _missingSi08 = Radx::missingSi08;
 
 }
 
