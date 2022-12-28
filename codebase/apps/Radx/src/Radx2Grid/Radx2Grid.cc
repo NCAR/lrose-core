@@ -425,6 +425,10 @@ int Radx2Grid::_readFile(const string &filePath)
     return -1;
   }
   _readPaths = inFile.getReadPaths();
+
+  // convert to fl32
+
+  _readVol.convertToFl32();
   
   // apply time offset
 
@@ -516,6 +520,15 @@ int Radx2Grid::_readFile(const string &filePath)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "  _startRangeKm: " << _readVol.getStartRangeKm() << endl;
     cerr << "  _gateSpacingKm: " << _readVol.getGateSpacingKm() << endl;
+  }
+
+  // censor the input data
+
+  if (_params.apply_censoring) {
+    vector<RadxRay *> &rays = _readVol.getRays();
+    for (size_t iray = 0; iray < rays.size(); iray++) {
+      _censorInputRay(rays[iray]);
+    }
   }
 
   // set up and fields than need transforming
@@ -678,8 +691,9 @@ void Radx2Grid::_loadInterpRays()
     for (size_t iray = sweep->getStartRayIndex();
          iray <= sweep->getEndRayIndex(); iray++) {
 
-      const RadxRay *ray = rays[iray];
-
+      RadxRay *ray = rays[iray];
+      ray->convertToFl32();
+      
       // check elevation limits if required
       
       if (_params.interp_mode != Params::INTERP_MODE_POLAR &&
@@ -738,14 +752,11 @@ void Radx2Grid::_loadInterpRays()
       // accept ray
       
       Interp::Ray *interpRay = 
-        new Interp::Ray(rays[iray],
+        new Interp::Ray(ray,
                         isweep,
                         _interpFields,
                         _params.use_fixed_angle_for_interpolation,
                         _params.use_fixed_angle_for_data_limits);
-      if (_params.apply_censoring) {
-        _censorInterpRay(interpRay);
-      }
       _interpRays.push_back(interpRay);
 
     } // iray
@@ -756,29 +767,28 @@ void Radx2Grid::_loadInterpRays()
 }
   
 ////////////////////////////////////////////////////////////////////
-// censor an interp ray
+// censor an input ray
 
-void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
+void Radx2Grid::_censorInputRay(RadxRay *inputRay)
 
 {
-
-  RadxRay *ray = interpRay->inputRay;
 
   if (!_params.apply_censoring) {
     return;
   }
-
+  
   // initialize censoring flags to true to
   // turn censoring ON everywhere
   
   vector<int> censorFlag;
-  size_t nGates = ray->getNGates();
+  size_t nGates = inputRay->getNGates();
   for (size_t igate = 0; igate < nGates; igate++) {
     censorFlag.push_back(1);
   }
 
   // check OR fields
-  // if any of these have VALID data, we turn censoring OFF
+  // if any of these have VALID data, 
+  // we turn censoring OFF at those gates
 
   int orFieldCount = 0;
 
@@ -789,7 +799,7 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
       continue;
     }
 
-    RadxField *field = ray->getField(cfld.name);
+    RadxField *field = inputRay->getField(cfld.name);
     if (field == NULL) {
       // field missing, do not censor
       if (_nWarnCensorPrint % 360 == 0) {
@@ -802,17 +812,20 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
       }
       continue;
     }
-    
+
     orFieldCount++;
     
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
+    Radx::fl32 minValidVal = cfld.min_valid_value;
+    Radx::fl32 maxValidVal = cfld.max_valid_value;
 
     const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
+    const Radx::fl32 fmiss = field->getMissingFl32();
     for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val >= minValidVal && val <= maxValidVal) {
-        censorFlag[igate] = 0;
+      Radx::fl32 val = fdata[igate];
+      if (val != fmiss) {
+        if (val >= minValidVal && val <= maxValidVal) {
+          censorFlag[igate] = 0;
+        }
       }
     }
     
@@ -828,6 +841,7 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
 
   // check AND fields
   // if any of these have INVALID data, we turn censoring ON
+  // for those gates
 
   for (int ifield = 0; ifield < _params.censoring_fields_n; ifield++) {
     
@@ -836,18 +850,19 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
       continue;
     }
 
-    RadxField *field = ray->getField(cfld.name);
+    RadxField *field = inputRay->getField(cfld.name);
     if (field == NULL) {
       continue;
     }
-    
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
+
+    Radx::fl32 minValidVal = cfld.min_valid_value;
+    Radx::fl32 maxValidVal = cfld.max_valid_value;
 
     const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
+    const Radx::fl32 fmiss = field->getMissingFl32();
     for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val < minValidVal || val > maxValidVal) {
+      Radx::fl32 val = fdata[igate];
+      if (val == fmiss || val < minValidVal || val > maxValidVal) {
         censorFlag[igate] = 1;
       }
     }
@@ -885,7 +900,7 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
 
   // apply censoring by setting censored gates to missing for all fields
 
-  vector<RadxField *> fields = ray->getFields();
+  vector<RadxField *> fields = inputRay->getFields();
   for (size_t ifield = 0; ifield < fields.size(); ifield++) {
     RadxField *field = fields[ifield];
     if (field->getLongName().find("diagnostic_field_") != string::npos) {
@@ -893,11 +908,15 @@ void Radx2Grid::_censorInterpRay(Interp::Ray *interpRay)
       continue;
     }
     Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+    const Radx::fl32 fmiss = field->getMissingFl32();
     for (size_t igate = 0; igate < nGates; igate++) {
       if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
+        if (fdata[igate] != fmiss) {
+          fdata[igate] = fmiss;
+        }
       }
     } // igate
+
   } // ifield
   
 }

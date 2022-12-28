@@ -375,6 +375,43 @@ paramdef struct select_field_t {
 } selected_fields[];
 
 commentdef {
+  p_header = "CENSORING INPUT FIELDS";
+  p_text = "You have the option of censoring the input fields - i.e. setting the fields to missing values - at gates which meet certain criteria based on the values in the input fields.\n\n This will also affect all of the interpolated fields.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply censoring based on field values and thresholds.";
+  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring will be applied.";
+} apply_censoring;
+
+typedef enum {
+  LOGICAL_AND, LOGICAL_OR
+} logical_t;
+
+typedef struct {
+  string name;
+  double min_valid_value;
+  double max_valid_value;
+  logical_t combination_method;
+} censoring_field_t;
+
+paramdef struct censoring_field_t {
+  p_default = {
+    { "SNR", 0.0, 1000.0, LOGICAL_OR },
+    { "NCP", 0.15, 1000.0, LOGICAL_OR }
+  };
+  p_descr = "Fields to be used for censoring.";
+  p_help = "Specify the input fields to be used to determine whether a gate should be censored.\n\nThe name refers to the field name in the input files.\n\nValid field values lie in the range from min_valid_value to max_valid_value, inclusively. If the value of a field at a gate lies within this range, it is considered valid.\n\nEach specified field is examined at each gate, and is flagged as valid if its value lies in the valid range.\n\nThese field flags are then combined as follows:\n\nFirst, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true.\n\nNext the combined_or flag is combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true.\n\nIf this computed flag is true, then the data at the gate is regarded as valid and is retained.\n\nIf the computed flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
+} censoring_fields[];
+  
+paramdef int {
+  p_default = 1;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} censoring_min_valid_run;
+
+commentdef {
   p_header = "TRANSFORMING FIELDS FOR INTERPOLATION";
 }
 
@@ -610,43 +647,6 @@ paramdef boolean {
   p_descr = "Option to add debug fields for checking the interpolation.";
   p_help = "The test fields allow us to ensure that the interpolation is working correctly.\n\nThe debug fields are:\n\n\tnContrib - number of points used in interpolation\n\tgridAz: azimuth deg\n\tgridEl: elevation deg\n\tgridRange: range km\n\tllEl: lower left elevation deg\n\tllAz: lower left azimuth deg\n\tlrEl: lower right elevation deg\n\tlrAz: lower right azimuth deg\n\tulEl: upper left elevation deg\n\tulAz: upper left azimuth deg\n\turEl: upper right elevation deg\n\turAz: upper right azimuth deg";
 } output_debug_fields;
-
-commentdef {
-  p_header = "CENSORING OUTPUT FIELDS";
-  p_text = "You have the option of censoring the output data fields - i.e. setting the fields to missing values - at gates which meet certain criteria based on the values in the input fields.\n\nIf this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression. This leads to smaller data files.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Apply censoring based on field values and thresholds.";
-  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring will be applied.";
-} apply_censoring;
-
-typedef enum {
-  LOGICAL_AND, LOGICAL_OR
-} logical_t;
-
-typedef struct {
-  string name;
-  double min_valid_value;
-  double max_valid_value;
-  logical_t combination_method;
-} censoring_field_t;
-
-paramdef struct censoring_field_t {
-  p_default = {
-    { "SNR", 0.0, 1000.0, LOGICAL_OR },
-    { "NCP", 0.15, 1000.0, LOGICAL_OR }
-  };
-  p_descr = "Fields to be used for censoring.";
-  p_help = "Specify the fields to be used to determine whether a gate should be censored.\n\nThe name refers to the field name in the input files.\n\nValid field values lie in the range from min_valid_value to max_valid_value, inclusively. If the value of a field at a gate lies within this range, it is considered valid.\n\nEach specified field is examined at each gate, and is flagged as valid if its value lies in the valid range.\n\nThese field flags are then combined as follows:\n\nFirst, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true.\n\nNext the combined_or flag is combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true.\n\nIf this computed flag is true, then the data at the gate is regarded as valid and is retained.\n\nIf the computed flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
-} censoring_fields[];
-  
-paramdef int {
-  p_default = 1;
-  p_descr = "Minimum valid run of non-censored gates.";
-  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
-} censoring_min_valid_run;
 
 commentdef {
   p_header = "SETTING THE PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS";

@@ -109,16 +109,16 @@ public:
   } projection_t;
 
   typedef enum {
+    LOGICAL_AND = 0,
+    LOGICAL_OR = 1
+  } logical_t;
+
+  typedef enum {
     TRANSFORM_DB_TO_LINEAR = 0,
     TRANSFORM_DB_TO_LINEAR_AND_BACK = 1,
     TRANSFORM_LINEAR_TO_DB = 2,
     TRANSFORM_LINEAR_TO_DB_AND_BACK = 3
   } interp_transform_t;
-
-  typedef enum {
-    LOGICAL_AND = 0,
-    LOGICAL_OR = 1
-  } logical_t;
 
   typedef enum {
     CLASSIC = 0,
@@ -148,6 +148,13 @@ public:
     char* input_name;
     tdrp_bool_t process_this_field;
   } select_field_t;
+
+  typedef struct {
+    char* name;
+    double min_valid_value;
+    double max_valid_value;
+    logical_t combination_method;
+  } censoring_field_t;
 
   typedef struct {
     char* input_name;
@@ -181,13 +188,6 @@ public:
     char* beta_field_name;
     char* gamma_field_name;
   } angle_fields_t;
-
-  typedef struct {
-    char* name;
-    double min_valid_value;
-    double max_valid_value;
-    logical_t combination_method;
-  } censoring_field_t;
 
   typedef struct {
     char* input_name;
@@ -567,6 +567,13 @@ public:
   select_field_t *_selected_fields;
   int selected_fields_n;
 
+  tdrp_bool_t apply_censoring;
+
+  censoring_field_t *_censoring_fields;
+  int censoring_fields_n;
+
+  int censoring_min_valid_run;
+
   tdrp_bool_t transform_fields_for_interpolation;
 
   transform_field_t *_transform_fields;
@@ -614,13 +621,6 @@ public:
   tdrp_bool_t interp_time_field;
 
   tdrp_bool_t output_debug_fields;
-
-  tdrp_bool_t apply_censoring;
-
-  censoring_field_t *_censoring_fields;
-  int censoring_fields_n;
-
-  int censoring_min_valid_run;
 
   tdrp_bool_t override_standard_pseudo_earth_radius;
 

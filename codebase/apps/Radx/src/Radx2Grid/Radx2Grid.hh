@@ -121,7 +121,7 @@ private:
   int _readFile(const string &filePath);
   void _checkFields(const string &filePath);
   void _loadInterpRays();
-  void _censorInterpRay(Interp::Ray *interpRay);
+  void _censorInputRay(RadxRay *inputRay);
   void _addGeometryFields();
   void _addTimeField();
   void _setupTransformFields();
