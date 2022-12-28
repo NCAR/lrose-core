@@ -513,7 +513,7 @@ paramdef enum pid_types_t {
     MISC
   };
   p_descr = "List of non-weather types to be censored.";
-  p_help = "This list applies to the fields for which censor_non_weather is set to true.";
+  p_help = "This list applies to the fields for which censor_non_weather is set to true. You can consider adding CLOUD to the list if, for example, the CLOUD type finds Bragg echo instead of cloud.";
 } non_weather_pid_types[];
 
 commentdef {

@@ -1275,7 +1275,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("non_weather_pid_types");
     tt->descr = tdrpStrDup("List of non-weather types to be censored.");
-    tt->help = tdrpStrDup("This list applies to the fields for which censor_non_weather is set to true.");
+    tt->help = tdrpStrDup("This list applies to the fields for which censor_non_weather is set to true. You can consider adding CLOUD to the list if, for example, the CLOUD type finds Bragg echo instead of cloud.");
     tt->array_offset = (char *) &_non_weather_pid_types - &_start_;
     tt->array_n_offset = (char *) &non_weather_pid_types_n - &_start_;
     tt->is_array = TRUE;
