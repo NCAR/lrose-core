@@ -487,16 +487,18 @@ void Worker::_censorNonWeather(RadxField &field)
 {
 
   const int *pid = _pid.getPid();
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    int ptype = pid[ii];
-    if (ptype == NcarParticleId::FLYING_INSECTS ||
-        ptype == NcarParticleId::SECOND_TRIP ||
-        ptype == NcarParticleId::GROUND_CLUTTER ||
-        ptype < NcarParticleId::CLOUD ||
-        ptype > NcarParticleId::SATURATED_SNR) {
-      field.setGateToMissing(ii);
-    }
-  } // ii
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    int ptype = pid[igate];
+    if (ptype <= 0) {
+      field.setGateToMissing(igate);
+    } else {
+      for (int it = 0; it < _params.non_weather_pid_types_n; it++) {
+        if (ptype == _params._non_weather_pid_types[it]) {
+          field.setGateToMissing(igate);
+        }
+      }  // it
+    } // if (ptype <= 0) 
+  } // igate
 
 }
 
