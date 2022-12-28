@@ -1,0 +1,1015 @@
+/**********************************************************************
+ * TDRP params for RadxRate
+ **********************************************************************/
+
+//======================================================================
+//
+// RadxRate reads moments from Radx-type files, computes precip rate 
+//   (and optionally PID and KDP) and writes out the results to CfRadial 
+//   files.
+//
+// A number of precipitation rate methods are available, based on Z, 
+//   ZZDR and KDP, and various hybrids.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// THREADING FOR SPEED.
+//
+// Multiple threads are used to improve performance. The computations 
+//   are carried out in parallel in separate threads. The read and write 
+//   stages occur in the main thread, since netCDF is not thread safe.
+//
+//======================================================================
+ 
+///////////// n_compute_threads ///////////////////////
+//
+// The number of compute threads.
+//
+// The moments computations are segmented in range, with each thread 
+//   computing a fraction of the number of gates. For maximum performance, 
+//   n_threads should be set to the number of processors multiplied by 4. 
+//   For further tuning, use top to maximize CPU usage while varying the 
+//   number of threads. For single-threaded operation set this to 1.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+n_compute_threads = 4;
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+//
+// In REALTIME mode, the program waits for a new input file.\nIn ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. 
+//
+// In FILELIST mode, it moves through the list of file names specified 
+//   on the command line.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = FILELIST;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/rain1/rsfdata/projects/pecan/cfradial/spol/moments/sband/sur";
+
+///////////// input_file_search_ext ///////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+input_file_search_ext = "nc";
+
+///////////// input_file_search_substr ////////////////
+//
+// File name sub-string.
+//
+// If set, only files with names containing this sub-string will be 
+//   processed.
+//
+//
+// Type: string
+//
+
+input_file_search_substr = "cfrad";
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+start_time = "2015 06 26 00 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time for ARCHIVE mode analysis.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+end_time = "2015 06 26 01 00 00";
+
+//======================================================================
+//
+// INPUT FIELD INFORMATION.
+//
+// Names of fields in the input file. The following fields are required: 
+//   SNR, DBZ, ZDR, PHIDP and RHOHV. If SNR is not available, it is 
+//   computed from DBZ.
+//
+//======================================================================
+ 
+///////////// SNR_available ///////////////////////////
+//
+// Is SNR data available?.
+//
+// If not, SNR will be computed from the DBZ field. See 
+//   'noise_dbz_at_100km'.
+//
+//
+// Type: boolean
+//
+
+SNR_available = TRUE;
+
+///////////// SNR_field_name //////////////////////////
+//
+// Field name for SNR.
+//
+// Signal-to-noise ratio (dB).
+//
+//
+// Type: string
+//
+
+SNR_field_name = "SNRHC";
+
+///////////// noise_dbz_at_100km //////////////////////
+//
+// The noise value, represented as dBZ at a range of 100km.
+//
+// This is used for computing the SNR from the DBZ field. It is only 
+//   used if SNR_available is FALSE. The SNR will be computed by 
+//   range-correcting this value and using it as the noise value.
+//
+//
+// Type: double
+//
+
+noise_dbz_at_100km = 0;
+
+///////////// DBZ_field_name //////////////////////////
+//
+// Field name for DBZ.
+//
+// Horizontally-polarized reflectivity factor.
+//
+//
+// Type: string
+//
+
+DBZ_field_name = "DBZ";
+
+///////////// ZDR_field_name //////////////////////////
+//
+// Field name for ZDR.
+//
+//
+// Type: string
+//
+
+ZDR_field_name = "ZDR";
+
+///////////// PHIDP_field_name ////////////////////////
+//
+// Field name for PHIDP.
+//
+//
+// Type: string
+//
+
+PHIDP_field_name = "PHIDP";
+
+///////////// RHOHV_field_name ////////////////////////
+//
+// Field name for RHOHV.
+//
+//
+// Type: string
+//
+
+RHOHV_field_name = "RHOHV";
+
+///////////// LDR_available ///////////////////////////
+//
+// Is LDR data available?.
+//
+//
+// Type: boolean
+//
+
+LDR_available = TRUE;
+
+///////////// LDR_field_name //////////////////////////
+//
+// Field name for LDR.
+//
+//
+// Type: string
+//
+
+LDR_field_name = "LDRH";
+
+//======================================================================
+//
+// COMPUTING KDP.
+//
+// KDP will be computed if KDP_available is FALSE.
+//
+//======================================================================
+ 
+///////////// KDP_available ///////////////////////////
+//
+// Is KDP data available?.
+//
+// If KDP is available, then it is not computed. Instead KDP_field_name 
+//   will be read in.
+//
+//
+// Type: boolean
+//
+
+KDP_available = FALSE;
+
+///////////// KDP_field_name //////////////////////////
+//
+// Field name for KDP.
+//
+//
+// Type: string
+//
+
+KDP_field_name = "KDP";
+
+///////////// KDP_params_file_path ////////////////////
+//
+// Path for parameters for computing KDP.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+KDP_params_file_path = "./KdpParams.test";
+
+//======================================================================
+//
+// COMPUTING PID.
+//
+//======================================================================
+ 
+///////////// PID_params_file_path ////////////////////
+//
+// Path for parameters for computing PID.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+PID_params_file_path = "./PidParams.spol";
+
+///////////// PID_use_KDP_self_consistency ////////////
+//
+// When computing PID, using KDP conditioned for self-consistency.
+//
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
+//
+//
+// Type: boolean
+//
+
+PID_use_KDP_self_consistency = FALSE;
+
+///////////// PID_use_attenuation_corrected_fields ////
+//
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PID.
+//
+//
+// Type: boolean
+//
+
+PID_use_attenuation_corrected_fields = FALSE;
+
+//======================================================================
+//
+// COMPUTING PRECIP RATE.
+//
+//======================================================================
+ 
+///////////// RATE_params_file_path ///////////////////
+//
+// Path for parameters for computing PRECIP.
+//
+// If set to use-defaults, no parameter file will be read in, and the 
+//   default parameters will be used.
+//
+//
+// Type: string
+//
+
+RATE_params_file_path = "./RateParams.test";
+
+///////////// RATE_use_KDP_self_consistency ///////////
+//
+// When computing PRECIP, using KDP conditioned for self-consistency.
+//
+// When KDP is computed, we compute both a standard result, and a 
+//   conditioned result based on the self-consistency method. If this 
+//   parameter is set to TRUE, the self-consistency result will be used 
+//   instead of the standard result.
+//
+//
+// Type: boolean
+//
+
+RATE_use_KDP_self_consistency = FALSE;
+
+///////////// RATE_use_attenuation_corrected_fields ///
+//
+// Option to use Z and ZDR fields that are corrected for attenuation.
+//
+// If TRUE, the attenuation-corrected Z and ZDR fields will be used for 
+//   computing PRECIP.
+//
+//
+// Type: boolean
+//
+
+RATE_use_attenuation_corrected_fields = FALSE;
+
+//======================================================================
+//
+// SPECIFYING OUTPUT FIELDS.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Indicate which fields should be written to the output file.
+//
+// Choose the ID from the list.
+//
+// The name and units can be set however the user prefers.
+//
+// The output_encoding apply to CfRadial output only. 
+//
+// 	RATE_ZH: Precip rate from ZH
+// 	RATE_ZH_SNOW: Precip rate from ZH in dry snow
+// 	RATE_Z_ZDR: Precip rate from Z and ZDR
+// 	RATE_KDP: Precip rate from KDP
+// 	RATE_KDP_ZDR: Precip rate from KDP and ZDR
+// 	RATE_HYBRID: Precip rate from NCAR hybrid
+// 	RATE_PID: Precip rate using PID to select the appropriate rate
+// 	RATE_HIDRO: Precip rate using CSU HIDRO hybrid
+// 	RATE_BRINGI: Precip rate using Bringi hybrid
+// 	PID: NCAR Particle ID
+// 	PID_INTEREST: final interest map for NCAR Particle ID values
+// 	TEMP_FOR_PID: temperature field for PID (C)
+// 	KDP: KDP from filtering PHIDP and computing slope (deg/km)
+// 	KDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)
+// 	DBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)
+// 	ZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)
+// 	DBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)
+// 	ZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)
+//
+// do_write: allows you to turn off writing while leaving the field in 
+//   the list
+//
+// censor_non_weather: use PID field to censor non-weather PID types
+// non_weather types are:
+// 	FLYING_INSECTS
+// 	SECOND_TRIP
+// 	GROUND_CLUTTER
+// 	FLYING_INSECTS
+// 	CLOUD
+// 	SATURATED_SNR.
+//
+//
+// Type: struct
+//   typedef struct {
+//      output_field_id_t id;
+//        Options:
+//          RATE_ZH
+//          RATE_ZH_SNOW
+//          RATE_Z_ZDR
+//          RATE_KDP
+//          RATE_KDP_ZDR
+//          RATE_HYBRID
+//          RATE_PID
+//          RATE_HIDRO
+//          RATE_BRINGI
+//          PID
+//          PID_INTEREST
+//          TEMP_FOR_PID
+//          KDP
+//          KDP_SC
+//          DBZ_ATTEN_CORRECTION
+//          ZDR_ATTEN_CORRECTION
+//          DBZ_ATTEN_CORRECTED
+//          ZDR_ATTEN_CORRECTED
+//      string name;
+//      string long_name;
+//      string standard_name;
+//      string units;
+//      boolean do_write;
+//      boolean censor_non_weather;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    id = RATE_ZH,
+    name = "RATE_ZH",
+    long_name = "precip_rate_from_z",
+    standard_name = "precip_rate_from_z",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_ZH_SNOW,
+    name = "RATE_ZH_SNOW",
+    long_name = "precip_rate_from_z_for_snow",
+    standard_name = "precip_rate_from_z_for_snow",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_Z_ZDR,
+    name = "RATE_Z_ZDR",
+    long_name = "precip_rate_from_z_and_zdr",
+    standard_name = "precip_rate_from_z_and_zdr",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_KDP,
+    name = "RATE_KDP",
+    long_name = "precip_rate_from_kdp",
+    standard_name = "precip_rate_from_kdp",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_KDP_ZDR,
+    name = "RATE_KDP_ZDR",
+    long_name = "precip_rate_from_kdp_and_zdr",
+    standard_name = "precip_rate_from_kdp_and_zdr",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_HYBRID,
+    name = "RATE_HYBRID",
+    long_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    standard_name = "precip_rate_hybrid_of_zh_zzdr_kdp_and_kdpzdr",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_PID,
+    name = "RATE_PID",
+    long_name = "precip_rate_based_on_pid",
+    standard_name = "precip_rate_based_on_pid",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_HIDRO,
+    name = "RATE_HIDRO",
+    long_name = "precip_rate_based_on_hidro",
+    standard_name = "precip_rate_based_on_hidro",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = RATE_BRINGI,
+    name = "RATE_BRINGI",
+    long_name = "precip_rate_based_on_bringi",
+    standard_name = "precip_rate_based_on_bringi",
+    units = "mm/hr",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = PID,
+    name = "PID",
+    long_name = "particle_id",
+    standard_name = "hydrometeor_type",
+    units = "",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = PID_INTEREST,
+    name = "PID_INTEREST",
+    long_name = "final_interest_value_for_pid_decision",
+    standard_name = "final_interest_value_for_pid_decision",
+    units = "",
+    do_write = FALSE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = TEMP_FOR_PID,
+    name = "TEMP_FOR_PID",
+    long_name = "temperature_for_computing_pid",
+    standard_name = "temperature",
+    units = "C",
+    do_write = FALSE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = KDP,
+    name = "KDP",
+    long_name = "specific_differential_phase",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = KDP_SC,
+    name = "KDP_SC",
+    long_name = "kdp_conditioned_using_ZZDR_self_consistency",
+    standard_name = "specific_differential_phase_hv",
+    units = "deg/km",
+    do_write = TRUE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = ZDR_ATTEN_CORRECTION,
+    name = "ZDR_ATTEN_CORRECTION",
+    long_name = "correction_to_zdr_for_attenuation",
+    standard_name = "zdr_attenuation_correction",
+    units = "dB",
+    do_write = FALSE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = DBZ_ATTEN_CORRECTED,
+    name = "DBZ_ATTEN_CORRECTED",
+    long_name = "dbz_corrected_for_attenuation",
+    standard_name = "dbz_corrected_for_attenuation",
+    units = "dBZ",
+    do_write = FALSE,
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    id = ZDR_ATTEN_CORRECTED,
+    name = "ZDR_ATTEN_CORRECTED",
+    long_name = "zdr_corrected_for_attenuation",
+    standard_name = "zdr_corrected_for_attenuation",
+    units = "dB",
+    do_write = FALSE,
+    censor_non_weather = FALSE
+  }
+};
+
+///////////// output_encoding /////////////////////////
+//
+// Set the encoding for fields in the output files.
+//
+// INT16 provides better compression. FL32 writes 32-bit floats.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_FL32
+//     OUTPUT_ENCODING_INT16
+//
+
+output_encoding = OUTPUT_ENCODING_INT16;
+
+//======================================================================
+//
+// SPECIFY COPY-THROUGH FIELDS.
+//
+// These fields are copied unchanged from the input file to the output 
+//   file. This allows the user to consolidate the input and output data 
+//   set in a single file.
+//
+//======================================================================
+ 
+///////////// copy_selected_input_fields_to_output ////
+//
+// Option to copy input fields unchanged to the output file.
+//
+//
+// Type: boolean
+//
+
+copy_selected_input_fields_to_output = TRUE;
+
+///////////// copy_fields /////////////////////////////
+//
+// These fields are copied through unchanged to the output file.
+//
+// You can change the name of the field on output. Optionally you can 
+//   censor the non-weather echoes, based on the PID.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_name;
+//      string output_name;
+//      boolean censor_non_weather;
+//   }
+//
+// 1D array - variable length.
+//
+
+copy_fields = {
+  {
+    input_name = "DBZ",
+    output_name = "DBZ",
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    input_name = "VEL",
+    output_name = "VEL",
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    input_name = "WIDTH",
+    output_name = "WIDTH",
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    input_name = "ZDR",
+    output_name = "ZDR",
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    input_name = "PHIDP",
+    output_name = "PHIDP",
+    censor_non_weather = FALSE
+  }
+  ,
+  {
+    input_name = "RHOHV",
+    output_name = "RHOHV",
+    censor_non_weather = FALSE
+  }
+};
+
+//======================================================================
+//
+// SPECIFY NON-WEATHER TYPES FROM PID.
+//
+// This section allows you to specify the PID particle types to be used 
+//   to censor non-weather echoes.
+//
+//======================================================================
+ 
+///////////// non_weather_pid_types ///////////////////
+//
+// List of non-weather types to be censored.
+//
+// This list applies to the fields for which censor_non_weather is set 
+//   to true. You can consider adding CLOUD to the list if, for example, 
+//   the CLOUD type finds Bragg echo instead of cloud.
+//
+//
+// Type: enum
+// Options:
+//     CLOUD
+//     DRIZZLE
+//     LIGHT_RAIN
+//     MODERATE_RAIN
+//     HEAVY_RAIN
+//     HAIL
+//     RAIN_HAIL_MIXTURE
+//     GRAUPEL_SMALL_HAIL
+//     GRAUPEL_RAIN
+//     DRY_SNOW
+//     WET_SNOW
+//     ICE_CRYSTALS
+//     IRREG_ICE_CRYSTALS
+//     SUPERCOOLED_DROPS
+//     FLYING_INSECTS
+//     SECOND_TRIP
+//     GROUND_CLUTTER
+//     SATURATED_SNR
+//     CHAFF
+//     MISC
+// 1D array - variable length.
+//
+
+non_weather_pid_types = {
+ FLYING_INSECTS,
+ SECOND_TRIP,
+ GROUND_CLUTTER,
+ SATURATED_SNR,
+ CHAFF,
+ MISC
+};
+
+//======================================================================
+//
+// WRITE DEBUG FIELDS.
+//
+//======================================================================
+ 
+///////////// KDP_write_debug_fields //////////////////
+//
+// Write extra fields to assist with KDP debugging.
+//
+// These are the intermediate fields used in computing KDP and 
+//   attenuation.
+//
+//
+// Type: boolean
+//
+
+KDP_write_debug_fields = FALSE;
+
+///////////// PID_write_debug_fields //////////////////
+//
+// Write extra fields to assist with PID debugging.
+//
+// These are the intermediate fields used in computing PID.
+//
+//
+// Type: boolean
+//
+
+PID_write_debug_fields = FALSE;
+
+//======================================================================
+//
+// WRITING THE OUTPUT FILES.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/cfradial/rate/spol";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_UF
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+//======================================================================
+//
+// SET MAX RANGE - OPTIONAL.
+//
+// If set, all rays will be truncated at this range.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+//======================================================================
+//
+// SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS.
+//
+//======================================================================
+ 
+///////////// override_standard_pseudo_earth_radius ///
+//
+// Option to override the standard 4/3 earth radius model for 
+//   refraction.
+//
+// If true, the standard 4/3 earth radius will be overridden. The US NWS 
+//   NEXRAD system uses 1.21 instead of 1.333.
+//
+//
+// Type: boolean
+//
+
+override_standard_pseudo_earth_radius = FALSE;
+
+///////////// pseudo_earth_radius_ratio ///////////////
+//
+// Ratio for computing the pseudo earth radius for beam height 
+//   computations.
+//
+// For standard refraction this is 4/3. For super refraction it will be 
+//   less than 4.3, and for sub-refraction it will be greater. NEXRAD uses 
+//   1.21.
+//
+//
+// Type: double
+//
+
+pseudo_earth_radius_ratio = 1.33333;
+
+//======================================================================
+//
+// REALTIME OPERATIONS.
+//
+//======================================================================
+ 
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "spol";
+
+///////////// procmap_register_interval ///////////////
+//
+// Interval for registering with procmap (secs).
+//
+// REALTIME mode only. The app will register with procmap at this 
+//   interval, to update its status. If it does not register within twice 
+//   this interval, the auto_restart script will restart the app.
+//
+//
+// Type: int
+//
+
+procmap_register_interval = 60;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
