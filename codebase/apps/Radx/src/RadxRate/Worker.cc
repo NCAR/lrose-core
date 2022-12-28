@@ -559,16 +559,14 @@ void Worker::_censorNonWeather(RadxField &field)
 {
 
   const int *pid = _pid.getPid();
-  for (size_t ii = 0; ii < _nGates; ii++) {
-    int ptype = pid[ii];
-    if (ptype == NcarParticleId::FLYING_INSECTS ||
-        ptype == NcarParticleId::SECOND_TRIP ||
-        ptype == NcarParticleId::GROUND_CLUTTER ||
-        ptype < NcarParticleId::CLOUD ||
-        ptype > NcarParticleId::SATURATED_SNR) {
-      field.setGateToMissing(ii);
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    int ptype = pid[igate];
+    for (int it = 0; it < _params.non_weather_pid_types_n; it++) {
+      if (ptype == _params._non_weather_pid_types[it]) {
+        field.setGateToMissing(igate);
+      }
     }
-  } // ii
+  } // igate
 
 }
 
@@ -775,6 +773,22 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
 
   } // if (_params.copy_input_fields_to_output)
 
+  // censor non-weather in output fields
+
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+    const Params::output_field_t &ofld = _params._output_fields[ifield];
+    if (!ofld.do_write) {
+      continue;
+    }
+    if (ofld.censor_non_weather) {
+      string outName = ofld.name;
+      RadxField *fld = outputRay->getField(outName);
+      if (fld != NULL) {
+        _censorNonWeather(*fld);
+      }
+    }
+  } // ifield
+  
   // add debug fields if required
 
   if (_params.PID_write_debug_fields) {
