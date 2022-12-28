@@ -98,6 +98,29 @@ public:
   } output_encoding_t;
 
   typedef enum {
+    CLOUD = 1,
+    DRIZZLE = 2,
+    LIGHT_RAIN = 3,
+    MODERATE_RAIN = 4,
+    HEAVY_RAIN = 5,
+    HAIL = 6,
+    RAIN_HAIL_MIXTURE = 7,
+    GRAUPEL_SMALL_HAIL = 8,
+    GRAUPEL_RAIN = 9,
+    DRY_SNOW = 10,
+    WET_SNOW = 11,
+    ICE_CRYSTALS = 12,
+    IRREG_ICE_CRYSTALS = 13,
+    SUPERCOOLED_DROPS = 14,
+    FLYING_INSECTS = 15,
+    SECOND_TRIP = 16,
+    GROUND_CLUTTER = 17,
+    SATURATED_SNR = 18,
+    CHAFF = 19,
+    MISC = 20
+  } pid_types_t;
+
+  typedef enum {
     START_AND_END_TIMES = 0,
     START_TIME_ONLY = 1,
     END_TIME_ONLY = 2
@@ -118,6 +141,7 @@ public:
     char* standard_name;
     char* units;
     tdrp_bool_t do_write;
+    tdrp_bool_t censor_non_weather;
   } output_field_t;
 
   typedef struct {
@@ -476,6 +500,9 @@ public:
   copy_field_t *_copy_fields;
   int copy_fields_n;
 
+  pid_types_t *_non_weather_pid_types;
+  int non_weather_pid_types_n;
+
   tdrp_bool_t KDP_write_debug_fields;
 
   tdrp_bool_t PID_write_debug_fields;
@@ -511,7 +538,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[56];
+  mutable TDRPtable _table[58];
 
   const char *_className;
 

@@ -480,9 +480,9 @@ void Worker::_computeSnrFromDbz()
 }
 
 //////////////////////////////////////////////////////////////
-// Censor gates with non-precip particle types
+// Censor gates with non-weather particle types
 
-void Worker::_censorNonPrecip(RadxField &field)
+void Worker::_censorNonWeather(RadxField &field)
 
 {
 
@@ -601,12 +601,31 @@ void Worker::_loadOutputFields(RadxRay *inputRay,
       if (inField != NULL) {
         RadxField *outField = new RadxField(*inField);
         outField->setName(cfield.output_name);
+        if (cfield.censor_non_weather) {
+          _censorNonWeather(*outField);
+        }
         outputRay->addField(outField);
       }
     } // ii
 
   } // if (_params.copy_input_fields_to_output)
 
+  // censor non-weather in output fields
+
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+    const Params::output_field_t &ofld = _params._output_fields[ifield];
+    if (!ofld.do_write) {
+      continue;
+    }
+    if (ofld.censor_non_weather) {
+      string outName = ofld.name;
+      RadxField *fld = outputRay->getField(outName);
+      if (fld != NULL) {
+        _censorNonWeather(*fld);
+      }
+    }
+  } // ifield
+  
   // add debug fields if required
 
   if (_params.PID_write_debug_fields) {

@@ -209,6 +209,7 @@ typedef struct {
   string standard_name; 
   string units;
   boolean do_write;
+  boolean censor_non_weather;
 } output_field_t;
 
 paramdef struct output_field_t {
@@ -219,7 +220,8 @@ paramdef struct output_field_t {
       long_name = "particle_id",
       standard_name = "hydrometeor_type",
       units = "",
-      do_write = TRUE
+      do_write = TRUE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -228,7 +230,8 @@ paramdef struct output_field_t {
       long_name = "final_interest_value_for_pid_decision",
       standard_name = "final_interest_value_for_pid_decision",
       units = "",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -237,7 +240,8 @@ paramdef struct output_field_t {
       long_name = "temperature_for_computing_pid",
       standard_name = "temperature",
       units = "C",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -246,7 +250,8 @@ paramdef struct output_field_t {
       long_name = "specific_differential_phase",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      do_write = TRUE
+      do_write = TRUE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -255,7 +260,8 @@ paramdef struct output_field_t {
       long_name = "kdp_conditioned_using_ZZDR_self_consistency",
       standard_name = "specific_differential_phase_hv",
       units = "deg/km",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -264,7 +270,8 @@ paramdef struct output_field_t {
       long_name = "correction_to_zdr_for_attenuation",
       standard_name = "zdr_attenuation_correction",
       units = "dB",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -273,7 +280,8 @@ paramdef struct output_field_t {
       long_name = "dbz_corrected_for_attenuation",
       standard_name = "dbz_corrected_for_attenuation",
       units = "dBZ",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
     ,
     {
@@ -282,7 +290,8 @@ paramdef struct output_field_t {
       long_name = "zdr_corrected_for_attenuation",
       standard_name = "zdr_corrected_for_attenuation",
       units = "dB",
-      do_write = FALSE
+      do_write = FALSE,
+      censor_non_weather = FALSE
     }
   };
   p_descr = "Indicate which fields should be written to the output file.";
@@ -297,7 +306,9 @@ paramdef struct output_field_t {
     "\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n"
     "\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n"
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
-    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n";
+    "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n"
+    "do_write: allows you to turn off writing while leaving the field in the list\n\n"
+    "censor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n";
 } output_fields[];
 
 typedef enum {
@@ -342,8 +353,51 @@ paramdef struct copy_field_t {
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
+  p_help =
+    "You can change the name of the field on output.\n\n"
+    "censor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n";
 } copy_fields[];
+
+commentdef {
+  p_header = "SPECIFY NON-WEATHER TYPES FROM PID";
+  p_text = "This section allows you to specify the PID particle types to be used to censor non-weather echoes.";
+}
+
+typedef enum {
+  CLOUD = 1,
+  DRIZZLE = 2,
+  LIGHT_RAIN = 3,
+  MODERATE_RAIN = 4,
+  HEAVY_RAIN = 5,
+  HAIL = 6,
+  RAIN_HAIL_MIXTURE = 7,
+  GRAUPEL_SMALL_HAIL = 8,
+  GRAUPEL_RAIN = 9,
+  DRY_SNOW = 10,
+  WET_SNOW = 11,
+  ICE_CRYSTALS = 12,
+  IRREG_ICE_CRYSTALS = 13,
+  SUPERCOOLED_DROPS = 14,
+  FLYING_INSECTS = 15,
+  SECOND_TRIP = 16,
+  GROUND_CLUTTER = 17,
+  SATURATED_SNR = 18,
+  CHAFF = 19,
+  MISC = 20
+} pid_types_t;
+
+paramdef enum pid_types_t {
+  p_default = {
+    FLYING_INSECTS,
+    SECOND_TRIP,
+    GROUND_CLUTTER,
+    SATURATED_SNR,
+    CHAFF,
+    MISC
+  };
+  p_descr = "List of non-weather types to be censored.";
+  p_help = "This list applies to the fields for which censor_non_weather is set to true. You can consider adding CLOUD to the list if, for example, the CLOUD type finds Bragg echo instead of cloud.";
+} non_weather_pid_types[];
 
 commentdef {
   p_header = "WRITE DEBUG FIELDS";

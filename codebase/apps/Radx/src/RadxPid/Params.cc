@@ -933,7 +933,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("output_fields");
     tt->descr = tdrpStrDup("Indicate which fields should be written to the output file.");
-    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n");
+    tt->help = tdrpStrDup("Choose the ID from the list.\n\nThe name and units can be set however the user prefers.\n\nThe output_encoding apply to CfRadial output only. \n\n\tPID: NCAR Particle ID\n\tPID_INTEREST: final interest map for NCAR Particle ID values\n\tTEMP_FOR_PID: temperature field for PID (C)\n\tKDP: KDP from filtering PHIDP and computing slope (deg/km)\n\tKDP_SC: KDP conditioned using ZZDR self-consistency (deg/km)\n\tDBZ_ATTEN_CORRECTION: DBZ attenuation correction (dB)\n\tZDR_ATTEN_CORRECTION: ZDR attenuation correction (dB)\n\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\ndo_write: allows you to turn off writing while leaving the field in the list\n\ncensor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n");
     tt->array_offset = (char *) &_output_fields - &_start_;
     tt->array_n_offset = (char *) &output_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -941,7 +941,7 @@
     tt->array_elem_size = sizeof(output_field_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 7;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("output_field_id_t");
@@ -996,7 +996,12 @@
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_output_fields->do_write - (char *) _output_fields;
-    tt->n_struct_vals = 48;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[6].fname = tdrpStrDup("censor_non_weather");
+      tt->struct_def.fields[6].ptype = BOOL_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_output_fields->censor_non_weather - (char *) _output_fields;
+    tt->n_struct_vals = 56;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = PID;
@@ -1005,48 +1010,56 @@
       tt->struct_vals[3].s = tdrpStrDup("hydrometeor_type");
       tt->struct_vals[4].s = tdrpStrDup("");
       tt->struct_vals[5].b = pTRUE;
-      tt->struct_vals[6].e = PID_INTEREST;
-      tt->struct_vals[7].s = tdrpStrDup("PID_INTEREST");
-      tt->struct_vals[8].s = tdrpStrDup("final_interest_value_for_pid_decision");
+      tt->struct_vals[6].b = pFALSE;
+      tt->struct_vals[7].e = PID_INTEREST;
+      tt->struct_vals[8].s = tdrpStrDup("PID_INTEREST");
       tt->struct_vals[9].s = tdrpStrDup("final_interest_value_for_pid_decision");
-      tt->struct_vals[10].s = tdrpStrDup("");
-      tt->struct_vals[11].b = pFALSE;
-      tt->struct_vals[12].e = TEMP_FOR_PID;
-      tt->struct_vals[13].s = tdrpStrDup("TEMP_FOR_PID");
-      tt->struct_vals[14].s = tdrpStrDup("temperature_for_computing_pid");
-      tt->struct_vals[15].s = tdrpStrDup("temperature");
-      tt->struct_vals[16].s = tdrpStrDup("C");
-      tt->struct_vals[17].b = pFALSE;
-      tt->struct_vals[18].e = KDP;
-      tt->struct_vals[19].s = tdrpStrDup("KDP");
-      tt->struct_vals[20].s = tdrpStrDup("specific_differential_phase");
-      tt->struct_vals[21].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[22].s = tdrpStrDup("deg/km");
-      tt->struct_vals[23].b = pTRUE;
-      tt->struct_vals[24].e = KDP_SC;
-      tt->struct_vals[25].s = tdrpStrDup("KDP_SC");
-      tt->struct_vals[26].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
-      tt->struct_vals[27].s = tdrpStrDup("specific_differential_phase_hv");
-      tt->struct_vals[28].s = tdrpStrDup("deg/km");
-      tt->struct_vals[29].b = pFALSE;
-      tt->struct_vals[30].e = ZDR_ATTEN_CORRECTION;
-      tt->struct_vals[31].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-      tt->struct_vals[32].s = tdrpStrDup("correction_to_zdr_for_attenuation");
-      tt->struct_vals[33].s = tdrpStrDup("zdr_attenuation_correction");
-      tt->struct_vals[34].s = tdrpStrDup("dB");
-      tt->struct_vals[35].b = pFALSE;
-      tt->struct_vals[36].e = DBZ_ATTEN_CORRECTED;
-      tt->struct_vals[37].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-      tt->struct_vals[38].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[39].s = tdrpStrDup("dbz_corrected_for_attenuation");
-      tt->struct_vals[40].s = tdrpStrDup("dBZ");
+      tt->struct_vals[10].s = tdrpStrDup("final_interest_value_for_pid_decision");
+      tt->struct_vals[11].s = tdrpStrDup("");
+      tt->struct_vals[12].b = pFALSE;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].e = TEMP_FOR_PID;
+      tt->struct_vals[15].s = tdrpStrDup("TEMP_FOR_PID");
+      tt->struct_vals[16].s = tdrpStrDup("temperature_for_computing_pid");
+      tt->struct_vals[17].s = tdrpStrDup("temperature");
+      tt->struct_vals[18].s = tdrpStrDup("C");
+      tt->struct_vals[19].b = pFALSE;
+      tt->struct_vals[20].b = pFALSE;
+      tt->struct_vals[21].e = KDP;
+      tt->struct_vals[22].s = tdrpStrDup("KDP");
+      tt->struct_vals[23].s = tdrpStrDup("specific_differential_phase");
+      tt->struct_vals[24].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[25].s = tdrpStrDup("deg/km");
+      tt->struct_vals[26].b = pTRUE;
+      tt->struct_vals[27].b = pFALSE;
+      tt->struct_vals[28].e = KDP_SC;
+      tt->struct_vals[29].s = tdrpStrDup("KDP_SC");
+      tt->struct_vals[30].s = tdrpStrDup("kdp_conditioned_using_ZZDR_self_consistency");
+      tt->struct_vals[31].s = tdrpStrDup("specific_differential_phase_hv");
+      tt->struct_vals[32].s = tdrpStrDup("deg/km");
+      tt->struct_vals[33].b = pFALSE;
+      tt->struct_vals[34].b = pFALSE;
+      tt->struct_vals[35].e = ZDR_ATTEN_CORRECTION;
+      tt->struct_vals[36].s = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+      tt->struct_vals[37].s = tdrpStrDup("correction_to_zdr_for_attenuation");
+      tt->struct_vals[38].s = tdrpStrDup("zdr_attenuation_correction");
+      tt->struct_vals[39].s = tdrpStrDup("dB");
+      tt->struct_vals[40].b = pFALSE;
       tt->struct_vals[41].b = pFALSE;
-      tt->struct_vals[42].e = ZDR_ATTEN_CORRECTED;
-      tt->struct_vals[43].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-      tt->struct_vals[44].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[45].s = tdrpStrDup("zdr_corrected_for_attenuation");
-      tt->struct_vals[46].s = tdrpStrDup("dB");
+      tt->struct_vals[42].e = DBZ_ATTEN_CORRECTED;
+      tt->struct_vals[43].s = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+      tt->struct_vals[44].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[45].s = tdrpStrDup("dbz_corrected_for_attenuation");
+      tt->struct_vals[46].s = tdrpStrDup("dBZ");
       tt->struct_vals[47].b = pFALSE;
+      tt->struct_vals[48].b = pFALSE;
+      tt->struct_vals[49].e = ZDR_ATTEN_CORRECTED;
+      tt->struct_vals[50].s = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+      tt->struct_vals[51].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[52].s = tdrpStrDup("zdr_corrected_for_attenuation");
+      tt->struct_vals[53].s = tdrpStrDup("dB");
+      tt->struct_vals[54].b = pFALSE;
+      tt->struct_vals[55].b = pFALSE;
     tt++;
     
     // Parameter 'output_encoding'
@@ -1097,7 +1110,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("copy_fields");
     tt->descr = tdrpStrDup("These fields are copied through unchanged to the output file.");
-    tt->help = tdrpStrDup("You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.");
+    tt->help = tdrpStrDup("You can change the name of the field on output.\n\ncensor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n");
     tt->array_offset = (char *) &_copy_fields - &_start_;
     tt->array_n_offset = (char *) &copy_fields_n - &_start_;
     tt->is_array = TRUE;
@@ -1139,6 +1152,83 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
+    tt->comment_hdr = tdrpStrDup("SPECIFY NON-WEATHER TYPES FROM PID");
+    tt->comment_text = tdrpStrDup("This section allows you to specify the PID particle types to be used to censor non-weather echoes.");
+    tt++;
+    
+    // Parameter 'non_weather_pid_types'
+    // ctype is '_pid_types_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("non_weather_pid_types");
+    tt->descr = tdrpStrDup("List of non-weather types to be censored.");
+    tt->help = tdrpStrDup("This list applies to the fields for which censor_non_weather is set to true. You can consider adding CLOUD to the list if, for example, the CLOUD type finds Bragg echo instead of cloud.");
+    tt->array_offset = (char *) &_non_weather_pid_types - &_start_;
+    tt->array_n_offset = (char *) &non_weather_pid_types_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(pid_types_t);
+    tt->array_n = 6;
+    tt->enum_def.name = tdrpStrDup("pid_types_t");
+    tt->enum_def.nfields = 20;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLOUD");
+      tt->enum_def.fields[0].val = CLOUD;
+      tt->enum_def.fields[1].name = tdrpStrDup("DRIZZLE");
+      tt->enum_def.fields[1].val = DRIZZLE;
+      tt->enum_def.fields[2].name = tdrpStrDup("LIGHT_RAIN");
+      tt->enum_def.fields[2].val = LIGHT_RAIN;
+      tt->enum_def.fields[3].name = tdrpStrDup("MODERATE_RAIN");
+      tt->enum_def.fields[3].val = MODERATE_RAIN;
+      tt->enum_def.fields[4].name = tdrpStrDup("HEAVY_RAIN");
+      tt->enum_def.fields[4].val = HEAVY_RAIN;
+      tt->enum_def.fields[5].name = tdrpStrDup("HAIL");
+      tt->enum_def.fields[5].val = HAIL;
+      tt->enum_def.fields[6].name = tdrpStrDup("RAIN_HAIL_MIXTURE");
+      tt->enum_def.fields[6].val = RAIN_HAIL_MIXTURE;
+      tt->enum_def.fields[7].name = tdrpStrDup("GRAUPEL_SMALL_HAIL");
+      tt->enum_def.fields[7].val = GRAUPEL_SMALL_HAIL;
+      tt->enum_def.fields[8].name = tdrpStrDup("GRAUPEL_RAIN");
+      tt->enum_def.fields[8].val = GRAUPEL_RAIN;
+      tt->enum_def.fields[9].name = tdrpStrDup("DRY_SNOW");
+      tt->enum_def.fields[9].val = DRY_SNOW;
+      tt->enum_def.fields[10].name = tdrpStrDup("WET_SNOW");
+      tt->enum_def.fields[10].val = WET_SNOW;
+      tt->enum_def.fields[11].name = tdrpStrDup("ICE_CRYSTALS");
+      tt->enum_def.fields[11].val = ICE_CRYSTALS;
+      tt->enum_def.fields[12].name = tdrpStrDup("IRREG_ICE_CRYSTALS");
+      tt->enum_def.fields[12].val = IRREG_ICE_CRYSTALS;
+      tt->enum_def.fields[13].name = tdrpStrDup("SUPERCOOLED_DROPS");
+      tt->enum_def.fields[13].val = SUPERCOOLED_DROPS;
+      tt->enum_def.fields[14].name = tdrpStrDup("FLYING_INSECTS");
+      tt->enum_def.fields[14].val = FLYING_INSECTS;
+      tt->enum_def.fields[15].name = tdrpStrDup("SECOND_TRIP");
+      tt->enum_def.fields[15].val = SECOND_TRIP;
+      tt->enum_def.fields[16].name = tdrpStrDup("GROUND_CLUTTER");
+      tt->enum_def.fields[16].val = GROUND_CLUTTER;
+      tt->enum_def.fields[17].name = tdrpStrDup("SATURATED_SNR");
+      tt->enum_def.fields[17].val = SATURATED_SNR;
+      tt->enum_def.fields[18].name = tdrpStrDup("CHAFF");
+      tt->enum_def.fields[18].val = CHAFF;
+      tt->enum_def.fields[19].name = tdrpStrDup("MISC");
+      tt->enum_def.fields[19].val = MISC;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].e = FLYING_INSECTS;
+      tt->array_vals[1].e = SECOND_TRIP;
+      tt->array_vals[2].e = GROUND_CLUTTER;
+      tt->array_vals[3].e = SATURATED_SNR;
+      tt->array_vals[4].e = CHAFF;
+      tt->array_vals[5].e = MISC;
+    tt++;
+    
+    // Parameter 'Comment 10'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("WRITE DEBUG FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1167,11 +1257,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("WRITING THE OUTPUT FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1256,11 +1346,11 @@
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("SET MAX RANGE - OPTIONAL");
     tt->comment_text = tdrpStrDup("If set, all rays will be truncated at this range.");
     tt++;
@@ -1289,11 +1379,11 @@
     tt->single_val.d = 9999;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("SETTING PSEUDO EARTH RADIUS RATIO FOR HEIGHT COMPUTATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1322,11 +1412,11 @@
     tt->single_val.d = 1.33333;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("REALTIME OPERATIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;

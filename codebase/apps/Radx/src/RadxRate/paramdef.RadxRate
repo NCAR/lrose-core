@@ -420,14 +420,7 @@ paramdef struct output_field_t {
     "\tDBZ_ATTEN_CORRECTED: DBZ corrected for attenuation (dBZ)\n"
     "\tZDR_ATTEN_CORRECTED: ZDR corrected for attenuation (dB)\n\n"
     "do_write: allows you to turn off writing while leaving the field in the list\n\n"
-    "censor_non_weather: use PID field to censor non-weather PID types\n"
-    "non_weather types are:\n"
-    "\tFLYING_INSECTS\n"
-    "\tSECOND_TRIP\n"
-    "\tGROUND_CLUTTER\n"
-    "\tFLYING_INSECTS\n"
-    "\tCLOUD\n"
-    "\tSATURATED_SNR\n";
+    "censor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n";
 } output_fields[];
 
 typedef enum {
@@ -472,7 +465,9 @@ paramdef struct copy_field_t {
     }
   };
   p_descr = "These fields are copied through unchanged to the output file.";
-  p_help = "You can change the name of the field on output. Optionally you can censor the non-weather echoes, based on the PID.";
+  p_help =
+    "You can change the name of the field on output.\n\n"
+    "censor_non_weather: use PID field to censor non-weather PID types - see non_weather_pid_types[] below.\n";
 } copy_fields[];
 
 commentdef {
