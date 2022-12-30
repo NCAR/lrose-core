@@ -196,3 +196,10 @@ If the build succeeds, test out some of the executables. Try the commands:
   ~/lrose/bin/HawkEye
 ```
 
+## 5. cmake and anaconda
+
+* If anaconda is installed, cmake can get confused by the libraries under anaconda.
+* In CMakeLists.txt, we have added CMAKE_IGNORE_PREFIX_PATH to ignore $HOME/anaconda2 and $HOME/anaconda3.
+* So if you install anaconda in the standard locations, that should be OK.
+* If you install anaconda in non-standard locations, you will need to modify codebase/CMakeLists.txt to add your anaconda location to CMAKE_IGNORE_PREFIX_PATH.
+
