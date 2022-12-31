@@ -617,30 +617,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'input_dir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("input_dir");
-    tt->descr = tdrpStrDup("Input directory for searching for files.");
-    tt->help = tdrpStrDup("Files will be searched for in this directory.");
-    tt->val_offset = (char *) &input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
-    tt++;
-    
-    // Parameter 'file_name_substr'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("file_name_substr");
-    tt->descr = tdrpStrDup("Substring that needs to exist in the file name.");
-    tt->help = tdrpStrDup("Set to empty to avoid this check.");
-    tt->val_offset = (char *) &file_name_substr - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
     // Parameter 'mode'
     // ctype is '_mode_t'
     
@@ -673,6 +649,66 @@
     tt->help = tdrpStrDup("Only data less old than this will be used.");
     tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
     tt->single_val.i = 300;
+    tt++;
+    
+    // Parameter 'input_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Input directory for searching for files.");
+    tt->help = tdrpStrDup("Files will be searched for in this directory.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup(".");
+    tt++;
+    
+    // Parameter 'input_file_search_ext'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_file_search_ext");
+    tt->descr = tdrpStrDup("File name extension.");
+    tt->help = tdrpStrDup("If set, only files with this extension will be processed.");
+    tt->val_offset = (char *) &input_file_search_ext - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'input_file_search_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_file_search_substr");
+    tt->descr = tdrpStrDup("File name sub-string.");
+    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->val_offset = (char *) &input_file_search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Set the start time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 00 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("Set the end time for ARCHIVE mode analysis.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2015 06 26 12 00 00");
     tt++;
     
     // Parameter 'Comment 3'

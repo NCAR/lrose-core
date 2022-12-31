@@ -48,8 +48,8 @@ using namespace std;
 Args::Args ()
 {
   TDRP_init_override(&override);
-  startTime = 0;
-  endTime = 0;
+  startTimeSet = false;
+  endTimeSet = false;
 }
 
 // Destructor
@@ -113,13 +113,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
-	startTime = RadxTime::parseDateTime(argv[++i]);
-	if (startTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        startTimeSet = true;
       } else {
 	OK = false;
       }
@@ -127,13 +125,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
     } else if (!strcmp(argv[i], "-end")) {
       
       if (i < argc - 1) {
-	endTime = RadxTime::parseDateTime(argv[++i]);
-	if (endTime == RadxTime::NEVER) {
-	  OK = false;
-	} else {
-	  sprintf(tmp_str, "mode = ARCHIVE;");
-	  TDRP_add_override(&override, tmp_str);
-	}
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        endTimeSet = true;
       } else {
 	OK = false;
       }

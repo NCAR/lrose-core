@@ -171,26 +171,16 @@ int RadxClutter::_runFilelist()
   // check for substr
 
   vector<string> inputPaths = _args.inputFileList; 
-  vector<string> goodPaths;
-  string subStr = _params.file_name_substr;
-  if (subStr.size() == 0) {
-    goodPaths = inputPaths;
-  } else {
-    for (size_t ii = 0; ii < inputPaths.size(); ii++) {
-      if (inputPaths[ii].find(subStr) != string::npos) {
-        goodPaths.push_back(inputPaths[ii]);
-      }
-    }
-  }
-  
-  // loop through the good file list
+  vector<string> validPaths = _getValidPaths(inputPaths);
 
+  // loop through the valid file list
+  
   int iret = 0;
-  for (size_t ii = 0; ii < goodPaths.size(); ii++) {
-    if (ii == goodPaths.size() - 1) {
+  for (size_t ii = 0; ii < validPaths.size(); ii++) {
+    if (ii == validPaths.size() - 1) {
       _finalFile = true;
     }
-    if (_processFile(goodPaths[ii])) {
+    if (_processFile(validPaths[ii])) {
       iret = -1;
     }
   }
@@ -205,16 +195,49 @@ int RadxClutter::_runFilelist()
 int RadxClutter::_runArchive()
 {
 
+  // get start and end times
+
+  time_t startTime = RadxTime::parseDateTime(_params.start_time);
+  if (startTime == RadxTime::NEVER) {
+    cerr << "ERROR - RadxClutter::_runArchive()" << endl;
+    cerr << "  Start time format incorrect: " << _params.start_time << endl;
+    if (_args.startTimeSet) {
+      cerr << "  Check command line" << endl;
+    } else {
+      cerr << "  Check params file: " << _paramsPath << endl;
+    }
+    return -1;
+  }
+
+  time_t endTime = RadxTime::parseDateTime(_params.end_time);
+  if (endTime == RadxTime::NEVER) {
+    cerr << "ERROR - RadxClutter::_runArchive()" << endl;
+    cerr << "  End time format incorrect: " << _params.end_time << endl;
+    if (_args.endTimeSet) {
+      cerr << "  Check command line" << endl;
+    } else {
+      cerr << "  Check params file: " << _paramsPath << endl;
+    }
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "RadxClutter::_runArchive" << endl;
+    cerr << "  Input dir: " << _params.input_dir << endl;
+    cerr << "  Start time: " << RadxTime::strm(startTime) << endl;
+    cerr << "  End time: " << RadxTime::strm(endTime) << endl;
+  }
+
   // get the files to be processed
 
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
+  tlist.setModeInterval(startTime, endTime);
   if (tlist.compile()) {
     LOG(ERROR) << "ERROR - RadxClutter::_runFilelist()";
     LOG(ERROR) << "  Cannot compile time list, dir: " << _params.input_dir;
-    LOG(ERROR) << "  Start time: " << RadxTime::strm(_args.startTime);
-    LOG(ERROR) << "  End time: " << RadxTime::strm(_args.endTime);
+    LOG(ERROR) << "  Start time: " << RadxTime::strm(startTime);
+    LOG(ERROR) << "  End time: " << RadxTime::strm(endTime);
     LOG(ERROR) << tlist.getErrStr();
     return -1;
   }
@@ -226,28 +249,18 @@ int RadxClutter::_runArchive()
     return -1;
   }
   
-  // check for substr
+  // get list of valid paths
 
-  vector<string> goodPaths;
-  string subStr = _params.file_name_substr;
-  if (subStr.size() == 0) {
-    goodPaths = inputPaths;
-  } else {
-    for (size_t ii = 0; ii < inputPaths.size(); ii++) {
-      if (inputPaths[ii].find(subStr) != string::npos) {
-        goodPaths.push_back(inputPaths[ii]);
-      }
-    }
-  }
+  vector<string> validPaths = _getValidPaths(inputPaths);
   
-  // loop through the good file list
+  // loop through the valid file list
 
   int iret = 0;
-  for (size_t ii = 0; ii < goodPaths.size(); ii++) {
-    if (ii == goodPaths.size() - 1) {
+  for (size_t ii = 0; ii < validPaths.size(); ii++) {
+    if (ii == validPaths.size() - 1) {
       _finalFile = true;
     }
-    if (_processFile(goodPaths[ii])) {
+    if (_processFile(validPaths[ii])) {
       iret = -1;
     }
   }
@@ -1314,5 +1327,51 @@ int RadxClutter::_writeFiltVol()
   }
 
   return 0;
+
+}
+
+
+//////////////////////////////////////
+// get vector of valid input paths
+
+vector<string> RadxClutter::_getValidPaths(const vector<string> &inputPaths)
+
+{
+
+  string subStr = _params.input_file_search_substr;
+  string fileExt = _params.input_file_search_ext;
+  
+  if (subStr.size() == 0 && fileExt.size() == 0) {
+    return inputPaths;
+  }
+
+  vector<string> validPaths;
+
+  for (size_t ii = 0; ii < inputPaths.size(); ii++) {
+
+    RadxPath rpath(inputPaths[ii]);
+    string fext = rpath.getExt();
+    string fname = rpath.getFile();
+    bool isValid = true;
+    
+    if (subStr.size() > 0) {
+      if (fname.find(subStr) == string::npos) {
+        isValid = false;
+      }
+    }
+
+    if (fileExt.size() > 0) {
+      if (fileExt != fext) {
+        isValid = false;
+      }
+    }
+
+    if (isValid) {
+      validPaths.push_back(inputPaths[ii]);
+    }
+
+  } // ii
+  
+  return validPaths;
 
 }

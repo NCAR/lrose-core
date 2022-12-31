@@ -388,13 +388,19 @@ public:
 
   char* instance;
 
-  char* input_dir;
-
-  char* file_name_substr;
-
   mode_t mode;
 
   int max_realtime_data_age_secs;
+
+  char* input_dir;
+
+  char* input_file_search_ext;
+
+  char* input_file_search_substr;
+
+  char* start_time;
+
+  char* end_time;
 
   action_t action;
 
@@ -469,7 +475,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[47];
+  mutable TDRPtable _table[50];
 
   const char *_className;
 

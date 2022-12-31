@@ -185,6 +185,8 @@ private:
   void _filterRay(RadxRay *ray, const RadxRay *clutRay);
   int _writeFiltVol();
 
+  vector<string> _getValidPaths(const vector<string> &inputPaths);
+
 };
 
 #endif

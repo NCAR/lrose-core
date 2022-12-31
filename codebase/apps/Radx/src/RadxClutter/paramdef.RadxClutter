@@ -58,19 +58,6 @@ commentdef {
   p_header = "DATA INPUT";
 }
 
-paramdef string {
-  p_default = ".";
-  p_descr = "Input directory for searching for files.";
-  p_help = "Files will be searched for in this directory.";
-} input_dir;
-
-paramdef string
-{
-  p_default = "";
-  p_descr = "Substring that needs to exist in the file name.";
-  p_help = "Set to empty to avoid this check.";
-} file_name_substr;
-
 typedef enum {
   REALTIME, ARCHIVE, FILELIST
 } mode_t;
@@ -89,6 +76,36 @@ paramdef int {
   p_descr = "Maximum age of realtime data (secs)";
   p_help =  "Only data less old than this will be used.";
 } max_realtime_data_age_secs;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory for searching for files.";
+  p_help = "Files will be searched for in this directory.";
+} input_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} input_file_search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} input_file_search_substr;
+
+paramdef string {
+  p_default = "2015 06 26 00 00 00";
+  p_descr = "Set the start time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} start_time;
+
+paramdef string {
+  p_default = "2015 06 26 12 00 00";
+  p_descr = "Set the end time for ARCHIVE mode analysis.";
+  p_help = "Format is 'yyyy mm dd hh mm ss'.";
+} end_time;
 
 commentdef {
   p_header = "ACTION - first or second pass.";

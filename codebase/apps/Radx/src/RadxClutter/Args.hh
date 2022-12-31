@@ -64,7 +64,7 @@ public:
   // public data
   
   tdrp_override_t override;
-  time_t startTime, endTime;
+  bool startTimeSet, endTimeSet;
   vector<string> inputFileList;
 
 protected:
