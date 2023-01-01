@@ -156,8 +156,8 @@ int TsDataMgr::run ()
   } else {
 
     _reader = new IwrfTsReaderFmq(_params.input_fmq_name, iwrfDebug,
-				   _params.seek_to_start_of_input);
-
+                                  _params.seek_to_start_of_input);
+    
   }
 
   int iret = 0;
@@ -484,6 +484,13 @@ void TsDataMgr::_computeMoments(const IwrfTsPulse *midPulse)
   platform.setLatitudeDeg(_latitudeDeg);
   platform.setLongitudeDeg(_longitudeDeg);
   platform.setAltitudeKm(_altitudeKm);
+
+  // set status xml if requested
+
+  if (_params.add_status_xml_to_spdb_output) {
+    const IwrfTsInfo &opsInfo = _reader->getOpsInfo();
+    _statusXml = opsInfo.getStatusXmlStr();
+  }
 
   // process this ray
   

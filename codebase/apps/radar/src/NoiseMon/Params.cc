@@ -1094,6 +1094,18 @@
     tt->single_val.s = tdrpStrDup("SPOL");
     tt++;
     
+    // Parameter 'add_status_xml_to_spdb_output'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("add_status_xml_to_spdb_output");
+    tt->descr = tdrpStrDup("Option to add the status XML to the output.");
+    tt->help = tdrpStrDup("If true, the status xml string will be appended to the output.");
+    tt->val_offset = (char *) &add_status_xml_to_spdb_output - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

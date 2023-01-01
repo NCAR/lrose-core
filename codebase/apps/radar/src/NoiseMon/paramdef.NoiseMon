@@ -273,3 +273,9 @@ paramdef string {
   p_help = "This is used to set the data_type in SPDB.";
 } radar_name;
 
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to add the status XML to the output.";
+  p_help = "If true, the status xml string will be appended to the output.";
+} add_status_xml_to_spdb_output;
+

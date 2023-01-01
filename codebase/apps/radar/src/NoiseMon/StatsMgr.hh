@@ -135,6 +135,10 @@ protected:
   double _meanDbmvx;
   double _meanNoiseZdr;
   double _meanHtKm;
+
+  // status xml
+
+  string _statusXml;
   
   double _computeStrongEchoDbzSum(RadxRay *ray);
     

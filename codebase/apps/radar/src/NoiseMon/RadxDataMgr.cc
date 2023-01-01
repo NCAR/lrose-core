@@ -172,6 +172,12 @@ int RadxDataMgr::_processFile(const string &filePath)
     return -1;
   }
 
+  // set status xml
+
+  if (_params.add_status_xml_to_spdb_output) {
+    _statusXml = _readVol.getStatusXml();
+  }
+
   // loop through the rays, processing them
 
   const vector<RadxRay *> &rays = _readVol.getRays();

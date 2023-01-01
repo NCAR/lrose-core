@@ -453,6 +453,8 @@ public:
 
   char* radar_name;
 
+  tdrp_bool_t add_status_xml_to_spdb_output;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -460,7 +462,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[43];
+  mutable TDRPtable _table[44];
 
   const char *_className;
 

@@ -496,6 +496,10 @@ int StatsMgr::writeStatsToSpdb()
   }
   
   xml += TaXml::writeEndTag("NoiseMonitoring", 0);
+
+  if (_statusXml.size() > 0) {
+    xml += _statusXml;
+  }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Writing XML stats to SPDB:" << endl;
