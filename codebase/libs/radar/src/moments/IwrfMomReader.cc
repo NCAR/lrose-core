@@ -46,6 +46,7 @@
 #include <radar/RadarCalib.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxGeoref.hh>
+#include <Radx/RadxMsg.hh>
 using namespace std;
 
 ////////////////////////////////////////////////////
@@ -104,8 +105,8 @@ void IwrfMomReader::seekToEnd()
 // Returns RadxRay pointer on success, NULL on failure.
 //
 // This method is used by the FMQ and TCP subclasses.
-// It calls the virtual _getNextMsg() method, which will use the
-// appropriate device.
+// It calls the virtual _getNextMsg() method, which will
+// use the appropriate device.
 //
 // Caller is responsible for freeing the ray.
 //
@@ -164,7 +165,7 @@ RadxRay *IwrfMomReader::readNextRay()
           continue;
         }
       } else {
-        if (_handleIwrfMessage()) {
+        if (_handleRadxMsg()) {
           continue;
         }
       }
@@ -658,14 +659,122 @@ void IwrfMomReader::_setRcalibIndex()
 }
 
 /////////////////////////////////////////////////////////////////////
-// handle input IWRF message
+// handle input Radx message
 //
 // returns 0 on success, -1 on failure
 
-int IwrfMomReader::_handleIwrfMessage()
+int IwrfMomReader::_handleRadxMsg()
 
 {
+
+  // disassemble message
+  
+  RadxMsg msg;
+  if (msg.disassemble(_msgBuf.getPtr(), _msgBuf.getLen())) {
+    return -1;
+  }
+
+  ///////////////// platform ///////////////////////////////
+  
+  if (msg.getMsgType() == RadxMsg::RadxPlatformMsg) {
+    if (_platform.deserialize(msg)) {
+      cerr << "ERROR - IwrfMomReader::_handleRadxMsg()" << endl;
+      cerr << "  Cannot deseralize platform from RadxMsg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+    if (_debug >= IWRF_DEBUG_EXTRA) {
+      cerr << "=========>> IwrfMomReader got RadxPlatform" << endl;
+    }
+    _latestFlags.platformUpdated = true;
+    return 0;
+  }
+
+  ///////////////// calibration ////////////////////////
+  
+  if (msg.getMsgType() == RadxMsg::RadxRcalibMsg) {
+
+    if (_debug >= IWRF_DEBUG_EXTRA) {
+      cerr << "=========>> got RADAR_CALIB" << endl;
+    }
+
+    RadxRcalib rcal;
+    if (rcal.deserialize(msg)) {
+      cerr << "ERROR - IwrfMomReader::_handleRadxMsg()" << endl;
+      cerr << "  Cannot deseralize calibration from RadxMsg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+
+    // remove cal with the same pulse width
+    // if one already exists
+    
+    double thisPulseWidth = rcal.getPulseWidthUsec();
+    for (vector<RadxRcalib>::iterator ii = _rcalibs.begin();
+         ii != _rcalibs.end(); ii++) {
+      double prevPulseWidth = ii->getPulseWidthUsec();
+      if (fabs(thisPulseWidth - prevPulseWidth) < 0.0001) {
+        // same pulse width, so remove existing one
+        _rcalibs.erase(ii);
+        break;
+      }
+    }
+
+    // store it
+    
+    _rcalibs.push_back(rcal);
+
+    if (_debug >= IWRF_DEBUG_EXTRA) {
+      cerr << "=========>> IwrfMomReader got RadxRcalib" << endl;
+    }
+    _latestFlags.rcalibUpdated = true;
+    return 0;
+
+  }
+  
+  ///////////////// event ////////////////////////
+  
+  if (msg.getMsgType() == RadxMsg::RadxEventMsg) {
+
+    RadxEvent event;
+    if (event.deserialize(msg)) {
+      cerr << "ERROR - IwrfMomReader::_handleRadxMsg()" << endl;
+      cerr << "  Cannot deseralize event from RadxMsg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+    
+    _latestEvents.push_back(event);
+
+    if (_debug >= IWRF_DEBUG_EXTRA) {
+      cerr << "=========>> IwrfMomReader got RadxEvent" << endl;
+    }
+    
+    
+    return 0;
+  }
+  
+  ///////////////// ray ////////////////////////
+  
+  if (msg.getMsgType() == RadxMsg::RadxRayMsg) {
+
+    if (_latestRay->deserialize(msg)) {
+      cerr << "ERROR - IwrfMomReader::_handleRadxMsg()" << endl;
+      cerr << "  Cannot deseralize ray from RadxMsg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+
+    _setEventFlags();
+    _setRcalibIndex();
+    _rayReady = true;
+    
+    return 0;
+    
+  }
+  
   return 0;
+
 }
 
 /////////////////////////////////////
@@ -909,8 +1018,6 @@ IwrfMomReaderFmq::IwrfMomReaderFmq(const char *input_fmq,
         _positionFmqAtStart(position_at_start)
         
 {
-  _nParts = 0;
-  _pos = 0;
   _fmqIsOpen = false;
 }
 

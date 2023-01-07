@@ -238,7 +238,7 @@ protected:
   void _setEventFlags();
   void _setRcalibIndex();
 
-  int _handleIwrfMessage();
+  int _handleRadxMsg();
 
   virtual int _getNextMsg();
 
@@ -363,12 +363,6 @@ private:
 
   // input message
 
-  DsMessage _msg;
-  int _nParts;
-  int _pos;
-
-  RadxRay _rayLocal; // _ray points to this
-  
   virtual int _getNextMsg();
 
 };
