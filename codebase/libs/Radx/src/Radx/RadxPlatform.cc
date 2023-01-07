@@ -422,7 +422,8 @@ void RadxPlatform::serialize(RadxMsg &msg)
       freq[ii] = _frequencyHz[ii];
     }
     ByteOrder::swap64(freq, _frequencyHz.size() * sizeof(Radx::si64));
-    msg.addPart(_frequencyPartId, freq, _frequencyHz.size() * sizeof(Radx::si64));
+    msg.addPart(_frequencyPartId, freq,
+                _frequencyHz.size() * sizeof(Radx::si64));
     
   }
 
@@ -534,7 +535,7 @@ void RadxPlatform::_loadMetaStringsToXml(string &xml, int level /* = 0 */)  cons
 // returns 0 on success, -1 on failure
 
 int RadxPlatform::_setMetaStringsFromXml(const char *xml,
-                                    size_t bufLen)
+                                         size_t bufLen)
 
 {
 
@@ -628,8 +629,8 @@ void RadxPlatform::_loadMetaNumbersToMsg()
 // set the meta number data from the message struct
 
 int RadxPlatform::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
-                                    size_t bufLen,
-                                    bool swap)
+                                         size_t bufLen,
+                                         bool swap)
   
 {
 

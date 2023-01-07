@@ -242,11 +242,53 @@ private:
 
   double _currentFixedAngle;  // deg
 
+  // struct for metadata numbers in messages
+  
+  typedef struct {
+    
+    Radx::si64 timeSecs;
+    Radx::fl64 nanoSecs;
+
+    Radx::fl64 spareFl64[6];
+
+    Radx::si32 startOfSweep;
+    Radx::si32 endOfSweep;
+
+    Radx::si32 startOfVolume;
+    Radx::si32 endOfVolume;
+
+    Radx::si32 sweepMode;
+    Radx::si32 followMode;
+
+    Radx::si32 volumeNum;
+    Radx::si32 sweepNum;
+
+    Radx::si32 spareSi32[8];
+    
+  } msgMetaNumbers_t;
+  
+  msgMetaNumbers_t _metaNumbers;
+    
   // methods
   
   void _init();
   RadxEvent & _copy(const RadxEvent &rhs);
   
+  /// load meta numbers to message struct
+  
+  void _loadMetaNumbersToMsg();
+  
+  /// set the meta number data from the message struct
+  /// returns 0 on success, -1 on failure
+  
+  int _setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
+                             size_t bufLen,
+                             bool swap);
+  
+  /// swap meta numbers
+  
+  static void _swapMetaNumbers(msgMetaNumbers_t &msgMetaNumbers);
+          
 };
 
 #endif

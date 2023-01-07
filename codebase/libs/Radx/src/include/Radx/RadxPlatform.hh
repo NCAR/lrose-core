@@ -420,7 +420,7 @@ private:
     Radx::si32 platformType;
     Radx::si32 primaryAxis;
 
-    Radx::si32 spareSi64[13];
+    Radx::si32 spareSi32[13];
     
   } msgMetaNumbers_t;
   
