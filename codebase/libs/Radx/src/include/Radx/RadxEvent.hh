@@ -41,6 +41,7 @@
 #include <string>
 #include <Radx/Radx.hh>
 class RadxRay;
+class RadxMsg;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////
@@ -218,6 +219,20 @@ public:
  
   //@}
 
+  /// \name Serialization:
+  //@{
+
+  // serialize into a RadxMsg
+  
+  void serialize(RadxMsg &msg);
+  
+  // deserialize from a RadxMsg
+  // return 0 on success, -1 on failure
+
+  int deserialize(const RadxMsg &msg);
+
+  //@}
+  
 protected:
 private:
 
@@ -242,6 +257,12 @@ private:
 
   double _currentFixedAngle;  // deg
 
+  /////////////////////////////////////////////////
+  // serialization
+  /////////////////////////////////////////////////
+  
+  static const int _metaNumbersPartId = 2;
+  
   // struct for metadata numbers in messages
   
   typedef struct {

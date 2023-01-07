@@ -39,6 +39,7 @@
 #include <Radx/RadxRemap.hh>
 #include <Radx/RadxRay.hh>
 #include <Radx/ByteOrder.hh>
+#include <Radx/RadxMsg.hh>
 #include <iostream>
 #include <cstring>
 #include <cstdio>
@@ -225,6 +226,73 @@ void RadxEvent::print(ostream &out) const
   out << "  currentFixedAngle: " << _currentFixedAngle << endl;
   out << "=========================================" << endl;
   
+}
+
+/////////////////////////////////////////////////////////
+// serialize into a RadxMsg
+
+void RadxEvent::serialize(RadxMsg &msg)
+  
+{
+
+  // init
+
+  msg.clearAll();
+  msg.setMsgType(RadxMsg::RadxEventMsg);
+
+  // add metadata numbers
+  
+  _loadMetaNumbersToMsg();
+  msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
+  
+}
+
+/////////////////////////////////////////////////////////
+// deserialize from a RadxMsg
+// return 0 on success, -1 on failure
+
+int RadxEvent::deserialize(const RadxMsg &msg)
+  
+{
+  
+  // initialize object
+
+  _init();
+
+  // check type
+  
+  if (msg.getMsgType() != RadxMsg::RadxEventMsg) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxEvent::deserialize" << endl;
+    cerr << "  incorrect message type" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  // get the metadata numbers
+  
+  const RadxMsg::Part *metaNumsPart = msg.getPartByType(_metaNumbersPartId);
+  if (metaNumsPart == NULL) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxEvent::deserialize" << endl;
+    cerr << "  No metadata numbers part in message" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+  if (_setMetaNumbersFromMsg((msgMetaNumbers_t *) metaNumsPart->getBuf(),
+                             metaNumsPart->getLength(),
+                             msg.getSwap())) {
+    cerr << "=======================================" << endl;
+    cerr << "ERROR - RadxEvent::deserialize" << endl;
+    msg.printHeader(cerr, "  ");
+    cerr << "=======================================" << endl;
+    return -1;
+  }
+
+  return 0;
+
 }
 
 /////////////////////////////////////////////////////////
