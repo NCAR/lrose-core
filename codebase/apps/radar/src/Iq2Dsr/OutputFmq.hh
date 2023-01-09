@@ -98,6 +98,7 @@ private:
   
   string _progName;
   const Params &_params;
+  bool _useRadx;
 
   // radar queue
 
@@ -121,6 +122,33 @@ private:
   // functions
 
   int _openFmq();
+
+  int _writeParamsDsRadar(const Beam &beam);
+  int _writeParamsRadx(const Beam &beam);
+  
+  int _writeCalibDsRadar(const Beam &beam);
+  int _writeCalibRadx(const Beam &beam);
+  
+  int _writeStatusXmlDsRadar(const Beam &beam);
+  int _writeStatusXmlRadx(const Beam &beam);
+  
+  int _writeBeamDsRadar(const Beam &beam);
+  int _writeBeamRadx(const Beam &beam);
+  
+  void _putEndOfVolumeDsRadar(int volNum, time_t time);
+  void _putEndOfVolumeRadx(int volNum, time_t time);
+
+  void _putStartOfVolumeDsRadar(int volNum, time_t time);
+  void _putStartOfVolumeRadx(int volNum, time_t time);
+
+  void _putEndOfTiltDsRadar(int tiltNum, time_t time);
+  void _putEndOfTiltRadx(int tiltNum, time_t time);
+
+  void _putStartOfTiltDsRadar(int tiltNum, time_t time);
+  void _putStartOfTiltRadx(int tiltNum, time_t time);
+
+  void _putNewScanTypeDsRadar(int scanType, time_t time);
+  void _putNewScanTypeRadx(int scanType, time_t time);
 
   // Add a field to the field params message.
 

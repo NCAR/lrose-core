@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Iq2Dsr reads raw time-series data, computes the moments and writes the contents into a DsRadar FMQ.";
+  p_header = "Iq2Dsr reads raw time-series data, computes the moments and writes the contents into a moments FMQ.";
 }
 
 commentdef {
@@ -1729,13 +1729,19 @@ paramdef double {
 } rhohv_improvement_factor_threshold;
 
 commentdef {
-  p_header = "OUTPUT TO DSRADAR FMQ";
+  p_header = "OUTPUT TO MOMENTS FMQ";
 };
 
 paramdef string {
   p_default = "fmqp:://localhost::fmq/lirp";
-  p_descr = "Output URL for DsRadar data via FMQ";
+  p_descr = "Output URL for moments data via FMQ";
 } output_fmq_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write output moments in Radx format.";
+  p_help = "If TRUE moments are written as Radx messages. If FALSE moments are written as DsRadar messages. ";
+} output_moments_in_radx_format;
 
 paramdef int {
   p_default = 50000000;

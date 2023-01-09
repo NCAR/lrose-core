@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Iq2Dsr reads raw time-series data, computes the moments and writes the contents into a DsRadar FMQ.");
+    tt->comment_hdr = tdrpStrDup("Iq2Dsr reads raw time-series data, computes the moments and writes the contents into a moments FMQ.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -4218,7 +4218,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("OUTPUT TO DSRADAR FMQ");
+    tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -4228,10 +4228,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_fmq_url");
-    tt->descr = tdrpStrDup("Output URL for DsRadar data via FMQ");
+    tt->descr = tdrpStrDup("Output URL for moments data via FMQ");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_fmq_url - &_start_;
     tt->single_val.s = tdrpStrDup("fmqp:://localhost::fmq/lirp");
+    tt++;
+    
+    // Parameter 'output_moments_in_radx_format'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("output_moments_in_radx_format");
+    tt->descr = tdrpStrDup("Write output moments in Radx format.");
+    tt->help = tdrpStrDup("If TRUE moments are written as Radx messages. If FALSE moments are written as DsRadar messages. ");
+    tt->val_offset = (char *) &output_moments_in_radx_format - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'output_fmq_size'

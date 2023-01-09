@@ -1178,6 +1178,8 @@ public:
 
   char* output_fmq_url;
 
+  tdrp_bool_t output_moments_in_radx_format;
+
   int output_fmq_size;
 
   int output_fmq_nslots;
@@ -1248,7 +1250,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[276];
+  mutable TDRPtable _table[277];
 
   const char *_className;
 
