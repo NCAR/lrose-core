@@ -100,11 +100,15 @@ private:
   const Params &_params;
   bool _useRadx;
 
-  // radar queue
+  // DsRadar moments queue
 
-  DsRadarQueue *_rQueue;
+  DsRadarQueue *_dsrQueue;
   DsRadarMsg _msg;
   int _nFields;
+
+  // Radx moments queue
+
+  DsFmq *_radxQueue;
 
   // mutex to prevent main thread and write thread from
   // accessing these functions concurrently
@@ -120,8 +124,6 @@ private:
   MomentsFields _flds;
 
   // functions
-
-  int _openFmq();
 
   int _writeParamsDsRadar(const Beam &beam);
   int _writeParamsRadx(const Beam &beam);
@@ -150,7 +152,11 @@ private:
   void _putNewScanTypeDsRadar(int scanType, time_t time);
   void _putNewScanTypeRadx(int scanType, time_t time);
 
-  // Add a field to the field params message.
+  int _openFmq();
+  int _openDsRadarQueue();
+  int _openRadxQueue();
+
+  // Add a field to the dsradar field params message.
 
   inline void _addField(const string &name,
                         const string &units,

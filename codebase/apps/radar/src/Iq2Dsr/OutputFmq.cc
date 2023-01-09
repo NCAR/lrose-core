@@ -60,7 +60,8 @@ OutputFmq::OutputFmq(const string &prog_name,
   constructorOK = TRUE;
   _nFields = 0;
   _nBeamsWritten = 0;
-  _rQueue = NULL;
+  _dsrQueue = NULL;
+  _radxQueue = NULL;
 
   if (_params.output_moments_in_radx_format) {
     _useRadx = true;
@@ -87,8 +88,8 @@ OutputFmq::~OutputFmq()
   
 {
 
-  if (_rQueue != NULL) {
-    delete _rQueue;
+  if (_dsrQueue != NULL) {
+    delete _dsrQueue;
   }
 
 }
@@ -383,7 +384,7 @@ int OutputFmq::_writeParamsDsRadar(const Beam &beam)
   
   // write the message
   
-  if (_rQueue->putDsMsg(msg,
+  if (_dsrQueue->putDsMsg(msg,
                        DsRadarMsg::RADAR_PARAMS | DsRadarMsg::FIELD_PARAMS)) {
     cerr << "ERROR - OutputFmq::_writeParamsDsRadar" << endl;
     cerr << "  Cannot put params to queue" << endl;
@@ -427,7 +428,7 @@ int OutputFmq::_writeCalibDsRadar(const Beam &beam)
 
   // write the message
   
-  if (_rQueue->putDsMsg(msg, DsRadarMsg::RADAR_CALIB)) {
+  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::RADAR_CALIB)) {
     cerr << "ERROR - OutputFmq::_writeCalibDsRadar" << endl;
     cerr << "  Cannot put calib to queue" << endl;
     // reopen the queue
@@ -472,7 +473,7 @@ int OutputFmq::_writeStatusXmlDsRadar(const Beam &beam)
   
   // write the message
   
-  if (_rQueue->putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
+  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
     cerr << "ERROR - OutputFmq::_writeCalibDsRadar" << endl;
     cerr << "  Cannot put status XML to queue" << endl;
     // reopen the queue
@@ -635,7 +636,7 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
   // write the message
   
   contents |= DsRadarMsg::RADAR_BEAM;
-  if (_rQueue->putDsMsg(_msg, contents)) {
+  if (_dsrQueue->putDsMsg(_msg, contents)) {
     cerr << "ERROR - OutputFmq::_writeBeamsDsRadar" << endl;
     cerr << "  Cannot put radar beam to queue" << endl;
     // reopen the queue
@@ -657,35 +658,35 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
 void OutputFmq::_putStartOfVolumeDsRadar(int volNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putStartOfVolume(volNum, time);
+  _dsrQueue->putStartOfVolume(volNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfVolumeDsRadar(int volNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putEndOfVolume(volNum, time);
+  _dsrQueue->putEndOfVolume(volNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putStartOfTiltDsRadar(int tiltNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putStartOfTilt(tiltNum, time);
+  _dsrQueue->putStartOfTilt(tiltNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfTiltDsRadar(int tiltNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putEndOfTilt(tiltNum, time);
+  _dsrQueue->putEndOfTilt(tiltNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putNewScanTypeDsRadar(int scanType, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putNewScanType(scanType, time);
+  _dsrQueue->putNewScanType(scanType, time);
   pthread_mutex_unlock(&_busy);
 }
 
@@ -847,7 +848,7 @@ int OutputFmq::_writeParamsRadx(const Beam &beam)
   
   // write the message
   
-  if (_rQueue->putDsMsg(msg,
+  if (_dsrQueue->putDsMsg(msg,
                        DsRadarMsg::RADAR_PARAMS | DsRadarMsg::FIELD_PARAMS)) {
     cerr << "ERROR - OutputFmq::_writeParamsRadx" << endl;
     cerr << "  Cannot put params to queue" << endl;
@@ -891,7 +892,7 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
 
   // write the message
   
-  if (_rQueue->putDsMsg(msg, DsRadarMsg::RADAR_CALIB)) {
+  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::RADAR_CALIB)) {
     cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
     cerr << "  Cannot put calib to queue" << endl;
     // reopen the queue
@@ -936,7 +937,7 @@ int OutputFmq::_writeStatusXmlRadx(const Beam &beam)
   
   // write the message
   
-  if (_rQueue->putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
+  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
     cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
     cerr << "  Cannot put status XML to queue" << endl;
     // reopen the queue
@@ -1099,7 +1100,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   // write the message
   
   contents |= DsRadarMsg::RADAR_BEAM;
-  if (_rQueue->putDsMsg(_msg, contents)) {
+  if (_dsrQueue->putDsMsg(_msg, contents)) {
     cerr << "ERROR - OutputFmq::_writeBeamsRadx" << endl;
     cerr << "  Cannot put radar beam to queue" << endl;
     // reopen the queue
@@ -1121,35 +1122,35 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 void OutputFmq::_putStartOfVolumeRadx(int volNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putStartOfVolume(volNum, time);
+  _dsrQueue->putStartOfVolume(volNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfVolumeRadx(int volNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putEndOfVolume(volNum, time);
+  _dsrQueue->putEndOfVolume(volNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putStartOfTiltRadx(int tiltNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putStartOfTilt(tiltNum, time);
+  _dsrQueue->putStartOfTilt(tiltNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfTiltRadx(int tiltNum, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putEndOfTilt(tiltNum, time);
+  _dsrQueue->putEndOfTilt(tiltNum, time);
   pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putNewScanTypeRadx(int scanType, time_t time)
 {
   pthread_mutex_lock(&_busy);
-  _rQueue->putNewScanType(scanType, time);
+  _dsrQueue->putNewScanType(scanType, time);
   pthread_mutex_unlock(&_busy);
 }
 
@@ -1159,16 +1160,28 @@ void OutputFmq::_putNewScanTypeRadx(int scanType, time_t time)
 int OutputFmq::_openFmq()
   
 {
+  int iret = 0;
+  if (_useRadx) {
+    iret = _openDsRadarQueue();
+  } else {
+    iret = _openRadxQueue();
+  }
+  return iret;
+}
 
-  if (_rQueue != NULL) {
-    delete _rQueue;
+int OutputFmq::_openDsRadarQueue()
+  
+{
+
+  if (_dsrQueue != NULL) {
+    delete _dsrQueue;
   }
 
-  _rQueue = new DsRadarQueue;
+  _dsrQueue = new DsRadarQueue;
 
   // initialize the output queue
   
-  if (_rQueue->init(_params.output_fmq_url,
+  if (_dsrQueue->init(_params.output_fmq_url,
 		    _progName.c_str(),
 		    _params.debug >= Params::DEBUG_VERBOSE,
 		    DsFmq::READ_WRITE, DsFmq::END,
@@ -1176,19 +1189,57 @@ int OutputFmq::_openFmq()
 		    _params.output_fmq_nslots,
 		    _params.output_fmq_size)) {
     cerr << "ERROR - " << _progName << "::OutputFmq" << endl;
-    cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
+    cerr << "  Cannot open dsradar fmq, URL: " << _params.output_fmq_url << endl;
     return -1;
   }
   if (_params.output_fmq_compress) {
-    _rQueue->setCompressionMethod(TA_COMPRESSION_ZLIB);
+    _dsrQueue->setCompressionMethod(TA_COMPRESSION_ZLIB);
   }
   if (_params.write_blocking) {
-    _rQueue->setBlockingWrite();
+    _dsrQueue->setBlockingWrite();
   }
   if (_params.data_mapper_report_interval > 0) {
-    _rQueue->setRegisterWithDmap(true, _params.data_mapper_report_interval);
+    _dsrQueue->setRegisterWithDmap(true, _params.data_mapper_report_interval);
   }
-  _rQueue->setSingleWriter();
+  _dsrQueue->setSingleWriter();
+
+  return 0;
+
+}
+
+int OutputFmq::_openRadxQueue()
+  
+{
+
+  if (_radxQueue != NULL) {
+    delete _radxQueue;
+  }
+
+  _radxQueue = new DsFmq;
+
+  // initialize the output queue
+  
+  if (_radxQueue->init(_params.output_fmq_url,
+                       _progName.c_str(),
+                       _params.debug >= Params::DEBUG_VERBOSE,
+                       DsFmq::READ_WRITE, DsFmq::END,
+                       _params.output_fmq_compress,
+                       _params.output_fmq_nslots,
+                       _params.output_fmq_size)) {
+    cerr << "ERROR - " << _progName << "::OutputFmq" << endl;
+    cerr << "  Cannot open radx fmq, URL: " << _params.output_fmq_url << endl;
+    return -1;
+  }
+  if (_params.output_fmq_compress) {
+    _radxQueue->setCompressionMethod(TA_COMPRESSION_ZLIB);
+  }
+  if (_params.write_blocking) {
+    _radxQueue->setBlockingWrite();
+  }
+  if (_params.data_mapper_report_interval > 0) {
+    _radxQueue->setRegisterWithDmap(true, _params.data_mapper_report_interval);
+  }
+  _radxQueue->setSingleWriter();
 
   return 0;
 
