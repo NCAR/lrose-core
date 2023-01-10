@@ -40,6 +40,7 @@
 #include <vector>
 #include "Params.hh"
 #include "Beam.hh"
+#include <Fmq/DsFmq.hh>
 #include <Fmq/DsRadarQueue.hh>
 class IwrfTsInfo;
 using namespace std;
