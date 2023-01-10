@@ -84,7 +84,8 @@ public:
     RadxCfactorsMsg = 222007,
     RadxFieldMsg = 222008,
     RadxEventMsg = 222009,
-    RadxRcalibMsg = 222010
+    RadxRcalibMsg = 222010,
+    RadxStatusXmlMsg = 222011
   } RadxMsg_t;
   
   // forward declaration
