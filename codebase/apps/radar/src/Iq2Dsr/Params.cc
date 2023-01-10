@@ -1019,6 +1019,86 @@
     tt->comment_text = tdrpStrDup("Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.");
     tt++;
     
+    // Parameter 'platform_type'
+    // ctype is '_platform_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("platform_type");
+    tt->descr = tdrpStrDup("Set the platform type.");
+    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_VEHICLE - radar is mounted on a land vehicle\n\tPLATFORM_SHIP - radar is mounted on a ship\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n");
+    tt->val_offset = (char *) &platform_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("platform_type_t");
+    tt->enum_def.nfields = 12;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PLATFORM_FIXED");
+      tt->enum_def.fields[0].val = PLATFORM_FIXED;
+      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_VEHICLE");
+      tt->enum_def.fields[1].val = PLATFORM_VEHICLE;
+      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_SHIP");
+      tt->enum_def.fields[2].val = PLATFORM_SHIP;
+      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT");
+      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT;
+      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
+      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_FORE;
+      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
+      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_AFT;
+      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
+      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_TAIL;
+      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
+      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_BELLY;
+      tt->enum_def.fields[8].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
+      tt->enum_def.fields[8].val = PLATFORM_AIRCRAFT_ROOF;
+      tt->enum_def.fields[9].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
+      tt->enum_def.fields[9].val = PLATFORM_AIRCRAFT_NOSE;
+      tt->enum_def.fields[10].name = tdrpStrDup("PLATFORM_SATELLITE_ORBIT");
+      tt->enum_def.fields[10].val = PLATFORM_SATELLITE_ORBIT;
+      tt->enum_def.fields[11].name = tdrpStrDup("PLATFORM_SATELLITE_GEOSTAT");
+      tt->enum_def.fields[11].val = PLATFORM_SATELLITE_GEOSTAT;
+    tt->single_val.e = PLATFORM_FIXED;
+    tt++;
+    
+    // Parameter 'override_primary_axis'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("override_primary_axis");
+    tt->descr = tdrpStrDup("Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &override_primary_axis - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'primary_axis'
+    // ctype is '_primary_axis_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("primary_axis");
+    tt->descr = tdrpStrDup("Set the primary axis.");
+    tt->help = tdrpStrDup("\tPRIMARY_AXIS_Z - vertical\n\tPRIMARY_AXIS_Y - longitudinal axis of platform\n\tPRIMARY_AXIS_X - lateral axis of platform\n\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n\tPRIMARY_AXIS_X_PRIME - translated lateral\n");
+    tt->val_offset = (char *) &primary_axis - &_start_;
+    tt->enum_def.name = tdrpStrDup("primary_axis_t");
+    tt->enum_def.nfields = 6;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("PRIMARY_AXIS_Z");
+      tt->enum_def.fields[0].val = PRIMARY_AXIS_Z;
+      tt->enum_def.fields[1].name = tdrpStrDup("PRIMARY_AXIS_Y");
+      tt->enum_def.fields[1].val = PRIMARY_AXIS_Y;
+      tt->enum_def.fields[2].name = tdrpStrDup("PRIMARY_AXIS_X");
+      tt->enum_def.fields[2].val = PRIMARY_AXIS_X;
+      tt->enum_def.fields[3].name = tdrpStrDup("PRIMARY_AXIS_Z_PRIME");
+      tt->enum_def.fields[3].val = PRIMARY_AXIS_Z_PRIME;
+      tt->enum_def.fields[4].name = tdrpStrDup("PRIMARY_AXIS_Y_PRIME");
+      tt->enum_def.fields[4].val = PRIMARY_AXIS_Y_PRIME;
+      tt->enum_def.fields[5].name = tdrpStrDup("PRIMARY_AXIS_X_PRIME");
+      tt->enum_def.fields[5].val = PRIMARY_AXIS_X_PRIME;
+    tt->single_val.e = PRIMARY_AXIS_Z;
+    tt++;
+    
     // Parameter 'override_radar_name'
     // ctype is 'tdrp_bool_t'
     

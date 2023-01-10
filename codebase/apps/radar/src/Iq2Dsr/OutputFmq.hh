@@ -127,7 +127,7 @@ private:
   // functions
 
   int _writeParamsDsRadar(const Beam &beam);
-  int _writeParamsRadx(const Beam &beam);
+  int _writePlatformRadx(const Beam &beam);
   
   int _writeCalibDsRadar(const Beam &beam);
   int _writeCalibRadx(const Beam &beam);

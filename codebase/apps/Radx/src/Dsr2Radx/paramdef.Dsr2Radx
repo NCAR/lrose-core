@@ -210,7 +210,7 @@ paramdef boolean {
 
 paramdef enum primary_axis_t {
   p_default = PRIMARY_AXIS_Z;
-  p_descr = "Platform type.";
+  p_descr = "Primary axis.";
   p_help = "See override_primary_axis.";
 } primary_axis;
 

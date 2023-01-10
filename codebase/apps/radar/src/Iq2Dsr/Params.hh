@@ -83,6 +83,30 @@ public:
   } mode_t;
 
   typedef enum {
+    PLATFORM_FIXED = 1,
+    PLATFORM_VEHICLE = 2,
+    PLATFORM_SHIP = 3,
+    PLATFORM_AIRCRAFT = 4,
+    PLATFORM_AIRCRAFT_FORE = 5,
+    PLATFORM_AIRCRAFT_AFT = 6,
+    PLATFORM_AIRCRAFT_TAIL = 7,
+    PLATFORM_AIRCRAFT_BELLY = 8,
+    PLATFORM_AIRCRAFT_ROOF = 9,
+    PLATFORM_AIRCRAFT_NOSE = 10,
+    PLATFORM_SATELLITE_ORBIT = 11,
+    PLATFORM_SATELLITE_GEOSTAT = 12
+  } platform_type_t;
+
+  typedef enum {
+    PRIMARY_AXIS_Z = 0,
+    PRIMARY_AXIS_Y = 1,
+    PRIMARY_AXIS_X = 2,
+    PRIMARY_AXIS_Z_PRIME = 3,
+    PRIMARY_AXIS_Y_PRIME = 4,
+    PRIMARY_AXIS_X_PRIME = 5
+  } primary_axis_t;
+
+  typedef enum {
     SCAN_MODE_UNKNOWN = 0,
     SCAN_MODE_SECTOR = 1,
     SCAN_MODE_COPLANE = 2,
@@ -794,6 +818,12 @@ public:
 
   tdrp_bool_t angle_interp_debug;
 
+  platform_type_t platform_type;
+
+  tdrp_bool_t override_primary_axis;
+
+  primary_axis_t primary_axis;
+
   tdrp_bool_t override_radar_name;
 
   char* radar_name;
@@ -1250,7 +1280,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[277];
+  mutable TDRPtable _table[280];
 
   const char *_className;
 

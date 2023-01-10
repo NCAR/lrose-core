@@ -234,6 +234,64 @@ commentdef {
   p_text = "Some radar parameters may be included in the time series data. This section allows you to optionally override some of those values.";
 };
 
+typedef enum {
+  PLATFORM_FIXED = 1,
+  PLATFORM_VEHICLE = 2,
+  PLATFORM_SHIP = 3,
+  PLATFORM_AIRCRAFT = 4,
+  PLATFORM_AIRCRAFT_FORE = 5,
+  PLATFORM_AIRCRAFT_AFT = 6,
+  PLATFORM_AIRCRAFT_TAIL = 7,
+  PLATFORM_AIRCRAFT_BELLY = 8,
+  PLATFORM_AIRCRAFT_ROOF = 9,
+  PLATFORM_AIRCRAFT_NOSE = 10,
+  PLATFORM_SATELLITE_ORBIT = 11,
+  PLATFORM_SATELLITE_GEOSTAT = 12
+} platform_type_t;
+
+paramdef enum platform_type_t {
+  p_default = PLATFORM_FIXED;
+  p_descr = "Set the platform type.";
+  p_help =
+    "\tPLATFORM_FIXED  - radar is in a fixed location\n"
+    "\tPLATFORM_VEHICLE - radar is mounted on a land vehicle\n"
+    "\tPLATFORM_SHIP - radar is mounted on a ship\n"
+    "\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n"
+    "\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n"
+    "\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n"
+    "\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n"
+    "\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n";
+} platform_type;
+
+typedef enum {
+  PRIMARY_AXIS_Z = 0, ///< vertical
+  PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+  PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+  PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+  PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+  PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+} primary_axis_t;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.";
+} override_primary_axis;
+
+paramdef enum primary_axis_t {
+  p_default = PRIMARY_AXIS_Z;
+  p_descr = "Set the primary axis.";
+  p_help =
+    "\tPRIMARY_AXIS_Z - vertical\n"
+    "\tPRIMARY_AXIS_Y - longitudinal axis of platform\n"
+    "\tPRIMARY_AXIS_X - lateral axis of platform\n"
+    "\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n"
+    "\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n"
+    "\tPRIMARY_AXIS_X_PRIME - translated lateral\n";
+} primary_axis;
+
 paramdef boolean {
   p_default = false;
   p_descr = "Option to override the radar name.";

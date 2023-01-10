@@ -46,6 +46,10 @@
 #include <toolsa/uusleep.h>
 #include <dsserver/DmapAccess.hh>
 #include <toolsa/DateTime.hh>
+#include <Radx/RadxMsg.hh>
+#include <Radx/RadxPlatform.hh>
+#include <Radx/RadxRcalib.hh>
+#include <Radx/RadxRay.hh>
 using namespace std;
 
 // Constructor
@@ -105,7 +109,7 @@ int OutputFmq::writeParams(const Beam &beam)
   int iret = 0;
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    iret = _writeParamsRadx(beam);
+    iret = _writePlatformRadx(beam);
   } else {
     iret = _writeParamsDsRadar(beam);
   }
@@ -238,10 +242,6 @@ void OutputFmq::putNewScanType(int scanType, time_t time)
 int OutputFmq::_writeParamsDsRadar(const Beam &beam)
 
 {
-
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
 
   // initialize 
 
@@ -390,12 +390,10 @@ int OutputFmq::_writeParamsDsRadar(const Beam &beam)
     cerr << "  Cannot put params to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -407,10 +405,6 @@ int OutputFmq::_writeParamsDsRadar(const Beam &beam)
 int OutputFmq::_writeCalibDsRadar(const Beam &beam)
 
 {
-
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeCalibDsRadar" << endl;
@@ -433,7 +427,6 @@ int OutputFmq::_writeCalibDsRadar(const Beam &beam)
     cerr << "  Cannot put calib to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
@@ -445,7 +438,6 @@ int OutputFmq::_writeCalibDsRadar(const Beam &beam)
     cerr << xml;
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -458,10 +450,6 @@ int OutputFmq::_writeStatusXmlDsRadar(const Beam &beam)
 
 {
 
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
-  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeStatusXmlDsRadar" << endl;
   }
@@ -478,7 +466,6 @@ int OutputFmq::_writeStatusXmlDsRadar(const Beam &beam)
     cerr << "  Cannot put status XML to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
@@ -488,7 +475,6 @@ int OutputFmq::_writeStatusXmlDsRadar(const Beam &beam)
     cerr << beam.getStatusXml() << endl;
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -502,10 +488,6 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
 
 {
 
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
-  
   bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
   if (_params.debug &&
       ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
@@ -641,13 +623,11 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
     cerr << "  Cannot put radar beam to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
 
   _nBeamsWritten++;
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -657,37 +637,27 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
 
 void OutputFmq::_putStartOfVolumeDsRadar(int volNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putStartOfVolume(volNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfVolumeDsRadar(int volNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putEndOfVolume(volNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putStartOfTiltDsRadar(int tiltNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putStartOfTilt(tiltNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfTiltDsRadar(int tiltNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putEndOfTilt(tiltNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putNewScanTypeDsRadar(int scanType, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putNewScanType(scanType, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 ///////////////////////////////////////////////////////////
@@ -699,167 +669,135 @@ void OutputFmq::_putNewScanTypeDsRadar(int scanType, time_t time)
 //
 // Returns 0 on success, -1 on failure
 
-int OutputFmq::_writeParamsRadx(const Beam &beam)
+int OutputFmq::_writePlatformRadx(const Beam &beam)
 
 {
-
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
 
   // initialize 
 
   const IwrfTsInfo &opsInfo = beam.getOpsInfo();
   const IwrfCalib &calib = beam.getCalib();
-  iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
+  // iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
                            
-  int nGatesOut = beam.getNGatesOut();
+  // int nGatesOut = beam.getNGatesOut();
   // int nSamples = beam.getNSamplesEffective();
-  int nSamples = beam.getNSamples();
-  double pulseWidthUs = beam.getPulseWidth() * 1.0e6;
+  // int nSamples = beam.getNSamples();
+  // double pulseWidthUs = beam.getPulseWidth() * 1.0e6;
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "-->> OutputFmq::_writeParamsRadx, nGates: " << nGatesOut << endl;
-  }
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
+  //   cerr << "-->> OutputFmq::_writeParamsRadx, nGates: " << nGatesOut << endl;
+  // }
   
   // compute nyquist and unambig range
 
-  double nyquistVel = beam.getNyquist();
-  double unambigRange = beam.getMaxRange();
+  // double nyquistVel = beam.getNyquist();
+  // double unambigRange = beam.getMaxRange();
 
-  // create message
-  
-  DsRadarMsg msg;
-  
-  // Add field parameters to the message
-  
-  vector<DsFieldParams*> &fp = msg.getFieldParams();
-
-  _nFields = 0;
-  for (int ii = 0; ii < _params.output_fields_n; ii++) {
-
-    const Params::output_field_t &field = _params._output_fields[ii];
-
-    if (field.write_unfiltered) {
-      _addField(field.name, field.units, field.scale, field.bias, fp);
-      _nFields++;
-    }
-    
-    if (field.write_filtered) {
-      string filteredName = field.name;
-      filteredName += "_F";
-      _addField(filteredName, field.units, field.scale, field.bias, fp);
-      _nFields++;
-    }
-    
-  } // ii
-  
   // Set radar parameters
   
-  DsRadarParams &rp = msg.getRadarParams();
-  
-  rp.radarId = 0;
-  rp.radarType = DS_RADAR_GROUND_TYPE;
-  rp.numFields = _nFields;
-  rp.numGates = nGatesOut;
-  rp.samplesPerBeam = nSamples;
-  rp.scanType = opsInfo.get_scan_mode();
-  rp.scanMode = beam.getScanMode();
-  rp.followMode = beam.getFollowMode();
+  RadxPlatform platform;
 
-  switch(xmitRcvMode) {
-    case IWRF_SINGLE_POL:
-      rp.polarization = DS_POLARIZATION_HORIZ_TYPE;
+  platform.setInstrumentName(opsInfo.get_radar_name());
+  platform.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
+
+  switch (_params.platform_type) {
+    case Params::PLATFORM_VEHICLE:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
       break;
-    case IWRF_SINGLE_POL_V:
-      rp.polarization = DS_POLARIZATION_VERT_TYPE;
+    case Params::PLATFORM_SHIP:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
       break;
-    case IWRF_ALT_HV_CO_ONLY:
-    case IWRF_ALT_HV_CO_CROSS:
-    case IWRF_ALT_HV_FIXED_HV:
-      rp.polarization = DS_POLARIZATION_DUAL_HV_ALT;
+    case Params::PLATFORM_AIRCRAFT:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT);
       break;
-    case IWRF_SIM_HV_FIXED_HV:
-    case IWRF_SIM_HV_SWITCHED_HV:
-      rp.polarization = DS_POLARIZATION_DUAL_HV_SIM;
+    case Params::PLATFORM_AIRCRAFT_FORE:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
       break;
-    case IWRF_H_ONLY_FIXED_HV:
-      rp.polarization = DS_POLARIZATION_DUAL_H_XMIT;
+    case Params::PLATFORM_AIRCRAFT_AFT:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_AFT);
       break;
-    case IWRF_V_ONLY_FIXED_HV:
-      rp.polarization = DS_POLARIZATION_DUAL_V_XMIT;
+    case Params::PLATFORM_AIRCRAFT_TAIL:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
       break;
-    default: {
-      rp.polarization = DS_POLARIZATION_DUAL_TYPE;
-    }
+    case Params::PLATFORM_AIRCRAFT_BELLY:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
+      break;
+    case Params::PLATFORM_AIRCRAFT_ROOF:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_ROOF);
+      break;
+    case Params::PLATFORM_AIRCRAFT_NOSE:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_NOSE);
+      break;
+    case Params::PLATFORM_SATELLITE_ORBIT:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_SATELLITE_ORBIT);
+      break;
+    case Params::PLATFORM_SATELLITE_GEOSTAT:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_SATELLITE_GEOSTAT);
+      break;
+    case Params::PLATFORM_FIXED:
+    default:
+      platform.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   }
 
-  if (beam.getIsStagPrt()) {
-    if (beam.getStagM() == 2) {
-      rp.prfMode = DS_RADAR_PRF_MODE_STAGGERED_2_3;
-    } else if (beam.getStagM() == 3) {
-      rp.prfMode = DS_RADAR_PRF_MODE_STAGGERED_3_4;
-    } else if (beam.getStagM() == 4) {
-      rp.prfMode = DS_RADAR_PRF_MODE_STAGGERED_4_5;
-    }
+  switch (_params.primary_axis) {
+    case Params::PRIMARY_AXIS_Y:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_Y);
+      break;
+    case Params::PRIMARY_AXIS_Z:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_Z);
+      break;
+    case Params::PRIMARY_AXIS_X_PRIME:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_X_PRIME);
+      break;
+    case Params::PRIMARY_AXIS_Y_PRIME:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_Y_PRIME);
+      break;
+    case Params::PRIMARY_AXIS_Z_PRIME:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_Z_PRIME);
+      break;
+    case Params::PRIMARY_AXIS_X:
+    default:
+      platform.setPrimaryAxis(Radx::PRIMARY_AXIS_X);
   }
-  
-  rp.radarConstant = calib.getRadarConstH();
-
-  rp.altitude = opsInfo.get_radar_altitude_m() / 1000.0;
-  rp.latitude = opsInfo.get_radar_latitude_deg();
-  rp.longitude = opsInfo.get_radar_longitude_deg();
+                             
+  platform.setAltitudeKm(opsInfo.get_radar_altitude_m() / 1000.0);
+  platform.setLatitudeDeg(opsInfo.get_radar_latitude_deg());
+  platform.setLongitudeDeg(opsInfo.get_radar_longitude_deg());
 
   // override if georefs active
 
   if (beam.getGeorefActive()) {
     const iwrf_platform_georef_t &georef = beam.getGeoref();
-    rp.latitude = georef.latitude;
-    rp.longitude = georef.longitude;
-    rp.altitude = georef.altitude_msl_km;
+    platform.setAltitudeKm(georef.altitude_msl_km);
+    platform.setLatitudeDeg(georef.latitude);
+    platform.setLongitudeDeg(georef.longitude);
   }
 
-  rp.gateSpacing = opsInfo.get_proc_gate_spacing_km();
-  rp.startRange = opsInfo.get_proc_start_range_km();
+  platform.setRadarBeamWidthDegH(calib.getBeamWidthDegH());
+  platform.setRadarBeamWidthDegV(calib.getBeamWidthDegV());
+  
+  platform.setRadarAntennaGainDbH(calib.getAntGainDbH());
+  platform.setRadarAntennaGainDbV(calib.getAntGainDbV());
 
-  rp.horizBeamWidth = calib.getBeamWidthDegH();
-  rp.vertBeamWidth = calib.getBeamWidthDegV();
-  
-  rp.pulseWidth = pulseWidthUs;
-  rp.pulseRepFreq = 1.0 / beam.getPrt();
-  rp.prt = beam.getPrt();
-  rp.prt2 = beam.getPrtLong();
-  rp.wavelength = opsInfo.get_radar_wavelength_cm();
-  
-  rp.xmitPeakPower = pow(10.0, calib.getXmitPowerDbmH() / 10.0);
-  rp.receiverGain = calib.getReceiverGainDbHc();
-  rp.receiverMds = calib.getNoiseDbmHc() - rp.receiverGain;
-  rp.antennaGain = calib.getAntGainDbH();
-  rp.systemGain =  rp.receiverGain + rp.antennaGain;
+  platform.setWavelengthCm(opsInfo.get_radar_wavelength_cm());
 
-  rp.unambigVelocity = nyquistVel;
-  rp.unambigRange = unambigRange;
+  // create message
   
-  rp.measXmitPowerDbmH = beam.getMeasXmitPowerDbmH();
-  rp.measXmitPowerDbmV = beam.getMeasXmitPowerDbmV();
+  RadxMsg msg;
+  platform.serialize(msg);
 
-  rp.radarName = opsInfo.get_radar_name();
-  rp.scanTypeName = opsInfo.get_scan_segment_name();
-  
   // write the message
   
-  if (_dsrQueue->putDsMsg(msg,
-                       DsRadarMsg::RADAR_PARAMS | DsRadarMsg::FIELD_PARAMS)) {
-    cerr << "ERROR - OutputFmq::_writeParamsRadx" << endl;
-    cerr << "  Cannot put params to queue" << endl;
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_writePlatformRadx" << endl;
+    cerr << "  Cannot put platform to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -873,8 +811,6 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
 {
 
   // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeCalibRadx" << endl;
@@ -897,7 +833,6 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
     cerr << "  Cannot put calib to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
@@ -909,7 +844,6 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
     cerr << xml;
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -922,10 +856,6 @@ int OutputFmq::_writeStatusXmlRadx(const Beam &beam)
 
 {
 
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
-  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeStatusXmlRadx" << endl;
   }
@@ -942,7 +872,6 @@ int OutputFmq::_writeStatusXmlRadx(const Beam &beam)
     cerr << "  Cannot put status XML to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
@@ -952,7 +881,6 @@ int OutputFmq::_writeStatusXmlRadx(const Beam &beam)
     cerr << beam.getStatusXml() << endl;
   }
   
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -966,10 +894,6 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 {
 
-  // get a lock on the busy mutex
-
-  pthread_mutex_lock(&_busy);
-  
   bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
   if (_params.debug &&
       ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
@@ -1105,13 +1029,11 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     cerr << "  Cannot put radar beam to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
-      pthread_mutex_unlock(&_busy);
       return -1;
     }
   }
 
   _nBeamsWritten++;
-  pthread_mutex_unlock(&_busy);
   return 0;
 
 }
@@ -1121,37 +1043,27 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 void OutputFmq::_putStartOfVolumeRadx(int volNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putStartOfVolume(volNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfVolumeRadx(int volNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putEndOfVolume(volNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putStartOfTiltRadx(int tiltNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putStartOfTilt(tiltNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putEndOfTiltRadx(int tiltNum, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putEndOfTilt(tiltNum, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 void OutputFmq::_putNewScanTypeRadx(int scanType, time_t time)
 {
-  pthread_mutex_lock(&_busy);
   _dsrQueue->putNewScanType(scanType, time);
-  pthread_mutex_unlock(&_busy);
 }
 
 ////////////////////////////////////////
