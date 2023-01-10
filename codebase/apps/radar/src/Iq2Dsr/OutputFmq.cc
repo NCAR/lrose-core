@@ -816,6 +816,11 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
     cerr << "-->> OutputFmq::_writeCalibRadx" << endl;
   }
   
+  // RadxRcalib calib;
+
+  // platform.setInstrumentName(opsInfo.get_radar_name());
+  // platform.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
+
   // create DsRadar message
   
   DsRadarMsg msg;
