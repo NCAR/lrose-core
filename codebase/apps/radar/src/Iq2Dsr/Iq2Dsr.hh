@@ -217,7 +217,7 @@ private:
 // sweep and vol info
 
   void _handleSweepAndVolChange(const Beam *beam);
-  void _putEndOfVol(time_t latestTime);
+  void _putEndOfVol(const Beam *beam);
   void _deduceEndOfVol(const Beam *beam);
   void _changeSweepOnDirectionChange(const Beam *beam);
 

@@ -79,13 +79,13 @@ public:
   
   // put flags
   
-  void putEndOfVolume(int volNum, time_t time);
-  void putStartOfVolume(int volNum, time_t time);
+  void putEndOfVolume(int volNum, const Beam &beam);
+  void putStartOfVolume(int volNum, const Beam &beam);
 
-  void putEndOfTilt(int tiltNum, time_t time);
-  void putStartOfTilt(int tiltNum, time_t time);
+  void putEndOfTilt(int tiltNum, const Beam &beam);
+  void putStartOfTilt(int tiltNum, const Beam &beam);
 
-  void putNewScanType(int scanType, time_t time);
+  void putNewScanType(int scanType, const Beam &beam);
 
   // constructor status
 
@@ -138,20 +138,20 @@ private:
   int _writeBeamDsRadar(const Beam &beam);
   int _writeBeamRadx(const Beam &beam);
   
-  void _putEndOfVolumeDsRadar(int volNum, time_t time);
-  void _putEndOfVolumeRadx(int volNum, time_t time);
+  void _putEndOfVolumeDsRadar(int volNum, const Beam &beam);
+  void _putEndOfVolumeRadx(int volNum, const Beam &beam);
 
-  void _putStartOfVolumeDsRadar(int volNum, time_t time);
-  void _putStartOfVolumeRadx(int volNum, time_t time);
+  void _putStartOfVolumeDsRadar(int volNum, const Beam &beam);
+  void _putStartOfVolumeRadx(int volNum, const Beam &beam);
 
-  void _putEndOfTiltDsRadar(int tiltNum, time_t time);
-  void _putEndOfTiltRadx(int tiltNum, time_t time);
+  void _putEndOfTiltDsRadar(int tiltNum, const Beam &beam);
+  void _putEndOfTiltRadx(int tiltNum, const Beam &beam);
 
-  void _putStartOfTiltDsRadar(int tiltNum, time_t time);
-  void _putStartOfTiltRadx(int tiltNum, time_t time);
+  void _putStartOfTiltDsRadar(int tiltNum, const Beam &beam);
+  void _putStartOfTiltRadx(int tiltNum, const Beam &beam);
 
-  void _putNewScanTypeDsRadar(int scanType, time_t time);
-  void _putNewScanTypeRadx(int scanType, time_t time);
+  void _putNewScanTypeDsRadar(int scanType, const Beam &beam);
+  void _putNewScanTypeRadx(int scanType, const Beam &beam);
 
   int _openFmq();
   int _openDsRadarQueue();

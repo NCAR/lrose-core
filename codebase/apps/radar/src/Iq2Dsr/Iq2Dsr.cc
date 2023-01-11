@@ -369,10 +369,10 @@ int Iq2Dsr::_runSingleThreaded()
 
   int iret = 0;
   PMU_auto_register("Run single threaded");
-  time_t latestBeamTime = 0;
+  Beam *latestBeam = NULL;
   
   while (true) {
-
+    
     PMU_auto_register("Getting next beam");
 
     // get next incoming beam
@@ -381,8 +381,8 @@ int Iq2Dsr::_runSingleThreaded()
     if (beam == NULL) {
       break;
     }
-    
-    latestBeamTime = beam->getTimeSecs();
+
+    latestBeam = beam;
     _nGatesComputed += beam->getNGates();
     
     // process the current beam
@@ -394,13 +394,13 @@ int Iq2Dsr::_runSingleThreaded()
     
     _nBeamsThisVol++;
     _nBeamsSinceParams++;
-
+    
   } // while
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, latestBeamTime);
-  _fmq->putEndOfVolume(_currentVolNum, latestBeamTime);
+  _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
+  _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
 
   return iret;
 
@@ -418,7 +418,7 @@ int Iq2Dsr::_runMultiThreaded()
   PMU_auto_register("Run multi-threaded");
 
   int iret = 0;
-  time_t latestBeamTime = 0;
+  Beam *latestBeam = NULL;
   
   Beam *beams[30];
   for (int ii = 0; ii < 30; ii++) {
@@ -432,7 +432,7 @@ int Iq2Dsr::_runMultiThreaded()
     Beam *beam = beams[ii % 30];
     
     _nGatesComputed += beam->getNGates();
-    latestBeamTime = beam->getTime();
+    latestBeam = beam;
     
     // process the current beam
     
@@ -448,8 +448,8 @@ int Iq2Dsr::_runMultiThreaded()
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, latestBeamTime);
-  _fmq->putEndOfVolume(_currentVolNum, latestBeamTime);
+  _fmq->putEndOfTilt(_currentSweepNum, latestBeam);
+  _fmq->putEndOfVolume(_currentVolNum, latestBeam);
 
   return iret;
 
@@ -466,7 +466,7 @@ int Iq2Dsr::_runMultiThreaded()
   PMU_auto_register("Run multi-threaded");
 
   int iret = 0;
-  time_t latestBeamTime = 0;
+  Beam *latestBeam = NULL;
   
   while (true) {
 
@@ -480,7 +480,7 @@ int Iq2Dsr::_runMultiThreaded()
     }
     
     _nGatesComputed += beam->getNGates();
-    latestBeamTime = beam->getTimeSecs();
+    latestBeam = beam;
     
     // process the current beam
     
@@ -496,8 +496,8 @@ int Iq2Dsr::_runMultiThreaded()
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, latestBeamTime);
-  _fmq->putEndOfVolume(_currentVolNum, latestBeamTime);
+  _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
+  _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
 
   return iret;
 
@@ -550,8 +550,6 @@ int Iq2Dsr::_processBeamSingleThreaded(Beam *beam)
   pthread_mutex_lock(&_beamRecyclePoolMutex);
   _beamRecyclePool.push_front(beam);
   pthread_mutex_unlock(&_beamRecyclePoolMutex);
-
-  // delete beam;
 
 #endif
 
@@ -948,7 +946,7 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   
   _beamScanMode = beam->getScanMode();
   if (_currentScanMode != _beamScanMode) {
-    _fmq->putNewScanType(_beamScanMode, beam->getTimeSecs());
+    _fmq->putNewScanType(_beamScanMode, *beam);
     _currentScanMode = _beamScanMode;
     if (_params.set_end_of_sweep_when_antenna_changes_direction) {
       _endOfVolPending = true;
@@ -1019,7 +1017,7 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   // end of sweep?
 
   if (_endOfSweepFlag) {
-    _fmq->putEndOfTilt(_currentSweepNum, beam->getTimeSecs());
+    _fmq->putEndOfTilt(_currentSweepNum, *beam);
     if (_params.debug) {
       cerr << "End of sweep num: " << _currentSweepNum << endl;
     }
@@ -1029,7 +1027,7 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   // end of vol?
   
   if (_endOfVolFlag) {
-    _putEndOfVol(beam->getTimeSecs());
+    _putEndOfVol(beam);
   }
   
   // start of vol?
@@ -1037,7 +1035,7 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   if (_startOfVolPending) {
     if (!_params.delay_tilt_start_msg_during_ant_trans ||
         !_antennaTransition) {
-      _fmq->putStartOfVolume(_currentVolNum, beam->getTimeSecs());
+      _fmq->putStartOfVolume(_currentVolNum, *beam);
       if (_params.debug) {
         cerr << "Start of vol num: " << _currentVolNum << endl;
       }
@@ -1050,7 +1048,7 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
   if (_startOfSweepPending) {
     if (!_params.delay_tilt_start_msg_during_ant_trans ||
         !_antennaTransition) {
-      _fmq->putStartOfTilt(_currentSweepNum, beam->getTimeSecs());
+      _fmq->putStartOfTilt(_currentSweepNum, *beam);
       if (_params.debug) {
         cerr << "Start of sweep num: " << _currentSweepNum << endl;
       }
@@ -1063,11 +1061,11 @@ void Iq2Dsr::_handleSweepAndVolChange(const Beam *beam)
 ////////////////////////////////////////////////////////////////////////
 // Put end of volume
 
-void Iq2Dsr::_putEndOfVol(time_t latestTime)
+void Iq2Dsr::_putEndOfVol(const Beam *beam)
   
 {
 
-  _fmq->putEndOfVolume(_currentVolNum, latestTime);
+  _fmq->putEndOfVolume(_currentVolNum, *beam);
   if (_params.debug) {
     cerr << "End of vol num: " << _currentVolNum << endl;
   }
@@ -1131,9 +1129,9 @@ void Iq2Dsr::_deduceEndOfVol(const Beam *beam)
   
   if (_endOfVolFlag) {
     
-    _fmq->putEndOfVolume(_currentVolNum, beam->getTimeSecs());
+    _fmq->putEndOfVolume(_currentVolNum, *beam);
     _currentVolNum++;
-    _fmq->putStartOfVolume(_currentVolNum, beam->getTimeSecs());
+    _fmq->putStartOfVolume(_currentVolNum, *beam);
     
     _volMinEl = 180.0;
     _volMaxEl = -180.0;
@@ -1204,7 +1202,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   // set flags on change
   
   _endOfSweepFlag = true;
-  _fmq->putEndOfTilt(_currentSweepNum, beam->getTimeSecs());
+  _fmq->putEndOfTilt(_currentSweepNum, *beam);
 
   if (dirnChange && _params.debug) {
     cerr << "Dirn change, end of sweep num: " << _currentSweepNum << endl;
@@ -1242,7 +1240,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   }
   
   if (_endOfVolFlag) {
-    _fmq->putEndOfVolume(_currentVolNum, beam->getTimeSecs());
+    _fmq->putEndOfVolume(_currentVolNum, *beam);
     if (_params.debug) {
       cerr << "End of vol num: " << _currentVolNum << endl;
     }
@@ -1251,7 +1249,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
     } else {
       _currentVolNum = _beamVolNum;
     }
-    _fmq->putStartOfVolume(_currentVolNum, beam->getTimeSecs());
+    _fmq->putStartOfVolume(_currentVolNum, *beam);
     if (_params.debug) {
       cerr << "Start of vol num: " << _currentVolNum << endl;
     }
@@ -1262,7 +1260,7 @@ void Iq2Dsr::_changeSweepOnDirectionChange(const Beam *beam)
   
   // start of sweep
   
-  _fmq->putStartOfTilt(_currentSweepNum, beam->getTimeSecs());
+  _fmq->putStartOfTilt(_currentSweepNum, *beam);
   if (_params.debug) {
     cerr << "Start of sweep num: " << _currentSweepNum << endl;
   }

@@ -49,6 +49,8 @@
 #include <Radx/RadxMsg.hh>
 #include <Radx/RadxPlatform.hh>
 #include <Radx/RadxRcalib.hh>
+#include <Radx/RadxStatusXml.hh>
+#include <Radx/RadxEvent.hh>
 #include <Radx/RadxRay.hh>
 using namespace std;
 
@@ -175,57 +177,57 @@ int OutputFmq::writeBeam(const Beam &beam)
 ////////////////////////////////////////
 // put volume flags
 
-void OutputFmq::putStartOfVolume(int volNum, time_t time)
+void OutputFmq::putStartOfVolume(int volNum, const Beam &beam)
 {
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    _putStartOfVolumeRadx(volNum, time);
+    _putStartOfVolumeRadx(volNum, beam);
   } else {
-    _putStartOfVolumeDsRadar(volNum, time);
+    _putStartOfVolumeDsRadar(volNum, beam);
   }
   pthread_mutex_unlock(&_busy);
 }
 
-void OutputFmq::putEndOfVolume(int volNum, time_t time)
+void OutputFmq::putEndOfVolume(int volNum, const Beam &beam)
 {
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    _putEndOfVolumeRadx(volNum, time);
+    _putEndOfVolumeRadx(volNum, beam);
   } else {
-    _putEndOfVolumeDsRadar(volNum, time);
+    _putEndOfVolumeDsRadar(volNum, beam);
   }
   pthread_mutex_unlock(&_busy);
 }
 
-void OutputFmq::putStartOfTilt(int tiltNum, time_t time)
+void OutputFmq::putStartOfTilt(int tiltNum, const Beam &beam)
 {
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    _putStartOfTiltRadx(tiltNum, time);
+    _putStartOfTiltRadx(tiltNum, beam);
   } else {
-    _putStartOfTiltDsRadar(tiltNum, time);
+    _putStartOfTiltDsRadar(tiltNum, beam);
   }
   pthread_mutex_unlock(&_busy);
 }
 
-void OutputFmq::putEndOfTilt(int tiltNum, time_t time)
+void OutputFmq::putEndOfTilt(int tiltNum, const Beam &beam)
 {
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    _putEndOfTiltRadx(tiltNum, time);
+    _putEndOfTiltRadx(tiltNum, beam);
   } else {
-    _putEndOfTiltDsRadar(tiltNum, time);
+    _putEndOfTiltDsRadar(tiltNum, beam);
   }
   pthread_mutex_unlock(&_busy);
 }
 
-void OutputFmq::putNewScanType(int scanType, time_t time)
+void OutputFmq::putNewScanType(int scanType, const Beam &beam)
 {
   pthread_mutex_lock(&_busy);
   if (_useRadx) {
-    _putNewScanTypeRadx(scanType, time);
+    _putNewScanTypeRadx(scanType, beam);
   } else {
-    _putNewScanTypeDsRadar(scanType, time);
+    _putNewScanTypeDsRadar(scanType, beam);
   }
   pthread_mutex_unlock(&_busy);
 }
@@ -635,29 +637,29 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
 ////////////////////////////////////////
 // put volume flags
 
-void OutputFmq::_putStartOfVolumeDsRadar(int volNum, time_t time)
+void OutputFmq::_putStartOfVolumeDsRadar(int volNum, const Beam &beam)
 {
-  _dsrQueue->putStartOfVolume(volNum, time);
+  _dsrQueue->putStartOfVolume(volNum, beam.getTimeSecs());
 }
 
-void OutputFmq::_putEndOfVolumeDsRadar(int volNum, time_t time)
+void OutputFmq::_putEndOfVolumeDsRadar(int volNum, const Beam &beam)
 {
-  _dsrQueue->putEndOfVolume(volNum, time);
+  _dsrQueue->putEndOfVolume(volNum, beam.getTimeSecs());
 }
 
-void OutputFmq::_putStartOfTiltDsRadar(int tiltNum, time_t time)
+void OutputFmq::_putStartOfTiltDsRadar(int tiltNum, const Beam &beam)
 {
-  _dsrQueue->putStartOfTilt(tiltNum, time);
+  _dsrQueue->putStartOfTilt(tiltNum, beam.getTimeSecs());
 }
 
-void OutputFmq::_putEndOfTiltDsRadar(int tiltNum, time_t time)
+void OutputFmq::_putEndOfTiltDsRadar(int tiltNum, const Beam &beam)
 {
-  _dsrQueue->putEndOfTilt(tiltNum, time);
+  _dsrQueue->putEndOfTilt(tiltNum, beam.getTimeSecs());
 }
 
-void OutputFmq::_putNewScanTypeDsRadar(int scanType, time_t time)
+void OutputFmq::_putNewScanTypeDsRadar(int scanType, const Beam &beam)
 {
-  _dsrQueue->putNewScanType(scanType, time);
+  _dsrQueue->putNewScanType(scanType, beam.getTimeSecs());
 }
 
 ///////////////////////////////////////////////////////////
@@ -791,7 +793,7 @@ int OutputFmq::_writePlatformRadx(const Beam &beam)
   if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
                            msg.assembledMsg(), msg.lengthAssembled())) {
     cerr << "ERROR - OutputFmq::_writePlatformRadx" << endl;
-    cerr << "  Cannot put platform to queue" << endl;
+    cerr << "  Cannot write platform to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
@@ -836,7 +838,7 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
   if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
                            msg.assembledMsg(), msg.lengthAssembled())) {
     cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
-    cerr << "  Cannot put calib to queue" << endl;
+    cerr << "  Cannot write calib to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
@@ -858,26 +860,32 @@ int OutputFmq::_writeStatusXmlRadx(const Beam &beam)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeStatusXmlRadx" << endl;
   }
+
+  // create RadxStatusXml object
+
+  RadxStatusXml status;
+  status.setXmlStr(beam.getStatusXml());
   
-  // create Radx message
+  // create message
   
-  DsRadarMsg msg;
-  msg.setStatusXml(beam.getStatusXml());
+  RadxMsg msg;
+  status.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "=========== Writing out status xml =============" << endl;
+    cerr << status.getXmlStr() << endl;
+    cerr << "================================================" << endl;
+  }
   
   // write the message
   
-  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::STATUS_XML)) {
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
     cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
-    cerr << "  Cannot put status XML to queue" << endl;
+    cerr << "  Cannot write status xml to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
     }
-  }
-
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "Writing out status xml: " << endl;
-    cerr << beam.getStatusXml() << endl;
   }
   
   return 0;
@@ -1025,7 +1033,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   contents |= DsRadarMsg::RADAR_BEAM;
   if (_dsrQueue->putDsMsg(_msg, contents)) {
     cerr << "ERROR - OutputFmq::_writeBeamsRadx" << endl;
-    cerr << "  Cannot put radar beam to queue" << endl;
+    cerr << "  Cannot write radar beam to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
@@ -1040,29 +1048,136 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 ////////////////////////////////////////
 // put volume flags
 
-void OutputFmq::_putStartOfVolumeRadx(int volNum, time_t time)
+void OutputFmq::_putStartOfVolumeRadx(int volNum, const Beam &beam)
 {
-  _dsrQueue->putStartOfVolume(volNum, time);
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(beam.getTimeSecs());
+  event.setStartOfVolume(true);
+  // event.setSweepMode(beam.getScanMode());
+  
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "======= Writing out start of vol event =========" << endl;
+    event.print(cerr);
+    cerr << "================================================" << endl;
+  }
+  
+  // write the message
+  
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_putStartOfVolumeRadx" << endl;
+    cerr << "  Cannot write start of vol event to queue" << endl;
+    // reopen the queue
+    _openFmq();
+  }
+
 }
 
-void OutputFmq::_putEndOfVolumeRadx(int volNum, time_t time)
+void OutputFmq::_putEndOfVolumeRadx(int volNum, const Beam &beam)
 {
-  _dsrQueue->putEndOfVolume(volNum, time);
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(beam.getTimeSecs());
+  event.setEndOfVolume(true);
+  
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "======= Writing out end of vol event =========" << endl;
+    event.print(cerr);
+    cerr << "================================================" << endl;
+  }
+  
+  // write the message
+  
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_putEndOfVolumeRadx" << endl;
+    cerr << "  Cannot write end of vol event to queue" << endl;
+    // reopen the queue
+    _openFmq();
+  }
+
 }
 
-void OutputFmq::_putStartOfTiltRadx(int tiltNum, time_t time)
+void OutputFmq::_putStartOfTiltRadx(int tiltNum, const Beam &beam)
 {
-  _dsrQueue->putStartOfTilt(tiltNum, time);
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(beam.getTimeSecs());
+  event.setStartOfSweep(true);
+
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "====== Writing out start of sweep event ========" << endl;
+    event.print(cerr);
+    cerr << "================================================" << endl;
+  }
+  
+  // write the message
+  
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_putStartOfTiltRadx" << endl;
+    cerr << "  Cannot write start of sweep event to queue" << endl;
+    // reopen the queue
+    _openFmq();
+  }
+
 }
 
-void OutputFmq::_putEndOfTiltRadx(int tiltNum, time_t time)
+void OutputFmq::_putEndOfTiltRadx(int tiltNum, const Beam &beam)
 {
-  _dsrQueue->putEndOfTilt(tiltNum, time);
+
+  // create event
+  
+  RadxEvent event;
+  event.setTime(beam.getTimeSecs());
+  event.setEndOfSweep(true);
+
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "======= Writing out end of sweep event =========" << endl;
+    event.print(cerr);
+    cerr << "================================================" << endl;
+  }
+  
+  // write the message
+  
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_putEndOfTiltRadx" << endl;
+    cerr << "  Cannot write start of vol event to queue" << endl;
+    // reopen the queue
+    _openFmq();
+  }
+
 }
 
-void OutputFmq::_putNewScanTypeRadx(int scanType, time_t time)
+void OutputFmq::_putNewScanTypeRadx(int scanType, const Beam &beam)
 {
-  _dsrQueue->putNewScanType(scanType, time);
+
+  _dsrQueue->putNewScanType(scanType, beam.getTimeSecs());
+
 }
 
 ////////////////////////////////////////
