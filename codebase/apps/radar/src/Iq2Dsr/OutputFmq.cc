@@ -810,43 +810,37 @@ int OutputFmq::_writeCalibRadx(const Beam &beam)
 
 {
 
-  // get a lock on the busy mutex
-
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "-->> OutputFmq::_writeCalibRadx" << endl;
   }
-  
-  // RadxRcalib calib;
 
-  // platform.setInstrumentName(opsInfo.get_radar_name());
-  // platform.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
-
-  // create DsRadar message
+  // copy IwrfCalib to RadxCalib
   
-  DsRadarMsg msg;
-
-  // set calib in message to the beam calibration
-  
-  DsRadarCalib &calib = msg.getRadarCalib();
   IwrfCalib icalib = beam.getCalib();
-  RadarCalib::copyIwrfToDsRadar(icalib, calib);
+  RadxRcalib xcalib;
+  RadarCalib::copyIwrfToRadx(icalib, xcalib);
 
+  // create message
+  
+  RadxMsg msg;
+  xcalib.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    string xml;
+    icalib.convert2Xml(xml);
+    cerr << "Writing out calibration:" << endl;
+    cerr << xml;
+  }
+  
   // write the message
   
-  if (_dsrQueue->putDsMsg(msg, DsRadarMsg::RADAR_CALIB)) {
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
     cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
     cerr << "  Cannot put calib to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
     }
-  }
-
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    string xml;
-    beam.getCalib().convert2Xml(xml);
-    cerr << "Writing out calibration:" << endl;
-    cerr << xml;
   }
   
   return 0;
