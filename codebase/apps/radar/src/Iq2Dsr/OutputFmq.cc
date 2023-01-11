@@ -1054,9 +1054,10 @@ void OutputFmq::_putStartOfVolumeRadx(int volNum, const Beam &beam)
   // create event
   
   RadxEvent event;
-  event.setTime(beam.getTimeSecs());
+  event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setStartOfVolume(true);
-  // event.setSweepMode(beam.getScanMode());
+  event.setVolumeNumber(volNum);
+  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
   
   // create message
 
@@ -1086,9 +1087,11 @@ void OutputFmq::_putEndOfVolumeRadx(int volNum, const Beam &beam)
   // create event
   
   RadxEvent event;
-  event.setTime(beam.getTimeSecs());
+  event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setEndOfVolume(true);
-  
+  event.setVolumeNumber(volNum);
+  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
+
   // create message
 
   RadxMsg msg;
@@ -1117,8 +1120,10 @@ void OutputFmq::_putStartOfTiltRadx(int tiltNum, const Beam &beam)
   // create event
   
   RadxEvent event;
-  event.setTime(beam.getTimeSecs());
+  event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setStartOfSweep(true);
+  event.setSweepNumber(tiltNum);
+  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
 
   // create message
 
@@ -1148,8 +1153,10 @@ void OutputFmq::_putEndOfTiltRadx(int tiltNum, const Beam &beam)
   // create event
   
   RadxEvent event;
-  event.setTime(beam.getTimeSecs());
+  event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
   event.setEndOfSweep(true);
+  event.setSweepNumber(tiltNum);
+  event.setSweepMode((Radx::SweepMode_t) beam.getScanMode());
 
   // create message
 
@@ -1176,7 +1183,31 @@ void OutputFmq::_putEndOfTiltRadx(int tiltNum, const Beam &beam)
 void OutputFmq::_putNewScanTypeRadx(int scanType, const Beam &beam)
 {
 
-  _dsrQueue->putNewScanType(scanType, beam.getTimeSecs());
+  // create event
+  
+  RadxEvent event;
+  event.setTime(beam.getTimeSecs(), beam.getNanoSecs());
+  event.setSweepMode((Radx::SweepMode_t) scanType);
+
+  // create message
+
+  RadxMsg msg;
+  event.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "======= Writing out new scan type =========" << endl;
+    event.print(cerr);
+    cerr << "===========================================" << endl;
+  }
+  
+  // write the message
+  
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_putNewScanTypeRadx" << endl;
+    cerr << "  Cannot write new scan mode event to queue" << endl;
+    // reopen the queue
+    _openFmq();
+  }
 
 }
 
