@@ -915,7 +915,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("primary_axis");
-    tt->descr = tdrpStrDup("Platform type.");
+    tt->descr = tdrpStrDup("Primary axis.");
     tt->help = tdrpStrDup("See override_primary_axis.");
     tt->val_offset = (char *) &primary_axis - &_start_;
     tt->enum_def.name = tdrpStrDup("primary_axis_t");

@@ -1302,9 +1302,9 @@ int OutputFmq::_openFmq()
 {
   int iret = 0;
   if (_useRadx) {
-    iret = _openDsRadarQueue();
-  } else {
     iret = _openRadxQueue();
+  } else {
+    iret = _openDsRadarQueue();
   }
   return iret;
 }
