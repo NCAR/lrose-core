@@ -297,6 +297,10 @@ void RadxGeoref::serialize(RadxMsg &msg)
   _loadMetaNumbersToMsg();
   msg.addPart(_metaNumbersPartId, &_metaNumbers, sizeof(msgMetaNumbers_t));
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////

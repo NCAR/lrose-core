@@ -427,6 +427,10 @@ void RadxPlatform::serialize(RadxMsg &msg)
     
   }
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////

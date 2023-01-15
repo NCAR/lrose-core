@@ -7115,6 +7115,10 @@ void RadxVol::serialize(RadxMsg &msg)
                 fieldMsg.lengthAssembled());
   }
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////

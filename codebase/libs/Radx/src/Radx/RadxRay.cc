@@ -2095,6 +2095,10 @@ void RadxRay::serialize(RadxMsg &msg)
 
   } // ifield
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////

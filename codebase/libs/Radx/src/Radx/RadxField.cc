@@ -3895,6 +3895,10 @@ void RadxField::serialize(RadxMsg &msg)
 
   msg.addPart(_dataPartId, _data, _nPoints * _byteWidth);
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////

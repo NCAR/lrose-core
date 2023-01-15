@@ -99,6 +99,10 @@ void RadxStatusXml::serialize(RadxMsg &msg)
   msg.setMsgType(RadxMsg::RadxStatusXmlMsg);
   msg.addPart(_statusXmlStringPartId, _xmlStr.c_str(), _xmlStr.size() + 1);
 
+  // assemble the message from the parts
+
+  msg.assemble();
+
 }
 
 /////////////////////////////////////////////////////////
