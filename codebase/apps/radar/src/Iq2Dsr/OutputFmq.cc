@@ -41,6 +41,7 @@
 #include "Calibration.hh"
 
 #include <radar/IwrfTsInfo.hh>
+#include <radar/IwrfMoments.hh>
 #include <radar/RadarCalib.hh>
 #include <cmath>
 #include <toolsa/uusleep.h>
@@ -52,6 +53,7 @@
 #include <Radx/RadxStatusXml.hh>
 #include <Radx/RadxEvent.hh>
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxGeoref.hh>
 using namespace std;
 
 // Constructor
@@ -679,27 +681,13 @@ int OutputFmq::_writePlatformRadx(const Beam &beam)
 
   const IwrfTsInfo &opsInfo = beam.getOpsInfo();
   const IwrfCalib &calib = beam.getCalib();
-  // iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
-                           
-  // int nGatesOut = beam.getNGatesOut();
-  // int nSamples = beam.getNSamplesEffective();
-  // int nSamples = beam.getNSamples();
-  // double pulseWidthUs = beam.getPulseWidth() * 1.0e6;
-
-  // if (_params.debug >= Params::DEBUG_VERBOSE) {
-  //   cerr << "-->> OutputFmq::_writeParamsRadx, nGates: " << nGatesOut << endl;
-  // }
-  
-  // compute nyquist and unambig range
-
-  // double nyquistVel = beam.getNyquist();
-  // double unambigRange = beam.getMaxRange();
 
   // Set radar parameters
   
   RadxPlatform platform;
 
   platform.setInstrumentName(opsInfo.get_radar_name());
+  platform.setSiteName(opsInfo.get_radar_name());
   platform.setInstrumentType(Radx::INSTRUMENT_TYPE_RADAR);
 
   switch (_params.platform_type) {
@@ -901,79 +889,125 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 {
 
-  bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
-  if (_params.debug &&
-      ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
-    printBeamDebug = true;
-  }
-  if (printBeamDebug) {
-    DateTime beamTime(beam.getTimeSecs(), true, beam.getNanoSecs() / 1.0e9);
-    time_t now = time(NULL);
-    int lateSecs = now - beam.getTimeSecs();
-    if (_params.mode == Params::ARCHIVE) {
-      fprintf(stderr,
-              "-->> OutputFmq::_writeBeamRadx %s - %s, vol: %.3d, "
-              "sweep: %.3d, "
-              "az: %6.3f, el %5.3f, nSamples: %3d\n",
-              beamTime.asString(3).c_str(),
-              iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
-              beam.getVolNum(), beam.getSweepNum(),
-              beam.getAz(), beam.getEl(),
-              beam.getNSamples());
-    } else {
-      fprintf(stderr,
-              "-->> OutputFmq::_writeBeamRadx %s (late %d) - %s, vol: %.3d, "
-              "sweep: %.3d, "
-              "az: %6.3f, el %5.3f, nSamples: %3d\n",
-              beamTime.asString(3).c_str(), lateSecs, 
-              iwrf_scan_mode_to_short_str(beam.getScanMode()).c_str(), 
-              beam.getVolNum(), beam.getSweepNum(),
-              beam.getAz(), beam.getEl(),
-              beam.getNSamples());
+  const IwrfTsInfo &opsInfo = beam.getOpsInfo();
+
+  // create ray
+  
+  RadxRay ray;
+  
+  ray.setTime(beam.getTimeSecs(), beam.getNanoSecs());
+  ray.setVolumeNumber(beam.getVolNum());
+  ray.setSweepNumber(beam.getSweepNum());
+  ray.setScanName(opsInfo.get_scan_segment_name());
+  
+  int dsrScanMode = beam.getScanMode();
+  ray.setSweepMode(IwrfMoments::getRadxSweepMode(dsrScanMode));
+
+  iwrf_xmit_rcv_mode_t xmitRcvMode = beam.getXmitRcvMode();
+  switch(xmitRcvMode) {
+    case IWRF_SINGLE_POL:
+      ray.setPolarizationMode(Radx::POL_MODE_HORIZONTAL);
+      break;
+    case IWRF_SINGLE_POL_V:
+      ray.setPolarizationMode(Radx::POL_MODE_VERTICAL);
+      break;
+    case IWRF_ALT_HV_CO_ONLY:
+    case IWRF_ALT_HV_CO_CROSS:
+    case IWRF_ALT_HV_FIXED_HV:
+      ray.setPolarizationMode(Radx::POL_MODE_HV_ALT);
+      break;
+    case IWRF_SIM_HV_FIXED_HV:
+    case IWRF_SIM_HV_SWITCHED_HV:
+      ray.setPolarizationMode(Radx::POL_MODE_HV_SIM);
+      break;
+    case IWRF_H_ONLY_FIXED_HV:
+      ray.setPolarizationMode(Radx::POL_MODE_HV_H_XMIT);
+      break;
+    case IWRF_V_ONLY_FIXED_HV:
+      ray.setPolarizationMode(Radx::POL_MODE_HV_V_XMIT);
+      break;
+    default: {
+      ray.setPolarizationMode(Radx::POL_MODE_HV_SIM);
     }
   }
 
-  // put georeference if applicable
-
-  int contents = 0;
-  if (beam.getGeorefActive()) {
-    DsPlatformGeoref &georef = _msg.getPlatformGeoref();
-    ds_iwrf_platform_georef_t dsGeoref;
-    // copy struct from iwrf to Radx
-    // these are identical, stored in different libs
-    // TODO - bring Radx into libs/radar
-    memcpy(&dsGeoref, &beam.getGeoref(), sizeof(dsGeoref));
-    georef.setGeoref(dsGeoref);
-    contents |= DsRadarMsg::PLATFORM_GEOREF;
+  if (beam.getIsStagPrt()) {
+    ray.setPrtMode(Radx::PRT_MODE_STAGGERED);
+    ray.setPrtRatio(beam.getPrtShort() / beam.getPrtLong());
+  } else {
+    ray.setPrtMode(Radx::PRT_MODE_FIXED);
+    ray.setPrtRatio(1.0);
   }
-    
-  int nGatesOut = beam.getNGatesOut();
+  ray.setFollowMode(Radx::FOLLOW_MODE_NOT_SET);
+
+  double elev = beam.getEl();
+  if (elev > 180) {
+    elev -= 360.0;
+  }
+  ray.setElevationDeg(elev);
+
+  double az = beam.getAz();
+  if (az < 0) {
+    az += 360.0;
+  }
+  ray.setAzimuthDeg(az);
   
-  DsRadarBeam &dsBeam = _msg.getRadarBeam();
-  int ndata = nGatesOut * _nFields;
-  ui16 *data = new ui16[ndata];
-  memset(data, 0, ndata * sizeof(ui16));
+  ray.setRangeGeom(beam.getStartRange(), beam.getGateSpacing());
+
+  if (dsrScanMode == DS_RADAR_RHI_MODE ||
+      dsrScanMode == DS_RADAR_EL_SURV_MODE) {
+    ray.setFixedAngleDeg(beam.getTargetAz());
+  } else {
+    ray.setFixedAngleDeg(beam.getTargetEl());
+  }
+
+  ray.setIsIndexed(beam.getBeamIsIndexed());
+  ray.setAngleResDeg(beam.getAngularResolution());
+  ray.setAntennaTransition(beam.getAntennaTransition());
+  ray.setNSamples(beam.getNSamples());
   
-  // params
-  
-  dsBeam.dataTime = beam.getTimeSecs();
-  double dtime = beam.getDoubleTime();
-  double partialSecs = fmod(dtime, 1.0);
-  dsBeam.nanoSecs = (int) (partialSecs * 1.0e9 + 0.5);
-  dsBeam.volumeNum = beam.getVolNum();
-  dsBeam.tiltNum = beam.getSweepNum();
-  dsBeam.elevation = beam.getEl();
-  dsBeam.azimuth = beam.getAz();
-  dsBeam.targetElev = beam.getTargetEl();
-  dsBeam.targetAz = beam.getTargetAz();
-  dsBeam.antennaTransition = beam.getAntennaTransition();
-  dsBeam.scanMode = beam.getScanMode();
-  dsBeam.beamIsIndexed = beam.getBeamIsIndexed();
-  dsBeam.angularResolution = beam.getAngularResolution();
-  dsBeam.nSamples = beam.getNSamples();
-  // dsBeam.nSamples = beam.getNSamplesEffective();
-  dsBeam.measXmitPowerDbmH = beam.getMeasXmitPowerDbmH();
-  dsBeam.measXmitPowerDbmV = beam.getMeasXmitPowerDbmV();
+  ray.setPulseWidthUsec(beam.getPulseWidth() * 1.0e6);
+  ray.setPrtSec(beam.getPrt());
+  ray.setNyquistMps(beam.getNyquist());
+
+  ray.setUnambigRangeKm(beam.getMaxRange());
+
+  ray.setMeasXmitPowerDbmH(beam.getMeasXmitPowerDbmH());
+  ray.setMeasXmitPowerDbmV(beam.getMeasXmitPowerDbmV());
+
+  // platform georeference - set if georefs active
+
+  if (beam.getGeorefActive()) {
+    const iwrf_platform_georef_t &dsGeoref = beam.getGeoref();
+    RadxGeoref georef;
+    georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
+    georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
+    georef.setUnitNum(dsGeoref.unit_num);
+    georef.setUnitId(dsGeoref.unit_id);
+    georef.setLongitude(dsGeoref.longitude);
+    georef.setLatitude(dsGeoref.latitude);
+    georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);
+    georef.setAltitudeKmAgl(dsGeoref.altitude_agl_km);
+    georef.setEwVelocity(dsGeoref.ew_velocity_mps);
+    georef.setNsVelocity(dsGeoref.ns_velocity_mps);
+    georef.setVertVelocity(dsGeoref.vert_velocity_mps);
+    georef.setHeading(dsGeoref.heading_deg);
+    georef.setTrack(dsGeoref.track_deg);
+    georef.setRoll(dsGeoref.roll_deg);
+    georef.setPitch(dsGeoref.pitch_deg);
+    georef.setDrift(dsGeoref.drift_angle_deg);
+    georef.setRotation(dsGeoref.rotation_angle_deg);
+    georef.setTilt(dsGeoref.tilt_deg);
+    georef.setEwWind(dsGeoref.ew_horiz_wind_mps);
+    georef.setNsWind(dsGeoref.ns_horiz_wind_mps);
+    georef.setVertWind(dsGeoref.vert_wind_mps);
+    georef.setHeadingRate(dsGeoref.heading_rate_dps);
+    georef.setPitchRate(dsGeoref.pitch_rate_dps);
+    georef.setRollRate(dsGeoref.roll_rate_dps);
+    georef.setDriveAngle1(dsGeoref.drive_angle_1_deg);
+    georef.setDriveAngle2(dsGeoref.drive_angle_2_deg);
+    ray.setGeoref(georef);
+  }
 
   // load up vector of field offsets
 
@@ -984,63 +1018,112 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     offsets.push_back(offset);
   }
 
-  // Load up data on a gate-by-gate basis.
-  // There are multiple fields for each gate
-
-  const MomentsFields *fieldsArray = beam.getFields();
-  const MomentsFields *fieldsFArray = beam.getFieldsF();
-  ui16 *dp = data;
-  for (int igate = 0; igate < nGatesOut; igate++) {
-
-    const MomentsFields &fields = fieldsArray[igate];
-    const MomentsFields &fieldsF = fieldsFArray[igate];
-
-    const double *start = &fields.start;
-    const double *startF = &fieldsF.start;
+  // load up fields
   
-    for (int ii = 0; ii < _params.output_fields_n; ii++) {
-      
-      const Params::output_field_t &field = _params._output_fields[ii];
-      int offset = offsets[ii];
-      
-      if (field.write_unfiltered) {
+  const MomentsFields *fieldsArray = beam.getFields(); // unfiltered
+  const MomentsFields *fieldsFArray = beam.getFieldsF(); // filtered
+  
+  int nGatesOut = beam.getNGatesOut();
+  
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+    
+    const Params::output_field_t &ofield = _params._output_fields[ifield];
+    int offset = offsets[ifield];
+    
+    if (ofield.write_unfiltered) {
+
+      RadxField *unfiltFld = new RadxField(ofield.name, ofield.units);
+
+      Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
+      for (int igate = 0; igate < nGatesOut; igate++) {
+        const MomentsFields &flds = fieldsArray[igate];
+        const double *start = &flds.start;
         double val = *(start + offset);
-        *dp = _convertDouble(val, field.scale, field.bias);
-        dp++;
+        fdata[igate] = val;
+      }
+
+      unfiltFld->addDataFl32(nGatesOut, fdata);
+      ray.addField(unfiltFld);
+
+    }
+      
+    if (ofield.write_filtered) {
+
+      string filtName = ofield.name;
+      filtName += "_F";
+      RadxField *filtFld = new RadxField(filtName, ofield.units);
+
+      Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
+      for (int igate = 0; igate < nGatesOut; igate++) {
+        const MomentsFields &flds = fieldsFArray[igate];
+        const double *start = &flds.start;
+        double val = *(start + offset);
+        fdata[igate] = val;
       }
       
-      if (field.write_filtered) {
-        double val = *(startF + offset);
-        *dp = _convertDouble(val, field.scale, field.bias);
-        dp++;
-      }
+      filtFld->addDataFl32(nGatesOut, fdata);
+      ray.addField(filtFld);
+
+    }
       
-    } // ii
-
-  } // igate
-
-  // load the data into the message
-
-  dsBeam.loadData(data, ndata * sizeof(ui16), sizeof(ui16));
-  delete[] data;
+  } // ifield
   
-  if (_params.mode != Params::REALTIME && _params.beam_wait_msecs > 0) {
-    umsleep(_params.beam_wait_msecs);
+  bool printBeamDebug = (_params.debug >= Params::DEBUG_VERBOSE);
+  if (_params.debug &&
+      ((_nBeamsWritten % _params.beam_count_for_debug_print) == 0)) {
+    printBeamDebug = true;
+  }
+  if (printBeamDebug) {
+    RadxTime rayTime(ray.getRadxTime());
+    time_t now = time(NULL);
+    int lateSecs = now - ray.getTimeSecs();
+    if (_params.mode == Params::ARCHIVE) {
+      fprintf(stderr,
+              "-->> OutputFmq::_writeBeamRadx %s - %s, vol: %.3d, "
+              "sweep: %.3d, "
+              "az: %6.3f, el %5.3f, nSamples: %3d\n",
+              rayTime.asString(3).c_str(),
+              Radx::sweepModeToShortStr(ray.getSweepMode()).c_str(), 
+              ray.getVolumeNumber(), ray.getSweepNumber(),
+              ray.getAzimuthDeg(), ray.getElevationDeg(),
+              beam.getNSamples());
+    } else {
+      fprintf(stderr,
+              "-->> OutputFmq::_writeBeamRadx %s (late %d) - %s, vol: %.3d, "
+              "sweep: %.3d, "
+              "az: %6.3f, el %5.3f, nSamples: %3d\n",
+              rayTime.asString(3).c_str(), lateSecs,
+              Radx::sweepModeToShortStr(ray.getSweepMode()).c_str(), 
+              ray.getVolumeNumber(), ray.getSweepNumber(),
+              ray.getAzimuthDeg(), ray.getElevationDeg(),
+              beam.getNSamples());
+    }
+  }
+
+  // create message
+  
+  RadxMsg msg;
+  ray.serialize(msg);
+  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
+    cerr << "=========== Writing out ray =============" << endl;
+    cerr << "  el, az: "
+         << ray.getElevationDeg() << ", "
+         << ray.getAzimuthDeg() << endl;
+    cerr << "=========================================" << endl;
   }
   
   // write the message
   
-  contents |= DsRadarMsg::RADAR_BEAM;
-  if (_dsrQueue->putDsMsg(_msg, contents)) {
-    cerr << "ERROR - OutputFmq::_writeBeamsRadx" << endl;
-    cerr << "  Cannot write radar beam to queue" << endl;
+  if (_radxQueue->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - OutputFmq::_writeCalibRadx" << endl;
+    cerr << "  Cannot write ray to queue" << endl;
     // reopen the queue
     if (_openFmq()) {
       return -1;
     }
   }
-
-  _nBeamsWritten++;
+  
   return 0;
 
 }
