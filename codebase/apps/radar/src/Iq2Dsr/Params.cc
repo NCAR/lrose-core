@@ -1745,7 +1745,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("compute_zdr_using_snr");
     tt->descr = tdrpStrDup("Option to compute ZDR using SNR instead of power.");
-    tt->help = tdrpStrDup("If true, we compute ZDR as SNRHC/SNRVC. This has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relatrive to SNR, not power.");
+    tt->help = tdrpStrDup("If true, we compute ZDR as SNRHC/SNRVC. This method applies the receiver gain, and has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relative to SNR, not power.");
     tt->val_offset = (char *) &compute_zdr_using_snr - &_start_;
     tt->single_val.b = pFALSE;
     tt++;

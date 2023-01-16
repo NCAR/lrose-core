@@ -646,7 +646,7 @@ paramdef boolean {
 paramdef boolean {
   p_default = false;
   p_descr = "Option to compute ZDR using SNR instead of power.";
-  p_help = "If true, we compute ZDR as SNRHC/SNRVC. This has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relatrive to SNR, not power.";
+  p_help = "If true, we compute ZDR as SNRHC/SNRVC. This method applies the receiver gain, and has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relative to SNR, not power.";
 } compute_zdr_using_snr;
 
 paramdef boolean {
