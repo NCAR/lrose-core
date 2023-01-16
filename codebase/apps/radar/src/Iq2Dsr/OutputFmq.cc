@@ -42,6 +42,7 @@
 
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfMoments.hh>
+#include <radar/MomentsFields.hh>
 #include <radar/RadarCalib.hh>
 #include <cmath>
 #include <toolsa/uusleep.h>
@@ -1022,6 +1023,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   
   const MomentsFields *fieldsArray = beam.getFields(); // unfiltered
   const MomentsFields *fieldsFArray = beam.getFieldsF(); // filtered
+  Radx::fl32 missingFl32 = MomentsFields::missingDouble;
   
   int nGatesOut = beam.getNGatesOut();
   
@@ -1033,6 +1035,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     if (ofield.write_unfiltered) {
 
       RadxField *unfiltFld = new RadxField(ofield.name, ofield.units);
+      unfiltFld->setMissingFl32(missingFl32);
 
       Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
       for (int igate = 0; igate < nGatesOut; igate++) {
@@ -1052,6 +1055,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       string filtName = ofield.name;
       filtName += "_F";
       RadxField *filtFld = new RadxField(filtName, ofield.units);
+      filtFld->setMissingFl32(missingFl32);
 
       Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
       for (int igate = 0; igate < nGatesOut; igate++) {
