@@ -1015,6 +1015,10 @@ public:
 
   int computeNExpandedStagPrt(int nSamples);
 
+  // compute unambig range from PRT
+  
+  static double computeUnambigRangeKm(double prtSecs);
+
   // Clutter phase alignment - single pol
 
   static double computeCpa(const RadarComplex_t *iq, int nSamples);
@@ -1239,6 +1243,10 @@ public:
   
   double getBaseDbz1km(channel_t channel);
 
+  // unambiguous range
+  
+  double getUnambigRangeKm() { return _unambigRangeKm; }
+
   // get nyquist after object has been initialized/used
 
   double getNyquist() const { return _nyquist; }
@@ -1428,6 +1436,7 @@ private:
   double _wavelengthMeters;
   double _prt;
   double _nyquist;
+  double _unambigRangeKm;
 
   // staggered PRT
 

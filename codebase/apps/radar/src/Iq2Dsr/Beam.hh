@@ -137,6 +137,7 @@ public:
   double getPrtLong() const { return _prtLong; }
   double getPulseWidth() const { return _pulseWidth; }
   double getNyquist() const { return _nyquist; }
+  double getUnambigRangeKm() const;
 
   double getMeasXmitPowerDbmH() const { return _measXmitPowerDbmH; }
   double getMeasXmitPowerDbmV() const { return _measXmitPowerDbmV; }
@@ -160,10 +161,10 @@ public:
 
   int getNGates() const { return _nGates; }
   int getNGatesOut() const { return _nGatesOut; }
-  double getMaxRange() const;
+  double getMaxRangeKm() const;
 
-  double getStartRange() const { return _startRangeKm; }
-  double getGateSpacing() const { return _gateSpacingKm; }
+  double getStartRangeKm() const { return _startRangeKm; }
+  double getGateSpacingKm() const { return _gateSpacingKm; }
 
   iwrf_xmit_rcv_mode_t getXmitRcvMode() const { return _xmitRcvMode; }
   bool getIsDualPol() const { return _dualPol; }

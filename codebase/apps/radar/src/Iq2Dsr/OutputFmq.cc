@@ -265,7 +265,7 @@ int OutputFmq::_writeParamsDsRadar(const Beam &beam)
   // compute nyquist and unambig range
 
   double nyquistVel = beam.getNyquist();
-  double unambigRange = beam.getMaxRange();
+  double unambigRange = beam.getUnambigRangeKm();
 
   // create message
   
@@ -938,7 +938,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     ray.setPrtMode(Radx::PRT_MODE_FIXED);
     ray.setPrtRatio(1.0);
   }
-  ray.setFollowMode(Radx::FOLLOW_MODE_NOT_SET);
+  ray.setFollowMode(Radx::FOLLOW_MODE_NONE);
 
   double elev = beam.getEl();
   if (elev > 180) {
@@ -952,7 +952,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   }
   ray.setAzimuthDeg(az);
   
-  ray.setRangeGeom(beam.getStartRange(), beam.getGateSpacing());
+  ray.setRangeGeom(beam.getStartRangeKm(), beam.getGateSpacingKm());
 
   if (dsrScanMode == DS_RADAR_RHI_MODE ||
       dsrScanMode == DS_RADAR_EL_SURV_MODE) {
@@ -970,7 +970,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
   ray.setPrtSec(beam.getPrt());
   ray.setNyquistMps(beam.getNyquist());
 
-  ray.setUnambigRangeKm(beam.getMaxRange());
+  ray.setUnambigRangeKm(beam.getUnambigRangeKm());
 
   ray.setMeasXmitPowerDbmH(beam.getMeasXmitPowerDbmH());
   ray.setMeasXmitPowerDbmV(beam.getMeasXmitPowerDbmV());

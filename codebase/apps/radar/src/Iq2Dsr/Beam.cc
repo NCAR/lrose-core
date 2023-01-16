@@ -863,15 +863,24 @@ int Beam::getScanMode() const
 ////////////////////////////////////////////////
 // get maximum range
 
-double Beam::getMaxRange() const
+double Beam::getMaxRangeKm() const
 
 {
-
   double maxRange = _opsInfo.get_proc_start_range_km() +
     _nGatesOut * _opsInfo.get_proc_gate_spacing_km();
-  
   return maxRange;
+}
 
+////////////////////////////////////////////////
+// get unambiguous range
+
+double Beam::getUnambigRangeKm() const
+
+{
+  if (_mom == NULL) {
+    return _missingDbl;
+  }
+  return _mom->getUnambigRangeKm();
 }
 
 ///////////////////////////////////////////////////////////

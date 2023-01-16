@@ -45,6 +45,7 @@
 #include <rapmath/umath.h>
 #include <radar/ClutFilter.hh>
 #include <radar/RadarMoments.hh>
+#include <Radx/Radx.hh>
 
 const double RadarMoments::_missing = MomentsFields::missingDouble;
 const double RadarMoments::_phidpPhaseLimitAlt = -70;
@@ -155,6 +156,8 @@ void RadarMoments::_init()
   _wavelengthMeters = 10.0;
   _prt = 0.001;
   _nyquist = 25;
+
+  _unambigRangeKm = _missing;
  
   _prtShort = 0.005;
   _prtLong = 0.0075;
@@ -5805,6 +5808,7 @@ void RadarMoments::init(double prt,
   _wavelengthMeters = wavelengthMeters;
   _prt = prt;
   _nyquist = ((_wavelengthMeters / _prt) / 4.0);
+  _unambigRangeKm = computeUnambigRangeKm(_prt);
 
   // compute range correction table
   
@@ -5860,6 +5864,7 @@ void RadarMoments::initStagPrt(double prtShort,
   _nyquistShortPlusLong = ((_wavelengthMeters / (_prtShort + _prtLong)) / 4.0);
   _nyquistStagNominal = ((_wavelengthMeters / (_prtShort / _staggeredM)) / 4.0);
   _nyquist = _nyquistPrtShort * _staggeredM;
+  _unambigRangeKm = computeUnambigRangeKm(_prtShort);
 
   // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
@@ -5955,6 +5960,17 @@ int RadarMoments::computeNExpandedStagPrt(int nSamples)
 
 {
   return ((nSamples / 2) * (_staggeredM + _staggeredN));
+}
+
+
+///////////////////////////////////////////////////////////
+// compute unambig range from PRT
+
+double RadarMoments::computeUnambigRangeKm(double prtSecs)
+
+{
+  double unambigRangeKm = (Radx::LIGHT_SPEED * prtSecs / 2.0) / 1000.0;
+  return unambigRangeKm;
 }
 
 ///////////////////////////////////////
