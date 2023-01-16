@@ -46,6 +46,7 @@
 #include <radar/RadarCalib.hh>
 #include <Radx/RadxFile.hh>
 #include <Radx/RadxGeoref.hh>
+#include <Radx/RadxStatusXml.hh>
 #include <Radx/RadxMsg.hh>
 using namespace std;
 
@@ -754,6 +755,24 @@ int IwrfMomReader::_handleRadxMsg()
     return 0;
   }
   
+  ///////////////// status xml /////////////////////////////
+  
+  if (msg.getMsgType() == RadxMsg::RadxStatusXmlMsg) {
+    RadxStatusXml status;
+    if (status.deserialize(msg)) {
+      cerr << "ERROR - IwrfMomReader::_handleRadxMsg()" << endl;
+      cerr << "  Cannot deseralize status xml from RadxMsg" << endl;
+      msg.printHeader(cerr, "  ");
+      return -1;
+    }
+    if (_debug >= IWRF_DEBUG_EXTRA) {
+      cerr << "=========>> IwrfMomReader got RadxStatusXml" << endl;
+    }
+    _statusXml = status.getXmlStr();
+    _latestFlags.statusXmlUpdated = true;
+    return 0;
+  }
+
   ///////////////// ray ////////////////////////
   
   if (msg.getMsgType() == RadxMsg::RadxRayMsg) {
