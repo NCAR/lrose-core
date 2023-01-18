@@ -955,6 +955,12 @@ public:
 
   char* egm_2008_geoid_file;
 
+  tdrp_bool_t correct_rx_gain_using_measured_noise;
+
+  char* noise_mon_spdb_url;
+
+  int noise_mon_search_margin_secs;
+
   tdrp_bool_t apply_precip_attenuation_correction;
 
   tdrp_bool_t specify_coefficients_for_attenuation_correction;
@@ -1280,7 +1286,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[280];
+  mutable TDRPtable _table[284];
 
   const char *_className;
 

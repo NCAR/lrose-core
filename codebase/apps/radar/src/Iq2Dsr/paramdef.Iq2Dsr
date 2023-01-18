@@ -950,6 +950,28 @@ paramdef string {
 } egm_2008_geoid_file;
 
 commentdef {
+  p_header = "CORRECT RECEIVER GAIN USING MEASURED NOISE VALUES";
+  p_text = "Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to correct receiver gains using measured noise values.";
+  p_help = "Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.";
+} correct_rx_gain_using_measured_noise;
+
+paramdef string {
+  p_default = "/scr/cirrus3/rsfdata/projects/precip/qc/calibration/noise_mon";
+  p_descr = "URL for noise monitoring.";
+} noise_mon_spdb_url;
+
+paramdef int {
+  p_default = 3600;
+  p_descr = "Search margin when finding noise monitoring data (secs).";
+  p_help = "We search for the value closest in time to the beam time. This is the search margin on either side of the search time.";
+} noise_mon_search_margin_secs;
+
+commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
 }
 
