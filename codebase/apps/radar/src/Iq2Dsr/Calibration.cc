@@ -130,145 +130,20 @@ int Calibration::loadCal(const Beam *beam)
     
   }
 
+  // adjust cal receiver gains from NoiseMon data
+  
   if (_params.noise_mon_correct_cal_rx_gain) {
-    
-    // retrieve noise monitoring results
-    
-    DsSpdb spdb;
-    if (spdb.getClosest(_params.noise_mon_spdb_url,
-                        beam->getTimeSecs(),
-                        _params.noise_mon_search_margin_secs)) {
-      // if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "WARNING - Calibration::loadCal()" << endl;
-        cerr << "  Cannot get NoiseMon data from URL: "
-             << _params.noise_mon_spdb_url << endl;
-        cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
-        cerr << "  Search margin (secs): "
-             << _params.noise_mon_search_margin_secs << endl;
-        cerr << spdb.getErrStr() << endl;
-        // }
+    if (_adjustCalGainFromNoiseMon(beam)) {
+      cerr << "WARNING - Calibration::loadCal()" << endl;
+      cerr << "  Cannot retrieve NoiseMon data to adjust rx gains" << endl;
       return -1;
     }
-    
-    // got chunks
-    
-    const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
-    if (chunks.size() < 1) {
-      // if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "ERROR -  Calibration::loadCal()" << endl;
-        cerr << "  No suitable noise mon data from URL: "
-             << _params.noise_mon_spdb_url << endl;
-        cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
-        cerr << "  Search margin (secs): "
-             << _params.noise_mon_search_margin_secs << endl;
-        // }
-      return -1;
-    }
-    const Spdb::chunk_t &chunk = chunks[0];
-    
-    // get xml string with gain results
-  
-    string xml((char *) chunk.data, chunk.len - 1);
-    string noiseMonXml;
-    if (TaXml::readString(xml, _params.noise_mon_tag_main, noiseMonXml)) {
-      // if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "ERROR -  Calibration::loadCal()" << endl;
-        cerr << "  No suitable noise mon data from URL: "
-             << _params.noise_mon_spdb_url << endl;
-        cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
-        cerr << "  Search margin (secs): "
-             << _params.noise_mon_search_margin_secs << endl;
-        // }
-      cerr << "noiseMonXml: " << noiseMonXml << endl;
-    }
-    
-    // find values from XML
-    
-    double noiseZdr = _getValFromXml(noiseMonXml,
-                                     _params.noise_mon_tag_zdr);
-    double noiseDbmhc = _getValFromXml(noiseMonXml,
-                                       _params.noise_mon_tag_dbmhc);
-    double noiseDbmvc = _getValFromXml(noiseMonXml,
-                                       _params.noise_mon_tag_dbmvc);
-    
-    // if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "Calibration::loadCal() - reading in noise monitoring results" << endl;
-      cerr << "  noiseZdr: " << noiseZdr << endl;
-      cerr << "  noiseDbmhc: " << noiseDbmhc << endl;
-      cerr << "  noiseDbmvc: " << noiseDbmvc << endl;
-      // }
-
-    if (std::isnan(noiseZdr) || std::isnan(noiseDbmhc) || std::isnan(noiseDbmvc)) {
-      if (_params.debug >= Params::DEBUG_VERBOSE) {
-        cerr << "WARNING - Calibration::loadCal()" << endl;
-        cerr << "  Cannot find noise mon values in XML: " << noiseMonXml << endl;
-      }
-      return -1;
-    }
-  
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
-      _calib.print(cerr);
-      cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
-      cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
-      // cerr << deltaGainXml << endl;
-      cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-    }
-  
-    // augment status xml in ops info
-    
-    // _statusXml += deltaGainXml;
-    
-    // compute base dbz if needed
-    
-    // if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
-    //   double rconst = _calib.getRadarConstV();
-    //   double noise = _calib.getNoiseDbmVc();
-    //   double noiseFixed = noise + deltaGainVc;
-    //   double gain = _calib.getReceiverGainDbVc();
-    //   double gainFixed = gain + deltaGainVc;
-    //   double baseDbz1km = noiseFixed - gainFixed + rconst;
-    //   if (!_calib.isMissing(noise) && !_calib.isMissing(rconst)) {
-    //     _calib.setBaseDbz1kmVc(baseDbz1km);
-    //   }
-    //   _calib.setReceiverGainDbVc(gainFixed);
-    //   _calib.setNoiseDbmVc(noiseFixed);
-    // }
-    
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
-      _calib.print(cerr);
-      cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
-    }
-    
   }
-  
+    
   return 0;
 
 }
 
-/////////////////////////////////////////////////////////////////
-// get value from XML string, given the tag list
-// returns val, NAN on failure
-
-double Calibration::_getValFromXml(const string &xml,
-                                   const string &tag) const
-  
-{
-  
-  // read val
-  
-  double val = NAN;
-  if (TaXml::readDouble(xml, tag, val)) {
-    cerr << "WARNING - Calibration::_getValFromXml()" << endl;
-    cerr << "  Bad val found in status xml: " << xml << endl;
-    return NAN;
-  }
-  
-  return val;
-
-}
-  
 /////////////////////////////////////////////////
 // Set the calibration from the ops info
 // that the baseDbz1km values are set
@@ -733,3 +608,145 @@ void Calibration::_applyCorrections()
 
 }
 
+/////////////////////////////////////////////////////////////////
+// get value from XML string, given the tag list
+// returns val, NAN on failure
+
+double Calibration::_getValFromXml(const string &xml,
+                                   const string &tag) const
+  
+{
+  
+  // read val
+  
+  double val = NAN;
+  if (TaXml::readDouble(xml, tag, val)) {
+    cerr << "WARNING - Calibration::_getValFromXml()" << endl;
+    cerr << "  Bad val found in status xml: " << xml << endl;
+    return NAN;
+  }
+  
+  return val;
+
+}
+  
+////////////////////////////////////////////////////////////////
+// adjust cal rx gain for noise mon
+
+int Calibration::_adjustCalGainFromNoiseMon(const Beam *beam)
+  
+{
+
+  // retrieve noise monitoring results
+  
+  DsSpdb spdb;
+  if (spdb.getClosest(_params.noise_mon_spdb_url,
+                      beam->getTimeSecs(),
+                      _params.noise_mon_search_margin_secs)) {
+    // if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "WARNING - Calibration::loadCal()" << endl;
+    cerr << "  Cannot get NoiseMon data from URL: "
+         << _params.noise_mon_spdb_url << endl;
+    cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.noise_mon_search_margin_secs << endl;
+    cerr << spdb.getErrStr() << endl;
+    // }
+    return -1;
+  }
+  
+  // got chunks
+  
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    // if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "ERROR -  Calibration::loadCal()" << endl;
+    cerr << "  No suitable noise mon data from URL: "
+         << _params.noise_mon_spdb_url << endl;
+    cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.noise_mon_search_margin_secs << endl;
+    // }
+    return -1;
+  }
+  const Spdb::chunk_t &chunk = chunks[0];
+    
+  // get xml string with gain results
+  
+  string xml((char *) chunk.data, chunk.len - 1);
+  string noiseMonXml;
+  if (TaXml::readString(xml, _params.noise_mon_tag_main, noiseMonXml)) {
+    // if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "ERROR -  Calibration::loadCal()" << endl;
+    cerr << "  No suitable noise mon data from URL: "
+         << _params.noise_mon_spdb_url << endl;
+    cerr << "  Search time: " << DateTime::strm(beam->getTimeSecs()) << endl;
+    cerr << "  Search margin (secs): "
+         << _params.noise_mon_search_margin_secs << endl;
+    // }
+  }
+  cerr << "noiseMonXml: " << noiseMonXml << endl;
+  
+  // find values from XML
+  
+  double noiseZdr = _getValFromXml(noiseMonXml,
+                                   _params.noise_mon_tag_zdr);
+  double noiseDbmhc = _getValFromXml(noiseMonXml,
+                                     _params.noise_mon_tag_dbmhc);
+  double noiseDbmvc = _getValFromXml(noiseMonXml,
+                                     _params.noise_mon_tag_dbmvc);
+  
+  // if (_params.debug >= Params::DEBUG_VERBOSE) {
+  cerr << "Calibration::loadCal() - reading in noise monitoring results" << endl;
+  cerr << "  noiseZdr: " << noiseZdr << endl;
+  cerr << "  noiseDbmhc: " << noiseDbmhc << endl;
+  cerr << "  noiseDbmvc: " << noiseDbmvc << endl;
+  // }
+  
+  if (std::isnan(noiseZdr) || std::isnan(noiseDbmhc) || std::isnan(noiseDbmvc)) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - Calibration::loadCal()" << endl;
+      cerr << "  Cannot find noise mon values in XML: " << noiseMonXml << endl;
+    }
+    return -1;
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
+    _calib.print(cerr);
+    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
+    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
+    // cerr << deltaGainXml << endl;
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
+  
+  // augment status xml in ops info
+  
+  // _statusXml += deltaGainXml;
+  
+  // compute base dbz if needed
+  
+  // if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
+  //   double rconst = _calib.getRadarConstV();
+  //   double noise = _calib.getNoiseDbmVc();
+  //   double noiseFixed = noise + deltaGainVc;
+  //   double gain = _calib.getReceiverGainDbVc();
+  //   double gainFixed = gain + deltaGainVc;
+  //   double baseDbz1km = noiseFixed - gainFixed + rconst;
+  //   if (!_calib.isMissing(noise) && !_calib.isMissing(rconst)) {
+  //     _calib.setBaseDbz1kmVc(baseDbz1km);
+  //   }
+  //   _calib.setReceiverGainDbVc(gainFixed);
+  //   _calib.setNoiseDbmVc(noiseFixed);
+  // }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
+    _calib.print(cerr);
+    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
+  }
+
+  return 0;
+  
+}
+  
