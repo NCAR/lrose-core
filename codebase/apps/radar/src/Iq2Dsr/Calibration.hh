@@ -108,6 +108,8 @@ private:
   int _compileFileList(const string &dirPath, FileMap &fileMap);
   iwrf_xmit_rcv_mode_t _getXmitRcvMode(Params::xmit_rcv_mode_t mode);
   void _applyCorrections();
+  double _getValFromXml(const string &xml, const string &tag) const;
+  
   
 };
 

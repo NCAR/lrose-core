@@ -2353,7 +2353,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("hcr_v_rx_delta_gain_tag_list");
-    tt->descr = tdrpStrDup("URL for HCR gain correction from SPDB.");
+    tt->descr = tdrpStrDup("Tag list for HCR V channel gai correction.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &hcr_v_rx_delta_gain_tag_list - &_start_;
     tt->single_val.s = tdrpStrDup("<HcrTempGainCorrection><v_delta_gain>");
@@ -2388,19 +2388,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("CORRECT RECEIVER GAIN USING MEASURED NOISE VALUES");
-    tt->comment_text = tdrpStrDup("Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.");
+    tt->comment_hdr = tdrpStrDup("CORRECT CALIBRATION RECEIVER GAIN USING MEASURED NOISE VALUES");
+    tt->comment_text = tdrpStrDup("Noise values are measured using NoiseMon, which computes the noise for gates above a designated height, and checks that rays are not close to the sun or contain significant reflectivity.");
     tt++;
     
-    // Parameter 'correct_rx_gain_using_measured_noise'
+    // Parameter 'noise_mon_correct_cal_rx_gain'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("correct_rx_gain_using_measured_noise");
-    tt->descr = tdrpStrDup("Option to correct receiver gains using measured noise values.");
-    tt->help = tdrpStrDup("Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.");
-    tt->val_offset = (char *) &correct_rx_gain_using_measured_noise - &_start_;
+    tt->param_name = tdrpStrDup("noise_mon_correct_cal_rx_gain");
+    tt->descr = tdrpStrDup("Option to correct calibration receiver gains using measured noise values.");
+    tt->help = tdrpStrDup("Noise values are measured using NoiseMon.");
+    tt->val_offset = (char *) &noise_mon_correct_cal_rx_gain - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -2410,10 +2410,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("noise_mon_spdb_url");
-    tt->descr = tdrpStrDup("URL for noise monitoring.");
+    tt->descr = tdrpStrDup("URL for NoiseMon results in SPDB.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &noise_mon_spdb_url - &_start_;
-    tt->single_val.s = tdrpStrDup("/scr/cirrus3/rsfdata/projects/precip/qc/calibration/noise_mon");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/calibration/spol/noise_mon/sband/spdb");
     tt++;
     
     // Parameter 'noise_mon_search_margin_secs'
@@ -2422,10 +2422,58 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("noise_mon_search_margin_secs");
-    tt->descr = tdrpStrDup("Search margin when finding noise monitoring data (secs).");
+    tt->descr = tdrpStrDup("Search margin when finding NoiseMon data (secs).");
     tt->help = tdrpStrDup("We search for the value closest in time to the beam time. This is the search margin on either side of the search time.");
     tt->val_offset = (char *) &noise_mon_search_margin_secs - &_start_;
-    tt->single_val.i = 3600;
+    tt->single_val.i = 13600;
+    tt++;
+    
+    // Parameter 'noise_mon_tag_main'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_tag_main");
+    tt->descr = tdrpStrDup("XML tag for noise monitoring section.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &noise_mon_tag_main - &_start_;
+    tt->single_val.s = tdrpStrDup("NoiseMonitoring");
+    tt++;
+    
+    // Parameter 'noise_mon_tag_zdr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_tag_zdr");
+    tt->descr = tdrpStrDup("Tag for noise ZDR.");
+    tt->help = tdrpStrDup("This tag must exist in the noise monitoring XML.");
+    tt->val_offset = (char *) &noise_mon_tag_zdr - &_start_;
+    tt->single_val.s = tdrpStrDup("meanNoiseZdr");
+    tt++;
+    
+    // Parameter 'noise_mon_tag_dbmhc'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_tag_dbmhc");
+    tt->descr = tdrpStrDup("Tag for noise dbm in H co-polar channel.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &noise_mon_tag_dbmhc - &_start_;
+    tt->single_val.s = tdrpStrDup("meanDbmhc");
+    tt++;
+    
+    // Parameter 'noise_mon_tag_dbmvc'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_tag_dbmvc");
+    tt->descr = tdrpStrDup("Tag for noise dbm in V co-polar channel.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &noise_mon_tag_dbmvc - &_start_;
+    tt->single_val.s = tdrpStrDup("meanDbmvc");
     tt++;
     
     // Parameter 'Comment 12'

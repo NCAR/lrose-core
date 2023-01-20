@@ -41,7 +41,6 @@
 #include <cassert>
 #include <iostream>
 #include <toolsa/pmu.h>
-#include <Spdb/DsSpdb.hh>
 #include "EgmCorrection.hh"
 #include "SpectraPrint.hh"
 #include "Iq2Dsr.hh"

@@ -934,7 +934,7 @@ paramdef int {
 
 paramdef string {
   p_default = "<HcrTempGainCorrection><v_delta_gain>";
-  p_descr = "URL for HCR gain correction from SPDB.";
+  p_descr = "Tag list for HCR V channel gai correction.";
 } hcr_v_rx_delta_gain_tag_list;
 
 paramdef boolean {
@@ -950,26 +950,47 @@ paramdef string {
 } egm_2008_geoid_file;
 
 commentdef {
-  p_header = "CORRECT RECEIVER GAIN USING MEASURED NOISE VALUES";
-  p_text = "Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.";
+  p_header = "CORRECT CALIBRATION RECEIVER GAIN USING MEASURED NOISE VALUES";
+  p_text = "Noise values are measured using NoiseMon, which computes the noise for gates above a designated height, and checks that rays are not close to the sun or contain significant reflectivity.";
 }
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to correct receiver gains using measured noise values.";
-  p_help = "Noise values are measured using NoiseMon, which computes the noise at geates above a designated height, for rays not close to the sun or containing significant reflectivity.";
-} correct_rx_gain_using_measured_noise;
+  p_descr = "Option to correct calibration receiver gains using measured noise values.";
+  p_help = "Noise values are measured using NoiseMon.";
+} noise_mon_correct_cal_rx_gain;
 
 paramdef string {
-  p_default = "/scr/cirrus3/rsfdata/projects/precip/qc/calibration/noise_mon";
-  p_descr = "URL for noise monitoring.";
+  p_default = "$(DATA_DIR)/calibration/spol/noise_mon/sband/spdb";
+  p_descr = "URL for NoiseMon results in SPDB.";
 } noise_mon_spdb_url;
 
 paramdef int {
-  p_default = 3600;
-  p_descr = "Search margin when finding noise monitoring data (secs).";
+  p_default = 13600;
+  p_descr = "Search margin when finding NoiseMon data (secs).";
   p_help = "We search for the value closest in time to the beam time. This is the search margin on either side of the search time.";
 } noise_mon_search_margin_secs;
+
+paramdef string {
+  p_default = "NoiseMonitoring";
+  p_descr = "XML tag for noise monitoring section.";
+} noise_mon_tag_main;
+
+paramdef string {
+  p_default = "meanNoiseZdr";
+  p_descr = "Tag for noise ZDR.";
+  p_help = "This tag must exist in the noise monitoring XML."; 
+} noise_mon_tag_zdr;
+
+paramdef string {
+  p_default = "meanDbmhc";
+  p_descr = "Tag for noise dbm in H co-polar channel.";
+} noise_mon_tag_dbmhc;
+
+paramdef string {
+  p_default = "meanDbmvc";
+  p_descr = "Tag for noise dbm in V co-polar channel.";
+} noise_mon_tag_dbmvc;
 
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
