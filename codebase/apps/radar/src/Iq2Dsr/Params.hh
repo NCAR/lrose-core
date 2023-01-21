@@ -971,6 +971,12 @@ public:
 
   char* noise_mon_tag_list_site_temp;
 
+  double noise_mon_zdrm_corr;
+
+  double noise_mon_mean_site_temp;
+
+  double noise_mon_zdr_temp_slope;
+
   tdrp_bool_t apply_precip_attenuation_correction;
 
   tdrp_bool_t specify_coefficients_for_attenuation_correction;
@@ -1296,7 +1302,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[289];
+  mutable TDRPtable _table[292];
 
   const char *_className;
 

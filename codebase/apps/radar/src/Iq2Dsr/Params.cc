@@ -2488,6 +2488,42 @@
     tt->single_val.s = tdrpStrDup("<SpolStatus><WxStation><tempC>");
     tt++;
     
+    // Parameter 'noise_mon_zdrm_corr'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_zdrm_corr");
+    tt->descr = tdrpStrDup("Correction to estimate ZDRM bias from noise ZDR (dB).");
+    tt->help = tdrpStrDup("Separately from this app, we monitor the ZDRM bias, say using vertical pointing scans. We compare the mean ZDRM bias with the mean ZDR as computed from noise. Applying this correction allows us to compute the ZDRM bias to use in the saved calibration.");
+    tt->val_offset = (char *) &noise_mon_zdrm_corr - &_start_;
+    tt->single_val.d = 0.52;
+    tt++;
+    
+    // Parameter 'noise_mon_mean_site_temp'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_mean_site_temp");
+    tt->descr = tdrpStrDup("Mean site temperature for ZDR analysis (C).");
+    tt->help = tdrpStrDup("Separately from this app, we determine the dependency of ZDR on site temperature. This is the mean temperature from that analysis. We use this to determine the ZDR bias from temperature.");
+    tt->val_offset = (char *) &noise_mon_mean_site_temp - &_start_;
+    tt->single_val.d = 27.34;
+    tt++;
+    
+    // Parameter 'noise_mon_zdr_temp_slope'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_zdr_temp_slope");
+    tt->descr = tdrpStrDup("Slope of ZDR dependency on temperature (dB/C).");
+    tt->help = tdrpStrDup("Separately from this app, we determine the dependency of ZDR on site temperature. This is the slope of the ZDR relationship on temperature from that analysis. We use this to determine the ZDR bias from temperature.");
+    tt->val_offset = (char *) &noise_mon_zdr_temp_slope - &_start_;
+    tt->single_val.d = 0.01296;
+    tt++;
+    
     // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));

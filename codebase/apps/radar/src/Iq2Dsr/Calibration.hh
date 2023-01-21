@@ -105,7 +105,9 @@ private:
   double _noiseMonDbmVc;
 
   int _tempCount;
-  double _noiseMonSiteTemp;
+  double _noiseMonSiteTempC;
+
+  double _noiseMonZdrm;
 
   bool _useNoiseMonCalib;
   IwrfCalib _noiseMonCalib;

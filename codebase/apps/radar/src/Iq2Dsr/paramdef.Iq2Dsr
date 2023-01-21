@@ -997,6 +997,24 @@ paramdef string {
   p_descr = "Tag for site temperature.";
 } noise_mon_tag_list_site_temp;
 
+paramdef double {
+  p_default = 0.52;
+  p_descr = "Correction to estimate ZDRM bias from noise ZDR (dB).";
+  p_help = "Separately from this app, we monitor the ZDRM bias, say using vertical pointing scans. We compare the mean ZDRM bias with the mean ZDR as computed from noise. Applying this correction allows us to compute the ZDRM bias to use in the saved calibration.";
+} noise_mon_zdrm_corr;
+
+paramdef double {
+  p_default = 27.34;
+  p_descr = "Mean site temperature for ZDR analysis (C).";
+  p_help = "Separately from this app, we determine the dependency of ZDR on site temperature. This is the mean temperature from that analysis. We use this to determine the ZDR bias from temperature.";
+} noise_mon_mean_site_temp;
+
+paramdef double {
+  p_default = 0.01296;
+  p_descr = "Slope of ZDR dependency on temperature (dB/C).";
+  p_help = "Separately from this app, we determine the dependency of ZDR on site temperature. This is the slope of the ZDR relationship on temperature from that analysis. We use this to determine the ZDR bias from temperature.";
+} noise_mon_zdr_temp_slope;
+
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";
 }

@@ -716,7 +716,6 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
     if (!std::isnan(siteTempC)) {
       sumSiteTempC += siteTempC;
       tempCount++;
-      sumNoiseZdr += noiseZdr;
     }
 
   } // ichunk
@@ -754,7 +753,7 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   _noiseMonDbmVc = meanNoiseDbmVc;
 
   _tempCount = tempCount;
-  _noiseMonSiteTemp = meanSiteTempC;
+  _noiseMonSiteTempC = meanSiteTempC;
 
   // create XML string to add to status string
   
@@ -765,8 +764,8 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   xml += TaXml::writeDouble("meanNoiseZdr", 1, _noiseMonZdr);
   xml += TaXml::writeDouble("meanDbmhc", 1, _noiseMonDbmHc);
   xml += TaXml::writeDouble("meanDbmvc", 1, _noiseMonDbmVc);
-  if (!isnan(_noiseMonSiteTemp)) {
-    xml += TaXml::writeDouble("siteTemp", 1, _noiseMonSiteTemp);
+  if (!isnan(_noiseMonSiteTempC)) {
+    xml += TaXml::writeDouble("siteTempC", 1, _noiseMonSiteTempC);
     xml += TaXml::writeDouble("tempCount", 1, _tempCount);
   }
   xml += TaXml::writeEndTag("NoiseMonitoring", 0);
@@ -784,7 +783,7 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   beam->appendStatusXml(xml);
     
   // compute cal adjusted for noise
-    
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     cerr << "+++++ CALIBRATION BEFORE RX GAIN CORRECTION +++++++++++++" << endl;
@@ -817,11 +816,21 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   
   _noiseMonCalib.setReceiverGainDbHc(corrGainDbHc);
   _noiseMonCalib.setReceiverGainDbVc(corrGainDbVc);
+
+  _noiseMonZdrm = _noiseMonZdr + _params.noise_mon_zdrm_corr;
+  if (!std::isnan(_noiseMonSiteTempC)) {
+    _noiseMonZdrm += ((_noiseMonSiteTempC - _params.noise_mon_mean_site_temp) *
+                      _params.noise_mon_zdr_temp_slope);
+  }
+  _noiseMonCalib.setZdrCorrectionDb(_noiseMonZdrm * -1.0);
   
   _useNoiseMonCalib = true;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "*********************************************************" << endl;
+    cerr << "==>> _noiseMonZdr: " << _noiseMonZdr << endl;
+    cerr << "==>> _noiseMonSiteTempC: " << _noiseMonSiteTempC << endl;
+    cerr << "==>> _noiseMonZdrm: " << _noiseMonZdrm << endl;
     cerr << "==>> calNoiseDbmHc: " << calNoiseDbmHc << endl;
     cerr << "==>> calNoiseDbmVc: " << calNoiseDbmVc << endl;
     cerr << "==>> noiseMonDbmHc: " << _noiseMonDbmHc << endl;
@@ -832,6 +841,7 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
     cerr << "==>> receiverGainDbVc: " << receiverGainDbVc << endl;
     cerr << "==>> corrGainDbHc: " << corrGainDbHc << endl;
     cerr << "==>> corrGainDbVc: " << corrGainDbVc << endl;
+    cerr << "==>> zdrm: " << _noiseMonZdrm << endl;
     cerr << "****** CALIBRATION AFTER RX GAIN CORRECTION *************" << endl;
     _noiseMonCalib.print(cerr);
     cerr << "*********************************************************" << endl;
