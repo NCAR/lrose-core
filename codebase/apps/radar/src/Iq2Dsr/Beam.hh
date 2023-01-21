@@ -116,6 +116,7 @@ public:
   void setTargetEl(double el) { _targetEl = el; }
   void setCalib(const IwrfCalib &calib);
   void setStatusXml(const string &statusXml);
+  void appendStatusXml(const string &extraXml);
 
   void setSweepNum(int val) { _sweepNum = val; }
   void setVolNum(int val) { _volNum = val; }

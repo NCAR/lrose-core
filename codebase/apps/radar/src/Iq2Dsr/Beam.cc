@@ -839,6 +839,14 @@ void Beam::setStatusXml(const string &statusXml)
 
 }
 
+void Beam::appendStatusXml(const string &extraXml)
+
+{
+
+  _statusXml += extraXml;
+
+}
+
 ////////////////////////////////////////////////
 // get scan mode
 

@@ -70,7 +70,7 @@ public:
   // Load calibration appropriate to a given beam
   // Returns 0 on success, -1 on failure
   
-  int loadCal(const Beam *beam);
+  int loadCal(Beam *beam);
   
   // is calibration data available?
 
@@ -89,7 +89,6 @@ private:
   bool _calAvailable;
   string _calFilePath;
 
-  time_t _prevTimeRequested;
   double _prevPulseWidth;
   string _calDirForPulseWidth;
 
@@ -99,17 +98,22 @@ private:
   string _radarName;
   time_t _calTime;
 
+  time_t _noiseMonTime;
+  double _noiseMonZdr;
+  double _noiseMonDbmhc;
+  double _noiseMonDbmvc;
+  
   // functions
   
-  void _setCalFromTimeSeries(const Beam *beam);
-  int _checkPulseWidthAndRead(const Beam *beam);
+  void _setCalFromTimeSeries(Beam *beam);
+  int _checkPulseWidthAndRead(Beam *beam);
   int _readCal(time_t utime, const string &calDir);
   int _readCalFromFile(const string &calPath);
   int _compileFileList(const string &dirPath, FileMap &fileMap);
   iwrf_xmit_rcv_mode_t _getXmitRcvMode(Params::xmit_rcv_mode_t mode);
   void _applyCorrections();
   double _getValFromXml(const string &xml, const string &tag) const;
-  int _adjustCalGainFromNoiseMon(const Beam *beam);
+  int _adjustCalGainFromNoiseMon(Beam *beam);
   
 };
 
