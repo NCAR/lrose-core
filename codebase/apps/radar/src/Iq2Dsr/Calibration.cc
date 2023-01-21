@@ -64,8 +64,8 @@ Calibration::Calibration(const Params &params) :
 
   _noiseMonTime = -1;
   _noiseMonZdr = -9999.0;
-  _noiseMonDbmhc = -9999.0;
-  _noiseMonDbmvc = -9999.0;
+  _noiseMonDbmHc = -9999.0;
+  _noiseMonDbmVc = -9999.0;
   _useNoiseMonCalib = false;
   
 }
@@ -659,8 +659,8 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
 
   if (fabs((double) beam->getTimeSecs() - (double) _noiseMonTime) < 10 &&
       _noiseMonZdr > -9990.0 &&
-      _noiseMonDbmhc > -9990.0 &&
-      _noiseMonDbmvc > -9990.0) {
+      _noiseMonDbmHc > -9990.0 &&
+      _noiseMonDbmVc > -9990.0) {
     // we have good recent data
     if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
       cerr << "====>> have good noiseMon data, time: "
@@ -722,14 +722,14 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   
   double noiseZdr = _getValFromXml(noiseMonXml,
                                    _params.noise_mon_tag_zdr);
-  double noiseDbmhc = _getValFromXml(noiseMonXml,
+  double noiseDbmHc = _getValFromXml(noiseMonXml,
                                      _params.noise_mon_tag_dbmhc);
-  double noiseDbmvc = _getValFromXml(noiseMonXml,
+  double noiseDbmVc = _getValFromXml(noiseMonXml,
                                      _params.noise_mon_tag_dbmvc);
 
   // check if we got good data
   
-  if (std::isnan(noiseZdr) || std::isnan(noiseDbmhc) || std::isnan(noiseDbmvc)) {
+  if (std::isnan(noiseZdr) || std::isnan(noiseDbmHc) || std::isnan(noiseDbmVc)) {
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "WARNING - Calibration::loadCal()" << endl;
       cerr << "  Cannot find noise mon values in XML: " << noiseMonXml << endl;
@@ -743,8 +743,8 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   cerr << "noiseMonXml: " << noiseMonXml << endl;
   cerr << "=============================================" << endl;
   cerr << "  noiseZdr: " << noiseZdr << endl;
-  cerr << "  noiseDbmhc: " << noiseDbmhc << endl;
-  cerr << "  noiseDbmvc: " << noiseDbmvc << endl;
+  cerr << "  noiseDbmHc: " << noiseDbmHc << endl;
+  cerr << "  noiseDbmVc: " << noiseDbmVc << endl;
   cerr << "=============================================" << endl;
   // }
   
@@ -756,8 +756,8 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   
   _noiseMonTime = beam->getTimeSecs();
   _noiseMonZdr = noiseZdr;
-  _noiseMonDbmhc = noiseDbmhc;
-  _noiseMonDbmvc = noiseDbmvc;
+  _noiseMonDbmHc = noiseDbmHc;
+  _noiseMonDbmVc = noiseDbmVc;
 
   // compute cal adjusted for noise
   
@@ -767,9 +767,34 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
     _calib.print(cerr);
     cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   }
+
+  // copy from main cal
+  
+  _noiseMonCalib = _calib;
+
+  // compute delta noise
+  
+  double calNoiseDbmHc = _calib.getNoiseDbmHc();
+  double calNoiseDbmVc = _calib.getNoiseDbmVc();
+
+  double deltaNoiseDbmHc = _noiseMonDbmHc - calNoiseDbmHc;
+  double deltaNoiseDbmVc = _noiseMonDbmVc - calNoiseDbmVc;
+
+  // compute corrected gains
+  
+  double receiverGainDbHc = _calib.getReceiverGainDbHc();
+  double receiverGainDbVc = _calib.getReceiverGainDbVc();
+
+  double corrGainDbHc = receiverGainDbHc + deltaNoiseDbmHc;
+  double corrGainDbVc = receiverGainDbVc + deltaNoiseDbmVc;
+
+  _noiseMonCalib.setNoiseDbmHc(_noiseMonDbmHc);
+  _noiseMonCalib.setNoiseDbmVc(_noiseMonDbmVc);
+  
+  _noiseMonCalib.setReceiverGainDbHc(corrGainDbHc);
+  _noiseMonCalib.setReceiverGainDbVc(corrGainDbVc);
   
   _useNoiseMonCalib = true;
-  _noiseMonCalib = _calib;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "*********************************************************" << endl;
@@ -777,22 +802,6 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
     _noiseMonCalib.print(cerr);
     cerr << "*********************************************************" << endl;
   }
-  
-  // compute base dbz if needed
-  
-  // if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
-  //   double rconst = _calib.getRadarConstV();
-  //   double noise = _calib.getNoiseDbmVc();
-  //   double noiseFixed = noise + deltaGainVc;
-  //   double gain = _calib.getReceiverGainDbVc();
-  //   double gainFixed = gain + deltaGainVc;
-  //   double baseDbz1km = noiseFixed - gainFixed + rconst;
-  //   if (!_calib.isMissing(noise) && !_calib.isMissing(rconst)) {
-  //     _calib.setBaseDbz1kmVc(baseDbz1km);
-  //   }
-  //   _calib.setReceiverGainDbVc(gainFixed);
-  //   _calib.setNoiseDbmVc(noiseFixed);
-  // }
   
   return 0;
   

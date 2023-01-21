@@ -100,8 +100,8 @@ private:
 
   time_t _noiseMonTime;
   double _noiseMonZdr;
-  double _noiseMonDbmhc;
-  double _noiseMonDbmvc;
+  double _noiseMonDbmHc;
+  double _noiseMonDbmVc;
   bool _useNoiseMonCalib;
   IwrfCalib _noiseMonCalib;
   
