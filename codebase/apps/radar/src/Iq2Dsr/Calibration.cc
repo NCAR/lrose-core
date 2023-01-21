@@ -777,16 +777,16 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   double calNoiseDbmHc = _calib.getNoiseDbmHc();
   double calNoiseDbmVc = _calib.getNoiseDbmVc();
 
-  double deltaNoiseDbmHc = _noiseMonDbmHc - calNoiseDbmHc;
-  double deltaNoiseDbmVc = _noiseMonDbmVc - calNoiseDbmVc;
+  double deltaNoiseDbHc = _noiseMonDbmHc - calNoiseDbmHc;
+  double deltaNoiseDbVc = _noiseMonDbmVc - calNoiseDbmVc;
 
   // compute corrected gains
   
   double receiverGainDbHc = _calib.getReceiverGainDbHc();
   double receiverGainDbVc = _calib.getReceiverGainDbVc();
 
-  double corrGainDbHc = receiverGainDbHc + deltaNoiseDbmHc;
-  double corrGainDbVc = receiverGainDbVc + deltaNoiseDbmVc;
+  double corrGainDbHc = receiverGainDbHc + deltaNoiseDbHc;
+  double corrGainDbVc = receiverGainDbVc + deltaNoiseDbVc;
 
   _noiseMonCalib.setNoiseDbmHc(_noiseMonDbmHc);
   _noiseMonCalib.setNoiseDbmVc(_noiseMonDbmVc);
@@ -798,6 +798,16 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "*********************************************************" << endl;
+    cerr << "==>> calNoiseDbmHc: " << calNoiseDbmHc << endl;
+    cerr << "==>> calNoiseDbmVc: " << calNoiseDbmVc << endl;
+    cerr << "==>> noiseMonDbmHc: " << _noiseMonDbmHc << endl;
+    cerr << "==>> noiseMonDbmVc: " << _noiseMonDbmVc << endl;
+    cerr << "==>> deltaNoiseDbHc: " << deltaNoiseDbHc << endl;
+    cerr << "==>> deltaNoiseDbVc: " << deltaNoiseDbVc << endl;
+    cerr << "==>> receiverGainDbHc: " << receiverGainDbHc << endl;
+    cerr << "==>> receiverGainDbVc: " << receiverGainDbVc << endl;
+    cerr << "==>> corrGainDbHc: " << corrGainDbHc << endl;
+    cerr << "==>> corrGainDbVc: " << corrGainDbVc << endl;
     cerr << "****** CALIBRATION AFTER RX GAIN CORRECTION *************" << endl;
     _noiseMonCalib.print(cerr);
     cerr << "*********************************************************" << endl;
