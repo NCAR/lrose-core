@@ -76,9 +76,9 @@ public:
 
   bool isCalAvailable() const { return _calAvailable; }
   
-  // get values
+  // get current cal values
 
-  const IwrfCalib &getIwrfCalib() const { return _calib; }
+  const IwrfCalib &getIwrfCalib() const;
 
 private:
 
@@ -102,6 +102,8 @@ private:
   double _noiseMonZdr;
   double _noiseMonDbmhc;
   double _noiseMonDbmvc;
+  bool _useNoiseMonCalib;
+  IwrfCalib _noiseMonCalib;
   
   // functions
   

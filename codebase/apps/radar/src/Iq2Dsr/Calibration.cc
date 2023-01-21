@@ -66,6 +66,7 @@ Calibration::Calibration(const Params &params) :
   _noiseMonZdr = -9999.0;
   _noiseMonDbmhc = -9999.0;
   _noiseMonDbmvc = -9999.0;
+  _useNoiseMonCalib = false;
   
 }
 
@@ -75,6 +76,20 @@ Calibration::Calibration(const Params &params) :
 
 Calibration::~Calibration()
 {
+}
+
+//////////////////////////////////////////////////////////
+// get current cal values
+
+const IwrfCalib &Calibration::getIwrfCalib() const
+{
+
+  if (_useNoiseMonCalib) {
+    return _noiseMonCalib;
+  } else {
+    return _calib;
+  }
+
 }
 
 //////////////////////////////////////////////////////////
@@ -134,7 +149,7 @@ int Calibration::loadCal(Beam *beam)
     
   }
 
-  // adjust cal receiver gains from NoiseMon data
+  // adjust cal receiver gains from NoiseMon data, if required
   
   if (_params.noise_mon_correct_cal_rx_gain) {
     if (_adjustCalGainFromNoiseMon(beam)) {
@@ -733,15 +748,6 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   cerr << "=============================================" << endl;
   // }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "++++ CALIBRATION BEFORE HCR GAIN CORRECTION +++++++++++++" << endl;
-    _calib.print(cerr);
-    cerr << "++++ END CALIBRATION BEFORE HCR GAIN TEMP CORRECTION ++++" << endl;
-    cerr << "Delta gain XML - created by HcrTempRxGain app" << endl;
-    // cerr << deltaGainXml << endl;
-    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-  }
-  
   // augment status xml in beam
   
   beam->appendStatusXml(noiseMonXml);
@@ -753,6 +759,25 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   _noiseMonDbmhc = noiseDbmhc;
   _noiseMonDbmvc = noiseDbmvc;
 
+  // compute cal adjusted for noise
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cerr << "+++++ CALIBRATION BEFORE RX GAIN CORRECTION +++++++++++++" << endl;
+    _calib.print(cerr);
+    cerr << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  }
+  
+  _useNoiseMonCalib = true;
+  _noiseMonCalib = _calib;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "*********************************************************" << endl;
+    cerr << "****** CALIBRATION AFTER RX GAIN CORRECTION *************" << endl;
+    _noiseMonCalib.print(cerr);
+    cerr << "*********************************************************" << endl;
+  }
+  
   // compute base dbz if needed
   
   // if (!_calib.isMissing(_calib.getReceiverGainDbVc())) {
@@ -769,12 +794,6 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   //   _calib.setNoiseDbmVc(noiseFixed);
   // }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "++++ CALIBRATION AFTER HCR GAIN CORRECTION +++++++++++++" << endl;
-    _calib.print(cerr);
-    cerr << "++++ END CALIBRATION AFTER HCR GAIN TEMP CORRECTION ++++" << endl;
-  }
-
   return 0;
   
 }
