@@ -2422,10 +2422,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("noise_mon_search_margin_secs");
-    tt->descr = tdrpStrDup("Search margin when finding NoiseMon data (secs).");
-    tt->help = tdrpStrDup("We search for the value closest in time to the beam time. This is the search margin on either side of the search time.");
+    tt->descr = tdrpStrDup("Search margin for finding NoiseMon data (secs).");
+    tt->help = tdrpStrDup("We search a time period from the radar time minus the margin to the radar time plus the margin. We compute the mean value within this time range.");
     tt->val_offset = (char *) &noise_mon_search_margin_secs - &_start_;
-    tt->single_val.i = 13600;
+    tt->single_val.i = 3600;
     tt++;
     
     // Parameter 'noise_mon_tag_main'
@@ -2440,40 +2440,52 @@
     tt->single_val.s = tdrpStrDup("NoiseMonitoring");
     tt++;
     
-    // Parameter 'noise_mon_tag_zdr'
+    // Parameter 'noise_mon_tag_list_zdr'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("noise_mon_tag_zdr");
+    tt->param_name = tdrpStrDup("noise_mon_tag_list_zdr");
     tt->descr = tdrpStrDup("Tag for noise ZDR.");
     tt->help = tdrpStrDup("This tag must exist in the noise monitoring XML.");
-    tt->val_offset = (char *) &noise_mon_tag_zdr - &_start_;
-    tt->single_val.s = tdrpStrDup("meanNoiseZdr");
+    tt->val_offset = (char *) &noise_mon_tag_list_zdr - &_start_;
+    tt->single_val.s = tdrpStrDup("<NoiseMonitoring><meanNoiseZdr>");
     tt++;
     
-    // Parameter 'noise_mon_tag_dbmhc'
+    // Parameter 'noise_mon_tag_list_dbmhc'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("noise_mon_tag_dbmhc");
+    tt->param_name = tdrpStrDup("noise_mon_tag_list_dbmhc");
     tt->descr = tdrpStrDup("Tag for noise dbm in H co-polar channel.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &noise_mon_tag_dbmhc - &_start_;
-    tt->single_val.s = tdrpStrDup("meanDbmhc");
+    tt->val_offset = (char *) &noise_mon_tag_list_dbmhc - &_start_;
+    tt->single_val.s = tdrpStrDup("<NoiseMonitoring><meanDbmhc>");
     tt++;
     
-    // Parameter 'noise_mon_tag_dbmvc'
+    // Parameter 'noise_mon_tag_list_dbmvc'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("noise_mon_tag_dbmvc");
+    tt->param_name = tdrpStrDup("noise_mon_tag_list_dbmvc");
     tt->descr = tdrpStrDup("Tag for noise dbm in V co-polar channel.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &noise_mon_tag_dbmvc - &_start_;
-    tt->single_val.s = tdrpStrDup("meanDbmvc");
+    tt->val_offset = (char *) &noise_mon_tag_list_dbmvc - &_start_;
+    tt->single_val.s = tdrpStrDup("<NoiseMonitoring><meanDbmvc>");
+    tt++;
+    
+    // Parameter 'noise_mon_tag_list_site_temp'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("noise_mon_tag_list_site_temp");
+    tt->descr = tdrpStrDup("Tag for site temperature.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &noise_mon_tag_list_site_temp - &_start_;
+    tt->single_val.s = tdrpStrDup("<SpolStatus><WxStation><tempC>");
     tt++;
     
     // Parameter 'Comment 12'

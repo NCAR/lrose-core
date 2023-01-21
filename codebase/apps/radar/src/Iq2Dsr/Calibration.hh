@@ -99,9 +99,14 @@ private:
   time_t _calTime;
 
   time_t _noiseMonTime;
+  int _noiseMonCount;
   double _noiseMonZdr;
   double _noiseMonDbmHc;
   double _noiseMonDbmVc;
+
+  int _tempCount;
+  double _noiseMonSiteTemp;
+
   bool _useNoiseMonCalib;
   IwrfCalib _noiseMonCalib;
   

@@ -131,8 +131,8 @@ void Args::_usage(string &prog_name, ostream &out)
       << "          SUMMARY: nmessages and data rate\n"
       << "          FULL: info on each message\n"
       << "          ASCII_PRINT: assumes messages are ASCII, prints messages\n"
-      << "  [-start] Seek to start of FMQ\n"
-      << "     If not set, reading begins at the end of the FMQ.\n"
+      << "       [-start] Seek to start of FMQ\n"
+      << "          If not set, reading begins at the end of the FMQ.\n"
       << "       [ -url/-fmq ? ] specify URL of fmq to watch\n"
       << "       [ -verbose ] print verbose debug messages\n"
       << endl;

@@ -966,9 +966,9 @@ paramdef string {
 } noise_mon_spdb_url;
 
 paramdef int {
-  p_default = 13600;
-  p_descr = "Search margin when finding NoiseMon data (secs).";
-  p_help = "We search for the value closest in time to the beam time. This is the search margin on either side of the search time.";
+  p_default = 3600;
+  p_descr = "Search margin for finding NoiseMon data (secs).";
+  p_help = "We search a time period from the radar time minus the margin to the radar time plus the margin. We compute the mean value within this time range.";
 } noise_mon_search_margin_secs;
 
 paramdef string {
@@ -977,20 +977,25 @@ paramdef string {
 } noise_mon_tag_main;
 
 paramdef string {
-  p_default = "meanNoiseZdr";
+  p_default = "<NoiseMonitoring><meanNoiseZdr>";
   p_descr = "Tag for noise ZDR.";
   p_help = "This tag must exist in the noise monitoring XML."; 
-} noise_mon_tag_zdr;
+} noise_mon_tag_list_zdr;
 
 paramdef string {
-  p_default = "meanDbmhc";
+  p_default = "<NoiseMonitoring><meanDbmhc>";
   p_descr = "Tag for noise dbm in H co-polar channel.";
-} noise_mon_tag_dbmhc;
+} noise_mon_tag_list_dbmhc;
 
 paramdef string {
-  p_default = "meanDbmvc";
+  p_default = "<NoiseMonitoring><meanDbmvc>";
   p_descr = "Tag for noise dbm in V co-polar channel.";
-} noise_mon_tag_dbmvc;
+} noise_mon_tag_list_dbmvc;
+
+paramdef string {
+  p_default = "<SpolStatus><WxStation><tempC>";
+  p_descr = "Tag for site temperature.";
+} noise_mon_tag_list_site_temp;
 
 commentdef {
   p_header = "PRECIP-INDUCED ATTENUATION CORRECTION FOR DBZ AND ZDR";

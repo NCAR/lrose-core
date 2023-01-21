@@ -963,11 +963,13 @@ public:
 
   char* noise_mon_tag_main;
 
-  char* noise_mon_tag_zdr;
+  char* noise_mon_tag_list_zdr;
 
-  char* noise_mon_tag_dbmhc;
+  char* noise_mon_tag_list_dbmhc;
 
-  char* noise_mon_tag_dbmvc;
+  char* noise_mon_tag_list_dbmvc;
+
+  char* noise_mon_tag_list_site_temp;
 
   tdrp_bool_t apply_precip_attenuation_correction;
 
@@ -1294,7 +1296,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[288];
+  mutable TDRPtable _table[289];
 
   const char *_className;
 
