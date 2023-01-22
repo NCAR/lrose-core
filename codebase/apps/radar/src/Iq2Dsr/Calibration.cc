@@ -770,14 +770,6 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   }
   xml += TaXml::writeEndTag("NoiseMonitoring", 0);
 
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "Calibration::loadCal() - noise monitoring" << endl;
-    cerr << "=============================================" << endl;
-    cerr << "noiseMonXml:" << endl;
-    cerr << xml << endl;
-    cerr << "=============================================" << endl;
-  }
-  
   // augment status xml in beam
   
   beam->appendStatusXml(xml);
@@ -826,8 +818,11 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   
   _useNoiseMonCalib = true;
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "*********************************************************" << endl;
+  if (_params.debug) {
+    cerr << "Calibration::loadCal() - noise monitoring" << endl;
+    cerr << "=========================================================" << endl;
+    cerr << "noiseMonXml:" << endl;
+    cerr << xml;
     cerr << "==>> _noiseMonZdr: " << _noiseMonZdr << endl;
     cerr << "==>> _noiseMonSiteTempC: " << _noiseMonSiteTempC << endl;
     cerr << "==>> _noiseMonZdrm: " << _noiseMonZdrm << endl;
@@ -842,6 +837,9 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
     cerr << "==>> corrGainDbHc: " << corrGainDbHc << endl;
     cerr << "==>> corrGainDbVc: " << corrGainDbVc << endl;
     cerr << "==>> zdrm: " << _noiseMonZdrm << endl;
+    cerr << "=========================================================" << endl;
+  }
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "****** CALIBRATION AFTER RX GAIN CORRECTION *************" << endl;
     _noiseMonCalib.print(cerr);
     cerr << "*********************************************************" << endl;

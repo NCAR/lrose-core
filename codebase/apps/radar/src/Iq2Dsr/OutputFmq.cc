@@ -1128,6 +1128,7 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     }
   }
   
+  _nBeamsWritten++;
   return 0;
 
 }
