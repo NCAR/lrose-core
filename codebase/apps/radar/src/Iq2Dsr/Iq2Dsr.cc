@@ -398,8 +398,10 @@ int Iq2Dsr::_runSingleThreaded()
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
-  _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
+  if (latestBeam != NULL) {
+    _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
+    _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
+  }
 
   return iret;
 
@@ -429,6 +431,9 @@ int Iq2Dsr::_runMultiThreaded()
     // get next incoming beam
     
     Beam *beam = beams[ii % 30];
+    if (beam == NULL) {
+      continue;
+    }
     
     _nGatesComputed += beam->getNGates();
     latestBeam = beam;
@@ -447,9 +452,11 @@ int Iq2Dsr::_runMultiThreaded()
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, latestBeam);
-  _fmq->putEndOfVolume(_currentVolNum, latestBeam);
-
+  if (latestBeam != NULL) {
+    _fmq->putEndOfTilt(_currentSweepNum, latestBeam);
+    _fmq->putEndOfVolume(_currentVolNum, latestBeam);
+  }
+  
   return iret;
 
 }
@@ -495,8 +502,10 @@ int Iq2Dsr::_runMultiThreaded()
   
   // put final end of sweep and volume flags
 
-  _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
-  _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
+  if (latestBeam != NULL) {
+    _fmq->putEndOfTilt(_currentSweepNum, *latestBeam);
+    _fmq->putEndOfVolume(_currentVolNum, *latestBeam);
+  }
 
   return iret;
 

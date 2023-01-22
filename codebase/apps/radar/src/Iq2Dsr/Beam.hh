@@ -144,7 +144,7 @@ public:
   double getMeasXmitPowerDbmV() const { return _measXmitPowerDbmV; }
   
   time_t getTimeSecs() const { return _timeSecs; }
-  time_t getNanoSecs() const { return _nanoSecs; }
+  long int getNanoSecs() const { return _nanoSecs; }
   double getDoubleTime() const { return _dtime; }
   
   int getScanMode() const;
@@ -222,7 +222,7 @@ private:
   // time and location
 
   time_t _timeSecs;
-  int _nanoSecs;
+  long int _nanoSecs;
   double _dtime;
 
   double _meanPointingAngle;
