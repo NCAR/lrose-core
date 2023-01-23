@@ -17,6 +17,8 @@
 //
 //
 
+#define debug_boundary false
+
 #include <cmath>
 #include <cstring>
 #include <cstdio>
@@ -406,6 +408,10 @@ void BoundaryPointMap::xse_set_intxn(double x, double y, double slope,
     BoundaryPointManagement *bpmx;
     double xx, yy; //  sqrt();
 
+#ifdef debug_boundary
+    cerr << "bpm->x, bpm->y = " << bpm->x << "," << bpm->y << endl;
+#endif
+
     /*
      * first compute the x coordinate of the intersection
      */
@@ -442,6 +448,11 @@ void BoundaryPointMap::xse_set_intxn(double x, double y, double slope,
       return; // (NO);
 
     ob->num_intxns++;
+
+  #ifdef debug_boundary
+    cerr << "ob->num_intxns = " << ob->num_intxns << endl;
+  #endif
+
     bpm->rx = sqrt(((double)(xx*xx)+(double)(yy*yy)));
 
     bpm->next_intxn = NULL;
@@ -547,6 +558,11 @@ void BoundaryPointMap::se_radar_inside_bnd(OneBoundary *ob)
     inside_count += (int)(nn & 1); /* i.e. and odd number of intxns */
   }
   ob->radar_inside_boundary = inside_count > 2;
+# ifdef debug_boundary
+  cerr << "   radar_inside_boundary is ";
+  if (ob->radar_inside_boundary) cerr << " true" << endl;
+  else cerr << " false" << endl;
+# endif
   // return(ob->radar_inside_boundary);
 }
 

@@ -337,41 +337,41 @@ void dd_radar_angles(
 
     if( radar_type == AIR_LF || radar_type == AIR_NOSE ) {
 
-	d = ( dgi_dds_ryib_azimuth );
-	lambda_a = dd_isnanf(d) ? 0 : RADIANS
-	  ( CART_ANGLE( d +cfac_azimuth_corr ));
-	sin_lambda_a = sin(lambda_a);
-	cos_lambda_a = cos(lambda_a);
+    	d = ( dgi_dds_ryib_azimuth );
+    	lambda_a = dd_isnanf(d) ? 0 : RADIANS
+    	  ( CART_ANGLE( d +cfac_azimuth_corr ));
+    	sin_lambda_a = sin(lambda_a);
+    	cos_lambda_a = cos(lambda_a);
 
-	d = ( dgi_dds_ryib_elevation );
-	phi_a = dd_isnanf(d) ? 0 : RADIANS( d +cfac_elevation_corr );
-	sin_phi_a = sin(phi_a);
-	cos_phi_a = cos(phi_a);
+    	d = ( dgi_dds_ryib_elevation );
+    	phi_a = dd_isnanf(d) ? 0 : RADIANS( d +cfac_elevation_corr );
+    	sin_phi_a = sin(phi_a);
+    	cos_phi_a = cos(phi_a);
 
-	sinR = sin(R);
-	cosR = cos(R);
+    	sinR = sin(R);
+    	cosR = cos(R);
 
-	*ra_x = xsubt = cos_lambda_a * cos_phi_a *
-	    (cosD * cosR - sinD * sinP * sinR) -
-	    sinD * cosP * sin_lambda_a * cos_phi_a +
-	    sin_phi_a * ( cosD * sinR + sinD * sinP * cosR );
+    	*ra_x = xsubt = cos_lambda_a * cos_phi_a *
+    	    (cosD * cosR - sinD * sinP * sinR) -
+    	    sinD * cosP * sin_lambda_a * cos_phi_a +
+    	    sin_phi_a * ( cosD * sinR + sinD * sinP * cosR );
 
-	*ra_y = ysubt = cos_lambda_a * cos_phi_a *
-	    ( sinD * cosR + cosD * sinP * sinR ) +
-	    cosD * cosP * sin_lambda_a * cos_phi_a +
-	    sin_phi_a * ( sinD * sinR - cosD * sinP * cosR );
+    	*ra_y = ysubt = cos_lambda_a * cos_phi_a *
+    	    ( sinD * cosR + cosD * sinP * sinR ) +
+    	    cosD * cosP * sin_lambda_a * cos_phi_a +
+    	    sin_phi_a * ( sinD * sinR - cosD * sinP * cosR );
 
-	*ra_z = zsubt = -cosP * sinR * cos_lambda_a * cos_phi_a +
-	    sinP * sin_lambda_a * cos_phi_a +
-	    cosP * cosR * sin_phi_a;
+    	*ra_z = zsubt = -cosP * sinR * cos_lambda_a * cos_phi_a +
+    	    sinP * sin_lambda_a * cos_phi_a +
+    	    cosP * cosR * sin_phi_a;
 
-	*ra_rotation_angle = theta_t = atan2(xsubt, zsubt);
-	*ra_tilt = tau_t = asin(ysubt);
-	lambda_t = atan2(xsubt, ysubt);
-	*ra_azimuth = fmod(lambda_t + T, TWOPI);
-	*ra_elevation = phi_t = asin(zsubt);
+    	*ra_rotation_angle = theta_t = atan2(xsubt, zsubt);
+    	*ra_tilt = tau_t = asin(ysubt);
+    	lambda_t = atan2(xsubt, ysubt);
+    	*ra_azimuth = fmod(lambda_t + T, TWOPI);
+    	*ra_elevation = phi_t = asin(zsubt);
 
-	return;
+    	return;
     }
 
     sinT = sin(T);
