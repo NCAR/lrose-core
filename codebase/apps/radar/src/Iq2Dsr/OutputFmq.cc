@@ -1034,9 +1034,13 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
     
     if (ofield.write_unfiltered) {
 
+      // create field
+      
       RadxField *unfiltFld = new RadxField(ofield.name, ofield.units);
       unfiltFld->setMissingFl32(missingFl32);
 
+      // add moments data
+      
       Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
       for (int igate = 0; igate < nGatesOut; igate++) {
         const MomentsFields &flds = fieldsArray[igate];
@@ -1046,17 +1050,28 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       }
 
       unfiltFld->addDataFl32(nGatesOut, fdata);
+
+      // convert missing value to standard
+      
+      unfiltFld->setMissingFl32(Radx::missingFl32);
+
+      // add field to output ray
+      
       ray.addField(unfiltFld);
 
     }
       
     if (ofield.write_filtered) {
 
+      // create field
+      
       string filtName = ofield.name;
       filtName += "_F";
       RadxField *filtFld = new RadxField(filtName, ofield.units);
       filtFld->setMissingFl32(missingFl32);
 
+      // add moments data
+      
       Radx::fl32 *fdata = new Radx::fl32[nGatesOut];
       for (int igate = 0; igate < nGatesOut; igate++) {
         const MomentsFields &flds = fieldsFArray[igate];
@@ -1066,9 +1081,16 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       }
       
       filtFld->addDataFl32(nGatesOut, fdata);
+
+      // convert missing value to standard
+      
+      filtFld->setMissingFl32(Radx::missingFl32);
+
+      // add field to output ray
+      
       ray.addField(filtFld);
 
-    }
+    } // if (ofield.write_filtered) 
       
   } // ifield
   

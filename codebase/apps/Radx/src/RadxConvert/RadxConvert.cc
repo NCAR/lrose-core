@@ -1695,9 +1695,10 @@ void RadxConvert::_censorRay(RadxRay *ray)
     RadxField *field = fields[ifield];
     if (_checkFieldForCensoring(field)) {
       Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
+      Radx::fl32 fmiss = field->getMissingFl32();
       for (size_t igate = 0; igate < nGates; igate++) {
         if (censorFlag[igate] == 1) {
-          fdata[igate] = Radx::missingFl32;
+          fdata[igate] = fmiss;
         }
       } // igate
     } // if (_checkFieldForCensoring(field))

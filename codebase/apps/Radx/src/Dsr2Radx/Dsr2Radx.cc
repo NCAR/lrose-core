@@ -1352,10 +1352,11 @@ void Dsr2Radx::_censorInputRay(RadxRay *ray)
   vector<RadxField *> fields = ray->getFields();
   for (size_t ifield = 0; ifield < fields.size(); ifield++) {
     RadxField *field = fields[ifield];
+    Radx::fl32 fmiss = field->getMissingFl32();
     Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
     for (size_t igate = 0; igate < nGates; igate++) {
       if (censorFlag[igate] == 1) {
-        fdata[igate] = Radx::missingFl32;
+        fdata[igate] = fmiss;
       }
     } // igate
   } // ifield

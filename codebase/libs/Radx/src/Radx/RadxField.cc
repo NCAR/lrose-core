@@ -2337,7 +2337,7 @@ void RadxField::transformDbToLinear()
   Radx::fl32 *fdat = (Radx::fl32 *) _data;
   for (size_t ii = 0; ii < _nPoints; ii++) {
     Radx::fl32 val = fdat[ii];
-    if (val != Radx::missingFl32) {
+    if (val != _missingFl32) {
       fdat[ii] = pow(10.0, val / 10.0);
     }
   }
@@ -2358,7 +2358,7 @@ void RadxField::transformLinearToDb()
     Radx::fl32 val = fdat[ii];
     if (val != Radx::missingFl32) {
       if (val <= 0.0) {
-        fdat[ii] = Radx::missingFl32;
+        fdat[ii] = _missingFl32;
       } else {
         fdat[ii] = 10.0 * log10(val);
       }
