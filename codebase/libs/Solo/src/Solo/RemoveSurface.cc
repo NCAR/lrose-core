@@ -244,14 +244,12 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     // cerr << " max_range_km=" << max_range_km;
 
     if (surface_only && getenv_ALTERNATE_GECHO) { // (aa = getenv ("ALTERNATE_GECHO"))) {
-      if( elev_radians > -.002)	// -.10 degrees 
-	      { 
+      if( elev_radians > -.002)	{ // -.10 degrees { 
           // cerr << endl << "returning elev_radians > -.002" << endl;
           return; 
-        }
+      }
       alt_gecho_flag = true;
-      if (d > 0)
-	      { min_grad = d; }	// dbz per meter
+      if (d > 0) { min_grad = d; }	// dbz per meter
     }
 
     if( !surface_only && (d = max_range_km * fudge * bmwidth_radians) >= alt_km) {
@@ -262,7 +260,7 @@ void se_ac_surface_tweak(Surface_Type which_removal,  // internal value based on
     	if( elev_radians > elev_limit) {
           // cerr << endl << "returning elev_radians > elev_limt" << endl;
     	    return;
-        }
+      }
 
     	if(d >= 0 && elev_radians > -fudge * bmwidth_radians) {
     	    only_2_trip = true;

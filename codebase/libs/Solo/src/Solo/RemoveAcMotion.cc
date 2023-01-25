@@ -16,10 +16,12 @@
 // float  4 bytes 
 // double 8 bytes
  // dds_qdata_ptrs[pn] or velocity data in this case 
+// ra_* means values from radar_angles data structure, which contains data corrected with the
+// correction factors
 
 // All data are coming in scaled and biased
 void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_velocity,
-			 float ew_gndspd_corr, float tilt, float elevation,
+			 float cfac_ew_gndspd_corr, float ra_tilt, float ra_elevation,
 			 const float *data, float *newData, size_t nGates,
 			 float bad, size_t dgi_clip_gate,
 			 float dds_radd_eff_unamb_vel,
@@ -62,7 +64,7 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
     */
     //ac_vel = dd_ac_vel(dgi);
     ac_vel = dd_ac_vel(vert_velocity, ew_velocity, ns_velocity, 
-		       ew_gndspd_corr, tilt, elevation);
+		       cfac_ew_gndspd_corr, ra_tilt, ra_elevation);
 
     if (dgi_clip_gate > nGates) {
       // throw std::invalid_argument("dgi_clip_gate greater than number of gates");

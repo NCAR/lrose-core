@@ -952,6 +952,72 @@ void SoloFunctionsApi::UnconditionalDelete(const float *data, float *newData, si
   }
 }
 
+
+void SoloFunctionsApi::CalculateRadarAngles(
+      float asib_roll,
+      float asib_pitch,
+      float asib_heading,
+      float asib_drift_angle,
+      float asib_rotation_angle,
+      float asib_tilt,
+      float cfac_pitch_corr,
+      float cfac_heading_corr,
+      float cfac_drift_corr,
+      float cfac_roll_corr,
+      float cfac_elevation_corr,
+      float cfac_azimuth_corr,
+      float cfac_rot_angle_corr,
+      float cfac_tilt_corr,
+      int radar_type,  // from dgi->dds->radd->radar_type
+      bool use_Wen_Chaus_algorithm,
+      float dgi_dds_ryib_azimuth,
+      float dgi_dds_ryib_elevation,
+      float *ra_x,
+      float *ra_y,
+      float *ra_z,
+      float *ra_rotation_angle,
+      float *ra_tilt,
+      float *ra_azimuth,
+      float *ra_elevation,
+      float *ra_psi) {
+
+  try {
+
+    dd_radar_angles( 
+       asib_roll,
+       asib_pitch,
+       asib_heading,
+       asib_drift_angle,
+       asib_rotation_angle,
+       asib_tilt,
+       cfac_pitch_corr,
+       cfac_heading_corr,
+       cfac_drift_corr,
+       cfac_roll_corr,
+       cfac_elevation_corr,
+       cfac_azimuth_corr,
+       cfac_rot_angle_corr,
+       cfac_tilt_corr,
+       radar_type,  // from dgi->dds->radd->radar_type
+       use_Wen_Chaus_algorithm,
+       dgi_dds_ryib_azimuth,
+       dgi_dds_ryib_elevation,
+       ra_x,
+       ra_y,
+       ra_z,
+       ra_rotation_angle,
+       ra_tilt,
+       ra_azimuth,
+       ra_elevation,
+       ra_psi
+    ); 
+
+  } catch(...) {
+    throw "Something bad happened during script evaluation: CalculateRadarAngles";
+  }
+}
+
+
 /*
 void SoloFunctionsApi::se_flag_glitches(float deglitch_threshold, int deglitch_radius,
                       int deglitch_min_bins,  // aka deglitch_min_gates                                  

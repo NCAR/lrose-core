@@ -13,16 +13,16 @@
 //  DGI_PTR dgi;
 
 
-double dd_ac_vel(float vert_velocity, float ew_velocity, float ns_velocity, float ew_gndspd_corr,
-		 float tilt, float elevation)
+double dd_ac_vel(float vert_velocity, float ew_velocity, float ns_velocity, float cfac_ew_gndspd_corr,
+		 float ra_tilt, float ra_elevation)
 {
     double vert, d, ac_vel;
 
     // TODO: handle bad data in the calling function?
     vert =  vert_velocity != -999 ? vert_velocity : 0;
     d = sqrt((double)(SQ(ew_velocity) + SQ(ns_velocity)));
-    d += ew_gndspd_corr; // klooge to correct ground speed
-    ac_vel = d*sin(tilt) + vert*sin(elevation);
+    d += cfac_ew_gndspd_corr; // klooge to correct ground speed
+    ac_vel = d*sin(ra_tilt) + vert*sin(ra_elevation);
     return(ac_vel);
 
 
