@@ -65,10 +65,25 @@ int main(int argc, char **argv)
   // create program object
 
   try {
+
+
+    QCoreApplication *coreApp = new QCoreApplication(argc, argv);
+
+    // ~/lrose/bin/HawkEdit -i -f cfrad*_not_applied* -script script.txt -output_dir output_dir 
+    // -i for interactive, pops up the GUI
+
     // The following line may fix the problem of the Boundary Editor
     // not appearing in the menu bar when HawkEye is built using
     // linux, run on a Mac.
-    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);    
+    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);   
+
+
+
+    // QCoreApplication is the base class, 
+    // QGuiApplication extends the base class with functionality related to 
+    // handling windows and GUI stuff (non-widget related, e.g. OpenGL or QtQuick), 
+    // QApplication extends QGuiApplication with functionality related to handling widgets.
+
 
     app = new QApplication(argc, argv);
     app->setWindowIcon(QIcon("://HawkEyeElleIcon.icns"));

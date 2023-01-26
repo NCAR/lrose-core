@@ -596,6 +596,30 @@
     tt->single_val.e = DEBUG_OFF;
     tt++;
     
+    // Parameter 'interactive'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interactive");
+    tt->descr = tdrpStrDup("Option to run interactively with a graphical interface.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &interactive - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'scriptFilePath'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("scriptFilePath");
+    tt->descr = tdrpStrDup("path to script file");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &scriptFilePath - &_start_;
+    tt->single_val.s = tdrpStrDup("script.txt");
+    tt++;
+    
     // Parameter 'check_ray_alloc'
     // ctype is 'tdrp_bool_t'
     
@@ -1217,7 +1241,7 @@
     tt->descr = tdrpStrDup("Radar name if overridden.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &radar_name - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("SPOL");
     tt++;
     
     // Parameter 'display_site_name'

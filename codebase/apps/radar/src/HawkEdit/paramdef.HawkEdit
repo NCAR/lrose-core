@@ -28,6 +28,18 @@ paramdef enum debug_t {
 } debug;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to run interactively with a graphical interface.";
+  p_descr = "If true, a polar display with interactive buttons and menus is started. If false, use the command line and terminal for interaction.";
+} interactive;
+
+paramdef string {
+  p_default = "script.txt";
+  p_descr = "path to script file";
+  p_help = "";
+} scriptFilePath;
+
+paramdef boolean {
   p_default = FALSE;
   p_descr = "Print out checks on ray memory allocation.";
   p_help = "If TRUE, the app will keep track of the number of rays allocated and freed, and print out that information every 100 rays.";

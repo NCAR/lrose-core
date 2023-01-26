@@ -97,8 +97,7 @@ void ScriptsDataModel::readData(string path,
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
-  _applyCorrectionFactors = applyCorrectionFactors;
-  cerr << "before " << endl;
+  _applyCorrectionFactors = false; // ALWAYS applyCorrectionFactors;
   RadxFile file;
   _initForRead();
   _readData(file, path);
@@ -111,8 +110,7 @@ void ScriptsDataModel::readData(string path,
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
-  _applyCorrectionFactors = applyCorrectionFactors;
-  cerr << "before " << endl;
+  _applyCorrectionFactors = false; // ALWAYS  = applyCorrectionFactors;
   RadxFile file;
   _initForRead();
   _setupVolRead(file, fieldNames, debug_verbose, debug_extra);
@@ -127,8 +125,7 @@ void ScriptsDataModel::readData(string path,
 
   LOG(DEBUG) << "enter";
 
-  _applyCorrectionFactors = applyCorrectionFactors;
-  cerr << "before " << endl;
+  _applyCorrectionFactors  = false; // ALWAYS = applyCorrectionFactors;
   RadxFile file;
   _initForRead();
   _setupVolRead(file, fieldNames, sweepNumber, debug_verbose, debug_extra);
@@ -484,7 +481,6 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
 
   RadxVol *vol = new RadxVol();
 
-  cerr << "before " << endl;
   RadxFile file;
 
   _setupVolRead(file, *fieldNames, debug_verbose, debug_extra);
@@ -499,7 +495,6 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
       cerr << errMsg;
       throw errMsg;
   } 
-  cerr << "after " << endl;
 
   vol->convertToFl32();
 
@@ -538,7 +533,6 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
 
   RadxVol *vol = new RadxVol();
 
-  cerr << "before " << endl;
   RadxFile file;
 
   _setupVolRead(file, *fieldNames, sweepNumber, debug_verbose, debug_extra);
@@ -553,7 +547,6 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
       cerr << errMsg;
       throw errMsg;
   } 
-  cerr << "after " << endl;
 
   vol->convertToFl32();
 
@@ -876,6 +869,7 @@ void ScriptsDataModel::writeData(string path) {
     _vol->loadFieldsFromRays(nFieldsConstantPerRay);
 
     RadxFile outFile;
+    outFile.setWriteCompressed(false);
 
     LOG(DEBUG) << "writing to file " << path;
     int result = outFile.writeToPath(*_vol, path);
@@ -893,6 +887,7 @@ void ScriptsDataModel::writeData(string path) {
 // no side effects, just writes the radar volume to the path
 void ScriptsDataModel::writeData(string path, RadxVol *vol) {
     RadxFile outFile;
+    outFile.setWriteCompressed(false);
 
     LOG(DEBUG) << "writing to file " << path;
     int result = outFile.writeToPath(*vol, path);
@@ -1200,6 +1195,7 @@ vector<RadxRay *> &ScriptsDataModel::getRays() {
 	return _vol->getRays();
 }
 
+// HOW TO KEEP TRACK IF THE CFACS HAVE BEEN APPIED TO THE RAY OR NOT?
 void ScriptsDataModel::applyCorrectionFactors(RadxRay *ray) {
 
   // adjust angles for elevation surveillance if needed
@@ -1675,6 +1671,55 @@ double ScriptsDataModel::getCfactorRotationCorr() {
   RadxCfactors *cfactors;
   if ((cfactors = _vol->getCfactors()) != NULL)
     return cfactors->getRotationCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorPitchCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getPitchCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorHeadingCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getHeadingCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorDriftCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getDriftCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorRollCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getRollCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorTiltCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getTiltCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorElevationCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getElevationCorr();
+  else return 0.0;
+}
+
+double ScriptsDataModel::getCfactorAzimuthCorr() {
+  RadxCfactors *cfactors;
+  if ((cfactors = _vol->getCfactors()) != NULL)
+    return cfactors->getAzimuthCorr();
   else return 0.0;
 }
 

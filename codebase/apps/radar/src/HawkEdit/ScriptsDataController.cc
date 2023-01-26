@@ -1492,6 +1492,34 @@ double ScriptsDataController::getCfactorRotationCorr() {
   */
 }
 
+double ScriptsDataController::getCfactorPitchCorr() {
+  return _scriptsDataModel.getCfactorPitchCorr();
+}
+
+double ScriptsDataController::getCfactorHeadingCorr() {
+  return _scriptsDataModel.getCfactorHeadingCorr();
+}
+
+double ScriptsDataController::getCfactorDriftCorr() {
+  return _scriptsDataModel.getCfactorDriftCorr();
+}
+
+double ScriptsDataController::getCfactorRollCorr() {
+  return _scriptsDataModel.getCfactorRollCorr();
+}
+
+double ScriptsDataController::getCfactorTiltCorr() {
+  return _scriptsDataModel.getCfactorTiltCorr();
+}
+
+double ScriptsDataController::getCfactorElevationCorr() {
+  return _scriptsDataModel.getCfactorElevationCorr();
+}
+
+double ScriptsDataController::getCfactorAzimuthCorr() {
+  return _scriptsDataModel.getCfactorAzimuthCorr();
+}
+
 /*
 double ScriptsDataController::getAltitudeKmAgl() {
 
@@ -1636,11 +1664,11 @@ void ScriptsDataController::nextRayIndependentOfSweep() {
   _currentRayIdx += 1;
 
   if ((_currentRayIdx % 100) == 0) {
-      cerr << "   current ray " << _currentRayIdx << 
+      LOG(DEBUG) << "   current ray " << _currentRayIdx << 
         " last ray index " << _lastRayIdx;
       if (moreRays()) 
-         cerr << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
-      cerr << " current sweep index " << _currentSweepIdx << endl;
+         LOG(DEBUG) << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
+      LOG(DEBUG) << " current sweep index " << _currentSweepIdx;
   }  
 }
 
@@ -1653,11 +1681,11 @@ void ScriptsDataController::nextRay() {
     _currentSweepIdx += 1;
   } 
   if ((_currentRayIdx % 100) == 0) {
-      cerr << "   current ray " << _currentRayIdx << 
+      LOG(DEBUG) << "   current ray " << _currentRayIdx << 
         " last ray index " << lastRayIndex;
       if (moreRays()) 
-         cerr << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
-      cerr << " current sweep index " << _currentSweepIdx << endl;
+         LOG(DEBUG) << " az = " << _scriptsDataModel.getRayAzimuthDeg(_currentRayIdx);
+      LOG(DEBUG) << " current sweep index " << _currentSweepIdx;
   }  
   //  applyBoundary();
   //cerr << "exit nextRay" << endl;

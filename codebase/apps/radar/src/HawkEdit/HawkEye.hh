@@ -100,6 +100,9 @@ private:
   int _setupReader();
   string _getArchiveUrl(const string &filePath);
 
+  int _runConsole(QApplication &app);
+  int _runInteractive(QApplication &app);
+
 };
 
 #endif

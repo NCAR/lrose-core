@@ -960,14 +960,12 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   //float vert_velocity = georef->getVertVelocity();  // fl32
 
-
- 
   // TODO: elevation changes with different rays/fields how to get the current one???
   float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
   float dds_ra_elevation = elevation * M_PI / 180.00; // radar angles!! requires cfac values and calculation
                            // origin dds->ra->elevation, ra = radar_angles
                            // get this from RadxRay::_elev if RadxRay::_georefApplied == true
-
+                           // 1/4/2023 I don't believe that cfacs need to be applied to elevation!!
   float vert_beam_width = _scriptsDataController->getRadarBeamWidthDegV(); // from platform radarBeamWidthDegV; origin dgi->dds->radd->vert_beam_width
   float radar_latitude = _scriptsDataController->getLatitudeDeg(); // radar->latitude 
 
@@ -1009,10 +1007,83 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
     bad_data_value = missingValue;
   }
   
-  //==========
+  SoloFunctionsApi soloFunctionsApi; 
 
-  // TODO: data, _boundaryMask, and newData should have all the same dimensions = nGates
-  SoloFunctionsApi soloFunctionsApi;
+  //==========  
+  
+  if (true) { // TODO: add this arg ... use_radar_angles) {
+    // these are input args to radar angles calculation
+    float asib_roll = dds_asib_roll;
+    float asib_pitch = georef->getPitch();
+    float asib_heading = georef->getHeading();
+    float asib_drift_angle = georef->getDrift();
+    float asib_rotation_angle = dds_asib_rotation_angle;
+    float asib_tilt = georef->getTilt();
+    float cfac_pitch_corr = _scriptsDataController->getCfactorPitchCorr();
+    float cfac_heading_corr = _scriptsDataController->getCfactorHeadingCorr();
+    float cfac_drift_corr = _scriptsDataController->getCfactorDriftCorr();
+    float cfac_roll_corr = _scriptsDataController->getCfactorRollCorr();
+    float cfac_elevation_corr = _scriptsDataController->getCfactorElevationCorr();
+    float cfac_azimuth_corr = _scriptsDataController->getCfactorAzimuthCorr();
+    float cfac_rot_angle_corr = dds_cfac_rot_angle_corr;
+    float cfac_tilt_corr = _scriptsDataController->getCfactorTiltCorr();
+
+    int radar_type =  6; // TODO: FIX!!! hard-coding to AIR_NOSE    // from dgi->dds->radd->radar_type
+    // TODO: convert the Radx::Platform enum to the SoloII int for the radar type
+    //switch (_scriptsDataController->getPlatform().getPlatformType()) {
+    //case ...
+    //}
+
+    // radar_type == AIR_LF || radar_type == AIR_NOSE
+    // this must translate to Radx::PlatformType_t
+    // PLATFORM_TYPE_AIRCRAFT_NOSE = 10,
+    // 
+
+    bool use_Wen_Chaus_algorithm = false;
+    float dgi_dds_ryib_azimuth = ray->getAzimuthDeg();
+    float dgi_dds_ryib_elevation = ray->getElevationDeg();
+    // these are output args to radar angles calculation
+    float  ra_x;
+    float  ra_y;
+    float  ra_z;
+    float  ra_rotation_angle;
+    float  ra_tilt;
+    float  ra_azimuth;
+    float  ra_elevation;
+    float  ra_psi;  
+
+
+
+    soloFunctionsApi.CalculateRadarAngles( 
+       asib_roll,
+       asib_pitch,
+       asib_heading,
+       asib_drift_angle,
+       asib_rotation_angle,
+       asib_tilt,
+       cfac_pitch_corr,
+       cfac_heading_corr,
+       cfac_drift_corr,
+       cfac_roll_corr,
+       cfac_elevation_corr,
+       cfac_azimuth_corr,
+       cfac_rot_angle_corr,
+       cfac_tilt_corr,
+       radar_type,  // from dgi->dds->radd->radar_type
+       use_Wen_Chaus_algorithm,
+       dgi_dds_ryib_azimuth,
+       dgi_dds_ryib_elevation,
+       &ra_x,
+       &ra_y,
+       &ra_z,
+       &ra_rotation_angle,
+       &ra_tilt,
+       &ra_azimuth,
+       &ra_elevation,
+       &ra_psi
+    );
+    dds_ra_elevation = ra_elevation; // not sure if in degrees or radians:  * M_PI / 180.00; 
+  }
 
   //soloFunctionsApi.RemoveAircraftMotion(vert_velocity, ew_velocity, ns_velocity,
   //        ew_gndspd_corr, tilt, elevation,
@@ -1841,8 +1912,7 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
   if (lower_threshold > startRange) {
     from_gate = ceil((lower_threshold - startRange) / gateSpace);
     if (from_gate > nGates) {
-      string msg = "RemoveRing: lower_threshold exceeds number of gates; setting to max number of gates";
-      cerr << msg << endl;
+      LOG(DEBUG) << "RemoveRing: lower_threshold exceeds number of gates; setting to max number of gates";
       from_gate = nGates;
       //throw std::invalid_argument(msg);
     }
@@ -1851,8 +1921,7 @@ string SoloFunctionsModel::RemoveRing(string fieldName,  // RadxVol *vol,
   if (upper_threshold > startRange) {
     to_gate = ceil((upper_threshold - startRange) / gateSpace);
     if (to_gate > nGates) {
-      string msg = "RemoveRing: upper_threshold exceeds number of gates; setting to max number of gates";
-      cerr << msg << endl;
+      LOG(DEBUG) << "RemoveRing: upper_threshold exceeds number of gates; setting to max number of gates";
       to_gate = nGates;
       //throw std::invalid_argument(msg);
     }
