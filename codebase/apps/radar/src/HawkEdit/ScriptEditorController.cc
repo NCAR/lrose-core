@@ -5,6 +5,9 @@
 //
 
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <map>
 #include <QtWidgets>
 #include <QJSEngine>
@@ -170,7 +173,16 @@ void ScriptEditorController::volumeUpdated(QStringList newFieldNames) {
   emit scriptChangedVolume(newFieldNames); // FAKE); // _currentModel->getVolume());
 }
 
-
+void ScriptEditorController::readScriptFile(string filename, string *script) {
+  std::ifstream is(filename);
+  if (is.is_open()) {
+    is >> *script;
+    is.close();
+  } else {
+    throw std::invalid_argument("Cannot open script file");
+  }
+}
+/*
 void ScriptEditorController::openData(string fileName)
 {
 
@@ -185,7 +197,7 @@ void ScriptEditorController::openData(string fileName)
   //  _currentView->setupContents(data, fieldName);  
   //}
 }
-
+*/
 void ScriptEditorController::setupBoundaryArray() {
   const vector<bool> *boundaryMaskForRay = _soloFunctionsController->GetBoundaryMask();
 

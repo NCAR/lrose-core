@@ -114,6 +114,10 @@ public:
   tdrp_bool_t begin_in_archive_mode;
   char* archive_data_url;
 
+  tdrp_bool_t interactive;
+
+  char* script;
+
   char* archive_start_time;
   double archive_time_span_secs;
   char* images_archive_end_time;

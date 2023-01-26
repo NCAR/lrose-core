@@ -59,8 +59,8 @@ public:
   void applyCorrectionFactors();
   void withdrawCorrectionFactors();
 
-  void writeData(string path);
-  void writeData(string path, RadxVol *vol);
+  void writeData(string path, bool compressed = false);
+  void writeData(string path, RadxVol *vol, bool compressed = false);
 
   int mergeDataFiles(string dest_path, string source_path, string original_path);
 

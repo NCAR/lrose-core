@@ -112,7 +112,7 @@ public:
   
   PolarManager(DisplayFieldController *displayFieldController,
 	       //               const vector<DisplayField *> &fields,
-               bool haveFilteredFields);
+               bool haveFilteredFields, bool interactiv = true);
   
   // destructor
   
@@ -299,6 +299,8 @@ public slots:
     string dataFileName, bool notifyListenersWhenVolumeChanges);
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
+  void runScriptBatchModeConsole(string scriptFilePath, bool useBoundary, 
+  bool useAllSweeps, bool useTimeRange);
   //void runScriptBatchModeDebug(QString script, bool useBoundary, 
   //  bool useAllSweeps, bool useTimeRange);  
   void undoScriptEdits(); // bool batchMode = false);

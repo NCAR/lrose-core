@@ -174,6 +174,13 @@ public:
   void getPredomRayGeom(double *startRangeKm, double *gateSpacingKm);
   double getRadarBeamWidthDegV();
   double getCfactorRotationCorr();
+  double getCfactorPitchCorr();
+  double getCfactorHeadingCorr();
+  double getCfactorDriftCorr();
+  double getCfactorRollCorr();
+  double getCfactorTiltCorr();
+  double getCfactorElevationCorr();
+  double getCfactorAzimuthCorr();
   const RadxGeoref *getGeoreference(size_t rayIdx);
 
   int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);

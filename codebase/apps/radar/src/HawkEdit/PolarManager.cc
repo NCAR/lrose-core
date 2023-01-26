@@ -137,7 +137,7 @@ PolarManager::PolarManager(const Params &params,
 */
 
 PolarManager::PolarManager(DisplayFieldController *displayFieldController,
-                           bool haveFilteredFields) :
+                           bool haveFilteredFields, bool interactive) :
 // DisplayManager(params, reader, displayFieldController, haveFilteredFields), 
         //_sweepManager(params),
         _rhiWindowDisplayed(false),
@@ -1905,7 +1905,6 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 // call when new data file is read; or when switching to new sweep?
 // or when new parameter file is read
 void PolarManager::_setupRayLocation() {
-  cerr << "setupRayLocations: enter " << endl;
 
   // requires ray info
   // DataModel *dataModel = DataModel::Instance();
@@ -1919,7 +1918,7 @@ void PolarManager::_setupRayLocation() {
     currentSweepNumber);
 
   _setMaxRangeKm();
-    cerr << "setupRayLocations: exit " << endl;
+
 }
 
 // find and set the max range for the Ppi display
@@ -3171,7 +3170,7 @@ void PolarManager::_saveCurrentVersionAllFiles()
   bool overwriteOnce = false;
   bool discard = false; 
 
-  QString finalPattern = "All files (*.nc)";
+  //QString finalPattern = "All files (*.nc)";
 
   QString inputPath = QDir::currentPath();
   // get the path of the current file, if available 
@@ -5241,7 +5240,7 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     _cfacRotationVal->show();
     _cfacRollVal->show();
     _cfacTiltVal->show();     
-    _applyCfacToggle->show();
+    //_applyCfacToggle->show();
 
     _georefsAppliedLabel->show(); 
     _geoRefRotationLabel->show(); 
@@ -5303,7 +5302,7 @@ void PolarManager::hideCfacs() {
   _cfacRollLabel->hide(); 
   _cfacTiltLabel->hide(); 
 
-  _applyCfacToggle->hide();  
+  //_applyCfacToggle->hide();  
 }
 
 ///////////////////////////////////////////
@@ -5564,6 +5563,171 @@ void PolarManager::restoreCurrentState() {
 // from the parameter file? YES, and the command line takes precedence.
 // From the way the saveDirectoryPath is chosen, the path must exist.
 // TODO: when running from the command line, verify the directory exists.
+void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoundary, 
+  bool useAllSweeps, bool useTimeRange) {
+
+  QString script;
+  try {
+    string text;
+    scriptEditorControl->readScriptFile(scriptFilePath, &text);
+    script = QString::fromStdString(text);
+  } catch (std::invalid_argument &ex) {
+    cerr << ex.what() + scriptFilePath << endl;
+    return;
+  }
+  //--------
+
+  _cancelled = false;
+   
+  vector<Point> boundaryPoints;
+  if (boundaryPointEditorControl != NULL) {
+    boundaryPoints = boundaryPointEditorControl->getWorldPoints();
+  }
+
+  // get the field names
+  vector<string> fieldNames = _displayFieldController->getFieldNames();
+  if (fieldNames.size() <= 0) {
+    errorMessage("Error", "No field names selected");
+    return;
+  }
+  string fileName;
+  string currentPath;
+  int firstArchiveFileIndex;
+  int lastArchiveFileIndex;
+
+  bool batchMode = _operationMode==BATCH;
+
+  // get list of archive files within start and end date/times
+  _timeNavController->getBounds(batchMode, &firstArchiveFileIndex,
+    &lastArchiveFileIndex);
+
+  // save the current state, in order to reconnect the DataModel to the interactive controls? 
+  saveCurrentState();
+
+  // TODO: maybe the progress becomes dots written to output??
+  // update the progress of each file in three stages, so multiply by 3
+  int nProgressStagesPerFile = 3;
+  int nProgressSteps = (lastArchiveFileIndex - firstArchiveFileIndex + 1) * nProgressStagesPerFile;
+  scriptEditorControl->initProgress(nProgressSteps);
+  QCoreApplication::processEvents();  // let the progress bar update
+
+  _batchEditing = batchMode;
+
+  try {
+
+     // run script on each file.
+     // run in automatic mode.  
+     // then for command-line mode, we just run the same code?? Yes, ideally.
+
+  // for each archive file 
+  int archiveFileIndex = firstArchiveFileIndex;
+
+  bool updateListenersOnVolumeChanged = true;
+  //bool cancelled = scriptEditorControl->cancelRequested();
+  while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
+
+    //_timeNavController->setTimeSliderPosition(archiveFileIndex);
+        
+    // need to get the current version of the file (by index)
+
+    string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
+    string versionPath = _undoRedoController->getCurrentVersion(archiveFileIndex);
+    if (versionPath.size() <= 0) {
+      // use original data file
+    } else {
+      // add the filename to the versionPath
+      versionPath.append("/");
+      string fileName = _timeNavController->getArchiveFileName(archiveFileIndex);
+      inputPath = versionPath.append(fileName);      
+    }
+    //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
+      //bool batchMode = true; // to prevent message box on every file
+      try {  
+
+        int currentProgressStep = (archiveFileIndex - firstArchiveFileIndex) * nProgressStagesPerFile;
+        scriptEditorControl->updateProgress(currentProgressStep, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
+
+        // use regular forEachRay ...        
+        runForEachRayScript(script, useBoundary, useAllSweeps, inputPath, updateListenersOnVolumeChanged);
+        // check if Cancel requested
+        //   save archive file to temp area
+        //LOG(DEBUG) << "writing to file " << name;
+
+        scriptEditorControl->updateProgress(currentProgressStep+1, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
+
+        string nextVersionPath = _getFileNewVersion(archiveFileIndex);
+          // _undoRedoController->getNewVersion(archiveFileIndex);
+
+  //      currentPath = saveDirectoryPath;
+  //      currentPath.append("/");
+  //      fileName = _timeNavController->getSelectedArchiveFileName();
+  //      currentPath.append(fileName);
+        scriptEditorControl->writeData(nextVersionPath);
+        //_unSavedEdits = false;
+
+        scriptEditorControl->updateProgress(currentProgressStep+2, nProgressSteps);
+        QCoreApplication::processEvents();  // let the progress bar update
+      
+      } catch (FileIException &ex) {
+        errorMessage("Error", "FileIException");
+        //this->setCursor(Qt::ArrowCursor);
+        _batchEditing = false;
+        return;
+      } catch (std::invalid_argument &ex) {
+        stringstream ss;
+        ss << "No matching sweep angle, skipping file " << archiveFileIndex << ": " <<
+          inputPath << " " <<
+          ex.what();
+        errorMessage("Error", ss.str());
+        //errorMessage("Error", ex.what());
+        //return;
+      } catch (const std::out_of_range& ex) {
+        errorMessage("ERROR", ex.what());
+        _batchEditing = false;
+        return;
+      } catch (string &msg) {
+        errorMessage("Error", msg);
+        _batchEditing = false;
+        return;
+      }
+    //}
+    updateListenersOnVolumeChanged = false;  
+    archiveFileIndex += 1;
+    //_timeNavController->setTimeSliderPosition(archiveFileIndex);
+    QCoreApplication::processEvents();
+    //cancelled = scriptEditorControl->cancelRequested();
+  } // while more archive files
+  
+  _batchEditing = false;
+
+// ---
+
+  /*
+    if (useAllSweeps) {
+      scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints);
+    } else {
+      // send the current sweep to the script editor controller
+      int currentSweepIndex = _sweepController->getSelectedNumber();
+      currentSweepIndex -= 1; // since GUI is 1-based and Volume sweep 
+      // index is a vector and zero-based 
+      scriptEditorControl->runForEachRayScript(script, currentSweepIndex,
+       useBoundary, boundaryPoints);
+    }
+    */
+    if (batchMode)
+      _undoRedoController->waterMarkVersion();
+  } catch (std::invalid_argument &ex) {
+    errorMessage("Error", ex.what());
+  }
+  _cancelled = false;
+  scriptEditorControl->batchEditComplete();
+  
+  // reconnect the DataModel to the selected time index, etc.
+  restoreCurrentState();
+}
+
 
 // useTimeRange distinquishes individual vs. batch mode 3/24/2022 NOT USED
 void PolarManager::runScriptBatchMode(QString script, bool useBoundary, 
@@ -6122,14 +6286,7 @@ void PolarManager::_applyCfac() {
     dataModel->applyCorrectionFactors();
   } else {
     // withdraw the correction factor
-    int result = resetDataMessage("Removing the correction factors will reset the data. \
-      All changes will be discarded", "Do you want to continue?");
-    if (result == QMessageBox::Reset) {
-      string currentFile = _timeNavController->getSelectedArchiveFile();
-      _readDataFile2(currentFile);
-    } else {
-      _applyCfacToggle->setCheckState(Qt::Checked);
-    }
+    errorMessage("Error", "Cannot remove the correction factors");
   }
   _applyDataEdits();
 }

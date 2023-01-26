@@ -183,9 +183,73 @@ HawkEye::~HawkEye()
 int HawkEye::Run(QApplication &app)
 {
 
-  // start the reader thread
+  if (_params->interactive) {
+    return _runInteractive(app);
+  } else {
+    return _runConsole(app);
+  }
+}
 
-  //_reader->signalRunToStart();
+int HawkEye::_runConsole(QApplication &app)
+{
+
+    int result = 0;
+
+    string emphasis_color = "white";
+    string annotation_color = "white";
+    string selectedFieldName = "";
+    if (_displayFields.size() > 0)
+      selectedFieldName = _displayFields[0]->getName();
+
+    DisplayFieldModel *displayFieldModel =
+      new DisplayFieldModel(_displayFields, selectedFieldName, // selectedField.getName(),
+                          _params->gridColor, // grid_and_range_ring_color,
+                          emphasis_color,
+                          annotation_color,
+                          _params->backgroundColor);  
+    DisplayFieldController *displayFieldController = 
+      new DisplayFieldController(displayFieldModel);
+    // TODO: the displayFields are in both the Controller and the Model
+    // but the Model can be edited by the parameter/color editor
+    bool interactive = false;
+    _polarManager = new PolarManager(displayFieldController,
+                                     _haveFilteredFields,
+                                     interactive);
+
+    bool noFilename = false;
+    if ((_args.inputFileList.size() > 0) && (_args.scriptFilePath.length() > 0)) {
+      _polarManager->setArchiveFileList(_args.inputFileList);
+      // override archive data url from input file
+      string url = _getArchiveUrl(_args.inputFileList[0]);
+      //TDRP_str_replace(&_params.archive_data_url, url.c_str());
+      _params->setArchiveDataUrl(url.c_str());
+
+//    return _polarManager->runScriptBatchMode(app); // not sure this is needed
+//    void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool useAllSweeps,
+//  string dataFileName, bool notifyListenersWhenVolumeChanges)  ==> called by runScriptBatchMode
+//    or 
+//    // useTimeRange distinquishes individual vs. batch mode 3/24/2022 NOT USED
+      // send script filename
+      bool useBoundary = false; // TODO: how to send boundary on the command-line?
+      bool useAllSweeps = true;
+      bool useTimeRange = true; 
+      //  { ==> runScriptBatchMode needs TimeNavController to retrieve data files
+      _polarManager->runScriptBatchModeConsole(_args.scriptFilePath,
+        useBoundary, useAllSweeps, useTimeRange); 
+    }  else {
+      cerr << "no input data files on command line; nothing to do; exiting\n";
+      result = 1;
+    }
+
+    return result;
+}
+
+
+//////////////////////////////////////////////////
+// Run
+
+int HawkEye::_runInteractive(QApplication &app)
+{
   
   if (_params->display_mode == Params::POLAR_DISPLAY) {
 

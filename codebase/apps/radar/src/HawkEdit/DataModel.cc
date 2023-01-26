@@ -450,7 +450,45 @@ void DataModel::withdrawCorrectionFactors() {
 }
 
 void DataModel::resetAnglesForElevationSurveillance(RadxVol *_vol) {
- // TODO: not sure how to do this, reread the data???
+  // adjust angles for elevation surveillance if needed
+  RadxRay *ray = getRay(0);
+  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+    size_t nRays = getNRays();
+    for (size_t iray = 0; iray < nRays; iray++) {
+      RadxRay *ray = getRay(iray);
+      LOG(DEBUG) << iray << ": adjusting az " << ray->getAzimuthDeg() << " to "; 
+      //ray->setAnglesForElevSurveillance();
+
+//----  copied this code from ray->setAnglesForElevSurveillance();
+      // because the cfactors were always NULL for the ray,
+      // but not for the volume.
+   // TODO: THIS IS NOT CORRECT, BECAUSE THE AZ and EL were overwritten when cfacs applied!!!
+      const RadxGeoref *georef = ray->getGeoreference();
+      if (georef != NULL) {
+        double rollCorr = 0.0;
+        double rotCorr = 0.0;
+        double tiltCorr = 0.0;
+        const RadxCfactors *cfactors = _vol->getCfactors();
+        if (cfactors != NULL) {
+          rollCorr = cfactors->getRollCorr();
+          rotCorr = cfactors->getRotationCorr();
+          tiltCorr = cfactors->getTiltCorr();
+        }
+        double rotation = georef->getRotation() - rotCorr;
+        double roll = georef->getRoll() - rollCorr;
+        double tilt = georef->getTilt() - tiltCorr;
+        double newAz = rotation - roll;
+        while (newAz < 0) {
+          newAz += 360.0;
+        }
+        while (newAz > 360.0) {
+          newAz -= 360.0;
+        }
+        ray->setAzimuthDeg(newAz);
+        ray->setElevationDeg(tilt);
+      }
+    }
+  }
 }
 
 void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
@@ -468,6 +506,8 @@ void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
       // because the cfactors were always NULL for the ray,
       // but not for the volume.
    
+   // TODO: THIS IS DIFFERENT FROM RadxRay::applyGeoref
+
     const RadxGeoref *georef = ray->getGeoreference();
     if (georef != NULL) {
       double rollCorr = 0.0;
@@ -800,9 +840,14 @@ void DataModel::writeWithMergeData(string outputPath, string currentVersionPath,
     delete mergedVolume;
 }
 
+// Make write no compression the default, 
+//  then turn compression on with final save of files.
 // NOTE: side effect of changing the class variable _currentFilePath
-void DataModel::writeData(string path) {
+void DataModel::writeData(string path, bool compressed) {
     RadxFile outFile;
+
+
+    //outFile.setWriteCompressed(compressed);
 
     LOG(DEBUG) << "writing to file " << path;
     int result = outFile.writeToPath(*_vol, path);
@@ -818,8 +863,10 @@ void DataModel::writeData(string path) {
 }
 
 // no side effects, just writes the radar volume to the path
-void DataModel::writeData(string path, RadxVol *vol) {
+void DataModel::writeData(string path, RadxVol *vol, bool compressed) {
     RadxFile outFile;
+
+    //outFile.setWriteCompressed(compressed);
 
     LOG(DEBUG) << "writing to file " << path;
     int result = outFile.writeToPath(*vol, path);

@@ -72,9 +72,9 @@ int Args::parse (const int argc, const char **argv)
   for (int i =  1; i < argc; i++) {
 
     if (!strcmp(argv[i], "--") ||
-	!strcmp(argv[i], "-h") ||
-	!strcmp(argv[i], "-help") ||
-	!strcmp(argv[i], "-man")) {
+    	!strcmp(argv[i], "-h") ||
+    	!strcmp(argv[i], "-help") ||
+    	!strcmp(argv[i], "-man")) {
       
       _usage(cout);
       exit (0);
@@ -130,17 +130,11 @@ int Args::parse (const int argc, const char **argv)
 	iret = -1;
       }
       
-    } else if (!strcmp(argv[i], "-instance")) {
+    } else if (!strcmp(argv[i], "-i")) {
       
-      if (i < argc - 1) {
-        sprintf(tmp_str, "instance = \"%s\";", argv[++i]);
+        sprintf(tmp_str, "interactive = TRUE;");
         TDRP_add_override(&override, tmp_str);
-        sprintf(tmp_str, "register_with_procmap = TRUE;");
-        TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-      
+
     } else if (!strcmp(argv[i], "-tcp_mode")) {
       
       sprintf(tmp_str, "input_mode = IWRF_TCP_INPUT;");
@@ -168,11 +162,31 @@ int Args::parse (const int argc, const char **argv)
       
       sprintf(tmp_str, "display_mode = BSCAN_DISPLAY;");
       TDRP_add_override(&override, tmp_str);
+
+    } else if (!strcmp(argv[i], "-outdir")) {
+
+      if (i < argc - 1) {
+        sprintf(tmp_str, "outdir = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        cerr << "ERROR - with -outdir, you must specify a directory path" << endl;        
+        iret = -1;
+      }            
       
     } else if (!strcmp(argv[i], "-polar")) {
       
       sprintf(tmp_str, "display_mode = POLAR_DISPLAY;");
       TDRP_add_override(&override, tmp_str);
+
+    } else if (!strcmp(argv[i], "-script")) {
+
+      if (i < argc - 1) {
+        sprintf(tmp_str, "scriptFilePath = \"%s\";", argv[++i]);
+        TDRP_add_override(&override, tmp_str);
+      } else {
+        cerr << "ERROR - with -script, you must specify a file to be read" << endl;        
+        iret = -1;
+      }      
       
     } else if (!strcmp(argv[i], "-start_x")) {
       
@@ -209,7 +223,7 @@ int Args::parse (const int argc, const char **argv)
         sprintf(tmp_str, "images_archive_start_time = \"%s\";", argv[++i]);
         TDRP_add_override(&override, tmp_str);
       } else {
-	iret = -1;
+	      iret = -1;
       }
       
     } else if (!strcmp(argv[i], "-images_end_time")) {
@@ -255,19 +269,19 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-f")) {
       
       if (i < argc - 1) {
-	// load up file list vector. Break at next arg which
-	// start with -
-	for (int j = i + 1; j < argc; j++) {
-	  if (argv[j][0] == '-') {
-	    break;
-	  } else {
-	    inputFileList.push_back(argv[j]);
-	  }
-	}
+      	// load up file list vector. Break at next arg which
+      	// start with -
+      	for (int j = i + 1; j < argc; j++) {
+      	  if (argv[j][0] == '-') {
+      	    break;
+      	  } else {
+      	    inputFileList.push_back(argv[j]);
+      	  }
+      	}
         sprintf(tmp_str, "begin_in_archive_mode = TRUE;");
         TDRP_add_override(&override, tmp_str);
       } else {
-	iret = -1;
+	      iret = -1;
       }
 
       if (inputFileList.size() < 1) {
@@ -301,16 +315,16 @@ void Args::_usage(ostream &out)
       << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"
-      << "       [ -fmq_mode] set forces DSR_FMQ_INPUT mode\n"
-      << "       [ -fmq_url ?] set input fmq URL\n"
+      << "       [ -i ] interactive mode with GUI\n"
       << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set end time for image generation mode\n"
       << "       [ -image_interval ?]\n"
       << "            set image generation interval (secs)\n"
       << "       [ -images_start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for image generation mode\n"
-      << "       [ -instance ?] set instance for procmap\n"
+      << "       [ -outdir ? ] directory for files after edited by script\n"
       << "       [ -polar ] run in POLAR (PPI/RHI) mode\n"
+      << "       [ -script ? ] name and path to text file\n"
       << "       [ -sim_mode] SIMULATED_INPUT mode\n"
       << "       [ -start_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set start time for archive mode\n"

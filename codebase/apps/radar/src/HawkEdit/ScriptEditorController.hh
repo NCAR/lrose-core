@@ -33,7 +33,7 @@ public:
   // vector<float> *getData(string fieldName);
   //void setData(string fieldName, vector<float> *data);
 
-  void openData(string fileName);
+  void readScriptFile(string filename, string *script);
   void writeData(string &path);
 
   ScriptEditorModel *getDataModel() {return _currentModel;};

@@ -456,6 +456,10 @@ public:
 
   debug_t debug;
 
+  tdrp_bool_t interactive;
+
+  char* scriptFilePath;
+
   tdrp_bool_t check_ray_alloc;
 
   tdrp_bool_t register_with_procmap;
@@ -747,7 +751,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[168];
+  mutable TDRPtable _table[170];
 
   const char *_className;
 
