@@ -389,3 +389,345 @@ void MomentsFields::init()
   
 }
 
+// Initialize to zero
+
+void MomentsFields::initToZero()
+
+{
+  
+  // reflectivity
+  
+  dbz = 0.0;
+  dbz_no_atmos_atten = 0.0;
+  dbzhc = 0.0;
+  dbzhx = 0.0;
+  dbzvc = 0.0;
+  dbzvx = 0.0;
+
+  // alternating mode velocity
+
+  vel = 0.0;
+  vel_alt = 0.0;
+  vel_hv = 0.0;
+  vel_h_only = 0.0;
+  vel_v_only = 0.0;
+  vel_alt_fold_interval = 0.0;
+  vel_alt_fold_confidence = 0.0;
+  vel_corr_vert = 0.0;
+  vel_corr_motion = 0.0;
+
+  // staggered PRT
+
+  vel_prt_short = 0.0;
+  vel_prt_long = 0.0;
+  vel_diff = 0.0;
+  vel_unfold_interval = 0.0;
+                                 
+  // spectrum width
+
+  width = 0.0;
+  width_r0r1 = 0.0;
+  width_r1r2 = 0.0;
+  width_r1r3 = 0.0;
+  width_ppls = 0.0;
+  width_h_only = 0.0;
+  width_v_only = 0.0;
+  width_prt_long = 0.0;
+  width_prt_short = 0.0;
+  width_corr_motion = 0.0;
+
+  // normalized coherent power
+  // also referred to as SQI - signal quality index
+  
+  ncp = 0.0;
+  ncp_h_only = 0.0;
+  ncp_v_only = 0.0;
+  ncp_h_minus_v = 0.0;
+
+  ncp_trip1 = 0.0;
+  ncp_trip2 = 0.0;
+  ncp_trip3 = 0.0;
+  ncp_trip4 = 0.0;
+  
+  ncp_prt_long = 0.0;
+  ncp_prt_short = 0.0;
+  ncp_trip_flag = 0.0;
+
+  // signal to noise
+
+  snr = 0.0;
+  snrhc = 0.0;
+  snrhx = 0.0;
+  snrvc = 0.0;
+  snrvx = 0.0;
+
+ // uncalibrated power
+
+  dbm = 0.0;
+  dbmhc = 0.0;
+  dbmhx = 0.0;
+  dbmvc = 0.0;
+  dbmvx = 0.0;
+
+  // noise-subtracted uncalibrated power
+  
+  dbmhc_ns = 0.0;
+  dbmhx_ns = 0.0;
+  dbmvc_ns = 0.0;
+  dbmvx_ns = 0.0;
+
+  // dual polarization fields
+
+  zdrm = 0.0;
+  zdr = 0.0;
+  zdr_bias = 0.0;
+  
+  ldr = 0.0;
+  ldrhm = 0.0;
+  ldrh = 0.0;
+  ldrvm = 0.0;
+  ldrv = 0.0;
+  ldr_diff = 0.0;
+  ldr_mean = 0.0;
+
+  rhohv = 0.0;
+  rhohv_nnc = 0.0;
+  phidp0 = 0.0;
+  phidp = 0.0;
+  phidp_cond = 0.0;
+  phidp_filt = 0.0;
+  phidp_sdev_4kdp = 0.0;
+  phidp_jitter_4kdp = 0.0;
+  zdr_sdev_4kdp = 0.0;
+  kdp = 0.0;
+  psob = 0.0;
+  kdp_hb = 0.0;
+
+  // co-cross correlations
+
+  rho_vchx = 0.0;
+  rho_hcvx = 0.0;
+  rho_vxhx = 0.0;
+  rho_phidp = 0.0;
+  
+  // cross polar ratio - CPR
+
+  cpr_mag = 0.0;
+  cpr_phase = 0.0;
+  cpr_ldr = 0.0;
+
+  // CMD - Clutter Mitigation Decision
+
+  cpa = 0.0;
+  pratio = 0.0;
+  mvar = 0.0;
+  tss = 0.0;
+  tpt = 0.0;
+  cpd = 0.0;
+  tclut = 0.0;
+  ozsnr = 0.0;
+  
+  tdbz = 0.0;
+  spin = 0.0;
+  max_tdbz_spin = 0.0;
+
+  zdr_sdev = 0.0;
+  phidp_sdev = 0.0;
+
+  dbz_diff_sq = 0.0;
+  dbz_spin_change = 0.0;
+  
+  cmd = 0.0;
+  cmd_flag = 0.0;
+  
+  tdbz_interest = 0.0;
+  spin_interest = 0.0;
+  cpa_interest = 0.0;
+  zdr_sdev_interest = 0.0;
+  phidp_sdev_interest = 0.0;
+
+  // clutter power and noise residue
+
+  clut = 0.0;
+  clut_2_wx_ratio = 0.0;
+  spectral_noise = 0.0;
+  spectral_snr = 0.0;
+
+  // refractivity fields
+
+  aiq_hc = 0.0;
+  niq_hc = 0.0;
+  aiq_vc = 0.0;
+  niq_vc = 0.0;
+
+  // SZ8-64 phase coding
+  
+  sz_trip_flag = 0.0;
+  sz_leakage = 0.0;
+  
+  // censoring flag
+
+  censoring_flag = 0.0;
+
+  // covariances linear
+
+  lag0_hc = 0.0;
+  lag0_hx = 0.0;
+  lag0_vc = 0.0;
+  lag0_vx = 0.0;
+
+  lag0_vchx.clear();
+  lag0_hcvx.clear();
+  lag1_hc.clear();
+  lag1_vc.clear();
+  lag1_hcvc.clear();
+  lag1_vchc.clear();
+  lag1_vxhx.clear();
+  lag2_hc.clear();
+  lag2_vc.clear();
+  lag3_hc.clear();
+  lag3_vc.clear();
+  rvvhh0.clear();
+
+  // covariances staggered
+
+  lag0_hc_short = 0.0;
+  lag0_vc_short = 0.0;
+  lag0_hc_long = 0.0;
+  lag0_vc_long = 0.0;
+
+  lag1_hc_long.clear();
+  lag1_vc_long.clear();
+  lag1_hc_short.clear();
+  lag1_vc_short.clear();
+
+  lag1_hc_short_to_long.clear();
+  lag1_vc_short_to_long.clear();
+  lag1_hc_long_to_short.clear();
+  lag1_vc_long_to_short.clear();
+
+  rvvhh0_long.clear();
+  rvvhh0_short.clear();
+
+  // covariances as log power and phase
+
+  lag0_hc_db = 0.0;
+  lag0_hx_db = 0.0;
+  lag0_vc_db = 0.0;
+  lag0_vx_db = 0.0;
+
+  lag0_vchx_db = 0.0;
+  lag0_vchx_phase = 0.0;
+
+  lag0_hcvx_db = 0.0;
+  lag0_hcvx_phase = 0.0;
+
+  lag1_hc_db = 0.0;
+  lag1_hc_phase = 0.0;
+
+  lag1_vc_db = 0.0;
+  lag1_vc_phase = 0.0;
+  
+  lag1_hcvc_db = 0.0;
+  lag1_hcvc_phase = 0.0;
+
+  lag1_vchc_db = 0.0;
+  lag1_vchc_phase = 0.0;
+
+  lag1_vxhx_db = 0.0;
+  lag1_vxhx_phase = 0.0;
+
+  lag2_hc_db = 0.0;
+  lag2_hc_phase = 0.0;
+
+  lag2_vc_db = 0.0;
+  lag2_vc_phase = 0.0;
+
+  lag3_hc_db = 0.0;
+  lag3_hc_phase = 0.0;
+
+  lag3_vc_db = 0.0;
+  lag3_vc_phase = 0.0;
+
+  rvvhh0_db = 0.0;
+  rvvhh0_phase = 0.0;
+
+  sdev_vv = 0.0;
+  
+  prt = 0.0;
+  num_pulses = 0.0;
+
+  prt_short = 0.0;
+  prt_long = 0.0;
+
+  // staggered lag1 covariances as log power and phase
+
+  lag0_hc_short_db = 0.0;
+  lag0_vc_short_db = 0.0;
+  lag0_hc_long_db = 0.0;
+  lag0_vc_long_db = 0.0;
+
+  lag1_hc_short_db = 0.0;
+  lag1_hc_short_phase = 0.0;
+  lag1_vc_short_db = 0.0;
+  lag1_vc_short_phase = 0.0;
+
+  lag1_hc_long_db = 0.0;
+  lag1_hc_long_phase = 0.0;
+  lag1_vc_long_db = 0.0;
+  lag1_vc_long_phase = 0.0;
+
+  lag1_hc_short_to_long_db = 0.0;
+  lag1_hc_short_to_long_phase = 0.0;
+  lag1_vc_short_to_long_db = 0.0;
+  lag1_vc_short_to_long_phase = 0.0;
+
+  lag1_hc_long_to_short_db = 0.0;
+  lag1_hc_long_to_short_phase = 0.0;
+  lag1_vc_long_to_short_db = 0.0;
+  lag1_vc_long_to_short_phase = 0.0;
+
+  rvvhh0_long_db = 0.0;
+  rvvhh0_long_phase = 0.0;
+  rvvhh0_short_db = 0.0;
+  rvvhh0_short_phase = 0.0;
+
+  // identifying noise
+
+  dbm_for_noise = 0.0;
+  dbm_sdev = 0.0;
+  ncp_mean = 0.0;
+  phase_for_noise.clear();
+  accum_phase_change = 0.0;
+  phase_change_error = 0.0;
+  
+  // flag to indicate noise/signal is present at a gate
+
+  noise_flag = 0.0;
+  signal_flag = 0.0;
+
+  // noise_bias relative to calibrated noise
+  // these will be constant for all gates in a ray
+  
+  noise_bias_db_hc = 0.0;
+  noise_bias_db_hx = 0.0;
+  noise_bias_db_vc = 0.0;
+  noise_bias_db_vx = 0.0;
+
+  // attenuation correction for refl and zdr
+
+  dbz_atten_correction = 0.0;
+  zdr_atten_correction = 0.0;
+  dbz_atten_corrected = 0.0;
+  zdr_atten_corrected = 0.0;
+
+  // fields for testing
+
+  test = 0.0;
+  test2 = 0.0;
+  test3 = 0.0;
+  test4 = 0.0;
+  test5 = 0.0;
+  
+}
+

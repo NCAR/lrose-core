@@ -73,6 +73,10 @@ public:
 
   void initFields();
 
+  // set the field data to zero
+  
+  void initFieldsToZero();
+
   // set field references
 
   void setFieldsToNormalTrip();

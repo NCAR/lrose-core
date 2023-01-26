@@ -49,6 +49,10 @@ public:
 
   void init();
 
+  // set values to zero
+  
+  void initToZero();
+
 public:
 
   // public data

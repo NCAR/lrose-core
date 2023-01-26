@@ -72,13 +72,24 @@ GateData::~GateData()
   _freeArrays();
 }
 
-// clear the field data
+// set the field data to missing
 
 void GateData::initFields()
 
 {
   fields.init();
   fieldsF.init();
+  specHcComputed = false;
+  specVcComputed = false;
+}
+
+// set the field data to zero
+
+void GateData::initFieldsToZero()
+
+{
+  fields.initToZero();
+  fieldsF.initToZero();
   specHcComputed = false;
   specVcComputed = false;
 }
