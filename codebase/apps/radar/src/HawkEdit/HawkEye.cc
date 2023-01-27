@@ -234,8 +234,14 @@ int HawkEye::_runConsole(QApplication &app)
       bool useAllSweeps = true;
       bool useTimeRange = true; 
       //  { ==> runScriptBatchMode needs TimeNavController to retrieve data files
+      string outputDir;
+      if (_args.outputDir.length() > 0) {
+        outputDir = _args.outputDir;
+      } else {
+        outputDir = "output";
+      }
       _polarManager->runScriptBatchModeConsole(_args.scriptFilePath,
-        useBoundary, useAllSweeps, useTimeRange); 
+        useBoundary, useAllSweeps, useTimeRange, outputDir); 
     }  else {
       cerr << "no input data files on command line; nothing to do; exiting\n";
       result = 1;

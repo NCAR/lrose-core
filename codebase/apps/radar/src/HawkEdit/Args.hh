@@ -62,6 +62,7 @@ public:
   tdrp_override_t override;
   vector<string> inputFileList;
   string scriptFilePath;
+  string outputDir;
 
 protected:
   

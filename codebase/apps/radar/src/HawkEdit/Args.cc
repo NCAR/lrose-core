@@ -166,7 +166,8 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-outdir")) {
 
       if (i < argc - 1) {
-        sprintf(tmp_str, "outdir = \"%s\";", argv[++i]);
+        outputDir = argv[++i];
+        sprintf(tmp_str, "outdir = \"%s\";", outputDir.c_str());
         TDRP_add_override(&override, tmp_str);
       } else {
         cerr << "ERROR - with -outdir, you must specify a directory path" << endl;        
@@ -181,7 +182,8 @@ int Args::parse (const int argc, const char **argv)
     } else if (!strcmp(argv[i], "-script")) {
 
       if (i < argc - 1) {
-        sprintf(tmp_str, "scriptFilePath = \"%s\";", argv[++i]);
+        scriptFilePath = argv[++i];
+        sprintf(tmp_str, "scriptFilePath = \"%s\";", scriptFilePath.c_str());
         TDRP_add_override(&override, tmp_str);
       } else {
         cerr << "ERROR - with -script, you must specify a file to be read" << endl;        

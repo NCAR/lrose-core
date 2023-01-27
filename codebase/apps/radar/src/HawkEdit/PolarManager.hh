@@ -300,7 +300,7 @@ public slots:
   void runScriptBatchMode(QString script, bool useBoundary, 
     bool useAllSweeps, bool useTimeRange);
   void runScriptBatchModeConsole(string scriptFilePath, bool useBoundary, 
-  bool useAllSweeps, bool useTimeRange);
+  bool useAllSweeps, bool useTimeRange, string outputDir);
   //void runScriptBatchModeDebug(QString script, bool useBoundary, 
   //  bool useAllSweeps, bool useTimeRange);  
   void undoScriptEdits(); // bool batchMode = false);

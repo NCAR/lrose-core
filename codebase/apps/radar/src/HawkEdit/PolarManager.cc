@@ -5521,7 +5521,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   try {
     if (useAllSweeps) {
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
-        _applyCfacToggle->isChecked(),
+        _applyCfacToggle->isChecked(), // <<== get rid of this!!!
         dataFileName, notifyListenersWhenVolumeChanges);
     } else {
       // send the current sweep to the script editor controller
@@ -5564,7 +5564,7 @@ void PolarManager::restoreCurrentState() {
 // From the way the saveDirectoryPath is chosen, the path must exist.
 // TODO: when running from the command line, verify the directory exists.
 void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoundary, 
-  bool useAllSweeps, bool useTimeRange) {
+  bool useAllSweeps, bool useTimeRange, string outputDir) {
 
   QString script;
   try {
@@ -5585,32 +5585,34 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
   }
 
   // get the field names
-  vector<string> fieldNames = _displayFieldController->getFieldNames();
-  if (fieldNames.size() <= 0) {
-    errorMessage("Error", "No field names selected");
-    return;
-  }
+  //vector<string> fieldNames = _displayFieldController->getFieldNames();
+  //if (fieldNames.size() <= 0) {
+  //  errorMessage("Error", "No field names selected");
+  //  return;
+  //}
   string fileName;
   string currentPath;
   int firstArchiveFileIndex;
   int lastArchiveFileIndex;
 
-  bool batchMode = _operationMode==BATCH;
+  bool batchMode = true; // _operationMode==BATCH;
+
 
   // get list of archive files within start and end date/times
   _timeNavController->getBounds(batchMode, &firstArchiveFileIndex,
     &lastArchiveFileIndex);
 
-  // save the current state, in order to reconnect the DataModel to the interactive controls? 
-  saveCurrentState();
+  if (isVisible()) {
+    // save the current state, in order to reconnect the DataModel to the interactive controls? 
+    saveCurrentState();
 
-  // TODO: maybe the progress becomes dots written to output??
-  // update the progress of each file in three stages, so multiply by 3
-  int nProgressStagesPerFile = 3;
-  int nProgressSteps = (lastArchiveFileIndex - firstArchiveFileIndex + 1) * nProgressStagesPerFile;
-  scriptEditorControl->initProgress(nProgressSteps);
-  QCoreApplication::processEvents();  // let the progress bar update
-
+    // TODO: maybe the progress becomes dots written to output??
+    // update the progress of each file in three stages, so multiply by 3
+    int nProgressStagesPerFile = 3;
+    int nProgressSteps = (lastArchiveFileIndex - firstArchiveFileIndex + 1) * nProgressStagesPerFile;
+    scriptEditorControl->initProgress(nProgressSteps);
+    QCoreApplication::processEvents();  // let the progress bar update
+  }
   _batchEditing = batchMode;
 
   try {
@@ -5627,48 +5629,52 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
   while (archiveFileIndex <= lastArchiveFileIndex && !_cancelled) {
 
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
-        
+    //  do not use version path, just output to dir
     // need to get the current version of the file (by index)
 
+    // inputPath is the complete path/filename
     string inputPath = _timeNavController->getArchiveFilePath(archiveFileIndex);
-    string versionPath = _undoRedoController->getCurrentVersion(archiveFileIndex);
-    if (versionPath.size() <= 0) {
+    //string versionPath = outputDir; // _undoRedoController->getCurrentVersion(archiveFileIndex);
+
+    //if (versionPath.size() <= 0) {
       // use original data file
-    } else {
+    //} else {
       // add the filename to the versionPath
-      versionPath.append("/");
-      string fileName = _timeNavController->getArchiveFileName(archiveFileIndex);
-      inputPath = versionPath.append(fileName);      
-    }
+    string outputPath = outputDir;
+    outputPath.append("/");
+    string fileName = _timeNavController->getArchiveFileName(archiveFileIndex);
+    outputPath.append(fileName);
+   
+    //}
+
     //<=== NO! Let the scriptEditorController manage the data file fetch using ScriptsDataModel
       //bool batchMode = true; // to prevent message box on every file
       try {  
 
-        int currentProgressStep = (archiveFileIndex - firstArchiveFileIndex) * nProgressStagesPerFile;
-        scriptEditorControl->updateProgress(currentProgressStep, nProgressSteps);
-        QCoreApplication::processEvents();  // let the progress bar update
-
+        if (isVisible()) {
+          //int currentProgressStep = (archiveFileIndex - firstArchiveFileIndex) * nProgressStagesPerFile;
+          //scriptEditorControl->updateProgress(currentProgressStep, nProgressSteps);
+          //QCoreApplication::processEvents();  // let the progress bar update
+        }
         // use regular forEachRay ...        
+        updateListenersOnVolumeChanged = false;
         runForEachRayScript(script, useBoundary, useAllSweeps, inputPath, updateListenersOnVolumeChanged);
         // check if Cancel requested
         //   save archive file to temp area
         //LOG(DEBUG) << "writing to file " << name;
 
-        scriptEditorControl->updateProgress(currentProgressStep+1, nProgressSteps);
-        QCoreApplication::processEvents();  // let the progress bar update
+        if (isVisible()) {
+          //scriptEditorControl->updateProgress(currentProgressStep+1, nProgressSteps);
+          //QCoreApplication::processEvents();  // let the progress bar update
+        }
 
-        string nextVersionPath = _getFileNewVersion(archiveFileIndex);
-          // _undoRedoController->getNewVersion(archiveFileIndex);
+        //string nextVersionPath = _getFileNewVersion(archiveFileIndex);
 
-  //      currentPath = saveDirectoryPath;
-  //      currentPath.append("/");
-  //      fileName = _timeNavController->getSelectedArchiveFileName();
-  //      currentPath.append(fileName);
-        scriptEditorControl->writeData(nextVersionPath);
+        scriptEditorControl->writeData(outputPath);
         //_unSavedEdits = false;
 
-        scriptEditorControl->updateProgress(currentProgressStep+2, nProgressSteps);
-        QCoreApplication::processEvents();  // let the progress bar update
+        //scriptEditorControl->updateProgress(currentProgressStep+2, nProgressSteps);
+        //QCoreApplication::processEvents();  // let the progress bar update
       
       } catch (FileIException &ex) {
         errorMessage("Error", "FileIException");
@@ -5693,10 +5699,10 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
         return;
       }
     //}
-    updateListenersOnVolumeChanged = false;  
+    //updateListenersOnVolumeChanged = false;  
     archiveFileIndex += 1;
     //_timeNavController->setTimeSliderPosition(archiveFileIndex);
-    QCoreApplication::processEvents();
+    //QCoreApplication::processEvents();
     //cancelled = scriptEditorControl->cancelRequested();
   } // while more archive files
   
@@ -5716,8 +5722,8 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
        useBoundary, boundaryPoints);
     }
     */
-    if (batchMode)
-      _undoRedoController->waterMarkVersion();
+    //if (batchMode)
+    //  _undoRedoController->waterMarkVersion();
   } catch (std::invalid_argument &ex) {
     errorMessage("Error", ex.what());
   }
@@ -5725,7 +5731,7 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
   scriptEditorControl->batchEditComplete();
   
   // reconnect the DataModel to the selected time index, etc.
-  restoreCurrentState();
+  //restoreCurrentState();
 }
 
 
@@ -6439,7 +6445,11 @@ void PolarManager::_about()
 
 
 void PolarManager::errorMessage(string title, string message) {
-  QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+  if (isVisible()) {
+    QMessageBox::information(this, QString::fromStdString(title), QString::fromStdString(message));
+  } else {
+    cerr << title << ":" << message << endl;
+  }
 }
 
 int PolarManager::saveDiscardMessage(string text, string question) {

@@ -176,7 +176,9 @@ void ScriptEditorController::volumeUpdated(QStringList newFieldNames) {
 void ScriptEditorController::readScriptFile(string filename, string *script) {
   std::ifstream is(filename);
   if (is.is_open()) {
-    is >> *script;
+    std::stringstream buffer;
+    buffer << is.rdbuf();
+    *script = buffer.str();
     is.close();
   } else {
     throw std::invalid_argument("Cannot open script file");
