@@ -63,6 +63,11 @@ int Args::parse (const int argc, const char **argv)
   char tmp_str[BUFSIZ];
 
   // intialize
+  // if no args, run interactively!!!
+  if (argc == 1)
+    interactive = true;
+  else
+    interactive = false;
 
   int iret = 0;
   TDRP_init_override(&override);
@@ -129,11 +134,6 @@ int Args::parse (const int argc, const char **argv)
       } else {
 	iret = -1;
       }
-      
-    } else if (!strcmp(argv[i], "-i")) {
-      
-        sprintf(tmp_str, "interactive = TRUE;");
-        TDRP_add_override(&override, tmp_str);
 
     } else if (!strcmp(argv[i], "-tcp_mode")) {
       
@@ -317,7 +317,6 @@ void Args::_usage(ostream &out)
       << "       [ -color_scales ? ] specify color scale directory\n"
       << "       [ -debug, -d ] print debug messages\n"
       << "       [ -f ? ?] list of files to process in archive mode\n"
-      << "       [ -i ] interactive mode with GUI\n"
       << "       [ -images_end_time \"yyyy mm dd hh mm ss\"]\n"
       << "            set end time for image generation mode\n"
       << "       [ -image_interval ?]\n"

@@ -67,7 +67,7 @@ int main(int argc, char **argv)
   try {
 
 
-    QCoreApplication *coreApp = new QCoreApplication(argc, argv);
+    //QCoreApplication *coreApp = new QCoreApplication(argc, argv);
 
     // ~/lrose/bin/HawkEdit -i -f cfrad*_not_applied* -script script.txt -output_dir output_dir 
     // -i for interactive, pops up the GUI

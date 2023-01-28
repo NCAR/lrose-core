@@ -58,7 +58,7 @@ public:
   int parse (const int argc, const char **argv);
 
   // public data
-
+  bool interactive;
   tdrp_override_t override;
   vector<string> inputFileList;
   string scriptFilePath;

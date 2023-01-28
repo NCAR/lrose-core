@@ -182,8 +182,7 @@ HawkEye::~HawkEye()
 
 int HawkEye::Run(QApplication &app)
 {
-
-  if (_params->interactive) {
+  if (_args.interactive) {
     return _runInteractive(app);
   } else {
     return _runConsole(app);
@@ -262,6 +261,8 @@ int HawkEye::_runInteractive(QApplication &app)
     string emphasis_color = "white";
     string annotation_color = "white";
     string selectedFieldName = "";
+
+    _displayFields.clear();
     if (_displayFields.size() > 0)
       selectedFieldName = _displayFields[0]->getName();
 

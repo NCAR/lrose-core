@@ -919,7 +919,7 @@ private slots:
     double range);
 
   void _scriptEditorSetup();
-  void EditRunScript();
+  void EditRunScript(bool interactive = true);
 
  
 

@@ -5469,15 +5469,22 @@ void PolarManager::_scriptEditorSetup() {
 }
 
 
-void PolarManager::EditRunScript() {
+void PolarManager::EditRunScript(bool interactive) {
   LOG(DEBUG) << "enter";
+
+  if (!interactive) {
+    // create the model
+    ScriptEditorModel *model = new ScriptEditorModel();
+    // create the controller
+    scriptEditorControl = new ScriptEditorController(scriptEditorView, model);    
+  }
   if (scriptEditorView == NULL) {
     // create the view
 
     scriptEditorView = new ScriptEditorView(this);
 
     // create the model
-    ScriptEditorModel *model = new ScriptEditorModel(); // _vol);
+    ScriptEditorModel *model = new ScriptEditorModel();
     
     // create the controller
     //ScriptEditorController *
@@ -5521,7 +5528,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   try {
     if (useAllSweeps) {
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
-        _applyCfacToggle->isChecked(), // <<== get rid of this!!!
+        _applyCfacToggle->isChecked(),
         dataFileName, notifyListenersWhenVolumeChanges);
     } else {
       // send the current sweep to the script editor controller
@@ -5614,6 +5621,9 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
     QCoreApplication::processEvents();  // let the progress bar update
   }
   _batchEditing = batchMode;
+
+  bool interactive = false;
+  EditRunScript(interactive);
 
   try {
 
@@ -5728,7 +5738,8 @@ void PolarManager::runScriptBatchModeConsole(string scriptFilePath, bool useBoun
     errorMessage("Error", ex.what());
   }
   _cancelled = false;
-  scriptEditorControl->batchEditComplete();
+  cerr << "editing complete" << endl;
+  //scriptEditorControl->batchEditComplete();
   
   // reconnect the DataModel to the selected time index, etc.
   //restoreCurrentState();
