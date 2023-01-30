@@ -2732,9 +2732,17 @@ void RadarMoments::singlePolHStagPrt(RadarComplex_t *iqhc,
     computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
     // CPA
     if (_computeCpaUsingAlt) {
-      fields.cpa = computeCpaAlt(iqhc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpaAlt(iqhc, _nSamples);
+      }
     } else {
-      fields.cpa = computeCpa(iqhc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhc, _nSamples);
+      }
     }
   }
   
@@ -2790,12 +2798,6 @@ void RadarMoments::singlePolHStagPrt(double lag0_hc_long,
   }
   bool snrHcOK = (fields.snrhc != _missing);
   
-  if (gateNum >= _nGatesPrtShort) {
-    // only power beyond short PRT region
-    // no phase-based computations
-    return;
-  }
-
   // set db and phase
 
   fields.lag0_hc_short_db = 10.0 * log10(lag0_hc_short);
@@ -2856,6 +2858,11 @@ void RadarMoments::singlePolHStagPrt(double lag0_hc_long,
   fields.vel = unfoldedVel;
   fields.vel_unfold_interval = _PP[ll];
   fields.vel_diff = vel_diff;
+
+  if (gateNum >= _nGatesPrtShort) {
+    // cannot compute velocity from only long prt data
+    fields.vel = _missing;
+  }
 
   // width
 
@@ -3541,11 +3548,6 @@ void RadarMoments::dpHOnlyStagPrt(RadarComplex_t *iqhc,
   dpHOnlyStagPrtPower(lag0_hc_long, lag0_vx_long, gateNum, isFiltered, fields);
   bool snrHcOK = (fields.snrhc != _missing);
   
-  if (gateNum >= _nGatesPrtShort) {
-    // only power beyond short PRT region, no phase-based fields
-    return;
-  }
-
   /////////////////////////////////////////////////////////////////////////////
   // ncp
   
@@ -3568,9 +3570,17 @@ void RadarMoments::dpHOnlyStagPrt(RadarComplex_t *iqhc,
     // CPA
     
     if (_computeCpaUsingAlt) {
-      fields.cpa = computeCpaAlt(iqhc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpaAlt(iqhc, _nSamples);
+      }
     } else {
-      fields.cpa = computeCpa(iqhc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhc, _nSamples);
+      }
     }
 
   }
@@ -3611,6 +3621,11 @@ void RadarMoments::dpHOnlyStagPrt(RadarComplex_t *iqhc,
   fields.vel = unfoldedVel;
   fields.vel_unfold_interval = _PP[ll];
   fields.vel_diff = vel_diff;
+
+  if (gateNum >= _nGatesPrtShort) {
+    // cannot compute velocity from only long prt data
+    fields.vel = _missing;
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // spectrum width
@@ -3837,11 +3852,6 @@ void RadarMoments::dpVOnlyStagPrt(RadarComplex_t *iqvc,
   dpVOnlyStagPrtPower(lag0_vc_long, lag0_hx_long, gateNum, isFiltered, fields);
   bool snrVcOK = (fields.snrvc != _missing);
   
-  if (gateNum >= _nGatesPrtShort) {
-    // only power beyond short PRT region, no phase-based fields
-    return;
-  }
-
   ////////////////////////////////////////////////////////////////////////////////
   // ncp
   
@@ -3864,9 +3874,17 @@ void RadarMoments::dpVOnlyStagPrt(RadarComplex_t *iqvc,
     // CPA
     
     if (_computeCpaUsingAlt) {
-      fields.cpa = computeCpaAlt(iqvc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpaAlt(iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpaAlt(iqvc, _nSamples);
+      }
     } else {
-      fields.cpa = computeCpa(iqvc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpa(iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqvc, _nSamples);
+      }
     }
 
   }
@@ -3907,6 +3925,11 @@ void RadarMoments::dpVOnlyStagPrt(RadarComplex_t *iqvc,
   fields.vel = unfoldedVel;
   fields.vel_unfold_interval = _PP[ll];
   fields.vel_diff = vel_diff;
+
+  if (gateNum >= _nGatesPrtShort) {
+    // cannot compute velocity from only long prt data
+    fields.vel = _missing;
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // spectrum width
