@@ -308,6 +308,7 @@ private:
   // Moments computations
   
   RadarMoments *_mom;
+  RadarMoments *_momStagPrt;
   PhaseCoding _pcode;
 
   bool _applyFiltering;
@@ -453,7 +454,7 @@ private:
   void _computeWindowRValues();
   void _overrideOpsInfo();
   void _computeWindows();
-  void _initMomentsObject();
+  void _initMomentsObject(RadarMoments *mom);
 
   void _kdpInit();
   void _kdpCompute(bool isFiltered);
