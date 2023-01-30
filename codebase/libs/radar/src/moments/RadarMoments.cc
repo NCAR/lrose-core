@@ -3056,9 +3056,17 @@ void RadarMoments::dpSimHvStagPrt(RadarComplex_t *iqhc,
     computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
     // CPA
     if (_computeCpaUsingAlt) {
-      fields.cpa = computeCpaAlt(iqhc, iqvc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpaAlt(iqhcLong, iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpaAlt(iqhc, iqvc, _nSamples);
+      }
     } else {
-      fields.cpa = computeCpa(iqhc, iqvc, _nSamples);
+      if (gateNum >= _nGatesPrtShort) {
+        fields.cpa = computeCpa(iqhcLong, iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhc, iqvc, _nSamples);
+      }
     }
   }
   
@@ -3139,11 +3147,6 @@ void RadarMoments::dpSimHvStagPrt(double lag0_hc_long,
   bool snrHcOK = (fields.snrhc != _missing);
   bool snrVcOK = (fields.snrvc != _missing);
   
-  if (gateNum >= _nGatesPrtShort) {
-    // only power beyond short PRT region, no phase-based fields
-    return;
-  }
-
   // set db and phase
   
   fields.lag0_hc_short_db = 10.0 * log10(lag0_hc_short);
@@ -3257,6 +3260,11 @@ void RadarMoments::dpSimHvStagPrt(double lag0_hc_long,
   fields.vel = unfoldedVel;
   fields.vel_unfold_interval = _PP[ll];
   fields.vel_diff = vel_diff;
+
+  if (gateNum >= _nGatesPrtShort) {
+    // cannot compute velocity from only long prt data
+    fields.vel = _missing;
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // spectrum width
