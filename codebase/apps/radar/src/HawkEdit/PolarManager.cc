@@ -817,7 +817,7 @@ void PolarManager::_createActions()
   connect(selectIndividualModeAct, &QAction::triggered, this, &PolarManager::selectIndividualMode);
 
 
-  connect(_applyCfacToggle, &QCheckBox::stateChanged, this, &PolarManager::_applyCfac);
+  //connect(_applyCfacToggle, &QCheckBox::stateChanged, this, &PolarManager::_applyCfac);
 
 }
 
@@ -2919,7 +2919,7 @@ void PolarManager::_openFile()
 
   DataModel *dataModel = DataModel::Instance();
   const RadxRay *ray = dataModel->getRay(0);
-  _applyCfacToggle->setCheckState(Qt::Checked);
+  //_applyCfacToggle->setCheckState(Qt::Checked);
   _updateStatusPanel(ray);
   LOG(DEBUG) << "exit";
 }
@@ -4604,8 +4604,8 @@ void PolarManager::_createStatusPanel()
   _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize,
     &_cfacTiltLabel);
                             
-  _applyCfacToggle = new QCheckBox("Apply Correction Factors", this);
-  _statusLayout->addWidget(_applyCfacToggle, row++, 0, 1, 2, alignCenter);
+  //_applyCfacToggle = new QCheckBox("Apply Correction Factors", this);
+  //_statusLayout->addWidget(_applyCfacToggle, row++, 0, 1, 2, alignCenter);
   QLabel *spacerRow = new QLabel("", _statusPanel);
   _statusLayout->addWidget(spacerRow, row, 0);
   _statusLayout->setRowStretch(row, 1);
@@ -5528,7 +5528,7 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
   try {
     if (useAllSweeps) {
       scriptEditorControl->runForEachRayScript(script, useBoundary, boundaryPoints,
-        _applyCfacToggle->isChecked(),
+        false, // _applyCfacToggle->isChecked(),
         dataFileName, notifyListenersWhenVolumeChanges);
     } else {
       // send the current sweep to the script editor controller
@@ -5543,7 +5543,8 @@ void PolarManager::runForEachRayScript(QString script, bool useBoundary, bool us
       // index is a vector and zero-based 
       scriptEditorControl->runForEachRayScript(script, (int) sweepNumber,
        useBoundary, boundaryPoints, 
-       _applyCfacToggle->isChecked(), dataFileName, 
+       false, // _applyCfacToggle->isChecked(), 
+       dataFileName, 
        notifyListenersWhenVolumeChanges);
     }
     // TODO: signal read of current data file, to get any updates the script made to the data
@@ -6296,7 +6297,7 @@ void PolarManager::setDataMissing(string fieldName, float missingValue) {
 }
 
 void PolarManager::_applyCfac() {
-
+/*
   DataModel *dataModel = DataModel::Instance();
   if (_applyCfacToggle->isChecked()) {
     // apply the correction factors
@@ -6306,6 +6307,7 @@ void PolarManager::_applyCfac() {
     errorMessage("Error", "Cannot remove the correction factors");
   }
   _applyDataEdits();
+  */
 }
 
 void PolarManager::spreadSheetClosed() {

@@ -176,7 +176,7 @@ private:
     bool debug_verbose, bool debug_extra);
 
   void adjustAnglesForElevationSurveillance(RadxVol *_vol);
-  void resetAnglesForElevationSurveillance(RadxVol *_vol);
+  //void resetAnglesForElevationSurveillance(RadxVol *_vol);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void _selectFieldsNotInCurrentVersion(

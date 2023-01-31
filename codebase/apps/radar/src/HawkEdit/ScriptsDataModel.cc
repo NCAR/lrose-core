@@ -500,7 +500,7 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
 
   // adjust angles for elevation surveillance if needed
   
-  vol->setAnglesForElevSurveillance();
+  //vol->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -552,7 +552,7 @@ RadxVol *ScriptsDataModel::getRadarVolume(string path, vector<string> *fieldName
 
   // adjust angles for elevation surveillance if needed
   
-  vol->setAnglesForElevSurveillance();
+  //vol->setAnglesForElevSurveillance();
   
   // compute the fixed angles from the rays
   // so that we reflect reality
@@ -1252,7 +1252,7 @@ RadxRay *ScriptsDataModel::getRay(size_t rayIdx) {
     throw std::invalid_argument(msg);
   } else {
     if (_applyCorrectionFactors) {
-      applyCorrectionFactors(ray);
+      // applyCorrectionFactors(ray);
     }
   	return ray;
   }

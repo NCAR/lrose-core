@@ -1006,7 +1006,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   if (bad_data_value == FLT_MIN) {
     bad_data_value = missingValue;
   }
-  
+
   SoloFunctionsApi soloFunctionsApi; 
 
   //==========  

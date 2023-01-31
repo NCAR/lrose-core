@@ -446,9 +446,10 @@ void DataModel::applyCorrectionFactors() {
 }
 
 void DataModel::withdrawCorrectionFactors() {
-  resetAnglesForElevationSurveillance(_vol);
+  //resetAnglesForElevationSurveillance(_vol);
 }
 
+/*
 void DataModel::resetAnglesForElevationSurveillance(RadxVol *_vol) {
   // adjust angles for elevation surveillance if needed
   RadxRay *ray = getRay(0);
@@ -490,7 +491,7 @@ void DataModel::resetAnglesForElevationSurveillance(RadxVol *_vol) {
     }
   }
 }
-
+*/
 void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
 
   // adjust angles for elevation surveillance if needed
@@ -604,7 +605,7 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   _vol->convertToFl32();
 
-  //_adjustAnglesForElevationSurveillance(_vol);
+  adjustAnglesForElevationSurveillance(_vol);
 
   // adjust angles for elevation surveillance if needed
   //if (_vol->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
