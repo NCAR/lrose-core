@@ -4613,20 +4613,20 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         
         // original data - full series
         
-        RadarComplex_t *iqhcOrig = gate->iqhcOrig;
-        RadarComplex_t *iqvcOrig = gate->iqvcOrig;
-        for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
-          iqhcOrig->re = iqChan0[isamp][ipos];
-          iqhcOrig->im = iqChan0[isamp][ipos+1];
-          iqvcOrig->re = iqChan1[isamp][ipos];
-          iqvcOrig->im = iqChan1[isamp][ipos+1];
-        }
+        // RadarComplex_t *iqhcOrig = gate->iqhcOrig;
+        // RadarComplex_t *iqvcOrig = gate->iqvcOrig;
+        // for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
+        //   iqhcOrig->re = iqChan0[isamp][ipos];
+        //   iqhcOrig->im = iqChan0[isamp][ipos+1];
+        //   iqvcOrig->re = iqChan1[isamp][ipos];
+        //   iqvcOrig->im = iqChan1[isamp][ipos+1];
+        // }
        
-        // windowed data
-        memcpy(gate->iqhc, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
-        memcpy(gate->iqvc, gate->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
-        RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
-        RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
+        // // windowed data
+        // memcpy(gate->iqhc, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
+        // memcpy(gate->iqvc, gate->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
+        // RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
+        // RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
 
       } // for (int igate = _nGatesPrtShort ...
       
@@ -4757,31 +4757,31 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         
         // original data - full series
         
-        RadarComplex_t *iqhcOrig = gate->iqhcOrig;
-        RadarComplex_t *iqvcOrig = gate->iqvcOrig;
-        for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
-          if (isamp % 2 == 0) {
-            iqhcOrig->re = iqChan0[isamp][ipos];
-            iqhcOrig->im = iqChan0[isamp][ipos+1];
-            if (iqChan1) {
-              iqvcOrig->re = iqChan1[isamp][ipos];
-              iqvcOrig->im = iqChan1[isamp][ipos+1];
-            }
-          } else {
-            iqvcOrig->re = iqChan0[isamp][ipos];
-            iqvcOrig->im = iqChan0[isamp][ipos+1];
-            if (iqChan1) {
-              iqhcOrig->re = iqChan1[isamp][ipos];
-              iqhcOrig->im = iqChan1[isamp][ipos+1];
-            }
-          }
-        }
+        // RadarComplex_t *iqhcOrig = gate->iqhcOrig;
+        // RadarComplex_t *iqvcOrig = gate->iqvcOrig;
+        // for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
+        //   if (isamp % 2 == 0) {
+        //     iqhcOrig->re = iqChan0[isamp][ipos];
+        //     iqhcOrig->im = iqChan0[isamp][ipos+1];
+        //     if (iqChan1) {
+        //       iqvcOrig->re = iqChan1[isamp][ipos];
+        //       iqvcOrig->im = iqChan1[isamp][ipos+1];
+        //     }
+        //   } else {
+        //     iqvcOrig->re = iqChan0[isamp][ipos];
+        //     iqvcOrig->im = iqChan0[isamp][ipos+1];
+        //     if (iqChan1) {
+        //       iqhcOrig->re = iqChan1[isamp][ipos];
+        //       iqhcOrig->im = iqChan1[isamp][ipos+1];
+        //     }
+        //   }
+        // }
         
-        // windowed data
-        memcpy(gate->iqhc, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
-        memcpy(gate->iqvc, gate->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
-        RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
-        RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
+        // // windowed data
+        // memcpy(gate->iqhc, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
+        // memcpy(gate->iqvc, gate->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
+        // RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
+        // RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
 
       } // for (int igate = _nGatesPrtShort ...
       
@@ -5030,7 +5030,6 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
            igate < _nGatesPrtLong; igate++, ipos += 2) {
 
         GateData *gate = _gateData[igate];
-
         memcpy(gate->iqhcPrtShortOrig, gate->iqhcPrtLongOrig, nBytesHalf);
 
       } // for (int igate = _nGatesPrtShort ...

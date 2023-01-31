@@ -70,6 +70,7 @@ RadxBuf::RadxBuf(const RadxBuf &other)
   }
   _nalloc = other._nalloc;
   _len = other._len;
+  _allowShrink = other._allowShrink;
   _buf = new char[_nalloc];
   memset(_buf, 0, _nalloc);
   memcpy(_buf, other._buf, _len);
@@ -157,8 +158,10 @@ void *RadxBuf::load(const void *source, const size_t numbytes)
 void *RadxBuf::add(const void *source, const size_t numbytes)
 
 {
-  if (numbytes > 0 && source != NULL) {
+  if (numbytes > 0) {
     grow(numbytes);
+  }
+  if (source != NULL) {
     memcpy(_buf + _len, source, numbytes);
     _len += numbytes;
   }
@@ -207,13 +210,14 @@ void *RadxBuf::alloc(const size_t nbytes_total)
 
   } else if (nbytes_total > _nalloc) {
 
-    size_t new_alloc = MAX(_nalloc * 2, nbytes_total);
+    size_t newSize = MAX(_nalloc * 2, nbytes_total) + 16;
     char *save = _buf;
-    _buf = new char[new_alloc];
-    memcpy(_buf, save, _nalloc);
+    _buf = new char[newSize];
+    memcpy(_buf, save, _len);
+    // memcpy(_buf, save, _nalloc);
     delete[] save;
-    _nalloc = new_alloc;
-    
+    _nalloc = newSize;
+
   } else if (_allowShrink && (nbytes_total < _nalloc / 2)) {
     
     size_t new_alloc = _nalloc / 2;
@@ -257,7 +261,7 @@ void RadxBuf::clear()
 void *RadxBuf::grow(const size_t nbytes_needed)
 
 {
-  size_t nbytes_total = _len + nbytes_needed;
+  size_t nbytes_total = _len + nbytes_needed + 16;
   alloc(nbytes_total);
   return _buf;
 }

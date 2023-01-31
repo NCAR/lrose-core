@@ -2729,22 +2729,24 @@ void RadarMoments::singlePolHStagPrt(RadarComplex_t *iqhc,
   
   if (!isFiltered) {
     // CPA and refractivity
-    computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
-    // CPA
-    if (_computeCpaUsingAlt) {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
-      } else {
+    if (gateNum < _nGatesPrtShort) {
+      // gates with both short and long prt data
+      computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
         fields.cpa = computeCpaAlt(iqhc, _nSamples);
-      }
-    } else {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
       } else {
         fields.cpa = computeCpa(iqhc, _nSamples);
       }
-    }
-  }
+    } else {
+      // gates with only long prt data
+      computeRefract(iqhcLong, _nSamplesHalf, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
+        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
+      }
+    } // if (gateNum < _nGatesPrtShort)
+  } // if (!isFiltered)
   
 }
 
@@ -3059,23 +3061,26 @@ void RadarMoments::dpSimHvStagPrt(RadarComplex_t *iqhc,
   
   if (!isFiltered) {
     // CPA and refractivity
-    computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
-    computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
-    // CPA
-    if (_computeCpaUsingAlt) {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpaAlt(iqhcLong, iqvcLong, _nSamplesHalf);
-      } else {
+    if (gateNum < _nGatesPrtShort) {
+      // gates with both short and long prt data
+      computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
         fields.cpa = computeCpaAlt(iqhc, iqvc, _nSamples);
-      }
-    } else {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpa(iqhcLong, iqvcLong, _nSamplesHalf);
       } else {
         fields.cpa = computeCpa(iqhc, iqvc, _nSamples);
       }
-    }
-  }
+    } else {
+      // gates with only long prt data
+      computeRefract(iqhcLong, _nSamplesHalf, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      computeRefract(iqvcLong, _nSamplesHalf, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
+        fields.cpa = computeCpaAlt(iqhcLong, iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhcLong, iqvcLong, _nSamplesHalf);
+      }
+    } // if (gateNum < _nGatesPrtShort)
+  } // if (!isFiltered)
   
 }
 
@@ -3562,28 +3567,25 @@ void RadarMoments::dpHOnlyStagPrt(RadarComplex_t *iqhc,
   // CPA and refract
 
   if (!isFiltered) {
-    
-    // refractivity
-    
-    computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
-
-    // CPA
-    
-    if (_computeCpaUsingAlt) {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
-      } else {
+    // CPA and refractivity
+    if (gateNum < _nGatesPrtShort) {
+      // gates with both short and long prt data
+      computeRefract(iqhc, _nSamples, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
         fields.cpa = computeCpaAlt(iqhc, _nSamples);
-      }
-    } else {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
       } else {
         fields.cpa = computeCpa(iqhc, _nSamples);
       }
-    }
-
-  }
+    } else {
+      // gates with only long prt data
+      computeRefract(iqhcLong, _nSamplesHalf, fields.aiq_hc, fields.niq_hc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
+        fields.cpa = computeCpaAlt(iqhcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqhcLong, _nSamplesHalf);
+      }
+    } // if (gateNum < _nGatesPrtShort)
+  } // if (!isFiltered)
 
   ////////////////////////////////////////////////////////////////////////////////
   // velocity
@@ -3866,28 +3868,25 @@ void RadarMoments::dpVOnlyStagPrt(RadarComplex_t *iqvc,
   // CPA and refract
 
   if (!isFiltered) {
-    
-    // refractivity
-    
-    computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
-
-    // CPA
-    
-    if (_computeCpaUsingAlt) {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpaAlt(iqvcLong, _nSamplesHalf);
-      } else {
+    // CPA and refractivity
+    if (gateNum < _nGatesPrtShort) {
+      // gates with both short and long prt data
+      computeRefract(iqvc, _nSamples, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
         fields.cpa = computeCpaAlt(iqvc, _nSamples);
-      }
-    } else {
-      if (gateNum >= _nGatesPrtShort) {
-        fields.cpa = computeCpa(iqvcLong, _nSamplesHalf);
       } else {
         fields.cpa = computeCpa(iqvc, _nSamples);
       }
-    }
-
-  }
+    } else {
+      // gates with only long prt data
+      computeRefract(iqvcLong, _nSamplesHalf, fields.aiq_vc, fields.niq_vc, _changeAiqSign);
+      if (_computeCpaUsingAlt) {
+        fields.cpa = computeCpaAlt(iqvcLong, _nSamplesHalf);
+      } else {
+        fields.cpa = computeCpa(iqvcLong, _nSamplesHalf);
+      }
+    } // if (gateNum < _nGatesPrtShort)
+  } // if (!isFiltered)
 
   ////////////////////////////////////////////////////////////////////////////////
   // velocity
