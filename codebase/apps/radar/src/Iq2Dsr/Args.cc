@@ -142,12 +142,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       if (i < argc - 1) {
 	startTime = DateTime::parseDateTime(argv[++i]);
-	if (startTime == DateTime::NEVER)
-	{
+	if (startTime == DateTime::NEVER) {
 	  iret = -1;
-	}
-	else
-	{
+	} else {
 	  sprintf(tmp_str, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
@@ -159,12 +156,9 @@ int Args::parse(int argc, char **argv, string &prog_name)
       
       if (i < argc - 1) {
 	endTime = DateTime::parseDateTime(argv[++i]);
-	if (endTime == DateTime::NEVER)
-	{
+	if (endTime == DateTime::NEVER)	{
 	  iret = -1;
-	}
-	else
-	{
+	} else {
 	  sprintf(tmp_str, "mode = ARCHIVE;");
 	  TDRP_add_override(&override, tmp_str);
 	}
