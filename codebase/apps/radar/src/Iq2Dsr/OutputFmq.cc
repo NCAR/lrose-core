@@ -1048,8 +1048,8 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
         double val = *(start + offset);
         fdata[igate] = val;
       }
-
       unfiltFld->addDataFl32(nGatesOut, fdata);
+      delete[] fdata;
 
       // convert missing value to standard
       
@@ -1079,8 +1079,8 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
         double val = *(start + offset);
         fdata[igate] = val;
       }
-      
       filtFld->addDataFl32(nGatesOut, fdata);
+      delete[] fdata;
 
       // convert missing value to standard
       

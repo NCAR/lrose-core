@@ -4538,9 +4538,11 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
           iqhcOrig->re = iqChan0[isamp][ipos];
           iqhcOrig->im = iqChan0[isamp][ipos+1];
-          iqvcOrig->re = iqChan1[isamp][ipos];
-          iqvcOrig->im = iqChan1[isamp][ipos+1];
-        }
+          if (iqChan1 != NULL) {
+            iqvcOrig->re = iqChan1[isamp][ipos];
+            iqvcOrig->im = iqChan1[isamp][ipos+1];
+          }
+          }
        
         // short PRT from input sequence, which starts with short
         
@@ -4550,8 +4552,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
              isamp++, iqhcShort++, iqvcShort++) {
           iqhcShort->re = iqChan0[jsamp][ipos];
           iqhcShort->im = iqChan0[jsamp][ipos+1];
-          iqvcShort->re = iqChan1[jsamp][ipos];
-          iqvcShort->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvcShort->re = iqChan1[jsamp][ipos];
+            iqvcShort->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
           jsamp++;
         }
@@ -4585,8 +4589,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
           jsamp++;
           iqhcLong->re = iqChan0[jsamp][ipos];
           iqhcLong->im = iqChan0[jsamp][ipos+1];
-          iqvcLong->re = iqChan1[jsamp][ipos];
-          iqvcLong->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvcLong->re = iqChan1[jsamp][ipos];
+            iqvcLong->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
         }
         
@@ -4755,34 +4761,6 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         memcpy(gate->iqhcPrtShort, gate->iqhcPrtLong, nBytesHalf);
         memcpy(gate->iqvcPrtShort, gate->iqvcPrtLong, nBytesHalf);
         
-        // original data - full series
-        
-        // RadarComplex_t *iqhcOrig = gate->iqhcOrig;
-        // RadarComplex_t *iqvcOrig = gate->iqvcOrig;
-        // for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvcOrig++) {
-        //   if (isamp % 2 == 0) {
-        //     iqhcOrig->re = iqChan0[isamp][ipos];
-        //     iqhcOrig->im = iqChan0[isamp][ipos+1];
-        //     if (iqChan1) {
-        //       iqvcOrig->re = iqChan1[isamp][ipos];
-        //       iqvcOrig->im = iqChan1[isamp][ipos+1];
-        //     }
-        //   } else {
-        //     iqvcOrig->re = iqChan0[isamp][ipos];
-        //     iqvcOrig->im = iqChan0[isamp][ipos+1];
-        //     if (iqChan1) {
-        //       iqhcOrig->re = iqChan1[isamp][ipos];
-        //       iqhcOrig->im = iqChan1[isamp][ipos+1];
-        //     }
-        //   }
-        // }
-        
-        // // windowed data
-        // memcpy(gate->iqhc, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
-        // memcpy(gate->iqvc, gate->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
-        // RadarMoments::applyWindow(gate->iqhc, _window, _nSamples);
-        // RadarMoments::applyWindow(gate->iqvc, _window, _nSamples);
-
       } // for (int igate = _nGatesPrtShort ...
       
     } break;
@@ -4804,8 +4782,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         for (int isamp = 0; isamp < _nSamples; isamp++, iqhcOrig++, iqvxOrig++) {
           iqhcOrig->re = iqChan0[isamp][ipos];
           iqhcOrig->im = iqChan0[isamp][ipos+1];
-          iqvxOrig->re = iqChan1[isamp][ipos];
-          iqvxOrig->im = iqChan1[isamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvxOrig->re = iqChan1[isamp][ipos];
+            iqvxOrig->im = iqChan1[isamp][ipos+1];
+          }
         }
         
         // short PRT from in sequence, starting with short
@@ -4816,8 +4796,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
              isamp++, iqhcShort++, iqvxShort++) {
           iqhcShort->re = iqChan0[jsamp][ipos];
           iqhcShort->im = iqChan0[jsamp][ipos+1];
-          iqvxShort->re = iqChan1[jsamp][ipos];
-          iqvxShort->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvxShort->re = iqChan1[jsamp][ipos];
+            iqvxShort->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
           jsamp++;
         }
@@ -4851,8 +4833,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
           jsamp++;
           iqhcLong->re = iqChan0[jsamp][ipos];
           iqhcLong->im = iqChan0[jsamp][ipos+1];
-          iqvxLong->re = iqChan1[jsamp][ipos];
-          iqvxLong->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvxLong->re = iqChan1[jsamp][ipos];
+            iqvxLong->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
         }
         
@@ -4898,8 +4882,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
         for (int isamp = 0; isamp < _nSamples; isamp++, iqhxOrig++, iqvcOrig++) {
           iqhxOrig->re = iqChan0[isamp][ipos];
           iqhxOrig->im = iqChan0[isamp][ipos+1];
-          iqvcOrig->re = iqChan1[isamp][ipos];
-          iqvcOrig->im = iqChan1[isamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvcOrig->re = iqChan1[isamp][ipos];
+            iqvcOrig->im = iqChan1[isamp][ipos+1];
+          }
         }
         
         // short PRT from in sequence, starting with short
@@ -4910,8 +4896,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
              isamp++, iqhxShort++, iqvcShort++) {
           iqhxShort->re = iqChan0[jsamp][ipos];
           iqhxShort->im = iqChan0[jsamp][ipos+1];
-          iqvcShort->re = iqChan1[jsamp][ipos];
-          iqvcShort->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvcShort->re = iqChan1[jsamp][ipos];
+            iqvcShort->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
           jsamp++;
         }
@@ -4945,8 +4933,10 @@ void Beam::_loadGateIqStagPrt(const fl32 **iqChan0,
           jsamp++;
           iqhxLong->re = iqChan0[jsamp][ipos];
           iqhxLong->im = iqChan0[jsamp][ipos+1];
-          iqvcLong->re = iqChan1[jsamp][ipos];
-          iqvcLong->im = iqChan1[jsamp][ipos+1];
+          if (iqChan1 != NULL) {
+            iqvcLong->re = iqChan1[jsamp][ipos];
+            iqvcLong->im = iqChan1[jsamp][ipos+1];
+          }
           jsamp++;
         }
         
@@ -6429,9 +6419,6 @@ void Beam::_fillInCensoring()
   delete[] countNot;
 
 }
-
-
-
 
 ///////////////////////////////////////////////////////////
 // Cohere trip1 time series to trip 2
