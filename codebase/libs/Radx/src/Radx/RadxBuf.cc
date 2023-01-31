@@ -210,7 +210,7 @@ void *RadxBuf::alloc(const size_t nbytes_total)
 
   } else if (nbytes_total > _nalloc) {
 
-    size_t newSize = MAX(_nalloc * 2, nbytes_total) + 16;
+    size_t newSize = MAX(_nalloc * 2, nbytes_total) + NBYTES_EXTRA;
     char *save = _buf;
     _buf = new char[newSize];
     memcpy(_buf, save, _len);
@@ -220,7 +220,7 @@ void *RadxBuf::alloc(const size_t nbytes_total)
 
   } else if (_allowShrink && (nbytes_total < _nalloc / 2)) {
     
-    size_t new_alloc = _nalloc / 2;
+    size_t new_alloc = _nalloc / 2 + NBYTES_EXTRA;
     char *save = _buf;
     _buf = new char[new_alloc];
     memcpy(_buf, save, new_alloc);
@@ -261,7 +261,7 @@ void RadxBuf::clear()
 void *RadxBuf::grow(const size_t nbytes_needed)
 
 {
-  size_t nbytes_total = _len + nbytes_needed + 16;
+  size_t nbytes_total = _len + nbytes_needed + NBYTES_EXTRA;
   alloc(nbytes_total);
   return _buf;
 }

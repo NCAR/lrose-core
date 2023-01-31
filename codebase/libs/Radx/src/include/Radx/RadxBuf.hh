@@ -177,6 +177,8 @@ public:
 protected:
 private:
 
+  static const size_t NBYTES_EXTRA = 32;
+  
   char *_buf; // pointer to allocated buffer
   size_t _len; // number of bytes currently used
   size_t _nalloc; // allocated size of buffer
