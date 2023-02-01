@@ -401,6 +401,38 @@ public:
   void setWriteRayFile(bool state = true,
                        string dir = "");
   
+  // runs of valid phidp
+
+  class PhidpRun {
+  public:
+    int ibegin;
+    int iend;
+    double phidpBegin;
+    double phidpEnd;
+    PhidpRun() {
+      ibegin = 0;
+      iend = 0;
+      phidpBegin = 0.0;
+      phidpEnd = 0.0;
+    }
+    PhidpRun(int begin, int end) {
+      ibegin = begin;
+      iend = end;
+      phidpBegin = 0.0;
+      phidpEnd = 0.0;
+    }
+    int len() const { return (iend - ibegin + 1); }
+    void print(int irun, ostream &out) {
+      out << "irun, ibegin, iend: "
+          << irun << ","
+          << ibegin << ","
+          << iend << endl;
+    }
+  };
+
+  const vector<PhidpRun> &getValidRuns() const { return _validRuns; }
+  const vector<PhidpRun> &getGapRuns() const { return _gapRuns; }
+
 protected:
   
 private:
@@ -527,35 +559,8 @@ private:
   
   // runs of valid phidp
 
-  class PhidpRun {
-  public:
-    int ibegin;
-    int iend;
-    double phidpBegin;
-    double phidpEnd;
-    PhidpRun() {
-      ibegin = 0;
-      iend = 0;
-      phidpBegin = 0.0;
-      phidpEnd = 0.0;
-    }
-    PhidpRun(int begin, int end) {
-      ibegin = begin;
-      iend = end;
-      phidpBegin = 0.0;
-      phidpEnd = 0.0;
-    }
-    int len() const { return (iend - ibegin + 1); }
-    void print(int irun, ostream &out) {
-      out << "irun, ibegin, iend: "
-          << irun << ","
-          << ibegin << ","
-          << iend << endl;
-    }
-  };
-
   vector<PhidpRun> _validRuns;
-  vector<PhidpRun> _gaps;
+  vector<PhidpRun> _gapRuns;
   
   // arrays for input and computed data
   // and pointers to those arrays
