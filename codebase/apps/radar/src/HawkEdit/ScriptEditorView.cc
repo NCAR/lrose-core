@@ -265,7 +265,13 @@ checkBoxLayout->addWidget(line);
     // Q_INIT_RESOURCE(resources);
 
     // ----
-    QString fileName(":/resources/script_help.txt");
+    // keep this line in the qmake.pro file
+    //
+    // Qt will generate a qrc_resources.cpp file and embed the 
+    // help info into the application.  The help text is then
+    // accessible with the syntax :/script_help.txt
+    // RESOURCES = resources.qrc 
+    QString fileName(":/script_help.txt");
 
     QFile file(fileName);
     // ---
