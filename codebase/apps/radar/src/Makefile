@@ -27,6 +27,7 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	Ecco \
 	HawkEye \
+	HawkEdit \
 	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
