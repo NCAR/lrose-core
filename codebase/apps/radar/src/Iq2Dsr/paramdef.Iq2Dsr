@@ -1490,6 +1490,12 @@ paramdef double {
   p_help = "Applies to CENSORING_BY_SNR_AND_NCP mode. Censoring is applied if both SNR and NCP are below the specified thresholds.";
 } censoring_ncp_threshold;
 
+paramdef int {
+  p_default = 3;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} censoring_min_valid_run;
+
 commentdef {
   p_header = "REFRACTIVITY FIELDS";
 };
@@ -2070,7 +2076,9 @@ typedef enum {
   // NOISE
   
   NOISE_FLAG,
+  NOISE_INTEREST,
   SIGNAL_FLAG,
+  SIGNAL_INTEREST,
 
   // REFRACT
 

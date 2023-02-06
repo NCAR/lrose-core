@@ -642,7 +642,11 @@ void Beam::_prepareForComputeMoments()
 
   // initialize ray properties for noise computations
 
-  _noise->setRayProps(_nGates, _calib, _timeSecs, _nanoSecs, _el, _az);
+  if (_isStagPrt) {
+    _noise->setRayProps(_nGatesPrtLong, _calib, _timeSecs, _nanoSecs, _el, _az);
+  } else {
+    _noise->setRayProps(_nGates, _calib, _timeSecs, _nanoSecs, _el, _az);
+  }
 
 }
 
@@ -1113,7 +1117,7 @@ void Beam::_computeMomSpH()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarSinglePolH(gate->iqhc, fields);
-    _mom->singlePolHNoisePrep(fields.lag0_hc, fields.lag1_hc, fields);
+    _mom->singlePolHNoisePrep(igate, fields.lag0_hc, fields.lag1_hc, fields);
   }
   
   // identify noise regions, and compute the mean noise
@@ -1235,7 +1239,7 @@ void Beam::_computeMomSpV()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarSinglePolV(gate->iqvc, fields);
-    _mom->singlePolVNoisePrep(fields.lag0_vc, fields.lag1_vc, fields);
+    _mom->singlePolVNoisePrep(igate, fields.lag0_vc, fields.lag1_vc, fields);
   }
   
   // identify noise regions, and compute the mean noise
@@ -1321,16 +1325,17 @@ void Beam::_computeMomSpStagPrt()
 
   // copy gate fields to _momFields array
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (int igate = 0; igate < _nGatesPrtLong; igate++) {
     _momFields[igate] = _gateData[igate]->fields;
   }
 
   // prepare for noise comps
   
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (int igate = 0; igate < _nGatesPrtLong; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
-    _mom->singlePolHStagPrtNoisePrep(gate->iqhcOrig,
+    _mom->singlePolHStagPrtNoisePrep(igate,
+                                     gate->iqhcOrig,
                                      gate->iqhcPrtShort,
                                      gate->iqhcPrtLong,
                                      fields);
@@ -1350,7 +1355,7 @@ void Beam::_computeMomSpStagPrt()
     }
   }
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (int igate = 0; igate < _nGatesPrtLong; igate++) {
       
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
@@ -1366,7 +1371,7 @@ void Beam::_computeMomSpStagPrt()
 
   // copy back to gate data
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (int igate = 0; igate < _nGatesPrtLong; igate++) {
     _gateData[igate]->fields = _momFields[igate];
   }
 
@@ -1393,7 +1398,8 @@ void Beam::_computeMomDpAltHvCoCross()
     _mom->computeCovarDpAltHvCoCross(gate->iqhc, gate->iqvc,
                                      gate->iqhx, gate->iqvx, 
                                      fields);
-    _mom->dpAltHvCoCrossNoisePrep(fields.lag0_hc,
+    _mom->dpAltHvCoCrossNoisePrep(igate,
+                                  fields.lag0_hc,
                                   fields.lag0_hx,
                                   fields.lag0_vc,
                                   fields.lag0_vx,
@@ -1492,7 +1498,8 @@ void Beam::_computeMomDpAltHvCoOnly()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarDpAltHvCoOnly(gate->iqhc, gate->iqvc, fields);
-    _mom->dpAltHvCoOnlyNoisePrep(fields.lag0_hc,
+    _mom->dpAltHvCoOnlyNoisePrep(igate,
+                                 fields.lag0_hc,
                                  fields.lag0_vc,
                                  fields.lag2_hc,
                                  fields.lag2_vc,
@@ -1581,7 +1588,8 @@ void Beam::_computeMomDpSimHv()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarDpSimHv(gate->iqhc, gate->iqvc, fields);
-    _mom->dpSimHvNoisePrep(fields.lag0_hc,
+    _mom->dpSimHvNoisePrep(igate,
+                           fields.lag0_hc,
                            fields.lag0_vc,
                            fields.lag1_hc,
                            fields.lag1_vc,
@@ -1670,7 +1678,8 @@ void Beam::_computeMomDpSimHvStagPrt()
   for (int igate = 0; igate < _nGatesPrtLong; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
-    _momStagPrt->dpSimHvStagPrtNoisePrep(gate->iqhcOrig,
+    _momStagPrt->dpSimHvStagPrtNoisePrep(igate,
+                                         gate->iqhcOrig,
                                          gate->iqvcOrig,
                                          gate->iqhcPrtShort,
                                          gate->iqvcPrtShort,
@@ -1757,7 +1766,8 @@ void Beam::_computeMomDpHOnly()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarDpHOnly(gate->iqhc, gate->iqvx, fields);
-    _mom->dpHOnlyNoisePrep(fields.lag0_hc,
+    _mom->dpHOnlyNoisePrep(igate,
+                           fields.lag0_hc,
                            fields.lag0_vx,
                            fields.lag1_hc,
                            fields);
@@ -1857,7 +1867,8 @@ void Beam::_computeMomDpVOnly()
     GateData *gate = _gateData[igate];
     MomentsFields &fields = _momFields[igate];
     _mom->computeCovarDpVOnly(gate->iqvc, gate->iqhx, fields);
-    _mom->dpVOnlyNoisePrep(fields.lag0_vc,
+    _mom->dpVOnlyNoisePrep(igate,
+                           fields.lag0_vc,
                            fields.lag0_hx,
                            fields.lag1_vc,
                            fields);
@@ -6169,17 +6180,24 @@ void Beam::_setNoiseFields()
 {
   
   const vector<bool> &noiseFlag = _noise->getNoiseFlag();
+  const vector<double> &noiseInterest = _noise->getNoiseInterest();
   const vector<bool> &signalFlag = _noise->getSignalFlag();
+  const vector<double> &signalInterest = _noise->getSignalInterest();
   const vector<double> &accumPhaseChange = _noise->getAccumPhaseChange();
   const vector<double> &phaseChangeError = _noise->getPhaseChangeError();
   const vector<double> &dbmSdev = _noise->getDbmSdev();
   const vector<double> &ncpMean = _noise->getNcpMean();
+  
+  size_t nGatesNoise = _nGates;
+  if (_isStagPrt) {
+    nGatesNoise = _nGatesPrtLong;
+  }
 
-  if ((int) noiseFlag.size() < _nGates) {
+  if (noiseFlag.size() < nGatesNoise) {
     return;
   }
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < nGatesNoise; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;
     fields.noise_flag = noiseFlag[igate];
@@ -6188,6 +6206,8 @@ void Beam::_setNoiseFields()
     fields.phase_change_error = phaseChangeError[igate];
     fields.dbm_sdev = dbmSdev[igate];
     fields.ncp_mean = ncpMean[igate];
+    fields.noise_interest = noiseInterest[igate];
+    fields.signal_interest = signalInterest[igate];
   }
   
 }
@@ -6199,9 +6219,12 @@ void Beam::_censorByNoiseFlag()
 
 {
 
-  // load up censor flag from noise flag
-
-  for (int igate = 0; igate < _nGates; igate++) {
+  size_t nGatesCensor = _nGates;
+  if (_isStagPrt) {
+    nGatesCensor = _nGatesPrtLong;
+  }
+  
+  for (size_t igate = 0; igate < nGatesCensor; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;
     if (fields.noise_flag) {
@@ -6213,11 +6236,11 @@ void Beam::_censorByNoiseFlag()
 
   // fill in gaps in censor flag
 
-  _fillInCensoring();
+  _fillInCensoring(nGatesCensor);
 
   // censor the fields
   
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < nGatesCensor; igate++) {
     if (_censorFlags[igate]) {
       GateData *gate = _gateData[igate];
       _censorFields(gate->fields);
@@ -6234,12 +6257,17 @@ void Beam::_censorBySnrNcp()
 
 {
 
+  size_t nGatesCensor = _nGates;
+  if (_isStagPrt) {
+    nGatesCensor = _nGatesPrtLong;
+  }
+  
   // load up censor flag from snr and ncp
 
   double snrThreshold = _params.censoring_snr_threshold;
   double ncpThreshold = _params.censoring_ncp_threshold;
 
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < nGatesCensor; igate++) {
     GateData *gate = _gateData[igate];
     MomentsFields &fields = gate->fields;
     if (fields.snr < snrThreshold &&
@@ -6250,13 +6278,42 @@ void Beam::_censorBySnrNcp()
     }
   }
 
+  // check that uncensored runs meet the minimum length
+  // those which do not are censored
+  
+  int minValidRun = _params.censoring_min_valid_run;
+  if (minValidRun > 1) {
+    int runLength = 0;
+    bool doCheck = false;
+    for (int igate = 0; igate < (int) nGatesCensor; igate++) {
+      if (_censorFlags[igate] == false) {
+        doCheck = false;
+        runLength++;
+      } else {
+        doCheck = true;
+      }
+      // last gate?
+      if (igate == (int) nGatesCensor - 1) doCheck = true;
+      // check run length
+      if (doCheck) {
+        if (runLength < minValidRun) {
+          // clear the run which is too short
+          for (int jgate = igate - runLength; jgate < igate; jgate++) {
+            _censorFlags[jgate] = true;
+          } // jgate
+        }
+        runLength = 0;
+      } // if (doCheck ...
+    } // igate
+  }
+
   // fill in gaps in censor flag
 
-  _fillInCensoring();
+  _fillInCensoring(nGatesCensor);
 
   // censor the fields
   
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < nGatesCensor; igate++) {
     if (_censorFlags[igate]) {
       GateData *gate = _gateData[igate];
       _censorFields(gate->fields);
@@ -6326,12 +6383,12 @@ void Beam::_censorFields(MomentsFields &mfield)
 /////////////////////////////////////////////////////////////
 // apply in-fill filter to censor flag
 
-void Beam::_fillInCensoring()
+void Beam::_fillInCensoring(size_t nGates)
   
 {
   
-  int *countSet = new int[_nGates];
-  int *countNot = new int[_nGates];
+  int *countSet = new int[nGates];
+  int *countNot = new int[nGates];
 
   // compute the running count of gates which have the flag set and
   // those which do not
@@ -6341,7 +6398,7 @@ void Beam::_fillInCensoring()
 
   int nSet = 0;
   int nNot = 0;
-  for (int igate = 0; igate < _nGates; igate++) {
+  for (size_t igate = 0; igate < nGates; igate++) {
     if (_censorFlags[igate]) {
       nSet++;
       nNot = 0;
@@ -6356,8 +6413,8 @@ void Beam::_fillInCensoring()
   // Go in reverse through the gates, taking the max non-zero
   // values and copying them across the set or not-set regions.
   // This makes all the counts equal in the gaps and set areas.
-
-  for (int igate = _nGates - 2; igate >= 0; igate--) {
+  
+  for (ssize_t igate = nGates - 2; igate >= 0; igate--) {
     if (countSet[igate] != 0 &&
         countSet[igate] < countSet[igate+1]) {
       countSet[igate] = countSet[igate+1];
@@ -6370,7 +6427,7 @@ void Beam::_fillInCensoring()
 
   // fill in gaps
 
-  for (int igate = 1; igate < _nGates - 1; igate++) {
+  for (ssize_t igate = 1; igate < (ssize_t) nGates - 1; igate++) {
 
     // is the gap small enough?
 
@@ -6384,8 +6441,8 @@ void Beam::_fillInCensoring()
         minGateCheck = 0;
       }
       int maxGateCheck = igate + nNot;
-      if (maxGateCheck > _nGates - 1) {
-        maxGateCheck = _nGates - 1;
+      if (maxGateCheck > (int) nGates - 1) {
+        maxGateCheck = nGates - 1;
       }
 
       int nAdjacentBelow = 0;

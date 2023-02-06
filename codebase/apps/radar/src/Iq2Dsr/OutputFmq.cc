@@ -1683,8 +1683,12 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       
     case Params::NOISE_FLAG:
       return (&_flds.noise_flag - start);
+    case Params::NOISE_INTEREST:
+      return (&_flds.noise_interest - start);
     case Params::SIGNAL_FLAG:
       return (&_flds.signal_flag - start);
+    case Params::SIGNAL_INTEREST:
+      return (&_flds.signal_interest - start);
 
       // REFRACT
 

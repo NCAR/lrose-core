@@ -514,7 +514,7 @@ private:
   void _censorByNoiseFlag();
   void _censorBySnrNcp();
   void _censorFields(MomentsFields &mfield);
-  void _fillInCensoring();
+  void _fillInCensoring(size_t nGates);
     
   void _cohereTrip1ToTrip2
     (RadarComplex_t *iq,
