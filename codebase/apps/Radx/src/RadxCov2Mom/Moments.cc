@@ -1252,7 +1252,7 @@ void Moments::_computeNoiseSinglePolH(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.singlePolHNoisePrep(covar.lag0Hc, covar.lag1Hc, mfields[igate]);
+    _rmom.singlePolHNoisePrep(igate, covar.lag0Hc, covar.lag1Hc, mfields[igate]);
   }
 
   // identify noise regions, and compute the mea noise
@@ -1288,7 +1288,7 @@ void Moments::_computeNoiseSinglePolV(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.singlePolVNoisePrep(covar.lag0Vc, covar.lag1Vc, mfields[igate]);
+    _rmom.singlePolVNoisePrep(igate, covar.lag0Vc, covar.lag1Vc, mfields[igate]);
   }
 
   // identify noise regions, and compute the mea noise
@@ -1324,7 +1324,8 @@ void Moments::_computeNoiseDpAltHvCoOnly(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.dpAltHvCoOnlyNoisePrep(covar.lag0Hc,
+    _rmom.dpAltHvCoOnlyNoisePrep(igate,
+                                 covar.lag0Hc,
                                  covar.lag0Vc,
                                  covar.lag2Hc,
                                  covar.lag2Vc,
@@ -1367,7 +1368,8 @@ void Moments::_computeNoiseDpAltHvCoCross(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.dpAltHvCoCrossNoisePrep(covar.lag0Hc,
+    _rmom.dpAltHvCoCrossNoisePrep(igate,
+                                  covar.lag0Hc,
                                   covar.lag0Hx,
                                   covar.lag0Vc,
                                   covar.lag0Vx,
@@ -1431,7 +1433,8 @@ void Moments::_computeNoiseDpSimHv(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.dpSimHvNoisePrep(covar.lag0Hc,
+    _rmom.dpSimHvNoisePrep(igate,
+                           covar.lag0Hc,
                            covar.lag0Vc,
                            covar.lag1Hc,
                            covar.lag1Vc,
@@ -1474,7 +1477,8 @@ void Moments::_computeNoiseDpHOnly(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.dpHOnlyNoisePrep(covar.lag0Hc,
+    _rmom.dpHOnlyNoisePrep(igate,
+                           covar.lag0Hc,
                            covar.lag0Vx,
                            covar.lag1Hc,
                            mfields[igate]);
@@ -1523,7 +1527,8 @@ void Moments::_computeNoiseDpVOnly(RadxRay *ray)
   MomentsFields *mfields = _momFields.dat();
   for (int igate = 0; igate < _nGates; igate++) {
     Covars &covar = covars[igate];
-    _rmom.dpVOnlyNoisePrep(covar.lag0Vc,
+    _rmom.dpVOnlyNoisePrep(igate,
+                           covar.lag0Vc,
                            covar.lag0Hx,
                            covar.lag1Vc,
                            mfields[igate]);
