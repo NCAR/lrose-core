@@ -961,6 +961,12 @@ paramdef boolean {
 
 paramdef boolean {
   p_default = false;
+  p_descr = "Option to include the scan name in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
+} include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
   p_descr = "Option to include the volume number in the file name.";
   p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
 } include_vol_num_in_file_name;

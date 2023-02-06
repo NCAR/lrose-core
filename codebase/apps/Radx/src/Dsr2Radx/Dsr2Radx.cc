@@ -930,6 +930,7 @@ void Dsr2Radx::_setupWrite()
   _outFile->setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
   _outFile->setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   _outFile->setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
+  _outFile->setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
   _outFile->setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   _outFile->setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
