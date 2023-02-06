@@ -7901,7 +7901,8 @@ void RadarMoments::_setFieldMetaData(MomentsFields &fields)
 // prepare for noise detection - single polarization
 // hc channel
   
-void RadarMoments::singlePolHNoisePrep(double lag0_hc,
+void RadarMoments::singlePolHNoisePrep(int gateNum,
+                                       double lag0_hc,
                                        RadarComplex_t lag1_hc,
                                        MomentsFields &fields)
   
@@ -7928,7 +7929,8 @@ void RadarMoments::singlePolHNoisePrep(double lag0_hc,
 // prepare for noise detection - single polarization
 // vc channel
   
-void RadarMoments::singlePolVNoisePrep(double lag0_vc,
+void RadarMoments::singlePolVNoisePrep(int gateNum,
+                                       double lag0_vc,
                                        RadarComplex_t lag1_vc,
                                        MomentsFields &fields)
   
@@ -7955,7 +7957,8 @@ void RadarMoments::singlePolVNoisePrep(double lag0_vc,
 // prepare for noise detection - DP_ALT_HV_CO_ONLY
 // Transmit alternating, receive copolar only
 
-void RadarMoments::dpAltHvCoOnlyNoisePrep(double lag0_hc,
+void RadarMoments::dpAltHvCoOnlyNoisePrep(int gateNum,
+                                          double lag0_hc,
                                           double lag0_vc,
                                           RadarComplex_t lag2_hc,
                                           RadarComplex_t lag2_vc,
@@ -7988,7 +7991,8 @@ void RadarMoments::dpAltHvCoOnlyNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_ALT_HV_CO_CROSS
 // Transmit alternating, receive co/cross
 
-void RadarMoments::dpAltHvCoCrossNoisePrep(double lag0_hc,
+void RadarMoments::dpAltHvCoCrossNoisePrep(int gateNum,
+                                           double lag0_hc,
                                            double lag0_hx,
                                            double lag0_vc,
                                            double lag0_vx,
@@ -8025,7 +8029,8 @@ void RadarMoments::dpAltHvCoCrossNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_SIM_HV
 // Dual pol, transmit simultaneous, receive fixed channels
 
-void RadarMoments::dpSimHvNoisePrep(double lag0_hc,
+void RadarMoments::dpSimHvNoisePrep(int gateNum,
+                                    double lag0_hc,
                                     double lag0_vc,
                                     RadarComplex_t lag1_hc,
                                     RadarComplex_t lag1_vc,
@@ -8063,7 +8068,8 @@ void RadarMoments::dpSimHvNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_H_ONLY
 // Dual pol, transmit H, receive co/cross
 
-void RadarMoments::dpHOnlyNoisePrep(double lag0_hc,
+void RadarMoments::dpHOnlyNoisePrep(int gateNum,
+                                    double lag0_hc,
                                     double lag0_vx,
                                     RadarComplex_t lag1_hc,
                                     MomentsFields &fields)
@@ -8092,7 +8098,8 @@ void RadarMoments::dpHOnlyNoisePrep(double lag0_hc,
 // prepare for noise detection - DP_V_ONLY
 // Dual pol, transmit V, receive co/cross
 
-void RadarMoments::dpVOnlyNoisePrep(double lag0_vc,
+void RadarMoments::dpVOnlyNoisePrep(int gateNum,
+                                    double lag0_vc,
                                     double lag0_hx,
                                     RadarComplex_t lag1_vc,
                                     MomentsFields &fields)
@@ -8122,7 +8129,8 @@ void RadarMoments::dpVOnlyNoisePrep(double lag0_vc,
 // prepare for noise detection
 // Single polarization Staggered-PRT
 
-void RadarMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
+void RadarMoments::singlePolHStagPrtNoisePrep(int gateNum,
+                                              RadarComplex_t *iqhc,
                                               RadarComplex_t *iqhcShort,
                                               RadarComplex_t *iqhcLong,
                                               MomentsFields &fields)
@@ -8136,19 +8144,44 @@ void RadarMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
   fields.lag0_hc_db = 10.0 * log10(lag0_hc);
   fields.dbm_for_noise = fields.lag0_hc_db;
 
-  // phase for noise detection
-  
-  RadarComplex_t lag1_short_to_long =
-    RadarComplex::meanConjugateProduct(iqhcShort, iqhcLong,
-                                       _nSamplesHalf - 1);
-  fields.phase_for_noise = lag1_short_to_long;
+  if (_nGatesPrtShort == _nGatesPrtLong) {
 
-  // ncp
+    // no long-prt gates beyond short prt
+    
+    // phase for noise detection
   
-  double lag1_hc_mag = RadarComplex::mag(lag1_short_to_long);
-  double ncp = lag1_hc_mag / lag0_hc;
-  fields.ncp = _constrain(ncp, 0.0, 1.0);
-  
+    RadarComplex_t lag1_short_to_long =
+      RadarComplex::meanConjugateProduct(iqhcShort, iqhcLong,
+                                         _nSamplesHalf - 1);
+    
+    fields.phase_for_noise = lag1_short_to_long;
+    
+    // ncp
+    
+    double lag1_hc_mag = RadarComplex::mag(lag1_short_to_long);
+    double ncp = lag1_hc_mag / lag0_hc;
+    fields.ncp = _constrain(ncp, 0.0, 1.0);
+
+  } else {
+
+    // there will be gates with only long PRT data
+    
+    // phase for noise detection
+    
+    RadarComplex_t lag1_hc_long =
+      RadarComplex::meanConjugateProduct(iqhcLong + 1, iqhcLong,
+                                         _nSamplesHalf - 1);
+    
+    fields.phase_for_noise = lag1_hc_long;
+    
+    // ncp
+    
+    double lag1_hc_mag = RadarComplex::mag(lag1_hc_long);
+    double ncp = lag1_hc_mag / lag0_hc;
+    fields.ncp = _constrain(ncp, 0.0, 1.0);
+
+  }
+    
 }
 
 ///////////////////////////////////////////////////////////
@@ -8156,7 +8189,8 @@ void RadarMoments::singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
 // Dual pol, transmit simultaneous, receive fixed channels
 // Staggered-PRT
 
-void RadarMoments::dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
+void RadarMoments::dpSimHvStagPrtNoisePrep(int gateNum,
+                                           RadarComplex_t *iqhc,
                                            RadarComplex_t *iqvc,
                                            RadarComplex_t *iqhcShort,
                                            RadarComplex_t *iqvcShort,
@@ -8193,6 +8227,56 @@ void RadarMoments::dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
   double ncp = lag1_mag / lag0_mean;
   fields.ncp = _constrain(ncp, 0.0, 1.0);
 
+  if (_nGatesPrtShort == _nGatesPrtLong) {
+
+    // no long-prt gates beyond short prt
+    
+    // phase for noise detection
+    
+    RadarComplex_t lag1_hc_short_to_long =
+      RadarComplex::meanConjugateProduct(iqhcShort, iqhcLong,
+                                         _nSamplesHalf - 1);
+    RadarComplex_t lag1_vc_short_to_long =
+      RadarComplex::meanConjugateProduct(iqvcShort, iqvcLong,
+                                         _nSamplesHalf - 1);
+    RadarComplex_t lag1_mean_short_to_long =
+      RadarComplex::complexMean(lag1_hc_short_to_long,
+                                lag1_vc_short_to_long);
+    fields.phase_for_noise = lag1_mean_short_to_long;
+    
+    // ncp
+    
+    double lag1_mag = RadarComplex::mag(lag1_mean_short_to_long);
+    double lag0_mean = (lag0_hc_long + lag0_vc_long) / 2.0;
+    double ncp = lag1_mag / lag0_mean;
+    fields.ncp = _constrain(ncp, 0.0, 1.0);
+
+  } else {
+
+    // there will be gates with only long PRT data
+    
+    // phase for noise detection
+    
+    RadarComplex_t lag1_hc_long =
+      RadarComplex::meanConjugateProduct(iqhcLong + 1, iqhcLong,
+                                         _nSamplesHalf - 1);
+    RadarComplex_t lag1_vc_long =
+      RadarComplex::meanConjugateProduct(iqvcLong + 1, iqvcLong,
+                                         _nSamplesHalf - 1);
+    RadarComplex_t lag1_mean_long =
+      RadarComplex::complexMean(lag1_hc_long,
+                                lag1_vc_long);
+    fields.phase_for_noise = lag1_mean_long;
+    
+    // ncp
+    
+    double lag1_mag = RadarComplex::mag(lag1_mean_long);
+    double lag0_mean = (lag0_hc_long + lag0_vc_long) / 2.0;
+    double ncp = lag1_mag / lag0_mean;
+    fields.ncp = _constrain(ncp, 0.0, 1.0);
+
+  }
+    
 }
 
 ///////////////////////////////////////////////////////////

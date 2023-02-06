@@ -1282,21 +1282,25 @@ public:
   // prepare for noise detection by computing the
   // lag0 power and the velocity phase
 
-  void singlePolHNoisePrep(double lag0_hc,
+  void singlePolHNoisePrep(int gateNum,
+                           double lag0_hc,
                            RadarComplex_t lag1_hc,
                            MomentsFields &fields);
   
-  void singlePolVNoisePrep(double lag0_vc,
+  void singlePolVNoisePrep(int gateNum,
+                           double lag0_vc,
                            RadarComplex_t lag1_vc,
                            MomentsFields &fields);
   
-  void dpAltHvCoOnlyNoisePrep(double lag0_hc,
+  void dpAltHvCoOnlyNoisePrep(int gateNum,
+                              double lag0_hc,
                               double lag0_vc,
                               RadarComplex_t lag2_hc,
                               RadarComplex_t lag2_vc,
                               MomentsFields &fields);
   
-  void dpAltHvCoCrossNoisePrep(double lag0_hc,
+  void dpAltHvCoCrossNoisePrep(int gateNum,
+                               double lag0_hc,
                                double lag0_hx,
                                double lag0_vc,
                                double lag0_vx,
@@ -1304,28 +1308,33 @@ public:
                                RadarComplex_t lag2_vc,
                                MomentsFields &fields);
   
-  void dpSimHvNoisePrep(double lag0_hc,
+  void dpSimHvNoisePrep(int gateNum,
+                        double lag0_hc,
                         double lag0_vc,
                         RadarComplex_t lag1_hc,
                         RadarComplex_t lag1_vc,
                         MomentsFields &fields);
   
-  void dpHOnlyNoisePrep(double lag0_hc,
+  void dpHOnlyNoisePrep(int gateNum,
+                        double lag0_hc,
                         double lag0_vx,
                         RadarComplex_t lag1_hc,
                         MomentsFields &fields);
   
-  void dpVOnlyNoisePrep(double lag0_vc,
+  void dpVOnlyNoisePrep(int gateNum,
+                        double lag0_vc,
                         double lag0_hx,
                         RadarComplex_t lag1_vc,
                         MomentsFields &fields);
   
-  void singlePolHStagPrtNoisePrep(RadarComplex_t *iqhc,
+  void singlePolHStagPrtNoisePrep(int gateNum,
+                                  RadarComplex_t *iqhc,
                                   RadarComplex_t *iqhcShort,
                                   RadarComplex_t *iqhcLong,
                                   MomentsFields &fields);
   
-  void dpSimHvStagPrtNoisePrep(RadarComplex_t *iqhc,
+  void dpSimHvStagPrtNoisePrep(int gateNum,
+                               RadarComplex_t *iqhc,
                                RadarComplex_t *iqvc,
                                RadarComplex_t *iqhcShort,
                                RadarComplex_t *iqvcShort,

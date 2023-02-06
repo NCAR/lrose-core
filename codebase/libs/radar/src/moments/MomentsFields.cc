@@ -362,7 +362,9 @@ void MomentsFields::init()
   // flag to indicate noise/signal is present at a gate
 
   noise_flag = missingDouble;
+  noise_interest = missingDouble;
   signal_flag = missingDouble;
+  signal_interest = missingDouble;
 
   // noise_bias relative to calibrated noise
   // these will be constant for all gates in a ray
@@ -704,7 +706,9 @@ void MomentsFields::initToZero()
   // flag to indicate noise/signal is present at a gate
 
   noise_flag = 0.0;
+  noise_interest = 0.0;
   signal_flag = 0.0;
+  signal_interest = 0.0;
 
   // noise_bias relative to calibrated noise
   // these will be constant for all gates in a ray

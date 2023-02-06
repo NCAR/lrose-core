@@ -368,7 +368,9 @@ public:
   // flag to indicate noise/signal is present at a gate
 
   double noise_flag;
+  double noise_interest;
   double signal_flag;
+  double signal_interest;
 
   // noise_bias relative to calibrated noise
   // these will be constant for all gates in a ray

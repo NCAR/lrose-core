@@ -212,7 +212,9 @@ public:
   // these arrays span the gates from 0 to nGates-1
 
   const vector<bool> &getNoiseFlag() const { return _noiseFlag; }
+  const vector<double> &getNoiseInterest() const { return _noiseInterest; }
   const vector<bool> &getSignalFlag() const { return _signalFlag; }
+  const vector<double> &getSignalInterest() const { return _signalInterest; }
 
   const vector<size_t> &getStartGate() const { return _startGate; }
   const vector<size_t> &getEndGate() const { return _endGate; }
@@ -272,6 +274,8 @@ private:
   vector<double> _phaseChangeError;
   vector<double> _dbmSdev;
   vector<double> _ncpMean;
+  vector<double> _noiseInterest;
+  vector<double> _signalInterest;
   
   double _medianNoiseDbmHc;
   double _medianNoiseDbmVc;
@@ -365,6 +369,13 @@ private:
   int _getSavedNoiseClosestVc(noise_val_t &closest);
 
   void _createDefaultInterestMaps();
+  void _applyGapFilter(int nGates, int filterLen, double filterThreshold);
+  void _applySpeckleFilter(int nGates,
+                           vector<int> lengths,
+                           vector<double> thresholds);
+  void _runSpeckleFilter(int nGates,
+                         int minRunLen,
+                         double minValidInterest);
 
 };
 

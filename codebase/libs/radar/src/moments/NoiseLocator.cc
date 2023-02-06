@@ -37,6 +37,7 @@
 #include <radar/NoiseLocator.hh>
 #include <toolsa/mem.h>
 #include <algorithm>
+#include <cassert>
 using namespace std;
 
 // mutexes
@@ -283,6 +284,8 @@ void NoiseLocator::locate(const MomentsFields *mfields)
   _phaseChangeError.resize(_nGates);
   _dbmSdev.resize(_nGates);
   _ncpMean.resize(_nGates);
+  _noiseInterest.resize(_nGates);
+  _signalInterest.resize(_nGates);
 
   for (int igate = 0; igate < _nGates; igate++) {
     _noiseFlag[igate] = false;
@@ -293,6 +296,8 @@ void NoiseLocator::locate(const MomentsFields *mfields)
     _phaseChangeError[igate] = -9999;
     _dbmSdev[igate] = -9999;
     _ncpMean[igate] = -9999;
+    _noiseInterest[igate] = -9999;
+    _signalInterest[igate] = -9999;
   }
   
   // first compute the absolute phase at each gate, summing up
@@ -374,7 +379,7 @@ void NoiseLocator::locate(const MomentsFields *mfields)
       (_interestMapNcpMeanForNoise->getInterest(ncpMean) * 
        _weightNcpMeanForNoise);
     
-    double interestNoise = sumInterestNoise / sumWeightsNoise;
+    _noiseInterest[igate] = sumInterestNoise / sumWeightsNoise;
 
     double sumInterestSignal =
       (_interestMapPhaseChangeErrorForSignal->getInterest(pce) * 
@@ -382,21 +387,38 @@ void NoiseLocator::locate(const MomentsFields *mfields)
       (_interestMapDbmSdevForSignal->getInterest(dbmSdev) * 
        _weightDbmSdevForSignal);
 
-    double interestSignal = sumInterestSignal / sumWeightsSignal;
+    _signalInterest[igate] = sumInterestSignal / sumWeightsSignal;
 
-    if (interestNoise > _interestThresholdForNoise) {
+    if (_noiseInterest[igate] > _interestThresholdForNoise) {
       _noiseFlag[igate] = true;
     } else {
       _noiseFlag[igate] = false;
     }
-
-    if (interestSignal > _interestThresholdForSignal) {
+    
+    if (_signalInterest[igate] > _interestThresholdForSignal) {
       _signalFlag[igate] = false;
     } else {
       _signalFlag[igate] = true;
     }
 
   } // igate
+
+  // apply the speckle filter to the noise flag
+  
+  vector<int> speckleFiltLengths;
+  speckleFiltLengths.push_back(11);
+  speckleFiltLengths.push_back(9);
+  speckleFiltLengths.push_back(7);
+  vector<double> speckleFilterThresholds;
+  speckleFilterThresholds.push_back(0.51);
+  speckleFilterThresholds.push_back(0.51);
+  speckleFilterThresholds.push_back(0.51);
+
+  // _applySpeckleFilter(_nGates, speckleFiltLengths, speckleFilterThresholds);
+
+  // apply the gap filter
+
+  // _applyGapFilter(_nGates, 7, 0.35);
 
   // for single gates surrounded by noise, set the noise flag
   
@@ -1702,5 +1724,198 @@ void NoiseLocator::addToMoments(MomentsFields *mfields)
     mfield.ncp_mean = _ncpMean[igate];
   }
   
+}
+
+/////////////////////////////////////////////
+// apply gap in-fill filter to NOISE flag
+//
+// After locate is run, the noise interest flag field tends to have gaps
+// which really should be filtered, since they are surrounded by
+// filtered gates. This infill process is designed to fill the
+// gaps in the flag field.
+//
+// Initialization:
+//
+// A template of weights, of length 6, is computed with the following values:
+//   1, 1/2, 1/3, 1/4, 1/5, 1/6
+//
+// Computing the forward sum of weights * interest:
+//
+//   For each gate at which the flag is not yet set, compute the sum of
+//   the (weight * interest) for each of the previous 6 gates at which the
+//   flag field is set.
+//   A weight of 1*interest applies to the previous gate,
+//   (1/2)*interest applies to the second previous gate, etc.
+// 
+// Computing the reverse sum of weights:
+//
+//   For each gate at which the flag is not yet set, compute the sum of
+//   the (weight * interest) for each of the next 6 gates at which the
+//   flag field is set.
+//   The weights are used in the reverse sense, i.e 1*interest applies to the next
+//   gate, (1/2)*interest applies to the second next gate etc.
+//
+// If both the forward sum and the reverse sum exceed the threshold, then
+// this gate is considered likely to have clutter, and the interest_flag is set.
+
+void NoiseLocator::_applyGapFilter(int nGates, int filterLen, double filterThreshold)
+  
+{
+
+  // set up weights for distance differences
+
+  int nweights = filterLen;
+  double *weights = new double[nweights];
+  for (int ii = 0; ii < nweights; ii++) {
+    weights[ii] = 1.0 / (ii + 1.0);
+  }
+  double sumWtThreshold = filterThreshold;
+  
+  // allocate arrays for sum of weights with the flag field
+  
+  double *sumWtsForward = new double[nGates];
+  double *sumWtsReverse = new double[nGates];
+  
+  bool done = false;
+  int count = 0;
+  while (!done) {
+
+    count++;
+    done = true;
+    
+    // compute sum in forward direction
+    
+    for (int igate = 0; igate < nGates; igate++) {
+      if (_noiseFlag[igate]) {
+        sumWtsForward[igate] = 1.0;
+        continue; // flag already set, don't need to modify this gate
+      }
+      sumWtsForward[igate] = 0.0;
+      for (int jj = 0; jj < nweights; jj++) {
+        int kgate = igate - jj - 1;
+        if (kgate >= 0) {
+          if (_noiseFlag[kgate]) {
+            sumWtsForward[igate] += weights[jj] * _noiseInterest[kgate];
+          }
+        }
+      }
+    }
+    
+    // compute sum in reverse direction
+    
+    for (int igate = nGates - 1; igate >= 0; igate--) {
+      if (_noiseFlag[igate]) {
+        sumWtsReverse[igate] = 1.0;
+        continue; // flag already set, don't need to modify this gate
+      }
+      sumWtsReverse[igate] = 0.0;
+      for (int jj = 0; jj < nweights; jj++) {
+        int kgate = igate + jj + 1;
+        if (kgate < nGates) {
+          if (_noiseFlag[kgate]) {
+            sumWtsReverse[igate] += weights[jj] * _noiseInterest[kgate];
+          }
+        }
+      }
+    }
+    
+    // fill in flag field if flag field is not already set and
+    // both forward sum and reverse sum exceed threshold
+    
+    for (int igate = 0; igate < nGates; igate++) {
+      if (!_noiseFlag[igate]) {
+        if (sumWtsForward[igate] > sumWtThreshold &&
+            sumWtsReverse[igate] > sumWtThreshold) {
+          _noiseFlag[igate] = true;
+          done = false;
+        }
+      }
+    }
+
+    if (count > 3) {
+      done = true;
+    }
+
+  } // while (!done)
+
+  delete[] sumWtsForward;
+  delete[] sumWtsReverse;
+  delete[] weights;
+
+}
+
+//////////////////////////////////////////////////
+// apply speckle filter for various length speckle
+// starting with the longest and working down
+
+void NoiseLocator::_applySpeckleFilter(int nGates,
+                                       vector<int> lengths,
+                                       vector<double> thresholds)
+
+{
+
+  assert(lengths.size() == thresholds.size());
+
+  // compute the max specified speckle length
+  int maxLen = 0;
+  for (size_t ii = 0; ii < lengths.size(); ii++) {
+    if (lengths[ii] > maxLen) {
+      maxLen = lengths[ii];
+    }
+  }
+
+  // for each specified speckle length, run the speckle filter
+  // in order of longest to shortest
+
+  int thisLen = maxLen;
+  while (thisLen > 0) {
+    for (size_t ii = 0; ii < lengths.size(); ii++) {
+      if (lengths[ii] == thisLen) {
+        double minValidInterest = thresholds[ii];
+        _runSpeckleFilter(nGates, thisLen, minValidInterest);
+        break;
+      }
+    }
+    thisLen--;
+  }
+
+}
+
+///////////////////////////////////////////////////////
+// run speckle filter for a given length and threshold
+//
+// minRunLen: length of run being tested for
+// minRunLen: if a run is less than or equal to the min length,
+//            apply the more stringent threshold to modify
+//            the flag field
+
+void NoiseLocator::_runSpeckleFilter(int nGates,
+                                     int minRunLen,
+                                     double minValidInterest)
+  
+{
+
+  int count = 0;
+  // loop through all gates
+  for (int ii = 0; ii < nGates; ii++) {
+    // check for CMD flag status
+    if (_noiseFlag[ii]) {
+      // set, so count up length of run
+      count++;
+    } else {
+      // not set, end of run
+      if (count <= minRunLen) {
+        // run too short, indicates possible speckle
+        for (int jj = ii - count; jj < ii; jj++) {
+          // check for CMD values below threshold
+          if (_noiseInterest[jj] < minValidInterest) {
+            _noiseFlag[jj] = false;
+          }
+        }
+      }
+      count = 0;
+    }
+  } // ii
+
 }
 
