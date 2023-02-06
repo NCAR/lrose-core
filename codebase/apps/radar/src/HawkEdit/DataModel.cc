@@ -1373,6 +1373,7 @@ int DataModel::getNGates(size_t rayIdx, string fieldName, double sweepHeight) {
 
 float DataModel::getMissingFl32(string fieldName) {
   //_vol->loadFieldsFromRays();
+  if (_vol == NULL) return Radx::missingFl32;
   const RadxField *field = _vol->getFieldFromRay(fieldName);
   if (field == NULL) return Radx::missingFl32;
   

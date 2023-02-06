@@ -1723,7 +1723,7 @@ void PolarManager::_plotArchiveData()
     LOG(DEBUG) << "  volume start time: " << _plotStartTime.asString();
   
   if (!_rayLocationController->isRayLocationSetup()) {
-    errorMessage("Warning", "Ray sorting is still in progress. Try selection again.");
+    errorMessage("Information", "Reading data ...");
     return;
   }
   // initialize plotting

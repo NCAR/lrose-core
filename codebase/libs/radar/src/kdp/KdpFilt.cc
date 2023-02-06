@@ -815,9 +815,9 @@ int KdpFilt::_unfoldPhidp()
   // fill in gaps in mean phidp using values
   // from each end of the gap
 
-  for (size_t irun = 0; irun < _gaps.size(); irun++) {
-    int startGap = _gaps[irun].ibegin;
-    int endGap = _gaps[irun].iend;
+  for (size_t irun = 0; irun < _gapRuns.size(); irun++) {
+    int startGap = _gapRuns[irun].ibegin;
+    int endGap = _gapRuns[irun].iend;
     int midGap = (startGap + endGap) / 2;
     // fill in first half of gap
     for (int jj = startGap; jj < midGap; jj++) {
@@ -856,9 +856,9 @@ int KdpFilt::_unfoldPhidp()
 
   // interpolate unfolded mean through the gaps
 
-  for (size_t irun = 0; irun < _gaps.size(); irun++) {
-    int startGap = _gaps[irun].ibegin;
-    int endGap = _gaps[irun].iend;
+  for (size_t irun = 0; irun < _gapRuns.size(); irun++) {
+    int startGap = _gapRuns[irun].ibegin;
+    int endGap = _gapRuns[irun].iend;
     double valBefore = _phidpMeanUnfold[startGap-1];
     double valAfter = _phidpMeanUnfold[endGap+1];
     double range = valAfter - valBefore;
@@ -1492,12 +1492,12 @@ int KdpFilt::_findValidRuns()
 
   // save the gaps
 
-  _gaps.clear();
+  _gapRuns.clear();
   for (size_t irun = 1; irun < _validRuns.size(); irun++) {
     PhidpRun gapRun;
     gapRun.ibegin = _validRuns[irun-1].iend + 1;
     gapRun.iend = _validRuns[irun].ibegin - 1;
-    _gaps.push_back(gapRun);
+    _gapRuns.push_back(gapRun);
   }
 
   // set global start and end gates
@@ -1518,8 +1518,8 @@ int KdpFilt::_findValidRuns()
   // if gap is smaller than the surrounding valid runs,
   // flag as OK for KDP
 
-  for (size_t igap = 0; igap < _gaps.size(); igap++) {
-    const PhidpRun &gap = _gaps[igap];
+  for (size_t igap = 0; igap < _gapRuns.size(); igap++) {
+    const PhidpRun &gap = _gapRuns[igap];
     const PhidpRun &prevValid = _validRuns[igap];
     const PhidpRun &nextValid = _validRuns[igap + 1];
     if (prevValid.len() > gap.len() && nextValid.len() > gap.len()) {
