@@ -1726,18 +1726,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'adjust_dbz_for_measured_xmit_power'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("adjust_dbz_for_measured_xmit_power");
-    tt->descr = tdrpStrDup("Option to adjust DBZ based on measured transmitter power.");
-    tt->help = tdrpStrDup("If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.");
-    tt->val_offset = (char *) &adjust_dbz_for_measured_xmit_power - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'compute_zdr_using_snr'
     // ctype is 'tdrp_bool_t'
     
@@ -1747,6 +1735,18 @@
     tt->descr = tdrpStrDup("Option to compute ZDR using SNR instead of power.");
     tt->help = tdrpStrDup("If true, we compute ZDR as SNRHC/SNRVC. This method applies the receiver gain, and has the effect of taking into account a difference in noise floor in each channel. The ZDR correction applied must therefore be computed relative to SNR, not power.");
     tt->val_offset = (char *) &compute_zdr_using_snr - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'adjust_dbz_for_measured_xmit_power'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("adjust_dbz_for_measured_xmit_power");
+    tt->descr = tdrpStrDup("Option to adjust DBZ based on measured transmitter power.");
+    tt->help = tdrpStrDup("If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed DBZ fields.");
+    tt->val_offset = (char *) &adjust_dbz_for_measured_xmit_power - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -1760,6 +1760,30 @@
     tt->help = tdrpStrDup("If true, and the measured transmitter power is available, the difference between the measured power and calibration power will be used to adjust the computed ZDR fields.");
     tt->val_offset = (char *) &adjust_zdr_for_measured_xmit_power - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_measured_xmit_power_dbm'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_measured_xmit_power_dbm");
+    tt->descr = tdrpStrDup("Min measured xmit power - dBm.");
+    tt->help = tdrpStrDup("If the measured power is below this limit, the previous measured value will be used instead.");
+    tt->val_offset = (char *) &min_measured_xmit_power_dbm - &_start_;
+    tt->single_val.d = 81;
+    tt++;
+    
+    // Parameter 'max_measured_xmit_power_dbm'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_measured_xmit_power_dbm");
+    tt->descr = tdrpStrDup("Max measured xmit power - dBm.");
+    tt->help = tdrpStrDup("If the measured power is above this limit, the previous measured value will be used instead.");
+    tt->val_offset = (char *) &max_measured_xmit_power_dbm - &_start_;
+    tt->single_val.d = 86;
     tt++;
     
     // Parameter 'check_for_missing_pulses'

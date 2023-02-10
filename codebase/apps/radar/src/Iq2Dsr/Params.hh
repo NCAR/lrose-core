@@ -875,11 +875,15 @@ public:
 
   tdrp_bool_t discard_non_indexed_beams;
 
-  tdrp_bool_t adjust_dbz_for_measured_xmit_power;
-
   tdrp_bool_t compute_zdr_using_snr;
 
+  tdrp_bool_t adjust_dbz_for_measured_xmit_power;
+
   tdrp_bool_t adjust_zdr_for_measured_xmit_power;
+
+  double min_measured_xmit_power_dbm;
+
+  double max_measured_xmit_power_dbm;
 
   tdrp_bool_t check_for_missing_pulses;
 
@@ -1306,7 +1310,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[293];
+  mutable TDRPtable _table[295];
 
   const char *_className;
 

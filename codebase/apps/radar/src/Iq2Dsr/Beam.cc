@@ -123,8 +123,8 @@ Beam::Beam(const string &progName,
   _stagM = 0;
   _stagN = 0;
 
-  _measXmitPowerDbmH = 0;
-  _measXmitPowerDbmV = 0;
+  _measXmitPowerDbmH = _params.min_measured_xmit_power_dbm;
+  _measXmitPowerDbmV = _params.min_measured_xmit_power_dbm;
 
   _fields = NULL;
   _fieldsF = NULL;
@@ -411,8 +411,15 @@ void Beam::_prepareForComputeMoments()
 
   // transmitter power
 
-  _measXmitPowerDbmH = midPulse->getMeasXmitPowerDbmH();
-  _measXmitPowerDbmV = midPulse->getMeasXmitPowerDbmV();
+  if (midPulse->getMeasXmitPowerDbmH() >= _params.min_measured_xmit_power_dbm &&
+      midPulse->getMeasXmitPowerDbmH() <= _params.max_measured_xmit_power_dbm) {
+    _measXmitPowerDbmH = midPulse->getMeasXmitPowerDbmH();
+  }
+
+  if (midPulse->getMeasXmitPowerDbmV() >= _params.min_measured_xmit_power_dbm &&
+      midPulse->getMeasXmitPowerDbmV() <= _params.max_measured_xmit_power_dbm) {
+    _measXmitPowerDbmV = midPulse->getMeasXmitPowerDbmV();
+  }
 
   // set time
 
