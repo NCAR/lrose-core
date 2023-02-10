@@ -98,6 +98,14 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-test")) {
+      
+      sprintf(tmp_str, "test_only = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
+      sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
+      TDRP_add_override(&override, tmp_str);
+
     } else if (!strcmp(argv[i], "-instance")) {
       
       if (i < argc - 1) {
@@ -253,6 +261,8 @@ void Args::_usage(ostream &out)
       << "  [ -link ] create symbolic links in link_dir.\n"
       << "\n"
       << "  [ -link_dir ? ] specify directory for symbolic links.\n"
+      << "\n"
+      << "  [ -test ] test by printing commands only, no action.\n"
       << "\n"
       << "  [ -rename ] rename files in place.\n"
       << "\n"

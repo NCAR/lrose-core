@@ -83,14 +83,14 @@ public:
   typedef enum {
     START_AND_END_TIMES = 0,
     START_TIME_ONLY = 1,
-    END_TIME_ONLY = 2
+    END_TIME_ONLY = 2,
+    SPECIFY_FILE_NAME = 3
   } filename_mode_t;
 
   typedef enum {
-    NO_ACTION = 0,
-    RENAME_IN_PLACE = 1,
-    COPY_FILE = 2,
-    CREATE_SYMBOLIC_LINK = 3
+    RENAME_IN_PLACE = 0,
+    COPY_FILE = 1,
+    CREATE_SYMBOLIC_LINK = 2
   } file_rename_t;
 
   ///////////////////////////
@@ -397,9 +397,35 @@ public:
 
   int max_realtime_data_age_secs;
 
+  char* output_dir;
+
   filename_mode_t output_filename_mode;
 
+  char* output_filename_prefix;
+
+  char* output_filename_suffix;
+
+  tdrp_bool_t include_instrument_name_in_file_name;
+
+  tdrp_bool_t include_site_name_in_file_name;
+
+  tdrp_bool_t include_subsecs_in_file_name;
+
+  tdrp_bool_t include_scan_type_in_file_name;
+
+  tdrp_bool_t include_scan_name_in_file_name;
+
+  tdrp_bool_t include_scan_id_in_file_name;
+
+  tdrp_bool_t include_range_resolution_in_file_name;
+
+  tdrp_bool_t include_vol_num_in_file_name;
+
+  tdrp_bool_t use_hyphen_in_file_name_datetime_part;
+
   file_rename_t file_rename;
+
+  tdrp_bool_t test_only;
 
   char* copy_dir;
 
@@ -416,7 +442,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[16];
+  mutable TDRPtable _table[31];
 
   const char *_className;
 

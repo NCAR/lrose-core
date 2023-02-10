@@ -36,6 +36,7 @@
 #include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/NcfRadxFile.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <toolsa/pmu.h>
 #include <toolsa/file_io.h>
@@ -245,7 +246,7 @@ int FixCfradialPaths::_processFile(const string &filePath)
   // compute the new filename
 
   string newName;
-  if (_computeNewName(filePath, newName)) {
+  if (_computeNewName(vol, filePath, newName)) {
     cerr << "ERROR - FixCfradialPaths::Run" << endl;
     cerr << "  Cannot compute new name" << endl;
     return -1;
@@ -296,9 +297,9 @@ void FixCfradialPaths::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
   
-  // read in times only
+  // read in times times and metadata only
 
-  file.setReadTimesOnly(true);
+  file.setReadMetadataOnly(true);
 
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
@@ -309,12 +310,14 @@ void FixCfradialPaths::_setupRead(RadxFile &file)
 //////////////////////////////////////////////////
 // compute new file name
 
-int FixCfradialPaths::_computeNewName(const string &filePath, 
+int FixCfradialPaths::_computeNewName(const RadxVol &vol,
+                                      const string &filePath, 
                                       string &newName)
   
 {
   
   RadxPath path(filePath);
+  string dir = path.getDirectory();
   string oldName = path.getFile();
   size_t cfradPos = oldName.find("cfrad");
   if (cfradPos == string::npos) {
@@ -324,65 +327,75 @@ int FixCfradialPaths::_computeNewName(const string &filePath,
     return -1;
   }
 
-  // look for last date_time.msc entry
+  // set up RadxFile to compute file name
 
-  const char *name = oldName.c_str();
-  int dateTimeIndex = -1;
-  char cc1, cc2;
-  int year, month, day, hour, min, sec, msec;
-  for (int ii = 0; ii < (int) oldName.size() - 20; ii++) {
-    if (sscanf(name + ii, "%4d%2d%2d%1c%2d%2d%2d%1c%3d",
-	       &year, &month, &day, &cc1,
-	       &hour, &min, &sec, &cc2, &msec) == 9) {
-      dateTimeIndex = ii;
-    }
-  } // ii
+  NcfRadxFile wFile;
+  _setupWritePath(wFile);
 
-  if (dateTimeIndex < 0) {
-    cerr << "ERROR - FixCfradialPaths::_computeNewName" << endl;
-    cerr << "  Cannot find yyyymmdd_hhmmss.msc in file name" << endl;
-    cerr << "  fileName: " << oldName << endl;
-    return -1;
+  // compute new path
+  
+  RadxTime startTime(vol.getStartTimeSecs());
+  int startMillisecs = (int) (vol.getStartNanoSecs() / 1.0e6 + 0.5);
+  if (startMillisecs > 999) {
+    startTime.set(vol.getStartTimeSecs() + 1);
+    startMillisecs -= 1000;
+  }
+  RadxTime endTime(vol.getEndTimeSecs());
+  int endMillisecs = (int) (vol.getEndNanoSecs() / 1.0e6 + 0.5);
+  if (endMillisecs > 999) {
+    endTime.set(vol.getEndTimeSecs() + 1);
+    endMillisecs -= 1000;
+  }
+  RadxTime fileTime = startTime;
+  int fileMillisecs = startMillisecs;
+  if (_params.output_filename_mode == Params::END_TIME_ONLY) {
+    fileTime = endTime;
+    fileMillisecs = endMillisecs;
   }
 
-  int trailingIndex = dateTimeIndex + 19;
-  string trailingString(name + trailingIndex);
-  
-  // compute time part of name
+  string writePath = wFile.computeWritePath(vol,
+                                            startTime, startMillisecs,
+                                            endTime, endMillisecs,
+                                            fileTime, fileMillisecs,
+                                            dir);
 
-  char timeText[256];
-  if (_params.output_filename_mode == Params::START_TIME_ONLY) {
-    RadxTime stime(_startTime);
-    sprintf(timeText, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d",
-            stime.getYear(), stime.getMonth(), stime.getDay(),
-            stime.getHour(), stime.getMin(), stime.getSec(),
-            _startMillisecs);
-  } else if (_params.output_filename_mode == Params::END_TIME_ONLY) {
-    RadxTime etime(_endTime);
-    sprintf(timeText, "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d",
-            etime.getYear(), etime.getMonth(), etime.getDay(),
-            etime.getHour(), etime.getMin(), etime.getSec(),
-            _endMillisecs);
-  } else {
-    RadxTime stime(_startTime);
-    RadxTime etime(_endTime);
-    sprintf(timeText,
-            "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d_to_"
-            "%.4d%.2d%.2d_%.2d%.2d%.2d.%.3d",
-            stime.getYear(), stime.getMonth(), stime.getDay(),
-            stime.getHour(), stime.getMin(), stime.getSec(),
-            _startMillisecs,
-            etime.getYear(), etime.getMonth(), etime.getDay(),
-            etime.getHour(), etime.getMin(), etime.getSec(),
-            _endMillisecs);
-  }
+  RadxPath wPath(writePath);
+  newName = wPath.getFile();
 
-  char newNameText[1024];
-  sprintf(newNameText, "cfrad.%s%s", timeText, trailingString.c_str());
-  newName = newNameText;
-  
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// set up write
+
+void FixCfradialPaths::_setupWritePath(RadxFile &wFile)
+{
+  
+  if (_params.output_filename_mode == Params::START_TIME_ONLY) {
+    wFile.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_TIME_ONLY);
+  } else if (_params.output_filename_mode == Params::END_TIME_ONLY) {
+    wFile.setWriteFileNameMode(RadxFile::FILENAME_WITH_END_TIME_ONLY);
+  } else {
+    wFile.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
+  }
+
+  if (strlen(_params.output_filename_prefix) > 0) {
+    wFile.setWriteFileNamePrefix(_params.output_filename_prefix);
+  }
+  if (strlen(_params.output_filename_suffix) > 0) {
+    wFile.setWriteFileNameSuffix(_params.output_filename_suffix);
+  }
+
+  wFile.setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
+  wFile.setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
+  wFile.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
+  wFile.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
+  wFile.setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
+  wFile.setWriteRangeResolutionInFileName(_params.include_range_resolution_in_file_name);
+  wFile.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
+  wFile.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
+  
 }
 
 //////////////////////////////////////////////////
@@ -425,6 +438,10 @@ int FixCfradialPaths::_renameInPlace(const string &filePath,
     cerr << "  " << filePath << endl;
     cerr << "to:" << endl;
     cerr << "  " << newPath << endl;
+  }
+
+  if (_params.test_only) {
+    return 0;
   }
 
   if (rename(filePath.c_str(), newPath)) {
@@ -496,6 +513,10 @@ int FixCfradialPaths::_copyFile(const string &filePath,
     cerr << "  " << filePath << endl;
     cerr << "to:" << endl;
     cerr << "  " << newPath << endl;
+  }
+
+  if (_params.test_only) {
+    return 0;
   }
 
   if (filecopy_by_name(newPath, filePath.c_str())) {
@@ -573,6 +594,10 @@ int FixCfradialPaths::_createSymbolicLink(const string &filePath,
   if (_params.debug) {
     cerr << "Creating sym link with command:" << endl;
     cerr << "  " << command << endl;
+  }
+
+  if (_params.test_only) {
+    return 0;
   }
 
   if (system(command)) {

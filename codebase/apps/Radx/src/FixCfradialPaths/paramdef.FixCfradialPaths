@@ -66,33 +66,119 @@ paramdef int {
 } max_realtime_data_age_secs;
 
 commentdef {
-  p_header = "RENAME THE FILE BASED ON DATA TIME";
+  p_header = "OUTPUT DIRECTORY";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+commentdef {
+  p_header = "FILE NAME OPTIONS";
 }
 
 typedef enum {
   START_AND_END_TIMES,
   START_TIME_ONLY,
-  END_TIME_ONLY
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
 } filename_mode_t;
 
 paramdef enum filename_mode_t {
   p_default = START_AND_END_TIMES;
   p_descr = "Mode for computing output file name.";
-  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
 } output_filename_mode;
 
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
+} output_filename_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional suffix for output filename.";
+  p_help = "If not empty, the suffix will be inserted immediately prior to the extension.";
+} output_filename_suffix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the site name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.";
+} include_site_name_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include sub-seconds in date-time part of file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
+} include_subsecs_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the scan type in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
+} include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan name in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
+} include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.";
+} include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the range resolution in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.";
+} include_range_resolution_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the volume number in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
+} include_vol_num_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a hyphen between date and time in filename.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
+} use_hyphen_in_file_name_datetime_part;
+
+commentdef {
+  p_header = "RENAME ACTIONS";
+}
+
 typedef enum {
-  NO_ACTION,
   RENAME_IN_PLACE,
   COPY_FILE,
   CREATE_SYMBOLIC_LINK
 } file_rename_t;
 
 paramdef enum file_rename_t {
-  p_default = NO_ACTION;
+  p_default = RENAME_IN_PLACE;
   p_descr = "Mode for renaming the file.";
   p_help = "RENAME_FILE_IN_PLACE: do not move the file, rename it in the current directory. COPY_FILE: make a copy into 'copy_dir'. CREATE_SYMBOLIC_LINK: create symbolic links in 'link_dir'";
 } file_rename;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Only print the commands to be run, do not actually run them.";
+  p_help = "Use for testing.";
+} test_only;
 
 paramdef string {
   p_default = "./copy";

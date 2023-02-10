@@ -80,8 +80,11 @@ private:
   void _setupRead(RadxFile &file);
   int _processFile(const string &filePath);
 
-  int _computeNewName(const string &filePath,
+  int _computeNewName(const RadxVol &vol,
+                      const string &filePath,
                       string &newName);
+  
+  void _setupWritePath(RadxFile &wFile);
   
   int _renameInPlace(const string &filePath,
                      const string &newName);

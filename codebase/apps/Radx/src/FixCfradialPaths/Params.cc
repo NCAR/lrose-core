@@ -668,7 +668,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("RENAME THE FILE BASED ON DATA TIME");
+    tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Output directory path.");
+    tt->help = tdrpStrDup("Files will be written to this directory.");
+    tt->val_offset = (char *) &output_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./output");
+    tt++;
+    
+    // Parameter 'Comment 4'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("FILE NAME OPTIONS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -679,10 +700,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("output_filename_mode");
     tt->descr = tdrpStrDup("Mode for computing output file name.");
-    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.");
+    tt->help = tdrpStrDup("START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.");
     tt->val_offset = (char *) &output_filename_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("filename_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("START_AND_END_TIMES");
@@ -691,7 +712,150 @@
       tt->enum_def.fields[1].val = START_TIME_ONLY;
       tt->enum_def.fields[2].name = tdrpStrDup("END_TIME_ONLY");
       tt->enum_def.fields[2].val = END_TIME_ONLY;
+      tt->enum_def.fields[3].name = tdrpStrDup("SPECIFY_FILE_NAME");
+      tt->enum_def.fields[3].val = SPECIFY_FILE_NAME;
     tt->single_val.e = START_AND_END_TIMES;
+    tt++;
+    
+    // Parameter 'output_filename_prefix'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_filename_prefix");
+    tt->descr = tdrpStrDup("Optional prefix for output filename.");
+    tt->help = tdrpStrDup("If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'");
+    tt->val_offset = (char *) &output_filename_prefix - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_filename_suffix'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_filename_suffix");
+    tt->descr = tdrpStrDup("Optional suffix for output filename.");
+    tt->help = tdrpStrDup("If not empty, the suffix will be inserted immediately prior to the extension.");
+    tt->val_offset = (char *) &output_filename_suffix - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'include_instrument_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_instrument_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the instrument name in the file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.");
+    tt->val_offset = (char *) &include_instrument_name_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_site_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_site_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the site name in the file name.");
+    tt->help = tdrpStrDup("Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.");
+    tt->val_offset = (char *) &include_site_name_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_subsecs_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_subsecs_in_file_name");
+    tt->descr = tdrpStrDup("Option to include sub-seconds in date-time part of file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.");
+    tt->val_offset = (char *) &include_subsecs_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_scan_type_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_type_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan type in the file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_scan_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan name in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_name_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_scan_id_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_id_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan Id in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_id_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_range_resolution_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_range_resolution_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the range resolution in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.");
+    tt->val_offset = (char *) &include_range_resolution_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_vol_num_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_vol_num_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the volume number in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.");
+    tt->val_offset = (char *) &include_vol_num_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_hyphen_in_file_name_datetime_part'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_hyphen_in_file_name_datetime_part");
+    tt->descr = tdrpStrDup("Option to use a hyphen between date and time in filename.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. Normally an underscore is used.");
+    tt->val_offset = (char *) &use_hyphen_in_file_name_datetime_part - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("RENAME ACTIONS");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'file_rename'
@@ -704,18 +868,28 @@
     tt->help = tdrpStrDup("RENAME_FILE_IN_PLACE: do not move the file, rename it in the current directory. COPY_FILE: make a copy into 'copy_dir'. CREATE_SYMBOLIC_LINK: create symbolic links in 'link_dir'");
     tt->val_offset = (char *) &file_rename - &_start_;
     tt->enum_def.name = tdrpStrDup("file_rename_t");
-    tt->enum_def.nfields = 4;
+    tt->enum_def.nfields = 3;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("NO_ACTION");
-      tt->enum_def.fields[0].val = NO_ACTION;
-      tt->enum_def.fields[1].name = tdrpStrDup("RENAME_IN_PLACE");
-      tt->enum_def.fields[1].val = RENAME_IN_PLACE;
-      tt->enum_def.fields[2].name = tdrpStrDup("COPY_FILE");
-      tt->enum_def.fields[2].val = COPY_FILE;
-      tt->enum_def.fields[3].name = tdrpStrDup("CREATE_SYMBOLIC_LINK");
-      tt->enum_def.fields[3].val = CREATE_SYMBOLIC_LINK;
-    tt->single_val.e = NO_ACTION;
+      tt->enum_def.fields[0].name = tdrpStrDup("RENAME_IN_PLACE");
+      tt->enum_def.fields[0].val = RENAME_IN_PLACE;
+      tt->enum_def.fields[1].name = tdrpStrDup("COPY_FILE");
+      tt->enum_def.fields[1].val = COPY_FILE;
+      tt->enum_def.fields[2].name = tdrpStrDup("CREATE_SYMBOLIC_LINK");
+      tt->enum_def.fields[2].val = CREATE_SYMBOLIC_LINK;
+    tt->single_val.e = RENAME_IN_PLACE;
+    tt++;
+    
+    // Parameter 'test_only'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("test_only");
+    tt->descr = tdrpStrDup("Only print the commands to be run, do not actually run them.");
+    tt->help = tdrpStrDup("Use for testing.");
+    tt->val_offset = (char *) &test_only - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'copy_dir'
