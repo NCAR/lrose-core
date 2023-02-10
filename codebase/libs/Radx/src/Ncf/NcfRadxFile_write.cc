@@ -141,11 +141,11 @@ int NcfRadxFile::writeToDir(const RadxVol &vol,
   
   // compute write path
 
-  string writePath = _computeWritePath(vol,
-                                       startTime, startMillisecs,
-                                       endTime, endMillisecs,
-                                       fileTime, fileMillisecs,
-                                       outDir);
+  string writePath = computeWritePath(vol,
+                                      startTime, startMillisecs,
+                                      endTime, endMillisecs,
+                                      fileTime, fileMillisecs,
+                                      outDir);
 
   // perform the write to the computed path
 
@@ -3798,14 +3798,14 @@ int NcfRadxFile::_setCompression(Nc3Var *var)
 ///////////////////////////////////////////////////////////////////////////
 // Compute the output path
 
-string NcfRadxFile::_computeWritePath(const RadxVol &vol,
-                                      const RadxTime &startTime,
-                                      int startMillisecs,
-                                      const RadxTime &endTime,
-                                      int endMillisecs,
-                                      const RadxTime &fileTime,
-                                      int fileMillisecs,
-                                      const string &dir)
+string NcfRadxFile::computeWritePath(const RadxVol &vol,
+                                     const RadxTime &startTime,
+                                     int startMillisecs,
+                                     const RadxTime &endTime,
+                                     int endMillisecs,
+                                     const RadxTime &fileTime,
+                                     int fileMillisecs,
+                                     const string &dir)
 
 {
 

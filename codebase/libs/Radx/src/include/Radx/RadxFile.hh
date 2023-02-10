@@ -623,8 +623,8 @@ public:
   void setReadRemoveShortRange(bool val);
 
   /// Set flag to indicate we should only read the main metadata,
-  /// including the sweep and field information, and NOT read the
-  /// rays and data fields.
+  /// including the times, sweep and field information, and NOT
+  /// read the rays and data fields.
   /// Defaults to false.
 
   void setReadMetadataOnly(bool val);

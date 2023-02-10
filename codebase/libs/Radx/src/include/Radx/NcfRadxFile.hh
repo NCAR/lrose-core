@@ -97,6 +97,34 @@ public:
   //@{
 
   //////////////////////////////////////////////////////////////
+  /// Compute the output path
+  ///
+  /// The computed path will be based on the choices made
+  /// in setting up the RadxFile, using the following methods:
+  ///
+  ///   setWriteFileNameMode(file_name_mode_t val)
+  ///   setWriteFileNamePrefix(const string &val)
+  ///   setWriteFileNameSuffix(const string &val)
+  ///   setWriteInstrNameInFileName(bool val)
+  ///   setWriteSiteNameInFileName(bool val)
+  ///   setWriteSubsecsInFileName(bool val)
+  ///   setWriteScanTypeInFileName(bool val)
+  ///   setWriteScanIdInFileName(bool val)
+  ///   setWriteScanNameInFileName(bool val)
+  ///   setWriteRangeResolutionInFileName(bool val)
+  ///   setWriteVolNumInFileName(bool val)
+  ///   setWriteHyphenInDateTime(bool val)
+  
+  string computeWritePath(const RadxVol &vol,
+                          const RadxTime &startTime,
+                          int startMillisecs,
+                          const RadxTime &endTime,
+                          int endMillisecs,
+                          const RadxTime &fileTime,
+                          int fileMillisecs,
+                          const string &dir);
+  
+  //////////////////////////////////////////////////////////////
   /// Write data from RadxVol volume to the specified directory.
   ///
   /// If addDaySubDir is true, a subdirectory will be
@@ -732,15 +760,6 @@ private:
   Radx::fl64 _checkMissingDouble(double val);
   Radx::fl32 _checkMissingFloat(float val);
   
-  string _computeWritePath(const RadxVol &vol,
-                           const RadxTime &startTime,
-                           int startMillisecs,
-                           const RadxTime &endTime,
-                           int endMillisecs,
-                           const RadxTime &fileTime,
-                           int fileMillisecs,
-                           const string &dir);
-
 };
 
 #endif
