@@ -919,6 +919,23 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     _censorFields(vol);
   }
 
+  if (_params.censor_test_pulse_ring) {
+    if (_params.debug) {
+      cerr << "DEBUG - censoring the test pulse ring" << endl;
+    }
+    bool censorAllFields = !_params.specify_fields_to_be_censored;
+    vector<string> fieldNames;
+    for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+      fieldNames.push_back(_params._fields_to_be_censored[ii]);
+    }
+    vol.censorRangeRing(_params.test_pulse_min_range_km,
+                        _params.test_pulse_max_range_km,
+                        true,
+                        _params.test_pulse_field_name,
+                        _params.test_pulse_margin_km,
+                        censorAllFields, fieldNames);
+  } // if (_params.censor_test_pulse_ring) {
+
   // linear transform on fields as required
 
   if (_params.apply_linear_transforms) {
@@ -1365,7 +1382,7 @@ void RadxConvert::_setupWrite(RadxFile &file)
   file.setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
   file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   file.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
-  file.setWriteScanIdInFileName(_params.include_scan_name_in_file_name); // include_scan_id_in_file_name);
+  file.setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
   file.setWriteRangeResolutionInFileName(_params.include_range_resolution_in_file_name);
   file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);

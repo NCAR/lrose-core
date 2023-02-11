@@ -2468,6 +2468,66 @@
       tt->array_vals[0].s = tdrpStrDup("LDR");
     tt++;
     
+    // Parameter 'censor_test_pulse_ring'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("censor_test_pulse_ring");
+    tt->descr = tdrpStrDup("Censor non-missing data within the test pulse ring.");
+    tt->help = tdrpStrDup("If TRUE, non-missing data within the ring will be censored, provided there is no adjacent data in the margins.");
+    tt->val_offset = (char *) &censor_test_pulse_ring - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'test_pulse_min_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_min_range_km");
+    tt->descr = tdrpStrDup("Minimum range of the test pulse to be censored (km).");
+    tt->help = tdrpStrDup("Only non-missing data within the ring will be censored.");
+    tt->val_offset = (char *) &test_pulse_min_range_km - &_start_;
+    tt->single_val.d = 238;
+    tt++;
+    
+    // Parameter 'test_pulse_max_range_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_max_range_km");
+    tt->descr = tdrpStrDup("Minimum range of the test pulse to be censored (km).");
+    tt->help = tdrpStrDup("Only non-missing data within the ring will be censored.");
+    tt->val_offset = (char *) &test_pulse_max_range_km - &_start_;
+    tt->single_val.d = 239.5;
+    tt++;
+    
+    // Parameter 'test_pulse_margin_km'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_margin_km");
+    tt->descr = tdrpStrDup("Range margin around test pulse (km).");
+    tt->help = tdrpStrDup("The test pulse is only censored if the margins have only missing data values.");
+    tt->val_offset = (char *) &test_pulse_margin_km - &_start_;
+    tt->single_val.d = 2.5;
+    tt++;
+    
+    // Parameter 'test_pulse_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("test_pulse_field_name");
+    tt->descr = tdrpStrDup("Field used to check for data in or around the test pulse.");
+    tt->help = tdrpStrDup("We use this field to decide if there is non-missing data that needs censoring within the test pulse.");
+    tt->val_offset = (char *) &test_pulse_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("DBZ");
+    tt++;
+    
     // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));

@@ -1113,6 +1113,33 @@ public:
                                  Radx::si32 missingValue);
 
   
+  /// censor data from within a range ring
+  ///
+  /// This is primarily intended to remove a test pulse from
+  /// otherwise good data.
+  ///
+  /// Inputs:
+  ///
+  ///  minRingRangeKm: min range for censoring
+  ///  maxRingRangeKm: max range for censoring
+  ///  checkNoDataInMargin: ensure there is no non-missing data
+  ///                       in the range margin
+  ///  checkFieldName: name of field to check for non-missing data
+  ///  marginKm: margin before min range, and beyond max range,
+  ///            to check for non-missing data
+  ///  censorAllFields: censor data in all fields
+  ///                   otherwise only censor the listed fields
+  ///  specifiedFieldNames: vector of field names to be censored
+  ///
+  
+  void censorRangeRing(double minRingRangeKm,
+                       double maxRingRangeKm,
+                       bool checkForDataInMargin,
+                       const string &checkFieldName,
+                       double marginKm,
+                       bool censorAllFields,
+                       const vector<string> &specifiedFieldNames);
+
   //@}
 
   //////////////////////////////////////////////////////////////////

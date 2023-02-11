@@ -751,6 +751,16 @@ public:
   char* *_fields_to_be_censored;
   int fields_to_be_censored_n;
 
+  tdrp_bool_t censor_test_pulse_ring;
+
+  double test_pulse_min_range_km;
+
+  double test_pulse_max_range_km;
+
+  double test_pulse_margin_km;
+
+  char* test_pulse_field_name;
+
   tdrp_bool_t apply_linear_transforms;
 
   transform_field_t *_transform_fields;
@@ -852,7 +862,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[191];
+  mutable TDRPtable _table[196];
 
   const char *_className;
 

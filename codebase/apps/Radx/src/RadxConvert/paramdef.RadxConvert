@@ -970,6 +970,36 @@ paramdef string {
   p_help = "Applies if 'specify_fields_to_be_censored' is TRUE.";
 } fields_to_be_censored[];
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Censor non-missing data within the test pulse ring.";
+  p_help = "If TRUE, non-missing data within the ring will be censored, provided there is no adjacent data in the margins.";
+} censor_test_pulse_ring;
+
+paramdef double {
+  p_default = 238.0;
+  p_descr = "Minimum range of the test pulse to be censored (km).";
+  p_help = "Only non-missing data within the ring will be censored.";
+} test_pulse_min_range_km;
+
+paramdef double {
+  p_default = 239.5;
+  p_descr = "Minimum range of the test pulse to be censored (km).";
+  p_help = "Only non-missing data within the ring will be censored.";
+} test_pulse_max_range_km;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Range margin around test pulse (km).";
+  p_help = "The test pulse is only censored if the margins have only missing data values.";
+} test_pulse_margin_km;
+
+paramdef string {
+  p_default = { "DBZ" };
+  p_descr = "Field used to check for data in or around the test pulse.";
+  p_help = "We use this field to decide if there is non-missing data that needs censoring within the test pulse.";
+} test_pulse_field_name;
+
 commentdef {
   p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
   p_text = "These transforms are fixed. The same transform is applied to all files.";

@@ -7567,3 +7567,163 @@ void RadxVol::_swapMetaNumbers(msgMetaNumbers_t &meta)
   ByteOrder::swap64(&meta.startTimeSecs, 4 * sizeof(Radx::si64));
   ByteOrder::swap32(&meta.scanId, 3 * sizeof(Radx::si32));
 }
+
+///////////////////////////////////////////////////////////
+/// censor data from within a range ring
+///
+/// This is primarily intended to remove a test pulse from
+/// otherwise good data.
+///
+/// Inputs:
+///
+///  minRingRangeKm: min range for censoring
+///  maxRingRangeKm: max range for censoring
+///  checkNoDataInMargin: ensure there is no non-missing data
+///                       in the range margin
+///  checkFieldName: name of field to check for non-missing data
+///  marginKm: margin before min range, and beyond max range,
+///            to check for non-missing data
+///  censorAllFields: censor data in all fields
+///                   otherwise only censor the listed fields
+///  fieldNames: vector of field names to be censored
+///
+
+void RadxVol::censorRangeRing(double minRingRangeKm,
+                              double maxRingRangeKm,
+                              bool checkForDataInMargin,
+                              const string &checkFieldName,
+                              double marginKm,
+                              bool censorAllFields,
+                              const vector<string> &specifiedFieldNames)
+
+{
+
+  // loop through the rays
+  
+  for (size_t iray = 0; iray < _rays.size(); iray++) {
+    
+    RadxRay *ray = _rays[iray];
+
+    // get the censoring field
+
+    RadxField *cfld = ray->getField(checkFieldName);
+    if (cfld == NULL) {
+      continue;
+    }
+    size_t nGates = ray->getNGates();
+    
+    // get the gate limits
+
+    size_t ringStartGate = cfld->getGateIndex(minRingRangeKm, nGates);
+    size_t ringEndGate = cfld->getGateIndex(maxRingRangeKm, nGates);
+    size_t marginStartGate = cfld->getGateIndex(minRingRangeKm - marginKm, nGates);
+    size_t marginEndGate = cfld->getGateIndex(maxRingRangeKm + marginKm, nGates);
+    
+    // save the field type
+    
+    Radx::DataType_t cfldType = cfld->getDataType();
+
+    // convert to fl32
+    
+    cfld->convertToFl32();
+    Radx::fl32 *cfldData = cfld->getDataFl32();
+    Radx::fl32 cfldMiss = cfld->getMissingFl32();
+
+    // determine whether we need to censor or not
+    
+    bool doCensor = false;
+    if (!checkForDataInMargin) {
+
+      doCensor = true;
+
+    } else {
+
+      // check whether there is data in the ring
+      
+      bool dataInRing = false;
+      for (size_t igate = ringStartGate; igate <= ringEndGate; igate++) {
+        if (cfldData[igate] != cfldMiss) {
+          dataInRing = true;
+          break;
+        }
+      }
+      
+      // check whether there is data in the margin
+      
+      bool dataInMargin = false;
+      for (size_t igate = marginStartGate; igate < ringStartGate; igate++) {
+        if (cfldData[igate] != cfldMiss) {
+          dataInMargin = true;
+          break;
+        }
+      }
+      for (size_t igate = ringEndGate; igate <= marginEndGate; igate++) {
+        if (cfldData[igate] != cfldMiss) {
+          dataInMargin = true;
+        break;
+        }
+      }
+
+      if (dataInRing && !dataInMargin) {
+        doCensor = true;
+      }
+      
+    } // if (!checkForDataInMargin)
+
+    // revert censor field type
+
+    cfld->convertToType(cfldType);
+    
+    if (!doCensor) {
+      continue;
+    }
+    
+    // determine which fields to censor
+
+    vector<string> censorFieldNames;
+    if (censorAllFields) {
+      vector<RadxField *> flds = ray->getFields();
+      for (size_t ii = 0; ii < flds.size(); ii++) {
+        censorFieldNames.push_back(flds[ii]->getName());
+      }
+    } else {
+      censorFieldNames = specifiedFieldNames;
+    }
+
+    // loop through the censor fields
+
+    for (size_t ifld = 0; ifld < censorFieldNames.size(); ifld++) {
+
+      // get the censoring field
+      
+      RadxField *fld = ray->getField(censorFieldNames[ifld]);
+      if (fld == NULL) {
+        continue;
+      }
+    
+      // save the field type
+      
+      Radx::DataType_t fldType = fld->getDataType();
+      
+      // convert to fl32
+      
+      fld->convertToFl32();
+      Radx::fl32 *fldData = fld->getDataFl32();
+      Radx::fl32 fldMiss = fld->getMissingFl32();
+      
+      // censor ring
+      
+      for (size_t igate = ringStartGate; igate <= ringEndGate; igate++) {
+        fldData[igate] = fldMiss;
+      }
+
+      // revert field type
+      
+      fld->convertToType(fldType);
+
+    } // ifld
+    
+  } // iray
+  
+}
+
