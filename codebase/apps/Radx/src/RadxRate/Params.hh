@@ -526,11 +526,35 @@ public:
 
   filename_mode_t output_filename_mode;
 
+  output_format_t output_format;
+
+  char* output_filename_prefix;
+
+  char* output_filename_suffix;
+
+  tdrp_bool_t include_instrument_name_in_file_name;
+
+  tdrp_bool_t include_site_name_in_file_name;
+
+  tdrp_bool_t include_subsecs_in_file_name;
+
+  tdrp_bool_t include_scan_type_in_file_name;
+
+  tdrp_bool_t include_scan_name_in_file_name;
+
+  tdrp_bool_t include_scan_id_in_file_name;
+
+  tdrp_bool_t include_range_resolution_in_file_name;
+
+  tdrp_bool_t include_vol_num_in_file_name;
+
+  tdrp_bool_t use_hyphen_in_file_name_datetime_part;
+
+  char* output_filename;
+
   tdrp_bool_t append_day_dir_to_output_dir;
 
   tdrp_bool_t append_year_dir_to_output_dir;
-
-  output_format_t output_format;
 
   tdrp_bool_t set_max_range;
 
@@ -553,7 +577,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[62];
+  mutable TDRPtable _table[74];
 
   const char *_className;
 

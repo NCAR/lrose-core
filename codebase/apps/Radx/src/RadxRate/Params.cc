@@ -1412,6 +1412,172 @@
     tt->single_val.e = START_AND_END_TIMES;
     tt++;
     
+    // Parameter 'output_format'
+    // ctype is '_output_format_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("output_format");
+    tt->descr = tdrpStrDup("Format for the output files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &output_format - &_start_;
+    tt->enum_def.name = tdrpStrDup("output_format_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
+      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
+      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
+      tt->enum_def.fields[1].val = OUTPUT_FORMAT_DORADE;
+      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_UF");
+      tt->enum_def.fields[2].val = OUTPUT_FORMAT_UF;
+    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
+    tt++;
+    
+    // Parameter 'output_filename_prefix'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_filename_prefix");
+    tt->descr = tdrpStrDup("Optional prefix for output filename.");
+    tt->help = tdrpStrDup("If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'");
+    tt->val_offset = (char *) &output_filename_prefix - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_filename_suffix'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_filename_suffix");
+    tt->descr = tdrpStrDup("Optional suffix for output filename.");
+    tt->help = tdrpStrDup("If not empty, the suffix will be inserted immediately prior to the extension.");
+    tt->val_offset = (char *) &output_filename_suffix - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'include_instrument_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_instrument_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the instrument name in the file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.");
+    tt->val_offset = (char *) &include_instrument_name_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_site_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_site_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the site name in the file name.");
+    tt->help = tdrpStrDup("Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.");
+    tt->val_offset = (char *) &include_site_name_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_subsecs_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_subsecs_in_file_name");
+    tt->descr = tdrpStrDup("Option to include sub-seconds in date-time part of file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.");
+    tt->val_offset = (char *) &include_subsecs_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_scan_type_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_type_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan type in the file name.");
+    tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'include_scan_name_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_name_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan name in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_name_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_scan_id_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_scan_id_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the scan Id in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.");
+    tt->val_offset = (char *) &include_scan_id_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_range_resolution_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_range_resolution_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the range resolution in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.");
+    tt->val_offset = (char *) &include_range_resolution_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'include_vol_num_in_file_name'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("include_vol_num_in_file_name");
+    tt->descr = tdrpStrDup("Option to include the volume number in the file name.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.");
+    tt->val_offset = (char *) &include_vol_num_in_file_name - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'use_hyphen_in_file_name_datetime_part'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("use_hyphen_in_file_name_datetime_part");
+    tt->descr = tdrpStrDup("Option to use a hyphen between date and time in filename.");
+    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. Normally an underscore is used.");
+    tt->val_offset = (char *) &use_hyphen_in_file_name_datetime_part - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'output_filename'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("output_filename");
+    tt->descr = tdrpStrDup("Name of output file.");
+    tt->help = tdrpStrDup("Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.");
+    tt->val_offset = (char *) &output_filename - &_start_;
+    tt->single_val.s = tdrpStrDup("cfradial.test.nc");
+    tt++;
+    
     // Parameter 'append_day_dir_to_output_dir'
     // ctype is 'tdrp_bool_t'
     
@@ -1434,28 +1600,6 @@
     tt->help = tdrpStrDup("Path will be output_dir/yyyy/yyyymmdd/filename.");
     tt->val_offset = (char *) &append_year_dir_to_output_dir - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_DORADE;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_UF");
-      tt->enum_def.fields[2].val = OUTPUT_FORMAT_UF;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
     tt++;
     
     // Parameter 'Comment 13'

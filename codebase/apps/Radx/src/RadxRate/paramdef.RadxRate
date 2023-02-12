@@ -549,6 +549,89 @@ paramdef enum filename_mode_t {
   p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name.";
 } output_filename_mode;
 
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_UF
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
+} output_filename_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional suffix for output filename.";
+  p_help = "If not empty, the suffix will be inserted immediately prior to the extension.";
+} output_filename_suffix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the site name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.";
+} include_site_name_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include sub-seconds in date-time part of file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
+} include_subsecs_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the scan type in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
+} include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan name in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
+} include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.";
+} include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the range resolution in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.";
+} include_range_resolution_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the volume number in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
+} include_vol_num_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a hyphen between date and time in filename.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
+} use_hyphen_in_file_name_datetime_part;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
 paramdef boolean {
   p_default = true;
   p_descr = "Add the day directory to the output directory.";
@@ -560,17 +643,6 @@ paramdef boolean {
   p_descr = "Add the year directory to the output directory.";
   p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
 } append_year_dir_to_output_dir;
-
-typedef enum {
-  OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_UF
-} output_format_t;
-
-paramdef enum output_format_t {
-  p_default = OUTPUT_FORMAT_CFRADIAL;
-  p_descr = "Format for the output files.";
-} output_format;
 
 commentdef {
   p_header = "SET MAX RANGE - OPTIONAL";

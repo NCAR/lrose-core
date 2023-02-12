@@ -752,8 +752,23 @@ void RadxRate::_setupWrite(RadxFile &file)
   // set netcdf format - used for CfRadial
 
   file.setNcFormat(RadxFile::NETCDF4);
-
   file.setWriteForceNgatesVary(true);
+
+  if (strlen(_params.output_filename_prefix) > 0) {
+    file.setWriteFileNamePrefix(_params.output_filename_prefix);
+  }
+  if (strlen(_params.output_filename_suffix) > 0) {
+    file.setWriteFileNameSuffix(_params.output_filename_suffix);
+  }
+
+  file.setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
+  file.setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
+  file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
+  file.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
+  file.setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
+  file.setWriteRangeResolutionInFileName(_params.include_range_resolution_in_file_name);
+  file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
+  file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
 }
 
