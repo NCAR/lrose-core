@@ -1787,6 +1787,18 @@
     tt->single_val.d = 0.25;
     tt++;
     
+    // Parameter 'combine_rhi'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("combine_rhi");
+    tt->descr = tdrpStrDup("Option to keep the azimuth constant in RHI scans.");
+    tt->help = tdrpStrDup("Default is false. If true, and the azimuth switches by 180 degree when the elevation passes 90 degrees, this option combines the ray azimuth into one consistent value. The ray elevation will also continue to increase from 90 degrees to 180 degrees. Only one RHI scan per file is allowed with this option. ");
+    tt->val_offset = (char *) &combine_rhi - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'override_sweep_mode'
     // ctype is 'tdrp_bool_t'
     

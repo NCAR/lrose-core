@@ -686,6 +686,8 @@ public:
 
   double optimized_transitions_max_elev_error;
 
+  tdrp_bool_t combine_rhi;
+
   tdrp_bool_t override_sweep_mode;
 
   sweep_mode_t sweep_mode;
@@ -862,7 +864,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[196];
+  mutable TDRPtable _table[197];
 
   const char *_className;
 
