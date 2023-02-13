@@ -979,6 +979,10 @@ void RadxConvert::_finalizeVol(RadxVol &vol)
     _volNum++;
   }
 
+  if (_params.combine_rhi) {
+    vol.combineRhi();
+  }
+
   // set global attributes
 
   _setGlobalAttr(vol);

@@ -652,6 +652,12 @@ paramdef double {
 } optimized_transitions_max_elev_error;
 
 paramdef boolean {
+  p_default = false;
+  p_descr = "Option to keep the azimuth constant in RHI scans.";
+  p_help = "Default is false. If true, and the azimuth switches by 180 degree when the elevation passes 90 degrees, this option combines the ray azimuth into one consistent value. The ray elevation will also continue to increase from 90 degrees to 180 degrees. Only one RHI scan per file is allowed with this option. ";
+} combine_rhi;
+
+paramdef boolean {
   p_default = FALSE;
   p_descr = "Option to override the sweep modes in the data.";
   p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
