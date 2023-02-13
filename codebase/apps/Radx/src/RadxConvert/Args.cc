@@ -370,6 +370,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       
       sprintf(tmp_str, "trim_surveillance_sweeps_to_360deg = TRUE;");
       TDRP_add_override(&override, tmp_str);
+
+    } else if (!strcmp(argv[i], "-combine_rhi")) {
+      
+      sprintf(tmp_str, "combine_rhi = TRUE;");
+      TDRP_add_override(&override, tmp_str);     
       
     } else if (!strcmp(argv[i], "-const_ngates")) {
       
