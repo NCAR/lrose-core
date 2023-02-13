@@ -1016,6 +1016,11 @@ public:
 
   void combineNexradSplitCuts(bool keepLongRange = false);
 
+  /// For Leosphere volumes, combine RHI rays: keep the azimuth the same
+  /// and allow the elevation to increase greater than 90 degrees.
+
+  void combineRhi();  
+
   /// Make fields uniform in the volume.
   /// This ensures that all rays in the volume have the same fields
   /// and that they are in the same order in each ray.
