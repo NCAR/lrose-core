@@ -1817,6 +1817,13 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
     azimuthDeg += 360.0;
   }
   double elevationDeg = asin(zz) * Radx::RadToDeg;
+  double tiltDeg = asin(yy) * Radx::RadToDeg;
+  if (tiltDeg < 0) {
+    tiltDeg += 360.0;
+  }
+  if (azimuthDeg < 0) {
+    azimuthDeg += 360.0;
+  }
 
 #ifdef DEBUG_PRINT
   cerr << "====>> roll, pitch, hdg, tilt, rot: "
@@ -1826,16 +1833,18 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
        << _georef->getTilt() << ", "
        << _georef->getRotation() << endl;
 
-  cerr << "====>> xx, yy, zz, az, el: "
+  cerr << "====>> xx, yy, zz, az, el, tilt: "
        << xx << ", "
        << yy << ", "
        << zz << ", "
        << azimuthDeg << ", "
-       << elevationDeg << endl;
+       << elevationDeg << ","
+       << tiltDeg << endl;
 #endif
 
   _az = azimuthDeg;
   _elev = elevationDeg;
+  _tilt_t = tiltDeg;
 
   _georefApplied = true;
 

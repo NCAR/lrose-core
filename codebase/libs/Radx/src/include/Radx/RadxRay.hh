@@ -871,6 +871,10 @@ public:
 
   inline double getElevationDeg() const { return _elev; }
 
+  /// Get the tilt angle for this ray, in degrees.
+
+  inline double getTiltTDeg() const { return _tilt_t; }
+
   /// Get the fixed angle for this ray, in degrees.
   ///
   /// See setFixedAngleDeg().
@@ -1117,6 +1121,7 @@ private:
   double _fixedAngle;      // deg
   double _targetScanRate;  // deg/s
   double _trueScanRate;  // deg/s
+  double _tilt_t;        // deg  tilt in the level track-relative coordinates 
   
   bool _isIndexed;   // ray is indexed
   double _angleRes;  // angular resolution if indexed (deg)
