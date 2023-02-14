@@ -660,8 +660,11 @@ public:
   /// Transforms x to y as follows:
   ///   y = x * scale + offset
   /// After operation, leaves type unchanged.
+  /// If field folds, ensure the result is within the folding region.
 
-  void applyLinearTransform(double scale, double offset);
+  void applyLinearTransform(double scale, double offset,
+                            bool fieldFolds = false,
+                            double foldingValue = 0.0);
 
   /// Transorm from db to linear units
   /// Note - will convert to fl32

@@ -1249,16 +1249,19 @@ void RadxRay::setNGatesConstant()
 ///   y = x * scale + offset
 /// After operation, field type is unchanged.
 /// Nothing is done if field does not exist.
+/// If field folds, ensure the result is within the folding region.
 
 void RadxRay::applyLinearTransform(const string &name,
-                                   double scale, double offset)
+                                   double scale, double offset,
+                                   bool fieldFolds /* = false */,
+                                   double foldingValue /* = 0.0 */)
 
 {
   RadxField *field = getField(name);
   if (field == NULL) {
     return;
   }
-  field->applyLinearTransform(scale, offset);
+  field->applyLinearTransform(scale, offset, fieldFolds, foldingValue);
 }
   
 //////////////////////////////////////////////////////

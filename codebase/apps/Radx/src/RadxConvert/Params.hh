@@ -214,6 +214,8 @@ public:
     char* input_field_name;
     double transform_scale;
     double transform_offset;
+    tdrp_bool_t field_folds;
+    double folding_value;
   } transform_field_t;
 
   typedef struct {

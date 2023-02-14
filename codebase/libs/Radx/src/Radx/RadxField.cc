@@ -2295,8 +2295,11 @@ int RadxField::computeMinAndMax() const
 /// Transforms x to y as follows:
 ///   y = x * scale + offset
 /// After operation, leaves type unchanged.
+/// If field folds, ensure the result is within the folding region.
 
-void RadxField::applyLinearTransform(double scale, double offset)
+void RadxField::applyLinearTransform(double scale, double offset,
+                                     bool fieldFolds /* = false */,
+                                     double foldingValue /* = 0.0 */)
 
 {
 
@@ -2315,6 +2318,11 @@ void RadxField::applyLinearTransform(double scale, double offset)
     Radx::fl32 val = *data;
     if (val != _missingFl32) {
       Radx::fl32 newVal = val * scale + offset;
+      if (newVal < -foldingValue) {
+        newVal += foldingValue * 2.0;
+      } else if (newVal > foldingValue) {
+        newVal -= foldingValue * 2.0;
+      }
       *data = newVal;
     }
   } // ii

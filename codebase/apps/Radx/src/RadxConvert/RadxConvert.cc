@@ -1123,7 +1123,10 @@ void RadxConvert::_applyLinearTransform(RadxVol &vol)
     string iname = tfld.input_field_name;
     double scale = tfld.transform_scale;
     double offset = tfld.transform_offset;
-    vol.applyLinearTransform(iname, scale, offset);
+    bool fieldFolds = tfld.field_folds;
+    double foldingValue = tfld.folding_value;
+    vol.applyLinearTransform(iname, scale, offset,
+                             fieldFolds, foldingValue);
   } // ii
 
 }

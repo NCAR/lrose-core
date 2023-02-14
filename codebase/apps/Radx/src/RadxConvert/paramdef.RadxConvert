@@ -1021,12 +1021,14 @@ typedef struct {
   string input_field_name; 
   double transform_scale;
   double transform_offset;
+  boolean field_folds;
+  double folding_value;
 } transform_field_t;
 
 paramdef struct transform_field_t {
   p_default = {
-    { "DBZ", 1.0, 0.0},
-    { "VEL", 1.0, 0.0}
+    { "DBZ", 1.0, 0.0, false, 0.0},
+    { "VEL", 1.0, 0.0, true, 25.0}
   };
   p_descr = "transform field details.";
   p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name.";
