@@ -134,6 +134,7 @@ set (SRCS
       ./Radx/RadxReadDir.cc
       ./Radx/RadxRemap.cc
       ./Radx/RadxSweep.cc
+      ./Radx/RadxStatusXml.cc
       ./Radx/RadxStr.cc
       ./Radx/RadxTime.cc
       ./Radx/RadxTimeList.cc

@@ -42,6 +42,7 @@ SUB_DIRS = \
 	RadxQpe \
 	RadxRate \
 	RadxSunMon \
+        RadxStats \
         RadxTimeStats \
         RadxVolTimingStats
 

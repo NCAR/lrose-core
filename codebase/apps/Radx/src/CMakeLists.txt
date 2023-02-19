@@ -47,6 +47,7 @@ add_subdirectory (RadxQc)
 add_subdirectory (RadxQpe)
 add_subdirectory (RadxRate)
 add_subdirectory (RadxSunMon)
+add_subdirectory (RadxStats)
 add_subdirectory (RadxTimeStats)
 add_subdirectory (RadxVolTimingStats)
 
