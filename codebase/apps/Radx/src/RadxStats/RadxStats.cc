@@ -353,6 +353,7 @@ void RadxStats::_printTimeGapTable(RadxFile &file,
     _prevStartTime = vol.getStartRadxTime();
     _prevEndTime = vol.getEndRadxTime();
     _firstFile = false;
+    out << "# startTime, endTime, gapSecs, gapHours, gapDays" << endl;
     return;
   }
   
@@ -365,11 +366,15 @@ void RadxStats::_printTimeGapTable(RadxFile &file,
 
   double gapSecs = startTime - _prevEndTime;
   if (gapSecs > _params.max_valid_gap_secs) {
+    out << _prevEndTime.getW3cStr();
+    out << ", ";
     out << startTime.getW3cStr();
     out << ", ";
-    out << endTime.getW3cStr();
-    out << ", ";
     out << floor(gapSecs + 0.5);
+    out << ", ";
+    out << gapSecs / 3600.0;
+    out << ", ";
+    out << gapSecs / 86400.0;
     out << endl;
     out.flush();
   }
