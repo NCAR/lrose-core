@@ -380,6 +380,8 @@ public:
 
   char* input_dir;
 
+  char* field_for_stats;
+
   mode_t mode;
 
   int max_realtime_data_age_secs;
@@ -390,7 +392,9 @@ public:
 
   tdrp_bool_t print_sweep_angle_table;
 
-  char* field_for_stats;
+  tdrp_bool_t print_time_gap_table;
+
+  double max_valid_gap_secs;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -399,7 +403,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[14];
+  mutable TDRPtable _table[16];
 
   const char *_className;
 

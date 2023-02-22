@@ -45,7 +45,6 @@
 #include <Radx/NexradRadxFile.hh>
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <didss/LdataInfo.hh>
@@ -59,6 +58,7 @@ RadxStats::RadxStats(int argc, char **argv)
 {
 
   OK = TRUE;
+  _firstFile = true;
   
   // set programe name
 
@@ -268,6 +268,10 @@ int RadxStats::_processFile(const string &filePath)
     _printSweepAngleTable(inFile, vol, cout);
   }
 
+  if (_params.print_time_gap_table) {
+    _printTimeGapTable(inFile, vol, cout);
+  }
+
   return 0;
 
 }
@@ -332,6 +336,46 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
   }
   
   out.flush();
+  
+}
+
+//////////////////////////////////////////////////
+// print time gap if applicable
+
+void RadxStats::_printTimeGapTable(RadxFile &file,
+                                   const RadxVol &vol,
+                                   ostream &out)
+{
+
+  // initialize
+  
+  if (_firstFile) {
+    _prevStartTime = vol.getStartRadxTime();
+    _prevEndTime = vol.getEndRadxTime();
+    _firstFile = false;
+    return;
+  }
+  
+  // get start and end times
+  
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+
+  // compute gap
+
+  double gapSecs = startTime - _prevEndTime;
+  if (gapSecs > _params.max_valid_gap_secs) {
+    out << startTime.getW3cStr();
+    out << ", ";
+    out << endTime.getW3cStr();
+    out << ", ";
+    out << floor(gapSecs + 0.5);
+    out << endl;
+    out.flush();
+  }
+
+  _prevStartTime = startTime;
+  _prevEndTime = endTime;
   
 }
 

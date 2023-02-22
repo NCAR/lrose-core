@@ -42,6 +42,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <string>
+#include <Radx/RadxTime.hh>
 class RadxFile;
 class RadxVol;
 using namespace std;
@@ -75,6 +76,10 @@ private:
   Params _params;
   vector<string> _readPaths;
 
+  bool _firstFile;
+  RadxTime _prevStartTime;
+  RadxTime _prevEndTime;
+
   int _runFilelist();
   int _runArchive();
   int _runRealtime();
@@ -82,6 +87,7 @@ private:
   int _processFile(const string &filePath);
 
   void _printSweepAngleTable(RadxFile &file, const RadxVol &vol, ostream &out);
+  void _printTimeGapTable(RadxFile &file, const RadxVol &vol, ostream &out);
 
 };
 
