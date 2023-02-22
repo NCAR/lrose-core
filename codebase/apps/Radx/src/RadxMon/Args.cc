@@ -218,6 +218,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "flags_in_summary_mode = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-scan_name")) {
+      
+      sprintf(tmp_str, "scan_name_in_summary_mode = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-subsecs_precision")) {
       
       if (i < argc - 1) {
@@ -312,6 +317,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "     if available\n"
       << "  [-power] print power and frequency summary\n"
       << "  [-range] range for single gate print - km\n"
+      << "  [-scan_name] add scan name at end of line in summary mode\n"
       << "  [-start] Seek to start of FMQ\n"
       << "     If not set, reading begins at the end of the FMQ.\n"
       << "  [-summary] scrolling summary\n"

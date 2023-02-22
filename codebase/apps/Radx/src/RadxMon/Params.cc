@@ -853,6 +853,18 @@
     tt->single_val.i = 10;
     tt++;
     
+    // Parameter 'scan_name_in_summary_mode'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("scan_name_in_summary_mode");
+    tt->descr = tdrpStrDup("Add scan name to end of line in summary mode.");
+    tt->help = tdrpStrDup("If TRUE, the scan name in the ray, if set, will be printed out at the end of the line, just before the transition flag.");
+    tt->val_offset = (char *) &scan_name_in_summary_mode - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'update_interval'
     // ctype is 'int'
     

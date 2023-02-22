@@ -612,6 +612,10 @@ void RadxMon::_printSummary(const RadxRay *ray)
     fprintf(stdout, format, subsecs);
   }
 
+  if (_params.scan_name_in_summary_mode && ray->getScanName().size() > 0) {
+    fprintf(stdout, " %s", ray->getScanName().c_str());
+  }
+  
   if (ray->getAntennaTransition()) {
     fprintf(stdout, " *");
   }

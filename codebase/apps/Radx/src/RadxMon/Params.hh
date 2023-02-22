@@ -424,6 +424,8 @@ public:
 
   int header_interval_in_summary_mode;
 
+  tdrp_bool_t scan_name_in_summary_mode;
+
   int update_interval;
 
   int n_monitor_line_feeds;
@@ -443,7 +445,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

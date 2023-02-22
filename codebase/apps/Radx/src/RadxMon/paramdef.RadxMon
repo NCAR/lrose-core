@@ -148,6 +148,12 @@ paramdef int {
   p_help = "A line header will be printed at regular intervals.";
 } header_interval_in_summary_mode;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Add scan name to end of line in summary mode.";
+  p_help = "If TRUE, the scan name in the ray, if set, will be printed out at the end of the line, just before the transition flag.";
+} scan_name_in_summary_mode;
+
 paramdef int {
   p_default = -1; 
   p_descr = "Update interval for display in secs.";
