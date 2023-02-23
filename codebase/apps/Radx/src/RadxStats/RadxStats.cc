@@ -226,6 +226,7 @@ int RadxStats::_processFile(const string &filePath)
         cerr << "Skipping file: " << filePath << endl;
         cerr << "  Previously processed in aggregation step" << endl;
       }
+      _firstFile = false;
       return 0;
     }
   }
@@ -272,6 +273,7 @@ int RadxStats::_processFile(const string &filePath)
     _printTimeGapTable(inFile, vol, cout);
   }
 
+  _firstFile = false;
   return 0;
 
 }
@@ -315,6 +317,13 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
                                       ostream &out)
 {
 
+  // initialize
+  
+  if (_firstFile) {
+    out << "# volStartTime, scanName, sweepFixedAngles" << endl;
+    return;
+  }
+  
   RadxTime startTime = vol.getStartRadxTime();
   const vector<RadxSweep *> sweeps = vol.getSweeps();
 
@@ -352,7 +361,6 @@ void RadxStats::_printTimeGapTable(RadxFile &file,
   if (_firstFile) {
     _prevStartTime = vol.getStartRadxTime();
     _prevEndTime = vol.getEndRadxTime();
-    _firstFile = false;
     out << "# startTime, endTime, gapSecs, gapHours, gapDays" << endl;
     return;
   }
