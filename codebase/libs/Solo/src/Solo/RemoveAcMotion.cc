@@ -110,10 +110,10 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
     //scaled_nyqv = DD_SCALE(nyqv, scale, bias);
     //scaled_nyqi = 2*scaled_nyqv;
     //scaled_ac_vel = DD_SCALE(ac_vel, scale, bias);
-
-    scaled_nyqv = DD_SCALE(nyqv);
+    // This is really tricky code! don't mess with it!
+    scaled_nyqv = nyqv * 100 + 0.5;  // DD_SCALE(nyqv);
     scaled_nyqi = 2*scaled_nyqv;
-    scaled_ac_vel = DD_SCALE(ac_vel);
+    scaled_ac_vel = ac_vel * 100 + 0.5; // DD_SCALE(ac_vel);
     //printf("scaled_ac_vel = %d\n", scaled_ac_vel);
     //printf("scaled_nyqi = %d\n", scaled_nyqi);
     
@@ -126,6 +126,9 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
         adjust = adjust + scaled_nyqi;
     }
 
+    // now the adjust, and scaled_* are scaled up by 100,
+    // what to do??
+
     // printf("adjust = %d\n", adjust);
     
     // TODO: make delta a variable or parameter and make it consistent
@@ -135,7 +138,7 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
       // if in boundary and not bad
       bool bad_data = abs((data[ssIdx] - bad)) < 0.0001;
       if (bnd[ssIdx] && !bad_data) {
-        vx = data[ssIdx] + adjust;
+        vx = data[ssIdx]*100.0 + adjust;
         // printf("abs(%f) = %f\n", vx, abs(vx));
         if(abs(vx) > scaled_nyqv) {
 	        //printf("vx = %f, greater than nyquist, %f,  adjusting to ", vx, nyqi);
@@ -146,7 +149,7 @@ void se_remove_ac_motion(float vert_velocity, float ew_velocity, float ns_veloci
             }
 	          // printf("%f\n", vx);
         }
-        newData[ssIdx] = vx;
+        newData[ssIdx] = vx/100.0;
       }
       ssIdx += 1;
     }

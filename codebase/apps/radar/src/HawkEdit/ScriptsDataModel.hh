@@ -215,7 +215,7 @@ private:
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
 
-  void applyCorrectionFactors(RadxRay *ray);
+  //void applyCorrectionFactors(RadxRay *ray);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);
   void _selectFieldsNotInCurrentVersion(

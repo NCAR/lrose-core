@@ -345,7 +345,9 @@ public:
   /// If force is false, the georefs are applied only if
   /// they have not been applied previously,
   /// i.e. if _georefApplied = false.
-  
+  //void applyGeoref(Radx::PrimaryAxis_t axis, 
+  //  Radx::RadxCfactors *cfactors, bool force /* = true */);
+
   void applyGeoref(Radx::PrimaryAxis_t axis, bool force = true);
 
   /// set the flag to indicate that georef has been applied
@@ -875,8 +877,9 @@ public:
   inline double getElevationDeg() const { return _elev; }
 
   /// Get the tilt angle for this ray, in degrees.
-
-  inline double getTiltTDeg() const { return _tilt_t; }
+  // TODO: get Tilt from the georef
+  //inline double getTiltTDeg() const { return _tilt_t; }
+  // _georef->getTiltDeg();
 
   /// Get the fixed angle for this ray, in degrees.
   ///

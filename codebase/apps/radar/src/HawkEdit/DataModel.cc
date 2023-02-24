@@ -442,7 +442,7 @@ void DataModel::getRayData(string path, vector<string> &fieldNames,
 }
 
 void DataModel::applyCorrectionFactors() {
-  adjustAnglesForElevationSurveillance(_vol);
+  //adjustAnglesForElevationSurveillance(_vol);
 }
 
 void DataModel::withdrawCorrectionFactors() {
@@ -492,6 +492,7 @@ void DataModel::resetAnglesForElevationSurveillance(RadxVol *_vol) {
   }
 }
 */
+/*
 void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
 
   // adjust angles for elevation surveillance if needed
@@ -545,7 +546,7 @@ void DataModel::adjustAnglesForElevationSurveillance(RadxVol *_vol) {
       //ray->setAnglesForElevSurveillance();
   }
 }
-
+*/
 
 void DataModel::readData(string path, vector<string> &fieldNames,
   int sweepNumber,
@@ -605,7 +606,7 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   _vol->convertToFl32();
 
-  adjustAnglesForElevationSurveillance(_vol);
+  // adjustAnglesForElevationSurveillance(_vol);
 
   // adjust angles for elevation surveillance if needed
   //if (_vol->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {

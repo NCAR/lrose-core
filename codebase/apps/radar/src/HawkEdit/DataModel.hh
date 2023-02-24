@@ -175,7 +175,7 @@ private:
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
 
-  void adjustAnglesForElevationSurveillance(RadxVol *_vol);
+  //void adjustAnglesForElevationSurveillance(RadxVol *_vol);
   //void resetAnglesForElevationSurveillance(RadxVol *_vol);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);

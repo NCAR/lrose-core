@@ -742,15 +742,15 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   float ew_velocity = georef->getEwVelocity(); // fl32
   float ns_velocity = georef->getNsVelocity(); // fl32;
 
-  float ew_gndspd_corr = 0.0; 
+  float ew_gndspd_corr = 0.0; // I don't know what this is or where to find it.
   const RadxCfactors *cfactors = ray->getCfactors();
   if (cfactors != NULL) {
     ew_gndspd_corr = cfactors->getEwVelCorr(); // ?? _gndspd_corr; // fl32;
   }
  
-  float tilt = georef->getTilt(); // fl32; 
+  float tilt = georef->getTilt() * Radx::DegToRad;
   // TODO: elevation changes with different rays/fields how to get the current one???
-  float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
+  float elevation = ray->getElevationDeg() * Radx::DegToRad; // doradeData.elevation; // fl32;
 
   /*
   // TODO:  look up the dataField and get the associated values
@@ -842,7 +842,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   // perform the function ...
   //  soloFunctionsApi.Despeckle(data,  newData, nGates, bad_data_value, speckle_length,
   //                             clip_gate, _boundaryMask);
-
+  // all angles should be in radians
   soloFunctionsApi.RemoveAircraftMotion(vert_velocity, ew_velocity, ns_velocity,
 					ew_gndspd_corr, tilt, elevation,
 					data, newData, nGates,
@@ -923,9 +923,9 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   } 
   */
 
-  Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
-  bool force = true;
-  ray->applyGeoref(primary_axis, force);
+  //Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
+  //bool force = true;
+  //ray->applyGeoref(primary_axis, force);
 
   /*
   const RadxGeoref *georef = ray->getGeoreference();
@@ -948,6 +948,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 // ----  need these values from cfac/georef
 
   // get from platform
+  // TODO: should these be in radians?
      double dds_asib_rotation_angle = georef->getRotation(); // origin dds->asib->rotation_angle;  asib is struct platform_i
      double dds_asib_roll = georef->getRoll();          // origin dds->asib->roll
      float asib_altitude_agl = georef->getAltitudeKmAgl();     // altitude angle ??? from platform??
@@ -962,7 +963,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   // TODO: elevation changes with different rays/fields how to get the current one???
   float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
-  float dds_ra_elevation = elevation * M_PI / 180.00; // radar angles!! requires cfac values and calculation
+  float dds_ra_elevation = elevation * Radx::DegToRad; // radar angles!! requires cfac values and calculation
                            // origin dds->ra->elevation, ra = radar_angles
                            // get this from RadxRay::_elev if RadxRay::_georefApplied == true
                            // 1/4/2023 I don't believe that cfacs need to be applied to elevation!!
@@ -1011,7 +1012,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   //==========  
   
-  if (true) { // TODO: add this arg ... use_radar_angles) {
+  if (false) { // TODO: add this arg ... use_radar_angles) {
     // these are input args to radar angles calculation
     float asib_roll = dds_asib_roll;
     float asib_pitch = georef->getPitch();
