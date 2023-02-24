@@ -1813,6 +1813,11 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
 
   }
 
+  // save intermediate values
+  _georef->setXX(xx);
+  _georef->setYY(yy);
+  _georef->setZZ(zz);
+
   // compute earth-referenced azimuth and elevation
   
   double azimuthDeg = atan2(xx, yy) * Radx::RadToDeg;

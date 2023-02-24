@@ -103,6 +103,9 @@ public:
   inline void setRollRate(double val) { _rollRate = val; }
   inline void setDriveAngle1(double val) { _driveAngle1 = val; }
   inline void setDriveAngle2(double val) { _driveAngle2 = val; }
+  inline void setXX(double val)  { _xx = val; }
+  inline void setYY(double val)  { _yy = val;  }
+  inline void setZZ(double val)  { _zz = val;  }  
 
   //@}
   /// \name Get methods:
@@ -135,7 +138,9 @@ public:
   inline double getRollRate() const { return _rollRate; }
   inline double getDriveAngle1() const { return _driveAngle1; }
   inline double getDriveAngle2() const { return _driveAngle2; }
-
+  inline double getXX() const { return _xx; }
+  inline double getYY() const { return _yy; }
+  inline double getZZ() const { return _zz; }  
   //@}
 
                                                    
@@ -252,6 +257,10 @@ private:
 
   double _driveAngle1;   /* angle of antenna drive 1, if applicable */
   double _driveAngle2;   /* angle of antenna drive 2, if applicable */
+
+  double _xx; // georeference transformation intermediate values
+  double _yy;
+  double _zz; 
 
   // methods
   
