@@ -42,7 +42,7 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxCfactors.hh>
-#include <dsserver/DsLdataInfo.hh>
+#include <Spdb/DsSpdb.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
 #include <toolsa/TaStr.hh>
@@ -395,12 +395,62 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
     return -1;
   }
 
+  // compute field diffs
+  
   if (_computeFieldDiffs(corrVol, truthVol)) {
     return -1;
   }
 
-  return 0;
+  // write diffs out to spdb
+  
+  // create XML string
 
+  string xml;
+  
+  xml += TaXml::writeStartTag("FieldDiffs", 0);
+
+  xml += TaXml::writeTime("VolStartTime", 1, corrVol.getStartTimeSecs());
+  xml += TaXml::writeTime("VolEndTime", 1, corrVol.getEndTimeSecs());
+  
+  for (size_t ifield = 0; ifield < _fieldDiffs.size(); ifield++) {
+    xml += TaXml::writeStartTag("Field", 1);
+    FieldDiff &fDiff = _fieldDiffs[ifield];
+    xml += TaXml::writeString("CorrName", 2, fDiff.corrName);
+    xml += TaXml::writeString("TruthName", 2, fDiff.truthName);
+    xml += TaXml::writeDouble("MeanDiff", 2, fDiff.meanDiff);
+    xml += TaXml::writeEndTag("Field", 1);
+  }
+  
+  xml += TaXml::writeEndTag("FieldDiffs", 0);
+
+  // if (_statusXml.size() > 0) {
+  //   xml += _statusXml;
+  // }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Writing XML stats to SPDB:" << endl;
+    cerr << xml << endl;
+  }
+
+  DsSpdb spdb;
+  time_t validTime = corrVol.getStartTimeSecs();
+  time_t expireTime = corrVol.getEndTimeSecs();
+  si32 dataType = Spdb::hash4CharsToInt32(corrVol.getInstrumentName().c_str());
+  spdb.addPutChunk(dataType, validTime, expireTime, xml.size() + 1, xml.c_str());
+  if (spdb.put(_params.field_bias_spdb_url,
+               SPDB_XML_ID, SPDB_XML_LABEL)) {
+    cerr << "ERROR - StatsMgr::writeStatsToSpdb" << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "Wrote stats to spdb, url: " << _params.field_bias_spdb_url << endl;
+    cerr << "  Valid time: " << RadxTime::strm(validTime) << endl;
+  }
+
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////////////
