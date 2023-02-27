@@ -9,7 +9,11 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-  p_header = "Converts files between CfRadial and other radial formats";
+  p_header = "ANALYSIS_STAGE: reads in 2 datasets and computes mean differences between specified fields. Biases are stored in Spdb.";
+}
+
+commentdef {
+  p_header = "CORRECTION_STAGE: retrieves biases from Spdb, corrects specified datasets using those previously-computed biases.";
 }
 
 commentdef {
@@ -33,12 +37,27 @@ paramdef string {
 } instance;
 
 commentdef {
+  p_header = "PROCESSING STAGES";
+}
+
+typedef enum {
+  ANALYSIS_STAGE,
+  CORRECTION_STAGE
+} stage_t;
+
+paramdef enum stage_t {
+  p_default = ANALYSIS_STAGE;
+  p_descr = "Stage of processing";
+  p_help = "ANALYSIS_STAGE: reads in 2 datasets and computes mean differences between specified fields. Biases are stored in Spdb.\n\nCORRECTION_STAGE: retrieves biases from Spdn, corrects specified datasets using those previously-computed biases.";
+} processing_stage;
+
+commentdef {
   p_header = "DATA INPUT";
 }
 
 paramdef string {
   p_default = ".";
-  p_descr = "Input directory for searching for files.";
+  p_descr = "Input directory for searching for CfRadial files.";
   p_help = "Files will be searched for in this directory.";
 } input_dir;
 
@@ -65,9 +84,15 @@ paramdef string {
 } search_ext;
 
 commentdef {
-  p_header = "OPTIONAL FIXED ANGLE OR SWEEP NUMBER LIMITS";
-  p_text = "Fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+  p_header = "SPDB FIELD BIAS DATA";
+  p_text = "Output in ANALYSIS_STAGE, input in CORRECTION_STAGE";
 }
+
+paramdef string {
+  p_default = "/tmp/field_biases/spdb";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} field_bias_spdb_url;
 
 commentdef {
   p_header = "READ OPTIONS";
@@ -89,18 +114,6 @@ paramdef double {
   p_descr = "Specified maximim range - km.";
   p_help = "Gates beyond this range are removed.";
 } max_range_km;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Preserve sweeps just as they are in the file.";
-  p_help = "Applies generally to NEXRAD data. If true, the sweep details are preserved. If false, we consolidate sweeps from split cuts into a single sweep.";
-} preserve_sweeps;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Preserve rays just as they are in the file.";
-  p_help = "Applies generally to SIGMET data. If true, the ray details are preserved. If false, we order the rays increasing in time.";
-} preserve_rays;
 
 paramdef boolean {
   p_default = false;

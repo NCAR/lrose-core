@@ -124,24 +124,63 @@ FixFieldVals::~FixFieldVals()
 int FixFieldVals::Run()
 {
 
+  vector<string> inputPaths;
+  
   if (_params.mode == Params::FILELIST) {
-    return _runFilelist();
+
+    inputPaths = _args.inputFileList;
+
+    if (inputPaths.size() < 1) {
+      cerr << "ERROR - FixFieldVals::Run()" << endl;
+      cerr << "  FILELIST mode - no files found on command line" << endl;
+      return -1;
+    }
+    
   } else {
-    return _runArchive();
+    
+    // get the files to be processed
+    
+    RadxTimeList tlist;
+    tlist.setDir(_params.input_dir);
+    tlist.setModeInterval(_args.startTime, _args.endTime);
+    if (tlist.compile()) {
+      cerr << "ERROR - FixFieldVals::_runArchive()" << endl;
+      cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
+      cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
+      cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
+      cerr << tlist.getErrStr() << endl;
+      return -1;
+    }
+    
+    inputPaths = tlist.getPathList();
+    if (inputPaths.size() < 1) {
+      cerr << "ERROR - FixFieldVals::Run()" << endl;
+      cerr << "  ARCHIVE mode - no files found, dir: " << _params.input_dir << endl;
+      return -1;
+    }
+    
   }
+
+  if (_params.processing_stage == Params::ANALYSIS_STAGE) {
+    return _analyze(inputPaths);
+  } else {
+    return _correct(inputPaths);
+  }
+
 }
 
-//////////////////////////////////////////////////
-// Run in filelist mode
+/////////////////////////////////
+// analyze the field differences
 
-int FixFieldVals::_runFilelist()
+int FixFieldVals::_analyze(const vector<string> &inputPaths)
+
 {
   
   int iret = 0;
-
+  
   if (_params.debug) {
-    cerr << "Running FixFieldVals" << endl;
-    cerr << "  n input files: " << _args.inputFileList.size() << endl;
+    cerr << "Running FixFieldVals::_analyze" << endl;
+    cerr << "  n input files: " << inputPaths.size() << endl;
   }
 
   int nGood = 0;
@@ -153,7 +192,7 @@ int FixFieldVals::_runFilelist()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     vol.setDebug(true);
   }
-  for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+  for (int ii = 0; ii < (int) inputPaths.size(); ii++) {
     string inputPath = _args.inputFileList[ii];
     // read input file
     int jret = _readFile(inputPath, vol);
@@ -198,39 +237,18 @@ int FixFieldVals::_runFilelist()
 }
 
 //////////////////////////////////////////////////
-// Run in archive mode
+// Run correction stage
 
-int FixFieldVals::_runArchive()
+int FixFieldVals::_correct(const vector<string> &inputPaths)
 {
 
-  // get the files to be processed
-
-  RadxTimeList tlist;
-  tlist.setDir(_params.input_dir);
-  tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (tlist.compile()) {
-    cerr << "ERROR - FixFieldVals::_runArchive()" << endl;
-    cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
-    cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
-    cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
-    cerr << tlist.getErrStr() << endl;
-    return -1;
-  }
-
-  const vector<string> &paths = tlist.getPathList();
-  if (paths.size() < 1) {
-    cerr << "ERROR - FixFieldVals::_runArchive()" << endl;
-    cerr << "  No files found, dir: " << _params.input_dir << endl;
-    return -1;
-  }
-  
   // loop through the input file list
 
   RadxVol vol;
   int iret = 0;
-  for (size_t ii = 0; ii < paths.size(); ii++) {
+  for (size_t ii = 0; ii < inputPaths.size(); ii++) {
     // read input file
-    int jret = _readFile(paths[ii], vol);
+    int jret = _readFile(inputPaths[ii], vol);
     if (jret == 0) {
       // finalize the volume
       _finalizeVol(vol);
@@ -568,18 +586,6 @@ void FixFieldVals::_setupRead(RadxFile &file)
       }
     }
     
-  }
-
-  if (_params.preserve_sweeps) {
-    file.setReadPreserveSweeps(true);
-  } else {
-    file.setReadPreserveSweeps(false);
-  }
-
-  if (_params.preserve_rays) {
-    file.setReadPreserveRays(true);
-  } else {
-    file.setReadPreserveRays(false);
   }
 
   if (_params.set_max_range) {

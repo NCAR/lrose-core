@@ -76,8 +76,8 @@ private:
 
   int _nWarnCensorPrint;
 
-  int _runFilelist();
-  int _runArchive();
+  int _analyze(const vector<string> &inputPaths);
+  int _correct(const vector<string> &inputPaths);
   int _readFile(const string &filePath,
                 RadxVol &vol);
   void _finalizeVol(RadxVol &vol);

@@ -75,6 +75,11 @@ public:
   } debug_t;
 
   typedef enum {
+    ANALYSIS_STAGE = 0,
+    CORRECTION_STAGE = 1
+  } stage_t;
+
+  typedef enum {
     ARCHIVE = 0,
     FILELIST = 1
   } mode_t;
@@ -462,21 +467,21 @@ public:
 
   char* instance;
 
+  stage_t processing_stage;
+
   char* input_dir;
 
   mode_t mode;
 
   char* search_ext;
 
+  char* field_bias_spdb_url;
+
   tdrp_bool_t trim_surveillance_sweeps_to_360deg;
 
   tdrp_bool_t set_max_range;
 
   double max_range_km;
-
-  tdrp_bool_t preserve_sweeps;
-
-  tdrp_bool_t preserve_rays;
 
   tdrp_bool_t set_ngates_constant;
 
@@ -658,7 +663,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[113];
+  mutable TDRPtable _table[115];
 
   const char *_className;
 
