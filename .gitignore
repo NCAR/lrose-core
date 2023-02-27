@@ -672,6 +672,7 @@ codebase/apps/trec/src/ctrec/ctrec
 codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
+codebase/apps/Radx/src/FixFieldVals/FixFieldVals
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
 codebase/apps/Radx/src/FixRadxValues/FixRadxValues
 codebase/apps/Radx/src/GroundEchoStats/GroundEchoStats
