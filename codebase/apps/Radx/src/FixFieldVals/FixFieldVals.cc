@@ -141,11 +141,11 @@ int FixFieldVals::Run()
     // get the files to be processed
     
     RadxTimeList tlist;
-    tlist.setDir(_params.input_dir);
+    tlist.setDir(_params.correction_input_dir);
     tlist.setModeInterval(_args.startTime, _args.endTime);
     if (tlist.compile()) {
       cerr << "ERROR - FixFieldVals::_runArchive()" << endl;
-      cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
+      cerr << "  Cannot compile time list, dir: " << _params.correction_input_dir << endl;
       cerr << "  Start time: " << RadxTime::strm(_args.startTime) << endl;
       cerr << "  End time: " << RadxTime::strm(_args.endTime) << endl;
       cerr << tlist.getErrStr() << endl;
@@ -155,7 +155,8 @@ int FixFieldVals::Run()
     inputPaths = tlist.getPathList();
     if (inputPaths.size() < 1) {
       cerr << "ERROR - FixFieldVals::Run()" << endl;
-      cerr << "  ARCHIVE mode - no files found, dir: " << _params.input_dir << endl;
+      cerr << "  ARCHIVE mode - no files found, dir: "
+           << _params.correction_input_dir << endl;
       return -1;
     }
     
@@ -182,7 +183,7 @@ int FixFieldVals::_analyze(const vector<string> &inputPaths)
     cerr << "Running FixFieldVals::_analyze" << endl;
     cerr << "  n input files: " << inputPaths.size() << endl;
   }
-
+  
   int nGood = 0;
   int nError = 0;
   
@@ -197,23 +198,12 @@ int FixFieldVals::_analyze(const vector<string> &inputPaths)
     // read input file
     int jret = _readFile(inputPath, vol);
     if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
-      // write the volume out
-      if (_writeVol(vol)) {
-        cerr << "ERROR - FixFieldVals::_runFileList" << endl;
-        cerr << "  Cannot write volume to file" << endl;
+      // analyze the file for bias compared with truth files
+      if (_analyzeVol(vol)) {
         iret = -1;
         nError++;
         if (_params.debug) {
           cerr << "  ====>> n errors so far: " << nError << endl;
-        }
-      } else {
-        nGood++;
-        if (_params.debug) {
-          cerr << "  ====>> n good files so far: " << nGood << endl;
-          cerr << "  ====>> n errors     so far: " << nError << endl;
-          cerr << "  ====>> sum          so far: " << nGood + nError << endl;
         }
       }
     } else if (jret < 0) {
@@ -310,7 +300,7 @@ int FixFieldVals::_readFile(const string &readPath,
   }
   
   GenericRadxFile inFile;
-  _setupRead(inFile);
+  _setupCorrectionRead(inFile);
   
   // read in file
 
@@ -338,6 +328,102 @@ int FixFieldVals::_readFile(const string &readPath,
 
   return 0;
 
+}
+
+//////////////////////////////////////////////////
+// Analyze the volume, comparing it to the truth files
+// Returns 0 on success, -1 on failure
+
+int FixFieldVals::_analyzeVol(RadxVol &corrVol)
+  
+{
+  // get truth file path closest in time to file to be corrected
+
+  RadxTimeList truthList;
+  truthList.setDir(_params.truth_input_dir);
+  truthList.setModeClosest(corrVol.getStartRadxTime(), _params.truth_search_margin_secs);
+  if (truthList.compile()) {
+    cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
+    cerr << "  Cannot compile time list, dir: " << _params.truth_input_dir << endl;
+    cerr << "  Search time: " << corrVol.getStartRadxTime().asString() << endl;
+    cerr << "  Search margin secs: " << _params.truth_search_margin_secs << endl;
+    cerr << truthList.getErrStr() << endl;
+    return -1;
+  }
+    
+  const vector<string> &truthPaths = truthList.getPathList();
+  if (truthPaths.size() < 1) {
+    cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
+    cerr << "  Cannot find files, dir: " << _params.truth_input_dir << endl;
+    cerr << "  Search time: " << corrVol.getStartRadxTime().asString() << endl;
+    cerr << "  Search margin secs: " << _params.truth_search_margin_secs << endl;
+    return -1;
+  }
+  
+  string truthPath = truthPaths[0];
+
+  // read in truth file
+
+  GenericRadxFile truthFile;
+  _setupTruthRead(truthFile);
+  
+  // read in file
+
+  RadxVol truthVol;
+  if (truthFile.readFromPath(truthPath, truthVol)) {
+    cerr << "ERROR - FixFieldVals::_analyzeVol" << endl;
+    cerr << "  Cannot read truth path: " << truthPath << endl;
+    cerr << truthFile.getErrStr() << endl;
+    return -1;
+  }
+
+  if (_analyzeFields(corrVol, truthVol)) {
+    return -1;
+  }
+
+  return 0;
+
+}
+
+//////////////////////////////////////////////////
+// Analyze the fields in the corr and truth volumes
+// Returns 0 on success, -1 on failure
+
+int FixFieldVals::_analyzeFields(RadxVol &corrVol, RadxVol &truthVol)
+  
+{
+  
+#ifdef JUNK
+  
+  // analyze each field
+  
+  // for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
+    
+  //   const char *corrFieldName = _params._comparison_fields[ii].correction_field_name;
+  //   RadxField *corrField = corrVol.getField(corrFieldName);
+  //   if (corrField == NULL) {
+  //     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
+  //     cerr << "  Cannot find correction field: " << corrFieldName << endl;
+  //     cerr << "  File path: " << corrVol.getPathInUse() << endl;
+  //     return -1;
+  //   }
+    
+    
+  //   const char *truthFieldName = _params._comparison_fields[ii].truth_field_name;
+  //   RadxField *truthField = truthVol.getField(truthFieldName);
+  //   if (truthField == NULL) {
+  //     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
+  //     cerr << "  Cannot find truth field: " << truthFieldName << endl;
+  //     cerr << "  File path: " << truthVol.getPathInUse() << endl;
+  //     return -1;
+  //   }
+    
+  //   _analyzeField(corrField, corrVol, file.addReadField(_params._comparison_fields[ii].truth_field_name);
+
+#endif
+      
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////
@@ -406,39 +492,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     } // ii
   }
 
-  // sweep angles
-
-  if (_params.recompute_sweep_fixed_angles) {
-    if (_params.debug) {
-      cerr << "DEBUG - recomputing sweep fixed angles from ray data" << endl;
-    }
-    vol.computeFixedAnglesFromRays();
-  }
-
-  // sweep limits
-  
-  if (_params.adjust_sweep_limits_using_angles) {
-    if (_params.debug) {
-      cerr << "DEBUG - adjusting sweep limits using angles" << endl;
-    }
-    vol.adjustSweepLimitsUsingAngles();
-  }
-
-  // sweep mode
-
-  if (_params.override_sweep_mode) {
-    vector<RadxRay *> &rays = vol.getRays();
-    for (size_t ii = 0; ii < rays.size(); ii++) {
-      rays[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
-    }
-    vector<RadxSweep *> &sweeps = vol.getSweeps();
-    for (size_t ii = 0; ii < sweeps.size(); ii++) {
-      sweeps[ii]->setSweepMode((Radx::SweepMode_t) _params.sweep_mode);
-    }
-  } else if (_params.set_sweep_mode_from_ray_angles) {
-    vol.setSweepScanModeFromRayAngles();
-  }
-
   // set number of gates constant if requested
 
   if (_params.set_ngates_constant) {
@@ -446,12 +499,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
       cerr << "DEBUG - setting nGates constant" << endl;
     }
     vol.setNGatesConstant();
-  }
-
-  // optimize transitions in surveillance mode
-
-  if (_params.optimize_surveillance_transitions) {
-    vol.optimizeSurveillanceTransitions(_params.optimized_transitions_max_elev_error);
   }
 
   // trim to 360s if requested
@@ -463,29 +510,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     vol.trimSurveillanceSweepsTo360Deg();
   }
 
-  // reorder sweeps if requested
-
-  if (_params.sort_sweeps_by_fixed_angle) {
-    if (_params.debug) {
-      cerr << "DEBUG - sorting sweeps by fixed angle" << endl;
-    }
-    vol.sortSweepsByFixedAngle();
-  }
-  
-  // reorder rays by time if requested
-
-  if (_params.sort_rays_by_time) {
-    if (_params.debug) {
-      cerr << "DEBUG - sorting rays by increasing time order" << endl;
-    }
-    vol.sortRaysByTime();
-  } else if (_params.sort_rays_by_time_decreasing) {
-    if (_params.debug) {
-      cerr << "DEBUG - sorting rays by decreasing time order" << endl;
-    }
-    vol.sortRaysByTimeDecreasing();
-  }
-  
   // censor as needed
 
   if (_params.apply_censoring) {
@@ -529,19 +553,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     _convertAllFields(vol);
   }
 
-  // reload sweep and/or volumen info from rays
-
-  if (_params.reload_sweep_info_from_rays) {
-    vol.loadSweepInfoFromRays();
-  }
-  if (_params.reload_volume_info_from_rays) {
-    vol.loadVolumeInfoFromRays();
-  }
-
-  if (_params.combine_rhi) {
-    vol.combineRhi();
-  }
-
   // set global attributes
 
   _setGlobalAttr(vol);
@@ -549,9 +560,9 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
 }
 
 //////////////////////////////////////////////////
-// set up read
+// set up read for correction files
 
-void FixFieldVals::_setupRead(RadxFile &file)
+void FixFieldVals::_setupCorrectionRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -561,37 +572,74 @@ void FixFieldVals::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (!_params.write_other_fields_unchanged) {
+  if (_params.processing_stage == Params::ANALYSIS_STAGE) {
 
-    if (_params.set_output_fields) {
-      for (int ii = 0; ii < _params.output_fields_n; ii++) {
-        file.addReadField(_params._output_fields[ii].input_field_name);
-      }
+    for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
+      file.addReadField(_params._comparison_fields[ii].correction_field_name);
     }
 
-    if (_params.apply_linear_transforms) {
-      for (int ii = 0; ii < _params.transform_fields_n; ii++) {
-        file.addReadField(_params._transform_fields[ii].input_field_name);
-      }
-    }
-    
-    if (_params.apply_censoring) {
-      for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
-        file.addReadField(_params._censoring_fields[ii].name);
-      }
-      if (_params.specify_fields_to_be_censored) {
-        for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
-          file.addReadField(_params._fields_to_be_censored[ii]);
+  } else {
+  
+    if (!_params.write_other_fields_unchanged) {
+      
+      if (_params.set_output_fields) {
+        for (int ii = 0; ii < _params.output_fields_n; ii++) {
+          file.addReadField(_params._output_fields[ii].input_field_name);
         }
       }
-    }
-    
-  }
+      
+      if (_params.apply_linear_transforms) {
+        for (int ii = 0; ii < _params.transform_fields_n; ii++) {
+          file.addReadField(_params._transform_fields[ii].input_field_name);
+        }
+      }
+      
+      if (_params.apply_censoring) {
+        for (int ii = 0; ii < _params.censoring_fields_n; ii++) {
+          file.addReadField(_params._censoring_fields[ii].name);
+        }
+        if (_params.specify_fields_to_be_censored) {
+          for (int ii = 0; ii < _params.fields_to_be_censored_n; ii++) {
+            file.addReadField(_params._fields_to_be_censored[ii]);
+          }
+        }
+      }
+      
+    } // if (!_params.write_other_fields_unchanged)
+
+  } // if (_params.process_stage == Params::ANALYSIS_STAGE)
 
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
 
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.printReadRequest(cerr);
+  }
+
+}
+
+//////////////////////////////////////////////////
+// set up read for truth files
+
+void FixFieldVals::_setupTruthRead(RadxFile &file)
+{
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    file.setDebug(true);
+  }
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    file.setVerbose(true);
+  }
+
+  for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
+    file.addReadField(_params._comparison_fields[ii].truth_field_name);
+  }
+
+  if (_params.set_max_range) {
+    file.setReadMaxRangeKm(_params.max_range_km);
+  }
+  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -832,7 +880,7 @@ int FixFieldVals::_writeVol(RadxVol &vol)
   GenericRadxFile outFile;
   _setupWrite(outFile);
 
-  string outputDir = _params.output_dir;
+  string outputDir = _params.corrected_files_output_dir;
 
   if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
     

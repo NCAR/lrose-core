@@ -56,10 +56,43 @@ commentdef {
 }
 
 paramdef string {
-  p_default = ".";
-  p_descr = "Input directory for searching for CfRadial files.";
-  p_help = "Files will be searched for in this directory.";
-} input_dir;
+  p_default = "/tmp/cfradial/correction_input";
+  p_descr = "Input directory for searching for CfRadial files that need correction.";
+  p_help = "Applies to both ANALYSIS_STAGE and CORRECTION_STAGE. These will be the files to be corrected, or some which the correction will be computed when compared to the truth files.";
+} correction_input_dir;
+
+paramdef string {
+  p_default = "/tmp/cfradial/truth_input";
+  p_descr = "Input directory for searching for truth CfRadial files.";
+  p_help = "Applies only to ANALYSIS_STAGE.";
+} truth_input_dir;
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Search margin in finding truth files (secs).";
+  p_help = "We perform a 'closest' search. This is the margin around the search time.";
+} truth_search_margin_secs;
+
+typedef struct {
+  string correction_field_name; 
+  string truth_field_name; 
+} comparison_field_t;
+
+paramdef struct comparison_field_t {
+  p_default = {
+    {
+      "DBZ",
+      "DBZ"
+    }
+    ,
+    {
+      "ZDR_F", 
+      "ZDR_F"
+    }
+  };
+  p_descr = "Comparison field names for analysis.";
+  p_help = "In the ANALYSIS_STAGE, we need to compare the correction fields to the truth fields. We do not assume they have the same name, though that is likely.";
+} comparison_fields[];
 
 typedef enum {
   ARCHIVE, FILELIST
@@ -194,114 +227,6 @@ paramdef struct nyquist_field_t {
 commentdef {
   p_header = "OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.";
 }
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to force a reload of sweep info from rays.";
-  p_help = "If TRUE, this forces the app to call RadxVol::loadSweepInfoFromRays(), which reads through the rays and reloads the sweep info appropriately.";
-} reload_sweep_info_from_rays;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to force a reload of volume info from rays.";
-  p_help = "If TRUE, this forces the app to call RadxVol::loadVolumeInfoFromRays(), which reads through the rays and reloads the volume summary info appropriately.";
-} reload_volume_info_from_rays;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to recompute sweep fixed angles using the angles in the data.";
-  p_help = "Normally the sweep angles are set using the scan strategy angles - i.e., the theoretically perfect angles. This option allows you to recompute the sweep angles using the measured elevation angles (in PPI mode) or azimuth angles (in RHI mode).";
-} recompute_sweep_fixed_angles;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Optimize the transitions in surveillance mode.";
-  p_help = "If true, we check the transitions between sweeps in surveillance mode, and move problem rays into the correct sweep. We also set the transition flag on/off based on the max elevation error speficied. See below.";
-} optimize_surveillance_transitions;
-
-paramdef double {
-  p_default = 0.25;
-  p_descr = "Max elevation angle error when optimizing surveillance transitions (degrees).";
-  p_help = "If the difference between the fixed angle and measured angle exceeds this value, the transition flag will be set. If not, it will be cleared.";
-} optimized_transitions_max_elev_error;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to keep the azimuth constant in RHI scans.";
-  p_help = "Default is false. If true, and the azimuth switches by 180 degree when the elevation passes 90 degrees, this option combines the ray azimuth into one consistent value. The ray elevation will also continue to increase from 90 degrees to 180 degrees. Only one RHI scan per file is allowed with this option. ";
-} combine_rhi;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to override the sweep modes in the data.";
-  p_help = "If TRUE, the mode for all sweeps is set to sweep_mode.";
-} override_sweep_mode;
-
-typedef enum {
-  SWEEP_MODE_SECTOR = 1,
-  SWEEP_MODE_RHI = 3,
-  SWEEP_MODE_VERTICAL_POINTING = 4,
-  SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
-  SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
-  SWEEP_MODE_SUNSCAN = 11,
-  SWEEP_MODE_POINTING = 12,
-  SWEEP_MODE_SUNSCAN_RHI = 17,
-  SWEEP_MODE_ELECTRONIC_STEERING = 20
-} sweep_mode_t;
-
-paramdef enum sweep_mode_t {
-  p_default = SWEEP_MODE_AZIMUTH_SURVEILLANCE;
-  p_descr = "Sweep mode for all sweeps.";
-  p_help = "See override_sweep_mode.";
-} sweep_mode;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to set the sweep mode from the ray angles.";
-  p_help = "If TRUE, we look through the scan angles to deduce the sweep modes, and then set this mode for each sweep.";
-} set_sweep_mode_from_ray_angles;
-
-commentdef {
-  p_header = "OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Adjust the limits of sweeps, by comparing the measured angles to the fixed angles.";
-  p_help = "Sometimes the transitions from one fixed angle to another are not accurately described by the scan flags, and as a result rays are not correctly assigned to the sweeps. This option goes through the volume in ray order, and adjusts the way rays are associated with each sweep. It does this by comparing the actual angle with the fixed angle, and minimizes the angular difference.";
-} adjust_sweep_limits_using_angles;
-
-commentdef {
-  p_header = "OPTION TO REORDER SWEEPS";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Sort the sweeps by fixed angle.";
-  p_help = "For some volumes, the sweep fixed angles may not be in increasing order. This option allows you to reorder the sweeps, and rays, into the correct order.";
-} sort_sweeps_by_fixed_angle;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Reverse the order of the sweeps in the volume, but preserve ray order in sweeps.";
-  p_help = "If TRUE, reverse the order in which the sweeps are stored in the volume. The order of the rays in the sweeps is preserved.";
-} reverse_sweep_order_in_vol;
-
-commentdef {
-  p_header = "OPTION TO SORT RAYS BY TIME";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Sort the rays in increasing time order.";
-  p_help = "For some volumes, the rays are not strictly in time order. If this is set, the rays will be sorted by time, in increasing order.";
-} sort_rays_by_time;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Sort the rays in decreasing time order.";
-  p_help = "If this is set, the rays will be sorted by time, in decreasing order.";
-} sort_rays_by_time_decreasing;
 
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
@@ -625,8 +550,8 @@ commentdef {
 paramdef string {
   p_default = "./output";
   p_descr = "Output directory path.";
-  p_help = "Files will be written to this directory.";
-} output_dir;
+  p_help = "Corrected files will be written to this directory.";
+} corrected_files_output_dir;
 
 typedef enum {
   START_AND_END_TIMES,

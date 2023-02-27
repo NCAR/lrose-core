@@ -80,8 +80,11 @@ private:
   int _correct(const vector<string> &inputPaths);
   int _readFile(const string &filePath,
                 RadxVol &vol);
+  int _analyzeVol(RadxVol &corr);
+  int _analyzeFields(RadxVol &corrVol, RadxVol &truthVol);
   void _finalizeVol(RadxVol &vol);
-  void _setupRead(RadxFile &file);
+  void _setupCorrectionRead(RadxFile &file);
+  void _setupTruthRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);
   void _convertFields(RadxVol &vol);
   void _convertAllFields(RadxVol &vol);

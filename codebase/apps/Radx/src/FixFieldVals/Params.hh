@@ -85,18 +85,6 @@ public:
   } mode_t;
 
   typedef enum {
-    SWEEP_MODE_SECTOR = 1,
-    SWEEP_MODE_RHI = 3,
-    SWEEP_MODE_VERTICAL_POINTING = 4,
-    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8,
-    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9,
-    SWEEP_MODE_SUNSCAN = 11,
-    SWEEP_MODE_POINTING = 12,
-    SWEEP_MODE_SUNSCAN_RHI = 17,
-    SWEEP_MODE_ELECTRONIC_STEERING = 20
-  } sweep_mode_t;
-
-  typedef enum {
     ATTR_STRING = 0,
     ATTR_INT = 1,
     ATTR_DOUBLE = 2,
@@ -130,6 +118,11 @@ public:
   } filename_mode_t;
 
   // struct typedefs
+
+  typedef struct {
+    char* correction_field_name;
+    char* truth_field_name;
+  } comparison_field_t;
 
   typedef struct {
     char* field_name;
@@ -469,7 +462,14 @@ public:
 
   stage_t processing_stage;
 
-  char* input_dir;
+  char* correction_input_dir;
+
+  char* truth_input_dir;
+
+  double truth_search_margin_secs;
+
+  comparison_field_t *_comparison_fields;
+  int comparison_fields_n;
 
   mode_t mode;
 
@@ -505,34 +505,6 @@ public:
 
   nyquist_field_t *_nyquist_fields;
   int nyquist_fields_n;
-
-  tdrp_bool_t reload_sweep_info_from_rays;
-
-  tdrp_bool_t reload_volume_info_from_rays;
-
-  tdrp_bool_t recompute_sweep_fixed_angles;
-
-  tdrp_bool_t optimize_surveillance_transitions;
-
-  double optimized_transitions_max_elev_error;
-
-  tdrp_bool_t combine_rhi;
-
-  tdrp_bool_t override_sweep_mode;
-
-  sweep_mode_t sweep_mode;
-
-  tdrp_bool_t set_sweep_mode_from_ray_angles;
-
-  tdrp_bool_t adjust_sweep_limits_using_angles;
-
-  tdrp_bool_t sort_sweeps_by_fixed_angle;
-
-  tdrp_bool_t reverse_sweep_order_in_vol;
-
-  tdrp_bool_t sort_rays_by_time;
-
-  tdrp_bool_t sort_rays_by_time_decreasing;
 
   char* version_override;
 
@@ -600,7 +572,7 @@ public:
 
   tdrp_bool_t output_force_ngates_vary;
 
-  char* output_dir;
+  char* corrected_files_output_dir;
 
   filename_mode_t output_filename_mode;
 
@@ -663,7 +635,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[115];
+  mutable TDRPtable _table[101];
 
   const char *_className;
 
