@@ -157,9 +157,26 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to trip surveillance sweeps so that they only cover 360 degrees.";
-  p_help = "Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.";
-} trim_surveillance_sweeps_to_360deg;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified fixed angle limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep. NOTE - fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to apply strict checking for angle or sweep number limits on read.";
+  p_help = "If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.";
+} apply_strict_angle_limits;
 
 paramdef boolean {
   p_default = false;

@@ -413,13 +413,14 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
   xml += TaXml::writeTime("VolEndTime", 1, corrVol.getEndTimeSecs());
   
   for (size_t ifield = 0; ifield < _fieldDiffs.size(); ifield++) {
-    xml += TaXml::writeStartTag("Field", 1);
     FieldDiff &fDiff = _fieldDiffs[ifield];
+    string fieldTag = "Field" + fDiff.corrName;
+    xml += TaXml::writeStartTag(fieldTag, 1);
     xml += TaXml::writeString("CorrName", 2, fDiff.corrName);
     xml += TaXml::writeString("TruthName", 2, fDiff.truthName);
     xml += TaXml::writeDouble("NPts", 2, fDiff.nPts);
     xml += TaXml::writeDouble("MeanDiff", 2, fDiff.meanDiff);
-    xml += TaXml::writeEndTag("Field", 1);
+    xml += TaXml::writeEndTag(fieldTag, 1);
   }
   
   xml += TaXml::writeEndTag("FieldDiffs", 0);
@@ -464,14 +465,15 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
 
   // loop through the rays in the correction vol
 
+  int startTruthIndex = 0;
   vector<RadxRay *> &corrRays = corrVol.getRays();
   for (size_t ic = 0; ic < corrRays.size(); ic++) {
     RadxRay *corrRay = corrRays[ic];
 
     // find the matching ray in the truth vol
-
+    
     vector<RadxRay *> &truthRays = truthVol.getRays();
-    for (size_t it = 0; it < truthRays.size(); it++) {
+    for (size_t it = startTruthIndex; it < truthRays.size(); it++) {
       RadxRay *truthRay = truthRays[it];
 
       // check tolerances
@@ -496,6 +498,8 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
       }
 
       // got matching ray
+
+      startTruthIndex = it;
 
       // loop through the field pairs
       
@@ -552,7 +556,6 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
     FieldDiff &fDiff = _fieldDiffs[ifield];
     fDiff.computeMeanDiff();
     if (fDiff.nPts < _params.min_npts_for_valid_diff) {
-      cerr << "2222222222222 nPts: " << fDiff.nPts << endl;
       iret = -1;
     }
   }
@@ -636,15 +639,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     vol.setNGatesConstant();
   }
 
-  // trim to 360s if requested
-
-  if (_params.trim_surveillance_sweeps_to_360deg) {
-    if (_params.debug) {
-      cerr << "DEBUG - trimming surveillance sweeps to 360 deg" << endl;
-    }
-    vol.trimSurveillanceSweepsTo360Deg();
-  }
-
   // censor as needed
 
   if (_params.apply_censoring) {
@@ -707,6 +701,20 @@ void FixFieldVals::_setupCorrectionRead(RadxFile &file)
     file.setVerbose(true);
   }
 
+  if (_params.set_fixed_angle_limits) {
+    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
+                                 _params.upper_fixed_angle_limit);
+    if (_params.lower_fixed_angle_limit == _params.upper_fixed_angle_limit) {
+      // relax strict angle checking since only a single angle is specified
+      // which means the user wants the closest angle
+      file.setReadStrictAngleLimits(false);
+    }
+  }
+
+  if (!_params.apply_strict_angle_limits) {
+    file.setReadStrictAngleLimits(false);
+  }
+
   if (_params.processing_stage == Params::ANALYSIS_STAGE) {
 
     for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
@@ -765,6 +773,20 @@ void FixFieldVals::_setupTruthRead(RadxFile &file)
   }
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setVerbose(true);
+  }
+
+  if (_params.set_fixed_angle_limits) {
+    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
+                                 _params.upper_fixed_angle_limit);
+    if (_params.lower_fixed_angle_limit == _params.upper_fixed_angle_limit) {
+      // relax strict angle checking since only a single angle is specified
+      // which means the user wants the closest angle
+      file.setReadStrictAngleLimits(false);
+    }
+  }
+
+  if (!_params.apply_strict_angle_limits) {
+    file.setReadStrictAngleLimits(false);
   }
 
   for (int ii = 0; ii < _params.comparison_fields_n; ii++) {

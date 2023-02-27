@@ -838,16 +838,52 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'trim_surveillance_sweeps_to_360deg'
+    // Parameter 'set_fixed_angle_limits'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("trim_surveillance_sweeps_to_360deg");
-    tt->descr = tdrpStrDup("Option to trip surveillance sweeps so that they only cover 360 degrees.");
-    tt->help = tdrpStrDup("Some sweeps will have rays which cover more than a 360-degree rotation. Often these include antenna transitions. If this is set to true, rays are trimmed off either end of the sweep to limit the coverage to 360 degrees. The median elevation angle is computed and the end ray which deviates from the median in elevation is trimmed first.");
-    tt->val_offset = (char *) &trim_surveillance_sweeps_to_360deg - &_start_;
+    tt->param_name = tdrpStrDup("set_fixed_angle_limits");
+    tt->descr = tdrpStrDup("Option to set fixed angle limits");
+    tt->help = tdrpStrDup("Only use sweeps within the specified fixed angle limits.");
+    tt->val_offset = (char *) &set_fixed_angle_limits - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'lower_fixed_angle_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("lower_fixed_angle_limit");
+    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &lower_fixed_angle_limit - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'upper_fixed_angle_limit'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("upper_fixed_angle_limit");
+    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &upper_fixed_angle_limit - &_start_;
+    tt->single_val.d = 90;
+    tt++;
+    
+    // Parameter 'apply_strict_angle_limits'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("apply_strict_angle_limits");
+    tt->descr = tdrpStrDup("Option to apply strict checking for angle or sweep number limits on read.");
+    tt->help = tdrpStrDup("If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.");
+    tt->val_offset = (char *) &apply_strict_angle_limits - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'set_max_range'

@@ -485,7 +485,13 @@ public:
 
   char* field_bias_spdb_url;
 
-  tdrp_bool_t trim_surveillance_sweeps_to_360deg;
+  tdrp_bool_t set_fixed_angle_limits;
+
+  double lower_fixed_angle_limit;
+
+  double upper_fixed_angle_limit;
+
+  tdrp_bool_t apply_strict_angle_limits;
 
   tdrp_bool_t set_max_range;
 
@@ -643,7 +649,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[105];
+  mutable TDRPtable _table[108];
 
   const char *_className;
 
