@@ -42,9 +42,9 @@
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <Radx/RadxCfactors.hh>
+#include <Radx/RadxXml.hh>
 #include <Spdb/DsSpdb.hh>
 #include <didss/DsInputPath.hh>
-#include <toolsa/TaXml.hh>
 #include <toolsa/TaStr.hh>
 #include <toolsa/TaFile.hh>
 #include <toolsa/pmu.h>
@@ -238,12 +238,13 @@ int FixFieldVals::_analyze(const vector<string> &inputPaths)
 
 //////////////////////////////////////////////////
 // Run correction stage
+// this applies bias corrections etc.
 
 int FixFieldVals::_correct(const vector<string> &inputPaths)
 {
 
   // loop through the input file list
-
+  
   RadxVol vol;
   int iret = 0;
   for (size_t ii = 0; ii < inputPaths.size(); ii++) {
@@ -407,23 +408,23 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
 
   string xml;
   
-  xml += TaXml::writeStartTag("FieldDiffs", 0);
+  xml += RadxXml::writeStartTag("FieldDiffs", 0);
 
-  xml += TaXml::writeTime("VolStartTime", 1, corrVol.getStartTimeSecs());
-  xml += TaXml::writeTime("VolEndTime", 1, corrVol.getEndTimeSecs());
+  xml += RadxXml::writeTime("VolStartTime", 1, corrVol.getStartTimeSecs());
+  xml += RadxXml::writeTime("VolEndTime", 1, corrVol.getEndTimeSecs());
   
   for (size_t ifield = 0; ifield < _fieldDiffs.size(); ifield++) {
     FieldDiff &fDiff = _fieldDiffs[ifield];
     string fieldTag = "Field" + fDiff.corrName;
-    xml += TaXml::writeStartTag(fieldTag, 1);
-    xml += TaXml::writeString("CorrName", 2, fDiff.corrName);
-    xml += TaXml::writeString("TruthName", 2, fDiff.truthName);
-    xml += TaXml::writeDouble("NPts", 2, fDiff.nPts);
-    xml += TaXml::writeDouble("MeanDiff", 2, fDiff.meanDiff);
-    xml += TaXml::writeEndTag(fieldTag, 1);
+    xml += RadxXml::writeStartTag(fieldTag, 1);
+    xml += RadxXml::writeString("CorrName", 2, fDiff.corrName);
+    xml += RadxXml::writeString("TruthName", 2, fDiff.truthName);
+    xml += RadxXml::writeDouble("NPts", 2, fDiff.nPts);
+    xml += RadxXml::writeDouble("MeanDiff", 2, fDiff.meanDiff);
+    xml += RadxXml::writeEndTag(fieldTag, 1);
   }
   
-  xml += TaXml::writeEndTag("FieldDiffs", 0);
+  xml += RadxXml::writeEndTag("FieldDiffs", 0);
 
   // if (_statusXml.size() > 0) {
   //   xml += _statusXml;
@@ -673,7 +674,7 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     }
     _applyLinearTransform(vol);
   }
-
+  
   // set field type, names, units etc
   
   _convertFields(vol);
@@ -810,16 +811,106 @@ void FixFieldVals::_applyLinearTransform(RadxVol &vol)
 {
 
   for (int ii = 0; ii < _params.transform_fields_n; ii++) {
+
     const Params::transform_field_t &tfld = _params._transform_fields[ii];
+
     string iname = tfld.input_field_name;
     double scale = tfld.transform_scale;
     double offset = tfld.transform_offset;
     bool fieldFolds = tfld.field_folds;
     double foldingValue = tfld.folding_value;
+    bool readBiasFromSpdb = tfld.read_bias_from_spdb;
+
+    if (readBiasFromSpdb) {
+      double biasFromSpdb;
+      if (_readBiasFromSpdb(vol.getStartRadxTime(), iname, biasFromSpdb) == 0) {
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "Got bias for time: "
+               << vol.getStartRadxTime().asString() << endl;
+          cerr << "  field, bias: " << iname << ", " << biasFromSpdb << endl;
+        }
+        offset = biasFromSpdb;
+      }
+    }
+    
     vol.applyLinearTransform(iname, scale, offset,
                              fieldFolds, foldingValue);
+
   } // ii
 
+}
+
+//////////////////////////////////////////////////
+// read the field bias from SPDB
+
+int FixFieldVals::_readBiasFromSpdb(const RadxTime &volStartTime,
+                                    const string &fieldName,
+                                    double &bias)
+{
+
+  // retrieve noise monitoring results in interval around beam time
+  
+  DsSpdb spdb;
+  time_t searchTime = volStartTime.utime();
+  if (spdb.getClosest(_params.field_bias_spdb_url,
+                      searchTime,
+                      _params.bias_time_margin_secs)) {
+    cerr << "ERROR - _readBiasFromSpdb()" << endl;
+    cerr << "  Cannot get bias data from URL: "
+         << _params.field_bias_spdb_url << endl;
+    cerr << "  Search time: " << volStartTime.asString() << endl;
+    cerr << spdb.getErrStr() << endl;
+    return -1;
+  }
+
+  const vector<Spdb::chunk_t> &chunks = spdb.getChunks();
+  if (chunks.size() < 1) {
+    cerr << "ERROR - _readBiasFromSpdb()" << endl;
+    cerr << "  Cannot get bias data from URL: "
+         << _params.field_bias_spdb_url << endl;
+    cerr << "  Search time: " << volStartTime.asString() << endl;
+    cerr << "  No chunks returned" << endl;
+    return -1;
+  }
+  
+  const Spdb::chunk_t &chunk = chunks[0];
+  string biasXml((char *) chunk.data, chunk.len - 1);
+
+  // get the field data
+
+  string fieldTag("Field");
+  fieldTag += fieldName;
+
+  string fieldXml;
+  if (RadxXml::readString(biasXml, fieldTag, fieldXml)) {
+    cerr << "ERROR - _readBiasFromSpdb()" << endl;
+    cerr << "Cannot get bias data from URL: "
+         << _params.field_bias_spdb_url << endl;
+    cerr << "-----------------------------------------" << endl;  
+    cerr << "Bias XML: " << endl;
+    cerr << biasXml;
+    cerr << "-----------------------------------------" << endl;  
+    cerr << "Field tag: " << fieldTag << endl;
+    return -1;
+  }
+
+  double meanDiff = 0.0;
+  if (RadxXml::readDouble(fieldXml, "MeanDiff", meanDiff)) {
+    cerr << "ERROR - _readBiasFromSpdb()" << endl;
+    cerr << "Cannot get bias data from URL: "
+         << _params.field_bias_spdb_url << endl;
+    cerr << "Cannot find 'MeanDiff' tag" << endl;
+    cerr << "-----------------------------------------" << endl;  
+    cerr << "field XML: " << endl;
+    cerr << fieldXml;
+    cerr << "-----------------------------------------" << endl;  
+    return -1;
+  }
+
+  bias = meanDiff;
+  
+  return 0;
+  
 }
 
 //////////////////////////////////////////////////

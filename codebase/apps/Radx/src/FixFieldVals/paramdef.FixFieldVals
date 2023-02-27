@@ -266,10 +266,6 @@ paramdef struct nyquist_field_t {
 } nyquist_fields[];
 
 commentdef {
-  p_header = "OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.";
-}
-
-commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }
 
@@ -563,16 +559,23 @@ typedef struct {
   double transform_offset;
   boolean field_folds;
   double folding_value;
+  boolean read_bias_from_spdb;
 } transform_field_t;
 
 paramdef struct transform_field_t {
   p_default = {
-    { "DBZ", 1.0, 0.0, false, 0.0},
-    { "VEL", 1.0, 0.0, true, 25.0}
+               { "DBZ", 1.0, 0.0, false, 0.0, FALSE},
+               { "VEL", 1.0, 0.0, true, 25.0, FALSE}
   };
   p_descr = "transform field details.";
-  p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name.";
+  p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name. If read_bias_from_spdb is TRUE, we read the bias values from the ";
 } transform_fields[];
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time margin for finding bias value from spdb (sec).";
+  p_help = "The bias stored in spdb must be within this tolerance of the vol time.";
+} bias_time_margin_secs;
 
 commentdef {
   p_header = "OUTPUT OPTIONS FOR CfRadial FILES";

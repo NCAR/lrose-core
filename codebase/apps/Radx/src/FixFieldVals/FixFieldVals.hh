@@ -43,6 +43,7 @@ class RadxVol;
 class RadxFile;
 class RadxRay;
 class RadxField;
+class RadxTime;
 using namespace std;
 
 class FixFieldVals {
@@ -117,6 +118,8 @@ private:
   void _setupCorrectionRead(RadxFile &file);
   void _setupTruthRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);
+  int _readBiasFromSpdb(const RadxTime &volStartTime,
+                        const string &fieldName, double &bias);
   void _convertFields(RadxVol &vol);
   void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);

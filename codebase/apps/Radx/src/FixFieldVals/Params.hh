@@ -160,6 +160,7 @@ public:
     double transform_offset;
     tdrp_bool_t field_folds;
     double folding_value;
+    tdrp_bool_t read_bias_from_spdb;
   } transform_field_t;
 
   ///////////////////////////
@@ -583,6 +584,8 @@ public:
 
   transform_field_t *_transform_fields;
   int transform_fields_n;
+
+  int bias_time_margin_secs;
 
   tdrp_bool_t output_force_ngates_vary;
 
