@@ -76,12 +76,43 @@ private:
 
   int _nWarnCensorPrint;
 
+  // inner class for field diffs
+  
+  class FieldDiff {
+  public:
+    string corrName;
+    string truthName;
+    double sumCorr;
+    double sumTruth;
+    double nPts;
+    double meanDiff;
+    FieldDiff(const string &corrFieldName,
+              const string &truthFieldName) {
+      corrName = corrFieldName;
+      truthName = truthFieldName;
+      init();
+    }
+    void init() {
+      sumCorr = 0.0;
+      sumTruth = 0.0;
+      nPts = 0.0;
+      meanDiff = 0.0;
+    }
+    void computeMeanDiff() {
+      if (nPts > 0) {
+        double sumDiff = sumTruth - sumCorr;
+        meanDiff = sumDiff / nPts;
+      }
+    }
+  };
+  vector<FieldDiff> _fieldDiffs;
+  
   int _analyze(const vector<string> &inputPaths);
   int _correct(const vector<string> &inputPaths);
   int _readFile(const string &filePath,
                 RadxVol &vol);
   int _analyzeVol(RadxVol &corr);
-  int _analyzeFields(RadxVol &corrVol, RadxVol &truthVol);
+  int _computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol);
   void _finalizeVol(RadxVol &vol);
   void _setupCorrectionRead(RadxFile &file);
   void _setupTruthRead(RadxFile &file);

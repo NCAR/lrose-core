@@ -71,7 +71,25 @@ paramdef double {
   p_default = 60;
   p_descr = "Search margin in finding truth files (secs).";
   p_help = "We perform a 'closest' search. This is the margin around the search time.";
-} truth_search_margin_secs;
+} truth_file_time_margin_secs;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Azimuth margin in finding truth rays (deg).";
+  p_help = "The truth ray azimuth must be within this tolerance of the correction ray.";
+} truth_ray_az_margin_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Elevation margin in finding truth rays (deg).";
+  p_help = "The truth ray elevation must be within this tolerance of the correction ray.";
+} truth_ray_el_margin_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Time margin in finding truth rays (sec).";
+  p_help = "The truth ray time must be within this tolerance of the correction ray.";
+} truth_ray_time_margin_secs;
 
 typedef struct {
   string correction_field_name; 
@@ -93,6 +111,12 @@ paramdef struct comparison_field_t {
   p_descr = "Comparison field names for analysis.";
   p_help = "In the ANALYSIS_STAGE, we need to compare the correction fields to the truth fields. We do not assume they have the same name, though that is likely.";
 } comparison_fields[];
+
+paramdef double {
+  p_default = 1000;
+  p_descr = "Min number of pts for valid analysis of field diffs.";
+  p_help = "If npts is less than this, the diffs are not written out.";
+} min_npts_for_valid_diff;
 
 typedef enum {
   ARCHIVE, FILELIST

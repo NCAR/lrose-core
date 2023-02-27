@@ -466,10 +466,18 @@ public:
 
   char* truth_input_dir;
 
-  double truth_search_margin_secs;
+  double truth_file_time_margin_secs;
+
+  double truth_ray_az_margin_deg;
+
+  double truth_ray_el_margin_deg;
+
+  double truth_ray_time_margin_secs;
 
   comparison_field_t *_comparison_fields;
   int comparison_fields_n;
+
+  double min_npts_for_valid_diff;
 
   mode_t mode;
 
@@ -635,7 +643,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[101];
+  mutable TDRPtable _table[105];
 
   const char *_className;
 

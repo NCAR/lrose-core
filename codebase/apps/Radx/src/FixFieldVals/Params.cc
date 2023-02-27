@@ -679,16 +679,52 @@
     tt->single_val.s = tdrpStrDup("/tmp/cfradial/truth_input");
     tt++;
     
-    // Parameter 'truth_search_margin_secs'
+    // Parameter 'truth_file_time_margin_secs'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("truth_search_margin_secs");
+    tt->param_name = tdrpStrDup("truth_file_time_margin_secs");
     tt->descr = tdrpStrDup("Search margin in finding truth files (secs).");
     tt->help = tdrpStrDup("We perform a 'closest' search. This is the margin around the search time.");
-    tt->val_offset = (char *) &truth_search_margin_secs - &_start_;
+    tt->val_offset = (char *) &truth_file_time_margin_secs - &_start_;
     tt->single_val.d = 60;
+    tt++;
+    
+    // Parameter 'truth_ray_az_margin_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("truth_ray_az_margin_deg");
+    tt->descr = tdrpStrDup("Azimuth margin in finding truth rays (deg).");
+    tt->help = tdrpStrDup("The truth ray azimuth must be within this tolerance of the correction ray.");
+    tt->val_offset = (char *) &truth_ray_az_margin_deg - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'truth_ray_el_margin_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("truth_ray_el_margin_deg");
+    tt->descr = tdrpStrDup("Elevation margin in finding truth rays (deg).");
+    tt->help = tdrpStrDup("The truth ray elevation must be within this tolerance of the correction ray.");
+    tt->val_offset = (char *) &truth_ray_el_margin_deg - &_start_;
+    tt->single_val.d = 0.1;
+    tt++;
+    
+    // Parameter 'truth_ray_time_margin_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("truth_ray_time_margin_secs");
+    tt->descr = tdrpStrDup("Time margin in finding truth rays (sec).");
+    tt->help = tdrpStrDup("The truth ray time must be within this tolerance of the correction ray.");
+    tt->val_offset = (char *) &truth_ray_time_margin_secs - &_start_;
+    tt->single_val.d = 0.1;
     tt++;
     
     // Parameter 'comparison_fields'
@@ -726,6 +762,18 @@
       tt->struct_vals[1].s = tdrpStrDup("DBZ");
       tt->struct_vals[2].s = tdrpStrDup("ZDR_F");
       tt->struct_vals[3].s = tdrpStrDup("ZDR_F");
+    tt++;
+    
+    // Parameter 'min_npts_for_valid_diff'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_npts_for_valid_diff");
+    tt->descr = tdrpStrDup("Min number of pts for valid analysis of field diffs.");
+    tt->help = tdrpStrDup("If npts is less than this, the diffs are not written out.");
+    tt->val_offset = (char *) &min_npts_for_valid_diff - &_start_;
+    tt->single_val.d = 1000;
     tt++;
     
     // Parameter 'mode'

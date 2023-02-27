@@ -87,7 +87,6 @@ FixFieldVals::FixFieldVals(int argc, char **argv)
     return;
   }
 
-
   // override missing values
 
   if (_params.override_missing_metadata_values) {
@@ -102,6 +101,17 @@ FixFieldVals::FixFieldVals(int argc, char **argv)
     Radx::setMissingSi32(_params.missing_field_si32);
     Radx::setMissingSi16(_params.missing_field_si16);
     Radx::setMissingSi08(_params.missing_field_si08);
+  }
+
+  // initialize field diffs array
+  
+  for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
+    
+    string corrFieldName = _params._comparison_fields[ii].correction_field_name;
+    string truthFieldName = _params._comparison_fields[ii].truth_field_name;
+
+    _fieldDiffs.push_back(FieldDiff(corrFieldName, truthFieldName));
+
   }
 
 }
@@ -337,16 +347,24 @@ int FixFieldVals::_readFile(const string &readPath,
 int FixFieldVals::_analyzeVol(RadxVol &corrVol)
   
 {
+
+  // initialize field diffs
+
+  for (size_t ii = 0; ii < _fieldDiffs.size(); ii++) {
+    _fieldDiffs[ii].init();
+  }
+  
   // get truth file path closest in time to file to be corrected
 
   RadxTimeList truthList;
   truthList.setDir(_params.truth_input_dir);
-  truthList.setModeClosest(corrVol.getStartRadxTime(), _params.truth_search_margin_secs);
+  truthList.setModeClosest(corrVol.getStartRadxTime(),
+                           _params.truth_file_time_margin_secs);
   if (truthList.compile()) {
     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.truth_input_dir << endl;
     cerr << "  Search time: " << corrVol.getStartRadxTime().asString() << endl;
-    cerr << "  Search margin secs: " << _params.truth_search_margin_secs << endl;
+    cerr << "  Search margin secs: " << _params.truth_file_time_margin_secs << endl;
     cerr << truthList.getErrStr() << endl;
     return -1;
   }
@@ -356,7 +374,7 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
     cerr << "  Cannot find files, dir: " << _params.truth_input_dir << endl;
     cerr << "  Search time: " << corrVol.getStartRadxTime().asString() << endl;
-    cerr << "  Search margin secs: " << _params.truth_search_margin_secs << endl;
+    cerr << "  Search margin secs: " << _params.truth_file_time_margin_secs << endl;
     return -1;
   }
   
@@ -377,7 +395,7 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
     return -1;
   }
 
-  if (_analyzeFields(corrVol, truthVol)) {
+  if (_computeFieldDiffs(corrVol, truthVol)) {
     return -1;
   }
 
@@ -385,44 +403,109 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
 
 }
 
-//////////////////////////////////////////////////
-// Analyze the fields in the corr and truth volumes
+//////////////////////////////////////////////////////////
+// Analyze the fields diffs for the corr and truth volumes
 // Returns 0 on success, -1 on failure
 
-int FixFieldVals::_analyzeFields(RadxVol &corrVol, RadxVol &truthVol)
+int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
   
 {
-  
-#ifdef JUNK
-  
-  // analyze each field
-  
-  // for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
-    
-  //   const char *corrFieldName = _params._comparison_fields[ii].correction_field_name;
-  //   RadxField *corrField = corrVol.getField(corrFieldName);
-  //   if (corrField == NULL) {
-  //     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
-  //     cerr << "  Cannot find correction field: " << corrFieldName << endl;
-  //     cerr << "  File path: " << corrVol.getPathInUse() << endl;
-  //     return -1;
-  //   }
-    
-    
-  //   const char *truthFieldName = _params._comparison_fields[ii].truth_field_name;
-  //   RadxField *truthField = truthVol.getField(truthFieldName);
-  //   if (truthField == NULL) {
-  //     cerr << "WARNING - FixFieldVals::_analyzeVol()" << endl;
-  //     cerr << "  Cannot find truth field: " << truthFieldName << endl;
-  //     cerr << "  File path: " << truthVol.getPathInUse() << endl;
-  //     return -1;
-  //   }
-    
-  //   _analyzeField(corrField, corrVol, file.addReadField(_params._comparison_fields[ii].truth_field_name);
 
-#endif
+  // loop through the rays in the correction vol
+
+  vector<RadxRay *> &corrRays = corrVol.getRays();
+  for (size_t ic = 0; ic < corrRays.size(); ic++) {
+    RadxRay *corrRay = corrRays[ic];
+
+    // find the matching ray in the truth vol
+
+    vector<RadxRay *> &truthRays = truthVol.getRays();
+    for (size_t it = 0; it < truthRays.size(); it++) {
+      RadxRay *truthRay = truthRays[it];
+
+      // check tolerances
+
+      if (corrRay->getNGates() != truthRay->getNGates()) {
+        continue;
+      }
+
+      double deltaEl = fabs(corrRay->getElevationDeg() - truthRay->getElevationDeg());
+      if (deltaEl > _params.truth_ray_el_margin_deg) {
+        continue;
+      }
       
-  return 0;
+      double deltaAz = fabs(corrRay->getAzimuthDeg() - truthRay->getAzimuthDeg());
+      if (deltaAz > _params.truth_ray_az_margin_deg) {
+        continue;
+      }
+      
+      double deltaTime = fabs(corrRay->getRadxTime() - truthRay->getRadxTime());
+      if (deltaTime > _params.truth_ray_time_margin_secs) {
+        continue;
+      }
+
+      // got matching ray
+
+      // loop through the field pairs
+      
+      for (size_t ifield = 0; ifield < _fieldDiffs.size(); ifield++) {
+
+        FieldDiff &fDiff = _fieldDiffs[ifield];
+
+        RadxField *corrField = corrVol.getField(fDiff.corrName);
+        if (corrField == NULL) {
+          continue;
+        }
+        
+        RadxField *truthField = truthVol.getField(fDiff.truthName);
+        if (truthField == NULL) {
+          continue;
+        }
+
+        if (corrField->getNPoints() != truthField->getNPoints()) {
+          continue;
+        }
+
+        // add to sums of diffs
+        
+        corrField->convertToFl32();
+        Radx::fl32 *corrData = corrField->getDataFl32();
+        Radx::fl32 corrMiss = corrField->getMissingFl32();
+        
+        truthField->convertToFl32();
+        Radx::fl32 *truthData = truthField->getDataFl32();
+        Radx::fl32 truthMiss = truthField->getMissingFl32();
+
+        for (size_t igate = 0; igate < corrField->getNPoints(); igate++) {
+          if (corrData[igate] == corrMiss) {
+            continue;
+          }
+          if (truthData[igate] == truthMiss) {
+            continue;
+          }
+          fDiff.sumCorr += corrData[igate];
+          fDiff.sumTruth += truthData[igate];
+          fDiff.nPts++;
+        }
+        
+      } // ifield
+  
+    } // it - truth rays
+
+  } // ic - corr rays
+  
+  // compute the means
+
+  int iret = 0;
+  for (size_t ifield = 0; ifield < _fieldDiffs.size(); ifield++) {
+    FieldDiff &fDiff = _fieldDiffs[ifield];
+    fDiff.computeMeanDiff();
+    if (fDiff.nPts < _params.min_npts_for_valid_diff) {
+      iret = -1;
+    }
+  }
+
+  return iret;
   
 }
 
