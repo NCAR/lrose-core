@@ -636,93 +636,17 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("In REALTIME mode, the program waits for a new input file.  In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("In ARCHIVE mode, it moves through the data between the start and end times set on the command line. In FILELIST mode, it moves through the list of file names specified on the command line. Paths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[0].val = REALTIME;
-      tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
-      tt->enum_def.fields[1].val = ARCHIVE;
-      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = REALTIME;
-    tt++;
-    
-    // Parameter 'max_realtime_data_age_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_data_age_secs");
-    tt->descr = tdrpStrDup("Maximum age of realtime data (secs)");
-    tt->help = tdrpStrDup("Only data less old than this will be used.");
-    tt->val_offset = (char *) &max_realtime_data_age_secs - &_start_;
-    tt->single_val.i = 300;
-    tt++;
-    
-    // Parameter 'latest_data_info_avail'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("latest_data_info_avail");
-    tt->descr = tdrpStrDup("Is _latest_data_info file available?");
-    tt->help = tdrpStrDup("If TRUE, will watch the latest_data_info file. If FALSE, will scan the input directory for new files.");
-    tt->val_offset = (char *) &latest_data_info_avail - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'search_recursively'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("search_recursively");
-    tt->descr = tdrpStrDup("Option to recurse to subdirectories while looking for new files.");
-    tt->help = tdrpStrDup("If TRUE, all subdirectories with ages less than max_dir_age will be searched. This may take considerable CPU, so be careful in its use. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &search_recursively - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'max_recursion_depth'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_recursion_depth");
-    tt->descr = tdrpStrDup("Maximum depth for recursive directory scan.");
-    tt->help = tdrpStrDup("Only applies search_recursively is TRUE. This is the max depth, below input_dir, to which the recursive directory search will be carried out. A depth of 0 will search the top-level directory only. A depth of 1 will search the level below the top directory, etc.");
-    tt->val_offset = (char *) &max_recursion_depth - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'wait_between_checks'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("wait_between_checks");
-    tt->descr = tdrpStrDup("Sleep time between checking directory for input - secs.");
-    tt->help = tdrpStrDup("If a directory is large and files do not arrive frequently, set this to a higher value to reduce the CPU load from checking the directory. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &wait_between_checks - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.i = 1;
-    tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'file_quiescence'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("file_quiescence");
-    tt->descr = tdrpStrDup("File quiescence when checking for files - secs.");
-    tt->help = tdrpStrDup("This allows you to make sure that a file coming from a remote machine is complete before reading it. Only applies if latest_data_info_avail is FALSE.");
-    tt->val_offset = (char *) &file_quiescence - &_start_;
-    tt->single_val.i = 5;
+      tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
+      tt->enum_def.fields[0].val = ARCHIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[1].val = FILELIST;
+    tt->single_val.e = ARCHIVE;
     tt++;
     
     // Parameter 'search_ext'
@@ -737,30 +661,6 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'gematronik_realtime_mode'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_mode");
-    tt->descr = tdrpStrDup("Set to TRUE if we are watching for Gematronik XML volumes.");
-    tt->help = tdrpStrDup("Gematronik volumes (for a given time) are stored in multiple files, one for each field. Therefore, after the time on a volume changes and a new field file is detected, we need to wait a while to ensure that all of the files have had a chance to be writted to disk. You need to set gematronik_realtime_wait_secs to a value in excess of the time it takes for all of the files to be written.");
-    tt->val_offset = (char *) &gematronik_realtime_mode - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'gematronik_realtime_wait_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("gematronik_realtime_wait_secs");
-    tt->descr = tdrpStrDup("Number of seconds to wait, so that all field files can be written to disk before we start to read.");
-    tt->help = tdrpStrDup("See 'gematronik_realtime_mode'.");
-    tt->val_offset = (char *) &gematronik_realtime_wait_secs - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -770,90 +670,6 @@
     tt->comment_text = tdrpStrDup("Fixed angles are elevation in PPI mode and azimuth in RHI mode.");
     tt++;
     
-    // Parameter 'set_fixed_angle_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_fixed_angle_limits");
-    tt->descr = tdrpStrDup("Option to set fixed angle limits");
-    tt->help = tdrpStrDup("Only use sweeps within the specified fixed angle limits.");
-    tt->val_offset = (char *) &set_fixed_angle_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lower_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lower_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Lower fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lower_fixed_angle_limit - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'upper_fixed_angle_limit'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("upper_fixed_angle_limit");
-    tt->descr = tdrpStrDup("Upper fixed angle limit - degrees.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &upper_fixed_angle_limit - &_start_;
-    tt->single_val.d = 90;
-    tt++;
-    
-    // Parameter 'set_sweep_num_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("set_sweep_num_limits");
-    tt->descr = tdrpStrDup("Option to set sweep number limits");
-    tt->help = tdrpStrDup("If 'apply_strict_angle_limits' is set, only read sweeps within the specified limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep.");
-    tt->val_offset = (char *) &set_sweep_num_limits - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lower_sweep_num'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("lower_sweep_num");
-    tt->descr = tdrpStrDup("Lower sweep number limit.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lower_sweep_num - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'upper_sweep_num'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("upper_sweep_num");
-    tt->descr = tdrpStrDup("Upper sweep number limit.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &upper_sweep_num - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'apply_strict_angle_limits'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_strict_angle_limits");
-    tt->descr = tdrpStrDup("Option to apply strict checking for angle or sweep number limits on read.");
-    tt->help = tdrpStrDup("If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.");
-    tt->val_offset = (char *) &apply_strict_angle_limits - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
     // Parameter 'Comment 4'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -861,114 +677,6 @@
     tt->param_name = tdrpStrDup("Comment 4");
     tt->comment_hdr = tdrpStrDup("READ OPTIONS");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'read_set_radar_num'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("read_set_radar_num");
-    tt->descr = tdrpStrDup("Option to set the radar number.");
-    tt->help = tdrpStrDup("See read_radar_num.");
-    tt->val_offset = (char *) &read_set_radar_num - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'read_radar_num'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("read_radar_num");
-    tt->descr = tdrpStrDup("Set the radar number for the data to be extracted.");
-    tt->help = tdrpStrDup("Most files have data from a single radar, so this does not apply. The NOAA HRD files, however, have data from both the lower fuselage (LF, radar_num = 1) and tail (TA, radar_num = 2) radars. For HRD files, by default the TA radar will be used, unless the radar num is set to 1 for the LF radar. If this is set to 1, it will force the convert to assume a lower fuselage radar. If set to 2, it will assume a tail radar.");
-    tt->val_offset = (char *) &read_radar_num - &_start_;
-    tt->single_val.i = -1;
-    tt++;
-    
-    // Parameter 'aggregate_sweep_files_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("aggregate_sweep_files_on_read");
-    tt->descr = tdrpStrDup("Option to aggregate sweep files into a volume on read.");
-    tt->help = tdrpStrDup("If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.");
-    tt->val_offset = (char *) &aggregate_sweep_files_on_read - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'aggregate_all_files_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("aggregate_all_files_on_read");
-    tt->descr = tdrpStrDup("Option to aggregate all files in the file list on read.");
-    tt->help = tdrpStrDup("If true, all of the files specified with the '-f' arg will be aggregated into a single volume as they are read in. This only applies to FILELIST mode. Overrides 'aggregate_sweep_files_on_read'.");
-    tt->val_offset = (char *) &aggregate_all_files_on_read - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'ignore_idle_scan_mode_on_read'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ignore_idle_scan_mode_on_read");
-    tt->descr = tdrpStrDup("Option to ignore data taken in IDLE mode.");
-    tt->help = tdrpStrDup("If true, on read will ignore files with an IDLE scan mode.");
-    tt->val_offset = (char *) &ignore_idle_scan_mode_on_read - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'remove_rays_with_all_data_missing'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_rays_with_all_data_missing");
-    tt->descr = tdrpStrDup("Option to remove rays for which all data is missing.");
-    tt->help = tdrpStrDup("If true, ray data will be checked. If all fields have missing data at all gates, the ray will be removed after reading.");
-    tt->val_offset = (char *) &remove_rays_with_all_data_missing - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'clear_transition_flag_on_all_rays'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("clear_transition_flag_on_all_rays");
-    tt->descr = tdrpStrDup("Option to clear the transition flag on all rays.");
-    tt->help = tdrpStrDup("If true, for all rays on which the transition flag is set, this flag will be removed, so that all rays are considered to be NOT in transition.");
-    tt->val_offset = (char *) &clear_transition_flag_on_all_rays - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'remove_rays_with_antenna_transitions'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_rays_with_antenna_transitions");
-    tt->descr = tdrpStrDup("Option to remove rays taken while the antenna was in transition.");
-    tt->help = tdrpStrDup("If true, rays with the transition flag set will not be used. The transiton flag is set when the antenna is in transtion between one sweep and the next.");
-    tt->val_offset = (char *) &remove_rays_with_antenna_transitions - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'transition_nrays_margin'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("transition_nrays_margin");
-    tt->descr = tdrpStrDup("Number of transition rays to include as a margin");
-    tt->help = tdrpStrDup("Sometimes the transition flag is turned on too early in a transition, on not turned off quickly enough after a transition. If you set this to a number greater than 0, that number of rays will be included at each end of the transition, i.e. the transition will effectively be shorter at each end by this number of rays.");
-    tt->val_offset = (char *) &transition_nrays_margin - &_start_;
-    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'trim_surveillance_sweeps_to_360deg'
@@ -1031,30 +739,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'remove_long_range_rays'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_long_range_rays");
-    tt->descr = tdrpStrDup("Option to remove long range rays.");
-    tt->help = tdrpStrDup("Applies to NEXRAD data. If true, data from the non-Doppler long-range sweeps will be removed.");
-    tt->val_offset = (char *) &remove_long_range_rays - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'remove_short_range_rays'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("remove_short_range_rays");
-    tt->descr = tdrpStrDup("Option to remove short range rays.");
-    tt->help = tdrpStrDup("Applies to NEXRAD data. If true, data from the Doppler short-range sweeps will be removed.");
-    tt->val_offset = (char *) &remove_short_range_rays - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'set_ngates_constant'
     // ctype is 'tdrp_bool_t'
     
@@ -1089,503 +773,6 @@
     tt->help = tdrpStrDup("If TRUE, all rays will be remapped onto the same range geometry, determined as that with the finest resolution in range - i.e. with the minimum gate spacing.");
     tt->val_offset = (char *) &remap_to_finest_range_geometry - &_start_;
     tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE GATE GEOMETRY");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_start_range'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_start_range");
-    tt->descr = tdrpStrDup("Option to override the start range.");
-    tt->help = tdrpStrDup("If true, the specified start range in this file will be used. If not, the start range in the data file will be used.");
-    tt->val_offset = (char *) &override_start_range - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'start_range_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("start_range_km");
-    tt->descr = tdrpStrDup("Specified start range (km).");
-    tt->help = tdrpStrDup("See override_start_range.");
-    tt->val_offset = (char *) &start_range_km - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'override_gate_spacing'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_gate_spacing");
-    tt->descr = tdrpStrDup("Option to override the gate spacing.");
-    tt->help = tdrpStrDup("If true, the specified gate spacing in this file will be used. If not, the gate spacing in the data file will be used.");
-    tt->val_offset = (char *) &override_gate_spacing - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'gate_spacing_km'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("gate_spacing_km");
-    tt->descr = tdrpStrDup("Specified gate spacing (km).");
-    tt->help = tdrpStrDup("See override_gate_spacing.");
-    tt->val_offset = (char *) &gate_spacing_km - &_start_;
-    tt->single_val.d = 0.0075;
-    tt++;
-    
-    // Parameter 'Comment 6'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT AND/OR SITE NAME");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_instrument_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_instrument_name");
-    tt->descr = tdrpStrDup("Option to override the instrument name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_instrument_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'instrument_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instrument_name");
-    tt->descr = tdrpStrDup("Instrument name.");
-    tt->help = tdrpStrDup("See override_instrument_name.");
-    tt->val_offset = (char *) &instrument_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'override_site_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_site_name");
-    tt->descr = tdrpStrDup("Option to override the site name.");
-    tt->help = tdrpStrDup("If true, the name provided will be used.");
-    tt->val_offset = (char *) &override_site_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'site_name'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("site_name");
-    tt->descr = tdrpStrDup("Site name.");
-    tt->help = tdrpStrDup("See override_site_name.");
-    tt->val_offset = (char *) &site_name - &_start_;
-    tt->single_val.s = tdrpStrDup("unknown");
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE VOLUME NUMBER, OR AUTOINCREMENT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_volume_number'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_volume_number");
-    tt->descr = tdrpStrDup("Option to override the volume number in the file.");
-    tt->help = tdrpStrDup("Useful is there is no volume number in the data.");
-    tt->val_offset = (char *) &override_volume_number - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'starting_volume_number'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("starting_volume_number");
-    tt->descr = tdrpStrDup("Volume number at startup.");
-    tt->help = tdrpStrDup("Applies if 'override_volume_number' is true.");
-    tt->val_offset = (char *) &starting_volume_number - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'autoincrement_volume_number'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("autoincrement_volume_number");
-    tt->descr = tdrpStrDup("Option to automatically increment the volume number.");
-    tt->help = tdrpStrDup("Starts at 'starting_volume_number' and increments from there.");
-    tt->val_offset = (char *) &autoincrement_volume_number - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE RADAR LOCATION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'override_radar_location'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_radar_location");
-    tt->descr = tdrpStrDup("Option to override the radar location.");
-    tt->help = tdrpStrDup("If true, the location in this file will be used. If not, the location in the time series data will be used.");
-    tt->val_offset = (char *) &override_radar_location - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'override_altitude_only'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_altitude_only");
-    tt->descr = tdrpStrDup("Option to override the radar altitude ONLY.");
-    tt->help = tdrpStrDup("If true, the altitude in this file will be used. If not, the altitude in the time series data will be used.");
-    tt->val_offset = (char *) &override_altitude_only - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'radar_latitude_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_latitude_deg");
-    tt->descr = tdrpStrDup("Radar latitude (deg).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_latitude_deg - &_start_;
-    tt->single_val.d = -999;
-    tt++;
-    
-    // Parameter 'radar_longitude_deg'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_longitude_deg");
-    tt->descr = tdrpStrDup("Radar longitude (deg).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_longitude_deg - &_start_;
-    tt->single_val.d = -999;
-    tt++;
-    
-    // Parameter 'radar_altitude_meters'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("radar_altitude_meters");
-    tt->descr = tdrpStrDup("Radar altitude (meters).");
-    tt->help = tdrpStrDup("See override_radar_location.");
-    tt->val_offset = (char *) &radar_altitude_meters - &_start_;
-    tt->single_val.d = -999;
-    tt++;
-    
-    // Parameter 'change_radar_latitude_sign'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("change_radar_latitude_sign");
-    tt->descr = tdrpStrDup("Option to negate the latitude.");
-    tt->help = tdrpStrDup("Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.");
-    tt->val_offset = (char *) &change_radar_latitude_sign - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'apply_georeference_corrections'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_georeference_corrections");
-    tt->descr = tdrpStrDup("Option to apply the georeference information and corrections for moving platforms.");
-    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If goereference data ia available, there is an optional corrections block that may also be stored in the file. If this parameter is true, the georeference data is applied and appropriate corrections made if corrections are available. If possible, Earth-centric azimuth and elevation angles will be computed.");
-    tt->val_offset = (char *) &apply_georeference_corrections - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'read_georeference_corrections'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("read_georeference_corrections");
-    tt->descr = tdrpStrDup("Option to read in corrections to the georeference data.");
-    tt->help = tdrpStrDup("For moving platforms, measured georeference information (e.g. from a GPS/NS) is sometimes available in the file. If this parameter is true, we will read in an ASCII file of correction factors for the georef data, and store those corrections in the file. See also 'apply_georeference_corrections' above.");
-    tt->val_offset = (char *) &read_georeference_corrections - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'georeference_corrections_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("georeference_corrections_path");
-    tt->descr = tdrpStrDup("Path to georeference corrections file.");
-    tt->help = tdrpStrDup("This is an ASCII file specifying corrections for the georeference data. See 'read_georeference_corrections' above. The ASCII file has the following format - this is an example:\n======================================\n\tazimuth_corr           =   0.000\n\televation_corr         =   0.000\n\trange_delay_corr       = -16.641\n\tlongitude_corr         =   0.000\n\tlatitude_corr          =   0.000\n\tpressure_alt_corr      =   4.969\n\tradar_alt_corr         =   0.000\n\tew_gndspd_corr         =   0.000\n\tns_gndspd_corr         =   0.000\n\tvert_vel_corr          =   0.000\n\theading_corr           =   0.000\n\troll_corr              =   0.000\n\tpitch_corr             =   0.009\n\tdrift_corr             =   0.119\n\trot_angle_corr         =  -0.016\n\ttilt_corr              =   0.713\n======================================\nYou can omit the fields that have values of zero.");
-    tt->val_offset = (char *) &georeference_corrections_path - &_start_;
-    tt->single_val.s = tdrpStrDup("/data/georeference_corrections/cfac.fore");
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT TIME");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'apply_time_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_time_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the ray times.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the existing ray times. This is useful, for example, for correcting time errors, or converting from local time to UTC.");
-    tt->val_offset = (char *) &apply_time_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'time_offset_secs'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("time_offset_secs");
-    tt->descr = tdrpStrDup("Time offset (secs).");
-    tt->help = tdrpStrDup("See 'apply_time_offset'. This value will be ADDED to the existing ray times.");
-    tt->val_offset = (char *) &time_offset_secs - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OPTION TO CORRECT ANTENNA ANGLES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'apply_azimuth_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_azimuth_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the azimuth values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured azimuth angles. This is useful, for example, in the case of a mobile platform which is not set up oriented to true north. Suppose you have a truck (like the DOWs) which is oriented off true north. Then if you add in the truck HEADING relative to true north, the measured azimuth angles will be adjusted by the heading, to give azimuth relative to TRUE north.");
-    tt->val_offset = (char *) &apply_azimuth_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'azimuth_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("azimuth_offset");
-    tt->descr = tdrpStrDup("Azimuth offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_azimuth_offset'. This value will be ADDED to the measured azimuths.");
-    tt->val_offset = (char *) &azimuth_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'apply_elevation_offset'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_elevation_offset");
-    tt->descr = tdrpStrDup("Option to apply an offset to the elevation values.");
-    tt->help = tdrpStrDup("If TRUE, this offset will be ADDED to the measured elevation angles. This is useful to correct for a systematic bias in measured elevation angles.");
-    tt->val_offset = (char *) &apply_elevation_offset - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'elevation_offset'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("elevation_offset");
-    tt->descr = tdrpStrDup("Elevation offset (degrees).");
-    tt->help = tdrpStrDup("See 'apply_elevation_offset'. This value will be ADDED to the measured elevations.");
-    tt->val_offset = (char *) &elevation_offset - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE INSTRUMENT TYPE, PLATFORM TYPE AND PRIMARY AXIS.");
-    tt->comment_text = tdrpStrDup("This applies to read operations.");
-    tt++;
-    
-    // Parameter 'override_instrument_type'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_instrument_type");
-    tt->descr = tdrpStrDup("Option to override instrument type on read.");
-    tt->help = tdrpStrDup("If true, the file will be read in, the instrument type will be changed, and then any post-read processing will be performed.");
-    tt->val_offset = (char *) &override_instrument_type - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'instrument_type'
-    // ctype is '_instrument_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("instrument_type");
-    tt->descr = tdrpStrDup("Specify the instrument type. See override_instrument_type.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &instrument_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("instrument_type_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("INSTRUMENT_RADAR");
-      tt->enum_def.fields[0].val = INSTRUMENT_RADAR;
-      tt->enum_def.fields[1].name = tdrpStrDup("INSTRUMENT_LIDAR");
-      tt->enum_def.fields[1].val = INSTRUMENT_LIDAR;
-    tt->single_val.e = INSTRUMENT_RADAR;
-    tt++;
-    
-    // Parameter 'override_platform_type'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_platform_type");
-    tt->descr = tdrpStrDup("Option to override platform type on read. If true, the file will be read in, the platform type will be changed, and then any post-read processing will be performed.");
-    tt->help = tdrpStrDup("\tPLATFORM_FIXED  - radar is in a fixed location\n\tPLATFORM_VEHICLE -  radar is mounted on a land vehicle\n\tPLATFORM_SHIP - radar is mounted on a ship\n\tPLATFORM_AIRCRAFT_FORE - forward-looking on aircraft\n\tPLATFORM_AIRCRAFT_AFT - backward-looking on aircraft\n\tPLATFORM_AIRCRAFT_TAIL - tail - e.g. ELDORA\n\tPLATFORM_AIRCRAFT_BELLY -  belly radar on aircraft\n\tPLATFORM_AIRCRAFT_ROOF - roof radar on aircraft\n\tPLATFORM_AIRCRAFT_NOSE - radar in nose radome on aircraft\n\tPLATFORM_SATELLITE_ORBIT - orbiting satellite\n\tPLATFORM_SATELLITE_GEOSTAT - geostationary satellite\n");
-    tt->val_offset = (char *) &override_platform_type - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'platform_type'
-    // ctype is '_platform_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("platform_type");
-    tt->descr = tdrpStrDup("Platform type.");
-    tt->help = tdrpStrDup("See override_platform_type.");
-    tt->val_offset = (char *) &platform_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("platform_type_t");
-    tt->enum_def.nfields = 11;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PLATFORM_FIXED");
-      tt->enum_def.fields[0].val = PLATFORM_FIXED;
-      tt->enum_def.fields[1].name = tdrpStrDup("PLATFORM_VEHICLE");
-      tt->enum_def.fields[1].val = PLATFORM_VEHICLE;
-      tt->enum_def.fields[2].name = tdrpStrDup("PLATFORM_SHIP");
-      tt->enum_def.fields[2].val = PLATFORM_SHIP;
-      tt->enum_def.fields[3].name = tdrpStrDup("PLATFORM_AIRCRAFT_FORE");
-      tt->enum_def.fields[3].val = PLATFORM_AIRCRAFT_FORE;
-      tt->enum_def.fields[4].name = tdrpStrDup("PLATFORM_AIRCRAFT_AFT");
-      tt->enum_def.fields[4].val = PLATFORM_AIRCRAFT_AFT;
-      tt->enum_def.fields[5].name = tdrpStrDup("PLATFORM_AIRCRAFT_TAIL");
-      tt->enum_def.fields[5].val = PLATFORM_AIRCRAFT_TAIL;
-      tt->enum_def.fields[6].name = tdrpStrDup("PLATFORM_AIRCRAFT_BELLY");
-      tt->enum_def.fields[6].val = PLATFORM_AIRCRAFT_BELLY;
-      tt->enum_def.fields[7].name = tdrpStrDup("PLATFORM_AIRCRAFT_ROOF");
-      tt->enum_def.fields[7].val = PLATFORM_AIRCRAFT_ROOF;
-      tt->enum_def.fields[8].name = tdrpStrDup("PLATFORM_AIRCRAFT_NOSE");
-      tt->enum_def.fields[8].val = PLATFORM_AIRCRAFT_NOSE;
-      tt->enum_def.fields[9].name = tdrpStrDup("PLATFORM_SATELLITE_ORBIT");
-      tt->enum_def.fields[9].val = PLATFORM_SATELLITE_ORBIT;
-      tt->enum_def.fields[10].name = tdrpStrDup("PLATFORM_SATELLITE_GEOSTAT");
-      tt->enum_def.fields[10].val = PLATFORM_SATELLITE_GEOSTAT;
-    tt->single_val.e = PLATFORM_FIXED;
-    tt++;
-    
-    // Parameter 'override_primary_axis'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("override_primary_axis");
-    tt->descr = tdrpStrDup("Option to override primary axis on read. If true, the file will be read in, the primary axis will be changed, and then any post-read processing will be performed.");
-    tt->help = tdrpStrDup("\tPRIMARY_AXIS_Z - vertical\n\tPRIMARY_AXIS_Y - longitudinal axis of platform\n\tPRIMARY_AXIS_X - lateral axis of platform\n\tPRIMARY_AXIS_Z_PRIME - inverted vertical\n\tPRIMARY_AXIS_Y_PRIME - ELDORA, HRD tail\n\tPRIMARY_AXIS_X_PRIME - translated lateral\n");
-    tt->val_offset = (char *) &override_primary_axis - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'primary_axis'
-    // ctype is '_primary_axis_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("primary_axis");
-    tt->descr = tdrpStrDup("Platform type.");
-    tt->help = tdrpStrDup("See override_primary_axis.");
-    tt->val_offset = (char *) &primary_axis - &_start_;
-    tt->enum_def.name = tdrpStrDup("primary_axis_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PRIMARY_AXIS_Z");
-      tt->enum_def.fields[0].val = PRIMARY_AXIS_Z;
-      tt->enum_def.fields[1].name = tdrpStrDup("PRIMARY_AXIS_Y");
-      tt->enum_def.fields[1].val = PRIMARY_AXIS_Y;
-      tt->enum_def.fields[2].name = tdrpStrDup("PRIMARY_AXIS_X");
-      tt->enum_def.fields[2].val = PRIMARY_AXIS_X;
-      tt->enum_def.fields[3].name = tdrpStrDup("PRIMARY_AXIS_Z_PRIME");
-      tt->enum_def.fields[3].val = PRIMARY_AXIS_Z_PRIME;
-      tt->enum_def.fields[4].name = tdrpStrDup("PRIMARY_AXIS_Y_PRIME");
-      tt->enum_def.fields[4].val = PRIMARY_AXIS_Y_PRIME;
-      tt->enum_def.fields[5].name = tdrpStrDup("PRIMARY_AXIS_X_PRIME");
-      tt->enum_def.fields[5].val = PRIMARY_AXIS_X_PRIME;
-    tt->single_val.e = PRIMARY_AXIS_Z;
     tt++;
     
     // Parameter 'override_beam_width'
@@ -1660,11 +847,11 @@
     tt->single_val.d = 45.1;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OPTION TO SET NYQUIST VELOCITY FOR SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1718,11 +905,11 @@
       tt->struct_vals[3].d = 25;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 6'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OPTION TO FORCE RELOAD OF SWEEP AND/OR VOLUME INFO, or RECOMPUTE SWEEP FIXED ANGLE.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1857,11 +1044,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADJUST SWEEP LIMITS USING FIXED AND MEASURED ANGLES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1878,11 +1065,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO REORDER SWEEPS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1911,11 +1098,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 16'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 16");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OPTION TO SORT RAYS BY TIME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1944,11 +1131,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 17'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 17");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2049,11 +1236,11 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
-    // Parameter 'Comment 18'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 18");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OPTION TO ADD USER-SPECIFIED GLOBAL ATTRIBUTES to output file");
     tt->comment_text = tdrpStrDup("Only applies to CfRadial output format.");
     tt++;
@@ -2137,11 +1324,11 @@
       tt->struct_vals[14].s = tdrpStrDup("1.1,2.2,3.3,4.4,5.5");
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2310,11 +1497,11 @@
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 20'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 20");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2357,11 +1544,11 @@
     tt->single_val.e = OUTPUT_ENCODING_ASIS;
     tt++;
     
-    // Parameter 'Comment 21'
+    // Parameter 'Comment 14'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 21");
+    tt->param_name = tdrpStrDup("Comment 14");
     tt->comment_hdr = tdrpStrDup("CENSORING");
     tt->comment_text = tdrpStrDup("You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.");
     tt++;
@@ -2540,11 +1727,11 @@
     tt->single_val.s = tdrpStrDup("DBZ");
     tt++;
     
-    // Parameter 'Comment 22'
+    // Parameter 'Comment 15'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 22");
+    tt->param_name = tdrpStrDup("Comment 15");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -2619,111 +1806,11 @@
       tt->struct_vals[9].d = 25;
     tt++;
     
-    // Parameter 'Comment 23'
+    // Parameter 'Comment 16'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 23");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_format'
-    // ctype is '_output_format_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_format");
-    tt->descr = tdrpStrDup("Format for the output files.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &output_format - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 9;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
-      tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL2");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_CFRADIAL2;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
-      tt->enum_def.fields[2].val = OUTPUT_FORMAT_DORADE;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_FORMAT_FORAY");
-      tt->enum_def.fields[3].val = OUTPUT_FORMAT_FORAY;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_FORMAT_NEXRAD");
-      tt->enum_def.fields[4].val = OUTPUT_FORMAT_NEXRAD;
-      tt->enum_def.fields[5].name = tdrpStrDup("OUTPUT_FORMAT_UF");
-      tt->enum_def.fields[5].val = OUTPUT_FORMAT_UF;
-      tt->enum_def.fields[6].name = tdrpStrDup("OUTPUT_FORMAT_MDV_RADIAL");
-      tt->enum_def.fields[6].val = OUTPUT_FORMAT_MDV_RADIAL;
-      tt->enum_def.fields[7].name = tdrpStrDup("OUTPUT_FORMAT_NSSL_MRD");
-      tt->enum_def.fields[7].val = OUTPUT_FORMAT_NSSL_MRD;
-      tt->enum_def.fields[8].name = tdrpStrDup("OUTPUT_FORMAT_ODIM_HDF5");
-      tt->enum_def.fields[8].val = OUTPUT_FORMAT_ODIM_HDF5;
-    tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = NETCDF4;
-    tt++;
-    
-    // Parameter 'Comment 24'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 24");
-    tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_native_byte_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_native_byte_order");
-    tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
-    tt->val_offset = (char *) &output_native_byte_order - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compressed'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compressed");
-    tt->descr = tdrpStrDup("Option to compress data fields on output.");
-    tt->help = tdrpStrDup("Applies to netCDF and Dorade. UF does not support compression.");
-    tt->val_offset = (char *) &output_compressed - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 25'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 25");
+    tt->param_name = tdrpStrDup("Comment 16");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2740,23 +1827,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'compression_level'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("compression_level");
-    tt->descr = tdrpStrDup("Compression level for output, if compressed.");
-    tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
-    tt->val_offset = (char *) &compression_level - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 17'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 17");
     tt->comment_hdr = tdrpStrDup("OUTPUT DIRECTORY AND FILE NAME");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -2965,30 +2040,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_individual_sweeps'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_individual_sweeps");
-    tt->descr = tdrpStrDup("Option to write out individual sweeps if appropriate.");
-    tt->help = tdrpStrDup("If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.");
-    tt->val_offset = (char *) &write_individual_sweeps - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'write_latest_data_info'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_latest_data_info");
-    tt->descr = tdrpStrDup("Option to write out _latest_data_info files.");
-    tt->help = tdrpStrDup("If true, the _latest_data_info files will be written after the converted file is written.");
-    tt->val_offset = (char *) &write_latest_data_info - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'write_using_proposed_standard_name_attr'
     // ctype is 'tdrp_bool_t'
     
@@ -3001,92 +2052,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 18'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
-    tt->comment_hdr = tdrpStrDup("SEPARATING VOLUMES BY TYPE");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'separate_output_dirs_by_scan_type'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("separate_output_dirs_by_scan_type");
-    tt->descr = tdrpStrDup("Option to separate the files based on scan type.");
-    tt->help = tdrpStrDup("Sometimes a scan strategy will switch between surveillance scans, sector scans, rhi scans, vertically-pointing scans and sun scans. If true, the files will be separated into subdirectories based on scan type.");
-    tt->val_offset = (char *) &separate_output_dirs_by_scan_type - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'surveillance_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("surveillance_subdir");
-    tt->descr = tdrpStrDup("The directory path for surveillance scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is surveillance, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &surveillance_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("sur");
-    tt++;
-    
-    // Parameter 'sector_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sector_subdir");
-    tt->descr = tdrpStrDup("The directory path for sector scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sector, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &sector_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("sec");
-    tt++;
-    
-    // Parameter 'rhi_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("rhi_subdir");
-    tt->descr = tdrpStrDup("The directory path for rhi files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is rhi, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &rhi_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("rhi");
-    tt++;
-    
-    // Parameter 'vert_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("vert_subdir");
-    tt->descr = tdrpStrDup("The directory path for vert scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is vert, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &vert_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("vert");
-    tt++;
-    
-    // Parameter 'sun_subdir'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("sun_subdir");
-    tt->descr = tdrpStrDup("The directory path for sun scan files.");
-    tt->help = tdrpStrDup("See 'separate_by_scan_type'. If the scan mode is sun, this subdirectory will be created under the ouput dir.");
-    tt->val_offset = (char *) &sun_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("sun");
-    tt++;
-    
-    // Parameter 'Comment 28'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE MISSING VALUES");
     tt->comment_text = tdrpStrDup("Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n");
     tt++;

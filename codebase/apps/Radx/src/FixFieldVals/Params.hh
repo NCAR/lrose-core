@@ -75,38 +75,9 @@ public:
   } debug_t;
 
   typedef enum {
-    REALTIME = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    ARCHIVE = 0,
+    FILELIST = 1
   } mode_t;
-
-  typedef enum {
-    INSTRUMENT_RADAR = 0,
-    INSTRUMENT_LIDAR = 1
-  } instrument_type_t;
-
-  typedef enum {
-    PLATFORM_FIXED = 1,
-    PLATFORM_VEHICLE = 2,
-    PLATFORM_SHIP = 3,
-    PLATFORM_AIRCRAFT_FORE = 5,
-    PLATFORM_AIRCRAFT_AFT = 6,
-    PLATFORM_AIRCRAFT_TAIL = 7,
-    PLATFORM_AIRCRAFT_BELLY = 8,
-    PLATFORM_AIRCRAFT_ROOF = 9,
-    PLATFORM_AIRCRAFT_NOSE = 10,
-    PLATFORM_SATELLITE_ORBIT = 11,
-    PLATFORM_SATELLITE_GEOSTAT = 12
-  } platform_type_t;
-
-  typedef enum {
-    PRIMARY_AXIS_Z = 0,
-    PRIMARY_AXIS_Y = 1,
-    PRIMARY_AXIS_X = 2,
-    PRIMARY_AXIS_Z_PRIME = 3,
-    PRIMARY_AXIS_Y_PRIME = 4,
-    PRIMARY_AXIS_X_PRIME = 5
-  } primary_axis_t;
 
   typedef enum {
     SWEEP_MODE_SECTOR = 1,
@@ -145,25 +116,6 @@ public:
     LOGICAL_AND = 0,
     LOGICAL_OR = 1
   } logical_t;
-
-  typedef enum {
-    OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_CFRADIAL2 = 1,
-    OUTPUT_FORMAT_DORADE = 2,
-    OUTPUT_FORMAT_FORAY = 3,
-    OUTPUT_FORMAT_NEXRAD = 4,
-    OUTPUT_FORMAT_UF = 5,
-    OUTPUT_FORMAT_MDV_RADIAL = 6,
-    OUTPUT_FORMAT_NSSL_MRD = 7,
-    OUTPUT_FORMAT_ODIM_HDF5 = 8
-  } output_format_t;
-
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
 
   typedef enum {
     START_AND_END_TIMES = 0,
@@ -514,55 +466,7 @@ public:
 
   mode_t mode;
 
-  int max_realtime_data_age_secs;
-
-  tdrp_bool_t latest_data_info_avail;
-
-  tdrp_bool_t search_recursively;
-
-  int max_recursion_depth;
-
-  int wait_between_checks;
-
-  int file_quiescence;
-
   char* search_ext;
-
-  tdrp_bool_t gematronik_realtime_mode;
-
-  int gematronik_realtime_wait_secs;
-
-  tdrp_bool_t set_fixed_angle_limits;
-
-  double lower_fixed_angle_limit;
-
-  double upper_fixed_angle_limit;
-
-  tdrp_bool_t set_sweep_num_limits;
-
-  int lower_sweep_num;
-
-  int upper_sweep_num;
-
-  tdrp_bool_t apply_strict_angle_limits;
-
-  tdrp_bool_t read_set_radar_num;
-
-  int read_radar_num;
-
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
-  tdrp_bool_t aggregate_all_files_on_read;
-
-  tdrp_bool_t ignore_idle_scan_mode_on_read;
-
-  tdrp_bool_t remove_rays_with_all_data_missing;
-
-  tdrp_bool_t clear_transition_flag_on_all_rays;
-
-  tdrp_bool_t remove_rays_with_antenna_transitions;
-
-  int transition_nrays_margin;
 
   tdrp_bool_t trim_surveillance_sweeps_to_360deg;
 
@@ -574,79 +478,11 @@ public:
 
   tdrp_bool_t preserve_rays;
 
-  tdrp_bool_t remove_long_range_rays;
-
-  tdrp_bool_t remove_short_range_rays;
-
   tdrp_bool_t set_ngates_constant;
 
   tdrp_bool_t remap_to_predominant_range_geometry;
 
   tdrp_bool_t remap_to_finest_range_geometry;
-
-  tdrp_bool_t override_start_range;
-
-  double start_range_km;
-
-  tdrp_bool_t override_gate_spacing;
-
-  double gate_spacing_km;
-
-  tdrp_bool_t override_instrument_name;
-
-  char* instrument_name;
-
-  tdrp_bool_t override_site_name;
-
-  char* site_name;
-
-  tdrp_bool_t override_volume_number;
-
-  int starting_volume_number;
-
-  tdrp_bool_t autoincrement_volume_number;
-
-  tdrp_bool_t override_radar_location;
-
-  tdrp_bool_t override_altitude_only;
-
-  double radar_latitude_deg;
-
-  double radar_longitude_deg;
-
-  double radar_altitude_meters;
-
-  tdrp_bool_t change_radar_latitude_sign;
-
-  tdrp_bool_t apply_georeference_corrections;
-
-  tdrp_bool_t read_georeference_corrections;
-
-  char* georeference_corrections_path;
-
-  tdrp_bool_t apply_time_offset;
-
-  double time_offset_secs;
-
-  tdrp_bool_t apply_azimuth_offset;
-
-  double azimuth_offset;
-
-  tdrp_bool_t apply_elevation_offset;
-
-  double elevation_offset;
-
-  tdrp_bool_t override_instrument_type;
-
-  instrument_type_t instrument_type;
-
-  tdrp_bool_t override_platform_type;
-
-  platform_type_t platform_type;
-
-  tdrp_bool_t override_primary_axis;
-
-  primary_axis_t primary_axis;
 
   tdrp_bool_t override_beam_width;
 
@@ -757,17 +593,7 @@ public:
   transform_field_t *_transform_fields;
   int transform_fields_n;
 
-  output_format_t output_format;
-
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
   tdrp_bool_t output_force_ngates_vary;
-
-  int compression_level;
 
   char* output_dir;
 
@@ -801,23 +627,7 @@ public:
 
   tdrp_bool_t append_year_dir_to_output_dir;
 
-  tdrp_bool_t write_individual_sweeps;
-
-  tdrp_bool_t write_latest_data_info;
-
   tdrp_bool_t write_using_proposed_standard_name_attr;
-
-  tdrp_bool_t separate_output_dirs_by_scan_type;
-
-  char* surveillance_subdir;
-
-  char* sector_subdir;
-
-  char* rhi_subdir;
-
-  char* vert_subdir;
-
-  char* sun_subdir;
 
   tdrp_bool_t override_missing_metadata_values;
 
@@ -848,7 +658,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[194];
+  mutable TDRPtable _table[113];
 
   const char *_className;
 

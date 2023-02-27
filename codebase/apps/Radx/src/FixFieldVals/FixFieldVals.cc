@@ -61,7 +61,6 @@ FixFieldVals::FixFieldVals(int argc, char **argv)
 
   OK = TRUE;
   _nWarnCensorPrint = 0;
-  _volNum = 1;
 
   // set programe name
 
@@ -88,27 +87,6 @@ FixFieldVals::FixFieldVals(int argc, char **argv)
     return;
   }
 
-  // check on overriding radar location
-
-  if (_params.override_radar_location) {
-    if (_params.radar_latitude_deg < -900 ||
-        _params.radar_longitude_deg < -900 ||
-        _params.radar_altitude_meters < -900) {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  Problem with command line or TDRP parameters." << endl;
-      cerr << "  You have chosen to override radar location" << endl;
-      cerr << "  You must override latitude, longitude and altitude" << endl;
-      cerr << "  You must override all 3 values." << endl;
-      OK = FALSE;
-    }
-  }
-
-  // volume number
-
-  if (_params.override_volume_number ||
-      _params.autoincrement_volume_number) {
-    _volNum = _params.starting_volume_number;
-  }
 
   // override missing values
 
@@ -146,16 +124,10 @@ FixFieldVals::~FixFieldVals()
 int FixFieldVals::Run()
 {
 
-  if (_params.mode == Params::ARCHIVE) {
-    return _runArchive();
-  } else if (_params.mode == Params::FILELIST) {
+  if (_params.mode == Params::FILELIST) {
     return _runFilelist();
   } else {
-    if (_params.latest_data_info_avail) {
-      return _runRealtimeWithLdata();
-    } else {
-      return _runRealtimeNoLdata();
-    }
+    return _runArchive();
   }
 }
 
@@ -175,86 +147,47 @@ int FixFieldVals::_runFilelist()
   int nGood = 0;
   int nError = 0;
   
-  if (!_params.aggregate_all_files_on_read) {
-
-    // loop through the input file list
-    
-    RadxVol vol;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      vol.setDebug(true);
-    }
-    for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
-      string inputPath = _args.inputFileList[ii];
-      // read input file
-      int jret = _readFile(inputPath, vol);
-      if (jret == 0) {
-        // finalize the volume
-        _finalizeVol(vol);
-        // write the volume out
-        if (_writeVol(vol)) {
-          cerr << "ERROR - FixFieldVals::_runFileList" << endl;
-          cerr << "  Cannot write volume to file" << endl;
-          iret = -1;
-          nError++;
-          if (_params.debug) {
-            cerr << "  ====>> n errors so far: " << nError << endl;
-          }
-        } else {
-          nGood++;
-          if (_params.debug) {
-            cerr << "  ====>> n good files so far: " << nGood << endl;
-            cerr << "  ====>> n errors     so far: " << nError << endl;
-            cerr << "  ====>> sum          so far: " << nGood + nError << endl;
-          }
-        }
-      } else if (jret < 0) {
+  // loop through the input file list
+  
+  RadxVol vol;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    vol.setDebug(true);
+  }
+  for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+    string inputPath = _args.inputFileList[ii];
+    // read input file
+    int jret = _readFile(inputPath, vol);
+    if (jret == 0) {
+      // finalize the volume
+      _finalizeVol(vol);
+      // write the volume out
+      if (_writeVol(vol)) {
+        cerr << "ERROR - FixFieldVals::_runFileList" << endl;
+        cerr << "  Cannot write volume to file" << endl;
         iret = -1;
         nError++;
         if (_params.debug) {
           cerr << "  ====>> n errors so far: " << nError << endl;
         }
+      } else {
+        nGood++;
+        if (_params.debug) {
+          cerr << "  ====>> n good files so far: " << nGood << endl;
+          cerr << "  ====>> n errors     so far: " << nError << endl;
+          cerr << "  ====>> sum          so far: " << nGood + nError << endl;
+        }
       }
-      // free up
-      vol.clear();
-    }
-
-  } else {
-    
-    // aggregate the files into a single volume on read
-    
-    RadxVol vol;
-    GenericRadxFile inFile;
-    _setupRead(inFile);
-    vector<string> paths = _args.inputFileList;
-    if (inFile.aggregateFromPaths(paths, vol)) {
-      cerr << "ERROR - FixFieldVals::_runFileList" << endl;
-      cerr << "  paths: " << endl;
-      for (size_t ii = 0; ii < paths.size(); ii++) {
-        cerr << "         " << paths[ii] << endl;
-      }
-      return -1;
-    }
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      for (size_t ii = 0; ii < paths.size(); ii++) {
-        cerr << "==>> read in file: " << paths[ii] << endl;
-      }
-    }
-    
-    // finalize the volume
-    
-    _finalizeVol(vol);
-    
-    // write the volume out
-    if (_writeVol(vol)) {
-      cerr << "ERROR - FixFieldVals::_runFileList" << endl;
-      cerr << "  Cannot write aggregated volume to file" << endl;
+    } else if (jret < 0) {
       iret = -1;
+      nError++;
+      if (_params.debug) {
+        cerr << "  ====>> n errors so far: " << nError << endl;
+      }
     }
-
-    nGood++;
-    
-  } // if (!_params.aggregate_all_files_on_read) {
-
+    // free up
+    vol.clear();
+  }
+  
   if (_params.debug) {
     cerr << "FixFieldVals done" << endl;
     cerr << "====>> n good files processed: " << nGood << endl;
@@ -275,9 +208,6 @@ int FixFieldVals::_runArchive()
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (_params.aggregate_sweep_files_on_read) {
-    tlist.setReadAggregateSweeps(true);
-  }
   if (tlist.compile()) {
     cerr << "ERROR - FixFieldVals::_runArchive()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
@@ -316,126 +246,6 @@ int FixFieldVals::_runArchive()
     // free up
     vol.clear();
   }
-
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in realtime mode with latest data info
-
-int FixFieldVals::_runRealtimeWithLdata()
-{
-
-  // init process mapper registration
-
-  PMU_auto_init(_progName.c_str(), _params.instance,
-                PROCMAP_REGISTER_INTERVAL);
-
-  // watch for new data to arrive
-
-  LdataInfo ldata(_params.input_dir,
-                  _params.debug >= Params::DEBUG_VERBOSE);
-  if (strlen(_params.search_ext) > 0) {
-    ldata.setDataFileExt(_params.search_ext);
-  }
-
-  RadxVol vol;
-  int iret = 0;
-  int msecsWait = _params.wait_between_checks * 1000;
-  while (true) {
-    ldata.readBlocking(_params.max_realtime_data_age_secs,
-                       msecsWait, PMU_auto_register);
-    const string path = ldata.getDataPath();
-    // read input file
-    int jret = _readFile(path, vol);
-    if (jret == 0) {
-      // finalize the volume
-      _finalizeVol(vol);
-      // write the volume out
-      if (_writeVol(vol)) {
-        cerr << "ERROR - FixFieldVals::_runRealtimeWithLdata" << endl;
-        cerr << "  Cannot write volume to file" << endl;
-        return -1;
-      }
-    } else if (jret < 0) {
-      iret = -1;
-    }
-    // free up
-    vol.clear();
-  }
-
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Run in realtime mode without latest data info
-
-int FixFieldVals::_runRealtimeNoLdata()
-{
-
-  // init process mapper registration
-
-  PMU_auto_init(_progName.c_str(), _params.instance,
-                PROCMAP_REGISTER_INTERVAL);
-  
-  // Set up input path
-
-  DsInputPath input(_progName,
-		    _params.debug >= Params::DEBUG_VERBOSE,
-		    _params.input_dir,
-		    _params.max_realtime_data_age_secs,
-		    PMU_auto_register,
-		    _params.latest_data_info_avail,
-		    false);
-
-  input.setFileQuiescence(_params.file_quiescence);
-  input.setSearchExt(_params.search_ext);
-  input.setRecursion(_params.search_recursively);
-  input.setMaxRecursionDepth(_params.max_recursion_depth);
-  input.setMaxDirAge(_params.max_realtime_data_age_secs);
-
-  int iret = 0;
-  RadxVol vol;
-
-  while(true) {
-
-    // check for new data
-    
-    char *path = input.next(false);
-    
-    if (path == NULL) {
-      
-      // sleep a bit
-      
-      PMU_auto_register("Waiting for data");
-      umsleep(_params.wait_between_checks * 1000);
-
-    } else {
-
-      // read the input file
-      
-      int jret = _readFile(path, vol);
-      if (jret == 0) {
-        // finalize the volume
-        _finalizeVol(vol);
-        // write the volume out
-        if (_writeVol(vol)) {
-          cerr << "ERROR - FixFieldVals::_runRealtimeNoLdata" << endl;
-          cerr << "  Cannot write volume to file" << endl;
-          return -1;
-        }
-      } else if (jret < 0) {
-        iret = -1;
-      }
-
-      // free up
-      vol.clear();
-  
-    }
-
-  } // while
 
   return iret;
 
@@ -481,21 +291,6 @@ int FixFieldVals::_readFile(const string &readPath,
     cerr << "  Input path: " << readPath << endl;
   }
   
-  // if we are reading gematronik files in realtime mode, we need to wait
-  // for all fields to be written before proceeding
-  
-  if (_params.mode == Params::REALTIME && _params.gematronik_realtime_mode) {
-    if (_params.debug) {
-      cerr << "Waiting for all Gematronik fields, sleeping for secs: "
-           << _params.gematronik_realtime_wait_secs << endl;
-    }
-    for (int ii = 0; ii < _params.gematronik_realtime_wait_secs; ii++) {
-      PMU_auto_register("Waiting for Gematronik files");
-      umsleep(1000);
-    }
-    PMU_force_register("Got Gematronik files");
-  }
-  
   GenericRadxFile inFile;
   _setupRead(inFile);
   
@@ -523,144 +318,8 @@ int FixFieldVals::_readFile(const string &readPath,
     return -1;
   }
 
-  // if requested, change some of the characteristics
-
-  if (_params.override_instrument_type) {
-    vol.setInstrumentType((Radx::InstrumentType_t) _params.instrument_type);
-  }
-  if (_params.override_platform_type) {
-    vol.setPlatformType((Radx::PlatformType_t) _params.platform_type);
-  }
-  if (_params.override_primary_axis) {
-    vol.setPrimaryAxis((Radx::PrimaryAxis_t) _params.primary_axis);
-    // if we change the primary axis, we need to reapply the georefs
-    if (_params.apply_georeference_corrections) {
-      vol.applyGeorefs(true);
-    }
-  }
-  if (_params.read_georeference_corrections) {
-    _readGeorefCorrections(vol);
-    // if we change the corrections, we need to reapply the georefs
-    if (_params.apply_georeference_corrections) {
-      vol.applyGeorefs(true);
-    }
-  }
-  if (_params.override_beam_width || _params.override_antenna_gain) {
-    RadxPlatform platform = vol.getPlatform();
-    if (_params.override_beam_width) {
-      platform.setRadarBeamWidthDegH(_params.beam_width_deg_h);
-      platform.setRadarBeamWidthDegV(_params.beam_width_deg_v);
-    }
-    if (_params.override_antenna_gain) {
-      platform.setRadarAntennaGainDbH(_params.antenna_gain_db_h);
-      platform.setRadarAntennaGainDbV(_params.antenna_gain_db_v);
-    }
-    vol.setPlatform(platform);
-  }
-  if (_params.reverse_sweep_order_in_vol) {
-    vol.reverseSweepOrder();
-  }
-
   return 0;
 
-}
-
-//////////////////////////////////////////////////
-// Read in the georef corrections
-// Returns 0 on success, -1 on failure
-
-int FixFieldVals::_readGeorefCorrections(RadxVol &vol)
-  
-{
-
-  // open the file
-  
-  TaFile taFile;
-  FILE *inFile = taFile.fopen(_params.georeference_corrections_path, "r");
-  if (inFile == NULL) {
-    int errNum = errno;
-    cerr << "ERROR - FixFieldVals::_readGeorefCorrections" << endl;
-    cerr << "  path: " << _params.georeference_corrections_path << endl;
-    cerr << "  " << strerror(errNum) << endl;
-    return -1;
-  }
-
-  // read in the data line by line
-
-  RadxCfactors cfac;
-
-  int iret = 0;
-  while (!feof(inFile)) {
-
-    char line[1024];
-    if (fgets(line, 1024, inFile) == NULL) {
-      continue;
-    }
-
-    // tokenize the line
-    
-    vector<string> toks;
-    TaStr::tokenize(line, " ", toks);
-    
-    if (toks.size() >= 3) {
-      // retrieve the correction value
-      double val = strtod(toks[2].c_str(), NULL);
-      if (errno == ERANGE) {
-        cerr << "ERROR - FixFieldVals::_readGeorefCorrections" << endl;
-        cerr << "  reading file: "
-             << _params.georeference_corrections_path << endl;
-        cerr << "  line: " << line;
-        iret = -1;
-      }
-      // store in cfac
-      if (toks[0].find("azimuth") != string::npos) {
-        cfac.setAzimuthCorr(val);
-      } else if (toks[0].find("elevation") != string::npos) {
-        cfac.setElevationCorr(val);
-      } else if (toks[0].find("range") != string::npos) {
-        cfac.setRangeCorr(val);
-      } else if (toks[0].find("longitude") != string::npos) {
-        cfac.setLongitudeCorr(val);
-      } else if (toks[0].find("latitude") != string::npos) {
-        cfac.setLatitudeCorr(val);
-      } else if (toks[0].find("pressure_alt") != string::npos) {
-        cfac.setPressureAltCorr(val);
-      } else if (toks[0].find("radar_alt") != string::npos) {
-        cfac.setAltitudeCorr(val);
-      } else if (toks[0].find("ew_gndspd") != string::npos) {
-        cfac.setEwVelCorr(val);
-      } else if (toks[0].find("ns_gndspd") != string::npos) {
-        cfac.setNsVelCorr(val);
-      } else if (toks[0].find("vert_vel") != string::npos) {
-        cfac.setVertVelCorr(val);
-      } else if (toks[0].find("heading") != string::npos) {
-        cfac.setHeadingCorr(val);
-      } else if (toks[0].find("roll") != string::npos) {
-        cfac.setRollCorr(val);
-      } else if (toks[0].find("pitch") != string::npos) {
-        cfac.setPitchCorr(val);
-      } else if (toks[0].find("drift") != string::npos) {
-        cfac.setDriftCorr(val);
-      } else if (toks[0].find("rot_angle") != string::npos) {
-        cfac.setRotationCorr(val);
-      } else if (toks[0].find("tilt") != string::npos) {
-        cfac.setTiltCorr(val);
-      }
-    }
-    
-  } // while (!feof ...
-
-  if (_params.debug) {
-    cerr << "=================================================" << endl;
-    cerr << "Read in georef corrections from file: "
-         << _params.georeference_corrections_path << endl;
-    cfac.print(cerr);
-    cerr << "=================================================" << endl;
-  }
-  
-  vol.setCfactors(cfac);
-  return iret;
-  
 }
 
 //////////////////////////////////////////////////
@@ -699,12 +358,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     } // jj
   }
 
-  // override start range and/or gate spacing
-
-  if (_params.override_start_range || _params.override_gate_spacing) {
-    vol.remapRangeGeom(_params.start_range_km, _params.gate_spacing_km);
-  }
-
   // remap geometry as applicable
 
   if (_params.remap_to_predominant_range_geometry) {
@@ -712,39 +365,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
   }
   if (_params.remap_to_finest_range_geometry) {
     vol.remapToFinestGeom();
-  }
-
-  // override radar location if requested
-  
-  if (_params.override_radar_location) {
-    vol.overrideLocation(_params.radar_latitude_deg,
-                         _params.radar_longitude_deg,
-                         _params.radar_altitude_meters / 1000.0);
-  }
-    
-  // override radar altitude if requested
-  
-  if (_params.override_altitude_only) {
-    vol.overrideAltitude(_params.radar_altitude_meters / 1000.0);
-  }
-
-  // override radar name and site name if requested
-  
-  if (_params.override_instrument_name) {
-    vol.setInstrumentName(_params.instrument_name);
-  }
-  if (_params.override_site_name) {
-    vol.setSiteName(_params.site_name);
-  }
-    
-  // apply time offset
-
-  if (_params.apply_time_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying time offset (secs): " 
-           << _params.time_offset_secs << endl;
-    }
-    vol.applyTimeOffsetSecs(_params.time_offset_secs);
   }
 
   // set nyquist
@@ -766,23 +386,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
         cerr << "WARNING: field not found for setting nyquist: " << fieldName << endl;
       }
     } // ii
-  }
-
-  // apply angle offsets
-
-  if (_params.apply_azimuth_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying azimuth offset (deg): " 
-           << _params.azimuth_offset << endl;
-    }
-    vol.applyAzimuthOffset(_params.azimuth_offset);
-  }
-  if (_params.apply_elevation_offset) {
-    if (_params.debug) {
-      cerr << "NOTE: applying elevation offset (deg): " 
-           << _params.elevation_offset << endl;
-    }
-    vol.applyElevationOffset(_params.elevation_offset);
   }
 
   // sweep angles
@@ -840,24 +443,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
       cerr << "DEBUG - trimming surveillance sweeps to 360 deg" << endl;
     }
     vol.trimSurveillanceSweepsTo360Deg();
-  }
-
-  // clear antenna transition flags if requested
-  
-  if (_params.clear_transition_flag_on_all_rays) {
-    if (_params.debug) {
-      cerr << "DEBUG - clearing transition flag on all rays" << endl;
-    }
-    vol.clearTransitionFlagOnAllRays();
-  }
-  
-  // remove transitions if requested
-  
-  if (_params.remove_rays_with_antenna_transitions) {
-    if (_params.debug) {
-      cerr << "DEBUG - removing transitions" << endl;
-    }
-    vol.removeTransitionRays(_params.transition_nrays_margin);
   }
 
   // reorder sweeps if requested
@@ -935,16 +520,6 @@ void FixFieldVals::_finalizeVol(RadxVol &vol)
     vol.loadVolumeInfoFromRays();
   }
 
-  // volume number
-  
-  if (_params.override_volume_number ||
-      _params.autoincrement_volume_number) {
-    vol.setVolumeNumber(_volNum);
-  }
-  if (_params.autoincrement_volume_number) {
-    _volNum++;
-  }
-
   if (_params.combine_rhi) {
     vol.combineRhi();
   }
@@ -966,23 +541,6 @@ void FixFieldVals::_setupRead(RadxFile &file)
   }
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.setVerbose(true);
-  }
-
-  if (_params.set_fixed_angle_limits) {
-    file.setReadFixedAngleLimits(_params.lower_fixed_angle_limit,
-                                 _params.upper_fixed_angle_limit);
-    if (_params.lower_fixed_angle_limit == _params.upper_fixed_angle_limit) {
-      // relax strict angle checking since only a single angle is specified
-      // which means the user wants the closest angle
-      file.setReadStrictAngleLimits(false);
-    }
-  } else if (_params.set_sweep_num_limits) {
-    file.setReadSweepNumLimits(_params.lower_sweep_num,
-                               _params.upper_sweep_num);
-  }
-
-  if (!_params.apply_strict_angle_limits) {
-    file.setReadStrictAngleLimits(false);
   }
 
   if (!_params.write_other_fields_unchanged) {
@@ -1012,24 +570,6 @@ void FixFieldVals::_setupRead(RadxFile &file)
     
   }
 
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  if (_params.ignore_idle_scan_mode_on_read) {
-    file.setReadIgnoreIdleMode(true);
-  } else {
-    file.setReadIgnoreIdleMode(false);
-  }
-
-  if (_params.remove_rays_with_all_data_missing) {
-    file.setReadRemoveRaysAllMissing(true);
-  } else {
-    file.setReadRemoveRaysAllMissing(false);
-  }
-
   if (_params.preserve_sweeps) {
     file.setReadPreserveSweeps(true);
   } else {
@@ -1042,36 +582,10 @@ void FixFieldVals::_setupRead(RadxFile &file)
     file.setReadPreserveRays(false);
   }
 
-  if (_params.remove_long_range_rays) {
-    file.setReadRemoveLongRange(true);
-  } else {
-    file.setReadRemoveLongRange(false);
-  }
-
-  if (_params.remove_short_range_rays) {
-    file.setReadRemoveShortRange(true);
-  } else {
-    file.setReadRemoveShortRange(false);
-  }
-
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
 
-  if (_params.change_radar_latitude_sign) {
-    file.setChangeLatitudeSignOnRead(true);
-  }
-
-  if (_params.apply_georeference_corrections &&
-      !_params.override_primary_axis &&
-      !_params.read_georeference_corrections) {
-    file.setApplyGeorefsOnRead(true);
-  }
-
-  if (_params.read_set_radar_num) {
-    file.setRadarNumOnRead(_params.read_radar_num);
-  }
-  
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -1196,73 +710,13 @@ void FixFieldVals::_setupWrite(RadxFile &file)
     file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
   }
 
-  if (_params.output_compressed) {
-    file.setWriteCompressed(true);
-    file.setCompressionLevel(_params.compression_level);
-  } else {
-    file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order) {
-    file.setWriteNativeByteOrder(true);
-  } else {
-    file.setWriteNativeByteOrder(false);
-  }
-
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
+  
   // set output format
 
-  switch (_params.output_format) {
-    case Params::OUTPUT_FORMAT_UF:
-      file.setFileFormat(RadxFile::FILE_FORMAT_UF);
-      break;
-    case Params::OUTPUT_FORMAT_DORADE:
-      file.setFileFormat(RadxFile::FILE_FORMAT_DORADE);
-      break;
-    case Params::OUTPUT_FORMAT_FORAY:
-      file.setFileFormat(RadxFile::FILE_FORMAT_FORAY_NC);
-      break;
-    case Params::OUTPUT_FORMAT_NEXRAD:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NEXRAD_AR2);
-      break;
-    case Params::OUTPUT_FORMAT_MDV_RADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_MDV_RADIAL);
-      break;
-    case Params::OUTPUT_FORMAT_NSSL_MRD:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NSSL_MRD);
-      break;
-    case Params::OUTPUT_FORMAT_ODIM_HDF5:
-      file.setFileFormat(RadxFile::FILE_FORMAT_ODIM_HDF5);
-      break;
-    // case Params::OUTPUT_FORMAT_NCXX:
-    //   file.setFileFormat(RadxFile::FILE_FORMAT_NCXX);
-    //   break;
-    case Params::OUTPUT_FORMAT_CFRADIAL2:
-      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL2);
-      break;
-    default:
-    case Params::OUTPUT_FORMAT_CFRADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
-  }
-
-  // set netcdf format - used for CfRadial
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4_CLASSIC:
-      file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::NC64BIT:
-      file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4:
-      file.setNcFormat(RadxFile::NETCDF4);
-      break;
-    default:
-      file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (_params.write_individual_sweeps) {
-    file.setWriteIndividualSweeps(true);
-  }
+  file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
+  file.setNcFormat(RadxFile::NETCDF4);
 
   if (_params.output_force_ngates_vary) {
     file.setWriteForceNgatesVary(true);
@@ -1374,28 +828,6 @@ int FixFieldVals::_writeVol(RadxVol &vol)
 
   string outputDir = _params.output_dir;
 
-  if (_params.separate_output_dirs_by_scan_type) {
-    outputDir += PATH_DELIM;
-    Radx::SweepMode_t sweepMode = vol.getPredomSweepMode();
-    switch (sweepMode) {
-      case Radx::SWEEP_MODE_RHI:
-        outputDir += _params.rhi_subdir;
-        break;
-      case Radx::SWEEP_MODE_SECTOR:
-        outputDir += _params.sector_subdir;
-        break;
-      case Radx::SWEEP_MODE_VERTICAL_POINTING:
-        outputDir += _params.vert_subdir;
-        break;
-      case Radx::SWEEP_MODE_SUNSCAN:
-      case Radx::SWEEP_MODE_SUNSCAN_RHI:
-        outputDir += _params.sun_subdir;
-        break;
-      default:
-        outputDir += _params.surveillance_subdir;
-    }
-  }
-    
   if (_params.output_filename_mode == Params::SPECIFY_FILE_NAME) {
     
     string outPath = outputDir;
@@ -1424,26 +856,6 @@ int FixFieldVals::_writeVol(RadxVol &vol)
       return -1;
     }
 
-  }
-
-  string outputPath = outFile.getPathInUse();
-
-  // write latest data info file if requested 
-  
-  if (_params.write_latest_data_info) {
-    DsLdataInfo ldata(outputDir);
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      ldata.setDebug(true);
-    }
-    string relPath;
-    RadxPath::stripDir(outputDir, outputPath, relPath);
-    ldata.setRelDataPath(relPath);
-    ldata.setWriter(_progName);
-    if (ldata.write(vol.getStartTimeSecs())) {
-      cerr << "WARNING - FixFieldVals::_writeVol" << endl;
-      cerr << "  Cannot write latest data info file to dir: "
-           << outputDir << endl;
-    }
   }
 
   return 0;

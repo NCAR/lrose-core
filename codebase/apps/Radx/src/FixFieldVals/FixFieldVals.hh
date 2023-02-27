@@ -74,16 +74,12 @@ private:
   Params _params;
   set<string> _readPaths;
 
-  int _volNum;
   int _nWarnCensorPrint;
 
   int _runFilelist();
   int _runArchive();
-  int _runRealtimeWithLdata();
-  int _runRealtimeNoLdata();
   int _readFile(const string &filePath,
                 RadxVol &vol);
-  int _readGeorefCorrections(RadxVol &vol);
   void _finalizeVol(RadxVol &vol);
   void _setupRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);
