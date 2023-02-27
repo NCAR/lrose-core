@@ -204,7 +204,7 @@ int FixFieldVals::_analyze(const vector<string> &inputPaths)
     vol.setDebug(true);
   }
   for (int ii = 0; ii < (int) inputPaths.size(); ii++) {
-    string inputPath = _args.inputFileList[ii];
+    string inputPath = inputPaths[ii];
     // read input file
     int jret = _readFile(inputPath, vol);
     if (jret == 0) {
@@ -398,6 +398,7 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
   // compute field diffs
   
   if (_computeFieldDiffs(corrVol, truthVol)) {
+    cerr << "111111111111111111111111" << endl;
     return -1;
   }
 
@@ -502,20 +503,29 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
 
         FieldDiff &fDiff = _fieldDiffs[ifield];
 
-        RadxField *corrField = corrVol.getField(fDiff.corrName);
+        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM corrName: " << fDiff.corrName << endl;
+        RadxField *corrField = corrRay->getField(fDiff.corrName);
         if (corrField == NULL) {
           continue;
         }
         
-        RadxField *truthField = truthVol.getField(fDiff.truthName);
+        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM truthName: " << fDiff.truthName << endl;
+        RadxField *truthField = truthRay->getField(fDiff.truthName);
         if (truthField == NULL) {
           continue;
         }
+
+        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM corrField->getNPoints(): "
+             << corrField->getNPoints() << endl;
+        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM truthField->getNPoints(): "
+             << truthField->getNPoints() << endl;
 
         if (corrField->getNPoints() != truthField->getNPoints()) {
           continue;
         }
 
+        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMm" << endl;
+      
         // add to sums of diffs
         
         corrField->convertToFl32();
@@ -551,6 +561,7 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
     FieldDiff &fDiff = _fieldDiffs[ifield];
     fDiff.computeMeanDiff();
     if (fDiff.nPts < _params.min_npts_for_valid_diff) {
+      cerr << "2222222222222 nPts: " << fDiff.nPts << endl;
       iret = -1;
     }
   }
@@ -710,7 +721,7 @@ void FixFieldVals::_setupCorrectionRead(RadxFile &file)
     for (int ii = 0; ii < _params.comparison_fields_n; ii++) {
       file.addReadField(_params._comparison_fields[ii].correction_field_name);
     }
-
+    
   } else {
   
     if (!_params.write_other_fields_unchanged) {
