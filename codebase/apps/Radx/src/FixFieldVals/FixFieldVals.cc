@@ -398,7 +398,6 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
   // compute field diffs
   
   if (_computeFieldDiffs(corrVol, truthVol)) {
-    cerr << "111111111111111111111111" << endl;
     return -1;
   }
 
@@ -418,6 +417,7 @@ int FixFieldVals::_analyzeVol(RadxVol &corrVol)
     FieldDiff &fDiff = _fieldDiffs[ifield];
     xml += TaXml::writeString("CorrName", 2, fDiff.corrName);
     xml += TaXml::writeString("TruthName", 2, fDiff.truthName);
+    xml += TaXml::writeDouble("NPts", 2, fDiff.nPts);
     xml += TaXml::writeDouble("MeanDiff", 2, fDiff.meanDiff);
     xml += TaXml::writeEndTag("Field", 1);
   }
@@ -503,29 +503,20 @@ int FixFieldVals::_computeFieldDiffs(RadxVol &corrVol, RadxVol &truthVol)
 
         FieldDiff &fDiff = _fieldDiffs[ifield];
 
-        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM corrName: " << fDiff.corrName << endl;
         RadxField *corrField = corrRay->getField(fDiff.corrName);
         if (corrField == NULL) {
           continue;
         }
         
-        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM truthName: " << fDiff.truthName << endl;
         RadxField *truthField = truthRay->getField(fDiff.truthName);
         if (truthField == NULL) {
           continue;
         }
 
-        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM corrField->getNPoints(): "
-             << corrField->getNPoints() << endl;
-        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMM truthField->getNPoints(): "
-             << truthField->getNPoints() << endl;
-
         if (corrField->getNPoints() != truthField->getNPoints()) {
           continue;
         }
 
-        cerr << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMm" << endl;
-      
         // add to sums of diffs
         
         corrField->convertToFl32();
