@@ -227,11 +227,11 @@ public:
 
   void setUseRegressionFilter(bool interpAcrossNotch,
                               double notchEdgePwrRatioThresholdDb,
-                              double minCsrDb) {
+                              double minCnrDb) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
     _regrInterpAcrossNotch = interpAcrossNotch;
     _regrNotchEdgePwrRatioThresholdDb = notchEdgePwrRatioThresholdDb;
-    _regrMinCsrDb = minCsrDb;
+    _regrMinCnrDb = minCnrDb;
   }
   
   // use notch filter
@@ -1263,7 +1263,7 @@ public:
   // get clutter-to-signal ratio, in dB,
   // from 3rd order regression filter
 
-  double getRegr3CsrDb() const { return _regr3CsrDb; }
+  double getRegr3CnrDb() const { return _regr3CnrDb; }
   double getRegrInterpRatioDb() const { return _regrInterpRatioDb; }
   
   // De-trend a time series in preparation
@@ -1424,8 +1424,8 @@ private:
                                              * power ratio for finding the 
                                              * end of the initial notch */
 
-  double _regrMinCsrDb; /* regression filter - 
-                         * minimum CSR - clutter-to-signal-ratio -
+  double _regrMinCnrDb; /* regression filter - 
+                         * minimum CNR - clutter-to-noise-ratio -
                          * for applying the filter */
   
   bool _regrInterpAcrossNotch; /* regression filter - 
@@ -1433,7 +1433,7 @@ private:
 
   
 
-  double _regr3CsrDb; /* regression filter - clutter-to-signal ratio
+  double _regr3CnrDb; /* regression filter - clutter-to-noise ratio
                        * from 3rd order fit */
 
   double _regrInterpRatioDb; /* regression filter - power ratio from

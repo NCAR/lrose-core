@@ -1145,9 +1145,9 @@ paramdef int {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to determine the polynomial order from the Clutter-to-Signal-Ratio (CSR).";
-  p_help = "If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.";
-} regression_filter_determine_order_from_CSR;
+  p_descr = "Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).";
+  p_help = "If TRUE, we compute the CNR from the 3 central spectral points. Then, using a lookup-table based on CNR, we determine the appropriate order of the polynomial fit.";
+} regression_filter_determine_order_from_CNR;
 
 paramdef double {
   p_default  = -45;
@@ -1157,9 +1157,9 @@ paramdef double {
 
 paramdef double {
   p_default  = -5;
-  p_descr = "Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).";
-  p_help = "As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.";
-} regression_filter_min_csr_db;
+  p_descr = "Min valid CNR - Clutter-to-Noise-Ratio - for applying the filter (dB).";
+  p_help = "As a first step, we compute the CNR using a 3rd order regression fit. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.";
+} regression_filter_min_cnr_db;
 
 paramdef boolean {
   p_default  = true;
@@ -1843,7 +1843,7 @@ paramdef double {
 
 commentdef {
   p_header = "RHOHV TEST to AUGMENT CMD";
-  p_text = "If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.";
+  p_text = "If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low clutter-to-noise ratio.";
 };
 
 paramdef boolean {

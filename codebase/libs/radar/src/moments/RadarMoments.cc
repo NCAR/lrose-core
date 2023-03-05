@@ -147,10 +147,10 @@ void RadarMoments::_init()
   _clutterWidthMps = 0.75;
   _clutterInitNotchWidthMps = 1.5;
   _regrNotchEdgePwrRatioThresholdDb = -45;
-  _regrMinCsrDb = -5;
+  _regrMinCnrDb = -5;
   _regrInterpAcrossNotch = true;
   _notchWidthMps = 3.0;
-  _regr3CsrDb = 0.0;
+  _regr3CnrDb = 0.0;
   _regrInterpRatioDb = 0.0;
 
   _wavelengthMeters = 10.0;
@@ -173,7 +173,7 @@ void RadarMoments::_init()
   MEM_zero(_PP_);
   _PP = _PP_;
   
-  _regr3CsrDb = -120.0;
+  _regr3CnrDb = -120.0;
 
   _velSign = 1.0;
   _velSignStaggered = 1.0;
@@ -4519,7 +4519,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //    spectralSnr: ratio of spectral noise to noise power
 //    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
 //
-//  After calling this routine, you can call getCsrRegr3Db() to get
+//  After calling this routine, you can call getCnrRegr3Db() to get
 //  the clutter-to-signal-ratio from a 3rd-order regression filter
 
 void RadarMoments::applyRegressionFilter
@@ -4545,7 +4545,7 @@ void RadarMoments::applyRegressionFilter
   iqRegr3.resize(nSamples);
   regr.applyForsythe3(iqUnfiltered, iqRegr3.data());
 
-  // compute clutter to signal ratio
+  // compute clutter to noise ratio
 
   double rawPower = RadarComplex::meanPower(iqUnfiltered, nSamples);
   double signal3Power = RadarComplex::meanPower(iqRegr3.data(), nSamples);
@@ -4553,15 +4553,36 @@ void RadarMoments::applyRegressionFilter
   if (clut3Power < 0) {
     clut3Power = 1.0e-12;
   }
-  // double csrRegr3 = clut3Power / signal3Power;
-  double csrRegr3 = clut3Power / calibratedNoise;
-  _regr3CsrDb = 10.0 * log10(csrRegr3);
+  double cnrRegr3 = clut3Power / calibratedNoise;
+  _regr3CnrDb = 10.0 * log10(cnrRegr3);
 
-  // cerr << "EEEEEEEE clut3Power, signal3Power, calibratedNoise, _regr3CsrDb: "
+  double clutPower = regr.compute3PtClutPower(iqUnfiltered);
+  double cnr3 = clutPower / calibratedNoise;
+  double cnr3Db = 10.0 * log10(cnr3);
+
+  TaArray<RadarComplex_t> iqSpec_;
+  RadarComplex_t *iqSpec = iqSpec_.alloc(nSamples);
+  fft.fwd(iqUnfiltered, iqSpec);
+  double sumPwr = 0.0;
+  for (int jj = 0; jj < 3; jj++) {
+    if (jj == 2) {
+      jj = nSamples - 1;
+    }
+    double pwr = iqSpec[jj].re * iqSpec[jj].re + iqSpec[jj].im * iqSpec[jj].im;
+    sumPwr += pwr;
+  }
+  double meanPwr = sumPwr / 3.0;
+  double meanPwrDb = 10.0 * log10(meanPwr);
+  double clutPwrDb = 10.0 * log10(clutPower);
+  
+  cerr << "FFFFFFFFFF _regr3CnrDb, cnr3Db, clutPwrDb, meanPwrDb: "
+       << _regr3CnrDb << ", " << cnr3Db << ", " << clutPwrDb << ", " << meanPwrDb << endl;
+  
+  // cerr << "EEEEEEEE clut3Power, signal3Power, calibratedNoise, _regr3CnrDb: "
   //      << clut3Power << ", " << signal3Power << ", "
-  //      << calibratedNoise << ", " << _regr3CsrDb << endl;
+  //      << calibratedNoise << ", " << _regr3CnrDb << endl;
 
-  if (_regr3CsrDb < _regrMinCsrDb) {
+  if (_regr3CnrDb < _regrMinCnrDb) {
 
     memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
 
@@ -5190,7 +5211,7 @@ void RadarMoments::_runRegressionFilter
   vector<double> regrSpec;
   regrSpec.resize(nSamples);
 
-  if (_regr3CsrDb < _regrMinCsrDb) {
+  if (_regr3CnrDb < _regrMinCnrDb) {
 
     // don't use a regression filter
     
@@ -5200,11 +5221,11 @@ void RadarMoments::_runRegressionFilter
 
   } else {
     
-    // apply regression filter, passing in CSR
+    // apply regression filter, passing in CNR
     
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, _antennaRate, _nyquist, iqRegr.data());
+    regr.applyForsythe(iqUnfiltered, _regr3CnrDb, _antennaRate, _nyquist, iqRegr.data());
     
     // apply the window to the regression-filtered times series
     
@@ -5325,7 +5346,7 @@ void RadarMoments::_runRegressionFilter
     
     invertWindow(regrWindowed.data(), window, iqFiltered, nSamples);
 
-  } // if (_regr3CsrDb < _regrMinCsrDb) {
+  } // if (_regr3CnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
   

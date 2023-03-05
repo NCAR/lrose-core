@@ -106,12 +106,22 @@ public:
                    size_t nn);
   
 
-// get references to sin and cos arrays
+  // get references to sin and cos arrays
   // will be loaded as required
-
+  
   const vector<vector<double> > &getCosArray() const;
   const vector<vector<double> > &getSinArray() const;
 
+  // compute DFT
+  
+  static void computeDft(const vector<double> &inReal,
+                         const vector<double> &inImag,
+                         vector<double> &outReal,
+                         vector<double> &outImag);
+  
+  static void computeDft(const vector<RadarComplex_t> &in,
+                         vector<RadarComplex_t> &out);
+	
 protected:
   
 private:

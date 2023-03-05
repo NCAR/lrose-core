@@ -469,8 +469,6 @@ void Beam::_prepareForComputeMoments()
     _targetAz = _az;
   }
 
-  _mom->setAntennaRate(_antennaRate);
-
 #ifdef DEBUG_PRINT_SPECTRA
   GlobAz = _az;
   GlobElev = _el;
@@ -515,10 +513,10 @@ void Beam::_prepareForComputeMoments()
   
   if (_params.use_polynomial_regression_clutter_filter) {
     int order = _params.regression_filter_polynomial_order;
-    bool orderFromCSR = _params.regression_filter_determine_order_from_CSR;
-    _regr->setup(_nSamples, order, orderFromCSR);
-    _regrHalf->setup(_nSamplesHalf, order, orderFromCSR);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCSR);
+    bool orderFromCNR = _params.regression_filter_determine_order_from_CNR;
+    _regr->setup(_nSamples, order, orderFromCNR);
+    _regrHalf->setup(_nSamplesHalf, order, orderFromCNR);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCNR);
   }
 
   pthread_mutex_unlock(&_fftMutex);
@@ -592,6 +590,8 @@ void Beam::_prepareForComputeMoments()
     _mom->init(_prt, _opsInfo);
   }
   
+  _mom->setAntennaRate(_antennaRate);
+
   // compute windows for FFTs
 
   _computeWindows();
@@ -1995,11 +1995,11 @@ void Beam::_filterSpH()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
 
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
     
     // compute filtered moments for this gate
     
@@ -2073,11 +2073,11 @@ void Beam::_filterSpV()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
     
     // compute filtered moments for this gate
     
@@ -2389,11 +2389,11 @@ void Beam::_filterDpAltHvCoCross()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
 
     // apply the filter ratio to other channels
     
@@ -2568,11 +2568,11 @@ void Beam::_filterDpAltHvCoOnly()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
     
     // apply the filter ratio to other channels
     
@@ -2758,11 +2758,11 @@ void Beam::_filterDpSimHvFixedPrt()
 
     // }
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     // fields.test3 = _mom->getRegrInterpRatioDb();
     // fields.test4 = _regr->getPolyOrderInUse();
-    // fields.test5 = _mom->getRegr3CsrDb();
+    // fields.test5 = _mom->getRegr3CnrDb();
 
   } // igate
 
@@ -2899,11 +2899,11 @@ void Beam::_filterDpHOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
     
     // apply the filter ratio to other channel
     
@@ -3065,11 +3065,11 @@ void Beam::_filterDpVOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing csr from 3-order regression filter
+    // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CsrDb();
+    fields.test5 = _mom->getRegr3CnrDb();
     
     // apply the filter ratio to other channel
     
@@ -3370,7 +3370,7 @@ void Beam::_initMomentsObject(RadarMoments *mom)
     mom->setUseRegressionFilter
       (_params.regression_filter_interp_across_notch,
        _params.regression_filter_notch_edge_power_ratio_threshold_db,
-       _params.regression_filter_min_csr_db);
+       _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }

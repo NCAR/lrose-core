@@ -2753,15 +2753,15 @@
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'regression_filter_determine_order_from_CSR'
+    // Parameter 'regression_filter_determine_order_from_CNR'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_determine_order_from_CSR");
-    tt->descr = tdrpStrDup("Option to determine the polynomial order from the Clutter-to-Signal-Ratio (CSR).");
-    tt->help = tdrpStrDup("If TRUE, we compute the CSR from the 3 central spectral points. Then, using a lookup-table based on CSR, we determine the appropriate order of the polynomial fit.");
-    tt->val_offset = (char *) &regression_filter_determine_order_from_CSR - &_start_;
+    tt->param_name = tdrpStrDup("regression_filter_determine_order_from_CNR");
+    tt->descr = tdrpStrDup("Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).");
+    tt->help = tdrpStrDup("If TRUE, we compute the CNR from the 3 central spectral points. Then, using a lookup-table based on CNR, we determine the appropriate order of the polynomial fit.");
+    tt->val_offset = (char *) &regression_filter_determine_order_from_CNR - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -2777,15 +2777,15 @@
     tt->single_val.d = -45;
     tt++;
     
-    // Parameter 'regression_filter_min_csr_db'
+    // Parameter 'regression_filter_min_cnr_db'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_min_csr_db");
-    tt->descr = tdrpStrDup("Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
-    tt->help = tdrpStrDup("As a first step, we compute the CSR using a 3rd order regression fit. If the CSR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
-    tt->val_offset = (char *) &regression_filter_min_csr_db - &_start_;
+    tt->param_name = tdrpStrDup("regression_filter_min_cnr_db");
+    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Noise-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CNR using a 3rd order regression fit. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->val_offset = (char *) &regression_filter_min_cnr_db - &_start_;
     tt->single_val.d = -5;
     tt++;
     
@@ -4419,7 +4419,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 24");
     tt->comment_hdr = tdrpStrDup("RHOHV TEST to AUGMENT CMD");
-    tt->comment_text = tdrpStrDup("If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low CSR.");
+    tt->comment_text = tdrpStrDup("If clutter is present the RHOHV value should increase after application of the clutter filter. We can use a RHOHV test to locate gates at which CMD fails to identify weak clutter. This allows us to improve clutter identification in cases with low clutter-to-noise ratio.");
     tt++;
     
     // Parameter 'apply_rhohv_test_after_cmd'

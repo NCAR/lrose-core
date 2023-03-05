@@ -76,7 +76,7 @@ public:
   //
   // nSamples: number of samples in IQ time series
   // polyOrder: order of polynomial for regression
-  // orderAuto: determine polynomial order from CSR
+  // orderAuto: determine polynomial order from CNR
 
   void setup(int nSamples, int polyOrder = 5,
              bool orderAuto = false);
@@ -87,7 +87,7 @@ public:
   // staggeredM, staggeredN - stagger ratio = M/N
   //   time series starts with short PRT
   // polyOrder: order of polynomial for regression
-  // orderAuto: determine polynomial order from CSR
+  // orderAuto: determine polynomial order from CNR
   //
   // If successful, _setupDone will be set to true.
   // If not successful, _setupDone will be set to false.
@@ -121,7 +121,7 @@ public:
   //
   // Inputs:
   //   rawIq: raw I,Q data
-  //   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+  //   cnrRegr3Db: clutter-to-signal-ratio from 3rd order fit
   //
   // Outputs:
   //   filteredIq: filtered I,Q data
@@ -132,7 +132,7 @@ public:
   // Note: assumes setup() has been successfully completed.
 
   void applyForsythe(const RadarComplex_t *rawIq,
-                     double csrRegr3Db,
+                     double cnrRegr3Db,
                      double antennaRateDegPerSec,
                      double nyquistMetersPerSec,
                      RadarComplex_t *filteredIq);
@@ -142,6 +142,10 @@ public:
 
   void applyForsythe3(const RadarComplex_t *rawIq,
                       RadarComplex_t *filteredIq);
+  
+  // compute the power from the central 3 points in the FFT
+  
+  double compute3PtClutPower(const RadarComplex_t *rawIq);
   
   // Perform polynomial fit from observed data
   //
@@ -208,6 +212,7 @@ private:
 
   bool _orderAuto;     // determine the order from the clutter to signal ratio
   int _polyOrderInUse; // polynomial order used in auto selection
+  int _maxOrder;
 
   bool _setupDone;
 
@@ -285,18 +290,6 @@ private:
                     int sizeAa,
                     FILE *out) const;
 
-  // compute DFT, specifying number of terms to compute
-  
-  static void _computeDft(const vector<double> &inReal,
-                          const vector<double> &inImag,
-                          size_t nTermsCompute,
-                          vector<double> &outReal,
-                          vector<double> &outImag);
-	
-  static void _computeDft(const vector<RadarComplex_t> &in,
-                          size_t nTermsCompute,
-                          vector<RadarComplex_t> &out);
-	
 };
 
 #endif

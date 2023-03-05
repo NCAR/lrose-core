@@ -40,6 +40,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <iomanip>
 #include <cstring>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/mem.h>
@@ -99,6 +100,7 @@ void RegressionFilter::_init()
   _nSamples = 0;
   _polyOrder = 5;
   _polyOrder1 = _polyOrder + 1;
+  _maxOrder = 0;
 
   _isStaggered = false;
   _staggeredM = 0;
@@ -414,7 +416,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 //
 // Inputs:
 //   rawIq: raw I,Q data
-//   csrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+//   cnrRegr3Db: clutter-to-signal-ratio from 3rd order fit
 //
 // Outputs:
 //   filteredIq: filtered I,Q data
@@ -425,7 +427,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 // Note: assumes setup() has been successfully completed.
 
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
-                                     double csrRegr3Db,
+                                     double cnrRegr3Db,
                                      double antennaRateDegPerSec,
                                      double nyquistMetersPerSec,
                                      RadarComplex_t *filteredIq)
@@ -448,48 +450,44 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
   }
 
   // compute the order to be used (from Meymaris)
-  
+
+  if (cnrRegr3Db < 1) {
+    cnrRegr3Db = 0.9999999;
+  }
   double ss = 1.0;
   double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
   double wcNorm = wc / nyquistMetersPerSec;
   double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
-  int order = ceil(orderNorm * pow(csrRegr3Db, 2.0 / 3.0) * _nSamples) + 1;
-  if (_orderAuto) {
-    _polyOrderInUse = order;
+  int order = ceil(orderNorm * pow(cnrRegr3Db, 2.0 / 3.0) * _nSamples) + 1;
+  if (order > _maxOrder) {
+    _maxOrder = order;
   }
+
+  cerr << "wc, wcNorm, cnr, orderNorm, order, max: "
+       << setw(6) << wc << ", "
+       << setw(6) << wcNorm << ", "
+       << setw(6) << cnrRegr3Db << ", "
+       << setw(6) << orderNorm << ", "
+       << setw(3) << order << ", "
+       << setw(3) << _maxOrder << endl;
+  
+  if (_orderAuto) {
+    _polyOrder = order;
+  }
+  _polyOrderInUse = _polyOrder;
   
   // prepare the forsythe
   
-  ForsytheFit &forsythe = _forsythe;
-  forsythe.prepareForFit(_polyOrderInUse, _xxVals);
-
-  // if (_orderAuto) {
-  //   if (csrRegr3Db > 75.0) {
-  //     forsythe = _forsythe9;
-  //     _polyOrderInUse = 9;
-  //   } else if (csrRegr3Db > 65.0) {
-  //     forsythe = _forsythe7;
-  //     _polyOrderInUse = 7;
-  //   } else if (csrRegr3Db > 50.0) {
-  //     forsythe = _forsythe6;
-  //     _polyOrderInUse = 6;
-  //   } else if (csrRegr3Db > 35.0) {
-  //     forsythe = _forsythe5;
-  //     _polyOrderInUse = 5;
-  //   } else {
-  //     forsythe = _forsythe4;
-  //     _polyOrderInUse = 4;
-  //   }
-  // }
+  _forsythe.prepareForFit(_polyOrderInUse, _xxVals);
 
   // poly fit to I
 
-  forsythe.performFit(rawI);
+  _forsythe.performFit(rawI);
 
   // compute the estimated I polynomial values
   // load residuals into filtered Iq
   
-  vector<double> iSmoothed = forsythe.getYEstVector();
+  vector<double> iSmoothed = _forsythe.getYEstVector();
   for (int ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
     _polyfitIq[ii].re = iSmoothed[ii];
@@ -497,12 +495,12 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
   
   // poly fit to Q
 
-  forsythe.performFit(rawQ);
+  _forsythe.performFit(rawQ);
   
   // compute the estimated Q polynomial values
   // load residuals into filtered Iq
   
-  vector<double> qSmoothed = forsythe.getYEstVector();
+  vector<double> qSmoothed = _forsythe.getYEstVector();
   for (int ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];
     _polyfitIq[ii].im = qSmoothed[ii];
@@ -918,63 +916,31 @@ void RegressionFilter::_vectorPrint(string name,
 
 }
 
-//////////////////////////////////////////////////////
-// compute DFT, specifying number of terms to compute
-// the remainder will be set to 0
+/////////////////////////////////////////////////////////////////////////
+// compute the power from the central 3 points in the FFT
 
-void RegressionFilter::_computeDft(const vector<double> &inReal,
-                                   const vector<double> &inImag,
-                                   size_t nTermsCompute,
-                                   vector<double> &outReal,
-                                   vector<double> &outImag)
-
-{
-	
-  size_t nn = inReal.size();
-
-  for (size_t kk = 0; kk < nTermsCompute; kk++) {  // For each output element
-    double sumReal = 0.0;
-    double sumImag = 0.0;
-    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
-      double angle = 2.0 * M_PI * tt * kk / nn;
-      sumReal +=  inReal[tt] * cos(angle) + inImag[tt] * sin(angle);
-      sumImag += -inReal[tt] * sin(angle) + inImag[tt] * cos(angle);
-    }
-    outReal[kk] = sumReal;
-    outImag[kk] = sumImag;
-  }
-
-  for (size_t kk = nTermsCompute; kk < nn; kk++) {  // For each output element
-    outReal[kk] = 0.0;
-    outImag[kk] = 0.0;
-  }
-
-}
-
-void RegressionFilter::_computeDft(const vector<RadarComplex_t> &in,
-                                   size_t nTermsCompute,
-                                   vector<RadarComplex_t> &out)
+double RegressionFilter::compute3PtClutPower(const RadarComplex_t *rawIq)
   
 {
-	
-  size_t nn = in.size();
-
-  for (size_t kk = 0; kk < nTermsCompute; kk++) {  // For each output element
+  
+  double sumPower = 0.0;
+  
+  for (size_t kk = 0; kk < 3; kk++) {
+    if (kk == 2) {
+      kk = _nSamples - 1;
+    }
     double sumReal = 0.0;
     double sumImag = 0.0;
-    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
-      double angle = 2.0 * M_PI * tt * kk / nn;
-      sumReal +=  in[tt].re * cos(angle) + in[tt].im * sin(angle);
-      sumImag += -in[tt].re * sin(angle) + in[tt].im * cos(angle);
+    for (int tt = 0; tt < _nSamples; tt++) {  // For each input element
+      double angle = 2.0 * M_PI * tt * kk / _nSamples;
+      sumReal +=  rawIq[tt].re * cos(angle) + rawIq[tt].im * sin(angle);
+      sumImag += -rawIq[tt].re * sin(angle) + rawIq[tt].im * cos(angle);
     }
-    out[kk].re = sumReal;
-    out[kk].im = sumImag;
+    double power = (sumReal * sumReal + sumImag * sumImag) / _nSamples;
+    sumPower += power;
   }
-  
-  for (size_t kk = nTermsCompute; kk < nn; kk++) {  // For each output element
-    out[kk].re = 0.0;
-    out[kk].im = 0.0;
-  }
+
+  return sumPower / 3.0;
 
 }
 
