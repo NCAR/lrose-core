@@ -1258,6 +1258,7 @@ public:
   double getNyquist() const { return _nyquist; }
   double getNyquistPrtShort() const { return _nyquistPrtShort; }
   double getNyquistPrtLong() const { return _nyquistPrtLong; }
+  double getNyquistPrtMean() const { return _nyquistPrtMean; }
 
   // get clutter-to-signal ratio, in dB,
   // from 3rd order regression filter
@@ -1463,6 +1464,7 @@ private:
   int _nGatesPrtLong;
   double _nyquistPrtShort;
   double _nyquistPrtLong;
+  double _nyquistPrtMean;
   double _nyquistShortPlusLong;
   double _nyquistStagNominal;
   int _LL;

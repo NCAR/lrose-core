@@ -227,29 +227,27 @@ void RegressionFilter::setup(int nSamples,
 
   double xDelta = 1.0 / _nSamples;
   double xx = -0.5;
+  _xxVals.clear();
   for (int ii = 0; ii < _nSamples; ii++) {
     _xx[ii] = xx;
+    _xxVals.push_back(xx);
     xx += xDelta;
   }
-
+  
   // compute CC matrix for later use
-
+  
   _computeCc();
-
+  
   // prepare Forsythe
 
-  vector<double> xVals;
-  for (int ii = 0; ii < _nSamples; ii++) {
-    xVals.push_back(_xx[ii]);
-  }
-  _forsythe.prepareForFit(_polyOrder, xVals);
-  _forsythe3.prepareForFit(3, xVals);
+  _forsythe.prepareForFit(_polyOrder, _xxVals);
+  _forsythe3.prepareForFit(3, _xxVals);
   if (_orderAuto) {
-    _forsythe4.prepareForFit(4, xVals);
-    _forsythe5.prepareForFit(5, xVals);
-    _forsythe6.prepareForFit(6, xVals);
-    _forsythe7.prepareForFit(7, xVals);
-    _forsythe9.prepareForFit(9, xVals);
+    _forsythe4.prepareForFit(4, _xxVals);
+    _forsythe5.prepareForFit(5, _xxVals);
+    _forsythe6.prepareForFit(6, _xxVals);
+    _forsythe7.prepareForFit(7, _xxVals);
+    _forsythe9.prepareForFit(9, _xxVals);
   }
 
   // done
@@ -307,8 +305,10 @@ void RegressionFilter::setupStaggered(int nSamples,
   int nStaggered = (_nSamples / 2) * (_staggeredM + _staggeredN);
   double xDelta = 1.0 / nStaggered;
   double xx = -0.5;
+  _xxVals.clear();
   for (int ii = 0; ii < _nSamples; ii++) {
     _xx[ii] = xx;
+    _xxVals.push_back(xx);
     if (ii % 2 == 0) {
       xx += xDelta * _staggeredM;
     } else {
@@ -322,18 +322,14 @@ void RegressionFilter::setupStaggered(int nSamples,
   
   // prepare Forsythe
 
-  vector<double> xVals;
-  for (int ii = 0; ii < _nSamples; ii++) {
-    xVals.push_back(_xx[ii]);
-  }
-  _forsythe.prepareForFit(_polyOrder, xVals);
-  _forsythe3.prepareForFit(3, xVals);
+  _forsythe.prepareForFit(_polyOrder, _xxVals);
+  _forsythe3.prepareForFit(3, _xxVals);
   if (_orderAuto) {
-    _forsythe4.prepareForFit(4, xVals);
-    _forsythe5.prepareForFit(5, xVals);
-    _forsythe6.prepareForFit(6, xVals);
-    _forsythe7.prepareForFit(7, xVals);
-    _forsythe9.prepareForFit(9, xVals);
+    _forsythe4.prepareForFit(4, _xxVals);
+    _forsythe5.prepareForFit(5, _xxVals);
+    _forsythe6.prepareForFit(6, _xxVals);
+    _forsythe7.prepareForFit(7, _xxVals);
+    _forsythe9.prepareForFit(9, _xxVals);
   }
 
   // done
@@ -430,7 +426,8 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
                                      double csrRegr3Db,
-                                     double antennaRate,
+                                     double antennaRateDegPerSec,
+                                     double nyquistMetersPerSec,
                                      RadarComplex_t *filteredIq)
   
 {
@@ -450,27 +447,40 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
     rawQ.push_back(rawIq[ii].im);
   }
 
-  // choose which order to apply
-
-  ForsytheFit &forsythe = _forsythe;
+  // compute the order to be used (from Meymaris)
+  
+  double ss = 1.0;
+  double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
+  double wcNorm = wc / nyquistMetersPerSec;
+  double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
+  int order = ceil(orderNorm * pow(csrRegr3Db, 2.0 / 3.0) * _nSamples) + 1;
   if (_orderAuto) {
-    if (csrRegr3Db > 75.0) {
-      forsythe = _forsythe9;
-      _polyOrderInUse = 9;
-    } else if (csrRegr3Db > 65.0) {
-      forsythe = _forsythe7;
-      _polyOrderInUse = 7;
-    } else if (csrRegr3Db > 50.0) {
-      forsythe = _forsythe6;
-      _polyOrderInUse = 6;
-    } else if (csrRegr3Db > 35.0) {
-      forsythe = _forsythe5;
-      _polyOrderInUse = 5;
-    } else {
-      forsythe = _forsythe4;
-      _polyOrderInUse = 4;
-    }
+    _polyOrderInUse = order;
   }
+  
+  // prepare the forsythe
+  
+  ForsytheFit &forsythe = _forsythe;
+  forsythe.prepareForFit(_polyOrderInUse, _xxVals);
+
+  // if (_orderAuto) {
+  //   if (csrRegr3Db > 75.0) {
+  //     forsythe = _forsythe9;
+  //     _polyOrderInUse = 9;
+  //   } else if (csrRegr3Db > 65.0) {
+  //     forsythe = _forsythe7;
+  //     _polyOrderInUse = 7;
+  //   } else if (csrRegr3Db > 50.0) {
+  //     forsythe = _forsythe6;
+  //     _polyOrderInUse = 6;
+  //   } else if (csrRegr3Db > 35.0) {
+  //     forsythe = _forsythe5;
+  //     _polyOrderInUse = 5;
+  //   } else {
+  //     forsythe = _forsythe4;
+  //     _polyOrderInUse = 4;
+  //   }
+  // }
 
   // poly fit to I
 

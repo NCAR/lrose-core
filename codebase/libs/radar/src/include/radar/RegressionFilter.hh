@@ -133,7 +133,8 @@ public:
 
   void applyForsythe(const RadarComplex_t *rawIq,
                      double csrRegr3Db,
-                     double antennaRate,
+                     double antennaRateDegPerSec,
+                     double nyquistMetersPerSec,
                      RadarComplex_t *filteredIq);
   
   // Perform 3rd-order regression filtering on I,Q data
@@ -211,6 +212,7 @@ private:
   bool _setupDone;
 
   double *_xx;    // x vector - observed
+  vector<double> _xxVals;
   double *_yyEst; // regression estimate of y
 
   double **_vv;   // Vandermonde matrix

@@ -4834,7 +4834,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, _nyquistPrtMean, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5060,7 +5060,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, _nyquistPrtMean, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5204,7 +5204,7 @@ void RadarMoments::_runRegressionFilter
     
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, _antennaRate, iqRegr.data());
+    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, _antennaRate, _nyquist, iqRegr.data());
     
     // apply the window to the regression-filtered times series
     
@@ -5891,6 +5891,8 @@ void RadarMoments::initStagPrt(double prtShort,
   
   _nyquistPrtShort = ((_wavelengthMeters / _prtShort) / 4.0);
   _nyquistPrtLong = ((_wavelengthMeters / _prtLong) / 4.0);
+  double prtMean = (_prtShort + _prtLong) / 2.0;
+  _nyquistPrtMean = ((_wavelengthMeters / prtMean) / 4.0);
   _nyquistShortPlusLong = ((_wavelengthMeters / (_prtShort + _prtLong)) / 4.0);
   _nyquistStagNominal = ((_wavelengthMeters / (_prtShort / _staggeredM)) / 4.0);
   _nyquist = _nyquistPrtShort * _staggeredM;
