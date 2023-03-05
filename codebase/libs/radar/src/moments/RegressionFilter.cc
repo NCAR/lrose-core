@@ -430,6 +430,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
                                      double csrRegr3Db,
+                                     double antennaRate,
                                      RadarComplex_t *filteredIq)
   
 {
@@ -906,4 +907,64 @@ void RegressionFilter::_vectorPrint(string name,
   fprintf(out, "==================================\n");
 
 }
+
+//////////////////////////////////////////////////////
+// compute DFT, specifying number of terms to compute
+// the remainder will be set to 0
+
+void RegressionFilter::_computeDft(const vector<double> &inReal,
+                                   const vector<double> &inImag,
+                                   size_t nTermsCompute,
+                                   vector<double> &outReal,
+                                   vector<double> &outImag)
+
+{
+	
+  size_t nn = inReal.size();
+
+  for (size_t kk = 0; kk < nTermsCompute; kk++) {  // For each output element
+    double sumReal = 0.0;
+    double sumImag = 0.0;
+    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
+      double angle = 2.0 * M_PI * tt * kk / nn;
+      sumReal +=  inReal[tt] * cos(angle) + inImag[tt] * sin(angle);
+      sumImag += -inReal[tt] * sin(angle) + inImag[tt] * cos(angle);
+    }
+    outReal[kk] = sumReal;
+    outImag[kk] = sumImag;
+  }
+
+  for (size_t kk = nTermsCompute; kk < nn; kk++) {  // For each output element
+    outReal[kk] = 0.0;
+    outImag[kk] = 0.0;
+  }
+
+}
+
+void RegressionFilter::_computeDft(const vector<RadarComplex_t> &in,
+                                   size_t nTermsCompute,
+                                   vector<RadarComplex_t> &out)
   
+{
+	
+  size_t nn = in.size();
+
+  for (size_t kk = 0; kk < nTermsCompute; kk++) {  // For each output element
+    double sumReal = 0.0;
+    double sumImag = 0.0;
+    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
+      double angle = 2.0 * M_PI * tt * kk / nn;
+      sumReal +=  in[tt].re * cos(angle) + in[tt].im * sin(angle);
+      sumImag += -in[tt].re * sin(angle) + in[tt].im * cos(angle);
+    }
+    out[kk].re = sumReal;
+    out[kk].im = sumImag;
+  }
+  
+  for (size_t kk = nTermsCompute; kk < nn; kk++) {  // For each output element
+    out[kk].re = 0.0;
+    out[kk].im = 0.0;
+  }
+
+}
+

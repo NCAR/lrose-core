@@ -4834,7 +4834,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5060,7 +5060,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, iqRegr);
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5204,7 +5204,7 @@ void RadarMoments::_runRegressionFilter
     
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, iqRegr.data());
+    regr.applyForsythe(iqUnfiltered, _regr3CsrDb, _antennaRate, iqRegr.data());
     
     // apply the window to the regression-filtered times series
     

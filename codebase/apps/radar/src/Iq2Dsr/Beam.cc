@@ -180,6 +180,7 @@ void Beam::init(const MomentsMgr &mmgr,
                 double angularResolution,
                 double meanPointingAngle,
                 scan_type_t scanType,
+                double antennaRate,
                 bool isAlternating,
                 bool isStagPrt,
                 double prt,
@@ -204,6 +205,7 @@ void Beam::init(const MomentsMgr &mmgr,
   _angularResolution = angularResolution;
   _meanPointingAngle = meanPointingAngle;
   _scanType = scanType;
+  _antennaRate = antennaRate;
   _isAlternating = isAlternating;
   _isStagPrt = isStagPrt;
   _prt = prt;
@@ -466,6 +468,8 @@ void Beam::_prepareForComputeMoments()
   if (std::isnan(_targetAz) || _targetAz < -990) {
     _targetAz = _az;
   }
+
+  _mom->setAntennaRate(_antennaRate);
 
 #ifdef DEBUG_PRINT_SPECTRA
   GlobAz = _az;
@@ -2816,11 +2820,11 @@ void Beam::_filterDpSimHvStagPrt()
     // apply the filter ratio to other channel
     
     _momStagPrt->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvcPrtShort, specRatioShort,
-                           gate->iqvcPrtShortF, NULL);
+                                  gate->iqvcPrtShort, specRatioShort,
+                                  gate->iqvcPrtShortF, NULL);
     _momStagPrt->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvcPrtLong, specRatioLong,
-                           gate->iqvcPrtLongF, NULL);
+                                  gate->iqvcPrtLong, specRatioLong,
+                                  gate->iqvcPrtLongF, NULL);
     
     // compute filtered moments for this gate
     

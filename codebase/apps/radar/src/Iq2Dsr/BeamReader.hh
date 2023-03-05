@@ -92,6 +92,15 @@ public:
   bool isOpsInfoNew() const { return _pulseReader->isOpsInfoNew(); }
   Beam::scan_type_t getScanType() const { return _scanType; }
 
+  // get beam rate
+  
+  double getBeamAzRate() const { return _beamAzRate; }
+  double getBeamElRate() const { return _beamElRate; }
+
+  // get antenna rate for scan type
+  
+  double getAntennaRate();
+
 protected:
   
 private:

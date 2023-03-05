@@ -295,6 +295,12 @@ public:
   }
 
   /////////////////////////////////////////////////////////////
+  // set the antenna rate for the beam, before computing moments
+  // this can apply to regression clutter filtering
+
+  void setAntennaRate(double rate) { _antennaRate = rate; }
+  
+  /////////////////////////////////////////////////////////////
   // load up the atmospheric attenuation table,
   // given the elevation angle
 
@@ -1547,7 +1553,11 @@ private:
 
   double _measXmitPowerDbmH;
   double _measXmitPowerDbmV;
+
+  // antenna rate
   
+  double _antennaRate;
+
   // moments
 
   static const double _minDetectableSnr;

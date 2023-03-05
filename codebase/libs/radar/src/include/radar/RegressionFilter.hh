@@ -133,6 +133,7 @@ public:
 
   void applyForsythe(const RadarComplex_t *rawIq,
                      double csrRegr3Db,
+                     double antennaRate,
                      RadarComplex_t *filteredIq);
   
   // Perform 3rd-order regression filtering on I,Q data
@@ -282,6 +283,18 @@ private:
                     int sizeAa,
                     FILE *out) const;
 
+  // compute DFT, specifying number of terms to compute
+  
+  static void _computeDft(const vector<double> &inReal,
+                          const vector<double> &inImag,
+                          size_t nTermsCompute,
+                          vector<double> &outReal,
+                          vector<double> &outImag);
+	
+  static void _computeDft(const vector<RadarComplex_t> &in,
+                          size_t nTermsCompute,
+                          vector<RadarComplex_t> &out);
+	
 };
 
 #endif

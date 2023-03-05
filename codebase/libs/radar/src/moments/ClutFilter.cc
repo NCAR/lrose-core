@@ -151,9 +151,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                              initNotchWidthMps,
                                              nyquist);
   
-  // cerr << "1111111111111 halfNotchWidth: " << halfNotchWidth << endl;
-  // cerr << "1111111111111 clutterPos: " << clutterPos << endl;
-
   // notch out the clutter, using the initial notch width
   
   TaArray<double> notched_;

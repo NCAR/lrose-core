@@ -91,6 +91,7 @@ public:
             double angularResolution,
             double meanPointingAngle,
             scan_type_t scanType,
+            double antennaRate,
             bool isAlternating,
             bool isStagPrt,
             double prt,
@@ -153,6 +154,7 @@ public:
   int getVolNum() const { return _volNum; }
   bool getEndOfSweepFlag() const { return _endOfSweepFlag; }
   bool getEndOfVolFlag() const { return _endOfVolFlag; }
+  double getAntennaRate() const { return _antennaRate; }
   bool getAntennaTransition() const { return _antennaTransition; }
 
   bool getBeamIsIndexed() const { return _beamIsIndexed; }
@@ -239,6 +241,7 @@ private:
   bool _endOfVolFlag;
   
   scan_type_t _scanType;
+  double _antennaRate;
   bool _antennaTransition;
 
   // range geometry

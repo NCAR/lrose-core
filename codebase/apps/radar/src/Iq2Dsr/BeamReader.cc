@@ -475,6 +475,7 @@ Beam *BeamReader::getNextBeam()
              _indexedResolution,
              pointingAngle,
              _scanType,
+             getAntennaRate(),
              _isAlternating,
              _isStaggeredPrt,
              _prt,
@@ -2741,6 +2742,24 @@ void BeamReader::_computeBeamElRate(int endIndex, int nSamples)
   }
 
 }
+
+///////////////////////////////////////////
+// get antenna rate for scan type
+
+double BeamReader::getAntennaRate()
+
+{
+  
+  double rate = 0.0;
+  if (_scanType == Beam::SCAN_TYPE_RHI) {
+    rate = _beamElRate;
+  } else {
+    rate = _beamAzRate;
+  }
+  return rate;
+  
+}
+
 
 ////////////////////////////////////////////////////////////////
 // check for end of vol and sweep flags
