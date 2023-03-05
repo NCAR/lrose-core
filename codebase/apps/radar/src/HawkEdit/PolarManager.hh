@@ -52,7 +52,7 @@
 #include "ContextEditingView.hh"
 #include "ClickableLabel.hh"
 #include "ParameterColorView.hh"
-#include "BatchFileSaveView.hh"
+//#include "BatchFileSaveView.hh"
 #include "FieldColorController.hh"
 #include "SweepView.hh"
 #include "SweepController.hh"

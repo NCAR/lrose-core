@@ -2,6 +2,7 @@
 #include "RayLocationModel.hh"
 #include "DataModel.hh"
 #include <toolsa/LogStream.hh>
+#include <cmath>
 
 RayLocationModel::RayLocationModel() {
   //_ppiRays = new RayLoc[RayLoc::RAY_LOC_N];
@@ -14,7 +15,7 @@ RayLocationModel::~RayLocationModel() {}
 
 void RayLocationModel::init() {
   _rayLocationSetup = false;
-  for (int ii = 0; ii < RayLoc::RAY_LOC_N; ii++) {
+  for (size_t ii = 0; ii < RayLoc::RAY_LOC_N; ii++) {
     ray_loc[ii].ray = NULL;
     ray_loc[ii].active = false;
     ray_loc[ii].startIndex = 0;
@@ -161,7 +162,7 @@ bool RayLocationModel::isRayLocationSetup() {
 
 size_t RayLocationModel::getNRayLocations() {
   return (size_t) RayLoc::RAY_LOC_N;
-};
+}
 
 double RayLocationModel::getStartRangeKm(size_t rayIdx) {
 	RadxRay *ray = ray_loc.at(rayIdx).ray;

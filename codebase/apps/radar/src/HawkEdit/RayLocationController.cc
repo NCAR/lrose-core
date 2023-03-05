@@ -23,7 +23,7 @@ bool RayLocationController::isRayLocationSetup() {
 
 size_t RayLocationController::getNRayLocations() {
   return _model->getNRayLocations();
-};
+}
 
 double RayLocationController::getStartRangeKm(size_t rayIdx) {
 	return _model->getStartRangeKm(rayIdx);
