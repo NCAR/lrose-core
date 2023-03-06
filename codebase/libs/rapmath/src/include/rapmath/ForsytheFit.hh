@@ -79,6 +79,18 @@ public:
   // This is done for efficiency, if the X values do not change.
   
   void prepareForFit(size_t order, const vector<double> &xObs);
+
+  // prepare for fit, specifying nSamples, fixed PRT
+  
+  void prepareForFitFixedPrt(size_t order, size_t nSamples);
+
+  // Prepare for a fit, specifying nSamples, staggered PRT
+  
+  void prepareForFitStaggeredPrt(size_t order, size_t nSamples,
+                                 int staggeredM, int staggeredN);
+
+  // perform the fit
+  
   int performFit(const vector<double> &yObs);
 
   // get order
