@@ -78,7 +78,7 @@ public:
   // polyOrder: order of polynomial for regression
   // orderAuto: determine polynomial order from CNR
 
-  void setup(int nSamples, int polyOrder = 5,
+  void setup(size_t nSamples, size_t polyOrder = 5,
              bool orderAuto = false);
 
   // set up regression parameters - staggered PRT
@@ -94,10 +94,10 @@ public:
   // Failure occurs if it is not possible to compute the
   // SVD of vvA.
   
-  void setupStaggered(int nSamples,
+  void setupStaggered(size_t nSamples,
                       int staggeredM,
                       int staggeredN,
-                      int polyOrder = 5,
+                      size_t polyOrder = 5,
                       bool orderAuto = false);
 
   // Apply regression filtering on I,Q data
@@ -160,12 +160,12 @@ public:
 
   // get methods
 
-  inline int getNSamples() const { return _nSamples; }
+  inline size_t getNSamples() const { return _nSamples; }
   inline bool isStaggered() const { return _isStaggered; }
   inline int getStaggeredM() const { return _staggeredM; }
   inline int getStaggeredN() const { return _staggeredN; }
 
-  inline double getX(int sampleNum) const {
+  inline double getX(size_t sampleNum) const {
     if (sampleNum < _nSamples) {
       return _xx[sampleNum];
     } else {
@@ -173,8 +173,8 @@ public:
     }
   }
 
-  inline int getNPoly() const { return _polyOrder; }
-  inline int getNPoly1() const { return _polyOrder1; }
+  inline size_t getNPoly() const { return _polyOrder; }
+  inline size_t getNPoly1() const { return _polyOrder1; }
   inline bool getOrderAuto() const { return _orderAuto; }
   inline int getPolyOrderInUse() const { return _polyOrderInUse; }
   inline bool getSetupDone() const { return _setupDone; }
@@ -200,11 +200,16 @@ public:
 protected:
 private:
 
+  static const size_t ORDER_ARRAY_MAX = 32;
+  static const size_t NSAMPLES_ARRAY_MAX = 1024;
+  // static const size_t ORDER_ARRAY_MAX = 2;
+  // static const size_t NSAMPLES_ARRAY_MAX = 10;
+  
   // data
 
-  int _nSamples;
-  int _polyOrder;    // polynomial order
-  int _polyOrder1;   // polynomial order plus 1
+  size_t _nSamples;
+  size_t _polyOrder;    // polynomial order
+  size_t _polyOrder1;   // polynomial order plus 1
 
   bool _isStaggered; // staggered-PRT version
   int _staggeredM;
@@ -242,6 +247,8 @@ private:
 
   // for orthogonal polynomials
 
+  vector<vector<ForsytheFit *>> _forsytheArray;
+  
   ForsytheFit _forsythe;
   ForsytheFit _forsythe3;
   ForsytheFit _forsythe4;
