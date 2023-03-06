@@ -152,10 +152,10 @@ public:
 
   ComputeThread();
   virtual ~ComputeThread();
-  void initFfts(int nSamples);
-  void initFftsStag(int nSamples, int stagM, int stagN);
-  void initRegr(int nSamples);
-  void initRegrStag(int nSamples, int stagM, int stagN);
+  void initFfts(size_t nSamples);
+  void initFftsStag(size_t nSamples, int stagM, int stagN);
+  void initRegr(size_t nSamples);
+  void initRegrStag(size_t nSamples, int stagM, int stagN);
   void initRegr(const RegressionFilter &master,
                 const RegressionFilter &masterHalf);
   void initRegrStag(const RegressionFilter &master);
@@ -163,7 +163,7 @@ public:
   //////////////////////////////////////////////////////////////
   // create and destroy FFT objects in a thread safe manner
   
-  static RadarFft *createFft(int nSamples);
+  static RadarFft *createFft(size_t nSamples);
   static void destroyFft(RadarFft *fft);
 
   // start and end gates
@@ -173,25 +173,25 @@ public:
 
   // FFT support
   
-  int nSamplesFft;
+  size_t nSamplesFft;
   RadarFft *fft;
   RadarFft *fftHalf;
 
   // FFT support - staggered mode
   
-  int nSamplesFftStag;
+  size_t nSamplesFftStag;
   int fftStagM, fftStagN;
   RadarFft *fftStag;
   
   // regression clutter filtering
 
-  int nSamplesRegr;
+  size_t nSamplesRegr;
   RegressionFilter regr;
   RegressionFilter regrHalf;
 
   // regression clutter filtering - staggered prt
 
-  int nSamplesRegrStag;
+  size_t nSamplesRegrStag;
   int regrStagM, regrStagN;
   RegressionFilter regrStag;
 

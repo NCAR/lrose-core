@@ -224,7 +224,7 @@ ComputeThread::~ComputeThread()
 
 // create and destroy FFT objects in a thread safe manner
 
-RadarFft *ComputeThread::createFft(int nSamples)
+RadarFft *ComputeThread::createFft(size_t nSamples)
 
 {
   pthread_mutex_lock(&_fftMutex);
@@ -243,7 +243,7 @@ void ComputeThread::destroyFft(RadarFft *fft)
 
 // initialize the FFTs
 
-void ComputeThread::initFfts(int nSamples)
+void ComputeThread::initFfts(size_t nSamples)
 {
   
   if (nSamplesFft == nSamples) {
@@ -269,7 +269,7 @@ void ComputeThread::initFfts(int nSamples)
   
 // initialize the FFTs - staggered mode
 
-void ComputeThread::initFftsStag(int nSamples, int stagM, int stagN)
+void ComputeThread::initFftsStag(size_t nSamples, int stagM, int stagN)
 {
   
   if (nSamplesFftStag == nSamples &&
@@ -301,7 +301,7 @@ void ComputeThread::initFftsStag(int nSamples, int stagM, int stagN)
 ////////////////////////////////////
 // initialize the regression filter
 
-void ComputeThread::initRegr(int nSamples)
+void ComputeThread::initRegr(size_t nSamples)
 {
 
   if (nSamplesRegr == nSamples) {
@@ -345,7 +345,7 @@ void ComputeThread::initRegr(const RegressionFilter &master,
 ////////////////////////////////////////////////////
 // initialize the regression filter - staggered PRT
 
-void ComputeThread::initRegrStag(int nSamples, int stagM, int stagN)
+void ComputeThread::initRegrStag(size_t nSamples, int stagM, int stagN)
 {
   
   if (nSamplesRegrStag == nSamples &&
