@@ -2389,12 +2389,6 @@ void Beam::_filterDpAltHvCoCross()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
-    // testing cnr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getRegrCnrDb();
-
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
@@ -2488,6 +2482,12 @@ void Beam::_filterDpAltHvCoCross()
       } // if (!fields.cmd_flag)
 
     } // if (_params.apply_rhohv_test_after_cmd)
+
+    // testing cnr from 3-order regression filter
+
+    fields.test3 = _mom->getRegrInterpRatioDb();
+    fields.test4 = _regrHalf->getPolyOrderInUse();
+    fields.test5 = _mom->getRegrCnrDb();
 
   } // igate
   
