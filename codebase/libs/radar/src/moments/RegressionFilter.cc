@@ -100,7 +100,6 @@ void RegressionFilter::_init()
   _nSamples = 0;
   _polyOrder = 5;
   _polyOrder1 = _polyOrder + 1;
-  _maxOrder = 0;
 
   _isStaggered = false;
   _staggeredM = 0;
@@ -416,7 +415,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 //
 // Inputs:
 //   rawIq: raw I,Q data
-//   cnrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+//   cnr3Db: clutter-to-noise-ratio from central 3 spectral points
 //
 // Outputs:
 //   filteredIq: filtered I,Q data
@@ -427,7 +426,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 // Note: assumes setup() has been successfully completed.
 
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
-                                     double cnrRegr3Db,
+                                     double cnr3Db,
                                      double antennaRateDegPerSec,
                                      double nyquistMetersPerSec,
                                      RadarComplex_t *filteredIq)
@@ -451,25 +450,20 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 
   // compute the order to be used (from Meymaris)
 
-  if (cnrRegr3Db < 1) {
-    cnrRegr3Db = 0.9999999;
+  if (cnr3Db < 1) {
+    cnr3Db = 0.9999999;
   }
   double ss = 1.0;
   double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
   double wcNorm = wc / nyquistMetersPerSec;
   double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
-  int order = ceil(orderNorm * pow(cnrRegr3Db, 2.0 / 3.0) * _nSamples) + 1;
-  if (order > _maxOrder) {
-    _maxOrder = order;
-  }
-
-  cerr << "wc, wcNorm, cnr, orderNorm, order, max: "
-       << setw(6) << wc << ", "
-       << setw(6) << wcNorm << ", "
-       << setw(6) << cnrRegr3Db << ", "
-       << setw(6) << orderNorm << ", "
-       << setw(3) << order << ", "
-       << setw(3) << _maxOrder << endl;
+  int order = ceil(orderNorm * pow(cnr3Db, 2.0 / 3.0) * _nSamples) + 1;
+  // cerr << "wc, wcNorm, cnr, orderNorm, order: "
+  //      << setw(6) << wc << ", "
+  //      << setw(6) << wcNorm << ", "
+  //      << setw(6) << cnr3Db << ", "
+  //      << setw(6) << orderNorm << ", "
+  //      << setw(3) << order << endl;
   
   if (_orderAuto) {
     _polyOrder = order;
@@ -482,7 +476,8 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 
   // poly fit to I
 
-  _forsythe.performFit(rawI);
+  // _forsythe.performFit(rawI);
+  _forsythe.performFit(order, _xxVals, rawI);
 
   // compute the estimated I polynomial values
   // load residuals into filtered Iq

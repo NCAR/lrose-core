@@ -673,7 +673,7 @@ public:
   //   iqWindowed: unfiltered time series,
   //               windowed using VONHANN, BLACKMAN or BLACKMAN_NUTTALL
   //   specWindowed: if not NULL, contains the spectrum of iqWindowed
-  //   calibratedNoise: noise level at digitizer, from cal
+  //   calNoise: measured noise level, from cal, in linear units
   //
   //  Outputs:
   //    iqFiltered: filtered time series
@@ -690,7 +690,7 @@ public:
                           const RadarComplex_t *iqOrig, // non-windowed
                           const RadarComplex_t *iqWindowed, // windowed
                           const RadarComplex_t *specWindowed, // windowed
-                          double calibratedNoise,
+                          double calNoise,
                           RadarComplex_t *iqFiltered,
                           RadarComplex_t *iqNotched,
                           double &filterRatio,
@@ -702,7 +702,7 @@ public:
                            const RadarFft &fft,
                            const RadarComplex_t *iqWindowed,
                            const RadarComplex_t *specWindowed,
-                           double calibratedNoise,
+                           double calNoise,
                            RadarComplex_t *iqFiltered,
                            RadarComplex_t *iqNotched,
                            double &filterRatio,
@@ -714,7 +714,7 @@ public:
                         const RadarFft &fft,
                         const RadarComplex_t *iqWindowed,
                         const RadarComplex_t *specWindowed,
-                        double calibratedNoise,
+                        double calNoise,
                         RadarComplex_t *iqFiltered,
                         double &filterRatio,
                         double &spectralNoise,
@@ -731,7 +731,7 @@ public:
   //   fft: object to be used for filling in notch
   //   regr: object to be used for polynomial computations
   //   iqOrig: unfiltered time series, not windowed
-  //   calibratedNoise: noise value from calibration in linear units
+  //   calNoise: measured noise value from calibration in linear units
   //
   //  Outputs:
   //    iqFiltered: filtered time series
@@ -751,7 +751,7 @@ public:
                              RegressionFilter &regr,
                              const double *window,
                              const RadarComplex_t *iqOrig, // non-windowed
-                             double calibratedNoise,
+                             double calNoise,
                              bool interpAcrossNotch,
                              RadarComplex_t *iqFiltered,
                              RadarComplex_t *iqNotched,
@@ -801,7 +801,7 @@ public:
                               const RadarFft &fftHalf,
                               const RadarComplex_t *iqShort,
                               const RadarComplex_t *iqLong,
-                              double calibratedNoise,
+                              double calNoise,
                               RadarComplex_t *iqFiltShort,
                               RadarComplex_t *iqFiltLong,
                               double &filterRatio,
@@ -838,7 +838,7 @@ public:
                               const RadarFft &fftHalf,
                               RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
-                              double calibratedNoise,
+                              double calNoise,
                               bool interpAcrossNotch,
                               RadarComplex_t *iqFiltered,
                               double &filterRatio,
@@ -880,7 +880,7 @@ public:
                               const RadarFft &fftExp,
                               RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
-                              double calibratedNoise,
+                              double calNoise,
                               bool interpAcrossNotch,
                               RadarComplex_t *iqFiltered,
                               double &filterRatio,
@@ -900,7 +900,7 @@ public:
                           const RadarFft &fft,
                           const RadarComplex_t *iqWindowed,
                           RadarComplex_t *specWindowed,
-                          double calibratedNoise,
+                          double calNoise,
                           double &spectralNoise,
                           double &spectralSnr);
   
@@ -1007,7 +1007,7 @@ public:
   void applyClutterFilterSz(int nSamples,
                             const RadarFft &fft,
                             GateData &gateData,
-                            double calibratedNoise,
+                            double calNoise,
                             double &filterRatio,
                             double &spectralNoise,
                             double &clutResidueRatio);
@@ -1263,7 +1263,7 @@ public:
   // get clutter-to-signal ratio, in dB,
   // from 3rd order regression filter
 
-  double getRegr3CnrDb() const { return _regr3CnrDb; }
+  double getRegrCnrDb() const { return _regrCnrDb; }
   double getRegrInterpRatioDb() const { return _regrInterpRatioDb; }
   
   // De-trend a time series in preparation
@@ -1423,7 +1423,7 @@ private:
   double _regrNotchEdgePwrRatioThresholdDb; /* regression filter - 
                                              * power ratio for finding the 
                                              * end of the initial notch */
-
+  
   double _regrMinCnrDb; /* regression filter - 
                          * minimum CNR - clutter-to-noise-ratio -
                          * for applying the filter */
@@ -1433,8 +1433,8 @@ private:
 
   
 
-  double _regr3CnrDb; /* regression filter - clutter-to-noise ratio
-                       * from 3rd order fit */
+  double _regrCnrDb; /* regression filter - clutter-to-noise ratio
+                      * from 3 central spectral points */
 
   double _regrInterpRatioDb; /* regression filter - power ratio from
                               * interpolating across the notch */
@@ -1510,7 +1510,7 @@ private:
 
   double *_atmosAttenCorr;
 
-  // calibration
+  // results of calibration
   
   double _calNoisePowerHc;
   double _calNoisePowerHx;
@@ -1536,7 +1536,7 @@ private:
   double _calibXmitPowerDbmH;
   double _calibXmitPowerDbmV;
 
-  // estimated noise power
+  // noise power estimated using NoiseLocator class
   
   double _estNoisePowerHc;
   double _estNoisePowerHx;
@@ -1623,7 +1623,7 @@ private:
 				    double rawPower,
 				    double filteredPower,
 				    double powerRemoved,
-                                    double calibratedNoise);
+                                    double calNoise);
 
   void _fillNotchRegrFilter(int nSamples,
                             const RadarFft &fft,
@@ -1635,7 +1635,7 @@ private:
   void _adapFiltHalfTseries(int nSamplesHalf,
                             const RadarFft &fftHalf,
                             const RadarComplex_t *iq,
-                            double calibratedNoise,
+                            double calNoise,
                             double nyquist,
                             bool adjustForPowerResidue,
                             RadarComplex_t *iqFiltered,
@@ -1657,7 +1657,7 @@ private:
                             RegressionFilter &regr,
                             const double *window,
                             const RadarComplex_t *iqUnfiltered,
-                            double calibratedNoise,
+                            double calNoise,
                             bool interpAcrossNotch,
                             RadarComplex_t *iqFiltered,
                             double &filterRatio,
@@ -1670,7 +1670,7 @@ private:
                                const double *window,
                                const RadarComplex_t *iqOrig,
                                const RadarComplex_t *iqRegr,
-                               double calibratedNoise,
+                               double calNoise,
                                bool interpAcrossNotch,
                                RadarComplex_t *iqFiltered,
                                double &filterRatio,

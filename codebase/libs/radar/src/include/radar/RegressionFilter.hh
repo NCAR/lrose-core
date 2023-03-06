@@ -121,7 +121,7 @@ public:
   //
   // Inputs:
   //   rawIq: raw I,Q data
-  //   cnrRegr3Db: clutter-to-signal-ratio from 3rd order fit
+  //   cnr3Db: clutter-to-noise-ratio from center 3 spectral points
   //
   // Outputs:
   //   filteredIq: filtered I,Q data
@@ -132,7 +132,7 @@ public:
   // Note: assumes setup() has been successfully completed.
 
   void applyForsythe(const RadarComplex_t *rawIq,
-                     double cnrRegr3Db,
+                     double cnr3Db,
                      double antennaRateDegPerSec,
                      double nyquistMetersPerSec,
                      RadarComplex_t *filteredIq);
@@ -212,7 +212,6 @@ private:
 
   bool _orderAuto;     // determine the order from the clutter to signal ratio
   int _polyOrderInUse; // polynomial order used in auto selection
-  int _maxOrder;
 
   bool _setupDone;
 

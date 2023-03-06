@@ -1999,7 +1999,7 @@ void Beam::_filterSpH()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
     
     // compute filtered moments for this gate
     
@@ -2077,7 +2077,7 @@ void Beam::_filterSpV()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
     
     // compute filtered moments for this gate
     
@@ -2393,7 +2393,7 @@ void Beam::_filterDpAltHvCoCross()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
 
     // apply the filter ratio to other channels
     
@@ -2572,7 +2572,7 @@ void Beam::_filterDpAltHvCoOnly()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channels
     
@@ -2619,7 +2619,7 @@ void Beam::_filterDpSimHvFixedPrt()
 {
 
   double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     GateData *gate = _gateData[igate];
@@ -2903,7 +2903,7 @@ void Beam::_filterDpHOnlyFixedPrt()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channel
     
@@ -3069,7 +3069,7 @@ void Beam::_filterDpVOnlyFixedPrt()
 
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regr->getPolyOrderInUse();
-    fields.test5 = _mom->getRegr3CnrDb();
+    fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channel
     
