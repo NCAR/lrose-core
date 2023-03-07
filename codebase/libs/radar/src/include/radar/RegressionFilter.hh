@@ -134,7 +134,8 @@ public:
   void applyForsythe(const RadarComplex_t *rawIq,
                      double cnr3Db,
                      double antennaRateDegPerSec,
-                     double nyquistMetersPerSec,
+                     double prtSecs,
+                     double wavelengthM,
                      RadarComplex_t *filteredIq);
   
   // Perform 3rd-order regression filtering on I,Q data
@@ -247,16 +248,10 @@ private:
 
   // for orthogonal polynomials
 
-  vector<vector<ForsytheFit *>> _forsytheArray;
-  
   ForsytheFit _forsythe;
   ForsytheFit _forsythe3;
-  ForsytheFit _forsythe4;
-  ForsytheFit _forsythe5;
-  ForsytheFit _forsythe6;
-  ForsytheFit _forsythe7;
-  ForsytheFit _forsythe9;
-
+  vector<vector<ForsytheFit *>> _forsytheArray;
+  
   // methods
 
   void _init();

@@ -684,6 +684,7 @@ public:
   //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
   
   void applyClutterFilter(int nSamples,
+                          double prtSecs,
                           const RadarFft &fft,
                           RegressionFilter &regr,
                           const double *window, // active window
@@ -699,6 +700,7 @@ public:
                           double *specRatio = NULL);
   
   void applyAdaptiveFilter(int nSamples,
+                           double prtSecs,
                            const RadarFft &fft,
                            const RadarComplex_t *iqWindowed,
                            const RadarComplex_t *specWindowed,
@@ -711,6 +713,7 @@ public:
                            double *specRatio = NULL);
   
   void applyNotchFilter(int nSamples,
+                        double prtSecs,
                         const RadarFft &fft,
                         const RadarComplex_t *iqWindowed,
                         const RadarComplex_t *specWindowed,
@@ -747,6 +750,7 @@ public:
   // not windowed. The window is passed in for use in the FFTs
   
   void applyRegressionFilter(int nSamples,
+                             double prtSecs,
                              const RadarFft &fft,
                              RegressionFilter &regr,
                              const double *window,
@@ -798,6 +802,8 @@ public:
   //    specRatioLong: filtered/unfiltered ratio, long PRT, if non-NULL
   
   void applyAdapFilterStagPrt(int nSamplesHalf,
+                              double prtSecsShort,
+                              double prtSecsLong,
                               const RadarFft &fftHalf,
                               const RadarComplex_t *iqShort,
                               const RadarComplex_t *iqLong,
@@ -835,6 +841,8 @@ public:
   //    specRatio[nSamples] - if non-NULL
   
   void applyRegrFilterStagPrt(int nSamples,
+                              double prtSecsShort,
+                              double prtSecsLong,
                               const RadarFft &fftHalf,
                               RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
@@ -877,6 +885,8 @@ public:
 
   void applyRegrFilterStagPrt(int nSamples,
                               int nExpanded,
+                              double prtSecsShort,
+                              double prtSecsLong,
                               const RadarFft &fftExp,
                               RegressionFilter &regr,
                               const RadarComplex_t *iqOrig,
@@ -1005,6 +1015,7 @@ public:
   // apply clutter filter for SZ 864
   
   void applyClutterFilterSz(int nSamples,
+                            double prtSecs,
                             const RadarFft &fft,
                             GateData &gateData,
                             double calNoise,
@@ -1633,6 +1644,7 @@ private:
                             double *specRatio);
 
   void _adapFiltHalfTseries(int nSamplesHalf,
+                            double prtSecs,
                             const RadarFft &fftHalf,
                             const RadarComplex_t *iq,
                             double calNoise,
@@ -1653,6 +1665,7 @@ private:
                                        double *regrSpec);
 
   void _runRegressionFilter(int nSamples,
+                            double prtSecs,
                             const RadarFft &fft,
                             RegressionFilter &regr,
                             const double *window,

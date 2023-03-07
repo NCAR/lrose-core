@@ -263,13 +263,6 @@ void RegressionFilter::setup(size_t nSamples,
 
   _forsythe.prepareForFit(_polyOrder, _xxVals);
   _forsythe3.prepareForFit(3, _xxVals);
-  if (_orderAuto) {
-    _forsythe4.prepareForFit(4, _xxVals);
-    _forsythe5.prepareForFit(5, _xxVals);
-    _forsythe6.prepareForFit(6, _xxVals);
-    _forsythe7.prepareForFit(7, _xxVals);
-    _forsythe9.prepareForFit(9, _xxVals);
-  }
 
   // done
 
@@ -345,13 +338,6 @@ void RegressionFilter::setupStaggered(size_t nSamples,
 
   _forsythe.prepareForFit(_polyOrder, _xxVals);
   _forsythe3.prepareForFit(3, _xxVals);
-  if (_orderAuto) {
-    _forsythe4.prepareForFit(4, _xxVals);
-    _forsythe5.prepareForFit(5, _xxVals);
-    _forsythe6.prepareForFit(6, _xxVals);
-    _forsythe7.prepareForFit(7, _xxVals);
-    _forsythe9.prepareForFit(9, _xxVals);
-  }
 
   // done
 
@@ -448,7 +434,8 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
                                      double cnr3Db,
                                      double antennaRateDegPerSec,
-                                     double nyquistMetersPerSec,
+                                     double prtSecs,
+                                     double wavelengthM,
                                      RadarComplex_t *filteredIq)
   
 {
@@ -468,39 +455,48 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
     rawQ.push_back(rawIq[ii].im);
   }
 
-  // compute the order to be used (from Meymaris)
-
-  if (cnr3Db < 1) {
-    cnr3Db = 0.9999999;
-  }
-  double ss = 1.0;
-  double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
-  double wcNorm = wc / nyquistMetersPerSec;
-  double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
-  int order = ceil(orderNorm * pow(cnr3Db, 2.0 / 3.0) * _nSamples) + 1;
-  // cerr << "wc, wcNorm, cnr, orderNorm, order: "
-  //      << setw(6) << wc << ", "
-  //      << setw(6) << wcNorm << ", "
-  //      << setw(6) << cnr3Db << ", "
-  //      << setw(6) << orderNorm << ", "
-  //      << setw(3) << order << endl;
-  
   if (_orderAuto) {
-    _polyOrder = order;
-  }
-  _polyOrderInUse = _polyOrder;
 
-  // get the entry in the forsythe array, if possible
+    // automatically compute the order to be used (from Meymaris 2021)
+    
+    if (cnr3Db < 1) {
+      cnr3Db = 1.0;
+    }
+    double ss = 1.0;
+    double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
+    double nyquist = wavelengthM / (4.0 * prtSecs);
+    double wcNorm = wc / nyquist;
+    double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
+    int order = ceil(orderNorm * pow(cnr3Db, 2.0 / 3.0) * _nSamples) + 1;
+    if (order < 3) {
+      order = 3;
+    }
+  
+    // cerr << "wc, wcNorm, cnr, orderNorm, order: "
+    //      << setw(6) << wc << ", "
+    //      << setw(6) << wcNorm << ", "
+    //      << setw(6) << cnr3Db << ", "
+    //      << setw(6) << orderNorm << ", "
+    //      << setw(3) << order << endl;
+    
+    _polyOrder = order;
+
+  }
+
+  _polyOrderInUse = _polyOrder;
+  
+  // find the entry in the forsythe array, if possible
   
   ForsytheFit *fit = &_forsythe;
-
+  
   if (_polyOrder < ORDER_ARRAY_MAX &&
       _nSamples < NSAMPLES_ARRAY_MAX) {
-
-    // use entry in array of fit objects
+    
+    // check for existing entry in array of fit objects
     
     fit = _forsytheArray[_polyOrder][_nSamples];
     if (fit == NULL) {
+      // create new object for (order, nsamples)
       fit = new ForsytheFit;
       fit->prepareForFitFixedPrt(_polyOrder, _nSamples);
       _forsytheArray[_polyOrder][_nSamples] = fit;
@@ -515,35 +511,18 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 
   }
 
-  // perform the fit
-  
-  fit->performFit(rawI);
-
-  // prepare the forsythe
-  
-  // _forsythe.prepareForFit(_polyOrderInUse, _xxVals);
-  
-  // poly fit to I
-
-  // _forsythe.performFit(rawI);
-  // _forsythe.performFit(order, _xxVals, rawI);
-
-  // compute the estimated I polynomial values
+  // perform the fit on I and Q and
+  // compute the estimated I/Q polynomial values
   // load residuals into filtered Iq
   
+  fit->performFit(rawI);
   vector<double> iSmoothed = fit->getYEstVector();
   for (size_t ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].re = rawI[ii] - iSmoothed[ii];
     _polyfitIq[ii].re = iSmoothed[ii];
   }
   
-  // poly fit to Q
-
   fit->performFit(rawQ);
-  
-  // compute the estimated Q polynomial values
-  // load residuals into filtered Iq
-  
   vector<double> qSmoothed = fit->getYEstVector();
   for (size_t ii = 0; ii < _nSamples; ii++) {
     filteredIq[ii].im = rawQ[ii] - qSmoothed[ii];

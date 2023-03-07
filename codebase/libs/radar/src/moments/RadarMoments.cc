@@ -4225,6 +4225,7 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyClutterFilter(int nSamples,
+                                      double prtSecs,
                                       const RadarFft &fft,
                                       RegressionFilter &regr,
                                       const double *window, // window in use
@@ -4243,7 +4244,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
 
   if (_clutterFilterType == CLUTTER_FILTER_REGRESSION) {
     
-    applyRegressionFilter(nSamples, fft, regr, window,
+    applyRegressionFilter(nSamples, prtSecs, fft, regr, window,
                           iqOrig, calNoise,
                           _regrInterpAcrossNotch,
                           iqFiltered, iqNotched, filterRatio,
@@ -4251,7 +4252,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
     
   } else if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
     
-    applyNotchFilter(nSamples, fft,
+    applyNotchFilter(nSamples, prtSecs, fft,
                      iqWindowed, specWindowed,
                      calNoise,
                      iqFiltered, filterRatio,
@@ -4259,7 +4260,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
     
   } else {
     
-    applyAdaptiveFilter(nSamples, fft,
+    applyAdaptiveFilter(nSamples, prtSecs, fft,
                         iqWindowed, specWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
@@ -4288,6 +4289,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
 //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyAdaptiveFilter(int nSamples,
+                                       double prtSecs,
                                        const RadarFft &fft,
                                        const RadarComplex_t *iqWindowed,
                                        const RadarComplex_t *specWindowed,
@@ -4410,6 +4412,7 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyNotchFilter(int nSamples,
+                                    double prtSecs,
                                     const RadarFft &fft,
                                     const RadarComplex_t *iqWindowed,
                                     const RadarComplex_t *specWindowed,
@@ -4525,6 +4528,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 
 void RadarMoments::applyRegressionFilter
   (int nSamples,
+   double prtSecs,
    const RadarFft &fft,
    RegressionFilter &regr,
    const double *window,
@@ -4592,7 +4596,7 @@ void RadarMoments::applyRegressionFilter
     
     // fill in the regression notch using Gaussian fit to remaining weather
     
-    _runRegressionFilter(nSamples, fft, regr, window,
+    _runRegressionFilter(nSamples, prtSecs, fft, regr, window,
                          iqUnfiltered, calNoise, interpAcrossNotch,
                          iqFiltered,
                          filterRatio, spectralNoise,
@@ -4643,8 +4647,10 @@ void RadarMoments::applyRegressionFilter
 //    spectralSnr: ratio of spectral noise to noise power
 //    specRatioShort: filtered/unfiltered ratio, short PRT, if non-NULL
 //    specRatioLong: filtered/unfiltered ratio, long PRT, if non-NULL
-  
+
 void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
+                                          double prtSecsShort,
+                                          double prtSecsLong,
                                           const RadarFft &fftHalf,
                                           const RadarComplex_t *iqShort,
                                           const RadarComplex_t *iqLong,
@@ -4660,13 +4666,15 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 {
   
   double filterNyquist = _nyquist / (_staggeredM + _staggeredN);
+  double prtSecsSum = prtSecsShort + prtSecsLong;
   
   // filter the short prt time series
   
   double filterRatioShort = 1.0;
   double spectralNoiseShort = 1.0e-13;
   double spectralSnrShort = 1.0;
-  _adapFiltHalfTseries(_nSamplesHalf, fftHalf, iqShort, calNoise,
+  _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
+                       fftHalf, iqShort, calNoise,
                        filterNyquist, true, iqFiltShort,
                        filterRatioShort,
                        spectralNoiseShort,
@@ -4678,7 +4686,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double filterRatioLong = 1.0;
   double spectralNoiseLong = 1.0e-13;
   double spectralSnrLong = 1.0;
-  _adapFiltHalfTseries(_nSamplesHalf, fftHalf, iqLong, calNoise,
+  _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
+                       fftHalf, iqLong, calNoise,
                        filterNyquist, true, iqFiltLong,
                        filterRatioLong,
                        spectralNoiseLong,
@@ -4710,6 +4719,7 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
    
 void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
+                                        double prtSecs,
                                         const RadarFft &fftHalf,
                                         const RadarComplex_t *iq,
                                         double calNoise,
@@ -4840,6 +4850,8 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 //    specRatio[nSamples] - if non-NULL
 
 void RadarMoments::applyRegrFilterStagPrt(int nSamples,
+                                          double prtSecsShort,
+                                          double prtSecsLong,
                                           const RadarFft &fftHalf,
                                           RegressionFilter &regr,
                                           const RadarComplex_t *iqOrig,
@@ -4857,7 +4869,8 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, _nyquistPrtMean, iqRegr);
+  double prtSecsSum = prtSecsShort + prtSecsLong;
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, prtSecsSum, _wavelengthMeters, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5067,6 +5080,8 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
 void RadarMoments::applyRegrFilterStagPrt(int nSamples,
                                           int nExpanded,
+                                          double prtSecsShort,
+                                          double prtSecsLong,
                                           const RadarFft &fftExp,
                                           RegressionFilter &regr,
                                           const RadarComplex_t *iqOrig,
@@ -5084,8 +5099,9 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, _nyquistPrtMean, iqRegr);
-
+  double prtSecsSum = prtSecsShort + prtSecsLong;
+  regr.applyForsythe(iqOrig, -120.0, _antennaRate, prtSecsSum, _wavelengthMeters, iqRegr);
+  
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
   double powerClut = powerOrig - powerRegr;
@@ -5177,6 +5193,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
 
 void RadarMoments::_runRegressionFilter
   (int nSamples,
+   double prtSecs,
    const RadarFft &fft,
    RegressionFilter &regr,
    const double *window, // window to use
@@ -5225,22 +5242,16 @@ void RadarMoments::_runRegressionFilter
   } else {
     
     // apply regression filter, passing in CNR
-    
+
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.applyForsythe(iqUnfiltered, _regrCnrDb, _antennaRate, _nyquist, iqRegr.data());
+    regr.applyForsythe(iqUnfiltered, _regrCnrDb, _antennaRate,
+                       prtSecs, _wavelengthMeters, iqRegr.data());
     
-    // apply the window to the regression-filtered times series
-    
-    // vector<RadarComplex_t> regrWindowed;
-    // regrWindowed.resize(nSamples);
-    // applyWindow(iqRegr.data(), window, regrWindowed.data(), nSamples);
-  
     // take the forward fft to compute the complex spectrum of regr-filtered series
     
     vector<RadarComplex_t> regrSpecC;
     regrSpecC.resize(nSamples);
-    // fft.fwd(regrWindowed.data(), regrSpecC.data());
     fft.fwd(iqRegr.data(), regrSpecC.data());
     
     // compute the real regr-filtered spectrum
@@ -5344,13 +5355,8 @@ void RadarMoments::_runRegressionFilter
     
     // invert the fft
     
-    // fft.inv(unfiltSpecC.data(), regrWindowed.data());
     fft.inv(unfiltSpecC.data(), iqFiltered);
     
-    // invert the window
-    
-    // invertWindow(regrWindowed.data(), window, iqFiltered, nSamples);
-
   } // if (_regrCnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
@@ -5787,6 +5793,7 @@ void RadarMoments::applyFilterRatio(int nSamples,
 // apply clutter filter for SZ 864
 
 void RadarMoments::applyClutterFilterSz(int nSamples,
+                                        double prtSecs,
                                         const RadarFft &fft,
                                         GateData &gateData,
                                         double calNoise,
@@ -5825,7 +5832,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
 
   if (gateData.clutterInStrong) {
     
-    applyAdaptiveFilter(nSamples, fft,
+    applyAdaptiveFilter(nSamples, prtSecs, fft,
                         gateData.iqStrong, NULL,
                         calNoise,
                         gateData.iqStrongF, NULL,
@@ -5837,7 +5844,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
     
   if (gateData.clutterInWeak) {
     
-    applyAdaptiveFilter(nSamples, fft,
+    applyAdaptiveFilter(nSamples, prtSecs, fft,
                         gateData.iqWeak, NULL,
                         calNoise,
                         gateData.iqWeakF, NULL,
