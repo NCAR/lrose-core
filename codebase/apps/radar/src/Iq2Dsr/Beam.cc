@@ -133,7 +133,6 @@ Beam::Beam(const string &progName,
   _momStagPrt = NULL;
   _noise = NULL;
 
-  _applyFiltering = true;
   _needKdp = false;
   _needKdpFiltered = false;
 
@@ -395,7 +394,6 @@ void Beam::_prepareForComputeMoments()
   }
 
   _switchingReceiver = _mmgr.isSwitchingReceiver();
-  _applyFiltering = _mmgr.applyClutterFilter();
 
   // range geometry
 
@@ -4213,7 +4211,8 @@ void Beam::_allocGateData(int nGates)
     }
   }
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
-    _gateData[ii]->allocArrays(_nSamples, _applyFiltering, _isStagPrt, _applySz1);
+    _gateData[ii]->allocArrays(_nSamples, _mmgr.applyClutterFilter(),
+                               _isStagPrt, _applySz1);
   }
   _momFields = _momFields_.alloc(_gateData.size());
   _momFieldsF = _momFieldsF_.alloc(_gateData.size());

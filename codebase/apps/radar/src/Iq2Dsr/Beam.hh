@@ -314,8 +314,6 @@ private:
   RadarMoments *_momStagPrt;
   PhaseCoding _pcode;
 
-  bool _applyFiltering;
-
   bool _checkForWindfarms;
   double _minSnrForWindfarmCheck;
   double _minCpaForWindfarmCheck;
