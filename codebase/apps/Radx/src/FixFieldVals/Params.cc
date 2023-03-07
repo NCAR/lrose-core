@@ -1708,7 +1708,7 @@
     tt->array_elem_size = sizeof(transform_field_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("transform_field_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 7;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -1736,12 +1736,17 @@
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
         (char *) &_transform_fields->folding_value - (char *) _transform_fields;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[5].fname = tdrpStrDup("read_bias_from_spdb");
-      tt->struct_def.fields[5].ptype = BOOL_TYPE;
+      tt->struct_def.fields[5].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[5].fname = tdrpStrDup("bias_field_name");
+      tt->struct_def.fields[5].ptype = STRING_TYPE;
       tt->struct_def.fields[5].rel_offset = 
+        (char *) &_transform_fields->bias_field_name - (char *) _transform_fields;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[6].fname = tdrpStrDup("read_bias_from_spdb");
+      tt->struct_def.fields[6].ptype = BOOL_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
         (char *) &_transform_fields->read_bias_from_spdb - (char *) _transform_fields;
-    tt->n_struct_vals = 12;
+    tt->n_struct_vals = 14;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
@@ -1749,13 +1754,15 @@
       tt->struct_vals[2].d = 0;
       tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].d = 0;
-      tt->struct_vals[5].b = pFALSE;
-      tt->struct_vals[6].s = tdrpStrDup("VEL");
-      tt->struct_vals[7].d = 1;
-      tt->struct_vals[8].d = 0;
-      tt->struct_vals[9].b = pTRUE;
-      tt->struct_vals[10].d = 25;
-      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[5].s = tdrpStrDup("DBZ");
+      tt->struct_vals[6].b = pFALSE;
+      tt->struct_vals[7].s = tdrpStrDup("ZDR");
+      tt->struct_vals[8].d = 1;
+      tt->struct_vals[9].d = 0;
+      tt->struct_vals[10].b = pFALSE;
+      tt->struct_vals[11].d = 0;
+      tt->struct_vals[12].s = tdrpStrDup("ZDR");
+      tt->struct_vals[13].b = pFALSE;
     tt++;
     
     // Parameter 'bias_time_margin_secs'

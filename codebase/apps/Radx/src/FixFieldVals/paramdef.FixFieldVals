@@ -559,13 +559,14 @@ typedef struct {
   double transform_offset;
   boolean field_folds;
   double folding_value;
+  string bias_field_name; 
   boolean read_bias_from_spdb;
 } transform_field_t;
 
 paramdef struct transform_field_t {
   p_default = {
-               { "DBZ", 1.0, 0.0, false, 0.0, FALSE},
-               { "VEL", 1.0, 0.0, true, 25.0, FALSE}
+               { "DBZ", 1.0, 0.0, false, 0.0, "DBZ", FALSE},
+               { "ZDR", 1.0, 0.0, false, 0.0, "ZDR", FALSE}
   };
   p_descr = "transform field details.";
   p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name. If read_bias_from_spdb is TRUE, we read the bias values from the ";

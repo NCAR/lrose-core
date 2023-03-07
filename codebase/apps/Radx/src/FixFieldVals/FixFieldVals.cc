@@ -819,17 +819,24 @@ void FixFieldVals::_applyLinearTransform(RadxVol &vol)
     double offset = tfld.transform_offset;
     bool fieldFolds = tfld.field_folds;
     double foldingValue = tfld.folding_value;
+    string bname = tfld.bias_field_name;
     bool readBiasFromSpdb = tfld.read_bias_from_spdb;
 
     if (readBiasFromSpdb) {
       double biasFromSpdb;
-      if (_readBiasFromSpdb(vol.getStartRadxTime(), iname, biasFromSpdb) == 0) {
+      if (_readBiasFromSpdb(vol.getStartRadxTime(), bname, biasFromSpdb) == 0) {
         if (_params.debug >= Params::DEBUG_VERBOSE) {
           cerr << "Got bias for time: "
                << vol.getStartRadxTime().asString() << endl;
           cerr << "  field, bias: " << iname << ", " << biasFromSpdb << endl;
         }
         offset = biasFromSpdb;
+      }
+    } else {
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "Applying fixed bias for time: "
+             << vol.getStartRadxTime().asString() << endl;
+        cerr << "  field, bias: " << iname << ", " << offset << endl;
       }
     }
     
@@ -844,7 +851,7 @@ void FixFieldVals::_applyLinearTransform(RadxVol &vol)
 // read the field bias from SPDB
 
 int FixFieldVals::_readBiasFromSpdb(const RadxTime &volStartTime,
-                                    const string &fieldName,
+                                    const string &biasFieldName,
                                     double &bias)
 {
 
@@ -879,7 +886,7 @@ int FixFieldVals::_readBiasFromSpdb(const RadxTime &volStartTime,
   // get the field data
 
   string fieldTag("Field");
-  fieldTag += fieldName;
+  fieldTag += biasFieldName;
 
   string fieldXml;
   if (RadxXml::readString(biasXml, fieldTag, fieldXml)) {
