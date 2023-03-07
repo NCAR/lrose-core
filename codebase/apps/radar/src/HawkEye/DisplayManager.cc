@@ -538,7 +538,7 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
 
-  LOG(DEBUG) << "enter"; 
+  LOG(DEBUG_VERBOSE) << "enter"; 
   
   // connect the new color map with the field
   // find the fieldName in the list of FieldDisplays
@@ -568,7 +568,7 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
     _changeField(fieldId, true); 
   }
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 

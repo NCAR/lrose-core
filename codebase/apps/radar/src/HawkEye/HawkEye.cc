@@ -122,7 +122,9 @@ HawkEye::HawkEye(int argc, char **argv) :
 
   AllocCheck::inst().setParams(&_params);
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    LOG_STREAM_INIT(true, true, true, true);
+  } else if (_params.debug) {
     LOG_STREAM_INIT(true, false, true, true);
   } else {
     LOG_STREAM_INIT(false, false, false, false);

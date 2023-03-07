@@ -305,7 +305,7 @@ private:
   // data retrieval
 
   void _handleRealtimeData(QTimerEvent * event);
-  void _handleArchiveData(QTimerEvent * event);
+  void _handleArchiveData(/* QTimerEvent * event */);
   int _getArchiveData();
   void _plotArchiveData();
   void _setupVolRead(RadxFile &file);

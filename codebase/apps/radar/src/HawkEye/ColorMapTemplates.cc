@@ -134,54 +134,54 @@ ColorMapTemplates::ColorMapTemplates(QWidget *parent) :
 
 
 ColorMapTemplates::~ColorMapTemplates() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   // clean up ...
   /* delete each colorMap; Hmm, maybe each color map should be in a vector? */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 
 // What to do:  send pointer? or make copy and send a copy?  Which is better for memory management?
 // send a copy; delete all pointers on Dialog close; pass along responsibility to next class.
 void ColorMapTemplates::defaultClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("default"); 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::rainbowClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("rainbow");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::eldoraDbzClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("eldoraDbz");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::eldoraVelClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("eldoraVel");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::spolVelClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("spolVel");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::spolDivClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("spolDiv");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ColorMapTemplates::spolDbzClicked() {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   emit newColorPaletteSelected("spolDbz");
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
