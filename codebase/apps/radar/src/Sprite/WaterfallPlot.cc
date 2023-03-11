@@ -1316,7 +1316,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
     double filterRatio, spectralNoise, spectralSnr;
-    moments.applyAdaptiveFilter(nSamples, fft,
+    moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
                                 iqWindowed, NULL,
                                 calibNoise,
                                 filtAdaptWindowed, NULL,
@@ -1348,7 +1348,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(nSamples);
     double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(nSamples, fft,
+    moments.applyRegressionFilter(nSamples, beam->getPrt(), fft,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,

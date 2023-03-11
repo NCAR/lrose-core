@@ -1412,6 +1412,7 @@ void Beam::_filterSpH()
     }
     
     _mom->applyClutterFilter(_nSamples,
+                             _prt,
                              *_fft,
                              *_regr,
                              _window,
@@ -1484,6 +1485,7 @@ void Beam::_filterSpV()
     }
     
     _mom->applyClutterFilter(_nSamples,
+                             _prt,
                              *_fft,
                              *_regr,
                              _window,
@@ -1571,6 +1573,7 @@ void Beam::_filterRegrSpStagPrt()
     memcpy(gate->iqhcF, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
 
     _mom->applyRegrFilterStagPrt(_nSamples,
+                                 _prt, _prtLong,
                                  *_fftHalf,
                                  *_regrStag,
                                  gate->iqhcOrig,
@@ -1636,6 +1639,7 @@ void Beam::_filterAdapSpStagPrt()
     double spectralSnr = 1.0;
 
     _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
                                  *_fftHalf,
                                  gate->iqhcPrtShort,
                                  gate->iqhcPrtLong,
@@ -1704,6 +1708,7 @@ void Beam::_filterDpAltHvCoCross()
     }
     
     _mom->applyClutterFilter(_nSamplesHalf,
+                             _prt * 2.0,
 			     *_fftHalf,
 			     *_regrHalf,
 			     _windowHalf,
@@ -1832,6 +1837,7 @@ void Beam::_filterDpAltHvCoOnly()
     }
     
     _mom->applyClutterFilter(_nSamplesHalf,
+                             _prt * 2.0,
                              *_fftHalf,
                              *_regrHalf,
                              _windowHalf,
@@ -1920,6 +1926,7 @@ void Beam::_filterDpSimHvFixedPrt()
     }
     
     _mom->applyClutterFilter(_nSamples,
+                             _prt,
                              *_fft,
                              *_regr,
                              _window,
@@ -1999,6 +2006,7 @@ void Beam::_filterDpSimHvStagPrt()
     double filterRatio = 1.0;
     double spectralSnr = 1.0;
     _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
                                  *_fftHalf,
                                  gate->iqhcPrtShort,
                                  gate->iqhcPrtLong,
@@ -2081,6 +2089,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     }
     
     _mom->applyClutterFilter(_nSamples,
+                             _prt,
                              *_fft,
                              *_regr,
                              _window,
@@ -2158,6 +2167,7 @@ void Beam::_filterDpHOnlyStagPrt()
     double filterRatio = 1.0;
     double spectralSnr = 1.0;
     _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
                                  *_fftHalf,
                                  gate->iqhcPrtShort,
                                  gate->iqhcPrtLong,
@@ -2241,6 +2251,7 @@ void Beam::_filterDpVOnlyFixedPrt()
     }
     
     _mom->applyClutterFilter(_nSamples,
+                             _prt,
                              *_fft,
                              *_regr,
                              _window,
@@ -2319,6 +2330,7 @@ void Beam::_filterDpVOnlyStagPrt()
     double filterRatio = 1.0;
     double spectralSnr = 1.0;
     _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
                                  *_fftHalf,
                                  gate->iqvcPrtShort,
                                  gate->iqvcPrtLong,
