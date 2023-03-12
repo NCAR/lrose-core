@@ -5242,7 +5242,7 @@ void RadarMoments::_runRegressionFilter
   } else {
     
     // apply regression filter, passing in CNR
-
+    
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
     regr.applyForsythe(iqUnfiltered, _regrCnrDb, _antennaRate,
@@ -5263,7 +5263,7 @@ void RadarMoments::_runRegressionFilter
     double powerBeforeInterp = RadarComplex::meanPower(regrSpec.data(), nSamples);
     
     if (interpAcrossNotch) {
-      
+
       // compute the filter ratio at each spectral point
       
       vector<double> filtRatioDb;
@@ -5278,6 +5278,39 @@ void RadarMoments::_runRegressionFilter
       // through the application of the regression filter.
       // We actually compute Half width of notch, using a filtRatioDb threshold test,
       // and widen this by 1 spectral point, and an upper limit of nSamples/4.
+
+      // find start and end of notch
+      // we start searching in the middle of the notch - spectral point 0
+      // and then move away from the center, computing the power change
+      // it increases as we move away from the center point
+      // the notch limits are defined by where the power starts to decrease again
+      // and we retain the inflection points
+
+      int nSamplesHalf = nSamples / 2;
+      double notchMinPower = regrSpec[0];
+
+      double prevPower = notchMinPower;
+      int notchUpperLimit = 1;
+      for (int ii = 1; ii < nSamplesHalf - 2; ii++) {
+        double power = regrSpec[ii];
+        if (power < prevPower) {
+          notchUpperLimit = ii - 1;
+          break;
+        }
+        prevPower = power;
+      }
+      
+      prevPower = notchMinPower;
+      int notchLowerLimit = -1;
+      for (int ii = 1; ii < nSamplesHalf - 2; ii++) {
+        int jj = (nSamples - ii) % nSamples;
+        double power = regrSpec[jj];
+        if (power < prevPower) {
+          notchLowerLimit = jj + 1 - nSamples;
+          break;
+        }
+        prevPower = power;
+      }
       
       int notchHalfWidth = 0;
       for (int ii = 0; ii < nSamples / 2; ii++) {
@@ -5296,6 +5329,18 @@ void RadarMoments::_runRegressionFilter
       
       int notchLowerBound = -notchHalfWidth;
       int notchUpperBound = notchHalfWidth;
+
+      // cerr << "1111111 lowBound, upBound, lowLimit, upLimit: "
+      //      << notchLowerBound << ", "
+      //      << notchUpperBound << ", "
+      //      << notchLowerLimit << ", "
+      //      << notchUpperLimit << endl;
+      
+      // notchLowerBound = notchLowerLimit + 1;
+      // notchUpperBound = notchUpperLimit - 1;
+      notchLowerBound = notchLowerLimit;
+      notchUpperBound = notchUpperLimit;
+
       int nUnfiltered = nSamples - notchHalfWidth * 2 - 1;
       double *startNonNotch = regrSpec.data() + notchHalfWidth + 1;
       
