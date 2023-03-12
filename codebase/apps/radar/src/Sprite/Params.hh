@@ -796,11 +796,11 @@ public:
 
   int regression_filter_polynomial_order;
 
-  tdrp_bool_t regression_filter_determine_order_from_CSR;
+  tdrp_bool_t regression_filter_determine_order_from_CNR;
 
   double regression_filter_notch_edge_power_ratio_threshold_db;
 
-  double regression_filter_min_csr_db;
+  double regression_filter_min_cnr_db;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
 

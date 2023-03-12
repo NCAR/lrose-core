@@ -539,7 +539,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     legendsLeft.push_back(text);
   }
   if (_useRegrFilt) {
-    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
+    snprintf(text, 1024, "Regr-order: %d", beam->getRegrOrder());
     legendsLeft.push_back(text);
   }
   if (_plotClutModel) {
@@ -762,7 +762,7 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
     snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
     legendsLeft.push_back(text);
   } else if (_useRegrFilt) {
-    snprintf(text, 1024, "Regr filt, order: %d", _regrOrder);
+    snprintf(text, 1024, "Regr filt, order: %d", beam->getRegrOrder());
     legendsLeft.push_back(text);
   }
   if (_medianFiltLen > 1) {
@@ -1051,7 +1051,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     xVals.push_back(ii);
   }
   ForsytheFit forsythe;
-  forsythe.prepareForFit(_regrOrder, xVals);
+  forsythe.prepareForFit(beam->getRegrOrder(), xVals);
   
   // compute polynomial regression fit
   
@@ -1193,7 +1193,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     
     char text[1024];
     vector<string> legends;
-    snprintf(text, 1024, "Regr-order: %d", _regrOrder);
+    snprintf(text, 1024, "Regr-order: %d", beam->getRegrOrder());
     legends.push_back(text);
     snprintf(text, 1024, "PwrUnfilt(dBm): %.2f", dbmUnfilt);
     legends.push_back(text);

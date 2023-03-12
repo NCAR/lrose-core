@@ -170,6 +170,9 @@ public:
 
   const RadarMoments *getMoments() { return _mom; }
 
+  double getAntennaRate();
+  int getRegrOrder();
+
 protected:
   
 private:
@@ -360,6 +363,11 @@ private:
 
   RegressionFilter *_regrStag;
 
+  // antenna rate
+
+  double _beamAzRate;
+  double _beamElRate;
+
   // private functions
 
   void _init();
@@ -422,6 +430,9 @@ private:
   double _computeClutPower(const MomentsFields &unfiltered,
                            const MomentsFields &filtered);
 
+  void _computeBeamAzRate();
+  void _computeBeamElRate();
+  
   // copy method for assignment and copy constructor
 
   Beam & _copy(const Beam &rhs);

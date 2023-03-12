@@ -2513,14 +2513,14 @@ void Beam::_initMomentsObject()
 
   if (_params.use_polynomial_regression_clutter_filter) {
     int order = _params.regression_filter_polynomial_order;
-    bool orderFromCSR = _params.regression_filter_determine_order_from_CSR;
-    _regr->setup(_nSamples, order, orderFromCSR);
-    _regrHalf->setup(_nSamplesHalf, order, orderFromCSR);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCSR);
+    bool orderFromCNR = _params.regression_filter_determine_order_from_CNR;
+    _regr->setup(_nSamples, order, orderFromCNR);
+    _regrHalf->setup(_nSamplesHalf, order, orderFromCNR);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCNR);
     _mom->setUseRegressionFilter
       (true,
        _params.regression_filter_notch_edge_power_ratio_threshold_db,
-       _params.regression_filter_min_csr_db);
+       _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
@@ -2547,6 +2547,11 @@ void Beam::_initMomentsObject()
     _mom->init(_prt, _opsInfo);
   
   }
+
+  _computeBeamAzRate();
+  _computeBeamElRate();
+
+  _mom->setAntennaRate(getAntennaRate());
 
 }
 
@@ -3707,4 +3712,103 @@ void Beam::_cleanUpStagVel()
   }
 
 }
+
+////////////////////////////////////////////////////////////////
+// compute azimuth rate for a beam
+
+void Beam::_computeBeamAzRate()
+
+{
+
+  const IwrfTsPulse *pulseStart = _pulses[0];
+  const IwrfTsPulse *pulseEnd = _pulses[_pulses.size() - 1];
+  
+  double azStart = pulseStart->getAz();
+  double azEnd = pulseEnd->getAz();
+
+  double deltaAz = azEnd - azStart;
+  if (deltaAz > 180) {
+    deltaAz -= 360;
+  } else if (deltaAz < -180) {
+    deltaAz += 360;
+  }
+  
+  double timeStart = pulseStart->getFTime();
+  double timeEnd = pulseEnd->getFTime();
+  double deltaTime = timeEnd - timeStart;
+  
+  if (deltaTime <= 0) {
+    _beamAzRate = 0.0;
+  } else {
+    _beamAzRate = deltaAz / deltaTime;
+  }
+  
+  cerr << "1111111111111 _beamAzRate: " << _beamAzRate << endl;
+
+}
+
+////////////////////////////////////////////////////////////////
+// compute elevation rate for a beam
+
+void Beam::_computeBeamElRate()
+
+{
+  
+  const IwrfTsPulse *pulseStart = _pulses[0];
+  const IwrfTsPulse *pulseEnd = _pulses[_pulses.size() - 1];
+  
+  double elStart = pulseStart->getEl();
+  double elEnd = pulseEnd->getEl();
+
+  double deltaEl = elEnd - elStart;
+  if (deltaEl > 180) {
+    deltaEl -= 360;
+  } else if (deltaEl < -180) {
+    deltaEl += 360;
+  }
+  
+  double timeStart = pulseStart->getFTime();
+  double timeEnd = pulseEnd->getFTime();
+  double deltaTime = timeEnd - timeStart;
+  
+  if (deltaTime <= 0) {
+    _beamElRate = 0.0;
+  } else {
+    _beamElRate = deltaEl / deltaTime;
+  }
+
+  cerr << "22222222222222 _beamElRate: " << _beamElRate << endl;
+
+}
+
+///////////////////////////////////////////
+// get antenna rate for scan type
+
+double Beam::getAntennaRate()
+
+{
+  
+  double rate = 0.0;
+  if (_isRhi) {
+    rate = _beamElRate;
+  } else {
+    rate = _beamAzRate;
+  }
+  return rate;
+  
+}
+
+///////////////////////////////////////////
+// get regression order
+
+int Beam::getRegrOrder()
+
+{
+  if (_regr->getOrderAuto()) {
+    return _regr->getPolyOrderInUse();
+  } else {
+    return _regr->getNPoly();
+  }
+}
+
 
