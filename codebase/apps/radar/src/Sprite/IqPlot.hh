@@ -147,7 +147,7 @@ public:
   
   void plotBeam(QPainter &painter,
                 Beam *beam,
-                int nSamples,
+                size_t nSamples,
                 double selectedRangeKm);
 
   // set grid lines on/off
@@ -211,6 +211,11 @@ protected:
   const Params &_params;
   int _id;
 
+  // beam to plot
+  
+  Beam *_beam;
+  size_t _nSamples;
+
   // plot type and channel
 
   Params::iq_plot_type_t _plotType;
@@ -231,6 +236,7 @@ protected:
   double _clutWidthMps;
   bool _useRegrFilt;
   int _regrOrder;
+  int _regrOrderInUse;
   bool _regrFiltInterpAcrossNotch;
   bool _computePlotRangeDynamically;
 
@@ -257,74 +263,54 @@ protected:
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
   void _plotSpectralPower(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
 
   void _plotSpectralPhase(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
 
   void _plotSpectralZdr(QPainter &painter,
-                        Beam *beam,
-                        int nSamples,
                         double selectedRangeKm,
                         int gateNum,
                         const RadarComplex_t *iqHc,
                         const RadarComplex_t *iqVc);
 
   void _plotSpectralPhidp(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iqHc,
                           const RadarComplex_t *iqVc);
 
   void _plotTsPower(QPainter &painter,
-                    Beam *beam,
-                    int nSamples,
                     double selectedRangeKm,
                     int gateNum,
                     const RadarComplex_t *iq);
   
   void _plotTsPhase(QPainter &painter,
-                    Beam *beam,
-                    int nSamples,
                     double selectedRangeKm,
                     int gateNum,
                     const RadarComplex_t *iq);
 
   void _plotIQVals(QPainter &painter,
-                   Beam *beam,
-                   int nSamples,
                    double selectedRangeKm,
                    int gateNum,
                    const double *iVals, 
                    const double *qVals);
   
   void _plotIvsQ(QPainter &painter,
-                 Beam *beam,
-                 int nSamples,
                  double selectedRangeKm,
                  int gateNum,
                  const RadarComplex_t *iq);
 
   void _plotPhasor(QPainter &painter,
-                   Beam *beam,
-                   int nSamples,
                    double selectedRangeKm,
                    int gateNum,
                    const RadarComplex_t *iq);
 
-  void _computePowerSpectrum(Beam *beam,
-                             int nSamples,
-                             const RadarComplex_t *iq,
+  void _computePowerSpectrum(const RadarComplex_t *iq,
                              double *power,
                              double *dbm);
   

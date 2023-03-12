@@ -2631,10 +2631,10 @@ void Beam::_regrInit()
   // initialize the regression objects
   
   if (_params.use_polynomial_regression_clutter_filter) {
-    int order = _params.regression_filter_polynomial_order;
-    _regr->setup(_nSamples, order);
-    _regrHalf->setup(_nSamplesHalf, order);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order);
+    int orderFromCNR = _params.regression_filter_polynomial_order;
+    _regr->setup(_nSamples, orderFromCNR);
+    _regrHalf->setup(_nSamplesHalf, orderFromCNR);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, orderFromCNR);
   }
 
 }

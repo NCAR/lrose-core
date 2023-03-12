@@ -79,7 +79,7 @@ IqPlot::IqPlot(QWidget* parent,
   _plotClutModel = false;
   _clutWidthMps = 0.75;
   _useRegrFilt = false;
-  _regrOrder = 3;
+  _regrOrder = _params.regression_filter_polynomial_order;
   _regrFiltInterpAcrossNotch = true;
   _computePlotRangeDynamically = true;
 }
@@ -146,7 +146,7 @@ void IqPlot::unzoom()
 
 void IqPlot::plotBeam(QPainter &painter,
                       Beam *beam,
-                      int nSamples,
+                      size_t nSamples,
                       double selectedRangeKm)
   
 {
@@ -156,6 +156,9 @@ void IqPlot::plotBeam(QPainter &painter,
          << endl;
     return;
   }
+
+  _beam = beam;
+  _nSamples = nSamples;
   
   int gateNum = beam->getGateNum(selectedRangeKm);
   if (gateNum > beam->getNGates() - 1) {
@@ -176,19 +179,19 @@ void IqPlot::plotBeam(QPainter &painter,
 
   const GateData *gateData = beam->getGateData()[gateNum];
   TaArray<RadarComplex_t> iq_;
-  RadarComplex_t *iq = iq_.alloc(nSamples);
+  RadarComplex_t *iq = iq_.alloc(_nSamples);
   switch (_rxChannel) {
     case Params::CHANNEL_HC:
-      memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+      memcpy(iq, gateData->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
       break;
     case Params::CHANNEL_VC:
-      memcpy(iq, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+      memcpy(iq, gateData->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
       break;
     case Params::CHANNEL_HX:
-      memcpy(iq, gateData->iqhxOrig, nSamples * sizeof(RadarComplex_t));
+      memcpy(iq, gateData->iqhxOrig, _nSamples * sizeof(RadarComplex_t));
       break;
     case Params::CHANNEL_VX:
-      memcpy(iq, gateData->iqvxOrig, nSamples * sizeof(RadarComplex_t));
+      memcpy(iq, gateData->iqvxOrig, _nSamples * sizeof(RadarComplex_t));
   }
   
   // perform the relevant plot
@@ -198,45 +201,45 @@ void IqPlot::plotBeam(QPainter &painter,
     case Params::Q_VALS: 
       {
         TaArray<double> iVals_;
-        double *iVals = iVals_.alloc(nSamples);
-        for (int ii = 0; ii < nSamples; ii++) {
+        double *iVals = iVals_.alloc(_nSamples);
+        for (size_t ii = 0; ii < _nSamples; ii++) {
           iVals[ii] = iq[ii].re;
         }
         TaArray<double> qVals_;
-        double *qVals = qVals_.alloc(nSamples);
-        for (int ii = 0; ii < nSamples; ii++) {
+        double *qVals = qVals_.alloc(_nSamples);
+        for (size_t ii = 0; ii < _nSamples; ii++) {
           qVals[ii] = iq[ii].im;
         }
-        _plotIQVals(painter, beam, nSamples, selectedRangeKm,
+        _plotIQVals(painter,  selectedRangeKm,
                     gateNum, iVals, qVals);
       }
       break;
     case Params::I_VS_Q:
-      _plotIvsQ(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotIvsQ(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::PHASOR:
-      _plotPhasor(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotPhasor(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::SPECTRAL_PHASE:
-      _plotSpectralPhase(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotSpectralPhase(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::SPECTRAL_ZDR:
-      _plotSpectralZdr(painter, beam, nSamples, selectedRangeKm, gateNum,
+      _plotSpectralZdr(painter, selectedRangeKm, gateNum,
                        gateData->iqhcOrig, gateData->iqvcOrig);
       break;
     case Params::SPECTRAL_PHIDP:
-      _plotSpectralPhidp(painter, beam, nSamples, selectedRangeKm, gateNum,
+      _plotSpectralPhidp(painter, selectedRangeKm, gateNum,
                          gateData->iqhcOrig, gateData->iqvcOrig);
       break;
     case Params::TS_POWER:
-      _plotTsPower(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotTsPower(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::TS_PHASE:
-      _plotTsPhase(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotTsPhase(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::SPECTRAL_POWER:
     default:
-      _plotSpectralPower(painter, beam, nSamples, selectedRangeKm, gateNum, iq);
+      _plotSpectralPower(painter, selectedRangeKm, gateNum, iq);
   }
 
 }
@@ -246,8 +249,6 @@ void IqPlot::plotBeam(QPainter &painter,
  */
 
 void IqPlot::_plotSpectralPower(QPainter &painter,
-                                Beam *beam,
-                                int nSamples,
                                 double selectedRangeKm,
                                 int gateNum,
                                 const RadarComplex_t *iq)
@@ -257,23 +258,23 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  _applyWindow(iq, iqWindowed, nSamples);
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  _applyWindow(iq, iqWindowed, _nSamples);
   
   // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-  RadarFft fft(nSamples);
+  RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
+  RadarFft fft(_nSamples);
   fft.fwd(iqWindowed, powerSpec);
   fft.shift(powerSpec);
   
   // compute power, plus min and max
 
   TaArray<double> powerDbm_;
-  double *powerDbm = powerDbm_.alloc(nSamples);
+  double *powerDbm = powerDbm_.alloc(_nSamples);
   double minDbm = 9999.0, maxDbm = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double power = RadarComplex::power(powerSpec[ii]);
     double dbm = 10.0 * log10(power);
     if (power <= 1.0e-12) {
@@ -283,14 +284,14 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     minDbm = min(dbm, minDbm);
     maxDbm = max(dbm, maxDbm);
   }
-  double totalPower = RadarComplex::meanPower(powerSpec, nSamples);
+  double totalPower = RadarComplex::meanPower(powerSpec, _nSamples);
 
   // compute adaptive filter as appropriate
   
   TaArray<double> filtAdaptDbm_;
-  double *filtAdaptDbm = filtAdaptDbm_.alloc(nSamples);
+  double *filtAdaptDbm = filtAdaptDbm_.alloc(_nSamples);
   
-  const IwrfCalib &calib = beam->getCalib();
+  const IwrfCalib &calib = _beam->getCalib();
   double calibNoise = 0.0;
   switch (_rxChannel) {
     case Params::CHANNEL_HC:
@@ -308,12 +309,13 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   }
   
   RadarMoments moments;
-  moments.setNSamples(nSamples);
-  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
-               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setNSamples(_nSamples);
+  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
   moments.setCalib(calib);
   moments.setClutterWidthMps(_clutWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
+  moments.setAntennaRate(_beam->getAntennaRate());
   
   double adaptPower = 1.0e-12;
   double adaptSpectralSnr = 1.0e-12;
@@ -321,9 +323,9 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   if (_useAdaptFilt) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
-    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
+    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
     double filterRatio, spectralNoise;
-    moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
+    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
                                 iqWindowed, NULL,
                                 calibNoise,
                                 filtAdaptWindowed, NULL,
@@ -332,11 +334,11 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
                                 adaptSpectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
     fft.fwd(filtAdaptWindowed, filtAdaptSpec);
     fft.shift(filtAdaptSpec);
     
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       double power = RadarComplex::power(filtAdaptSpec[ii]);
       double dbm = 10.0 * log10(power);
       if (power <= 1.0e-12) {
@@ -347,30 +349,33 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       maxDbm = max(dbm, maxDbm);
     }
 
-    adaptPower = RadarComplex::meanPower(filtAdaptSpec, nSamples);
+    adaptPower = RadarComplex::meanPower(filtAdaptSpec, _nSamples);
     
   } // if (_useAdaptFilt)
 
   // compute regression filter as appropriate
 
   TaArray<double> filtRegrDbm_;
-  double *filtRegrDbm = filtRegrDbm_.alloc(nSamples);
+  double *filtRegrDbm = filtRegrDbm_.alloc(_nSamples);
 
   double regrPower = 0.0;
+  _regrOrderInUse = 0;
   if (_useRegrFilt) {
     
     RegressionFilter regrF;
-    if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(),
-                           beam->getStagN(), _regrOrder);
+    if (_beam->getIsStagPrt()) {
+      regrF.setupStaggered(_nSamples, _beam->getStagM(),
+                           _beam->getStagN(), _regrOrder,
+                           _params.regression_filter_determine_order_from_CNR);
     } else {
-      regrF.setup(nSamples, _regrOrder);
+      regrF.setup(_nSamples, _regrOrder,
+                  _params.regression_filter_determine_order_from_CNR);
     }
     
     TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    RadarComplex_t *filtered = filtered_.alloc(_nSamples);
     double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(nSamples, beam->getPrt(), fft,
+    moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
@@ -379,17 +384,18 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
+    _regrOrderInUse = regrF.getPolyOrderInUse();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
-    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
-    _applyWindow(filtered, filtRegrWindowed, nSamples);
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
+    _applyWindow(filtered, filtRegrWindowed, _nSamples);
   
     TaArray<RadarComplex_t> filtRegrSpec_;
-    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(_nSamples);
     fft.fwd(filtRegrWindowed, filtRegrSpec);
     fft.shift(filtRegrSpec);
     
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       double power = RadarComplex::power(filtRegrSpec[ii]);
       double dbm = 10.0 * log10(power);
       if (power <= 1.0e-12) {
@@ -400,7 +406,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       filtRegrDbm[ii] = dbm;
     }
 
-    regrPower = RadarComplex::meanPower(filtRegrSpec, nSamples);
+    regrPower = RadarComplex::meanPower(filtRegrSpec, _nSamples);
     
   } // if (_useRegrFilt)
 
@@ -423,7 +429,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   // draw the unfiltered spectrum
 
-  FilterUtils::applyMedianFilter(powerDbm, nSamples, _medianFiltLen);
+  FilterUtils::applyMedianFilter(powerDbm, _nSamples, _medianFiltLen);
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
@@ -431,7 +437,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double val = powerDbm[ii];
     QPointF pt(ii, val);
     pts.push_back(pt);
@@ -443,7 +449,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   
   if (_useAdaptFilt) {
     
-    FilterUtils::applyMedianFilter(filtAdaptDbm, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(filtAdaptDbm, _nSamples, _medianFiltLen);
     painter.save();
     QPen pen(painter.pen());
     pen.setColor(_params.iqplot_adaptive_filtered_color);
@@ -451,7 +457,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     pen.setWidth(_params.iqplot_line_width);
     painter.setPen(pen);
     QVector<QPointF> filtPts;
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       QPointF pt(ii, filtAdaptDbm[ii]);
       filtPts.push_back(pt);
     }
@@ -464,7 +470,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   if (_useRegrFilt) {
     
-    FilterUtils::applyMedianFilter(filtRegrDbm, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(filtRegrDbm, _nSamples, _medianFiltLen);
     painter.save();
     QPen pen(painter.pen());
     pen.setColor(_params.iqplot_regression_filtered_color);
@@ -472,7 +478,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     pen.setWidth(_params.iqplot_line_width);
     painter.setPen(pen);
     QVector<QPointF> filtPts;
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       QPointF pt(ii, filtRegrDbm[ii]);
       filtPts.push_back(pt);
     }
@@ -487,17 +493,17 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
     ClutFilter clut;
     TaArray<double> clutModel_;
-    double *clutModel = clutModel_.alloc(nSamples);
+    double *clutModel = clutModel_.alloc(_nSamples);
     TaArray<double> powerReal_;
-    double *powerReal = powerReal_.alloc(nSamples);
-    for (int ii = 0; ii < nSamples; ii++) {
+    double *powerReal = powerReal_.alloc(_nSamples);
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       powerReal[ii] = RadarComplex::power(powerSpec[ii]);
     }
     
     if (clut.computeGaussianClutterModel(powerReal,
-                                         nSamples,
+                                         _nSamples,
                                          _clutWidthMps,
-                                         beam->getNyquist(),
+                                         _beam->getNyquist(),
                                          clutModel) == 0) {
       
       painter.save();
@@ -507,7 +513,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       pen.setWidth(2);
       painter.setPen(pen);
       QVector<QPointF> clutPts;
-      for (int ii = 0; ii < nSamples; ii++) {
+      for (size_t ii = 0; ii < _nSamples; ii++) {
         double power = clutModel[ii];
         double dbm = 10.0 * log10(power);
         if (dbm < minDbm) {
@@ -525,7 +531,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   // legends
   
-  // const MomentsFields* fields = beam->getOutFields();
+  // const MomentsFields* fields = _beam->getOutFields();
   // double dbm = fields[gateNum].dbm;
   // double dbz = fields[gateNum].dbz;
   // double vel = fields[gateNum].vel;
@@ -539,7 +545,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     legendsLeft.push_back(text);
   }
   if (_useRegrFilt) {
-    snprintf(text, 1024, "Regr-order: %d", beam->getRegrOrder());
+    snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
     legendsLeft.push_back(text);
   }
   if (_plotClutModel) {
@@ -593,8 +599,6 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
  */
 
 void IqPlot::_plotSpectralPhase(QPainter &painter,
-                                Beam *beam,
-                                int nSamples,
                                 double selectedRangeKm,
                                 int gateNum,
                                 const RadarComplex_t *iq)
@@ -604,23 +608,23 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  _applyWindow(iq, iqWindowed, nSamples);
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  _applyWindow(iq, iqWindowed, _nSamples);
   
   // compute spectrum
   
   TaArray<RadarComplex_t> spec_;
-  RadarComplex_t *spec = spec_.alloc(nSamples);
-  RadarFft fft(nSamples);
+  RadarComplex_t *spec = spec_.alloc(_nSamples);
+  RadarFft fft(_nSamples);
   fft.fwd(iqWindowed, spec);
   fft.shift(spec);
   
   // compute phase
 
   TaArray<double> phase_;
-  double *phase = phase_.alloc(nSamples);
+  double *phase = phase_.alloc(_nSamples);
   double minVal = 9999.0, maxVal = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double phaseRad = atan2(spec[ii].im, spec[ii].re);
     double phaseDeg = phaseRad * RAD_TO_DEG;
     phase[ii] = phaseDeg;
@@ -652,8 +656,8 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    int jj = (ii + _nSamples) % _nSamples;
     double val = phase[ii];
     QPointF pt(jj, val);
     pts.push_back(pt);
@@ -663,7 +667,7 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   
   // legends
 
-  const MomentsFields* fields = beam->getOutFields();
+  const MomentsFields* fields = _beam->getOutFields();
   double vel = fields[gateNum].vel;
   
   char text[1024];
@@ -690,8 +694,6 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
  */
 
 void IqPlot::_plotSpectralZdr(QPainter &painter,
-                              Beam *beam,
-                              int nSamples,
                               double selectedRangeKm,
                               int gateNum,
                               const RadarComplex_t *iqHc,
@@ -702,19 +704,19 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   // compute ZDR spectrum
   
   TaArray<double> powerHc_, dbmHc_;
-  double *powerHc = powerHc_.alloc(nSamples);
-  double *dbmHc = dbmHc_.alloc(nSamples);
-  _computePowerSpectrum(beam, nSamples, iqHc, powerHc, dbmHc);
+  double *powerHc = powerHc_.alloc(_nSamples);
+  double *dbmHc = dbmHc_.alloc(_nSamples);
+  _computePowerSpectrum(iqHc, powerHc, dbmHc);
   
   TaArray<double> powerVc_, dbmVc_;
-  double *powerVc = powerVc_.alloc(nSamples);
-  double *dbmVc = dbmVc_.alloc(nSamples);
-  _computePowerSpectrum(beam, nSamples, iqVc, powerVc, dbmVc);
+  double *powerVc = powerVc_.alloc(_nSamples);
+  double *dbmVc = dbmVc_.alloc(_nSamples);
+  _computePowerSpectrum(iqVc, powerVc, dbmVc);
   
   TaArray<double> zdr_;
   double minVal = 9999.0, maxVal = -9999.0;
-  double *zdr = zdr_.alloc(nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
+  double *zdr = zdr_.alloc(_nSamples);
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     zdr[ii] = dbmHc[ii] - dbmVc[ii];
     minVal = min(zdr[ii], minVal);
     maxVal = max(zdr[ii], maxVal);
@@ -737,7 +739,7 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
 
   // draw the spectral zdr
   
-  FilterUtils::applyMedianFilter(zdr, nSamples, _medianFiltLen);
+  FilterUtils::applyMedianFilter(zdr, _nSamples, _medianFiltLen);
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
@@ -745,8 +747,8 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    int jj = (ii + _nSamples) % _nSamples;
     double val = zdr[ii];
     QPointF pt(jj, val);
     pts.push_back(pt);
@@ -762,7 +764,7 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
     snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
     legendsLeft.push_back(text);
   } else if (_useRegrFilt) {
-    snprintf(text, 1024, "Regr filt, order: %d", beam->getRegrOrder());
+    snprintf(text, 1024, "Regr filt, order: %d", _beam->getRegrOrder());
     legendsLeft.push_back(text);
   }
   if (_medianFiltLen > 1) {
@@ -785,8 +787,6 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
  */
 
 void IqPlot::_plotSpectralPhidp(QPainter &painter,
-                                Beam *beam,
-                                int nSamples,
                                 double selectedRangeKm,
                                 int gateNum,
                                 const RadarComplex_t *iqHc,
@@ -797,17 +797,17 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-  RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-  RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-  _applyWindow(iqHc, iqWindowedHc, nSamples);
-  _applyWindow(iqVc, iqWindowedVc, nSamples);
+  RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(_nSamples);
+  RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(_nSamples);
+  _applyWindow(iqHc, iqWindowedHc, _nSamples);
+  _applyWindow(iqVc, iqWindowedVc, _nSamples);
   
   // compute spectra
   
   TaArray<RadarComplex_t> specHc_, specVc_;
-  RadarComplex_t *specHc = specHc_.alloc(nSamples);
-  RadarComplex_t *specVc = specVc_.alloc(nSamples);
-  RadarFft fft(nSamples);
+  RadarComplex_t *specHc = specHc_.alloc(_nSamples);
+  RadarComplex_t *specVc = specVc_.alloc(_nSamples);
+  RadarFft fft(_nSamples);
   fft.fwd(iqWindowedHc, specHc);
   fft.shift(specHc);
   fft.fwd(iqWindowedVc, specVc);
@@ -817,8 +817,8 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   
   TaArray<double> phidp_;
   double minVal = 9999.0, maxVal = -9999.0;
-  double *phidp = phidp_.alloc(nSamples);
-  for (int ii = 0; ii < nSamples; ii++) {
+  double *phidp = phidp_.alloc(_nSamples);
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
     phidp[ii] = RadarComplex::argDeg(diff);
     minVal = min(phidp[ii], minVal);
@@ -842,7 +842,7 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
 
   // draw the spectrum phidp
   
-  FilterUtils::applyMedianFilter(phidp, nSamples, _medianFiltLen);
+  FilterUtils::applyMedianFilter(phidp, _nSamples, _medianFiltLen);
   painter.save();
   QPen pen(painter.pen());
   pen.setColor(_params.iqplot_line_color);
@@ -850,8 +850,8 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    int jj = (ii + _nSamples) % _nSamples;
     double val = phidp[ii];
     QPointF pt(jj, val);
     pts.push_back(pt);
@@ -861,7 +861,7 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   
   // legends
 
-  const MomentsFields* fields = beam->getOutFields();
+  const MomentsFields* fields = _beam->getOutFields();
   char text[1024];
   vector<string> legendsLeft;
   snprintf(text, 1024, "phidp: %.2f", fields[gateNum].phidp);
@@ -886,8 +886,6 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
  */
 
 void IqPlot::_plotTsPower(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq)
@@ -897,9 +895,9 @@ void IqPlot::_plotTsPower(QPainter &painter,
   // compute power, plus min and max
   
   TaArray<double> powerDbm_;
-  double *powerDbm = powerDbm_.alloc(nSamples);
+  double *powerDbm = powerDbm_.alloc(_nSamples);
   double minDbm = 9999.0, maxDbm = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double power = RadarComplex::power(iq[ii]);
     double dbm = 10.0 * log10(power);
     if (power <= 0) {
@@ -934,8 +932,8 @@ void IqPlot::_plotTsPower(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    int jj = (ii + _nSamples) % _nSamples;
     double val = powerDbm[ii];
     QPointF pt(jj, val);
     pts.push_back(pt);
@@ -945,7 +943,7 @@ void IqPlot::_plotTsPower(QPainter &painter,
   
   // legends
 
-  double power = RadarComplex::meanPower(iq, nSamples);
+  double power = RadarComplex::meanPower(iq, _nSamples);
   double dbm = 10.0 * log10(power);
   char text[1024];
   snprintf(text, 1024, "DbmMean: %.2f", dbm);
@@ -967,8 +965,6 @@ void IqPlot::_plotTsPower(QPainter &painter,
  */
 
 void IqPlot::_plotTsPhase(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq)
@@ -978,9 +974,9 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   // compute time series phases
   
   TaArray<double> phase_;
-  double *phase = phase_.alloc(nSamples);
+  double *phase = phase_.alloc(_nSamples);
   double minVal = 9999.0, maxVal = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double phaseRad = atan2(iq[ii].im, iq[ii].re);
     double phaseDeg = phaseRad * RAD_TO_DEG;
     phase[ii] = phaseDeg;
@@ -1012,8 +1008,8 @@ void IqPlot::_plotTsPhase(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
-    int jj = (ii + nSamples) % nSamples;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    int jj = (ii + _nSamples) % _nSamples;
     double val = phase[ii];
     QPointF pt(jj, val);
     pts.push_back(pt);
@@ -1035,8 +1031,6 @@ void IqPlot::_plotTsPhase(QPainter &painter,
  */
 
 void IqPlot::_plotIQVals(QPainter &painter,
-                         Beam *beam,
-                         int nSamples,
                          double selectedRangeKm,
                          int gateNum,
                          const double *iVals,
@@ -1047,33 +1041,33 @@ void IqPlot::_plotIQVals(QPainter &painter,
   // prepare Forsythe compute object for regression
   
   vector<double> xVals;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     xVals.push_back(ii);
   }
   ForsytheFit forsythe;
-  forsythe.prepareForFit(beam->getRegrOrder(), xVals);
+  forsythe.prepareForFit(_beam->getRegrOrder(), xVals);
   
   // compute polynomial regression fit
   
   vector<double> iRaw;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     iRaw.push_back(iVals[ii]);
   }
   forsythe.performFit(iRaw);
   vector<double> iSmooth = forsythe.getYEstVector();
   vector<double> iResid;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     iResid.push_back(iRaw[ii] - iSmooth[ii]);
   }
 
   vector<double> qRaw;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     qRaw.push_back(qVals[ii]);
   }
   forsythe.performFit(qRaw);
   vector<double> qSmooth = forsythe.getYEstVector();
   vector<double> qResid;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     qResid.push_back(qRaw[ii] - qSmooth[ii]);
   }
 
@@ -1081,12 +1075,12 @@ void IqPlot::_plotIQVals(QPainter &painter,
 
   double sumPowerUnfilt = 0.0;
   double sumPowerFilt = 0.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     sumPowerUnfilt += iVals[ii] * iVals[ii] + qVals[ii] * qVals[ii];
     sumPowerFilt += iResid[ii] * iResid[ii] + qResid[ii] * qResid[ii];
   }
-  double meanPowerUnfilt = sumPowerUnfilt / nSamples;
-  double meanPowerFilt = sumPowerFilt / nSamples;
+  double meanPowerUnfilt = sumPowerUnfilt / _nSamples;
+  double meanPowerFilt = sumPowerFilt / _nSamples;
   double dbmUnfilt = 10.0 * log10(meanPowerUnfilt);
   double dbmFilt = 10.0 * log10(meanPowerFilt);
   double clutPower = meanPowerUnfilt - meanPowerFilt;
@@ -1099,7 +1093,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
   
   double minVal = 9999.0;
   double maxVal = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     minVal = min(iVals[ii], minVal);
     minVal = min(iSmooth[ii], minVal);
     minVal = min(iResid[ii], minVal);
@@ -1147,7 +1141,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> pts;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     QPointF pt(ii, vals[ii]);
     pts.push_back(pt);
   }
@@ -1167,7 +1161,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     pen.setWidth(_params.iqplot_polynomial_line_width);
     painter.setPen(pen);
     QVector<QPointF> pts;
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       QPointF pt(ii, smooth[ii]);
       pts.push_back(pt);
     }
@@ -1182,7 +1176,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     pen.setWidth(_params.iqplot_polynomial_line_width);
     painter.setPen(pen);
     pts.clear();
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       QPointF pt(ii, resid[ii]);
       pts.push_back(pt);
     }
@@ -1193,7 +1187,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     
     char text[1024];
     vector<string> legends;
-    snprintf(text, 1024, "Regr-order: %d", beam->getRegrOrder());
+    snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
     legends.push_back(text);
     snprintf(text, 1024, "PwrUnfilt(dBm): %.2f", dbmUnfilt);
     legends.push_back(text);
@@ -1219,8 +1213,6 @@ void IqPlot::_plotIQVals(QPainter &painter,
  */
 
 void IqPlot::_plotIvsQ(QPainter &painter,
-                       Beam *beam,
-                       int nSamples,
                        double selectedRangeKm,
                        int gateNum,
                        const RadarComplex_t *iq)
@@ -1230,13 +1222,13 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   // get I and Q vals
 
   TaArray<double> iVals_, qVals_;
-  double *iVals = iVals_.alloc(nSamples);
-  double *qVals = qVals_.alloc(nSamples);
+  double *iVals = iVals_.alloc(_nSamples);
+  double *qVals = qVals_.alloc(_nSamples);
   double minIVal = 9999.0;
   double maxIVal = -9999.0;
   double minQVal = 9999.0;
   double maxQVal = -9999.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double iVal = iq[ii].re;
     double qVal = iq[ii].im;
     iVals[ii] = iVal;
@@ -1278,7 +1270,7 @@ void IqPlot::_plotIvsQ(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> iqpts;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double ival = iVals[ii];
     double qval = qVals[ii];
     QPointF pt(ival, qval);
@@ -1301,8 +1293,6 @@ void IqPlot::_plotIvsQ(QPainter &painter,
  */
 
 void IqPlot::_plotPhasor(QPainter &painter,
-                         Beam *beam,
-                         int nSamples,
                          double selectedRangeKm,
                          int gateNum,
                          const RadarComplex_t *iq)
@@ -1312,15 +1302,15 @@ void IqPlot::_plotPhasor(QPainter &painter,
   // get I and Q vals
 
   TaArray<double> iSums_, qSums_;
-  double *iSums = iSums_.alloc(nSamples);
-  double *qSums = qSums_.alloc(nSamples);
+  double *iSums = iSums_.alloc(_nSamples);
+  double *qSums = qSums_.alloc(_nSamples);
   double minISum = 9999.0;
   double maxISum = -9999.0;
   double minQSum = 9999.0;
   double maxQSum = -9999.0;
   double iSum = 0.0;
   double qSum = 0.0;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     iSum += iq[ii].re;
     qSum += iq[ii].im;
     iSums[ii] = iSum;
@@ -1362,7 +1352,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
   pen.setWidth(_params.iqplot_line_width);
   painter.setPen(pen);
   QVector<QPointF> iqpts;
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     double ival = iSums[ii];
     double qval = qSums[ii];
     QPointF pt(ival, qval);
@@ -1382,8 +1372,8 @@ void IqPlot::_plotPhasor(QPainter &painter,
 
   // legends
 
-  double cpa = RadarMoments::computeCpa(iq, nSamples);
-  double cpaAlt = RadarMoments::computeCpaAlt(iq, nSamples);
+  double cpa = RadarMoments::computeCpa(iq, _nSamples);
+  double cpaAlt = RadarMoments::computeCpaAlt(iq, _nSamples);
   vector<string> legends;
   char text[1024];
   snprintf(text, 1024, "CPA: %.2f", cpa);
@@ -1405,9 +1395,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
  * compute the spectrum
  */
 
-void IqPlot::_computePowerSpectrum(Beam *beam,
-                                   int nSamples,
-                                   const RadarComplex_t *iq,
+void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
                                    double *power,
                                    double *dbm)
   
@@ -1415,7 +1403,7 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
 
   // init
   
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     power[ii] = 1.0e-12;
     dbm[ii] = -120.0;
   }
@@ -1423,20 +1411,20 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
   // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  _applyWindow(iq, iqWindowed, nSamples);
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  _applyWindow(iq, iqWindowed, _nSamples);
   
   // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-  RadarFft fft(nSamples);
+  RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
+  RadarFft fft(_nSamples);
   fft.fwd(iqWindowed, powerSpec);
   fft.shift(powerSpec);
   
   // set up filtering
   
-  const IwrfCalib &calib = beam->getCalib();
+  const IwrfCalib &calib = _beam->getCalib();
   double calibNoise = 0.0;
   switch (_rxChannel) {
     case Params::CHANNEL_HC:
@@ -1454,23 +1442,25 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
   }
   
   RadarMoments moments;
-  moments.setNSamples(nSamples);
-  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
-               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setNSamples(_nSamples);
+  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
   moments.setCalib(calib);
   moments.setClutterWidthMps(_clutWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
+  moments.setAntennaRate(_beam->getAntennaRate());
   
   // filter as appropriate
   
+  _regrOrderInUse = 0;
   if (_useAdaptFilt) {
 
     // adaptive filtering takes precedence over regression
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
-    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
+    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
     double filterRatio, spectralNoise, spectralSnr;
-    moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
+    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
                                 iqWindowed, NULL,
                                 calibNoise,
                                 filtAdaptWindowed, NULL,
@@ -1479,11 +1469,11 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
                                 spectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
     fft.fwd(filtAdaptWindowed, filtAdaptSpec);
     fft.shift(filtAdaptSpec);
     
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
     }
     
@@ -1492,17 +1482,19 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
     // regression
     
     RegressionFilter regrF;
-    if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(),
-                           beam->getStagN(), _regrOrder);
+    if (_beam->getIsStagPrt()) {
+      regrF.setupStaggered(_nSamples, _beam->getStagM(),
+                           _beam->getStagN(), _regrOrder,
+                           _params.regression_filter_determine_order_from_CNR);
     } else {
-      regrF.setup(nSamples, _regrOrder);
+      regrF.setup(_nSamples, _regrOrder,
+                  _params.regression_filter_determine_order_from_CNR);
     }
     
     TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(nSamples);
+    RadarComplex_t *filtered = filtered_.alloc(_nSamples);
     double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(nSamples, beam->getPrt(), fft,
+    moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
@@ -1511,17 +1503,18 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
+    _regrOrderInUse = regrF.getPolyOrderInUse();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
-    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
-    _applyWindow(filtered, filtRegrWindowed, nSamples);
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
+    _applyWindow(filtered, filtRegrWindowed, _nSamples);
     
     TaArray<RadarComplex_t> filtRegrSpec_;
-    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(_nSamples);
     fft.fwd(filtRegrWindowed, filtRegrSpec);
     fft.shift(filtRegrSpec);
     
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       power[ii] = RadarComplex::power(filtRegrSpec[ii]);
     }
     
@@ -1529,7 +1522,7 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
 
     // no filtering
     
-    for (int ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       power[ii] = RadarComplex::power(powerSpec[ii]);
     }
     
@@ -1537,7 +1530,7 @@ void IqPlot::_computePowerSpectrum(Beam *beam,
 
   // compute dbm
   
-  for (int ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     if (power[ii] <= 1.0e-12) {
       dbm[ii] = -120.0;
     } else {
