@@ -70,8 +70,8 @@ IqPlot::IqPlot(QWidget* parent,
         
 {
   _isZoomed = false;
-  _xGridLinesOn = _params.iqplot_x_grid_lines_on;
-  _yGridLinesOn = _params.iqplot_y_grid_lines_on;
+  _xGridLinesOn = _params.x_grid_lines_on;
+  _yGridLinesOn = _params.y_grid_lines_on;
   _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;

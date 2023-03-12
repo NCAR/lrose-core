@@ -283,6 +283,21 @@ paramdef int {
   p_help = "Size of cross drawn at click point, to select data.";
 } click_cross_size;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the X direction.";
+} x_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to draw grid lines in the Y direction.";
+} y_grid_lines_on;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to add legends to the plots.";
+} legends_on;
+
 commentdef {
   p_header = "ASCOPE DISPLAY PANEL";
   p_text = "The ascope panel shows the power plotted against range. It can be configured for both the spectra plot and the waterfall plot.";
@@ -376,16 +391,6 @@ paramdef int {
   p_descr = "Height of bottom margin for ascope plot (pixels).";
   p_help = "The X axis labels are plotted here.";
 } ascope_bottom_margin;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the X direction.";
-} ascope_x_grid_lines_on;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the Y direction.";
-} ascope_y_grid_lines_on;
 
 paramdef string {
   p_default = "white";
@@ -621,16 +626,6 @@ paramdef int {
   p_descr = "Height of bottom margin for waterfall plot (pixels).";
   p_help = "The X axis labels are plotted here.";
 } waterfall_bottom_margin;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the X direction.";
-} waterfall_x_grid_lines_on;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the Y direction.";
-} waterfall_y_grid_lines_on;
 
 paramdef string {
   p_default = "white";
@@ -910,16 +905,6 @@ paramdef int {
   p_default = 2;
   p_descr = "Width of data lines in polynomial plots.";
 } iqplot_polynomial_line_width;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the Y direction.";
-} iqplot_y_grid_lines_on;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to draw grid lines in the X direction.";
-} iqplot_x_grid_lines_on;
 
 paramdef boolean {
   p_default = true;

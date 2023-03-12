@@ -576,6 +576,12 @@ public:
 
   int click_cross_size;
 
+  tdrp_bool_t x_grid_lines_on;
+
+  tdrp_bool_t y_grid_lines_on;
+
+  tdrp_bool_t legends_on;
+
   int ascope_n_panels;
 
   moment_type_t *_ascope_moments;
@@ -604,10 +610,6 @@ public:
   int ascope_left_margin;
 
   int ascope_bottom_margin;
-
-  tdrp_bool_t ascope_x_grid_lines_on;
-
-  tdrp_bool_t ascope_y_grid_lines_on;
 
   char* ascope_axis_label_color;
 
@@ -681,10 +683,6 @@ public:
   int waterfall_left_margin;
 
   int waterfall_bottom_margin;
-
-  tdrp_bool_t waterfall_x_grid_lines_on;
-
-  tdrp_bool_t waterfall_y_grid_lines_on;
 
   char* waterfall_axis_label_color;
 
@@ -767,10 +765,6 @@ public:
   char* iqplot_polynomial_residual_color;
 
   int iqplot_polynomial_line_width;
-
-  tdrp_bool_t iqplot_y_grid_lines_on;
-
-  tdrp_bool_t iqplot_x_grid_lines_on;
 
   tdrp_bool_t iqplot_draw_instrument_height_line;
 
@@ -899,7 +893,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[208];
+  mutable TDRPtable _table[205];
 
   const char *_className;
 

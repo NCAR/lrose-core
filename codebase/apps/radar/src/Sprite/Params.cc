@@ -1165,6 +1165,42 @@
     tt->single_val.i = 11;
     tt++;
     
+    // Parameter 'x_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("x_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &x_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'y_grid_lines_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("y_grid_lines_on");
+    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &y_grid_lines_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'legends_on'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("legends_on");
+    tt->descr = tdrpStrDup("Option to add legends to the plots.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &legends_on - &_start_;
+    tt->single_val.b = pTRUE;
+    tt++;
+    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -1373,30 +1409,6 @@
     tt->help = tdrpStrDup("The X axis labels are plotted here.");
     tt->val_offset = (char *) &ascope_bottom_margin - &_start_;
     tt->single_val.i = 18;
-    tt++;
-    
-    // Parameter 'ascope_x_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_x_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_x_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'ascope_y_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ascope_y_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ascope_y_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'ascope_axis_label_color'
@@ -1940,30 +1952,6 @@
     tt->help = tdrpStrDup("The X axis labels are plotted here.");
     tt->val_offset = (char *) &waterfall_bottom_margin - &_start_;
     tt->single_val.i = 18;
-    tt++;
-    
-    // Parameter 'waterfall_x_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_x_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_x_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'waterfall_y_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("waterfall_y_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &waterfall_y_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'waterfall_axis_label_color'
@@ -2752,30 +2740,6 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &iqplot_polynomial_line_width - &_start_;
     tt->single_val.i = 2;
-    tt++;
-    
-    // Parameter 'iqplot_y_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("iqplot_y_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the Y direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &iqplot_y_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'iqplot_x_grid_lines_on'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("iqplot_x_grid_lines_on");
-    tt->descr = tdrpStrDup("Option to draw grid lines in the X direction.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &iqplot_x_grid_lines_on - &_start_;
-    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'iqplot_draw_instrument_height_line'

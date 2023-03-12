@@ -71,8 +71,8 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
         
 {
   _isZoomed = false;
-  _xGridLinesOn = _params.waterfall_x_grid_lines_on;
-  _yGridLinesOn = _params.waterfall_y_grid_lines_on;
+  _xGridLinesOn = _params.x_grid_lines_on;
+  _yGridLinesOn = _params.y_grid_lines_on;
   _legendsOn = true;
   _plotType = Params::WATERFALL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
