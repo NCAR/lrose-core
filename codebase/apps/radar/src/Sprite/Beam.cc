@@ -3743,8 +3743,6 @@ void Beam::_computeBeamAzRate()
     _beamAzRate = deltaAz / deltaTime;
   }
   
-  cerr << "1111111111111 _beamAzRate: " << _beamAzRate << endl;
-
 }
 
 ////////////////////////////////////////////////////////////////
@@ -3776,8 +3774,6 @@ void Beam::_computeBeamElRate()
   } else {
     _beamElRate = deltaEl / deltaTime;
   }
-
-  cerr << "22222222222222 _beamElRate: " << _beamElRate << endl;
 
 }
 
