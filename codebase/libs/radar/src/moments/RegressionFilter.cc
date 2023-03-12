@@ -225,7 +225,10 @@ void RegressionFilter::setup(size_t nSamples,
 
 {
 
-  if (_setupDone && _nSamples == nSamples && _polyOrder == polyOrder) {
+  if (_setupDone &&
+      _nSamples == nSamples &&
+      _polyOrder == polyOrder &&
+      _orderAuto == orderAuto) {
     return;
   }
 
@@ -472,10 +475,11 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
       order = 3;
     }
   
-    // cerr << "wc, wcNorm, cnr, orderNorm, order: "
+    // cerr << "rate, cnr, wc, wcNorm, orderNorm, order: "
+    //      << setw(6) << antennaRateDegPerSec << ", "
+    //      << setw(6) << cnr3Db << ", "
     //      << setw(6) << wc << ", "
     //      << setw(6) << wcNorm << ", "
-    //      << setw(6) << cnr3Db << ", "
     //      << setw(6) << orderNorm << ", "
     //      << setw(3) << order << endl;
     
