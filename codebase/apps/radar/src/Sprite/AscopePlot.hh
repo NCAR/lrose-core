@@ -130,7 +130,11 @@ public:
 
   void setXGridLinesOn(bool val) { _xGridLinesOn = val; }
   void setYGridLinesOn(bool val) { _yGridLinesOn = val; }
+
+  // legends
   
+  void setLegendsOn(bool val) { _legendsOn = val; }
+
   // get the world plot objects
   
   WorldPlot &getFullWorld() { return _fullWorld; }
@@ -148,6 +152,10 @@ public:
 
   bool getXGridLinesOn() const { return _xGridLinesOn; }
   bool getYGridLinesOn() const { return _yGridLinesOn; }
+
+  // legends
+
+  bool getLegendsOn() const { return _legendsOn; }
   
   // get the moment type
 
@@ -186,6 +194,10 @@ protected:
 
   bool _xGridLinesOn;
   bool _yGridLinesOn;
+
+  // legends
+
+  bool _legendsOn;
   
   ///////////////////////
   // Protected methods //

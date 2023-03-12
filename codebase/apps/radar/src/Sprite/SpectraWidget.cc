@@ -319,6 +319,21 @@ void SpectraWidget::setYGridEnabled(bool state)
   update();
 }
 
+void SpectraWidget::setLegendsEnabled(bool state)
+{
+  _legendsEnabled = state;
+  for (size_t ii = 0; ii < _ascopes.size(); ii++) {
+    _ascopes[ii]->setLegendsOn(state);
+  }
+  for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+    _waterfalls[ii]->setLegendsOn(state);
+  }
+  for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
+    _iqPlots[ii]->setLegendsOn(state);
+  }
+  update();
+}
+
 /*************************************************************************
  * plot a beam
  */

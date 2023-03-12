@@ -552,7 +552,9 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     snprintf(text, 1024, "Clut-width: %g", _clutWidthMps);
     legendsLeft.push_back(text);
   }
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
 
   vector<string> legendsRight;
   double totalPowerDbm = 10.0 * log10(totalPower);
@@ -583,7 +585,9 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     snprintf(text, 1024, "RegrCSR: %.2f", regrClutPowerDbm - regrPowerDbm);
     legendsRight.push_back(text);
   }
-  _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  }
 
   // draw the title
 
@@ -674,12 +678,16 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   vector<string> legendsLeft;
   snprintf(text, 1024, "Vel: %.2f", vel);
   legendsLeft.push_back(text);
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
   
   vector<string> legendsRight;
   legendsRight.push_back(getFftWindowName());
-  _zoomWorld.drawLegendsTopRight(painter, legendsRight);
-
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  }
+  
   // draw the title
   
   painter.save();
@@ -771,7 +779,9 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
   }
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
 
   // draw the title
   
@@ -870,7 +880,9 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
   }
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
   
   // draw the title
   
@@ -949,7 +961,9 @@ void IqPlot::_plotTsPower(QPainter &painter,
   snprintf(text, 1024, "DbmMean: %.2f", dbm);
   vector<string> legends;
   legends.push_back(text);
-  _zoomWorld.drawLegendsTopLeft(painter, legends);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legends);
+  }
   
   // draw the title
 
@@ -1195,7 +1209,9 @@ void IqPlot::_plotIQVals(QPainter &painter,
     legends.push_back(text);
     snprintf(text, 1024, "CSR(dB): %.2f", csrDb);
     legends.push_back(text);
-    _zoomWorld.drawLegendsTopLeft(painter, legends);
+    if (_legendsOn) {
+      _zoomWorld.drawLegendsTopLeft(painter, legends);
+    }
 
   } // if (_useRegrFilt)
 
@@ -1380,7 +1396,9 @@ void IqPlot::_plotPhasor(QPainter &painter,
   legends.push_back(text);
   snprintf(text, 1024, "CPA-alt: %.2f", cpaAlt);
   legends.push_back(text);
-  _zoomWorld.drawLegendsTopLeft(painter, legends);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legends);
+  }
   
   // draw the title
 

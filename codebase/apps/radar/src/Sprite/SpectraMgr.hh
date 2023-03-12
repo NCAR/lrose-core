@@ -256,6 +256,7 @@ private:
 
   QAction *_xGridAct;
   QAction *_yGridAct;
+  QAction *_legendsAct;
 
   QAction *_xAxisAct;
   QAction *_yAxisAct;

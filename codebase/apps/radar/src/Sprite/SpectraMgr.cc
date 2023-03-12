@@ -264,6 +264,7 @@ void SpectraMgr::_createMenus()
   _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
   _overlaysMenu->addAction(_xGridAct);
   _overlaysMenu->addAction(_yGridAct);
+  _overlaysMenu->addAction(_legendsAct);
 
   _actionsMenu = menuBar()->addMenu(tr("&Actions"));
   _actionsMenu->addAction(_showClickAct);
@@ -354,6 +355,14 @@ void SpectraMgr::_createActions()
   connect(_yGridAct, SIGNAL(triggered(bool)),
           _spectra, SLOT(setYGridEnabled(bool)));
   
+  // write legends
+
+  _legendsAct = new QAction(tr("Legends"), this);
+  _legendsAct->setStatusTip(tr("Turn legends on/off"));
+  _legendsAct->setCheckable(true);
+  connect(_legendsAct, SIGNAL(triggered(bool)),
+          _spectra, SLOT(setLegendsEnabled(bool)));
+  
   // show instrument height line in altitude display
 
   // _instHtLineAct = new QAction(tr("Instrument Ht Line"), this);
@@ -429,6 +438,8 @@ void SpectraMgr::_initActions()
     // _yGridAct->setChecked(true);  // initialize to true
     // _yGridAct->trigger();         // toggle to false
   // }
+
+  _legendsAct->setChecked(false); // initialize to false
 
 }
 

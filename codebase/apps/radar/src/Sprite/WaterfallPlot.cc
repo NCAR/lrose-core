@@ -73,6 +73,7 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _isZoomed = false;
   _xGridLinesOn = _params.waterfall_x_grid_lines_on;
   _yGridLinesOn = _params.waterfall_y_grid_lines_on;
+  _legendsOn = true;
   _plotType = Params::WATERFALL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
   _useAdaptFilt = false;
@@ -212,7 +213,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
   }
-  _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
 
   // switch (_plotType) {
   //   case Params::WATERFALL_HC: {
@@ -226,7 +229,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   //       snprintf(text, 1024, "Clut power (dBm): %.2f", _powerClut);
   //       legendsRight.push_back(text);
   //     }
-  //     _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  //     if (_legendsOn) {
+  //       _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  //     }
   //   }
   //   case Params::WATERFALL_VC:
   //   case Params::WATERFALL_HX:

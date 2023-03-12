@@ -214,6 +214,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
 
   void setXGridEnabled(bool state);
   void setYGridEnabled(bool state);
+  void setLegendsEnabled(bool state);
 
   // show context menu in response to right click
   
@@ -289,6 +290,12 @@ class DLL_EXPORT SpectraWidget : public QWidget
   bool _xGridEnabled;
   bool _yGridEnabled;
 
+  // legends
+
+  bool _legendsEnabled;
+
+  // labels
+  
   ScaledLabel _scaledLabel;
 
   // currently selected range

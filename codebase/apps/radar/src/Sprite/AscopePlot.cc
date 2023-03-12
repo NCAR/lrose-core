@@ -65,6 +65,7 @@ AscopePlot::AscopePlot(QWidget* parent,
   _isZoomed = false;
   _xGridLinesOn = _params.ascope_x_grid_lines_on;
   _yGridLinesOn = _params.ascope_y_grid_lines_on;
+  _legendsOn = true;
 }
 
 /*************************************************************************
