@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RegressionFilter.hh
+// MatrixRegrFilter.hh
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -33,15 +33,17 @@
 //
 // Filter clutter by performing a polynomial regression fit to 
 // the time series and remove the smoothly-varing values, leaving
-// the variation around the polynomial
+// the variation around the polynomial.
+//
+// Uses Vandermonde matrices for polynomial fitting.
 //
 // See: Torres S and D.S.Zrnic, 1999: Ground clutter filtering with
 // a regression filter. Jtech, 16, 1364 - 1372.
 //
 ////////////////////////////////////////////////////////////////
 
-#ifndef RegressionFilter_HH
-#define RegressionFilter_HH
+#ifndef MatrixRegrFilter_HH
+#define MatrixRegrFilter_HH
 
 #include <radar/RadarComplex.hh>
 #include <rapmath/ForsytheFit.hh>
@@ -51,25 +53,25 @@ using namespace std;
 ////////////////////////
 // This class
 
-class RegressionFilter {
+class MatrixRegrFilter {
   
 public:
 
   // constructor
 
-  RegressionFilter();
+  MatrixRegrFilter();
 
   // copy constructor
   
-  RegressionFilter(const RegressionFilter &rhs);
+  MatrixRegrFilter(const MatrixRegrFilter &rhs);
 
   // destructor
   
-  ~RegressionFilter();
+  ~MatrixRegrFilter();
 
   // assignment
   
-  RegressionFilter & operator=(const RegressionFilter &rhs);
+  MatrixRegrFilter & operator=(const MatrixRegrFilter &rhs);
 
   // set number of samples in IQ data and order of
   // polynomial to use
@@ -255,7 +257,7 @@ private:
   // methods
 
   void _init();
-  RegressionFilter &_copy(const RegressionFilter &rhs);
+  MatrixRegrFilter &_copy(const MatrixRegrFilter &rhs);
   
   void _alloc();
   void _free();

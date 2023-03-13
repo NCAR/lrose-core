@@ -115,11 +115,11 @@ set (SRCS
       ./moments/InterestMap.cc
       ./moments/IwrfMoments.cc
       ./moments/IwrfMomReader.cc
+      ./moments/MatrixRegrFilter.cc
       ./moments/NoiseLocator.cc
       ./moments/PhaseCoding.cc
       ./moments/RadarFft.cc
       ./moments/RadarMoments.cc
-      ./moments/RegressionFilter.cc
       ./moments/Sz864.cc
       ./pid/NcarPidParams.cc
       ./pid/NcarParticleId.cc

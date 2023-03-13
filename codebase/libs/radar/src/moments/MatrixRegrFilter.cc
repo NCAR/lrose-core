@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RegressionFilter.cc
+// MatrixRegrFilter.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -33,6 +33,8 @@
 // Filter clutter by performing a polynomial regression fit to 
 // the time series and remove the smoothly-varing values, leaving
 // the variation around the polynomial
+//
+// Uses Vandermonde matrices for polynomial fitting.
 //
 // See: Torres S and D.S.Zrnic, 1999: Ground clutter filtering with
 // a regression filter. Jtech, 16, 1364 - 1372.
@@ -45,13 +47,13 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/mem.h>
 #include <toolsa/TaArray.hh>
-#include <radar/RegressionFilter.hh>
+#include <radar/MatrixRegrFilter.hh>
 #include <rapmath/usvd.h>
 using namespace std;
 
 // Constructor
 
-RegressionFilter::RegressionFilter()
+MatrixRegrFilter::MatrixRegrFilter()
 
 {
   _init();
@@ -61,7 +63,7 @@ RegressionFilter::RegressionFilter()
 // Copy constructor
 //
 
-RegressionFilter::RegressionFilter(const RegressionFilter &rhs)
+MatrixRegrFilter::MatrixRegrFilter(const MatrixRegrFilter &rhs)
 
 {
   if (this != &rhs) {
@@ -72,7 +74,7 @@ RegressionFilter::RegressionFilter(const RegressionFilter &rhs)
 
 // destructor
 
-RegressionFilter::~RegressionFilter()
+MatrixRegrFilter::~MatrixRegrFilter()
 
 {
   _free();
@@ -91,7 +93,7 @@ RegressionFilter::~RegressionFilter()
 // Assignment
 //
 
-RegressionFilter &RegressionFilter::operator=(const RegressionFilter &rhs)
+MatrixRegrFilter &MatrixRegrFilter::operator=(const MatrixRegrFilter &rhs)
 
 {
   return _copy(rhs);
@@ -100,7 +102,7 @@ RegressionFilter &RegressionFilter::operator=(const RegressionFilter &rhs)
 /////////////////////////////
 // initialization
 
-void RegressionFilter::_init()
+void MatrixRegrFilter::_init()
 
 {
 
@@ -156,7 +158,7 @@ void RegressionFilter::_init()
 // copy
 //
 
-RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
+MatrixRegrFilter &MatrixRegrFilter::_copy(const MatrixRegrFilter &rhs)
 
 {
 
@@ -219,7 +221,7 @@ RegressionFilter &RegressionFilter::_copy(const RegressionFilter &rhs)
 // Failure occurs if it is not possible to compute the
 // SVD of vvA.
 
-void RegressionFilter::setup(size_t nSamples,
+void MatrixRegrFilter::setup(size_t nSamples,
                              size_t polyOrder /* = 5*/,
                              bool orderAuto /* = false */)
 
@@ -286,7 +288,7 @@ void RegressionFilter::setup(size_t nSamples,
 // Failure occurs if it is not possible to compute the
 // SVD of vvA.
 
-void RegressionFilter::setupStaggered(size_t nSamples,
+void MatrixRegrFilter::setupStaggered(size_t nSamples,
                                       int staggeredM,
                                       int staggeredN,
                                       size_t polyOrder /* = 5*/,
@@ -363,13 +365,13 @@ void RegressionFilter::setupStaggered(size_t nSamples,
 //
 // Note: assumes setup() has been successfully completed.
 
-void RegressionFilter::apply(const RadarComplex_t *rawIq,
+void MatrixRegrFilter::apply(const RadarComplex_t *rawIq,
                              RadarComplex_t *filteredIq)
 
 {
 
   if (_nSamples == 0) {
-    cerr << "ERROR - RegressionFilter::apply" << endl;
+    cerr << "ERROR - MatrixRegrFilter::apply" << endl;
     cerr << "  Number of samples has not been set" << endl;
     cerr << "  Call setup() before apply()" << endl;
     return;
@@ -434,7 +436,7 @@ void RegressionFilter::apply(const RadarComplex_t *rawIq,
 //
 // Note: assumes setup() has been successfully completed.
 
-void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
+void MatrixRegrFilter::applyForsythe(const RadarComplex_t *rawIq,
                                      double cnr3Db,
                                      double antennaRateDegPerSec,
                                      double prtSecs,
@@ -444,7 +446,7 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 {
 
   if (_nSamples == 0) {
-    cerr << "ERROR - RegressionFilter::applyForsythe" << endl;
+    cerr << "ERROR - MatrixRegrFilter::applyForsythe" << endl;
     cerr << "  Number of samples has not been set" << endl;
     cerr << "  Call setup() before apply()" << endl;
     return;
@@ -550,13 +552,13 @@ void RegressionFilter::applyForsythe(const RadarComplex_t *rawIq,
 //
 // Note: assumes setup() has been successfully completed.
 
-void RegressionFilter::applyForsythe3(const RadarComplex_t *rawIq,
+void MatrixRegrFilter::applyForsythe3(const RadarComplex_t *rawIq,
                                       RadarComplex_t *filteredIq)
   
 {
   
   if (_nSamples == 0) {
-    cerr << "ERROR - RegressionFilter::applyForsythe3" << endl;
+    cerr << "ERROR - MatrixRegrFilter::applyForsythe3" << endl;
     cerr << "  Number of samples has not been set" << endl;
     cerr << "  Call setup() before apply()" << endl;
     return;
@@ -608,12 +610,12 @@ void RegressionFilter::applyForsythe3(const RadarComplex_t *rawIq,
 //
 // Note: assumes setup() has been successfully completed.
 
-void RegressionFilter::polyFit(const double *yy) const
+void MatrixRegrFilter::polyFit(const double *yy) const
 
 {
 
   if (!_setupDone) {
-    cerr << "ERROR - RegressionFilter::polyFit" << endl;
+    cerr << "ERROR - MatrixRegrFilter::polyFit" << endl;
     cerr << "  Setup not successful, cannot perform fit" << endl;
     return;
   }
@@ -653,7 +655,7 @@ void RegressionFilter::polyFit(const double *yy) const
 /////////////////////////////////////////////////////
 // allocate space
 
-void RegressionFilter::_alloc()
+void MatrixRegrFilter::_alloc()
 
 {
   
@@ -689,7 +691,7 @@ void RegressionFilter::_alloc()
 /////////////////////////////////////////////////////
 // free allocated space
 
-void RegressionFilter::_free()
+void MatrixRegrFilter::_free()
 
 {
   
@@ -715,7 +717,7 @@ void RegressionFilter::_free()
 
 }
 
-void RegressionFilter::_freeVec(double* &vec)
+void MatrixRegrFilter::_freeVec(double* &vec)
 {
   if (vec != NULL) {
     ufree(vec);
@@ -723,7 +725,7 @@ void RegressionFilter::_freeVec(double* &vec)
   }
 }
 
-void RegressionFilter::_freeVec(RadarComplex_t* &vec)
+void MatrixRegrFilter::_freeVec(RadarComplex_t* &vec)
 {
   if (vec != NULL) {
     ufree(vec);
@@ -731,7 +733,7 @@ void RegressionFilter::_freeVec(RadarComplex_t* &vec)
   }
 }
 
-void RegressionFilter::_freeMatrix(double** &array)
+void MatrixRegrFilter::_freeMatrix(double** &array)
 {
   if (array != NULL) {
     ufree2((void **) array);
@@ -742,7 +744,7 @@ void RegressionFilter::_freeMatrix(double** &array)
 /////////////////////////
 // compute the CC matrix
 
-void RegressionFilter::_computeCc()
+void MatrixRegrFilter::_computeCc()
 
 {
 
@@ -755,7 +757,7 @@ void RegressionFilter::_computeCc()
   
   int iret = usvd(_vvA, _polyOrder1, _polyOrder1, _uu, _ww, _ssVec);
   if (iret) {
-    cerr << "ERROR - RegressionFilter::_computeCc()" << endl;
+    cerr << "ERROR - MatrixRegrFilter::_computeCc()" << endl;
     cerr << "  SVD returns error: " << iret << endl;
     cerr << "  Cannot compute SVD on Vandermonde matrix * transpose" << endl;
     return;
@@ -812,7 +814,7 @@ void RegressionFilter::_computeCc()
 //////////////////////////////////////////////  
 // compute Vandermonde matrix and transpose
 
-void RegressionFilter::_computeVandermonde()
+void MatrixRegrFilter::_computeVandermonde()
 
 {
 
@@ -851,7 +853,7 @@ void RegressionFilter::_computeVandermonde()
 //        bb[nColsAa][nColsBb]
 //        xx[nRowsAa][nColsBb]
 
-void RegressionFilter::_matrixMult(double **aa,
+void MatrixRegrFilter::_matrixMult(double **aa,
                                    double **bb,
                                    int nRowsAa,
                                    int nColsAa,
@@ -881,7 +883,7 @@ void RegressionFilter::_matrixMult(double **aa,
 //   bb[nColsAa]
 //   xx[nRowsAa]
 
-void RegressionFilter::_matrixVectorMult(double **aa,
+void MatrixRegrFilter::_matrixVectorMult(double **aa,
                                          double *bb,
                                          int nRowsAa,
                                          int nColsAa,
@@ -903,7 +905,7 @@ void RegressionFilter::_matrixVectorMult(double **aa,
 // print matrix
 //
 
-void RegressionFilter::_matrixPrint(string name,
+void MatrixRegrFilter::_matrixPrint(string name,
                                     double **aa,
                                     int nRowsAa,
                                     int nColsAa,
@@ -927,7 +929,7 @@ void RegressionFilter::_matrixPrint(string name,
 // print vector
 //
 
-void RegressionFilter::_vectorPrint(string name,
+void MatrixRegrFilter::_vectorPrint(string name,
                                     double *aa,
                                     int sizeAa,
                                     FILE *out) const
@@ -946,7 +948,7 @@ void RegressionFilter::_vectorPrint(string name,
 /////////////////////////////////////////////////////////////////////////
 // compute the power from the central 3 points in the FFT
 
-double RegressionFilter::compute3PtClutPower(const RadarComplex_t *rawIq)
+double MatrixRegrFilter::compute3PtClutPower(const RadarComplex_t *rawIq)
   
 {
   
