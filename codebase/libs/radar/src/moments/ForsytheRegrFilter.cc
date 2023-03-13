@@ -361,29 +361,25 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
   
   if (_polyOrder < ORDER_ARRAY_MAX &&
       _nSamples < NSAMPLES_ARRAY_MAX) {
-    
+
+    // re-use objects
     // check for existing entry in array of fit objects
     
     fit = _forsytheArray[_polyOrder][_nSamples];
     if (fit == NULL) {
       // create new object for (order, nsamples)
       fit = new ForsytheFit;
-      fit->prepareForFitFixedPrt(_polyOrder, _nSamples);
+      fit->prepareForFit(_polyOrder, _xxVals);
       _forsytheArray[_polyOrder][_nSamples] = fit;
     }
     fit->performFit(rawI);
     
   } else {
 
-    // prepare for fit
+    // use single object
 
-    if (_isStaggered) {
-      fit->prepareForFitStaggeredPrt(_polyOrder, _nSamples,
-                                     _staggeredM, _staggeredN);
-    } else {
-      fit->prepareForFitFixedPrt(_polyOrder, _nSamples);
-    }
-
+    fit->prepareForFit(_polyOrder, _xxVals);
+    
   }
 
   // perform the fit on I and Q and
