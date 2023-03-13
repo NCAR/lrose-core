@@ -133,6 +133,9 @@ void ForsytheRegrFilter::_init()
   _staggeredM = 0;
   _staggeredN = 0;
   
+  _clutterWidthFactor = 1.0;
+  _cnrExponent = 2.0 / 3.0;
+  
   // prepare the array of forsythe fit objects,
   // for supported orders and nsamples
   // this is done for efficiency
@@ -347,7 +350,7 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
     //      << setw(6) << wcNorm << ", "
     //      << setw(6) << orderNorm << ", "
     //      << setw(3) << order << endl;
-    
+  
     _polyOrder = order;
 
   }

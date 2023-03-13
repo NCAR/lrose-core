@@ -1342,13 +1342,14 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
 
     // regression
     
-    RegressionFilter regrF;
+    ForsytheRegrFilter regrF;
     if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(),
-                           beam->getStagN(), _regrOrder);
+      regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN());
     } else {
-      regrF.setup(nSamples, _regrOrder);
+      regrF.setup(nSamples);
     }
+    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(nSamples);

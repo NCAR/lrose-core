@@ -43,7 +43,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfCalib.hh>
 #include <radar/MomentsFields.hh>
-#include <radar/RegressionFilter.hh>
+#include <radar/ForsytheRegrFilter.hh>
 #include <radar/AtmosAtten.hh>
 #include <rapformats/DsRadarCalib.hh>
 #include <radar/Sz864.hh>
@@ -225,7 +225,7 @@ public:
 
   // use polynomial regression filter
 
-  void setUseRegressionFilter(bool interpAcrossNotch,
+  void setUseForsytheRegrFilter(bool interpAcrossNotch,
                               double notchEdgePwrRatioThresholdDb,
                               double minCnrDb) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
@@ -686,7 +686,7 @@ public:
   void applyClutterFilter(int nSamples,
                           double prtSecs,
                           const RadarFft &fft,
-                          RegressionFilter &regr,
+                          ForsytheRegrFilter &regr,
                           const double *window, // active window
                           const RadarComplex_t *iqOrig, // non-windowed
                           const RadarComplex_t *iqWindowed, // windowed
@@ -752,7 +752,7 @@ public:
   void applyRegressionFilter(int nSamples,
                              double prtSecs,
                              const RadarFft &fft,
-                             RegressionFilter &regr,
+                             ForsytheRegrFilter &regr,
                              const double *window,
                              const RadarComplex_t *iqOrig, // non-windowed
                              double calNoise,
@@ -844,7 +844,7 @@ public:
                               double prtSecsShort,
                               double prtSecsLong,
                               const RadarFft &fftHalf,
-                              RegressionFilter &regr,
+                              ForsytheRegrFilter &regr,
                               const RadarComplex_t *iqOrig,
                               double calNoise,
                               bool interpAcrossNotch,
@@ -888,7 +888,7 @@ public:
                               double prtSecsShort,
                               double prtSecsLong,
                               const RadarFft &fftExp,
-                              RegressionFilter &regr,
+                              ForsytheRegrFilter &regr,
                               const RadarComplex_t *iqOrig,
                               double calNoise,
                               bool interpAcrossNotch,
@@ -1636,13 +1636,6 @@ private:
 				    double powerRemoved,
                                     double calNoise);
 
-  void _fillNotchRegrFilter(int nSamples,
-                            const RadarFft &fft,
-                            const RadarComplex_t *iqOrig,
-                            const RadarComplex_t *iqRegr,
-                            RadarComplex_t *iqFiltered,
-                            double *specRatio);
-
   void _adapFiltHalfTseries(int nSamplesHalf,
                             double prtSecs,
                             const RadarFft &fftHalf,
@@ -1667,7 +1660,7 @@ private:
   void _runRegressionFilter(int nSamples,
                             double prtSecs,
                             const RadarFft &fft,
-                            RegressionFilter &regr,
+                            ForsytheRegrFilter &regr,
                             const double *window,
                             const RadarComplex_t *iqUnfiltered,
                             double calNoise,
@@ -1678,19 +1671,6 @@ private:
                             double &spectralSnr,
                             double *specRatio);
 
-  void _adjustRegressionFilter(int nSamples,
-                               const RadarFft &fft,
-                               const double *window,
-                               const RadarComplex_t *iqOrig,
-                               const RadarComplex_t *iqRegr,
-                               double calNoise,
-                               bool interpAcrossNotch,
-                               RadarComplex_t *iqFiltered,
-                               double &filterRatio,
-                               double &spectralNoise,
-                               double &spectralSnr,
-                               double *specRatio);
-  
   static void _compute3PtMedian(const RadarComplex_t *iq,
                                 RadarComplex_t &median);
 

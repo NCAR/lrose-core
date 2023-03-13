@@ -43,7 +43,7 @@
 #include <rapmath/ForsytheFit.hh>
 #include <radar/GateData.hh>
 #include <radar/RadarFft.hh>
-#include <radar/RegressionFilter.hh>
+#include <radar/ForsytheRegrFilter.hh>
 #include <radar/ClutFilter.hh>
 #include <radar/FilterUtils.hh>
 
@@ -362,15 +362,14 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   _regrOrderInUse = 0;
   if (_useRegrFilt) {
     
-    RegressionFilter regrF;
+    ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
-      regrF.setupStaggered(_nSamples, _beam->getStagM(),
-                           _beam->getStagN(), _regrOrder,
-                           _params.regression_filter_determine_order_from_CNR);
+      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN());
     } else {
-      regrF.setup(_nSamples, _regrOrder,
-                  _params.regression_filter_determine_order_from_CNR);
+      regrF.setup(_nSamples);
     }
+    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(_nSamples);
@@ -384,7 +383,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
-    _regrOrderInUse = regrF.getPolyOrderInUse();
+    _regrOrderInUse = regrF.getPolyOrder();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
     RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
@@ -1499,15 +1498,14 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
 
     // regression
     
-    RegressionFilter regrF;
+    ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
-      regrF.setupStaggered(_nSamples, _beam->getStagM(),
-                           _beam->getStagN(), _regrOrder,
-                           _params.regression_filter_determine_order_from_CNR);
+      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN());
     } else {
-      regrF.setup(_nSamples, _regrOrder,
-                  _params.regression_filter_determine_order_from_CNR);
+      regrF.setup(_nSamples);
     }
+    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(_nSamples);
@@ -1521,7 +1519,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
-    _regrOrderInUse = regrF.getPolyOrderInUse();
+    _regrOrderInUse = regrF.getPolyOrder();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
     RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);

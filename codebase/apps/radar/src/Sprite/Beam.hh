@@ -356,12 +356,12 @@ private:
   
   // regression clutter filtering
 
-  RegressionFilter *_regr;
-  RegressionFilter *_regrHalf;
+  ForsytheRegrFilter *_regr;
+  ForsytheRegrFilter *_regrHalf;
 
   // regression clutter filtering - staggered prt
 
-  RegressionFilter *_regrStag;
+  ForsytheRegrFilter *_regrStag;
 
   // antenna rate
 

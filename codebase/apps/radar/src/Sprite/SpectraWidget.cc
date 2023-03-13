@@ -1840,16 +1840,16 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setClutterWidth);
 
-  QAction useRegressionFilter("Use regression filter", &contextMenu);
-  useRegressionFilter.setCheckable(true);
-  useRegressionFilter.setChecked
+  QAction useForsytheRegrFilter("Use regression filter", &contextMenu);
+  useForsytheRegrFilter.setCheckable(true);
+  useForsytheRegrFilter.setChecked
     (_waterfalls[id]->getUseRegrFilt());
-  connect(&useRegressionFilter, &QAction::triggered,
+  connect(&useForsytheRegrFilter, &QAction::triggered,
           [this, id] (bool state) {
             _waterfalls[id]->setUseRegrFilt(state);
             _configureWaterfall(id);
           } );
-  setFilteringMenu.addAction(&useRegressionFilter);
+  setFilteringMenu.addAction(&useForsytheRegrFilter);
 
   QAction setRegressionOrder("Set regression order", &contextMenu);
   connect(&setRegressionOrder, &QAction::triggered,
@@ -2193,16 +2193,16 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setClutterWidth);
 
-  QAction useRegressionFilter("Use regression filter", &contextMenu);
-  useRegressionFilter.setCheckable(true);
-  useRegressionFilter.setChecked
+  QAction useForsytheRegrFilter("Use regression filter", &contextMenu);
+  useForsytheRegrFilter.setCheckable(true);
+  useForsytheRegrFilter.setChecked
     (_iqPlots[id]->getUseRegrFilt());
-  connect(&useRegressionFilter, &QAction::triggered,
+  connect(&useForsytheRegrFilter, &QAction::triggered,
           [this, id] (bool state) {
             _iqPlots[id]->setUseRegrFilt(state);
             _configureIqPlot(id);
           } );
-  setFilteringMenu.addAction(&useRegressionFilter);
+  setFilteringMenu.addAction(&useForsytheRegrFilter);
 
   QAction setRegressionOrder("Set regression order", &contextMenu);
   connect(&setRegressionOrder, &QAction::triggered,

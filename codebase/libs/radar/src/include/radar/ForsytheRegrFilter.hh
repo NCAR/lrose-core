@@ -112,19 +112,16 @@ public:
                       int staggeredM,
                       int staggeredN);
   
-  // set the polynomial order, rather than compute it automatically
+  // Set the polynomial order.
+  // If autoOrder is true, order will be computed automatically.
+  // If autoOrder is false, specifiedOrder will be used.
   
-  void setPolyOrder(size_t val) {
-    _polyOrder = val;
-    _orderAuto = false;
+  void setPolyOrder(bool autoOrder,
+                    size_t specifiedOrder) {
+    _orderAuto = autoOrder;
+    _polyOrder = specifiedOrder;
   }
   
-  // set to compute the order automatically
-  
-  void setOrderAuto(bool val) {
-    _orderAuto = val;
-  }
-
   // in automatic order computation, set the width factor
   
   void setClutterWidthFactor(double val) {

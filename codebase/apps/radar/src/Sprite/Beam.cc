@@ -308,9 +308,9 @@ void Beam::_init()
   _fftHalf = new RadarFft();
   _fftStag = new RadarFft();
   
-  _regr = new RegressionFilter();
-  _regrHalf = new RegressionFilter();
-  _regrStag = new RegressionFilter();
+  _regr = new ForsytheRegrFilter();
+  _regrHalf = new ForsytheRegrFilter();
+  _regrStag = new ForsytheRegrFilter();
 
   _haveChan1 = false;
   _iqChan0 = NULL;
@@ -2512,12 +2512,16 @@ void Beam::_initMomentsObject()
   _mom->setUseAdaptiveFilter();
 
   if (_params.use_polynomial_regression_clutter_filter) {
-    int order = _params.regression_filter_polynomial_order;
-    bool orderFromCNR = _params.regression_filter_determine_order_from_CNR;
-    _regr->setup(_nSamples, order, orderFromCNR);
-    _regrHalf->setup(_nSamplesHalf, order, orderFromCNR);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCNR);
-    _mom->setUseRegressionFilter
+    _regr->setup(_nSamples);
+    _regrHalf->setup(_nSamplesHalf);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN);
+    _regr->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                        _params.regression_filter_polynomial_order);
+    _regrHalf->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                            _params.regression_filter_polynomial_order);
+    _regrStag->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                            _params.regression_filter_polynomial_order);
+    _mom->setUseForsytheRegrFilter
       (true,
        _params.regression_filter_notch_edge_power_ratio_threshold_db,
        _params.regression_filter_min_cnr_db);
@@ -2631,10 +2635,15 @@ void Beam::_regrInit()
   // initialize the regression objects
   
   if (_params.use_polynomial_regression_clutter_filter) {
-    int orderFromCNR = _params.regression_filter_polynomial_order;
-    _regr->setup(_nSamples, orderFromCNR);
-    _regrHalf->setup(_nSamplesHalf, orderFromCNR);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, orderFromCNR);
+    _regr->setup(_nSamples);
+    _regrHalf->setup(_nSamplesHalf);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN);
+    _regr->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                        _params.regression_filter_polynomial_order);
+    _regrHalf->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                            _params.regression_filter_polynomial_order);
+    _regrStag->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
+                            _params.regression_filter_polynomial_order);
   }
 
 }
@@ -3800,11 +3809,7 @@ double Beam::getAntennaRate()
 int Beam::getRegrOrder()
 
 {
-  if (_regr->getOrderAuto()) {
-    return _regr->getPolyOrderInUse();
-  } else {
-    return _regr->getNPoly();
-  }
+  return _regr->getPolyOrder();
 }
 
 

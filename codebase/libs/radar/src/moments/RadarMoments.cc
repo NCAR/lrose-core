@@ -4227,7 +4227,7 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 void RadarMoments::applyClutterFilter(int nSamples,
                                       double prtSecs,
                                       const RadarFft &fft,
-                                      RegressionFilter &regr,
+                                      ForsytheRegrFilter &regr,
                                       const double *window, // window in use
                                       const RadarComplex_t *iqOrig, // non-windowed
                                       const RadarComplex_t *iqWindowed, // windowed
@@ -4530,7 +4530,7 @@ void RadarMoments::applyRegressionFilter
   (int nSamples,
    double prtSecs,
    const RadarFft &fft,
-   RegressionFilter &regr,
+   ForsytheRegrFilter &regr,
    const double *window,
    const RadarComplex_t *iqUnfiltered, // non-windowed
    double calNoise,
@@ -4853,7 +4853,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
                                           double prtSecsShort,
                                           double prtSecsLong,
                                           const RadarFft &fftHalf,
-                                          RegressionFilter &regr,
+                                          ForsytheRegrFilter &regr,
                                           const RadarComplex_t *iqOrig,
                                           double calNoise,
                                           bool interpAcrossNotch,
@@ -4870,7 +4870,9 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
   double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, prtSecsSum, _wavelengthMeters, iqRegr);
+  regr.apply(iqOrig, -120.0,
+             _antennaRate, prtSecsSum,
+             _wavelengthMeters, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5083,7 +5085,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
                                           double prtSecsShort,
                                           double prtSecsLong,
                                           const RadarFft &fftExp,
-                                          RegressionFilter &regr,
+                                          ForsytheRegrFilter &regr,
                                           const RadarComplex_t *iqOrig,
                                           double calNoise,
                                           bool interpAcrossNotch,
@@ -5100,7 +5102,9 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
   double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.applyForsythe(iqOrig, -120.0, _antennaRate, prtSecsSum, _wavelengthMeters, iqRegr);
+  regr.apply(iqOrig, -120.0,
+             _antennaRate, prtSecsSum,
+             _wavelengthMeters, iqRegr);
   
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5195,7 +5199,7 @@ void RadarMoments::_runRegressionFilter
   (int nSamples,
    double prtSecs,
    const RadarFft &fft,
-   RegressionFilter &regr,
+   ForsytheRegrFilter &regr,
    const double *window, // window to use
    const RadarComplex_t *iqUnfiltered, // non-windowed
    double calNoise,
@@ -5245,10 +5249,11 @@ void RadarMoments::_runRegressionFilter
     
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.applyForsythe(iqUnfiltered, _regrCnrDb, _antennaRate,
-                       prtSecs, _wavelengthMeters, iqRegr.data());
+    regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate,
+               prtSecs, _wavelengthMeters, iqRegr.data());
     
-    // take the forward fft to compute the complex spectrum of regr-filtered series
+    // take the forward fft to compute the complex spectrum
+    // of regr-filtered series
     
     vector<RadarComplex_t> regrSpecC;
     regrSpecC.resize(nSamples);
@@ -5417,179 +5422,6 @@ void RadarMoments::_runRegressionFilter
   // compute SNR based on the spectral noise
 
   spectralSnr = spectralNoise / calNoise;
-
-}
-
-//////////////////////////////////////////////////////////////////////
-// adjust regression-filtered time series for notch and residual power
-//
-// Not used in current code
-
-void RadarMoments::_adjustRegressionFilter
-  (int nSamples,
-   const RadarFft &fft,
-   const double *window, // window to use
-   const RadarComplex_t *iqOrig, // non-windowed
-   const RadarComplex_t *iqRegr, // regr-filtered
-   double calNoise,
-   bool interpAcrossNotch,
-   RadarComplex_t *iqFiltered,
-   double &filterRatio,
-   double &spectralNoise,
-   double &spectralSnr,
-   double *specRatio)
-  
-{
-
-  // apply the window to the regression-filtered times series
-
-  TaArray<RadarComplex_t> regrWindowed_;
-  RadarComplex_t *regrWindowed = regrWindowed_.alloc(nSamples);
-  applyWindow(iqRegr, window, regrWindowed, nSamples);
-  
-  // take the forward fft to compute the complex spectrum of filtered series
-  
-  TaArray<RadarComplex_t> regrSpecC_;
-  RadarComplex_t *regrSpecC = regrSpecC_.alloc(nSamples);
-  fft.fwd(regrWindowed, regrSpecC);
-  
-  // compute the real filtered spectrum
-  
-  TaArray<double> regrSpec_;
-  double *regrSpec = regrSpec_.alloc(nSamples);
-  RadarComplex::loadPower(regrSpecC, regrSpec, nSamples);
-
-  // interpolate across the notch
-
-  if (interpAcrossNotch) {
-    _interpAcrossNotch(nSamples, regrSpec);
-  }
-
-  // compute powers and filter ratio
-  
-  double rawPower = RadarComplex::meanPower(iqOrig, nSamples);
-  double filteredPower = RadarComplex::meanPower(iqRegr, nSamples);
-  double powerRemoved = rawPower - filteredPower;
-  filterRatio = rawPower / filteredPower;
-
-  // compute spectral noise value
-  
-  spectralNoise = ClutFilter::computeSpectralNoise(regrSpec, nSamples);
-  
-  // compute SNR based on the spectral noise
-
-  spectralSnr = spectralNoise / calNoise;
-
-  if (powerRemoved > 0) {
-    double correctionRatio =
-      _computePwrCorrectionRatio(nSamples, spectralSnr,
- 				 rawPower, filteredPower,
-                                 powerRemoved, calNoise);
-    // correct the filtered powers for clutter residue
-    for (int ii = 0; ii < nSamples; ii++) {
-      regrSpec[ii] *= correctionRatio;
-    }
-  }
-  
-  // window the input iq data
-  
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  applyWindow(iqOrig, window, iqWindowed, nSamples);
-
-  // take the forward fft to compute the raw complex power spectrum
-  
-  TaArray<RadarComplex_t> powerSpecC_;
-  RadarComplex_t *powerSpecC = powerSpecC_.alloc(nSamples);
-  fft.fwd(iqWindowed, powerSpecC);
-  
-  // load the raw power spectrum
-  
-  TaArray<double> powerSpec_;
-  double *powerSpec = powerSpec_.alloc(nSamples);
-  RadarComplex::loadPower(powerSpecC, powerSpec, nSamples);
-  
-  // adjust the input spectrum by the filter ratio
-  // constrain ratios to be 1 or less
-
-  for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / powerSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
-    }
-    powerSpecC[ii].re *= magRatio;
-    powerSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
-  }
-
-  // invert the fft
-  
-  fft.inv(powerSpecC, regrWindowed);
-
-  // invert the window
-
-  invertWindow(regrWindowed, window, iqFiltered, nSamples);
- 
-}
-
-//////////////////////////////////////////////////////////////////////
-// fill in notch in regression-filtered spectrum
-
-void RadarMoments::_fillNotchRegrFilter
-  (int nSamples,
-   const RadarFft &fft,
-   const RadarComplex_t *iqOrig, // original data
-   const RadarComplex_t *iqRegr, // regr-filtered
-   RadarComplex_t *iqFiltered,
-   double *specRatio)
-  
-{
-  
-  // compute the complex spectra
-  
-  TaArray<RadarComplex_t> origSpecC_;
-  RadarComplex_t *origSpecC = origSpecC_.alloc(nSamples);
-  fft.fwd(iqOrig, origSpecC);
-  
-  TaArray<RadarComplex_t> regrSpecC_;
-  RadarComplex_t *regrSpecC = regrSpecC_.alloc(nSamples);
-  fft.fwd(iqRegr, regrSpecC);
-  
-  // compute the real spectra
-  
-  TaArray<double> origSpec_;
-  double *origSpec = origSpec_.alloc(nSamples);
-  RadarComplex::loadPower(origSpecC, origSpec, nSamples);
-  
-  TaArray<double> regrSpec_;
-  double *regrSpec = regrSpec_.alloc(nSamples);
-  RadarComplex::loadPower(regrSpecC, regrSpec, nSamples);
-  
-  // interpolate across the notch in the filtered spectrum
-  
-  _interpAcrossNotch(nSamples, regrSpec);
-
-  // adjust the input spectrum by the filter ratio
-  // this preserves the phase information
-  // constrain ratios to be 1 or less
-
-  for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / origSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
-    }
-    regrSpecC[ii].re = origSpecC[ii].re * magRatio;
-    regrSpecC[ii].im = origSpecC[ii].im * magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
-  }
-
-  // invert to get the filtered time series
-  
-  fft.inv(regrSpecC, iqFiltered);
 
 }
 
