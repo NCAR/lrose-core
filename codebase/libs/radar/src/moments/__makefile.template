@@ -21,6 +21,7 @@ HDRS = \
 	../include/radar/AlternatingVelocity.hh \
 	../include/radar/AtmosAtten.hh \
 	../include/radar/ClutFilter.hh \
+	../include/radar/ForsytheRegrFilter.hh \
 	../include/radar/GateData.hh \
 	../include/radar/MomentsFields.hh \
 	../include/radar/InterestMap.hh \
@@ -34,6 +35,7 @@ CPPC_SRCS = \
 	AlternatingVelocity.cc \
 	AtmosAtten.cc \
 	ClutFilter.cc \
+	ForsytheRegrFilter.cc \
 	GateData.cc \
 	MomentsFields.cc \
 	InterestMap.cc \

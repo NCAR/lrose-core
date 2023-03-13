@@ -10,6 +10,7 @@ SUB_DIRS = \
 	Ascii2Radx \
 	Dsr2Radx \
 	FixCfradialPaths \
+	FixFieldVals \
 	FixRadxPointing \
 	FixRadxValues \
 	Radx2Dsr \

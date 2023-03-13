@@ -109,6 +109,7 @@ set (SRCS
       ./moments/AlternatingVelocity.cc
       ./moments/AtmosAtten.cc
       ./moments/ClutFilter.cc
+      ./moments/ForsytheRegrFilter.cc
       ./moments/GateData.cc
       ./moments/MomentsFields.cc
       ./moments/InterestMap.cc
