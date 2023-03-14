@@ -77,7 +77,7 @@ IqPlot::IqPlot(QWidget* parent,
   _fftWindow = Params::FFT_WINDOW_VONHANN;
   _useAdaptFilt = false;
   _plotClutModel = false;
-  _clutWidthMps = 0.75;
+  _clutModelWidthMps = 0.75;
   _useRegrFilt = false;
   _regrOrder = _params.regression_filter_specified_polynomial_order;
   _regrOrderInUse = _regrOrder;
@@ -314,7 +314,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
                _beam->getStartRangeKm(), _beam->getGateSpacingKm());
   moments.setCalib(calib);
-  moments.setClutterWidthMps(_clutWidthMps);
+  moments.setClutterWidthMps(_clutModelWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
   moments.setAntennaRate(_beam->getAntennaRate());
   
@@ -511,7 +511,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     
     if (clut.computeGaussianClutterModel(powerReal,
                                          _nSamples,
-                                         _clutWidthMps,
+                                         _clutModelWidthMps,
                                          _beam->getNyquist(),
                                          clutModel) == 0) {
       
@@ -558,7 +558,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     legendsLeft.push_back(text);
   }
   if (_plotClutModel) {
-    snprintf(text, 1024, "Clut-width: %g", _clutWidthMps);
+    snprintf(text, 1024, "Clut-model-width: %g", _clutModelWidthMps);
     legendsLeft.push_back(text);
   }
   if (_legendsOn) {
@@ -778,7 +778,7 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   char text[1024];
   vector<string> legendsLeft;
   if (_useAdaptFilt) {
-    snprintf(text, 1024, "Adapt filt, width: %.2f", _clutWidthMps);
+    snprintf(text, 1024, "Adapt filt, clut width: %.2f", _clutModelWidthMps);
     legendsLeft.push_back(text);
   } else if (_useRegrFilt) {
     snprintf(text, 1024, "Regr filt, order: %d", _beam->getRegrOrder());
@@ -1473,7 +1473,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
                _beam->getStartRangeKm(), _beam->getGateSpacingKm());
   moments.setCalib(calib);
-  moments.setClutterWidthMps(_clutWidthMps);
+  moments.setClutterWidthMps(_clutModelWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
   moments.setAntennaRate(_beam->getAntennaRate());
   

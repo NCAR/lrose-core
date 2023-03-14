@@ -128,9 +128,10 @@ public:
   void setMedianFiltLen(int val) { _medianFiltLen = val; }
   void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
   void setPlotClutModel(bool val) { _plotClutModel = val; }
-  void setClutWidthMps(double val) { _clutWidthMps = val; }
+  void setClutModelWidthMps(double val) { _clutModelWidthMps = val; }
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
+  void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
   void setRegrFiltInterpAcrossNotch(bool val) {
     _regrFiltInterpAcrossNotch = val;
   }
@@ -192,9 +193,10 @@ public:
   int getMedianFiltLen() const { return _medianFiltLen; }
   bool getUseAdaptFilt() const { return _useAdaptFilt; }
   bool getPlotClutModel() const { return _plotClutModel; }
-  double getClutWidthMps() const { return _clutWidthMps; }
+  double getClutModelWidthMps() const { return _clutModelWidthMps; }
   bool getUseRegrFilt() const { return _useRegrFilt; }
   int getRegrOrder() const { return _regrOrder; }
+  double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
   bool getRegrFiltInterpAcrossNotch() const {
     return _regrFiltInterpAcrossNotch;
   }
@@ -241,10 +243,11 @@ protected:
   int _medianFiltLen;
   bool _useAdaptFilt;
   bool _plotClutModel;
-  double _clutWidthMps;
+  double _clutModelWidthMps;
   bool _useRegrFilt;
   int _regrOrder;
   int _regrOrderInUse;
+  double _regrClutWidthFactor;
   bool _regrFiltInterpAcrossNotch;
   bool _computePlotRangeDynamically;
 

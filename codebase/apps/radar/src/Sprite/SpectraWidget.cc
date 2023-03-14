@@ -1254,7 +1254,7 @@ void SpectraWidget::_createWaterfall(int id)
   waterfall->setMedianFiltLen(_params._waterfall_plots[id].median_filter_len);
   waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
   waterfall->setUseAdaptFilt(_params._waterfall_plots[id].use_adaptive_filter);
-  waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_width_mps);
+  waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_model_width_mps);
   waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
   waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
   
@@ -1342,7 +1342,7 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setMedianFiltLen(_params._iq_plots[id].median_filter_len);
   iqplot->setUseAdaptFilt(_params._iq_plots[id].use_adaptive_filter);
   iqplot->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
-  iqplot->setClutWidthMps(_params._iq_plots[id].clutter_width_mps);
+  iqplot->setClutModelWidthMps(_params._iq_plots[id].clutter_model_width_mps);
   iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
   iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
   iqplot->setRegrFiltInterpAcrossNotch
@@ -1826,13 +1826,13 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&useAdaptFilter);
 
-  QAction setClutterWidth("Set clutter width", &contextMenu);
+  QAction setClutterWidth("Set clutter model width", &contextMenu);
   connect(&setClutterWidth, &QAction::triggered,
           [this, id] () {
             bool ok;
             double width = QInputDialog::getDouble
               (this,
-               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
+               tr("QInputDialog::getDouble()"), tr("Set clutter model width (mps):"),
                _waterfalls[id]->getClutWidthMps(), 0.05, 5.0, 2,
                &ok, Qt::WindowFlags());
             _waterfalls[id]->setClutWidthMps(width);
@@ -2179,16 +2179,16 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&plotClutModel);
 
-  QAction setClutterWidth("Set clutter width", &contextMenu);
+  QAction setClutterWidth("Set clutter model width", &contextMenu);
   connect(&setClutterWidth, &QAction::triggered,
           [this, id] () {
             bool ok;
             double width = QInputDialog::getDouble
               (this,
-               tr("QInputDialog::getDouble()"), tr("Set clutter width (mps):"),
-               _iqPlots[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               tr("QInputDialog::getDouble()"), tr("Set clutter model width (mps):"),
+               _iqPlots[id]->getClutModelWidthMps(), 0.05, 5.0, 2,
                &ok, Qt::WindowFlags());
-            _iqPlots[id]->setClutWidthMps(width);
+            _iqPlots[id]->setClutModelWidthMps(width);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setClutterWidth);
@@ -2228,6 +2228,20 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&regrInterpNotch);
+  
+  QAction setRegressionClutWidthFactor("Set regression clutter width factor (ss)", &contextMenu);
+  connect(&setRegressionClutWidthFactor, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double wf = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getInt()"), tr("Set regression clutter width factor (ss):"),
+               _iqPlots[id]->getRegrClutWidthFactor(),
+               1, 100, 1, &ok);
+            _iqPlots[id]->setRegrClutWidthFactor(wf);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionClutWidthFactor);
   
   // show the context menu
   

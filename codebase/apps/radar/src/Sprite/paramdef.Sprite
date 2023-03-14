@@ -479,7 +479,7 @@ typedef struct {
   fft_window_t fft_window;
   int median_filter_len;
   boolean use_adaptive_filter;
-  double clutter_width_mps;
+  double clutter_model_width_mps;
   boolean use_regression_filter;
   int regression_order;
 } waterfall_plot_t;
@@ -718,7 +718,7 @@ typedef struct {
   int median_filter_len;
   boolean use_adaptive_filter;
   boolean plot_clutter_model;
-  double clutter_width_mps;
+  double clutter_model_width_mps;
   boolean use_regression_filter;
   int regression_order;
   boolean regression_filter_interp_across_notch;

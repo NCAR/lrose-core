@@ -1621,10 +1621,10 @@
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_waterfall_plots->use_adaptive_filter - (char *) _waterfall_plots;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("clutter_width_mps");
+      tt->struct_def.fields[4].fname = tdrpStrDup("clutter_model_width_mps");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_waterfall_plots->clutter_width_mps - (char *) _waterfall_plots;
+        (char *) &_waterfall_plots->clutter_model_width_mps - (char *) _waterfall_plots;
       tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[5].fname = tdrpStrDup("use_regression_filter");
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
@@ -2200,10 +2200,10 @@
       tt->struct_def.fields[5].rel_offset = 
         (char *) &_iq_plots->plot_clutter_model - (char *) _iq_plots;
       tt->struct_def.fields[6].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[6].fname = tdrpStrDup("clutter_width_mps");
+      tt->struct_def.fields[6].fname = tdrpStrDup("clutter_model_width_mps");
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
-        (char *) &_iq_plots->clutter_width_mps - (char *) _iq_plots;
+        (char *) &_iq_plots->clutter_model_width_mps - (char *) _iq_plots;
       tt->struct_def.fields[7].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[7].fname = tdrpStrDup("use_regression_filter");
       tt->struct_def.fields[7].ptype = BOOL_TYPE;

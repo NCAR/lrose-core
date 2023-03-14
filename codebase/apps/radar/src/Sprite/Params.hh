@@ -195,7 +195,7 @@ public:
     fft_window_t fft_window;
     int median_filter_len;
     tdrp_bool_t use_adaptive_filter;
-    double clutter_width_mps;
+    double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
   } waterfall_plot_t;
@@ -207,7 +207,7 @@ public:
     int median_filter_len;
     tdrp_bool_t use_adaptive_filter;
     tdrp_bool_t plot_clutter_model;
-    double clutter_width_mps;
+    double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
     tdrp_bool_t regression_filter_interp_across_notch;
