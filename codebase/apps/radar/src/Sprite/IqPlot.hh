@@ -132,6 +132,7 @@ public:
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
   void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
+  void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
   void setRegrFiltInterpAcrossNotch(bool val) {
     _regrFiltInterpAcrossNotch = val;
   }
@@ -197,6 +198,7 @@ public:
   bool getUseRegrFilt() const { return _useRegrFilt; }
   int getRegrOrder() const { return _regrOrder; }
   double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
+  double getRegrCnrExponent() const { return _regrCnrExponent; }
   bool getRegrFiltInterpAcrossNotch() const {
     return _regrFiltInterpAcrossNotch;
   }
@@ -248,6 +250,7 @@ protected:
   int _regrOrder;
   int _regrOrderInUse;
   double _regrClutWidthFactor;
+  double _regrCnrExponent;
   bool _regrFiltInterpAcrossNotch;
   bool _computePlotRangeDynamically;
 

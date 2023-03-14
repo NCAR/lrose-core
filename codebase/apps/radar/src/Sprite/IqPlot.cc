@@ -81,6 +81,8 @@ IqPlot::IqPlot(QWidget* parent,
   _useRegrFilt = false;
   _regrOrder = _params.regression_filter_specified_polynomial_order;
   _regrOrderInUse = _regrOrder;
+  _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
+  _regrCnrExponent = _params.regression_filter_cnr_exponent;
   _regrFiltInterpAcrossNotch = true;
   _computePlotRangeDynamically = true;
 }

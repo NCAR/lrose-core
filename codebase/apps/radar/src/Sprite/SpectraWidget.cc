@@ -1805,12 +1805,12 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   connect(&setMedianFiltLen, &QAction::triggered,
           [this, id] () {
             bool ok;
-            int len = QInputDialog::getInt
+            int val = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set median filter len:"),
                _waterfalls[id]->getMedianFiltLen(),
                1, 100, 1, &ok);
-            _waterfalls[id]->setMedianFiltLen(len);
+            _waterfalls[id]->setMedianFiltLen(val);
             _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setMedianFiltLen);
@@ -1830,12 +1830,12 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   connect(&setClutterWidth, &QAction::triggered,
           [this, id] () {
             bool ok;
-            double width = QInputDialog::getDouble
+            double val = QInputDialog::getDouble
               (this,
                tr("QInputDialog::getDouble()"), tr("Set clutter model width (mps):"),
                _waterfalls[id]->getClutWidthMps(), 0.05, 5.0, 2,
                &ok, Qt::WindowFlags());
-            _waterfalls[id]->setClutWidthMps(width);
+            _waterfalls[id]->setClutWidthMps(val);
             _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setClutterWidth);
@@ -1855,12 +1855,12 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
   connect(&setRegressionOrder, &QAction::triggered,
           [this, id] () {
             bool ok;
-            int order = QInputDialog::getInt
+            int val = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set regression order:"),
                _waterfalls[id]->getRegrOrder(),
-               1, 100, 1, &ok);
-            _waterfalls[id]->setRegrOrder(order);
+               3, 100, 1, &ok);
+            _waterfalls[id]->setRegrOrder(val);
             _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
@@ -2147,12 +2147,12 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   connect(&setMedianFiltLen, &QAction::triggered,
           [this, id] () {
             bool ok;
-            int len = QInputDialog::getInt
+            int val = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set median filter len:"),
                _iqPlots[id]->getMedianFiltLen(),
                1, 100, 1, &ok);
-            _iqPlots[id]->setMedianFiltLen(len);
+            _iqPlots[id]->setMedianFiltLen(val);
             _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setMedianFiltLen);
@@ -2208,12 +2208,12 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   connect(&setRegressionOrder, &QAction::triggered,
           [this, id] () {
             bool ok;
-            int order = QInputDialog::getInt
+            int val = QInputDialog::getInt
               (this,
                tr("QInputDialog::getInt()"), tr("Set regression order:"),
                _iqPlots[id]->getRegrOrder(),
-               1, 100, 1, &ok);
-            _iqPlots[id]->setRegrOrder(order);
+               3, 100, 1, &ok);
+            _iqPlots[id]->setRegrOrder(val);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
@@ -2233,20 +2233,33 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
   connect(&setRegressionClutWidthFactor, &QAction::triggered,
           [this, id] () {
             bool ok;
-            double wf = QInputDialog::getDouble
+            double val = QInputDialog::getDouble
               (this,
-               tr("QInputDialog::getInt()"), tr("Set regression clutter width factor (ss):"),
+               tr("QInputDialog::getDouble()"), tr("Set regression clutter width factor (ss):"),
                _iqPlots[id]->getRegrClutWidthFactor(),
-               1, 100, 1, &ok);
-            _iqPlots[id]->setRegrClutWidthFactor(wf);
+               0.1, 10.0, 3, &ok);
+            _iqPlots[id]->setRegrClutWidthFactor(val);
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setRegressionClutWidthFactor);
+  
+  QAction setRegressionCnrExponent("Set regression CNR exponent", &contextMenu);
+  connect(&setRegressionCnrExponent, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double val = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set regression CNR exponent:"),
+               _iqPlots[id]->getRegrCnrExponent(),
+               0.1, 10.0, 5, &ok);
+            _iqPlots[id]->setRegrCnrExponent(val);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionCnrExponent);
   
   // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));
   
 }
-
 
