@@ -79,7 +79,8 @@ IqPlot::IqPlot(QWidget* parent,
   _plotClutModel = false;
   _clutWidthMps = 0.75;
   _useRegrFilt = false;
-  _regrOrder = _params.regression_filter_polynomial_order;
+  _regrOrder = _params.regression_filter_specified_polynomial_order;
+  _regrOrderInUse = _regrOrder;
   _regrFiltInterpAcrossNotch = true;
   _computePlotRangeDynamically = true;
 }
@@ -360,16 +361,25 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   double regrPower = 0.0;
   _regrOrderInUse = 0;
+
   if (_useRegrFilt) {
-    
+
     ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
-      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN());
+      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
+                           _params.regression_filter_determine_order_from_cnr,
+                           _params.regression_filter_specified_polynomial_order,
+                           _params.regression_filter_clutter_width_factor,
+                           _params.regression_filter_cnr_exponent,
+                           _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
-      regrF.setup(_nSamples);
+      regrF.setup(_nSamples,
+                  _params.regression_filter_determine_order_from_cnr,
+                  _params.regression_filter_specified_polynomial_order,
+                  _params.regression_filter_clutter_width_factor,
+                  _params.regression_filter_cnr_exponent,
+                  _beam->getCalib().getWavelengthCm() / 100.0);
     }
-    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(_nSamples);
@@ -1500,12 +1510,20 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     
     ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
-      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN());
+      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
+                           _params.regression_filter_determine_order_from_cnr,
+                           _params.regression_filter_specified_polynomial_order,
+                           _params.regression_filter_clutter_width_factor,
+                           _params.regression_filter_cnr_exponent,
+                           _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
-      regrF.setup(_nSamples);
+      regrF.setup(_nSamples,
+                  _params.regression_filter_determine_order_from_cnr,
+                  _params.regression_filter_specified_polynomial_order,
+                  _params.regression_filter_clutter_width_factor,
+                  _params.regression_filter_cnr_exponent,
+                  _beam->getCalib().getWavelengthCm() / 100.0);
     }
-    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(_nSamples);

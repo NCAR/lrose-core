@@ -94,8 +94,18 @@ public:
   // polynomial to use
   //
   // nSamples: number of samples in IQ time series
+  // orderAuto: specify whether to compute order automatically
+  // specifiedOrder: used if orderAuto is false
+  // clutterWidthFactor: ss in auto order computation
+  // cnrExponent: power to which CNR is raised in auto order computation
+  // wavelengthM: wavelength in meters
   
-  void setup(size_t nSamples);
+  void setup(size_t nSamples,
+             bool orderAuto,
+             size_t specifiedOrder,
+             double clutterWidthFactor,
+             double cnrExponent,
+             double wavelengthM);
   
   // set up regression parameters - staggered PRT
   //
@@ -103,37 +113,21 @@ public:
   // staggeredM, staggeredN - stagger ratio = M/N
   //   time series starts with short PRT
   //
-  // If successful, _setupDone will be set to true.
-  // If not successful, _setupDone will be set to false.
-  // Failure occurs if it is not possible to compute the
-  // SVD of vvA.
-  
+  // orderAuto: specify whether to compute order automatically
+  // specifiedOrder: used if orderAuto is false
+  // clutterWidthFactor: ss in auto order computation
+  // cnrExponent: power to which CNR is raised in auto order computation
+  // wavelengthM: wavelength in meters
+
   void setupStaggered(size_t nSamples,
                       int staggeredM,
-                      int staggeredN);
+                      int staggeredN,
+                      bool orderAuto,
+                      size_t specifiedOrder,
+                      double clutterWidthFactor,
+                      double cnrExponent,
+                      double wavelengthM);
   
-  // Set the polynomial order.
-  // If autoOrder is true, order will be computed automatically.
-  // If autoOrder is false, specifiedOrder will be used.
-  
-  void setPolyOrder(bool autoOrder,
-                    size_t specifiedOrder) {
-    _orderAuto = autoOrder;
-    _polyOrder = specifiedOrder;
-  }
-  
-  // in automatic order computation, set the width factor
-  
-  void setClutterWidthFactor(double val) {
-    _clutterWidthFactor = val;
-  }
-
-  // in automatic order computation, set the cnr exponent
-  
-  void setCnrExponent(double val) {
-    _cnrExponent = val;
-  }
-
   // Perform regression filtering on I,Q data
   // Note: assumes set() methods have been applied
   //
@@ -155,7 +149,6 @@ public:
              double cnr3Db,
              double antennaRateDegPerSec,
              double prtSecs,
-             double wavelengthM,
              RadarComplex_t *filteredIq);
   
   // compute the power from the central 3 points in the FFT
@@ -174,15 +167,15 @@ public:
   void polyFit(const double *yy) const;
 
   // get methods
-
+  
   inline size_t getNSamples() const { return _nSamples; }
   inline bool getOrderAuto() const { return _orderAuto; }
   inline size_t getPolyOrder() const { return _polyOrder; }
-
+  
   inline bool isStaggered() const { return _isStaggered; }
   inline int getStaggeredM() const { return _staggeredM; }
   inline int getStaggeredN() const { return _staggeredN; }
-
+  
   inline bool getSetupDone() const { return _setupDone; }
   
   inline double getX(size_t sampleNum) const {
@@ -201,6 +194,7 @@ public:
 protected:
 private:
 
+  static const size_t AUTO_ORDER_MIN_VAL = 3;
   static const size_t ORDER_ARRAY_MAX = 32;
   static const size_t NSAMPLES_ARRAY_MAX = 1024;
   
@@ -209,20 +203,24 @@ private:
   bool _setupDone;
 
   size_t _nSamples;
-  bool _orderAuto;     // determine the order from the clutter to signal ratio
-  size_t _polyOrder;    // polynomial order
 
   bool _isStaggered; // staggered-PRT version
-  int _staggeredM;
-  int _staggeredN;
+  int _staggeredM;   // M in staggered ratio
+  int _staggeredN;   // N in staggered ratio
 
-  double _clutterWidthFactor; // factor to allow us to increase order
+  bool _orderAuto;     // compute the order from the clutter to signal ratio
+  size_t _polyOrder;   // polynomial order
+
+
+  double _clutterWidthFactor; // ss factor to allow us to increase order
   double _cnrExponent; // allows us to tune the width
-
+  double _wavelengthM; // wavelength in meters
+  
   vector<double> _xxVals;
   vector<RadarComplex_t> _polyfitIqVals;
 
-  // forsythe orthogonal polynomial object
+  // single forsythe orthogonal polynomial object
+  // if array not suitable
 
   ForsytheFit _forsythe;
 

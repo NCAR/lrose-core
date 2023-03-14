@@ -205,8 +205,13 @@ public:
 
   // set the estimated clutter width in MPS
 
-  void setClutterWidthMps(double val) { _clutterWidthMps = val; }
-  void setClutterInitNotchWidthMps(double val) { _clutterInitNotchWidthMps = val; }
+  void setClutterWidthMps(double val) {
+    _clutterWidthMps = val;
+  }
+
+  void setClutterInitNotchWidthMps(double val) {
+    _clutterInitNotchWidthMps = val;
+  }
 
   // use the adaptive filter (default)
   
@@ -225,12 +230,10 @@ public:
 
   // use polynomial regression filter
 
-  void setUseForsytheRegrFilter(bool interpAcrossNotch,
-                              double notchEdgePwrRatioThresholdDb,
+  void setUseRegressionFilter(bool interpAcrossNotch,
                               double minCnrDb) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
     _regrInterpAcrossNotch = interpAcrossNotch;
-    _regrNotchEdgePwrRatioThresholdDb = notchEdgePwrRatioThresholdDb;
     _regrMinCnrDb = minCnrDb;
   }
   
@@ -1431,10 +1434,6 @@ private:
   ////////////////////
   // regression filter
 
-  double _regrNotchEdgePwrRatioThresholdDb; /* regression filter - 
-                                             * power ratio for finding the 
-                                             * end of the initial notch */
-  
   double _regrMinCnrDb; /* regression filter - 
                          * minimum CNR - clutter-to-noise-ratio -
                          * for applying the filter */

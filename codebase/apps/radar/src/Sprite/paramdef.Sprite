@@ -985,22 +985,29 @@ paramdef boolean {
   p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
 } use_polynomial_regression_clutter_filter;
 
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).";
+  p_help = "If TRUE, we compute the CNR from the 3 central spectral points. Then, we compute the order using CNR, antenna speed etc.";
+} regression_filter_determine_order_from_cnr;
+
 paramdef int {
   p_default = 5;
   p_descr = "Order of the polynomial fit for the regression filter.";
-} regression_filter_polynomial_order;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).";
-  p_help = "If TRUE, we compute the CNR from the 3 central spectral points. Then, we compute the order using CNR, antenna speed etc.";
-} regression_filter_determine_order_from_CNR;
+  p_help = "Used if regression_filter_determine_order_from_CNR is false";
+} regression_filter_specified_polynomial_order;
 
 paramdef double {
-  p_default  = -45;
-  p_descr = "Power ratio threshold to determine the edge of the filtered notch (dB).";
-  p_help = "After the initial application of the regression filter, a notch is formed around 0. In order to determine the width of this notch, we compute the ratio of the filtered power to the original unfiltered power. This is the threshold used to determine where the edge of the notch occurs.";
-} regression_filter_notch_edge_power_ratio_threshold_db;
+  p_default = 1.0;
+  p_descr = "Width factor used when automatically computing polynomial order.";
+  p_help = "Applies if regression_filter_determine_order_from_CNR it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.";
+} regression_filter_clutter_width_factor;
+
+paramdef double {
+  p_default = 0.666666667;
+  p_descr = "CNR exponent used when automatically computing polynomial order.";
+  p_help = "Applies if regression_filter_determine_order_from_CNR it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.";
+} regression_filter_cnr_exponent;
 
 paramdef double {
   p_default  = -5;

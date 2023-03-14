@@ -79,7 +79,7 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _useAdaptFilt = false;
   _clutWidthMps = 0.75;
   _useRegrFilt = false;
-  _regrOrder = 3;
+  _regrOrder = 5;
   _medianFiltLen = 3;
 }
 
@@ -1344,12 +1344,20 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     
     ForsytheRegrFilter regrF;
     if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN());
+      regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN(),
+                           _params.regression_filter_determine_order_from_cnr,
+                           _params.regression_filter_specified_polynomial_order,
+                           _params.regression_filter_clutter_width_factor,
+                           _params.regression_filter_cnr_exponent,
+                           beam->getCalib().getWavelengthCm() / 100.0);
     } else {
-      regrF.setup(nSamples);
+      regrF.setup(nSamples,
+                  _params.regression_filter_determine_order_from_cnr,
+                  _params.regression_filter_specified_polynomial_order,
+                  _params.regression_filter_clutter_width_factor,
+                  _params.regression_filter_cnr_exponent,
+                  beam->getCalib().getWavelengthCm() / 100.0);
     }
-    regrF.setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                       _regrOrder);
     
     TaArray<RadarComplex_t> filtered_;
     RadarComplex_t *filtered = filtered_.alloc(nSamples);
@@ -1363,7 +1371,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
-    
+
     TaArray<RadarComplex_t> filtRegrWindowed_;
     RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
     _applyWindow(filtered, filtRegrWindowed, nSamples);

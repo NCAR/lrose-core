@@ -2512,19 +2512,26 @@ void Beam::_initMomentsObject()
   _mom->setUseAdaptiveFilter();
 
   if (_params.use_polynomial_regression_clutter_filter) {
-    _regr->setup(_nSamples);
-    _regrHalf->setup(_nSamplesHalf);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN);
-    _regr->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                        _params.regression_filter_polynomial_order);
-    _regrHalf->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                            _params.regression_filter_polynomial_order);
-    _regrStag->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                            _params.regression_filter_polynomial_order);
-    _mom->setUseForsytheRegrFilter
-      (true,
-       _params.regression_filter_notch_edge_power_ratio_threshold_db,
-       _params.regression_filter_min_cnr_db);
+    _regr->setup(_nSamples,
+                 _params.regression_filter_determine_order_from_cnr,
+                 _params.regression_filter_specified_polynomial_order,
+                 _params.regression_filter_clutter_width_factor,
+                 _params.regression_filter_cnr_exponent,
+                 _wavelengthM);
+    _regrHalf->setup(_nSamplesHalf,
+                     _params.regression_filter_determine_order_from_cnr,
+                     _params.regression_filter_specified_polynomial_order,
+                     _params.regression_filter_clutter_width_factor,
+                     _params.regression_filter_cnr_exponent,
+                     _wavelengthM);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN,
+                              _params.regression_filter_determine_order_from_cnr,
+                              _params.regression_filter_specified_polynomial_order,
+                              _params.regression_filter_clutter_width_factor,
+                              _params.regression_filter_cnr_exponent,
+                              _wavelengthM);
+    _mom->setUseRegressionFilter
+      (true, _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
@@ -2635,15 +2642,24 @@ void Beam::_regrInit()
   // initialize the regression objects
   
   if (_params.use_polynomial_regression_clutter_filter) {
-    _regr->setup(_nSamples);
-    _regrHalf->setup(_nSamplesHalf);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN);
-    _regr->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                        _params.regression_filter_polynomial_order);
-    _regrHalf->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                            _params.regression_filter_polynomial_order);
-    _regrStag->setPolyOrder(_params.regression_filter_determine_order_from_CNR,
-                            _params.regression_filter_polynomial_order);
+    _regr->setup(_nSamples,
+                 _params.regression_filter_determine_order_from_cnr,
+                 _params.regression_filter_specified_polynomial_order,
+                 _params.regression_filter_clutter_width_factor,
+                 _params.regression_filter_cnr_exponent,
+                 _wavelengthM);
+    _regrHalf->setup(_nSamplesHalf,
+                     _params.regression_filter_determine_order_from_cnr,
+                     _params.regression_filter_specified_polynomial_order,
+                     _params.regression_filter_clutter_width_factor,
+                     _params.regression_filter_cnr_exponent,
+                     _wavelengthM);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN,
+                              _params.regression_filter_determine_order_from_cnr,
+                              _params.regression_filter_specified_polynomial_order,
+                              _params.regression_filter_clutter_width_factor,
+                              _params.regression_filter_cnr_exponent,
+                              _wavelengthM);
   }
 
 }

@@ -133,8 +133,9 @@ void ForsytheRegrFilter::_init()
   _staggeredM = 0;
   _staggeredN = 0;
   
-  _clutterWidthFactor = 1.0;
-  _cnrExponent = 2.0 / 3.0;
+  _clutterWidthFactor = 1.0; // uses in order selection
+  _cnrExponent = 2.0 / 3.0; // used in order selection
+  _wavelengthM = 0.1; // 10 cm
   
   // prepare the array of forsythe fit objects,
   // for supported orders and nsamples
@@ -162,10 +163,15 @@ ForsytheRegrFilter &ForsytheRegrFilter::_copy(const ForsytheRegrFilter &rhs)
     return *this;
   }
 
+  // initialize
+  // this also initializes _forsytheArray members to 0
+  
   _init();
 
-  // copy simple members
+  // copy members
   
+  _setupDone = rhs._setupDone;
+
   _nSamples = rhs._nSamples;
   _orderAuto = rhs._orderAuto;
   _polyOrder = rhs._polyOrder;
@@ -174,13 +180,10 @@ ForsytheRegrFilter &ForsytheRegrFilter::_copy(const ForsytheRegrFilter &rhs)
   _staggeredM = rhs._staggeredM;
   _staggeredN = rhs._staggeredN;
 
-  _setupDone = rhs._setupDone;
-
   _clutterWidthFactor = rhs._clutterWidthFactor;
   _cnrExponent = rhs._cnrExponent;
+  _wavelengthM = rhs._wavelengthM;
 
-  // copy the arrays
-  
   _xxVals = rhs._xxVals;
   _polyfitIqVals = rhs._polyfitIqVals;
   
@@ -199,25 +202,33 @@ ForsytheRegrFilter &ForsytheRegrFilter::_copy(const ForsytheRegrFilter &rhs)
 // Failure occurs if it is not possible to compute the
 // SVD of vvA.
 
-void ForsytheRegrFilter::setup(size_t nSamples)
+void ForsytheRegrFilter::setup(size_t nSamples,
+                               bool orderAuto,
+                               size_t specifiedOrder,
+                               double clutterWidthFactor,
+                               double cnrExponent,
+                               double wavelengthM)
   
 {
-
-  if (_setupDone && _nSamples == nSamples) {
-    return;
-  }
 
   _nSamples = nSamples;
 
   _isStaggered = false;
   _staggeredM = 0;
   _staggeredN = 0;
+  
+  _orderAuto = orderAuto; // do we compute order automatically
+  _polyOrder = specifiedOrder; // specified order if orderAuto is false
 
+  _clutterWidthFactor = clutterWidthFactor; // ss factor to allow us to increase order
+  _cnrExponent = cnrExponent; // allows us to tune the width
+  _wavelengthM = wavelengthM; // wavelength in meters
+ 
   // allocate arrays
 
   _alloc();
   
-  // load x vector
+  // load x (time scale) vector
 
   double xDelta = 1.0 / _nSamples;
   double xx = -0.5;
@@ -247,28 +258,33 @@ void ForsytheRegrFilter::setup(size_t nSamples)
 
 void ForsytheRegrFilter::setupStaggered(size_t nSamples,
                                         int staggeredM,
-                                        int staggeredN)
+                                        int staggeredN,
+                                        bool orderAuto,
+                                        size_t specifiedOrder,
+                                        double clutterWidthFactor,
+                                        double cnrExponent,
+                                        double wavelengthM)
   
 {
   
-  if (_setupDone &&
-      _isStaggered &&
-      _nSamples == nSamples &&
-      _staggeredM == staggeredM &&
-      _staggeredN == staggeredN) {
-    return;
-  }
-
   _nSamples = nSamples;
+
   _isStaggered = true;
   _staggeredM = staggeredM;
   _staggeredN = staggeredN;
   
+  _orderAuto = orderAuto; // do we compute order automatically
+  _polyOrder = specifiedOrder; // specified order if orderAuto is false
+  
+  _clutterWidthFactor = clutterWidthFactor; // ss factor to allow us to increase order
+  _cnrExponent = cnrExponent; // allows us to tune the width
+  _wavelengthM = wavelengthM; // wavelength in meters
+ 
   // allocate arrays
 
   _alloc();
-
-  // load x vector
+  
+  // load x (time scale) vector
 
   int nStaggered = (_nSamples / 2) * (_staggeredM + _staggeredN);
   double xDelta = 1.0 / nStaggered;
@@ -297,7 +313,6 @@ void ForsytheRegrFilter::setupStaggered(size_t nSamples,
 //   cnr3Db: clutter-to-noise-ratio from center 3 spectral points
 //   antennaRateDegPerSec: antenna rate - higher rate widens clutter
 //   double prtSecs: PRT for the passed-in IQ values
-//   double wavelengthM: wanelength
 //
 // Outputs:
 //   filteredIq: filtered I,Q data
@@ -310,7 +325,6 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
                                double cnr3Db,
                                double antennaRateDegPerSec,
                                double prtSecs,
-                               double wavelengthM,
                                RadarComplex_t *filteredIq)
   
 {
@@ -335,21 +349,25 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
     }
     double ss = _clutterWidthFactor;
     double wc = ss * (0.03 + 0.017 * antennaRateDegPerSec);
-    double nyquist = wavelengthM / (4.0 * prtSecs);
+    double nyquist = _wavelengthM / (4.0 * prtSecs);
     double wcNorm = wc / nyquist;
     double orderNorm = -1.9791 * wcNorm * wcNorm + 0.6456 * wcNorm;
     int order = ceil(orderNorm * pow(cnr3Db, _cnrExponent) * _nSamples);
-    if (order < 3) {
-      order = 3;
+    if (order < (int) AUTO_ORDER_MIN_VAL) {
+      order = (int) AUTO_ORDER_MIN_VAL;
+    } else if (order > (int) _nSamples - 1) {
+      order = _nSamples - 1;
     }
-  
-    // cerr << "rate, cnr, wc, wcNorm, orderNorm, order: "
-    //      << setw(6) << antennaRateDegPerSec << ", "
-    //      << setw(6) << cnr3Db << ", "
-    //      << setw(6) << wc << ", "
-    //      << setw(6) << wcNorm << ", "
-    //      << setw(6) << orderNorm << ", "
-    //      << setw(3) << order << endl;
+
+#ifdef DEBUG_PRINT
+    cerr << "rate, cnr, wc, wcNorm, orderNorm, order: "
+         << setw(6) << antennaRateDegPerSec << ", "
+         << setw(6) << cnr3Db << ", "
+         << setw(6) << wc << ", "
+         << setw(6) << wcNorm << ", "
+         << setw(6) << orderNorm << ", "
+         << setw(3) << order << endl;
+#endif
   
     _polyOrder = order;
 

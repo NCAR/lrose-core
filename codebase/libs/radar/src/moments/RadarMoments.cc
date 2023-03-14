@@ -146,7 +146,6 @@ void RadarMoments::_init()
   _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
   _clutterWidthMps = 0.75;
   _clutterInitNotchWidthMps = 1.5;
-  _regrNotchEdgePwrRatioThresholdDb = -45;
   _regrMinCnrDb = -5;
   _regrInterpAcrossNotch = true;
   _notchWidthMps = 3.0;
@@ -4870,9 +4869,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
   double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.apply(iqOrig, -120.0,
-             _antennaRate, prtSecsSum,
-             _wavelengthMeters, iqRegr);
+  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
 
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5102,9 +5099,7 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamples,
   TaArray<RadarComplex_t> iqRegr_;
   RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
   double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.apply(iqOrig, -120.0,
-             _antennaRate, prtSecsSum,
-             _wavelengthMeters, iqRegr);
+  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
   
   double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
   double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
@@ -5249,8 +5244,7 @@ void RadarMoments::_runRegressionFilter
     
     vector<RadarComplex_t> iqRegr;
     iqRegr.resize(nSamples);
-    regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate,
-               prtSecs, _wavelengthMeters, iqRegr.data());
+    regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
     
     // take the forward fft to compute the complex spectrum
     // of regr-filtered series
@@ -5320,8 +5314,8 @@ void RadarMoments::_runRegressionFilter
       int notchHalfWidth = 0;
       for (int ii = 0; ii < nSamples / 2; ii++) {
         int jj = (nSamples - ii) % nSamples;
-        if (filtRatioDb[ii] > _regrNotchEdgePwrRatioThresholdDb ||
-            filtRatioDb[jj] > _regrNotchEdgePwrRatioThresholdDb) {
+        if (filtRatioDb[ii] > -45.0 ||
+            filtRatioDb[jj] > -45.0) {
           notchHalfWidth = ii; // widen by 1 spectral point
           break;
         }
@@ -5346,7 +5340,8 @@ void RadarMoments::_runRegressionFilter
       notchLowerBound = notchLowerLimit;
       notchUpperBound = notchUpperLimit;
 
-      int nUnfiltered = nSamples - notchHalfWidth * 2 - 1;
+      int nFiltered = notchUpperBound - notchLowerBound + 1;
+      int nUnfiltered = nSamples - nFiltered;
       double *startNonNotch = regrSpec.data() + notchHalfWidth + 1;
       
       // compute the noise in the filtered spectrum, but not the notch
