@@ -541,6 +541,8 @@ public:
 
   char* search_ext;
 
+  char* search_substr;
+
   tdrp_bool_t gematronik_realtime_mode;
 
   int gematronik_realtime_wait_secs;
@@ -866,7 +868,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[197];
+  mutable TDRPtable _table[198];
 
   const char *_className;
 

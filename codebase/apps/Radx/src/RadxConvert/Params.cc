@@ -737,6 +737,18 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
+    // Parameter 'search_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("search_substr");
+    tt->descr = tdrpStrDup("File name sub-string.");
+    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->val_offset = (char *) &search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'gematronik_realtime_mode'
     // ctype is 'tdrp_bool_t'
     

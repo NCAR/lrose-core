@@ -2947,7 +2947,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_specified_polynomial_order");
     tt->descr = tdrpStrDup("Order of the polynomial fit for the regression filter.");
-    tt->help = tdrpStrDup("Used if regression_filter_determine_order_from_CNR is false");
+    tt->help = tdrpStrDup("Used if regression_filter_determine_order_from_cnr is false");
     tt->val_offset = (char *) &regression_filter_specified_polynomial_order - &_start_;
     tt->single_val.i = 5;
     tt++;
@@ -2959,7 +2959,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_clutter_width_factor");
     tt->descr = tdrpStrDup("Width factor used when automatically computing polynomial order.");
-    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_CNR it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.");
+    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_cnr it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.");
     tt->val_offset = (char *) &regression_filter_clutter_width_factor - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -2971,7 +2971,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_cnr_exponent");
     tt->descr = tdrpStrDup("CNR exponent used when automatically computing polynomial order.");
-    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_CNR it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.");
+    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_cnr it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.");
     tt->val_offset = (char *) &regression_filter_cnr_exponent - &_start_;
     tt->single_val.d = 0.666667;
     tt++;

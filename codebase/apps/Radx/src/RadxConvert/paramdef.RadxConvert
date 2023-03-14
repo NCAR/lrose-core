@@ -102,6 +102,12 @@ paramdef string {
   p_help = "If set, only files with this extension will be processed.";
 } search_ext;
 
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} search_substr;
+
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Set to TRUE if we are watching for Gematronik XML volumes.";
