@@ -294,6 +294,7 @@ private:
   // manager for computing moments
 
   IwrfTsInfo _opsInfo;
+  double _wavelengthM;
 
   // moments fields at each gate
 
@@ -403,12 +404,12 @@ private:
   
   // regression clutter filtering
 
-  RegressionFilter *_regr;
-  RegressionFilter *_regrHalf;
+  ForsytheRegrFilter *_regr;
+  ForsytheRegrFilter *_regrHalf;
 
   // regression clutter filtering - staggered prt
 
-  RegressionFilter *_regrStag;
+  ForsytheRegrFilter *_regrStag;
 
   // debug printing
   

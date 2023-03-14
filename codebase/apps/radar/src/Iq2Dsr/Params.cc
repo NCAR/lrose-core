@@ -2741,40 +2741,52 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'regression_filter_polynomial_order'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_polynomial_order");
-    tt->descr = tdrpStrDup("Order of the polynomial fit for the regression filter.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &regression_filter_polynomial_order - &_start_;
-    tt->single_val.i = 5;
-    tt++;
-    
-    // Parameter 'regression_filter_determine_order_from_CNR'
+    // Parameter 'regression_filter_determine_order_from_cnr'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_determine_order_from_CNR");
+    tt->param_name = tdrpStrDup("regression_filter_determine_order_from_cnr");
     tt->descr = tdrpStrDup("Option to determine the polynomial order from the Clutter-to-Noise-Ratio (CNR).");
-    tt->help = tdrpStrDup("If TRUE, we compute the CNR from the 3 central spectral points. Then, using a lookup-table based on CNR, we determine the appropriate order of the polynomial fit.");
-    tt->val_offset = (char *) &regression_filter_determine_order_from_CNR - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->help = tdrpStrDup("If TRUE, we compute the CNR from the 3 central spectral points. Then, we compute the order using CNR, antenna speed etc.");
+    tt->val_offset = (char *) &regression_filter_determine_order_from_cnr - &_start_;
+    tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'regression_filter_notch_edge_power_ratio_threshold_db'
+    // Parameter 'regression_filter_specified_polynomial_order'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_specified_polynomial_order");
+    tt->descr = tdrpStrDup("Order of the polynomial fit for the regression filter.");
+    tt->help = tdrpStrDup("Used if regression_filter_determine_order_from_cnr is false");
+    tt->val_offset = (char *) &regression_filter_specified_polynomial_order - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'regression_filter_clutter_width_factor'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_notch_edge_power_ratio_threshold_db");
-    tt->descr = tdrpStrDup("Power ratio threshold to determine the edge of the filtered notch (dB).");
-    tt->help = tdrpStrDup("After the initial application of the regression filter, a notch is formed around 0. In order to determine the width of this notch, we compute the ratio of the filtered power to the original unfiltered power. This is the threshold used to determine where the edge of the notch occurs.");
-    tt->val_offset = (char *) &regression_filter_notch_edge_power_ratio_threshold_db - &_start_;
-    tt->single_val.d = -45;
+    tt->param_name = tdrpStrDup("regression_filter_clutter_width_factor");
+    tt->descr = tdrpStrDup("Width factor used when automatically computing polynomial order.");
+    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_cnr it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.");
+    tt->val_offset = (char *) &regression_filter_clutter_width_factor - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'regression_filter_cnr_exponent'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_cnr_exponent");
+    tt->descr = tdrpStrDup("CNR exponent used when automatically computing polynomial order.");
+    tt->help = tdrpStrDup("Applies if regression_filter_determine_order_from_cnr it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.");
+    tt->val_offset = (char *) &regression_filter_cnr_exponent - &_start_;
+    tt->single_val.d = 0.666667;
     tt++;
     
     // Parameter 'regression_filter_min_cnr_db'
@@ -2783,8 +2795,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_min_cnr_db");
-    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Noise-Ratio - for applying the filter (dB).");
-    tt->help = tdrpStrDup("As a first step, we compute the CNR using a 3rd order regression fit. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CNR the central 3 spectral points. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
     tt->val_offset = (char *) &regression_filter_min_cnr_db - &_start_;
     tt->single_val.d = -5;
     tt++;

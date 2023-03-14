@@ -161,9 +161,9 @@ Beam::Beam(const string &progName,
   _fftHalf = new RadarFft;
   _fftStag = new RadarFft;
 
-  _regr = new RegressionFilter;
-  _regrHalf = new RegressionFilter;
-  _regrStag = new RegressionFilter;
+  _regr = new ForsytheRegrFilter;
+  _regrHalf = new ForsytheRegrFilter;
+  _regrStag = new ForsytheRegrFilter;
 
 }
 
@@ -222,9 +222,9 @@ void Beam::init(const MomentsMgr &mmgr,
   _endOfVolFlag = endOfVolFlag;
   _atmosAtten = &atmosAtten;
   _opsInfo = opsInfo;
+  _wavelengthM = _opsInfo.get_radar_wavelength_cm() / 100.0;
   _pulses = pulses;
   _georefActive = false;
-
   _pcode.setNSamples(_nSamples);
 
   // for each pulse, increase client count by 1,
@@ -510,11 +510,24 @@ void Beam::_prepareForComputeMoments()
   // initialize the regression objects
   
   if (_params.use_polynomial_regression_clutter_filter) {
-    int order = _params.regression_filter_polynomial_order;
-    bool orderFromCNR = _params.regression_filter_determine_order_from_CNR;
-    _regr->setup(_nSamples, order, orderFromCNR);
-    _regrHalf->setup(_nSamplesHalf, order, orderFromCNR);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN, order, orderFromCNR);
+    _regr->setup(_nSamples,
+                 _params.regression_filter_determine_order_from_cnr,
+                 _params.regression_filter_specified_polynomial_order,
+                 _params.regression_filter_clutter_width_factor,
+                 _params.regression_filter_cnr_exponent,
+                 _wavelengthM);
+    _regrHalf->setup(_nSamplesHalf,
+                     _params.regression_filter_determine_order_from_cnr,
+                     _params.regression_filter_specified_polynomial_order,
+                     _params.regression_filter_clutter_width_factor,
+                     _params.regression_filter_cnr_exponent,
+                     _wavelengthM);
+    _regrStag->setupStaggered(_nSamples, _stagM, _stagN,
+                              _params.regression_filter_determine_order_from_cnr,
+                              _params.regression_filter_specified_polynomial_order,
+                              _params.regression_filter_clutter_width_factor,
+                              _params.regression_filter_cnr_exponent,
+                              _wavelengthM);
   }
 
   pthread_mutex_unlock(&_fftMutex);
@@ -1997,7 +2010,7 @@ void Beam::_filterSpH()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test4 = _regr->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
     
     // compute filtered moments for this gate
@@ -2076,7 +2089,7 @@ void Beam::_filterSpV()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test4 = _regr->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
     
     // compute filtered moments for this gate
@@ -2490,7 +2503,7 @@ void Beam::_filterDpAltHvCoCross()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regrHalf->getPolyOrderInUse();
+    fields.test4 = _regrHalf->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
 
   } // igate
@@ -2576,7 +2589,7 @@ void Beam::_filterDpAltHvCoOnly()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regrHalf->getPolyOrderInUse();
+    fields.test4 = _regrHalf->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channels
@@ -2910,7 +2923,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test4 = _regr->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channel
@@ -3078,7 +3091,7 @@ void Beam::_filterDpVOnlyFixedPrt()
     // testing cnr from 3-order regression filter
 
     fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrderInUse();
+    fields.test4 = _regr->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
     
     // apply the filter ratio to other channel
@@ -3378,10 +3391,7 @@ void Beam::_initMomentsObject(RadarMoments *mom)
   mom->setUseAdaptiveFilter();
   
   if (_params.use_polynomial_regression_clutter_filter) {
-    mom->setUseRegressionFilter
-      (_params.regression_filter_interp_across_notch,
-       _params.regression_filter_notch_edge_power_ratio_threshold_db,
-       _params.regression_filter_min_cnr_db);
+    mom->setUseRegressionFilter(true, _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }

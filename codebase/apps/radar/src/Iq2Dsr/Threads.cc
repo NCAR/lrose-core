@@ -312,12 +312,21 @@ void ComputeThread::initRegr(size_t nSamples)
 
   assert(_app);
   const Params &params = _app->getParams();
+  double wavelengthM = _app->getWavelengthM();
 
   regr.setup(nSamples,
-             params.regression_filter_polynomial_order);
+             params.regression_filter_determine_order_from_cnr,
+             params.regression_filter_specified_polynomial_order,
+             params.regression_filter_clutter_width_factor,
+             params.regression_filter_cnr_exponent,
+             wavelengthM);
   
   regrHalf.setup(nSamples / 2,
-                 params.regression_filter_polynomial_order);
+                 params.regression_filter_determine_order_from_cnr,
+                 params.regression_filter_specified_polynomial_order,
+                 params.regression_filter_clutter_width_factor,
+                 params.regression_filter_cnr_exponent,
+                 wavelengthM);
   
   nSamplesRegr = nSamples;
   
@@ -326,8 +335,8 @@ void ComputeThread::initRegr(size_t nSamples)
 ///////////////////////////////////////////////////////////////////
 // initialize the regression filter from another regression object
 
-void ComputeThread::initRegr(const RegressionFilter &master,
-                             const RegressionFilter &masterHalf)
+void ComputeThread::initRegr(const ForsytheRegrFilter &master,
+                             const ForsytheRegrFilter &masterHalf)
 {
   
   if (nSamplesRegr == master.getNSamples()) {
@@ -358,9 +367,14 @@ void ComputeThread::initRegrStag(size_t nSamples, int stagM, int stagN)
   
   assert(_app);
   const Params &params = _app->getParams();
-
+  double wavelengthM = _app->getWavelengthM();
+  
   regrStag.setupStaggered(nSamples, stagM, stagN,
-                          params.regression_filter_polynomial_order);
+                          params.regression_filter_determine_order_from_cnr,
+                          params.regression_filter_specified_polynomial_order,
+                          params.regression_filter_clutter_width_factor,
+                          params.regression_filter_cnr_exponent,
+                          wavelengthM);
   
   nSamplesRegrStag = nSamples;
   regrStagM = stagM;
@@ -371,7 +385,7 @@ void ComputeThread::initRegrStag(size_t nSamples, int stagM, int stagN)
 ///////////////////////////////////////////////////////////////////
 // initialize the regression filter from another regression object
 
-void ComputeThread::initRegrStag(const RegressionFilter &master)
+void ComputeThread::initRegrStag(const ForsytheRegrFilter &master)
 {
   
   if (nSamplesRegrStag == master.getNSamples() &&

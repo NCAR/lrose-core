@@ -40,7 +40,7 @@
 
 #include <pthread.h>
 #include <radar/RadarFft.hh>
-#include <radar/RegressionFilter.hh>
+#include <radar/ForsytheRegrFilter.hh>
 class BeamReader;
 class OutputFmq;
 class Beam;
@@ -156,9 +156,9 @@ public:
   void initFftsStag(size_t nSamples, int stagM, int stagN);
   void initRegr(size_t nSamples);
   void initRegrStag(size_t nSamples, int stagM, int stagN);
-  void initRegr(const RegressionFilter &master,
-                const RegressionFilter &masterHalf);
-  void initRegrStag(const RegressionFilter &master);
+  void initRegr(const ForsytheRegrFilter &master,
+                const ForsytheRegrFilter &masterHalf);
+  void initRegrStag(const ForsytheRegrFilter &master);
 
   //////////////////////////////////////////////////////////////
   // create and destroy FFT objects in a thread safe manner
@@ -186,14 +186,14 @@ public:
   // regression clutter filtering
 
   size_t nSamplesRegr;
-  RegressionFilter regr;
-  RegressionFilter regrHalf;
+  ForsytheRegrFilter regr;
+  ForsytheRegrFilter regrHalf;
 
   // regression clutter filtering - staggered prt
 
   size_t nSamplesRegrStag;
   int regrStagM, regrStagN;
-  RegressionFilter regrStag;
+  ForsytheRegrFilter regrStag;
 
   // beam for computations
   

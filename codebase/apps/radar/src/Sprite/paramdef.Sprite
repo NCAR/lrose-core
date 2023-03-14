@@ -994,19 +994,19 @@ paramdef boolean {
 paramdef int {
   p_default = 5;
   p_descr = "Order of the polynomial fit for the regression filter.";
-  p_help = "Used if regression_filter_determine_order_from_CNR is false";
+  p_help = "Used if regression_filter_determine_order_from_cnr is false";
 } regression_filter_specified_polynomial_order;
 
 paramdef double {
   p_default = 1.0;
   p_descr = "Width factor used when automatically computing polynomial order.";
-  p_help = "Applies if regression_filter_determine_order_from_CNR it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.";
+  p_help = "Applies if regression_filter_determine_order_from_cnr it true. Default is 1. If less than 1, order will decrease. If more than 1, order will increase.";
 } regression_filter_clutter_width_factor;
 
 paramdef double {
   p_default = 0.666666667;
   p_descr = "CNR exponent used when automatically computing polynomial order.";
-  p_help = "Applies if regression_filter_determine_order_from_CNR it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.";
+  p_help = "Applies if regression_filter_determine_order_from_cnr it true. Default is 2/3. If less than 2/3, order will decrease. If more than 2/3, order will increase.";
 } regression_filter_cnr_exponent;
 
 paramdef double {
