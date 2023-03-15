@@ -147,6 +147,7 @@ void RadarMoments::_init()
   _clutterWidthMps = 0.75;
   _clutterInitNotchWidthMps = 1.5;
   _regrMinCnrDb = -5;
+  _regrNotchInterpMethod = INTERP_METHOD_GAUSSIAN;
   _regrInterpAcrossNotch = true;
   _notchWidthMps = 3.0;
   _regrCnrDb = 0.0;

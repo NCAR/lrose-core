@@ -203,6 +203,14 @@ public:
     CLUTTER_FILTER_NOTCH
   } clutter_filter_type_t;
 
+  // notch interpolation method
+  
+  typedef enum {
+    INTERP_METHOD_NONE,
+    INTERP_METHOD_LINEAR,
+    INTERP_METHOD_GAUSSIAN
+  } notch_interp_method_t;
+
   // set the estimated clutter width in MPS
 
   void setClutterWidthMps(double val) {
@@ -1438,6 +1446,8 @@ private:
                          * minimum CNR - clutter-to-noise-ratio -
                          * for applying the filter */
   
+  notch_interp_method_t _regrNotchInterpMethod; /* interpolating across the notch */
+
   bool _regrInterpAcrossNotch; /* regression filter - 
                                 * interpolate across the notch */
 
