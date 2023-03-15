@@ -40,9 +40,9 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/pjg.h>
-#include <rapmath/ForsytheFit.hh>
 #include <radar/GateData.hh>
 #include <radar/RadarFft.hh>
+#include <rapmath/ForsytheFit.hh>
 #include <radar/ForsytheRegrFilter.hh>
 #include <radar/ClutFilter.hh>
 #include <radar/FilterUtils.hh>
@@ -371,15 +371,15 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
       regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
                            _params.regression_filter_determine_order_from_cnr,
                            _params.regression_filter_specified_polynomial_order,
-                           _params.regression_filter_clutter_width_factor,
-                           _params.regression_filter_cnr_exponent,
+                           _regrClutWidthFactor,
+                           _regrCnrExponent,
                            _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
       regrF.setup(_nSamples,
                   _params.regression_filter_determine_order_from_cnr,
                   _params.regression_filter_specified_polynomial_order,
-                  _params.regression_filter_clutter_width_factor,
-                  _params.regression_filter_cnr_exponent,
+                  _regrClutWidthFactor,
+                  _regrCnrExponent,
                   _beam->getCalib().getWavelengthCm() / 100.0);
     }
     
@@ -1509,21 +1509,21 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   } else if (_useRegrFilt) {
 
     // regression
-    
+
     ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
       regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
                            _params.regression_filter_determine_order_from_cnr,
                            _params.regression_filter_specified_polynomial_order,
-                           _params.regression_filter_clutter_width_factor,
-                           _params.regression_filter_cnr_exponent,
+                           _regrClutWidthFactor,
+                           _regrCnrExponent,
                            _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
       regrF.setup(_nSamples,
                   _params.regression_filter_determine_order_from_cnr,
                   _params.regression_filter_specified_polynomial_order,
-                  _params.regression_filter_clutter_width_factor,
-                  _params.regression_filter_cnr_exponent,
+                  _regrClutWidthFactor,
+                  _regrCnrExponent,
                   _beam->getCalib().getWavelengthCm() / 100.0);
     }
     
