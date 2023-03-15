@@ -425,7 +425,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   double rangeY = maxDbm - minDbm;
   double minY = minDbm - rangeY * 0.05;
-  double maxY = maxDbm + rangeY * 0.125;
+  double maxY = maxDbm + rangeY * 0.25;
   if (!_isZoomed) {
     if (_computePlotRangeDynamically) {
       setWorldLimitsY(minY, maxY);
