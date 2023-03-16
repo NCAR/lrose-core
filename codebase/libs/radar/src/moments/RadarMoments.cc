@@ -5277,39 +5277,74 @@ void RadarMoments::_regrDoInterpAcrossNotch(vector<double> &regrSpec)
   
   _notchStart = notchLowerBound + nSamples;
   _notchEnd = notchUpperBound;
+  int nUnfiltered = _notchStart - _notchEnd + 1;
+  int nFiltered = nSamples - nUnfiltered;
 
-  cerr <<"1111111111111 notchLowerBound: " << notchLowerBound << endl;
-  cerr <<"1111111111111 notchUpperBound: " << notchUpperBound << endl;
-  cerr <<"1111111111111 _notchStart: " << _notchStart << endl;
-  cerr <<"1111111111111 _notchEnd: " << _notchEnd << endl;
+#ifdef DEBUG_PRINT
+  cerr << "==>> regression filter interp across notch" << endl;
+  cerr <<"notchLowerBound: " << notchLowerBound << endl;
+  cerr <<"notchUpperBound: " << notchUpperBound << endl;
+  cerr <<"_notchStart: " << _notchStart << endl;
+  cerr <<"_notchEnd: " << _notchEnd << endl;
+  cerr <<"nFiltered: " << nFiltered << endl;
+  cerr <<"nUnfiltered: " << nUnfiltered << endl;
+#endif
   
   if (_regrNotchInterpMethod == INTERP_METHOD_NONE) {
 
     // no interp across notch, leave it as it is
-    
+
+#ifdef DEBUG_PRINT
+    cerr << "No interp across notch" << endl;
+#endif
     return;
 
   } else if (_regrNotchInterpMethod == INTERP_METHOD_LINEAR) {
-
+    
     // linear interp
+    double pwrLowerDb = 10.0 * log10(regrSpec.data()[_notchStart]);
+    double pwrUpperDb = 10.0 * log10(regrSpec.data()[_notchEnd]);
+    double deltaPwrDb = pwrUpperDb - pwrLowerDb;
+    double xRange = nFiltered + 1.0;
+#ifdef DEBUG_PRINT
+    cerr << "Linear interp across notch" << endl;
+    cerr << "pwrLower: " << pwrLowerDb << endl;
+    cerr << "pwrUpper: " << pwrUpperDb << endl;
+    cerr << "deltaPwrDb: " << deltaPwrDb << endl;
+    cerr << "xRange: " << xRange << endl;
+#endif
+
+    double xx = 0.0;
+    for (int ii = _notchStart; ii <= notchUpperBound + nSamples; ii++) {
+      int jj = (ii + nSamples) % nSamples;
+      double frac = xx / xRange;
+      double pwrDb = pwrLowerDb + frac * deltaPwrDb;
+#ifdef DEBUG_PRINT
+      cerr << "==>> interpolating ii, jj, xx, frac, pwr: "
+           << ii << ", " << jj << ", "
+           << xx << ", " << frac << ", " << pwrDb << endl;
+#endif
+      regrSpec[jj] = pow(10.0, pwrDb / 10.0);
+      xx++;
+    }
+    
+    return;
 
   } else {
     
     // gaussian interp
     
-    int nFiltered = _notchStart - _notchEnd + 1;
-    int nUnfiltered = nSamples - nFiltered;
     double *startNonNotch = regrSpec.data() + notchUpperBound + 1;
 
-    cerr <<"222222222222222 nFiltered: " << _nFiltered << endl;
-    cerr <<"222222222222222 nUnFiltered: " << _nUnFiltered << endl;
-    
     // compute the noise in the filtered spectrum, but not the notch
     
     double regrNoise =
       ClutFilter::computeSpectralNoise(startNonNotch, nUnfiltered);
     
-    cerr <<"222222222222222 regrNoise: " << 10.0 * log10(regrNoise) << endl;
+#ifdef DEBUG_PRINT
+    cerr <<"==>> gaussian interp, regrNoise: " <<
+      10.0 * log10(regrNoise) << endl;
+#endif
 
     // find the location of the max power in the filtered spectrum,
     // presumably the weather position
