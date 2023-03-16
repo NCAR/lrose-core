@@ -5277,49 +5277,72 @@ void RadarMoments::_regrDoInterpAcrossNotch(vector<double> &regrSpec)
   
   _notchStart = notchLowerBound + nSamples;
   _notchEnd = notchUpperBound;
+
+  cerr <<"1111111111111 notchLowerBound: " << notchLowerBound << endl;
+  cerr <<"1111111111111 notchUpperBound: " << notchUpperBound << endl;
+  cerr <<"1111111111111 _notchStart: " << _notchStart << endl;
+  cerr <<"1111111111111 _notchEnd: " << _notchEnd << endl;
   
   if (_regrNotchInterpMethod == INTERP_METHOD_NONE) {
-    return;
-  }
-  
-  int nFiltered = notchUpperBound - notchLowerBound + 1;
-  int nUnfiltered = nSamples - nFiltered;
-  double *startNonNotch = regrSpec.data() + notchUpperBound + 1;
-      
-  // compute the noise in the filtered spectrum, but not the notch
-  
-  double regrNoise =
-    ClutFilter::computeSpectralNoise(startNonNotch, nUnfiltered);
-  
-  // find the location of the max power in the filtered spectrum,
-  // presumably the weather position
-  
-  int weatherPos = 0;
-  double maxRegrPower = regrSpec[0];
-  for (int ii = 1; ii < nSamples; ii++) {
-    if (regrSpec[ii] > maxRegrPower) {
-      weatherPos = ii;
-      maxRegrPower = regrSpec[ii];
-    }
-  }
-  
-  // interpolate across the filtered notch
-  // iterate 3 times, refining the correcting further each time
-  // by fitting a Gaussian to the spectrum
-  
-  vector<double> gaussian;
-  gaussian.resize(nSamples);
-  for (int iter = 0; iter < 3; iter++) {
-    // fit gaussian to notched spectrum
-    ClutFilter::fitGaussian(regrSpec.data(), nSamples,
-                            weatherPos, regrNoise,
-                            gaussian.data());
-    for (int ii = notchLowerBound; ii <= notchUpperBound; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      regrSpec[jj] = gaussian[jj];
-    }
-  } // iter
 
+    // no interp across notch, leave it as it is
+    
+    return;
+
+  } else if (_regrNotchInterpMethod == INTERP_METHOD_LINEAR) {
+
+    // linear interp
+
+  } else {
+    
+    // gaussian interp
+    
+    int nFiltered = _notchStart - _notchEnd + 1;
+    int nUnfiltered = nSamples - nFiltered;
+    double *startNonNotch = regrSpec.data() + notchUpperBound + 1;
+
+    cerr <<"222222222222222 nFiltered: " << _nFiltered << endl;
+    cerr <<"222222222222222 nUnFiltered: " << _nUnFiltered << endl;
+    
+    // compute the noise in the filtered spectrum, but not the notch
+    
+    double regrNoise =
+      ClutFilter::computeSpectralNoise(startNonNotch, nUnfiltered);
+    
+    cerr <<"222222222222222 regrNoise: " << 10.0 * log10(regrNoise) << endl;
+
+    // find the location of the max power in the filtered spectrum,
+    // presumably the weather position
+    
+    int weatherPos = 0;
+    double maxRegrPower = regrSpec[0];
+    for (int ii = 1; ii < nSamples; ii++) {
+      if (regrSpec[ii] > maxRegrPower) {
+        weatherPos = ii;
+        maxRegrPower = regrSpec[ii];
+      }
+    }
+    
+    // interpolate across the filtered notch
+    // iterate 3 times, refining the correcting further each time
+    // by fitting a Gaussian to the spectrum
+    
+    vector<double> gaussian;
+    gaussian.resize(nSamples);
+    for (int iter = 0; iter < 3; iter++) {
+      // fit gaussian to notched spectrum
+      ClutFilter::fitGaussian(regrSpec.data(), nSamples,
+                              weatherPos, regrNoise,
+                              gaussian.data());
+      for (int ii = notchLowerBound; ii <= notchUpperBound; ii++) {
+        int jj = (ii + nSamples) % nSamples;
+        regrSpec[jj] = gaussian[jj];
+      }
+    } // iter
+
+  } // if (_regrNotchInterpMethod == INTERP_METHOD_NONE)
+
+  
 }
     
 //////////////////////////////////////////////////////////////////////
