@@ -273,15 +273,9 @@ private:
 
   IwrfCalib _calib;
 
-  // status XML
-
-  // string _statusXml;
-
   // Moments computations
   
   RadarMoments *_mom;
-  // PhaseCoding _pcode;
-
   bool _applyFiltering;
 
   // window

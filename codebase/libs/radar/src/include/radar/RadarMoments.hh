@@ -1680,6 +1680,8 @@ private:
                             double &spectralSnr,
                             double *specRatio);
 
+  void _regrDoInterpAcrossNotch(vector<double> &unfiltSpec);
+
   static void _compute3PtMedian(const RadarComplex_t *iq,
                                 RadarComplex_t &median);
 
