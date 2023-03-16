@@ -1345,8 +1345,9 @@ void SpectraWidget::_createIqPlot(int id)
   iqplot->setClutModelWidthMps(_params._iq_plots[id].clutter_model_width_mps);
   iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
   iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
-  iqplot->setRegrFiltInterpAcrossNotch
-    (_params._iq_plots[id].regression_filter_interp_across_notch);
+  iqplot->setRegrFiltNotchInterpMethod
+    ((RadarMoments::notch_interp_method_t)
+     _params._iq_plots[id].regression_filter_notch_interp_method);
   iqplot->setComputePlotRangeDynamically
     (_params._iq_plots[id].compute_plot_range_dynamically);
 
@@ -2218,18 +2219,38 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
   
-  QAction regrInterpNotch("Regr interp across notch", &contextMenu);
-  regrInterpNotch.setCheckable(true);
-  regrInterpNotch.setChecked
-    (_iqPlots[id]->getRegrFiltInterpAcrossNotch());
-  connect(&regrInterpNotch, &QAction::triggered,
-          [this, id] (bool state) {
-            _iqPlots[id]->setRegrFiltInterpAcrossNotch(state);
+  QMenu setRegrInterpMethod("Set regr notch interp method", &setFilteringMenu);
+  setFilteringMenu.addMenu(&setRegrInterpMethod);
+  
+  QAction setMethodGaussian("Gaussian", &setRegrInterpMethod);
+  connect(&setMethodGaussian, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_GAUSSIAN);
             _configureIqPlot(id);
           } );
-  setFilteringMenu.addAction(&regrInterpNotch);
-  
-  QAction setRegressionClutWidthFactor("Set regression clutter width factor (ss)", &contextMenu);
+  setRegrInterpMethod.addAction(&setMethodGaussian);
+
+  QAction setMethodLinear("Linear", &setRegrInterpMethod);
+  connect(&setMethodLinear, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_LINEAR);
+            _configureIqPlot(id);
+          } );
+  setRegrInterpMethod.addAction(&setMethodLinear);
+
+  QAction setMethodNone("None", &setRegrInterpMethod);
+  connect(&setMethodNone, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_NONE);
+            _configureIqPlot(id);
+          } );
+  setRegrInterpMethod.addAction(&setMethodNone);
+
+  QAction setRegressionClutWidthFactor
+    ("Set regression clutter width factor (ss)", &contextMenu);
   connect(&setRegressionClutWidthFactor, &QAction::triggered,
           [this, id] () {
             bool ok;

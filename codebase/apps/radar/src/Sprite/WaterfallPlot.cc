@@ -299,7 +299,7 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     // _powerFilt = RadarComplex::meanPower(power, nSamples);
     // _powerClut = _powerUnfilt - _powerFilt;
     
-    // apply 3-pt median filter
+    // apply median filter
     
     FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
       
@@ -1366,7 +1366,6 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
-                                  true,
                                   filtered, NULL,
                                   filterRatio,
                                   spectralNoise,

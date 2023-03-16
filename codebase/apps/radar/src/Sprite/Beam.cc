@@ -2531,7 +2531,7 @@ void Beam::_initMomentsObject()
                               _params.regression_filter_cnr_exponent,
                               _wavelengthM);
     _mom->setUseRegressionFilter
-      (true, _params.regression_filter_min_cnr_db);
+      (RadarMoments::INTERP_METHOD_GAUSSIAN, _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     _mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }

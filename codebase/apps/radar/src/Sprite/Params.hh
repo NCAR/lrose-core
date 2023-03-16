@@ -108,6 +108,12 @@ public:
   } fft_window_t;
 
   typedef enum {
+    INTERP_METHOD_NONE = 0,
+    INTERP_METHOD_LINEAR = 1,
+    INTERP_METHOD_GAUSSIAN = 2
+  } notch_interp_method_t;
+
+  typedef enum {
     WATERFALL_HC = 0,
     WATERFALL_VC = 1,
     WATERFALL_HX = 2,
@@ -198,6 +204,7 @@ public:
     double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
+    notch_interp_method_t regression_filter_notch_interp_method;
   } waterfall_plot_t;
 
   typedef struct {
@@ -210,7 +217,7 @@ public:
     double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
-    tdrp_bool_t regression_filter_interp_across_notch;
+    notch_interp_method_t regression_filter_notch_interp_method;
     tdrp_bool_t compute_plot_range_dynamically;
   } iq_plot_t;
 

@@ -1547,7 +1547,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("waterfall_plots");
     tt->descr = tdrpStrDup("Details of waterfall plots for each sub panel.");
-    tt->help = tdrpStrDup("HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.");
+    tt->help = tdrpStrDup("HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood. For the regression filter, set the order to -1 to compute the order automatically in the filter.");
     tt->array_offset = (char *) &_waterfall_plots - &_start_;
     tt->array_n_offset = (char *) &waterfall_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -1555,7 +1555,7 @@
     tt->array_elem_size = sizeof(waterfall_plot_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("waterfall_plot_t");
-    tt->struct_def.nfields = 7;
+    tt->struct_def.nfields = 8;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("waterfall_type_t");
@@ -1635,7 +1635,22 @@
       tt->struct_def.fields[6].ptype = INT_TYPE;
       tt->struct_def.fields[6].rel_offset = 
         (char *) &_waterfall_plots->regression_order - (char *) _waterfall_plots;
-    tt->n_struct_vals = 14;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("notch_interp_method_t");
+      tt->struct_def.fields[7].fname = tdrpStrDup("regression_filter_notch_interp_method");
+      tt->struct_def.fields[7].ptype = ENUM_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_waterfall_plots->regression_filter_notch_interp_method - (char *) _waterfall_plots;
+        tt->struct_def.fields[7].enum_def.name = tdrpStrDup("notch_interp_method_t");
+        tt->struct_def.fields[7].enum_def.nfields = 3;
+        tt->struct_def.fields[7].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[7].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+        tt->struct_def.fields[7].enum_def.fields[0].val = INTERP_METHOD_NONE;
+        tt->struct_def.fields[7].enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+        tt->struct_def.fields[7].enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+        tt->struct_def.fields[7].enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+        tt->struct_def.fields[7].enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
+    tt->n_struct_vals = 16;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = WATERFALL_HC;
@@ -1644,14 +1659,16 @@
       tt->struct_vals[3].b = pFALSE;
       tt->struct_vals[4].d = 0.75;
       tt->struct_vals[5].b = pFALSE;
-      tt->struct_vals[6].i = 3;
-      tt->struct_vals[7].e = WATERFALL_ZDR;
-      tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[9].i = 3;
-      tt->struct_vals[10].b = pFALSE;
-      tt->struct_vals[11].d = 0.75;
-      tt->struct_vals[12].b = pFALSE;
-      tt->struct_vals[13].i = 3;
+      tt->struct_vals[6].i = -1;
+      tt->struct_vals[7].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[8].e = WATERFALL_ZDR;
+      tt->struct_vals[9].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[10].i = 3;
+      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[12].d = 0.75;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].i = -1;
+      tt->struct_vals[15].e = INTERP_METHOD_GAUSSIAN;
     tt++;
     
     // Parameter 'waterfall_width'
@@ -2102,7 +2119,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("iq_plots");
     tt->descr = tdrpStrDup("Details of IQ plots for each sub panel.");
-    tt->help = tdrpStrDup("SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra.");
+    tt->help = tdrpStrDup("SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra. For the regression filter, set the order to -1 to compute the order automatically in the filter");
     tt->array_offset = (char *) &_iq_plots - &_start_;
     tt->array_n_offset = (char *) &iq_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -2214,11 +2231,21 @@
       tt->struct_def.fields[8].ptype = INT_TYPE;
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_iq_plots->regression_order - (char *) _iq_plots;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[9].fname = tdrpStrDup("regression_filter_interp_across_notch");
-      tt->struct_def.fields[9].ptype = BOOL_TYPE;
+      tt->struct_def.fields[9].ftype = tdrpStrDup("notch_interp_method_t");
+      tt->struct_def.fields[9].fname = tdrpStrDup("regression_filter_notch_interp_method");
+      tt->struct_def.fields[9].ptype = ENUM_TYPE;
       tt->struct_def.fields[9].rel_offset = 
-        (char *) &_iq_plots->regression_filter_interp_across_notch - (char *) _iq_plots;
+        (char *) &_iq_plots->regression_filter_notch_interp_method - (char *) _iq_plots;
+        tt->struct_def.fields[9].enum_def.name = tdrpStrDup("notch_interp_method_t");
+        tt->struct_def.fields[9].enum_def.nfields = 3;
+        tt->struct_def.fields[9].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[9].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[9].enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+        tt->struct_def.fields[9].enum_def.fields[0].val = INTERP_METHOD_NONE;
+        tt->struct_def.fields[9].enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+        tt->struct_def.fields[9].enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+        tt->struct_def.fields[9].enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+        tt->struct_def.fields[9].enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
       tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[10].fname = tdrpStrDup("compute_plot_range_dynamically");
       tt->struct_def.fields[10].ptype = BOOL_TYPE;
@@ -2235,8 +2262,8 @@
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].d = 0.75;
       tt->struct_vals[7].b = pFALSE;
-      tt->struct_vals[8].i = 3;
-      tt->struct_vals[9].b = pTRUE;
+      tt->struct_vals[8].i = -1;
+      tt->struct_vals[9].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[10].b = pTRUE;
       tt->struct_vals[11].e = SPECTRAL_PHASE;
       tt->struct_vals[12].e = CHANNEL_HC;
@@ -2246,8 +2273,8 @@
       tt->struct_vals[16].b = pFALSE;
       tt->struct_vals[17].d = 0.75;
       tt->struct_vals[18].b = pFALSE;
-      tt->struct_vals[19].i = 3;
-      tt->struct_vals[20].b = pTRUE;
+      tt->struct_vals[19].i = -1;
+      tt->struct_vals[20].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[21].b = pTRUE;
       tt->struct_vals[22].e = TS_POWER;
       tt->struct_vals[23].e = CHANNEL_HC;
@@ -2257,8 +2284,8 @@
       tt->struct_vals[27].b = pFALSE;
       tt->struct_vals[28].d = 0.75;
       tt->struct_vals[29].b = pFALSE;
-      tt->struct_vals[30].i = 3;
-      tt->struct_vals[31].b = pTRUE;
+      tt->struct_vals[30].i = -1;
+      tt->struct_vals[31].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[32].b = pTRUE;
       tt->struct_vals[33].e = TS_PHASE;
       tt->struct_vals[34].e = CHANNEL_HC;
@@ -2268,8 +2295,8 @@
       tt->struct_vals[38].b = pFALSE;
       tt->struct_vals[39].d = 0.75;
       tt->struct_vals[40].b = pFALSE;
-      tt->struct_vals[41].i = 3;
-      tt->struct_vals[42].b = pTRUE;
+      tt->struct_vals[41].i = -1;
+      tt->struct_vals[42].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[43].b = pTRUE;
       tt->struct_vals[44].e = I_VALS;
       tt->struct_vals[45].e = CHANNEL_HC;
@@ -2279,8 +2306,8 @@
       tt->struct_vals[49].b = pFALSE;
       tt->struct_vals[50].d = 0.75;
       tt->struct_vals[51].b = pFALSE;
-      tt->struct_vals[52].i = 3;
-      tt->struct_vals[53].b = pTRUE;
+      tt->struct_vals[52].i = -1;
+      tt->struct_vals[53].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[54].b = pTRUE;
       tt->struct_vals[55].e = Q_VALS;
       tt->struct_vals[56].e = CHANNEL_HC;
@@ -2290,8 +2317,8 @@
       tt->struct_vals[60].b = pFALSE;
       tt->struct_vals[61].d = 0.75;
       tt->struct_vals[62].b = pFALSE;
-      tt->struct_vals[63].i = 3;
-      tt->struct_vals[64].b = pTRUE;
+      tt->struct_vals[63].i = -1;
+      tt->struct_vals[64].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[65].b = pTRUE;
       tt->struct_vals[66].e = I_VS_Q;
       tt->struct_vals[67].e = CHANNEL_HC;
@@ -2301,8 +2328,8 @@
       tt->struct_vals[71].b = pFALSE;
       tt->struct_vals[72].d = 0.75;
       tt->struct_vals[73].b = pFALSE;
-      tt->struct_vals[74].i = 3;
-      tt->struct_vals[75].b = pTRUE;
+      tt->struct_vals[74].i = -1;
+      tt->struct_vals[75].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[76].b = pTRUE;
       tt->struct_vals[77].e = PHASOR;
       tt->struct_vals[78].e = CHANNEL_HC;
@@ -2312,8 +2339,8 @@
       tt->struct_vals[82].b = pFALSE;
       tt->struct_vals[83].d = 0.75;
       tt->struct_vals[84].b = pFALSE;
-      tt->struct_vals[85].i = 3;
-      tt->struct_vals[86].b = pTRUE;
+      tt->struct_vals[85].i = -1;
+      tt->struct_vals[86].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[87].b = pTRUE;
     tt++;
     

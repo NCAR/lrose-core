@@ -203,14 +203,6 @@ public:
     CLUTTER_FILTER_NOTCH
   } clutter_filter_type_t;
 
-  // notch interpolation method
-  
-  typedef enum {
-    INTERP_METHOD_NONE,
-    INTERP_METHOD_LINEAR,
-    INTERP_METHOD_GAUSSIAN
-  } notch_interp_method_t;
-
   // set the estimated clutter width in MPS
 
   void setClutterWidthMps(double val) {
@@ -238,10 +230,18 @@ public:
 
   // use polynomial regression filter
 
-  void setUseRegressionFilter(bool interpAcrossNotch,
+  // notch interpolation method
+  
+  typedef enum {
+    INTERP_METHOD_NONE,
+    INTERP_METHOD_LINEAR,
+    INTERP_METHOD_GAUSSIAN
+  } notch_interp_method_t;
+
+  void setUseRegressionFilter(notch_interp_method_t interpMethod,
                               double minCnrDb) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
-    _regrInterpAcrossNotch = interpAcrossNotch;
+    _regrNotchInterpMethod = interpMethod;
     _regrMinCnrDb = minCnrDb;
   }
   
@@ -767,7 +767,6 @@ public:
                              const double *window,
                              const RadarComplex_t *iqOrig, // non-windowed
                              double calNoise,
-                             bool interpAcrossNotch,
                              RadarComplex_t *iqFiltered,
                              RadarComplex_t *iqNotched,
                              double &filterRatio,
@@ -1448,11 +1447,6 @@ private:
   
   notch_interp_method_t _regrNotchInterpMethod; /* interpolating across the notch */
 
-  bool _regrInterpAcrossNotch; /* regression filter - 
-                                * interpolate across the notch */
-
-  
-
   double _regrCnrDb; /* regression filter - clutter-to-noise ratio
                       * from 3 central spectral points */
 
@@ -1665,20 +1659,6 @@ private:
                                        int staggeredM,
                                        int staggeredN,
                                        double *regrSpec);
-
-  void _runRegressionFilter(int nSamples,
-                            double prtSecs,
-                            const RadarFft &fft,
-                            ForsytheRegrFilter &regr,
-                            const double *window,
-                            const RadarComplex_t *iqUnfiltered,
-                            double calNoise,
-                            bool interpAcrossNotch,
-                            RadarComplex_t *iqFiltered,
-                            double &filterRatio,
-                            double &spectralNoise,
-                            double &spectralSnr,
-                            double *specRatio);
 
   void _regrDoInterpAcrossNotch(vector<double> &unfiltSpec);
 

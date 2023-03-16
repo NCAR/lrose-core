@@ -224,7 +224,8 @@ public:
                                          int nSamples, 
                                          double widthMps,
                                          double nyquistMps,
-                                         double *gaussianModel);
+                                         double *gaussianModel,
+                                         bool force = false);
   
   /////////////////////////////////////////////////////////////////
   // Shift a spectrum, in place, so that DC is in the center.

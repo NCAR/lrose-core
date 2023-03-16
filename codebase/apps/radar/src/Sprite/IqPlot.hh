@@ -49,6 +49,7 @@
 
 #include <toolsa/TaArray.hh>
 #include <radar/RadarComplex.hh>
+#include <radar/RadarMoments.hh>
 #include "Params.hh"
 #include "ScaledLabel.hh"
 #include "WorldPlot.hh"
@@ -133,8 +134,8 @@ public:
   void setRegrOrder(int val) { _regrOrder = val; }
   void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
   void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
-  void setRegrFiltInterpAcrossNotch(bool val) {
-    _regrFiltInterpAcrossNotch = val;
+  void setRegrFiltNotchInterpMethod(RadarMoments::notch_interp_method_t val) {
+    _regrNotchInterpMethod = val;
   }
   void setComputePlotRangeDynamically(bool val) {
     _computePlotRangeDynamically = val;
@@ -199,13 +200,13 @@ public:
   int getRegrOrder() const { return _regrOrder; }
   double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
   double getRegrCnrExponent() const { return _regrCnrExponent; }
-  bool getRegrFiltInterpAcrossNotch() const {
-    return _regrFiltInterpAcrossNotch;
+  RadarMoments::notch_interp_method_t getRegrFiltNotchInterpMethod() const {
+    return _regrNotchInterpMethod;
   }
   bool getComputePlotRangeDynamically() const {
     return _computePlotRangeDynamically;
   }
-
+  
   // get strings
 
   string getName();
@@ -251,7 +252,7 @@ protected:
   int _regrOrderInUse;
   double _regrClutWidthFactor;
   double _regrCnrExponent;
-  bool _regrFiltInterpAcrossNotch;
+  RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
   bool _computePlotRangeDynamically;
 
   // unzoomed world

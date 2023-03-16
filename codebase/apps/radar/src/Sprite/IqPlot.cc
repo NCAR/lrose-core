@@ -83,7 +83,7 @@ IqPlot::IqPlot(QWidget* parent,
   _regrOrderInUse = _regrOrder;
   _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
   _regrCnrExponent = _params.regression_filter_cnr_exponent;
-  _regrFiltInterpAcrossNotch = true;
+  _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
   _computePlotRangeDynamically = true;
 }
 
@@ -366,6 +366,8 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   if (_useRegrFilt) {
 
+    moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
+    
     ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
       regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
@@ -390,7 +392,6 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
-                                  _regrFiltInterpAcrossNotch,
                                   filtered, NULL,
                                   filterRatio,
                                   spectralNoise,
@@ -515,7 +516,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
                                          _nSamples,
                                          _clutModelWidthMps,
                                          _beam->getNyquist(),
-                                         clutModel) == 0) {
+                                         clutModel, true) == 0) {
       
       painter.save();
       pen = painter.pen();
@@ -1534,7 +1535,6 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
                                   regrF, _windowCoeff,
                                   iq,
                                   calibNoise,
-                                  true,
                                   filtered, NULL,
                                   filterRatio,
                                   spectralNoise,

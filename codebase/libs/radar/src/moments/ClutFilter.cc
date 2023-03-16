@@ -826,12 +826,14 @@ double ClutFilter::computeSpectralNoise(const double *powerSpec,
 // The caller manages the memory for gaussianModel.
 //
 // Returns 0 if clutter is found, -1 otherwise.
+// If force is true, the model is always computed.
 
 int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
                                             int nSamples, 
                                             double widthMps,
                                             double nyquistMps,
-                                            double *gaussianModel)
+                                            double *gaussianModel,
+                                            bool force /* = false*/)
   
 {
 
@@ -855,13 +857,15 @@ int ClutFilter::computeGaussianClutterModel(const double *powerSpectrum,
     }
   }
 
-  if (maxIndex < nSamplesHalf - 1 ||
-      maxIndex > nSamplesHalf + 1) {
-    // clutter does not dominate
-    for (int ii = 0; ii < nSamples; ii++) {
-      gaussianModel[ii] = MissingPower;
+  if (!force) {
+    if (maxIndex < nSamplesHalf - 1 ||
+        maxIndex > nSamplesHalf + 1) {
+      // clutter does not dominate
+      for (int ii = 0; ii < nSamples; ii++) {
+        gaussianModel[ii] = MissingPower;
+      }
+      return -1;
     }
-    return -1;
   }
 
   // set clutter properties
