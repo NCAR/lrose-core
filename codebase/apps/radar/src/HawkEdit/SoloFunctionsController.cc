@@ -85,15 +85,19 @@ QVector<double> add(QVector<double> v, QVector<double> v2) {
 */
 
 
-QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data,
-					   size_t clip_gate) { 
+QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, 
+     float nyquist, 
+     bool SoloII,
+     float bad_data,
+	   size_t clip_gate) { 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), //_data,
-						     currentRayIdx, // _currentSweepIdx,
-						      nyquist,
-						      clip_gate,
-						      bad_data,
-						     field.toStdString());
+						    currentRayIdx, // _currentSweepIdx,
+						    nyquist,
+                SoloII,
+						    clip_gate,
+						    bad_data,
+						    field.toStdString());
 
   // returns name of new field in RadxVol
   return QString::fromStdString(tempFieldName);
