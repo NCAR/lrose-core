@@ -36,6 +36,7 @@ public:
   string RemoveAircraftMotion(string fieldName, //RadxVol *vol,
 			      size_t rayIdx, //int sweepIdx,
 			      float nyquist_velocity,
+			      bool use_radar_angles,
 			      size_t clip_gate,
 			      float bad_data_value,
 			      string newFieldName);
