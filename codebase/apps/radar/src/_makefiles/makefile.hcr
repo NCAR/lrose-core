@@ -28,6 +28,7 @@ SUB_DIRS = \
 	StaggeredLimits \
 	SunCal \
 	SunCpCompute \
+	TerrainHtServer \
 	Ts2NetCDF \
 	TsCalAuto \
 	TsConvert \
