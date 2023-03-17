@@ -193,16 +193,6 @@ private:
   QLabel *_altVal;
   QLabel *_altLabel;
 
-  // QLabel *_altRateVal;
-  // QLabel *_altRateLabel;
-  // double _prevAltKm;
-  // RadxTime _prevAltTime;
-  // double _altRateMps;
-
-  // QLabel *_speedVal;
-  // QLabel *_headingVal;
-  // QLabel *_trackVal;
-
   QLabel *_sunElVal;
   QLabel *_sunAzVal;
 
@@ -234,8 +224,8 @@ private:
 
   // windows
 
-  QFrame *_spectraFrame;
-  SpriteWidget *_spectra;
+  QFrame *_mainFrame;
+  SpriteWidget *_widgets;
 
   // times for rays
 
@@ -249,7 +239,6 @@ private:
   QMenu *_configMenu;
   QMenu *_overlaysMenu;
   QMenu *_actionsMenu;
-  // QMenu *_vertMenu;
   QMenu *_helpMenu;
 
   // actions
@@ -261,43 +250,13 @@ private:
   QAction *_xAxisAct;
   QAction *_yAxisAct;
 
-  // QAction *_saveImageAct;
-
-  // QAction *_latlonLegendAct;
-  // QAction *_speedTrackLegendAct;
-  // QAction *_distScaleAct;
-
-  // range axis settings dialog
-
-  // QDialog *_rangeAxisDialog;
-  // QGroupBox *_rangeAxisModeBox;
-  // QGroupBox *_rangeAxisAltitudeBox;
-  // QGroupBox *_rangeAxisRangeBox;
-  // QGroupBox *_rangeAxisDoneBox;
-  
-  // QRadioButton *_rangeAxisModeUpButton;
-  // QRadioButton *_rangeAxisModeDownButton;
-  // QRadioButton *_rangeAxisModeAltitudeButton;
-
-  // time axis settings dialog
-  
-  // QDialog *_timeAxisDialog;
-  // QLabel *_timeAxisInfo;
-
-  // QLineEdit *_timeSpanEdit;
-
   double _timeSpanSecs;
 
   bool _archiveMode;
   bool _archiveRetrievalPending;
-  // QRadioButton *_realtimeModeButton;
-  // QRadioButton *_archiveModeButton;
 
-  // QGroupBox *_archiveTimeBox;
-  // QDateTimeEdit *_archiveStartTimeEdit;
   RadxTime _archiveStartTime;
 
-  // QLabel *_archiveEndTimeEcho;
   RadxTime _archiveEndTime;
   
   double _xLocClicked;
@@ -325,9 +284,7 @@ private:
   // panels
   
   void _createStatusPanel();
-  // void _createClickReportDialog();
   void _updateStatusPanel(const Beam *beam);
-  // double _getInstHtKm(const RadxRay *ray);
 
   // setting text
 
@@ -409,17 +366,8 @@ private slots:
 
   // local slots
 
-  void _spectraLocationClicked(double selectedRangeKm, int selectedGateNum);
+  void _widgetsLocationClicked(double selectedRangeKm, int selectedGateNum);
 
-  void _setTimeSpan();
-  void _resetTimeSpanToDefault();
-  
-  void _setStartTimeFromGui(const QDateTime &datetime1);
-  void _setGuiFromStartTime();
-  void _setArchiveStartTimeToDefault();
-  void _setArchiveStartTime(const RadxTime &rtime);
-  void _setArchiveEndTime();
-  void _setDataRetrievalMode();
   void _goBack();
   void _goFwd();
   void _changeRange(int deltaGates);

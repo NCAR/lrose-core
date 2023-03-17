@@ -93,15 +93,7 @@ SpriteMgr::SpriteMgr(const Params &params,
         
 {
   
-  _spectra = NULL;
-
-  // _prevAltKm = -9999.0;
-  // _altRateMps = 0.0;
-  
-  // initialize geometry
-  
-  // _realtimeModeButton = NULL;
-  // _archiveModeButton = NULL;
+  _widgets = NULL;
 
   _timeSpanSecs = _params.archive_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
@@ -112,9 +104,6 @@ SpriteMgr::SpriteMgr(const Params &params,
     _archiveMode = false;
   }
   _archiveRetrievalPending = false;
-  // _archiveTimeBox = NULL;
-  // _archiveStartTimeEdit = NULL;
-  // _archiveEndTimeEcho = NULL;
 
   _archiveStartTime.set(_params.archive_start_time);
   _archiveEndTime = _archiveStartTime + _timeSpanSecs;
@@ -133,10 +122,6 @@ SpriteMgr::SpriteMgr(const Params &params,
     _clickPointFmq.setDebug();
   }
 
-  // set initial field to 0
-  
-  // _changeField(0, false);
-
 }
 
 // destructor
@@ -145,8 +130,8 @@ SpriteMgr::~SpriteMgr()
 
 {
 
-  if (_spectra) {
-    delete _spectra;
+  if (_widgets) {
+    delete _widgets;
   }
 
 }
@@ -191,19 +176,19 @@ void SpriteMgr::_setupWindows()
   
   // ascope - main window
 
-  _spectraFrame = new QFrame(_main);
-  _spectraFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _mainFrame = new QFrame(_main);
+  _mainFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // configure the ASCOPE
 
-  _spectra = new SpriteWidget(_spectraFrame, *this, _params);
+  _widgets = new SpriteWidget(_mainFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
-	  _spectra, SLOT(resize(const int, const int)));
+	  _widgets, SLOT(resize(const int, const int)));
   
   // connect slots for location change
   
-  connect(_spectra, SIGNAL(locationClicked(double, int)),
-          this, SLOT(_spectraLocationClicked(double, int)));
+  connect(_widgets, SIGNAL(locationClicked(double, int)),
+          this, SLOT(_widgetsLocationClicked(double, int)));
   
   // create status panel
 
@@ -214,7 +199,7 @@ void SpriteMgr::_setupWindows()
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
   mainLayout->setMargin(3);
   mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_spectraFrame);
+  mainLayout->addWidget(_mainFrame);
 
   _createActions();
 
@@ -222,7 +207,6 @@ void SpriteMgr::_setupWindows()
 
   _initActions();
 
-  
   // QString message = tr("A context menu is available by right-clicking");
   // statusBar()->showMessage(message);
   
@@ -235,18 +219,7 @@ void SpriteMgr::_setupWindows()
   pos.setY(_params.main_window_start_y);
   move(pos);
 
-  // set up field click dialog
-
-  // _createClickReportDialog();
-
-  // create the range axis settings dialog
-
-  // _createRangeAxisDialog();
-
-  // create the time axis settings dialog
-  
-  // _createTimeAxisDialog();
-  _spectra->refresh();
+  _widgets->refresh();
  
 }
 
@@ -258,8 +231,6 @@ void SpriteMgr::_createMenus()
   _fileMenu->addAction(_exitAct);
   
   _configMenu = menuBar()->addMenu(tr("&Config"));
-  // _configMenu->addAction(_rangeAxisAct);
-  // _configMenu->addAction(_timeAxisAct);
 
   _overlaysMenu = menuBar()->addMenu(tr("Overlays"));
   _overlaysMenu->addAction(_xGridAct);
@@ -297,22 +268,6 @@ void SpriteMgr::_createActions()
   _showClickAct->setStatusTip(tr("Show click value dialog"));
   connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
 
-  // set range axis settings
-
-  // _rangeAxisAct = new QAction(tr("Range-Config"), this);
-  // _rangeAxisAct->setStatusTip(tr("Set configuration for range axis"));
-  // connect(_rangeAxisAct,
-  //         SIGNAL(triggered()), this,
-  //         SLOT(_showRangeAxisDialog()));
-
-  // set time axis settings
-
-  // _timeAxisAct = new QAction(tr("Time-Config"), this);
-  // _timeAxisAct->setStatusTip(tr("Set configuration for time axis"));
-  // connect(_timeAxisAct,
-  //         SIGNAL(triggered()),
-  //         this, SLOT(_showTimeAxisDialog()));
-
   // unzoom display
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
@@ -330,7 +285,7 @@ void SpriteMgr::_createActions()
 
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _spectra, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _widgets, SLOT(clear()));
 
   // exit app
 
@@ -345,7 +300,7 @@ void SpriteMgr::_createActions()
   _xGridAct->setStatusTip(tr("Turn X grid on/off"));
   _xGridAct->setCheckable(true);
   connect(_xGridAct, SIGNAL(triggered(bool)),
-          _spectra, SLOT(setXGridEnabled(bool)));
+          _widgets, SLOT(setXGridEnabled(bool)));
 
   // show Y grid lines
 
@@ -353,7 +308,7 @@ void SpriteMgr::_createActions()
   _yGridAct->setStatusTip(tr("Turn Y grid on/off"));
   _yGridAct->setCheckable(true);
   connect(_yGridAct, SIGNAL(triggered(bool)),
-          _spectra, SLOT(setYGridEnabled(bool)));
+          _widgets, SLOT(setYGridEnabled(bool)));
   
   // write legends
 
@@ -361,40 +316,8 @@ void SpriteMgr::_createActions()
   _legendsAct->setStatusTip(tr("Turn legends on/off"));
   _legendsAct->setCheckable(true);
   connect(_legendsAct, SIGNAL(triggered(bool)),
-          _spectra, SLOT(setLegendsEnabled(bool)));
+          _widgets, SLOT(setLegendsEnabled(bool)));
   
-  // show instrument height line in altitude display
-
-  // _instHtLineAct = new QAction(tr("Instrument Ht Line"), this);
-  // _instHtLineAct->setStatusTip(tr("Turn instrument height line on/off"));
-  // _instHtLineAct->setCheckable(true);
-  // connect(_instHtLineAct, SIGNAL(triggered(bool)),
-  //         _spectra, SLOT(setInstHtLineEnabled(bool)));
-
-  // show latlon legend
-
-  // _latlonLegendAct = new QAction(tr("Starting lat/lon legend"), this);
-  // _latlonLegendAct->setStatusTip(tr("Display starting lat/lon as a legend"));
-  // _latlonLegendAct->setCheckable(true);
-  // connect(_latlonLegendAct, SIGNAL(triggered(bool)),
-  //         _spectra, SLOT(setLatlonLegendEnabled(bool)));
-
-  // show dist/track legend
-
-  // _speedTrackLegendAct = new QAction(tr("Mean speed/track legend"), this);
-  // _speedTrackLegendAct->setStatusTip(tr("Display mean speed and track as a legend"));
-  // _speedTrackLegendAct->setCheckable(true);
-  // connect(_speedTrackLegendAct, SIGNAL(triggered(bool)),
-  //         _spectra, SLOT(setSpeedTrackLegendEnabled(bool)));
-
-  // display distance ticks
-
-  // _distScaleAct = new QAction(tr("Distance scale"), this);
-  // _distScaleAct->setStatusTip(tr("Display distance scale in addition to time scale"));
-  // _distScaleAct->setCheckable(true);
-  // connect(_distScaleAct, SIGNAL(triggered(bool)),
-  //         this, SLOT(_setDistScaleEnabled()));
-
   // howto / about
 
   _howtoAct = new QAction(tr("&Howto"), this);
@@ -456,7 +379,7 @@ void SpriteMgr::_configureAxes()
   
 {
   
-  _spectra->configureAxes(0.0, 1.0,
+  _widgets->configureAxes(0.0, 1.0,
                           _params.archive_time_span_secs);
 
 }
@@ -477,7 +400,7 @@ void SpriteMgr::timerEvent(QTimerEvent *event)
   
   if (_firstTimerEvent) {
 
-    _spectra->resize(_spectraFrame->width(), _spectraFrame->height());
+    _widgets->resize(_mainFrame->width(), _mainFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -542,7 +465,7 @@ void SpriteMgr::resizeEvent(QResizeEvent *event)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
   }
-  emit frameResized(_spectraFrame->width(), _spectraFrame->height());
+  emit frameResized(_mainFrame->width(), _mainFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -564,14 +487,6 @@ void SpriteMgr::keyPressEvent(QKeyEvent * e)
     cerr << "         key: " << hex << key << dec << endl;
   }
 
-  // for '.', swap with previous field
-
-  if (keychar == '.') {
-    // QRadioButton *button = (QRadioButton *) _fieldGroup->button(_prevFieldNum);
-    // button->click();
-    // return;
-  }
-  
   // for ESC, freeze / unfreeze
 
   if (keychar == 27) {
@@ -656,7 +571,7 @@ void SpriteMgr::_handleRealtimeData()
 
   // plot the data
   
-  _spectra->plotBeam(beam);
+  _widgets->plotBeam(beam);
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
@@ -714,7 +629,7 @@ void SpriteMgr::_handleArchiveData()
     
     // plot the data
     
-    _spectra->plotBeam(beam);
+    _widgets->plotBeam(beam);
     this->setCursor(Qt::ArrowCursor);
 
   }
@@ -752,8 +667,8 @@ void SpriteMgr::_followDisplay()
     return;
   }
 
-  _spectra->setRange(_clickPointRangeKm);
-  _clickPointGateNum = _spectra->getSelectedGateNum();
+  _widgets->setRange(_clickPointRangeKm);
+  _clickPointGateNum = _widgets->getSelectedGateNum();
   _clickPointTime = beam->getTime();
   _clickPointElevation = beam->getEl();
   _clickPointAzimuth = beam->getAz();
@@ -778,7 +693,7 @@ void SpriteMgr::_followDisplay()
     
     // plot the data
     
-    _spectra->plotBeam(beam);
+    _widgets->plotBeam(beam);
     this->setCursor(Qt::ArrowCursor);
 
   }
@@ -822,7 +737,7 @@ void SpriteMgr::_manageBeamQueue(Beam *beam)
 /////////////////////////////////////////////////////////
 // respond to a change in click location in the widget
 
-void SpriteMgr::_spectraLocationClicked(double selectedRangeKm,
+void SpriteMgr::_widgetsLocationClicked(double selectedRangeKm,
                                         int selectedGateNum)
   
 {
@@ -857,7 +772,7 @@ void SpriteMgr::_clickPointChanged()
 
 void SpriteMgr::_unzoom()
 {
-  _spectra->unzoom();
+  _widgets->unzoom();
   _unzoomAct->setEnabled(false);
 }
 
@@ -897,208 +812,6 @@ void SpriteMgr::enableUnzoomButton() const
 }
 
 ////////////////////////////////////////////////////////
-// change altitude limits
-
-// void SpriteMgr::_setAltitudeLimits()
-// {
-
-//   // limits
-
-//   double minAltitude;
-//   if (sscanf(_minAltitudeEdit->text().toLocal8Bit().data(), "%lg", &minAltitude) != 1) {
-//     QErrorMessage errMsg(_minAltitudeEdit);
-//     string text("Bad entry for min altitude: ");
-//     text += _minAltitudeEdit->text().toLocal8Bit().data();
-//     errMsg.setModal(true);
-//     errMsg.showMessage(text.c_str());
-//     errMsg.exec();
-//     _resetAltitudeLimitsToDefaults();
-//     return;
-//   }
-//   double maxAltitude;
-//   if (sscanf(_maxAltitudeEdit->text().toLocal8Bit().data(), "%lg", &maxAltitude) != 1) {
-//     QErrorMessage errMsg(_maxAltitudeEdit);
-//     string text("Bad entry for max altitude: ");
-//     text += _maxAltitudeEdit->text().toLocal8Bit().data();
-//     errMsg.setModal(true);
-//     errMsg.showMessage(text.c_str());
-//     errMsg.exec();
-//     _resetAltitudeLimitsToDefaults();
-//     return;
-//   }
-
-//   if (minAltitude > maxAltitude) {
-//     QErrorMessage errMsg(_maxAltitudeEdit);
-//     string text("Bad entry for min/max altitudes: ");
-//     text += _minAltitudeEdit->text().toLocal8Bit().data();
-//     text += " / ";
-//     text += _maxAltitudeEdit->text().toLocal8Bit().data();
-//     text += "  Max must exceed min";
-//     errMsg.setModal(true);
-//     errMsg.showMessage(text.c_str());
-//     errMsg.exec();
-//     _resetAltitudeLimitsToDefaults();
-//     return;
-//   }
-
-//   _minPlotAltitudeKm = minAltitude / _altitudeUnitsMult;
-//   _maxPlotAltitudeKm = maxAltitude / _altitudeUnitsMult;
-
-//   _refreshRangeAxisDialog();
-
-//   // refresh
-
-//   _configureAxes();
-
-//   // _rangeAxisDialog->setVisible(false);
-
-// }
-
-////////////////////////////////////////////////////////
-// change time span
-
-void SpriteMgr::_setTimeSpan()
-{
-
-  // double timeSpan;
-  // if (sscanf(_timeSpanEdit->text().toLocal8Bit().data(), 
-  //            "%lg", &timeSpan) != 1) {
-  //   QErrorMessage errMsg(_timeSpanEdit);
-  //   string text("Bad entry for time span: ");
-  //   text += _timeSpanEdit->text().toLocal8Bit().data();
-  //   errMsg.setModal(true);
-  //   errMsg.showMessage(text.c_str());
-  //   errMsg.exec();
-  //   _resetTimeSpanToDefault();
-  //   return;
-  // }
-  
-  // _timeSpanSecs = timeSpan;
-  // _plotEndTime = _plotStartTime + _timeSpanSecs;
-    
-  // _setArchiveEndTime();
-  // _configureAxes();
-
-}
-
-void SpriteMgr::_resetTimeSpanToDefault()
-{
-  // _timeSpanSecs = _params.spectra_time_span_secs;
-  // char text[1024];
-  // sprintf(text, "%g", _timeSpanSecs);
-  // if (_timeSpanEdit) {
-  //   _timeSpanEdit->setText(text);
-  // }
-  // _setArchiveEndTime();
-  // _configureAxes();
-}
-
-////////////////////////////////////////////////////////
-// set start time from gui widget
-
-void SpriteMgr::_setStartTimeFromGui(const QDateTime &datetime1)
-{
-  // QDateTime datetime = _archiveStartTimeEdit->dateTime();
-  // QDate date = datetime.date();
-  // QTime time = datetime.time();
-  // _archiveStartTime.set(date.year(), date.month(), date.day(),
-  //                       time.hour(), time.minute(), time.second());
-  // _setArchiveEndTime();
-}
-
-////////////////////////////////////////////////////////
-// set gui widget from start time
-
-void SpriteMgr::_setGuiFromStartTime()
-{
-  // QDate date(_archiveStartTime.getYear(),
-  //            _archiveStartTime.getMonth(), _archiveStartTime.getDay());
-  // QTime time(_archiveStartTime.getHour(),
-  //            _archiveStartTime.getMin(), _archiveStartTime.getSec());
-  // QDateTime datetime(date, time);
-  // _archiveStartTimeEdit->setDateTime(datetime);
-}
-
-////////////////////////////////////////////////////////
-// set start time to defaults
-
-void SpriteMgr::_setArchiveStartTimeToDefault()
-
-{
-
-  // _archiveStartTime.set(_params.archive_start_time);
-  // if (!_archiveStartTime.isValid()) {
-  //   _archiveStartTime.set(RadxTime::NOW);
-  // }
-  // _setGuiFromStartTime();
-  // _setArchiveEndTime();
-
-}
-
-////////////////////////////////////////////////////////
-// set start time
-
-void SpriteMgr::_setArchiveStartTime(const RadxTime &rtime)
-
-{
-
-  // if (rtime.utime() == 0) {
-  //   return;
-  // }
-
-  // _archiveStartTime = rtime;
-  // if (!_archiveStartTime.isValid()) {
-  //   _archiveStartTime.set(RadxTime::NOW);
-  // }
-  // _setGuiFromStartTime();
-  // _setArchiveEndTime();
-
-}
-
-////////////////////////////////////////////////////////
-// set end time from start time and span
-
-void SpriteMgr::_setArchiveEndTime()
-
-{
-
-  // _archiveEndTime = _archiveStartTime + _timeSpanSecs;
-  // if (_archiveEndTimeEcho) {
-  //   _archiveEndTimeEcho->setText(_archiveEndTime.asString(3).c_str());
-  // }
-
-}
-
-
-////////////////////////////////////////////////////////
-// change modes
-
-void SpriteMgr::_setDataRetrievalMode()
-{
-  // if (!_archiveTimeBox) {
-  //   return;
-  // }
-  // if (_realtimeModeButton && _realtimeModeButton->isChecked()) {
-  //   if (_archiveMode) {
-  //     _archiveMode = false;
-  //     _archiveTimeBox->setEnabled(false);
-  //     _spectra->activateRealtimeRendering();
-  //   }
-  // } else {
-  //   if (!_archiveMode) {
-  //     _archiveMode = true;
-  //     _archiveTimeBox->setEnabled(true);
-  //     if (_plotStartTime.utime() != 0) {
-  //       _setArchiveStartTime(_plotStartTime - _timeSpanSecs);
-  //       _setGuiFromStartTime();
-  //     }
-  //     _spectra->activateArchiveRendering();
-  //   }
-  // }
-  // _configureAxes();
-}
-
-////////////////////////////////////////////////////////
 // change time or azimuth
 
 void SpriteMgr::_goBack()
@@ -1111,7 +824,6 @@ void SpriteMgr::_goBack()
   } else {
     _goForward = false;
     _archiveStartTime -= 1 * _timeSpanSecs;
-    _setGuiFromStartTime();
   }
 }
 
@@ -1125,15 +837,14 @@ void SpriteMgr::_goFwd()
   } else {
     _goForward = true;
     _archiveStartTime += 1 * _timeSpanSecs;
-    _setGuiFromStartTime();
   }
 }
 
 void SpriteMgr::_changeRange(int deltaGates)
 {
-  _spectra->changeRange(deltaGates);
-  _clickPointRangeKm = _spectra->getSelectedRangeKm();
-  _clickPointGateNum = _spectra->getSelectedGateNum();
+  _widgets->changeRange(deltaGates);
+  _clickPointRangeKm = _widgets->getSelectedRangeKm();
+  _clickPointGateNum = _widgets->getSelectedGateNum();
   _clickPointChanged();
 }
 
