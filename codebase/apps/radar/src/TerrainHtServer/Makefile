@@ -36,38 +36,7 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = TerrainHtServer
 
-LOC_INCLUDES = $(NETCDF4_INCS)
-
-LOC_LIBS = -ltoolsa -ltdrp -ldataport $(XMLRPC_LIBS) \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
-
-LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
-
-LOC_CFLAGS =
-
-MDV_LIBS = \
-	-L$(LROSE_INSTALL_DIR)/lib \
-	-lMdv -lRadx \
-	-lrapformats \
-	-leuclid \
-	-ldsserver \
-	-ldidss \
-	-ltoolsa -lz \
-	-ldataport
-
 XMLRPC_LIBS = \
-	-lxmlrpc \
-	-lxmlrpc++ \
-	-lxmlrpc_abyss \
-	-lxmlrpc_client \
-	-lxmlrpc_client++ \
-	-lxmlrpc_cpp \
-	-lxmlrpc_server \
-	-lxmlrpc_server++ \
-	-lxmlrpc_server_abyss \
-	-lxmlrpc_server_abyss++ \
-	-lxmlrpc_server_pstream++ \
-	-lxmlrpc_util
 
 # NOTE: RH packages to install for xmlrpc
 #   xmlrpc-c
@@ -79,6 +48,27 @@ XMLRPC_LIBS = \
 #   xmlrpc-server
 # yum install -y xmlrpc-c xmlrpc-c-c++ xmlrpc-c-client xmlrpc-c-client++ xmlrpc-c-devel xmlrpc-client xmlrpc-server
 
+LOC_INCLUDES = $(NETCDF4_INCS)
+
+LOC_LIBS = -ltoolsa -ltdrp -ldataport \
+	-lxmlrpc \
+	-lxmlrpc++ \
+	-lxmlrpc_abyss \
+	-lxmlrpc_client \
+	-lxmlrpc_client++ \
+	-lxmlrpc_cpp \
+	-lxmlrpc_server \
+	-lxmlrpc_server++ \
+	-lxmlrpc_server_abyss \
+	-lxmlrpc_server_abyss++ \
+	-lxmlrpc_server_pstream++ \
+	-lxmlrpc_util \
+	-lNcxx \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
+
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
+
+LOC_CFLAGS =
 
 HDRS = \
 	$(PARAMS_HH) \
