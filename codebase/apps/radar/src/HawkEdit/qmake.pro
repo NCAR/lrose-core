@@ -13,7 +13,7 @@ CONFIG += debug
 
 RESOURCES = resources.qrc 
 RESOURCES = customcompleter.qrc
-RESOURCES = scripthelp.qrc
+#RESOURCES = scripthelp.qrc
 
 HEADERS += AllocCheck.hh
 HEADERS += Args.hh
