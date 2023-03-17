@@ -4544,22 +4544,22 @@ void RadarMoments::applyRegressionFilter
 
   // apply the window to the original unfiltered times series
   // normally this is a no-op because the window is rectangular
-  
+
   vector<RadarComplex_t> unfiltWindowed;
   unfiltWindowed.resize(nSamples);
   applyWindow(iqUnfiltered, window, unfiltWindowed.data(), nSamples);
   
   // take the forward fft to compute the complex spectrum of unfiltered series
   
-  vector<RadarComplex_t> unfiltSpecC;
-  unfiltSpecC.resize(nSamples);
-  fft.fwd(unfiltWindowed.data(), unfiltSpecC.data());
+  vector<RadarComplex_t> inputSpecC;
+  inputSpecC.resize(nSamples);
+  fft.fwd(unfiltWindowed.data(), inputSpecC.data());
   
   // compute the real unfiltered spectrum
   
   vector<double> unfiltSpec;
   unfiltSpec.resize(nSamples);
-  RadarComplex::loadPower(unfiltSpecC.data(), unfiltSpec.data(), nSamples);
+  RadarComplex::loadPower(inputSpecC.data(), unfiltSpec.data(), nSamples);
 
   // allocate space for regression power spectrum
   
@@ -4578,7 +4578,7 @@ void RadarMoments::applyRegressionFilter
     
     memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
     regrSpec = unfiltSpec;
-    _regrInterpRatioDb = -9999.0;
+    _regrInterpRatioDb = 0.0;
 
   } else {
     
@@ -4600,14 +4600,12 @@ void RadarMoments::applyRegressionFilter
     
     RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
     
-    // interpolate across the notch
+    // interpolate across the notch, computing the power before and after
     
     double powerBeforeInterp =
       RadarComplex::meanPower(regrSpec.data(), nSamples);
     
-    if (_regrNotchInterpMethod != INTERP_METHOD_NONE) {
-      _regrDoInterpAcrossNotch(regrSpec);
-    }
+    _regrDoInterpAcrossNotch(regrSpec);
     
     double powerAfterInterp =
       RadarComplex::meanPower(regrSpec.data(), nSamples);
@@ -4615,22 +4613,24 @@ void RadarMoments::applyRegressionFilter
     
     // adjust the input spectrum by the filter ratio
     // constrain ratios to be 1 or less
+    // this preserves the phases on the spectrum
     
     for (int ii = 0; ii < nSamples; ii++) {
       double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
       if (magRatio > 1.0) {
         magRatio = 1.0;
       }
-      unfiltSpecC[ii].re *= magRatio;
-      unfiltSpecC[ii].im *= magRatio;
+      inputSpecC[ii].re *= magRatio;
+      inputSpecC[ii].im *= magRatio;
       if (specRatio != NULL) {
         specRatio[ii] = magRatio;
       }
     }
     
-    // invert the fft
+    // invert the resulting fft
+    // storing result in the filtered time series
     
-    fft.inv(unfiltSpecC.data(), iqFiltered);
+    fft.inv(inputSpecC.data(), iqFiltered);
     
   } // if (_regrCnrDb < _regrMinCnrDb) {
   
