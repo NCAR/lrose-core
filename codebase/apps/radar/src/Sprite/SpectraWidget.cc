@@ -2278,6 +2278,42 @@ void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setRegressionCnrExponent);
   
+  // X grid lines on/off
+
+  QAction xGridLinesOn("X grid lines on", this);
+  connect(&xGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setXGridLinesOn(true);
+          } );
+  QAction xGridLinesOff("X grid lines off", this);
+  connect(&xGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setXGridLinesOn(false);
+          } );
+  if (_iqPlots[id]->getXGridLinesOn()) {
+    contextMenu.addAction(&xGridLinesOff);
+  } else {
+    contextMenu.addAction(&xGridLinesOn);
+  }
+  
+  // Y grid lines on/off
+
+  QAction yGridLinesOn("Y grid lines on", this);
+  connect(&yGridLinesOn, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setYGridLinesOn(true);
+          } );
+  QAction yGridLinesOff("Y grid lines off", this);
+  connect(&yGridLinesOff, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setYGridLinesOn(false);
+          } );
+  if (_iqPlots[id]->getYGridLinesOn()) {
+    contextMenu.addAction(&yGridLinesOff);
+  } else {
+    contextMenu.addAction(&yGridLinesOn);
+  }
+  
   // show the context menu
   
   contextMenu.exec(this->mapToGlobal(pos));
