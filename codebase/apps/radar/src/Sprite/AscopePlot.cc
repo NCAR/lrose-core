@@ -49,7 +49,7 @@
 #include <QStylePainter>
 
 #include "AscopePlot.hh"
-#include "SpectraMgr.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 using namespace std;

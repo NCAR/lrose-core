@@ -60,8 +60,8 @@ HDRS = \
 	IqPlot.hh \
 	RadarSpectra.hh \
 	ScaledLabel.hh \
-	SpectraMgr.hh \
-	SpectraWidget.hh \
+	SpriteMgr.hh \
+	SpriteWidget.hh \
 	Sprite.hh \
 	TsReader.hh \
 	WaterfallPlot.hh \
@@ -84,12 +84,12 @@ NORM_SRCS = \
 	WorldPlot.cc
 
 MOC_SRCS = \
-	SpectraMgr.cc \
-	SpectraWidget.cc
+	SpriteMgr.cc \
+	SpriteWidget.cc
 
 MOC_OUTPUT = \
-	moc_SpectraMgr.cpp \
-	moc_SpectraWidget.cpp
+	moc_SpriteMgr.cpp \
+	moc_SpriteWidget.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

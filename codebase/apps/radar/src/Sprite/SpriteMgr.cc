@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// SpectraMgr.cc
+// SpriteMgr.cc
 //
-// SpectraMgr object
+// SpriteMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,12 +32,12 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// SpectraMgr manages BSCAN rendering - vert pointing etc
+// SpriteMgr manages BSCAN rendering - vert pointing etc
 //
 ///////////////////////////////////////////////////////////////
 
-#include "SpectraMgr.hh"
-#include "SpectraWidget.hh"
+#include "SpriteMgr.hh"
+#include "SpriteWidget.hh"
 #include "ColorMap.hh"
 #include "Params.hh"
 #include "TsReader.hh"
@@ -81,12 +81,12 @@
 #include <QRect>
 
 using namespace std;
-bool SpectraMgr::_firstTimerEvent = true;
+bool SpriteMgr::_firstTimerEvent = true;
 
 // Constructor
 
-SpectraMgr::SpectraMgr(const Params &params,
-                       TsReader *tsReader) :
+SpriteMgr::SpriteMgr(const Params &params,
+                     TsReader *tsReader) :
         _params(params),
         _tsReader(tsReader),
         _plotStart(true)
@@ -141,7 +141,7 @@ SpectraMgr::SpectraMgr(const Params &params,
 
 // destructor
 
-SpectraMgr::~SpectraMgr()
+SpriteMgr::~SpriteMgr()
 
 {
 
@@ -154,7 +154,7 @@ SpectraMgr::~SpectraMgr()
 //////////////////////////////////////////////////
 // Run
 
-int SpectraMgr::run(QApplication &app)
+int SpriteMgr::run(QApplication &app)
 {
 
   // make window visible
@@ -172,7 +172,7 @@ int SpectraMgr::run(QApplication &app)
 ////////////////////////////////////////////////////////////////////////
 // Set the label in the title bar.
 
-void SpectraMgr::_setTitleBar(const string &radarName)
+void SpriteMgr::_setTitleBar(const string &radarName)
 {
   _windowTitle = "SPRITE - Spectral Plot for Radar Iq Time sEries - " + radarName;
   setWindowTitle(tr(_windowTitle.c_str()));
@@ -181,7 +181,7 @@ void SpectraMgr::_setTitleBar(const string &radarName)
 //////////////////////////////////////////////////
 // set up windows and widgets
   
-void SpectraMgr::_setupWindows()
+void SpriteMgr::_setupWindows()
 {
 
   // set up windows
@@ -196,7 +196,7 @@ void SpectraMgr::_setupWindows()
 
   // configure the ASCOPE
 
-  _spectra = new SpectraWidget(_spectraFrame, *this, _params);
+  _spectra = new SpriteWidget(_spectraFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
 	  _spectra, SLOT(resize(const int, const int)));
   
@@ -250,7 +250,7 @@ void SpectraMgr::_setupWindows()
  
 }
 
-void SpectraMgr::_createMenus()
+void SpriteMgr::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
@@ -281,7 +281,7 @@ void SpectraMgr::_createMenus()
 
 }
 
-void SpectraMgr::_createActions()
+void SpriteMgr::_createActions()
 {
 
   // freeze display
@@ -420,7 +420,7 @@ void SpectraMgr::_createActions()
 ///////////////////////
 // initialize actions
 
-void SpectraMgr::_initActions()
+void SpriteMgr::_initActions()
 {
 
   if (_params.x_grid_lines_on) {
@@ -452,7 +452,7 @@ void SpectraMgr::_initActions()
 ///////////////////////////////////////////////////////
 // configure the plot axes
 
-void SpectraMgr::_configureAxes()
+void SpriteMgr::_configureAxes()
   
 {
   
@@ -464,7 +464,7 @@ void SpectraMgr::_configureAxes()
 //////////////////////////////////////////////////////////////
 // override timer event to respond to timer
   
-void SpectraMgr::timerEvent(QTimerEvent *event)
+void SpriteMgr::timerEvent(QTimerEvent *event)
 {
 
   // register with procmap
@@ -537,7 +537,7 @@ void SpectraMgr::timerEvent(QTimerEvent *event)
 ///////////////////////////
 // override resize event
 
-void SpectraMgr::resizeEvent(QResizeEvent *event)
+void SpriteMgr::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent" << endl;
@@ -548,7 +548,7 @@ void SpectraMgr::resizeEvent(QResizeEvent *event)
 ////////////////////////////////////////////////////////////////
 // override key press event
 
-void SpectraMgr::keyPressEvent(QKeyEvent * e)
+void SpriteMgr::keyPressEvent(QKeyEvent * e)
 {
   
   // get key pressed
@@ -614,7 +614,7 @@ void SpectraMgr::keyPressEvent(QKeyEvent * e)
 /////////////////////////////
 // get data in realtime mode
 
-void SpectraMgr::_handleRealtimeData()
+void SpriteMgr::_handleRealtimeData()
 
 {
 
@@ -629,7 +629,7 @@ void SpectraMgr::_handleRealtimeData()
   }
 
   if (_params.debug) {
-    cerr << "SpectraMgr::_handleRealtimeData()" << endl;
+    cerr << "SpriteMgr::_handleRealtimeData()" << endl;
   }
 
   // set cursor to wait cursor
@@ -668,12 +668,12 @@ void SpectraMgr::_handleRealtimeData()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void SpectraMgr::_handleArchiveData()
+void SpriteMgr::_handleArchiveData()
 
 {
 
   if (_params.debug) {
-    cerr << "SpectraMgr::_handleArchiveData()" << endl;
+    cerr << "SpriteMgr::_handleArchiveData()" << endl;
   }
 
   // set cursor to wait cursor
@@ -703,7 +703,7 @@ void SpectraMgr::_handleArchiveData()
   
   if (beam->computeMoments()) {
 
-    cerr << "ERROR - SpectraMgr::_handleArchiveData()" << endl;
+    cerr << "ERROR - SpriteMgr::_handleArchiveData()" << endl;
     cerr << "  Cannot compute moments" << endl;
 
   } else {
@@ -728,12 +728,12 @@ void SpectraMgr::_handleArchiveData()
 ///////////////////////////////////////
 // following display click point
 
-void SpectraMgr::_followDisplay()
+void SpriteMgr::_followDisplay()
 
 {
 
   if (_params.debug) {
-    cerr << "SpectraMgr::_followDisplay()" << endl;
+    cerr << "SpriteMgr::_followDisplay()" << endl;
   }
   
   // set cursor to wait cursor
@@ -767,7 +767,7 @@ void SpectraMgr::_followDisplay()
   
   if (beam->computeMoments()) {
 
-    cerr << "ERROR - SpectraMgr::_followDisplay()" << endl;
+    cerr << "ERROR - SpriteMgr::_followDisplay()" << endl;
     cerr << "  Cannot compute moments" << endl;
 
   } else {
@@ -792,7 +792,7 @@ void SpectraMgr::_followDisplay()
 ///////////////////////////////////////
 // manage the beam memory
 
-void SpectraMgr::_manageBeamQueue(Beam *beam)
+void SpriteMgr::_manageBeamQueue(Beam *beam)
 
 {
 
@@ -822,8 +822,8 @@ void SpectraMgr::_manageBeamQueue(Beam *beam)
 /////////////////////////////////////////////////////////
 // respond to a change in click location in the widget
 
-void SpectraMgr::_spectraLocationClicked(double selectedRangeKm,
-                                         int selectedGateNum)
+void SpriteMgr::_spectraLocationClicked(double selectedRangeKm,
+                                        int selectedGateNum)
   
 {
   if (_params.debug) {
@@ -840,7 +840,7 @@ void SpectraMgr::_spectraLocationClicked(double selectedRangeKm,
 //////////////////////////////////////////////////////////////////
 // respond to a click point location change
 
-void SpectraMgr::_clickPointChanged()
+void SpriteMgr::_clickPointChanged()
 
 {
 
@@ -855,7 +855,7 @@ void SpectraMgr::_clickPointChanged()
 ////////////////////////////////
 // unzoom display
 
-void SpectraMgr::_unzoom()
+void SpriteMgr::_unzoom()
 {
   _spectra->unzoom();
   _unzoomAct->setEnabled(false);
@@ -864,7 +864,7 @@ void SpectraMgr::_unzoom()
 ////////////////////////////////////////////
 // refresh
 
-void SpectraMgr::_refresh()
+void SpriteMgr::_refresh()
 {
   if (_archiveMode) {
     _performArchiveRetrieval();
@@ -874,7 +874,7 @@ void SpectraMgr::_refresh()
 //////////////////////////////
 // freeze display
 
-void SpectraMgr::_freeze()
+void SpriteMgr::_freeze()
 {
   if (_frozen) {
     _frozen = false;
@@ -891,7 +891,7 @@ void SpectraMgr::_freeze()
 //////////////////////////////////////////////////
 // enable the unzoom button
 
-void SpectraMgr::enableUnzoomButton() const
+void SpriteMgr::enableUnzoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -899,7 +899,7 @@ void SpectraMgr::enableUnzoomButton() const
 ////////////////////////////////////////////////////////
 // change altitude limits
 
-// void SpectraMgr::_setAltitudeLimits()
+// void SpriteMgr::_setAltitudeLimits()
 // {
 
 //   // limits
@@ -957,7 +957,7 @@ void SpectraMgr::enableUnzoomButton() const
 ////////////////////////////////////////////////////////
 // change time span
 
-void SpectraMgr::_setTimeSpan()
+void SpriteMgr::_setTimeSpan()
 {
 
   // double timeSpan;
@@ -981,7 +981,7 @@ void SpectraMgr::_setTimeSpan()
 
 }
 
-void SpectraMgr::_resetTimeSpanToDefault()
+void SpriteMgr::_resetTimeSpanToDefault()
 {
   // _timeSpanSecs = _params.spectra_time_span_secs;
   // char text[1024];
@@ -996,7 +996,7 @@ void SpectraMgr::_resetTimeSpanToDefault()
 ////////////////////////////////////////////////////////
 // set start time from gui widget
 
-void SpectraMgr::_setStartTimeFromGui(const QDateTime &datetime1)
+void SpriteMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 {
   // QDateTime datetime = _archiveStartTimeEdit->dateTime();
   // QDate date = datetime.date();
@@ -1009,7 +1009,7 @@ void SpectraMgr::_setStartTimeFromGui(const QDateTime &datetime1)
 ////////////////////////////////////////////////////////
 // set gui widget from start time
 
-void SpectraMgr::_setGuiFromStartTime()
+void SpriteMgr::_setGuiFromStartTime()
 {
   // QDate date(_archiveStartTime.getYear(),
   //            _archiveStartTime.getMonth(), _archiveStartTime.getDay());
@@ -1022,7 +1022,7 @@ void SpectraMgr::_setGuiFromStartTime()
 ////////////////////////////////////////////////////////
 // set start time to defaults
 
-void SpectraMgr::_setArchiveStartTimeToDefault()
+void SpriteMgr::_setArchiveStartTimeToDefault()
 
 {
 
@@ -1038,7 +1038,7 @@ void SpectraMgr::_setArchiveStartTimeToDefault()
 ////////////////////////////////////////////////////////
 // set start time
 
-void SpectraMgr::_setArchiveStartTime(const RadxTime &rtime)
+void SpriteMgr::_setArchiveStartTime(const RadxTime &rtime)
 
 {
 
@@ -1058,7 +1058,7 @@ void SpectraMgr::_setArchiveStartTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // set end time from start time and span
 
-void SpectraMgr::_setArchiveEndTime()
+void SpriteMgr::_setArchiveEndTime()
 
 {
 
@@ -1073,7 +1073,7 @@ void SpectraMgr::_setArchiveEndTime()
 ////////////////////////////////////////////////////////
 // change modes
 
-void SpectraMgr::_setDataRetrievalMode()
+void SpriteMgr::_setDataRetrievalMode()
 {
   // if (!_archiveTimeBox) {
   //   return;
@@ -1101,7 +1101,7 @@ void SpectraMgr::_setDataRetrievalMode()
 ////////////////////////////////////////////////////////
 // change time or azimuth
 
-void SpectraMgr::_goBack()
+void SpriteMgr::_goBack()
 {
   if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
     _clickPointAzimuth -= _params.click_point_delta_azimuth_deg;
@@ -1115,7 +1115,7 @@ void SpectraMgr::_goBack()
   }
 }
 
-void SpectraMgr::_goFwd()
+void SpriteMgr::_goFwd()
 {
   if (_params.input_mode == Params::FOLLOW_DISPLAY_MODE) {
     _clickPointAzimuth += _params.click_point_delta_azimuth_deg;
@@ -1129,7 +1129,7 @@ void SpectraMgr::_goFwd()
   }
 }
 
-void SpectraMgr::_changeRange(int deltaGates)
+void SpriteMgr::_changeRange(int deltaGates)
 {
   _spectra->changeRange(deltaGates);
   _clickPointRangeKm = _spectra->getSelectedRangeKm();
@@ -1140,7 +1140,7 @@ void SpectraMgr::_changeRange(int deltaGates)
 ////////////////////////////////////////////////////////
 // perform archive retrieval
 
-void SpectraMgr::_performArchiveRetrieval()
+void SpriteMgr::_performArchiveRetrieval()
 {
   _archiveRetrievalPending = true;
 }
@@ -1148,7 +1148,7 @@ void SpectraMgr::_performArchiveRetrieval()
 ////////////////////////////////////////////////////////
 // Open file
 
-void SpectraMgr::_openFile()
+void SpriteMgr::_openFile()
 {
 }
 
@@ -1158,7 +1158,7 @@ void SpectraMgr::_openFile()
 /////////////////////////////
 // show data at click point
 
-void SpectraMgr::_showClick()
+void SpriteMgr::_showClick()
 {
   if (_clickReportDialog) {
     if (_clickReportDialog->isVisible()) {
@@ -1180,7 +1180,7 @@ void SpectraMgr::_showClick()
 /////////////////////////////////////////////////////
 // howto help
 
-void SpectraMgr::_howto()
+void SpriteMgr::_howto()
 {
   string text;
   text += "HOWTO HINTS FOR SPRITE\n";
@@ -1202,7 +1202,7 @@ void SpectraMgr::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
-void SpectraMgr::_about()
+void SpriteMgr::_about()
 {
   string text;
   
@@ -1237,7 +1237,7 @@ void SpectraMgr::_about()
 //////////////////////////////////////////////
 // create the status panel
 
-void SpectraMgr::_createStatusPanel()
+void SpriteMgr::_createStatusPanel()
 {
  
   // Qt::Alignment alignLeft(Qt::AlignLeft);
@@ -1440,11 +1440,11 @@ void SpectraMgr::_createStatusPanel()
 //////////////////////////////////////////////////
 // create a row in the status panel
 
-QLabel *SpectraMgr::_createStatusVal(const string &leftLabel,
-                                     const string &rightLabel,
-                                     int row, 
-                                     int fontSize,
-                                     QLabel **label)
+QLabel *SpriteMgr::_createStatusVal(const string &leftLabel,
+                                    const string &rightLabel,
+                                    int row, 
+                                    int fontSize,
+                                    QLabel **label)
   
 {
 
@@ -1476,7 +1476,7 @@ QLabel *SpectraMgr::_createStatusVal(const string &leftLabel,
 //////////////////////////////////////////////
 // update the status panel
 
-void SpectraMgr::_updateStatusPanel(const Beam *beam)
+void SpriteMgr::_updateStatusPanel(const Beam *beam)
 {
 
   // set time etc
@@ -1628,14 +1628,14 @@ void SpectraMgr::_updateStatusPanel(const Beam *beam)
         case IWRF_SCAN_MODE_RHI: {
           _sweepModeVal->setText("rhi"); break;
         }
-        case IWRF_SCAN_MODE_VERTICAL_POINTING: {
-          _sweepModeVal->setText("vert"); break;
-        }
-        case IWRF_SCAN_MODE_IDLE: {
-          _sweepModeVal->setText("idle"); break;
-        }
-        case IWRF_SCAN_MODE_AZ_SUR_360:
-          _sweepModeVal->setText("sur"); break;
+          case IWRF_SCAN_MODE_VERTICAL_POINTING: {
+            _sweepModeVal->setText("vert"); break;
+          }
+            case IWRF_SCAN_MODE_IDLE: {
+              _sweepModeVal->setText("idle"); break;
+            }
+              case IWRF_SCAN_MODE_AZ_SUR_360:
+                _sweepModeVal->setText("sur"); break;
       }
       case IWRF_SCAN_MODE_SUNSCAN: {
         _sweepModeVal->setText("sun"); break;
@@ -1730,9 +1730,9 @@ void SpectraMgr::_updateStatusPanel(const Beam *beam)
 ///////////////////////////////////////////
 // set text for GUI panels
 
-void SpectraMgr::_setText(char *text,
-                          const char *format,
-                          int val)
+void SpriteMgr::_setText(char *text,
+                         const char *format,
+                         int val)
 {
   if (abs(val) < 9999) {
     sprintf(text, format, val);
@@ -1741,9 +1741,9 @@ void SpectraMgr::_setText(char *text,
   }
 }
 
-void SpectraMgr::_setText(char *text,
-                          const char *format,
-                          double val)
+void SpriteMgr::_setText(char *text,
+                         const char *format,
+                         double val)
 {
   if (fabs(val) < 9999) {
     sprintf(text, format, val);
@@ -1756,14 +1756,14 @@ void SpectraMgr::_setText(char *text,
 // read click point data from FMQ
 // Returns 0 on success, -1 on failure
 
-int SpectraMgr::_readClickPointFmq(bool &gotNew)
+int SpriteMgr::_readClickPointFmq(bool &gotNew)
   
 {
   
   // read in a new message
   
   if (_clickPointFmq.read(gotNew)) {
-    cerr << "ERROR -  SpectraMgr::_readClickPointFmq" << endl;
+    cerr << "ERROR -  SpriteMgr::_readClickPointFmq" << endl;
     cerr << "  Cannot read click point info from FMQ" << endl;
     cerr << "  Fmq: " << _params.click_point_fmq_url << endl;
     return -1;
@@ -1801,7 +1801,7 @@ int SpectraMgr::_readClickPointFmq(bool &gotNew)
 /////////////////////////////////////////////////////////////////
 // write click point data, in XML format, to FMQ
 
-int SpectraMgr::_writeClickPointXml2Fmq()
+int SpriteMgr::_writeClickPointXml2Fmq()
 
 {
   

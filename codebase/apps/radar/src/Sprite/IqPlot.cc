@@ -56,7 +56,7 @@
 #include <QStylePainter>
 
 #include "IqPlot.hh"
-#include "SpectraMgr.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 using namespace std;

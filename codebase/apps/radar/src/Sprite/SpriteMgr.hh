@@ -22,9 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// SpectraMgr.hh
+// SpriteMgr.hh
 //
-// SpectraMgr object
+// SpriteMgr object
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -32,13 +32,13 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// SpectraMgr manages BSCAN data - vert pointing etc
+// SpriteMgr manages BSCAN data - vert pointing etc
 // Rendering is delegated to BscanWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef SpectraMgr_HH
-#define SpectraMgr_HH
+#ifndef SpriteMgr_HH
+#define SpriteMgr_HH
 
 #include <string>
 #include <vector>
@@ -57,7 +57,7 @@
 #include <radar/ClickPointFmq.hh>
 
 class TsReader;
-class SpectraWidget;
+class SpriteWidget;
 class Beam;
 
 class QApplication;
@@ -79,7 +79,7 @@ class QSlider;
 class QVBoxLayout;
 class QWidget;
 
-class SpectraMgr : public QMainWindow {
+class SpriteMgr : public QMainWindow {
   
   Q_OBJECT
   
@@ -87,18 +87,18 @@ public:
 
   // constructor
 
-  SpectraMgr(const Params &params,
+  SpriteMgr(const Params &params,
              TsReader *tsReader);
   
   // destructor
   
-  ~SpectraMgr();
+  ~SpriteMgr();
 
   // run 
   
   int run(QApplication &app);
 
-  // enable the unzoom button - called by SpectraWidget
+  // enable the unzoom button - called by SpriteWidget
   
   virtual void enableUnzoomButton() const;
 
@@ -235,7 +235,7 @@ private:
   // windows
 
   QFrame *_spectraFrame;
-  SpectraWidget *_spectra;
+  SpriteWidget *_spectra;
 
   // times for rays
 

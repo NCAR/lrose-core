@@ -55,7 +55,7 @@
 #include <algorithm>
 
 #include "WaterfallPlot.hh"
-#include "SpectraMgr.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 double WaterfallPlot::missingVal = -9999.0;

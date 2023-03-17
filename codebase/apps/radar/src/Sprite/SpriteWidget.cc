@@ -36,8 +36,8 @@
 #include <QResizeEvent>
 #include <QInputDialog>
 
-#include "SpectraWidget.hh"
-#include "SpectraMgr.hh"
+#include "SpriteWidget.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 #include "AscopePlot.hh"
 #include "WaterfallPlot.hh"
@@ -45,9 +45,9 @@
 
 using namespace std;
 
-SpectraWidget::SpectraWidget(QWidget* parent,
-                             const SpectraMgr &manager,
-                             const Params &params) :
+SpriteWidget::SpriteWidget(QWidget* parent,
+                           const SpriteMgr &manager,
+                           const Params &params) :
         QWidget(parent),
         _parent(parent),
         _manager(manager),
@@ -153,7 +153,7 @@ SpectraWidget::SpectraWidget(QWidget* parent,
  * Destructor
  */
 
-SpectraWidget::~SpectraWidget()
+SpriteWidget::~SpriteWidget()
 {
 
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -178,9 +178,9 @@ SpectraWidget::~SpectraWidget()
  * configure the axes
  */
 
-void SpectraWidget::configureAxes(double min_amplitude,
-                                  double max_amplitude,
-                                  double time_span_secs)
+void SpriteWidget::configureAxes(double min_amplitude,
+                                 double max_amplitude,
+                                 double time_span_secs)
   
 {
 
@@ -235,7 +235,7 @@ void SpectraWidget::configureAxes(double min_amplitude,
  * clear()
  */
 
-void SpectraWidget::clear()
+void SpriteWidget::clear()
 {
 
   // Clear out the beam array
@@ -253,7 +253,7 @@ void SpectraWidget::clear()
  * refresh()
  */
 
-void SpectraWidget::refresh()
+void SpriteWidget::refresh()
 {
   _refresh();
 }
@@ -262,7 +262,7 @@ void SpectraWidget::refresh()
  * unzoom the view
  */
 
-void SpectraWidget::unzoom()
+void SpriteWidget::unzoom()
 {
 
   _zoomWorld = _fullWorld;
@@ -289,7 +289,7 @@ void SpectraWidget::unzoom()
  * setGrids()
  */
 
-void SpectraWidget::setXGridEnabled(bool state)
+void SpriteWidget::setXGridEnabled(bool state)
 {
   _xGridEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -304,7 +304,7 @@ void SpectraWidget::setXGridEnabled(bool state)
   update();
 }
 
-void SpectraWidget::setYGridEnabled(bool state)
+void SpriteWidget::setYGridEnabled(bool state)
 {
   _yGridEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -319,7 +319,7 @@ void SpectraWidget::setYGridEnabled(bool state)
   update();
 }
 
-void SpectraWidget::setLegendsEnabled(bool state)
+void SpriteWidget::setLegendsEnabled(bool state)
 {
   _legendsEnabled = state;
   for (size_t ii = 0; ii < _ascopes.size(); ii++) {
@@ -338,12 +338,12 @@ void SpectraWidget::setLegendsEnabled(bool state)
  * plot a beam
  */
 
-void SpectraWidget::plotBeam(Beam *beam)
+void SpriteWidget::plotBeam(Beam *beam)
 
 {
 
   if(_params.debug) {
-    cerr << "======== SpectraWidget handling beam ================" << endl;
+    cerr << "======== SpriteWidget handling beam ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
   }
@@ -387,7 +387,7 @@ void SpectraWidget::plotBeam(Beam *beam)
  * backgroundColor()
  */
 
-void SpectraWidget::setBackgroundColor(const QColor &color)
+void SpriteWidget::setBackgroundColor(const QColor &color)
 {
 
   _backgroundBrush.setColor(color);
@@ -405,7 +405,7 @@ void SpectraWidget::setBackgroundColor(const QColor &color)
  * getImage()
  */
 
-QImage* SpectraWidget::getImage()
+QImage* SpriteWidget::getImage()
 {
 
   QPixmap pixmap = grab();
@@ -419,7 +419,7 @@ QImage* SpectraWidget::getImage()
  * getPixmap()
  */
 
-QPixmap* SpectraWidget::getPixmap()
+QPixmap* SpriteWidget::getPixmap()
 {
 
   QPixmap* pixmap = new QPixmap(grab());
@@ -436,7 +436,7 @@ QPixmap* SpectraWidget::getPixmap()
  * mousePressEvent()
  */
 
-void SpectraWidget::mousePressEvent(QMouseEvent *e)
+void SpriteWidget::mousePressEvent(QMouseEvent *e)
 {
 
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
@@ -460,7 +460,7 @@ void SpectraWidget::mousePressEvent(QMouseEvent *e)
  * mouseMoveEvent()
  */
 
-void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
+void SpriteWidget::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
@@ -481,7 +481,7 @@ void SpectraWidget::mouseMoveEvent(QMouseEvent * e)
  * mouseReleaseEvent()
  */
 
-void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
+void SpriteWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
@@ -576,7 +576,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
           if (ii == _mouseReleasePanelId) {
             // perform 2D zoom
             waterfall->setZoomLimits(_mousePressX, _mousePressY,
-                                  _mouseReleaseX, _mouseReleaseY);
+                                     _mouseReleaseX, _mouseReleaseY);
           } else {
             // perform zoom in range only
             waterfall->setZoomLimitsY(_mousePressY, _mouseReleaseY);
@@ -640,7 +640,7 @@ void SpectraWidget::mouseReleaseEvent(QMouseEvent *e)
  * paintEvent()
  */
 
-void SpectraWidget::paintEvent(QPaintEvent *event)
+void SpriteWidget::paintEvent(QPaintEvent *event)
 {
 
   // check on time since rendered
@@ -689,7 +689,7 @@ void SpectraWidget::paintEvent(QPaintEvent *event)
  * resizeEvent()
  */
 
-void SpectraWidget::resizeEvent(QResizeEvent * e)
+void SpriteWidget::resizeEvent(QResizeEvent * e)
 {
 
   _ascopeHeight = height() - _titleMargin;
@@ -720,7 +720,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
     int xOffset = _waterfallStartIx + ii * _waterfallWidth;
     int yOffset = _titleMargin;
     _waterfalls[ii]->setWindowGeom(_waterfallWidth, _waterfallHeight,
-                                xOffset, yOffset);
+                                   xOffset, yOffset);
 
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "   waterfallWidth[" << ii << "]: "
@@ -764,7 +764,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "SpectraWidget::resizeEvent" << endl;
+    cerr << "SpriteWidget::resizeEvent" << endl;
     cerr << "  width: " << width() << endl;
     cerr << "  height: " << height() << endl;
     cerr << "  _nIqRows: " << _nIqRows << endl;
@@ -787,7 +787,7 @@ void SpectraWidget::resizeEvent(QResizeEvent * e)
  * resize()
  */
 
-void SpectraWidget::resize(int width, int height)
+void SpriteWidget::resize(int width, int height)
 {
 
   setGeometry(0, 0, width, height);
@@ -798,7 +798,7 @@ void SpectraWidget::resize(int width, int height)
 //////////////////////////////////////////////////////////////
 // reset the pixel size of the world view
 
-void SpectraWidget::_resetWorld(int width, int height)
+void SpriteWidget::_resetWorld(int width, int height)
 
 {
   
@@ -816,8 +816,8 @@ void SpectraWidget::_resetWorld(int width, int height)
  * mouse release event
  */
 
-void SpectraWidget::setMouseClickPoint(double worldX,
-                                       double worldY)
+void SpriteWidget::setMouseClickPoint(double worldX,
+                                      double worldY)
 {
 
   if (_pointClicked) {
@@ -840,7 +840,7 @@ void SpectraWidget::setMouseClickPoint(double worldX,
  * increment/decrement the range in response to up/down arrow keys
  */
 
-void SpectraWidget::changeRange(int nGatesDelta)
+void SpriteWidget::changeRange(int nGatesDelta)
 {
   setRange(_selectedRangeKm + nGatesDelta * _beam->getGateSpacingKm());
 }
@@ -849,7 +849,7 @@ void SpectraWidget::changeRange(int nGatesDelta)
  * set the range in km
  */
 
-void SpectraWidget::setRange(double rangeKm)
+void SpriteWidget::setRange(double rangeKm)
 {
   if (_beam != NULL) {
     _selectedRangeKm = rangeKm;
@@ -871,7 +871,7 @@ void SpectraWidget::setRange(double rangeKm)
  * compute selected gate num from selected range
  */
 
-void SpectraWidget::_computeSelectedGateNum()
+void SpriteWidget::_computeSelectedGateNum()
 {
   if (_beam != NULL) {
     _selectedGateNum = 
@@ -895,7 +895,7 @@ void SpectraWidget::_computeSelectedGateNum()
  * Draw the overlays, axes, legends etc
  */
 
-void SpectraWidget::_drawOverlays(QPainter &painter)
+void SpriteWidget::_drawOverlays(QPainter &painter)
 {
 
   // draw panel dividing lines
@@ -1082,7 +1082,7 @@ void SpectraWidget::_drawOverlays(QPainter &painter)
  * _refresh()
  */
 
-void SpectraWidget::_refresh()
+void SpriteWidget::_refresh()
 {
   update();
 }
@@ -1091,7 +1091,7 @@ void SpectraWidget::_refresh()
 ////////////////////
 // set the transform
 
-void SpectraWidget::_setTransform(const QTransform &transform)
+void SpriteWidget::_setTransform(const QTransform &transform)
 {
   
   _fullTransform = transform;
@@ -1102,7 +1102,7 @@ void SpectraWidget::_setTransform(const QTransform &transform)
 /////////////////////////////////////////////////////////////	
 // Title
     
-void SpectraWidget::_drawMainTitle(QPainter &painter) 
+void SpriteWidget::_drawMainTitle(QPainter &painter) 
 
 {
 
@@ -1161,7 +1161,7 @@ void SpectraWidget::_drawMainTitle(QPainter &painter)
  * create ascope
  */
 
-void SpectraWidget::_createAscope(int id)
+void SpriteWidget::_createAscope(int id)
   
 {
 
@@ -1213,7 +1213,7 @@ void SpectraWidget::_createAscope(int id)
  * configure ascope
  */
 
-void SpectraWidget::_configureAscope(int id)
+void SpriteWidget::_configureAscope(int id)
   
 {
 
@@ -1245,7 +1245,7 @@ void SpectraWidget::_configureAscope(int id)
  * create waterfall
  */
 
-void SpectraWidget::_createWaterfall(int id)
+void SpriteWidget::_createWaterfall(int id)
   
 {
 
@@ -1303,7 +1303,7 @@ void SpectraWidget::_createWaterfall(int id)
  * configure waterfall
  */
 
-void SpectraWidget::_configureWaterfall(int id)
+void SpriteWidget::_configureWaterfall(int id)
   
 {
 
@@ -1331,7 +1331,7 @@ void SpectraWidget::_configureWaterfall(int id)
  * create IqPlot
  */
 
-void SpectraWidget::_createIqPlot(int id)
+void SpriteWidget::_createIqPlot(int id)
   
 {
   
@@ -1399,7 +1399,7 @@ void SpectraWidget::_createIqPlot(int id)
  * configure the iqplot
  */
 
-void SpectraWidget::_configureIqPlot(int id)
+void SpriteWidget::_configureIqPlot(int id)
   
 {
 
@@ -1424,9 +1424,9 @@ void SpectraWidget::_configureIqPlot(int id)
 /////////////////////////////////////////////////////////////	
 // determine the selected panel
 
-void SpectraWidget::_identSelectedPanel(int xx, int yy,
-                                        panel_type_t &panelType,
-                                        int &panelId)
+void SpriteWidget::_identSelectedPanel(int xx, int yy,
+                                       panel_type_t &panelType,
+                                       int &panelId)
 
 {
 
@@ -1470,7 +1470,7 @@ void SpectraWidget::_identSelectedPanel(int xx, int yy,
 //////////////////////////////////////////////////////////
 // create and show context menu
 
-void SpectraWidget::showContextMenu(const QPoint &pos) 
+void SpriteWidget::showContextMenu(const QPoint &pos) 
 {
 
   _identSelectedPanel(pos.x(), pos.y(),
@@ -1490,7 +1490,7 @@ void SpectraWidget::showContextMenu(const QPoint &pos)
 //////////////////////////////////////////////////////////
 // context menu for Ascope
 
-void SpectraWidget::_createAscopeContextMenu(const QPoint &pos) 
+void SpriteWidget::_createAscopeContextMenu(const QPoint &pos) 
 {
 
   QMenu contextMenu("AscopeMenu", this);
@@ -1642,7 +1642,7 @@ void SpectraWidget::_createAscopeContextMenu(const QPoint &pos)
 //////////////////////////////////////////////////////////
 // context menu for Waterfall
 
-void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos) 
+void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos) 
 {
 
   QMenu contextMenu("WaterfallMenu", this);
@@ -1924,7 +1924,7 @@ void SpectraWidget::_createWaterfallContextMenu(const QPoint &pos)
 //////////////////////////////////////////////////////////
 // context menu for IqPlot
 
-void SpectraWidget::_createIqPlotContextMenu(const QPoint &pos) 
+void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos) 
 {
 
   ///////////////////////////////////////

@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef SpectraWidget_HH
-#define SpectraWidget_HH
+#ifndef SpriteWidget_HH
+#define SpriteWidget_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -58,12 +58,12 @@ class AscopePlot;
 class WaterfallPlot;
 class IqPlot;
 class RadxRay;
-class SpectraMgr;
+class SpriteMgr;
 
 /// Widget class - Spectra mode
 /// Plot the Spectra and spectra for a beam
 
-class DLL_EXPORT SpectraWidget : public QWidget
+class DLL_EXPORT SpriteWidget : public QWidget
 {
 
   // must include this if you use Qt signals/slots
@@ -89,15 +89,15 @@ class DLL_EXPORT SpectraWidget : public QWidget
    * @param[in] params         TDRP parameters.
    */
 
-  SpectraWidget(QWidget* parent,
-                const SpectraMgr &manager,
+  SpriteWidget(QWidget* parent,
+                const SpriteMgr &manager,
                 const Params &params);
   
   /**
    * @brief Destructor.
    */
 
-  virtual ~SpectraWidget();
+  virtual ~SpriteWidget();
 
   // configure the axes
   
@@ -231,7 +231,7 @@ class DLL_EXPORT SpectraWidget : public QWidget
    */
   
   QWidget *_parent;
-  const SpectraMgr &_manager;
+  const SpriteMgr &_manager;
 
   /**
    * @brief TDRP params.
