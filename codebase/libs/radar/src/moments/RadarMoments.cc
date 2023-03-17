@@ -4543,6 +4543,7 @@ void RadarMoments::applyRegressionFilter
   _notchEnd = 0;
 
   // apply the window to the original unfiltered times series
+  // normally this is a no-op because the window is rectangular
   
   vector<RadarComplex_t> unfiltWindowed;
   unfiltWindowed.resize(nSamples);
@@ -4565,72 +4566,73 @@ void RadarMoments::applyRegressionFilter
   vector<double> regrSpec;
   regrSpec.resize(nSamples);
 
-  // compute clutter to noise ratio
+  // compute clutter to noise ratio, using the central 3 points in the FFT
   
   double clutPower = regr.compute3PtClutPower(iqUnfiltered);
   double cnr = clutPower / calNoise;
   _regrCnrDb = 10.0 * log10(cnr);
   
-  // if (_regrCnrDb < _regrMinCnrDb) {
+  if (_regrCnrDb < _regrMinCnrDb) {
 
-  //   // don't use a regression filter
-
-  //   memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
-  //   regrSpec = unfiltSpec;
-  //   _regrInterpRatioDb = -9999.0;
-
-  // } else {
+    // don't use a regression filter
     
-  // apply regression filter, passing in CNR
-  
-  vector<RadarComplex_t> iqRegr;
-  iqRegr.resize(nSamples);
-  regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
-  
-  // take the forward fft to compute the complex spectrum
-  // of regr-filtered series
-  
-  vector<RadarComplex_t> regrSpecC;
-  regrSpecC.resize(nSamples);
-  fft.fwd(iqRegr.data(), regrSpecC.data());
-  
-  // compute the real regr-filtered spectrum
-  
-  RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
-  
-  // interpolate across the notch
-  
-  double powerBeforeInterp =
-    RadarComplex::meanPower(regrSpec.data(), nSamples);
-  
-  if (_regrNotchInterpMethod != INTERP_METHOD_NONE) {
-    _regrDoInterpAcrossNotch(regrSpec);
-  }
-  
-  double powerAfterInterp =
-    RadarComplex::meanPower(regrSpec.data(), nSamples);
-  _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
-  
-  // adjust the input spectrum by the filter ratio
-  // constrain ratios to be 1 or less
-  
-  for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
+    memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+    regrSpec = unfiltSpec;
+    _regrInterpRatioDb = -9999.0;
+
+  } else {
+    
+    // apply regression filter, passing in CNR
+    // results are in iqRegr
+    
+    vector<RadarComplex_t> iqRegr;
+    iqRegr.resize(nSamples);
+    regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
+    
+    // take the forward fft to compute the complex spectrum
+    // of regr-filtered series
+    
+    vector<RadarComplex_t> regrSpecC;
+    regrSpecC.resize(nSamples);
+    fft.fwd(iqRegr.data(), regrSpecC.data());
+    
+    // compute the real regr-filtered spectrum
+    
+    RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
+    
+    // interpolate across the notch
+    
+    double powerBeforeInterp =
+      RadarComplex::meanPower(regrSpec.data(), nSamples);
+    
+    if (_regrNotchInterpMethod != INTERP_METHOD_NONE) {
+      _regrDoInterpAcrossNotch(regrSpec);
     }
-    unfiltSpecC[ii].re *= magRatio;
-    unfiltSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
+    
+    double powerAfterInterp =
+      RadarComplex::meanPower(regrSpec.data(), nSamples);
+    _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
+    
+    // adjust the input spectrum by the filter ratio
+    // constrain ratios to be 1 or less
+    
+    for (int ii = 0; ii < nSamples; ii++) {
+      double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
+      if (magRatio > 1.0) {
+        magRatio = 1.0;
+      }
+      unfiltSpecC[ii].re *= magRatio;
+      unfiltSpecC[ii].im *= magRatio;
+      if (specRatio != NULL) {
+        specRatio[ii] = magRatio;
+      }
     }
-  }
-  
-  // invert the fft
-  
-  fft.inv(unfiltSpecC.data(), iqFiltered);
-  
-  // } // if (_regrCnrDb < _regrMinCnrDb) {
+    
+    // invert the fft
+    
+    fft.inv(unfiltSpecC.data(), iqFiltered);
+    
+  } // if (_regrCnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
   
@@ -4646,7 +4648,7 @@ void RadarMoments::applyRegressionFilter
 
   spectralSnr = spectralNoise / calNoise;
 
-  // save filtered data to iqNotched
+  // save filtered data, without interp, to iqNotched
 
   if (iqNotched != NULL) {
     memcpy(iqNotched, iqFiltered, nSamples * sizeof(RadarComplex_t));
