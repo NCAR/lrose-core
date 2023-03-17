@@ -1168,11 +1168,17 @@ paramdef double {
   p_help = "As a first step, we compute the CNR the central 3 spectral points. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.";
 } regression_filter_min_cnr_db;
 
-paramdef boolean {
-  p_default  = true;
+typedef enum {
+  INTERP_METHOD_NONE,
+  INTERP_METHOD_LINEAR,
+  INTERP_METHOD_GAUSSIAN
+} notch_interp_method_t;
+
+paramdef enum notch_interp_method_t {
+  p_default = INTERP_METHOD_GAUSSIAN;
   p_descr = "For the regression filter, option to interpolate power across the notch.";
-  p_help = "If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.";
-} regression_filter_interp_across_notch;
+  p_help = "If NONE, no interpolation is performed. If LINEAR, a linear interpolation is performed across the notch. If GAUSSIAN, an iterative Gaussian interpolation is performed across the notch.";
+} regression_filter_notch_interp_method;
 
 paramdef boolean {
   p_default = false;

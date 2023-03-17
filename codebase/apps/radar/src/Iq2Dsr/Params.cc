@@ -2801,16 +2801,26 @@
     tt->single_val.d = -5;
     tt++;
     
-    // Parameter 'regression_filter_interp_across_notch'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'regression_filter_notch_interp_method'
+    // ctype is '_notch_interp_method_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_interp_across_notch");
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_notch_interp_method");
     tt->descr = tdrpStrDup("For the regression filter, option to interpolate power across the notch.");
-    tt->help = tdrpStrDup("If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.");
-    tt->val_offset = (char *) &regression_filter_interp_across_notch - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->help = tdrpStrDup("If NONE, no interpolation is performed. If LINEAR, a linear interpolation is performed across the notch. If GAUSSIAN, an iterative Gaussian interpolation is performed across the notch.");
+    tt->val_offset = (char *) &regression_filter_notch_interp_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("notch_interp_method_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+      tt->enum_def.fields[0].val = INTERP_METHOD_NONE;
+      tt->enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+      tt->enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+      tt->enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+      tt->enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
+    tt->single_val.e = INTERP_METHOD_GAUSSIAN;
     tt++;
     
     // Parameter 'use_simple_notch_clutter_filter'

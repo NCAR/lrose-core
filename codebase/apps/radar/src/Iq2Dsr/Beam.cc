@@ -2155,17 +2155,19 @@ void Beam::_filterRegrSpStagPrt()
     double spectralNoise = 1.0e-13;
     double filterRatio = 1.0;
     double spectralSnr = 1.0;
-    bool interpAcrossNotch = _params.regression_filter_interp_across_notch;
+    RadarMoments::notch_interp_method_t interpMethod =
+      (RadarMoments::notch_interp_method_t)
+      _params.regression_filter_notch_interp_method;
 
     memcpy(gate->iqhcF, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
-
+    
     _mom->applyRegrFilterStagPrt(_nSamples,
                                  _prt, _prtLong,
                                  *_fftHalf,
                                  *_regrStag,
                                  gate->iqhcOrig,
                                  calibNoise,
-                                 interpAcrossNotch,
+                                 interpMethod,
                                  gate->iqhcF,
                                  filterRatio,
                                  spectralNoise,
@@ -3390,8 +3392,12 @@ void Beam::_initMomentsObject(RadarMoments *mom)
   
   mom->setUseAdaptiveFilter();
   
+  RadarMoments::notch_interp_method_t interpMethod =
+    (RadarMoments::notch_interp_method_t)
+    _params.regression_filter_notch_interp_method;
+  
   if (_params.use_polynomial_regression_clutter_filter) {
-    mom->setUseRegressionFilter(true, _params.regression_filter_min_cnr_db);
+    mom->setUseRegressionFilter(interpMethod, _params.regression_filter_min_cnr_db);
   } else if (_params.use_simple_notch_clutter_filter) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }

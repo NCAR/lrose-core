@@ -174,6 +174,12 @@ public:
   } atmos_atten_method_t;
 
   typedef enum {
+    INTERP_METHOD_NONE = 0,
+    INTERP_METHOD_LINEAR = 1,
+    INTERP_METHOD_GAUSSIAN = 2
+  } notch_interp_method_t;
+
+  typedef enum {
     FIR_LEN_125 = 0,
     FIR_LEN_60 = 1,
     FIR_LEN_40 = 2,
@@ -1019,7 +1025,7 @@ public:
 
   double regression_filter_min_cnr_db;
 
-  tdrp_bool_t regression_filter_interp_across_notch;
+  notch_interp_method_t regression_filter_notch_interp_method;
 
   tdrp_bool_t use_simple_notch_clutter_filter;
 
