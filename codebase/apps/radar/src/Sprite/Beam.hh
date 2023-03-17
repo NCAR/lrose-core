@@ -276,7 +276,6 @@ private:
   // Moments computations
   
   RadarMoments *_mom;
-  bool _applyFiltering;
 
   // window
 

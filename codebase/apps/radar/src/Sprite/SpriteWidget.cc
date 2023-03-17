@@ -664,7 +664,7 @@ void SpriteWidget::paintEvent(QPaintEvent *event)
 
   if (_beam) {
     for (size_t ii = 0; ii < _ascopes.size(); ii++) {
-      _ascopes[ii]->plotBeam(painter, _beam, _selectedRangeKm);
+      _ascopes[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
       _waterfalls[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);

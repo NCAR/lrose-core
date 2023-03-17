@@ -164,8 +164,6 @@ Beam &Beam::_copy(const Beam &rhs)
                           _params.debug >= Params::DEBUG_NORM,
                           _params.debug >= Params::DEBUG_VERBOSE);
   
-  _applyFiltering = rhs._applyFiltering;
-
   // KDP
   
   _kdpInit();
@@ -289,8 +287,6 @@ void Beam::_init()
   _outFieldsF = NULL;
 
   _mom = NULL;
-
-  _applyFiltering = true;
 
   _fftWindowType = Params::FFT_WINDOW_RECT;
 
@@ -701,9 +697,7 @@ int Beam::computeMoments(Params::fft_window_t windowType
 
   // apply clutter filtering if required
 
-  if (_applyFiltering) {
-    _performClutterFiltering();
-  }
+  _performClutterFiltering();
 
   // post-processing
 
@@ -725,10 +719,7 @@ int Beam::computeMoments(Params::fft_window_t windowType
   // compute kdp
 
   if (kdpAvail) {
-    _kdpCompute(false);
-    if (_applyFiltering) {
-      _kdpCompute(true);
-    }
+    _kdpCompute(true);
   }
   
   // copy the results to the output beam Field vectors
@@ -2455,18 +2446,12 @@ void Beam::_computeWindows()
 
   _freeWindows();
 
-  if (_applyFiltering &&
-      _params.use_polynomial_regression_clutter_filter) {
+  if (_params.use_polynomial_regression_clutter_filter) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
   } else if (_fftWindowType == Params::FFT_WINDOW_RECT) {
-    if (_applyFiltering) {
-      _window = RadarMoments::createWindowVonhann(_nSamples);
-      _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
-    } else {
-      _window = RadarMoments::createWindowRect(_nSamples);
-      _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
-    }
+    _window = RadarMoments::createWindowVonhann(_nSamples);
+    _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
   } else if (_fftWindowType == Params::FFT_WINDOW_VONHANN) {
     _window = RadarMoments::createWindowVonhann(_nSamples);
     _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
@@ -2797,7 +2782,7 @@ void Beam::_allocGateData(int nGates)
   }
 
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
-    _gateData[ii]->allocArrays(_nSamples, _applyFiltering, _isStagPrt, false);
+    _gateData[ii]->allocArrays(_nSamples, true, _isStagPrt, false);
   }
 
   _outFields = _outFields_.alloc(nGates);

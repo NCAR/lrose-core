@@ -37,20 +37,12 @@
 #include <string>
 #include <vector>
 
-#include <QDialog>
 #include <QWidget>
-#include <QResizeEvent>
-#include <QImage>
-#include <QTimer>
-#include <QRubberBand>
-#include <QPoint>
-#include <QTransform>
 #include <toolsa/TaArray.hh>
 #include <radar/RadarComplex.hh>
 
 #include "Params.hh"
-#include "ScaledLabel.hh"
-#include "WorldPlot.hh"
+#include "SpritePlot.hh"
 #include "ColorMap.hh"
 
 class Beam;
@@ -58,7 +50,7 @@ class MomentsFields;
 
 /// Waterfall plotting
 
-class WaterfallPlot
+class WaterfallPlot : public SpritePlot
 {
 
 public:
@@ -85,34 +77,21 @@ public:
    * Clear the plot
    */
   
-  void clear();
-
+  virtual void clear();
+  
   // set the window geometry
   
-  void setWindowGeom(int width,
-                     int height,
-                     int xOffset,
-                     int yOffset);
+  virtual void setWindowGeom(int width,
+                             int height,
+                             int xOffset,
+                             int yOffset);
 
   // set the world limits
 
-  void setWorldLimits(double xMinWorld,
-                      double yMinWorld,
-                      double xMaxWorld,
-                      double yMaxWorld);
-
-  // set the zoom limits, using pixel space
-
-  void setZoomLimits(int xMin,
-                     int yMin,
-                     int xMax,
-                     int yMax);
-  
-  void setZoomLimitsX(int xMin,
-                      int xMax);
-
-  void setZoomLimitsY(int yMin,
-                      int yMax);
+  virtual void setWorldLimits(double xMinWorld,
+                              double yMinWorld,
+                              double xMaxWorld,
+                              double yMaxWorld);
 
   // set the plot details
 
@@ -127,11 +106,6 @@ public:
   void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
 
-  // zooming
-
-  void zoom(int x1, int y1, int x2, int y2);
-  void unzoom();
-
   // plot a beam
   
   void plotBeam(QPainter &painter,
@@ -139,37 +113,6 @@ public:
                 int nSamples,
                 double selectedRangeKm);
 
-  // set grid lines on/off
-
-  void setXGridLinesOn(bool val) { _xGridLinesOn = val; }
-  void setYGridLinesOn(bool val) { _yGridLinesOn = val; }
-  
-  // legends
-  
-  void setLegendsOn(bool val) { _legendsOn = val; }
-
-  // get the world plot objects
-  
-  WorldPlot &getFullWorld() { return _fullWorld; }
-  WorldPlot &getZoomWorld() { return _zoomWorld; }
-  bool getIsZoomed() const { return _isZoomed; }
-
-  // get the window geom
-
-  int getWidth() const { return _fullWorld.getWidthPixels(); }
-  int getHeight() const { return _fullWorld.getHeightPixels(); }
-  int getXOffset() const { return _fullWorld.getXPixOffset(); }
-  int getYOffset() const { return _fullWorld.getYPixOffset(); }
-  
-  // get grid lines state
-
-  bool getXGridLinesOn() const { return _xGridLinesOn; }
-  bool getYGridLinesOn() const { return _yGridLinesOn; }
-  
-  // legends
-
-  bool getLegendsOn() const { return _legendsOn; }
-  
   // get the plot details
   
   const Params::waterfall_type_t getPlotType() const { return _plotType; }

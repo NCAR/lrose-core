@@ -61,6 +61,7 @@ HDRS = \
 	RadarSpectra.hh \
 	ScaledLabel.hh \
 	SpriteMgr.hh \
+	SpritePlot.hh \
 	SpriteWidget.hh \
 	Sprite.hh \
 	TsReader.hh \
@@ -79,6 +80,7 @@ NORM_SRCS = \
 	RadarSpectra.cc \
 	ScaledLabel.cc \
 	Sprite.cc \
+	SpritePlot.cc \
 	TsReader.cc \
 	WaterfallPlot.cc \
 	WorldPlot.cc

@@ -32,30 +32,14 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <assert.h>
 #include <cmath>
 #include <iostream>
-#include <fstream>
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
-#include <toolsa/TaArray.hh>
 #include <toolsa/TaArray2D.hh>
-#include <toolsa/pjg.h>
 #include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
 
-#include <QTimer>
-#include <QBrush>
-#include <QPalette>
-#include <QPaintEngine>
-#include <QPen>
-#include <QResizeEvent>
-#include <QStylePainter>
-#include <algorithm>
-
 #include "WaterfallPlot.hh"
-#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 double WaterfallPlot::missingVal = -9999.0;
@@ -65,15 +49,10 @@ using namespace std;
 WaterfallPlot::WaterfallPlot(QWidget* parent,
                              const Params &params,
                              int id) :
-        _parent(parent),
-        _params(params),
-        _id(id)
+        SpritePlot(parent, params, id),
+        _params(params)
         
 {
-  _isZoomed = false;
-  _xGridLinesOn = _params.x_grid_lines_on;
-  _yGridLinesOn = _params.y_grid_lines_on;
-  _legendsOn = true;
   _plotType = Params::WATERFALL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
   _useAdaptFilt = false;
@@ -99,30 +78,6 @@ WaterfallPlot::~WaterfallPlot()
 
 void WaterfallPlot::clear()
 {
-
-}
-
-/*************************************************************************
- * perform zoom
- */
-
-void WaterfallPlot::zoom(int x1, int y1, int x2, int y2)
-{
-
-  _zoomWorld.setZoomLimits(x1, y1, x2, y2);
-  _isZoomed = true;
-
-}
-
-/*************************************************************************
- * unzoom the view
- */
-
-void WaterfallPlot::unzoom()
-{
-
-  _zoomWorld = _fullWorld;
-  _isZoomed = false;
 
 }
 
@@ -153,14 +108,15 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   int nGates = beam->getNGates();
   if (_params.set_max_range) {
     int nGatesMax =
-      (_params.max_range_km - beam->getStartRangeKm()) / beam->getGateSpacingKm();
+      (_params.max_range_km - beam->getStartRangeKm()) /
+      beam->getGateSpacingKm();
     if (nGatesMax < nGates) {
       nGates = nGatesMax;
     }
   }
 
   // perform the relevant plot
-
+ 
   switch (_plotType) {
 
     case Params::WATERFALL_HC:
@@ -1483,33 +1439,6 @@ void WaterfallPlot::setWorldLimits(double xMinWorld,
                             xMaxWorld, yMaxWorld);
   _fullWorld.setColorScaleWidth(_params.waterfall_color_scale_width);
   _zoomWorld = _fullWorld;
-}
-
-/*************************************************************************
- * set the zoom limits, from pixel space
- */
-
-void WaterfallPlot::setZoomLimits(int xMin,
-                                  int yMin,
-                                  int xMax,
-                                  int yMax)
-{
-  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
-  _isZoomed = true;
-}
-
-void WaterfallPlot::setZoomLimitsX(int xMin,
-                                   int xMax)
-{
-  _zoomWorld.setZoomLimitsX(xMin, xMax);
-  _isZoomed = true;
-}
-
-void WaterfallPlot::setZoomLimitsY(int yMin,
-                                   int yMax)
-{
-  _zoomWorld.setZoomLimitsY(yMin, yMax);
-  _isZoomed = true;
 }
 
 /*************************************************************************

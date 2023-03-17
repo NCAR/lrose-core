@@ -64,14 +64,10 @@ using namespace std;
 IqPlot::IqPlot(QWidget* parent,
                const Params &params,
                int id) :
-        _parent(parent),
-        _params(params),
-        _id(id)
+        SpritePlot(parent, params, id),
+        _params(params)
         
 {
-  _isZoomed = false;
-  _xGridLinesOn = _params.x_grid_lines_on;
-  _yGridLinesOn = _params.y_grid_lines_on;
   _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
@@ -1802,33 +1798,6 @@ void IqPlot::setWorldLimitsY(double yMinWorld,
   _fullWorld.setWorldLimitsY(yMinWorld, yMaxWorld);
   _zoomWorld = _fullWorld;
   _isZoomed = false;
-}
-
-/*************************************************************************
- * set the zoom limits, from pixel space
- */
-
-void IqPlot::setZoomLimits(int xMin,
-                           int yMin,
-                           int xMax,
-                           int yMax)
-{
-  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
-  _isZoomed = true;
-}
-
-void IqPlot::setZoomLimitsX(int xMin,
-                            int xMax)
-{
-  _zoomWorld.setZoomLimitsX(xMin, xMax);
-  _isZoomed = true;
-}
-
-void IqPlot::setZoomLimitsY(int yMin,
-                            int yMax)
-{
-  _zoomWorld.setZoomLimitsY(yMin, yMax);
-  _isZoomed = true;
 }
 
 /*************************************************************************
