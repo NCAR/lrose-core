@@ -108,10 +108,10 @@ public:
 
   void setPlotType(Params::iq_plot_type_t val);
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
-  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
   // set filtering
   
+  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
   void setMedianFiltLen(int val) { _medianFiltLen = val; }
   void setClutterFilterType(RadarMoments::clutter_filter_type_t val) {
     _clutterFilterType = val;
@@ -169,7 +169,6 @@ public:
   string getName();
   string getXUnits();
   string getYUnits();
-  string getFftWindowName();
   
 protected:
 
@@ -191,7 +190,8 @@ protected:
   Params::iq_plot_type_t _plotType;
   Params::rx_channel_t _rxChannel;
   Params::iq_plot_static_range_t _staticRange;
-
+  bool _computePlotRangeDynamically;
+  
   // fft window
   
   Params::fft_window_t _fftWindow;
@@ -209,7 +209,6 @@ protected:
   double _regrClutWidthFactor;
   double _regrCnrExponent;
   RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
-  bool _computePlotRangeDynamically;
 
   ///////////////////////
   // Protected methods //

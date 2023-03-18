@@ -96,21 +96,28 @@ public:
   // set the plot details
 
   void setPlotType(Params::waterfall_type_t val) { _plotType = val; }
-  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
   // set filtering
-
+  
+  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
   void setMedianFiltLen(int val) { _medianFiltLen = val; }
-  void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
-  void setClutWidthMps(double val) { _clutWidthMps = val; }
-  void setUseRegrFilt(bool val) { _useRegrFilt = val; }
+  void setClutterFilterType(RadarMoments::clutter_filter_type_t val) {
+    _clutterFilterType = val;
+  }
+  void setPlotClutModel(bool val) { _plotClutModel = val; }
+  void setClutModelWidthMps(double val) { _clutModelWidthMps = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
+  void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
+  void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
+  void setRegrFiltNotchInterpMethod(RadarMoments::notch_interp_method_t val) {
+    _regrNotchInterpMethod = val;
+  }
 
   // plot a beam
   
   void plotBeam(QPainter &painter,
                 Beam *beam,
-                int nSamples,
+                size_t nSamples,
                 double selectedRangeKm);
 
   // get the plot details
@@ -121,11 +128,18 @@ public:
   // get the filter details
   
   int getMedianFiltLen() const { return _medianFiltLen; }
-  bool getUseAdaptFilt() const { return _useAdaptFilt; }
-  double getClutWidthMps() const { return _clutWidthMps; }
-  bool getUseRegrFilt() const { return _useRegrFilt; }
+  RadarMoments::clutter_filter_type_t getClutterFilterType() const {
+    return _clutterFilterType;
+  }
+  bool getPlotClutModel() const { return _plotClutModel; }
+  double getClutModelWidthMps() const { return _clutModelWidthMps; }
   int getRegrOrder() const { return _regrOrder; }
-
+  double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
+  double getRegrCnrExponent() const { return _regrCnrExponent; }
+  RadarMoments::notch_interp_method_t getRegrFiltNotchInterpMethod() const {
+    return _regrNotchInterpMethod;
+  }
+  
   // get strings
 
   static string getName(Params::waterfall_type_t wtype);
@@ -158,10 +172,14 @@ protected:
   // filtering
 
   int _medianFiltLen;
-  bool _useAdaptFilt;
-  double _clutWidthMps;
-  bool _useRegrFilt;
+  RadarMoments::clutter_filter_type_t _clutterFilterType;
+  bool _plotClutModel;
+  double _clutModelWidthMps;
   int _regrOrder;
+  int _regrOrderInUse;
+  double _regrClutWidthFactor;
+  double _regrCnrExponent;
+  RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
 
   // unzoomed world
 
@@ -182,60 +200,60 @@ protected:
 
   void _plotHc(QPainter &painter,
                Beam *beam,
-               int nSamples,
-               int nGates,
+               size_t nSamples,
+               size_t nGates,
                double selectedRangeKm);
   
   void _plotVc(QPainter &painter,
                Beam *beam,
-               int nSamples,
-               int nGates,
+               size_t nSamples,
+               size_t nGates,
                double selectedRangeKm);
   
   void _plotHx(QPainter &painter,
                Beam *beam,
-               int nSamples,
-               int nGates,
+               size_t nSamples,
+               size_t nGates,
                double selectedRangeKm);
   
   void _plotVx(QPainter &painter,
                Beam *beam,
-               int nSamples,
-               int nGates,
+               size_t nSamples,
+               size_t nGates,
                double selectedRangeKm);
   
   void _plotZdr(QPainter &painter,
                 Beam *beam,
-                int nSamples,
-                int nGates,
+                size_t nSamples,
+                size_t nGates,
                 double selectedRangeKm);
   
   void _plotPhidp(QPainter &painter,
                   Beam *beam,
-                  int nSamples,
-                  int nGates,
+                  size_t nSamples,
+                  size_t nGates,
                   double selectedRangeKm);
   
   void _plotSdevZdr(QPainter &painter,
                     Beam *beam,
-                    int nSamples,
-                    int nGates,
+                    size_t nSamples,
+                    size_t nGates,
                     double selectedRangeKm);
   
   void _plotSdevPhidp(QPainter &painter,
                       Beam *beam,
-                      int nSamples,
-                      int nGates,
+                      size_t nSamples,
+                      size_t nGates,
                       double selectedRangeKm);
   
   void _plotCmd(QPainter &painter,
                 Beam *beam,
-                int nSamples,
-                int nGates,
+                size_t nSamples,
+                size_t nGates,
                 double selectedRangeKm);
   
   void _computePowerSpectrum(Beam *beam,
-                             int nSamples,
+                             size_t nSamples,
                              const RadarComplex_t *iq,
                              double *power,
                              double *dbm);
@@ -246,11 +264,11 @@ protected:
 
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,
-                    int nSamples);
+                    size_t nSamples);
   
   double _computeSdevZdr(const vector<double> &zdr);
   double _computeSdevPhidp(const vector<double> &phidp);
-  void _computePhidpFoldingRange(int nGates, int nSamples, 
+  void _computePhidpFoldingRange(size_t nGates, size_t nSamples, 
                                  double **phidp2D);
 
 };

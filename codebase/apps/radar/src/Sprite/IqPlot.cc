@@ -392,7 +392,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   char text[1024];
 
   vector<string> legendsLeft;
-  legendsLeft.push_back(getFftWindowName() + " window");
+  legendsLeft.push_back(getFftWindowName(_fftWindow) + " window");
   if (_medianFiltLen > 1) {
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
@@ -539,7 +539,7 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   }
   
   vector<string> legendsRight;
-  legendsRight.push_back(getFftWindowName());
+  legendsRight.push_back(getFftWindowName(_fftWindow));
   if (_legendsOn) {
     _zoomWorld.drawLegendsTopRight(painter, legendsRight);
   }
@@ -1635,33 +1635,6 @@ string IqPlot::getYUnits()
       return "volts";
     case Params::PHASOR:
       return "volts";
-    default:
-      return "";
-  }
-}
-
-//////////////////////////////////
-// get fft window name
-
-string IqPlot::getFftWindowName()
-{
-  switch (_fftWindow) {
-    case Params::FFT_WINDOW_RECT:
-      return "Rectangular";
-    case Params::FFT_WINDOW_VONHANN:
-      return "VonHann";
-    case Params::FFT_WINDOW_BLACKMAN:
-      return "Blackman";
-    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
-      return "Blackman-Nuttall";
-    case Params::FFT_WINDOW_TUKEY_10:
-      return "Tukey-10";
-    case Params::FFT_WINDOW_TUKEY_20:
-      return "Tukey-20";
-    case Params::FFT_WINDOW_TUKEY_30:
-      return "Tukey-30";
-    case Params::FFT_WINDOW_TUKEY_50:
-      return "Tukey-50";
     default:
       return "";
   }

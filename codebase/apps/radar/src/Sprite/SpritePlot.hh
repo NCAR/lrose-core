@@ -42,6 +42,7 @@
 
 #include "Params.hh"
 #include "WorldPlot.hh"
+#include <radar/RadarMoments.hh>
 
 class Beam;
 class MomentsFields;
@@ -137,6 +138,10 @@ public:
   // legends
 
   bool getLegendsOn() const { return _legendsOn; }
+  
+  // get the fft window name
+  
+  string getFftWindowName(Params::fft_window_t fftWindow);
   
 protected:
 

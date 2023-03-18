@@ -146,3 +146,30 @@ void SpritePlot::unzoom()
 
 }
 
+//////////////////////////////////
+// get fft window name
+
+string SpritePlot::getFftWindowName(Params::fft_window_t fftWindow)
+{
+  switch (fftWindow) {
+    case Params::FFT_WINDOW_RECT:
+      return "Rectangular";
+    case Params::FFT_WINDOW_VONHANN:
+      return "VonHann";
+    case Params::FFT_WINDOW_BLACKMAN:
+      return "Blackman";
+    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
+      return "Blackman-Nuttall";
+    case Params::FFT_WINDOW_TUKEY_10:
+      return "Tukey-10";
+    case Params::FFT_WINDOW_TUKEY_20:
+      return "Tukey-20";
+    case Params::FFT_WINDOW_TUKEY_30:
+      return "Tukey-30";
+    case Params::FFT_WINDOW_TUKEY_50:
+      return "Tukey-50";
+    default:
+      return "";
+  }
+}
+

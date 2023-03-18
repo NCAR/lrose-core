@@ -1253,10 +1253,16 @@ void SpriteWidget::_createWaterfall(int id)
   waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
   waterfall->setMedianFiltLen(_params._waterfall_plots[id].median_filter_len);
   waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
-  waterfall->setUseAdaptFilt(_params._waterfall_plots[id].use_adaptive_filter);
-  waterfall->setClutWidthMps(_params._waterfall_plots[id].clutter_model_width_mps);
-  waterfall->setUseRegrFilt(_params._waterfall_plots[id].use_regression_filter);
-  waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
+
+  waterfall->setClutterFilterType
+    ((RadarMoments::clutter_filter_type_t)
+     _params._iq_plots[id].clutter_filter_type);
+  waterfall->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
+  waterfall->setClutModelWidthMps(_params._iq_plots[id].clutter_model_width_mps);
+  waterfall->setRegrOrder(_params._iq_plots[id].regression_order);
+  waterfall->setRegrFiltNotchInterpMethod
+    ((RadarMoments::notch_interp_method_t)
+     _params._iq_plots[id].regression_filter_notch_interp_method);
   
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   
@@ -1340,6 +1346,7 @@ void SpriteWidget::_createIqPlot(int id)
   iqplot->setRxChannel(_params._iq_plots[id].rx_channel);
   iqplot->setFftWindow(_params._iq_plots[id].fft_window);
   iqplot->setMedianFiltLen(_params._iq_plots[id].median_filter_len);
+
   iqplot->setClutterFilterType
     ((RadarMoments::clutter_filter_type_t)
      _params._iq_plots[id].clutter_filter_type);
@@ -1817,41 +1824,71 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setMedianFiltLen);
   
-  QAction useAdaptFilter("Use adaptive filter", &contextMenu);
-  useAdaptFilter.setCheckable(true);
-  useAdaptFilter.setChecked
-    (_waterfalls[id]->getUseAdaptFilt());
-  connect(&useAdaptFilter, &QAction::triggered,
-          [this, id] (bool state) {
-            _waterfalls[id]->setUseAdaptFilt(state);
-            _configureWaterfall(id);
+  // notch interpolation type
+  
+  QMenu setClutFiltType("Set clutter filter type", &setFilteringMenu);
+  setFilteringMenu.addMenu(&setClutFiltType);
+  
+  QAction setClutFiltAdapt("Adaptive", &setClutFiltType);
+  connect(&setClutFiltAdapt, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_ADAPTIVE);
+            _configureIqPlot(id);
           } );
-  setFilteringMenu.addAction(&useAdaptFilter);
+  setClutFiltType.addAction(&setClutFiltAdapt);
+
+  QAction setClutFiltRegr("Regression", &setClutFiltType);
+  connect(&setClutFiltRegr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_REGRESSION);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltRegr);
+
+  QAction setClutFiltNotch("Notch", &setClutFiltType);
+  connect(&setClutFiltNotch, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_NOTCH);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltNotch);
+
+  QAction setClutFiltNone("None", &setClutFiltType);
+  connect(&setClutFiltNone, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_NONE);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltNone);
+
+  QAction plotClutModel("Plot clutter model", &contextMenu);
+  plotClutModel.setCheckable(true);
+  plotClutModel.setChecked
+    (_waterfalls[id]->getPlotClutModel());
+  connect(&plotClutModel, &QAction::triggered,
+          [this, id] (bool state) {
+            _waterfalls[id]->setPlotClutModel(state);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&plotClutModel);
 
   QAction setClutterWidth("Set clutter model width", &contextMenu);
   connect(&setClutterWidth, &QAction::triggered,
           [this, id] () {
             bool ok;
-            double val = QInputDialog::getDouble
+            double width = QInputDialog::getDouble
               (this,
                tr("QInputDialog::getDouble()"), tr("Set clutter model width (mps):"),
-               _waterfalls[id]->getClutWidthMps(), 0.05, 5.0, 2,
+               _waterfalls[id]->getClutModelWidthMps(), 0.05, 5.0, 2,
                &ok, Qt::WindowFlags());
-            _waterfalls[id]->setClutWidthMps(val);
-            _configureWaterfall(id);
+            _waterfalls[id]->setClutModelWidthMps(width);
+            _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setClutterWidth);
-
-  QAction useForsytheRegrFilter("Use regression filter", &contextMenu);
-  useForsytheRegrFilter.setCheckable(true);
-  useForsytheRegrFilter.setChecked
-    (_waterfalls[id]->getUseRegrFilt());
-  connect(&useForsytheRegrFilter, &QAction::triggered,
-          [this, id] (bool state) {
-            _waterfalls[id]->setUseRegrFilt(state);
-            _configureWaterfall(id);
-          } );
-  setFilteringMenu.addAction(&useForsytheRegrFilter);
 
   QAction setRegressionOrder("Set regression order", &contextMenu);
   connect(&setRegressionOrder, &QAction::triggered,
@@ -1863,9 +1900,70 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
                _waterfalls[id]->getRegrOrder(),
                3, 100, 1, &ok);
             _waterfalls[id]->setRegrOrder(val);
-            _configureWaterfall(id);
+            _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
+
+  // notch interpolation type
+  
+  QMenu setRegrInterpMethod("Set regr notch interp method", &setFilteringMenu);
+  setFilteringMenu.addMenu(&setRegrInterpMethod);
+  
+  QAction setMethodGaussian("Gaussian", &setRegrInterpMethod);
+  connect(&setMethodGaussian, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_GAUSSIAN);
+            _configureIqPlot(id);
+          } );
+  setRegrInterpMethod.addAction(&setMethodGaussian);
+
+  QAction setMethodLinear("Linear", &setRegrInterpMethod);
+  connect(&setMethodLinear, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_LINEAR);
+            _configureIqPlot(id);
+          } );
+  setRegrInterpMethod.addAction(&setMethodLinear);
+
+  QAction setMethodNone("None", &setRegrInterpMethod);
+  connect(&setMethodNone, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setRegrFiltNotchInterpMethod
+              (RadarMoments::INTERP_METHOD_NONE);
+            _configureIqPlot(id);
+          } );
+  setRegrInterpMethod.addAction(&setMethodNone);
+
+  QAction setRegressionClutWidthFactor
+    ("Set regression clutter width factor (ss)", &contextMenu);
+  connect(&setRegressionClutWidthFactor, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double val = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set regression clutter width factor (ss):"),
+               _waterfalls[id]->getRegrClutWidthFactor(),
+               0.1, 10.0, 3, &ok);
+            _waterfalls[id]->setRegrClutWidthFactor(val);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionClutWidthFactor);
+  
+  QAction setRegressionCnrExponent("Set regression CNR exponent", &contextMenu);
+  connect(&setRegressionCnrExponent, &QAction::triggered,
+          [this, id] () {
+            bool ok;
+            double val = QInputDialog::getDouble
+              (this,
+               tr("QInputDialog::getDouble()"), tr("Set regression CNR exponent:"),
+               _waterfalls[id]->getRegrCnrExponent(),
+               0.1, 10.0, 5, &ok);
+            _waterfalls[id]->setRegrCnrExponent(val);
+            _configureIqPlot(id);
+          } );
+  setFilteringMenu.addAction(&setRegressionCnrExponent);
   
   // unzoom action
 
