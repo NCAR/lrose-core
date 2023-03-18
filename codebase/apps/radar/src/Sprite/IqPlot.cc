@@ -71,10 +71,9 @@ IqPlot::IqPlot(QWidget* parent,
   _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _useAdaptFilt = false;
+  _clutterFilterType = RadarMoments::CLUTTER_FILTER_NONE;
   _plotClutModel = false;
   _clutModelWidthMps = 0.75;
-  _useRegrFilt = false;
   _regrOrder = _params.regression_filter_specified_polynomial_order;
   _regrOrderInUse = _regrOrder;
   _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
@@ -319,7 +318,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   double adaptPower = 1.0e-12;
   double adaptSpectralSnr = 1.0e-12;
 
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
@@ -350,7 +349,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
     adaptPower = RadarComplex::meanPower(filtAdaptSpec, _nSamples);
     
-  } // if (_useAdaptFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE)
 
   // compute regression filter as appropriate
 
@@ -360,7 +359,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   double regrPower = 0.0;
   _regrOrderInUse = 0;
 
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
 
     moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
     
@@ -416,7 +415,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
     regrPower = RadarComplex::meanPower(filtRegrSpec, _nSamples);
     
-  } // if (_useRegrFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION)
 
   // set the Y axis range
 
@@ -455,7 +454,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   // draw adaptive filter
   
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     
     FilterUtils::applyMedianFilter(filtAdaptDbm, _nSamples, _medianFiltLen);
     painter.save();
@@ -472,11 +471,11 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
 
-  } // if (_useAdaptFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE)
 
   // draw regr filter
 
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     
     FilterUtils::applyMedianFilter(filtRegrDbm, _nSamples, _medianFiltLen);
     painter.save();
@@ -493,7 +492,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
 
-  } // if (_useRegrFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION)
 
   // plot clutter model
 
@@ -552,7 +551,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
   }
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
     legendsLeft.push_back(text);
   }
@@ -568,7 +567,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   double totalPowerDbm = 10.0 * log10(totalPower);
   snprintf(text, 1024, "TotalPower (dBm): %.2f", totalPowerDbm);
   legendsRight.push_back(text);
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     double adaptClutPower = totalPower - adaptPower;
     double adaptPowerDbm = 10.0 * log10(adaptPower);
     double adaptClutPowerDbm = 10.0 * log10(adaptClutPower);
@@ -582,7 +581,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     snprintf(text, 1024, "AdaptSpecSNR: %.2f", adaptSpectralSnrDb);
     legendsRight.push_back(text);
   }
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     double regrClutPower = totalPower - regrPower;
     double regrPowerDbm = 10.0 * log10(regrPower);
     double regrClutPowerDbm = 10.0 * log10(regrClutPower);
@@ -776,10 +775,10 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   
   char text[1024];
   vector<string> legendsLeft;
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     snprintf(text, 1024, "Adapt filt, clut width: %.2f", _clutModelWidthMps);
     legendsLeft.push_back(text);
-  } else if (_useRegrFilt) {
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr filt, order: %d", _beam->getRegrOrder());
     legendsLeft.push_back(text);
   }
@@ -1172,7 +1171,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
   
   // plot regression filter as appropriate
 
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     
     // plot the polynomial fit
     
@@ -1221,7 +1220,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
       _zoomWorld.drawLegendsTopLeft(painter, legends);
     }
 
-  } // if (_useRegrFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION)
 
   // draw the title
 
@@ -1479,7 +1478,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   // filter as appropriate
   
   _regrOrderInUse = 0;
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive filtering takes precedence over regression
     
@@ -1503,7 +1502,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
       power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
     }
     
-  } else if (_useRegrFilt) {
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
 
     // regression
 

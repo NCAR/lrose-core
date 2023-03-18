@@ -469,6 +469,13 @@ typedef enum {
 } notch_interp_method_t;
 
 typedef enum {
+  CLUTTER_FILTER_ADAPTIVE,
+  CLUTTER_FILTER_REGRESSION,
+  CLUTTER_FILTER_NOTCH,
+  CLUTTER_FILTER_NONE
+} clutter_filter_type_t;
+
+typedef enum {
   WATERFALL_HC,
   WATERFALL_VC,
   WATERFALL_HX,
@@ -723,10 +730,9 @@ typedef struct {
   rx_channel_t rx_channel;
   fft_window_t fft_window;
   int median_filter_len;
-  boolean use_adaptive_filter;
+  clutter_filter_type_t clutter_filter_type;
   boolean plot_clutter_model;
   double clutter_model_width_mps;
-  boolean use_regression_filter;
   int regression_order;
   notch_interp_method_t regression_filter_notch_interp_method;
   boolean compute_plot_range_dynamically;
@@ -734,14 +740,14 @@ typedef struct {
 
 paramdef struct iq_plot_t {
   p_default = {
-    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true },
-    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN, true }
+    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true }
   };
   p_descr = "Details of IQ plots for each sub panel.";
   p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra. For the regression filter, set the order to -1 to compute the order automatically in the filter";

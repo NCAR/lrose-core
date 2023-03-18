@@ -2681,6 +2681,30 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
+    // Parameter 'clutter_filter_type'
+    // ctype is '_clutter_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("clutter_filter_type");
+    tt->descr = tdrpStrDup("Type of clutter filter to use.");
+    tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
+    tt->val_offset = (char *) &clutter_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+      tt->enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+      tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+      tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+    tt->single_val.e = CLUTTER_FILTER_ADAPTIVE;
+    tt++;
+    
     // Parameter 'clutter_model_width_in_adaptive_filter'
     // ctype is 'double'
     
@@ -2727,18 +2751,6 @@
     tt->help = tdrpStrDup("Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.");
     tt->val_offset = (char *) &min_snr_db_for_residue_correction - &_start_;
     tt->single_val.d = 75;
-    tt++;
-    
-    // Parameter 'use_polynomial_regression_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_polynomial_regression_clutter_filter");
-    tt->descr = tdrpStrDup("Option to apply a regression clutter filter.");
-    tt->help = tdrpStrDup("For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.");
-    tt->val_offset = (char *) &use_polynomial_regression_clutter_filter - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'regression_filter_determine_order_from_cnr'
@@ -2821,18 +2833,6 @@
       tt->enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
       tt->enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
     tt->single_val.e = INTERP_METHOD_GAUSSIAN;
-    tt++;
-    
-    // Parameter 'use_simple_notch_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_simple_notch_clutter_filter");
-    tt->descr = tdrpStrDup("Option to use a simple notch for clutter filtering.");
-    tt->help = tdrpStrDup("If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.");
-    tt->val_offset = (char *) &use_simple_notch_clutter_filter - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'simple_notch_filter_width_mps'

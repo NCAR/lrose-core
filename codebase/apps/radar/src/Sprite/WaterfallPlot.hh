@@ -171,20 +171,6 @@ protected:
 
   ColorMap _cmap;
 
-  // zoomed world
-
-  bool _isZoomed;
-  WorldPlot _zoomWorld;
-
-  // grid lines
-
-  bool _xGridLinesOn;
-  bool _yGridLinesOn;
-
-  // legends
-
-  bool _legendsOn;
-  
   // phidp sdev
 
   bool _phidpFoldsAt90;

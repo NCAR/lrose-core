@@ -509,7 +509,7 @@ void Beam::_prepareForComputeMoments()
   
   // initialize the regression objects
   
-  if (_params.use_polynomial_regression_clutter_filter) {
+  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
     _regr->setup(_nSamples,
                  _params.regression_filter_determine_order_from_cnr,
                  _params.regression_filter_specified_polynomial_order,
@@ -3280,7 +3280,7 @@ void Beam::_computeWindows()
   _freeWindows();
 
   if (_mmgr.applyClutterFilter() &&
-      _params.use_polynomial_regression_clutter_filter) {
+      _params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
   } else if (_mmgr.getWindowType() == Params::WINDOW_RECT) {
@@ -3396,9 +3396,10 @@ void Beam::_initMomentsObject(RadarMoments *mom)
     (RadarMoments::notch_interp_method_t)
     _params.regression_filter_notch_interp_method;
   
-  if (_params.use_polynomial_regression_clutter_filter) {
-    mom->setUseRegressionFilter(interpMethod, _params.regression_filter_min_cnr_db);
-  } else if (_params.use_simple_notch_clutter_filter) {
+  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+    mom->setUseRegressionFilter(interpMethod,
+                                _params.regression_filter_min_cnr_db);
+  } else if (_params.clutter_filter_type == Params::CLUTTER_FILTER_NOTCH) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   }
 

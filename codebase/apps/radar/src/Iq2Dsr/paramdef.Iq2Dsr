@@ -1108,6 +1108,19 @@ commentdef {
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
 
+typedef enum {
+  CLUTTER_FILTER_ADAPTIVE,
+  CLUTTER_FILTER_REGRESSION,
+  CLUTTER_FILTER_NOTCH,
+  CLUTTER_FILTER_NONE
+} clutter_filter_type_t;
+
+paramdef enum clutter_filter_type_t {
+  p_default = CLUTTER_FILTER_ADAPTIVE;
+  p_descr = "Type of clutter filter to use.";
+  p_help = "ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.";
+} clutter_filter_type;
+
 paramdef double {
   p_default = 0.75;
   p_descr = "Width of clutter, in model used by adaptive filter (m/s).";
@@ -1132,11 +1145,11 @@ paramdef double {
   p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
 } min_snr_db_for_residue_correction;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to apply a regression clutter filter.";
-  p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
-} use_polynomial_regression_clutter_filter;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to apply a regression clutter filter.";
+//   p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
+// } use_polynomial_regression_clutter_filter;
 
 paramdef boolean {
   p_default = true;
@@ -1180,11 +1193,11 @@ paramdef enum notch_interp_method_t {
   p_help = "If NONE, no interpolation is performed. If LINEAR, a linear interpolation is performed across the notch. If GAUSSIAN, an iterative Gaussian interpolation is performed across the notch.";
 } regression_filter_notch_interp_method;
 
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to use a simple notch for clutter filtering.";
-  p_help = "If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.";
-} use_simple_notch_clutter_filter;
+// paramdef boolean {
+//   p_default = false;
+//   p_descr = "Option to use a simple notch for clutter filtering.";
+//   p_help = "If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.";
+// } use_simple_notch_clutter_filter;
 
 paramdef double {
   p_default = 3.0;

@@ -4255,13 +4255,33 @@ void RadarMoments::applyClutterFilter(int nSamples,
                      iqFiltered, filterRatio,
                      spectralNoise, spectralSnr, specRatio);
     
-  } else {
+  } else if (_clutterFilterType == CLUTTER_FILTER_ADAPTIVE) {
     
     applyAdaptiveFilter(nSamples, prtSecs, fft,
                         iqWindowed, specWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
                         spectralNoise, spectralSnr, specRatio);
+
+  } else {
+
+    // apply filter to computed spectral noise etc
+    
+    applyAdaptiveFilter(nSamples, prtSecs, fft,
+                        iqWindowed, specWindowed,
+                        calNoise,
+                        iqFiltered, iqNotched, filterRatio,
+                        spectralNoise, spectralSnr, specRatio);
+
+    // overwrite with original series
+    
+    if (iqFiltered) {
+      memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
+    }
+    if (iqNotched) {
+      memcpy(iqNotched, iqOrig, nSamples * sizeof(RadarComplex_t));
+    }
+    filterRatio = 1.0;
 
   }
     

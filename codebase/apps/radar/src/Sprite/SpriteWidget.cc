@@ -1340,10 +1340,11 @@ void SpriteWidget::_createIqPlot(int id)
   iqplot->setRxChannel(_params._iq_plots[id].rx_channel);
   iqplot->setFftWindow(_params._iq_plots[id].fft_window);
   iqplot->setMedianFiltLen(_params._iq_plots[id].median_filter_len);
-  iqplot->setUseAdaptFilt(_params._iq_plots[id].use_adaptive_filter);
+  iqplot->setClutterFilterType
+    ((RadarMoments::clutter_filter_type_t)
+     _params._iq_plots[id].clutter_filter_type);
   iqplot->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
   iqplot->setClutModelWidthMps(_params._iq_plots[id].clutter_model_width_mps);
-  iqplot->setUseRegrFilt(_params._iq_plots[id].use_regression_filter);
   iqplot->setRegrOrder(_params._iq_plots[id].regression_order);
   iqplot->setRegrFiltNotchInterpMethod
     ((RadarMoments::notch_interp_method_t)
@@ -2158,16 +2159,37 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setMedianFiltLen);
   
-  QAction useAdaptFilt("Use adaptive filter", &contextMenu);
-  useAdaptFilt.setCheckable(true);
-  useAdaptFilt.setChecked
-    (_iqPlots[id]->getUseAdaptFilt());
-  connect(&useAdaptFilt, &QAction::triggered,
-          [this, id] (bool state) {
-            _iqPlots[id]->setUseAdaptFilt(state);
+  // notch interpolation type
+  
+  QMenu setClutFiltType("Set clutter filter type", &setFilteringMenu);
+  setFilteringMenu.addMenu(&setClutFiltType);
+  
+  QAction setClutFiltAdapt("Adaptive", &setClutFiltType);
+  connect(&setClutFiltAdapt, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_ADAPTIVE);
             _configureIqPlot(id);
           } );
-  setFilteringMenu.addAction(&useAdaptFilt);
+  setClutFiltType.addAction(&setClutFiltAdapt);
+
+  QAction setClutFiltRegr("Regression", &setClutFiltType);
+  connect(&setClutFiltRegr, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_REGRESSION);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltRegr);
+
+  QAction setClutFiltNone("None", &setClutFiltType);
+  connect(&setClutFiltNone, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_NONE);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltNone);
 
   QAction plotClutModel("Plot clutter model", &contextMenu);
   plotClutModel.setCheckable(true);
@@ -2194,17 +2216,6 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setFilteringMenu.addAction(&setClutterWidth);
 
-  QAction useForsytheRegrFilter("Use regression filter", &contextMenu);
-  useForsytheRegrFilter.setCheckable(true);
-  useForsytheRegrFilter.setChecked
-    (_iqPlots[id]->getUseRegrFilt());
-  connect(&useForsytheRegrFilter, &QAction::triggered,
-          [this, id] (bool state) {
-            _iqPlots[id]->setUseRegrFilt(state);
-            _configureIqPlot(id);
-          } );
-  setFilteringMenu.addAction(&useForsytheRegrFilter);
-
   QAction setRegressionOrder("Set regression order", &contextMenu);
   connect(&setRegressionOrder, &QAction::triggered,
           [this, id] () {
@@ -2218,6 +2229,8 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
             _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
+
+  // notch interpolation type
   
   QMenu setRegrInterpMethod("Set regr notch interp method", &setFilteringMenu);
   setFilteringMenu.addMenu(&setRegrInterpMethod);

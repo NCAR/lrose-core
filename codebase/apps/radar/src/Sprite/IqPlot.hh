@@ -113,10 +113,11 @@ public:
   // set filtering
   
   void setMedianFiltLen(int val) { _medianFiltLen = val; }
-  void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
+  void setClutterFilterType(RadarMoments::clutter_filter_type_t val) {
+    _clutterFilterType = val;
+  }
   void setPlotClutModel(bool val) { _plotClutModel = val; }
   void setClutModelWidthMps(double val) { _clutModelWidthMps = val; }
-  void setUseRegrFilt(bool val) { _useRegrFilt = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
   void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
   void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
@@ -148,10 +149,11 @@ public:
   // get the filter details
   
   int getMedianFiltLen() const { return _medianFiltLen; }
-  bool getUseAdaptFilt() const { return _useAdaptFilt; }
+  RadarMoments::clutter_filter_type_t getClutterFilterType() const {
+    return _clutterFilterType;
+  }
   bool getPlotClutModel() const { return _plotClutModel; }
   double getClutModelWidthMps() const { return _clutModelWidthMps; }
-  bool getUseRegrFilt() const { return _useRegrFilt; }
   int getRegrOrder() const { return _regrOrder; }
   double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
   double getRegrCnrExponent() const { return _regrCnrExponent; }
@@ -199,10 +201,9 @@ protected:
   // filtering
 
   int _medianFiltLen;
-  bool _useAdaptFilt;
+  RadarMoments::clutter_filter_type_t _clutterFilterType;
   bool _plotClutModel;
   double _clutModelWidthMps;
-  bool _useRegrFilt;
   int _regrOrder;
   int _regrOrderInUse;
   double _regrClutWidthFactor;
@@ -210,24 +211,6 @@ protected:
   RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
   bool _computePlotRangeDynamically;
 
-  // unzoomed world
-
-  WorldPlot _fullWorld;
-
-  // zoomed world
-
-  bool _isZoomed;
-  WorldPlot _zoomWorld;
-
-  // grid lines
-
-  bool _xGridLinesOn;
-  bool _yGridLinesOn;
-  
-  // legends
-
-  bool _legendsOn;
-  
   ///////////////////////
   // Protected methods //
   ///////////////////////

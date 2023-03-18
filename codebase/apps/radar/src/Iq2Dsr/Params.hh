@@ -174,6 +174,13 @@ public:
   } atmos_atten_method_t;
 
   typedef enum {
+    CLUTTER_FILTER_ADAPTIVE = 0,
+    CLUTTER_FILTER_REGRESSION = 1,
+    CLUTTER_FILTER_NOTCH = 2,
+    CLUTTER_FILTER_NONE = 3
+  } clutter_filter_type_t;
+
+  typedef enum {
     INTERP_METHOD_NONE = 0,
     INTERP_METHOD_LINEAR = 1,
     INTERP_METHOD_GAUSSIAN = 2
@@ -1005,6 +1012,8 @@ public:
 
   double atmos_atten_db_per_km;
 
+  clutter_filter_type_t clutter_filter_type;
+
   double clutter_model_width_in_adaptive_filter;
 
   double init_notch_width_in_adaptive_filter;
@@ -1012,8 +1021,6 @@ public:
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
-
-  tdrp_bool_t use_polynomial_regression_clutter_filter;
 
   tdrp_bool_t regression_filter_determine_order_from_cnr;
 
@@ -1026,8 +1033,6 @@ public:
   double regression_filter_min_cnr_db;
 
   notch_interp_method_t regression_filter_notch_interp_method;
-
-  tdrp_bool_t use_simple_notch_clutter_filter;
 
   double simple_notch_filter_width_mps;
 
@@ -1318,7 +1323,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[296];
+  mutable TDRPtable _table[295];
 
   const char *_className;
 

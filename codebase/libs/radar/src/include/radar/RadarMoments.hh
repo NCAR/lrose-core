@@ -200,7 +200,8 @@ public:
   typedef enum {
     CLUTTER_FILTER_ADAPTIVE,
     CLUTTER_FILTER_REGRESSION,
-    CLUTTER_FILTER_NOTCH
+    CLUTTER_FILTER_NOTCH,
+    CLUTTER_FILTER_NONE
   } clutter_filter_type_t;
 
   // set the estimated clutter width in MPS
