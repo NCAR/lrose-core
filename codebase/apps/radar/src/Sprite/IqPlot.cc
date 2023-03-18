@@ -392,7 +392,7 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   char text[1024];
 
   vector<string> legendsLeft;
-  legendsLeft.push_back(getFftWindowName());
+  legendsLeft.push_back(getFftWindowName() + " window");
   if (_medianFiltLen > 1) {
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
