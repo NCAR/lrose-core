@@ -176,10 +176,6 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     snprintf(text, 1024, "Notch filter");
     legendsLeft.push_back(text);
   }
-  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
-    snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
-    legendsLeft.push_back(text);
-  }
   if (_legendsOn) {
     _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
   }
@@ -1299,17 +1295,19 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
     
     ForsytheRegrFilter regrF;
+    bool orderAuto = true;
+    if (_regrOrder > 2) {
+      orderAuto = false;
+    }
     if (beam->getIsStagPrt()) {
       regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN(),
-                           _params.regression_filter_determine_order_from_cnr,
-                           _params.regression_filter_specified_polynomial_order,
+                           orderAuto, _regrOrder,
                            _regrClutWidthFactor,
                            _regrCnrExponent,
                            beam->getCalib().getWavelengthCm() / 100.0);
     } else {
       regrF.setup(nSamples,
-                  _params.regression_filter_determine_order_from_cnr,
-                  _params.regression_filter_specified_polynomial_order,
+                  orderAuto, _regrOrder,
                   _regrClutWidthFactor,
                   _regrCnrExponent,
                   beam->getCalib().getWavelengthCm() / 100.0);

@@ -1253,16 +1253,15 @@ void SpriteWidget::_createWaterfall(int id)
   waterfall->setPlotType(_params._waterfall_plots[id].plot_type);
   waterfall->setMedianFiltLen(_params._waterfall_plots[id].median_filter_len);
   waterfall->setFftWindow(_params._waterfall_plots[id].fft_window);
-
+  
   waterfall->setClutterFilterType
     ((RadarMoments::clutter_filter_type_t)
-     _params._iq_plots[id].clutter_filter_type);
-  waterfall->setPlotClutModel(_params._iq_plots[id].plot_clutter_model);
-  waterfall->setClutModelWidthMps(_params._iq_plots[id].clutter_model_width_mps);
-  waterfall->setRegrOrder(_params._iq_plots[id].regression_order);
+     _params._waterfall_plots[id].clutter_filter_type);
+  waterfall->setClutModelWidthMps(_params._waterfall_plots[id].clutter_model_width_mps);
+  waterfall->setRegrOrder(_params._waterfall_plots[id].regression_order);
   waterfall->setRegrFiltNotchInterpMethod
     ((RadarMoments::notch_interp_method_t)
-     _params._iq_plots[id].regression_filter_notch_interp_method);
+     _params._waterfall_plots[id].regression_filter_notch_interp_method);
   
   WorldPlot &waterfallWorld = waterfall->getFullWorld();
   

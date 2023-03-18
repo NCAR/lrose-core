@@ -207,7 +207,7 @@ public:
     waterfall_type_t plot_type;
     fft_window_t fft_window;
     int median_filter_len;
-    tdrp_bool_t use_adaptive_filter;
+    clutter_filter_type_t clutter_filter_type;
     double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;

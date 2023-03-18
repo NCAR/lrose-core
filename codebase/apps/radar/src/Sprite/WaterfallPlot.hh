@@ -181,10 +181,6 @@ protected:
   double _regrCnrExponent;
   RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
 
-  // unzoomed world
-
-  WorldPlot _fullWorld;
-
   // color map
 
   ColorMap _cmap;

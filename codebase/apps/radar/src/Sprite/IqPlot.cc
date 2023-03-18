@@ -1397,17 +1397,20 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
     
     ForsytheRegrFilter regrF;
+    bool orderAuto = true;
+    if (_regrOrder > 2) {
+      orderAuto = false;
+    }
+ 
     if (_beam->getIsStagPrt()) {
       regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
-                           _params.regression_filter_determine_order_from_cnr,
-                           _params.regression_filter_specified_polynomial_order,
+                           orderAuto, _regrOrder,
                            _regrClutWidthFactor,
                            _regrCnrExponent,
                            _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
       regrF.setup(_nSamples,
-                  _params.regression_filter_determine_order_from_cnr,
-                  _params.regression_filter_specified_polynomial_order,
+                  orderAuto, _regrOrder,
                   _regrClutWidthFactor,
                   _regrCnrExponent,
                   _beam->getCalib().getWavelengthCm() / 100.0);

@@ -491,7 +491,7 @@ typedef struct {
   waterfall_type_t plot_type;
   fft_window_t fft_window;
   int median_filter_len;
-  boolean use_adaptive_filter;
+  clutter_filter_type_t clutter_filter_type;
   double clutter_model_width_mps;
   boolean use_regression_filter;
   int regression_order;
@@ -500,8 +500,8 @@ typedef struct {
 
 paramdef struct waterfall_plot_t {
   p_default = {
-               { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN },
-               { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, false, 0.75, false, -1, INTERP_METHOD_GAUSSIAN }
+  { WATERFALL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_NONE, 0.75, false, -1, INTERP_METHOD_GAUSSIAN },
+  { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, 0.75, false, -1, INTERP_METHOD_GAUSSIAN }
   };
   p_descr = "Details of waterfall plots for each sub panel.";
   p_help = "HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood. For the regression filter, set the order to -1 to compute the order automatically in the filter.";

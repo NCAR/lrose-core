@@ -1615,11 +1615,23 @@
       tt->struct_def.fields[2].ptype = INT_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_waterfall_plots->median_filter_len - (char *) _waterfall_plots;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
-      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("clutter_filter_type_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("clutter_filter_type");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_waterfall_plots->use_adaptive_filter - (char *) _waterfall_plots;
+        (char *) &_waterfall_plots->clutter_filter_type - (char *) _waterfall_plots;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("clutter_filter_type_t");
+        tt->struct_def.fields[3].enum_def.nfields = 4;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+        tt->struct_def.fields[3].enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+        tt->struct_def.fields[3].enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+        tt->struct_def.fields[3].enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+        tt->struct_def.fields[3].enum_def.fields[3].val = CLUTTER_FILTER_NONE;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("clutter_model_width_mps");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
@@ -1655,16 +1667,16 @@
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = WATERFALL_HC;
       tt->struct_vals[1].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[2].i = 3;
-      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[2].i = 1;
+      tt->struct_vals[3].e = CLUTTER_FILTER_NONE;
       tt->struct_vals[4].d = 0.75;
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].i = -1;
       tt->struct_vals[7].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[8].e = WATERFALL_ZDR;
       tt->struct_vals[9].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[10].i = 3;
-      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[10].i = 1;
+      tt->struct_vals[11].e = CLUTTER_FILTER_ADAPTIVE;
       tt->struct_vals[12].d = 0.75;
       tt->struct_vals[13].b = pFALSE;
       tt->struct_vals[14].i = -1;
