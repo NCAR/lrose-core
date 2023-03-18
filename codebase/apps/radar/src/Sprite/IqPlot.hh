@@ -268,8 +268,14 @@ protected:
                    const RadarComplex_t *iq);
 
   void _computePowerSpectrum(const RadarComplex_t *iq,
-                             double *power,
-                             double *dbm);
+                             RadarComplex_t *iqWindowed,
+                             RadarComplex_t *iqFilt,
+                             RadarComplex_t *iqNotched,
+                             double *dbm,
+                             double *dbmFilt,
+                             double &filterRatio,
+                             double &spectralNoise,
+                             double &spectralSnr);
   
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,
