@@ -1480,7 +1480,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   _regrOrderInUse = 0;
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
-    // adaptive filtering takes precedence over regression
+    // adaptive spectral filter
     
     TaArray<RadarComplex_t> filtAdaptWindowed_;
     RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
@@ -1504,7 +1504,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     
   } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
 
-    // regression
+    // regression filter
 
     ForsytheRegrFilter regrF;
     if (_beam->getIsStagPrt()) {
@@ -1547,6 +1547,30 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
       power[ii] = RadarComplex::power(filtRegrSpec[ii]);
+    }
+    
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+
+    // simple notch filter
+    
+    TaArray<RadarComplex_t> filtNotchWindowed_;
+    RadarComplex_t *filtNotchWindowed = filtNotchWindowed_.alloc(_nSamples);
+    double filterRatio, spectralNoise, spectralSnr;
+    moments.applyNotchFilter(_nSamples, _beam->getPrt(), fft,
+                             iqWindowed, NULL,
+                             calibNoise,
+                             filtNotchWindowed,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr);
+    
+    TaArray<RadarComplex_t> filtNotchSpec_;
+    RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(_nSamples);
+    fft.fwd(filtNotchWindowed, filtNotchSpec);
+    fft.shift(filtNotchSpec);
+
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      power[ii] = RadarComplex::power(filtNotchSpec[ii]);
     }
     
   } else {

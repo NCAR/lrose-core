@@ -2182,6 +2182,15 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setClutFiltType.addAction(&setClutFiltRegr);
 
+  QAction setClutFiltNotch("Notch", &setClutFiltType);
+  connect(&setClutFiltNotch, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setClutterFilterType
+              (RadarMoments::CLUTTER_FILTER_NOTCH);
+            _configureIqPlot(id);
+          } );
+  setClutFiltType.addAction(&setClutFiltNotch);
+
   QAction setClutFiltNone("None", &setClutFiltType);
   connect(&setClutFiltNone, &QAction::triggered,
           [this, id] () {
