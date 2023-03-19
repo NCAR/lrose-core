@@ -2372,55 +2372,85 @@ void Beam::_filterDpAltHvCoCross()
 
     }
       
-    // filter the HC time series, save the filter ratio
-    
-    TaArray<double> _specRatio;
-    double *specRatio = _specRatio.alloc(_nSamplesHalf);
-    double spectralNoise = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
 
-    RadarComplex_t *specHc = NULL;
-    if (gate->specHcComputed) {
-      specHc = gate->specHc;
-    }
-    
-    _mom->applyClutterFilter(_nSamplesHalf,
-                             _prt * 2.0,
-			     *_fftHalf,
-			     *_regrHalf,
-			     _windowHalf,
-			     gate->iqhcOrig,
-			     gate->iqhc, specHc,
-			     calibNoise,
-			     gate->iqhcF,
-			     gate->iqhcNotched,
-			     filterRatio,
-			     spectralNoise,
-			     spectralSnr,
-			     specRatio);
-
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+      // filter the HC time series, save the filter ratio
+      
+      TaArray<double> _specRatio;
+      double *specRatio = _specRatio.alloc(_nSamplesHalf);
+      double spectralNoise = 1.0e-13;
+      double filterRatio = 1.0;
+      double spectralSnr = 1.0;
+      
+      RadarComplex_t *specHc = NULL;
+      if (gate->specHcComputed) {
+        specHc = gate->specHc;
+      }
+      
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqhcOrig, gate->iqhc, specHc,
+                               calibNoise,
+                               gate->iqhcF, gate->iqhcNotched,
+                               filterRatio, spectralNoise,
+                               spectralSnr, specRatio);
+      
+      if (filterRatio > 1.0) {
+        fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+      } else {
+        fields.clut_2_wx_ratio = MomentsFields::missingDouble;
+      }
+      fields.spectral_noise = 10.0 * log10(spectralNoise);
+      fields.spectral_snr = 10.0 * log10(spectralSnr);
+      
+      // apply the spectral filter ratio to other channels
+      
+      
+      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+                             gate->iqvc, specRatio,
+                             gate->iqvcF, gate->iqvcNotched);
+      
+      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+                             gate->iqhx, specRatio,
+                             gate->iqhxF, NULL);
+      
+      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+                             gate->iqvx, specRatio,
+                             gate->iqvxF, NULL);
+      
     } else {
-      fields.clut_2_wx_ratio = MomentsFields::missingDouble;
+      
+      // filter all of the channels individually - Hc, Vc, Hx, Vx
+      
+      double filterRatioHc, spectralNoiseHc, spectralSnrHc;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqhcOrig, gate->iqhc, NULL, calibNoise,
+                               gate->iqhcF, gate->iqhcNotched,
+                               filterRatioHc, spectralNoiseHc, spectralSnrHc);
+
+      double filterRatioVc, spectralNoiseVc, spectralSnrVc;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvcOrig, gate->iqvc, NULL, calibNoise,
+                               gate->iqvcF, gate->iqvcNotched,
+                               filterRatioVc, spectralNoiseVc, spectralSnrVc);
+
+      double filterRatioHx, spectralNoiseHx, spectralSnrHx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqhxOrig, gate->iqhx, NULL, calibNoise,
+                               gate->iqhxF, NULL,
+                               filterRatioHx, spectralNoiseHx, spectralSnrHx);
+
+      double filterRatioVx, spectralNoiseVx, spectralSnrVx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvxOrig, gate->iqvx, NULL, calibNoise,
+                               gate->iqvxF, NULL,
+                               filterRatioVx, spectralNoiseVx, spectralSnrVx);
+      
     }
-    fields.spectral_noise = 10.0 * log10(spectralNoise);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
-    
-    // apply the filter ratio to other channels
-    
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvc, specRatio,
-                           gate->iqvcF, gate->iqvcNotched);
-    
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqhx, specRatio,
-                           gate->iqhxF, NULL);
-    
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvx, specRatio,
-                           gate->iqvxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -3380,18 +3410,8 @@ void Beam::_initMomentsObject(RadarMoments *mom)
     mom->setMinSnrDbForLdr(_params.min_snr_db_for_ldr);
   }
 
-  mom->setClutterWidthMps(_params.clutter_model_width_in_adaptive_filter);
-
-  mom->setClutterInitNotchWidthMps(_params.init_notch_width_in_adaptive_filter);
-  
   mom->setNSamples(_nSamples);
 
-  mom->setApplySpectralResidueCorrection
-    (_params.apply_residue_correction_in_adaptive_filter,
-     _params.min_snr_db_for_residue_correction);
-  
-  mom->setUseAdaptiveFilter();
-  
   RadarMoments::notch_interp_method_t interpMethod =
     (RadarMoments::notch_interp_method_t)
     _params.regression_filter_notch_interp_method;
@@ -3401,8 +3421,18 @@ void Beam::_initMomentsObject(RadarMoments *mom)
                                 _params.regression_filter_min_cnr_db);
   } else if (_params.clutter_filter_type == Params::CLUTTER_FILTER_NOTCH) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
+  } else {
+    mom->setUseAdaptiveFilter();
   }
 
+  mom->setApplySpectralResidueCorrection
+    (_params.apply_residue_correction_in_adaptive_filter,
+     _params.min_snr_db_for_residue_correction);
+  
+  mom->setClutterWidthMps(_params.clutter_model_width_in_adaptive_filter);
+
+  mom->setClutterInitNotchWidthMps(_params.init_notch_width_in_adaptive_filter);
+  
   if (_params.correct_for_system_phidp) {
     mom->setCorrectForSystemPhidp(true);
   } else {
