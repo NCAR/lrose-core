@@ -2475,7 +2475,7 @@ void Beam::_filterDpAltHvCoCross()
     // compute notched moments for rhohv, phidp and zdr
 
     MomentsFields fieldsN;
-    _mom->computeCovarDpAltHvCoCross(gate->iqhcF, gate->iqvcF,
+    _mom->computeCovarDpAltHvCoCross(gate->iqhcNotched, gate->iqvcNotched,
                                      gate->iqhxF, gate->iqvxF, 
                                      fieldsN);
     _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc,
@@ -2492,9 +2492,9 @@ void Beam::_filterDpAltHvCoCross()
                                    igate, 
                                    fieldsN);
 
-    fieldsF.test = fieldsN.zdr;
-    fieldsF.test2 = fieldsN.phidp;
-    // fieldsF.test3 = fieldsN.rhohv;
+    fieldsF.test6 = fieldsN.zdr;
+    fieldsF.test7 = fieldsN.phidp;
+    fieldsF.test8 = fieldsN.rhohv;
     
     // compute clutter power
     
@@ -5819,9 +5819,9 @@ void Beam::_performClutterFiltering()
   // copy the unfiltered fields to the filtered fields
   
   for (int igate = 0; igate < _nGates; igate++) {
-    _gateData[igate]->fields.test = _gateData[igate]->fields.zdr;
-    _gateData[igate]->fields.test2 = _gateData[igate]->fields.phidp;
-    // _gateData[igate]->fields.test3 = _gateData[igate]->fields.rhohv;
+    _gateData[igate]->fields.test6 = _gateData[igate]->fields.zdr;
+    _gateData[igate]->fields.test7 = _gateData[igate]->fields.phidp;
+    _gateData[igate]->fields.test8 = _gateData[igate]->fields.rhohv;
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
   

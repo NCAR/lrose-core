@@ -389,11 +389,16 @@ public:
 
   // for testing
 
-  mutable double test;
+  mutable double test0;
+  mutable double test1;
   mutable double test2;
   mutable double test3;
   mutable double test4;
   mutable double test5;
+  mutable double test6;
+  mutable double test7;
+  mutable double test8;
+  mutable double test9;
   
   static const double missingDouble;
 

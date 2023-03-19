@@ -2218,11 +2218,17 @@ typedef enum {
 
   PRT,
   NUM_PULSES,
-  TEST,
+
+  TEST0,
+  TEST1,
   TEST2,
   TEST3,
   TEST4,
-  TEST5
+  TEST5,
+  TEST6,
+  TEST7,
+  TEST8,
+  TEST9
 
 } field_id_t;
 
@@ -2320,7 +2326,7 @@ paramdef struct output_field_t {
     { SDEV_VV, "SDEV_VV", "dBm", 0.01, -320, FALSE, FALSE},
     { PRT, "PRT", "s", 0.00001, 780e-6, TRUE, FALSE},
     { NUM_PULSES, "NUM_PULSES", "", 1, 0, TRUE, FALSE},
-    { TEST, "TEST", "", 0.01, -320, FALSE, FALSE}
+    { TEST0, "TEST0", "", 0.01, -320, FALSE, FALSE}
   };
   p_descr = "Indicate which fields should be written to the Dsr FMQ.";
   p_help = "Choose the ID from the list. The name and units can be set however the user prefers. The scale and bias are applied to the floating point value to compute the 16-bit output value for the FMQ. The write_filtered and write_unfiltered flags indicate which fields should be written.";

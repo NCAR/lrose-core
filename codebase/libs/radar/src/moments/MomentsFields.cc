@@ -383,11 +383,16 @@ void MomentsFields::init()
 
   // fields for testing
 
-  test = missingDouble;
+  test0 = missingDouble;
+  test1 = missingDouble;
   test2 = missingDouble;
   test3 = missingDouble;
   test4 = missingDouble;
   test5 = missingDouble;
+  test6 = missingDouble;
+  test7 = missingDouble;
+  test8 = missingDouble;
+  test9 = missingDouble;
   
 }
 
@@ -727,11 +732,16 @@ void MomentsFields::initToZero()
 
   // fields for testing
 
-  test = 0.0;
+  test0 = 0.0;
+  test1 = 0.0;
   test2 = 0.0;
   test3 = 0.0;
   test4 = 0.0;
   test5 = 0.0;
+  test6 = 0.0;
+  test7 = 0.0;
+  test8 = 0.0;
+  test9 = 0.0;
   
 }
 
