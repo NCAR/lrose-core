@@ -380,6 +380,10 @@ RadxNcfStr::RadxNcfStr()
   TIME_W3C_STR = "time_w3c_str";
   TITLE = "title";
   TRACK = "track";
+  TRACK_REL_ROT = "track_rel_rot";
+  TRACK_REL_TILT = "track_rel_tilt";
+  TRACK_REL_AZ = "track_rel_az";
+  TRACK_REL_EL = "track_rel_el";
   TWO_WAY_RADOME_LOSS_H = "two_way_radome_loss_h";
   TWO_WAY_RADOME_LOSS_V = "two_way_radome_loss_v";
   TWO_WAY_WAVEGUIDE_LOSS_H = "two_way_waveguide_loss_h";
@@ -593,6 +597,10 @@ RadxNcfStr::RadxNcfStr()
   TIME_COVERAGE_END_LONG = "data_volume_end_time_utc";
   TIME_COVERAGE_START_LONG = "data_volume_start_time_utc";
   TRACK_LONG = "platform_track_over_the_ground";
+  TRACK_REL_ROT_LONG = "track_rel_rotation_angle";
+  TRACK_REL_TILT_LONG = "track_rel_tilt_angle";
+  TRACK_REL_AZ_LONG = "track_rel_azimith_angle";
+  TRACK_REL_EL_LONG = "track_rel_elevation_angle";
   TWO_WAY_RADOME_LOSS_H_LONG = "radar_calibration_two_way_radome_loss_h_channel";
   TWO_WAY_RADOME_LOSS_V_LONG = "radar_calibration_two_way_radome_loss_v_channel";
   TWO_WAY_WAVEGUIDE_LOSS_H_LONG = "radar_calibration_two_way_waveguide_loss_h_channel";

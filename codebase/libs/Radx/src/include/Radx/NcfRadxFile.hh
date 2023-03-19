@@ -582,6 +582,10 @@ private:
   vector<double> _geoRollRate;
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
+  vector<double> _geoTrackRelRot;
+  vector<double> _geoTrackRelTilt;
+  vector<double> _geoTrackRelAz;
+  vector<double> _geoTrackRelEl;
 
   // field meta-data
   

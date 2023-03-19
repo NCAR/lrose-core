@@ -1550,6 +1550,10 @@ void NcfRadxFile::_clearGeorefVariables()
   _geoPitchRate.clear();
   _geoDriveAngle1.clear();
   _geoDriveAngle2.clear();
+  _geoTrackRelRot.clear();
+  _geoTrackRelTilt.clear();
+  _geoTrackRelAz.clear();
+  _geoTrackRelEl.clear();
 
 }
 
@@ -1610,6 +1614,11 @@ int NcfRadxFile::_readGeorefVariables()
   _readRayVar(PITCH_CHANGE_RATE, _geoPitchRate, false);
   _readRayVar(DRIVE_ANGLE_1, _geoDriveAngle1, false);
   _readRayVar(DRIVE_ANGLE_2, _geoDriveAngle2, false);
+
+  _readRayVar(TRACK_REL_ROT, _geoTrackRelRot, false);
+  _readRayVar(TRACK_REL_TILT, _geoTrackRelTilt, false);
+  _readRayVar(TRACK_REL_AZ, _geoTrackRelAz, false);
+  _readRayVar(TRACK_REL_EL, _geoTrackRelEl, false);
 
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_readGeorefVariables");
@@ -1943,6 +1952,18 @@ int NcfRadxFile::_createRays(const string &path)
       }
       if (_geoDriveAngle2.size() > rayIndex) {
         geo.setDriveAngle2(_geoDriveAngle2[rayIndex]);
+      }
+      if (_geoTrackRelRot.size() > rayIndex) {
+        geo.setTrackRelRot(_geoTrackRelRot[rayIndex]);
+      }
+      if (_geoTrackRelTilt.size() > rayIndex) {
+        geo.setTrackRelTilt(_geoTrackRelTilt[rayIndex]);
+      }
+      if (_geoTrackRelAz.size() > rayIndex) {
+        geo.setTrackRelAz(_geoTrackRelAz[rayIndex]);
+      }
+      if (_geoTrackRelEl.size() > rayIndex) {
+        geo.setTrackRelEl(_geoTrackRelEl[rayIndex]);
       }
       
       ray->setGeoref(geo);
