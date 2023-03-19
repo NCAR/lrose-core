@@ -2134,8 +2134,11 @@ void Moments::_loadOutputFields(RadxRay *momRay)
 
           // test fields
 
-        case Params::TEST:
-          *datp = fields->test;
+        case Params::TEST0:
+          *datp = fields->test0;
+          break;
+        case Params::TEST1:
+          *datp = fields->test1;
           break;
         case Params::TEST2:
           *datp = fields->test2;
@@ -2148,6 +2151,18 @@ void Moments::_loadOutputFields(RadxRay *momRay)
           break;
         case Params::TEST5:
           *datp = fields->test5;
+          break;
+        case Params::TEST6:
+          *datp = fields->test6;
+          break;
+        case Params::TEST7:
+          *datp = fields->test7;
+          break;
+        case Params::TEST8:
+          *datp = fields->test8;
+          break;
+        case Params::TEST9:
+          *datp = fields->test9;
           break;
 
           // kdp
