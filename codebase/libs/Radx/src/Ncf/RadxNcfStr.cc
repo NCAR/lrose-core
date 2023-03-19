@@ -597,10 +597,10 @@ RadxNcfStr::RadxNcfStr()
   TIME_COVERAGE_END_LONG = "data_volume_end_time_utc";
   TIME_COVERAGE_START_LONG = "data_volume_start_time_utc";
   TRACK_LONG = "platform_track_over_the_ground";
-  TRACK_REL_ROT_LONG = "track_rel_rotation_angle";
-  TRACK_REL_TILT_LONG = "track_rel_tilt_angle";
-  TRACK_REL_AZ_LONG = "track_rel_azimith_angle";
-  TRACK_REL_EL_LONG = "track_rel_elevation_angle";
+  TRACK_REL_ROT_LONG = "track_relative_rotation_angle";
+  TRACK_REL_TILT_LONG = "track_relative_tilt_angle";
+  TRACK_REL_AZ_LONG = "track_relative_azimith_angle";
+  TRACK_REL_EL_LONG = "track_relative_elevation_angle";
   TWO_WAY_RADOME_LOSS_H_LONG = "radar_calibration_two_way_radome_loss_h_channel";
   TWO_WAY_RADOME_LOSS_V_LONG = "radar_calibration_two_way_radome_loss_v_channel";
   TWO_WAY_WAVEGUIDE_LOSS_H_LONG = "radar_calibration_two_way_waveguide_loss_h_channel";
@@ -699,5 +699,9 @@ void RadxNcfStr::_createRayMetaNameSet()
   _rayMetaNames.insert(RadxNcfStr::RAY_GATE_SPACING);
   _rayMetaNames.insert(RadxNcfStr::RAY_N_GATES);
   _rayMetaNames.insert(RadxNcfStr::RAY_START_INDEX);
+  _rayMetaNames.insert(RadxNcfStr::TRACK_REL_ROT);
+  _rayMetaNames.insert(RadxNcfStr::TRACK_REL_TILT);
+  _rayMetaNames.insert(RadxNcfStr::TRACK_REL_AZ);
+  _rayMetaNames.insert(RadxNcfStr::TRACK_REL_EL);
 
 }
