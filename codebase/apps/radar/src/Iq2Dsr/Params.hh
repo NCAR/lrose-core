@@ -390,16 +390,17 @@ public:
     SDEV_VV = 173,
     PRT = 174,
     NUM_PULSES = 175,
-    TEST0 = 176,
-    TEST1 = 177,
-    TEST2 = 178,
-    TEST3 = 179,
-    TEST4 = 180,
-    TEST5 = 181,
-    TEST6 = 182,
-    TEST7 = 183,
-    TEST8 = 184,
-    TEST9 = 185
+    TEST = 176,
+    TEST0 = 177,
+    TEST1 = 178,
+    TEST2 = 179,
+    TEST3 = 180,
+    TEST4 = 181,
+    TEST5 = 182,
+    TEST6 = 183,
+    TEST7 = 184,
+    TEST8 = 185,
+    TEST9 = 186
   } field_id_t;
 
   typedef enum {

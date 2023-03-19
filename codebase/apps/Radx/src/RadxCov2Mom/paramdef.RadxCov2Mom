@@ -982,6 +982,7 @@ typedef enum {
   PHIDP_JITTER_FOR_KDP,
   ZDR_SDEV_FOR_KDP,
 
+  TEST,
   TEST0,
   TEST1,
   TEST2,

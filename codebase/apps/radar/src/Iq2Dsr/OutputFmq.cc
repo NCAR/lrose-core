@@ -1854,6 +1854,8 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.prt - start);
     case Params::NUM_PULSES:
       return (&_flds.num_pulses - start);
+    case Params::TEST:
+      return (&_flds.test0 - start);
     case Params::TEST0:
       return (&_flds.test0 - start);
     case Params::TEST1:

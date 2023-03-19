@@ -2219,6 +2219,7 @@ typedef enum {
   PRT,
   NUM_PULSES,
 
+  TEST,
   TEST0,
   TEST1,
   TEST2,
