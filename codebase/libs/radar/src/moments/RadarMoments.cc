@@ -4612,6 +4612,12 @@ void RadarMoments::applyRegressionFilter
     iqRegr.resize(nSamples);
     regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
     
+    // save filtered data, without interp, to iqNotched if non-NULL
+    
+    if (iqNotched != NULL) {
+      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
+    }
+
     // take the forward fft to compute the complex spectrum
     // of regr-filtered series
     
@@ -4655,12 +4661,6 @@ void RadarMoments::applyRegressionFilter
     
     fft.inv(inputSpecC.data(), iqFiltered);
     
-    // save filtered data, without interp, to iqNotched if non-NULL
-    
-    if (iqNotched != NULL) {
-      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
-    }
-
   } // if (_regrCnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
