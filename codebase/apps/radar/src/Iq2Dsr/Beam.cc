@@ -2492,6 +2492,10 @@ void Beam::_filterDpAltHvCoCross()
                                    igate, 
                                    fieldsN);
 
+    fieldsF.zdr = fieldsN.zdr;
+    fieldsF.phidp = fieldsN.phidp;
+    fieldsF.rhohv = fieldsN.rhohv;
+    
     fieldsF.test6 = fieldsN.zdr;
     fieldsF.test7 = fieldsN.phidp;
     fieldsF.test8 = fieldsN.rhohv;
