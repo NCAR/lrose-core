@@ -4597,6 +4597,9 @@ void RadarMoments::applyRegressionFilter
     // don't use a regression filter
     
     memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+    if (iqNotched) {
+      memcpy(iqNotched, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+    }
     regrSpec = unfiltSpec;
     _regrInterpRatioDb = 0.0;
 
@@ -4652,6 +4655,12 @@ void RadarMoments::applyRegressionFilter
     
     fft.inv(inputSpecC.data(), iqFiltered);
     
+    // save filtered data, without interp, to iqNotched if non-NULL
+    
+    if (iqNotched != NULL) {
+      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
+    }
+
   } // if (_regrCnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
@@ -4667,12 +4676,6 @@ void RadarMoments::applyRegressionFilter
   // compute SNR based on the spectral noise
 
   spectralSnr = spectralNoise / calNoise;
-
-  // save filtered data, without interp, to iqNotched
-
-  if (iqNotched != NULL) {
-    memcpy(iqNotched, iqFiltered, nSamples * sizeof(RadarComplex_t));
-  }
 
 }
 
