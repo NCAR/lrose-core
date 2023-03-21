@@ -151,6 +151,10 @@ public:
              double prtSecs,
              RadarComplex_t *filteredIq);
   
+  // compute the power using a 3rd order polynomial
+  
+  double computeOrder3ClutPower(const RadarComplex_t *unfiltIq);
+  
   // compute the power from the central 3 points in the FFT
   
   double compute3PtClutPower(const RadarComplex_t *rawIq);

@@ -390,7 +390,6 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
       fit->prepareForFit(_polyOrder, _xxVals);
       _forsytheArray[_polyOrder][_nSamples] = fit;
     }
-    fit->performFit(rawI);
     
   } else {
 
@@ -433,6 +432,81 @@ void ForsytheRegrFilter::_alloc()
 }
 
 /////////////////////////////////////////////////////////////////////////
+// compute the power using a 3rd order polynomial
+
+double ForsytheRegrFilter::computeOrder3ClutPower(const RadarComplex_t *unfiltIq)
+  
+{
+
+  assert(_nSamples != 0);
+  assert(_setupDone);
+
+  // copy IQ data
+
+  vector<double> rawI, rawQ;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    rawI.push_back(unfiltIq[ii].re);
+    rawQ.push_back(unfiltIq[ii].im);
+  }
+
+  // find the entry in the forsythe array, if possible
+
+  size_t order = 3;
+  ForsytheFit *fit = &_forsythe;
+  
+  if (order < ORDER_ARRAY_MAX &&
+      _nSamples < NSAMPLES_ARRAY_MAX) {
+    
+    // re-use objects
+    // check for existing entry in array of fit objects
+    
+    fit = _forsytheArray[order][_nSamples];
+    if (fit == NULL) {
+      // create new object for (order, nsamples)
+      fit = new ForsytheFit;
+      fit->prepareForFit(order, _xxVals);
+      _forsytheArray[order][_nSamples] = fit;
+    }
+    
+  } else {
+
+    // use single object
+
+    fit->prepareForFit(order, _xxVals);
+    
+  }
+
+  // perform the fit on I and Q and
+  // compute the estimated I/Q polynomial values
+  
+  fit->performFit(rawI);
+  vector<double> iSmoothed = fit->getYEstVector();
+  RadarComplex_t empty(0.0, 0.0);
+  vector<RadarComplex_t> filtIq(_nSamples, empty);
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    filtIq[ii].re = rawI[ii] - iSmoothed[ii];
+  }
+  
+  fit->performFit(rawQ);
+  vector<double> qSmoothed = fit->getYEstVector();
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    filtIq[ii].im = rawQ[ii] - qSmoothed[ii];
+  }
+
+  // compute powers
+  
+  double unfiltPower = RadarComplex::meanPower(unfiltIq, _nSamples);
+  double filtPower = RadarComplex::meanPower(filtIq.data(), _nSamples);
+  double clutPower = unfiltPower - filtPower;
+  if (clutPower <= 0.0) {
+    clutPower = 1.0e-20;
+  }
+
+  return clutPower;
+
+}
+
+/////////////////////////////////////////////////////////////////////////
 // compute the power from the central 3 points in the FFT
 
 double ForsytheRegrFilter::compute3PtClutPower(const RadarComplex_t *rawIq)
@@ -456,7 +530,7 @@ double ForsytheRegrFilter::compute3PtClutPower(const RadarComplex_t *rawIq)
     sumPower += power;
   }
 
-  return sumPower / 3.0;
+  return sumPower / _nSamples;
 
 }
 

@@ -4539,7 +4539,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //    spectralSnr: ratio of spectral noise to noise power
 //    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
 //
-//  After calling this routine, you can call getCnrRegr3Db() to get
+//  After calling this routine, you can call getRegrCnrDb() to get
 //  the clutter-to-signal-ratio from a 3rd-order regression filter
 
 void RadarMoments::applyRegressionFilter
@@ -4585,9 +4585,10 @@ void RadarMoments::applyRegressionFilter
 
   // compute clutter to noise ratio, using the central 3 points in the FFT
   
-  double clutPower = regr.compute3PtClutPower(iqUnfiltered);
-  double cnr = clutPower / calNoise;
-  _regrCnrDb = 10.0 * log10(cnr);
+  // double clutPower3 = regr.compute3PtClutPower(iqUnfiltered);
+  double clutPower3 = regr.computeOrder3ClutPower(iqUnfiltered);
+  double cnr3 = clutPower3 / calNoise;
+  _regrCnrDb = 10.0 * log10(cnr3);
   
   if (_regrCnrDb < _regrMinCnrDb) {
 
@@ -4613,6 +4614,9 @@ void RadarMoments::applyRegressionFilter
     
     if (iqNotched != NULL) {
 
+      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
+
+#ifdef NOTNOW      
       // ensure the phases in the fft domain are the same
       // as for the unfiltered sample
       
@@ -4633,6 +4637,7 @@ void RadarMoments::applyRegressionFilter
       }
       
       fft.inv(scaledInput.data(), iqNotched);
+#endif
 
     }
 
