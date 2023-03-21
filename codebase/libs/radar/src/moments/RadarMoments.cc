@@ -4565,26 +4565,23 @@ void RadarMoments::applyRegressionFilter
   // apply the window to the original unfiltered times series
   // normally this is a no-op because the window is rectangular
 
-  vector<RadarComplex_t> unfiltWindowed;
-  unfiltWindowed.resize(nSamples);
+  RadarComplex_t empty(0.0, 0.0);
+  vector<RadarComplex_t> unfiltWindowed(nSamples, empty);
   applyWindow(iqUnfiltered, window, unfiltWindowed.data(), nSamples);
   
   // take the forward fft to compute the complex spectrum of unfiltered series
   
-  vector<RadarComplex_t> inputSpecC;
-  inputSpecC.resize(nSamples);
+  vector<RadarComplex_t> inputSpecC(nSamples, empty);
   fft.fwd(unfiltWindowed.data(), inputSpecC.data());
   
   // compute the real unfiltered spectrum
   
-  vector<double> unfiltSpec;
-  unfiltSpec.resize(nSamples);
+  vector<double> unfiltSpec(nSamples, 0.0);
   RadarComplex::loadPower(inputSpecC.data(), unfiltSpec.data(), nSamples);
 
   // allocate space for regression power spectrum
   
-  vector<double> regrSpec;
-  regrSpec.resize(nSamples);
+  vector<double> regrSpec(nSamples, 0.0);
 
   // compute clutter to noise ratio, using the central 3 points in the FFT
   
@@ -4608,21 +4605,41 @@ void RadarMoments::applyRegressionFilter
     // apply regression filter, passing in CNR
     // results are in iqRegr
     
-    vector<RadarComplex_t> iqRegr;
-    iqRegr.resize(nSamples);
+    vector<RadarComplex_t> iqRegr(nSamples, empty);
     regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
     
-    // save filtered data, without interp, to iqNotched if non-NULL
+    // if iqNotched is non-NULL,
+    // save filtered data, without interp across the notch
     
     if (iqNotched != NULL) {
-      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
+
+      // ensure the phases in the fft domain are the same
+      // as for the unfiltered sample
+      
+      vector<RadarComplex_t> specRegr(nSamples, empty);
+      fft.fwd(iqRegr.data(), specRegr.data());
+
+      vector<RadarComplex_t> scaledInput(inputSpecC);
+      vector<double> realRegr(nSamples, 0.0);
+      RadarComplex::loadPower(specRegr.data(), realRegr.data(), nSamples);
+      
+      for (int ii = 0; ii < nSamples; ii++) {
+        double magRatio = sqrt(realRegr[ii] / unfiltSpec[ii]);
+        if (magRatio > 1.0) {
+          magRatio = 1.0;
+        }
+        scaledInput[ii].re *= magRatio;
+        scaledInput[ii].im *= magRatio;
+      }
+      
+      fft.inv(scaledInput.data(), iqNotched);
+
     }
 
     // take the forward fft to compute the complex spectrum
     // of regr-filtered series
     
-    vector<RadarComplex_t> regrSpecC;
-    regrSpecC.resize(nSamples);
+    vector<RadarComplex_t> regrSpecC(nSamples, empty);
     fft.fwd(iqRegr.data(), regrSpecC.data());
     
     // compute the real regr-filtered spectrum
@@ -4660,7 +4677,7 @@ void RadarMoments::applyRegressionFilter
     // storing result in the filtered time series
     
     fft.inv(inputSpecC.data(), iqFiltered);
-    
+
   } // if (_regrCnrDb < _regrMinCnrDb) {
   
   // compute powers and filter ratio
