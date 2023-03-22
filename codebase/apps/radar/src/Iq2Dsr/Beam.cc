@@ -2492,9 +2492,12 @@ void Beam::_filterDpAltHvCoCross()
                                    igate, 
                                    fieldsN);
 
-    fieldsF.zdr = fieldsN.zdr;
-    fieldsF.phidp = fieldsN.phidp;
-    fieldsF.rhohv = fieldsN.rhohv;
+    if (_params.clutter_filter_type != Params::CLUTTER_FILTER_ADAPTIVE) {
+      fieldsF.zdr = fieldsN.zdr;
+      fieldsF.phidp = fieldsN.phidp;
+      fieldsF.rhohv = fieldsN.rhohv;
+      fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
+    }
     
     fieldsF.test6 = fieldsN.zdr;
     fieldsF.test7 = fieldsN.phidp;
