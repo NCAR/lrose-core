@@ -58,6 +58,60 @@ public:
   // Inputs:
   //   rawPowerSpec: unfiltered power spectrum
   //   nSamples: number of samples
+  //   locateTheClutter:
+  //     if true, locate wx and clutter
+  //     if false, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
+  //   clutterWidthMps: spectrum width for clutter model (m/s)
+  //   initNotchWidthMps: width of first guess notch (m/s)
+  //   nyquist: unambiguous vel (m/s)
+  //   calibratedNoise: noise power at digitizer from calibration (mW)
+  //
+  // Outputs:
+  //
+  //   filteredPowerSpec: power spectrum after filtering
+  //   notchedPowerSpec: power spectrum after notching, no interp
+  //
+  // After calling this method, you can use the get() methods
+  // to access the details, as follows:
+  //
+  //   getClutterFound(): true if clutter is identified in signal
+  //   getNotchStart(): spectral position of start of final filtering notch
+  //   getNotchEnd(): spectral position of end of final filtering notch
+  //   getRawPower(): mean power in unfiltered spectrum
+  //   getFilteredPower(): mean power in filtered spectrum
+  //   getPowerRemoved(): mean power removed by the filter (mW)
+  //   getSpectralNoise(): noise determined from the spectrum (mW)
+  //   getWeatherPos(): spectral location of weather peak
+  //   getClutterPos(): spectral location of clutter peak
+
+  void performAdaptive(const double *rawPowerSpec, 
+                       int nSamples,
+                       bool locateTheClutter,
+                       double clutterWidthMps,
+                       double initNotchWidthMps,
+                       double nyquist,
+                       double calibratedNoise,
+                       double *filteredPowerSpec,
+                       double *notchedPowerSpec);
+  
+  // get results of the fit - after calling non-static method
+
+  bool getClutterFound() const { return _clutterFound; }
+  int getNotchStart() const { return _notchStart; }
+  int getNotchEnd() const { return _notchEnd; }
+  double getRawPower() const{ return _rawPower; }
+  double getFilteredPower() const{ return _filteredPower; }
+  double getPowerRemoved() const{ return _powerRemoved; }
+  double getSpectralNoise() const{ return _spectralNoise; }
+  int getWeatherPos() const { return _weatherPos; }
+  int getClutterPos() const { return _clutterPos; }
+  
+  // Perform adaptive filtering on a power spectrum - static method
+  //
+  // Inputs:
+  //   rawPowerSpec: unfiltered power spectrum
+  //   nSamples: number of samples
   //   clutterWidthMps: spectrum width for clutter model (m/s)
   //   initNotchWidthMps: width of first guess notch (m/s)
   //   nyquist: unambiguous vel (m/s)
@@ -69,6 +123,7 @@ public:
   //
   //   clutterFound: true if clutter is identified in signal
   //   filteredPowerSpec: power spectrum after filtering
+  //   notchedPowerSpec: power spectrum after notching, no interp
   //   notchStart: spectral position of start of final filtering notch
   //   notchEnd: spectral position of end of final filtering notch
   //   rawPower: mean power in unfiltered spectrum
@@ -87,6 +142,7 @@ public:
                               bool setNotchToNoise,
                               bool &clutterFound,
                               double *filteredPowerSpec,
+                              double *notchedPowerSpec,
                               int &notchStart,
                               int &notchEnd,
                               double &rawPower,
@@ -261,6 +317,21 @@ public:
 
 protected:
 private:
+
+  // results of the fit - non-static method
+  
+  bool _clutterFound;
+  int _notchStart;
+  int _notchEnd;
+  double _rawPower;
+  double _filteredPower;
+  double _powerRemoved;
+  double _spectralNoise;
+  int _weatherPos;
+  int _clutterPos;
+  
+  double _weatherPeak, _clutterPeak, _clutNoise;
+  int _notchWidth, _halfNotchWidth;
   
 };
 

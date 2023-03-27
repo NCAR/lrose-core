@@ -1721,19 +1721,48 @@ void Beam::_filterDpAltHvCoCross()
     fields.spectral_noise = 10.0 * log10(spectralNoise);
     fields.spectral_snr = 10.0 * log10(spectralSnr);
     
+      // filter the other channels
+      
+      double filterRatioVc, spectralNoiseVc, spectralSnrVc;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvcOrig, gate->iqvc, NULL,
+                               calibNoise,
+                               gate->iqvcF, gate->iqvcNotched,
+                               filterRatioVc, spectralNoiseVc,
+                               spectralSnrVc);
+      
+      double filterRatioHx, spectralNoiseHx, spectralSnrHx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqhxOrig, gate->iqhx, NULL,
+                               calibNoise,
+                               gate->iqhxF, NULL,
+                               filterRatioHx, spectralNoiseHx,
+                               spectralSnrHx);
+      
+      double filterRatioVx, spectralNoiseVx, spectralSnrVx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvxOrig, gate->iqvx, NULL,
+                               calibNoise,
+                               gate->iqvxF, NULL,
+                               filterRatioVx, spectralNoiseVx,
+                               spectralSnrVx);
+      
     // apply the filter ratio to other channels
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvc, specRatio,
-                           gate->iqvcF, gate->iqvcNotched);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvc, specRatio,
+    //                        gate->iqvcF, gate->iqvcNotched);
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqhx, specRatio,
-                           gate->iqhxF, NULL);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqhx, specRatio,
+    //                        gate->iqhxF, NULL);
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvx, specRatio,
-                           gate->iqvxF, NULL);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvx, specRatio,
+    //                        gate->iqvxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -1851,9 +1880,23 @@ void Beam::_filterDpAltHvCoOnly()
     
     // apply the filter ratio to other channels
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvc, specRatio, 
-                           gate->iqvcF, gate->iqvcNotched);
+    _mom->applyClutterFilter(_nSamplesHalf,
+                             _prt * 2.0,
+                             *_fftHalf,
+                             *_regrHalf,
+                             _windowHalf,
+                             gate->iqvcOrig,
+                             gate->iqvc, NULL,
+                             calibNoise,
+                             gate->iqvcF, gate->iqvcNotched,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr,
+                             specRatio);
+    
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvc, specRatio, 
+    //                        gate->iqvcF, gate->iqvcNotched);
     
     // compute filtered moments for this gate
     
@@ -1940,9 +1983,23 @@ void Beam::_filterDpSimHvFixedPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqvc, specRatio,
-                           gate->iqvcF, gate->iqvcNotched);
+    _mom->applyClutterFilter(_nSamples,
+                             _prt,
+                             *_fft,
+                             *_regr,
+                             _window,
+                             gate->iqvcOrig,
+                             gate->iqvc, NULL,
+                             calibNoise,
+                             gate->iqvcF, gate->iqvcNotched,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr,
+                             specRatio);
+
+    // _mom->applyFilterRatio(_nSamples, *_fft,
+    //                        gate->iqvc, specRatio,
+    //                        gate->iqvcF, gate->iqvcNotched);
     
     // compute filtered moments for this gate
     
@@ -2020,12 +2077,26 @@ void Beam::_filterDpSimHvStagPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvcPrtShort, specRatioShort,
-                           gate->iqvcPrtShortF, NULL);
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvcPrtLong, specRatioLong,
-                           gate->iqvcPrtLongF, NULL);
+    _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
+                                 *_fftHalf,
+                                 gate->iqvcPrtShort,
+                                 gate->iqvcPrtLong,
+                                 calibNoise,
+                                 gate->iqvcPrtShortF,
+                                 gate->iqvcPrtLongF,
+                                 filterRatio,
+                                 spectralNoise,
+                                 spectralSnr,
+                                 specRatioShort,
+                                 specRatioLong);
+    
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvcPrtShort, specRatioShort,
+    //                        gate->iqvcPrtShortF, NULL);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvcPrtLong, specRatioLong,
+    //                        gate->iqvcPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2103,8 +2174,22 @@ void Beam::_filterDpHOnlyFixedPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqvx, specRatio, gate->iqvxF, NULL);
+    _mom->applyClutterFilter(_nSamples,
+                             _prt,
+                             *_fft,
+                             *_regr,
+                             _window,
+                             gate->iqvxOrig,
+                             gate->iqvx, NULL,
+                             calibNoise,
+                             gate->iqvxF, NULL,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr,
+                             specRatio);
+
+    // _mom->applyFilterRatio(_nSamples, *_fft,
+    //                        gate->iqvx, specRatio, gate->iqvxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2181,13 +2266,27 @@ void Beam::_filterDpHOnlyStagPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvxPrtShort, specRatioShort,
-                           gate->iqvxPrtShortF, NULL);
+    _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
+                                 *_fftHalf,
+                                 gate->iqvxPrtShort,
+                                 gate->iqvxPrtLong,
+                                 calibNoise,
+                                 gate->iqvxPrtShortF,
+                                 gate->iqvxPrtLongF,
+                                 filterRatio,
+                                 spectralNoise,
+                                 spectralSnr,
+                                 specRatioShort,
+                                 specRatioLong);
+
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvxPrtShort, specRatioShort,
+    //                        gate->iqvxPrtShortF, NULL);
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqvxPrtLong, specRatioLong,
-                           gate->iqvxPrtLongF, NULL);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqvxPrtLong, specRatioLong,
+    //                        gate->iqvxPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2265,9 +2364,23 @@ void Beam::_filterDpVOnlyFixedPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamples, *_fft,
-                           gate->iqhx, specRatio,
-                           gate->iqhxF, NULL);
+    _mom->applyClutterFilter(_nSamples,
+                             _prt,
+                             *_fft,
+                             *_regr,
+                             _window,
+                             gate->iqhxOrig,
+                             gate->iqhx, NULL,
+                             calibNoise,
+                             gate->iqhxF, NULL,
+                             filterRatio,
+                             spectralNoise,
+                             spectralSnr,
+                             specRatio);
+
+    // _mom->applyFilterRatio(_nSamples, *_fft,
+    //                        gate->iqhx, specRatio,
+    //                        gate->iqhxF, NULL);
     
     // compute filtered moments for this gate
     
@@ -2344,13 +2457,27 @@ void Beam::_filterDpVOnlyStagPrt()
     
     // apply the filter ratio to other channel
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqhxPrtShort, specRatioShort,
-                           gate->iqhxPrtShortF, NULL);
+    _mom->applyAdapFilterStagPrt(_nSamplesHalf,
+                                 _prt, _prtLong,
+                                 *_fftHalf,
+                                 gate->iqhxPrtShort,
+                                 gate->iqhxPrtLong,
+                                 calibNoise,
+                                 gate->iqhxPrtShortF,
+                                 gate->iqhxPrtLongF,
+                                 filterRatio,
+                                 spectralNoise,
+                                 spectralSnr,
+                                 specRatioShort,
+                                 specRatioLong);
     
-    _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                           gate->iqhxPrtLong, specRatioLong,
-                           gate->iqhxPrtLongF, NULL);
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqhxPrtShort, specRatioShort,
+    //                        gate->iqhxPrtShortF, NULL);
+    
+    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+    //                        gate->iqhxPrtLong, specRatioLong,
+    //                        gate->iqhxPrtLongF, NULL);
     
     // compute filtered moments for this gate
     
