@@ -1679,28 +1679,28 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
   // write burst data
   
   if (_writeVar(file, timeDim,
-                "burst_mag_hc", "", "",
+                "burst_mag_hc", "burst_magnitude_H_copolar", "",
                 _burstMagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_mag_vc", "", "",
+                "burst_mag_vc", "burst_magnitude_V_copolar", "",
                 _burstMagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_hc", "", "",
+                "burst_arg_hc", "burst_phase_H_copolar", "degrees",
                 _burstArgArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_vc", "", "",
+                "burst_arg_vc", "burst_phase_V_copolar", "degrees",
                 _burstArgArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
