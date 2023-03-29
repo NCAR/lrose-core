@@ -1904,6 +1904,8 @@ void IwrfTsPulse::_deriveFromRvp8Header()
   _hdr.start_range_m = _info.get_proc_start_range_m();
   _hdr.gate_spacing_m = _info.get_proc_gate_spacing_m();
 
+  _hdr.tx_phase_deg = (_rvp8_hdr.i_tx_phase / 256.0) * 360.0;
+
 }
 
 ///////////////////////////////////////////////////////////////
