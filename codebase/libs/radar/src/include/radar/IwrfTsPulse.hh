@@ -332,6 +332,9 @@ public:
   inline int getSweepNum() const { return _hdr.sweep_num; }
   inline double getPhaseDiff0() const { return _phaseDiff[0]; }
   inline double getPhaseDiff1() const { return _phaseDiff[1]; }
+
+  inline double getTxPhaseDeg() const { return _hdr.tx_phase_deg; }
+
   bool isHoriz() const; // is horizontally polarized
   inline bool antennaTransition() const { return (bool) _hdr.antenna_transition; }
 
