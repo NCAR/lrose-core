@@ -4332,7 +4332,11 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
     memcpy(powerSpecC, specWindowed, nSamples * sizeof(RadarComplex_t));
   }
 
-  // load the raw power spectrum
+  TaArray<RadarComplex_t> notchedSpecC_;
+  RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nSamples);
+  memcpy(notchedSpecC, powerSpecC, nSamples * sizeof(RadarComplex_t));
+
+   // load the raw power spectrum
   
   TaArray<double> powerSpec_;
   double *powerSpec = powerSpec_.alloc(nSamples);
@@ -4340,8 +4344,11 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
     
   // allocate space for the filtered power spectrum
   
-  TaArray<double> powerSpecF_;
-  double *powerSpecF = powerSpecF_.alloc(nSamples);
+  TaArray<double> powerSpecFilt_, powerSpecNotched_;
+  double *powerSpecFilt = powerSpecFilt_.alloc(nSamples);
+  double *powerSpecNotched = powerSpecNotched_.alloc(nSamples);
+
+  // perform the adaptive filtering
   
   double rawPower = 0.0;
   double filteredPower = 0.0;
@@ -4354,7 +4361,8 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
   ClutFilter::performAdaptive(powerSpec, nSamples,
                               _clutterWidthMps, _clutterInitNotchWidthMps,
                               _nyquist, calNoise,
-                              false, clutterFound, powerSpecF,
+                              false, clutterFound,
+                              powerSpecFilt, powerSpecNotched,
                               _notchStart, _notchEnd,
                               rawPower, filteredPower,
                               powerRemoved, _spectralNoise,
@@ -4374,15 +4382,36 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
                                  powerRemoved, calNoise);
     // correct the filtered powers for clutter residue
     for (int ii = 0; ii < nSamples; ii++) {
-      powerSpecF[ii] *= correctionRatio;
+      powerSpecFilt[ii] *= correctionRatio;
+      powerSpecNotched[ii] *= correctionRatio;
     }
+  }
+  
+  // fill the notched time series if requested
+  
+  if (iqNotched != NULL) {
+    // adjust the input spectrum by the notched ratio
+    // constrain ratios to be 1 or less
+    for (int ii = 0; ii < nSamples; ii++) {
+      double magRatio = sqrt(powerSpecNotched[ii] / powerSpec[ii]);
+      if (magRatio > 1.0) {
+        magRatio = 1.0;
+      }
+      notchedSpecC[ii].re *= magRatio;
+      notchedSpecC[ii].im *= magRatio;
+      if (specRatio != NULL) {
+        specRatio[ii] = magRatio;
+      }
+    }
+    // invert the notched fft
+    fft.inv(notchedSpecC, iqNotched);
   }
   
   // adjust the input spectrum by the filter ratio
   // constrain ratios to be 1 or less
 
   for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(powerSpecF[ii] / powerSpec[ii]);
+    double magRatio = sqrt(powerSpecFilt[ii] / powerSpec[ii]);
     if (magRatio > 1.0) {
       magRatio = 1.0;
     }
@@ -4397,18 +4426,6 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
   
   fft.inv(powerSpecC, iqFiltered);
 
-  // return the notched time series?
-
-  if (iqNotched != NULL) {
-    for (int ii = 0; ii < nSamples; ii++) {
-      if (ii <= _notchEnd || ii >= _notchStart) {
-        powerSpecC[ii].re = 0.0;
-        powerSpecC[ii].im = 0.0;
-      }
-    }
-    fft.inv(powerSpecC, iqNotched);
-  }
- 
 }
 
 /////////////////////////////////////////////////////
@@ -4830,8 +4847,9 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 
   // allocate space for the filtered power spectrum
   
-  TaArray<double> powerSpecF_;
-  double *powerSpecF = powerSpecF_.alloc(nSamplesHalf);
+  TaArray<double> powerSpecFilt_, powerSpecNotched_;
+  double *powerSpecFilt = powerSpecFilt_.alloc(nSamplesHalf);
+  double *powerSpecNotched = powerSpecNotched_.alloc(nSamplesHalf);
   
   // load the power spectrum
   
@@ -4849,10 +4867,12 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 
     ClutFilter::performNotch(powerSpec, nSamplesHalf,
 			     _notchWidthMps, nyquist,
-                             calNoise, powerSpecF,
+                             calNoise, powerSpecFilt,
 			     _notchStart, _notchEnd,
 			     rawPower, filteredPower, powerRemoved);
-    
+
+    memcpy(powerSpecNotched, powerSpecFilt, nSamplesHalf * sizeof(double));
+   
     spectralNoise = calNoise;
     spectralSnr = 1.0;
     filterRatio = rawPower / filteredPower;
@@ -4864,7 +4884,8 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
     ClutFilter::performAdaptive(powerSpec, nSamplesHalf,
                                 _clutterWidthMps, _clutterInitNotchWidthMps,
 				nyquist, calNoise,
-                                true, clutterFound, powerSpecF,
+                                true, clutterFound,
+                                powerSpecFilt, powerSpecNotched,
 				_notchStart, _notchEnd,
 				rawPower, filteredPower,
 				powerRemoved, _spectralNoise,
@@ -4886,7 +4907,7 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
     // correct the filtered powers for clutter residue
     
     for (int ii = 0; ii < nSamplesHalf; ii++) {
-      powerSpecF[ii] *= correctionRatio;
+      powerSpecFilt[ii] *= correctionRatio;
     }
     
   }
@@ -4895,7 +4916,7 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
   // constrain ratios to be 1 or less
 
   for (int ii = 0; ii < nSamplesHalf; ii++) {
-    double magRatio = sqrt(powerSpecF[ii] / powerSpec[ii]);
+    double magRatio = sqrt(powerSpecFilt[ii] / powerSpec[ii]);
     if (magRatio > 1.0) {
       magRatio = 1.0;
     }

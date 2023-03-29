@@ -359,10 +359,15 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
       order = _nSamples - 1;
     }
 
+    // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-    cerr << "rate, cnr, wc, wcNorm, orderNorm, order: "
+    cerr << "n, rate, prt, cnr, wl, nyq, wc, wcNorm, orderNorm, order: "
+         << setw(6) << _nSamples << ", "
          << setw(6) << antennaRateDegPerSec << ", "
+         << setw(6) << prtSecs << ", "
          << setw(6) << cnr3Db << ", "
+         << setw(6) << _wavelengthM << ", "
+         << setw(6) << nyquist << ", "
          << setw(6) << wc << ", "
          << setw(6) << wcNorm << ", "
          << setw(6) << orderNorm << ", "

@@ -86,6 +86,7 @@ ClutFilter::~ClutFilter()
 //
 //   clutterFound: true if clutter is identified in signal
 //   filteredPowerSpec: power spectrum after filtering
+//   notchedPowerSpec: power spectrum after notching, no interp
 //   notchStart: spectral position of start of final filtering notch
 //   notchEnd: spectral position of end of final filtering notch
 //   rawPower: mean power in unfiltered spectrum
@@ -104,6 +105,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                  bool setNotchToNoise,
                                  bool &clutterFound,
                                  double *filteredPowerSpec,
+                                 double *notchedPowerSpec,
                                  int &notchStart,
                                  int &notchEnd,
 				 double &rawPower,
@@ -157,9 +159,10 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   double *notched = notched_.alloc(nSamples);
   memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
   for (int ii = -halfNotchWidth; ii <= halfNotchWidth; ii++) {
-    notched[(ii + nSamples) % nSamples] = clutNoise;
+    notched[(ii + nSamples) % nSamples] = 0.0;
   }
-  
+  memcpy(notchedPowerSpec, notched, nSamples * sizeof(double));
+
   // widen the notch by one point on either side,
   // copying in the value adjacent to the notch
 
@@ -497,7 +500,7 @@ void ClutFilter::locateWxAndClutter(const double *power,
   }
 
   // compare peak at 0 with max of other peaks
-  // if less than 3dB down, we have clutter
+  // if less than 30dB down, we have clutter
   
   double zeroMean = blockMeans[0];
   double maxOtherMean = 0.0;
@@ -507,7 +510,7 @@ void ClutFilter::locateWxAndClutter(const double *power,
     minOtherMean = MIN(minOtherMean, blockMeans[ii]);
   }
   clutterFound = false;
-  if ((zeroMean / maxOtherMean) > 0.5) {
+  if ((zeroMean / maxOtherMean) > 0.001) {
     clutterFound = true;
   }
   

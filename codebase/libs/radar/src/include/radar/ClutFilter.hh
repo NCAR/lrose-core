@@ -69,6 +69,7 @@ public:
   //
   //   clutterFound: true if clutter is identified in signal
   //   filteredPowerSpec: power spectrum after filtering
+  //   notchedPowerSpec: power spectrum after notching, no interp
   //   notchStart: spectral position of start of final filtering notch
   //   notchEnd: spectral position of end of final filtering notch
   //   rawPower: mean power in unfiltered spectrum
@@ -87,6 +88,7 @@ public:
                               bool setNotchToNoise,
                               bool &clutterFound,
                               double *filteredPowerSpec,
+                              double *notchedPowerSpec,
                               int &notchStart,
                               int &notchEnd,
                               double &rawPower,

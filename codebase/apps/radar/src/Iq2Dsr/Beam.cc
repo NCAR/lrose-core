@@ -2403,20 +2403,49 @@ void Beam::_filterDpAltHvCoCross()
       fields.spectral_noise = 10.0 * log10(spectralNoise);
       fields.spectral_snr = 10.0 * log10(spectralSnr);
       
+      // filter the other channels
+      
+      double filterRatioVc, spectralNoiseVc, spectralSnrVc;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvcOrig, gate->iqvc, NULL,
+                               calibNoise,
+                               gate->iqvcF, gate->iqvcNotched,
+                               filterRatioVc, spectralNoiseVc,
+                               spectralSnrVc);
+      
+      double filterRatioHx, spectralNoiseHx, spectralSnrHx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqhxOrig, gate->iqhx, NULL,
+                               calibNoise,
+                               gate->iqhxF, NULL,
+                               filterRatioHx, spectralNoiseHx,
+                               spectralSnrHx);
+      
+      double filterRatioVx, spectralNoiseVx, spectralSnrVx;
+      _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
+                               *_fftHalf, *_regrHalf, _windowHalf,
+                               gate->iqvxOrig, gate->iqvx, NULL,
+                               calibNoise,
+                               gate->iqvxF, NULL,
+                               filterRatioVx, spectralNoiseVx,
+                               spectralSnrVx);
+      
       // apply the spectral filter ratio to other channels
       
       
-      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                             gate->iqvc, specRatio,
-                             gate->iqvcF, gate->iqvcNotched);
+      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+      //                        gate->iqvc, specRatio,
+      //                        gate->iqvcF, gate->iqvcNotched);
       
-      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                             gate->iqhx, specRatio,
-                             gate->iqhxF, NULL);
+      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+      //                        gate->iqhx, specRatio,
+      //                        gate->iqhxF, NULL);
       
-      _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-                             gate->iqvx, specRatio,
-                             gate->iqvxF, NULL);
+      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
+      //                        gate->iqvx, specRatio,
+      //                        gate->iqvxF, NULL);
       
     } else {
       
@@ -2492,12 +2521,12 @@ void Beam::_filterDpAltHvCoCross()
                                    igate, 
                                    fieldsN);
 
-    if (_params.clutter_filter_type != Params::CLUTTER_FILTER_ADAPTIVE) {
-      fieldsF.zdr = fieldsN.zdr;
-      fieldsF.phidp = fieldsN.phidp;
-      fieldsF.rhohv = fieldsN.rhohv;
-      fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    }
+    // if (_params.clutter_filter_type != Params::CLUTTER_FILTER_ADAPTIVE) {
+    fieldsF.zdr = fieldsN.zdr;
+    fieldsF.phidp = fieldsN.phidp;
+    fieldsF.rhohv = fieldsN.rhohv;
+    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
+    // }
     
     fieldsF.test6 = fieldsN.zdr;
     fieldsF.test7 = fieldsN.phidp;
@@ -2630,7 +2659,7 @@ void Beam::_filterDpAltHvCoOnly()
     fields.test3 = _mom->getRegrInterpRatioDb();
     fields.test4 = _regrHalf->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
-    
+
     // apply the filter ratio to other channels
     
     _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
