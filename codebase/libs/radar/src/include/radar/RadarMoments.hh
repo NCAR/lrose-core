@@ -686,6 +686,10 @@ public:
   //               windowed using VONHANN, BLACKMAN or BLACKMAN_NUTTALL
   //   specWindowed: if not NULL, contains the spectrum of iqWindowed
   //   calNoise: measured noise level, from cal, in linear units
+  //   useStoredNotch:
+  //     if false (the default) locate wx and clutter
+  //     if true, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
   //
   //  Outputs:
   //    iqFiltered: filtered time series
@@ -709,7 +713,8 @@ public:
                           double &filterRatio,
                           double &spectralNoise,
                           double &spectralSnr,
-                          double *specRatio = NULL);
+                          double *specRatio = NULL,
+                          bool useStoredNotch = false);
   
   void applyAdaptiveFilter(int nSamples,
                            double prtSecs,
@@ -722,7 +727,8 @@ public:
                            double &filterRatio,
                            double &spectralNoise,
                            double &clutResidueRatio,
-                           double *specRatio = NULL);
+                           double *specRatio = NULL,
+                           bool useStoredNotch = false);
   
   void applyNotchFilter(int nSamples,
                         double prtSecs,
@@ -801,6 +807,11 @@ public:
   //   iqOrigLong: unfiltered long-prt time series
   //   channel: which channel - used to determine calibrated noise
   //   interpAcrossNotch: whether to fill in notch
+  //   useStoredNotch:
+  //     if false (the default) locate wx and clutter
+  //     if true, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
+  //
   //
   //  Outputs:
   //    iqFiltShort: filtered short-prt time series
@@ -825,7 +836,8 @@ public:
                               double &spectralNoise,
                               double &spectralSnr,
                               double *spectralRatioShort = NULL,
-                              double *spectralRatioLong = NULL);
+                              double *spectralRatioLong = NULL,
+                              bool useStoredNotch = false);
   
   // apply polynomial regression clutter filter to IQ time series
   //
@@ -1016,12 +1028,12 @@ public:
   //    iqFiltered: filtered time series
   //    iqNotched: if not NULL, notched time series
   
-  void applyFilterRatio(int nSamples,
-                        const RadarFft &fft,
-                        const RadarComplex_t *iq,
-                        const double *specRatio,
-                        RadarComplex_t *iqFiltered,
-                        RadarComplex_t *iqNotched);
+  // void applyFilterRatio(int nSamples,
+  //                       const RadarFft &fft,
+  //                       const RadarComplex_t *iq,
+  //                       const double *specRatio,
+  //                       RadarComplex_t *iqFiltered,
+  //                       RadarComplex_t *iqNotched);
   
   // apply clutter filter for SZ 864
   
@@ -1651,7 +1663,8 @@ private:
                             double &filterRatio,
                             double &spectralNoise,
                             double &spectralSnr,
-                            double *specRatio);
+                            double *specRatio,
+                            bool useStoredNotch = false);
   
   static void _interpAcrossNotch(int nSamples, double *regrSpec);
 

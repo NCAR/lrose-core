@@ -4213,6 +4213,10 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 //   iqWindowed: unfiltered time series, windowed using VONHANN or BLACKMAN
 //   specWindowed: if not NULL, contains the spectrum of iqWindowed
 //   calNoise: noise level at digitizer, from cal, linear units
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 //  Outputs:
 //    iqFiltered: filtered time series
@@ -4236,7 +4240,8 @@ void RadarMoments::applyClutterFilter(int nSamples,
                                       double &filterRatio,
                                       double &spectralNoise,
                                       double &spectralSnr,
-                                      double *specRatio /* = NULL*/)
+                                      double *specRatio /* = NULL*/,
+                                      bool useStoredNotch /* = false */)
   
 {
 
@@ -4261,7 +4266,8 @@ void RadarMoments::applyClutterFilter(int nSamples,
                         iqWindowed, specWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
-                        spectralNoise, spectralSnr, specRatio);
+                        spectralNoise, spectralSnr,
+                        specRatio, useStoredNotch);
 
   } else {
 
@@ -4271,7 +4277,8 @@ void RadarMoments::applyClutterFilter(int nSamples,
                         iqWindowed, specWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
-                        spectralNoise, spectralSnr, specRatio);
+                        spectralNoise, spectralSnr,
+                        specRatio, useStoredNotch);
 
     // overwrite with original series
     
@@ -4296,6 +4303,10 @@ void RadarMoments::applyClutterFilter(int nSamples,
 //   iqWindowed: unfiltered time series, pre-windowed using VONHANN or BLACKMAN
 //   specWindowed: if not NULL, contains the spectrum of iqWindowed
 //   calNoise: noise level at digitizer, from cal, linear units
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 //  Outputs:
 //    iqFiltered: filtered time series
@@ -4316,7 +4327,8 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
                                        double &filterRatio,
                                        double &spectralNoise,
                                        double &spectralSnr,
-                                       double *specRatio /* = NULL*/)
+                                       double *specRatio /* = NULL*/,
+                                       bool useStoredNotch /* = false */)
   
 {
 
@@ -4744,6 +4756,10 @@ void RadarMoments::applyRegressionFilter
 //   iqOrigShort: unfiltered short-prt time series
 //   iqOrigLong: unfiltered long-prt time series
 //   calNoise: measured noise from cal, linear units
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 //  Outputs:
 //    iqFiltShort: filtered short-prt time series
@@ -4767,7 +4783,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                                           double &spectralNoise,
                                           double &spectralSnr,
                                           double *spectralRatioShort /* = NULL */,
-                                          double *spectralRatioLong /* = NULL */)
+                                          double *spectralRatioLong /* = NULL */,
+                                          bool useStoredNotch /* = false */)
   
 {
   
@@ -4785,7 +4802,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                        filterRatioShort,
                        spectralNoiseShort,
                        spectralSnrShort,
-                       spectralRatioShort);
+                       spectralRatioShort,
+                       useStoredNotch);
   
   // filter the long prt time series
   
@@ -4798,7 +4816,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                        filterRatioLong,
                        spectralNoiseLong,
                        spectralSnrLong,
-                       spectralRatioLong);
+                       spectralRatioLong,
+                       useStoredNotch);
   
   filterRatio = (filterRatioShort + filterRatioLong) / 2.0;
   spectralNoise = (spectralNoiseShort + spectralNoiseLong) / 2.0;
@@ -4816,6 +4835,10 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 //   iq: unfiltered time series
 //   channel: HC, VC, HX, VX
 //   adjustForPowerResidue: adjust filtered spectrum for power residue
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 //  Outputs:
 //    iqFiltered: filtered time series
@@ -4835,7 +4858,8 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
                                         double &filterRatio,
                                         double &spectralNoise,
                                         double &spectralSnr,
-                                        double *specRatio /* = NULL*/)
+                                        double *specRatio /* = NULL*/,
+                                        bool useStoredNotch /* = false */)
   
 {
 
@@ -5623,7 +5647,8 @@ void RadarMoments::condenseStagIq(int nSamples,
   }
 
 }
-  
+
+#ifdef JUNK
 /////////////////////////////////////////////////////
 // Applies previously computed filter ratios, in the spectral
 // domain, to a time series
@@ -5688,6 +5713,7 @@ void RadarMoments::applyFilterRatio(int nSamples,
   } // if (iqNotched != NULL)
  
 }
+#endif
 
 /////////////////////////////////////////////////////
 // apply clutter filter for SZ 864

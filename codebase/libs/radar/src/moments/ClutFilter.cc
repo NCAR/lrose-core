@@ -75,14 +75,14 @@ ClutFilter::~ClutFilter()
 // Inputs:
 //   rawPowerSpec: unfiltered power spectrum
 //   nSamples: number of samples
-//   locateTheClutter:
-//     if true, locate wx and clutter
-//     if false, use previously located wx and clutter - this is used
-//        if multiple channels are to be filtered
 //   clutterWidthMps: spectrum width for clutter model (m/s)
 //   initNotchWidthMps: width of first guess notch (m/s)
 //   nyquist: unambiguous vel (m/s)
 //   calibratedNoise: noise power at digitizer from calibration (mW)
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 // Outputs:
 //
@@ -104,13 +104,13 @@ ClutFilter::~ClutFilter()
 
 void ClutFilter::performAdaptive(const double *rawPowerSpec, 
                                  int nSamples,
-                                 bool locateTheClutter,
                                  double clutterWidthMps,
                                  double initNotchWidthMps,
                                  double nyquist,
                                  double calibratedNoise,
                                  double *filteredPowerSpec,
-                                 double *notchedPowerSpec)
+                                 double *notchedPowerSpec,
+                                 bool useStoredNotch /* = FALSE */)
 
 {
 
@@ -125,7 +125,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   
   // locate the weather and clutter
   
-  if (locateTheClutter) {
+  if (!useStoredNotch) {
 
     _clutterFound = false;
     _notchStart = 0;
