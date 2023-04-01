@@ -1264,20 +1264,20 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   double *powerFilt = powerFilt_.alloc(nSamples);
 
   _regrOrderInUse = 0;
-  TaArray<RadarComplex_t> iqFilt_;
+
+  TaArray<RadarComplex_t> iqFilt_, iqNotched_;
   RadarComplex_t *iqFilt = iqFilt_.alloc(nSamples);
+  RadarComplex_t *iqNotched = iqNotched_.alloc(nSamples);
   double filterRatio, spectralNoise, spectralSnr;
+
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
     
     moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
-                                iqWindowed, NULL,
-                                calibNoise,
-                                iqFilt, NULL,
-                                filterRatio,
-                                spectralNoise,
-                                spectralSnr);
+                                iqWindowed, calibNoise,
+                                iqFilt, iqNotched,
+                                filterRatio, spectralNoise, spectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
     RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
@@ -1317,7 +1317,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
                                   regrF, _windowCoeff,
                                   iqWindowed,
                                   calibNoise,
-                                  iqFilt, NULL,
+                                  iqFilt, iqNotched,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
@@ -1341,12 +1341,9 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     // simple notch filter
     
     moments.applyNotchFilter(nSamples, beam->getPrt(), fft,
-                             iqWindowed, NULL,
-                             calibNoise,
+                             iqWindowed, calibNoise,
                              iqFilt,
-                             filterRatio,
-                             spectralNoise,
-                             spectralSnr);
+                             filterRatio, spectralNoise, spectralSnr);
     
     TaArray<RadarComplex_t> filtNotchSpec_;
     RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(nSamples);

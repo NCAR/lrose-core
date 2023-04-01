@@ -128,17 +128,6 @@ void RadarMoments::_init()
   _nSamples = 64;
   _nSamplesHalf = _nSamples / 2;
 
-  _applySpectralResidueCorrection = false;
-  _minSnrDbForResidueCorrection = 80.0;
-  _applyDbForDbCorrection = false;
-  _dbForFbRatio = 0.0;
-  _dbForDbThreshold = 0.0;
-  _notchStart = 0;
-  _notchEnd = 0;
-
-  _minSnrDbForZdr = _missing;
-  _minSnrDbForLdr = _missing;
-
   _correctForSystemPhidp = false;
   _changeAiqSign = false;
   _computeCpaUsingAlt = false;
@@ -146,16 +135,35 @@ void RadarMoments::_init()
   _clutterFilterType = CLUTTER_FILTER_ADAPTIVE;
   _clutterWidthMps = 0.75;
   _clutterInitNotchWidthMps = 1.5;
+
+  _applySpectralResidueCorrection = false;
+  _minSnrDbForResidueCorrection = 80.0;
+
+  _applyDbForDbCorrection = false;
+  _dbForFbRatio = 0.0;
+  _dbForDbThreshold = 0.0;
+  _notchStart = 0;
+  _notchEnd = 0;
+
+  _spectralNoise = 0.0;
+  _weatherPos = 0;
+  _clutterPos = 0;
+  
+  _minSnrDbForZdr = _missing;
+  _minSnrDbForLdr = _missing;
+
   _regrMinCnrDb = -5;
   _regrNotchInterpMethod = INTERP_METHOD_GAUSSIAN;
-  _notchWidthMps = 3.0;
   _regrCnrDb = -120.0;
   _regrInterpRatioDb = 0.0;
+  _notchWidthMps = 3.0;
+
+  _minSnrDbForZdr = _missing;
+  _minSnrDbForLdr = _missing;
 
   _wavelengthMeters = 10.0;
   _prt = 0.001;
   _nyquist = 25;
-
   _unambigRangeKm = _missing;
  
   _prtShort = 0.005;
@@ -195,11 +203,6 @@ void RadarMoments::_init()
   _calNoisePowerVc = _missing;
   _calNoisePowerVx = _missing;
 
-  _estNoisePowerHc = _missing;
-  _estNoisePowerHx = _missing;
-  _estNoisePowerVc = _missing;
-  _estNoisePowerVx = _missing;
-
   _baseDbz1kmHc = _missing;
   _baseDbz1kmHx = _missing;
   _baseDbz1kmVc = _missing;
@@ -210,14 +213,19 @@ void RadarMoments::_init()
   _receiverGainDbVc = _missing;
   _receiverGainDbVx = _missing;
 
+  _calibXmitPowerDbmH = _missing;
+  _calibXmitPowerDbmV = _missing;
+
   _dbzCorrection = 0;
   _zdrCorrectionDb = 0;
   _ldrCorrectionDbH = 0;
   _ldrCorrectionDbV = 0;
   _systemPhidpDeg = 0;
 
-  _calibXmitPowerDbmH = _missing;
-  _calibXmitPowerDbmV = _missing;
+  _estNoisePowerHc = _missing;
+  _estNoisePowerHx = _missing;
+  _estNoisePowerVc = _missing;
+  _estNoisePowerVx = _missing;
 
   _computeZdrUsingSnr = false;
 
@@ -227,6 +235,8 @@ void RadarMoments::_init()
   _measXmitPowerDbmH = _missing;
   _measXmitPowerDbmV = _missing;
 
+  _antennaRate = 0.0;
+
   _phidpOffsetAlt.re = 1.0;
   _phidpOffsetAlt.im = 0.0;
   _phidpOffsetSim.re = 1.0;
@@ -234,7 +244,7 @@ void RadarMoments::_init()
 
   _applySz = false;
   _sz = NULL;
-
+  
   _tssNotchWidth = 3;
   
 }
@@ -255,6 +265,7 @@ void RadarMoments::setMaxGates(int max_gates)
   if (_atmosAttenCorr != NULL) {
     delete[] _atmosAttenCorr;
   }
+
   _maxGates = max_gates;
   _allocRangeCorr();
   _allocAtmosAttenCorr();
@@ -4206,12 +4217,12 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 //
 // Inputs:
 //   nSamples
+//   prtSecs
 //   fft: object to be used for FFT computations
 //   regr: object to be used for regression filtering
 //   window: window used to create iqWindowed
 //   iqOrig: unfltered time series, not windowed
 //   iqWindowed: unfiltered time series, windowed using VONHANN or BLACKMAN
-//   specWindowed: if not NULL, contains the spectrum of iqWindowed
 //   calNoise: noise level at digitizer, from cal, linear units
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
@@ -4224,7 +4235,6 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyClutterFilter(int nSamples,
                                       double prtSecs,
@@ -4233,14 +4243,12 @@ void RadarMoments::applyClutterFilter(int nSamples,
                                       const double *window, // window in use
                                       const RadarComplex_t *iqOrig, // non-windowed
                                       const RadarComplex_t *iqWindowed, // windowed
-                                      const RadarComplex_t *specWindowed,
                                       double calNoise,
                                       RadarComplex_t *iqFiltered,
                                       RadarComplex_t *iqNotched,
                                       double &filterRatio,
                                       double &spectralNoise,
                                       double &spectralSnr,
-                                      double *specRatio /* = NULL*/,
                                       bool useStoredNotch /* = false */)
   
 {
@@ -4250,44 +4258,48 @@ void RadarMoments::applyClutterFilter(int nSamples,
     applyRegressionFilter(nSamples, prtSecs, fft, regr, window,
                           iqOrig, calNoise,
                           iqFiltered, iqNotched, filterRatio,
-                          spectralNoise, spectralSnr, specRatio);
+                          spectralNoise, spectralSnr);
     
   } else if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
     
     applyNotchFilter(nSamples, prtSecs, fft,
-                     iqWindowed, specWindowed,
+                     iqWindowed,
                      calNoise,
                      iqFiltered, filterRatio,
-                     spectralNoise, spectralSnr, specRatio);
+                     spectralNoise, spectralSnr);
     
   } else if (_clutterFilterType == CLUTTER_FILTER_ADAPTIVE) {
     
     applyAdaptiveFilter(nSamples, prtSecs, fft,
-                        iqWindowed, specWindowed,
+                        iqWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
                         spectralNoise, spectralSnr,
-                        specRatio, useStoredNotch);
+                        useStoredNotch);
 
   } else {
 
-    // apply filter to computed spectral noise etc
+    // no filtering
     
-    applyAdaptiveFilter(nSamples, prtSecs, fft,
-                        iqWindowed, specWindowed,
-                        calNoise,
-                        iqFiltered, iqNotched, filterRatio,
-                        spectralNoise, spectralSnr,
-                        specRatio, useStoredNotch);
+    // take the forward fft to compute the complex spectrum of unfiltered series
+    
+    RadarComplex_t empty(0.0, 0.0);
+    vector<RadarComplex_t> inputSpecC(nSamples, empty);
+    fft.fwd(iqWindowed, inputSpecC.data());
+    
+    // compute the real unfiltered spectrum
+    
+    vector<double> unfiltSpec(nSamples, 0.0);
+    RadarComplex::loadPower(inputSpecC.data(), unfiltSpec.data(), nSamples);
 
-    // overwrite with original series
+    // compute the spectral noise
     
-    if (iqFiltered) {
-      memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
+    spectralNoise = ClutFilter::computeSpectralNoise(unfiltSpec.data(), nSamples);
+    spectralSnr = (spectralNoise - calNoise) / calNoise;
+    if (spectralSnr < 0) {
+      spectralSnr = 1.0e-99;
     }
-    if (iqNotched) {
-      memcpy(iqNotched, iqOrig, nSamples * sizeof(RadarComplex_t));
-    }
+
     filterRatio = 1.0;
 
   }
@@ -4299,9 +4311,9 @@ void RadarMoments::applyClutterFilter(int nSamples,
 //
 // Inputs:
 //   nSamples
+//   prtSecs
 //   fft: object to be used for FFT computations
 //   iqWindowed: unfiltered time series, pre-windowed using VONHANN or BLACKMAN
-//   specWindowed: if not NULL, contains the spectrum of iqWindowed
 //   calNoise: noise level at digitizer, from cal, linear units
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
@@ -4314,35 +4326,26 @@ void RadarMoments::applyClutterFilter(int nSamples,
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyAdaptiveFilter(int nSamples,
                                        double prtSecs,
                                        const RadarFft &fft,
                                        const RadarComplex_t *iqWindowed,
-                                       const RadarComplex_t *specWindowed,
                                        double calNoise,
                                        RadarComplex_t *iqFiltered,
                                        RadarComplex_t *iqNotched,
                                        double &filterRatio,
                                        double &spectralNoise,
                                        double &spectralSnr,
-                                       double *specRatio /* = NULL*/,
                                        bool useStoredNotch /* = false */)
   
 {
 
-  // If specWindowed is not NULL, it contains the spectrum of iqWindowed.
-  // If it is NULL, we need to take the forward fft to compute the
-  // raw complex power spectrum
+  // take the forward fft to compute the raw complex power spectrum
   
   TaArray<RadarComplex_t> powerSpecC_;
   RadarComplex_t *powerSpecC = powerSpecC_.alloc(nSamples);
-  if (specWindowed == NULL) {
-    fft.fwd(iqWindowed, powerSpecC);
-  } else {
-    memcpy(powerSpecC, specWindowed, nSamples * sizeof(RadarComplex_t));
-  }
+  fft.fwd(iqWindowed, powerSpecC);
 
   TaArray<RadarComplex_t> notchedSpecC_;
   RadarComplex_t *notchedSpecC = notchedSpecC_.alloc(nSamples);
@@ -4362,25 +4365,21 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 
   // perform the adaptive filtering
   
-  double rawPower = 0.0;
-  double filteredPower = 0.0;
-  double powerRemoved = 0.0;
-
-  bool clutterFound = false;
-  _notchStart = 0;
-  _notchEnd = 0;
-  
-  ClutFilter::performAdaptive(powerSpec, nSamples,
+  _clutFilter.performAdaptive(powerSpec, nSamples,
                               _clutterWidthMps, _clutterInitNotchWidthMps,
                               _nyquist, calNoise,
-                              false, clutterFound,
                               powerSpecFilt, powerSpecNotched,
-                              _notchStart, _notchEnd,
-                              rawPower, filteredPower,
-                              powerRemoved, _spectralNoise,
-                              _weatherPos, _clutterPos);
+                              useStoredNotch);
   
-  spectralNoise = _spectralNoise;
+  _notchStart = _clutFilter.getNotchStart();
+  _notchEnd = _clutFilter.getNotchEnd();
+  double rawPower = _clutFilter.getRawPower();
+  double filteredPower = _clutFilter.getFilteredPower();
+  double powerRemoved = _clutFilter.getPowerRemoved();
+  spectralNoise = _spectralNoise = _clutFilter.getSpectralNoise();
+  _weatherPos = _clutFilter.getWeatherPos();
+  _clutterPos = _clutFilter.getClutterPos();
+  
   spectralSnr = (spectralNoise - calNoise) / calNoise;
   if (spectralSnr < 0) {
     spectralSnr = 1.0e-99;
@@ -4411,9 +4410,6 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
       }
       notchedSpecC[ii].re *= magRatio;
       notchedSpecC[ii].im *= magRatio;
-      if (specRatio != NULL) {
-        specRatio[ii] = magRatio;
-      }
     }
     // invert the notched fft
     fft.inv(notchedSpecC, iqNotched);
@@ -4429,9 +4425,6 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
     }
     powerSpecC[ii].re *= magRatio;
     powerSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
   }
 
   // invert the fft
@@ -4445,9 +4438,9 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 //
 // Inputs:
 //   nSamples
+//   prtSecs
 //   fft: object to be used for FFT computations
 //   iqWindowed: unfiltered time series, pre-windowed using VONHANN or BLACKMAN
-//   specWindowed: if not NULL, contains the spectrum of iqWindowed
 //   calNoise: noise level at digitizer, from cal, linear units
 //
 //  Outputs:
@@ -4455,33 +4448,24 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
 
 void RadarMoments::applyNotchFilter(int nSamples,
                                     double prtSecs,
                                     const RadarFft &fft,
                                     const RadarComplex_t *iqWindowed,
-                                    const RadarComplex_t *specWindowed,
                                     double calNoise,
                                     RadarComplex_t *iqFiltered,
                                     double &filterRatio,
                                     double &spectralNoise,
-                                    double &spectralSnr,
-                                    double *specRatio /* = NULL*/)
+                                    double &spectralSnr)
   
 {
 
-  // If specWindowed is not NULL, it contains the spectrum of iqWindowed.
-  // If it is NULL, we need to take the forward fft to compute the
-  // raw complex power spectrum
+  // take the forward fft to compute the raw complex power spectrum
   
   TaArray<RadarComplex_t> powerSpecC_;
   RadarComplex_t *powerSpecC = powerSpecC_.alloc(nSamples);
-  if (specWindowed == NULL) {
-    fft.fwd(iqWindowed, powerSpecC);
-  } else {
-    memcpy(powerSpecC, specWindowed, nSamples * sizeof(RadarComplex_t));
-  }
+  fft.fwd(iqWindowed, powerSpecC);
 
   // load the raw power spectrum
   
@@ -4536,9 +4520,6 @@ void RadarMoments::applyNotchFilter(int nSamples,
     }
     powerSpecC[ii].re *= magRatio;
     powerSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
   }
 
   // invert the fft
@@ -4554,6 +4535,7 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //
 // Inputs:
 //   nSamples
+//   prtSecs
 //   fft: object to be used for filling in notch
 //   regr: object to be used for polynomial computations
 //   window: coefficients for window that is actively in use
@@ -4566,25 +4548,22 @@ void RadarMoments::applyNotchFilter(int nSamples,
 //    filterRatio: ratio of raw to unfiltered power
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
 //
 //  After calling this routine, you can call getRegrCnrDb() to get
 //  the clutter-to-signal-ratio from a 3rd-order regression filter
 
-void RadarMoments::applyRegressionFilter
-  (int nSamples,
-   double prtSecs,
-   const RadarFft &fft,
-   ForsytheRegrFilter &regr,
-   const double *window,
-   const RadarComplex_t *iqUnfiltered, // non-windowed
-   double calNoise,
-   RadarComplex_t *iqFiltered,
-   RadarComplex_t *iqNotched,
-   double &filterRatio,
-   double &spectralNoise,
-   double &spectralSnr,
-   double *specRatio /* = NULL*/)
+void RadarMoments::applyRegressionFilter(int nSamples,
+                                         double prtSecs,
+                                         const RadarFft &fft,
+                                         ForsytheRegrFilter &regr,
+                                         const double *window,
+                                         const RadarComplex_t *iqUnfilt, // non-windowed
+                                         double calNoise,
+                                         RadarComplex_t *iqFiltered,
+                                         RadarComplex_t *iqNotched,
+                                         double &filterRatio,
+                                         double &spectralNoise,
+                                         double &spectralSnr)
   
 {
 
@@ -4596,7 +4575,7 @@ void RadarMoments::applyRegressionFilter
 
   RadarComplex_t empty(0.0, 0.0);
   vector<RadarComplex_t> unfiltWindowed(nSamples, empty);
-  applyWindow(iqUnfiltered, window, unfiltWindowed.data(), nSamples);
+  applyWindow(iqUnfilt, window, unfiltWindowed.data(), nSamples);
   
   // take the forward fft to compute the complex spectrum of unfiltered series
   
@@ -4614,8 +4593,8 @@ void RadarMoments::applyRegressionFilter
 
   // compute clutter to noise ratio, using the central 3 points in the FFT
   
-  // double clutPower3 = regr.compute3PtClutPower(iqUnfiltered);
-  double clutPower3 = regr.computeOrder3ClutPower(iqUnfiltered);
+  // double clutPower3 = regr.compute3PtClutPower(iqUnfilt);
+  double clutPower3 = regr.computeOrder3ClutPower(iqUnfilt);
   double cnr3 = clutPower3 / calNoise;
   _regrCnrDb = 10.0 * log10(cnr3);
   
@@ -4623,9 +4602,9 @@ void RadarMoments::applyRegressionFilter
 
     // don't use a regression filter
     
-    memcpy(iqFiltered, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+    memcpy(iqFiltered, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     if (iqNotched) {
-      memcpy(iqNotched, iqUnfiltered, nSamples * sizeof(RadarComplex_t));
+      memcpy(iqNotched, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     }
     regrSpec = unfiltSpec;
     _regrInterpRatioDb = 0.0;
@@ -4636,7 +4615,7 @@ void RadarMoments::applyRegressionFilter
     // results are in iqRegr
     
     vector<RadarComplex_t> iqRegr(nSamples, empty);
-    regr.apply(iqUnfiltered, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
+    regr.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
     
     // if iqNotched is non-NULL,
     // save filtered data, without interp across the notch
@@ -4644,29 +4623,6 @@ void RadarMoments::applyRegressionFilter
     if (iqNotched != NULL) {
 
       memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
-
-#ifdef NOTNOW      
-      // ensure the phases in the fft domain are the same
-      // as for the unfiltered sample
-      
-      vector<RadarComplex_t> specRegr(nSamples, empty);
-      fft.fwd(iqRegr.data(), specRegr.data());
-
-      vector<RadarComplex_t> scaledInput(inputSpecC);
-      vector<double> realRegr(nSamples, 0.0);
-      RadarComplex::loadPower(specRegr.data(), realRegr.data(), nSamples);
-      
-      for (int ii = 0; ii < nSamples; ii++) {
-        double magRatio = sqrt(realRegr[ii] / unfiltSpec[ii]);
-        if (magRatio > 1.0) {
-          magRatio = 1.0;
-        }
-        scaledInput[ii].re *= magRatio;
-        scaledInput[ii].im *= magRatio;
-      }
-      
-      fft.inv(scaledInput.data(), iqNotched);
-#endif
 
     }
 
@@ -4702,9 +4658,6 @@ void RadarMoments::applyRegressionFilter
       }
       inputSpecC[ii].re *= magRatio;
       inputSpecC[ii].im *= magRatio;
-      if (specRatio != NULL) {
-        specRatio[ii] = magRatio;
-      }
     }
     
     // invert the resulting fft
@@ -4716,7 +4669,7 @@ void RadarMoments::applyRegressionFilter
   
   // compute powers and filter ratio
   
-  double rawPower = RadarComplex::meanPower(iqUnfiltered, nSamples);
+  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamples);
   double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
   filterRatio = rawPower / filteredPower;
 
@@ -4744,17 +4697,16 @@ void RadarMoments::applyRegressionFilter
 //        iqOrigLong[nSamplesHalf]
 //        iqFiltShort[nSamplesHalf]
 //        iqFiltLong[nSamplesHalf]
-//        spectralRatioShort[nSamplesHalf]
-//        spectralRatioLong[nSamplesHalf]
 //   4. Input and output data is windowed appropriately for FFTs.
 //
 // The short and long sequences are filtered separately.
 // The notch is not filled in.
 //
 // Inputs:
+//   prtSecsShort, prtSecsLong
 //   fftHalf: object to be used for FFT computations
-//   iqOrigShort: unfiltered short-prt time series
-//   iqOrigLong: unfiltered long-prt time series
+//   iqShort: unfiltered short-prt time series
+//   iqLong: unfiltered long-prt time series
 //   calNoise: measured noise from cal, linear units
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
@@ -4764,11 +4716,11 @@ void RadarMoments::applyRegressionFilter
 //  Outputs:
 //    iqFiltShort: filtered short-prt time series
 //    iqFiltLong: filtered long-prt time series
+//    iqNotchedShort: notched short-prt time series
+//    iqNotchedLong: notched long-prt time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatioShort: filtered/unfiltered ratio, short PRT, if non-NULL
-//    specRatioLong: filtered/unfiltered ratio, long PRT, if non-NULL
 
 void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                                           double prtSecsShort,
@@ -4779,11 +4731,11 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                                           double calNoise,
                                           RadarComplex_t *iqFiltShort,
                                           RadarComplex_t *iqFiltLong,
+                                          RadarComplex_t *iqNotchedShort,
+                                          RadarComplex_t *iqNotchedLong,
                                           double &filterRatio,
                                           double &spectralNoise,
                                           double &spectralSnr,
-                                          double *spectralRatioShort /* = NULL */,
-                                          double *spectralRatioLong /* = NULL */,
                                           bool useStoredNotch /* = false */)
   
 {
@@ -4798,11 +4750,11 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralSnrShort = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        fftHalf, iqShort, calNoise,
-                       filterNyquist, true, iqFiltShort,
+                       filterNyquist, true,
+                       iqFiltShort, iqNotchedShort,
                        filterRatioShort,
                        spectralNoiseShort,
                        spectralSnrShort,
-                       spectralRatioShort,
                        useStoredNotch);
   
   // filter the long prt time series
@@ -4812,11 +4764,11 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralSnrLong = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        fftHalf, iqLong, calNoise,
-                       filterNyquist, true, iqFiltLong,
+                       filterNyquist, true,
+                       iqFiltLong, iqNotchedLong,
                        filterRatioLong,
                        spectralNoiseLong,
                        spectralSnrLong,
-                       spectralRatioLong,
                        useStoredNotch);
   
   filterRatio = (filterRatioShort + filterRatioLong) / 2.0;
@@ -4826,13 +4778,13 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 }
 
 ////////////////////////////////////////////////////////////
-// apply clutter filter to partial staggered PRT time series
+// apply adaptive clutter filter to partial staggered PRT time series
 // This is applied to horizontal and vertical separately.
 //
 // Inputs:
 //   nSamples
 //   fft: object to be used for FFT computations
-//   iq: unfiltered time series
+//   iqUnfilt: unfiltered time series
 //   channel: HC, VC, HX, VX
 //   adjustForPowerResidue: adjust filtered spectrum for power residue
 //   useStoredNotch:
@@ -4842,23 +4794,23 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 //
 //  Outputs:
 //    iqFiltered: filtered time series
+//    iqNotched: notched time series, before interpolation
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
    
 void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
                                         double prtSecs,
                                         const RadarFft &fftHalf,
-                                        const RadarComplex_t *iq,
+                                        const RadarComplex_t *iqUnfilt,
                                         double calNoise,
                                         double nyquist,
                                         bool adjustForPowerResidue,
                                         RadarComplex_t *iqFiltered,
+                                        RadarComplex_t *iqNotched,
                                         double &filterRatio,
                                         double &spectralNoise,
                                         double &spectralSnr,
-                                        double *specRatio /* = NULL*/,
                                         bool useStoredNotch /* = false */)
   
 {
@@ -4867,7 +4819,7 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
   
   TaArray<RadarComplex_t> powerSpecC_;
   RadarComplex_t *powerSpecC = powerSpecC_.alloc(nSamplesHalf);
-  fftHalf.fwd(iq, powerSpecC);
+  fftHalf.fwd(iqUnfilt, powerSpecC);
 
   // allocate space for the filtered power spectrum
   
@@ -4881,46 +4833,24 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
   double *powerSpec = powerSpec_.alloc(nSamplesHalf);
   RadarComplex::loadPower(powerSpecC, powerSpec, nSamplesHalf);
     
-  double rawPower = 0.0;
-  double filteredPower = 0.0;
-  double powerRemoved = 0.0;
-  _notchStart = 0;
-  _notchEnd = 0;
+  _clutFilter.performAdaptive(powerSpec, nSamplesHalf,
+                              _clutterWidthMps, _clutterInitNotchWidthMps,
+                              _nyquist, calNoise,
+                              powerSpecFilt, powerSpecNotched,
+                              useStoredNotch);
   
-  if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
-
-    ClutFilter::performNotch(powerSpec, nSamplesHalf,
-			     _notchWidthMps, nyquist,
-                             calNoise, powerSpecFilt,
-			     _notchStart, _notchEnd,
-			     rawPower, filteredPower, powerRemoved);
-
-    memcpy(powerSpecNotched, powerSpecFilt, nSamplesHalf * sizeof(double));
-   
-    spectralNoise = calNoise;
-    spectralSnr = 1.0;
-    filterRatio = rawPower / filteredPower;
-
-  } else {
-
-    bool clutterFound = false;
-    
-    ClutFilter::performAdaptive(powerSpec, nSamplesHalf,
-                                _clutterWidthMps, _clutterInitNotchWidthMps,
-				nyquist, calNoise,
-                                true, clutterFound,
-                                powerSpecFilt, powerSpecNotched,
-				_notchStart, _notchEnd,
-				rawPower, filteredPower,
-				powerRemoved, _spectralNoise,
-                                _weatherPos, _clutterPos);
-    spectralNoise = _spectralNoise;
-    
-    spectralSnr = spectralNoise / calNoise;
-    filterRatio = rawPower / filteredPower;
-    
-  } // if (_useSimpleNotchFilter)
-
+  _notchStart = _clutFilter.getNotchStart();
+  _notchEnd = _clutFilter.getNotchEnd();
+  double rawPower = _clutFilter.getRawPower();
+  double filteredPower = _clutFilter.getFilteredPower();
+  double powerRemoved = _clutFilter.getPowerRemoved();
+  spectralNoise = _spectralNoise = _clutFilter.getSpectralNoise();
+  _weatherPos = _clutFilter.getWeatherPos();
+  _clutterPos = _clutFilter.getClutterPos();
+  
+  spectralSnr = spectralNoise / calNoise;
+  filterRatio = rawPower / filteredPower;
+  
   if (adjustForPowerResidue && powerRemoved > 0) {
     
     double correctionRatio =
@@ -4946,9 +4876,6 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
     }
     powerSpecC[ii].re *= magRatio;
     powerSpecC[ii].im *= magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
-    }
   }
 
   // invert the fft
@@ -4957,367 +4884,236 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
  
 }
 
-/////////////////////////////////////////////////////////////////
-// apply polynomial regression clutter filter to IQ time series
+////////////////////////////////////////////////////////////////////
+// apply regression clutter filter to staggered PRT IQ time series
 //
-// NOTE: IQ data should not be windowed.
+// The following is assumed:
+//
+//   1. nSamplesHalf refers to short and long prt sequences.
+//      nSamples = nSamplesHalf * 2
+//   2. The combined sequence starts with short PRT.
+//   3. Memory has been allocated as follows:
+//        iqShort[nSamplesHalf]
+//        iqLong[nSamplesHalf]
+//        iqFiltShort[nSamplesHalf]
+//        iqFiltLong[nSamplesHalf]
+//        iqNotchedShort[nSamplesHalf]
+//        iqNotchedLong[nSamplesHalf]
+//   4. Input and output data is windowed appropriately for FFTs.
+//
+// The short and long sequences are filtered separately.
+// The notch is not filled in.
 //
 // Inputs:
-//   nSamples
-//   fftHalf: fft object for short and long half time series, length nSamples/2
-//   regr: object to be used for polynomial computations
-//   iqOrig: unfiltered time series, not windowed
+//   fftHalf: object to be used for FFT computations
+//   iqOrigShort: unfiltered short-prt time series
+//   iqOrigLong: unfiltered long-prt time series
 //   calNoise: measured noise from cal, linear units
-//   interpAcrossNotch: whether to fill in notch
 //
 //  Outputs:
-//    iqFiltered: filtered time series
+//    iqFiltShort: filtered short-prt time series
+//    iqFiltLong: filtered long-prt time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
-//
-//  Memory allocation by calling routine:
-//    regr - initialized to size nSamples
-//    iqOrig[nSamples]
-//    iqFiltered[nSamples]
-//    specRatio[nSamples] - if non-NULL
 
-void RadarMoments::applyRegrFilterStagPrt(int nSamples,
+void RadarMoments::applyRegrFilterStagPrt(int nSamplesHalf,
                                           double prtSecsShort,
                                           double prtSecsLong,
                                           const RadarFft &fftHalf,
-                                          ForsytheRegrFilter &regr,
-                                          const RadarComplex_t *iqOrig,
+                                          ForsytheRegrFilter &regrHalf,
+                                          const RadarComplex_t *iqShort,
+                                          const RadarComplex_t *iqLong,
                                           double calNoise,
-                                          bool interpAcrossNotch,
-                                          RadarComplex_t *iqFiltered,
+                                          RadarComplex_t *iqFiltShort,
+                                          RadarComplex_t *iqFiltLong,
+                                          RadarComplex_t *iqNotchedShort,
+                                          RadarComplex_t *iqNotchedLong,
                                           double &filterRatio,
                                           double &spectralNoise,
-                                          double &spectralSnr,
-                                          double *specRatio /* = NULL*/)
+                                          double &spectralSnr)
   
 {
   
-  // apply the regression filter to the non-windowed (original) time series
-
-  TaArray<RadarComplex_t> iqRegr_;
-  RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
+  double filterNyquist = _nyquist / (_staggeredM + _staggeredN);
   double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
-
-  double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
-  double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
-  double powerClut = powerOrig - powerRegr;
-  double csr = powerClut / powerRegr;
-
-  // check for low CSR, is less than 10dB do not filter
-
-  if (csr < .1) {
-    memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
-    return;
-  }
   
-  // if no notch interpolation is required, return now
-
-  if (!interpAcrossNotch || nSamples < 16) {
-    memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
-    return;
-  }
-
-  // separate the filtered time series into two series,
-  // for short and long PRT respectively
-
-  int nSamplesHalf = nSamples / 2;
-  TaArray<RadarComplex_t> filtShort_, filtLong_;
-  RadarComplex_t *filtShort = filtShort_.alloc(nSamplesHalf);
-  RadarComplex_t *filtLong = filtLong_.alloc(_nSamplesHalf);
-  RadarMoments::separateStagIq(nSamples, iqFiltered, filtShort, filtLong);
+  // filter the short prt time series
   
-  // compute the spectra of these 2 half series
+  double filterRatioShort = 1.0;
+  double spectralNoiseShort = 1.0e-13;
+  double spectralSnrShort = 1.0;
+  _regrFiltHalfTseries(_nSamplesHalf, prtSecsSum,
+                       fftHalf, regrHalf,
+                       iqShort, calNoise,
+                       filterNyquist, true,
+                       iqFiltShort, iqNotchedShort,
+                       filterRatioShort,
+                       spectralNoiseShort,
+                       spectralSnrShort);
   
-  TaArray<RadarComplex_t> filtShortSpec_;
-  RadarComplex_t *filtShortSpec = filtShortSpec_.alloc(nSamplesHalf);
-  fftHalf.fwd(filtShort, filtShortSpec);
-
-  TaArray<RadarComplex_t> filtLongSpec_;
-  RadarComplex_t *filtLongSpec = filtLongSpec_.alloc(_nSamplesHalf);
-  fftHalf.fwd(filtLong, filtLongSpec);
-
-#ifdef JUNK
-
-  // perform gaussian infill for powers, keeping phases unchanged
-
-  TaArray<RadarComplex_t> filledShortSpec_;
-  RadarComplex_t *filledShortSpec = filledShortSpec_.alloc(nSamplesHalf);
-
-  TaArray<RadarComplex_t> filledLongSpec_;
-  RadarComplex_t *filledLongSpec = filledLongSpec_.alloc(nSamplesHalf);
-
-  int maxNotchWidth = 7;
-  ClutFilter::fillNotchUsingGfit(filtShortSpec, nSamplesHalf,
-                                 maxNotchWidth, filledShortSpec);
+  // filter the long prt time series
   
-  ClutFilter::fillNotchUsingGfit(filtLongSpec, nSamplesHalf,
-                                 maxNotchWidth, filledLongSpec);
-
-  // for the long-PRT half spectrum, interpolate the phase difference
-  // between the short and long
+  double filterRatioLong = 1.0;
+  double spectralNoiseLong = 1.0e-13;
+  double spectralSnrLong = 1.0;
+  _regrFiltHalfTseries(_nSamplesHalf, prtSecsSum,
+                       fftHalf, regrHalf,
+                       iqLong, calNoise,
+                       filterNyquist, true,
+                       iqFiltLong, iqNotchedLong,
+                       filterRatioLong,
+                       spectralNoiseLong,
+                       spectralSnrLong);
   
-  int notchWidthHalf = maxNotchWidth / 2;
-  if (notchWidthHalf > _nSamplesHalf - 1) notchWidthHalf = _nSamplesHalf - 1;
-  int startIndex =  -notchWidthHalf;
-  int endIndex = notchWidthHalf;
-
-  RadarComplex_t diffStart =
-    RadarComplex::conjugateProduct(filledLongSpec[startIndex],
-                                   filledShortSpec[startIndex]);
-  double diffPhaseStart = RadarComplex::argRad(diffStart);
+  filterRatio = (filterRatioShort + filterRatioLong) / 2.0;
+  spectralNoise = (spectralNoiseShort + spectralNoiseLong) / 2.0;
+  spectralSnr = (spectralSnrShort + spectralSnrLong) / 2.0;
   
-  RadarComplex_t diffEnd =
-    RadarComplex::conjugateProduct(filledLongSpec[endIndex],
-                                   filledShortSpec[endIndex]);
-  double diffPhaseEnd = RadarComplex::argRad(diffEnd);
-  double deltaDiffPhase = RadarComplex::diffRad(diffPhaseEnd, diffPhaseStart);
-  
-  double count = 0.0;
-  for (int ii = startIndex; ii <= endIndex; ii++, count++) {
-    double interpFraction = count / (double) maxNotchWidth;
-    int jj = (ii + _nSamplesHalf) % _nSamplesHalf;
-    double interpDiffPhase = diffPhaseStart + interpFraction * deltaDiffPhase;
-    double phaseShort = RadarComplex::argRad(filledShortSpec[jj]);
-    double phaseLong = RadarComplex::sumRad(phaseShort, interpDiffPhase);
-    double interpMag = RadarComplex::mag(filledLongSpec[jj]);
-    filledLongSpec[jj].re = interpMag * cos(phaseLong);
-    filledLongSpec[jj].im = interpMag * sin(phaseLong);
-  }
- 
-  // invert from FFT space back into time series
-
-  fftHalf.inv(filledShortSpec, filtShort);
-  fftHalf.inv(filledLongSpec, filtLong);
-
-#endif
-
-  // for the short-PRT half spectrum, interpolate the power
-  // across the filter notch, keeping the phase constant
-
-  int notchWidth = 7;
-  int notchWidthHalf = notchWidth / 2;
-  int startIndex = nSamplesHalf - notchWidthHalf;
-  int endIndex = notchWidthHalf;
-  int nCenter = nSamplesHalf / 2;
-  
-  double powerStart = RadarComplex::power(filtShortSpec[startIndex]);
-  double powerEnd = RadarComplex::power(filtShortSpec[endIndex]);
-  double deltaPower = powerEnd - powerStart;
-  
-  for (int ii = nCenter - notchWidthHalf + 1;
-       ii < nCenter + notchWidthHalf; ii++) {
-
-    int jj = (ii + nSamplesHalf / 2) % nSamplesHalf;
-    int kk = ii - (nCenter - notchWidthHalf);
-    double interpFraction = (double) kk / (double) notchWidth;
-    double interpPower = powerStart + interpFraction * deltaPower;
-    double origPower = RadarComplex::power(filtShortSpec[jj]);
-    double powerRatio = interpPower / origPower;
-    double magRatio = sqrt(powerRatio);
-    filtShortSpec[jj].re *= magRatio;
-    filtShortSpec[jj].im *= magRatio;
-
-  }
-
-  // for the long-PRT half spectrum, interpolate the power
-  // across the filter notch, and interpolate the phase difference
-  // between the short and long
-
-  powerStart = RadarComplex::power(filtLongSpec[startIndex]);
-  powerEnd = RadarComplex::power(filtLongSpec[endIndex]);
-  deltaPower = powerEnd - powerStart;
-  
-  RadarComplex_t diffStart =
-    RadarComplex::conjugateProduct(filtLongSpec[startIndex],
-                                   filtShortSpec[startIndex]);
-  double diffPhaseStart = RadarComplex::argRad(diffStart);
-
-  RadarComplex_t diffEnd =
-    RadarComplex::conjugateProduct(filtLongSpec[endIndex],
-                                   filtShortSpec[endIndex]);
-  double diffPhaseEnd = RadarComplex::argRad(diffEnd);
-  
-  double deltaDiffPhase = RadarComplex::diffRad(diffPhaseEnd, diffPhaseStart);
-  
-  for (int ii = nCenter - notchWidthHalf + 1;
-       ii < nCenter + notchWidthHalf; ii++) {
-    
-    int jj = (ii + nSamplesHalf / 2) % nSamplesHalf;
-    int kk = ii - (nCenter - notchWidthHalf);
-    double interpFraction = (double) kk / (double) notchWidth;
-    
-    // power
-
-    double interpPower = powerStart + interpFraction * deltaPower;
-    double origPower = RadarComplex::power(filtLongSpec[jj]);
-    double powerRatio = interpPower / origPower;
-    double magRatio = sqrt(powerRatio);
-    filtLongSpec[jj].re *= magRatio;
-    filtLongSpec[jj].im *= magRatio;
-    
-    // phase
-    
-    double interpDiffPhase = diffPhaseStart + interpFraction * deltaDiffPhase;
-    double phaseShort = RadarComplex::argRad(filtShortSpec[jj]);
-    double phaseLong = RadarComplex::sumRad(phaseShort, interpDiffPhase);
-    double interpMag = RadarComplex::mag(filtLongSpec[jj]);
-    filtLongSpec[jj].re = interpMag * cos(phaseLong);
-    filtLongSpec[jj].im = interpMag * sin(phaseLong);
-    
-  }
-
-  // invert from FFT space back into time series
-
-  fftHalf.inv(filtShortSpec, filtShort);
-  fftHalf.inv(filtLongSpec, filtLong);
-
-  // recombine short and long PRT series into full series
-
-  RadarMoments::combineStagIq(nSamples, filtShort, filtLong, iqFiltered);
-
 }
 
-/////////////////////////////////////////////////////////////////
-// apply polynomial regression clutter filter to IQ time series
-//
-// NOTE: IQ data should not be windowed.
+//////////////////////////////////////////////////////////////////////////////
+// apply regression clutter filter to partial staggered PRT time series
+// This is applied to horizontal and vertical separately.
 //
 // Inputs:
-//   nSamples
-//   nExpanded = (nSamples / 2) * (m + n)
-//   fftExp: fft object for expanded time series, length nExpanded
-//   regr: object to be used for polynomial computations
-//   iqOrig: unfiltered time series, not windowed
-//   calNoise: measured noise from cal, linear units
-//   interpAcrossNotch: whether to fill in notch
+//   nSamplesHalf
+//   fftHalf: object to be used for FFT computations
+//   regrHalf: object to be used for polynomial computations
+//   windowHalf: for regression filter, the input data and filtered result is
+//               not windowed. The window is passed in for use in the FFTs
+//   iqUnfilt: unfiltered time series
+//   channel: HC, VC, HX, VX
+//   adjustForPowerResidue: adjust filtered spectrum for power residue
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
 //
 //  Outputs:
 //    iqFiltered: filtered time series
+//    iqNotched: notched time series
 //    filterRatio: ratio of raw to unfiltered power, before applying correction
 //    spectralNoise: spectral noise estimated from the spectrum
 //    spectralSnr: ratio of spectral noise to noise power
-//    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
-//
-//  Memory allocation by calling routine:
-//    regr - initialized to size nSamples
-//    iqOrig[nSamples]
-//    iqFiltered[nSamples]
-//    specRatio[nSamples] - if non-NULL
 
-void RadarMoments::applyRegrFilterStagPrt(int nSamples,
-                                          int nExpanded,
-                                          double prtSecsShort,
-                                          double prtSecsLong,
-                                          const RadarFft &fftExp,
-                                          ForsytheRegrFilter &regr,
-                                          const RadarComplex_t *iqOrig,
-                                          double calNoise,
-                                          bool interpAcrossNotch,
-                                          RadarComplex_t *iqFiltered,
-                                          double &filterRatio,
-                                          double &spectralNoise,
-                                          double &spectralSnr,
-                                          double *specRatio /* = NULL*/)
+void RadarMoments::_regrFiltHalfTseries(int nSamplesHalf,
+                                        double prtSecs,
+                                        const RadarFft &fftHalf,
+                                        ForsytheRegrFilter &regrHalf,
+                                        const RadarComplex_t *iqUnfilt,
+                                        double calNoise,
+                                        double nyquist,
+                                        bool adjustForPowerResidue,
+                                        RadarComplex_t *iqFiltered,
+                                        RadarComplex_t *iqNotched,
+                                        double &filterRatio,
+                                        double &spectralNoise,
+                                        double &spectralSnr)
   
 {
 
-  // apply the regression filter to the non-windowed (original) time series
+  // take the forward fft to compute the complex spectrum of unfiltered series
+  
+  RadarComplex_t empty(0.0, 0.0);
+  vector<RadarComplex_t> inputSpecC(nSamplesHalf, empty);
+  fftHalf.fwd(iqUnfilt, inputSpecC.data());
+  
+  // compute the real unfiltered spectrum
+  
+  vector<double> unfiltSpec(nSamplesHalf, 0.0);
+  RadarComplex::loadPower(inputSpecC.data(), unfiltSpec.data(), nSamplesHalf);
+  
+  // allocate space for regression power spectrum
+  
+  vector<double> regrSpec(nSamplesHalf, 0.0);
 
-  TaArray<RadarComplex_t> iqRegr_;
-  RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
-  double prtSecsSum = prtSecsShort + prtSecsLong;
-  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
+  // compute clutter to noise ratio, using the central 3 points in the FFT
   
-  double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
-  double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
-  double powerClut = powerOrig - powerRegr;
-  double csr = powerClut / powerRegr;
-
-  // check for low CSR, is less than 10dB do not filter
-
-  if (csr < .1) {
-    memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
-    return;
-  }
+  double clutPower3 = regrHalf.computeOrder3ClutPower(iqUnfilt);
+  double cnr3 = clutPower3 / calNoise;
+  _regrCnrDb = 10.0 * log10(cnr3);
   
-  // memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
-  // return;
-
-  // if no notch interpolation is required, return now
-
-  if (!interpAcrossNotch) {
-    memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
-    return;
-  }
-  
-  // expand the orig and filtered time series into pseudo-constant-prt series
-  
-  TaArray<RadarComplex_t> iqOrigExp_;
-  RadarComplex_t *iqOrigExp = iqOrigExp_.alloc(nExpanded);
-  expandStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
-               iqOrig, iqOrigExp);
-  
-  TaArray<RadarComplex_t> iqRegrExp_;
-  RadarComplex_t *iqRegrExp = iqRegrExp_.alloc(nExpanded);
-  expandStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
-               iqRegr, iqRegrExp);
-  
-  // take the forward fft to compute the complex spectra, orig and filtered
-  
-  TaArray<RadarComplex_t> origSpecC_;
-  RadarComplex_t *origSpecC = origSpecC_.alloc(nExpanded);
-  fftExp.fwd(iqOrigExp, origSpecC);
-  
-  TaArray<RadarComplex_t> regrSpecC_;
-  RadarComplex_t *regrSpecC = regrSpecC_.alloc(nExpanded);
-  fftExp.fwd(iqRegrExp, regrSpecC);
-
-  // compute the real power spectra, original and filtered
-  
-  TaArray<double> origSpec_;
-  double *origSpec = origSpec_.alloc(nExpanded);
-  RadarComplex::loadPower(origSpecC, origSpec, nExpanded);
-
-  TaArray<double> regrSpec_;
-  double *regrSpec = regrSpec_.alloc(nExpanded);
-  RadarComplex::loadPower(regrSpecC, regrSpec, nExpanded);
-  
-  // interpolate across the notches of the filtered spectrum
-  
-  _interpAcrossStagNotches(nSamples, nExpanded,
-                           _staggeredM, _staggeredN, regrSpec);
-  
-  // adjust the spectrum by the filter ratio
-  // constrain ratios to be 1 or less
-
-  for (int ii = 0; ii < nExpanded; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / origSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
+  if (_regrCnrDb < _regrMinCnrDb) {
+    
+    // don't use a regression filter
+    
+    memcpy(iqFiltered, iqUnfilt, nSamplesHalf * sizeof(RadarComplex_t));
+    if (iqNotched) {
+      memcpy(iqNotched, iqUnfilt, nSamplesHalf * sizeof(RadarComplex_t));
     }
-    regrSpecC[ii].re = origSpecC[ii].re * magRatio;
-    regrSpecC[ii].im = origSpecC[ii].im * magRatio;
-    if (specRatio != NULL) {
-      specRatio[ii] = magRatio;
+    regrSpec = unfiltSpec;
+    _regrInterpRatioDb = 0.0;
+
+  } else {
+    
+    // apply regression filter, passing in CNR
+    // results are in iqRegr
+    
+    vector<RadarComplex_t> iqRegr(nSamplesHalf, empty);
+    regrHalf.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
+    
+    // if iqNotched is non-NULL,
+    // save filtered data, without interp across the notch
+    
+    if (iqNotched != NULL) {
+      memcpy(iqNotched, iqRegr.data(), nSamplesHalf * sizeof(RadarComplex_t));
     }
-  }
 
-  // invert the fft
+    // take the forward fft to compute the complex spectrum
+    // of regr-filtered series
+    
+    vector<RadarComplex_t> regrSpecC(nSamplesHalf, empty);
+    fftHalf.fwd(iqRegr.data(), regrSpecC.data());
+    
+    // compute the real regr-filtered spectrum
+    
+    RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamplesHalf);
+    
+    // interpolate across the notch, computing the power before and after
+    
+    double powerBeforeInterp =
+      RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
+    
+    _regrDoInterpAcrossNotch(regrSpec);
+    
+    double powerAfterInterp =
+      RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
+    _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
+    
+    // adjust the input spectrum by the filter ratio
+    // constrain ratios to be 1 or less
+    // this preserves the phases on the spectrum
+    
+    for (int ii = 0; ii < nSamplesHalf; ii++) {
+      double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
+      if (magRatio > 1.0) {
+        magRatio = 1.0;
+      }
+      inputSpecC[ii].re *= magRatio;
+      inputSpecC[ii].im *= magRatio;
+    }
+    
+    // invert the resulting fft
+    // storing result in the filtered time series
+    
+    fftHalf.inv(inputSpecC.data(), iqFiltered);
+    
+  } // if (_regrCnrDb < _regrMinCnrDb) {
   
-  fftExp.inv(regrSpecC, iqRegrExp);
+  // compute powers and filter ratio
   
-  // condense the expanded time series
+  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamplesHalf);
+  double filteredPower = RadarComplex::meanPower(iqFiltered, nSamplesHalf);
+  filterRatio = rawPower / filteredPower;
 
-  condenseStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
-                 iqRegrExp, iqFiltered);
+  // compute spectral noise value
+  
+  spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamplesHalf);
+  
+  // compute SNR based on the spectral noise
+
+  spectralSnr = spectralNoise / calNoise;
 
 }
 
@@ -5648,73 +5444,6 @@ void RadarMoments::condenseStagIq(int nSamples,
 
 }
 
-#ifdef JUNK
-/////////////////////////////////////////////////////
-// Applies previously computed filter ratios, in the spectral
-// domain, to a time series
-//
-// Inputs:
-//   nSamples
-//   fft: object to be used for FFT computations
-//   iq: input time series to be adjusted for filtering
-//   specRatio: ratio of filtered to unfiltered in spectrum
-//
-//  Outputs:
-//    iqFiltered: filtered time series
-//    iqNotched: if not NULL, notched time series
-
-void RadarMoments::applyFilterRatio(int nSamples,
-                                    const RadarFft &fft,
-                                    const RadarComplex_t *iq,
-                                    const double *specRatio,
-                                    RadarComplex_t *iqFiltered,
-                                    RadarComplex_t *iqNotched)
-  
-{
-  
-  // take the forward fft
-
-  TaArray<RadarComplex_t> spec_;
-  RadarComplex_t *spec = spec_.alloc(nSamples);
-  fft.fwd(iq, spec);
-
-  // adjust the spectrum by the filter ratio
-
-  TaArray<RadarComplex_t> adjSpec_;
-  RadarComplex_t *adjSpec = adjSpec_.alloc(nSamples);
-  memcpy(adjSpec, spec, nSamples * sizeof(RadarComplex_t));
-
-  for (int ii = 0; ii < nSamples; ii++) {
-    double ratio = specRatio[ii];
-    adjSpec[ii].re *= ratio;
-    adjSpec[ii].im *= ratio;
-  }
-
-  // invert the fft
-
-  fft.inv(adjSpec, iqFiltered);
- 
-  // return the notched time series?
-
-  if (iqNotched != NULL) {
-
-    TaArray<RadarComplex_t> notchedSpec_;
-    RadarComplex_t *notchedSpec = notchedSpec_.alloc(nSamples);
-    memcpy(notchedSpec, spec, nSamples * sizeof(RadarComplex_t));
-
-    for (int ii = 0; ii < nSamples; ii++) {
-      if (ii <= _notchEnd || ii >= _notchStart) {
-        notchedSpec[ii].re = 0.0;
-        notchedSpec[ii].im = 0.0;
-      }
-    }
-    fft.inv(notchedSpec, iqNotched);
-
-  } // if (iqNotched != NULL)
- 
-}
-#endif
-
 /////////////////////////////////////////////////////
 // apply clutter filter for SZ 864
 
@@ -5759,8 +5488,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
   if (gateData.clutterInStrong) {
     
     applyAdaptiveFilter(nSamples, prtSecs, fft,
-                        gateData.iqStrong, NULL,
-                        calNoise,
+                        gateData.iqStrong, calNoise,
                         gateData.iqStrongF, NULL,
                         filterRatio,
                         spectralNoise,
@@ -5771,8 +5499,7 @@ void RadarMoments::applyClutterFilterSz(int nSamples,
   if (gateData.clutterInWeak) {
     
     applyAdaptiveFilter(nSamples, prtSecs, fft,
-                        gateData.iqWeak, NULL,
-                        calNoise,
+                        gateData.iqWeak, calNoise,
                         gateData.iqWeakF, NULL,
                         filterRatio,
                         spectralNoise,
@@ -8290,4 +8017,427 @@ void RadarMoments::computeMitchSwitchRipple(RadarComplex_t *iqhc,
 {
                                       
 }
+
+#ifdef NOTNOW
+
+/////////////////////////////////////////////////////
+// Applies previously computed filter ratios, in the spectral
+// domain, to a time series
+//
+// Inputs:
+//   nSamples
+//   fft: object to be used for FFT computations
+//   iq: input time series to be adjusted for filtering
+//   specRatio: ratio of filtered to unfiltered in spectrum
+//
+//  Outputs:
+//    iqFiltered: filtered time series
+//    iqNotched: if not NULL, notched time series
+
+void RadarMoments::applyFilterRatio(int nSamples,
+                                    const RadarFft &fft,
+                                    const RadarComplex_t *iq,
+                                    const double *specRatio,
+                                    RadarComplex_t *iqFiltered,
+                                    RadarComplex_t *iqNotched)
+  
+{
+  
+  // take the forward fft
+
+  TaArray<RadarComplex_t> spec_;
+  RadarComplex_t *spec = spec_.alloc(nSamples);
+  fft.fwd(iq, spec);
+
+  // adjust the spectrum by the filter ratio
+
+  TaArray<RadarComplex_t> adjSpec_;
+  RadarComplex_t *adjSpec = adjSpec_.alloc(nSamples);
+  memcpy(adjSpec, spec, nSamples * sizeof(RadarComplex_t));
+
+  for (int ii = 0; ii < nSamples; ii++) {
+    double ratio = specRatio[ii];
+    adjSpec[ii].re *= ratio;
+    adjSpec[ii].im *= ratio;
+  }
+
+  // invert the fft
+
+  fft.inv(adjSpec, iqFiltered);
+ 
+  // return the notched time series?
+
+  if (iqNotched != NULL) {
+
+    TaArray<RadarComplex_t> notchedSpec_;
+    RadarComplex_t *notchedSpec = notchedSpec_.alloc(nSamples);
+    memcpy(notchedSpec, spec, nSamples * sizeof(RadarComplex_t));
+
+    for (int ii = 0; ii < nSamples; ii++) {
+      if (ii <= _notchEnd || ii >= _notchStart) {
+        notchedSpec[ii].re = 0.0;
+        notchedSpec[ii].im = 0.0;
+      }
+    }
+    fft.inv(notchedSpec, iqNotched);
+
+  } // if (iqNotched != NULL)
+ 
+}
+
+/////////////////////////////////////////////////////////////////
+// apply polynomial regression clutter filter to IQ time series
+//
+// NOTE: IQ data should not be windowed.
+//
+// Inputs:
+//   nSamples
+//   fftHalf: fft object for short and long half time series, length nSamples/2
+//   regr: object to be used for polynomial computations
+//   iqOrig: unfiltered time series, not windowed
+//   calNoise: measured noise from cal, linear units
+//   interpAcrossNotch: whether to fill in notch
+//
+//  Outputs:
+//    iqFiltered: filtered time series
+//    filterRatio: ratio of raw to unfiltered power, before applying correction
+//    spectralNoise: spectral noise estimated from the spectrum
+//    spectralSnr: ratio of spectral noise to noise power
+//
+//  Memory allocation by calling routine:
+//    regr - initialized to size nSamples
+//    iqOrig[nSamples]
+//    iqFiltered[nSamples]
+
+void RadarMoments::applyRegrFilterStagPrt(int nSamples,
+                                          double prtSecsShort,
+                                          double prtSecsLong,
+                                          const RadarFft &fftHalf,
+                                          ForsytheRegrFilter &regr,
+                                          const RadarComplex_t *iqOrig,
+                                          double calNoise,
+                                          bool interpAcrossNotch,
+                                          RadarComplex_t *iqFiltered,
+                                          double &filterRatio,
+                                          double &spectralNoise,
+                                          double &spectralSnr)
+  
+{
+  
+  // apply the regression filter to the non-windowed (original) time series
+
+  TaArray<RadarComplex_t> iqRegr_;
+  RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
+  double prtSecsSum = prtSecsShort + prtSecsLong;
+  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
+
+  double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
+  double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
+  double powerClut = powerOrig - powerRegr;
+  double csr = powerClut / powerRegr;
+
+  // check for low CSR, is less than 10dB do not filter
+
+  if (csr < .1) {
+    memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
+    return;
+  }
+  
+  // if no notch interpolation is required, return now
+
+  if (!interpAcrossNotch || nSamples < 16) {
+    memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
+    return;
+  }
+
+  // separate the filtered time series into two series,
+  // for short and long PRT respectively
+
+  int nSamplesHalf = nSamples / 2;
+  TaArray<RadarComplex_t> filtShort_, filtLong_;
+  RadarComplex_t *filtShort = filtShort_.alloc(nSamplesHalf);
+  RadarComplex_t *filtLong = filtLong_.alloc(_nSamplesHalf);
+  RadarMoments::separateStagIq(nSamples, iqFiltered, filtShort, filtLong);
+  
+  // compute the spectra of these 2 half series
+  
+  TaArray<RadarComplex_t> filtShortSpec_;
+  RadarComplex_t *filtShortSpec = filtShortSpec_.alloc(nSamplesHalf);
+  fftHalf.fwd(filtShort, filtShortSpec);
+
+  TaArray<RadarComplex_t> filtLongSpec_;
+  RadarComplex_t *filtLongSpec = filtLongSpec_.alloc(_nSamplesHalf);
+  fftHalf.fwd(filtLong, filtLongSpec);
+
+#ifdef JUNK
+
+  // perform gaussian infill for powers, keeping phases unchanged
+
+  TaArray<RadarComplex_t> filledShortSpec_;
+  RadarComplex_t *filledShortSpec = filledShortSpec_.alloc(nSamplesHalf);
+
+  TaArray<RadarComplex_t> filledLongSpec_;
+  RadarComplex_t *filledLongSpec = filledLongSpec_.alloc(nSamplesHalf);
+
+  int maxNotchWidth = 7;
+  ClutFilter::fillNotchUsingGfit(filtShortSpec, nSamplesHalf,
+                                 maxNotchWidth, filledShortSpec);
+  
+  ClutFilter::fillNotchUsingGfit(filtLongSpec, nSamplesHalf,
+                                 maxNotchWidth, filledLongSpec);
+
+  // for the long-PRT half spectrum, interpolate the phase difference
+  // between the short and long
+  
+  int notchWidthHalf = maxNotchWidth / 2;
+  if (notchWidthHalf > _nSamplesHalf - 1) notchWidthHalf = _nSamplesHalf - 1;
+  int startIndex =  -notchWidthHalf;
+  int endIndex = notchWidthHalf;
+
+  RadarComplex_t diffStart =
+    RadarComplex::conjugateProduct(filledLongSpec[startIndex],
+                                   filledShortSpec[startIndex]);
+  double diffPhaseStart = RadarComplex::argRad(diffStart);
+  
+  RadarComplex_t diffEnd =
+    RadarComplex::conjugateProduct(filledLongSpec[endIndex],
+                                   filledShortSpec[endIndex]);
+  double diffPhaseEnd = RadarComplex::argRad(diffEnd);
+  double deltaDiffPhase = RadarComplex::diffRad(diffPhaseEnd, diffPhaseStart);
+  
+  double count = 0.0;
+  for (int ii = startIndex; ii <= endIndex; ii++, count++) {
+    double interpFraction = count / (double) maxNotchWidth;
+    int jj = (ii + _nSamplesHalf) % _nSamplesHalf;
+    double interpDiffPhase = diffPhaseStart + interpFraction * deltaDiffPhase;
+    double phaseShort = RadarComplex::argRad(filledShortSpec[jj]);
+    double phaseLong = RadarComplex::sumRad(phaseShort, interpDiffPhase);
+    double interpMag = RadarComplex::mag(filledLongSpec[jj]);
+    filledLongSpec[jj].re = interpMag * cos(phaseLong);
+    filledLongSpec[jj].im = interpMag * sin(phaseLong);
+  }
+ 
+  // invert from FFT space back into time series
+
+  fftHalf.inv(filledShortSpec, filtShort);
+  fftHalf.inv(filledLongSpec, filtLong);
+
+#endif
+
+  // for the short-PRT half spectrum, interpolate the power
+  // across the filter notch, keeping the phase constant
+
+  int notchWidth = 7;
+  int notchWidthHalf = notchWidth / 2;
+  int startIndex = nSamplesHalf - notchWidthHalf;
+  int endIndex = notchWidthHalf;
+  int nCenter = nSamplesHalf / 2;
+  
+  double powerStart = RadarComplex::power(filtShortSpec[startIndex]);
+  double powerEnd = RadarComplex::power(filtShortSpec[endIndex]);
+  double deltaPower = powerEnd - powerStart;
+  
+  for (int ii = nCenter - notchWidthHalf + 1;
+       ii < nCenter + notchWidthHalf; ii++) {
+
+    int jj = (ii + nSamplesHalf / 2) % nSamplesHalf;
+    int kk = ii - (nCenter - notchWidthHalf);
+    double interpFraction = (double) kk / (double) notchWidth;
+    double interpPower = powerStart + interpFraction * deltaPower;
+    double origPower = RadarComplex::power(filtShortSpec[jj]);
+    double powerRatio = interpPower / origPower;
+    double magRatio = sqrt(powerRatio);
+    filtShortSpec[jj].re *= magRatio;
+    filtShortSpec[jj].im *= magRatio;
+
+  }
+
+  // for the long-PRT half spectrum, interpolate the power
+  // across the filter notch, and interpolate the phase difference
+  // between the short and long
+
+  powerStart = RadarComplex::power(filtLongSpec[startIndex]);
+  powerEnd = RadarComplex::power(filtLongSpec[endIndex]);
+  deltaPower = powerEnd - powerStart;
+  
+  RadarComplex_t diffStart =
+    RadarComplex::conjugateProduct(filtLongSpec[startIndex],
+                                   filtShortSpec[startIndex]);
+  double diffPhaseStart = RadarComplex::argRad(diffStart);
+
+  RadarComplex_t diffEnd =
+    RadarComplex::conjugateProduct(filtLongSpec[endIndex],
+                                   filtShortSpec[endIndex]);
+  double diffPhaseEnd = RadarComplex::argRad(diffEnd);
+  
+  double deltaDiffPhase = RadarComplex::diffRad(diffPhaseEnd, diffPhaseStart);
+  
+  for (int ii = nCenter - notchWidthHalf + 1;
+       ii < nCenter + notchWidthHalf; ii++) {
+    
+    int jj = (ii + nSamplesHalf / 2) % nSamplesHalf;
+    int kk = ii - (nCenter - notchWidthHalf);
+    double interpFraction = (double) kk / (double) notchWidth;
+    
+    // power
+
+    double interpPower = powerStart + interpFraction * deltaPower;
+    double origPower = RadarComplex::power(filtLongSpec[jj]);
+    double powerRatio = interpPower / origPower;
+    double magRatio = sqrt(powerRatio);
+    filtLongSpec[jj].re *= magRatio;
+    filtLongSpec[jj].im *= magRatio;
+    
+    // phase
+    
+    double interpDiffPhase = diffPhaseStart + interpFraction * deltaDiffPhase;
+    double phaseShort = RadarComplex::argRad(filtShortSpec[jj]);
+    double phaseLong = RadarComplex::sumRad(phaseShort, interpDiffPhase);
+    double interpMag = RadarComplex::mag(filtLongSpec[jj]);
+    filtLongSpec[jj].re = interpMag * cos(phaseLong);
+    filtLongSpec[jj].im = interpMag * sin(phaseLong);
+    
+  }
+
+  // invert from FFT space back into time series
+
+  fftHalf.inv(filtShortSpec, filtShort);
+  fftHalf.inv(filtLongSpec, filtLong);
+
+  // recombine short and long PRT series into full series
+
+  RadarMoments::combineStagIq(nSamples, filtShort, filtLong, iqFiltered);
+
+}
+
+/////////////////////////////////////////////////////////////////
+// apply polynomial regression clutter filter to IQ time series
+//
+// NOTE: IQ data should not be windowed.
+//
+// Inputs:
+//   nSamples
+//   nExpanded = (nSamples / 2) * (m + n)
+//   fftExp: fft object for expanded time series, length nExpanded
+//   regr: object to be used for polynomial computations
+//   iqOrig: unfiltered time series, not windowed
+//   calNoise: measured noise from cal, linear units
+//   interpAcrossNotch: whether to fill in notch
+//
+//  Outputs:
+//    iqFiltered: filtered time series
+//    filterRatio: ratio of raw to unfiltered power, before applying correction
+//    spectralNoise: spectral noise estimated from the spectrum
+//    spectralSnr: ratio of spectral noise to noise power
+//
+//  Memory allocation by calling routine:
+//    regr - initialized to size nSamples
+//    iqOrig[nSamples]
+//    iqFiltered[nSamples]
+
+void RadarMoments::applyRegrFilterStagPrt(int nSamples,
+                                          int nExpanded,
+                                          double prtSecsShort,
+                                          double prtSecsLong,
+                                          const RadarFft &fftExp,
+                                          ForsytheRegrFilter &regr,
+                                          const RadarComplex_t *iqOrig,
+                                          double calNoise,
+                                          bool interpAcrossNotch,
+                                          RadarComplex_t *iqFiltered,
+                                          double &filterRatio,
+                                          double &spectralNoise,
+                                          double &spectralSnr)
+  
+{
+
+  // apply the regression filter to the non-windowed (original) time series
+
+  TaArray<RadarComplex_t> iqRegr_;
+  RadarComplex_t *iqRegr = iqRegr_.alloc(nSamples);
+  double prtSecsSum = prtSecsShort + prtSecsLong;
+  regr.apply(iqOrig, -120.0, _antennaRate, prtSecsSum, iqRegr);
+  
+  double powerOrig = RadarComplex::meanPower(iqOrig, nSamples);
+  double powerRegr = RadarComplex::meanPower(iqRegr, nSamples);
+  double powerClut = powerOrig - powerRegr;
+  double csr = powerClut / powerRegr;
+
+  // check for low CSR, is less than 10dB do not filter
+
+  if (csr < .1) {
+    memcpy(iqFiltered, iqOrig, nSamples * sizeof(RadarComplex_t));
+    return;
+  }
+  
+  // memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
+  // return;
+
+  // if no notch interpolation is required, return now
+
+  if (!interpAcrossNotch) {
+    memcpy(iqFiltered, iqRegr, nSamples * sizeof(RadarComplex_t));
+    return;
+  }
+  
+  // expand the orig and filtered time series into pseudo-constant-prt series
+  
+  TaArray<RadarComplex_t> iqOrigExp_;
+  RadarComplex_t *iqOrigExp = iqOrigExp_.alloc(nExpanded);
+  expandStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
+               iqOrig, iqOrigExp);
+  
+  TaArray<RadarComplex_t> iqRegrExp_;
+  RadarComplex_t *iqRegrExp = iqRegrExp_.alloc(nExpanded);
+  expandStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
+               iqRegr, iqRegrExp);
+  
+  // take the forward fft to compute the complex spectra, orig and filtered
+  
+  TaArray<RadarComplex_t> origSpecC_;
+  RadarComplex_t *origSpecC = origSpecC_.alloc(nExpanded);
+  fftExp.fwd(iqOrigExp, origSpecC);
+  
+  TaArray<RadarComplex_t> regrSpecC_;
+  RadarComplex_t *regrSpecC = regrSpecC_.alloc(nExpanded);
+  fftExp.fwd(iqRegrExp, regrSpecC);
+
+  // compute the real power spectra, original and filtered
+  
+  TaArray<double> origSpec_;
+  double *origSpec = origSpec_.alloc(nExpanded);
+  RadarComplex::loadPower(origSpecC, origSpec, nExpanded);
+
+  TaArray<double> regrSpec_;
+  double *regrSpec = regrSpec_.alloc(nExpanded);
+  RadarComplex::loadPower(regrSpecC, regrSpec, nExpanded);
+  
+  // interpolate across the notches of the filtered spectrum
+  
+  _interpAcrossStagNotches(nSamples, nExpanded,
+                           _staggeredM, _staggeredN, regrSpec);
+  
+  // adjust the spectrum by the filter ratio
+  // constrain ratios to be 1 or less
+
+  for (int ii = 0; ii < nExpanded; ii++) {
+    double magRatio = sqrt(regrSpec[ii] / origSpec[ii]);
+    if (magRatio > 1.0) {
+      magRatio = 1.0;
+    }
+    regrSpecC[ii].re = origSpecC[ii].re * magRatio;
+    regrSpecC[ii].im = origSpecC[ii].im * magRatio;
+  }
+
+  // invert the fft
+  
+  fftExp.inv(regrSpecC, iqRegrExp);
+  
+  // condense the expanded time series
+
+  condenseStagIq(nSamples, nExpanded, _staggeredM, _staggeredN,
+                 iqRegrExp, iqFiltered);
+
+}
+#endif
 

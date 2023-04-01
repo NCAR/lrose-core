@@ -1374,7 +1374,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     // adaptive spectral filter
     
     moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
-                                iqWindowed, NULL,
+                                iqWindowed,
                                 calibNoise,
                                 iqFilt, iqNotched,
                                 filterRatio,
@@ -1444,12 +1444,10 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     // simple notch filter
     
     moments.applyNotchFilter(_nSamples, _beam->getPrt(), fft,
-                             iqWindowed, NULL,
+                             iqWindowed,
                              calibNoise,
                              iqFilt,
-                             filterRatio,
-                             spectralNoise,
-                             spectralSnr);
+                             filterRatio, spectralNoise, spectralSnr);
     
     TaArray<RadarComplex_t> filtNotchSpec_;
     RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(_nSamples);

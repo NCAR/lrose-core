@@ -795,11 +795,11 @@ public:
 
   tdrp_bool_t iqplot_plot_legend2;
 
+  clutter_filter_type_t ascope_clutter_filter_type;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
-
-  tdrp_bool_t use_polynomial_regression_clutter_filter;
 
   tdrp_bool_t regression_filter_determine_order_from_cnr;
 

@@ -1028,7 +1028,7 @@ void Beam::_filterMoments()
       } else {
         _filterSpH();
       }
-      
+
   }
 
 }
@@ -1457,20 +1457,12 @@ void Beam::_computeMomDpAltHvCoCross()
       
     // compute moments for this gate
 
-    _mom->computeMomDpAltHvCoCross(fields.lag0_hc,
-                                   fields.lag0_hx,
-                                   fields.lag0_vc,
-                                   fields.lag0_vx,
-                                   fields.lag0_vchx,
-                                   fields.lag0_hcvx,
-                                   fields.lag1_vxhx,
-                                   fields.lag1_vchc,
-                                   fields.lag1_hcvc,
-                                   fields.lag2_hc,
-                                   fields.lag2_vc,
-                                   igate, 
-                                   fields);
-    
+    _mom->computeMomDpAltHvCoCross(fields.lag0_hc, fields.lag0_hx,
+                                   fields.lag0_vc, fields.lag0_vx,
+                                   fields.lag0_vchx, fields.lag0_hcvx,
+                                   fields.lag1_vxhx, fields.lag1_vchc, fields.lag1_hcvc,
+                                   fields.lag2_hc, fields.lag2_vc,
+                                   igate, fields);
     
     // compute clutter detection quantities as needed
     
@@ -1494,7 +1486,7 @@ void Beam::_computeMomDpAltHvCoCross()
   _altVel.computeVelAlt(_nGates, _momFields, _nyquist);
 
   // copy back to gate data
-
+  
   for (int igate = 0; igate < _nGates; igate++) {
     _gateData[igate]->fields = _momFields[igate];
   }
@@ -1978,34 +1970,22 @@ void Beam::_filterSpH()
     // filter the HC time series
     
     double spectralNoiseHc = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
+    double filterRatioHc = 1.0;
+    double spectralSnrHc = 1.0;
 
-    RadarComplex_t *specHc = NULL;
-    if (gate->specHcComputed) {
-      specHc = gate->specHc;
-    }
-    
-    _mom->applyClutterFilter(_nSamples,
-                             _prt,
-                             *_fft,
-                             *_regr,
-                             _window,
-                             gate->iqhcOrig,
-                             gate->iqhc, specHc,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqhcOrig, gate->iqhc,
                              calibNoise,
-                             gate->iqhcF, NULL,
-                             filterRatio,
-                             spectralNoiseHc,
-                             spectralSnr);
+                             gate->iqhcF, gate->iqhcNotched,
+                             filterRatioHc, spectralNoiseHc, spectralSnrHc);
     
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+    if (filterRatioHc > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
     } else {
       fields.clut_2_wx_ratio = MomentsFields::missingDouble;
     }
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
+    fields.spectral_snr = 10.0 * log10(spectralSnrHc);
 
     // testing cnr from 3-order regression filter
 
@@ -2015,15 +1995,11 @@ void Beam::_filterSpH()
     
     // compute filtered moments for this gate
     
-    _mom->computeCovarSinglePolH(gate->iqhcF,
-                                 fieldsF);
+    _mom->computeCovarSinglePolH(gate->iqhcF, fieldsF);
     
-    _mom->computeMomSinglePolH(fieldsF.lag0_hc,
-                               fieldsF.lag1_hc,
-                               fieldsF.lag2_hc,
-                               fieldsF.lag3_hc,
-                               igate,
-                               fieldsF);
+    _mom->computeMomSinglePolH(fieldsF.lag0_hc, fieldsF.lag1_hc,
+                               fieldsF.lag2_hc, fieldsF.lag3_hc,
+                               igate, fieldsF);
     
     // compute clutter power
     
@@ -2056,53 +2032,31 @@ void Beam::_filterSpV()
       
     // filter the VC time series
     
-    double spectralNoise = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
+    double spectralNoiseVc = 1.0e-13;
+    double filterRatioVc = 1.0;
+    double spectralSnrVc = 1.0;
 
-    RadarComplex_t *specVc = NULL;
-    if (gate->specVcComputed) {
-      specVc = gate->specVc;
-    }
-    
-    _mom->applyClutterFilter(_nSamples,
-                             _prt,
-                             *_fft,
-                             *_regr,
-                             _window,
-                             gate->iqvcOrig,
-                             gate->iqvc, specVc,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqvcOrig, gate->iqvc,
                              calibNoise,
-                             gate->iqvcF, NULL,
-                             filterRatio,
-                             spectralNoise,
-                             spectralSnr);
+                             gate->iqvcF, gate->iqvcNotched,
+                             filterRatioVc, spectralNoiseVc, spectralSnrVc);
     
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+    if (filterRatioVc > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatioVc - 1.0);
     } else {
       fields.clut_2_wx_ratio = MomentsFields::missingDouble;
     }
-    fields.spectral_noise = 10.0 * log10(spectralNoise);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
-    
-    // testing cnr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrder();
-    fields.test5 = _mom->getRegrCnrDb();
+    fields.spectral_noise = 10.0 * log10(spectralNoiseVc);
+    fields.spectral_snr = 10.0 * log10(spectralSnrVc);
     
     // compute filtered moments for this gate
     
-    _mom->computeCovarSinglePolV(gate->iqvcF,
-                                 fieldsF);
+    _mom->computeCovarSinglePolV(gate->iqvcF, fieldsF);
     
-    _mom->computeMomSinglePolV(fieldsF.lag0_vc,
-                               fieldsF.lag1_vc,
-                               fieldsF.lag2_vc,
-                               fieldsF.lag3_vc,
-                               igate,
-                               fieldsF);
+    _mom->computeMomSinglePolV(fieldsF.lag0_vc, fieldsF.lag1_vc,
+                               fieldsF.lag2_vc, fieldsF.lag3_vc,
+                               igate, fieldsF);
     
     // compute clutter power
     
@@ -2119,87 +2073,14 @@ void Beam::_filterSpStagPrt()
   
 {
 
-  // NOTE - regression filter is not working correctly for
-  // staggered
-  
-  // if (_params.use_polynomial_regression_clutter_filter) {
-  //   _filterRegrSpStagPrt();
-  // } else {
-  _filterAdapSpStagPrt();
-  // }
-
-}    
-
-//////////////////////////////////////////////
-// Single Pol, staggered PRT, regression filter
-
-void Beam::_filterRegrSpStagPrt()
-{
-
-  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-
-  for (int igate = 0; igate < _nGates; igate++) {
-      
-    GateData *gate = _gateData[igate];
-    MomentsFields &fields = gate->fields;
-    MomentsFields &fieldsF = gate->fieldsF;
-      
-    // check if we have clutter at this gate
-    
-    if (!fields.cmd_flag) {
-      continue;
-    }
-      
-    // filter the short prt time series
-    
-    double spectralNoiseHc = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
-    RadarMoments::notch_interp_method_t interpMethod =
-      (RadarMoments::notch_interp_method_t)
-      _params.regression_filter_notch_interp_method;
-
-    memcpy(gate->iqhcF, gate->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
-    
-    _mom->applyRegrFilterStagPrt(_nSamples,
-                                 _prt, _prtLong,
-                                 *_fftHalf,
-                                 *_regrStag,
-                                 gate->iqhcOrig,
-                                 calibNoise,
-                                 interpMethod,
-                                 gate->iqhcF,
-                                 filterRatio,
-                                 spectralNoiseHc,
-                                 spectralSnr);
-    
-    RadarMoments::separateStagIq(_nSamples,
-                                 gate->iqhcF,
-                                 gate->iqhcPrtShortF,
-                                 gate->iqhcPrtLongF);
-    
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
-    } else {
-      fields.clut_2_wx_ratio = MomentsFields::missingDouble;
-    }
-    fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
-    
-    // compute filtered moments for this gate
-    
-    _mom->singlePolHStagPrt(gate->iqhc,
-                            gate->iqhcPrtShortF,
-                            gate->iqhcPrtLongF,
-                            igate, true, fieldsF);
-    
-    // compute clutter power
-    
-    fields.clut = _computeClutPower(fields, fieldsF);
-    
-  } // igate
+  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    _filterAdapSpStagPrt();
+  } else {
+    _filterRegrSpStagPrt();
+  }
 
 }
+    
 
 //////////////////////////////////////////////
 // Single Pol, staggered PRT, adaptive filter
@@ -2224,34 +2105,81 @@ void Beam::_filterAdapSpStagPrt()
     // filter the short prt time series
     
     double spectralNoiseHc = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
+    double filterRatioHc = 1.0;
+    double spectralSnrHc = 1.0;
 
-    _mom->applyAdapFilterStagPrt(_nSamplesHalf,
-                                 _prt, _prtLong,
-                                 *_fftHalf,
-                                 gate->iqhcPrtShort,
-                                 gate->iqhcPrtLong,
+    _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                 gate->iqhcPrtShort, gate->iqhcPrtLong,
                                  calibNoise,
-                                 gate->iqhcPrtShortF,
-                                 gate->iqhcPrtLongF,
-                                 filterRatio,
-                                 spectralNoiseHc,
-                                 spectralSnr);
+                                 gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                 gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                 filterRatioHc, spectralNoiseHc, spectralSnrHc);
     
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+    if (filterRatioHc > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
     } else {
       fields.clut_2_wx_ratio = MomentsFields::missingDouble;
     }
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
+    fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
     // compute filtered moments for this gate
     
-    _mom->singlePolHStagPrt(gate->iqhc,
-                            gate->iqhcPrtShortF,
-                            gate->iqhcPrtLongF,
+    _mom->singlePolHStagPrt(gate->iqhc, gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                            igate, true, fieldsF);
+    
+    // compute clutter power
+    
+    fields.clut = _computeClutPower(fields, fieldsF);
+    
+  } // igate
+
+}
+
+//////////////////////////////////////////////
+// Single Pol, staggered PRT, regression filter
+
+void Beam::_filterRegrSpStagPrt()
+{
+
+  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  
+  for (int igate = 0; igate < _nGates; igate++) {
+      
+    GateData *gate = _gateData[igate];
+    MomentsFields &fields = gate->fields;
+    MomentsFields &fieldsF = gate->fieldsF;
+      
+    // check if we have clutter at this gate
+    
+    if (!fields.cmd_flag) {
+      continue;
+    }
+      
+    // filter the short prt time series
+    
+    double spectralNoiseHc = 1.0e-13;
+    double filterRatioHc = 1.0;
+    double spectralSnrHc = 1.0;
+
+    _mom->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                 gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                 calibNoise,
+                                 gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                 gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                 filterRatioHc, spectralNoiseHc, spectralSnrHc);
+    
+    if (filterRatioHc > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
+    } else {
+      fields.clut_2_wx_ratio = MomentsFields::missingDouble;
+    }
+    fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
+    fields.spectral_snr = 10.0 * log10(spectralSnrHc);
+    
+    // compute filtered moments for this gate
+    
+    _mom->singlePolHStagPrt(gate->iqhc, gate->iqhcPrtShortF, gate->iqhcPrtLongF,
                             igate, true, fieldsF);
     
     // compute clutter power
@@ -2290,25 +2218,20 @@ void Beam::_filterSpSz864()
     
     // apply the clutter filter
     
-    double spectralNoise = 1.0e-13;
-    double filterRatio = 1.0;
-    double spectralSnr = 1.0;
-    _mom->applyClutterFilterSz(_nSamples,
-                               _prt,
-                               *_fft,
-                               *gate,
-                               calibNoise,
-                               filterRatio,
-                               spectralNoise,
-                               spectralSnr);
+    double spectralNoiseHc = 1.0e-13;
+    double filterRatioHc = 1.0;
+    double spectralSnrHc = 1.0;
+    _mom->applyClutterFilterSz(_nSamples, _prt, *_fft,
+                               *gate, calibNoise,
+                               filterRatioHc, spectralNoiseHc, spectralSnrHc);
     
-    if (filterRatio > 1.0) {
-      fields.clut_2_wx_ratio = 10.0 * log10(filterRatio - 1.0);
+    if (filterRatioHc > 1.0) {
+      fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
     } else {
       fields.clut_2_wx_ratio = MomentsFields::missingDouble;
     }
-    fields.spectral_noise = 10.0 * log10(spectralNoise);
-    fields.spectral_snr = 10.0 * log10(spectralSnr);
+    fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
+    fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
     // compute moments
     
@@ -2376,23 +2299,16 @@ void Beam::_filterDpAltHvCoCross()
 
       // filter the HC time series, save the filter ratio
       
-      TaArray<double> _specRatio;
-      double *specRatio = _specRatio.alloc(_nSamplesHalf);
-      RadarComplex_t *specHc = NULL;
-      if (gate->specHcComputed) {
-        specHc = gate->specHc;
-      }
-      
       double spectralNoiseHc = 1.0e-13;
       double filterRatioHc = 1.0;
       double spectralSnrHc = 1.0;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqhcOrig, gate->iqhc, specHc,
+                               gate->iqhcOrig, gate->iqhc,
                                calibNoise,
                                gate->iqhcF, gate->iqhcNotched,
                                filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                               specRatio, false);
+                               false);
       
       if (filterRatioHc > 1.0) {
         fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -2402,49 +2318,34 @@ void Beam::_filterDpAltHvCoCross()
       fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
       fields.spectral_snr = 10.0 * log10(spectralSnrHc);
       
-      // filter the other channels
+      // filter the other channels, using the same notch as Hc
       
       double filterRatioVc, spectralNoiseVc, spectralSnrVc;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqvcOrig, gate->iqvc, NULL,
+                               gate->iqvcOrig, gate->iqvc,
                                calibNoise,
                                gate->iqvcF, gate->iqvcNotched,
                                filterRatioVc, spectralNoiseVc,
-                               spectralSnrVc, NULL, true);
+                               spectralSnrVc, true);
       
       double filterRatioHx, spectralNoiseHx, spectralSnrHx;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqhxOrig, gate->iqhx, NULL,
+                               gate->iqhxOrig, gate->iqhx,
                                calibNoise,
                                gate->iqhxF, NULL,
                                filterRatioHx, spectralNoiseHx,
-                               spectralSnrHx, NULL, true);
+                               spectralSnrHx, true);
       
       double filterRatioVx, spectralNoiseVx, spectralSnrVx;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqvxOrig, gate->iqvx, NULL,
+                               gate->iqvxOrig, gate->iqvx,
                                calibNoise,
                                gate->iqvxF, NULL,
                                filterRatioVx, spectralNoiseVx,
-                               spectralSnrVx, NULL, true);
-      
-      // apply the spectral filter ratio to other channels
-      
-      
-      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-      //                        gate->iqvc, specRatio,
-      //                        gate->iqvcF, gate->iqvcNotched);
-      
-      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-      //                        gate->iqhx, specRatio,
-      //                        gate->iqhxF, NULL);
-      
-      // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-      //                        gate->iqvx, specRatio,
-      //                        gate->iqvxF, NULL);
+                               spectralSnrVx, true);
       
     } else {
       
@@ -2453,28 +2354,28 @@ void Beam::_filterDpAltHvCoCross()
       double filterRatioHc, spectralNoiseHc, spectralSnrHc;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqhcOrig, gate->iqhc, NULL, calibNoise,
+                               gate->iqhcOrig, gate->iqhc, calibNoise,
                                gate->iqhcF, gate->iqhcNotched,
                                filterRatioHc, spectralNoiseHc, spectralSnrHc);
 
       double filterRatioVc, spectralNoiseVc, spectralSnrVc;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqvcOrig, gate->iqvc, NULL, calibNoise,
+                               gate->iqvcOrig, gate->iqvc, calibNoise,
                                gate->iqvcF, gate->iqvcNotched,
                                filterRatioVc, spectralNoiseVc, spectralSnrVc);
 
       double filterRatioHx, spectralNoiseHx, spectralSnrHx;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqhxOrig, gate->iqhx, NULL, calibNoise,
+                               gate->iqhxOrig, gate->iqhx, calibNoise,
                                gate->iqhxF, NULL,
                                filterRatioHx, spectralNoiseHx, spectralSnrHx);
 
       double filterRatioVx, spectralNoiseVx, spectralSnrVx;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
-                               gate->iqvxOrig, gate->iqvx, NULL, calibNoise,
+                               gate->iqvxOrig, gate->iqvx, calibNoise,
                                gate->iqvxF, NULL,
                                filterRatioVx, spectralNoiseVx, spectralSnrVx);
       
@@ -2485,7 +2386,7 @@ void Beam::_filterDpAltHvCoCross()
     _mom->computeCovarDpAltHvCoCross(gate->iqhcF, gate->iqvcF,
                                      gate->iqhxF, gate->iqvxF, 
                                      fieldsF);
-
+    
     _mom->computeMomDpAltHvCoCross(fieldsF.lag0_hc,
                                    fieldsF.lag0_hx,
                                    fieldsF.lag0_vc,
@@ -2499,42 +2400,34 @@ void Beam::_filterDpAltHvCoCross()
                                    fieldsF.lag2_vc,
                                    igate, 
                                    fieldsF);
-
+    
     // compute notched moments for rhohv, phidp and zdr
 
     MomentsFields fieldsN;
     _mom->computeCovarDpAltHvCoCross(gate->iqhcNotched, gate->iqvcNotched,
                                      gate->iqhxF, gate->iqvxF, 
                                      fieldsN);
-    _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc,
-                                   fieldsN.lag0_hx,
-                                   fieldsN.lag0_vc,
-                                   fieldsN.lag0_vx,
-                                   fieldsN.lag0_vchx,
-                                   fieldsN.lag0_hcvx,
-                                   fieldsN.lag1_vxhx,
-                                   fieldsN.lag1_vchc,
-                                   fieldsN.lag1_hcvc,
-                                   fieldsN.lag2_hc,
-                                   fieldsN.lag2_vc,
-                                   igate, 
-                                   fieldsN);
 
-    // if (_params.clutter_filter_type != Params::CLUTTER_FILTER_ADAPTIVE) {
+    _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc, fieldsN.lag0_hx,
+                                   fieldsN.lag0_vc, fieldsN.lag0_vx,
+                                   fieldsN.lag0_vchx, fieldsN.lag0_hcvx,
+                                   fieldsN.lag1_vxhx, fieldsN.lag1_vchc, fieldsN.lag1_hcvc,
+                                   fieldsN.lag2_hc, fieldsN.lag2_vc,
+                                   igate, fieldsN);
+
     fieldsF.zdr = fieldsN.zdr;
     fieldsF.phidp = fieldsN.phidp;
     fieldsF.rhohv = fieldsN.rhohv;
     fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    // }
     
-    fieldsF.test6 = fieldsN.zdr;
-    fieldsF.test7 = fieldsN.phidp;
-    fieldsF.test8 = fieldsN.rhohv;
+    // fieldsF.test6 = fieldsN.zdr;
+    // fieldsF.test7 = fieldsN.phidp;
+    // fieldsF.test8 = fieldsN.rhohv;
     
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
-
+    
     if (_params.apply_rhohv_test_after_cmd) {
 
       // compute rhohv improvement
@@ -2620,23 +2513,16 @@ void Beam::_filterDpAltHvCoOnly()
       
     // filter the HC time series, save the filter ratio
     
-    TaArray<double> _specRatio;
-    double *specRatio = _specRatio.alloc(_nSamplesHalf);
-    RadarComplex_t *specHc = NULL;
-    if (gate->specHcComputed) {
-      specHc = gate->specHc;
-    }
-    
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
     _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                              *_fftHalf, *_regrHalf, _windowHalf,
-                             gate->iqhcOrig, gate->iqhc, specHc,
+                             gate->iqhcOrig, gate->iqhc,
                              calibNoise,
                              gate->iqhcF, gate->iqhcNotched,
                              filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                             specRatio, false);
+                             false);
     
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -2652,23 +2538,17 @@ void Beam::_filterDpAltHvCoOnly()
     fields.test4 = _regrHalf->getPolyOrder();
     fields.test5 = _mom->getRegrCnrDb();
 
-    // filter the other channel
+    // filter the Vc channel using the same notch as Hc
     
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
     _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                              *_fftHalf, *_regrHalf, _windowHalf,
-                             gate->iqvcOrig, gate->iqvc, NULL,
+                             gate->iqvcOrig, gate->iqvc,
                              calibNoise,
                              gate->iqvcF, gate->iqvcNotched,
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                             NULL, true);
+                             true);
       
-    // apply the filter ratio to other channels
-    
-    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                        gate->iqvc, specRatio, 
-    //                        gate->iqvcF, gate->iqvcNotched);
-    
     // compute filtered moments for this gate
     
     _mom->computeCovarDpAltHvCoOnly(gate->iqhcF, gate->iqvcF,
@@ -2723,23 +2603,15 @@ void Beam::_filterDpSimHvFixedPrt()
       
     // filter the HC time series
     
-    TaArray<double> _specRatio;
-    double *specRatio = _specRatio.alloc(_nSamples);
-    RadarComplex_t *specHc = NULL;
-    if (gate->specHcComputed) {
-      specHc = gate->specHc;
-    }
-    
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    _mom->applyClutterFilter(_nSamples, _prt,
-                             *_fft, *_regr, _window,
-                             gate->iqhcOrig, gate->iqhc, specHc,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqhcOrig, gate->iqhc,
                              calibNoise,
                              gate->iqhcF, gate->iqhcNotched,
                              filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                             specRatio, false);
+                             false);
 
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -2749,38 +2621,24 @@ void Beam::_filterDpSimHvFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    // filter the other channel
+    // filter Vc channel using the same notch as Hc
     
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
-    _mom->applyClutterFilter(_nSamples, _prt,
-                             *_fft, *_regr, _window,
-                             gate->iqvcOrig, gate->iqvc, NULL,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqvcOrig, gate->iqvc,
                              calibNoise,
                              gate->iqvcF, gate->iqvcNotched,
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                             specRatio, true);
+                             true);
       
-    // apply the filter ratio to other channel
-    
-    // _mom->applyFilterRatio(_nSamples, *_fft,
-    //                        gate->iqvc, specRatio,
-    //                        gate->iqvcF, gate->iqvcNotched);
-    
     // compute filtered moments for this gate
     
     _mom->computeCovarDpSimHv(gate->iqhcF, gate->iqvcF, fieldsF);
-      
-    _mom->computeMomDpSimHv(fieldsF.lag0_hc,
-                            fieldsF.lag0_vc,
-                            fieldsF.rvvhh0,
-                            fieldsF.lag1_hc,
-                            fieldsF.lag1_vc,
-                            fieldsF.lag2_hc,
-                            fieldsF.lag2_vc,
-                            fieldsF.lag3_hc,
-                            fieldsF.lag3_vc,
-                            igate,
-                            fieldsF);
+    
+    _mom->computeMomDpSimHv(fieldsF.lag0_hc, fieldsF.lag0_vc, fieldsF.rvvhh0,
+                            fieldsF.lag1_hc, fieldsF.lag1_vc, fieldsF.lag2_hc,
+                            fieldsF.lag2_vc, fieldsF.lag3_hc, fieldsF.lag3_vc,
+                            igate, fieldsF);
     
     // compute clutter power
     
@@ -2791,21 +2649,14 @@ void Beam::_filterDpSimHvFixedPrt()
     if (fields.spectral_snr >= 25.0 &&
         fields.clut_2_wx_ratio >= 5.0 &&
         fields.cmd >= 0.5) {
-    // if (fields.spectral_snr >= 25.0 &&
-    //     fields.cmd >= 0.5) {
+      // if (fields.spectral_snr >= 25.0 &&
+      //     fields.cmd >= 0.5) {
       fields.test2 = 1.0;
     } else {
       fields.test2 = MomentsFields::missingDouble;
     }
 
     fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
-    
-    // if (fields.spectral_snr >= 25.0 &&
-    //     fields.cmd >= 0.5) {
-    //   fields.test4 = fieldsF.dbz - fields.spectral_snr;
-    // } else {
-    //   fields.test4 = fieldsF.dbz;
-    // }
     
     if (fields.spectral_snr >= 25.0 &&
         fields.cmd >= 0.5 &&
@@ -2824,40 +2675,6 @@ void Beam::_filterDpSimHvFixedPrt()
       fields.test4 = fieldsF.dbz;
     }
     
-    // if (fields.spectral_snr >= 25.0 &&
-    //     fields.clut_2_wx_ratio >= 5.0 &&
-    //     fields.cmd >= 0.5) {
-    //   fields.test4 = 75;
-    // }
-
-    // if (fields.spectral_snr >= 25.0 &&
-    //     fields.cmd >= 0.5 &&
-    //     fieldsF.dbz > -99) {
-      
-    //   double rangeKm = _startRangeKm + igate * _gateSpacingKm;
-    //   double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
-    //   double snrLinear = pow(10.0, snrF / 10.0);
-    //   double pwrLinear = (snrLinear + 1.0) * calibNoise;
-    //   double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
-    //   double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
-    //   double pwrCorrLinear = pwrLinear - specPwrLinear;
-    //   if (pwrCorrLinear < calibNoise) {
-    //     pwrCorrLinear = calibNoise * 1.1;
-    //   }
-    //   double snrCorrLinear = (pwrCorrLinear - calibNoise) / calibNoise;
-    //   double snrCorrDb = 10.0 * log10(snrCorrLinear);
-    //   double dbzCorr = _calib.getBaseDbz1kmHc() + snrCorrDb + 20.0 * log10(rangeKm);
-      
-    //   fields.test4 = dbzCorr;
-
-    // }
-    
-    // testing cnr from 3-order regression filter
-
-    // fields.test3 = _mom->getRegrInterpRatioDb();
-    // fields.test4 = _regr->getPolyOrderInUse();
-    // fields.test5 = _mom->getRegr3CnrDb();
-
   } // igate
 
 }
@@ -2884,19 +2701,25 @@ void Beam::_filterDpSimHvStagPrt()
       
     // filter the HC time series
     
-    TaArray<double> _specRatioShort, _specRatioLong;
-    double *specRatioShort = _specRatioShort.alloc(_nSamplesHalf);
-    double *specRatioLong = _specRatioLong.alloc(_nSamplesHalf);
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                        *_fftHalf,
-                                        gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                        calibNoise,
-                                        gate->iqhcPrtShortF, gate->iqhcPrtLongF,
-                                        filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                                        specRatioShort, specRatioLong, false);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                          calibNoise,
+                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                          filterRatioHc, spectralNoiseHc, spectralSnrHc,
+                                          false);
+    } else {
+      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                          calibNoise,
+                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                          filterRatioHc, spectralNoiseHc, spectralSnrHc);
+    }
     
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -2906,26 +2729,27 @@ void Beam::_filterDpSimHvStagPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    // apply filter to vc, using stored notch details
+    // apply filter to Vc
+    // for adaptive filter use the same notch as Hc
     
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
-    _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                        *_fftHalf,
-                                        gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                        calibNoise,
-                                        gate->iqvcPrtShortF, gate->iqvcPrtLongF,
-                                        filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                                        specRatioShort, specRatioLong, true);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                          gate->iqvcPrtShort, gate->iqvcPrtLong,
+                                          calibNoise,
+                                          gate->iqvcPrtShortF, gate->iqvcPrtLongF,
+                                          gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
+                                          filterRatioVc, spectralNoiseVc, spectralSnrVc,
+                                          true);
+    } else {
+      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                          gate->iqvcPrtShort, gate->iqvcPrtLong,
+                                          calibNoise,
+                                          gate->iqvcPrtShortF, gate->iqvcPrtLongF,
+                                          gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
+                                          filterRatioVc, spectralNoiseVc, spectralSnrVc);
+    }
 
-    // apply the filter ratio to other channel
-    
-    // _momStagPrt->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                               gate->iqvcPrtShort, specRatioShort,
-    //                               gate->iqvcPrtShortF, NULL);
-    // _momStagPrt->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                               gate->iqvcPrtLong, specRatioLong,
-    //                               gate->iqvcPrtLongF, NULL);
-    
     // compute filtered moments for this gate
     
     _momStagPrt->dpSimHvStagPrt(gate->iqhc,
@@ -2967,22 +2791,15 @@ void Beam::_filterDpHOnlyFixedPrt()
       
     // filter the HC time series
     
-    TaArray<double> _specRatio;
-    double *specRatio = _specRatio.alloc(_nSamples);
-    RadarComplex_t *specHc = NULL;
-    if (gate->specHcComputed) {
-      specHc = gate->specHc;
-    }
-    
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    _mom->applyClutterFilter(_nSamples, _prt, *_fft,
-                             *_regr, _window,
-                             gate->iqhcOrig, gate->iqhc, specHc,
-                             calibNoise, gate->iqhcF, NULL,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqhcOrig, gate->iqhc,
+                             calibNoise,
+                             gate->iqhcF, gate->iqhcNotched,
                              filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                             specRatio, false);
+                             false);
 
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -3004,16 +2821,13 @@ void Beam::_filterDpHOnlyFixedPrt()
     double filterRatioVx = 1.0;
     double spectralSnrVx = 1.0;
     
-    _mom->applyClutterFilter(_nSamples, _prt, *_fft,
-                             *_regr, _window,
-                             gate->iqvxOrig, gate->iqvx, NULL,
-                             calibNoise, gate->iqvxF, NULL,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqvxOrig, gate->iqvx,
+                             calibNoise,
+                             gate->iqvxF, gate->iqvxNotched,
                              filterRatioVx, spectralNoiseVx, spectralSnrVx,
-                             NULL, true);
+                             true);
 
-    // _mom->applyFilterRatio(_nSamples, *_fft,
-    //                        gate->iqvx, specRatio, gate->iqvxF, NULL);
-    
     // compute filtered moments for this gate
     
     _mom->computeCovarDpHOnly(gate->iqhcF, gate->iqvxF, fieldsF);
@@ -3042,7 +2856,7 @@ void Beam::_filterDpHOnlyStagPrt()
 {
 
   double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
-
+  
   for (int igate = 0; igate < _nGates; igate++) {
       
     GateData *gate = _gateData[igate];
@@ -3055,23 +2869,27 @@ void Beam::_filterDpHOnlyStagPrt()
       continue;
     }
       
-    // SHORT PRT
-    // filter the HC time series
-
-    TaArray<double> _specRatioShort, _specRatioLong;
-    double *specRatioShort = _specRatioShort.alloc(_nSamplesHalf);
-    double *specRatioLong = _specRatioLong.alloc(_nSamplesHalf);
+    // SHORT PRT filter the HC time series
 
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                 *_fftHalf,
-                                 gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                 calibNoise,
-                                 gate->iqhcPrtShortF, gate->iqhcPrtLongF,
-                                 filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                                 specRatioShort, specRatioLong, false);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                          calibNoise,
+                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                          filterRatioHc, spectralNoiseHc, spectralSnrHc,
+                                          false);
+    } else {
+      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                          calibNoise,
+                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                          filterRatioHc, spectralNoiseHc, spectralSnrHc);
+    }
     
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -3081,26 +2899,28 @@ void Beam::_filterDpHOnlyStagPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    // apply the filter to the Vx channel, using the same notch as the Hc channel
+    // apply the filter to the Vx channel
+    // for adaptive use the same notch as the Hc channel
     
     double spectralNoiseVx = 1.0e-13;
     double filterRatioVx = 1.0;
     double spectralSnrVx = 1.0;
-    _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                 *_fftHalf,
-                                 gate->iqvxPrtShort, gate->iqvxPrtLong,
-                                 calibNoise,
-                                 gate->iqvxPrtShortF, gate->iqvxPrtLongF,
-                                 filterRatioVx, spectralNoiseVx, spectralSnrVx,
-                                 specRatioShort, specRatioLong, true);
-    
-    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                        gate->iqvxPrtShort, specRatioShort,
-    //                        gate->iqvxPrtShortF, NULL);
-    
-    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                        gate->iqvxPrtLong, specRatioLong,
-    //                        gate->iqvxPrtLongF, NULL);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                          gate->iqvxPrtShort, gate->iqvxPrtLong,
+                                          calibNoise,
+                                          gate->iqvxPrtShortF, gate->iqvxPrtLongF,
+                                          gate->iqvxPrtShortNotched, gate->iqvxPrtLongNotched,
+                                          filterRatioVx, spectralNoiseVx, spectralSnrVx,
+                                          false);
+    } else {
+      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                          gate->iqvxPrtShort, gate->iqvxPrtLong,
+                                          calibNoise,
+                                          gate->iqvxPrtShortF, gate->iqvxPrtLongF,
+                                          gate->iqvxPrtShortNotched, gate->iqvxPrtLongNotched,
+                                          filterRatioVx, spectralNoiseVx, spectralSnrVx);
+    }
     
     // compute filtered moments for this gate
     
@@ -3143,23 +2963,15 @@ void Beam::_filterDpVOnlyFixedPrt()
       
     // filter the HC time series
     
-    TaArray<double> _specRatio;
-    double *specRatio = _specRatio.alloc(_nSamples);
-    RadarComplex_t *specVc = NULL;
-    if (gate->specVcComputed) {
-      specVc = gate->specVc;
-    }
-    
     double spectralNoiseVc = 1.0e-13;
     double filterRatioVc = 1.0;
     double spectralSnrVc = 1.0;
-    _mom->applyClutterFilter(_nSamples, _prt, *_fft,
-                             *_regr, _window,
-                             gate->iqvcOrig, gate->iqvc, specVc,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqvcOrig, gate->iqvc,
                              calibNoise,
-                             gate->iqvcF, NULL,
+                             gate->iqvcF, gate->iqvcNotched,
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                             specRatio, false);
+                             false);
 
     if (filterRatioVc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioVc - 1.0);
@@ -3169,29 +2981,19 @@ void Beam::_filterDpVOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseVc);
     fields.spectral_snr = 10.0 * log10(spectralSnrVc);
     
-    // testing cnr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regr->getPolyOrder();
-    fields.test5 = _mom->getRegrCnrDb();
-    
-    // apply the filter to the Hx channel, applying the same notch as the Vc channel
+    // apply the filter to the Hx channel
+    // for adaptive use the same notch as the Vc channel
     
     double spectralNoiseHx = 1.0e-13;
     double filterRatioHx = 1.0;
     double spectralSnrHx = 1.0;
-    _mom->applyClutterFilter(_nSamples, _prt, *_fft,
-                             *_regr, _window,
-                             gate->iqhxOrig, gate->iqhx, NULL,
+    _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
+                             gate->iqhxOrig, gate->iqhx,
                              calibNoise,
-                             gate->iqhxF, NULL,
+                             gate->iqhxF, gate->iqhxNotched,
                              filterRatioHx, spectralNoiseHx, spectralSnrHx,
-                             specRatio, true);
+                             true);
 
-    // _mom->applyFilterRatio(_nSamples, *_fft,
-    //                        gate->iqhx, specRatio,
-    //                        gate->iqhxF, NULL);
-    
     // compute filtered moments for this gate
     
     _mom->computeCovarDpVOnly(gate->iqvcF, gate->iqhxF, fieldsF);
@@ -3236,20 +3038,25 @@ void Beam::_filterDpVOnlyStagPrt()
     // SHORT PRT
     // filter the VC time series
 
-    TaArray<double> _specRatioShort, _specRatioLong;
-    double *specRatioShort = _specRatioShort.alloc(_nSamplesHalf);
-    double *specRatioLong = _specRatioLong.alloc(_nSamplesHalf);
-
     double spectralNoiseVc = 1.0e-13;
     double filterRatioVc = 1.0;
     double spectralSnrVc = 1.0;
-    _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                 *_fftHalf,
-                                 gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                 calibNoise,
-                                 gate->iqvcPrtShortF, gate->iqvcPrtLongF,
-                                 filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                                 specRatioShort, specRatioLong, false);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                   gate->iqvcPrtShort, gate->iqvcPrtLong,
+                                   calibNoise,
+                                   gate->iqvcPrtShortF, gate->iqvcPrtLongF,
+                                   gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
+                                   filterRatioVc, spectralNoiseVc, spectralSnrVc,
+                                   false);
+    } else {
+      _mom->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                   gate->iqvcPrtShort, gate->iqvcPrtLong,
+                                   calibNoise,
+                                   gate->iqvcPrtShortF, gate->iqvcPrtLongF,
+                                   gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
+                                   filterRatioVc, spectralNoiseVc, spectralSnrVc);
+    }
     
     if (filterRatioVc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioVc - 1.0);
@@ -3259,26 +3066,28 @@ void Beam::_filterDpVOnlyStagPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseVc);
     fields.spectral_snr = 10.0 * log10(spectralSnrVc);
     
-    // apply the filter to Hx channel, using the same notch
+    // apply the filter to Hx channel
+    // for the adaptive filter use the same notch
     
     double spectralNoiseHx = 1.0e-13;
     double filterRatioHx = 1.0;
     double spectralSnrHx = 1.0;
-    _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong,
-                                 *_fftHalf,
-                                 gate->iqhxPrtShort, gate->iqhxPrtLong,
-                                 calibNoise,
-                                 gate->iqhxPrtShortF, gate->iqhxPrtLongF,
-                                 filterRatioHx, spectralNoiseHx, spectralSnrHx,
-                                 specRatioShort, specRatioLong, true);
-    
-    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                        gate->iqhxPrtShort, specRatioShort,
-    //                        gate->iqhxPrtShortF, NULL);
-    
-    // _mom->applyFilterRatio(_nSamplesHalf, *_fftHalf,
-    //                        gate->iqhxPrtLong, specRatioLong,
-    //                        gate->iqhxPrtLongF, NULL);
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+      _mom->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
+                                   gate->iqhxPrtShort, gate->iqhxPrtLong,
+                                   calibNoise,
+                                   gate->iqhxPrtShortF, gate->iqhxPrtLongF,
+                                   gate->iqhxPrtShortNotched, gate->iqhxPrtLongNotched,
+                                   filterRatioHx, spectralNoiseHx, spectralSnrHx,
+                                   true);
+    } else {
+      _mom->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
+                                   gate->iqhxPrtShort, gate->iqhxPrtLong,
+                                   calibNoise,
+                                   gate->iqhxPrtShortF, gate->iqhxPrtLongF,
+                                   gate->iqhxPrtShortNotched, gate->iqhxPrtLongNotched,
+                                   filterRatioHx, spectralNoiseHx, spectralSnrHx);
+    }
     
     // compute filtered moments for this gate
     

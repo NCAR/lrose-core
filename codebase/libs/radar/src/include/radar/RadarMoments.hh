@@ -43,6 +43,7 @@
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfCalib.hh>
 #include <radar/MomentsFields.hh>
+#include <radar/ClutFilter.hh>
 #include <radar/ForsytheRegrFilter.hh>
 #include <radar/AtmosAtten.hh>
 #include <rapformats/DsRadarCalib.hh>
@@ -697,7 +698,6 @@ public:
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    clutResidueRatio: ratio of spectral noise to calibrated noise
-  //    specRatio: ratio of filtered to unfiltered in spectrum, if non-NULL
   
   void applyClutterFilter(int nSamples,
                           double prtSecs,
@@ -706,41 +706,35 @@ public:
                           const double *window, // active window
                           const RadarComplex_t *iqOrig, // non-windowed
                           const RadarComplex_t *iqWindowed, // windowed
-                          const RadarComplex_t *specWindowed, // windowed
                           double calNoise,
                           RadarComplex_t *iqFiltered,
                           RadarComplex_t *iqNotched,
                           double &filterRatio,
                           double &spectralNoise,
                           double &spectralSnr,
-                          double *specRatio = NULL,
                           bool useStoredNotch = false);
   
   void applyAdaptiveFilter(int nSamples,
                            double prtSecs,
                            const RadarFft &fft,
                            const RadarComplex_t *iqWindowed,
-                           const RadarComplex_t *specWindowed,
                            double calNoise,
                            RadarComplex_t *iqFiltered,
                            RadarComplex_t *iqNotched,
                            double &filterRatio,
                            double &spectralNoise,
                            double &clutResidueRatio,
-                           double *specRatio = NULL,
                            bool useStoredNotch = false);
   
   void applyNotchFilter(int nSamples,
                         double prtSecs,
                         const RadarFft &fft,
                         const RadarComplex_t *iqWindowed,
-                        const RadarComplex_t *specWindowed,
                         double calNoise,
                         RadarComplex_t *iqFiltered,
                         double &filterRatio,
                         double &spectralNoise,
-                        double &spectralSnr,
-                        double *specRatio = NULL);
+                        double &spectralSnr);
   
   // apply polynomial regression clutter filter to IQ time series
   //
@@ -751,6 +745,8 @@ public:
   //   nSamples
   //   fft: object to be used for filling in notch
   //   regr: object to be used for polynomial computations
+  //   window: for regression filter, the input data and filtered result is
+  //           not windowed. The window is passed in for use in the FFTs
   //   iqOrig: unfiltered time series, not windowed
   //   calNoise: measured noise value from calibration in linear units
   //
@@ -761,12 +757,7 @@ public:
   //                 before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    spectralSnr: ratio of spectral noise to noise power
-  //    specRatio: if non-NULL, contains ratio of filtered to
-  //               unfiltered spectrum
 
-  // for regression filter, the input data and filtered result is
-  // not windowed. The window is passed in for use in the FFTs
-  
   void applyRegressionFilter(int nSamples,
                              double prtSecs,
                              const RadarFft &fft,
@@ -778,8 +769,7 @@ public:
                              RadarComplex_t *iqNotched,
                              double &filterRatio,
                              double &spectralNoise,
-                             double &spectralSnr,
-                             double *specRatio = NULL);
+                             double &spectralSnr);
   
   // apply adaptive clutter filter to staggered PRT
   // IQ time series
@@ -820,8 +810,6 @@ public:
   //    before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    spectralSnr: ratio of spectral noise to noise power
-  //    specRatioShort: filtered/unfiltered ratio, short PRT, if non-NULL
-  //    specRatioLong: filtered/unfiltered ratio, long PRT, if non-NULL
   
   void applyAdapFilterStagPrt(int nSamplesHalf,
                               double prtSecsShort,
@@ -832,94 +820,58 @@ public:
                               double calNoise,
                               RadarComplex_t *iqFiltShort,
                               RadarComplex_t *iqFiltLong,
+                              RadarComplex_t *iqNotchedShort,
+                              RadarComplex_t *iqNotchedLong,
                               double &filterRatio,
                               double &spectralNoise,
                               double &spectralSnr,
-                              double *spectralRatioShort = NULL,
-                              double *spectralRatioLong = NULL,
                               bool useStoredNotch = false);
   
-  // apply polynomial regression clutter filter to IQ time series
+  // apply regression clutter filter to staggered PRT IQ time series
   //
-  // NOTE: IQ data should not be windowed.
+  // The following is assumed:
+  //
+  //   1. nSamplesHalf refers to short and long prt sequences.
+  //      nSamples = nSamplesHalf * 2
+  //   2. The combined sequence starts with short PRT.
+  //   3. Memory has been allocated as follows:
+  //        iqOrigShort[nSamplesHalf]
+  //        iqOrigLong[nSamplesHalf]
+  //        iqFiltShort[nSamplesHalf]
+  //        iqFiltLong[nSamplesHalf]
+  //   4. Input and output data is windowed appropriately for FFTs.
+  //
+  // The short and long sequences are filtered separately.
+  // The notch is not filled in.
   //
   // Inputs:
-  //   nSamples
-  //   fftHalf: fft object for short and long half time series, length nSamples/2
-  //   regr: object to be used for polynomial computations
-  //   iqOrig: unfiltered time series, not windowed
-  //   channel: which channel - used to determine calibrated noise
+  //   fftHalf: object to be used for FFT computations
+  //   iqOrigShort: unfiltered short-prt time series
+  //   iqOrigLong: unfiltered long-prt time series
+  //   calNoise: measured noise from cal, linear units
   //
   //  Outputs:
-  //    iqFiltered: filtered time series
+  //    iqFiltShort: filtered short-prt time series
+  //    iqFiltLong: filtered long-prt time series
   //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    spectralSnr: ratio of spectral noise to noise power
-  //    specRatio: if non-NULL, contains ratio of filtered to unfiltered spectrum
-  //
-  //  Memory allocation by calling routine:
-  //    regr - initialized to size nSamples
-  //    iqOrig[nSamples]
-  //    iqFiltered[nSamples]
-  //    specRatio[nSamples] - if non-NULL
   
-  void applyRegrFilterStagPrt(int nSamples,
+  void applyRegrFilterStagPrt(int nSamplesHalf,
                               double prtSecsShort,
                               double prtSecsLong,
                               const RadarFft &fftHalf,
-                              ForsytheRegrFilter &regr,
-                              const RadarComplex_t *iqOrig,
+                              ForsytheRegrFilter &regrHalf,
+                              const RadarComplex_t *iqShort,
+                              const RadarComplex_t *iqLong,
                               double calNoise,
-                              bool interpAcrossNotch,
-                              RadarComplex_t *iqFiltered,
+                              RadarComplex_t *iqFiltShort,
+                              RadarComplex_t *iqFiltLong,
+                              RadarComplex_t *iqNotchedShort,
+                              RadarComplex_t *iqNotchedLong,
                               double &filterRatio,
                               double &spectralNoise,
-                              double &spectralSnr,
-                              double *specRatio = NULL);
-  
-  // apply polynomial regression clutter filter to IQ time series
-  //
-  // NOTE: IQ data should not be windowed.
-  //
-  // Inputs:
-  //   nSamples
-  //   nExpanded = length of expanded time series with inserted 0's
-  //             = (nSamples / 2) * (m + n)
-  //   fftExp: object to be used for FFT computations
-  //   regr: object to be used for polynomial computations
-  //   iqOrig: unfiltered time series, not windowed
-  //   channel: which channel - used to determine calibrated noise
-  //
-  //  Outputs:
-  //    iqFiltered: filtered time series
-  //    filterRatio: ratio of raw to unfiltered power,
-  //                 before applying correction
-  //    spectralNoise: spectral noise estimated from the spectrum
-  //    spectralSnr: ratio of spectral noise to noise power
-  //    specRatio: if non-NULL, contains ratio of filtered
-  //               to unfiltered spectrum
-  //
-  //  Memory allocation by calling routine:
-  //    fftExp - initialized to size nExpanded
-  //    regr - initialized to size nSamples
-  //    iqOrig[nSamples]
-  //    iqFiltered[nSamples]
-  //    specRatio[nSamples] - if non-NULL
-
-  void applyRegrFilterStagPrt(int nSamples,
-                              int nExpanded,
-                              double prtSecsShort,
-                              double prtSecsLong,
-                              const RadarFft &fftExp,
-                              ForsytheRegrFilter &regr,
-                              const RadarComplex_t *iqOrig,
-                              double calNoise,
-                              bool interpAcrossNotch,
-                              RadarComplex_t *iqFiltered,
-                              double &filterRatio,
-                              double &spectralNoise,
-                              double &spectralSnr,
-                              double *specRatio = NULL);
+                              double &spectralSnr);
 
   //////////////////////////////////////////////////////////////////////
   // Compute the spectral snr
@@ -1014,27 +966,7 @@ public:
                              int staggeredN,
                              const RadarComplex_t *iqExpanded,
                              RadarComplex_t *iqCondensed);
-  
-  // Applies previously computed filter ratios, in the spectral
-  // domain, to a time series
-  //
-  // Inputs:
-  //   nSamples
-  //   fft: object to be used for FFT computations
-  //   iq: input time series to be adjusted for filtering
-  //   specRatio: ratio of filtered to unfiltered in spectrum
-  //
-  //  Outputs:
-  //    iqFiltered: filtered time series
-  //    iqNotched: if not NULL, notched time series
-  
-  // void applyFilterRatio(int nSamples,
-  //                       const RadarFft &fft,
-  //                       const RadarComplex_t *iq,
-  //                       const double *specRatio,
-  //                       RadarComplex_t *iqFiltered,
-  //                       RadarComplex_t *iqNotched);
-  
+
   // apply clutter filter for SZ 864
   
   void applyClutterFilterSz(int nSamples,
@@ -1432,7 +1364,8 @@ private:
   bool _computeCpaUsingAlt; // use alternative cpa method
 
   // clutter filtering parameters
-  
+
+  ClutFilter _clutFilter;
   clutter_filter_type_t _clutterFilterType;
   double _clutterWidthMps;
   double _clutterInitNotchWidthMps;
@@ -1655,16 +1588,30 @@ private:
   void _adapFiltHalfTseries(int nSamplesHalf,
                             double prtSecs,
                             const RadarFft &fftHalf,
-                            const RadarComplex_t *iq,
+                            const RadarComplex_t *iqUnfilt,
                             double calNoise,
                             double nyquist,
                             bool adjustForPowerResidue,
                             RadarComplex_t *iqFiltered,
+                            RadarComplex_t *iqNotched,
                             double &filterRatio,
                             double &spectralNoise,
                             double &spectralSnr,
-                            double *specRatio,
                             bool useStoredNotch = false);
+  
+  void _regrFiltHalfTseries(int nSamplesHalf,
+                            double prtSecs,
+                            const RadarFft &fftHalf,
+                            ForsytheRegrFilter &regrHalf,
+                            const RadarComplex_t *iqUnfilt,
+                            double calNoise,
+                            double nyquist,
+                            bool adjustForPowerResidue,
+                            RadarComplex_t *iqFiltered,
+                            RadarComplex_t *iqNotched,
+                            double &filterRatio,
+                            double &spectralNoise,
+                            double &spectralSnr);
   
   static void _interpAcrossNotch(int nSamples, double *regrSpec);
 
@@ -1703,3 +1650,99 @@ private:
 
 #endif
 
+#ifdef NOTNOW
+
+  // Applies previously computed filter ratios, in the spectral
+  // domain, to a time series
+  //
+  // Inputs:
+  //   nSamples
+  //   fft: object to be used for FFT computations
+  //   iq: input time series to be adjusted for filtering
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    iqNotched: if not NULL, notched time series
+  
+  void applyFilterRatio(int nSamples,
+                        const RadarFft &fft,
+                        const RadarComplex_t *iq,
+                        RadarComplex_t *iqFiltered,
+                        RadarComplex_t *iqNotched);
+  
+  // apply polynomial regression clutter filter to IQ time series
+  //
+  // NOTE: IQ data should not be windowed.
+  //
+  // Inputs:
+  //   nSamples
+  //   fftHalf: fft object for short and long half time series, length nSamples/2
+  //   regr: object to be used for polynomial computations
+  //   iqOrig: unfiltered time series, not windowed
+  //   channel: which channel - used to determine calibrated noise
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    filterRatio: ratio of raw to unfiltered power, before applying correction
+  //    spectralNoise: spectral noise estimated from the spectrum
+  //    spectralSnr: ratio of spectral noise to noise power
+  //
+  //  Memory allocation by calling routine:
+  //    regr - initialized to size nSamples
+  //    iqOrig[nSamples]
+  //    iqFiltered[nSamples]
+  
+  void applyRegrFilterStagPrt(int nSamples,
+                              double prtSecsShort,
+                              double prtSecsLong,
+                              const RadarFft &fftHalf,
+                              ForsytheRegrFilter &regr,
+                              const RadarComplex_t *iqOrig,
+                              double calNoise,
+                              bool interpAcrossNotch,
+                              RadarComplex_t *iqFiltered,
+                              double &filterRatio,
+                              double &spectralNoise,
+                              double &spectralSnr);
+  
+  // apply polynomial regression clutter filter to IQ time series
+  //
+  // NOTE: IQ data should not be windowed.
+  //
+  // Inputs:
+  //   nSamples
+  //   nExpanded = length of expanded time series with inserted 0's
+  //             = (nSamples / 2) * (m + n)
+  //   fftExp: object to be used for FFT computations
+  //   regr: object to be used for polynomial computations
+  //   iqOrig: unfiltered time series, not windowed
+  //   channel: which channel - used to determine calibrated noise
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    filterRatio: ratio of raw to unfiltered power,
+  //                 before applying correction
+  //    spectralNoise: spectral noise estimated from the spectrum
+  //    spectralSnr: ratio of spectral noise to noise power
+  //
+  //  Memory allocation by calling routine:
+  //    fftExp - initialized to size nExpanded
+  //    regr - initialized to size nSamples
+  //    iqOrig[nSamples]
+  //    iqFiltered[nSamples]
+
+  void applyRegrFilterStagPrt(int nSamples,
+                              int nExpanded,
+                              double prtSecsShort,
+                              double prtSecsLong,
+                              const RadarFft &fftExp,
+                              ForsytheRegrFilter &regr,
+                              const RadarComplex_t *iqOrig,
+                              double calNoise,
+                              bool interpAcrossNotch,
+                              RadarComplex_t *iqFiltered,
+                              double &filterRatio,
+                              double &spectralNoise,
+                              double &spectralSnr);
+#endif
+  

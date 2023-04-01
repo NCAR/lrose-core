@@ -119,6 +119,8 @@ public:
 
   RadarComplex_t *iqhcNotched;
   RadarComplex_t *iqvcNotched;
+  RadarComplex_t *iqhxNotched;
+  RadarComplex_t *iqvxNotched;
 
   // staggered PRT
   // original time series - unwindowed IQ
@@ -158,6 +160,16 @@ public:
   RadarComplex_t *iqhxPrtLongF;
   RadarComplex_t *iqvxPrtShortF;
   RadarComplex_t *iqvxPrtLongF;
+
+  RadarComplex_t *iqhcPrtShortNotched;
+  RadarComplex_t *iqvcPrtShortNotched;
+  RadarComplex_t *iqhxPrtShortNotched;
+  RadarComplex_t *iqvxPrtShortNotched;
+
+  RadarComplex_t *iqhcPrtLongNotched;
+  RadarComplex_t *iqvcPrtLongNotched;
+  RadarComplex_t *iqhxPrtLongNotched;
+  RadarComplex_t *iqvxPrtLongNotched;
 
   RadarComplex_t *iqStrong;
   RadarComplex_t *iqWeak;
@@ -243,6 +255,8 @@ private:
 
   TaArray<RadarComplex_t> _iqhcNotched;
   TaArray<RadarComplex_t> _iqvcNotched;
+  TaArray<RadarComplex_t> _iqhxNotched;
+  TaArray<RadarComplex_t> _iqvxNotched;
 
   // staggered PRT
   // original time series - unwindowed IQ
@@ -257,8 +271,7 @@ private:
   TaArray<RadarComplex_t> _iqvxPrtShortOrig;
   TaArray<RadarComplex_t> _iqvxPrtLongOrig;
 
-  // staggered PRT
-  // windowed IQ
+  // staggered PRT IQ
   
   TaArray<RadarComplex_t> _iqhcPrtShort;
   TaArray<RadarComplex_t> _iqhcPrtLong;
@@ -270,8 +283,7 @@ private:
   TaArray<RadarComplex_t> _iqvxPrtShort;
   TaArray<RadarComplex_t> _iqvxPrtLong;
 
-  // staggered PRT
-  // filtered IQ
+  // staggered PRT filtered IQ
   
   TaArray<RadarComplex_t> _iqhcPrtShortF;
   TaArray<RadarComplex_t> _iqhcPrtLongF;
@@ -283,6 +295,20 @@ private:
   TaArray<RadarComplex_t> _iqvxPrtShortF;
   TaArray<RadarComplex_t> _iqvxPrtLongF;
 
+  // staggered PRT notched IQ
+  
+  TaArray<RadarComplex_t> _iqhcPrtShortNotched;
+  TaArray<RadarComplex_t> _iqvcPrtShortNotched;
+  TaArray<RadarComplex_t> _iqhxPrtShortNotched;
+  TaArray<RadarComplex_t> _iqvxPrtShortNotched;
+
+  TaArray<RadarComplex_t> _iqhcPrtLongNotched;
+  TaArray<RadarComplex_t> _iqvcPrtLongNotched;
+  TaArray<RadarComplex_t> _iqhxPrtLongNotched;
+  TaArray<RadarComplex_t> _iqvxPrtLongNotched;
+
+  // SZ
+  
   TaArray<RadarComplex_t> _iqStrong;
   TaArray<RadarComplex_t> _iqWeak;
   TaArray<RadarComplex_t> _iqStrongF;

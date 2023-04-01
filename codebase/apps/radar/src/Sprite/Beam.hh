@@ -385,8 +385,8 @@ private:
   void _filterSpH();
   void _filterSpV();
   void _filterSpStagPrt();
-  void _filterRegrSpStagPrt();
   void _filterAdapSpStagPrt();
+  void _filterRegrSpStagPrt();
   void _filterDpAltHvCoCross();
   void _filterDpAltHvCoOnly();
   void _filterDpSimHvFixedPrt();

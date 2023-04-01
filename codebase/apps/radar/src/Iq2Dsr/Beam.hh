@@ -441,8 +441,8 @@ private:
   void _filterSpH();
   void _filterSpV();
   void _filterSpStagPrt();
-  void _filterRegrSpStagPrt();
   void _filterAdapSpStagPrt();
+  void _filterRegrSpStagPrt();
   void _filterSpSz864();
   void _filterDpAltHvCoCross();
   void _filterDpAltHvCoOnly();

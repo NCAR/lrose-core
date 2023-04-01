@@ -980,6 +980,12 @@ commentdef {
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
 
+paramdef enum clutter_filter_type_t {
+  p_default = CLUTTER_FILTER_ADAPTIVE;
+  p_descr = "Type of clutter filter to use.";
+  p_help = "ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.";
+} ascope_clutter_filter_type;
+
 paramdef boolean {
   p_default = true;
   p_descr = "Option to apply residue correction to adaptive filter.";
@@ -991,12 +997,6 @@ paramdef double {
   p_descr = "Min SNR for applying the residue correction (dB).";
   p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
 } min_snr_db_for_residue_correction;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to apply a regression clutter filter.";
-  p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
-} use_polynomial_regression_clutter_filter;
 
 paramdef boolean {
   p_default = true;
