@@ -2398,6 +2398,13 @@ void Beam::_filterDpAltHvCoCross()
     fieldsF.rho_vxhx = fieldsN.rho_vxhx;
     fieldsF.rho_phidp = fieldsN.rho_phidp;
 
+    // regression filter internals
+
+    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2433,12 +2440,6 @@ void Beam::_filterDpAltHvCoCross()
       } // if (!fields.cmd_flag)
 
     } // if (_params.apply_rhohv_test_after_cmd)
-
-    // testing cnr from 3-order regression filter
-
-    fields.test3 = _mom->getRegrInterpRatioDb();
-    fields.test4 = _regrHalf->getPolyOrder();
-    fields.test5 = _mom->getRegrCnrDb();
 
   } // igate
   
@@ -2528,15 +2529,48 @@ void Beam::_filterDpAltHvCoOnly()
     _mom->computeCovarDpAltHvCoOnly(gate->iqhcF, gate->iqvcF,
                                     fieldsF);
 
-    _mom->computeMomDpAltHvCoOnly(fieldsF.lag0_hc,
-                                  fieldsF.lag0_vc,
-                                  fieldsF.lag1_vchc,
-                                  fieldsF.lag1_hcvc,
-                                  fieldsF.lag2_hc,
-                                  fieldsF.lag2_vc,
-                                  igate, 
-                                  fieldsF);
+    _mom->computeMomDpAltHvCoOnly(fieldsF.lag0_hc, fieldsF.lag0_vc,
+                                  fieldsF.lag1_vchc, fieldsF.lag1_hcvc,
+                                  fieldsF.lag2_hc, fieldsF.lag2_vc,
+                                  igate, fieldsF);
     
+    // compute notched moments for rhohv, phidp, zdr, ldr
+    
+    MomentsFields fieldsN;
+    _mom->computeCovarDpAltHvCoOnly(gate->iqhcNotched, gate->iqvcNotched,
+                                    fieldsN);
+    
+    _mom->computeMomDpAltHvCoOnly(fieldsN.lag0_hc, fieldsN.lag0_vc,
+                                  fieldsN.lag1_vchc, fieldsN.lag1_hcvc,
+                                  fieldsN.lag2_hc, fieldsN.lag2_vc,
+                                  igate, fieldsN);
+    
+    
+    // copy dual-pol notched moments to the filtered moments
+    
+    fieldsF.zdr = fieldsN.zdr;
+    fieldsF.zdrm = fieldsN.zdrm;
+    fieldsF.zdr_bias = fieldsN.zdr_bias;
+
+    fieldsF.phidp = fieldsN.phidp;
+    fieldsF.phidp0 = fieldsN.phidp0;
+    fieldsF.phidp_cond = fieldsN.phidp_cond;
+    fieldsF.phidp_filt = fieldsN.phidp_filt;
+
+    fieldsF.rhohv = fieldsN.rhohv;
+    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
+    fieldsF.rho_vchx = fieldsN.rho_vchx;
+    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
+    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
+    fieldsF.rho_phidp = fieldsN.rho_phidp;
+
+    // regression filter internals
+
+    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2614,6 +2648,40 @@ void Beam::_filterDpSimHvFixedPrt()
                             fieldsF.lag2_vc, fieldsF.lag3_hc, fieldsF.lag3_vc,
                             igate, fieldsF);
     
+    // compute notched moments for rhohv, phidp, zdr
+    
+    MomentsFields fieldsN;
+    _mom->computeCovarDpSimHv(gate->iqhcNotched, gate->iqvcNotched, fieldsN);
+    _mom->computeMomDpSimHv(fieldsN.lag0_hc, fieldsN.lag0_vc, fieldsN.rvvhh0,
+                            fieldsN.lag1_hc, fieldsN.lag1_vc, fieldsN.lag2_hc,
+                            fieldsN.lag2_vc, fieldsN.lag3_hc, fieldsN.lag3_vc,
+                            igate, fieldsN);
+
+    // copy dual-pol notched moments to the filtered moments
+    
+    fieldsF.zdr = fieldsN.zdr;
+    fieldsF.zdrm = fieldsN.zdrm;
+    fieldsF.zdr_bias = fieldsN.zdr_bias;
+
+    fieldsF.phidp = fieldsN.phidp;
+    fieldsF.phidp0 = fieldsN.phidp0;
+    fieldsF.phidp_cond = fieldsN.phidp_cond;
+    fieldsF.phidp_filt = fieldsN.phidp_filt;
+
+    fieldsF.rhohv = fieldsN.rhohv;
+    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
+    fieldsF.rho_vchx = fieldsN.rho_vchx;
+    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
+    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
+    fieldsF.rho_phidp = fieldsN.rho_phidp;
+
+    // regression filter internals
+
+    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
@@ -2678,23 +2746,14 @@ void Beam::_filterDpSimHvStagPrt()
     double spectralNoiseHc = 1.0e-13;
     double filterRatioHc = 1.0;
     double spectralSnrHc = 1.0;
-    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
-      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
-                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                          calibNoise,
-                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
-                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
-                                          filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                                          false);
-    } else {
-      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
-                                          gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                          calibNoise,
-                                          gate->iqhcPrtShortF, gate->iqhcPrtLongF,
-                                          gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
-                                          filterRatioHc, spectralNoiseHc, spectralSnrHc);
-    }
-    
+    _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
+                                      *_fftHalf, *_regrHalf,
+                                      gate->iqhcPrtShort, gate->iqhcPrtLong,
+                                      calibNoise,
+                                      gate->iqhcPrtShortF, gate->iqhcPrtLongF,
+                                      gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
+                                      filterRatioHc, spectralNoiseHc, spectralSnrHc, false);
+
     if (filterRatioHc > 1.0) {
       fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
     } else {
@@ -2707,22 +2766,13 @@ void Beam::_filterDpSimHvStagPrt()
     // for adaptive filter use the same notch as Hc
     
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
-    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
-      _momStagPrt->applyAdapFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf,
-                                          gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                          calibNoise,
-                                          gate->iqvcPrtShortF, gate->iqvcPrtLongF,
-                                          gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
-                                          filterRatioVc, spectralNoiseVc, spectralSnrVc,
-                                          true);
-    } else {
-      _momStagPrt->applyRegrFilterStagPrt(_nSamplesHalf, _prt, _prtLong, *_fftHalf, *_regrHalf,
-                                          gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                          calibNoise,
-                                          gate->iqvcPrtShortF, gate->iqvcPrtLongF,
-                                          gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
-                                          filterRatioVc, spectralNoiseVc, spectralSnrVc);
-    }
+    _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
+                                      *_fftHalf, *_regrHalf,
+                                      gate->iqvcPrtShort, gate->iqvcPrtLong,
+                                      calibNoise,
+                                      gate->iqvcPrtShortF, gate->iqvcPrtLongF,
+                                      gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
+                                      filterRatioVc, spectralNoiseVc, spectralSnrVc, true);
 
     // compute filtered moments for this gate
     
@@ -2734,6 +2784,42 @@ void Beam::_filterDpSimHvStagPrt()
                                 gate->iqvcPrtLongF,
                                 igate, true, fieldsF);
     
+    // compute notched moments for rhohv, phidp, zdr, ldr
+    
+    MomentsFields fieldsN;
+    _momStagPrt->dpSimHvStagPrt(gate->iqhc,
+                                gate->iqvc,
+                                gate->iqhcPrtShortNotched,
+                                gate->iqvcPrtShortNotched,
+                                gate->iqhcPrtLongNotched,
+                                gate->iqvcPrtLongNotched,
+                                igate, true, fieldsN);
+
+    // copy dual-pol notched moments to the filtered moments
+    
+    fieldsF.zdr = fieldsN.zdr;
+    fieldsF.zdrm = fieldsN.zdrm;
+    fieldsF.zdr_bias = fieldsN.zdr_bias;
+
+    fieldsF.phidp = fieldsN.phidp;
+    fieldsF.phidp0 = fieldsN.phidp0;
+    fieldsF.phidp_cond = fieldsN.phidp_cond;
+    fieldsF.phidp_filt = fieldsN.phidp_filt;
+
+    fieldsF.rhohv = fieldsN.rhohv;
+    fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
+    fieldsF.rho_vchx = fieldsN.rho_vchx;
+    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
+    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
+    fieldsF.rho_phidp = fieldsN.rho_phidp;
+
+    // regression filter internals
+
+    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);

@@ -771,8 +771,7 @@ public:
                              double &spectralNoise,
                              double &spectralSnr);
   
-  // apply adaptive clutter filter to staggered PRT
-  // IQ time series
+  // apply clutter filter to staggered PRT IQ time series
   //
   // The following is assumed:
   //
@@ -784,32 +783,48 @@ public:
   //        iqOrigLong[nSamplesHalf]
   //        iqFiltShort[nSamplesHalf]
   //        iqFiltLong[nSamplesHalf]
-  //        spectralRatioShort[nSamplesHalf]
-  //        spectralRatioLong[nSamplesHalf]
   //   4. Input and output data is windowed appropriately for FFTs.
   //
   // The short and long sequences are filtered separately.
   // The notch is not filled in.
   //
   // Inputs:
+  //   prtSecsShort, prtSecsLong
   //   fftHalf: object to be used for FFT computations
-  //   iqOrigShort: unfiltered short-prt time series
-  //   iqOrigLong: unfiltered long-prt time series
-  //   channel: which channel - used to determine calibrated noise
-  //   interpAcrossNotch: whether to fill in notch
+  //   regrHalf: regression filter object
+  //   iqShort: unfiltered short-prt time series
+  //   iqLong: unfiltered long-prt time series
+  //   calNoise: measured noise from cal, linear units
   //   useStoredNotch:
   //     if false (the default) locate wx and clutter
   //     if true, use previously located wx and clutter - this is used
   //        if multiple channels are to be filtered
   //
-  //
   //  Outputs:
   //    iqFiltShort: filtered short-prt time series
   //    iqFiltLong: filtered long-prt time series
-  //    filterRatio: ratio of raw to unfiltered power,
-  //    before applying correction
+  //    iqNotchedShort: notched short-prt time series
+  //    iqNotchedLong: notched long-prt time series
+  //    filterRatio: ratio of raw to unfiltered power, before applying correction
   //    spectralNoise: spectral noise estimated from the spectrum
   //    spectralSnr: ratio of spectral noise to noise power
+  
+  void applyClutFiltStagPrt(int nSamplesHalf,
+                            double prtSecsShort,
+                            double prtSecsLong,
+                            const RadarFft &fftHalf,
+                            ForsytheRegrFilter &regrHalf,
+                            const RadarComplex_t *iqShort,
+                            const RadarComplex_t *iqLong,
+                            double calNoise,
+                            RadarComplex_t *iqFiltShort,
+                            RadarComplex_t *iqFiltLong,
+                            RadarComplex_t *iqNotchedShort,
+                            RadarComplex_t *iqNotchedLong,
+                            double &filterRatio,
+                            double &spectralNoise,
+                            double &spectralSnr,
+                            bool useStoredNotch = false);
   
   void applyAdapFilterStagPrt(int nSamplesHalf,
                               double prtSecsShort,
@@ -826,36 +841,6 @@ public:
                               double &spectralNoise,
                               double &spectralSnr,
                               bool useStoredNotch = false);
-  
-  // apply regression clutter filter to staggered PRT IQ time series
-  //
-  // The following is assumed:
-  //
-  //   1. nSamplesHalf refers to short and long prt sequences.
-  //      nSamples = nSamplesHalf * 2
-  //   2. The combined sequence starts with short PRT.
-  //   3. Memory has been allocated as follows:
-  //        iqOrigShort[nSamplesHalf]
-  //        iqOrigLong[nSamplesHalf]
-  //        iqFiltShort[nSamplesHalf]
-  //        iqFiltLong[nSamplesHalf]
-  //   4. Input and output data is windowed appropriately for FFTs.
-  //
-  // The short and long sequences are filtered separately.
-  // The notch is not filled in.
-  //
-  // Inputs:
-  //   fftHalf: object to be used for FFT computations
-  //   iqOrigShort: unfiltered short-prt time series
-  //   iqOrigLong: unfiltered long-prt time series
-  //   calNoise: measured noise from cal, linear units
-  //
-  //  Outputs:
-  //    iqFiltShort: filtered short-prt time series
-  //    iqFiltLong: filtered long-prt time series
-  //    filterRatio: ratio of raw to unfiltered power, before applying correction
-  //    spectralNoise: spectral noise estimated from the spectrum
-  //    spectralSnr: ratio of spectral noise to noise power
   
   void applyRegrFilterStagPrt(int nSamplesHalf,
                               double prtSecsShort,

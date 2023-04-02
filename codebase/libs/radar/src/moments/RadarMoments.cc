@@ -4212,7 +4212,7 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
     
 }
 
-/////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // apply clutter filter to IQ time series
 //
 // Inputs:
@@ -4254,53 +4254,24 @@ void RadarMoments::applyClutterFilter(int nSamples,
 {
 
   if (_clutterFilterType == CLUTTER_FILTER_REGRESSION) {
+
+    // regression filter
     
     applyRegressionFilter(nSamples, prtSecs, fft, regr, window,
                           iqOrig, calNoise,
                           iqFiltered, iqNotched, filterRatio,
                           spectralNoise, spectralSnr);
     
-  } else if (_clutterFilterType == CLUTTER_FILTER_NOTCH) {
-    
-    applyNotchFilter(nSamples, prtSecs, fft,
-                     iqWindowed,
-                     calNoise,
-                     iqFiltered, filterRatio,
-                     spectralNoise, spectralSnr);
-    
-  } else if (_clutterFilterType == CLUTTER_FILTER_ADAPTIVE) {
-    
+  } else {
+
+    // adaptive filter
+      
     applyAdaptiveFilter(nSamples, prtSecs, fft,
                         iqWindowed,
                         calNoise,
                         iqFiltered, iqNotched, filterRatio,
                         spectralNoise, spectralSnr,
                         useStoredNotch);
-
-  } else {
-
-    // no filtering
-    
-    // take the forward fft to compute the complex spectrum of unfiltered series
-    
-    RadarComplex_t empty(0.0, 0.0);
-    vector<RadarComplex_t> inputSpecC(nSamples, empty);
-    fft.fwd(iqWindowed, inputSpecC.data());
-    
-    // compute the real unfiltered spectrum
-    
-    vector<double> unfiltSpec(nSamples, 0.0);
-    RadarComplex::loadPower(inputSpecC.data(), unfiltSpec.data(), nSamples);
-
-    // compute the spectral noise
-    
-    spectralNoise = ClutFilter::computeSpectralNoise(unfiltSpec.data(), nSamples);
-    spectralSnr = (spectralNoise - calNoise) / calNoise;
-    if (spectralSnr < 0) {
-      spectralSnr = 1.0e-99;
-    }
-
-    filterRatio = 1.0;
 
   }
     
@@ -4684,6 +4655,91 @@ void RadarMoments::applyRegressionFilter(int nSamples,
 }
 
 /////////////////////////////////////////////////////////////////
+// apply clutter filter to staggered PRT IQ time series
+//
+// The following is assumed:
+//
+//   1. nSamplesHalf refers to short and long prt sequences.
+//      nSamples = nSamplesHalf * 2
+//   2. The combined sequence starts with short PRT.
+//   3. Memory has been allocated as follows:
+//        iqOrigShort[nSamplesHalf]
+//        iqOrigLong[nSamplesHalf]
+//        iqFiltShort[nSamplesHalf]
+//        iqFiltLong[nSamplesHalf]
+//   4. Input and output data is windowed appropriately for FFTs.
+//
+// The short and long sequences are filtered separately.
+// The notch is not filled in.
+//
+// Inputs:
+//   prtSecsShort, prtSecsLong
+//   fftHalf: object to be used for FFT computations
+//   regrHalf: regression filter object
+//   iqShort: unfiltered short-prt time series
+//   iqLong: unfiltered long-prt time series
+//   calNoise: measured noise from cal, linear units
+//   useStoredNotch:
+//     if false (the default) locate wx and clutter
+//     if true, use previously located wx and clutter - this is used
+//        if multiple channels are to be filtered
+//
+//  Outputs:
+//    iqFiltShort: filtered short-prt time series
+//    iqFiltLong: filtered long-prt time series
+//    iqNotchedShort: notched short-prt time series
+//    iqNotchedLong: notched long-prt time series
+//    filterRatio: ratio of raw to unfiltered power, before applying correction
+//    spectralNoise: spectral noise estimated from the spectrum
+//    spectralSnr: ratio of spectral noise to noise power
+
+void RadarMoments::applyClutFiltStagPrt(int nSamplesHalf,
+                                        double prtSecsShort,
+                                        double prtSecsLong,
+                                        const RadarFft &fftHalf,
+                                        ForsytheRegrFilter &regrHalf,
+                                        const RadarComplex_t *iqShort,
+                                        const RadarComplex_t *iqLong,
+                                        double calNoise,
+                                        RadarComplex_t *iqFiltShort,
+                                        RadarComplex_t *iqFiltLong,
+                                        RadarComplex_t *iqNotchedShort,
+                                        RadarComplex_t *iqNotchedLong,
+                                        double &filterRatio,
+                                        double &spectralNoise,
+                                        double &spectralSnr,
+                                        bool useStoredNotch /* = false */)
+  
+{
+
+  if (_clutterFilterType == CLUTTER_FILTER_REGRESSION) {
+
+    // regression filter
+    
+    applyRegrFilterStagPrt(nSamplesHalf, prtSecsShort, prtSecsLong,
+                           fftHalf, regrHalf,
+                           iqShort, iqLong, calNoise,
+                           iqFiltShort, iqFiltLong,
+                           iqNotchedShort, iqNotchedLong,
+                           filterRatio, spectralNoise, spectralSnr);
+    
+  } else {
+
+    // adaptive filter
+    
+    applyAdapFilterStagPrt(nSamplesHalf, prtSecsShort, prtSecsLong,
+                           fftHalf,
+                           iqShort, iqLong, calNoise,
+                           iqFiltShort, iqFiltLong,
+                           iqNotchedShort, iqNotchedLong,
+                           filterRatio, spectralNoise, spectralSnr,
+                           useStoredNotch);
+    
+  }
+    
+}
+  
+/////////////////////////////////////////////////////////////////
 // apply adaptive clutter filter to staggered PRT
 // IQ time series
 //
@@ -4906,6 +4962,7 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
 //
 // Inputs:
 //   fftHalf: object to be used for FFT computations
+//   regrHalf: regression filter object
 //   iqOrigShort: unfiltered short-prt time series
 //   iqOrigLong: unfiltered long-prt time series
 //   calNoise: measured noise from cal, linear units
