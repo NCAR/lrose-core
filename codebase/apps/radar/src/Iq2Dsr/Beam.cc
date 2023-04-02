@@ -2307,8 +2307,8 @@ void Beam::_filterDpAltHvCoCross()
                                gate->iqhcOrig, gate->iqhc,
                                calibNoise,
                                gate->iqhcF, gate->iqhcNotched,
-                               filterRatioHc, spectralNoiseHc, spectralSnrHc,
-                               false);
+                               filterRatioHc, spectralNoiseHc,
+                               spectralSnrHc, false);
       
       if (filterRatioHc > 1.0) {
         fields.clut_2_wx_ratio = 10.0 * log10(filterRatioHc - 1.0);
@@ -2334,7 +2334,7 @@ void Beam::_filterDpAltHvCoCross()
                                *_fftHalf, *_regrHalf, _windowHalf,
                                gate->iqhxOrig, gate->iqhx,
                                calibNoise,
-                               gate->iqhxF, NULL,
+                               gate->iqhxF, gate->iqhxNotched,
                                filterRatioHx, spectralNoiseHx,
                                spectralSnrHx, true);
       
@@ -2343,7 +2343,7 @@ void Beam::_filterDpAltHvCoCross()
                                *_fftHalf, *_regrHalf, _windowHalf,
                                gate->iqvxOrig, gate->iqvx,
                                calibNoise,
-                               gate->iqvxF, NULL,
+                               gate->iqvxF, gate->iqvxNotched,
                                filterRatioVx, spectralNoiseVx,
                                spectralSnrVx, true);
       
@@ -2369,14 +2369,14 @@ void Beam::_filterDpAltHvCoCross()
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
                                gate->iqhxOrig, gate->iqhx, calibNoise,
-                               gate->iqhxF, NULL,
+                               gate->iqhxF, gate->iqhxNotched,
                                filterRatioHx, spectralNoiseHx, spectralSnrHx);
 
       double filterRatioVx, spectralNoiseVx, spectralSnrVx;
       _mom->applyClutterFilter(_nSamplesHalf, _prt * 2.0,
                                *_fftHalf, *_regrHalf, _windowHalf,
                                gate->iqvxOrig, gate->iqvx, calibNoise,
-                               gate->iqvxF, NULL,
+                               gate->iqvxF, gate->iqvxNotched,
                                filterRatioVx, spectralNoiseVx, spectralSnrVx);
       
     }
@@ -2387,43 +2387,54 @@ void Beam::_filterDpAltHvCoCross()
                                      gate->iqhxF, gate->iqvxF, 
                                      fieldsF);
     
-    _mom->computeMomDpAltHvCoCross(fieldsF.lag0_hc,
-                                   fieldsF.lag0_hx,
-                                   fieldsF.lag0_vc,
-                                   fieldsF.lag0_vx,
-                                   fieldsF.lag0_vchx,
-                                   fieldsF.lag0_hcvx,
-                                   fieldsF.lag1_vxhx,
-                                   fieldsF.lag1_vchc,
+    _mom->computeMomDpAltHvCoCross(fieldsF.lag0_hc, fieldsF.lag0_hx,
+                                   fieldsF.lag0_vc, fieldsF.lag0_vx,
+                                   fieldsF.lag0_vchx, fieldsF.lag0_hcvx,
+                                   fieldsF.lag1_vxhx, fieldsF.lag1_vchc,
                                    fieldsF.lag1_hcvc,
-                                   fieldsF.lag2_hc,
-                                   fieldsF.lag2_vc,
-                                   igate, 
-                                   fieldsF);
+                                   fieldsF.lag2_hc, fieldsF.lag2_vc,
+                                   igate, fieldsF);
     
-    // compute notched moments for rhohv, phidp and zdr
+    // compute notched moments for rhohv, phidp, zdr, ldr
 
     MomentsFields fieldsN;
     _mom->computeCovarDpAltHvCoCross(gate->iqhcNotched, gate->iqvcNotched,
                                      gate->iqhxF, gate->iqvxF, 
                                      fieldsN);
-
+    
     _mom->computeMomDpAltHvCoCross(fieldsN.lag0_hc, fieldsN.lag0_hx,
                                    fieldsN.lag0_vc, fieldsN.lag0_vx,
                                    fieldsN.lag0_vchx, fieldsN.lag0_hcvx,
-                                   fieldsN.lag1_vxhx, fieldsN.lag1_vchc, fieldsN.lag1_hcvc,
+                                   fieldsN.lag1_vxhx, fieldsN.lag1_vchc,
+                                   fieldsN.lag1_hcvc,
                                    fieldsN.lag2_hc, fieldsN.lag2_vc,
                                    igate, fieldsN);
 
     fieldsF.zdr = fieldsN.zdr;
+    fieldsF.zdrm = fieldsN.zdrm;
+    fieldsF.zdr_bias = fieldsN.zdr_bias;
+
+    fieldsF.ldr = fieldsN.ldr;
+    fieldsF.ldr = fieldsN.ldr;
+    fieldsF.ldrhm = fieldsN.ldrhm;
+    fieldsF.ldrh = fieldsN.ldrh;
+    fieldsF.ldrvm = fieldsN.ldrvm;
+    fieldsF.ldrv = fieldsN.ldrv;
+    fieldsF.ldr_diff = fieldsN.ldr_diff;
+    fieldsF.ldr_mean = fieldsN.ldr_mean;
+    
     fieldsF.phidp = fieldsN.phidp;
+    fieldsF.phidp0 = fieldsN.phidp0;
+    fieldsF.phidp_cond = fieldsN.phidp_cond;
+    fieldsF.phidp_filt = fieldsN.phidp_filt;
+
     fieldsF.rhohv = fieldsN.rhohv;
     fieldsF.rhohv_nnc = fieldsN.rhohv_nnc;
-    
-    // fieldsF.test6 = fieldsN.zdr;
-    // fieldsF.test7 = fieldsN.phidp;
-    // fieldsF.test8 = fieldsN.rhohv;
-    
+    fieldsF.rho_vchx = fieldsN.rho_vchx;
+    fieldsF.rho_hcvx = fieldsN.rho_hcvx;
+    fieldsF.rho_vxhx = fieldsN.rho_vxhx;
+    fieldsF.rho_phidp = fieldsN.rho_phidp;
+
     // compute clutter power
     
     fields.clut = _computeClutPower(fields, fieldsF);
