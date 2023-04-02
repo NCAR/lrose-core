@@ -210,13 +210,16 @@ public:
   double cpa_interest;
   double zdr_sdev_interest;
   double phidp_sdev_interest;
-
+  
   // clutter power and noise residue
 
   double clut; // total clut power, after corrections for noise floor
   double clut_2_wx_ratio; // as computed by the filter
   double spectral_noise; // dBm power for skirts in spectrum
   double spectral_snr; // SNR for skirts in spectrum
+
+  double regr_filt_poly_order;
+  double regr_filt_cnr_db;
 
   // refractivity fields
 

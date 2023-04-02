@@ -210,6 +210,8 @@ void MomentsFields::init()
   clut_2_wx_ratio = missingDouble;
   spectral_noise = missingDouble;
   spectral_snr = missingDouble;
+  regr_filt_poly_order = missingDouble;
+  regr_filt_cnr_db = missingDouble;
 
   // refractivity fields
 
@@ -559,6 +561,8 @@ void MomentsFields::initToZero()
   clut_2_wx_ratio = 0.0;
   spectral_noise = 0.0;
   spectral_snr = 0.0;
+  regr_filt_poly_order = 0.0;
+  regr_filt_cnr_db = 0.0;
 
   // refractivity fields
 

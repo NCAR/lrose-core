@@ -1678,6 +1678,10 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.spectral_noise - start);
     case Params::SPECTRAL_SNR:
       return (&_flds.spectral_snr - start);
+    case Params::REGR_FILT_POLY_ORDER:
+      return (&_flds.regr_filt_poly_order - start);
+    case Params::REGR_FILT_CNR_DB:
+      return (&_flds.regr_filt_cnr_db - start);
 
       // NOISE
       
