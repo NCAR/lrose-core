@@ -40,7 +40,7 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 # Note: QJSENGINE is defined in rap_make.OSX_LINUX
 
-LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
+LOC_LIBS = -lradar -lMdv -lSpdb -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \

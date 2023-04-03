@@ -93,7 +93,7 @@ public:
                        double calibratedNoise,
                        double *filteredPowerSpec,
                        double *notchedPowerSpec,
-                       bool useStoredNotch = FALSE);
+                       bool useStoredNotch = false);
   
   // get results of the fit - after calling non-static method
 
