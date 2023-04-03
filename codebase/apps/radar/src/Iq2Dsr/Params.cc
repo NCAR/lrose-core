@@ -1334,7 +1334,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS");
+    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1345,7 +1345,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("moments_params");
     tt->descr = tdrpStrDup("Moments algorithm parameters.");
-    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nSPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nSPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nCONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam.");
+    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nSPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nSPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nCONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nCONSTANT_PULSE_WIDTH: create beams (dwells) with with constant pulse width. If the pulse width changes we move to a new dwell. Also, optionally specify the pulase width and ignore pulses with a different width.");
     tt->array_offset = (char *) &_moments_params - &_start_;
     tt->array_n_offset = (char *) &moments_params_n - &_start_;
     tt->is_array = TRUE;
@@ -1428,7 +1428,7 @@
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_moments_params->beam_method - (char *) _moments_params;
         tt->struct_def.fields[8].enum_def.name = tdrpStrDup("beam_method_t");
-        tt->struct_def.fields[8].enum_def.nfields = 3;
+        tt->struct_def.fields[8].enum_def.nfields = 4;
         tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("BEAM_SPECIFY_N_SAMPLES");
@@ -1437,6 +1437,8 @@
         tt->struct_def.fields[8].enum_def.fields[1].val = BEAM_SPECIFY_ANGLE;
         tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("BEAM_CONSTANT_STEERING_ANGLE");
         tt->struct_def.fields[8].enum_def.fields[2].val = BEAM_CONSTANT_STEERING_ANGLE;
+        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("BEAM_CONSTANT_PULSE_WIDTH");
+        tt->struct_def.fields[8].enum_def.fields[3].val = BEAM_CONSTANT_PULSE_WIDTH;
       tt->struct_def.fields[9].ftype = tdrpStrDup("int");
       tt->struct_def.fields[9].fname = tdrpStrDup("beam_n_samples");
       tt->struct_def.fields[9].ptype = INT_TYPE;
@@ -1678,28 +1680,28 @@
     tt->single_val.i = 128;
     tt++;
     
-    // Parameter 'control_n_samples_from_time_series'
+    // Parameter 'specify_pulse_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("control_n_samples_from_time_series");
-    tt->descr = tdrpStrDup("Option to control n_samples by using the integration_cycle_pulses value in the time series.");
-    tt->help = tdrpStrDup("If true, the number of samples will be determined by using the value of integration_cycle_pulses in the time series. If false, the beam_n_samples specified in moments_params will be used.");
-    tt->val_offset = (char *) &control_n_samples_from_time_series - &_start_;
+    tt->param_name = tdrpStrDup("specify_pulse_width");
+    tt->descr = tdrpStrDup("Option to specify the pulse width.");
+    tt->help = tdrpStrDup("Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. See 'fixed_pulse_width_us'. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &specify_pulse_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'control_xmit_rcv_mode_from_time_series'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'fixed_pulse_width_us'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("control_xmit_rcv_mode_from_time_series");
-    tt->descr = tdrpStrDup("Option to control the xmit/rcv mode by using the xmit_rcv_mode value in the time series.");
-    tt->help = tdrpStrDup("If true, the moments will be computed according to the xmit_rcv_mode value in the time series. If false, the xmit_rcv_mode in the moments_params will be used.");
-    tt->val_offset = (char *) &control_xmit_rcv_mode_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fixed_pulse_width_us");
+    tt->descr = tdrpStrDup("Specified pulse width in microseconds.");
+    tt->help = tdrpStrDup("See 'specify_pulse_width'. Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &fixed_pulse_width_us - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'control_beam_indexing_from_time_series'
@@ -1723,6 +1725,30 @@
     tt->descr = tdrpStrDup("Option to discard beams that cannot indexed.");
     tt->help = tdrpStrDup("Sometimes, when the antenna moves too slowly, it is not possible to index the beams. In this case we normally revert to non-indexed beams, so that we can at least get some beams from the system. If this parameter is true, we will discard non-indexed beams and only include indexed beams in the output data.");
     tt->val_offset = (char *) &discard_non_indexed_beams - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'control_n_samples_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("control_n_samples_from_time_series");
+    tt->descr = tdrpStrDup("Option to control n_samples by using the integration_cycle_pulses value in the time series.");
+    tt->help = tdrpStrDup("If true, the number of samples will be determined by using the value of integration_cycle_pulses in the time series. If false, the beam_n_samples specified in moments_params will be used.");
+    tt->val_offset = (char *) &control_n_samples_from_time_series - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'control_xmit_rcv_mode_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("control_xmit_rcv_mode_from_time_series");
+    tt->descr = tdrpStrDup("Option to control the xmit/rcv mode by using the xmit_rcv_mode value in the time series.");
+    tt->help = tdrpStrDup("If true, the moments will be computed according to the xmit_rcv_mode value in the time series. If false, the xmit_rcv_mode in the moments_params will be used.");
+    tt->val_offset = (char *) &control_xmit_rcv_mode_from_time_series - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     

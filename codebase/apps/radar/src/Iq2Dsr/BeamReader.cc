@@ -338,6 +338,13 @@ Beam *BeamReader::getNextBeam()
         return NULL;
       }
       
+    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_PULSE_WIDTH) {
+
+      if (_readConstantPulseWidthBeam()) {
+        // end of data
+        return NULL;
+      }
+      
     } else if (_indexTheBeams) {
       
       // indexed beams
@@ -660,7 +667,7 @@ int BeamReader::_readNonIndexedBeam()
     
 //////////////////////////////////////////////////
 // read in data for a beam with constant steering
-// angle, as in phsed array radar.
+// angle, as in phased array radar.
 // returns 0 on success, -1 on failure
 
 int BeamReader::_readConstantSteeringAngleBeam()
@@ -714,6 +721,92 @@ int BeamReader::_readConstantSteeringAngleBeam()
   // by dropping one pulse if needed
   
   _nSamples = (count / 2) * 2;
+  _midIndex = _nSamples / 2;
+
+  _startIndex = _nSamples - 1;
+  _endIndex = 0;
+
+  _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
+  _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
+
+  _computeBeamAzRate(0, _nSamples);
+  _computeBeamElRate(0, _nSamples);
+
+  // save sequence numbers in case we switch to indexed search
+  
+  _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
+  
+  return 0;
+
+}
+    
+//////////////////////////////////////////////////
+// read in data for a beam with constant pulse
+// width, as in HCR.
+// returns 0 on success, -1 on failure
+
+int BeamReader::_readConstantPulseWidthBeam()
+  
+{
+
+  // read in pulses until PRT changes
+  
+  int nPulsesInDwell = 0;
+  int warningCount = 0;
+  double pulseWidthUs = -9999;
+  
+  while (nPulsesInDwell <= _params.max_n_samples) {
+    
+    // get a pulse
+    
+    IwrfTsPulse *pulse = _getNextPulse();
+    if (pulse == NULL) {
+      // end of data
+      return -1;
+    }
+    warningCount++;
+    
+    // save pulse width from first pulse
+    
+    if (nPulsesInDwell == 0) {
+      if (_params.specify_pulse_width) {
+        // check for valid pulse width
+        if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
+          delete pulse;
+          if (warningCount == 100000) {
+            cerr << "WARNING - cannot find pulse with width: "
+                 << _params.fixed_pulse_width_us << endl;
+            warningCount = 0;
+          }
+          continue;
+        }
+      }
+      pulseWidthUs = pulse->getPulseWidthUs();
+    }
+
+    // check if angles have changed
+    
+    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3) {
+      if (nPulsesInDwell > 1) {
+        // new pulse width
+        // save pulse for next beam
+        _cacheLatestPulse();
+        break;
+      }
+    }
+    
+    nPulsesInDwell++;
+
+  } // while
+
+  // set PRT (and mean PRF)
+
+  _setPrt();
+
+  // set number of samples, ensuring an even number of pulses
+  // by dropping one pulse if needed
+  
+  _nSamples = (nPulsesInDwell / 2) * 2;
   _midIndex = _nSamples / 2;
 
   _startIndex = _nSamples - 1;

@@ -151,7 +151,8 @@ public:
   typedef enum {
     BEAM_SPECIFY_N_SAMPLES = 0,
     BEAM_SPECIFY_ANGLE = 1,
-    BEAM_CONSTANT_STEERING_ANGLE = 2
+    BEAM_CONSTANT_STEERING_ANGLE = 2,
+    BEAM_CONSTANT_PULSE_WIDTH = 3
   } beam_method_t;
 
   typedef enum {
@@ -888,13 +889,17 @@ public:
 
   int max_n_samples;
 
-  tdrp_bool_t control_n_samples_from_time_series;
+  tdrp_bool_t specify_pulse_width;
 
-  tdrp_bool_t control_xmit_rcv_mode_from_time_series;
+  double fixed_pulse_width_us;
 
   tdrp_bool_t control_beam_indexing_from_time_series;
 
   tdrp_bool_t discard_non_indexed_beams;
+
+  tdrp_bool_t control_n_samples_from_time_series;
+
+  tdrp_bool_t control_xmit_rcv_mode_from_time_series;
 
   tdrp_bool_t compute_zdr_using_snr;
 
@@ -1331,7 +1336,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[295];
+  mutable TDRPtable _table[297];
 
   const char *_className;
 

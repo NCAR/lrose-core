@@ -269,6 +269,7 @@ private:
   int _readDualPrtBeam();
   int _readNonIndexedBeam();
   int _readConstantSteeringAngleBeam();
+  int _readConstantPulseWidthBeam();
   int _readIndexedBeam();
 
   int _findPrevIndexedBeam();
