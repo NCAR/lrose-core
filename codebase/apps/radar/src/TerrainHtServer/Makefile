@@ -36,8 +36,6 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = TerrainHtServer
 
-XMLRPC_LIBS = \
-
 # NOTE: RH packages to install for xmlrpc
 #   xmlrpc-c
 #   xmlrpc-c-c++
@@ -50,7 +48,7 @@ XMLRPC_LIBS = \
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ltoolsa -ltdrp -ldataport \
+XMLRPC_LIBS = \
 	-lxmlrpc \
 	-lxmlrpc++ \
 	-lxmlrpc_abyss \
@@ -62,9 +60,15 @@ LOC_LIBS = -ltoolsa -ltdrp -ldataport \
 	-lxmlrpc_server_abyss \
 	-lxmlrpc_server_abyss++ \
 	-lxmlrpc_server_pstream++ \
-	-lxmlrpc_util \
-	-lNcxx \
-	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
+	-lxmlrpc_util
+
+LOC_LIBS = \
+	-ldsdata -lradar -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -ltoolsa -ldataport \
+	-ltdrp -lRadx -lNcxx -lphysics \
+	-lkd $(NETCDF4_LIBS) -lfftw3 -lbz2 \
+	-lz -lpthread $(XMLRPC_LIBS)
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
@@ -114,11 +118,13 @@ TestClientTerrainHt: TestClientTerrainHt.cc
 	TestClientTerrainHt.cc $(XMLRPC_LIBS)
 
 WorldTerrain: WorldTerrain.cc
-	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INSTALL_DIR)/include -o WorldTerrain \
-	WorldTerrain.cc $(XMLRPC_LIBS) $(MDV_LIBS)
+	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INSTALL_DIR)/include \
+	-o WorldTerrain WorldTerrain.cc \
+	-L$(LROSE_INSTALL_DIR)/lib $(LOC_LDFLAGS) $(LOC_LIBS)
+
 
 cleaner: clean_all
-	/bin/rm TestClientTerrainHt TerrainHtServer WorldTerrain
+	/bin/rm -f TestClientTerrainHt TerrainHtServer WorldTerrain
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
