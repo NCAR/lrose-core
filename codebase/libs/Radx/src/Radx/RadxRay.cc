@@ -1868,7 +1868,7 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
 
   // compute track-relative quantities for Y-Prime radar, and save
   
-  if (axis != Radx::PRIMARY_AXIS_Y_PRIME) {
+  if (axis == Radx::PRIMARY_AXIS_Y_PRIME) {
     _computeTrackRelAnglesYPrime(rollRad, rotRad, cosPitch, sinPitch,
                                  cosTilt, sinTilt, cosDrift, sinDrift);
   }
