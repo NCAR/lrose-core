@@ -1584,18 +1584,6 @@ private:
                             double &spectralSnr,
                             bool useStoredNotch = false);
   
-  void _regrFiltHalfTseries(int nSamplesHalf,
-                            double prtSecs,
-                            const RadarFft &fftHalf,
-                            ForsytheRegrFilter &regrHalf,
-                            const RadarComplex_t *iqUnfilt,
-                            double calNoise,
-                            RadarComplex_t *iqFiltered,
-                            RadarComplex_t *iqNotched,
-                            double &filterRatio,
-                            double &spectralNoise,
-                            double &spectralSnr);
-  
   static void _interpAcrossNotch(int nSamples, double *regrSpec);
 
   static void _interpAcrossStagNotches(int nSamples,
