@@ -324,7 +324,7 @@ void RadarMoments::setDbForDb(double db_for_db_ratio,
                               double db_for_db_threshold)
   
 {
-  
+
   _applyDbForDbCorrection = true;
   _dbForFbRatio = db_for_db_ratio;
   _dbForDbThreshold = db_for_db_threshold;
@@ -4257,7 +4257,7 @@ void RadarMoments::applyClutterFilter(int nSamples,
 
     // regression filter
     
-    applyRegressionFilter(nSamples, prtSecs, fft, regr, window,
+    applyRegressionFilter(nSamples, prtSecs, fft, regr,
                           iqOrig, calNoise,
                           iqFiltered, iqNotched, filterRatio,
                           spectralNoise, spectralSnr);
@@ -4356,6 +4356,8 @@ void RadarMoments::applyAdaptiveFilter(int nSamples,
     spectralSnr = 1.0e-99;
   }
   filterRatio = rawPower / filteredPower;
+  
+  // correct for power residue
   
   if (powerRemoved > 0) {
     double correctionRatio =
@@ -4527,8 +4529,7 @@ void RadarMoments::applyRegressionFilter(int nSamples,
                                          double prtSecs,
                                          const RadarFft &fft,
                                          ForsytheRegrFilter &regr,
-                                         const double *window,
-                                         const RadarComplex_t *iqUnfilt, // non-windowed
+                                         const RadarComplex_t *iqUnfilt, // not-windowed
                                          double calNoise,
                                          RadarComplex_t *iqFiltered,
                                          RadarComplex_t *iqNotched,
@@ -4538,20 +4539,11 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   
 {
 
-  _notchStart = 0;
-  _notchEnd = 0;
-
-  // apply the window to the original unfiltered times series
-  // normally this is a no-op because the window is rectangular
+  // take the forward fft to compute the complex spectrum of unfiltered series
 
   RadarComplex_t empty(0.0, 0.0);
-  vector<RadarComplex_t> unfiltWindowed(nSamples, empty);
-  applyWindow(iqUnfilt, window, unfiltWindowed.data(), nSamples);
-  
-  // take the forward fft to compute the complex spectrum of unfiltered series
-  
   vector<RadarComplex_t> inputSpecC(nSamples, empty);
-  fft.fwd(unfiltWindowed.data(), inputSpecC.data());
+  fft.fwd(iqUnfilt, inputSpecC.data());
   
   // compute the real unfiltered spectrum
   
@@ -4569,81 +4561,56 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   double cnr3 = clutPower3 / calNoise;
   _regrCnrDb = 10.0 * log10(cnr3);
   
+  // if no clutter, do not filter
   if (_regrCnrDb < _regrMinCnrDb) {
-
-    // don't use a regression filter
-    
     memcpy(iqFiltered, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     if (iqNotched) {
       memcpy(iqNotched, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     }
     regrSpec = unfiltSpec;
     _regrInterpRatioDb = 0.0;
-
-  } else {
-    
-    // apply regression filter, passing in CNR
-    // results are in iqRegr
-    
-    vector<RadarComplex_t> iqRegr(nSamples, empty);
-    regr.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
-    
-    // if iqNotched is non-NULL,
-    // save filtered data, without interp across the notch
-    
-    if (iqNotched != NULL) {
-
-      memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
-
-    }
-
-    // take the forward fft to compute the complex spectrum
-    // of regr-filtered series
-    
-    vector<RadarComplex_t> regrSpecC(nSamples, empty);
-    fft.fwd(iqRegr.data(), regrSpecC.data());
-    
-    // compute the real regr-filtered spectrum
-    
-    RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
-    
-    // interpolate across the notch, computing the power before and after
-    
-    double powerBeforeInterp =
-      RadarComplex::meanPower(regrSpec.data(), nSamples);
-    
-    _regrDoInterpAcrossNotch(regrSpec);
-    
-    double powerAfterInterp =
-      RadarComplex::meanPower(regrSpec.data(), nSamples);
-    _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
-    
-    // adjust the input spectrum by the filter ratio
-    // constrain ratios to be 1 or less
-    // this preserves the phases on the spectrum
-    
-    for (int ii = 0; ii < nSamples; ii++) {
-      double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
-      if (magRatio > 1.0) {
-        magRatio = 1.0;
-      }
-      inputSpecC[ii].re *= magRatio;
-      inputSpecC[ii].im *= magRatio;
-    }
-    
-    // invert the resulting fft
-    // storing result in the filtered time series
-    
-    fft.inv(inputSpecC.data(), iqFiltered);
-
-  } // if (_regrCnrDb < _regrMinCnrDb) {
+    filterRatio = 1.0;
+    spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamples);
+    spectralSnr = spectralNoise / calNoise;
+    return;
+  }
   
-  // compute powers and filter ratio
+  // apply regression filter, passing in CNR
+  // results are in iqRegr
   
-  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamples);
-  double filteredPower = RadarComplex::meanPower(iqFiltered, nSamples);
-  filterRatio = rawPower / filteredPower;
+  vector<RadarComplex_t> iqRegr(nSamples, empty);
+  regr.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
+  
+  // if iqNotched is non-NULL,
+  // save filtered data, without interp across the notch
+  
+  if (iqNotched != NULL) {
+    memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(RadarComplex_t));
+  }
 
+  // take the forward fft to compute the complex spectrum
+  // of regr-filtered series
+  
+  vector<RadarComplex_t> regrSpecC(nSamples, empty);
+  fft.fwd(iqRegr.data(), regrSpecC.data());
+  
+  // compute the real regr-filtered spectrum
+  
+  RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamples);
+  
+  // interpolate across the notch, computing the power before and after
+  
+  double powerBeforeInterp =
+    RadarComplex::meanPower(regrSpec.data(), nSamples);
+  
+  _regrDoInterpAcrossNotch(regrSpec);
+
+  // compute interp power ratio
+  
+  double powerAfterInterp =
+    RadarComplex::meanPower(regrSpec.data(), nSamples);
+  _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
+  
   // compute spectral noise value
   
   spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamples);
@@ -4652,6 +4619,45 @@ void RadarMoments::applyRegressionFilter(int nSamples,
 
   spectralSnr = spectralNoise / calNoise;
 
+  // compute powers and filter ratio
+  
+  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamples);
+  double filteredPower = powerAfterInterp;
+  double powerRemoved = rawPower - filteredPower;
+  filterRatio = rawPower / filteredPower;
+  
+  // correct the filtered powers for clutter residue
+
+  if (powerRemoved > 0) {
+    double correctionRatio =
+      _computePwrCorrectionRatio(nSamples, spectralSnr,
+ 				 rawPower, filteredPower,
+                                 powerRemoved, calNoise);
+
+    // correct the filtered powers for clutter residue
+    for (int ii = 0; ii < nSamples; ii++) {
+      regrSpec[ii] *= correctionRatio;
+    }
+  }
+  
+  // adjust the input spectrum by the filter ratio
+  // constrain ratios to be 1 or less
+  // this preserves the phases on the spectrum
+  
+  for (int ii = 0; ii < nSamples; ii++) {
+    double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
+    if (magRatio > 1.0) {
+      magRatio = 1.0;
+    }
+    inputSpecC[ii].re *= magRatio;
+    inputSpecC[ii].im *= magRatio;
+  }
+  
+  // invert the resulting fft
+  // storing result in the filtered time series
+  
+  fft.inv(inputSpecC.data(), iqFiltered);
+  
 }
 
 /////////////////////////////////////////////////////////////////
@@ -4806,8 +4812,7 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralSnrShort = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        _clutFilterShortPrt, fftHalf,
-                       iqShort, calNoise,
-                       filterNyquist, true,
+                       iqShort, calNoise, filterNyquist,
                        iqFiltShort, iqNotchedShort,
                        filterRatioShort,
                        spectralNoiseShort,
@@ -4821,8 +4826,7 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralSnrLong = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        _clutFilterLongPrt, fftHalf,
-                       iqLong, calNoise,
-                       filterNyquist, true,
+                       iqLong, calNoise, filterNyquist,
                        iqFiltLong, iqNotchedLong,
                        filterRatioLong,
                        spectralNoiseLong,
@@ -4844,7 +4848,6 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
 //   fft: object to be used for FFT computations
 //   iqUnfilt: unfiltered time series
 //   channel: HC, VC, HX, VX
-//   adjustForPowerResidue: adjust filtered spectrum for power residue
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
 //     if true, use previously located wx and clutter - this is used
@@ -4864,7 +4867,6 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
                                         const RadarComplex_t *iqUnfilt,
                                         double calNoise,
                                         double nyquist,
-                                        bool adjustForPowerResidue,
                                         RadarComplex_t *iqFiltered,
                                         RadarComplex_t *iqNotched,
                                         double &filterRatio,
@@ -4898,32 +4900,29 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
                            powerSpecFilt, powerSpecNotched,
                            useStoredNotch);
   
-  _notchStart = _clutFilter.getNotchStart();
-  _notchEnd = _clutFilter.getNotchEnd();
-  double rawPower = _clutFilter.getRawPower();
-  double filteredPower = _clutFilter.getFilteredPower();
-  double powerRemoved = _clutFilter.getPowerRemoved();
-  _spectralNoise = _clutFilter.getSpectralNoise();
+  _notchStart = clutFilt.getNotchStart();
+  _notchEnd = clutFilt.getNotchEnd();
+  double rawPower = clutFilt.getRawPower();
+  double filteredPower = clutFilt.getFilteredPower();
+  double powerRemoved = clutFilt.getPowerRemoved();
+  _spectralNoise = clutFilt.getSpectralNoise();
   spectralNoise = _spectralNoise;
-  _weatherPos = _clutFilter.getWeatherPos();
-  _clutterPos = _clutFilter.getClutterPos();
+  _weatherPos = clutFilt.getWeatherPos();
+  _clutterPos = clutFilt.getClutterPos();
 
   spectralSnr = spectralNoise / calNoise;
   filterRatio = rawPower / filteredPower;
+
+  // correct for power residue
   
-  if (adjustForPowerResidue && powerRemoved > 0) {
-    
+  if (powerRemoved > 0) {
     double correctionRatio =
       _computePwrCorrectionRatio(nSamplesHalf, spectralSnr,
  				 rawPower, filteredPower,
                                  powerRemoved, calNoise);
-
-    // correct the filtered powers for clutter residue
-    
     for (int ii = 0; ii < nSamplesHalf; ii++) {
       powerSpecFilt[ii] *= correctionRatio;
     }
-    
   }
   
   // adjust the input spectrum by the filter ratio
@@ -4996,7 +4995,6 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamplesHalf,
   
 {
   
-  double filterNyquist = _nyquist / (_staggeredM + _staggeredN);
   double prtSecsSum = prtSecsShort + prtSecsLong;
   
   // filter the short prt time series
@@ -5007,7 +5005,6 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamplesHalf,
   _regrFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        fftHalf, regrHalf,
                        iqShort, calNoise,
-                       filterNyquist, true,
                        iqFiltShort, iqNotchedShort,
                        filterRatioShort,
                        spectralNoiseShort,
@@ -5021,7 +5018,6 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamplesHalf,
   _regrFiltHalfTseries(_nSamplesHalf, prtSecsSum,
                        fftHalf, regrHalf,
                        iqLong, calNoise,
-                       filterNyquist, true,
                        iqFiltLong, iqNotchedLong,
                        filterRatioLong,
                        spectralNoiseLong,
@@ -5045,7 +5041,6 @@ void RadarMoments::applyRegrFilterStagPrt(int nSamplesHalf,
 //               not windowed. The window is passed in for use in the FFTs
 //   iqUnfilt: unfiltered time series
 //   channel: HC, VC, HX, VX
-//   adjustForPowerResidue: adjust filtered spectrum for power residue
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
 //     if true, use previously located wx and clutter - this is used
@@ -5064,8 +5059,6 @@ void RadarMoments::_regrFiltHalfTseries(int nSamplesHalf,
                                         ForsytheRegrFilter &regrHalf,
                                         const RadarComplex_t *iqUnfilt,
                                         double calNoise,
-                                        double nyquist,
-                                        bool adjustForPowerResidue,
                                         RadarComplex_t *iqFiltered,
                                         RadarComplex_t *iqNotched,
                                         double &filterRatio,
@@ -5094,80 +5087,57 @@ void RadarMoments::_regrFiltHalfTseries(int nSamplesHalf,
   double clutPower3 = regrHalf.computeOrder3ClutPower(iqUnfilt);
   double cnr3 = clutPower3 / calNoise;
   _regrCnrDb = 10.0 * log10(cnr3);
-  
+
+  // if no clutter, do not filter
   if (_regrCnrDb < _regrMinCnrDb) {
-    
-    // don't use a regression filter
-    
     memcpy(iqFiltered, iqUnfilt, nSamplesHalf * sizeof(RadarComplex_t));
     if (iqNotched) {
       memcpy(iqNotched, iqUnfilt, nSamplesHalf * sizeof(RadarComplex_t));
     }
     regrSpec = unfiltSpec;
     _regrInterpRatioDb = 0.0;
+    filterRatio = 1.0;
+    spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamplesHalf);
+    spectralSnr = spectralNoise / calNoise;
+    return;
+  }
 
-  } else {
-    
-    // apply regression filter, passing in CNR
-    // results are in iqRegr
-    
-    vector<RadarComplex_t> iqRegr(nSamplesHalf, empty);
-    regrHalf.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
-    
-    // if iqNotched is non-NULL,
-    // save filtered data, without interp across the notch
-    
-    if (iqNotched != NULL) {
-      memcpy(iqNotched, iqRegr.data(), nSamplesHalf * sizeof(RadarComplex_t));
-    }
-
-    // take the forward fft to compute the complex spectrum
-    // of regr-filtered series
-    
-    vector<RadarComplex_t> regrSpecC(nSamplesHalf, empty);
-    fftHalf.fwd(iqRegr.data(), regrSpecC.data());
-    
-    // compute the real regr-filtered spectrum
-    
-    RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamplesHalf);
-    
-    // interpolate across the notch, computing the power before and after
-    
-    double powerBeforeInterp =
-      RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
-    
-    _regrDoInterpAcrossNotch(regrSpec);
-    
-    double powerAfterInterp =
-      RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
-    _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
-    
-    // adjust the input spectrum by the filter ratio
-    // constrain ratios to be 1 or less
-    // this preserves the phases on the spectrum
-    
-    for (int ii = 0; ii < nSamplesHalf; ii++) {
-      double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
-      if (magRatio > 1.0) {
-        magRatio = 1.0;
-      }
-      inputSpecC[ii].re *= magRatio;
-      inputSpecC[ii].im *= magRatio;
-    }
-    
-    // invert the resulting fft
-    // storing result in the filtered time series
-    
-    fftHalf.inv(inputSpecC.data(), iqFiltered);
-    
-  } // if (_regrCnrDb < _regrMinCnrDb) {
+  // apply regression filter, passing in CNR
+  // results are in iqRegr
   
-  // compute powers and filter ratio
+  vector<RadarComplex_t> iqRegr(nSamplesHalf, empty);
+  regrHalf.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
   
-  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamplesHalf);
-  double filteredPower = RadarComplex::meanPower(iqFiltered, nSamplesHalf);
-  filterRatio = rawPower / filteredPower;
-
+  // if iqNotched is non-NULL,
+  // save filtered data, without interp across the notch
+  
+  if (iqNotched != NULL) {
+    memcpy(iqNotched, iqRegr.data(), nSamplesHalf * sizeof(RadarComplex_t));
+  }
+  
+  // take the forward fft to compute the complex spectrum
+  // of regr-filtered series
+  
+  vector<RadarComplex_t> regrSpecC(nSamplesHalf, empty);
+  fftHalf.fwd(iqRegr.data(), regrSpecC.data());
+  
+  // compute the real regr-filtered spectrum
+  
+  RadarComplex::loadPower(regrSpecC.data(), regrSpec.data(), nSamplesHalf);
+  
+  // interpolate across the notch, computing the power before and after
+  
+  double powerBeforeInterp =
+    RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
+  
+  _regrDoInterpAcrossNotch(regrSpec);
+  
+  // compute interp power ratio
+  
+  double powerAfterInterp =
+    RadarComplex::meanPower(regrSpec.data(), nSamplesHalf);
+  _regrInterpRatioDb = 10.0 * log10(powerAfterInterp / powerBeforeInterp);
+  
   // compute spectral noise value
   
   spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamplesHalf);
@@ -5176,6 +5146,45 @@ void RadarMoments::_regrFiltHalfTseries(int nSamplesHalf,
 
   spectralSnr = spectralNoise / calNoise;
 
+  // compute powers and filter ratio
+  
+  double rawPower = RadarComplex::meanPower(iqUnfilt, nSamplesHalf);
+  double filteredPower = powerAfterInterp;
+  double powerRemoved = rawPower - filteredPower;
+  filterRatio = rawPower / filteredPower;
+  
+  // correct the filtered powers for clutter residue
+
+  if (powerRemoved > 0) {
+    double correctionRatio =
+      _computePwrCorrectionRatio(nSamplesHalf, spectralSnr,
+ 				 rawPower, filteredPower,
+                                 powerRemoved, calNoise);
+
+    // correct the filtered powers for clutter residue
+    for (int ii = 0; ii < nSamplesHalf; ii++) {
+      regrSpec[ii] *= correctionRatio;
+    }
+  }
+  
+  // adjust the input spectrum by the filter ratio
+  // constrain ratios to be 1 or less
+  // this preserves the phases on the spectrum
+  
+  for (int ii = 0; ii < nSamplesHalf; ii++) {
+    double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
+    if (magRatio > 1.0) {
+      magRatio = 1.0;
+    }
+    inputSpecC[ii].re *= magRatio;
+    inputSpecC[ii].im *= magRatio;
+  }
+  
+  // invert the resulting fft
+  // storing result in the filtered time series
+  
+  fftHalf.inv(inputSpecC.data(), iqFiltered);
+  
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -7121,6 +7130,7 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
   // check if we need to apply residue correction at all
 
   if (!_applySpectralResidueCorrection) {
+    // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
     return 1.0;
   }
 
@@ -7128,10 +7138,13 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
 
   double snr = (rawPower - calNoise) / calNoise;
   if (snr <= 0) {
+    // cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbb rawPower, calNoise, snr: "
+    //      << rawPower << ", " << calNoise << ", " << snr << endl;
     return 1.0;
   }
   double snrDb = 10.0 * log10(snr);
   if (snrDb < _minSnrDbForResidueCorrection) {
+    // cerr << "ccccccccccccccccccccccccc dbzDb: " << snrDb << endl;
     return 1.0;
   }
 
@@ -7154,6 +7167,7 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
       powerRemovedDbCorrection += (diffDb - dbForDbThreshold);
     }
     double correctionRatio = 1.0 / pow(10.0, powerRemovedDbCorrection / 10.0);
+    // cerr << "ddddddddddddddddddddddd correctionRatio: " << correctionRatio << endl;
     return correctionRatio;
     
   }
