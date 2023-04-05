@@ -1351,6 +1351,7 @@ private:
   // clutter filtering parameters
 
   ClutFilter _clutFilter;
+  ClutFilter _clutFilterShortPrt, _clutFilterLongPrt;
   clutter_filter_type_t _clutterFilterType;
   double _clutterWidthMps;
   double _clutterInitNotchWidthMps;
@@ -1572,6 +1573,7 @@ private:
 
   void _adapFiltHalfTseries(int nSamplesHalf,
                             double prtSecs,
+                            ClutFilter &clutFilt,
                             const RadarFft &fftHalf,
                             const RadarComplex_t *iqUnfilt,
                             double calNoise,

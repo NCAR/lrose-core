@@ -77,7 +77,7 @@ ClutFilter::~ClutFilter()
 //   nSamples: number of samples
 //   clutterWidthMps: spectrum width for clutter model (m/s)
 //   initNotchWidthMps: width of first guess notch (m/s)
-//   nyquist: unambiguous vel (m/s)
+//   nyquistMps: unambiguous vel (m/s)
 //   calibratedNoise: noise power at digitizer from calibration (mW)
 //   useStoredNotch:
 //     if false (the default) locate wx and clutter
@@ -106,11 +106,11 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                  int nSamples,
                                  double clutterWidthMps,
                                  double initNotchWidthMps,
-                                 double nyquist,
+                                 double nyquistMps,
                                  double calibratedNoise,
                                  double *filteredPowerSpec,
                                  double *notchedPowerSpec,
-                                 bool useStoredNotch /* = FALSE */)
+                                 bool useStoredNotch /* = false */)
 
 {
 
@@ -135,7 +135,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                        nSamples,
                        clutterWidthMps,
                        initNotchWidthMps,
-                       nyquist,
+                       nyquistMps,
                        _notchWidth,
                        _clutterFound,
                        _clutterPos,
@@ -150,7 +150,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                             nSamples,
                                             clutterWidthMps,
                                             initNotchWidthMps,
-                                            nyquist);
+                                            nyquistMps);
 
   }
   
@@ -179,73 +179,12 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   int clutterLowerBound = -maxSearchWidth;
   int clutterUpperBound = +maxSearchWidth;
 
+  // fill notch using a gaussian fit
   // iterate 3 times, refining the correcting further each time
-  // by fitting a Gaussian to the spectrum
 
-  TaArray<double> gaussian_;
-  double *gaussian = gaussian_.alloc(nSamples);
-  double matchRatio = 10.0;
-  double prevPower = 0.0;
-
-  for (int iter = 0; iter < 3; iter++) {
-    
-    // fit gaussian to notched spectrum
-    
-    fitGaussian(notched, nSamples, _weatherPos, _spectralNoise, gaussian);
-    
-    // find where clutter peak drops below gaussian, and
-    // create a notched spectrum using the gaussian where
-    // the clutter peak was
-    
-    prevPower = rawPowerSpec[0];
-    for (int ii = -1; ii >= -maxSearchWidth; ii--) {
-      int jj = (ii + nSamples) % nSamples;
-      double power = rawPowerSpec[jj];
-      double gauss = gaussian[jj];
-      if (power <= gauss) {
-	// power falls below gaussian fit
-	clutterLowerBound = ii + 1;
-	break;
-      }
-      if (power < gauss * matchRatio) {
-	if (power > prevPower) {
-	  // power came close to gaussian fit and is moving away
-	  clutterLowerBound = ii + 1;
-	  break;
-	}
-      }
-      prevPower = power;
-    }
-    
-    prevPower = rawPowerSpec[0];
-    for (int ii = 1; ii <= maxSearchWidth; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      double power = rawPowerSpec[jj];
-      double gauss = gaussian[jj];
-      if (power < gauss) {
-	// power falls below gaussian fit
-	clutterUpperBound = ii - 1;
-	break;
-      }
-      if (power < gauss * matchRatio) {
-	if (power > prevPower) {
-	  // power came close to gaussian fit and is moving away
-	  clutterUpperBound = ii - 1;
-	  break;
-	}
-      }
-      prevPower = power;
-    }
-    
-    // recompute notched spectrum, using gaussian to fill in notch
-    
-    memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
-    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      notched[jj] = gaussian[jj];
-    }
-
-  } // iter
+  fillNotchWithGaussian(rawPowerSpec, nSamples, notched,
+                        _weatherPos, _spectralNoise, maxSearchWidth,
+                        clutterLowerBound, clutterUpperBound);
 
   // set notch limits used
   
@@ -258,6 +197,16 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
     filteredPowerSpec[ii] = notched[ii];
   }
 
+  // if requested, set power to the noise in the notch
+
+  bool setNotchToNoise = true;
+  if (setNotchToNoise) {
+    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
+      int jj = (ii + nSamples) % nSamples;
+      filteredPowerSpec[jj] = calibratedNoise;
+    }
+  }
+  
   // compute filtered power
   
   _filteredPower = RadarComplex::meanPower(filteredPowerSpec, nSamples);
@@ -276,7 +225,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 //   nSamples: number of samples
 //   clutterWidthMps: spectrum width for clutter model (m/s)
 //   initNotchWidthMps: width of first guess notch (m/s)
-//   nyquist: unambiguous vel (m/s)
+//   nyquistMps: unambiguous vel (m/s)
 //   calibratedNoise: noise power at digitizer from calibration (mW)
 //   setNotchToNoise: if true, points within the notch will be
 //                       set to the calibrated noise
@@ -299,7 +248,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                  int nSamples,
                                  double clutterWidthMps,
                                  double initNotchWidthMps,
-                                 double nyquist,
+                                 double nyquistMps,
                                  double calibratedNoise,
                                  bool setNotchToNoise,
                                  bool &clutterFound,
@@ -323,9 +272,10 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   notchEnd = 0;
   powerRemoved = 0.0;
 
-  // compute raw power
+  // compute raw power and spectral noise
   
   rawPower = RadarComplex::meanPower(rawPowerSpec, nSamples);
+  spectralNoise = computeSpectralNoise(rawPowerSpec, nSamples);
 
   // locate the weather and clutter
   
@@ -335,7 +285,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                      nSamples,
                      clutterWidthMps,
                      initNotchWidthMps,
-                     nyquist,
+                     nyquistMps,
                      notchWidth,
                      clutterFound,
                      clutterPos,
@@ -350,15 +300,14 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                              nSamples,
                                              clutterWidthMps,
                                              initNotchWidthMps,
-                                             nyquist);
+                                             nyquistMps);
   
-  // notch out the clutter, using the initial notch width
+  // notch out the clutter, setting to 0
   
   TaArray<double> notched_;
   double *notched = notched_.alloc(nSamples);
   memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
   for (int ii = -halfNotchWidth; ii <= halfNotchWidth; ii++) {
-    // notched[(ii + nSamples) % nSamples] = clutNoise;
     notched[(ii + nSamples) % nSamples] = 0.0;
   }
   memcpy(notchedPowerSpec, notched, nSamples * sizeof(double));
@@ -378,73 +327,12 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   int clutterLowerBound = -maxSearchWidth;
   int clutterUpperBound = +maxSearchWidth;
 
+  // fill notch using a gaussian fit
   // iterate 3 times, refining the correcting further each time
-  // by fitting a Gaussian to the spectrum
 
-  TaArray<double> gaussian_;
-  double *gaussian = gaussian_.alloc(nSamples);
-  double matchRatio = 10.0;
-  double prevPower = 0.0;
-
-  for (int iter = 0; iter < 3; iter++) {
-    
-    // fit gaussian to notched spectrum
-    
-    fitGaussian(notched, nSamples, weatherPos, clutNoise, gaussian);
-    
-    // find where clutter peak drops below gaussian, and
-    // create a notched spectrum using the gaussian where
-    // the clutter peak was
-    
-    prevPower = rawPowerSpec[0];
-    for (int ii = -1; ii >= -maxSearchWidth; ii--) {
-      int jj = (ii + nSamples) % nSamples;
-      double power = rawPowerSpec[jj];
-      double gauss = gaussian[jj];
-      if (power <= gauss) {
-	// power falls below gaussian fit
-	clutterLowerBound = ii + 1;
-	break;
-      }
-      if (power < gauss * matchRatio) {
-	if (power > prevPower) {
-	  // power came close to gaussian fit and is moving away
-	  clutterLowerBound = ii + 1;
-	  break;
-	}
-      }
-      prevPower = power;
-    }
-    
-    prevPower = rawPowerSpec[0];
-    for (int ii = 1; ii <= maxSearchWidth; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      double power = rawPowerSpec[jj];
-      double gauss = gaussian[jj];
-      if (power < gauss) {
-	// power falls below gaussian fit
-	clutterUpperBound = ii - 1;
-	break;
-      }
-      if (power < gauss * matchRatio) {
-	if (power > prevPower) {
-	  // power came close to gaussian fit and is moving away
-	  clutterUpperBound = ii - 1;
-	  break;
-	}
-      }
-      prevPower = power;
-    }
-    
-    // recompute notched spectrum, using gaussian to fill in notch
-    
-    memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
-    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      notched[jj] = gaussian[jj];
-    }
-
-  } // iter
+  fillNotchWithGaussian(rawPowerSpec, nSamples, notched,
+                        weatherPos, spectralNoise, maxSearchWidth,
+                        clutterLowerBound, clutterUpperBound);
 
   // set notch limits used
   
@@ -465,7 +353,7 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
       filteredPowerSpec[jj] = calibratedNoise;
     }
   }
-  
+
   // compute filtered power
   
   filteredPower = RadarComplex::meanPower(filteredPowerSpec, nSamples);
@@ -474,10 +362,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   
   powerRemoved = rawPower - filteredPower;
 
-  // compute spectral noise by stand-alone method
-
-  spectralNoise = computeSpectralNoise(rawPowerSpec, nSamples);
-  
 }
 
 /////////////////////////////////////////////////////
@@ -584,7 +468,7 @@ void ClutFilter::fillNotchUsingGfit(const RadarComplex_t *notchedSpec,
 //   rawPowerSpec: unfiltered power spectrum
 //   nSamples: number of samples
 //   notchWidthMps: notch width (m/s)
-//   nyquist: unambiguous vel (m/s)
+//   nyquistMps: unambiguous vel (m/s)
 //   notchPower: power top be set within the notch
 //
 // Outputs:
@@ -599,7 +483,7 @@ void ClutFilter::fillNotchUsingGfit(const RadarComplex_t *notchedSpec,
 void ClutFilter::performNotch(const double *rawPowerSpec, 
                               int nSamples,
                               double notchWidthMps,
-                              double nyquist,
+                              double nyquistMps,
                               double notchPower,
                               double *filteredPowerSpec,
                               int &notchStart,
@@ -616,7 +500,7 @@ void ClutFilter::performNotch(const double *rawPowerSpec,
 
   // compute notch posn
   
-  int halfNotch = int ((notchWidthMps * nSamples) / (4.0 * nyquist) + 0.5);
+  int halfNotch = int ((notchWidthMps * nSamples) / (4.0 * nyquistMps) + 0.5);
   if (halfNotch < 1) {
     halfNotch = 1;
   }
@@ -654,7 +538,7 @@ void ClutFilter::locateWxAndClutter(const double *power,
                                     int nSamples,
                                     double clutterWidthMps,
                                     double initNotchWidthMps,
-                                    double nyquist,
+                                    double nyquistMps,
                                     int &notchWidth,
                                     bool &clutterFound,
                                     int &clutterPos,
@@ -673,12 +557,12 @@ void ClutFilter::locateWxAndClutter(const double *power,
 
   int nHalf = nSamples / 2;
   int nClutWidth =
-    (int) ((clutterWidthMps / (nyquist * 2.0)) * nSamples + 0.5);
+    (int) ((clutterWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
   nClutWidth = MAX(nClutWidth, nHalf - 1);
   nClutWidth = MIN(nClutWidth, 1);
 
   notchWidth =
-    (int) ((initNotchWidthMps / (nyquist * 2.0)) * nSamples + 0.5);
+    (int) ((initNotchWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
   notchWidth = MIN(notchWidth, nHalf - 1);
   notchWidth = MAX(notchWidth, 1);
 
@@ -807,7 +691,7 @@ int ClutFilter::computeHalfNotchWidth(const double *power,
                                       int nSamples,
                                       double clutterWidthMps,
                                       double initNotchWidthMps,
-                                      double nyquist)
+                                      double nyquistMps)
   
 {
   
@@ -815,7 +699,7 @@ int ClutFilter::computeHalfNotchWidth(const double *power,
   
   int nQuarter = nSamples / 4;
   int halfNotchWidth =
-    (int) ((initNotchWidthMps / (nyquist * 2.0)) * nSamples + 0.5);
+    (int) ((initNotchWidthMps / (nyquistMps * 2.0)) * nSamples + 0.5);
   if (halfNotchWidth > nQuarter) {
     halfNotchWidth = nQuarter;
   }
@@ -829,7 +713,7 @@ int ClutFilter::computeHalfNotchWidth(const double *power,
   TaArray<double> clutModel_;
   double *clutModel = clutModel_.alloc(nSamples);
   if (computeGaussianClutterModel(powerShifted, nSamples, 
-                                  clutterWidthMps, nyquist,
+                                  clutterWidthMps, nyquistMps,
                                   clutModel)) {
     // failed - return default value
     return halfNotchWidth;
@@ -861,6 +745,90 @@ int ClutFilter::computeHalfNotchWidth(const double *power,
   halfNotchWidth = notchWidth / 2;
   
   return halfNotchWidth;
+
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Interpolate the notch with a gaussian
+
+void ClutFilter::fillNotchWithGaussian(const double *rawPowerSpec, 
+                                       const int nSamples,
+                                       double *notched,
+                                       const int weatherPos,
+                                       const double clutNoise,
+                                       const int maxSearchWidth,
+                                       int &clutterLowerBound,
+                                       int &clutterUpperBound)
+
+{
+  
+  // iterate 3 times, refining the correcting further each time
+  // by fitting a Gaussian to the spectrum
+  
+  TaArray<double> gaussian_;
+  double *gaussian = gaussian_.alloc(nSamples);
+  double matchRatio = 10.0;
+  double prevPower = 0.0;
+
+  for (int iter = 0; iter < 3; iter++) {
+    
+    // fit gaussian to notched spectrum
+    
+    fitGaussian(notched, nSamples, weatherPos, clutNoise, gaussian);
+    
+    // find where clutter peak drops below gaussian, and
+    // create a notched spectrum using the gaussian where
+    // the clutter peak was
+    
+    prevPower = rawPowerSpec[0];
+    for (int ii = -1; ii >= -maxSearchWidth; ii--) {
+      int jj = (ii + nSamples) % nSamples;
+      double power = rawPowerSpec[jj];
+      double gauss = gaussian[jj];
+      if (power <= gauss) {
+	// power falls below gaussian fit
+	clutterLowerBound = ii + 1;
+	break;
+      }
+      if (power < gauss * matchRatio) {
+	if (power > prevPower) {
+	  // power came close to gaussian fit and is moving away
+	  clutterLowerBound = ii + 1;
+	  break;
+	}
+      }
+      prevPower = power;
+    }
+    
+    prevPower = rawPowerSpec[0];
+    for (int ii = 1; ii <= maxSearchWidth; ii++) {
+      int jj = (ii + nSamples) % nSamples;
+      double power = rawPowerSpec[jj];
+      double gauss = gaussian[jj];
+      if (power < gauss) {
+	// power falls below gaussian fit
+	clutterUpperBound = ii - 1;
+	break;
+      }
+      if (power < gauss * matchRatio) {
+	if (power > prevPower) {
+	  // power came close to gaussian fit and is moving away
+	  clutterUpperBound = ii - 1;
+	  break;
+	}
+      }
+      prevPower = power;
+    }
+    
+    // recompute notched spectrum, using gaussian to fill in notch
+    
+    memcpy(notched, rawPowerSpec, nSamples * sizeof(double));
+    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
+      int jj = (ii + nSamples) % nSamples;
+      notched[jj] = gaussian[jj];
+    }
+
+  } // iter
 
 }
 

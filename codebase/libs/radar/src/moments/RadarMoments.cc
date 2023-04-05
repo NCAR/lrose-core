@@ -4795,7 +4795,7 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
                                           bool useStoredNotch /* = false */)
   
 {
-  
+
   double filterNyquist = _nyquist / (_staggeredM + _staggeredN);
   double prtSecsSum = prtSecsShort + prtSecsLong;
   
@@ -4805,7 +4805,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralNoiseShort = 1.0e-13;
   double spectralSnrShort = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
-                       fftHalf, iqShort, calNoise,
+                       _clutFilterShortPrt, fftHalf,
+                       iqShort, calNoise,
                        filterNyquist, true,
                        iqFiltShort, iqNotchedShort,
                        filterRatioShort,
@@ -4819,7 +4820,8 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
   double spectralNoiseLong = 1.0e-13;
   double spectralSnrLong = 1.0;
   _adapFiltHalfTseries(_nSamplesHalf, prtSecsSum,
-                       fftHalf, iqLong, calNoise,
+                       _clutFilterLongPrt, fftHalf,
+                       iqLong, calNoise,
                        filterNyquist, true,
                        iqFiltLong, iqNotchedLong,
                        filterRatioLong,
@@ -4857,6 +4859,7 @@ void RadarMoments::applyAdapFilterStagPrt(int nSamplesHalf,
    
 void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
                                         double prtSecs,
+                                        ClutFilter &clutFilt,
                                         const RadarFft &fftHalf,
                                         const RadarComplex_t *iqUnfilt,
                                         double calNoise,
@@ -4888,22 +4891,23 @@ void RadarMoments::_adapFiltHalfTseries(int nSamplesHalf,
   TaArray<double> powerSpec_;
   double *powerSpec = powerSpec_.alloc(nSamplesHalf);
   RadarComplex::loadPower(powerSpecC, powerSpec, nSamplesHalf);
-    
-  _clutFilter.performAdaptive(powerSpec, nSamplesHalf,
-                              _clutterWidthMps, _clutterInitNotchWidthMps,
-                              _nyquist, calNoise,
-                              powerSpecFilt, powerSpecNotched,
-                              useStoredNotch);
+
+  clutFilt.performAdaptive(powerSpec, nSamplesHalf,
+                           _clutterWidthMps, _clutterInitNotchWidthMps,
+                           nyquist, calNoise,
+                           powerSpecFilt, powerSpecNotched,
+                           useStoredNotch);
   
   _notchStart = _clutFilter.getNotchStart();
   _notchEnd = _clutFilter.getNotchEnd();
   double rawPower = _clutFilter.getRawPower();
   double filteredPower = _clutFilter.getFilteredPower();
   double powerRemoved = _clutFilter.getPowerRemoved();
-  spectralNoise = _spectralNoise = _clutFilter.getSpectralNoise();
+  _spectralNoise = _clutFilter.getSpectralNoise();
+  spectralNoise = _spectralNoise;
   _weatherPos = _clutFilter.getWeatherPos();
   _clutterPos = _clutFilter.getClutterPos();
-  
+
   spectralSnr = spectralNoise / calNoise;
   filterRatio = rawPower / filteredPower;
   
