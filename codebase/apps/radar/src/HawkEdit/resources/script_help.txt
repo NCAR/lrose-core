@@ -1,4 +1,4 @@
-Getting Started				How to familiarize yourself with HawkEdit Scripts
+Getting2 Started				How to familiarize yourself with HawkEdit Scripts
                             HawkEdit scripts are a functional language. Whereas Solo had "one time" and "for each ray" commands, HawkEdit scripts have variable assignments and functions.  The "one time" commands convert to variables and function arguments in HawkEdit. A script applies to every ray.  
     No overwrite               No field is modified unless it is assigned, i.e. the field appears on the lefthand side of an equals "=".  
     functional              HawkEdit scripts follow JavaScript syntax.  JavaScript is a functional language.

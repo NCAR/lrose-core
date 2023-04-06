@@ -314,8 +314,10 @@ QString SoloFunctionsController::DESPECKLE(QString field, size_t speckle_length,
 }
 
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, float bad_data,
-					     size_t clip_gate, QString bad_flag_field) { 
+QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, 
+               QString bad_flag_field, 
+               float bad_data,
+					     size_t clip_gate) { 
 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // updated bad_flag_field is returned in tempFieldName
@@ -329,8 +331,11 @@ QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, floa
 }
 
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, float constant, float bad_data,
-					   size_t clip_gate, QString bad_flag_field) { 
+QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, 
+                 float constant, 
+                 QString bad_flag_field,
+                 float bad_data,
+					       size_t clip_gate) { 
 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.FlaggedMultiply(field.toStdString(), //_data,
@@ -492,11 +497,13 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float consta
 } 
 */
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
-						  size_t clip_gate, QString badFlagMaskFieldName) { 
+QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, 
+              QString badFlagMaskFieldName,
+              float bad_data,
+						  size_t clip_gate) { 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
-  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(), //_data,
-							   currentRayIdx, //_currentSweepIdx,
+  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(),
+							   currentRayIdx,
 							   clip_gate, bad_data,
 							   badFlagMaskFieldName.toStdString());
 							  

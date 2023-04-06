@@ -741,9 +741,9 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
     throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
   } 
 
-  float tilt = georef->getTilt() * Radx::DegToRad;
+  float tilt = georef->getTrackRelTilt() * Radx::DegToRad;
   // TODO: elevation changes with different rays/fields how to get the current one???
-  float elevation = ray->getElevationDeg() * Radx::DegToRad;
+  float elevation = georef->getTrackRelEl() * Radx::DegToRad;
 
   float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
   float seds_nyquist_velocity = nyquist_velocity; // TODO: what is this value?
@@ -945,16 +945,8 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
 					bad_data_value, clip_gate,
 					dds_radd_eff_unamb_vel, seds_nyquist_velocity,
 					_boundaryMask);
-  
-
 
   // insert new field into RadxVol   
-  /*                                                                          
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
-  */
   
   //Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = true;
@@ -964,6 +956,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   //newField->addDataFl32(nGates, newData);
   RadxField *field1 = ray->addField(newFieldName, "m/s", nGates, missingValue, newData, isLocal);
 
+  // replace azimuth with rotation only for display
   if (use_radar_angles) {
      ray->setAzimuthDeg(new_az);
   }

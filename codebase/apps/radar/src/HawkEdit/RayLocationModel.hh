@@ -46,6 +46,11 @@ private:
 	// the rays have been sorted.
 	bool _rayLocationSetup;
 
+	void _sortRaysIntoRayLocationsUsingAzimuth(float ppi_rendering_beam_width,
+		int sweepNumber);
+	void _sortRaysIntoRayLocationsUsingRotation(float ppi_rendering_beam_width,
+		int sweepNumber);
+
 };
 
 #endif

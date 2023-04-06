@@ -1251,6 +1251,7 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
     dataModel->readData(inputPath, fieldNames, sweep_number,
       debug_verbose, debug_extra);
   } catch (const string &errMsg) {
+    // for fatal errors
     if (!_params->images_auto_create)  {
       QErrorMessage errorDialog;
       errorDialog.setMinimumSize(400, 250);
@@ -1258,6 +1259,9 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
       errorDialog.exec();
     }
     return -1;
+  } catch (std::invalid_argument &ex) {
+    // for non-fatal and warning messages
+    errorMessage("Warning", ex.what());
   }
   cerr << "_getArchiveDataPlainVanilla exit" << endl;
   LOG(DEBUG) << "exit";
@@ -1907,8 +1911,7 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 void PolarManager::_setupRayLocation() {
 
   // requires ray info
-  // DataModel *dataModel = DataModel::Instance();
-
+  
   float ppi_rendering_beam_width = _platform.getRadarBeamWidthDegH();
   if (_params->ppi_override_rendering_beam_width) {
     ppi_rendering_beam_width = _params->ppi_rendering_beam_width;

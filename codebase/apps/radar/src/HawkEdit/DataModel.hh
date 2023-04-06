@@ -204,6 +204,8 @@ private:
   vector<double> _lookAheadSweepAngles;
   vector<RadxField *> _lookAheadFields;  
 
+  void _sanityCheckVolume();
+
 };
 
 #endif

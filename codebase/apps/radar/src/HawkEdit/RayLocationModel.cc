@@ -1,6 +1,7 @@
 
 #include "RayLocationModel.hh"
 #include "DataModel.hh"
+#include <Radx/RadxCfactors.hh>
 #include <toolsa/LogStream.hh>
 #include <cmath>
 
@@ -27,6 +28,24 @@ void RayLocationModel::init() {
 
 // call when new data file is read, or when switching to new sweep?
 void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
+  int sweepNumber) {
+  LOG(DEBUG) << "enter";
+
+  DataModel *dataModel = DataModel::Instance();
+  if (dataModel->getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
+    // _platform.getPrimaryAxis()
+    _sortRaysIntoRayLocationsUsingRotation(ppi_rendering_beam_width,
+      sweepNumber);
+  } else {
+    _sortRaysIntoRayLocationsUsingAzimuth(ppi_rendering_beam_width,
+      sweepNumber);
+  }
+  LOG(DEBUG) << "exit";
+}
+
+// call when new data file is read, or when switching to new sweep?
+void RayLocationModel::_sortRaysIntoRayLocationsUsingAzimuth(
+  float ppi_rendering_beam_width,
   int sweepNumber) {
   LOG(DEBUG) << "enter";
   init();
@@ -155,6 +174,168 @@ void RayLocationModel::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
 
   LOG(DEBUG) << "exit";
 }
+
+// call when new data file is read, or when switching to new sweep?
+void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
+  float ppi_rendering_beam_width,
+  int sweepNumber) {
+  LOG(DEBUG) << "enter";
+  init();
+//  _storeRayLoc(const RadxRay *ray, const double az,
+//                                const double beam_width, RayLoc *ray_loc)
+
+  DataModel *dataModel = DataModel::Instance();
+  vector<RadxRay *> &listOfRays = dataModel->getRays();
+
+  //RadxCfactors *cfac = dataModel->getCfactors();
+
+  // the rendering beam width should be the minimum distance between rays.
+  // this may result in gaps between rays, but at least the rays won't
+  // overlap, and hide data.
+
+  double minDistance = 99999999.0;
+  double previousAz = 0.0;
+  size_t minDistanceRayIdx = 0;
+  vector<RadxRay *>::const_iterator rayItr;
+  for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
+    RadxRay *ray = *rayItr;
+    if (ray->getSweepNumber() == sweepNumber) {   
+      RadxGeoref *georef = ray->getGeoreference();
+      if (georef == NULL) {
+        throw std::invalid_argument("georefence is NULL cannot sort rays");
+      }
+
+      //float T_deg = (georef->getHeading() + cfac->getHeadingCorr())  + 
+      //        (georef->getDrift() + cfac->getDriftCorr());
+      float T_deg = (georef->getHeading())  + 
+              (georef->getDrift());              
+      float T = T_deg * Radx::DegToRad;
+      // CfRadial has the track-relative rotation,
+      // but Dorade files, don't have this value, it is missing.
+      // what to use for Dorade? azimuth - T? or Rotation - Track?
+      double az = georef->getTrackRelRot(); // georef->getRotation()  - T_deg; // getTrackRelEl();
+      if (az == -9999) {
+        // use the rotation angle for the az; this is the best guess in this
+        // situation.
+        az = georef->getRotation();
+      }
+      if (rayItr != listOfRays.begin()) { 
+        // what if the rays are NOT in sorted order by az? It will be close enough
+        double distance = fabs(az - previousAz);
+        LOG(DEBUG) << "az= " << az << " distance=" << distance;
+        if (distance < minDistance) {
+          minDistance = distance;
+          minDistanceRayIdx = rayItr - listOfRays.begin();
+        }
+      }
+      previousAz = az;
+    }
+  }
+  LOG(DEBUG) << "using minimum ray distance of " << minDistance;
+  if (minDistance < 1) {
+    minDistance = 1.0;
+    cerr << "min ray distance less than 1.0, setting to 1.0" << endl;
+  }
+  //double half_angle = ppi_rendering_beam_width / 2.0;
+  double half_angle = minDistance / 2.0;
+
+
+  LOG(DEBUG) << "sorting " << listOfRays.size() << " rays";
+
+  // vector<RadxRay *>::const_iterator rayItr;
+  for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
+  // for each ray in file,
+  // sort into RayLoc structure based on ray azimuth
+
+  // Determine the extent of this ray: _startAz & _endAz
+/*
+  if (ppi_override_rendering_beam_width) {
+    double half_angle = ppi_rendering_beam_width / 2.0;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
+  } else if (ray->getIsIndexed()) {
+    double half_angle = ray->getAngleResDeg() / 2.0;
+    _startAz = az - half_angle - 0.1;
+    _endAz = az + half_angle + 0.1;
+  } else {
+    double max_half_angle = beam_width / 2.0;
+    double prev_offset = max_half_angle;
+    if (_prevAz >= 0.0) {
+      double az_diff = az - _prevAz;
+      if (az_diff < 0.0)
+        az_diff += 360.0;
+      double half_az_diff = az_diff / 2.0;
+  
+      if (prev_offset > half_az_diff)
+        prev_offset = half_az_diff;
+    }
+    _startAz = az - prev_offset - 0.1;
+    _endAz = az + max_half_angle + 0.1;
+  }
+ */
+    RadxRay *ray = *rayItr;
+         
+    if (ray->getSweepNumber() == sweepNumber) {   
+
+      RadxGeoref *georef = ray->getGeoreference();
+      if (georef == NULL) {
+        throw std::invalid_argument("georefence is NULL cannot sort rays2");
+      }
+     // RadxCfactors *cfac = ray->getCfactors();
+    //float T_deg = (georef->getHeading() + cfac->getHeadingCorr())  + 
+    //          (georef->getDrift() + cfac->getDriftCorr());
+    float T_deg = (georef->getHeading())  + 
+              (georef->getDrift());                
+    float T = T_deg * Radx::DegToRad;
+      double az = georef->getTrackRelRot(); // ray->getGeoreference()->getTrackRelRot();
+      while (az < 0) {
+        az += 360.0;  
+        //TODO: where to handle this?? when making mods for survellance? or somehwere else??
+        // mod everything by 360?
+      }
+      while (az > 360) {
+        az = az - 360;
+      }
+      double startAz = az - half_angle; // - 0.1;
+      double endAz = az + half_angle; // + 0.1;
+
+    // store
+
+      int startIndex = (int) (startAz * RayLoc::RAY_LOC_RES);
+      int endIndex = (int) (endAz * RayLoc::RAY_LOC_RES); //  + 1);
+      LOG(DEBUG) << "startIndex " << startIndex << " to " << endIndex;
+      if (startIndex < 0) startIndex = 0;
+      if (endIndex >= RayLoc::RAY_LOC_N) endIndex = RayLoc::RAY_LOC_N - 1;   
+
+    // Clear out any rays in the locations list that are overlapped by the
+    // new ray
+      
+    //_clearRayOverlap(startIndex, endIndex, ray_loc);
+
+    // Set the locations associated with this ray
+
+      if (endIndex < startIndex) {
+        LOG(DEBUG) << "ERROR endIndex: " << endIndex << " < startIndex: " << startIndex;
+      } else {
+        for (int ii = startIndex; ii <= endIndex; ii++) {
+          ray_loc[ii].ray = ray;
+          ray_loc[ii].active = true;
+          ray_loc[ii].startIndex = startIndex;
+          ray_loc[ii].endIndex = endIndex;
+        }
+      }
+    }
+  }
+  _rayLocationSetup = true;
+
+  //for (int i = 0; i< RayLoc::RAY_LOC_N; i++) {
+    //LOG(DEBUG) << "ray_loc[" << i << "].startIdx = " << ray_loc[i].startIndex;
+    //LOG(DEBUG) << "  ray_loc[" << i << "].endIdx = " << ray_loc[i].endIndex;
+  //}
+
+  LOG(DEBUG) << "exit";
+}
+
 
 bool RayLocationModel::isRayLocationSetup() {
   return _rayLocationSetup;

@@ -634,7 +634,39 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   _currentFilePath = path;
 
+  _sanityCheckVolume();
+
   LOG(DEBUG) << "exit";
+}
+
+void DataModel::_sanityCheckVolume() {
+
+  if (getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
+
+      const RadxGeoref *georef = getGeoreference(0);
+      if (georef == NULL) {
+        string msg = "HawkEdit detected missing georeference block for a Y-Prime radar. ";
+        msg.append("This information is needed to properly display the field data.  ");
+        throw std::invalid_argument(msg);
+      }
+
+      double az = georef->getTrackRelRot();
+      if (az == -9999) { // TODO: this should be a Radx::Missing??
+        // Where to check this? Detect in DataModel? 
+        // if PRIMARY_AXIS_Y_PRIME, and georef is null, or if georef->getTrackRelRot is missing,
+        //   send message to PolarManager.  PolarManager must display the message.
+        // So, it must propogate up that far.
+        string msg;
+        msg.append("HawkEdit detected the track-relative rotation is missing for a Y-Prime radar. ");
+        msg.append("This information is needed to properly display the field data.  ");
+        msg.append("If the displayed data do not appear as expected, ");
+        msg.append("please exit HawkEdit and use RadxConvert with the parameter ");
+        msg.append("apply_georeference_corrections = TRUE to fix this issue.");
+        throw std::invalid_argument(msg);
+      }
+
+  }
+
 }
 
 
