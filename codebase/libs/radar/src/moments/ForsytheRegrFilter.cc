@@ -236,7 +236,7 @@ void ForsytheRegrFilter::setup(size_t nSamples,
     _xxVals[ii] = xx;
     xx += xDelta;
   }
-  
+
   // done
 
   _setupDone = true;
@@ -361,17 +361,19 @@ void ForsytheRegrFilter::apply(const RadarComplex_t *rawIq,
 
     // #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-    cerr << "n, rate, prt, cnr, wl, nyq, wc, wcNorm, orderNorm, order: "
-         << setw(6) << _nSamples << ", "
-         << setw(6) << antennaRateDegPerSec << ", "
-         << setw(6) << prtSecs << ", "
-         << setw(6) << cnr3Db << ", "
-         << setw(6) << _wavelengthM << ", "
-         << setw(6) << nyquist << ", "
-         << setw(6) << wc << ", "
-         << setw(6) << wcNorm << ", "
-         << setw(6) << orderNorm << ", "
-         << setw(3) << order << endl;
+    if (cnr3Db > 1) {
+      cerr << "n, rate, prt, cnr, wl, nyq, wc, wcNorm, orderNorm, order: "
+           << setw(6) << _nSamples << ", "
+           << setw(6) << antennaRateDegPerSec << ", "
+           << setw(6) << prtSecs << ", "
+           << setw(6) << cnr3Db << ", "
+           << setw(6) << _wavelengthM << ", "
+           << setw(6) << nyquist << ", "
+           << setw(6) << wc << ", "
+           << setw(6) << wcNorm << ", "
+           << setw(6) << orderNorm << ", "
+           << setw(3) << order << endl;
+    }
 #endif
   
     _polyOrder = order;
