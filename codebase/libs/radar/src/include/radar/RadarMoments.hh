@@ -714,27 +714,41 @@ public:
                           double &spectralSnr,
                           bool useStoredNotch = false);
   
+  // apply adaptive clutter filter to IQ time series
+  //
+  // Inputs:
+  //   nSamples
+  //   prtSecs
+  //   clutFilt: adaptive filter object to use
+  //   fft: object to be used for FFT computations
+  //   iqWindowed: unfiltered time series, pre-windowed using VONHANN or BLACKMAN
+  //   calNoise: noise level at digitizer, from cal, linear units
+  //   nyquist: folding velocity in m/s
+  //   useStoredNotch:
+  //     if false (the default) locate wx and clutter
+  //     if true, use previously located wx and clutter - this is used
+  //        if multiple channels are to be filtered
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    iqNotched: if non-NULL, notched time series
+  //    filterRatio: ratio of raw to unfiltered power, before applying correction
+  //    spectralNoise: spectral noise estimated from the spectrum
+  //    spectralSnr: ratio of spectral noise to noise power
+  
   void applyAdaptiveFilter(int nSamples,
                            double prtSecs,
+                           ClutFilter &clutFilt,
                            const RadarFft &fft,
                            const RadarComplex_t *iqWindowed,
                            double calNoise,
+                           double nyquist,
                            RadarComplex_t *iqFiltered,
                            RadarComplex_t *iqNotched,
                            double &filterRatio,
                            double &spectralNoise,
-                           double &clutResidueRatio,
+                           double &spectralSnr,
                            bool useStoredNotch = false);
-  
-  void applyNotchFilter(int nSamples,
-                        double prtSecs,
-                        const RadarFft &fft,
-                        const RadarComplex_t *iqWindowed,
-                        double calNoise,
-                        RadarComplex_t *iqFiltered,
-                        double &filterRatio,
-                        double &spectralNoise,
-                        double &spectralSnr);
   
   // apply polynomial regression clutter filter to IQ time series
   //
@@ -769,6 +783,31 @@ public:
                              double &filterRatio,
                              double &spectralNoise,
                              double &spectralSnr);
+  
+  // apply notch filter to IQ time series
+  //
+  // Inputs:
+  //   nSamples
+  //   prtSecs
+  //   fft: object to be used for FFT computations
+  //   iqWindowed: unfiltered time series, pre-windowed using VONHANN or BLACKMAN
+  //   calNoise: noise level at digitizer, from cal, linear units
+  //
+  //  Outputs:
+  //    iqFiltered: filtered time series
+  //    filterRatio: ratio of raw to unfiltered power, before applying correction
+  //    spectralNoise: spectral noise estimated from the spectrum
+  //    spectralSnr: ratio of spectral noise to noise power
+  
+  void applyNotchFilter(int nSamples,
+                        double prtSecs,
+                        const RadarFft &fft,
+                        const RadarComplex_t *iqWindowed,
+                        double calNoise,
+                        RadarComplex_t *iqFiltered,
+                        double &filterRatio,
+                        double &spectralNoise,
+                        double &spectralSnr);
   
   // apply clutter filter to staggered PRT IQ time series
   //
@@ -1570,20 +1609,6 @@ private:
 				    double powerRemoved,
                                     double calNoise);
 
-  void _adapFiltHalfTseries(int nSamplesHalf,
-                            double prtSecs,
-                            ClutFilter &clutFilt,
-                            const RadarFft &fftHalf,
-                            const RadarComplex_t *iqUnfilt,
-                            double calNoise,
-                            double nyquist,
-                            RadarComplex_t *iqFiltered,
-                            RadarComplex_t *iqNotched,
-                            double &filterRatio,
-                            double &spectralNoise,
-                            double &spectralSnr,
-                            bool useStoredNotch = false);
-  
   static void _interpAcrossNotch(int nSamples, double *regrSpec);
 
   static void _interpAcrossStagNotches(int nSamples,

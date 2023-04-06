@@ -2596,7 +2596,8 @@ void Beam::_filterDpAltHvCoOnly()
 void Beam::_filterDpSimHvFixedPrt()
 {
 
-  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
   
   for (int igate = 0; igate < _nGates; igate++) {
       
@@ -2617,7 +2618,7 @@ void Beam::_filterDpSimHvFixedPrt()
     double spectralSnrHc = 1.0;
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqhcOrig, gate->iqhc,
-                             calibNoise,
+                             calibNoiseHc,
                              gate->iqhcF, gate->iqhcNotched,
                              filterRatioHc, spectralNoiseHc, spectralSnrHc,
                              false);
@@ -2635,7 +2636,7 @@ void Beam::_filterDpSimHvFixedPrt()
     double filterRatioVc, spectralNoiseVc, spectralSnrVc;
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqvcOrig, gate->iqvc,
-                             calibNoise,
+                             calibNoiseVc,
                              gate->iqvcF, gate->iqvcNotched,
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
                              true);
@@ -2707,11 +2708,11 @@ void Beam::_filterDpSimHvFixedPrt()
       double rangeKm = _startRangeKm + igate * _gateSpacingKm;
       double snrF = fieldsF.dbz - _calib.getBaseDbz1kmHc() - 20.0 * log10(rangeKm);
       double snrLinear = pow(10.0, snrF / 10.0);
-      double pwrLinear = (snrLinear + 1.0) * calibNoise;
+      double pwrLinear = (snrLinear + 1.0) * calibNoiseHc;
       double specSnrLinear = pow(10.0, fields.spectral_snr / 10.0);
-      double specPwrLinear = (specSnrLinear + 1.0) * calibNoise * 2.0;
+      double specPwrLinear = (specSnrLinear + 1.0) * calibNoiseHc * 2.0;
       double pwrCorrLinear = pwrLinear - specPwrLinear;
-      if (pwrCorrLinear > calibNoise) {
+      if (pwrCorrLinear > calibNoiseHc) {
         fields.test4 = fieldsF.dbz - fields.spectral_snr;
       }
     } else {
@@ -2727,8 +2728,9 @@ void Beam::_filterDpSimHvFixedPrt()
 
 void Beam::_filterDpSimHvStagPrt()
 {
-
-  double calibNoise = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  
+  double calibNoiseHc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseVc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_VC);
   
   for (int igate = 0; igate < _nGatesPrtLong; igate++) {
       
@@ -2750,7 +2752,7 @@ void Beam::_filterDpSimHvStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                      calibNoise,
+                                      calibNoiseHc,
                                       gate->iqhcPrtShortF, gate->iqhcPrtLongF,
                                       gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
                                       filterRatioHc, spectralNoiseHc, spectralSnrHc, false);
@@ -2770,7 +2772,7 @@ void Beam::_filterDpSimHvStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                      calibNoise,
+                                      calibNoiseVc,
                                       gate->iqvcPrtShortF, gate->iqvcPrtLongF,
                                       gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
                                       filterRatioVc, spectralNoiseVc, spectralSnrVc, true);
@@ -2836,7 +2838,8 @@ void Beam::_filterDpSimHvStagPrt()
 void Beam::_filterDpHOnlyFixedPrt()
 {
 
-  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseHc = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseVx = _mom->getCalNoisePower(RadarMoments::CHANNEL_VX);
 
   for (int igate = 0; igate < _nGates; igate++) {
       
@@ -2857,7 +2860,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     double spectralSnrHc = 1.0;
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqhcOrig, gate->iqhc,
-                             calibNoise,
+                             calibNoiseHc,
                              gate->iqhcF, gate->iqhcNotched,
                              filterRatioHc, spectralNoiseHc, spectralSnrHc,
                              false);
@@ -2884,7 +2887,7 @@ void Beam::_filterDpHOnlyFixedPrt()
     
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqvxOrig, gate->iqvx,
-                             calibNoise,
+                             calibNoiseVx,
                              gate->iqvxF, gate->iqvxNotched,
                              filterRatioVx, spectralNoiseVx, spectralSnrVx,
                              true);
@@ -2941,7 +2944,8 @@ void Beam::_filterDpHOnlyFixedPrt()
 void Beam::_filterDpHOnlyStagPrt()
 {
 
-  double calibNoise = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseHc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  double calibNoiseVx = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_VX);
   
   for (int igate = 0; igate < _nGates; igate++) {
       
@@ -2963,7 +2967,7 @@ void Beam::_filterDpHOnlyStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqhcPrtShort, gate->iqhcPrtLong,
-                                      calibNoise,
+                                      calibNoiseHc,
                                       gate->iqhcPrtShortF, gate->iqhcPrtLongF,
                                       gate->iqhcPrtShortNotched, gate->iqhcPrtLongNotched,
                                       filterRatioHc, spectralNoiseHc, spectralSnrHc, false);
@@ -2985,7 +2989,7 @@ void Beam::_filterDpHOnlyStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqvxPrtShort, gate->iqvxPrtLong,
-                                      calibNoise,
+                                      calibNoiseVx,
                                       gate->iqvxPrtShortF, gate->iqvxPrtLongF,
                                       gate->iqvxPrtShortNotched, gate->iqvxPrtLongNotched,
                                       filterRatioVx, spectralNoiseVx, spectralSnrVx, true);
@@ -3048,7 +3052,8 @@ void Beam::_filterDpHOnlyStagPrt()
 void Beam::_filterDpVOnlyFixedPrt()
 {
 
-  double calibNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
+  double calibNoiseVc = _mom->getCalNoisePower(RadarMoments::CHANNEL_VC);
+  double calibNoiseHx = _mom->getCalNoisePower(RadarMoments::CHANNEL_HX);
   
   for (int igate = 0; igate < _nGates; igate++) {
       
@@ -3069,7 +3074,7 @@ void Beam::_filterDpVOnlyFixedPrt()
     double spectralSnrVc = 1.0;
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqvcOrig, gate->iqvc,
-                             calibNoise,
+                             calibNoiseVc,
                              gate->iqvcF, gate->iqvcNotched,
                              filterRatioVc, spectralNoiseVc, spectralSnrVc,
                              false);
@@ -3090,7 +3095,7 @@ void Beam::_filterDpVOnlyFixedPrt()
     double spectralSnrHx = 1.0;
     _mom->applyClutterFilter(_nSamples, _prt, *_fft, *_regr, _window,
                              gate->iqhxOrig, gate->iqhx,
-                             calibNoise,
+                             calibNoiseHx,
                              gate->iqhxF, gate->iqhxNotched,
                              filterRatioHx, spectralNoiseHx, spectralSnrHx,
                              true);
@@ -3147,7 +3152,8 @@ void Beam::_filterDpVOnlyFixedPrt()
 void Beam::_filterDpVOnlyStagPrt()
 {
 
-  double calibNoise = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_VC);
+  double calibNoiseVc = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_VC);
+  double calibNoiseHx = _momStagPrt->getCalNoisePower(RadarMoments::CHANNEL_HX);
   
   for (int igate = 0; igate < _nGates; igate++) {
     
@@ -3170,7 +3176,7 @@ void Beam::_filterDpVOnlyStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqvcPrtShort, gate->iqvcPrtLong,
-                                      calibNoise,
+                                      calibNoiseVc,
                                       gate->iqvcPrtShortF, gate->iqvcPrtLongF,
                                       gate->iqvcPrtShortNotched, gate->iqvcPrtLongNotched,
                                       filterRatioVc, spectralNoiseVc, spectralSnrVc, false);
@@ -3192,7 +3198,7 @@ void Beam::_filterDpVOnlyStagPrt()
     _momStagPrt->applyClutFiltStagPrt(_nSamplesHalf, _prt, _prtLong,
                                       *_fftHalf, *_regrHalf,
                                       gate->iqhxPrtShort, gate->iqhxPrtLong,
-                                      calibNoise,
+                                      calibNoiseHx,
                                       gate->iqhxPrtShortF, gate->iqhxPrtLongF,
                                       gate->iqhxPrtShortNotched, gate->iqhxPrtLongNotched,
                                       filterRatioHx, spectralNoiseHx, spectralSnrHx, false);
