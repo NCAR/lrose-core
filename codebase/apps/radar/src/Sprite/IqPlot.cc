@@ -1372,10 +1372,13 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
-    
-    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
+
+    ClutFilter clutFilt;
+    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(),
+                                clutFilt, fft,
                                 iqWindowed,
                                 calibNoise,
+                                _beam->getNyquist(),
                                 iqFilt, iqNotched,
                                 filterRatio,
                                 spectralNoise,
@@ -1417,8 +1420,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     }
     
     moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
-                                  regrF, _windowCoeff,
-                                  iqWindowed,
+                                  regrF, iqWindowed,
                                   calibNoise,
                                   iqFilt, NULL,
                                   filterRatio,

@@ -38,6 +38,7 @@
 #include <toolsa/TaArray2D.hh>
 #include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
+#include <radar/ClutFilter.hh>
 
 #include "WaterfallPlot.hh"
 #include "Beam.hh"
@@ -1273,9 +1274,11 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
 
     // adaptive spectral filter
-    
-    moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
-                                iqWindowed, calibNoise,
+
+    ClutFilter clutFilt;
+    moments.applyAdaptiveFilter(nSamples, beam->getPrt(),
+                                clutFilt, fft,
+                                iqWindowed, calibNoise, beam->getNyquist(),
                                 iqFilt, iqNotched,
                                 filterRatio, spectralNoise, spectralSnr);
     
@@ -1313,8 +1316,8 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
                   beam->getCalib().getWavelengthCm() / 100.0);
     }
     
-    moments.applyRegressionFilter(nSamples, beam->getPrt(), fft,
-                                  regrF, _windowCoeff,
+    moments.applyRegressionFilter(nSamples, beam->getPrt(),
+                                  fft, regrF,
                                   iqWindowed,
                                   calibNoise,
                                   iqFilt, iqNotched,
