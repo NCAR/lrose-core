@@ -27,6 +27,7 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	Ecco \
 	HawkEye \
+	HawkEdit \
 	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
@@ -63,6 +64,7 @@ SUB_DIRS = \
 	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
+	TerrainHtServer \
 	Ts2NetCDF \
 	TsCalAuto \
 	TsConvert \
