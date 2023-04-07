@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
   Mdvx::field_header_t Fhdr;
   MEM_zero(Fhdr);
   
-  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE;
+  Fhdr.struct_id = Mdvx::FIELD_HEAD_MAGIC_COOKIE_64;
   Fhdr.field_code = 5;
   Fhdr.user_time1 =     Now;
   Fhdr.forecast_delta = 0; 

@@ -38,7 +38,7 @@ TARGET_FILE = TerrainHtServer
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = -ltoolsa -ltdrp -ldataport $(XMLRPC_LIBS) \
+LOC_LIBS = -ltoolsa -ltdrp -ldataport -lNcxx $(XMLRPC_LIBS) \
 	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
 LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
@@ -52,7 +52,7 @@ MDV_LIBS = \
 	-leuclid \
 	-ldsserver \
 	-ldidss \
-	-ltoolsa -lz \
+	-ltoolsa -lNcxx -lz \
 	-ldataport
 
 XMLRPC_LIBS = \
@@ -125,7 +125,7 @@ TestClientTerrainHt: TestClientTerrainHt.cc
 
 WorldTerrain: WorldTerrain.cc
 	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INSTALL_DIR)/include -o WorldTerrain \
-	WorldTerrain.cc $(XMLRPC_LIBS) $(MDV_LIBS)
+	WorldTerrain.cc $(XMLRPC_LIBS) $(MDV_LIBS) $(NETCDF4_LDFLAGS) $(NETCDF4_LIBS)
 
 cleaner: clean_all
 	/bin/rm TestClientTerrainHt TerrainHtServer WorldTerrain
