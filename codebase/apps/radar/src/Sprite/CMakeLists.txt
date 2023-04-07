@@ -25,11 +25,12 @@ set (SRCS
       RadarSpectra.cc
       ScaledLabel.cc
       Sprite.cc
+      SpritePlot.cc
       TsReader.cc
       WaterfallPlot.cc
       WorldPlot.cc
-      SpectraMgr.cc
-      SpectraWidget.cc
+      SpriteMgr.cc
+      SpriteWidget.cc
     )
 
 # QT5

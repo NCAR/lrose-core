@@ -23,78 +23,77 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for Sprite program
+# Makefile for TerrainHtServer program
 #
-# Mike Dixon, EOL, NCAR
+# Mike Dixon, RAP, NCAR
 # POBox 3000, Boulder, CO, 80307, USA
 #
-# March 2019
+# Oct 2014
 #
 ###########################################################################
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = Sprite
+TARGET_FILE = TerrainHtServer
 
-LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
+LOC_INCLUDES = $(NETCDF4_INCS)
 
-LOC_LIBS = \
-	-ldsdata -lradar -lMdv -lSpdb \
-	-lFmq -lrapformats -ldsserver -ldidss \
-	-leuclid -lrapmath -ltoolsa -ldataport \
-	-ltdrp -lRadx -lNcxx -lphysics \
-	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) -lfftw3 \
-	-lbz2 -lz -lpthread
+LOC_LIBS = -ltoolsa -ltdrp -ldataport -lNcxx $(XMLRPC_LIBS) \
+	$(NETCDF4_LIBS) -lbz2 -lz -lpthread
 
-LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(NETCDF4_LDFLAGS)
 
-LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
+LOC_CFLAGS =
+
+MDV_LIBS = \
+	-L$(LROSE_INSTALL_DIR)/lib \
+	-lMdv -lRadx \
+	-lrapformats \
+	-leuclid \
+	-ldsserver \
+	-ldidss \
+	-ltoolsa -lNcxx -lz \
+	-ldataport
+
+XMLRPC_LIBS = \
+	-lxmlrpc \
+	-lxmlrpc++ \
+	-lxmlrpc_abyss \
+	-lxmlrpc_client \
+	-lxmlrpc_client++ \
+	-lxmlrpc_cpp \
+	-lxmlrpc_server \
+	-lxmlrpc_server++ \
+	-lxmlrpc_server_abyss \
+	-lxmlrpc_server_abyss++ \
+	-lxmlrpc_server_pstream++ \
+	-lxmlrpc_util
+
+# NOTE: RH packages to install for xmlrpc
+#   xmlrpc-c
+#   xmlrpc-c-c++
+#   xmlrpc-c-client
+#   xmlrpc-c-client++
+#   xmlrpc-c-devel
+#   xmlrpc-client
+#   xmlrpc-server
+# yum install -y xmlrpc-c xmlrpc-c-c++ xmlrpc-c-client xmlrpc-c-client++ xmlrpc-c-devel xmlrpc-client xmlrpc-server
+
 
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	AscopePlot.hh \
-	Beam.hh \
-	BeamMgr.hh \
-	ColorMap.hh \
-	IqPlot.hh \
-	RadarSpectra.hh \
-	ScaledLabel.hh \
-	SpriteMgr.hh \
-	SpritePlot.hh \
-	SpriteWidget.hh \
-	Sprite.hh \
-	TsReader.hh \
-	WaterfallPlot.hh \
-	WorldPlot.hh
+	ServerThread.hh \
+	SquareDegree.hh \
+	TerrainHtServer.hh
 
-NORM_SRCS = \
+CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	AscopePlot.cc \
-	Beam.cc \
-	BeamMgr.cc \
-	ColorMap.cc \
-	IqPlot.cc \
 	Main.cc \
-	RadarSpectra.cc \
-	ScaledLabel.cc \
-	Sprite.cc \
-	SpritePlot.cc \
-	TsReader.cc \
-	WaterfallPlot.cc \
-	WorldPlot.cc
-
-MOC_SRCS = \
-	SpriteMgr.cc \
-	SpriteWidget.cc
-
-MOC_OUTPUT = \
-	moc_SpriteMgr.cpp \
-	moc_SpriteWidget.cpp
-
-CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+	ServerThread.cc \
+	SquareDegree.cc \
+	TerrainHtServer.cc
 
 #
 # tdrp macros
@@ -103,10 +102,10 @@ CPP_SRCS = $(MOC_OUTPUT)
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
-# QT C++ targets
+# standard C++ targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
 
 #
 # tdrp targets
@@ -118,6 +117,18 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 # local targets
 #
 
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+all: TestClientTerrainHt TerrainHtServer WorldTerrain
 
+TestClientTerrainHt: TestClientTerrainHt.cc
+	g++ $(DBUG_OPT_FLAGS) -o TestClientTerrainHt \
+	TestClientTerrainHt.cc $(XMLRPC_LIBS)
+
+WorldTerrain: WorldTerrain.cc
+	g++ $(DBUG_OPT_FLAGS) -I$(LROSE_INSTALL_DIR)/include -o WorldTerrain \
+	WorldTerrain.cc $(XMLRPC_LIBS) $(MDV_LIBS) $(NETCDF4_LDFLAGS) $(NETCDF4_LIBS)
+
+cleaner: clean_all
+	/bin/rm TestClientTerrainHt TerrainHtServer WorldTerrain
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
