@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+#include "Radx/Radx.hh"
 #include "Radx/RadxVol.hh"
 #include "Point.hh"
 #include "ScriptsDataController.hh"
@@ -26,6 +27,8 @@ public:
   //string &inputPath, bool debug_verbose, bool debug_extra,
   //  vector<string> *fieldNames);  
   //void writeData(string &path);
+
+  int ConvertRadxPlatformToSoloRadarType(Radx::PlatformType_t platform);
 
   vector<double> RemoveAircraftMotion(vector<double>); // , RadxVol *vol);
   vector<double> RemoveAircraftMotion(string fieldName); // RadxVol *vol);

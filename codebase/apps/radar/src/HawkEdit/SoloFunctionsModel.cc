@@ -53,6 +53,53 @@ void SoloFunctionsModel::writeData(string &path) {
   }  
 }
 */
+
+int SoloFunctionsModel::ConvertRadxPlatformToSoloRadarType(Radx::PlatformType_t platform) {
+
+  int soloRadarType = 0; // default is ground
+  switch (platform) {
+  // PLATFORM_TYPE_NOT_SET = 0, ///< Initialized but not yet set
+  //  PLATFORM_TYPE_FIXED = 1, ///< Radar is in a fixed location
+  //  PLATFORM_TYPE_VEHICLE = 2, ///< Radar is mounted on a land vehicle
+  //  PLATFORM_TYPE_SHIP = 3, ///< Radar is mounted on a ship
+  //  PLATFORM_TYPE_AIRCRAFT = 4, ///< Foreward looking on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_FORE = 5, ///< Foreward looking on aircraft
+    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT: // = 6, ///< Backward looking on aircraft
+      soloRadarType = 2; // AIR_AFT
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL: //  = 7, ///< Tail - e.g. ELDORA
+      soloRadarType = 3; // AIR_TAIL
+      break;
+  //  PLATFORM_TYPE_AIRCRAFT_BELLY = 8, ///< Belly radar on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_ROOF = 9, ///< Roof radar on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_NOSE = 10, ///< radar in nose radome on aircraft
+  //  PLATFORM_TYPE_SATELLITE_ORBIT = 11, ///< orbiting satellite
+  //  PLATFORM_TYPE_SATELLITE_GEOSTAT = 12, ///< geostationary satellite  
+  //  RadxPlatform platform _scriptsDataController::getPlatform();
+    default:
+      soloRadarType = 0; // GROUND
+
+  }
+  // convert from RadxPlatform to Solo radar type;
+  // or just convert Solo radar types to Radx
+  
+  // use DoradeData.hh radar_type_t or lidar_type_t
+/* Dorade radar types */
+/*
+# define           GROUND 0
+# define         AIR_FORE 1
+# define          AIR_AFT 2
+# define         AIR_TAIL 3
+# define           AIR_LF 4
+# define             SHIP 5
+# define         AIR_NOSE 6         
+# define        SATELLITE 7
+# define     LIDAR_MOVING 8
+# define      LIDAR_FIXED 9
+*/ 
+  return soloRadarType;
+}
+
 void SoloFunctionsModel::ClearBoundaryMask() {
   delete[] _boundaryMask;
   _boundaryMask = NULL;
@@ -225,7 +272,7 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   // because the boundary is for a particular ray; then the boundary
   // can be used with multiple functions ?? maybe NOT!
 
-// TODO: we need the cfactors applied BEFORE accessing this info!!!
+  // we need the cfactors applied BEFORE accessing this info!!!
 
 
   // wrestle this information out of the ray and radar volume ...
@@ -271,16 +318,50 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
 
   float gateSize = ray->getGateSpacingKm() * 1000.0;
   float distanceToCellNInMeters = ray->getStartRangeKm() * 1000.0;
+
+  // need to do some conversions here ...
+  // TODO: get these from SoloLibrary::dd_math.h
+  Radx::PlatformType_t platform = _scriptsDataController->getPlatform().getPlatformType();
+  // convert from RadxPlatform to Solo radar type;
+  // or just convert Solo radar types to Radx
+  
+  // use DoradeData.hh radar_type_t or lidar_type_t
+/* Dorade radar types */
+/*
+# define           GROUND 0
+# define         AIR_FORE 1
+# define          AIR_AFT 2
+# define         AIR_TAIL 3
+# define           AIR_LF 4
+# define             SHIP 5
+# define         AIR_NOSE 6         
+# define        SATELLITE 7
+# define     LIDAR_MOVING 8
+# define      LIDAR_FIXED 9
+*/ 
+  int radar_scan_mode = 1; // PPI; // TODO: need to get this: either RHI or PPI? 
+  int radar_type = ConvertRadxPlatformToSoloRadarType(platform);
+ 
+  float tilt_angle = 0.0; // TODO: It should be this ... ray->getElevationDeg();
+
+  /* TODO: if Y-Prime radar, then send the track-relative rotation for the azimuth.
+      PRIMARY_AXIS_Z = 0, ///< vertical
+    PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+    PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+    PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+    PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+    PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+  */ 
+  Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
+  
+  
   float azimuth = ray->getAzimuthDeg();
+  if (primary_axis == Radx::PRIMARY_AXIS_Y_PRIME) {
+    azimuth = ray->getGeoreference()->getTrackRelRot();
+  }
   if ((azimuth > 180) && (azimuth < 350)) {
      cerr << "HERE: azimuth = " << azimuth << endl;
   }
-  // need to do some conversions here ...
-  // TODO: get these from SoloLibrary::dd_math.h
-  int radar_scan_mode = 1; // PPI;
-  int radar_type = 0; // GROUND; 
- 
-  float tilt_angle = 0.0; // TODO: It should be this ... ray->getElevationDeg();
 
 
   // TODO: need to fix this!  sending bool*, expecting short*
