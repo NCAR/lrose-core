@@ -46,6 +46,7 @@
 #include <radar/ForsytheRegrFilter.hh>
 #include <radar/ClutFilter.hh>
 #include <radar/FilterUtils.hh>
+#include <radar/Sz864.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -68,6 +69,7 @@ IqPlot::IqPlot(QWidget* parent,
         _params(params)
         
 {
+
   _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
@@ -80,6 +82,7 @@ IqPlot::IqPlot(QWidget* parent,
   _regrCnrExponent = _params.regression_filter_cnr_exponent;
   _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
   _computePlotRangeDynamically = true;
+
 }
 
 /*************************************************************************
@@ -271,7 +274,13 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   
   double filterRatio, spectralNoise, spectralSnr;
   
-  _computePowerSpectrum(iq, iqWindowed, iqFilt, iqNotched,
+  // apply window to time series
+  
+  _applyWindow(iq, iqWindowed, _nSamples);
+  
+  // compute the power spectrum
+  
+  _computePowerSpectrum(iqWindowed, iqFilt, iqNotched,
                         dbm, dbmFilt,
                         filterRatio, spectralNoise, spectralSnr);
 
@@ -592,13 +601,18 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   double spectralNoiseHc, spectralNoiseVc;
   double spectralSnrHc, spectralSnrVc;
   
+  // apply window to time series
+  
+  _applyWindow(iqHc, iqWindowedHc, _nSamples);
+  _applyWindow(iqVc, iqWindowedVc, _nSamples);
+  
   // compute Hc and Vc spectra
   
-  _computePowerSpectrum(iqHc, iqWindowedHc, iqFiltHc, iqNotchedHc,
+  _computePowerSpectrum(iqWindowedHc, iqFiltHc, iqNotchedHc,
                         dbmHc, dbmFiltHc,
                         filterRatioHc, spectralNoiseHc, spectralSnrHc);
   
-  _computePowerSpectrum(iqVc, iqWindowedVc, iqFiltVc, iqNotchedVc,
+  _computePowerSpectrum(iqWindowedVc, iqFiltVc, iqNotchedVc,
                         dbmVc, dbmFiltVc,
                         filterRatioVc, spectralNoiseVc, spectralSnrVc);
   
@@ -783,47 +797,86 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
 void IqPlot::_plotSpectralSz864(QPainter &painter,
                                 double selectedRangeKm,
                                 int gateNum,
-                                const RadarComplex_t *iq1)
+                                const RadarComplex_t *iq)
   
 {
 
-  // shift the spectrum by 30deg (PI/6 radians) as a test
+  if (_nSamples < 64) {
+    cerr << "ERROR - IqPlot::_plotSpectralSz864" << endl;
+    cerr << "  nSamples too small: " << _nSamples << endl;
+    return;
+  }
+  if (_nSamples != 64) {
+    cerr << "WARNING - IqPlot::_plotSpectralSz864" << endl;
+    cerr << "  nSamples not equal to 64: " << _nSamples << endl;
+    cerr << "  only the first 64 will be used" << endl;
+  }
 
-  double shiftRadians = M_PI_2 / 9.0;
-  TaArray<RadarComplex_t> iqShifted_;
-  RadarComplex_t *iqShifted = iqShifted_.alloc(_nSamples);
-  RadarComplex::timeDomainPhaseShift(iq1, _nSamples, shiftRadians, iqShifted);
+  
+  // sz864 phase coding object
+
+  // Sz864 sz(_params.debug >= Params::DEBUG_VERBOSE);
+  Sz864 sz(true);
+  sz.setSignalToNoiseRatioThreshold(0.0);
+  // _sz.setSzNegatePhaseCodes();
+  sz.setSzStrongToWeakPowerRatioThreshold(50.0);
+  sz.setSzOutOfTripPowerRatioThreshold(6.0);
+  sz.setSzOutOfTripPowerNReplicas(3);
+
+  // fft
+  
+  RadarFft fft(_nSamples);
+
+  // get the gate data etc
+
+  GateData *gateData = _beam->getGateData()[gateNum];
+  const vector<RadarComplex_t> &delta12 = _beam->getDelta12();
+
+  // separate the trips
+  
+  sz.separateTrips(*gateData, delta12.data(), _beam->getPrt(), fft);
+    
+  // shift the spectrum by 30deg (PI/6 radians) as a test
+  // double shiftRadians = M_PI_2 / 3.0;
+  // TaArray<RadarComplex_t> iqShifted_;
+  // RadarComplex_t *iqShifted = iqShifted_.alloc(_nSamples);
+  // RadarComplex::timeDomainPhaseShift(iq, _nSamples, shiftRadians, iqShifted);
 
   // compute the power spectrum
   // applying the appropriate clutter filter
   
-  TaArray<RadarComplex_t> iqWindowed_, iqFilt_, iqNotched_;
-  TaArray<double> dbm_, dbmFilt_;
+  TaArray<RadarComplex_t> iqWindowed_, iqFiltStrong_, iqNotchedStrong_;
+  TaArray<double> dbmStrong_, dbmFiltStrong_;
+  
+  // RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  RadarComplex_t *iqFiltStrong = iqFiltStrong_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedStrong = iqNotchedStrong_.alloc(_nSamples);
 
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
-  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
-  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
-
-  double *dbm = dbm_.alloc(_nSamples);
-  double *dbmFilt = dbmFilt_.alloc(_nSamples);
+  double *dbmStrong = dbmStrong_.alloc(_nSamples);
+  double *dbmFiltStrong = dbmFiltStrong_.alloc(_nSamples);
   
   double filterRatio, spectralNoise, spectralSnr;
   
-  _computePowerSpectrum(iqShifted, iqWindowed, iqFilt, iqNotched,
-                        dbm, dbmFilt,
-                        filterRatio, spectralNoise, spectralSnr);
-  // _computePowerSpectrum(iq, iqWindowed, iqFilt, iqNotched,
+  // apply window to time series
+  
+  // _applyWindow(iq, iqWindowed, _nSamples);
+  
+  // _computePowerSpectrum(iqShifted, iqWindowed, iqFilt, iqNotched,
   //                       dbm, dbmFilt,
   //                       filterRatio, spectralNoise, spectralSnr);
+
+  _computePowerSpectrum(gateData->iqStrong, iqFiltStrong, iqNotchedStrong,
+                        dbmStrong, dbmFiltStrong,
+                        filterRatio, spectralNoise, spectralSnr);
 
   // compute power limits
   
   double minDbm = 9999.0, maxDbm = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    minDbm = min(dbm[ii], minDbm);
-    minDbm = min(dbmFilt[ii], minDbm);
-    maxDbm = max(dbm[ii], maxDbm);
-    maxDbm = max(dbmFilt[ii], maxDbm);
+    minDbm = min(dbmStrong[ii], minDbm);
+    minDbm = min(dbmFiltStrong[ii], minDbm);
+    maxDbm = max(dbmStrong[ii], maxDbm);
+    maxDbm = max(dbmFiltStrong[ii], maxDbm);
   }
 
   // set the Y axis range
@@ -843,9 +896,9 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
 
   _drawOverlays(painter, selectedRangeKm);
 
-  // draw the unfiltered spectrum
-
-  FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
+  // draw the strong unfiltered spectrum
+  
+  FilterUtils::applyMedianFilter(dbmStrong, _nSamples, _medianFiltLen);
   {
     painter.save();
     QPen pen(painter.pen());
@@ -855,7 +908,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> pts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      double val = dbm[ii];
+      double val = dbmStrong[ii];
       QPointF pt(ii, val);
       pts.push_back(pt);
     }
@@ -866,7 +919,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   // apply median filter to the spectrum if needed
 
   if (_medianFiltLen > 1) {
-    FilterUtils::applyMedianFilter(dbmFilt, _nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(dbmFiltStrong, _nSamples, _medianFiltLen);
   }
 
   // draw filtered spectrum
@@ -884,7 +937,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, dbmFilt[ii]);
+      QPointF pt(ii, dbmFiltStrong[ii]);
       filtPts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, filtPts);
@@ -900,7 +953,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     double *clutModel = clutModel_.alloc(_nSamples);
     TaArray<double> powerReal_;
     double *powerReal = powerReal_.alloc(_nSamples);
-    RadarComplex::loadPower(iq1, powerReal, _nSamples);
+    RadarComplex::loadPower(iq, powerReal, _nSamples);
     
     if (clut.computeGaussianClutterModel(powerReal,
                                          _nSamples,
@@ -964,12 +1017,12 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   }
 
   vector<string> legendsRight;
-  double unfiltPower = RadarComplex::meanPower(iq1, _nSamples);
+  double unfiltPower = RadarComplex::meanPower(iq, _nSamples);
   double unfiltPowerDbm = 10.0 * log10(unfiltPower);
   snprintf(text, 1024, "UnfiltPower (dBm): %.2f", unfiltPowerDbm);
   legendsRight.push_back(text);
   if (_clutterFilterType != RadarMoments::CLUTTER_FILTER_NONE) {
-    double filtPower = RadarComplex::meanPower(iqFilt, _nSamples);
+    double filtPower = RadarComplex::meanPower(iqFiltStrong, _nSamples);
     double filtPowerDbm = 10.0 * log10(filtPower);
     snprintf(text, 1024, "FiltPower: %.2f", filtPowerDbm);
     legendsRight.push_back(text);
@@ -1518,8 +1571,7 @@ void IqPlot::_plotPhasor(QPainter &painter,
  * compute the spectrum
  */
 
-void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
-                                   RadarComplex_t *iqWindowed,
+void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
                                    RadarComplex_t *iqFilt,
                                    RadarComplex_t *iqNotched,
                                    double *dbm,
@@ -1537,16 +1589,12 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     dbmFilt[ii] = -120.0;
   }
 
-  // apply window to time series
-  
-  _applyWindow(iq, iqWindowed, _nSamples);
-  
   // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
   RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
   RadarFft fft(_nSamples);
-  fft.fwd(iqWindowed, powerSpec);
+  fft.fwd(iqIn, powerSpec);
   fft.shift(powerSpec);
   
   // compute infiltered power
@@ -1601,7 +1649,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     ClutFilter clutFilt;
     moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(),
                                 clutFilt, fft,
-                                iqWindowed,
+                                iqIn,
                                 calibNoise,
                                 _beam->getNyquist(),
                                 iqFilt, iqNotched,
@@ -1645,7 +1693,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     }
     
     moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
-                                  regrF, iqWindowed,
+                                  regrF, iqIn,
                                   calibNoise,
                                   iqFilt, NULL,
                                   filterRatio,
@@ -1671,7 +1719,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     // simple notch filter
     
     moments.applyNotchFilter(_nSamples, _beam->getPrt(), fft,
-                             iqWindowed,
+                             iqIn,
                              calibNoise,
                              iqFilt,
                              filterRatio, spectralNoise, spectralSnr);
@@ -1712,7 +1760,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
 ///////////////////////////////////////
 // Apply the window to the time series
 
-void IqPlot::_applyWindow(const RadarComplex_t *iq, 
+void IqPlot::_applyWindow(const RadarComplex_t *iqIn, 
                           RadarComplex_t *iqWindowed,
                           int nSamples)
 {
@@ -1749,7 +1797,7 @@ void IqPlot::_applyWindow(const RadarComplex_t *iq,
 
   // compute power spectrum
   
-  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, nSamples);
+  RadarMoments::applyWindow(iqIn, _windowCoeff, iqWindowed, nSamples);
 
 }
   

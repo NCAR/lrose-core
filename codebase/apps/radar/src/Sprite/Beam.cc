@@ -557,6 +557,25 @@ void Beam::setPulses(bool isRhi,
     }
   }
 
+  // SZ phase coding
+
+  // compute phase differences between this pulse and previous ones
+  // to prepare for cohering to multiple trips
+  
+  _computePhaseDiffs(_pulses, 4);
+  _txDelta12.resize(_nSamples);
+  for (int i = 0; i < _nSamples; i++) {
+    _txDelta12[i].re = cos(_pulses[i]->getPhaseDiff0() * DEG_TO_RAD);
+    _txDelta12[i].im = -1.0 * sin(_pulses[i]->getPhaseDiff0() * DEG_TO_RAD);
+  }
+
+  // set up burst phase vector
+  
+  _burstPhases.clear();
+  for (size_t ii = 0; ii < _pulses.size(); ii++) {
+    _burstPhases.push_back(_pulses[ii]->getBurstPhases());
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -2776,7 +2795,7 @@ void Beam::_allocGateData(int nGates)
   }
 
   for (size_t ii = 0; ii < _gateData.size(); ii++) {
-    _gateData[ii]->allocArrays(_nSamples, true, _isStagPrt, false);
+    _gateData[ii]->allocArrays(_nSamples, true, _isStagPrt, true);
   }
 
   _outFields = _outFields_.alloc(nGates);
@@ -3807,4 +3826,41 @@ int Beam::getRegrOrder()
   return _regr->getPolyOrder();
 }
 
+/////////////////////////////////////////////////////////////////
+// Compute phase differences between this pulse and previous ones
+// to be able to cohere to multiple trips
+//
+// Before this method is called, this pulse should be added to
+// the queue.
+
+void Beam::_computePhaseDiffs
+  (const deque<const IwrfTsPulse *> &pulseQueue, int maxTrips)
+  
+{
+  
+  _phaseDiffs.clear();
+  
+  // phase diffs for maxTrips previous beams
+  
+  int qSize = (int) pulseQueue.size();
+  
+  for (int ii = 0; ii < maxTrips; ii++) { // ii is (trip - 1)
+    if (ii == 0) {
+      _phaseDiffs.push_back(0.0);
+    } else {
+      if (ii <= qSize) {
+	double sum = _phaseDiffs[ii-1] + pulseQueue[ii-1]->getPhaseDiff0();
+	while (sum > 360.0) {
+	  sum -= 360.0;
+	}
+	_phaseDiffs.push_back(sum);
+      } else {
+	// actual phase diff not available
+	// use previous trip's value
+	_phaseDiffs.push_back(_phaseDiffs[ii-1]);
+      }
+    }
+  }
+
+}
 

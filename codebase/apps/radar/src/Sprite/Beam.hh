@@ -173,6 +173,13 @@ public:
   double getAntennaRate();
   int getRegrOrder();
 
+  const vector<RadarComplex_t> &getDelta12() const { return _txDelta12; }
+  const vector<double> &getPhaseDiffs() const { return _phaseDiffs; }
+  const vector<IwrfTsPulse::burst_phase_t> &getBurstPhases() const
+  {
+    return  _burstPhases;
+  }
+
 protected:
   
 private:
@@ -361,6 +368,12 @@ private:
   double _beamAzRate;
   double _beamElRate;
 
+  // sz 864 phase code support
+
+  vector<RadarComplex_t> _txDelta12;
+  vector<double> _phaseDiffs;
+  vector<IwrfTsPulse::burst_phase_t> _burstPhases;
+
   // private functions
 
   void _init();
@@ -425,6 +438,9 @@ private:
 
   void _computeBeamAzRate();
   void _computeBeamElRate();
+  
+  void _computePhaseDiffs
+    (const deque<const IwrfTsPulse *> &pulseQueue, int maxTrips);
   
   // copy method for assignment and copy constructor
 

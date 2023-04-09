@@ -38,15 +38,6 @@
 #include <vector>
 #include <map>
 
-// #include <QDialog>
-// #include <QWidget>
-// #include <QResizeEvent>
-// #include <QImage>
-// #include <QTimer>
-// #include <QRubberBand>
-// #include <QPoint>
-// #include <QTransform>
-
 #include <toolsa/TaArray.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/RadarMoments.hh>
@@ -272,7 +263,6 @@ protected:
                    const RadarComplex_t *iq);
 
   void _computePowerSpectrum(const RadarComplex_t *iq,
-                             RadarComplex_t *iqWindowed,
                              RadarComplex_t *iqFilt,
                              RadarComplex_t *iqNotched,
                              double *dbm,
