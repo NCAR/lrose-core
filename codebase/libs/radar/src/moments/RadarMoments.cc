@@ -4157,25 +4157,25 @@ void RadarMoments::singlePolHSz864(GateData &gateData,
   // compute strong trip moments, checking censoring flag first
   
   if (!gateData.censorStrong) {
-    
     if (gateData.trip1IsStrong) {
-      singlePolH(gateData.iqStrong, gateNum, false, gateData.fields);
+      singlePolH(gateData.iqStrong, gateNum,
+                 false, gateData.fields);
     } else {
-      singlePolH(gateData.iqStrong, gateNum + ngatesPulse, false, gateData.secondTrip);
+      singlePolH(gateData.iqStrong, gateNum + ngatesPulse,
+                 false, gateData.secondTrip);
     }
-    
   }
     
   // compute weak trip moments, checking censoring flag first
   
   if (!gateData.censorWeak) {
-    
     if (gateData.trip1IsStrong) {
-      singlePolH(gateData.iqWeak, gateNum + ngatesPulse, false, gateData.secondTrip);
+      singlePolH(gateData.iqWeak, gateNum + ngatesPulse,
+                 false, gateData.secondTrip);
     } else {
-      singlePolH(gateData.iqWeak, gateNum, false, gateData.fields);
+      singlePolH(gateData.iqWeak, gateNum,
+                 false, gateData.fields);
     }
-    
   }
 
 }
@@ -4193,7 +4193,8 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
   
   if (gateData.clutterInStrong) {
     if (gateData.trip1IsStrong) {
-      singlePolH(gateData.iqStrongF, gateNum, true, gateData.fieldsF);
+      singlePolH(gateData.iqStrongF, gateNum,
+                 true, gateData.fieldsF);
     } else {
       singlePolH(gateData.iqStrongF, gateNum + ngatesPulse,
                  true, gateData.secondTripF);
@@ -4204,9 +4205,11 @@ void RadarMoments::singlePolHSz864Filtered(GateData &gateData,
   
   if (gateData.clutterInWeak) {
     if (gateData.trip1IsStrong) {
-      singlePolH(gateData.iqWeakF, gateNum + ngatesPulse, true, gateData.secondTripF);
+      singlePolH(gateData.iqWeakF, gateNum + ngatesPulse,
+                 true, gateData.secondTripF);
     } else {
-      singlePolH(gateData.iqWeakF, gateNum, true, gateData.fieldsF);
+      singlePolH(gateData.iqWeakF, gateNum,
+                 true, gateData.fieldsF);
     }
   }
     

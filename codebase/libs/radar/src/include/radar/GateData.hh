@@ -187,15 +187,15 @@ public:
   MomentsFields fields;
   MomentsFields fieldsF; // filtered
 
-  MomentsFields secondTrip;
-  MomentsFields secondTripF; // filtered
+  MomentsFields secondTrip; // sz
+  MomentsFields secondTripF; // sz filtered
 
-  // field references
+  // field pointers
   // can be switched between normal and second trip fields
   // used for computations in SZ mode
 
-  MomentsFields &flds;
-  MomentsFields &fldsF;
+  MomentsFields *flds;
+  MomentsFields *fldsF;
 
   // SZ8-64
   

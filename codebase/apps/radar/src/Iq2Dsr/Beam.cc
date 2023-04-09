@@ -928,7 +928,8 @@ void Beam::_computeMoments()
 {
 
   switch (_xmitRcvMode) {
-      
+
+    
     case IWRF_ALT_HV_CO_ONLY:
       _computeMomDpAltHvCoOnly();
       break;
@@ -5866,13 +5867,17 @@ void Beam::_performClutterFilteringSz()
   for (int igate = 0; igate < _nGates; igate++) {
     _gateData[igate]->fieldsF = _gateData[igate]->fields;
   }
-  
+
   // set field pointers to second trip
-  
+
   for (int ii = 0; ii < _nGates; ii++) {
     _gateData[ii]->setFieldsToSecondTrip();
   }
 
+  for (int ii = 0; ii < _nGates; ii++) {
+    _gateData[ii]->setFieldsToNormalTrip();
+  }
+      
   // compute CMD
   
   _cmd->compute(_nGates, _dualPol);
@@ -5883,7 +5888,7 @@ void Beam::_performClutterFilteringSz()
   for (int igate = 0; igate < _nGates; igate++) {
     _gateData[igate]->secondTripF = _gateData[igate]->secondTrip;
   }
-  
+
   // reset field pointers to first trip
   
   for (int ii = 0; ii < _nGates; ii++) {
@@ -5939,7 +5944,7 @@ void Beam::_fixAltClutVelocity()
   for (int ii = 1; ii < _nGates - 1; ii++) {
     
     if (inRun) {
-      if (fabs(_gateData[ii]->flds.vel) < closeToNyquist) {
+      if (fabs(_gateData[ii]->flds->vel) < closeToNyquist) {
         // end of run
         if (ii - startGate < 4) {
           startGates.push_back(startGate);
@@ -5948,7 +5953,7 @@ void Beam::_fixAltClutVelocity()
         inRun = false;
       }
     } else {
-      if (fabs(_gateData[ii]->flds.vel) >= closeToNyquist) {
+      if (fabs(_gateData[ii]->flds->vel) >= closeToNyquist) {
         // start of run
         startGate = ii;
         inRun = true;
@@ -5967,8 +5972,8 @@ void Beam::_fixAltClutVelocity()
     int startGate = startGates[ii];
     int endGate = endGates[ii];
 
-    double velPrev = fabs(_gateData[startGate-1]->flds.vel);
-    double velNext = fabs(_gateData[endGate+1]->flds.vel);
+    double velPrev = fabs(_gateData[startGate-1]->flds->vel);
+    double velNext = fabs(_gateData[endGate+1]->flds->vel);
     
     if (velPrev > closeToZero || velNext > closeToZero) {
       continue;
@@ -5977,8 +5982,8 @@ void Beam::_fixAltClutVelocity()
     // check that the diffs at each end of the run are
     // close to the nyquist
 
-    double velStart = fabs(_gateData[startGate]->flds.vel);
-    double velEnd = fabs(_gateData[endGate]->flds.vel);
+    double velStart = fabs(_gateData[startGate]->flds->vel);
+    double velEnd = fabs(_gateData[endGate]->flds->vel);
     
     double diffPrev = fabs(velStart - velPrev);
     double diffNext = fabs(velEnd - velNext);
@@ -5990,7 +5995,7 @@ void Beam::_fixAltClutVelocity()
     // OK - set the vel to the H-only vel
 
     for (int jj = startGate; jj <= endGate; jj++) {
-      _gateData[jj]->flds.vel = _gateData[jj]->flds.vel_hv;
+      _gateData[jj]->flds->vel = _gateData[jj]->flds->vel_hv;
     }
     
   } // ii
@@ -6024,7 +6029,7 @@ void Beam::_fixAltClutVelocityFiltered()
   for (int ii = 1; ii < _nGates - 1; ii++) {
     
     if (inRun) {
-      if (fabs(_gateData[ii]->fldsF.vel) < closeToNyquist) {
+      if (fabs(_gateData[ii]->fldsF->vel) < closeToNyquist) {
         // end of run
         if (ii - startGate < 4) {
           startGates.push_back(startGate);
@@ -6033,7 +6038,7 @@ void Beam::_fixAltClutVelocityFiltered()
         inRun = false;
       }
     } else {
-      if (fabs(_gateData[ii]->fldsF.vel) >= closeToNyquist) {
+      if (fabs(_gateData[ii]->fldsF->vel) >= closeToNyquist) {
         // start of run
         startGate = ii;
         inRun = true;
@@ -6052,8 +6057,8 @@ void Beam::_fixAltClutVelocityFiltered()
     int startGate = startGates[ii];
     int endGate = endGates[ii];
 
-    double velPrev = fabs(_gateData[startGate-1]->fldsF.vel);
-    double velNext = fabs(_gateData[endGate+1]->fldsF.vel);
+    double velPrev = fabs(_gateData[startGate-1]->fldsF->vel);
+    double velNext = fabs(_gateData[endGate+1]->fldsF->vel);
     
     if (velPrev > closeToZero || velNext > closeToZero) {
       continue;
@@ -6062,8 +6067,8 @@ void Beam::_fixAltClutVelocityFiltered()
     // check that the diffs at each end of the run are
     // close to the nyquist
 
-    double velStart = fabs(_gateData[startGate]->fldsF.vel);
-    double velEnd = fabs(_gateData[endGate]->fldsF.vel);
+    double velStart = fabs(_gateData[startGate]->fldsF->vel);
+    double velEnd = fabs(_gateData[endGate]->fldsF->vel);
     
     double diffPrev = fabs(velStart - velPrev);
     double diffNext = fabs(velEnd - velNext);
@@ -6075,7 +6080,7 @@ void Beam::_fixAltClutVelocityFiltered()
     // OK - set the vel to the H-only vel
 
     for (int jj = startGate; jj <= endGate; jj++) {
-      _gateData[jj]->fldsF.vel = _gateData[jj]->fldsF.vel_hv;
+      _gateData[jj]->fldsF->vel = _gateData[jj]->fldsF->vel_hv;
     }
     
   } // ii

@@ -45,8 +45,8 @@ using namespace std;
 // Call allocArrays() before using.
 
 GateData::GateData() :
-        flds(fields),
-        fldsF(fieldsF)
+        flds(&fields),
+        fldsF(&fieldsF)
 
 {
   
@@ -99,15 +99,15 @@ void GateData::initFieldsToZero()
 void GateData::setFieldsToNormalTrip()
   
 {
-  flds = fields;
-  fldsF = fieldsF;
+  flds = &fields;
+  fldsF = &fieldsF;
 }
 
 void GateData::setFieldsToSecondTrip()
 
 {
-  flds = secondTrip;
-  fldsF = secondTripF;
+  flds = &secondTrip;
+  fldsF = &secondTripF;
 }
 
 //////////////////////////////////////
