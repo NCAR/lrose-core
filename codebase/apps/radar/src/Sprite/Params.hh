@@ -137,12 +137,13 @@ public:
     SPECTRAL_PHASE = 1,
     SPECTRAL_ZDR = 2,
     SPECTRAL_PHIDP = 3,
-    TS_POWER = 4,
-    TS_PHASE = 5,
-    I_VALS = 6,
-    Q_VALS = 7,
-    I_VS_Q = 8,
-    PHASOR = 9
+    SPECTRAL_SZ864 = 4,
+    TS_POWER = 5,
+    TS_PHASE = 6,
+    I_VALS = 7,
+    Q_VALS = 8,
+    I_VS_Q = 9,
+    PHASOR = 10
   } iq_plot_type_t;
 
   typedef enum {

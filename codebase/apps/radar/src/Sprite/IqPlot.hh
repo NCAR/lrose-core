@@ -240,6 +240,11 @@ protected:
                           const RadarComplex_t *iqHc,
                           const RadarComplex_t *iqVc);
 
+  void _plotSpectralSz864(QPainter &painter,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const RadarComplex_t *iq);
+
   void _plotTsPower(QPainter &painter,
                     double selectedRangeKm,
                     int gateNum,

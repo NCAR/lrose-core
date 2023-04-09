@@ -229,6 +229,9 @@ void IqPlot::plotBeam(QPainter &painter,
       _plotSpectralPhidp(painter, selectedRangeKm, gateNum,
                          gateData->iqhcOrig, gateData->iqvcOrig);
       break;
+    case Params::SPECTRAL_SZ864:
+      _plotSpectralSz864(painter, selectedRangeKm, gateNum, iq);
+      break;
     case Params::TS_POWER:
       _plotTsPower(painter, selectedRangeKm, gateNum, iq);
       break;
@@ -769,6 +772,228 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   painter.save();
   painter.setPen(_params.iqplot_title_color);
   _zoomWorld.drawTitleTopCenter(painter, "SPECTRAL PHIDP (H-V)");
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the power spectrum for SZ864
+ */
+
+void IqPlot::_plotSpectralSz864(QPainter &painter,
+                                double selectedRangeKm,
+                                int gateNum,
+                                const RadarComplex_t *iq1)
+  
+{
+
+  // shift the spectrum by 30deg (PI/6 radians) as a test
+
+  double shiftRadians = M_PI_2 / 9.0;
+  TaArray<RadarComplex_t> iqShifted_;
+  RadarComplex_t *iqShifted = iqShifted_.alloc(_nSamples);
+  RadarComplex::timeDomainPhaseShift(iq1, _nSamples, shiftRadians, iqShifted);
+
+  // compute the power spectrum
+  // applying the appropriate clutter filter
+  
+  TaArray<RadarComplex_t> iqWindowed_, iqFilt_, iqNotched_;
+  TaArray<double> dbm_, dbmFilt_;
+
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
+
+  double *dbm = dbm_.alloc(_nSamples);
+  double *dbmFilt = dbmFilt_.alloc(_nSamples);
+  
+  double filterRatio, spectralNoise, spectralSnr;
+  
+  _computePowerSpectrum(iqShifted, iqWindowed, iqFilt, iqNotched,
+                        dbm, dbmFilt,
+                        filterRatio, spectralNoise, spectralSnr);
+  // _computePowerSpectrum(iq, iqWindowed, iqFilt, iqNotched,
+  //                       dbm, dbmFilt,
+  //                       filterRatio, spectralNoise, spectralSnr);
+
+  // compute power limits
+  
+  double minDbm = 9999.0, maxDbm = -9999.0;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    minDbm = min(dbm[ii], minDbm);
+    minDbm = min(dbmFilt[ii], minDbm);
+    maxDbm = max(dbm[ii], maxDbm);
+    maxDbm = max(dbmFilt[ii], maxDbm);
+  }
+
+  // set the Y axis range
+
+  double rangeY = maxDbm - minDbm;
+  double minY = minDbm - rangeY * 0.05;
+  double maxY = maxDbm + rangeY * 0.25;
+  if (!_isZoomed) {
+    if (_computePlotRangeDynamically) {
+      setWorldLimitsY(minY, maxY);
+    } else {
+      setWorldLimitsY(_staticRange.min_val, _staticRange.max_val);
+    }
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the unfiltered spectrum
+
+  FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
+  {
+    painter.save();
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_line_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> pts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      double val = dbm[ii];
+      QPointF pt(ii, val);
+      pts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
+  }
+
+  // apply median filter to the spectrum if needed
+
+  if (_medianFiltLen > 1) {
+    FilterUtils::applyMedianFilter(dbmFilt, _nSamples, _medianFiltLen);
+  }
+
+  // draw filtered spectrum
+  
+  {
+    painter.save();
+    QPen pen(painter.pen());
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else {
+      pen.setColor(_params.iqplot_regression_filtered_color);
+    }
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> filtPts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      QPointF pt(ii, dbmFilt[ii]);
+      filtPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, filtPts);
+    painter.restore();
+  }
+
+  // plot clutter model
+
+  if (_plotClutModel) {
+
+    ClutFilter clut;
+    TaArray<double> clutModel_;
+    double *clutModel = clutModel_.alloc(_nSamples);
+    TaArray<double> powerReal_;
+    double *powerReal = powerReal_.alloc(_nSamples);
+    RadarComplex::loadPower(iq1, powerReal, _nSamples);
+    
+    if (clut.computeGaussianClutterModel(powerReal,
+                                         _nSamples,
+                                         _clutModelWidthMps,
+                                         _beam->getNyquist(),
+                                         clutModel, true) == 0) {
+      
+      painter.save();
+      QPen pen = painter.pen();
+      pen.setColor(_params.iqplot_clutter_model_color);
+      pen.setStyle(Qt::DotLine);
+      pen.setWidth(2);
+      painter.setPen(pen);
+      QVector<QPointF> clutPts;
+      for (size_t ii = 0; ii < _nSamples; ii++) {
+        double power = clutModel[ii];
+        double dbm = 10.0 * log10(power);
+        if (dbm < minDbm) {
+          dbm = minDbm;
+        }
+        QPointF pt(ii, dbm);
+        clutPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, clutPts);
+      painter.restore();
+
+    } // if (clut.computeGaussianClutterModel
+
+  } // if (_plotClutModel)
+
+  // legends
+  
+  char text[1024];
+
+  vector<string> legendsLeft;
+  legendsLeft.push_back(getFftWindowName(_fftWindow) + " window");
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+    snprintf(text, 1024, "Adaptive filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+    snprintf(text, 1024, "Regression filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+    snprintf(text, 1024, "Notch filter");
+    legendsLeft.push_back(text);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+    snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
+    legendsLeft.push_back(text);
+  }
+  if (_plotClutModel) {
+    snprintf(text, 1024, "Clut-model-width: %g", _clutModelWidthMps);
+    legendsLeft.push_back(text);
+  }
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
+
+  vector<string> legendsRight;
+  double unfiltPower = RadarComplex::meanPower(iq1, _nSamples);
+  double unfiltPowerDbm = 10.0 * log10(unfiltPower);
+  snprintf(text, 1024, "UnfiltPower (dBm): %.2f", unfiltPowerDbm);
+  legendsRight.push_back(text);
+  if (_clutterFilterType != RadarMoments::CLUTTER_FILTER_NONE) {
+    double filtPower = RadarComplex::meanPower(iqFilt, _nSamples);
+    double filtPowerDbm = 10.0 * log10(filtPower);
+    snprintf(text, 1024, "FiltPower: %.2f", filtPowerDbm);
+    legendsRight.push_back(text);
+    double clutPower = unfiltPower - filtPower;
+    if (clutPower > 0.0) {
+      double clutPowerDbm = 10.0 * log10(clutPower);
+      snprintf(text, 1024, "ClutPower: %.2f", clutPowerDbm);
+      legendsRight.push_back(text);
+      snprintf(text, 1024, "CSR: %.2f", clutPowerDbm - filtPowerDbm);
+      legendsRight.push_back(text);
+    }
+    // snprintf(text, 1024, "SpecSNR: %.2f", spectralSnr);
+    // legendsRight.push_back(text);
+  }
+  
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  }
+
+  // draw the title
+
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -1547,6 +1772,9 @@ string IqPlot::getName()
       break;
     case Params::SPECTRAL_PHIDP:
       ptypeStr =  "SPECTRAL_PHIDP";
+      break;
+    case Params::SPECTRAL_SZ864:
+      ptypeStr =  "SPECTRAL_SZ864";
       break;
     case Params::TS_POWER:
       ptypeStr =  "TS_POWER";

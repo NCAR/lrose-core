@@ -2069,6 +2069,14 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPhidp);
   
+  QAction plotSpectrumSz864("Plot spectral SZ864", &contextMenu);
+  connect(&plotSpectrumSz864, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_SZ864);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumSz864);
+  
   QAction plotTsPower("Plot TS Power", &contextMenu);
   connect(&plotTsPower, &QAction::triggered,
           [this, id] () {
