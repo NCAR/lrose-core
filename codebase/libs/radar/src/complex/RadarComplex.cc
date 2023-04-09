@@ -260,6 +260,22 @@ RadarComplex_t RadarComplex::mean(RadarComplex_t sum, double nn)
   return mean;
 }
 
+// phase shift in the time domain
+// add the phase shift provided in radians
+
+void RadarComplex::timeDomainPhaseShift(const RadarComplex_t *orig,
+                                        int len,
+                                        double shiftRadians,
+                                        RadarComplex_t *shifted)
+  
+{
+  for (int ii = 0; ii < len; ii++) {
+    double expon = ii * shiftRadians;
+    RadarComplex_t shifter(cos(expon), sin(expon));
+    shifted[ii] = RadarComplex::complexProduct(shifter, orig[ii]);
+  }
+}
+
 // normalize in place - set magnitude to 1.0
 
 void RadarComplex::normalize(RadarComplex_t &cc)
