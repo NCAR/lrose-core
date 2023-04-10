@@ -915,7 +915,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
   
   if (_pulseWidthVal) {
-    _setText(text, "%.2f", ray->getPulseWidthUsec());
+    _setText(text, "%.3f", ray->getPulseWidthUsec());
     _pulseWidthVal->setText(text);
   }
 
