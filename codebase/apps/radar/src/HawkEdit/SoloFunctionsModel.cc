@@ -357,12 +357,19 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   
   float azimuth = ray->getAzimuthDeg();
   if (primary_axis == Radx::PRIMARY_AXIS_Y_PRIME) {
-    azimuth = ray->getGeoreference()->getTrackRelRot();
+    RadxGeoref *georef = ray->getGeoreference();
+    if (georef == NULL) {
+      LOG(DEBUG) << "ERROR - georef for ray is NULL";
+      string msg = "Georef for ray is null. Cannot apply boundary";
+      throw msg;
+    }
+    azimuth = georef->getTrackRelRot();
+    if (azimuth == Radx::missingMetaDouble) {
+      LOG(DEBUG) << "ERROR - track-relative rotation is missing";
+      string msg = "Track-relative rotation is missing.  Cannot apply boundary";
+      throw msg;
+    }
   }
-  if ((azimuth > 180) && (azimuth < 350)) {
-     cerr << "HERE: azimuth = " << azimuth << endl;
-  }
-
 
   // TODO: need to fix this!  sending bool*, expecting short*
   _boundaryMask = new bool[_boundaryMaskLength];

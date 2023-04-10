@@ -5864,7 +5864,10 @@ void PolarManager::runScriptBatchMode(QString script, bool useBoundary,
         _batchEditing = false;
         return;
       } catch (string &msg) {
-        errorMessage("Error", msg);
+        stringstream ss;
+        ss << "Some files may not be edited due to errors: " <<
+          msg << endl;
+        errorMessage("Error", ss.str());
         _batchEditing = false;
         return;
       }
