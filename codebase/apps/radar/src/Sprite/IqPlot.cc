@@ -842,41 +842,54 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   // RadarComplex_t *iqShifted = iqShifted_.alloc(_nSamples);
   // RadarComplex::timeDomainPhaseShift(iq, _nSamples, shiftRadians, iqShifted);
 
-  // compute the power spectrum
-  // applying the appropriate clutter filter
+  // strong trip
   
-  TaArray<RadarComplex_t> iqWindowed_, iqFiltStrong_, iqNotchedStrong_;
+  TaArray<RadarComplex_t> iqFiltStrong_, iqNotchedStrong_;
   TaArray<double> dbmStrong_, dbmFiltStrong_;
   
-  // RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
   RadarComplex_t *iqFiltStrong = iqFiltStrong_.alloc(_nSamples);
   RadarComplex_t *iqNotchedStrong = iqNotchedStrong_.alloc(_nSamples);
-
+  
   double *dbmStrong = dbmStrong_.alloc(_nSamples);
   double *dbmFiltStrong = dbmFiltStrong_.alloc(_nSamples);
   
   double filterRatio, spectralNoise, spectralSnr;
   
-  // apply window to time series
-  
-  // _applyWindow(iq, iqWindowed, _nSamples);
-  
-  // _computePowerSpectrum(iqShifted, iqWindowed, iqFilt, iqNotched,
-  //                       dbm, dbmFilt,
-  //                       filterRatio, spectralNoise, spectralSnr);
-
   _computePowerSpectrum(gateData->iqStrong, iqFiltStrong, iqNotchedStrong,
                         dbmStrong, dbmFiltStrong,
+                        filterRatio, spectralNoise, spectralSnr);
+
+  // weak trip
+  
+  TaArray<RadarComplex_t> iqFiltWeak_, iqNotchedWeak_;
+  TaArray<double> dbmWeak_, dbmFiltWeak_;
+  
+  RadarComplex_t *iqFiltWeak = iqFiltWeak_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedWeak = iqNotchedWeak_.alloc(_nSamples);
+  
+  double *dbmWeak = dbmWeak_.alloc(_nSamples);
+  double *dbmFiltWeak = dbmFiltWeak_.alloc(_nSamples);
+  
+  _computePowerSpectrum(gateData->iqWeak, iqFiltWeak, iqNotchedWeak,
+                        dbmWeak, dbmFiltWeak,
                         filterRatio, spectralNoise, spectralSnr);
 
   // compute power limits
   
   double minDbm = 9999.0, maxDbm = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    minDbm = min(dbmStrong[ii], minDbm);
-    minDbm = min(dbmFiltStrong[ii], minDbm);
-    maxDbm = max(dbmStrong[ii], maxDbm);
-    maxDbm = max(dbmFiltStrong[ii], maxDbm);
+    if (!gateData->censorStrong) {
+      minDbm = min(dbmStrong[ii], minDbm);
+      minDbm = min(dbmFiltStrong[ii], minDbm);
+      maxDbm = max(dbmStrong[ii], maxDbm);
+      maxDbm = max(dbmFiltStrong[ii], maxDbm);
+    }
+    if (!gateData->censorWeak) {
+      minDbm = min(dbmWeak[ii], minDbm);
+      minDbm = min(dbmFiltWeak[ii], minDbm);
+      maxDbm = max(dbmWeak[ii], maxDbm);
+      maxDbm = max(dbmFiltWeak[ii], maxDbm);
+    }
   }
 
   // set the Y axis range
@@ -899,7 +912,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   // draw the strong unfiltered spectrum
   
   FilterUtils::applyMedianFilter(dbmStrong, _nSamples, _medianFiltLen);
-  {
+  if (!gateData->censorStrong) {
     painter.save();
     QPen pen(painter.pen());
     pen.setColor(_params.iqplot_line_color);
@@ -916,15 +929,9 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     painter.restore();
   }
 
-  // apply median filter to the spectrum if needed
-
-  if (_medianFiltLen > 1) {
-    FilterUtils::applyMedianFilter(dbmFiltStrong, _nSamples, _medianFiltLen);
-  }
-
-  // draw filtered spectrum
+  // draw weak spectrum
   
-  {
+  if (!gateData->censorWeak) {
     painter.save();
     QPen pen(painter.pen());
     if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
@@ -937,7 +944,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, dbmFiltStrong[ii]);
+      QPointF pt(ii, dbmWeak[ii]);
       filtPts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, filtPts);
