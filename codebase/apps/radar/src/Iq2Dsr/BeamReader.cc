@@ -772,7 +772,8 @@ int BeamReader::_readConstantPulseWidthBeam()
       if (_params.specify_pulse_width) {
         // check for valid pulse width
         if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
-          delete pulse;
+          pulse->removeClient();
+          _addPulseToRecyclePool(pulse);
           if (warningCount == 100000) {
             cerr << "WARNING - cannot find pulse with width: "
                  << _params.fixed_pulse_width_us << endl;
@@ -784,7 +785,7 @@ int BeamReader::_readConstantPulseWidthBeam()
       pulseWidthUs = pulse->getPulseWidthUs();
     }
 
-    // check if angles have changed
+    // check if pulse width has changed
     
     if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3) {
       if (nPulsesInDwell > 1) {
