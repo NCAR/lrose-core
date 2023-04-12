@@ -1085,7 +1085,7 @@ int Sz864::_computeNotchStart(int notchWidth,
   
   double nyquist = _wavelengthMeters / (4.0 * prtSecs);
 
-  // compute the location of the spectral peack based on the
+  // compute the location of the spectral peak based on the
   // velocity
   
   double integ;
