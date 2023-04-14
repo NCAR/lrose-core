@@ -509,26 +509,24 @@ void Beam::_prepareForComputeMoments()
   
   // initialize the regression objects
   
-  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
-    _regr->setup(_nSamples,
-                 _params.regression_filter_determine_order_from_cnr,
-                 _params.regression_filter_specified_polynomial_order,
-                 _params.regression_filter_clutter_width_factor,
-                 _params.regression_filter_cnr_exponent,
-                 _wavelengthM);
-    _regrHalf->setup(_nSamplesHalf,
-                     _params.regression_filter_determine_order_from_cnr,
-                     _params.regression_filter_specified_polynomial_order,
-                     _params.regression_filter_clutter_width_factor,
-                     _params.regression_filter_cnr_exponent,
-                     _wavelengthM);
-    _regrStag->setupStaggered(_nSamples, _stagM, _stagN,
-                              _params.regression_filter_determine_order_from_cnr,
-                              _params.regression_filter_specified_polynomial_order,
-                              _params.regression_filter_clutter_width_factor,
-                              _params.regression_filter_cnr_exponent,
-                              _wavelengthM);
-  }
+  _regr->setup(_nSamples,
+               _params.regression_filter_determine_order_from_cnr,
+               _params.regression_filter_specified_polynomial_order,
+               _params.regression_filter_clutter_width_factor,
+               _params.regression_filter_cnr_exponent,
+               _wavelengthM);
+  _regrHalf->setup(_nSamplesHalf,
+                   _params.regression_filter_determine_order_from_cnr,
+                   _params.regression_filter_specified_polynomial_order,
+                   _params.regression_filter_clutter_width_factor,
+                   _params.regression_filter_cnr_exponent,
+                   _wavelengthM);
+  _regrStag->setupStaggered(_nSamples, _stagM, _stagN,
+                            _params.regression_filter_determine_order_from_cnr,
+                            _params.regression_filter_specified_polynomial_order,
+                            _params.regression_filter_clutter_width_factor,
+                            _params.regression_filter_cnr_exponent,
+                            _wavelengthM);
 
   pthread_mutex_unlock(&_fftMutex);
 
@@ -1332,9 +1330,11 @@ void Beam::_computeMomSpSz()
 
 {
 
+  double calNoise = _mom->getCalNoisePower(RadarMoments::CHANNEL_HC);
+  
   for (int igate = 0; igate < _nGates; igate++) {
     GateData *gate = _gateData[igate];
-    _mom->singlePolHSz864(*gate, _txDelta12, igate, _nGates, *_fft);
+    _mom->singlePolHSz864(*gate, _txDelta12, igate, _nGates, *_fft, *_regr, calNoise);
   }
 
 }

@@ -36,9 +36,11 @@
 
 #include <string>
 #include <vector>
-#include <radar/RadarFft.hh>
-#include <radar/GateData.hh>
-
+class GateData;
+class RadarComplex_t;
+class RadarFft;
+class ForsytheRegrFilter;
+class RadarMoments;
 using namespace std;
 
 ////////////////////////
@@ -56,7 +58,8 @@ public:
 
   // constructor
   
-  Sz864(bool debug);
+  Sz864(bool debug,
+        RadarMoments *mom = NULL);
   
   // destructor
   
@@ -95,6 +98,17 @@ public:
                      const RadarComplex_t *delta12,
                      double prtSecs,
                      const RadarFft &fft);
+
+  // separate trips and compute moments
+  // using a rectangular window and regression filter for the
+  // notch
+  
+  void separateTripsRegr(GateData &gateData,
+                         const RadarComplex_t *delta12,
+                         double prtSecs,
+                         const RadarFft &fft,
+                         ForsytheRegrFilter &regr,
+                         double calNoise);
 
   // compute power from IQ
 
@@ -143,7 +157,8 @@ protected:
 private:
 
   bool _debug;
-
+  RadarMoments *_mom;
+  
   // levels
 
   double _wavelengthMeters;
@@ -275,7 +290,7 @@ private:
 
   void _velWidthFromTd(const RadarComplex_t *IQ,
 		       double prtSecs,
-		       double &vel, double &width) const;
+		       double &vel, double &width, double &phaseRad) const;
   
   void _velWidthFromFft(const double *magnitude,
 			double prtSecs,

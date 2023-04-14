@@ -47,7 +47,8 @@
 #include <radar/ForsytheRegrFilter.hh>
 #include <radar/AtmosAtten.hh>
 #include <rapformats/DsRadarCalib.hh>
-#include <radar/Sz864.hh>
+class GateData;
+class Sz864;
 using namespace std;
 
 ////////////////////////
@@ -664,16 +665,18 @@ public:
   // Single polarization, range unfolding using SZ864
   
   void singlePolHSz864(GateData &gateData,
-                      RadarComplex_t *delta12,
-                      int gateNum,
-                      int ngatesPulse,
-                      const RadarFft &fft);
+                       RadarComplex_t *delta12,
+                       int gateNum,
+                       int ngatesPulse,
+                       const RadarFft &fft,
+                       ForsytheRegrFilter &regr,
+                       double calNoise);
   
   // Single polarization, SZ864, Filtered
   
   void singlePolHSz864Filtered(GateData &gateData,
-                              int gateNum,
-                              int ngatesPulse);
+                               int gateNum,
+                               int ngatesPulse);
   
   // apply clutter filter to IQ time series
   //

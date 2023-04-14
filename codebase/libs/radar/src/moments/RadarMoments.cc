@@ -45,6 +45,8 @@
 #include <rapmath/umath.h>
 #include <radar/ClutFilter.hh>
 #include <radar/RadarMoments.hh>
+#include <radar/GateData.hh>
+#include <radar/Sz864.hh>
 #include <Radx/Radx.hh>
 
 const double RadarMoments::_missing = MomentsFields::missingDouble;
@@ -297,7 +299,7 @@ void RadarMoments::setSz(double snr_threshold,
 {
 
   _applySz = true;
-  _sz = new Sz864(_verbose);
+  _sz = new Sz864(_verbose, this);
 
   _sz->setSignalToNoiseRatioThreshold(snr_threshold);
     
@@ -4131,7 +4133,9 @@ void RadarMoments::singlePolHSz864(GateData &gateData,
                                    RadarComplex_t *delta12,
                                    int gateNum,
                                    int ngatesPulse,
-                                   const RadarFft &fft)
+                                   const RadarFft &fft,
+                                   ForsytheRegrFilter &regr,
+                                   double calNoise)
   
 {
 
@@ -4144,6 +4148,7 @@ void RadarMoments::singlePolHSz864(GateData &gateData,
   // separate the trips
 
   _sz->separateTrips(gateData, delta12, _prt, fft);
+  // _sz->separateTripsRegr(gateData, delta12, _prt, fft, regr, calNoise);
   gateData.fields.sz_leakage = gateData.szLeakage;
 
   if (gateData.trip1IsStrong) {
