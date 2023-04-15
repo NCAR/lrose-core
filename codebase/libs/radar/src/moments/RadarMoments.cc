@@ -294,13 +294,15 @@ void RadarMoments::setSz(double snr_threshold,
                          bool negate_phase_codes,
                          double strong_to_weak_power_ratio_threshold,
                          double out_of_trip_power_ratio_threshold,
-                         int out_of_trip_power_n_replicas)
-
+                         int out_of_trip_power_n_replicas,
+                         bool use_regression_filter)
+  
 {
 
   _applySz = true;
   _sz = new Sz864(_verbose, this);
-
+  _szUseRegressionFilter = use_regression_filter;
+  
   _sz->setSignalToNoiseRatioThreshold(snr_threshold);
     
   if (negate_phase_codes) {
@@ -4147,8 +4149,11 @@ void RadarMoments::singlePolHSz864(GateData &gateData,
 
   // separate the trips
 
-  _sz->separateTrips(gateData, delta12, _prt, fft);
-  // _sz->separateTripsRegr(gateData, delta12, _prt, fft, regr, calNoise);
+  if (_szUseRegressionFilter) {
+    _sz->separateTripsRegr(gateData, delta12, _prt, fft, regr, calNoise);
+  } else {
+    _sz->separateTrips(gateData, delta12, _prt, fft);
+  }
   gateData.fields.sz_leakage = gateData.szLeakage;
 
   if (gateData.trip1IsStrong) {

@@ -1174,6 +1174,8 @@ public:
 
   int sz1_out_of_trip_power_n_replicas;
 
+  tdrp_bool_t sz1_use_regression_filter;
+
   int cmd_kernel_ngates_tdbz;
 
   int cmd_kernel_ngates_spin;
@@ -1336,7 +1338,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[297];
+  mutable TDRPtable _table[298];
 
   const char *_className;
 

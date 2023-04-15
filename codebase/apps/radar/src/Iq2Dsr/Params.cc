@@ -3847,6 +3847,18 @@
     tt->single_val.i = 3;
     tt++;
     
+    // Parameter 'sz1_use_regression_filter'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sz1_use_regression_filter");
+    tt->descr = tdrpStrDup("Option to use regression filter in SZ decoding.");
+    tt->help = tdrpStrDup("If TRUE, a rectangular filter will be applied to SZ decoding.");
+    tt->val_offset = (char *) &sz1_use_regression_filter - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));

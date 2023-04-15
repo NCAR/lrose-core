@@ -1630,6 +1630,12 @@ paramdef int {
   p_help = "SZ1 decoding only. When checking for out-of-trip power after deconvolution, this is the number of peaks to check. See 'sz_out_of_trip_power_ratio_threshold'.";
 } sz1_out_of_trip_power_n_replicas;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use regression filter in SZ decoding.";
+  p_help = "If TRUE, a rectangular filter will be applied to SZ decoding.";
+} sz1_use_regression_filter;
+
 commentdef {
   p_header = "CMD - CLUTTER MITIGATION DECISION system";
   p_text = "Option to compute and use CMD fields.";

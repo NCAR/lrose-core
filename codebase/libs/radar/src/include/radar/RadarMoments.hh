@@ -268,7 +268,8 @@ public:
              bool negate_phase_codes,
              double strong_to_weak_power_ratio_threshold,
              double out_of_trip_power_ratio_threshold,
-             int out_of_trip_power_n_replicas);
+             int out_of_trip_power_n_replicas,
+             bool use_regression_filter);
 
   // set min SNR threshold for computing ZDR and LDR
 
@@ -1562,6 +1563,7 @@ private:
 
   bool _applySz;
   Sz864 *_sz;
+  bool _szUseRegressionFilter;
 
   // computing time series power smoothness
   

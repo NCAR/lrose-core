@@ -3474,13 +3474,14 @@ void Beam::_initMomentsObject(RadarMoments *mom)
   } else {
     mom->setChangePhidpSign(false);
   }
-  
+   
   if (_applySz1) {
     mom->setSz(_params.phase_decoding_snr_threshold,
-                _params.sz1_negate_phase_codes,
-                _params.sz1_strong_to_weak_power_ratio_threshold,
-                _params.sz1_out_of_trip_power_ratio_threshold,
-                _params.sz1_out_of_trip_power_n_replicas);
+               _params.sz1_negate_phase_codes,
+               _params.sz1_strong_to_weak_power_ratio_threshold,
+               _params.sz1_out_of_trip_power_ratio_threshold,
+               _params.sz1_out_of_trip_power_n_replicas,
+               _params.sz1_use_regression_filter);
   }
 
   if (_params.apply_db_for_db_correction) {
