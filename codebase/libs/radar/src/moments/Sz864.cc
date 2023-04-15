@@ -120,6 +120,10 @@ Sz864::Sz864(bool debug,
   _initVonhann(_vonhann);
   _initBlackman(_blackman);
 
+  // regression filtering for notch
+
+  _forsythe = new ForsytheRegrFilter;
+
   return;
 
 }
@@ -149,6 +153,8 @@ Sz864::~Sz864()
     delete[] _deconvMatrix50;
   }
 
+  delete _forsythe;
+  
 }
 
 /////////////////////////////////////
@@ -399,6 +405,7 @@ void Sz864::separateTripsRegr(GateData &gateData,
 
   // initialize
 
+  RadarComplex_t empty(0.0, 0.0);
   gateData.trip1IsStrong = true;
   gateData.censorStrong = false;
   gateData.censorWeak = false;
@@ -422,10 +429,10 @@ void Sz864::separateTripsRegr(GateData &gateData,
     gateData.censorWeak = true;
     return;
   }
-  
+
+#ifdef NOTNOW
   // apply regression filter to remove clutter
 
-  RadarComplex_t empty(0.0, 0.0);
   vector<RadarComplex_t> iqFiltered(_nSamples, empty);
   vector<RadarComplex_t> iqNotched(_nSamples, empty);
   double filterRatio, spectralNoise, spectralSnr;
@@ -439,6 +446,9 @@ void Sz864::separateTripsRegr(GateData &gateData,
   // IQ data comes in cohered to trip 1
   
   const RadarComplex_t *iqTrip1 = iqNotched.data();
+#else
+  const RadarComplex_t *iqTrip1 = gateData.iqhc;
+#endif
   
   // cohere to trip 2
   
@@ -485,46 +495,47 @@ void Sz864::separateTripsRegr(GateData &gateData,
     }
   }
 
-  // compute FFT for strong trip
-  // IQ is already windowed
-  
-  TaArray<RadarComplex_t> strongSpec_;
-  RadarComplex_t *strongSpec = strongSpec_.alloc(_nSamples);
-  fft.fwd(iqStrong, strongSpec);
+  // shift phases of strong trip time series to center the
+  // weather at 0
 
-  // apply notch
+  vector<RadarComplex_t> strongShifted(_nSamples, empty);
+  RadarComplex::timeDomainPhaseShift(iqStrong, _nSamples,
+                                     -phaseRadStrong, strongShifted.data());
   
-  TaArray<RadarComplex_t> notched_;
-  RadarComplex_t *notched = notched_.alloc(_nSamples);
-  int notchStart =
-    _computeNotchStart(_szNotchWidth75, velStrong, prtSecs);
-  _applyNotch75(notchStart, strongSpec, notched);
+  // apply regression filter to shifted time series - to perform 3/4 notch
+
+  vector<RadarComplex_t> strongNotchedShifted(_nSamples, empty);
+  _forsythe->setup(_nSamples, false, 37,
+                   1.0, 0.6667, 10.0); // last 3 args not used
+  _forsythe->apply(strongShifted.data(),
+                   0.0, 0.0, 0.001, // not used
+                   strongNotchedShifted.data());
   
+  // shift phases of notched strong trip back to original position
+
+  vector<RadarComplex_t> strongNotched(_nSamples, empty);
+  RadarComplex::timeDomainPhaseShift(strongNotchedShifted.data(), _nSamples,
+                                     phaseRadStrong, strongNotched.data());
+
   // compute weak trip power
   
-  double powerWeak = computePower(notched);
+  double powerWeak = computePower(strongNotched.data());
   
   // adjust power
   
   double corrPowerStrong = powerStrong - powerWeak;
   adjustPower(gateData.iqStrong, corrPowerStrong);
   
-  // invert the notched spectra into the time domain
-  
-  TaArray<RadarComplex_t> notchedTd_;
-  RadarComplex_t *notchedTd = notchedTd_.alloc(_nSamples);
-  fft.inv(notched, notchedTd);
-  
   // cohere to the weaker trip
   
   TaArray<RadarComplex_t> weakTd_;
   RadarComplex_t *weakTd = weakTd_.alloc(_nSamples);
   if (gateData.trip1IsStrong) {
-    _cohereTrip1_to_Trip2(notchedTd, delta12, weakTd);
+    _cohereTrip1_to_Trip2(strongNotched.data(), delta12, weakTd);
   } else {
-    _cohereTrip2_to_Trip1(notchedTd, delta12, weakTd);
+    _cohereTrip2_to_Trip1(strongNotched.data(), delta12, weakTd);
   }
-
+  
   // take fft of cohered weaker trip
   
   TaArray<RadarComplex_t> weakSpectra_;

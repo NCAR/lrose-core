@@ -41,6 +41,7 @@ class RadarComplex_t;
 class RadarFft;
 class ForsytheRegrFilter;
 class RadarMoments;
+class ForsytheRegrFilter;
 using namespace std;
 
 ////////////////////////
@@ -169,6 +170,10 @@ private:
   
   window_t _szWindow;
   bool _szNegatePhaseCodes;
+
+  // regression filter for notch
+
+  ForsytheRegrFilter *_forsythe;
 
   // censoring thresholds
 
