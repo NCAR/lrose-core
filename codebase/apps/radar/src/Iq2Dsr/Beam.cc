@@ -3325,6 +3325,14 @@ void Beam::_computeWindows()
       _params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
     _window = RadarMoments::createWindowRect(_nSamples);
     _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
+  } else if (_mmgr.applyPhaseDecoding()) {
+    if (_params.sz1_use_regression_filter) {
+      _window = RadarMoments::createWindowRect(_nSamples);
+      _windowHalf = RadarMoments::createWindowRect(_nSamplesHalf);
+    } else {
+      _window = RadarMoments::createWindowVonhann(_nSamples);
+      _windowHalf = RadarMoments::createWindowVonhann(_nSamplesHalf);
+    }
   } else if (_mmgr.getWindowType() == Params::WINDOW_RECT) {
     if (_mmgr.applyClutterFilter()) {
       if (_nWarnings % 1000 == 0 ||
