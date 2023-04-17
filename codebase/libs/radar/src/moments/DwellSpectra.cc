@@ -42,12 +42,8 @@
 #include <algorithm>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/DateTime.hh>
-#include <toolsa/TaStr.hh>
-#include <toolsa/TaXml.hh>
 #include <toolsa/sincos.h>
-#include <rapformats/ds_radar.h>
 #include <radar/FilterUtils.hh>
-#include <Spdb/DsSpdb.hh>
 #include "DwellSpectra.hh"
 using namespace std;
 
@@ -63,13 +59,8 @@ DwellSpectra::DwellSpectra()
 {
 
   _nSamples = 0;
-  _nSamplesAlloc = 0;
-
   _nGates = 0;
-  _nGatesAlloc = 0;
   
-  _window = NULL;
-
 }
 
 //////////////////////////////////////////////////////////////////
@@ -80,7 +71,6 @@ DwellSpectra::~DwellSpectra()
 {
 
   _freeArrays();
-  _freeWindows();
   _freeGateData();
 
 }
@@ -92,11 +82,19 @@ void DwellSpectra::setDimensions(size_t nGates, size_t nSamples)
 
 {
 
+  if (nGates == _nGates && nSamples == _nSamples) {
+    // nothing to do
+    return;
+  }
+
+  // allocate the arrays
+  
   _allocArrays(nGates, nSamples);
 
+  // save dims
+  
   _nGates = nGates;
   _nSamples = nSamples;
-
   
 }
 
@@ -107,51 +105,44 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
 
 {
   
-  if (nGates == _nGatesAlloc &&
-      nSamples == _nSamplesAlloc) {
-    // nothing to do
-    return;
-  }
-  
   // free up existing arrays
 
   _freeArrays();
 
-  _nGates = nGates;
-  _nSamples = nSamples;
-
   // allocate arrays
 
-  _iqHc.alloc(_nGates, _nSamples);
-  _iqVc.alloc(_nGates, _nSamples);
-  _iqHx.alloc(_nGates, _nSamples);
-  _iqVx.alloc(_nGates, _nSamples);
+  _window.alloc(nSamples);
   
-  _iqHcWindowed.alloc(_nGates, _nSamples);
-  _iqVcWindowed.alloc(_nGates, _nSamples);
-  _iqHxWindowed.alloc(_nGates, _nSamples);
-  _iqVxWindowed.alloc(_nGates, _nSamples);
+  _iqHc.alloc(nGates, nSamples);
+  _iqVc.alloc(nGates, nSamples);
+  _iqHx.alloc(nGates, nSamples);
+  _iqVx.alloc(nGates, nSamples);
   
-  _specCompHc.alloc(_nGates, _nSamples);
-  _specCompVc.alloc(_nGates, _nSamples);
+  _iqHcWindowed.alloc(nGates, nSamples);
+  _iqVcWindowed.alloc(nGates, nSamples);
+  _iqHxWindowed.alloc(nGates, nSamples);
+  _iqVxWindowed.alloc(nGates, nSamples);
+  
+  _specCompHc.alloc(nGates, nSamples);
+  _specCompVc.alloc(nGates, nSamples);
 
-  _specPowerHc.alloc(_nGates, _nSamples);
-  _specPowerVc.alloc(_nGates, _nSamples);
+  _specPowerHc.alloc(nGates, nSamples);
+  _specPowerVc.alloc(nGates, nSamples);
 
-  _specDbmHc.alloc(_nGates, _nSamples);
-  _specDbmVc.alloc(_nGates, _nSamples);
+  _specDbmHc.alloc(nGates, nSamples);
+  _specDbmVc.alloc(nGates, nSamples);
 
-  _specDbz.alloc(_nGates, _nSamples);
-  _specZdr.alloc(_nGates, _nSamples);
-  _specPhidp.alloc(_nGates, _nSamples);
+  _specDbz.alloc(nGates, nSamples);
+  _specZdr.alloc(nGates, nSamples);
+  _specPhidp.alloc(nGates, nSamples);
 
-  _specTdbz.alloc(_nGates, _nSamples);
-  _specZdrSdev.alloc(_nGates, _nSamples);
-  _specPhidpSdev.alloc(_nGates, _nSamples);
-  _specZdrSdev2D.alloc(_nGates, _nSamples);
-  _specPhidpSdev2D.alloc(_nGates, _nSamples);
+  _specTdbz.alloc(nGates, nSamples);
+  _specZdrSdev.alloc(nGates, nSamples);
+  _specPhidpSdev.alloc(nGates, nSamples);
+  _specZdrSdev2D.alloc(nGates, nSamples);
+  _specPhidpSdev2D.alloc(nGates, nSamples);
 
-  _specCmd.alloc(_nGates, _nSamples);
+  _specCmd.alloc(nGates, nSamples);
 
 }
 
@@ -162,6 +153,8 @@ void DwellSpectra::_freeArrays()
 
 {
 
+  _window.free();
+  
   _iqHc.free();
   _iqVc.free();
   _iqHx.free();
@@ -192,20 +185,6 @@ void DwellSpectra::_freeArrays()
   _specPhidpSdev2D.free();
 
   _specCmd.free();
-
-}
-  
-//////////////////////////////////////////////////////////////////
-// free up windows
-
-void DwellSpectra::_freeWindows()
-
-{
-
-  if (_window) {
-    delete[] _window;
-    _window = NULL;
-  }
 
 }
   

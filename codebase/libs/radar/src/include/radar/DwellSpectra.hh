@@ -94,25 +94,18 @@ private:
   
   static pthread_mutex_t _debugPrintMutex;
 
-  // number of samples
+  // dimensions
 
-  size_t _nSamples; // nsamples making adjustment for window
-  size_t _nSamplesAlloc;
-  
-  // number of gates, gate geometry
-  
-  size_t _nGates; // input data
-  size_t _nGatesAlloc; // output
-
-  // window
-
-  double *_window;
+  size_t _nSamples;
+  size_t _nGates;
 
   // gate data
   
   vector<GateData *> _gateData;
 
   // IQ data
+
+  TaArray<double> _window;
 
   TaArray2D<RadarComplex_t> _iqHc;
   TaArray2D<RadarComplex_t> _iqVc;
@@ -150,7 +143,6 @@ private:
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
 
-  void _freeWindows();
   void _freeGateData();
 
 };
