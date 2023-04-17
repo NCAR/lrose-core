@@ -152,12 +152,18 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   
   _specCompHc.alloc(nGates, nSamples);
   _specCompVc.alloc(nGates, nSamples);
+  _specCompHx.alloc(nGates, nSamples);
+  _specCompVx.alloc(nGates, nSamples);
 
   _specPowerHc.alloc(nGates, nSamples);
   _specPowerVc.alloc(nGates, nSamples);
+  _specPowerHx.alloc(nGates, nSamples);
+  _specPowerVx.alloc(nGates, nSamples);
 
   _specDbmHc.alloc(nGates, nSamples);
   _specDbmVc.alloc(nGates, nSamples);
+  _specDbmHx.alloc(nGates, nSamples);
+  _specDbmVx.alloc(nGates, nSamples);
 
   _specDbz.alloc(nGates, nSamples);
   _specZdr.alloc(nGates, nSamples);
@@ -194,12 +200,18 @@ void DwellSpectra::_freeArrays()
 
   _specCompHc.free();
   _specCompVc.free();
+  _specCompHx.free();
+  _specCompVx.free();
 
   _specPowerHc.free();
   _specPowerVc.free();
+  _specPowerHx.free();
+  _specPowerVx.free();
 
   _specDbmHc.free();
   _specDbmVc.free();
+  _specDbmHx.free();
+  _specDbmVx.free();
 
   _specDbz.free();
   _specZdr.free();
@@ -242,43 +254,6 @@ void DwellSpectra::setWindow(const double *window, size_t nSamples)
 ///////////////////////////////////////////////////////////////
 // set IQ arrays
 
-void DwellSpectra::setIqVals(const vector<GateData *> &gateData,
-                             size_t nGates, size_t nSamples)
-
-{
-
-  assert(nGates == _nGates);
-  assert(nSamples == _nSamples);
-
-  for (size_t ii = 0; ii < nGates; ii++) {
-
-    const GateData *gd = gateData[ii];
-    
-    if (gd->iqhcOrig) {
-      memcpy(_iqHc.dat2D()[ii], gd->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-      RadarMoments::applyWindow(_iqHc.dat2D()[ii], _window.dat(), _nSamples);
-      _hcAvail = true;
-    }
-    if (gd->iqvcOrig) {
-      memcpy(_iqVc.dat2D()[ii], gd->iqvcOrig, nSamples * sizeof(RadarComplex_t));
-      RadarMoments::applyWindow(_iqVc.dat2D()[ii], _window.dat(), _nSamples);
-      _vcAvail = true;
-    }
-    if (gd->iqhxOrig) {
-      memcpy(_iqHx.dat2D()[ii], gd->iqhxOrig, nSamples * sizeof(RadarComplex_t));
-      RadarMoments::applyWindow(_iqHx.dat2D()[ii], _window.dat(), _nSamples);
-      _hxAvail = true;
-    }
-    if (gd->iqvxOrig) {
-      memcpy(_iqVx.dat2D()[ii], gd->iqvxOrig, nSamples * sizeof(RadarComplex_t));
-      RadarMoments::applyWindow(_iqVx.dat2D()[ii], _window.dat(), _nSamples);
-      _vxAvail = true;
-    }
-    
-  } // ii
-  
-}
-
 void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
                            size_t gateNum, size_t nSamples)
   
@@ -286,7 +261,8 @@ void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqHc.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
-  RadarMoments::applyWindow(_iqHc.dat2D()[gateNum], _window.dat(), _nSamples);
+  _iqHcWindowed = _iqHc;
+  RadarMoments::applyWindow(_iqHcWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
   _hcAvail = true;
 }
   
@@ -297,7 +273,8 @@ void DwellSpectra::setIqVc(const RadarComplex_t *iqVc,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqVc.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
-  RadarMoments::applyWindow(_iqVc.dat2D()[gateNum], _window.dat(), _nSamples);
+  _iqVcWindowed = _iqVc;
+  RadarMoments::applyWindow(_iqVcWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
   _vcAvail = true;
 }
   
@@ -308,7 +285,8 @@ void DwellSpectra::setIqHx(const RadarComplex_t *iqHx,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqHx.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
-  RadarMoments::applyWindow(_iqHx.dat2D()[gateNum], _window.dat(), _nSamples);
+  _iqHxWindowed = _iqHx;
+  RadarMoments::applyWindow(_iqHxWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
   _hxAvail = true;
 }
   
@@ -319,10 +297,79 @@ void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqVx.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
-  RadarMoments::applyWindow(_iqVx.dat2D()[gateNum], _window.dat(), _nSamples);
+  _iqVxWindowed = _iqVx;
+  RadarMoments::applyWindow(_iqVxWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
   _vxAvail = true;
 }
   
+////////////////////////////////////////////////////
+// Compute spectra
+
+void DwellSpectra::computeSpectra()
+  
+{
+
+  if (_hcAvail) {
+    _computeSpectra(_iqHcWindowed, _specCompHc, _specPowerHc, _specDbmHc);
+  }
+      
+  if (_vcAvail) {
+    _computeSpectra(_iqVcWindowed, _specCompVc, _specPowerVc, _specDbmVc);
+  }
+      
+  if (_hxAvail) {
+    _computeSpectra(_iqHxWindowed, _specCompHx, _specPowerHx, _specDbmHx);
+  }
+      
+  if (_vxAvail) {
+    _computeSpectra(_iqVxWindowed, _specCompVx, _specPowerVx, _specDbmVx);
+  }
+
+}
+
+void DwellSpectra::_computeSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
+                                   TaArray2D<RadarComplex_t> &specComp,
+                                   TaArray2D<double> &specPower,
+                                   TaArray2D<double> &specDbm)
+{
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+
+    RadarComplex_t *iq = iqWindowed.dat2D()[igate];
+    RadarComplex_t *spec = specComp.dat2D()[igate];
+    double *power = specPower.dat2D()[igate];
+    double *dbm = specDbm.dat2D()[igate];
+    
+    _fft.fwd(iq, spec);
+    _fft.shift(spec);
+
+    _computePowerSpectrum(spec, power, dbm);
+    
+  } // igate
+
+}
+
+void DwellSpectra::_computePowerSpectrum(RadarComplex_t *spec,
+                                         double *power,
+                                         double *dbm)
+
+{
+  
+  for (size_t isample = 0; isample < _nSamples; isample++) {
+
+    double pwr = RadarComplex::power(spec[isample]);
+    double db = 10.0 * log10(pwr);
+    if (pwr <= 1.0e-12) {
+      db = -120.0;
+    }
+
+    power[isample] = pwr;
+    dbm[isample] = db;
+
+  } // isample
+
+}
+
 #ifdef JUNK
 
 ////////////////////////////////////////////////////

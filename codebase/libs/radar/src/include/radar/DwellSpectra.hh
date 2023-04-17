@@ -51,10 +51,8 @@
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
-#include <radar/GateData.hh>
 #include <radar/MomentsFields.hh>
 #include <radar/InterestMap.hh>
-#include <radar/NoiseLocator.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/ForsytheRegrFilter.hh>
 
@@ -112,9 +110,6 @@ public:
 
   // set IQ arrays
   
-  void setIqVals(const vector<GateData *> &gateData,
-                 size_t nGates, size_t nSamples);
-
   void setIqHc(const RadarComplex_t *iqHc,
                size_t gateNum, size_t nSamples);
 
@@ -127,6 +122,10 @@ public:
   void setIqVx(const RadarComplex_t *iqVx,
                size_t gateNum, size_t nSamples);
 
+  // Compute spectra
+
+  void computeSpectra();
+  
 protected:
   
 private:
@@ -193,12 +192,18 @@ private:
   
   TaArray2D<RadarComplex_t> _specCompHc;
   TaArray2D<RadarComplex_t> _specCompVc;
+  TaArray2D<RadarComplex_t> _specCompHx;
+  TaArray2D<RadarComplex_t> _specCompVx;
   
   TaArray2D<double> _specPowerHc;
   TaArray2D<double> _specPowerVc;
+  TaArray2D<double> _specPowerHx;
+  TaArray2D<double> _specPowerVx;
   
   TaArray2D<double> _specDbmHc;
   TaArray2D<double> _specDbmVc;
+  TaArray2D<double> _specDbmHx;
+  TaArray2D<double> _specDbmVx;
   
   TaArray2D<double> _specDbz;
   TaArray2D<double> _specZdr;
@@ -216,6 +221,15 @@ private:
   
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
+
+  void _computeSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
+                       TaArray2D<RadarComplex_t> &specComp,
+                       TaArray2D<double> &specPower,
+                       TaArray2D<double> &specDbm);
+
+  void _computePowerSpectrum(RadarComplex_t *spec,
+                             double *power,
+                             double *dbm);
 
 };
 
