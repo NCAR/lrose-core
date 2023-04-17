@@ -373,6 +373,37 @@ void DwellSpectra::_computePowerSpectrum(RadarComplex_t *specComp1D,
 }
 
 ////////////////////////////////////////////////////
+// Compute dbz spectra
+
+void DwellSpectra::computeDbzSpectra()
+  
+{
+  
+  if (!_hcAvail) {
+    return;
+  }
+
+  double specScale = 10.0 * log10((double) _nSamples);
+  
+  double rangeKm = _startRangeKm;
+  for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
+    
+    double *specDbmHc1D = _specDbmHc2D.dat2D()[igate];
+    double *specDbz1D = _specDbz2D.dat2D()[igate];
+    
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      double dbm = specDbmHc1D[isample] - _calib.getReceiverGainDbHc();
+
+      specDbz1D[isample] = dbm - specScale;
+
+    } // isample
+
+  } // igate
+
+}
+
+////////////////////////////////////////////////////
 // Compute zdr spectra
 
 void DwellSpectra::computeZdrSpectra()
@@ -533,7 +564,7 @@ void DwellSpectra::computePhidpSdev()
       gateStart = gateEnd - nGatesSdev;
       
       // load up phidp values for kernel region
-
+      
       vector<double> phidpKernel;
       for (int jgate = gateStart; jgate < gateEnd; jgate++) {
         for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {

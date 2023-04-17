@@ -51,6 +51,7 @@
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
 #include <radar/IwrfTsPulse.hh>
+#include <radar/IwrfCalib.hh>
 #include <radar/MomentsFields.hh>
 #include <radar/InterestMap.hh>
 #include <radar/AtmosAtten.hh>
@@ -83,6 +84,10 @@ public:
   void setSdevZdrKernelNSamples(size_t val) { _sdevZdrKernelNSamples = val; }
   void setSdevPhidpKernelNGates(size_t val) { _sdevPhidpKernelNGates = val; }
   void setSdevPhidpKernelNSamples(size_t val) { _sdevPhidpKernelNSamples = val; }
+
+  // set calibration
+
+  void setCalibration(const IwrfCalib &val) { _calib = val; }
 
   // set metadata
 
@@ -132,6 +137,7 @@ public:
   // Compute spectra
 
   void computePowerSpectra();
+  void computeDbzSpectra();
   void computeZdrSpectra();
   void computePhidpSpectra();
   void computeZdrSdev();
@@ -164,6 +170,10 @@ private:
   size_t _sdevZdrKernelNSamples;
   size_t _sdevPhidpKernelNGates;
   size_t _sdevPhidpKernelNSamples;
+  
+  // calibration
+    
+  IwrfCalib _calib;
   
   // dwell metadata - from radar obs
   
