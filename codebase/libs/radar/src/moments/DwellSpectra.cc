@@ -380,22 +380,81 @@ void DwellSpectra::computeZdrSpectra()
   
   for (size_t igate = 0; igate < _nGates; igate++) {
     
-    double *dbmHc1D = _specDbmHc2D.dat2D()[igate];
-    double *dbmVc1D = _specDbmVc2D.dat2D()[igate];
-    double *zdr1D = _specZdr2D.dat2D()[igate];
+    double *specDbmHc1D = _specDbmHc2D.dat2D()[igate];
+    double *specDbmVc1D = _specDbmVc2D.dat2D()[igate];
+    double *specZdr1D = _specZdr2D.dat2D()[igate];
     
     for (size_t isample = 0; isample < _nSamples; isample++) {
-        
-      double dbmHc = dbmHc1D[isample];
-      double dbmVc = dbmVc1D[isample];
-      double zdr = dbmHc - dbmVc;
-
-      zdr1D[isample] = zdr;
-
+      double zdr = specDbmHc1D[isample] - specDbmVc1D[isample];
+      specZdr1D[isample] = zdr;
     } // isample
 
   } // igate
 
+}
+
+////////////////////////////////////////////////////
+// Compute phidp spectra
+
+void DwellSpectra::computePhidpSpectra()
+  
+{
+
+  if (!_hcAvail || !_vcAvail) {
+    return;
+  }
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    
+    RadarComplex_t *specCompHc1D = _specCompHc2D.dat2D()[igate];
+    RadarComplex_t *specCompVc1D = _specCompVc2D.dat2D()[igate];
+    double *specPhidp1D = _specPhidp2D.dat2D()[igate];
+    
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      RadarComplex_t phaseDiff = RadarComplex::conjugateProduct(specCompHc1D[isample],
+                                                                specCompVc1D[isample]);
+      specPhidp1D[isample] = RadarComplex::argDeg(phaseDiff);
+
+    } // isample
+
+  } // igate
+  
+  // compute the phidp folding range - 90 or 180 deg?
+  
+  _computePhidpFoldingRange();
+
+}
+
+/////////////////////////////////////////////
+// compute the folding values and range
+// by inspecting the phidp values
+
+void DwellSpectra::_computePhidpFoldingRange()
+  
+{
+  
+  // check if fold is at 90 or 180
+  
+  double phidpMin = 9999;
+  double phidpMax = -9999;
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      double phidp = _specPhidp2D.dat2D()[igate][isample];
+      phidpMin = min(phidpMin, phidp);
+      phidpMax = max(phidpMax, phidp);
+    } // isample
+  } // igate
+  
+  _phidpFoldsAt90 = false;
+  _phidpFoldVal = 180.0;
+  if (phidpMin > -90 && phidpMax < 90) {
+    _phidpFoldVal = 90.0;
+    _phidpFoldsAt90 = true;
+  }
+  _phidpFoldRange = _phidpFoldVal * 2.0;
+  
 }
 
 #ifdef JUNK

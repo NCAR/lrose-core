@@ -126,6 +126,7 @@ public:
 
   void computePowerSpectra();
   void computeZdrSpectra();
+  void computePhidpSpectra();
   
 protected:
   
@@ -174,6 +175,11 @@ private:
   double _nyquist;
   double _pulseWidthUs;
   double _wavelengthM;
+
+  // phidp sdev
+
+  bool _phidpFoldsAt90;
+  double _phidpFoldVal, _phidpFoldRange;
 
   // Arrays
 
@@ -230,6 +236,8 @@ private:
                              double *specPower1D,
                              double *specDbm1D);
 
+  void _computePhidpFoldingRange();
+  
 };
 
 #endif
