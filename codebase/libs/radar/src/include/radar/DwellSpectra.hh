@@ -77,6 +77,49 @@ public:
   // set dimensions
 
   void setDimensions(size_t nGates, size_t nSamples);
+  
+  // set metadata
+
+  void setTime(time_t timeSecs, int nanoSecs) {
+    _timeSecs = timeSecs;
+    _nanoSecs = nanoSecs;
+    _dtime = (double) timeSecs + nanoSecs * 1.0e-9;
+  }
+  
+  void setElevation(double val) { _el = val; }
+  void setAzimuth(double val) { _az = val; }
+  void setAntennaRate(double val) { _antennaRate = val; }
+
+  void setRangeGeometry(double startRangeKm, double gateSpacingKm) {
+    _startRangeKm = startRangeKm;
+    _gateSpacingKm = gateSpacingKm;
+  }
+
+  void setXmitRcvMode(iwrf_xmit_rcv_mode_t val) { _xmitRcvMode = val; }
+  void setPrt(double val) { _prt = val; }
+  void setNyquist(double val) { _nyquist = val; }
+  void setPulseWidth(double val) { _pulseWidth = val; }
+
+  // set window array
+
+  void setWindow(const double *window, size_t nSamples);
+
+  // set IQ arrays
+  
+  void setIqVals(const vector<GateData *> &gateData,
+                 size_t nGates, size_t nSamples);
+
+  void setIqHc(const RadarComplex_t *iqHc,
+               size_t gateNum, size_t nSamples);
+
+  void setIqVc(const RadarComplex_t *iqVc,
+               size_t gateNum, size_t nSamples);
+
+  void setIqHx(const RadarComplex_t *iqHx,
+               size_t gateNum, size_t nSamples);
+
+  void setIqVx(const RadarComplex_t *iqVx,
+               size_t gateNum, size_t nSamples);
 
 protected:
   
@@ -99,14 +142,38 @@ private:
   size_t _nSamples;
   size_t _nGates;
 
-  // gate data
+  // time and location
   
-  vector<GateData *> _gateData;
+  time_t _timeSecs;
+  long int _nanoSecs;
+  double _dtime;
 
-  // IQ data
+  double _el;
+  double _az;
+
+  double _antennaRate;
+
+  // range geometry
+
+  double _startRangeKm;
+  double _gateSpacingKm;
+
+  // transmit/rcv mode
+
+  iwrf_xmit_rcv_mode_t _xmitRcvMode;
+  
+  // prt and pulse width
+
+  double _prt;
+  double _nyquist;
+  double _pulseWidth;
+
+  // Arrays
 
   TaArray<double> _window;
 
+  bool _hcAvail, _vcAvail, _hxAvail, _vxAvail;
+  
   TaArray2D<RadarComplex_t> _iqHc;
   TaArray2D<RadarComplex_t> _iqVc;
   TaArray2D<RadarComplex_t> _iqHx;
@@ -140,10 +207,9 @@ private:
   
   // member functions
   
+  void _resetAvailFlags();
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
-
-  void _freeGateData();
 
 };
 
@@ -403,7 +469,6 @@ private:
 
 
   void _checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses);
-  void _allocGateData(int nGates);
   void _initFieldData();
   void _loadGateIq(const fl32 **iqChan0, const fl32 **iqChan1);
   void _loadGateIqStagPrt(const fl32 **iqChan0, const fl32 **iqChan1);

@@ -61,6 +61,8 @@ DwellSpectra::DwellSpectra()
   _nSamples = 0;
   _nGates = 0;
   
+  _resetAvailFlags();
+
 }
 
 //////////////////////////////////////////////////////////////////
@@ -71,7 +73,6 @@ DwellSpectra::~DwellSpectra()
 {
 
   _freeArrays();
-  _freeGateData();
 
 }
 
@@ -81,6 +82,8 @@ DwellSpectra::~DwellSpectra()
 void DwellSpectra::setDimensions(size_t nGates, size_t nSamples)
 
 {
+
+  _resetAvailFlags();
 
   if (nGates == _nGates && nSamples == _nSamples) {
     // nothing to do
@@ -112,6 +115,9 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   // allocate arrays
 
   _window.alloc(nSamples);
+  for (size_t ii = 0; ii < nSamples; ii++) {
+    _window.dat()[ii] = 1.0;
+  }
   
   _iqHc.alloc(nGates, nSamples);
   _iqVc.alloc(nGates, nSamples);
@@ -188,18 +194,114 @@ void DwellSpectra::_freeArrays()
 
 }
   
-/////////////////////////////////////////////////////////////////
-// Free gate data
+//////////////////////////////////////////////////////////////////
+// reset the availability flags
 
-void DwellSpectra::_freeGateData()
+void DwellSpectra::_resetAvailFlags()
 
 {
-  for (int ii = 0; ii < (int) _gateData.size(); ii++) {
-    delete _gateData[ii];
-  }
-  _gateData.clear();
+
+  _hcAvail = false;
+  _vcAvail = false;
+  _hxAvail = false;
+  _vxAvail = false;
+
 }
 
+///////////////////////////////////////////////////////////////
+// set window array
+
+void DwellSpectra::setWindow(const double *window, size_t nSamples)
+
+{
+  assert(nSamples == _nSamples);
+  memcpy(_window.dat(), window, nSamples * sizeof(double));
+}
+
+///////////////////////////////////////////////////////////////
+// set IQ arrays
+
+void DwellSpectra::setIqVals(const vector<GateData *> &gateData,
+                             size_t nGates, size_t nSamples)
+
+{
+
+  assert(nGates == _nGates);
+  assert(nSamples == _nSamples);
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+
+    const GateData *gd = gateData[ii];
+    
+    if (gd->iqhcOrig) {
+      memcpy(_iqHc.dat2D()[ii], gd->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+      RadarMoments::applyWindow(_iqHc.dat2D()[ii], _window.dat(), _nSamples);
+      _hcAvail = true;
+    }
+    if (gd->iqvcOrig) {
+      memcpy(_iqVc.dat2D()[ii], gd->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+      RadarMoments::applyWindow(_iqVc.dat2D()[ii], _window.dat(), _nSamples);
+      _vcAvail = true;
+    }
+    if (gd->iqhxOrig) {
+      memcpy(_iqHx.dat2D()[ii], gd->iqhxOrig, nSamples * sizeof(RadarComplex_t));
+      RadarMoments::applyWindow(_iqHx.dat2D()[ii], _window.dat(), _nSamples);
+      _hxAvail = true;
+    }
+    if (gd->iqvxOrig) {
+      memcpy(_iqVx.dat2D()[ii], gd->iqvxOrig, nSamples * sizeof(RadarComplex_t));
+      RadarMoments::applyWindow(_iqVx.dat2D()[ii], _window.dat(), _nSamples);
+      _vxAvail = true;
+    }
+    
+  } // ii
+  
+}
+
+void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
+                           size_t gateNum, size_t nSamples)
+  
+{
+  assert(gateNum < _nGates);
+  assert(nSamples == _nSamples);
+  memcpy(_iqHc.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
+  RadarMoments::applyWindow(_iqHc.dat2D()[gateNum], _window.dat(), _nSamples);
+  _hcAvail = true;
+}
+  
+void DwellSpectra::setIqVc(const RadarComplex_t *iqVc,
+                           size_t gateNum, size_t nSamples)
+  
+{
+  assert(gateNum < _nGates);
+  assert(nSamples == _nSamples);
+  memcpy(_iqVc.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
+  RadarMoments::applyWindow(_iqVc.dat2D()[gateNum], _window.dat(), _nSamples);
+  _vcAvail = true;
+}
+  
+void DwellSpectra::setIqHx(const RadarComplex_t *iqHx,
+                           size_t gateNum, size_t nSamples)
+  
+{
+  assert(gateNum < _nGates);
+  assert(nSamples == _nSamples);
+  memcpy(_iqHx.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
+  RadarMoments::applyWindow(_iqHx.dat2D()[gateNum], _window.dat(), _nSamples);
+  _hxAvail = true;
+}
+  
+void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
+                           size_t gateNum, size_t nSamples)
+  
+{
+  assert(gateNum < _nGates);
+  assert(nSamples == _nSamples);
+  memcpy(_iqVx.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
+  RadarMoments::applyWindow(_iqVx.dat2D()[gateNum], _window.dat(), _nSamples);
+  _vxAvail = true;
+}
+  
 #ifdef JUNK
 
 ////////////////////////////////////////////////////
