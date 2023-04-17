@@ -80,6 +80,11 @@ DwellSpectra::DwellSpectra()
   _pulseWidthUs = 0.0;
   _wavelengthM = 0.0;
 
+  _sdevZdrKernelNGates = 5;
+  _sdevZdrKernelNSamples = 3;
+  _sdevPhidpKernelNGates = 5;
+  _sdevPhidpKernelNSamples = 3;
+
   prepareForData();
 
 }
@@ -424,6 +429,217 @@ void DwellSpectra::computePhidpSpectra()
   
   _computePhidpFoldingRange();
 
+}
+
+////////////////////////////////////////////////////
+// Compute 2D standard deviation of zdr
+
+void DwellSpectra::computeZdrSdev()
+  
+{
+
+  if (!_hcAvail || !_vcAvail) {
+    return;
+  }
+  
+  // compute 2D sdev of spectral zdr
+  
+  double **zdr2D = _specZdr2D.dat2D();
+  double **sdev2D = _specZdrSdev2D.dat2D();
+  size_t nSamplesSdev = _nSamples;
+  size_t nGatesSdev = _nGates;
+  if (_sdevZdrKernelNGates < _nGates) {
+    nGatesSdev = _sdevZdrKernelNGates;
+    nSamplesSdev = _sdevZdrKernelNSamples;
+  }
+  size_t nSamplesSdevHalf = nSamplesSdev / 2;
+  size_t nGatesSdevHalf = nGatesSdev / 2;
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      // compute index limits for computing sdev
+
+      int sampleStart = isample - nSamplesSdevHalf;
+      sampleStart = max(0, sampleStart);
+      int sampleEnd = sampleStart + nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - nSamplesSdev;
+
+      int gateStart = igate - nGatesSdevHalf;
+      gateStart = max(0, gateStart);
+      int gateEnd = gateStart + nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - nGatesSdev;
+      
+      // load up zdr values for kernel region
+
+      vector<double> zdrKernel;
+      for (int jgate = gateStart; jgate < gateEnd; jgate++) {
+        for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
+          zdrKernel.push_back(zdr2D[jgate][jsample]);
+        } // jsample
+      } // jgate
+
+      // compute sdev of zdr
+      
+      double zdrSdev = _computeSdevZdr(zdrKernel);
+      sdev2D[igate][isample] = zdrSdev;
+      
+    } // isample
+  } // igate
+
+}
+
+////////////////////////////////////////////////////
+// Compute 2D standard deviation of phidp
+
+void DwellSpectra::computePhidpSdev()
+  
+{
+
+  if (!_hcAvail || !_vcAvail) {
+    return;
+  }
+  
+  // compute 2D sdev of spectral phidp
+  
+  double **phidp2D = _specPhidp2D.dat2D();
+  double **sdev2D = _specPhidpSdev2D.dat2D();
+  size_t nSamplesSdev = _nSamples;
+  size_t nGatesSdev = _nGates;
+  if (_sdevPhidpKernelNGates < _nGates) {
+    nGatesSdev = _sdevPhidpKernelNGates;
+    nSamplesSdev = _sdevPhidpKernelNSamples;
+  }
+  size_t nSamplesSdevHalf = nSamplesSdev / 2;
+  size_t nGatesSdevHalf = nGatesSdev / 2;
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      // compute index limits for computing sdev
+
+      int sampleStart = isample - nSamplesSdevHalf;
+      sampleStart = max(0, sampleStart);
+      int sampleEnd = sampleStart + nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - nSamplesSdev;
+
+      int gateStart = igate - nGatesSdevHalf;
+      gateStart = max(0, gateStart);
+      int gateEnd = gateStart + nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - nGatesSdev;
+      
+      // load up phidp values for kernel region
+
+      vector<double> phidpKernel;
+      for (int jgate = gateStart; jgate < gateEnd; jgate++) {
+        for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
+          phidpKernel.push_back(phidp2D[jgate][jsample]);
+        } // jsample
+      } // jgate
+
+      // compute sdev of phidp
+      
+      double phidpSdev = _computeSdevPhidp(phidpKernel);
+      sdev2D[igate][isample] = phidpSdev;
+      
+    } // isample
+  } // igate
+
+}
+
+/////////////////////////////////////////////////
+// compute for ZDR SDEV
+
+double DwellSpectra::_computeSdevZdr(const vector<double> &zdr)
+  
+{
+  
+  double nZdr = 0.0;
+  double sumZdr = 0.0;
+  double sumZdrSq = 0.0;
+  
+  for (size_t ii = 0; ii < zdr.size(); ii++) {
+    double val = zdr[ii];
+    sumZdr += val;
+    sumZdrSq += (val * val);
+    nZdr++;
+  }
+    
+  double meanZdr = sumZdr / nZdr;
+  double sdev = 0.001;
+  if (nZdr > 2) {
+    double term1 = sumZdrSq / nZdr;
+    double term2 = meanZdr * meanZdr;
+    if (term1 >= term2) {
+      sdev = sqrt(term1 - term2);
+    }
+  }
+
+  return sdev;
+
+}
+
+/////////////////////////////////////////////////
+// compute SDEV for PHIDP
+// takes account of folding
+
+double DwellSpectra::_computeSdevPhidp(const vector<double> &phidp)
+   
+{
+  
+  // compute mean phidp
+
+  double count = 0.0;
+  double sumxx = 0.0;
+  double sumyy = 0.0;
+  for (size_t ii = 0; ii < phidp.size(); ii++) {
+    double xx, yy;
+    ta_sincos(phidp[ii] * DEG_TO_RAD, &yy, &xx);
+    sumxx += xx;
+    sumyy += yy;
+    count++;
+  }
+  double meanxx = sumxx / count;
+  double meanyy = sumyy / count;
+  double phidpMean = atan2(meanyy, meanxx) * RAD_TO_DEG;
+  if (_phidpFoldsAt90) {
+    phidpMean *= 0.5;
+  }
+  
+  // compute standard deviation centered on the mean value
+  
+  count = 0.0;
+  double sum = 0.0;
+  double sumSq = 0.0;
+  for (size_t ii = 0; ii < phidp.size(); ii++) {
+    double diff = phidp[ii] - phidpMean;
+    // constrain diff
+    while (diff < -_phidpFoldVal) {
+      diff += 2 * _phidpFoldVal;
+    }
+    while (diff > _phidpFoldVal) {
+      diff -= 2 * _phidpFoldVal;
+    }
+    // sum up
+    count++;
+    sum += diff;
+    sumSq += diff * diff;
+  }
+
+  double meanDiff = sum / count;
+  double term1 = sumSq / count;
+  double term2 = meanDiff * meanDiff;
+  double sdev = 0.001;
+  if (term1 >= term2) {
+    sdev = sqrt(term1 - term2);
+  }
+
+  return sdev;
+  
 }
 
 /////////////////////////////////////////////

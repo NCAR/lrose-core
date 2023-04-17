@@ -76,7 +76,14 @@ public:
   // set dimensions
 
   void setDimensions(size_t nGates, size_t nSamples);
-  
+
+  // set algorithm parameters
+
+  void setSdevZdrKernelNGates(size_t val) { _sdevZdrKernelNGates = val; }
+  void setSdevZdrKernelNSamples(size_t val) { _sdevZdrKernelNSamples = val; }
+  void setSdevPhidpKernelNGates(size_t val) { _sdevPhidpKernelNGates = val; }
+  void setSdevPhidpKernelNSamples(size_t val) { _sdevPhidpKernelNSamples = val; }
+
   // set metadata
 
   void setTime(time_t timeSecs, int nanoSecs) {
@@ -127,6 +134,8 @@ public:
   void computePowerSpectra();
   void computeZdrSpectra();
   void computePhidpSpectra();
+  void computeZdrSdev();
+  void computePhidpSdev();
   
 protected:
   
@@ -149,7 +158,14 @@ private:
   size_t _nSamples;
   size_t _nGates;
 
-  // time and location
+  // algorithm parameters
+  
+  size_t _sdevZdrKernelNGates;
+  size_t _sdevZdrKernelNSamples;
+  size_t _sdevPhidpKernelNGates;
+  size_t _sdevPhidpKernelNSamples;
+  
+  // dwell metadata - from radar obs
   
   time_t _timeSecs;
   int _nanoSecs;
@@ -160,17 +176,11 @@ private:
 
   double _antennaRate;
 
-  // range geometry
-
   double _startRangeKm;
   double _gateSpacingKm;
 
-  // transmit/rcv mode
-
   iwrf_xmit_rcv_mode_t _xmitRcvMode;
   
-  // prt and pulse width
-
   double _prt;
   double _nyquist;
   double _pulseWidthUs;
@@ -236,6 +246,8 @@ private:
                              double *specPower1D,
                              double *specDbm1D);
 
+  double _computeSdevZdr(const vector<double> &zdr);
+  double _computeSdevPhidp(const vector<double> &phidp);
   void _computePhidpFoldingRange();
   
 };
