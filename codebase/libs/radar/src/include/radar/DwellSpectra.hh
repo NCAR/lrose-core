@@ -124,7 +124,8 @@ public:
 
   // Compute spectra
 
-  void computeSpectra();
+  void computePowerSpectra();
+  void computeZdrSpectra();
   
 protected:
   
@@ -222,10 +223,10 @@ private:
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
 
-  void _computeSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
-                       TaArray2D<RadarComplex_t> &specComp,
-                       TaArray2D<double> &specPower,
-                       TaArray2D<double> &specDbm);
+  void _computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
+                            TaArray2D<RadarComplex_t> &specComp,
+                            TaArray2D<double> &specPower,
+                            TaArray2D<double> &specDbm);
 
   void _computePowerSpectrum(RadarComplex_t *spec,
                              double *power,

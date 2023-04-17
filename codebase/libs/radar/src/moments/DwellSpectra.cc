@@ -305,68 +305,100 @@ void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
 ////////////////////////////////////////////////////
 // Compute spectra
 
-void DwellSpectra::computeSpectra()
+void DwellSpectra::computePowerSpectra()
   
 {
 
   if (_hcAvail) {
-    _computeSpectra(_iqHcWindowed, _specCompHc, _specPowerHc, _specDbmHc);
+    _computePowerSpectra(_iqHcWindowed, _specCompHc, _specPowerHc, _specDbmHc);
   }
       
   if (_vcAvail) {
-    _computeSpectra(_iqVcWindowed, _specCompVc, _specPowerVc, _specDbmVc);
+    _computePowerSpectra(_iqVcWindowed, _specCompVc, _specPowerVc, _specDbmVc);
   }
       
   if (_hxAvail) {
-    _computeSpectra(_iqHxWindowed, _specCompHx, _specPowerHx, _specDbmHx);
+    _computePowerSpectra(_iqHxWindowed, _specCompHx, _specPowerHx, _specDbmHx);
   }
       
   if (_vxAvail) {
-    _computeSpectra(_iqVxWindowed, _specCompVx, _specPowerVx, _specDbmVx);
+    _computePowerSpectra(_iqVxWindowed, _specCompVx, _specPowerVx, _specDbmVx);
   }
 
 }
 
-void DwellSpectra::_computeSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
-                                   TaArray2D<RadarComplex_t> &specComp,
-                                   TaArray2D<double> &specPower,
-                                   TaArray2D<double> &specDbm)
+void DwellSpectra::_computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
+                                        TaArray2D<RadarComplex_t> &specComp,
+                                        TaArray2D<double> &specPower,
+                                        TaArray2D<double> &specDbm)
+  
 {
 
   for (size_t igate = 0; igate < _nGates; igate++) {
 
-    RadarComplex_t *iq = iqWindowed.dat2D()[igate];
-    RadarComplex_t *spec = specComp.dat2D()[igate];
-    double *power = specPower.dat2D()[igate];
-    double *dbm = specDbm.dat2D()[igate];
+    RadarComplex_t *iq1D = iqWindowed.dat2D()[igate];
+    RadarComplex_t *specComp1D = specComp.dat2D()[igate];
+    double *specPower1D = specPower.dat2D()[igate];
+    double *specDbm1D = specDbm.dat2D()[igate];
     
-    _fft.fwd(iq, spec);
-    _fft.shift(spec);
-
-    _computePowerSpectrum(spec, power, dbm);
+    _fft.fwd(iq1D, specComp1D);
+    _fft.shift(specComp1D);
+    
+    _computePowerSpectrum(specComp1D, specPower1D, specDbm1D);
     
   } // igate
 
 }
 
-void DwellSpectra::_computePowerSpectrum(RadarComplex_t *spec,
-                                         double *power,
-                                         double *dbm)
+void DwellSpectra::_computePowerSpectrum(RadarComplex_t *specComp1D,
+                                         double *specPower1D,
+                                         double *specDbm1D)
 
 {
   
   for (size_t isample = 0; isample < _nSamples; isample++) {
 
-    double pwr = RadarComplex::power(spec[isample]);
-    double db = 10.0 * log10(pwr);
+    double pwr = RadarComplex::power(specComp1D[isample]);
+    double dbm = 10.0 * log10(pwr);
     if (pwr <= 1.0e-12) {
-      db = -120.0;
+      dbm = -120.0;
     }
 
-    power[isample] = pwr;
-    dbm[isample] = db;
+    specPower1D[isample] = pwr;
+    specDbm1D[isample] = dbm;
 
   } // isample
+
+}
+
+////////////////////////////////////////////////////
+// Compute zdr spectra
+
+void DwellSpectra::computeZdrSpectra()
+  
+{
+
+  if (!_hcAvail || !_vcAvail) {
+    return;
+  }
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    
+    double *dbmHc1D = _specDbmHc.dat2D()[igate];
+    double *dbmVc1D = _specDbmVc.dat2D()[igate];
+    double *zdr1D = _specZdr.dat2D()[igate];
+    
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+        
+      double dbmHc = dbmHc1D[isample];
+      double dbmVc = dbmVc1D[isample];
+      double zdr = dbmHc - dbmVc;
+
+      zdr1D[isample] = zdr;
+
+    } // isample
+
+  } // igate
 
 }
 
