@@ -61,7 +61,26 @@ DwellSpectra::DwellSpectra()
   _nSamples = 0;
   _nGates = 0;
   
-  _resetAvailFlags();
+  _timeSecs = 0;
+  _nanoSecs = 0;
+  _dtime = 0.0;
+
+  _el = 0.0;
+  _az = 0.0;
+
+  _antennaRate = 0.0;
+
+  _startRangeKm = 0.0;
+  _gateSpacingKm = 0.0;
+
+  _xmitRcvMode = IWRF_SINGLE_POL;
+  
+  _prt = 0.0;
+  _nyquist = 0.0;
+  _pulseWidthUs = 0.0;
+  _wavelengthM = 0.0;
+
+  prepareForData();
 
 }
 
@@ -83,7 +102,7 @@ void DwellSpectra::setDimensions(size_t nGates, size_t nSamples)
 
 {
 
-  _resetAvailFlags();
+  prepareForData();
 
   if (nGates == _nGates && nSamples == _nSamples) {
     // nothing to do
@@ -99,6 +118,8 @@ void DwellSpectra::setDimensions(size_t nGates, size_t nSamples)
   _nGates = nGates;
   _nSamples = nSamples;
   
+  _fft.init(nSamples);
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -197,7 +218,7 @@ void DwellSpectra::_freeArrays()
 //////////////////////////////////////////////////////////////////
 // reset the availability flags
 
-void DwellSpectra::_resetAvailFlags()
+void DwellSpectra::prepareForData()
 
 {
 

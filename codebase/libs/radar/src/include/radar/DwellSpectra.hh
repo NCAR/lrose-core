@@ -56,6 +56,7 @@
 #include <radar/InterestMap.hh>
 #include <radar/NoiseLocator.hh>
 #include <radar/AtmosAtten.hh>
+#include <radar/ForsytheRegrFilter.hh>
 
 using namespace std;
 
@@ -98,11 +99,16 @@ public:
   void setXmitRcvMode(iwrf_xmit_rcv_mode_t val) { _xmitRcvMode = val; }
   void setPrt(double val) { _prt = val; }
   void setNyquist(double val) { _nyquist = val; }
-  void setPulseWidth(double val) { _pulseWidth = val; }
+  void setPulseWidthUs(double val) { _pulseWidthUs = val; }
+  void setWavelengthM(double val) { _wavelengthM = val; }
 
   // set window array
 
   void setWindow(const double *window, size_t nSamples);
+
+  // reset, ready for setting new data
+  
+  void prepareForData();
 
   // set IQ arrays
   
@@ -130,8 +136,8 @@ private:
   // FFTs
 
   static pthread_mutex_t _fftMutex;
-  RadarFft *_fft;
-  RadarFft *_fftHalf;
+  RadarFft _fft;
+  ForsytheRegrFilter _regr;
 
   // debug printing
   
@@ -145,7 +151,7 @@ private:
   // time and location
   
   time_t _timeSecs;
-  long int _nanoSecs;
+  int _nanoSecs;
   double _dtime;
 
   double _el;
@@ -166,7 +172,8 @@ private:
 
   double _prt;
   double _nyquist;
-  double _pulseWidth;
+  double _pulseWidthUs;
+  double _wavelengthM;
 
   // Arrays
 
@@ -207,7 +214,6 @@ private:
   
   // member functions
   
-  void _resetAvailFlags();
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
 
