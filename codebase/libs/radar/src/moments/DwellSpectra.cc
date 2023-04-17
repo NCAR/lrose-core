@@ -140,42 +140,40 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
     _window.dat()[ii] = 1.0;
   }
   
-  _iqHc.alloc(nGates, nSamples);
-  _iqVc.alloc(nGates, nSamples);
-  _iqHx.alloc(nGates, nSamples);
-  _iqVx.alloc(nGates, nSamples);
+  _iqHc2D.alloc(nGates, nSamples);
+  _iqVc2D.alloc(nGates, nSamples);
+  _iqHx2D.alloc(nGates, nSamples);
+  _iqVx2D.alloc(nGates, nSamples);
   
-  _iqHcWindowed.alloc(nGates, nSamples);
-  _iqVcWindowed.alloc(nGates, nSamples);
-  _iqHxWindowed.alloc(nGates, nSamples);
-  _iqVxWindowed.alloc(nGates, nSamples);
-  
-  _specCompHc.alloc(nGates, nSamples);
-  _specCompVc.alloc(nGates, nSamples);
-  _specCompHx.alloc(nGates, nSamples);
-  _specCompVx.alloc(nGates, nSamples);
+  _iqWindowedHc2D.alloc(nGates, nSamples);
+  _iqWindowedVc2D.alloc(nGates, nSamples);
+  _iqWindowedHx2D.alloc(nGates, nSamples);
+  _iqWindowedVx2D.alloc(nGates, nSamples);
+ 
+  _specCompHc2D.alloc(nGates, nSamples);
+  _specCompVc2D.alloc(nGates, nSamples);
+  _specCompHx2D.alloc(nGates, nSamples);
+  _specCompVx2D.alloc(nGates, nSamples);
 
-  _specPowerHc.alloc(nGates, nSamples);
-  _specPowerVc.alloc(nGates, nSamples);
-  _specPowerHx.alloc(nGates, nSamples);
-  _specPowerVx.alloc(nGates, nSamples);
+  _specPowerHc2D.alloc(nGates, nSamples);
+  _specPowerVc2D.alloc(nGates, nSamples);
+  _specPowerHx2D.alloc(nGates, nSamples);
+  _specPowerVx2D.alloc(nGates, nSamples);
 
-  _specDbmHc.alloc(nGates, nSamples);
-  _specDbmVc.alloc(nGates, nSamples);
-  _specDbmHx.alloc(nGates, nSamples);
-  _specDbmVx.alloc(nGates, nSamples);
+  _specDbmHc2D.alloc(nGates, nSamples);
+  _specDbmVc2D.alloc(nGates, nSamples);
+  _specDbmHx2D.alloc(nGates, nSamples);
+  _specDbmVx2D.alloc(nGates, nSamples);
 
-  _specDbz.alloc(nGates, nSamples);
-  _specZdr.alloc(nGates, nSamples);
-  _specPhidp.alloc(nGates, nSamples);
+  _specDbz2D.alloc(nGates, nSamples);
+  _specZdr2D.alloc(nGates, nSamples);
+  _specPhidp2D.alloc(nGates, nSamples);
 
-  _specTdbz.alloc(nGates, nSamples);
-  _specZdrSdev.alloc(nGates, nSamples);
-  _specPhidpSdev.alloc(nGates, nSamples);
+  _specTdbz2D.alloc(nGates, nSamples);
   _specZdrSdev2D.alloc(nGates, nSamples);
   _specPhidpSdev2D.alloc(nGates, nSamples);
 
-  _specCmd.alloc(nGates, nSamples);
+  _specCmd2D.alloc(nGates, nSamples);
 
 }
 
@@ -188,42 +186,40 @@ void DwellSpectra::_freeArrays()
 
   _window.free();
   
-  _iqHc.free();
-  _iqVc.free();
-  _iqHx.free();
-  _iqVx.free();
+  _iqHc2D.free();
+  _iqVc2D.free();
+  _iqHx2D.free();
+  _iqVx2D.free();
 
-  _iqHcWindowed.free();
-  _iqVcWindowed.free();
-  _iqHxWindowed.free();
-  _iqVxWindowed.free();
+  _iqWindowedHc2D.free();
+  _iqWindowedVc2D.free();
+  _iqWindowedHx2D.free();
+  _iqWindowedVx2D.free();
 
-  _specCompHc.free();
-  _specCompVc.free();
-  _specCompHx.free();
-  _specCompVx.free();
+  _specCompHc2D.free();
+  _specCompVc2D.free();
+  _specCompHx2D.free();
+  _specCompVx2D.free();
 
-  _specPowerHc.free();
-  _specPowerVc.free();
-  _specPowerHx.free();
-  _specPowerVx.free();
+  _specPowerHc2D.free();
+  _specPowerVc2D.free();
+  _specPowerHx2D.free();
+  _specPowerVx2D.free();
 
-  _specDbmHc.free();
-  _specDbmVc.free();
-  _specDbmHx.free();
-  _specDbmVx.free();
+  _specDbmHc2D.free();
+  _specDbmVc2D.free();
+  _specDbmHx2D.free();
+  _specDbmVx2D.free();
 
-  _specDbz.free();
-  _specZdr.free();
-  _specPhidp.free();
+  _specDbz2D.free();
+  _specZdr2D.free();
+  _specPhidp2D.free();
 
-  _specTdbz.free();
-  _specZdrSdev.free();
-  _specPhidpSdev.free();
+  _specTdbz2D.free();
   _specZdrSdev2D.free();
   _specPhidpSdev2D.free();
 
-  _specCmd.free();
+  _specCmd2D.free();
 
 }
   
@@ -260,9 +256,9 @@ void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
 {
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
-  memcpy(_iqHc.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
-  _iqHcWindowed = _iqHc;
-  RadarMoments::applyWindow(_iqHcWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
+  memcpy(_iqHc2D.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
+  _iqWindowedHc2D = _iqHc2D;
+  RadarMoments::applyWindow(_iqWindowedHc2D.dat2D()[gateNum], _window.dat(), _nSamples);
   _hcAvail = true;
 }
   
@@ -272,9 +268,9 @@ void DwellSpectra::setIqVc(const RadarComplex_t *iqVc,
 {
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
-  memcpy(_iqVc.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
-  _iqVcWindowed = _iqVc;
-  RadarMoments::applyWindow(_iqVcWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
+  memcpy(_iqVc2D.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
+  _iqWindowedVc2D = _iqVc2D;
+  RadarMoments::applyWindow(_iqWindowedVc2D.dat2D()[gateNum], _window.dat(), _nSamples);
   _vcAvail = true;
 }
   
@@ -284,9 +280,9 @@ void DwellSpectra::setIqHx(const RadarComplex_t *iqHx,
 {
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
-  memcpy(_iqHx.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
-  _iqHxWindowed = _iqHx;
-  RadarMoments::applyWindow(_iqHxWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
+  memcpy(_iqHx2D.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
+  _iqWindowedHx2D = _iqHx2D;
+  RadarMoments::applyWindow(_iqWindowedHx2D.dat2D()[gateNum], _window.dat(), _nSamples);
   _hxAvail = true;
 }
   
@@ -296,9 +292,9 @@ void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
 {
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
-  memcpy(_iqVx.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
-  _iqVxWindowed = _iqVx;
-  RadarMoments::applyWindow(_iqVxWindowed.dat2D()[gateNum], _window.dat(), _nSamples);
+  memcpy(_iqVx2D.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
+  _iqWindowedVx2D = _iqVx2D;
+  RadarMoments::applyWindow(_iqWindowedVx2D.dat2D()[gateNum], _window.dat(), _nSamples);
   _vxAvail = true;
 }
   
@@ -310,36 +306,36 @@ void DwellSpectra::computePowerSpectra()
 {
 
   if (_hcAvail) {
-    _computePowerSpectra(_iqHcWindowed, _specCompHc, _specPowerHc, _specDbmHc);
+    _computePowerSpectra(_iqWindowedHc2D, _specCompHc2D, _specPowerHc2D, _specDbmHc2D);
   }
       
   if (_vcAvail) {
-    _computePowerSpectra(_iqVcWindowed, _specCompVc, _specPowerVc, _specDbmVc);
+    _computePowerSpectra(_iqWindowedVc2D, _specCompVc2D, _specPowerVc2D, _specDbmVc2D);
   }
       
   if (_hxAvail) {
-    _computePowerSpectra(_iqHxWindowed, _specCompHx, _specPowerHx, _specDbmHx);
+    _computePowerSpectra(_iqWindowedHx2D, _specCompHx2D, _specPowerHx2D, _specDbmHx2D);
   }
       
   if (_vxAvail) {
-    _computePowerSpectra(_iqVxWindowed, _specCompVx, _specPowerVx, _specDbmVx);
+    _computePowerSpectra(_iqWindowedVx2D, _specCompVx2D, _specPowerVx2D, _specDbmVx2D);
   }
 
 }
 
-void DwellSpectra::_computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
-                                        TaArray2D<RadarComplex_t> &specComp,
-                                        TaArray2D<double> &specPower,
-                                        TaArray2D<double> &specDbm)
+void DwellSpectra::_computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed2D,
+                                        TaArray2D<RadarComplex_t> &specComp2D,
+                                        TaArray2D<double> &specPower2D,
+                                        TaArray2D<double> &specDbm2D)
   
 {
 
   for (size_t igate = 0; igate < _nGates; igate++) {
 
-    RadarComplex_t *iq1D = iqWindowed.dat2D()[igate];
-    RadarComplex_t *specComp1D = specComp.dat2D()[igate];
-    double *specPower1D = specPower.dat2D()[igate];
-    double *specDbm1D = specDbm.dat2D()[igate];
+    RadarComplex_t *iq1D = iqWindowed2D.dat2D()[igate];
+    RadarComplex_t *specComp1D = specComp2D.dat2D()[igate];
+    double *specPower1D = specPower2D.dat2D()[igate];
+    double *specDbm1D = specDbm2D.dat2D()[igate];
     
     _fft.fwd(iq1D, specComp1D);
     _fft.shift(specComp1D);
@@ -384,9 +380,9 @@ void DwellSpectra::computeZdrSpectra()
   
   for (size_t igate = 0; igate < _nGates; igate++) {
     
-    double *dbmHc1D = _specDbmHc.dat2D()[igate];
-    double *dbmVc1D = _specDbmVc.dat2D()[igate];
-    double *zdr1D = _specZdr.dat2D()[igate];
+    double *dbmHc1D = _specDbmHc2D.dat2D()[igate];
+    double *dbmVc1D = _specDbmVc2D.dat2D()[igate];
+    double *zdr1D = _specZdr2D.dat2D()[igate];
     
     for (size_t isample = 0; isample < _nSamples; isample++) {
         

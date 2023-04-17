@@ -181,56 +181,54 @@ private:
 
   bool _hcAvail, _vcAvail, _hxAvail, _vxAvail;
   
-  TaArray2D<RadarComplex_t> _iqHc;
-  TaArray2D<RadarComplex_t> _iqVc;
-  TaArray2D<RadarComplex_t> _iqHx;
-  TaArray2D<RadarComplex_t> _iqVx;
+  TaArray2D<RadarComplex_t> _iqHc2D;
+  TaArray2D<RadarComplex_t> _iqVc2D;
+  TaArray2D<RadarComplex_t> _iqHx2D;
+  TaArray2D<RadarComplex_t> _iqVx2D;
   
-  TaArray2D<RadarComplex_t> _iqHcWindowed;
-  TaArray2D<RadarComplex_t> _iqVcWindowed;
-  TaArray2D<RadarComplex_t> _iqHxWindowed;
-  TaArray2D<RadarComplex_t> _iqVxWindowed;
+  TaArray2D<RadarComplex_t> _iqWindowedHc2D;
+  TaArray2D<RadarComplex_t> _iqWindowedVc2D;
+  TaArray2D<RadarComplex_t> _iqWindowedHx2D;
+  TaArray2D<RadarComplex_t> _iqWindowedVx2D;
   
-  TaArray2D<RadarComplex_t> _specCompHc;
-  TaArray2D<RadarComplex_t> _specCompVc;
-  TaArray2D<RadarComplex_t> _specCompHx;
-  TaArray2D<RadarComplex_t> _specCompVx;
+  TaArray2D<RadarComplex_t> _specCompHc2D;
+  TaArray2D<RadarComplex_t> _specCompVc2D;
+  TaArray2D<RadarComplex_t> _specCompHx2D;
+  TaArray2D<RadarComplex_t> _specCompVx2D;
   
-  TaArray2D<double> _specPowerHc;
-  TaArray2D<double> _specPowerVc;
-  TaArray2D<double> _specPowerHx;
-  TaArray2D<double> _specPowerVx;
+  TaArray2D<double> _specPowerHc2D;
+  TaArray2D<double> _specPowerVc2D;
+  TaArray2D<double> _specPowerHx2D;
+  TaArray2D<double> _specPowerVx2D;
   
-  TaArray2D<double> _specDbmHc;
-  TaArray2D<double> _specDbmVc;
-  TaArray2D<double> _specDbmHx;
-  TaArray2D<double> _specDbmVx;
+  TaArray2D<double> _specDbmHc2D;
+  TaArray2D<double> _specDbmVc2D;
+  TaArray2D<double> _specDbmHx2D;
+  TaArray2D<double> _specDbmVx2D;
   
-  TaArray2D<double> _specDbz;
-  TaArray2D<double> _specZdr;
-  TaArray2D<double> _specPhidp;
+  TaArray2D<double> _specDbz2D;
+  TaArray2D<double> _specZdr2D;
+  TaArray2D<double> _specPhidp2D;
 
-  TaArray2D<double> _specTdbz;
-  TaArray2D<double> _specZdrSdev;
-  TaArray2D<double> _specPhidpSdev;
+  TaArray2D<double> _specTdbz2D;
   TaArray2D<double> _specZdrSdev2D;
   TaArray2D<double> _specPhidpSdev2D;
   
-  TaArray2D<double> _specCmd;
+  TaArray2D<double> _specCmd2D;
   
   // member functions
   
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
 
-  void _computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed,
-                            TaArray2D<RadarComplex_t> &specComp,
-                            TaArray2D<double> &specPower,
-                            TaArray2D<double> &specDbm);
+  void _computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed2D,
+                            TaArray2D<RadarComplex_t> &specComp2D,
+                            TaArray2D<double> &specPower2D,
+                            TaArray2D<double> &specDbm2D);
 
-  void _computePowerSpectrum(RadarComplex_t *spec,
-                             double *power,
-                             double *dbm);
+  void _computePowerSpectrum(RadarComplex_t *specComp1D,
+                             double *specPower1D,
+                             double *specDbm1D);
 
 };
 
