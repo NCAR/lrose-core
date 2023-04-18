@@ -161,6 +161,7 @@ public:
   void computeTdbz();
   void computeZdrSdev();
   void computePhidpSdev();
+  void computeSpectralCmd();
   
   // Compute spectral noise for entire dwell for specified variable
   // this is the min noise at any gate
@@ -242,10 +243,6 @@ private:
   InterestMap *_interestMapZdrSdev;
   InterestMap *_interestMapPhidpSdev;
 
-  double _weightTdbz;
-  double _weightZdrSdev;
-  double _weightPhidpSdev;
-
   double _cmdInterestThreshold;
 
   // Arrays
@@ -287,6 +284,10 @@ private:
   TaArray2D<double> _specTdbz2D;
   TaArray2D<double> _specZdrSdev2D;
   TaArray2D<double> _specPhidpSdev2D;
+  
+  TaArray2D<double> _specTdbzInterest2D;
+  TaArray2D<double> _specZdrSdevInterest2D;
+  TaArray2D<double> _specPhidpSdevInterest2D;
   
   TaArray2D<double> _specCmd2D;
   

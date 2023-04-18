@@ -184,6 +184,10 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _specZdrSdev2D.alloc(nGates, nSamples);
   _specPhidpSdev2D.alloc(nGates, nSamples);
 
+  _specTdbzInterest2D.alloc(nGates, nSamples);
+  _specZdrSdevInterest2D.alloc(nGates, nSamples);
+  _specPhidpSdevInterest2D.alloc(nGates, nSamples);
+
   _specCmd2D.alloc(nGates, nSamples);
 
 }
@@ -230,6 +234,10 @@ void DwellSpectra::_freeArrays()
   _specTdbz2D.free();
   _specZdrSdev2D.free();
   _specPhidpSdev2D.free();
+
+  _specTdbzInterest2D.free();
+  _specZdrSdevInterest2D.free();
+  _specPhidpSdevInterest2D.free();
 
   _specCmd2D.free();
 
@@ -879,6 +887,84 @@ double DwellSpectra::computeSpectralNoise(const double *powerSpec,
 
 }
 
+////////////////////////////////////////////////////
+// Compute spectral CMD
+
+void DwellSpectra::computeSpectralCmd()
+  
+{
+
+  // check we have data
+  
+  if (!_hcAvail || !_vcAvail) {
+    return;
+  }
+
+  // compute the features we need
+  
+  computePowerSpectra();
+  computeDbzSpectra();
+  computeZdrSpectra();
+  computePhidpSpectra();
+  computeTdbz();
+  computeZdrSdev();
+  computePhidpSdev();
+
+  // accumulate the interest
+  
+  double **tdbz = _specTdbz2D.dat2D();
+  double **zdrSdev = _specZdrSdev2D.dat2D();
+  double **phidpSdev = _specPhidpSdev2D.dat2D();
+
+  double **tdbzInt = _specTdbzInterest2D.dat2D();
+  double **zdrSdevInt = _specZdrSdevInterest2D.dat2D();
+  double **phidpSdevInt = _specPhidpSdevInterest2D.dat2D();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      tdbzInt[igate][isample] =
+        _interestMapTdbz->getInterest(tdbz[igate][isample]);
+      
+      zdrSdevInt[igate][isample] =
+        _interestMapZdrSdev->getInterest(zdrSdev[igate][isample]);
+      
+      phidpSdevInt[igate][isample] =
+        _interestMapPhidpSdev->getInterest(phidpSdev[igate][isample]);
+
+    } // isample
+  } // igate
+
+  // compute sum weights
+
+  double weightTdbz = _interestMapTdbz->getWeight();
+  double weightZdrSdev = _interestMapZdrSdev->getWeight();
+  double weightPhidpSdev = _interestMapPhidpSdev->getWeight();
+
+  double sumWeights = 0.0;
+  sumWeights += weightTdbz;
+  sumWeights += weightZdrSdev;
+  sumWeights += weightPhidpSdev;
+  
+  // compute cmd
+  
+  double **cmd = _specCmd2D.dat2D();
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+
+      double sumInterest = 0.0;
+
+      sumInterest += tdbzInt[igate][isample] * weightTdbz;
+      sumInterest += zdrSdevInt[igate][isample] * weightZdrSdev;
+      sumInterest += phidpSdevInt[igate][isample] * weightPhidpSdev;
+
+      cmd[igate][isample] = sumInterest / sumWeights;
+        
+    } // isample
+  } // igate
+
+}
+
 ///////////////////////////////////////////////////////////////
 // Create the default interest maps and weights
 
@@ -919,7 +1005,6 @@ void DwellSpectra::setInterestMapTdbz
     delete _interestMapTdbz;
   }
   _interestMapTdbz = new InterestMap("Tdbz", pts, weight);
-  _weightTdbz = weight;
 }
 
 /////////////////////////////////////////////////////////
@@ -934,7 +1019,6 @@ void DwellSpectra::setInterestMapZdrSdev
     delete _interestMapZdrSdev;
   }
   _interestMapZdrSdev = new InterestMap("ZdrSdev", pts, weight);
-  _weightZdrSdev = weight;
 }
 
 /////////////////////////////////////////////////////////
@@ -949,7 +1033,6 @@ void DwellSpectra::setInterestMapPhidpSdev
     delete _interestMapPhidpSdev;
   }
   _interestMapPhidpSdev = new InterestMap("PhidpSdev", pts, weight);
-  _weightPhidpSdev = weight;
 }
 
 #ifdef JUNK
