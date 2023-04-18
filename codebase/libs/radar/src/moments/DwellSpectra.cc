@@ -80,6 +80,8 @@ DwellSpectra::DwellSpectra()
   _pulseWidthUs = 0.0;
   _wavelengthM = 0.0;
 
+  _tdbzKernelNGates = 5;
+  _tdbzKernelNSamples = 3;
   _sdevZdrKernelNGates = 5;
   _sdevZdrKernelNSamples = 3;
   _sdevPhidpKernelNGates = 5;
@@ -484,6 +486,68 @@ void DwellSpectra::computePhidpSpectra()
 }
 
 ////////////////////////////////////////////////////
+// Compute texture of reflectivity
+
+void DwellSpectra::computeTdbz()
+  
+{
+
+  if (!_hcAvail) {
+    return;
+  }
+  
+  // compute 2D sdev of spectral dbz
+  
+  double **dbz2D = _specDbz2D.dat2D();
+  double **tdbz2D = _specTdbz2D.dat2D();
+  size_t nSamplesSdev = _nSamples;
+  size_t nGatesSdev = _nGates;
+  if (_tdbzKernelNGates < _nGates) {
+    nGatesSdev = _tdbzKernelNGates;
+    nSamplesSdev = _tdbzKernelNSamples;
+  }
+  size_t nSamplesSdevHalf = nSamplesSdev / 2;
+  size_t nGatesSdevHalf = nGatesSdev / 2;
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      // compute index limits for computing sdev
+
+      int sampleStart = isample - nSamplesSdevHalf;
+      sampleStart = max(0, sampleStart);
+      int sampleEnd = sampleStart + nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - nSamplesSdev;
+
+      int gateStart = igate - nGatesSdevHalf;
+      gateStart = max(0, gateStart);
+      int gateEnd = gateStart + nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - nGatesSdev;
+      
+      // load up dbz^2 values for kernel region
+      
+      vector<double> tdbzKernel;
+      for (int jgate = gateStart; jgate < gateEnd; jgate++) {
+        for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
+          double dbz = dbz2D[jgate][jsample];
+          tdbzKernel.push_back(dbz * dbz);
+        } // jsample
+      } // jgate
+
+      // compute sdev of tdbz
+      
+      double sdev = _computeSdev(tdbzKernel);
+      double tdbz = sqrt(sdev);
+      tdbz2D[igate][isample] = tdbz;
+      
+    } // isample
+  } // igate
+
+}
+
+////////////////////////////////////////////////////
 // Compute 2D standard deviation of zdr
 
 void DwellSpectra::computeZdrSdev()
@@ -535,7 +599,7 @@ void DwellSpectra::computeZdrSdev()
 
       // compute sdev of zdr
       
-      double zdrSdev = _computeSdevZdr(zdrKernel);
+      double zdrSdev = _computeSdev(zdrKernel);
       sdev2D[igate][isample] = zdrSdev;
       
     } // isample
@@ -604,28 +668,28 @@ void DwellSpectra::computePhidpSdev()
 }
 
 /////////////////////////////////////////////////
-// compute for ZDR SDEV
+// compute SDEV
 
-double DwellSpectra::_computeSdevZdr(const vector<double> &zdr)
+double DwellSpectra::_computeSdev(const vector<double> &val)
   
 {
   
-  double nZdr = 0.0;
-  double sumZdr = 0.0;
-  double sumZdrSq = 0.0;
+  double nVal = 0.0;
+  double sumVal = 0.0;
+  double sumValSq = 0.0;
   
-  for (size_t ii = 0; ii < zdr.size(); ii++) {
-    double val = zdr[ii];
-    sumZdr += val;
-    sumZdrSq += (val * val);
-    nZdr++;
+  for (size_t ii = 0; ii < val.size(); ii++) {
+    double vv = val[ii];
+    sumVal += vv;
+    sumValSq += (vv * vv);
+    nVal++;
   }
     
-  double meanZdr = sumZdr / nZdr;
+  double meanVal = sumVal / nVal;
   double sdev = 0.001;
-  if (nZdr > 2) {
-    double term1 = sumZdrSq / nZdr;
-    double term2 = meanZdr * meanZdr;
+  if (nVal > 2) {
+    double term1 = sumValSq / nVal;
+    double term2 = meanVal * meanVal;
     if (term1 >= term2) {
       sdev = sqrt(term1 - term2);
     }

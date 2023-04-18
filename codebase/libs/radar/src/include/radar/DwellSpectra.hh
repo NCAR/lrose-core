@@ -80,6 +80,8 @@ public:
 
   // set algorithm parameters
 
+  void setTdbzKernelNGates(size_t val) { _tdbzKernelNGates = val; }
+  void setTdbzKernelNSamples(size_t val) { _tdbzKernelNSamples = val; }
   void setSdevZdrKernelNGates(size_t val) { _sdevZdrKernelNGates = val; }
   void setSdevZdrKernelNSamples(size_t val) { _sdevZdrKernelNSamples = val; }
   void setSdevPhidpKernelNGates(size_t val) { _sdevPhidpKernelNGates = val; }
@@ -140,6 +142,7 @@ public:
   void computeDbzSpectra();
   void computeZdrSpectra();
   void computePhidpSpectra();
+  void computeTdbz();
   void computeZdrSdev();
   void computePhidpSdev();
   
@@ -176,6 +179,8 @@ private:
 
   // algorithm parameters
   
+  size_t _tdbzKernelNGates;
+  size_t _tdbzKernelNSamples;
   size_t _sdevZdrKernelNGates;
   size_t _sdevZdrKernelNSamples;
   size_t _sdevPhidpKernelNGates;
@@ -271,7 +276,7 @@ private:
                              double *specPower1D,
                              double *specDbm1D);
 
-  double _computeSdevZdr(const vector<double> &zdr);
+  double _computeSdev(const vector<double> &zdr);
   double _computeSdevPhidp(const vector<double> &phidp);
   void _computePhidpFoldingRange();
   
