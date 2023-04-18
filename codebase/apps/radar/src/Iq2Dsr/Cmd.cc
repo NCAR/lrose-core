@@ -493,9 +493,9 @@ void Cmd::_computeSpin(int nGates)
       double dbz = flds->dbz;
       if (dsc != MomentsFields::missingDouble &&
           dbz != MomentsFields::missingDouble) {
-	  nSpinChange += dsc;
-	  nSpinTotal++;
-	}
+        nSpinChange += dsc;
+        nSpinTotal++;
+      }
 
     } // jgate
       
@@ -900,9 +900,9 @@ void Cmd::_computePhidpFoldingRange(int nGates)
 // Returns 0 on success, -1 on failure
 
 int Cmd::_convertInterestMapToVector(const string &label,
-				      const Params::interest_map_point_t *map,
-				      int nPoints,
-				      vector<InterestMap::ImPoint> &pts)
+                                     const Params::interest_map_point_t *map,
+                                     int nPoints,
+                                     vector<InterestMap::ImPoint> &pts)
 
 {
 
