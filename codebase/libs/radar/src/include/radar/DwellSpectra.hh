@@ -143,6 +143,16 @@ public:
   void computeZdrSdev();
   void computePhidpSdev();
   
+  // Compute spectral noise for entire dwell for specified variable
+  // this is the min noise at any gate
+  
+  double computeDwellSpectralNoise(const TaArray2D<double> &specPower2D,
+                                   TaArray<double> &specNoise1D);
+  
+  // Compute noise from a power spectrum
+  
+  double computeSpectralNoise(const double *powerSpec, size_t nSamples);
+  
 protected:
   
 private:
@@ -201,9 +211,14 @@ private:
   bool _phidpFoldsAt90;
   double _phidpFoldVal, _phidpFoldRange;
 
+  // noise
+
+  double _specNoiseDwellHc;
+  
   // Arrays
 
-  TaArray<double> _window;
+  TaArray<double> _window1D;
+  TaArray<double> _specNoiseHc1D;
 
   bool _hcAvail, _vcAvail, _hxAvail, _vxAvail;
   

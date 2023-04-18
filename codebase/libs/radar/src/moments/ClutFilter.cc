@@ -958,7 +958,7 @@ double ClutFilter::computeSpectralNoise(const double *powerSpec,
   }
   double minSum = sum;
   
-  // not move through the spectrum one point at a time, computing
+  // now move through the spectrum one point at a time, computing
   // the sum for that run by removing the first point of the previous
   // run and adding the next point to the end.
   // keep track of the minimum sum

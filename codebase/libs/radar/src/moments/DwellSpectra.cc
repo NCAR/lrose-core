@@ -140,11 +140,13 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
 
   // allocate arrays
 
-  _window.alloc(nSamples);
+  _window1D.alloc(nSamples);
   for (size_t ii = 0; ii < nSamples; ii++) {
-    _window.dat()[ii] = 1.0;
+    _window1D.dat()[ii] = 1.0;
   }
   
+  _specNoiseHc1D.alloc(nSamples);
+
   _iqHc2D.alloc(nGates, nSamples);
   _iqVc2D.alloc(nGates, nSamples);
   _iqHx2D.alloc(nGates, nSamples);
@@ -189,7 +191,8 @@ void DwellSpectra::_freeArrays()
 
 {
 
-  _window.free();
+  _window1D.free();
+  _specNoiseHc1D.free();
   
   _iqHc2D.free();
   _iqVc2D.free();
@@ -249,7 +252,7 @@ void DwellSpectra::setWindow(const double *window, size_t nSamples)
 
 {
   assert(nSamples == _nSamples);
-  memcpy(_window.dat(), window, nSamples * sizeof(double));
+  memcpy(_window1D.dat(), window, nSamples * sizeof(double));
 }
 
 ///////////////////////////////////////////////////////////////
@@ -263,7 +266,7 @@ void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
   assert(nSamples == _nSamples);
   memcpy(_iqHc2D.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
   _iqWindowedHc2D = _iqHc2D;
-  RadarMoments::applyWindow(_iqWindowedHc2D.dat2D()[gateNum], _window.dat(), _nSamples);
+  RadarMoments::applyWindow(_iqWindowedHc2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _hcAvail = true;
 }
   
@@ -275,7 +278,7 @@ void DwellSpectra::setIqVc(const RadarComplex_t *iqVc,
   assert(nSamples == _nSamples);
   memcpy(_iqVc2D.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
   _iqWindowedVc2D = _iqVc2D;
-  RadarMoments::applyWindow(_iqWindowedVc2D.dat2D()[gateNum], _window.dat(), _nSamples);
+  RadarMoments::applyWindow(_iqWindowedVc2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _vcAvail = true;
 }
   
@@ -287,7 +290,7 @@ void DwellSpectra::setIqHx(const RadarComplex_t *iqHx,
   assert(nSamples == _nSamples);
   memcpy(_iqHx2D.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
   _iqWindowedHx2D = _iqHx2D;
-  RadarMoments::applyWindow(_iqWindowedHx2D.dat2D()[gateNum], _window.dat(), _nSamples);
+  RadarMoments::applyWindow(_iqWindowedHx2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _hxAvail = true;
 }
   
@@ -299,7 +302,7 @@ void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
   assert(nSamples == _nSamples);
   memcpy(_iqVx2D.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
   _iqWindowedVx2D = _iqVx2D;
-  RadarMoments::applyWindow(_iqWindowedVx2D.dat2D()[gateNum], _window.dat(), _nSamples);
+  RadarMoments::applyWindow(_iqWindowedVx2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _vxAvail = true;
 }
   
@@ -383,20 +386,38 @@ void DwellSpectra::computeDbzSpectra()
     return;
   }
 
-  double specScale = 10.0 * log10((double) _nSamples);
+  // compute spectral noise, using min of any gate
+  
+  _specNoiseDwellHc = computeDwellSpectralNoise(_specPowerHc2D, _specNoiseHc1D);
   
   double rangeKm = _startRangeKm;
   for (size_t igate = 0; igate < _nGates; igate++, rangeKm += _gateSpacingKm) {
     
-    double *specDbmHc1D = _specDbmHc2D.dat2D()[igate];
-    double *specDbz1D = _specDbz2D.dat2D()[igate];
+    double rangeCorr = 20.0 * log10(rangeKm);
     
+    double *specPowerHc1D = _specPowerHc2D.dat2D()[igate];
+    double *specDbz1D = _specDbz2D.dat2D()[igate];
+
     for (size_t isample = 0; isample < _nSamples; isample++) {
       
-      double dbm = specDbmHc1D[isample] - _calib.getReceiverGainDbHc();
+      double powerHc = specPowerHc1D[isample];
+      double powerHcNs = powerHc - _specNoiseDwellHc;
 
-      specDbz1D[isample] = dbm - specScale;
+      if (powerHcNs > 0.0) {
 
+        double snr = powerHcNs / _specNoiseDwellHc;
+        double snrDb = 10.0 * log10(snr);
+        double dbz =  snrDb + _calib.getBaseDbz1kmHc() + rangeCorr;
+        specDbz1D[isample] = dbz;
+        
+      } else {
+
+        // censored, set to low val
+        
+        specDbz1D[isample] = -50.0;
+
+      }
+      
     } // isample
 
   } // igate
@@ -702,6 +723,94 @@ void DwellSpectra::_computePhidpFoldingRange()
   }
   _phidpFoldRange = _phidpFoldVal * 2.0;
   
+}
+
+/////////////////////////////////////////////////////////////////
+// Compute spectral noise for entire dwell for specified variable
+// this is the min noise at any gate
+
+double DwellSpectra::computeDwellSpectralNoise(const TaArray2D<double> &specPower2D,
+                                               TaArray<double> &specNoise1D)
+  
+{
+
+  // get spectral noise at each gate
+  // compute the min spectral noise for the dwell
+
+  double specNoiseDwell = 1000.0;
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *specPower = specPower2D.dat2D()[igate];
+    double noise = computeSpectralNoise(specPower, _nSamples);
+    if (noise < specNoiseDwell) {
+      specNoiseDwell = noise;
+    }
+    specNoise1D.dat()[igate] = noise;
+  }
+
+  return specNoiseDwell;
+
+}
+
+/////////////////////////////////////////////////////
+// Compute noise from a power spectrum
+//
+// Divide spectrum into runs and compute the mean power
+// for each run, incrementing by one index at a time.
+//
+// The noise power is estimated as the mimumum of the section
+// powers.
+
+double DwellSpectra::computeSpectralNoise(const double *powerSpec,
+                                          size_t nSamples)
+  
+{
+
+  // for short spectra use the entire spectrum
+
+  if (nSamples < 8) {
+    double sum = 0.0;
+    for (size_t ii = 0; ii < nSamples; ii++) {
+      sum += powerSpec[ii];
+    }
+    double noisePower = sum / nSamples;
+    return noisePower;
+  }
+
+  // compute the size of a section
+
+  int nRuns = nSamples / 8;
+  if (nRuns < 8) {
+    nRuns = 8;
+  }
+  int nPtsRun = nSamples / nRuns;
+  
+  // compute the sum for the first run
+  
+  double sum = 0.0;
+  for (int ii = 0; ii < nPtsRun; ii++) {
+    sum += powerSpec[ii];
+  }
+  double minSum = sum;
+  
+  // now move through the spectrum one point at a time, computing
+  // the sum for that run by removing the first point of the previous
+  // run and adding the next point to the end.
+  // keep track of the minimum sum
+
+  for (size_t ii = nPtsRun; ii < nSamples; ii++) {
+    sum -= powerSpec[ii - nPtsRun];
+    sum += powerSpec[ii];
+    if (sum < minSum) {
+      minSum = sum;
+    }
+  }
+
+  // compute noise from minimum sum
+
+  double noisePower = minSum / nPtsRun;
+  
+  return noisePower;
+
 }
 
 #ifdef JUNK
