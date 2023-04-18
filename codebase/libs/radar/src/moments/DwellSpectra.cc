@@ -87,6 +87,8 @@ DwellSpectra::DwellSpectra()
   _sdevPhidpKernelNGates = 5;
   _sdevPhidpKernelNSamples = 3;
 
+  _createDefaultInterestMaps();
+
   prepareForData();
 
 }
@@ -877,6 +879,79 @@ double DwellSpectra::computeSpectralNoise(const double *powerSpec,
 
 }
 
+///////////////////////////////////////////////////////////////
+// Create the default interest maps and weights
+
+void DwellSpectra::_createDefaultInterestMaps()
+  
+{
+
+  vector<InterestMap::ImPoint> pts;
+  
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(35.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(45.0, 1.0));
+  setInterestMapTdbz(pts, 1.0);
+  
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(8.0, 1.0));
+  setInterestMapZdrSdev(pts, 1.0);
+
+  pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(64.0, 1.0));
+  setInterestMapPhidpSdev(pts, 1.0);
+
+  setCmdInterestThreshold(0.51);
+
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for dbz texture
+
+void DwellSpectra::setInterestMapTdbz
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapTdbz) {
+    delete _interestMapTdbz;
+  }
+  _interestMapTdbz = new InterestMap("Tdbz", pts, weight);
+  _weightTdbz = weight;
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for sdev of ZDR
+
+void DwellSpectra::setInterestMapZdrSdev
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapZdrSdev) {
+    delete _interestMapZdrSdev;
+  }
+  _interestMapZdrSdev = new InterestMap("ZdrSdev", pts, weight);
+  _weightZdrSdev = weight;
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for sdev of PHIDP
+
+void DwellSpectra::setInterestMapPhidpSdev
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapPhidpSdev) {
+    delete _interestMapPhidpSdev;
+  }
+  _interestMapPhidpSdev = new InterestMap("PhidpSdev", pts, weight);
+  _weightPhidpSdev = weight;
+}
+
 #ifdef JUNK
 
 ////////////////////////////////////////////////////
@@ -892,8 +967,6 @@ DwellSpectra::DwellSpectra()
   _nGates = 0;
   _nGatesAlloc = 0;
 
-#ifdef JUNK
-  
   _hasMissingPulses = false;
 
   _timeSecs = 0;
@@ -981,8 +1054,6 @@ DwellSpectra::DwellSpectra()
   _regr = new ForsytheRegrFilter;
   _regrHalf = new ForsytheRegrFilter;
   _regrStag = new ForsytheRegrFilter;
-
-#endif
 
 }
 

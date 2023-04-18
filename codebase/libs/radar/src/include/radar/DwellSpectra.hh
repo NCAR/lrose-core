@@ -91,6 +91,22 @@ public:
 
   void setCalibration(const IwrfCalib &val) { _calib = val; }
 
+  // set interest maps for cmd
+
+  void setInterestMapTdbz
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
+  void setInterestMapZdrSdev
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
+  void setInterestMapPhidpSdev
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
+  void setCmdInterestThreshold(double val);
+
   // set metadata
 
   void setTime(time_t timeSecs, int nanoSecs) {
@@ -219,7 +235,19 @@ private:
   // noise
 
   double _specNoiseDwellHc;
+
+  // interest maps for CMD
   
+  InterestMap *_interestMapTdbz;
+  InterestMap *_interestMapZdrSdev;
+  InterestMap *_interestMapPhidpSdev;
+
+  double _weightTdbz;
+  double _weightZdrSdev;
+  double _weightPhidpSdev;
+
+  double _cmdInterestThreshold;
+
   // Arrays
 
   TaArray<double> _window1D;
@@ -279,6 +307,7 @@ private:
   double _computeSdev(const vector<double> &zdr);
   double _computeSdevPhidp(const vector<double> &phidp);
   void _computePhidpFoldingRange();
+  void _createDefaultInterestMaps();
   
 };
 
