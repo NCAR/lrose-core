@@ -157,7 +157,7 @@ public:
   void computePowerSpectra();
   void computeDbzSpectra();
   void computeZdrSpectra();
-  void computePhidpSpectra();
+  void computePhidpRhohvSpectra();
   void computeTdbz();
   void computeZdrSdev();
   void computePhidpSdev();
@@ -280,6 +280,7 @@ private:
   TaArray2D<double> _specDbz2D;
   TaArray2D<double> _specZdr2D;
   TaArray2D<double> _specPhidp2D;
+  TaArray2D<double> _specRhohv2D;
 
   TaArray2D<double> _specTdbz2D;
   TaArray2D<double> _specZdrSdev2D;

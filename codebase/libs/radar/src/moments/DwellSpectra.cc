@@ -179,6 +179,7 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _specDbz2D.alloc(nGates, nSamples);
   _specZdr2D.alloc(nGates, nSamples);
   _specPhidp2D.alloc(nGates, nSamples);
+  _specRhohv2D.alloc(nGates, nSamples);
 
   _specTdbz2D.alloc(nGates, nSamples);
   _specZdrSdev2D.alloc(nGates, nSamples);
@@ -230,6 +231,7 @@ void DwellSpectra::_freeArrays()
   _specDbz2D.free();
   _specZdr2D.free();
   _specPhidp2D.free();
+  _specRhohv2D.free();
 
   _specTdbz2D.free();
   _specZdrSdev2D.free();
@@ -463,9 +465,9 @@ void DwellSpectra::computeZdrSpectra()
 }
 
 ////////////////////////////////////////////////////
-// Compute phidp spectra
+// Compute phidp and rhohv spectra
 
-void DwellSpectra::computePhidpSpectra()
+void DwellSpectra::computePhidpRhohvSpectra()
   
 {
 
@@ -477,13 +479,18 @@ void DwellSpectra::computePhidpSpectra()
     
     RadarComplex_t *specCompHc1D = _specCompHc2D.dat2D()[igate];
     RadarComplex_t *specCompVc1D = _specCompVc2D.dat2D()[igate];
+    double *specPowerHc1D = _specPowerHc2D.dat2D()[igate];
+    double *specPowerVc1D = _specPowerVc2D.dat2D()[igate];
     double *specPhidp1D = _specPhidp2D.dat2D()[igate];
+    double *specRhohv1D = _specRhohv2D.dat2D()[igate];
     
     for (size_t isample = 0; isample < _nSamples; isample++) {
       
       RadarComplex_t phaseDiff = RadarComplex::conjugateProduct(specCompHc1D[isample],
                                                                 specCompVc1D[isample]);
       specPhidp1D[isample] = RadarComplex::argDeg(phaseDiff);
+      specRhohv1D[isample] =
+        RadarComplex::mag(phaseDiff) / sqrt(specPowerHc1D[isample] * specPowerVc1D[isample]);
 
     } // isample
 
@@ -905,7 +912,7 @@ void DwellSpectra::computeSpectralCmd()
   computePowerSpectra();
   computeDbzSpectra();
   computeZdrSpectra();
-  computePhidpSpectra();
+  computePhidpRhohvSpectra();
   computeTdbz();
   computeZdrSdev();
   computePhidpSdev();
