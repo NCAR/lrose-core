@@ -49,6 +49,7 @@
 #include <radar/GateData.hh>
 #include <radar/MomentsFields.hh>
 #include <radar/KdpFilt.hh>
+#include <radar/DwellSpectra.hh>
 
 #include "Params.hh"
 
@@ -97,6 +98,10 @@ public:
   
   int computeMoments(Params::fft_window_t windowType
                      = Params::FFT_WINDOW_VONHANN);
+
+  // get spectra in range for dwell, after computeMoments
+
+  const DwellSpectra &getSpectra() const { return _spectra; }
 
   // set methods
 
@@ -374,6 +379,10 @@ private:
   vector<double> _phaseDiffs;
   vector<IwrfTsPulse::burst_phase_t> _burstPhases;
 
+  // spectra in range for dwell
+
+  DwellSpectra _spectra;
+
   // private functions
 
   void _init();
@@ -441,6 +450,8 @@ private:
   
   void _computePhaseDiffs
     (const deque<const IwrfTsPulse *> &pulseQueue, int maxTrips);
+
+  void _loadDwellSpectra();
   
   // copy method for assignment and copy constructor
 

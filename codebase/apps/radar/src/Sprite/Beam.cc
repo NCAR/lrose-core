@@ -745,6 +745,10 @@ int Beam::computeMoments(Params::fft_window_t windowType
 
   _copyDataToOutputFields();
 
+  // load up time series for dwell spectra
+
+  _loadDwellSpectra();
+
   return 0;
 
 }
@@ -3861,6 +3865,75 @@ void Beam::_computePhaseDiffs
       }
     }
   }
+
+}
+
+/////////////////////////////////////////////////////////////////
+// load up time series in dwell spectra
+
+void Beam::_loadDwellSpectra()
+  
+{
+
+  // dimensions
+  
+  _spectra.setDimensions(_nGates, _nSamples);
+
+  // metadata
+
+  _spectra.setTime(_timeSecs, _nanoSecs);
+  _spectra.setElevation(_el);
+  _spectra.setAzimuth(_az);
+  _spectra.setAntennaRate(getAntennaRate());
+
+  _spectra.setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  _spectra.setXmitRcvMode(_xmitRcvMode);
+  _spectra.setPrt(_prt);
+  _spectra.setNyquist(_nyquist);
+  _spectra.setPulseWidthUs(_pulseWidth);
+  _spectra.setWavelengthM(_wavelengthM);
+
+  // windowing
+
+  _spectra.setWindow(_window, _nSamples);
+
+  // set time series
+
+  _spectra.prepareForData();
+
+  for (size_t igate = 0; igate < _gateData.size(); igate++) {
+
+    GateData *gd = _gateData[igate];
+
+    if (gd->iqhcOrig != NULL) {
+      _spectra.setIqHc(gd->iqhcOrig, igate, _nSamples);
+    }
+    
+    if (gd->iqvcOrig != NULL) {
+      _spectra.setIqVc(gd->iqvcOrig, igate, _nSamples);
+    }
+    
+    if (gd->iqhxOrig != NULL) {
+      _spectra.setIqHx(gd->iqhxOrig, igate, _nSamples);
+    }
+    
+    if (gd->iqvxOrig != NULL) {
+      _spectra.setIqVx(gd->iqvxOrig, igate, _nSamples);
+    }
+    
+  } // igate
+
+  // compute spectra
+
+  _spectra.computePowerSpectra();
+  // _spectra.computeDbzSpectra();
+  // _spectra.computeZdrSpectra();
+  // _spectra.computePhidpRhohvSpectra();
+  // _spectra.computeTdbz();
+  // _spectra.computeZdrSdev();
+  // _spectra.computePhidpSdev();
+
+  // _spectra.computeSpectralCmd();
 
 }
 

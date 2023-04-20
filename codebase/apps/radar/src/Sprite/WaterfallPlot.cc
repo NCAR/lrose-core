@@ -238,12 +238,15 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     double *power = power_.alloc(nSamples);
     double *dbm = dbm_.alloc(nSamples);
     _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+
     // _powerFilt = RadarComplex::meanPower(power, nSamples);
     // _powerClut = _powerUnfilt - _powerFilt;
+
+    // double *dbm = beam->getSpectra().getSpecPowerHc2D()[igate];
     
     // apply median filter
     
-    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
+    // FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
       
     // plot the samples
     

@@ -809,7 +809,7 @@ void IqPlot::_plotSpectralSz864(QPainter &painter,
   if (_nSamples != 64) {
     cerr << "WARNING - IqPlot::_plotSpectralSz864" << endl;
     cerr << "  nSamples not equal to 64: " << _nSamples << endl;
-    cerr << "  only the first 64 will be used" << endl;
+    return;
   }
 
   
