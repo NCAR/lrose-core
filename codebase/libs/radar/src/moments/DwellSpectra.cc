@@ -87,6 +87,10 @@ DwellSpectra::DwellSpectra()
   _sdevPhidpKernelNGates = 5;
   _sdevPhidpKernelNSamples = 3;
 
+  _interestMapTdbz = NULL;
+  _interestMapZdrSdev = NULL;
+  _interestMapPhidpSdev = NULL;
+
   _createDefaultInterestMaps();
 
   prepareForData();
@@ -910,13 +914,13 @@ void DwellSpectra::computeSpectralCmd()
   // compute the features we need
   
   computePowerSpectra();
-  computeDbzSpectra();
-  computeZdrSpectra();
-  computePhidpRhohvSpectra();
-  computeTdbz();
-  computeZdrSdev();
-  computePhidpSdev();
-
+  // computeDbzSpectra();
+  // computeZdrSpectra();
+  // computePhidpRhohvSpectra();
+  // computeTdbz();
+  // computeZdrSdev();
+  // computePhidpSdev();
+ 
   // accumulate the interest
   
   double **tdbz = _specTdbz2D.dat2D();

@@ -105,7 +105,7 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setCmdInterestThreshold(double val);
+  void setCmdInterestThreshold(double val) { _cmdInterestThreshold = val; }
 
   // set metadata
 
@@ -172,6 +172,55 @@ public:
   // Compute noise from a power spectrum
   
   double computeSpectralNoise(const double *powerSpec, size_t nSamples);
+
+  // get spectra
+
+  bool getHcAvail() const { return _hcAvail; }
+  bool getVcAvail() const { return _vcAvail; }
+  bool getHxAvail() const { return _hxAvail; }
+  bool getVxAvail() const { return _vxAvail; }
+  
+  RadarComplex_t **getIqHc() const { return _iqHc2D.dat2D(); }
+
+  RadarComplex_t **getIqHc2D() const { return _iqHc2D.dat2D(); }
+  RadarComplex_t **getIqVc2D() const { return _iqVc2D.dat2D(); }
+  RadarComplex_t **getIqHx2D() const { return _iqHx2D.dat2D(); }
+  RadarComplex_t **getIqVx2D() const { return _iqVx2D.dat2D(); }
+
+  RadarComplex_t **getIqWindowedHc2D() const { return _iqWindowedHc2D.dat2D(); }
+  RadarComplex_t **getIqWindowedVc2D() const { return _iqWindowedVc2D.dat2D(); }
+  RadarComplex_t **getIqWindowedHx2D() const { return _iqWindowedHx2D.dat2D(); }
+  RadarComplex_t **getIqWindowedVx2D() const { return _iqWindowedVx2D.dat2D(); }
+  
+  RadarComplex_t **getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
+  RadarComplex_t **getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
+  RadarComplex_t **getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
+  RadarComplex_t **getSpecCompVx2D() const { return _specCompVx2D.dat2D(); }
+  
+  double **getSpecPowerHc2D() const { return _specPowerHc2D.dat2D(); }
+  double **getSpecPowerVc2D() const { return _specPowerVc2D.dat2D(); }
+  double **getSpecPowerHx2D() const { return _specPowerHx2D.dat2D(); }
+  double **getSpecPowerVx2D() const { return _specPowerVx2D.dat2D(); }
+  
+  double **getSpecDbmHc2D() const { return _specDbmHc2D.dat2D(); }
+  double **getSpecDbmVc2D() const { return _specDbmVc2D.dat2D(); }
+  double **getSpecDbmHx2D() const { return _specDbmHx2D.dat2D(); }
+  double **getSpecDbmVx2D() const { return _specDbmVx2D.dat2D(); }
+  
+  double **getSpecDbz2D() const { return _specDbz2D.dat2D(); }
+  double **getSpecZdr2D() const { return _specZdr2D.dat2D(); }
+  double **getSpecPhidp2D() const { return _specPhidp2D.dat2D(); }
+  double **getSpecRhohv2D() const { return _specRhohv2D.dat2D(); }
+
+  double **getSpecTdbz2D() const { return _specTdbz2D.dat2D(); }
+  double **getSpecZdrSdev2D() const { return _specZdrSdev2D.dat2D(); }
+  double **getSpecPhidpSdev2D() const { return _specPhidpSdev2D.dat2D(); }
+
+  double **getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
+  double **getSpecZdrSdevInterest2D() const { return _specZdrSdevInterest2D.dat2D(); }
+  double **getSpecPhidpSdevInterest2D() const { return _specPhidpSdevInterest2D.dat2D(); }
+  
+  double **getSpecCmd2D() const { return _specCmd2D.dat2D(); }
   
 protected:
   
