@@ -226,23 +226,23 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     
     // get Iq data for this gate
 
-    const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iq_;
-    RadarComplex_t *iq = iq_.alloc(nSamples);
-    memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+    // const GateData *gateData = beam->getGateData()[igate];
+    // TaArray<RadarComplex_t> iq_;
+    // RadarComplex_t *iq = iq_.alloc(nSamples);
+    // memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
     // _powerUnfilt = RadarComplex::meanPower(iq, nSamples);
     
     // compute power spectrum
     
-    TaArray<double> power_, dbm_;
-    double *power = power_.alloc(nSamples);
-    double *dbm = dbm_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iq, power, dbm);
-
+    // TaArray<double> power_, dbm_;
+    // double *power = power_.alloc(nSamples);
+    // double *dbm = dbm_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    
     // _powerFilt = RadarComplex::meanPower(power, nSamples);
     // _powerClut = _powerUnfilt - _powerFilt;
-
-    // double *dbm = beam->getSpectra().getSpecPowerHc2D()[igate];
+    
+    double *dbm = beam->getSpectra().getSpecDbmHc2D()[igate];
     
     // apply median filter
     
@@ -251,7 +251,7 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     // plot the samples
     
     for (size_t ii = 0; ii < nSamples; ii++) {
-      
+
       // get color
 
       int red, green, blue;
@@ -311,18 +311,20 @@ void WaterfallPlot::_plotVc(QPainter &painter,
     
     // get Iq data for this gate
 
-    const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iq_;
-    RadarComplex_t *iq = iq_.alloc(nSamples);
-    memcpy(iq, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+    // const GateData *gateData = beam->getGateData()[igate];
+    // TaArray<RadarComplex_t> iq_;
+    // RadarComplex_t *iq = iq_.alloc(nSamples);
+    // memcpy(iq, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
-    TaArray<double> power_, dbm_;
-    double *power = power_.alloc(nSamples);
-    double *dbm = dbm_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // TaArray<double> power_, dbm_;
+    // double *power = power_.alloc(nSamples);
+    // double *dbm = dbm_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
     
+    double *dbm = beam->getSpectra().getSpecDbmVc2D()[igate];
+
     // apply 3-pt median filter
     
     FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
@@ -390,18 +392,20 @@ void WaterfallPlot::_plotHx(QPainter &painter,
     
     // get Iq data for this gate
 
-    const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iq_;
-    RadarComplex_t *iq = iq_.alloc(nSamples);
-    memcpy(iq, gateData->iqhxOrig, nSamples * sizeof(RadarComplex_t));
+    // const GateData *gateData = beam->getGateData()[igate];
+    // TaArray<RadarComplex_t> iq_;
+    // RadarComplex_t *iq = iq_.alloc(nSamples);
+    // memcpy(iq, gateData->iqhxOrig, nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
-    TaArray<double> power_, dbm_;
-    double *power = power_.alloc(nSamples);
-    double *dbm = dbm_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // TaArray<double> power_, dbm_;
+    // double *power = power_.alloc(nSamples);
+    // double *dbm = dbm_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
     
+    double *dbm = beam->getSpectra().getSpecDbmHx2D()[igate];
+
     // apply 3-pt median filter
     
     FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
@@ -469,18 +473,20 @@ void WaterfallPlot::_plotVx(QPainter &painter,
     
     // get Iq data for this gate
 
-    const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iq_;
-    RadarComplex_t *iq = iq_.alloc(nSamples);
-    memcpy(iq, gateData->iqvxOrig, nSamples * sizeof(RadarComplex_t));
+    // const GateData *gateData = beam->getGateData()[igate];
+    // TaArray<RadarComplex_t> iq_;
+    // RadarComplex_t *iq = iq_.alloc(nSamples);
+    // memcpy(iq, gateData->iqvxOrig, nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
-    TaArray<double> power_, dbm_;
-    double *power = power_.alloc(nSamples);
-    double *dbm = dbm_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // TaArray<double> power_, dbm_;
+    // double *power = power_.alloc(nSamples);
+    // double *dbm = dbm_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
     
+    double *dbm = beam->getSpectra().getSpecDbmVx2D()[igate];
+
     // apply 3-pt median filter
     
     FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
@@ -548,25 +554,27 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
     
     // get Iq data for this gate
     
-    const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = beam->getGateData()[igate];
     
     // compute ZDR spectrum
     
-    TaArray<double> powerHc_, dbmHc_;
-    double *powerHc = powerHc_.alloc(nSamples);
-    double *dbmHc = dbmHc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
+    // TaArray<double> powerHc_, dbmHc_;
+    // double *powerHc = powerHc_.alloc(nSamples);
+    // double *dbmHc = dbmHc_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
     
-    TaArray<double> powerVc_, dbmVc_;
-    double *powerVc = powerVc_.alloc(nSamples);
-    double *dbmVc = dbmVc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
+    // TaArray<double> powerVc_, dbmVc_;
+    // double *powerVc = powerVc_.alloc(nSamples);
+    // double *dbmVc = dbmVc_.alloc(nSamples);
+    // _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
     
-    TaArray<double> zdr_;
-    double *zdr = zdr_.alloc(nSamples);
-    for (size_t ii = 0; ii < nSamples; ii++) {
-      zdr[ii] = dbmHc[ii] - dbmVc[ii];
-    }
+    // TaArray<double> zdr_;
+    // double *zdr = zdr_.alloc(nSamples);
+    // for (size_t ii = 0; ii < nSamples; ii++) {
+    //   zdr[ii] = dbmHc[ii] - dbmVc[ii];
+    // }
+
+    double *zdr = beam->getSpectra().getSpecZdr2D()[igate];
 
     // apply 3-pt median filter
     
@@ -575,7 +583,7 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
     // plot the samples
     
     for (size_t ii = 0; ii < nSamples; ii++) {
-      
+
       // get color
 
       int red, green, blue;
@@ -635,40 +643,42 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
     
     // get Iq data for this gate
     
-    const GateData *gateData = beam->getGateData()[igate];
-    TaArray<RadarComplex_t> iqHc_, iqVc_;
-    RadarComplex_t *iqHc = iqHc_.alloc(nSamples);
-    RadarComplex_t *iqVc = iqVc_.alloc(nSamples);
-    memcpy(iqHc, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-    memcpy(iqVc, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+    // const GateData *gateData = beam->getGateData()[igate];
+    // TaArray<RadarComplex_t> iqHc_, iqVc_;
+    // RadarComplex_t *iqHc = iqHc_.alloc(nSamples);
+    // RadarComplex_t *iqVc = iqVc_.alloc(nSamples);
+    // memcpy(iqHc, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
+    // memcpy(iqVc, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
     
-    // apply window to time series
+    // // apply window to time series
     
-    TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-    _applyWindow(iqHc, iqWindowedHc, nSamples);
-    _applyWindow(iqVc, iqWindowedVc, nSamples);
+    // TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
+    // RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
+    // RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
+    // _applyWindow(iqHc, iqWindowedHc, nSamples);
+    // _applyWindow(iqVc, iqWindowedVc, nSamples);
     
-    // compute spectra
+    // // compute spectra
     
-    TaArray<RadarComplex_t> specHc_, specVc_;
-    RadarComplex_t *specHc = specHc_.alloc(nSamples);
-    RadarComplex_t *specVc = specVc_.alloc(nSamples);
-    RadarFft fft(nSamples);
-    fft.fwd(iqWindowedHc, specHc);
-    fft.shift(specHc);
-    fft.fwd(iqWindowedVc, specVc);
-    fft.shift(specVc);
+    // TaArray<RadarComplex_t> specHc_, specVc_;
+    // RadarComplex_t *specHc = specHc_.alloc(nSamples);
+    // RadarComplex_t *specVc = specVc_.alloc(nSamples);
+    // RadarFft fft(nSamples);
+    // fft.fwd(iqWindowedHc, specHc);
+    // fft.shift(specHc);
+    // fft.fwd(iqWindowedVc, specVc);
+    // fft.shift(specVc);
 
-    // compute phidp spectrum
+    // // compute phidp spectrum
 
-    TaArray<double> phidp_;
-    double *phidp = phidp_.alloc(nSamples);
-    for (size_t ii = 0; ii < nSamples; ii++) {
-      RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
-      phidp[ii] = RadarComplex::argDeg(diff);
-    }
+    // TaArray<double> phidp_;
+    // double *phidp = phidp_.alloc(nSamples);
+    // for (size_t ii = 0; ii < nSamples; ii++) {
+    //   RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
+    //   phidp[ii] = RadarComplex::argDeg(diff);
+    // }
+    
+    double *phidp = beam->getSpectra().getSpecPhidp2D()[igate];
     
     // apply 3-pt median filter
     
