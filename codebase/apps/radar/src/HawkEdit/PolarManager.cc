@@ -1263,6 +1263,7 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
     // for non-fatal and warning messages
     errorMessage("Warning", ex.what());
   }
+
   cerr << "_getArchiveDataPlainVanilla exit" << endl;
   LOG(DEBUG) << "exit";
   return 0;
@@ -2915,7 +2916,8 @@ void PolarManager::_openFile()
     boundaryPointEditorView->setVisible(false);
   }
 
-  _timeNavController->setSliderPosition();
+  bool reReadData = false;
+  _timeNavController->setSliderPosition(reReadData);
   string path = _timeNavController->getSelectedPath();
   _undoRedoController->reset(path, _timeNavController->getNFiles());
   _undoRedoController->waterMarkVersion();

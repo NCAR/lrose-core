@@ -60,7 +60,7 @@ public:
 
   ~TimeNavController();
 
-  void setSliderPosition();
+  void setSliderPosition(bool update = true);
 
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);

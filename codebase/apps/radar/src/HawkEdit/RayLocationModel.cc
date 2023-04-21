@@ -207,14 +207,14 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
 
       //float T_deg = (georef->getHeading() + cfac->getHeadingCorr())  + 
       //        (georef->getDrift() + cfac->getDriftCorr());
-      float T_deg = (georef->getHeading())  + 
-              (georef->getDrift());              
-      float T = T_deg * Radx::DegToRad;
+      //float T_deg = (georef->getHeading())  + 
+      //        (georef->getDrift());              
+      //float T = T_deg * Radx::DegToRad;
       // CfRadial has the track-relative rotation,
       // but Dorade files, don't have this value, it is missing.
       // what to use for Dorade? azimuth - T? or Rotation - Track?
       double az = georef->getTrackRelRot(); // georef->getRotation()  - T_deg; // getTrackRelEl();
-      if (az == -9999) {
+      if (az == Radx::missingMetaDouble) {
         // use the rotation angle for the az; this is the best guess in this
         // situation.
         az = georef->getRotation();
@@ -284,10 +284,15 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
      // RadxCfactors *cfac = ray->getCfactors();
     //float T_deg = (georef->getHeading() + cfac->getHeadingCorr())  + 
     //          (georef->getDrift() + cfac->getDriftCorr());
-    float T_deg = (georef->getHeading())  + 
-              (georef->getDrift());                
-    float T = T_deg * Radx::DegToRad;
+    //float T_deg = (georef->getHeading())  + 
+    //          (georef->getDrift());                
+    //float T = T_deg * Radx::DegToRad;
       double az = georef->getTrackRelRot(); // ray->getGeoreference()->getTrackRelRot();
+       if (az == Radx::missingMetaDouble) {
+        // use the rotation angle for the az; this is the best guess in this
+        // situation.
+        az = georef->getRotation();
+      }
       while (az < 0) {
         az += 360.0;  
         //TODO: where to handle this?? when making mods for survellance? or somehwere else??

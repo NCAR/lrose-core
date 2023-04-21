@@ -124,9 +124,9 @@ int TimeNavController::getNFiles() {
   return _model->getNArchiveFiles();
 }
 
-void TimeNavController::setSliderPosition() {
+void TimeNavController::setSliderPosition(bool update) {
   int value = _model->getPositionOfSelection();
-  _view->setSliderPosition(value);
+  _view->setSliderPosition(value, update);
 }
 
 string &TimeNavController::getSelectedArchiveFile() {

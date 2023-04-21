@@ -441,13 +441,13 @@ void DataModel::getRayData(string path, vector<string> &fieldNames,
   readData(path, fieldNames, sweepNumber);
 }
 
-void DataModel::applyCorrectionFactors() {
+//void DataModel::applyCorrectionFactors() {
   //adjustAnglesForElevationSurveillance(_vol);
-}
+//}
 
-void DataModel::withdrawCorrectionFactors() {
+//void DataModel::withdrawCorrectionFactors() {
   //resetAnglesForElevationSurveillance(_vol);
-}
+//}
 
 /*
 void DataModel::resetAnglesForElevationSurveillance(RadxVol *_vol) {
@@ -641,30 +641,61 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
 void DataModel::_sanityCheckVolume() {
 
+  // accumulate warning or error information, then send
+  // the appropriate level of information.
+  // fatal errors, throw a string exception
+  string fatalErrorMsg;
+  bool errors = false;
+  // warnings, throw a std::invalide_argument exception
+  string warningMsg;
+  bool warnings = false;
+
   if (getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
 
+      // check if georeferences have been applied for the first ray
+      bool areGeorefsApplied = getGeoreferenceApplied(0);
+      if (!areGeorefsApplied) {
+        // issue a warning ...
+        warningMsg.append("HawkEdit will display the data as-is, still allow any edits, ");
+        warningMsg.append("and examination of the data. However, these data are NOT considered ready and it is ");
+        warningMsg.append("recommended to run RadxConvert, to prepare the data for ");
+        warningMsg.append("HawkEdit display and editing.");
+        warnings = true;
+      }
+
+      // get georefs on first ray
       const RadxGeoref *georef = getGeoreference(0);
       if (georef == NULL) {
-        string msg = "HawkEdit detected missing georeference block for a Y-Prime radar. ";
-        msg.append("This information is needed to properly display the field data.  ");
-        throw std::invalid_argument(msg);
-      }
+        warningMsg.append("HawkEdit detected a Y-Prime radar. ");
+        warningMsg.append("Georeference information is missing.  ");
+        warningMsg.append("This information is needed to properly display the field data. ");
+        warningMsg.append("Azimuth will be used in the PPI display, instead of rotation. ");
+        warnings = true;
+        // TODO: should this be a warning? and just use the azimuth since there is no rotation?
+      } else {
+        double az = georef->getTrackRelRot();
+        if (az == Radx::missingMetaDouble) {
+          // this is alright, we will just use the rotation from the georefs block.
 
-      double az = georef->getTrackRelRot();
-      if (az == -9999) { // TODO: this should be a Radx::Missing??
-        // Where to check this? Detect in DataModel? 
-        // if PRIMARY_AXIS_Y_PRIME, and georef is null, or if georef->getTrackRelRot is missing,
-        //   send message to PolarManager.  PolarManager must display the message.
-        // So, it must propogate up that far.
-        string msg;
-        msg.append("HawkEdit detected the track-relative rotation is missing for a Y-Prime radar. ");
-        msg.append("This information is needed to properly display the field data.  ");
-        msg.append("If the displayed data do not appear as expected, ");
-        msg.append("please exit HawkEdit and use RadxConvert with the parameter ");
-        msg.append("apply_georeference_corrections = TRUE to fix this issue.");
-        throw std::invalid_argument(msg);
+          // Where to check this? Detect in DataModel? 
+          // if PRIMARY_AXIS_Y_PRIME, and georef is null, or if georef->getTrackRelRot is missing,
+          //   send message to PolarManager.  PolarManager must display the message.
+          // So, it must propogate up that far.
+          // warningMsg.append("HawkEdit detected the track-relative rotation is missing for a Y-Prime radar. ");
+          // warningMsg.append("This information is needed to properly display the field data.  ");
+          // warningMsg.append("If the displayed data do not appear as expected, ");
+          // warningMsg.append("please exit HawkEdit and use RadxConvert with the parameter ");
+          // warningMsg.append("apply_georeference_corrections = TRUE to fix this issue.");
+          // warnings = true;
+        }
       }
+  }
 
+  if (warnings) {
+    throw std::invalid_argument(warningMsg);
+  } 
+  if (errors) {
+    throw std::invalid_argument(fatalErrorMsg);
   }
 
 }
@@ -917,6 +948,7 @@ void DataModel::writeData(string path, RadxVol *vol, bool compressed) {
 int DataModel::mergeDataFiles(string dest_path, string source_path, string original_path) {
 
   writeWithMergeData(dest_path, source_path, original_path);
+  return 0;
 
 }
 
@@ -1662,10 +1694,15 @@ const RadxGeoref *DataModel::getGeoreference(size_t rayIdx) {
     _vol->setLocationFromStartRay();
     georef = ray->getGeoreference();
     if (georef == NULL) {
-      throw "BBUnfoldAircraftWind: Georef is null. Cannot find ew_wind, ns_wind, vert_wind";
+      throw "could not recover from missing georeference information";
     }
   } 
   return georef;
+}
+
+bool DataModel::getGeoreferenceApplied(size_t rayIdx) {
+  RadxRay *ray = getRay(rayIdx);
+  return ray->getGeorefApplied(); 
 }
 
 void DataModel::_setupVolRead(RadxFile &file, vector<string> &fieldNames,
