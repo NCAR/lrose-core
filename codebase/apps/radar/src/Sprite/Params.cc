@@ -1564,7 +1564,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 9;
+        tt->struct_def.fields[0].enum_def.nfields = 10;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1579,12 +1579,14 @@
         tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_SDEV_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_CMD");
-        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_SDEV_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_CMD");
+        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_CMD;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1801,6 +1803,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_phidp_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("phidp.colors");
+    tt++;
+    
+    // Parameter 'waterfall_rhohv_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_rhohv_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for rhohv");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_rhohv_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("rhohv.colors");
     tt++;
     
     // Parameter 'waterfall_sdev_zdr_color_scale_name'
@@ -2148,7 +2162,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_iq_plots->plot_type - (char *) _iq_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iq_plot_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 11;
+        tt->struct_def.fields[0].enum_def.nfields = 12;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRAL_POWER");
@@ -2159,20 +2173,22 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = SPECTRAL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SPECTRAL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[3].val = SPECTRAL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_SZ864");
-        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_SZ864;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("TS_POWER");
-        tt->struct_def.fields[0].enum_def.fields[5].val = TS_POWER;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[6].val = TS_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("I_VALS");
-        tt->struct_def.fields[0].enum_def.fields[7].val = I_VALS;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("Q_VALS");
-        tt->struct_def.fields[0].enum_def.fields[8].val = Q_VALS;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("I_VS_Q");
-        tt->struct_def.fields[0].enum_def.fields[9].val = I_VS_Q;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("PHASOR");
-        tt->struct_def.fields[0].enum_def.fields[10].val = PHASOR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("SPECTRAL_SZ864");
+        tt->struct_def.fields[0].enum_def.fields[5].val = SPECTRAL_SZ864;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_POWER");
+        tt->struct_def.fields[0].enum_def.fields[6].val = TS_POWER;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("TS_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[7].val = TS_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VALS");
+        tt->struct_def.fields[0].enum_def.fields[8].val = I_VALS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("Q_VALS");
+        tt->struct_def.fields[0].enum_def.fields[9].val = Q_VALS;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[10].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[11].val = PHASOR;
       tt->struct_def.fields[1].ftype = tdrpStrDup("rx_channel_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("rx_channel");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -2381,7 +2397,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_iq_plot_static_ranges->plot_type - (char *) _iq_plot_static_ranges;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iq_plot_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 11;
+        tt->struct_def.fields[0].enum_def.nfields = 12;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRAL_POWER");
@@ -2392,20 +2408,22 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = SPECTRAL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SPECTRAL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[3].val = SPECTRAL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_SZ864");
-        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_SZ864;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("TS_POWER");
-        tt->struct_def.fields[0].enum_def.fields[5].val = TS_POWER;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[6].val = TS_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("I_VALS");
-        tt->struct_def.fields[0].enum_def.fields[7].val = I_VALS;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("Q_VALS");
-        tt->struct_def.fields[0].enum_def.fields[8].val = Q_VALS;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("I_VS_Q");
-        tt->struct_def.fields[0].enum_def.fields[9].val = I_VS_Q;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("PHASOR");
-        tt->struct_def.fields[0].enum_def.fields[10].val = PHASOR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("SPECTRAL_SZ864");
+        tt->struct_def.fields[0].enum_def.fields[5].val = SPECTRAL_SZ864;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_POWER");
+        tt->struct_def.fields[0].enum_def.fields[6].val = TS_POWER;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("TS_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[7].val = TS_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VALS");
+        tt->struct_def.fields[0].enum_def.fields[8].val = I_VALS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("Q_VALS");
+        tt->struct_def.fields[0].enum_def.fields[9].val = Q_VALS;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[10].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[11].val = PHASOR;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("min_val");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;

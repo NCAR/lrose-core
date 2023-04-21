@@ -1828,6 +1828,9 @@ string IqPlot::getName()
     case Params::SPECTRAL_PHIDP:
       ptypeStr =  "SPECTRAL_PHIDP";
       break;
+    case Params::SPECTRAL_RHOHV:
+      ptypeStr =  "SPECTRAL_RHOHV";
+      break;
     case Params::SPECTRAL_SZ864:
       ptypeStr =  "SPECTRAL_SZ864";
       break;
@@ -1883,6 +1886,7 @@ string IqPlot::getXUnits()
     case Params::SPECTRAL_PHASE:
     case Params::SPECTRAL_ZDR:
     case Params::SPECTRAL_PHIDP:
+    case Params::SPECTRAL_RHOHV:
     case Params::TS_POWER:
     case Params::TS_PHASE:
     case Params::I_VALS:
@@ -1910,6 +1914,8 @@ string IqPlot::getYUnits()
       return "dB";
     case Params::SPECTRAL_PHIDP:
       return "deg";
+    case Params::SPECTRAL_RHOHV:
+      return "";
     case Params::TS_POWER:
       return "dbm";
     case Params::TS_PHASE:

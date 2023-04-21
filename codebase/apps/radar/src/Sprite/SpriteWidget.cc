@@ -1709,6 +1709,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotPhidp);
   
+  QAction plotRhohv("Plot RHOHV", &contextMenu);
+  connect(&plotRhohv, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_RHOHV);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotRhohv);
+  
   QAction plotSdevZdr("Plot SDEV_ZDR", &contextMenu);
   connect(&plotSdevZdr, &QAction::triggered,
           [this, id] () {
@@ -2068,6 +2076,14 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
             _configureIqPlot(id);
           } );
   setPlotTypeMenu.addAction(&plotSpectrumPhidp);
+  
+  QAction plotSpectrumRhohv("Plot spectral rhohv", &contextMenu);
+  connect(&plotSpectrumRhohv, &QAction::triggered,
+          [this, id] () {
+            _iqPlots[id]->setPlotType(Params::SPECTRAL_RHOHV);
+            _configureIqPlot(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSpectrumRhohv);
   
   QAction plotSpectrumSz864("Plot spectral SZ864", &contextMenu);
   connect(&plotSpectrumSz864, &QAction::triggered,

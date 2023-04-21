@@ -127,9 +127,10 @@ public:
     WATERFALL_VX = 3,
     WATERFALL_ZDR = 4,
     WATERFALL_PHIDP = 5,
-    WATERFALL_SDEV_ZDR = 6,
-    WATERFALL_SDEV_PHIDP = 7,
-    WATERFALL_CMD = 8
+    WATERFALL_RHOHV = 6,
+    WATERFALL_SDEV_ZDR = 7,
+    WATERFALL_SDEV_PHIDP = 8,
+    WATERFALL_CMD = 9
   } waterfall_type_t;
 
   typedef enum {
@@ -137,13 +138,14 @@ public:
     SPECTRAL_PHASE = 1,
     SPECTRAL_ZDR = 2,
     SPECTRAL_PHIDP = 3,
-    SPECTRAL_SZ864 = 4,
-    TS_POWER = 5,
-    TS_PHASE = 6,
-    I_VALS = 7,
-    Q_VALS = 8,
-    I_VS_Q = 9,
-    PHASOR = 10
+    SPECTRAL_RHOHV = 4,
+    SPECTRAL_SZ864 = 5,
+    TS_POWER = 6,
+    TS_PHASE = 7,
+    I_VALS = 8,
+    Q_VALS = 9,
+    I_VS_Q = 10,
+    PHASOR = 11
   } iq_plot_type_t;
 
   typedef enum {
@@ -668,6 +670,8 @@ public:
 
   char* waterfall_phidp_color_scale_name;
 
+  char* waterfall_rhohv_color_scale_name;
+
   char* waterfall_sdev_zdr_color_scale_name;
 
   char* waterfall_sdev_phidp_color_scale_name;
@@ -909,7 +913,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[206];
+  mutable TDRPtable _table[207];
 
   const char *_className;
 

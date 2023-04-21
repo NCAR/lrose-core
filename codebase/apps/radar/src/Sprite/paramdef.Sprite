@@ -482,6 +482,7 @@ typedef enum {
   WATERFALL_VX,
   WATERFALL_ZDR,
   WATERFALL_PHIDP,
+  WATERFALL_RHOHV,
   WATERFALL_SDEV_ZDR,
   WATERFALL_SDEV_PHIDP,
   WATERFALL_CMD
@@ -563,6 +564,11 @@ paramdef string {
   p_default = "phidp.colors";
   p_descr = "Color scale name for phidp";
 } waterfall_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "rhohv.colors";
+  p_descr = "Color scale name for rhohv";
+} waterfall_rhohv_color_scale_name;
 
 paramdef string {
   p_default = "sdzdr_spectra.colors";
@@ -710,6 +716,7 @@ typedef enum {
   SPECTRAL_PHASE,
   SPECTRAL_ZDR,
   SPECTRAL_PHIDP,
+  SPECTRAL_RHOHV,
   SPECTRAL_SZ864,
   TS_POWER,
   TS_PHASE,
