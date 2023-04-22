@@ -153,7 +153,7 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
     _window1D.dat()[ii] = 1.0;
   }
   
-  _specNoiseHc1D.alloc(nSamples);
+  _specNoiseHc1D.alloc(nGates);
 
   _iqHc2D.alloc(nGates, nSamples);
   _iqVc2D.alloc(nGates, nSamples);

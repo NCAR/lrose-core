@@ -3926,14 +3926,14 @@ void Beam::_loadDwellSpectra()
   // compute spectra
 
   _spectra.computePowerSpectra();
-  // _spectra.computeDbzSpectra();
+  _spectra.computeDbzSpectra();
   _spectra.computeZdrSpectra();
   _spectra.computePhidpRhohvSpectra();
-  // _spectra.computeTdbz();
+  _spectra.computeTdbz();
   _spectra.computeZdrSdev();
   _spectra.computePhidpSdev();
   
-  // _spectra.computeSpectralCmd();
+  _spectra.computeSpectralCmd();
 
 }
 
