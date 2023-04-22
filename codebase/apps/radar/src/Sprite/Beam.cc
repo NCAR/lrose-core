@@ -3937,7 +3937,8 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
   spectra.computePowerSpectra();
   spectra.computeDbzSpectra();
   spectra.computeZdrSpectra();
-  spectra.computePhidpRhohvSpectra();
+  spectra.computePhidpSpectra();
+  spectra.computeRhohvSpectra();
   spectra.computeTdbz();
   spectra.computeZdrSdev();
   spectra.computePhidpSdev();
