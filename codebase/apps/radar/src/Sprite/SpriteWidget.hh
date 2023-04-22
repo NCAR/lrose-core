@@ -113,6 +113,10 @@ class DLL_EXPORT SpriteWidget : public QWidget
 
   void setBackgroundColor(const QColor &color);
 
+  // prepare a beam for plotting
+
+  void prepareBeam(Beam *beam);
+
   // plot a beam
 
   void plotBeam(Beam *beam);

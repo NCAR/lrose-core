@@ -225,7 +225,7 @@ private:
   // windows
 
   QFrame *_mainFrame;
-  SpriteWidget *_widgets;
+  SpriteWidget *_widget;
 
   // times for rays
 
@@ -366,7 +366,7 @@ private slots:
 
   // local slots
 
-  void _widgetsLocationClicked(double selectedRangeKm, int selectedGateNum);
+  void _widgetLocationClicked(double selectedRangeKm, int selectedGateNum);
 
   void _goBack();
   void _goFwd();

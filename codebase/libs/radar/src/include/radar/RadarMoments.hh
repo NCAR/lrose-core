@@ -61,8 +61,24 @@ public:
   // receiver channel identification
 
   typedef enum {
-    CHANNEL_HC, CHANNEL_VC, CHANNEL_HX, CHANNEL_VX
+    CHANNEL_HC,
+    CHANNEL_VC,
+    CHANNEL_HX,
+    CHANNEL_VX
   } channel_t;
+
+  // window types
+
+  typedef enum {
+    WINDOW_RECT,
+    WINDOW_VONHANN,
+    WINDOW_BLACKMAN,
+    WINDOW_BLACKMAN_NUTTALL,
+    WINDOW_TUKEY_10,
+    WINDOW_TUKEY_20,
+    WINDOW_TUKEY_30,
+    WINDOW_TUKEY_50
+  } window_type_t;
 
   // default constructor
 
@@ -1140,6 +1156,11 @@ public:
 
   double computeNcp(RadarComplex_t *iq);
 
+  // initialize window from type
+
+  static void initWindow(window_type_t windowType,
+                         int nSamples, double *window);
+  
   // initialize rectangular window
 
   static void initWindowRect(int nSamples, double *window);

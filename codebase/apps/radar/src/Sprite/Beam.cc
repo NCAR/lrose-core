@@ -745,10 +745,6 @@ int Beam::computeMoments(Params::fft_window_t windowType
 
   _copyDataToOutputFields();
 
-  // load up time series for dwell spectra
-
-  _loadDwellSpectra();
-
   return 0;
 
 }
@@ -3871,82 +3867,81 @@ void Beam::_computePhaseDiffs
 /////////////////////////////////////////////////////////////////
 // load up time series in dwell spectra
 
-void Beam::_loadDwellSpectra()
+void Beam::loadDwellSpectra(DwellSpectra &spectra)
   
 {
 
   // dimensions
   
-  _spectra.setDimensions(_nGates, _nSamples);
+  spectra.setDimensions(_nGates, _nSamples);
 
   // metadata
 
-  _spectra.setTime(_timeSecs, _nanoSecs);
-  _spectra.setElevation(_el);
-  _spectra.setAzimuth(_az);
-  _spectra.setAntennaRate(getAntennaRate());
+  spectra.setTime(_timeSecs, _nanoSecs);
+  spectra.setElevation(_el);
+  spectra.setAzimuth(_az);
+  spectra.setAntennaRate(getAntennaRate());
 
-  _spectra.setRangeGeometry(_startRangeKm, _gateSpacingKm);
-  _spectra.setXmitRcvMode(_xmitRcvMode);
-  _spectra.setPrt(_prt);
-  _spectra.setNyquist(_nyquist);
-  _spectra.setPulseWidthUs(_pulseWidth);
-  _spectra.setWavelengthM(_wavelengthM);
+  spectra.setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  spectra.setXmitRcvMode(_xmitRcvMode);
+  spectra.setPrt(_prt);
+  spectra.setNyquist(_nyquist);
+  spectra.setPulseWidthUs(_pulseWidth);
+  spectra.setWavelengthM(_wavelengthM);
 
   // windowing
 
-  _spectra.setWindow(_window, _nSamples);
+  spectra.setWindow(_window, _nSamples);
 
   // calibration
   
-  _spectra.setCalibration(getCalib());
+  spectra.setCalibration(getCalib());
 
   // computing textures
   
-  _spectra.setTdbzKernelNGates(_params.waterfall_tdbz_kernel_ngates);
-  _spectra.setTdbzKernelNSamples(_params.waterfall_tdbz_kernel_nsamples);
-  _spectra.setSdevZdrKernelNGates(_params.waterfall_sdev_zdr_kernel_ngates);
-  _spectra.setSdevZdrKernelNSamples(_params.waterfall_sdev_zdr_kernel_nsamples);
-  _spectra.setSdevPhidpKernelNGates(_params.waterfall_sdev_phidp_kernel_ngates);
-  _spectra.setSdevPhidpKernelNSamples(_params.waterfall_sdev_phidp_kernel_nsamples);
+  spectra.setTdbzKernelNGates(_params.waterfall_tdbz_kernel_ngates);
+  spectra.setTdbzKernelNSamples(_params.waterfall_tdbz_kernel_nsamples);
+  spectra.setSdevZdrKernelNGates(_params.waterfall_sdev_zdr_kernel_ngates);
+  spectra.setSdevZdrKernelNSamples(_params.waterfall_sdev_zdr_kernel_nsamples);
+  spectra.setSdevPhidpKernelNGates(_params.waterfall_sdev_phidp_kernel_ngates);
+  spectra.setSdevPhidpKernelNSamples(_params.waterfall_sdev_phidp_kernel_nsamples);
 
   // set time series
 
-  _spectra.prepareForData();
+  spectra.prepareForData();
 
   for (size_t igate = 0; igate < _gateData.size(); igate++) {
 
     GateData *gd = _gateData[igate];
 
     if (gd->iqhcOrig != NULL) {
-      _spectra.setIqHc(gd->iqhcOrig, igate, _nSamples);
+      spectra.setIqHc(gd->iqhcOrig, igate, _nSamples);
     }
     
     if (gd->iqvcOrig != NULL) {
-      _spectra.setIqVc(gd->iqvcOrig, igate, _nSamples);
+      spectra.setIqVc(gd->iqvcOrig, igate, _nSamples);
     }
     
     if (gd->iqhxOrig != NULL) {
-      _spectra.setIqHx(gd->iqhxOrig, igate, _nSamples);
+      spectra.setIqHx(gd->iqhxOrig, igate, _nSamples);
     }
     
     if (gd->iqvxOrig != NULL) {
-      _spectra.setIqVx(gd->iqvxOrig, igate, _nSamples);
+      spectra.setIqVx(gd->iqvxOrig, igate, _nSamples);
     }
     
   } // igate
 
   // compute spectra
 
-  _spectra.computePowerSpectra();
-  _spectra.computeDbzSpectra();
-  _spectra.computeZdrSpectra();
-  _spectra.computePhidpRhohvSpectra();
-  _spectra.computeTdbz();
-  _spectra.computeZdrSdev();
-  _spectra.computePhidpSdev();
-  
-  _spectra.computeSpectralCmd();
+  spectra.computePowerSpectra();
+  spectra.computeDbzSpectra();
+  spectra.computeZdrSpectra();
+  spectra.computePhidpRhohvSpectra();
+  spectra.computeTdbz();
+  spectra.computeZdrSdev();
+  spectra.computePhidpSdev();
+  spectra.computeSpectralCmd();
 
 }
 

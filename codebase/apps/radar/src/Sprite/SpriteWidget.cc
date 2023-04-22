@@ -335,6 +335,22 @@ void SpriteWidget::setLegendsEnabled(bool state)
 }
 
 /*************************************************************************
+ * prepare a beam for plotting
+ */
+
+void SpriteWidget::prepareBeam(Beam *beam)
+
+{
+  
+  if (beam) {
+    for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
+      _waterfalls[ii]->prepareBeam(beam, _nSamplesPlot);
+    }
+  }
+
+}
+
+/*************************************************************************
  * plot a beam
  */
 
@@ -667,7 +683,7 @@ void SpriteWidget::paintEvent(QPaintEvent *event)
       _ascopes[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _waterfalls.size(); ii++) {
-      _waterfalls[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
+      _waterfalls[ii]->plotBeam(painter, _selectedRangeKm);
     }
     for (size_t ii = 0; ii < _iqPlots.size(); ii++) {
       _iqPlots[ii]->plotBeam(painter, _beam, _nSamplesPlot, _selectedRangeKm);
@@ -1328,6 +1344,8 @@ void SpriteWidget::_configureWaterfall(int id)
   
   _waterfalls[id]->setWorldLimits(0.0, 0.0, _nSamplesPlot, maxRange);
 
+  _waterfalls[id]->prepareBeam(_beam, _nSamplesPlot);
+
   update();
 
 }
@@ -1857,7 +1875,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setClutterFilterType
               (RadarMoments::CLUTTER_FILTER_ADAPTIVE);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setClutFiltType.addAction(&setClutFiltAdapt);
 
@@ -1866,7 +1884,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setClutterFilterType
               (RadarMoments::CLUTTER_FILTER_REGRESSION);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setClutFiltType.addAction(&setClutFiltRegr);
 
@@ -1875,7 +1893,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setClutterFilterType
               (RadarMoments::CLUTTER_FILTER_NOTCH);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setClutFiltType.addAction(&setClutFiltNotch);
 
@@ -1884,7 +1902,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setClutterFilterType
               (RadarMoments::CLUTTER_FILTER_NONE);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setClutFiltType.addAction(&setClutFiltNone);
 
@@ -1895,7 +1913,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
   connect(&plotClutModel, &QAction::triggered,
           [this, id] (bool state) {
             _waterfalls[id]->setPlotClutModel(state);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&plotClutModel);
 
@@ -1909,7 +1927,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
                _waterfalls[id]->getClutModelWidthMps(), 0.05, 5.0, 2,
                &ok, Qt::WindowFlags());
             _waterfalls[id]->setClutModelWidthMps(width);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setClutterWidth);
 
@@ -1921,9 +1939,9 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
               (this,
                tr("QInputDialog::getInt()"), tr("Set regression order:"),
                _waterfalls[id]->getRegrOrder(),
-               3, 100, 1, &ok);
+               -1, 100, 1, &ok);
             _waterfalls[id]->setRegrOrder(val);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setRegressionOrder);
 
@@ -1937,7 +1955,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setRegrFiltNotchInterpMethod
               (RadarMoments::INTERP_METHOD_GAUSSIAN);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setRegrInterpMethod.addAction(&setMethodGaussian);
 
@@ -1946,7 +1964,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setRegrFiltNotchInterpMethod
               (RadarMoments::INTERP_METHOD_LINEAR);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setRegrInterpMethod.addAction(&setMethodLinear);
 
@@ -1955,7 +1973,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           [this, id] () {
             _waterfalls[id]->setRegrFiltNotchInterpMethod
               (RadarMoments::INTERP_METHOD_NONE);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setRegrInterpMethod.addAction(&setMethodNone);
 
@@ -1970,7 +1988,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
                _waterfalls[id]->getRegrClutWidthFactor(),
                0.1, 10.0, 3, &ok);
             _waterfalls[id]->setRegrClutWidthFactor(val);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setRegressionClutWidthFactor);
   
@@ -1984,7 +2002,7 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
                _waterfalls[id]->getRegrCnrExponent(),
                0.1, 10.0, 5, &ok);
             _waterfalls[id]->setRegrCnrExponent(val);
-            _configureIqPlot(id);
+            _configureWaterfall(id);
           } );
   setFilteringMenu.addAction(&setRegressionCnrExponent);
   
@@ -2292,7 +2310,7 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
                _iqPlots[id]->getMedianFiltLen(),
                1, 100, 1, &ok);
             _iqPlots[id]->setMedianFiltLen(val);
-            _configureWaterfall(id);
+            _configureIqPlot(id);
           } );
   setFilteringMenu.addAction(&setMedianFiltLen);
   

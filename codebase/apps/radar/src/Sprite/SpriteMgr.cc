@@ -93,7 +93,7 @@ SpriteMgr::SpriteMgr(const Params &params,
         
 {
   
-  _widgets = NULL;
+  _widget = NULL;
 
   _timeSpanSecs = _params.archive_time_span_secs;
   if (_params.input_mode == Params::ARCHIVE_TIME_MODE ||
@@ -130,8 +130,8 @@ SpriteMgr::~SpriteMgr()
 
 {
 
-  if (_widgets) {
-    delete _widgets;
+  if (_widget) {
+    delete _widget;
   }
 
 }
@@ -181,14 +181,14 @@ void SpriteMgr::_setupWindows()
 
   // configure the ASCOPE
 
-  _widgets = new SpriteWidget(_mainFrame, *this, _params);
+  _widget = new SpriteWidget(_mainFrame, *this, _params);
   connect(this, SIGNAL(frameResized(const int, const int)),
-	  _widgets, SLOT(resize(const int, const int)));
+	  _widget, SLOT(resize(const int, const int)));
   
   // connect slots for location change
   
-  connect(_widgets, SIGNAL(locationClicked(double, int)),
-          this, SLOT(_widgetsLocationClicked(double, int)));
+  connect(_widget, SIGNAL(locationClicked(double, int)),
+          this, SLOT(_widgetLocationClicked(double, int)));
   
   // create status panel
 
@@ -219,7 +219,7 @@ void SpriteMgr::_setupWindows()
   pos.setY(_params.main_window_start_y);
   move(pos);
 
-  _widgets->refresh();
+  _widget->refresh();
  
 }
 
@@ -285,7 +285,7 @@ void SpriteMgr::_createActions()
 
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _widgets, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _widget, SLOT(clear()));
 
   // exit app
 
@@ -300,7 +300,7 @@ void SpriteMgr::_createActions()
   _xGridAct->setStatusTip(tr("Turn X grid on/off"));
   _xGridAct->setCheckable(true);
   connect(_xGridAct, SIGNAL(triggered(bool)),
-          _widgets, SLOT(setXGridEnabled(bool)));
+          _widget, SLOT(setXGridEnabled(bool)));
 
   // show Y grid lines
 
@@ -308,7 +308,7 @@ void SpriteMgr::_createActions()
   _yGridAct->setStatusTip(tr("Turn Y grid on/off"));
   _yGridAct->setCheckable(true);
   connect(_yGridAct, SIGNAL(triggered(bool)),
-          _widgets, SLOT(setYGridEnabled(bool)));
+          _widget, SLOT(setYGridEnabled(bool)));
   
   // write legends
 
@@ -316,7 +316,7 @@ void SpriteMgr::_createActions()
   _legendsAct->setStatusTip(tr("Turn legends on/off"));
   _legendsAct->setCheckable(true);
   connect(_legendsAct, SIGNAL(triggered(bool)),
-          _widgets, SLOT(setLegendsEnabled(bool)));
+          _widget, SLOT(setLegendsEnabled(bool)));
   
   // howto / about
 
@@ -379,8 +379,8 @@ void SpriteMgr::_configureAxes()
   
 {
   
-  _widgets->configureAxes(0.0, 1.0,
-                          _params.archive_time_span_secs);
+  _widget->configureAxes(0.0, 1.0,
+                         _params.archive_time_span_secs);
 
 }
 
@@ -400,7 +400,7 @@ void SpriteMgr::timerEvent(QTimerEvent *event)
   
   if (_firstTimerEvent) {
 
-    _widgets->resize(_mainFrame->width(), _mainFrame->height());
+    _widget->resize(_mainFrame->width(), _mainFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -571,7 +571,7 @@ void SpriteMgr::_handleRealtimeData()
 
   // plot the data
   
-  _widgets->plotBeam(beam);
+  _widget->plotBeam(beam);
   this->setCursor(Qt::ArrowCursor);
 
   // clean up
@@ -627,9 +627,13 @@ void SpriteMgr::_handleArchiveData()
     
     this->setCursor(Qt::WaitCursor);
     
+    // prepare beam for plotting
+    
+    _widget->prepareBeam(beam);
+
     // plot the data
     
-    _widgets->plotBeam(beam);
+    _widget->plotBeam(beam);
     this->setCursor(Qt::ArrowCursor);
 
   }
@@ -667,8 +671,8 @@ void SpriteMgr::_followDisplay()
     return;
   }
 
-  _widgets->setRange(_clickPointRangeKm);
-  _clickPointGateNum = _widgets->getSelectedGateNum();
+  _widget->setRange(_clickPointRangeKm);
+  _clickPointGateNum = _widget->getSelectedGateNum();
   _clickPointTime = beam->getTime();
   _clickPointElevation = beam->getEl();
   _clickPointAzimuth = beam->getAz();
@@ -691,9 +695,13 @@ void SpriteMgr::_followDisplay()
     
     this->setCursor(Qt::WaitCursor);
     
+    // prepare beam for plotting
+    
+    _widget->prepareBeam(beam);
+
     // plot the data
     
-    _widgets->plotBeam(beam);
+    _widget->plotBeam(beam);
     this->setCursor(Qt::ArrowCursor);
 
   }
@@ -737,8 +745,8 @@ void SpriteMgr::_manageBeamQueue(Beam *beam)
 /////////////////////////////////////////////////////////
 // respond to a change in click location in the widget
 
-void SpriteMgr::_widgetsLocationClicked(double selectedRangeKm,
-                                        int selectedGateNum)
+void SpriteMgr::_widgetLocationClicked(double selectedRangeKm,
+                                       int selectedGateNum)
   
 {
   if (_params.debug) {
@@ -772,7 +780,7 @@ void SpriteMgr::_clickPointChanged()
 
 void SpriteMgr::_unzoom()
 {
-  _widgets->unzoom();
+  _widget->unzoom();
   _unzoomAct->setEnabled(false);
 }
 
@@ -842,9 +850,9 @@ void SpriteMgr::_goFwd()
 
 void SpriteMgr::_changeRange(int deltaGates)
 {
-  _widgets->changeRange(deltaGates);
-  _clickPointRangeKm = _widgets->getSelectedRangeKm();
-  _clickPointGateNum = _widgets->getSelectedGateNum();
+  _widget->changeRange(deltaGates);
+  _clickPointRangeKm = _widget->getSelectedRangeKm();
+  _clickPointGateNum = _widget->getSelectedGateNum();
   _clickPointChanged();
 }
 

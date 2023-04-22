@@ -99,10 +99,6 @@ public:
   int computeMoments(Params::fft_window_t windowType
                      = Params::FFT_WINDOW_VONHANN);
 
-  // get spectra in range for dwell, after computeMoments
-
-  const DwellSpectra &getSpectra() const { return _spectra; }
-
   // set methods
 
   void setCalib(const IwrfCalib &calib);
@@ -185,6 +181,8 @@ public:
     return  _burstPhases;
   }
 
+  void loadDwellSpectra(DwellSpectra &spectra);
+  
 protected:
   
 private:
@@ -451,8 +449,6 @@ private:
   void _computePhaseDiffs
     (const deque<const IwrfTsPulse *> &pulseQueue, int maxTrips);
 
-  void _loadDwellSpectra();
-  
   // copy method for assignment and copy constructor
 
   Beam & _copy(const Beam &rhs);

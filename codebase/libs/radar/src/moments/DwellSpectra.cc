@@ -44,6 +44,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
+#include <radar/ClutFilter.hh>
 #include "DwellSpectra.hh"
 using namespace std;
 
@@ -93,6 +94,13 @@ DwellSpectra::DwellSpectra()
 
   _createDefaultInterestMaps();
 
+  _windowType = RadarMoments::WINDOW_RECT;
+  _clutterFilterType = RadarMoments::CLUTTER_FILTER_NONE;
+  _regrOrder = -1;
+  _regrClutWidthFactor = 1.0;
+  _regrCnrExponent = 0.66667;
+  _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
+  
   prepareForData();
 
 }
@@ -160,11 +168,6 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _iqHx2D.alloc(nGates, nSamples);
   _iqVx2D.alloc(nGates, nSamples);
   
-  _iqWindowedHc2D.alloc(nGates, nSamples);
-  _iqWindowedVc2D.alloc(nGates, nSamples);
-  _iqWindowedHx2D.alloc(nGates, nSamples);
-  _iqWindowedVx2D.alloc(nGates, nSamples);
- 
   _specCompHc2D.alloc(nGates, nSamples);
   _specCompVc2D.alloc(nGates, nSamples);
   _specCompHx2D.alloc(nGates, nSamples);
@@ -211,11 +214,6 @@ void DwellSpectra::_freeArrays()
   _iqVc2D.free();
   _iqHx2D.free();
   _iqVx2D.free();
-
-  _iqWindowedHc2D.free();
-  _iqWindowedVc2D.free();
-  _iqWindowedHx2D.free();
-  _iqWindowedVx2D.free();
 
   _specCompHc2D.free();
   _specCompVc2D.free();
@@ -283,8 +281,6 @@ void DwellSpectra::setIqHc(const RadarComplex_t *iqHc,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqHc2D.dat2D()[gateNum], iqHc, nSamples * sizeof(RadarComplex_t));
-  _iqWindowedHc2D = _iqHc2D;
-  RadarMoments::applyWindow(_iqWindowedHc2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _hcAvail = true;
 }
   
@@ -295,8 +291,6 @@ void DwellSpectra::setIqVc(const RadarComplex_t *iqVc,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqVc2D.dat2D()[gateNum], iqVc, nSamples * sizeof(RadarComplex_t));
-  _iqWindowedVc2D = _iqVc2D;
-  RadarMoments::applyWindow(_iqWindowedVc2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _vcAvail = true;
 }
   
@@ -307,8 +301,6 @@ void DwellSpectra::setIqHx(const RadarComplex_t *iqHx,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqHx2D.dat2D()[gateNum], iqHx, nSamples * sizeof(RadarComplex_t));
-  _iqWindowedHx2D = _iqHx2D;
-  RadarMoments::applyWindow(_iqWindowedHx2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _hxAvail = true;
 }
   
@@ -319,8 +311,6 @@ void DwellSpectra::setIqVx(const RadarComplex_t *iqVx,
   assert(gateNum < _nGates);
   assert(nSamples == _nSamples);
   memcpy(_iqVx2D.dat2D()[gateNum], iqVx, nSamples * sizeof(RadarComplex_t));
-  _iqWindowedVx2D = _iqVx2D;
-  RadarMoments::applyWindow(_iqWindowedVx2D.dat2D()[gateNum], _window1D.dat(), _nSamples);
   _vxAvail = true;
 }
   
@@ -331,39 +321,130 @@ void DwellSpectra::computePowerSpectra()
   
 {
 
+  // initialize
+  
+  RadarMoments::initWindow(_windowType, _nSamples, _window1D.dat());
+  
+  RadarMoments moments;
+  moments.setNSamples(_nSamples);
+  moments.init(_prt, _wavelengthM, _startRangeKm, _gateSpacingKm);
+  moments.setCalib(_calib);
+  moments.setClutterWidthMps(0.75);
+  moments.setClutterInitNotchWidthMps(3.0);
+  moments.setAntennaRate(_antennaRate);
+  
   if (_hcAvail) {
-    _computePowerSpectra(_iqWindowedHc2D, _specCompHc2D, _specPowerHc2D, _specDbmHc2D);
+    _computePowerSpectra(_iqHc2D,
+                         pow(10.0, _calib.getNoiseDbmHc() / 10.0),
+                         moments,
+                         _specCompHc2D, _specPowerHc2D, _specDbmHc2D);
   }
       
   if (_vcAvail) {
-    _computePowerSpectra(_iqWindowedVc2D, _specCompVc2D, _specPowerVc2D, _specDbmVc2D);
+    _computePowerSpectra(_iqVc2D,
+                         pow(10.0, _calib.getNoiseDbmVc() / 10.0),
+                         moments,
+                         _specCompVc2D, _specPowerVc2D, _specDbmVc2D);
   }
       
   if (_hxAvail) {
-    _computePowerSpectra(_iqWindowedHx2D, _specCompHx2D, _specPowerHx2D, _specDbmHx2D);
+    _computePowerSpectra(_iqHx2D,
+                         pow(10.0, _calib.getNoiseDbmHx() / 10.0),
+                         moments,
+                         _specCompHx2D, _specPowerHx2D, _specDbmHx2D);
   }
-      
+  
   if (_vxAvail) {
-    _computePowerSpectra(_iqWindowedVx2D, _specCompVx2D, _specPowerVx2D, _specDbmVx2D);
+    _computePowerSpectra(_iqVx2D,
+                         pow(10.0, _calib.getNoiseDbmVx() / 10.0),
+                         moments,
+                         _specCompVx2D, _specPowerVx2D, _specDbmVx2D);
   }
 
 }
 
-void DwellSpectra::_computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed2D,
+void DwellSpectra::_computePowerSpectra(TaArray2D<RadarComplex_t> &iq2D,
+                                        double calibNoise,
+                                        RadarMoments &moments,
                                         TaArray2D<RadarComplex_t> &specComp2D,
                                         TaArray2D<double> &specPower2D,
                                         TaArray2D<double> &specDbm2D)
   
 {
 
+  // allocate arrays and variables
+  
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  
+  TaArray<RadarComplex_t> iqFilt_;
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+
+  double filterRatio, spectralNoise, spectralSnr;
+  ClutFilter clutFilt;
+
+  bool orderAuto = true;
+  if (_regrOrder > 2) {
+    orderAuto = false;
+  }
+  ForsytheRegrFilter regrF;
+  regrF.setup(_nSamples, orderAuto, _regrOrder,
+              _regrClutWidthFactor, _regrCnrExponent,
+              _wavelengthM);
+      
   for (size_t igate = 0; igate < _nGates; igate++) {
 
-    RadarComplex_t *iq1D = iqWindowed2D.dat2D()[igate];
+    // filter the time series
+    
+    memcpy(iqWindowed, iq2D.dat2D()[igate], _nSamples * sizeof(RadarComplex_t));
+    RadarMoments::applyWindow(iqWindowed, _window1D.dat(), _nSamples);
+    
+    // filter as appropriate
+    
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+
+      // adaptive spectral filter
+
+      moments.applyAdaptiveFilter(_nSamples, _prt, clutFilt, _fft,
+                                  iqWindowed, calibNoise, _nyquist,
+                                  iqFilt, NULL,
+                                  filterRatio, spectralNoise, spectralSnr);
+      
+    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+      
+      // regression filter
+      
+      moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
+      
+      moments.applyRegressionFilter(_nSamples, _prt, _fft, regrF,
+                                    iqWindowed, calibNoise,
+                                    iqFilt, NULL,
+                                    filterRatio, spectralNoise, spectralSnr);
+      
+    } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+      
+      // simple notch filter
+      
+      moments.applyNotchFilter(_nSamples, _prt, _fft,
+                               iqWindowed, pow(10.0, calibNoise / 10.0),
+                               iqFilt,
+                               filterRatio, spectralNoise, spectralSnr);
+      
+    } else {
+      
+      // no filtering
+      
+      memcpy(iqFilt, iqWindowed, _nSamples * sizeof(RadarComplex_t));
+
+    }
+
+    // spectra
+    
     RadarComplex_t *specComp1D = specComp2D.dat2D()[igate];
     double *specPower1D = specPower2D.dat2D()[igate];
     double *specDbm1D = specDbm2D.dat2D()[igate];
     
-    _fft.fwd(iq1D, specComp1D);
+    _fft.fwd(iqFilt, specComp1D);
     _fft.shift(specComp1D);
     
     _computePowerSpectrum(specComp1D, specPower1D, specDbm1D);

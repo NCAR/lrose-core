@@ -510,11 +510,9 @@ void ClutFilter::performNotch(const double *rawPowerSpec,
   // load up filtered power, summing up power removed
 
   memcpy(filteredPowerSpec, rawPowerSpec, nSamples * sizeof(double));
+  
   for (int ii = -halfNotch; ii <= halfNotch; ii++) {
-    int jj = ii;
-    if (jj < 0) {
-      jj += nSamples;
-    }
+    int jj = (ii + nSamples) % nSamples;
     filteredPowerSpec[jj] = notchPower;
   }
 

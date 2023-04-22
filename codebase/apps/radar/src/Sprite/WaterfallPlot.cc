@@ -64,6 +64,9 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
   _regrCnrExponent = _params.regression_filter_cnr_exponent;
   _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
+  _beam = NULL;
+  _nSamples = 0;
+  _nGates = 0;
 }
 
 /*************************************************************************
@@ -86,37 +89,66 @@ void WaterfallPlot::clear()
 }
 
 /*************************************************************************
- * plot a beam
+ * prepare a beam for plotting
  */
 
-void WaterfallPlot::plotBeam(QPainter &painter,
-                             Beam *beam,
-                             size_t nSamples,
-                             double selectedRangeKm)
+void WaterfallPlot::prepareBeam(Beam *beam,
+                                size_t nSamples)
   
 {
 
-  if (beam == NULL) {
-    cerr << "WARNING - WaterfallPlot::plotBeam() - got NULL beam, ignoring"
+  _beam = beam;
+  _nSamples = nSamples;
+  
+  if (_beam == NULL) {
+    cerr << "WARNING - WaterfallPlot::prepareBeam() - got NULL beam, ignoring"
          << endl;
     return;
   }
   
   if(_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "======== Waterfall - plotting beam data ================" << endl;
+    cerr << "======== Waterfall - preparing beam data ================" << endl;
     DateTime beamTime(beam->getTimeSecs(), true, beam->getNanoSecs() * 1.0e-9);
     cerr << "  Beam time: " << beamTime.asString(3) << endl;
     cerr << "  Max range: " << beam->getMaxRange() << endl;
   }
-
-  size_t nGates = beam->getNGates();
+  
+  // compute ngates for plotting
+  
+  _nGates = _beam->getNGates();
+  
   if (_params.set_max_range) {
     size_t nGatesMax =
-      (_params.max_range_km - beam->getStartRangeKm()) /
-      beam->getGateSpacingKm();
-    if (nGatesMax < nGates) {
-      nGates = nGatesMax;
+      (_params.max_range_km - _beam->getStartRangeKm()) /
+      _beam->getGateSpacingKm();
+    if (nGatesMax < _nGates) {
+      _nGates = nGatesMax;
     }
+  }
+  
+  // load up time series for dwell spectra
+
+  _spectra.setClutterFilterType(_clutterFilterType);
+  _spectra.setRegrOrder(_regrOrder);
+  _spectra.setRegrClutWidthFactor(_regrClutWidthFactor);
+  _spectra.setRegrCnrExponent(_regrCnrExponent);
+  _spectra.setRegrFiltNotchInterpMethod(_regrNotchInterpMethod);
+  
+  _beam->loadDwellSpectra(_spectra);
+
+}
+
+/*************************************************************************
+ * plot a beam
+ */
+
+void WaterfallPlot::plotBeam(QPainter &painter,
+                             double selectedRangeKm)
+  
+{
+
+  if (_beam == NULL) {
+    return;
   }
 
   // perform the relevant plot
@@ -124,40 +156,40 @@ void WaterfallPlot::plotBeam(QPainter &painter,
   switch (_plotType) {
 
     case Params::WATERFALL_HC:
-      _plotHc(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotHc(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_VC:
-      _plotVc(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotVc(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_HX:
-      _plotHx(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotHx(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_VX:
-      _plotVx(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotVx(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_DBZ:
-      _plotDbz(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotDbz(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_ZDR:
-      _plotZdr(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotZdr(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_PHIDP:
-      _plotPhidp(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotPhidp(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_RHOHV:
-      _plotRhohv(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotRhohv(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_TDBZ:
-      _plotTdbz(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotTdbz(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_SDEV_ZDR:
-      _plotSdevZdr(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotSdevZdr(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_SDEV_PHIDP:
-      _plotSdevPhidp(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotSdevPhidp(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_CMD:
-      _plotCmd(painter, beam, nSamples, nGates, selectedRangeKm);
+      _plotCmd(painter, selectedRangeKm);
       break;
       
   }
@@ -206,15 +238,12 @@ void WaterfallPlot::plotBeam(QPainter &painter,
  */
 
 void WaterfallPlot::_plotHc(QPainter &painter,
-                            Beam *beam,
-                            size_t nSamples,
-                            size_t nGates,
                             double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -227,7 +256,7 @@ void WaterfallPlot::_plotHc(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -235,31 +264,31 @@ void WaterfallPlot::_plotHc(QPainter &painter,
     
     // get Iq data for this gate
 
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     // TaArray<RadarComplex_t> iq_;
-    // RadarComplex_t *iq = iq_.alloc(nSamples);
-    // memcpy(iq, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-    // _powerUnfilt = RadarComplex::meanPower(iq, nSamples);
+    // RadarComplex_t *iq = iq_.alloc(_nSamples);
+    // memcpy(iq, gateData->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
+    // _powerUnfilt = RadarComplex::meanPower(iq, _nSamples);
     
     // compute power spectrum
     
     // TaArray<double> power_, dbm_;
-    // double *power = power_.alloc(nSamples);
-    // double *dbm = dbm_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // double *power = power_.alloc(_nSamples);
+    // double *dbm = dbm_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, iq, power, dbm);
     
-    // _powerFilt = RadarComplex::meanPower(power, nSamples);
+    // _powerFilt = RadarComplex::meanPower(power, _nSamples);
     // _powerClut = _powerUnfilt - _powerFilt;
     
-    double *dbm = beam->getSpectra().getSpecDbmHc2D()[igate];
+    double *dbm = _spectra.getSpecDbmHc2D()[igate];
     
     // apply median filter
     
-    // FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
+    // FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
 
       // get color
 
@@ -291,15 +320,12 @@ void WaterfallPlot::_plotHc(QPainter &painter,
  */
 
 void WaterfallPlot::_plotVc(QPainter &painter,
-                            Beam *beam,
-                            size_t nSamples,
-                            size_t nGates,
                             double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -312,7 +338,7 @@ void WaterfallPlot::_plotVc(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -320,27 +346,27 @@ void WaterfallPlot::_plotVc(QPainter &painter,
     
     // get Iq data for this gate
 
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     // TaArray<RadarComplex_t> iq_;
-    // RadarComplex_t *iq = iq_.alloc(nSamples);
-    // memcpy(iq, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+    // RadarComplex_t *iq = iq_.alloc(_nSamples);
+    // memcpy(iq, gateData->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
     // TaArray<double> power_, dbm_;
-    // double *power = power_.alloc(nSamples);
-    // double *dbm = dbm_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // double *power = power_.alloc(_nSamples);
+    // double *dbm = dbm_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, iq, power, dbm);
     
-    double *dbm = beam->getSpectra().getSpecDbmVc2D()[igate];
+    double *dbm = _spectra.getSpecDbmVc2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       
       // get color
 
@@ -372,15 +398,12 @@ void WaterfallPlot::_plotVc(QPainter &painter,
  */
 
 void WaterfallPlot::_plotHx(QPainter &painter,
-                            Beam *beam,
-                            size_t nSamples,
-                            size_t nGates,
                             double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -393,7 +416,7 @@ void WaterfallPlot::_plotHx(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -401,27 +424,27 @@ void WaterfallPlot::_plotHx(QPainter &painter,
     
     // get Iq data for this gate
 
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     // TaArray<RadarComplex_t> iq_;
-    // RadarComplex_t *iq = iq_.alloc(nSamples);
-    // memcpy(iq, gateData->iqhxOrig, nSamples * sizeof(RadarComplex_t));
+    // RadarComplex_t *iq = iq_.alloc(_nSamples);
+    // memcpy(iq, gateData->iqhxOrig, _nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
     // TaArray<double> power_, dbm_;
-    // double *power = power_.alloc(nSamples);
-    // double *dbm = dbm_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // double *power = power_.alloc(_nSamples);
+    // double *dbm = dbm_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, iq, power, dbm);
     
-    double *dbm = beam->getSpectra().getSpecDbmHx2D()[igate];
+    double *dbm = _spectra.getSpecDbmHx2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       
       // get color
 
@@ -453,15 +476,12 @@ void WaterfallPlot::_plotHx(QPainter &painter,
  */
 
 void WaterfallPlot::_plotVx(QPainter &painter,
-                            Beam *beam,
-                            size_t nSamples,
-                            size_t nGates,
                             double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -474,7 +494,7 @@ void WaterfallPlot::_plotVx(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -482,27 +502,27 @@ void WaterfallPlot::_plotVx(QPainter &painter,
     
     // get Iq data for this gate
 
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     // TaArray<RadarComplex_t> iq_;
-    // RadarComplex_t *iq = iq_.alloc(nSamples);
-    // memcpy(iq, gateData->iqvxOrig, nSamples * sizeof(RadarComplex_t));
+    // RadarComplex_t *iq = iq_.alloc(_nSamples);
+    // memcpy(iq, gateData->iqvxOrig, _nSamples * sizeof(RadarComplex_t));
     
     // compute power spectrum
     
     // TaArray<double> power_, dbm_;
-    // double *power = power_.alloc(nSamples);
-    // double *dbm = dbm_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, iq, power, dbm);
+    // double *power = power_.alloc(_nSamples);
+    // double *dbm = dbm_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, iq, power, dbm);
     
-    double *dbm = beam->getSpectra().getSpecDbmVx2D()[igate];
+    double *dbm = _spectra.getSpecDbmVx2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(dbm, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       
       // get color
 
@@ -534,15 +554,12 @@ void WaterfallPlot::_plotVx(QPainter &painter,
  */
 
 void WaterfallPlot::_plotDbz(QPainter &painter,
-                             Beam *beam,
-                             size_t nSamples,
-                             size_t nGates,
                              double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -555,7 +572,7 @@ void WaterfallPlot::_plotDbz(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -563,15 +580,15 @@ void WaterfallPlot::_plotDbz(QPainter &painter,
 
     // get field
     
-    double *dbz = beam->getSpectra().getSpecDbz2D()[igate];
+    double *dbz = _spectra.getSpecDbz2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(dbz, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(dbz, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
 
       // get color
 
@@ -603,15 +620,12 @@ void WaterfallPlot::_plotDbz(QPainter &painter,
  */
 
 void WaterfallPlot::_plotZdr(QPainter &painter,
-                             Beam *beam,
-                             size_t nSamples,
-                             size_t nGates,
                              double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -624,7 +638,7 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -632,35 +646,35 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
     
     // get Iq data for this gate
     
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     
     // compute ZDR spectrum
     
     // TaArray<double> powerHc_, dbmHc_;
-    // double *powerHc = powerHc_.alloc(nSamples);
-    // double *dbmHc = dbmHc_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
+    // double *powerHc = powerHc_.alloc(_nSamples);
+    // double *dbmHc = dbmHc_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, gateData->iqhcOrig, powerHc, dbmHc);
     
     // TaArray<double> powerVc_, dbmVc_;
-    // double *powerVc = powerVc_.alloc(nSamples);
-    // double *dbmVc = dbmVc_.alloc(nSamples);
-    // _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
+    // double *powerVc = powerVc_.alloc(_nSamples);
+    // double *dbmVc = dbmVc_.alloc(_nSamples);
+    // _computePowerSpectrum(beam, _nSamples, gateData->iqvcOrig, powerVc, dbmVc);
     
     // TaArray<double> zdr_;
-    // double *zdr = zdr_.alloc(nSamples);
-    // for (size_t ii = 0; ii < nSamples; ii++) {
+    // double *zdr = zdr_.alloc(_nSamples);
+    // for (size_t ii = 0; ii < _nSamples; ii++) {
     //   zdr[ii] = dbmHc[ii] - dbmVc[ii];
     // }
 
-    double *zdr = beam->getSpectra().getSpecZdr2D()[igate];
+    double *zdr = _spectra.getSpecZdr2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(zdr, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(zdr, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
 
       // get color
 
@@ -692,15 +706,12 @@ void WaterfallPlot::_plotZdr(QPainter &painter,
  */
 
 void WaterfallPlot::_plotPhidp(QPainter &painter,
-                               Beam *beam,
-                               size_t nSamples,
-                               size_t nGates,
                                double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -713,7 +724,7 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -721,27 +732,27 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
     
     // get Iq data for this gate
     
-    // const GateData *gateData = beam->getGateData()[igate];
+    // const GateData *gateData = _beam->getGateData()[igate];
     // TaArray<RadarComplex_t> iqHc_, iqVc_;
-    // RadarComplex_t *iqHc = iqHc_.alloc(nSamples);
-    // RadarComplex_t *iqVc = iqVc_.alloc(nSamples);
-    // memcpy(iqHc, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-    // memcpy(iqVc, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
+    // RadarComplex_t *iqHc = iqHc_.alloc(_nSamples);
+    // RadarComplex_t *iqVc = iqVc_.alloc(_nSamples);
+    // memcpy(iqHc, gateData->iqhcOrig, _nSamples * sizeof(RadarComplex_t));
+    // memcpy(iqVc, gateData->iqvcOrig, _nSamples * sizeof(RadarComplex_t));
     
     // // apply window to time series
     
     // TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-    // RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-    // RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-    // _applyWindow(iqHc, iqWindowedHc, nSamples);
-    // _applyWindow(iqVc, iqWindowedVc, nSamples);
+    // RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(_nSamples);
+    // RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(_nSamples);
+    // _applyWindow(iqHc, iqWindowedHc, _nSamples);
+    // _applyWindow(iqVc, iqWindowedVc, _nSamples);
     
     // // compute spectra
     
     // TaArray<RadarComplex_t> specHc_, specVc_;
-    // RadarComplex_t *specHc = specHc_.alloc(nSamples);
-    // RadarComplex_t *specVc = specVc_.alloc(nSamples);
-    // RadarFft fft(nSamples);
+    // RadarComplex_t *specHc = specHc_.alloc(_nSamples);
+    // RadarComplex_t *specVc = specVc_.alloc(_nSamples);
+    // RadarFft fft(_nSamples);
     // fft.fwd(iqWindowedHc, specHc);
     // fft.shift(specHc);
     // fft.fwd(iqWindowedVc, specVc);
@@ -750,21 +761,21 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
     // // compute phidp spectrum
 
     // TaArray<double> phidp_;
-    // double *phidp = phidp_.alloc(nSamples);
-    // for (size_t ii = 0; ii < nSamples; ii++) {
+    // double *phidp = phidp_.alloc(_nSamples);
+    // for (size_t ii = 0; ii < _nSamples; ii++) {
     //   RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
     //   phidp[ii] = RadarComplex::argDeg(diff);
     // }
     
-    double *phidp = beam->getSpectra().getSpecPhidp2D()[igate];
+    double *phidp = _spectra.getSpecPhidp2D()[igate];
     
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(phidp, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(phidp, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       
       // get color
 
@@ -796,15 +807,12 @@ void WaterfallPlot::_plotPhidp(QPainter &painter,
  */
 
 void WaterfallPlot::_plotRhohv(QPainter &painter,
-                               Beam *beam,
-                               size_t nSamples,
-                               size_t nGates,
                                double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -817,7 +825,7 @@ void WaterfallPlot::_plotRhohv(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -825,15 +833,15 @@ void WaterfallPlot::_plotRhohv(QPainter &painter,
 
     // get field
     
-    double *rhohv = beam->getSpectra().getSpecRhohv2D()[igate];
+    double *rhohv = _spectra.getSpecRhohv2D()[igate];
     
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(rhohv, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(rhohv, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       
       // get color
 
@@ -865,15 +873,12 @@ void WaterfallPlot::_plotRhohv(QPainter &painter,
  */
 
 void WaterfallPlot::_plotTdbz(QPainter &painter,
-                             Beam *beam,
-                             size_t nSamples,
-                             size_t nGates,
                              double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -886,7 +891,7 @@ void WaterfallPlot::_plotTdbz(QPainter &painter,
 
   // loop through the gates
   
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // set limits for plotting this gate
     
@@ -894,15 +899,15 @@ void WaterfallPlot::_plotTdbz(QPainter &painter,
 
     // get field
     
-    double *tdbz = beam->getSpectra().getSpecTdbz2D()[igate];
+    double *tdbz = _spectra.getSpecTdbz2D()[igate];
 
     // apply 3-pt median filter
     
-    FilterUtils::applyMedianFilter(tdbz, nSamples, _medianFiltLen);
+    FilterUtils::applyMedianFilter(tdbz, _nSamples, _medianFiltLen);
       
     // plot the samples
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
 
       // get color
 
@@ -934,15 +939,12 @@ void WaterfallPlot::_plotTdbz(QPainter &painter,
  */
 
 void WaterfallPlot::_plotSdevZdr(QPainter &painter,
-                                 Beam *beam,
-                                 size_t nSamples,
-                                 size_t nGates,
                                  double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -955,30 +957,30 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
   // load up 2D array of spectral zdr
 
   TaArray2D<double> zdr2D_;
-  double **zdr2D = zdr2D_.alloc(nGates, nSamples);
+  double **zdr2D = zdr2D_.alloc(_nGates, _nSamples);
 
   double minVal = 9999.0;
   double maxVal = -9999.0;
 
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // get Iq data for this gate
     
-    const GateData *gateData = beam->getGateData()[igate];
+    const GateData *gateData = _beam->getGateData()[igate];
     
     // compute ZDR spectrum
     
     TaArray<double> powerHc_, dbmHc_;
-    double *powerHc = powerHc_.alloc(nSamples);
-    double *dbmHc = dbmHc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
+    double *powerHc = powerHc_.alloc(_nSamples);
+    double *dbmHc = dbmHc_.alloc(_nSamples);
+    _computePowerSpectrum(beam, _nSamples, gateData->iqhcOrig, powerHc, dbmHc);
     
     TaArray<double> powerVc_, dbmVc_;
-    double *powerVc = powerVc_.alloc(nSamples);
-    double *dbmVc = dbmVc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
+    double *powerVc = powerVc_.alloc(_nSamples);
+    double *dbmVc = dbmVc_.alloc(_nSamples);
+    _computePowerSpectrum(beam, _nSamples, gateData->iqvcOrig, powerVc, dbmVc);
     
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       double zdr = dbmHc[isample] - dbmVc[isample];
       zdr2D[igate][isample] = zdr;
     } // isample
@@ -988,32 +990,32 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
   // compute 2D sdev of spectral zdr
   
   TaArray2D<double> sdev2D_;
-  double **sdev2D = sdev2D_.alloc(nGates, nSamples);
-  size_t nSamplesSdev = nSamples;
-  size_t nGatesSdev = nGates;
-  if (_params.waterfall_sdev_zdr_kernel_ngates < (int) nGates) {
-    nSamplesSdev = _params.waterfall_sdev_zdr_kernel_nsamples;
-    nGatesSdev = _params.waterfall_sdev_zdr_kernel_ngates;
+  double **sdev2D = sdev2D_.alloc(_nGates, _nSamples);
+  size_t _nSamplesSdev = _nSamples;
+  size_t _nGatesSdev = _nGates;
+  if (_params.waterfall_sdev_zdr_kernel_ngates < (int) _nGates) {
+    _nSamplesSdev = _params.waterfall_sdev_zdr_kernel_nsamples;
+    _nGatesSdev = _params.waterfall_sdev_zdr_kernel_ngates;
   }
-  size_t nSamplesSdevHalf = nSamplesSdev / 2;
-  size_t nGatesSdevHalf = nGatesSdev / 2;
+  size_t _nSamplesSdevHalf = _nSamplesSdev / 2;
+  size_t _nGatesSdevHalf = _nGatesSdev / 2;
   
-  for (size_t igate = 0; igate < nGates; igate++) {
-    for (size_t isample = 0; isample < nSamples; isample++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       
       // compute index limits for computing sdev
 
-      int sampleStart = isample - nSamplesSdevHalf;
+      int sampleStart = isample - _nSamplesSdevHalf;
       sampleStart = max(0, sampleStart);
-      int sampleEnd = sampleStart + nSamplesSdev;
-      sampleEnd = min((int) nSamples, sampleEnd);
-      sampleStart = sampleEnd - nSamplesSdev;
+      int sampleEnd = sampleStart + _nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - _nSamplesSdev;
 
-      int gateStart = igate - nGatesSdevHalf;
+      int gateStart = igate - _nGatesSdevHalf;
       gateStart = max(0, gateStart);
-      int gateEnd = gateStart + nGatesSdev;
-      gateEnd = min((int) nGates, gateEnd);
-      gateStart = gateEnd - nGatesSdev;
+      int gateEnd = gateStart + _nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - _nGatesSdev;
 
       // load up zdr values for kernel region
 
@@ -1042,10 +1044,10 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
   painter.save();
 
   
-  for (size_t igate = 0; igate < nGates; igate++) {
-    double *zdrSdev = beam->getSpectra().getSpecZdrSdev2D()[igate];
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *zdrSdev = _spectra.getSpecZdrSdev2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       // get color
       int red, green, blue;
       _cmap.dataColor(zdrSdev[isample], red, green, blue);
@@ -1069,15 +1071,12 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
  */
 
 void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
-                                   Beam *beam,
-                                   size_t nSamples,
-                                   size_t nGates,
                                    double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -1090,31 +1089,31 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
   // load up 2D array of spectral phidp
 
   TaArray2D<double> phidp2D_;
-  double **phidp2D = phidp2D_.alloc(nGates, nSamples);
+  double **phidp2D = phidp2D_.alloc(_nGates, _nSamples);
 
   double minVal = 9999.0;
   double maxVal = -9999.0;
 
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // get Iq data for this gate
     
-    const GateData *gateData = beam->getGateData()[igate];
+    const GateData *gateData = _beam->getGateData()[igate];
     
     // apply window to time series
     
     TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-    _applyWindow(gateData->iqhcOrig, iqWindowedHc, nSamples);
-    _applyWindow(gateData->iqvcOrig, iqWindowedVc, nSamples);
+    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(_nSamples);
+    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(_nSamples);
+    _applyWindow(gateData->iqhcOrig, iqWindowedHc, _nSamples);
+    _applyWindow(gateData->iqvcOrig, iqWindowedVc, _nSamples);
     
     // compute spectra
     
     TaArray<RadarComplex_t> specHc_, specVc_;
-    RadarComplex_t *specHc = specHc_.alloc(nSamples);
-    RadarComplex_t *specVc = specVc_.alloc(nSamples);
-    RadarFft fft(nSamples);
+    RadarComplex_t *specHc = specHc_.alloc(_nSamples);
+    RadarComplex_t *specVc = specVc_.alloc(_nSamples);
+    RadarFft fft(_nSamples);
     fft.fwd(iqWindowedHc, specHc);
     fft.shift(specHc);
     fft.fwd(iqWindowedVc, specVc);
@@ -1122,7 +1121,7 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
 
     // compute phidp spectrum, store in 2D array
 
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[isample], specVc[isample]);
       phidp2D[igate][isample] = RadarComplex::argDeg(diff);
     } // isample
@@ -1131,33 +1130,33 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
 
   // compute the phidp folding range
 
-  _computePhidpFoldingRange(nGates, nSamples, phidp2D);
+  _computePhidpFoldingRange(_nGates, _nSamples, phidp2D);
 
   // compute 2D sdev of spectral phidp
 
   TaArray2D<double> sdev2D_;
-  double **sdev2D = sdev2D_.alloc(nGates, nSamples);
-  int nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_nsamples, (int) nSamples);
-  int nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_ngates, (int) nGates);
-  int nSamplesSdevHalf = nSamplesSdev / 2;
-  int nGatesSdevHalf = nGatesSdev / 2;
+  double **sdev2D = sdev2D_.alloc(_nGates, _nSamples);
+  int _nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_nsamples, (int) _nSamples);
+  int _nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_ngates, (int) _nGates);
+  int _nSamplesSdevHalf = _nSamplesSdev / 2;
+  int _nGatesSdevHalf = _nGatesSdev / 2;
   
-  for (size_t igate = 0; igate < nGates; igate++) {
-    for (size_t isample = 0; isample < nSamples; isample++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
 
       // compute index limits for computing sdev
 
-      int sampleStart = isample - nSamplesSdevHalf;
+      int sampleStart = isample - _nSamplesSdevHalf;
       sampleStart = max(0, sampleStart);
-      int sampleEnd = sampleStart + nSamplesSdev;
-      sampleEnd = min((int) nSamples, sampleEnd);
-      sampleStart = sampleEnd - nSamplesSdev;
+      int sampleEnd = sampleStart + _nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - _nSamplesSdev;
 
-      int gateStart = igate - nGatesSdevHalf;
+      int gateStart = igate - _nGatesSdevHalf;
       gateStart = max(0, gateStart);
-      int gateEnd = gateStart + nGatesSdev;
-      gateEnd = min((int) nGates, gateEnd);
-      gateStart = gateEnd - nGatesSdev;
+      int gateEnd = gateStart + _nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - _nGatesSdev;
 
       // load up phidp values for kernel region
 
@@ -1185,10 +1184,10 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
 
   painter.save();
 
-  for (size_t igate = 0; igate < nGates; igate++) {
-    double *phidpSdev = beam->getSpectra().getSpecPhidpSdev2D()[igate];
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *phidpSdev = _spectra.getSpecPhidpSdev2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       // get color
       int red, green, blue;
       _cmap.dataColor(phidpSdev[isample], red, green, blue);
@@ -1212,15 +1211,12 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
  */
 
 void WaterfallPlot::_plotCmd(QPainter &painter,
-                             Beam *beam,
-                             size_t nSamples,
-                             size_t nGates,
                              double selectedRangeKm)
   
 {
 
-  double startRange = beam->getStartRangeKm();
-  double gateSpacing = beam->getGateSpacingKm();
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
 
   // draw the color scale
   
@@ -1231,37 +1227,37 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
   
   // get the noise value
   
-  const IwrfCalib &calib = beam->getCalib();
+  const IwrfCalib &calib = _beam->getCalib();
   double calibNoiseHcDb = calib.getNoiseDbmHc();
   
   // load up 2D arrays of spectral power, zdr and phidp
 
   TaArray2D<double> powerHc2D_;
-  double **powerHc2D = powerHc2D_.alloc(nGates, nSamples);
+  double **powerHc2D = powerHc2D_.alloc(_nGates, _nSamples);
   TaArray2D<double> zdr2D_;
-  double **zdr2D = zdr2D_.alloc(nGates, nSamples);
+  double **zdr2D = zdr2D_.alloc(_nGates, _nSamples);
   TaArray2D<double> phidp2D_;
-  double **phidp2D = phidp2D_.alloc(nGates, nSamples);
+  double **phidp2D = phidp2D_.alloc(_nGates, _nSamples);
 
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
 
     // get Iq data for this gate
     
-    const GateData *gateData = beam->getGateData()[igate];
+    const GateData *gateData = _beam->getGateData()[igate];
     
     // compute ZDR spectrum
     
     TaArray<double> powerHc_, dbmHc_;
-    double *powerHc = powerHc_.alloc(nSamples);
-    double *dbmHc = dbmHc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqhcOrig, powerHc, dbmHc);
+    double *powerHc = powerHc_.alloc(_nSamples);
+    double *dbmHc = dbmHc_.alloc(_nSamples);
+    _computePowerSpectrum(_beam, _nSamples, gateData->iqhcOrig, powerHc, dbmHc);
     
     TaArray<double> powerVc_, dbmVc_;
-    double *powerVc = powerVc_.alloc(nSamples);
-    double *dbmVc = dbmVc_.alloc(nSamples);
-    _computePowerSpectrum(beam, nSamples, gateData->iqvcOrig, powerVc, dbmVc);
+    double *powerVc = powerVc_.alloc(_nSamples);
+    double *dbmVc = dbmVc_.alloc(_nSamples);
+    _computePowerSpectrum(_beam, _nSamples, gateData->iqvcOrig, powerVc, dbmVc);
     
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       double zdr = dbmHc[isample] - dbmVc[isample];
       zdr2D[igate][isample] = zdr;
     } // isample
@@ -1269,17 +1265,17 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
     // apply window to time series
     
     TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-    _applyWindow(gateData->iqhcOrig, iqWindowedHc, nSamples);
-    _applyWindow(gateData->iqvcOrig, iqWindowedVc, nSamples);
+    RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(_nSamples);
+    RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(_nSamples);
+    _applyWindow(gateData->iqhcOrig, iqWindowedHc, _nSamples);
+    _applyWindow(gateData->iqvcOrig, iqWindowedVc, _nSamples);
     
     // compute spectra
     
     TaArray<RadarComplex_t> specHc_, specVc_;
-    RadarComplex_t *specHc = specHc_.alloc(nSamples);
-    RadarComplex_t *specVc = specVc_.alloc(nSamples);
-    RadarFft fft(nSamples);
+    RadarComplex_t *specHc = specHc_.alloc(_nSamples);
+    RadarComplex_t *specVc = specVc_.alloc(_nSamples);
+    RadarFft fft(_nSamples);
     fft.fwd(iqWindowedHc, specHc);
     fft.shift(specHc);
     fft.fwd(iqWindowedVc, specVc);
@@ -1287,7 +1283,7 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
 
     // compute phidp spectrum, store in 2D array
 
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[isample], specVc[isample]);
       phidp2D[igate][isample] = RadarComplex::argDeg(diff);
       powerHc2D[igate][isample] = RadarComplex::power(specHc[isample]);
@@ -1297,35 +1293,35 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
 
   // compute the phidp folding range
 
-  _computePhidpFoldingRange(nGates, nSamples, phidp2D);
+  _computePhidpFoldingRange(_nGates, _nSamples, phidp2D);
 
   // compute 2D sdev of spectral zdr and phidp
 
   TaArray2D<double> sdevZdr2D_;
-  double **sdevZdr2D = sdevZdr2D_.alloc(nGates, nSamples);
+  double **sdevZdr2D = sdevZdr2D_.alloc(_nGates, _nSamples);
   TaArray2D<double> sdevPhidp2D_;
-  double **sdevPhidp2D = sdevPhidp2D_.alloc(nGates, nSamples);
-  int nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_nsamples, (int) nSamples);
-  int nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_ngates, (int) nGates);
-  int nSamplesSdevHalf = nSamplesSdev / 2;
-  int nGatesSdevHalf = nGatesSdev / 2;
+  double **sdevPhidp2D = sdevPhidp2D_.alloc(_nGates, _nSamples);
+  int _nSamplesSdev = min(_params.waterfall_sdev_phidp_kernel_nsamples, (int) _nSamples);
+  int _nGatesSdev = min(_params.waterfall_sdev_phidp_kernel_ngates, (int) _nGates);
+  int _nSamplesSdevHalf = _nSamplesSdev / 2;
+  int _nGatesSdevHalf = _nGatesSdev / 2;
   
-  for (size_t igate = 0; igate < nGates; igate++) {
-    for (size_t isample = 0; isample < nSamples; isample++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
 
       // compute index limits for computing sdev
 
-      int sampleStart = isample - nSamplesSdevHalf;
+      int sampleStart = isample - _nSamplesSdevHalf;
       sampleStart = max(0, sampleStart);
-      int sampleEnd = sampleStart + nSamplesSdev;
-      sampleEnd = min((int) nSamples, sampleEnd);
-      sampleStart = sampleEnd - nSamplesSdev;
+      int sampleEnd = sampleStart + _nSamplesSdev;
+      sampleEnd = min((int) _nSamples, sampleEnd);
+      sampleStart = sampleEnd - _nSamplesSdev;
 
-      int gateStart = igate - nGatesSdevHalf;
+      int gateStart = igate - _nGatesSdevHalf;
       gateStart = max(0, gateStart);
-      int gateEnd = gateStart + nGatesSdev;
-      gateEnd = min((int) nGates, gateEnd);
-      gateStart = gateEnd - nGatesSdev;
+      int gateEnd = gateStart + _nGatesSdev;
+      gateEnd = min((int) _nGates, gateEnd);
+      gateStart = gateEnd - _nGatesSdev;
 
       // load up zdr values for kernel region
 
@@ -1361,10 +1357,10 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
   // compute CMD
 
   TaArray2D<double> cmd2D_;
-  double **cmd2D = cmd2D_.alloc(nGates, nSamples);
+  double **cmd2D = cmd2D_.alloc(_nGates, _nSamples);
 
-  for (size_t igate = 0; igate < nGates; igate++) {
-    for (size_t isample = 0; isample < nSamples; isample++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
 
       double powerHc = powerHc2D[igate][isample];
       double sdevZdr = sdevZdr2D[igate][isample];
@@ -1410,9 +1406,9 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
   
   painter.save();
 
-  for (size_t igate = 0; igate < nGates; igate++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
     double yy = startRange + gateSpacing * (igate-0.5);
-    for (size_t isample = 0; isample < nSamples; isample++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       // get color
       int red, green, blue;
       _cmap.dataColor(cmd2D[igate][isample], red, green, blue);
@@ -1436,7 +1432,7 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
  */
 
 void WaterfallPlot::_computePowerSpectrum(Beam *beam,
-                                          size_t nSamples,
+                                          size_t _nSamples,
                                           const RadarComplex_t *iq,
                                           double *power,
                                           double *dbm)
@@ -1445,7 +1441,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
 
   // init
   
-  for (size_t ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     power[ii] = 1.0e-12;
     dbm[ii] = -120.0;
   }
@@ -1453,20 +1449,20 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   // apply window to time series
   
   TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(nSamples);
-  _applyWindow(iq, iqWindowed, nSamples);
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  _applyWindow(iq, iqWindowed, _nSamples);
   
   // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(nSamples);
-  RadarFft fft(nSamples);
+  RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
+  RadarFft fft(_nSamples);
   fft.fwd(iqWindowed, powerSpec);
   fft.shift(powerSpec);
   
   // set up filtering
   
-  const IwrfCalib &calib = beam->getCalib();
+  const IwrfCalib &calib = _beam->getCalib();
   double calibNoise = 0.0;
   switch (_plotType) {
     case Params::WATERFALL_HC:
@@ -1492,24 +1488,24 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   }
   
   RadarMoments moments;
-  moments.setNSamples(nSamples);
-  moments.init(beam->getPrt(), calib.getWavelengthCm() / 100.0,
-               beam->getStartRangeKm(), beam->getGateSpacingKm());
+  moments.setNSamples(_nSamples);
+  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
   moments.setCalib(calib);
   moments.setClutterWidthMps(_clutModelWidthMps);
   moments.setClutterInitNotchWidthMps(3.0);
-  moments.setAntennaRate(beam->getAntennaRate());
+  moments.setAntennaRate(_beam->getAntennaRate());
   
   // filter as appropriate
   
   TaArray<double> powerFilt_;
-  double *powerFilt = powerFilt_.alloc(nSamples);
+  double *powerFilt = powerFilt_.alloc(_nSamples);
 
   _regrOrderInUse = 0;
 
   TaArray<RadarComplex_t> iqFilt_, iqNotched_;
-  RadarComplex_t *iqFilt = iqFilt_.alloc(nSamples);
-  RadarComplex_t *iqNotched = iqNotched_.alloc(nSamples);
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
   double filterRatio, spectralNoise, spectralSnr;
 
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
@@ -1517,18 +1513,18 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     // adaptive spectral filter
 
     ClutFilter clutFilt;
-    moments.applyAdaptiveFilter(nSamples, beam->getPrt(),
+    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(),
                                 clutFilt, fft,
-                                iqWindowed, calibNoise, beam->getNyquist(),
+                                iqWindowed, calibNoise, _beam->getNyquist(),
                                 iqFilt, iqNotched,
                                 filterRatio, spectralNoise, spectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
+    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
     fft.fwd(iqFilt, filtAdaptSpec);
     fft.shift(filtAdaptSpec);
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       powerFilt[ii] = RadarComplex::power(filtAdaptSpec[ii]);
     }
     
@@ -1543,21 +1539,21 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     if (_regrOrder > 2) {
       orderAuto = false;
     }
-    if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN(),
+    if (_beam->getIsStagPrt()) {
+      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
                            orderAuto, _regrOrder,
                            _regrClutWidthFactor,
                            _regrCnrExponent,
-                           beam->getCalib().getWavelengthCm() / 100.0);
+                           _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
-      regrF.setup(nSamples,
+      regrF.setup(_nSamples,
                   orderAuto, _regrOrder,
                   _regrClutWidthFactor,
                   _regrCnrExponent,
-                  beam->getCalib().getWavelengthCm() / 100.0);
+                  _beam->getCalib().getWavelengthCm() / 100.0);
     }
     
-    moments.applyRegressionFilter(nSamples, beam->getPrt(),
+    moments.applyRegressionFilter(_nSamples, _beam->getPrt(),
                                   fft, regrF,
                                   iqWindowed,
                                   calibNoise,
@@ -1568,15 +1564,15 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
     _regrOrderInUse = regrF.getPolyOrder();
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
-    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
-    _applyWindow(iqFilt, filtRegrWindowed, nSamples);
+    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
+    _applyWindow(iqFilt, filtRegrWindowed, _nSamples);
     
     TaArray<RadarComplex_t> filtRegrSpec_;
-    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
+    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(_nSamples);
     fft.fwd(filtRegrWindowed, filtRegrSpec);
     fft.shift(filtRegrSpec);
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       powerFilt[ii] = RadarComplex::power(filtRegrSpec[ii]);
     }
     
@@ -1584,17 +1580,17 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
 
     // simple notch filter
     
-    moments.applyNotchFilter(nSamples, beam->getPrt(), fft,
+    moments.applyNotchFilter(_nSamples, _beam->getPrt(), fft,
                              iqWindowed, calibNoise,
                              iqFilt,
                              filterRatio, spectralNoise, spectralSnr);
     
     TaArray<RadarComplex_t> filtNotchSpec_;
-    RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(nSamples);
+    RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(_nSamples);
     fft.fwd(iqFilt, filtNotchSpec);
     fft.shift(filtNotchSpec);
 
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       powerFilt[ii] = RadarComplex::power(filtNotchSpec[ii]);
     }
     
@@ -1602,7 +1598,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
 
     // no filtering
     
-    for (size_t ii = 0; ii < nSamples; ii++) {
+    for (size_t ii = 0; ii < _nSamples; ii++) {
       powerFilt[ii] = RadarComplex::power(powerSpec[ii]);
     }
     
@@ -1610,7 +1606,7 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
 
   // compute dbm
   
-  for (size_t ii = 0; ii < nSamples; ii++) {
+  for (size_t ii = 0; ii < _nSamples; ii++) {
     power[ii] = powerFilt[ii];
     if (power[ii] <= 1.0e-12) {
       dbm[ii] = -120.0;
@@ -1618,109 +1614,6 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
       dbm[ii] = 10.0 * log10(power[ii]);
     }
   }
-
-#ifdef JUNK
-  // compute dbmFilt
-  
-  for (size_t ii = 0; ii < nSamples; ii++) {
-    if (powerFilt[ii] <= 1.0e-12) {
-      dbmFilt[ii] = -120.0;
-    } else {
-      dbmFilt[ii] = 10.0 * log10(powerFilt[ii]);
-    }
-  }
-
-  if (_useAdaptFilt) {
-
-    // adaptive filtering takes precedence over regression
-    
-    TaArray<RadarComplex_t> filtAdaptWindowed_;
-    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyAdaptiveFilter(nSamples, beam->getPrt(), fft,
-                                iqWindowed, NULL,
-                                calibNoise,
-                                filtAdaptWindowed, NULL,
-                                filterRatio,
-                                spectralNoise,
-                                spectralSnr);
-    
-    TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(nSamples);
-    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
-    fft.shift(filtAdaptSpec);
-    
-    for (size_t ii = 0; ii < nSamples; ii++) {
-      power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
-    }
-    
-  } else if (_useRegrFilt) {
-
-    // regression
-    
-    ForsytheRegrFilter regrF;
-    if (beam->getIsStagPrt()) {
-      regrF.setupStaggered(nSamples, beam->getStagM(), beam->getStagN(),
-                           _params.regression_filter_determine_order_from_cnr,
-                           _params.regression_filter_specified_polynomial_order,
-                           _params.regression_filter_clutter_width_factor,
-                           _params.regression_filter_cnr_exponent,
-                           beam->getCalib().getWavelengthCm() / 100.0);
-    } else {
-      regrF.setup(nSamples,
-                  _params.regression_filter_determine_order_from_cnr,
-                  _params.regression_filter_specified_polynomial_order,
-                  _params.regression_filter_clutter_width_factor,
-                  _params.regression_filter_cnr_exponent,
-                  beam->getCalib().getWavelengthCm() / 100.0);
-    }
-    
-    TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(nSamples, beam->getPrt(), fft,
-                                  regrF, _windowCoeff,
-                                  iq,
-                                  calibNoise,
-                                  filtered, NULL,
-                                  filterRatio,
-                                  spectralNoise,
-                                  spectralSnr);
-
-    TaArray<RadarComplex_t> filtRegrWindowed_;
-    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(nSamples);
-    _applyWindow(filtered, filtRegrWindowed, nSamples);
-    
-    TaArray<RadarComplex_t> filtRegrSpec_;
-    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(nSamples);
-    fft.fwd(filtRegrWindowed, filtRegrSpec);
-    fft.shift(filtRegrSpec);
-    
-    for (size_t ii = 0; ii < nSamples; ii++) {
-      power[ii] = RadarComplex::power(filtRegrSpec[ii]);
-    }
-    
-  } else {
-
-    // no filtering
-    
-    for (size_t ii = 0; ii < nSamples; ii++) {
-      power[ii] = RadarComplex::power(powerSpec[ii]);
-    }
-    
-  }
-
-  // compute dbm
-  
-  for (size_t ii = 0; ii < nSamples; ii++) {
-    if (power[ii] <= 1.0e-12) {
-      dbm[ii] = -120.0;
-    } else {
-      dbm[ii] = 10.0 * log10(power[ii]);
-    }
-  }
-
-#endif
 
 }
 
@@ -1905,42 +1798,42 @@ int WaterfallPlot::_readColorMap(string colorScaleName)
 
 void WaterfallPlot::_applyWindow(const RadarComplex_t *iq, 
                                  RadarComplex_t *iqWindowed,
-                                 size_t nSamples)
+                                 size_t _nSamples)
 {
   
   // initialize the window
   
-  _windowCoeff = _windowCoeff_.alloc(nSamples);
+  _windowCoeff = _windowCoeff_.alloc(_nSamples);
   switch (_fftWindow) {
     case Params::FFT_WINDOW_RECT:
     default:
-      RadarMoments::initWindowRect(nSamples, _windowCoeff);
+      RadarMoments::initWindowRect(_nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_VONHANN:
-      RadarMoments::initWindowVonhann(nSamples, _windowCoeff);
+      RadarMoments::initWindowVonhann(_nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_BLACKMAN:
-      RadarMoments::initWindowBlackman(nSamples, _windowCoeff);
+      RadarMoments::initWindowBlackman(_nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
-      RadarMoments::initWindowBlackmanNuttall(nSamples, _windowCoeff);
+      RadarMoments::initWindowBlackmanNuttall(_nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_10:
-      RadarMoments::initWindowTukey(0.1, nSamples, _windowCoeff);
+      RadarMoments::initWindowTukey(0.1, _nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_20:
-      RadarMoments::initWindowTukey(0.2, nSamples, _windowCoeff);
+      RadarMoments::initWindowTukey(0.2, _nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_30:
-      RadarMoments::initWindowTukey(0.3, nSamples, _windowCoeff);
+      RadarMoments::initWindowTukey(0.3, _nSamples, _windowCoeff);
       break;
     case Params::FFT_WINDOW_TUKEY_50:
-      RadarMoments::initWindowTukey(0.5, nSamples, _windowCoeff);
+      RadarMoments::initWindowTukey(0.5, _nSamples, _windowCoeff);
   }
 
   // compute power spectrum
   
-  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, nSamples);
+  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, _nSamples);
 
 }
   
@@ -2039,7 +1932,7 @@ double WaterfallPlot::_computeSdevPhidp(const vector<double> &phidp)
 // compute the folding values and range
 // by inspecting the phidp values
 
-void WaterfallPlot::_computePhidpFoldingRange(size_t nGates, size_t nSamples, 
+void WaterfallPlot::_computePhidpFoldingRange(size_t _nGates, size_t _nSamples, 
                                               double **phidp2D)
   
 {
@@ -2049,8 +1942,8 @@ void WaterfallPlot::_computePhidpFoldingRange(size_t nGates, size_t nSamples,
   double phidpMin = 9999;
   double phidpMax = -9999;
 
-  for (size_t igate = 0; igate < nGates; igate++) {
-    for (size_t isample = 0; isample < nSamples; isample++) {
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
       double phidp = phidp2D[igate][isample];
       phidpMin = min(phidpMin, phidp);
       phidpMax = max(phidpMax, phidp);

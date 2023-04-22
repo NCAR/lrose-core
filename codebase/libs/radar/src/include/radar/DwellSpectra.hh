@@ -134,6 +134,24 @@ public:
 
   void setWindow(const double *window, size_t nSamples);
 
+  // set filtering
+  
+  void setWindowType(RadarMoments::window_type_t val =
+                     RadarMoments::WINDOW_RECT) {
+    _windowType = val;
+  }
+  void setClutterFilterType(RadarMoments::clutter_filter_type_t val =
+                            RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+    _clutterFilterType = val;
+  }
+  void setRegrOrder(int val = -1) { _regrOrder = val; }
+  void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
+  void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
+  void setRegrFiltNotchInterpMethod(RadarMoments::notch_interp_method_t val =
+                                    RadarMoments::INTERP_METHOD_GAUSSIAN) {
+    _regrNotchInterpMethod = val;
+  }
+
   // reset, ready for setting new data
   
   void prepareForData();
@@ -187,11 +205,6 @@ public:
   RadarComplex_t **getIqHx2D() const { return _iqHx2D.dat2D(); }
   RadarComplex_t **getIqVx2D() const { return _iqVx2D.dat2D(); }
 
-  RadarComplex_t **getIqWindowedHc2D() const { return _iqWindowedHc2D.dat2D(); }
-  RadarComplex_t **getIqWindowedVc2D() const { return _iqWindowedVc2D.dat2D(); }
-  RadarComplex_t **getIqWindowedHx2D() const { return _iqWindowedHx2D.dat2D(); }
-  RadarComplex_t **getIqWindowedVx2D() const { return _iqWindowedVx2D.dat2D(); }
-  
   RadarComplex_t **getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
   RadarComplex_t **getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
   RadarComplex_t **getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
@@ -282,10 +295,22 @@ private:
   bool _phidpFoldsAt90;
   double _phidpFoldVal, _phidpFoldRange;
 
+  // filtering
+
+  RadarMoments::window_type_t _windowType;
+  RadarMoments::clutter_filter_type_t _clutterFilterType;
+  int _regrOrder; // auto if negative
+  double _regrClutWidthFactor;
+  double _regrCnrExponent;
+  RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
+
   // noise
 
   double _specNoiseDwellHc;
-
+  double _specNoiseDwellVc;
+  double _specNoiseDwellHx;
+  double _specNoiseDwellVx;
+  
   // interest maps for CMD
   
   InterestMap *_interestMapTdbz;
@@ -305,11 +330,6 @@ private:
   TaArray2D<RadarComplex_t> _iqVc2D;
   TaArray2D<RadarComplex_t> _iqHx2D;
   TaArray2D<RadarComplex_t> _iqVx2D;
-  
-  TaArray2D<RadarComplex_t> _iqWindowedHc2D;
-  TaArray2D<RadarComplex_t> _iqWindowedVc2D;
-  TaArray2D<RadarComplex_t> _iqWindowedHx2D;
-  TaArray2D<RadarComplex_t> _iqWindowedVx2D;
   
   TaArray2D<RadarComplex_t> _specCompHc2D;
   TaArray2D<RadarComplex_t> _specCompVc2D;
@@ -346,7 +366,9 @@ private:
   void _allocArrays(size_t nGates, size_t nSamples);
   void _freeArrays();
 
-  void _computePowerSpectra(TaArray2D<RadarComplex_t> &iqWindowed2D,
+  void _computePowerSpectra(TaArray2D<RadarComplex_t> &iq2D,
+                            double calibNoise,
+                            RadarMoments &moments,
                             TaArray2D<RadarComplex_t> &specComp2D,
                             TaArray2D<double> &specPower2D,
                             TaArray2D<double> &specDbm2D);

@@ -6112,6 +6112,43 @@ double RadarMoments::computeNcp(RadarComplex_t *iq)
   
 }
 
+////////////////////////////////////////////////////////////
+// initialize window from type
+
+void RadarMoments::initWindow(window_type_t windowType,
+                              int nSamples, double *window)
+  
+{
+
+  switch(windowType) {
+    case WINDOW_VONHANN:
+      initWindowVonhann(nSamples, window);
+      break;
+    case WINDOW_BLACKMAN:
+      initWindowBlackman(nSamples, window);
+      break;
+    case WINDOW_BLACKMAN_NUTTALL:
+      initWindowBlackmanNuttall(nSamples, window);
+      break;
+    case WINDOW_TUKEY_10:
+      initWindowTukey(0.1, nSamples, window);
+      break;
+    case WINDOW_TUKEY_20:
+      initWindowTukey(0.2, nSamples, window);
+      break;
+    case WINDOW_TUKEY_30:
+      initWindowTukey(0.3, nSamples, window);
+      break;
+    case WINDOW_TUKEY_50:
+      initWindowTukey(0.5, nSamples, window);
+      break;
+    case WINDOW_RECT:
+    default:
+      initWindowRect(nSamples, window);
+  }
+  
+}
+  
 /////////////////////////////////////
 // initialize rectangular window
 

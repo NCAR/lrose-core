@@ -40,6 +40,7 @@
 #include <QWidget>
 #include <toolsa/TaArray.hh>
 #include <radar/RadarComplex.hh>
+#include <radar/DwellSpectra.hh>
 
 #include "Params.hh"
 #include "SpritePlot.hh"
@@ -113,11 +114,13 @@ public:
     _regrNotchInterpMethod = val;
   }
 
+  // prepare a beam for plotting
+  
+  void prepareBeam(Beam *beam, size_t nSamples);
+  
   // plot a beam
   
   void plotBeam(QPainter &painter,
-                Beam *beam,
-                size_t nSamples,
                 double selectedRangeKm);
 
   // get the plot details
@@ -175,7 +178,7 @@ protected:
   RadarMoments::clutter_filter_type_t _clutterFilterType;
   bool _plotClutModel;
   double _clutModelWidthMps;
-  int _regrOrder;
+  int _regrOrder; // auto if negative
   int _regrOrderInUse;
   double _regrClutWidthFactor;
   double _regrCnrExponent;
@@ -190,80 +193,54 @@ protected:
   bool _phidpFoldsAt90;
   double _phidpFoldVal, _phidpFoldRange;
 
+  // beam data
+
+  Beam *_beam;
+  size_t _nSamples;
+  size_t _nGates;
+
+  // spectra in range for dwell
+
+  DwellSpectra _spectra;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
 
   void _plotHc(QPainter &painter,
-               Beam *beam,
-               size_t nSamples,
-               size_t nGates,
                double selectedRangeKm);
   
   void _plotVc(QPainter &painter,
-               Beam *beam,
-               size_t nSamples,
-               size_t nGates,
                double selectedRangeKm);
   
   void _plotHx(QPainter &painter,
-               Beam *beam,
-               size_t nSamples,
-               size_t nGates,
                double selectedRangeKm);
   
   void _plotVx(QPainter &painter,
-               Beam *beam,
-               size_t nSamples,
-               size_t nGates,
                double selectedRangeKm);
   
   void _plotDbz(QPainter &painter,
-                Beam *beam,
-                size_t nSamples,
-                size_t nGates,
                 double selectedRangeKm);
   
   void _plotZdr(QPainter &painter,
-                Beam *beam,
-                size_t nSamples,
-                size_t nGates,
                 double selectedRangeKm);
   
   void _plotPhidp(QPainter &painter,
-                  Beam *beam,
-                  size_t nSamples,
-                  size_t nGates,
                   double selectedRangeKm);
   
   void _plotRhohv(QPainter &painter,
-                  Beam *beam,
-                  size_t nSamples,
-                  size_t nGates,
                   double selectedRangeKm);
   
   void _plotTdbz(QPainter &painter,
-                 Beam *beam,
-                 size_t nSamples,
-                 size_t nGates,
                  double selectedRangeKm);
   
   void _plotSdevZdr(QPainter &painter,
-                    Beam *beam,
-                    size_t nSamples,
-                    size_t nGates,
                     double selectedRangeKm);
   
   void _plotSdevPhidp(QPainter &painter,
-                      Beam *beam,
-                      size_t nSamples,
-                      size_t nGates,
                       double selectedRangeKm);
   
   void _plotCmd(QPainter &painter,
-                Beam *beam,
-                size_t nSamples,
-                size_t nGates,
                 double selectedRangeKm);
   
   void _computePowerSpectrum(Beam *beam,
