@@ -1564,7 +1564,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 10;
+        tt->struct_def.fields[0].enum_def.nfields = 12;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1575,18 +1575,22 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = WATERFALL_HX;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("WATERFALL_VX");
         tt->struct_def.fields[0].enum_def.fields[3].val = WATERFALL_VX;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_RHOHV;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_SDEV_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_CMD");
-        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_TDBZ");
+        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_TDBZ;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_SDEV_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[10].val = WATERFALL_SDEV_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("WATERFALL_CMD");
+        tt->struct_def.fields[0].enum_def.fields[11].val = WATERFALL_CMD;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1709,6 +1713,30 @@
     tt->single_val.i = 30;
     tt++;
     
+    // Parameter 'waterfall_tdbz_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tdbz_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &waterfall_tdbz_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'waterfall_tdbz_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tdbz_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.");
+    tt->val_offset = (char *) &waterfall_tdbz_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
     // Parameter 'waterfall_sdev_zdr_kernel_ngates'
     // ctype is 'int'
     
@@ -1767,6 +1795,18 @@
     tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
     tt->val_offset = (char *) &color_scale_dir - &_start_;
     tt->single_val.s = tdrpStrDup("../share/color_scales");
+    tt++;
+    
+    // Parameter 'waterfall_dbz_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_dbz_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for dbz");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_dbz_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbz.colors");
     tt++;
     
     // Parameter 'waterfall_dbm_color_scale_name'

@@ -218,6 +218,12 @@ protected:
                size_t nGates,
                double selectedRangeKm);
   
+  void _plotDbz(QPainter &painter,
+                Beam *beam,
+                size_t nSamples,
+                size_t nGates,
+                double selectedRangeKm);
+  
   void _plotZdr(QPainter &painter,
                 Beam *beam,
                 size_t nSamples,
@@ -235,6 +241,12 @@ protected:
                   size_t nSamples,
                   size_t nGates,
                   double selectedRangeKm);
+  
+  void _plotTdbz(QPainter &painter,
+                 Beam *beam,
+                 size_t nSamples,
+                 size_t nGates,
+                 double selectedRangeKm);
   
   void _plotSdevZdr(QPainter &painter,
                     Beam *beam,

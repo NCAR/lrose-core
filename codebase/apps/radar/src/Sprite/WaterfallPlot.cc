@@ -135,6 +135,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     case Params::WATERFALL_VX:
       _plotVx(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
+    case Params::WATERFALL_DBZ:
+      _plotDbz(painter, beam, nSamples, nGates, selectedRangeKm);
+      break;
     case Params::WATERFALL_ZDR:
       _plotZdr(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
@@ -143,6 +146,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
       break;
     case Params::WATERFALL_RHOHV:
       _plotRhohv(painter, beam, nSamples, nGates, selectedRangeKm);
+      break;
+    case Params::WATERFALL_TDBZ:
+      _plotTdbz(painter, beam, nSamples, nGates, selectedRangeKm);
       break;
     case Params::WATERFALL_SDEV_ZDR:
       _plotSdevZdr(painter, beam, nSamples, nGates, selectedRangeKm);
@@ -524,6 +530,75 @@ void WaterfallPlot::_plotVx(QPainter &painter,
 }
 
 /*************************************************************************
+ * plot DBZ spectrum
+ */
+
+void WaterfallPlot::_plotDbz(QPainter &painter,
+                             Beam *beam,
+                             size_t nSamples,
+                             size_t nGates,
+                             double selectedRangeKm)
+  
+{
+
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_dbz_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  painter.save();
+
+  // loop through the gates
+  
+  for (size_t igate = 0; igate < nGates; igate++) {
+
+    // set limits for plotting this gate
+    
+    double yy = startRange + gateSpacing * (igate-0.5);
+
+    // get field
+    
+    double *dbz = beam->getSpectra().getSpecDbz2D()[igate];
+
+    // apply 3-pt median filter
+    
+    FilterUtils::applyMedianFilter(dbz, nSamples, _medianFiltLen);
+      
+    // plot the samples
+    
+    for (size_t ii = 0; ii < nSamples; ii++) {
+
+      // get color
+
+      int red, green, blue;
+      _cmap.dataColor(dbz[ii], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      
+      // set x limits
+
+      double xx = ii;
+      
+      // fill rectangle
+
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+
+    } // ii
+
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
  * plot ZDR spectrum
  */
 
@@ -747,43 +822,8 @@ void WaterfallPlot::_plotRhohv(QPainter &painter,
     // set limits for plotting this gate
     
     double yy = startRange + gateSpacing * (igate-0.5);
-    
-    // get Iq data for this gate
-    
-    // const GateData *gateData = beam->getGateData()[igate];
-    // TaArray<RadarComplex_t> iqHc_, iqVc_;
-    // RadarComplex_t *iqHc = iqHc_.alloc(nSamples);
-    // RadarComplex_t *iqVc = iqVc_.alloc(nSamples);
-    // memcpy(iqHc, gateData->iqhcOrig, nSamples * sizeof(RadarComplex_t));
-    // memcpy(iqVc, gateData->iqvcOrig, nSamples * sizeof(RadarComplex_t));
-    
-    // // apply window to time series
-    
-    // TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
-    // RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(nSamples);
-    // RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(nSamples);
-    // _applyWindow(iqHc, iqWindowedHc, nSamples);
-    // _applyWindow(iqVc, iqWindowedVc, nSamples);
-    
-    // // compute spectra
-    
-    // TaArray<RadarComplex_t> specHc_, specVc_;
-    // RadarComplex_t *specHc = specHc_.alloc(nSamples);
-    // RadarComplex_t *specVc = specVc_.alloc(nSamples);
-    // RadarFft fft(nSamples);
-    // fft.fwd(iqWindowedHc, specHc);
-    // fft.shift(specHc);
-    // fft.fwd(iqWindowedVc, specVc);
-    // fft.shift(specVc);
 
-    // // compute phidp spectrum
-
-    // TaArray<double> phidp_;
-    // double *phidp = phidp_.alloc(nSamples);
-    // for (size_t ii = 0; ii < nSamples; ii++) {
-    //   RadarComplex_t diff = RadarComplex::conjugateProduct(specHc[ii], specVc[ii]);
-    //   phidp[ii] = RadarComplex::argDeg(diff);
-    // }
+    // get field
     
     double *rhohv = beam->getSpectra().getSpecRhohv2D()[igate];
     
@@ -799,6 +839,75 @@ void WaterfallPlot::_plotRhohv(QPainter &painter,
 
       int red, green, blue;
       _cmap.dataColor(rhohv[ii], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      
+      // set x limits
+
+      double xx = ii;
+      
+      // fill rectangle
+
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+
+    } // ii
+
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot TDBZ spectrum
+ */
+
+void WaterfallPlot::_plotTdbz(QPainter &painter,
+                             Beam *beam,
+                             size_t nSamples,
+                             size_t nGates,
+                             double selectedRangeKm)
+  
+{
+
+  double startRange = beam->getStartRangeKm();
+  double gateSpacing = beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_dbz_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  painter.save();
+
+  // loop through the gates
+  
+  for (size_t igate = 0; igate < nGates; igate++) {
+
+    // set limits for plotting this gate
+    
+    double yy = startRange + gateSpacing * (igate-0.5);
+
+    // get field
+    
+    double *tdbz = beam->getSpectra().getSpecTdbz2D()[igate];
+
+    // apply 3-pt median filter
+    
+    FilterUtils::applyMedianFilter(tdbz, nSamples, _medianFiltLen);
+      
+    // plot the samples
+    
+    for (size_t ii = 0; ii < nSamples; ii++) {
+
+      // get color
+
+      int red, green, blue;
+      _cmap.dataColor(tdbz[ii], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       
@@ -1361,11 +1470,13 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   double calibNoise = 0.0;
   switch (_plotType) {
     case Params::WATERFALL_HC:
+    case Params::WATERFALL_DBZ:
     case Params::WATERFALL_ZDR:
-    case Params::WATERFALL_SDEV_ZDR:
     case Params::WATERFALL_PHIDP:
     case Params::WATERFALL_RHOHV:
+    case Params::WATERFALL_TDBZ:
     case Params::WATERFALL_SDEV_PHIDP:
+    case Params::WATERFALL_SDEV_ZDR:
     case Params::WATERFALL_CMD:
       calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
       break;
@@ -1627,10 +1738,14 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "HX";
     case Params::WATERFALL_VX:
       return "VX";
+    case Params::WATERFALL_DBZ:
+      return "DBZ";
     case Params::WATERFALL_ZDR:
       return "ZDR";
     case Params::WATERFALL_PHIDP:
       return "PHIDP";
+    case Params::WATERFALL_TDBZ:
+      return "TDBZ";
     case Params::WATERFALL_SDEV_ZDR:
       return "SDEV_ZDR";
     case Params::WATERFALL_SDEV_PHIDP:
@@ -1653,6 +1768,9 @@ string WaterfallPlot::getUnits(Params::waterfall_type_t wtype)
     case Params::WATERFALL_HX:
     case Params::WATERFALL_VX:
       return "dBm";
+    case Params::WATERFALL_DBZ:
+    case Params::WATERFALL_TDBZ:
+      return "dBZ";
     case Params::WATERFALL_ZDR:
     case Params::WATERFALL_SDEV_ZDR:
       return "dB";

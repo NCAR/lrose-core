@@ -480,9 +480,11 @@ typedef enum {
   WATERFALL_VC,
   WATERFALL_HX,
   WATERFALL_VX,
+  WATERFALL_DBZ,
   WATERFALL_ZDR,
   WATERFALL_PHIDP,
   WATERFALL_RHOHV,
+  WATERFALL_TDBZ,
   WATERFALL_SDEV_ZDR,
   WATERFALL_SDEV_PHIDP,
   WATERFALL_CMD
@@ -522,6 +524,18 @@ paramdef int {
 
 paramdef int {
   p_default = 5;
+  p_descr = "Kernal size in range for computing TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.";
+} waterfall_tdbz_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.";
+} waterfall_tdbz_kernel_nsamples;
+
+paramdef int {
+  p_default = 5;
   p_descr = "Kernal size in range for computing sdev of zdr";
   p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.";
 } waterfall_sdev_zdr_kernel_ngates;
@@ -549,6 +563,11 @@ paramdef string {
   p_descr = "Directory for color scales";
   p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
 } color_scale_dir;
+
+paramdef string {
+  p_default = "dbz.colors";
+  p_descr = "Color scale name for dbz";
+} waterfall_dbz_color_scale_name;
 
 paramdef string {
   p_default = "dbm_spectra.colors";

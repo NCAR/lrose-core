@@ -1693,6 +1693,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotVx);
   
+  QAction plotDbz("Plot DBZ", &contextMenu);
+  connect(&plotDbz, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_DBZ);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotDbz);
+  
   QAction plotZdr("Plot ZDR", &contextMenu);
   connect(&plotZdr, &QAction::triggered,
           [this, id] () {
@@ -1716,6 +1724,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
             _configureWaterfall(id);
           } );
   setPlotTypeMenu.addAction(&plotRhohv);
+  
+  QAction plotTdbz("Plot TDBZ", &contextMenu);
+  connect(&plotTdbz, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_TDBZ);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotTdbz);
   
   QAction plotSdevZdr("Plot SDEV_ZDR", &contextMenu);
   connect(&plotSdevZdr, &QAction::triggered,

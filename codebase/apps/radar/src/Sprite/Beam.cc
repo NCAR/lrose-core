@@ -3897,6 +3897,19 @@ void Beam::_loadDwellSpectra()
 
   _spectra.setWindow(_window, _nSamples);
 
+  // calibration
+  
+  _spectra.setCalibration(getCalib());
+
+  // computing textures
+  
+  _spectra.setTdbzKernelNGates(_params.waterfall_tdbz_kernel_ngates);
+  _spectra.setTdbzKernelNSamples(_params.waterfall_tdbz_kernel_nsamples);
+  _spectra.setSdevZdrKernelNGates(_params.waterfall_sdev_zdr_kernel_ngates);
+  _spectra.setSdevZdrKernelNSamples(_params.waterfall_sdev_zdr_kernel_nsamples);
+  _spectra.setSdevPhidpKernelNGates(_params.waterfall_sdev_phidp_kernel_ngates);
+  _spectra.setSdevPhidpKernelNSamples(_params.waterfall_sdev_phidp_kernel_nsamples);
+
   // set time series
 
   _spectra.prepareForData();
