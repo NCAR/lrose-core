@@ -3930,8 +3930,8 @@ void Beam::_loadDwellSpectra()
   _spectra.computeZdrSpectra();
   _spectra.computePhidpRhohvSpectra();
   // _spectra.computeTdbz();
-  // _spectra.computeZdrSdev();
-  // _spectra.computePhidpSdev();
+  _spectra.computeZdrSdev();
+  _spectra.computePhidpSdev();
   
   // _spectra.computeSpectralCmd();
 

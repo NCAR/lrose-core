@@ -841,7 +841,8 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
     _zoomWorld.drawColorScale(_cmap, painter,
                               _params.waterfall_color_scale_font_size);
   }
-  
+
+#ifdef JUNK
   // load up 2D array of spectral zdr
 
   TaArray2D<double> zdr2D_;
@@ -925,16 +926,20 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
     } // isample
   } // igate
 
+#endif
+
   // plot the data
 
   painter.save();
 
+  
   for (size_t igate = 0; igate < nGates; igate++) {
+    double *zdrSdev = beam->getSpectra().getSpecZdrSdev2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
     for (size_t isample = 0; isample < nSamples; isample++) {
       // get color
       int red, green, blue;
-      _cmap.dataColor(sdev2D[igate][isample], red, green, blue);
+      _cmap.dataColor(zdrSdev[isample], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       // set x limits
@@ -971,7 +976,8 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
     _zoomWorld.drawColorScale(_cmap, painter,
                               _params.waterfall_color_scale_font_size);
   }
-  
+
+#ifdef JUNK
   // load up 2D array of spectral phidp
 
   TaArray2D<double> phidp2D_;
@@ -1064,16 +1070,19 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
     } // isample
   } // igate
 
+#endif
+  
   // plot the data
 
   painter.save();
 
   for (size_t igate = 0; igate < nGates; igate++) {
+    double *phidpSdev = beam->getSpectra().getSpecPhidpSdev2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
     for (size_t isample = 0; isample < nSamples; isample++) {
       // get color
       int red, green, blue;
-      _cmap.dataColor(sdev2D[igate][isample], red, green, blue);
+      _cmap.dataColor(phidpSdev[isample], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       // set x limits
