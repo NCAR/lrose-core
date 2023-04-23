@@ -197,16 +197,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
     filteredPowerSpec[ii] = notched[ii];
   }
 
-  // if requested, set power to the noise in the notch
-
-  bool setNotchToNoise = true;
-  if (setNotchToNoise) {
-    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      filteredPowerSpec[jj] = calibratedNoise;
-    }
-  }
-  
   // compute filtered power
   
   _filteredPower = RadarComplex::meanPower(filteredPowerSpec, nSamples);
@@ -227,8 +217,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
 //   initNotchWidthMps: width of first guess notch (m/s)
 //   nyquistMps: unambiguous vel (m/s)
 //   calibratedNoise: noise power at digitizer from calibration (mW)
-//   setNotchToNoise: if true, points within the notch will be
-//                       set to the calibrated noise
 //
 // Outputs:
 //
@@ -250,7 +238,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
                                  double initNotchWidthMps,
                                  double nyquistMps,
                                  double calibratedNoise,
-                                 bool setNotchToNoise,
                                  bool &clutterFound,
                                  double *filteredPowerSpec,
                                  double *notchedPowerSpec,
@@ -343,15 +330,6 @@ void ClutFilter::performAdaptive(const double *rawPowerSpec,
   
   for (int ii = 0; ii < nSamples; ii++) {
     filteredPowerSpec[ii] = notched[ii];
-  }
-
-  // if requested, set power to the noise in the notch
-
-  if (setNotchToNoise) {
-    for (int ii = clutterLowerBound; ii <= clutterUpperBound; ii++) {
-      int jj = (ii + nSamples) % nSamples;
-      filteredPowerSpec[jj] = calibratedNoise;
-    }
   }
 
   // compute filtered power

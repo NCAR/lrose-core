@@ -128,6 +128,33 @@ void WaterfallPlot::prepareBeam(Beam *beam,
   
   // load up time series for dwell spectra
 
+  switch (_fftWindow) {
+    case Params::FFT_WINDOW_VONHANN:
+      _spectra.setWindowType(RadarMoments::WINDOW_VONHANN);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN:
+      _spectra.setWindowType(RadarMoments::WINDOW_BLACKMAN);
+      break;
+    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
+      _spectra.setWindowType(RadarMoments::WINDOW_BLACKMAN_NUTTALL);
+      break;
+    case Params::FFT_WINDOW_TUKEY_10:
+      _spectra.setWindowType(RadarMoments::WINDOW_TUKEY_10);
+      break;
+    case Params::FFT_WINDOW_TUKEY_20:
+      _spectra.setWindowType(RadarMoments::WINDOW_TUKEY_20);
+      break;
+    case Params::FFT_WINDOW_TUKEY_30:
+      _spectra.setWindowType(RadarMoments::WINDOW_TUKEY_30);
+      break;
+    case Params::FFT_WINDOW_TUKEY_50:
+      _spectra.setWindowType(RadarMoments::WINDOW_TUKEY_50);
+    case Params::FFT_WINDOW_RECT:
+    default:
+      _spectra.setWindowType(RadarMoments::WINDOW_RECT);
+      break;
+  }
+  
   _spectra.setClutterFilterType(_clutterFilterType);
   _spectra.setRegrOrder(_regrOrder);
   _spectra.setRegrClutWidthFactor(_regrClutWidthFactor);

@@ -116,8 +116,6 @@ public:
   //   initNotchWidthMps: width of first guess notch (m/s)
   //   nyquistMps: unambiguous vel (m/s)
   //   calibratedNoise: noise power at digitizer from calibration (mW)
-  //   setNotchToNoise: if true, points within the notch will be
-  //                       set to the calibrated noise
   //
   // Outputs:
   //
@@ -139,7 +137,6 @@ public:
                               double initNotchWidthMps,
                               double nyquistMps,
                               double calibratedNoise,
-                              bool setNotchToNoise,
                               bool &clutterFound,
                               double *filteredPowerSpec,
                               double *notchedPowerSpec,
