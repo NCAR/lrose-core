@@ -132,7 +132,10 @@ public:
     WATERFALL_TDBZ = 8,
     WATERFALL_SDEV_ZDR = 9,
     WATERFALL_SDEV_PHIDP = 10,
-    WATERFALL_CMD = 11
+    WATERFALL_TDBZ_INT = 11,
+    WATERFALL_SDEV_ZDR_INT = 12,
+    WATERFALL_SDEV_PHIDP_INT = 13,
+    WATERFALL_CMD = 14
   } waterfall_type_t;
 
   typedef enum {
@@ -237,6 +240,11 @@ public:
     double min_val;
     double max_val;
   } iq_plot_static_range_t;
+
+  typedef struct {
+    double value;
+    double interest;
+  } interest_map_point_t;
 
   ///////////////////////////
   // Member functions
@@ -680,9 +688,13 @@ public:
 
   char* waterfall_rhohv_color_scale_name;
 
+  char* waterfall_tdbz_color_scale_name;
+
   char* waterfall_sdev_zdr_color_scale_name;
 
   char* waterfall_sdev_phidp_color_scale_name;
+
+  char* waterfall_interest_color_scale_name;
 
   char* waterfall_cmd_color_scale_name;
 
@@ -904,6 +916,23 @@ public:
 
   fft_window_t fft_window;
 
+  interest_map_point_t *_tdbz_interest_map;
+  int tdbz_interest_map_n;
+
+  double tdbz_interest_weight;
+
+  interest_map_point_t *_zdr_sdev_interest_map;
+  int zdr_sdev_interest_map_n;
+
+  double zdr_sdev_interest_weight;
+
+  interest_map_point_t *_phidp_sdev_interest_map;
+  int phidp_sdev_interest_map_n;
+
+  double phidp_sdev_interest_weight;
+
+  double cmd_threshold_for_clutter;
+
   char* cal_file_path;
 
   tdrp_bool_t use_cal_from_time_series;
@@ -921,7 +950,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[210];
+  mutable TDRPtable _table[220];
 
   const char *_className;
 

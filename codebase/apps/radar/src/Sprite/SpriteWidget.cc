@@ -1767,6 +1767,30 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSdevPhidp);
   
+  QAction plotTdbzInt("Plot TDBZ interest", &contextMenu);
+  connect(&plotTdbzInt, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_TDBZ_INT);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotTdbzInt);
+  
+  QAction plotSdevZdrInt("Plot SDEV_ZDR interest", &contextMenu);
+  connect(&plotSdevZdrInt, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_ZDR_INT);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevZdrInt);
+  
+  QAction plotSdevPhidpInt("Plot SDEV_PHIDP interest", &contextMenu);
+  connect(&plotSdevPhidpInt, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SDEV_PHIDP_INT);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSdevPhidpInt);
+  
   QAction plotCmd("Plot CMD", &contextMenu);
   connect(&plotCmd, &QAction::triggered,
           [this, id] () {

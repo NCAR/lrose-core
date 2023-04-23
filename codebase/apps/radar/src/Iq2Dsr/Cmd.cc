@@ -420,7 +420,7 @@ void Cmd::_computeTdbz(int nGates)
     endGate.push_back(end);
   } // igate
   
-  // tdbz is based on spatial variation in range and azimuth
+  // tdbz is based on spatial variation in range
 
   for (int igate = 0; igate < nGates; igate++) {
     

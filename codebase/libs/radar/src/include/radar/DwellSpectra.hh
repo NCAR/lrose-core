@@ -97,11 +97,11 @@ public:
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapZdrSdev
+  void setInterestMapSdevZdr
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
-  void setInterestMapPhidpSdev
+  void setInterestMapSdevPhidp
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
   
@@ -178,8 +178,8 @@ public:
   void computePhidpSpectra();
   void computeRhohvSpectra();
   void computeTdbz();
-  void computeZdrSdev();
-  void computePhidpSdev();
+  void computeSdevZdr();
+  void computeSdevPhidp();
   void computeSpectralCmd();
   
   // Compute spectral noise for entire dwell for specified variable
@@ -227,12 +227,12 @@ public:
   double **getSpecRhohv2D() const { return _specRhohv2D.dat2D(); }
 
   double **getSpecTdbz2D() const { return _specTdbz2D.dat2D(); }
-  double **getSpecZdrSdev2D() const { return _specZdrSdev2D.dat2D(); }
-  double **getSpecPhidpSdev2D() const { return _specPhidpSdev2D.dat2D(); }
+  double **getSpecSdevZdr2D() const { return _specSdevZdr2D.dat2D(); }
+  double **getSpecSdevPhidp2D() const { return _specSdevPhidp2D.dat2D(); }
 
   double **getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
-  double **getSpecZdrSdevInterest2D() const { return _specZdrSdevInterest2D.dat2D(); }
-  double **getSpecPhidpSdevInterest2D() const { return _specPhidpSdevInterest2D.dat2D(); }
+  double **getSpecSdevZdrInterest2D() const { return _specSdevZdrInterest2D.dat2D(); }
+  double **getSpecSdevPhidpInterest2D() const { return _specSdevPhidpInterest2D.dat2D(); }
   
   double **getSpecCmd2D() const { return _specCmd2D.dat2D(); }
   
@@ -315,9 +315,8 @@ private:
   // interest maps for CMD
   
   InterestMap *_interestMapTdbz;
-  InterestMap *_interestMapZdrSdev;
-  InterestMap *_interestMapPhidpSdev;
-
+  InterestMap *_interestMapSdevZdr;
+  InterestMap *_interestMapSdevPhidp;
   double _cmdInterestThreshold;
 
   // Arrays
@@ -353,12 +352,12 @@ private:
   TaArray2D<double> _specRhohv2D;
 
   TaArray2D<double> _specTdbz2D;
-  TaArray2D<double> _specZdrSdev2D;
-  TaArray2D<double> _specPhidpSdev2D;
+  TaArray2D<double> _specSdevZdr2D;
+  TaArray2D<double> _specSdevPhidp2D;
   
   TaArray2D<double> _specTdbzInterest2D;
-  TaArray2D<double> _specZdrSdevInterest2D;
-  TaArray2D<double> _specPhidpSdevInterest2D;
+  TaArray2D<double> _specSdevZdrInterest2D;
+  TaArray2D<double> _specSdevPhidpInterest2D;
   
   TaArray2D<double> _specCmd2D;
   

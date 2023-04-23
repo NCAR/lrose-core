@@ -203,6 +203,12 @@ protected:
 
   DwellSpectra _spectra;
 
+  // interest maps
+
+  InterestMap *_tdbzInterestMap;
+  InterestMap *_zdrSdevInterestMap;
+  InterestMap *_phidpSdevInterestMap;
+
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -240,6 +246,15 @@ protected:
   void _plotSdevPhidp(QPainter &painter,
                       double selectedRangeKm);
   
+  void _plotTdbzInt(QPainter &painter,
+                    double selectedRangeKm);
+  
+  void _plotSdevZdrInt(QPainter &painter,
+                       double selectedRangeKm);
+  
+  void _plotSdevPhidpInt(QPainter &painter,
+                         double selectedRangeKm);
+  
   void _plotCmd(QPainter &painter,
                 double selectedRangeKm);
   
@@ -261,6 +276,13 @@ protected:
   double _computeSdevPhidp(const vector<double> &phidp);
   void _computePhidpFoldingRange(size_t nGates, size_t nSamples, 
                                  double **phidp2D);
+
+  int _setInterestMaps();
+  
+  int _convertInterestMapToVector(const string &label,
+                                  const Params::interest_map_point_t *map,
+                                  int nPoints,
+                                  vector<InterestMap::ImPoint> &pts);
 
 };
 

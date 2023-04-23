@@ -54,6 +54,7 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
         _params(params)
         
 {
+
   _plotType = Params::WATERFALL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
   _clutterFilterType = RadarMoments::CLUTTER_FILTER_NONE;
@@ -67,6 +68,9 @@ WaterfallPlot::WaterfallPlot(QWidget* parent,
   _beam = NULL;
   _nSamples = 0;
   _nGates = 0;
+
+  _setInterestMaps();
+  
 }
 
 /*************************************************************************
@@ -214,6 +218,15 @@ void WaterfallPlot::plotBeam(QPainter &painter,
       break;
     case Params::WATERFALL_SDEV_PHIDP:
       _plotSdevPhidp(painter, selectedRangeKm);
+      break;
+    case Params::WATERFALL_TDBZ_INT:
+      _plotTdbzInt(painter, selectedRangeKm);
+      break;
+    case Params::WATERFALL_SDEV_ZDR_INT:
+      _plotSdevZdrInt(painter, selectedRangeKm);
+      break;
+    case Params::WATERFALL_SDEV_PHIDP_INT:
+      _plotSdevPhidpInt(painter, selectedRangeKm);
       break;
     case Params::WATERFALL_CMD:
       _plotCmd(painter, selectedRangeKm);
@@ -878,7 +891,7 @@ void WaterfallPlot::_plotSdevZdr(QPainter &painter,
   painter.save();
   
   for (size_t igate = 0; igate < _nGates; igate++) {
-    double *zdrSdev = _spectra.getSpecZdrSdev2D()[igate];
+    double *zdrSdev = _spectra.getSpecSdevZdr2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
     for (size_t isample = 0; isample < _nSamples; isample++) {
       // get color
@@ -923,12 +936,147 @@ void WaterfallPlot::_plotSdevPhidp(QPainter &painter,
   painter.save();
 
   for (size_t igate = 0; igate < _nGates; igate++) {
-    double *phidpSdev = _spectra.getSpecPhidpSdev2D()[igate];
+    double *phidpSdev = _spectra.getSpecSdevPhidp2D()[igate];
     double yy = startRange + gateSpacing * (igate-0.5);
     for (size_t isample = 0; isample < _nSamples; isample++) {
       // get color
       int red, green, blue;
       _cmap.dataColor(phidpSdev[isample], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      // set x limits
+      double xx = isample;
+      // fill rectangle
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+    } // isample
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot interest of sdev of TDBZ spectrum
+ */
+
+void WaterfallPlot::_plotTdbzInt(QPainter &painter,
+                                 double selectedRangeKm)
+  
+{
+  
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_interest_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+
+  // plot the data
+  
+  painter.save();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *interest = _spectra.getSpecTdbzInterest2D()[igate];
+    double yy = startRange + gateSpacing * (igate-0.5);
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      // get color
+      int red, green, blue;
+      _cmap.dataColor(interest[isample], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      // set x limits
+      double xx = isample;
+      // fill rectangle
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+    } // isample
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot interest of sdev of ZDR spectrum
+ */
+
+void WaterfallPlot::_plotSdevZdrInt(QPainter &painter,
+                                      double selectedRangeKm)
+  
+{
+  
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_interest_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+
+  // plot the data
+  
+  painter.save();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *interest = _spectra.getSpecSdevZdrInterest2D()[igate];
+    double yy = startRange + gateSpacing * (igate-0.5);
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      // get color
+      int red, green, blue;
+      _cmap.dataColor(interest[isample], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      // set x limits
+      double xx = isample;
+      // fill rectangle
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+    } // isample
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot interest of sdev of PHIDP spectrum
+ */
+
+void WaterfallPlot::_plotSdevPhidpInt(QPainter &painter,
+                                      double selectedRangeKm)
+  
+{
+  
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_interest_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+
+  // plot the data
+  
+  painter.save();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    double *interest = _spectra.getSpecSdevPhidpInterest2D()[igate];
+    double yy = startRange + gateSpacing * (igate-0.5);
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      // get color
+      int red, green, blue;
+      _cmap.dataColor(interest[isample], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       // set x limits
@@ -1204,17 +1352,6 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
   const IwrfCalib &calib = _beam->getCalib();
   double calibNoise = 0.0;
   switch (_plotType) {
-    case Params::WATERFALL_HC:
-    case Params::WATERFALL_DBZ:
-    case Params::WATERFALL_ZDR:
-    case Params::WATERFALL_PHIDP:
-    case Params::WATERFALL_RHOHV:
-    case Params::WATERFALL_TDBZ:
-    case Params::WATERFALL_SDEV_PHIDP:
-    case Params::WATERFALL_SDEV_ZDR:
-    case Params::WATERFALL_CMD:
-      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
-      break;
     case Params::WATERFALL_VC:
       calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
       break;
@@ -1223,6 +1360,9 @@ void WaterfallPlot::_computePowerSpectrum(Beam *beam,
       break;
     case Params::WATERFALL_VX:
       calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+    default:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
       break;
   }
   
@@ -1384,8 +1524,14 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "SDEV_ZDR";
     case Params::WATERFALL_SDEV_PHIDP:
       return "SDEV_PHIDP";
+    case Params::WATERFALL_TDBZ_INT:
+      return "TDBZ_INT";
+    case Params::WATERFALL_SDEV_ZDR_INT:
+      return "SDEV_ZDR_INT";
+    case Params::WATERFALL_SDEV_PHIDP_INT:
+      return "SDEV_PHIDP_INT";
     case Params::WATERFALL_CMD:
-      return "SDEV_CMD";
+      return "CMD";
     default:
       return "UNKNOWN";
   }
@@ -1699,5 +1845,83 @@ void WaterfallPlot::_computePhidpFoldingRange(size_t _nGates, size_t _nSamples,
   }
   _phidpFoldRange = _phidpFoldVal * 2.0;
   
+}
+
+/////////////////////////////////////////////////////////
+// create interest maps
+
+int WaterfallPlot::_setInterestMaps()
+
+{  
+
+  // TDBZ
+
+  vector<InterestMap::ImPoint> pts;
+  if (_convertInterestMapToVector("TDBZ",
+                                  _params._tdbz_interest_map,
+                                  _params.tdbz_interest_map_n,
+                                  pts)) {
+    return -1;
+  }
+  _spectra.setInterestMapTdbz(pts, _params.tdbz_interest_weight);
+
+  // sdev of zdr
+
+  if (_convertInterestMapToVector("zdr sdev",
+                                  _params._zdr_sdev_interest_map,
+                                  _params.zdr_sdev_interest_map_n,
+                                  pts)) {
+    return -1;
+  }
+  _spectra.setInterestMapSdevZdr(pts, _params.zdr_sdev_interest_weight);
+
+  // sdev of phidp
+  
+  if (_convertInterestMapToVector("phidp sdev",
+                                  _params._phidp_sdev_interest_map,
+                                  _params.phidp_sdev_interest_map_n,
+                                  pts)) {
+    return -1;
+  }
+  _spectra.setInterestMapSdevPhidp(pts, _params.phidp_sdev_interest_weight);
+
+  // set threshold for identification of clutter
+  
+  _spectra.setCmdInterestThreshold(_params.cmd_threshold_for_clutter);
+  
+  return 0;
+  
+}
+
+////////////////////////////////////////////////////////////////////////
+// Convert interest map points to vector
+//
+// Returns 0 on success, -1 on failure
+
+int WaterfallPlot::_convertInterestMapToVector
+  (const string &label,
+   const Params::interest_map_point_t *map,
+   int nPoints,
+   vector<InterestMap::ImPoint> &pts)
+
+{
+
+  pts.clear();
+
+  double prevVal = -1.0e99;
+  for (int ii = 0; ii < nPoints; ii++) {
+    if (map[ii].value <= prevVal) {
+      cerr << "ERROR - Cmd::_convertInterestMapToVector" << endl;
+      cerr << "  Map label: " << label << endl;
+      cerr << "  Map values must increase monotonically" << endl;
+      return -1;
+    }
+    InterestMap::ImPoint pt(map[ii].value, map[ii].interest);
+    pts.push_back(pt);
+    prevVal = map[ii].value;
+  } // ii
+  
+  return 0;
+
 }
 

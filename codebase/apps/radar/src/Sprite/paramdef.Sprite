@@ -487,6 +487,9 @@ typedef enum {
   WATERFALL_TDBZ,
   WATERFALL_SDEV_ZDR,
   WATERFALL_SDEV_PHIDP,
+  WATERFALL_TDBZ_INT,
+  WATERFALL_SDEV_ZDR_INT,
+  WATERFALL_SDEV_PHIDP_INT,
   WATERFALL_CMD
 } waterfall_type_t;
 
@@ -590,6 +593,11 @@ paramdef string {
 } waterfall_rhohv_color_scale_name;
 
 paramdef string {
+  p_default = "dbz.colors";
+  p_descr = "Color scale name for TDBZ";
+} waterfall_tdbz_color_scale_name;
+
+paramdef string {
   p_default = "sdzdr_spectra.colors";
   p_descr = "Color scale name for sdev of zdr";
 } waterfall_sdev_zdr_color_scale_name;
@@ -598,6 +606,11 @@ paramdef string {
   p_default = "sdphidp_spectra.colors";
   p_descr = "Color scale name for sdev of phidp";
 } waterfall_sdev_phidp_color_scale_name;
+
+paramdef string {
+  p_default = "interest.colors";
+  p_descr = "Color scale name for interest values";
+} waterfall_interest_color_scale_name;
 
 paramdef string {
   p_default = "cmd_spectra.colors";
@@ -1324,6 +1337,53 @@ paramdef enum fft_window_t {
   p_default = FFT_WINDOW_VONHANN;
   p_descr = "Window to be applied to time series before computing spectra.";
 } fft_window;
+
+commentdef {
+  p_header = "SPECTRAL CMD INTEREST MAPS and WEIGHTS";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{30.0, 0.0001}, {40.0, 1.0}};
+  p_descr = "Interest mapping for TDBZ.";
+} tdbz_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for TDBZ interest.";
+  p_help = "This weight is used for combining tdbz interest into the final CMD interest.";
+} tdbz_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{3.0, 0.0001}, {4.0, 1.0}};
+  p_descr = "Interest mapping for zdr.";
+} zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of zdr.";
+} zdr_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{28.0, 0.0001}, {32.0, 1.0}};
+  p_descr = "Interest mapping for standard deviation of phidp.";
+} phidp_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of phidp.";
+} phidp_sdev_interest_weight;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Threshold CMD value for identifying clutter.";
+  p_help = "If the CMD value exceeds this threshold, clutter is assumed to exist at that point.";
+} cmd_threshold_for_clutter;
 
 commentdef {
   p_header = "RADAR CALIBRATION";

@@ -89,8 +89,8 @@ DwellSpectra::DwellSpectra()
   _sdevPhidpKernelNSamples = 3;
 
   _interestMapTdbz = NULL;
-  _interestMapZdrSdev = NULL;
-  _interestMapPhidpSdev = NULL;
+  _interestMapSdevZdr = NULL;
+  _interestMapSdevPhidp = NULL;
 
   _createDefaultInterestMaps();
 
@@ -189,12 +189,12 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _specRhohv2D.alloc(nGates, nSamples);
 
   _specTdbz2D.alloc(nGates, nSamples);
-  _specZdrSdev2D.alloc(nGates, nSamples);
-  _specPhidpSdev2D.alloc(nGates, nSamples);
+  _specSdevZdr2D.alloc(nGates, nSamples);
+  _specSdevPhidp2D.alloc(nGates, nSamples);
 
   _specTdbzInterest2D.alloc(nGates, nSamples);
-  _specZdrSdevInterest2D.alloc(nGates, nSamples);
-  _specPhidpSdevInterest2D.alloc(nGates, nSamples);
+  _specSdevZdrInterest2D.alloc(nGates, nSamples);
+  _specSdevPhidpInterest2D.alloc(nGates, nSamples);
 
   _specCmd2D.alloc(nGates, nSamples);
 
@@ -236,12 +236,12 @@ void DwellSpectra::_freeArrays()
   _specRhohv2D.free();
 
   _specTdbz2D.free();
-  _specZdrSdev2D.free();
-  _specPhidpSdev2D.free();
+  _specSdevZdr2D.free();
+  _specSdevPhidp2D.free();
 
   _specTdbzInterest2D.free();
-  _specZdrSdevInterest2D.free();
-  _specPhidpSdevInterest2D.free();
+  _specSdevZdrInterest2D.free();
+  _specSdevPhidpInterest2D.free();
 
   _specCmd2D.free();
 
@@ -700,7 +700,7 @@ void DwellSpectra::computeTdbz()
 ////////////////////////////////////////////////////
 // Compute 2D standard deviation of zdr
 
-void DwellSpectra::computeZdrSdev()
+void DwellSpectra::computeSdevZdr()
   
 {
 
@@ -711,7 +711,7 @@ void DwellSpectra::computeZdrSdev()
   // compute 2D sdev of spectral zdr
   
   double **zdr2D = _specZdr2D.dat2D();
-  double **sdev2D = _specZdrSdev2D.dat2D();
+  double **sdev2D = _specSdevZdr2D.dat2D();
   size_t nSamplesSdev = _nSamples;
   size_t nGatesSdev = _nGates;
   if (_sdevZdrKernelNGates < _nGates) {
@@ -760,7 +760,7 @@ void DwellSpectra::computeZdrSdev()
 ////////////////////////////////////////////////////
 // Compute 2D standard deviation of phidp
 
-void DwellSpectra::computePhidpSdev()
+void DwellSpectra::computeSdevPhidp()
   
 {
 
@@ -771,7 +771,7 @@ void DwellSpectra::computePhidpSdev()
   // compute 2D sdev of spectral phidp
   
   double **phidp2D = _specPhidp2D.dat2D();
-  double **sdev2D = _specPhidpSdev2D.dat2D();
+  double **sdev2D = _specSdevPhidp2D.dat2D();
   size_t nSamplesSdev = _nSamples;
   size_t nGatesSdev = _nGates;
   if (_sdevPhidpKernelNGates < _nGates) {
@@ -1047,18 +1047,18 @@ void DwellSpectra::computeSpectralCmd()
   // computeZdrSpectra();
   // computePhidpRhohvSpectra();
   // computeTdbz();
-  // computeZdrSdev();
-  // computePhidpSdev();
+  // computeSdevZdr();
+  // computeSdevPhidp();
  
   // accumulate the interest
   
   double **tdbz = _specTdbz2D.dat2D();
-  double **zdrSdev = _specZdrSdev2D.dat2D();
-  double **phidpSdev = _specPhidpSdev2D.dat2D();
+  double **zdrSdev = _specSdevZdr2D.dat2D();
+  double **phidpSdev = _specSdevPhidp2D.dat2D();
 
   double **tdbzInt = _specTdbzInterest2D.dat2D();
-  double **zdrSdevInt = _specZdrSdevInterest2D.dat2D();
-  double **phidpSdevInt = _specPhidpSdevInterest2D.dat2D();
+  double **zdrSdevInt = _specSdevZdrInterest2D.dat2D();
+  double **phidpSdevInt = _specSdevPhidpInterest2D.dat2D();
 
   for (size_t igate = 0; igate < _nGates; igate++) {
     for (size_t isample = 0; isample < _nSamples; isample++) {
@@ -1067,10 +1067,10 @@ void DwellSpectra::computeSpectralCmd()
         _interestMapTdbz->getInterest(tdbz[igate][isample]);
       
       zdrSdevInt[igate][isample] =
-        _interestMapZdrSdev->getInterest(zdrSdev[igate][isample]);
+        _interestMapSdevZdr->getInterest(zdrSdev[igate][isample]);
       
       phidpSdevInt[igate][isample] =
-        _interestMapPhidpSdev->getInterest(phidpSdev[igate][isample]);
+        _interestMapSdevPhidp->getInterest(phidpSdev[igate][isample]);
 
     } // isample
   } // igate
@@ -1078,13 +1078,13 @@ void DwellSpectra::computeSpectralCmd()
   // compute sum weights
 
   double weightTdbz = _interestMapTdbz->getWeight();
-  double weightZdrSdev = _interestMapZdrSdev->getWeight();
-  double weightPhidpSdev = _interestMapPhidpSdev->getWeight();
+  double weightSdevZdr = _interestMapSdevZdr->getWeight();
+  double weightSdevPhidp = _interestMapSdevPhidp->getWeight();
 
   double sumWeights = 0.0;
   sumWeights += weightTdbz;
-  sumWeights += weightZdrSdev;
-  sumWeights += weightPhidpSdev;
+  sumWeights += weightSdevZdr;
+  sumWeights += weightSdevPhidp;
   
   // compute cmd
   
@@ -1095,8 +1095,8 @@ void DwellSpectra::computeSpectralCmd()
       double sumInterest = 0.0;
 
       sumInterest += tdbzInt[igate][isample] * weightTdbz;
-      sumInterest += zdrSdevInt[igate][isample] * weightZdrSdev;
-      sumInterest += phidpSdevInt[igate][isample] * weightPhidpSdev;
+      sumInterest += zdrSdevInt[igate][isample] * weightSdevZdr;
+      sumInterest += phidpSdevInt[igate][isample] * weightSdevPhidp;
 
       cmd[igate][isample] = sumInterest / sumWeights;
         
@@ -1115,19 +1115,19 @@ void DwellSpectra::_createDefaultInterestMaps()
   vector<InterestMap::ImPoint> pts;
   
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(35.0, 0.0001));
-  pts.push_back(InterestMap::ImPoint(45.0, 1.0));
+  pts.push_back(InterestMap::ImPoint(30.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(40.0, 1.0));
   setInterestMapTdbz(pts, 1.0);
   
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.0, 0.0001));
-  pts.push_back(InterestMap::ImPoint(8.0, 1.0));
-  setInterestMapZdrSdev(pts, 1.0);
+  pts.push_back(InterestMap::ImPoint(3.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(4.0, 1.0));
+  setInterestMapSdevZdr(pts, 1.0);
 
   pts.clear();
-  pts.push_back(InterestMap::ImPoint(0.0, 0.0001));
-  pts.push_back(InterestMap::ImPoint(64.0, 1.0));
-  setInterestMapPhidpSdev(pts, 1.0);
+  pts.push_back(InterestMap::ImPoint(28.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(32.0, 1.0));
+  setInterestMapSdevPhidp(pts, 1.0);
 
   setCmdInterestThreshold(0.51);
 
@@ -1150,28 +1150,28 @@ void DwellSpectra::setInterestMapTdbz
 /////////////////////////////////////////////////////////
 // set interest map and weight for sdev of ZDR
 
-void DwellSpectra::setInterestMapZdrSdev
+void DwellSpectra::setInterestMapSdevZdr
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
-  if (_interestMapZdrSdev) {
-    delete _interestMapZdrSdev;
+  if (_interestMapSdevZdr) {
+    delete _interestMapSdevZdr;
   }
-  _interestMapZdrSdev = new InterestMap("ZdrSdev", pts, weight);
+  _interestMapSdevZdr = new InterestMap("SdevZdr", pts, weight);
 }
 
 /////////////////////////////////////////////////////////
 // set interest map and weight for sdev of PHIDP
 
-void DwellSpectra::setInterestMapPhidpSdev
+void DwellSpectra::setInterestMapSdevPhidp
   (const vector<InterestMap::ImPoint> &pts,
    double weight)
   
 {
-  if (_interestMapPhidpSdev) {
-    delete _interestMapPhidpSdev;
+  if (_interestMapSdevPhidp) {
+    delete _interestMapSdevPhidp;
   }
-  _interestMapPhidpSdev = new InterestMap("PhidpSdev", pts, weight);
+  _interestMapSdevPhidp = new InterestMap("SdevPhidp", pts, weight);
 }
 
