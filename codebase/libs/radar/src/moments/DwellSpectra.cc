@@ -503,7 +503,7 @@ void DwellSpectra::computeDbzSpectra()
       double powerHcNs = powerHc - _specNoiseDwellHc;
 
       if (powerHcNs > 0.0) {
-
+        
         double snr = powerHcNs / _specNoiseDwellHc;
         double snrDb = 10.0 * log10(snr);
         double dbz =  snrDb + _calib.getBaseDbz1kmHc() + rangeCorr;
@@ -514,7 +514,7 @@ void DwellSpectra::computeDbzSpectra()
         // censored, set to low val
         
         specDbz1D[isample] = -50.0;
-
+        
       }
       
     } // isample
