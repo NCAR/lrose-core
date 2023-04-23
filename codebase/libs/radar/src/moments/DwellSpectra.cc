@@ -168,10 +168,16 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _iqHx2D.alloc(nGates, nSamples);
   _iqVx2D.alloc(nGates, nSamples);
   
+  _iqHcFilt2D.alloc(nGates, nSamples);
+  _iqVcFilt2D.alloc(nGates, nSamples);
+
   _specCompHc2D.alloc(nGates, nSamples);
   _specCompVc2D.alloc(nGates, nSamples);
   _specCompHx2D.alloc(nGates, nSamples);
   _specCompVx2D.alloc(nGates, nSamples);
+
+  _specCompHcFilt2D.alloc(nGates, nSamples);
+  _specCompVcFilt2D.alloc(nGates, nSamples);
 
   _specPowerHc2D.alloc(nGates, nSamples);
   _specPowerVc2D.alloc(nGates, nSamples);
@@ -215,10 +221,16 @@ void DwellSpectra::_freeArrays()
   _iqHx2D.free();
   _iqVx2D.free();
 
+  _iqHcFilt2D.free();
+  _iqVcFilt2D.free();
+
   _specCompHc2D.free();
   _specCompVc2D.free();
   _specCompHx2D.free();
   _specCompVx2D.free();
+
+  _specCompHcFilt2D.free();
+  _specCompVcFilt2D.free();
 
   _specPowerHc2D.free();
   _specPowerVc2D.free();
@@ -1086,7 +1098,7 @@ void DwellSpectra::computeSpectralCmd()
   sumWeights += weightSdevZdr;
   sumWeights += weightSdevPhidp;
   
-  // compute cmd
+  // compute cmd, and filter
   
   double **cmd = _specCmd2D.dat2D();
   for (size_t igate = 0; igate < _nGates; igate++) {
@@ -1103,6 +1115,60 @@ void DwellSpectra::computeSpectralCmd()
     } // isample
   } // igate
 
+}
+
+////////////////////////////////////////////////////
+// Filter IQ Hc and Vc based on CMD
+
+void DwellSpectra::filterIqUsingCmd()
+  
+{
+
+  // copy the unfiltered data to filtered arrays
+  
+  _specCompHcFilt2D = _specCompHc2D;
+  _specCompVcFilt2D = _specCompVc2D;
+
+  // clear (zero out) the filtered spectra for those
+  // specrtal points that have a CMD value
+  // exceeding the threshold
+  
+  double **specCmd = _specCmd2D.dat2D();
+  RadarComplex_t **specHcFilt2D = _specCompHcFilt2D.dat2D();
+  RadarComplex_t **specVcFilt2D = _specCompVcFilt2D.dat2D();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      double cmdVal = specCmd[igate][isample];
+      if (cmdVal > _cmdInterestThreshold) {
+        // notch out the spectral point
+        specHcFilt2D[igate][isample].clear();
+        specVcFilt2D[igate][isample].clear();
+      }
+    } // isample
+  } // igate
+
+  // invert the filtered spectra into the time series
+  
+  RadarComplex_t **iqHcFilt2D = _iqHcFilt2D.dat2D();
+  RadarComplex_t **iqVcFilt2D = _iqVcFilt2D.dat2D();
+
+  for (size_t igate = 0; igate < _nGates; igate++) {
+    
+    RadarComplex_t *specHcFilt1D = specHcFilt2D[igate];
+    RadarComplex_t *specVcFilt1D = specVcFilt2D[igate];
+    
+    RadarComplex_t *iqHcFilt1D = iqHcFilt2D[igate];
+    RadarComplex_t *iqVcFilt1D = iqVcFilt2D[igate];
+    
+    _fft.unshift(specHcFilt1D);
+    _fft.unshift(specVcFilt1D);
+
+    _fft.inv(specHcFilt1D, iqHcFilt1D);
+    _fft.inv(specVcFilt1D, iqVcFilt1D);
+    
+  } // igate
+  
 }
 
 ///////////////////////////////////////////////////////////////

@@ -182,6 +182,10 @@ public:
   void computeSdevPhidp();
   void computeSpectralCmd();
   
+  // Filter IQ Hc and Vc based on CMD
+  
+  void filterIqUsingCmd();
+  
   // Compute spectral noise for entire dwell for specified variable
   // this is the min noise at any gate
   
@@ -199,18 +203,22 @@ public:
   bool getHxAvail() const { return _hxAvail; }
   bool getVxAvail() const { return _vxAvail; }
   
-  RadarComplex_t **getIqHc() const { return _iqHc2D.dat2D(); }
-
   RadarComplex_t **getIqHc2D() const { return _iqHc2D.dat2D(); }
   RadarComplex_t **getIqVc2D() const { return _iqVc2D.dat2D(); }
   RadarComplex_t **getIqHx2D() const { return _iqHx2D.dat2D(); }
   RadarComplex_t **getIqVx2D() const { return _iqVx2D.dat2D(); }
+
+  RadarComplex_t **getIqHcFilt2D() const { return _iqHcFilt2D.dat2D(); }
+  RadarComplex_t **getIqVcFilt2D() const { return _iqVcFilt2D.dat2D(); }
 
   RadarComplex_t **getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
   RadarComplex_t **getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
   RadarComplex_t **getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
   RadarComplex_t **getSpecCompVx2D() const { return _specCompVx2D.dat2D(); }
   
+  RadarComplex_t **getSpecCompHcFilt2D() const { return _specCompHcFilt2D.dat2D(); }
+  RadarComplex_t **getSpecCompVcFilt2D() const { return _specCompVcFilt2D.dat2D(); }
+
   double **getSpecPowerHc2D() const { return _specPowerHc2D.dat2D(); }
   double **getSpecPowerVc2D() const { return _specPowerVc2D.dat2D(); }
   double **getSpecPowerHx2D() const { return _specPowerHx2D.dat2D(); }
@@ -331,11 +339,17 @@ private:
   TaArray2D<RadarComplex_t> _iqHx2D;
   TaArray2D<RadarComplex_t> _iqVx2D;
   
+  TaArray2D<RadarComplex_t> _iqHcFilt2D;
+  TaArray2D<RadarComplex_t> _iqVcFilt2D;
+
   TaArray2D<RadarComplex_t> _specCompHc2D;
   TaArray2D<RadarComplex_t> _specCompVc2D;
   TaArray2D<RadarComplex_t> _specCompHx2D;
   TaArray2D<RadarComplex_t> _specCompVx2D;
   
+  TaArray2D<RadarComplex_t> _specCompHcFilt2D;
+  TaArray2D<RadarComplex_t> _specCompVcFilt2D;
+
   TaArray2D<double> _specPowerHc2D;
   TaArray2D<double> _specPowerVc2D;
   TaArray2D<double> _specPowerHx2D;
