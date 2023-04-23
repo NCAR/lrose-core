@@ -3932,7 +3932,7 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
     
   } // igate
 
-  // compute spectra
+  // compute spectra and CMD
 
   spectra.computePowerSpectra();
   spectra.computeDbzSpectra();
@@ -3943,6 +3943,7 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
   spectra.computeSdevZdr();
   spectra.computeSdevPhidp();
   spectra.computeSpectralCmd();
+  spectra.filterIqUsingCmd();
 
 }
 
