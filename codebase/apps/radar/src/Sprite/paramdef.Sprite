@@ -1397,10 +1397,16 @@ paramdef double {
 } phidp_sdev_interest_weight;
 
 paramdef double {
-  p_default = 0.5;
-  p_descr = "Threshold CMD value for identifying clutter.";
-  p_help = "If the CMD value exceeds this threshold, clutter is assumed to exist at that point.";
-} cmd_threshold_for_clutter;
+  p_default = 0.9;
+  p_descr = "Threshold CMD value for detecting clutter.";
+  p_help = "If the mean CMD value exceeds this threshold, clutter is assumed to exist at that point.";
+} cmd_threshold_for_detection;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Threshold CMD value for computing moments.";
+  p_help = "If CMD at a spectral point exceeds this threshold, it is set to 0 so it is not used in the computation of the moments.";
+} cmd_threshold_for_moments;
 
 commentdef {
   p_header = "RADAR CALIBRATION";

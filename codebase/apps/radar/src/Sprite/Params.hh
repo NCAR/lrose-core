@@ -939,7 +939,9 @@ public:
 
   double phidp_sdev_interest_weight;
 
-  double cmd_threshold_for_clutter;
+  double cmd_threshold_for_detection;
+
+  double cmd_threshold_for_moments;
 
   char* cal_file_path;
 
@@ -958,7 +960,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[223];
+  mutable TDRPtable _table[224];
 
   const char *_className;
 

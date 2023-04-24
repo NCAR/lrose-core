@@ -1969,7 +1969,8 @@ int WaterfallPlot::_setInterestMaps()
 
   // set threshold for identification of clutter
   
-  _spectra.setCmdInterestThreshold(_params.cmd_threshold_for_clutter);
+  _spectra.setCmdThresholdMoments(_params.cmd_threshold_for_moments);
+  _spectra.setCmdThresholdDetect(_params.cmd_threshold_for_detection);
   
   return 0;
   

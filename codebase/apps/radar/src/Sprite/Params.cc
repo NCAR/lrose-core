@@ -3920,16 +3920,28 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'cmd_threshold_for_clutter'
+    // Parameter 'cmd_threshold_for_detection'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("cmd_threshold_for_clutter");
-    tt->descr = tdrpStrDup("Threshold CMD value for identifying clutter.");
-    tt->help = tdrpStrDup("If the CMD value exceeds this threshold, clutter is assumed to exist at that point.");
-    tt->val_offset = (char *) &cmd_threshold_for_clutter - &_start_;
-    tt->single_val.d = 0.5;
+    tt->param_name = tdrpStrDup("cmd_threshold_for_detection");
+    tt->descr = tdrpStrDup("Threshold CMD value for detecting clutter.");
+    tt->help = tdrpStrDup("If the mean CMD value exceeds this threshold, clutter is assumed to exist at that point.");
+    tt->val_offset = (char *) &cmd_threshold_for_detection - &_start_;
+    tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'cmd_threshold_for_moments'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cmd_threshold_for_moments");
+    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
+    tt->help = tdrpStrDup("If CMD at a spectral point exceeds this threshold, it is set to 0 so it is not used in the computation of the moments.");
+    tt->val_offset = (char *) &cmd_threshold_for_moments - &_start_;
+    tt->single_val.d = 0.7;
     tt++;
     
     // Parameter 'Comment 19'
