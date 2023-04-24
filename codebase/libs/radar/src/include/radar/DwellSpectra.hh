@@ -93,6 +93,10 @@ public:
 
   // set interest maps for cmd
 
+  void setInterestMapSnr
+    (const vector<InterestMap::ImPoint> &pts,
+     double weight);
+  
   void setInterestMapTdbz
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
@@ -226,6 +230,7 @@ public:
   double **getSpecDbmVx2D() const { return _specDbmVx2D.dat2D(); }
   
   double **getSpecDbz2D() const { return _specDbz2D.dat2D(); }
+  double **getSpecSnr2D() const { return _specSnr2D.dat2D(); }
   double **getSpecZdr2D() const { return _specZdr2D.dat2D(); }
   double **getSpecPhidp2D() const { return _specPhidp2D.dat2D(); }
   double **getSpecRhohv2D() const { return _specRhohv2D.dat2D(); }
@@ -234,6 +239,7 @@ public:
   double **getSpecSdevZdr2D() const { return _specSdevZdr2D.dat2D(); }
   double **getSpecSdevPhidp2D() const { return _specSdevPhidp2D.dat2D(); }
 
+  double **getSpecSnrInterest2D() const { return _specSnrInterest2D.dat2D(); }
   double **getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
   double **getSpecSdevZdrInterest2D() const { return _specSdevZdrInterest2D.dat2D(); }
   double **getSpecSdevPhidpInterest2D() const { return _specSdevPhidpInterest2D.dat2D(); }
@@ -318,6 +324,7 @@ private:
   
   // interest maps for CMD
   
+  InterestMap *_interestMapSnr;
   InterestMap *_interestMapTdbz;
   InterestMap *_interestMapSdevZdr;
   InterestMap *_interestMapSdevPhidp;
@@ -357,6 +364,7 @@ private:
   TaArray2D<double> _specDbmVx2D;
   
   TaArray2D<double> _specDbz2D;
+  TaArray2D<double> _specSnr2D;
   TaArray2D<double> _specZdr2D;
   TaArray2D<double> _specPhidp2D;
   TaArray2D<double> _specRhohv2D;
@@ -365,6 +373,7 @@ private:
   TaArray2D<double> _specSdevZdr2D;
   TaArray2D<double> _specSdevPhidp2D;
   
+  TaArray2D<double> _specSnrInterest2D;
   TaArray2D<double> _specTdbzInterest2D;
   TaArray2D<double> _specSdevZdrInterest2D;
   TaArray2D<double> _specSdevPhidpInterest2D;
@@ -391,7 +400,10 @@ private:
   double _computeSdevPhidp(const vector<double> &phidp);
   void _computePhidpFoldingRange();
   void _createDefaultInterestMaps();
-  
+
+  void _computeMeanSdev(vector<double> &xx,
+                        double &mean, double &sdev);
+
 };
 
 #endif

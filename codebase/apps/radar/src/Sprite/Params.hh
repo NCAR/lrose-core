@@ -126,16 +126,17 @@ public:
     WATERFALL_HX = 2,
     WATERFALL_VX = 3,
     WATERFALL_DBZ = 4,
-    WATERFALL_ZDR = 5,
-    WATERFALL_PHIDP = 6,
-    WATERFALL_RHOHV = 7,
-    WATERFALL_TDBZ = 8,
-    WATERFALL_SDEV_ZDR = 9,
-    WATERFALL_SDEV_PHIDP = 10,
-    WATERFALL_TDBZ_INT = 11,
-    WATERFALL_SDEV_ZDR_INT = 12,
-    WATERFALL_SDEV_PHIDP_INT = 13,
-    WATERFALL_CMD = 14
+    WATERFALL_SNR = 5,
+    WATERFALL_ZDR = 6,
+    WATERFALL_PHIDP = 7,
+    WATERFALL_RHOHV = 8,
+    WATERFALL_TDBZ = 9,
+    WATERFALL_SDEV_ZDR = 10,
+    WATERFALL_SDEV_PHIDP = 11,
+    WATERFALL_TDBZ_INT = 12,
+    WATERFALL_SDEV_ZDR_INT = 13,
+    WATERFALL_SDEV_PHIDP_INT = 14,
+    WATERFALL_CMD = 15
   } waterfall_type_t;
 
   typedef enum {
@@ -680,6 +681,8 @@ public:
 
   char* waterfall_dbz_color_scale_name;
 
+  char* waterfall_snr_color_scale_name;
+
   char* waterfall_dbm_color_scale_name;
 
   char* waterfall_zdr_color_scale_name;
@@ -916,6 +919,11 @@ public:
 
   fft_window_t fft_window;
 
+  interest_map_point_t *_snr_interest_map;
+  int snr_interest_map_n;
+
+  double snr_interest_weight;
+
   interest_map_point_t *_tdbz_interest_map;
   int tdbz_interest_map_n;
 
@@ -950,7 +958,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[220];
+  mutable TDRPtable _table[223];
 
   const char *_className;
 

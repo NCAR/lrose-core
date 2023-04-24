@@ -88,6 +88,7 @@ DwellSpectra::DwellSpectra()
   _sdevPhidpKernelNGates = 5;
   _sdevPhidpKernelNSamples = 3;
 
+  _interestMapSnr = NULL;
   _interestMapTdbz = NULL;
   _interestMapSdevZdr = NULL;
   _interestMapSdevPhidp = NULL;
@@ -190,6 +191,7 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _specDbmVx2D.alloc(nGates, nSamples);
 
   _specDbz2D.alloc(nGates, nSamples);
+  _specSnr2D.alloc(nGates, nSamples);
   _specZdr2D.alloc(nGates, nSamples);
   _specPhidp2D.alloc(nGates, nSamples);
   _specRhohv2D.alloc(nGates, nSamples);
@@ -198,6 +200,7 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   _specSdevZdr2D.alloc(nGates, nSamples);
   _specSdevPhidp2D.alloc(nGates, nSamples);
 
+  _specSnrInterest2D.alloc(nGates, nSamples);
   _specTdbzInterest2D.alloc(nGates, nSamples);
   _specSdevZdrInterest2D.alloc(nGates, nSamples);
   _specSdevPhidpInterest2D.alloc(nGates, nSamples);
@@ -243,6 +246,7 @@ void DwellSpectra::_freeArrays()
   _specDbmVx2D.free();
 
   _specDbz2D.free();
+  _specSnr2D.free();
   _specZdr2D.free();
   _specPhidp2D.free();
   _specRhohv2D.free();
@@ -251,6 +255,7 @@ void DwellSpectra::_freeArrays()
   _specSdevZdr2D.free();
   _specSdevPhidp2D.free();
 
+  _specSnrInterest2D.free();
   _specTdbzInterest2D.free();
   _specSdevZdrInterest2D.free();
   _specSdevPhidpInterest2D.free();
@@ -497,6 +502,7 @@ void DwellSpectra::computeDbzSpectra()
     double rangeCorr = 20.0 * log10(rangeKm);
     
     double *specPowerHc1D = _specPowerHc2D.dat2D()[igate];
+    double *specSnr1D = _specSnr2D.dat2D()[igate];
     double *specDbz1D = _specDbz2D.dat2D()[igate];
 
     for (size_t isample = 0; isample < _nSamples; isample++) {
@@ -509,12 +515,14 @@ void DwellSpectra::computeDbzSpectra()
         double snr = powerHcNs / _specNoiseDwellHc;
         double snrDb = 10.0 * log10(snr);
         double dbz =  snrDb + _calib.getBaseDbz1kmHc() + rangeCorr;
+        specSnr1D[isample] = snrDb;
         specDbz1D[isample] = dbz;
         
       } else {
 
         // censored, set to low val
         
+        specSnr1D[isample] = -50.0;
         specDbz1D[isample] = -50.0;
         
       }
@@ -684,6 +692,9 @@ void DwellSpectra::computeTdbz()
       for (int jgate = gateStart; jgate < gateEnd; jgate++) {
         for (int jsample = sampleStart; jsample < sampleEnd; jsample++) {
           double dbz = dbz2D[jgate][jsample];
+          if (dbz < 0.0) {
+            dbz = 0.0;
+          }
           tdbzKernel.push_back(dbz * dbz);
         } // jsample
       } // jgate
@@ -951,19 +962,48 @@ double DwellSpectra::computeDwellSpectralNoise(const TaArray2D<double> &specPowe
 {
 
   // get spectral noise at each gate
-  // compute the min spectral noise for the dwell
 
-  double specNoiseDwell = 1000.0;
+  double minNoise = 1000.0;
+  vector<double> noiseDbm;
   for (size_t igate = 0; igate < _nGates; igate++) {
     double *specPower = specPower2D.dat2D()[igate];
     double noise = computeSpectralNoise(specPower, _nSamples);
-    if (noise < specNoiseDwell) {
-      specNoiseDwell = noise;
+    if (noise < minNoise) {
+      minNoise = noise;
     }
     specNoise1D.dat()[igate] = noise;
+    noiseDbm.push_back(10.0 * log10(noise));
+  }
+  
+  // compute mean and standard deviation
+  
+  double meanDbm, sdevDbm;
+  _computeMeanSdev(noiseDbm, meanDbm, sdevDbm);
+
+  // load array with low end of noise
+  
+  // double cutoffDbm = meanDbm - sdevDbm;
+  double cutoffDbm = meanDbm;
+  vector<double> lowDbm;
+  for (size_t ii = 0; ii < noiseDbm.size(); ii++) {
+    if (noiseDbm[ii] < cutoffDbm) {
+      lowDbm.push_back(noiseDbm[ii]);
+    }
   }
 
-  return specNoiseDwell;
+  if (lowDbm.size() < 1) {
+    return minNoise;
+  }
+  
+  // sort array
+
+  sort(lowDbm.begin(), lowDbm.end());
+  
+  // return median of low Dbm
+
+  double medianLowDbm = lowDbm[lowDbm.size() / 2];
+
+  return pow(10.0, medianLowDbm / 10.0);
 
 }
 
@@ -1054,16 +1094,21 @@ void DwellSpectra::computeSpectralCmd()
  
   // accumulate the interest
   
+  double **snr = _specSnr2D.dat2D();
   double **tdbz = _specTdbz2D.dat2D();
   double **zdrSdev = _specSdevZdr2D.dat2D();
   double **phidpSdev = _specSdevPhidp2D.dat2D();
 
+  double **snrInt = _specSnrInterest2D.dat2D();
   double **tdbzInt = _specTdbzInterest2D.dat2D();
   double **zdrSdevInt = _specSdevZdrInterest2D.dat2D();
   double **phidpSdevInt = _specSdevPhidpInterest2D.dat2D();
 
   for (size_t igate = 0; igate < _nGates; igate++) {
     for (size_t isample = 0; isample < _nSamples; isample++) {
+      
+      snrInt[igate][isample] =
+        _interestMapSnr->getInterest(snr[igate][isample]);
       
       tdbzInt[igate][isample] =
         _interestMapTdbz->getInterest(tdbz[igate][isample]);
@@ -1079,11 +1124,13 @@ void DwellSpectra::computeSpectralCmd()
 
   // compute sum weights
 
+  double weightSnr = _interestMapSnr->getWeight();
   double weightTdbz = _interestMapTdbz->getWeight();
   double weightSdevZdr = _interestMapSdevZdr->getWeight();
   double weightSdevPhidp = _interestMapSdevPhidp->getWeight();
 
   double sumWeights = 0.0;
+  sumWeights += weightSnr;
   sumWeights += weightTdbz;
   sumWeights += weightSdevZdr;
   sumWeights += weightSdevPhidp;
@@ -1096,6 +1143,7 @@ void DwellSpectra::computeSpectralCmd()
 
       double sumInterest = 0.0;
 
+      sumInterest += snrInt[igate][isample] * weightSnr;
       sumInterest += tdbzInt[igate][isample] * weightTdbz;
       sumInterest += zdrSdevInt[igate][isample] * weightSdevZdr;
       sumInterest += phidpSdevInt[igate][isample] * weightSdevPhidp;
@@ -1171,6 +1219,11 @@ void DwellSpectra::_createDefaultInterestMaps()
   vector<InterestMap::ImPoint> pts;
   
   pts.clear();
+  pts.push_back(InterestMap::ImPoint(0.0, 0.0001));
+  pts.push_back(InterestMap::ImPoint(20.0, 1.0));
+  setInterestMapSnr(pts, 1.0);
+  
+  pts.clear();
   pts.push_back(InterestMap::ImPoint(30.0, 0.0001));
   pts.push_back(InterestMap::ImPoint(40.0, 1.0));
   setInterestMapTdbz(pts, 1.0);
@@ -1187,6 +1240,20 @@ void DwellSpectra::_createDefaultInterestMaps()
 
   setCmdInterestThreshold(0.51);
 
+}
+
+/////////////////////////////////////////////////////////
+// set interest map and weight for snr
+
+void DwellSpectra::setInterestMapSnr
+  (const vector<InterestMap::ImPoint> &pts,
+   double weight)
+  
+{
+  if (_interestMapSnr) {
+    delete _interestMapSnr;
+  }
+  _interestMapSnr = new InterestMap("Snr", pts, weight);
 }
 
 /////////////////////////////////////////////////////////
@@ -1229,5 +1296,35 @@ void DwellSpectra::setInterestMapSdevPhidp
     delete _interestMapSdevPhidp;
   }
   _interestMapSdevPhidp = new InterestMap("SdevPhidp", pts, weight);
+}
+
+///////////////////////////////////////////////////////////////
+// Compute mean and standard deviation
+
+void DwellSpectra::_computeMeanSdev(vector<double> &xx,
+                                    double &mean,
+                                    double &sdev)
+  
+{
+
+  double sumx = 0.0;
+  double sumx2 = 0.0;
+  double nn = 0.0;
+  for (size_t ii = 0; ii < xx.size(); ii++) {
+    double xval = xx[ii];
+    sumx += xval;
+    sumx2 += xval * xval;
+    nn++;
+  }
+
+  mean = sumx / nn;
+
+  double var = (sumx2 - (sumx * sumx) / nn) / (nn - 1.0);
+  if (var >= 0.0) {
+    sdev = sqrt(var);
+  } else {
+    sdev = 0.0;
+  }
+
 }
 

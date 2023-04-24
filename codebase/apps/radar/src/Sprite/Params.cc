@@ -1564,7 +1564,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 15;
+        tt->struct_def.fields[0].enum_def.nfields = 16;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1577,26 +1577,28 @@
         tt->struct_def.fields[0].enum_def.fields[3].val = WATERFALL_VX;
         tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_DBZ");
         tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_DBZ;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_RHOHV;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_TDBZ");
-        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_TDBZ;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_SDEV_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[10].val = WATERFALL_SDEV_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("WATERFALL_TDBZ_INT");
-        tt->struct_def.fields[0].enum_def.fields[11].val = WATERFALL_TDBZ_INT;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("WATERFALL_SDEV_ZDR_INT");
-        tt->struct_def.fields[0].enum_def.fields[12].val = WATERFALL_SDEV_ZDR_INT;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("WATERFALL_SDEV_PHIDP_INT");
-        tt->struct_def.fields[0].enum_def.fields[13].val = WATERFALL_SDEV_PHIDP_INT;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("WATERFALL_CMD");
-        tt->struct_def.fields[0].enum_def.fields[14].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_SNR");
+        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_SNR;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_TDBZ");
+        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_TDBZ;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[10].val = WATERFALL_SDEV_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[11].val = WATERFALL_SDEV_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("WATERFALL_TDBZ_INT");
+        tt->struct_def.fields[0].enum_def.fields[12].val = WATERFALL_TDBZ_INT;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("WATERFALL_SDEV_ZDR_INT");
+        tt->struct_def.fields[0].enum_def.fields[13].val = WATERFALL_SDEV_ZDR_INT;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("WATERFALL_SDEV_PHIDP_INT");
+        tt->struct_def.fields[0].enum_def.fields[14].val = WATERFALL_SDEV_PHIDP_INT;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("WATERFALL_CMD");
+        tt->struct_def.fields[0].enum_def.fields[15].val = WATERFALL_CMD;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1813,6 +1815,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_dbz_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("dbz.colors");
+    tt++;
+    
+    // Parameter 'waterfall_snr_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_snr_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for snr");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_snr_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("snr.colors");
     tt++;
     
     // Parameter 'waterfall_dbm_color_scale_name'
@@ -3708,6 +3722,55 @@
     tt->param_name = tdrpStrDup("Comment 18");
     tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
+    tt++;
+    
+    // Parameter 'snr_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("snr_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for SNR.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_snr_interest_map - &_start_;
+    tt->array_n_offset = (char *) &snr_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_snr_interest_map->value - (char *) _snr_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_snr_interest_map->interest - (char *) _snr_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 20;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'snr_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("snr_interest_weight");
+    tt->descr = tdrpStrDup("Weight for SNR interest.");
+    tt->help = tdrpStrDup("This weight is used for combining snr interest into the final CMD interest.");
+    tt->val_offset = (char *) &snr_interest_weight - &_start_;
+    tt->single_val.d = 1.5;
     tt++;
     
     // Parameter 'tdbz_interest_map'

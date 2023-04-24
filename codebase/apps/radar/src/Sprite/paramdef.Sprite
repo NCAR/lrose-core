@@ -481,6 +481,7 @@ typedef enum {
   WATERFALL_HX,
   WATERFALL_VX,
   WATERFALL_DBZ,
+  WATERFALL_SNR,
   WATERFALL_ZDR,
   WATERFALL_PHIDP,
   WATERFALL_RHOHV,
@@ -571,6 +572,11 @@ paramdef string {
   p_default = "dbz.colors";
   p_descr = "Color scale name for dbz";
 } waterfall_dbz_color_scale_name;
+
+paramdef string {
+  p_default = "snr.colors";
+  p_descr = "Color scale name for snr";
+} waterfall_snr_color_scale_name;
 
 paramdef string {
   p_default = "dbm_spectra.colors";
@@ -1347,6 +1353,17 @@ typedef struct {
   double value;
   double interest;
 } interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0001}, {20.0, 1.0}};
+  p_descr = "Interest mapping for SNR.";
+} snr_interest_map[];
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Weight for SNR interest.";
+  p_help = "This weight is used for combining snr interest into the final CMD interest.";
+} snr_interest_weight;
 
 paramdef struct interest_map_point_t {
   p_default = {{30.0, 0.0001}, {40.0, 1.0}};

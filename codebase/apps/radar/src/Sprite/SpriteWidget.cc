@@ -1719,6 +1719,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotDbz);
   
+  QAction plotSnr("Plot SNR", &contextMenu);
+  connect(&plotSnr, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_SNR);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotSnr);
+  
   QAction plotZdr("Plot ZDR", &contextMenu);
   connect(&plotZdr, &QAction::triggered,
           [this, id] () {

@@ -201,6 +201,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     case Params::WATERFALL_DBZ:
       _plotDbz(painter, selectedRangeKm);
       break;
+    case Params::WATERFALL_SNR:
+      _plotSnr(painter, selectedRangeKm);
+      break;
     case Params::WATERFALL_ZDR:
       _plotZdr(painter, selectedRangeKm);
       break;
@@ -582,6 +585,72 @@ void WaterfallPlot::_plotDbz(QPainter &painter,
 
       int red, green, blue;
       _cmap.dataColor(dbz[ii], red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      
+      // set x limits
+
+      double xx = ii;
+      
+      // fill rectangle
+
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+
+    } // ii
+
+  } // igate
+  
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot SNR spectrum
+ */
+
+void WaterfallPlot::_plotSnr(QPainter &painter,
+                             double selectedRangeKm)
+  
+{
+
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_snr_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  painter.save();
+
+  // loop through the gates
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+
+    // set limits for plotting this gate
+    
+    double yy = startRange + gateSpacing * (igate-0.5);
+
+    // get field
+    
+    double *snr = _spectra.getSpecSnr2D()[igate];
+
+    // apply 3-pt median filter
+    
+    FilterUtils::applyMedianFilter(snr, _nSamples, _medianFiltLen);
+      
+    // plot the samples
+    
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+
+      // get color
+
+      int red, green, blue;
+      _cmap.dataColor(snr[ii], red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       
@@ -1512,6 +1581,8 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "VX";
     case Params::WATERFALL_DBZ:
       return "DBZ";
+    case Params::WATERFALL_SNR:
+      return "SNR";
     case Params::WATERFALL_ZDR:
       return "ZDR";
     case Params::WATERFALL_PHIDP:
@@ -1551,6 +1622,7 @@ string WaterfallPlot::getUnits(Params::waterfall_type_t wtype)
     case Params::WATERFALL_DBZ:
     case Params::WATERFALL_TDBZ:
       return "dBZ";
+    case Params::WATERFALL_SNR:
     case Params::WATERFALL_ZDR:
     case Params::WATERFALL_SDEV_ZDR:
       return "dB";
@@ -1854,9 +1926,19 @@ int WaterfallPlot::_setInterestMaps()
 
 {  
 
-  // TDBZ
+  // SNR
 
   vector<InterestMap::ImPoint> pts;
+  if (_convertInterestMapToVector("SNR",
+                                  _params._snr_interest_map,
+                                  _params.snr_interest_map_n,
+                                  pts)) {
+    return -1;
+  }
+  _spectra.setInterestMapSnr(pts, _params.snr_interest_weight);
+
+  // TDBZ
+
   if (_convertInterestMapToVector("TDBZ",
                                   _params._tdbz_interest_map,
                                   _params.tdbz_interest_map_n,

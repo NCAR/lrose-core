@@ -228,6 +228,9 @@ protected:
   void _plotDbz(QPainter &painter,
                 double selectedRangeKm);
   
+  void _plotSnr(QPainter &painter,
+                double selectedRangeKm);
+  
   void _plotZdr(QPainter &painter,
                 double selectedRangeKm);
   
