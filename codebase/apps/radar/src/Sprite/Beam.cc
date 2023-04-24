@@ -3889,10 +3889,6 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
   spectra.setPulseWidthUs(_pulseWidth);
   spectra.setWavelengthM(_wavelengthM);
 
-  // windowing
-
-  spectra.setWindow(_window, _nSamples);
-
   // calibration
   
   spectra.setCalibration(getCalib());
@@ -3908,7 +3904,7 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
 
   // set time series
 
-  spectra.prepareForData();
+  spectra.resetFlags();
 
   for (size_t igate = 0; igate < _gateData.size(); igate++) {
 

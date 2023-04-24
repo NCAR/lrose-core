@@ -2720,6 +2720,10 @@ void Beam::_filterDpSimHvFixedPrt()
     
   } // igate
 
+  if (_params.run_spectral_cmd) {
+    _filtSpecCmdSimHv();
+  }
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -3245,6 +3249,140 @@ void Beam::_filterDpVOnlyStagPrt()
 
 }
 
+//////////////////////////////////////////
+// run spectral CMD on SIM HV data
+
+void Beam::_filtSpecCmdSimHv()
+
+{
+
+  // load up time series for dwell spectra
+
+  switch (_params.clutter_filter_type) {
+    case Params::WINDOW_VONHANN:
+      _specCmd.setWindowType(RadarMoments::WINDOW_VONHANN);
+      break;
+    case Params::WINDOW_BLACKMAN:
+      _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN);
+      break;
+    case Params::WINDOW_BLACKMAN_NUTTALL:
+      _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN_NUTTALL);
+      break;
+    case Params::WINDOW_RECT:
+    default:
+      _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
+      break;
+  }
+
+  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+    _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_RECT) {
+    _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_BLACKMAN) {
+    _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN);
+  } else if (_mmgr.getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
+    _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN_NUTTALL);
+  } else {
+    _specCmd.setWindowType(RadarMoments::WINDOW_VONHANN);
+  }
+
+  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
+    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_REGRESSION);
+  } else if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
+    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_ADAPTIVE);
+  } else {
+    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_NONE);
+  }
+  
+  // dimensions
+  
+  _specCmd.setDimensions(_nGates, _nSamples);
+
+  // metadata
+
+  _specCmd.setTime(_timeSecs, _nanoSecs);
+  _specCmd.setElevation(_el);
+  _specCmd.setAzimuth(_az);
+  _specCmd.setAntennaRate(getAntennaRate());
+
+  _specCmd.setRangeGeometry(_startRangeKm, _gateSpacingKm);
+  _specCmd.setXmitRcvMode(_xmitRcvMode);
+  _specCmd.setPrt(_prt);
+  _specCmd.setNyquist(_nyquist);
+  _specCmd.setPulseWidthUs(_pulseWidth);
+  _specCmd.setWavelengthM(_wavelengthM);
+
+  // calibration
+  
+  _specCmd.setCalibration(getCalib());
+
+  // computing textures
+  
+  _specCmd.setTdbzKernelNGates(_params.spec_cmd_tdbz_kernel_ngates);
+  _specCmd.setTdbzKernelNSamples(_params.spec_cmd_tdbz_kernel_nsamples);
+  _specCmd.setSdevZdrKernelNGates(_params.spec_cmd_sdev_zdr_kernel_ngates);
+  _specCmd.setSdevZdrKernelNSamples(_params.spec_cmd_sdev_zdr_kernel_nsamples);
+  _specCmd.setSdevPhidpKernelNGates(_params.spec_cmd_sdev_phidp_kernel_ngates);
+  _specCmd.setSdevPhidpKernelNSamples(_params.spec_cmd_sdev_phidp_kernel_nsamples);
+
+  // set time series
+
+  _specCmd.resetFlags();
+
+  for (size_t igate = 0; igate < _gateData.size(); igate++) {
+    GateData *gd = _gateData[igate];
+    _specCmd.setIqHc(gd->iqhcOrig, igate, _nSamples);
+    _specCmd.setIqVc(gd->iqvcOrig, igate, _nSamples);
+  } // igate
+
+  // compute _specCmd and CMD
+
+  _specCmd.computePowerSpectra();
+  _specCmd.computeDbzSpectra();
+  _specCmd.computeZdrSpectra();
+  _specCmd.computePhidpSpectra();
+  _specCmd.computeRhohvSpectra();
+  _specCmd.computeTdbz();
+  _specCmd.computeSdevZdr();
+  _specCmd.computeSdevPhidp();
+  _specCmd.computeSpectralCmd();
+  _specCmd.filterIqUsingCmd();
+
+  RadarComplex_t **iqHcFilt2D = _specCmd.getIqHcFilt2D();
+  RadarComplex_t **iqVcFilt2D = _specCmd.getIqVcFilt2D();
+
+  for (int igate = 0; igate < _nGates; igate++) {
+    
+    GateData *gate = _gateData[igate];
+    RadarComplex_t *iqHcFilt1D = iqHcFilt2D[igate];
+    RadarComplex_t *iqVcFilt1D = iqVcFilt2D[igate];
+    
+    // compute filtered moments for this gate
+    
+    MomentsFields fieldsSF;
+    MomentsFields &fieldsF = gate->fieldsF;
+      
+    _mom->computeCovarDpSimHv(iqHcFilt1D, iqVcFilt1D, fieldsSF);
+    
+    _mom->computeMomDpSimHv(fieldsSF.lag0_hc, fieldsSF.lag0_vc,
+                            fieldsSF.rvvhh0, fieldsSF.lag1_hc,
+                            fieldsSF.lag1_vc, fieldsSF.lag2_hc,
+                            fieldsSF.lag2_vc, fieldsSF.lag3_hc,
+                            fieldsSF.lag3_vc, igate, fieldsSF);
+    
+    // copy notched moments to the filtered moments
+    
+    fieldsF.test4 = fieldsSF.dbz;
+    fieldsF.test5 = fieldsSF.vel;
+    fieldsF.test6 = fieldsSF.width;
+    fieldsF.test7 = fieldsSF.zdr;
+    fieldsF.test8 = fieldsSF.phidp;
+    fieldsF.test9 = fieldsSF.rhohv;
+
+  } // igate
+
+}
+  
 //////////////////////////////////////////
 // compute R1, R2 and R3 values for window
 

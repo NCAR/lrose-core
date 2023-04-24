@@ -1264,6 +1264,37 @@ public:
 
   double rhohv_improvement_factor_threshold;
 
+  tdrp_bool_t run_spectral_cmd;
+
+  int spec_cmd_tdbz_kernel_ngates;
+
+  int spec_cmd_tdbz_kernel_nsamples;
+
+  int spec_cmd_sdev_zdr_kernel_ngates;
+
+  int spec_cmd_sdev_zdr_kernel_nsamples;
+
+  int spec_cmd_sdev_phidp_kernel_ngates;
+
+  int spec_cmd_sdev_phidp_kernel_nsamples;
+
+  interest_map_point_t *_spec_cmd_tdbz_interest_map;
+  int spec_cmd_tdbz_interest_map_n;
+
+  double spec_cmd_tdbz_interest_weight;
+
+  interest_map_point_t *_spec_cmd_zdr_sdev_interest_map;
+  int spec_cmd_zdr_sdev_interest_map_n;
+
+  double spec_cmd_zdr_sdev_interest_weight;
+
+  interest_map_point_t *_spec_cmd_phidp_sdev_interest_map;
+  int spec_cmd_phidp_sdev_interest_map_n;
+
+  double spec_cmd_phidp_sdev_interest_weight;
+
+  double spec_cmd_threshold_for_clutter;
+
   char* output_fmq_url;
 
   tdrp_bool_t output_moments_in_radx_format;
@@ -1338,7 +1369,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[298];
+  mutable TDRPtable _table[314];
 
   const char *_className;
 

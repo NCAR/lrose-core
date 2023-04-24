@@ -54,6 +54,7 @@
 #include <radar/KdpBringi.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/PhaseCoding.hh>
+#include <radar/DwellSpectra.hh>
 #include "Params.hh"
 #include "Cmd.hh"
 #include "MomentsMgr.hh"
@@ -411,6 +412,10 @@ private:
 
   ForsytheRegrFilter *_regrStag;
 
+  // spectral CMD
+
+  DwellSpectra _specCmd;
+
   // debug printing
   
   static pthread_mutex_t _debugPrintMutex;
@@ -452,6 +457,8 @@ private:
   void _filterDpHOnlyStagPrt();
   void _filterDpVOnlyFixedPrt();
   void _filterDpVOnlyStagPrt();
+
+  void _filtSpecCmdSimHv();
   
   void _computeWindowRValues();
   void _overrideOpsInfo();

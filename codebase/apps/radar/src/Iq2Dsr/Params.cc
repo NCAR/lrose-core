@@ -4535,6 +4535,267 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 25");
+    tt->comment_hdr = tdrpStrDup("SPECTRAL CMD");
+    tt->comment_text = tdrpStrDup("You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.");
+    tt++;
+    
+    // Parameter 'run_spectral_cmd'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("run_spectral_cmd");
+    tt->descr = tdrpStrDup("Run the spectral-CMD filtering step.");
+    tt->help = tdrpStrDup("This computes a version of CMD in the FFT space.");
+    tt->val_offset = (char *) &run_spectral_cmd - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_zdr_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_zdr_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_sdev_zdr_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_zdr_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_zdr_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &spec_cmd_sdev_zdr_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_phidp_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_phidp_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_sdev_phidp_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_phidp_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_phidp_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &spec_cmd_sdev_phidp_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'Comment 26'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 26");
+    tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
+    tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for TDBZ.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_tdbz_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_tdbz_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_tdbz_interest_map->value - (char *) _spec_cmd_tdbz_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_tdbz_interest_map->interest - (char *) _spec_cmd_tdbz_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 30;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 40;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_interest_weight");
+    tt->descr = tdrpStrDup("Weight for TDBZ interest.");
+    tt->help = tdrpStrDup("This weight is used for combining tdbz interest into the final CMD interest.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_zdr_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_zdr_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for zdr.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_zdr_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_zdr_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_zdr_sdev_interest_map->value - (char *) _spec_cmd_zdr_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_zdr_sdev_interest_map->interest - (char *) _spec_cmd_zdr_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 3;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 4;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_zdr_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_zdr_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of zdr.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spec_cmd_zdr_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_phidp_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_phidp_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_phidp_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_phidp_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_phidp_sdev_interest_map->value - (char *) _spec_cmd_phidp_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_phidp_sdev_interest_map->interest - (char *) _spec_cmd_phidp_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 28;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 32;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_phidp_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_phidp_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spec_cmd_phidp_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_threshold_for_clutter'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_clutter");
+    tt->descr = tdrpStrDup("Threshold CMD value for identifying clutter.");
+    tt->help = tdrpStrDup("If the CMD value exceeds this threshold, clutter is assumed to exist at that point.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_clutter - &_start_;
+    tt->single_val.d = 0.5;
+    tt++;
+    
+    // Parameter 'Comment 27'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -5642,11 +5903,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -5723,11 +5984,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -5818,11 +6079,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

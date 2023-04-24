@@ -101,7 +101,7 @@ DwellSpectra::DwellSpectra()
   _regrCnrExponent = 0.66667;
   _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
   
-  prepareForData();
+  resetFlags();
 
 }
 
@@ -123,7 +123,7 @@ void DwellSpectra::setDimensions(size_t nGates, size_t nSamples)
 
 {
 
-  prepareForData();
+  resetFlags();
 
   if (nGates == _nGates && nSamples == _nSamples) {
     // nothing to do
@@ -262,7 +262,7 @@ void DwellSpectra::_freeArrays()
 //////////////////////////////////////////////////////////////////
 // reset the availability flags
 
-void DwellSpectra::prepareForData()
+void DwellSpectra::resetFlags()
 
 {
 
@@ -271,16 +271,6 @@ void DwellSpectra::prepareForData()
   _hxAvail = false;
   _vxAvail = false;
 
-}
-
-///////////////////////////////////////////////////////////////
-// set window array
-
-void DwellSpectra::setWindow(const double *window, size_t nSamples)
-
-{
-  assert(nSamples == _nSamples);
-  memcpy(_window1D.dat(), window, nSamples * sizeof(double));
 }
 
 ///////////////////////////////////////////////////////////////

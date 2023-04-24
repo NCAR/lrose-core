@@ -1916,6 +1916,95 @@ paramdef double {
 } rhohv_improvement_factor_threshold;
 
 commentdef {
+  p_header = "SPECTRAL CMD";
+  p_text = "You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.";
+};
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Run the spectral-CMD filtering step.";
+  p_help = "This computes a version of CMD in the FFT space.";
+} run_spectral_cmd;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.";
+} spec_cmd_tdbz_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.";
+} spec_cmd_tdbz_kernel_nsamples;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.";
+} spec_cmd_sdev_zdr_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of zdr";
+  p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} spec_cmd_sdev_zdr_kernel_nsamples;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.";
+} spec_cmd_sdev_phidp_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of phidp";
+  p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.";
+} spec_cmd_sdev_phidp_kernel_nsamples;
+
+commentdef {
+  p_header = "SPECTRAL CMD INTEREST MAPS and WEIGHTS";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.";
+};
+
+paramdef struct interest_map_point_t {
+  p_default = {{30.0, 0.0001}, {40.0, 1.0}};
+  p_descr = "Interest mapping for TDBZ.";
+} spec_cmd_tdbz_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for TDBZ interest.";
+  p_help = "This weight is used for combining tdbz interest into the final CMD interest.";
+} spec_cmd_tdbz_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{3.0, 0.0001}, {4.0, 1.0}};
+  p_descr = "Interest mapping for zdr.";
+} spec_cmd_zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of zdr.";
+} spec_cmd_zdr_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{28.0, 0.0001}, {32.0, 1.0}};
+  p_descr = "Interest mapping for standard deviation of phidp.";
+} spec_cmd_phidp_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of phidp.";
+} spec_cmd_phidp_sdev_interest_weight;
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "Threshold CMD value for identifying clutter.";
+  p_help = "If the CMD value exceeds this threshold, clutter is assumed to exist at that point.";
+} spec_cmd_threshold_for_clutter;
+
+commentdef {
   p_header = "OUTPUT TO MOMENTS FMQ";
 };
 

@@ -130,10 +130,6 @@ public:
   void setPulseWidthUs(double val) { _pulseWidthUs = val; }
   void setWavelengthM(double val) { _wavelengthM = val; }
 
-  // set window array
-
-  void setWindow(const double *window, size_t nSamples);
-
   // set filtering
   
   void setWindowType(RadarMoments::window_type_t val =
@@ -154,7 +150,7 @@ public:
 
   // reset, ready for setting new data
   
-  void prepareForData();
+  void resetFlags();
 
   // set IQ arrays
   
