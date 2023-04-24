@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 // parameter definitions Iq2Dsr
 //
 // RAP, NCAR,
@@ -1968,6 +1968,17 @@ commentdef {
 };
 
 paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0001}, {20.0, 1.0}};
+  p_descr = "Interest mapping for SNR in spectral CMD..";
+} spec_cmd_snr_interest_map[];
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Weight for SNR interest.";
+  p_help = "This weight is used for combining snr interest into the final spectral CMD interest.";
+} spec_cmd_snr_interest_weight;
+
+paramdef struct interest_map_point_t {
   p_default = {{30.0, 0.0001}, {40.0, 1.0}};
   p_descr = "Interest mapping for TDBZ.";
 } spec_cmd_tdbz_interest_map[];
@@ -1999,10 +2010,28 @@ paramdef double {
 } spec_cmd_phidp_sdev_interest_weight;
 
 paramdef double {
-  p_default = 0.5;
-  p_descr = "Threshold CMD value for identifying clutter.";
-  p_help = "If the CMD value exceeds this threshold, clutter is assumed to exist at that point.";
-} spec_cmd_threshold_for_clutter;
+  p_default = 0.9;
+  p_descr = "Threshold CMD value for detecting clutter.";
+  p_help = "This is aimed mainly at wind turbine clutter. If the CMD value exceeds this threshold, clutter is assumed detected at the gate.";
+} spec_cmd_threshold_for_detection;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Threshold CMD value for computing moments.";
+  p_help = "Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.";
+} spec_cmd_threshold_for_moments;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Threshold of CMD spectral fraction, for wind turbine detection.";
+  p_help = "If the fraction of the CMD spectrum in excess of 'spec_cmd_threshold_for_detection' exceeds this, we flag the gate as having a wind turbine gate.";
+} spec_cmd_fraction_threshold_for_wind_turbine;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Threshold CMD value for computing moments.";
+  p_help = "Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.";
+} cmd_threshold_for_moments;
 
 commentdef {
   p_header = "OUTPUT TO MOMENTS FMQ";

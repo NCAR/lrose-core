@@ -4632,6 +4632,55 @@
     tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
     tt++;
     
+    // Parameter 'spec_cmd_snr_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_snr_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for SNR in spectral CMD..");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_snr_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_snr_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_snr_interest_map->value - (char *) _spec_cmd_snr_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_snr_interest_map->interest - (char *) _spec_cmd_snr_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 20;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_snr_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_snr_interest_weight");
+    tt->descr = tdrpStrDup("Weight for SNR interest.");
+    tt->help = tdrpStrDup("This weight is used for combining snr interest into the final spectral CMD interest.");
+    tt->val_offset = (char *) &spec_cmd_snr_interest_weight - &_start_;
+    tt->single_val.d = 1.5;
+    tt++;
+    
     // Parameter 'spec_cmd_tdbz_interest_map'
     // ctype is '_interest_map_point_t'
     
@@ -4779,16 +4828,52 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'spec_cmd_threshold_for_clutter'
+    // Parameter 'spec_cmd_threshold_for_detection'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_clutter");
-    tt->descr = tdrpStrDup("Threshold CMD value for identifying clutter.");
-    tt->help = tdrpStrDup("If the CMD value exceeds this threshold, clutter is assumed to exist at that point.");
-    tt->val_offset = (char *) &spec_cmd_threshold_for_clutter - &_start_;
-    tt->single_val.d = 0.5;
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_detection");
+    tt->descr = tdrpStrDup("Threshold CMD value for detecting clutter.");
+    tt->help = tdrpStrDup("This is aimed mainly at wind turbine clutter. If the CMD value exceeds this threshold, clutter is assumed detected at the gate.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_detection - &_start_;
+    tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'spec_cmd_threshold_for_moments'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_moments");
+    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
+    tt->help = tdrpStrDup("Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_moments - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
+    // Parameter 'spec_cmd_fraction_threshold_for_wind_turbine'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_fraction_threshold_for_wind_turbine");
+    tt->descr = tdrpStrDup("Threshold of CMD spectral fraction, for wind turbine detection.");
+    tt->help = tdrpStrDup("If the fraction of the CMD spectrum in excess of 'spec_cmd_threshold_for_detection' exceeds this, we flag the gate as having a wind turbine gate.");
+    tt->val_offset = (char *) &spec_cmd_fraction_threshold_for_wind_turbine - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
+    // Parameter 'cmd_threshold_for_moments'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cmd_threshold_for_moments");
+    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
+    tt->help = tdrpStrDup("Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.");
+    tt->val_offset = (char *) &cmd_threshold_for_moments - &_start_;
+    tt->single_val.d = 0.7;
     tt++;
     
     // Parameter 'Comment 27'

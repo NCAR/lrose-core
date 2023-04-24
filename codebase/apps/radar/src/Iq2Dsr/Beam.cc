@@ -2694,9 +2694,9 @@ void Beam::_filterDpSimHvFixedPrt()
         fields.cmd >= 0.5) {
       // if (fields.spectral_snr >= 25.0 &&
       //     fields.cmd >= 0.5) {
-      fields.test2 = 1.0;
+      fields.test1 = 1.0;
     } else {
-      fields.test2 = MomentsFields::missingDouble;
+      fields.test1 = MomentsFields::missingDouble;
     }
 
     fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
@@ -3327,6 +3327,11 @@ void Beam::_filtSpecCmdSimHv()
   _specCmd.setSdevPhidpKernelNGates(_params.spec_cmd_sdev_phidp_kernel_ngates);
   _specCmd.setSdevPhidpKernelNSamples(_params.spec_cmd_sdev_phidp_kernel_nsamples);
 
+  // thresholds
+
+  _specCmd.setCmdThresholdMoments(_params.spec_cmd_threshold_for_moments);
+  _specCmd.setCmdThresholdDetect(_params.spec_cmd_threshold_for_detection);
+  
   // set time series
 
   _specCmd.resetFlags();
@@ -3352,35 +3357,46 @@ void Beam::_filtSpecCmdSimHv()
 
   RadarComplex_t **iqHcFilt2D = _specCmd.getIqHcFilt2D();
   RadarComplex_t **iqVcFilt2D = _specCmd.getIqVcFilt2D();
+  double *meanCmd = _specCmd.getMeanCmd1D();
+  double *fractionCmd = _specCmd.getFractionCmd1D();
 
   for (int igate = 0; igate < _nGates; igate++) {
     
     GateData *gate = _gateData[igate];
     RadarComplex_t *iqHcFilt1D = iqHcFilt2D[igate];
     RadarComplex_t *iqVcFilt1D = iqVcFilt2D[igate];
-    
+
     // compute filtered moments for this gate
     
     MomentsFields fieldsSF;
     MomentsFields &fieldsF = gate->fieldsF;
+    
+    fieldsF.test2 = meanCmd[igate];
+    fieldsF.test3 = fractionCmd[igate];
+
+    // only filter for wind turbines if fraction exceeds threshold
+    
+    if (fractionCmd[igate] > _params.spec_cmd_fraction_threshold_for_wind_turbine) {
       
-    _mom->computeCovarDpSimHv(iqHcFilt1D, iqVcFilt1D, fieldsSF);
-    
-    _mom->computeMomDpSimHv(fieldsSF.lag0_hc, fieldsSF.lag0_vc,
-                            fieldsSF.rvvhh0, fieldsSF.lag1_hc,
-                            fieldsSF.lag1_vc, fieldsSF.lag2_hc,
-                            fieldsSF.lag2_vc, fieldsSF.lag3_hc,
-                            fieldsSF.lag3_vc, igate, fieldsSF);
-    
-    // copy notched moments to the filtered moments
+      _mom->computeCovarDpSimHv(iqHcFilt1D, iqVcFilt1D, fieldsSF);
+      
+      _mom->computeMomDpSimHv(fieldsSF.lag0_hc, fieldsSF.lag0_vc,
+                              fieldsSF.rvvhh0, fieldsSF.lag1_hc,
+                              fieldsSF.lag1_vc, fieldsSF.lag2_hc,
+                              fieldsSF.lag2_vc, fieldsSF.lag3_hc,
+                              fieldsSF.lag3_vc, igate, fieldsSF);
+      
+      // copy notched moments to the filtered moments
+      
+      fieldsF.test4 = fieldsSF.dbz;
+      fieldsF.test5 = fieldsSF.vel;
+      fieldsF.test6 = fieldsSF.width;
+      fieldsF.test7 = fieldsSF.zdr;
+      fieldsF.test8 = fieldsSF.phidp;
+      fieldsF.test9 = fieldsSF.rhohv;
 
-    fieldsF.test4 = fieldsSF.dbz;
-    fieldsF.test5 = fieldsSF.vel;
-    fieldsF.test6 = fieldsSF.width;
-    fieldsF.test7 = fieldsSF.zdr;
-    fieldsF.test8 = fieldsSF.phidp;
-    fieldsF.test9 = fieldsSF.rhohv;
-
+    }
+      
   } // igate
 
 }

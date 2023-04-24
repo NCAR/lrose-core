@@ -1278,6 +1278,11 @@ public:
 
   int spec_cmd_sdev_phidp_kernel_nsamples;
 
+  interest_map_point_t *_spec_cmd_snr_interest_map;
+  int spec_cmd_snr_interest_map_n;
+
+  double spec_cmd_snr_interest_weight;
+
   interest_map_point_t *_spec_cmd_tdbz_interest_map;
   int spec_cmd_tdbz_interest_map_n;
 
@@ -1293,7 +1298,13 @@ public:
 
   double spec_cmd_phidp_sdev_interest_weight;
 
-  double spec_cmd_threshold_for_clutter;
+  double spec_cmd_threshold_for_detection;
+
+  double spec_cmd_threshold_for_moments;
+
+  double spec_cmd_fraction_threshold_for_wind_turbine;
+
+  double cmd_threshold_for_moments;
 
   char* output_fmq_url;
 
@@ -1369,7 +1380,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[314];
+  mutable TDRPtable _table[319];
 
   const char *_className;
 
