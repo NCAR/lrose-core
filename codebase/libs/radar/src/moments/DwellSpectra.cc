@@ -163,6 +163,8 @@ void DwellSpectra::_allocArrays(size_t nGates, size_t nSamples)
   }
   
   _specNoiseHc1D.alloc(nGates);
+  _meanCmd1D.alloc(nGates);
+  _fractionCmd1D.alloc(nGates);
 
   _iqHc2D.alloc(nGates, nSamples);
   _iqVc2D.alloc(nGates, nSamples);
@@ -218,6 +220,8 @@ void DwellSpectra::_freeArrays()
 
   _window1D.free();
   _specNoiseHc1D.free();
+  _meanCmd1D.free();
+  _fractionCmd1D.free();
   
   _iqHc2D.free();
   _iqVc2D.free();
@@ -1153,6 +1157,29 @@ void DwellSpectra::computeSpectralCmd()
     } // isample
   } // igate
 
+  // compute cmd mean and fraction exceeding threshold
+  
+  double *meanCmd = getMeanCmd1D();
+  double *fractionCmd = getFractionCmd1D();
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+
+    double sumCmd = 0.0;
+    double sumFrac = 0.0;
+    
+    for (size_t isample = 0; isample < _nSamples; isample++) {
+      double val = cmd[igate][isample];
+      sumCmd += val;
+      if (val >= _cmdThresholdDetect) {
+        sumFrac++;
+      }
+    } // isample
+
+    meanCmd[igate] = sumCmd / (double) _nSamples;
+    fractionCmd[igate] = sumFrac / (double) _nSamples;
+    
+  } // igate
+  
 }
 
 ////////////////////////////////////////////////////
@@ -1178,7 +1205,7 @@ void DwellSpectra::filterIqUsingCmd()
   for (size_t igate = 0; igate < _nGates; igate++) {
     for (size_t isample = 0; isample < _nSamples; isample++) {
       double cmdVal = specCmd[igate][isample];
-      if (cmdVal > _cmdInterestThreshold) {
+      if (cmdVal > _cmdThresholdMoments) {
         // notch out the spectral point
         specHcFilt2D[igate][isample].clear();
         specVcFilt2D[igate][isample].clear();
@@ -1238,7 +1265,8 @@ void DwellSpectra::_createDefaultInterestMaps()
   pts.push_back(InterestMap::ImPoint(32.0, 1.0));
   setInterestMapSdevPhidp(pts, 1.0);
 
-  setCmdInterestThreshold(0.51);
+  setCmdThresholdMoments(0.7);
+  setCmdThresholdDetect(0.9);
 
 }
 

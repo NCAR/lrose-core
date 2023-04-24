@@ -108,8 +108,14 @@ public:
   void setInterestMapSdevPhidp
     (const vector<InterestMap::ImPoint> &pts,
      double weight);
+
+  // CMD threshold for computing moments
   
-  void setCmdInterestThreshold(double val) { _cmdInterestThreshold = val; }
+  void setCmdThresholdMoments(double val) { _cmdThresholdMoments = val; }
+
+  // CMD threshold for clutter detection
+  
+  void setCmdThresholdDetect(double val) { _cmdThresholdDetect = val; }
 
   // set metadata
 
@@ -202,22 +208,44 @@ public:
   bool getVcAvail() const { return _vcAvail; }
   bool getHxAvail() const { return _hxAvail; }
   bool getVxAvail() const { return _vxAvail; }
+
+  // spectral noise in range
+  
+  double *getSpecNoise1D() const { return _specNoiseHc1D.dat(); }
+
+  // mean cmd for the range gate, averaged across the spectrum
+  
+  double *getMeanCmd1D() const { return _meanCmd1D.dat(); }
+
+  // fraction of the spectrum that exceeds the cmd threshold
+  
+  double *getFractionCmd1D() const { return _fractionCmd1D.dat(); }
+
+  // IQ time series - original
   
   RadarComplex_t **getIqHc2D() const { return _iqHc2D.dat2D(); }
   RadarComplex_t **getIqVc2D() const { return _iqVc2D.dat2D(); }
   RadarComplex_t **getIqHx2D() const { return _iqHx2D.dat2D(); }
   RadarComplex_t **getIqVx2D() const { return _iqVx2D.dat2D(); }
 
+  // filtered IQ time series
+  
   RadarComplex_t **getIqHcFilt2D() const { return _iqHcFilt2D.dat2D(); }
   RadarComplex_t **getIqVcFilt2D() const { return _iqVcFilt2D.dat2D(); }
 
+  // complex spectra of the time series
+  
   RadarComplex_t **getSpecCompHc2D() const { return _specCompHc2D.dat2D(); }
   RadarComplex_t **getSpecCompVc2D() const { return _specCompVc2D.dat2D(); }
   RadarComplex_t **getSpecCompHx2D() const { return _specCompHx2D.dat2D(); }
   RadarComplex_t **getSpecCompVx2D() const { return _specCompVx2D.dat2D(); }
   
+  // complex spectra of the fitered time series
+  
   RadarComplex_t **getSpecCompHcFilt2D() const { return _specCompHcFilt2D.dat2D(); }
   RadarComplex_t **getSpecCompVcFilt2D() const { return _specCompVcFilt2D.dat2D(); }
+
+  // real spectra of the moments
 
   double **getSpecPowerHc2D() const { return _specPowerHc2D.dat2D(); }
   double **getSpecPowerVc2D() const { return _specPowerVc2D.dat2D(); }
@@ -239,10 +267,14 @@ public:
   double **getSpecSdevZdr2D() const { return _specSdevZdr2D.dat2D(); }
   double **getSpecSdevPhidp2D() const { return _specSdevPhidp2D.dat2D(); }
 
+  // interest fields
+  
   double **getSpecSnrInterest2D() const { return _specSnrInterest2D.dat2D(); }
   double **getSpecTdbzInterest2D() const { return _specTdbzInterest2D.dat2D(); }
   double **getSpecSdevZdrInterest2D() const { return _specSdevZdrInterest2D.dat2D(); }
   double **getSpecSdevPhidpInterest2D() const { return _specSdevPhidpInterest2D.dat2D(); }
+
+  // spectra of CMD
   
   double **getSpecCmd2D() const { return _specCmd2D.dat2D(); }
   
@@ -328,12 +360,15 @@ private:
   InterestMap *_interestMapTdbz;
   InterestMap *_interestMapSdevZdr;
   InterestMap *_interestMapSdevPhidp;
-  double _cmdInterestThreshold;
+  double _cmdThresholdMoments;
+  double _cmdThresholdDetect;
 
   // Arrays
 
   TaArray<double> _window1D;
   TaArray<double> _specNoiseHc1D;
+  TaArray<double> _meanCmd1D;
+  TaArray<double> _fractionCmd1D;
 
   bool _hcAvail, _vcAvail, _hxAvail, _vxAvail;
   
