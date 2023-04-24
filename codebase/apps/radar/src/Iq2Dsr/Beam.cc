@@ -2700,7 +2700,8 @@ void Beam::_filterDpSimHvFixedPrt()
     }
 
     fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
-    
+
+#ifdef JUNK
     if (fields.spectral_snr >= 25.0 &&
         fields.cmd >= 0.5 &&
         fieldsF.dbz > -99) {
@@ -2717,6 +2718,7 @@ void Beam::_filterDpSimHvFixedPrt()
     } else {
       fields.test4 = fieldsF.dbz;
     }
+#endif
     
   } // igate
 
@@ -3371,7 +3373,7 @@ void Beam::_filtSpecCmdSimHv()
                             fieldsSF.lag3_vc, igate, fieldsSF);
     
     // copy notched moments to the filtered moments
-    
+
     fieldsF.test4 = fieldsSF.dbz;
     fieldsF.test5 = fieldsSF.vel;
     fieldsF.test6 = fieldsSF.width;
