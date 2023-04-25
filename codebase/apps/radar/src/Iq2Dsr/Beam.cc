@@ -55,6 +55,7 @@ using namespace std;
 const double Beam::_missingDbl = MomentsFields::missingDouble;
 int Beam::_nWarnings = 0;
 pthread_mutex_t Beam::_fftMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t Beam::_pulseUnpackMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t Beam::_debugPrintMutex = PTHREAD_MUTEX_INITIALIZER;
 
 ////////////////////////////////////////////////////
@@ -190,7 +191,7 @@ void Beam::init(const MomentsMgr &mmgr,
                 bool endOfVolFlag,
                 const AtmosAtten &atmosAtten,
                 const IwrfTsInfo &opsInfo,
-                const vector<const IwrfTsPulse *> &pulses)
+                const vector<IwrfTsPulse *> &pulses)
   
 {
 
@@ -373,6 +374,8 @@ void Beam::_prepareForComputeMoments()
 
 {
 
+  // initialize
+  
   _nSamplesHalf = _nSamples / 2;
   _stagM = 2;
   _stagN = 3;
@@ -400,13 +403,21 @@ void Beam::_prepareForComputeMoments()
   _startRangeKm = _opsInfo.get_proc_start_range_km();
   _gateSpacingKm = _opsInfo.get_proc_gate_spacing_km();
 
+  // unpack the pulses as needed
+
+  pthread_mutex_lock(&_pulseUnpackMutex);
+  for (size_t ii = 0; ii < _pulses.size(); ii++) {
+    _pulses[ii]->convertToFL32();
+  }
+  pthread_mutex_unlock(&_pulseUnpackMutex);
+
   // override OpsInfo time-series values as needed
   
   _overrideOpsInfo();
 
   // pulse width
   
-  const IwrfTsPulse *midPulse = _pulses[_nSamplesHalf];
+  IwrfTsPulse *midPulse = _pulses[_nSamplesHalf];
   _pulseWidth = midPulse->getPulseWidthUs() / 1.0e6;
 
   // transmitter power
@@ -4378,11 +4389,11 @@ int Beam::_convertInterestParamsToVector(const string &label,
 // set transition for beam if both the start and end pulses are
 // in transition
 
-void Beam::_checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses)
+void Beam::_checkAntennaTransition(const vector<IwrfTsPulse *> &pulses)
 
 {
 
-  const IwrfTsPulse *midPulse = pulses[_nSamplesHalf];
+  IwrfTsPulse *midPulse = pulses[_nSamplesHalf];
 
   _antennaTransition = false;
   size_t nPulses = pulses.size();
@@ -6407,7 +6418,7 @@ void Beam::_printSelectedMoments()
 // the queue.
 
 void Beam::_computePhaseDiffs
-  (const vector<const IwrfTsPulse *> &pulseQueue, int maxTrips)
+  (const vector<IwrfTsPulse *> &pulseQueue, int maxTrips)
   
 {
   

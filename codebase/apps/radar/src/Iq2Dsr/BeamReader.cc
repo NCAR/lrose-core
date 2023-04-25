@@ -429,7 +429,7 @@ Beam *BeamReader::getNextBeam()
   // load the pulse pointers into a vector for just this beam
   // reversing the order, so we start with oldest pulse
       
-  vector<const IwrfTsPulse *> beamPulses;
+  vector<IwrfTsPulse *> beamPulses;
   for (int ii = _startIndex; ii >= _endIndex; ii--) {
     beamPulses.push_back(_pulseQueue[ii]);
   }
@@ -1503,10 +1503,10 @@ IwrfTsPulse *BeamReader::_doReadNextPulse()
   IwrfTsPulse *latest = _getPulseFromRecyclePool();
   if (latest == NULL) {
     // create a new pulse
-    latest = _pulseReader->getNextPulse(true);
+    latest = _pulseReader->getNextPulse(false);
   } else {
     // recycle previously used pulse
-    latest = _pulseReader->getNextPulse(true, latest);
+    latest = _pulseReader->getNextPulse(false, latest);
   }
   if (latest == NULL) {
     return NULL;
@@ -1745,7 +1745,7 @@ bool BeamReader::_beamOk()
     if (pulsesMissing) {
       cerr << "  n pulses in queue to be discarded: " << _pulseQueue.size() << endl;
       int midIndex = (_startIndex + _endIndex) / 2;
-      const IwrfTsPulse *pulse = _pulseQueue[midIndex];
+      IwrfTsPulse *pulse = _pulseQueue[midIndex];
       RadxTime ptime(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
       cerr << "  time, el, az: "
            << ptime.asString(3) << ", "
@@ -2377,7 +2377,7 @@ int BeamReader::_computeNSamplesIndexed()
   nSamples = (nSamples / 2) * 2;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    const IwrfTsPulse *pulse = _pulseQueue[0];
+    IwrfTsPulse *pulse = _pulseQueue[0];
     time_t psecs = pulse->getTime();
     int pnanosecs = pulse->getNanoSecs();
     DateTime ptime(psecs);
@@ -2760,8 +2760,8 @@ void BeamReader::_computeBeamAzRate(int endIndex, int nSamples)
     startIndex = (int) _pulseQueue.size() - 1;
   }
 
-  const IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
-  const IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
+  IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
+  IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
   
   double azStart = pulseStart->getAz();
   double azEnd = pulseEnd->getAz();
@@ -2812,8 +2812,8 @@ void BeamReader::_computeBeamElRate(int endIndex, int nSamples)
     startIndex = _pulseQueue.size() - 1;
   }
 
-  const IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
-  const IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
+  IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
+  IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
   
   double elStart = pulseStart->getEl();
   double elEnd = pulseEnd->getEl();
@@ -2858,7 +2858,7 @@ double BeamReader::getAntennaRate()
 ////////////////////////////////////////////////////////////////
 // check for end of vol and sweep flags
 
-void BeamReader::_checkForEndFlags(const vector<const IwrfTsPulse *> &beamPulses)
+void BeamReader::_checkForEndFlags(const vector<IwrfTsPulse *> &beamPulses)
   
 {
   

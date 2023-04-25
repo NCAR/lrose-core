@@ -103,7 +103,7 @@ public:
             bool endOfVolFlag,
             const AtmosAtten &atmosAtten,
             const IwrfTsInfo &opsInfo,
-            const vector<const IwrfTsPulse *> &pulses);
+            const vector<IwrfTsPulse *> &pulses);
 
   // destructor
   
@@ -206,8 +206,9 @@ private:
 
   // pulse vector
 
-  vector<const IwrfTsPulse *> _pulses;
+  vector<IwrfTsPulse *> _pulses;
   bool _hasMissingPulses;
+  static pthread_mutex_t _pulseUnpackMutex;
 
   // number of samples
 
@@ -481,7 +482,7 @@ private:
                                      vector<InterestMap::ImPoint> &pts);
 
 
-  void _checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses);
+  void _checkAntennaTransition(const vector<IwrfTsPulse *> &pulses);
   void _allocGateData(int nGates);
   void _freeGateData();
   void _initFieldData();
@@ -517,7 +518,7 @@ private:
   void _printSelectedMoments();
 
   void _computePhaseDiffs
-    (const vector<const IwrfTsPulse *> &pulseQueue, int maxTrips);
+    (const vector<IwrfTsPulse *> &pulseQueue, int maxTrips);
 
   void _setNoiseFields();
   void _censorByNoiseFlag();

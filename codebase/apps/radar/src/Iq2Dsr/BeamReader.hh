@@ -160,10 +160,10 @@ private:
   double _prevAzInterp, _prevElInterp;
   
   // Pulse recycle pool.
-  // The pulse pool holds previously used pulse objects, 
+  // The pulse pool holds previously used pulse objects,
   // so that they may be re-used. This saves continual allocation
   // and de-allocation of memory.
-  
+
   deque<IwrfTsPulse *> _pulseRecyclePool;
 
   // phase coding
@@ -180,7 +180,7 @@ private:
   si64 _beamCount;
   int _midIndex, _startIndex, _endIndex;
   si64 _prevBeamPulseSeqNum; // pulse after center of beam
-  vector<const IwrfTsPulse *> _beamPulses;
+  vector<IwrfTsPulse *> _beamPulses;
 
   // beam properties
 
@@ -324,7 +324,7 @@ private:
   void _computeBeamAzRate(int endIndex, int nSamples);
   void _computeBeamElRate(int endIndex, int nSamples);
 
-  void _checkForEndFlags(const vector<const IwrfTsPulse *> &beamPulses);
+  void _checkForEndFlags(const vector<IwrfTsPulse *> &beamPulses);
   void _checkQueueStatus();
   void _computeWindowFactors();
 
