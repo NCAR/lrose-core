@@ -1266,6 +1266,10 @@ public:
 
   tdrp_bool_t run_spectral_cmd;
 
+  clutter_filter_type_t spec_cmd_clutter_filter_type;
+
+  window_t spec_cmd_window_type;
+
   int spec_cmd_tdbz_kernel_ngates;
 
   int spec_cmd_tdbz_kernel_nsamples;
@@ -1380,7 +1384,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[319];
+  mutable TDRPtable _table[321];
 
   const char *_className;
 

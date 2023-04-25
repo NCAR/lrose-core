@@ -4551,6 +4551,62 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'spec_cmd_clutter_filter_type'
+    // ctype is '_clutter_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_clutter_filter_type");
+    tt->descr = tdrpStrDup("Type of clutter filter to use for spectral CMD.");
+    tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
+    tt->val_offset = (char *) &spec_cmd_clutter_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+      tt->enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+      tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+      tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+    tt->single_val.e = CLUTTER_FILTER_NONE;
+    tt++;
+    
+    // Parameter 'spec_cmd_window_type'
+    // ctype is '_window_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_window_type");
+    tt->descr = tdrpStrDup("Window to use for spectral CMD.");
+    tt->help = tdrpStrDup("VONHANN is recommended.");
+    tt->val_offset = (char *) &spec_cmd_window_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("window_t");
+    tt->enum_def.nfields = 8;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
+      tt->enum_def.fields[0].val = WINDOW_RECT;
+      tt->enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
+      tt->enum_def.fields[1].val = WINDOW_VONHANN;
+      tt->enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
+      tt->enum_def.fields[2].val = WINDOW_BLACKMAN;
+      tt->enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
+      tt->enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
+      tt->enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
+      tt->enum_def.fields[4].val = WINDOW_TUKEY_10;
+      tt->enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
+      tt->enum_def.fields[5].val = WINDOW_TUKEY_20;
+      tt->enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
+      tt->enum_def.fields[6].val = WINDOW_TUKEY_30;
+      tt->enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
+      tt->enum_def.fields[7].val = WINDOW_TUKEY_50;
+    tt->single_val.e = WINDOW_VONHANN;
+    tt++;
+    
     // Parameter 'spec_cmd_tdbz_kernel_ngates'
     // ctype is 'int'
     

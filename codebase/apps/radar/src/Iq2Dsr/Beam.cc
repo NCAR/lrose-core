@@ -2694,14 +2694,15 @@ void Beam::_filterDpSimHvFixedPrt()
         fields.cmd >= 0.5) {
       // if (fields.spectral_snr >= 25.0 &&
       //     fields.cmd >= 0.5) {
-      fields.test1 = 1.0;
+      fields.test0 = 1.0;
     } else {
-      fields.test1 = MomentsFields::missingDouble;
+      fields.test0 = 0.0;
     }
+
+#ifdef JUNK
 
     fields.test3 = fields.spectral_snr + fields.clut_2_wx_ratio;
 
-#ifdef JUNK
     if (fields.spectral_snr >= 25.0 &&
         fields.cmd >= 0.5 &&
         fieldsF.dbz > -99) {
@@ -3260,10 +3261,7 @@ void Beam::_filtSpecCmdSimHv()
 
   // load up time series for dwell spectra
 
-  switch (_params.clutter_filter_type) {
-    case Params::WINDOW_VONHANN:
-      _specCmd.setWindowType(RadarMoments::WINDOW_VONHANN);
-      break;
+  switch (_params.spec_cmd_window_type) {
     case Params::WINDOW_BLACKMAN:
       _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN);
       break;
@@ -3271,34 +3269,33 @@ void Beam::_filtSpecCmdSimHv()
       _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN_NUTTALL);
       break;
     case Params::WINDOW_RECT:
-    default:
       _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
+      break;
+    case Params::WINDOW_VONHANN:
+    default:
+      _specCmd.setWindowType(RadarMoments::WINDOW_VONHANN);
       break;
   }
 
-  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
-    _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
-  } else if (_mmgr.getWindowType() == Params::WINDOW_RECT) {
-    _specCmd.setWindowType(RadarMoments::WINDOW_RECT);
-  } else if (_mmgr.getWindowType() == Params::WINDOW_BLACKMAN) {
-    _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN);
-  } else if (_mmgr.getWindowType() == Params::WINDOW_BLACKMAN_NUTTALL) {
-    _specCmd.setWindowType(RadarMoments::WINDOW_BLACKMAN_NUTTALL);
-  } else {
-    _specCmd.setWindowType(RadarMoments::WINDOW_VONHANN);
-  }
-
-  if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
-    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_REGRESSION);
-  } else if (_params.clutter_filter_type == Params::CLUTTER_FILTER_ADAPTIVE) {
-    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_ADAPTIVE);
-  } else {
-    _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_NONE);
+  switch (_params.spec_cmd_clutter_filter_type) {
+    case Params::CLUTTER_FILTER_REGRESSION:
+      _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_REGRESSION);
+      break;
+    case Params::CLUTTER_FILTER_ADAPTIVE:
+      _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_ADAPTIVE);
+      break;
+    case RadarMoments::CLUTTER_FILTER_NONE:
+    default:
+      _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_NONE);
   }
   
   // dimensions
+  // need to protect fft during initialization since that action
+  // is not thread safe
   
+  pthread_mutex_lock(&_fftMutex);
   _specCmd.setDimensions(_nGates, _nSamples);
+  pthread_mutex_unlock(&_fftMutex);
 
   // metadata
 
@@ -3368,23 +3365,27 @@ void Beam::_filtSpecCmdSimHv()
 
     // compute filtered moments for this gate
     
-    MomentsFields fieldsSF;
+    MomentsFields &fields = gate->fields;
     MomentsFields &fieldsF = gate->fieldsF;
+    MomentsFields fieldsSF = fieldsF;
     
-    fieldsF.test2 = meanCmd[igate];
-    fieldsF.test3 = fractionCmd[igate];
-
+    fields.test2 = meanCmd[igate];
+    fields.test3 = fractionCmd[igate];
+    
     // only filter for wind turbines if fraction exceeds threshold
     
-    if (fractionCmd[igate] > _params.spec_cmd_fraction_threshold_for_wind_turbine) {
+    _mom->computeCovarDpSimHv(iqHcFilt1D, iqVcFilt1D, fieldsSF);
+    
+    _mom->computeMomDpSimHv(fieldsSF.lag0_hc, fieldsSF.lag0_vc,
+                            fieldsSF.rvvhh0, fieldsSF.lag1_hc,
+                            fieldsSF.lag1_vc, fieldsSF.lag2_hc,
+                            fieldsSF.lag2_vc, fieldsSF.lag3_hc,
+                            fieldsSF.lag3_vc, igate, fieldsSF);
       
-      _mom->computeCovarDpSimHv(iqHcFilt1D, iqVcFilt1D, fieldsSF);
+    if (fractionCmd[igate] >
+        _params.spec_cmd_fraction_threshold_for_wind_turbine) {
       
-      _mom->computeMomDpSimHv(fieldsSF.lag0_hc, fieldsSF.lag0_vc,
-                              fieldsSF.rvvhh0, fieldsSF.lag1_hc,
-                              fieldsSF.lag1_vc, fieldsSF.lag2_hc,
-                              fieldsSF.lag2_vc, fieldsSF.lag3_hc,
-                              fieldsSF.lag3_vc, igate, fieldsSF);
+      fields.test1 = 1.00; // wind farm
       
       // copy notched moments to the filtered moments
       
@@ -3395,12 +3396,23 @@ void Beam::_filtSpecCmdSimHv()
       fieldsF.test8 = fieldsSF.phidp;
       fieldsF.test9 = fieldsSF.rhohv;
 
+    } else {
+      
+      fields.test1 = 0.0; // no wind farm
+      
+      fieldsF.test4 = fieldsF.dbz;
+      fieldsF.test5 = fieldsF.vel;
+      fieldsF.test6 = fieldsF.width;
+      fieldsF.test7 = fieldsF.zdr;
+      fieldsF.test8 = fieldsF.phidp;
+      fieldsF.test9 = fieldsF.rhohv;
+
     }
       
   } // igate
 
 }
-  
+
 //////////////////////////////////////////
 // compute R1, R2 and R3 values for window
 

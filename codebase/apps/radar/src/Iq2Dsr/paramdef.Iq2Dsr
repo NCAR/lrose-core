@@ -1926,6 +1926,18 @@ paramdef boolean {
   p_help = "This computes a version of CMD in the FFT space.";
 } run_spectral_cmd;
 
+paramdef enum clutter_filter_type_t {
+  p_default = CLUTTER_FILTER_NONE;
+  p_descr = "Type of clutter filter to use for spectral CMD.";
+  p_help = "ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.";
+} spec_cmd_clutter_filter_type;
+
+paramdef enum window_t {
+  p_default = WINDOW_VONHANN;
+  p_descr = "Window to use for spectral CMD.";
+  p_help = "VONHANN is recommended.";
+} spec_cmd_window_type;
+
 paramdef int {
   p_default = 5;
   p_descr = "Kernal size in range for computing TDBZ";

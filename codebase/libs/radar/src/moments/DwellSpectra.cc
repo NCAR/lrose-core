@@ -1175,9 +1175,16 @@ void DwellSpectra::computeSpectralCmd()
       }
     } // isample
 
-    meanCmd[igate] = sumCmd / (double) _nSamples;
-    fractionCmd[igate] = sumFrac / (double) _nSamples;
-    
+    double mean = sumCmd / (double) _nSamples;
+    double frac = sumFrac / (double) _nSamples;
+
+    // if (frac > 0) {
+    //   cerr << "222222222 mean, frac: " << mean << ", " << frac << endl;
+    // }
+
+    meanCmd[igate] = mean;
+    fractionCmd[igate] = frac;
+
   } // igate
   
 }
