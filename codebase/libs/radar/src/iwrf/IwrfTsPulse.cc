@@ -84,7 +84,6 @@ IwrfTsPulse::IwrfTsPulse(IwrfTsInfo &info,
   // initialize mutexes
 
   _nClients = 0;
-  pthread_mutex_init(&_nClientsMutex, NULL);
 
 }
 
@@ -98,7 +97,6 @@ IwrfTsPulse::IwrfTsPulse(const IwrfTsPulse &rhs) :
 {
   if (this != &rhs) {
     _copy(rhs);
-    pthread_mutex_init(&_nClientsMutex, NULL);
   }
 }
 
@@ -110,7 +108,6 @@ IwrfTsPulse::~IwrfTsPulse()
 {
   _clearIq();
   _clearPacked();
-  pthread_mutex_destroy(&_nClientsMutex);
 }
 
 /////////////////////////////
@@ -1396,23 +1393,13 @@ int IwrfTsPulse::writeToTsarchiveFile(FILE *out) const
 int IwrfTsPulse::addClient() const
   
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  _nClients++;
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+	return ++_nClients;
 }
 
 int IwrfTsPulse::removeClient() const
 
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  _nClients--;
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+	return --_nClients;
 }
 
 void IwrfTsPulse::deleteIfUnused(IwrfTsPulse *pulse)
@@ -1426,11 +1413,7 @@ void IwrfTsPulse::deleteIfUnused(IwrfTsPulse *pulse)
 int IwrfTsPulse::getNClients() const
 
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+  return _nClients;
 }
 
 /////////////////////////////

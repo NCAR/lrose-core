@@ -34,6 +34,7 @@
 #ifndef IwrfTsPulse_hh
 #define IwrfTsPulse_hh
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <deque>
@@ -626,8 +627,7 @@ private:
   
   // memory handling
 
-  mutable int _nClients;
-  mutable pthread_mutex_t _nClientsMutex;
+  mutable std::atomic<int> _nClients;
 
   // lookup table for converting packed 16-bit floats to 32-bit floats
 
