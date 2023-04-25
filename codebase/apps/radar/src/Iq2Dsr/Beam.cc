@@ -3409,6 +3409,8 @@ void Beam::_filtSpecCmdSimHv()
 
     }
       
+    fields.test0 += fields.test1;
+    
   } // igate
 
 }
