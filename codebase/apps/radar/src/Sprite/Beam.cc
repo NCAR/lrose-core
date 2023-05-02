@@ -3871,10 +3871,6 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
   
 {
 
-  // dimensions
-  
-  spectra.setDimensions(_nGates, _nSamples);
-
   // metadata
 
   spectra.setTime(_timeSecs, _nanoSecs);
@@ -3906,24 +3902,49 @@ void Beam::loadDwellSpectra(DwellSpectra &spectra)
 
   spectra.resetFlags();
 
+  // dimensions
+  
+  int nSamples = _nSamples;
+  switch (_xmitRcvMode) {
+    case IWRF_ALT_HV_CO_ONLY:
+    case IWRF_ALT_HV_CO_CROSS:
+    case IWRF_ALT_HV_FIXED_HV:
+      nSamples = _nSamplesHalf;
+      break;
+    case IWRF_SIM_HV_SWITCHED_HV:
+      if (_isStagPrt) {
+        nSamples = _nSamplesHalf;
+      }
+      break;
+    case IWRF_SINGLE_POL:
+      if (_isStagPrt) {
+        nSamples = _nSamplesHalf;
+      }
+      break;
+    default:
+      nSamples = _nSamples;
+  } // switch
+
+  spectra.setDimensions(_nGates, nSamples);
+
   for (size_t igate = 0; igate < _gateData.size(); igate++) {
 
     GateData *gd = _gateData[igate];
 
     if (gd->iqhcOrig != NULL) {
-      spectra.setIqHc(gd->iqhcOrig, igate, _nSamples);
+      spectra.setIqHc(gd->iqhcOrig, igate, nSamples);
     }
     
     if (gd->iqvcOrig != NULL) {
-      spectra.setIqVc(gd->iqvcOrig, igate, _nSamples);
+      spectra.setIqVc(gd->iqvcOrig, igate, nSamples);
     }
     
     if (gd->iqhxOrig != NULL) {
-      spectra.setIqHx(gd->iqhxOrig, igate, _nSamples);
+      spectra.setIqHx(gd->iqhxOrig, igate, nSamples);
     }
     
     if (gd->iqvxOrig != NULL) {
-      spectra.setIqVx(gd->iqvxOrig, igate, _nSamples);
+      spectra.setIqVx(gd->iqvxOrig, igate, nSamples);
     }
     
   } // igate
