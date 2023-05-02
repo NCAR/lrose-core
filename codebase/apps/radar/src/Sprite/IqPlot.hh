@@ -249,8 +249,7 @@ protected:
   void _plotIQVals(QPainter &painter,
                    double selectedRangeKm,
                    int gateNum,
-                   const double *iVals, 
-                   const double *qVals);
+                   const RadarComplex_t *iq);
   
   void _plotIvsQ(QPainter &painter,
                  double selectedRangeKm,

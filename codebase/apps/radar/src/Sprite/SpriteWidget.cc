@@ -2420,7 +2420,7 @@ void SpriteWidget::_createIqPlotContextMenu(const QPoint &pos)
               (this,
                tr("QInputDialog::getInt()"), tr("Set regression order:"),
                _iqPlots[id]->getRegrOrder(),
-               3, 100, 1, &ok);
+               -1, 100, 1, &ok);
             _iqPlots[id]->setRegrOrder(val);
             _configureIqPlot(id);
           } );

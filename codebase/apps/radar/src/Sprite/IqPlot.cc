@@ -200,20 +200,7 @@ void IqPlot::plotBeam(QPainter &painter,
   switch (_plotType) {
     case Params::I_VALS:
     case Params::Q_VALS: 
-      {
-        TaArray<double> iVals_;
-        double *iVals = iVals_.alloc(_nSamples);
-        for (size_t ii = 0; ii < _nSamples; ii++) {
-          iVals[ii] = iq[ii].re;
-        }
-        TaArray<double> qVals_;
-        double *qVals = qVals_.alloc(_nSamples);
-        for (size_t ii = 0; ii < _nSamples; ii++) {
-          qVals[ii] = iq[ii].im;
-        }
-        _plotIQVals(painter,  selectedRangeKm,
-                    gateNum, iVals, qVals);
-      }
+      _plotIQVals(painter,  selectedRangeKm, gateNum, iq);
       break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, selectedRangeKm, gateNum, iq);
@@ -1212,54 +1199,44 @@ void IqPlot::_plotTsPhase(QPainter &painter,
 void IqPlot::_plotIQVals(QPainter &painter,
                          double selectedRangeKm,
                          int gateNum,
-                         const double *iVals,
-                         const double *qVals)
+                         const RadarComplex_t *iq)
   
 {
 
-  // prepare Forsythe compute object for regression
+  // apply the window
   
-  vector<double> xVals;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    xVals.push_back(ii);
-  }
-  ForsytheFit forsythe;
-  forsythe.prepareForFit(_beam->getRegrOrder(), xVals);
+  TaArray<RadarComplex_t> iqWindowed_;
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  _applyWindow(iq, iqWindowed, _nSamples);
   
-  // compute polynomial regression fit
+  // compute the power spectrum, filtering with the regression filter
   
-  vector<double> iRaw;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    iRaw.push_back(iVals[ii]);
-  }
-  forsythe.performFit(iRaw);
-  vector<double> iSmooth = forsythe.getYEstVector();
-  vector<double> iResid;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    iResid.push_back(iRaw[ii] - iSmooth[ii]);
-  }
+  TaArray<RadarComplex_t> iqFilt_, iqNotched_;
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
+  TaArray<double> dbmA_, dbmFiltA_;
+  double *dbmA = dbmA_.alloc(_nSamples);
+  double *dbmFiltA = dbmFiltA_.alloc(_nSamples);
+  double filterRatio, spectralNoise, spectralSnr;
 
-  vector<double> qRaw;
+  _clutterFilterType = RadarMoments::CLUTTER_FILTER_REGRESSION;
+  _computePowerSpectrum(iqWindowed, iqFilt, iqNotched,
+                        dbmA, dbmFiltA,
+                        filterRatio, spectralNoise, spectralSnr);
+
+  // compute residuals from regression fit
+  
+  vector<double> iResid, qResid;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    qRaw.push_back(qVals[ii]);
-  }
-  forsythe.performFit(qRaw);
-  vector<double> qSmooth = forsythe.getYEstVector();
-  vector<double> qResid;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    qResid.push_back(qRaw[ii] - qSmooth[ii]);
+    iResid.push_back(iqWindowed[ii].re - iqFilt[ii].re);
+    qResid.push_back(iqWindowed[ii].im - iqFilt[ii].im);
   }
 
   // compute CSR
 
-  double sumPowerUnfilt = 0.0;
-  double sumPowerFilt = 0.0;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    sumPowerUnfilt += iVals[ii] * iVals[ii] + qVals[ii] * qVals[ii];
-    sumPowerFilt += iResid[ii] * iResid[ii] + qResid[ii] * qResid[ii];
-  }
-  double meanPowerUnfilt = sumPowerUnfilt / _nSamples;
-  double meanPowerFilt = sumPowerFilt / _nSamples;
+  double meanPowerUnfilt = RadarComplex::meanPower(iqWindowed, _nSamples);
+  double meanPowerFilt = RadarComplex::meanPower(iqFilt, _nSamples);
+
   double dbmUnfilt = 10.0 * log10(meanPowerUnfilt);
   double dbmFilt = 10.0 * log10(meanPowerFilt);
   double clutPower = meanPowerUnfilt - meanPowerFilt;
@@ -1273,18 +1250,20 @@ void IqPlot::_plotIQVals(QPainter &painter,
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    minVal = min(iVals[ii], minVal);
-    minVal = min(iSmooth[ii], minVal);
+    minVal = min(iqWindowed[ii].re, minVal);
+    minVal = min(iqFilt[ii].re, minVal);
     minVal = min(iResid[ii], minVal);
-    maxVal = max(iVals[ii], maxVal);
-    maxVal = max(iSmooth[ii], maxVal);
+    maxVal = max(iqWindowed[ii].re, maxVal);
+    maxVal = max(iqFilt[ii].re, maxVal);
     maxVal = max(iResid[ii], maxVal);
-    minVal = min(qVals[ii], minVal);
-    minVal = min(qSmooth[ii], minVal);
-    minVal = min(qResid[ii], minVal);
-    maxVal = max(qVals[ii], maxVal);
-    maxVal = max(qSmooth[ii], maxVal);
-    maxVal = max(qResid[ii], maxVal);
+
+    minVal = min(iqWindowed[ii].im, minVal);
+    minVal = min(iqFilt[ii].im, minVal);
+    minVal = min(iResid[ii], minVal);
+    maxVal = max(iqWindowed[ii].im, maxVal);
+    maxVal = max(iqFilt[ii].im, maxVal);
+    maxVal = max(iResid[ii], maxVal);
+
   }
   
   // set the Y axis range
@@ -1304,13 +1283,19 @@ void IqPlot::_plotIQVals(QPainter &painter,
 
   // draw the data
 
-  const double *vals = iVals;
+  vector<double> vals, smoothed;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    if (_plotType == Params::I_VALS) {
+      vals.push_back(iq[ii].re);
+      smoothed.push_back(iqFilt[ii].re);
+    } else {
+      vals.push_back(iq[ii].im);
+      smoothed.push_back(iqFilt[ii].im);
+    }
+  }
   double *resid = iResid.data();
-  double *smooth = iSmooth.data();
   if (_plotType == Params::Q_VALS) {
-    vals = qVals;
     resid = qResid.data();
-    smooth = qSmooth.data();
   }
   
   painter.save();
@@ -1341,7 +1326,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> pts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, smooth[ii]);
+      QPointF pt(ii, smoothed[ii]);
       pts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, pts);
