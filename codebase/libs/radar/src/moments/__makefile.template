@@ -35,6 +35,7 @@ CPPC_SRCS = \
 	AlternatingVelocity.cc \
 	AtmosAtten.cc \
 	ClutFilter.cc \
+	DwellSpectra.cc \
 	ForsytheRegrFilter.cc \
 	GateData.cc \
 	MomentsFields.cc \
