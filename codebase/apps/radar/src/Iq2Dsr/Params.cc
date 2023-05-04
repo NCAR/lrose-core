@@ -2833,10 +2833,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_min_cnr_db");
-    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
-    tt->help = tdrpStrDup("As a first step, we compute the CNR the central 3 spectral points. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Noise-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CNR from the central 3 spectral points. If the CNR is below this threshold, and the CSR is below min_csr (see below) we do not apply the filter at all, and simply return the unfiltered spectrum. This test");
     tt->val_offset = (char *) &regression_filter_min_cnr_db - &_start_;
-    tt->single_val.d = -5;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'regression_filter_min_csr_db'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_min_csr_db");
+    tt->descr = tdrpStrDup("Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CSR from the central 3 spectral points. If the CSR is below this threshold, and the CNR is below min_cnr (see above) we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->val_offset = (char *) &regression_filter_min_csr_db - &_start_;
+    tt->single_val.d = -15;
     tt++;
     
     // Parameter 'regression_filter_notch_interp_method'

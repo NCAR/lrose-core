@@ -1045,6 +1045,8 @@ public:
 
   double regression_filter_min_cnr_db;
 
+  double regression_filter_min_csr_db;
+
   notch_interp_method_t regression_filter_notch_interp_method;
 
   double simple_notch_filter_width_mps;
@@ -1384,7 +1386,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[321];
+  mutable TDRPtable _table[322];
 
   const char *_className;
 

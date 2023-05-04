@@ -1989,9 +1989,9 @@ void Beam::_filterSpH()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
 
-    fields.regr_filt_poly_order = _regr->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regr->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
     
     // compute filtered moments for this gate
@@ -2401,9 +2401,9 @@ void Beam::_filterDpAltHvCoCross()
 
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // compute clutter power
@@ -2508,9 +2508,9 @@ void Beam::_filterDpAltHvCoOnly()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // filter the Vc channel using the same notch as Hc
@@ -2566,9 +2566,9 @@ void Beam::_filterDpAltHvCoOnly()
 
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // compute clutter power
@@ -2678,9 +2678,9 @@ void Beam::_filterDpSimHvFixedPrt()
 
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regr->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regr->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // compute clutter power
@@ -2824,10 +2824,10 @@ void Beam::_filterDpSimHvStagPrt()
 
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
-    fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
-    fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
+    fields.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
+    fields.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
+    fieldsF.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
+    fieldsF.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
 
     // compute clutter power
     
@@ -2879,9 +2879,9 @@ void Beam::_filterDpHOnlyFixedPrt()
     fields.spectral_noise = 10.0 * log10(spectralNoiseHc);
     fields.spectral_snr = 10.0 * log10(spectralSnrHc);
     
-    fields.regr_filt_poly_order = _regr->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regr->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
     
     // apply the filter to the Vx channel
@@ -2929,9 +2929,9 @@ void Beam::_filterDpHOnlyFixedPrt()
     
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regr->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regr->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // compute clutter power
@@ -3037,9 +3037,9 @@ void Beam::_filterDpHOnlyStagPrt()
     
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fields.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regrHalf->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _momStagPrt->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _momStagPrt->getRegrCnrDb();
 
     // compute clutter power
@@ -3137,9 +3137,9 @@ void Beam::_filterDpVOnlyFixedPrt()
     
     // regression filter internals
 
-    fields.regr_filt_poly_order = _regr->getPolyOrder();
+    fields.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fields.regr_filt_cnr_db = _mom->getRegrCnrDb();
-    fieldsF.regr_filt_poly_order = _regr->getPolyOrder();
+    fieldsF.regr_filt_poly_order = _mom->getRegrPolyOrder();
     fieldsF.regr_filt_cnr_db = _mom->getRegrCnrDb();
 
     // compute clutter power
@@ -3608,7 +3608,8 @@ void Beam::_initMomentsObject(RadarMoments *mom)
   
   if (_params.clutter_filter_type == Params::CLUTTER_FILTER_REGRESSION) {
     mom->setUseRegressionFilter(interpMethod,
-                                _params.regression_filter_min_cnr_db);
+                                _params.regression_filter_min_cnr_db,
+                                _params.regression_filter_min_csr_db);
   } else if (_params.clutter_filter_type == Params::CLUTTER_FILTER_NOTCH) {
     mom->setUseSimpleNotchFilter(_params.simple_notch_filter_width_mps);
   } else {
