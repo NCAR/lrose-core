@@ -183,6 +183,10 @@ protected:
   Params::iq_plot_static_range_t _staticRange;
   bool _computePlotRangeDynamically;
   
+  // calibration
+
+  double _calibNoise;
+
   // fft window
   
   Params::fft_window_t _fftWindow;
@@ -269,6 +273,10 @@ protected:
                              double &filterRatio,
                              double &spectralNoise,
                              double &spectralSnr);
+  
+  void _runRegressionFilter(ForsytheRegrFilter &regrF,
+                            const RadarComplex_t *iqIn,
+                            RadarComplex_t *iqFilt);
   
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,

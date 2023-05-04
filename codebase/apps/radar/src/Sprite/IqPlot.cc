@@ -194,6 +194,25 @@ void IqPlot::plotBeam(QPainter &painter,
     case Params::CHANNEL_VX:
       memcpy(iq, gateData->iqvxOrig, _nSamples * sizeof(RadarComplex_t));
   }
+
+  // calibration
+  
+  const IwrfCalib &calib = _beam->getCalib();
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      _calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      _calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      _calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      _calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
   
   // perform the relevant plot
 
@@ -1203,46 +1222,20 @@ void IqPlot::_plotIQVals(QPainter &painter,
   
 {
 
-  // apply the window
+  // run the regression filter
   
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
-  _applyWindow(iq, iqWindowed, _nSamples);
-  
-  // compute the power spectrum, filtering with the regression filter
-  
-  TaArray<RadarComplex_t> iqFilt_, iqNotched_;
+  ForsytheRegrFilter regrF;
+  TaArray<RadarComplex_t> iqFilt_;
   RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
-  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
-  TaArray<double> dbmA_, dbmFiltA_;
-  double *dbmA = dbmA_.alloc(_nSamples);
-  double *dbmFiltA = dbmFiltA_.alloc(_nSamples);
-  double filterRatio, spectralNoise, spectralSnr;
-
-  _clutterFilterType = RadarMoments::CLUTTER_FILTER_REGRESSION;
-  _computePowerSpectrum(iqWindowed, iqFilt, iqNotched,
-                        dbmA, dbmFiltA,
-                        filterRatio, spectralNoise, spectralSnr);
-
+  _runRegressionFilter(regrF, iq, iqFilt);
+  const RadarComplex_t* polyFitIq = regrF.getPolyfitIq();
+  
   // compute residuals from regression fit
   
   vector<double> iResid, qResid;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    iResid.push_back(iqWindowed[ii].re - iqFilt[ii].re);
-    qResid.push_back(iqWindowed[ii].im - iqFilt[ii].im);
-  }
-
-  // compute CSR
-
-  double meanPowerUnfilt = RadarComplex::meanPower(iqWindowed, _nSamples);
-  double meanPowerFilt = RadarComplex::meanPower(iqFilt, _nSamples);
-
-  double dbmUnfilt = 10.0 * log10(meanPowerUnfilt);
-  double dbmFilt = 10.0 * log10(meanPowerFilt);
-  double clutPower = meanPowerUnfilt - meanPowerFilt;
-  double csrDb = 0.0;
-  if (clutPower > 0) {
-    csrDb = 10.0 * log10(clutPower / meanPowerFilt);
+    iResid.push_back(iq[ii].re - polyFitIq[ii].re);
+    qResid.push_back(iq[ii].im - polyFitIq[ii].im);
   }
 
   // compute min and max vals for plot
@@ -1250,17 +1243,17 @@ void IqPlot::_plotIQVals(QPainter &painter,
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    minVal = min(iqWindowed[ii].re, minVal);
+    minVal = min(iq[ii].re, minVal);
     minVal = min(iqFilt[ii].re, minVal);
     minVal = min(iResid[ii], minVal);
-    maxVal = max(iqWindowed[ii].re, maxVal);
+    maxVal = max(iq[ii].re, maxVal);
     maxVal = max(iqFilt[ii].re, maxVal);
     maxVal = max(iResid[ii], maxVal);
 
-    minVal = min(iqWindowed[ii].im, minVal);
+    minVal = min(iq[ii].im, minVal);
     minVal = min(iqFilt[ii].im, minVal);
     minVal = min(iResid[ii], minVal);
-    maxVal = max(iqWindowed[ii].im, maxVal);
+    maxVal = max(iq[ii].im, maxVal);
     maxVal = max(iqFilt[ii].im, maxVal);
     maxVal = max(iResid[ii], maxVal);
 
@@ -1287,10 +1280,10 @@ void IqPlot::_plotIQVals(QPainter &painter,
   for (size_t ii = 0; ii < _nSamples; ii++) {
     if (_plotType == Params::I_VALS) {
       vals.push_back(iq[ii].re);
-      smoothed.push_back(iqFilt[ii].re);
+      smoothed.push_back(polyFitIq[ii].re);
     } else {
       vals.push_back(iq[ii].im);
-      smoothed.push_back(iqFilt[ii].im);
+      smoothed.push_back(polyFitIq[ii].im);
     }
   }
   double *resid = iResid.data();
@@ -1313,7 +1306,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
   painter.restore();
   
   // plot regression filter as appropriate
-
+  
   if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     
     // plot the polynomial fit
@@ -1352,12 +1345,6 @@ void IqPlot::_plotIQVals(QPainter &painter,
     char text[1024];
     vector<string> legends;
     snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
-    legends.push_back(text);
-    snprintf(text, 1024, "PwrUnfilt(dBm): %.2f", dbmUnfilt);
-    legends.push_back(text);
-    snprintf(text, 1024, "PwrFilt(dBm): %.2f", dbmFilt);
-    legends.push_back(text);
-    snprintf(text, 1024, "CSR(dB): %.2f", csrDb);
     legends.push_back(text);
     if (_legendsOn) {
       _zoomWorld.drawLegendsTopLeft(painter, legends);
@@ -1747,6 +1734,79 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
     }
   }
 
+}
+
+/*************************************************************************
+ * run the regression filter without interp across notch
+ */
+
+void IqPlot::_runRegressionFilter(ForsytheRegrFilter &regrF,
+                                  const RadarComplex_t *iqIn,
+                                  RadarComplex_t *iqFilt)
+  
+{
+
+  // calibration
+  
+  const IwrfCalib &calib = _beam->getCalib();
+  double calibNoise = 0.0;
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
+  // prepare regression filter
+  
+  bool orderAuto = true;
+  if (_regrOrder > 2) {
+    orderAuto = false;
+  }
+  if (_beam->getIsStagPrt()) {
+    regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
+                         orderAuto, _regrOrder,
+                         _regrClutWidthFactor,
+                         _regrCnrExponent,
+                         _beam->getCalib().getWavelengthCm() / 100.0);
+  } else {
+    regrF.setup(_nSamples,
+                orderAuto, _regrOrder,
+                _regrClutWidthFactor,
+                _regrCnrExponent,
+                _beam->getCalib().getWavelengthCm() / 100.0);
+  }
+
+  // prepare moments object
+  
+  RadarMoments moments;
+  moments.setNSamples(_nSamples);
+  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
+  moments.setCalib(calib);
+  moments.setClutterWidthMps(_clutModelWidthMps);
+  moments.setClutterInitNotchWidthMps(3.0);
+  moments.setAntennaRate(_beam->getAntennaRate());
+  moments.setUseRegressionFilter(RadarMoments::INTERP_METHOD_NONE, -120.0);
+  RadarFft fft(_nSamples);
+  double filterRatio, spectralNoise, spectralSnr;
+  moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
+                                regrF, iqIn,
+                                calibNoise,
+                                iqFilt, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+  _regrOrderInUse = regrF.getPolyOrder();
+  
 }
 
 ///////////////////////////////////////
