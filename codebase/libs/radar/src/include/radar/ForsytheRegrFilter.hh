@@ -106,7 +106,7 @@ public:
              double clutterWidthFactor,
              double cnrExponent,
              double wavelengthM);
-  
+
   // set up regression parameters - staggered PRT
   //
   // nSamples: number of samples in IQ time series
@@ -198,7 +198,7 @@ public:
 protected:
 private:
 
-  static const size_t AUTO_ORDER_MIN_VAL = 3;
+  static const size_t AUTO_ORDER_MIN_VAL = 1;
   static const size_t ORDER_ARRAY_MAX = 32;
   static const size_t NSAMPLES_ARRAY_MAX = 1024;
   

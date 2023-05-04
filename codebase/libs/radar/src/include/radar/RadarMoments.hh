@@ -258,10 +258,12 @@ public:
   } notch_interp_method_t;
 
   void setUseRegressionFilter(notch_interp_method_t interpMethod,
-                              double minCnrDb) {
+                              double minCnrDb = -5.0,
+                              double minCsrDb = -10.0) {
     _clutterFilterType = CLUTTER_FILTER_REGRESSION;
     _regrNotchInterpMethod = interpMethod;
     _regrMinCnrDb = minCnrDb;
+    _regrMinCsrDb = minCsrDb;
   }
   
   // use notch filter
@@ -1278,7 +1280,9 @@ public:
   // from 3rd order regression filter
 
   double getRegrCnrDb() const { return _regrCnrDb; }
+  double getRegrCsrDb() const { return _regrCsrDb; }
   double getRegrInterpRatioDb() const { return _regrInterpRatioDb; }
+  size_t getRegrPolyOrder() const { return _regrPolyOrder; }
   
   // De-trend a time series in preparation
   // for windowing and FFT.
@@ -1440,9 +1444,18 @@ private:
                          * minimum CNR - clutter-to-noise-ratio -
                          * for applying the filter */
   
+  double _regrMinCsrDb; /* regression filter - 
+                         * minimum CSR - clutter-to-signal-ratio -
+                         * for applying the filter */
+  
   notch_interp_method_t _regrNotchInterpMethod; /* interpolating across the notch */
 
+  size_t _regrPolyOrder; /* regression filter - polynomial order used */
+
   double _regrCnrDb; /* regression filter - clutter-to-noise ratio
+                      * from 3 central spectral points */
+
+  double _regrCsrDb; /* regression filter - clutter-to-signal ratio
                       * from 3 central spectral points */
 
   double _regrInterpRatioDb; /* regression filter - power ratio from

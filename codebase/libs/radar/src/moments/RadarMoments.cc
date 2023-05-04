@@ -154,7 +154,8 @@ void RadarMoments::_init()
   _minSnrDbForZdr = _missing;
   _minSnrDbForLdr = _missing;
 
-  _regrMinCnrDb = -5;
+  _regrMinCnrDb = -5.0;
+  _regrMinCsrDb = -10.0;
   _regrNotchInterpMethod = INTERP_METHOD_GAUSSIAN;
   _regrCnrDb = -120.0;
   _regrInterpRatioDb = 0.0;
@@ -4478,19 +4479,23 @@ void RadarMoments::applyRegressionFilter(int nSamples,
 
   // compute clutter to noise ratio, using the central 3 points in the FFT
   
-  // double clutPower3 = regr.compute3PtClutPower(iqUnfilt);
-  double clutPower3 = regr.computeOrder3ClutPower(iqUnfilt);
-  double cnr3 = clutPower3 / calNoise;
-  _regrCnrDb = 10.0 * log10(cnr3);
-  
+  double clutPower = regr.compute3PtClutPower(iqUnfilt);
+  double cnr = clutPower / calNoise;
+  _regrCnrDb = 10.0 * log10(cnr);
+  double totalPower = RadarComplex::meanPower(iqUnfilt, nSamples);
+  double signalPower = totalPower - clutPower;
+  double csr = clutPower / signalPower;
+  _regrCsrDb = 10.0 * log10(csr);
+
   // if no clutter, do not filter
-  if (_regrCnrDb < _regrMinCnrDb) {
+  if (_regrCnrDb < _regrMinCnrDb || _regrCsrDb < _regrMinCsrDb) {
     memcpy(iqFiltered, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     if (iqNotched) {
       memcpy(iqNotched, iqUnfilt, nSamples * sizeof(RadarComplex_t));
     }
     regrSpec = unfiltSpec;
     _regrInterpRatioDb = 0.0;
+    _regrPolyOrder = 0;
     filterRatio = 1.0;
     spectralNoise = ClutFilter::computeSpectralNoise(regrSpec.data(), nSamples);
     spectralSnr = spectralNoise / calNoise;
@@ -4502,6 +4507,7 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   
   vector<RadarComplex_t> iqRegr(nSamples, empty);
   regr.apply(iqUnfilt, _regrCnrDb, _antennaRate, prtSecs, iqRegr.data());
+  _regrPolyOrder = regr.getPolyOrder();
   
   // if iqNotched is non-NULL,
   // save filtered data, without interp across the notch
