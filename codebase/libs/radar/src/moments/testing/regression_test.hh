@@ -41,26 +41,35 @@ using namespace std;
 // compute the power from the central 3 points in the FFT
 
 extern double
-  compute3PtClutPower(size_t nSamples, const complex<double> *rawIq);
+  compute3PtClutPower(int nSamples, const complex<double> *rawIq);
 
 /////////////////////////////////////////////
 // compute mean power of time series
 
 extern double
-  meanPower(size_t nSamples, const complex<double> *c1);
+  meanPower(int nSamples, const complex<double> *c1);
+
+extern double
+  meanPower(int nSamples, const double *c1);
+
+////////////////////////////////////////
+// load power from complex
+
+extern void
+  loadPower(int nSamples, const complex<double> *in, double *power);
 
 /////////////////////////////////////////////////////////////////////////
 // compute csr and cnr
 
 extern void
-  computePowerRatios(size_t nSamples, double calNoise, const complex<double> *iqRaw,
+  computePowerRatios(int nSamples, double calNoise, const complex<double> *iqRaw,
                      double &cnrDb, double &csrDb);
 
 /////////////////////////////////////////////////////////////////////////
 // compute polynomial order
 
 extern int
-  computePolyOrder(size_t nSamples,
+  computePolyOrder(int nSamples,
                    double cnrDb,
                    double antRateDegPerSec,
                    double prtSecs,
@@ -86,8 +95,7 @@ extern void
 // powers.
 
 extern double
-  computeSpectralNoise(const double *powerSpec,
-                       int nSamples);
+  computeSpectralNoise(int nSamples, const double *powerSpec);
 
 //////////////////////////////////////////////////////////////////////
 // Interpolate across the regression filter notch
@@ -96,3 +104,42 @@ extern void
   doInterpAcrossNotch(vector<double> &regrSpec,
                       int &notchStart,
                       int &notchEnd);
+
+/////////////////////////////////////////////////////
+// Perform regression filtering on I,Q data
+//
+// Inputs:
+//   nSamples
+//   rawIq: raw I,Q data
+//   cnr3Db: clutter-to-noise-ratio from center 3 spectral points
+//   antennaRateDegPerSec: antenna rate - higher rate widens clutter
+//   double prtSecs: PRT for the passed-in IQ values
+//
+// Outputs:
+//   filteredIq: filtered I,Q data
+
+extern void
+  applyRegrFilter(int nSamples,
+                  const complex<double> *rawIq,
+                  double cnr3Db,
+                  double antennaRateDegPerSec,
+                  double prtSecs,
+                  complex<double> *filteredIq);
+  
+/////////////////////////////////////////////////////////////////
+// Compute correction ratio to be applied to filtered time series
+// to account for noise added to the spectrum by the clutter peak
+//
+// The computations are carried out in dB space, because the
+// corrections are normally discussed in this manner.
+
+extern double
+  computePwrCorrectionRatio(bool applyDbForDbCorrection,
+                            int nSamples,
+                            double spectralSnr,
+                            double rawPower,
+                            double filteredPower,
+                            double powerRemoved,
+                            double calNoise);
+
+  

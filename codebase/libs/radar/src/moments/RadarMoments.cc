@@ -6928,7 +6928,6 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
   // check if we need to apply residue correction at all
 
   if (!_applySpectralResidueCorrection) {
-    // cerr << "aaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
     return 1.0;
   }
 
@@ -6936,13 +6935,10 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
 
   double snr = (rawPower - calNoise) / calNoise;
   if (snr <= 0) {
-    // cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbb rawPower, calNoise, snr: "
-    //      << rawPower << ", " << calNoise << ", " << snr << endl;
     return 1.0;
   }
   double snrDb = 10.0 * log10(snr);
   if (snrDb < _minSnrDbForResidueCorrection) {
-    // cerr << "ccccccccccccccccccccccccc dbzDb: " << snrDb << endl;
     return 1.0;
   }
 
@@ -6965,7 +6961,6 @@ double RadarMoments::_computePwrCorrectionRatio(int nSamples,
       powerRemovedDbCorrection += (diffDb - dbForDbThreshold);
     }
     double correctionRatio = 1.0 / pow(10.0, powerRemovedDbCorrection / 10.0);
-    // cerr << "ddddddddddddddddddddddd correctionRatio: " << correctionRatio << endl;
     return correctionRatio;
     
   }
