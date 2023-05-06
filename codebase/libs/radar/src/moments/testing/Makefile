@@ -19,10 +19,12 @@ TARGET_FILE = ../../libradar.a
 
 HDRS = \
 	./ForsytheFit.hh \
+	./RadarFft.hh \
 	./regression_test.hh
 
 CPPC_SRCS = \
 	./ForsytheFit.cc \
+	./RadarFft.cc \
 	./regression_test.cc
 
 #
