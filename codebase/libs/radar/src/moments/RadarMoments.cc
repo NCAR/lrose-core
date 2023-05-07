@@ -49,8 +49,8 @@
 #include <radar/Sz864.hh>
 #include <Radx/Radx.hh>
 
-// #define TESTING
-#ifdef TESTING
+// #define REGR_FILT_TEST
+#ifdef REGR_FILT_TEST
 #include "testing/RegrFilter.hh"
 RegrFilter _regrFilt;
 #endif
@@ -4468,7 +4468,7 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   
 {
 
-#ifdef TESTING
+#ifdef REGR_FILT_TEST
 
   _regrFilt.applyFilter(nSamples, _antennaRate, prtSecs, _wavelengthMeters, calNoise,
                         true,
