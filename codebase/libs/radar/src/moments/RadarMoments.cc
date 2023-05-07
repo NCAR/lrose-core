@@ -49,6 +49,12 @@
 #include <radar/Sz864.hh>
 #include <Radx/Radx.hh>
 
+#define TESTING
+#ifdef TESTING
+#include "testing/RegrFilter.hh"
+RegrFilter _regrFilt;
+#endif
+
 const double RadarMoments::_missing = MomentsFields::missingDouble;
 const double RadarMoments::_phidpPhaseLimitAlt = -70;
 const double RadarMoments::_phidpPhaseLimitSim = -160;
@@ -4462,6 +4468,22 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   
 {
 
+#ifdef TESTING
+
+  _regrFilt.applyFilter(nSamples, _antennaRate, prtSecs, _wavelengthMeters, calNoise,
+                        true,
+                        (complex<double> *) iqUnfilt,
+                        (complex<double> *) iqFiltered,
+                        (complex<double> *) iqNotched);
+  filterRatio = _regrFilt.getFilterRatio();
+  spectralNoise = _regrFilt.getSpectralNoise();
+  spectralSnr = _regrFilt.getSpectralSnr();
+  _regrCnrDb = _regrFilt.getCnrDb();
+  _regrCsrDb = _regrFilt.getCsrDb();
+  _regrPolyOrder = _regrFilt.getPolyOrder();
+  
+#else
+
   // take the forward fft to compute the complex spectrum of unfiltered series
 
   RadarComplex_t empty(0.0, 0.0);
@@ -4586,6 +4608,8 @@ void RadarMoments::applyRegressionFilter(int nSamples,
   
   fft.inv(inputSpecC.data(), iqFiltered);
   
+#endif
+
 }
 
 /////////////////////////////////////////////////////

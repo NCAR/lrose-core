@@ -188,7 +188,9 @@ void RegrFilter::applyFilter(int nSamples,
     double filteredI = rawI[ii] - iSmoothed[ii];
     double filteredQ = rawQ[ii] - qSmoothed[ii];
     iqRegr[ii] = complex<double>(filteredI, filteredQ);
-    iqPolyFit[ii] = complex<double>(iSmoothed[ii], qSmoothed[ii]);
+    if (iqPolyFit) {
+      iqPolyFit[ii] = complex<double>(iSmoothed[ii], qSmoothed[ii]);
+    }
   }
   
   // if iqNotched is non-NULL,
