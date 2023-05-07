@@ -33,6 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
+#include <cassert>
 #include <cstring>
 #include <cmath>
 #include <cstdio>
@@ -101,26 +102,15 @@ void RegrFilter::applyFilter(int nSamples,
   
 {
 
+  // empty complex for creating arrays
+
+  complex<double> empty(0.0, 0.0);
+
   // initialize the fft manager for number of samples
   // this is a no-op if nSamples has not changed
   
   _fft.init(nSamples);
   
-  // take the forward fft to compute the complex spectrum of unfiltered series
-  
-  complex<double> empty(0.0, 0.0);
-  vector<complex<double> > rawSpecC(nSamples, empty);
-  _fft.fwd(iqRaw, rawSpecC.data());
-  
-  // compute the real unfiltered spectrum
-  
-  vector<double> unfiltSpec(nSamples, 0.0);
-  loadPower(nSamples, rawSpecC.data(), unfiltSpec.data());
-
-  // allocate space for regression power spectrum
-  
-  vector<double> regrSpec(nSamples, 0.0);
-
   // compute clutter to noise ratio, using the central 3 points in the FFT
 
   computePowerRatios(nSamples, calNoise, iqRaw, _cnrDb, _csrDb);
@@ -131,10 +121,9 @@ void RegrFilter::applyFilter(int nSamples,
     if (iqNotched) {
       memcpy(iqNotched, iqRaw, nSamples * sizeof(complex<double>));
     }
-    regrSpec = unfiltSpec;
     _filterRatio = 1.0;
-    _spectralNoise = computeSpectralNoise(nSamples, regrSpec.data());
-    _spectralSnr = _spectralNoise / calNoise;
+    _spectralNoise = calNoise;
+    _spectralSnr = 0.0;
     return;
   }
   
@@ -146,9 +135,6 @@ void RegrFilter::applyFilter(int nSamples,
   _polyOrder = computePolyOrder(nSamples, _cnrDb,
                                 antennaRateDegPerSec, prtSecs, wavelengthM);
 
-  // apply regression filter, passing in CNR
-  // results are in iqRegr
-  
   // copy IQ data into double arrays
 
   vector<double> rawI, rawQ;
@@ -157,31 +143,21 @@ void RegrFilter::applyFilter(int nSamples,
     rawQ.push_back(iqRaw[ii].imag());
   }
   
-  // load x (time scale) vector
-  
-  vector<double> xxVals;
-  double xDelta = 1.0 / nSamples;
-  double xx = -0.5;
-  for (int ii = 0; ii < nSamples; ii++) {
-    xxVals.push_back(xx);
-    xx += xDelta;
-  }
-
   // prepare for fitting
   
   _poly.prepareForFitFixedPrt(_polyOrder, nSamples);
 
-  // fit I
+  // fit I as double
 
   _poly.performFit(rawI);
   vector<double> iSmoothed = _poly.getYEstVector();
 
-  // fit Q
+  // fit Q as double
 
   _poly.performFit(rawQ);
   vector<double> qSmoothed = _poly.getYEstVector();
 
-  // save results as complex
+  // save results as complex<double>
   
   vector<complex<double> > iqRegr(nSamples, empty);
   for (int ii = 0; ii < nSamples; ii++) {
@@ -195,6 +171,7 @@ void RegrFilter::applyFilter(int nSamples,
   
   // if iqNotched is non-NULL,
   // save filtered data, without interp across the notch
+  // these are used for dual-pol moments
   
   if (iqNotched != NULL) {
     memcpy(iqNotched, iqRegr.data(), nSamples * sizeof(complex<double>));
@@ -208,15 +185,17 @@ void RegrFilter::applyFilter(int nSamples,
   
   // compute the real regr-filtered spectrum
   
+  vector<double> regrSpec(nSamples, 0.0);
   loadPower(nSamples, regrSpecC.data(), regrSpec.data());
   
   // interpolate across the notch, computing the power before and after
   
-  doInterpAcrossNotch(regrSpec, _notchStart, _notchEnd);
+  vector<double> interpSpec(nSamples, 0.0);
+  doInterpAcrossNotch(regrSpec, _notchStart, _notchEnd, interpSpec);
 
   // compute interp power ratio
   
-  double powerAfterInterp = meanPower(nSamples, regrSpec.data());
+  double powerAfterInterp = meanPower(nSamples, interpSpec.data());
   
   // compute spectral noise value
   
@@ -243,27 +222,22 @@ void RegrFilter::applyFilter(int nSamples,
 
     // correct the filtered powers for clutter residue
     for (int ii = 0; ii < nSamples; ii++) {
-      regrSpec[ii] *= correctionRatio;
+      interpSpec[ii] *= correctionRatio;
     }
   }
   
-  // adjust the input spectrum by the filter ratio
-  // constrain ratios to be 1 or less
-  // this preserves the phases on the spectrum
+  // adjust the regression spectrum by the filter ratio
   
   for (int ii = 0; ii < nSamples; ii++) {
-    double magRatio = sqrt(regrSpec[ii] / unfiltSpec[ii]);
-    if (magRatio > 1.0) {
-      magRatio = 1.0;
-    }
-    rawSpecC[ii] = complex<double>(rawSpecC[ii].real() * magRatio,
-                                   rawSpecC[ii].imag() * magRatio);
+    double magRatio = sqrt(interpSpec[ii] / regrSpec[ii]);
+    regrSpecC[ii] = complex<double>(regrSpecC[ii].real() * magRatio,
+                                    regrSpecC[ii].imag() * magRatio);
   }
   
   // invert the resulting fft
   // storing result in the filtered time series
   
-  _fft.inv(rawSpecC.data(), iqFiltered);
+  _fft.inv(regrSpecC.data(), iqFiltered);
   
 }
 
@@ -521,12 +495,18 @@ double RegrFilter::computeSpectralNoise(int nSamples,
 //////////////////////////////////////////////////////////////////////
 // Interpolate across the regression filter notch
 
-void RegrFilter::doInterpAcrossNotch(vector<double> &regrSpec,
+void RegrFilter::doInterpAcrossNotch(const vector<double> &regrSpec,
                                      int &notchStart,
-                                     int &notchEnd)
+                                     int &notchEnd,
+                                     vector<double> &interpSpec)
 
 {
 
+  // copy filtered to interpolated
+
+  assert(regrSpec.size() == interpSpec.size());
+  interpSpec = regrSpec;
+  
   // find start and end of notch
   // we start searching in the middle of the notch - spectral point 0
   // and then move away from the center, computing the power change
@@ -567,11 +547,10 @@ void RegrFilter::doInterpAcrossNotch(vector<double> &regrSpec,
   notchStart = notchLowerBound + nSamples;
   notchEnd = notchUpperBound;
   int nUnfiltered = notchStart - notchEnd + 1;
-  // int nFiltered = nSamples - nUnfiltered;
 
   // gaussian interp
   
-  double *startNonNotch = regrSpec.data() + notchUpperBound + 1;
+  double *startNonNotch = interpSpec.data() + notchUpperBound + 1;
   
   // compute the noise in the filtered spectrum, but not the notch
   
@@ -597,12 +576,12 @@ void RegrFilter::doInterpAcrossNotch(vector<double> &regrSpec,
   gaussian.resize(nSamples);
   for (int iter = 0; iter < 3; iter++) {
     // fit gaussian to notched spectrum
-    fitGaussian(regrSpec.data(), nSamples,
+    fitGaussian(interpSpec.data(), nSamples,
                 weatherPos, regrNoise,
                 gaussian.data());
     for (int ii = notchLowerBound; ii <= notchUpperBound; ii++) {
       int jj = (ii + nSamples) % nSamples;
-      regrSpec[jj] = gaussian[jj];
+      interpSpec[jj] = gaussian[jj];
     }
   } // iter
   

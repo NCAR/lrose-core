@@ -49,7 +49,7 @@
 #include <radar/Sz864.hh>
 #include <Radx/Radx.hh>
 
-#define TESTING
+// #define TESTING
 #ifdef TESTING
 #include "testing/RegrFilter.hh"
 RegrFilter _regrFilt;

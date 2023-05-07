@@ -54,19 +54,6 @@ public:
   
   virtual ~RegrFilter();
 
-  // get filter results after the filter has been applied
-  
-  double getCnrDb() const { return _cnrDb; } // clutter to noise ratio initial estimate
-  double getCsrDb() const { return _csrDb; } // clutter to signal ratio initial estimate
-  double getPolyOrder() const { return _polyOrder; } // polynomial order used
-
-  int getNotchStart() const { return _notchStart; }
-  int getNotchEnd() const { return _notchEnd; }
-
-  double getFilterRatio() const { return _filterRatio; } // ratio of raw to unfiltered power
-  double getSpectralNoise() const { return _spectralNoise; } // noise estimated from spectrum
-  double getSpectralSnr() const { return _spectralSnr; } // SNR estimated from spectrum
-
   // apply polynomial regression clutter filter to IQ time series
   // NOTE: input raw IQ data should not be windowed.
   //
@@ -100,6 +87,19 @@ public:
                    complex<double> *iqNotched = NULL,
                    complex<double> *iqPolyFit = NULL);
   
+  // get filter results after the filter has been applied
+  
+  double getCnrDb() const { return _cnrDb; } // clutter to noise ratio initial estimate
+  double getCsrDb() const { return _csrDb; } // clutter to signal ratio initial estimate
+  double getPolyOrder() const { return _polyOrder; } // polynomial order used
+
+  int getNotchStart() const { return _notchStart; }
+  int getNotchEnd() const { return _notchEnd; }
+
+  double getFilterRatio() const { return _filterRatio; } // ratio of raw to unfiltered power
+  double getSpectralNoise() const { return _spectralNoise; } // noise estimated from spectrum
+  double getSpectralSnr() const { return _spectralSnr; } // SNR estimated from spectrum
+
   /////////////////////////////////////////////////////////////////////////
   // compute the power from the central 3 points in the FFT
   
@@ -164,30 +164,10 @@ public:
   // Interpolate across the regression filter notch
   
   static void
-    doInterpAcrossNotch(vector<double> &regrSpec,
+    doInterpAcrossNotch(const vector<double> &regrSpec,
                         int &notchStart,
-                        int &notchEnd);
-  
-  /////////////////////////////////////////////////////
-  // Perform regression filtering on I,Q data
-  //
-  // Inputs:
-  //   nSamples
-  //   rawIq: raw I,Q data
-  //   cnr3Db: clutter-to-noise-ratio from center 3 spectral points
-  //   antennaRateDegPerSec: antenna rate - higher rate widens clutter
-  //   double prtSecs: PRT for the passed-in IQ values
-  //
-  // Outputs:
-  //   filteredIq: filtered I,Q data
-  
-  static void
-    applyRegrFilter(int nSamples,
-                    const complex<double> *rawIq,
-                    double cnr3Db,
-                    double antennaRateDegPerSec,
-                    double prtSecs,
-                    complex<double> *filteredIq);
+                        int &notchEnd,
+                        vector<double> &interpSpec);
   
   /////////////////////////////////////////////////////////////////
   // Compute correction ratio to be applied to filtered time series
