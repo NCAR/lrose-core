@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// RadarFft.cc
+// FftManager.cc
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,20 +30,23 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// RadarFft handles Fast Fourier Transform computations
+// FftManager handles Fast Fourier Transform computations
 //
 ////////////////////////////////////////////////////////////////
 
-#include "RadarFft.hh"
+#include "FftManager.hh"
 #include <iostream>
 #include <cmath>
 #include <cassert>
 #include <cstring>
+#include <pthread.h>
 using namespace std;
+
+pthread_mutex_t FftManager::_initMutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Constructors
 
-RadarFft::RadarFft()
+FftManager::FftManager()
   
 {
 
@@ -55,21 +58,28 @@ RadarFft::RadarFft()
 
 }
 
-void RadarFft::init(int n)
+void FftManager::init(int n)
   
 {
 
+  // check whether we need to do this
+
   if (_n == n) {
     return;
-  } else {
-    _free();
   }
+  
+  // init is not thread safe, so protect with mutex
+  
+  pthread_mutex_lock(&_initMutex);
 
-  assert(n != 0);
-
-  _sqrtN = sqrt((double) n);
+  // free previous initialization
+  
+  _free();
   
   // set up Fft plans
+
+  assert(n != 0);
+  _sqrtN = sqrt((double) n);
 
   if (_n > 0) {
     if (_in) fftw_free(_in);
@@ -85,9 +95,13 @@ void RadarFft::init(int n)
 
   _n = n;
 
+  // unlock mutex
+  
+  pthread_mutex_unlock(&_initMutex);
+
 }
 
-RadarFft::RadarFft(int n) :
+FftManager::FftManager(int n) :
         _n(n)
   
 {
@@ -109,7 +123,7 @@ RadarFft::RadarFft(int n) :
 
 // destructor
 
-RadarFft::~RadarFft()
+FftManager::~FftManager()
 
 {
 
@@ -120,7 +134,7 @@ RadarFft::~RadarFft()
 ///////////////////////////////////////////////////
 // free up
 
-void RadarFft::_free()
+void FftManager::_free()
   
 {
 
@@ -152,7 +166,7 @@ void RadarFft::_free()
 ///////////////////////////////////////////////
 // compute forward
 
-void RadarFft::fwd(const complex<double> *in, complex<double> *out) const
+void FftManager::fwd(const complex<double> *in, complex<double> *out) const
   
 {
 
@@ -177,7 +191,7 @@ void RadarFft::fwd(const complex<double> *in, complex<double> *out) const
 ///////////////////////////////////////////////
 // compute inverse
 
-void RadarFft::inv(const complex<double> *in, complex<double> *out) const
+void FftManager::inv(const complex<double> *in, complex<double> *out) const
   
 {
   
@@ -207,7 +221,7 @@ void RadarFft::inv(const complex<double> *in, complex<double> *out) const
 //   if n is odd,  the DC location is at the center index
 //   if n is even, the DC location is at index n/2
 
-void RadarFft::shift(complex<double> *spectrum) const
+void FftManager::shift(complex<double> *spectrum) const
   
 {
 
@@ -216,9 +230,9 @@ void RadarFft::shift(complex<double> *spectrum) const
   int nRight = _n / 2;
   int nLeft = _n - nRight;
 
-  RadarFft::copy(_tmp, spectrum, nLeft);
-  RadarFft::copy(spectrum, spectrum + nLeft, nRight);
-  RadarFft::copy(spectrum + nRight, _tmp, nLeft);
+  FftManager::copy(_tmp, spectrum, nLeft);
+  FftManager::copy(spectrum, spectrum + nLeft, nRight);
+  FftManager::copy(spectrum + nRight, _tmp, nLeft);
   
   // memcpy(_tmp, spectrum, nLeft * sizeof(complex<double>));
   // memcpy(spectrum, spectrum + nLeft, nRight * sizeof(complex<double>));
@@ -231,7 +245,7 @@ void RadarFft::shift(complex<double> *spectrum) const
 // Swaps left and right sides.
 // After the shift, DC is at index 0.
 
-void RadarFft::unshift(complex<double> *spectrum) const
+void FftManager::unshift(complex<double> *spectrum) const
   
 {
 
@@ -240,9 +254,9 @@ void RadarFft::unshift(complex<double> *spectrum) const
   int nRight = _n / 2;
   int nLeft = _n - nRight;
   
-  RadarFft::copy(_tmp, spectrum, nRight);
-  RadarFft::copy(spectrum, spectrum + nRight, nLeft);
-  RadarFft::copy(spectrum + nLeft, _tmp, nRight);
+  FftManager::copy(_tmp, spectrum, nRight);
+  FftManager::copy(spectrum, spectrum + nRight, nLeft);
+  FftManager::copy(spectrum + nLeft, _tmp, nRight);
   
   // memcpy(_tmp, spectrum, nRight * sizeof(complex<double>));
   // memcpy(spectrum, spectrum + nRight, nLeft * sizeof(complex<double>));
@@ -254,7 +268,7 @@ void RadarFft::unshift(complex<double> *spectrum) const
 // get reference to cosine array
 // will be computed if needed
 
-const vector<vector<double> > &RadarFft::getCosArray() const
+const vector<vector<double> > &FftManager::getCosArray() const
 
 {
 
@@ -281,7 +295,7 @@ const vector<vector<double> > &RadarFft::getCosArray() const
 // get reference to sine array
 // will be computed if needed
 
-const vector<vector<double> > &RadarFft::getSinArray() const
+const vector<vector<double> > &FftManager::getSinArray() const
 
 {
 
@@ -307,9 +321,9 @@ const vector<vector<double> > &RadarFft::getSinArray() const
 /////////////////////////////////////////////
 // copy between complex<double> and fftw_complex
 
-void RadarFft::copy(fftw_complex *dest,
-                    const complex<double> *src,
-                    size_t nn)
+void FftManager::copy(fftw_complex *dest,
+                      const complex<double> *src,
+                      size_t nn)
   
 {
   for (size_t ii = 0; ii < nn; ii++) {
@@ -318,9 +332,9 @@ void RadarFft::copy(fftw_complex *dest,
   }
 }
 
-void RadarFft::copy(complex<double> *dest,
-                    const fftw_complex *src,
-                    size_t nn)
+void FftManager::copy(complex<double> *dest,
+                      const fftw_complex *src,
+                      size_t nn)
   
 {
   for (size_t ii = 0; ii < nn; ii++) {
@@ -328,9 +342,9 @@ void RadarFft::copy(complex<double> *dest,
   }
 }
 
-void RadarFft::copy(complex<double> *dest,
-                    const complex<double> *src,
-                    size_t nn)
+void FftManager::copy(complex<double> *dest,
+                      const complex<double> *src,
+                      size_t nn)
   
 {
   for (size_t ii = 0; ii < nn; ii++) {
@@ -338,9 +352,9 @@ void RadarFft::copy(complex<double> *dest,
   }
 }
 
-void RadarFft::copy(fftw_complex *dest,
-                    const fftw_complex *src,
-                    size_t nn)
+void FftManager::copy(fftw_complex *dest,
+                      const fftw_complex *src,
+                      size_t nn)
   
 {
   for (size_t ii = 0; ii < nn; ii++) {
@@ -352,10 +366,10 @@ void RadarFft::copy(fftw_complex *dest,
 //////////////////////////////////////////////////////
 // compute DFT
 
-void RadarFft::computeDft(const vector<double> &inReal,
-                          const vector<double> &inImag,
-                          vector<double> &outReal,
-                          vector<double> &outImag)
+void FftManager::computeDft(const vector<double> &inReal,
+                            const vector<double> &inImag,
+                            vector<double> &outReal,
+                            vector<double> &outImag)
   
 {
 	
@@ -375,8 +389,8 @@ void RadarFft::computeDft(const vector<double> &inReal,
 
 }
 
-void RadarFft::computeDft(const vector<complex<double>> &in,
-                          vector<complex<double>> &out)
+void FftManager::computeDft(const vector<complex<double>> &in,
+                            vector<complex<double>> &out)
   
 {
 	

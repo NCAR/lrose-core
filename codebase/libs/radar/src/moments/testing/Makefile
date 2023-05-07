@@ -18,14 +18,14 @@ TARGET_FILE = ../../libradar.a
 #
 
 HDRS = \
-	./ForsytheFit.hh \
-	./RadarFft.hh \
-	./regression_test.hh
+	./FftManager.hh \
+	./PolyFit.hh \
+	./RegrFilter.hh
 
 CPPC_SRCS = \
-	./ForsytheFit.cc \
-	./RadarFft.cc \
-	./regression_test.cc
+	./FftManager.cc \
+	./PolyFit.cc \
+	./RegrFilter.cc
 
 #
 # general targets

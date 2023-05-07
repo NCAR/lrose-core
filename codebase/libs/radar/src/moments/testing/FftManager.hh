@@ -22,7 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// RadarFft.hh
+// FftManager.hh
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -31,8 +31,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef RadarFft_hh
-#define RadarFft_hh
+#ifndef FftManager_hh
+#define FftManager_hh
 
 #include <vector>
 #include <fftw3.h>
@@ -42,25 +42,25 @@ using namespace std;
 ////////////////////////
 // This class
 
-class RadarFft {
+class FftManager {
   
 public:
   
   // default constructor - does not initialize
   // You must call init() before using
   
-  RadarFft();
+  FftManager();
   void init(int n);
   
   // constructor - initializes for given size
   // note that the constructor and destructor are not
   // thread-safe, but the other methods are thread-safe
   
-  RadarFft(int n);
+  FftManager(int n);
   
   // destructor
   
-  ~RadarFft();
+  ~FftManager();
 
   // perform fwd fft
 
@@ -123,6 +123,8 @@ public:
 protected:
   
 private:
+
+  static pthread_mutex_t _initMutex; // fft init is not thread safe
 
   int _n;
   double _sqrtN;
