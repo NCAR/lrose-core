@@ -96,6 +96,8 @@ SYS_FFLAGS = -DLITENDIAN
 STATIC_FLAG=-static
 SYS_LIBS = 
 SYS_CPPC_LIBS =
+LROSE_PROFILE_LIB_DIR = $(LROSE_INSTALL_DIR)/lib
+
 # Don't include -lXm, -lXpm as it fails with the libc6 version of libX11
 SYS_X_LIBS = -lXext -lXt -lX11 -lSM -lICE
 SYS_LDFLAGS =
