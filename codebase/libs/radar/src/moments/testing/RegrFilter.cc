@@ -306,6 +306,15 @@ void RegrFilter::loadPower(int nSamples, const complex<double> *in, double *powe
 
 /////////////////////////////////////////////////////////////////////////
 // compute csr and cnr
+//
+// Inputs:
+//   nSamples
+//   calNoise - linear units
+//   iqRaw - unfiltered time series
+//
+// Outputs:
+//   cnrDb - clutter to noise ratio in dB
+//   csrDb - clutter to signal ratio in dB
 
 void RegrFilter::computePowerRatios(int nSamples, double calNoise, const complex<double> *iqRaw,
                                     double &cnrDb, double &csrDb)
@@ -321,6 +330,15 @@ void RegrFilter::computePowerRatios(int nSamples, double calNoise, const complex
 
 /////////////////////////////////////////////////////////////////////////
 // compute polynomial order
+//
+// Inputs:
+//   nSamples
+//   cnrDb - clutter to noise ratio in dB
+//   antRateDegPerSec - antenna rotation rate in degrees per second
+//   prtSec - PRT in seconds
+//   wavelengthM - wavelengthM
+//
+// Returns: polynomial order
 
 int RegrFilter::computePolyOrder(int nSamples,
                                  double cnrDb,
@@ -494,6 +512,9 @@ double RegrFilter::computeSpectralNoise(int nSamples,
 
 //////////////////////////////////////////////////////////////////////
 // Interpolate across the regression filter notch
+// Input is the filtered regression spectrum.
+// The interpolated spectrum is computed.
+// Also the start and the end of the interpolated section are set.
 
 void RegrFilter::doInterpAcrossNotch(const vector<double> &regrSpec,
                                      int &notchStart,
