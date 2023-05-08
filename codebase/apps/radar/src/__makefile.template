@@ -31,6 +31,7 @@ SUB_DIRS = \
 	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
+	HcrTempRxGain \
 	IntfRemove \
 	IpsEye \
 	IpsTsArchive \
