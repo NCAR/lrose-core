@@ -8,7 +8,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-LOC_INCLUDES = -I../include -I../include/radar $(NETCDF4_INCS)
+LOC_INCLUDES = -I../include -I../include/radar -I./testing $(NETCDF4_INCS)
 LOC_CFLAGS =
 
 TARGET_FILE = ../libradar.a

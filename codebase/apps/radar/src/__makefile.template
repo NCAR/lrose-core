@@ -64,11 +64,13 @@ SUB_DIRS = \
 	SunCal \
 	SunCpCompute \
 	SweepInfo2Spdb \
+        TerrainHtServer \
 	Ts2NetCDF \
 	TsCalAuto \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
+	TsMaxPower2Fmq \
 	TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \
