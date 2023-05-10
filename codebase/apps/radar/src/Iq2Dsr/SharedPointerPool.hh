@@ -74,7 +74,7 @@ public:
         {
             if (grow_on_demand)
             {
-                freeNodes_.push_back(std::unique_ptr<T>(new T()));
+                freeNodes_.push_back(std::unique_ptr<T>(factoryFunction_()));
                 nodeCount_++;
             }
             else
@@ -156,7 +156,7 @@ public:
             // Add new free nodes
             for (int i = 0; i < delta; i++)
             {
-                freeNodes_.push_back(std::unique_ptr<T>(new T()));
+                freeNodes_.push_back(std::unique_ptr<T>(factoryFunction_()));
                 nodeCount_++;
             }
         }
