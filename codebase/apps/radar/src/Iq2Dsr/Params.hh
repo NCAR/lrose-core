@@ -1310,8 +1310,6 @@ public:
 
   double spec_cmd_fraction_threshold_for_wind_turbine;
 
-  double cmd_threshold_for_moments;
-
   char* output_fmq_url;
 
   tdrp_bool_t output_moments_in_radx_format;
@@ -1386,7 +1384,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[322];
+  mutable TDRPtable _table[321];
 
   const char *_className;
 

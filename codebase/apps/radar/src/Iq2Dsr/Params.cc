@@ -4932,18 +4932,6 @@
     tt->single_val.d = 0.7;
     tt++;
     
-    // Parameter 'cmd_threshold_for_moments'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("cmd_threshold_for_moments");
-    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
-    tt->help = tdrpStrDup("Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.");
-    tt->val_offset = (char *) &cmd_threshold_for_moments - &_start_;
-    tt->single_val.d = 0.7;
-    tt++;
-    
     // Parameter 'Comment 27'
     
     memset(tt, 0, sizeof(TDRPtable));
