@@ -393,12 +393,12 @@ Beam *BeamReader::getNextBeam()
   }
   
 
-  // load the raw pulse pointers into a vector for just this beam
+  // load the pulse shared_ptr-s into a vector for just this beam
   // reversing the order, so we start with oldest pulse
       
-  vector<IwrfTsPulse *> beamPulses;
+  vector<shared_ptr<IwrfTsPulse>> beamPulses;
   for (int ii = _startIndex; ii >= _endIndex; ii--) {
-    beamPulses.push_back(_pulseQueue[ii].get());
+    beamPulses.push_back(_pulseQueue[ii]);
   }
   
   // set pointing angle
@@ -2778,7 +2778,7 @@ double BeamReader::getAntennaRate()
 ////////////////////////////////////////////////////////////////
 // check for end of vol and sweep flags
 
-void BeamReader::_checkForEndFlags(const vector<IwrfTsPulse *> &beamPulses)
+void BeamReader::_checkForEndFlags(const vector<shared_ptr<IwrfTsPulse>> &beamPulses)
   
 {
   

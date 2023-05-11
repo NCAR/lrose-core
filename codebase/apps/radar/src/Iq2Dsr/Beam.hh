@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <memory>
 #include <radar/RadarMoments.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
@@ -103,7 +104,7 @@ public:
             bool endOfVolFlag,
             const AtmosAtten &atmosAtten,
             const IwrfTsInfo &opsInfo,
-            const vector<IwrfTsPulse *> &pulses);
+            const vector<shared_ptr<IwrfTsPulse>> &pulses);
 
   // destructor
   
@@ -206,7 +207,7 @@ private:
 
   // pulse vector
 
-  vector<IwrfTsPulse *> _pulses;
+  vector<shared_ptr<IwrfTsPulse>> _pulses;
   bool _hasMissingPulses;
   static pthread_mutex_t _pulseUnpackMutex;
 
@@ -424,7 +425,6 @@ private:
  // private functions
   
   void _freeWindows();
-  void _releasePulses();
   void _prepareForComputeMoments();
   int _getVolNum();
   int _getSweepNum();
@@ -482,7 +482,7 @@ private:
                                      vector<InterestMap::ImPoint> &pts);
 
 
-  void _checkAntennaTransition(const vector<IwrfTsPulse *> &pulses);
+  void _checkAntennaTransition(const vector<shared_ptr<IwrfTsPulse>> &pulses);
   void _allocGateData(int nGates);
   void _freeGateData();
   void _initFieldData();
@@ -518,7 +518,7 @@ private:
   void _printSelectedMoments();
 
   void _computePhaseDiffs
-    (const vector<IwrfTsPulse *> &pulseQueue, int maxTrips);
+    (const vector<shared_ptr<IwrfTsPulse>> &pulseQueue, int maxTrips);
 
   void _setNoiseFields();
   void _censorByNoiseFlag();

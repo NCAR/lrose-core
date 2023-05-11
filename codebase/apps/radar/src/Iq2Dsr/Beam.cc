@@ -191,7 +191,7 @@ void Beam::init(const MomentsMgr &mmgr,
                 bool endOfVolFlag,
                 const AtmosAtten &atmosAtten,
                 const IwrfTsInfo &opsInfo,
-                const vector<IwrfTsPulse *> &pulses)
+                const vector<shared_ptr<IwrfTsPulse>> &pulses)
   
 {
 
@@ -228,18 +228,11 @@ void Beam::init(const MomentsMgr &mmgr,
   _georefActive = false;
   _pcode.setNSamples(_nSamples);
 
-  // for each pulse, increase client count by 1,
-  // so we can keep track of how many threads are using this pulse
-
-  for (size_t ii = 0; ii < _pulses.size(); ii++) {
-    _pulses[ii]->addClient();
-  }
-
   // set up burst phase vector
 
   _burstPhases.clear();
-  for (size_t ii = 0; ii < _pulses.size(); ii++) {
-    _burstPhases.push_back(_pulses[ii]->getBurstPhases());
+  for (auto pulse : _pulses) {
+    _burstPhases.push_back(pulse->getBurstPhases());
   }
 
   // initialize noise computations
@@ -349,24 +342,6 @@ void Beam::_freeWindows()
 
 }
   
-//////////////////////////////////////////////////////////////////
-// release pulses for use by other threads
-
-void Beam::_releasePulses()
-
-{
-  
-  // for each pulse, decrease client count by 1, so we know how many threads
-  // are using this pulse. When a pulse has no clients, it
-  // can be reused
-  
-  for (size_t ii = 0; ii < _pulses.size(); ii++) {
-    _pulses[ii]->removeClient();
-  }
-  _pulses.clear();
-
-}
-
 ////////////////////////////////////////////////////
 // Prepare for moments computations
 
@@ -417,7 +392,7 @@ void Beam::_prepareForComputeMoments()
 
   // pulse width
   
-  IwrfTsPulse *midPulse = _pulses[_nSamplesHalf];
+  shared_ptr<IwrfTsPulse> midPulse = _pulses[_nSamplesHalf];
   _pulseWidth = midPulse->getPulseWidthUs() / 1.0e6;
 
   // transmitter power
@@ -670,7 +645,7 @@ void Beam::_prepareForComputeMoments()
 
   // free up pulses for use by other threads
 
-  _releasePulses();
+  _pulses.clear();
 
   // initialize ray properties for noise computations
 
@@ -4389,11 +4364,11 @@ int Beam::_convertInterestParamsToVector(const string &label,
 // set transition for beam if both the start and end pulses are
 // in transition
 
-void Beam::_checkAntennaTransition(const vector<IwrfTsPulse *> &pulses)
+void Beam::_checkAntennaTransition(const vector<shared_ptr<IwrfTsPulse>> &pulses)
 
 {
 
-  IwrfTsPulse *midPulse = pulses[_nSamplesHalf];
+  shared_ptr<IwrfTsPulse> midPulse = pulses[_nSamplesHalf];
 
   _antennaTransition = false;
   size_t nPulses = pulses.size();
@@ -6418,7 +6393,7 @@ void Beam::_printSelectedMoments()
 // the queue.
 
 void Beam::_computePhaseDiffs
-  (const vector<IwrfTsPulse *> &pulseQueue, int maxTrips)
+  (const vector<shared_ptr<IwrfTsPulse>> &pulseQueue, int maxTrips)
   
 {
   

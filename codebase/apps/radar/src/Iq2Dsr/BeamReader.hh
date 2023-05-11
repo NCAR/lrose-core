@@ -323,7 +323,7 @@ private:
   void _computeBeamAzRate(int endIndex, int nSamples);
   void _computeBeamElRate(int endIndex, int nSamples);
 
-  void _checkForEndFlags(const vector<IwrfTsPulse*> &beamPulses);
+  void _checkForEndFlags(const vector<shared_ptr<IwrfTsPulse>> &beamPulses);
   void _checkQueueStatus();
   void _computeWindowFactors();
 
