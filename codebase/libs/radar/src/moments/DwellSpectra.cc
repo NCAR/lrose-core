@@ -1178,10 +1178,6 @@ void DwellSpectra::computeSpectralCmd()
     double mean = sumCmd / (double) _nSamples;
     double frac = sumFrac / (double) _nSamples;
 
-    // if (frac > 0) {
-    //   cerr << "222222222 mean, frac: " << mean << ", " << frac << endl;
-    // }
-
     meanCmd[igate] = mean;
     fractionCmd[igate] = frac;
 
@@ -1213,9 +1209,27 @@ void DwellSpectra::filterIqUsingCmd()
     for (size_t isample = 0; isample < _nSamples; isample++) {
       double cmdVal = specCmd[igate][isample];
       if (cmdVal > _cmdThresholdMoments) {
+
         // notch out the spectral point
         specHcFilt2D[igate][isample].clear();
         specVcFilt2D[igate][isample].clear();
+
+        // set the power to the noise
+        
+        // RadarComplex_t &specHc = specHcFilt2D[igate][isample];
+        // double powerHc = RadarComplex::power(specHc);
+        // double powerRatioHc = _specNoiseDwellHc / powerHc;
+        // double magRatioHc = sqrt(powerRatioHc);
+        // specHc.re *= magRatioHc;
+        // specHc.im *= magRatioHc;
+        
+        // RadarComplex_t &specVc = specVcFilt2D[igate][isample];
+        // double powerVc = RadarComplex::power(specVc);
+        // double powerRatioVc = _specNoiseDwellVc / powerVc;
+        // double magRatioVc = sqrt(powerRatioVc);
+        // specVc.re *= magRatioVc;
+        // specVc.im *= magRatioVc;
+
       }
     } // isample
   } // igate

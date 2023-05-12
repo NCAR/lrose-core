@@ -50,9 +50,7 @@
 #include <radar/RadarMoments.hh>
 #include <radar/AlternatingVelocity.hh>
 #include <radar/InterestMap.hh>
-#include <radar/NoiseLocator.hh>
 #include <radar/IwrfCalib.hh>
-#include <radar/KdpBringi.hh>
 #include <Radx/RadxArray.hh>
 #include <Radx/RadxRcalib.hh>
 class RadxVol;

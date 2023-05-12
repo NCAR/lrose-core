@@ -2045,12 +2045,6 @@ paramdef double {
   p_help = "If the fraction of the CMD spectrum in excess of 'spec_cmd_threshold_for_detection' exceeds this, we flag the gate as having a wind turbine gate.";
 } spec_cmd_fraction_threshold_for_wind_turbine;
 
-paramdef double {
-  p_default = 0.7;
-  p_descr = "Threshold CMD value for computing moments.";
-  p_help = "Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.";
-} cmd_threshold_for_moments;
-
 commentdef {
   p_header = "OUTPUT TO MOMENTS FMQ";
 };
