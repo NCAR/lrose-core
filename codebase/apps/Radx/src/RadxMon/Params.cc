@@ -894,7 +894,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("CHECK FOR MISSING DATA");
+    tt->comment_hdr = tdrpStrDup("CHECK DATA");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -920,6 +920,18 @@
     tt->help = tdrpStrDup("If the angle of the latest beam differs from the angle of the previous beam by more than this value, it will be assumed that one or more beams are missing. For RHI scans, the 'angle' referred to here is the 'elevation angle'. For other scans, it is the 'azimuth angle'.");
     tt->val_offset = (char *) &max_delta_angle - &_start_;
     tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'check_for_increasing_time'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("check_for_increasing_time");
+    tt->descr = tdrpStrDup("Option to check that times increase.");
+    tt->help = tdrpStrDup("If TRUE, we compare times from one ray to the next, and print out a suitable warning if time goes backwards.");
+    tt->val_offset = (char *) &check_for_increasing_time - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 6'
