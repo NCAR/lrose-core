@@ -299,11 +299,10 @@ void IwrfTsBurst::convertToFL32()
     double phaseMult = 180.0 / 32767.0;
     for (int ii = 0; ii < _hdr.n_samples * 2; ii += 2) {
       double powerDbm = packed[ii] * _packedScale + _packedOffset;
-      double power = pow(10.0, powerDbm / 10.0);
+      double mag = pow(10.0, powerDbm / 20.0);
       double phaseDeg = packed[ii+1] * phaseMult;
       double sinPhase, cosPhase;
       ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-      double mag = sqrt(power);
       _iq[ii] = mag * cosPhase;
       _iq[ii+1] = mag * sinPhase;
 

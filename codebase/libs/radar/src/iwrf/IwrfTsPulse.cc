@@ -505,11 +505,10 @@ void IwrfTsPulse::convertToFL32()
     si16 *packed = (si16 *) _packed;
     for (int ii = 0; ii < _hdr.n_data; ii += 2) {
       double powerDbm = packed[ii] * _packedScale + _packedOffset;
-      double power = pow(10.0, powerDbm / 10.0);
+      double mag = pow(10.0, powerDbm / 20.0);
       double phaseDeg = packed[ii+1] * PHASE_MULT;
       double sinPhase, cosPhase;
       ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-      double mag = sqrt(power);
       if (mag == 0.0) {
         mag = 1.0e-20;
       }
@@ -625,11 +624,10 @@ void IwrfTsPulse::getIq(int chanNum,
     // compute from power and phase
     
     double powerDbm = _packed[offset] * _packedScale + _packedOffset;
-    double power = pow(10.0, powerDbm / 10.0);
+    double mag = pow(10.0, powerDbm / 20.0);
     double phaseDeg = _packed[offset + 1] * PHASE_MULT;
     double sinPhase, cosPhase;
     ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-    double mag = sqrt(power);
     ival = mag * cosPhase;
     qval = mag * sinPhase;
 
