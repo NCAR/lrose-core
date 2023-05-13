@@ -362,11 +362,11 @@ public:
   // identifying noise
 
   double dbm_for_noise;
-  double dbm_sdev;
-  double ncp_mean;
+  double noise_dbm_sdev;
+  double noise_ncp_mean;
   RadarComplex_t phase_for_noise;
-  double accum_phase_change;
-  double phase_change_error;
+  double noise_accum_phase_change;
+  double noise_phase_change_error;
 
   // flag to indicate noise/signal is present at a gate
 

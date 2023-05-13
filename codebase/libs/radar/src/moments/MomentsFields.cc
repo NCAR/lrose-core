@@ -355,11 +355,11 @@ void MomentsFields::init()
   // identifying noise
 
   dbm_for_noise = missingDouble;
-  dbm_sdev = missingDouble;
-  ncp_mean = missingDouble;
+  noise_dbm_sdev = missingDouble;
+  noise_ncp_mean = missingDouble;
   phase_for_noise.clear();
-  accum_phase_change = 0.0;
-  phase_change_error = 0.0;
+  noise_accum_phase_change = 0.0;
+  noise_phase_change_error = 0.0;
   
   // flag to indicate noise/signal is present at a gate
 
@@ -706,11 +706,11 @@ void MomentsFields::initToZero()
   // identifying noise
 
   dbm_for_noise = 0.0;
-  dbm_sdev = 0.0;
-  ncp_mean = 0.0;
+  noise_dbm_sdev = 0.0;
+  noise_ncp_mean = 0.0;
   phase_for_noise.clear();
-  accum_phase_change = 0.0;
-  phase_change_error = 0.0;
+  noise_accum_phase_change = 0.0;
+  noise_phase_change_error = 0.0;
   
   // flag to indicate noise/signal is present at a gate
 

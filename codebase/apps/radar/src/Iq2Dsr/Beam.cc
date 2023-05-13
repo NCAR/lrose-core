@@ -6453,10 +6453,10 @@ void Beam::_setNoiseFields()
     MomentsFields &fields = gate->fields;
     fields.noise_flag = noiseFlag[igate];
     fields.signal_flag = signalFlag[igate];
-    fields.accum_phase_change = accumPhaseChange[igate];
-    fields.phase_change_error = phaseChangeError[igate];
-    fields.dbm_sdev = dbmSdev[igate];
-    fields.ncp_mean = ncpMean[igate];
+    fields.noise_accum_phase_change = accumPhaseChange[igate];
+    fields.noise_phase_change_error = phaseChangeError[igate];
+    fields.noise_dbm_sdev = dbmSdev[igate];
+    fields.noise_ncp_mean = ncpMean[igate];
     fields.noise_interest = noiseInterest[igate];
     fields.signal_interest = signalInterest[igate];
   }

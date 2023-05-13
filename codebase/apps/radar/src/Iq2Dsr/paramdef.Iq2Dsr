@@ -1946,37 +1946,37 @@ paramdef enum window_t {
 
 paramdef int {
   p_default = 5;
-  p_descr = "Kernal size in range for computing TDBZ";
+  p_descr = "Kernel size in range for computing TDBZ";
   p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.";
 } spec_cmd_tdbz_kernel_ngates;
 
 paramdef int {
   p_default = 3;
-  p_descr = "Kernal size in samples for computing sdev of TDBZ";
+  p_descr = "Kernel size in samples for computing sdev of TDBZ";
   p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.";
 } spec_cmd_tdbz_kernel_nsamples;
 
 paramdef int {
   p_default = 5;
-  p_descr = "Kernal size in range for computing sdev of zdr";
+  p_descr = "Kernel size in range for computing sdev of zdr";
   p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.";
 } spec_cmd_sdev_zdr_kernel_ngates;
 
 paramdef int {
   p_default = 3;
-  p_descr = "Kernal size in samples for computing sdev of zdr";
+  p_descr = "Kernel size in samples for computing sdev of zdr";
   p_help = "The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.";
 } spec_cmd_sdev_zdr_kernel_nsamples;
 
 paramdef int {
   p_default = 5;
-  p_descr = "Kernal size in range for computing sdev of phidp";
+  p_descr = "Kernel size in range for computing sdev of phidp";
   p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.";
 } spec_cmd_sdev_phidp_kernel_ngates;
 
 paramdef int {
   p_default = 3;
-  p_descr = "Kernal size in samples for computing sdev of phidp";
+  p_descr = "Kernel size in samples for computing sdev of phidp";
   p_help = "The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.";
 } spec_cmd_sdev_phidp_kernel_nsamples;
 
@@ -2162,6 +2162,18 @@ typedef enum {
   NOISE_BIAS_DB_VC,
   NOISE_BIAS_DB_VX,
 
+  // NOISE IDENTIFICATION
+  
+  NOISE_FLAG,
+  SIGNAL_FLAG,
+  NOISE_INTEREST,
+  SIGNAL_INTEREST,
+
+  NOISE_ACCUM_PHASE_CHANGE,
+  NOISE_PHASE_CHANGE_ERROR,
+  NOISE_DBM_SDEV,
+  NOISE_NCP_MEAN,
+
   // SIGNAL-TO-NOISE RATIO
 
   SNR,
@@ -2261,13 +2273,6 @@ typedef enum {
   SPECTRAL_SNR,
   REGR_FILT_POLY_ORDER,
   REGR_FILT_CNR_DB,
-
-  // NOISE
-  
-  NOISE_FLAG,
-  NOISE_INTEREST,
-  SIGNAL_FLAG,
-  SIGNAL_INTEREST,
 
   // REFRACT
 

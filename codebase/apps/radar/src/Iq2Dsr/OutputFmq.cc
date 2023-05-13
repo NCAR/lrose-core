@@ -1519,7 +1519,7 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.ncp_prt_long - start);
     case Params::NCP_TRIP_FLAG:
       return (&_flds.ncp_trip_flag - start);
-
+      
       // NOISE BIAS RELATIVE TO CALIBRATION
 
     case Params::NOISE_BIAS_DB_HC:
@@ -1531,6 +1531,26 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::NOISE_BIAS_DB_VX:
       return (&_flds.noise_bias_db_vx - start);
 
+      // NOISE IDENTIFICATION
+      
+    case Params::NOISE_FLAG:
+      return (&_flds.noise_flag - start);
+    case Params::NOISE_INTEREST:
+      return (&_flds.noise_interest - start);
+    case Params::SIGNAL_FLAG:
+      return (&_flds.signal_flag - start);
+    case Params::SIGNAL_INTEREST:
+      return (&_flds.signal_interest - start);
+
+    case Params::NOISE_ACCUM_PHASE_CHANGE:
+      return (&_flds.noise_accum_phase_change - start);
+    case Params::NOISE_PHASE_CHANGE_ERROR:
+      return (&_flds.noise_phase_change_error - start);
+    case Params::NOISE_DBM_SDEV:
+      return (&_flds.noise_dbm_sdev - start);
+    case Params::NOISE_NCP_MEAN:
+      return (&_flds.noise_ncp_mean - start);
+      
       // SIGNAL-TO-NOISE RATIO
 
     case Params::SNR:
@@ -1682,17 +1702,6 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.regr_filt_poly_order - start);
     case Params::REGR_FILT_CNR_DB:
       return (&_flds.regr_filt_cnr_db - start);
-
-      // NOISE
-      
-    case Params::NOISE_FLAG:
-      return (&_flds.noise_flag - start);
-    case Params::NOISE_INTEREST:
-      return (&_flds.noise_interest - start);
-    case Params::SIGNAL_FLAG:
-      return (&_flds.signal_flag - start);
-    case Params::SIGNAL_INTEREST:
-      return (&_flds.signal_interest - start);
 
       // REFRACT
 
