@@ -1845,8 +1845,15 @@ void RadxField::convertToSi32()
       // scale_factor = (_maxVal - _minVal)/(2^n - 2)
       // packedVal = (unpacked - offset)/scaleFactor
       // where n is the number of bits of the packed (integer) data type
-      scale = (_maxVal - _minVal) / (pow(2.0, 32.0) - 2);
-      offset = (_maxVal + _minVal) / 2.0;
+      // allow for 1% outside the actual range
+      double range = _maxVal - _minVal;
+      if (range == 0.0) {
+        range = 1.0;
+      }
+      double minVal = _minVal - range / 100.0;
+      double maxVal = _maxVal + range / 100.0;
+      scale = (maxVal - minVal) / (pow(2.0, 32.0) - 2);
+      offset = (maxVal + minVal) / 2.0;
     }
   } // if (!_isDiscrete)
 
@@ -1892,8 +1899,15 @@ void RadxField::convertToSi16()
       // scale_factor = (_maxVal - _minVal)/(2^n - 2)
       // packedVal = (unpacked - offset)/scaleFactor
       // where n is the number of bits of the packed (integer) data type
-      scale = (_maxVal - _minVal) / (pow(2.0, 16.0) - 2);
-      offset = (_maxVal + _minVal) / 2.0;
+      // allow for 1% outside the actual range
+      double range = _maxVal - _minVal;
+      if (range == 0.0) {
+        range = 1.0;
+      }
+      double minVal = _minVal - range / 100.0;
+      double maxVal = _maxVal + range / 100.0;
+      scale = (maxVal - minVal) / (pow(2.0, 16.0) - 2);
+      offset = (maxVal + minVal) / 2.0;
     }
   } // if (!_isDiscrete)
 
@@ -1935,8 +1949,15 @@ void RadxField::convertToSi08()
       // scale_factor = (_maxVal - _minVal)/(2^n - 2)
       // packedVal = (unpacked - offset)/scaleFactor
       // where n is the number of bits of the packed (integer) data type
-      scale = (_maxVal - _minVal) / (pow(2.0, 8.0) - 2);
-      offset = (_maxVal + _minVal) / 2.0;
+      // allow for 1% outside the actual range
+      double range = _maxVal - _minVal;
+      if (range == 0.0) {
+        range = 1.0;
+      }
+      double minVal = _minVal - range / 100.0;
+      double maxVal = _maxVal + range / 100.0;
+      scale = (maxVal - minVal) / (pow(2.0, 8.0) - 2);
+      offset = (maxVal + minVal) / 2.0;
     }
   } // if (!_isDiscrete)
 
