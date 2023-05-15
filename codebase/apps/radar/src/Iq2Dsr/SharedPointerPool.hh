@@ -202,9 +202,12 @@ private:
         else
         {
             std::ostringstream os;
-            os << "SharedPointerPool::_free(): failed to free unknown node 0x"
+            os << "SharedPointerPool::_free(): did not free unknown node 0x"
                << std::hex << objPtr;
-            throw std::runtime_error(os.str());
+            // Log the request to free an unknown node
+            cerr << os.str() << endl;
+//            // Throw an exception if we were asked to free an unknown node
+//            throw std::runtime_error(os.str());
         }
     }
 
