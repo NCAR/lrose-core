@@ -1423,6 +1423,7 @@ int TsCalAuto::_sampleReceivedPowers(double powerDbm)
 
 {                              
              
+  int warningCount = 0;
   int pulseCount = 0;
   Stats stats;
 
@@ -1444,6 +1445,20 @@ int TsCalAuto::_sampleReceivedPowers(double powerDbm)
       return -1;
     }
 
+    if (_params.specify_pulse_width) {
+      warningCount++;
+      // check for valid pulse width
+      if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
+        if (warningCount == 100000) {
+          cerr << "WARNING - cannot find pulse with width: "
+               << _params.fixed_pulse_width_us << endl;
+          warningCount = 0;
+        }
+        // Go back to get next pulse
+        continue;
+      }
+    }
+    
     const fl32 *iqChan0 = pulse->getIq0();
     const fl32 *iqChan1 = pulse->getIq1();
     bool isHoriz = pulse->isHoriz();
