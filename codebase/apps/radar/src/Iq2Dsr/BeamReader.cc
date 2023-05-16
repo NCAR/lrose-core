@@ -738,9 +738,13 @@ int BeamReader::_readConstantPulseWidthBeam()
       if (_params.specify_pulse_width) {
         // check for valid pulse width
         if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
+          // _getNextPulse() automatically inserted this pulse at the front of
+          // _pulseQueue, but we don't want it! Remove it from the deque now.
+          _pulseQueue.pop_front();
+
           if (warningCount == 100000) {
-            cerr << "WARNING - cannot find pulse with width: "
-                 << _params.fixed_pulse_width_us << endl;
+            cerr << "WARNING - " << warningCount << " consecutive pulses with width != "
+		 << _params.fixed_pulse_width_us << " us" << endl;
             warningCount = 0;
           }
           // Go back to get a shared pointer to the next pulse
@@ -752,13 +756,8 @@ int BeamReader::_readConstantPulseWidthBeam()
 
     // check if pulse width has changed
     
-    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3) {
-      if (nPulsesInDwell > 1) {
-        // new pulse width
-        // save pulse for next beam
-        _cacheLatestPulse();
-        break;
-      }
+    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3 && nPulsesInDwell > 1) {
+      break;
     }
     
     nPulsesInDwell++;
@@ -1203,9 +1202,13 @@ void BeamReader::_constrainPulsesToWithinDwell()
 }
   
 /////////////////////////////////////////////////////////
-// get the next pulse
-// check to see if it has a moments manager
-// loops until one is found, or end of data is reached
+/// @brief Find the next valid pulse, push it onto the front of _pulseQueue,
+/// assign it as _latestPulse, and return the associated shared pointer.
+///
+/// A pulse is considered valid if it has a moments manager.
+///
+/// @return a shared pointer to the pulse which was read, or a NULL shared
+/// pointer if the end of data is reached.
 
 shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
 
