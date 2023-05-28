@@ -2100,16 +2100,16 @@ void Moments::_loadOutputFields(RadxRay *momRay)
           foldLimitUpper = 180.0;
           break;
         case Params::ACCUM_PHASE_CHANGE:
-          *datp = fmod(fields->accum_phase_change, 180.0);
+          *datp = fmod(fields->noise_accum_phase_change, 180.0);
           break;
         case Params::PHASE_CHANGE_ERROR:
-          *datp = fields->phase_change_error;
+          *datp = fields->noise_phase_change_error;
           break;
         case Params::DBM_SDEV:
-          *datp = fields->dbm_sdev;
+          *datp = fields->noise_dbm_sdev;
           break;
         case Params::NCP_MEAN:
-          *datp = fields->ncp_mean;
+          *datp = fields->noise_ncp_mean;
           break;
         case Params::NOISE_FLAG:
           *datp = fields->noise_flag;
@@ -2274,10 +2274,10 @@ void Moments::_setNoiseFields()
     MomentsFields &mfield = mfields[igate];
     mfield.noise_flag = noiseFlag[igate];
     mfield.signal_flag = signalFlag[igate];
-    mfield.accum_phase_change = accumPhaseChange[igate];
-    mfield.phase_change_error = phaseChangeError[igate];
-    mfield.dbm_sdev = dbmSdev[igate];
-    mfield.ncp_mean = ncpMean[igate];
+    mfield.noise_accum_phase_change = accumPhaseChange[igate];
+    mfield.noise_phase_change_error = phaseChangeError[igate];
+    mfield.noise_dbm_sdev = dbmSdev[igate];
+    mfield.noise_ncp_mean = ncpMean[igate];
   }
   
 }
