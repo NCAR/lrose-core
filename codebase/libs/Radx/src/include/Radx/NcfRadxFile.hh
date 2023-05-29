@@ -642,6 +642,7 @@ private:
   int _readGeorefVariables();
   void _clearRayVariables();
   int _readRayVariables();
+  int _checkSweepIndices();
   int _createRays(const string &path);
   int _readFrequencyVariable();
   void _readRayGateGeom();
