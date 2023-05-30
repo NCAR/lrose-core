@@ -257,8 +257,12 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
   }
 
   // check that the sweep indices are valid
-  
-  _checkSweepIndices()
+
+  if (_checkSweepIndices()) {
+    _addErrStr("ERROR - bad sweep indices");
+    _addErrStr(errStr);
+    return -1;
+  }
   
   // read in georef variables
 
@@ -1808,14 +1812,85 @@ int NcfRadxFile::_checkSweepIndices()
       indicesAreBad = true;
     }
   }
-      
-  //  cerr << "77777777 nRaysInFile, nRaysInSweeps, indicesAreBad: " << nRaysInFile << ", " << nRaysInSweeps << ", " << (indicesAreBad?"Y":"N") << endl;
 
-  if (indicesAreBad) {
-    return -1;
-  } else {
+  if (!indicesAreBad) {
+    // all good
     return 0;
   }
+
+  if (_debug) {
+    cerr << "WARNING - NcfRadxFile::_checkSweepIndices()" << endl;
+    cerr << "Bad sweep indices found" << endl;
+    cerr << "Trying to fix them from the sweep fixed angles" << endl;
+    cerr << "Path: " << _pathInUse << endl;
+  }
+
+  // is this an RHI?
+
+  RadxSweep *sweepFirst = _sweepsInFile[0];
+  bool isRhi = false;
+  if (sweepFirst->getSweepMode() == Radx::SWEEP_MODE_RHI  ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
+    isRhi = true;
+  }
+
+  // try to set limits by comparing ray angles to fixed angles
+
+  int currentIndex = 0;
+  int maxIndex = nRaysInFile - 1;
+  for (int isweep = 0; (int) isweep < _sweepsInFile.size() - 1; isweep++) {
+
+    RadxSweep *sweepThis = _sweepsInFile[isweep];
+    RadxSweep *sweepNext = _sweepsInFile[isweep + 1];
+
+    double fixedAngleThis = sweepThis->getFixedAngleDeg();
+    double fixedAngleNext = sweepNext->getFixedAngleDeg();
+
+    int startIndex = currentIndex;
+    int endIndex = startIndex;
+
+    for (int iray = startIndex; iray < nRaysInFile; iray++) {
+
+      double angle = _rayElevations[iray];
+      if (isRhi) {
+        angle = _rayAzimuths[iray];
+      }
+
+      double angleDiffThis = fabs(angle - fixedAngleThis);
+      double angleDiffNext = fabs(angle - fixedAngleNext);
+
+      endIndex = iray;
+      currentIndex = iray + 1;
+      
+      if (angleDiffNext < angleDiffThis) {
+        // change in sweep angle
+        break;
+      }
+      
+    } // iray
+
+    sweepThis->setStartRayIndex(startIndex);
+    sweepThis->setEndRayIndex(endIndex);
+    
+  } // isweep
+
+  RadxSweep *sweepLast = _sweepsInFile[_sweepsInFile.size() - 1];
+  sweepLast->setStartRayIndex(currentIndex);
+  sweepLast->setEndRayIndex(maxIndex);
+
+  if (currentIndex <= maxIndex) {
+    if (_debug) {
+      cerr << "SUCCESS - sweep indices fixed" << endl;
+    }
+    return 0;
+  }
+
+  _addErrStr("WARNING - NcfRadxFile::_checkSweepIndices, indices are invalid");
+  _addErrInt("  nRaysInFile: ", nRaysInFile);
+  _addErrInt("  nRaysInSweeps: ", nRaysInSweeps);
+  
+  return -1;
   
 }
 
