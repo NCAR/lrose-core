@@ -2754,13 +2754,15 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
     int iret = 0;
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, false)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, false)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
@@ -2894,13 +2896,15 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
     int iret = 0;
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, true)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, true)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
@@ -3798,6 +3802,7 @@ int NcfRadxFile::_readCalVar(const string &name, Nc3Var* &var,
 int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
+                                     double scale, double offset,
                                      bool isQualifier)
   
 {
@@ -3842,6 +3847,18 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
   for (size_t ii = 0; ii < nData; ii++) {
     if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
+    }
+  }
+
+  // apply scale and bias if needed
+
+  if (scale != 0.0) {
+    if (scale != 1.0 || offset != 0.0) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (data[ii] != missingVal) {
+          data[ii] = data[ii] * scale + offset;
+        }
+      } // ii
     }
   }
 
@@ -3897,6 +3914,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
+                                     double scale, double offset,
                                      bool isQualifier)
   
 {
@@ -3941,6 +3959,18 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
   for (size_t ii = 0; ii < nData; ii++) {
     if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
+    }
+  }
+
+  // apply scale and bias if needed
+
+  if (scale != 0.0) {
+    if (scale != 1.0 || offset != 0.0) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (data[ii] != missingVal) {
+          data[ii] = data[ii] * scale + offset;
+        }
+      } // ii
     }
   }
 

@@ -703,9 +703,11 @@ private:
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
+                          double scale, double offset,
                           bool isQualifier = false);
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
+                          double scale, double offset,
                           bool isQualifier = false);
   int _addSi32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
