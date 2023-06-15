@@ -535,6 +535,53 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
 	return ray_loc.at(closestIdx).ray;
 }
 
+size_t RayLocationModel::validateRayLocIndex(size_t index) {
+  // ray loc is circular; it goes from 0 ... RAY_LOC_N-1 ... 0
+  if (index >= RayLoc::RAY_LOC_N) {
+    return 0;
+  }
+  if (index < 0) {
+    return RayLoc::RAY_LOC_N-1;
+  }
+  return index;
+}
+
+// Why not just fill in the ray loc array with pointers?? from start to end??
+// There are spaces in the ray location map, 
+// depending on the beam width and how close the data are. 
+// Remember, size_t cannot be negative, but it can be > RAY_LOC_N
+RadxRay *RayLocationModel::findClosestNonNullRay(size_t rayIndex) {
+  size_t startIndex = validateRayLocIndex(rayIndex);
+
+  size_t offset = 1;
+  size_t testIndex;
+  bool found = false;
+  //bool atStart = false;
+  RadxRay *ray;
+  while ((!found) && (offset < RayLoc::RAY_LOC_N/2)) {
+    testIndex = validateRayLocIndex(startIndex + offset);
+    //atStart = testIndex == startIndex;
+    ray = ray_loc.at(testIndex).ray;
+    if (ray != NULL) {
+      found = true;
+    } else {
+      testIndex = validateRayLocIndex(startIndex - offset);
+      //if (!atStart) {
+      //  atStart = testIndex == startIndex;
+      //}
+      if (ray != NULL) {
+        found = true;
+      }
+    }
+    offset += 1;
+  }
+  if (found) {
+    return ray;
+  } else {
+    throw std::invalid_argument("RayLocationModel::findClosestNonNullRay - all rays are NULL");
+  }
+}  
+
 size_t RayLocationModel::getClosestRayIdx(double azDeg) {
   int rayIndex = (int) (azDeg * RayLoc::RAY_LOC_RES);
     if ((rayIndex < 0) || (rayIndex >= RayLoc::RAY_LOC_N)) {
@@ -547,7 +594,7 @@ float RayLocationModel::getNyquistVelocityForRay(double azDeg,
   int offset) {
 
   size_t rayIdx = getClosestRayIdx(azDeg, offset);
-  RadxRay *ray = ray_loc.at(rayIdx).ray;
+  RadxRay *ray = findClosestNonNullRay(rayIdx); 
   return ray->getNyquistMps();;
 }
 
@@ -555,9 +602,6 @@ float RayLocationModel::getAzimuthForRay(double azDeg,
   int offset) {
 
   size_t rayIdx = getClosestRayIdx(azDeg, offset);
-  RadxRay *ray = ray_loc.at(rayIdx).ray;
-  if (ray == NULL) {
-    throw std::invalid_argument("RayLocationModel::getAzimuthForRay - closest ray is NULL");
-  }
+  RadxRay *ray = findClosestNonNullRay(rayIdx); 
   return ray->getAzimuthDeg();
 }

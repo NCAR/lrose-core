@@ -327,6 +327,12 @@ void DataModel::regularizeRays() {
 RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
   bool debug_verbose, bool debug_extra) {
 
+
+  // Is this a new path? or has it been read before?
+  //if (_currentFilePath.compare(path) == 0) {
+  //  return;  <<====  
+  //}
+
   LOG(DEBUG) << "enter";
   // set up file object for reading
 
@@ -438,6 +444,8 @@ RadxVol *DataModel::getRadarVolume(string path, vector<string> *fieldNames,
 
 void DataModel::getRayData(string path, vector<string> &fieldNames,
   int sweepNumber) {
+  // before reading, see if we have the information already ...
+
   readData(path, fieldNames, sweepNumber);
 }
 
@@ -581,6 +589,15 @@ void DataModel::readData(string path, vector<string> &fieldNames,
       throw errMsg;
   } 
   cerr << "after " << endl;
+
+  if (_vol == NULL) {
+      string errMsg = "ERROR - Cannot retrieve archive data\n";
+      errMsg += "DataModel::readData\n";
+      errMsg += file.getErrStr() + "\n";
+      errMsg += "  path: " + path + "\n";
+      cerr << errMsg;
+      throw errMsg;  
+  }
 
   // check for fields read
   //bool nFieldsConstantPerRay = true;
@@ -1035,6 +1052,9 @@ RadxField *DataModel::fetchDataField(RadxRay *ray, string &fieldName) {
     //throw std::invalid_argument("ray is out of bounds!");
   //  cerr << "ray is out of bounds!";
   //}
+  if (_vol == NULL) {
+    throw std::invalid_argument("volume is NULL; no data found");
+  }
   _vol->loadRaysFromFields();
   //ray->loadFieldNameMap();
   //RadxRay::FieldNameMap fieldNameMap = ray->getFieldNameMap();

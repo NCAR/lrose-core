@@ -36,6 +36,9 @@ size_t getClosestRayIdx(double azDeg);
 size_t getClosestRayIdx(float azDeg, int offset);
 float getNyquistVelocityForRay(double azDeg, int offset);
 float getAzimuthForRay(double azDeg, int offset);
+RadxRay *findClosestNonNullRay(size_t rayIndex);
+size_t validateRayLocIndex(size_t index);
+
 bool isRayLocationSetup();
 
 private:
