@@ -95,41 +95,26 @@ class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
-class StatusPanel : public QMainWindow {
+class StatusPanelController : public QMainWindow {
   
   Q_OBJECT
 
 public:
-  static StatusPanel* Instance();
-
-  // boundary editor dialog
-  QDialog *_boundaryEditorDialog;
-  QGridLayout *_boundaryEditorDialogLayout;
 
   // constructor
   
-  StatusPanel(DisplayFieldController *displayFieldController,
+  StatusPanelController(DisplayFieldController *displayFieldController,
 	       //               const vector<DisplayField *> &fields,
                bool haveFilteredFields, bool interactiv = true);
   
   // destructor
   
-  ~StatusPanel();
+  ~StatusPanelController();
 
   // override event handling
 
   //void timerEvent (QTimerEvent * event);
   void resizeEvent (QResizeEvent * event);
-
-  // get selected name and units
-
-  const string &getSelectedFieldLabel() const { return _selectedLabel; }
-  const string &getSelectedFieldName() const { return _selectedName; }
-  const string &getSelectedFieldUnits() const { return _selectedUnits; }
-  // const DisplayField &getSelectedField() const { return _displayFieldController->getField(_fieldNum); }
-  // const vector<DisplayField *> &getDisplayFields() const { return _fields; }
-  //  const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
-  //  const vector<DisplayField *> &getDisplayFields() const { return _fields; }
 
   // location
 
@@ -140,8 +125,6 @@ public:
 
   bool evaluateCursor(bool isShiftKeyDown);
 
-  bool moveBoundaryPoint(double worldPressX, double worldPressY,
-  double worldReleaseX, double worldReleaseY);
   bool evaluateRange(double xRange);
 
 

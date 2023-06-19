@@ -24,18 +24,19 @@
 /////////////////////////////////////////////////////////////
 // StatusPanelView.hh
 //
-// StatusPanel object
+// StatusPanel View
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Oct 2014
 //
+// Brenda Javornik, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// June 2023
+//
 ///////////////////////////////////////////////////////////////
 //
-// StatusPanel manages polar data gathering and dissemination
-// for PPIs and RHIs
-//
-// Rendering is delegated to PpiWidget and RhiWidget
+// StatusPanel view of metadata.
 //
 ///////////////////////////////////////////////////////////////
 
@@ -74,11 +75,6 @@ class QDateTime;
 class QDateTimeEdit;
 class QFileDialog;
 
-class DisplayField;
-class PpiWidget;
-class RhiWidget;
-class RhiWindow;
-class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
@@ -91,65 +87,13 @@ public:
   // constructor
   
   StatusPanelView(QWidget *parent);
-  //DisplayFieldController *displayFieldController,
-	       //               const vector<DisplayField *> &fields,
-   //            bool haveFilteredFields, bool interactiv = true);
-  
-  // destructor
-  
   ~StatusPanelView();
-
-  // override event handling
-
-  //void timerEvent (QTimerEvent * event);
-  void resizeEvent (QResizeEvent * event);
-  void keyPressEvent(QKeyEvent* event);
-
-  // check on archive mode
-  
-  bool checkArchiveMode() const { return _archiveMode; }
-
-  
-  //double getSelectedSweepAngle();
-  size_t getSelectedFieldIndex();
-
-  vector<string> *getFieldsArchiveData(string fileName);
-  vector<string> *userSelectFieldsForReading(string fileName);
-  void getFileAndFields();
-
-// from DisplayManager ...
-
-  // get selected name and units
-
-  const string &getSelectedFieldLabel() const { return _selectedLabel; }
-  const string &getSelectedFieldName() const { return _selectedName; }
-  const string &getSelectedFieldUnits() const { return _selectedUnits; }
-  // const DisplayField &getSelectedField() const { return _displayFieldController->getField(_fieldNum); }
-  // const vector<DisplayField *> &getDisplayFields() const { return _fields; }
-  //  const DisplayField &getSelectedField() const { return *_fields[_fieldNum]; }
-  //  const vector<DisplayField *> &getDisplayFields() const { return _fields; }
-
-  // location
-
-  double getRadarLat() const { return _radarLat; }
-  double getRadarLon() const { return _radarLon; }
-  double getRadarAltKm() const { return _radarAltKm; }
-  const RadxPlatform &getPlatform() const { return _platform; }
-
-  bool evaluateRange(double xRange);
-
 
   void closeEvent(QEvent *event);
 
 public slots:
 
   void setDataMissing(string fieldName, float missingValue);
-
-  void selectedFieldChanged(QString newFieldName);
-  void selectedFieldChanged(string fieldName);
-
-  void selectedSweepChanged(int sweepNumber);
-  void dataFileChanged();
 
   void setFieldToMissing(QString fieldName);
 
@@ -167,31 +111,6 @@ private:
 
   RadxPlatform _platform;
   
-  // beam reading timer
-
-  //static bool _firstTimerEvent;
-  //int _beamTimerId;
-  //bool _frozen;
-
-  // data fields
-  //  vector <DisplayField *> _fields;
-  DisplayFieldController *_displayFieldController;
-  bool _haveFilteredFields;
-  int _rowOffset;
-
-  SpreadSheetController *spreadSheetControl;
-  SpreadSheetView *sheetView;
-
-  ScriptEditorController *scriptEditorControl;
-  ScriptEditorView *scriptEditorView;
-
-  BoundaryPointEditor *boundaryPointEditorControl;
-  BoundaryPointEditorView *boundaryPointEditorView;
-  BoundaryView *boundaryView;
-
-  UndoRedoController *_undoRedoController;
-
-
   // windows
 
   QFrame *_main;
@@ -338,8 +257,6 @@ private:
   // panels
   
   void _createStatusPanel();
-  void _createFieldPanel();
-  void _updateFieldPanel(string newFieldName);
 
   void _createClickReportDialog();
   void _updateStatusPanel(const RadxRay *ray);
@@ -430,14 +347,6 @@ private slots:
   void _refresh();
 
   // local
-
-  void _ppiLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
-  void _rhiLocationClicked(double xkm, double ykm,
-                           const RadxRay *closestRay);
-  void _locationClicked(double xkm, double ykm,
-                        //RayLoc *ray_loc, 
-                        const RadxRay *ray);
 
 };
 

@@ -63,6 +63,7 @@
 #include "ScriptEditorView.hh"
 #include "BoundaryPointEditor.hh"
 #include "BoundaryPointEditorView.hh"
+#include "StatusPanelController.hh"
 #include "TimeNavView.hh"
 #include "TimeNavController.hh"
 #include "UndoRedoController.hh"
@@ -341,6 +342,8 @@ signals:
 
   void newSweepData(int sweepNumber);
 
+  void readDataFileSignal(vector<string> *selectedFields);
+
 // end from DisplayManager
 
 private:
@@ -472,6 +475,12 @@ private:
   QLabel *_cfacRollVal;
   QLabel *_cfacTiltVal;
 
+  QLabel *_geoRefTrackRelRotationVal;
+  QLabel *_geoRefTrackRelAzVal;
+  QLabel *_geoRefTrackRelTiltVal;
+  QLabel *_geoRefTrackRelElVal;
+      
+
   QLabel *_georefsAppliedLabel;
   QLabel *_geoRefRotationLabel;
   QLabel *_geoRefRollLabel;
@@ -479,6 +488,11 @@ private:
   QLabel *_cfacRotationLabel;
   QLabel *_cfacRollLabel;
   QLabel *_cfacTiltLabel;  
+
+  QLabel *_geoRefTrackRelRotationLabel;
+  QLabel *_geoRefTrackRelAzLabel;
+  QLabel *_geoRefTrackRelElLabel;
+  QLabel *_geoRefTrackRelTiltLabel;  
   
 
   bool _altitudeInFeet;
@@ -921,7 +935,7 @@ private slots:
   void _scriptEditorSetup();
   void EditRunScript(bool interactive = true);
 
- 
+  void inbetweenReadDataFile(vector<string> *selectedFields);
 
 };
 

@@ -252,7 +252,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
 
   //_changeField(0, false);
 
-  //connect(this, SIGNAL(newDataFile()), _displayFieldController, SLOT(dataFileChanged()));  
+  connect(this, SIGNAL(readDataFileSignal(vector<string> *)), this, SLOT(inbetweenReadDataFile(vector<string> *)));  
   //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
 }
 
@@ -1284,30 +1284,32 @@ int PolarManager::_getArchiveData()
 int PolarManager::_getArchiveData(string &inputPath)
 {
 
-int result = _getArchiveDataPlainVanilla(inputPath);
-if (result == 0) {
-  _setupRayLocation();
-  //emit newDataFile();
-  //dataFileChanged();
+  int result = _getArchiveDataPlainVanilla(inputPath);
+  if (result == 0) {
+    _setupRayLocation();
+    emit dataFileRead();  HERE what to do; need to update the StatusPanel, 
+    but what ray? Just grab the first nonNull ray from RayLocationController
+    which field???
+    //dataFileChanged();
 
-  // reconcile sweep info; if the sweep angles are the same, then no need for change
- // _sweepController->updateSweepRadioButtons();
+    // reconcile sweep info; if the sweep angles are the same, then no need for change
+    // _sweepController->updateSweepRadioButtons();
 
-  DataModel *dataModel = DataModel::Instance();  
+    DataModel *dataModel = DataModel::Instance();  
 
-  // set plot times
-  
-  _plotStartTime = dataModel->getStartTimeSecs();
-  _plotEndTime = dataModel->getEndTimeSecs();
+    // set plot times
+    
+    _plotStartTime = dataModel->getStartTimeSecs();
+    _plotEndTime = dataModel->getEndTimeSecs();
 
-  char text[128];
-  snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
-           _plotStartTime.getYear(),
-           _plotStartTime.getMonth(),
-           _plotStartTime.getDay(),
-           _plotStartTime.getHour(),
-           _plotStartTime.getMin(),
-           _plotStartTime.getSec());
+    char text[128];
+    snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
+             _plotStartTime.getYear(),
+             _plotStartTime.getMonth(),
+             _plotStartTime.getDay(),
+             _plotStartTime.getHour(),
+             _plotStartTime.getMin(),
+             _plotStartTime.getSec());
 
     LOG(DEBUG) << "----------------------------------------------------";
     LOG(DEBUG) << "perform archive retrieval";
@@ -2911,22 +2913,39 @@ void PolarManager::_openFile()
 
   //since we are opening a new radar file, close any boundaries currently being displayed
 
+// DO this after the data file is read!!!
+
+
   if (boundaryPointEditorControl!= NULL) {
     boundaryPointEditorControl->clear();
     boundaryPointEditorView->setVisible(false);
   }
-
-  bool reReadData = false;
-  _timeNavController->setSliderPosition(reReadData);
+  // first time open, do NOT reread
+  // second time open, do reread; because _vol in DataModel is NULL!!
+  // how to distinguish??? Leave it up to the DataModel, whether to reread or not??
+  //bool reReadData = true; // false;  <<=== ISSUE HERE
+  // At this point, the data file has already been read!!!
+  // TODO: This should be an emit to notify timeSlider, undoRedoController, statusPanel
+  // this event is NOT tied to reading the data file.
+  // We need to read the Data File!!!
+  _timeNavController->setSliderPositionNoRead();
   string path = _timeNavController->getSelectedPath();
   _undoRedoController->reset(path, _timeNavController->getNFiles());
   _undoRedoController->waterMarkVersion();
 
-  DataModel *dataModel = DataModel::Instance();
-  const RadxRay *ray = dataModel->getRay(0);
+  //DataModel *dataModel = DataModel::Instance();
+  //const RadxRay *ray = dataModel->getRay(0);
   //_applyCfacToggle->setCheckState(Qt::Checked);
-  _updateStatusPanel(ray);
+  // TODO: status panel needs to be a separate View...
+  //_updateStatusPanel(ray);
   LOG(DEBUG) << "exit";
+}
+
+void PolarManager::inbetweenReadDataFile(vector<string> *selectedFields) {
+    _readDataFile();
+    selectedSweepChanged(_sweepController->getSelectedNumber());
+    _updateDisplayFields(selectedFields);
+    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
 }
 
 void PolarManager::_readDataFile() { // vector<string> *selectedFields) {
@@ -3025,9 +3044,12 @@ void PolarManager::fieldsSelected(vector<string> *selectedFields) {
     // give the selected fields to the volume read ...
     _sweepController->updateSweepRadioButtons();
     // trigger a read of ray data
-    selectedSweepChanged(_sweepController->getSelectedNumber());
-    _updateDisplayFields(selectedFields);
-    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
+    emit readDataFileSignal(selectedFields);
+    // FIX HERE !!! these should happen AFTER the data file is successfully read
+
+    //selectedSweepChanged(_sweepController->getSelectedNumber());
+    //_updateDisplayFields(selectedFields);
+    //selectedFieldChanged(_displayFieldController->getSelectedFieldName());
   }  
   // close the modal dialog box for field selection
   closeFieldListDialog(true);
@@ -4357,13 +4379,17 @@ void PolarManager::showBoundaryEditor()
 
 
 // from DisplayManager ...
+// really, StatusPanel should be its own class
 
 //////////////////////////////////////////////
 // create the status panel
 
 void PolarManager::_createStatusPanel()
 {
- 
+
+  _statusPanelController = new StatusPanelController();
+  connect(this, SIGNAL(dataFileRead), _statusPanelController, SLOT(newDataFile));
+/* 
   Qt::Alignment alignLeft(Qt::AlignLeft);
   Qt::Alignment alignRight(Qt::AlignRight);
   Qt::Alignment alignCenter(Qt::AlignCenter);
@@ -4384,6 +4410,9 @@ void PolarManager::_createStatusPanel()
   QFont font = dummy.font();
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
+  */
+  _statusPanelController->setFont(_params->label_font_size);
+  /*
   int fsize = _params->label_font_size;
   int fsize2 = _params->label_font_size; //  + 2;
   int fsize6 = _params->label_font_size; //  + 6;
@@ -4391,8 +4420,11 @@ void PolarManager::_createStatusPanel()
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);
 
+  */
   // radar and site name
-  
+  _statusPanelController->setRadarName(_params->radar_name);
+  _statusPanelController->displaySiteName(_params->display_site_name);
+  /*
   _radarName = new QLabel(_statusPanel);
   string rname(_params->radar_name);
   if (_params->display_site_name) {
@@ -4426,119 +4458,38 @@ void PolarManager::_createStatusPanel()
   _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
   _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
 
-  if (_params->show_status_in_gui.fixed_angle) {
-    _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2);
-  } else {
-    _fixedAngVal = NULL;
-  }
-  
-  if (_params->show_status_in_gui.volume_number) {
-    _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
-  } else {
-    _volNumVal = NULL;
-  }
-  
-  if (_params->show_status_in_gui.sweep_number) {
-    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
-  } else {
-    _sweepNumVal = NULL;
-  }
+  */
 
-  if (_params->show_status_in_gui.n_samples) {
-    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
-  } else {
-    _nSamplesVal = NULL;
-  }
+  _statusPanelController->setAltitudeInFeet(_altitudeInFeet);
+  _statusPanelController->setDisplay(
+    _params->show_status_in_gui.fixed_angle,
+    _params->show_status_in_gui.volume_number,
+    _params->show_status_in_gui.sweep_number,
+    _params->show_status_in_gui.n_samples,
+    _params->show_status_in_gui.n_gates,
+    _params->show_status_in_gui.gate_length,
+    _params->show_status_in_gui.pulse_width,
+    _params->show_status_in_gui.prf_mode,
+    _params->show_status_in_gui.prf,
+    _params->show_status_in_gui.nyquist,
+    _params->show_status_in_gui.max_range,
+    _params->show_status_in_gui.unambiguous_range,
+    _params->show_status_in_gui.measured_power_h,
+    _params->show_status_in_gui.measured_power_v,
+    _params->show_status_in_gui.scan_name,
+    _params->show_status_in_gui.scan_mode,
+    _params->show_status_in_gui.polarization_mode,
+    _params->show_status_in_gui.latitude,
+    _params->show_status_in_gui.longitude,
+    _params->show_status_in_gui.altitude,
+    _params->show_status_in_gui.altitude_rate,
+    _params->show_status_in_gui.speed,
+    _params->show_status_in_gui.heading,
+    _params->show_status_in_gui.track,
+    _params->show_status_in_gui.sun_elevation,
+    _params->show_status_in_gui.sun_azimuth);
 
-  if (_params->show_status_in_gui.n_gates) {
-    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
-  } else {
-    _nGatesVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.gate_length) {
-    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
-  } else {
-    _gateSpacingVal = NULL;
-  }
-  
-  if (_params->show_status_in_gui.pulse_width) {
-    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
-  } else {
-    _pulseWidthVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.prf_mode) {
-    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
-  } else {
-    _prfModeVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.prf) {
-    _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
-  } else {
-    _prfVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.nyquist) {
-    _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
-  } else {
-    _nyquistVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.max_range) {
-    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
-  } else {
-    _maxRangeVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.unambiguous_range) {
-    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
-  } else {
-    _unambigRangeVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.measured_power_h) {
-    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
-  } else {
-    _powerHVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.measured_power_v) {
-    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
-  } else {
-    _powerVVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.scan_name) {
-    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
-  } else {
-    _scanNameVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.scan_mode) {
-    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
-  } else {
-    _sweepModeVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.polarization_mode) {
-    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
-  } else {
-    _polModeVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.latitude) {
-    _latVal = _createStatusVal("Lat", "-99.999", row++, fsize);
-  } else {
-    _latVal = NULL;
-  }
-
-  if (_params->show_status_in_gui.longitude) {
-    _lonVal = _createStatusVal("Lon", "-999.999", row++, fsize);
-  } else {
-    _lonVal = NULL;
-  }
+  /*
 
   if (_params->show_status_in_gui.altitude) {
     if (_altitudeInFeet) {
@@ -4602,6 +4553,14 @@ void PolarManager::_createStatusPanel()
     &_geoRefRollLabel);
   _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize,
     &_geoRefTiltLabel);
+  _geoRefTrackRelRotationVal = _createStatusVal("Track Rel Rot (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelRotationLabel);
+  _geoRefTrackRelTiltVal = _createStatusVal("Track Rel  Tilt (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelTiltLabel);
+  _geoRefTrackRelAzVal = _createStatusVal("Track Rel  Az (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelAzLabel);
+  _geoRefTrackRelElVal = _createStatusVal("Track Rel  El (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelElLabel);
   _cfacRotationVal = _createStatusVal("Cfac Rot (deg)", "0.0", row++, fsize,
     &_cfacRotationLabel);
   _cfacRollVal = _createStatusVal("Cfac Roll (deg)", "", row++, fsize,
@@ -4609,8 +4568,6 @@ void PolarManager::_createStatusPanel()
   _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize,
     &_cfacTiltLabel);
                             
-  //_applyCfacToggle = new QCheckBox("Apply Correction Factors", this);
-  //_statusLayout->addWidget(_applyCfacToggle, row++, 0, 1, 2, alignCenter);
   QLabel *spacerRow = new QLabel("", _statusPanel);
   _statusLayout->addWidget(spacerRow, row, 0);
   _statusLayout->setRowStretch(row, 1);
@@ -4618,6 +4575,7 @@ void PolarManager::_createStatusPanel()
 
   hideCfacs(); 
 
+  */
 }
 
 
@@ -4915,6 +4873,24 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
 {
 
   // set time etc
+
+  _statusPanelController->updateTime(DateTime rayTime(ray->getTimeSecs()),
+    ((int) ray->getNanoSecs() / 1000000));
+  _statusPanelController->update(
+    ray->getVolumeNumber(),
+    ray->getSweepNumber(),
+    ray->getFixedAngleDeg(),
+    ray->getElevationDeg(),
+    ray->getAzimuthDeg(),
+    ray->getNSamples(),
+    ray->getNGates(),
+    ray->getGateSpacingKm(),
+    ray->getPulseWidthUsec(),
+
+
+
+ray->getNyquistMps()
+    );
 
   char text[1024];
   
@@ -5242,6 +5218,10 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     _geoRefRotationVal->show();
     _geoRefRollVal->show();
     _geoRefTiltVal->show();
+    _geoRefTrackRelRotationVal->show(); 
+    _geoRefTrackRelTiltVal->show(); 
+    _geoRefTrackRelAzVal->show(); 
+    _geoRefTrackRelElVal->show(); 
     _cfacRotationVal->show();
     _cfacRollVal->show();
     _cfacTiltVal->show();     
@@ -5250,7 +5230,11 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     _georefsAppliedLabel->show(); 
     _geoRefRotationLabel->show(); 
     _geoRefRollLabel->show(); 
-    _geoRefTiltLabel->show(); 
+    _geoRefTiltLabel->show();
+    _geoRefTrackRelRotationLabel->show(); 
+    _geoRefTrackRelTiltLabel->show(); 
+    _geoRefTrackRelAzLabel->show(); 
+    _geoRefTrackRelElLabel->show(); 
     _cfacRotationLabel->show(); 
     _cfacRollLabel->show(); 
     _cfacTiltLabel->show();     
@@ -5270,6 +5254,15 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
       _geoRefRollVal->setText(text); 
       _setText(text, "%.3f", georef->getTilt());  
       _geoRefTiltVal->setText(text);
+
+      _setText(text, "%.3f", georef->getTrackRelRot());  
+      _geoRefTrackRelRotationVal->setText(text); 
+      _setText(text, "%.3f", georef->getTrackRelTilt());  
+      _geoRefTrackRelTiltVal->setText(text);
+      _setText(text, "%.3f", georef->getTrackRelAz());  
+      _geoRefTrackRelAzVal->setText(text); 
+      _setText(text, "%.3f", georef->getTrackRelEl());  
+      _geoRefTrackRelElVal->setText(text); 
 
       double rollCorr = 0.0;
       double rotCorr = 0.0;
@@ -5294,15 +5287,22 @@ void PolarManager::hideCfacs() {
   _georefsApplied->hide(); 
   _geoRefRotationVal->hide(); 
   _geoRefRollVal->hide(); 
-  _geoRefTiltVal->hide(); 
+  _geoRefTiltVal->hide();   
+  _geoRefTrackRelRotationVal->hide(); 
+  _geoRefTrackRelAzVal->hide(); 
+  _geoRefTrackRelTiltVal->hide();  
+  _geoRefTrackRelElVal->hide();  
   _cfacRotationVal->hide(); 
   _cfacRollVal->hide(); 
   _cfacTiltVal->hide(); 
-
   _georefsAppliedLabel->hide(); 
   _geoRefRotationLabel->hide(); 
   _geoRefRollLabel->hide(); 
   _geoRefTiltLabel->hide(); 
+  _geoRefTrackRelRotationLabel->hide(); 
+  _geoRefTrackRelAzLabel->hide(); 
+  _geoRefTrackRelTiltLabel->hide();   
+  _geoRefTrackRelElLabel->hide(); 
   _cfacRotationLabel->hide(); 
   _cfacRollLabel->hide(); 
   _cfacTiltLabel->hide(); 
