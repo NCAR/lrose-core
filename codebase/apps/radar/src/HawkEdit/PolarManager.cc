@@ -54,6 +54,8 @@
 #include "Reader.hh"
 #include "AllocCheck.hh"
 #include "BoundaryPointEditor.hh"
+#include "StatusPanelView.hh"
+#include "StatusPanelController.hh"
 
 #include <string>
 #include <cmath>
@@ -582,8 +584,12 @@ void PolarManager::_setupWindows()
 
   // add widgets
 
-  mainLayout->addWidget(_statusPanel);
-  mainLayout->addWidget(_fieldPanel); // <=== here 
+
+  StatusPanelView *_statusPanelView = new StatusPanelView(_main);
+  _statusPanelController = new StatusPanelController(_statusPanelView);
+
+  mainLayout->addWidget(_statusPanelView);
+  mainLayout->addWidget(_fieldPanel);
   mainLayout->addWidget(_ppiFrame);
   _ppiFrame->show();
   _ppi->show();
@@ -1287,9 +1293,7 @@ int PolarManager::_getArchiveData(string &inputPath)
   int result = _getArchiveDataPlainVanilla(inputPath);
   if (result == 0) {
     _setupRayLocation();
-    emit dataFileRead();  HERE what to do; need to update the StatusPanel, 
-    but what ray? Just grab the first nonNull ray from RayLocationController
-    which field???
+    emit dataFileRead();
     //dataFileChanged();
 
     // reconcile sweep info; if the sweep angles are the same, then no need for change
@@ -4387,8 +4391,8 @@ void PolarManager::showBoundaryEditor()
 void PolarManager::_createStatusPanel()
 {
 
-  _statusPanelController = new StatusPanelController();
-  connect(this, SIGNAL(dataFileRead), _statusPanelController, SLOT(newDataFile));
+  //connect(this, SIGNAL(dataFileRead), this, metaDataChanged());
+    // _statusPanelController, SLOT(newDataFile));
 /* 
   Qt::Alignment alignLeft(Qt::AlignLeft);
   Qt::Alignment alignRight(Qt::AlignRight);
@@ -4411,7 +4415,7 @@ void PolarManager::_createStatusPanel()
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
   */
-  _statusPanelController->setFont(_params->label_font_size);
+  _statusPanelController->setFontSize(_params->label_font_size);
   /*
   int fsize = _params->label_font_size;
   int fsize2 = _params->label_font_size; //  + 2;
@@ -4421,16 +4425,21 @@ void PolarManager::_createStatusPanel()
   font6.setPixelSize(fsize6);
 
   */
+
   // radar and site name
-  _statusPanelController->setRadarName(_params->radar_name);
-  _statusPanelController->displaySiteName(_params->display_site_name);
-  /*
-  _radarName = new QLabel(_statusPanel);
-  string rname(_params->radar_name);
+  // radar name is specified in the params as a string
+  // display_site_name is a boolean whether or not to 
+  // use the params->site_name in the display
+
+  //_radarName = new QLabel(_statusPanel);
+  //string rname(_params->radar_name);
+  string site_name("");
   if (_params->display_site_name) {
-    rname += ":";
-    rname += _params->site_name;
+    site_name.append(_params->site_name);
   }
+  _statusPanelController->setRadarName(_params->radar_name, site_name);
+
+  /*
   _radarName->setText(rname.c_str());
   _radarName->setFont(font6);
   _statusLayout->addWidget(_radarName, row, 0, 1, 4, alignCenter);
@@ -4460,7 +4469,7 @@ void PolarManager::_createStatusPanel()
 
   */
 
-  _statusPanelController->setAltitudeInFeet(_altitudeInFeet);
+  //_statusPanelController->setAltitudeInFeet(_altitudeInFeet);
   _statusPanelController->setDisplay(
     _params->show_status_in_gui.fixed_angle,
     _params->show_status_in_gui.volume_number,
@@ -4489,6 +4498,7 @@ void PolarManager::_createStatusPanel()
     _params->show_status_in_gui.sun_elevation,
     _params->show_status_in_gui.sun_azimuth);
 
+  _statusPanelController->createStatusPanel();  
   /*
 
   if (_params->show_status_in_gui.altitude) {
@@ -4717,7 +4727,7 @@ QLabel *PolarManager::_newLabelRight(const string &text)
 
 //////////////////////////////////////////////////
 // create a row in the status panel
-
+/*
 QLabel *PolarManager::_createStatusVal(const string &leftLabel,
                                          const string &rightLabel,
                                          int row, 
@@ -4750,6 +4760,7 @@ QLabel *PolarManager::_createStatusVal(const string &leftLabel,
 
   return right;
 }
+*/
 
 //////////////////////////////////////////////////
 // create a label row in a dialog
@@ -4869,13 +4880,23 @@ QLineEdit *PolarManager::_addInputRow(QWidget *parent,
 //////////////////////////////////////////////
 // update the status panel
 
+// what to do; need to update the StatusPanel, 
+// but what ray? Just grab the first nonNull ray from RayLocationController
+//
+void PolarManager::metaDataChanged() {
+  const RadxRay *ray = _rayLocationController->getClosestRay(0.0);
+  _updateStatusPanel(ray);
+}
+
 void PolarManager::_updateStatusPanel(const RadxRay *ray)
 {
 
   // set time etc
 
-  _statusPanelController->updateTime(DateTime rayTime(ray->getTimeSecs()),
-    ((int) ray->getNanoSecs() / 1000000));
+  //_statusPanelController->updateTime(DateTime rayTime(ray->getTimeSecs()),
+  //  ((int) ray->getNanoSecs() / 1000000));
+  _statusPanelController->updateStatusPanel(ray);
+  /*
   _statusPanelController->update(
     ray->getVolumeNumber(),
     ray->getSweepNumber(),
@@ -4887,9 +4908,7 @@ void PolarManager::_updateStatusPanel(const RadxRay *ray)
     ray->getGateSpacingKm(),
     ray->getPulseWidthUsec(),
 
-
-
-ray->getNyquistMps()
+    ray->getNyquistMps()
     );
 
   char text[1024];
@@ -4912,6 +4931,7 @@ ray->getNyquistMps()
     _setTitleBar(rname);
   }
   
+ 
   DateTime rayTime(ray->getTimeSecs());
   sprintf(text, "%.4d/%.2d/%.2d",
           rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
@@ -4998,7 +5018,8 @@ ray->getNyquistMps()
     }
     _prfVal->setText(text);
   }
-
+  */
+/*
   if (_nyquistVal) {
     if (fabs(ray->getNyquistMps()) < 1000) {
       _setText(text, "%.1f", ray->getNyquistMps());
@@ -5006,20 +5027,23 @@ ray->getNyquistMps()
     }
   }
 
-  if (_maxRangeVal) {
+*/
+
+//  if (_maxRangeVal) {
     double maxRangeData = ray->getStartRangeKm() +
       ray->getNGates() * ray->getGateSpacingKm();
-    _setText(text, "%.1f", maxRangeData);
-    _maxRangeVal->setText(text);
-  }
+//    _setText(text, "%.1f", maxRangeData);
+//    _maxRangeVal->setText(text);
+//  }
 
-  if (_unambigRangeVal) {
+//  if (_unambigRangeVal) {
     if (fabs(ray->getUnambigRangeKm()) < 100000) {
-      _setText(text, "%.1f", ray->getUnambigRangeKm());
-      _unambigRangeVal->setText(text);
-    }
+//      _setText(text, "%.1f", ray->getUnambigRangeKm());
+//      _unambigRangeVal->setText(text);
+//    }
   }
   
+/*  
   if (_powerHVal) {
     if (ray->getMeasXmitPowerDbmH() > -9990) {
       _setText(text, "%.1f", ray->getMeasXmitPowerDbmH());
@@ -5281,9 +5305,12 @@ ray->getNyquistMps()
     hideCfacs();
   }
 
+*/
 }
 
 void PolarManager::hideCfacs() {
+  //_statusPanelController->hideCfacs();
+  /*
   _georefsApplied->hide(); 
   _geoRefRotationVal->hide(); 
   _geoRefRollVal->hide(); 
@@ -5308,6 +5335,7 @@ void PolarManager::hideCfacs() {
   _cfacTiltLabel->hide(); 
 
   //_applyCfacToggle->hide();  
+  */
 }
 
 ///////////////////////////////////////////

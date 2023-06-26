@@ -89,23 +89,53 @@ public:
   StatusPanelView(QWidget *parent);
   ~StatusPanelView();
 
+  void reset();
+  void clear();
+
   void closeEvent(QEvent *event);
+
+  void setFontSize(int params_label_font_size);
+  void setRadarName(string radarName, string siteName);
+  void updateStatusPanel(
+    string volumeNumber,
+    string sweepNumber,
+    string fixedAngleDeg,
+    string elevationDeg,
+    string azimuthDeg,
+    string nSamples,
+    string nGates,
+    string gateSpacingKm,
+    string pulseWidthUsec,
+    string nyquistMps);
+
+  void setVolumeNumber(int volumeNumber);
+  void setFixedAngleDeg(double fixedAngleDeg);
+  void setSweepNum(int sweepNumber);
+
+  void createStatusPanel();
+
+  void createFixedAngleDeg();
+  void createVolumeNumber();  
+  void updateTime(QDateTime rayTime, int nanoSeconds);
+
 
 public slots:
 
-  void setDataMissing(string fieldName, float missingValue);
+  //void setDataMissing(string fieldName, float missingValue);
 
-  void setFieldToMissing(QString fieldName);
+  //void setFieldToMissing(QString fieldName);
 
   //void close();
 
 signals:
   
-  void frameResized(const int width, const int height);
+  //void frameResized(const int width, const int height);
 
 private:
 
-
+  QFont font;
+  QFont font2;
+  QFont font6;
   
   // instrument platform details 
 
@@ -113,26 +143,7 @@ private:
   
   // windows
 
-  QFrame *_main;
-
-  // actions
-  
-  QAction *_exitAct;
-  //QAction *_freezeAct;
-  QAction *_clearAct;
-  QAction *_unzoomAct;
-  QAction *_refreshAct;
-  QAction *_showClickAct;
-  QAction *_showBoundaryEditorAct;
-  QAction *_howtoAct;
-  QAction *_aboutAct;
-  QAction *_aboutQtAct;
-  QAction *undoAct;
-  QAction *redoAct;
-  QAction *selectBatchModeAct;
-  QAction *selectIndividualModeAct;
-  //QAction *_openFileAct;
-  //QAction *_saveFileAct;
+  //QFrame *_main;
 
   // status panel
 
@@ -218,21 +229,6 @@ private:
 
   vector<QLabel *> _valsRight;
   
-  // field panel
-  
-  DisplayFieldView *_fieldPanel;
-  QGridLayout *_fieldsLayout;
-  QLabel *_selectedLabelWidget;
-  QButtonGroup *_fieldGroup;
-  vector<QRadioButton *> _fieldButtons;
-  DisplayField *_selectedField;
-  string _selectedName;
-  string _selectedLabel;
-  string _selectedUnits;
-  QLabel *_valueLabel;
-  //int _fieldNum;
-  int _prevFieldNum;
-
   // click location report dialog
   QDialog *_clickReportDialog;
   QGridLayout *_clickReportDialogLayout;
@@ -250,42 +246,63 @@ private:
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
 
-  // set top bar
-
-  //virtual void _setTitleBar(const string &radarName) = 0;
-
-  // panels
   
-  void _createStatusPanel();
 
-  void _createClickReportDialog();
-  void _updateStatusPanel(const RadxRay *ray);
-  double _getInstHtKm(const RadxRay *ray);
 
-  void _applyCfac();
+  //void _createClickReportDialog();
+  //void updateStatusPanel(const RadxRay *ray);
+  //double _getInstHtKm(const RadxRay *ray);
+
+  //void _applyCfac();
   void hideCfacs();
 
   // setting text
 
-  void _setText(char *text, const char *format, int val);
-  void _setText(char *text, const char *format, double val);
+  //void _setText(char *text, const char *format, int val);
+  //void _setText(char *text, const char *format, double val);
   
   // adding vals / labels
 
-  QLabel *_newLabelRight(const string &text);
+  void setInt(int s, QLabel *label, string format);
+  void setDouble(double s, QLabel *label, int fieldWidth, int precision);
 
+  double _getInstHtKm(const RadxRay *ray);
+  //QLabel *_newLabelRight(const string &text);
+/*
+    void set(T s, QLabel *label, string format) {
+      if (label != NULL) {
+        char text[100];
+
+        if (abs(s) < 9999) {
+          sprintf(text, format, s);
+        } else {
+          sprintf(text, format, -9999);
+        }
+
+        label->setText(text.c_str());
+      }
+    }
+
+*/
   QLabel *_createStatusVal(const string &leftLabel,
                            const string &rightLabel,
-                           int row, 
-                           int fontSize,
-                           QLabel **label = NULL);
+                           //int row, 
+                           int fontSize);
+                           //QLabel **label = NULL);
   
+  /*
   QLabel *_addLabelRow(QWidget *widget,
                        QGridLayout *layout,
                        const string &leftLabel,
                        const string &rightLabel,
                        int row,
                        int fontSize = 0);
+
+  */
+
+
+
+  QWidget *_parent;
 
   bool _firstTime;
 
@@ -302,7 +319,7 @@ private:
   double _endAz;
 
   // times for rays
-
+  // TODO: these should all be QStrings or QDateTime
   RadxTime _plotStartTime;
   RadxTime _plotEndTime;
   RadxTime _prevRayTime;
@@ -317,22 +334,19 @@ private:
   QMenu *_modeMenu;
   QMenu *_boundaryMenu;
 
+  int _fsize;
+  int _fsize2;
+  int _fsize6;
+
+  int _nrows;
+
   // actions
 
 
   //////////////////////////////
   // private methods
-
-  // set top bar
-
-  void _setTitleBar(const string &radarName);
   
   // local methods
-
-  //void _clear();
-  void _setupWindows();
-  void _createActions();
-  void _createMenus(); 
 
 private slots:
 
@@ -340,15 +354,46 @@ private slots:
   // Qt slots //
   //////////////
 
-
-  void _about();
-  void _showClick();
-
   void _refresh();
 
   // local
 
 };
+
+/*
+template<typename T>
+class StatusPanelViewT : public StatusPanelView {
+  //void set(T s, QLabel *label, string format);
+
+  StatusPanelViewT(QWidget *parent) : StatusPanelView(parent) {
+
+  }
+
+    void set(T s, QLabel *label, string format) {
+      if (label != NULL) {
+        char text[100];
+
+        if (abs(s) < 9999) {
+          sprintf(text, format, s);
+        } else {
+          sprintf(text, format, -9999);
+        }
+
+        label->setText(text.c_str());
+      }
+    }
+
+  void setFixedAngleDeg(double fixedAngleDeg) {
+    set<double>(fixedAngleDeg, "%d");
+  }    
+
+  void setVolumeNumber(int volumeNumber) {
+    set<double>(_volNumVal, "%d");
+  }
+
+}
+*/
+
 
 #endif
 

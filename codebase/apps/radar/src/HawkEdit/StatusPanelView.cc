@@ -96,12 +96,6 @@
 #include <toolsa/LogStream.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <radar/RadarComplex.hh>
-#include <Radx/RadxFile.hh>
-#include <Radx/NcfRadxFile.hh>
-#include <Radx/RadxSweep.hh>
-#include <Radx/RadxField.hh>
-#include <Radx/RadxTime.hh>
-#include <Radx/RadxPath.hh>
 
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/Path.hh>
@@ -113,28 +107,12 @@ using namespace H5x;
 // Constructor
 
 
-StatusPanel::StatusPanel(DisplayFieldController *displayFieldController,
-                           bool haveFilteredFields, bool interactive) :
-// DisplayManager(params, reader, displayFieldController, haveFilteredFields), 
-        //_sweepManager(params),
-        _rhiWindowDisplayed(false),
-        QMainWindow(NULL),
-        //_params->params),
-        //_reader(reader),
-        _initialRay(true),
-        _displayFieldController(displayFieldController),
-        _haveFilteredFields(haveFilteredFields)
+StatusPanelView::StatusPanelView(QWidget *parent)
 {
 
-	m_pInstance = this;
+  _parent = parent;
 
   // initialize
-
-  // from DisplayManager ...
-  //_beamTimerId = 0;
-  // _frozen = false;
-  //  _displayFieldController->setSelectedField(0);
-  _prevFieldNum = -1;
 
   _radarLat = -9999.0;
   _radarLon = -9999.0;
@@ -143,69 +121,15 @@ StatusPanel::StatusPanel(DisplayFieldController *displayFieldController,
   _altitudeInFeet = false;
   // end from DisplayManager    
 
-  _firstTime = true;
-
-  // setWindowIcon(QIcon("HawkEyePolarIcon.icns"));
-  
-  _prevAz = -9999.0;
-  _prevEl = -9999.0;
-  _startAz = -9999.0;
-  _endAz = -9999.0;
-  //_ppiRays = NULL;
-  _rhiMode = false;
-
   _nGates = 1000;
   _maxRangeKm = 1.0;
-  
-  //_archiveRetrievalPending = false;
-  
-  _ppiFrame = NULL;
-  _ppi = NULL;
 
-  _rhiWindow = NULL;
-  _rhi = NULL;
-
-  _operationMode = INDIVIDUAL;
-
-  //_sweepVBoxLayout = NULL;
-  _sweepPanel = NULL;
-
-  //_archiveStartTimeEdit = NULL;
-  //_archiveEndTimeEdit = NULL;
-
-  //_selectedTimeLabel = NULL;
-  
-  //_back1 = NULL;
-  //_fwd1 = NULL;
-  //_backPeriod = NULL;
-  //_fwdPeriod = NULL;
-
-  _timeNavController = NULL;
-  _timeNavView = NULL;
-  _timeControlPlaced = false;
-  //_timeLayout = NULL;
-  //_timeSlider = NULL;
-
-  ParamFile *_params = ParamFile::Instance();
-
-  //_setArchiveMode(_params->begin_in_archive_mode);
-
-  if (_timeNavController != NULL) {
-    //_timeNavController->setArchiveStartTime(_params->archive_start_time);
-    //_timeNavController->setArchiveEndTime(_archiveStartTime + _params->archive_time_span_secs);
-    //_timeNavController->setArchiveScanIndex(0);
-  }
-
-  _imagesArchiveStartTime.set(_params->images_archive_start_time);
-  _imagesArchiveEndTime.set(_params->images_archive_end_time);
-  _imagesScanIntervalSecs = _params->images_scan_interval_secs;
-
-  // set up ray locators
+  _nrows = 0;
 
 
   // set up windows
 
-  _setupWindows();
+  //_setupWindows();
 
   // install event filter to catch when the StatusPanel is closed
   CloseEventFilter *closeFilter = new CloseEventFilter(this);
@@ -213,45 +137,41 @@ StatusPanel::StatusPanel(DisplayFieldController *displayFieldController,
 
   setAttribute(Qt::WA_DeleteOnClose);
 
-  _batchEditing = false;
-
-  // set initial field to 0
-
-  //_changeField(0, false);
-
-  connect(this, SIGNAL(readDataFileSignal(vector<string> *)), this, SLOT(inbetweenReadDataFile(vector<string> *)));  
+  //connect(this, SIGNAL(readDataFileSignal(vector<string> *)), this, SLOT(inbetweenReadDataFile(vector<string> *)));  
   //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
 }
 
 // destructor
 
-StatusPanel::~StatusPanel()
+StatusPanelView::~StatusPanelView()
 {
 
-  cerr << "StatusPanel destructor called " << endl;
+  cerr << "StatusPanelView destructor called " << endl;
 
 }
 
-void StatusPanel::setFieldToMissing(QString fieldName) {
-  _displayFieldController->setFieldToMissing(fieldName.toStdString());
+void StatusPanelView::reset() {
+   // delete all the labels and set the number of rows to zero
+  _nrows = 0;
 }
+
 
 ////////////////////////////////////////////
 // refresh
 
-void StatusPanel::_refresh()
+void StatusPanelView::_refresh()
 {
 }
 
-
+/*
 ////////////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-void StatusPanel::_locationClicked(double xkm, double ykm,
+void StatusPanelView::_locationClicked(double xkm, double ykm,
                                     const RadxRay *ray)
 {
 
-  LOG(DEBUG) << "*** Entering StatusPanel::_locationClicked()";
+  LOG(DEBUG) << "*** Entering StatusPanelView::_locationClicked()";
   
   double range = sqrt(xkm * xkm + ykm * ykm);
   int gate = (int) 
@@ -347,7 +267,7 @@ void StatusPanel::_locationClicked(double xkm, double ykm,
 }
 
 // no prompting, and use a progress bar ...
-void StatusPanel::_goHere(int nFiles, string saveDirName) {
+void StatusPanelView::_goHere(int nFiles, string saveDirName) {
 
     QProgressDialog progress("Saving files...", "Cancel", 0, nFiles, this);
     progress.setWindowModality(Qt::WindowModal);
@@ -433,44 +353,35 @@ void StatusPanel::_goHere(int nFiles, string saveDirName) {
       QCoreApplication::processEvents();
     }
 }
+*/
 
-void StatusPanelView::clear() {
-  // reset values to original 
-}
-
-//////////////////////////////////////////////
-// create the status panel
-
-void StatusPanel::_createStatusPanel()
-{
- 
-  Qt::Alignment alignLeft(Qt::AlignLeft);
-  Qt::Alignment alignRight(Qt::AlignRight);
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignTop(Qt::AlignTop);
-
-  // status panel - rows of label value pairs
-  
-  _statusPanel = new QGroupBox(_main);
-  _statusLayout = new QGridLayout(_statusPanel);
-  _statusLayout->setVerticalSpacing(5);
-
-  int row = 0;
-  
-  ParamFile *_params = ParamFile::Instance();
-  // fonts
-  
+//
+// There are set one (when the parameter file changes) 
+//       - set font size
+// and there are set multiple times:
+//   1. when the ray, range (selected azimuth)
+//   2. sweep changes (what azimuth to use? )
+//   3. when the file changes (reset to 0 azimuth)
+// 
+void StatusPanelView::setFontSize(int params_label_font_size) {
   QLabel dummy;
-  QFont font = dummy.font();
-  QFont font2 = dummy.font();
-  QFont font6 = dummy.font();
-  int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size; //  + 2;
-  int fsize6 = _params->label_font_size; //  + 6;
+  font = dummy.font();
+  font2 = dummy.font();
+  font6 = dummy.font();
+  int fsize = params_label_font_size;
+  int fsize2 = params_label_font_size; //  + 2;
+  int fsize6 = params_label_font_size; //  + 6;
   font.setPixelSize(fsize);
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);
+}
 
+
+void StatusPanelView::clear() {
+  // reset values to original 
+  
+
+/*
   // radar and site name
   
   _radarName = new QLabel(_statusPanel);
@@ -512,6 +423,377 @@ void StatusPanel::_createStatusPanel()
     _fixedAngVal = NULL;
   }
   
+  if (_params->show_status_in_gui.volume_number) {
+    _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
+  } else {
+    _volNumVal = NULL;
+  }
+  
+  if (_params->show_status_in_gui.sweep_number) {
+    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
+  } else {
+    _sweepNumVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.n_samples) {
+    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
+  } else {
+    _nSamplesVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.n_gates) {
+    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
+  } else {
+    _nGatesVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.gate_length) {
+    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
+  } else {
+    _gateSpacingVal = NULL;
+  }
+  
+  if (_params->show_status_in_gui.pulse_width) {
+    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
+  } else {
+    _pulseWidthVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.prf_mode) {
+    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
+  } else {
+    _prfModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.prf) {
+    _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
+  } else {
+    _prfVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.nyquist) {
+    _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
+  } else {
+    _nyquistVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.max_range) {
+    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
+  } else {
+    _maxRangeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.unambiguous_range) {
+    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
+  } else {
+    _unambigRangeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.measured_power_h) {
+    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
+  } else {
+    _powerHVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.measured_power_v) {
+    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
+  } else {
+    _powerVVal = NULL;
+  }
+
+// who holds state?  who holds the _scanNameVal pointer = NULL if not used. 
+// the view must hold this
+  if (_params->show_status_in_gui.scan_name) {
+    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
+  } else {
+    _scanNameVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.scan_mode) {
+    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
+  } else {
+    _sweepModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.polarization_mode) {
+    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
+  } else {
+    _polModeVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.latitude) {
+    _latVal = _createStatusVal("Lat", "-99.999", row++, fsize);
+  } else {
+    _latVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.longitude) {
+    _lonVal = _createStatusVal("Lon", "-999.999", row++, fsize);
+  } else {
+    _lonVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.altitude) {
+    if (_altitudeInFeet) {
+      _altVal = _createStatusVal("Alt(kft)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    } else {
+      _altVal = _createStatusVal("Alt(km)", "-999.999",
+                                 row++, fsize, &_altLabel);
+    }
+  } else {
+    _altVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.altitude_rate) {
+    if (_altitudeInFeet) {
+      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    } else {
+      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
+                                     row++, fsize, &_altRateLabel);
+    }
+  } else {
+    _altRateVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.speed) {
+    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
+  } else {
+    _speedVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.heading) {
+    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
+  } else {
+    _headingVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.track) {
+    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
+  } else {
+    _trackVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.sun_elevation) {
+    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunElVal = NULL;
+  }
+
+  if (_params->show_status_in_gui.sun_azimuth) {
+    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
+  } else {
+    _sunAzVal = NULL;
+  }
+
+  _georefsApplied = _createStatusVal("Georefs applied?", "T/F", row++, fsize,
+    &_georefsAppliedLabel);
+  _geoRefRotationVal = _createStatusVal("Georef Rot (deg)", "0.0", row++, fsize,
+    &_geoRefRotationLabel);
+  _geoRefRollVal = _createStatusVal("Georef Roll (deg)", "0.0", row++, fsize,
+    &_geoRefRollLabel);
+  _geoRefTiltVal = _createStatusVal("Georef Tilt (deg)", "0.0", row++, fsize,
+    &_geoRefTiltLabel);
+  _geoRefTrackRelRotationVal = _createStatusVal("Track Rel Rot (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelRotationLabel);
+  _geoRefTrackRelTiltVal = _createStatusVal("Track Rel  Tilt (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelTiltLabel);
+  _geoRefTrackRelAzVal = _createStatusVal("Track Rel  Az (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelAzLabel);
+  _geoRefTrackRelElVal = _createStatusVal("Track Rel  El (deg)", "0.0", row++, fsize,
+    &_geoRefTrackRelElLabel);
+  _cfacRotationVal = _createStatusVal("Cfac Rot (deg)", "0.0", row++, fsize,
+    &_cfacRotationLabel);
+  _cfacRollVal = _createStatusVal("Cfac Roll (deg)", "", row++, fsize,
+    &_cfacRollLabel);
+  _cfacTiltVal = _createStatusVal("Cfac Tilt (deg)", "", row++, fsize,
+    &_cfacTiltLabel);
+                            
+  QLabel *spacerRow = new QLabel("", _statusPanel);
+  _statusLayout->addWidget(spacerRow, row, 0);
+  _statusLayout->setRowStretch(row, 1);
+  row++;
+
+  hideCfacs(); 
+*/
+}
+
+
+//////////////////////////////////////////////
+// create the status panel
+
+void StatusPanelView::createStatusPanel()
+{
+ 
+  Qt::Alignment alignLeft(Qt::AlignLeft);
+  Qt::Alignment alignRight(Qt::AlignRight);
+  Qt::Alignment alignCenter(Qt::AlignCenter);
+  Qt::Alignment alignTop(Qt::AlignTop);
+
+  // status panel - rows of label value pairs
+  
+  _statusPanel = new QGroupBox(_parent);
+  _statusLayout = new QGridLayout(_statusPanel);
+  //_statusLayout->setVerticalSpacing(5);
+
+  //int row = 0;
+
+  _elevVal = _createStatusVal("Elev", "-99.99", _fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", _fsize2);
+  
+  // fonts
+  /*
+  QLabel dummy;
+  QFont font = dummy.font();
+  QFont font2 = dummy.font();
+  QFont font6 = dummy.font();
+  int fsize = _params->label_font_size;
+  int fsize2 = _params->label_font_size; //  + 2;
+  int fsize6 = _params->label_font_size; //  + 6;
+  font.setPixelSize(fsize);
+  font2.setPixelSize(fsize2);
+  font6.setPixelSize(fsize6);
+*/
+
+}
+
+  // radar and site name
+  
+
+void StatusPanelView::setRadarName(string radarName, string siteName) {
+  _radarName = new QLabel(_statusPanel);
+  string rname(radarName);
+  if (siteName.length() > 0) {
+    rname.append(":");
+    rname.append(siteName);
+  }
+  _radarName->setText(rname.c_str());
+  _radarName->setFont(font6);
+  _statusLayout->addWidget(_radarName); //, row, 0, 1, 4, alignCenter);
+  //row++;
+}
+
+/*
+  // date and time
+
+  _dateVal = new QLabel("9999/99/99", _statusPanel);
+  _dateVal->setFont(font2);
+  _statusLayout->addWidget(_dateVal); // , row, 0, 1, 2, alignCenter);
+  row++;
+
+  _timeVal = new QLabel("99:99:99.999", _statusPanel);
+  _timeVal->setFont(font2);
+  _statusLayout->addWidget(_timeVal); // , row, 0, 1, 2, alignCenter);
+  row++;
+
+
+  // other labels.  Note that we set the minimum size of the column
+  // containing the right hand labels in timerEvent() to prevent the
+  // wiggling we were seeing in certain circumstances.  For this to work,
+  // the default values for these fields must represent the maximum digits
+  // posible for each field.
+
+ Use int QGridLayout::rowCount() const to get the last row instead of keeping the count
+
+  _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
+*/
+
+/*
+template<typename T>
+void StatusPanelView::f(T s)
+{
+    std::cout << s << '\n';
+}
+ 
+//int main()
+//{
+    f<double>(1); // instantiates and calls f<double>(double)
+    f<>('a');     // instantiates and calls f<char>(char)
+    f(7);         // instantiates and calls f<int>(int)
+    void (*pf)(std::string) = f; // instantiates f<string>(string)
+    pf("∇");                     // calls f<string>(string)
+//}
+*/
+
+/*
+// Q_OBJECT does not support templates (unless the template class inherits from the Q_OBJECT class)
+// s is the value
+// template<typename T>
+*/
+    void StatusPanelView::setInt(int s, QLabel *label, string format) {
+      if (label != NULL) {
+
+        int value = -9999;
+
+        if (abs(s) < 9999) {
+          value = s;
+        }
+        label->setText(QString("%1").arg(value));
+      }
+    }
+    
+    void StatusPanelView::setDouble(double s, QLabel *label, int fieldWidth, int precision) {
+      if (label != NULL) {
+
+        double value = -9999;
+
+        if (abs(s) < 9999) {
+          value = s;
+        }
+        label->setText(QString("%1").arg(value, fieldWidth, 'f', precision));
+      }
+    }
+
+
+
+/* s is the value
+template<typename T>
+    QLabel *StatusPanelView::create(T s, string textLabel, string format) {
+      if (label == NULL) {
+        _nrows += 1;
+        label = _createStatusVal(textLabel, s, _nrows, _fsize2);
+      } 
+      return label;
+    }    
+*/
+// Q: How do we know which row in the display? only need the row when creating.
+
+// to use (in Controller???): 
+//   set<double>(s, "Fixed ang", "%d", row??)
+void StatusPanelView::setFixedAngleDeg(double fixedAngleDeg) {
+  setDouble(fixedAngleDeg, _fixedAngVal, 7, 2);
+}
+  
+void StatusPanelView::createFixedAngleDeg() {
+  if (_fixedAngVal == NULL) {
+    _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", _fsize2);
+  } 
+}
+
+void StatusPanelView::setVolumeNumber(int volumeNumber) {
+  setInt(volumeNumber, _volNumVal, "%d");
+}
+
+void StatusPanelView::createVolumeNumber() {
+    if (_volNumVal == NULL) {    
+      _volNumVal = _createStatusVal("Volume", "0", _fsize);
+    }
+}
+
+//void StatusPanelView::setSweepNum(int sweepNumber) {
+//  set<int>(_sweepNumVal, "%d");
+  /*
+  char text[1024];
+  if (_sweepNumVal != NULL) {
+    _setText(text, "%d", sweepNumber);
+    _sweepNumVal->setText(text);
+  }
+  */
+//}
+
+/*  
   if (_params->show_status_in_gui.volume_number) {
     _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
   } else {
@@ -705,36 +987,39 @@ void StatusPanel::_createStatusPanel()
   hideCfacs(); 
 
 }
+*/
 
 //////////////////////////////////////////////
-// make a new label with right justification
+/* make a new label with right justification
 
-QLabel *StatusPanel::_newLabelRight(const string &text)
+QLabel *StatusPanelView::_newLabelRight(const string &text)
 {
   QLabel *label = new QLabel;
   label->setText("-----");
   label->setAlignment(Qt::AlignRight);
   return label;
 }
+*/
 
 //////////////////////////////////////////////////
 // create a row in the status panel
 
-QLabel *StatusPanel::_createStatusVal(const string &leftLabel,
+QLabel *StatusPanelView::_createStatusVal(const string &leftLabel,
                                          const string &rightLabel,
-                                         int row, 
-                                         int fontSize,
-                                         QLabel **label)
+                                         //int row, 
+                                         int fontSize)
+                                         //QLabel **label)
   
 {
-
+  _nrows += 1;
+  int row = _nrows;
   QLabel *left = new QLabel(_statusPanel);
   left->setText(leftLabel.c_str());
   Qt::Alignment alignRight(Qt::AlignRight);
   _statusLayout->addWidget(left, row, 0, alignRight);
-  if (label != NULL) {
-    *label = left;
-  }
+  //if (label != NULL) {
+  //  *label = left;
+  //}
 
   QLabel *right = new QLabel(_statusPanel);
   right->setText(rightLabel.c_str());
@@ -748,15 +1033,15 @@ QLabel *StatusPanel::_createStatusVal(const string &leftLabel,
     right->setFont(font);
   }
 
-  _valsRight.push_back(right);
+  //_valsRight.push_back(right);
 
   return right;
 }
 
 //////////////////////////////////////////////////
-// create a label row in a dialog
+/* create a label row in a dialog
 
-QLabel *StatusPanel::_addLabelRow(QWidget *parent,
+QLabel *StatusPanelView::_addLabelRow(QWidget *parent,
                                      QGridLayout *layout,
                                      const string &leftLabel,
                                      const string &rightLabel,
@@ -785,16 +1070,17 @@ QLabel *StatusPanel::_addLabelRow(QWidget *parent,
   return right;
 }
 
-
+*/
 
 
 //////////////////////////////////////////////
 // update the status panel
 
-void StatusPanelView::updateTime(DateTime rayTime, int nanoSeconds) {
+void StatusPanelView::updateTime(QDateTime rayTime, int nanoSeconds) {
 
   // set time etc
 
+/*
   char text[1024];
 
   sprintf(text, "%.4d/%.2d/%.2d",
@@ -805,10 +1091,22 @@ void StatusPanelView::updateTime(DateTime rayTime, int nanoSeconds) {
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
           ((int) nanoSeconds / 1000000));
   _timeVal->setText(text);
-
+*/
 }
 
-void StatusPanel::_updateStatusPanel(const RadxRay *ray)
+/*
+void StatusPanelView::updateStatusPanel(
+    string volumeNumber,
+    string sweepNumber,
+    string fixedAngleDeg,
+    string elevationDeg,
+    string azimuthDeg,
+    string nSamples,
+    string nGates,
+    string gateSpacingKm,
+    string pulseWidthUsec,
+    string nyquistMps)
+  //const RadxRay *ray)
 {
 
   // set time etc
@@ -842,17 +1140,10 @@ void StatusPanel::_updateStatusPanel(const RadxRay *ray)
           rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
           ((int) ray->getNanoSecs() / 1000000));
   _timeVal->setText(text);
-  
-  if (_volNumVal) {
-    _setText(text, "%d", ray->getVolumeNumber());
-    _volNumVal->setText(text);
-  }
-  
-  if (_sweepNumVal) {
-    _setText(text, "%d", ray->getSweepNumber());
-    _sweepNumVal->setText(text);
-  }
-  
+  */
+
+
+  /*
   if (_fixedAngVal) {  
     _setText(text, "%6.2f", ray->getFixedAngleDeg());
     _fixedAngVal->setText(text);
@@ -1202,9 +1493,10 @@ void StatusPanel::_updateStatusPanel(const RadxRay *ray)
     hideCfacs();
   }
 
+ 
 }
-
-void StatusPanel::hideCfacs() {
+*/
+void StatusPanelView::hideCfacs() {
   _georefsApplied->hide(); 
   _geoRefRotationVal->hide(); 
   _geoRefRollVal->hide(); 
@@ -1232,9 +1524,9 @@ void StatusPanel::hideCfacs() {
 }
 
 ///////////////////////////////////////////
-// set text for GUI panels
+/* set text for GUI panels
 
-void StatusPanel::_setText(char *text,
+void StatusPanelView::_setText(char *text,
                               const char *format,
                               int val)
 {
@@ -1245,7 +1537,7 @@ void StatusPanel::_setText(char *text,
   }
 }
 
-void StatusPanel::_setText(char *text,
+void StatusPanelView::_setText(char *text,
                               const char *format,
                               double val)
 {
@@ -1255,10 +1547,10 @@ void StatusPanel::_setText(char *text,
     sprintf(text, format, -9999.0);
   }
 }
-
+*/
 ////////////////////////////////////////////////////////////////
 
-double StatusPanel::_getInstHtKm(const RadxRay *ray)
+double StatusPanelView::_getInstHtKm(const RadxRay *ray)
 
 {
   double instHtKm = _platform.getAltitudeKm();
@@ -1272,7 +1564,7 @@ double StatusPanel::_getInstHtKm(const RadxRay *ray)
 // slots
 
 
-void StatusPanel::closeEvent(QEvent *event)
+void StatusPanelView::closeEvent(QEvent *event)
 {
  
     event->accept();

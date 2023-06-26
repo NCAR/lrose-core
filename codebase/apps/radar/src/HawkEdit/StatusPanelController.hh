@@ -30,10 +30,21 @@
 //
 // Oct 2014
 //
+// Brenda Javornik, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// June 2023
+//
 ///////////////////////////////////////////////////////////////
 //
 // StatusPanel manages the display of metadata for a selected
 // (file, sweep, ray, range) = (time, elevation, azimuth, range)
+//
+// Let the view request information for update
+// The controller/model will supply the information
+// 
+// We ask the view to read the data in the top left cell again 
+// by emitting the dataChanged() signal. Note that we did not 
+// explicitly connect the dataChanged() signal to the view. 
+// This happened automatically when we called setModel().
 //
 ///////////////////////////////////////////////////////////////
 
@@ -45,67 +56,26 @@
 
 #include "Args.hh"
 #include "Params.hh"
-//#include "DisplayManager.hh"
-#include "RayLocationController.hh"
-#include "ContextEditingView.hh"
-#include "ClickableLabel.hh"
-#include "ParameterColorView.hh"
-//#include "BatchFileSaveView.hh"
-#include "FieldColorController.hh"
-#include "SweepView.hh"
-#include "SweepController.hh"
-#include "DisplayFieldView.hh"
-#include "SpreadSheetController.hh"
-#include "SpreadSheetView.hh"
-#include "ScriptEditorController.hh"
-#include "ScriptEditorView.hh"
-#include "BoundaryPointEditor.hh"
-#include "BoundaryPointEditorView.hh"
-#include "TimeNavView.hh"
-#include "TimeNavController.hh"
-#include "UndoRedoController.hh"
-#include <QMainWindow>
-#include <QListWidgetItem>
-#include <QStringList>
-#include <QCheckBox>
+
+#include "StatusPanelView.hh"
+
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
-class QApplication;
-class QActionGroup;
-class QButtonGroup;
-class QRadioButton;
-class QPushButton;
-class QProgressDialog;
-class QListWidget;
-class QFrame;
-class QDialog;
-class QLabel;
-class QGroupBox;
-class QGridLayout;
 class QDateTime;
-class QDateTimeEdit;
-class QFileDialog;
 
-class DisplayField;
-class PpiWidget;
-class RhiWidget;
-class RhiWindow;
-class Reader;
 class RadxPlatform;
-class TimeScaleWidget;
 
-class StatusPanelController : public QMainWindow {
-  
+
+class StatusPanelController : public QObject {
+
   Q_OBJECT
 
 public:
 
   // constructor
   
-  StatusPanelController(DisplayFieldController *displayFieldController,
-	       //               const vector<DisplayField *> &fields,
-               bool haveFilteredFields, bool interactiv = true);
+  StatusPanelController(StatusPanelView *view);
   
   // destructor
   
@@ -116,7 +86,7 @@ public:
   //void timerEvent (QTimerEvent * event);
   void resizeEvent (QResizeEvent * event);
 
-  // location
+  /* location
 
   double getRadarLat() const { return _radarLat; }
   double getRadarLon() const { return _radarLon; }
@@ -126,19 +96,57 @@ public:
   bool evaluateCursor(bool isShiftKeyDown);
 
   bool evaluateRange(double xRange);
-
+*/
 
   void closeEvent(QEvent *event);
 
-public slots:
- 
-  void setDataMissing(string fieldName, float missingValue);
+  void setDisplay(
+    bool show_fixed_angle,
+    bool show_volume_number,
+    bool show_sweep_number,
+    bool show_n_samples,
+    bool show_n_gates,
+    bool show_gate_length,
+    bool show_pulse_width,
+    bool show_prf_mode,
+    bool show_prf,
+    bool show_nyquist,
+    bool show_max_range,
+    bool show_unambiguous_range,
+    bool show_measured_power_h,
+    bool show_measured_power_v,
+    bool show_scan_name,
+    bool show_scan_mode,
+    bool show_polarization_mode,
+    bool show_latitude,
+    bool show_longitude,
+    bool show_altitude,
+    bool show_altitude_rate,
+    bool show_speed,
+    bool show_heading,
+    bool show_track,
+    bool show_sun_elevation,
+    bool show_sun_azimuth);  
 
-  void selectedFieldChanged(QString newFieldName);
-  void selectedFieldChanged(string fieldName);
+  void createStatusPanel();
+  void updateStatusPanel(const RadxRay *ray);
+  void setFontSize(int fontSize);
+
+  void setRadarName(string radarName, string siteName);  
+
+  string interpretSweepMode(Radx::SweepMode_t sweepMode);
+
+public slots:
+
+  void newDataFile();
+ 
+  //void setDataMissing(string fieldName, float missingValue);
+
+  //void selectedFieldChanged(QString newFieldName);
+  //void selectedFieldChanged(string fieldName);
   //void _updateField(size_t fieldId);
 
-  void selectedSweepChanged(int sweepNumber);
+  //void selectedSweepChanged(int sweepNumber);
 
 
 signals:
@@ -148,118 +156,28 @@ signals:
   ////////////////
 
   
-  void frameResized(const int width, const int height);
+  //void frameResized(const int width, const int height);
   //void setParamsFile();
 
-  void addField(QString fieldName);
+  //void addField(QString fieldName);
 
-  void newSweepData(int sweepNumber);
+  //void newSweepData(int sweepNumber);
 
 private:
 
   // from DisplayManager ...
-  ParamFile *_params;
+  //ParamFile *_params;
+
+  StatusPanelView *_view;
   
   // instrument platform details 
 
   RadxPlatform _platform;
 
-  // data fields
-  //  vector <DisplayField *> _fields;
-  DisplayFieldController *_displayFieldController;
-  bool _haveFilteredFields;
-  int _rowOffset;
-
-  // windows
-
-  QFrame *_main;
-
-  // status panel
-
-  QGroupBox *_statusPanel;
-  QGridLayout *_statusLayout;
-
-  QLabel *_radarName;
-  QLabel *_dateVal;
-  QLabel *_timeVal;
-
-  QLabel *_volNumVal;
-  QLabel *_sweepNumVal;
-
-  QLabel *_fixedAngVal;
-  QLabel *_elevVal;
-  QLabel *_azVal;
-
-  QLabel *_nSamplesVal;
-  QLabel *_nGatesVal;
-  QLabel *_gateSpacingVal;
-
-  QLabel *_pulseWidthVal;
-  QLabel *_prfVal;
-  QLabel *_nyquistVal;
-  QLabel *_maxRangeVal;
-  QLabel *_unambigRangeVal;
-  QLabel *_powerHVal;
-  QLabel *_powerVVal;
-
-  QLabel *_scanNameVal;
-  QLabel *_sweepModeVal;
-  QLabel *_polModeVal;
-  QLabel *_prfModeVal;
-
-  QLabel *_latVal;
-  QLabel *_lonVal;
-
-  QLabel *_altVal;
-  QLabel *_altLabel;
-
-  QLabel *_altRateVal;
-  QLabel *_altRateLabel;
-  double _prevAltKm;
-  RadxTime _prevAltTime;
-  double _altRateMps;
-
-  QLabel *_speedVal;
-  QLabel *_headingVal;
-  QLabel *_trackVal;
-
-  QLabel *_sunElVal;
-  QLabel *_sunAzVal;
-
-  QLabel *_georefsApplied;
-  QLabel *_geoRefRotationVal;
-  QLabel *_geoRefRollVal;
-  QLabel *_geoRefTiltVal;
-  QLabel *_cfacRotationVal;
-  QLabel *_cfacRollVal;
-  QLabel *_cfacTiltVal;
-
-  QLabel *_geoRefTrackRelRotationVal;
-  QLabel *_geoRefTrackRelAzVal;
-  QLabel *_geoRefTrackRelTiltVal;
-  QLabel *_geoRefTrackRelElVal;
-      
-
-  QLabel *_georefsAppliedLabel;
-  QLabel *_geoRefRotationLabel;
-  QLabel *_geoRefRollLabel;
-  QLabel *_geoRefTiltLabel;
-  QLabel *_cfacRotationLabel;
-  QLabel *_cfacRollLabel;
-  QLabel *_cfacTiltLabel;  
-
-  QLabel *_geoRefTrackRelRotationLabel;
-  QLabel *_geoRefTrackRelAzLabel;
-  QLabel *_geoRefTrackRelElLabel;
-  QLabel *_geoRefTrackRelTiltLabel;  
-  
-
   bool _altitudeInFeet;
 
   vector<QLabel *> _valsRight;
   
-
-
   // click location report dialog
   QDialog *_clickReportDialog;
   QGridLayout *_clickReportDialogLayout;
@@ -281,7 +199,7 @@ private:
 
   //virtual void _setTitleBar(const string &radarName) = 0;
 
-  // panels
+  /* panels
   
   void _createStatusPanel();
   void _createFieldPanel();
@@ -296,95 +214,9 @@ private:
 
   // setting text
 
-  void _setText(char *text, const char *format, int val);
-  void _setText(char *text, const char *format, double val);
-  
-  // adding vals / labels
-
-  QLabel *_newLabelRight(const string &text);
-
-  QLabel *_createStatusVal(const string &leftLabel,
-                           const string &rightLabel,
-                           int row, 
-                           int fontSize,
-                           QLabel **label = NULL);
-  
-  QLabel *_addLabelRow(QWidget *widget,
-                       QGridLayout *layout,
-                       const string &leftLabel,
-                       const string &rightLabel,
-                       int row,
-                       int fontSize = 0);
-
-  bool _firstTime;
-
-  // beam geometry
-  
-  int _nGates;
-  double _maxRangeKm;
-
-  // windows
-
-  QFrame *_ppiFrame;
-  PolarWidget *_ppi;
-
-  RhiWindow *_rhiWindow;
-  RhiWidget *_rhi;
-  bool _rhiWindowDisplayed;
-  bool _rhiMode;
-  
-  // azimuths for current ray
-
-  double _prevAz;
-  double _prevEl;
-  double _startAz;
-  double _endAz;
-
-  // times for rays
-
-  RadxTime _plotStartTime;
-  RadxTime _plotEndTime;
-  RadxTime _prevRayTime;
-  
-  // actions
-
-  QAction *_realtimeAct;
-  QAction *_showTimeControlAct;
-  QAction *_ringsAct;
-  QAction *_gridsAct;
-  QAction *_azLinesAct;
-  QAction *_showRhiAct;
-  
-  QAction *_timeControllerAct;
-  QAction *_openFileAct;
-  QAction *_saveFileAct;
-  QAction *_saveImageAct;
-
-  QAction *_examineAct;
-  QAction *_editAct;
-
-  // archive mode
-  
-  bool _archiveMode;
-  bool _archiveRetrievalPending;
-
-  bool _cancelled;
-  bool _batchEditing;
 
 
-  //////////////////////////////
-  // private methods
-
-  // set top bar
-
-  void _setTitleBar(const string &radarName);
-  
-  // local methods
-
-  //void _clear();
-  void _setupWindows();
-  void _createActions();
-  void _createMenus();
+  */
 
 private slots:
 
@@ -392,7 +224,37 @@ private slots:
   // Qt slots //
   //////////////
 
-  void _refresh();
+  //void _refresh();
+
+private:
+    bool _show_radar_name;
+    bool _show_site_name;
+    bool _show_fixed_angle;
+    bool _show_volume_number;
+    bool _show_sweep_number;
+    bool _show_n_samples;
+    bool _show_n_gates;
+    bool _show_gate_length;
+    bool _show_pulse_width;
+    bool _show_prf_mode;
+    bool _show_prf;
+    bool _show_nyquist;
+    bool _show_max_range;
+    bool _show_unambiguous_range;
+    bool _show_measured_power_h;
+    bool _show_measured_power_v;
+    bool _show_scan_name;
+    bool _show_scan_mode;
+    bool _show_polarization_mode;
+    bool _show_latitude;
+    bool _show_longitude;
+    bool _show_altitude;
+    bool _show_altitude_rate;
+    bool _show_speed;
+    bool _show_heading;
+    bool _show_track;
+    bool _show_sun_elevation;
+    bool _show_sun_azimuth;
 
 };
 

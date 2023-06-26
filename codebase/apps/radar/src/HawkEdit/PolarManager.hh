@@ -344,6 +344,8 @@ signals:
 
   void readDataFileSignal(vector<string> *selectedFields);
 
+  void dataFileRead();
+
 // end from DisplayManager
 
 private:
@@ -417,6 +419,8 @@ private:
 
   // status panel
 
+  StatusPanelController *_statusPanelController;
+  /*
   QGroupBox *_statusPanel;
   QGridLayout *_statusLayout;
 
@@ -494,10 +498,10 @@ private:
   QLabel *_geoRefTrackRelElLabel;
   QLabel *_geoRefTrackRelTiltLabel;  
   
-
+  */
   bool _altitudeInFeet;
 
-  vector<QLabel *> _valsRight;
+  //vector<QLabel *> _valsRight;
   
   // field panel
   
@@ -557,12 +561,14 @@ private:
 
   QLabel *_newLabelRight(const string &text);
 
+/*
   QLabel *_createStatusVal(const string &leftLabel,
                            const string &rightLabel,
                            int row, 
                            int fontSize,
                            QLabel **label = NULL);
-  
+ */
+
   QLabel *_addLabelRow(QWidget *widget,
                        QGridLayout *layout,
                        const string &leftLabel,
@@ -936,6 +942,8 @@ private slots:
   void EditRunScript(bool interactive = true);
 
   void inbetweenReadDataFile(vector<string> *selectedFields);
+
+  void metaDataChanged();
 
 };
 
