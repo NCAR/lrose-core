@@ -4390,42 +4390,11 @@ void PolarManager::_createStatusPanel()
 {
 
   connect(this, SIGNAL(dataFileRead()), this, SLOT(metaDataChanged()));
-    // _statusPanelController, SLOT(newDataFile));
-/* 
-  Qt::Alignment alignLeft(Qt::AlignLeft);
-  Qt::Alignment alignRight(Qt::AlignRight);
-  Qt::Alignment alignCenter(Qt::AlignCenter);
-  Qt::Alignment alignTop(Qt::AlignTop);
 
-  // status panel - rows of label value pairs
-  
-  _statusPanel = new QGroupBox(_main);
-  _statusLayout = new QGridLayout(_statusPanel);
-  _statusLayout->setVerticalSpacing(5);
-
-  int row = 0;
-  
-
-  // fonts
-  
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont font2 = dummy.font();
-  QFont font6 = dummy.font();
-  */
 
   ParamFile *_params = ParamFile::Instance();
   _statusPanelController->setFontSize(_params->label_font_size);
 
-  /*
-  int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size; //  + 2;
-  int fsize6 = _params->label_font_size; //  + 6;
-  font.setPixelSize(fsize);
-  font2.setPixelSize(fsize2);
-  font6.setPixelSize(fsize6);
-
-  */
 
   // radar and site name
   // radar name is specified in the params as a string
@@ -4440,14 +4409,9 @@ void PolarManager::_createStatusPanel()
   }
   _statusPanelController->setRadarName(_params->radar_name, site_name);
 
-  /*
-  _radarName->setText(rname.c_str());
-  _radarName->setFont(font6);
-  _statusLayout->addWidget(_radarName, row, 0, 1, 4, alignCenter);
-  row++;
-
   // date and time
-
+  _statusPanelController->createDateTime();
+/*
   _dateVal = new QLabel("9999/99/99", _statusPanel);
   _dateVal->setFont(font2);
   _statusLayout->addWidget(_dateVal, row, 0, 1, 2, alignCenter);
@@ -4457,14 +4421,14 @@ void PolarManager::_createStatusPanel()
   _timeVal->setFont(font2);
   _statusLayout->addWidget(_timeVal, row, 0, 1, 2, alignCenter);
   row++;
-
+*/
 
   // other labels.  Note that we set the minimum size of the column
   // containing the right hand labels in timerEvent() to prevent the
   // wiggling we were seeing in certain circumstances.  For this to work,
   // the default values for these fields must represent the maximum digits
   // posible for each field.
-
+/*
   _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
   _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
 

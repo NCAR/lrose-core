@@ -366,6 +366,10 @@ void StatusPanelController::setRadarName(string radarName, string siteName) {
   _view->setRadarName(radarName, siteName);
 };
 
+void StatusPanelController::createDateTime() {
+  _view->createDateTime();
+}
+
 // ??? the push should NOT come from the PolarManager;
 // the pull of information should come from the view via the controller!!!
 // PolarManager emits event
@@ -374,6 +378,8 @@ void StatusPanelController::setRadarName(string radarName, string siteName) {
 // StatusPanelView getValue (row, column) of table view.
 void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
 
+
+  _view->updateAzEl(ray->getAzimuthDeg(), ray->getElevationDeg());
 
   //if (_fixedAngVal) {  
   //  _setText(text, "%6.2f", ray->getFixedAngleDeg());
@@ -386,8 +392,7 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   //if (_show_sweep_number)
   //  _view->setSweepNum(ray->getSweepNumber());
 
-    //ray->getElevationDeg(),
-    //ray->getAzimuthDeg(),
+
 
   if (_show_fixed_angle) 
     _view->setFixedAngleDeg(ray->getFixedAngleDeg());

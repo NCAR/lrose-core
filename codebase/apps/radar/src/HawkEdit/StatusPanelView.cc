@@ -124,7 +124,7 @@ StatusPanelView::StatusPanelView(QWidget *parent)
   _nGates = 1000;
   _maxRangeKm = 1.0;
 
-  _nrows = 0;
+  _nrows = 2;  // first three rows are radar name, date, and time
 
 
   // set up windows
@@ -385,8 +385,8 @@ void StatusPanelView::setFontSize(int params_label_font_size) {
   font2 = dummy.font();
   font6 = dummy.font();
   int fsize = params_label_font_size;
-  int fsize2 = params_label_font_size; //  + 2;
-  int fsize6 = params_label_font_size; //  + 6;
+  int fsize2 = params_label_font_size + 2;
+  int fsize6 = params_label_font_size + 6;
   font.setPixelSize(fsize);
   font2.setPixelSize(fsize2);
   font6.setPixelSize(fsize6);
@@ -654,14 +654,14 @@ void StatusPanelView::_init()
   setLayout(_statusLayout);
   //_statusLayout->setVerticalSpacing(5);
 
-  QLabel *hello = new QLabel();
-  hello->setText("hello");
-  _statusLayout->addWidget(hello);
+  //QLabel *hello = new QLabel();
+  //hello->setText("hello");
+  //_statusLayout->addWidget(hello);
 
   //int row = 0;
 
-  _elevVal = _createStatusVal("Elev", "-99.99", 45); // _fsize2);
-  _azVal = _createStatusVal("Az", "-999.99", 45); // _fsize2);
+  _elevVal = _createStatusVal("Elev", "-99.99", _fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", _fsize2);
   
 }
 
@@ -677,23 +677,26 @@ void StatusPanelView::setRadarName(string radarName, string siteName) {
   }
   _radarName->setText(rname.c_str());
   _radarName->setFont(font6);
-  _statusLayout->addWidget(_radarName); //, row, 0, 1, 4, alignCenter);
-  //row++;
+
+  // always put radar name at row zero
+  //Qt::Alignment alignCenter(Qt::AlignCenter); 
+  _statusLayout->addWidget(_radarName, _radarNameRow, 0, 1, 2, Qt::AlignCenter);
 }
 
-/*
+void StatusPanelView::createDateTime() {
   // date and time
 
-  _dateVal = new QLabel("9999/99/99", _statusPanel);
+  _dateVal = new QLabel("9999/99/99", this);
   _dateVal->setFont(font2);
-  _statusLayout->addWidget(_dateVal); // , row, 0, 1, 2, alignCenter);
-  row++;
+  _statusLayout->addWidget(_dateVal, _dateRow, 0, 1, 2, Qt::AlignCenter); // , row, 0, 1, 2, alignCenter);
+  
 
-  _timeVal = new QLabel("99:99:99.999", _statusPanel);
+  _timeVal = new QLabel("99:99:99.999", this);
   _timeVal->setFont(font2);
-  _statusLayout->addWidget(_timeVal); // , row, 0, 1, 2, alignCenter);
-  row++;
-
+  _statusLayout->addWidget(_timeVal, _timeRow, 0, 1, 2, Qt::AlignCenter); // , row, 0, 1, 2, alignCenter);
+  
+}
+/*
 
   // other labels.  Note that we set the minimum size of the column
   // containing the right hand labels in timerEvent() to prevent the
@@ -1151,21 +1154,16 @@ void StatusPanelView::updateStatusPanel(
     _setText(text, "%6.2f", ray->getFixedAngleDeg());
     _fixedAngVal->setText(text);
   }
-  
-  if (_elevVal) {
-    if (fabs(ray->getElevationDeg()) < 1000) {
-      _setText(text, "%6.2f", ray->getElevationDeg());
-      _elevVal->setText(text);
+  */
+  void StatusPanelView::updateAzEl(double azDeg, double elDeg) {
+    if (abs(azDeg) < 1000) {
+      setDouble(azDeg, _azVal, 6, 2);
+    }
+    if (abs(elDeg) < 1000) {
+      setDouble(elDeg, _elevVal, 6, 2);
     }
   }
-
-  if (_azVal) {
-    if (fabs(ray->getAzimuthDeg()) < 1000) {
-      _setText(text, "%6.2f", ray->getAzimuthDeg());
-      _azVal->setText(text);
-    }
-  }
-  
+  /*
   if (_nSamplesVal) {
     _setText(text, "%d", (int) ray->getNSamples());
     _nSamplesVal->setText(text);

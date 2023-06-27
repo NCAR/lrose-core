@@ -111,7 +111,9 @@ public:
   void setVolumeNumber(int volumeNumber);
   void setFixedAngleDeg(double fixedAngleDeg);
   void setSweepNum(int sweepNumber);
+  void updateAzEl(double azDeg, double elDeg);
 
+  void createDateTime();
   void createFixedAngleDeg();
   void createVolumeNumber();  
   void updateTime(QDateTime rayTime, int nanoSeconds);
@@ -243,6 +245,10 @@ private:
   // sun position calculator
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
+
+  const static int _radarNameRow = 0;
+  const static int _dateRow = 1;
+  const static int _timeRow = 2; 
 
   
   void _init();

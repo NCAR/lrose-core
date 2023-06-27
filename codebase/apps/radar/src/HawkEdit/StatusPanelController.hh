@@ -133,6 +133,7 @@ public:
   void setFontSize(int fontSize);
 
   void setRadarName(string radarName, string siteName);  
+  void createDateTime();
 
   string interpretSweepMode(Radx::SweepMode_t sweepMode);
 
