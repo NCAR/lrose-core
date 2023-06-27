@@ -111,6 +111,8 @@ void ParamFile::_init() {
 
   _nGates = 1000;
   _maxRangeKm = 1.0;
+
+  label_font_size = 12;
   
   //_archiveStartTimeEdit = NULL;
   //_archiveEndTimeEdit = NULL;

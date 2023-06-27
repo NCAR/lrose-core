@@ -112,8 +112,6 @@ public:
   void setFixedAngleDeg(double fixedAngleDeg);
   void setSweepNum(int sweepNumber);
 
-  void createStatusPanel();
-
   void createFixedAngleDeg();
   void createVolumeNumber();  
   void updateTime(QDateTime rayTime, int nanoSeconds);
@@ -247,6 +245,7 @@ private:
   SunPosn _sunPosn;
 
   
+  void _init();
 
 
   //void _createClickReportDialog();

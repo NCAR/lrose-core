@@ -139,6 +139,22 @@ StatusPanelView::StatusPanelView(QWidget *parent)
 
   //connect(this, SIGNAL(readDataFileSignal(vector<string> *)), this, SLOT(inbetweenReadDataFile(vector<string> *)));  
   //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
+
+
+  //setGeometry(30, 30, 300, 100);
+
+QPalette pal = QPalette();
+
+// set black background
+// Qt::black / "#000000" / "black"
+pal.setColor(QPalette::Window, Qt::yellow);
+
+setAutoFillBackground(true); 
+setPalette(pal);
+show();
+
+
+  _init();
 }
 
 // destructor
@@ -623,7 +639,7 @@ void StatusPanelView::clear() {
 //////////////////////////////////////////////
 // create the status panel
 
-void StatusPanelView::createStatusPanel()
+void StatusPanelView::_init()
 {
  
   Qt::Alignment alignLeft(Qt::AlignLeft);
@@ -633,36 +649,27 @@ void StatusPanelView::createStatusPanel()
 
   // status panel - rows of label value pairs
   
-  _statusPanel = new QGroupBox(_parent);
-  _statusLayout = new QGridLayout(_statusPanel);
+  //_statusPanel = new QGroupBox(_parent);
+  _statusLayout = new QGridLayout(this);
+  setLayout(_statusLayout);
   //_statusLayout->setVerticalSpacing(5);
+
+  QLabel *hello = new QLabel();
+  hello->setText("hello");
+  _statusLayout->addWidget(hello);
 
   //int row = 0;
 
-  _elevVal = _createStatusVal("Elev", "-99.99", _fsize2);
-  _azVal = _createStatusVal("Az", "-999.99", _fsize2);
+  _elevVal = _createStatusVal("Elev", "-99.99", 45); // _fsize2);
+  _azVal = _createStatusVal("Az", "-999.99", 45); // _fsize2);
   
-  // fonts
-  /*
-  QLabel dummy;
-  QFont font = dummy.font();
-  QFont font2 = dummy.font();
-  QFont font6 = dummy.font();
-  int fsize = _params->label_font_size;
-  int fsize2 = _params->label_font_size; //  + 2;
-  int fsize6 = _params->label_font_size; //  + 6;
-  font.setPixelSize(fsize);
-  font2.setPixelSize(fsize2);
-  font6.setPixelSize(fsize6);
-*/
-
 }
 
   // radar and site name
   
 
 void StatusPanelView::setRadarName(string radarName, string siteName) {
-  _radarName = new QLabel(_statusPanel);
+  _radarName = new QLabel(this);
   string rname(radarName);
   if (siteName.length() > 0) {
     rname.append(":");
@@ -767,9 +774,7 @@ void StatusPanelView::setFixedAngleDeg(double fixedAngleDeg) {
 }
   
 void StatusPanelView::createFixedAngleDeg() {
-  if (_fixedAngVal == NULL) {
     _fixedAngVal = _createStatusVal("Fixed ang", "-99.99", _fsize2);
-  } 
 }
 
 void StatusPanelView::setVolumeNumber(int volumeNumber) {
@@ -777,9 +782,7 @@ void StatusPanelView::setVolumeNumber(int volumeNumber) {
 }
 
 void StatusPanelView::createVolumeNumber() {
-    if (_volNumVal == NULL) {    
       _volNumVal = _createStatusVal("Volume", "0", _fsize);
-    }
 }
 
 //void StatusPanelView::setSweepNum(int sweepNumber) {
@@ -1013,7 +1016,7 @@ QLabel *StatusPanelView::_createStatusVal(const string &leftLabel,
 {
   _nrows += 1;
   int row = _nrows;
-  QLabel *left = new QLabel(_statusPanel);
+  QLabel *left = new QLabel(this);
   left->setText(leftLabel.c_str());
   Qt::Alignment alignRight(Qt::AlignRight);
   _statusLayout->addWidget(left, row, 0, alignRight);
@@ -1021,7 +1024,7 @@ QLabel *StatusPanelView::_createStatusVal(const string &leftLabel,
   //  *label = left;
   //}
 
-  QLabel *right = new QLabel(_statusPanel);
+  QLabel *right = new QLabel(this);
   right->setText(rightLabel.c_str());
   Qt::Alignment alignCenter(Qt::AlignCenter);
   _statusLayout->addWidget(right, row, 1, alignRight);

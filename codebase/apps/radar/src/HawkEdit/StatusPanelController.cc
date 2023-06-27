@@ -357,6 +357,8 @@ void StatusPanelController::createStatusPanel() {
   }
 */
 
+  _view->show();
+
 }
 
 

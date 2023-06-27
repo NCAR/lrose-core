@@ -554,10 +554,6 @@ void PolarManager::_setupWindows()
   connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
 	  this, SLOT(ShowContextMenu(const QPoint &)));
 
-  // create status panel
-
-  _createStatusPanel();
-
   // create fields panel
   
   //_createFieldPanel();
@@ -584,9 +580,11 @@ void PolarManager::_setupWindows()
 
   // add widgets
 
-
+  // create status panel
   StatusPanelView *_statusPanelView = new StatusPanelView(_main);
   _statusPanelController = new StatusPanelController(_statusPanelView);
+  _createStatusPanel();
+  _statusPanelView->show();
 
   mainLayout->addWidget(_statusPanelView);
   mainLayout->addWidget(_fieldPanel);
@@ -4391,7 +4389,7 @@ void PolarManager::showBoundaryEditor()
 void PolarManager::_createStatusPanel()
 {
 
-  //connect(this, SIGNAL(dataFileRead), this, metaDataChanged());
+  connect(this, SIGNAL(dataFileRead()), this, SLOT(metaDataChanged()));
     // _statusPanelController, SLOT(newDataFile));
 /* 
   Qt::Alignment alignLeft(Qt::AlignLeft);
@@ -4407,7 +4405,7 @@ void PolarManager::_createStatusPanel()
 
   int row = 0;
   
-  ParamFile *_params = ParamFile::Instance();
+
   // fonts
   
   QLabel dummy;
@@ -4415,7 +4413,10 @@ void PolarManager::_createStatusPanel()
   QFont font2 = dummy.font();
   QFont font6 = dummy.font();
   */
+
+  ParamFile *_params = ParamFile::Instance();
   _statusPanelController->setFontSize(_params->label_font_size);
+
   /*
   int fsize = _params->label_font_size;
   int fsize2 = _params->label_font_size; //  + 2;
