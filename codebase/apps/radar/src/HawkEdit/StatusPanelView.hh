@@ -116,7 +116,8 @@ public:
   void createDateTime();
   void createFixedAngleDeg();
   void createVolumeNumber();  
-  void updateTime(QDateTime rayTime, int nanoSeconds);
+  void setDateTime(int year, int month, int day,
+    int hour, int minutes, int seconds, int nanoSeconds);
 
 
 public slots:
@@ -249,6 +250,7 @@ private:
   const static int _radarNameRow = 0;
   const static int _dateRow = 1;
   const static int _timeRow = 2; 
+  const static int _startingRow = 2;
 
   
   void _init();

@@ -378,6 +378,20 @@ void StatusPanelController::createDateTime() {
 // StatusPanelView getValue (row, column) of table view.
 void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
 
+  if (ray == NULL) 
+    return;
+
+  DateTime rayTime(ray->getTimeSecs());
+  //sprintf(text, "%.4d/%.2d/%.2d",
+  //        rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
+
+  //sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+  //        rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+  //        ((int) ray->getNanoSecs() / 1000000));
+
+  _view->setDateTime(rayTime.getYear(), rayTime.getMonth(), rayTime.getDay(),
+    rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+    ray->getNanoSecs());
 
   _view->updateAzEl(ray->getAzimuthDeg(), ray->getElevationDeg());
 

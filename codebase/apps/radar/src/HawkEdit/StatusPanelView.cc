@@ -124,7 +124,7 @@ StatusPanelView::StatusPanelView(QWidget *parent)
   _nGates = 1000;
   _maxRangeKm = 1.0;
 
-  _nrows = 2;  // first three rows are radar name, date, and time
+  _nrows = _startingRow;  // first three rows are radar name, date, and time
 
 
   // set up windows
@@ -168,7 +168,7 @@ StatusPanelView::~StatusPanelView()
 
 void StatusPanelView::reset() {
    // delete all the labels and set the number of rows to zero
-  _nrows = 0;
+  _nrows = _startingRow;
 }
 
 
@@ -218,157 +218,9 @@ void StatusPanelView::_locationClicked(double xkm, double ykm,
           ((int) (ray->getNanoSecs() / 1000000)));
   _timeClicked->setText(text);
   
-  _setText(text, "%6.2f", ray->getElevationDeg());
-  _elevClicked->setText(text);
-  
-  _setText(text, "%6.2f", ray->getAzimuthDeg());
-  _azClicked->setText(text);
-  
-  _setText(text, "%d", gate);
-  _gateNumClicked->setText(text);
-  
-  _setText(text, "%6.2f", range);
-  _rangeClicked->setText(text);
 
-  _displayFieldController->setForLocationClicked(-9999.0, "----");  
-  
-  vector<RadxField *> flds = ray->getFields();
-  for (size_t ifield = 0; ifield < flds.size(); ifield++) {
-    const RadxField *field = flds[ifield];
 
-    const string fieldName = field->getName();
-    if (fieldName.size() == 0) {
-      continue;
-    }
-    Radx::fl32 *data = (Radx::fl32 *) field->getData();
-    double val = data[gate];
-    const string fieldUnits = field->getUnits();
 
-    LOG(DEBUG) << "Field name, selected name: "
-	   << fieldName << ", "
-	   << _selectedName;
-    
-    if (fieldName == _selectedName) {
-      char text[128];
-      if (fabs(val) < 10000) {
-        sprintf(text, "%g %s", val, fieldUnits.c_str());
-      } else {
-        sprintf(text, "%g %s", -9999.0, fieldUnits.c_str());
-      }
-      _valueLabel->setText(text);
-    }
-
-    LOG(DEBUG) << "Field name, units, val: "
-	   << field->getName() << ", "
-	   << field->getUnits() << ", "
-	   << val;
-    
-    char text[128];
-    if (fabs(val) > 10000) {
-      sprintf(text, "----");
-    } else if (fabs(val) > 10) {
-      sprintf(text, "%.2f", val);
-    } else {
-      sprintf(text, "%.3f", val);
-    }
-
-    _displayFieldController->setForLocationClicked(fieldName, val, text);
-
-  } // ifield
-
-  // update the status panel
-  
-  _updateStatusPanel(ray);
-    
-}
-
-// no prompting, and use a progress bar ...
-void StatusPanelView::_goHere(int nFiles, string saveDirName) {
-
-    QProgressDialog progress("Saving files...", "Cancel", 0, nFiles, this);
-    progress.setWindowModality(Qt::WindowModal);
-    progress.setAutoReset(false); 
-    progress.setAutoClose(false);
-    progress.setValue(1);
-    progress.show();
-
-    //progress.exec();
-    
-    // for each file in timeNav ...
-    int i=0;
-    bool cancel = false;
-
-    while (i<nFiles && !cancel) {
-        
-        if (progress.wasCanceled()) {
-          cancel = true;
-          break;          
-        }
-
-        try {
-          // the active one in memory (i.e. the selected file)
-          // may have unsaved changes, so treat it differently.
-          if (i == _timeNavController->getSelectedArchiveFileIndex()) {
-            DataModel *dataModel = DataModel::Instance();
-            string currentFile = _timeNavController->getSelectedArchiveFile();
-            string saveFile = _combinePathFile(saveDirName, _fileName(QString(currentFile.c_str())));
-            dataModel->writeWithMergeData(saveFile, currentFile);
-          }  else {
-
-            string versionName = _undoRedoController->getCurrentVersion(i);
-            string realName = _timeNavController->getArchiveFilePath(i);
-            // versionName is something like v1, or v2, etc.
-            // realName is something like cfrad_yyyymmdd...
-            string justTheFileName = _fileName(QString(realName.c_str()));
-            string sourcePathFile;
-            if (versionName.empty()) {
-              // this is the original version; and the name is NOT v1, v2, etc.
-              //versionName = _timeNavController->getArchiveFilePath(i);
-              sourcePathFile = realName;
-              // TODO: just copy the file to the destination
-            } else {
-              sourcePathFile = _combinePathFile(versionName, justTheFileName);
-            }
-            const char *source_path = sourcePathFile.c_str();
-            string savePathFile = _combinePathFile(saveDirName, justTheFileName);
-            const char *dest_path = savePathFile.c_str();
-
-            cout << "source_path = " << source_path << endl;
-            cout << "dest_path = " << dest_path << endl;
-
-            // use toolsa utility
-            // Returns -1 on error, 0 otherwise
-            // filecopy_by_name doesnn't work;
-            // also, need to merge the files with the original file,
-            // since we have saved a delta ...
-            string originalPath = _timeNavController->getArchiveFilePath(i);
-
-            DataModel *dataModel = DataModel::Instance();
-            int return_val = dataModel->mergeDataFiles(dest_path, source_path, originalPath);
-            if (return_val != 0) {
-              stringstream ss;
-              ss << "could not save file: " << dest_path;
-              errorMessage("Error", ss.str());
-            }
-
-          }
-        } catch (FileIException &ex) {
-          this->setCursor(Qt::ArrowCursor);
-          return;
-        }
-        i+= 1;
-        progress.setValue(i);
-        stringstream m;
-        m << i+1 << " of " << nFiles;
-        QString QStr = QString::fromStdString(m.str());
-        progress.setLabelText(QStr);
-        QCoreApplication::processEvents();
-    } // end while loop each file in timeNav and !cancel
-    if (cancel) {
-      progress.setLabelText("cancelling ...");
-      QCoreApplication::processEvents();
-    }
-}
 */
 
 //
@@ -1082,22 +934,26 @@ QLabel *StatusPanelView::_addLabelRow(QWidget *parent,
 //////////////////////////////////////////////
 // update the status panel
 
-void StatusPanelView::updateTime(QDateTime rayTime, int nanoSeconds) {
+void StatusPanelView::setDateTime(int year, int month, int day,
+  int hour, int minutes, int seconds,  int nanoSeconds) {
 
   // set time etc
 
-/*
-  char text[1024];
+  //char text[1024];
 
-  sprintf(text, "%.4d/%.2d/%.2d",
-          rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateVal->setText(text);
+  //sprintf(text, "%.4d/%.2d/%.2d",
+  //        rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
 
-  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
-          rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) nanoSeconds / 1000000));
-  _timeVal->setText(text);
-*/
+  QDate rayDate(year, month, day);
+  _dateVal->setText(rayDate.toString("yyyy/MM/dd"));
+
+  //sprintf(text, "%.2d:%.2d:%.2d.%.3d",
+  //        rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
+  //        ((int) nanoSeconds / 1000000));
+
+  QTime rayTime(hour, minutes, seconds, (int) nanoSeconds / 1000000);
+  _timeVal->setText(rayTime.toString("hh:mm:ss.zzz"));
+
 }
 
 /*
