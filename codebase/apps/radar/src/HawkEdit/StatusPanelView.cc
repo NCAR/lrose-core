@@ -179,50 +179,6 @@ void StatusPanelView::_refresh()
 {
 }
 
-/*
-////////////////////////////////////////////////////////////////////////
-// respond to a change in click location on one of the windows
-
-void StatusPanelView::_locationClicked(double xkm, double ykm,
-                                    const RadxRay *ray)
-{
-
-  LOG(DEBUG) << "*** Entering StatusPanelView::_locationClicked()";
-  
-  double range = sqrt(xkm * xkm + ykm * ykm);
-  int gate = (int) 
-    ((range - ray->getStartRangeKm()) / ray->getGateSpacingKm() + 0.5);
-
-  if (gate < 0 || gate >= (int) ray->getNGates())
-  {
-    //user clicked outside of ray
-    return;
-  }
-
-  if (_params->debug) {
-    LOG(DEBUG) << "Clicked on location: xkm, ykm: " << xkm << ", " << ykm;
-    LOG(DEBUG) << "  range, gate: " << range << ", " << gate;
-    LOG(DEBUG) << "  az, el from ray: "
-         << ray->getAzimuthDeg() << ", "
-         << ray->getElevationDeg();
-  }
-
-  DateTime rayTime(ray->getTimeSecs());
-  char text[256];
-  sprintf(text, "%.4d/%.2d/%.2d",
-          rayTime.getYear(), rayTime.getMonth(), rayTime.getDay());
-  _dateClicked->setText(text);
-
-  sprintf(text, "%.2d:%.2d:%.2d.%.3d",
-          rayTime.getHour(), rayTime.getMin(), rayTime.getSec(),
-          ((int) (ray->getNanoSecs() / 1000000)));
-  _timeClicked->setText(text);
-  
-
-
-
-*/
-
 //
 // There are set one (when the parameter file changes) 
 //       - set font size
@@ -514,7 +470,23 @@ void StatusPanelView::_init()
 
   _elevVal = _createStatusVal("Elev", "-99.99", _fsize2);
   _azVal = _createStatusVal("Az", "-999.99", _fsize2);
+
+/*
+struct S {
+  string label; // =   "Volume",
+  string emptyValue; // =  "0",
+  string format;
+  QLabel *value; 
+  int fontSize;
+};
+*/
+
+  // what to do about float format?
+  _metaDataS[FixedAngleKey] = {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize2};
   
+  _metaDataS[VolumeNumberKey] = {"Volume", "0", "%d", NULL, _fsize};  
+  
+  _metaDataS[SweepNumberKey] = {"Sweep", "0", "%d", NULL, _fsize};  
 }
 
   // radar and site name
@@ -556,27 +528,6 @@ void StatusPanelView::createDateTime() {
   // the default values for these fields must represent the maximum digits
   // posible for each field.
 
- Use int QGridLayout::rowCount() const to get the last row instead of keeping the count
-
-  _elevVal = _createStatusVal("Elev", "-99.99", row++, fsize2);
-  _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
-*/
-
-/*
-template<typename T>
-void StatusPanelView::f(T s)
-{
-    std::cout << s << '\n';
-}
- 
-//int main()
-//{
-    f<double>(1); // instantiates and calls f<double>(double)
-    f<>('a');     // instantiates and calls f<char>(char)
-    f(7);         // instantiates and calls f<int>(int)
-    void (*pf)(std::string) = f; // instantiates f<string>(string)
-    pf("∇");                     // calls f<string>(string)
-//}
 */
 
 /*
@@ -584,7 +535,7 @@ void StatusPanelView::f(T s)
 // s is the value
 // template<typename T>
 */
-    void StatusPanelView::setInt(int s, QLabel *label, string format) {
+    void StatusPanelView::setInt(int s, QLabel *label) { // , string format) {
       if (label != NULL) {
 
         int value = -9999;
@@ -633,108 +584,121 @@ void StatusPanelView::createFixedAngleDeg() {
 }
 
 void StatusPanelView::setVolumeNumber(int volumeNumber) {
-  setInt(volumeNumber, _volNumVal, "%d");
+  setInt(volumeNumber, _volNumVal);// , "%d");
 }
 
 void StatusPanelView::createVolumeNumber() {
-      _volNumVal = _createStatusVal("Volume", "0", _fsize);
+  _volNumVal = _createStatusVal("Volume", "0", _fsize);
 }
 
-//void StatusPanelView::setSweepNum(int sweepNumber) {
-//  set<int>(_sweepNumVal, "%d");
-  /*
-  char text[1024];
-  if (_sweepNumVal != NULL) {
-    _setText(text, "%d", sweepNumber);
-    _sweepNumVal->setText(text);
-  }
-  */
-//}
+void StatusPanelView::setSweepNum(int sweepNumber) {
+  setInt(sweepNumber, _sweepNumVal); //  "%d");
+}
+/*
+void StatusPanelView::createSweepNumber() {
+  // create the label 
+  _sweepNumVal = _createStatusVal("Sweep", "0", _fsize);
+} 
+*/ 
+//                <Key,         Hash,       KeyEqual,    Allocator>::find
+//                <data_type> 
+//std::unordered_map<int, S> hashy;
+//hashy.insert(obj);
+//hashy.find("one"); // returns an iterator ...
 
-/*  
-  if (_params->show_status_in_gui.volume_number) {
-    _volNumVal = _createStatusVal("Volume", "0", row++, fsize);
-  } else {
-    _volNumVal = NULL;
-  }
-  
-  if (_params->show_status_in_gui.sweep_number) {
-    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
-  } else {
-    _sweepNumVal = NULL;
-  }
+/*
+struct S {
+  string label; // =   "Volume",
+  string emptyValue; // =  "0",
+  string format;
+  QLabel *value; 
+  int fontSize;
+};
+*/
 
-  if (_params->show_status_in_gui.n_samples) {
-    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
-  } else {
-    _nSamplesVal = NULL;
-  }
+void StatusPanelView::create(int key) {
+  //_view->create(SweepNumber(SweepNumKey)); 
+  S *s = &_metaDataS[key];
+  s->value = _createStatusVal(s->label, s->emptyValue, s->fontSize);
+  hashy[key] = s; 
+  // hashy[key] now has the pointer to the QLabel for the sweep number
+}
 
-  if (_params->show_status_in_gui.n_gates) {
-    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
-  } else {
-    _nGatesVal = NULL;
-  }
+// _view->set(SweepNumKey, ray->getSweepNumber());
+void StatusPanelView::set(int key, int value) {
+  S *s = hashy[key];
+  setInt(value, s->value); // , "%d");  // set for int always uses "%d" format.
+  //setInt(value, hashy[key], hashyFormat[key]);
+}
 
-  if (_params->show_status_in_gui.gate_length) {
+// each of theses should be a class/factory object that are placed in a list
+// the class must associate the ray varable with the panel variable.
+// Use parallel lists / arrays.
+// clear and initialize when new parameter file is read.
+// stuff the label pointer into a list
+// stuff the values from the ray into a list
+// create: stuff the (strings, value as a string, font size) into a list
+//    set: stuff the ray values into a list
+// loop through the lists in parallel and set the values.
+// loop through the list and create the labels.
+// so much less code to maintain.
+
+/*
+void StatusPanelView::setNSamples(int nSamples) {
+  setInt(nSamples, _nSamplesVal, "%d");  
+}
+
+void StatusPanelView::updateStatusPanel(vector<double>
+
+
+void StatusPanelView::createNSamples() {
+    _nSamplesVal = _createStatusVal("N samp", "0", _fsize);
+}
+
+void StatusPanelView::createNGates() {
+    _nGatesVal = _createStatusVal("N gates", "0", _fsize);
+}
+
+void StatusPanelView::createGateSpacing() {
     _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
-  } else {
-    _gateSpacingVal = NULL;
-  }
+}
   
-  if (_params->show_status_in_gui.pulse_width) {
+void StatusPanelView::createPulseWidth() {  
     _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
-  } else {
-    _pulseWidthVal = NULL;
-  }
+} 
 
-  if (_params->show_status_in_gui.prf_mode) {
+void StatusPanelView::createPrfMode() {
     _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
-  } else {
-    _prfModeVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.prf) {
+void StatusPanelView::createPrf() {
     _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
-  } else {
-    _prfVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.nyquist) {
+void StatusPanelView::createNyquist() {
     _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
-  } else {
-    _nyquistVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.max_range) {
+void StatusPanelView::createMaxRange() {
     _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
-  } else {
-    _maxRangeVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.unambiguous_range) {
+void StatusPanelView::createUnambiguousRange() {
     _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
-  } else {
-    _unambigRangeVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.measured_power_h) {
+void StatusPanelView::createPowerH() {
     _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
-  } else {
-    _powerHVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.measured_power_v) {
+void StatusPanelView::createPowerV() {
     _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
-  } else {
-    _powerVVal = NULL;
-  }
+}
 
-  if (_params->show_status_in_gui.scan_name) {
+void StatusPanelView::createScanName() {
     _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
-  } else {
-    _scanNameVal = NULL;
-  }
+}
+
 
   if (_params->show_status_in_gui.scan_mode) {
     _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
@@ -785,31 +749,31 @@ void StatusPanelView::createVolumeNumber() {
   }
 
   if (_params->show_status_in_gui.speed) {
-    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
+    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", _fsize);
   } else {
     _speedVal = NULL;
   }
 
   if (_params->show_status_in_gui.heading) {
-    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
+    _headingVal = _createStatusVal("Heading(deg)", "-999.99", _fsize);
   } else {
     _headingVal = NULL;
   }
 
   if (_params->show_status_in_gui.track) {
-    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
+    _trackVal = _createStatusVal("Track(deg)", "-999.99", _fsize);
   } else {
     _trackVal = NULL;
   }
 
   if (_params->show_status_in_gui.sun_elevation) {
-    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
+    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", _fsize);
   } else {
     _sunElVal = NULL;
   }
 
   if (_params->show_status_in_gui.sun_azimuth) {
-    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
+    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", _fsize);
   } else {
     _sunAzVal = NULL;
   }

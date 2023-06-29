@@ -45,6 +45,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 //#include "Args.hh"
 //#include "Params.hh"
@@ -118,6 +119,13 @@ public:
   void createVolumeNumber();  
   void setDateTime(int year, int month, int day,
     int hour, int minutes, int seconds, int nanoSeconds);
+
+  void create(int key);
+  void set(int key, int value);
+
+const static int FixedAngleKey = 0;
+const static int VolumeNumberKey = 1;
+const static int SweepNumberKey = 2;
 
 
 public slots:
@@ -270,7 +278,7 @@ private:
   
   // adding vals / labels
 
-  void setInt(int s, QLabel *label, string format);
+  void setInt(int s, QLabel *label); // , string format);
   void setDouble(double s, QLabel *label, int fieldWidth, int precision);
 
   double _getInstHtKm(const RadxRay *ray);
@@ -346,6 +354,17 @@ private:
   int _fsize6;
 
   int _nrows;
+
+  struct S {
+    string label; // =   "Volume",
+    string emptyValue; // =  "0",
+    string format;
+    QLabel *value; 
+    int fontSize;
+  };
+
+   S _metaDataS[100];
+   std::unordered_map<int, S *> hashy;  
 
   // actions
 

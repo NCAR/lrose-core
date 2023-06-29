@@ -184,7 +184,7 @@ void StatusPanelController::createStatusPanel() {
 //  _azVal = _createStatusVal("Az", "-999.99", row++, fsize2);
 
   if (_show_fixed_angle) {
-    _view->createFixedAngleDeg();
+    _view->create(StatusPanelView::FixedAngleKey);
   }
     //_fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2); // TO VIEW???
   //} //else {
@@ -199,31 +199,44 @@ void StatusPanelController::createStatusPanel() {
   //} //else {
    // _volNumVal = NULL;
   //}
-  /*
+  
   if (_show_sweep_number) {
+    _view->create(StatusPanelView::SweepNumberKey);
+    /*
     _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
   } else {
     _sweepNumVal = NULL;
+    */
   }
-
+  /*
   if (_show_n_samples) {
+    _view->createNSamples();
+    
     _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
   } else {
     _nSamplesVal = NULL;
+    
   }
 
   if (_show_n_gates) {
+    _view->createNGates();
+    
     _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
   } else {
     _nGatesVal = NULL;
+    
   }
-
+  
   if (_show_gate_length) {
+    _view->createGateSpacing();
+    
     _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
   } else {
     _gateSpacingVal = NULL;
+    
   }
-  
+  */
+  /*
   if (_show_pulse_width) {
     _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
   } else {
@@ -351,11 +364,13 @@ void StatusPanelController::createStatusPanel() {
   }
 
   if (_show_sun_azimuth) {
+    _view->createSunAzVal();
+    /*
     _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
   } else {
     _sunAzVal = NULL;
   }
-*/
+  */
 
   _view->show();
 
@@ -400,16 +415,24 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   //  _fixedAngVal->setText(text);
   //}
 
+  //   _view->set(<key>, <value>) // one for int, one for float, one for string.
+  //values.setSet(nDisplayValues);
+
   if (_show_volume_number)
-    _view->setVolumeNumber(ray->getVolumeNumber());
+    //_view->setValue(index, value) // requires templates in view/Q_OBJECT
+    //_values->push_back(format(ray->getVolumeNumber()); // requires the format to be kept by the controller;
+      // AND cannot use QString for formatting.  Grrh! 
+      // just use separate functions darn it!!!
+      // make each row it's own class??? with format info, etc???
+    _view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
 
-  //if (_show_sweep_number)
-  //  _view->setSweepNum(ray->getSweepNumber());
-
-
+  if (_show_sweep_number)
+    _view->set(StatusPanelView::SweepNumberKey, ray->getSweepNumber());
+    // _view->setSweepNum(ray->getSweepNumber());
 
   if (_show_fixed_angle) 
-    _view->setFixedAngleDeg(ray->getFixedAngleDeg());
+    _view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
+  
   /*
   if (_show_n_samples) 
     _view->setNSamples(ray->getNSamples());
@@ -425,7 +448,8 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
     _view->setNyquist(ray->getNyquistMps());
     */
     /*
-    if (_show_max_range) _view->set
+
+    if (_show_max_range) _view->set("maxRange", value)
     if (_show_unambiguous_range) _view->set
     if (_show_measured_power_h) _view->set
     if (_show_measured_power_v) _view->set
@@ -441,10 +465,9 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
     if (_show_track) _view->set
     if (_show_sun_elevation) _view->set
     if (_show_sun_azimuth) _view->set
+*/
 
-  _view->updateStatusPanel(
-
-    
+    /*
     ray->getGateSpacingKm(),
     ray->getPulseWidthUsec(),
     ray->getNyquistMps()
