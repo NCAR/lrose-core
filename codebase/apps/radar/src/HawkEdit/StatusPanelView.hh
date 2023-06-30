@@ -122,11 +122,77 @@ public:
 
   void create(int key);
   void set(int key, int value);
+  //void set(int key, double value);
 
 const static int FixedAngleKey = 0;
 const static int VolumeNumberKey = 1;
 const static int SweepNumberKey = 2;
 
+const static int NSamplesKey = 3;
+const static int NGatesKey = 4;
+const static int GateSpacingKey = 5;
+const static int PulseWidthKey = 6;
+const static int PrfModeKey = 7;
+const static int PrfKey = 8;
+const static int NyquistKey = 9;
+const static int MaxRangeKey = 10;
+const static int UnambiguousRangeKey = 11;
+const static int PowerHKey = 12;
+const static int PowerVKey = 13;
+const static int ScanNameKey = 14;
+
+const static int SweepModeKey = 15;
+const static int PolarizationModeKey = 16;
+const static int LatitudeKey = 17;
+const static int LongitudeKey = 18;
+const static int AltitudeInFeetKey = 19;
+const static int AltitudeInKmKey = 20;
+
+const static int AltitudeRateFtsKey = 21;
+const static int AltitudeRateMsKey = 22;
+const static int SpeedKey = 23;
+const static int HeadingKey = 24;
+const static int TrackKey = 25;
+const static int SunElevationKey = 26;
+const static int SunAzimuthKey = 27;
+
+const static int GeoRefsAppliedKey = 28;
+const static int GeoRefRollKey = 29;
+const static int GeoRefTiltKey = 30;
+
+const static int GeoRefTrackRelRotationKey = 31;
+const static int GeoRefTrackRelTiltKey = 32;
+const static int GeoRefTrackRelAzimuthKey = 33;
+const static int GeoRefTrackRelElevationKey = 34;
+
+const static int CfacRotationKey = 35;
+const static int CfacRollKey = 36;
+const static int CfacTiltKey = 37;
+
+const static int LastKey = 37;
+
+
+  typedef struct {
+    string label; // =   "Volume",
+    string emptyValue; // =  "0",
+    string format;
+    QLabel *value; 
+    int fontSize;
+  } S;
+
+   S _metaDataS[100]; 
+
+  typedef std::unordered_map<int, S *> Hashy;
+  typedef Hashy::iterator HashyIt;
+  typedef Hashy::const_iterator HashyConstIt;
+
+  //std::unordered_map<int, S *> hashy; 
+  // static Hashy hashy; 
+  Hashy hashy; 
+
+  inline const Hashy &getMetaDataMap() const { return hashy; }
+
+  void printHash();
 
 public slots:
 
@@ -270,11 +336,6 @@ private:
 
   //void _applyCfac();
   void hideCfacs();
-
-  // setting text
-
-  //void _setText(char *text, const char *format, int val);
-  //void _setText(char *text, const char *format, double val);
   
   // adding vals / labels
 
@@ -355,16 +416,7 @@ private:
 
   int _nrows;
 
-  struct S {
-    string label; // =   "Volume",
-    string emptyValue; // =  "0",
-    string format;
-    QLabel *value; 
-    int fontSize;
-  };
 
-   S _metaDataS[100];
-   std::unordered_map<int, S *> hashy;  
 
   // actions
 

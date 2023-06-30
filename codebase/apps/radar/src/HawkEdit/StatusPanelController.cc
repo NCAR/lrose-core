@@ -48,6 +48,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>    // std::find
+#include <unordered_map>
 #include <Ncxx/H5x.hh>
 #include <QActionGroup>
 #include <QApplication>
@@ -151,30 +152,30 @@ void StatusPanelController::setDisplay(
 
     _show_fixed_angle = show_fixed_angle;
     _show_volume_number = show_volume_number;
-    _show_sweep_number = show_sweep_number;
-    _show_n_samples = show_n_samples;
-    _show_n_gates = show_n_gates;
-    _show_gate_length = show_gate_length;
-    _show_pulse_width = show_pulse_width;
-    _show_prf_mode = show_prf_mode;
-    _show_prf = show_prf;
-    _show_nyquist = show_nyquist;
-    _show_max_range = show_max_range;
-    _show_unambiguous_range = show_unambiguous_range;
-    _show_measured_power_h = show_measured_power_h;
-    _show_measured_power_v = show_measured_power_v;
-    _show_scan_name = show_scan_name;
-    _show_scan_mode = show_scan_mode;
-    _show_polarization_mode = show_polarization_mode;
-    _show_latitude = show_latitude;
-    _show_longitude = show_longitude;
-    _show_altitude = show_altitude;
-    _show_altitude_rate = show_altitude_rate;
-    _show_speed = show_speed;
-    _show_heading = show_heading;
-    _show_track = show_track;
-    _show_sun_elevation = show_sun_elevation;
-    _show_sun_azimuth = show_sun_azimuth;
+    _show_sweep_number = false; //show_sweep_number;
+    _show_n_samples = false; // show_n_samples;
+    _show_n_gates = false; // show_n_gates;
+    _show_gate_length = false; // show_gate_length;
+    _show_pulse_width = false; // show_pulse_width;
+    _show_prf_mode = false; // show_prf_mode;
+    _show_prf = false; // show_prf;
+    _show_nyquist = false; // show_nyquist;
+    _show_max_range = false; // show_max_range;
+    _show_unambiguous_range = false; // show_unambiguous_range;
+    _show_measured_power_h = false; // show_measured_power_h;
+    _show_measured_power_v = false; // show_measured_power_v;
+    _show_scan_name = false; // show_scan_name;
+    _show_scan_mode = false; // show_scan_mode;
+    _show_polarization_mode = false; // show_polarization_mode;
+    _show_latitude = false; // show_latitude;
+    _show_longitude = false; // show_longitude;
+    _show_altitude = false; // show_altitude;
+    _show_altitude_rate = false; // show_altitude_rate;
+    _show_speed = false; // show_speed;
+    _show_heading = false; // show_heading;
+    _show_track = false; // show_track;
+    _show_sun_elevation = false; // show_sun_elevation;
+    _show_sun_azimuth = false; // show_sun_azimuth;
 }
 
 
@@ -186,192 +187,116 @@ void StatusPanelController::createStatusPanel() {
   if (_show_fixed_angle) {
     _view->create(StatusPanelView::FixedAngleKey);
   }
-    //_fixedAngVal = _createStatusVal("Fixed ang", "-99.99", row++, fsize2); // TO VIEW???
-  //} //else {
-   // _fixedAngVal = NULL;
-  //}
   
   if (_show_volume_number) {
-    _view->createVolumeNumber();
+    _view->create(StatusPanelView::VolumeNumberKey);
   }
-  //  _view->setVolumeNumber(0);
-    //_volNumVal = _createStatusVal("Volume", "0", row++, fsize);
-  //} //else {
-   // _volNumVal = NULL;
-  //}
   
   if (_show_sweep_number) {
     _view->create(StatusPanelView::SweepNumberKey);
-    /*
-    _sweepNumVal = _createStatusVal("Sweep", "0", row++, fsize);
-  } else {
-    _sweepNumVal = NULL;
-    */
   }
-  /*
+  
   if (_show_n_samples) {
-    _view->createNSamples();
-    
-    _nSamplesVal = _createStatusVal("N samp", "0", row++, fsize);
-  } else {
-    _nSamplesVal = NULL;
-    
+    _view->create(StatusPanelView::NSamplesKey);
   }
 
   if (_show_n_gates) {
-    _view->createNGates();
-    
-    _nGatesVal = _createStatusVal("N gates", "0", row++, fsize);
-  } else {
-    _nGatesVal = NULL;
-    
+    _view->create(StatusPanelView::NGatesKey);
   }
   
   if (_show_gate_length) {
-    _view->createGateSpacing();
-    
-    _gateSpacingVal = _createStatusVal("Gate len", "0", row++, fsize);
-  } else {
-    _gateSpacingVal = NULL;
-    
+    _view->create(StatusPanelView::GateSpacingKey);
   }
-  */
-  /*
+  
+  
   if (_show_pulse_width) {
-    _pulseWidthVal = _createStatusVal("Pulse width", "-9999", row++, fsize);
-  } else {
-    _pulseWidthVal = NULL;
+    _view->create(StatusPanelView::PulseWidthKey);
   }
 
   if (_show_prf_mode) {
-    _prfModeVal = _createStatusVal("PRF mode", "Fixed", row++, fsize);
-  } else {
-    _prfModeVal = NULL;
+    _view->create(StatusPanelView::PrfModeKey);
   }
 
   if (_show_prf) {
-    _prfVal = _createStatusVal("PRF", "-9999", row++, fsize);
-  } else {
-    _prfVal = NULL;
+    _view->create(StatusPanelView::PrfKey);
   }
 
   if (_show_nyquist) {
-    _nyquistVal = _createStatusVal("Nyquist", "-9999", row++, fsize);
-  } else {
-    _nyquistVal = NULL;
+    _view->create(StatusPanelView::NyquistKey);
   }
 
   if (_show_max_range) {
-    _maxRangeVal = _createStatusVal("Max range", "-9999", row++, fsize);
-  } else {
-    _maxRangeVal = NULL;
+    _view->create(StatusPanelView::MaxRangeKey);
   }
 
   if (_show_unambiguous_range) {
-    _unambigRangeVal = _createStatusVal("U-A range", "-9999", row++, fsize);
-  } else {
-    _unambigRangeVal = NULL;
+    _view->create(StatusPanelView::UnambiguousRangeKey);
   }
 
   if (_show_measured_power_h) {
-    _powerHVal = _createStatusVal("Power H", "-9999", row++, fsize);
-  } else {
-    _powerHVal = NULL;
+    _view->create(StatusPanelView::PowerHKey);
   }
 
   if (_show_measured_power_v) {
-    _powerVVal = _createStatusVal("Power V", "-9999", row++, fsize);
-  } else {
-    _powerVVal = NULL;
+    _view->create(StatusPanelView::PowerVKey);
   }
 
   if (_show_scan_name) {
-    _scanNameVal = _createStatusVal("Scan name", "unknown", row++, fsize);
-  } else {
-    _scanNameVal = NULL;
+    _view->create(StatusPanelView::ScanNameKey);
   }
 
   if (_show_scan_mode) {
-    _sweepModeVal = _createStatusVal("Scan mode", "SUR", row++, fsize);
-  } else {
-    _sweepModeVal = NULL;
+    _view->create(StatusPanelView::SweepModeKey);
   }
 
   if (_show_polarization_mode) {
-    _polModeVal = _createStatusVal("Pol mode", "Single", row++, fsize);
-  } else {
-    _polModeVal = NULL;
+    _view->create(StatusPanelView::PolarizationModeKey);
   }
 
   if (_show_latitude) {
-    _latVal = _createStatusVal("Lat", "-99.999", row++, fsize);
-  } else {
-    _latVal = NULL;
+    _view->create(StatusPanelView::LatitudeKey);
   }
 
   if (_show_longitude) {
-    _lonVal = _createStatusVal("Lon", "-999.999", row++, fsize);
-  } else {
-    _lonVal = NULL;
+    _view->create(StatusPanelView::LongitudeKey);
   }
 
   if (_show_altitude) {
     if (_altitudeInFeet) {
-      _altVal = _createStatusVal("Alt(kft)", "-999.999",
-                                 row++, fsize, &_altLabel);
+      _view->create(StatusPanelView::AltitudeInFeetKey);
     } else {
-      _altVal = _createStatusVal("Alt(km)", "-999.999",
-                                 row++, fsize, &_altLabel);
+      _view->create(StatusPanelView::AltitudeInKmKey);
     }
-  } else {
-    _altVal = NULL;
   }
 
   if (_show_altitude_rate) {
     if (_altitudeInFeet) {
-      _altRateVal = _createStatusVal("AltRate(ft/s)", "-999.999",
-                                     row++, fsize, &_altRateLabel);
+      _view->create(StatusPanelView::AltitudeRateFtsKey);
     } else {
-      _altRateVal = _createStatusVal("AltRate(m/s)", "-999.999",
-                                     row++, fsize, &_altRateLabel);
+      _view->create(StatusPanelView::AltitudeRateMsKey);
     }
-  } else {
-    _altRateVal = NULL;
   }
 
   if (_show_speed) {
-    _speedVal = _createStatusVal("Speed(m/s)", "-999.99", row++, fsize);
-  } else {
-    _speedVal = NULL;
+    _view->create(StatusPanelView::SpeedKey);
   }
 
   if (_show_heading) {
-    _headingVal = _createStatusVal("Heading(deg)", "-999.99", row++, fsize);
-  } else {
-    _headingVal = NULL;
+    _view->create(StatusPanelView::HeadingKey);
   }
 
   if (_show_track) {
-    _trackVal = _createStatusVal("Track(deg)", "-999.99", row++, fsize);
-  } else {
-    _trackVal = NULL;
+    _view->create(StatusPanelView::TrackKey);
   }
 
   if (_show_sun_elevation) {
-    _sunElVal = _createStatusVal("Sun el (deg)", "-999.999", row++, fsize);
-  } else {
-    _sunElVal = NULL;
+    _view->create(StatusPanelView::SunElevationKey);
   }
 
   if (_show_sun_azimuth) {
-    _view->createSunAzVal();
-    /*
-    _sunAzVal = _createStatusVal("Sun az (deg)", "-999.999", row++, fsize);
-  } else {
-    _sunAzVal = NULL;
+    _view->create(StatusPanelView::SunAzimuthKey);
   }
-  */
-
+  
   _view->show();
 
 }
@@ -418,6 +343,54 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   //   _view->set(<key>, <value>) // one for int, one for float, one for string.
   //values.setSet(nDisplayValues);
 
+  // we now have a hash/unordered_map of all the values to display
+  // if we can just go through the unordered_map systematically, and
+  // know which ray value is associated, then we don't need all the if
+  // statements.
+
+  // go through the unordered_map and use a case statement on the Keys?
+  // to associate the ray variable?
+
+
+  const StatusPanelView::Hashy myHashy = _view->getMetaDataMap();
+  StatusPanelView::HashyConstIt it;
+  for (it=myHashy.begin(); it != myHashy.end(); ++it) {
+    int key = it->first;
+    switch (key) {
+      case StatusPanelView::FixedAngleKey:
+        _view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
+        break;
+      case StatusPanelView::VolumeNumberKey:
+        _view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
+        break;
+      default:
+        cerr << "not found" << endl;
+
+    }
+  }
+
+/*
+
+  HashyIt it;
+  for (it=hashy.begin(); it != hashy.end(); ++it) {
+    int key = it->first;
+    switch (key) {
+      case FixedAngleKey:
+        //_view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
+        cerr << "FixedAngleKey" << endl;
+        break;
+      case VolumeNumberKey:
+        //_view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
+        cerr << "VolumeNumberKey" << endl;
+        break;
+      default:
+        cerr << "not found" << endl;
+
+    }
+  }
+*/
+
+
   if (_show_volume_number)
     //_view->setValue(index, value) // requires templates in view/Q_OBJECT
     //_values->push_back(format(ray->getVolumeNumber()); // requires the format to be kept by the controller;
@@ -433,40 +406,39 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   if (_show_fixed_angle) 
     _view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
   
-  /*
   if (_show_n_samples) 
-    _view->setNSamples(ray->getNSamples());
+    _view->set(StatusPanelView::NSamplesKey, ray->getNSamples());
   if (_show_n_gates) 
-    _view->setNGates(ray->getNGates());      
+    _view->set(StatusPanelView::NGatesKey, ray->getNGates());      
   if (_show_gate_length) 
-    _view->setGateSpacingKm(ray->getGateSpacingKm());
+    _view->set(StatusPanelView::GateSpacingKey, ray->getGateSpacingKm());
   if (_show_pulse_width) 
-    _view->setPulseWidth(ray->getPulseWidthUsec());
-  //if (_show_prf_mode) _view->set
-  //if (_show_prf) _view->set
+    _view->set(StatusPanelView::PulseWidthKey, ray->getPulseWidthUsec());
+  //if (_show_prf_mode) _view->set(StatusPanelView::
+  //if (_show_prf) _view->set(StatusPanelView::
   if (_show_nyquist) 
-    _view->setNyquist(ray->getNyquistMps());
-    */
-    /*
+    _view->set(StatusPanelView::NyquistKey, ray->getNyquistMps());
+    
+/*
 
-    if (_show_max_range) _view->set("maxRange", value)
-    if (_show_unambiguous_range) _view->set
-    if (_show_measured_power_h) _view->set
-    if (_show_measured_power_v) _view->set
-    if (_show_scan_name) _view->set
-    if (_show_scan_mode) _view->set
-    if (_show_polarization_mode) _view->set
-    if (_show_latitude) _view->set
-    if (_show_longitude) _view->set
-    if (_show_altitude) _view->set
-    if (_show_altitude_rate) _view->set
-    if (_show_speed) _view->set
-    if (_show_heading) _view->set
-    if (_show_track) _view->set
-    if (_show_sun_elevation) _view->set
-    if (_show_sun_azimuth) _view->set
+    if (_show_max_range) _view->set(StatusPanelView::("maxRange", value)
+    if (_show_unambiguous_range) _view->set(StatusPanelView::
+    if (_show_measured_power_h) _view->set(StatusPanelView::
+    if (_show_measured_power_v) _view->set(StatusPanelView::
+    if (_show_scan_name) _view->set(StatusPanelView::
+    if (_show_scan_mode) _view->set(StatusPanelView::
+    if (_show_polarization_mode) _view->set(StatusPanelView::
+    if (_show_latitude) _view->set(StatusPanelView::
+    if (_show_longitude) _view->set(StatusPanelView::
+    if (_show_altitude) _view->set(StatusPanelView::
+    if (_show_altitude_rate) _view->set(StatusPanelView::
+    if (_show_speed) _view->set(StatusPanelView::
+    if (_show_heading) _view->set(StatusPanelView::
+    if (_show_track) _view->set(StatusPanelView::
+    if (_show_sun_elevation) _view->set(StatusPanelView::
+    if (_show_sun_azimuth) _view->set(StatusPanelView::
+
 */
-
     /*
     ray->getGateSpacingKm(),
     ray->getPulseWidthUsec(),

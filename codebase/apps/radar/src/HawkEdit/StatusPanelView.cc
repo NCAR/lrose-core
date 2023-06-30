@@ -200,10 +200,30 @@ void StatusPanelView::setFontSize(int params_label_font_size) {
   font6.setPixelSize(fsize6);
 }
 
+void StatusPanelView::printHash() {
+
+  HashyIt it;
+  for (it=hashy.begin(); it != hashy.end(); ++it) {
+    int key = it->first;
+    switch (key) {
+      case FixedAngleKey:
+        //_view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
+        cerr << "FixedAngleKey" << endl;
+        break;
+      case VolumeNumberKey:
+        //_view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
+        cerr << "VolumeNumberKey" << endl;
+        break;
+      default:
+        cerr << "not found" << endl;
+
+    }
+  }
+}
+
 
 void StatusPanelView::clear() {
   // reset values to original 
-  
 
 /*
   // radar and site name
@@ -481,12 +501,56 @@ struct S {
 };
 */
 
+  hashy.reserve(LastKey);
+
   // what to do about float format?
-  _metaDataS[FixedAngleKey] = {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize2};
-  
+  _metaDataS[FixedAngleKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize2};
   _metaDataS[VolumeNumberKey] = {"Volume", "0", "%d", NULL, _fsize};  
-  
-  _metaDataS[SweepNumberKey] = {"Sweep", "0", "%d", NULL, _fsize};  
+  _metaDataS[SweepNumberKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
+
+  _metaDataS[NSamplesKey] =   {"N samp", "0", "%d", NULL, _fsize};
+  _metaDataS[NGatesKey] = {"N gates", "0", "%d", NULL, _fsize};  
+  _metaDataS[GateSpacingKey] =  {"Gate len", "0", "%d", NULL, _fsize};  
+  _metaDataS[PulseWidthKey] =   {"Pulse width", "-9999", "f6.2???", NULL, _fsize};
+  _metaDataS[PrfModeKey] = {"PRF mode", "fixed", "%d", NULL, _fsize};  
+  _metaDataS[PrfKey] =  {"PRF", "-9999", "%d", NULL, _fsize};  
+  _metaDataS[NyquistKey] =   {"Nyquist", "-9999", "f6.2???", NULL, _fsize};
+  _metaDataS[MaxRangeKey] = {"Max range", "-9999", "%d", NULL, _fsize};  
+  _metaDataS[UnambiguousRangeKey] =  {"U-A range", "-9999", "%d", NULL, _fsize};  
+  _metaDataS[PowerHKey] =   {"Power H", "-9999", "f6.2???", NULL, _fsize};
+  _metaDataS[PowerVKey] = {"Power V", "-9999", "%d", NULL, _fsize};  
+  _metaDataS[ScanNameKey] =  {"Scan name", "unknown", "%s", NULL, _fsize};  
+
+  _metaDataS[SweepModeKey] =   {"Scan mode", "SUR", "f6.2???", NULL, _fsize};
+  _metaDataS[PolarizationModeKey] = {"Pol mode", "Single", "%d", NULL, _fsize};  
+  _metaDataS[LatitudeKey] =  {"Lat", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[LongitudeKey] =   {"Lon", "-999.999", "f6.2???", NULL, _fsize};
+  _metaDataS[AltitudeInFeetKey] = {"Alt(kft)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[AltitudeInKmKey] =  {"Alt(km)", "-999.999", "%d", NULL, _fsize};  
+
+  _metaDataS[AltitudeRateFtsKey] =   {"AltRate(ft/s)", "-999.999", "f6.2???", NULL, _fsize};
+  _metaDataS[AltitudeRateMsKey] = {"AltRate(m/s)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[SpeedKey] =  {"Speed(m/s)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[HeadingKey] =   {"Heading(deg)", "-999.999", "f6.2???", NULL, _fsize};
+  _metaDataS[TrackKey] = {"Track(deg)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[SunElevationKey] =  {"Sun el (deg)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[SunAzimuthKey] =   {"Sun az (deg)", "-999.999", "f6.2???", NULL, _fsize};
+
+
+  _metaDataS[GeoRefsAppliedKey] = {"Volume", "0", "%d", NULL, _fsize};  
+  _metaDataS[GeoRefRollKey] =  {"Sweep", "0", "%d", NULL, _fsize};            
+  _metaDataS[GeoRefTiltKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
+
+  _metaDataS[GeoRefTrackRelRotationKey] = {"Volume", "0", "%d", NULL, _fsize};  
+  _metaDataS[GeoRefTrackRelTiltKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
+  _metaDataS[GeoRefTrackRelAzimuthKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
+  _metaDataS[GeoRefTrackRelElevationKey] = {"Volume", "0", "%d", NULL, _fsize};  
+
+  _metaDataS[CfacRotationKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
+  _metaDataS[CfacRollKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
+  _metaDataS[CfacTiltKey] = {"Volume", "0", "%d", NULL, _fsize};  
+        
+
 }
 
   // radar and site name
@@ -572,7 +636,7 @@ template<typename T>
     }    
 */
 // Q: How do we know which row in the display? only need the row when creating.
-
+/*
 // to use (in Controller???): 
 //   set<double>(s, "Fixed ang", "%d", row??)
 void StatusPanelView::setFixedAngleDeg(double fixedAngleDeg) {
@@ -594,11 +658,12 @@ void StatusPanelView::createVolumeNumber() {
 void StatusPanelView::setSweepNum(int sweepNumber) {
   setInt(sweepNumber, _sweepNumVal); //  "%d");
 }
-/*
+
 void StatusPanelView::createSweepNumber() {
   // create the label 
   _sweepNumVal = _createStatusVal("Sweep", "0", _fsize);
 } 
+
 */ 
 //                <Key,         Hash,       KeyEqual,    Allocator>::find
 //                <data_type> 
@@ -630,6 +695,14 @@ void StatusPanelView::set(int key, int value) {
   setInt(value, s->value); // , "%d");  // set for int always uses "%d" format.
   //setInt(value, hashy[key], hashyFormat[key]);
 }
+
+/*
+void StatusPanelView::set(int key, double value) {
+  S *s = hashy[key];
+  setDouble(value, s->value); // , "%d");  // set for int always uses "%d" format.
+  //setInt(value, hashy[key], hashyFormat[key]);
+}
+*/
 
 // each of theses should be a class/factory object that are placed in a list
 // the class must associate the ray varable with the panel variable.
@@ -982,6 +1055,8 @@ void StatusPanelView::updateStatusPanel(
     if (abs(elDeg) < 1000) {
       setDouble(elDeg, _elevVal, 6, 2);
     }
+
+    clear();
   }
   /*
   if (_nSamplesVal) {
