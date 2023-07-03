@@ -71,7 +71,7 @@
 #include <QListWidgetItem>
 #include <QStringList>
 #include <QCheckBox>
-#include <euclid/SunPosn.hh>
+//#include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
 class QApplication;
@@ -172,9 +172,9 @@ public:
 
   // location
 
-  double getRadarLat() const { return _radarLat; }
-  double getRadarLon() const { return _radarLon; }
-  double getRadarAltKm() const { return _radarAltKm; }
+  //double getRadarLat() const { return _radarLat; }
+  //double getRadarLon() const { return _radarLon; }
+  //double getRadarAltKm() const { return _radarAltKm; }
   const RadxPlatform &getPlatform() const { return _platform; }
 
 
@@ -531,9 +531,10 @@ private:
 
   QCheckBox *_applyCfacToggle;
   
+  // moved to StatusPanelController
   // sun position calculator
-  double _radarLat, _radarLon, _radarAltKm;
-  SunPosn _sunPosn;
+  //double _radarLat, _radarLon, _radarAltKm;
+  //SunPosn _sunPosn;
 
   // set top bar
 

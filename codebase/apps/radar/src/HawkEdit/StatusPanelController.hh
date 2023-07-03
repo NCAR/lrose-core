@@ -61,6 +61,7 @@
 
 #include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
+#include <Radx/RadxGeoref.hh>
 
 class QDateTime;
 
@@ -196,26 +197,18 @@ private:
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
 
-  // set top bar
+  void _chooseGeoReferenceOrPlatform(const RadxRay *ray, int key);  
+  void _getInforFromPlatform(const RadxRay *ray, int key);
+  void _getInfoFromGeoreference(const RadxGeoref *georef,
+   RadxTime rayTime, int key);
 
-  //virtual void _setTitleBar(const string &radarName) = 0;
+  double _calculateSpeed(double ewVel, double nsVel);
 
   /* panels
   
-  void _createStatusPanel();
-  void _createFieldPanel();
-  void _updateFieldPanel(string newFieldName);
-
-  void _createClickReportDialog();
-  void _updateStatusPanel(const RadxRay *ray);
-  double _getInstHtKm(const RadxRay *ray);
-
-  void _applyCfac();
   void hideCfacs();
 
   // setting text
-
-
 
   */
 

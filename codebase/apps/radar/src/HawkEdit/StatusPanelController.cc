@@ -43,6 +43,7 @@
 #include "Params.hh"
 #include "Reader.hh"
 #include "AllocCheck.hh"
+#include "DataModel.hh"
 
 #include <string>
 #include <cmath>
@@ -152,30 +153,30 @@ void StatusPanelController::setDisplay(
 
     _show_fixed_angle = show_fixed_angle;
     _show_volume_number = show_volume_number;
-    _show_sweep_number = false; //show_sweep_number;
-    _show_n_samples = false; // show_n_samples;
-    _show_n_gates = false; // show_n_gates;
-    _show_gate_length = false; // show_gate_length;
-    _show_pulse_width = false; // show_pulse_width;
-    _show_prf_mode = false; // show_prf_mode;
-    _show_prf = false; // show_prf;
-    _show_nyquist = false; // show_nyquist;
-    _show_max_range = false; // show_max_range;
-    _show_unambiguous_range = false; // show_unambiguous_range;
-    _show_measured_power_h = false; // show_measured_power_h;
-    _show_measured_power_v = false; // show_measured_power_v;
-    _show_scan_name = false; // show_scan_name;
-    _show_scan_mode = false; // show_scan_mode;
-    _show_polarization_mode = false; // show_polarization_mode;
-    _show_latitude = false; // show_latitude;
-    _show_longitude = false; // show_longitude;
-    _show_altitude = false; // show_altitude;
-    _show_altitude_rate = false; // show_altitude_rate;
-    _show_speed = false; // show_speed;
-    _show_heading = false; // show_heading;
-    _show_track = false; // show_track;
-    _show_sun_elevation = false; // show_sun_elevation;
-    _show_sun_azimuth = false; // show_sun_azimuth;
+    _show_sweep_number = show_sweep_number;
+    _show_n_samples = show_n_samples;
+    _show_n_gates = show_n_gates;
+    _show_gate_length = show_gate_length;
+    _show_pulse_width = show_pulse_width;
+    _show_prf_mode = show_prf_mode;
+    _show_prf = show_prf;
+    _show_nyquist = show_nyquist;
+    _show_max_range = show_max_range;
+    _show_unambiguous_range = show_unambiguous_range;
+    _show_measured_power_h = show_measured_power_h;
+    _show_measured_power_v = show_measured_power_v;
+    _show_scan_name = show_scan_name;
+    _show_scan_mode = show_scan_mode;
+    _show_polarization_mode = show_polarization_mode;
+    _show_latitude = show_latitude;
+    _show_longitude = show_longitude;
+    _show_altitude = show_altitude;
+    _show_altitude_rate = show_altitude_rate;
+    _show_speed = show_speed;
+    _show_heading = show_heading;
+    _show_track = show_track;
+    _show_sun_elevation = show_sun_elevation;
+    _show_sun_azimuth = show_sun_azimuth;
 }
 
 
@@ -351,100 +352,317 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   // go through the unordered_map and use a case statement on the Keys?
   // to associate the ray variable?
 
+  const RadxGeoref *georef = ray->getGeoreference();
 
   const StatusPanelView::Hashy myHashy = _view->getMetaDataMap();
   StatusPanelView::HashyConstIt it;
   for (it=myHashy.begin(); it != myHashy.end(); ++it) {
     int key = it->first;
     switch (key) {
-      case StatusPanelView::FixedAngleKey:
+      case StatusPanelView::FixedAngleKey: {
         _view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
         break;
-      case StatusPanelView::VolumeNumberKey:
+      }
+      case StatusPanelView::VolumeNumberKey: {
         _view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
         break;
-      default:
-        cerr << "not found" << endl;
+      }
+      case StatusPanelView::SweepNumberKey: {
+        _view->set(StatusPanelView::SweepNumberKey, ray->getSweepNumber());
+        break;  
+      }
+      case StatusPanelView::NSamplesKey: { 
+        _view->set(StatusPanelView::NSamplesKey, ray->getNSamples());
+        break;
+      }
+      case StatusPanelView::NGatesKey: {
+        _view->set(StatusPanelView::NGatesKey, ray->getNGates());   
+        break;   
+      }
+      case StatusPanelView::GateSpacingKey: {
+        _view->set(StatusPanelView::GateSpacingKey, ray->getGateSpacingKm());
+        break;
+      }
+      case StatusPanelView::PulseWidthKey: {
+        _view->set(StatusPanelView::PulseWidthKey, ray->getPulseWidthUsec());
+        break;
+      }
+  //case StatusPanelView::PrfModeKey:
+  // _view->set(StatusPanelView::
+  //case StatusPanelView::_prf) _view->set(StatusPanelView::
 
+      case StatusPanelView::NyquistKey: {
+        _view->set(StatusPanelView::NyquistKey, ray->getNyquistMps());
+        break;
+      }
+      case StatusPanelView::MaxRangeKey: {
+        double maxRangeData = ray->getStartRangeKm() +
+          ray->getNGates() * ray->getGateSpacingKm();
+        _view->set(StatusPanelView::MaxRangeKey, maxRangeData);
+        break;
+      }
+      case StatusPanelView::UnambiguousRangeKey: {
+        if (fabs(ray->getUnambigRangeKm()) < 100000) {
+          _view->set(StatusPanelView::UnambiguousRangeKey, ray->getUnambigRangeKm());
+        }
+        break;
+      }
+      case StatusPanelView::PowerHKey: {
+        if (ray->getMeasXmitPowerDbmH() > -9990) {
+          _view->set(StatusPanelView::PowerHKey, ray->getMeasXmitPowerDbmH());
+        }
+        break;
+      }
+      case StatusPanelView::PowerVKey: {
+        if (ray->getMeasXmitPowerDbmV() > -9990) {
+          _view->set(StatusPanelView::PowerVKey, ray->getMeasXmitPowerDbmV());
+        }
+        break;
+      }
+      case StatusPanelView::ScanNameKey: {
+        //_view->set(StatusPanelView::ScanNameKey, ray->getScanName().substr(0, 8));
+        break;
+      }
+      case StatusPanelView::SweepModeKey: {
+//        _view->set(StatusPanelView::SweepModeKey, 
+//          _view->translateSweepMode(ray->getSweepMode());
+        break;
+      }
+      case StatusPanelView::PolarizationModeKey: {
+        //_view->setString(StatusPanelView::PolarizationModeKey, 
+        //  Radx::polarizationModeToStr(ray->getPolarizationMode()).c_str());
+        break;
+      }
+      // PrfMode?
+      
+      case StatusPanelView::LatitudeKey:
+      case StatusPanelView::LongitudeKey:
+      case StatusPanelView::AltitudeInFeetKey:
+      case StatusPanelView::AltitudeInKmKey:
+      case StatusPanelView::AltitudeRateFtsKey:
+      case StatusPanelView::AltitudeRateMsKey:
+      case StatusPanelView::SpeedKey:
+      case StatusPanelView::HeadingKey:
+      case StatusPanelView::TrackKey: {
+        _chooseGeoReferenceOrPlatform(ray, key);
+        break;
+      }
+      case StatusPanelView::GeoRefsAppliedKey: {
+        string value("");
+        if (ray->getGeorefApplied())
+          value.append("true");
+        else 
+          value.append("false");
+        //_view->set(StatusPanelView::GeoRefsAppliedKey, value);
+        break;
+      }
+      case StatusPanelView::GeoRefRollKey: {
+        if (georef != NULL)
+          _view->set(StatusPanelView::GeoRefRollKey, georef->getRoll());
+        break;   
+      }
+      case StatusPanelView::GeoRefTiltKey: {
+        if (georef != NULL)
+          _view->set(StatusPanelView::GeoRefTiltKey, georef->getTilt());
+        break;
+      }
+      case StatusPanelView::GeoRefTrackRelRotationKey: {
+        if (georef != NULL)
+          _view->set(StatusPanelView::GeoRefTrackRelRotationKey, georef->getTrackRelRot()); 
+        break;
+      }
+      case StatusPanelView::GeoRefTrackRelTiltKey: {
+        if (georef != NULL)
+          _view->set(StatusPanelView::GeoRefTrackRelTiltKey, georef->getTrackRelTilt()); 
+        break;
+      }
+      case StatusPanelView::GeoRefTrackRelAzimuthKey: {
+        if (georef != NULL)
+          _view->set(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
+        break;
+      }
+      case StatusPanelView::GeoRefTrackRelElevationKey: {
+        if (georef != NULL)
+         _view->set(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
+        break;
+      }
+
+  // TODO: these are coupled; show one, show all; depends on 
+    // if airborne data ...
+  //  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+
+      case StatusPanelView::CfacRotationKey:
+      case StatusPanelView::CfacRollKey:
+      case StatusPanelView::CfacTiltKey: {
+        //if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) 
+          //_showCfactors(key);
+        break;    
+
+      // deal with this ...
+/*
+  if (fabs(_radarLat - _platform.getLatitudeDeg()) > 0.0001 ||
+      fabs(_radarLon - _platform.getLongitudeDeg()) > 0.0001 ||
+      fabs(_radarAltKm - _platform.getAltitudeKm()) > 0.0001) {
+    _radarLat = _platform.getLatitudeDeg();
+    _radarLon = _platform.getLongitudeDeg();
+    _radarAltKm = _platform.getAltitudeKm();
+    _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
+  }
+*/
+//    case StatusPanelView::SunElevationKey:
+//     _view->set(StatusPanelView::SunElevationKey
+//      break;
+//    case StatusPanelView::SunAzimuthKey:
+//     _view->set(StatusPanelView::SunAzimuthKey
+//      break;
+      }
+      default: {
+        cerr << "not found" << endl;
+        break;
+      }
     }
   }
+}
 
 /*
+void StatusPanelController::_showCfactors(int key) {
+// TODO: these are coupled; show one, show all; depends on 
+  // if airborne data ...
+//   {
 
-  HashyIt it;
-  for (it=hashy.begin(); it != hashy.end(); ++it) {
-    int key = it->first;
+    case StatusPanelView::CfacRotationKey:
+        _view->set(StatusPanelView::CfacRotationKey
+      break;
+    case StatusPanelView::CfacRollKey:
+      if (georef != NULL)
+        _view->set(StatusPanelView::CfacRollKey
+      break;
+    case StatusPanelView::CfacTiltKey:
+      if (georef != NULL)
+        _view->set(StatusPanelView::CfacTiltKey
+      break;     
+}
+*/
+
+double StatusPanelController::_calculateSpeed(double ewVel, double nsVel) {
+      double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
+      return speed;
+}
+
+void StatusPanelController::_getInfoFromGeoreference(const RadxGeoref *georef,
+   RadxTime rayTime, int key) {
     switch (key) {
-      case FixedAngleKey:
-        //_view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
-        cerr << "FixedAngleKey" << endl;
+      case StatusPanelView::LatitudeKey: {
+        _view->set(StatusPanelView::LatitudeKey, georef->getLatitude());
+        break; 
+      }
+      case StatusPanelView::LongitudeKey:
+        _view->set(StatusPanelView::LongitudeKey, georef->getLongitude());
+        break; 
+      case StatusPanelView::AltitudeInFeetKey: {
+        double radarAltFeet = georef->getAltitudeKmMsl() / 0.3048;
+        _view->set(StatusPanelView::AltitudeInFeetKey, radarAltFeet);
+        break; 
+      }
+      case StatusPanelView::AltitudeInKmKey:
+        _view->set(StatusPanelView::AltitudeInKmKey, georef->getAltitudeKmMsl());
         break;
-      case VolumeNumberKey:
-        //_view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
-        cerr << "VolumeNumberKey" << endl;
-        break;
-      default:
-        cerr << "not found" << endl;
 
+      /* 
+
+      case StatusPanelView::AltitudeRateFtsKey:
+        _view->set(StatusPanelView::AltitudeRateFtsKey, georef->getLatitude());
+        break;
+      case StatusPanelView::AltitudeRateMsKey:
+        _view->set(StatusPanelView::AltitudeRateMsKey, georef->getLatitude());
+        break;
+        */
+      case StatusPanelView::SpeedKey: {
+        double value = _calculateSpeed(georef->getEwVelocity(),
+          georef->getNsVelocity());
+        _view->set(StatusPanelView::SpeedKey, value);
+        break;
+      }
+      case StatusPanelView::HeadingKey: {
+        double heading = georef->getHeading();
+        if (heading >= 0 && heading <= 360.0) {
+          _view->set(StatusPanelView::HeadingKey, heading);
+        }
+        break;
+      }
+      case StatusPanelView::TrackKey: {
+        double track = georef->getTrack();
+        if (track >= 0 && track <= 360.0) {
+          _view->set(StatusPanelView::TrackKey, track);
+        }        
+        break;
+      }
+      default: {
+        cerr << "something awful happened" << endl;
+      }
     }
-  }
-*/
 
-
-  if (_show_volume_number)
-    //_view->setValue(index, value) // requires templates in view/Q_OBJECT
-    //_values->push_back(format(ray->getVolumeNumber()); // requires the format to be kept by the controller;
-      // AND cannot use QString for formatting.  Grrh! 
-      // just use separate functions darn it!!!
-      // make each row it's own class??? with format info, etc???
-    _view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
-
-  if (_show_sweep_number)
-    _view->set(StatusPanelView::SweepNumberKey, ray->getSweepNumber());
-    // _view->setSweepNum(ray->getSweepNumber());
-
-  if (_show_fixed_angle) 
-    _view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
-  
-  if (_show_n_samples) 
-    _view->set(StatusPanelView::NSamplesKey, ray->getNSamples());
-  if (_show_n_gates) 
-    _view->set(StatusPanelView::NGatesKey, ray->getNGates());      
-  if (_show_gate_length) 
-    _view->set(StatusPanelView::GateSpacingKey, ray->getGateSpacingKm());
-  if (_show_pulse_width) 
-    _view->set(StatusPanelView::PulseWidthKey, ray->getPulseWidthUsec());
-  //if (_show_prf_mode) _view->set(StatusPanelView::
-  //if (_show_prf) _view->set(StatusPanelView::
-  if (_show_nyquist) 
-    _view->set(StatusPanelView::NyquistKey, ray->getNyquistMps());
-    
-/*
-
-    if (_show_max_range) _view->set(StatusPanelView::("maxRange", value)
-    if (_show_unambiguous_range) _view->set(StatusPanelView::
-    if (_show_measured_power_h) _view->set(StatusPanelView::
-    if (_show_measured_power_v) _view->set(StatusPanelView::
-    if (_show_scan_name) _view->set(StatusPanelView::
-    if (_show_scan_mode) _view->set(StatusPanelView::
-    if (_show_polarization_mode) _view->set(StatusPanelView::
-    if (_show_latitude) _view->set(StatusPanelView::
-    if (_show_longitude) _view->set(StatusPanelView::
-    if (_show_altitude) _view->set(StatusPanelView::
-    if (_show_altitude_rate) _view->set(StatusPanelView::
-    if (_show_speed) _view->set(StatusPanelView::
-    if (_show_heading) _view->set(StatusPanelView::
-    if (_show_track) _view->set(StatusPanelView::
-    if (_show_sun_elevation) _view->set(StatusPanelView::
-    if (_show_sun_azimuth) _view->set(StatusPanelView::
-
-*/
     /*
-    ray->getGateSpacingKm(),
-    ray->getPulseWidthUsec(),
-    ray->getNyquistMps()
-    );
-    */
+
+
+    // compute altitude rate every 2 secs
+    
+    if (_prevAltKm > -9990) {
+      double deltaTime = ray->getRadxTime() - _prevAltTime;
+      if (deltaTime > 2.0) {
+        double altKm = ray->getGeoreference()->getAltitudeKmMsl();
+        double deltaAltKm = altKm - _prevAltKm;
+        _altRateMps = (deltaAltKm / deltaTime) * 1000.0;
+        _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+        _prevAltTime = ray->getRadxTime();
+      }
+    } else {
+      _prevAltKm = ray->getGeoreference()->getAltitudeKmMsl();
+      _prevAltTime = ray->getRadxTime();
+    }
+    
+    if (_altitudeInFeet) {
+      _setText(text, "%.1f", _altRateMps / 0.3048);
+    } else {
+      _setText(text, "%.1f", _altRateMps);
+    }
+    if (_altRateVal) {
+      _altRateVal->setText(text);
+    }
+*/
+}
+
+void StatusPanelController::_getInforFromPlatform(const RadxRay *ray, int key) {
+
+  DataModel *dataModel = DataModel::Instance();  
+  const RadxPlatform platform = dataModel->getPlatform();
+  switch (key) {
+    case StatusPanelView::LatitudeKey:
+      _view->set(StatusPanelView::LatitudeKey, platform.getLongitudeDeg());
+      break; 
+    case StatusPanelView::LongitudeKey:
+      _view->set(StatusPanelView::LongitudeKey, _platform.getLongitudeDeg());
+      break; 
+    case StatusPanelView::AltitudeInFeetKey: {
+      double radarAltFeet = _platform.getAltitudeKm()  / 0.3048;
+      _view->set(StatusPanelView::AltitudeInFeetKey, radarAltFeet);
+      break; 
+    }
+    case StatusPanelView::AltitudeInKmKey:
+      _view->set(StatusPanelView::AltitudeInKmKey, _platform.getAltitudeKm() );
+      break;
+    default:
+      cerr << "something really awful happened" << endl;
+    }
+}
+
+void StatusPanelController::_chooseGeoReferenceOrPlatform(const RadxRay *ray, int key) {
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef != NULL) {
+    _getInfoFromGeoreference(georef, ray->getRadxTime(), key);     
+  } else {
+    _getInforFromPlatform(ray, key);
+  }
 }
 
 void StatusPanelController::setFontSize(int fontSize) {

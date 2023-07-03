@@ -161,9 +161,9 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   //  _displayFieldController->setSelectedField(0);
   _prevFieldNum = -1;
 
-  _radarLat = -9999.0;
-  _radarLon = -9999.0;
-  _radarAltKm = -9999.0;
+  //_radarLat = -9999.0;
+  //_radarLon = -9999.0;
+  //_radarAltKm = -9999.0;
 
   _altitudeInFeet = false;
   // end from DisplayManager    
@@ -4411,17 +4411,6 @@ void PolarManager::_createStatusPanel()
 
   // date and time
   _statusPanelController->createDateTime();
-/*
-  _dateVal = new QLabel("9999/99/99", _statusPanel);
-  _dateVal->setFont(font2);
-  _statusLayout->addWidget(_dateVal, row, 0, 1, 2, alignCenter);
-  row++;
-
-  _timeVal = new QLabel("99:99:99.999", _statusPanel);
-  _timeVal->setFont(font2);
-  _statusLayout->addWidget(_timeVal, row, 0, 1, 2, alignCenter);
-  row++;
-*/
 
   // other labels.  Note that we set the minimum size of the column
   // containing the right hand labels in timerEvent() to prevent the

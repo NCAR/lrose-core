@@ -58,7 +58,6 @@
 #include <QStringList>
 #include <QCheckBox>
 //#include <euclid/SunPosn.hh>
-#include <Radx/RadxRay.hh>
 
 class QApplication;
 class QActionGroup;
@@ -341,8 +340,9 @@ private:
 
   void setInt(int s, QLabel *label); // , string format);
   void setDouble(double s, QLabel *label, int fieldWidth, int precision);
+  void setString(string s, QLabel *label);
 
-  double _getInstHtKm(const RadxRay *ray);
+  //double _getInstHtKm(const RadxRay *ray);
   //QLabel *_newLabelRight(const string &text);
 /*
     void set(T s, QLabel *label, string format) {

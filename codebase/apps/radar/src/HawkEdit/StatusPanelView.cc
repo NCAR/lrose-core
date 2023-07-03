@@ -207,11 +207,9 @@ void StatusPanelView::printHash() {
     int key = it->first;
     switch (key) {
       case FixedAngleKey:
-        //_view->set(StatusPanelView::FixedAngleKey, ray->getFixedAngleDeg());
         cerr << "FixedAngleKey" << endl;
         break;
       case VolumeNumberKey:
-        //_view->set(StatusPanelView::VolumeNumberKey, ray->getVolumeNumber());
         cerr << "VolumeNumberKey" << endl;
         break;
       default:
@@ -622,6 +620,12 @@ void StatusPanelView::createDateTime() {
         label->setText(QString("%1").arg(value, fieldWidth, 'f', precision));
       }
     }
+
+     void StatusPanelView::setString(string s, QLabel *label) { // , string format) {
+      if (label != NULL) {
+        label->setText(QString(s.c_str()));
+      }
+    }   
 
 
 
@@ -1445,7 +1449,7 @@ void StatusPanelView::_setText(char *text,
 }
 */
 ////////////////////////////////////////////////////////////////
-
+/*
 double StatusPanelView::_getInstHtKm(const RadxRay *ray)
 
 {
@@ -1455,7 +1459,7 @@ double StatusPanelView::_getInstHtKm(const RadxRay *ray)
   }
   return instHtKm;
 }
-
+*/
 /////////////////////////////////////////////////////////////////////  
 // slots
 
