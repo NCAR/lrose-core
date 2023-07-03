@@ -119,9 +119,11 @@ public:
   void setDateTime(int year, int month, int day,
     int hour, int minutes, int seconds, int nanoSeconds);
 
+  void createOnly(int key);
   void create(int key);
   void set(int key, int value);
   //void set(int key, double value);
+  void createGeoreferenceLabels();
 
 const static int FixedAngleKey = 0;
 const static int VolumeNumberKey = 1;
@@ -333,7 +335,7 @@ private:
   //void updateStatusPanel(const RadxRay *ray);
   //double _getInstHtKm(const RadxRay *ray);
 
-  //void _applyCfac();
+  void showCfacs();
   void hideCfacs();
   
   // adding vals / labels

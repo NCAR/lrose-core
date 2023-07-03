@@ -147,10 +147,10 @@ QPalette pal = QPalette();
 
 // set black background
 // Qt::black / "#000000" / "black"
-pal.setColor(QPalette::Window, Qt::yellow);
+//pal.setColor(QPalette::Window, Qt::yellow);
 
-setAutoFillBackground(true); 
-setPalette(pal);
+//setAutoFillBackground(true); 
+//setPalette(pal);
 show();
 
 
@@ -582,6 +582,15 @@ void StatusPanelView::createDateTime() {
   _statusLayout->addWidget(_timeVal, _timeRow, 0, 1, 2, Qt::AlignCenter); // , row, 0, 1, 2, alignCenter);
   
 }
+
+void StatusPanelView::createGeoreferenceLabels() {
+
+  for (int key=GeoRefsAppliedKey; key<LastKey; key++) {
+    createOnly(key);  
+  }
+  hideCfacs();
+}
+
 /*
 
   // other labels.  Note that we set the minimum size of the column
@@ -684,11 +693,15 @@ struct S {
   int fontSize;
 };
 */
-
-void StatusPanelView::create(int key) {
-  //_view->create(SweepNumber(SweepNumKey)); 
+void StatusPanelView::createOnly(int key) {
   S *s = &_metaDataS[key];
   s->value = _createStatusVal(s->label, s->emptyValue, s->fontSize);
+}
+
+void StatusPanelView::create(int key) {
+  createOnly(key);
+  S *s = &_metaDataS[key];
+  //s->value = _createStatusVal(s->label, s->emptyValue, s->fontSize);
   hashy[key] = s; 
   // hashy[key] now has the pointer to the QLabel for the sweep number
 }
@@ -1421,6 +1434,32 @@ void StatusPanelView::hideCfacs() {
   _cfacTiltLabel->hide(); 
 
   //_applyCfacToggle->hide();  
+}
+
+void StatusPanelView::showCfacs() {
+      _georefsApplied->show();
+      _geoRefRotationVal->show();
+      _geoRefRollVal->show();
+      _geoRefTiltVal->show();
+      _geoRefTrackRelRotationVal->show(); 
+      _geoRefTrackRelTiltVal->show(); 
+      _geoRefTrackRelAzVal->show(); 
+      _geoRefTrackRelElVal->show(); 
+      _cfacRotationVal->show();
+      _cfacRollVal->show();
+      _cfacTiltVal->show();     
+
+      _georefsAppliedLabel->show(); 
+      _geoRefRotationLabel->show(); 
+      _geoRefRollLabel->show(); 
+      _geoRefTiltLabel->show();
+      _geoRefTrackRelRotationLabel->show(); 
+      _geoRefTrackRelTiltLabel->show(); 
+      _geoRefTrackRelAzLabel->show(); 
+      _geoRefTrackRelElLabel->show(); 
+      _cfacRotationLabel->show(); 
+      _cfacRollLabel->show(); 
+      _cfacTiltLabel->show();   
 }
 
 ///////////////////////////////////////////

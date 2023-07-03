@@ -297,11 +297,12 @@ void StatusPanelController::createStatusPanel() {
   if (_show_sun_azimuth) {
     _view->create(StatusPanelView::SunAzimuthKey);
   }
-  
+
+  _view->createGeoreferenceLabels();
+
   _view->show();
 
 }
-
 
 void StatusPanelController::setRadarName(string radarName, string siteName) {
   _view->setRadarName(radarName, siteName);
@@ -447,57 +448,6 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
         _chooseGeoReferenceOrPlatform(ray, key);
         break;
       }
-      case StatusPanelView::GeoRefsAppliedKey: {
-        string value("");
-        if (ray->getGeorefApplied())
-          value.append("true");
-        else 
-          value.append("false");
-        //_view->set(StatusPanelView::GeoRefsAppliedKey, value);
-        break;
-      }
-      case StatusPanelView::GeoRefRollKey: {
-        if (georef != NULL)
-          _view->set(StatusPanelView::GeoRefRollKey, georef->getRoll());
-        break;   
-      }
-      case StatusPanelView::GeoRefTiltKey: {
-        if (georef != NULL)
-          _view->set(StatusPanelView::GeoRefTiltKey, georef->getTilt());
-        break;
-      }
-      case StatusPanelView::GeoRefTrackRelRotationKey: {
-        if (georef != NULL)
-          _view->set(StatusPanelView::GeoRefTrackRelRotationKey, georef->getTrackRelRot()); 
-        break;
-      }
-      case StatusPanelView::GeoRefTrackRelTiltKey: {
-        if (georef != NULL)
-          _view->set(StatusPanelView::GeoRefTrackRelTiltKey, georef->getTrackRelTilt()); 
-        break;
-      }
-      case StatusPanelView::GeoRefTrackRelAzimuthKey: {
-        if (georef != NULL)
-          _view->set(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
-        break;
-      }
-      case StatusPanelView::GeoRefTrackRelElevationKey: {
-        if (georef != NULL)
-         _view->set(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
-        break;
-      }
-
-  // TODO: these are coupled; show one, show all; depends on 
-    // if airborne data ...
-  //  if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
-
-      case StatusPanelView::CfacRotationKey:
-      case StatusPanelView::CfacRollKey:
-      case StatusPanelView::CfacTiltKey: {
-        //if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) 
-          //_showCfactors(key);
-        break;    
-
       // deal with this ...
 /*
   if (fabs(_radarLat - _platform.getLatitudeDeg()) > 0.0001 ||
@@ -515,13 +465,92 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
 //    case StatusPanelView::SunAzimuthKey:
 //     _view->set(StatusPanelView::SunAzimuthKey
 //      break;
-      }
+      
       default: {
         cerr << "not found" << endl;
         break;
       }
     }
+    // if airborne data ...
+    if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
+      _updateGeoreferencedData(ray);
+    }
   }
+}
+
+void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
+// need to create and update; because only know if airborne data 
+  // once we have a ray ... HERE
+  // no need to keep these keys in the hashy, because they are always
+  // on. They are hidden be default. 
+
+
+  const RadxGeoref *georef = ray->getGeoreference();
+  if (georef != NULL) {
+        string value("");
+        if (ray->getGeorefApplied())
+          value.append("true");
+        else 
+          value.append("false");
+        //_view->set(StatusPanelView::GeoRefsAppliedKey, value);
+
+        _view->set(StatusPanelView::GeoRefRollKey, georef->getRoll());
+        _view->set(StatusPanelView::GeoRefTiltKey, georef->getTilt());
+        _view->set(StatusPanelView::GeoRefTrackRelRotationKey, georef->getTrackRelRot()); 
+        _view->set(StatusPanelView::GeoRefTrackRelTiltKey, georef->getTrackRelTilt()); 
+        _view->set(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
+        _view->set(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
+
+  // TODO: these are coupled; show one, show all; depends on 
+    // if airborne data ...
+        double rollCorr = 0.0;
+        double rotCorr = 0.0;
+        double tiltCorr = 0.0;
+        DataModel *dataModel = DataModel::Instance();
+        dataModel->getCfactors(&rollCorr, &rotCorr, &tiltCorr);
+        _view->set(StatusPanelView::CfacRotationKey, rotCorr); 
+        _view->set(StatusPanelView::CfacRollKey, rollCorr); 
+        _view->set(StatusPanelView::CfacTiltKey, tiltCorr); 
+
+      /*
+
+        if (ray->getGeorefApplied()) {
+          _georefsApplied->setText("true");       
+        } else {
+          _georefsApplied->setText("false");          
+        }
+
+        _setText(text, "%.3f", georef->getRotation());  
+        _geoRefRotationVal->setText(text); 
+        _setText(text, "%.3f", georef->getRoll());  
+        _geoRefRollVal->setText(text); 
+        _setText(text, "%.3f", georef->getTilt());  
+        _geoRefTiltVal->setText(text);
+
+        _setText(text, "%.3f", georef->getTrackRelRot());  
+        _geoRefTrackRelRotationVal->setText(text); 
+        _setText(text, "%.3f", georef->getTrackRelTilt());  
+        _geoRefTrackRelTiltVal->setText(text);
+        _setText(text, "%.3f", georef->getTrackRelAz());  
+        _geoRefTrackRelAzVal->setText(text); 
+        _setText(text, "%.3f", georef->getTrackRelEl());  
+        _geoRefTrackRelElVal->setText(text); 
+
+        double rollCorr = 0.0;
+        double rotCorr = 0.0;
+        double tiltCorr = 0.0;
+        DataModel *dataModel = DataModel::Instance();
+        dataModel->getCfactors(&rollCorr, &rotCorr, &tiltCorr);
+        _setText(text, "%.3f", rollCorr);
+        _cfacRollVal->setText(text);
+        _setText(text, "%.3f", rotCorr);
+        _cfacRotationVal->setText(text);   
+        _setText(text, "%.3f", tiltCorr);    
+        _cfacTiltVal->setText(text);
+*/
+      }
+
+      //_view->showCfacs();
 }
 
 /*

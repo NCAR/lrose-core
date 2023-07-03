@@ -204,6 +204,8 @@ private:
 
   double _calculateSpeed(double ewVel, double nsVel);
 
+  void _updateGeoreferencedData(const RadxRay *ray);
+
   /* panels
   
   void hideCfacs();
@@ -249,7 +251,6 @@ private:
     bool _show_track;
     bool _show_sun_elevation;
     bool _show_sun_azimuth;
-
 };
 
 #endif
