@@ -124,8 +124,13 @@ StatusPanelView::StatusPanelView(QWidget *parent)
   _nGates = 1000;
   _maxRangeKm = 1.0;
 
+  _radarNameRow = 0;
+  _dateRow = 1;
+  _timeRow = 2; 
+  _startingRow = 3;  
   _nrows = _startingRow;  // first three rows are radar name, date, and time
 
+  cerr << "StatusPanelView: _nrows = " << _nrows << "startingRow = " << _startingRow << endl;
 
   // set up windows
 
@@ -153,7 +158,6 @@ QPalette pal = QPalette();
 //setPalette(pal);
 show();
 
-
   _init();
 }
 
@@ -168,7 +172,7 @@ StatusPanelView::~StatusPanelView()
 
 void StatusPanelView::reset() {
    // delete all the labels and set the number of rows to zero
-  _nrows = _startingRow;
+  _nrows = StatusPanelView::_startingRow;
 }
 
 
@@ -714,7 +718,8 @@ void StatusPanelView::set(int key, int value) {
   //setInt(value, hashy[key], hashyFormat[key]);
 }
 
-// TODO: why keep the georefs separate? why not just put them into the hash table too?
+// Why keep the georefs separate? why not just put them into the hash table too?
+// because the georefs are hidden sometimes if the data are NOT airborne.
 void StatusPanelView::setNoHash(int key, int value) {
   setInt(value, _metaDataS[key].value);
 }

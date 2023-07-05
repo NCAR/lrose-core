@@ -327,10 +327,10 @@ private:
   double _radarLat, _radarLon, _radarAltKm;
   SunPosn _sunPosn;
 
-  const static int _radarNameRow = 0;
-  const static int _dateRow = 1;
-  const static int _timeRow = 2; 
-  const static int _startingRow = 2;
+  int _radarNameRow = 0;
+  int _dateRow = 1;
+  int _timeRow = 2; 
+  int _startingRow = 3;
 
   
   void _init();
