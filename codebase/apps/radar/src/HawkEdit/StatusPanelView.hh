@@ -180,15 +180,23 @@ const static int CfacTiltKey = 38;
 const static int LastKey = 38;
 
 
-  typedef struct {
+typedef struct {
     string label; // =   "Volume",
     string emptyValue; // =  "0",
     string format;
     int fontSize;
     QLabel *value; 
     QLabel *guiLeftLabel;
-    //int fieldWidth;
-    //int precision;
+    int fieldWidth;
+    int precision;
+    //S(string aLabel, string aEmptyValue, string aFormat = "",
+    //  int aFontSize = 12, QLabel *aValue = NULL, QLabel *aGuiLeftLabel = NULL,
+    //  int fieldWidth = 6, int precision = 2) : label(aLabel), emptyValue(aEmptyValue),
+    //    fontSize(aFontSize)
+    //{
+    //  value = aValue;
+    //  guiLeftLabel = aGuiLeftLabel;
+    //};
   } S;
 
    S _metaDataS[100]; 
