@@ -122,8 +122,11 @@ public:
   void createOnly(int key);
   void create(int key);
   void set(int key, int value);
-  //void set(int key, double value);
+  void set(int key, double value);
+  void set(int key, string value);
   void setNoHash(int key, int value);
+  void setNoHash(int key, double value);
+  void setNoHash(int key, string value);
   void createGeoreferenceLabels();
   void showCfacs();
   void hideCfacs();
@@ -184,6 +187,8 @@ const static int LastKey = 38;
     int fontSize;
     QLabel *value; 
     QLabel *guiLeftLabel;
+    //int fieldWidth;
+    //int precision;
   } S;
 
    S _metaDataS[100]; 

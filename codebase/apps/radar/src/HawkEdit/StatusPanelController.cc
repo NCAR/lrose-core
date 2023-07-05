@@ -377,7 +377,7 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
         break;
       }
       case StatusPanelView::NGatesKey: {
-        _view->set(StatusPanelView::NGatesKey, ray->getNGates());   
+        _view->set(StatusPanelView::NGatesKey, (int) ray->getNGates());   
         break;   
       }
       case StatusPanelView::GateSpacingKey: {
@@ -421,17 +421,17 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
         break;
       }
       case StatusPanelView::ScanNameKey: {
-        //_view->set(StatusPanelView::ScanNameKey, ray->getScanName().substr(0, 8));
+        _view->set(StatusPanelView::ScanNameKey, ray->getScanName().substr(0, 8));
         break;
       }
       case StatusPanelView::SweepModeKey: {
-//        _view->set(StatusPanelView::SweepModeKey, 
-//          _view->translateSweepMode(ray->getSweepMode());
+        _view->set(StatusPanelView::SweepModeKey, 
+          Radx::sweepModeToStr(ray->getSweepMode()));
         break;
       }
       case StatusPanelView::PolarizationModeKey: {
-        //_view->setString(StatusPanelView::PolarizationModeKey, 
-        //  Radx::polarizationModeToStr(ray->getPolarizationMode()).c_str());
+        _view->set(StatusPanelView::PolarizationModeKey, 
+          Radx::polarizationModeToStr(ray->getPolarizationMode()));
         break;
       }
       // PrfMode?
@@ -481,6 +481,48 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   }
 }
 
+/*
+string StatusPanelController::_translateSweepMode(Radx::SweepMode_t sweepMode) {
+  string sweepModeText = "";
+  switch (sweepMode {
+    case Radx::SWEEP_MODE_SECTOR: {
+      sweepModeText.append("sector"); break;
+    }
+    case Radx::SWEEP_MODE_COPLANE: {
+      sweepModeText.append("coplane"); break;
+    }
+    case Radx::SWEEP_MODE_RHI: {
+      sweepModeText.append("RHI"); break;
+    }
+    case Radx::SWEEP_MODE_VERTICAL_POINTING: {
+      sweepModeText.append("vert"); break;
+    }
+    case Radx::SWEEP_MODE_IDLE: {
+      sweepModeText.append("idle"); break;
+    }
+    case Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE:
+    case Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE: {
+      sweepModeText.append("SUR"); break;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN: {
+      sweepModeText.append("sunscan"); break;
+    }
+    case Radx::SWEEP_MODE_SUNSCAN_RHI: {
+      sweepModeText.append("sun_rhi"); break;
+    }
+    case Radx::SWEEP_MODE_POINTING: {
+      sweepModeText.append("point"); break;
+    }
+    case Radx::SWEEP_MODE_CALIBRATION: {
+      sweepModeText.append("cal"); break;
+    }
+    default: {
+      sweepModeText.append("unknown");
+    }
+  return sweepModeText;
+}
+*/
+
 void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
 // need to create and update; because only know if airborne data 
   // once we have a ray ... HERE
@@ -495,7 +537,7 @@ void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
           value.append("true");
         else 
           value.append("false");
-        //_view->set(StatusPanelView::GeoRefsAppliedKey, value);
+        _view->setNoHash(StatusPanelView::GeoRefsAppliedKey, value);
 
         _view->setNoHash(StatusPanelView::GeoRefRollKey, georef->getRoll());
         _view->setNoHash(StatusPanelView::GeoRefTiltKey, georef->getTilt());
@@ -504,7 +546,7 @@ void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
         _view->setNoHash(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
         _view->setNoHash(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
 
-  // TODO: these are coupled; show one, show all; depends on 
+    // these are coupled; show one, show all; depends on 
     // if airborne data ...
         double rollCorr = 0.0;
         double rotCorr = 0.0;

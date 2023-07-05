@@ -205,6 +205,7 @@ private:
   double _calculateSpeed(double ewVel, double nsVel);
 
   void _updateGeoreferencedData(const RadxRay *ray);
+  //string _translateSweepMode(Radx::SweepMode_t sweepMode);
 
   /* panels
   

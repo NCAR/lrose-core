@@ -718,10 +718,29 @@ void StatusPanelView::set(int key, int value) {
   //setInt(value, hashy[key], hashyFormat[key]);
 }
 
+void StatusPanelView::set(int key, double value) {
+  S *s = hashy[key];
+  setDouble(value, s->value, 6, 2);
+}
+
+void StatusPanelView::set(int key, string value) {
+  S *s = hashy[key];
+  setString(value, s->value);
+}
+
 // Why keep the georefs separate? why not just put them into the hash table too?
 // because the georefs are hidden sometimes if the data are NOT airborne.
 void StatusPanelView::setNoHash(int key, int value) {
   setInt(value, _metaDataS[key].value);
+}
+
+void StatusPanelView::setNoHash(int key, double value) {
+  setDouble(value, _metaDataS[key].value, 6, 2); // _metaDataS[key].fieldWidth, _metatDataS[key].precision);
+  // (double s, QLabel *label, int fieldWidth, int precision) 
+}
+
+void StatusPanelView::setNoHash(int key, string value) {
+  setString(value, _metaDataS[key].value);
 }
 
 /*
