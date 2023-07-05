@@ -137,6 +137,7 @@ public:
   void createDateTime();
 
   string interpretSweepMode(Radx::SweepMode_t sweepMode);
+  void calculateSunEl(double rayTime);
 
 public slots:
 
@@ -174,7 +175,7 @@ private:
   
   // instrument platform details 
 
-  RadxPlatform _platform;
+  //RadxPlatform _platform;
 
   bool _altitudeInFeet;
 
@@ -206,6 +207,8 @@ private:
 
   void _updateGeoreferencedData(const RadxRay *ray);
   //string _translateSweepMode(Radx::SweepMode_t sweepMode);
+  string interpretPrf(Radx::PrtMode_t rayPrtMode, 
+  double rayPrtSec, double rayPrtRatio);
 
   /* panels
   

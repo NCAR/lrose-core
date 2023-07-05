@@ -388,10 +388,20 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
         _view->set(StatusPanelView::PulseWidthKey, ray->getPulseWidthUsec());
         break;
       }
-  //case StatusPanelView::PrfModeKey:
-  // _view->set(StatusPanelView::
-  //case StatusPanelView::_prf) _view->set(StatusPanelView::
-
+      
+      // 
+      case StatusPanelView::PrfModeKey: {
+        _view->set(StatusPanelView::PrfModeKey, 
+          Radx::prtModeToStr(ray->getPrtMode()));
+        break;
+      }
+      case StatusPanelView::PrfKey: {
+        string text = interpretPrf(ray->getPrtMode(), 
+          ray->getPrtSec(), ray->getPrtRatio());
+        _view->set(StatusPanelView::PrfKey, text);
+         break;
+      } 
+      
       case StatusPanelView::NyquistKey: {
         _view->set(StatusPanelView::NyquistKey, ray->getNyquistMps());
         break;
@@ -434,7 +444,6 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
           Radx::polarizationModeToStr(ray->getPolarizationMode()));
         break;
       }
-      // PrfMode?
       
       case StatusPanelView::LatitudeKey:
       case StatusPanelView::LongitudeKey:
@@ -448,7 +457,16 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
         _chooseGeoReferenceOrPlatform(ray, key);
         break;
       }
-      // deal with this ...
+      // TODO: deal with this ...
+      // Options: 
+      //   1. Calculate both values at the beginning of the loop
+      //      and if it SunAz & El are not displayed, then we wasted some time.
+      //   2. Calculate SunAz & El once for Az, and then again for El, if 
+      //      both are displayed. 
+      //
+      //  Let's go with option 2. because there is no dependence on a prior
+      //   state, i.e. option 2 does not depend on some other calculation
+      //   happening.   
 /*
   if (fabs(_radarLat - _platform.getLatitudeDeg()) > 0.0001 ||
       fabs(_radarLon - _platform.getLongitudeDeg()) > 0.0001 ||
@@ -458,14 +476,17 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
     _radarAltKm = _platform.getAltitudeKm();
     _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
   }
+
+  double sunEl, sunAz;
+  _sunPosn.computePosn(ray->getTimeDouble(), sunEl, sunAz);  
 */
-//    case StatusPanelView::SunElevationKey:
-//     _view->set(StatusPanelView::SunElevationKey
-//      break;
-//    case StatusPanelView::SunAzimuthKey:
-//     _view->set(StatusPanelView::SunAzimuthKey
-//      break;
-      
+      case StatusPanelView::SunElevationKey:
+      case StatusPanelView::SunAzimuthKey: {
+        calculateSunEl(ray->getTimeDouble());
+       //_view->set(StatusPanelView::SunElevationKey, sunEl);    
+       //_view->set(StatusPanelView::SunAzimuthKey, sunAz);
+        break;
+      }
       default: {
         cerr << "not found" << endl;
         break;
@@ -481,7 +502,35 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
   }
 }
 
+void StatusPanelController::calculateSunEl(double rayTime) {
+    // the sun Az and El are related to the platform; Does this need to be calculate
+    // using the info from georeference? for airborne data????
+    // TODO: ASK MIKE!
+    // 
+
+  DataModel *dataModel = DataModel::Instance();  
+  const RadxPlatform platform = dataModel->getPlatform();  
+
+  // should this be done in the StatusPanelModel? 
+  if (fabs(_radarLat - platform.getLatitudeDeg()) > 0.0001 ||
+      fabs(_radarLon - platform.getLongitudeDeg()) > 0.0001 ||
+      fabs(_radarAltKm - platform.getAltitudeKm()) > 0.0001) {
+    _radarLat = platform.getLatitudeDeg();
+    _radarLon = platform.getLongitudeDeg();
+    _radarAltKm = platform.getAltitudeKm();
+    _sunPosn.setLocation(_radarLat, _radarLon, _radarAltKm * 1000.0);
+  }
+  double sunEl, sunAz;
+  _sunPosn.computePosn(rayTime, sunEl, sunAz);  
+
+  _view->setNoHash(StatusPanelView::SunAzimuthKey, sunAz);
+  _view->setNoHash(StatusPanelView::SunElevationKey, sunEl);  
+
+}
+
+
 /*
+// KEEP THIS!!! It has abreviations for the longer sweep mode text from Radx translation.
 string StatusPanelController::_translateSweepMode(Radx::SweepMode_t sweepMode) {
   string sweepModeText = "";
   switch (sweepMode {
@@ -706,6 +755,7 @@ void StatusPanelController::_getInfoFromGeoreference(const RadxGeoref *georef,
 */
 }
 
+// TODO should probably go into the StatusPanelModel
 void StatusPanelController::_getInforFromPlatform(const RadxRay *ray, int key) {
 
   DataModel *dataModel = DataModel::Instance();  
@@ -715,19 +765,19 @@ void StatusPanelController::_getInforFromPlatform(const RadxRay *ray, int key) {
       _view->set(StatusPanelView::LatitudeKey, platform.getLongitudeDeg());
       break; 
     case StatusPanelView::LongitudeKey:
-      _view->set(StatusPanelView::LongitudeKey, _platform.getLongitudeDeg());
+      _view->set(StatusPanelView::LongitudeKey, platform.getLongitudeDeg());
       break; 
     case StatusPanelView::AltitudeInFeetKey: {
-      double radarAltFeet = _platform.getAltitudeKm()  / 0.3048;
+      double radarAltFeet = platform.getAltitudeKm()  / 0.3048;
       _view->set(StatusPanelView::AltitudeInFeetKey, radarAltFeet);
       break; 
     }
     case StatusPanelView::AltitudeInKmKey:
-      _view->set(StatusPanelView::AltitudeInKmKey, _platform.getAltitudeKm() );
+      _view->set(StatusPanelView::AltitudeInKmKey, platform.getAltitudeKm() );
       break;
     default:
       cerr << "something really awful happened" << endl;
-    }
+    }    
 }
 
 void StatusPanelController::_chooseGeoReferenceOrPlatform(const RadxRay *ray, int key) {
@@ -743,40 +793,42 @@ void StatusPanelController::setFontSize(int fontSize) {
   _view->setFontSize(fontSize);
 }
 
-/*
-string StatusPanelController::interpretPrf(Radx::  rayPrtMode, double rayPrtSec, double rayPrtRatio) {
-  string text;
 
-    if (_view->_prfVal) {
-    if (ray->getPrtMode() == Radx::PRT_MODE_FIXED) {
-      if (ray->getPrtSec() <= 0) {
-        _setText(text, "%d", -9999);
+string StatusPanelController::interpretPrf(Radx::PrtMode_t rayPrtMode, 
+  double rayPrtSec, double rayPrtRatio) {
+  string text;
+  int iprt;
+
+    if (rayPrtMode == Radx::PRT_MODE_FIXED) {
+      if (rayPrtSec <= 0) {
+        text.append("-9999");
       } else {
-        _setText(text, "%d", (int) ((1.0 / ray->getPrtSec()) * 10.0 + 0.5) / 10);
-      }
+        iprt =  (int) ((1.0 / rayPrtSec) * 10.0 + 0.5) / 10;
+        text = std::to_string(iprt);
+      } 
     } else {
       double prtSec = rayPrtSec;
       if (prtSec <= 0) {
-        _setText(text, "%d", -9999);
+        text.append("-9999");
       } else {
-        int iprt = (int) ((1.0 / rayPrtSec) * 10.0 + 0.5) / 10;
+        iprt = (int) ((1.0 / rayPrtSec) * 10.0 + 0.5) / 10;
+        text = std::to_string(iprt);
         double prtRatio = rayPrtRatio;
         if (prtRatio > 0.6 && prtRatio < 0.7) {
-          _setText(text, "%d(2/3)", iprt);
+          text.append("(2/3)");
         } else if (prtRatio < 0.775) {
-          _setText(text, "%d(3/4)", iprt);
+          text.append("(3/4)");
         } else if (prtRatio < 0.825) {
-          _setText(text, "%d(4/5)", iprt);
+          text.append("(4/5)");
         } else {
-          _setText(text, "%d", iprt);
+          ; // nothing to do
         }
       }
     }
-    _prfVal->setText(text);
-  }
+
   return text;
 }
-*/
+
 
 string StatusPanelController::interpretSweepMode(Radx::SweepMode_t sweepMode) {
 
