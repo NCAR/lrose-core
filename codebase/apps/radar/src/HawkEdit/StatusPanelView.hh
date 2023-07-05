@@ -123,7 +123,10 @@ public:
   void create(int key);
   void set(int key, int value);
   //void set(int key, double value);
+  void setNoHash(int key, int value);
   void createGeoreferenceLabels();
+  void showCfacs();
+  void hideCfacs();
 
 const static int FixedAngleKey = 0;
 const static int VolumeNumberKey = 1;
@@ -158,27 +161,29 @@ const static int SunElevationKey = 26;
 const static int SunAzimuthKey = 27;
 
 const static int GeoRefsAppliedKey = 28;
-const static int GeoRefRollKey = 29;
-const static int GeoRefTiltKey = 30;
+const static int GeoRefRotationKey = 29;
+const static int GeoRefRollKey = 30;
+const static int GeoRefTiltKey = 31;
 
-const static int GeoRefTrackRelRotationKey = 31;
-const static int GeoRefTrackRelTiltKey = 32;
-const static int GeoRefTrackRelAzimuthKey = 33;
-const static int GeoRefTrackRelElevationKey = 34;
+const static int GeoRefTrackRelRotationKey = 32;
+const static int GeoRefTrackRelTiltKey = 33;
+const static int GeoRefTrackRelAzimuthKey = 34;
+const static int GeoRefTrackRelElevationKey = 35;
 
-const static int CfacRotationKey = 35;
-const static int CfacRollKey = 36;
-const static int CfacTiltKey = 37;
+const static int CfacRotationKey = 36;
+const static int CfacRollKey = 37;
+const static int CfacTiltKey = 38;
 
-const static int LastKey = 37;
+const static int LastKey = 38;
 
 
   typedef struct {
     string label; // =   "Volume",
     string emptyValue; // =  "0",
     string format;
-    QLabel *value; 
     int fontSize;
+    QLabel *value; 
+    QLabel *guiLeftLabel;
   } S;
 
    S _metaDataS[100]; 
@@ -334,9 +339,6 @@ private:
   //void _createClickReportDialog();
   //void updateStatusPanel(const RadxRay *ray);
   //double _getInstHtKm(const RadxRay *ray);
-
-  void showCfacs();
-  void hideCfacs();
   
   // adding vals / labels
 
@@ -363,10 +365,9 @@ private:
 
 */
   QLabel *_createStatusVal(const string &leftLabel,
-                           const string &rightLabel,
-                           //int row, 
-                           int fontSize);
-                           //QLabel **label = NULL);
+                           const string &rightLabel, 
+                           int fontSize,
+                           QLabel **guiLeftLabel = NULL);
   
   /*
   QLabel *_addLabelRow(QWidget *widget,

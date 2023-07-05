@@ -502,51 +502,52 @@ struct S {
   hashy.reserve(LastKey);
 
   // what to do about float format?
-  _metaDataS[FixedAngleKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize2};
-  _metaDataS[VolumeNumberKey] = {"Volume", "0", "%d", NULL, _fsize};  
-  _metaDataS[SweepNumberKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
+  _metaDataS[FixedAngleKey] =   {"Fixed ang", "-99.99", "f6.2???", _fsize2, NULL, NULL};
+  _metaDataS[VolumeNumberKey] = {"Volume", "0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[SweepNumberKey] =  {"Sweep", "0", "%d", _fsize, NULL, NULL};  
 
-  _metaDataS[NSamplesKey] =   {"N samp", "0", "%d", NULL, _fsize};
-  _metaDataS[NGatesKey] = {"N gates", "0", "%d", NULL, _fsize};  
-  _metaDataS[GateSpacingKey] =  {"Gate len", "0", "%d", NULL, _fsize};  
-  _metaDataS[PulseWidthKey] =   {"Pulse width", "-9999", "f6.2???", NULL, _fsize};
-  _metaDataS[PrfModeKey] = {"PRF mode", "fixed", "%d", NULL, _fsize};  
-  _metaDataS[PrfKey] =  {"PRF", "-9999", "%d", NULL, _fsize};  
-  _metaDataS[NyquistKey] =   {"Nyquist", "-9999", "f6.2???", NULL, _fsize};
-  _metaDataS[MaxRangeKey] = {"Max range", "-9999", "%d", NULL, _fsize};  
-  _metaDataS[UnambiguousRangeKey] =  {"U-A range", "-9999", "%d", NULL, _fsize};  
-  _metaDataS[PowerHKey] =   {"Power H", "-9999", "f6.2???", NULL, _fsize};
-  _metaDataS[PowerVKey] = {"Power V", "-9999", "%d", NULL, _fsize};  
-  _metaDataS[ScanNameKey] =  {"Scan name", "unknown", "%s", NULL, _fsize};  
+  _metaDataS[NSamplesKey] =   {"N samp", "0", "%d", _fsize, NULL, NULL};
+  _metaDataS[NGatesKey] = {"N gates", "0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[GateSpacingKey] =  {"Gate len", "0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[PulseWidthKey] =   {"Pulse width", "-9999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[PrfModeKey] = {"PRF mode", "fixed", "%d", _fsize, NULL, NULL};  
+  _metaDataS[PrfKey] =  {"PRF", "-9999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[NyquistKey] =   {"Nyquist", "-9999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[MaxRangeKey] = {"Max range", "-9999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[UnambiguousRangeKey] =  {"U-A range", "-9999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[PowerHKey] =   {"Power H", "-9999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[PowerVKey] = {"Power V", "-9999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[ScanNameKey] =  {"Scan name", "unknown", "%s", _fsize, NULL, NULL};  
 
-  _metaDataS[SweepModeKey] =   {"Scan mode", "SUR", "f6.2???", NULL, _fsize};
-  _metaDataS[PolarizationModeKey] = {"Pol mode", "Single", "%d", NULL, _fsize};  
-  _metaDataS[LatitudeKey] =  {"Lat", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[LongitudeKey] =   {"Lon", "-999.999", "f6.2???", NULL, _fsize};
-  _metaDataS[AltitudeInFeetKey] = {"Alt(kft)", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[AltitudeInKmKey] =  {"Alt(km)", "-999.999", "%d", NULL, _fsize};  
+  _metaDataS[SweepModeKey] =   {"Scan mode", "SUR", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[PolarizationModeKey] = {"Pol mode", "Single", "%d", _fsize, NULL, NULL};  
+  _metaDataS[LatitudeKey] =  {"Lat", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[LongitudeKey] =   {"Lon", "-999.999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[AltitudeInFeetKey] = {"Alt(kft)", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[AltitudeInKmKey] =  {"Alt(km)", "-999.999", "%d", _fsize, NULL, NULL};  
 
-  _metaDataS[AltitudeRateFtsKey] =   {"AltRate(ft/s)", "-999.999", "f6.2???", NULL, _fsize};
-  _metaDataS[AltitudeRateMsKey] = {"AltRate(m/s)", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[SpeedKey] =  {"Speed(m/s)", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[HeadingKey] =   {"Heading(deg)", "-999.999", "f6.2???", NULL, _fsize};
-  _metaDataS[TrackKey] = {"Track(deg)", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[SunElevationKey] =  {"Sun el (deg)", "-999.999", "%d", NULL, _fsize};  
-  _metaDataS[SunAzimuthKey] =   {"Sun az (deg)", "-999.999", "f6.2???", NULL, _fsize};
+  _metaDataS[AltitudeRateFtsKey] =   {"AltRate(ft/s)", "-999.999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[AltitudeRateMsKey] = {"AltRate(m/s)", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[SpeedKey] =  {"Speed(m/s)", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[HeadingKey] =   {"Heading(deg)", "-999.999", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[TrackKey] = {"Track(deg)", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[SunElevationKey] =  {"Sun el (deg)", "-999.999", "%d", _fsize, NULL, NULL};  
+  _metaDataS[SunAzimuthKey] =   {"Sun az (deg)", "-999.999", "f6.2???", _fsize, NULL, NULL};
 
 
-  _metaDataS[GeoRefsAppliedKey] = {"Volume", "0", "%d", NULL, _fsize};  
-  _metaDataS[GeoRefRollKey] =  {"Sweep", "0", "%d", NULL, _fsize};            
-  _metaDataS[GeoRefTiltKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
+  _metaDataS[GeoRefsAppliedKey] = {"Georefs applied?", "T/F", "%s", _fsize, NULL, NULL};  
+  _metaDataS[GeoRefRotationKey] =  {"Georef Rot (deg)", "0.0", "%d", _fsize, NULL, NULL};
+  _metaDataS[GeoRefRollKey] =  {"Georef Roll (deg)", "0.0", "%d", _fsize, NULL, NULL};            
+  _metaDataS[GeoRefTiltKey] =   {"Georef Tilt (deg)", "0.0", "f6.2???", _fsize, NULL, NULL};
 
-  _metaDataS[GeoRefTrackRelRotationKey] = {"Volume", "0", "%d", NULL, _fsize};  
-  _metaDataS[GeoRefTrackRelTiltKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
-  _metaDataS[GeoRefTrackRelAzimuthKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
-  _metaDataS[GeoRefTrackRelElevationKey] = {"Volume", "0", "%d", NULL, _fsize};  
+  _metaDataS[GeoRefTrackRelRotationKey] = {"Track Rel Rot (deg)", "0.0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[GeoRefTrackRelTiltKey] =  {"Track Rel  Tilt (deg)", "0.0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[GeoRefTrackRelAzimuthKey] =   {"Track Rel  Az (deg)", "0.0", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[GeoRefTrackRelElevationKey] = {"Track Rel  El (deg)", "0.0", "%d", _fsize, NULL, NULL};  
 
-  _metaDataS[CfacRotationKey] =  {"Sweep", "0", "%d", NULL, _fsize};  
-  _metaDataS[CfacRollKey] =   {"Fixed ang", "-99.99", "f6.2???", NULL, _fsize};
-  _metaDataS[CfacTiltKey] = {"Volume", "0", "%d", NULL, _fsize};  
+  _metaDataS[CfacRotationKey] =  {"Cfac Rot (deg)", "0.0", "%d", _fsize, NULL, NULL};  
+  _metaDataS[CfacRollKey] =   {"Cfac Roll (deg)", "0.0", "f6.2???", _fsize, NULL, NULL};
+  _metaDataS[CfacTiltKey] = {"Cfac Tilt (deg)", "0.0", "%d", _fsize, NULL, NULL};  
         
 
 }
@@ -585,7 +586,7 @@ void StatusPanelView::createDateTime() {
 
 void StatusPanelView::createGeoreferenceLabels() {
 
-  for (int key=GeoRefsAppliedKey; key<LastKey; key++) {
+  for (int key = GeoRefsAppliedKey; key <= LastKey; key++) {
     createOnly(key);  
   }
   hideCfacs();
@@ -695,7 +696,7 @@ struct S {
 */
 void StatusPanelView::createOnly(int key) {
   S *s = &_metaDataS[key];
-  s->value = _createStatusVal(s->label, s->emptyValue, s->fontSize);
+  s->value = _createStatusVal(s->label, s->emptyValue, s->fontSize, &(s->guiLeftLabel));
 }
 
 void StatusPanelView::create(int key) {
@@ -711,6 +712,11 @@ void StatusPanelView::set(int key, int value) {
   S *s = hashy[key];
   setInt(value, s->value); // , "%d");  // set for int always uses "%d" format.
   //setInt(value, hashy[key], hashyFormat[key]);
+}
+
+// TODO: why keep the georefs separate? why not just put them into the hash table too?
+void StatusPanelView::setNoHash(int key, int value) {
+  setInt(value, _metaDataS[key].value);
 }
 
 /*
@@ -918,10 +924,8 @@ QLabel *StatusPanelView::_newLabelRight(const string &text)
 
 QLabel *StatusPanelView::_createStatusVal(const string &leftLabel,
                                          const string &rightLabel,
-                                         //int row, 
-                                         int fontSize)
-                                         //QLabel **label)
-  
+                                         int fontSize,
+                                         QLabel **guiLeftLabel)  
 {
   _nrows += 1;
   int row = _nrows;
@@ -929,9 +933,9 @@ QLabel *StatusPanelView::_createStatusVal(const string &leftLabel,
   left->setText(leftLabel.c_str());
   Qt::Alignment alignRight(Qt::AlignRight);
   _statusLayout->addWidget(left, row, 0, alignRight);
-  //if (label != NULL) {
-  //  *label = left;
-  //}
+  if (guiLeftLabel != NULL) {
+    *guiLeftLabel = left;
+  }
 
   QLabel *right = new QLabel(this);
   right->setText(rightLabel.c_str());
@@ -1410,6 +1414,16 @@ void StatusPanelView::updateStatusPanel(
 }
 */
 void StatusPanelView::hideCfacs() {
+
+  for (int key = GeoRefsAppliedKey; key <= LastKey; key++) {
+    //S s = _metaDataS[key];
+    QLabel *value = _metaDataS[key].value;
+    value->hide();
+    QLabel *leftLabel = _metaDataS[key].guiLeftLabel;
+    leftLabel->hide();
+  }
+}
+/*
   _georefsApplied->hide(); 
   _geoRefRotationVal->hide(); 
   _geoRefRollVal->hide(); 
@@ -1435,8 +1449,18 @@ void StatusPanelView::hideCfacs() {
 
   //_applyCfacToggle->hide();  
 }
-
+*/
 void StatusPanelView::showCfacs() {
+
+  for (int key = GeoRefsAppliedKey; key <= LastKey; key++) {
+    //S s = _metaDataS[key];
+    QLabel *value = _metaDataS[key].value;
+    value->show();
+    QLabel *leftLabel = _metaDataS[key].guiLeftLabel;
+    leftLabel->show();
+  }
+}
+/*
       _georefsApplied->show();
       _geoRefRotationVal->show();
       _geoRefRollVal->show();
@@ -1461,6 +1485,7 @@ void StatusPanelView::showCfacs() {
       _cfacRollLabel->show(); 
       _cfacTiltLabel->show();   
 }
+*/
 
 ///////////////////////////////////////////
 /* set text for GUI panels

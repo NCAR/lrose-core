@@ -474,6 +474,9 @@ void StatusPanelController::updateStatusPanel(const RadxRay *ray) {
     // if airborne data ...
     if (ray->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE) {
       _updateGeoreferencedData(ray);
+      _view->showCfacs();
+    } else {
+      _view->hideCfacs();
     }
   }
 }
@@ -494,12 +497,12 @@ void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
           value.append("false");
         //_view->set(StatusPanelView::GeoRefsAppliedKey, value);
 
-        _view->set(StatusPanelView::GeoRefRollKey, georef->getRoll());
-        _view->set(StatusPanelView::GeoRefTiltKey, georef->getTilt());
-        _view->set(StatusPanelView::GeoRefTrackRelRotationKey, georef->getTrackRelRot()); 
-        _view->set(StatusPanelView::GeoRefTrackRelTiltKey, georef->getTrackRelTilt()); 
-        _view->set(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
-        _view->set(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
+        _view->setNoHash(StatusPanelView::GeoRefRollKey, georef->getRoll());
+        _view->setNoHash(StatusPanelView::GeoRefTiltKey, georef->getTilt());
+        _view->setNoHash(StatusPanelView::GeoRefTrackRelRotationKey, georef->getTrackRelRot()); 
+        _view->setNoHash(StatusPanelView::GeoRefTrackRelTiltKey, georef->getTrackRelTilt()); 
+        _view->setNoHash(StatusPanelView::GeoRefTrackRelAzimuthKey, georef->getTrackRelAz()); 
+        _view->setNoHash(StatusPanelView::GeoRefTrackRelElevationKey, georef->getTrackRelEl());  
 
   // TODO: these are coupled; show one, show all; depends on 
     // if airborne data ...
@@ -508,9 +511,9 @@ void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
         double tiltCorr = 0.0;
         DataModel *dataModel = DataModel::Instance();
         dataModel->getCfactors(&rollCorr, &rotCorr, &tiltCorr);
-        _view->set(StatusPanelView::CfacRotationKey, rotCorr); 
-        _view->set(StatusPanelView::CfacRollKey, rollCorr); 
-        _view->set(StatusPanelView::CfacTiltKey, tiltCorr); 
+        _view->setNoHash(StatusPanelView::CfacRotationKey, rotCorr); 
+        _view->setNoHash(StatusPanelView::CfacRollKey, rollCorr); 
+        _view->setNoHash(StatusPanelView::CfacTiltKey, tiltCorr); 
 
       /*
 
