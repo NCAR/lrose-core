@@ -289,6 +289,8 @@ const float *data, float *newData, size_t nGates,
   string UnconditionalDelete(string fieldName,  size_t rayIdx, //int sweepIdx,
              size_t clip_gate, float bad_data_value);
   
+  string AssignValue(string fieldName,  size_t rayIdx,
+             float data_value, size_t clip_gate);
   /*
 const float *data, float *newData, size_t nGates,
 			 float nyquist_velocity, float dds_radd_eff_unamb_vel,

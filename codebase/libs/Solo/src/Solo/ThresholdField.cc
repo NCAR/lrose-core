@@ -194,6 +194,11 @@ void se_unconditional_delete(const float *data, float *newData, size_t nGates,
   se_hard_zap(data, nGates, newData, bad, dgi_clip_gate, boundary_mask);
 }
 
+void se_assign_value(const float *data, float *newData, size_t nGates,
+         float value, size_t dgi_clip_gate, bool *boundary_mask) {
+  se_hard_zap(data, nGates, newData, value, dgi_clip_gate, boundary_mask);
+}
+
 /* c------------------------------------------------------------------------ */
 
   
