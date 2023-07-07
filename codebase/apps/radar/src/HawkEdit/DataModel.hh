@@ -164,6 +164,8 @@ public:
   void deleteLookAhead();
   void moveToLookAhead();
   void clearVolume();
+
+  void sanityCheckVolume(string &msg);
   
 private:
   
@@ -204,8 +206,6 @@ private:
   vector<int> _lookAheadSweepNumbers;
   vector<double> _lookAheadSweepAngles;
   vector<RadxField *> _lookAheadFields;  
-
-  void _sanityCheckVolume();
 
 };
 

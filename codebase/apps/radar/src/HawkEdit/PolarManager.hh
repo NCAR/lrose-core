@@ -233,6 +233,7 @@ public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
   void cancelFieldListDialog(bool clicked);
+  void warningMessage(string msg);
 
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
@@ -345,6 +346,8 @@ signals:
   void readDataFileSignal(vector<string> *selectedFields);
 
   void dataFileRead();
+
+  void warningMessageEvent(string msg);
 
 // end from DisplayManager
 
@@ -737,6 +740,8 @@ private:
   void _readDataFile(); // vector<string> *selectedFields);
   int _readDataFile2();
   int _readDataFile2(string &inputPath);
+
+  void _sanityCheck();
 
   // handleArchiveData calls:
   // getArchiveData

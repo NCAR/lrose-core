@@ -255,6 +255,7 @@ PolarManager::PolarManager(DisplayFieldController *displayFieldController,
   //_changeField(0, false);
 
   connect(this, SIGNAL(readDataFileSignal(vector<string> *)), this, SLOT(inbetweenReadDataFile(vector<string> *)));  
+  connect(this, SIGNAL(warningMessageEvent(string)), this, SLOT(warningMessage(string)));
   //connect(this, SIGNAL(fieldSelected(string)), _displayFieldController, SLOT(fieldSelected(string))); 
 }
 
@@ -1273,6 +1274,16 @@ int PolarManager::_getArchiveDataPlainVanilla(string &inputPath) {
   return 0;
 }
 
+void PolarManager::_sanityCheck() {
+  string msg;
+  DataModel *dataModel = DataModel::Instance(); 
+  dataModel->sanityCheckVolume(msg);
+
+  if (msg.length() > 0) {
+    emit warningMessageEvent(msg);
+  } 
+}
+
 
 /////////////////////////////
 // get data in archive mode
@@ -1324,6 +1335,7 @@ int PolarManager::_getArchiveData(string &inputPath)
   
   
     _platform = dataModel->getPlatform();
+    _sanityCheck();
     LOG(DEBUG) << "exit";
     return 0;
   } else {
@@ -6453,6 +6465,10 @@ void PolarManager::errorMessage(string title, string message) {
   } else {
     cerr << title << ":" << message << endl;
   }
+}
+
+void PolarManager::warningMessage(string msg) {
+  errorMessage("Warning", msg);
 }
 
 int PolarManager::saveDiscardMessage(string text, string question) {

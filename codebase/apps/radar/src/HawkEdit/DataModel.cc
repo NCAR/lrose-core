@@ -651,12 +651,12 @@ void DataModel::readData(string path, vector<string> &fieldNames,
 
   _currentFilePath = path;
 
-  _sanityCheckVolume();
+  //_sanityCheckVolume();
 
   LOG(DEBUG) << "exit";
 }
 
-void DataModel::_sanityCheckVolume() {
+void DataModel::sanityCheckVolume(string &warningMsg) {
 
   // accumulate warning or error information, then send
   // the appropriate level of information.
@@ -664,7 +664,7 @@ void DataModel::_sanityCheckVolume() {
   string fatalErrorMsg;
   bool errors = false;
   // warnings, throw a std::invalide_argument exception
-  string warningMsg;
+  //string warningMsg;
   bool warnings = false;
 
   if (getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
@@ -708,12 +708,12 @@ void DataModel::_sanityCheckVolume() {
       }
   }
 
-  if (warnings) {
-    throw std::invalid_argument(warningMsg);
-  } 
-  if (errors) {
-    throw std::invalid_argument(fatalErrorMsg);
-  }
+  //if (warnings) {
+  //  throw std::invalid_argument(warningMsg);
+  //} 
+  //if (errors) {
+  //  throw std::invalid_argument(fatalErrorMsg);
+  //}
 
 }
 
