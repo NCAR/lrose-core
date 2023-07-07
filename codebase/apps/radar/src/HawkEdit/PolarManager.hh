@@ -553,9 +553,6 @@ private:
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
 
-  void _applyCfac();
-  void hideCfacs();
-
   // setting text
 
   void _setText(char *text, const char *format, int val);

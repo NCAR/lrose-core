@@ -38,71 +38,17 @@
 ///////////////////////////////////////////////////////////////
 
 #include "StatusPanelController.hh"
-#include "DisplayField.hh"
-#include "FieldListView.hh"
-#include "Params.hh"
-#include "Reader.hh"
-#include "AllocCheck.hh"
 #include "DataModel.hh"
 
 #include <string>
 #include <cmath>
 #include <iostream>
-#include <algorithm>    // std::find
 #include <unordered_map>
-#include <Ncxx/H5x.hh>
-#include <QActionGroup>
-#include <QApplication>
-#include <QButtonGroup>
-#include <QDialogButtonBox>
-#include <QDir>
-#include <QFrame>
-#include <QFont>
-#include <QLabel>
-#include <QToolTip>
-#include <QMenu>
-#include <QMenuBar>
-#include <QGroupBox>
-#include <QMessageBox>
-#include <QFormLayout>
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QStringListModel>
-#include <QRadioButton>
-#include <QStatusBar>
-#include <QDateTime>
-#include <QDateTimeEdit>
-#include <QLineEdit>
-#include <QErrorMessage>
-#include <QFileDialog>
-#include <QSlider>
-#include <QGraphicsScene>
-#include <QGraphicsAnchorLayout>
-#include <QGraphicsProxyWidget>
 
 #include <cstdlib>
-#include <fstream>
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/pmu.h>
-#include <toolsa/file_io.h>
 #include <toolsa/DateTime.hh>
 #include <toolsa/LogStream.hh>
-#include <dsserver/DsLdataInfo.hh>
-#include <radar/RadarComplex.hh>
-#include <Radx/RadxFile.hh>
-#include <Radx/NcfRadxFile.hh>
-#include <Radx/RadxSweep.hh>
-#include <Radx/RadxField.hh>
-#include <Radx/RadxTime.hh>
-#include <Radx/RadxPath.hh>
 
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/Path.hh>
 
 #include "CloseEventFilter.hh"
 using namespace std;
@@ -606,66 +552,9 @@ void StatusPanelController::_updateGeoreferencedData(const RadxRay *ray) {
         _view->setNoHash(StatusPanelView::CfacRollKey, rollCorr); 
         _view->setNoHash(StatusPanelView::CfacTiltKey, tiltCorr); 
 
-      /*
-
-        if (ray->getGeorefApplied()) {
-          _georefsApplied->setText("true");       
-        } else {
-          _georefsApplied->setText("false");          
-        }
-
-        _setText(text, "%.3f", georef->getRotation());  
-        _geoRefRotationVal->setText(text); 
-        _setText(text, "%.3f", georef->getRoll());  
-        _geoRefRollVal->setText(text); 
-        _setText(text, "%.3f", georef->getTilt());  
-        _geoRefTiltVal->setText(text);
-
-        _setText(text, "%.3f", georef->getTrackRelRot());  
-        _geoRefTrackRelRotationVal->setText(text); 
-        _setText(text, "%.3f", georef->getTrackRelTilt());  
-        _geoRefTrackRelTiltVal->setText(text);
-        _setText(text, "%.3f", georef->getTrackRelAz());  
-        _geoRefTrackRelAzVal->setText(text); 
-        _setText(text, "%.3f", georef->getTrackRelEl());  
-        _geoRefTrackRelElVal->setText(text); 
-
-        double rollCorr = 0.0;
-        double rotCorr = 0.0;
-        double tiltCorr = 0.0;
-        DataModel *dataModel = DataModel::Instance();
-        dataModel->getCfactors(&rollCorr, &rotCorr, &tiltCorr);
-        _setText(text, "%.3f", rollCorr);
-        _cfacRollVal->setText(text);
-        _setText(text, "%.3f", rotCorr);
-        _cfacRotationVal->setText(text);   
-        _setText(text, "%.3f", tiltCorr);    
-        _cfacTiltVal->setText(text);
-*/
       }
 
-      //_view->showCfacs();
 }
-
-/*
-void StatusPanelController::_showCfactors(int key) {
-// TODO: these are coupled; show one, show all; depends on 
-  // if airborne data ...
-//   {
-
-    case StatusPanelView::CfacRotationKey:
-        _view->set(StatusPanelView::CfacRotationKey
-      break;
-    case StatusPanelView::CfacRollKey:
-      if (georef != NULL)
-        _view->set(StatusPanelView::CfacRollKey
-      break;
-    case StatusPanelView::CfacTiltKey:
-      if (georef != NULL)
-        _view->set(StatusPanelView::CfacTiltKey
-      break;     
-}
-*/
 
 double StatusPanelController::_calculateSpeed(double ewVel, double nsVel) {
       double speed = sqrt(ewVel * ewVel + nsVel * nsVel);
@@ -873,36 +762,7 @@ string StatusPanelController::interpretSweepMode(Radx::SweepMode_t sweepMode) {
 void StatusPanelController::newDataFile() {
   //clear();
 }
-/*
-//////////////////////////////////////////////////
 
-  // create status panel
-
-  _createStatusPanel();
-
-void StatusPanel::selectedSweepChanged(int sweepNumber) {
-  LOG(DEBUG) << "enter"; 
-  //string fieldName = newFieldName.toStdString();
-  //_displayFieldController->setSelectedField(fieldName);
-  if (_sweepController->getSelectedNumber() != sweepNumber) {
-    _sweepController->setSelectedNumber(sweepNumber);
-    _readDataFile();
-    // signal polar display to update; which causes rayLocations to update
-    selectedFieldChanged(_displayFieldController->getSelectedFieldName());
-    emit newSweepData(sweepNumber);
-    //processEvents();
-    //_setupRayLocation();  // this is done by _getArchiveData
-    //_plotArchiveData();
-    //refreshBoundaries();
-  } else {
-    if (sheetView != NULL) {
-      spreadSheetControl->displaySweepData(sweepNumber);
-    }
-  }
-  LOG(DEBUG) << "exit";
-}
-
-*/
 
 
 

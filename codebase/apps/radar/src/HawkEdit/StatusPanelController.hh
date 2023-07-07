@@ -54,9 +54,6 @@
 #include <string>
 #include <vector>
 
-#include "Args.hh"
-#include "Params.hh"
-
 #include "StatusPanelView.hh"
 
 #include <euclid/SunPosn.hh>
@@ -81,23 +78,6 @@ public:
   // destructor
   
   ~StatusPanelController();
-
-  // override event handling
-
-  //void timerEvent (QTimerEvent * event);
-  void resizeEvent (QResizeEvent * event);
-
-  /* location
-
-  double getRadarLat() const { return _radarLat; }
-  double getRadarLon() const { return _radarLon; }
-  double getRadarAltKm() const { return _radarAltKm; }
-  const RadxPlatform &getPlatform() const { return _platform; }
-
-  bool evaluateCursor(bool isShiftKeyDown);
-
-  bool evaluateRange(double xRange);
-*/
 
   void closeEvent(QEvent *event);
 
@@ -142,57 +122,16 @@ public:
 public slots:
 
   void newDataFile();
- 
-  //void setDataMissing(string fieldName, float missingValue);
-
-  //void selectedFieldChanged(QString newFieldName);
-  //void selectedFieldChanged(string fieldName);
-  //void _updateField(size_t fieldId);
-
-  //void selectedSweepChanged(int sweepNumber);
-
 
 signals:
 
-  ////////////////
-  // Qt signals //
-  ////////////////
-
-  
-  //void frameResized(const int width, const int height);
-  //void setParamsFile();
-
-  //void addField(QString fieldName);
-
-  //void newSweepData(int sweepNumber);
-
 private:
-
-  // from DisplayManager ...
-  //ParamFile *_params;
 
   StatusPanelView *_view;
   
   // instrument platform details 
 
-  //RadxPlatform _platform;
-
   bool _altitudeInFeet;
-
-  vector<QLabel *> _valsRight;
-  
-  // click location report dialog
-  QDialog *_clickReportDialog;
-  QGridLayout *_clickReportDialogLayout;
-  QLabel *_dateClicked;
-  QLabel *_timeClicked;
-  QLabel *_elevClicked;
-  QLabel *_azClicked;
-  QLabel *_gateNumClicked;
-  QLabel *_rangeClicked;
-  QLabel *_altitudeClicked;
-
-  QCheckBox *_applyCfacToggle;
   
   // sun position calculator
   double _radarLat, _radarLon, _radarAltKm;
@@ -210,21 +149,12 @@ private:
   string interpretPrf(Radx::PrtMode_t rayPrtMode, 
   double rayPrtSec, double rayPrtRatio);
 
-  /* panels
-  
-  void hideCfacs();
-
-  // setting text
-
-  */
-
 private slots:
 
   //////////////
   // Qt slots //
   //////////////
 
-  //void _refresh();
 
 private:
     bool _show_radar_name;
