@@ -3101,6 +3101,60 @@ string SoloFunctionsModel::UnconditionalDelete(string fieldName,  size_t rayIdx,
 
 }
 
+string SoloFunctionsModel::AssignValue(string fieldName,  size_t rayIdx,
+             float data_value, size_t clip_gate) {
+
+   SoloFunctionsApi api;
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+  
+  const RadxField *field;
+
+  //  get the ray for this field 
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // create new data field for return 
+  float *newData = new float[nGates];
+
+  // data, _boundaryMask, and bad flag mask should have all the same dimensions = nGates
+  SoloFunctionsApi soloFunctionsApi;
+
+  if (_boundaryMaskSet) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+  }
+
+  const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+
+  // perform the function ...
+  soloFunctionsApi.AssignValue(data, newData, nGates,
+          data_value, 
+          clip_gate, _boundaryMask);
+
+  bool isLocal = true;
+  string field_units = field->getUnits();
+
+  RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  // get the name that was actually inserted ...
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  return tempFieldName;
+
+}
+
 
 // Private methods 
 

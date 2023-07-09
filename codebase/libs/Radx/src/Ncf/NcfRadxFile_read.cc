@@ -50,6 +50,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <algorithm>
+#include <set>
 using namespace std;
 
 ////////////////////////////////////////////////////////////
@@ -255,6 +256,14 @@ int NcfRadxFile::_readPath(const string &path, size_t pathNum)
     return -1;
   }
 
+  // check that the sweep indices are valid
+
+  if (_checkSweepIndices()) {
+    _addErrStr("ERROR - bad sweep indices");
+    _addErrStr(errStr);
+    return -1;
+  }
+  
   // read in georef variables
 
   if (_georefsActive) {
@@ -439,9 +448,9 @@ int NcfRadxFile::_getVolumePaths(const string &path,
   if (rhour == 0) {
     RadxTime prevDate(rtime.utime() - RadxTime::RADX_SECS_IN_DAY);
     char prevDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(prevDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
-            prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
+    snprintf(prevDir, RadxPath::RADX_MAX_PATH_LEN, "%s%s%.4d%.2d%.2d",
+             parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+             prevDate.getYear(), prevDate.getMonth(), prevDate.getDay());
     _addToPathList(prevDir, volStr, 23, 23, paths);
   }
 
@@ -450,8 +459,8 @@ int NcfRadxFile::_getVolumePaths(const string &path,
   if (rhour == 23) {
     RadxTime nextDate(rtime.utime() + RadxTime::RADX_SECS_IN_DAY);
     char nextDir[RadxPath::RADX_MAX_PATH_LEN];
-    sprintf(nextDir, "%s%s%.4d%.2d%.2d",
-            parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
+    snprintf(nextDir, RadxPath::RADX_MAX_PATH_LEN, "%s%s%.4d%.2d%.2d",
+             parentDir.c_str(), RadxPath::RADX_PATH_DELIM,
             nextDate.getYear(), nextDate.getMonth(), nextDate.getDay());
     _addToPathList(nextDir, volStr, 0, 0, paths);
   }
@@ -1380,6 +1389,8 @@ int NcfRadxFile::_readSweepVariables()
 
   int iret = 0;
 
+  // sweep numbers
+  
   _readSweepVar(_sweepNumberVar, SWEEP_NUMBER, sweepNums);
   if (sweepNums.size() < nSweepsInFile) {
     _addErrStr("ERROR - _readSweepVariables - sweepNums size incorrect.");
@@ -1388,20 +1399,40 @@ int NcfRadxFile::_readSweepVariables()
     iret = -1;
   }
 
-  _readSweepVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX, startRayIndexes);
-  if (startRayIndexes.size() < nSweepsInFile) {
-    _addErrStr("ERROR - _readSweepVariables - startRayIndex size incorrect.");
-    _addErrInt("  startRayIndexes.size(): ", (int) startRayIndexes.size());
-    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
-    iret = -1;
+  // sweep ray indices
+  
+  if (_getSweepVar(SWEEP_START_RAY_INDEX, true) == NULL) {
+    cerr << "WARNING - NcfRadxFile::_readSweepVariables" << endl;
+    cerr << "  var: " << SWEEP_START_RAY_INDEX << " does not exist" << endl;
+    cerr << "  trying to determine start indexes from angle list" << endl;
+    for (size_t ii = 0; ii < nSweepsInFile; ii++) {
+      startRayIndexes.push_back(0);
+    }
+  } else {
+    _readSweepVar(_sweepStartRayIndexVar, SWEEP_START_RAY_INDEX, startRayIndexes);
+    if (startRayIndexes.size() < nSweepsInFile) {
+      _addErrStr("ERROR - _readSweepVariables - startRayIndex size incorrect.");
+      _addErrInt("  startRayIndexes.size(): ", (int) startRayIndexes.size());
+      _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
+      iret = -1;
+    }
   }
 
-  _readSweepVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX, endRayIndexes);
-  if (endRayIndexes.size() < nSweepsInFile) {
-    _addErrStr("ERROR - _readSweepVariables - endRayIndex size incorrect.");
-    _addErrInt("  endRayIndexes.size(): ", (int) endRayIndexes.size());
-    _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
-    iret = -1;
+  if (_getSweepVar(SWEEP_END_RAY_INDEX, true) == NULL) {
+    cerr << "WARNING - NcfRadxFile::_readSweepVariables" << endl;
+    cerr << "  var: " << SWEEP_END_RAY_INDEX << " does not exist" << endl;
+    cerr << "  trying to determine end indexes from angle list" << endl;
+    for (size_t ii = 0; ii < nSweepsInFile; ii++) {
+      endRayIndexes.push_back(0);
+    }
+  } else {
+    _readSweepVar(_sweepEndRayIndexVar, SWEEP_END_RAY_INDEX, endRayIndexes);
+    if (endRayIndexes.size() < nSweepsInFile) {
+      _addErrStr("ERROR - _readSweepVariables - endRayIndex size incorrect.");
+      _addErrInt("  endRayIndexes.size(): ", (int) endRayIndexes.size());
+      _addErrInt("  nSweepsInFile: ", (int) nSweepsInFile);
+      iret = -1;
+    }
   }
 
   for (size_t ii = 0; ii < startRayIndexes.size(); ii++) {
@@ -1426,6 +1457,8 @@ int NcfRadxFile::_readSweepVariables()
     }  
   }
 
+  // fixed angle
+  
   _sweepFixedAngleVar = NULL;
   _readSweepVar(_sweepFixedAngleVar, FIXED_ANGLE, fixedAngles, false);
   if (!_sweepFixedAngleVar) {
@@ -1733,6 +1766,132 @@ int NcfRadxFile::_readRayVariables()
 
   return 0;
 
+}
+
+///////////////////////////////////
+// check sweep indices
+// try to fix problems with sweep indices
+
+int NcfRadxFile::_checkSweepIndices()
+
+{
+
+  // check for bad indices
+  
+  set<int> startIndices, endIndices;
+  bool indicesAreBad = false;
+  int nRaysInSweeps = 0;
+  for (size_t isweep = 0; isweep < _sweepsInFile.size(); isweep++) {
+
+    RadxSweep *sweep = _sweepsInFile[isweep];
+
+    if (startIndices.find(sweep->getStartRayIndex()) != startIndices.end()) {
+      indicesAreBad = true;
+      // break;
+    }
+    startIndices.insert(sweep->getStartRayIndex());
+
+    if (endIndices.find(sweep->getEndRayIndex()) != endIndices.end()) {
+      indicesAreBad = true;
+      // break;
+    }
+    endIndices.insert(sweep->getEndRayIndex());
+
+    int nRaysInSweep = (int) sweep->getEndRayIndex() - (int) sweep->getStartRayIndex() + 1;
+    if (nRaysInSweep < 1) {
+      indicesAreBad = true;
+      // break;
+    }
+    nRaysInSweeps += nRaysInSweep;
+    
+  } // isweep
+
+  int nRaysInFile = _rayAzimuths.size();
+  if (!indicesAreBad) {
+    if (nRaysInSweeps < nRaysInFile / 2) {
+      indicesAreBad = true;
+    }
+  }
+
+  if (!indicesAreBad) {
+    // all good
+    return 0;
+  }
+
+  if (_debug) {
+    cerr << "WARNING - NcfRadxFile::_checkSweepIndices()" << endl;
+    cerr << "Bad sweep indices found" << endl;
+    cerr << "Trying to fix them from the sweep fixed angles" << endl;
+    cerr << "Path: " << _pathInUse << endl;
+  }
+
+  // is this an RHI?
+
+  RadxSweep *sweepFirst = _sweepsInFile[0];
+  bool isRhi = false;
+  if (sweepFirst->getSweepMode() == Radx::SWEEP_MODE_RHI  ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_ELEVATION_SURVEILLANCE ||
+      sweepFirst->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
+    isRhi = true;
+  }
+
+  // try to set limits by comparing ray angles to fixed angles
+
+  int currentIndex = 0;
+  int maxIndex = nRaysInFile - 1;
+  for (int isweep = 0; (int) isweep < _sweepsInFile.size() - 1; isweep++) {
+
+    RadxSweep *sweepThis = _sweepsInFile[isweep];
+    RadxSweep *sweepNext = _sweepsInFile[isweep + 1];
+
+    double fixedAngleThis = sweepThis->getFixedAngleDeg();
+    double fixedAngleNext = sweepNext->getFixedAngleDeg();
+
+    int startIndex = currentIndex;
+    int endIndex = startIndex;
+
+    for (int iray = startIndex; iray < nRaysInFile; iray++) {
+
+      double angle = _rayElevations[iray];
+      if (isRhi) {
+        angle = _rayAzimuths[iray];
+      }
+
+      double angleDiffThis = fabs(angle - fixedAngleThis);
+      double angleDiffNext = fabs(angle - fixedAngleNext);
+
+      endIndex = iray;
+      currentIndex = iray + 1;
+      
+      if (angleDiffNext < angleDiffThis) {
+        // change in sweep angle
+        break;
+      }
+      
+    } // iray
+
+    sweepThis->setStartRayIndex(startIndex);
+    sweepThis->setEndRayIndex(endIndex);
+    
+  } // isweep
+
+  RadxSweep *sweepLast = _sweepsInFile[_sweepsInFile.size() - 1];
+  sweepLast->setStartRayIndex(currentIndex);
+  sweepLast->setEndRayIndex(maxIndex);
+
+  if (currentIndex <= maxIndex) {
+    if (_debug) {
+      cerr << "SUCCESS - sweep indices fixed" << endl;
+    }
+    return 0;
+  }
+
+  _addErrStr("WARNING - NcfRadxFile::_checkSweepIndices, indices are invalid");
+  _addErrInt("  nRaysInFile: ", nRaysInFile);
+  _addErrInt("  nRaysInSweeps: ", nRaysInSweeps);
+  
+  return -1;
+  
 }
 
 ///////////////////////////////////
@@ -2595,13 +2754,15 @@ int NcfRadxFile::_readNormalFields(bool metaOnly)
     int iret = 0;
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, false)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, false)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, false)) {
           iret = -1;
         }
         break;
@@ -2735,13 +2896,15 @@ int NcfRadxFile::_readQualifierFields(bool metaOnly)
     int iret = 0;
     switch (var->type()) {
       case nc3Double: {
-        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits, true)) {
+        if (_addFl64FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
       }
       case nc3Float: {
-        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits, true)) {
+        if (_addFl32FieldToRays(var, _fieldName, _fieldUnits,
+                                _fieldScale, _fieldOffset, true)) {
           iret = -1;
         }
         break;
@@ -3639,6 +3802,7 @@ int NcfRadxFile::_readCalVar(const string &name, Nc3Var* &var,
 int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
+                                     double scale, double offset,
                                      bool isQualifier)
   
 {
@@ -3683,6 +3847,18 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
   for (size_t ii = 0; ii < nData; ii++) {
     if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
+    }
+  }
+
+  // apply scale and bias if needed
+
+  if (scale != 0.0) {
+    if (scale != 1.0 || offset != 0.0) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (data[ii] != missingVal) {
+          data[ii] = data[ii] * scale + offset;
+        }
+      } // ii
     }
   }
 
@@ -3738,6 +3914,7 @@ int NcfRadxFile::_addFl64FieldToRays(Nc3Var* var,
 int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
                                      const string &name,
                                      const string &units,
+                                     double scale, double offset,
                                      bool isQualifier)
   
 {
@@ -3782,6 +3959,18 @@ int NcfRadxFile::_addFl32FieldToRays(Nc3Var* var,
   for (size_t ii = 0; ii < nData; ii++) {
     if (!std::isfinite(data[ii])) {
       data[ii] = missingVal;
+    }
+  }
+
+  // apply scale and bias if needed
+
+  if (scale != 0.0) {
+    if (scale != 1.0 || offset != 0.0) {
+      for (size_t ii = 0; ii < nData; ii++) {
+        if (data[ii] != missingVal) {
+          data[ii] = data[ii] * scale + offset;
+        }
+      } // ii
     }
   }
 

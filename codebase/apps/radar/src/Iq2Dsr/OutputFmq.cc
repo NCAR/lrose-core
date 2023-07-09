@@ -549,9 +549,7 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
   // params
   
   dsBeam.dataTime = beam.getTimeSecs();
-  double dtime = beam.getDoubleTime();
-  double partialSecs = fmod(dtime, 1.0);
-  dsBeam.nanoSecs = (int) (partialSecs * 1.0e9 + 0.5);
+  dsBeam.nanoSecs = beam.getNanoSecs();
   dsBeam.volumeNum = beam.getVolNum();
   dsBeam.tiltNum = beam.getSweepNum();
   dsBeam.elevation = beam.getEl();

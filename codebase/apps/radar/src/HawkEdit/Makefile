@@ -105,6 +105,8 @@ HDRS = \
 	SpreadSheetModel.hh \
 	SpreadSheetUtils.hh \
 	SpreadSheetView.hh \
+	StatusPanelController.hh \
+	StatusPanelView.hh \
 	SweepView.hh \
 	SweepController.hh \
 	SweepModel.hh \
@@ -184,6 +186,8 @@ MOC_SRCS = \
 	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
+	StatusPanelController.cc \
+	StatusPanelView.cc \
 	SweepView.cc \
 	TimeNavView.cc \
 	FunctionEditor.cc 
@@ -212,9 +216,12 @@ MOC_OUTPUT = \
 	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
+	moc_StatusPanelController.cpp \
+	moc_StatusPanelView.cpp \
 	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
 	moc_TimeNavView.cpp \
+	qrc_scripthelp.cpp \
 	qrc_resources.cpp \
 	qrc_customcompleter.cpp
 

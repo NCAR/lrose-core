@@ -562,6 +562,12 @@ public:
     (volatile ui16 iCodes_a[], volatile const fl32 fIQVals_a[],
      si32 iCount_a);
 
+  // dBm / phase unpack routine
+
+  static std::pair<fl32,fl32> _unpackDbmPhaseSi16
+    (si16 mag, si16 phase,
+     double magScale, double packedScale);
+
 protected:
 
   // copy
@@ -637,6 +643,14 @@ private:
   static bool _sigmetLegacyUnpackingActive;
   static pthread_mutex_t _sigmetLutMutex;
 
+  // lookup table for converting packed mag/phase to floats
+  static bool _magPhaseLutReady;
+  static double _magPhaseLutScale;
+  static fl32 _magPhaseLutSin[65536];
+  static fl32 _magPhaseLutCos[65536];
+  static fl32 _magPhaseLutMag[65536];
+  static pthread_mutex_t _magPhaseLutMutex;
+
   // functions
   
   void _checkScanModeForVert();
@@ -648,6 +662,7 @@ private:
   void _setDataPointers();
   void _fixZeroPower();
   void _computeSigmetFloatLut() const;
+  static void _computeMagPhaseLut(double packedScale);
 
   void _clearIq();
   void _clearPacked();

@@ -15,6 +15,7 @@ AND_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad-flags
 APPEND_HISTOGRAM_TO_FILE - not implemented
 AREA_HISTOGRAM( <field> ) - not implemented
 ASSERT_BAD_FLAGS( <field>, <bad-flags> [, <bad-data-value>])
+ASSIGN_VALUE( <field>, <real> )
 A_SPECKLE = <integer> 
 BB_GATES_AVERAGED = <integer> 
 BB_MAX_NEG_FOLDS = <integer>

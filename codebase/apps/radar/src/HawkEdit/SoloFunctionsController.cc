@@ -682,6 +682,18 @@ QString SoloFunctionsController::UNCONDITIONAL_DELETE(QString field,
                 return QString::fromStdString(tempFieldName);
 } 
 
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::ASSIGN_VALUE(QString field, 
+                  float value,
+                  size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
+  string tempFieldName = soloFunctionsModel.AssignValue(field.toStdString(),
+                     currentRayIdx, 
+                     value, clip_gate);
+
+                return QString::fromStdString(tempFieldName);
+} 
+
 /*
 // return the name of the field in which the result is stored in the RadxVol
 QString SoloFunctionsController::FLAG_FRECKLES(QString field, float constant, float bad_data,

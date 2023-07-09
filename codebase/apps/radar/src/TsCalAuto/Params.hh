@@ -390,6 +390,10 @@ public:
 
   int radar_id;
 
+  tdrp_bool_t specify_pulse_width;
+
+  double fixed_pulse_width_us;
+
   int siggen_tcp_port;
 
   char* siggen_ip_address;
@@ -490,7 +494,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[66];
+  mutable TDRPtable _table[68];
 
   const char *_className;
 

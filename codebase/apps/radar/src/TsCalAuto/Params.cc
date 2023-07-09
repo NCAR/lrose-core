@@ -725,6 +725,30 @@
     tt->single_val.i = 0;
     tt++;
     
+    // Parameter 'specify_pulse_width'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("specify_pulse_width");
+    tt->descr = tdrpStrDup("Option to specify the pulse width.");
+    tt->help = tdrpStrDup("Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. See 'fixed_pulse_width_us'. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &specify_pulse_width - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'fixed_pulse_width_us'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fixed_pulse_width_us");
+    tt->descr = tdrpStrDup("Specified pulse width in microseconds.");
+    tt->help = tdrpStrDup("See 'specify_pulse_width'. Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &fixed_pulse_width_us - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

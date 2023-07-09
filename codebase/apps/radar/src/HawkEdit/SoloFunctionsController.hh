@@ -182,6 +182,10 @@ public:
                   float bad_data_value = -FLT_MAX,
                   size_t clip_gate = SIZE_MAX);
 
+  Q_INVOKABLE QString ASSIGN_VALUE(QString field, 
+                  float value = 0,
+                  size_t clip_gate = SIZE_MAX);
+
   Q_INVOKABLE double sqrt(double value) { return qSqrt(value); }
   Q_INVOKABLE QVector<double> add(QVector<double> v, QVector<double> v2) {
     int size = v.size();

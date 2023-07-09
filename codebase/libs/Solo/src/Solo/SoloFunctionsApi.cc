@@ -670,11 +670,15 @@ void SoloFunctionsApi::CopyBadFlags(const float *data, size_t nGates,
   }
 }
 
+
+// What is the difference between flaggedAssign and AssignValue?
+// flagged_assign sets values based on the bad_flag_mask
+
 void SoloFunctionsApi::FlaggedAssign(float constant, const float *data, float *newData, size_t nGates,
 		   size_t dgi_clip_gate,
 		   bool *boundary_mask, const bool *bad_flag_mask) {
   try {
-    se_assign_value(constant, data, newData, nGates, dgi_clip_gate, boundary_mask, bad_flag_mask);
+    se_flagged_assign_value(constant, data, newData, nGates, dgi_clip_gate, boundary_mask, bad_flag_mask);
   } catch(...) {
     throw "Something bad happened during script evaluation";
   }
@@ -952,6 +956,14 @@ void SoloFunctionsApi::UnconditionalDelete(const float *data, float *newData, si
   }
 }
 
+void SoloFunctionsApi::AssignValue(const float *data, float *newData, size_t nGates,
+      float value, size_t dgi_clip_gate, bool *boundary_mask) {
+  try {
+    se_assign_value(data, newData, nGates, value, dgi_clip_gate, boundary_mask);
+  } catch(...) {
+    throw "Something bad happened during script evaluation";
+  }
+}
 
 void SoloFunctionsApi::CalculateRadarAngles(
       float asib_roll,

@@ -549,6 +549,7 @@ void ScriptEditorController::setupSoloFunctions(SoloFunctionsController *soloFun
   engine->globalObject().setProperty("FLAG_FRECKLES", myExt.property("FLAG_FRECKLES"));
   engine->globalObject().setProperty("FLAG_GLITCHES", myExt.property("FLAG_GLITCHES"));
   engine->globalObject().setProperty("UNCONDITIONAL_DELETE", myExt.property("UNCONDITIONAL_DELETE"));
+  engine->globalObject().setProperty("ASSIGN_VALUE", myExt.property("ASSIGN_VALUE"));
   engine->globalObject().setProperty("~+", myExt.property("FLAGGED_ADD"));
 
   // print the context ...
