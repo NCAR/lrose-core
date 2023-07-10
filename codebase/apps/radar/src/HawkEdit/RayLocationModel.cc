@@ -200,6 +200,7 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
   for (rayItr = listOfRays.begin(); rayItr != listOfRays.end(); ++rayItr) {
     RadxRay *ray = *rayItr;
     if (ray->getSweepNumber() == sweepNumber) {   
+      /*
       RadxGeoref *georef = ray->getGeoreference();
       if (georef == NULL) {
         throw std::invalid_argument("georefence is NULL cannot sort rays");
@@ -218,7 +219,9 @@ void RayLocationModel::_sortRaysIntoRayLocationsUsingRotation(
         // use the rotation angle for the az; this is the best guess in this
         // situation.
         az = georef->getRotation();
-      }
+      }*/
+
+      float az = _getTrackRelativeRotation(ray);
       if (rayItr != listOfRays.begin()) { 
         // what if the rays are NOT in sorted order by az? It will be close enough
         double distance = fabs(az - previousAz);
@@ -601,7 +604,54 @@ float RayLocationModel::getNyquistVelocityForRay(double azDeg,
 float RayLocationModel::getAzimuthForRay(double azDeg,
   int offset) {
 
+  DataModel *dataModel = DataModel::Instance();
+  if (dataModel->getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
+    // _platform.getPrimaryAxis()
+    return _getAzimuthForRayYPrimeAxis(azDeg, offset);
+  } else {
+    return _getAzimuthForRayUsingAzimuth(azDeg, offset);
+  }  
+}
+
+float RayLocationModel::getAzimuthForRay(const RadxRay *ray) {
+  DataModel *dataModel = DataModel::Instance();
+  if (dataModel->getPrimaryAxis() == Radx::PRIMARY_AXIS_Y_PRIME) {
+    // _platform.getPrimaryAxis()
+    return _getTrackRelativeRotation(ray);
+  } else {
+    return ray->getAzimuthDeg();
+  }   
+}
+
+float RayLocationModel::_getAzimuthForRayUsingAzimuth(double azDeg,
+  int offset) {
+
   size_t rayIdx = getClosestRayIdx(azDeg, offset);
   RadxRay *ray = findClosestNonNullRay(rayIdx); 
   return ray->getAzimuthDeg();
 }
+
+float RayLocationModel::_getAzimuthForRayYPrimeAxis(double angleDeg,
+  int offset) {
+
+  size_t rayIdx = getClosestRayIdx(angleDeg, offset);
+  RadxRay *ray = findClosestNonNullRay(rayIdx); 
+  return _getTrackRelativeRotation(ray);
+}
+
+float RayLocationModel::_getTrackRelativeRotation(const RadxRay *ray) {
+      const RadxGeoref *georef = ray->getGeoreference();
+      if (georef == NULL) {
+        throw std::invalid_argument("georefence is NULL cannot retrieve\
+         track relative rotation rays");
+      }
+      double az = georef->getTrackRelRot(); // georef->getRotation()  - T_deg; // getTrackRelEl();
+      if (az == Radx::missingMetaDouble) {
+        // use the rotation angle for the az; this is the best guess in this
+        // situation.
+        az = georef->getRotation();
+      }  
+      return az;
+}
+
+

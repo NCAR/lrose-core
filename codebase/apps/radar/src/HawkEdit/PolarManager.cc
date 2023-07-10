@@ -4358,7 +4358,9 @@ void PolarManager::ExamineEdit(double azimuth, int sweepNumber, size_t fieldInde
   } else {
     string currentFieldName = _displayFieldController->getSelectedFieldName();
     //spreadSheetControl->switchRay(closestRayToEdit->getAzimuthDeg(), elevation);
-    float azimuth = closestRayToEdit->getAzimuthDeg();
+    float azimuth = _rayLocationController->getAzimuthForRay(closestRayToEdit); 
+    //<<----- need to check primary axis and return trackRelRot for Y-Prime
+    // // float azimuth = closestRayToEdit->getAzimuthDeg();  
     int sweepNumber = _sweepController->getSelectedNumber();
     spreadSheetControl->moveToLocation(currentFieldName, sweepNumber,
       azimuth, range);

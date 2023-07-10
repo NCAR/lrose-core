@@ -36,6 +36,7 @@ const RadxRay *getClosestRay(double azDeg);
 
 float getNyquistVelocityForRay(float azDeg, int offset);
 float getAzimuthForRay(float azDeg, int offset);
+float getAzimuthForRay(const RadxRay *ray);
 
 private:
 	RayLocationModel *_model;
