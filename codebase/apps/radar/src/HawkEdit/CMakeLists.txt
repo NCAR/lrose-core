@@ -79,6 +79,8 @@ set (SRCS
       SpreadSheetView.cc
       SpreadSheetController.cc
       SpreadSheetDelegate.cc
+      StatusPanelController.cc
+      StatusPanelView.cc
       SweepView.cc
       TimeNavView.cc
       FunctionEditor.cc
