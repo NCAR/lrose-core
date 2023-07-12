@@ -45,7 +45,7 @@
 #include <toolsa/sincos.h>
 #include <radar/FilterUtils.hh>
 #include <radar/ClutFilter.hh>
-#include "DwellSpectra.hh"
+#include <radar/DwellSpectra.hh>
 using namespace std;
 
 const double DwellSpectra::_missingDbl = MomentsFields::missingDouble;
