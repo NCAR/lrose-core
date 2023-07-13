@@ -50,10 +50,6 @@ LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
 
-# compiler_rcc_make_all: qrc_resources.cpp
-compiler_rcc_make_all:
-	rcc -name resources resources.qrc -o qrc_resources.cpp
-
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
@@ -227,8 +223,6 @@ MOC_OUTPUT = \
 
 RESOURCES = \
 	qrc_resources.cpp
-	# qrc_customcompleter.cpp \
-	# qrc_scripthelp.cpp 
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT) $(RESOURCES)
@@ -250,6 +244,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+
+# create cpp file for resources
+compiler_rcc_make_all:
+	rcc -name resources resources.qrc -o qrc_resources.cpp
 
 #
 # local targets

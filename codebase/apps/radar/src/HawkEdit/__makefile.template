@@ -26,7 +26,7 @@
 # Makefile for HawkEye program
 #
 # Mike Dixon, RAP, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# POBox 3000,Boulder, CO, 80307, USA
 #
 # May 2006
 #
@@ -49,7 +49,6 @@ LOC_LIBS = -lradar -lMdv -lSpdb -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
-
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -220,13 +219,13 @@ MOC_OUTPUT = \
 	moc_StatusPanelView.cpp \
 	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
-	moc_TimeNavView.cpp \
-	qrc_scripthelp.cpp \
-	qrc_resources.cpp \
-	qrc_customcompleter.cpp
+	moc_TimeNavView.cpp 
+
+RESOURCES = \
+	qrc_resources.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+CPP_SRCS = $(MOC_OUTPUT) $(RESOURCES)
 
 #
 # tdrp macros
@@ -245,6 +244,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+
+# create cpp file for resources
+compiler_rcc_make_all:
+	rcc -name resources resources.qrc -o qrc_resources.cpp
 
 #
 # local targets
