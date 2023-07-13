@@ -26,7 +26,7 @@
 # Makefile for HawkEye program
 #
 # Mike Dixon, RAP, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# POBox 3000,Boulder, CO, 80307, USA
 #
 # May 2006
 #
@@ -50,6 +50,11 @@ LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
 
+# compiler_rcc_make_all: qrc_resources.cpp
+compiler_rcc_make_all:
+	/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources resources.qrc -o qrc_resources.cpp
+	#/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources customcompleter.qrc -o qrc_customcompleter.cpp
+	#/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources scripthelp.qrc -o qrc_scripthelp.cpp
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -220,13 +225,15 @@ MOC_OUTPUT = \
 	moc_StatusPanelView.cpp \
 	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
-	moc_TimeNavView.cpp \
-	qrc_scripthelp.cpp \
-	qrc_resources.cpp \
-	qrc_customcompleter.cpp
+	moc_TimeNavView.cpp 
+
+RESOURCES = \
+	qrc_resources.cpp
+	# qrc_customcompleter.cpp \
+	# qrc_scripthelp.cpp 
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+CPP_SRCS = $(MOC_OUTPUT) $(RESOURCES)
 
 #
 # tdrp macros

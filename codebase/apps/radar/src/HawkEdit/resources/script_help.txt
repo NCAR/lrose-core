@@ -1,20 +1,23 @@
-Getting2 Started				How to familiarize yourself with HawkEdit Scripts
-                            HawkEdit scripts are a functional language. Whereas Solo had "one time" and "for each ray" commands, HawkEdit scripts have variable assignments and functions.  The "one time" commands convert to variables and function arguments in HawkEdit. A script applies to every ray.  
-    No overwrite               No field is modified unless it is assigned, i.e. the field appears on the lefthand side of an equals "=".  
-    functional              HawkEdit scripts follow JavaScript syntax.  JavaScript is a functional language.
-    hidden variables        Solo had hidden variables such as boundary and bad flags.  HawkEdit exposes these hidden variables as arguments to functions. This way you know exactly which variables affect a function. 
-    <field>                 Arguments in angle brackets: replace with field name.  
-    [<clip-gate>]           Arguments in square brackets are optional.
+Getting Started		How to familiarize yourself with HawkEdit Scripts
+    Solo "one time"	commands are replaced by variable assignments in HawkEdit, NYQUIST = 13.0 
+    Solo "for each ray" 	commands are still available in HawkEdit as functions.  
+    The "one time" commands     replaced by variables and function arguments in HawkEdit. 
+    A script applies to every ray.  
+    No overwrite 	No field is modified unless it is assigned, i.e. the field appears on the lefthand side of an equals "=".  
+    functional 	HawkEdit scripts follow JavaScript syntax.  JavaScript is a functional language.
+    hidden variables 	Solo had hidden variables such as boundary and bad flags.  HawkEdit exposes these hidden variables as arguments to functions. This way you know exactly which variables affect a function. 
+    <field> 	Arguments in angle brackets: replace with field name.  
+    [<clip-gate>] 	Arguments in square brackets are optional.
     Example:
-    VZ_COPY = VZ 			Copy VZ data to new field VZ_COPY
-    VZ2 = VZ * 2.0			Multiply data in field VZ by 2.0
+    VZ_COPY = VZ 	Copy VZ data to new field VZ_COPY
+    VZ2 = VZ * 2.0 	Multiply data in field VZ by 2.0
 
 Predefined functions			For all predefined functions, reference the field name as is, e.g. VEL.  Autocomplete contains all the predefined functions. Arguments in angle brackets <field> replace with field name and remove angle brackets.  Arguments in square brackets are optional.
 
-Bad Flag functions			All bad flag functions use a separate field with a flag to indicate bad data is in the associated gate. 
+Bad Flag functions	All bad flag functions use a separate field with a flag to indicate bad data is in the associated gate. 
 
-    bad-flags               Bad flags is a field of flags that can be manipulated with logical operations on fields and then asserted in various fields.
-    bad-data-value          Default is -FLT_MAX = -3.402823e+38
+    bad-flags       Bad flags is a field of flags that can be manipulated with logical operations on fields and then asserted in various fields.
+    bad-data-value  Default is -FLT_MAX = -3.402823e+38
     Example:                The following sequence is one way to remove clutter from both the VE and DZ fields
     CLEAR_BAD_FLAGS(BAD_FLAGS)
     SET_BAD_FLAGS_BETWEEN( VE between -1. and 1.)
