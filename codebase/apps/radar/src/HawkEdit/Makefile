@@ -52,9 +52,7 @@ LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
 
 # compiler_rcc_make_all: qrc_resources.cpp
 compiler_rcc_make_all:
-	/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources resources.qrc -o qrc_resources.cpp
-	#/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources customcompleter.qrc -o qrc_customcompleter.cpp
-	#/usr/local/Cellar/qt/5.15.0/bin/rcc -name resources scripthelp.qrc -o qrc_scripthelp.cpp
+	rcc -name resources resources.qrc -o qrc_resources.cpp
 
 HDRS = \
 	$(PARAMS_HH) \
