@@ -211,9 +211,9 @@ commentdef {
     "\t        use RATE_ZZDR\n"
     "\t    else\n"
     "\t      if ZDR >= threshold\n"
-    "\t        use RATE_Z\n"
+    "\t        use RATE_ZZDR\n"
     "\t      else\n"
-    "\t        use RATE_ZZDR\n";
+    "\t        use RATE_Z\n";
 }
 
 paramdef double {
