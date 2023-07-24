@@ -220,7 +220,7 @@ private:
     string standardName;
     string units;
     bool folds;
-    vector<int> index;
+    int index;
     vector<Radx::fl32> data;    
     Field() {
       folds = false;
@@ -245,29 +245,33 @@ private:
   void _clearHeaderData();
 
   int _readHeaderData(string &xml);
-  void _findFieldsModel200();
-  void _findFieldsModel70();
-  void _findFieldsModel7();
-  bool _findFieldsModel100();
-  void _findFieldsModel866();
+  void _getFields(unordered_map<string, string> &dictionary);
+  void _getRayQualifiers(unordered_map<string, string> &dictionary);
+
+  void _findFields(string &columnLabel);
+  void _findRayQualifiers(string &columnLabel);
+
   void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
   void _printFieldQualifiers();
   void _addFieldQualifiers(RadxRay *ray, vector<string> &tok);
 
+
+  int _readRayQualifiers();
+  int _readRayData();
+/*
   int _readRayDataModel200();
   int _readRayDataModel70();
   int _readRayDataModel866();
   int _readRayDataModel7();
   int _readRayDataModel100();
-
+*/
   bool findAzimuthAngle(string &columnLabel);
   bool findElevationAngle(string &columnLabel);
   int findTimeStamp();
   int findAzimuthAngle();
   int findElevationAngle();
 
-  //void identifyModel(string &modelStr, const string &path);
-  void identifyModel(const string &path);
+  int identifyModel(unordered_map<string, string> &dictionary);
 
   int _openRead(const string &path);
   void _close();
