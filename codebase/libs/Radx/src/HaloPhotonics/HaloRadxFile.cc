@@ -369,7 +369,7 @@ int HaloRadxFile::_readHeaderData(string &xml)
   
 {
 
-  int nHeaderLines = 0;
+  // int nHeaderLines = 0;
   int nLinesRead = 0;
 
   _ranges.clear();
@@ -661,11 +661,11 @@ void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
 }
 
 int HaloRadxFile::_readRayQualifiers() {
-
+  return 0;
 }
 
 int HaloRadxFile::_readRayData() {
-
+  return 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -687,7 +687,7 @@ void HaloRadxFile::_findFields(string &columnLabel)
   // loop through the column labels
 
   //double firstRange = _ranges[0];
-  bool foundFirstRange = false;
+  // bool foundFirstRange = false;
   string rangeGate = "Range Gate";
   size_t ii = ll.find(rangeGate);
   if (ii != string::npos) {
