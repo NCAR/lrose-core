@@ -227,7 +227,8 @@ private:
     }
   };
   vector<Field> _fields;
-  vector<Field> _fieldQualifiers;
+  vector<Field> _rayQualifiers;
+
   set<string> _fieldNames;
   map<string, size_t> _fieldCols;
 
@@ -236,7 +237,7 @@ private:
   vector<RadxRay *> _rays;
 
   // file handle
-
+ 
   FILE *_file;
 
   // private methods
@@ -250,10 +251,11 @@ private:
 
   void _findFields(string &columnLabel);
   void _findRayQualifiers(string &columnLabel);
+  void _addField(string &name, string &units, int columnIndex);
 
   void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
   void _printFieldQualifiers();
-  void _addFieldQualifiers(RadxRay *ray, vector<string> &tok);
+  void _addRayQualifiers(RadxRay *ray, vector<string> &tok);
 
 
   int _readRayQualifiers();

@@ -369,7 +369,7 @@ int HaloRadxFile::_readHeaderData(string &xml)
   
 {
 
-  // int nHeaderLines = 0;
+  int nHeaderLines = 0;
   int nLinesRead = 0;
 
   _ranges.clear();
@@ -657,24 +657,6 @@ Field *HaloRadxFile::_makeField() {
 */
 
 void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
-
-}
-
-int HaloRadxFile::_readRayQualifiers() {
-  return 0;
-}
-
-int HaloRadxFile::_readRayData() {
-  return 0;
-}
-
-////////////////////////////////////////////////////////////
-// Set up the field names and units for model 200
-
-void HaloRadxFile::_findFields(string &columnLabel)
-  
-{
-
   _fields.clear();
 
   string ll(_stripLine(columnLabel.c_str()));
@@ -686,13 +668,11 @@ void HaloRadxFile::_findFields(string &columnLabel)
 
   // loop through the column labels
 
-  //double firstRange = _ranges[0];
-  // bool foundFirstRange = false;
-  string rangeGate = "Range Gate";
-  size_t ii = ll.find(rangeGate);
+  string time = "Decimal time";
+  size_t ii = ll.find(time);
   if (ii != string::npos) {
     // found it
-    ii += rangeGate.size();
+    ii += time.size();
   } 
 /*
   // read the range if possible; looking for "Range Gate"
@@ -735,7 +715,7 @@ void HaloRadxFile::_findFields(string &columnLabel)
         field.standardName = name;
         field.index = columnIndex;
 
-        _fields.push_back(field);
+        _rayQualifiers.push_back(field);
 
         ii = rpos + 1;
         columnIndex += 1;
@@ -759,9 +739,117 @@ void HaloRadxFile::_findFields(string &columnLabel)
       cerr << "    index: " << field.index << endl;
     } // ii
   }
+}
+
+int HaloRadxFile::_readRayQualifiers() {
+  return 0;
+}
+
+int HaloRadxFile::_readRayData() {
+  return 0;
+}
+
+////////////////////////////////////////////////////////////
+// Set up the field names and units for model 200
+
+void HaloRadxFile::_findFields(string &columnLabel)
+  
+{
+
+  _fields.clear();
+
+  string ll(_stripLine(columnLabel.c_str()));
+    
+  // we cannot use a tokenizer because there are embedded spaces inside the units
+  // we need to just parse it by hand and look for the left and right parentheses
+  //vector<string> toks;
+  //RadxStr::tokenize(ll, "\t ()", toks);
+
+  // loop through the column labels
+
+  //double firstRange = _ranges[0];
+  bool foundFirstRange = false;
+  string rangeGate = "Range Gate";
+  size_t ii = ll.find(rangeGate);
+  if (ii != string::npos) {
+    // found it
+    ii += rangeGate.size();
+  } 
+/*
+  // read the range if possible; looking for "Range Gate"
+  if (toks.size() > 2) {
+    if ((toks[0].compare("Range") == 0) && (toks[1].compare("Gate") == 0)) {
+      // this is the Range Gate
+    }
+  }
+ */
+
+
+  int columnIndex = 1;  
+  bool done = false;
+  // now follow this format  <field name> (<units>)
+  while (ii < ll.size() && !done) {
+
+      // we are in the fields
+      string units;
+      size_t lpos = ll.find('(', ii);
+      size_t rpos = ll.find(')', ii);
+      if ((lpos != string::npos) && (rpos != string::npos)) {
+        units = ll.substr(lpos+1, (rpos) - (lpos+1));
+      
+        //string label = colLabel.substr(nameStart, colLabel.size() - nameStart);
+        //string origName = colLabel.substr(nameStart, nameEnd - nameStart);
+        //string units = colLabel.substr(unitsStart, unitsEnd - unitsStart);
+
+        size_t startIndexOfName = ll.find_first_not_of(" ", ii);
+        string name = ll.substr(startIndexOfName, (lpos-1) - startIndexOfName);
+        _addField(name, units, columnIndex);
+      } else {
+        // there are no units
+        units = "";
+        lpos = rpos = ll.size();
+        size_t startIndexOfName = ll.find_first_not_of(" ", ii);
+        if (startIndexOfName != string::npos) {
+          string name = ll.substr(startIndexOfName, (rpos) - startIndexOfName);
+          _addField(name, units, columnIndex);
+        }      
+        done = true;
+      }
+      ii = rpos + 1;
+      columnIndex += 1;
+
+  } // ii
+
+  if (_debug) {
+    cerr << "Fields:" << endl;
+    for (size_t ii = 0; ii < _fields.size(); ii++) {
+      const Field &field = _fields[ii];
+      cerr << "  Field: " << field.name << endl;
+      cerr << "    label: " << field.label << endl;
+      cerr << "    orig name: " << field.origName << endl;
+      cerr << "    long name: " << field.longName << endl;
+      cerr << "    standard name: " << field.standardName << endl;
+      cerr << "    units: " << field.units << endl;
+      cerr << "    folds: " << string(field.folds?"Y":"N") << endl;
+      cerr << "    index: " << field.index << endl;
+    } // ii
+  }
 
 }
 
+
+void HaloRadxFile::_addField(string &name, string &units, int columnIndex) {
+  Field field;
+  field.label = name;
+  field.origName = name;
+  field.longName = name;
+  field.units = units;
+  field.name = name;
+  field.standardName = name;
+  field.index = columnIndex;
+
+  _fields.push_back(field);  
+}
 
 void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnIndex) {
 
@@ -821,7 +909,7 @@ void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnInde
     //  } // jj
   //  }
   //}    
-    _fieldQualifiers.push_back(field);
+    //_fieldQualifiers.push_back(field);
   }
 }
 
@@ -833,11 +921,11 @@ void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnInde
 
 
 
-void HaloRadxFile::_addFieldQualifiers(RadxRay *ray, vector<string> &toks) {
+void HaloRadxFile::_addRayQualifiers(RadxRay *ray, vector<string> &toks) {
 
-      for (size_t ifield = 0; ifield < _fieldQualifiers.size(); ifield++) {
+      for (size_t ifield = 0; ifield < _rayQualifiers.size(); ifield++) {
       
-      const Field &field = _fieldQualifiers[ifield];
+      const Field &field = _rayQualifiers[ifield];
       
       //if (isFieldRequiredOnRead(field.name)) {
         
