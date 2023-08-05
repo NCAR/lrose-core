@@ -55,6 +55,8 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <algorithm>
+#include <string>
 using namespace std;
 
 //////////////
@@ -187,6 +189,13 @@ bool HaloRadxFile::isHaloPhotonics(const string &path)
 
 void HaloRadxFile::_getRayQualifiers(unordered_map<string, string> &dictionary) {
 
+  unordered_map<string, string>::iterator it = dictionary.find("Data line 1");
+  if (it != dictionary.end()) {
+    string columnLabel = it->second;
+    _findRayQualifiers(columnLabel); 
+  } else {
+    std::cerr << "Data line1 ray meta data not found\n";
+  } 
 }
 
 void HaloRadxFile::_getFields(unordered_map<string, string> &dictionary) {
@@ -196,8 +205,21 @@ void HaloRadxFile::_getFields(unordered_map<string, string> &dictionary) {
     string columnLabel = it->second;
     _findFields(columnLabel); 
   } else {
-    std::cerr << "Data line2 field labels Not found\n";
+    std::cerr << "Data line2 field labels not found\n";
   } 
+}
+
+int HaloRadxFile::_getNGates(unordered_map<string, string> &dictionary) {
+
+  int nGates = 0;
+  unordered_map<string, string>::iterator it = dictionary.find("Number of gates");
+  if (it != dictionary.end()) {
+    string nGatesValue = it->second;
+    nGates = atoi(nGatesValue.c_str());
+  } else {
+    std::cerr << "Number of gates not found\n";
+  } 
+  return nGates;
 }
 
 ////////////////////////////////////////////////////////////
@@ -321,7 +343,13 @@ int HaloRadxFile::readFromPath(const string &path,
   // if the flag is set to aggregate sweeps into a volume on read,
   // call the method to handle that
 
-  _readRayQualifiers();
+  //_readRayQualifiers(_rayQualifiers);
+
+  int nGates = _getNGates(_rawHeaderInfo);
+  vector<Field>::iterator it;
+  for (it = _fields.begin(); it != _fields.end(); ++ it) {
+    it->data.reserve(nGates);
+  }
 
   // read in ray data
   int iret = _readRayData();
@@ -657,7 +685,7 @@ Field *HaloRadxFile::_makeField() {
 */
 
 void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
-  _fields.clear();
+  _rayQualifiers.clear();
 
   string ll(_stripLine(columnLabel.c_str()));
     
@@ -665,31 +693,13 @@ void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
   // we need to just parse it by hand and look for the left and right parentheses
   //vector<string> toks;
   //RadxStr::tokenize(ll, "\t ()", toks);
-
-  // loop through the column labels
-
-  string time = "Decimal time";
-  size_t ii = ll.find(time);
-  if (ii != string::npos) {
-    // found it
-    ii += time.size();
-  } 
-/*
-  // read the range if possible; looking for "Range Gate"
-  if (toks.size() > 2) {
-    if ((toks[0].compare("Range") == 0) && (toks[1].compare("Gate") == 0)) {
-      // this is the Range Gate
-    }
-  }
- */
-
-
-  int columnIndex = 1;  
+  size_t ii = 0;
+  int columnIndex = 0;  
   bool done = false;
-  // now follow this format  <field name> (<units>)
+  // now follow this format  <name> (<units>)
   while (ii < ll.size() && !done) {
 
-      // we are in the fields for the first range
+      // we are in the fields 
       string units;
       size_t lpos = ll.find('(', ii);
       size_t rpos = ll.find(')', ii);
@@ -726,9 +736,9 @@ void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
   } // ii
 
   if (_debug) {
-    cerr << "Fields:" << endl;
-    for (size_t ii = 0; ii < _fields.size(); ii++) {
-      const Field &field = _fields[ii];
+    cerr << "RayQualifiers:" << endl;
+    for (size_t ii = 0; ii < _rayQualifiers.size(); ii++) {
+      const Field &field = _rayQualifiers[ii];
       cerr << "  Field: " << field.name << endl;
       cerr << "    label: " << field.label << endl;
       cerr << "    orig name: " << field.origName << endl;
@@ -741,13 +751,11 @@ void HaloRadxFile::_findRayQualifiers(string &columnLabel) {
   }
 }
 
+/*
 int HaloRadxFile::_readRayQualifiers() {
   return 0;
 }
-
-int HaloRadxFile::_readRayData() {
-  return 0;
-}
+*/
 
 ////////////////////////////////////////////////////////////
 // Set up the field names and units for model 200
@@ -851,6 +859,7 @@ void HaloRadxFile::_addField(string &name, string &units, int columnIndex) {
   _fields.push_back(field);  
 }
 
+/*
 void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnIndex) {
 
   if (((int) columnIndex != _timeStampIndex) &&
@@ -873,7 +882,7 @@ void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnInde
       field.units = "degrees C";     
     } 
 
-/*
+
     if (origName.find("Radial Wind Speed Dispersion") != string::npos) {
       field.name = "DISP";
     } else if (origName.find("Radial Wind Speed") != string::npos) {
@@ -895,7 +904,7 @@ void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnInde
     } else if (origName.find("Z-Wind") != string::npos) {
       field.standardName = "upward_wind";
     }
-*/
+
 
   // set the indexes into the ray data
 
@@ -913,13 +922,218 @@ void HaloRadxFile::_checkForFieldQualifier(string columnLabel, size_t columnInde
   }
 }
 
+*/
+
+bool HaloRadxFile::_contains(string &s1, string &s2) {
+  if (s1.find(s2) != std::string::npos) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+// I am willin to bet that the order of this information is fixed to
+// Decimal time (hours) Azimuth (degrees) Elevation (degrees) Pitch (degrees) Roll (degrees)
+// So, let's assume this and modify it if needed.
+void HaloRadxFile::decipherField(RadxRay *ray, Field &field, string value) {
+
+  string Time("time");
+  string Az("az");
+  string El("el");
+  if (_contains(field.name, Time)) {
+    RadxTime rtime(value);
+    ray->setTime(rtime.utime(), (int) (rtime.getSubSec() * 1.0e9 + 0.5));
+  } else if (_contains(field.name, Az)) {
+    double az = 0.0;
+    az = atof(value.c_str());
+    ray->setAzimuthDeg(az);      
+  } else if (_contains(field.name, El)) {
+    double el = 90.0;
+    el = atof(value.c_str());
+    if (el > 180) {
+      el -= 360.0;
+    }
+    ray->setElevationDeg(el);
+  }
+}
+
+int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
+
+      int error = -1;
+      string ll(_stripLine(line));
+      vector<string> toks;
+      RadxStr::tokenize(ll, "\t ", toks);
+      // so, the _rayQualifiers have the position of the data in the token string
+      // then, how to associate them? Ah, I can index the tokens directly,
+      // so just go through the vector/list and pull out the tokens as
+      // needed.
+      if (toks.size() != _rayQualifiers.size()) {
+        cerr << "Error: expected " << _rayQualifiers.size() << 
+          " ray qualifiers, found " << toks.size() << endl;
+        return error;
+      }
+      string value;
+
+      // time is in hours
+      value = toks[0];
+      RadxTime rtime(value.c_str());
+      ray->setTime(rtime.utime(), (int) (rtime.getSubSec() * 1.0e9 + 0.5));
+
+      value = toks[1];   
+      double az = 0.0;
+      az = atof(value.c_str());
+      ray->setAzimuthDeg(az);      
+
+      value = toks[2];
+      double el = 90.0;
+      el = atof(value.c_str());
+      if (el > 180) {
+        el -= 360.0;
+      }
+      ray->setElevationDeg(el);
+  
+      ray = new RadxRay;
+      ray->setVolumeNumber(0);
+      ray->setSweepNumber(0); 
+/*
+      size_t idx = 0;
+      for (idx = 0; idx < _rayQualifiers.size(); idx++) {
+        Field field = _rayQualifiers[idx];
+        string value = toks[field.index];
+        decipherField(ray, field, value);
+      }
+      */
+    
+      // fixed angle
+      if (_fixedAngle > -9990) {
+        ray->setFixedAngleDeg(_fixedAngle);
+      } else {
+        if (_rhiMode) {
+          ray->setFixedAngleDeg(az);
+        } else {
+          ray->setFixedAngleDeg(el);
+        }
+      }
+
+      // range geometry
+
+      ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
+
+      // sweep mode
+
+      if (_rhiMode) {
+        ray->setSweepMode(Radx::SWEEP_MODE_RHI);
+      } else {
+        if (_azLimit1 == _azLimit2) {
+          ray->setSweepMode(Radx::SWEEP_MODE_AZIMUTH_SURVEILLANCE);
+        } else {
+          ray->setSweepMode(Radx::SWEEP_MODE_SECTOR);
+        }
+      }
+      return !error;
+}
+
+// Read in ray data
+// Returns 0 on success, -1 on failure
+
+// the format is ...
+// <ray qualifiers>
+// <gate 0> <field 1 data> <field 2 data> ...
+// <gate N-1> <field 1 data> <field 2 data>
+// <ray qualifiers>
+// <gate 0> <field 1 data> <field 2 data> ...
+// <gate N-1> <field 1 data> <field 2 data>
+// <ray qualifiers>
+// <gate 0> <field 1 data> <field 2 data> ...
+// <gate N-1> <field 1 data> <field 2 data>
+
+int HaloRadxFile::_readRayData() {
+  int error = -1;
+  RadxRay *ray = NULL;
+  // read the values for the ray qualifiers
+  char line[65536];
+  while (!feof(_file)) {
+    // get data columns array
+    if (fgets(line, 65536, _file) != NULL) {
+      _readRayQualifiers(ray, line);
+      _readRayData(ray, _fields);
+      // add ray to vector
+      _rays.push_back(ray);  
+    }
+  } // while
+  return 0;
+}
 
 
 ////////////////////////////////////////////////////////////
 // Read in ray data for model 866
 // Returns 0 on success, -1 on failure
 
+int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
 
+  int error = -1;
+  if (_fields.size() <= 0) return error;
+  int nGates = _fields[0].data.size();
+  int igate = 0;
+  char line[65536];
+
+  // get next line
+  fgets(line, 65536, _file);
+  while (!feof(_file) && (igate < nGates)) {
+     _readNStoreFieldData(line, fields, igate);
+     // get next line
+     fgets(line, 65536, _file); 
+     igate += 1;
+  }
+  //if (igate == nGates) {
+    _fillRay(ray, fields);
+  //}  
+  return !error;
+}
+
+// move data stored in fields into the ray; copy the data 
+// because we want to reuse the memory in the fields
+//
+void HaloRadxFile::_fillRay(RadxRay *ray, vector<Field> &fields) {
+  for (size_t ifield = 0; ifield < _fields.size(); ifield++) {
+    Field &field = _fields[ifield];
+    RadxField *rfld = new RadxField(field.name, field.units);
+    rfld->setLongName(field.longName);
+    rfld->setStandardName(field.standardName);
+    rfld->setMissingFl32(Radx::missingFl32);
+    rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    size_t nGates = field.data.size();
+    RadxArray<Radx::fl32> data_;
+    Radx::fl32 *data = data_.alloc(nGates);
+    for (size_t jj = 0; jj < nGates; jj++) {
+      data[jj] = field.data.at(jj);
+    }    
+    rfld->addDataFl32(nGates, data);
+    ray->addField(rfld); 
+  } // ifield   
+}
+
+void HaloRadxFile::_readNStoreFieldData(char *line, vector<Field> &fields,
+  int gateIdx) {
+  if (line != NULL) {
+    string ll(_stripLine(line));
+    
+    // data columns array
+    vector<string> toks;
+    RadxStr::tokenize(ll, "\t ", toks);
+
+    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
+      Field &field = fields[ifield];
+      string tok = toks[field.index];
+      Radx::fl32 fval = Radx::missingFl32;
+      if (tok.find("NaN") == string::npos) {
+        fval = atof(tok.c_str());
+      }
+      field.data[gateIdx] = fval;
+    } // ifield  
+  }
+}
 
 void HaloRadxFile::_addRayQualifiers(RadxRay *ray, vector<string> &toks) {
 
@@ -1025,7 +1239,7 @@ int HaloRadxFile::_loadReadVolume()
 
   // set meta-data
  
-  _readVol->setOrigFormat("LEOPhotonics");
+  _readVol->setOrigFormat("HaloPhotonics");
   _readVol->setInstrumentType(Radx::INSTRUMENT_TYPE_LIDAR);
   _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
   
@@ -1034,7 +1248,7 @@ int HaloRadxFile::_loadReadVolume()
   _readVol->setEndTime(_rays[nRays-1]->getTimeSecs(),
                        _rays[nRays-1]->getNanoSecs());
 
-  _readVol->setTitle("LEOPhotonics LIDAR");
+  _readVol->setTitle("HaloPhotonics LIDAR");
   _readVol->setSource(_instrumentName);
   size_t nameStart = _pathInUse.find_last_of(PATH_SEPARATOR);
   string fileName = _pathInUse;
@@ -1612,6 +1826,10 @@ string HaloRadxFile::_substituteChar(const string &source, char find, char repla
 
 }
 
+
+ // int op_increase (int i) { return ++i; }
+//unsigned char HaloRadxFile::_lowerIt(unsigned char c) { return std::tolower(c); }
+
 ////////////////////////////////////////
 // strip eol from line
 
@@ -1634,6 +1852,10 @@ string HaloRadxFile::_stripLine(const char *line)
   }
   
   string stripped(line, lineLen);
+
+  for (string::iterator it = stripped.begin(); it != stripped.end(); ++it) {
+    *it = std::tolower(*it);
+  } 
 
   return stripped;
 

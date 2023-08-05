@@ -240,6 +240,8 @@ private:
  
   FILE *_file;
 
+  //const static string NGatesLabel("Number of gates");
+
   // private methods
   
   void _clearRays();
@@ -253,13 +255,19 @@ private:
   void _findRayQualifiers(string &columnLabel);
   void _addField(string &name, string &units, int columnIndex);
 
-  void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
-  void _printFieldQualifiers();
+  //void _checkForFieldQualifier(string columnLabel, size_t columnIndex);
+  //void _printFieldQualifiers();
   void _addRayQualifiers(RadxRay *ray, vector<string> &tok);
 
 
-  int _readRayQualifiers();
+  int _readRayQualifiers(RadxRay *ray, char *line);
   int _readRayData();
+  int _readRayData(RadxRay *ray, vector<Field> &fields);
+
+  void _fillRay(RadxRay *ray, vector<Field> &fields);
+  void _readNStoreFieldData(char *line, vector<Field> &fields,
+    int gateIdx);  
+  int _getNGates(unordered_map<string, string> &dictionary);
 /*
   int _readRayDataModel200();
   int _readRayDataModel70();
@@ -287,6 +295,10 @@ private:
 
   string _substituteChar(const string &source, char find, char replace);
   string _stripLine(const char *line);
+  bool _contains(string &s1, string &s2);
+  void decipherField(RadxRay *ray, Field &field, string value);
+
+  unsigned char _lowerIt(unsigned char c);
   
 };
 
