@@ -2665,22 +2665,6 @@ void RadxVol::combineRhi()
     return;
   }
 
-  /// ensure we are in RHI mode
-  // this may not be necessary ??
-  int nRhi = 0;
-  for (size_t isweep = 0; isweep < _sweeps.size(); isweep++) {
-    const RadxSweep *sweep = _sweeps[isweep];
-    if ((sweep->getSweepMode() == Radx::SWEEP_MODE_RHI) ||
-        (sweep->getSweepMode() == Radx::SWEEP_MODE_MANUAL_RHI) ||
-        (sweep->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI)) {
-      nRhi++;
-    }
-  }
-  if (nRhi < ((int) _sweeps.size() / 2)) {
-    // not predominantly RHI
-    return;
-  }
-
   // loop through rays, looking for a 180 degree change in azimuth
   // we consider the transition from one ray to the next
   // logic from Jacquie Witte  ...
