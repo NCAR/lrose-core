@@ -2669,8 +2669,6 @@ void RadxVol::combineRhi()
   // we consider the transition from one ray to the next
   // logic from Jacquie Witte  ...
   float tolerance = 5;
-  const RadxSweep *sweep = _sweeps[0];
-  //vector<RadxRay *> &rays = sweep->getRays();
   vector<RadxRay *>::iterator it;
   float az0 = _rays[0]->getAzimuthDeg();
   for (it = _rays.begin(); it != _rays.end(); ++it) {
