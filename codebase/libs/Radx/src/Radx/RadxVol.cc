@@ -2664,10 +2664,8 @@ void RadxVol::combineRhi()
     cerr << "Error: attempting to combine RHI scans on non-RHI data" << endl;
     return;
   }
-
+  
   // loop through rays, looking for a 180 degree change in azimuth
-  // we consider the transition from one ray to the next
-  // logic from Jacquie Witte  ...
   float tolerance = 5;
   vector<RadxRay *>::iterator it;
   float az0 = _rays[0]->getAzimuthDeg();
@@ -2676,24 +2674,15 @@ void RadxVol::combineRhi()
     RadxRay *ray = *it;
     float az1 = ray->getAzimuthDeg();
     float res = az0 - az1;
+
     // reset the azimuth if it is almost 180 degrees from starting azimuth
-    if (fabs(res) > tolerance) {
-      // Angle cases
-      if ((res >= -92) && (res < 0)) {
-        ray->setAzimuthDeg(az1 - 90.0);
-      }
-      if ((res >= -180) && (res < -175)) {
-        ray->setAzimuthDeg(abs(az1 - 180.0));
-      }
-      if (res >= 180.0) {
-         ray->setAzimuthDeg(360.0 - az1);
-      }
-      if ((res >= 90.0) && (res < 100.0)) {
-         ray->setAzimuthDeg(270.0 - az1);
-      }
-      float elevation = ray->getElevationDeg();
-      float delta = 180.0 - elevation;
-      ray->setElevationDeg(delta);
+    if ((res > (180 - tolerance)) && (res < (180 + tolerance))){
+      ray->setAzimuthDeg(az1 + 180);
+      ray->setElevationDeg(180 - ray->getElevationDeg());
+    }
+    else if ((res > (-180 - tolerance) && (res < (-180 + tolerance)))){
+      ray->setAzimuthDeg(az1 - 180);
+      ray->setElevationDeg(180 - ray->getElevationDeg());
     }
 
   } // rays
