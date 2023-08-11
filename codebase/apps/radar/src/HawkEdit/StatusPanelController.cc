@@ -252,7 +252,7 @@ void StatusPanelController::createStatusPanel() {
 
 void StatusPanelController::setRadarName(string radarName, string siteName) {
   _view->setRadarName(radarName, siteName);
-};
+}
 
 void StatusPanelController::createDateTime() {
   _view->createDateTime();
