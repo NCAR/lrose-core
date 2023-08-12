@@ -764,7 +764,7 @@ int Calibration::_adjustCalGainFromNoiseMon(Beam *beam)
   xml += TaXml::writeDouble("meanNoiseZdr", 1, _noiseMonZdr);
   xml += TaXml::writeDouble("meanDbmhc", 1, _noiseMonDbmHc);
   xml += TaXml::writeDouble("meanDbmvc", 1, _noiseMonDbmVc);
-  if (!isnan(_noiseMonSiteTempC)) {
+  if (!std::isnan(_noiseMonSiteTempC)) {
     xml += TaXml::writeDouble("siteTempC", 1, _noiseMonSiteTempC);
     xml += TaXml::writeDouble("tempCount", 1, _tempCount);
   }
