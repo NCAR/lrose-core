@@ -39,6 +39,7 @@
 #include "TimeNavView.hh"
 
 #include <QMessageBox>
+#include <QCalendar>
 
 TimeNavView::TimeNavView(QWidget *parent)
 {
