@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <cstdint>
 #include <sys/types.h>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxField.hh>
