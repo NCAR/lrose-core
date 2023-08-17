@@ -1564,7 +1564,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 16;
+        tt->struct_def.fields[0].enum_def.nfields = 17;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1599,6 +1599,8 @@
         tt->struct_def.fields[0].enum_def.fields[14].val = WATERFALL_SDEV_PHIDP_INT;
         tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("WATERFALL_CMD");
         tt->struct_def.fields[0].enum_def.fields[15].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("WATERFALL_CMD_FRAC");
+        tt->struct_def.fields[0].enum_def.fields[16].val = WATERFALL_CMD_FRAC;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1935,6 +1937,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_cmd_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("cmd_spectra.colors");
+    tt++;
+    
+    // Parameter 'waterfall_cmd_frac_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_cmd_frac_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for CMD FRACTION");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_cmd_frac_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cmd_frac.colors");
     tt++;
     
     // Parameter 'waterfall_title_font_size'

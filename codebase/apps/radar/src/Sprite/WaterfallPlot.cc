@@ -164,7 +164,7 @@ void WaterfallPlot::prepareBeam(Beam *beam,
   _spectra.setRegrClutWidthFactor(_regrClutWidthFactor);
   _spectra.setRegrCnrExponent(_regrCnrExponent);
   _spectra.setRegrFiltNotchInterpMethod(_regrNotchInterpMethod);
-  
+
   _beam->loadDwellSpectra(_spectra);
 
 }
@@ -234,7 +234,9 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     case Params::WATERFALL_CMD:
       _plotCmd(painter, selectedRangeKm);
       break;
-      
+    case Params::WATERFALL_CMD_FRAC:
+      _plotCmdFraction(painter, selectedRangeKm);
+      break;
   }
 
   // draw the overlays
@@ -1179,6 +1181,8 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
     _zoomWorld.drawColorScale(_cmap, painter,
                               _params.waterfall_color_scale_font_size);
   }
+
+#ifdef JUNK
   
   // get the noise value
   
@@ -1357,6 +1361,8 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
     } // isample
   } // igate
 
+#endif
+  
   // plot the data
   
   painter.save();
@@ -1381,6 +1387,68 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
   
   painter.restore();
   
+}
+
+/*************************************************************************
+ * plot CMD fraction
+ */
+
+void WaterfallPlot::_plotCmdFraction(QPainter &painter,
+                                     double selectedRangeKm)
+  
+{
+
+  double startRange = _beam->getStartRangeKm();
+  double gateSpacing = _beam->getGateSpacingKm();
+
+  // draw the color scale
+  
+  if (_readColorMap(_params.waterfall_cmd_frac_color_scale_name) == 0) {
+    _zoomWorld.drawColorScale(_cmap, painter,
+                              _params.waterfall_color_scale_font_size);
+  }
+  
+  painter.save();
+
+  // loop through the gates
+  
+  for (size_t igate = 0; igate < _nGates; igate++) {
+
+    // set limits for plotting this gate
+    
+    double yy = startRange + gateSpacing * (igate-0.5);
+
+    // get field
+    
+    double frac = _spectra.getFractionCmd1D()[igate];
+
+    // plot the samples
+    
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+
+      // get color
+
+      int red, green, blue;
+      _cmap.dataColor(frac, red, green, blue);
+      QColor color(red, green, blue);
+      QBrush brush(color);
+      
+      // set x limits
+
+      double xx = ii;
+      
+      // fill rectangle
+
+      double width = 1.0;
+      double height = gateSpacing;
+      _zoomWorld.fillRectangle(painter, brush, xx, yy, width * 2, height * 2);
+
+    } // ii
+
+  } // igate
+  
+  painter.restore();
+
 }
 
 /*************************************************************************
@@ -1603,6 +1671,8 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "SDEV_PHIDP_INT";
     case Params::WATERFALL_CMD:
       return "CMD";
+    case Params::WATERFALL_CMD_FRAC:
+      return "CMD_FRAC";
     default:
       return "UNKNOWN";
   }

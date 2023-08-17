@@ -1727,6 +1727,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSnr);
   
+  QAction plotCmdFrac("Plot CMD FRAC", &contextMenu);
+  connect(&plotCmdFrac, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_CMD_FRAC);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotCmdFrac);
+  
   QAction plotZdr("Plot ZDR", &contextMenu);
   connect(&plotZdr, &QAction::triggered,
           [this, id] () {
