@@ -2145,7 +2145,8 @@ RadxVol::RayGeom RadxVol::_getPredomGeom() const
 
   // find the predominant geometry - i.e with highest ray count
 
-  RayGeom predom(0.0, 0.0);
+  RayGeom predom;
+  
   for (size_t ii = 0; ii < geoms.size(); ii++) {
     RayGeom &geom = geoms[ii];
     if (geom.rayCount > predom.rayCount) {
