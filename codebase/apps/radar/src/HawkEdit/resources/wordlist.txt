@@ -27,18 +27,17 @@ CLEAR_BAD_FLAGS (<bad-flags>)
 COMPLEMENT_BAD_FLAGS (<bad-flags>)
 COPY_BAD_FLAGS( <field> )
 COUNT_HISTOGRAM on <field> ) - not implemented
-DEGLITCH_MIN_GATES ( <integer> )
-DEGLITCH_RADIUS ( <integer> )
-DEGLITCH_THRESHOLD ( <real> )
+DEGLITCH_MIN_GATES = <integer> 
+DEGLITCH_RADIUS = <integer> 
+DEGLITCH_THRESHOLD = <real> 
 DESPECKLE( <field>, A_SPECKLE )
 DONT_APPEND_HISTOGRAM_TO_FILE - not implemented
-DONT_USE_BOUNDARY
 DO_HISTOGRAM - not implemented
-DUPLICATE <field>( <field> )
+DUPLICATE (<field>, <field> )
 ESTABLISH_AND_RESET <field> to <field> )
 EW_WIND = <real>
 EXP( <field>,  <real> )  
-FIRST_GOOD_GATE( <integer> )
+FIRST_GOOD_GATE= <integer> 
 FIX_VORTEX_VELOCITIES( <field> )
 FLAGGED_ADD( <field>, <real>, <bad-flags> )
 FLAGGED_ASSIGN( <real>( <field> ) - not implemented
@@ -56,9 +55,9 @@ HISTOGRAM_DIRECTORY <directory>  - not implemented
 HISTOGRAM_FLUSH  - not implemented
 IGNORE_FIELD( <field> ) - not implemented
 IRREGULAR_HISTOGRAM_BIN from <real> to <real> ) - not implemented
-MERGE_FIELD <field> with <field> put_in <field> )
-MIN_BAD_COUNT( <integer> gates )
-MIN_NOTCH_SHEAR( <real> )
+MERGE_FIELD <field> with <field> put_in <field> ) - not implemented
+MIN_BAD_COUNT= <integer> gates  - not implemented
+MIN_NOTCH_SHEAR= <real> 
 NEW_HISTOGRAM_FILE - not implemented 
 NOTCH_MAX = <real>
 NS_WIND = <real> 
@@ -83,13 +82,12 @@ RUN(<starttime>, <stoptime>, <fx>, <boundary>) - not implemented
 SET_BAD_FLAGS_ABOVE(<field>, <threshold>)
 SET_BAD_FLAGS_BELOW(<field>, <threshold>)
 SET_BAD_FLAGS_BETWEEN(<field>, <lower_threshold>, <upper_threshold>)
-SHIFT_FIELD <field> put_in <field> )
-SURFACE_GATE_SHIFT( <integer> gates )
+SHIFT_FIELD <field> put_in <field> ) - not implemented
+SURFACE_GATE_SHIFT( <integer> gates ) - not implemented
 THRESHOLD_ABOVE( <field>, <on field>, <real> )
 THRESHOLD_BELOW( <field>, <on field>, <real> )
 UNCONDITIONAL_DELETE( <field> )
-USE_BOUNDARY
-VERT_WIND( <real> )
+VERT_WIND= <real> 
 XOR_BAD_FLAGS_ABOVE( <field>, <real>, <bad-flags> )
 XOR_BAD_FLAGS_BELOW( <field>, <real>, <bad-flags> )
 XOR_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad-flags> )
