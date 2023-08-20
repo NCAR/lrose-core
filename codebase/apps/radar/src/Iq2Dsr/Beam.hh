@@ -416,6 +416,7 @@ private:
 
   // spectral CMD
 
+  bool _specCmdValid;
   DwellSpectra _specCmd;
 
   // debug printing
@@ -459,6 +460,7 @@ private:
   void _filterDpVOnlyFixedPrt();
   void _filterDpVOnlyStagPrt();
 
+  int _specCmdInit();
   void _filtSpecCmdSimHv();
   
   void _computeWindowRValues();

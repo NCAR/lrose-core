@@ -242,6 +242,18 @@ void Beam::init(const MomentsMgr &mmgr,
     cerr << "  Cannot initialize noise object" << endl;
   }
 
+  // initialize spectral cmd
+
+  _specCmdValid = false;
+  if (_params.run_spectral_cmd) {
+    if (_specCmdInit()) {
+      cerr << "ERROR - Beam::init()" << endl;
+      cerr << "  Cannot initialize spectral cmd object" << endl;
+    } else {
+      _specCmdValid = true;
+    }
+  }
+
   if (_params.write_alt_mode_vel_debug_fields) {
     _altVel.setLoadTestFields(true);
   }
@@ -2710,7 +2722,9 @@ void Beam::_filterDpSimHvFixedPrt()
   } // igate
 
   if (_params.run_spectral_cmd) {
-    _filtSpecCmdSimHv();
+    if (_specCmdValid) {
+      _filtSpecCmdSimHv();
+    }
   }
 
 }
@@ -3238,11 +3252,11 @@ void Beam::_filterDpVOnlyStagPrt()
 
 }
 
-//////////////////////////////////////////
-// run spectral CMD on SIM HV data
-
-void Beam::_filtSpecCmdSimHv()
-
+//////////////////////////////////////
+// initialize spectral CMD computations
+  
+int Beam::_specCmdInit()
+  
 {
 
   // load up time series for dwell spectra
@@ -3275,6 +3289,73 @@ void Beam::_filtSpecCmdSimHv()
       _specCmd.setClutterFilterType(RadarMoments::CLUTTER_FILTER_NONE);
   }
   
+  // computing textures
+  
+  _specCmd.setTdbzKernelNGates(_params.spec_cmd_tdbz_kernel_ngates);
+  _specCmd.setTdbzKernelNSamples(_params.spec_cmd_tdbz_kernel_nsamples);
+  _specCmd.setSdevZdrKernelNGates(_params.spec_cmd_sdev_zdr_kernel_ngates);
+  _specCmd.setSdevZdrKernelNSamples(_params.spec_cmd_sdev_zdr_kernel_nsamples);
+  _specCmd.setSdevPhidpKernelNGates(_params.spec_cmd_sdev_phidp_kernel_ngates);
+  _specCmd.setSdevPhidpKernelNSamples(_params.spec_cmd_sdev_phidp_kernel_nsamples);
+
+  // interest maps
+  // SNR
+
+  vector<InterestMap::ImPoint> pts;
+  if (_convertInterestParamsToVector("SNR",
+                                     _params._spec_cmd_snr_interest_map,
+                                     _params.spec_cmd_snr_interest_map_n,
+                                     pts)) {
+    return -1;
+  }
+  _specCmd.setInterestMapSnr(pts, _params.spec_cmd_snr_interest_weight);
+
+  // TDBZ
+
+  if (_convertInterestParamsToVector("TDBZ",
+                                     _params._spec_cmd_tdbz_interest_map,
+                                     _params.spec_cmd_tdbz_interest_map_n,
+                                     pts)) {
+    return -1;
+  }
+  _specCmd.setInterestMapTdbz(pts, _params.spec_cmd_tdbz_interest_weight);
+
+  // sdev of zdr
+  
+  if (_convertInterestParamsToVector("zdr sdev",
+                                     _params._spec_cmd_zdr_sdev_interest_map,
+                                     _params.spec_cmd_zdr_sdev_interest_map_n,
+                                     pts)) {
+    return -1;
+  }
+  _specCmd.setInterestMapSdevZdr(pts, _params.spec_cmd_zdr_sdev_interest_weight);
+
+  // sdev of phidp
+  
+  if (_convertInterestParamsToVector("phidp sdev",
+                                     _params._spec_cmd_phidp_sdev_interest_map,
+                                     _params.spec_cmd_phidp_sdev_interest_map_n,
+                                     pts)) {
+    return -1;
+  }
+  _specCmd.setInterestMapSdevPhidp(pts, _params.spec_cmd_phidp_sdev_interest_weight);
+  
+  // thresholds
+
+  _specCmd.setCmdThresholdMoments(_params.spec_cmd_threshold_for_moments);
+  _specCmd.setCmdThresholdDetect(_params.spec_cmd_threshold_for_detection);
+  
+  return 0;
+
+}
+
+//////////////////////////////////////////
+// run spectral CMD on SIM HV data
+
+void Beam::_filtSpecCmdSimHv()
+
+{
+
   // dimensions
   // need to protect fft during initialization since that action
   // is not thread safe
@@ -3289,7 +3370,7 @@ void Beam::_filtSpecCmdSimHv()
   _specCmd.setElevation(_el);
   _specCmd.setAzimuth(_az);
   _specCmd.setAntennaRate(getAntennaRate());
-
+  
   _specCmd.setRangeGeometry(_startRangeKm, _gateSpacingKm);
   _specCmd.setXmitRcvMode(_xmitRcvMode);
   _specCmd.setPrt(_prt);
@@ -3301,25 +3382,11 @@ void Beam::_filtSpecCmdSimHv()
   
   _specCmd.setCalibration(getCalib());
 
-  // computing textures
-  
-  _specCmd.setTdbzKernelNGates(_params.spec_cmd_tdbz_kernel_ngates);
-  _specCmd.setTdbzKernelNSamples(_params.spec_cmd_tdbz_kernel_nsamples);
-  _specCmd.setSdevZdrKernelNGates(_params.spec_cmd_sdev_zdr_kernel_ngates);
-  _specCmd.setSdevZdrKernelNSamples(_params.spec_cmd_sdev_zdr_kernel_nsamples);
-  _specCmd.setSdevPhidpKernelNGates(_params.spec_cmd_sdev_phidp_kernel_ngates);
-  _specCmd.setSdevPhidpKernelNSamples(_params.spec_cmd_sdev_phidp_kernel_nsamples);
-
-  // thresholds
-
-  _specCmd.setCmdThresholdMoments(_params.spec_cmd_threshold_for_moments);
-  _specCmd.setCmdThresholdDetect(_params.spec_cmd_threshold_for_detection);
-  
   // set time series
 
   _specCmd.resetFlags();
 
-  for (size_t igate = 0; igate < _gateData.size(); igate++) {
+  for (int igate = 0; igate < _nGates; igate++) {
     GateData *gd = _gateData[igate];
     _specCmd.setIqHc(gd->iqhcOrig, igate, _nSamples);
     _specCmd.setIqVc(gd->iqvcOrig, igate, _nSamples);
