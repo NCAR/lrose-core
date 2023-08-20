@@ -1161,7 +1161,7 @@ void DwellSpectra::computeSpectralCmd()
   
   double *meanCmd = getMeanCmd1D();
   double *fractionCmd = getFractionCmd1D();
-  
+
   for (size_t igate = 0; igate < _nGates; igate++) {
 
     double sumCmd = 0.0;
@@ -1287,7 +1287,7 @@ void DwellSpectra::_createDefaultInterestMaps()
   setInterestMapSdevPhidp(pts, 1.0);
 
   setCmdThresholdMoments(0.7);
-  setCmdThresholdDetect(0.9);
+  setCmdThresholdDetect(0.8);
 
 }
 
