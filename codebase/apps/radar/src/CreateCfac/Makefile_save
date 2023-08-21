@@ -8,6 +8,7 @@ LDFLAGS =
 
 # Libraries
 NETCDF = /usr/local
+# run this command to locate the path: xcrun --sdk macosx --show-sdk-path
 SDKPATH = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk
 LIBS = -L${SDKPATH}/usr/lib -L${NETCDF}/lib -lnetcdf -lnetcdff -lcurl -lhdf5 -lhdf5_hl
 INCLUDES = -I${NETCDF}/include
