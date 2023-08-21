@@ -1308,11 +1308,9 @@ public:
 
   double spec_cmd_phidp_sdev_interest_weight;
 
-  double spec_cmd_threshold_for_detection;
+  double spec_cmd_threshold_for_wtc_detection;
 
   double spec_cmd_threshold_for_moments;
-
-  double spec_cmd_fraction_threshold_for_wind_turbine;
 
   char* output_fmq_url;
 
@@ -1388,7 +1386,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[321];
+  mutable TDRPtable _table[320];
 
   const char *_className;
 

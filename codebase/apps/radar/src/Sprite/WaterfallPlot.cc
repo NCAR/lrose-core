@@ -234,8 +234,8 @@ void WaterfallPlot::plotBeam(QPainter &painter,
     case Params::WATERFALL_CMD:
       _plotCmd(painter, selectedRangeKm);
       break;
-    case Params::WATERFALL_CMD_FRAC:
-      _plotCmdFraction(painter, selectedRangeKm);
+    case Params::WATERFALL_CMD_MEAN:
+      _plotCmdSpectralMean(painter, selectedRangeKm);
       break;
   }
 
@@ -1390,11 +1390,11 @@ void WaterfallPlot::_plotCmd(QPainter &painter,
 }
 
 /*************************************************************************
- * plot CMD fraction
+ * plot CMD spectral mean
  */
 
-void WaterfallPlot::_plotCmdFraction(QPainter &painter,
-                                     double selectedRangeKm)
+void WaterfallPlot::_plotCmdSpectralMean(QPainter &painter,
+                                         double selectedRangeKm)
   
 {
 
@@ -1403,13 +1403,13 @@ void WaterfallPlot::_plotCmdFraction(QPainter &painter,
 
   // draw the color scale
   
-  if (_readColorMap(_params.waterfall_cmd_frac_color_scale_name) == 0) {
+  if (_readColorMap(_params.waterfall_cmd_mean_color_scale_name) == 0) {
     _zoomWorld.drawColorScale(_cmap, painter,
                               _params.waterfall_color_scale_font_size);
   }
   
   painter.save();
-
+  
   // loop through the gates
   
   for (size_t igate = 0; igate < _nGates; igate++) {
@@ -1420,8 +1420,8 @@ void WaterfallPlot::_plotCmdFraction(QPainter &painter,
 
     // get field
     
-    double frac = _spectra.getFractionCmd1D()[igate];
-
+    double mean = _spectra.getMeanCmd1D()[igate];
+    
     // plot the samples
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
@@ -1429,7 +1429,7 @@ void WaterfallPlot::_plotCmdFraction(QPainter &painter,
       // get color
 
       int red, green, blue;
-      _cmap.dataColor(frac, red, green, blue);
+      _cmap.dataColor(mean, red, green, blue);
       QColor color(red, green, blue);
       QBrush brush(color);
       
@@ -1671,8 +1671,8 @@ string WaterfallPlot::getName(Params::waterfall_type_t wtype)
       return "SDEV_PHIDP_INT";
     case Params::WATERFALL_CMD:
       return "CMD";
-    case Params::WATERFALL_CMD_FRAC:
-      return "CMD_FRAC";
+    case Params::WATERFALL_CMD_MEAN:
+      return "CMD_MEAN";
     default:
       return "UNKNOWN";
   }

@@ -261,8 +261,8 @@ protected:
   void _plotCmd(QPainter &painter,
                 double selectedRangeKm);
   
-  void _plotCmdFraction(QPainter &painter,
-                        double selectedRangeKm);
+  void _plotCmdSpectralMean(QPainter &painter,
+                            double selectedRangeKm);
   
   void _computePowerSpectrum(Beam *beam,
                              size_t nSamples,

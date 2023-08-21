@@ -3343,7 +3343,7 @@ int Beam::_specCmdInit()
   // thresholds
 
   _specCmd.setCmdThresholdMoments(_params.spec_cmd_threshold_for_moments);
-  _specCmd.setCmdThresholdDetect(_params.spec_cmd_threshold_for_detection);
+  _specCmd.setCmdThresholdDetect(_params.spec_cmd_threshold_for_wtc_detection);
   
   return 0;
 
@@ -3435,8 +3435,8 @@ void Beam::_filtSpecCmdSimHv()
                             fieldsSF.lag2_vc, fieldsSF.lag3_hc,
                             fieldsSF.lag3_vc, igate, fieldsSF);
       
-    if (fractionCmd[igate] >
-        _params.spec_cmd_fraction_threshold_for_wind_turbine) {
+    if (meanCmd[igate] >
+        _params.spec_cmd_threshold_for_wtc_detection) {
       
       fields.test1 = 1.00; // wind farm
       

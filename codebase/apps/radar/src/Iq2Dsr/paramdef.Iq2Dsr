@@ -2028,22 +2028,16 @@ paramdef double {
 } spec_cmd_phidp_sdev_interest_weight;
 
 paramdef double {
-  p_default = 0.9;
+  p_default = 0.8;
   p_descr = "Threshold CMD value for detecting clutter.";
-  p_help = "This is aimed mainly at wind turbine clutter. If the CMD value exceeds this threshold, clutter is assumed detected at the gate.";
-} spec_cmd_threshold_for_detection;
+  p_help = "This is aimed mainly at wind turbine clutter. If the mean spectral CMD exceeds this threshold, wind turbine clutter is assumed detected at the gate.";
+} spec_cmd_threshold_for_wtc_detection;
 
 paramdef double {
   p_default = 0.7;
   p_descr = "Threshold CMD value for computing moments.";
   p_help = "Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.";
 } spec_cmd_threshold_for_moments;
-
-paramdef double {
-  p_default = 0.7;
-  p_descr = "Threshold of CMD spectral fraction, for wind turbine detection.";
-  p_help = "If the fraction of the CMD spectrum in excess of 'spec_cmd_threshold_for_detection' exceeds this, we flag the gate as having a wind turbine gate.";
-} spec_cmd_fraction_threshold_for_wind_turbine;
 
 commentdef {
   p_header = "OUTPUT TO MOMENTS FMQ";
