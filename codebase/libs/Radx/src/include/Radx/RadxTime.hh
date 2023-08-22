@@ -70,6 +70,11 @@ public:
 
   RadxTime(time_t when, double subSec);
 
+  /// construct from double secs
+  /// Unused is a dummy, to disambiguate.
+
+  RadxTime(double secs, bool unused);
+    
   /// construct from year, month, day, hour, min, sec, sub secs
   /// hour, min, secs and subSec are optional args, that default
   /// to 0.

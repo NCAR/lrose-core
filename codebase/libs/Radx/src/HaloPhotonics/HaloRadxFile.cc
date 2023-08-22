@@ -414,7 +414,7 @@ int HaloRadxFile::_readHeaderData(string &xml)
   
 {
 
-  int nHeaderLines = 0;
+  // int nHeaderLines = 0;
   int nLinesRead = 0;
 
   _ranges.clear();
@@ -793,7 +793,7 @@ void HaloRadxFile::_findFields(string &columnLabel)
   // loop through the column labels
 
   //double firstRange = _ranges[0];
-  bool foundFirstRange = false;
+  // bool foundFirstRange = false;
   string rangeGate = "Range Gate";
   size_t ii = ll.find(rangeGate);
   if (ii != string::npos) {
@@ -996,7 +996,7 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
       value = toks[0];
       float timeInHours = atof(value.c_str());
       int minutesInHour = 60;
-      int secondsInHour = minutesInHour * 60;
+      // int secondsInHour = minutesInHour * 60;
       int hours = int(timeInHours);
       float minutes = (timeInHours - hours) * minutesInHour;
       float seconds = minutes * 60.;
@@ -1073,7 +1073,7 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
 // <gate N-1> <field 1 data> <field 2 data>
 
 int HaloRadxFile::_readRayData(int  nRaysInFile, int nGatesPerRay) {
-  int error = -1;
+  // int error = -1;
   int nRays = 0;
   RadxRay *ray = NULL;
   // read the values for the ray qualifiers
@@ -1091,7 +1091,7 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, int nGatesPerRay) {
     }
   } // while
   if (nRays != nRaysInFile) {
-    cerr << "Not enough rays in file: expected " << 
+    cerr << "Not enough rays in file: expected " << endl;
   }
   return 0;
 }
@@ -1110,11 +1110,12 @@ int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
   char line[65536];
 
   // get next line
-  fgets(line, 65536, _file);
+  char *cc = fgets(line, 65536, _file);
   while (!feof(_file) && (igate < nGates)) {
      _readNStoreFieldData(line, fields, igate);
      // get next line
-     fgets(line, 65536, _file); 
+     cc = fgets(line, 65536, _file);
+     if (cc) {} // suppress compiler warning
      igate += 1;
   }
   //if (igate == nGates) {

@@ -1839,7 +1839,7 @@ int NcfRadxFile::_checkSweepIndices()
 
   int currentIndex = 0;
   int maxIndex = nRaysInFile - 1;
-  for (int isweep = 0; (int) isweep < _sweepsInFile.size() - 1; isweep++) {
+  for (int isweep = 0; isweep < (int) _sweepsInFile.size() - 1; isweep++) {
 
     RadxSweep *sweepThis = _sweepsInFile[isweep];
     RadxSweep *sweepNext = _sweepsInFile[isweep + 1];
