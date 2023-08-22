@@ -109,6 +109,9 @@ private:
   RadxRay *_nextShortRay;
   RadxRay *_nextLongRay;
 
+  vector<RadxRay *> _dwellShortRays;
+  vector<RadxRay *> _dwellLongRays;
+
   RadxVol _dwellVol;
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
@@ -132,6 +135,8 @@ private:
 
   int _openFmqs();
   int _positionInputFmqs();
+  int _readNextDwellFromFmq();
+  void _clearDwellRays();
   
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
