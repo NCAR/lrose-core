@@ -749,7 +749,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("SET THE DWELL DETAILS");
+    tt->comment_hdr = tdrpStrDup("SET THE COMBINED DWELL DETAILS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -762,7 +762,7 @@
     tt->descr = tdrpStrDup("Specify the output dwell time (secs).");
     tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time.");
     tt->val_offset = (char *) &dwell_time_secs - &_start_;
-    tt->single_val.d = 1;
+    tt->single_val.d = 0.1;
     tt++;
     
     // Parameter 'center_dwell_on_time'

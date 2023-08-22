@@ -50,6 +50,7 @@
 #include <Radx/RadxTime.hh>
 #include <rapformats/DsRadarMsg.hh>
 #include <Fmq/DsRadarQueue.hh>
+#include <radar/IwrfMomReader.hh>
 class RadxFile;
 class RadxRay;
 using namespace std;
@@ -85,7 +86,11 @@ private:
 
   // fmq mode
 
-  DsRadarQueue _inputFmq;
+  IwrfMomReader *_readerFmqShort;
+  IwrfMomReader *_readerFmqLong;
+
+  DsRadarQueue _inputFmqShort;
+  DsRadarQueue _inputFmqLong;
   DsRadarQueue _outputFmq;
   DsRadarMsg _inputMsg;
   DsRadarMsg _outputMsg;
@@ -97,6 +102,12 @@ private:
   int _nRaysWritten;
 
   // combining
+
+  double _nextDwellStartSecs;
+  double _nextDwellEndSecs;
+
+  RadxRay *_nextShortRay;
+  RadxRay *_nextLongRay;
 
   RadxVol _dwellVol;
   RadxField::StatsMethod_t _globalMethod;
@@ -119,6 +130,9 @@ private:
   int _runArchive();
   int _runFmq();
 
+  int _openFmqs();
+  int _positionInputFmqs();
+  
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);

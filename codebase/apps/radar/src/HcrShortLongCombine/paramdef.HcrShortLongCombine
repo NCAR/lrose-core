@@ -107,11 +107,11 @@ paramdef double {
 } max_range_km;
 
 commentdef {
-  p_header = "SET THE DWELL DETAILS";
+  p_header = "SET THE COMBINED DWELL DETAILS";
 }
 
 paramdef double {
-  p_default = 1.0;
+  p_default = 0.1;
   p_descr = "Specify the output dwell time (secs).";
   p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
 } dwell_time_secs;

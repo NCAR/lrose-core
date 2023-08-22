@@ -57,6 +57,8 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
 
   OK = TRUE;
   _nWarnCensorPrint = 0;
+  _readerFmqShort = NULL;
+  _readerFmqLong = NULL;
 
   // set programe name
 
@@ -114,7 +116,16 @@ HcrShortLongCombine::~HcrShortLongCombine()
 
 {
 
-  _inputFmq.closeMsgQueue();
+  if (_readerFmqShort) {
+    delete _readerFmqShort;
+  }
+
+  if (_readerFmqLong) {
+    delete _readerFmqLong;
+  }
+
+  _inputFmqShort.closeMsgQueue();
+  _inputFmqLong.closeMsgQueue();
   _outputFmq.closeMsgQueue();
 
   // unregister process
@@ -1018,61 +1029,16 @@ RadxField::StatsMethod_t
 int HcrShortLongCombine::_runFmq()
 {
 
-  // Instantiate and initialize the input DsRadar queue and message
-  
-  if (_params.seek_to_end_of_input_fmq) {
-    if (_inputFmq.init(_params.input_fmq_url_short, _progName.c_str(),
-                       _params.debug >= Params::DEBUG_VERBOSE,
-                       DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_short);
-      return -1;
-    }
-  } else {
-    if (_inputFmq.init(_params.input_fmq_url_short, _progName.c_str(),
-                       _params.debug >= Params::DEBUG_VERBOSE,
-                       DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_short);
-      return -1;
-    }
+  // Instantiate and initialize the input radar queues
+
+  if (_openFmqs()) {
+    return -1;
   }
 
-  // create the output FMQ
-  
-  if (_outputFmq.init(_params.output_fmq_url,
-                      _progName.c_str(),
-                      _params.debug >= Params::DEBUG_VERBOSE,
-                      DsFmq::READ_WRITE, DsFmq::END,
-                      _params.output_fmq_compress,
-                      _params.output_fmq_n_slots,
-                      _params.output_fmq_buf_size)) {
-    cerr << "WARNING - trying to create new fmq" << endl;
-    if (_outputFmq.init(_params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        DsFmq::CREATE, DsFmq::START,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_n_slots,
-                        _params.output_fmq_buf_size)) {
-      cerr << "ERROR - Radx2Dsr" << endl;
-      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
-      return -1;
-    }
-  }
-  
-  if (_params.output_fmq_compress) {
-    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
-  }
-  
-  if (_params.output_fmq_write_blocking) {
-    _outputFmq.setBlockingWrite();
-  }
-  if (_params.output_fmq_data_mapper_report_interval > 0) {
-    _outputFmq.setRegisterWithDmap
-      (true, _params.output_fmq_data_mapper_report_interval);
+  // prepare the input fmqs at the start of the first output dwell
+
+  if (_positionInputFmqs()) {
+    return -1;
   }
 
   // read messages from the queue and process them
@@ -1083,9 +1049,9 @@ int HcrShortLongCombine::_runFmq()
   RadxTime prevDwellRayTime;
   int iret = 0;
   while (true) {
-
+    
     PMU_auto_register("Reading FMQ");
-
+    
     bool gotMsg = false;
     if (_readFmqMsg(gotMsg) || !gotMsg) {
       umsleep(100);
@@ -1169,6 +1135,192 @@ int HcrShortLongCombine::_runFmq()
 
 }
 
+//////////////////////////////////////////////////
+// Open fmqs
+
+int HcrShortLongCombine::_openFmqs()
+{
+
+  // Instantiate and initialize the input radar queues
+  
+  _readerFmqShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
+  _readerFmqLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _readerFmqShort->setDebug(IWRF_DEBUG_NORM);
+    _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
+  }
+  if (_params.seek_to_end_of_input_fmq) {
+    _readerFmqShort->seekToEnd();
+    _readerFmqLong->seekToEnd();
+  } else {
+    _readerFmqShort->seekToStart();
+    _readerFmqLong->seekToStart();
+  }
+  
+  if (_params.seek_to_end_of_input_fmq) {
+    if (_inputFmqShort.init(_params.input_fmq_url_short, _progName.c_str(),
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
+      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url_short);
+      return -1;
+    }
+    if (_inputFmqLong.init(_params.input_fmq_url_long, _progName.c_str(),
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
+      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url_long);
+      return -1;
+    }
+  } else {
+    if (_inputFmqShort.init(_params.input_fmq_url_short, _progName.c_str(),
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
+      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url_short);
+      return -1;
+    }
+    if (_inputFmqLong.init(_params.input_fmq_url_long, _progName.c_str(),
+                            _params.debug >= Params::DEBUG_VERBOSE,
+                            DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
+      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
+      fprintf(stderr, "Could not initialize radar queue '%s'\n",
+	      _params.input_fmq_url_long);
+      return -1;
+    }
+  }
+
+  // create the output FMQ
+  
+  if (_outputFmq.init(_params.output_fmq_url,
+                      _progName.c_str(),
+                      _params.debug >= Params::DEBUG_VERBOSE,
+                      DsFmq::READ_WRITE, DsFmq::END,
+                      _params.output_fmq_compress,
+                      _params.output_fmq_n_slots,
+                      _params.output_fmq_buf_size)) {
+    cerr << "WARNING - trying to create new fmq" << endl;
+    if (_outputFmq.init(_params.output_fmq_url,
+                        _progName.c_str(),
+                        _params.debug >= Params::DEBUG_VERBOSE,
+                        DsFmq::CREATE, DsFmq::START,
+                        _params.output_fmq_compress,
+                        _params.output_fmq_n_slots,
+                        _params.output_fmq_buf_size)) {
+      cerr << "ERROR - Radx2Dsr" << endl;
+      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
+      return -1;
+    }
+  }
+  
+  if (_params.output_fmq_compress) {
+    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
+  }
+  
+  if (_params.output_fmq_write_blocking) {
+    _outputFmq.setBlockingWrite();
+  }
+  if (_params.output_fmq_data_mapper_report_interval > 0) {
+    _outputFmq.setRegisterWithDmap
+      (true, _params.output_fmq_data_mapper_report_interval);
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Position the input fmqs at the start of the first output dwell
+
+int HcrShortLongCombine::_positionInputFmqs()
+{
+
+  // get the latest short and long ray
+
+  RadxTime shortTime;
+  RadxTime longTime;
+
+  {
+    
+    RadxRay *shortRay = _readerFmqShort->readNextRay();
+    if (shortRay == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_positionInputFmqs()" << endl;
+      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      return -1;
+    }
+    
+    RadxRay *longRay = _readerFmqLong->readNextRay();
+    if (longRay == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_positionInputFmqs()" << endl;
+      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      delete shortRay;
+      return -1;
+    }
+    
+    shortTime = shortRay->getRadxTime();
+    longTime = longRay->getRadxTime();
+    
+    delete shortRay;
+    delete longRay;
+
+  }
+
+  cerr << "1111111111111111 shortTime: " << shortTime.asString(6) << endl;
+  cerr << "1111111111111111 longTime: " << longTime.asString(6) << endl;
+  
+  // compute the latest time
+  
+  RadxTime latestTime = shortTime;
+  if (longTime > latestTime) {
+    latestTime = longTime;
+  }
+  double latestSecs = latestTime.asDouble();
+  
+  // compute the next dwell limits
+  
+  double dwellTime = _params.dwell_time_secs;
+  _nextDwellStartSecs = (floor(latestSecs / dwellTime) + 1.0) * dwellTime;
+  _nextDwellEndSecs = _nextDwellStartSecs + dwellTime;
+  
+  cerr << "1111111111111111 nextDwellStartSecs: " << RadxTime(_nextDwellStartSecs, true).asString(6) << endl;
+  cerr << "1111111111111111 nextDwellEndSecs: " << RadxTime(_nextDwellEndSecs, true).asString(6) << endl;
+
+  // read until both short and long are within the next dwell
+
+  _nextShortRay = NULL;
+  while (true) {
+    RadxRay *ray = _readerFmqShort->readNextRay();
+    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
+      _nextShortRay = ray;
+      break;
+    } else {
+      delete ray;
+    }
+  }
+
+  cerr << "2222222222 nextShortTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
+  
+  _nextLongRay = NULL;
+  while (true) {
+    RadxRay *ray = _readerFmqLong->readNextRay();
+    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
+      _nextLongRay = ray;
+      break;
+    } else {
+      delete ray;
+    }
+  }
+
+  cerr << "2222222222 nextLongTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
+  exit(0);
+
+  return 0;
+
+}
+
 ////////////////////////////////////////////////////////////////////
 // _readFmqMsg()
 //
@@ -1184,7 +1336,7 @@ int HcrShortLongCombine::_readFmqMsg(bool &gotMsg)
   PMU_auto_register("Reading radar queue");
   
   _inputContents = 0;
-  if (_inputFmq.getDsMsg(_inputMsg, &_inputContents, &gotMsg)) {
+  if (_inputFmqShort.getDsMsg(_inputMsg, &_inputContents, &gotMsg)) {
     return -1;
   }
   if (!gotMsg) {
@@ -1489,6 +1641,10 @@ RadxRay *HcrShortLongCombine::_createInputRay()
     delete[] fdata;
 
   } // iparam
+
+  if (_params.set_max_range) {
+    ray->setMaxRangeKm(_params.max_range_km);
+  }
 
   return ray;
 
