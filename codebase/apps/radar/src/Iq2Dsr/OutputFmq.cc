@@ -1053,6 +1053,10 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       
       unfiltFld->setMissingFl32(Radx::missingFl32);
 
+      // set folding attributes
+
+      _setFoldingAttr(beam, ofield, *unfiltFld);
+
       // add field to output ray
       
       ray.addField(unfiltFld);
@@ -1083,6 +1087,10 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       // convert missing value to standard
       
       filtFld->setMissingFl32(Radx::missingFl32);
+
+      // set folding attributes
+
+      _setFoldingAttr(beam, ofield, *filtFld);
 
       // add field to output ray
       
@@ -1153,6 +1161,39 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 }
 
+////////////////////////////////////////
+// set folding attributes
+
+void OutputFmq::_setFoldingAttr(const Beam &beam,
+                                const Params::output_field_t &ofld,
+                                RadxField &field)
+
+{
+      
+  if (ofld.id == Params::VEL ||
+      ofld.id == Params::VEL_CORR_MOTION ||
+      ofld.id == Params::VEL_CORR_VERT ||
+      ofld.id == Params::VEL_H_ONLY ||
+      ofld.id == Params::VEL_V_ONLY) {
+    field.setFieldFolds(beam.getNyquist() * -1.0,
+                        beam.getNyquist());
+  } else if (ofld.id == Params::VEL_PRT_SHORT) {
+    field.setFieldFolds(beam.getNyquistPrtShort() * -1.0,
+                        beam.getNyquistPrtShort());
+  } else if (ofld.id == Params::VEL_PRT_LONG) {
+    field.setFieldFolds(beam.getNyquistPrtLong() * -1.0,
+                        beam.getNyquistPrtLong());
+  } else if (ofld.id == Params::PHIDP) {
+    if (beam.getIsAlternating()) {
+      field.setFieldFolds(-90.0, 90.0);
+    } else {
+      field.setFieldFolds(-180.0, 180.0);
+    }
+  }
+
+
+}
+  
 ////////////////////////////////////////
 // put volume flags
 
