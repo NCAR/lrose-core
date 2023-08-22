@@ -122,7 +122,6 @@ private:
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
   void _applyLinearTransform(RadxVol &vol);
-  void _setFieldFoldsAttribute(RadxVol &vol);
   void _convertFields(RadxVol &vol);
   void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);

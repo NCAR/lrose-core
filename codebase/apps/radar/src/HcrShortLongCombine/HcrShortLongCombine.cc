@@ -283,12 +283,6 @@ int HcrShortLongCombine::_processFile(const string &readPath)
     _applyLinearTransform(vol);
   }
 
-  // add field folding attribute if needed
-
-  if (_params.set_field_folds_attribute) {
-    _setFieldFoldsAttribute(vol);
-  }
-
   // combine the dwells
 
   if (_params.center_dwell_on_time) {
@@ -343,12 +337,6 @@ void HcrShortLongCombine::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
   if (_params.set_max_range) {
     file.setReadMaxRangeKm(_params.max_range_km);
   }
@@ -373,25 +361,6 @@ void HcrShortLongCombine::_applyLinearTransform(RadxVol &vol)
     vol.applyLinearTransform(iname, scale, offset);
   } // ii
 
-}
-
-////////////////////////////////////////////////////////
-// set the field folds attribute on selected fields
-
-void HcrShortLongCombine::_setFieldFoldsAttribute(RadxVol &vol)
-{
-
-  for (int ii = 0; ii < _params.field_folds_n; ii++) {
-    
-    const Params::field_folds_t &fld = _params._field_folds[ii];
-
-    vol.setFieldFolds(fld.field_name,
-                      fld.use_nyquist,
-                      fld.fold_limit_lower,
-                      fld.fold_limit_upper);
-
-  } // ii
-  
 }
 
 //////////////////////////////////////////////////
@@ -1052,21 +1021,21 @@ int HcrShortLongCombine::_runFmq()
   // Instantiate and initialize the input DsRadar queue and message
   
   if (_params.seek_to_end_of_input_fmq) {
-    if (_inputFmq.init(_params.input_fmq_url, _progName.c_str(),
+    if (_inputFmq.init(_params.input_fmq_url_short, _progName.c_str(),
                        _params.debug >= Params::DEBUG_VERBOSE,
                        DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
       fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
       fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url);
+	      _params.input_fmq_url_short);
       return -1;
     }
   } else {
-    if (_inputFmq.init(_params.input_fmq_url, _progName.c_str(),
+    if (_inputFmq.init(_params.input_fmq_url_short, _progName.c_str(),
                        _params.debug >= Params::DEBUG_VERBOSE,
                        DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
       fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
       fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url);
+	      _params.input_fmq_url_short);
       return -1;
     }
   }
