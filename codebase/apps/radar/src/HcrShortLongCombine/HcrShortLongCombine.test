@@ -195,7 +195,7 @@ max_range_km = 9999;
 //
 //======================================================================
  
-///////////// dwell_time_secs /////////////////////////
+///////////// dwell_length_secs /////////////////////////
 //
 // Specify the output dwell time (secs).
 //
@@ -206,7 +206,7 @@ max_range_km = 9999;
 // Type: double
 //
 
-dwell_time_secs = 0.1;
+dwell_length_secs = 0.1;
 
 ///////////// center_dwell_on_time ////////////////////
 //

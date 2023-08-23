@@ -89,8 +89,6 @@ private:
   IwrfMomReader *_readerFmqShort;
   IwrfMomReader *_readerFmqLong;
 
-  DsRadarQueue _inputFmqShort;
-  DsRadarQueue _inputFmqLong;
   DsRadarQueue _outputFmq;
   DsRadarMsg _inputMsg;
   DsRadarMsg _outputMsg;
@@ -103,14 +101,15 @@ private:
 
   // combining
 
-  double _nextDwellStartSecs;
-  double _nextDwellEndSecs;
-
-  RadxTime _nextDwellStartTime;
-  RadxTime _nextDwellEndTime;
-
-  RadxRay *_nextShortRay;
-  RadxRay *_nextLongRay;
+  double _dwellLengthSecs;
+  double _dwellLengthSecsHalf;
+  
+  RadxTime _dwellStartTime;
+  RadxTime _dwellEndTime;
+  RadxTime _dwellMidTime;
+  
+  RadxRay *_cacheShortRay;
+  RadxRay *_cacheLongRay;
 
   vector<RadxRay *> _dwellShortRays;
   vector<RadxRay *> _dwellLongRays;
@@ -137,7 +136,7 @@ private:
   int _runFmq();
 
   int _openFmqs();
-  int _initInputFmqs();
+  int _prepareInputFmqs();
   int _readNextDwellFromFmq();
   void _clearDwellRays();
   
@@ -159,9 +158,6 @@ private:
   RadxField::StatsMethod_t
     _getDwellStatsMethod(Params::dwell_stats_method_t method);
 
-  int _readFmqMsg(bool &gotMsg);
-  void _loadRadarParams();
-  RadxRay *_createInputRay();
   int _writeParams(const RadxRay *ray);
   int _writeRay(const RadxRay *ray);
 

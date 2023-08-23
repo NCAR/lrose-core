@@ -84,6 +84,9 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
     return;
   }
 
+  _dwellLengthSecs = _params.dwell_length_secs;
+  _dwellLengthSecsHalf = _dwellLengthSecs / 2.0;
+
   // set dwell stats method
 
   _globalMethod = _getDwellStatsMethod(_params.dwell_stats_method);
@@ -124,8 +127,6 @@ HcrShortLongCombine::~HcrShortLongCombine()
     delete _readerFmqLong;
   }
 
-  _inputFmqShort.closeMsgQueue();
-  _inputFmqLong.closeMsgQueue();
   _outputFmq.closeMsgQueue();
 
   // unregister process
@@ -1037,7 +1038,7 @@ int HcrShortLongCombine::_runFmq()
 
   // prepare the input fmqs at the start of the first output dwell
 
-  if (_initInputFmqs()) {
+  if (_prepareInputFmqs()) {
     return -1;
   }
 
@@ -1058,11 +1059,11 @@ int HcrShortLongCombine::_runFmq()
     
     PMU_auto_register("Reading FMQ");
     
-    bool gotMsg = false;
-    if (_readFmqMsg(gotMsg) || !gotMsg) {
-      umsleep(100);
-      continue;
-    }
+    // bool gotMsg = false;
+    // if (_readFmqMsg(gotMsg) || !gotMsg) {
+    //   umsleep(100);
+    //   continue;
+    // }
 
     // pass message through if not related to beam
     
@@ -1148,6 +1149,13 @@ int HcrShortLongCombine::_openFmqs()
 {
 
   // Instantiate and initialize the input radar queues
+
+  if (_params.debug) {
+    cerr << "DEBUG - opening input fmq for short pulse: "
+         << _params.input_fmq_url_short << endl;
+    cerr << "DEBUG - opening input fmq for long  pulse: "
+         << _params.input_fmq_url_long << endl;
+  }
   
   _readerFmqShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
   _readerFmqLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
@@ -1155,48 +1163,24 @@ int HcrShortLongCombine::_openFmqs()
     _readerFmqShort->setDebug(IWRF_DEBUG_NORM);
     _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
   }
+
+  // initialize - read one ray
+
+  RadxRay *rayShort = _readerFmqShort->readNextRay();
+  if (rayShort != NULL) {
+    delete rayShort;
+  }
+  RadxRay *rayLong = _readerFmqLong->readNextRay();
+  if (rayLong != NULL) {
+    delete rayLong;
+  }
+
   if (_params.seek_to_end_of_input_fmq) {
     _readerFmqShort->seekToEnd();
     _readerFmqLong->seekToEnd();
   } else {
     _readerFmqShort->seekToStart();
     _readerFmqLong->seekToStart();
-  }
-  
-  if (_params.seek_to_end_of_input_fmq) {
-    if (_inputFmqShort.init(_params.input_fmq_url_short, _progName.c_str(),
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_short);
-      return -1;
-    }
-    if (_inputFmqLong.init(_params.input_fmq_url_long, _progName.c_str(),
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            DsFmq::BLOCKING_READ_WRITE, DsFmq::END )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_long);
-      return -1;
-    }
-  } else {
-    if (_inputFmqShort.init(_params.input_fmq_url_short, _progName.c_str(),
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_short);
-      return -1;
-    }
-    if (_inputFmqLong.init(_params.input_fmq_url_long, _progName.c_str(),
-                            _params.debug >= Params::DEBUG_VERBOSE,
-                            DsFmq::BLOCKING_READ_WRITE, DsFmq::START )) {
-      fprintf(stderr, "ERROR - %s:Dsr2Radx::_run\n", _progName.c_str());
-      fprintf(stderr, "Could not initialize radar queue '%s'\n",
-	      _params.input_fmq_url_long);
-      return -1;
-    }
   }
 
   // create the output FMQ
@@ -1241,7 +1225,7 @@ int HcrShortLongCombine::_openFmqs()
 /////////////////////////////////////////////////////////////////
 // Initialize the input fmqs at the start of the first output dwell
 
-int HcrShortLongCombine::_initInputFmqs()
+int HcrShortLongCombine::_prepareInputFmqs()
 {
 
   // read a short and long ray
@@ -1253,14 +1237,14 @@ int HcrShortLongCombine::_initInputFmqs()
     
     RadxRay *shortRay = _readerFmqShort->readNextRay();
     if (shortRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_initInputFmqs()" << endl;
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
       cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
       return -1;
     }
     
     RadxRay *longRay = _readerFmqLong->readNextRay();
     if (longRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_initInputFmqs()" << endl;
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
       cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
       delete shortRay;
       return -1;
@@ -1274,8 +1258,10 @@ int HcrShortLongCombine::_initInputFmqs()
 
   }
 
-  cerr << "1111111111111111 start shortTime: " << shortTime.asString(6) << endl;
-  cerr << "1111111111111111 start longTime: " << longTime.asString(6) << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=======>> first short ray read, time: " << shortTime.asString(6) << endl;
+    cerr << "=======>> first long  ray read, time: " << longTime.asString(6) << endl;
+  }
   
   // compute the latest time
   
@@ -1287,46 +1273,53 @@ int HcrShortLongCombine::_initInputFmqs()
   
   // compute the next dwell limits
   
-  double dwellSecs = _params.dwell_length_secs;
-  double nextDwellStartSecs = (floor(latestSecs / dwellSecs) + 1.0) * dwellSecs + dwellSecs / 2.0;
-  // double nextDwellEndSecs = nextDwellStartSecs + dwellSecs;
-
-  _nextDwellStartTime.setFromDouble(nextDwellStartSecs);
-  _nextDwellEndTime = _nextDwellStartTime + dwellSecs;
+  double dwellMidSecs = (floor(latestSecs / dwellLengthSecs) + 1.0) * dwellLengthSecs;
   
-  // cerr << "1111111111111111 nextDwellStartSecs: " << RadxTime(_nextDwellStartSecs, true).asString(6) << endl;
-  // cerr << "1111111111111111 nextDwellEndSecs: " << RadxTime(_nextDwellEndSecs, true).asString(6) << endl;
+  _dwellMidTime.setFromDouble(dwellMidSecs);
+  _dwellStartTime = _dwellMidTime - _dwellLengthSecsHalf;
+  _dwellEndTime = _dwellMidTime + _dwellLengthSecsHalf;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
+    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
+    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
+  }
 
-  cerr << "00000000 nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
-  cerr << "00000000 nextDwellEndTime: " << _nextDwellEndTime.asString(6) << endl;
-
-  // read until both short and long are within the next dwell
-
-  _nextShortRay = NULL;
+  // read short rays, prepare for first dwell
+  
+  _cacheShortRay = NULL;
   while (true) {
     RadxRay *ray = _readerFmqShort->readNextRay();
-    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
-      _nextShortRay = ray;
+    if (ray == NULL) {
+      cerr << "========>> short queue done <<==========" << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellStartTime) {
+      // save for next dwell
+      _cacheShortRay = ray;
       break;
     } else {
       delete ray;
     }
   }
 
-  // cerr << "2222222222 nextShortRayTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
+  // read long rays, prepare for first dwell
   
-  _nextLongRay = NULL;
+  _cacheLongRay = NULL;
   while (true) {
     RadxRay *ray = _readerFmqLong->readNextRay();
-    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
-      _nextLongRay = ray;
+    if (ray == NULL) {
+      cerr << "========>> long queue done <<==========" << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellStartTime) {
+      // save for next dwell
+      _cacheLongRay = ray;
       break;
     } else {
       delete ray;
     }
   }
-
-  // cerr << "2222222222 nextLongRayTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
 
   return 0;
 
@@ -1344,64 +1337,65 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   
   // add in the latest rays already read in
 
-  if (_nextShortRay != NULL) {
-    _dwellShortRays.push_back(_nextShortRay);
-    _nextShortRay = NULL;
+  if (_cacheShortRay != NULL) {
+    _dwellShortRays.push_back(_cacheShortRay);
+    _cacheShortRay = NULL;
   }
-  if (_nextLongRay != NULL) {
-    _dwellLongRays.push_back(_nextLongRay);
-    _nextLongRay = NULL;
+  if (_cacheLongRay != NULL) {
+    _dwellLongRays.push_back(_cacheLongRay);
+    _cacheLongRay = NULL;
   }
 
-  // read in short rays
+  // read in short rays for the dwell
   
   while (true) {
     RadxRay *ray = _readerFmqShort->readNextRay();
-    if (ray->getRadxTime() >= _nextDwellEndTime) {
-      _nextShortRay = ray;
+    if (ray->getRadxTime() >= _dwellEndTime) {
+      // save for start of next dwell
+      _cacheShortRay = ray;
       break;
     } else {
-      // cerr << "33333333 adding short ray, time: " << ray->getRadxTime().asString(6) << endl;
       _dwellShortRays.push_back(ray);
     }
   }
-  // cerr << "9999999999 nextShortTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
 
-  // read in long rays
+  // read in long rays for the dwell
   
   while (true) {
     RadxRay *ray = _readerFmqLong->readNextRay();
-    if (ray->getRadxTime() >= _nextDwellEndTime) {
-      _nextLongRay = ray;
+    if (ray->getRadxTime() >= _dwellEndTime) {
+      // save for start of next dwell
+      _cacheLongRay = ray;
       break;
     } else {
-      // cerr << "33333333 adding long ray, time: " << ray->getRadxTime().asString(6) << endl;
       _dwellLongRays.push_back(ray);
     }
   }
-  // cerr << "9999999999 nextLongTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
 
-  cerr << "aaaaaaaaaaaaaaaa short ray count: " << _dwellShortRays.size() << endl;
-  for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
-    cerr << "aaaaaaaa short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=================>> short ray count: " << _dwellShortRays.size() << endl;
+    for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+      cerr << "  short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << endl;
+    }
+    cerr << "========================================" << endl;
+    cerr << "=================>> long ray count: " << _dwellLongRays.size() << endl;
+    for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+      cerr << "  long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << endl;
+    }
+    cerr << "========================================" << endl;
   }
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-
-  cerr << "bbbbbbbbbbbbbbbb long ray count: " << _dwellLongRays.size() << endl;
-  for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
-    cerr << "bbbbbbb long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << endl;
+  
+  // set to advance to next dwell
+  
+  _dwellStartTime = _dwellEndTime;
+  _dwellMidTime = _dwellStartTime + _dwellLengthSecsHalf;
+  _dwellEndTime = _dwellStartTime + _dwellLengthSecs;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
+    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
+    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
   }
-  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
-  
-  // set next dwell time limits
-
-  double dwellSecs = _params.dwell_length_secs;
-  _nextDwellStartTime = _nextDwellEndTime;
-  _nextDwellEndTime = _nextDwellStartTime + dwellSecs;
-  
-  cerr << "555555555555555 nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
-  cerr << "555555555555555 nextDwellEndTime: " << _nextDwellEndTime.asString(6) << endl;
-
 
   return 0;
 
@@ -1422,336 +1416,6 @@ void HcrShortLongCombine::_clearDwellRays()
     delete _dwellLongRays[ii];
   }
   _dwellLongRays.clear();
-
-}
-
-
-////////////////////////////////////////////////////////////////////
-// _readFmqMsg()
-//
-// Read a message from the queue, setting the flags about ray_data
-// and _endOfVolume appropriately.
-//
-// Sets gotMsg to true if message was read
-
-int HcrShortLongCombine::_readFmqMsg(bool &gotMsg) 
-  
-{
-  
-  PMU_auto_register("Reading radar queue");
-  
-  _inputContents = 0;
-  if (_inputFmqShort.getDsMsg(_inputMsg, &_inputContents, &gotMsg)) {
-    return -1;
-  }
-  if (!gotMsg) {
-    return -1;
-  }
-  
-  // set radar parameters if avaliable
-  
-  if (_inputContents & DsRadarMsg::RADAR_PARAMS) {
-    _loadRadarParams();
-    _needWriteParams = true;
-  }
-
-  // If we have radar and field params, and there is good ray data,
-  
-  RadxRay *ray = NULL;
-  if (_inputContents & DsRadarMsg::RADAR_BEAM) {
-
-    if (_inputMsg.allParamsSet()) {
-      
-      _nRaysRead++;
-      
-      // crete ray from ray message
-      
-      ray = _createInputRay();
-      
-      // debug print
-      
-      if (_params.debug) {
-        if ((_nRaysRead > 0) && (_nRaysRead % 360 == 0)) {
-          cerr << "==>>    read nRays, latest time, el, az: "
-               << _nRaysRead << ", "
-               << utimstr(ray->getTimeSecs()) << ", "
-               << ray->getElevationDeg() << ", "
-               << ray->getAzimuthDeg() << endl;
-        }
-      }
-      
-      // add the ray to the volume as appropriate
-      
-      _dwellVol.addRay(ray);
-      
-    }
-    
-  } // if (_inputContents ...
-  
-  return 0;
-
-}
-
-////////////////////////////////////////////////////////////////
-// load radar params
-
-void HcrShortLongCombine::_loadRadarParams()
-
-{
-  
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "=========>> got RADAR_PARAMS" << endl;
-  }
-
-  _rparams = _inputMsg.getRadarParams();
-  
-  _dwellVol.setInstrumentName(_rparams.radarName);
-  _dwellVol.setScanName(_rparams.scanTypeName);
-  
-  switch (_rparams.radarType) {
-    case DS_RADAR_AIRBORNE_FORE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_AFT_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_FORE);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_TAIL_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_TAIL);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_LOWER_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_BELLY);
-      break;
-    }
-    case DS_RADAR_AIRBORNE_UPPER_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_AIRCRAFT_ROOF);
-      break;
-    }
-    case DS_RADAR_SHIPBORNE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_SHIP);
-      break;
-    }
-    case DS_RADAR_VEHICLE_TYPE: {
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_VEHICLE);
-      break;
-    }
-    case DS_RADAR_GROUND_TYPE:
-    default:{
-      _dwellVol.setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-    }
-  }
-  
-  _dwellVol.setLocation(_rparams.latitude,
-                        _rparams.longitude,
-                        _rparams.altitude);
-
-  _dwellVol.addWavelengthCm(_rparams.wavelength);
-  _dwellVol.setRadarBeamWidthDegH(_rparams.horizBeamWidth);
-  _dwellVol.setRadarBeamWidthDegV(_rparams.vertBeamWidth);
-
-}
-
-////////////////////////////////////////////////////////////////////
-// add an input ray from an incoming message
-
-RadxRay *HcrShortLongCombine::_createInputRay()
-
-{
-
-  // input data
-
-  const DsRadarBeam &rbeam = _inputMsg.getRadarBeam();
-  const DsRadarParams &rparams = _inputMsg.getRadarParams();
-  const vector<DsFieldParams *> &fparamsVec = _inputMsg.getFieldParams();
-
-  // create new ray
-
-  RadxRay *ray = new RadxRay;
-
-  // set ray properties
-
-  ray->setTime(rbeam.dataTime, rbeam.nanoSecs);
-  ray->setVolumeNumber(rbeam.volumeNum);
-  ray->setSweepNumber(rbeam.tiltNum);
-
-  int scanMode = rparams.scanMode;
-  if (rbeam.scanMode > 0) {
-    scanMode = rbeam.scanMode;
-  } else {
-    scanMode = rparams.scanMode;
-  }
-
-  ray->setSweepMode(_getRadxSweepMode(scanMode));
-  ray->setPolarizationMode(_getRadxPolarizationMode(rparams.polarization));
-  ray->setPrtMode(_getRadxPrtMode(rparams.prfMode));
-  ray->setFollowMode(_getRadxFollowMode(rparams.followMode));
-
-  double elev = rbeam.elevation;
-  if (elev > 180) {
-    elev -= 360.0;
-  }
-  ray->setElevationDeg(elev);
-
-  double az = rbeam.azimuth;
-  if (az < 0) {
-    az += 360.0;
-  }
-  ray->setAzimuthDeg(az);
-
-  // range geometry
-
-  int nGates = rparams.numGates;
-  ray->setRangeGeom(rparams.startRange, rparams.gateSpacing);
-
-  if (scanMode == DS_RADAR_RHI_MODE ||
-      scanMode == DS_RADAR_EL_SURV_MODE) {
-    ray->setFixedAngleDeg(rbeam.targetAz);
-  } else {
-    ray->setFixedAngleDeg(rbeam.targetElev);
-  }
-
-  ray->setIsIndexed(rbeam.beamIsIndexed);
-  ray->setAngleResDeg(rbeam.angularResolution);
-  ray->setAntennaTransition(rbeam.antennaTransition);
-  ray->setNSamples(rparams.samplesPerBeam);
-  
-  ray->setPulseWidthUsec(rparams.pulseWidth);
-  double prt = 1.0 / rparams.pulseRepFreq;
-  ray->setPrtSec(prt);
-  ray->setPrtRatio(1.0);
-  ray->setNyquistMps(rparams.unambigVelocity);
-
-  ray->setUnambigRangeKm(Radx::missingMetaDouble);
-  ray->setUnambigRange();
-
-  ray->setMeasXmitPowerDbmH(rbeam.measXmitPowerDbmH);
-  ray->setMeasXmitPowerDbmV(rbeam.measXmitPowerDbmV);
-
-  // platform georeference
-  
-  if (_inputContents & DsRadarMsg::PLATFORM_GEOREF) {
-    const DsPlatformGeoref &platformGeoref = _inputMsg.getPlatformGeoref();
-    const ds_iwrf_platform_georef_t &dsGeoref = platformGeoref.getGeoref();
-    _georefs.push_back(platformGeoref);
-    RadxGeoref georef;
-    georef.setTimeSecs(dsGeoref.packet.time_secs_utc);
-    georef.setNanoSecs(dsGeoref.packet.time_nano_secs);
-    georef.setLongitude(dsGeoref.longitude);
-    georef.setLatitude(dsGeoref.latitude);
-    georef.setAltitudeKmMsl(dsGeoref.altitude_msl_km);
-    georef.setAltitudeKmAgl(dsGeoref.altitude_agl_km);
-    georef.setEwVelocity(dsGeoref.ew_velocity_mps);
-    georef.setNsVelocity(dsGeoref.ns_velocity_mps);
-    georef.setVertVelocity(dsGeoref.vert_velocity_mps);
-    georef.setHeading(dsGeoref.heading_deg);
-    georef.setRoll(dsGeoref.roll_deg);
-    georef.setPitch(dsGeoref.pitch_deg);
-    georef.setDrift(dsGeoref.drift_angle_deg);
-    georef.setRotation(dsGeoref.rotation_angle_deg);
-    georef.setTilt(dsGeoref.tilt_angle_deg);
-    georef.setEwWind(dsGeoref.ew_horiz_wind_mps);
-    georef.setNsWind(dsGeoref.ns_horiz_wind_mps);
-    georef.setVertWind(dsGeoref.vert_wind_mps);
-    georef.setHeadingRate(dsGeoref.heading_rate_dps);
-    georef.setPitchRate(dsGeoref.pitch_rate_dps);
-    georef.setDriveAngle1(dsGeoref.drive_angle_1_deg);
-    georef.setDriveAngle2(dsGeoref.drive_angle_2_deg);
-    ray->clearGeoref();
-    ray->setGeoref(georef);
-  }
-
-  // load up fields
-
-  int byteWidth = rbeam.byteWidth;
-  
-  for (size_t iparam = 0; iparam < fparamsVec.size(); iparam++) {
-
-    // is this an output field or censoring field?
-
-    const DsFieldParams &fparams = *fparamsVec[iparam];
-    string fieldName = fparams.name;
-    if (_params.set_output_fields && !_isOutputField(fieldName)) {
-      continue;
-    }
-
-    // convert to floats
-    
-    Radx::fl32 *fdata = new Radx::fl32[nGates];
-
-    if (byteWidth == sizeof(fl32)) {
-
-      fl32 *inData = (fl32 *) rbeam.data() + iparam;
-      fl32 inMissing = (fl32) fparams.missingDataValue;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        fl32 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData;
-        }
-      } // igate
-
-    } else if (byteWidth == sizeof(ui16)) {
-
-      ui16 *inData = (ui16 *) rbeam.data() + iparam;
-      ui16 inMissing = (ui16) fparams.missingDataValue;
-      double scale = fparams.scale;
-      double bias = fparams.bias;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        ui16 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData * scale + bias;
-        }
-      } // igate
-
-    } else {
-
-      // byte width 1
-
-      ui08 *inData = (ui08 *) rbeam.data() + iparam;
-      ui08 inMissing = (ui08) fparams.missingDataValue;
-      double scale = fparams.scale;
-      double bias = fparams.bias;
-      Radx::fl32 *outData = fdata;
-      
-      for (int igate = 0; igate < nGates;
-           igate++, inData += fparamsVec.size(), outData++) {
-        ui08 inVal = *inData;
-        if (inVal == inMissing) {
-          *outData = Radx::missingFl32;
-        } else {
-          *outData = *inData * scale + bias;
-        }
-      } // igate
-
-    } // if (byteWidth == 4)
-
-    RadxField *field = new RadxField(fparams.name, fparams.units);
-    field->copyRangeGeom(*ray);
-    field->setTypeFl32(Radx::missingFl32);
-    field->addDataFl32(nGates, fdata);
-
-    ray->addField(field);
-
-    delete[] fdata;
-
-  } // iparam
-
-  if (_params.set_max_range) {
-    ray->setMaxRangeKm(_params.max_range_km);
-  }
-
-  return ray;
 
 }
 
