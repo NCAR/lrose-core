@@ -112,9 +112,9 @@ commentdef {
 
 paramdef double {
   p_default = 0.1;
-  p_descr = "Specify the output dwell time (secs).";
+  p_descr = "Specify the output dwell length (secs).";
   p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
-} dwell_time_secs;
+} dwell_length_secs;
 
 paramdef boolean {
   p_default = false;

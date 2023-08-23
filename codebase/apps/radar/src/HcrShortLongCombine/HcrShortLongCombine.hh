@@ -106,6 +106,9 @@ private:
   double _nextDwellStartSecs;
   double _nextDwellEndSecs;
 
+  RadxTime _nextDwellStartTime;
+  RadxTime _nextDwellEndTime;
+
   RadxRay *_nextShortRay;
   RadxRay *_nextLongRay;
 
@@ -134,7 +137,7 @@ private:
   int _runFmq();
 
   int _openFmqs();
-  int _positionInputFmqs();
+  int _initInputFmqs();
   int _readNextDwellFromFmq();
   void _clearDwellRays();
   

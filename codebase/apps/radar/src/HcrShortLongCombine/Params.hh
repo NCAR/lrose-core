@@ -478,7 +478,7 @@ public:
 
   double max_range_km;
 
-  double dwell_time_secs;
+  double dwell_length_secs;
 
   tdrp_bool_t center_dwell_on_time;
 

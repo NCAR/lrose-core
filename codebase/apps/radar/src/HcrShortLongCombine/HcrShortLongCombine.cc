@@ -837,7 +837,7 @@ int HcrShortLongCombine::_combineDwells(RadxVol &vol)
     
     // dwell time exceeded, so compute dwell ray and add to volume
     
-    if (dwellSecs >= _params.dwell_time_secs) {
+    if (dwellSecs >= _params.dwell_length_secs) {
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "INFO: _combineDwells, using nrays: " << nRaysDwell << endl;
       }
@@ -914,9 +914,9 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
       RadxTime volStartTime(vol.getStartTimeSecs());
       double dsecs = _latestRayTime - volStartTime;
       double roundedSecs =
-        ((int) (dsecs / _params.dwell_time_secs) + 1.0) * _params.dwell_time_secs;
+        ((int) (dsecs / _params.dwell_length_secs) + 1.0) * _params.dwell_length_secs;
       _dwellMidTime = volStartTime + roundedSecs;
-      _dwellEndTime = _dwellMidTime + _params.dwell_time_secs / 2.0;
+      _dwellEndTime = _dwellMidTime + _params.dwell_length_secs / 2.0;
 
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "==>> starting new dwell <<==" << endl;
@@ -1037,7 +1037,7 @@ int HcrShortLongCombine::_runFmq()
 
   // prepare the input fmqs at the start of the first output dwell
 
-  if (_positionInputFmqs()) {
+  if (_initInputFmqs()) {
     return -1;
   }
 
@@ -1088,7 +1088,7 @@ int HcrShortLongCombine::_runFmq()
       double dwellSecs = (_dwellEndTime - _dwellStartTime);
       dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
       
-      if (dwellSecs >= _params.dwell_time_secs) {
+      if (dwellSecs >= _params.dwell_length_secs) {
 
         // dwell time exceeded, so compute dwell ray and add to volume
 
@@ -1102,8 +1102,8 @@ int HcrShortLongCombine::_runFmq()
         double deltaSecs = dwellRayTime - prevDwellRayTime;
 
         if (_params.debug >= Params::DEBUG_VERBOSE) {
-          if (deltaSecs < _params.dwell_time_secs * 0.8 ||
-              deltaSecs > _params.dwell_time_secs * 1.2) {
+          if (deltaSecs < _params.dwell_length_secs * 0.8 ||
+              deltaSecs > _params.dwell_length_secs * 1.2) {
             cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
                  << dwellRay->getRadxTime().asString(3) << ", "
                  << nRaysDwell << ", "
@@ -1239,12 +1239,12 @@ int HcrShortLongCombine::_openFmqs()
 }
 
 /////////////////////////////////////////////////////////////////
-// Position the input fmqs at the start of the first output dwell
+// Initialize the input fmqs at the start of the first output dwell
 
-int HcrShortLongCombine::_positionInputFmqs()
+int HcrShortLongCombine::_initInputFmqs()
 {
 
-  // get the latest short and long ray
+  // read a short and long ray
 
   RadxTime shortTime;
   RadxTime longTime;
@@ -1253,14 +1253,14 @@ int HcrShortLongCombine::_positionInputFmqs()
     
     RadxRay *shortRay = _readerFmqShort->readNextRay();
     if (shortRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_positionInputFmqs()" << endl;
+      cerr << "ERROR - HcrShortLongCombine::_initInputFmqs()" << endl;
       cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
       return -1;
     }
     
     RadxRay *longRay = _readerFmqLong->readNextRay();
     if (longRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_positionInputFmqs()" << endl;
+      cerr << "ERROR - HcrShortLongCombine::_initInputFmqs()" << endl;
       cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
       delete shortRay;
       return -1;
@@ -1274,8 +1274,8 @@ int HcrShortLongCombine::_positionInputFmqs()
 
   }
 
-  cerr << "1111111111111111 shortTime: " << shortTime.asString(6) << endl;
-  cerr << "1111111111111111 longTime: " << longTime.asString(6) << endl;
+  cerr << "1111111111111111 start shortTime: " << shortTime.asString(6) << endl;
+  cerr << "1111111111111111 start longTime: " << longTime.asString(6) << endl;
   
   // compute the latest time
   
@@ -1287,12 +1287,18 @@ int HcrShortLongCombine::_positionInputFmqs()
   
   // compute the next dwell limits
   
-  double dwellTime = _params.dwell_time_secs;
-  _nextDwellStartSecs = (floor(latestSecs / dwellTime) + 1.0) * dwellTime;
-  _nextDwellEndSecs = _nextDwellStartSecs + dwellTime;
+  double dwellSecs = _params.dwell_length_secs;
+  double nextDwellStartSecs = (floor(latestSecs / dwellSecs) + 1.0) * dwellSecs + dwellSecs / 2.0;
+  // double nextDwellEndSecs = nextDwellStartSecs + dwellSecs;
+
+  _nextDwellStartTime.setFromDouble(nextDwellStartSecs);
+  _nextDwellEndTime = _nextDwellStartTime + dwellSecs;
   
-  cerr << "1111111111111111 nextDwellStartSecs: " << RadxTime(_nextDwellStartSecs, true).asString(6) << endl;
-  cerr << "1111111111111111 nextDwellEndSecs: " << RadxTime(_nextDwellEndSecs, true).asString(6) << endl;
+  // cerr << "1111111111111111 nextDwellStartSecs: " << RadxTime(_nextDwellStartSecs, true).asString(6) << endl;
+  // cerr << "1111111111111111 nextDwellEndSecs: " << RadxTime(_nextDwellEndSecs, true).asString(6) << endl;
+
+  cerr << "00000000 nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
+  cerr << "00000000 nextDwellEndTime: " << _nextDwellEndTime.asString(6) << endl;
 
   // read until both short and long are within the next dwell
 
@@ -1307,7 +1313,7 @@ int HcrShortLongCombine::_positionInputFmqs()
     }
   }
 
-  cerr << "2222222222 nextShortTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
+  // cerr << "2222222222 nextShortRayTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
   
   _nextLongRay = NULL;
   while (true) {
@@ -1320,7 +1326,7 @@ int HcrShortLongCombine::_positionInputFmqs()
     }
   }
 
-  cerr << "2222222222 nextLongTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
+  // cerr << "2222222222 nextLongRayTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
 
   return 0;
 
@@ -1347,45 +1353,55 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
     _nextLongRay = NULL;
   }
 
-  // set dwell time limits
-  
-  double dwellTime = _params.dwell_time_secs;
-  _nextDwellStartSecs = (floor(_nextDwellStartSecs / dwellTime) + 1.0) * dwellTime;
-  _nextDwellEndSecs = _nextDwellStartSecs + dwellTime;
-
-  _nextDwellStartSecs += dwellTime;
-  _nextDwellEndSecs = _nextDwellStartSecs + dwellTime;
-  
-  cerr << "555555555555555 nextDwellStartSecs: " << RadxTime(_nextDwellStartSecs, true).asString(6) << endl;
-  cerr << "555555555555555 nextDwellEndSecs: " << RadxTime(_nextDwellEndSecs, true).asString(6) << endl;
-
   // read in short rays
   
   while (true) {
     RadxRay *ray = _readerFmqShort->readNextRay();
-    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
+    if (ray->getRadxTime() >= _nextDwellEndTime) {
       _nextShortRay = ray;
       break;
     } else {
-      cerr << "33333333 adding short ray, time: " << ray->getRadxTime().asString(6) << endl;
+      // cerr << "33333333 adding short ray, time: " << ray->getRadxTime().asString(6) << endl;
       _dwellShortRays.push_back(ray);
     }
   }
-  cerr << "9999999999 nextShortTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
+  // cerr << "9999999999 nextShortTime: " << _nextShortRay->getRadxTime().asString(6) << endl;
 
   // read in long rays
   
   while (true) {
     RadxRay *ray = _readerFmqLong->readNextRay();
-    if (ray->getTimeDouble() >= _nextDwellStartSecs) {
+    if (ray->getRadxTime() >= _nextDwellEndTime) {
       _nextLongRay = ray;
       break;
     } else {
-      cerr << "33333333 adding long ray, time: " << ray->getRadxTime().asString(6) << endl;
+      // cerr << "33333333 adding long ray, time: " << ray->getRadxTime().asString(6) << endl;
       _dwellLongRays.push_back(ray);
     }
   }
-  cerr << "9999999999 nextLongTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
+  // cerr << "9999999999 nextLongTime: " << _nextLongRay->getRadxTime().asString(6) << endl;
+
+  cerr << "aaaaaaaaaaaaaaaa short ray count: " << _dwellShortRays.size() << endl;
+  for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+    cerr << "aaaaaaaa short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << endl;
+  }
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
+
+  cerr << "bbbbbbbbbbbbbbbb long ray count: " << _dwellLongRays.size() << endl;
+  for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+    cerr << "bbbbbbb long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << endl;
+  }
+  cerr << "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" << endl;
+  
+  // set next dwell time limits
+
+  double dwellSecs = _params.dwell_length_secs;
+  _nextDwellStartTime = _nextDwellEndTime;
+  _nextDwellEndTime = _nextDwellStartTime + dwellSecs;
+  
+  cerr << "555555555555555 nextDwellStartTime: " << _nextDwellStartTime.asString(6) << endl;
+  cerr << "555555555555555 nextDwellEndTime: " << _nextDwellEndTime.asString(6) << endl;
+
 
   return 0;
 

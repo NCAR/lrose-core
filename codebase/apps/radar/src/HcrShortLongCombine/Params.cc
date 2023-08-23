@@ -753,15 +753,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'dwell_time_secs'
+    // Parameter 'dwell_length_secs'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("dwell_time_secs");
-    tt->descr = tdrpStrDup("Specify the output dwell time (secs).");
+    tt->param_name = tdrpStrDup("dwell_length_secs");
+    tt->descr = tdrpStrDup("Specify the output dwell length (secs).");
     tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time.");
-    tt->val_offset = (char *) &dwell_time_secs - &_start_;
+    tt->val_offset = (char *) &dwell_length_secs - &_start_;
     tt->single_val.d = 0.1;
     tt++;
     
