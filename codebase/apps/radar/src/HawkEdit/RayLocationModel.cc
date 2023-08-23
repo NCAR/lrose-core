@@ -499,13 +499,15 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
   // find the closest ray_loc that is active
   // search in positive direction first
   bool activeFound = false;
+  int nsteps = 0;
   int indexPlus = rayIndex;
   while ((indexPlus >= 0) && (indexPlus < RayLoc::RAY_LOC_N)
-    && !activeFound) {
+    && !activeFound && (nsteps < 50)) {
     if (ray_loc.at(indexPlus).active) {
       activeFound = true;
     } else {
       indexPlus += 1;
+      nsteps += 1;
       if (indexPlus >= RayLoc::RAY_LOC_N)
         indexPlus = 0; 
     }
@@ -513,17 +515,20 @@ RadxRay *RayLocationModel::getClosestRay(double azDeg) {
 
   // search in the negative direction
   activeFound = false;
+  nsteps = 0;
   int indexNeg = rayIndex;
   while ((indexNeg >= 0) && (indexNeg < RayLoc::RAY_LOC_N)
-    && !activeFound) {
+    && !activeFound && (nsteps < 50)) {
     if (ray_loc.at(indexNeg).active) {
       activeFound = true;
     } else {
       indexNeg -= 1;
+      nsteps += 1;
       if (indexNeg < 0)
         indexNeg = RayLoc::RAY_LOC_N-1; 
     }
   }
+  if (nsteps >= 50) throw "Way to many steps to find closest ray!!";
 
   int distPlus = abs(indexPlus - rayIndex);
   int distNeg = abs(indexNeg - rayIndex);
