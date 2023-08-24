@@ -115,26 +115,21 @@ private:
   vector<RadxRay *> _dwellShortRays;
   vector<RadxRay *> _dwellLongRays;
 
-  RadxVol _dwellVol;
+  RadxVol _dwellVolShort;
+  RadxVol _dwellVolLong;
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
-  // RadxTime _dwellStartTime, _dwellEndTime;
-  // RadxTime _latestRayTime, _dwellMidTime;
 
   // output data on time boundaries
 
   RadxTime _nextEndOfVolTime;
   RadxVol _splitVol;
 
-  // censoring
-
-  int _nWarnCensorPrint;
-
   // methods
 
-  int _runFilelist();
+  int _runRealtime();
+
   int _runArchive();
-  int _runFmq();
 
   int _openFmqs();
   int _prepareInputFmqs();
@@ -171,9 +166,6 @@ private:
 
   int _getDsScanMode(Radx::SweepMode_t mode);
     
-  void _censorFields(RadxVol &vol);
-  void _censorRay(RadxRay *ray);
-
 };
 
 #endif

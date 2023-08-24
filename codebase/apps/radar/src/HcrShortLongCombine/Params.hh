@@ -75,9 +75,8 @@ public:
   } debug_t;
 
   typedef enum {
-    FMQ = 0,
-    ARCHIVE = 1,
-    FILELIST = 2
+    REALTIME = 0,
+    ARCHIVE = 1
   } mode_t;
 
   typedef enum {
@@ -88,11 +87,6 @@ public:
     DWELL_STATS_MIDDLE = 4,
     DWELL_STATS_DISCRETE_MODE = 5
   } dwell_stats_method_t;
-
-  typedef enum {
-    LOGICAL_AND = 0,
-    LOGICAL_OR = 1
-  } logical_t;
 
   typedef enum {
     OUTPUT_ENCODING_ASIS = 0,
@@ -136,13 +130,6 @@ public:
     char* field_name;
     dwell_stats_method_t stats_method;
   } stats_method_field_t;
-
-  typedef struct {
-    char* name;
-    double min_valid_value;
-    double max_valid_value;
-    logical_t combination_method;
-  } censoring_field_t;
 
   typedef struct {
     char* input_field_name;
@@ -480,8 +467,6 @@ public:
 
   double dwell_length_secs;
 
-  tdrp_bool_t center_dwell_on_time;
-
   dwell_stats_method_t dwell_stats_method;
 
   double dwell_stats_max_fraction_missing;
@@ -490,36 +475,6 @@ public:
 
   stats_method_field_t *_stats_method_fields;
   int stats_method_fields_n;
-
-  char* radar_name_override;
-
-  char* site_name_override;
-
-  char* title_override;
-
-  char* institution_override;
-
-  char* references_override;
-
-  char* source_override;
-
-  char* history_override;
-
-  char* comment_override;
-
-  char* author_override;
-
-  tdrp_bool_t apply_censoring;
-
-  censoring_field_t *_censoring_fields;
-  int censoring_fields_n;
-
-  int censoring_min_valid_run;
-
-  tdrp_bool_t specify_non_censored_fields;
-
-  char* *_non_censored_fields;
-  int non_censored_fields_n;
 
   tdrp_bool_t set_output_fields;
 
@@ -603,7 +558,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[84];
+  mutable TDRPtable _table[67];
 
   const char *_className;
 

@@ -56,7 +56,6 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
 {
 
   OK = TRUE;
-  _nWarnCensorPrint = 0;
   _readerFmqShort = NULL;
   _readerFmqLong = NULL;
   _cacheShortRay = NULL;
@@ -146,15 +145,12 @@ int HcrShortLongCombine::Run()
   int iret = 0;
 
   switch (_params.mode) {
-    case Params::FMQ:
-      iret = _runFmq();
-      break;
     case Params::ARCHIVE:
       iret = _runArchive();
       break;
-    case Params::FILELIST:
+    case Params::REALTIME:
     default:
-      iret = _runFilelist();
+      iret = _runRealtime();
   } // switch
 
   // if we are writing out on time boundaries, there
@@ -171,25 +167,419 @@ int HcrShortLongCombine::Run()
 }
 
 //////////////////////////////////////////////////
-// Run in filelist mode
+// Run in REALTIME mode
 
-int HcrShortLongCombine::_runFilelist()
+int HcrShortLongCombine::_runRealtime()
 {
 
-  // loop through the input file list
+  // Instantiate and initialize the input radar queues
 
-  int iret = 0;
+  if (_openFmqs()) {
+    return -1;
+  }
 
-  for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+  // prepare the input fmqs at the start of the first output dwell
 
-    string inputPath = _args.inputFileList[ii];
-    if (_processFile(inputPath)) {
-      iret = -1;
+  if (_prepareInputFmqs()) {
+    return -1;
+  }
+
+  int count = 0;
+  while (true) {
+    if (_readNextDwellFromFmq()) {
+      return -1;
     }
+    count++;
+    // cerr << "+";
+    // if (count == 400) {
+    //   exit(0);
+    // }
+  }
+  
+  // read messages from the queue and process them
+  
+  _nRaysRead = 0;
+  _nRaysWritten = 0;
+  _needWriteParams = false;
+  RadxTime prevDwellRayTime;
+  int iret = 0;
+  while (true) {
+    
+    PMU_auto_register("Reading FMQ");
+    
+    // bool gotMsg = false;
+    // if (_readFmqMsg(gotMsg) || !gotMsg) {
+    //   umsleep(100);
+    //   continue;
+    // }
+
+    // pass message through if not related to beam
+    
+    if (!(_inputContents & DsRadarMsg::RADAR_BEAM) &&
+        !(_inputContents & DsRadarMsg::RADAR_PARAMS) &&
+        !(_inputContents & DsRadarMsg::PLATFORM_GEOREF)) {
+      if(_outputFmq.putDsMsg(_inputMsg, _inputContents)) {
+        cerr << "ERROR - HcrShortLongCombine::_runFmq()" << endl;
+        cerr << "  Cannot copy message to output queue" << endl;
+        cerr << "  URL: " << _params.output_fmq_url << endl;
+        return -1;
+      }
+    }
+
+    // combine rays if combined time exceeds specified dwell
+
+    const vector<RadxRay *> &raysDwell = _dwellVolShort.getRays();
+    size_t nRaysDwell = raysDwell.size();
+    if (nRaysDwell > 1) {
+      
+      _dwellStartTime = raysDwell[0]->getRadxTime();
+      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
+      double dwellSecs = (_dwellEndTime - _dwellStartTime);
+      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
+      
+      if (dwellSecs >= _params.dwell_length_secs) {
+
+        // dwell time exceeded, so compute dwell ray and add to volume
+
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
+        }
+        RadxRay *dwellRay = _dwellVolShort.computeFieldStats(_globalMethod,
+                                                        _namedMethods);
+
+        RadxTime dwellRayTime(dwellRay->getRadxTime());
+        double deltaSecs = dwellRayTime - prevDwellRayTime;
+
+        if (_params.debug >= Params::DEBUG_VERBOSE) {
+          if (deltaSecs < _params.dwell_length_secs * 0.8 ||
+              deltaSecs > _params.dwell_length_secs * 1.2) {
+            cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
+                 << dwellRay->getRadxTime().asString(3) << ", "
+                 << nRaysDwell << ", "
+                 << deltaSecs << endl;
+          }
+        }
+
+        prevDwellRayTime = dwellRayTime;
+        
+        // write params if needed
+        if (_needWriteParams) {
+          if (_writeParams(dwellRay)) {
+            return -1; 
+          }
+          _needWriteParams = false;
+        }
+
+        // write out ray
+
+        _writeRay(dwellRay);
+
+        // clean up
+
+        RadxRay::deleteIfUnused(dwellRay);
+        _dwellVolShort.clearRays();
+        _georefs.clear();
+
+      }
+
+    } // if (nRaysDwell > 1)
+
+  } // while (true)
+  
+  return iret;
+
+}
+
+//////////////////////////////////////////////////
+// Open fmqs
+
+int HcrShortLongCombine::_openFmqs()
+{
+
+  // Instantiate and initialize the input radar queues
+
+  if (_params.debug) {
+    cerr << "DEBUG - opening input fmq for short pulse: "
+         << _params.input_fmq_url_short << endl;
+    cerr << "DEBUG - opening input fmq for long  pulse: "
+         << _params.input_fmq_url_long << endl;
+  }
+  
+  _readerFmqShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
+  _readerFmqLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _readerFmqShort->setDebug(IWRF_DEBUG_NORM);
+    _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
+  }
+
+  // initialize - read one ray
+
+  RadxRay *rayShort = _readerFmqShort->readNextRay();
+  if (rayShort != NULL) {
+    delete rayShort;
+  }
+  RadxRay *rayLong = _readerFmqLong->readNextRay();
+  if (rayLong != NULL) {
+    delete rayLong;
+  }
+
+  if (_params.seek_to_end_of_input_fmq) {
+    _readerFmqShort->seekToEnd();
+    _readerFmqLong->seekToEnd();
+  } else {
+    _readerFmqShort->seekToStart();
+    _readerFmqLong->seekToStart();
+  }
+
+  // create the output FMQ
+  
+  if (_outputFmq.init(_params.output_fmq_url,
+                      _progName.c_str(),
+                      _params.debug >= Params::DEBUG_VERBOSE,
+                      DsFmq::READ_WRITE, DsFmq::END,
+                      _params.output_fmq_compress,
+                      _params.output_fmq_n_slots,
+                      _params.output_fmq_buf_size)) {
+    cerr << "WARNING - trying to create new fmq" << endl;
+    if (_outputFmq.init(_params.output_fmq_url,
+                        _progName.c_str(),
+                        _params.debug >= Params::DEBUG_VERBOSE,
+                        DsFmq::CREATE, DsFmq::START,
+                        _params.output_fmq_compress,
+                        _params.output_fmq_n_slots,
+                        _params.output_fmq_buf_size)) {
+      cerr << "ERROR - Radx2Dsr" << endl;
+      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
+      return -1;
+    }
+  }
+  
+  if (_params.output_fmq_compress) {
+    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
+  }
+  
+  if (_params.output_fmq_write_blocking) {
+    _outputFmq.setBlockingWrite();
+  }
+  if (_params.output_fmq_data_mapper_report_interval > 0) {
+    _outputFmq.setRegisterWithDmap
+      (true, _params.output_fmq_data_mapper_report_interval);
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Initialize the input fmqs at the start of the first output dwell
+
+int HcrShortLongCombine::_prepareInputFmqs()
+{
+
+  // read a short and long ray
+
+  RadxTime shortTime;
+  RadxTime longTime;
+
+  {
+    
+    RadxRay *shortRay = _readerFmqShort->readNextRay();
+    if (shortRay == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
+      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      return -1;
+    }
+    
+    RadxRay *longRay = _readerFmqLong->readNextRay();
+    if (longRay == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
+      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      delete shortRay;
+      return -1;
+    }
+    
+    shortTime = shortRay->getRadxTime();
+    longTime = longRay->getRadxTime();
+    
+    delete shortRay;
+    delete longRay;
 
   }
 
-  return iret;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=======>> first short ray read, time: " << shortTime.asString(6) << endl;
+    cerr << "=======>> first long  ray read, time: " << longTime.asString(6) << endl;
+  }
+  
+  // compute the latest time
+  
+  RadxTime latestTime = shortTime;
+  if (longTime > latestTime) {
+    latestTime = longTime;
+  }
+  double latestSecs = latestTime.asDouble();
+  
+  // compute the next dwell limits
+  
+  double dwellMidSecs = (floor(latestSecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
+  
+  _dwellMidTime.setFromDouble(dwellMidSecs);
+  _dwellStartTime = _dwellMidTime - _dwellLengthSecsHalf;
+  _dwellEndTime = _dwellMidTime + _dwellLengthSecsHalf;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
+    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
+    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
+  }
+
+  // read short rays, prepare for first dwell
+  
+  _cacheShortRay = NULL;
+  while (true) {
+    RadxRay *ray = _readerFmqShort->readNextRay();
+    if (ray == NULL) {
+      cerr << "========>> short queue done <<==========" << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellStartTime) {
+      // save for next dwell
+      _cacheShortRay = ray;
+      break;
+    } else {
+      // read ahead
+      delete ray;
+    }
+  }
+
+  // read long rays, prepare for first dwell
+  
+  _cacheLongRay = NULL;
+  while (true) {
+    RadxRay *ray = _readerFmqLong->readNextRay();
+    if (ray == NULL) {
+      cerr << "========>> long queue done <<==========" << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellStartTime) {
+      // save for next dwell
+      _cacheLongRay = ray;
+      break;
+    } else {
+      // read ahead
+      delete ray;
+    }
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Read in rays for next dwell
+
+int HcrShortLongCombine::_readNextDwellFromFmq()
+{
+
+  // clear the dwell vectors
+
+  _clearDwellRays();
+  
+  // add in the cached rays already read in
+
+  if (_cacheShortRay != NULL) {
+    _dwellShortRays.push_back(_cacheShortRay);
+    _cacheShortRay = NULL;
+  }
+  if (_cacheLongRay != NULL) {
+    _dwellLongRays.push_back(_cacheLongRay);
+    _cacheLongRay = NULL;
+  }
+
+  // read in short rays for the dwell
+  
+  while (true) {
+    RadxRay *ray = _readerFmqShort->readNextRay();
+    if (ray == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
+      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellEndTime) {
+      // save for start of next dwell
+      _cacheShortRay = ray;
+      break;
+    } else {
+      _dwellShortRays.push_back(ray);
+    }
+  }
+
+  // read in long rays for the dwell
+  
+  while (true) {
+    RadxRay *ray = _readerFmqLong->readNextRay();
+    if (ray == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
+      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      return -1;
+    }
+    if (ray->getRadxTime() >= _dwellEndTime) {
+      // save for start of next dwell
+      _cacheLongRay = ray;
+      break;
+    } else {
+      _dwellLongRays.push_back(ray);
+    }
+  }
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=================>> short ray count: " << _dwellShortRays.size() << endl;
+    for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+      cerr << "  short ray time: "
+           << _dwellShortRays[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellShortRays[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+    cerr << "=================>> long ray count: " << _dwellLongRays.size() << endl;
+    for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+      cerr << "  long ray time: "
+           << _dwellLongRays[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellLongRays[ii] << endl;
+    }
+    cerr << "========================================" << endl;
+  }
+  
+  // set to advance to next dwell
+  
+  _dwellStartTime = _dwellEndTime;
+  _dwellMidTime = _dwellStartTime + _dwellLengthSecsHalf;
+  _dwellEndTime = _dwellStartTime + _dwellLengthSecs;
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
+    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
+    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// clear the dwell rays
+
+void HcrShortLongCombine::_clearDwellRays()
+{
+
+  for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+    delete _dwellShortRays[ii];
+  }
+  _dwellShortRays.clear();
+
+  for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+    delete _dwellLongRays[ii];
+  }
+  _dwellLongRays.clear();
 
 }
 
@@ -299,20 +689,7 @@ int HcrShortLongCombine::_processFile(const string &readPath)
 
   // combine the dwells
 
-  if (_params.center_dwell_on_time) {
-    _combineDwellsCentered(vol);
-  } else {
-    _combineDwells(vol);
-  }
-
-  // censor as needed
-
-  if (_params.apply_censoring) {
-    if (_params.debug) {
-      cerr << "DEBUG - applying censoring" << endl;
-    }
-    _censorFields(vol);
-  }
+  _combineDwellsCentered(vol);
 
   // set field type, names, units etc
   
@@ -556,48 +933,6 @@ void HcrShortLongCombine::_setGlobalAttr(RadxVol &vol)
 {
 
   vol.setDriver("HcrShortLongCombine(NCAR)");
-
-  if (strlen(_params.radar_name_override) > 0) {
-    vol.setInstrumentName(_params.radar_name_override);
-  }
-
-  if (strlen(_params.site_name_override) > 0) {
-    vol.setSiteName(_params.site_name_override);
-  }
-
-  if (strlen(_params.title_override) > 0) {
-    vol.setTitle(_params.title_override);
-  }
-
-  if (strlen(_params.institution_override) > 0) {
-    vol.setInstitution(_params.institution_override);
-  }
-
-  if (strlen(_params.references_override) > 0) {
-    vol.setReferences(_params.references_override);
-  }
-
-  if (strlen(_params.source_override) > 0) {
-    vol.setSource(_params.source_override);
-  }
-
-  if (strlen(_params.history_override) > 0) {
-    vol.setHistory(_params.history_override);
-  } else {
-    string history(vol.getHistory());
-    history += "\n";
-    history += "Dwells combined using HcrShortLongCombine\n";
-    vol.setHistory(history);
-  }
-  
-  if (strlen(_params.author_override) > 0) {
-    vol.setAuthor(_params.author_override);
-  }
-
-  if (strlen(_params.comment_override) > 0) {
-    vol.setComment(_params.comment_override);
-  }
-
   RadxTime now(RadxTime::NOW);
   vol.setCreated(now.asString());
 
@@ -694,7 +1029,7 @@ int HcrShortLongCombine::_writeVolOnTimeBoundary(RadxVol &vol)
     _writeSplitVol();
     _setNextEndOfVolTime(newVolStart);
     // clear out rays from previous file
-    _dwellVol.clearRays();
+    _dwellVolShort.clearRays();
     // clear any rays before the new vol start
     // these could have been introduced during the merge
   }
@@ -814,7 +1149,7 @@ int HcrShortLongCombine::_combineDwells(RadxVol &vol)
   
   if (_params.debug) {
     cerr << "INFO - combineDwells: nrays left from previous file: "
-         << _dwellVol.getNRays() << endl;
+         << _dwellVolShort.getNRays() << endl;
   }
 
   // create a volume for stats
@@ -827,11 +1162,11 @@ int HcrShortLongCombine::_combineDwells(RadxVol &vol)
     // add rays to stats vol
     
     RadxRay *ray = new RadxRay(*fileRays[iray]);
-    if (_dwellVol.getNRays() == 0) {
+    if (_dwellVolShort.getNRays() == 0) {
       _dwellStartTime = ray->getRadxTime();
     }
-    _dwellVol.addRay(ray);
-    int nRaysDwell = _dwellVol.getNRays();
+    _dwellVolShort.addRay(ray);
+    int nRaysDwell = _dwellVolShort.getNRays();
     _dwellEndTime = ray->getRadxTime();
     double dwellSecs = (_dwellEndTime - _dwellStartTime);
     if (nRaysDwell > 1) {
@@ -845,7 +1180,7 @@ int HcrShortLongCombine::_combineDwells(RadxVol &vol)
         cerr << "INFO: _combineDwells, using nrays: " << nRaysDwell << endl;
       }
       RadxRay *dwellRay =
-        _dwellVol.computeFieldStats(_globalMethod,
+        _dwellVolShort.computeFieldStats(_globalMethod,
                                     _namedMethods,
                                     _params.dwell_stats_max_fraction_missing);
       if (dwellRay->getRadxTime() >= vol.getStartRadxTime() - 60) {
@@ -854,7 +1189,7 @@ int HcrShortLongCombine::_combineDwells(RadxVol &vol)
         RadxRay::deleteIfUnused(dwellRay);
       }
       // clear out stats vol
-      _dwellVol.clearRays();
+      _dwellVolShort.clearRays();
     }
       
   } // iray
@@ -883,7 +1218,7 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
   
   if (_params.debug) {
     cerr << "INFO - combineDwellsCentered: nrays left from previous file: "
-         << _dwellVol.getNRays() << endl;
+         << _dwellVolShort.getNRays() << endl;
   }
 
   // create a volume for combined dwells
@@ -903,16 +1238,16 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
     // at the start of reading a volume, we always need 
     // at least 1 ray in the dwell
 
-    if (_dwellVol.getNRays() == 0) {
-      _dwellVol.addRay(ray);
+    if (_dwellVolShort.getNRays() == 0) {
+      _dwellVolShort.addRay(ray);
       continue;
     }
     
     // set dwell time limits if we have just 1 ray in the dwell so far
     
-    if (_dwellVol.getNRays() == 1) {
+    if (_dwellVolShort.getNRays() == 1) {
 
-      _dwellStartTime = _dwellVol.getRays()[0]->getRadxTime();
+      _dwellStartTime = _dwellVolShort.getRays()[0]->getRadxTime();
 
       RadxTime volStartTime(vol.getStartTimeSecs());
       double dsecs = _latestRayTime - volStartTime;
@@ -939,8 +1274,8 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
       
       if (_params.debug >= Params::DEBUG_VERBOSE) {
         cerr << "INFO: _combineDwellsCentered, using nrays: "
-             << _dwellVol.getNRays() << endl;
-        const vector<RadxRay *> &dwellRays = _dwellVol.getRays();
+             << _dwellVolShort.getNRays() << endl;
+        const vector<RadxRay *> &dwellRays = _dwellVolShort.getRays();
         for (size_t jray = 0; jray < dwellRays.size(); jray++) {
           const RadxRay *dray = dwellRays[jray];
           cerr << "INFO: using ray at time: "
@@ -951,7 +1286,7 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
       // compute ray for dwell
       
       RadxRay *dwellRay =
-        _dwellVol.computeFieldStats(_globalMethod, _namedMethods,
+        _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods,
                                     _params.dwell_stats_max_fraction_missing);
 
       // add it to the combination
@@ -967,13 +1302,13 @@ int HcrShortLongCombine::_combineDwellsCentered(RadxVol &vol)
 
       // clear out stats vol
 
-      _dwellVol.clearRays();
+      _dwellVolShort.clearRays();
 
     } // if (_latestRayTime > _dwellEndTime) {
       
     // add the latest ray to the next dwell vol
     
-    _dwellVol.addRay(ray);
+    _dwellVolShort.addRay(ray);
     
   } // iray
 
@@ -1025,427 +1360,6 @@ RadxField::StatsMethod_t
 
 }
 
-
-//////////////////////////////////////////////////
-// Run in FMQ mode
-
-int HcrShortLongCombine::_runFmq()
-{
-
-  // Instantiate and initialize the input radar queues
-
-  if (_openFmqs()) {
-    return -1;
-  }
-
-  // prepare the input fmqs at the start of the first output dwell
-
-  if (_prepareInputFmqs()) {
-    return -1;
-  }
-
-  int count = 0;
-  while (true) {
-    if (_readNextDwellFromFmq()) {
-      return -1;
-    }
-    count++;
-    // cerr << "+";
-    // if (count == 400) {
-    //   exit(0);
-    // }
-  }
-  
-  // read messages from the queue and process them
-  
-  _nRaysRead = 0;
-  _nRaysWritten = 0;
-  _needWriteParams = false;
-  RadxTime prevDwellRayTime;
-  int iret = 0;
-  while (true) {
-    
-    PMU_auto_register("Reading FMQ");
-    
-    // bool gotMsg = false;
-    // if (_readFmqMsg(gotMsg) || !gotMsg) {
-    //   umsleep(100);
-    //   continue;
-    // }
-
-    // pass message through if not related to beam
-    
-    if (!(_inputContents & DsRadarMsg::RADAR_BEAM) &&
-        !(_inputContents & DsRadarMsg::RADAR_PARAMS) &&
-        !(_inputContents & DsRadarMsg::PLATFORM_GEOREF)) {
-      if(_outputFmq.putDsMsg(_inputMsg, _inputContents)) {
-        cerr << "ERROR - HcrShortLongCombine::_runFmq()" << endl;
-        cerr << "  Cannot copy message to output queue" << endl;
-        cerr << "  URL: " << _params.output_fmq_url << endl;
-        return -1;
-      }
-    }
-
-    // combine rays if combined time exceeds specified dwell
-
-    const vector<RadxRay *> &raysDwell = _dwellVol.getRays();
-    size_t nRaysDwell = raysDwell.size();
-    if (nRaysDwell > 1) {
-      
-      _dwellStartTime = raysDwell[0]->getRadxTime();
-      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
-      double dwellSecs = (_dwellEndTime - _dwellStartTime);
-      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
-      
-      if (dwellSecs >= _params.dwell_length_secs) {
-
-        // dwell time exceeded, so compute dwell ray and add to volume
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
-        }
-        RadxRay *dwellRay = _dwellVol.computeFieldStats(_globalMethod,
-                                                        _namedMethods);
-
-        RadxTime dwellRayTime(dwellRay->getRadxTime());
-        double deltaSecs = dwellRayTime - prevDwellRayTime;
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          if (deltaSecs < _params.dwell_length_secs * 0.8 ||
-              deltaSecs > _params.dwell_length_secs * 1.2) {
-            cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
-                 << dwellRay->getRadxTime().asString(3) << ", "
-                 << nRaysDwell << ", "
-                 << deltaSecs << endl;
-          }
-        }
-
-        prevDwellRayTime = dwellRayTime;
-        
-        // write params if needed
-        if (_needWriteParams) {
-          if (_writeParams(dwellRay)) {
-            return -1; 
-          }
-          _needWriteParams = false;
-        }
-
-        // write out ray
-
-        _writeRay(dwellRay);
-
-        // clean up
-
-        RadxRay::deleteIfUnused(dwellRay);
-        _dwellVol.clearRays();
-        _georefs.clear();
-
-      }
-
-    } // if (nRaysDwell > 1)
-
-  } // while (true)
-  
-  return iret;
-
-}
-
-//////////////////////////////////////////////////
-// Open fmqs
-
-int HcrShortLongCombine::_openFmqs()
-{
-
-  // Instantiate and initialize the input radar queues
-
-  if (_params.debug) {
-    cerr << "DEBUG - opening input fmq for short pulse: "
-         << _params.input_fmq_url_short << endl;
-    cerr << "DEBUG - opening input fmq for long  pulse: "
-         << _params.input_fmq_url_long << endl;
-  }
-  
-  _readerFmqShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
-  _readerFmqLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _readerFmqShort->setDebug(IWRF_DEBUG_NORM);
-    _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
-  }
-
-  // initialize - read one ray
-
-  RadxRay *rayShort = _readerFmqShort->readNextRay();
-  if (rayShort != NULL) {
-    delete rayShort;
-  }
-  RadxRay *rayLong = _readerFmqLong->readNextRay();
-  if (rayLong != NULL) {
-    delete rayLong;
-  }
-
-  if (_params.seek_to_end_of_input_fmq) {
-    _readerFmqShort->seekToEnd();
-    _readerFmqLong->seekToEnd();
-  } else {
-    _readerFmqShort->seekToStart();
-    _readerFmqLong->seekToStart();
-  }
-
-  // create the output FMQ
-  
-  if (_outputFmq.init(_params.output_fmq_url,
-                      _progName.c_str(),
-                      _params.debug >= Params::DEBUG_VERBOSE,
-                      DsFmq::READ_WRITE, DsFmq::END,
-                      _params.output_fmq_compress,
-                      _params.output_fmq_n_slots,
-                      _params.output_fmq_buf_size)) {
-    cerr << "WARNING - trying to create new fmq" << endl;
-    if (_outputFmq.init(_params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        DsFmq::CREATE, DsFmq::START,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_n_slots,
-                        _params.output_fmq_buf_size)) {
-      cerr << "ERROR - Radx2Dsr" << endl;
-      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
-      return -1;
-    }
-  }
-  
-  if (_params.output_fmq_compress) {
-    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
-  }
-  
-  if (_params.output_fmq_write_blocking) {
-    _outputFmq.setBlockingWrite();
-  }
-  if (_params.output_fmq_data_mapper_report_interval > 0) {
-    _outputFmq.setRegisterWithDmap
-      (true, _params.output_fmq_data_mapper_report_interval);
-  }
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// Initialize the input fmqs at the start of the first output dwell
-
-int HcrShortLongCombine::_prepareInputFmqs()
-{
-
-  // read a short and long ray
-
-  RadxTime shortTime;
-  RadxTime longTime;
-
-  {
-    
-    RadxRay *shortRay = _readerFmqShort->readNextRay();
-    if (shortRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
-      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
-      return -1;
-    }
-    
-    RadxRay *longRay = _readerFmqLong->readNextRay();
-    if (longRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
-      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-      delete shortRay;
-      return -1;
-    }
-    
-    shortTime = shortRay->getRadxTime();
-    longTime = longRay->getRadxTime();
-    
-    delete shortRay;
-    delete longRay;
-
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=======>> first short ray read, time: " << shortTime.asString(6) << endl;
-    cerr << "=======>> first long  ray read, time: " << longTime.asString(6) << endl;
-  }
-  
-  // compute the latest time
-  
-  RadxTime latestTime = shortTime;
-  if (longTime > latestTime) {
-    latestTime = longTime;
-  }
-  double latestSecs = latestTime.asDouble();
-  
-  // compute the next dwell limits
-  
-  double dwellMidSecs = (floor(latestSecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
-  
-  _dwellMidTime.setFromDouble(dwellMidSecs);
-  _dwellStartTime = _dwellMidTime - _dwellLengthSecsHalf;
-  _dwellEndTime = _dwellMidTime + _dwellLengthSecsHalf;
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
-    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
-    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
-  }
-
-  // read short rays, prepare for first dwell
-  
-  _cacheShortRay = NULL;
-  while (true) {
-    RadxRay *ray = _readerFmqShort->readNextRay();
-    if (ray == NULL) {
-      cerr << "========>> short queue done <<==========" << endl;
-      return -1;
-    }
-    if (ray->getRadxTime() >= _dwellStartTime) {
-      // save for next dwell
-      _cacheShortRay = ray;
-      break;
-    } else {
-      // read ahead
-      delete ray;
-    }
-  }
-
-  // read long rays, prepare for first dwell
-  
-  _cacheLongRay = NULL;
-  while (true) {
-    RadxRay *ray = _readerFmqLong->readNextRay();
-    if (ray == NULL) {
-      cerr << "========>> long queue done <<==========" << endl;
-      return -1;
-    }
-    if (ray->getRadxTime() >= _dwellStartTime) {
-      // save for next dwell
-      _cacheLongRay = ray;
-      break;
-    } else {
-      // read ahead
-      delete ray;
-    }
-  }
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// Read in rays for next dwell
-
-int HcrShortLongCombine::_readNextDwellFromFmq()
-{
-
-  // clear the dwell vectors
-
-  _clearDwellRays();
-  
-  // add in the cached rays already read in
-
-  if (_cacheShortRay != NULL) {
-    _dwellShortRays.push_back(_cacheShortRay);
-    // cerr << "11111111111 using cacheShortRay: " << _cacheShortRay << endl;
-    _cacheShortRay = NULL;
-  }
-  if (_cacheLongRay != NULL) {
-    _dwellLongRays.push_back(_cacheLongRay);
-    // cerr << "11111111111 using cacheLongRay: " << _cacheLongRay << endl;
-    _cacheLongRay = NULL;
-  }
-
-  // read in short rays for the dwell
-  
-  while (true) {
-    RadxRay *ray = _readerFmqShort->readNextRay();
-    if (ray == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
-      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
-      return -1;
-    }
-    if (ray->getRadxTime() >= _dwellEndTime) {
-      // save for start of next dwell
-      _cacheShortRay = ray;
-      // cerr << "2222222222 creating cacheShortRay: " << _cacheShortRay << endl;
-      break;
-    } else {
-      // cerr << "2222222222 saving short ray: " << ray << endl;
-      _dwellShortRays.push_back(ray);
-    }
-  }
-
-  // read in long rays for the dwell
-  
-  while (true) {
-    RadxRay *ray = _readerFmqLong->readNextRay();
-    if (ray == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
-      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-      return -1;
-    }
-    if (ray->getRadxTime() >= _dwellEndTime) {
-      // save for start of next dwell
-      _cacheLongRay = ray;
-      // cerr << "3333333333 creating cacheLongRay: " << _cacheLongRay << endl;
-      break;
-    } else {
-      // cerr << "3333333333 saving long ray: " << ray << endl;
-      _dwellLongRays.push_back(ray);
-    }
-  }
-
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=================>> short ray count: " << _dwellShortRays.size() << endl;
-    for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
-      cerr << "  short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << ", " <<  _dwellShortRays[ii] << endl;
-    }
-    cerr << "========================================" << endl;
-    cerr << "=================>> long ray count: " << _dwellLongRays.size() << endl;
-    for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
-      cerr << "  long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << ", " <<  _dwellLongRays[ii] << endl;
-    }
-    cerr << "========================================" << endl;
-  }
-  
-  // set to advance to next dwell
-  
-  _dwellStartTime = _dwellEndTime;
-  _dwellMidTime = _dwellStartTime + _dwellLengthSecsHalf;
-  _dwellEndTime = _dwellStartTime + _dwellLengthSecs;
-  
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "====>> dwellStartTime: " << _dwellStartTime.asString(6) << endl;
-    cerr << "====>> dwellMidTime  : " << _dwellMidTime.asString(6) << endl;
-    cerr << "====>> dwellEndTime  : " << _dwellEndTime.asString(6) << endl;
-  }
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////////////////////
-// clear the dwell rays
-
-void HcrShortLongCombine::_clearDwellRays()
-{
-
-  for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
-    // cerr << "44444444444 delete short ray: " << _dwellShortRays[ii] << endl;
-    delete _dwellShortRays[ii];
-  }
-  _dwellShortRays.clear();
-
-  for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
-    // cerr << "55555555555 delete long ray: " << _dwellLongRays[ii] << endl;
-    delete _dwellLongRays[ii];
-  }
-  _dwellLongRays.clear();
-
-}
 
 //////////////////////////////////////////////////
 // write radar and field parameters
@@ -1747,213 +1661,5 @@ int HcrShortLongCombine::_getDsScanMode(Radx::SweepMode_t mode)
     default:
       return DS_RADAR_SURVEILLANCE_MODE;
   }
-}
-
-////////////////////////////////////////////////////////////////////
-// censor fields in vol
-
-void HcrShortLongCombine::_censorFields(RadxVol &vol)
-
-{
-
-  vector<RadxRay *> &rays = vol.getRays();
-  for (size_t ii = 0; ii < rays.size(); ii++) {
-    _censorRay(rays[ii]);
-  }
-  
-
-}
-
-////////////////////////////////////////////////////////////////////
-// censor fields in a ray
-
-void HcrShortLongCombine::_censorRay(RadxRay *ray)
-
-{
-
-  if (!_params.apply_censoring) {
-    return;
-  }
-
-  // convert fields to floats
-
-  vector<Radx::DataType_t> fieldTypes;
-  vector<RadxField *> fields = ray->getFields();
-  for (size_t ii = 0; ii < fields.size(); ii++) {
-    RadxField *field = fields[ii];
-    Radx::DataType_t dtype = field->getDataType();
-    fieldTypes.push_back(dtype);
-    field->convertToFl32();
-  }
-
-  // initialize censoring flags to true to
-  // turn censoring ON everywhere
-  
-  vector<int> censorFlag;
-  size_t nGates = ray->getNGates();
-  for (size_t igate = 0; igate < nGates; igate++) {
-    censorFlag.push_back(1);
-  }
-
-  // check OR fields
-  // if any of these have VALID data, we turn censoring OFF
-
-  int orFieldCount = 0;
-
-  for (int ifield = 0; ifield < _params.censoring_fields_n; ifield++) {
-
-    const Params::censoring_field_t &cfld = _params._censoring_fields[ifield];
-    if (cfld.combination_method != Params::LOGICAL_OR) {
-      continue;
-    }
-
-    RadxField *field = ray->getField(cfld.name);
-    if (field == NULL) {
-      // field missing, do not censor
-      if (_nWarnCensorPrint % 360 == 0) {
-        cerr << "WARNING - censoring field missing: " << cfld.name << endl;
-        cerr << "  Censoring will not be applied for this field." << endl;
-      }
-      _nWarnCensorPrint++;
-      for (size_t igate = 0; igate < nGates; igate++) {
-        censorFlag[igate] = 0;
-      }
-      continue;
-    }
-    
-    orFieldCount++;
-    
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
-
-    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val >= minValidVal && val <= maxValidVal) {
-        censorFlag[igate] = 0;
-      }
-    }
-    
-  } // ifield
-
-  // if no OR fields were found, turn off ALL censoring at this stage
-
-  if (orFieldCount == 0) {
-    for (size_t igate = 0; igate < nGates; igate++) {
-      censorFlag[igate] = 0;
-    }
-  }
-
-  // check AND fields
-  // if any of these have INVALID data, we turn censoring ON
-
-  for (int ifield = 0; ifield < _params.censoring_fields_n; ifield++) {
-    
-    const Params::censoring_field_t &cfld = _params._censoring_fields[ifield];
-    if (cfld.combination_method != Params::LOGICAL_AND) {
-      continue;
-    }
-
-    RadxField *field = ray->getField(cfld.name);
-    if (field == NULL) {
-      continue;
-    }
-    
-    double minValidVal = cfld.min_valid_value;
-    double maxValidVal = cfld.max_valid_value;
-
-    const Radx::fl32 *fdata = (const Radx::fl32 *) field->getData();
-    for (size_t igate = 0; igate < nGates; igate++) {
-      double val = fdata[igate];
-      if (val < minValidVal || val > maxValidVal) {
-        censorFlag[igate] = 1;
-      }
-    }
-    
-  } // ifield
-
-  // check that uncensored runs meet the minimum length
-  // those which do not are censored
-
-  int minValidRun = _params.censoring_min_valid_run;
-  if (minValidRun > 1) {
-    int runLength = 0;
-    bool doCheck = false;
-    for (int igate = 0; igate < (int) nGates; igate++) {
-      if (censorFlag[igate] == 0) {
-        doCheck = false;
-        runLength++;
-      } else {
-        doCheck = true;
-      }
-      // last gate?
-      if (igate == (int) nGates - 1) doCheck = true;
-      // check run length
-      if (doCheck) {
-        if (runLength < minValidRun) {
-          // clear the run which is too short
-          for (int jgate = igate - runLength; jgate < igate; jgate++) {
-            censorFlag[jgate] = 1;
-          } // jgate
-        }
-        runLength = 0;
-      } // if (doCheck ...
-    } // igate
-  }
-
-  // apply censoring by setting censored gates to missing for all fields
-  // except those specified to not be censored
-
-  if (_params.specify_non_censored_fields) {
-
-    // only censor fields that are not excluded
-
-    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
-      RadxField *field = fields[ifield];
-      bool applyCensoring = true;
-      for (int ii = 0; ii < _params.non_censored_fields_n; ii++) {
-        string fieldToAvoid = _params._non_censored_fields[ii];
-        if (field->getName() == fieldToAvoid) {
-          applyCensoring = false;
-          break;
-        }
-      }
-      if (applyCensoring) {
-        Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-        for (size_t igate = 0; igate < nGates; igate++) {
-          if (censorFlag[igate] == 1) {
-            fdata[igate] = Radx::missingFl32;
-          }
-        } // igate
-      } else {
-        if (_params.debug >= Params::DEBUG_EXTRA) {
-          cerr << "Not censoring field: " << field->getName() << endl;
-        }
-      }
-    } // ifield
-
-  } else {
-
-    // censor all fields
-
-    for (size_t ifield = 0; ifield < fields.size(); ifield++) {
-      RadxField *field = fields[ifield];
-      Radx::fl32 *fdata = (Radx::fl32 *) field->getData();
-      for (size_t igate = 0; igate < nGates; igate++) {
-        if (censorFlag[igate] == 1) {
-          fdata[igate] = Radx::missingFl32;
-        }
-      } // igate
-    } // ifield
-
-  }
-    
-  // convert back to original types
-  
-  for (size_t ii = 0; ii < fields.size(); ii++) {
-    RadxField *field = fields[ii];
-    field->convertToType(fieldTypes[ii]);
-  }
-
 }
 

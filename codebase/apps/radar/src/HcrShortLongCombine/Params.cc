@@ -636,19 +636,17 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operating mode");
-    tt->help = tdrpStrDup("\n\nFMQ: read data from two moments FMQ, combine the dwells and write to an output queue.\n\nARCHIVE: move through the data between the start and end times set on the command line. \n\nFILELIST: move through the list of file names specified on the command line. \nPaths (in ARCHIVE mode, at least) MUST contain a day-directory above the data file -- ./data_file.ext will not work as a file path, but ./yyyymmdd/data_file.ext will.");
+    tt->help = tdrpStrDup("\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FMQ");
-      tt->enum_def.fields[0].val = FMQ;
+      tt->enum_def.fields[0].name = tdrpStrDup("REALTIME");
+      tt->enum_def.fields[0].val = REALTIME;
       tt->enum_def.fields[1].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[1].val = ARCHIVE;
-      tt->enum_def.fields[2].name = tdrpStrDup("FILELIST");
-      tt->enum_def.fields[2].val = FILELIST;
-    tt->single_val.e = FMQ;
+    tt->single_val.e = REALTIME;
     tt++;
     
     // Parameter 'input_dir_short'
@@ -658,7 +656,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir_short");
     tt->descr = tdrpStrDup("Input directory short.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files. ARCHIVE and FILELIST modes .");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
     tt->val_offset = (char *) &input_dir_short - &_start_;
     tt->single_val.s = tdrpStrDup(".");
     tt++;
@@ -670,7 +668,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_dir_long");
     tt->descr = tdrpStrDup("Input directory long.");
-    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files. ARCHIVE and FILELIST modes .");
+    tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
     tt->val_offset = (char *) &input_dir_long - &_start_;
     tt->single_val.s = tdrpStrDup(".");
     tt++;
@@ -682,7 +680,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_fmq_url_short");
     tt->descr = tdrpStrDup("FMQ from which to read the short pulse moments stream.");
-    tt->help = tdrpStrDup("FMQ mode only.");
+    tt->help = tdrpStrDup("REALTIME mode only.");
     tt->val_offset = (char *) &input_fmq_url_short - &_start_;
     tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input_short");
     tt++;
@@ -694,7 +692,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("input_fmq_url_long");
     tt->descr = tdrpStrDup("FMQ from which to read the long pulse moments stream.");
-    tt->help = tdrpStrDup("FMQ mode only.");
+    tt->help = tdrpStrDup("REALTIME mode only.");
     tt->val_offset = (char *) &input_fmq_url_long - &_start_;
     tt->single_val.s = tdrpStrDup("fmqp:://localhost::/tmp/fmq/input_long");
     tt++;
@@ -716,7 +714,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 3");
-    tt->comment_hdr = tdrpStrDup("READ OPTIONS");
+    tt->comment_hdr = tdrpStrDup("LIMIT RANGE?");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -763,18 +761,6 @@
     tt->help = tdrpStrDup("Dwells from the input data will be combined to form dwells covering the specified time.");
     tt->val_offset = (char *) &dwell_length_secs - &_start_;
     tt->single_val.d = 0.1;
-    tt++;
-    
-    // Parameter 'center_dwell_on_time'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("center_dwell_on_time");
-    tt->descr = tdrpStrDup("Option to center the dwell on a multiple of the dwell_time.");
-    tt->help = tdrpStrDup("The dwell will be chosen so that the center time of the dwell will be close to an even multiple of the dwell_time_secs. So if for example dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 0.75, 1.25 secs etc.");
-    tt->val_offset = (char *) &center_dwell_on_time - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'dwell_stats_method'
@@ -900,247 +886,6 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 6");
-    tt->comment_hdr = tdrpStrDup("OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'radar_name_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("radar_name_override");
-    tt->descr = tdrpStrDup("Option to override the radar name.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the radar name.");
-    tt->val_offset = (char *) &radar_name_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'site_name_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("site_name_override");
-    tt->descr = tdrpStrDup("Option to override the site name.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the site name.");
-    tt->val_offset = (char *) &site_name_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'title_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("title_override");
-    tt->descr = tdrpStrDup("Option to override the title global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the title attribute.");
-    tt->val_offset = (char *) &title_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'institution_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("institution_override");
-    tt->descr = tdrpStrDup("Option to override the institution global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the institution attribute.");
-    tt->val_offset = (char *) &institution_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'references_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("references_override");
-    tt->descr = tdrpStrDup("Option to override the references global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the references attribute.");
-    tt->val_offset = (char *) &references_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'source_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("source_override");
-    tt->descr = tdrpStrDup("Option to override the source global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the source attribute.");
-    tt->val_offset = (char *) &source_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'history_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("history_override");
-    tt->descr = tdrpStrDup("Option to override the history global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the history attribute.");
-    tt->val_offset = (char *) &history_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'comment_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("comment_override");
-    tt->descr = tdrpStrDup("Option to override the comment global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the comment attribute.");
-    tt->val_offset = (char *) &comment_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'author_override'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("author_override");
-    tt->descr = tdrpStrDup("Option to override the author global attribute.");
-    tt->help = tdrpStrDup("If empty, no effect. If not empty, this string is used to override the author attribute.");
-    tt->val_offset = (char *) &author_override - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("CENSORING");
-    tt->comment_text = tdrpStrDup("You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.");
-    tt++;
-    
-    // Parameter 'apply_censoring'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_censoring");
-    tt->descr = tdrpStrDup("Apply censoring based on field values and thresholds.");
-    tt->help = tdrpStrDup("If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied.");
-    tt->val_offset = (char *) &apply_censoring - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'censoring_fields'
-    // ctype is '_censoring_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("censoring_fields");
-    tt->descr = tdrpStrDup("Fields to be used for determining censoring.");
-    tt->help = tdrpStrDup("Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.");
-    tt->array_offset = (char *) &_censoring_fields - &_start_;
-    tt->array_n_offset = (char *) &censoring_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(censoring_field_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("censoring_field_t");
-    tt->struct_def.nfields = 4;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_censoring_fields->name - (char *) _censoring_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("min_valid_value");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_censoring_fields->min_valid_value - (char *) _censoring_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("max_valid_value");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_censoring_fields->max_valid_value - (char *) _censoring_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("logical_t");
-      tt->struct_def.fields[3].fname = tdrpStrDup("combination_method");
-      tt->struct_def.fields[3].ptype = ENUM_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_censoring_fields->combination_method - (char *) _censoring_fields;
-        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("logical_t");
-        tt->struct_def.fields[3].enum_def.nfields = 2;
-        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("LOGICAL_AND");
-        tt->struct_def.fields[3].enum_def.fields[0].val = LOGICAL_AND;
-        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("LOGICAL_OR");
-        tt->struct_def.fields[3].enum_def.fields[1].val = LOGICAL_OR;
-    tt->n_struct_vals = 8;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("SNR");
-      tt->struct_vals[1].d = 0;
-      tt->struct_vals[2].d = 1000;
-      tt->struct_vals[3].e = LOGICAL_OR;
-      tt->struct_vals[4].s = tdrpStrDup("NCP");
-      tt->struct_vals[5].d = 0.15;
-      tt->struct_vals[6].d = 1000;
-      tt->struct_vals[7].e = LOGICAL_OR;
-    tt++;
-    
-    // Parameter 'censoring_min_valid_run'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("censoring_min_valid_run");
-    tt->descr = tdrpStrDup("Minimum valid run of non-censored gates.");
-    tt->help = tdrpStrDup("Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.");
-    tt->val_offset = (char *) &censoring_min_valid_run - &_start_;
-    tt->single_val.i = 1;
-    tt++;
-    
-    // Parameter 'specify_non_censored_fields'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_non_censored_fields");
-    tt->descr = tdrpStrDup("Option to exclude fields from censoring.");
-    tt->help = tdrpStrDup("If censoring is turned on, you also have the option of non censoring specified fields. Set this parameter to TRUE, and specify the fields to be excluded in the non_censored_fields list.");
-    tt->val_offset = (char *) &specify_non_censored_fields - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'non_censored_fields'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("non_censored_fields");
-    tt->descr = tdrpStrDup("List of fields to be excluded from censoring.");
-    tt->help = tdrpStrDup("See 'specify_non_censored_fields'.");
-    tt->array_offset = (char *) &_non_censored_fields - &_start_;
-    tt->array_n_offset = (char *) &non_censored_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(char*);
-    tt->array_n = 2;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].s = tdrpStrDup("DBMHC");
-      tt->array_vals[1].s = tdrpStrDup("DBMVC");
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1297,11 +1042,11 @@
       tt->array_vals[1].s = tdrpStrDup("VEL");
     tt++;
     
-    // Parameter 'Comment 9'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1344,11 +1089,11 @@
     tt->single_val.e = OUTPUT_ENCODING_ASIS;
     tt++;
     
-    // Parameter 'Comment 10'
+    // Parameter 'Comment 8'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
+    tt->param_name = tdrpStrDup("Comment 8");
     tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
     tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
     tt++;
@@ -1409,11 +1154,11 @@
       tt->struct_vals[5].d = 0;
     tt++;
     
-    // Parameter 'Comment 11'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1470,11 +1215,11 @@
     tt->single_val.e = NETCDF4;
     tt++;
     
-    // Parameter 'Comment 12'
+    // Parameter 'Comment 10'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
+    tt->param_name = tdrpStrDup("Comment 10");
     tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1503,11 +1248,11 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 11'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 11");
     tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1536,11 +1281,11 @@
     tt->single_val.i = 4;
     tt++;
     
-    // Parameter 'Comment 14'
+    // Parameter 'Comment 12'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 14");
+    tt->param_name = tdrpStrDup("Comment 12");
     tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -1749,11 +1494,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 15'
+    // Parameter 'Comment 13'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 15");
+    tt->param_name = tdrpStrDup("Comment 13");
     tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;

@@ -43,46 +43,37 @@ commentdef {
 }
 
 typedef enum {
-  FMQ, ARCHIVE, FILELIST
+  REALTIME, ARCHIVE
 } mode_t;
 
 paramdef enum mode_t {
-  p_default = FMQ;
+  p_default = REALTIME;
   p_descr = "Operating mode";
-  p_help = "\n\nFMQ: read data from two moments FMQ, combine the dwells "
-           "and write to an output queue."
-           "\n\nARCHIVE: move through the data between the start "
-           "and end times set on the command line. "
-           "\n\nFILELIST: move through the list of file names "
-           "specified on the command line. "
-           "\nPaths (in ARCHIVE mode, at least) MUST contain a "
-           "day-directory above the data file -- ./data_file.ext will not "
-           "work as a file path, but ./yyyymmdd/data_file.ext will.";
-
+  p_help = "\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.";
 } mode;
 
 paramdef string {
   p_default = ".";
   p_descr = "Input directory short.";
-  p_help = "ARCHIVE mode only. Directory for short pulse files. ARCHIVE and FILELIST modes .";
+  p_help = "ARCHIVE mode only. Directory for short pulse files.";
 } input_dir_short;
 
 paramdef string {
   p_default = ".";
   p_descr = "Input directory long.";
-  p_help = "ARCHIVE mode only. Directory for long pulse files. ARCHIVE and FILELIST modes .";
+  p_help = "ARCHIVE mode only. Directory for long pulse files.";
 } input_dir_long;
 
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_short";
   p_descr = "FMQ from which to read the short pulse moments stream.";
-  p_help = "FMQ mode only.";
+  p_help = "REALTIME mode only.";
 } input_fmq_url_short;
 
 paramdef string {
   p_default = "fmqp:://localhost::/tmp/fmq/input_long";
   p_descr = "FMQ from which to read the long pulse moments stream.";
-  p_help = "FMQ mode only.";
+  p_help = "REALTIME mode only.";
 } input_fmq_url_long;
 
 paramdef boolean {
@@ -92,7 +83,7 @@ paramdef boolean {
 } seek_to_end_of_input_fmq;
 
 commentdef {
-  p_header = "READ OPTIONS";
+  p_header = "LIMIT RANGE?";
 }
 
 paramdef boolean {
@@ -115,12 +106,6 @@ paramdef double {
   p_descr = "Specify the output dwell length (secs).";
   p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
 } dwell_length_secs;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to center the dwell on a multiple of the dwell_time.";
-  p_help = "The dwell will be chosen so that the center time of the dwell will be close to an even multiple of the dwell_time_secs. So if for example dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 0.75, 1.25 secs etc.";
-} center_dwell_on_time;
 
 typedef enum {
   DWELL_STATS_MEAN = 0,
@@ -168,113 +153,6 @@ paramdef struct stats_method_field_t {
   p_descr = "Stats methods for individual fields.";
   p_help = "Applies if 'set_stats_method_for_individual_fields' is true. The global stats method is set by the 'dwell_stats_method' parameter. Fields not specified here will use the global parameter.";
 } stats_method_fields[];
-
-commentdef {
-  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
-}
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the radar name.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the radar name.";
-} radar_name_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the site name.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the site name.";
-} site_name_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the title global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
-} title_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the institution global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
-} institution_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the references global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
-} references_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the source global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
-} source_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the history global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
-} history_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the comment global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
-} comment_override;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Option to override the author global attribute.";
-  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
-} author_override;
-
-commentdef {
-  p_header = "CENSORING";
-  p_text = "You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Apply censoring based on field values and thresholds.";
-  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied.";
-} apply_censoring;
-
-typedef enum {
-  LOGICAL_AND, LOGICAL_OR
-} logical_t;
-
-typedef struct {
-  string name;
-  double min_valid_value;
-  double max_valid_value;
-  logical_t combination_method;
-} censoring_field_t;
-
-paramdef struct censoring_field_t {
-  p_default = {
-    { "SNR", 0.0, 1000.0, LOGICAL_OR },
-    { "NCP", 0.15, 1000.0, LOGICAL_OR }
-  };
-  p_descr = "Fields to be used for determining censoring.";
-  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
-} censoring_fields[];
-  
-paramdef int {
-  p_default = 1;
-  p_descr = "Minimum valid run of non-censored gates.";
-  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
-} censoring_min_valid_run;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to exclude fields from censoring.";
-  p_help = "If censoring is turned on, you also have the option of non censoring specified fields. Set this parameter to TRUE, and specify the fields to be excluded in the non_censored_fields list.";
-} specify_non_censored_fields;
-
-paramdef string {
-  p_default = { "DBMHC", "DBMVC" };
-  p_descr = "List of fields to be excluded from censoring.";
-  p_help = "See 'specify_non_censored_fields'.";
-} non_censored_fields[];
 
 commentdef {
   p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
