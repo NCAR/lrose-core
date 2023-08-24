@@ -122,11 +122,11 @@ private:
   RadxTime _dwellMidTime;
   RadxTime _latestRayTime;
   
-  RadxRay *_cacheShortRay;
-  RadxRay *_cacheLongRay;
+  RadxRay *_cacheRayShort;
+  RadxRay *_cacheRayLong;
 
-  vector<RadxRay *> _dwellShortRays;
-  vector<RadxRay *> _dwellLongRays;
+  vector<RadxRay *> _dwellRaysShort;
+  vector<RadxRay *> _dwellRaysLong;
 
   RadxVol _dwellVolShort;
   RadxVol _dwellVolLong;
@@ -141,12 +141,12 @@ private:
   // methods
 
   int _runRealtime();
-
   int _runArchive();
 
   int _openFmqs();
   int _prepareInputFmqs();
   int _readNextDwellFromFmq();
+  int _combineDwellRays();
   void _clearDwellRays();
   RadxRay *_readRayShort();
   RadxRay *_readRayLong();

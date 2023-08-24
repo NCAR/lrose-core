@@ -59,8 +59,8 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
   OK = TRUE;
   _readerFmqShort = NULL;
   _readerFmqLong = NULL;
-  _cacheShortRay = NULL;
-  _cacheLongRay = NULL;
+  _cacheRayShort = NULL;
+  _cacheRayLong = NULL;
   _outputFmq = NULL;
 
   // set programe name
@@ -188,16 +188,11 @@ int HcrShortLongCombine::_runRealtime()
     return -1;
   }
 
-  int count = 0;
   while (true) {
     if (_readNextDwellFromFmq()) {
       return -1;
     }
-    count++;
-    // cerr << "+";
-    // if (count == 400) {
-    //   exit(0);
-    // }
+    _combineDwellRays();
   }
 
 #ifdef JUNK
@@ -434,7 +429,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
 
   // read short rays, prepare for first dwell
   
-  _cacheShortRay = NULL;
+  _cacheRayShort = NULL;
   while (true) {
     RadxRay *ray = _readRayShort();
     if (ray == NULL) {
@@ -443,7 +438,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
     }
     if (ray->getRadxTime() >= _dwellStartTime) {
       // save for next dwell
-      _cacheShortRay = ray;
+      _cacheRayShort = ray;
       break;
     } else {
       // read ahead
@@ -453,7 +448,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
 
   // read long rays, prepare for first dwell
   
-  _cacheLongRay = NULL;
+  _cacheRayLong = NULL;
   while (true) {
     RadxRay *ray = _readRayLong();
     if (ray == NULL) {
@@ -462,7 +457,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
     }
     if (ray->getRadxTime() >= _dwellStartTime) {
       // save for next dwell
-      _cacheLongRay = ray;
+      _cacheRayLong = ray;
       break;
     } else {
       // read ahead
@@ -486,13 +481,13 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   
   // add in the cached rays already read in
 
-  if (_cacheShortRay != NULL) {
-    _dwellShortRays.push_back(_cacheShortRay);
-    _cacheShortRay = NULL;
+  if (_cacheRayShort != NULL) {
+    _dwellRaysShort.push_back(_cacheRayShort);
+    _cacheRayShort = NULL;
   }
-  if (_cacheLongRay != NULL) {
-    _dwellLongRays.push_back(_cacheLongRay);
-    _cacheLongRay = NULL;
+  if (_cacheRayLong != NULL) {
+    _dwellRaysLong.push_back(_cacheRayLong);
+    _cacheRayLong = NULL;
   }
 
   // read in short rays for the dwell
@@ -506,10 +501,10 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
     }
     if (ray->getRadxTime() >= _dwellEndTime) {
       // save for start of next dwell
-      _cacheShortRay = ray;
+      _cacheRayShort = ray;
       break;
     } else {
-      _dwellShortRays.push_back(ray);
+      _dwellRaysShort.push_back(ray);
     }
   }
 
@@ -524,26 +519,26 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
     }
     if (ray->getRadxTime() >= _dwellEndTime) {
       // save for start of next dwell
-      _cacheLongRay = ray;
+      _cacheRayLong = ray;
       break;
     } else {
-      _dwellLongRays.push_back(ray);
+      _dwellRaysLong.push_back(ray);
     }
   }
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=================>> short ray count: " << _dwellShortRays.size() << endl;
-    for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+    cerr << "=================>> short ray count: " << _dwellRaysShort.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
       cerr << "  short ray time: "
-           << _dwellShortRays[ii]->getRadxTime().asString(6) << ", "
-           <<  _dwellShortRays[ii] << endl;
+           << _dwellRaysShort[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysShort[ii] << endl;
     }
     cerr << "========================================" << endl;
-    cerr << "=================>> long ray count: " << _dwellLongRays.size() << endl;
-    for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+    cerr << "=================>> long ray count: " << _dwellRaysLong.size() << endl;
+    for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
       cerr << "  long ray time: "
-           << _dwellLongRays[ii]->getRadxTime().asString(6) << ", "
-           <<  _dwellLongRays[ii] << endl;
+           << _dwellRaysLong[ii]->getRadxTime().asString(6) << ", "
+           <<  _dwellRaysLong[ii] << endl;
     }
     cerr << "========================================" << endl;
   }
@@ -565,20 +560,127 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
 }
 
 /////////////////////////////////////////////////////////////////
+// combine dwell rays
+
+int HcrShortLongCombine::_combineDwellRays()
+
+{
+
+  // short rays
+  // sanity check
+  
+  size_t nRaysShort = _dwellRaysShort.size();
+  if (nRaysShort < 1) {
+    return -1;
+  }
+
+  // add short rays to vol
+  
+  _dwellVolShort.clear();
+  for (size_t iray = 0; iray < nRaysShort; iray++) {
+    _dwellVolShort.addRay(_dwellRaysShort[iray]);
+  }
+
+  // ownership of rays passed to vol, which will free them
+
+  _dwellRaysShort.clear();
+
+  // combine short rays into a single ray
+
+  RadxRay *rayShort = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
+  
+  // long rays
+  // sanity check
+  
+  size_t nRaysLong = _dwellRaysLong.size();
+  if (nRaysLong < 1) {
+    delete rayShort;
+    return -1;
+  }
+
+  // add long rays to vol
+  
+  _dwellVolLong.clear();
+  for (size_t iray = 0; iray < nRaysLong; iray++) {
+    _dwellVolLong.addRay(_dwellRaysLong[iray]);
+  }
+  
+  // ownership of rays passed to vol, which will free them
+
+  _dwellRaysLong.clear();
+
+  // combine long rays into a single ray
+  
+  RadxRay *rayLong = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
+  
+  // rename short fields
+
+  vector<RadxField *> fieldsShort = rayShort->getFields();
+  for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
+    RadxField *fld = fieldsShort[ifield];
+    string newName = fld->getName() + "_short";
+    fld->setName(newName);
+  }
+
+  // add long fields to short ray
+
+  vector<RadxField *> fieldsLong = rayLong->getFields();
+  for (size_t ifield = 0; ifield < fieldsLong.size(); ifield++) {
+    RadxField *fld = new RadxField(*fieldsLong[ifield]);
+    string newName = fld->getName() + "_long";
+    fld->setName(newName);
+    rayShort->addField(fld);
+  }
+
+  // create message from combined ray
+
+  RadxMsg msg;
+  rayShort->serialize(msg);
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "=========== Writing out ray =============" << endl;
+    cerr << "  time, el, az: "
+         << rayShort->getRadxTime().asString(3) << ", "
+         << rayShort->getElevationDeg() << ", "
+         << rayShort->getAzimuthDeg() << endl;
+    cerr << "=========================================" << endl;
+  }
+  
+  // write the message
+
+  int iret = 0;
+  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                           msg.assembledMsg(), msg.lengthAssembled())) {
+    cerr << "ERROR - HcrShortLongCombine::_combineDwellRays" << endl;
+    cerr << "  Cannot write ray to output queue" << endl;
+    iret = -1;
+  }
+  
+  // free up memory
+
+  _dwellVolShort.clear();
+  _dwellVolLong.clear();
+  delete rayShort;
+  delete rayLong;
+  
+  return iret;
+    
+}
+
+/////////////////////////////////////////////////////////////////
 // clear the dwell rays
 
 void HcrShortLongCombine::_clearDwellRays()
 {
 
-  for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
-    delete _dwellShortRays[ii];
+  for (size_t ii = 0; ii < _dwellRaysShort.size(); ii++) {
+    delete _dwellRaysShort[ii];
   }
-  _dwellShortRays.clear();
+  _dwellRaysShort.clear();
 
-  for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
-    delete _dwellLongRays[ii];
+  for (size_t ii = 0; ii < _dwellRaysLong.size(); ii++) {
+    delete _dwellRaysLong[ii];
   }
-  _dwellLongRays.clear();
+  _dwellRaysLong.clear();
 
 }
 
