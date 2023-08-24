@@ -75,34 +75,26 @@ instance = "test";
 //
 
 //
-// FMQ: read data from two moments FMQ, combine the dwells and write to 
-//   an output queue.
+// REALTIME: read data from two moments FMQ, combine the dwells and 
+//   write to an output queue. 
 //
 // ARCHIVE: move through the data between the start and end times set on 
-//   the command line. 
-//
-// FILELIST: move through the list of file names specified on the 
-//   command line. 
-// Paths (in ARCHIVE mode, at least) MUST contain a day-directory above 
-//   the data file -- ./data_file.ext will not work as a file path, but 
-//   ./yyyymmdd/data_file.ext will.
+//   the command line.
 //
 //
 // Type: enum
 // Options:
-//     FMQ
+//     REALTIME
 //     ARCHIVE
-//     FILELIST
 //
 
-mode = FMQ;
+mode = REALTIME;
 
 ///////////// input_dir_short /////////////////////////
 //
 // Input directory short.
 //
-// ARCHIVE mode only. Directory for short pulse files. ARCHIVE and 
-//   FILELIST modes .
+// ARCHIVE mode only. Directory for short pulse files.
 //
 //
 // Type: string
@@ -114,8 +106,7 @@ input_dir_short = ".";
 //
 // Input directory long.
 //
-// ARCHIVE mode only. Directory for long pulse files. ARCHIVE and 
-//   FILELIST modes .
+// ARCHIVE mode only. Directory for long pulse files.
 //
 //
 // Type: string
@@ -127,7 +118,7 @@ input_dir_long = ".";
 //
 // FMQ from which to read the short pulse moments stream.
 //
-// FMQ mode only.
+// REALTIME mode only.
 //
 //
 // Type: string
@@ -139,7 +130,7 @@ input_fmq_url_short = "/tmp/fmq/moments/100hz.shortPulse/shmem_20140";
 //
 // FMQ from which to read the long pulse moments stream.
 //
-// FMQ mode only.
+// REALTIME mode only.
 //
 //
 // Type: string
@@ -163,7 +154,7 @@ seek_to_end_of_input_fmq = TRUE;
 
 //======================================================================
 //
-// READ OPTIONS.
+// LIMIT RANGE?.
 //
 //======================================================================
  
@@ -207,21 +198,6 @@ max_range_km = 9999;
 //
 
 dwell_length_secs = 0.1;
-
-///////////// center_dwell_on_time ////////////////////
-//
-// Option to center the dwell on a multiple of the dwell_time.
-//
-// The dwell will be chosen so that the center time of the dwell will be 
-//   close to an even multiple of the dwell_time_secs. So if for example 
-//   dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 
-//   0.75, 1.25 secs etc.
-//
-//
-// Type: boolean
-//
-
-center_dwell_on_time = FALSE;
 
 ///////////// dwell_stats_method //////////////////////
 //
@@ -316,251 +292,6 @@ stats_method_fields = {
     field_name = "ANTENNA_FLAG",
     stats_method = DWELL_STATS_MIDDLE
   }
-};
-
-//======================================================================
-//
-// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
-//
-//======================================================================
- 
-///////////// radar_name_override /////////////////////
-//
-// Option to override the radar name.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the radar name.
-//
-//
-// Type: string
-//
-
-radar_name_override = "";
-
-///////////// site_name_override //////////////////////
-//
-// Option to override the site name.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the site name.
-//
-//
-// Type: string
-//
-
-site_name_override = "";
-
-///////////// title_override //////////////////////////
-//
-// Option to override the title global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the title attribute.
-//
-//
-// Type: string
-//
-
-title_override = "";
-
-///////////// institution_override ////////////////////
-//
-// Option to override the institution global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the institution attribute.
-//
-//
-// Type: string
-//
-
-institution_override = "";
-
-///////////// references_override /////////////////////
-//
-// Option to override the references global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the references attribute.
-//
-//
-// Type: string
-//
-
-references_override = "";
-
-///////////// source_override /////////////////////////
-//
-// Option to override the source global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the source attribute.
-//
-//
-// Type: string
-//
-
-source_override = "";
-
-///////////// history_override ////////////////////////
-//
-// Option to override the history global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the history attribute.
-//
-//
-// Type: string
-//
-
-history_override = "";
-
-///////////// comment_override ////////////////////////
-//
-// Option to override the comment global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the comment attribute.
-//
-//
-// Type: string
-//
-
-comment_override = "";
-
-///////////// author_override /////////////////////////
-//
-// Option to override the author global attribute.
-//
-// If empty, no effect. If not empty, this string is used to override 
-//   the author attribute.
-//
-//
-// Type: string
-//
-
-author_override = "";
-
-//======================================================================
-//
-// CENSORING.
-//
-// You have the option of censoring the data fields - i.e. setting the 
-//   fields to missing values - at gates which meet certain criteria. If 
-//   this is done correctly, it allows you to preserve the valid data and 
-//   discard the noise, thereby improving compression.
-//
-//======================================================================
- 
-///////////// apply_censoring /////////////////////////
-//
-// Apply censoring based on field values and thresholds.
-//
-// If TRUE, censoring will be performed. See 'censoring_fields' for 
-//   details on how the censoring is applied.
-//
-//
-// Type: boolean
-//
-
-apply_censoring = FALSE;
-
-///////////// censoring_fields ////////////////////////
-//
-// Fields to be used for determining censoring.
-//
-// Specify the fields to be used to determine whether a gate should be 
-//   censored. The name refers to the input data field names. Valid field 
-//   values lie in the range from min_valid_value to max_valid_value 
-//   inclusive. If the value of a field at a gate lies within this range, 
-//   it is considered valid. Each specified field is examined at each 
-//   gate, and is flagged as valid if its value lies in the valid range. 
-//   These field flags are then combined as follows: first, all of the 
-//   LOGICAL_OR flags are combined, yielding a single combined_or flag 
-//   which is true if any of the LOGICAL_OR fields is true. The 
-//   combined_or flag is then combined with all of the LOGICAL_AND fields, 
-//   yielding a true value only if the combined_or flag and the 
-//   LOGICAL_AND fields are all true. If this final flag is true, then the 
-//   data at the gate is regarded as valid and is retained. If the final 
-//   flag is false, the data at the gate is censored, and all of the 
-//   fields at the gate are set to missing.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string name;
-//      double min_valid_value;
-//      double max_valid_value;
-//      logical_t combination_method;
-//        Options:
-//          LOGICAL_AND
-//          LOGICAL_OR
-//   }
-//
-// 1D array - variable length.
-//
-
-censoring_fields = {
-  {
-    name = "SNR",
-    min_valid_value = 0,
-    max_valid_value = 1000,
-    combination_method = LOGICAL_OR
-  }
-  ,
-  {
-    name = "NCP",
-    min_valid_value = 0.15,
-    max_valid_value = 1000,
-    combination_method = LOGICAL_OR
-  }
-};
-
-///////////// censoring_min_valid_run /////////////////
-//
-// Minimum valid run of non-censored gates.
-//
-// Only active if set to 2 or greater. A check is made to remove short 
-//   runs of noise. Looking along the radial, we compute the number of 
-//   contiguous gates (a 'run') with uncensored data. For the gates in 
-//   this run to be accepted the length of the run must exceed 
-//   censoring_min_valid_run. If the number of gates in a run is less than 
-//   this, then all gates in the run are censored.
-//
-//
-// Type: int
-//
-
-censoring_min_valid_run = 1;
-
-///////////// specify_non_censored_fields /////////////
-//
-// Option to exclude fields from censoring.
-//
-// If censoring is turned on, you also have the option of non censoring 
-//   specified fields. Set this parameter to TRUE, and specify the fields 
-//   to be excluded in the non_censored_fields list.
-//
-//
-// Type: boolean
-//
-
-specify_non_censored_fields = FALSE;
-
-///////////// non_censored_fields /////////////////////
-//
-// List of fields to be excluded from censoring.
-//
-// See 'specify_non_censored_fields'.
-//
-//
-// Type: string
-// 1D array - variable length.
-//
-
-non_censored_fields = {
- "DBMHC",
- "DBMVC"
 };
 
 //======================================================================
@@ -1095,7 +826,7 @@ write_latest_data_info = FALSE;
 // Type: string
 //
 
-output_fmq_url = "fmqp:://localhost::/tmp/fmq/output";
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/moments/100hz.combined/shmem_20200";
 
 ///////////// output_fmq_compress /////////////////////
 //
