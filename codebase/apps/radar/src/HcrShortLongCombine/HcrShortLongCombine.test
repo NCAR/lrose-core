@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./HcrShortLongCombine
+ * TDRP params for HcrShortLongCombine
  **********************************************************************/
 
 //======================================================================
@@ -195,9 +195,9 @@ max_range_km = 9999;
 //
 //======================================================================
  
-///////////// dwell_length_secs /////////////////////////
+///////////// dwell_length_secs ///////////////////////
 //
-// Specify the output dwell time (secs).
+// Specify the output dwell length (secs).
 //
 // Dwells from the input data will be combined to form dwells covering 
 //   the specified time.

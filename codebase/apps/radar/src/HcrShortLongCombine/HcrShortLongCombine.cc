@@ -43,6 +43,7 @@
 #include <Radx/RadxGeoref.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
+#include <Radx/RadxStatusXml.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include <didss/DsInputPath.hh>
 #include <toolsa/TaXml.hh>
@@ -60,6 +61,7 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
   _readerFmqLong = NULL;
   _cacheShortRay = NULL;
   _cacheLongRay = NULL;
+  _outputFmq = NULL;
 
   // set programe name
 
@@ -128,7 +130,9 @@ HcrShortLongCombine::~HcrShortLongCombine()
     delete _readerFmqLong;
   }
 
-  _outputFmq.closeMsgQueue();
+  if (_outputFmq) {
+    delete _outputFmq;
+  }
 
   // unregister process
 
@@ -195,6 +199,8 @@ int HcrShortLongCombine::_runRealtime()
     //   exit(0);
     // }
   }
+
+#ifdef JUNK
   
   // read messages from the queue and process them
   
@@ -285,8 +291,10 @@ int HcrShortLongCombine::_runRealtime()
     } // if (nRaysDwell > 1)
 
   } // while (true)
+
+#endif
   
-  return iret;
+  return 0;
 
 }
 
@@ -312,13 +320,39 @@ int HcrShortLongCombine::_openFmqs()
     _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
   }
 
-  // initialize - read one ray
+  // create the output FMQ
+  
+  _outputFmq = new DsFmq;
 
-  RadxRay *rayShort = _readerFmqShort->readNextRay();
+  if (_outputFmq->init(_params.output_fmq_url,
+                       _progName.c_str(),
+                       _params.debug >= Params::DEBUG_VERBOSE,
+                       DsFmq::READ_WRITE, DsFmq::END,
+                       _params.output_fmq_compress,
+                       _params.output_fmq_n_slots,
+                       _params.output_fmq_buf_size)) {
+    cerr << "ERROR - " << _progName << "::_openFmqs" << endl;
+    cerr << "  Cannot open output fmq, URL: " << _params.output_fmq_url << endl;
+    return -1;
+  }
+  if (_params.output_fmq_compress) {
+    _outputFmq->setCompressionMethod(TA_COMPRESSION_GZIP);
+  }
+  if (_params.output_fmq_write_blocking) {
+    _outputFmq->setBlockingWrite();
+  }
+  if (_params.output_fmq_data_mapper_report_interval > 0) {
+    _outputFmq->setRegisterWithDmap(true, _params.output_fmq_data_mapper_report_interval);
+  }
+  _outputFmq->setSingleWriter();
+
+  // initialize reader - read one ray
+
+  RadxRay *rayShort = _readRayShort();
   if (rayShort != NULL) {
     delete rayShort;
   }
-  RadxRay *rayLong = _readerFmqLong->readNextRay();
+  RadxRay *rayLong = _readRayLong();
   if (rayLong != NULL) {
     delete rayLong;
   }
@@ -329,41 +363,6 @@ int HcrShortLongCombine::_openFmqs()
   } else {
     _readerFmqShort->seekToStart();
     _readerFmqLong->seekToStart();
-  }
-
-  // create the output FMQ
-  
-  if (_outputFmq.init(_params.output_fmq_url,
-                      _progName.c_str(),
-                      _params.debug >= Params::DEBUG_VERBOSE,
-                      DsFmq::READ_WRITE, DsFmq::END,
-                      _params.output_fmq_compress,
-                      _params.output_fmq_n_slots,
-                      _params.output_fmq_buf_size)) {
-    cerr << "WARNING - trying to create new fmq" << endl;
-    if (_outputFmq.init(_params.output_fmq_url,
-                        _progName.c_str(),
-                        _params.debug >= Params::DEBUG_VERBOSE,
-                        DsFmq::CREATE, DsFmq::START,
-                        _params.output_fmq_compress,
-                        _params.output_fmq_n_slots,
-                        _params.output_fmq_buf_size)) {
-      cerr << "ERROR - Radx2Dsr" << endl;
-      cerr << "  Cannot open fmq, URL: " << _params.output_fmq_url << endl;
-      return -1;
-    }
-  }
-  
-  if (_params.output_fmq_compress) {
-    _outputFmq.setCompressionMethod(TA_COMPRESSION_GZIP);
-  }
-  
-  if (_params.output_fmq_write_blocking) {
-    _outputFmq.setBlockingWrite();
-  }
-  if (_params.output_fmq_data_mapper_report_interval > 0) {
-    _outputFmq.setRegisterWithDmap
-      (true, _params.output_fmq_data_mapper_report_interval);
   }
 
   return 0;
@@ -383,25 +382,25 @@ int HcrShortLongCombine::_prepareInputFmqs()
 
   {
     
-    RadxRay *shortRay = _readerFmqShort->readNextRay();
-    if (shortRay == NULL) {
+    RadxRay *rayShort = _readRayShort();
+    if (rayShort == NULL) {
       cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
       cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
       return -1;
     }
     
-    RadxRay *longRay = _readerFmqLong->readNextRay();
+    RadxRay *longRay = _readRayLong();
     if (longRay == NULL) {
       cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
       cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
-      delete shortRay;
+      delete rayShort;
       return -1;
     }
     
-    shortTime = shortRay->getRadxTime();
+    shortTime = rayShort->getRadxTime();
     longTime = longRay->getRadxTime();
     
-    delete shortRay;
+    delete rayShort;
     delete longRay;
 
   }
@@ -437,7 +436,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
   
   _cacheShortRay = NULL;
   while (true) {
-    RadxRay *ray = _readerFmqShort->readNextRay();
+    RadxRay *ray = _readRayShort();
     if (ray == NULL) {
       cerr << "========>> short queue done <<==========" << endl;
       return -1;
@@ -456,7 +455,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
   
   _cacheLongRay = NULL;
   while (true) {
-    RadxRay *ray = _readerFmqLong->readNextRay();
+    RadxRay *ray = _readRayLong();
     if (ray == NULL) {
       cerr << "========>> long queue done <<==========" << endl;
       return -1;
@@ -499,7 +498,7 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   // read in short rays for the dwell
   
   while (true) {
-    RadxRay *ray = _readerFmqShort->readNextRay();
+    RadxRay *ray = _readRayShort();
     if (ray == NULL) {
       cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
       cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
@@ -517,7 +516,7 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   // read in long rays for the dwell
   
   while (true) {
-    RadxRay *ray = _readerFmqLong->readNextRay();
+    RadxRay *ray = _readRayLong();
     if (ray == NULL) {
       cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
       cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
@@ -580,6 +579,147 @@ void HcrShortLongCombine::_clearDwellRays()
     delete _dwellLongRays[ii];
   }
   _dwellLongRays.clear();
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Read a short ray
+// Creates ray, must be freed by caller.
+
+RadxRay *HcrShortLongCombine::_readRayShort()
+{
+
+  // read next ray
+  
+  RadxRay *rayShort = _readerFmqShort->readNextRay();
+
+  // check for platform update
+  
+  if (_readerFmqShort->getPlatformUpdated()) {
+    RadxPlatform platform = _readerFmqShort->getPlatform();
+    _platformShort = platform;
+    // create message
+    RadxMsg msg;
+    platform.serialize(msg);
+    // write the platform to the output queue
+    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                             msg.assembledMsg(), msg.lengthAssembled())) {
+      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+      cerr << "  Cannot write platform to queue" << endl;
+    }
+  }
+
+  // check for calibration update
+  
+  if (_readerFmqShort->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerFmqShort->getRcalibs();
+    _calibsShort = calibs;
+    for (size_t ii = 0; ii < calibs.size(); ii++) {
+      // create message
+      RadxRcalib calib = calibs[ii];
+      RadxMsg msg;
+      calib.serialize(msg);
+      // write to output queue
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+        cerr << "  Cannot write calib to queue" << endl;
+      }
+    } // ii
+  }
+
+  // check for status xml update
+  
+  if (_readerFmqShort->getStatusXmlUpdated()) {
+    const string statusXml = _readerFmqShort->getStatusXml();
+    _statusXmlShort = statusXml;
+    // create RadxStatusXml object
+    RadxStatusXml status;
+    status.setXmlStr(statusXml);
+    // create message
+    RadxMsg msg;
+    status.serialize(msg);
+    // write to output queue
+    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                             msg.assembledMsg(), msg.lengthAssembled())) {
+      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+      cerr << "  Cannot write status xml to queue" << endl;
+    }
+  }
+  
+  // update events
+  
+  _eventsShort = _readerFmqShort->getEvents();
+  for (size_t ii = 0; ii < _eventsShort.size(); ii++) {
+    RadxEvent event = _eventsShort[ii];
+    RadxMsg msg;
+    event.serialize(msg);
+    // write to output queue
+    if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                             msg.assembledMsg(), msg.lengthAssembled())) {
+      cerr << "ERROR - HcrShortLongCombine::_readRayShort" << endl;
+      cerr << "  Cannot write start of vol event to queue" << endl;
+    }
+  } // ii
+
+  return rayShort;
+
+}
+
+/////////////////////////////////////////////////////////////////
+// Read a long ray
+// Creates ray, must be freed by caller.
+
+RadxRay *HcrShortLongCombine::_readRayLong()
+{
+
+  // read next ray
+  
+  RadxRay *rayLong = _readerFmqLong->readNextRay();
+
+  // check for platform update
+  
+  if (_readerFmqLong->getPlatformUpdated()) {
+    const RadxPlatform &platform = _readerFmqLong->getPlatform();
+    _platformLong = platform;
+  }
+
+  // check for calibration update
+  
+  if (_readerFmqLong->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerFmqLong->getRcalibs();
+    _calibsLong = calibs;
+    for (size_t ii = 0; ii < calibs.size(); ii++) {
+      // create message
+      RadxRcalib calib = calibs[ii];
+      RadxMsg msg;
+      calib.serialize(msg);
+      // write to output queue
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrLongLongCombine::_readRayLong" << endl;
+        cerr << "  Cannot write calib to queue" << endl;
+      }
+    } // ii
+  }
+
+  if (_readerFmqLong->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerFmqLong->getRcalibs();
+    _calibsLong = calibs;
+  }
+
+  // check for status xml update
+  
+  if (_readerFmqLong->getStatusXmlUpdated()) {
+    const string statusXml = _readerFmqLong->getStatusXml();
+    _statusXmlLong = statusXml;
+  }
+
+  // update events
+  
+  _eventsLong = _readerFmqLong->getEvents();
+
+  return rayLong;
 
 }
 
@@ -1398,13 +1538,13 @@ int HcrShortLongCombine::_writeParams(const RadxRay *ray)
 
   // put params
   
-  int content = DsRadarMsg::FIELD_PARAMS | DsRadarMsg::RADAR_PARAMS;
-  if(_outputFmq.putDsMsg(msg, content)) {
-    cerr << "ERROR - HcrShortLongCombine::_writeParams()" << endl;
-    cerr << "  Cannot write field params to FMQ" << endl;
-    cerr << "  URL: " << _params.output_fmq_url << endl;
-    return -1;
-  }
+  // int content = DsRadarMsg::FIELD_PARAMS | DsRadarMsg::RADAR_PARAMS;
+  // if(_outputFmq.putDsMsg(msg, content)) {
+  //   cerr << "ERROR - HcrShortLongCombine::_writeParams()" << endl;
+  //   cerr << "  Cannot write field params to FMQ" << endl;
+  //   cerr << "  URL: " << _params.output_fmq_url << endl;
+  //   return -1;
+  // }
         
   return 0;
 
@@ -1497,12 +1637,12 @@ int HcrShortLongCombine::_writeRay(const RadxRay *ray)
     
   // put beam
   
-  if(_outputFmq.putDsMsg(msg, contents)) {
-    cerr << "ERROR - HcrShortLongCombine::_writeBeam()" << endl;
-    cerr << "  Cannot write beam to FMQ" << endl;
-    cerr << "  URL: " << _params.output_fmq_url << endl;
-    return -1;
-  }
+  // if(_outputFmq.putDsMsg(msg, contents)) {
+  //   cerr << "ERROR - HcrShortLongCombine::_writeBeam()" << endl;
+  //   cerr << "  Cannot write beam to FMQ" << endl;
+  //   cerr << "  URL: " << _params.output_fmq_url << endl;
+  //   return -1;
+  // }
 
   // debug print
   

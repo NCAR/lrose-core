@@ -84,20 +84,33 @@ private:
   Params _params;
   vector<string> _readPaths;
 
-  // fmq mode
+  // reading fmq in realtime
 
   IwrfMomReader *_readerFmqShort;
   IwrfMomReader *_readerFmqLong;
 
-  DsRadarQueue _outputFmq;
-  DsRadarMsg _inputMsg;
-  DsRadarMsg _outputMsg;
+  // Radx output moments queue
+
+  DsFmq *_outputFmq;
+
+  // DsRadarQueue _outputFmq;
+  // DsRadarMsg _inputMsg;
+  // DsRadarMsg _outputMsg;
   DsRadarParams _rparams;
   vector<DsPlatformGeoref> _georefs;
   bool _needWriteParams;
   int _inputContents;
   int _nRaysRead;
   int _nRaysWritten;
+
+  RadxPlatform _platformShort;
+  RadxPlatform _platformLong;
+  vector<RadxRcalib> _calibsShort;
+  vector<RadxRcalib> _calibsLong;
+  string _statusXmlShort;
+  string _statusXmlLong;
+  vector<RadxEvent> _eventsShort;
+  vector<RadxEvent> _eventsLong;
 
   // combining
 
@@ -135,6 +148,8 @@ private:
   int _prepareInputFmqs();
   int _readNextDwellFromFmq();
   void _clearDwellRays();
+  RadxRay *_readRayShort();
+  RadxRay *_readRayLong();
   
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
