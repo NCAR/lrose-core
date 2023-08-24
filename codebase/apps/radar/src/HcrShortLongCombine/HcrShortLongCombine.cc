@@ -59,6 +59,8 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
   _nWarnCensorPrint = 0;
   _readerFmqShort = NULL;
   _readerFmqLong = NULL;
+  _cacheShortRay = NULL;
+  _cacheLongRay = NULL;
 
   // set programe name
 
@@ -1042,10 +1044,16 @@ int HcrShortLongCombine::_runFmq()
     return -1;
   }
 
+  int count = 0;
   while (true) {
     if (_readNextDwellFromFmq()) {
       return -1;
     }
+    count++;
+    // cerr << "+";
+    // if (count == 400) {
+    //   exit(0);
+    // }
   }
   
   // read messages from the queue and process them
@@ -1273,7 +1281,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
   
   // compute the next dwell limits
   
-  double dwellMidSecs = (floor(latestSecs / dwellLengthSecs) + 1.0) * dwellLengthSecs;
+  double dwellMidSecs = (floor(latestSecs / _dwellLengthSecs) + 1.0) * _dwellLengthSecs;
   
   _dwellMidTime.setFromDouble(dwellMidSecs);
   _dwellStartTime = _dwellMidTime - _dwellLengthSecsHalf;
@@ -1299,6 +1307,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
       _cacheShortRay = ray;
       break;
     } else {
+      // read ahead
       delete ray;
     }
   }
@@ -1317,6 +1326,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
       _cacheLongRay = ray;
       break;
     } else {
+      // read ahead
       delete ray;
     }
   }
@@ -1335,14 +1345,16 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
 
   _clearDwellRays();
   
-  // add in the latest rays already read in
+  // add in the cached rays already read in
 
   if (_cacheShortRay != NULL) {
     _dwellShortRays.push_back(_cacheShortRay);
+    // cerr << "11111111111 using cacheShortRay: " << _cacheShortRay << endl;
     _cacheShortRay = NULL;
   }
   if (_cacheLongRay != NULL) {
     _dwellLongRays.push_back(_cacheLongRay);
+    // cerr << "11111111111 using cacheLongRay: " << _cacheLongRay << endl;
     _cacheLongRay = NULL;
   }
 
@@ -1350,11 +1362,18 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   
   while (true) {
     RadxRay *ray = _readerFmqShort->readNextRay();
+    if (ray == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
+      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      return -1;
+    }
     if (ray->getRadxTime() >= _dwellEndTime) {
       // save for start of next dwell
       _cacheShortRay = ray;
+      // cerr << "2222222222 creating cacheShortRay: " << _cacheShortRay << endl;
       break;
     } else {
+      // cerr << "2222222222 saving short ray: " << ray << endl;
       _dwellShortRays.push_back(ray);
     }
   }
@@ -1363,11 +1382,18 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   
   while (true) {
     RadxRay *ray = _readerFmqLong->readNextRay();
+    if (ray == NULL) {
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
+      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      return -1;
+    }
     if (ray->getRadxTime() >= _dwellEndTime) {
       // save for start of next dwell
       _cacheLongRay = ray;
+      // cerr << "3333333333 creating cacheLongRay: " << _cacheLongRay << endl;
       break;
     } else {
+      // cerr << "3333333333 saving long ray: " << ray << endl;
       _dwellLongRays.push_back(ray);
     }
   }
@@ -1375,12 +1401,12 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=================>> short ray count: " << _dwellShortRays.size() << endl;
     for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
-      cerr << "  short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << endl;
+      cerr << "  short ray time: " << _dwellShortRays[ii]->getRadxTime().asString(6) << ", " <<  _dwellShortRays[ii] << endl;
     }
     cerr << "========================================" << endl;
     cerr << "=================>> long ray count: " << _dwellLongRays.size() << endl;
     for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
-      cerr << "  long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << endl;
+      cerr << "  long ray time: " << _dwellLongRays[ii]->getRadxTime().asString(6) << ", " <<  _dwellLongRays[ii] << endl;
     }
     cerr << "========================================" << endl;
   }
@@ -1408,11 +1434,13 @@ void HcrShortLongCombine::_clearDwellRays()
 {
 
   for (size_t ii = 0; ii < _dwellShortRays.size(); ii++) {
+    // cerr << "44444444444 delete short ray: " << _dwellShortRays[ii] << endl;
     delete _dwellShortRays[ii];
   }
   _dwellShortRays.clear();
 
   for (size_t ii = 0; ii < _dwellLongRays.size(); ii++) {
+    // cerr << "55555555555 delete long ray: " << _dwellLongRays[ii] << endl;
     delete _dwellLongRays[ii];
   }
   _dwellLongRays.clear();

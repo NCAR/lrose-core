@@ -107,6 +107,7 @@ private:
   RadxTime _dwellStartTime;
   RadxTime _dwellEndTime;
   RadxTime _dwellMidTime;
+  RadxTime _latestRayTime;
   
   RadxRay *_cacheShortRay;
   RadxRay *_cacheLongRay;
@@ -117,8 +118,8 @@ private:
   RadxVol _dwellVol;
   RadxField::StatsMethod_t _globalMethod;
   vector<RadxField::NamedStatsMethod> _namedMethods;
-  RadxTime _dwellStartTime, _dwellEndTime;
-  RadxTime _latestRayTime, _dwellMidTime;
+  // RadxTime _dwellStartTime, _dwellEndTime;
+  // RadxTime _latestRayTime, _dwellMidTime;
 
   // output data on time boundaries
 
