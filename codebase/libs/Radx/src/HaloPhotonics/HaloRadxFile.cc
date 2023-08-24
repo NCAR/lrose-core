@@ -990,21 +990,31 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
           " ray qualifiers, found " << toks.size() << endl;
         return error;
       }
+
+      // Let's assume the token order is the same as the RayQualifier order
+      
       string value;
 
       // time is in hours
       value = toks[0];
-      float timeInHours = atof(value.c_str());
-      int minutesInHour = 60;
+      double timeInHours = atof(value.c_str());
+      printf("timeInHours %15.12f original string: %s\n", timeInHours, value.c_str());
+      int minutesInHour = 60;  // also seconds in minute
       // int secondsInHour = minutesInHour * 60;
       int hours = int(timeInHours);
-      float minutes = (timeInHours - hours) * minutesInHour;
-      float seconds = minutes * 60.;
-      int subseconds = (seconds - (int) seconds) * 1.0e6 + 0.5;
-      RadxTime rtime(hours, (int) minutes, (int) seconds, subseconds);
-      cerr << "Ray time: " << hours << ":" << (int) minutes 
-        << ":" << (int) seconds << "." << subseconds << endl;  
-      ray->setTime(rtime.utime(), subseconds); // (int) (rtime.getSubSec() * 1.0e9 + 0.5));
+      double minutesf = timeInHours - hours;
+      int minutes = int(minutesf * minutesInHour);
+      double secondsf = minutesf - minutes;
+      int seconds = int(secondsf * 60); // seconds in minute
+      double subseconds = (secondsf - seconds) * 1.0e3;
+      RadxTime rtime(hours, minutes, seconds, subseconds);
+      cerr.precision(10);
+      cerr << "Ray time: " << hours << ":" << minutes 
+        << ":" << seconds << "." << subseconds << endl;  
+      ray->setTime(rtime.utime(), subseconds);
+      double reconstituted = hours + minutes/minutesInHour + seconds/(60*60) + subseconds/1.0e3;
+      cerr << "Ray time reconstituted: " << reconstituted << " vs. original "
+       << timeInHours << " diff = " << timeInHours - reconstituted << endl;
 
       value = toks[1];   
       double az = 0.0;
@@ -1018,6 +1028,9 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
         el -= 360.0;
       }
       ray->setElevationDeg(el);
+
+      // TODO: get the pitch and the roll
+
       ray->setVolumeNumber(0);
       ray->setSweepNumber(0); 
 /*
