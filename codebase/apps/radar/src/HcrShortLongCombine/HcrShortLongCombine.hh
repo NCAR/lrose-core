@@ -148,6 +148,7 @@ private:
   int _readNextDwellFromFmq();
   int _combineDwellRays();
   void _clearDwellRays();
+  void _unfoldVel(RadxRay *rayCombined);
   RadxRay *_readRayShort();
   RadxRay *_readRayLong();
   

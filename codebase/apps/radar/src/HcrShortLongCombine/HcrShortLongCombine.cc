@@ -542,6 +542,10 @@ int HcrShortLongCombine::_combineDwellRays()
     rayCombined->addField(fld);
   }
 
+  // unfold the velocity, add unfolded field to ray
+
+  _unfoldVel(rayCombined);
+
   // create message from combined ray
 
   RadxMsg msg;
@@ -575,6 +579,81 @@ int HcrShortLongCombine::_combineDwellRays()
   
   return iret;
     
+}
+
+////////////////////////////////////////////////////////////////
+// unfold the velocity, add unfolded field to ray
+
+void HcrShortLongCombine::_unfoldVel(RadxRay *rayCombined)
+
+{
+
+  RadxField *velShort = rayCombined->getField("VEL_short");
+  RadxField *velLong = rayCombined->getField("VEL_long");
+
+  velShort->convertToFl32();
+  velLong->convertToFl32();
+
+  RadxField *velUnfold = new RadxField(*velShort);
+  velUnfold->setName("VEL_unfold");
+
+  // compute the unfolded velocity
+
+  int _staggeredM = 2;
+  int _staggeredN = 3;
+  
+  double _nyquistPrtShort = 7.8;
+  double _nyquistPrtLong = 5.2;
+
+    int _LL;
+  int _PP_[32];
+  int *_PP;
+  
+  _LL = (_staggeredM + _staggeredN - 1) / 2;
+  if (_LL > 5) {
+    _LL = 2; // set to 2/3
+  }
+  _PP = _PP_ + _LL;
+
+  int cc = 0;
+  int pp = 0;
+  _PP[0] = 0;
+  for (int ll = 1; ll <= _LL; ll++) {
+    if ((ll / 2 * 2) == ll) {
+      // even - va1 transition
+      cc -= _staggeredN;
+      pp++;
+    } else {
+      // odd - va2 transition
+      cc += _staggeredM;
+    }
+    _PP[cc] = pp;
+    _PP[-cc] = -pp;
+  }
+
+  size_t nGates = velUnfold->getNPoints();
+  Radx::fl32 *dataShort = velShort->getDataFl32();
+  Radx::fl32 *dataLong = velLong->getDataFl32();
+  Radx::fl32 *dataUnfold = velUnfold->getDataFl32();
+  double nyquistDiff = _nyquistPrtShort - _nyquistPrtLong;
+
+  for (size_t ii = 0; ii < nGates; ii++) {
+    
+    double vel_diff = dataShort[ii] - dataLong[ii];
+    double nyquistIntervalShort = (vel_diff / nyquistDiff) / 2.0;
+    int ll = (int) floor(nyquistIntervalShort + 0.5);
+    if (ll < -_LL) {
+      ll = -_LL;
+    } else if (ll > _LL) {
+      ll = _LL;
+    }
+    double unfoldedVel = dataShort[ii] + _PP[ll] * _nyquistPrtShort * 2;
+    dataUnfold[ii] = unfoldedVel;
+
+  } // ii
+  
+  rayCombined->addField(velUnfold);
+
 }
 
 /////////////////////////////////////////////////////////////////
