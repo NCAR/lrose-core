@@ -183,112 +183,22 @@ int HcrShortLongCombine::_runRealtime()
   }
 
   // prepare the input fmqs at the start of the first output dwell
-
+  
   if (_prepareInputFmqs()) {
     return -1;
   }
 
+  _nRaysRead = 0;
+  _nRaysWritten = 0;
+
   while (true) {
+    PMU_auto_register("Reading FMQ realtime");
     if (_readNextDwellFromFmq()) {
       return -1;
     }
     _combineDwellRays();
   }
 
-#ifdef JUNK
-  
-  // read messages from the queue and process them
-  
-  _nRaysRead = 0;
-  _nRaysWritten = 0;
-  _needWriteParams = false;
-  RadxTime prevDwellRayTime;
-  int iret = 0;
-  while (true) {
-    
-    PMU_auto_register("Reading FMQ");
-    
-    // bool gotMsg = false;
-    // if (_readFmqMsg(gotMsg) || !gotMsg) {
-    //   umsleep(100);
-    //   continue;
-    // }
-
-    // pass message through if not related to beam
-    
-    if (!(_inputContents & DsRadarMsg::RADAR_BEAM) &&
-        !(_inputContents & DsRadarMsg::RADAR_PARAMS) &&
-        !(_inputContents & DsRadarMsg::PLATFORM_GEOREF)) {
-      if(_outputFmq.putDsMsg(_inputMsg, _inputContents)) {
-        cerr << "ERROR - HcrShortLongCombine::_runFmq()" << endl;
-        cerr << "  Cannot copy message to output queue" << endl;
-        cerr << "  URL: " << _params.output_fmq_url << endl;
-        return -1;
-      }
-    }
-
-    // combine rays if combined time exceeds specified dwell
-
-    const vector<RadxRay *> &raysDwell = _dwellVolShort.getRays();
-    size_t nRaysDwell = raysDwell.size();
-    if (nRaysDwell > 1) {
-      
-      _dwellStartTime = raysDwell[0]->getRadxTime();
-      _dwellEndTime = raysDwell[nRaysDwell-1]->getRadxTime();
-      double dwellSecs = (_dwellEndTime - _dwellStartTime);
-      dwellSecs *= ((double) nRaysDwell / (nRaysDwell - 1.0));
-      
-      if (dwellSecs >= _params.dwell_length_secs) {
-
-        // dwell time exceeded, so compute dwell ray and add to volume
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          cerr << "INFO: _runFmq, using nrays: " << nRaysDwell << endl;
-        }
-        RadxRay *dwellRay = _dwellVolShort.computeFieldStats(_globalMethod,
-                                                        _namedMethods);
-
-        RadxTime dwellRayTime(dwellRay->getRadxTime());
-        double deltaSecs = dwellRayTime - prevDwellRayTime;
-
-        if (_params.debug >= Params::DEBUG_VERBOSE) {
-          if (deltaSecs < _params.dwell_length_secs * 0.8 ||
-              deltaSecs > _params.dwell_length_secs * 1.2) {
-            cerr << "===>> bad dwell time, nRaysDwell, dsecs: "
-                 << dwellRay->getRadxTime().asString(3) << ", "
-                 << nRaysDwell << ", "
-                 << deltaSecs << endl;
-          }
-        }
-
-        prevDwellRayTime = dwellRayTime;
-        
-        // write params if needed
-        if (_needWriteParams) {
-          if (_writeParams(dwellRay)) {
-            return -1; 
-          }
-          _needWriteParams = false;
-        }
-
-        // write out ray
-
-        _writeRay(dwellRay);
-
-        // clean up
-
-        RadxRay::deleteIfUnused(dwellRay);
-        _dwellVolShort.clearRays();
-        _georefs.clear();
-
-      }
-
-    } // if (nRaysDwell > 1)
-
-  } // while (true)
-
-#endif
-  
   return 0;
 
 }
@@ -587,14 +497,14 @@ int HcrShortLongCombine::_combineDwellRays()
 
   // combine short rays into a single ray
 
-  RadxRay *rayShort = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
+  RadxRay *rayCombined = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
   
   // long rays
   // sanity check
   
   size_t nRaysLong = _dwellRaysLong.size();
   if (nRaysLong < 1) {
-    delete rayShort;
+    delete rayCombined;
     return -1;
   }
 
@@ -611,11 +521,11 @@ int HcrShortLongCombine::_combineDwellRays()
 
   // combine long rays into a single ray
   
-  RadxRay *rayLong = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
+  RadxRay *rayLong = _dwellVolLong.computeFieldStats(_globalMethod, _namedMethods);
   
   // rename short fields
 
-  vector<RadxField *> fieldsShort = rayShort->getFields();
+  vector<RadxField *> fieldsShort = rayCombined->getFields();
   for (size_t ifield = 0; ifield < fieldsShort.size(); ifield++) {
     RadxField *fld = fieldsShort[ifield];
     string newName = fld->getName() + "_short";
@@ -629,19 +539,19 @@ int HcrShortLongCombine::_combineDwellRays()
     RadxField *fld = new RadxField(*fieldsLong[ifield]);
     string newName = fld->getName() + "_long";
     fld->setName(newName);
-    rayShort->addField(fld);
+    rayCombined->addField(fld);
   }
 
   // create message from combined ray
 
   RadxMsg msg;
-  rayShort->serialize(msg);
+  rayCombined->serialize(msg);
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "=========== Writing out ray =============" << endl;
     cerr << "  time, el, az: "
-         << rayShort->getRadxTime().asString(3) << ", "
-         << rayShort->getElevationDeg() << ", "
-         << rayShort->getAzimuthDeg() << endl;
+         << rayCombined->getRadxTime().asString(3) << ", "
+         << rayCombined->getElevationDeg() << ", "
+         << rayCombined->getAzimuthDeg() << endl;
     cerr << "=========================================" << endl;
   }
   
@@ -654,12 +564,13 @@ int HcrShortLongCombine::_combineDwellRays()
     cerr << "  Cannot write ray to output queue" << endl;
     iret = -1;
   }
+  _nRaysWritten++;
   
   // free up memory
 
   _dwellVolShort.clear();
   _dwellVolLong.clear();
-  delete rayShort;
+  delete rayCombined;
   delete rayLong;
   
   return iret;
@@ -694,7 +605,8 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   // read next ray
   
   RadxRay *rayShort = _readerFmqShort->readNextRay();
-
+  _nRaysRead++;
+  
   // check for platform update
   
   if (_readerFmqShort->getPlatformUpdated()) {
@@ -778,6 +690,7 @@ RadxRay *HcrShortLongCombine::_readRayLong()
   // read next ray
   
   RadxRay *rayLong = _readerFmqLong->readNextRay();
+  _nRaysRead++;
 
   // check for platform update
   
