@@ -22,7 +22,9 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
-// GemSweep.cc
+// GemSweepField.cc
+//
+// Field for a given sweep
 //
 // Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
@@ -30,7 +32,7 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include "GemSweep.hh"
+#include "GemSweepField.hh"
 #include "GemBlob.hh"
 #include <cerrno>
 #include <cstdio>
@@ -43,7 +45,7 @@ using namespace std;
 
 // Constructor
 
-GemSweep::GemSweep(int num, bool debug, bool verbose) :
+GemSweepField::GemSweepField(int num, bool debug, bool verbose) :
         _debug(debug),
         _verbose(verbose),
         _num(num),
@@ -58,7 +60,7 @@ GemSweep::GemSweep(int num, bool debug, bool verbose) :
 
 // Copy constructor
 
-GemSweep::GemSweep(const GemSweep &orig, int num, 
+GemSweepField::GemSweepField(const GemSweepField &orig, int num, 
                    bool debug, bool verbose) :
         _debug(debug),
         _verbose(verbose),
@@ -119,7 +121,7 @@ GemSweep::GemSweep(const GemSweep &orig, int num,
 
 // destructor
 
-GemSweep::~GemSweep()
+GemSweepField::~GemSweepField()
 
 {
   clear();
@@ -128,7 +130,7 @@ GemSweep::~GemSweep()
 //////////////////
 // clear data
 
-void GemSweep::clear()
+void GemSweepField::clear()
 
 {
   
@@ -186,7 +188,7 @@ void GemSweep::clear()
 //////////////////
 // print
 
-void GemSweep::print(ostream &out) const
+void GemSweepField::print(ostream &out) const
   
 {
 
@@ -240,7 +242,7 @@ void GemSweep::print(ostream &out) const
 // decode info from XML
 // returns 0 on success, -1 on failure
 
-int GemSweep::decodeInfoXml(const string &xmlBuf)
+int GemSweepField::decodeInfoXml(const string &xmlBuf)
   
 {
 
@@ -256,7 +258,7 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   vector<RadxXml::attribute> attributes;
   string sliceBuf;
   if (RadxXml::readString(xmlBuf, "slice", sliceBuf, attributes)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Sweep num: " << _num << endl;
     cerr << "  Cannot find <slice> tag" << endl;
     return -1;
@@ -265,7 +267,7 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   int num;
   if (RadxXml::readIntAttr(attributes, "refid", num) == 0) {
     if (num != _num) {
-      cerr << "WARNING - GemSweep::decodeXml" << endl;
+      cerr << "WARNING - GemSweepField::decodeXml" << endl;
       cerr << "  Sweep num incorrect: " << num << endl;
       cerr << "  Should be: " << _num << endl;
     }
@@ -274,7 +276,7 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   // fixed angle
 
   if (RadxXml::readDouble(sliceBuf, "posangle", _fixedAngle)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Sweep num: " << _num << endl;
     cerr << "  Cannot set fixed angle <posangle>" << endl;
     return -1;
@@ -357,12 +359,12 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   attributes.clear();
   string sliceDataBuf;
   if (RadxXml::readString(sliceBuf, "slicedata", sliceDataBuf, attributes)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find slicedata section" << endl;
     return -1;
   }
   if (_decodeDateTime(attributes, _startTime)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find slicedata time" << endl;
     return -1;
   }
@@ -372,45 +374,45 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   attributes.clear();
   string rawDataBuf;
   if (RadxXml::readString(sliceDataBuf, "rawdata", rawDataBuf, attributes)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find rawdata attributes" << endl;
     return -1;
   }
   
   if (RadxXml::readIntAttr(attributes, "blobid", _dataBlobId)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find blobid attr for data" << endl;
     return -1;
   }
   if (RadxXml::readStringAttr(attributes, "type", _fieldName)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find type attr for data" << endl;
     return -1;
   }
   if (RadxXml::readIntAttr(attributes, "rays", _nAngles)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find rays attr for data" << endl;
     return -1;
   }
   if (RadxXml::readIntAttr(attributes, "bins", _nGates)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find bins attr for data" << endl;
     return -1;
   }
   int dataBitWidth;
   if (RadxXml::readIntAttr(attributes, "depth", dataBitWidth)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find depth for data" << endl;
     return -1;
   }
   _dataByteWidth = dataBitWidth / 8;
   if (RadxXml::readDoubleAttr(attributes, "min", _minValue)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find min attr for data" << endl;
     return -1;
   }
   if (RadxXml::readDoubleAttr(attributes, "max", _maxValue)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find max attr for data" << endl;
     return -1;
   }
@@ -420,19 +422,19 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
   attributes.clear();
   string rayinfoBuf;
   if (RadxXml::readString(sliceDataBuf, "rayinfo", rayinfoBuf, attributes)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find rayinfo attributes" << endl;
     return -1;
   }
   
   if (RadxXml::readIntAttr(attributes, "blobid", _anglesBlobId)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find blobid attr for angles" << endl;
     return -1;
   }
   int anglesBitWidth;
   if (RadxXml::readIntAttr(attributes, "depth", anglesBitWidth)) {
-    cerr << "ERROR - GemSweep::decodeXml" << endl;
+    cerr << "ERROR - GemSweepField::decodeXml" << endl;
     cerr << "  Cannot find depth for angles" << endl;
     return -1;
   }
@@ -445,7 +447,7 @@ int GemSweep::decodeInfoXml(const string &xmlBuf)
 ////////////////////////////////////////
 // decode date and time from attributes
 
-int GemSweep::_decodeDateTime(const vector<RadxXml::attribute> &attributes,
+int GemSweepField::_decodeDateTime(const vector<RadxXml::attribute> &attributes,
                               time_t &time)
   
   
@@ -478,7 +480,7 @@ int GemSweep::_decodeDateTime(const vector<RadxXml::attribute> &attributes,
 ////////////////////////////////////////
 // set the angle array from a GemBlob
 
-int GemSweep::setAngles(const GemBlob &blob)
+int GemSweepField::setAngles(const GemBlob &blob)
 
 {
 
@@ -487,7 +489,7 @@ int GemSweep::setAngles(const GemBlob &blob)
   int nBytesAvail = blob.getSize();
   int nBytesNeeded = _nAngles * _anglesByteWidth;
   if (nBytesNeeded != nBytesAvail) {
-    cerr << "ERROR - GemSweep::setAngles" << endl;
+    cerr << "ERROR - GemSweepField::setAngles" << endl;
     cerr << "  Cannot set angles, nbytes do not match" << endl;
     cerr << "  nBytesNeeded: " << nBytesNeeded << endl;
     cerr << "  nBytesAvail: " << nBytesAvail << endl;
@@ -528,7 +530,7 @@ int GemSweep::setAngles(const GemBlob &blob)
 ////////////////////////////////////////
 // set the field data from a GemBlob
 
-int GemSweep::setFieldData(const GemBlob &blob)
+int GemSweepField::setFieldData(const GemBlob &blob)
 
 {
 
@@ -541,7 +543,7 @@ int GemSweep::setFieldData(const GemBlob &blob)
   int nBytesAvail = blob.getSize();
   int nBytesNeeded = nPts * _dataByteWidth;
   if (nBytesNeeded != nBytesAvail) {
-    cerr << "ERROR - GemSweep::setFieldData" << endl;
+    cerr << "ERROR - GemSweepField::setFieldData" << endl;
     cerr << "  Cannot set field data, nbytes do not match" << endl;
     cerr << "  nBytesNeeded: " << nBytesNeeded << endl;
     cerr << "  nBytesAvail: " << nBytesAvail << endl;
@@ -567,7 +569,7 @@ int GemSweep::setFieldData(const GemBlob &blob)
 ////////////////////////////////////////
 // initialize pulse width vector
 
-void GemSweep::_initPulseWidths()
+void GemSweepField::_initPulseWidths()
 
 {
 
@@ -579,7 +581,7 @@ void GemSweep::_initPulseWidths()
   }
 
   if (_parseList(widthStr, _pulseWidths)) {
-    cerr << "ERROR - GemSweep::_initPulseWidths()" << endl;
+    cerr << "ERROR - GemSweepField::_initPulseWidths()" << endl;
     cerr << "  Cannot properly parse pulse widths" << endl;
   }
 
@@ -588,7 +590,7 @@ void GemSweep::_initPulseWidths()
 ////////////////////////////////////////
 // get the pulse width from the index
 
-double GemSweep::_getPulseWidth(int index)
+double GemSweepField::_getPulseWidth(int index)
 
 {
 
@@ -609,7 +611,7 @@ double GemSweep::_getPulseWidth(int index)
 ////////////////////////////////////////
 // get value from list
 
-double GemSweep::_getValFromList(const string &listStr, int index)
+double GemSweepField::_getValFromList(const string &listStr, int index)
 
 {
 
@@ -632,7 +634,7 @@ double GemSweep::_getValFromList(const string &listStr, int index)
 // parse a space-delimited or comma-delimited list of 
 // entries into a vector
 
-int GemSweep::_parseList(const char *listStr,
+int GemSweepField::_parseList(const char *listStr,
                          vector<double> &list)
 
 {
@@ -649,7 +651,7 @@ int GemSweep::_parseList(const char *listStr,
     if (sscanf(toks[ii].c_str(), "%lg", &val) == 1) {
       list.push_back(val);
     } else {
-      cerr << "ERROR - GemSweep::_parseList" << endl;
+      cerr << "ERROR - GemSweepField::_parseList" << endl;
       cerr << "  Cannot parse list: " << listStr << endl;
       cerr << "  Bad token: " << toks[ii] << endl;
       iret = -1;

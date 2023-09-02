@@ -9,7 +9,9 @@
  ** 1999/03/14 14:18:54
  *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 /////////////////////////////////////////////////////////////
-// GemSweep.hh
+// GemSweepField.hh
+//
+// Field for a given sweep
 //
 // Mike Dixon, RAP, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
@@ -18,8 +20,8 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef GemSweep_HH
-#define GemSweep_HH
+#ifndef GemSweepField_HH
+#define GemSweepField_HH
 
 #include <string>
 #include <vector>
@@ -32,21 +34,21 @@ using namespace std;
 ////////////////////////
 // This class
 
-class GemSweep {
+class GemSweepField {
   
 public:
 
   // constructor
   
-  GemSweep(int num, bool debug, bool verbose);
+  GemSweepField(int num, bool debug, bool verbose);
   
   // copy constructor
   
-  GemSweep(const GemSweep &orig, int num, bool debug, bool verbose);
+  GemSweepField(const GemSweepField &orig, int num, bool debug, bool verbose);
   
   // destructor
   
-  ~GemSweep();
+  ~GemSweepField();
 
   // clear data
   
@@ -67,11 +69,11 @@ public:
   time_t getStartTime() const { return _startTime; }
   const string &getFieldName() const { return _fieldName; }
 
-  int getNSamples() const { return _nSamples; }
+  size_t getNSamples() const { return _nSamples; }
 
   double getFixedAngle() const { return _fixedAngle; }
-  int getNAngles() const { return _nAngles; }
-  int getNGates() const { return _nGates; }
+  size_t getNAngles() const { return _nAngles; }
+  size_t getNGates() const { return _nGates; }
   double getStartRange() const { return _startRange; }
   double getGateSpacing() const { return _gateSpacing; }
 
