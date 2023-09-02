@@ -1,0 +1,894 @@
+/**********************************************************************
+ * TDRP params for HcrShortLongCombine
+ **********************************************************************/
+
+//======================================================================
+//
+// Combines 100Hz HCR moments stream containing both long and short 
+//   pulses, and optionally long and short PRTs. Groups the high-rate 
+//   (100Hz) rays into longer dwells (normally 10Hz). We write out the 
+//   individual fields (i.e. long and short) and combined fields. If both 
+//   long and short PRT data are present, the velocity fields are unfolded 
+//   into a final velocity field.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+//
+// REALTIME: read data from two moments FMQ, combine the dwells and 
+//   write to an output queue. 
+//
+// ARCHIVE: move through the data between the start and end times set on 
+//   the command line.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//
+
+mode = REALTIME;
+
+///////////// input_dir_short /////////////////////////
+//
+// Input directory short.
+//
+// ARCHIVE mode only. Directory for short pulse files.
+//
+//
+// Type: string
+//
+
+input_dir_short = ".";
+
+///////////// input_dir_long //////////////////////////
+//
+// Input directory long.
+//
+// ARCHIVE mode only. Directory for long pulse files.
+//
+//
+// Type: string
+//
+
+input_dir_long = ".";
+
+///////////// input_fmq_url_short /////////////////////
+//
+// FMQ from which to read the short pulse moments stream.
+//
+// REALTIME mode only.
+//
+//
+// Type: string
+//
+
+input_fmq_url_short = "/tmp/fmq/moments/100hz.shortPulse/shmem_20140";
+
+///////////// input_fmq_url_long //////////////////////
+//
+// FMQ from which to read the long pulse moments stream.
+//
+// REALTIME mode only.
+//
+//
+// Type: string
+//
+
+input_fmq_url_long = "/tmp/fmq/moments/100hz.longPulse/shmem_20120";
+
+///////////// seek_to_end_of_input_fmq ////////////////
+//
+// Option to seek to the end of the input FMQ.
+//
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+//
+//
+// Type: boolean
+//
+
+seek_to_end_of_input_fmq = TRUE;
+
+//======================================================================
+//
+// LIMIT RANGE?.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+//======================================================================
+//
+// SET THE COMBINED DWELL DETAILS.
+//
+//======================================================================
+ 
+///////////// dwell_length_secs ///////////////////////
+//
+// Specify the output dwell length (secs).
+//
+// Dwells from the input data will be combined to form dwells covering 
+//   the specified time.
+//
+//
+// Type: double
+//
+
+dwell_length_secs = 0.1;
+
+///////////// dwell_stats_method //////////////////////
+//
+// Method for computing stats on the dwell.
+//
+// MIDDLE refers to the middle ray in the dwell sequence. The 
+//   DISCRETE_MODE computes applies only to discrete (integer) fields, and 
+//   returns the most common entry in a discrete data set.
+//
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//     DWELL_STATS_DISCRETE_MODE
+//
+
+dwell_stats_method = DWELL_STATS_MEAN;
+
+///////////// dwell_stats_max_fraction_missing ////////
+//
+// Specify the max fraction of the dwell that can have missing data.
+//
+// We compute how much of the dwell is missing for each field. If the 
+//   fraction exceeds this parameter, the combined value will be set to 
+//   missing.
+//
+// Minimum val: 0
+// Maximum val: 1
+//
+// Type: double
+//
+
+dwell_stats_max_fraction_missing = 0.25;
+
+//======================================================================
+//
+// OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_stats_method_for_individual_fields //
+//
+// Set the stats method for individual fields.
+//
+// The global stats method is set by the 'dwell_stats_method' parameter. 
+//   If 'set_stats_method_for_individual_fields' is true, we can set the 
+//   stats method on particular fields. Fields not specified here will use 
+//   the global parameter.
+//
+//
+// Type: boolean
+//
+
+set_stats_method_for_individual_fields = FALSE;
+
+///////////// stats_method_fields /////////////////////
+//
+// Stats methods for individual fields.
+//
+// Applies if 'set_stats_method_for_individual_fields' is true. The 
+//   global stats method is set by the 'dwell_stats_method' parameter. 
+//   Fields not specified here will use the global parameter.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      dwell_stats_method_t stats_method;
+//        Options:
+//          DWELL_STATS_MEAN
+//          DWELL_STATS_MEDIAN
+//          DWELL_STATS_MAXIMUM
+//          DWELL_STATS_MINIMUM
+//          DWELL_STATS_MIDDLE
+//          DWELL_STATS_DISCRETE_MODE
+//   }
+//
+// 1D array - variable length.
+//
+
+stats_method_fields = {
+  {
+    field_name = "FLAG",
+    stats_method = DWELL_STATS_MEDIAN
+  }
+  ,
+  {
+    field_name = "ANTENNA_FLAG",
+    stats_method = DWELL_STATS_MIDDLE
+  }
+};
+
+//======================================================================
+//
+// OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// set_output_fields ///////////////////////
+//
+// Set the field names and output encoding.
+//
+// If false, all fields will be used.
+//
+//
+// Type: boolean
+//
+
+set_output_fields = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+//
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. Set the long name to a more descriptive name. 
+//   Set the standard name to the CF standard name for this field. If the 
+//   long name or standard name are empty, the existing names are used. If 
+//   SCALING_SPECIFIED, then the scale and offset is used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_ASIS
+//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t output_scaling;
+//        Options:
+//          SCALING_DYNAMIC
+//          SCALING_SPECIFIED
+//      double output_scale;
+//      double output_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "DBZ",
+    output_field_name = "DBZ",
+    long_name = "reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    output_units = "dBZ",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    output_field_name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity_of_scatterers_away_from_instrument",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+};
+
+///////////// exclude_specified_fields ////////////////
+//
+// Option to exclude fields in the specified list.
+//
+// If true, the specified fields will be excluded. This may be easier 
+//   than specifiying all of the fields to be included, if that list is 
+//   very long.
+//
+//
+// Type: boolean
+//
+
+exclude_specified_fields = FALSE;
+
+///////////// excluded_fields /////////////////////////
+//
+// List of fields to be excluded.
+//
+// List the names to be excluded.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+excluded_fields = {
+ "DBZ",
+ "VEL"
+};
+
+//======================================================================
+//
+// OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_output_encoding_for_all_fields //////
+//
+// Option to set output encoding for all fields.
+//
+//
+// Type: boolean
+//
+
+set_output_encoding_for_all_fields = FALSE;
+
+///////////// output_encoding /////////////////////////
+//
+// Output encoding for all fields, if requested.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_ASIS
+//     OUTPUT_ENCODING_FLOAT32
+//     OUTPUT_ENCODING_INT32
+//     OUTPUT_ENCODING_INT16
+//     OUTPUT_ENCODING_INT08
+//
+
+output_encoding = OUTPUT_ENCODING_ASIS;
+
+//======================================================================
+//
+// OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
+//
+// These transforms are fixed. The same transform is applied to all 
+//   files.
+//
+//======================================================================
+ 
+///////////// apply_linear_transforms /////////////////
+//
+// Apply linear transform to specified fields.
+//
+// If true, we will apply a linear transform to selected fields.
+//
+//
+// Type: boolean
+//
+
+apply_linear_transforms = FALSE;
+
+///////////// transform_fields ////////////////////////
+//
+// transform field details.
+//
+// Set the field name, scale and offset to be applied to the selected 
+//   fields. NOTE: the field name is the INPUT field name.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      double transform_scale;
+//      double transform_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_field_name = "DBZ",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+//
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+//
+//
+// Type: boolean
+//
+
+output_force_ngates_vary = FALSE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// WRITE CFRADIAL FILES.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "./output";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+//
+// If empty, the standard prefix will be used.
+//
+//
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// write_output_files_on_time_boundaries ///
+//
+// Option to write the output files on time boundaries.
+//
+// See 'output_file_time_interval_secs'.
+//
+//
+// Type: boolean
+//
+
+write_output_files_on_time_boundaries = FALSE;
+
+///////////// output_file_time_interval_secs //////////
+//
+// Time interval at which files will be written out (secs).
+//
+// See 'split_output_files_on_time'. To make sense, this interval should 
+//   divide evenly into an hour - i.e. 3600.
+//
+//
+// Type: int
+//
+
+output_file_time_interval_secs = 600;
+
+///////////// include_instrument_name_in_file_name ////
+//
+// Option to include the instrument name in the file name.
+//
+// Only applies to CfRadial files. If true, the instrument name will be 
+//   included just before the volume number in the output file name.
+//
+//
+// Type: boolean
+//
+
+include_instrument_name_in_file_name = TRUE;
+
+///////////// include_site_name_in_file_name //////////
+//
+// Option to include the site name in the file name.
+//
+// Only applies to CfRadial files. If true, the site name will be 
+//   included just before the volume number in the output file name.
+//
+//
+// Type: boolean
+//
+
+include_site_name_in_file_name = FALSE;
+
+///////////// include_subsecs_in_file_name ////////////
+//
+// Option to include sub-seconds in date-time part of file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the 
+//   millisecs of the start and end time will be included in the file 
+//   name.
+//
+//
+// Type: boolean
+//
+
+include_subsecs_in_file_name = TRUE;
+
+///////////// include_scan_type_in_file_name //////////
+//
+// Option to include the scan type in the file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the scan 
+//   type (SUR, SEC, RHI, VER etc) will be included in the file name.
+//
+//
+// Type: boolean
+//
+
+include_scan_type_in_file_name = TRUE;
+
+///////////// include_vol_num_in_file_name ////////////
+//
+// Option to include the volume number in the file name.
+//
+// Default is false. Only applies to CfRadial files. If true, the volume 
+//   number is included in the file name, preceded by '_v'.
+//
+//
+// Type: boolean
+//
+
+include_vol_num_in_file_name = FALSE;
+
+///////////// use_hyphen_in_file_name_datetime_part ///
+//
+// Option to use a hyphen between date and time in filename.
+//
+// Default is false. Only applies to CfRadial files. Normally an 
+//   underscore is used.
+//
+//
+// Type: boolean
+//
+
+use_hyphen_in_file_name_datetime_part = FALSE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+//
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// OUTPUT IN FMQ MODE.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// FMQ to which the combined dwells are written.
+//
+// FMQ mode only.
+//
+//
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/moments/100hz.combined/shmem_20200";
+
+///////////// output_fmq_compress /////////////////////
+//
+// Option to compress the output fmq.
+//
+// The default is for no compression.
+//
+//
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// output_fmq_n_slots //////////////////////
+//
+// Number of slots in output FMQ.
+//
+//
+// Type: int
+//
+
+output_fmq_n_slots = 5000;
+
+///////////// output_fmq_buf_size /////////////////////
+//
+// Size of buffer in output FMQ.
+//
+//
+// Type: int
+//
+
+output_fmq_buf_size = 100000000;
+
+///////////// output_fmq_write_blocking ///////////////
+//
+// Option to block on write when the radar queue fills up.
+//
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+//
+//
+// Type: boolean
+//
+
+output_fmq_write_blocking = FALSE;
+
+///////////// output_fmq_data_mapper_report_interval //
+//
+// Number of seconds between reports to DataMapper.
+//
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+//
+//
+// Type: int
+//
+
+output_fmq_data_mapper_report_interval = 5;
+

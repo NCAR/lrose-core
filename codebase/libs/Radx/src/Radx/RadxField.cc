@@ -250,7 +250,7 @@ RadxField &RadxField::_copy(const RadxField &rhs)
 
   // for copy, always make local copy of data
 
-  _buf.reset();
+  _buf.clear();
   _data = _buf.add(rhs._data, rhs.getNBytes());
   _dataIsLocal = true;
   copyPacking(rhs);
@@ -582,7 +582,7 @@ void RadxField::addDataFl32(size_t nGates,
   _printTypeMismatch("addDataFl32", Radx::FL32);
   assert(_dataType == Radx::FL32);
   assert(_dataIsLocal);
-  
+   
   // add data to the buffer
   
   _data = _buf.add(data, nGates * sizeof(Radx::fl32));

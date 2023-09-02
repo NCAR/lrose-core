@@ -1,0 +1,471 @@
+/*********************************************************
+ * parameter definitions for HcrShortLongCombine
+ *
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Aug 2023
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the high-rate (100Hz) rays into longer dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to register this process with the process mapper (procmap).";
+  p_help = "If TRUE, every minute this process will register a heartbeat with procmap. If the process hangs, it will be restared by the auto_restarter.";
+} register_with_procmap;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+typedef enum {
+  REALTIME, ARCHIVE
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = REALTIME;
+  p_descr = "Operating mode";
+  p_help = "\n\nREALTIME: read data from two moments FMQ, combine the dwells and write to an output queue. \n\nARCHIVE: move through the data between the start and end times set on the command line.";
+} mode;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory short.";
+  p_help = "ARCHIVE mode only. Directory for short pulse files.";
+} input_dir_short;
+
+paramdef string {
+  p_default = ".";
+  p_descr = "Input directory long.";
+  p_help = "ARCHIVE mode only. Directory for long pulse files.";
+} input_dir_long;
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/input_short";
+  p_descr = "FMQ from which to read the short pulse moments stream.";
+  p_help = "REALTIME mode only.";
+} input_fmq_url_short;
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/input_long";
+  p_descr = "FMQ from which to read the long pulse moments stream.";
+  p_help = "REALTIME mode only.";
+} input_fmq_url_long;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Option to seek to the end of the input FMQ.";
+  p_help = "If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.";
+} seek_to_end_of_input_fmq;
+
+commentdef {
+  p_header = "LIMIT RANGE?";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+commentdef {
+  p_header = "SET THE COMBINED DWELL DETAILS";
+}
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Specify the output dwell length (secs).";
+  p_help = "Dwells from the input data will be combined to form dwells covering the specified time.";
+} dwell_length_secs;
+
+typedef enum {
+  DWELL_STATS_MEAN = 0,
+  DWELL_STATS_MEDIAN = 1,
+  DWELL_STATS_MAXIMUM = 2,
+  DWELL_STATS_MINIMUM = 3,
+  DWELL_STATS_MIDDLE = 4,
+  DWELL_STATS_DISCRETE_MODE = 5
+} dwell_stats_method_t;
+
+paramdef enum dwell_stats_method_t {
+  p_default = DWELL_STATS_MEAN;
+  p_descr = "Method for computing stats on the dwell.";
+  p_help = "MIDDLE refers to the middle ray in the dwell sequence. The DISCRETE_MODE computes applies only to discrete (integer) fields, and returns the most common entry in a discrete data set.";
+} dwell_stats_method;
+
+paramdef double {
+  p_default = 0.25;
+  p_min = 0.0;
+  p_max = 1.0;
+  p_descr = "Specify the max fraction of the dwell that can have missing data.";
+  p_help = "We compute how much of the dwell is missing for each field. If the fraction exceeds this parameter, the combined value will be set to missing.";
+} dwell_stats_max_fraction_missing;
+
+commentdef {
+  p_header = "OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the stats method for individual fields.";
+  p_help = "The global stats method is set by the 'dwell_stats_method' parameter. If 'set_stats_method_for_individual_fields' is true, we can set the stats method on particular fields. Fields not specified here will use the global parameter.";
+} set_stats_method_for_individual_fields;
+
+typedef struct {
+  string field_name; 
+  dwell_stats_method_t stats_method;
+} stats_method_field_t;
+
+paramdef struct stats_method_field_t {
+  p_default = {
+    { "FLAG", DWELL_STATS_MEDIAN},
+    { "ANTENNA_FLAG", DWELL_STATS_MIDDLE}
+  };
+  p_descr = "Stats methods for individual fields.";
+  p_help = "Applies if 'set_stats_method_for_individual_fields' is true. The global stats method is set by the 'dwell_stats_method' parameter. Fields not specified here will use the global parameter.";
+} stats_method_fields[];
+
+commentdef {
+  p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the field names and output encoding";
+  p_help = "If false, all fields will be used.";
+} set_output_fields;
+
+typedef enum {
+  OUTPUT_ENCODING_ASIS,
+  OUTPUT_ENCODING_FLOAT32,
+  OUTPUT_ENCODING_INT32,
+  OUTPUT_ENCODING_INT16,
+  OUTPUT_ENCODING_INT08
+} output_encoding_t;
+
+typedef enum {
+  SCALING_DYNAMIC,
+  SCALING_SPECIFIED
+} output_scaling_t;
+
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string long_name; 
+  string standard_name; 
+  string output_units;
+  output_encoding_t encoding;
+  output_scaling_t output_scaling;
+  double output_scale;
+  double output_offset;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "DBZ",
+      "DBZ",
+      "reflectivity",
+      "equivalent_reflectivity_factor",
+      "dBZ",
+      OUTPUT_ENCODING_ASIS,
+      SCALING_DYNAMIC, 0.01, 0.0
+    },
+    { "VEL", 
+      "VEL", 
+      "radial_velocity",
+      "radial_velocity_of_scatterers_away_from_instrument",
+      "m/s", 
+      OUTPUT_ENCODING_ASIS,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+  };
+  p_descr = "Output field details.";
+  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
+} output_fields[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to exclude fields in the specified list.";
+  p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
+} exclude_specified_fields;
+
+paramdef string {
+  p_default = { "DBZ", "VEL" };
+  p_descr = "List of fields to be excluded.";
+  p_help = "List the names to be excluded";
+} excluded_fields[];
+
+commentdef {
+  p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set output encoding for all fields";
+} set_output_encoding_for_all_fields;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_ASIS;
+  p_descr = "Output encoding for all fields, if requested.";
+} output_encoding;
+
+commentdef {
+  p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
+  p_text = "These transforms are fixed. The same transform is applied to all files.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Apply linear transform to specified fields.";
+  p_help = "If true, we will apply a linear transform to selected fields.";
+} apply_linear_transforms;
+
+typedef struct {
+  string input_field_name; 
+  double transform_scale;
+  double transform_offset;
+} transform_field_t;
+
+paramdef struct transform_field_t {
+  p_default = {
+    { "DBZ", 1.0, 0.0},
+    { "VEL", 1.0, 0.0}
+  };
+  p_descr = "transform field details.";
+  p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name.";
+} transform_fields[];
+
+commentdef {
+  p_header = "OUTPUT FORMAT";
+}
+
+typedef enum {
+  OUTPUT_FORMAT_CFRADIAL,
+  OUTPUT_FORMAT_DORADE,
+  OUTPUT_FORMAT_FORAY,
+  OUTPUT_FORMAT_NEXRAD,
+  OUTPUT_FORMAT_UF,
+  OUTPUT_FORMAT_MDV_RADIAL
+} output_format_t;
+
+paramdef enum output_format_t {
+  p_default = OUTPUT_FORMAT_CFRADIAL;
+  p_descr = "Format for the output files.";
+} output_format;
+
+typedef enum {
+  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
+} netcdf_style_t;
+
+paramdef enum netcdf_style_t {
+  p_default = NETCDF4;
+  p_descr = "NetCDF style - if output_format is CFRADIAL";
+  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
+} netcdf_style;
+
+commentdef {
+  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to leave data in native byte order.";
+  p_help = "If false, data will be byte-swapped as appropriate on output.";
+} output_native_byte_order;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to compress data fields on output.";
+  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
+} output_compressed;
+
+commentdef {
+  p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the use of ragged arrays for CfRadial files.";
+  p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
+} output_force_ngates_vary;
+
+paramdef int {
+  p_default = 4;
+  p_descr = "Compression level for output, if compressed.";
+  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
+} compression_level;
+
+commentdef {
+  p_header = "WRITE CFRADIAL FILES";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Files will be written to this directory.";
+} output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used.";
+} output_filename_prefix;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write the output files on time boundaries.";
+  p_help = "See 'output_file_time_interval_secs'.";
+} write_output_files_on_time_boundaries;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Time interval at which files will be written out (secs).";
+  p_help = "See 'split_output_files_on_time'. To make sense, this interval should divide evenly into an hour - i.e. 3600.";
+} output_file_time_interval_secs;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the site name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.";
+} include_site_name_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include sub-seconds in date-time part of file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
+} include_subsecs_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the scan type in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
+} include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the volume number in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
+} include_vol_num_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a hyphen between date and time in filename.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
+} use_hyphen_in_file_name_datetime_part;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out individual sweeps if appropriate.";
+  p_help = "If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.";
+} write_individual_sweeps;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out _latest_data_info files.";
+  p_help = "If true, the _latest_data_info files will be written after the converted file is written.";
+} write_latest_data_info;
+
+commentdef {
+  p_header = "OUTPUT IN FMQ MODE";
+}
+
+paramdef string {
+  p_default = "fmqp:://localhost::/tmp/fmq/output";
+  p_descr = "FMQ to which the combined dwells are written.";
+  p_help = "FMQ mode only.";
+} output_fmq_url;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to compress the output fmq.";
+  p_help = "The default is for no compression.";
+} output_fmq_compress;
+
+paramdef int {
+  p_default = 5000;
+  p_descr = "Number of slots in output FMQ.";
+} output_fmq_n_slots;
+
+paramdef int {
+  p_default = 100000000;
+  p_descr = "Size of buffer in output FMQ.";
+} output_fmq_buf_size;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to block on write when the radar queue fills up.";
+  p_help = "If false, the program writes data to the output queue without regard to whether the reader is keeping up. This mode should usually be used in realtime, to avoid holding things up if a client becomes slow. If true, the program will not overwrite data in the queue which has not been read by the reader. This is recommended for ARCHIVE and FILELIST mode. In this mode there should be only one reader. If you need to service more than one reader, use Fmq2Fmq in write blocking mode with multiple output urls to multiplex the queue.";
+} output_fmq_write_blocking;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Number of seconds between reports to DataMapper.";
+  p_help = "If > 0, the program will register with the DataMapper when the output FMQs are written to. If <= 0, registration will not be performed.";
+} output_fmq_data_mapper_report_interval;
+

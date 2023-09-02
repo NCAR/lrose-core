@@ -491,7 +491,8 @@ typedef enum {
   WATERFALL_TDBZ_INT,
   WATERFALL_SDEV_ZDR_INT,
   WATERFALL_SDEV_PHIDP_INT,
-  WATERFALL_CMD
+  WATERFALL_CMD,
+  WATERFALL_CMD_MEAN
 } waterfall_type_t;
 
 typedef struct {
@@ -622,6 +623,11 @@ paramdef string {
   p_default = "cmd_spectra.colors";
   p_descr = "Color scale name for CMD";
 } waterfall_cmd_color_scale_name;
+
+paramdef string {
+  p_default = "cmd_mean.colors";
+  p_descr = "Color scale name for CMD SPECTRAL MEAN";
+} waterfall_cmd_mean_color_scale_name;
 
 paramdef int {
   p_default = 10;

@@ -136,7 +136,8 @@ public:
     WATERFALL_TDBZ_INT = 12,
     WATERFALL_SDEV_ZDR_INT = 13,
     WATERFALL_SDEV_PHIDP_INT = 14,
-    WATERFALL_CMD = 15
+    WATERFALL_CMD = 15,
+    WATERFALL_CMD_MEAN = 16
   } waterfall_type_t;
 
   typedef enum {
@@ -701,6 +702,8 @@ public:
 
   char* waterfall_cmd_color_scale_name;
 
+  char* waterfall_cmd_mean_color_scale_name;
+
   int waterfall_title_font_size;
 
   int waterfall_axis_label_font_size;
@@ -960,7 +963,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[224];
+  mutable TDRPtable _table[225];
 
   const char *_className;
 

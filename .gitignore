@@ -67,6 +67,7 @@ codebase/install-sh
 codebase/missing
 codebase/stamp-h1
 codebase/autom4te.cache
+codebase/build*
 
 # qt
 
@@ -474,6 +475,7 @@ codebase/apps/radar/src/IpsTsSim/IpsTsSim
 codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
 codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
 
+codebase/apps/radar/src/HcrShortLongCombine/HcrShortLongCombine
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/HcrVelCorrect/ReadEgm2008/ReadEgm2008
 codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain

@@ -72,7 +72,7 @@ public:
     string fullUrl,
     bool keepTimeRange = false);
 
-  string &getSelectedArchiveFile();
+  string getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   int getSelectedArchiveFileIndex();
   string getArchiveFilePath(int idx);

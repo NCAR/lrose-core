@@ -92,7 +92,7 @@ public:
   void setSelectedFile(string fileName);
 
   string getCurrentPath();
-  string &getSelectedArchiveFile();
+  string getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   string getArchiveFilePath(int idx);
   string getArchiveFileName(int idx);

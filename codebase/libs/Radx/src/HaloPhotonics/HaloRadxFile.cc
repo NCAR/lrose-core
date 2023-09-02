@@ -218,8 +218,23 @@ int HaloRadxFile::_getNGates(unordered_map<string, string> &dictionary) {
     nGates = atoi(nGatesValue.c_str());
   } else {
     std::cerr << "Number of gates not found\n";
+    return 0;
   } 
   return nGates;
+}
+
+int HaloRadxFile::_getNRays(unordered_map<string, string> &dictionary) {
+
+  int nRays = 0;
+  unordered_map<string, string>::iterator it = dictionary.find("No. of rays in file");
+  if (it != dictionary.end()) {
+    string value = it->second;
+    nRays = atoi(value.c_str());
+  } else {
+    std::cerr << "Number of rays not found\n";
+    return 0;
+  } 
+  return nRays;
 }
 
 ////////////////////////////////////////////////////////////
@@ -345,14 +360,16 @@ int HaloRadxFile::readFromPath(const string &path,
 
   //_readRayQualifiers(_rayQualifiers);
 
-  int nGates = _getNGates(_rawHeaderInfo);
+  int nGatesPerRay = _getNGates(_rawHeaderInfo);
   vector<Field>::iterator it;
   for (it = _fields.begin(); it != _fields.end(); ++ it) {
-    it->data.reserve(nGates);
+    it->data.reserve(nGatesPerRay);
   }
 
+  int nRaysInFile = _getNRays(_rawHeaderInfo);
+
   // read in ray data
-  int iret = _readRayData();
+  int iret = _readRayData(nRaysInFile, nGatesPerRay);
 
   if (iret) {
     _addErrStr("ERROR - HaloRadxFile::readFromPath");
@@ -397,7 +414,7 @@ int HaloRadxFile::_readHeaderData(string &xml)
   
 {
 
-  int nHeaderLines = 0;
+  // int nHeaderLines = 0;
   int nLinesRead = 0;
 
   _ranges.clear();
@@ -776,7 +793,7 @@ void HaloRadxFile::_findFields(string &columnLabel)
   // loop through the column labels
 
   //double firstRange = _ranges[0];
-  bool foundFirstRange = false;
+  // bool foundFirstRange = false;
   string rangeGate = "Range Gate";
   size_t ii = ll.find(rangeGate);
   if (ii != string::npos) {
@@ -973,12 +990,31 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
           " ray qualifiers, found " << toks.size() << endl;
         return error;
       }
+
+      // Let's assume the token order is the same as the RayQualifier order
+      
       string value;
 
       // time is in hours
       value = toks[0];
-      RadxTime rtime(value.c_str());
-      ray->setTime(rtime.utime(), (int) (rtime.getSubSec() * 1.0e9 + 0.5));
+      double timeInHours = atof(value.c_str());
+      printf("timeInHours %15.12f original string: %s\n", timeInHours, value.c_str());
+      int minutesInHour = 60;  // also seconds in minute
+      // int secondsInHour = minutesInHour * 60;
+      int hours = int(timeInHours);
+      double minutesf = timeInHours - hours;
+      int minutes = int(minutesf * minutesInHour);
+      double secondsf = minutesf - minutes;
+      int seconds = int(secondsf * 60); // seconds in minute
+      double subseconds = (secondsf - seconds) * 1.0e3;
+      RadxTime rtime(hours, minutes, seconds, subseconds);
+      cerr.precision(10);
+      cerr << "Ray time: " << hours << ":" << minutes 
+        << ":" << seconds << "." << subseconds << endl;  
+      ray->setTime(rtime.utime(), subseconds);
+      double reconstituted = hours + minutes/minutesInHour + seconds/(60*60) + subseconds/1.0e3;
+      cerr << "Ray time reconstituted: " << reconstituted << " vs. original "
+       << timeInHours << " diff = " << timeInHours - reconstituted << endl;
 
       value = toks[1];   
       double az = 0.0;
@@ -992,8 +1028,9 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
         el -= 360.0;
       }
       ray->setElevationDeg(el);
-  
-      ray = new RadxRay;
+
+      // TODO: get the pitch and the roll
+
       ray->setVolumeNumber(0);
       ray->setSweepNumber(0); 
 /*
@@ -1048,20 +1085,27 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
 // <gate 0> <field 1 data> <field 2 data> ...
 // <gate N-1> <field 1 data> <field 2 data>
 
-int HaloRadxFile::_readRayData() {
-  int error = -1;
+int HaloRadxFile::_readRayData(int  nRaysInFile, int nGatesPerRay) {
+  // int error = -1;
+  int nRays = 0;
   RadxRay *ray = NULL;
   // read the values for the ray qualifiers
   char line[65536];
-  while (!feof(_file)) {
+  while (!feof(_file) && (nRays < nRaysInFile)) {
     // get data columns array
     if (fgets(line, 65536, _file) != NULL) {
+      cerr << "reading ray " << nRays << endl;
+      ray = new RadxRay();
       _readRayQualifiers(ray, line);
       _readRayData(ray, _fields);
       // add ray to vector
       _rays.push_back(ray);  
+      nRays += 1;
     }
   } // while
+  if (nRays != nRaysInFile) {
+    cerr << "Not enough rays in file: expected " << endl;
+  }
   return 0;
 }
 
@@ -1079,11 +1123,12 @@ int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
   char line[65536];
 
   // get next line
-  fgets(line, 65536, _file);
+  char *cc = fgets(line, 65536, _file);
   while (!feof(_file) && (igate < nGates)) {
      _readNStoreFieldData(line, fields, igate);
      // get next line
-     fgets(line, 65536, _file); 
+     cc = fgets(line, 65536, _file);
+     if (cc) {} // suppress compiler warning
      igate += 1;
   }
   //if (igate == nGates) {
@@ -1853,9 +1898,9 @@ string HaloRadxFile::_stripLine(const char *line)
   
   string stripped(line, lineLen);
 
-  for (string::iterator it = stripped.begin(); it != stripped.end(); ++it) {
-    *it = std::tolower(*it);
-  } 
+  //for (string::iterator it = stripped.begin(); it != stripped.end(); ++it) {
+  //  *it = std::tolower(*it);
+  //} 
 
   return stripped;
 
