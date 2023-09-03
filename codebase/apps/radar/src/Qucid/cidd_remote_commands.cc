@@ -333,7 +333,7 @@ void remote_set_domain_name(char *name)
     // label = (char *) xv_get(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,i);
     if(label != NULL)  {
         if(strncmp(name,label,PARSE_FIELD_SIZE) == 0) {
-          set_domain_proc(gd.zoom_pu->domain_st,i, (Event *) NULL);
+          // set_domain_proc(gd.zoom_pu->domain_st,i, (Event *) NULL);
           return;
         }
       }
@@ -345,7 +345,7 @@ void remote_set_domain_name(char *name)
 void remote_set_domain_num(int num)
 {
   if(num >= 0 && num < gd.h_win.num_zoom_levels - NUM_CUSTOM_ZOOMS) {
-       set_domain_proc(gd.zoom_pu->domain_st,num, (Event *) NULL);
+       // set_domain_proc(gd.zoom_pu->domain_st,num, (Event *) NULL);
   }
 }
 

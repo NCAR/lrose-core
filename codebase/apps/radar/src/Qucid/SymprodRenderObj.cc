@@ -36,6 +36,7 @@
 #include "Product.hh"
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
+#include <toolsa/TaArray.hh>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>     // Map projection geometry
 
@@ -390,8 +391,9 @@ void SymprodRenderPolyline::draw(RenderContext &context)
 
   // copy the points
 
-  Symprod::wpt_t points[_props.num_points];
-  memcpy(points, _points, sizeof(points));
+  TaArray<Symprod::wpt_t> points__;
+  Symprod::wpt_t *points = points__.alloc(_props.num_points);
+  memcpy(points, _points, _props.num_points * sizeof(Symprod::wpt_t));
 
   // adjust the lon range of the latlon points as applicable
 
@@ -539,6 +541,7 @@ void SymprodRenderPolyline::draw(RenderContext &context)
 	
 	XDrawLines(context.display,context.xid,context.gc,bpt,8,CoordModeOrigin);
   }
+
 }
 
 double SymprodRenderPolyline::dist(double lat, double lon)
@@ -603,7 +606,9 @@ void SymprodRenderIconline::draw(RenderContext &context)
   // taking the origin and scaling the offsets accordingly
 
   double penup = -9999.0;
-  GPoint gpts[_props.num_points];
+
+  TaArray<GPoint> gpts__;
+  GPoint *gpts = gpts__.alloc(_props.num_points);
 
   for (int i = 0; i < _props.num_points; i++) {
     if (_points[i].x == Symprod::PPT_PENUP &&

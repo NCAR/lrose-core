@@ -82,7 +82,7 @@ TimePlot::TimePlot(Color_gc_t &background,
 //////////////////////////////////////////
 // INIT: Set up the Time plot graphics, etc
 //
-void TimePlot::Init(Display *dpy, GC gc, Colormap cmap, Canvas canvas)
+void TimePlot::Init(Display *dpy, GC gc, Colormap cmap /* , Canvas canvas */)
 {
     Window  root; // Root window ID of drawable
     unsigned int    border_width,depth; 
@@ -92,7 +92,7 @@ void TimePlot::Init(Display *dpy, GC gc, Colormap cmap, Canvas canvas)
     display = dpy;
     cmap = cmap;
     gc = gc;
-    canvas = canvas;
+    // canvas = canvas;
 
     // win_height = xv_get(gd.movie_pu->movie_pu,WIN_HEIGHT);
 
@@ -237,7 +237,7 @@ void TimePlot::Event_handler(long x_pixel, long y_pixel, long event_id, long but
 		      if(frame > nframes) frame = nframes;
 
 		      // xv_set(gd.movie_pu->movie_frame_sl, PANEL_VALUE, frame, NULL);
-		      movie_frame_proc(gd.movie_pu->movie_frame_sl,frame, (Event*)NULL);
+		      // movie_frame_proc(gd.movie_pu->movie_frame_sl,frame, (Event*)NULL);
 		  }
 	      } else {
 	          switch(drag_in_progress) {

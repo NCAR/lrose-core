@@ -147,9 +147,9 @@ extern void check_for_io();
 #endif
 
 #ifndef DATA_PU_PROC
-extern void set_data_proc( Panel_item item, int value, Event *event);
+// extern void set_data_proc( Panel_item item, int value, Event *event);
 extern void set_field(int value);
-extern int set_group_proc(Panel_item item, const char *string, Xv_opaque client_data, Panel_list_op op, Event *event, int row);
+// extern int set_group_proc(Panel_item item, const char *string, Xv_opaque client_data, Panel_list_op op, Event *event, int row);
 #endif
 
 #ifndef MDVX_DATA_REQUEST
@@ -167,94 +167,94 @@ void update_draw_export_panel();
 
 #ifndef PAGE_PU_PROC
 extern void set_color( const char *cname, void* c_data);
-extern void ref_mark_proc(Panel_item item, int value, Event *event);
-extern void wind_scale_proc(Panel_item item, int value, Event *event);
-extern void cont_activate_proc(Panel_item item, int value, Event *event);
-extern void cont_label_set_proc(Panel_item item, int value, Event *event);
-extern Panel_setting cont_fr_proc(Panel_item item, Event *event);
-extern Panel_setting cont_to_proc(Panel_item item, Event *event) ;
-extern Panel_setting cont_int_proc(Panel_item item, Event *event);
-extern Menu cont_field_mu_gen(Menu menu, Menu_generate op);
-extern void dim_im_proc(Panel_item item, int value, Event *event);
-extern void ref_color_proc(Panel_item item, Event *event);
-extern void cont_color_proc(Panel_item item, Event *event);
-extern void vect_set_color_proc(Panel_item item, Event *event);
-extern void set_ov_color_proc(Panel_item item, Event *event);
-extern int vect_field_num_set_proc(Panel_item item, const char *string,
-                            Xv_opaque client_data, Panel_list_op  op,
-                            Event *event, int row);
-extern int over_select_proc(Panel_item item, const char *string,
-                      Xv_opaque client_data, Panel_list_op  op,
-                      Event *event, int row);
-extern void prod_font_sel_proc(Panel_item item, int value, Event *event);
-extern void prod_line_width_proc(Panel_item item, int value, Event *event);
-extern void prod_time_sel_proc(Panel_item item, int value, Event *event);
-extern void prod_time_width_proc(Panel_item item, int value, Event *event);
-extern Panel_setting overlay_fld_max_proc(Panel_item item, Event *event);
-extern void overlay_fld_on_proc(Panel_item item, int value, Event *event);
-extern void set_cont_field_proc(Panel_item item, Event *event);
-extern void set_ov_fld_proc(Panel_item item, Event *event);
-extern void cont_field_proc(Menu menu, Menu_item item);
-extern void cont_layer_set_proc( Panel_item item, int value, Event *event);
-extern void update_layered_contour_panel();
-extern void ov_field_num_sel_proc( Panel_item item, int value, Event *event);
-extern void update_layered_field_panel();
-extern void save_h_image_proc(Panel_item item, Event *event);
-extern void layer_mode_proc(Panel_item item, int value, Event *event);
-extern void layer_legend_proc(Panel_item item, int value, Event *event);
-extern void cont_legend_proc(Panel_item item, int value, Event *event);
-extern void wind_legend_proc(Panel_item item, int value, Event *event);
+// extern void ref_mark_proc(Panel_item item, int value, Event *event);
+// extern void wind_scale_proc(Panel_item item, int value, Event *event);
+// extern void cont_activate_proc(Panel_item item, int value, Event *event);
+// extern void cont_label_set_proc(Panel_item item, int value, Event *event);
+// extern Panel_setting cont_fr_proc(Panel_item item, Event *event);
+// extern Panel_setting cont_to_proc(Panel_item item, Event *event) ;
+// extern Panel_setting cont_int_proc(Panel_item item, Event *event);
+// extern Menu cont_field_mu_gen(Menu menu, Menu_generate op);
+// extern void dim_im_proc(Panel_item item, int value, Event *event);
+// extern void ref_color_proc(Panel_item item, Event *event);
+// extern void cont_color_proc(Panel_item item, Event *event);
+// extern void vect_set_color_proc(Panel_item item, Event *event);
+// extern void set_ov_color_proc(Panel_item item, Event *event);
+// extern int vect_field_num_set_proc(Panel_item item, const char *string,
+//                             Xv_opaque client_data, Panel_list_op  op,
+//                             Event *event, int row);
+// extern int over_select_proc(Panel_item item, const char *string,
+//                       Xv_opaque client_data, Panel_list_op  op,
+//                       Event *event, int row);
+// extern void prod_font_sel_proc(Panel_item item, int value, Event *event);
+// extern void prod_line_width_proc(Panel_item item, int value, Event *event);
+// extern void prod_time_sel_proc(Panel_item item, int value, Event *event);
+// extern void prod_time_width_proc(Panel_item item, int value, Event *event);
+// extern Panel_setting overlay_fld_max_proc(Panel_item item, Event *event);
+// extern void overlay_fld_on_proc(Panel_item item, int value, Event *event);
+// extern void set_cont_field_proc(Panel_item item, Event *event);
+// extern void set_ov_fld_proc(Panel_item item, Event *event);
+// extern void cont_field_proc(Menu menu, Menu_item item);
+// extern void cont_layer_set_proc( Panel_item item, int value, Event *event);
+// extern void update_layered_contour_panel();
+// extern void ov_field_num_sel_proc( Panel_item item, int value, Event *event);
+// extern void update_layered_field_panel();
+// extern void save_h_image_proc(Panel_item item, Event *event);
+// extern void layer_mode_proc(Panel_item item, int value, Event *event);
+// extern void layer_legend_proc(Panel_item item, int value, Event *event);
+// extern void cont_legend_proc(Panel_item item, int value, Event *event);
+// extern void wind_legend_proc(Panel_item item, int value, Event *event);
 #endif
 
 #ifndef FIELDS_PU_PROC
-extern int field_display_proc(Panel_item item, const char *string, Xv_opaque client_data,
-                       Panel_list_op op, Event* eventr, int row);
-extern void config_field_proc(Menu menu, Menu_item item);
-extern void update_grid_config_gui();
-extern void update_wind_config_gui();
-extern void update_prod_config_gui();
-extern void set_cscale_apply_proc(Panel_item item, Event *event);
-extern void set_composite_proc(Panel_item item, int value, Event *event);
-extern void set_ren_meth_proc(Panel_item item, int value, Event *event);
-extern void set_update_proc(Panel_item item, int value, Event *event);
-extern void set_servmap_proc(Panel_item item, int value, Event *event);
-extern Menu field_mu_gen_proc( Menu  menu, Menu_generate op);
-extern Panel_setting set_host_proc(Panel_item item, Event *event);
-extern Panel_setting set_port_proc(Panel_item item, Event *event);
-extern Panel_setting set_field_no_proc(Panel_item item, Event *event);
-extern Panel_setting set_stretch_proc(Panel_item item, Event *event);
-extern Panel_setting set_subtype_proc(Panel_item item, Event *event);
-extern Panel_setting set_instance_proc(Panel_item item, Event *event);
-extern Panel_setting set_cscale_min_proc(Panel_item item, Event *event);
-extern Panel_setting set_cscale_max_proc(Panel_item item, Event *event);
-extern Panel_setting set_time_offset_proc(Panel_item item, Event *event);
+// extern int field_display_proc(Panel_item item, const char *string, Xv_opaque client_data,
+//                        Panel_list_op op, Event* eventr, int row);
+// extern void config_field_proc(Menu menu, Menu_item item);
+// extern void update_grid_config_gui();
+// extern void update_wind_config_gui();
+// extern void update_prod_config_gui();
+// extern void set_cscale_apply_proc(Panel_item item, Event *event);
+// extern void set_composite_proc(Panel_item item, int value, Event *event);
+// extern void set_ren_meth_proc(Panel_item item, int value, Event *event);
+// extern void set_update_proc(Panel_item item, int value, Event *event);
+// extern void set_servmap_proc(Panel_item item, int value, Event *event);
+// extern Menu field_mu_gen_proc( Menu  menu, Menu_generate op);
+// extern Panel_setting set_host_proc(Panel_item item, Event *event);
+// extern Panel_setting set_port_proc(Panel_item item, Event *event);
+// extern Panel_setting set_field_no_proc(Panel_item item, Event *event);
+// extern Panel_setting set_stretch_proc(Panel_item item, Event *event);
+// extern Panel_setting set_subtype_proc(Panel_item item, Event *event);
+// extern Panel_setting set_instance_proc(Panel_item item, Event *event);
+// extern Panel_setting set_cscale_min_proc(Panel_item item, Event *event);
+// extern Panel_setting set_cscale_max_proc(Panel_item item, Event *event);
+// extern Panel_setting set_time_offset_proc(Panel_item item, Event *event);
 #endif
 
 #ifndef GRAPHIC_MARGIN_EVENTS
-extern void top_margin_event(Event *event);
-extern void bot_margin_event(Event *event);
-extern void left_margin_event(Event *event);
-extern void right_margin_event(Event *event);
+// extern void top_margin_event(Event *event);
+// extern void bot_margin_event(Event *event);
+// extern void left_margin_event(Event *event);
+// extern void right_margin_event(Event *event);
 void set_height(int index);
 #endif
 
 #ifndef GRAPHIC_CANVAS_EVENTS_BKWD
-extern Notify_value can_event_proc_bkwd(Xv_window win, Event *event,
-                            Notify_arg arg, Notify_event_type type);
+// extern Notify_value can_event_proc_bkwd(Xv_window win, Event *event,
+//                             Notify_arg arg, Notify_event_type type);
 #endif
 
 #ifndef GRAPHIC_CANVAS_EVENTS
-extern Notify_value can_event_proc(Xv_window win, Event *event,
-                            Notify_arg arg, Notify_event_type type);
-extern void can_repaint( Canvas canvas, Window paint_window, Display *display,
-                         Window xid /* , Xv_xrectlist *rects */);
-extern void process_rotate_keys(Event*);
+// extern Notify_value can_event_proc(Xv_window win, Event *event,
+//                             Notify_arg arg, Notify_event_type type);
+// extern void can_repaint( Canvas canvas, Window paint_window, Display *display,
+//                          Window xid /* , Xv_xrectlist *rects */);
+// extern void process_rotate_keys(Event*);
 #endif
-extern void handle_click_h(Event *event,
-                           int clickXPixel, int clickYPixel,
-                           double clickXKm, double clickYKm,
-                           double clickLat, double clickLon,
-                           int clickType);
+// extern void handle_click_h(Event *event,
+//                            int clickXPixel, int clickYPixel,
+//                            double clickXKm, double clickYKm,
+//                            double clickLat, double clickLon,
+//                            int clickType);
 
 #ifndef GRAPHIC_CHECK
 extern void check_for_invalid_images(int index);
@@ -282,8 +282,8 @@ extern void manage_v_pixmaps( int mode);
 #endif
 
 #ifndef GRAPHIC_PANEL
-extern Notify_value h_pan_event_proc( Xv_window   win, Event *event,
-                               Notify_arg  arg, Notify_event_type type);
+// extern Notify_value h_pan_event_proc( Xv_window   win, Event *event,
+//                                Notify_arg  arg, Notify_event_type type);
 #endif
 
 #ifndef GRAPHIC_RESET
@@ -297,20 +297,20 @@ extern void prev_cache_image();
 #endif
 
 #ifndef GRAPHIC_RESIZE
-extern Notify_value h_win_events( Frame frame, Event *event,
-                       Notify_arg arg, Notify_event_type type);
+// extern Notify_value h_win_events( Frame frame, Event *event,
+//                        Notify_arg arg, Notify_event_type type);
 #endif
 
 #ifndef GRAPHIC_XSECT_CANVAS_EVENTS
-extern Notify_value v_can_events( Xv_window  win, Event *event, Notify_arg arg,
-                           Notify_event_type type);
-extern void v_can_repaint( Canvas canvas, Window paint_window, Display *display,
-                   Window xid /*, Xv_xrectlist *rects */);
+// extern Notify_value v_can_events( Xv_window  win, Event *event, Notify_arg arg,
+//                            Notify_event_type type);
+// extern void v_can_repaint( Canvas canvas, Window paint_window, Display *display,
+//                    Window xid /*, Xv_xrectlist *rects */);
 #endif
 
 #ifndef GRAPHIC_XSECT_RESIZE
-extern Notify_value v_win_events(Frame frame, Event *event, 
-                         Notify_arg arg, Notify_event_type type);
+// extern Notify_value v_win_events(Frame frame, Event *event, 
+//                          Notify_arg arg, Notify_event_type type);
 #endif
 
 #ifndef GRAPHIC_ZOOM
@@ -331,8 +331,8 @@ extern void set_domain_zoom(double zoom_min_x, double zoom_min_y,
 extern void zoom_back();
   
 #ifndef GUI_DESTROY
-extern Notify_value x_error_proc( Display *disp, XErrorEvent *event);
-extern Notify_value base_win_destroy( Notify_client client, Destroy_status status);
+// extern Notify_value x_error_proc( Display *disp, XErrorEvent *event);
+// extern Notify_value base_win_destroy( Notify_client client, Destroy_status status);
 #endif
 
 // #ifndef GUI_INIT
@@ -354,7 +354,7 @@ void update_frame_time_msg(int index);
 #endif
 
 #ifndef H_WIN_PROC
-extern void main_st_proc(Panel_item item, u_int value, Event *event);
+// extern void main_st_proc(Panel_item item, u_int value, Event *event);
 extern void set_height_label();
 extern void show_dpd_menu(u_int value);
 extern void show_cmd_menu(u_int value);
@@ -396,28 +396,28 @@ extern int save_v_movie_frame( int index, Drawable xid);
 #ifndef MOVIE_PU_PROC
 extern void update_movie_popup();
 extern void movie_start(u_int value);
-extern void movie_start_proc(Panel_item item, int value, Event *event);
-extern void movie_type_proc(Panel_item item, int value, Event *event);
-extern void movie_frame_proc(Panel_item item, int value, Event *event);
-extern void movie_speed_proc(Panel_item item, int value, Event *event);
-extern void movie_delay_proc(Panel_item item, int value, Event *event);
+// extern void movie_start_proc(Panel_item item, int value, Event *event);
+// extern void movie_type_proc(Panel_item item, int value, Event *event);
+// extern void movie_frame_proc(Panel_item item, int value, Event *event);
+// extern void movie_speed_proc(Panel_item item, int value, Event *event);
+// extern void movie_delay_proc(Panel_item item, int value, Event *event);
 extern void set_display_time(time_t utime);
-extern Panel_setting start_time_proc(Panel_item item, Event *event);
-extern Panel_setting start_frame_proc(Panel_item item, Event *event);
-extern Panel_setting end_frame_proc(Panel_item item, Event *event);
-extern Panel_setting time_interv_proc(Panel_item item, Event *event);
-extern Panel_setting set_fcast_period_proc(Panel_item item, Event *event);
+// extern Panel_setting start_time_proc(Panel_item item, Event *event);
+// extern Panel_setting start_frame_proc(Panel_item item, Event *event);
+// extern Panel_setting end_frame_proc(Panel_item item, Event *event);
+// extern Panel_setting time_interv_proc(Panel_item item, Event *event);
+// extern Panel_setting set_fcast_period_proc(Panel_item item, Event *event);
 extern void set_end_frame(int num_frames);
 #endif
 
 #ifndef GEN_TIME_PU_PROC
 extern met_record_t    *choose_model_mr(int page);
 extern void show_gen_time_menu( u_int value);
-extern void gen_time_proc(Panel_item item, int value, Event *event);
+// extern void gen_time_proc(Panel_item item, int value, Event *event);
 #endif
 
 #ifndef OVER_PU_PROC
-extern void over_pu_proc(Panel_item item, u_int value, Event *event);
+// extern void over_pu_proc(Panel_item item, u_int value, Event *event);
 #endif
 
 #ifndef OVERLAY_INIT
@@ -610,11 +610,11 @@ extern void route_winds_init();
 
 #ifndef SAVE_PU_PROCS
 extern void update_save_panel();
-extern Panel_setting set_dir_proc(Panel_item item, Event *event);
-extern Panel_setting set_fname_proc(Panel_item item, Event *event);
-extern Panel_setting set_command_proc(Panel_item item, Event *event);
-extern void save_image_proc(Panel_item item, Event *event);
-extern void cancel_save_proc(Panel_item item, Event *event);
+// extern Panel_setting set_dir_proc(Panel_item item, Event *event);
+// extern Panel_setting set_fname_proc(Panel_item item, Event *event);
+// extern Panel_setting set_command_proc(Panel_item item, Event *event);
+// extern void save_image_proc(Panel_item item, Event *event);
+// extern void cancel_save_proc(Panel_item item, Event *event);
 #endif
 
 #ifndef SHMEM_INIT
@@ -631,19 +631,19 @@ extern void init_symprods();
 #endif
 
 #ifndef TIMER_CONTROL
-extern void timer_func( Notify_client   client, int which);
+// extern void timer_func( Notify_client   client, int which);
 extern void start_timer();
 extern void stop_timer();
 #endif
 
 #ifndef V_WIN_PROC
 extern void set_v_field(int field_no);
-extern Notify_value v_pan_event_proc( Xv_window win, Event *event,
-                               Notify_arg  arg, Notify_event_type type);
-extern void set_v_field_proc( Menu menu, Menu_item item);
-extern Menu v_field_mu_gen_proc(Menu menu, Menu_generate op);
-extern void v_panel_dismiss(Panel_item item, Event *event);
-extern void show_route_pu_proc(Panel_item item, unsigned int value, Event *event);
+// extern Notify_value v_pan_event_proc( Xv_window win, Event *event,
+//                                Notify_arg  arg, Notify_event_type type);
+// extern void set_v_field_proc( Menu menu, Menu_item item);
+// extern Menu v_field_mu_gen_proc(Menu menu, Menu_generate op);
+// extern void v_panel_dismiss(Panel_item item, Event *event);
+// extern void show_route_pu_proc(Panel_item item, unsigned int value, Event *event);
 #endif
 
 #ifndef WINDS_INIT
@@ -651,13 +651,13 @@ extern void init_wind_data_links(const char *param_buf, long param_buf_len, long
 #endif
 
 #ifndef XVIEW_FILE_ACCESS
-extern FILE* open_check_write(const char *file_name, Frame   owner);
-extern FILE * open_check_read( const char    *file_name, Frame    owner);
-extern int chdir_check( const char * path, Frame    owner);
+// extern FILE* open_check_write(const char *file_name, Frame   owner);
+// extern FILE * open_check_read( const char    *file_name, Frame    owner);
+// extern int chdir_check( const char * path, Frame    owner);
 #endif
 
 #ifndef ZOOM_PU_PROC
-extern void set_domain_proc(Panel_item item, int value, Event *event);
+// extern void set_domain_proc(Panel_item item, int value, Event *event);
 #endif
 
 #endif

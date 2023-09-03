@@ -33,18 +33,18 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = CIDD
 
-LAST_INCLUDES = $(SYS_X_INCLUDES) $(SYS_XVIEW_INCLUDES) 
+LAST_INCLUDES = $(SYS_X_INCLUDES)
 
 LOC_INCLUDES = $(NETCDF4_INCS)
 
 LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx -lNcxx \
 	-leuclid -ldsserver -ldidss -lrapplot \
 	-lrapformats -ltoolsa -ldataport -ltdrp \
-	-lshapelib -ldevguide -lxview -lolgx \
+	-lshapelib \
 	-lX11 -lXext -lpng $(NETCDF4_LIBS) \
 	-lbz2 -lz -lpthread
 
-LOC_LDFLAGS = $(SYS_XVIEW_LDFLAGS) $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 
 # We now use libpng to dump images
@@ -73,20 +73,6 @@ HDRS =  cidd.h \
 	cidd_structs.h \
 	cidd_winds.h \
 	cidd_windows.h \
-	cmd_pu_ui.h \
-	data_pu_ui.h \
-	gen_time_pu_ui.h \
-	past_pu_ui.h \
-	page_pu_ui.h \
-	prod_pu_ui.h \
-	h_win_ui.h \
-	movie_pu_ui.h \
-	over_pu_ui.h \
-	route_pu_ui.h \
-	save_pu_ui.h \
-	status_pu_ui.h \
-	v_win_ui.h \
-	zoom_pu_ui.h \
 	Csyprod_P.hh \
 	Cdraw_P.hh \
 	Cgui_P.hh \
@@ -131,15 +117,7 @@ CPPC_SRCS = \
 	data_gather.cc \
 	data_init.cc \
 	data_io.cc \
-	data_pu_proc.cc \
 	draw_export_init.cc \
-	draw_pu_proc.cc \
-	past_pu_proc.cc \
-	page_pu_proc.cc \
-	prod_pu_proc.cc \
-	fcast_pu_proc.cc \
-	fields_pu_proc.cc \
-	gen_time_pu_proc.cc \
 	graphic_canvas_events.cc \
 	graphic_canvas_events_bkwd.cc \
 	graphic_check.cc \
@@ -158,14 +136,11 @@ CPPC_SRCS = \
 	gui_init.cc \
 	gui_label_frame.cc \
 	gui_modify.cc \
-	h_win_proc.cc  \
 	mdvx_data_request.cc \
 	movie_control.cc \
 	movie_frame_retrieve.cc \
 	movie_frame_save.cc \
-	movie_pu_proc.cc \
 	overlay_init.cc \
-	over_pu_proc.cc \
 	process_args.cc \
 	render_azimuths.cc \
 	render_bottom_margin.cc \
@@ -200,37 +175,13 @@ CPPC_SRCS = \
 	render_xsect_products.cc \
 	render_xsect_top_layers.cc \
 	render_xsect_winds.cc \
-	route_pu_proc.cc \
 	route_winds_init.cc \
-	save_pu_proc.cc \
 	shmem_init.cc \
-	status_pu_proc.cc \
 	symprod_init.cc \
 	timer_control.cc \
-	v_win_proc.cc \
 	winds_init.cc \
 	xview_file_access.cc \
-	zoom_pu_proc.cc \
-	cmd_pu_ui.cc \
-	data_pu_ui.cc \
-	draw_pu_ui.cc \
-	fcast_pu_ui.cc \
-	fields_pu_ui.cc \
-	gen_time_pu_ui.cc \
-	h_win_ui.cc \
-	movie_pu_ui.cc \
-	over_pu_ui.cc \
-	past_pu_ui.cc \
-	page_pu_ui.cc \
-	prod_pu_ui.cc \
-	route_pu_ui.cc \
-	save_pu_ui.cc \
-	status_pu_ui.cc \
-	v_win_ui.cc \
-	zoom_pu_ui.cc \
 	Uparams.cc
-
-C_SRCS =  
 
 #
 # TDRP support

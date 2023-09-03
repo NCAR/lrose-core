@@ -66,7 +66,7 @@ public:
 			Color_gc_t *time_tick5,
 			Color_gc_t *time_tick6);
 
-  void Init(Display *dpy, GC gc, Colormap cmap, Canvas canvas);
+  void Init(Display *dpy, GC gc, Colormap cmap /* , Canvas canvas */);
   
   void Set_times(time_t ep_start, time_t ep_end,
                  time_t fr_start, time_t fr_end,

@@ -123,23 +123,23 @@
 #endif
 
 // GUI  - Devguide Generated .h files 
-#include "h_win_ui.h"       // CIDD Object Definitions for horizontal view 
-#include "v_win_ui.h"       // CIDD Object Definitions for vertical view
-#include "page_pu_ui.h"     // CIDD Definitions for Extra features popup 
-#include "movie_pu_ui.h"    // CIDD Definitions for Movie Control popup 
-#include "zoom_pu_ui.h"     // CIDD Definitions for Zoom/Domain Control popup 
-#include "data_pu_ui.h"     // CIDD Definitions for Data field chooser popup 
-#include "draw_pu_ui.h"     // CIDD Definitions for Draw/Export Product OK/Edit popup 
-#include "fields_pu_ui.h"   // CIDD Definitions for Fields popup 
-#include "fcast_pu_ui.h"    // CIDD Definitions for Forecast Time Select popup 
-#include "past_pu_ui.h"     // CIDD Definitions for Past Time Select popup 
-#include "route_pu_ui.h"    // CIDD Definitions for Route Path popup 
-#include "save_pu_ui.h"     // CIDD Definitions for Save Image popup 
-#include "status_pu_ui.h"   // CIDD Definitions for Status text popup 
-#include "over_pu_ui.h"     // CIDD Definitions for Overlay Selector popup 
-#include "prod_pu_ui.h"     // CIDD Definitions for Product Selection popup 
-#include "gen_time_pu_ui.h" // CIDD Definitions for Model Run Time Selection popup 
-#include "cmd_pu_ui.h"      // CIDD Definitions for Command Menu popup 
+// #include "h_win_ui.h"       // CIDD Object Definitions for horizontal view 
+// #include "v_win_ui.h"       // CIDD Object Definitions for vertical view
+// #include "page_pu_ui.h"     // CIDD Definitions for Extra features popup 
+// #include "movie_pu_ui.h"    // CIDD Definitions for Movie Control popup 
+// #include "zoom_pu_ui.h"     // CIDD Definitions for Zoom/Domain Control popup 
+// #include "data_pu_ui.h"     // CIDD Definitions for Data field chooser popup 
+// #include "draw_pu_ui.h"     // CIDD Definitions for Draw/Export Product OK/Edit popup 
+// #include "fields_pu_ui.h"   // CIDD Definitions for Fields popup 
+// #include "fcast_pu_ui.h"    // CIDD Definitions for Forecast Time Select popup 
+// #include "past_pu_ui.h"     // CIDD Definitions for Past Time Select popup 
+// #include "route_pu_ui.h"    // CIDD Definitions for Route Path popup 
+// #include "save_pu_ui.h"     // CIDD Definitions for Save Image popup 
+// #include "status_pu_ui.h"   // CIDD Definitions for Status text popup 
+// #include "over_pu_ui.h"     // CIDD Definitions for Overlay Selector popup 
+// #include "prod_pu_ui.h"     // CIDD Definitions for Product Selection popup 
+// #include "gen_time_pu_ui.h" // CIDD Definitions for Model Run Time Selection popup 
+// #include "cmd_pu_ui.h"      // CIDD Definitions for Command Menu popup 
  
 // Exported Coordinate information for auxilliary programs
 #include <rapformats/coord_export.h> 
@@ -171,28 +171,28 @@
 
 struct    Global_data {
     // GUI OBJECTS
-    h_win_horiz_bw_objects  *h_win_horiz_bw; // Handles to Plan view widgets
+    // h_win_horiz_bw_objects  *h_win_horiz_bw; // Handles to Plan view widgets
     Drawable    hcan_xid;    
 
-    v_win_v_win_pu_objects  *v_win_v_win_pu;// Handles to Vert view widgets
+    // v_win_v_win_pu_objects  *v_win_v_win_pu;// Handles to Vert view widgets
     Drawable    vcan_xid;    
 
-    page_pu_page_pu_objects *page_pu; // Overlays popup widgets
-    movie_pu_movie_pu_objects   *movie_pu; // Movie controls popup widgets
-    zoom_pu_zoom_pu_objects   *zoom_pu; // Domain selector popup widgets
-    zoom_pu_bookmk_pu_objects *bookmk_pu; // URL selector widgets
-    data_pu_data_pu_objects   *data_pu; // Config popup widgets
-    draw_pu_draw_pu_objects   *draw_pu; // Draw/Export Wdit/OK popup wigets
-    over_pu_over_pu_objects   *over_pu; // Overlays popup widgets
-    prod_pu_prod_pu_objects   *prod_pu; // Product selection popup widgets
-    fields_pu_fields_pu_objects *fields_pu; // Overlays popup widget;
-    fcast_pu_fcast_pu_objects *fcast_pu; // Forecast time menu widgets;
-    past_pu_past_pu_objects   *past_pu; // Past Menu widgets;
-    route_pu_route_pu_objects  *route_pu; // Route popup widgets
-    save_pu_save_im_pu_objects  *save_pu; // Save Image popup widgets
-    status_pu_status_pu_objects *status_pu; // Status text popup widgets
-    gen_time_pu_popup1_objects *gen_time_pu; // Model Run time Selection popup widgets
-    cmd_pu_cmd_pu_objects *cmd_pu; // Command Menu Popup
+    // page_pu_page_pu_objects *page_pu; // Overlays popup widgets
+    // movie_pu_movie_pu_objects   *movie_pu; // Movie controls popup widgets
+    // zoom_pu_zoom_pu_objects   *zoom_pu; // Domain selector popup widgets
+    // zoom_pu_bookmk_pu_objects *bookmk_pu; // URL selector widgets
+    // data_pu_data_pu_objects   *data_pu; // Config popup widgets
+    // draw_pu_draw_pu_objects   *draw_pu; // Draw/Export Wdit/OK popup wigets
+    // over_pu_over_pu_objects   *over_pu; // Overlays popup widgets
+    // prod_pu_prod_pu_objects   *prod_pu; // Product selection popup widgets
+    // fields_pu_fields_pu_objects *fields_pu; // Overlays popup widget;
+    // fcast_pu_fcast_pu_objects *fcast_pu; // Forecast time menu widgets;
+    // past_pu_past_pu_objects   *past_pu; // Past Menu widgets;
+    // route_pu_route_pu_objects  *route_pu; // Route popup widgets
+    // save_pu_save_im_pu_objects  *save_pu; // Save Image popup widgets
+    // status_pu_status_pu_objects *status_pu; // Status text popup widgets
+    // gen_time_pu_popup1_objects *gen_time_pu; // Model Run time Selection popup widgets
+    // cmd_pu_cmd_pu_objects *cmd_pu; // Command Menu Popup
 
     int    debug;        // Normal debugging flag  
     int    debug1;       // More verbose debugging  flag 
@@ -447,16 +447,20 @@ struct    Global_data {
  
 #ifdef CIDD_MAIN
 struct    Global_data gd;
-Attr_attribute  INSTANCE;
-Attr_attribute  MENU_KEY;
+// Attr_attribute  INSTANCE;
+// Attr_attribute  MENU_KEY;
+int INSTANCE;
+int MENU_KEY;
 #endif
     
 //************************ External reference to global data structure *******/
 
 #ifndef    CIDD_MAIN
 extern    struct    Global_data    gd;
-extern Attr_attribute  INSTANCE;
-extern Attr_attribute  MENU_KEY;
+// extern Attr_attribute  INSTANCE;
+// extern Attr_attribute  MENU_KEY;
+extern int INSTANCE;
+extern int MENU_KEY;
 #endif
 
 
