@@ -33,12 +33,12 @@ void init_field_menus();  // Forward references
 void update_frame_time_msg(int index);
 
 /*****************************************************************
- * MODIFY_XVIEW_OBJECTS : Modify any Xview objects that couldn't
+ * MODIFY_GUI_OBJECTS : Modify any Xview objects that couldn't
  *    be set up in Devguide. This is primarily to avoid manually
  *    changing any *ui.c file
  */
 
-void modify_xview_objects()
+void modify_gui_objects()
 {
     int    i,j;
     int    height,width;

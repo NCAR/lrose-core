@@ -78,7 +78,7 @@ int main(int  argc, char **argv)
     init_symprods();
 
     /* make changes to xview objects not available from DevGuide */
-    modify_xview_objects();
+    modify_gui_objects();
 
     gd.finished_init = 1;
      

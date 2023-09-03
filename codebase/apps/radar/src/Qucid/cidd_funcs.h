@@ -347,7 +347,7 @@ extern void update_ticker(time_t cur_time);
 #endif
 
 #ifndef GUI_MODIFY
-// extern void modify_xview_objects();
+extern void modify_gui_objects();
 extern void init_field_menus();
 extern const char * frame_time_msg(int index);
 void update_frame_time_msg(int index);
