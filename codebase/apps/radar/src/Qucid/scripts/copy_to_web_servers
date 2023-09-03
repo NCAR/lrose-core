@@ -1,0 +1,8 @@
+#! /bin/csh
+#
+#
+#  Copy the test files to the web servers
+
+rsync -Cavz CIDD.master *.CIDD *.txt spider:/www/htdocs/CIDD
+#
+rsync -Cavz CIDD.master *.CIDD *.txt oberon:/var/www/CIDD
