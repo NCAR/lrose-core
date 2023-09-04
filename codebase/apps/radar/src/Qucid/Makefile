@@ -213,33 +213,33 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 # local targets
 #
 
-Csyprod_P.cc: paramdef.Cidd_syprods
-	tdrp_gen -f paramdef.Cidd_syprods -c++ -class Csyprod_P -prog CIDD -add_ncar_copyright
+#Csyprod_P.cc: paramdef.Cidd_syprods
+#	tdrp_gen -f paramdef.Cidd_syprods -c++ -class Csyprod_P -prog CIDD -add_ncar_copyright
 
-Cgui_P.cc: paramdef.Cidd_gui
-	tdrp_gen -f paramdef.Cidd_gui -c++ -class Cgui_P -prog CIDD -add_ncar_copyright
+#Cgui_P.cc: paramdef.Cidd_gui
+#	tdrp_gen -f paramdef.Cidd_gui -c++ -class Cgui_P -prog CIDD -add_ncar_copyright
 
-Cimages_P.cc: paramdef.Cidd_images
-	tdrp_gen -f paramdef.Cidd_images -c++ -class Cimages_P -prog CIDD -add_ncar_copyright
+#Cimages_P.cc: paramdef.Cidd_images
+#	tdrp_gen -f paramdef.Cidd_images -c++ -class Cimages_P -prog CIDD -add_ncar_copyright
 
-Cdraw_P.cc: paramdef.Cidd_draw
-	tdrp_gen -f paramdef.Cidd_draw -c++ -class Cdraw_P -prog CIDD -add_ncar_copyright
+#Cdraw_P.cc: paramdef.Cidd_draw
+#	tdrp_gen -f paramdef.Cidd_draw -c++ -class Cdraw_P -prog CIDD -add_ncar_copyright
 
-Cterrain_P.cc: paramdef.Cidd_terrain
-	tdrp_gen -f paramdef.Cidd_terrain -c++ -class Cterrain_P -prog CIDD -add_ncar_copyright
+#Cterrain_P.cc: paramdef.Cidd_terrain
+#	tdrp_gen -f paramdef.Cidd_terrain -c++ -class Cterrain_P -prog CIDD -add_ncar_copyright
 
-Croutes_P.cc: paramdef.Cidd_routes
-	tdrp_gen -f paramdef.Cidd_routes -c++ -class Croutes_P -prog CIDD -add_ncar_copyright
+#Croutes_P.cc: paramdef.Cidd_routes
+#	tdrp_gen -f paramdef.Cidd_routes -c++ -class Croutes_P -prog CIDD -add_ncar_copyright
 
 depend: cidd_macros.h $(TDRP_C) depend_generic
 
-clean_tdrp:
-	$(RM) Csyprod_P.cc Csyprod_P.hh \
-	Cdraw_P.cc Cdraw_P.hh \
-	Cgui_P.cc Cgui_P.hh \
-	Cimages_P.cc Cimages_P.hh \
-	Cterrain_P.cc  Cterrain_P.hh \
-	Croutes_P.cc Croutes_P.hh
+#clean_tdrp:
+#	$(RM) Csyprod_P.cc Csyprod_P.hh \
+#	Cdraw_P.cc Cdraw_P.hh \
+#	Cgui_P.cc Cgui_P.hh \
+#	Cimages_P.cc Cimages_P.hh \
+#	Cterrain_P.cc  Cterrain_P.hh \
+#	Croutes_P.cc Croutes_P.hh
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

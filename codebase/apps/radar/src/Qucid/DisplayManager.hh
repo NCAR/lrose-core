@@ -55,7 +55,6 @@
 #include <Radx/RadxGeoref.hh>
 #include <radar/ClickPointFmq.hh>
 #include <radar/BeamHeight.hh>
-#include "SweepManager.hh"
 
 class QApplication;
 class QButtonGroup;
