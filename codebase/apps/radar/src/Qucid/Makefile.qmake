@@ -331,6 +331,7 @@ DIST          = /../lib64/qt5/mkspecs/features/spec_pre.prf \
 		/../lib64/qt5/mkspecs/features/qt_config.prf \
 		/../lib64/qt5/mkspecs/linux-g++/qmake.conf \
 		/../lib64/qt5/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/../lib64/qt5/mkspecs/features/exclusive_builds.prf \
 		/../lib64/qt5/mkspecs/features/toolchain.prf \
 		/../lib64/qt5/mkspecs/features/default_pre.prf \
@@ -566,6 +567,7 @@ Makefile.qmake: qmake.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 		/../lib64/qt5/mkspecs/features/qt_config.prf \
 		/../lib64/qt5/mkspecs/linux-g++/qmake.conf \
 		/../lib64/qt5/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/../lib64/qt5/mkspecs/features/exclusive_builds.prf \
 		/../lib64/qt5/mkspecs/features/toolchain.prf \
 		/../lib64/qt5/mkspecs/features/default_pre.prf \
@@ -664,6 +666,7 @@ Makefile.qmake: qmake.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 /../lib64/qt5/mkspecs/features/qt_config.prf:
 /../lib64/qt5/mkspecs/linux-g++/qmake.conf:
 /../lib64/qt5/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /../lib64/qt5/mkspecs/features/exclusive_builds.prf:
 /../lib64/qt5/mkspecs/features/toolchain.prf:
 /../lib64/qt5/mkspecs/features/default_pre.prf:
@@ -763,28 +766,61 @@ compiler_clean: compiler_rcc_clean compiler_moc_predefs_clean
 
 ####### Compile
 
-Params.o: Params.cc 
+Params.o: Params.cc Params.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Params.o Params.cc
 
-Csyprod_P.o: Csyprod_P.cc 
+Csyprod_P.o: Csyprod_P.cc Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Csyprod_P.o Csyprod_P.cc
 
-Cdraw_P.o: Cdraw_P.cc 
+Cdraw_P.o: Cdraw_P.cc Cdraw_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Cdraw_P.o Cdraw_P.cc
 
-Cgui_P.o: Cgui_P.cc 
+Cgui_P.o: Cgui_P.cc Cgui_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Cgui_P.o Cgui_P.cc
 
-Cimages_P.o: Cimages_P.cc 
+Cimages_P.o: Cimages_P.cc Cimages_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Cimages_P.o Cimages_P.cc
 
-Cterrain_P.o: Cterrain_P.cc 
+Cterrain_P.o: Cterrain_P.cc Cterrain_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Cterrain_P.o Cterrain_P.cc
 
-Croutes_P.o: Croutes_P.cc 
+Croutes_P.o: Croutes_P.cc Croutes_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Croutes_P.o Croutes_P.cc
 
 Product.o: Product.cc Product.hh \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
 		/usr/local/lrose/include/Spdb/DsSpdbThreaded.hh \
 		/usr/local/lrose/include/Spdb/DsSpdb.hh \
 		/usr/local/lrose/include/didss/DsURL.hh \
@@ -887,6 +923,9 @@ Product.o: Product.cc Product.hh \
 		/usr/local/lrose/include/Fmq/FmqDevice.hh \
 		/usr/local/lrose/include/Fmq/FmqDeviceShmem.hh \
 		/usr/local/lrose/include/Fmq/DsFmqMsg.hh \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -900,6 +939,8 @@ Product.o: Product.cc Product.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1007,6 +1048,14 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1033,6 +1082,8 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1172,6 +1223,11 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		/usr/local/lrose/include/euclid/PjgTransMercatorMath.hh \
 		/usr/local/lrose/include/euclid/PjgVertPerspMath.hh \
 		Product.hh \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
 		/usr/local/lrose/include/Spdb/DsSpdbThreaded.hh \
 		cidd.h \
 		/usr/local/lrose/include/dataport/bigend.h \
@@ -1205,6 +1261,9 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		/usr/local/lrose/include/Fmq/FmqDevice.hh \
 		/usr/local/lrose/include/Fmq/FmqDeviceShmem.hh \
 		/usr/local/lrose/include/Fmq/DsFmqMsg.hh \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1218,6 +1277,8 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1335,6 +1396,14 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1356,6 +1425,8 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1463,6 +1534,14 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_structs.h \
@@ -1487,6 +1566,8 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1591,6 +1672,14 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1617,6 +1706,8 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1723,6 +1814,14 @@ cidd_font.o: cidd_font.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1749,6 +1848,8 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1855,6 +1956,14 @@ cidd_init.o: cidd_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -1881,6 +1990,8 @@ cidd_init.o: cidd_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -1987,6 +2098,14 @@ cidd_main.o: cidd_main.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2013,6 +2132,8 @@ cidd_main.o: cidd_main.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2119,6 +2240,14 @@ cidd_params.o: cidd_params.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2145,6 +2274,8 @@ cidd_params.o: cidd_params.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2252,6 +2383,14 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2278,6 +2417,8 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2384,6 +2525,14 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2410,6 +2559,8 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2516,6 +2667,14 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2542,6 +2701,8 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2648,6 +2809,14 @@ colorscales.o: colorscales.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2674,6 +2843,8 @@ colorscales.o: colorscales.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2780,6 +2951,14 @@ contours.o: contours.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2806,6 +2985,8 @@ contours.o: contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -2913,6 +3094,14 @@ data_gather.o: data_gather.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -2939,6 +3128,8 @@ data_gather.o: data_gather.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3045,6 +3236,14 @@ data_init.o: data_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3071,6 +3270,8 @@ data_init.o: data_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3177,6 +3378,14 @@ data_io.o: data_io.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3203,6 +3412,8 @@ data_io.o: data_io.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3309,6 +3520,14 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3335,6 +3554,8 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3441,6 +3662,14 @@ draw_export_init.o: draw_export_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3467,6 +3696,8 @@ draw_export_init.o: draw_export_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3573,6 +3804,14 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3599,6 +3838,8 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3706,6 +3947,14 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3732,6 +3981,8 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3838,6 +4089,14 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3864,6 +4123,8 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -3970,6 +4231,14 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -3996,6 +4265,8 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4102,6 +4373,14 @@ graphic_check.o: graphic_check.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4128,6 +4407,8 @@ graphic_check.o: graphic_check.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4234,6 +4515,14 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4260,6 +4549,8 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4366,6 +4657,14 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4392,6 +4691,8 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4498,6 +4799,14 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4524,6 +4833,8 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4635,6 +4946,14 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4661,6 +4980,8 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4767,6 +5088,14 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4793,6 +5122,8 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -4899,6 +5230,14 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -4925,6 +5264,8 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5031,6 +5372,14 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5057,6 +5406,8 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5163,6 +5514,14 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5189,6 +5548,8 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5295,6 +5656,14 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5321,6 +5690,8 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5427,6 +5798,14 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5453,6 +5832,8 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5559,6 +5940,14 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5585,6 +5974,8 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5691,6 +6082,14 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5717,6 +6116,8 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5823,6 +6224,14 @@ gui_init.o: gui_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5849,6 +6258,8 @@ gui_init.o: gui_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -5955,6 +6366,14 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -5981,6 +6400,8 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6087,6 +6508,14 @@ gui_modify.o: gui_modify.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6113,6 +6542,8 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6221,6 +6652,14 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6247,6 +6686,8 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6353,6 +6794,14 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6379,6 +6828,8 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6485,6 +6936,14 @@ movie_control.o: movie_control.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6511,6 +6970,8 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6617,6 +7078,14 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6643,6 +7112,8 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6749,6 +7220,14 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6775,6 +7254,8 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -6881,6 +7362,14 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -6907,6 +7396,8 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7013,6 +7504,14 @@ overlay_init.o: overlay_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7039,6 +7538,8 @@ overlay_init.o: overlay_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7146,6 +7647,14 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7172,6 +7681,8 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7278,6 +7789,14 @@ process_args.o: process_args.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7304,6 +7823,8 @@ process_args.o: process_args.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7410,6 +7931,14 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7436,6 +7965,8 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7542,6 +8073,14 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7568,6 +8107,8 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7674,6 +8215,14 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7700,6 +8249,8 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7806,6 +8357,14 @@ render_cbar.o: render_cbar.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7832,6 +8391,8 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -7938,6 +8499,14 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -7964,6 +8533,8 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8070,6 +8641,14 @@ render_control.o: render_control.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8096,6 +8675,8 @@ render_control.o: render_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8202,6 +8783,14 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8228,6 +8817,8 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8334,6 +8925,14 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8360,6 +8959,8 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8466,6 +9067,14 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8492,6 +9101,8 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8598,6 +9209,14 @@ render_grids.o: render_grids.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8624,6 +9243,8 @@ render_grids.o: render_grids.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8730,6 +9351,14 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8756,6 +9385,8 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8862,6 +9493,14 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -8888,6 +9527,8 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -8994,6 +9635,14 @@ render_legends.o: render_legends.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9020,6 +9669,8 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9126,6 +9777,14 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9152,6 +9811,8 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9258,6 +9919,14 @@ render_margins.o: render_margins.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9284,6 +9953,8 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9390,6 +10061,14 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9416,6 +10095,8 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9522,6 +10203,14 @@ render_overlays.o: render_overlays.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9548,6 +10237,8 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9654,6 +10345,14 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9680,6 +10379,8 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9786,6 +10487,14 @@ render_products.o: render_products.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9812,6 +10521,8 @@ render_products.o: render_products.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -9918,6 +10629,14 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -9944,6 +10663,8 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10050,6 +10771,14 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10076,6 +10805,8 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10182,6 +10913,14 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10208,6 +10947,8 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10314,6 +11055,14 @@ render_terrain.o: render_terrain.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10340,6 +11089,8 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10446,6 +11197,14 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10472,6 +11231,8 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10578,6 +11339,14 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10604,6 +11373,8 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10710,6 +11481,14 @@ render_winds.o: render_winds.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10736,6 +11515,8 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10842,6 +11623,14 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -10868,6 +11657,8 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -10974,6 +11765,14 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11000,6 +11799,8 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11106,6 +11907,14 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11132,6 +11941,8 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11238,6 +12049,14 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11264,6 +12083,8 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11370,6 +12191,14 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11396,6 +12225,8 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11502,6 +12333,14 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11528,6 +12367,8 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11634,6 +12475,14 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11660,6 +12509,8 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11766,6 +12617,14 @@ route_winds_init.o: route_winds_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11792,6 +12651,8 @@ route_winds_init.o: route_winds_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -11898,6 +12759,14 @@ shmem_init.o: shmem_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -11924,6 +12793,8 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12030,6 +12901,14 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12056,6 +12935,8 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12163,6 +13044,14 @@ symprod_init.o: symprod_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12189,6 +13078,8 @@ symprod_init.o: symprod_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12295,6 +13186,14 @@ timer_control.o: timer_control.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12321,6 +13220,8 @@ timer_control.o: timer_control.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12428,6 +13329,14 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12454,6 +13363,8 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12560,6 +13471,14 @@ winds_init.o: winds_init.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12586,6 +13505,8 @@ winds_init.o: winds_init.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12692,6 +13613,14 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12718,6 +13647,8 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
@@ -12839,6 +13770,14 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		/usr/local/lrose/include/dsserver/DsServerMsg.hh \
 		/usr/local/lrose/include/didss/DsMessage.hh \
 		/usr/local/lrose/include/didss/ds_message.h \
+		Csyprod_P.hh \
+		/usr/local/lrose/include/tdrp/tdrp.h \
+		/usr/local/lrose/include/tdrp/tdrp_p.h \
+		/usr/local/lrose/include/tdrp/tdrpbuf.h \
+		/usr/local/lrose/include/tdrp/tdrp_obsolete.h \
+		Cdraw_P.hh \
+		Cgui_P.hh \
+		Cimages_P.hh \
 		Uparams.hh \
 		/usr/local/lrose/include/rapformats/coord_export.h \
 		cidd_macros.h \
@@ -12865,6 +13804,8 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_overlays.h \
 		cidd_products.h \
 		cidd_layers.h \
+		Cterrain_P.hh \
+		Croutes_P.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
