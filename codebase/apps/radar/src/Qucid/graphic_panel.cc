@@ -90,6 +90,7 @@ int    r_state;              // ROUTE multi segment define state
 // way point. Terminate the route by explictly clicking again on
 // the last way point. 
 
+#ifdef NOTNOW
 /*************************************************************************
  * Event callback function for `cp'.
  */
@@ -176,3 +177,4 @@ Notify_value h_pan_event_proc( Window   win, Event *event,
 
     return notify_next_event_func(win, (Notify_event) event, arg, type);
 }
+#endif

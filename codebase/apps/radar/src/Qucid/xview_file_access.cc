@@ -36,6 +36,9 @@
 #include "cidd.h"
 
 extern    int    errno;
+
+#ifdef NOTNOW
+
 /**************************************************************************
  * OPEN_CHECK_WRITE: Open a file for writing and if there is an error,
  *          or the file exists,    Display a popup notice with the cause of
@@ -168,3 +171,4 @@ int chdir_check( char * path, Frame    owner)
     }
      return 0;
 }
+#endif

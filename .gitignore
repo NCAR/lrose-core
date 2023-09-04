@@ -495,6 +495,7 @@ codebase/apps/radar/src/MergeHcrAndHsrl/MergeHcrAndHsrl
 codebase/apps/radar/src/Mpd2Radx/Mpd2Radx
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/NoiseMon/NoiseMon
+codebase/apps/radar/src/Qucid/Qucid
 codebase/apps/radar/src/PartRain/PartRain
 codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute

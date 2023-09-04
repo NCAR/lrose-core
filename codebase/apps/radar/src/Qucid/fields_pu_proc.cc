@@ -36,16 +36,17 @@ void update_grid_config_gui();
 void update_wind_config_gui();
 void update_prod_config_gui();
 
-void config_grid_proc(Menu menu, Menu_item item);
-void config_wind_proc(Menu menu, Menu_item item);
-void config_prod_proc(Menu menu, Menu_item item);
+// void config_grid_proc(Menu menu, Menu_item item);
+// void config_wind_proc(Menu menu, Menu_item item);
+// void config_prod_proc(Menu menu, Menu_item item);
 
-void wind_color_proc(Panel_item, Event *); 
+// void wind_color_proc(Panel_item, Event *); 
 
 static int grid_config_field = 0;
 static int wind_config_field = 0;
 static int prod_config_field = 0;
 
+#ifdef NOTNOW
 /*************************************************************************
  * FIELD_MU_GEN_PROC
  */
@@ -191,14 +192,20 @@ prod_mu_gen_proc(Menu menu, Menu_generate op)
 	return prod_menu;
 }
 
+#endif
+
 /*************************************************************************
  * Reset WIND URLs
  */
 void reset_wind_urls()
 {
-    char *	url_value = (char *) xv_get(gd.fields_pu->w_config_url_tx, PANEL_VALUE);
-    char *	u_name = (char *) xv_get(gd.fields_pu->w_config_u_tx, PANEL_VALUE);
-    char *	v_name = (char *) xv_get(gd.fields_pu->w_config_v_tx, PANEL_VALUE);
+    // char *	url_value = (char *) xv_get(gd.fields_pu->w_config_url_tx, PANEL_VALUE);
+    // char *	u_name = (char *) xv_get(gd.fields_pu->w_config_u_tx, PANEL_VALUE);
+    // char *	v_name = (char *) xv_get(gd.fields_pu->w_config_v_tx, PANEL_VALUE);
+  const char *	url_value = "url_value";
+  const char *	u_name = "u_name";
+  const char *	v_name = "v_name";
+  const char *	w_name = "w_name";
 
     // U FIELD
     STRcopy(gd.layers.wind[wind_config_field].wind_u->url,url_value,URL_LENGTH);
@@ -216,7 +223,7 @@ void reset_wind_urls()
 
     // W Field
     if(gd.layers.wind[wind_config_field].wind_w != NULL) {
-        char *	w_name = (char *) xv_get(gd.fields_pu->w_config_w_tx, PANEL_VALUE);
+      // char *	w_name = (char *) xv_get(gd.fields_pu->w_config_w_tx, PANEL_VALUE);
         STRcopy(gd.layers.wind[wind_config_field].wind_w->url,url_value,URL_LENGTH);
         strncat(gd.layers.wind[wind_config_field].wind_w->url,"&",URL_LENGTH);
         strncat(gd.layers.wind[wind_config_field].wind_w->url,w_name,URL_LENGTH);
@@ -225,6 +232,8 @@ void reset_wind_urls()
     }
     set_redraw_flags(1,1);
 }
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `w_config_url_tx'.
@@ -486,6 +495,7 @@ void config_prod_proc(Menu menu, Menu_item item)
 
     update_prod_config_gui();
 }
+#endif
 
 /*************************************************************************
  * UPDATE GRID  Config gui elements to indicate the settings of the 
@@ -498,34 +508,34 @@ void update_grid_config_gui()
 	 
     /* Now set all the panel labels appropriately */
     sprintf(str,"Label: %s\n",gd.mrec[grid_config_field]->button_name);
-    xv_set(gd.fields_pu->f_config_msg2,PANEL_LABEL_STRING,str,NULL);
+    // xv_set(gd.fields_pu->f_config_msg2,PANEL_LABEL_STRING,str,NULL);
 
     sprintf(str,"Colorscale: %s\n",gd.mrec[grid_config_field]->color_file);
-    xv_set(gd.fields_pu->f_config_msg3,PANEL_LABEL_STRING,str,NULL);
+    // xv_set(gd.fields_pu->f_config_msg3,PANEL_LABEL_STRING,str,NULL);
      
     sprintf(str,"Units: %s\n",gd.mrec[grid_config_field]->field_units);
-    xv_set(gd.fields_pu->f_config_msg4,PANEL_LABEL_STRING,str,NULL);
+    // xv_set(gd.fields_pu->f_config_msg4,PANEL_LABEL_STRING,str,NULL);
 
-    xv_set(gd.fields_pu->f_config_tx1,PANEL_VALUE,gd.mrec[grid_config_field]->url,NULL);
+    // xv_set(gd.fields_pu->f_config_tx1,PANEL_VALUE,gd.mrec[grid_config_field]->url,NULL);
 
     sprintf(str,"%g",gd.mrec[grid_config_field]->alt_offset);
-    xv_set(gd.fields_pu->f_config_tx3,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->f_config_tx3,PANEL_VALUE,str,NULL);
 
     sprintf(str,"%.2f",gd.mrec[grid_config_field]->time_allowance);
-    xv_set(gd.fields_pu->f_config_tx4,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->f_config_tx4,PANEL_VALUE,str,NULL);
 
     sprintf(str,"%.2f",gd.mrec[grid_config_field]->cscale_min);
-    xv_set(gd.fields_pu->f_config_tx7,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->f_config_tx7,PANEL_VALUE,str,NULL);
 
     sprintf(str,"%.2f",gd.mrec[grid_config_field]->cscale_delta);
-    xv_set(gd.fields_pu->f_config_tx8,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->f_config_tx8,PANEL_VALUE,str,NULL);
 
     sprintf(str,"%.2f",gd.mrec[grid_config_field]->time_offset);
-    xv_set(gd.fields_pu->f_config_tx9,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->f_config_tx9,PANEL_VALUE,str,NULL);
 
-    xv_set(gd.fields_pu->ren_meth_st,PANEL_VALUE,gd.mrec[grid_config_field]->render_method & 1,NULL);
-    xv_set(gd.fields_pu->update_st,PANEL_VALUE,gd.mrec[grid_config_field]->auto_render & 1,NULL);
-    xv_set(gd.fields_pu->max_st,PANEL_VALUE,gd.mrec[grid_config_field]->composite_mode & 1,NULL);
+    // xv_set(gd.fields_pu->ren_meth_st,PANEL_VALUE,gd.mrec[grid_config_field]->render_method & 1,NULL);
+    // xv_set(gd.fields_pu->update_st,PANEL_VALUE,gd.mrec[grid_config_field]->auto_render & 1,NULL);
+    // xv_set(gd.fields_pu->max_st,PANEL_VALUE,gd.mrec[grid_config_field]->composite_mode & 1,NULL);
 }
 
 
@@ -540,68 +550,68 @@ void update_wind_config_gui()
     char *ptr;
 	 
     if(gd.layers.num_wind_sets == 0) {
-        xv_set(gd.fields_pu->w_config_msg1,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_msg2,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_sel_bt,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_url_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->wind_alt_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->textfield1,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->textfield2,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_u_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_v_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_w_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_style_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_line_width_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->w_config_color_msg,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_msg1,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_msg2,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_sel_bt,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_url_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->wind_alt_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->textfield1,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->textfield2,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_u_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_v_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_w_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_style_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_line_width_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->w_config_color_msg,PANEL_INACTIVE,TRUE,NULL);
 	
 	return;
     }
 
     /* Now set all the panel labels appropriately */
     sprintf(str,"Label: %s\n",gd.layers.wind[wind_config_field].wind_u->button_name);
-    xv_set(gd.fields_pu->w_config_msg2,PANEL_LABEL_STRING,str,NULL);
+    // xv_set(gd.fields_pu->w_config_msg2,PANEL_LABEL_STRING,str,NULL);
 
     strncpy(str,gd.layers.wind[wind_config_field].wind_u->url,URL_LENGTH);
     if((ptr = strchr(str,'&')) != NULL) {
 	*ptr = '\0';
     }
-    xv_set(gd.fields_pu->w_config_url_tx,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->w_config_url_tx,PANEL_VALUE,str,NULL);
 
     if(ptr != NULL) {
        ptr++;
-       xv_set(gd.fields_pu->w_config_u_tx,PANEL_VALUE,ptr,NULL);
+       // xv_set(gd.fields_pu->w_config_u_tx,PANEL_VALUE,ptr,NULL);
     }
 
     strncpy(str,gd.layers.wind[wind_config_field].wind_v->url,URL_LENGTH);
     if((ptr = strchr(str,'&')) != NULL) {
        ptr++;
-       xv_set(gd.fields_pu->w_config_v_tx,PANEL_VALUE,ptr,NULL);
+       // xv_set(gd.fields_pu->w_config_v_tx,PANEL_VALUE,ptr,NULL);
     }
 
     if(gd.layers.wind[wind_config_field].wind_w == NULL) {
-           xv_set(gd.fields_pu->w_config_w_tx,PANEL_VALUE," ",
-	          PANEL_INACTIVE,TRUE,NULL);
+           // xv_set(gd.fields_pu->w_config_w_tx,PANEL_VALUE," ",
+	   //        PANEL_INACTIVE,TRUE,NULL);
     } else {
         strncpy(str,gd.layers.wind[wind_config_field].wind_w->url,URL_LENGTH);
         if((ptr = strchr(str,'&')) != NULL) {
            ptr++;
-           xv_set(gd.fields_pu->w_config_w_tx,PANEL_VALUE,ptr,
-	          PANEL_INACTIVE,FALSE,NULL);
+           // xv_set(gd.fields_pu->w_config_w_tx,PANEL_VALUE,ptr,
+	   //        PANEL_INACTIVE,FALSE,NULL);
         }
     }
 
     sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->alt_offset);
-    xv_set(gd.fields_pu->wind_alt_tx,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->wind_alt_tx,PANEL_VALUE,str,NULL);
       
     sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_offset);
-    xv_set(gd.fields_pu->textfield1,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->textfield1,PANEL_VALUE,str,NULL);
       
     sprintf(str,"%g\n",gd.layers.wind[wind_config_field].wind_u->time_allowance);
-    xv_set(gd.fields_pu->textfield2,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->textfield2,PANEL_VALUE,str,NULL);
       
-    xv_set(gd.fields_pu->w_style_tx,PANEL_VALUE,gd.layers.wind[wind_config_field].marker_type-1,NULL);
-    xv_set(gd.fields_pu->w_config_line_width_tx,PANEL_VALUE,gd.layers.wind[wind_config_field].line_width,NULL);
-    xv_set(gd.fields_pu->w_config_color_msg,PANEL_LABEL_STRING,gd.layers.wind[wind_config_field].color->name,NULL);
+    // xv_set(gd.fields_pu->w_style_tx,PANEL_VALUE,gd.layers.wind[wind_config_field].marker_type-1,NULL);
+    // xv_set(gd.fields_pu->w_config_line_width_tx,PANEL_VALUE,gd.layers.wind[wind_config_field].line_width,NULL);
+    // xv_set(gd.fields_pu->w_config_color_msg,PANEL_LABEL_STRING,gd.layers.wind[wind_config_field].color->name,NULL);
 }
 
 
@@ -615,40 +625,41 @@ void update_prod_config_gui()
     char str[128];
 	 
     if(gd.syprod_P == NULL || gd.syprod_P->prod_info_n <= 0) {
-        xv_set(gd.fields_pu->prod_config_msg1,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->p_config_sel_bt,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->prod_config_msg2,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->p_config_url_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->p_config_type_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->allow_before_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->allow_after_tx,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->p_config_msg3,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->render_type_st,PANEL_INACTIVE,TRUE,NULL);
-        xv_set(gd.fields_pu->text_thresh_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->prod_config_msg1,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->p_config_sel_bt,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->prod_config_msg2,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->p_config_url_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->p_config_type_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->allow_before_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->allow_after_tx,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->p_config_msg3,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->render_type_st,PANEL_INACTIVE,TRUE,NULL);
+        // xv_set(gd.fields_pu->text_thresh_tx,PANEL_INACTIVE,TRUE,NULL);
 
 	return;
     }
 
-    xv_set(gd.fields_pu->prod_config_msg2,PANEL_LABEL_STRING,gd.syprod_P->_prod_info[prod_config_field].menu_label,NULL);
+    // xv_set(gd.fields_pu->prod_config_msg2,PANEL_LABEL_STRING,gd.syprod_P->_prod_info[prod_config_field].menu_label,NULL);
 
-    xv_set(gd.fields_pu->p_config_url_tx,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].url,NULL);
+    // xv_set(gd.fields_pu->p_config_url_tx,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].url,NULL);
 
     sprintf(str,"%d",gd.syprod_P->_prod_info[prod_config_field].data_type);
-    xv_set(gd.fields_pu->p_config_type_tx,PANEL_VALUE,str,NULL);
+    // // xv_set(gd.fields_pu->p_config_type_tx,PANEL_VALUE,str,NULL);
 
-    sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].minutes_allow_before);
-    xv_set(gd.fields_pu->allow_before_tx,PANEL_VALUE,str,NULL);
+    // sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].minutes_allow_before);
+    // xv_set(gd.fields_pu->allow_before_tx,PANEL_VALUE,str,NULL);
 
     sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].minutes_allow_after);
-    xv_set(gd.fields_pu->allow_after_tx,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->allow_after_tx,PANEL_VALUE,str,NULL);
 
-    xv_set(gd.fields_pu->render_type_st,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].render_type,NULL);
+    // xv_set(gd.fields_pu->render_type_st,PANEL_VALUE,gd.syprod_P->_prod_info[prod_config_field].render_type,NULL);
 
     sprintf(str,"%g",gd.syprod_P->_prod_info[prod_config_field].text_off_threshold);
-    xv_set(gd.fields_pu->text_thresh_tx,PANEL_VALUE,str,NULL);
+    // xv_set(gd.fields_pu->text_thresh_tx,PANEL_VALUE,str,NULL);
 
 }
 
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `f_config_tx1'.
@@ -988,3 +999,4 @@ land_use_url_proc(Panel_item item, Event *event)
         return panel_text_notify(item, event);
 }
 
+#endif

@@ -36,6 +36,8 @@
 extern int    b_lastx,b_lasty;    /* Boundry end point */
 extern int    b_startx,b_starty;    /* Boundry start point */
 
+#ifdef NOTNOW
+
 static void handle_click(Event *event, int click_x, int click_y);
 
 /*************************************************************************
@@ -523,3 +525,5 @@ void v_can_repaint( Canvas canvas, Window paint_window, Display *display,
               gd.v_win.can_dim.y_pos);
   }
 }
+
+#endif

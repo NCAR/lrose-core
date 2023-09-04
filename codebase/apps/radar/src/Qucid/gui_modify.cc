@@ -56,11 +56,11 @@ void modify_gui_objects()
     // Xv_opaque   image1;
     // Xv_opaque   image2;
     static unsigned short bbits[] =  {
-#include "black.icon" 
+#include "icons/black.icon" 
     };
 
     static unsigned short wbits[] =  {
-#include "white.icon"
+#include "icons/white.icon"
     };
 
     // image1 = xv_create(XV_NULL, SERVER_IMAGE,
@@ -295,7 +295,7 @@ void modify_gui_objects()
         /* Set the labels on the Route panel " */
         for(i=0; i < gd.layers.route_wind.num_predef_routes; i++) {
             // xv_set(gd.route_pu->route_st,PANEL_CHOICE_STRING,i,
-	    gd.layers.route_wind.route[i].route_label,NULL);
+            // gd.layers.route_wind.route[i].route_label,NULL);
         }
         // xv_set(gd.route_pu->route_st,PANEL_CHOICE_STRING,
 	//    gd.layers.route_wind.num_predef_routes,"Custom",NULL);
@@ -674,7 +674,7 @@ void modify_gui_objects()
 			     gd.legends.time_tick_color[4],
 			     gd.legends.time_tick_color[5]);
 
-    gd.time_plot->Init(gd.dpy,gd.def_gc,gd.cmap,gd.movie_pu->time_can);
+    // gd.time_plot->Init(gd.dpy,gd.def_gc,gd.cmap,gd.movie_pu->time_can);
 
     update_movie_popup();
 

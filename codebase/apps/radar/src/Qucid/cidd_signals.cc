@@ -35,7 +35,7 @@
 void signal_trap(int signal)
 {
     fprintf(stderr,"CIDD: Received signal %d\n",signal);
-    if(gd.finished_init) base_win_destroy(gd.h_win_horiz_bw->horiz_bw,DESTROY_PROCESS_DEATH);
+    // if(gd.finished_init) base_win_destroy(gd.h_win_horiz_bw->horiz_bw,DESTROY_PROCESS_DEATH);
     exit(0);
 }
 

@@ -36,7 +36,7 @@
 
 void update_layered_field_panel();
 void update_layered_contour_panel();
-void cont_field_proc(Menu menu, Menu_item item);
+// void cont_field_proc(Menu menu, Menu_item item);
 
 static Color_change_t cs;
 /*************************************************************************
@@ -57,7 +57,8 @@ void set_color( char *cname, void* c_data)
     XParseColor(gd.dpy,gd.cmap,cname,&rgb_def);
     rgb_def.flags = DoRed | DoGreen | DoBlue;
 
-    if ( PseudoColor == xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
+    // if ( PseudoColor == xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
+    if (true) {
         rgb_def.pixel = ptr->cgcp->pixval;
         XStoreColor(gd.dpy,gd.cmap,&rgb_def);
     } else {
@@ -75,33 +76,48 @@ void set_color( char *cname, void* c_data)
     STRcopy(ptr->cgcp->name,cname,NAME_LENGTH);
 
     /* Update the GUI widgets */
-    if(ptr->handle == gd.page_pu->map_set_color_bt) {
+
+    typedef enum
+    {
+     color_bt_not_set = 0,
+     map_set_color_bt = 1,
+     vect_set_color_bt = 2,
+    } page_pu_t;
+
+    page_pu_t page_pu_handle = color_bt_not_set;
+    
+    if(page_pu_handle == map_set_color_bt) {
+      // if(ptr->handle == gd.page_pu->map_set_color_bt) {
 
             sprintf(string,"%s  %s",
 	       gd.over[gd.layers.cur_map_overlay]->control_label,
 	       gd.over[gd.layers.cur_map_overlay]->color->name);
-            xv_set(gd.page_pu->overlay_list,
-		PANEL_LIST_STRING, gd.layers.cur_map_overlay, string, NULL);
+            // xv_set(gd.page_pu->overlay_list,
+	    //     PANEL_LIST_STRING, gd.layers.cur_map_overlay, string, NULL);
 
-    } else if (ptr->handle ==  gd.page_pu->vect_set_color_bt) {
+    } else if (page_pu_handle == vect_set_color_bt) {
+      // } else if (ptr->handle ==  gd.page_pu->vect_set_color_bt) {
 
-            sprintf(string,"%s  %s",
-	       gd.layers.wind[gd.layers.cur_wind_overlay].wind_u->button_name,
-	       gd.layers.wind[gd.layers.cur_wind_overlay].color->name);
-
-              xv_set(gd.page_pu->wind_on_list,
-		PANEL_LIST_STRING, gd.layers.cur_wind_overlay, string, NULL);
+      sprintf(string,"%s  %s",
+              gd.layers.wind[gd.layers.cur_wind_overlay].wind_u->button_name,
+              gd.layers.wind[gd.layers.cur_wind_overlay].color->name);
+      
+      // xv_set(gd.page_pu->wind_on_list,
+      //        PANEL_LIST_STRING, gd.layers.cur_wind_overlay, string, NULL);
 
     } else{
             /* set the message string to the new name */
-            xv_set(ptr->handle,PANEL_LABEL_STRING,cname,NULL);
+      // xv_set(ptr->handle,PANEL_LABEL_STRING,cname,NULL);
     }
 
  
-    gcc_suspend(TRUE);
+    // gcc_suspend(TRUE);
  
     set_redraw_flags(1,1); /*  */
 }
+
+#ifdef NOTNOW
+
 /*************************************************************************
  * Notify callback function for `extra_st1'. - Range Rings, etc
  */
@@ -583,6 +599,8 @@ void cont_layer_set_proc( Panel_item item, int value, Event *event)
     update_layered_contour_panel();
 }
 
+#endif
+
 /*************************************************************************
  * UPDATE_CONTOUR_FIELD_PANEL
  */
@@ -593,31 +611,33 @@ void update_layered_contour_panel()
 
   field = gd.layers.cont[gd.layers.cur_contour_layer].field;
 
-  xv_set(gd.page_pu->cont_st,PANEL_VALUE,
-	 gd.layers.cont[gd.layers.cur_contour_layer].active,NULL);
+  // xv_set(gd.page_pu->cont_st,PANEL_VALUE,
+  //        gd.layers.cont[gd.layers.cur_contour_layer].active,NULL);
 
-  xv_set(gd.page_pu->cont_label_st,PANEL_VALUE,
-	 gd.layers.cont[gd.layers.cur_contour_layer].labels_on,NULL);
+  // xv_set(gd.page_pu->cont_label_st,PANEL_VALUE,
+  //        gd.layers.cont[gd.layers.cur_contour_layer].labels_on,NULL);
 
   /* Display a field label in the popup */
-  xv_set(gd.page_pu->cont_msg,PANEL_LABEL_STRING,
-	gd.mrec[field]->button_name,NULL);
+  // xv_set(gd.page_pu->cont_msg,PANEL_LABEL_STRING,
+  //       gd.mrec[field]->button_name,NULL);
 
-  xv_set(gd.page_pu->cont_color_msg,PANEL_LABEL_STRING,
-	gd.layers.cont[gd.layers.cur_contour_layer].color->name,NULL);
+  // xv_set(gd.page_pu->cont_color_msg,PANEL_LABEL_STRING,
+  //       gd.layers.cont[gd.layers.cur_contour_layer].color->name,NULL);
 
   
   /* Reset Contour Limits, interval */
   sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].min);
-  xv_set(gd.page_pu->cont_fr_tx,PANEL_VALUE,string,NULL);
+  //   xv_set(gd.page_pu->cont_fr_tx,PANEL_VALUE,string,NULL);
      
   sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].max);
-  xv_set(gd.page_pu->cont_to_tx,PANEL_VALUE,string,NULL);
+  // xv_set(gd.page_pu->cont_to_tx,PANEL_VALUE,string,NULL);
      
   sprintf(string,"%g",gd.layers.cont[gd.layers.cur_contour_layer].interval);
-  xv_set(gd.page_pu->cont_int_tx,PANEL_VALUE,string,NULL);
+  // xv_set(gd.page_pu->cont_int_tx,PANEL_VALUE,string,NULL);
 
 }
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `ov_field_num_st'.
@@ -629,6 +649,7 @@ void ov_field_num_sel_proc( Panel_item item, int value, Event *event)
     gd.layers.cur_overlay_layer = value;
     update_layered_field_panel();
 }
+#endif
 
 /*************************************************************************
  * UPDATE_LAYERED_FIELD_PANEL
@@ -644,19 +665,20 @@ void update_layered_field_panel()
     /* Display Overlay data thresholds */
     gd.layers.overlay_min[gd.layers.cur_overlay_layer] = gd.mrec[field]->overlay_min;
     sprintf(string,"%g",gd.layers.overlay_min[gd.layers.cur_overlay_layer]);
-    xv_set(gd.page_pu->ov_fld_min_tx,PANEL_VALUE,string,NULL);
+    // xv_set(gd.page_pu->ov_fld_min_tx,PANEL_VALUE,string,NULL);
      
     gd.layers.overlay_max[gd.layers.cur_overlay_layer] = gd.mrec[field]->overlay_max;
     sprintf(string,"%g",gd.layers.overlay_max[gd.layers.cur_overlay_layer]);
-    xv_set(gd.page_pu->ov_fld_max_tx,PANEL_VALUE,string,NULL);
+    // xv_set(gd.page_pu->ov_fld_max_tx,PANEL_VALUE,string,NULL);
      
     /* Display a field label in the popup */
-    xv_set(gd.page_pu->ov_fld_msg,PANEL_LABEL_STRING,
-        gd.mrec[field]->button_name,NULL);
-    xv_set(gd.page_pu->over_fld_st,PANEL_VALUE,
-        gd.layers.overlay_field_on[gd.layers.cur_overlay_layer],NULL);
+    // xv_set(gd.page_pu->ov_fld_msg,PANEL_LABEL_STRING,
+    //     gd.mrec[field]->button_name,NULL);
+    // xv_set(gd.page_pu->over_fld_st,PANEL_VALUE,
+    //     gd.layers.overlay_field_on[gd.layers.cur_overlay_layer],NULL);
 }
 
+#ifdef NOTNOW
 /*************************************************************************
  * Notify callback function for `save_bt'.
  */
@@ -764,3 +786,4 @@ set_wind_density_proc(Panel_item item, int value, Event *event)
    set_redraw_flags(1,1);
 }
  
+#endif

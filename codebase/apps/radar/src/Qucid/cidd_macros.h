@@ -128,11 +128,16 @@
 #endif
 
 #define PSEUDO_RADIUS 8533.0  
+
 /* Methods of rendering Gridded false colored data */
-#define POLYGONS  0
-#define FILLED_CONTOURS 1
-#define DYNAMIC_CONTOURS  2
-#define LINE_CONTOURS  3
+
+typedef enum
+  {
+   POLYGONS = 0,
+   FILLED_CONTOURS = 1,
+   DYNAMIC_CONTOURS = 2,
+   LINE_CONTOURS = 3
+  } render_method_t;
  
 /*    OR's flag with 1 if cliped and "returns" a value >= l && <= u */
 #define CLIP(x,l,u,flag) (x < l) ? flag|=1,l: ((x > u)? flag|=1,u:x) 

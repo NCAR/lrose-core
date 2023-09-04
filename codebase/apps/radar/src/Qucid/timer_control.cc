@@ -372,6 +372,8 @@ void check_what_needs_rendering(int frame_index)
  *
  */
 
+#ifdef NOTNOW
+
 void timer_func( Notify_client   client, int which)
 {
   met_record_t *mr;
@@ -955,6 +957,8 @@ void timer_func( Notify_client   client, int which)
 
 }
 
+#endif
+
 /**********************************************************************
  * STOP_TIMER:  Stop the interval timer
  */
@@ -970,9 +974,9 @@ void stop_timer()
   timer.it_interval.tv_usec = 0;
 
   /* Set the interval timer function and start timer */
-  notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
-                         (Notify_func)timer_func,
-                         ITIMER_REAL, &timer, NULL); /*  */
+  // notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
+  //                        (Notify_func)timer_func,
+  //                        ITIMER_REAL, &timer, NULL); /*  */
 }
 
 /**********************************************************************
@@ -997,9 +1001,9 @@ void start_timer()
   if(gd.debug) fprintf(stderr,"Starting Interval timer\n"); 
 
   /* Set the interval timer function and start timer */
-  notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
-                         (Notify_func)timer_func,
-                         ITIMER_REAL, &timer, NULL); /*  */
+  // notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
+  //                        (Notify_func)timer_func,
+  //                        ITIMER_REAL, &timer, NULL); /*  */
 
   gd.coord_expt->shmem_ready = 1;  // Display should be up and running */
 }

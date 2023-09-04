@@ -29,6 +29,7 @@
 
 #include "cidd.h"
 #include <Mdv/MdvxContour.hh>
+#include <vector>
 
 #define IDEAL_NUM_VERT_CONT_LEVELS 10.0
 #define MAX_N_LABELS_X 15
@@ -218,8 +219,9 @@ void RenderLineContours(Drawable xid, contour_info_t *crec,
   // create array for keeping track of label positions
   int max_n_labels_x = MAX_N_LABELS_X;
   int max_n_labels_y = MAX_N_LABELS_Y;
-  char label_loc[max_n_labels_y * max_n_labels_x];
-  memset(label_loc, 0, max_n_labels_y * max_n_labels_x * sizeof(char));
+  vector<char> label_loc;
+  label_loc.resize(max_n_labels_y * max_n_labels_x);
+  memset(label_loc.data(), 0, max_n_labels_y * max_n_labels_x * sizeof(char));
 
   // render lines for each level
 
@@ -232,7 +234,7 @@ void RenderLineContours(Drawable xid, contour_info_t *crec,
 
   for (size_t ii = 0; ii < levels.size(); ii++) {
     draw_labels_for_level(*gframe, ii, levels[ii], crec,
-			  font, label_loc, max_n_labels_x, max_n_labels_y);
+			  font, label_loc.data(), max_n_labels_x, max_n_labels_y);
   } // ii
   
   // Add the list of times to the time plot
@@ -297,8 +299,9 @@ static void draw_lines_for_level(const gframe_t &frame,
       if (line.pts.size() > 0) {
 	
 	// load up gpoint array
-	
-	GPoint gpoints[line.pts.size()];
+
+        vector<GPoint> gpoints;
+        gpoints.resize(line.pts.size());
 	
 	for (size_t ii = 0; ii < line.pts.size(); ii++) {
 	  gpoints[ii].x = line.pts[ii].x;
@@ -308,7 +311,7 @@ static void draw_lines_for_level(const gframe_t &frame,
 	// draw the lines
 	
 	GDrawLines(XDEV, &frame, gc, NULL,
-		   gpoints, line.pts.size(), CoordModeOrigin);
+		   gpoints.data(), line.pts.size(), CoordModeOrigin);
 	
       } // if (line.pts.size() > 0)
       
@@ -384,7 +387,8 @@ static void draw_labels_for_level(const gframe_t &frame,
       
       // load up gpoint array
       
-      GPoint gpoints[line.pts.size()];
+      vector<GPoint> gpoints;
+      gpoints.resize(line.pts.size());
       
       for (size_t ii = 0; ii < line.pts.size(); ii++) {
 	gpoints[ii].x = line.pts[ii].x;
@@ -394,7 +398,7 @@ static void draw_labels_for_level(const gframe_t &frame,
       // put in the labels
       
       draw_labels_for_line(&frame, contourIndex, (int) line.pts.size(),
-			   gpoints, level.val, gc, font,
+			   gpoints.data(), level.val, gc, font,
 			   label_loc, max_n_labels_x, max_n_labels_y);
       
     } // if (line.pts.size() > 0)

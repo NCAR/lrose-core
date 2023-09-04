@@ -53,7 +53,7 @@ void init_symprods()
         value = 0;
         for (int i = 0; i < gd.syprod_P->prod_info_n && i < 32; i++) {
           // if(!gd.run_unmapped) xv_set(gd.prod_pu->prod_st,PANEL_CHOICE_STRING,i,
-	       gd.syprod_P->_prod_info[i].menu_label,NULL);
+          // gd.syprod_P->_prod_info[i].menu_label,NULL);
 
 	    if(gd.syprod_P->_prod_info[i].on_by_default == TRUE) value |= 1 <<i;
 

@@ -536,11 +536,11 @@ static void dump_png(Drawable xid, Window w, const char *dir, const char *fname,
   // display dialog if not
 
   if( confirm_flag) {
-    if((outfile = open_check_write(pathname,gd.h_win_horiz_bw->horiz_bw)) == NULL) {
-      perror("CIDD: Couldn't open file for dumping image - Aborted\n");
-      set_busy_state(0);
-      return;
-    }
+    // if((outfile = open_check_write(pathname,gd.h_win_horiz_bw->horiz_bw)) == NULL) {
+    //   perror("CIDD: Couldn't open file for dumping image - Aborted\n");
+    //   set_busy_state(0);
+    //   return;
+    // }
   } else {
     if((outfile = fopen(pathname,"w+")) == NULL) {
       perror("CIDD: Couldn't open file for dumping image - Aborted\n");

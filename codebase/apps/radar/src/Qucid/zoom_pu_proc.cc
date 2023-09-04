@@ -29,6 +29,8 @@
 
 #include "cidd.h"
 
+#ifdef NOTNOW
+
 /*************************************************************************
  * Notify callback function for `domain_st'.
  */
@@ -69,6 +71,8 @@ void set_domain_proc(Panel_item item, int value, Event *event)
   if(event != NULL) gd.coord_expt->pointer_seq_num++; 
 
 }
+
+#endif
 
 /*************************************************************************
  * Notify callback function for `domain_st'.
@@ -134,6 +138,8 @@ void set_domain_zoom(double zoom_min_x, double zoom_min_y,
 
 }
 
+#ifdef NOTNOW
+
 #define CMD_BUF_LEN 2048
 /*************************************************************************
  * Notify callback function for `bookmark_st'.
@@ -180,3 +186,4 @@ void bookmark_proc(Panel_item item, int value, Event *event)
     xv_set(gd.bookmk_pu->bookmk_pu,FRAME_CMD_PUSHPIN_IN, FALSE, XV_SHOW, FALSE, NULL); 
 }
 
+#endif

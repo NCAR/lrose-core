@@ -189,7 +189,7 @@ void rotate_movie_frames()
 
     /* restarts the sequence of rendering each field at each zoom state */
     if(gd.html_mode) {
-        set_domain_proc(gd.zoom_pu->domain_st,0,NULL); /* reset domain to 1st area */
+      // set_domain_proc(gd.zoom_pu->domain_st,0,NULL); /* reset domain to 1st area */
     }
 
 }

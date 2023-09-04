@@ -33,7 +33,9 @@ extern int fullscreendebug;
 /***************************************************************************
  * INIT_XVIEW : Initialize the base frame and other global objects
  */ 
- 
+
+#ifdef NOTNOW
+
 void init_xview(int *argc_ptr, char    *argv[])
 {
     // xv_init(XV_INIT_ARGC_PTR_ARGV, argc_ptr, argv,
@@ -117,3 +119,5 @@ void init_xview(int *argc_ptr, char    *argv[])
     load_fonts(gd.dpy);
 
 }
+
+#endif

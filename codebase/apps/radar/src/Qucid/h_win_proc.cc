@@ -33,6 +33,8 @@
 #include "cidd.h"
 
 void show_xsect_panel( u_int value); // forward decleration
+
+#ifdef NOTNOW
 /*************************************************************************
  * Notify callback function for `im_cache_st'.
  */
@@ -41,15 +43,16 @@ im_cache_proc(Panel_item item, int value, Event *event)
 {
     gd.h_win.cur_cache_im = value;
 }
+#endif
 
 /*************************************************************************
  * SET_HEIGHT_LABEL: 
  */
 void set_height_label()
 {
-   const char *label;
+   const char *label = NULL;
    label = height_label();
-   xv_set(gd.h_win_horiz_bw->cur_ht_msg, PANEL_LABEL_STRING, label, NULL);
+   // xv_set(gd.h_win_horiz_bw->cur_ht_msg, PANEL_LABEL_STRING, label, NULL);
 }
 
 /*************************************************************************
@@ -57,22 +60,22 @@ void set_height_label()
  */
 void show_cmd_menu(u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos = 0,y_pos = 0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label = NULL;   // What this button is called 
     static int first_time = 1;
 
     if(value) {
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -88,29 +91,28 @@ void show_cmd_menu(u_int value)
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_cmd_menu_bit) /
 			    log(2.0)));
 
-	label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Far Left, below control panel */
-        x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-        y_pos = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT) +
-          (4 * gd.h_win.margin.top);
-        xv_set(gd.cmd_pu->cmd_pu,
-               XV_X,    p_x + x_pos, 
-               XV_Y,    p_y + y_pos, 
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+        // x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+        // y_pos = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT) + (4 * gd.h_win.margin.top);
+        // xv_set(gd.cmd_pu->cmd_pu,
+        //        XV_X,    p_x + x_pos, 
+        //        XV_Y,    p_y + y_pos, 
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+	//        XV_LABEL, label,
+        //        NULL);
       } else {
-        xv_set(gd.cmd_pu->cmd_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+        // xv_set(gd.cmd_pu->cmd_pu,
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+        //        NULL);
       }
     } else {
-        xv_set(gd.cmd_pu->cmd_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.cmd_pu->cmd_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
    }
 }
 
@@ -119,14 +121,14 @@ void show_cmd_menu(u_int value)
  */
 void show_dpd_menu(u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos = 0,y_pos = 0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -134,7 +136,7 @@ void show_dpd_menu(u_int value)
     static int first_time = 1;
 
     if(value) {
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -150,28 +152,28 @@ void show_dpd_menu(u_int value)
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_dpd_menu_bit) /
 			    log(2.0)));
 
-	label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Far Left, below control panel */
-        x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+        // x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
         y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-        xv_set(gd.data_pu->data_pu,
-               XV_X,    p_x + x_pos, 
-               XV_Y,    p_y + y_pos, 
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+        // xv_set(gd.data_pu->data_pu,
+        //        XV_X,    p_x + x_pos, 
+        //        XV_Y,    p_y + y_pos, 
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+	//        XV_LABEL, label,
+        //        NULL);
       } else {
-        xv_set(gd.data_pu->data_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+        // xv_set(gd.data_pu->data_pu,
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+        //        NULL);
       }
     } else {
-        xv_set(gd.data_pu->data_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.data_pu->data_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
    }
 }
  
@@ -180,14 +182,14 @@ void show_dpd_menu(u_int value)
  */
 void show_view_menu(u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos=0,y_pos=0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -195,7 +197,7 @@ void show_view_menu(u_int value)
     static int first_time = 1;
 
     if(value) {
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -212,28 +214,28 @@ void show_view_menu(u_int value)
 			    log(2.0)));
 
 
-	label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Just Right of the data_pu, below control panel */
-        x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+        // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
         y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-        xv_set(gd.zoom_pu->zoom_pu,
-               XV_X,    p_x + x_pos, 
-               XV_Y,    p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+        // xv_set(gd.zoom_pu->zoom_pu,
+        //        XV_X,    p_x + x_pos, 
+        //        XV_Y,    p_y + y_pos,
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+	//        XV_LABEL, label,
+        //        NULL);
       } else {
-        xv_set(gd.zoom_pu->zoom_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+        // xv_set(gd.zoom_pu->zoom_pu,
+        //        FRAME_CMD_PUSHPIN_IN, TRUE,
+        //        XV_SHOW, TRUE,
+        //        NULL);
       }
     } else {
-        xv_set(gd.zoom_pu->zoom_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.zoom_pu->zoom_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
    }
 }
  
@@ -244,14 +246,14 @@ void show_view_menu(u_int value)
  */
 void show_dpd_panel( u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos;
+    int x_pos=0;
     int size,cp_size;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
@@ -262,7 +264,7 @@ void show_dpd_panel( u_int value)
 
     if(value) { /* open or close the Page Config  Popup */
 
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -278,28 +280,28 @@ void show_dpd_panel( u_int value)
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.show_dpd_panel_bit) /
 			    log(2.0)));
 
-	    label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-            x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
-            cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
-	    size = xv_get(gd.page_pu->page_pu,XV_WIDTH);
-            xv_set(gd.page_pu->page_pu,
-               XV_X, p_x + x_pos - size, /* Place agianst the Upper right edge */
-               XV_Y, p_y + cp_size,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+            // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
+            // cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
+	    // size = xv_get(gd.page_pu->page_pu,XV_WIDTH);
+            // xv_set(gd.page_pu->page_pu,
+            //    XV_X, p_x + x_pos - size, /* Place agianst the Upper right edge */
+            //    XV_Y, p_y + cp_size,
+            //    FRAME_CMD_PUSHPIN_IN, TRUE,
+            //    XV_SHOW, TRUE,
+	    //    XV_LABEL, label,
+            //    NULL);
 	 } else { /* Just pop it up where ever the user last left it */
-             xv_set(gd.page_pu->page_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.page_pu->page_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	 }
       } else {
-        xv_set(gd.page_pu->page_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.page_pu->page_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
   }
 }
 
@@ -336,15 +338,15 @@ void set_route_mode( u_int value)
 	// Make sure the Pick Button is up.
 	if(gd.menu_bar.set_pick_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 	
 	// Make sure the Draw Button is up.
 	if(gd.menu_bar.set_draw_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 }
 
@@ -381,15 +383,15 @@ void set_pick_export_mode( u_int value)
 	// Make sure the Route Button is up.
 	if(gd.menu_bar.set_route_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 	
 	// Make sure the Draw Button is up.
 	if(gd.menu_bar.set_draw_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_draw_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 }
 
@@ -427,15 +429,15 @@ void set_draw_export_mode( u_int value)
 	// Make sure the Route Button is up.
 	if(gd.menu_bar.set_route_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_route_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 	
 	// Make sure the Pick Button is up.
 	if(gd.menu_bar.set_pick_mode_bit != 0) {
 	  gd.menu_bar.last_callback_value &= ~gd.menu_bar.set_pick_mode_bit;
-	  xv_set(gd.h_win_horiz_bw->main_st,
-			  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
+	  // xv_set(gd.h_win_horiz_bw->main_st,
+	  //       	  PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
 	}
 }
 
@@ -445,14 +447,14 @@ void set_draw_export_mode( u_int value)
  */
 void show_draw_panel( u_int value)
 {
-    Window  xid;
+    Window  xid=0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos;
+    int x_pos=0;
     int size,cp_size;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
@@ -463,7 +465,7 @@ void show_draw_panel( u_int value)
 
     if(value) { /* open or close the Draw/Export Confirmation popup */
 
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -479,22 +481,22 @@ void show_draw_panel( u_int value)
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.set_draw_mode_bit) /
 			    log(2.0)));
 
-	    label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-            x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
-            cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
-	    size = xv_get(gd.draw_pu->draw_pu,XV_WIDTH);
-            xv_set(gd.draw_pu->draw_pu,
-               XV_X, p_x + x_pos - size, /* Place agianst the Upper right edge */
-               XV_Y, p_y + cp_size,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+            // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
+            // cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
+	    // size = xv_get(gd.draw_pu->draw_pu,XV_WIDTH);
+            // xv_set(gd.draw_pu->draw_pu,
+            //    XV_X, p_x + x_pos - size, /* Place agianst the Upper right edge */
+            //    XV_Y, p_y + cp_size,
+            //    FRAME_CMD_PUSHPIN_IN, TRUE,
+            //    XV_SHOW, TRUE,
+	    //    XV_LABEL, label,
+            //    NULL);
 	 } else { /* Just pop it up where ever the user last left it */
-             xv_set(gd.draw_pu->draw_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.draw_pu->draw_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	 }
 
 	 int tries = 10;
@@ -514,10 +516,10 @@ void show_draw_panel( u_int value)
          update_draw_export_panel();
 
       } else {
-        xv_set(gd.draw_pu->draw_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.draw_pu->draw_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
   }
 }
 
@@ -526,14 +528,14 @@ void show_draw_panel( u_int value)
  */
 void show_product_menu( u_int value)
 {
-    Window  xid;
+    Window  xid=0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
-    int x,y;            /* location of drawable relative to parent */
+    int x=0,y=0;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos=0,y_pos=0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -548,8 +550,8 @@ void show_product_menu( u_int value)
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_prod_menu_bit) /
 			    log(2.0)));
 
-	     label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-             xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+             // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
              /* Windows position on xv_get is relative to the parent */
              /* so find out where the parent window is */
              XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -558,26 +560,26 @@ void show_product_menu( u_int value)
              /* take parents postion to get pos relative to root win */
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
-             y_pos = xv_get(gd.data_pu->data_pu,XV_HEIGHT) + 30;
-             x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-             xv_set(gd.prod_pu->prod_pu,
-               XV_X, p_x + x_pos,
-               XV_Y, p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+             // y_pos = xv_get(gd.data_pu->data_pu,XV_HEIGHT) + 30;
+             // x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+             // xv_set(gd.prod_pu->prod_pu,
+             //   XV_X, p_x + x_pos,
+             //   XV_Y, p_y + y_pos,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+	     //   XV_LABEL, label,
+             //   NULL);
 	} else  {
-             xv_set(gd.prod_pu->prod_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.prod_pu->prod_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	}
       } else {
-        xv_set(gd.prod_pu->prod_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.prod_pu->prod_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
       }
 }
 
@@ -587,14 +589,14 @@ void show_product_menu( u_int value)
  */
 void show_map_menu( u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos=0,y_pos=0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -609,8 +611,8 @@ void show_map_menu( u_int value)
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_map_menu_bit) /
 			    log(2.0)));
 
-	     label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-             xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+             // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
              /* Windows position on xv_get is relative to the parent */
              /* so find out where the parent window is */
              XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -619,26 +621,26 @@ void show_map_menu( u_int value)
              /* take parents postion to get pos relative to root win */
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
-             y_pos = xv_get(gd.zoom_pu->zoom_pu,XV_HEIGHT) + 30;
-             x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-             xv_set(gd.over_pu->over_pu,
-               XV_X, p_x + x_pos,
-               XV_Y, p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+             // y_pos = xv_get(gd.zoom_pu->zoom_pu,XV_HEIGHT) + 30;
+             // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+             // xv_set(gd.over_pu->over_pu,
+             //   XV_X, p_x + x_pos,
+             //   XV_Y, p_y + y_pos,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+	     //   XV_LABEL, label,
+             //   NULL);
 	} else  {
-             xv_set(gd.over_pu->over_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.over_pu->over_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	}
       } else {
-        xv_set(gd.over_pu->over_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.over_pu->over_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
       }
 }
 
@@ -647,14 +649,14 @@ void show_map_menu( u_int value)
  */
 void show_past_time_menu( u_int value)
 {
-    Window  xid;
+  Window  xid=0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos=0,y_pos=0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -669,8 +671,8 @@ void show_past_time_menu( u_int value)
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_past_menu_bit) /
 			    log(2.0)));
 
-	     label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-             xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+             // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
              /* Windows position on xv_get is relative to the parent */
              /* so find out where the parent window is */
              XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -680,28 +682,28 @@ void show_past_time_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-             x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
-             xv_set(gd.past_pu->past_pu,
-               XV_X, p_x + x_pos,
-               XV_Y, p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+             // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
+             // xv_set(gd.past_pu->past_pu,
+             //   XV_X, p_x + x_pos,
+             //   XV_Y, p_y + y_pos,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+	     //   XV_LABEL, label,
+             //   NULL);
 	} else  {
-             xv_set(gd.past_pu->past_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.past_pu->past_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	}
       } else {
-         xv_set(gd.past_pu->past_pu,
-           FRAME_CMD_PUSHPIN_IN, FALSE,
-           XV_SHOW, FALSE,
-           NULL);
+         // xv_set(gd.past_pu->past_pu,
+         //   FRAME_CMD_PUSHPIN_IN, FALSE,
+         //   XV_SHOW, FALSE,
+         //   NULL);
       }
 }
 
@@ -710,14 +712,14 @@ void show_past_time_menu( u_int value)
  */
 void show_forecast_time_menu( u_int value)
 {
-    Window  xid;
+    Window  xid=0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
-    int x_pos,y_pos;
+    int x_pos=0,y_pos=0;
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
     int  choice_num;
@@ -732,8 +734,8 @@ void show_forecast_time_menu( u_int value)
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_forecast_menu_bit) /
 			    log(2.0)));
 
-	     label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-             xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+             // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
              /* Windows position on xv_get is relative to the parent */
              /* so find out where the parent window is */
              XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -743,28 +745,28 @@ void show_forecast_time_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-             x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
-             xv_set(gd.fcast_pu->fcast_pu,
-               XV_X, p_x + x_pos,
-               XV_Y, p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+             // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
+             // xv_set(gd.fcast_pu->fcast_pu,
+             //   XV_X, p_x + x_pos,
+             //   XV_Y, p_y + y_pos,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+	     //   XV_LABEL, label,
+             //   NULL);
 	} else  {
-             xv_set(gd.fcast_pu->fcast_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.fcast_pu->fcast_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	}
       } else {
-         xv_set(gd.fcast_pu->fcast_pu,
-           FRAME_CMD_PUSHPIN_IN, FALSE,
-           XV_SHOW, FALSE,
-           NULL);
+         // xv_set(gd.fcast_pu->fcast_pu,
+         //   FRAME_CMD_PUSHPIN_IN, FALSE,
+         //   XV_SHOW, FALSE,
+         //   NULL);
       }
 }
 
@@ -795,8 +797,8 @@ void show_bookmk_menu( u_int value)
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_bookmark_menu_bit) /
 			    log(2.0)));
 
-	     label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-             xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+             // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
              /* Windows position on xv_get is relative to the parent */
              /* so find out where the parent window is */
              XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -806,29 +808,29 @@ void show_bookmk_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-             x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
-             x_pos += xv_get(gd.fcast_pu->fcast_pu,XV_WIDTH) + 10;
-             xv_set(gd.bookmk_pu->bookmk_pu,
-               XV_X, p_x + x_pos,
-               XV_Y, p_y + y_pos,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-	       XV_LABEL, label,
-               NULL);
+             // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.prod_pu->prod_pu,XV_WIDTH) + 10;
+             // x_pos += xv_get(gd.fcast_pu->fcast_pu,XV_WIDTH) + 10;
+             // xv_set(gd.bookmk_pu->bookmk_pu,
+             //   XV_X, p_x + x_pos,
+             //   XV_Y, p_y + y_pos,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+	     //   XV_LABEL, label,
+             //   NULL);
 	} else  {
-             xv_set(gd.bookmk_pu->bookmk_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW, TRUE,
-               NULL);
+             // xv_set(gd.bookmk_pu->bookmk_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW, TRUE,
+             //   NULL);
 	}
       } else {
-        xv_set(gd.bookmk_pu->bookmk_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.bookmk_pu->bookmk_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
       }
 }
 
@@ -854,7 +856,7 @@ void show_xsect_panel( u_int value)
     static int first_time = 1;
 
     if(value) {
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
@@ -877,21 +879,21 @@ void show_xsect_panel( u_int value)
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_xsect_panel_bit) /
 			    log(2.0)));
 
-	label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-            xv_set(gd.v_win_v_win_pu->v_win_pu,
-                   XV_X,    x_pos, 
-                   XV_Y,    y_pos,
-	           XV_LABEL, label,
-                   NULL);
+	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+        //     xv_set(gd.v_win_v_win_pu->v_win_pu,
+        //            XV_X,    x_pos, 
+        //            XV_Y,    y_pos,
+	//            XV_LABEL, label,
+        //            NULL);
       }
-            xv_set(gd.v_win_v_win_pu->v_win_pu,
-                   XV_SHOW, TRUE,
-                   NULL);
+            // xv_set(gd.v_win_v_win_pu->v_win_pu,
+            //        XV_SHOW, TRUE,
+            //        NULL);
             gd.v_win.active = 1;
     } else {
-            xv_set(gd.v_win_v_win_pu->v_win_pu,
-                   XV_SHOW, FALSE,
-                   NULL);
+            // xv_set(gd.v_win_v_win_pu->v_win_pu,
+            //        XV_SHOW, FALSE,
+            //        NULL);
             gd.v_win.active = 0;
     }
     set_redraw_flags(1,1);
@@ -920,7 +922,7 @@ show_time_panel(u_int value)
     static int first_time = 1;
 
     if(value) {
-       xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
        /* Windows position on xv_get is relative to the parent */
        /* so find out where the parent window is */
@@ -935,33 +937,33 @@ show_time_panel(u_int value)
 	    // calc the bit number of the widget 
 	    choice_num = (int)(rint(log((double) gd.menu_bar.show_time_panel_bit) / log(2.0)));
 
-	    label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-            cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
-            x_width = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH);
-            y_ht = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT);
-            size_x = xv_get(gd.movie_pu->movie_pu,XV_WIDTH);
-            size_y = xv_get(gd.movie_pu->movie_pu,XV_HEIGHT);
+	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+            // cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
+            // x_width = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH);
+            // y_ht = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT);
+            // size_x = xv_get(gd.movie_pu->movie_pu,XV_WIDTH);
+            // size_y = xv_get(gd.movie_pu->movie_pu,XV_HEIGHT);
 	     
-             xv_set(gd.movie_pu->movie_pu,
-               XV_X,   0, /* lower left corner screen */
-               XV_Y,   DisplayHeight(gd.dpy,0) - size_y - 30,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-	       XV_LABEL, label,
-               XV_SHOW,TRUE,NULL);
+            //  xv_set(gd.movie_pu->movie_pu,
+            //    XV_X,   0, /* lower left corner screen */
+            //    XV_Y,   DisplayHeight(gd.dpy,0) - size_y - 30,
+            //    FRAME_CMD_PUSHPIN_IN, TRUE,
+	    //    XV_LABEL, label,
+            //    XV_SHOW,TRUE,NULL);
 	     gd.movie.active = 1;
 	     if(gd.time_plot) gd.time_plot->Draw();
 	} else {  /* Show it where the user last left it */
-             xv_set(gd.movie_pu->movie_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW,TRUE,NULL);
+             // xv_set(gd.movie_pu->movie_pu,
+             //   FRAME_CMD_PUSHPIN_IN, TRUE,
+             //   XV_SHOW,TRUE,NULL);
 	     gd.movie.active = 1;
 	     if(gd.time_plot) gd.time_plot->Draw();
 	}
     } else {
-        xv_set(gd.movie_pu->movie_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+        // xv_set(gd.movie_pu->movie_pu,
+        //        FRAME_CMD_PUSHPIN_IN, FALSE,
+        //        XV_SHOW, FALSE,
+        //        NULL);
 	     gd.movie.active = 0;
     }
 
@@ -973,23 +975,23 @@ show_time_panel(u_int value)
  */
 void show_status_panel( u_int value)
 {
-    int x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+    // int x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
     int y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
-    xv_set(gd.status_pu->status_pu,
-           XV_X, x_pos, 
-           XV_Y, y_pos,
-           NULL);
+    // xv_set(gd.status_pu->status_pu,
+    //        XV_X, x_pos, 
+    //        XV_Y, y_pos,
+    //        NULL);
     if(value) {
-	xv_set(gd.status_pu->status_pu,
-		FRAME_CMD_PUSHPIN_IN, TRUE,
-		XV_SHOW, TRUE,
-		NULL);
+	// xv_set(gd.status_pu->status_pu,
+	// 	FRAME_CMD_PUSHPIN_IN, TRUE,
+	// 	XV_SHOW, TRUE,
+	// 	NULL);
 
     } else {
-	 xv_set(gd.status_pu->status_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+	 // xv_set(gd.status_pu->status_pu,
+         //       FRAME_CMD_PUSHPIN_IN, FALSE,
+         //       XV_SHOW, FALSE,
+         //       NULL);
     }
 }
 
@@ -1017,8 +1019,8 @@ void show_grid_panel( u_int value)
     static int first_time = 1;
 
     if(value) {
-        xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
-
+      // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
+        
         /* Windows position on xv_get is relative to the parent */
         /* so find out where the parent window is */
         XQueryTree(gd.dpy,xid,&root,&parent,&children,&nchild);
@@ -1033,29 +1035,29 @@ void show_grid_panel( u_int value)
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.show_grid_panel_bit) /
 			    log(2.0)));
 
-	    label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
-            x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
-            y_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT);
-            size = xv_get(gd.fields_pu->fields_pu,XV_HEIGHT);
-	    xv_set(gd.fields_pu->fields_pu,
-               XV_X,    p_x, /* On lower left corner of parent win */
-               XV_Y,    p_y + y_pos - size, /* */
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-	       XV_LABEL, label,
-               XV_SHOW,TRUE,NULL);
+	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
+            // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
+            // y_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_HEIGHT);
+            // size = xv_get(gd.fields_pu->fields_pu,XV_HEIGHT);
+	    // xv_set(gd.fields_pu->fields_pu,
+            //    XV_X,    p_x, /* On lower left corner of parent win */
+            //    XV_Y,    p_y + y_pos - size, /* */
+            //    FRAME_CMD_PUSHPIN_IN, TRUE,
+	    //    XV_LABEL, label,
+            //    XV_SHOW,TRUE,NULL);
 	} else {
-	    xv_set(gd.fields_pu->fields_pu,
-               FRAME_CMD_PUSHPIN_IN, TRUE,
-               XV_SHOW,TRUE,NULL);
+	    // xv_set(gd.fields_pu->fields_pu,
+            //    FRAME_CMD_PUSHPIN_IN, TRUE,
+            //    XV_SHOW,TRUE,NULL);
 	}
 	update_grid_config_gui();
 	update_wind_config_gui();
 	update_prod_config_gui();
     } else {
-	 xv_set(gd.fields_pu->fields_pu,
-               FRAME_CMD_PUSHPIN_IN, FALSE,
-               XV_SHOW, FALSE,
-               NULL);
+	 // xv_set(gd.fields_pu->fields_pu,
+         //       FRAME_CMD_PUSHPIN_IN, FALSE,
+         //       XV_SHOW, FALSE,
+         //       NULL);
     }
 }
 
@@ -1085,10 +1087,10 @@ void landuse_onoff( u_int value)
 {
     if(value > 0) {
          gd.layers.earth.landuse_active = 1;
-	     xv_set(gd.page_pu->land_use_st,PANEL_VALUE,1,NULL);
+         // xv_set(gd.page_pu->land_use_st,PANEL_VALUE,1,NULL);
     } else {
          gd.layers.earth.landuse_active = 0;
-	     xv_set(gd.page_pu->land_use_st,PANEL_VALUE,0,NULL);
+         // xv_set(gd.page_pu->land_use_st,PANEL_VALUE,0,NULL);
     }
 
     set_redraw_flags(1,0);
@@ -1142,7 +1144,7 @@ void startup_printing( u_int value)
     p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.print_button_bit);
 
     gd.menu_bar.last_callback_value = p_value;
-    xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
+    // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
 
 #define SNAPSHOT_CMD "Cidd_snap"
@@ -1163,7 +1165,7 @@ void startup_snapshot( u_int value)
 
     p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.snapshot_bit);
     gd.menu_bar.last_callback_value = p_value;
-    xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
+    // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
 
 #define BUFFER_SIZE   1024
@@ -1189,8 +1191,10 @@ void startup_help( u_int value)
     p_value = gd.menu_bar.last_callback_value & ~(gd.menu_bar.help_button_bit);
 
     gd.menu_bar.last_callback_value = p_value;
-    xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
+    // xv_set(gd.h_win_horiz_bw->main_st,PANEL_VALUE,p_value,NULL);
 }
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `main_st'.
@@ -1404,3 +1408,4 @@ void main_st_proc(Panel_item item, u_int value, Event *event)
 	 xv_set(item,PANEL_VALUE,gd.menu_bar.last_callback_value,NULL);
     }
 }
+#endif

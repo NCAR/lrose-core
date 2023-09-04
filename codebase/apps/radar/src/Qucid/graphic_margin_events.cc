@@ -71,6 +71,7 @@ void set_height(int index)
      
 }
 
+#ifdef NOTNOW
 //////////////////////////////////////////////////////////////////////////
 // Event handler function for top margin 
 //
@@ -217,3 +218,4 @@ void right_margin_event(Event *event)
     return;
 }
 
+#endif

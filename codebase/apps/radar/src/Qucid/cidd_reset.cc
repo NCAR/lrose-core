@@ -30,7 +30,7 @@
 #define CIDD_RESET 1
 #include "cidd.h"
 
-extern void set_fcast_tm_proc(Panel_item item, int value, Event *event);
+// extern void set_fcast_tm_proc(Panel_item item, int value, Event *event);
 
 //*******************************************************************
 // INVALIDATE_ALL_DATA
@@ -134,7 +134,7 @@ void reset_display()
    if(gd.movie.demo_mode == 0 || gd.movie.demo_time == 0) {
 
      // Set back to now if in real time mode real time;
-     set_fcast_tm_proc(0,0,NULL);
+     // set_fcast_tm_proc(0,0,NULL);
      
      // gd.movie.cur_frame = gd.movie.end_frame;
      
@@ -262,7 +262,7 @@ void reset_display()
     }
 
    // Restore the zoom level
-   set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.start_zoom_level, (Event *) NULL);
+   // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.start_zoom_level, (Event *) NULL);
 
   // restore the starting height
   gd.h_win.cur_ht = start_height;

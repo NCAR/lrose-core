@@ -63,13 +63,15 @@ static int yheight = gd.h_win.can_dim.height;
   
 // file scope functions
 
-static void draw_report_text(Event *event);
-static void respond_to_select(Event *event);
-static void respond_to_adjust(Event *event);
-static void respond_to_menu(Event *event);
-static void respond_to_drag(Event *event);
-static void respond_to_keyboard(Event *event);
-static double constrain_az(double az);
+// static void draw_report_text(Event *event);
+// static void respond_to_select(Event *event);
+// static void respond_to_adjust(Event *event);
+// static void respond_to_menu(Event *event);
+// static void respond_to_drag(Event *event);
+// static void respond_to_keyboard(Event *event);
+// static double constrain_az(double az);
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Event callback function for `canvas1'.
@@ -1130,4 +1132,6 @@ static double constrain_az(double az)
   }
   return az;
 }
+
+#endif
 

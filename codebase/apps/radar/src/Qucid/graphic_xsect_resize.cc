@@ -36,6 +36,8 @@
 
 extern void update_save_panel();
 
+#ifdef NOTNOW
+
 /*************************************************************************
  * V_WIN_EVENTS: Handle resizing events in the verticle display
  */
@@ -139,3 +141,4 @@ v_win_events(Frame frame, Event *event, Notify_arg arg,
 
     return(notify_next_event_func(frame,(Notify_event) event,arg,type));
 }   
+#endif

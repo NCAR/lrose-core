@@ -31,7 +31,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = CIDD
+TARGET_FILE = Qucid
 
 LAST_INCLUDES = $(SYS_X_INCLUDES)
 
@@ -111,13 +111,15 @@ CPPC_SRCS = \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
 	cidd_signals.cc \
-	cmd_pu_proc.cc \
 	colorscales.cc \
 	contours.cc \
 	data_gather.cc \
 	data_init.cc \
 	data_io.cc \
+	data_pu_proc.cc \
 	draw_export_init.cc \
+	draw_pu_proc.cc \
+	fields_pu_proc.cc \
 	graphic_canvas_events.cc \
 	graphic_canvas_events_bkwd.cc \
 	graphic_check.cc \
@@ -136,11 +138,14 @@ CPPC_SRCS = \
 	gui_init.cc \
 	gui_label_frame.cc \
 	gui_modify.cc \
+	h_win_proc.cc \
 	mdvx_data_request.cc \
 	movie_control.cc \
 	movie_frame_retrieve.cc \
 	movie_frame_save.cc \
+	movie_pu_proc.cc \
 	overlay_init.cc \
+	page_pu_proc.cc \
 	process_args.cc \
 	render_azimuths.cc \
 	render_bottom_margin.cc \
@@ -177,11 +182,14 @@ CPPC_SRCS = \
 	render_xsect_winds.cc \
 	route_winds_init.cc \
 	shmem_init.cc \
+	status_pu_proc.cc \
 	symprod_init.cc \
 	timer_control.cc \
+	v_win_proc.cc \
 	winds_init.cc \
 	xview_file_access.cc \
-	Uparams.cc
+	Uparams.cc \
+	zoom_pu_proc.cc
 
 #
 # TDRP support

@@ -31,6 +31,7 @@
 #define RENDER_XSECT_GRIDS
 
 #include "cidd.h"
+#include <vector>
 #define MESSAGE_LEN 1024
 
 static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, time_t end_time, int is_overlay_field);
@@ -105,7 +106,9 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
     disp_proj_to_pixel_v(&gd.v_win.margin,gd.h_win.route.total_length,height,&endx,&endy);
     r_wd =  (double)ABSDIFF(endx,startx) / (double) mr->v_fhdr.nx;        /* get data point rectangle width */
 
-    vert_spacing_t vert[mr->v_fhdr.nz];
+    vector<vert_spacing_t> vert;
+    vert.resize(mr->v_fhdr.nz);
+    //    vert_spacing_t *vert = vert_.alloc(mr->v_fhdr.nz);
 
     for(i=0; i < mr->v_fhdr.nz; i++) { 
       if(i == 0) { // Lowest plane 
@@ -125,8 +128,9 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
       }
     }
 
-    int y_start[mr->v_fhdr.nz];    /* canvas  rectangle begin coords */
-    int y_end[mr->v_fhdr.nz];    /* canvas  rectangle end coords */
+    vector<int> y_start, y_end;
+    y_start.resize(mr->v_fhdr.nz); /* canvas  rectangle begin coords */
+    y_end.resize(mr->v_fhdr.nz); /* canvas  rectangle end coords */
     for(i= 0; i < mr->v_fhdr.nz; i++) {    /* Calc starting/ending coords for the array */
           height = vert[i].min;
           disp_proj_to_pixel_v(&gd.v_win.margin,dist,height,&endx,&(y_start[i]));
@@ -139,7 +143,8 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
 		  }
     }
 
-    int x_start[mr->v_fhdr.nx];    /* canvas rectangle begin  coords */
+    vector<int> x_start;
+    x_start.resize(mr->v_fhdr.nx);    /* canvas rectangle begin  coords */
     for(j=0;j< mr->v_fhdr.nx; j++) {
         x_start[j] = (int)(((double) j * r_wd) + startx);
     }
@@ -195,7 +200,7 @@ int render_xsect_grid( Drawable xid, met_record_t *mr, time_t start_time, time_t
 	      if (gd.layers.use_alt_contours) {
 		RenderFilledPolygons(xid, mr, true);
 	      } else {
-		draw_xsect_filled_contours(xid,x_start,y_start,mr);
+		draw_xsect_filled_contours(xid,x_start.data(),y_start.data(),mr);
 	      }
 	break;
       }
@@ -211,13 +216,14 @@ static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, 
 
 {
 
-    double elevLimit[mr->v_fhdr.ny + 1];
-    double slant[mr->v_fhdr.nx + 1];
-    double htcorr[mr->v_fhdr.nx + 1];
-    double **ht = (double **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(double));
-    double **range = (double **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(double));
-    int **yy = (int **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(int));
-    int **xx = (int **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(int));
+  vector<double> elevLimit, slant, htcorr;
+  elevLimit.resize(mr->v_fhdr.ny + 1);
+  slant.resize(mr->v_fhdr.nx + 1);
+  htcorr.resize(mr->v_fhdr.nx + 1);
+  double **ht = (double **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(double));
+  double **range = (double **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(double));
+  int **yy = (int **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(int));
+  int **xx = (int **) umalloc2(mr->v_fhdr.ny + 1, mr->v_fhdr.nx + 1, sizeof(int));
 
     // compute array of heights and ranges
 
@@ -260,7 +266,8 @@ static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, 
     // render polygons
 
     int num_points = 4;
-    XPoint xpt[num_points];
+    vector<XPoint> xpt;
+    xpt.resize(num_points);
     
     unsigned short *ptr =  (unsigned short *) mr->v_data;
     for (int ii = 0; ii < mr->v_fhdr.ny; ii++) {
@@ -275,7 +282,7 @@ static int render_polar_rhi( Drawable xid, met_record_t *mr, time_t start_time, 
 	  xpt[3].x = xx[ii][jj+1];
 	  xpt[3].y = yy[ii][jj+1];
 	  XFillPolygon(gd.dpy, xid, mr->v_vcm.val_gc[*ptr],
-		       xpt, num_points, Nonconvex, CoordModeOrigin);
+		       xpt.data(), num_points, Nonconvex, CoordModeOrigin);
 	}
       } // jj
     } // ii

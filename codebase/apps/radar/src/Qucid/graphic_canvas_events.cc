@@ -50,6 +50,8 @@ extern int    r_state; /* Route - Drawing State 0 = Off
 /*************************************************************************
  * PROCESS_ROTATE_KEYS
  */
+#ifdef NOTNOW
+
 void process_rotate_keys(Event *event)
 {
   static double coarse_adjust = -9999.99;
@@ -1104,7 +1106,7 @@ Notify_value can_event_proc(Window win, Event *event,
 
   return notify_next_event_func(win, (Notify_event) event, arg, type);
 }
- 
+
 /*************************************************************************
  * Repaint callback function for `canvas1'.
  */
@@ -1225,5 +1227,7 @@ void handle_click_h(Event *event,
 
 
 }
+
+#endif
 
   

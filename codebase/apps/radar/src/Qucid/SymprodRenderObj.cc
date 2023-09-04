@@ -36,7 +36,7 @@
 #include "Product.hh"
 #include <Spdb/Symprod.hh>
 #include <Spdb/Product_defines.hh>
-#include <toolsa/TaArray.hh>
+#include <vector>
 #include <toolsa/str.h>
 #include <toolsa/pjg.h>     // Map projection geometry
 
@@ -391,9 +391,9 @@ void SymprodRenderPolyline::draw(RenderContext &context)
 
   // copy the points
 
-  TaArray<Symprod::wpt_t> points__;
-  Symprod::wpt_t *points = points__.alloc(_props.num_points);
-  memcpy(points, _points, _props.num_points * sizeof(Symprod::wpt_t));
+  vector<Symprod::wpt_t> points;
+  points.resize(_props.num_points);
+  memcpy(points.data(), _points, _props.num_points * sizeof(Symprod::wpt_t));
 
   // adjust the lon range of the latlon points as applicable
 
@@ -607,8 +607,8 @@ void SymprodRenderIconline::draw(RenderContext &context)
 
   double penup = -9999.0;
 
-  TaArray<GPoint> gpts__;
-  GPoint *gpts = gpts__.alloc(_props.num_points);
+  vector<GPoint> gpts;
+  gpts.resize(_props.num_points);
 
   for (int i = 0; i < _props.num_points; i++) {
     if (_points[i].x == Symprod::PPT_PENUP &&
@@ -709,7 +709,7 @@ void SymprodRenderIconline::draw(RenderContext &context)
       
 	GDrawLines(context.dev, &context.frame,
 		   context.gc, &context.psgc,
-		   gpts + start, count,
+		   gpts.data() + start, count,
 		   CoordModeOrigin);
       
 	if (_props.close_flag &&
@@ -722,7 +722,7 @@ void SymprodRenderIconline::draw(RenderContext &context)
 	  }
 	  GFillPolygon(context.dev, &context.frame,
 		       context.gc, &context.psgc,
-		       gpts + start, count,
+		       gpts.data() + start, count,
 		       CoordModeOrigin);
 	  if (context.dev == XDEV &&
 	      _props.fill >= Symprod::FILL_STIPPLE10 &&

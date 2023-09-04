@@ -31,7 +31,7 @@
 
 #define ST_MAX_LINES 1000
 static int num_lines = -1;
-static Xv_opaque scrollbar = 0;
+// static Xv_opaque scrollbar = 0;
 static int view_length = 0;
 /*************************************************************************
  *
@@ -41,28 +41,30 @@ void add_message_to_status_win(const char *mess, int display_flag)
 {
 
     if( num_lines < 0) {
-	scrollbar = xv_get(gd.status_pu->status_list,PANEL_LIST_SCROLLBAR);
-	view_length = xv_get(scrollbar,SCROLLBAR_VIEW_LENGTH);
+	// scrollbar = xv_get(gd.status_pu->status_list,PANEL_LIST_SCROLLBAR);
+	// view_length = xv_get(scrollbar,SCROLLBAR_VIEW_LENGTH);
 	num_lines = 0;
     }
 
     if(gd.enable_status_window ) {
-	if(gd.menu_bar.show_status_win_bit == 0 && display_flag) xv_set(gd.status_pu->status_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
+      if(gd.menu_bar.show_status_win_bit == 0 && display_flag) {
+        // xv_set(gd.status_pu->status_pu,FRAME_CMD_PUSHPIN_IN, TRUE,XV_SHOW, TRUE,NULL);
+      }
     } else {
-	return;
+      return;
     }
 
     if(num_lines == ST_MAX_LINES) {
 	// Delete first line
-	xv_set(gd.status_pu->status_list,PANEL_LIST_DELETE,0,NULL);
+      // xv_set(gd.status_pu->status_list,PANEL_LIST_DELETE,0,NULL);
 	num_lines--;
     }
 
-    xv_set( gd.status_pu->status_list, PANEL_LIST_STRING, num_lines, mess, NULL);
+    // xv_set( gd.status_pu->status_list, PANEL_LIST_STRING, num_lines, mess, NULL);
     num_lines++;
 
     if (num_lines > view_length ) {
-	xv_set(scrollbar, SCROLLBAR_VIEW_START, num_lines - view_length + 1, NULL );
+      // xv_set(scrollbar, SCROLLBAR_VIEW_START, num_lines - view_length + 1, NULL );
     }
 }
 
@@ -76,14 +78,14 @@ void add_report_to_status_win(const char *mess)
 {
 
   if( num_lines < 0) {
-    scrollbar = xv_get(gd.status_pu->status_list,PANEL_LIST_SCROLLBAR);
-    view_length = xv_get(scrollbar,SCROLLBAR_VIEW_LENGTH);
+    // scrollbar = xv_get(gd.status_pu->status_list,PANEL_LIST_SCROLLBAR);
+    // view_length = xv_get(scrollbar,SCROLLBAR_VIEW_LENGTH);
     num_lines = 0;
   }
   
   if(num_lines == ST_MAX_LINES) {
     // Delete first line
-    xv_set(gd.status_pu->status_list,PANEL_LIST_DELETE,0,NULL);
+    // xv_set(gd.status_pu->status_list,PANEL_LIST_DELETE,0,NULL);
     num_lines--;
   }
   
@@ -94,15 +96,17 @@ void add_report_to_status_win(const char *mess)
   
   // copy lines to the status window
   for (int ii = 0; ii < (int) lines.size(); ii++) {
-    xv_set( gd.status_pu->status_list, PANEL_LIST_STRING, num_lines, lines[ii].c_str(), NULL);
+    // xv_set( gd.status_pu->status_list, PANEL_LIST_STRING, num_lines, lines[ii].c_str(), NULL);
     num_lines++;
   }
   
   if (num_lines > view_length ) {
-    xv_set(scrollbar, SCROLLBAR_VIEW_START, num_lines - view_length + 1, NULL );
+    // xv_set(scrollbar, SCROLLBAR_VIEW_START, num_lines - view_length + 1, NULL );
   }
 
 }
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `dismiss_bt'.
@@ -157,3 +161,5 @@ status_clear_proc(Panel_item item, Event *event)
     xv_set(gd.status_pu->status_list,PANEL_LIST_DELETE_ROWS,0,num_lines,NULL);
     num_lines = 0;
 } 
+
+#endif

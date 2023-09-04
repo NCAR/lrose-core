@@ -74,12 +74,14 @@ void set_field(int value)
 
    if(gd.movie.movie_on ) reset_data_valid_flags(1,0);
 
-   xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
+   // xv_set(gd.data_pu->data_st,PANEL_VALUE,value,NULL);
 
    /* make sure the horiz window's slider has the correct label */
    set_height_label();
 
 }
+
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `data_st'.
@@ -160,3 +162,4 @@ set_group_proc(Panel_item item, const char *string, Xv_opaque client_data, Panel
 
     return XV_OK;
 }
+#endif

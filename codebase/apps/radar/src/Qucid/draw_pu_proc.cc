@@ -60,22 +60,22 @@ update_draw_export_panel()
 	}
 
     if(de->data_time == 0) {
-        notice_prompt(gd.h_win_horiz_bw->horiz_bw,NULL,
-               NOTICE_MESSAGE_STRINGS,
-				"Warning: Data Time Not Set",
-				"Using Current Time",
-               NULL,
-               NOTICE_BUTTON,  "OK", 101,
-               NULL);
+        // notice_prompt(gd.h_win_horiz_bw->horiz_bw,NULL,
+        //        NOTICE_MESSAGE_STRINGS,
+	// 			"Warning: Data Time Not Set",
+	// 			"Using Current Time",
+        //        NULL,
+        //        NOTICE_BUTTON,  "OK", 101,
+        //        NULL);
 		de->data_time = time(0);
 	}
 
 
 	sprintf(string,"%d",de->default_serial_no);
-	xv_set(gd.draw_pu->serialno_tx,PANEL_VALUE,de->default_serial_no,NULL);
+	// xv_set(gd.draw_pu->serialno_tx,PANEL_VALUE,de->default_serial_no,NULL);
 
 	sprintf(string,"%g",de->default_valid_minutes);
-	xv_set(gd.draw_pu->validtm_tx,PANEL_VALUE,string,NULL);
+	// xv_set(gd.draw_pu->validtm_tx,PANEL_VALUE,string,NULL);
 
 	UTIMunix_to_date(de->data_time,&temp_utime);
 	sprintf(text,"%ld:%02ld:%02ld %ld/%ld/%ld",
@@ -86,13 +86,14 @@ update_draw_export_panel()
 	    temp_utime.day,
 	    temp_utime.year);
 
-	xv_set(gd.draw_pu->time_tx,PANEL_VALUE,text,NULL);
+	// xv_set(gd.draw_pu->time_tx,PANEL_VALUE,text,NULL);
 
-	xv_set(gd.draw_pu->label_tx,PANEL_VALUE,de->product_label_text,NULL);
+	// xv_set(gd.draw_pu->label_tx,PANEL_VALUE,de->product_label_text,NULL);
 
-	xv_set(gd.draw_pu->url_tx,PANEL_VALUE,de->product_fmq_url,NULL);
+	// xv_set(gd.draw_pu->url_tx,PANEL_VALUE,de->product_fmq_url,NULL);
 }
 
+#ifdef NOTNOW
 
 /*************************************************************************
  * Notify callback function for `type_st'.
@@ -337,3 +338,4 @@ set_draw_time_proc(Panel_item item, Event *event)
 
     return panel_text_notify(item, event);
 }
+#endif

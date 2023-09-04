@@ -61,6 +61,8 @@ void set_v_field(int field_no)
     if(gd.movie.movie_on ) reset_data_valid_flags(0,1);
 }
 
+#ifdef NOTNOW
+
 /*************************************************************************
  * Event callback function for `controls1'.
  */
@@ -278,3 +280,4 @@ scale_base_proc(Panel_item item, Event *event)
 	return panel_text_notify(item, event);
 }
          
+#endif

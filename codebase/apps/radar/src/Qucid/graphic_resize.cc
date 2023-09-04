@@ -36,6 +36,7 @@
  * H_WIN_EVENTS: Handle resizing events
  */
 
+#ifdef NOTNOW
 Notify_value h_win_events( Frame frame, Event *event, Notify_arg arg, Notify_event_type type)
 {
     static  int in_progress;
@@ -214,3 +215,4 @@ Notify_value h_win_events( Frame frame, Event *event, Notify_arg arg, Notify_eve
  
     return(notify_next_event_func(frame,(Notify_event) event,arg,type));
 }
+#endif

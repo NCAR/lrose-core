@@ -132,7 +132,7 @@ void check_for_invalid_images(int index)
 
 	     /* Set zoom to next level */
 	     gd.h_win.zoom_level++;
-	     set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+	     // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
 
                // If more heights to render
 	} else if (gd.cur_render_height < gd.num_render_heights -1) {
@@ -144,7 +144,7 @@ void check_for_invalid_images(int index)
 
            // Reset Zoom back to first  level
 	   gd.h_win.zoom_level = 0;
-	   set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
+	   // set_domain_proc(gd.zoom_pu->domain_st,gd.h_win.zoom_level,NULL);
 
 	   // Make sure new data gets loaded
 	   reset_data_valid_flags(1,0);
