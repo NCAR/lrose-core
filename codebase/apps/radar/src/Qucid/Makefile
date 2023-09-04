@@ -33,33 +33,26 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
 TARGET_FILE = Qucid
 
-LAST_INCLUDES = $(SYS_X_INCLUDES)
+LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
-LOC_INCLUDES = $(NETCDF4_INCS)
+# Note: QJSENGINE is defined in lrose_make.OSX_LINUX
 
-LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx -lNcxx \
-	-leuclid -ldsserver -ldidss -lrapplot \
-	-lrapformats -ltoolsa -ldataport -ltdrp \
-	-lshapelib \
-	-lX11 -lXext -lpng $(NETCDF4_LIBS) \
-	-lbz2 -lz -lpthread
+LOC_LIBS = \
+	-ldsdata -lradar -lMdv -lSpdb \
+	-lFmq -lrapformats -ldsserver -ldidss \
+	-leuclid -lrapmath -lrapplot -lqtplot -ltoolsa \
+	-ldataport -ltdrp -lRadx -lNcxx \
+	-lphysics -lshapelib \
+	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) -lX11 -lXext \
+	-lfftw3 -lpng -lbz2 -lz -lpthread
 
-LOC_LDFLAGS = $(SYS_X_LDFLAGS) $(NETCDF4_LDFLAGS)
+LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
+LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
-# We now use libpng to dump images
-
-
-# To compile CIDD to use Imlib2 instead of libpng,
-# uncomment the LOC_CPPC_CFLAGS and the next 3 LOC_LIBS lines, below,
-# and comment out the LOC_LIBS above.
-#
-#LOC_CPPC_CFLAGS = -DUSE_IMLIB2
-#LOC_LIBS = -lFmq -lSpdb -lMdv -lRadx -lNcxx -leuclid -ldsserver -ldidss -lrapplot \
-#	-lrapformats -ltoolsa -ldataport -ltdrp \
-#	-lshapelib -lImlib2 -lpthread -ldevguide -lxview -lolgx -lX11 -lXext
-
-HDRS =  cidd.h \
+HDRS = \
+	$(PARAMS_HH) \
+	cidd.h \
 	cidd_colorscales.h \
 	cidd_contours.h \
 	cidd_field_data.h \
@@ -88,8 +81,8 @@ HDRS =  cidd.h \
 	TimePlot.hh \
 	Uparams.hh
 
-
-CPPC_SRCS = \
+NORM_SRCS = \
+	$(PARAMS_CC) \
 	Csyprod_P.cc \
 	Cdraw_P.cc \
 	Cgui_P.cc \
@@ -191,17 +184,30 @@ CPPC_SRCS = \
 	Uparams.cc \
 	zoom_pu_proc.cc
 
+MOC_SRCS =
+
+MOC_OUTPUT =
+
+CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
+CPP_SRCS = $(MOC_OUTPUT)
+
 #
-# TDRP support
+# tdrp macros
 #
-  
+
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
 #
-# standard targets
+# QT C++ targets
 #
 
-include $(LROSE_CORE_DIR)/build/make_include/lrose_make_c++_targets
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
+
+#
+# tdrp targets
+#
+
+include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
 
 #
 # local targets
@@ -234,4 +240,6 @@ clean_tdrp:
 	Cimages_P.cc Cimages_P.hh \
 	Cterrain_P.cc  Cterrain_P.hh \
 	Croutes_P.cc Croutes_P.hh
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
