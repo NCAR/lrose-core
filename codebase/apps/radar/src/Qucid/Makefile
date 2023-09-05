@@ -79,7 +79,19 @@ HDRS = \
 	SymprodRenderObj.hh  \
 	TimeList.hh \
 	TimePlot.hh \
-	Uparams.hh
+	Uparams.hh \
+	HorizManager.hh \
+	HorizWidget.hh \
+	PpiWidget.hh \
+	VertWidget.hh \
+	VertWindow.hh \
+	ColorTableManager.hh \
+	Reader.hh \
+	Args.hh	\
+	DisplayField.hh \
+	DisplayManager.hh \
+	SoloDefaultColorWrapper.hh \
+	SiiPalette.hh
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
@@ -182,11 +194,24 @@ NORM_SRCS = \
 	winds_init.cc \
 	xview_file_access.cc \
 	Uparams.cc \
-	zoom_pu_proc.cc
+	zoom_pu_proc.cc \
+	HorizManager.cc \
+	HorizWidget.cc \
+	PpiWidget.cc \
+	VertWidget.cc \
+	VertWindow.cc \
+	ColorTableManager.cc \
+	Reader.cc \
+	Args.cc	\
+	DisplayField.cc \
+	SoloDefaultColorWrapper.cc \
+	SiiPalette.cc
 
-MOC_SRCS =
+MOC_SRCS = \
+	DisplayManager.cc
 
-MOC_OUTPUT =
+MOC_OUTPUT = \
+	moc_DisplayManager.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)
