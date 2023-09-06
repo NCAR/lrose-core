@@ -21,74 +21,86 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// Qucid.h
 //
-// main for Qucid
+// Qucid object
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Sept 2023
 //
 ///////////////////////////////////////////////////////////////
+//
+// Qucid is the Qt replacement for CIDD
+//
+///////////////////////////////////////////////////////////////
 
-#include "Qucid.hh"
-#include <QApplication>
-#include <toolsa/uusleep.h>
-#include <toolsa/LogStream.hh>
-#include <QIcon>
+#ifndef Qucid_HH
+#define Qucid_HH
 
-// file scope
+#include <string>
+#include <vector>
 
-static void tidy_and_exit (int sig);
-static Qucid *Prog;
-static QApplication *app;
+#include "Args.hh"
+#include "Params.hh"
+#include <euclid/SunPosn.hh>
 
-// main
+class QApplication;
+class DisplayField;
+class Reader;
+class CartManager;
 
-int main(int argc, char **argv)
+class Qucid {
+  
+public:
 
-{
+  // constructor
 
-  // create program object
+  Qucid (int argc, char **argv);
 
-  try {
+  // destructor
+  
+  virtual ~Qucid();
 
-    // The following line may fix the problem of the Boundary Editor
-    // not appearing in the menu bar when Qucid is built using
-    // linux, run on a Mac.                                                                                                                       
-    QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
-    
-    app = new QApplication(argc, argv);
-    app->setWindowIcon(QIcon("://QucidCycloneIcon.icns"));
-    LOG(DEBUG_VERBOSE) << "After setting Window Icon\n";
-    Qucid *Prog;
-    Prog = new Qucid(argc, argv);
-    if (!Prog->OK) {
-      return(-1);
-    }
-    
-    // run it
-    
-    int iret = Prog->Run(*app);
-    
-    // clean up
-    
-    tidy_and_exit(iret);
-    return (iret);
-    
-  } catch (std::bad_alloc &a) {
-    cerr << ">>>>> bad alloc: " << a.what() << endl;
-  }
+  // run 
 
-}
+  int Run(QApplication &app);
 
-// tidy up on exit
+  // data members
 
-static void tidy_and_exit (int sig)
+  bool OK;
 
-{
-  app->exit();
-  delete(Prog);
-  umsleep(1000);
-  exit(sig);
-}
+protected:
+private:
+
+  // basic
+
+  string _progName;
+  Params _params;
+  Args _args;
+
+  // reading data in
+
+  Reader *_reader;
+
+  // data fields
+
+  vector<DisplayField *> _displayFields;
+  bool _haveFilteredFields;
+
+  // managing the rendering objects
+
+  CartManager *_cartManager;
+  
+  // methods
+
+  void _initGlobals();
+  int _setupDisplayFields();
+  int _setupReader();
+  string _getArchiveUrl(const string &filePath);
+
+};
+
+#endif
+

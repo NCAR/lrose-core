@@ -427,16 +427,16 @@ private slots:
   void ShowContextMenu(const QPoint &pos);
 
   // boundary editor
-  void createBoundaryEditorDialog();
-  void showBoundaryEditor();
-  void refreshBoundaries();
-  void clearBoundaryEditorClick();
-  void helpBoundaryEditorClick();
-  void polygonBtnBoundaryEditorClick();
-  void circleBtnBoundaryEditorClick();
-  void brushBtnBoundaryEditorClick();
-  void onBoundaryEditorListItemClicked(QListWidgetItem* item);
-  void saveBoundaryEditorClick();
+  // void createBoundaryEditorDialog();
+  // void showBoundaryEditor();
+  // void refreshBoundaries();
+  // void clearBoundaryEditorClick();
+  // void helpBoundaryEditorClick();
+  // void polygonBtnBoundaryEditorClick();
+  // void circleBtnBoundaryEditorClick();
+  // void brushBtnBoundaryEditorClick();
+  // void onBoundaryEditorListItemClicked(QListWidgetItem* item);
+  // void saveBoundaryEditorClick();
   // void selectBoundaryTool(BoundaryToolType tool);
 };
 

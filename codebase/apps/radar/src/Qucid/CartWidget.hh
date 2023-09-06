@@ -539,8 +539,6 @@ class DLL_EXPORT CartWidget : public QWidget
   //  virtual void ShowContextMenu(const QPoint &pos);
   virtual void ShowContextMenu(const QPoint &pos, RadxVol *vol);
   void setFont();
-  virtual void ExamineEdit(const RadxRay *closestRay);
-  void notImplemented();
   virtual void informationMessage();
 
  public slots:

@@ -30,8 +30,6 @@
 //
 // CartManager manages polar rendering - HORIZs and RHIs
 //
-// Jeff Smith added support for the new BoundaryPointEditor (Sept-Nov 2019)
-//
 ///////////////////////////////////////////////////////////////
 
 #include "CartManager.hh"
@@ -576,7 +574,7 @@ void CartManager::_setupWindows()
   // set up field status dialog
   _createClickReportDialog();
 
-  createBoundaryEditorDialog();
+  // createBoundaryEditorDialog();
 
   if (_archiveMode) {
     _showTimeControl();
@@ -616,9 +614,9 @@ void CartManager::_createActions()
   connect(_showClickAct, SIGNAL(triggered()), this, SLOT(_showClick()));
 
   // show boundary editor dialog
-  _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
-  _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
-  connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(showBoundaryEditor()));
+  // _showBoundaryEditorAct = new QAction(tr("Boundary Editor"), this);
+  // _showBoundaryEditorAct->setStatusTip(tr("Show boundary editor dialog"));
+  // connect(_showBoundaryEditorAct, SIGNAL(triggered()), this, SLOT(showBoundaryEditor()));
   
   // set time controller settings
   _timeControllerAct = new QAction(tr("Time-Config"), this);
@@ -759,7 +757,7 @@ void CartManager::_createMenus()
 
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
-  menuBar()->addAction(_showBoundaryEditorAct);
+  // menuBar()->addAction(_showBoundaryEditorAct);
   menuBar()->addAction(_unzoomAct);
   menuBar()->addAction(_clearAct);
 
@@ -874,7 +872,7 @@ void CartManager::_changeSweep(bool value) {
       _vert->setStartOfSweep(true);
       _moveUpDown();
 
-      refreshBoundaries();
+      // refreshBoundaries();
       return;
     }
   } // ii
@@ -1765,7 +1763,7 @@ void CartManager::_changeField(int fieldId, bool guiMode)
   }
   _valueLabel->setText(text);
 
-  refreshBoundaries();
+  // refreshBoundaries();
 }
 
 // TODO: need to add the background changed, etc. 
@@ -3276,177 +3274,5 @@ void CartManager::createBoundaryEditorDialog()
   _boundaryEditorSaveBtn = new QPushButton(_boundaryEditorDialog);
 	_boundaryEditorSaveBtn->setText("Save");
 	hLayout->addWidget(_boundaryEditorSaveBtn);
-  connect(_boundaryEditorSaveBtn, SIGNAL(clicked()), this, SLOT(saveBoundaryEditorClick()));
 }
 
-#ifdef NOTNOW
-
-// Select the given tool and set the hint text, while also un-selecting the other tools
-void CartManager::selectBoundaryTool(BoundaryToolType tool)
-{
-	_boundaryEditorPolygonBtn->setChecked(false);
-	_boundaryEditorCircleBtn->setChecked(false);
-	_boundaryEditorBrushBtn->setChecked(false);
-
-	if (tool == BoundaryToolType::polygon)
-	{
-		_boundaryEditorPolygonBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Polygon: click points over desired area to\ndraw a polygon. Click near the first point\nto close it. Once closed, hold the Shift\nkey to insert/delete points.");
-	}
-	else if (tool == BoundaryToolType::circle)
-	{
-		_boundaryEditorCircleBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Circle: click on the main window to\ncreate your circle. You can then adjust\nthe radius slider to rescale it to the\ndesired size.");
-	}
-	else
-	{
-		_boundaryEditorBrushBtn->setChecked(true);
-		_boundaryEditorInfoLabel->setText("Brush: adjust slider to set brush size.\nClick/drag the mouse to 'paint' boundary.\nClick inside your shape and drag outwards\nto enlarge a desired region.");
-	}
-}
-
-// User clicked on the polygonBtn
-void CartManager::polygonBtnBoundaryEditorClick()
-{
-	selectBoundaryTool(BoundaryToolType::polygon);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
-	_horiz->update();
-}
-
-// User clicked on the circleBtn
-void CartManager::circleBtnBoundaryEditorClick()
-{
-	selectBoundaryTool(BoundaryToolType::circle);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
-	_horiz->update();
-}
-
-// User clicked on the brushBtn
-void CartManager::brushBtnBoundaryEditorClick()
-{
-	selectBoundaryTool(BoundaryToolType::brush);
-	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
-	_horiz->update();
-}
-
-// returns the file path for the boundary file, given the currently selected field and sweep
-// boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
-string CartManager::getBoundaryFilePath(string boundaryFileName)
-{
-	return(BoundaryPointEditor::Instance()->getBoundaryFilePath(_boundaryDir, _fieldNum, _sweepManager.getGuiIndex(), boundaryFileName));
-//	return(_boundaryDir + PATH_DELIM + "field" + to_string(_fieldNum) + "-sweep" + to_string(_sweepManager.getGuiIndex()) + "-" + boundaryFileName);
-}
-
-// user clicked on one of the 5 boundaries in the boundary editor list, so load that boundary
-void CartManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
-{
-	string fileName = item->text().toUtf8().constData();
-	bool found = (fileName.find("<none>") != string::npos);
-	if (!found)
-	{
-		if (_boundaryDir.empty())
-			_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-		BoundaryPointEditor::Instance()->load(getBoundaryFilePath(fileName));
-
-		if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::circle)
-		{
-			_circleRadiusSlider->setValue(BoundaryPointEditor::Instance()->getCircleRadius());
-			selectBoundaryTool(BoundaryToolType::circle);
-		}
-		else if (BoundaryPointEditor::Instance()->getCurrentTool() == BoundaryToolType::brush)
-		{
-			_brushRadiusSlider->setValue(BoundaryPointEditor::Instance()->getBrushRadius());
-			selectBoundaryTool(BoundaryToolType::brush);
-		}
-		else
-		{
-			selectBoundaryTool(BoundaryToolType::polygon);
-		}
-
-		_horiz->update();   //forces repaint which clears existing polygon
-	}
-}
-
-// user clicked the boundary editor Clear button
-void CartManager::clearBoundaryEditorClick()
-{
-	BoundaryPointEditor::Instance()->clear();
-	_horiz->update();   //forces repaint which clears existing polygon
-}
-
-void CartManager::helpBoundaryEditorClick()
-{
-	QDesktopServices::openUrl(QUrl("https://vimeo.com/369963107"));
-}
-
-// user clicked the boundary editor Save button
-void CartManager::saveBoundaryEditorClick()
-{
-	cout << "CartManager, _saveBoundaryEditorClick" << endl;
-
-	if (_boundaryDir.empty())
-		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-	ta_makedir_recurse(_boundaryDir.c_str());
-
-	string fileName = "Boundary" + to_string(_boundaryEditorList->currentRow()+1);
-	_boundaryEditorList->currentItem()->setText(fileName.c_str());
-
-	BoundaryPointEditor::Instance()->save(getBoundaryFilePath(fileName));
-}
-
-// user clicked on the main menu item "Boundary Editor", so toggle it visible or invisible
-void CartManager::showBoundaryEditor()
-{
-  if (_boundaryEditorDialog)
-  {
-    if (_boundaryEditorDialog->isVisible())
-    {
-    	clearBoundaryEditorClick();
-    	_boundaryEditorDialog->setVisible(false);
-    }
-    else
-    {
-      if (_boundaryEditorDialog->x() == 0 && _boundaryEditorDialog->y() == 0)
-      {
-        QPoint pos;
-        pos.setX(x() + width() + 5);
-        pos.setY(y());
-        _boundaryEditorDialog->move(pos);
-      }
-      _boundaryEditorDialog->setVisible(true);
-      _boundaryEditorDialog->raise();
-
-      refreshBoundaries();
-    }
-  }
-}
-
-// check which (if any) of the 5 boundary files exist, and populate the list accordingly
-void CartManager::refreshBoundaries()
-{
-  BoundaryPointEditor::Instance()->clear();
-	setBoundaryDir();
-
-  //rename any items that have corresponding file on disk
-  for (int i=1; i <= 5; i++)
-  {
-		string outputDir;
-		string fileName = "Boundary" + to_string(i);
-		string path = getBoundaryFilePath(fileName);
-
-		ifstream infile(path);
-		if (infile.good())
-			_boundaryEditorList->item(i-1)->setText(fileName.c_str());
-		else
-		{
-			string blankCaption = fileName + " <none>";
-			_boundaryEditorList->item(i-1)->setText(blankCaption.c_str());  //e.g "Boundary2 <none>", "Boundary3 <none>", ...
-		}
-  }
-
-	_boundaryEditorList->setCurrentRow(0);
-
-  if (_boundaryEditorDialog->isVisible())
-		onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
-}
-#endif

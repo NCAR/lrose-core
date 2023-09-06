@@ -52,66 +52,82 @@ LOC_CPPC_CFLAGS = $(QT_CPPC_CFLAGS)
 
 HDRS = \
 	$(PARAMS_HH) \
+	Args.hh \
+	CartManager.hh \
+	CartWidget.hh \
+	Cdraw_P.hh \
+	Cgui_P.hh \
+	Cimages_P.hh \
+	ColorTableManager.hh \
+	Croutes_P.hh \
+	Csyprod_P.hh \
+	Cterrain_P.hh \
+	DisplayField.hh \
+	DisplayManager.hh \
+	HorizWidget.hh \
+	Product.hh \
+	ProductMgr.hh \
+	Qucid.hh \
+	Reader.hh \
+	RenderContext.hh \
+	ScaledLabel.hh \
+	SiiPalette.hh \
+	SoloDefaultColorWrapper.hh \
+	SymprodRender.hh \
+	SymprodRenderObj.hh \
+	TimeList.hh \
+	TimePlot.hh \
+	Uparams.hh \
+	VertWidget.hh \
+	VertWindow.hh \
+	WorldPlot.hh \
 	cidd.h \
 	cidd_colorscales.h \
 	cidd_contours.h \
+	cidd_data_io.h \
+	cidd_dpd.h \
 	cidd_field_data.h \
 	cidd_funcs.h \
 	cidd_layers.h \
+	cidd_legend.h \
 	cidd_macros.h \
 	cidd_movies.h \
 	cidd_overlays.h \
 	cidd_params.h \
 	cidd_products.h \
 	cidd_structs.h \
-	cidd_winds.h \
 	cidd_windows.h \
-	Csyprod_P.hh \
-	Cdraw_P.hh \
-	Cgui_P.hh \
-	Cimages_P.hh \
-	Cterrain_P.hh \
-	Croutes_P.hh \
-	Product.hh \
-	ProductMgr.hh \
-	RenderContext.hh \
-	SymprodRender.hh \
-	SymprodRenderObj.hh  \
-	TimeList.hh \
-	TimePlot.hh \
-	Uparams.hh \
-	HorizManager.hh \
-	HorizWidget.hh \
-	PpiWidget.hh \
-	VertWidget.hh \
-	VertWindow.hh \
-	ColorTableManager.hh \
-	Reader.hh \
-	Args.hh	\
-	DisplayField.hh \
-	DisplayManager.hh \
-	SoloDefaultColorWrapper.hh \
-	SiiPalette.hh
+	cidd_winds.h
 
 NORM_SRCS = \
 	$(PARAMS_CC) \
-	Csyprod_P.cc \
+	Args.cc \
 	Cdraw_P.cc \
 	Cgui_P.cc \
 	Cimages_P.cc \
-	Cterrain_P.cc \
+	ColorTableManager.cc \
 	Croutes_P.cc \
+	Csyprod_P.cc \
+	Cterrain_P.cc \
+	DisplayField.cc \
+	Main.cc \
 	Product.cc \
 	ProductMgr.cc \
+	Qucid.cc \
+	Reader.cc \
 	RenderContext.cc \
+	ScaledLabel.cc \
+	SiiPalette.cc \
+	SoloDefaultColorWrapper.cc \
 	SymprodRender.cc \
 	SymprodRenderObj.cc \
 	TimeList.cc \
 	TimePlot.cc \
+	Uparams.cc \
+	WorldPlot.cc \
 	cidd_coords.cc \
 	cidd_font.cc \
 	cidd_init.cc \
-	cidd_main.cc \
 	cidd_params.cc \
 	cidd_remote_commands.cc \
 	cidd_reset.cc \
@@ -168,7 +184,7 @@ NORM_SRCS = \
 	render_line_contours.cc \
 	render_margins.cc \
 	render_movie_frame.cc \
-	render_overlays.cc  \
+	render_overlays.cc \
 	render_polar_grid.cc \
 	render_products.cc \
 	render_range_rings.cc \
@@ -193,25 +209,23 @@ NORM_SRCS = \
 	v_win_proc.cc \
 	winds_init.cc \
 	xview_file_access.cc \
-	Uparams.cc \
-	zoom_pu_proc.cc \
-	HorizManager.cc \
-	HorizWidget.cc \
-	PpiWidget.cc \
-	VertWidget.cc \
-	VertWindow.cc \
-	ColorTableManager.cc \
-	Reader.cc \
-	Args.cc	\
-	DisplayField.cc \
-	SoloDefaultColorWrapper.cc \
-	SiiPalette.cc
+	zoom_pu_proc.cc
 
 MOC_SRCS = \
-	DisplayManager.cc
+	CartManager.cc \
+	CartWidget.cc \
+	DisplayManager.cc \
+	HorizWidget.cc \
+	VertWidget.cc \
+	VertWindow.cc
 
 MOC_OUTPUT = \
-	moc_DisplayManager.cpp
+	moc_CartManager.cpp \
+	moc_CartWidget.cpp \
+	moc_DisplayManager.cpp \
+	moc_HorizWidget.cpp \
+	moc_VertWidget.cpp \
+	moc_VertWindow.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
 CPP_SRCS = $(MOC_OUTPUT)

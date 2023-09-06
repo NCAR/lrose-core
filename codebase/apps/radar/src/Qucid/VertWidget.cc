@@ -578,7 +578,7 @@ void VertWidget::_drawOverlays(QPainter &painter)
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
-    switch (_params.ppi_main_legend_pos) {
+    switch (_params.horiz_main_legend_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;

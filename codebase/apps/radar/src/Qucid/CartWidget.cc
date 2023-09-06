@@ -632,23 +632,23 @@ void CartWidget::informationMessage()
 
 }
 
-void CartWidget::notImplemented()
-{
-  cerr << "inside notImplemented() ... " << endl;
+// void CartWidget::notImplemented()
+// {
+//   cerr << "inside notImplemented() ... " << endl;
 
-  QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
-  // QLabel *informationLabel = new QLabel();
+//   QErrorMessage *errorMessageDialog = new QErrorMessage(_parent);
+//   // QLabel *informationLabel = new QLabel();
 
-  errorMessageDialog->showMessage("This option is not implemented yet.");
-  QLabel errorLabel;
-  int frameStyle = QFrame::Sunken | QFrame::Panel;
-  errorLabel.setFrameStyle(frameStyle);
-  errorLabel.setText("If the box is unchecked, the message "
-		     "won't appear again.");
+//   errorMessageDialog->showMessage("This option is not implemented yet.");
+//   QLabel errorLabel;
+//   int frameStyle = QFrame::Sunken | QFrame::Panel;
+//   errorLabel.setFrameStyle(frameStyle);
+//   errorLabel.setText("If the box is unchecked, the message "
+// 		     "won't appear again.");
 
-  cerr << "exiting notImplemented() " << endl;
+//   cerr << "exiting notImplemented() " << endl;
 
-}
+// }
 
 
 // slots for context editing; create and show the associated modeless dialog and return                                   
@@ -720,14 +720,9 @@ void CartWidget::contextMenuDataWidget()
   //  notImplemented();                                                                                                   
 }
 
-
-void CartWidget::ExamineEdit(const RadxRay *closestRay) 
+void CartWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol)
 {
-  notImplemented();
+
 }
 
-void CartWidget::ShowContextMenu(const QPoint &pos, RadxVol *vol) 
-{  
-  notImplemented();
-}
 

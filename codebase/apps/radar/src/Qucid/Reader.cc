@@ -36,7 +36,6 @@
 ///////////////////////////////////////////////////////////////
 
 #include "Reader.hh"
-#include "AllocCheck.hh"
 #include <cmath>
 #include <iostream>
 #include <toolsa/uusleep.h>
@@ -97,12 +96,10 @@ void Reader::_addRay(RadxRay *ray)
     // pop the oldest ray
     RadxRay *ray = _rayQueue.back();
     delete ray;
-    AllocCheck::inst().addFree();
     _rayQueue.pop_back();
   }
 
   _rayQueue.push_front(ray);
-  AllocCheck::inst().addAlloc();
 
 }
 
@@ -182,7 +179,7 @@ void SimReader::_runSimPpi()
     elev = 1.0;
     sweepNum = 0;
     double maxElev = 89.5;
-    if (_params.rhi_display_180_degrees) {
+    if (_params.vert_display_180_degrees) {
       maxElev = 179.5;
     }
 

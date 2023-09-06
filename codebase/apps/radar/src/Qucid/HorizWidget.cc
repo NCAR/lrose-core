@@ -54,16 +54,16 @@ HorizWidget::HorizWidget(QWidget* parent,
         
 {
 
-  _aspectRatio = _params.ppi_aspect_ratio;
+  _aspectRatio = _params.horiz_aspect_ratio;
   _colorScaleWidth = _params.color_scale_width;
 
   // initialoze world view
 
   configureRange(_params.max_range_km);
 
-  setGrids(_params.ppi_grids_on_at_startup);
-  setRings(_params.ppi_range_rings_on_at_startup);
-  setAngleLines(_params.ppi_azimuth_lines_on_at_startup);
+  setGrids(_params.horiz_grids_on_at_startup);
+  setRings(_params.horiz_range_rings_on_at_startup);
+  setAngleLines(_params.horiz_azimuth_lines_on_at_startup);
 
   _isArchiveMode = false;
   _isStartOfSweep = true;
@@ -351,7 +351,7 @@ void HorizWidget::configureRange(double max_range)
   int nTicksIdeal = 7;
   int textMargin = 5;
 
-  if (_params.ppi_display_type == Params::PPI_AIRBORNE) {
+  if (_params.horiz_display_type == Params::HORIZ_AIRBORNE) {
 
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin,
@@ -843,7 +843,7 @@ void HorizWidget::_drawOverlays(QPainter &painter)
     painter.setBrush(Qt::black);
     painter.setBackgroundMode(Qt::OpaqueMode);
 
-    switch (_params.ppi_main_legend_pos) {
+    switch (_params.horiz_main_legend_pos) {
       case Params::LEGEND_TOP_LEFT:
         _zoomWorld.drawLegendsTopLeft(painter, legends);
         break;
