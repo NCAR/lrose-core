@@ -28,7 +28,7 @@
 //
 ///////////////////////////////////////////////////////////////
 //
-// CartManager manages polar rendering - PPIs and RHIs
+// CartManager manages polar rendering - HORIZs and RHIs
 //
 // Jeff Smith added support for the new BoundaryPointEditor (Sept-Nov 2019)
 //
@@ -36,9 +36,9 @@
 
 #include "CartManager.hh"
 #include "DisplayField.hh"
-#include "PpiWidget.hh"
-#include "RhiWidget.hh"
-#include "RhiWindow.hh"
+#include "HorizWidget.hh"
+#include "VertWidget.hh"
+#include "VertWindow.hh"
 #include "Params.hh"
 #include "Reader.hh"
 // #include "AllocCheck.hh"
@@ -115,7 +115,8 @@ CartManager::CartManager(const Params &params,
                            const vector<DisplayField *> &fields,
                            bool haveFilteredFields) :
         DisplayManager(params, reader, fields, haveFilteredFields),
-        _sweepManager(params), _rhiWindowDisplayed(false)
+        // _sweepManager(params),
+        _vertWindowDisplayed(false)
 {
 	m_pInstance = this;
 
@@ -130,7 +131,7 @@ CartManager::CartManager(const Params &params,
   _prevEl = -9999.0;
   _startAz = -9999.0;
   _endAz = -9999.0;
-  _rhiMode = false;
+  _vertMode = false;
 
   _nGates = 1000;
   _maxRangeKm = 1.0;
@@ -138,11 +139,11 @@ CartManager::CartManager(const Params &params,
   _archiveMode = false;
   _archiveRetrievalPending = false;
   
-  _ppiFrame = NULL;
-  _ppi = NULL;
+  _horizFrame = NULL;
+  _horiz = NULL;
 
-  _rhiWindow = NULL;
-  _rhi = NULL;
+  _vertWindow = NULL;
+  _vert = NULL;
 
   _sweepVBoxLayout = NULL;
   _sweepPanel = NULL;
@@ -191,12 +192,12 @@ CartManager::~CartManager()
 
 {
 
-  if (_ppi) {
-    delete _ppi;
+  if (_horiz) {
+    delete _horiz;
   }
 
-  if (_rhi) {
-    delete _rhi;
+  if (_vert) {
+    delete _vert;
   }
 
 }
@@ -247,7 +248,7 @@ void CartManager::timerEvent(QTimerEvent *event)
 
   if (_timerEventCount == 0) {
 
-    _ppi->resize(_ppiFrame->width(), _ppiFrame->height());
+    _horiz->resize(_horizFrame->width(), _horizFrame->height());
     
     // Set the size of the second column to the size of the largest
     // label.  This should keep the column from wiggling as the values change.
@@ -278,8 +279,8 @@ void CartManager::timerEvent(QTimerEvent *event)
       if (_params.debug) {
         cerr << "====>> gotNewClickInfo" << endl;
       }
-      if (_ppi) {
-        _ppi->setClickPoint(_clickPointFmq.getAzimuth(),
+      if (_horiz) {
+        _horiz->setClickPoint(_clickPointFmq.getAzimuth(),
                             _clickPointFmq.getElevation(),
                             _clickPointFmq.getRangeKm());
       }
@@ -345,7 +346,7 @@ void CartManager::resizeEvent(QResizeEvent *event)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent: " << event << endl;
   }
-  emit frameResized(_ppiFrame->width(), _ppiFrame->height());
+  emit frameResized(_horizFrame->width(), _horizFrame->height());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -422,8 +423,8 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked left arrow, go back in time" << endl;
     }
-    _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    _horiz->setStartOfSweep(true);
+    _vert->setStartOfSweep(true);
     _goBack1();
 
   } else if (key == Qt::Key_Right) {
@@ -431,35 +432,35 @@ void CartManager::keyPressEvent(QKeyEvent * e)
     if (_params.debug) {
       cerr << "Clicked right arrow, go forward in time" << endl;
     }
-    _ppi->setStartOfSweep(true);
-    _rhi->setStartOfSweep(true);
+    _horiz->setStartOfSweep(true);
+    _vert->setStartOfSweep(true);
     _goFwd1();
     
   } else if (key == Qt::Key_Up) {
 
-    if (_sweepManager.getGuiIndex() > 0) {
+    // if (_sweepManager.getGuiIndex() > 0) {
 
-      if (_params.debug) {
-        cerr << "Clicked up arrow, go up a sweep" << endl;
-      }
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-      _changeSweepRadioButton(-1);
+    //   if (_params.debug) {
+    //     cerr << "Clicked up arrow, go up a sweep" << endl;
+    //   }
+    //   _horiz->setStartOfSweep(true);
+    //   _vert->setStartOfSweep(true);
+    //   _changeSweepRadioButton(-1);
 
-    }
+    // }
 
   } else if (key == Qt::Key_Down) {
 
-    if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
+    // if (_sweepManager.getGuiIndex() < (int) _sweepManager.getNSweeps() - 1) {
 
-      if (_params.debug) {
-        cerr << "Clicked down arrow, go down a sweep" << endl;
-      }
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
-      _changeSweepRadioButton(+1);
+    //   if (_params.debug) {
+    //     cerr << "Clicked down arrow, go down a sweep" << endl;
+    //   }
+    //   _horiz->setStartOfSweep(true);
+    //   _vert->setStartOfSweep(true);
+    //   _changeSweepRadioButton(+1);
 
-    }
+    // }
 
   }
 
@@ -496,39 +497,39 @@ void CartManager::_setupWindows()
   mainLayout->setContentsMargins(3,3,3,3);
   setCentralWidget(_main);
 
-  // ppi window
+  // horiz window
 
-  _ppiFrame = new QFrame(_main);
-  _ppiFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _horizFrame = new QFrame(_main);
+  _horizFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  // configure the PPI
+  // configure the HORIZ
 
-  _ppi = new PpiWidget(_ppiFrame, *this, _params, _platform, _fields, _haveFilteredFields);
+  _horiz = new HorizWidget(_horizFrame, *this, _params, _platform, _fields, _haveFilteredFields);
 
   connect(this, SIGNAL(frameResized(const int, const int)),
-	  _ppi, SLOT(resize(const int, const int)));
+	  _horiz, SLOT(resize(const int, const int)));
   
-  // Create the RHI window
+  // Create the VERT window
 
-  _rhiWindow = new RhiWindow(this, _params, _platform,
+  _vertWindow = new VertWindow(this, _params, _platform,
                              _fields, _haveFilteredFields);
-  _rhiWindow->setRadarName(_params.radar_name);
+  _vertWindow->setRadarName(_params.radar_name);
 
-  // set pointer to the rhiWidget
+  // set pointer to the vertWidget
 
-  _rhi = _rhiWindow->getWidget();
+  _vert = _vertWindow->getWidget();
   
   // connect slots for location
 
-  connect(_ppi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_ppiLocationClicked(double, double, const RadxRay*)));
-  connect(_rhi, SIGNAL(locationClicked(double, double, const RadxRay*)),
-          this, SLOT(_rhiLocationClicked(double, double, const RadxRay*)));
+  connect(_horiz, SIGNAL(locationClicked(double, double, const RadxRay*)),
+          this, SLOT(_horizLocationClicked(double, double, const RadxRay*)));
+  connect(_vert, SIGNAL(locationClicked(double, double, const RadxRay*)),
+          this, SLOT(_vertLocationClicked(double, double, const RadxRay*)));
 
   // add a right-click context menu to the image
   setContextMenuPolicy(Qt::CustomContextMenu);
   // customContextMenuRequested(e->pos());
-  connect(_ppi, SIGNAL(customContextMenuRequested(const QPoint &)),
+  connect(_horiz, SIGNAL(customContextMenuRequested(const QPoint &)),
 	  this, SLOT(ShowContextMenu(const QPoint &)));
 
   // create status panel
@@ -543,7 +544,7 @@ void CartManager::_setupWindows()
 
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_fieldPanel);
-  mainLayout->addWidget(_ppiFrame);
+  mainLayout->addWidget(_horizFrame);
 
   // sweep panel
 
@@ -655,8 +656,8 @@ void CartManager::_createActions()
   // clear display
   _clearAct = new QAction(tr("Clear"), this);
   _clearAct->setStatusTip(tr("Clear data"));
-  connect(_clearAct, SIGNAL(triggered()), _ppi, SLOT(clear()));
-  connect(_clearAct, SIGNAL(triggered()), _rhi, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _horiz, SLOT(clear()));
+  connect(_clearAct, SIGNAL(triggered()), _vert, SLOT(clear()));
 
   // exit app
   _exitAct = new QAction(tr("E&xit"), this);
@@ -681,33 +682,33 @@ void CartManager::_createActions()
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.ppi_range_rings_on_at_startup);
+  _ringsAct->setChecked(_params.horiz_range_rings_on_at_startup);
   connect(_ringsAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setRings(bool)));
+	  _horiz, SLOT(setRings(bool)));
 
   // show grids
 
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(_params.ppi_grids_on_at_startup);
+  _gridsAct->setChecked(_params.horiz_grids_on_at_startup);
   connect(_gridsAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setGrids(bool)));
+	  _horiz, SLOT(setGrids(bool)));
 
   // show azimuth lines
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.ppi_azimuth_lines_on_at_startup);
+  _azLinesAct->setChecked(_params.horiz_azimuth_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  _ppi, SLOT(setAngleLines(bool)));
+	  _horiz, SLOT(setAngleLines(bool)));
 
-  // show RHI window
+  // show VERT window
 
-  _showRhiAct = new QAction(tr("Show RHI Window"), this);
-  _showRhiAct->setStatusTip(tr("Show the RHI Window"));
-  connect(_showRhiAct, SIGNAL(triggered()), _rhiWindow, SLOT(show()));
+  _showVertAct = new QAction(tr("Show VERT Window"), this);
+  _showVertAct->setStatusTip(tr("Show the VERT Window"));
+  connect(_showVertAct, SIGNAL(triggered()), _vertWindow, SLOT(show()));
 
   // howto and about
   
@@ -754,7 +755,7 @@ void CartManager::_createMenus()
   _overlaysMenu->addAction(_gridsAct);
   _overlaysMenu->addAction(_azLinesAct);
   _overlaysMenu->addSeparator();
-  _overlaysMenu->addAction(_showRhiAct);
+  _overlaysMenu->addAction(_showVertAct);
 
   menuBar()->addAction(_freezeAct);
   menuBar()->addAction(_showClickAct);
@@ -805,27 +806,27 @@ void CartManager::_createSweepRadioButtons()
 
   // radar and site name
   
-  char buf[256];
-  _sweepRButtons = new vector<QRadioButton *>();
+  // char buf[256];
+  // _sweepRButtons = new vector<QRadioButton *>();
 
-  for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
+  // for (int ielev = 0; ielev < (int) _sweepManager.getNSweeps(); ielev++) {
 
-    std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
-    QRadioButton *radio1 = new QRadioButton(buf); 
-    radio1->setFont(fontm2);
+  //   std::snprintf(buf, 256, "%.2f", _sweepManager.getFixedAngleDeg(ielev));
+  //   QRadioButton *radio1 = new QRadioButton(buf); 
+  //   radio1->setFont(fontm2);
     
-    if (ielev == _sweepManager.getGuiIndex()) {
-      radio1->setChecked(true);
-    }
+  //   if (ielev == _sweepManager.getGuiIndex()) {
+  //     radio1->setChecked(true);
+  //   }
     
-    _sweepRButtons->push_back(radio1);
-    _sweepVBoxLayout->addWidget(radio1);
+  //   _sweepRButtons->push_back(radio1);
+  //   _sweepVBoxLayout->addWidget(radio1);
     
-    // connect slot for sweep change
+  //   // connect slot for sweep change
 
-    connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
+  //   connect(radio1, SIGNAL(toggled(bool)), this, SLOT(_changeSweep(bool)));
 
-  }
+  // }
 
 }
 
@@ -868,9 +869,9 @@ void CartManager::_changeSweep(bool value) {
         cerr << "sweepRButton " << sweepIndex << " is checked" << endl;
         cerr << "  moving to sweep index " << sweepIndex << endl;
       }
-      _sweepManager.setGuiIndex(sweepIndex);
-      _ppi->setStartOfSweep(true);
-      _rhi->setStartOfSweep(true);
+      // _sweepManager.setGuiIndex(sweepIndex);
+      _horiz->setStartOfSweep(true);
+      _vert->setStartOfSweep(true);
       _moveUpDown();
 
       refreshBoundaries();
@@ -898,8 +899,8 @@ void CartManager::_changeSweepRadioButton(int increment)
   }
   
   if (increment != 0) {
-    _sweepManager.changeSelectedIndex(increment);
-    _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
+    // _sweepManager.changeSelectedIndex(increment);
+    // _sweepRButtons->at(_sweepManager.getGuiIndex())->setChecked(true);
   }
 
 }
@@ -911,8 +912,8 @@ void CartManager::_handleRealtimeData(QTimerEvent * event)
 
 {
 
-  _ppi->setArchiveMode(false);
-  _rhi->setArchiveMode(false);
+  _horiz->setArchiveMode(false);
+  _vert->setArchiveMode(false);
 
   // do nothing if freeze is on
 
@@ -1071,11 +1072,11 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
     cerr << "handling archive data ..." << endl;
   }
 
-  _ppi->setArchiveMode(true);
-  _ppi->setStartOfSweep(true);
+  _horiz->setArchiveMode(true);
+  _horiz->setStartOfSweep(true);
 
-  _rhi->setArchiveMode(true);
-  _rhi->setStartOfSweep(true);
+  _vert->setArchiveMode(true);
+  _vert->setStartOfSweep(true);
 
   // set cursor to wait cursor
 
@@ -1098,9 +1099,9 @@ void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
   _createSweepRadioButtons();
   
   if (_vol.checkIsRhi()) {
-    _rhiMode = true;
+    _vertMode = true;
   } else {
-    _rhiMode = false;
+    _vertMode = false;
   }
 
   // plot the data
@@ -1183,18 +1184,18 @@ int CartManager::_getArchiveData()
 
   // load the sweep manager
   
-  _sweepManager.set(_vol);
+  // _sweepManager.set(_vol);
 
-  if (_params.debug) {
-    cerr << "----------------------------------------------------" << endl;
-    cerr << "perform archive retrieval" << endl;
-    cerr << "  read file: " << _vol.getPathInUse() << endl;
-    cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
-    cerr << "  guiIndex, fixedAngle: " 
-         << _sweepManager.getGuiIndex() << ", "
-         << _sweepManager.getSelectedAngle() << endl;
-    cerr << "----------------------------------------------------" << endl;
-  }
+  // if (_params.debug) {
+  //   cerr << "----------------------------------------------------" << endl;
+  //   cerr << "perform archive retrieval" << endl;
+  //   cerr << "  read file: " << _vol.getPathInUse() << endl;
+  //   cerr << "  nSweeps: " << _vol.getNSweeps() << endl;
+  //   cerr << "  guiIndex, fixedAngle: " 
+  //        << _sweepManager.getGuiIndex() << ", "
+  //        << _sweepManager.getSelectedAngle() << endl;
+  //   cerr << "----------------------------------------------------" << endl;
+  // }
   
    _platform = _vol.getPlatform();
    
@@ -1257,15 +1258,15 @@ void CartManager::_plotArchiveData()
 
   // handle the rays
 
-  const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
-  for (size_t ii = gsweep.radx->getStartRayIndex();
-       ii <= gsweep.radx->getEndRayIndex(); ii++) {
-    RadxRay *ray = rays[ii];
-    _handleRay(_platform, ray);
-    if (ii == 0) {
-      _updateStatusPanel(ray);
-    }
-  }
+  // const SweepManager::GuiSweep &gsweep = _sweepManager.getSelectedSweep();
+  // for (size_t ii = gsweep.radx->getStartRayIndex();
+  //      ii <= gsweep.radx->getEndRayIndex(); ii++) {
+  //   RadxRay *ray = rays[ii];
+  //   _handleRay(_platform, ray);
+  //   if (ii == 0) {
+  //     _updateStatusPanel(ray);
+  //   }
+  // }
   
 }
 
@@ -1301,14 +1302,14 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
     return;
   }
 
-  // do we need to reconfigure the PPI?
+  // do we need to reconfigure the HORIZ?
 
   _nGates = ray->getNGates();
   double maxRange = ray->getStartRangeKm() + _nGates * ray->getGateSpacingKm();
   if (!_params.set_max_range && (maxRange > _maxRangeKm)) {
     _maxRangeKm = maxRange;
-    _ppi->configureRange(_maxRangeKm);
-    _rhi->configureRange(_maxRangeKm);
+    _horiz->configureRange(_maxRangeKm);
+    _vert->configureRange(_maxRangeKm);
   }
 
   // create 2D field data vector
@@ -1376,32 +1377,32 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   } // end for each field
 
   // Store the ray location (which also sets _startAz and _endAz), then
-  // draw beam on the PPI or RHI, as appropriate
+  // draw beam on the HORIZ or VERT, as appropriate
 
   if (ray->getSweepMode() == Radx::SWEEP_MODE_RHI ||
       ray->getSweepMode() == Radx::SWEEP_MODE_SUNSCAN_RHI) {
 
-    _rhiMode = true;
+    _vertMode = true;
 
-    // If this is the first RHI beam we've encountered, automatically open
-    // the RHI window.  After this, opening and closing the window will be
+    // If this is the first VERT beam we've encountered, automatically open
+    // the VERT window.  After this, opening and closing the window will be
     // left to the user.
 
-    if (!_rhiWindowDisplayed) {
-      _rhiWindow->show();
-      _rhiWindow->resize();
-      _rhiWindowDisplayed = true;
+    if (!_vertWindowDisplayed) {
+      _vertWindow->show();
+      _vertWindow->resize();
+      _vertWindowDisplayed = true;
     }
 
     // Add the beam to the display
 
-    _rhi->addBeam(ray, fieldData, _fields);
-    _rhiWindow->setAzimuth(ray->getAzimuthDeg());
-    _rhiWindow->setElevation(ray->getElevationDeg());
+    _vert->addBeam(ray, fieldData, _fields);
+    _vertWindow->setAzimuth(ray->getAzimuthDeg());
+    _vertWindow->setElevation(ray->getElevationDeg());
     
   } else {
 
-    _rhiMode = false;
+    _vertMode = false;
 
     // check for elevation surveillance sweep mode
     // in this case, set azimuth to rotation if georef is available
@@ -1410,7 +1411,7 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
       ray->setAnglesForElevSurveillance();
     }
 
-    // Store the ray location using the azimuth angle and the PPI location
+    // Store the ray location using the azimuth angle and the HORIZ location
     // table
 
     double az = ray->getAzimuthDeg();
@@ -1423,7 +1424,7 @@ void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 
     // Add the beam to the display
 
-    _ppi->addBeam(ray, _startAz, _endAz, fieldData, _fields);
+    _horiz->addBeam(ray, _startAz, _endAz, fieldData, _fields);
 
   }
   
@@ -1443,8 +1444,8 @@ void CartManager::_storeRayLoc(const RadxRay *ray,
 
   // Determine the extent of this ray
 
-  if (_params.ppi_override_rendering_beam_width) {
-    double half_angle = _params.ppi_rendering_beam_width / 2.0;
+  if (_params.horiz_override_rendering_beam_width) {
+    double half_angle = _params.horiz_rendering_beam_width / 2.0;
     _startAz = az - half_angle - 0.1;
     _endAz = az + half_angle + 0.1;
   } else if (ray->getIsIndexed()) {
@@ -1706,7 +1707,7 @@ void CartManager::_freeze()
 
 void CartManager::_unzoom()
 {
-  _ppi->unzoomView();
+  _horiz->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -1744,8 +1745,8 @@ void CartManager::_changeField(int fieldId, bool guiMode)
   _prevFieldNum = _fieldNum;
   _fieldNum = fieldId;
   
-  _ppi->selectVar(_fieldNum);
-  _rhi->selectVar(_fieldNum);
+  _horiz->selectVar(_fieldNum);
+  _vert->selectVar(_fieldNum);
 
   // _colorBar->setColorMap(&_fields[_fieldNum]->getColorMap());
 
@@ -1801,8 +1802,8 @@ void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMa
   } else {
     // look up the fieldId from the fieldName                                                       
     // change the field variable                                                                    
-    _ppi->backgroundColor(backgroundColor);
-    _ppi->gridRingsColor(gridColor);
+    _horiz->backgroundColor(backgroundColor);
+    _horiz->gridRingsColor(gridColor);
     _changeField(fieldId, false);
   }
   LOG(DEBUG_VERBOSE) << "exit";
@@ -1821,9 +1822,9 @@ void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 }
 
 ///////////////////////////////////////////////////
-// respond to a change in click location on the PPI
+// respond to a change in click location on the HORIZ
 
-void CartManager::_ppiLocationClicked(double xkm, double ykm, 
+void CartManager::_horizLocationClicked(double xkm, double ykm, 
                                        const RadxRay *closestRay)
 
 {
@@ -1868,9 +1869,9 @@ void CartManager::_ppiLocationClicked(double xkm, double ykm,
 }
 
 ///////////////////////////////////////////////////
-// respond to a change in click location on the RHI
+// respond to a change in click location on the VERT
 
-void CartManager::_rhiLocationClicked(double xkm, double ykm, 
+void CartManager::_vertLocationClicked(double xkm, double ykm, 
                                        const RadxRay *closestRay)
   
 {
@@ -2205,15 +2206,15 @@ void CartManager::_placeTimeControl()
 void CartManager::_circleRadiusSliderValueChanged(int value)
 {
   //returns true if existing circle was resized with this new radius
-  if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
-    _ppi->update();
-  }
+  // if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
+  //   _horiz->update();
+  // }
 }
 
 // BoundaryEditor brush (size) slider has changed value
 void CartManager::_brushRadiusSliderValueChanged(int value)
 {
-  BoundaryPointEditor::Instance()->setBrushRadius(value);
+  // BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2306,13 +2307,13 @@ void CartManager::_timeSliderPressed()
 // sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
 void CartManager::setBoundaryDir()
 {
-  if (!_openFilePath.empty()) {
-    _boundaryDir =
-      BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath
-      (BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
-  } else {
-    _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
-  }
+  // if (!_openFilePath.empty()) {
+  //   _boundaryDir =
+  //     BoundaryPointEditor::Instance()->getBoundaryDirFromRadarFilePath
+  //     (BoundaryPointEditor::Instance()->getRootBoundaryDir(), _openFilePath);
+  // } else {
+  //   _boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
+  // }
 }
 
 ////////////////////////////////////////////////////
@@ -2336,14 +2337,14 @@ void CartManager::_openFile()
   }
   
   //since we are opening a new radar file, close any boundaries currently being displayed
-  BoundaryPointEditor::Instance()->clear();
-  if (_boundaryEditorDialog) {
-    clearBoundaryEditorClick();
-    _boundaryEditorDialog->setVisible(false);
-  }
+  // BoundaryPointEditor::Instance()->clear();
+  // if (_boundaryEditorDialog) {
+  //   clearBoundaryEditorClick();
+  //   _boundaryEditorDialog->setVisible(false);
+  // }
 
-  if (_ppi){
-    _ppi->showOpeningFileMsg(true);
+  if (_horiz){
+    _horiz->showOpeningFileMsg(true);
   }
   
   QString filePath =
@@ -2378,7 +2379,7 @@ void CartManager::_openFile()
       try {
         _getArchiveData();
       } catch (FileIException &ex) {
-        _ppi->showOpeningFileMsg(false);
+        _horiz->showOpeningFileMsg(false);
         this->setCursor(Qt::ArrowCursor);
         // _timeControl->setCursor(Qt::ArrowCursor);
         return;
@@ -2440,7 +2441,7 @@ void CartManager::_openFile()
       _setGuiFromArchiveStartTime();
       _setGuiFromArchiveEndTime();
 
-      _ppi->showOpeningFileMsg(false);
+      _horiz->showOpeningFileMsg(false);
     } // end else pathList is not empty
   });
 }
@@ -2690,11 +2691,11 @@ void CartManager::_setArchiveRetrievalPending()
 
 void CartManager::_clear()
 {
-  if (_ppi) {
-    _ppi->clear();
+  if (_horiz) {
+    _horiz->clear();
   }
-  if (_rhi) {
-    _rhi->clear();
+  if (_vert) {
+    _vert->clear();
   }
 }
 
@@ -2706,11 +2707,11 @@ void CartManager::_setArchiveMode(bool state)
   _archiveMode = state;
   _setSweepPanelVisibility();
 
-  if (_ppi) {
-    _ppi->setArchiveMode(state);
+  if (_horiz) {
+    _horiz->setArchiveMode(state);
   }
-  if (_rhi) {
-    _rhi->setArchiveMode(state);
+  if (_vert) {
+    _vert->setArchiveMode(state);
   }
 }
 
@@ -2742,11 +2743,11 @@ void CartManager::_activateRealtimeRendering()
   _nGates = 1000;
   _maxRangeKm = _params.max_range_km;
   _clear();
-  if (_ppi) {
-    _ppi->activateRealtimeRendering();
+  if (_horiz) {
+    _horiz->activateRealtimeRendering();
   }
-  if (_rhi) {
-    _rhi->activateRealtimeRendering();
+  if (_vert) {
+    _vert->activateRealtimeRendering();
   }
 }
 
@@ -2756,11 +2757,11 @@ void CartManager::_activateRealtimeRendering()
 void CartManager::_activateArchiveRendering()
 {
   _clear();
-  if (_ppi) {
-    _ppi->activateArchiveRendering();
+  if (_horiz) {
+    _horiz->activateArchiveRendering();
   }
-  if (_rhi) {
-    _rhi->activateArchiveRendering();
+  if (_vert) {
+    _vert->activateArchiveRendering();
   }
 }
 
@@ -2869,7 +2870,7 @@ void CartManager::_createImageFilesAllSweeps()
     for (int ii = 0; ii < _params.images_sweep_index_list_n; ii++) {
       int index = _params._images_sweep_index_list[ii];
       if (index >= 0 && index < (int) _vol.getNSweeps()) {
-        _sweepManager.setFileIndex(index);
+        // _sweepManager.setFileIndex(index);
         _createImageFiles();
       }
     }
@@ -2877,7 +2878,7 @@ void CartManager::_createImageFilesAllSweeps()
   } else {
     
     for (size_t index = 0; index < _vol.getNSweeps(); index++) {
-      _sweepManager.setFileIndex(index);
+      // _sweepManager.setFileIndex(index);
       _createImageFiles();
     }
     
@@ -2899,18 +2900,18 @@ void CartManager::_createImageFiles()
 
   // plot the data
 
-  _ppi->setStartOfSweep(true);
-  _rhi->setStartOfSweep(true);
+  _horiz->setStartOfSweep(true);
+  _vert->setStartOfSweep(true);
   _handleArchiveData();
 
   // set times from plots
 
-  if (_rhiMode) {
-    _plotStartTime = _rhi->getPlotStartTime();
-    _plotEndTime = _rhi->getPlotEndTime();
+  if (_vertMode) {
+    _plotStartTime = _vert->getPlotStartTime();
+    _plotEndTime = _vert->getPlotEndTime();
   } else {
-    _plotStartTime = _ppi->getPlotStartTime();
-    _plotEndTime = _ppi->getPlotEndTime();
+    _plotStartTime = _horiz->getPlotStartTime();
+    _plotEndTime = _horiz->getPlotEndTime();
   }
 
   // save current field
@@ -2950,12 +2951,12 @@ void CartManager::_createImageFiles()
 string CartManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
 	  // set times from plots
-	  if (_rhiMode) {
-	    _plotStartTime = _rhi->getPlotStartTime();
-	    _plotEndTime = _rhi->getPlotEndTime();
+	  if (_vertMode) {
+	    _plotStartTime = _vert->getPlotStartTime();
+	    _plotEndTime = _vert->getPlotEndTime();
 	  } else {
-	    _plotStartTime = _ppi->getPlotStartTime();
-	    _plotEndTime = _ppi->getPlotEndTime();
+	    _plotStartTime = _horiz->getPlotStartTime();
+	    _plotEndTime = _horiz->getPlotEndTime();
 	  }
 
 	  // compute output dir
@@ -3070,10 +3071,10 @@ void CartManager::_saveImageToFile(bool interactive)
 {
 	  // create image
   QPixmap pixmap;
-  if (_rhiMode)
-    pixmap = _rhi->grab();
+  if (_vertMode)
+    pixmap = _vert->grab();
   else
-    pixmap = _ppi->grab();
+    pixmap = _horiz->grab();
   QImage image = pixmap.toImage();
 
   string outputDir;
@@ -3130,7 +3131,7 @@ void CartManager::_saveImageToFile(bool interactive)
 
 
 void CartManager::ShowContextMenu(const QPoint &pos) {
-  _ppi->ShowContextMenu(pos, &_vol);
+  _horiz->ShowContextMenu(pos, &_vol);
 }
 
 
@@ -3278,6 +3279,8 @@ void CartManager::createBoundaryEditorDialog()
   connect(_boundaryEditorSaveBtn, SIGNAL(clicked()), this, SLOT(saveBoundaryEditorClick()));
 }
 
+#ifdef NOTNOW
+
 // Select the given tool and set the hint text, while also un-selecting the other tools
 void CartManager::selectBoundaryTool(BoundaryToolType tool)
 {
@@ -3307,7 +3310,7 @@ void CartManager::polygonBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::polygon);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
-	_ppi->update();
+	_horiz->update();
 }
 
 // User clicked on the circleBtn
@@ -3315,7 +3318,7 @@ void CartManager::circleBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::circle);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
-	_ppi->update();
+	_horiz->update();
 }
 
 // User clicked on the brushBtn
@@ -3323,7 +3326,7 @@ void CartManager::brushBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::brush);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
-	_ppi->update();
+	_horiz->update();
 }
 
 // returns the file path for the boundary file, given the currently selected field and sweep
@@ -3360,7 +3363,7 @@ void CartManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 			selectBoundaryTool(BoundaryToolType::polygon);
 		}
 
-		_ppi->update();   //forces repaint which clears existing polygon
+		_horiz->update();   //forces repaint which clears existing polygon
 	}
 }
 
@@ -3368,7 +3371,7 @@ void CartManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 void CartManager::clearBoundaryEditorClick()
 {
 	BoundaryPointEditor::Instance()->clear();
-	_ppi->update();   //forces repaint which clears existing polygon
+	_horiz->update();   //forces repaint which clears existing polygon
 }
 
 void CartManager::helpBoundaryEditorClick()
@@ -3446,3 +3449,4 @@ void CartManager::refreshBoundaries()
   if (_boundaryEditorDialog->isVisible())
 		onBoundaryEditorListItemClicked(_boundaryEditorList->currentItem());
 }
+#endif

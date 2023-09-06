@@ -1174,7 +1174,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("display_mode");
     tt->descr = tdrpStrDup("Main display mode.");
-    tt->help = tdrpStrDup("\tPOLAR_DISPLAY - normal PPI and VERT display. \tBSCAN_DISPLAY - BSCAN mode.\n");
+    tt->help = tdrpStrDup("\tPOLAR_DISPLAY - normal HORIZ and VERT display. \tBSCAN_DISPLAY - BSCAN mode.\n");
     tt->val_offset = (char *) &display_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("display_mode_t");
     tt->enum_def.nfields = 2;
@@ -1426,87 +1426,87 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("PPI MODE DISPLAY");
+    tt->comment_hdr = tdrpStrDup("HORIZ MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'ppi_display_type'
-    // ctype is '_ppi_display_type_t'
+    // Parameter 'horiz_display_type'
+    // ctype is '_horiz_display_type_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ppi_display_type");
-    tt->descr = tdrpStrDup("Type of display to use for the PPI window.");
-    tt->help = tdrpStrDup("\tPPI_FULL - Display the full 360 degrees of the PPI. This is the default.\n\tPPI_AIRBORN - Use the airborn radar PPI display. This display shows just the 180 degrees of radar pointing forward from the nose of the plane.\n");
-    tt->val_offset = (char *) &ppi_display_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("ppi_display_type_t");
+    tt->param_name = tdrpStrDup("horiz_display_type");
+    tt->descr = tdrpStrDup("Type of display to use for the HORIZ window.");
+    tt->help = tdrpStrDup("\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. This is the default.\n\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. This display shows just the 180 degrees of radar pointing forward from the nose of the plane.\n");
+    tt->val_offset = (char *) &horiz_display_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("horiz_display_type_t");
     tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("PPI_FULL");
-      tt->enum_def.fields[0].val = PPI_FULL;
-      tt->enum_def.fields[1].name = tdrpStrDup("PPI_AIRBORNE");
-      tt->enum_def.fields[1].val = PPI_AIRBORNE;
-    tt->single_val.e = PPI_FULL;
+      tt->enum_def.fields[0].name = tdrpStrDup("HORIZ_FULL");
+      tt->enum_def.fields[0].val = HORIZ_FULL;
+      tt->enum_def.fields[1].name = tdrpStrDup("HORIZ_AIRBORNE");
+      tt->enum_def.fields[1].val = HORIZ_AIRBORNE;
+    tt->single_val.e = HORIZ_FULL;
     tt++;
     
-    // Parameter 'ppi_aspect_ratio'
+    // Parameter 'horiz_aspect_ratio'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ppi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of PPI window.");
+    tt->param_name = tdrpStrDup("horiz_aspect_ratio");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of HORIZ window.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_aspect_ratio - &_start_;
+    tt->val_offset = (char *) &horiz_aspect_ratio - &_start_;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'ppi_grids_on_at_startup'
+    // Parameter 'horiz_grids_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI grids overlay on at startup.");
+    tt->param_name = tdrpStrDup("horiz_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set HORIZ grids overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_grids_on_at_startup - &_start_;
+    tt->val_offset = (char *) &horiz_grids_on_at_startup - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'ppi_range_rings_on_at_startup'
+    // Parameter 'horiz_range_rings_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI range rings overlay on at startup.");
+    tt->param_name = tdrpStrDup("horiz_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set HORIZ range rings overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_range_rings_on_at_startup - &_start_;
+    tt->val_offset = (char *) &horiz_range_rings_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'ppi_azimuth_lines_on_at_startup'
+    // Parameter 'horiz_azimuth_lines_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_azimuth_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set PPI azimuth lines overlay on at startup.");
+    tt->param_name = tdrpStrDup("horiz_azimuth_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set HORIZ azimuth lines overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &ppi_azimuth_lines_on_at_startup - &_start_;
+    tt->val_offset = (char *) &horiz_azimuth_lines_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'ppi_main_legend_pos'
+    // Parameter 'horiz_main_legend_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("ppi_main_legend_pos");
-    tt->descr = tdrpStrDup("Position of main legend in the PPI plot window");
+    tt->param_name = tdrpStrDup("horiz_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the HORIZ plot window");
     tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &ppi_main_legend_pos - &_start_;
+    tt->val_offset = (char *) &horiz_main_legend_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -1522,27 +1522,27 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'ppi_override_rendering_beam_width'
+    // Parameter 'horiz_override_rendering_beam_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("ppi_override_rendering_beam_width");
+    tt->param_name = tdrpStrDup("horiz_override_rendering_beam_width");
     tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
     tt->help = tdrpStrDup("Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &ppi_override_rendering_beam_width - &_start_;
+    tt->val_offset = (char *) &horiz_override_rendering_beam_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'ppi_rendering_beam_width'
+    // Parameter 'horiz_rendering_beam_width'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("ppi_rendering_beam_width");
+    tt->param_name = tdrpStrDup("horiz_rendering_beam_width");
     tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
-    tt->help = tdrpStrDup("See 'ppi_override_rendering_beam_width'");
-    tt->val_offset = (char *) &ppi_rendering_beam_width - &_start_;
+    tt->help = tdrpStrDup("See 'horiz_override_rendering_beam_width'");
+    tt->val_offset = (char *) &horiz_rendering_beam_width - &_start_;
     tt->single_val.d = 1;
     tt++;
     
@@ -2848,7 +2848,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("images_scan_interval_secs");
     tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
-    tt->help = tdrpStrDup("Only applies to POLAR (PPI/VERT) mode, not BSCAN mode.");
+    tt->help = tdrpStrDup("Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.");
     tt->val_offset = (char *) &images_scan_interval_secs - &_start_;
     tt->single_val.i = 300;
     tt++;

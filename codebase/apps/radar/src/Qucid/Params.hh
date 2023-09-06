@@ -87,9 +87,9 @@ public:
   } display_mode_t;
 
   typedef enum {
-    PPI_FULL = 0,
-    PPI_AIRBORNE = 1
-  } ppi_display_type_t;
+    HORIZ_FULL = 0,
+    HORIZ_AIRBORNE = 1
+  } horiz_display_type_t;
 
   typedef enum {
     LEGEND_TOP_LEFT = 0,
@@ -535,21 +535,21 @@ public:
 
   int click_cross_line_width;
 
-  ppi_display_type_t ppi_display_type;
+  horiz_display_type_t horiz_display_type;
 
-  double ppi_aspect_ratio;
+  double horiz_aspect_ratio;
 
-  tdrp_bool_t ppi_grids_on_at_startup;
+  tdrp_bool_t horiz_grids_on_at_startup;
 
-  tdrp_bool_t ppi_range_rings_on_at_startup;
+  tdrp_bool_t horiz_range_rings_on_at_startup;
 
-  tdrp_bool_t ppi_azimuth_lines_on_at_startup;
+  tdrp_bool_t horiz_azimuth_lines_on_at_startup;
 
-  legend_pos_t ppi_main_legend_pos;
+  legend_pos_t horiz_main_legend_pos;
 
-  tdrp_bool_t ppi_override_rendering_beam_width;
+  tdrp_bool_t horiz_override_rendering_beam_width;
 
-  double ppi_rendering_beam_width;
+  double horiz_rendering_beam_width;
 
   int vert_window_width;
 

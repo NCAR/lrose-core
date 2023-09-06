@@ -33,9 +33,9 @@
 ///////////////////////////////////////////////////////////////
 //
 // CartManager manages polar data gathering and dissemination
-// for PPIs and RHIs
+// for HORIZs and VERTs
 //
-// Rendering is delegated to PpiWidget and RhiWidget
+// Rendering is delegated to HorizWidget and VertWidget
 //
 ///////////////////////////////////////////////////////////////
 
@@ -72,9 +72,9 @@ class QDateTimeEdit;
 class QFileDialog;
 
 class DisplayField;
-class PpiWidget;
-class RhiWidget;
-class RhiWindow;
+class HorizWidget;
+class VertWidget;
+class VertWindow;
 class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
@@ -177,13 +177,13 @@ private:
 
   // windows
 
-  QFrame *_ppiFrame;
-  PpiWidget *_ppi;
+  QFrame *_horizFrame;
+  HorizWidget *_horiz;
 
-  RhiWindow *_rhiWindow;
-  RhiWidget *_rhi;
-  bool _rhiWindowDisplayed;
-  bool _rhiMode;
+  VertWindow *_vertWindow;
+  VertWidget *_vert;
+  bool _vertWindowDisplayed;
+  bool _vertMode;
   
   // azimuths for current ray
 
@@ -212,7 +212,7 @@ private:
   QAction *_ringsAct;
   QAction *_gridsAct;
   QAction *_azLinesAct;
-  QAction *_showRhiAct;
+  QAction *_showVertAct;
   
   QAction *_timeControllerAct;
   QAction *_openFileAct;
@@ -366,9 +366,9 @@ private slots:
 
   // local
 
-  void _ppiLocationClicked(double xkm, double ykm,
+  void _horizLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
-  void _rhiLocationClicked(double xkm, double ykm,
+  void _vertLocationClicked(double xkm, double ykm,
                            const RadxRay *closestRay);
   void _locationClicked(double xkm, double ykm,
                         const RadxRay *ray);

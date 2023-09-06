@@ -342,7 +342,7 @@ paramdef enum display_mode_t
 {
   p_descr = "Main display mode.";
   p_help =
-  "\tPOLAR_DISPLAY - normal PPI and VERT display. "
+  "\tPOLAR_DISPLAY - normal HORIZ and VERT display. "
   "\tBSCAN_DISPLAY - BSCAN mode.\n";
   p_default = POLAR_DISPLAY;
 } display_mode;
@@ -448,46 +448,46 @@ paramdef int {
 } click_cross_line_width;
 
 commentdef {
-  p_header = "PPI MODE DISPLAY";
+  p_header = "HORIZ MODE DISPLAY";
 }
 
 typedef enum
 {
-  PPI_FULL,
-  PPI_AIRBORNE
-} ppi_display_type_t;
+  HORIZ_FULL,
+  HORIZ_AIRBORNE
+} horiz_display_type_t;
 
-paramdef enum ppi_display_type_t
+paramdef enum horiz_display_type_t
 {
-  p_descr = "Type of display to use for the PPI window.";
-  p_help = "\tPPI_FULL - Display the full 360 degrees of the PPI. "
+  p_descr = "Type of display to use for the HORIZ window.";
+  p_help = "\tHORIZ_FULL - Display the full 360 degrees of the HORIZ. "
            "This is the default.\n"
-           "\tPPI_AIRBORN - Use the airborn radar PPI display. "
+           "\tHORIZ_AIRBORN - Use the airborn radar HORIZ display. "
            "This display shows just the 180 degrees of radar pointing forward "
            "from the nose of the plane.\n";
-  p_default = PPI_FULL;
-} ppi_display_type;
+  p_default = HORIZ_FULL;
+} horiz_display_type;
 
 paramdef double {
   p_default = 1.0;
-  p_descr = "Aspect ratio (width/height) of PPI window.";
+  p_descr = "Aspect ratio (width/height) of HORIZ window.";
   p_descr = "Set to -1 to allow aspect ratio to vary as the main window is resized.";
-} ppi_aspect_ratio;
+} horiz_aspect_ratio;
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Set PPI grids overlay on at startup.";
-} ppi_grids_on_at_startup;
+  p_descr = "Set HORIZ grids overlay on at startup.";
+} horiz_grids_on_at_startup;
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Set PPI range rings overlay on at startup.";
-} ppi_range_rings_on_at_startup;
+  p_descr = "Set HORIZ range rings overlay on at startup.";
+} horiz_range_rings_on_at_startup;
 
 paramdef boolean {
   p_default = true;
-  p_descr = "Set PPI azimuth lines overlay on at startup.";
-} ppi_azimuth_lines_on_at_startup;
+  p_descr = "Set HORIZ azimuth lines overlay on at startup.";
+} horiz_azimuth_lines_on_at_startup;
 
 typedef enum {
   LEGEND_TOP_LEFT, LEGEND_TOP_RIGHT, LEGEND_BOTTOM_LEFT, LEGEND_BOTTOM_RIGHT
@@ -495,21 +495,21 @@ typedef enum {
 
 paramdef enum legend_pos_t {
   p_default = LEGEND_TOP_LEFT;
-  p_descr = "Position of main legend in the PPI plot window";
+  p_descr = "Position of main legend in the HORIZ plot window";
   p_help = "This include time, field name and elevation angle.";
-} ppi_main_legend_pos;
+} horiz_main_legend_pos;
 
 paramdef boolean {
   p_default = false;
   p_descr = "Option to override the azimuth beam width for rendering.";
   p_help = "Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.";
-} ppi_override_rendering_beam_width;
+} horiz_override_rendering_beam_width;
 
 paramdef double {
   p_default = 1.0;
   p_descr = "Rendering beam width, if override is active.";
-  p_help = "See 'ppi_override_rendering_beam_width'";
-} ppi_rendering_beam_width;
+  p_help = "See 'horiz_override_rendering_beam_width'";
+} horiz_rendering_beam_width;
 
 commentdef {
   p_header = "VERT MODE DISPLAY";
@@ -1115,7 +1115,7 @@ paramdef string {
 paramdef int {
   p_default = 300;
   p_descr = "Time between scans in archive mode (secs).";
-  p_help = "Only applies to POLAR (PPI/VERT) mode, not BSCAN mode.";
+  p_help = "Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.";
 } images_scan_interval_secs;
 
 paramdef boolean {
