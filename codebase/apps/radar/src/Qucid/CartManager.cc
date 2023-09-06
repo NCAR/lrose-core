@@ -3158,6 +3158,7 @@ void CartManager::_howto()
   QMessageBox::about(this, tr("Howto dialog"), tr(text.c_str()));
 }
 
+#ifdef NOTNOW
 // Creates the boundary editor dialog and associated event slots
 void CartManager::createBoundaryEditorDialog()
 {
@@ -3275,4 +3276,5 @@ void CartManager::createBoundaryEditorDialog()
 	_boundaryEditorSaveBtn->setText("Save");
 	hLayout->addWidget(_boundaryEditorSaveBtn);
 }
+#endif
 

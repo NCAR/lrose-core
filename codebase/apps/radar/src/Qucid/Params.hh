@@ -118,6 +118,50 @@ public:
     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE = 2
   } images_creation_mode_t;
 
+  typedef enum {
+    SYMPROD_DEBUG_OFF = 0,
+    SYMPROD_DEBUG_NORM = 1,
+    SYMPROD_DEBUG_VERBOSE = 2
+  } symprod_debug_t;
+
+  typedef enum {
+    RENDER_ALL = 0,
+    RENDER_ALL_VALID = 1,
+    RENDER_VALID_IN_LAST_FRAME = 2,
+    RENDER_LATEST_IN_FRAME = 3,
+    RENDER_LATEST_IN_LOOP = 4,
+    RENDER_FIRST_BEFORE_FRAME_TIME = 5,
+    RENDER_FIRST_BEFORE_DATA_TIME = 6,
+    RENDER_FIRST_AFTER_DATA_TIME = 7,
+    RENDER_ALL_BEFORE_DATA_TIME = 8,
+    RENDER_ALL_AFTER_DATA_TIME = 9,
+    RENDER_GET_VALID = 10,
+    RENDER_GET_VALID_AT_FRAME_TIME = 11
+  } symprod_render_type_t;
+
+  typedef enum {
+    TERRAIN_RENDER_FILLED_CONT = 1,
+    TERRAIN_RENDER_RECTANGLES = 2,
+    TERRAIN_RENDER_DYNAMIC_CONTOURS = 3
+  } terrain_render_type_t;
+
+  typedef enum {
+    IMAGE_DEBUG_OFF = 0,
+    IMAGE_DEBUG_NORM = 1,
+    IMAGE_DEBUG_VERBOSE = 2
+  } image_debug_t;
+
+  typedef enum {
+    ROUTE_DEBUG_OFF = 0,
+    ROUTE_DEBUG_NORM = 1,
+    ROUTE_DEBUG_VERBOSE = 2
+  } route_debug_t;
+
+  typedef enum {
+    REGULAR_INTERVALS = 0,
+    EQUAL_DIVISIONS = 1
+  } route_label_style_t;
+
   // struct typedefs
 
   typedef struct {
@@ -159,6 +203,38 @@ public:
     char* color_map;
     char* shortcut;
   } field_t;
+
+  typedef struct {
+    char* id_label;
+    char* grid_list;
+  } gui_field_set_t;
+
+  typedef struct {
+    char* id_label;
+    char* url;
+    double valid_minutes;
+    int default_id_no;
+    char* default_label;
+  } dexport_t;
+
+  typedef struct {
+    char* menu_label;
+    char* url;
+    int data_type;
+    symprod_render_type_t render_type;
+    tdrp_bool_t on_by_default;
+    double minutes_allow_before;
+    double minutes_allow_after;
+    double text_off_threshold;
+    tdrp_bool_t request_data_on_zoom;
+    tdrp_bool_t request_data_on_vert_change;
+  } symprod_prod_info_t;
+
+  typedef struct {
+    char* vsection_label;
+    int n_waypts;
+    char* waypt_locs;
+  } image_vsection_spec_t;
 
   ///////////////////////////
   // Member functions
@@ -752,6 +828,87 @@ public:
 
   char* click_point_fmq_url;
 
+  gui_field_set_t *_gui_field_list;
+  int gui_field_list_n;
+
+  dexport_t *_dexport_info;
+  int dexport_info_n;
+
+  symprod_debug_t symprod_debug;
+
+  tdrp_bool_t symprod_short_requests;
+
+  tdrp_bool_t symprod_gzip_requests;
+
+  symprod_prod_info_t *_symprod_prod_info;
+  int symprod_prod_info_n;
+
+  char* terrain_id_label;
+
+  char* terrain_url;
+
+  double terrain_height_scaler;
+
+  char* landuse_url;
+
+  char* landuse_colorscale;
+
+  terrain_render_type_t land_use_render_method;
+
+  tdrp_bool_t landuse_active;
+
+  char* earth_color1;
+
+  char* earth_color2;
+
+  image_debug_t image_debug;
+
+  tdrp_bool_t generate_vsection_images;
+
+  tdrp_bool_t image_vsection_waypts_in_latlon;
+
+  image_vsection_spec_t *_image_vsection_spec;
+  int image_vsection_spec_n;
+
+  route_debug_t route_debug;
+
+  int route_font_height;
+
+  int route_add_waypoints_labels;
+
+  int route_add_wind_text;
+
+  route_label_style_t route_label_style;
+
+  double route_label_interval;
+
+  int route_num_route_labels;
+
+  int route_track_line_width;
+
+  char* route_u_url;
+
+  char* route_v_url;
+
+  char* route_turb_url;
+
+  double route_turb_low_thresh;
+
+  double route_turb_mod_thresh;
+
+  double route_turb_hi_thresh;
+
+  char* route_icing_url;
+
+  double route_icing_low_thresh;
+
+  double route_icing_mod_thresh;
+
+  double route_icing_hi_thresh;
+
+  char* *_route_paths;
+  int route_paths_n;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -759,7 +916,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[175];
+  mutable TDRPtable _table[217];
 
   const char *_className;
 

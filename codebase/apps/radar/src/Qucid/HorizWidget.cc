@@ -1378,7 +1378,7 @@ void HorizWidget::contextMenuEditor()
     QMessageBox::information(this, QString::fromStdString(""), QString::fromStdString("No ray found at location clicked"));
     // TODO: move to this ...  errorMessage("", "No ray found at location clicked");
   } else {
-    ExamineEdit(closestRay);
+    // ExamineEdit(closestRay);
   }
   LOG(DEBUG_VERBOSE) << "exit";
 }
