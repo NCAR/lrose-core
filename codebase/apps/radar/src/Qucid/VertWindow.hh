@@ -21,8 +21,8 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef RhiWindow_HH
-#define RhiWindow_HH
+#ifndef VertWindow_HH
+#define VertWindow_HH
 
 #ifndef DLL_EXPORT
 #ifdef WIN32
@@ -45,12 +45,12 @@
 #include <vector>
 
 #include "Params.hh"
-#include "RhiWidget.hh"
+#include "VertWidget.hh"
 
-class PolarManager;
+class CartManager;
 class DisplayField;
 
-class DLL_EXPORT RhiWindow : public QMainWindow
+class DLL_EXPORT VertWindow : public QMainWindow
 {
 
   // must include this if you use Qt signals/slots
@@ -68,7 +68,7 @@ public:
    * @param[in] parent   The parent widget.
    */
 
-  RhiWindow(PolarManager *manager,
+  VertWindow(CartManager *manager,
             const Params &params,
             const RadxPlatform &platform,
             const vector<DisplayField *> &fields,
@@ -79,11 +79,11 @@ public:
    * @brief Destructor
    */
 
-  virtual ~RhiWindow();
+  virtual ~VertWindow();
 
-  // get the RHI widget
+  // get the VERT widget
 
-  RhiWidget *getWidget() { return _rhiWidget; }
+  VertWidget *getWidget() { return _vertWidget; }
 
   /**
    * @brief Set the azimuth value displayed in the window.
@@ -104,7 +104,7 @@ public:
 
   void setRadarName(const string &radar_name);
 
-  // enable the zoom button - called by RhiWidget
+  // enable the zoom button - called by VertWidget
   
   void enableZoomButton() const;
 
@@ -155,15 +155,15 @@ protected:
   QFrame *_main;
   
   /**
-   * @brief The parent frame of the RHI widget.
+   * @brief The parent frame of the VERT widget.
    */
 
-  QFrame *_rhiTopFrame;
-  RhiWidget *_rhiWidget;
+  QFrame *_vertTopFrame;
+  VertWidget *_vertWidget;
 
   // the polar manager that created this window
 
-  PolarManager *_manager;
+  CartManager *_manager;
 
   // params
 
@@ -244,10 +244,10 @@ protected:
   /**
    * @brief Create the actions for the menu bar menus on this window.
    *
-   * @param[in] rhi    A pointer to the RHI widget in this window.
+   * @param[in] vert    A pointer to the VERT widget in this window.
    */
 
-  void _createActions(RhiWidget *rhi);
+  void _createActions(VertWidget *vert);
 
   /**
    * @brief Create the menus for the menu bar on this window.

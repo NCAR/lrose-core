@@ -26,8 +26,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#include "PolarManager.hh"
-#include "RhiWindow.hh"
+#include "CartManager.hh"
+#include "VertWindow.hh"
 
 using namespace std;
 
@@ -35,7 +35,7 @@ using namespace std;
  * Constructor
  */
 
-RhiWindow::RhiWindow(PolarManager *manager,
+VertWindow::VertWindow(CartManager *manager,
                      const Params &params,
                      const RadxPlatform &platform,
                      const vector<DisplayField *> &fields,
@@ -53,31 +53,31 @@ RhiWindow::RhiWindow(PolarManager *manager,
   _main = new QFrame(this);
   setCentralWidget(_main);
   
-  // Create the parent frame for the RHI rendering
+  // Create the parent frame for the VERT rendering
 
-  _rhiTopFrame = new QFrame(_main);
-  _rhiTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _vertTopFrame = new QFrame(_main);
+  _vertTopFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  // create RHI widget
+  // create VERT widget
   
-  _rhiWidget = new RhiWidget(_main, *manager, *this,
+  _vertWidget = new VertWidget(_main, *manager, *this,
                              _params, _platform, _fields, _haveFilteredFields);
-  _rhiWidget->setGrids(_params.rhi_grids_on_at_startup);
-  _rhiWidget->setRings(_params.rhi_range_rings_on_at_startup);
-  _rhiWidget->setAngleLines(_params.rhi_elevation_lines_on_at_startup);
-  _rhiWidget->setParent(_rhiTopFrame);
+  _vertWidget->setGrids(_params.vert_grids_on_at_startup);
+  _vertWidget->setRings(_params.vert_range_rings_on_at_startup);
+  _vertWidget->setAngleLines(_params.vert_elevation_lines_on_at_startup);
+  _vertWidget->setParent(_vertTopFrame);
   
-  // Connect the window resize signal to the RHI widget resize() method.
+  // Connect the window resize signal to the VERT widget resize() method.
 
   connect(this, SIGNAL(windowResized(const int, const int)),
-	  _rhiWidget, SLOT(resize(const int, const int)));
+	  _vertWidget, SLOT(resize(const int, const int)));
   
-  // Connect the first beam recieved widget from the RhiWidget object to the
+  // Connect the first beam recieved widget from the VertWidget object to the
   // resize() method so that we resize the window after processing several
-  // RHI beams.  This is done to get around a window resizing problem at
+  // VERT beams.  This is done to get around a window resizing problem at
   // startup.
 
-  connect(_rhiWidget, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
+  connect(_vertWidget, SIGNAL(severalBeamsProcessed()), this, SLOT(resize()));
   
   // Create the status panel
   
@@ -88,20 +88,20 @@ RhiWindow::RhiWindow(PolarManager *manager,
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
   main_layout->setMargin(0);
-  main_layout->addWidget(_rhiTopFrame, 100);
+  main_layout->addWidget(_vertTopFrame, 100);
   main_layout->addWidget(_statusPanel, 0);
   
   // Create the actions and the menus
 
-  _createActions(_rhiWidget);
+  _createActions(_vertWidget);
   _createMenus();
 
   // Set the window attributes.
 
-  setWindowTitle(tr("RHI"));
+  setWindowTitle(tr("VERT"));
   setMinimumSize(200, 200);
-  setGeometry(params.rhi_window_start_x, params.rhi_window_start_y,
-	      params.rhi_window_width, params.rhi_window_height);
+  setGeometry(params.vert_window_start_x, params.vert_window_start_y,
+	      params.vert_window_width, params.vert_window_height);
 }
 
 
@@ -109,7 +109,7 @@ RhiWindow::RhiWindow(PolarManager *manager,
  * Destructor
  */
 
-RhiWindow::~RhiWindow()
+VertWindow::~VertWindow()
 {
 
 }
@@ -119,9 +119,9 @@ RhiWindow::~RhiWindow()
  * resize()
  */
 
-void RhiWindow::resize()
+void VertWindow::resize()
 {
-  emit windowResized(_rhiTopFrame->width(), _rhiTopFrame->height());
+  emit windowResized(_vertTopFrame->width(), _vertTopFrame->height());
 }
 
 
@@ -129,16 +129,16 @@ void RhiWindow::resize()
  * resizeEvent()
  */
 
-void RhiWindow::resizeEvent(QResizeEvent *event)
+void VertWindow::resizeEvent(QResizeEvent *event)
 {
   resize();
 }
 
 
 ////////////////////////////////////////////////////////////////
-void RhiWindow::keyPressEvent(QKeyEvent * e)
+void VertWindow::keyPressEvent(QKeyEvent * e)
 {
-  // pass event up to PolarManager
+  // pass event up to CartManager
   _manager->keyPressEvent(e);
 }
 
@@ -148,28 +148,28 @@ void RhiWindow::keyPressEvent(QKeyEvent * e)
  * _createActions()
  */
 
-void RhiWindow::_createActions(RhiWidget *rhi)
+void VertWindow::_createActions(VertWidget *vert)
 {
   _ringsAct = new QAction(tr("Range Rings"), this);
   _ringsAct->setStatusTip(tr("Turn range rings on/off"));
   _ringsAct->setCheckable(true);
-  _ringsAct->setChecked(_params.rhi_range_rings_on_at_startup);
+  _ringsAct->setChecked(_params.vert_range_rings_on_at_startup);
   connect(_ringsAct, SIGNAL(triggered(bool)),
-	  rhi, SLOT(setRings(bool)));
+	  vert, SLOT(setRings(bool)));
 
   _gridsAct = new QAction(tr("Grids"), this);
   _gridsAct->setStatusTip(tr("Turn range grids on/off"));
   _gridsAct->setCheckable(true);
-  _gridsAct->setChecked(_params.rhi_grids_on_at_startup);
+  _gridsAct->setChecked(_params.vert_grids_on_at_startup);
   connect(_gridsAct, SIGNAL(triggered(bool)),
-	  rhi, SLOT(setGrids(bool)));
+	  vert, SLOT(setGrids(bool)));
 
   _azLinesAct = new QAction(tr("Az Lines"), this);
   _azLinesAct->setStatusTip(tr("Turn range azLines on/off"));
   _azLinesAct->setCheckable(true);
-  _azLinesAct->setChecked(_params.rhi_elevation_lines_on_at_startup);
+  _azLinesAct->setChecked(_params.vert_elevation_lines_on_at_startup);
   connect(_azLinesAct, SIGNAL(triggered(bool)),
-	  rhi, SLOT(setAngleLines(bool)));
+	  vert, SLOT(setAngleLines(bool)));
 
   _unzoomAct = new QAction(tr("Unzoom"), this);
   _unzoomAct->setStatusTip(tr("Unzoom to original view"));
@@ -179,9 +179,9 @@ void RhiWindow::_createActions(RhiWidget *rhi)
 }
 
 //////////////////////////////////////////////////
-// enable the zoom button - called by RhiWidget
+// enable the zoom button - called by VertWidget
 
-void RhiWindow::enableZoomButton() const
+void VertWindow::enableZoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -189,9 +189,9 @@ void RhiWindow::enableZoomButton() const
 ////////////////////////////////
 // unzoom display
 
-void RhiWindow::_unzoom()
+void VertWindow::_unzoom()
 {
-  _rhiWidget->unzoomView();
+  _vertWidget->unzoomView();
   _unzoomAct->setEnabled(false);
 }
 
@@ -199,7 +199,7 @@ void RhiWindow::_unzoom()
  * _createMenus()
  */
 
-void RhiWindow::_createMenus()
+void VertWindow::_createMenus()
 {
   _overlaysMenu = menuBar()->addMenu(tr("&Overlays"));
   _overlaysMenu->addAction(_ringsAct);
@@ -215,7 +215,7 @@ void RhiWindow::_createMenus()
  * _createStatusPanel()
  */
 
-void RhiWindow::_createStatusPanel(const int label_font_size)
+void VertWindow::_createStatusPanel(const int label_font_size)
 {
   // Create the status panel
   
@@ -273,7 +273,7 @@ void RhiWindow::_createStatusPanel(const int label_font_size)
  * @brief Set the azimuth value displayed in the window.
  */
 
-void RhiWindow::setAzimuth(const double azimuth)
+void VertWindow::setAzimuth(const double azimuth)
 {
   if (_manager->checkArchiveMode()) {
     _azValue->setText("-----");
@@ -290,7 +290,7 @@ void RhiWindow::setAzimuth(const double azimuth)
  * @brief Set the elevation value displayed in the window.
  */
 
-void RhiWindow::setElevation(const double elevation)
+void VertWindow::setElevation(const double elevation)
 {
   if (_manager->checkArchiveMode()) {
     _elevValue->setText("-----");
@@ -309,9 +309,9 @@ void RhiWindow::setElevation(const double elevation)
  *        title.
  */
 
-void RhiWindow::setRadarName(const string &radar_name)
+void VertWindow::setRadarName(const string &radar_name)
 {
-  string window_title = "RHI -- " + radar_name;
+  string window_title = "VERT -- " + radar_name;
   setWindowTitle(tr(window_title.c_str()));
 }
 

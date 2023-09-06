@@ -551,51 +551,51 @@ public:
 
   double ppi_rendering_beam_width;
 
-  int rhi_window_width;
+  int vert_window_width;
 
-  int rhi_window_height;
+  int vert_window_height;
 
-  int rhi_window_start_x;
+  int vert_window_start_x;
 
-  int rhi_window_start_y;
+  int vert_window_start_y;
 
-  int rhi_top_margin;
+  int vert_top_margin;
 
-  int rhi_bottom_margin;
+  int vert_bottom_margin;
 
-  int rhi_left_margin;
+  int vert_left_margin;
 
-  int rhi_right_margin;
+  int vert_right_margin;
 
-  int rhi_label_font_size;
+  int vert_label_font_size;
 
-  int rhi_axis_tick_len;
+  int vert_axis_tick_len;
 
-  int rhi_n_ticks_ideal;
+  int vert_n_ticks_ideal;
 
-  int rhi_text_margin;
+  int vert_text_margin;
 
-  tdrp_bool_t rhi_display_180_degrees;
+  tdrp_bool_t vert_display_180_degrees;
 
-  double rhi_aspect_ratio;
+  double vert_aspect_ratio;
 
-  double rhi_max_height_km;
+  double vert_max_height_km;
 
-  int rhi_color_scale_width;
+  int vert_color_scale_width;
 
-  tdrp_bool_t rhi_grids_on_at_startup;
+  tdrp_bool_t vert_grids_on_at_startup;
 
-  tdrp_bool_t rhi_range_rings_on_at_startup;
+  tdrp_bool_t vert_range_rings_on_at_startup;
 
-  tdrp_bool_t rhi_elevation_lines_on_at_startup;
+  tdrp_bool_t vert_elevation_lines_on_at_startup;
 
-  legend_pos_t rhi_main_legend_pos;
+  legend_pos_t vert_main_legend_pos;
 
-  int rhi_beam_queue_size;
+  int vert_beam_queue_size;
 
-  tdrp_bool_t rhi_override_rendering_beam_width;
+  tdrp_bool_t vert_override_rendering_beam_width;
 
-  double rhi_rendering_beam_width;
+  double vert_rendering_beam_width;
 
   double bscan_time_span_secs;
 

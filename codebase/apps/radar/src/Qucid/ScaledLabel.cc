@@ -21,54 +21,67 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// Args.hh: Command line object
+// ScaledLabel.cpp: implementation of the ScaledLabel class.
 //
-// Mike Dixon, EOL, NCAR,
-// P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// July 2006
-//
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#include "ScaledLabel.hh"
+#include <iomanip>
+#include <math.h>
 
-#include <tdrp/tdrp.h>
-#include <iostream>
-#include <string>
-#include <vector>
-using namespace std;
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
-class Args {
-  
-public:
+ScaledLabel::ScaledLabel(ScalingType t)
+{
+    m_scalingType = t;
+    m_stringStr << std::setiosflags(std::ios_base::fixed);
+    
+}
 
-  // constructor
+ScaledLabel::~ScaledLabel()
+{
+    
+}
 
-  Args (const string &prog_name);
+//////////////////////////////////////////////////////////////////////
+std::string
+ScaledLabel::scale(double value) {
+    
+    // value is in km. 
+    
+    double exp = floor(log10(value));
+    std::string units;
+    
+    double scaleFactor;
+    if (exp < -3) {
+        units = "mm";
+        scaleFactor = 0.000001;
+    } else {
+        if (exp < 0) {
+            units = "m";
+            scaleFactor = 0.001;
+        } else {
+            units = "km";
+            scaleFactor = 1;
+        }
+    }
+    
+    double m = value/scaleFactor;
+    if (m >=100) {
+        m_stringStr << std::setprecision(0);
+    } else { 
+        if (m >= 10.0) {
+            m_stringStr << std::setprecision(1);
+        } else {
+            m_stringStr << std::setprecision(2);
+        }
+    }
 
-  // destructor
+    m_stringStr.str("");
+    m_stringStr << m << units;
+    return m_stringStr.str();
+    
+}
 
-  virtual ~Args ();
-
-  // parse command line
-  // Returns 0 on success, -1 on failure
-
-  int parse (const int argc, const char **argv);
-
-  // public data
-
-  tdrp_override_t override;
-  vector<string> inputFileList;
-
-protected:
-  
-private:
-
-  string _progName;
-  void _usage(ostream &out);
-  
-};
-
-#endif

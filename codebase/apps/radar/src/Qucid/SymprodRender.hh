@@ -26,7 +26,7 @@
 //
 // Rendering for Symprod class
 //
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
 // Jan 2000

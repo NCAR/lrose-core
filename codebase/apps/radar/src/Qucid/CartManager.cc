@@ -23,26 +23,26 @@
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ///////////////////////////////////////////////////////////////
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-// Oct 2014
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Sept 2023
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarManager manages polar rendering - PPIs and RHIs
+// CartManager manages polar rendering - PPIs and RHIs
 //
 // Jeff Smith added support for the new BoundaryPointEditor (Sept-Nov 2019)
 //
 ///////////////////////////////////////////////////////////////
 
-#include "PolarManager.hh"
+#include "CartManager.hh"
 #include "DisplayField.hh"
 #include "PpiWidget.hh"
 #include "RhiWidget.hh"
 #include "RhiWindow.hh"
 #include "Params.hh"
 #include "Reader.hh"
-#include "AllocCheck.hh"
-#include "BoundaryPointEditor.hh"
+// #include "AllocCheck.hh"
+// #include "BoundaryPointEditor.hh"
 
 #include <string>
 #include <cmath>
@@ -101,16 +101,16 @@
 using namespace std;
 using namespace H5x;
 
-PolarManager* PolarManager::m_pInstance = NULL;
+CartManager* CartManager::m_pInstance = NULL;
 
-PolarManager* PolarManager::Instance()
+CartManager* CartManager::Instance()
 {
    return m_pInstance;
 }
 
 // Constructor
 
-PolarManager::PolarManager(const Params &params,
+CartManager::CartManager(const Params &params,
                            Reader *reader,
                            const vector<DisplayField *> &fields,
                            bool haveFilteredFields) :
@@ -173,7 +173,7 @@ PolarManager::PolarManager(const Params &params,
 
   // set up ray locators
 
-  _rayLoc.resize(RayLoc::RAY_LOC_N);
+  // _rayLoc.resize(RayLoc::RAY_LOC_N);
 
   // set up windows
 
@@ -187,7 +187,7 @@ PolarManager::PolarManager(const Params &params,
 
 // destructor
 
-PolarManager::~PolarManager()
+CartManager::~CartManager()
 
 {
 
@@ -204,7 +204,7 @@ PolarManager::~PolarManager()
 //////////////////////////////////////////////////
 // Run
 
-int PolarManager::run(QApplication &app)
+int CartManager::run(QApplication &app)
 {
 
   if (_params.debug) {
@@ -226,7 +226,7 @@ int PolarManager::run(QApplication &app)
 //////////////////////////////////////////////////
 // enable the zoom button - called by PolarWidgets
 
-void PolarManager::enableZoomButton() const
+void CartManager::enableZoomButton() const
 {
   _unzoomAct->setEnabled(true);
 }
@@ -234,7 +234,7 @@ void PolarManager::enableZoomButton() const
 //////////////////////////////////////////////////////////////
 // respond to timer events
   
-void PolarManager::timerEvent(QTimerEvent *event)
+void CartManager::timerEvent(QTimerEvent *event)
 {
 
   // register with procmap
@@ -340,7 +340,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
 ///////////////////////////////////////////////
 // override resize event
 
-void PolarManager::resizeEvent(QResizeEvent *event)
+void CartManager::resizeEvent(QResizeEvent *event)
 {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "resizeEvent: " << event << endl;
@@ -349,7 +349,7 @@ void PolarManager::resizeEvent(QResizeEvent *event)
 }
 
 ////////////////////////////////////////////////////////////////
-void PolarManager::keyPressEvent(QKeyEvent * e)
+void CartManager::keyPressEvent(QKeyEvent * e)
 {
 
   // get key pressed
@@ -465,7 +465,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
 
 }
 
-void PolarManager::_moveUpDown() 
+void CartManager::_moveUpDown() 
 {
   this->setCursor(Qt::WaitCursor);
   _plotArchiveData();
@@ -475,7 +475,7 @@ void PolarManager::_moveUpDown()
 //////////////////////////////////////////////////
 // Set radar name in title bar
 
-void PolarManager::_setTitleBar(const string &radarName)
+void CartManager::_setTitleBar(const string &radarName)
 {
   string windowTitle = "HAWK_EYE -- " + radarName;
   setWindowTitle(tr(windowTitle.c_str()));
@@ -484,7 +484,7 @@ void PolarManager::_setTitleBar(const string &radarName)
 //////////////////////////////////////////////////
 // set up windows and widgets
   
-void PolarManager::_setupWindows()
+void CartManager::_setupWindows()
 {
 
   // set up windows
@@ -587,7 +587,7 @@ void PolarManager::_setupWindows()
 //////////////////////////////
 // add/remove  sweep panel (archive mode only)
 
-void PolarManager::_setSweepPanelVisibility()
+void CartManager::_setSweepPanelVisibility()
 {
   if (_sweepPanel != NULL) {
     if (_archiveMode) {
@@ -601,7 +601,7 @@ void PolarManager::_setSweepPanelVisibility()
 //////////////////////////////
 // create actions for menus
 
-void PolarManager::_createActions()
+void CartManager::_createActions()
 {
   // freeze display
   _freezeAct = new QAction(tr("Freeze"), this);
@@ -734,7 +734,7 @@ void PolarManager::_createActions()
 ////////////////
 // create menus
 
-void PolarManager::_createMenus()
+void CartManager::_createMenus()
 {
 
   _fileMenu = menuBar()->addMenu(tr("&File"));
@@ -773,7 +773,7 @@ void PolarManager::_createMenus()
 // create the sweep panel
 // buttons will be filled in by createSweepRadioButtons()
 
-void PolarManager::_createSweepPanel()
+void CartManager::_createSweepPanel()
 {
   
   _sweepPanel = new QGroupBox("Sweeps", _main);
@@ -790,7 +790,7 @@ void PolarManager::_createSweepPanel()
 // create radio buttons
 // this requires that _sweepManager is up to date with sweep info
 
-void PolarManager::_createSweepRadioButtons() 
+void CartManager::_createSweepRadioButtons() 
 {
 
   // fonts
@@ -832,7 +832,7 @@ void PolarManager::_createSweepRadioButtons()
 /////////////////////////////////////////////////////////////////////
 // create sweep panel of radio buttons
 
-void PolarManager::_clearSweepRadioButtons() 
+void CartManager::_clearSweepRadioButtons() 
 {
 
   QLayoutItem* child;
@@ -851,10 +851,10 @@ void PolarManager::_clearSweepRadioButtons()
 ///////////////////////////////////////////////////////////////
 // change sweep
 
-void PolarManager::_changeSweep(bool value) {
+void CartManager::_changeSweep(bool value) {
 
   if (_params.debug) {
-    cerr << "From PolarManager: the sweep was changed ";
+    cerr << "From CartManager: the sweep was changed ";
     cerr << endl;
   }
 
@@ -889,7 +889,7 @@ void PolarManager::_changeSweep(bool value) {
 // value = +1 move forward
 // value = -1 move backward in sweeps
 
-void PolarManager::_changeSweepRadioButton(int increment)
+void CartManager::_changeSweepRadioButton(int increment)
 
 {
   
@@ -907,7 +907,7 @@ void PolarManager::_changeSweepRadioButton(int increment)
 /////////////////////////////
 // get data in realtime mode
 
-void PolarManager::_handleRealtimeData(QTimerEvent * event)
+void CartManager::_handleRealtimeData(QTimerEvent * event)
 
 {
 
@@ -963,7 +963,7 @@ void PolarManager::_handleRealtimeData(QTimerEvent * event)
 ///////////////////////////////////////
 // set input file list for archive mode
 
-void PolarManager::setArchiveFileList(const vector<string> &list,
+void CartManager::setArchiveFileList(const vector<string> &list,
                                       bool fromCommandLine /* = true */)
 {
 
@@ -1034,7 +1034,7 @@ void PolarManager::setArchiveFileList(const vector<string> &list,
 // get archive file list by searching for files
 // returns 0 on success, -1 on failure
 
-int PolarManager::loadArchiveFileList()
+int CartManager::loadArchiveFileList()
 
 {
   RadxTimeList timeList;
@@ -1044,7 +1044,7 @@ int PolarManager::loadArchiveFileList()
   _urlOK = true;
 
   if (timeList.getPathList().size() < 1) {
-    cerr << "ERROR - PolarManager::loadArchiveFileList() for dir:" << _params.archive_data_url << endl;
+    cerr << "ERROR - CartManager::loadArchiveFileList() for dir:" << _params.archive_data_url << endl;
     cerr << "  Cannot load file list for url: " 
          << _params.archive_data_url << endl;
     cerr << "  Start time: " << _archiveStartTime.getStr() << endl;
@@ -1063,7 +1063,7 @@ int PolarManager::loadArchiveFileList()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void PolarManager::_handleArchiveData(/*QTimerEvent * event*/)
+void CartManager::_handleArchiveData(/*QTimerEvent * event*/)
 
 {
   
@@ -1119,7 +1119,7 @@ void PolarManager::_handleArchiveData(/*QTimerEvent * event*/)
 // get data in archive mode
 // returns 0 on success, -1 on failure
 
-int PolarManager::_getArchiveData()
+int CartManager::_getArchiveData()
 
 {
 
@@ -1141,7 +1141,7 @@ int PolarManager::_getArchiveData()
     
     if (file.readFromPath(inputPath, _vol)) {
       string errMsg = "ERROR - Cannot retrieve archive data\n";
-      errMsg += "PolarManager::_getArchiveData\n";
+      errMsg += "CartManager::_getArchiveData\n";
       errMsg += file.getErrStr() + "\n";
       errMsg += "  path: " + inputPath + "\n";
       cerr << errMsg;
@@ -1207,11 +1207,11 @@ int PolarManager::_getArchiveData()
 // apply new, edited  data in archive mode
 // the volume has been updated 
 
-void PolarManager::_applyDataEdits()
+void CartManager::_applyDataEdits()
 {
 
   if (_params.debug) {
-    std::ofstream outfile("/tmp/voldebug_PolarManager_applyDataEdits.txt");
+    std::ofstream outfile("/tmp/voldebug_CartManager_applyDataEdits.txt");
     _vol.printWithFieldData(outfile);  
     outfile << "_vol = " << &_vol << endl;
   }
@@ -1222,7 +1222,7 @@ void PolarManager::_applyDataEdits()
 /////////////////////////////
 // plot data in archive mode
 
-void PolarManager::_plotArchiveData()
+void CartManager::_plotArchiveData()
 
 {
 
@@ -1272,7 +1272,7 @@ void PolarManager::_plotArchiveData()
 //////////////////////////////////////////////////
 // set up read
 
-void PolarManager::_setupVolRead(RadxFile &file)
+void CartManager::_setupVolRead(RadxFile &file)
 {
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -1293,7 +1293,7 @@ void PolarManager::_setupVolRead(RadxFile &file)
 //////////////////////////////////////////////////////////////
 // handle an incoming ray
 
-void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
+void CartManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
   
 {
 
@@ -1432,10 +1432,13 @@ void PolarManager::_handleRay(RadxPlatform &platform, RadxRay *ray)
 ///////////////////////////////////////////////////////////
 // store ray location
 
-void PolarManager::_storeRayLoc(const RadxRay *ray, 
+void CartManager::_storeRayLoc(const RadxRay *ray, 
                                 const double az,
                                 const double beam_width)
 {
+
+#ifdef NOTNOW
+  
   LOG(DEBUG_VERBOSE) << "az = " << az << " beam_width = " << beam_width;
 
   // Determine the extent of this ray
@@ -1526,7 +1529,9 @@ void PolarManager::_storeRayLoc(const RadxRay *ray,
       _rayLoc[ii].endIndex = endIndex;
     }
 
-  } // if (startIndex > endIndex) 
+  } // if (startIndex > endIndex)
+
+#endif
 
 }
 
@@ -1534,9 +1539,11 @@ void PolarManager::_storeRayLoc(const RadxRay *ray,
 ///////////////////////////////////////////////////////////
 // clear any locations that are overlapped by the given ray
 
-void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
+void CartManager::_clearRayOverlap(const int start_index, const int end_index)
 {
 
+#ifdef NOTNOW
+  
   LOG(DEBUG_VERBOSE) << "enter" << " start_index=" << start_index <<
     " end_index = " << end_index;
 
@@ -1672,13 +1679,15 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
   } /* endwhile - i */
   
   LOG(DEBUG_VERBOSE) << "exit ";
+
+#endif
   
 }
 
 ////////////////////////////////////////////
 // freeze / unfreeze
 
-void PolarManager::_freeze()
+void CartManager::_freeze()
 {
   if (_frozen) {
     _frozen = false;
@@ -1695,7 +1704,7 @@ void PolarManager::_freeze()
 ////////////////////////////////////////////
 // unzoom
 
-void PolarManager::_unzoom()
+void CartManager::_unzoom()
 {
   _ppi->unzoomView();
   _unzoomAct->setEnabled(false);
@@ -1704,14 +1713,14 @@ void PolarManager::_unzoom()
 ////////////////////////////////////////////
 // refresh
 
-void PolarManager::_refresh()
+void CartManager::_refresh()
 {
 }
 
 ///////////////////////////////////////////////////////////
 // respond to change field request from field button group
 
-void PolarManager::_changeField(int fieldId, bool guiMode)
+void CartManager::_changeField(int fieldId, bool guiMode)
 
 {
   _selectedField = _fields[fieldId];
@@ -1759,7 +1768,7 @@ void PolarManager::_changeField(int fieldId, bool guiMode)
 }
 
 // TODO: need to add the background changed, etc. 
-void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
+void CartManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap,
 					    QColor gridColor,
 					    QColor emphasisColor,
 					    QColor annotationColor,
@@ -1799,7 +1808,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
   LOG(DEBUG_VERBOSE) << "exit";
 }
 
-void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
+void CartManager::setVolume() { // const RadxVol &radarDataVolume) {
 
   LOG(DEBUG_VERBOSE) << "enter";
 
@@ -1814,11 +1823,13 @@ void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 ///////////////////////////////////////////////////
 // respond to a change in click location on the PPI
 
-void PolarManager::_ppiLocationClicked(double xkm, double ykm, 
+void CartManager::_ppiLocationClicked(double xkm, double ykm, 
                                        const RadxRay *closestRay)
 
 {
 
+#ifdef NOTNOW
+  
   // find the relevant ray
   // ignore closest ray sent in
   
@@ -1852,12 +1863,14 @@ void PolarManager::_ppiLocationClicked(double xkm, double ykm,
 
   _locationClicked(xkm, ykm, ray);
 
+#endif
+  
 }
 
 ///////////////////////////////////////////////////
 // respond to a change in click location on the RHI
 
-void PolarManager::_rhiLocationClicked(double xkm, double ykm, 
+void CartManager::_rhiLocationClicked(double xkm, double ykm, 
                                        const RadxRay *closestRay)
   
 {
@@ -1869,13 +1882,13 @@ void PolarManager::_rhiLocationClicked(double xkm, double ykm,
 ////////////////////////////////////////////////////////////////////////
 // respond to a change in click location on one of the windows
 
-void PolarManager::_locationClicked(double xkm, double ykm,
+void CartManager::_locationClicked(double xkm, double ykm,
                                     const RadxRay *ray)
   
 {
 
   if (_params.debug) {
-    cerr << "*** Entering PolarManager::_locationClicked()" << endl;
+    cerr << "*** Entering CartManager::_locationClicked()" << endl;
   }
   
   double rangeKm = sqrt(xkm * xkm + ykm * ykm);
@@ -1993,7 +2006,7 @@ void PolarManager::_locationClicked(double xkm, double ykm,
 //////////////////////////////////////////////
 // create the time panel
 
-void PolarManager::_createTimeControl()
+void CartManager::_createTimeControl()
 {
   
   _timeControl = new QDialog(this);
@@ -2151,7 +2164,7 @@ void PolarManager::_createTimeControl()
 /////////////////////////////////////
 // show the time controller dialog
 
-void PolarManager::_showTimeControl()
+void CartManager::_showTimeControl()
 {
 
   if (_timeControl) {
@@ -2169,7 +2182,7 @@ void PolarManager::_showTimeControl()
 /////////////////////////////////////
 // place the time controller dialog
 
-void PolarManager::_placeTimeControl()
+void CartManager::_placeTimeControl()
 {
   if (_timeControl) {
     if (!_timeControlPlaced) {
@@ -2189,7 +2202,7 @@ void PolarManager::_placeTimeControl()
 }
 
 // BoundaryEditor circle (radius) slider has changed value
-void PolarManager::_circleRadiusSliderValueChanged(int value)
+void CartManager::_circleRadiusSliderValueChanged(int value)
 {
   //returns true if existing circle was resized with this new radius
   if (BoundaryPointEditor::Instance()->setCircleRadius(value)){
@@ -2198,7 +2211,7 @@ void PolarManager::_circleRadiusSliderValueChanged(int value)
 }
 
 // BoundaryEditor brush (size) slider has changed value
-void PolarManager::_brushRadiusSliderValueChanged(int value)
+void CartManager::_brushRadiusSliderValueChanged(int value)
 {
   BoundaryPointEditor::Instance()->setBrushRadius(value);
 }
@@ -2206,7 +2219,7 @@ void PolarManager::_brushRadiusSliderValueChanged(int value)
 ///////////////////////////////////////////////////////////////////////////////
 // print time slider actions for debugging
 
-void PolarManager::_timeSliderActionTriggered(int action) {
+void CartManager::_timeSliderActionTriggered(int action) {
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     switch (action) {
       case QAbstractSlider::SliderNoAction:
@@ -2240,7 +2253,7 @@ void PolarManager::_timeSliderActionTriggered(int action) {
   }
 } 
 
-void PolarManager::_timeSliderValueChanged(int value) 
+void CartManager::_timeSliderValueChanged(int value) 
 {
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {
     return;
@@ -2258,7 +2271,7 @@ void PolarManager::_timeSliderValueChanged(int value)
   }
 }
 
-void PolarManager::_timeSliderReleased() 
+void CartManager::_timeSliderReleased() 
 {
   int value = _timeSlider->value();
   if (value < 0 || value > (int) _archiveFileList.size() - 1) {
@@ -2282,7 +2295,7 @@ void PolarManager::_timeSliderReleased()
   }
 }
 
-void PolarManager::_timeSliderPressed() 
+void CartManager::_timeSliderPressed() 
 {
   int value = _timeSlider->value();
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -2291,7 +2304,7 @@ void PolarManager::_timeSliderPressed()
 }
 
 // sets the directory (_boundaryDir) into which boundary files will be read/written for current radar file (_openFilePath)
-void PolarManager::setBoundaryDir()
+void CartManager::setBoundaryDir()
 {
   if (!_openFilePath.empty()) {
     _boundaryDir =
@@ -2307,7 +2320,7 @@ void PolarManager::setBoundaryDir()
 //
 // This allows the user to choose an archive file to open
 
-void PolarManager::_openFile()
+void CartManager::_openFile()
 {
   // seed with files for the day currently in view, generate like this: *yyyymmdd*
   string pattern = _archiveStartTime.getDateStrPlain();
@@ -2391,13 +2404,13 @@ void PolarManager::_openFile()
     timeList.setDir(absolutePath);
     timeList.setModeInterval(_archiveStartTime, _archiveEndTime);
     if (timeList.compile()) {
-      cerr << "ERROR - PolarManager::openFile()" << endl;
+      cerr << "ERROR - CartManager::openFile()" << endl;
       cerr << "  " << timeList.getErrStr() << endl;
     }
 
     vector<string> pathList = timeList.getPathList();
     if (pathList.size() <= 0) {
-      cerr << "ERROR - PolarManager::openFile()" << endl;
+      cerr << "ERROR - CartManager::openFile()" << endl;
       cerr << "  pathList is empty" << endl;
       cerr << "  " << timeList.getErrStr() << endl;
     } else {
@@ -2440,7 +2453,7 @@ void PolarManager::_openFile()
 // This allows the user to choose the name of a
 // file in which to save Volume data
 
-void PolarManager::_saveFile()
+void CartManager::_saveFile()
 {
   
   QString finalPattern = "All files (*.nc)";
@@ -2480,17 +2493,17 @@ void PolarManager::_saveFile()
   }
 }
 
-void PolarManager::_createFileChooserDialog()
+void CartManager::_createFileChooserDialog()
 {
   _refreshFileChooserDialog();
 }
 
-void PolarManager::_refreshFileChooserDialog()
+void CartManager::_refreshFileChooserDialog()
 {
 
 }
 
-void PolarManager::_showFileChooserDialog()
+void CartManager::_showFileChooserDialog()
 {
 
 }
@@ -2498,7 +2511,7 @@ void PolarManager::_showFileChooserDialog()
 ////////////////////////////////////////////////////////
 // set times from gui widgets
 
-void PolarManager::_setArchiveStartTimeFromGui(const QDateTime &qdt)
+void CartManager::_setArchiveStartTimeFromGui(const QDateTime &qdt)
 {
   QDate date = qdt.date();
   QTime time = qdt.time();
@@ -2506,7 +2519,7 @@ void PolarManager::_setArchiveStartTimeFromGui(const QDateTime &qdt)
                     time.hour(), time.minute(), time.second());
 }
 
-void PolarManager::_setArchiveEndTimeFromGui(const QDateTime &qdt)
+void CartManager::_setArchiveEndTimeFromGui(const QDateTime &qdt)
 {
   QDate date = qdt.date();
   QTime time = qdt.time();
@@ -2514,14 +2527,14 @@ void PolarManager::_setArchiveEndTimeFromGui(const QDateTime &qdt)
                   time.hour(), time.minute(), time.second());
 }
 
-void PolarManager::_acceptGuiTimes()
+void CartManager::_acceptGuiTimes()
 {
   _archiveStartTime = _guiStartTime;
   _archiveEndTime = _guiEndTime;
   loadArchiveFileList();
 }
 
-void PolarManager::_cancelGuiTimes()
+void CartManager::_cancelGuiTimes()
 {
   _setGuiFromArchiveStartTime();
   _setGuiFromArchiveEndTime();
@@ -2530,7 +2543,7 @@ void PolarManager::_cancelGuiTimes()
 ////////////////////////////////////////////////////////
 // set gui widget from archive start time
 
-void PolarManager::_setGuiFromArchiveStartTime()
+void CartManager::_setGuiFromArchiveStartTime()
 {
   if (!_archiveStartTimeEdit) {
     return;
@@ -2549,7 +2562,7 @@ void PolarManager::_setGuiFromArchiveStartTime()
 ////////////////////////////////////////////////////////
 // set gui widget from archive end time
 
-void PolarManager::_setGuiFromArchiveEndTime()
+void CartManager::_setGuiFromArchiveEndTime()
 {
   if (!_archiveEndTimeEdit) {
     return;
@@ -2568,7 +2581,7 @@ void PolarManager::_setGuiFromArchiveEndTime()
 ////////////////////////////////////////////////////////
 // set gui selected time label
 
-void PolarManager::_setGuiFromSelectedTime()
+void CartManager::_setGuiFromSelectedTime()
 {
   char text[128];
   snprintf(text, 128, "%.4d/%.2d/%.2d %.2d:%.2d:%.2d",
@@ -2584,7 +2597,7 @@ void PolarManager::_setGuiFromSelectedTime()
 ////////////////////////////////////////////////////////
 // set archive start time
 
-void PolarManager::_setArchiveStartTime(const RadxTime &rtime)
+void CartManager::_setArchiveStartTime(const RadxTime &rtime)
 
 {
   _archiveStartTime = rtime;
@@ -2597,7 +2610,7 @@ void PolarManager::_setArchiveStartTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // set archive end time
 
-void PolarManager::_setArchiveEndTime(const RadxTime &rtime)
+void CartManager::_setArchiveEndTime(const RadxTime &rtime)
 
 {
   _archiveEndTime = rtime;
@@ -2610,7 +2623,7 @@ void PolarManager::_setArchiveEndTime(const RadxTime &rtime)
 ////////////////////////////////////////////////////////
 // change start time
 
-void PolarManager::_goBack1()
+void CartManager::_goBack1()
 {
   if (_archiveScanIndex > 0) {
     _archiveScanIndex -= 1;
@@ -2623,7 +2636,7 @@ void PolarManager::_goBack1()
   _timeSlider->setSliderPosition(_archiveScanIndex);
 }
 
-void PolarManager::_goBackPeriod()
+void CartManager::_goBackPeriod()
 {
 
   int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
@@ -2637,7 +2650,7 @@ void PolarManager::_goBackPeriod()
 
 }
 
-void PolarManager::_goFwd1()
+void CartManager::_goFwd1()
 {
   if (_archiveScanIndex < (int) _archiveFileList.size() - 1) {
     _archiveScanIndex += 1;
@@ -2650,7 +2663,7 @@ void PolarManager::_goFwd1()
   _timeSlider->setSliderPosition(_archiveScanIndex);
 }
 
-void PolarManager::_goFwdPeriod()
+void CartManager::_goFwdPeriod()
 {
 
   int archiveSpanSecs = _archiveEndTime - _archiveStartTime;
@@ -2667,7 +2680,7 @@ void PolarManager::_goFwdPeriod()
 ////////////////////////////////////////////////////////
 // set for pending archive retrieval
 
-void PolarManager::_setArchiveRetrievalPending()
+void CartManager::_setArchiveRetrievalPending()
 {
   _archiveRetrievalPending = true;
 }
@@ -2675,7 +2688,7 @@ void PolarManager::_setArchiveRetrievalPending()
 /////////////////////////////////////
 // clear display widgets
 
-void PolarManager::_clear()
+void CartManager::_clear()
 {
   if (_ppi) {
     _ppi->clear();
@@ -2688,7 +2701,7 @@ void PolarManager::_clear()
 /////////////////////////////////////
 // set archive mode
 
-void PolarManager::_setArchiveMode(bool state)
+void CartManager::_setArchiveMode(bool state)
 {
   _archiveMode = state;
   _setSweepPanelVisibility();
@@ -2704,7 +2717,7 @@ void PolarManager::_setArchiveMode(bool state)
 ////////////////////////////////////////////////////////
 // set modes for retrieving the data
 
-void PolarManager::_setRealtime(bool enabled)
+void CartManager::_setRealtime(bool enabled)
 {
   if (enabled) {
     if (_archiveMode) {
@@ -2724,7 +2737,7 @@ void PolarManager::_setRealtime(bool enabled)
 /////////////////////////////////////
 // activate realtime rendering
 
-void PolarManager::_activateRealtimeRendering()
+void CartManager::_activateRealtimeRendering()
 {
   _nGates = 1000;
   _maxRangeKm = _params.max_range_km;
@@ -2740,7 +2753,7 @@ void PolarManager::_activateRealtimeRendering()
 /////////////////////////////////////
 // activate archive rendering
 
-void PolarManager::_activateArchiveRendering()
+void CartManager::_activateArchiveRendering()
 {
   _clear();
   if (_ppi) {
@@ -2754,7 +2767,7 @@ void PolarManager::_activateArchiveRendering()
 /////////////////////////////////////////////////////
 // creating image files in realtime mode
 
-void PolarManager::_createRealtimeImageFiles()
+void CartManager::_createRealtimeImageFiles()
 {
 
   int interval = _params.images_schedule_interval_secs;
@@ -2800,7 +2813,7 @@ void PolarManager::_createRealtimeImageFiles()
 /////////////////////////////////////////////////////
 // creating image files in archive mode
 
-void PolarManager::_createArchiveImageFiles()
+void CartManager::_createArchiveImageFiles()
 {
 
   if (_params.images_creation_mode ==
@@ -2848,7 +2861,7 @@ void PolarManager::_createArchiveImageFiles()
 /////////////////////////////////////////////////////
 // creating one image per field, for each sweep
 
-void PolarManager::_createImageFilesAllSweeps()
+void CartManager::_createImageFilesAllSweeps()
 {
   
   if (_params.images_set_sweep_index_list) {
@@ -2875,11 +2888,11 @@ void PolarManager::_createImageFilesAllSweeps()
 /////////////////////////////////////////////////////
 // creating one image per field
 
-void PolarManager::_createImageFiles()
+void CartManager::_createImageFiles()
 {
 
   if (_params.debug) {
-    cerr << "PolarManager::_createImageFiles()" << endl;
+    cerr << "CartManager::_createImageFiles()" << endl;
   }
 
   PMU_auto_register("createImageFiles");
@@ -2934,7 +2947,7 @@ void PolarManager::_createImageFiles()
 
 }
 
-string PolarManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
+string CartManager::_getOutputPath(bool interactive, string &outputDir, string fileExt)
 {
 	  // set times from plots
 	  if (_rhiMode) {
@@ -2959,7 +2972,7 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 
 	  if (ta_makedir_recurse(outputDir.c_str())) {
 	    string errmsg("Cannot create output dir: " + outputDir);
-	    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
+	    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
 	    cerr << "  " << errmsg << endl;
 	    if (interactive) {
 	        QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -3053,7 +3066,7 @@ string PolarManager::_getOutputPath(bool interactive, string &outputDir, string 
 // If interactive is true, use dialog boxes to indicate errors or report
 // where the image was saved.
 
-void PolarManager::_saveImageToFile(bool interactive)
+void CartManager::_saveImageToFile(bool interactive)
 {
 	  // create image
   QPixmap pixmap;
@@ -3069,7 +3082,7 @@ void PolarManager::_saveImageToFile(bool interactive)
   // write the file
   if (!image.save(outputPath.c_str())) {
     string errmsg("Cannot save image to file: " + outputPath);
-    cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
+    cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
     cerr << "  " << errmsg << endl;
     if (interactive) {
         QMessageBox::critical(this, "Error", errmsg.c_str());
@@ -3105,7 +3118,7 @@ void PolarManager::_saveImageToFile(bool interactive)
     ldataInfo.setRelDataPath(relPath);
     
     if(ldataInfo.write(_plotStartTime.utime())) {
-      cerr << "ERROR - PolarManager::_saveImageToFile()" << endl;
+      cerr << "ERROR - CartManager::_saveImageToFile()" << endl;
       cerr << "  Cannot write _latest_data_info to dir: " << outputDir << endl;
       return;
     }
@@ -3116,7 +3129,7 @@ void PolarManager::_saveImageToFile(bool interactive)
 
 
 
-void PolarManager::ShowContextMenu(const QPoint &pos) {
+void CartManager::ShowContextMenu(const QPoint &pos) {
   _ppi->ShowContextMenu(pos, &_vol);
 }
 
@@ -3124,7 +3137,7 @@ void PolarManager::ShowContextMenu(const QPoint &pos) {
 /////////////////////////////////////////////////////
 // howto help
 
-void PolarManager::_howto()
+void CartManager::_howto()
 {
   string text;
   text += "HOWTO HINTS FOR HAWK-EYE in POLAR mode\n";
@@ -3147,7 +3160,7 @@ void PolarManager::_howto()
 }
 
 // Creates the boundary editor dialog and associated event slots
-void PolarManager::createBoundaryEditorDialog()
+void CartManager::createBoundaryEditorDialog()
 {
 	_boundaryEditorDialog = new QDialog(this);
 	_boundaryEditorDialog->setMaximumHeight(368);
@@ -3266,7 +3279,7 @@ void PolarManager::createBoundaryEditorDialog()
 }
 
 // Select the given tool and set the hint text, while also un-selecting the other tools
-void PolarManager::selectBoundaryTool(BoundaryToolType tool)
+void CartManager::selectBoundaryTool(BoundaryToolType tool)
 {
 	_boundaryEditorPolygonBtn->setChecked(false);
 	_boundaryEditorCircleBtn->setChecked(false);
@@ -3290,7 +3303,7 @@ void PolarManager::selectBoundaryTool(BoundaryToolType tool)
 }
 
 // User clicked on the polygonBtn
-void PolarManager::polygonBtnBoundaryEditorClick()
+void CartManager::polygonBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::polygon);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::polygon);
@@ -3298,7 +3311,7 @@ void PolarManager::polygonBtnBoundaryEditorClick()
 }
 
 // User clicked on the circleBtn
-void PolarManager::circleBtnBoundaryEditorClick()
+void CartManager::circleBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::circle);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::circle);
@@ -3306,7 +3319,7 @@ void PolarManager::circleBtnBoundaryEditorClick()
 }
 
 // User clicked on the brushBtn
-void PolarManager::brushBtnBoundaryEditorClick()
+void CartManager::brushBtnBoundaryEditorClick()
 {
 	selectBoundaryTool(BoundaryToolType::brush);
 	BoundaryPointEditor::Instance()->setTool(BoundaryToolType::brush);
@@ -3315,14 +3328,14 @@ void PolarManager::brushBtnBoundaryEditorClick()
 
 // returns the file path for the boundary file, given the currently selected field and sweep
 // boundaryFileName will be one of 5 values: "Boundary1", "Boundary2"..."Boundary5"
-string PolarManager::getBoundaryFilePath(string boundaryFileName)
+string CartManager::getBoundaryFilePath(string boundaryFileName)
 {
 	return(BoundaryPointEditor::Instance()->getBoundaryFilePath(_boundaryDir, _fieldNum, _sweepManager.getGuiIndex(), boundaryFileName));
 //	return(_boundaryDir + PATH_DELIM + "field" + to_string(_fieldNum) + "-sweep" + to_string(_sweepManager.getGuiIndex()) + "-" + boundaryFileName);
 }
 
 // user clicked on one of the 5 boundaries in the boundary editor list, so load that boundary
-void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
+void CartManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 {
 	string fileName = item->text().toUtf8().constData();
 	bool found = (fileName.find("<none>") != string::npos);
@@ -3352,21 +3365,21 @@ void PolarManager::onBoundaryEditorListItemClicked(QListWidgetItem* item)
 }
 
 // user clicked the boundary editor Clear button
-void PolarManager::clearBoundaryEditorClick()
+void CartManager::clearBoundaryEditorClick()
 {
 	BoundaryPointEditor::Instance()->clear();
 	_ppi->update();   //forces repaint which clears existing polygon
 }
 
-void PolarManager::helpBoundaryEditorClick()
+void CartManager::helpBoundaryEditorClick()
 {
 	QDesktopServices::openUrl(QUrl("https://vimeo.com/369963107"));
 }
 
 // user clicked the boundary editor Save button
-void PolarManager::saveBoundaryEditorClick()
+void CartManager::saveBoundaryEditorClick()
 {
-	cout << "PolarManager, _saveBoundaryEditorClick" << endl;
+	cout << "CartManager, _saveBoundaryEditorClick" << endl;
 
 	if (_boundaryDir.empty())
 		_boundaryDir = BoundaryPointEditor::Instance()->getRootBoundaryDir();
@@ -3379,7 +3392,7 @@ void PolarManager::saveBoundaryEditorClick()
 }
 
 // user clicked on the main menu item "Boundary Editor", so toggle it visible or invisible
-void PolarManager::showBoundaryEditor()
+void CartManager::showBoundaryEditor()
 {
   if (_boundaryEditorDialog)
   {
@@ -3406,7 +3419,7 @@ void PolarManager::showBoundaryEditor()
 }
 
 // check which (if any) of the 5 boundary files exist, and populate the list accordingly
-void PolarManager::refreshBoundaries()
+void CartManager::refreshBoundaries()
 {
   BoundaryPointEditor::Instance()->clear();
 	setBoundaryDir();

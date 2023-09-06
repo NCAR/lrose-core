@@ -26,13 +26,13 @@
 //
 // DisplayManager object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2014
+// Sept 2023
 //
 ///////////////////////////////////////////////////////////////
 //
-// Virtual base class for BscanManager and PolarManager
+// Virtual base class for HorizManager and VertManager
 //
 ///////////////////////////////////////////////////////////////
 

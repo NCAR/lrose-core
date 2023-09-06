@@ -26,7 +26,7 @@
  *    to pop up a conformation window if anything is wrong, etc 
  *    Callable from within XView Applications only!
  *
- * F. Hage    NCAR/RAP 1991.
+ * F. Hage    NCAR/EOL 1991.
  *
  * KEYWORD: XView Notice, File Access Checking
  */

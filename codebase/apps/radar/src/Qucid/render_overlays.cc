@@ -24,7 +24,7 @@
 /************************************************************************
  * RENDER_OVERLAYS.C : Rendering routines for the CIDD program
  *
- * F. Hage    Jan 1991    NCAR - RAP
+ * F. Hage    Jan 1991    NCAR - EOL
  */
 
 #define RENDER_OVERLAYS

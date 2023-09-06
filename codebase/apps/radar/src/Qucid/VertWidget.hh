@@ -21,22 +21,22 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-#ifndef RhiWidget_HH
-#define RhiWidget_HH
+#ifndef VertWidget_HH
+#define VertWidget_HH
 
-#include "PolarWidget.hh"
-#include "RayLoc.hh"
+#include "CartWidget.hh"
+// #include "RayLoc.hh"
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxTime.hh>
 #include <deque>
-class PolarManager;
-class RhiWindow;
+class CartManager;
+class VertWindow;
 
 // Widget representing an RHI scan.  Beams are added to the scan as they
 // are received.  The widget can be set up to display the RHI in a 90 degree
 // view or in a 180 degree view.
 
-class DLL_EXPORT RhiWidget : public PolarWidget
+class DLL_EXPORT VertWidget : public CartWidget
 {
 
   // must include this if you use Qt signals/slots
@@ -55,9 +55,9 @@ class DLL_EXPORT RhiWidget : public PolarWidget
    * @param[in] params   TDRP parameters.
    */
 
-  RhiWidget(QWidget* parent, 
-            const PolarManager &manager,
-            const RhiWindow &rhiWindow,
+  VertWidget(QWidget* parent, 
+            const CartManager &manager,
+            const VertWindow &rhiWindow,
             const Params &params,
             const RadxPlatform &platform,
             const vector<DisplayField *> &fields,
@@ -67,7 +67,7 @@ class DLL_EXPORT RhiWidget : public PolarWidget
    * @brief Destructor.
    */
 
-  virtual ~RhiWidget();
+  virtual ~VertWidget();
 
   /**
    * @brief Configure for range.
@@ -165,7 +165,7 @@ protected:
   // Protected members //
   ///////////////////////
 
-  const RhiWindow &_rhiWindow;
+  const VertWindow &_vertWindow;
 
   // are we in archive mode? and if so are we at the start of a sweep?
 
@@ -193,11 +193,11 @@ protected:
    * @brief Pointers to all of the active beams are saved here.
    */
 
-  std::deque<RhiBeam*> _rhiBeams;
+  // std::deque<RhiBeam*> _rhiBeams;
 
   // ray locations
 
-  vector<RayLoc> _rayLoc;
+  // vector<RayLoc> _rayLoc;
   BeamHeight _beamHt;
 
   // computing angle limits of rays

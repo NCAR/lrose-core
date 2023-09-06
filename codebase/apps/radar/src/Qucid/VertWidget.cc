@@ -22,23 +22,23 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 
-#include "PolarManager.hh"
-#include "RhiWidget.hh"
-#include "RhiWindow.hh"
+#include "CartManager.hh"
+#include "VertWidget.hh"
+#include "VertWindow.hh"
 #include <toolsa/toolsa_macros.h>
 
 using namespace std;
 
-RhiWidget::RhiWidget(QWidget* parent,
-                     const PolarManager &manager,
-                     const RhiWindow &rhiWindow,
+VertWidget::VertWidget(QWidget* parent,
+                     const CartManager &manager,
+                     const VertWindow &vertWindow,
                      const Params &params,
                      const RadxPlatform &platform,
                      const vector<DisplayField *> &fields,
                      bool haveFilteredFields) :
-        PolarWidget(parent, manager, params, platform,
-                    fields, haveFilteredFields),
-        _rhiWindow(rhiWindow),
+        CartWidget(parent, manager, params, platform,
+                   fields, haveFilteredFields),
+        _vertWindow(vertWindow),
         _beamsProcessed(0)
 
 {
@@ -47,27 +47,27 @@ RhiWidget::RhiWidget(QWidget* parent,
   _prevAz = -9999.0;
   _prevTime = 0;
 
-  if (_params.rhi_display_180_degrees) {
-    _aspectRatio = _params.rhi_aspect_ratio * 2.0;
+  if (_params.vert_display_180_degrees) {
+    _aspectRatio = _params.vert_aspect_ratio * 2.0;
   } else {
-    _aspectRatio = _params.rhi_aspect_ratio;
+    _aspectRatio = _params.vert_aspect_ratio;
   }
-  _colorScaleWidth = _params.rhi_color_scale_width;
+  _colorScaleWidth = _params.vert_color_scale_width;
 
-  setGrids(_params.rhi_grids_on_at_startup);
-  setRings(_params.rhi_range_rings_on_at_startup);
-  setAngleLines(_params.rhi_elevation_lines_on_at_startup);
+  setGrids(_params.vert_grids_on_at_startup);
+  setRings(_params.vert_range_rings_on_at_startup);
+  setAngleLines(_params.vert_elevation_lines_on_at_startup);
 
   // initialize world view
 
-  _maxHeightKm = _params.rhi_max_height_km;
+  _maxHeightKm = _params.vert_max_height_km;
   _xGridSpacing = 0.0;
   _yGridSpacing = 0.0;
   configureRange(_params.max_range_km);
 
   // set up ray locators
 
-  _rayLoc.resize(RayLoc::RAY_LOC_N);
+  // _rayLoc.resize(RayLoc::RAY_LOC_N);
 
   // archive mode
 
@@ -87,15 +87,15 @@ RhiWidget::RhiWidget(QWidget* parent,
  * Destructor
  */
 
-RhiWidget::~RhiWidget()
+VertWidget::~VertWidget()
 {
 
   // delete all of the dynamically created beams
 
-  for (size_t i = 0; i < _rhiBeams.size(); ++i) {
-    Beam::deleteIfUnused(_rhiBeams[i]);
-  }
-  _rhiBeams.clear();
+  // for (size_t i = 0; i < _vertBeams.size(); ++i) {
+  //   Beam::deleteIfUnused(_vertBeams[i]);
+  // }
+  // _vertBeams.clear();
 
 }
 
@@ -104,7 +104,7 @@ RhiWidget::~RhiWidget()
  * addBeam()
  */
 
-void RhiWidget::addBeam(const RadxRay *ray,
+void VertWidget::addBeam(const RadxRay *ray,
                         const std::vector< std::vector< double > > &beam_data,
                         const std::vector< DisplayField* > &fields)
 {
@@ -121,16 +121,16 @@ void RhiWidget::addBeam(const RadxRay *ray,
     instHtKm = 0.0;
   }
 
-  RhiBeam* beam = new RhiBeam(_params, ray, instHtKm,
-                              _fields.size(), _startElev, _endElev);
-  beam->addClient();
+  // VertBeam* beam = new VertBeam(_params, ray, instHtKm,
+  //                             _fields.size(), _startElev, _endElev);
+  // beam->addClient();
 
-  if ((int) _rhiBeams.size() == _params.rhi_beam_queue_size) {
-    RhiBeam *oldBeam = _rhiBeams.front();
-    Beam::deleteIfUnused(oldBeam);
-    _rhiBeams.pop_front();
-  }
-  _rhiBeams.push_back(beam);
+  // if ((int) _vertBeams.size() == _params.vert_beam_queue_size) {
+  //   VertBeam *oldBeam = _vertBeams.front();
+  //   Beam::deleteIfUnused(oldBeam);
+  //   _vertBeams.pop_front();
+  // }
+  // _vertBeams.push_back(beam);
 
   // compute angles and times in archive mode
   
@@ -155,27 +155,27 @@ void RhiWidget::addBeam(const RadxRay *ray,
   // Set up the brushes for all of the fields in this beam.  This can be
   // done independently of a Painter object.
     
-  beam->fillColors(beam_data, fields, &_backgroundBrush);
+  // beam->fillColors(beam_data, fields, &_backgroundBrush);
 
   // Add the new beams to the render lists for each of the fields
   
-  for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
-    if (field == _selectedField ||
-        _fieldRenderers[field]->isBackgroundRendered()) {
-      _fieldRenderers[field]->addBeam(beam);
-    } else {
-      beam->setBeingRendered(field, false);
-    }
-  }
+  // for (size_t field = 0; field < _fieldRenderers.size(); ++field) {
+  //   if (field == _selectedField ||
+  //       _fieldRenderers[field]->isBackgroundRendered()) {
+  //     _fieldRenderers[field]->addBeam(beam);
+  //   } else {
+  //     beam->setBeingRendered(field, false);
+  //   }
+  // }
   
   // Start the threads to render the new beams
   
   _performRendering();
 
-  if (_params.debug >= Params::DEBUG_VERBOSE &&
-      _rhiBeams.size() % 10 == 0) {
-    cerr << "==>> _rhiBeams.size(): " << _rhiBeams.size() << endl;
-  }
+  // if (_params.debug >= Params::DEBUG_VERBOSE &&
+  //     _vertBeams.size() % 10 == 0) {
+  //   cerr << "==>> _vertBeams.size(): " << _vertBeams.size() << endl;
+  // }
 
 }
 
@@ -183,7 +183,7 @@ void RhiWidget::addBeam(const RadxRay *ray,
  * configureRange()
  */
 
-void RhiWidget::configureRange(double max_range)
+void VertWidget::configureRange(double max_range)
 {
 
   // Save the specified values
@@ -196,16 +196,16 @@ void RhiWidget::configureRange(double max_range)
   
   // set world view
 
-  int leftMargin = _params.rhi_left_margin;
-  int rightMargin = _params.rhi_right_margin;
-  int topMargin = _params.rhi_top_margin;
-  int bottomMargin = _params.rhi_bottom_margin;
-  int colorScaleWidth = _params.rhi_color_scale_width;
-  int axisTickLen = _params.rhi_axis_tick_len;
-  int nTicksIdeal = _params.rhi_n_ticks_ideal;
-  int textMargin = _params.rhi_text_margin;
+  int leftMargin = _params.vert_left_margin;
+  int rightMargin = _params.vert_right_margin;
+  int topMargin = _params.vert_top_margin;
+  int bottomMargin = _params.vert_bottom_margin;
+  int colorScaleWidth = _params.vert_color_scale_width;
+  int axisTickLen = _params.vert_axis_tick_len;
+  int nTicksIdeal = _params.vert_n_ticks_ideal;
+  int textMargin = _params.vert_text_margin;
 
-  if (_params.rhi_display_180_degrees) {
+  if (_params.vert_display_180_degrees) {
     _fullWorld.set(width(), height(),
                    leftMargin, rightMargin, topMargin, bottomMargin, colorScaleWidth,
                    -_maxRangeKm, 0.0,
@@ -237,7 +237,7 @@ void RhiWidget::configureRange(double max_range)
  * mouseReleaseEvent()
  */
 
-void RhiWidget::mouseReleaseEvent(QMouseEvent *e)
+void VertWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 
   _pointClicked = false;
@@ -291,7 +291,7 @@ void RhiWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // enable unzoom button
 
-    _rhiWindow.enableZoomButton();
+    _vertWindow.enableZoomButton();
     
     // Update the window in the renderers
     
@@ -309,29 +309,29 @@ void RhiWidget::mouseReleaseEvent(QMouseEvent *e)
 ////////////////////////////////////////////////////////////////////////////
 // get ray closest to click point
 
-const RadxRay *RhiWidget::_getClosestRay(double xx, double yy)
+const RadxRay *VertWidget::_getClosestRay(double xx, double yy)
 
 {
 
-  if (_platform.getAltitudeKm() > -1.0) {
-    _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
-  }
-  double clickEl = _beamHt.computeElevationDeg(yy, xx);
+  // if (_platform.getAltitudeKm() > -1.0) {
+  //   _beamHt.setInstrumentHtKm(_platform.getAltitudeKm());
+  // }
+  // double clickEl = _beamHt.computeElevationDeg(yy, xx);
   
-  double minDiff = 1.0e99;
+  // double minDiff = 1.0e99;
   const RadxRay *closestRay = NULL;
-  for (size_t ii = 0; ii < _rhiBeams.size(); ii++) {
-    const RadxRay *ray = _rhiBeams[ii]->getRay();
-    double rayEl = ray->getElevationDeg();
-    double diff = fabs(clickEl - rayEl);
-    if (diff > 180.0) {
-      diff = fabs(diff - 360.0);
-    }
-    if (diff < minDiff) {
-      closestRay = ray;
-      minDiff = diff;
-    }
-  }
+  // for (size_t ii = 0; ii < _vertBeams.size(); ii++) {
+  //   const RadxRay *ray = _vertBeams[ii]->getRay();
+  //   double rayEl = ray->getElevationDeg();
+  //   double diff = fabs(clickEl - rayEl);
+  //   if (diff > 180.0) {
+  //     diff = fabs(diff - 360.0);
+  //   }
+  //   if (diff < minDiff) {
+  //     closestRay = ray;
+  //     minDiff = diff;
+  //   }
+  // }
 
   return closestRay;
 
@@ -341,7 +341,7 @@ const RadxRay *RhiWidget::_getClosestRay(double xx, double yy)
  * _setGridSpacing()
  */
 
-void RhiWidget::_setGridSpacing()
+void VertWidget::_setGridSpacing()
 {
 
   double xRange = _zoomWorld.getXMaxWorld() - _zoomWorld.getXMinWorld();
@@ -357,7 +357,7 @@ void RhiWidget::_setGridSpacing()
  * Get spacing for a given distance range
  */
 
-double RhiWidget::_getSpacing(double range)
+double VertWidget::_getSpacing(double range)
 {
 
   if (range <= 1.0) {
@@ -385,7 +385,7 @@ double RhiWidget::_getSpacing(double range)
  * _drawOverlays()
  */
 
-void RhiWidget::_drawOverlays(QPainter &painter)
+void VertWidget::_drawOverlays(QPainter &painter)
 {
 
   // save painter state
@@ -411,7 +411,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
   double yMax = _zoomWorld.getYMaxWorld();
   
   QFont font = painter.font();
-  font.setPointSizeF(_params.rhi_label_font_size);
+  font.setPointSizeF(_params.vert_label_font_size);
   painter.setFont(font);
   
   _zoomWorld.setSpecifyTicks(true, xMin, _xGridSpacing);
@@ -559,8 +559,8 @@ void RhiWidget::_drawOverlays(QPainter &painter)
 
     // field name legend
 
-    string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
-    sprintf(text, "Field: %s", fieldName.c_str());
+    // string fieldName = _fieldRenderers[_selectedField]->getField().getLabel();
+    // sprintf(text, "Field: %s", fieldName.c_str());
     legends.push_back(text);
     
     // azimuth legend
@@ -605,7 +605,7 @@ void RhiWidget::_drawOverlays(QPainter &painter)
 ///////////////////////////////////////////////////////////
 // Compute the limits of the ray angles
 
-void RhiWidget::_computeAngleLimits(const RadxRay *ray)
+void VertWidget::_computeAngleLimits(const RadxRay *ray)
   
 {
   
@@ -618,8 +618,8 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
   // if (ray->getIsIndexed() || fabs(elevDiff) > beamWidth * 4.0) {
     
   double halfAngle = ray->getAngleResDeg() / 2.0;
-  if (_params.rhi_override_rendering_beam_width) {
-    halfAngle = _params.rhi_rendering_beam_width / 2.0;
+  if (_params.vert_override_rendering_beam_width) {
+    halfAngle = _params.vert_rendering_beam_width / 2.0;
   }
 
   _startElev = elev - halfAngle;
@@ -660,11 +660,12 @@ void RhiWidget::_computeAngleLimits(const RadxRay *ray)
 ///////////////////////////////////////////////////////////
 // store ray location
 
-void RhiWidget::_storeRayLoc(const RadxRay *ray)
+void VertWidget::_storeRayLoc(const RadxRay *ray)
 {
 
+#ifdef NOTNOW
   // compute start and end indices for _rayLoc
-  // RHIs elevation range from -180 to 180
+  // VERTs elevation range from -180 to 180
   // so add 180 to put the index in 0 to 3599 range
 
   int startIndex = (int) ((_startElev + 180.0) * RayLoc::RAY_LOC_RES);
@@ -683,13 +684,15 @@ void RhiWidget::_storeRayLoc(const RadxRay *ray)
     _rayLoc[ii].startIndex = startIndex;
     _rayLoc[ii].endIndex = endIndex;
   }
+#endif
 
 }
 
+#ifdef NOTNOW
 ///////////////////////////////////////////////////////////
 // clear any locations that are overlapped by the given ray
 
-void RhiWidget::_clearRayOverlap(const int startIndex,
+void VertWidget::_clearRayOverlap(const int startIndex,
                                  const int endIndex)
 {
   // Loop through the ray locations, clearing out old information
@@ -774,45 +777,46 @@ void RhiWidget::_clearRayOverlap(const int startIndex,
   } /* endwhile - i */
   
 }
+#endif
 
 /*************************************************************************
  * _refreshImages()
  */
 
-void RhiWidget::_refreshImages()
+void VertWidget::_refreshImages()
 {
 
-  for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
+  // for (size_t ifield = 0; ifield < _fieldRenderers.size(); ++ifield) {
     
-    FieldRenderer *field = _fieldRenderers[ifield];
+  //   FieldRenderer *field = _fieldRenderers[ifield];
     
-    // If needed, create new image for this field
+  //   // If needed, create new image for this field
     
-    if (size() != field->getImage()->size()) {
-      field->createImage(width(), height());
-    }
+  //   if (size() != field->getImage()->size()) {
+  //     field->createImage(width(), height());
+  //   }
 
-    // clear image
+  //   // clear image
 
-    field->getImage()->fill(_backgroundBrush.color().rgb());
+  //   field->getImage()->fill(_backgroundBrush.color().rgb());
     
-    // set up rendering details
+  //   // set up rendering details
 
-    field->setTransform(_zoomTransform);
+  //   field->setTransform(_zoomTransform);
     
-    // Add pointers to the beams to be rendered
+  //   // Add pointers to the beams to be rendered
     
-    if (ifield == _selectedField || field->isBackgroundRendered()) {
+  //   if (ifield == _selectedField || field->isBackgroundRendered()) {
 
-      std::deque<RhiBeam*>::iterator beam;
-      for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
-	(*beam)->setBeingRendered(ifield, true);
-	field->addBeam(*beam);
-      }
+  //     std::deque<VertBeam*>::iterator beam;
+  //     for (beam = _vertBeams.begin(); beam != _vertBeams.end(); ++beam) {
+  //       (*beam)->setBeingRendered(ifield, true);
+  //       field->addBeam(*beam);
+  //     }
       
-    }
+  //   }
     
-  } // ifield
+  // } // ifield
   
   // do the rendering
 
@@ -826,15 +830,15 @@ void RhiWidget::_refreshImages()
  * clear()
  */
 
-void RhiWidget::clear()
+void VertWidget::clear()
 {
 
   // Clear out the beam array
   
-  for (size_t i = 0; i < _rhiBeams.size(); i++) {
-    Beam::deleteIfUnused(_rhiBeams[i]);
-  }
-  _rhiBeams.clear();
+  // for (size_t i = 0; i < _vertBeams.size(); i++) {
+  //   Beam::deleteIfUnused(_vertBeams[i]);
+  // }
+  // _vertBeams.clear();
   _pointClicked = false;
   
   // Now rerender the images
@@ -848,7 +852,7 @@ void RhiWidget::clear()
  * refresh()
  */
 
-void RhiWidget::refresh()
+void VertWidget::refresh()
 {
   _refreshImages();
 }
@@ -857,7 +861,7 @@ void RhiWidget::refresh()
  * unzoom the view
  */
 
-void RhiWidget::unzoomView()
+void VertWidget::unzoomView()
 {
   
   _zoomWorld = _fullWorld;
@@ -873,7 +877,7 @@ void RhiWidget::unzoomView()
  * resize()
  */
 
-void RhiWidget::resize(int width, int height)
+void VertWidget::resize(int width, int height)
 {
   
   setGeometry(0, 0, width, height);
@@ -886,14 +890,14 @@ void RhiWidget::resize(int width, int height)
  * paintEvent()
  */
 
-void RhiWidget::paintEvent(QPaintEvent *event)
+void VertWidget::paintEvent(QPaintEvent *event)
 {
 
   QPainter painter(this);
   painter.save();
   painter.eraseRect(0, 0, width(), height());
   _zoomWorld.setClippingOn(painter);
-  painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
+  // painter.drawImage(0, 0, *(_fieldRenderers[_selectedField]->getImage()));
   painter.restore();
   _drawOverlays(painter);
 
@@ -903,7 +907,7 @@ void RhiWidget::paintEvent(QPaintEvent *event)
  * selectVar()
  */
 
-void RhiWidget::selectVar(const size_t index)
+void VertWidget::selectVar(const size_t index)
 {
 
   // If the field index isn't actually changing, we don't need to do anything
@@ -913,26 +917,26 @@ void RhiWidget::selectVar(const size_t index)
   }
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========>> RhiWidget::selectVar() for field index: " 
+    cerr << "=========>> VertWidget::selectVar() for field index: " 
          << index << endl;
   }
 
   // If this field isn't being rendered in the background, render all of
   // the beams for it
 
-  if (!_fieldRenderers[index]->isBackgroundRendered()) {
-    std::deque<RhiBeam*>::iterator beam;
-    for (beam = _rhiBeams.begin(); beam != _rhiBeams.end(); ++beam) {
-      (*beam)->setBeingRendered(index, true);
-      _fieldRenderers[index]->addBeam(*beam);
-    }
-  }
+  // if (!_fieldRenderers[index]->isBackgroundRendered()) {
+  //   std::deque<VertBeam*>::iterator beam;
+  //   for (beam = _vertBeams.begin(); beam != _vertBeams.end(); ++beam) {
+  //     (*beam)->setBeingRendered(index, true);
+  //     _fieldRenderers[index]->addBeam(*beam);
+  //   }
+  // }
   _performRendering();
 
   // Do any needed housekeeping when the field selection is changed
 
-  _fieldRenderers[_selectedField]->unselectField();
-  _fieldRenderers[index]->selectField();
+  // _fieldRenderers[_selectedField]->unselectField();
+  // _fieldRenderers[index]->selectField();
   
   // Change the selected field index
 

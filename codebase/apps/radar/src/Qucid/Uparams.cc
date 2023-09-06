@@ -26,7 +26,7 @@
 //
 // Uparams class provides parameter utilities
 //
-// Mike Dixon, RAP, NCAR, Boulder, CO, USA
+// Mike Dixon, EOL, NCAR, Boulder, CO, USA
 // March 2001
 //
 /////////////////////////////////////////////////////////////

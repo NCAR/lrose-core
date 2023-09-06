@@ -21,54 +21,53 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// Args.hh: Command line object
+// ScaledLabel.h: interface for the ScaledLabel class.
 //
-// Mike Dixon, EOL, NCAR,
-// P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// July 2006
-//
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#if !defined(SCALEDLABEL_HH)
+#define SCALEDLABEL_HH
 
-#include <tdrp/tdrp.h>
-#include <iostream>
 #include <string>
-#include <vector>
-using namespace std;
+#include <sstream>
+#include <map>
 
-class Args {
-  
+/**
+Create a label that is scaled in engineering units. At
+construction, ScaledLabel is instructed on the type of
+conversion it will perform. Subsequent calls to scale(double)
+will return a string, scaled accordingly.
+*/
+class ScaledLabel  
+{
 public:
-
-  // constructor
-
-  Args (const string &prog_name);
-
-  // destructor
-
-  virtual ~Args ();
-
-  // parse command line
-  // Returns 0 on success, -1 on failure
-
-  int parse (const int argc, const char **argv);
-
-  // public data
-
-  tdrp_override_t override;
-  vector<string> inputFileList;
-
+    enum ScalingType {
+      /// Scale for distance, in engineering units, 
+      /// with the appropriate units designation appended.
+        DistanceEng
+    };
+    
+    // Constructor. 
+    ScaledLabel(
+        /// The type of scaling to apply.
+        ScalingType t);
+    
+    //Destructor
+    virtual ~ScaledLabel();
+    
+    /// Return a string containing the scaled representation.
+    std::string scale(
+        /// The value to be scaled.
+        double scale
+        );
+    
 protected:
-  
-private:
-
-  string _progName;
-  void _usage(ostream &out);
-  
+    /// The type of scaling we are performing.
+    ScalingType m_scalingType;
+    
+    /// A stringstream used to format numbers
+    std::ostringstream m_stringStr;
 };
 
-#endif
+#endif // !defined(SCALEDLABEL_H)
+

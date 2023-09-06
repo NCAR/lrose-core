@@ -24,7 +24,7 @@
 /****************************************************************************
  * RENDER_CBAR.C : Routines used to draw the colorbars for CIDD
  *
- * F. Hage    Jan 1991    NCAR - RAP
+ * F. Hage    Jan 1991    NCAR - EOL
  */
 
 #define RENDER_CBAR

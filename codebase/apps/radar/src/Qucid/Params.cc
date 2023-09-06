@@ -1174,7 +1174,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("display_mode");
     tt->descr = tdrpStrDup("Main display mode.");
-    tt->help = tdrpStrDup("\tPOLAR_DISPLAY - normal PPI and RHI display. \tBSCAN_DISPLAY - BSCAN mode.\n");
+    tt->help = tdrpStrDup("\tPOLAR_DISPLAY - normal PPI and VERT display. \tBSCAN_DISPLAY - BSCAN mode.\n");
     tt->val_offset = (char *) &display_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("display_mode_t");
     tt->enum_def.nfields = 2;
@@ -1551,247 +1551,247 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("RHI MODE DISPLAY");
+    tt->comment_hdr = tdrpStrDup("VERT MODE DISPLAY");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'rhi_window_width'
+    // Parameter 'vert_window_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_width");
-    tt->descr = tdrpStrDup("Startup width of RHI window (pixels).");
+    tt->param_name = tdrpStrDup("vert_window_width");
+    tt->descr = tdrpStrDup("Startup width of VERT window (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_width - &_start_;
+    tt->val_offset = (char *) &vert_window_width - &_start_;
     tt->single_val.i = 500;
     tt++;
     
-    // Parameter 'rhi_window_height'
+    // Parameter 'vert_window_height'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_height");
-    tt->descr = tdrpStrDup("Startup height of RHI window (pixels).");
+    tt->param_name = tdrpStrDup("vert_window_height");
+    tt->descr = tdrpStrDup("Startup height of VERT window (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_height - &_start_;
+    tt->val_offset = (char *) &vert_window_height - &_start_;
     tt->single_val.i = 500;
     tt++;
     
-    // Parameter 'rhi_window_start_x'
+    // Parameter 'vert_window_start_x'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_start_x");
-    tt->descr = tdrpStrDup("Startup X for RHI window (pixels).");
+    tt->param_name = tdrpStrDup("vert_window_start_x");
+    tt->descr = tdrpStrDup("Startup X for VERT window (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_start_x - &_start_;
+    tt->val_offset = (char *) &vert_window_start_x - &_start_;
     tt->single_val.i = 1100;
     tt++;
     
-    // Parameter 'rhi_window_start_y'
+    // Parameter 'vert_window_start_y'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_window_start_y");
-    tt->descr = tdrpStrDup("Startup Y for RHI window (pixels).");
+    tt->param_name = tdrpStrDup("vert_window_start_y");
+    tt->descr = tdrpStrDup("Startup Y for VERT window (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_window_start_y - &_start_;
+    tt->val_offset = (char *) &vert_window_start_y - &_start_;
     tt->single_val.i = 0;
     tt++;
     
-    // Parameter 'rhi_top_margin'
+    // Parameter 'vert_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_top_margin");
-    tt->descr = tdrpStrDup("Height of top margin in RHI mode (pixels).");
+    tt->param_name = tdrpStrDup("vert_top_margin");
+    tt->descr = tdrpStrDup("Height of top margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Titles go in the top margin.");
-    tt->val_offset = (char *) &rhi_top_margin - &_start_;
+    tt->val_offset = (char *) &vert_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'rhi_bottom_margin'
+    // Parameter 'vert_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_bottom_margin");
-    tt->descr = tdrpStrDup("Height of bottom margin in RHI mode (pixels).");
+    tt->param_name = tdrpStrDup("vert_bottom_margin");
+    tt->descr = tdrpStrDup("Height of bottom margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &rhi_bottom_margin - &_start_;
+    tt->val_offset = (char *) &vert_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'rhi_left_margin'
+    // Parameter 'vert_left_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_left_margin");
-    tt->descr = tdrpStrDup("Width of left margin in RHI mode (pixels).");
+    tt->param_name = tdrpStrDup("vert_left_margin");
+    tt->descr = tdrpStrDup("Width of left margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the left margin.");
-    tt->val_offset = (char *) &rhi_left_margin - &_start_;
+    tt->val_offset = (char *) &vert_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'rhi_right_margin'
+    // Parameter 'vert_right_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_right_margin");
-    tt->descr = tdrpStrDup("Width of right margin in RHI mode (pixels).");
+    tt->param_name = tdrpStrDup("vert_right_margin");
+    tt->descr = tdrpStrDup("Width of right margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Height scale goes in the right margin.");
-    tt->val_offset = (char *) &rhi_right_margin - &_start_;
+    tt->val_offset = (char *) &vert_right_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'rhi_label_font_size'
+    // Parameter 'vert_label_font_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_label_font_size");
+    tt->param_name = tdrpStrDup("vert_label_font_size");
     tt->descr = tdrpStrDup("Font size for labels on range rings (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_label_font_size - &_start_;
+    tt->val_offset = (char *) &vert_label_font_size - &_start_;
     tt->single_val.i = 8;
     tt++;
     
-    // Parameter 'rhi_axis_tick_len'
+    // Parameter 'vert_axis_tick_len'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_axis_tick_len");
+    tt->param_name = tdrpStrDup("vert_axis_tick_len");
     tt->descr = tdrpStrDup("Length of ticks on axes (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_axis_tick_len - &_start_;
+    tt->val_offset = (char *) &vert_axis_tick_len - &_start_;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'rhi_n_ticks_ideal'
+    // Parameter 'vert_n_ticks_ideal'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_n_ticks_ideal");
+    tt->param_name = tdrpStrDup("vert_n_ticks_ideal");
     tt->descr = tdrpStrDup("Ideal number of ticks on axes.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_n_ticks_ideal - &_start_;
+    tt->val_offset = (char *) &vert_n_ticks_ideal - &_start_;
     tt->single_val.i = 7;
     tt++;
     
-    // Parameter 'rhi_text_margin'
+    // Parameter 'vert_text_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_text_margin");
+    tt->param_name = tdrpStrDup("vert_text_margin");
     tt->descr = tdrpStrDup("Margin around some text (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_text_margin - &_start_;
+    tt->val_offset = (char *) &vert_text_margin - &_start_;
     tt->single_val.i = 5;
     tt++;
     
-    // Parameter 'rhi_display_180_degrees'
+    // Parameter 'vert_display_180_degrees'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_display_180_degrees");
-    tt->descr = tdrpStrDup("Flag indicating to display full 180 degrees in RHI window. If set to false, the RHI window will just display 90 degrees of the RHI.");
+    tt->param_name = tdrpStrDup("vert_display_180_degrees");
+    tt->descr = tdrpStrDup("Flag indicating to display full 180 degrees in VERT window. If set to false, the VERT window will just display 90 degrees of the VERT.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_display_180_degrees - &_start_;
+    tt->val_offset = (char *) &vert_display_180_degrees - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'rhi_aspect_ratio'
+    // Parameter 'vert_aspect_ratio'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhi_aspect_ratio");
-    tt->descr = tdrpStrDup("Aspect ratio (width/height) of RHI window.");
+    tt->param_name = tdrpStrDup("vert_aspect_ratio");
+    tt->descr = tdrpStrDup("Aspect ratio (width/height) of VERT window.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_aspect_ratio - &_start_;
+    tt->val_offset = (char *) &vert_aspect_ratio - &_start_;
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'rhi_max_height_km'
+    // Parameter 'vert_max_height_km'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhi_max_height_km");
-    tt->descr = tdrpStrDup("Max height of data in RHI window (km).");
+    tt->param_name = tdrpStrDup("vert_max_height_km");
+    tt->descr = tdrpStrDup("Max height of data in VERT window (km).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_max_height_km - &_start_;
+    tt->val_offset = (char *) &vert_max_height_km - &_start_;
     tt->single_val.d = 25;
     tt++;
     
-    // Parameter 'rhi_color_scale_width'
+    // Parameter 'vert_color_scale_width'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_color_scale_width");
-    tt->descr = tdrpStrDup("Width of color scale for RHI window (pixels).");
+    tt->param_name = tdrpStrDup("vert_color_scale_width");
+    tt->descr = tdrpStrDup("Width of color scale for VERT window (pixels).");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_color_scale_width - &_start_;
+    tt->val_offset = (char *) &vert_color_scale_width - &_start_;
     tt->single_val.i = 40;
     tt++;
     
-    // Parameter 'rhi_grids_on_at_startup'
+    // Parameter 'vert_grids_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_grids_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI grids overlay on at startup.");
+    tt->param_name = tdrpStrDup("vert_grids_on_at_startup");
+    tt->descr = tdrpStrDup("Set VERT grids overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_grids_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vert_grids_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'rhi_range_rings_on_at_startup'
+    // Parameter 'vert_range_rings_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_range_rings_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI range rings overlay on at startup.");
+    tt->param_name = tdrpStrDup("vert_range_rings_on_at_startup");
+    tt->descr = tdrpStrDup("Set VERT range rings overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_range_rings_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vert_range_rings_on_at_startup - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'rhi_elevation_lines_on_at_startup'
+    // Parameter 'vert_elevation_lines_on_at_startup'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_elevation_lines_on_at_startup");
-    tt->descr = tdrpStrDup("Set RHI elevation lines overlay on at startup.");
+    tt->param_name = tdrpStrDup("vert_elevation_lines_on_at_startup");
+    tt->descr = tdrpStrDup("Set VERT elevation lines overlay on at startup.");
     tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &rhi_elevation_lines_on_at_startup - &_start_;
+    tt->val_offset = (char *) &vert_elevation_lines_on_at_startup - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'rhi_main_legend_pos'
+    // Parameter 'vert_main_legend_pos'
     // ctype is '_legend_pos_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("rhi_main_legend_pos");
-    tt->descr = tdrpStrDup("Position of main legend in the RHI plot window");
+    tt->param_name = tdrpStrDup("vert_main_legend_pos");
+    tt->descr = tdrpStrDup("Position of main legend in the VERT plot window");
     tt->help = tdrpStrDup("This include time, field name and elevation angle.");
-    tt->val_offset = (char *) &rhi_main_legend_pos - &_start_;
+    tt->val_offset = (char *) &vert_main_legend_pos - &_start_;
     tt->enum_def.name = tdrpStrDup("legend_pos_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
@@ -1807,39 +1807,39 @@
     tt->single_val.e = LEGEND_TOP_LEFT;
     tt++;
     
-    // Parameter 'rhi_beam_queue_size'
+    // Parameter 'vert_beam_queue_size'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("rhi_beam_queue_size");
-    tt->descr = tdrpStrDup("Size of the queue for RHI beams.");
+    tt->param_name = tdrpStrDup("vert_beam_queue_size");
+    tt->descr = tdrpStrDup("Size of the queue for VERT beams.");
     tt->help = tdrpStrDup("After the queue reaches this size, older beams are discarded.");
-    tt->val_offset = (char *) &rhi_beam_queue_size - &_start_;
+    tt->val_offset = (char *) &vert_beam_queue_size - &_start_;
     tt->single_val.i = 360;
     tt++;
     
-    // Parameter 'rhi_override_rendering_beam_width'
+    // Parameter 'vert_override_rendering_beam_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("rhi_override_rendering_beam_width");
+    tt->param_name = tdrpStrDup("vert_override_rendering_beam_width");
     tt->descr = tdrpStrDup("Option to override the azimuth beam width for rendering.");
     tt->help = tdrpStrDup("Normally Qucid determines the azimuth rendering beam width automatically. You can override this and specifcally set the azimuth beam width for rendering.");
-    tt->val_offset = (char *) &rhi_override_rendering_beam_width - &_start_;
+    tt->val_offset = (char *) &vert_override_rendering_beam_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'rhi_rendering_beam_width'
+    // Parameter 'vert_rendering_beam_width'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("rhi_rendering_beam_width");
+    tt->param_name = tdrpStrDup("vert_rendering_beam_width");
     tt->descr = tdrpStrDup("Rendering beam width, if override is active.");
-    tt->help = tdrpStrDup("See 'rhi_override_rendering_beam_width'");
-    tt->val_offset = (char *) &rhi_rendering_beam_width - &_start_;
+    tt->help = tdrpStrDup("See 'vert_override_rendering_beam_width'");
+    tt->val_offset = (char *) &vert_rendering_beam_width - &_start_;
     tt->single_val.d = 1;
     tt++;
     
@@ -2848,7 +2848,7 @@
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("images_scan_interval_secs");
     tt->descr = tdrpStrDup("Time between scans in archive mode (secs).");
-    tt->help = tdrpStrDup("Only applies to POLAR (PPI/RHI) mode, not BSCAN mode.");
+    tt->help = tdrpStrDup("Only applies to POLAR (PPI/VERT) mode, not BSCAN mode.");
     tt->val_offset = (char *) &images_scan_interval_secs - &_start_;
     tt->single_val.i = 300;
     tt++;

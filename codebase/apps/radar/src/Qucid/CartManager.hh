@@ -22,25 +22,25 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// PolarManager.hh
+// CartManager.hh
 //
-// PolarManager object
+// CartManager object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2014
+// Sept 2023
 //
 ///////////////////////////////////////////////////////////////
 //
-// PolarManager manages polar data gathering and dissemination
+// CartManager manages polar data gathering and dissemination
 // for PPIs and RHIs
 //
 // Rendering is delegated to PpiWidget and RhiWidget
 //
 ///////////////////////////////////////////////////////////////
 
-#ifndef PolarManager_HH
-#define PolarManager_HH
+#ifndef CartManager_HH
+#define CartManager_HH
 
 #include <string>
 #include <vector>
@@ -48,9 +48,9 @@
 #include "Args.hh"
 #include "Params.hh"
 #include "DisplayManager.hh"
-#include "RayLoc.hh"
-#include "ContextEditingView.hh"
-#include "BoundaryPointEditor.hh"
+// #include "RayLoc.hh"
+// #include "ContextEditingView.hh"
+// #include "BoundaryPointEditor.hh"
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include <euclid/SunPosn.hh>
@@ -79,12 +79,12 @@ class Reader;
 class RadxPlatform;
 class TimeScaleWidget;
 
-class PolarManager : public DisplayManager {
+class CartManager : public DisplayManager {
   
   Q_OBJECT
 
 public:
-  static PolarManager* Instance();
+  static CartManager* Instance();
 
   // boundary editor dialog
   QDialog *_boundaryEditorDialog;
@@ -92,14 +92,14 @@ public:
 
   // constructor
   
-  PolarManager(const Params &params,
+  CartManager(const Params &params,
                Reader *reader,
                const vector<DisplayField *> &fields,
                bool haveFilteredFields);
   
   // destructor
   
-  virtual ~PolarManager();
+  virtual ~CartManager();
 
   // run 
 
@@ -145,7 +145,7 @@ signals:
 
 private:
 
-  static PolarManager* m_pInstance;
+  static CartManager* m_pInstance;
   string _openFilePath;
   string _boundaryDir;
   void setBoundaryDir();
@@ -161,7 +161,7 @@ private:
 
   // ray locations
 
-  vector<RayLoc> _rayLoc;
+  // vector<RayLoc> _rayLoc;
 
   // input data
   
@@ -170,7 +170,7 @@ private:
 
   // sweeps
 
-  SweepManager _sweepManager;
+  // SweepManager _sweepManager;
   QVBoxLayout *_sweepVBoxLayout;
   QGroupBox *_sweepPanel;
   vector<QRadioButton *> *_sweepRButtons;
@@ -437,7 +437,7 @@ private slots:
   void brushBtnBoundaryEditorClick();
   void onBoundaryEditorListItemClicked(QListWidgetItem* item);
   void saveBoundaryEditorClick();
-  void selectBoundaryTool(BoundaryToolType tool);
+  // void selectBoundaryTool(BoundaryToolType tool);
 };
 
 #endif

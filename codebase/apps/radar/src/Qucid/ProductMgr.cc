@@ -27,7 +27,7 @@
 // Product rendering
 //
 // Mike Dixon, from Nancy Rehak
-// RAP, NCAR, Boulder, CO, 80307, USA
+// EOL, NCAR, Boulder, CO, 80307, USA
 //
 // Jan 2000
 //

@@ -25,7 +25,7 @@
 #
 # Makefile for CIDD program
 #
-# Frank Hage RAP, NCAR, Boulder, CO, 80307, USA
+# Frank Hage EOL, NCAR, Boulder, CO, 80307, USA
 #
 ###########################################################################
 
