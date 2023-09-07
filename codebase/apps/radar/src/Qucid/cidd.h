@@ -389,6 +389,7 @@ struct    Global_data {
     GC  def_gc;       // default gc for copy & misc X operations  
     GC  ol_gc;        // Gc for drawing in the reference reference overlay color 
     GC  clear_ol_gc;  // Gc for Removing the reference overlay color 
+    char *dpyName; // display name
     Display *dpy;     // default Display pointer for copy operations 
     Colormap cmap;
     Color_gc_t    color[MAX_COLORS];   // stores all colors and GCs 

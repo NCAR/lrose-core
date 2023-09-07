@@ -159,7 +159,14 @@ Qucid::Qucid(int argc, char **argv) :
   if (rlim.rlim_cur >  3200) 
     rlim.rlim_cur = 3200;
   setrlimit(RLIMIT_NOFILE, &rlim);
+
+  // get the display
   
+  if (_setupXDisplay(argc, argv)) {
+    cerr << "Cannot set up X display" << endl;
+    OK = false;
+  }
+
   // init process mapper registration
 
   if (_params.register_with_procmap) {
@@ -258,6 +265,45 @@ int Qucid::Run(QApplication &app)
   }
   
   return -1;
+
+}
+
+//////////////////////////////////////////////////
+// set up the display variable
+  
+int Qucid::_setupXDisplay(int argc, char **argv)
+{
+
+  /*
+   * search for display name on command line
+   */
+
+  gd.dpyName = NULL;
+  
+  for (int i =  1; i < argc; i++) {
+    if (!strcmp(argv[i], "-display") || !strcmp(argv[i], "-d")) {
+      if (i < argc - 1) {
+	gd.dpyName = new char[strlen(argv[i+1]) + 1];
+	strcpy(gd.dpyName, argv[i+1]);
+      }
+    }
+  } /* i */
+	
+  if((gd.dpy = XOpenDisplay(gd.dpyName)) == NULL) {
+    fprintf(stderr, "ERROR - Qucid::_setupXDisplay\n");
+    fprintf(stderr,
+	    "Cannot open display '%s' or '%s'\n",
+	    gd.dpyName, getenv("DISPLAY"));
+    return -1;
+  }
+  
+  /*
+   * register x error handler
+   */
+  
+  // XSetErrorHandler(xerror_handler);
+
+  return 0;
 
 }
 
@@ -645,6 +691,7 @@ void Qucid::_initGlobals()
     gd.def_gc = 0;
     gd.ol_gc = 0;
     gd.clear_ol_gc = 0;
+    gd.dpyName = NULL;
     gd.dpy = NULL;
     MEM_zero(gd.color);
     MEM_zero(gd.null_color);

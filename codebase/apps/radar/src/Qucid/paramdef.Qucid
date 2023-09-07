@@ -199,7 +199,7 @@ commentdef {
 }
 
 paramdef string {
-  p_default = "../share/color_scales";
+  p_default = "$(HOME)/git/lrose-displays/color_scales";
   p_descr = "Directory for color scales";
   p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
 } color_scale_dir;

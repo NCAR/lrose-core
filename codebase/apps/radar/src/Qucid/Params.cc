@@ -995,7 +995,7 @@
     tt->descr = tdrpStrDup("Directory for color scales");
     tt->help = tdrpStrDup("You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.");
     tt->val_offset = (char *) &color_scale_dir - &_start_;
-    tt->single_val.s = tdrpStrDup("../share/color_scales");
+    tt->single_val.s = tdrpStrDup("$(HOME)/git/lrose-displays/color_scales");
     tt++;
     
     // Parameter 'fields'

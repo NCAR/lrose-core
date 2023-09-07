@@ -95,6 +95,7 @@ private:
   
   // methods
 
+  int _setupXDisplay(int argc, char **argv);
   void _initGlobals();
   int _setupDisplayFields();
   int _setupReader();
