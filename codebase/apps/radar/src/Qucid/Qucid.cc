@@ -678,5 +678,5 @@ void Qucid::_initGlobals()
     gd.images_P = NULL;  
     gd.uparams = NULL;
 
-};
- 
+}
+
