@@ -55,6 +55,8 @@
 #define CIDD_MAIN 1 /* This is the main module */
 #include "cidd.h"
 
+extern void init_xview(int *argc_ptr, char *argv[]);
+
 using namespace std;
 
 // Constructor
@@ -166,6 +168,7 @@ Qucid::Qucid(int argc, char **argv) :
     cerr << "Cannot set up X display" << endl;
     OK = false;
   }
+  init_xview(&argc, argv);
 
   // init process mapper registration
 
@@ -211,7 +214,7 @@ int Qucid::Run(QApplication &app)
 
   // init_xview(&argc,argv); /* create all Xview objects */    
   
-  setup_colorscales(gd.dpy);    /* Establish color table & mappings  */
+  // setup_colorscales(gd.dpy);    /* Establish color table & mappings  */
   
   // Instantiate Symbolic products
   init_symprods();
