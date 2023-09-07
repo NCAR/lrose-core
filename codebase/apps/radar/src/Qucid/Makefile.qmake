@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -D_BSD_TYPES -DF_UNDERSCORE2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_QML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -D_REENTRANT -Wall -Wextra -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -D_REENTRANT -Wall -Wextra -fPIC $(DEFINES)
-INCPATH       = -I. -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I-DQT_GUI_LIB -I-DQT_QML_LIB -I/usr/include/qt5/QtQml -I-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/dixon/lrose/include -I. -I/../lib64/qt5/mkspecs/linux-g++
+INCPATH       = -I. -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I-DQT_GUI_LIB -I-DQT_QML_LIB -I/usr/include/qt5/QtQml -I-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I$(HOME)/lrose/include -I/home/rsfdata/lrose/include -I. -I/../lib64/qt5/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,10 +37,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = Qucid1.0.0
-DISTDIR = /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/.tmp/Qucid1.0.0
+DISTDIR = /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/.tmp/Qucid1.0.0
 LINK          = g++
 LFLAGS        = 
-LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/dixon/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Qml.so /usr/lib64/libQt5Network.so /usr/lib64/libQt5Core.so -lGL -lpthread   
+LIBS          = $(SUBLIBS) -L$(HOME)/lrose/lib -L/usr/local/lib -L/usr/local/lrose/lib /home/rsfdata/lrose/lib -ldsdata -lradar -lMdv -lSpdb -lFmq -lrapformats -ldsserver -ldidss -leuclid -lrapmath -lrapplot -lqtplot -ltoolsa -ldataport -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_hl -lhdf5 -lphysics -lshapelib -lXext -lX11 -lfftw3 -lpng -lbz2 -lz -lexpat -lm -framework QtWidgets -framework QtScript -framework QtQml /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Qml.so /usr/lib64/libQt5Network.so /usr/lib64/libQt5Core.so -lGL -lpthread   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -306,11 +306,8 @@ DIST          = /../lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/common/g++-base.conf \
 		/usr/lib64/qt5/mkspecs/common/g++-unix.conf \
 		/../lib64/qt5/mkspecs/qconfig.pri \
-		/../lib64/qt5/mkspecs/modules/qt_KIdentityManagementWidgets.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri \
-		/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri \
-		/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_core.pri \
@@ -573,11 +570,8 @@ Makefile.qmake: qmake.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 		/usr/lib64/qt5/mkspecs/common/g++-base.conf \
 		/usr/lib64/qt5/mkspecs/common/g++-unix.conf \
 		/../lib64/qt5/mkspecs/qconfig.pri \
-		/../lib64/qt5/mkspecs/modules/qt_KIdentityManagementWidgets.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri \
-		/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri \
-		/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri \
 		/../lib64/qt5/mkspecs/modules/qt_lib_core.pri \
@@ -672,11 +666,8 @@ Makefile.qmake: qmake.pro /../lib64/qt5/mkspecs/linux-g++/qmake.conf /../lib64/q
 /usr/lib64/qt5/mkspecs/common/g++-base.conf:
 /usr/lib64/qt5/mkspecs/common/g++-unix.conf:
 /../lib64/qt5/mkspecs/qconfig.pri:
-/../lib64/qt5/mkspecs/modules/qt_KIdentityManagementWidgets.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_accessibility_support_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_bootstrap_private.pri:
-/../lib64/qt5/mkspecs/modules/qt_lib_charts.pri:
-/../lib64/qt5/mkspecs/modules/qt_lib_charts_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_concurrent.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_concurrent_private.pri:
 /../lib64/qt5/mkspecs/modules/qt_lib_core.pri:
@@ -873,7 +864,7 @@ moc_CartManager.cpp: CartManager.hh \
 		/usr/local/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include CartManager.hh -o moc_CartManager.cpp
 
 moc_CartWidget.cpp: CartWidget.hh \
 		/usr/local/lrose/include/Radx/RadxPlatform.hh \
@@ -898,7 +889,7 @@ moc_CartWidget.cpp: CartWidget.hh \
 		/usr/local/lrose/include/qtplot/ColorMap.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include CartWidget.hh -o moc_CartWidget.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include CartWidget.hh -o moc_CartWidget.cpp
 
 moc_DisplayManager.cpp: DisplayManager.hh \
 		Args.hh \
@@ -948,7 +939,7 @@ moc_DisplayManager.cpp: DisplayManager.hh \
 		/usr/local/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include DisplayManager.hh -o moc_DisplayManager.cpp
 
 moc_HorizWidget.cpp: HorizWidget.hh \
 		/usr/local/lrose/include/Radx/RadxVol.hh \
@@ -974,7 +965,7 @@ moc_HorizWidget.cpp: HorizWidget.hh \
 		/usr/local/lrose/include/qtplot/ColorMap.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include HorizWidget.hh -o moc_HorizWidget.cpp
 
 moc_VertWidget.cpp: VertWidget.hh \
 		CartWidget.hh \
@@ -1002,7 +993,7 @@ moc_VertWidget.cpp: VertWidget.hh \
 		/usr/local/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include VertWidget.hh -o moc_VertWidget.cpp
 
 moc_VertWindow.cpp: VertWindow.hh \
 		Params.hh \
@@ -1031,7 +1022,7 @@ moc_VertWindow.cpp: VertWindow.hh \
 		/usr/local/lrose/include/toolsa/TaArray2D.hh \
 		moc_predefs.h \
 		/../lib64/qt5/bin/moc
-	/../lib64/qt5/bin/moc $(DEFINES) --include /home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/dixon/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/dixon/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
+	/../lib64/qt5/bin/moc $(DEFINES) --include /home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/moc_predefs.h -I/../lib64/qt5/mkspecs/linux-g++ -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid -I/usr/include/qt5/QtCore -I/usr/include/qt5 -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_WIDGETS_LIB -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_GUI_LIB -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_QML_LIB -I/usr/include/qt5/QtQml -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_NETWORK_LIB -I/usr/include/qt5/QtNetwork -I/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/-DQT_CORE_LIB -I/usr/local/include -I/usr/local/lrose/include -I'/home/rsfdata/git/lrose-core/codebase/apps/radar/src/Qucid/$(HOME)/lrose/include' -I/home/rsfdata/lrose/include -I/usr/include/c++/8 -I/usr/include/c++/8/x86_64-redhat-linux -I/usr/include/c++/8/backward -I/usr/lib/gcc/x86_64-redhat-linux/8/include -I/usr/local/include -I/usr/include VertWindow.hh -o moc_VertWindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:

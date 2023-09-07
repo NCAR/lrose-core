@@ -587,7 +587,7 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
     if(gd.debug) fprintf(stderr,"Total Unique colors used so far: %d\n",gd.num_colors);
 
     // switch(v_class = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_VISUAL_CLASS)) {
-    switch(v_class = 0) {
+    switch(v_class = PseudoColor) {
 	 default:
 		fprintf(stderr,"Visual Class %d of Display not supported - Sorry \n",v_class);
 		return -1;
@@ -597,7 +597,10 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
            /* Allocate the color cells needed -  Can Modify colors */
            status = XAllocColorCells(dpy, cmap, False,&mask, 0, pix_vals, gd.num_colors);
           if(!gd.quiet_mode) fprintf(stderr,"Detected 8 Bit display - Allocating %d colors\n",gd.num_colors);
-           if(status == 0) return -1;
+          // if(status == 0) {
+          //   cerr << "HHHHHHHHHHHHHHHHHHHh" << endl;
+          //   return -1;
+          // }
 	 break;
 
 	 case TrueColor: /* Colors are read only */
@@ -698,7 +701,7 @@ void setup_colorscales(Display *dpy)
     Visual *visual;
  
     status = 0;
-     
+
     gd.cmap = DefaultColormap(dpy,DefaultScreen(dpy));
     status = combine_color_maps(dpy,gd.cmap);
     if(status < 0) {
@@ -744,6 +747,7 @@ void setup_colorscales(Display *dpy)
         }
       }
     }
+    
 }
 
 /*****************************************************************

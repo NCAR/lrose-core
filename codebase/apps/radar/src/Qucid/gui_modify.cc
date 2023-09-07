@@ -674,7 +674,7 @@ void modify_gui_objects()
 			     gd.legends.time_tick_color[4],
 			     gd.legends.time_tick_color[5]);
 
-    // gd.time_plot->Init(gd.dpy,gd.def_gc,gd.cmap,gd.movie_pu->time_can);
+    gd.time_plot->Init(gd.dpy,gd.def_gc,gd.cmap /*,gd.movie_pu->time_can */);
 
     update_movie_popup();
 
