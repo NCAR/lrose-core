@@ -75,20 +75,11 @@ Qucid::Qucid(int argc, char **argv) :
 
   _progName = strdup("Qucid");
 
-  // initialize legacy CIDD structs
+  // clear out legacy CIDD structs
 
-  cerr << "11111111111111111" << endl;
-  
   _initGlobals();
   
-  /* initialize globals, get/set defaults, establish data sources etc. */
-  cerr << "2222222222222222" << endl;
-  
-  init_data_space();
-  
   // get command line args
-  
-  cerr << "33333333333333333" << endl;
   
   if (_args.parse(argc, (const char **) argv)) {
     cerr << "ERROR: " << _progName << endl;
@@ -96,7 +87,6 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
-  cerr << "444444444444444" << endl;
   
   // load TDRP params from command line
   
@@ -118,6 +108,10 @@ Qucid::Qucid(int argc, char **argv) :
     return;
   }
 
+  // initialize globals, get/set defaults, establish data sources etc.
+  
+  init_data_space();
+  
   // check for any filtered fields
 
   _haveFilteredFields = false;
