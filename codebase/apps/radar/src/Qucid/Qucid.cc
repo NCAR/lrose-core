@@ -75,7 +75,20 @@ Qucid::Qucid(int argc, char **argv) :
 
   _progName = strdup("Qucid");
 
+  // initialize legacy CIDD structs
+
+  cerr << "11111111111111111" << endl;
+  
+  _initGlobals();
+  
+  /* initialize globals, get/set defaults, establish data sources etc. */
+  cerr << "2222222222222222" << endl;
+  
+  init_data_space();
+  
   // get command line args
+  
+  cerr << "33333333333333333" << endl;
   
   if (_args.parse(argc, (const char **) argv)) {
     cerr << "ERROR: " << _progName << endl;
@@ -83,7 +96,8 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
-
+  cerr << "444444444444444" << endl;
+  
   // load TDRP params from command line
   
   char *paramsPath = (char *) "unknown";
@@ -144,15 +158,6 @@ Qucid::Qucid(int argc, char **argv) :
     return;
   }
 
-  // initialize legacy CIDD structs
-  
-  _initGlobals();
-  gd.use_cosine_correction = -1;
-  process_args(argc,argv);    /* process command line arguments */
-  
-  /* initialize globals, get/set defaults, establish data sources etc. */
-  init_data_space();
-  
   /* Ref: https://bugs.launchpad.net/ubuntu/+source/xview/+bug/1059988
    * Xview libs Segfault if RLIMIT_NOFILE > 3232
    */
@@ -559,7 +564,7 @@ void Qucid::_initGlobals()
     gd.range_ring_for_radar_only = 0;
     gd.domain_follows_data = 0; 
     gd.show_height_sel = 0;
-    gd.use_cosine_correction = 0; 
+    gd.use_cosine_correction = -1; 
     gd.latlon_mode = 0;    
     gd.zoom_limits_in_latlon = 0; 
     gd.label_contours = 0; 

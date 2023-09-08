@@ -67,6 +67,7 @@ protected:
 private:
 
   string _progName;
+  int _processLegacyArgs(int argc, const char **argv);
   void _usage(ostream &out);
   
 };

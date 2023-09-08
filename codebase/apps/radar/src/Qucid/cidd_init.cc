@@ -67,8 +67,12 @@ void init_data_space()
 
   // load up the params buffer from file or http
 
+  cerr << "aaaaaaaaaaaaa db_name: " << gd.db_name << endl;
+  
   load_db_data(gd.db_name);  // Retrieve the parameter text file
 
+  cerr << "bbbbbbbbbbbbbbbbbbbbb" << endl;
+  
   // create uparams object, read params into it from buffer
 
   gd.uparams = new Uparams();

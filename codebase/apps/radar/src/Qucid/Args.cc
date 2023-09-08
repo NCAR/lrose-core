@@ -31,8 +31,10 @@
 
 #include "Args.hh"
 #include "Params.hh"
+#include "cidd.h"
 #include <cstring>
 #include <cstdlib>
+#include <toolsa/DateTime.hh>
 using namespace std;
 
 // Constructor
@@ -66,6 +68,12 @@ int Args::parse (const int argc, const char **argv)
 
   int iret = 0;
   TDRP_init_override(&override);
+
+  // process the legacy args
+  
+  if (_processLegacyArgs(argc, argv)) {
+    iret = -1;
+  }
 
   // loop through args
   
@@ -346,15 +354,222 @@ void Args::_usage(ostream &out)
       << "            or archive mode time span\n"
       << "       [ -v, -verbose ] print verbose debug messages\n"
       << "       [ -vv, -extra ] print extra verbose debug messages\n"
+      << "legacy options:\n"
+      << "       [ -p ?] legacy params file\n"
+      << "       [ -quiet ] quiet mode\n"
+      << "       [ -unmapped ] run unmapped - i.e. no window pops up\n"
+      << "       [ -vert ] run in vert mode, cosine correction for elevation not applied\n"
+      << "       [ -print_legacy_params ] print out legacy params\n"
+      << "       [ -vvv ? ] legacy CIDD verbose level\n"
+      << "       [ -proxy_url ?] use this proxy server for data requests\n"
+      << "                       in the param file, and in HTML Mode will automatically\n"
+      << "       [ -start_height ?,?,?...] starts up at the first height, overiding the setting\n"
+      << "                       in the param file, and in HTML Mode will automatically\n"
+      << "                       render each height in the list\n"
+      << "       [ -start_time ?] starts up in archive mode at this time\n"
+      << "                        YYYYMMDDHHMM(SS - seconds optional\n"
+      << "                        -t minus3600 starts in archive mode with the first frame 1 hour ago\n"
+      << "                        ie. use -t minusX to start X seconds ago in archive mode\n"
       << endl;
 
   Params::usage(out);
 
 }
 
+int Args::_processLegacyArgs(int argc, const char **argv)
+{
 
+  int n_fields;
+  const char *app_ptr;
+  const char *token;
+  UTIMstruct temp_utime;
 
+  gd.db_name = strdup("");    /* Set the default data base name */
+  gd.http_proxy_url = "";
 
+  gd.argv = (char **) argv;
+  gd.argc = argc;
+  gd.orig_wd = getcwd(NULL,0);
 
+  if((app_ptr = strrchr(argv[0],'/')) == NULL) {
+    gd.app_name = argv[0];
+  } else {
+    gd.app_name = ++app_ptr;
+  }
+  gd.app_instance = "test";
 
+  // Look for the quiet mode flag first.
+  for(int ii=1; ii < argc; ii++) {
+    if(strcmp(argv[ii], "-quiet") == 0 ) {
+      gd.quiet_mode = 1;
+    }
+  }
+     
+  // loop through args
 
+  int iret = 0;
+  
+  for (int ii =  1; ii < argc; ii++) {
+    
+    if (!strcmp(argv[ii], "-p")) {
+      
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        gd.db_name = strdup(optarg);
+      } else {
+	iret = -1;
+      }
+
+    } else if (!strcmp(argv[ii], "-print_legacy_params")) {
+      
+      load_db_data("");
+      fputs(gd.db_data,stdout);
+      exit(0);
+
+    } else if (!strcmp(argv[ii], "-vvv")) {
+      
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        int debug_level = atoi(optarg);
+        gd.debug |= (debug_level & 0x01);
+        gd.debug1 |= (debug_level & 0x02);
+        gd.debug2 |= (debug_level & 0x04);
+      } else {
+        gd.debug = 1;
+      }
+ 
+    } else if (!strcmp(argv[ii], "-proxy_url")) {
+      
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        gd.http_proxy_url = strdup(optarg);
+        if(!gd.quiet_mode) printf("Loading Parameters via Proxy: %s\n",gd.http_proxy_url);
+      } else {
+	iret = -1;
+      }
+ 
+    } else if (!strcmp(argv[ii], "-start_height")) {
+      
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        gd.num_render_heights = 0;
+        gd.cur_render_height = 0;
+        token = strtok((char *) optarg,","); // Prime strtok
+        gd.h_win.cur_ht = atof(token);
+        while(token != NULL && gd.num_render_heights < MAX_SECTS) {
+          gd.height_array[gd.num_render_heights] = atof(token);
+          gd.num_render_heights++;
+          token = strtok(NULL,","); // get next rtoken strtok
+        }
+        if(!gd.quiet_mode) printf("CIDD Found %d heights starting at: %g\n",
+                                  gd.num_render_heights,gd.h_win.cur_ht);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[ii], "-instance")) {
+      
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        gd.app_instance = strdup(optarg);
+        if(!gd.quiet_mode) printf("CIDD Instance: %s\n",optarg);
+      } else {
+	iret = -1;
+      }
+      
+    } else if (!strcmp(argv[ii], "-unmapped")) {
+
+      gd.run_unmapped = 1;
+      if(!gd.quiet_mode) printf("CIDD will run unmapped\n");
+      
+    } else if (!strcmp(argv[ii], "-vert")) {
+      
+      gd.use_cosine_correction = 0;
+      if(!gd.quiet_mode) printf("CIDD will run in VERT pointing mode\n");
+      
+    } else if (!strcmp(argv[ii], "-start_time")) {
+      
+      if (ii < argc - 1) {
+
+        const char *optarg = argv[++ii];
+        if (strncmp(optarg, "minus", strlen("minus"))==0){
+          time_t throwBack;
+          if (1!=sscanf(optarg,"minus%ld", &throwBack)){
+            fprintf(stderr,"Problems parsing time: %s\n",optarg);
+            fprintf(stderr,"Use: -t minus3600 to look back one hour\n");
+          } else {
+            time_t minusTime = time(NULL) - throwBack;
+            gd.movie.mode = ARCHIVE_MODE;
+            gd.movie.start_time = minusTime;
+            gd.movie.demo_time = minusTime;
+            if(!gd.quiet_mode)
+              printf("11 CIDD Starting in ARCHIVE mode with Data time: %s\n",
+                     DateTime::strm(minusTime).c_str());
+          }
+        } else {
+          //
+          // Are seconds included in the time string?
+          //
+          if (strlen(optarg) == strlen("YYYYMMDDhhmmss")){
+            //
+            // Yes, we do have seconds.
+            //
+            n_fields = sscanf(optarg,"%4ld%2ld%2ld%2ld%2ld%2ld",
+                              &temp_utime.year,
+                              &temp_utime.month,
+                              &temp_utime.day,
+                              &temp_utime.hour,
+                              &temp_utime.min,
+                              &temp_utime.sec );
+            
+            if(n_fields == 6) {
+              temp_utime.unix_time = UTIMdate_to_unix(&temp_utime);
+              gd.movie.mode = ARCHIVE_MODE;
+              gd.movie.start_time = temp_utime.unix_time;
+              gd.movie.demo_time = temp_utime.unix_time;
+              if(!gd.quiet_mode)
+                printf("22 CIDD Starting in ARCHIVE mode with Data time: %s\n",
+                       DateTime::strm(temp_utime.unix_time).c_str());
+            } else {
+              fprintf(stderr,"Problems parsing time: %s\n",optarg);
+              fprintf(stderr,"Use: YYYYMMDDHHMMSS : Example 199806211624\n");
+              fprintf(stderr,"     YYYYMMDDHHMM is also an option.\n");
+            } 
+          } else {
+            //
+            // No seconds in time string.
+            //
+            n_fields = sscanf(optarg,"%4ld%2ld%2ld%2ld%2ld",
+                              &temp_utime.year,
+                              &temp_utime.month,
+                              &temp_utime.day,
+                              &temp_utime.hour,
+                              &temp_utime.min);
+            
+            if(n_fields == 5) {
+              temp_utime.sec = 0;
+              temp_utime.unix_time = UTIMdate_to_unix(&temp_utime);
+              gd.movie.mode = ARCHIVE_MODE;
+              gd.movie.start_time = temp_utime.unix_time;
+              gd.movie.demo_time = temp_utime.unix_time;
+              if(!gd.quiet_mode) 
+                printf("33 CIDD Starting in ARCHIVE mode with Data time: %s\n",
+                       DateTime::strm(temp_utime.unix_time).c_str());
+            } else {
+              fprintf(stderr,"Problems parsing time: %s\n",optarg);
+              fprintf(stderr,"Use: YYYYMMDDHHMM : Example 199806211624\n");
+              fprintf(stderr,"     YYYYMMDDHHMMSS is also an option.\n");
+            }
+          }
+
+        } // if (strncmp(optarg, "minus", strlen("minus"))==0) ...
+
+      } // if (ii < argc - 1) {
+
+    } // else if (!strcmp(argv[i], "-start_time"))
+
+  } // ii
+
+  return iret;
+  
+}  
