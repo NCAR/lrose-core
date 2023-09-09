@@ -42,6 +42,7 @@
 
 Uparams::Uparams()
 {
+  _printTdrp = false;
 }
 
 // destructor
@@ -354,6 +355,16 @@ const char *Uparams::_get(const char *search_name) const
 double Uparams::getDouble(const char *name, double default_val)
 {
 
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef double {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
   const char *entryStr = _get(name);
   if (entryStr == NULL) {
     return default_val;
@@ -365,7 +376,7 @@ double Uparams::getDouble(const char *name, double default_val)
       return default_val;
     }
   }
-  
+
   return default_val;
 
 }
@@ -378,6 +389,16 @@ double Uparams::getDouble(const char *name, double default_val)
 float Uparams::getFloat(const char *name, float default_val)
 {
 
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef double {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
   const char *entryStr = _get(name);
   if (entryStr == NULL) {
     return default_val;
@@ -403,6 +424,16 @@ int Uparams::getInt(const char *name, int default_val)
 
 {
 
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef int {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
   const char *entryStr = _get(name);
   if (entryStr == NULL) {
     return default_val;
@@ -428,6 +459,16 @@ long Uparams::getLong(const char *name, long default_val)
 
 {
 
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef int {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
   const char *entryStr = _get(name);
   if (entryStr == NULL) {
     return default_val;
@@ -453,6 +494,16 @@ const char *Uparams::getString(const char *name, const char *default_val)
 
 {
 
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef string {" << endl;
+    cout << "  p_default = \"" << default_val << "\";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
   const char *entryStr = _get(name);
   if (entryStr == NULL) {
     return default_val;

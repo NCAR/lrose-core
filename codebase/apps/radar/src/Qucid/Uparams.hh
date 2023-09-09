@@ -55,6 +55,10 @@ public:
   // Clear the data base
   
   void clear();
+
+  // set to print TDRP version of parameter
+
+  void setPrintTdrp(bool val) { _printTdrp = val; }
     
   // read in from param file
   // returns 0 on success, -1 on failure
@@ -80,6 +84,8 @@ private:
   vector<Uparam_list_t> _plist;
 
   const char *_get(const char *search_name) const;
+
+  bool _printTdrp;
 
 };
   

@@ -76,6 +76,7 @@ void init_data_space()
     fprintf(stderr,"init_data_space: could not read params buffer\n");
     exit(-1);
   }
+  gd.uparams->setPrintTdrp(true);
 
   // Load the Main parameters
   param_text_line_no = 0;
