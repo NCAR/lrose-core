@@ -1791,6 +1791,342 @@ paramdef int {
 } cidd.num_fonts;
 
 
+paramdef int {
+  p_default = 6;
+  p_descr = "";
+  p_help = "";
+} contour_font_num;
+
+
+paramdef int {
+  p_default = 5;
+  p_descr = "";
+  p_help = "";
+} n_ideal_contour_labels;
+
+
+paramdef double {
+  p_default = 6;
+  p_descr = "";
+  p_help = "";
+} cidd.rotate_coarse_adjust;
+
+
+paramdef double {
+  p_default = 2;
+  p_descr = "";
+  p_help = "";
+} cidd.rotate_medium_adjust;
+
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "";
+  p_help = "";
+} cidd.rotate_fine_adjust;
+
+
+paramdef double {
+  p_default = 5;
+  p_descr = "";
+  p_help = "";
+} cidd.min_zoom_threshold;
+
+
+paramdef int {
+  p_default = 63500;
+  p_descr = "";
+  p_help = "";
+} cidd.coord_key;
+
+
+paramdef string {
+  p_default = "NO DATA FOUND (in this area at the selected time)";
+  p_descr = "";
+  p_help = "";
+} cidd.no_data_message;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_top_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_bot_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_left_margin;
+
+
+paramdef int {
+  p_default = 80;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_right_margin;
+
+
+paramdef int {
+  p_default = 25;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_legends_start_x;
+
+
+paramdef int {
+  p_default = 60;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_legends_start_y;
+
+
+paramdef int {
+  p_default = 30;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_legends_delta_y;
+
+
+paramdef int {
+  p_default = 440;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_min_height;
+
+
+paramdef int {
+  p_default = 580;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_min_width;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.wsddm_mode;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.one_click_rhi;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.click_posn_rel_to_origin;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.report_clicks_in_status_window;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.report_clicks_in_degM_and_nm;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.magnetic_variation_deg;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.check_data_times;
+
+
+paramdef string {
+  p_default = "Qucid";
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_frame_label;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} cidd.status_info_file;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_default_y_pos;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} cidd.horiz_default_x_pos;
+
+
+paramdef string {
+  p_default = "maps";
+  p_descr = "";
+  p_help = "";
+} cidd.map_file_subdir;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} cidd.ideal_x_vectors;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} cidd.ideal_y_vectors;
+
+
+paramdef double {
+  p_default = 30;
+  p_descr = "";
+  p_help = "";
+} cidd.azmith_interval;
+
+
+paramdef double {
+  p_default = 200;
+  p_descr = "";
+  p_help = "";
+} cidd.azmith_radius;
+
+
+paramdef int {
+  p_default = 11;
+  p_descr = "";
+  p_help = "";
+} cidd.latest_click_mark_size;
+
+
+paramdef int {
+  p_default = 50;
+  p_descr = "";
+  p_help = "";
+} cidd.range_ring_x_space;
+
+
+paramdef int {
+  p_default = 15;
+  p_descr = "";
+  p_help = "";
+} cidd.range_ring_y_space;
+
+
+paramdef double {
+  p_default = -1;
+  p_descr = "";
+  p_help = "";
+} cidd.range_ring_spacing;
+
+
+paramdef double {
+  p_default = 1000;
+  p_descr = "";
+  p_help = "";
+} cidd.max_ring_range;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} cidd.range_ring_labels;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} cidd.wind_units_scale_factor;
+
+
+paramdef string {
+  p_default = "m/sec";
+  p_descr = "";
+  p_help = "";
+} cidd.wind_units_label;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} cidd.wind_w_scale_factor;
+
+
+paramdef double {
+  p_default = 300;
+  p_descr = "";
+  p_help = "";
+} cidd.scale_constant;
+
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "";
+  p_help = "";
+} cidd.redraw_interval;
+
+
+paramdef int {
+  p_default = 120;
+  p_descr = "";
+  p_help = "";
+} cidd.update_interval;
+
+
+paramdef string {
+  p_default = "arrow";
+  p_descr = "";
+  p_help = "";
+} cidd.wind_marker_type;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} cidd.wind_reference_speed;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} cidd.num_fonts;
+
+
 paramdef string {
   p_default = "fixed";
   p_descr = "";

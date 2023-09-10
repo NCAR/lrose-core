@@ -740,5 +740,32 @@ void Qucid::_initGlobals()
 
     gd.status_info_file = NULL;
 
+    gd.horiz_default_x_pos = 0;
+    gd.horiz_default_y_pos = 0;
+
+    gd.map_file_sub_dir = NULL;
+
+    gd.ideal_x_vectors = 0;
+    gd.ideal_y_vectors = 0;
+    gd.azimuth_interval = 0;
+    gd.azimuth_radius = 0;
+    gd.latest_click_mark_size = 0;
+    gd.range_ring_x_space = 0;
+    gd.range_ring_y_space = 0;
+    gd.range_ring_spacing = 0;
+    gd.max_ring_range = 0;
+    gd.range_ring_labels = 0;
+    gd.wind_units_scale_factor = 0;
+    gd.wind_units_label = NULL;
+    gd.wind_w_scale_factor = 0;
+
+    gd.scale_constant = 0.0;
+    
+    gd.redraw_interval = 0;
+    gd.update_interval = 0;
+    
+    gd.wind_marker_type = NULL;
+    gd.wind_reference_speed = 0.0;
+
 }
 

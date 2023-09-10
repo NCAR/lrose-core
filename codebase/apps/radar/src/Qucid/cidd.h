@@ -466,7 +466,46 @@ struct    Global_data {
   // gui
   
   const char *status_info_file;
+
+  // positions
+
+  int horiz_default_x_pos;
+  int horiz_default_y_pos;
   
+  // overlays
+
+  const char *map_file_sub_dir;
+
+  // page_pu_proc
+
+  int ideal_x_vectors;
+  int ideal_y_vectors;
+  double azimuth_interval;
+  double azimuth_radius;
+  int latest_click_mark_size;
+  int range_ring_x_space;
+  int range_ring_y_space;
+  double range_ring_spacing;
+  double max_ring_range;
+  int range_ring_labels;
+  double wind_units_scale_factor;
+  const char *wind_units_label;
+  double wind_w_scale_factor;
+
+  // symprods
+
+  double scale_constant;
+  
+  // timer control
+
+  int redraw_interval;
+  int update_interval;
+
+  // winds init
+  
+  const char *wind_marker_type;
+  double wind_reference_speed;
+
 };
  
 #ifdef CIDD_MAIN

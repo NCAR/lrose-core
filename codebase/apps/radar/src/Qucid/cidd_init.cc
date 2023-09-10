@@ -1500,6 +1500,45 @@ void init_data_space()
 
   gd.frame_label = gd.uparams->getString("cidd.horiz_frame_label", "Qucid");
   
-  gd.status_info_file = gd.uparams->getString("cidd.status_info_file", ""); 
+  gd.status_info_file = gd.uparams->getString("cidd.status_info_file", "");
+
+  // h_win_proc
+  
+  gd.horiz_default_y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+  gd.horiz_default_x_pos = gd.uparams->getLong("cidd.horiz_default_x_pos",0);
+
+  // overlays
+
+  gd.map_file_sub_dir =  gd.uparams->getString( "cidd.map_file_subdir", "maps");
+
+  // page_pu_proc
+
+  gd.ideal_x_vectors = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
+  gd.ideal_y_vectors = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
+  gd.azimuth_interval = gd.uparams->getDouble( "cidd.azmith_interval", 30.0);
+  gd.azimuth_radius = gd.uparams->getDouble( "cidd.azmith_radius", 200.0);
+  gd.latest_click_mark_size = gd.uparams->getLong("cidd.latest_click_mark_size", 11);
+  gd.range_ring_x_space = gd.uparams->getLong("cidd.range_ring_x_space", 50);
+  gd.range_ring_y_space = gd.uparams->getLong("cidd.range_ring_y_space", 15);
+  gd.range_ring_spacing = gd.uparams->getDouble("cidd.range_ring_spacing", -1.0);
+  gd.max_ring_range = gd.uparams->getDouble("cidd.max_ring_range", 1000.0);
+  gd.range_ring_labels = gd.uparams->getLong("cidd.range_ring_labels", 1);
+  gd.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
+  gd.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
+  gd.wind_w_scale_factor = gd.uparams->getDouble( "cidd.wind_w_scale_factor", 10.0);
+
+  // symprods
+  
+  gd.scale_constant = gd.uparams->getDouble("cidd.scale_constant", 300.0);
+
+  // timer control
+
+  gd.redraw_interval = gd.uparams->getLong("cidd.redraw_interval", 1000);
+  gd.update_interval = gd.uparams->getLong("cidd.update_interval", 120);
+
+  // winds init
+  
+  gd.wind_marker_type = gd.uparams->getString( "cidd.wind_marker_type", "arrow");
+  gd.wind_reference_speed = gd.uparams->getDouble( "cidd.wind_reference_speed", 10.0);
 
 }
