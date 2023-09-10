@@ -727,5 +727,18 @@ void Qucid::_initGlobals()
     gd.images_P = NULL;  
     gd.uparams = NULL;
 
+    gd.contour_font_num = 0;
+    gd.n_ideal_contour_labels = 0;
+
+    gd.rotate_coarse_adjust = 0.0;
+    gd.rotate_medium_adjust = 0.0;
+    gd.rotate_fine_adjust = 0.0;
+  
+    gd.min_zoom_threshold = 0.0;
+
+    gd.coord_key = 0;
+
+    gd.status_info_file = NULL;
+
 }
 

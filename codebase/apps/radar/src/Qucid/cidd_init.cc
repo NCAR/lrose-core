@@ -1411,4 +1411,95 @@ void init_data_space()
   free(cfield[1]);
   free(cfield[2]);
 
+  // fonts
+
+  gd.num_fonts = gd.uparams->getLong( "cidd.num_fonts", 1);
+  
+  if(gd.num_fonts > MAX_FONTS) {
+    gd.num_fonts = MAX_FONTS;
+    fprintf(stderr,"Cidd: Warning. Too Many Fonts. Limited to %d Fonts\n",MAX_FONTS);
+  }
+
+#ifdef NOTNOW
+  
+  // Make sure specified font for Winds, Contours and Products are within range.
+  if(gd.prod.prod_font_num < 0) gd.prod.prod_font_num = 0;
+  if(gd.prod.prod_font_num >= gd.num_fonts) gd.prod.prod_font_num = gd.num_fonts -1;
+  
+  for(i=0;i < gd.num_fonts; i++) {
+    sprintf(p_name,"cidd.font%d",i+1);
+    f_name = gd.uparams->getString(
+            p_name, "fixed");
+    gd.fontst[i] = (XFontStruct *) XLoadQueryFont(dpy,f_name);
+    if(gd.fontst[i] != NULL) {
+      gd.ciddfont[i]  = gd.fontst[i]->fid;
+    } else {
+      fprintf(stderr,"Can't load font: %s\n",f_name);
+      fprintf(stderr,"Using 'fixed' instead\n");
+      gd.fontst[i]  = (XFontStruct *) XLoadQueryFont(dpy,"fixed");
+      gd.ciddfont[i]  = gd.fontst[i]->fid;
+    }
+  }    
+
+#endif
+
+  // contours
+
+  gd.contour_font_num = gd.uparams->getLong("contour_font_num", 6);
+  gd.n_ideal_contour_labels = gd.uparams->getLong("n_ideal_contour_labels", 5);
+
+  // canvas events
+
+  gd.rotate_coarse_adjust = gd.uparams->getDouble( "cidd.rotate_coarse_adjust",6.0);
+  gd.rotate_medium_adjust = gd.uparams->getDouble( "cidd.rotate_medium_adjust",2.0);
+  gd.rotate_fine_adjust = gd.uparams->getDouble( "cidd.rotate_fine_adjust", 0.5);
+
+  // zoom
+  
+  gd.min_zoom_threshold = gd.uparams->getDouble( "cidd.min_zoom_threshold", 5.0);
+
+  // shmem
+  
+  gd.coord_key = gd.uparams->getLong( "cidd.coord_key", 63500);
+
+  // gui
+
+  gd.no_data_message = gd.uparams->getString
+    ("cidd.no_data_message",
+     "NO DATA FOUND (in this area at the selected time)");
+
+  
+  gd.h_win.margin.top =  gd.uparams->getLong( "cidd.horiz_top_margin", 20);
+  gd.h_win.margin.bot =  gd.uparams->getLong( "cidd.horiz_bot_margin", 20);
+  gd.h_win.margin.left = gd.uparams->getLong( "cidd.horiz_left_margin", 20);
+  gd.h_win.margin.right = gd.uparams->getLong( "cidd.horiz_right_margin", 80);
+  
+  gd.h_win.legends_start_x =
+    gd.uparams->getLong( "cidd.horiz_legends_start_x",
+                         gd.h_win.margin.left + 5);
+  
+  gd.h_win.legends_start_y =
+    gd.uparams->getLong( "cidd.horiz_legends_start_y",
+                         gd.h_win.margin.top * 2);
+  
+  gd.h_win.legends_delta_y =
+    gd.uparams->getLong( "cidd.horiz_legends_delta_y",
+                         gd.h_win.margin.top);
+  
+  gd.h_win.min_height = gd.uparams->getLong( "cidd.horiz_min_height", 440);
+  gd.h_win.min_width = gd.uparams->getLong( "cidd.horiz_min_width", 580);
+  gd.h_win.active = 1;
+  
+  gd.wsddm_mode  = gd.uparams->getLong( "cidd.wsddm_mode", 0);
+  gd.one_click_rhi  = gd.uparams->getLong( "cidd.one_click_rhi", 0);
+  gd.click_posn_rel_to_origin  = gd.uparams->getLong( "cidd.click_posn_rel_to_origin", 0);
+  gd.report_clicks_in_status_window = gd.uparams->getLong("cidd.report_clicks_in_status_window", 0);
+  gd.report_clicks_in_degM_and_nm = gd.uparams->getLong( "cidd.report_clicks_in_degM_and_nm", 0);
+  gd.magnetic_variation_deg = gd.uparams->getLong( "cidd.magnetic_variation_deg", 0);
+  gd.check_data_times = gd.uparams->getLong("cidd.check_data_times", 0);
+
+  gd.frame_label = gd.uparams->getString("cidd.horiz_frame_label", "Qucid");
+  
+  gd.status_info_file = gd.uparams->getString("cidd.status_info_file", ""); 
+
 }
