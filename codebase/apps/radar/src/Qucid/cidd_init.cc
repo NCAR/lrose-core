@@ -33,6 +33,7 @@
 
 #define CIDD_INIT    1
 #include "cidd.h"
+#include <algorithm>
 
 #define NUM_PARSE_FIELDS    64
 #define PARSE_FIELD_SIZE    1024
@@ -47,12 +48,9 @@ void init_data_space()
   int i,j,pid;
   int num_fields;
   int err_flag;
-  int default_setting;
   long param_text_len;
   long param_text_line_no;
-  time_t    clock;
   const char *param_text;
-  const char *demo_time;
   const char *resource;
   const char *field_str;
   char str_buf[128];   /* Space to build resource strings */
@@ -332,6 +330,8 @@ void init_data_space()
 
   // projections
   
+  gd.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
+     
   gd.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
   gd.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
   gd.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
@@ -465,6 +465,9 @@ void init_data_space()
   gd.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
   gd.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
   gd.stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
+  gd.climo_mode = gd.uparams->getString("cidd.climo_mode", "regular");
+  gd.temporal_rounding = gd.uparams->getLong("cidd.temporal_rounding", 300);
+  gd.movie_speed_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
 
   // copy movie info to other globals
 
@@ -479,6 +482,8 @@ void init_data_space()
   gd.movie.forecast_interval = gd.forecast_interval;
   gd.movie.past_interval = gd.past_interval;
   gd.movie.mr_stretch_factor = gd.stretch_factor;
+  gd.movie.round_to_seconds = gd.temporal_rounding;
+  gd.movie.display_time_msec = gd.movie_speed_msec;
 
   gd.movie.start_frame = 0;
   gd.movie.sweep_on = 0;
@@ -488,11 +493,12 @@ void init_data_space()
   gd.movie.last_frame = gd.movie.cur_frame;
 
   gd.movie.climo_mode = REGULAR_INTERVAL;
-  resource = gd.uparams->getString("cidd.climo_mode", "regular");
-  if(strncmp(resource,"daily",5) == 0 ) gd.movie.climo_mode = DAILY_INTERVAL;
-  if(strncmp(resource,"yearly",6) == 0 ) gd.movie.climo_mode = YEARLY_INTERVAL;
-  gd.check_clipping = gd.uparams->getLong("cidd.check_clipping", 0);
+  if(strncmp(gd.climo_mode,"daily", 5) == 0) gd.movie.climo_mode = DAILY_INTERVAL;
+  if(strncmp(gd.climo_mode,"yearly",6) == 0) gd.movie.climo_mode = YEARLY_INTERVAL;
 
+  // clipping for rendering
+  gd.check_clipping = gd.uparams->getLong("cidd.check_clipping", 0);
+  
   /* Toggle for displaying the analog clock */
   gd.max_time_list_span = gd.uparams->getLong("cidd.max_time_list_span", 365);
 
@@ -513,39 +519,45 @@ void init_data_space()
 
   /* Toggle for enabling a Save Image Panel */
   // WARNING - ALLOWS USERS SHELL ACCESS
-  gd.enable_save_image_panel = gd.uparams->getLong("cidd.enable_save_image_panel", 0);
-
+  gd.enable_save_image_panel =
+    gd.uparams->getLong("cidd.enable_save_image_panel", 0);
+  
   /* Set the time to display on the analog clock */
   gd.draw_clock_local = gd.uparams->getLong("cidd.draw_clock_local", 0);
-
+  
   /* Use local times for Product timestamps and user input widgets. */
   gd.use_local_timestamps = gd.uparams->getLong("cidd.use_local_timestamps", 0);
-
+  
   /* Toggle for displaying the height Selector in Right Margin */
   gd.show_height_sel = gd.uparams->getLong("cidd.show_height_sel", 1);
 
   /* Use cosine correction for computing range in polar data */
   if (gd.use_cosine_correction < 0) {
     // not set on command line
-    gd.use_cosine_correction = gd.uparams->getLong("cidd.use_cosine", 1);
+    int use_cosine = gd.uparams->getLong("cidd.use_cosine", 1); // legacy
+    gd.use_cosine_correction =
+      gd.uparams->getLong("cidd.use_cosine_correction", use_cosine);
   }
 
-  clock = time(0);    /* get current time */
-  gd.movie.round_to_seconds = gd.uparams->getLong("cidd.temporal_rounding", 300);
+  // IF demo_time is set in the params
+  // Set into Archive Mode at the indicated time.
 
-  /* IF this string is present in the params - Set into Archive Mode at the indicated time. */
-  demo_time = gd.uparams->getString("cidd.demo_time","");
-
-  gd.gather_data_mode = gd.uparams->getLong("cidd.gather_data_mode",CLOSEST_TO_FRAME_CENTER);
-	 
+  gd.demo_time = gd.uparams->getString("cidd.demo_time", "");
+  
+  gd.gather_data_mode = gd.uparams->getLong("cidd.gather_data_mode",
+                                            CLOSEST_TO_FRAME_CENTER);
+  
   /* If demo time param is not set and command line option hasn't set archive mode */
-  if((int)strlen(demo_time) < 8 && (gd.movie.mode != ARCHIVE_MODE) ) { /* LIVE MODE */
+
+  if(strlen(gd.demo_time) < 8 &&
+     (gd.movie.mode != ARCHIVE_MODE) ) { /* REALTIME MODE */
     gd.movie.mode = REALTIME_MODE;
     gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
     gd.coord_expt->time_seq_num++;
     gd.forecast_mode = 0;
-
+    
     /* set the first index's time based on current time  */
+    time_t clock = time(0);    /* get current time */
     gd.movie.start_time = (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval * 60.0));
     gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
     gd.movie.demo_time = 0; // Indicated REAL-TIME is Native
@@ -553,14 +565,14 @@ void init_data_space()
     UTIMunix_to_date(gd.movie.start_time,&temp_utime);
     gd.movie.demo_mode = 0;
 
-  } else {   /* DEMO MODE */
-
+  } else {   /* ARCHIVE MODE */
+    
     if(gd.movie.mode != ARCHIVE_MODE) { /* if not set by command line args */
       gd.movie.mode = ARCHIVE_MODE;     /* time_series */
       gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
       gd.coord_expt->time_seq_num++;
 
-      parse_string_into_time(demo_time,&temp_utime);
+      parse_string_into_time(gd.demo_time,&temp_utime);
       UTIMdate_to_unix(&temp_utime);
       /* set the first index's time  based on indicated time */
       gd.movie.start_time = temp_utime.unix_time;
@@ -569,7 +581,6 @@ void init_data_space()
 	 
     /* Adjust the start time downward to the nearest round interval seconds */
     gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
-
 
     if(gd.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
       // Offset movie frame by 1/2 frame interval so that interest time
@@ -586,15 +597,13 @@ void init_data_space()
     gd.movie.cur_frame = 0;
   }
 
-  gd.movie.movie_on = gd.uparams->getLong("cidd.movie_on",0);
+  reset_time_points(); // reset movie
 
-  gd.movie.display_time_msec = gd.uparams->getLong("cidd.movie_speed_msec", 75);
+  gd.image_fill_threshold =
+    gd.uparams->getLong("cidd.image_fill_threshold", 120000);
 
-  reset_time_points();
-
-  gd.image_fill_threshold = gd.uparams->getLong("cidd.image_fill_threshold",    120000);
-
-  gd.dynamic_contour_threshold = gd.uparams->getLong("cidd.dynamic_contour_threshold",    160000);
+  gd.dynamic_contour_threshold =
+    gd.uparams->getLong("cidd.dynamic_contour_threshold", 160000);
 
   gd.image_inten = gd.uparams->getDouble("cidd.image_inten", 0.8);
   gd.inten_levels = gd.uparams->getLong("cidd.inten_levels", 32);
@@ -602,80 +611,119 @@ void init_data_space()
 
   gd.data_timeout_secs = gd.uparams->getLong("cidd.data_timeout_secs", 10);
 
-  gd.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
+  // data compression from server
+  
+  gd.request_compressed_data =
+    gd.uparams->getLong("cidd.request_compressed_data",0);
+  gd.request_gzip_vol_compression =
+    gd.uparams->getLong("cidd.request_gzip_vol_compression",0);
+
+  // output image file names
+  
+  gd.add_frame_num_to_filename =
+    gd.uparams->getLong("cidd.add_frame_num_to_filename",1);
+
+  gd.add_button_name_to_filename =
+    gd.uparams->getLong("cidd.add_button_name_to_filename",0);
+
+  gd.add_height_to_filename =
+    gd.uparams->getLong("cidd.add_height_to_filename",0);
      
-  gd.request_compressed_data = gd.uparams->getLong("cidd.request_compressed_data",0);
-  gd.request_gzip_vol_compression = gd.uparams->getLong("cidd.request_gzip_vol_compression",0);
+  gd.add_frame_time_to_filename =
+    gd.uparams->getLong("cidd.add_frame_time_to_filename",1);
      
-  gd.add_frame_num_to_filename = gd.uparams->getLong("cidd.add_frame_num_to_filename",1);
-  gd.add_button_name_to_filename = gd.uparams->getLong("cidd.add_button_name_to_filename",0);
+  gd.add_gen_time_to_filename =
+    gd.uparams->getLong("cidd.add_gen_time_to_filename",0);
      
-  gd.add_height_to_filename = gd.uparams->getLong("cidd.add_height_to_filename",0);
+  gd.add_valid_time_to_filename =
+    gd.uparams->getLong("cidd.add_valid_time_to_filename",0);
      
-  gd.add_frame_time_to_filename = gd.uparams->getLong("cidd.add_frame_time_to_filename",1);
-     
-  gd.add_gen_time_to_filename = gd.uparams->getLong("cidd.add_gen_time_to_filename",0);
-     
-  gd.add_valid_time_to_filename = gd.uparams->getLong("cidd.add_valid_time_to_filename",0);
-     
-  gd.font_display_mode = gd.uparams->getLong("cidd.font_display_mode",1);
+  gd.font_display_mode =
+    gd.uparams->getLong("cidd.font_display_mode",1);
 
   gd.label_contours = gd.uparams->getLong("cidd.label_contours",1);
 
-  default_setting =  1;
-  gd.top_margin_render_style = gd.uparams->getLong("cidd.top_margin_render_style",default_setting);
+  // margins
+  
+  gd.top_margin_render_style =
+    gd.uparams->getLong("cidd.top_margin_render_style", 1);
 
-  default_setting =  2;
-  if(gd.html_mode || gd.movie.num_frames < 3 ) default_setting =  1;
-  gd.bot_margin_render_style = gd.uparams->getLong("cidd.bot_margin_render_style",default_setting);
+  if(gd.html_mode || gd.movie.num_frames < 3 ) {
+    gd.bot_margin_render_style =
+      gd.uparams->getLong("cidd.bot_margin_render_style", 1);
+  } else {
+    gd.bot_margin_render_style =
+      gd.uparams->getLong("cidd.bot_margin_render_style", 2);
+  }
 
+  // field menu - number of columns
+  
   gd.num_field_menu_cols = gd.uparams->getLong("cidd.num_field_menu_cols",0);
 
+  // caching zooms to go back to
+  
   gd.num_cache_zooms = gd.uparams->getLong("cidd.num_cache_zooms",1);
-  if(gd.num_cache_zooms > MAX_CACHE_PIXMAPS)
-    gd.num_cache_zooms = MAX_CACHE_PIXMAPS ;
-  if(gd.num_cache_zooms < 1) gd.num_cache_zooms = 1 ;
+  if(gd.num_cache_zooms > MAX_CACHE_PIXMAPS) {
+    gd.num_cache_zooms = MAX_CACHE_PIXMAPS;
+  }
+  if(gd.num_cache_zooms < 1) {
+    gd.num_cache_zooms = 1 ;
+  }
+
   gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
   gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
+  
+  gd.num_zoom_levels =  gd.uparams->getLong("cidd.num_zoom_levels",1);
+  gd.start_zoom_level =  gd.uparams->getLong("cidd.start_zoom_level",1);
 
-  gd.h_win.num_zoom_levels =  gd.uparams->getLong("cidd.num_zoom_levels",1);
   if(gd.html_mode ==0) {
-    gd.h_win.zoom_level =  gd.uparams->getLong("cidd.start_zoom_level",1) -1;
-
+    gd.h_win.zoom_level = gd.start_zoom_level;
+    gd.h_win.num_zoom_levels = gd.num_zoom_levels;
     if(gd.h_win.zoom_level < 0) gd.h_win.zoom_level = 0;
-    if(gd.h_win.zoom_level > gd.h_win.num_zoom_levels) gd.h_win.zoom_level = gd.h_win.num_zoom_levels -1;
+    if(gd.h_win.zoom_level > gd.h_win.num_zoom_levels) {
+      gd.h_win.zoom_level = gd.h_win.num_zoom_levels -1;
+    }
     gd.h_win.start_zoom_level = gd.h_win.zoom_level;
   }
 
-  gd.h_win.zmin_x = (double *)  calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmax_x = (double *)  calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmin_y = (double *)  calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmax_y = (double *)  calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+  gd.h_win.zmin_x =
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+  gd.h_win.zmax_x =
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+  gd.h_win.zmin_y =
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
+  gd.h_win.zmax_y =
+    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
 
   gd.zoom_limits_in_latlon =  gd.uparams->getLong("cidd.zoom_limits_in_latlon",0);
 
-  switch(gd.display_projection) {
-    case Mdvx::PROJ_FLAT:
-      gd.h_win.min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-1000);
-      gd.h_win.max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",1000);
-      gd.h_win.min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-1000);
-      gd.h_win.max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",1000);
-      break;
+  gd.domain_limit_min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-10000);
+  gd.domain_limit_max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",10000);
+  gd.domain_limit_min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-10000);
+  gd.domain_limit_max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",10000);
+  
+  if (gd.display_projection == Mdvx::PROJ_LATLON) {
+    gd.h_win.min_x = max(gd.domain_limit_min_x, -360.0);
+    gd.h_win.max_x = min(gd.domain_limit_max_x, 360.0);
+    gd.h_win.min_y = max(gd.domain_limit_min_y, -90.0);
+    gd.h_win.max_y = min(gd.domain_limit_max_y, 90.0);
+  } else {
+    gd.h_win.min_x = gd.domain_limit_min_x;
+    gd.h_win.max_x = gd.domain_limit_max_x;
+    gd.h_win.min_y = gd.domain_limit_min_y;
+    gd.h_win.max_y = gd.domain_limit_max_y;
+  }
+  
+  gd.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
+  gd.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
+  gd.start_ht = gd.uparams->getDouble("cidd.start_ht", 0.0);
 
-    case Mdvx::PROJ_LATLON:
-      gd.h_win.min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-360);
-      gd.h_win.max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",360);
-      gd.h_win.min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-90);
-      gd.h_win.max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",90);
-      break;
+  gd.h_win.min_ht = gd.min_ht;
+  gd.h_win.max_ht = gd.max_ht;
 
-    case Mdvx::PROJ_LAMBERT_CONF:
-    default:
-      gd.h_win.min_x = gd.uparams->getDouble("cidd.domain_limit_min_x",-10000);
-      gd.h_win.max_x = gd.uparams->getDouble("cidd.domain_limit_max_x",10000);
-      gd.h_win.min_y = gd.uparams->getDouble("cidd.domain_limit_min_y",-10000);
-      gd.h_win.max_y = gd.uparams->getDouble("cidd.domain_limit_max_y",10000);
-
+  // Otherwise set in the command line arguments
+  if(gd.num_render_heights == 0) {
+    gd.h_win.cur_ht = gd.start_ht;
   }
 
   // Fix out of order limits.
@@ -723,7 +771,7 @@ void init_data_space()
   double max_delta_y = gd.h_win.max_y - gd.h_win.min_y;
 
   for(i=0; i < gd.h_win.num_zoom_levels; i++) {
-
+    
     sprintf(str_buf, "cidd.level%d_min_xkm", i+1);
     double minx = gd.uparams->getDouble(str_buf,-200.0/(i+1));
 
@@ -790,7 +838,6 @@ void init_data_space()
       gd.h_win.zmax_y[i] = gd.h_win.max_y;
       gd.h_win.zmin_y[i] =  gd.h_win.max_y - delta_y;
     }
-
 
     if(gd.aspect_ratio <= 0.0) gd.aspect_ratio = fabs(delta_x/delta_y);
 
@@ -946,14 +993,6 @@ void init_data_space()
     exit(-1);
   } 
 
-  gd.h_win.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
-  gd.h_win.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
-
-  // Otherwise set in the command line arguments
-  if( gd.num_render_heights == 0) {
-    gd.h_win.cur_ht = gd.uparams->getDouble("cidd.start_ht", 0.5);
-  }
-
   gd.v_win.zmin_x = (double *)  calloc(sizeof(double), 1);
   gd.v_win.zmax_x = (double *)  calloc(sizeof(double), 1);
   gd.v_win.zmin_y = (double *)  calloc(sizeof(double), 1);
@@ -978,19 +1017,24 @@ void init_data_space()
   // Load Wind Rendering preferences.
   gd.ideal_x_vects = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
   gd.ideal_y_vects = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
-  gd.head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
-  gd.shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 25);
-  gd.head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
-
+  gd.wind_head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
+  gd.wind_head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
+  gd.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 25);
+  
   /* Initialize Extra features data */
-  gd.layers.wind_vectors = gd.uparams->getLong("cidd.all_winds_on", 1);
+  gd.all_winds_on = gd.uparams->getLong("cidd.all_winds_on", 1);
+  gd.layers.wind_vectors = gd.all_winds_on;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
-
-  gd.layers.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
-  gd.layers.wind_time_scale_interval =
+  
+  gd.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
+  gd.layers.wind_mode = gd.wind_mode;
+  
+  gd.wind_time_scale_interval =
     gd.uparams->getDouble("cidd.wind_time_scale_interval", 10.0);
+  gd.layers.wind_time_scale_interval = gd.wind_time_scale_interval;
 
-  gd.layers.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
+  gd.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
+  gd.layers.wind_scaler = gd.wind_scaler;
 
   gd.legends.range = gd.uparams->getLong("cidd.range_rings", 0) ? RANGE_BIT : 0;
   int plot_azimuths = gd.uparams->getLong("cidd.azmith_lines", 0);

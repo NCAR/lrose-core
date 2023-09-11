@@ -558,9 +558,19 @@ void Qucid::_initGlobals()
   gd.range_ring_for_radar_only = 0;
   gd.domain_follows_data = 0; 
   gd.show_height_sel = 0;
+
   gd.use_cosine_correction = -1; 
   gd.latlon_mode = 0;    
   gd.zoom_limits_in_latlon = 0; 
+
+  gd.domain_limit_min_x = 0;
+  gd.domain_limit_max_x = 0;
+  gd.domain_limit_min_y = 0;
+  gd.domain_limit_max_y = 0;
+  gd.min_ht = 0;
+  gd.max_ht = 0;
+  gd.start_ht = 0;
+  
   gd.label_contours = 0; 
   gd.top_margin_render_style = 0; 
   gd.bot_margin_render_style = 0; 
@@ -602,8 +612,13 @@ void Qucid::_initGlobals()
 				                 
   gd.ideal_x_vects = 0;
   gd.ideal_y_vects = 0;
-  gd.head_size = 0;     
-  gd.shaft_len = 0;     
+  gd.wind_head_size = 0;     
+  gd.wind_head_angle = 0;     
+  gd.barb_shaft_len = 0;
+  gd.all_winds_on = 0;
+  gd.wind_mode = 0;
+  gd.wind_time_scale_interval = 0;
+  gd.wind_scaler = 0;
 
   gd.num_colors = 0;       
   gd.num_draw_colors = 0;  
@@ -641,7 +656,6 @@ void Qucid::_initGlobals()
   MEM_zero(gd.field_index);
   gd.movieframe_time_mode = 0;  
                                
-  gd.head_angle = 0;     
   gd.image_inten = 0;    
   gd.data_inten = 0;     
   gd.aspect_correction = 0; 
@@ -674,7 +688,10 @@ void Qucid::_initGlobals()
   gd.forecast_interval = 0;
   gd.past_interval = 0;
   gd.stretch_factor = 0;
-
+  gd.climo_mode = NULL;
+  gd.temporal_rounding = 0;
+  gd.movie_speed_msec = 0;
+  
   gd.argv = NULL;             
   gd.orig_wd = NULL;           
   gd.db_data = NULL;           

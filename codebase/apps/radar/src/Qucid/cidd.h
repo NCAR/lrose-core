@@ -233,7 +233,19 @@ struct    Global_data {
   int    show_height_sel;// 1 = Show Vertical Height selector in Right Margin
   int    use_cosine_correction; // use cosine correction for computing range in polar data
   int    latlon_mode;    // 0 = Report decimal degrees, 1 = deg,min,sec  
+  int    num_zoom_levels; // number of zoom levels available
+  int    start_zoom_level; // starting zoom level - 1-based
   int    zoom_limits_in_latlon; // 1 = set zoom limits in lat/lon degrees instead of km
+
+  double domain_limit_min_x;
+  double domain_limit_max_x;
+  double domain_limit_min_y;
+  double domain_limit_max_y;
+  
+  double min_ht;
+  double max_ht;
+  double start_ht;
+  
   int    label_contours; // 0 = No numeric Labels, 1 = Add numeric value labels
   int    top_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc, 3 = None.
   int    bot_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc
@@ -282,8 +294,13 @@ struct    Global_data {
   // WIND Vector & barb preferences.
   int ideal_x_vects;
   int ideal_y_vects;
-  int head_size;     // Vectors
-  int shaft_len;     // Wind barbs 
+  int wind_head_size;     // Vectors
+  double wind_head_angle;     // Wind barb head angle.
+  int barb_shaft_len;     // Wind barbs
+  int all_winds_on;
+  int wind_mode;
+  double wind_time_scale_interval;
+  int wind_scaler;
 
   // Run-time counters and indicies
   int    num_colors;       // Total colors allocated 
@@ -326,7 +343,6 @@ struct    Global_data {
   // 0: use the end time for file name
   // 1: use the mid time for file name
 
-  double head_angle;     // Wind barb head angle.
   double image_inten;    // Image color intensity 
   double data_inten;     // Data Cell color intensity 
   double aspect_correction; // Aspect ratio correction for LAT-LON mode 
@@ -362,6 +378,13 @@ struct    Global_data {
   double forecast_interval;
   double past_interval;
   double stretch_factor;
+  const char *climo_mode;
+  int temporal_rounding;
+  int movie_speed_msec;
+
+  // start time etc
+
+  const char *demo_time;
   
   // Files, names, Commands and other text parameters
   char **argv;             // Command line arguments

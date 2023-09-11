@@ -286,8 +286,8 @@ int render_vert_wind_vectors( Drawable xid)
 			}
 
                         XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x3,y3,x2,y2,
-								gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-								gd.head_angle * DEG_TO_RAD);
+								gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+								gd.wind_head_angle * DEG_TO_RAD);
 
 		    break;
 
@@ -308,7 +308,7 @@ int render_vert_wind_vectors( Drawable xid)
                     case BARB:        /* Use barbs */
 
 			XUDRwind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,
-				      x1,y1,uspeed,vspeed,gd.shaft_len);
+				      x1,y1,uspeed,vspeed,gd.barb_shaft_len);
                     break;
 
 		    case VECTOR: /* Use vectors - originating at the grid point  */
@@ -327,8 +327,8 @@ int render_vert_wind_vectors( Drawable xid)
 			}
 
                         XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,
-								gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-								gd.head_angle * DEG_TO_RAD);
+                                  gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+                                  gd.wind_head_angle * DEG_TO_RAD);
 
 		    break;
 
@@ -360,15 +360,15 @@ int render_vert_wind_vectors( Drawable xid)
 			if (num_ticks <= 0) num_ticks = 1;
 			XUDRtickarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,
 			              x3,y3,x2,y2,
-						  gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-						  gd.head_angle * DEG_TO_RAD,num_ticks,4);
+						  gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+						  gd.wind_head_angle * DEG_TO_RAD,num_ticks,4);
 
 		    break;
 
                     case LABELEDBARB:        /* Use Labeled barbs */
 
 			XUDRwind_barb_labeled(gd.dpy,xid,gd.layers.wind[k].color->gc,
-				      x1,y1,uspeed,vspeed,gd.shaft_len);
+				      x1,y1,uspeed,vspeed,gd.barb_shaft_len);
                     break;
 
 		    case METBARB: /* Use Meterologists Labeled barbs */
@@ -393,17 +393,17 @@ int render_vert_wind_vectors( Drawable xid)
 			wp_lat += ((pt_dist - total_dist)/gd.h_win.route.seg_length[wpindex]) * gd.h_win.route.y_world[wpindex +1];
 
                         XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                          uspeed,vspeed,gd.shaft_len,TENS_ONLY_LABEL,wp_lat);
+                                          uspeed,vspeed,gd.barb_shaft_len,TENS_ONLY_LABEL,wp_lat);
                     break;
 
 		    case BARB_SH: /* Use S. Hemisphere barbs */
                         XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                          uspeed,vspeed,gd.shaft_len,0,-1.0);
+                                          uspeed,vspeed,gd.barb_shaft_len,0,-1.0);
                     break;
 
 		    case LABELEDBARB_SH: /* Use S. Hemisphere labeled barbs */
                         XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                          uspeed,vspeed,gd.shaft_len,ROUND10_LABEL,-1.0);
+                                          uspeed,vspeed,gd.barb_shaft_len,ROUND10_LABEL,-1.0);
                     break;
  
                 }
@@ -442,8 +442,8 @@ int render_vert_wind_vectors( Drawable xid)
         y2 = y1;
      
         XUDRarrow(gd.dpy,xid,gd.layers.wind[0].color->gc,x1,y1,x2,y2,
-				gd.head_size + (3 * (gd.layers.wind[0].line_width -1)),
-				gd.head_angle * DEG_TO_RAD);
+				gd.wind_head_size + (3 * (gd.layers.wind[0].line_width -1)),
+				gd.wind_head_angle * DEG_TO_RAD);
 
         sprintf(label,"%g %s (W * %g)",speed,gd.layers.wind[0].units_label,w_scale_factor);
         font = choose_font(label,((x2 -x1) * 5), gd.v_win.margin.top,&xmid,&ymid);

@@ -312,8 +312,8 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
                 /* Stop drawing winds when the features are more than
                  * 25 % of the size of the image */
                 if((abs(x2-x3) < width/4) && (abs(y2-y3) < height/4))
-                XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x3,y3,x2,y2,gd.head_size +
-						 (3 * (gd.layers.wind[k].line_width -1)) ,gd.head_angle * DEG_TO_RAD);
+                XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x3,y3,x2,y2,gd.wind_head_size +
+						 (3 * (gd.layers.wind[k].line_width -1)) ,gd.wind_head_angle * DEG_TO_RAD);
               break;
 
               case TUFT: /* Use tufts */
@@ -329,7 +329,7 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
 
               case BARB: /* Use barbs */
 
-                XUDRwind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.shaft_len);
+                XUDRwind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.barb_shaft_len);
               break;
 
               case VECTOR: /* Use vectors */
@@ -339,8 +339,8 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
                 /* Stop drawing winds when the features are more than
                  * 25 % of the size of the image */
                 if((abs(x2-x1) < width/4) && (abs(y2-y1) < height/4))
-                    XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,gd.head_size +
-							 (3 * (gd.layers.wind[k].line_width -1)) ,gd.head_angle * DEG_TO_RAD);
+                    XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,gd.wind_head_size +
+							 (3 * (gd.layers.wind[k].line_width -1)) ,gd.wind_head_angle * DEG_TO_RAD);
               break;
 
               case TICKVECTOR: /* Use vectors with ticks */
@@ -352,13 +352,13 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
                  * 25 % of the size of the image */
                 if((abs(x2-x1) < width/4) && (abs(y2-y1) < height/4))
                     XUDRtickarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,
-                        gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-						gd.head_angle * DEG_TO_RAD,num_ticks,4);
+                        gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+						gd.wind_head_angle * DEG_TO_RAD,num_ticks,4);
               break;
 
               case LABELEDBARB: /* Use Labeled barbs */
 
-                XUDRwind_barb_labeled(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.shaft_len);
+                XUDRwind_barb_labeled(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.barb_shaft_len);
               break;
 
               case METBARB: /* Use Meterologists Labeled barbs */
@@ -367,19 +367,19 @@ int render_rect_wind_grid(Drawable xid, int k, int font_index)
                 gd.proj.xy2latlon(km_x,km_y,lat,lon);
 
                 XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,TENS_ONLY_LABEL,lat);
+                                  uspeed,vspeed,gd.barb_shaft_len,TENS_ONLY_LABEL,lat);
               break;
 
               case BARB_SH: /* Use S. Hemisphere barbs */
 
                 XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,0,-1.0);
+                                  uspeed,vspeed,gd.barb_shaft_len,0,-1.0);
               break;
 
               case LABELEDBARB_SH: /* Use S. Hemisphere labeled  barbs */
 
                 XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,ROUND10_LABEL,-1.0);
+                                  uspeed,vspeed,gd.barb_shaft_len,ROUND10_LABEL,-1.0);
               break;
             }
         }  // is a plottable vector
@@ -517,7 +517,7 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
                 if((abs(x2-x3) < gd.h_win.img_dim.width/4) && 
 		   (abs(y2-y3) < gd.h_win.img_dim.height/4))
                     XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x2,y2,x3,y3,
-			      gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),gd.head_angle * DEG_TO_RAD);
+			      gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),gd.wind_head_angle * DEG_TO_RAD);
               break;
 
               case TUFT: /* Use tufts */
@@ -540,7 +540,7 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
               case BARB: /* Use barbs */
 		 // KLUDGE  - FIX ME
 		 // Warning - Gives BARB on GRID - NOT TRUE E-W 
-                 XUDRwind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.shaft_len);
+                 XUDRwind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.barb_shaft_len);
               break;
 
               case VECTOR: /* Use vectors */
@@ -564,8 +564,8 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
                 if((abs(x2-x1) < gd.h_win.img_dim.width/4) && 
 		   (abs(y2-y1) < gd.h_win.img_dim.height/4))
                      XUDRarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,
-							 gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-							 gd.head_angle * DEG_TO_RAD);
+							 gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+							 gd.wind_head_angle * DEG_TO_RAD);
               break;
 
               case TICKVECTOR: /* Use vectors with ticks */
@@ -590,35 +590,35 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
                 if((abs(x2-x1) < gd.h_win.img_dim.width/4) && 
 		   (abs(y2-y1) < gd.h_win.img_dim.height/4))
                     XUDRtickarrow(gd.dpy,xid,gd.layers.wind[k].color->gc,x1,y1,x2,y2,
-                        gd.head_size + (3 * (gd.layers.wind[k].line_width -1)),
-						gd.head_angle * DEG_TO_RAD,num_ticks,4);
+                        gd.wind_head_size + (3 * (gd.layers.wind[k].line_width -1)),
+						gd.wind_head_angle * DEG_TO_RAD,num_ticks,4);
               break;
 
               case LABELEDBARB: /* Use Labeled barbs */
 		 // KLUDGE  - FIX ME
 		 // Warning - Gives BARB on GRID - NOT TRUE E-W 
-                XUDRwind_barb_labeled(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.shaft_len);
+                XUDRwind_barb_labeled(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,uspeed,vspeed,gd.barb_shaft_len);
               break;
 
               case METBARB: /* Use Meterologists Labeled barbs */
 		 // KLUDGE  - FIX ME
 		 // Warning - Gives BARB on GRID - NOT TRUE E-W 
                  XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,TENS_ONLY_LABEL,lat);
+                                  uspeed,vspeed,gd.barb_shaft_len,TENS_ONLY_LABEL,lat);
               break;
 
               case BARB_SH: /* Use S. Hemisphere barbs */
 		 // KLUDGE  - FIX ME
 		 // Warning - Gives BARB on GRID - NOT TRUE E-W 
                 XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,0,-1.0);
+                                  uspeed,vspeed,gd.barb_shaft_len,0,-1.0);
               break;
 
               case LABELEDBARB_SH: /* Use S. Hemisphere labeled  barbs */
 		 // KLUDGE  - FIX ME
 		 // Warning - Gives BARB on GRID - NOT TRUE E-W 
                 XUDRmet_wind_barb(gd.dpy,xid,gd.layers.wind[k].color->gc,x1, y1,
-                                  uspeed,vspeed,gd.shaft_len,ROUND10_LABEL,-1.0);
+                                  uspeed,vspeed,gd.barb_shaft_len,ROUND10_LABEL,-1.0);
               break;
             }
         }  // is a plottable vector
