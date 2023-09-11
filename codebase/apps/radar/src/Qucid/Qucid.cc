@@ -651,11 +651,34 @@ void Qucid::_initGlobals()
   MEM_zero(gd.height_array);
   MEM_zero(gd.proj_param);
 
+  gd.origin_latitude = 0.0;
+  gd.origin_longitude = 0.0;
+
+  gd.reset_click_latitude = 0.0;
+  gd.reset_click_longitude = 0.0;
+  
+  gd.north_angle = 0.0;      // radar cart
+  gd.lambert_lat1 = 0.0;     // lambert
+  gd.lambert_lat2 = 0.0;     // lambert
+  gd.tangent_lat = 0.0;      // stereographic
+  gd.tangent_lon = 0.0;      // stereographic
+  gd.central_scale = 0.0;    // stereographic
+
+  gd.movie_on = 0;
+  gd.movie_magnify_factor = 0;
+  gd.time_interval = 0;
+  gd.frame_span = 0;
+  gd.starting_movie_frames = 0;
+  gd.reset_frames = 0;
+  gd.movie_delay = 0;
+  gd.forecast_interval = 0;
+  gd.past_interval = 0;
+  gd.stretch_factor = 0;
+
   gd.argv = NULL;             
   gd.orig_wd = NULL;           
   gd.db_data = NULL;           
   gd.db_name = NULL;           
-  gd.movie_frame_dir = NULL;   
   gd.frame_label = NULL;       
   gd.no_data_message = NULL;   
   gd.help_command = NULL;      

@@ -79,6 +79,7 @@ void init_data_space()
   gd.uparams->setPrintTdrp(true);
 
   // Load the Main parameters
+
   param_text_line_no = 0;
   param_text_len = 0;
   param_text = find_tag_text(gd.db_data,"MAIN_PARAMS",
@@ -90,21 +91,11 @@ void init_data_space()
   }
     
   // set_X_parameter_database(param_text); /* load the main parameter database*/
-
-
-  if(!gd.quiet_mode)
-    fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n", CIDD_VERSION, CIDD_UCOPYRIGHT);
-
-  if(!gd.run_once_and_exit)  PMU_auto_register("Initializing SHMEM");
-
-  init_shared();            /* Initialize Shared memory based communications */
-  if(!gd.run_once_and_exit)  PMU_auto_register("Parsing Config Sections");
-     
-  /* Initialize tha Process Mapper Functions */
-  if(!gd.run_once_and_exit)  PMU_auto_init(gd.app_name,gd.app_instance,PROCMAP_REGISTER_INTERVAL);
-
-  if(!gd.run_once_and_exit)  PMU_auto_register("Initializing data");
-
+  
+  if(!gd.quiet_mode) {
+    fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n",
+            CIDD_VERSION, CIDD_UCOPYRIGHT);
+  }
 
   gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
   gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
@@ -114,8 +105,6 @@ void init_data_space()
   gd.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
 
   gd.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
-
-  gd.movie.magnify_factor = gd.uparams->getDouble("cidd.movie_magnify_factor",1.0);
 
   gd.model_run_list_hours = gd.uparams->getLong("cidd.model_run_list_hours",24);
 
@@ -135,7 +124,6 @@ void init_data_space()
   }
 
   gd.html_mode = gd.uparams->getLong("cidd.html_mode", 0);
-  if(gd.html_mode) gd.movie.movie_on = 0;
   
   gd.run_once_and_exit = gd.uparams->getLong("cidd.run_once_and_exit",0);
   if(gd.run_once_and_exit) gd.html_mode = 1; 
@@ -173,6 +161,7 @@ void init_data_space()
   
   STRcopy(gd.h_win.image_dir, gd.image_dir, MAX_PATH_LEN);
   STRcopy(gd.v_win.image_dir, gd.image_dir, MAX_PATH_LEN);
+
   
   STRcopy(gd.h_win.image_fname, gd.horiz_image_fname, MAX_PATH_LEN);
   STRcopy(gd.h_win.image_command, gd.horiz_image_command, MAX_PATH_LEN);
@@ -323,17 +312,34 @@ void init_data_space()
     exit(-1);
   }
 
-  gd.h_win.origin_lat = gd.uparams->getDouble("cidd.origin_latitude", 39.8783);
-  gd.h_win.origin_lon = gd.uparams->getDouble("cidd.origin_longitude", -104.7568);
+  // origin latitude and longitude
+  
+  gd.origin_latitude = gd.uparams->getDouble("cidd.origin_latitude", 0.0);
+  gd.origin_longitude = gd.uparams->getDouble("cidd.origin_longitude", 0.0);
 
-  double north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
-  double lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
-  double lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
-  double tangent_lat = gd.uparams->getDouble("cidd.tangent_lat",90.0);
-  double tangent_lon = gd.uparams->getDouble("cidd.tangent_lon",0.0);
-  double central_scale = gd.uparams->getDouble("cidd.central_scale",1.0);
+  gd.h_win.origin_lat = gd.origin_latitude;
+  gd.h_win.origin_lon = gd.origin_longitude;
 
-  gd.proj_param[0] = north_angle; // flat projection is default
+  // click location on reset
+  
+  gd.reset_click_latitude =
+    gd.uparams->getDouble("cidd.reset_click_latitude", gd.origin_latitude);
+  gd.reset_click_longitude =
+    gd.uparams->getDouble("cidd.reset_click_longitude", gd.origin_longitude);
+
+  gd.h_win.reset_click_lat = gd.reset_click_latitude;
+  gd.h_win.reset_click_lon = gd.reset_click_longitude;
+
+  // projections
+  
+  gd.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
+  gd.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
+  gd.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
+  gd.tangent_lat = gd.uparams->getDouble("cidd.tangent_lat",90.0);
+  gd.tangent_lon = gd.uparams->getDouble("cidd.tangent_lon",0.0);
+  gd.central_scale = gd.uparams->getDouble("cidd.central_scale",1.0);
+
+  gd.proj_param[0] = gd.north_angle; // flat projection is default
 
   gd.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio",1.0);
   if (gd.aspect_ratio <= 0.0 && gd.debug) {
@@ -343,10 +349,6 @@ void init_data_space()
   gd.scale_units_per_km = gd.uparams->getDouble("cidd.units_per_km",1.0);
   gd.scale_units_label = gd.uparams->getString("cidd.scale_units_label", "km");
 
-  gd.h_win.reset_click_lon = gd.uparams->getDouble("cidd.reset_click_longitude",
-                                                    gd.h_win.origin_lon);
-  gd.h_win.reset_click_lat = gd.uparams->getDouble("cidd.reset_click_latitude", 
-                                                    gd.h_win.origin_lat);
 
 
   /* Establish the native projection type */
@@ -358,23 +360,23 @@ void init_data_space()
     gd.display_projection = Mdvx::PROJ_FLAT;
     if(gd.debug) {
       printf("Cartesian Projection - Origin at: %g, %g\n", 
-             gd.h_win.origin_lat,gd.h_win.origin_lon);
+             gd.origin_latitude,gd.origin_longitude);
     }
-    gd.proj.initFlat(gd.h_win.origin_lat,gd.h_win.origin_lon,north_angle);
+    gd.proj.initFlat(gd.origin_latitude,gd.origin_longitude,gd.north_angle);
 
   } else if (strncasecmp(resource,"LAT_LON",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LATLON;
     if(gd.debug) {
       printf("LATLON/ Cylindrical Projection - Origin at: %g, %g\n",
-             gd.h_win.origin_lat,gd.h_win.origin_lon);
+             gd.origin_latitude,gd.origin_longitude);
     }
 
   } else if (strncasecmp(resource,"LAMBERT",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
-    gd.proj_param[0] = lambert_lat1;
-    gd.proj_param[1] = lambert_lat2;
+    gd.proj_param[0] = gd.lambert_lat1;
+    gd.proj_param[1] = gd.lambert_lat2;
     if(lat1 == -90.0 || lat2 == -90.0) {
       fprintf(stderr,
               "Must set cidd.lambert_lat1 and cidd.lambert_lat2 parameters for LAMBERT projections\n");
@@ -382,51 +384,51 @@ void init_data_space()
     }
     if(gd.debug) {
       printf("LAMBERT Projection - Origin at: %g, %g Parallels at: %g, %g\n",
-             gd.h_win.origin_lat,gd.h_win.origin_lon,
-             lambert_lat1, lambert_lat2);
-      gd.proj.initLambertConf(gd.h_win.origin_lat,gd.h_win.origin_lon,
-                              lambert_lat1, lambert_lat2);
+             gd.origin_latitude,gd.origin_longitude,
+             gd.lambert_lat1, gd.lambert_lat2);
+      gd.proj.initLambertConf(gd.origin_latitude,gd.origin_longitude,
+                              gd.lambert_lat1, gd.lambert_lat2);
     }
 
   } else if (strncasecmp(resource,"STEREOGRAPHIC",13) == 0) {
 
     gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
-    gd.proj_param[0] = tangent_lat;
-    gd.proj_param[1] = tangent_lon;
-    gd.proj_param[2] = central_scale;
+    gd.proj_param[0] = gd.tangent_lat;
+    gd.proj_param[1] = gd.tangent_lon;
+    gd.proj_param[2] = gd.central_scale;
     if(gd.debug) {
       printf("Oblique Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.h_win.origin_lat,gd.h_win.origin_lon,
-             tangent_lat,tangent_lon);
+             gd.origin_latitude,gd.origin_longitude,
+             gd.tangent_lat,gd.tangent_lon);
     }
-    gd.proj.initStereographic(tangent_lat, tangent_lon, central_scale);
-    gd.proj.setOffsetOrigin(gd.h_win.origin_lat,gd.h_win.origin_lon);
+    gd.proj.initStereographic(gd.tangent_lat, gd.tangent_lon, gd.central_scale);
+    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
 
   } else if (strncasecmp(resource,"POLAR_STEREO",12) == 0) {
 
     gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
-    gd.proj_param[0] = tangent_lat;
-    gd.proj_param[1] = tangent_lon;
-    gd.proj_param[2] = central_scale;
+    gd.proj_param[0] = gd.tangent_lat;
+    gd.proj_param[1] = gd.tangent_lon;
+    gd.proj_param[2] = gd.central_scale;
     if(gd.debug) {
       printf("Polar Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.h_win.origin_lat,gd.h_win.origin_lon,
-             tangent_lat,tangent_lon);
+             gd.origin_latitude,gd.origin_longitude,
+             gd.tangent_lat,gd.tangent_lon);
     }
     gd.proj.initPolarStereo
-      (tangent_lon,
-       (Mdvx::pole_type_t) (tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
-       central_scale);
-    gd.proj.setOffsetOrigin(gd.h_win.origin_lat,gd.h_win.origin_lon);
+      (gd.tangent_lon,
+       (Mdvx::pole_type_t) (gd.tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
+       gd.central_scale);
+    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
 
   } else if (strncasecmp(resource,"MERCATOR",8) == 0) {
 
     gd.display_projection = Mdvx::PROJ_MERCATOR;
     if(gd.debug) {
       printf("MERCATOR Projection - Origin at: %g, %g\n",
-             gd.h_win.origin_lat,gd.h_win.origin_lon);
+             gd.origin_latitude,gd.origin_longitude);
     }
-    gd.proj.initMercator(gd.h_win.origin_lat,gd.h_win.origin_lon);
+    gd.proj.initMercator(gd.origin_latitude,gd.origin_longitude);
 
   } else {
 
@@ -439,39 +441,44 @@ void init_data_space()
   gd.h_win.last_page = -1;
   gd.v_win.last_page = -1;
 
-  /* fill in movie frame names & other info */
-  gd.movie_frame_dir = gd.uparams->getString("cidd.movie_frame_dir", "/tmp");
-
-  if(strncmp(gd.movie_frame_dir,"/tmp",4) != 0) {
-    fprintf(stderr,"NOTE: cidd.movie_frame_dir is a deprecated parameter.\n");
-    fprintf(stderr,"      Set cidd.image_dir instead.\n"); 
-  }
+  // movies
 
   pid = getpid();
   for(i=0; i < MAX_FRAMES; i++) {
     sprintf(gd.movie.frame[i].fname,
             "%s/cidd_im%d_%d.",
-            gd.movie_frame_dir, pid, i);
+            gd.image_dir, pid, i);
     gd.movie.frame[i].h_xid = 0;
     gd.movie.frame[i].v_xid = 0;
     gd.movie.frame[i].redraw_horiz = 1;
     gd.movie.frame[i].redraw_vert = 1;
   }
 
-  gd.movie.time_interval = gd.uparams->getDouble("cidd.time_interval",10.0);
-  gd.movie.frame_span = gd.uparams->getDouble("cidd.frame_span",gd.movie.time_interval);
+  gd.movie_on = gd.uparams->getLong("cidd.movie_on", 0);
+  gd.movie_magnify_factor = gd.uparams->getDouble("cidd.movie_magnify_factor",1.0);
+  gd.time_interval = gd.uparams->getDouble("cidd.time_interval",10.0);
+  gd.frame_span = gd.uparams->getDouble("cidd.frame_span", gd.time_interval);
+  gd.starting_movie_frames =
+    gd.uparams->getLong("cidd.starting_movie_frames", 12);
+  gd.reset_frames = gd.uparams->getLong("cidd.reset_frames", 0);
+  gd.movie_delay = gd.uparams->getLong("cidd.movie_delay",3000);
+  gd.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
+  gd.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
+  gd.stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
 
-  gd.movie.forecast_interval = gd.uparams->getDouble("cidd.forecast_interval", 0.0);
-  gd.movie.past_interval = gd.uparams->getDouble("cidd.past_interval", 0.0);
+  // copy movie info to other globals
 
-  gd.movie.reset_frames = gd.uparams->getLong("cidd.reset_frames", 0);
-  gd.movie.mr_stretch_factor = gd.uparams->getDouble("cidd.stretch_factor", 1.5);
-
-  // Handle legacy parameter for starting number of movie frames
-  gd.movie.num_frames = gd.uparams->getLong("cidd.starting_movie_frames",
-                                             gd.uparams->getLong("cidd.num_pixmaps", 5));
-
-  gd.movie.delay = gd.uparams->getLong("cidd.movie_delay",3000);
+  gd.movie.movie_on = gd.movie_on;
+  if(gd.html_mode) gd.movie.movie_on = 0;
+  gd.movie.magnify_factor = gd.movie_magnify_factor;
+  gd.movie.time_interval = gd.time_interval;
+  gd.movie.frame_span = gd.frame_span;
+  gd.movie.num_frames = gd.starting_movie_frames;
+  gd.movie.reset_frames = gd.reset_frames;
+  gd.movie.delay = gd.movie_delay;
+  gd.movie.forecast_interval = gd.forecast_interval;
+  gd.movie.past_interval = gd.past_interval;
+  gd.movie.mr_stretch_factor = gd.stretch_factor;
 
   gd.movie.start_frame = 0;
   gd.movie.sweep_on = 0;
@@ -952,8 +959,8 @@ void init_data_space()
   gd.v_win.zmin_y = (double *)  calloc(sizeof(double), 1);
   gd.v_win.zmax_y = (double *)  calloc(sizeof(double), 1);
 
-  gd.v_win.origin_lat = gd.h_win.origin_lat;
-  gd.v_win.origin_lon = gd.h_win.origin_lon;
+  gd.v_win.origin_lat = gd.origin_latitude;
+  gd.v_win.origin_lon = gd.origin_longitude;
   gd.v_win.min_x = gd.h_win.min_x;
   gd.v_win.max_x = gd.h_win.max_x;
   gd.v_win.min_y = gd.h_win.min_y;
@@ -980,7 +987,8 @@ void init_data_space()
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
 
   gd.layers.wind_mode = gd.uparams->getLong("cidd.wind_mode", 0);
-  gd.layers.wind_time_scale_interval = gd.uparams->getDouble("cidd.wind_time_scale_interval", 10.0);
+  gd.layers.wind_time_scale_interval =
+    gd.uparams->getDouble("cidd.wind_time_scale_interval", 10.0);
 
   gd.layers.wind_scaler = gd.uparams->getLong("cidd.wind_scaler", 3);
 
@@ -1513,4 +1521,20 @@ void init_data_space()
   gd.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
   gd.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
 
+  gd.uparams->setPrintTdrp(false);
+
+  // initialize procmap
+  
+  if(!gd.run_once_and_exit) {
+    PMU_auto_init(gd.app_name, gd.app_instance, PROCMAP_REGISTER_INTERVAL);
+  }
+
+  // initialize shared memory
+  
+  if(!gd.run_once_and_exit) {
+    PMU_auto_register("Initializing SHMEM");
+  }
+    
+  init_shared(); /* Initialize Shared memory based communications */
+  
 }

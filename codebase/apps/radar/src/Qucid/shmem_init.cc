@@ -37,54 +37,57 @@
 
 void init_shared()
 {
-    int coord_key;
 
-    coord_key = gd.uparams->getLong( "cidd.coord_key", 63500);
+  if((gd.coord_expt =
+      (coord_export_t *) ushm_create(gd.coord_key,
+                                     sizeof(coord_export_t),
+                                     0666)) == NULL) {
+    fprintf(stderr, "Couldn't create shared memory segment for Aux process communications\n");
+    exit(-1);
+  }
+  
+  memset(gd.coord_expt, 0, sizeof(coord_export_t));
 
-    if((gd.coord_expt = (coord_export_t *) ushm_create(coord_key, sizeof(coord_export_t), 0666)) == NULL) {
-        fprintf(stderr, "Couldn't create shared memory segment for Aux process communications\n");
-        exit(-1);
-    }
+  /* Initialize shared memory area for coordinate/selection communications */
 
-    memset(gd.coord_expt, 0, sizeof(coord_export_t));
+  gd.coord_expt->button =  0;
+  gd.coord_expt->selection_sec = 0;
+  gd.coord_expt->selection_usec = 0;
+  
+  gd.epoch_start = (time_t)
+    (gd.movie.start_time - (gd.movie.time_interval * 30.0));   
+  gd.epoch_end = (time_t)
+    (gd.movie.start_time +
+     (gd.movie.num_frames * gd.movie.time_interval * 60.0) -
+     (gd.movie.time_interval * 30.0)); 
 
-    /* Initialize shared memory area for coordinate/selection communications */
-    gd.coord_expt->button =  0;
-    gd.coord_expt->selection_sec = 0;
-    gd.coord_expt->selection_usec = 0;
+  gd.coord_expt->epoch_start = gd.epoch_start;
+  gd.coord_expt->epoch_end = gd.epoch_end;
+  
+  gd.coord_expt->time_min = gd.movie.frame[gd.movie.num_frames -1].time_start;
+  gd.coord_expt->time_max = gd.movie.frame[gd.movie.num_frames -1].time_end;
+  if(gd.movie.movie_on) {
+    gd.coord_expt->time_cent = gd.epoch_end; 
+  } else {
+    gd.coord_expt->time_cent = gd.coord_expt->time_min +
+      (gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
+  } 
+  gd.coord_expt->pointer_seq_num = 0;
 
-    gd.epoch_start = (time_t)  (gd.movie.start_time - (gd.movie.time_interval * 30.0));   
-    gd.epoch_end = (time_t) (gd.movie.start_time +
-               (gd.movie.num_frames * gd.movie.time_interval * 60.0) -
-	       (gd.movie.time_interval * 30.0)); 
+  gd.coord_expt->datum_latitude = gd.uparams->getDouble(
+          "cidd.origin_latitude", 39.8783);
+  gd.coord_expt->datum_longitude = gd.uparams->getDouble( 
+          "cidd.origin_longitude", -104.7568);
+  gd.coord_expt->pointer_x = 0.0;
+  gd.coord_expt->pointer_y = 0.0;
+  gd.coord_expt->pointer_lon = gd.coord_expt->datum_longitude;
+  gd.coord_expt->pointer_lat = gd.coord_expt->datum_latitude;
 
-    gd.coord_expt->epoch_start = gd.epoch_start;
-    gd.coord_expt->epoch_end = gd.epoch_end;
+  gd.coord_expt->focus_x = 0.0;
+  gd.coord_expt->focus_y = 0.0;
+  gd.coord_expt->focus_lat = gd.coord_expt->datum_latitude;
+  gd.coord_expt->focus_lon = gd.coord_expt->datum_longitude;
 
-    gd.coord_expt->time_min = gd.movie.frame[gd.movie.num_frames -1].time_start;
-    gd.coord_expt->time_max = gd.movie.frame[gd.movie.num_frames -1].time_end;
-    if(gd.movie.movie_on) {
-        gd.coord_expt->time_cent = gd.epoch_end; 
-    } else {
-      gd.coord_expt->time_cent = gd.coord_expt->time_min +
-	(gd.coord_expt->time_max - gd.coord_expt->time_min) / 2;
-    } 
-    gd.coord_expt->pointer_seq_num = 0;
-
-    gd.coord_expt->datum_latitude = gd.uparams->getDouble(
-                                    "cidd.origin_latitude", 39.8783);
-    gd.coord_expt->datum_longitude = gd.uparams->getDouble( 
-				      "cidd.origin_longitude", -104.7568);
-    gd.coord_expt->pointer_x = 0.0;
-    gd.coord_expt->pointer_y = 0.0;
-    gd.coord_expt->pointer_lon = gd.coord_expt->datum_longitude;
-    gd.coord_expt->pointer_lat = gd.coord_expt->datum_latitude;
-
-    gd.coord_expt->focus_x = 0.0;
-    gd.coord_expt->focus_y = 0.0;
-    gd.coord_expt->focus_lat = gd.coord_expt->datum_latitude;
-    gd.coord_expt->focus_lon = gd.coord_expt->datum_longitude;
-
-    gd.coord_expt->click_type = CIDD_RESET_CLICK;
+  gd.coord_expt->click_type = CIDD_RESET_CLICK;
 }
 

@@ -210,6 +210,7 @@ struct    Global_data {
   int    report_mode;   // 1 =  Do continious data value reporting
   int    close_popups;   // Close popups also when main window is closed.
   int    one_click_rhi;  // 1 =  Disallow Multiple segment Routes - First button release ends route.
+
   int    click_posn_rel_to_origin; // report posn relative to origin 
   int    report_clicks_in_status_window; // report click details in status window
   int    report_clicks_in_degM_and_nm; /* also report click locations in degM and nautical
@@ -321,6 +322,7 @@ struct    Global_data {
   int    db_data_len;       // Length of the data base 
   int    field_index[MAX_DATA_FIELDS];   // menu item to field number lookup table 
   int movieframe_time_mode;  // mode for determining output file name
+
   // 0: use the end time for file name
   // 1: use the mid time for file name
 
@@ -332,14 +334,40 @@ struct    Global_data {
   double scale_units_per_km; // For scaling distance to things other than km.
   double locator_margin_km;  // Max dist between requested point and station 
   double height_array[MAX_SECTS];  // Heights to render in HTML MODE
-  double proj_param[8];    // Projection parameters - Like Mdv
 
+  double origin_latitude;
+  double origin_longitude;
+  double reset_click_latitude;
+  double reset_click_longitude;
+
+  // projections
+  
+  double proj_param[8];    // Projection parameters - Like Mdv
+  double north_angle;      // radar cart
+  double lambert_lat1;     // lambert
+  double lambert_lat2;     // lambert
+  double tangent_lat;      // stereographic
+  double tangent_lon;      // stereographic
+  double central_scale;    // stereographic
+
+  // movies
+  
+  int movie_on;
+  double movie_magnify_factor;
+  double time_interval;
+  double frame_span;
+  int starting_movie_frames;
+  int reset_frames;
+  double movie_delay;
+  double forecast_interval;
+  double past_interval;
+  double stretch_factor;
+  
   // Files, names, Commands and other text parameters
   char **argv;             // Command line arguments
   const char *orig_wd;           // Original working directory
   const char *db_data;           // Pointer to the parameter data
   const char *db_name;           // The  parameter database filename 
-  const char *movie_frame_dir;   // The place to store movie frames 
   const char *frame_label;       // The default string to show on the frame 
   const char *no_data_message;   // The default message to display on no data conditions 
   const char *help_command;      // the command used to spawn A Help Viewer
