@@ -87,8 +87,8 @@ int   load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
                  
                 over[num_overlays]->color_name[0] = '\0';
                 for(i=6; i < num_fields; i++) {
-                    strncat(over[num_overlays]->color_name,cfield[i],NAME_LENGTH);
-                    strncat(over[num_overlays]->color_name," ",NAME_LENGTH);
+                    strncat(over[num_overlays]->color_name,cfield[i],NAME_LENGTH-1);
+                    strncat(over[num_overlays]->color_name," ",NAME_LENGTH-1);
                 }
                 over[num_overlays]->color_name[strlen(over[num_overlays]->color_name) -1] = '\0';
 
@@ -173,8 +173,8 @@ static void  load_rap_map(Overlay_t *ov, const char    *map_file_subdir)
     for(i=0; i < 32; i++)  cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
 
         // Add . to list to start.
-        strncpy(dirname,".,",2048);
-        strncat(dirname,map_file_subdir,2048);
+        strncpy(dirname,".,",1024);
+        strncat(dirname,map_file_subdir,1024);
 
         str_ptr = strtok(dirname,","); // Prime strtok
 
@@ -600,7 +600,7 @@ static void   load_shape_map(Overlay_t *ov, const char    *map_file_subdir)
     int    ret_stat;
     char   *str_ptr;
     char    name_base[1024];  /* Buffer for input names */
-    char    dirname[2048];   /* Buffer for directories to search */
+    char    dirname[4096];   /* Buffer for directories to search */
     char    name_buf[2048];  /* Buffer for input names */
     char    name_buf2[2048]; /* Buffer for input names */
     char    *map_buf;

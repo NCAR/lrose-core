@@ -38,7 +38,7 @@ void update_layered_field_panel();
 void update_layered_contour_panel();
 // void cont_field_proc(Menu menu, Menu_item item);
 
-static Color_change_t cs;
+// static Color_change_t cs;
 /*************************************************************************
  * SET_COLOR : Set a overlay element's color - Called through gcc_activate
  *    routine, via color mname message callbacks
@@ -606,10 +606,10 @@ void cont_layer_set_proc( Panel_item item, int value, Event *event)
  */
 void update_layered_contour_panel()
 {
-  int        field;
+  // int        field;
   char    string[NAME_LENGTH];
 
-  field = gd.layers.cont[gd.layers.cur_contour_layer].field;
+  // field = gd.layers.cont[gd.layers.cur_contour_layer].field;
 
   // xv_set(gd.page_pu->cont_st,PANEL_VALUE,
   //        gd.layers.cont[gd.layers.cur_contour_layer].active,NULL);

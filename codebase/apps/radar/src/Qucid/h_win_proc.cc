@@ -50,8 +50,10 @@ im_cache_proc(Panel_item item, int value, Event *event)
  */
 void set_height_label()
 {
+#ifdef NOTNOW
    const char *label = NULL;
    label = height_label();
+#endif
    // xv_set(gd.h_win_horiz_bw->cur_ht_msg, PANEL_LABEL_STRING, label, NULL);
 }
 
@@ -67,11 +69,15 @@ void show_cmd_menu(u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos = 0,y_pos = 0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
     char *label = NULL;   // What this button is called 
+#endif
     static int first_time = 1;
 
     if(value) {
@@ -88,8 +94,11 @@ void show_cmd_menu(u_int value)
       if(first_time) {
 	first_time = 0;
 	// calc the bit number of the widget 
+#ifdef NOTNOW
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_cmd_menu_bit) /
 			    log(2.0)));
+#endif
+        
 
 	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Far Left, below control panel */
@@ -128,11 +137,15 @@ void show_dpd_menu(u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos = 0,y_pos = 0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
     static int first_time = 1;
 
     if(value) {
@@ -148,14 +161,18 @@ void show_dpd_menu(u_int value)
 
       if(first_time) {
 	first_time = 0;
-	// calc the bit number of the widget 
+	// calc the bit number of the widget
+#ifdef NOTNOW
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_dpd_menu_bit) /
 			    log(2.0)));
+#endif
 
 	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Far Left, below control panel */
         // x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+#ifdef NOTNOW
         y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
         // xv_set(gd.data_pu->data_pu,
         //        XV_X,    p_x + x_pos, 
         //        XV_Y,    p_y + y_pos, 
@@ -189,11 +206,15 @@ void show_view_menu(u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW   
     int x_pos=0,y_pos=0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
     static int first_time = 1;
 
     if(value) {
@@ -210,14 +231,18 @@ void show_view_menu(u_int value)
       if(first_time) {
 	first_time = 0;
 	// calc the bit number of the widget 
+#ifdef NOTNOW
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_view_menu_bit) /
 			    log(2.0)));
+#endif
 
 
 	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         /* Position the popup Just Right of the data_pu, below control panel */
         // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+#ifdef NOTNOW
         y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
         // xv_set(gd.zoom_pu->zoom_pu,
         //        XV_X,    p_x + x_pos, 
         //        XV_Y,    p_y + y_pos,
@@ -253,12 +278,16 @@ void show_dpd_panel( u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0;
     int size,cp_size;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -277,8 +306,10 @@ void show_dpd_panel( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
 	    first_time = 0;
 	    // calc the bit number of the widget 
+#ifdef NOTNOW
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.show_dpd_panel_bit) /
 			    log(2.0)));
+#endif
 
 	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
             // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
@@ -454,12 +485,16 @@ void show_draw_panel( u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0;
     int size,cp_size;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -478,8 +513,10 @@ void show_draw_panel( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
 	    first_time = 0;
 	    // calc the bit number of the widget 
+#ifdef NOTNOW
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.set_draw_mode_bit) /
 			    log(2.0)));
+#endif
 
 	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
             // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;
@@ -535,11 +572,15 @@ void show_product_menu( u_int value)
     unsigned int nchild;
     int x=0,y=0;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0,y_pos=0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -547,8 +588,10 @@ void show_product_menu( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
              first_time = 0;
 	     // calc the bit number of the widget 
+#ifdef NOTNOW
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_prod_menu_bit) /
 			    log(2.0)));
+#endif
 
 	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
              // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
@@ -596,11 +639,15 @@ void show_map_menu( u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0,y_pos=0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -608,8 +655,10 @@ void show_map_menu( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
              first_time = 0;
 	     // calc the bit number of the widget 
+#ifdef NOTNOW
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_map_menu_bit) /
 			    log(2.0)));
+#endif
 
 	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
              // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
@@ -656,11 +705,15 @@ void show_past_time_menu( u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0,y_pos=0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -668,8 +721,10 @@ void show_past_time_menu( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
              first_time = 0;
 	     // calc the bit number of the widget 
+#ifdef NOTNOW
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_past_menu_bit) /
 			    log(2.0)));
+#endif
 
 	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
              // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
@@ -681,7 +736,9 @@ void show_past_time_menu( u_int value)
              /* take parents postion to get pos relative to root win */
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
+#ifdef NOTNOW
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
@@ -719,11 +776,15 @@ void show_forecast_time_menu( u_int value)
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos=0,y_pos=0;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -731,8 +792,10 @@ void show_forecast_time_menu( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
              first_time = 0;
 	     // calc the bit number of the widget 
+#ifdef NOTNOW
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_forecast_menu_bit) /
 			    log(2.0)));
+#endif
 
 	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
              // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
@@ -744,7 +807,9 @@ void show_forecast_time_menu( u_int value)
              /* take parents postion to get pos relative to root win */
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
+#ifdef NOTNOW
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
@@ -775,18 +840,22 @@ void show_forecast_time_menu( u_int value)
  */
 void show_bookmk_menu( u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos,y_pos;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -794,8 +863,10 @@ void show_bookmk_menu( u_int value)
 	if(first_time) { /* Only posistion this panel one time */
              first_time = 0;
 	     // calc the bit number of the widget 
+#ifdef NOTNOW
 	     choice_num =  (int)(rint(log((double) gd.menu_bar.show_bookmark_menu_bit) /
 			    log(2.0)));
+#endif
 
 	     // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
              // xid = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
@@ -807,7 +878,9 @@ void show_bookmk_menu( u_int value)
              /* take parents postion to get pos relative to root win */
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
+#ifdef NOTNOW
              y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.over_pu->over_pu,XV_WIDTH) + 10;
@@ -839,20 +912,26 @@ void show_bookmk_menu( u_int value)
  */
 void show_xsect_panel( u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
+#ifdef NOTNOW
     unsigned int display_width;
     unsigned int display_height;
+#endif
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos,y_pos;   /* Where to position window */
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
     static int first_time = 1;
 
     if(value) {
@@ -865,19 +944,25 @@ void show_xsect_panel( u_int value)
         XGetGeometry(gd.dpy,xid,&root,&x,&y,&width,&height,&border_width,&depth);
         /* take parents postion to get pos relative to root win */
         XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
+#ifdef NOTNOW
 	display_width = DisplayWidth(gd.dpy,0);
 	display_height = DisplayHeight(gd.dpy,0);
+#endif
 
         //XV_X,    p_x, /* On lower left corner of parent win */
         //XV_Y,    p_y + gd.h_win.can_dim.height - gd.v_win.can_dim.height, /* */
+#ifdef NOTNOW
 	x_pos = gd.uparams->getLong( "cidd.vert_default_x_pos", display_width  - gd.v_win.win_dim.width - 10);
 	y_pos = gd.uparams->getLong( "cidd.vert_default_y_pos", display_height - gd.v_win.win_dim.height - 30);
+#endif
 
       if(first_time) {
 	first_time = 0;
 	// calc the bit number of the widget 
+#ifdef NOTNOW
 	choice_num =  (int)(rint(log((double) gd.menu_bar.show_xsect_panel_bit) /
 			    log(2.0)));
+#endif
 
 	// label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
         //     xv_set(gd.v_win_v_win_pu->v_win_pu,
@@ -905,19 +990,23 @@ void show_xsect_panel( u_int value)
 void
 show_time_panel(u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_width,y_ht,cp_size;
     int size_x,size_y;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
 
     static int first_time = 1;
 
@@ -935,7 +1024,9 @@ show_time_panel(u_int value)
 	 if(first_time) { /* Position the popup on the lower right Once only */
 	    first_time = 0;
 	    // calc the bit number of the widget 
+#ifdef NOTNOW
 	    choice_num = (int)(rint(log((double) gd.menu_bar.show_time_panel_bit) / log(2.0)));
+#endif
 
 	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
             // cp_size = xv_get(gd.h_win_horiz_bw->cp,XV_HEIGHT);
@@ -976,7 +1067,9 @@ show_time_panel(u_int value)
 void show_status_panel( u_int value)
 {
     // int x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
+#ifdef NOTNOW
     int y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+#endif
     // xv_set(gd.status_pu->status_pu,
     //        XV_X, x_pos, 
     //        XV_Y, y_pos,
@@ -1000,19 +1093,23 @@ void show_status_panel( u_int value)
  */
 void show_grid_panel( u_int value)
 {
-    Window  xid;
+    Window  xid = 0;
     Window  root;     /* Root window ID of drawable */
     Window  parent;   /* Root window ID of drawable */
     Window  *children;
     unsigned int nchild;
     int x,y;            /* location of drawable relative to parent */
     int p_x,p_y;        /* parent window location */
+#ifdef NOTNOW
     int x_pos,y_pos;
     int size;
+#endif
     unsigned int    width,height;/* dimensions of Drawable */
     unsigned int    border_width,depth; /* dimensions of Drawable */
+#ifdef NOTNOW
     int  choice_num;
-    char *label;   // What this button is called 
+    char *label;   // What this button is called
+#endif
     void update_grid_config_gui();
     void update_wind_config_gui();
     void update_prod_config_gui();
@@ -1032,8 +1129,10 @@ void show_grid_panel( u_int value)
 	 if(first_time) { /* Position the popup Once only */
 	    first_time = 0;
 	    // calc the bit number of the widget 
+#ifdef NOTNOW
 	    choice_num =  (int)(rint(log((double) gd.menu_bar.show_grid_panel_bit) /
 			    log(2.0)));
+#endif
 
 	    // label = (char *)  xv_get(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,choice_num,NULL);
             // x_pos = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_WIDTH) + 10;

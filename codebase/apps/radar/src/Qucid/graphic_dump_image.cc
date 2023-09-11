@@ -48,9 +48,9 @@ static void dump_png(Drawable xid, Window w, const char *dir, const char *fname,
 
 const char * gen_image_fname(const char *prefix,met_record_t *mr)
 {
-  static char nbuf[2048];
-  char    tbuf[1024];
-  char    zbuf[1024];
+  static char nbuf[4096];
+  char    tbuf[2048];
+  char    zbuf[2048];
   struct tm res;
   time_t t;
   char *ptr;
@@ -169,9 +169,9 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
 {
 
   char cmd[MAX_PATH_LEN * 2];
-  char pathname[MAX_PATH_LEN];
+  char pathname[MAX_PATH_LEN * 4];
   const char *fname;
-  char dir[MAX_PATH_LEN];
+  char dir[MAX_PATH_LEN * 2];
   Window w;
   Drawable xid;
 
@@ -195,7 +195,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     default:
     case PLAN_VIEW:  /* The horizontal window */
       if(gd.generate_filename) {
-        strncpy(gd.h_win.image_fname,
+        STRcopy(gd.h_win.image_fname,
                 gen_image_fname(gd.image_horiz_prefix,gd.mrec[page]),
                 MAX_PATH_LEN);
         if(strstr(gd.h_win.image_fname,gd.image_ext) == NULL) { 
@@ -227,7 +227,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       sprintf(pathname,"%s/%s",dir,fname);
-      strncpy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
+      STRcopy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
 
 
       break;
@@ -235,7 +235,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
     case XSECT_VIEW:  /* The vertical cross section  window */
       if(gd.generate_filename) {
         strncpy(gd.v_win.image_fname,
-                gen_image_fname(gd.image_vert_prefix,gd.mrec[page]), MAX_PATH_LEN);
+                gen_image_fname(gd.image_vert_prefix,gd.mrec[page]), MAX_PATH_LEN - 2);
         if(strstr(gd.v_win.image_fname,gd.image_ext) == NULL) { 
           strncat(gd.v_win.image_fname,".",MAX_PATH_LEN-1);
           strncat(gd.v_win.image_fname,gd.image_ext,MAX_PATH_LEN-1);
@@ -256,8 +256,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
       sprintf(pathname,"%s/%s",dir,fname);
-      strncpy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH);
-
+      STRcopy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH - 1);
 
       dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;
@@ -305,7 +304,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
 static void dump_image_xml(const char *dir, const char *fname)
 {
   FILE *xfile = NULL;
-  char pathname_xml[MAX_PATH_LEN];
+  char pathname_xml[MAX_PATH_LEN*2];
   sprintf(pathname_xml,"%s/%s",dir,fname);
 
   // Make sure the output directory exists
@@ -316,7 +315,7 @@ static void dump_image_xml(const char *dir, const char *fname)
 
   // replace the image extension with .xml 
   char *ptr;
-  if((ptr = rindex(pathname_xml,'.')) != NULL) strncpy(ptr,".xml",4);
+  if((ptr = rindex(pathname_xml,'.')) != NULL) strncpy(ptr,".xml",5);
 
   if((xfile = fopen(pathname_xml,"w+")) == NULL) {
     perror("CIDD: Couldn't open file for dumping image Georeferencing info- Aborted\n");

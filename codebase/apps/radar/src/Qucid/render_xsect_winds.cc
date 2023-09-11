@@ -42,7 +42,7 @@ double w_scale_factor = 0.0;
 int render_vert_wind_vectors( Drawable xid)
 {
     int i,j,k;
-    int wd;              /* Dims of drawing canvas */
+    // int wd;              /* Dims of drawing canvas */
     int xmid,ymid;
     int nx,nz;
     int x1,y1,x2,y2,x3,y3;
@@ -175,7 +175,7 @@ int render_vert_wind_vectors( Drawable xid)
         miss_v =(unsigned short) mr_v->v_fhdr.missing_data_value;
         bad_u =(unsigned short) mr_u->v_fhdr.bad_data_value;
         bad_v =(unsigned short) mr_v->v_fhdr.bad_data_value;
-        wd = (int)(r_wd + 1.0);
+        // wd = (int)(r_wd + 1.0);
 
         /* get scalers for data  */
 	/* Distance is scaled in increments of wind_time_scale_interval (default = 10) minutes */

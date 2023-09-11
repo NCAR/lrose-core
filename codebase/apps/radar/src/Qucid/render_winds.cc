@@ -419,7 +419,7 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
     unsigned short    *ptr_v;
 
     met_record_t *mr_u;
-    met_record_t *mr_v;
+    // met_record_t *mr_v;
 
     /* get pointers to desired sections - Parent has checked for null */
     ptr_u = (unsigned short *) gd.layers.wind[k].wind_u->h_data;
@@ -432,7 +432,7 @@ int render_distorted_wind_grid(Drawable xid, int k, int font_index)
 
     // Get convienient pointers 
     mr_u = gd.layers.wind[k].wind_u;
-    mr_v = gd.layers.wind[k].wind_v;
+    // mr_v = gd.layers.wind[k].wind_v;
 
     u_miss = (unsigned short) gd.layers.wind[k].wind_u->h_fhdr.missing_data_value;
     v_miss = (unsigned short) gd.layers.wind[k].wind_v->h_fhdr.missing_data_value;

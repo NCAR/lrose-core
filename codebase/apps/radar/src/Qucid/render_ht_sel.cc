@@ -108,7 +108,8 @@ draw_height_selector(Display *dpy, Drawable xid, GC gc_axis, GC gc_ind,
     int 	xmid, ymid;
     int		y_max;
     int		label_height = 0,label_width = 0;
-    double      base,top,range;
+    double      base,top;
+    // double      range;
     double      value;
 
     met_record_t *mr;
@@ -122,7 +123,7 @@ draw_height_selector(Display *dpy, Drawable xid, GC gc_axis, GC gc_ind,
 
     base = mr->vert[0].min;
     top = mr->vert[mr->ds_fhdr.nz -1].max;
-    range = top - base;
+    // range = top - base;
 
 
     // Calc slope of function. 

@@ -31,6 +31,7 @@
 #define RENDER_LEGENDS
 
 #include "cidd.h"
+#include <toolsa/str.h>
 
 /**********************************************************************
  * VLEVEL_LABEL: Return an appropriate units label for a field's
@@ -69,10 +70,10 @@ const char *vlevel_label(Mdvx::field_header_t *fhdr)
 
 const char * field_label( met_record_t *mr)
 {
-    time_t  now;
+  // time_t  now;
     struct tm tms;
-    char   tlabel[256];
-    static char   label[256];
+    char   tlabel[1024];
+    static char label[2048];
 
     /* Convert to a string */
     if(gd.use_local_timestamps) {
@@ -81,7 +82,7 @@ const char * field_label( met_record_t *mr)
       strftime(tlabel,256,gd.label_time_format,gmtime_r(&mr->h_date.unix_time,&tms));
     }
 
-    now = time(NULL);
+    // now = time(NULL);
     label[0] = '\0';
      
     if(mr->composite_mode == FALSE) {
@@ -184,7 +185,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
     int    xmid,ymid;
     int    ht,wd;
     met_record_t *mr;        /* pointer to record for convienence */
-    char    label[LABEL_LEN];
+    char    label[LABEL_LEN * 8];
     Font    font;
 
     label[0] = '\0';
@@ -229,7 +230,7 @@ int draw_hwin_interior_labels( Drawable xid, int page, time_t start_time, time_t
     time_t now;
     struct tm *gmt;
     struct tm res;
-    char fmt_str[128];
+    char fmt_str[2048];
 
     now = time(0);
     if(gd.use_local_timestamps) {

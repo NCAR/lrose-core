@@ -50,7 +50,7 @@ static void draw_label_centered(Drawable xid, GC gc,
 void calc_local_over_coords()
 {
     int    i,j,l;
-    int    npoints;
+    // int    npoints;
     int    clip_flag;
     double lat,lon;
     double min_lat,max_lat;
@@ -175,7 +175,7 @@ void calc_local_over_coords()
 	    max_loc_x = DBL_MIN;
             min_loc_y = DBL_MAX;
 	    max_loc_y = DBL_MIN;
-            npoints = 0;
+            // npoints = 0;
             for(l=0; l < poly->num_points; l++) {
 		clip_flag = 0;
 		if(poly->lat[l] < min_lat || poly->lat[l] > max_lat)
@@ -262,7 +262,7 @@ void calc_local_over_coords()
         /* Convert all Poly Line Objects */
         for(j=0; j < ov->num_polylines; j++) {
             poly = ov->geo_polyline[j];
-            npoints = 0;
+            // npoints = 0;
 	    /* Reset the bounding box limits */
             min_loc_x = DBL_MAX;
 	    max_loc_x = DBL_MIN;

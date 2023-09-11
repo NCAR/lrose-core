@@ -29,6 +29,7 @@
 //////////////////////////////////////////////////////////
 
 #include <string>
+#include <toolsa/str.h>
 #include "Product.hh"
 
 //////////////////////////////////////////
@@ -305,7 +306,7 @@ int Product::getData(const time_t data_start_time,
 
   *spdbp_url = '\0'; // insure null termination
   *tmp_str = '\0';
-  strncpy(spdbp_url,_prodInfo.url,1024);
+  STRcopy(spdbp_url,_prodInfo.url,1024);
 
   // If using the tunnel - Add the tunnel_url to the Url as a name=value pair
   if(strlen(gd.http_tunnel_url) > URL_MIN_SIZE) { 
@@ -318,7 +319,7 @@ int Product::getData(const time_t data_start_time,
     }
 
     // Append the arguments to the end of the Url string
-    strncat(spdbp_url,tmp_str,1024); 
+    STRconcat(spdbp_url,tmp_str,1023); 
   }
 
   if (_active &&

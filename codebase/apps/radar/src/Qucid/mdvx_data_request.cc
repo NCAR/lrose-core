@@ -40,12 +40,12 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
     double min_lat,max_lat,min_lon,max_lon;
     double height = 0.0;
     int field_num;
-    char url[1024];
+    char url[2048];
     char tmp_str[1024];
-    char fieldname[128];
+    char fieldname[256];
     char label[128];
     char *ptr;
-    time_t delta;
+    // time_t delta;
 
 
     memset(fieldname,0,128);
@@ -88,7 +88,7 @@ int mdvx_request_horiz_data_plane(met_record_t *mr, time_t start_time,time_t end
      /* Off set the request time */
      start_time += (int) (mr->time_offset * 60);
      end_time += (int) (mr->time_offset * 60);
-     delta = gd.epoch_end - gd.epoch_start;
+     // delta = gd.epoch_end - gd.epoch_start;
 
 
      if(gd.debug1) {
@@ -249,12 +249,12 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
 {
     int i,num_way_points;
     int field_num;
-    char url[1024];
+    char url[2048];
     char tmp_str[1024];
-    char fieldname[128];
+    char fieldname[256];
     char *ptr;
     double tlat,tlon;
-    double lat1, lon1, lat2, lon2;
+    // double lat1, lon1, lat2, lon2;
 
     mr->v_mdvx->clearRead(); 
 
@@ -375,11 +375,11 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
       gd.proj.xy2latlon(gd.h_win.route.x_world[i],gd.h_win.route.y_world[i],tlat,tlon);
       mr->v_mdvx->addReadWayPt(tlat,tlon);
       if (i == 0) {
-	lat1 = tlat;
-	lon1 = tlon;
+	// lat1 = tlat;
+	// lon1 = tlon;
       } else if (i == num_way_points - 1) {
-	lat2 = tlat;
-	lon2 = tlon;
+	// lat2 = tlat;
+	// lon2 = tlon;
       }
 
       if(gd.debug1) fprintf(stderr,"Way pt Lat,Lon: %g,%g   Len: %g\n",
@@ -414,10 +414,10 @@ int mdvx_request_vert_data_plane(met_record_t *mr, time_t start_time,time_t end_
 int mdvx_request_time_list(met_record_t *mr, time_t start_time,time_t end_time, int page)
 {
     double min_lat,max_lat,min_lon,max_lon;
-    char url[1024];
+    char url[2048];
     char tmp_str[1024];
-    char fieldname[128];
-    char label[128];
+    char fieldname[256];
+    char label[1024];
     char *ptr;
     time_t delta;
 

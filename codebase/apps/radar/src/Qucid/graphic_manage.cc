@@ -112,9 +112,10 @@ void manage_h_pixmaps(int  mode)  /* 1= create, 2 = replace, 3 = destroy */
 
     case 3: // Destroy ALL
         for(i=0;i < MAX_FRAMES; i++ ) {
-            if(gd.movie.frame[i].h_xid) 
+          if(gd.movie.frame[i].h_xid) {
                 XFreePixmap(gd.dpy,gd.movie.frame[i].h_xid); 
                 gd.movie.frame[i].h_xid = 0;
+          }
         }
         for(i=0; i < gd.num_datafields; i++) {
             if(gd.h_win.page_xid[i]) {
@@ -214,9 +215,10 @@ void manage_v_pixmaps( int mode)   /* 1= create, 2 = replace, 3 = destroy */
 
         case 3:
             for(i=0;i < MAX_FRAMES; i++ ) {
-                if(gd.movie.frame[i].v_xid)
-                    XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
-                    gd.movie.frame[i].v_xid = 0;
+              if(gd.movie.frame[i].v_xid) {
+                XFreePixmap(gd.dpy,gd.movie.frame[i].v_xid);
+                gd.movie.frame[i].v_xid = 0;
+              }
             }
             for(i=0; i < gd.num_datafields; i++) {
                 if(gd.v_win.page_xid[i]) {

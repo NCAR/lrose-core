@@ -31,6 +31,7 @@
 #define FIELDS_PU_PROC 1
 
 #include "cidd.h"
+#include <toolsa/str.h>
 
 void update_grid_config_gui();
 void update_wind_config_gui();
@@ -504,7 +505,7 @@ void config_prod_proc(Menu menu, Menu_item item)
 
 void update_grid_config_gui()
 {
-    char str[128];
+    char str[1024];
 	 
     /* Now set all the panel labels appropriately */
     sprintf(str,"Label: %s\n",gd.mrec[grid_config_field]->button_name);

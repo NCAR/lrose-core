@@ -39,7 +39,7 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
 {
     int i;
     int x1,y1,ht,wd;    /* boundries of image area */
-    int stat;
+    // int stat;
     contour_info_t cont; // contour params
 
     if(xid == 0) return CIDD_FAILURE;
@@ -72,7 +72,8 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
  	      render_xsect_line_contours(xid,&cont);
  	    }
         } else {
-            stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+          render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+          // stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
 	}
     }
     
@@ -100,7 +101,8 @@ int render_vert_display( Drawable xid, int page, time_t start_time, time_t end_t
  	      render_xsect_line_contours(xid,&cont);
  	    }
         } else {
-            stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+          // stat =  render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
+          render_xsect_grid(xid,gd.mrec[page],start_time,end_time,0);
         }
     }
 

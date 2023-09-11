@@ -965,6 +965,7 @@ void timer_func( Notify_client   client, int which)
 
 void stop_timer()
 {
+#ifdef NOTNOW
   struct  itimerval   timer;
 
   /* set up interval timer interval */
@@ -972,6 +973,7 @@ void stop_timer()
   timer.it_value.tv_usec = 0;
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 0;
+#endif
 
   /* Set the interval timer function and start timer */
   // notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
@@ -985,6 +987,7 @@ void stop_timer()
 
 void start_timer()
 {
+#ifdef NOTNOW
   struct  itimerval   timer;
 
   if(redraw_interv == 0) {
@@ -997,6 +1000,7 @@ void start_timer()
   timer.it_value.tv_usec = 10000;
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 10000;
+#endif
 
   if(gd.debug) fprintf(stderr,"Starting Interval timer\n"); 
 

@@ -43,6 +43,8 @@ extern int r_lastx,r_lasty;    /* ROUTE end point */
 extern int r_startx,r_starty;    /* ROUTE start point */
 extern int r_state;
 
+#ifdef NOTNOW
+
 static fl32 _missingVal = -9999;
 static fl32 _badVal = -9999;
 static met_record_t *_mr = NULL;
@@ -60,7 +62,9 @@ static int xx1 = gd.h_win.can_dim.x_pos;
 static int yy1 = gd.h_win.can_dim.y_pos;
 static int xwidth = gd.h_win.can_dim.width;
 static int yheight = gd.h_win.can_dim.height;
-  
+
+#endif
+
 // file scope functions
 
 // static void draw_report_text(Event *event);

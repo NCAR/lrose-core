@@ -77,6 +77,7 @@
 
 #define CIDD_REMOTE_COMMANDS
 #include "cidd.h"
+#include <toolsa/str.h>
 
 // Space for sub string parsing
 #define NUM_PARSE_FIELDS MAX_ROUTE_SEGMENTS * 2
@@ -406,7 +407,7 @@ void remote_set_maps_off()
 
 void remote_set_maps_on(char *name)
 {
-  char *label;
+  char *label = NULL;
   if(gd.num_map_overlays <= 32) {
     for(int i = 0; i <  gd.num_map_overlays; i++)  {
       // label = (char *)xv_get(gd.over_pu->over_pu_st,PANEL_CHOICE_STRING,i);
@@ -628,9 +629,9 @@ char *parse_remote_commands(char *buf)
 
 	// Sets the output file name 
 	if(strcmp(cfield[0],"SET_V_IMAGE_NAME") == 0) {
-	    strncpy(gd.v_win.image_fname,cfield[1],MAX_PATH_LEN);
+	    STRcopy(gd.v_win.image_fname,cfield[1],MAX_PATH_LEN);
 	    if(strstr(gd.v_win.image_fname,".png") == NULL) {
-		 strncat(gd.v_win.image_fname,".png",MAX_PATH_LEN);
+		 STRconcat(gd.v_win.image_fname,".png",MAX_PATH_LEN);
 	    }
 	}
 
@@ -691,9 +692,9 @@ char *parse_remote_commands(char *buf)
 
 	// Sets the output file name 
 	if(strcmp(cfield[0],"SET_H_IMAGE_NAME") == 0) {
-	    strncpy(gd.h_win.image_fname,cfield[1],MAX_PATH_LEN);
+	    STRcopy(gd.h_win.image_fname,cfield[1],MAX_PATH_LEN);
 	    if(strstr(gd.h_win.image_fname,".png") == NULL) {
-		 strncat(gd.h_win.image_fname,".png",MAX_PATH_LEN);
+		 STRconcat(gd.h_win.image_fname,".png",MAX_PATH_LEN);
 	    }
 	}
 

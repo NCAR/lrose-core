@@ -41,20 +41,26 @@ void update_frame_time_msg(int index);
 void modify_gui_objects()
 {
     int    i,j;
-    int    height,width;
+#ifdef NOTNOW
+    int    height;
+#endif
+    int    width;
     int    render_line;
-    int    value;
+    int    value = 0;
     extern void  field_mi_proc();
     extern void  zoom_mi_proc();
 
-    char    str[NAME_LENGTH];
-    char    string[128];
+    char    str[NAME_LENGTH * 4];
+    char    string[1024];
+#ifdef NOTNOW
     const char  *resource;
+#endif
     const char  *fname;
     char   panel_choice_string[256];
 
     // Xv_opaque   image1;
     // Xv_opaque   image2;
+#ifdef NOTNOW
     static unsigned short bbits[] =  {
 #include "icons/black.icon" 
     };
@@ -62,6 +68,7 @@ void modify_gui_objects()
     static unsigned short wbits[] =  {
 #include "icons/white.icon"
     };
+#endif
 
     // image1 = xv_create(XV_NULL, SERVER_IMAGE,
     //   SERVER_IMAGE_DEPTH, 1,
@@ -152,7 +159,9 @@ void modify_gui_objects()
     for(i=1; i <= gd.menu_bar.num_menu_bar_cells; i++) {
 
         sprintf(string,"cidd.menu_bar_label%d",i);
+#ifdef NOTNOW
         resource = gd.uparams->getString(string,"Not Defined");
+#endif
 
         // xv_set(gd.h_win_horiz_bw->main_st,PANEL_CHOICE_STRING,i-1,resource,NULL);
     }
@@ -753,8 +762,10 @@ void modify_gui_objects()
 void init_field_menus()
 {
     int i;
+#ifdef NOTNOW
     int x,y;
     int ncols;
+#endif
 
     /* Clear out any old items */
     // xv_set(gd.data_pu->data_st, PANEL_CHOICE_STRINGS, "", NULL, NULL);
@@ -767,8 +778,10 @@ void init_field_menus()
            gd.num_menu_fields++;
         }
     }
+#ifdef NOTNOW
     ncols = (gd.num_field_menu_cols <=0 ) ? (int)(gd.num_menu_fields / 30.0) + 1
                                          : gd.num_field_menu_cols;
+#endif
 
     if(gd.gui_P->field_list_n > 1 ) {
         // xv_set(gd.data_pu->data_st,XV_X,0,
@@ -777,9 +790,11 @@ void init_field_menus()
 
         // int x1 = xv_get(gd.data_pu->group_list,XV_WIDTH);
         // int x2 = xv_get(gd.data_pu->data_st,XV_WIDTH);
+#ifdef NOTNOW
       int x1 = 0;
       int x2 = 0;
-		x = x1 > x2 ? x1 : x2;
+      x = x1 > x2 ? x1 : x2;
+#endif
 
         // y = xv_get(gd.data_pu->data_st,XV_HEIGHT) +  xv_get(gd.data_pu->group_list,XV_HEIGHT) + 4;
         // xv_set(gd.data_pu->data_st,PANEL_LIST_WIDTH,x,NULL);
@@ -893,9 +908,13 @@ const char * frame_time_msg(int index)
 //
 void update_frame_time_msg(int index)
 {
+
+#ifdef NOTNOW
+  
     const char *label;
      
     label = frame_time_msg(index);
+#endif
 
     // xv_set(gd.movie_pu->fr_begin_msg, PANEL_LABEL_STRING, label, NULL);
     // xv_set(gd.h_win_horiz_bw->movie_frame_msg, PANEL_LABEL_STRING, label, NULL);

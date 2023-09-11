@@ -31,6 +31,7 @@
 #define RENDER_XSECT_MARGINS
 
 #include "cidd.h"
+#include <toolsa/str.h>
 
 /**********************************************************************
  * DRAW_VWIN_RIGHT_LABEL:     Displays a labeled color scale if the
@@ -39,7 +40,8 @@
 
 void draw_vwin_right_margin( Drawable xid, int page)
 {
-    int x_start,y_start;
+  int x_start = 0;
+  int y_start = 0;
     int ht,wd;
     met_record_t *mr;       /* pointer to record for convienence */
 
@@ -48,7 +50,7 @@ void draw_vwin_right_margin( Drawable xid, int page)
     mr = gd.mrec[page];    /* get pointer to data record */
  
     /* calc dimensions of drawable area */
-    y_start = gd.v_win.margin.top;
+    // y_start = gd.v_win.margin.top;
     x_start = gd.v_win.can_dim.width - gd.v_win.margin.right;
     ht = gd.v_win.can_dim.height - gd.v_win.margin.top - gd.v_win.margin.bot;
     wd = gd.v_win.margin.right;
@@ -71,7 +73,8 @@ void draw_vwin_right_margin( Drawable xid, int page)
 
 void draw_vwin_left_margin( Drawable xid, int page) 
 {
-    int x_start,y_start;
+    int x_start;
+    // int y_start;
     int tick_xstart,tick_xend;
     int tick_ystart;
     int xmid,ymid;
@@ -88,7 +91,7 @@ void draw_vwin_left_margin( Drawable xid, int page)
     mr = choose_ht_sel_mr(page);
     /* calc dimensions of drawable area */
     x_start = 0;
-    y_start =  gd.v_win.margin.top;
+    // y_start =  gd.v_win.margin.top;
     tick_xstart = (int)(gd.v_win.margin.left * 0.75);
  
 
@@ -172,8 +175,8 @@ void draw_vwin_top_margin(Drawable xid, int page)
     int    xmid,ymid;
     int    ht,wd;
     met_record_t *mr;        /* pointer to record for convienence */
-    char    timestr[64];
-    char    label[TITLE_LENGTH];
+    char    timestr[1024];
+    char    label[TITLE_LENGTH * 10];
     Font    font;
 
     if(gd.v_win.margin.top == 0) return;
@@ -238,7 +241,7 @@ void draw_vwin_bot_margin(Drawable xid, int page)
     double  current_tick;
     char    label[16];
     Font    font;
-    met_record_t *mr;       /* pointer to record for convienence */
+    // met_record_t *mr;       /* pointer to record for convienence */
 
     double unit_per_km;
     const char *u_label;
@@ -247,7 +250,7 @@ void draw_vwin_bot_margin(Drawable xid, int page)
     u_label = gd.scale_units_label;
 
     if(gd.v_win.margin.bot == 0) return;
-    mr = gd.mrec[page];    /* get pointer to data record */
+    // mr = gd.mrec[page];    /* get pointer to data record */
     /* calc dimensions of drawable area */
     tick_yend = (int)(gd.v_win.can_dim.height - (gd.v_win.margin.bot * 0.75));
 

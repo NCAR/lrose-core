@@ -32,6 +32,7 @@
 #define RENDER_ROUTE_WINDS
 
 #include "cidd.h"
+#include <toolsa/str.h>
 
 typedef struct route_seg {
   XPoint *pixel;
@@ -53,8 +54,8 @@ void render_route_winds( Drawable xid)
     int num_route_segs,num_route_points;
     double dir,spd;
     int idir,ispd;
-    char wind_label[128];
-    char hazard_label[128];
+    char wind_label[1024];
+    char hazard_label[1024];
     int xmid,ymid;
     Font    font;
 

@@ -30,6 +30,7 @@
 
 #define RENDER_XSECT_TOP_LAYERS
 #include "cidd.h"
+#include <toolsa/str.h>
 
 /**********************************************************************
  * RENDER_XSECT_TOP_LAYERS: Render reference lines
@@ -41,9 +42,9 @@ void render_xsect_top_layers(Drawable xid, int page)
     double   x_dproj,km_ht;
     double dir,spd;
     int idir,ispd;
-    char wind_label[128];
-    char hazard_label[128];
-    char screen_label[256];
+    char wind_label[1024];
+    char hazard_label[1024];
+    char screen_label[2048];
     int xmid,ymid;
     Font    font;
 
@@ -146,8 +147,8 @@ void render_xsect_top_layers(Drawable xid, int page)
     }
 
     // Pack all labels together
-    strncat(screen_label,wind_label,256);
-    strncat(screen_label,hazard_label,256);
+    STRconcat(screen_label,wind_label,256);
+    STRconcat(screen_label,hazard_label,256);
 
     if(strlen(screen_label) > 3) {
       font = choose_font(screen_label,gd.v_win.img_dim.width/2,gd.v_win.margin.top,&xmid,&ymid);

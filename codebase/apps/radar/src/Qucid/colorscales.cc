@@ -31,6 +31,7 @@
 
 #define COLORSCALES 
 #include "cidd.h"
+#include <toolsa/str.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -98,7 +99,7 @@ int    get_color_mapping(const char *color_file_subdir,
     // Try the local dir first
     if((cfile = fopen(fname,"r")) == NULL) {
 
-	strncpy(name_buf,color_file_subdir,2048);
+	STRcopy(name_buf,color_file_subdir,2048);
 
 	str_ptr = strtok(name_buf,","); // Prime strtok
 
@@ -597,10 +598,10 @@ int combine_color_maps( Display    *dpy, Colormap    cmap)
            /* Allocate the color cells needed -  Can Modify colors */
            status = XAllocColorCells(dpy, cmap, False,&mask, 0, pix_vals, gd.num_colors);
           if(!gd.quiet_mode) fprintf(stderr,"Detected 8 Bit display - Allocating %d colors\n",gd.num_colors);
-          // if(status == 0) {
-          //   cerr << "HHHHHHHHHHHHHHHHHHHh" << endl;
-          //   return -1;
-          // }
+          if(status == 0) {
+            //   cerr << "HHHHHHHHHHHHHHHHHHHh" << endl;
+            //   return -1;
+          }
 	 break;
 
 	 case TrueColor: /* Colors are read only */

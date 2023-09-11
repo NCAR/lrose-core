@@ -50,7 +50,7 @@ extern int    r_startx,r_starty;    /* ROUTE start point */
 
 void setup_route_area(int clear_flag )
 {
-    int value;
+    int value = 0;
 
 	if(clear_flag) {
       gd.v_win.cmin_x = 0.0;
