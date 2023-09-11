@@ -230,7 +230,7 @@ int Qucid::Run(QApplication &app)
   if (_params.display_mode == Params::POLAR_DISPLAY) {
 
     _cartManager = new CartManager(_params, _reader,
-                                    _displayFields, _haveFilteredFields);
+                                   _displayFields, _haveFilteredFields);
     
     if (_args.inputFileList.size() > 0) {
       _cartManager->setArchiveFileList(_args.inputFileList);
@@ -419,27 +419,27 @@ int Qucid::_setupDisplayFields()
     bool noColorMap = false;
 
     if (map.readMap(colorMapPath)) {
-        cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
-        cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-        cerr << "  Looking for default color map for field " << pfld.label << endl; 
+      cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
+      cerr << "  Cannot read in color map file: " << colorMapPath << endl;
+      cerr << "  Looking for default color map for field " << pfld.label << endl; 
 
-        try {
-          // check here for smart color scale; look up by field name/label and
-          // see if the name is a usual parameter for a known color map
-          SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-          ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-          cerr << "  found default color map for " <<  pfld.label  << endl;
-          // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
-          map = colorMap;
-          // HERE: What is missing from the ColorMap object??? 
-        } catch (std::out_of_range &ex) {
-          cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
-	  // Just set the colormap to a generic color map
-	  // use range to indicate it needs update; update when we have access to the actual data values
-          map = ColorMap(0.0, 1.0);
-	  noColorMap = true; 
-          // return -1
-        }
+      try {
+        // check here for smart color scale; look up by field name/label and
+        // see if the name is a usual parameter for a known color map
+        SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
+        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
+        cerr << "  found default color map for " <<  pfld.label  << endl;
+        // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
+        map = colorMap;
+        // HERE: What is missing from the ColorMap object??? 
+      } catch (std::out_of_range &ex) {
+        cerr << "WARNING - did not find default color map for field; using rainbow colors" << endl;
+        // Just set the colormap to a generic color map
+        // use range to indicate it needs update; update when we have access to the actual data values
+        map = ColorMap(0.0, 1.0);
+        noColorMap = true; 
+        // return -1
+      }
     }
 
     // unfiltered field
@@ -523,249 +523,258 @@ void Qucid::_initGlobals()
   
 {
 
-    gd.hcan_xid = 0;
-    gd.vcan_xid = 0;
+  gd.hcan_xid = 0;
+  gd.vcan_xid = 0;
     
-    gd.debug = 0;
-    gd.debug1 = 0;
-    gd.debug2 = 0;
+  gd.debug = 0;
+  gd.debug1 = 0;
+  gd.debug2 = 0;
     
-    gd.argc = 0;
-    gd.display_projection = 0;
-    gd.always_get_full_domain = 0; 
-    gd.do_not_clip_on_mdv_request = 0;
-    gd.do_not_decimate_on_mdv_request = 0;
-    gd.enable_status_window = 0;   
-    gd.wsddm_mode = 0;   
-    gd.quiet_mode = 0;   
-    gd.report_mode = 0;   
-    gd.close_popups = 0;   
-    gd.one_click_rhi = 0;  
-    gd.click_posn_rel_to_origin = 0; 
-    gd.report_clicks_in_status_window = 0; 
-    gd.report_clicks_in_degM_and_nm = 0;
-    gd.magnetic_variation_deg = 0; 
-    gd.display_labels = 0; 
-    gd.display_ref_lines = 0; 
-    gd.show_clock = 0;     
-    gd.show_data_messages = 0;
-    gd.draw_clock_local = 0; 
-    gd.use_local_timestamps = 0; 
-    gd.run_unmapped = 0;   
-    gd.html_mode = 0;      
-    gd.transparent_images = 0;
-    gd.range_ring_follows_data = 0; 
-    gd.range_ring_for_radar_only = 0;
-    gd.domain_follows_data = 0; 
-    gd.show_height_sel = 0;
-    gd.use_cosine_correction = -1; 
-    gd.latlon_mode = 0;    
-    gd.zoom_limits_in_latlon = 0; 
-    gd.label_contours = 0; 
-    gd.top_margin_render_style = 0; 
-    gd.bot_margin_render_style = 0; 
-    gd.drawing_mode = 0;   
-    gd.draw_main_on_top = 0;  
-    gd.mark_latest_click_location = 0; 
-    gd.mark_latest_client_location = 0; 
-    gd.check_data_times = 0;  
-    gd.check_clipping = 0;    
-    gd.run_once_and_exit = 0; 
-    gd.request_compressed_data = 0;  
-    gd.request_gzip_vol_compression = 0;  
-    gd.add_height_to_filename = 0;   
-    gd.add_frame_time_to_filename = 0; 
-    gd.add_gen_time_to_filename = 0; 
-    gd.add_valid_time_to_filename = 0; 
-    gd.add_frame_num_to_filename = 0; 
-    gd.add_button_name_to_filename = 0;
-    gd.save_images_to_day_subdir = 0;
-    gd.simple_command_timeout_secs = 0; 
-    gd.complex_command_timeout_secs = 0; 
+  gd.argc = 0;
+  gd.display_projection = 0;
+  gd.always_get_full_domain = 0; 
+  gd.do_not_clip_on_mdv_request = 0;
+  gd.do_not_decimate_on_mdv_request = 0;
+  gd.enable_status_window = 0;   
+  gd.wsddm_mode = 0;   
+  gd.quiet_mode = 0;   
+  gd.report_mode = 0;   
+  gd.close_popups = 0;   
+  gd.one_click_rhi = 0;  
+  gd.click_posn_rel_to_origin = 0; 
+  gd.report_clicks_in_status_window = 0; 
+  gd.report_clicks_in_degM_and_nm = 0;
+  gd.magnetic_variation_deg = 0; 
+  gd.display_labels = 0; 
+  gd.display_ref_lines = 0; 
+  gd.show_clock = 0;     
+  gd.show_data_messages = 0;
+  gd.draw_clock_local = 0; 
+  gd.use_local_timestamps = 0; 
+  gd.run_unmapped = 0;   
+  gd.html_mode = 0;      
+  gd.transparent_images = 0;
+  gd.range_ring_follows_data = 0; 
+  gd.range_ring_for_radar_only = 0;
+  gd.domain_follows_data = 0; 
+  gd.show_height_sel = 0;
+  gd.use_cosine_correction = -1; 
+  gd.latlon_mode = 0;    
+  gd.zoom_limits_in_latlon = 0; 
+  gd.label_contours = 0; 
+  gd.top_margin_render_style = 0; 
+  gd.bot_margin_render_style = 0; 
+  gd.drawing_mode = 0;   
+  gd.draw_main_on_top = 0;  
+  gd.mark_latest_click_location = 0; 
+  gd.mark_latest_client_location = 0; 
+  gd.check_data_times = 0;  
+  gd.check_clipping = 0;    
+  gd.run_once_and_exit = 0; 
+  gd.request_compressed_data = 0;  
+  gd.request_gzip_vol_compression = 0;  
+  gd.add_height_to_filename = 0;   
+  gd.add_frame_time_to_filename = 0; 
+  gd.add_gen_time_to_filename = 0; 
+  gd.add_valid_time_to_filename = 0; 
+  gd.add_frame_num_to_filename = 0; 
+  gd.add_button_name_to_filename = 0;
+  gd.save_images_to_day_subdir = 0;
+  gd.simple_command_timeout_secs = 0; 
+  gd.complex_command_timeout_secs = 0; 
 
-    gd.font_display_mode = 0; 
-    gd.forecast_mode = 0;     
-    gd.gather_data_mode = 0;  
-    gd.enable_save_image_panel = 0; 
-    gd.disable_pick_mode = 0;  
-    gd.clip_overlay_fields = 0; 
-    gd.output_geo_xml = 0;       
-    gd.use_latlon_in_geo_xml = 0;       
-    gd.replace_underscores = 0;  
+  gd.font_display_mode = 0; 
+  gd.forecast_mode = 0;     
+  gd.gather_data_mode = 0;  
+  gd.enable_save_image_panel = 0; 
+  gd.disable_pick_mode = 0;  
+  gd.clip_overlay_fields = 0; 
+  gd.output_geo_xml = 0;       
+  gd.use_latlon_in_geo_xml = 0;       
+  gd.replace_underscores = 0;  
 
-    gd.data_format = 0; 
-    gd.image_fill_threshold = 0; 
-    gd.dynamic_contour_threshold = 0; 
-    gd.inten_levels = 0;    
-    gd.idle_reset_seconds = 0;   
-    gd.model_run_list_hours = 0; 
+  gd.data_format = 0; 
+  gd.image_fill_threshold = 0; 
+  gd.dynamic_contour_threshold = 0; 
+  gd.inten_levels = 0;    
+  gd.idle_reset_seconds = 0;   
+  gd.model_run_list_hours = 0; 
 				                 
-    gd.ideal_x_vects = 0;
-    gd.ideal_y_vects = 0;
-    gd.head_size = 0;     
-    gd.shaft_len = 0;     
+  gd.ideal_x_vects = 0;
+  gd.ideal_y_vects = 0;
+  gd.head_size = 0;     
+  gd.shaft_len = 0;     
 
-    gd.num_colors = 0;       
-    gd.num_draw_colors = 0;  
-    gd.map_overlay_color_index_start = 0;
-    gd.last_event_time = 0;  
-    gd.epoch_start = 0;      
-    gd.epoch_end  = 0;       
-    gd.model_run_time = 0;  
-    gd.data_request_time = 0; 
-    gd.finished_init = 0;    
+  gd.num_colors = 0;       
+  gd.num_draw_colors = 0;  
+  gd.map_overlay_color_index_start = 0;
+  gd.last_event_time = 0;  
+  gd.epoch_start = 0;      
+  gd.epoch_end  = 0;       
+  gd.model_run_time = 0;  
+  gd.data_request_time = 0; 
+  gd.finished_init = 0;    
 
-    gd.num_datafields = 0;   
-    gd.num_menu_fields = 0;  
-    gd.num_field_menu_cols = 0; 
-    gd.num_map_overlays = 0; 
-    gd.num_bookmarks = 0;    
-    gd.num_render_heights = 0;
-    gd.num_cache_zooms = 0;   
-    gd.cur_render_height = 0; 
-    gd.cur_field_set = 0;     
-    gd.save_im_win = 0;       
-    gd.image_needs_saved = 0; 
-    gd.generate_filename = 0; 
-    gd.max_time_list_span = 0; 
+  gd.num_datafields = 0;   
+  gd.num_menu_fields = 0;  
+  gd.num_field_menu_cols = 0; 
+  gd.num_map_overlays = 0; 
+  gd.num_bookmarks = 0;    
+  gd.num_render_heights = 0;
+  gd.num_cache_zooms = 0;   
+  gd.cur_render_height = 0; 
+  gd.cur_field_set = 0;     
+  gd.save_im_win = 0;       
+  gd.image_needs_saved = 0; 
+  gd.generate_filename = 0; 
+  gd.max_time_list_span = 0; 
 
-    gd.pan_in_progress = 0;    
-    gd.zoom_in_progress = 0;   
-    gd.route_in_progress = 0;  
-    gd.data_timeout_secs = 0;  
-    gd.data_status_changed = 0;
-    gd.series_save_active = 0; 
+  gd.pan_in_progress = 0;    
+  gd.zoom_in_progress = 0;   
+  gd.route_in_progress = 0;  
+  gd.data_timeout_secs = 0;  
+  gd.data_status_changed = 0;
+  gd.series_save_active = 0; 
 
-    gd.num_field_labels = 0;  
-    gd.db_data_len = 0;       
-    MEM_zero(gd.field_index);
-    gd.movieframe_time_mode = 0;  
+  gd.num_field_labels = 0;  
+  gd.db_data_len = 0;       
+  MEM_zero(gd.field_index);
+  gd.movieframe_time_mode = 0;  
                                
-    gd.head_angle = 0;     
-    gd.image_inten = 0;    
-    gd.data_inten = 0;     
-    gd.aspect_correction = 0; 
-    gd.aspect_ratio = 0;  
-    gd.scale_units_per_km = 0; 
-    gd.locator_margin_km = 0;  
-    MEM_zero(gd.height_array);
-    MEM_zero(gd.proj_param);
+  gd.head_angle = 0;     
+  gd.image_inten = 0;    
+  gd.data_inten = 0;     
+  gd.aspect_correction = 0; 
+  gd.aspect_ratio = 0;  
+  gd.scale_units_per_km = 0; 
+  gd.locator_margin_km = 0;  
+  MEM_zero(gd.height_array);
+  MEM_zero(gd.proj_param);
 
-    gd.argv = NULL;             
-    gd.orig_wd = NULL;           
-    gd.db_data = NULL;           
-    gd.db_name = NULL;           
-    gd.movie_frame_dir = NULL;   
-    gd.frame_label = NULL;       
-    gd.no_data_message = NULL;   
-    gd.help_command = NULL;      
-    gd.bookmark_command = NULL;  
-    gd.app_name = NULL;          
-    gd.app_instance = NULL;      
-    gd.scale_units_label = NULL; 
+  gd.argv = NULL;             
+  gd.orig_wd = NULL;           
+  gd.db_data = NULL;           
+  gd.db_name = NULL;           
+  gd.movie_frame_dir = NULL;   
+  gd.frame_label = NULL;       
+  gd.no_data_message = NULL;   
+  gd.help_command = NULL;      
+  gd.bookmark_command = NULL;  
+  gd.app_name = NULL;          
+  gd.app_instance = NULL;      
+  gd.scale_units_label = NULL; 
 
-    gd.image_dir = NULL;     
-    gd.image_ext = NULL;     
-    gd.image_convert_script = NULL; 
-    gd.series_convert_script = NULL; 
-    gd.print_script = NULL;          
-    gd.image_horiz_prefix = NULL;   
-    gd.image_vert_prefix = NULL;   
-    gd.image_name_separator = NULL; 
+  gd.image_dir = NULL;     
+  gd.horiz_image_dir = NULL;     
+  gd.vert_image_dir = NULL;     
+  gd.horiz_image_fname = NULL;     
+  gd.vert_image_fname = NULL;     
+  gd.horiz_image_command = NULL;     
+  gd.vert_image_command = NULL;     
 
-    gd.http_tunnel_url = NULL;   
-    gd.http_proxy_url = NULL;    
-    gd.station_loc_url = NULL;   
-    gd.remote_ui_url = NULL;     
-    gd.datamap_host = NULL;      
+  gd.image_ext = NULL;     
+  gd.image_convert_script = NULL; 
+  gd.series_convert_script = NULL; 
 
-    gd.label_time_format = NULL;  
-    gd.moviestart_time_format = NULL;   
-    gd.frame_range_time_format = NULL;   
-    gd.movieframe_time_format = NULL;  
-    MEM_zero(gd.data_info);
+  gd.image_horiz_prefix = NULL;   
+  gd.image_vert_prefix = NULL;   
+  gd.image_name_separator = NULL; 
 
-    MEM_zero(gd.gen_time_list);
+  gd.print_script = NULL;          
 
-    MEM_zero(gd.h_win);
-    MEM_zero(gd.v_win);
+  gd.http_tunnel_url = NULL;   
+  gd.http_proxy_url = NULL;    
+  gd.station_loc_url = NULL;   
+  gd.remote_ui_url = NULL;     
+  gd.datamap_host = NULL;      
 
-    gd.def_gc = 0;
-    gd.ol_gc = 0;
-    gd.clear_ol_gc = 0;
-    gd.dpyName = NULL;
-    gd.dpy = NULL;
-    MEM_zero(gd.color);
-    MEM_zero(gd.null_color);
+  gd.label_time_format = NULL;  
+  gd.moviestart_time_format = NULL;   
+  gd.frame_range_time_format = NULL;   
+  gd.movieframe_time_format = NULL;  
+  MEM_zero(gd.data_info);
 
-    // FONTS
-    gd.num_fonts = 0;
-    MEM_zero(gd.ciddfont);
-    MEM_zero(gd.fontst);
+  MEM_zero(gd.gen_time_list);
+
+  MEM_zero(gd.h_win);
+  MEM_zero(gd.v_win);
+
+  gd.def_gc = 0;
+  gd.ol_gc = 0;
+  gd.clear_ol_gc = 0;
+  gd.dpyName = NULL;
+  gd.dpy = NULL;
+  MEM_zero(gd.color);
+  MEM_zero(gd.null_color);
+
+  // FONTS
+  gd.num_fonts = 0;
+  MEM_zero(gd.ciddfont);
+  MEM_zero(gd.fontst);
     
-    MEM_zero(gd.prod);
-    MEM_zero(gd.over);
-    MEM_zero(gd.mrec);
-    MEM_zero(gd.layers);
-    MEM_zero(gd.legends);
-    MEM_zero(gd.menu_bar);
-    gd.bookmark = NULL;
-    MEM_zero(gd.movie);
-    MEM_zero(gd.io_info);
-    MEM_zero(gd.status);
-    MEM_zero(gd.draw);
+  MEM_zero(gd.prod);
+  MEM_zero(gd.over);
+  MEM_zero(gd.mrec);
+  MEM_zero(gd.layers);
+  MEM_zero(gd.legends);
+  MEM_zero(gd.menu_bar);
+  gd.bookmark = NULL;
+  MEM_zero(gd.movie);
+  MEM_zero(gd.io_info);
+  MEM_zero(gd.status);
+  MEM_zero(gd.draw);
 
-    gd.coord_expt = NULL;
-    gd.prod_mgr = NULL;
-    gd.time_plot = NULL;         
-    gd.r_context = NULL;    
-    gd.station_loc = NULL;    
-    gd.remote_ui = NULL;   
-    gd.syprod_P = NULL;  
-    gd.draw_P = NULL;      
-    gd.gui_P = NULL;        
-    gd.images_P = NULL;  
-    gd.uparams = NULL;
+  gd.coord_expt = NULL;
+  gd.prod_mgr = NULL;
+  gd.time_plot = NULL;         
+  gd.r_context = NULL;    
+  gd.station_loc = NULL;    
+  gd.remote_ui = NULL;   
+  gd.syprod_P = NULL;  
+  gd.draw_P = NULL;      
+  gd.gui_P = NULL;        
+  gd.images_P = NULL;  
+  gd.uparams = NULL;
 
-    gd.contour_font_num = 0;
-    gd.n_ideal_contour_labels = 0;
+  gd.contour_font_num = 0;
+  gd.n_ideal_contour_labels = 0;
 
-    gd.rotate_coarse_adjust = 0.0;
-    gd.rotate_medium_adjust = 0.0;
-    gd.rotate_fine_adjust = 0.0;
+  gd.rotate_coarse_adjust = 0.0;
+  gd.rotate_medium_adjust = 0.0;
+  gd.rotate_fine_adjust = 0.0;
   
-    gd.min_zoom_threshold = 0.0;
+  gd.min_zoom_threshold = 0.0;
 
-    gd.coord_key = 0;
+  gd.coord_key = 0;
 
-    gd.status_info_file = NULL;
+  gd.status_info_file = NULL;
 
-    gd.horiz_default_x_pos = 0;
-    gd.horiz_default_y_pos = 0;
+  gd.horiz_default_x_pos = 0;
+  gd.horiz_default_y_pos = 0;
 
-    gd.map_file_sub_dir = NULL;
+  gd.map_file_sub_dir = NULL;
 
-    gd.ideal_x_vectors = 0;
-    gd.ideal_y_vectors = 0;
-    gd.azimuth_interval = 0;
-    gd.azimuth_radius = 0;
-    gd.latest_click_mark_size = 0;
-    gd.range_ring_x_space = 0;
-    gd.range_ring_y_space = 0;
-    gd.range_ring_spacing = 0;
-    gd.max_ring_range = 0;
-    gd.range_ring_labels = 0;
-    gd.wind_units_scale_factor = 0;
-    gd.wind_units_label = NULL;
-    gd.wind_w_scale_factor = 0;
+  gd.ideal_x_vectors = 0;
+  gd.ideal_y_vectors = 0;
+  gd.azimuth_interval = 0;
+  gd.azimuth_radius = 0;
+  gd.latest_click_mark_size = 0;
+  gd.range_ring_x_space = 0;
+  gd.range_ring_y_space = 0;
+  gd.range_ring_spacing = 0;
+  gd.max_ring_range = 0;
+  gd.range_ring_labels = 0;
+  gd.wind_units_scale_factor = 0;
+  gd.wind_units_label = NULL;
+  gd.wind_w_scale_factor = 0;
 
-    gd.scale_constant = 0.0;
+  gd.scale_constant = 0.0;
     
-    gd.redraw_interval = 0;
-    gd.update_interval = 0;
+  gd.redraw_interval = 0;
+  gd.update_interval = 0;
     
-    gd.wind_marker_type = NULL;
-    gd.wind_reference_speed = 0.0;
+  gd.wind_marker_type = NULL;
+  gd.wind_reference_speed = 0.0;
 
 }
 

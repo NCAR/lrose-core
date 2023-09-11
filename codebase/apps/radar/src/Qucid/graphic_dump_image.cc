@@ -31,10 +31,6 @@
 
 #include "cidd.h"
 
-#ifdef USE_IMLIB2
-#include <Imlib2.h>
-#endif
-
 #include <png.h>
 
 #include <toolsa/str.h>
@@ -42,7 +38,6 @@
 #include <toolsa/Path.hh>
 #include <dsserver/DsLdataInfo.hh>
 
-static void dump_cidd_xid(Drawable xid, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
 static void dump_image_xml(const char *dir, const char *fname);
 static void dump_png(Drawable xid, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height);
 
@@ -158,8 +153,8 @@ const char * gen_image_fname(const char *prefix,met_record_t *mr)
   }
 
   // Add the final extension
-  strncat(nbuf,".",2048);
-  strncat(nbuf,gd.image_ext,2048);
+  strncat(nbuf, ".", 2047);
+  strncat(nbuf,gd.image_ext,2047);
 
   // replace any spaces in the file name with underscores - .
   while(gd.replace_underscores && (ptr = strchr(nbuf,' ')) != NULL)  *ptr = '_';
@@ -204,8 +199,8 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
                 gen_image_fname(gd.image_horiz_prefix,gd.mrec[page]),
                 MAX_PATH_LEN);
         if(strstr(gd.h_win.image_fname,gd.image_ext) == NULL) { 
-          strncat(gd.h_win.image_fname,".",MAX_PATH_LEN);
-          strncat(gd.h_win.image_fname,gd.image_ext,MAX_PATH_LEN);
+          strncat(gd.h_win.image_fname,".",MAX_PATH_LEN-1);
+          strncat(gd.h_win.image_fname,gd.image_ext,MAX_PATH_LEN-1);
         }
 
         gd.generate_filename = 0;
@@ -229,7 +224,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
 
       if(gd.output_geo_xml) dump_image_xml(dir, fname);
-      dump_cidd_xid(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       sprintf(pathname,"%s/%s",dir,fname);
       strncpy(gd.movie.frame[gd.movie.cur_frame].fname,pathname,NAME_LENGTH);
@@ -242,8 +237,8 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
         strncpy(gd.v_win.image_fname,
                 gen_image_fname(gd.image_vert_prefix,gd.mrec[page]), MAX_PATH_LEN);
         if(strstr(gd.v_win.image_fname,gd.image_ext) == NULL) { 
-          strncat(gd.v_win.image_fname,".",MAX_PATH_LEN);
-          strncat(gd.v_win.image_fname,gd.image_ext,MAX_PATH_LEN);
+          strncat(gd.v_win.image_fname,".",MAX_PATH_LEN-1);
+          strncat(gd.v_win.image_fname,gd.image_ext,MAX_PATH_LEN-1);
         }
 
         gd.generate_filename = 0;
@@ -264,7 +259,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       strncpy(gd.movie.frame[gd.movie.cur_frame].vfname,pathname,NAME_LENGTH);
 
 
-      dump_cidd_xid(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;
 
     case BOTH_VIEWS:  /* The Both windows */
@@ -281,7 +276,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       xid = gd.h_win.can_xid[gd.h_win.cur_cache_im];
       // w = xv_get(gd.h_win_horiz_bw->horiz_bw,XV_XID);
       if(gd.output_geo_xml) dump_image_xml(dir, fname);
-      dump_cidd_xid(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
+      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.h_win.can_dim.width,gd.h_win.can_dim.height);
 
       fname = gd.v_win.image_fname;
       if(print_flag) {
@@ -295,7 +290,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
       }
       xid = gd.v_win.can_xid[gd.v_win.cur_cache_im];
       // w = xv_get(gd.v_win_v_win_pu->v_win_pu,XV_XID);
-      dump_cidd_xid(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
+      dump_png(xid,w,dir,fname,cmd,confirm_flag,page,gd.v_win.can_dim.width,gd.v_win.can_dim.height);
       break;
   }
 
@@ -401,108 +396,17 @@ static void dump_image_xml(const char *dir, const char *fname)
 } 
 
 //////////////////////////////////////////////////////////////////////////////
-// DUMP_CIDD_XID: Write the actual image - Output an Ldatainfo file too.
+// DUMP_PNG: Write the actual image as a png
 //
-static void dump_cidd_xid(Drawable xid, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height)
-{
-
-#ifndef USE_IMLIB2
-
-  dump_png(xid, w, dir, fname, cmd, confirm_flag, page, width, height);
-  return;
-
-#else
-
-  //
-  // Make sure the directory exists.
-  //
-  FILE *outfile = NULL;
-  char pathname[MAX_PATH_LEN];
-  char cmdbuf[MAX_PATH_LEN*2];
-
-  if (ta_makedir_recurse( dir )){
-    fprintf(stderr,"ERROR : failed to create directory %s\n", dir);
-    return;
-  }
-  Imlib_Image image;
-
-  sprintf(pathname,"%s/%s",dir,fname);
-
-  if(strlen(pathname) < 1) {
-    fprintf(stderr,"WARNING - copy path not set\n");
-    return;
-  }
-
-  if( confirm_flag) {
-    if((outfile = open_check_write(pathname,gd.h_win_horiz_bw->horiz_bw)) == NULL) {
-      perror("CIDD: Couldn't open file for dumping image - Aborted\n");
-      set_busy_state(0);
-      return;
-    }
-  } else {
-    if((outfile = fopen(pathname,"w+")) == NULL) {
-      perror("CIDD: Couldn't open file for dumping image - Aborted\n");
-      set_busy_state(0);
-      return;
-    }
-  }
-  if(fclose(outfile) !=0) {
-    fprintf(stderr,"Problem closing %s\n",pathname);
-    perror("CIDD");
-  }
-  if(unlink(pathname) !=0) {
-    fprintf(stderr,"Problem Unlinking %s\n",pathname);
-    perror("CIDD");
-  }
- 
-	
-  imlib_context_set_display(gd.dpy);
-  imlib_context_set_visual(DefaultVisual(gd.dpy,0));
-  imlib_context_set_colormap(gd.cmap);
-  imlib_context_set_drawable(xid);
-
-  image = imlib_create_image_from_drawable(0, 0, 0, width, height, '1');
-
-  imlib_context_set_image(image);
-  if(gd.debug || gd.debug1 || gd.series_save_active ) {
-    fprintf(stderr,"Saving: %s\n",pathname);
-  }
-    
-  imlib_save_image (pathname);
-
-  imlib_free_image();
-
-  DsLdataInfo LDI(gd.image_dir); // Set up a LdataInfo File
-
-  string relPath;
-  Path::stripDir(gd.image_dir, pathname, relPath);
-
-  if(gd.debug) LDI.setDebug();
-  LDI.setLatestTime((time_t)gd.mrec[page]->h_mhdr.time_centroid);
-  LDI.setWriter(gd.app_name);
-  LDI.setDataFileExt(gd.image_ext);
-  LDI.setDataType(gd.image_ext);
-  LDI.setUserInfo1("CIDD Output Image");
-  LDI.setRelDataPath(relPath);
-
-  if(LDI.write((time_t)gd.mrec[page]->h_mhdr.time_centroid)) {
-    fprintf(stderr,"Problem Writing LdataInfo File in %s",dir);
-    perror("CIDD");
-  }
-
-  if(strlen(cmd) > 3) {
-    sprintf(cmdbuf,"%s %s",cmd,pathname);
-    safe_system(cmdbuf,gd.simple_command_timeout_secs);
-  }
-
-#endif
-
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// DUMP_PNG: Write the actual image as a png - Output an Ldatainfo file too.
-//
-static void dump_png(Drawable xid, Window w, const char *dir, const char *fname, const char *cmd, int confirm_flag, int page, int width, int height)
+static void dump_png(Drawable xid,
+                     Window w,
+                     const char *dir,
+                     const char *fname,
+                     const char *cmd,
+                     int confirm_flag,
+                     int page,
+                     int width,
+                     int height)
 {
 
   if (gd.debug || gd.debug1) {

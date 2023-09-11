@@ -348,15 +348,24 @@ struct    Global_data {
   const char *app_instance;      // Application Instance 
   const char *scale_units_label; // Units label to use for distance scales
 
-  const char *image_dir;     // The place to store html images 
-  const char *image_ext;     // Image output extension - Legal types are png,jpg,tif,ppm,pgm,xpm,eim
+  const char *image_dir;           // The place to store images
+  const char *horiz_image_dir;     // The place to store horiz images
+  const char *vert_image_dir;      // The place to store vert images
+  const char *horiz_image_fname;   // File name for horiz images
+  const char *vert_image_fname;    // File name for vert images
+  const char *horiz_image_command; // Convert command for horiz images
+  const char *vert_image_command;  // Convert command for vert images
+  
   const char *image_convert_script; // Cidd Calls this script with the image name as the argument  
   const char *series_convert_script; // Cidd Calls this script with all image names as arguments 
-  const char *print_script;          // Cidd Calls this script with the image name as the argument  
+
+  const char *image_ext; // Image output extension - only png is legal
   const char *image_horiz_prefix;   // Prefix for plan-view images
   const char *image_vert_prefix;   // Prefix for vert-section images
   const char *image_name_separator; // Char used to separate parts of the image file name. Defaults to '_'.
 
+  const char *print_script; // Cidd Calls this script with the image name as the argument  
+  
   const char *http_tunnel_url;   // The url of a DsServer tunnel
   const char *http_proxy_url;    // The url of a http proxy server
   const char *station_loc_url;   // The url of a station locator file
