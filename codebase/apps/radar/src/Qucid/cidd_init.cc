@@ -274,9 +274,7 @@ void init_data_space()
 	
 
   gd.always_get_full_domain = gd.uparams->getLong("cidd.always_get_full_domain", 0);
-     
   gd.do_not_clip_on_mdv_request = gd.uparams->getLong("cidd.do_not_clip_on_mdv_request", 0);
-     
   gd.do_not_decimate_on_mdv_request = gd.uparams->getLong("cidd.do_not_decimate_on_mdv_request", 0);
      
   // Toggle for displaying range rings at the data's origin - Useful for mobile units.
@@ -295,11 +293,8 @@ void init_data_space()
   }
 
   gd.help_command = gd.uparams->getString("cidd.help_command", "");
-
   gd.http_tunnel_url = gd.uparams->getString("cidd.http_tunnel_url", "");
-
   gd.datamap_host = gd.uparams->getString("cidd.datamap_host", "");
-
   gd.http_proxy_url = gd.uparams->getString("cidd.http_proxy_url", "");
 
   // Bookmarks for a menu of URLS - Index starts at 1
@@ -355,7 +350,6 @@ void init_data_space()
   // projections
   
   gd.latlon_mode = gd.uparams->getLong("cidd.latlon_mode",0);
-     
   gd.north_angle = gd.uparams->getDouble("cidd.north_angle",0.0);
   gd.lambert_lat1 = gd.uparams->getDouble("cidd.lambert_lat1",20.0);
   gd.lambert_lat2 = gd.uparams->getDouble("cidd.lambert_lat2",60.0);
@@ -365,16 +359,14 @@ void init_data_space()
 
   gd.proj_param[0] = gd.north_angle; // flat projection is default
 
-  gd.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio",1.0);
+  gd.aspect_ratio = gd.uparams->getDouble("cidd.aspect_ratio", 1.0);
   if (gd.aspect_ratio <= 0.0 && gd.debug) {
-    cerr << "WARNING - Using First domain to set aspect ratio: " << endl;
+    cerr << "WARNING - Using first domain to set aspect ratio: " << endl;
   }
 
-  gd.scale_units_per_km = gd.uparams->getDouble("cidd.units_per_km",1.0);
+  gd.scale_units_per_km = gd.uparams->getDouble("cidd.scale_units_per_km",1.0);
   gd.scale_units_label = gd.uparams->getString("cidd.scale_units_label", "km");
-
-
-
+  
   /* Establish the native projection type */
 
   resource = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
