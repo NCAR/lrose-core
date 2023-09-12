@@ -376,6 +376,7 @@ struct    Global_data {
 
   // projections
   
+  const char *projection_type;
   double proj_param[8];    // Projection parameters - Like Mdv
   double north_angle;      // radar cart
   double lambert_lat1;     // lambert

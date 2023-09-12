@@ -369,9 +369,9 @@ void init_data_space()
   
   /* Establish the native projection type */
 
-  resource = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
+  gd.projection_type = gd.uparams->getString("cidd.projection_type", "CARTESIAN");
 
-  if (strncasecmp(resource,"CARTESIAN",9) == 0) {
+  if (strncasecmp(gd.projection_type,"CARTESIAN",9) == 0) {
 
     gd.display_projection = Mdvx::PROJ_FLAT;
     if(gd.debug) {
@@ -380,7 +380,7 @@ void init_data_space()
     }
     gd.proj.initFlat(gd.origin_latitude,gd.origin_longitude,gd.north_angle);
 
-  } else if (strncasecmp(resource,"LAT_LON",7) == 0) {
+  } else if (strncasecmp(gd.projection_type,"LAT_LON",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LATLON;
     if(gd.debug) {
@@ -388,7 +388,7 @@ void init_data_space()
              gd.origin_latitude,gd.origin_longitude);
     }
 
-  } else if (strncasecmp(resource,"LAMBERT",7) == 0) {
+  } else if (strncasecmp(gd.projection_type,"LAMBERT",7) == 0) {
 
     gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
     gd.proj_param[0] = gd.lambert_lat1;
@@ -406,7 +406,7 @@ void init_data_space()
                               gd.lambert_lat1, gd.lambert_lat2);
     }
 
-  } else if (strncasecmp(resource,"STEREOGRAPHIC",13) == 0) {
+  } else if (strncasecmp(gd.projection_type,"STEREOGRAPHIC",13) == 0) {
 
     gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
     gd.proj_param[0] = gd.tangent_lat;
@@ -420,7 +420,7 @@ void init_data_space()
     gd.proj.initStereographic(gd.tangent_lat, gd.tangent_lon, gd.central_scale);
     gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
 
-  } else if (strncasecmp(resource,"POLAR_STEREO",12) == 0) {
+  } else if (strncasecmp(gd.projection_type,"POLAR_STEREO",12) == 0) {
 
     gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
     gd.proj_param[0] = gd.tangent_lat;
@@ -437,7 +437,7 @@ void init_data_space()
        gd.central_scale);
     gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
 
-  } else if (strncasecmp(resource,"MERCATOR",8) == 0) {
+  } else if (strncasecmp(gd.projection_type,"MERCATOR",8) == 0) {
 
     gd.display_projection = Mdvx::PROJ_MERCATOR;
     if(gd.debug) {
@@ -448,7 +448,7 @@ void init_data_space()
 
   } else {
 
-    fprintf(stderr,"Unknown projection type for resource: cidd.projection_type! \n");
+    fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", gd.projection_type);
     fprintf(stderr," Current valid types are: CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, MERCATOR\n");
     exit(-1);
 

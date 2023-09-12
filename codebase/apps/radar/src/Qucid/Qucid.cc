@@ -688,7 +688,8 @@ void Qucid::_initGlobals()
 
   gd.reset_click_latitude = 0.0;
   gd.reset_click_longitude = 0.0;
-  
+
+  gd.projection_type = NULL;
   gd.north_angle = 0.0;      // radar cart
   gd.lambert_lat1 = 0.0;     // lambert
   gd.lambert_lat2 = 0.0;     // lambert
