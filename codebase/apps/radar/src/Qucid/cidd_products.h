@@ -30,22 +30,23 @@
 
 #define NUM_PRODUCT_DETAIL_THRESHOLDS 3
 
-typedef enum {
-      LAST_FRAME_PRODUCTS = 0,
-      EACH_FRAME_PRODUCTS
-} select_type_t;
+// typedef enum {
+//       LAST_FRAME_PRODUCTS = 0,
+//       EACH_FRAME_PRODUCTS
+// } select_type_t;
+
+// Threshold and adjustment to font size
 
 typedef struct  {
-    double threshold;
-    int adjustment;
+  double threshold;
+  int adjustment;
 } prod_detail_thresh_t;
 
 typedef struct  {  
-    int    products_on;         /* Flag to turn products on/off globally */
-    int    prod_line_width;    /* How wide to make the lines */
-    int    prod_font_num;    
-
-    prod_detail_thresh_t detail[NUM_PRODUCT_DETAIL_THRESHOLDS];  /* Threshold and adjustment to font size */
+  int products_on;     /* Flag to turn products on/off globally */
+  int prod_line_width; /* How wide to make the lines */
+  int prod_font_num;    
+  prod_detail_thresh_t detail[NUM_PRODUCT_DETAIL_THRESHOLDS];
 } prod_info_t;
 
 #endif

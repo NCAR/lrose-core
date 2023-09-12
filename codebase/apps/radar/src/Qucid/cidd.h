@@ -252,6 +252,24 @@ struct    Global_data {
   int    drawing_mode;   // Flag for Internal drawing mode - FMQ output
   // 0 = not in drawing mode (initial value) 
   // != 0  Disable - zoom/pan, reporting 
+
+  int layer_legends_on;     // Control variables for plotting legend/Titles
+  int cont_legends_on;
+  int wind_legends_on;
+  int contour_line_width;
+  int smooth_contours;     // Apply smoothing before contouring ;  0-2 are valid values 
+  int use_alt_contours;    // 1 =  Use the Alternate Contouring routines 
+  int add_noise;           // Add 1 part in 250 of noise to contours 1 == true
+  double special_contour_value;      // which value to draw wider 
+  int map_bad_to_min_value; // 1 == true
+  int map_missing_to_min_value; // 1 == true
+
+  int products_on;
+  int product_line_width;
+  int product_font_size;
+  double product_detail_threshold[NUM_PRODUCT_DETAIL_THRESHOLDS];
+  int product_detail_adjustment[NUM_PRODUCT_DETAIL_THRESHOLDS];
+  
   int draw_main_on_top;  //  1 = Draw the main grid over all the other layers. 
   int mark_latest_click_location; // place a mark at latest click location
   int mark_latest_client_location; // place a mark at latest click location from client

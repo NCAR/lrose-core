@@ -575,6 +575,24 @@ void Qucid::_initGlobals()
   gd.top_margin_render_style = 0; 
   gd.bot_margin_render_style = 0; 
   gd.drawing_mode = 0;   
+
+  gd.layer_legends_on = 0;  // Control variables for plotting legend/Titles
+  gd.cont_legends_on = 0;
+  gd.wind_legends_on = 0;
+  gd.contour_line_width = 0;
+  gd.smooth_contours = 0;  // Apply smoothing before contouring  = 0;  0-2 are valid values 
+  gd.use_alt_contours = 0; // 1 =  Use the Alternate Contouring routines 
+  gd.add_noise = 0;        // Add 1 part in 250 of noise to contours 1 == true
+  gd.special_contour_value = 0;    // which value to draw wider 
+  gd.map_bad_to_min_value = 0;     // 1 == true
+  gd.map_missing_to_min_value = 0; // 1 == true
+
+  gd.products_on = 0;
+  gd.product_line_width = 0;
+  gd.product_font_size = 0;
+  MEM_zero(gd.product_detail_threshold);
+  MEM_zero(gd.product_detail_adjustment);
+
   gd.draw_main_on_top = 0;  
   gd.mark_latest_click_location = 0; 
   gd.mark_latest_client_location = 0; 

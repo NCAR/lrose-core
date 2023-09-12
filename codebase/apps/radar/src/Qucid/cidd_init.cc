@@ -214,38 +214,62 @@ void init_data_space()
           "cidd.movieframe_time_mode", 0);
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
-  gd.layers.layer_legends_on = (gd.uparams->getLong("cidd.layer_legends_on", 1) & 1);
-  gd.layers.cont_legends_on = (gd.uparams->getLong("cidd.cont_legends_on", 1) & 1);
-  gd.layers.wind_legends_on = (gd.uparams->getLong("cidd.wind_legends_on", 1) & 1);
 
-  gd.layers.contour_line_width = gd.uparams->getLong("cidd.contour_line_width", 1);
-  gd.layers.smooth_contours = gd.uparams->getLong("cidd.smooth_contours", 0);
-  gd.layers.use_alt_contours = gd.uparams->getLong("cidd.use_alt_contours", 0);
-  gd.layers.add_noise = gd.uparams->getLong("cidd.add_noise", 0);
-  gd.layers.special_contour_value = gd.uparams->getDouble("cidd.special_contour_value", 0.0);
+  gd.layer_legends_on = (gd.uparams->getLong("cidd.layer_legends_on", 1) & 1);
+  gd.cont_legends_on = (gd.uparams->getLong("cidd.cont_legends_on", 1) & 1);
+  gd.wind_legends_on = (gd.uparams->getLong("cidd.wind_legends_on", 1) & 1);
+  gd.contour_line_width = gd.uparams->getLong("cidd.contour_line_width", 1);
+  gd.smooth_contours = gd.uparams->getLong("cidd.smooth_contours", 0);
+  gd.use_alt_contours = gd.uparams->getLong("cidd.use_alt_contours", 0);
+  gd.add_noise = gd.uparams->getLong("cidd.add_noise", 0);
+  gd.special_contour_value = gd.uparams->getDouble("cidd.special_contour_value", 0.0);
+  gd.map_bad_to_min_value =  gd.uparams->getLong("cidd.map_bad_to_min_value", 0);
+  gd.map_missing_to_min_value =  gd.uparams->getLong("cidd.map_missing_to_min_value", 0);
 
-  gd.layers.map_bad_to_min_value =  gd.uparams->getLong("cidd.map_bad_to_min_value", 0);
-  gd.layers.map_missing_to_min_value =  gd.uparams->getLong("cidd.map_missing_to_min_value", 0);
+  gd.layers.layer_legends_on = gd.layer_legends_on;
+  gd.layers.cont_legends_on = gd.cont_legends_on;
+  gd.layers.wind_legends_on = gd.wind_legends_on;
+  gd.layers.contour_line_width = gd.contour_line_width;
+  gd.layers.smooth_contours = gd.smooth_contours;
+  gd.layers.use_alt_contours = gd.use_alt_contours;
+  gd.layers.add_noise = gd.add_noise;
+  gd.layers.special_contour_value = gd.special_contour_value;
+  gd.layers.map_bad_to_min_value = gd.map_bad_to_min_value;
+  gd.layers.map_missing_to_min_value = gd.map_missing_to_min_value;
 
+  // main field on top?
+  
   gd.draw_main_on_top = (gd.uparams->getLong("cidd.draw_main_on_top", 0) & 1);
+
+  // latest click location
+  
   gd.mark_latest_click_location =
     gd.uparams->getLong("cidd.mark_latest_click_location", 0);
-  gd.mark_latest_client_location =
-    gd.uparams->getLong("cidd.mark_latest_client_location", 0);
 
+  // drawing
+  
   gd.drawing_mode = 0;
 
-  gd.prod.products_on = 1;
-  gd.prod.prod_line_width = gd.uparams->getLong("cidd.product_line_width", 1);
-
-  gd.prod.prod_font_num = gd.uparams->getLong("cidd.product_font_size", 1);;
-
+  // products
+  
+  gd.products_on = gd.uparams->getLong("cidd.products_on", 1);
+  gd.product_line_width = gd.uparams->getLong("cidd.product_line_width", 1);
+  gd.product_font_size = gd.uparams->getLong("cidd.product_font_size", 1);
+  
+  gd.prod.products_on = gd.products_on;
+  gd.prod.prod_line_width = gd.product_line_width;
+  gd.prod.prod_font_num = gd.product_font_size;
+  
   for(i=0; i < NUM_PRODUCT_DETAIL_THRESHOLDS; i++) {
-    sprintf(str_buf,"cidd.product_detail_threshold%d",i+1);
-    gd.prod.detail[i].threshold = gd.uparams->getDouble(str_buf,0.0);
 
+    sprintf(str_buf,"cidd.product_detail_threshold%d",i+1);
+    gd.product_detail_threshold[i] = gd.uparams->getDouble(str_buf,0.0);
+    gd.prod.detail[i].threshold = gd.product_detail_threshold[i];
+    
     sprintf(str_buf,"cidd.product_detail_adjustment%d",i+1);
-    gd.prod.detail[i].adjustment = gd.uparams->getLong(str_buf,0);
+    gd.product_detail_adjustment[i] = gd.uparams->getLong(str_buf,0);
+    gd.prod.detail[i].adjustment = gd.product_detail_adjustment[i];
+
   }
 	
 
