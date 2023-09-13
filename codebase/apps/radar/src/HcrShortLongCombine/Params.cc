@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the high-rate (100Hz) rays into longer dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.");
+    tt->comment_hdr = tdrpStrDup("Combines 100Hz HCR moments stream containing both long and short pulses, and optionally long and short PRTs. Groups the long and short pulses into dwells (normally 10Hz). We write out the individual fields (i.e. long and short) and combined fields. If both long and short PRT data are present, the velocity fields are unfolded into a final velocity field.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -658,7 +658,7 @@
     tt->descr = tdrpStrDup("Input directory short.");
     tt->help = tdrpStrDup("ARCHIVE mode only. Directory for short pulse files.");
     tt->val_offset = (char *) &input_dir_short - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_short");
     tt++;
     
     // Parameter 'input_dir_long'
@@ -670,7 +670,7 @@
     tt->descr = tdrpStrDup("Input directory long.");
     tt->help = tdrpStrDup("ARCHIVE mode only. Directory for long pulse files.");
     tt->val_offset = (char *) &input_dir_long - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
+    tt->single_val.s = tdrpStrDup("$(DATA_DIR)/cfradial/moments/100hz_long");
     tt++;
     
     // Parameter 'input_fmq_url_short'
@@ -704,7 +704,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("seek_to_end_of_input_fmq");
     tt->descr = tdrpStrDup("Option to seek to the end of the input FMQ.");
-    tt->help = tdrpStrDup("If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
+    tt->help = tdrpStrDup("REALTIME mode only. If TRUE, the program will seek to the end of the fmq and only read in new data. If FALSE, it will start reading from the beginning of the FMQ.");
     tt->val_offset = (char *) &seek_to_end_of_input_fmq - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -1094,72 +1094,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.");
-    tt->comment_text = tdrpStrDup("These transforms are fixed. The same transform is applied to all files.");
-    tt++;
-    
-    // Parameter 'apply_linear_transforms'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("apply_linear_transforms");
-    tt->descr = tdrpStrDup("Apply linear transform to specified fields.");
-    tt->help = tdrpStrDup("If true, we will apply a linear transform to selected fields.");
-    tt->val_offset = (char *) &apply_linear_transforms - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'transform_fields'
-    // ctype is '_transform_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("transform_fields");
-    tt->descr = tdrpStrDup("transform field details.");
-    tt->help = tdrpStrDup("Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name.");
-    tt->array_offset = (char *) &_transform_fields - &_start_;
-    tt->array_n_offset = (char *) &transform_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(transform_field_t);
-    tt->array_n = 2;
-    tt->struct_def.name = tdrpStrDup("transform_field_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_transform_fields->input_field_name - (char *) _transform_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("transform_scale");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_transform_fields->transform_scale - (char *) _transform_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("transform_offset");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_transform_fields->transform_offset - (char *) _transform_fields;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ");
-      tt->struct_vals[1].d = 1;
-      tt->struct_vals[2].d = 0;
-      tt->struct_vals[3].s = tdrpStrDup("VEL");
-      tt->struct_vals[4].d = 1;
-      tt->struct_vals[5].d = 0;
-    tt++;
-    
-    // Parameter 'Comment 9'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 9");
-    tt->comment_hdr = tdrpStrDup("OUTPUT FORMAT");
+    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1173,121 +1108,14 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &output_format - &_start_;
     tt->enum_def.name = tdrpStrDup("output_format_t");
-    tt->enum_def.nfields = 6;
+    tt->enum_def.nfields = 2;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL");
       tt->enum_def.fields[0].val = OUTPUT_FORMAT_CFRADIAL;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_DORADE");
-      tt->enum_def.fields[1].val = OUTPUT_FORMAT_DORADE;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_FORMAT_FORAY");
-      tt->enum_def.fields[2].val = OUTPUT_FORMAT_FORAY;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_FORMAT_NEXRAD");
-      tt->enum_def.fields[3].val = OUTPUT_FORMAT_NEXRAD;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_FORMAT_UF");
-      tt->enum_def.fields[4].val = OUTPUT_FORMAT_UF;
-      tt->enum_def.fields[5].name = tdrpStrDup("OUTPUT_FORMAT_MDV_RADIAL");
-      tt->enum_def.fields[5].val = OUTPUT_FORMAT_MDV_RADIAL;
+      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_FORMAT_CFRADIAL2");
+      tt->enum_def.fields[1].val = OUTPUT_FORMAT_CFRADIAL2;
     tt->single_val.e = OUTPUT_FORMAT_CFRADIAL;
-    tt++;
-    
-    // Parameter 'netcdf_style'
-    // ctype is '_netcdf_style_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("netcdf_style");
-    tt->descr = tdrpStrDup("NetCDF style - if output_format is CFRADIAL");
-    tt->help = tdrpStrDup("netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls");
-    tt->val_offset = (char *) &netcdf_style - &_start_;
-    tt->enum_def.name = tdrpStrDup("netcdf_style_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("CLASSIC");
-      tt->enum_def.fields[0].val = CLASSIC;
-      tt->enum_def.fields[1].name = tdrpStrDup("NC64BIT");
-      tt->enum_def.fields[1].val = NC64BIT;
-      tt->enum_def.fields[2].name = tdrpStrDup("NETCDF4");
-      tt->enum_def.fields[2].val = NETCDF4;
-      tt->enum_def.fields[3].name = tdrpStrDup("NETCDF4_CLASSIC");
-      tt->enum_def.fields[3].val = NETCDF4_CLASSIC;
-    tt->single_val.e = NETCDF4;
-    tt++;
-    
-    // Parameter 'Comment 10'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 10");
-    tt->comment_hdr = tdrpStrDup("OUTPUT BYTE-SWAPPING and COMPRESSION");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_native_byte_order'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_native_byte_order");
-    tt->descr = tdrpStrDup("Option to leave data in native byte order.");
-    tt->help = tdrpStrDup("If false, data will be byte-swapped as appropriate on output.");
-    tt->val_offset = (char *) &output_native_byte_order - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compressed'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_compressed");
-    tt->descr = tdrpStrDup("Option to compress data fields on output.");
-    tt->help = tdrpStrDup("Applies to netCDF and Dorade. UF does not support compression.");
-    tt->val_offset = (char *) &output_compressed - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'Comment 11'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 11");
-    tt->comment_hdr = tdrpStrDup("OUTPUT OPTIONS FOR CfRadial FILES");
-    tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_force_ngates_vary'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_force_ngates_vary");
-    tt->descr = tdrpStrDup("Option to force the use of ragged arrays for CfRadial files.");
-    tt->help = tdrpStrDup("Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.");
-    tt->val_offset = (char *) &output_force_ngates_vary - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'compression_level'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("compression_level");
-    tt->descr = tdrpStrDup("Compression level for output, if compressed.");
-    tt->help = tdrpStrDup("Applies to netCDF only. Dorade compression is run-length encoding, and has not options..");
-    tt->val_offset = (char *) &compression_level - &_start_;
-    tt->single_val.i = 4;
-    tt++;
-    
-    // Parameter 'Comment 12'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 12");
-    tt->comment_hdr = tdrpStrDup("WRITE CFRADIAL FILES");
-    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'output_dir'
@@ -1374,18 +1202,6 @@
     tt->single_val.b = pTRUE;
     tt++;
     
-    // Parameter 'include_site_name_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_site_name_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the site name in the file name.");
-    tt->help = tdrpStrDup("Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.");
-    tt->val_offset = (char *) &include_site_name_in_file_name - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'include_subsecs_in_file_name'
     // ctype is 'tdrp_bool_t'
     
@@ -1408,18 +1224,6 @@
     tt->help = tdrpStrDup("Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.");
     tt->val_offset = (char *) &include_scan_type_in_file_name - &_start_;
     tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'include_vol_num_in_file_name'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("include_vol_num_in_file_name");
-    tt->descr = tdrpStrDup("Option to include the volume number in the file name.");
-    tt->help = tdrpStrDup("Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.");
-    tt->val_offset = (char *) &include_vol_num_in_file_name - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'use_hyphen_in_file_name_datetime_part'
@@ -1470,18 +1274,6 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'write_individual_sweeps'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("write_individual_sweeps");
-    tt->descr = tdrpStrDup("Option to write out individual sweeps if appropriate.");
-    tt->help = tdrpStrDup("If true, the volume is split into individual sweeps for writing. Applies to CfRadial format. This is always true for DORADE format files.");
-    tt->val_offset = (char *) &write_individual_sweeps - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
     // Parameter 'write_latest_data_info'
     // ctype is 'tdrp_bool_t'
     
@@ -1494,11 +1286,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 13'
+    // Parameter 'Comment 9'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 13");
+    tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("OUTPUT IN FMQ MODE");
     tt->comment_text = tdrpStrDup("");
     tt++;

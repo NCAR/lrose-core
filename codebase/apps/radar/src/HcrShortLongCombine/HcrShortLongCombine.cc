@@ -26,14 +26,16 @@
 //
 // Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Dec 2014
+// Sept 2023
 //
 //////////////////////////////////////////////////////////////////////////
 //
-// Combines multiple dwells from CfRadial files, writes out combined
-// dwell files. The goal is to summarize dwells in pointing data - for
-// example from vertically-pointing instruments. This can make displaying
-// the data in a BSCAN quicker and more efficient.
+// Combines 100Hz HCR moments stream containing both long and short pulses,
+// and optionally long and short PRTs. Groups the long and short pulses
+// into dwells (normally 10Hz). We write out the individual fields
+// (i.e. long and short) and combined fields.
+// If both long and short PRT data are present, the velocity fields
+// are unfolded into a final velocity field.
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -497,7 +499,8 @@ int HcrShortLongCombine::_combineDwellRays()
 
   // combine short rays into a single ray
 
-  RadxRay *rayCombined = _dwellVolShort.computeFieldStats(_globalMethod, _namedMethods);
+  RadxRay *rayCombined = _dwellVolShort.computeFieldStats(_globalMethod,
+                                                          _namedMethods);
   
   // long rays
   // sanity check
@@ -915,12 +918,6 @@ int HcrShortLongCombine::_processFile(const string &readPath)
     }
   }
 
-  // linear transform on fields as required
-
-  if (_params.apply_linear_transforms) {
-    _applyLinearTransform(vol);
-  }
-
   // combine the dwells
 
   _combineDwellsCentered(vol);
@@ -969,22 +966,6 @@ void HcrShortLongCombine::_setupRead(RadxFile &file)
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
-
-}
-
-//////////////////////////////////////////////////
-// apply linear transform to fields as required
-
-void HcrShortLongCombine::_applyLinearTransform(RadxVol &vol)
-{
-
-  for (int ii = 0; ii < _params.transform_fields_n; ii++) {
-    const Params::transform_field_t &tfld = _params._transform_fields[ii];
-    string iname = tfld.input_field_name;
-    double scale = tfld.transform_scale;
-    double offset = tfld.transform_offset;
-    vol.applyLinearTransform(iname, scale, offset);
-  } // ii
 
 }
 
@@ -1087,64 +1068,19 @@ void HcrShortLongCombine::_setupWrite(RadxFile &file)
     file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
   }
 
-  if (_params.output_compressed) {
-    file.setWriteCompressed(true);
-    file.setCompressionLevel(_params.compression_level);
-  } else {
-    file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order) {
-    file.setWriteNativeByteOrder(true);
-  } else {
-    file.setWriteNativeByteOrder(false);
-  }
+  file.setNcFormat(RadxFile::NETCDF4);
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
 
   // set output format
 
   switch (_params.output_format) {
-    case Params::OUTPUT_FORMAT_UF:
-      file.setFileFormat(RadxFile::FILE_FORMAT_UF);
+    case Params::OUTPUT_FORMAT_CFRADIAL2:
+      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL2);
       break;
-    case Params::OUTPUT_FORMAT_DORADE:
-      file.setFileFormat(RadxFile::FILE_FORMAT_DORADE);
-      break;
-    case Params::OUTPUT_FORMAT_FORAY:
-      file.setFileFormat(RadxFile::FILE_FORMAT_FORAY_NC);
-      break;
-    case Params::OUTPUT_FORMAT_NEXRAD:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NEXRAD_AR2);
-      break;
-    case Params::OUTPUT_FORMAT_MDV_RADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_MDV_RADIAL);
-      break;
-    default:
     case Params::OUTPUT_FORMAT_CFRADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
-  }
-
-  // set netcdf format - used for CfRadial
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4_CLASSIC:
-      file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::NC64BIT:
-      file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4:
-      file.setNcFormat(RadxFile::NETCDF4);
-      break;
     default:
-      file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (_params.write_individual_sweeps) {
-    file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
+      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
   }
 
   if (strlen(_params.output_filename_prefix) > 0) {
@@ -1152,10 +1088,8 @@ void HcrShortLongCombine::_setupWrite(RadxFile &file)
   }
 
   file.setWriteInstrNameInFileName(_params.include_instrument_name_in_file_name);
-  file.setWriteSiteNameInFileName(_params.include_site_name_in_file_name);
   file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   file.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
-  file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);
 
 }

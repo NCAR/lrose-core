@@ -93,9 +93,6 @@ private:
 
   DsFmq *_outputFmq;
 
-  // DsRadarQueue _outputFmq;
-  // DsRadarMsg _inputMsg;
-  // DsRadarMsg _outputMsg;
   DsRadarParams _rparams;
   vector<DsPlatformGeoref> _georefs;
   bool _needWriteParams;
@@ -154,7 +151,6 @@ private:
   
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
-  void _applyLinearTransform(RadxVol &vol);
   void _convertFields(RadxVol &vol);
   void _convertAllFields(RadxVol &vol);
   void _setupWrite(RadxFile &file);

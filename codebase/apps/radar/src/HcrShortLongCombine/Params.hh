@@ -103,19 +103,8 @@ public:
 
   typedef enum {
     OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_FORAY = 2,
-    OUTPUT_FORMAT_NEXRAD = 3,
-    OUTPUT_FORMAT_UF = 4,
-    OUTPUT_FORMAT_MDV_RADIAL = 5
+    OUTPUT_FORMAT_CFRADIAL2 = 1
   } output_format_t;
-
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
 
   typedef enum {
     START_AND_END_TIMES = 0,
@@ -142,12 +131,6 @@ public:
     double output_scale;
     double output_offset;
   } output_field_t;
-
-  typedef struct {
-    char* input_field_name;
-    double transform_scale;
-    double transform_offset;
-  } transform_field_t;
 
   ///////////////////////////
   // Member functions
@@ -490,22 +473,7 @@ public:
 
   output_encoding_t output_encoding;
 
-  tdrp_bool_t apply_linear_transforms;
-
-  transform_field_t *_transform_fields;
-  int transform_fields_n;
-
   output_format_t output_format;
-
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  tdrp_bool_t output_force_ngates_vary;
-
-  int compression_level;
 
   char* output_dir;
 
@@ -519,13 +487,9 @@ public:
 
   tdrp_bool_t include_instrument_name_in_file_name;
 
-  tdrp_bool_t include_site_name_in_file_name;
-
   tdrp_bool_t include_subsecs_in_file_name;
 
   tdrp_bool_t include_scan_type_in_file_name;
-
-  tdrp_bool_t include_vol_num_in_file_name;
 
   tdrp_bool_t use_hyphen_in_file_name_datetime_part;
 
@@ -534,8 +498,6 @@ public:
   tdrp_bool_t append_day_dir_to_output_dir;
 
   tdrp_bool_t append_year_dir_to_output_dir;
-
-  tdrp_bool_t write_individual_sweeps;
 
   tdrp_bool_t write_latest_data_info;
 
@@ -558,7 +520,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[67];
+  mutable TDRPtable _table[53];
 
   const char *_className;
 
