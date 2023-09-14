@@ -56,7 +56,6 @@ using namespace std;
 IwrfMomReader::IwrfMomReader()
   
 {
-  _opsInfo.setDebug(IWRF_DEBUG_OFF);
   _nonBlocking = false;
   _msecsNonblockingWait = 0;
   _msecsBlockingTimeout = -1;
@@ -811,6 +810,7 @@ int IwrfMomReader::_getNextMsg()
 // Read pulses from FILE
 // Derived class
 
+//////////////////////////////////////////////////////////////
 // REALTIME mode, read files as they arrive
 // Specify input directory to watch.
 //
@@ -824,6 +824,8 @@ IwrfMomReaderFile::IwrfMomReaderFile(const char *input_dir,
         IwrfMomReader()
         
 {
+
+  _inputDir = input_dir;
   
   _input = new DsInputPath("IwrfMomReaderFile",
                            false,
@@ -836,7 +838,34 @@ IwrfMomReaderFile::IwrfMomReaderFile(const char *input_dir,
 
 }
 
-// ARCHIVE mode - specify list of files to be read
+//////////////////////////////////////////////////////////////
+// ARCHIVE mode, read rays between start and end time.
+// Specify input directory.
+
+IwrfMomReaderFile::IwrfMomReaderFile(const char *input_dir,
+                                     const RadxTime &start_time,
+                                     const RadxTime &end_time) :
+        IwrfMomReader()
+        
+{
+  
+  _inputDir = input_dir;
+  
+  _archiveStartTime = start_time;
+  _archiveEndTime = end_time;
+  
+  _input = new DsInputPath("IwrfMomReaderFile",
+                           false,
+                           input_dir,
+                           start_time.utime(),
+                           end_time.utime());
+
+  _rayIndex = 0;
+
+}
+
+////////////////////////////////////////////////////
+// FILELIST mode - specify list of files to be read
 
 IwrfMomReaderFile::IwrfMomReaderFile(const vector<string> &fileList) :
         IwrfMomReader(),
