@@ -363,7 +363,7 @@ int HaloRadxFile::readFromPath(const string &path,
   int nGatesPerRay = _getNGates(_rawHeaderInfo);
   vector<Field>::iterator it;
   for (it = _fields.begin(); it != _fields.end(); ++ it) {
-    it->data.reserve(nGatesPerRay);
+    it->data.resize(nGatesPerRay);
   }
 
   int nRaysInFile = _getNRays(_rawHeaderInfo);
@@ -778,7 +778,6 @@ int HaloRadxFile::_readRayQualifiers() {
 // Set up the field names and units for model 200
 
 void HaloRadxFile::_findFields(string &columnLabel)
-  
 {
 
   _fields.clear();
@@ -949,8 +948,54 @@ bool HaloRadxFile::_contains(string &s1, string &s2) {
   }
 }
 
+Radx::SweepMode_t HaloRadxFile::decodeScanType(string &scanType) {
 
-// I am willin to bet that the order of this information is fixed to
+  //lower(scanType);
+  switch (scanType[0]) {
+  case 'S':
+  case 's':  // stare
+    return Radx::SWEEP_MODE_POINTING;
+  // 'W':
+  // 'w':
+  // return Radx::SWEEP_MODE_WIND_PROFILE;
+  default:
+    return Radx::SWEEP_MODE_NOT_SET;
+  }
+  //if (_contains(scanType, "Stare")) {
+
+  //}
+        /* sweep mode
+
+    SWEEP_MODE_NOT_SET = -1, ///< Initialized but not yet set
+    SWEEP_MODE_CALIBRATION = 0, ///< pointing for calibration
+    SWEEP_MODE_SECTOR = 1,     ///< sector scan mode
+    SWEEP_MODE_COPLANE = 2,    ///< co-plane dual doppler mode
+    SWEEP_MODE_RHI = 3,        ///< range height vertical scanning mode
+    SWEEP_MODE_VERTICAL_POINTING = 4, ///< vertical pointing for calibration
+    SWEEP_MODE_IDLE = 7,       ///< between scans
+    SWEEP_MODE_AZIMUTH_SURVEILLANCE = 8, /**< 360-degree azimuth mode,
+                                          * (surveillance) 
+    SWEEP_MODE_ELEVATION_SURVEILLANCE = 9, /**< 360-degree elevation
+                                            * mode (Eldora) 
+    SWEEP_MODE_SUNSCAN = 11,   ///< scanning the sun for calibrations
+  Stare ?=  SWEEP_MODE_POINTING = 12,  ///< fixed pointing
+    SWEEP_MODE_FOLLOW_VEHICLE = 13, ///< follow target vehicle
+    SWEEP_MODE_EL_SURV = 14, ///< elevation surveillance (ELDORA)
+    SWEEP_MODE_MANUAL_PPI = 15, /**< Manual PPI mode - elevation does
+                                 * not step automatically 
+    SWEEP_MODE_MANUAL_RHI = 16, /**< Manual RHI mode - azimuth does
+                                 * not step automatically 
+    SWEEP_MODE_SUNSCAN_RHI = 17,  ///< scanning the sun in RHI mode
+    SWEEP_MODE_DOPPLER_BEAM_SWINGING = 18, ///< as in profiler or lidar
+    SWEEP_MODE_COMPLEX_TRAJECTORY = 19,  ///< any sequential angle sequence
+    SWEEP_MODE_ELECTRONIC_STEERING = 20,  ///< as in phased array
+    SWEEP_MODE_LAST
+  } SweepMode_t;      
+  */
+}
+
+
+// I am willing to bet that the order of this information is fixed to
 // Decimal time (hours) Azimuth (degrees) Elevation (degrees) Pitch (degrees) Roll (degrees)
 // So, let's assume this and modify it if needed.
 void HaloRadxFile::decipherField(RadxRay *ray, Field &field, string value) {
@@ -992,7 +1037,7 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
       }
 
       // Let's assume the token order is the same as the RayQualifier order
-      
+
       string value;
 
       // time is in hours
@@ -1030,6 +1075,19 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
       ray->setElevationDeg(el);
 
       // TODO: get the pitch and the roll
+      RadxGeoref georef;
+
+      value = toks[3];
+      double pitch = 0.0;
+      pitch = atof(value.c_str());
+      georef.setPitch(pitch);
+
+      value = toks[4];
+      double roll = 0.0;
+      roll = atof(value.c_str());
+      georef.setRoll(roll);
+
+      ray->setGeoref(georef);            
 
       ray->setVolumeNumber(0);
       ray->setSweepNumber(0); 
@@ -1054,10 +1112,17 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
       }
 
       // range geometry
+      string label("Range gate length (m)");
+      float gateSpacingKm = identify(label, _rawHeaderInfo) / 1000.0;
+      string startRangeLabel("");
+      float startRangeKm =  0.0;  // identify(startRangeLabel, _rawHeaderInfo) / 1000.0; 
+      if (_verbose) {
+        cout << "range geom: startRangeKm " << startRangeKm << 
+          ", gateSpacingKm " << gateSpacingKm << endl;
+      }
+      ray->setRangeGeom(startRangeKm, gateSpacingKm);
 
-      ray->setRangeGeom(_startRangeKm, _gateSpacingKm);
 
-      // sweep mode
 
       if (_rhiMode) {
         ray->setSweepMode(Radx::SWEEP_MODE_RHI);
@@ -1085,7 +1150,7 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
 // <gate 0> <field 1 data> <field 2 data> ...
 // <gate N-1> <field 1 data> <field 2 data>
 
-int HaloRadxFile::_readRayData(int  nRaysInFile, int nGatesPerRay) {
+int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay) {
   // int error = -1;
   int nRays = 0;
   RadxRay *ray = NULL;
@@ -1096,10 +1161,12 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, int nGatesPerRay) {
     if (fgets(line, 65536, _file) != NULL) {
       cerr << "reading ray " << nRays << endl;
       ray = new RadxRay();
+      ray->setNGates(nGatesPerRay);
       _readRayQualifiers(ray, line);
       _readRayData(ray, _fields);
       // add ray to vector
       _rays.push_back(ray);  
+      cout << "in readRayData: nGates = " << ray->getNGates() << endl;
       nRays += 1;
     }
   } // while
@@ -1147,7 +1214,7 @@ void HaloRadxFile::_fillRay(RadxRay *ray, vector<Field> &fields) {
     rfld->setLongName(field.longName);
     rfld->setStandardName(field.standardName);
     rfld->setMissingFl32(Radx::missingFl32);
-    rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
+    rfld->setRangeGeom(ray->getStartRangeKm(), ray->getGateSpacingKm());
     size_t nGates = field.data.size();
     RadxArray<Radx::fl32> data_;
     Radx::fl32 *data = data_.alloc(nGates);
@@ -1198,9 +1265,9 @@ void HaloRadxFile::_addRayQualifiers(RadxRay *ray, vector<string> &toks) {
         rfld->setRangeGeom(_startRangeKm, _gateSpacingKm);
         rfld->setIsRayQualifier(true);
         
-        size_t nGates = 5; //field.index.size();
-        RadxArray<Radx::fl32> data_;
-        Radx::fl32 *data = data_.alloc(nGates);
+        //size_t nGates = 5; //field.index.size();
+        //RadxArray<Radx::fl32> data_;
+        //Radx::fl32 *data = data_.alloc(nGates);
 /*
         for (size_t jj = 0; jj < nGates; jj++) {
           string tok = toks[field.index[jj]];
@@ -1212,7 +1279,7 @@ void HaloRadxFile::_addRayQualifiers(RadxRay *ray, vector<string> &toks) {
         }
         
         */
-        rfld->addDataFl32(nGates, data);
+        //rfld->addDataFl32(nGates, data);
 
         ray->addField(rfld);
 
@@ -1325,7 +1392,7 @@ int HaloRadxFile::_loadReadVolume()
   _rays.clear();
   
   // load the sweep information from the rays
-
+  //_readVol->loadRayInfoFromFields();
   _readVol->loadSweepInfoFromRays();
   
   // constrain the sweep data as appropriate
@@ -1475,7 +1542,7 @@ void HaloRadxFile::print(ostream &out) const
 }
 
 ////////////////////////////////////////////////////////////
-// Print native data in leoPhotonics file
+// Print native data in Halo Photonics file
 // Returns 0 on success, -1 on failure
 // Use getErrStr() if error occurs
 
@@ -1490,7 +1557,7 @@ int HaloRadxFile::printNative(const string &path, ostream &out,
   
   if (!isHaloPhotonics(path)) {
     _addErrStr("ERROR - HaloRadxFile::printNative");
-    _addErrStr("  Not a leoshpere file: ", path);
+    _addErrStr("  Not a HaloPhotonics file: ", path);
     return -1;
   }
 
@@ -1815,6 +1882,17 @@ int HaloRadxFile::identifyModel(unordered_map<string, string> &dictionary) {
     return stoi(it->second);
   } else {
     std::cerr << "System ID Not found\n";
+    return 0;
+  }
+}
+
+int HaloRadxFile::identify(string &label, unordered_map<string, string> &dictionary) {
+
+  unordered_map<string, string>::iterator it = dictionary.find(label.c_str());
+  if (it != dictionary.end()) {
+    return stoi(it->second);
+  } else {
+    std::cerr << label << " Not found\n";
     return 0;
   }
 }
