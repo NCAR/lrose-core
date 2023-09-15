@@ -367,6 +367,7 @@ int HaloRadxFile::readFromPath(const string &path,
   }
 
   int nRaysInFile = _getNRays(_rawHeaderInfo);
+  // this is useless; it is not always correct.
 
   // read in ray data
   int iret = _readRayData(nRaysInFile, nGatesPerRay);
@@ -1156,7 +1157,7 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay) {
   RadxRay *ray = NULL;
   // read the values for the ray qualifiers
   char line[65536];
-  while (!feof(_file) && (nRays < nRaysInFile)) {
+  while (!feof(_file)) { // } && (nRays < nRaysInFile)) {
     // get data columns array
     if (fgets(line, 65536, _file) != NULL) {
       cerr << "reading ray " << nRays << endl;
@@ -1178,7 +1179,7 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay) {
 
 
 ////////////////////////////////////////////////////////////
-// Read in ray data for model 866
+// Read in ray data
 // Returns 0 on success, -1 on failure
 
 int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
@@ -1188,16 +1189,15 @@ int HaloRadxFile::_readRayData(RadxRay *ray, vector<Field> &fields) {
   int nGates = _fields[0].data.size();
   int igate = 0;
   char line[65536];
-
-  // get next line
-  char *cc = fgets(line, 65536, _file);
-  while (!feof(_file) && (igate < nGates)) {
+  do {
+     // get next line
+     char *cc = fgets(line, 65536, _file);
      _readNStoreFieldData(line, fields, igate);
      // get next line
-     cc = fgets(line, 65536, _file);
-     if (cc) {} // suppress compiler warning
+     // cc = fgets(line, 65536, _file);
+     //if (cc) {} // suppress compiler warning
      igate += 1;
-  }
+  } while (!feof(_file) && (igate < nGates));
   //if (igate == nGates) {
     _fillRay(ray, fields);
   //}  
