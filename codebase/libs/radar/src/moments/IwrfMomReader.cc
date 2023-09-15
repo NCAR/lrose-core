@@ -875,6 +875,7 @@ IwrfMomReaderFile::IwrfMomReaderFile(const vector<string> &fileList) :
 
   _input = new DsInputPath("IwrfMomReaderFile", false, _fileList);
   _rayIndex = 0;
+  _fileIndex = -1;
 
 }
 
@@ -942,10 +943,32 @@ RadxRay *IwrfMomReaderFile::readNextRay()
     _flags.clear();
   }
   
+  // in archive mode, and for first file,
+  // read until ray time exceeds start time
+
+  if (_archiveStartTime.utime() != RadxTime::NEVER && _fileIndex == 0) {
+    for (size_t iray = 0; iray < _vol.getRays().size(); iray++) {
+      _rayIndex = iray;
+      const RadxRay &ray = *_vol.getRays()[_rayIndex];
+      if (ray.getRadxTime() >= _archiveStartTime) {
+        break;
+      }
+    }
+  }
+
   const RadxRay &thisRay = *_vol.getRays()[_rayIndex];
   RadxEvent event;
   event.setFromRayFlags(thisRay);
   
+  // in archive mode check if ray time is after end time
+  
+  if (_archiveEndTime.utime() != RadxTime::NEVER) {
+    if (thisRay.getRadxTime() > _archiveEndTime) {
+      // ray time is beyond end time
+      return NULL;
+    }
+  }
+
   if (_rayIndex == 0) {
     // start of volume
     _events.push_back(event);
@@ -1023,6 +1046,7 @@ int IwrfMomReaderFile::_readNextFile()
 
   // set the metadata
 
+  _fileIndex++;
   _platform = _vol.getPlatform();
   _statusXml = _vol.getStatusXml();
   _rcalibs.clear();

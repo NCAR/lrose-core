@@ -314,6 +314,7 @@ private:
   
   DsInputPath *_input;
   vector<string> _fileList;
+  int _fileIndex;
   string _inputDir;
   string _inputPath;
   RadxVol _vol;
