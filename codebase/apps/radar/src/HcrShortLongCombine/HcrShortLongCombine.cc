@@ -59,8 +59,8 @@ HcrShortLongCombine::HcrShortLongCombine(int argc, char **argv)
 {
 
   OK = TRUE;
-  _readerFmqShort = NULL;
-  _readerFmqLong = NULL;
+  _readerShort = NULL;
+  _readerLong = NULL;
   _cacheRayShort = NULL;
   _cacheRayLong = NULL;
   _outputFmq = NULL;
@@ -124,12 +124,12 @@ HcrShortLongCombine::~HcrShortLongCombine()
 
 {
 
-  if (_readerFmqShort) {
-    delete _readerFmqShort;
+  if (_readerShort) {
+    delete _readerShort;
   }
 
-  if (_readerFmqLong) {
-    delete _readerFmqLong;
+  if (_readerLong) {
+    delete _readerLong;
   }
 
   if (_outputFmq) {
@@ -184,24 +184,71 @@ int HcrShortLongCombine::_runRealtime()
     return -1;
   }
 
-  // prepare the input fmqs at the start of the first output dwell
+  // prepare the input rays at the start of the first output dwell
   
-  if (_prepareInputFmqs()) {
+  if (_prepareInputRays()) {
     return -1;
   }
 
   _nRaysRead = 0;
   _nRaysWritten = 0;
 
+  // loop forever
+  
+  int iret = 0;
   while (true) {
+
+    // read in next dwell for short and long
+    
     PMU_auto_register("Reading FMQ realtime");
-    if (_readNextDwellFromFmq()) {
+    if (_readNextDwell()) {
       return -1;
     }
-    _combineDwellRays();
-  }
 
-  return 0;
+    // combine short and long
+
+    RadxRay *rayCombined = _combineDwellRays();
+    
+    if (rayCombined != NULL) {
+
+      // create output message from combined ray
+      
+      RadxMsg msg;
+      rayCombined->serialize(msg);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "=========== Writing out ray =============" << endl;
+        cerr << "  time, el, az: "
+             << rayCombined->getRadxTime().asString(3) << ", "
+             << rayCombined->getElevationDeg() << ", "
+             << rayCombined->getAzimuthDeg() << endl;
+        cerr << "=========================================" << endl;
+      }
+      
+      // write the message
+      
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+        cerr << "  Cannot write ray to output queue" << endl;
+        iret = -1;
+      }
+      _nRaysWritten++;
+      
+      // free up memory
+      
+      delete rayCombined;
+
+    } else {
+
+      cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+      cerr << "  no combined ray created" << endl;
+      iret = -1;
+      
+    }
+    
+  } // while (true)
+
+  return iret;
 
 }
 
@@ -220,11 +267,11 @@ int HcrShortLongCombine::_openFmqs()
          << _params.input_fmq_url_long << endl;
   }
   
-  _readerFmqShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
-  _readerFmqLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
+  _readerShort = new IwrfMomReaderFmq(_params.input_fmq_url_short);
+  _readerLong = new IwrfMomReaderFmq(_params.input_fmq_url_long);
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    _readerFmqShort->setDebug(IWRF_DEBUG_NORM);
-    _readerFmqLong->setDebug(IWRF_DEBUG_NORM);
+    _readerShort->setDebug(IWRF_DEBUG_NORM);
+    _readerLong->setDebug(IWRF_DEBUG_NORM);
   }
 
   // create the output FMQ
@@ -265,11 +312,11 @@ int HcrShortLongCombine::_openFmqs()
   }
 
   if (_params.seek_to_end_of_input_fmq) {
-    _readerFmqShort->seekToEnd();
-    _readerFmqLong->seekToEnd();
+    _readerShort->seekToEnd();
+    _readerLong->seekToEnd();
   } else {
-    _readerFmqShort->seekToStart();
-    _readerFmqLong->seekToStart();
+    _readerShort->seekToStart();
+    _readerLong->seekToStart();
   }
 
   return 0;
@@ -277,9 +324,9 @@ int HcrShortLongCombine::_openFmqs()
 }
 
 /////////////////////////////////////////////////////////////////
-// Initialize the input fmqs at the start of the first output dwell
+// Initialize the input rays at the start of the first output dwell
 
-int HcrShortLongCombine::_prepareInputFmqs()
+int HcrShortLongCombine::_prepareInputRays()
 {
 
   // read a short and long ray
@@ -291,15 +338,23 @@ int HcrShortLongCombine::_prepareInputFmqs()
     
     RadxRay *rayShort = _readRayShort();
     if (rayShort == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
-      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputRays()" << endl;
+      if (_params.mode == Params::REALTIME) {
+        cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      } else {
+        cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
+      }
       return -1;
     }
     
     RadxRay *longRay = _readRayLong();
     if (longRay == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_prepareInputFmqs()" << endl;
-      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      cerr << "ERROR - HcrShortLongCombine::_prepareInputRays()" << endl;
+      if (_params.mode == Params::REALTIME) {
+        cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      } else {
+        cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
+      }
       delete rayShort;
       return -1;
     }
@@ -384,7 +439,7 @@ int HcrShortLongCombine::_prepareInputFmqs()
 /////////////////////////////////////////////////////////////////
 // Read in rays for next dwell
 
-int HcrShortLongCombine::_readNextDwellFromFmq()
+int HcrShortLongCombine::_readNextDwell()
 {
 
   // clear the dwell vectors
@@ -407,8 +462,12 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   while (true) {
     RadxRay *ray = _readRayShort();
     if (ray == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
-      cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwell()" << endl;
+      if (_params.mode == Params::REALTIME) {
+        cerr << "  Cannot read input fmq short: " << _params.input_fmq_url_short << endl;
+      } else {
+        cerr << "  Cannot read input dir short: " << _params.input_dir_short << endl;
+      }
       return -1;
     }
     if (ray->getRadxTime() >= _dwellEndTime) {
@@ -425,8 +484,12 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
   while (true) {
     RadxRay *ray = _readRayLong();
     if (ray == NULL) {
-      cerr << "ERROR - HcrShortLongCombine::_readNextDwellFromFmq()" << endl;
-      cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      cerr << "ERROR - HcrShortLongCombine::_readNextDwell()" << endl;
+      if (_params.mode == Params::REALTIME) {
+        cerr << "  Cannot read input fmq long: " << _params.input_fmq_url_long << endl;
+      } else {
+        cerr << "  Cannot read input dir long: " << _params.input_dir_long << endl;
+      }
       return -1;
     }
     if (ray->getRadxTime() >= _dwellEndTime) {
@@ -473,8 +536,9 @@ int HcrShortLongCombine::_readNextDwellFromFmq()
 
 /////////////////////////////////////////////////////////////////
 // combine dwell rays
+// returns pointer to combined ray - this must be freed by caller.
 
-int HcrShortLongCombine::_combineDwellRays()
+RadxRay *HcrShortLongCombine::_combineDwellRays()
 
 {
 
@@ -483,7 +547,7 @@ int HcrShortLongCombine::_combineDwellRays()
   
   size_t nRaysShort = _dwellRaysShort.size();
   if (nRaysShort < 1) {
-    return -1;
+    return NULL;
   }
 
   // add short rays to vol
@@ -508,7 +572,7 @@ int HcrShortLongCombine::_combineDwellRays()
   size_t nRaysLong = _dwellRaysLong.size();
   if (nRaysLong < 1) {
     delete rayCombined;
-    return -1;
+    return NULL;
   }
 
   // add long rays to vol
@@ -544,44 +608,21 @@ int HcrShortLongCombine::_combineDwellRays()
     fld->setName(newName);
     rayCombined->addField(fld);
   }
+  delete rayLong;
 
   // unfold the velocity, add unfolded field to ray
 
   _unfoldVel(rayCombined);
 
-  // create message from combined ray
-
-  RadxMsg msg;
-  rayCombined->serialize(msg);
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
-    cerr << "=========== Writing out ray =============" << endl;
-    cerr << "  time, el, az: "
-         << rayCombined->getRadxTime().asString(3) << ", "
-         << rayCombined->getElevationDeg() << ", "
-         << rayCombined->getAzimuthDeg() << endl;
-    cerr << "=========================================" << endl;
-  }
-  
-  // write the message
-
-  int iret = 0;
-  if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
-                           msg.assembledMsg(), msg.lengthAssembled())) {
-    cerr << "ERROR - HcrShortLongCombine::_combineDwellRays" << endl;
-    cerr << "  Cannot write ray to output queue" << endl;
-    iret = -1;
-  }
-  _nRaysWritten++;
-  
   // free up memory
 
   _dwellVolShort.clear();
   _dwellVolLong.clear();
-  delete rayCombined;
-  delete rayLong;
+
+  // return combined ray
   
-  return iret;
-    
+  return rayCombined;
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -686,13 +727,13 @@ RadxRay *HcrShortLongCombine::_readRayShort()
 
   // read next ray
   
-  RadxRay *rayShort = _readerFmqShort->readNextRay();
+  RadxRay *rayShort = _readerShort->readNextRay();
   _nRaysRead++;
   
   // check for platform update
   
-  if (_readerFmqShort->getPlatformUpdated()) {
-    RadxPlatform platform = _readerFmqShort->getPlatform();
+  if (_readerShort->getPlatformUpdated()) {
+    RadxPlatform platform = _readerShort->getPlatform();
     _platformShort = platform;
     // create message
     RadxMsg msg;
@@ -707,8 +748,8 @@ RadxRay *HcrShortLongCombine::_readRayShort()
 
   // check for calibration update
   
-  if (_readerFmqShort->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerFmqShort->getRcalibs();
+  if (_readerShort->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerShort->getRcalibs();
     _calibsShort = calibs;
     for (size_t ii = 0; ii < calibs.size(); ii++) {
       // create message
@@ -726,8 +767,8 @@ RadxRay *HcrShortLongCombine::_readRayShort()
 
   // check for status xml update
   
-  if (_readerFmqShort->getStatusXmlUpdated()) {
-    const string statusXml = _readerFmqShort->getStatusXml();
+  if (_readerShort->getStatusXmlUpdated()) {
+    const string statusXml = _readerShort->getStatusXml();
     _statusXmlShort = statusXml;
     // create RadxStatusXml object
     RadxStatusXml status;
@@ -745,7 +786,7 @@ RadxRay *HcrShortLongCombine::_readRayShort()
   
   // update events
   
-  _eventsShort = _readerFmqShort->getEvents();
+  _eventsShort = _readerShort->getEvents();
   for (size_t ii = 0; ii < _eventsShort.size(); ii++) {
     RadxEvent event = _eventsShort[ii];
     RadxMsg msg;
@@ -771,20 +812,20 @@ RadxRay *HcrShortLongCombine::_readRayLong()
 
   // read next ray
   
-  RadxRay *rayLong = _readerFmqLong->readNextRay();
+  RadxRay *rayLong = _readerLong->readNextRay();
   _nRaysRead++;
 
   // check for platform update
   
-  if (_readerFmqLong->getPlatformUpdated()) {
-    const RadxPlatform &platform = _readerFmqLong->getPlatform();
+  if (_readerLong->getPlatformUpdated()) {
+    const RadxPlatform &platform = _readerLong->getPlatform();
     _platformLong = platform;
   }
 
   // check for calibration update
   
-  if (_readerFmqLong->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerFmqLong->getRcalibs();
+  if (_readerLong->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerLong->getRcalibs();
     _calibsLong = calibs;
     for (size_t ii = 0; ii < calibs.size(); ii++) {
       // create message
@@ -800,21 +841,21 @@ RadxRay *HcrShortLongCombine::_readRayLong()
     } // ii
   }
 
-  if (_readerFmqLong->getRcalibUpdated()) {
-    const vector<RadxRcalib> &calibs = _readerFmqLong->getRcalibs();
+  if (_readerLong->getRcalibUpdated()) {
+    const vector<RadxRcalib> &calibs = _readerLong->getRcalibs();
     _calibsLong = calibs;
   }
 
   // check for status xml update
   
-  if (_readerFmqLong->getStatusXmlUpdated()) {
-    const string statusXml = _readerFmqLong->getStatusXml();
+  if (_readerLong->getStatusXmlUpdated()) {
+    const string statusXml = _readerLong->getStatusXml();
     _statusXmlLong = statusXml;
   }
 
   // update events
   
-  _eventsLong = _readerFmqLong->getEvents();
+  _eventsLong = _readerLong->getEvents();
 
   return rayLong;
 
@@ -826,6 +867,92 @@ RadxRay *HcrShortLongCombine::_readRayLong()
 int HcrShortLongCombine::_runArchive()
 {
 
+  // Instantiate and initialize the input radar queues
+
+  if (_openFileReaders()) {
+    return -1;
+  }
+
+  // prepare the input rays at the start of the first output dwell
+  
+  if (_prepareInputRays()) {
+    return -1;
+  }
+
+  _nRaysRead = 0;
+  _nRaysWritten = 0;
+
+  // loop until readers are empty
+  
+  int iret = 0;
+  while (true) {
+    
+    // read in next dwell for short and long
+    
+    if (_readNextDwell()) {
+      return -1;
+    }
+
+    // combine short and long
+
+    RadxRay *rayCombined = _combineDwellRays();
+    
+    if (rayCombined != NULL) {
+
+      // create output message from combined ray
+      
+      RadxMsg msg;
+      rayCombined->serialize(msg);
+      if (_params.debug >= Params::DEBUG_VERBOSE) {
+        cerr << "=========== Writing out ray =============" << endl;
+        cerr << "  time, el, az: "
+             << rayCombined->getRadxTime().asString(3) << ", "
+             << rayCombined->getElevationDeg() << ", "
+             << rayCombined->getAzimuthDeg() << endl;
+        cerr << "=========================================" << endl;
+      }
+      
+      // write the message
+      
+      if (_outputFmq->writeMsg(msg.getMsgType(), msg.getSubType(),
+                               msg.assembledMsg(), msg.lengthAssembled())) {
+        cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+        cerr << "  Cannot write ray to output queue" << endl;
+        iret = -1;
+      }
+      _nRaysWritten++;
+      
+      // free up memory
+      
+      delete rayCombined;
+
+    } else {
+
+      cerr << "ERROR - HcrShortLongCombine::_runRealtime" << endl;
+      cerr << "  no combined ray created" << endl;
+      iret = -1;
+      
+    }
+    
+  } // while (true)
+
+  return iret;
+
+  _nRaysRead = 0;
+  _nRaysWritten = 0;
+
+  while (true) {
+    PMU_auto_register("Reading FMQ realtime");
+    if (_readNextDwell()) {
+      return -1;
+    }
+    _combineDwellRays();
+  }
+
+  return 0;
+
+#ifdef JUNK
+  
   // get the files to be processed
 
   RadxTimeList tlist;
@@ -857,6 +984,56 @@ int HcrShortLongCombine::_runArchive()
   }
 
   return iret;
+
+#endif
+
+}
+
+//////////////////////////////////////////////////
+// Open readers from CfRadial files
+
+int HcrShortLongCombine::_openFileReaders()
+{
+
+  // Instantiate and initialize the input radar queues
+
+  if (_params.debug) {
+    cerr << "DEBUG - opening input dir for short pulse: "
+         << _params.input_dir_short << endl;
+    cerr << "DEBUG - opening input dir for long  pulse: "
+         << _params.input_dir_long << endl;
+  }
+
+  RadxTime startTime(_args.startTime);
+  RadxTime endTime(_args.endTime);
+  
+  _readerShort = new IwrfMomReaderFile(_params.input_dir_short, startTime, endTime);
+  _readerLong = new IwrfMomReaderFile(_params.input_dir_long, startTime, endTime);
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _readerShort->setDebug(IWRF_DEBUG_NORM);
+    _readerLong->setDebug(IWRF_DEBUG_NORM);
+  }
+
+  // initialize reader - read one ray
+  
+  RadxRay *rayShort = _readRayShort();
+  if (rayShort == NULL) {
+    cerr << "ERROR - HcrShortLongCombine::_openFileReaders()" << endl;
+    cerr << "  Cannot read rays from short pulse dir: " << _params.input_dir_short << endl;
+    cerr << "  Start time: " << startTime.asString(0) << endl;
+    cerr << "  End time: " << endTime.asString(0) << endl;
+  }
+
+  RadxRay *rayLong = _readRayLong();
+  if (rayLong == NULL) {
+    cerr << "ERROR - HcrShortLongCombine::_openFileReaders()" << endl;
+    cerr << "  Cannot read rays from long pulse dir: " << _params.input_dir_long << endl;
+    cerr << "  Start time: " << startTime.asString(0) << endl;
+    cerr << "  End time: " << endTime.asString(0) << endl;
+  }
+
+  return 0;
 
 }
 

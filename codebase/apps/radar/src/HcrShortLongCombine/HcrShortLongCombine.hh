@@ -86,8 +86,8 @@ private:
 
   // reading fmq in realtime
 
-  IwrfMomReader *_readerFmqShort;
-  IwrfMomReader *_readerFmqLong;
+  IwrfMomReader *_readerShort;
+  IwrfMomReader *_readerLong;
 
   // Radx output moments queue
 
@@ -141,14 +141,15 @@ private:
   int _runArchive();
 
   int _openFmqs();
-  int _prepareInputFmqs();
-  int _readNextDwellFromFmq();
-  int _combineDwellRays();
+  int _prepareInputRays();
+  int _readNextDwell();
+  RadxRay *_combineDwellRays();
   void _clearDwellRays();
   void _unfoldVel(RadxRay *rayCombined);
   RadxRay *_readRayShort();
   RadxRay *_readRayLong();
   
+  int _openFileReaders();
   int _processFile(const string &filePath);
   void _setupRead(RadxFile &file);
   void _convertFields(RadxVol &vol);
