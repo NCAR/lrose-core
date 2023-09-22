@@ -737,6 +737,18 @@
     tt->single_val.s = tdrpStrDup("");
     tt++;
     
+    // Parameter 'search_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("search_substr");
+    tt->descr = tdrpStrDup("File name sub-string.");
+    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->val_offset = (char *) &search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'gematronik_realtime_mode'
     // ctype is 'tdrp_bool_t'
     
@@ -2576,7 +2588,7 @@
     tt->array_elem_size = sizeof(transform_field_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("transform_field_t");
-    tt->struct_def.nfields = 3;
+    tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
@@ -2594,15 +2606,29 @@
       tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_transform_fields->transform_offset - (char *) _transform_fields;
-    tt->n_struct_vals = 6;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[3].fname = tdrpStrDup("field_folds");
+      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_transform_fields->field_folds - (char *) _transform_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[4].fname = tdrpStrDup("folding_value");
+      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_transform_fields->folding_value - (char *) _transform_fields;
+    tt->n_struct_vals = 10;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("DBZ");
       tt->struct_vals[1].d = 1;
       tt->struct_vals[2].d = 0;
-      tt->struct_vals[3].s = tdrpStrDup("VEL");
-      tt->struct_vals[4].d = 1;
-      tt->struct_vals[5].d = 0;
+      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[4].d = 0;
+      tt->struct_vals[5].s = tdrpStrDup("VEL");
+      tt->struct_vals[6].d = 1;
+      tt->struct_vals[7].d = 0;
+      tt->struct_vals[8].b = pTRUE;
+      tt->struct_vals[9].d = 25;
     tt++;
     
     // Parameter 'Comment 23'

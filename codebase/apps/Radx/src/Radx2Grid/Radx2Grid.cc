@@ -312,6 +312,33 @@ int Radx2Grid::_processFile(const string &filePath)
   _readVol.clear();
   _freeInterpRays();
 
+  // check file name
+  
+  if (strlen(_params.input_file_search_ext) > 0) {
+    RadxPath rpath(filePath);
+    if (strcmp(rpath.getExt().c_str(), _params.input_file_search_ext)) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "  Does not have correct extension: "
+             << _params.input_file_search_ext << endl;
+      }
+      return 0;
+    }
+  }
+  
+  if (strlen(_params.input_file_search_substr) > 0) {
+    RadxPath rpath(filePath);
+    if (rpath.getFile().find(_params.input_file_search_substr)
+        == string::npos) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << filePath << endl;
+        cerr << "  Does not contain required substr: "
+             << _params.input_file_search_substr << endl;
+      }
+      return 0;
+    }
+  }
+
   // check we have not already processed this file
   // in the file aggregation step
 

@@ -31,7 +31,7 @@ ParameterColorView::ParameterColorView(QWidget *parent) :
 void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedField)
 //				map<string, string> selectedColorMap)
 {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
 
     // setTitle("Parameter + Color");
     layout = new QGridLayout;
@@ -241,8 +241,8 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
     setLayout(layout);
 
     // kick off the fetch of the color map
-  LOG(DEBUG) << "selected Field is ...";
-  LOG(DEBUG) << selectedField;
+  LOG(DEBUG_VERBOSE) << "selected Field is ...";
+  LOG(DEBUG_VERBOSE) << selectedField;
 
   //_selectedField = selectedField;
   emit getColorMap(selectedField);
@@ -251,7 +251,7 @@ void ParameterColorView::updateEvent(vector<string> fieldNames, string selectedF
   emit getAnnotationColor();
   emit getBackgroundColor();
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
@@ -265,7 +265,7 @@ void ParameterColorView::errorMessage(string title, string message) {
 
 
 void ParameterColorView::fieldSelected(QListWidgetItem *current, QListWidgetItem *previous) {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   // get the color map for the current field
   QString fieldName = current->text();
   
@@ -276,11 +276,11 @@ void ParameterColorView::fieldSelected(QListWidgetItem *current, QListWidgetItem
     _selectedField = newSelection;
     emit getColorMap(_selectedField);
   } 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ParameterColorView::colorMapProvided(string fieldName, ColorMap *colorMap) {
-  LOG(DEBUG) << "entry";
+  LOG(DEBUG_VERBOSE) << "entry";
   if (colorMap == NULL) {
     errorMessage("field not found", fieldName);
   } else {
@@ -310,7 +310,7 @@ void ParameterColorView::colorMapProvided(string fieldName, ColorMap *colorMap) 
     layout->addWidget(cmapLabel, 1, 3, -1, 1);
 
   }
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ParameterColorView::gridColorProvided(QColor color) {
@@ -360,7 +360,7 @@ bool ParameterColorView::getChanges() {
 
 void ParameterColorView::setCenterPoint()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   QString qvalue;
   bool ok = false;
   qvalue = centerColorLineEdit->text();
@@ -374,13 +374,13 @@ void ParameterColorView::setCenterPoint()
   //qvalue = centerColorLineEdit->text();
   //std::string value = qvalue.toStdString();
   //sscanf(value.c_str(),"%g", &newCenterPoint);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }       
 
 void ParameterColorView::setMaxPoint()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   QString qvalue;
   bool ok = false;
@@ -403,7 +403,7 @@ void ParameterColorView::setMaxPoint()
 
 void ParameterColorView::setMinPoint()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   QString qvalue;
   bool ok = false;
@@ -426,7 +426,7 @@ void ParameterColorView::setMinPoint()
 
 void ParameterColorView::setStepPoint()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   QString qvalue;
   bool ok = false;
@@ -445,7 +445,7 @@ void ParameterColorView::setStepPoint()
 
 /*
 void ParameterColorView::saveColorScale() {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   QString qvalue;
   bool ok = false;
@@ -463,13 +463,13 @@ void ParameterColorView::saveColorScale() {
 
 void ParameterColorView::replotColorScale() {
 
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   QString qvalue;
   // bool ok = false;
   
-  LOG(DEBUG) << "enter";
-  LOG(DEBUG) << "emit replotFieldColorMapChanges";
+  LOG(DEBUG_VERBOSE) << "enter";
+  LOG(DEBUG_VERBOSE) << "emit replotFieldColorMapChanges";
 
   emit replotFieldColorMapChanges(); // _selectedField);
 /*
@@ -477,12 +477,12 @@ void ParameterColorView::replotColorScale() {
   msgBox.setText("Replot ...");
   msgBox.exec();
 */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ParameterColorView::setGridColor()
 {   
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   
     // const QColorView::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
@@ -494,12 +494,12 @@ void ParameterColorView::setGridColor()
         emit gridColorChanged(color);
     }
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void ParameterColorView::setBoundaryColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   errorMessage("", "Not Implemented");
     /*
@@ -513,13 +513,13 @@ void ParameterColorView::setBoundaryColor()
 	//         emit boundaryColorChanged(color);
     }
     */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setExceededColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   errorMessage("", "Not Implemented");
   /*
@@ -531,13 +531,13 @@ void ParameterColorView::setExceededColor()
         exceededColorButton->setAutoFillBackground(true);
     }
   */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setMissingColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   errorMessage("", "Not Implemented");
   /*
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
@@ -548,13 +548,13 @@ void ParameterColorView::setMissingColor()
         missingColorButton->setAutoFillBackground(true);
     }
   */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setAnnotationColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   errorMessage("", "Not Implemented");
   /*
@@ -567,13 +567,13 @@ void ParameterColorView::setAnnotationColor()
         annotationColorButton->setAutoFillBackground(true);
     }
   */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setBackgroundColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
     // const QColorDialog::ColorDialogOptions options = QFlag(colorDialogOptionsWidget->value());
     const QColor color = QColorDialog::getColor(Qt::green, this); // , "Select Color", options);
@@ -583,25 +583,25 @@ void ParameterColorView::setBackgroundColor()
         backgroundColorButton->setAutoFillBackground(true);
         emit backgroundColorChanged(color);
     }
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setColorOnButton(QPushButton *button, QColor color)
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
     if (color.isValid()) {
         button->setPalette(QPalette(color));
         button->setAutoFillBackground(true);
     }
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 
 void ParameterColorView::setEmphasisColor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   errorMessage("", "Not Implemented");
 
   /*
@@ -613,7 +613,7 @@ void ParameterColorView::setEmphasisColor()
         emphasisColorButton->setAutoFillBackground(true);
     }
   */
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 }
 

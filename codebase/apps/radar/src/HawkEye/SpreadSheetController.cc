@@ -95,7 +95,7 @@ vector<string>  SpreadSheetController::getFieldNames()
 vector<float> *SpreadSheetController::getData(string fieldName)
 {
 
-  LOG(DEBUG) << "getting values for " << fieldName;
+  LOG(DEBUG_VERBOSE) << "getting values for " << fieldName;
 
   
   //return _currentModel->getData(fieldName);
@@ -103,7 +103,7 @@ vector<float> *SpreadSheetController::getData(string fieldName)
   //  vector<float> SpreadSheetModel::getData(string fieldName)
   vector<float> *data = _currentModel->getData(fieldName);
 
-  LOG(DEBUG) << " found " << data->size() << " data values ";
+  LOG(DEBUG_VERBOSE) << " found " << data->size() << " data values ";
 
   return data;
  
@@ -111,7 +111,7 @@ vector<float> *SpreadSheetController::getData(string fieldName)
 
 void SpreadSheetController::setData(string fieldName, vector<float> *data)
 {
-  LOG(DEBUG) << "setting values for " << fieldName;
+  LOG(DEBUG_VERBOSE) << "setting values for " << fieldName;
   _currentModel->setData(fieldName, data);
 }
 
@@ -128,7 +128,7 @@ void  SpreadSheetController::needDataForField(string fieldName, int r, int c) {
 
 void SpreadSheetController::getVolumeChanges() {
 
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   vector<string> *fields = _currentView->getVariablesFromSpreadSheet();
   int column = 0;
   for(vector<string>::iterator s = fields->begin(); s != fields->end(); s++) {
@@ -137,7 +137,7 @@ void SpreadSheetController::getVolumeChanges() {
     column++;
   }
   volumeUpdated();
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void SpreadSheetController::volumeUpdated() {

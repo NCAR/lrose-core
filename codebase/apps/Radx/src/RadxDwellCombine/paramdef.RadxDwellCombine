@@ -141,12 +141,6 @@ commentdef {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to aggregate sweep files into a volume on read.";
-  p_help = "If true, and the input data is in sweeps rather than volumes (e.g. DORADE), the sweep files from a volume will be aggregated into a volume.";
-} aggregate_sweep_files_on_read;
-
-paramdef boolean {
-  p_default = false;
   p_descr = "Option to set the max range for any ray.";
 } set_max_range;
 
@@ -459,68 +453,18 @@ paramdef struct transform_field_t {
 } transform_fields[];
 
 commentdef {
-  p_header = "OUTPUT FORMAT";
+  p_header = "WRITE CFRADIAL FILES";
 }
 
 typedef enum {
   OUTPUT_FORMAT_CFRADIAL,
-  OUTPUT_FORMAT_DORADE,
-  OUTPUT_FORMAT_FORAY,
-  OUTPUT_FORMAT_NEXRAD,
-  OUTPUT_FORMAT_UF,
-  OUTPUT_FORMAT_MDV_RADIAL
+  OUTPUT_FORMAT_CFRADIAL2
 } output_format_t;
 
 paramdef enum output_format_t {
   p_default = OUTPUT_FORMAT_CFRADIAL;
   p_descr = "Format for the output files.";
 } output_format;
-
-typedef enum {
-  CLASSIC, NC64BIT, NETCDF4, NETCDF4_CLASSIC
-} netcdf_style_t;
-
-paramdef enum netcdf_style_t {
-  p_default = NETCDF4;
-  p_descr = "NetCDF style - if output_format is CFRADIAL";
-  p_help = "netCDF classic format, netCDF 64-bit offset format, netCDF4 using HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls";
-} netcdf_style;
-
-commentdef {
-  p_header = "OUTPUT BYTE-SWAPPING and COMPRESSION";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to leave data in native byte order.";
-  p_help = "If false, data will be byte-swapped as appropriate on output.";
-} output_native_byte_order;
-
-paramdef boolean {
-  p_default = true;
-  p_descr = "Option to compress data fields on output.";
-  p_help = "Applies to netCDF and Dorade. UF does not support compression.";
-} output_compressed;
-
-commentdef {
-  p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
-}
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to force the use of ragged arrays for CfRadial files.";
-  p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
-} output_force_ngates_vary;
-
-paramdef int {
-  p_default = 4;
-  p_descr = "Compression level for output, if compressed.";
-  p_help = "Applies to netCDF only. Dorade compression is run-length encoding, and has not options..";
-} compression_level;
-
-commentdef {
-  p_header = "WRITE CFRADIAL FILES";
-}
 
 paramdef string {
   p_default = "./output";

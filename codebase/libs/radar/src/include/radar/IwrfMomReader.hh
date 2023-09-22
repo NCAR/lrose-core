@@ -167,14 +167,13 @@ public:
 protected:
   
   IwrfDebug_t _debug;
-  IwrfTsInfo _opsInfo;
-
+  
   // incoming message
-
+  
   MemBuf _msgBuf;
   int _msgId;
 
-  // reading DsRadar format
+  // reading DsRadar format - FMQ only
 
   DsRadarMsg _dsRadarMsg;
   int _dsContents;
@@ -267,7 +266,13 @@ public:
                     DsInput_heartbeat_t heartbeat_func = PMU_auto_register,
                     bool use_ldata_info = TRUE);
   
-  // ARCHIVE mode - specify list of files to be read
+  // ARCHIVE mode - reads data within a time interval
+  
+  IwrfMomReaderFile(const char *input_dir,
+                    const RadxTime &start_time,
+                    const RadxTime &end_time);
+  
+  // FILELIST mode - specify list of files to be read
   
   IwrfMomReaderFile(const vector<string> &fileList);
  
@@ -309,9 +314,13 @@ private:
   
   DsInputPath *_input;
   vector<string> _fileList;
+  int _fileIndex;
+  string _inputDir;
   string _inputPath;
   RadxVol _vol;
   size_t _rayIndex;
+  RadxTime _archiveStartTime;
+  RadxTime _archiveEndTime;
 
   // private functions
   

@@ -202,7 +202,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
                         const std::vector< DisplayField* > &fields)
 {
 
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   // add a new beam to the display. 
   // The steps are:
@@ -281,7 +281,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
       _sumElev += ray->getElevationDeg();
       _nRays++;
       _meanElev = _sumElev / _nRays;
-      LOG(DEBUG) << "isArchiveMode _nRays = " << _nRays;    
+      LOG(DEBUG_VERBOSE) << "isArchiveMode _nRays = " << _nRays;    
     } // if (_isArchiveMode) 
     
   } // if (newBeams.size() > 0) 
@@ -291,7 +291,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
       _ppiBeams.size() % 10 == 0) {
     cerr << "==>> _ppiBeams.size(): " << _ppiBeams.size() << endl;
   }
-  LOG(DEBUG) << "number of new Beams " << newBeams.size();
+  LOG(DEBUG_VERBOSE) << "number of new Beams " << newBeams.size();
 
   // newBeams has pointers to all of the newly added beams.  Render the
   // beam data.
@@ -322,7 +322,7 @@ void PpiWidget::addBeam(const RadxRay *ray,
 
   _performRendering();
 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 
@@ -1189,7 +1189,7 @@ void PpiWidget::_refreshImages()
 void PpiWidget::contextMenuParameterColors()
 {
   
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   //DisplayField selectedField;                                                                             
 
@@ -1234,20 +1234,20 @@ void PpiWidget::contextMenuParameterColors()
     // TODO: what are changes?  new displayField(s)?                                                        
   //}
  
-  LOG(DEBUG) << "exit ";
+  LOG(DEBUG_VERBOSE) << "exit ";
   
 }
 
 /*
 void PpiWidget::sillyReceived() {
-  LOG(DEBUG) << "enter";
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "enter";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 */
 /*
 void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMap) {
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   // connect the new color map with the field                                                                    
   // find the fieldName in the list of FieldDisplays                                                             
   
@@ -1277,7 +1277,7 @@ void PpiWidget::changeToDisplayField(string fieldName)  // , ColorMap newColorMa
     _changeField(fieldId, true);
   }
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 */
 
@@ -1303,7 +1303,7 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
       if (closestRay->getElevationDeg() == rayr->getElevationDeg()) {
         foundIt = true;
         closestRayToEdit = *r;
-        LOG(DEBUG) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
+        LOG(DEBUG_VERBOSE) << "Found closest ray: index = " << idx << " pointer = " << closestRayToEdit;
         closestRay->print(cout); 
       }
     }
@@ -1347,7 +1347,7 @@ void PpiWidget::ExamineEdit(const RadxRay *closestRay) {
 
 void PpiWidget::contextMenuEditor()
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   // get click location in world coords
   // by using the location stored in class variables
@@ -1364,7 +1364,7 @@ void PpiWidget::contextMenuEditor()
   } else {
     ExamineEdit(closestRay);
   }
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 /* TODO add to PolarWidget class

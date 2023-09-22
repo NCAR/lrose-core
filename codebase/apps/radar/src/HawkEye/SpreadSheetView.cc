@@ -32,7 +32,7 @@ Q_DECLARE_METATYPE(QVector<double>)
   SpreadSheetView::SpreadSheetView(QWidget *parent, float rayAzimuth)
   : QMainWindow(parent)
 {
-  LOG(DEBUG) << "in SpreadSheetView constructor";
+  LOG(DEBUG_VERBOSE) << "in SpreadSheetView constructor";
   //  initSpreadSheet();
   int rows;
   int cols;
@@ -135,16 +135,16 @@ Q_DECLARE_METATYPE(QVector<double>)
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
     }
     
-    LOG(DEBUG) << "creating table";
+    LOG(DEBUG_VERBOSE) << "creating table";
     table->setItemPrototype(table->item(rows - 1, cols - 1));
     table->setItemDelegate(new SpreadSheetDelegate());
 
     createActions();
-    LOG(DEBUG) << "Action created\n";
+    LOG(DEBUG_VERBOSE) << "Action created\n";
     updateColor(0);
-    LOG(DEBUG) << "update Color\n";
+    LOG(DEBUG_VERBOSE) << "update Color\n";
     setupMenuBar();
-    LOG(DEBUG) << "setupMenuBar\n";
+    LOG(DEBUG_VERBOSE) << "setupMenuBar\n";
     //setupContentsBlank();
     //cout << "setupContentsBlank\n";
     setupContextMenu();
@@ -255,7 +255,7 @@ SpreadSheetView::SpreadSheetView(std::string fileName, QWidget *parent)
 
 void SpreadSheetView::init()
 {
-  LOG(DEBUG) << "emitting signal to get field names";
+  LOG(DEBUG_VERBOSE) << "emitting signal to get field names";
   //  emit a signal to the controller to get the data for display
   emit needFieldNames();
   
@@ -475,7 +475,7 @@ void SpreadSheetView::updateTextEdit(QTableWidgetItem *item)
 void SpreadSheetView::returnPressed()
 {
     QString text = formulaInput->getText();
-    LOG(DEBUG) << "text entered: " << text.toStdString();
+    LOG(DEBUG_VERBOSE) << "text entered: " << text.toStdString();
 
     int row = table->currentRow();
     int col = table->currentColumn();
@@ -495,7 +495,7 @@ float  SpreadSheetView::myPow()
 // SoloFunctions object comes in with data model already attached
 void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
 
-  LOG(DEBUG) << "defining REMOVE_AIRCRAFT_MOTION function";
+  LOG(DEBUG_VERBOSE) << "defining REMOVE_AIRCRAFT_MOTION function";
   //  emit radarVolumeDataRequest();  make the request for the data inside the SoloFunctions object
 
   //    QJSValue myExt = engine.newQObject(new SoloFunctions(_controller));
@@ -509,7 +509,7 @@ void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
     printQJSEngineContext();
 
     /*
-    LOG(DEBUG) << "current QJSEngine context ...";
+    LOG(DEBUG_VERBOSE) << "current QJSEngine context ...";
 
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine.globalObject();
@@ -523,7 +523,7 @@ void SpreadSheetView::setupSoloFunctions(SoloFunctions *soloFunctions) {
 	qDebug() << it.name() << ": " << theValue; // it.value().toString().truncate(100);
         currentVariableContext[it.name()] = it.value().toString();
       }
-      LOG(DEBUG) << "end current QJSEngine context";
+      LOG(DEBUG_VERBOSE) << "end current QJSEngine context";
     */
   
 }
@@ -554,7 +554,7 @@ void SpreadSheetView::acceptFormulaInput()
       QString theValue = it.value().toString();
       theValue.truncate(100);
 
-      LOG(DEBUG) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().truncate(100);
+      LOG(DEBUG_VERBOSE) << it.name().toStdString() << ": " << theValue.toStdString(); // it.value().toString().truncate(100);
       currentVariableContext[it.name()] = it.value().toString();
     }
       // ======
@@ -566,13 +566,13 @@ void SpreadSheetView::acceptFormulaInput()
         message.append(" on line number ");
         message.append(result.property("lineNumber").toString());
         criticalMessage(message.toStdString()); 
-        LOG(DEBUG)
+        LOG(DEBUG_VERBOSE)
 	  << "Uncaught exception at line"
   	  << result.property("lineNumber").toInt()
 	  << ":" << result.toString().toStdString();
       } else {
 
-	LOG(DEBUG) << " the result is " << result.toString().toStdString();
+	LOG(DEBUG_VERBOSE) << " the result is " << result.toString().toStdString();
 
 	if (result.isArray()) {
 	  cerr << " the result is an array\n"; 
@@ -595,10 +595,10 @@ void SpreadSheetView::acceptFormulaInput()
 	  it2.next();
           QString theValue = it2.value().toString();
           theValue.truncate(100);
-	  LOG(DEBUG) << it2.name().toStdString() << ": " << theValue.toStdString();
+	  LOG(DEBUG_VERBOSE) << it2.name().toStdString() << ": " << theValue.toStdString();
 	  if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
 	    // we have a newly defined variable
-	    LOG(DEBUG) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
+	    LOG(DEBUG_VERBOSE) << "NEW VARIABLE " << it2.name().toStdString() <<  ": " << theValue.toStdString();
 	    addVariableToSpreadSheet(it2.name(), it2.value());
 	  }
 	}
@@ -608,10 +608,10 @@ void SpreadSheetView::acceptFormulaInput()
 	int col = table->currentColumn();
 	QTableWidgetItem *item = table->item(row, col);
 	if (!item) {
-          LOG(DEBUG) << "considered not item ";
+          LOG(DEBUG_VERBOSE) << "considered not item ";
 	  table->setItem(row, col, new SpreadSheetItem(result.toString())); // text));
         } else {
-          LOG(DEBUG) << "considered item";
+          LOG(DEBUG_VERBOSE) << "considered item";
 	  item->setData(Qt::EditRole, result.toString()); // text);
         }
         */
@@ -676,7 +676,7 @@ vector<string> *SpreadSheetView::getVariablesFromSpreadSheet() {
   for (int c=0; c < table->columnCount(); c++) {
     QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
     string fieldName = tableWidgetItem->text().toStdString(); 
-    LOG(DEBUG) << fieldName; 
+    LOG(DEBUG_VERBOSE) << fieldName; 
     //if (currentVariableContext.find(it2.name()) == currentVariableContext.end()) {
     //  // we have a newly defined variable
     //  qDebug() << "NEW VARIABLE " << it2.name() <<  ": " << theValue; // it2.value().toString().truncate(100);
@@ -698,7 +698,7 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, st
   int c = 0;
   // QTableWidgetItem *tableWidgetItem = table->horizontalHeaderItem(c);
   // TODO; verify fieldName and matches expected name
-  LOG(DEBUG) << "getting data for column " << column << ", " << fieldName;;
+  LOG(DEBUG_VERBOSE) << "getting data for column " << column << ", " << fieldName;;
   // go through the rows and put the data into a vector
   for (int r = 0; r < table->rowCount(); r++) {
     QTableWidgetItem *tableWidgetItem = table->item(r, c);
@@ -706,7 +706,7 @@ vector<float> *SpreadSheetView::getDataForVariableFromSpreadSheet(int column, st
     float value = tableWidgetItem->text().toFloat(&ok);
     if (ok) {
       data->push_back(value);
-      LOG(DEBUG) << value;
+      LOG(DEBUG_VERBOSE) << value;
     } else {
       QMessageBox::warning(this, tr("HawkEye"),
                            tr("Could not convert to number.\n"),
@@ -1093,7 +1093,7 @@ void SpreadSheetView::setupContents()
 // request filled by Controller in response to needFieldData 
 void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
   size_t nPoints = data->size();
-  LOG(DEBUG) << "number of data values = " << nPoints;
+  LOG(DEBUG_VERBOSE) << "number of data values = " << nPoints;
 
       string format = "%g";
       char formattedData[250];
@@ -1113,14 +1113,14 @@ void SpreadSheetView::fieldDataSent(vector<float> *data, int useless, int c) {
       // 752019 for (std::size_t r=0; r<data.size(); r++) {
         //    sprintf(formattedData, format, data[0]);
         sprintf(formattedData, "%g", *dp); // data->at(r));
-        LOG(DEBUG) << "setting " << r << "," << c << "= " << formattedData; 
+        LOG(DEBUG_VERBOSE) << "setting " << r << "," << c << "= " << formattedData; 
         table->setItem(r, c, new SpreadSheetItem(formattedData));
         fieldArray.setProperty(r, *dp); // data.at(r));
         dp++;
       }
-      LOG(DEBUG) << "adding vector form " << vectorName.toStdString();
+      LOG(DEBUG_VERBOSE) << "adding vector form " << vectorName.toStdString();
       engine.globalObject().setProperty(vectorName, fieldArray);
-      LOG(DEBUG) << "end adding vector form " << vectorName.toStdString();
+      LOG(DEBUG_VERBOSE) << "end adding vector form " << vectorName.toStdString();
 
 }
 
@@ -1132,13 +1132,13 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
   // fill everything that needs the fieldNames ...
 
     table->setColumnCount(fieldNames.size());
-    LOG(DEBUG) << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess";
+    LOG(DEBUG_VERBOSE) << "In SpreadSheetView::fieldNamesProvided, there are " << fieldNames.size() << " field namess";
 
     int c = 0;
     vector<string>::iterator it; 
     for(it = fieldNames.begin(); it != fieldNames.end(); it++) {
       QString the_name(QString::fromStdString(*it));
-      LOG(DEBUG) << *it;
+      LOG(DEBUG_VERBOSE) << *it;
       table->setHorizontalHeaderItem(c, new QTableWidgetItem(the_name));
       // TODO: what about setHorizontalHeaderLabels(const QStringList &labels) instead? would it be faster?
       emit needDataForField(*it, useless, c);
@@ -1185,7 +1185,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
     
     //if (LOG_STREAM_IS_ENABLED(LogStream::DEBUG)) { // causes a segmentation fault
     // print the context ...                                                                                                   
-      LOG(DEBUG) << "current QJSEngine context ... after fieldNamesProvided";
+      LOG(DEBUG_VERBOSE) << "current QJSEngine context ... after fieldNamesProvided";
 
       printQJSEngineContext();
       /*
@@ -1198,12 +1198,12 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
       QString theValue = it2.value().toString();
       theValue.truncate(100);
 
-      //      LOG(DEBUG) << it2.name().toStdString() << ": " << theValue;
+      //      LOG(DEBUG_VERBOSE) << it2.name().toStdString() << ": " << theValue;
       qDebug() << it2.name() << ": " << theValue;
       currentVariableContext[it2.name()] = it2.value().toString();
     }
       
-      LOG(DEBUG) << "end current QJSEngine context";
+      LOG(DEBUG_VERBOSE) << "end current QJSEngine context";
       */
       //}
     
@@ -1212,7 +1212,7 @@ void SpreadSheetView::fieldNamesProvided(vector<string> fieldNames) {
 
 void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
-  LOG(DEBUG) << "adding variable to spreadsheet " << name.toStdString();
+  LOG(DEBUG_VERBOSE) << "adding variable to spreadsheet " << name.toStdString();
 
   string format = "%g";
   // char formattedData[250];
@@ -1220,7 +1220,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   int variableLength = value.property("length").toInt();
   if ( variableLength > 1) {
     // this is a vector
-    LOG(DEBUG) << "variable is a vector " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable is a vector " << name.toStdString();
       QJSValue fieldArray = engine.newArray(variableLength);
       QString vectorName = name;
       for (int i=0; i<variableLength; i++) {
@@ -1233,7 +1233,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
   if (value.isArray()) {
     //qDebug() << "variable isArray " << name << endl;
-    LOG(DEBUG) << "variable isArray " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isArray " << name.toStdString();
 
     /*
   for(it = value.begin(); it != value.end(); it++) {
@@ -1253,30 +1253,30 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   }
   if (value.isBool()) {
     //qDebug() << "variable isBool " << name << endl;
-    LOG(DEBUG) << "variable isBool " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isBool " << name.toStdString();
   }
   if (value.isCallable()) {
     //qDebug() << "variable isCallable " << name << endl;
-    LOG(DEBUG) << "variable isCallable " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isCallable " << name.toStdString();
   }
   if (value.isDate()) {
-    LOG(DEBUG) << "variable isDate " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isDate " << name.toStdString();
     //qDebug() << "variable isDate " << name << endl;
   }
   if (value.isError()) {
-    LOG(DEBUG) << "variable isError " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isError " << name.toStdString();
     //qDebug() << "variable isError " << name << endl;
   }
   if (value.isNull()) {
-    LOG(DEBUG) << "variable isNull " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isNull " << name.toStdString();
     //qDebug() << "variable isNull " << name << endl;
   }
   if (value.isNumber()) {
     //qDebug() << "variable isNumber " << name << endl;
-    LOG(DEBUG) << "variable isNumber " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isNumber " << name.toStdString();
   }
   if (value.isObject()) {
-    LOG(DEBUG) << "variable isObject " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isObject " << name.toStdString();
     //qDebug() << "variable isObject " << name << endl;
     //    QVector<double> myv = value.property("values");
     //qDebug() << myv.at(0) << ";" << myv.at(1) << endl;
@@ -1288,7 +1288,7 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
     QJSValueIterator it(value);
     while (it.hasNext()) {
       it.next();
-      LOG(DEBUG) << it.name().toStdString() << ": " << it.value().toString().toStdString();
+      LOG(DEBUG_VERBOSE) << it.name().toStdString() << ": " << it.value().toString().toStdString();
     }
 
     for (int r=0; r<value.property("length").toInt(); r++) {
@@ -1301,20 +1301,20 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
 
   }
   // if (value.isQMetaObject()) {
-  //   LOG(DEBUG) << "variable isQMetaObject " << name.toStdString();
+  //   LOG(DEBUG_VERBOSE) << "variable isQMetaObject " << name.toStdString();
   //   qDebug() << "variable isQMetaObject " << name << endl;
   // }
   if (value.isQObject()) {
-    LOG(DEBUG) << "variable isQObject " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isQObject " << name.toStdString();
     //qDebug() << "variable isQObject " << name << endl;
   }
   if (value.isRegExp()) {
     //qDebug() << "variable isRegExp " << name << endl;
-    LOG(DEBUG) << "variable isRegExp " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isRegExp " << name.toStdString();
   }
   if (value.isString()) {
     //qDebug() << "variable isString " << name << endl;
-    LOG(DEBUG) << "variable isString " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isString " << name.toStdString();
     table->setColumnCount(table->columnCount() + 1);
 
     int c = table->columnCount() - 1;
@@ -1324,11 +1324,11 @@ void SpreadSheetView::addVariableToSpreadSheet(QString name, QJSValue value) {
   }
   if (value.isUndefined()) {
     //qDebug() << "variable isUndefined " << name << endl;
-    LOG(DEBUG) << "variable isUndefined " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isUndefined " << name.toStdString();
   }
   if (value.isVariant()) {
     //qDebug() << "variable isVariant " << name << endl;
-    LOG(DEBUG) << "variable isVariant " << name.toStdString();
+    LOG(DEBUG_VERBOSE) << "variable isVariant " << name.toStdString();
   }
 
 }
@@ -1342,13 +1342,13 @@ void SpreadSheetView::criticalMessage(std::string message)
   
   //  QMessageBox::Abort | QMessageBox::Retry | QMessageBox::Ignore);
   if (reply == QMessageBox::Abort)
-    LOG(DEBUG) << "Abort";
+    LOG(DEBUG_VERBOSE) << "Abort";
     // criticalLabel->setText("Abort");
   else if (reply == QMessageBox::Retry)
-    LOG(DEBUG) << "Retry";
+    LOG(DEBUG_VERBOSE) << "Retry";
     // criticalLabel->setText("Retry");
   else
-    LOG(DEBUG) << "Ignore";
+    LOG(DEBUG_VERBOSE) << "Ignore";
     // criticalLabel->setText("Ignore");
 }
 
@@ -1387,16 +1387,16 @@ QString SpreadSheetView::open()
 
 void  SpreadSheetView::newDataReady()
 {
-  LOG(DEBUG) << "newDataReady ...";
+  LOG(DEBUG_VERBOSE) << "newDataReady ...";
   setupContents();
 }
 
 void SpreadSheetView::printQJSEngineContext() {
 
     // print the context ...                                                                                                   
-    LOG(DEBUG) << "current QJSEngine context ...";
+    LOG(DEBUG_VERBOSE) << "current QJSEngine context ...";
 
-    LOG(DEBUG) << "pepsi cola";
+    LOG(DEBUG_VERBOSE) << "pepsi cola";
     /*
     std::map<QString, QString> currentVariableContext;
     QJSValue theGlobalObject = engine.globalObject();
@@ -1407,10 +1407,10 @@ void SpreadSheetView::printQJSEngineContext() {
       QString theValue = it2.value().toString();
       theValue.truncate(100);
 
-      LOG(DEBUG) << it2.name() << ": " << theValue;
+      LOG(DEBUG_VERBOSE) << it2.name() << ": " << theValue;
       currentVariableContext[it2.name()] = it2.value().toString();
     }
     */
-    LOG(DEBUG) << "end current QJSEngine context";
+    LOG(DEBUG_VERBOSE) << "end current QJSEngine context";
 
 }

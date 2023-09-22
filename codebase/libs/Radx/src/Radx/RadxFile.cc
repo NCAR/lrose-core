@@ -47,6 +47,7 @@
 #include <Radx/HrdRadxFile.hh>
 #include <Radx/LeoRadxFile.hh>
 #include <Radx/LeoCf2RadxFile.hh>
+#include <Radx/HaloRadxFile.hh>
 // #include <Radx/NcxxRadxFile.hh>
 #include <Radx/NcfRadxFile.hh>
 #include <Radx/NexradCmdRadxFile.hh>
@@ -333,6 +334,14 @@ bool RadxFile::_isSupportedOther(const string &path)
   {
     LeoRadxFile file;
     if (file.isLeosphere(path)) {
+      return true;
+    }
+  }
+
+  // try Halo Photonics LIDAR
+  {
+    HaloRadxFile file;
+    if (file.isHaloPhotonics(path)) {
       return true;
     }
   }
@@ -1673,6 +1682,29 @@ int RadxFile::_readFromPathOther(const string &path,
       return iret;
     }
   }
+
+  // try Halo Photonics next
+
+  {
+    HaloRadxFile file;
+    file.copyReadDirectives(*this);
+    if (file.isHaloPhotonics(path)) {
+      int iret = file.readFromPath(path, vol);
+      if (_verbose) file.print(cerr);
+      _errStr = file.getErrStr();
+      _dirInUse = file.getDirInUse();
+      _pathInUse = file.getPathInUse();
+      vol.setPathInUse(_pathInUse);
+      _readPaths = file.getReadPaths();
+      if (iret == 0) {
+        if (_debug) {
+          cerr << "INFO: RadxFile::readFromPath" << endl;
+          cerr << "  Read Halo Photonics file, path: " << _pathInUse << endl;
+        }
+      }
+      return iret;
+    }
+  }  
 
   // try RAPIC next
 

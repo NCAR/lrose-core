@@ -29,8 +29,8 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   // maybe return a pointer to std::vector<double> ?? then when presenting the data, we can convert it to string,
   // but maintain the precision in the model (RadxVol)??
 
-  LOG(DEBUG) << "entry with fieldName ... ";
-  LOG(DEBUG) << fieldName;
+  LOG(DEBUG_VERBOSE) << "entry with fieldName ... ";
+  LOG(DEBUG_VERBOSE) << fieldName;
 
   // gather data from context -- most of the data are in a DoradeRadxFile object
 
@@ -42,7 +42,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   const RadxField *field;
   field = vol->getFieldFromRay(fieldName);
   if (field == NULL) {
-    LOG(DEBUG) << "no RadxField found in volume";
+    LOG(DEBUG_VERBOSE) << "no RadxField found in volume";
     throw "No data field with name " + fieldName;;
   }
   
@@ -50,17 +50,17 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   // TODO: get the ray for this field 
   const vector<RadxRay *>  &rays = vol->getRays();
   if (rays.size() > 1) {
-    LOG(DEBUG) <<  "ERROR - more than one ray; expected only one";
+    LOG(DEBUG_VERBOSE) <<  "ERROR - more than one ray; expected only one";
   }
   RadxRay *ray = rays.at(0);
   if (ray == NULL) {
-    LOG(DEBUG) << "ERROR - first ray is NULL";
+    LOG(DEBUG_VERBOSE) << "ERROR - first ray is NULL";
     throw "Ray is null";
   } 
 
   const RadxGeoref *georef = ray->getGeoreference();
   if (georef == NULL) {
-    LOG(DEBUG) << "ERROR - georef is NULL";
+    LOG(DEBUG_VERBOSE) << "ERROR - georef is NULL";
     throw "Georef is null";
   } 
  
@@ -109,20 +109,20 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   short dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
   int seds_nyquist_velocity = 0; // TODO: what is this value?
 
-  LOG(DEBUG) << "sizeof(short) = " << sizeof(short);
+  LOG(DEBUG_VERBOSE) << "sizeof(short) = " << sizeof(short);
 
-  LOG(DEBUG) << "args: ";
-  LOG(DEBUG) << "vert_velocity " << vert_velocity;
-  LOG(DEBUG) <<   "ew_velocity " << ew_velocity;
-  LOG(DEBUG) <<   "ns_velocity " << ns_velocity;
-  LOG(DEBUG) <<   "ew_gndspd_corr " << ew_gndspd_corr;
-  LOG(DEBUG) <<   "tilt " << tilt;
-  LOG(DEBUG) <<   "elevation " << elevation;
-  LOG(DEBUG) <<   "bad " << bad;
-  LOG(DEBUG) <<   "parameter_scale " << parameter_scale;
-  LOG(DEBUG) <<   "dgi_clip_gate " << dgi_clip_gate;
-  LOG(DEBUG) <<   "dds_radd_eff_unamb_vel " << dds_radd_eff_unamb_vel;
-  LOG(DEBUG) <<   "seds_nyquist_velocity " << "??";
+  LOG(DEBUG_VERBOSE) << "args: ";
+  LOG(DEBUG_VERBOSE) << "vert_velocity " << vert_velocity;
+  LOG(DEBUG_VERBOSE) <<   "ew_velocity " << ew_velocity;
+  LOG(DEBUG_VERBOSE) <<   "ns_velocity " << ns_velocity;
+  LOG(DEBUG_VERBOSE) <<   "ew_gndspd_corr " << ew_gndspd_corr;
+  LOG(DEBUG_VERBOSE) <<   "tilt " << tilt;
+  LOG(DEBUG_VERBOSE) <<   "elevation " << elevation;
+  LOG(DEBUG_VERBOSE) <<   "bad " << bad;
+  LOG(DEBUG_VERBOSE) <<   "parameter_scale " << parameter_scale;
+  LOG(DEBUG_VERBOSE) <<   "dgi_clip_gate " << dgi_clip_gate;
+  LOG(DEBUG_VERBOSE) <<   "dds_radd_eff_unamb_vel " << dds_radd_eff_unamb_vel;
+  LOG(DEBUG_VERBOSE) <<   "seds_nyquist_velocity " << "??";
   
   //SoloFunctionsApi soloFunctionsApi;
   int result = se_remove_ac_motion(vert_velocity, ew_velocity, ns_velocity,
@@ -130,10 +130,10 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
      field->getDataSi16(), bad, parameter_scale, parameter_bias, dgi_clip_gate,
      dds_radd_eff_unamb_vel, seds_nyquist_velocity);
   
-  LOG(DEBUG) << " result: " << result;
-  LOG(DEBUG) << " A few data values ";
+  LOG(DEBUG_VERBOSE) << " result: " << result;
+  LOG(DEBUG_VERBOSE) << " A few data values ";
   for (int i=0; i< 10; i++) {
-      LOG(DEBUG) << field->getDoubleValue(i);
+      LOG(DEBUG_VERBOSE) << field->getDoubleValue(i);
   }
 
   // TODO: We are converting from short to double!!!  <=====
@@ -141,7 +141,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(string fieldName, RadxVo
   //  for (vector<double>::iterator it = data.begin(); it != data.end(); ++it)
   //  newData.push_back(*it * 2.0);
 
-  LOG(DEBUG) << "exit ";
+  LOG(DEBUG_VERBOSE) << "exit ";
 
   return newData;
 }
@@ -195,7 +195,7 @@ vector<double> SoloFunctionsModel::RemoveAircraftMotion(vector<double> data, Rad
   if (cfactors != NULL) {
     ew_gndspd_corr = cfactors->getEwVelCorr(); // ?? _gndspd_corr; // fl32;
   }
-  LOG(DEBUG) << "ew_gndspd_corr: " << ew_gndspd_corr;
+  LOG(DEBUG_VERBOSE) << "ew_gndspd_corr: " << ew_gndspd_corr;
  
   // float tilt = georef->getTilt(); // fl32; 
   // TODO: elevation changes with different rays/fields how to get the current one???

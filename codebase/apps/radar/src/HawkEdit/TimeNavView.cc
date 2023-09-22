@@ -39,6 +39,7 @@
 #include "TimeNavView.hh"
 
 #include <QMessageBox>
+// #include <QCalendar>
 
 TimeNavView::TimeNavView(QWidget *parent)
 {
@@ -242,6 +243,10 @@ void TimeNavView::setNTicks(int nFiles) {
 
 }
 
+void TimeNavView::setSliderPositionNoRead(int value) {
+  _timeSlider->setValue(value);
+}
+
 void TimeNavView::setSliderPosition(int value) {
   _timeSlider->setValue(value);
   timeSliderReleased();
@@ -259,18 +264,14 @@ void TimeNavView::setGuiFromArchiveStartTime(int year, int month, int day,
   //}
   // QDate::QDate(int y, int m, int d)
   // 
-  QCalendar calendar;
-  QDate date = calendar.dateFromParts(year, month, day);
-  //QDate date(year; 
-  //           month;
-  //           day);
-  QTime time(hour,
-             minute,
-             seconds);
+  // QCalendar calendar;
+  // QDate date = calendar.dateFromParts(year, month, day);
+  QDate date(year, month, day);
+  QTime time(hour, minute, seconds);
   QDateTime datetime(date, time);
   _archiveStartTimeEdit->setDateTime(datetime);
-      //  setVisible(true);
-      // raise();
+  //  setVisible(true);
+  // raise();
 }
 
 ////////////////////////////////////////////////////////

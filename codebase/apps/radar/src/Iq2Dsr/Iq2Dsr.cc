@@ -864,10 +864,14 @@ int Iq2Dsr::_writeRemainingBeamsOnExit()
   
 {
 
+  if (!_params.use_multiple_threads) {
+    return 0;
+  }
+    
   int iret = 0;
   int startRetrievePos = _threadPoolRetrievePos;
   int endRetrievePos = (startRetrievePos - 1) % _threadPoolSize;
-
+  
   int retrievePos = startRetrievePos;
   while (retrievePos != endRetrievePos) {
     

@@ -83,6 +83,9 @@ int Args::parse (const int argc, const char **argv)
       
       _usage(cout);
       exit (0);
+
+    } else if (!strcmp(argv[i], "-i")) {
+      interactive = true; 
       
     } else if (!strcmp(argv[i], "-debug") ||
                !strcmp(argv[i], "-d")) {

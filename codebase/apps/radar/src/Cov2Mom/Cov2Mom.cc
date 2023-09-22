@@ -636,7 +636,7 @@ void Cov2Mom::_loadCovData(cov_field_t &field)
 
   // allocate data array
 
-  if (_nGates > field.data_.size()) {
+  if (_nGates > (int) field.data_.size()) {
     field.data_.free();
     field.data = (double *) field.data_.alloc(_nGates);
   }
@@ -974,7 +974,7 @@ void Cov2Mom::_allocateArrays(int nGates)
 
 {
 
-  if (nGates <= _ncp_.size()) {
+  if (nGates <= (int) _ncp_.size()) {
     return;
   }
 

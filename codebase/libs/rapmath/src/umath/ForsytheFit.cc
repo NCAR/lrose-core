@@ -222,6 +222,50 @@ int ForsytheFit::performFit(size_t order,
 }
 
 ///////////////////////////////////////////////////////////////////////
+// Prepare for a fit, specifying nSamples, fixed PRT
+
+void ForsytheFit::prepareForFitFixedPrt(size_t order, size_t nSamples)
+{
+
+  double xDelta = 1.0 / (double) nSamples;
+  double xx = -0.5;
+  vector<double> xVals;
+  for (size_t ii = 0; ii < nSamples; ii++) {
+    xVals.push_back(xx);
+    xx += xDelta;
+  }
+
+  prepareForFit(order, xVals);
+  
+}
+  
+///////////////////////////////////////////////////////////////////////
+// Prepare for a fit, specifying nSamples, staggered PRT
+
+void ForsytheFit::prepareForFitStaggeredPrt(size_t order, size_t nSamples,
+                                            int staggeredM, int staggeredN)
+{
+  
+  // load x vector
+  
+  int nStaggered = (nSamples / 2) * (staggeredM + staggeredN);
+  double xDelta = 1.0 / nStaggered;
+  double xx = -0.5;
+  vector<double> xVals;
+  for (size_t ii = 0; ii < nSamples; ii++) {
+    xVals.push_back(xx);
+    if (ii % 2 == 0) {
+      xx += xDelta * staggeredM;
+    } else {
+      xx += xDelta * staggeredN;
+    }
+  }
+
+  prepareForFit(order, xVals);
+  
+}
+  
+///////////////////////////////////////////////////////////////////////
 // Prepare for a fit, specifying the X values.
 // This is done for efficiency, if the X values do not change.
 //

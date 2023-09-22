@@ -41,6 +41,7 @@ HDRS = \
 	../include/Radx/RadxRcalib.hh \
 	../include/Radx/RadxReadDir.hh \
 	../include/Radx/RadxRemap.hh \
+	../include/Radx/RadxStatusXml.hh \
 	../include/Radx/RadxStr.hh \
 	../include/Radx/RadxSweep.hh \
 	../include/Radx/RadxTime.hh \
@@ -75,6 +76,7 @@ CPPC_SRCS = \
 	RadxReadDir.cc \
 	RadxRemap.cc \
 	RadxSweep.cc \
+	RadxStatusXml.cc \
 	RadxStr.cc \
 	RadxTime.cc \
 	RadxTimeList.cc \

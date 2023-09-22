@@ -62,7 +62,7 @@ QColor FieldColorController::_stringToQColor(string colorName) {
 // in response to Replot from View
 void FieldColorController::modelChanged() // string fieldName) // , ColorMap newColorMap) 
 {
-  LOG(DEBUG) << "enter"; 
+  LOG(DEBUG_VERBOSE) << "enter"; 
 
   string selectedField = _model->getSelectedField();
 
@@ -76,7 +76,7 @@ void FieldColorController::modelChanged() // string fieldName) // , ColorMap new
   ColorMap *newColorMap = _model->getColorMap(selectedField);
   string color;
   color = _model->getGridColor();
-  LOG(DEBUG) << "grid:" << color;
+  LOG(DEBUG_VERBOSE) << "grid:" << color;
   QColor gridColor = _stringToQColor(color);
   color = _model->getEmphasisColor();
   QColor emphasisColor = _stringToQColor(color);
@@ -86,11 +86,11 @@ void FieldColorController::modelChanged() // string fieldName) // , ColorMap new
   QColor backgroundColor = _stringToQColor(color);
 
   //  fieldName should be current working fieldName & colorMap
-  LOG(DEBUG) << "emit colorMapRedefineSent";
-  LOG(DEBUG) << "grid:" << gridColor.name().toStdString();
+  LOG(DEBUG_VERBOSE) << "emit colorMapRedefineSent";
+  LOG(DEBUG_VERBOSE) << "grid:" << gridColor.name().toStdString();
   emit colorMapRedefineSent(selectedField, *newColorMap, gridColor, emphasisColor,
 			    annotationColor, backgroundColor);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void FieldColorController::getColorMap(string fieldName) 
@@ -197,39 +197,39 @@ void FieldColorController::newColorPaletteSelected(string newColorMapName) {
 }
 
 void FieldColorController::newGridColorSelected(QColor newColor) {
-  LOG(DEBUG) << "enter ";
+  LOG(DEBUG_VERBOSE) << "enter ";
   string color = newColor.name().toStdString();
-  LOG(DEBUG) << color;
+  LOG(DEBUG_VERBOSE) << color;
   _model->setGridColor(color);
   emit gridColorSet(newColor);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void FieldColorController::newEmphasisColorSelected(QColor newColor) {
-  LOG(DEBUG) << "enter ";
+  LOG(DEBUG_VERBOSE) << "enter ";
   string color = newColor.name().toStdString();
-  LOG(DEBUG) << color;
+  LOG(DEBUG_VERBOSE) << color;
   _model->setEmphasisColor(color);
   emit emphasisColorSet(newColor);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void FieldColorController::newAnnotationColorSelected(QColor newColor) {
-  LOG(DEBUG) << "enter ";
+  LOG(DEBUG_VERBOSE) << "enter ";
   string color = newColor.name().toStdString();
-  LOG(DEBUG) << color;
+  LOG(DEBUG_VERBOSE) << color;
   _model->setAnnotationColor(color);
   emit annotationColorSet(newColor);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void FieldColorController::newBackgroundColorSelected(QColor newColor) {
-  LOG(DEBUG) << "enter ";
+  LOG(DEBUG_VERBOSE) << "enter ";
   string color = newColor.name().toStdString();
-  LOG(DEBUG) << color;
+  LOG(DEBUG_VERBOSE) << color;
   _model->setBackgroundColor(color);
   emit backgroundColorSet(newColor);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 

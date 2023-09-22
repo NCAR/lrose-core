@@ -34,6 +34,7 @@
 #ifndef IwrfTsPulse_hh
 #define IwrfTsPulse_hh
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <deque>
@@ -332,6 +333,9 @@ public:
   inline int getSweepNum() const { return _hdr.sweep_num; }
   inline double getPhaseDiff0() const { return _phaseDiff[0]; }
   inline double getPhaseDiff1() const { return _phaseDiff[1]; }
+
+  inline double getTxPhaseDeg() const { return _hdr.tx_phase_deg; }
+
   bool isHoriz() const; // is horizontally polarized
   inline bool antennaTransition() const { return (bool) _hdr.antenna_transition; }
 
@@ -558,6 +562,12 @@ public:
     (volatile ui16 iCodes_a[], volatile const fl32 fIQVals_a[],
      si32 iCount_a);
 
+  // dBm / phase unpack routine
+
+  static std::pair<fl32,fl32> _unpackDbmPhaseSi16
+    (si16 mag, si16 phase,
+     double magScale, double packedScale);
+
 protected:
 
   // copy
@@ -623,8 +633,7 @@ private:
   
   // memory handling
 
-  mutable int _nClients;
-  mutable pthread_mutex_t _nClientsMutex;
+  mutable std::atomic<int> _nClients;
 
   // lookup table for converting packed 16-bit floats to 32-bit floats
 
@@ -633,6 +642,14 @@ private:
   static bool _sigmetLegacyUnpacking;
   static bool _sigmetLegacyUnpackingActive;
   static pthread_mutex_t _sigmetLutMutex;
+
+  // lookup table for converting packed mag/phase to floats
+  static bool _magPhaseLutReady;
+  static double _magPhaseLutScale;
+  static fl32 _magPhaseLutSin[65536];
+  static fl32 _magPhaseLutCos[65536];
+  static fl32 _magPhaseLutMag[65536];
+  static pthread_mutex_t _magPhaseLutMutex;
 
   // functions
   
@@ -645,6 +662,7 @@ private:
   void _setDataPointers();
   void _fixZeroPower();
   void _computeSigmetFloatLut() const;
+  static void _computeMagPhaseLut(double packedScale);
 
   void _clearIq();
   void _clearPacked();

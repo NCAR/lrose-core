@@ -26,7 +26,7 @@
 #include <iostream>
 #include <Radx/RadxXml.hh>
 #include "GemBlob.hh"
-#include "GemSweep.hh"
+#include "GemSweepField.hh"
 using namespace std;
 
 ////////////////////////
@@ -60,7 +60,12 @@ public:
   // returns 0 on success, -1 on failure
   
   int read();
+
+  // field valid? We check ngates and nrays against other fields
   
+  void setInvalid() { _isValid = false; }
+  bool getIsValid() const { return _isValid; }
+
   // get methods
 
   const string &getFileName() const { return _fileName; }
@@ -93,12 +98,12 @@ public:
   const string &getPolarization() const { return _polarization; }
   const double &getPulseWidthUs() const { return _pulseWidthUs; }
   double getAntennaSpeed() const { return _antennaSpeed; }
-
-  int getNSweeps() const { return (int) _sweeps.size(); }
-  const vector<GemSweep *> &getSweeps() const { return _sweeps; }
-  int getNBlobs() const { return (int) _blobs.size(); }
+  
+  size_t getNSweeps() const { return _sweeps.size(); }
+  const vector<GemSweepField *> &getSweepFields() const { return _sweeps; }
+  size_t getNBlobs() const { return _blobs.size(); }
   const vector<GemBlob *> &getGemBlobs() const { return _blobs; }
-
+  
   const string &getXmlStr() const { return _xmlStr; }
   const string &getErrStr() const { return _errStr; }
 
@@ -112,6 +117,8 @@ private:
 
   bool _debug;
   bool _verbose;
+  bool _isValid;
+
   string _xmlStr;
   string _errStr;
   
@@ -153,7 +160,7 @@ private:
   double _pulseWidthUs;
   double _antennaSpeed;
 
-  vector<GemSweep *> _sweeps;
+  vector<GemSweepField *> _sweeps;
   vector<GemBlob *> _blobs;
 
   int _decodeXml(const string &xmlBuf);

@@ -127,9 +127,12 @@ void se_flag_freckles(float freckle_threshold, size_t freckle_avg_count,
                       bool *boundary_mask, bool *bad_flag_mask);
 
 // flagged-assign
-void se_assign_value(float constant, const float *data, float *newData, size_t nGates,
+void se_flagged_assign_value(float constant, const float *data, float *newData, size_t nGates,
                     size_t dgi_clip_gate,
                     bool *boundary_mask, const bool *bad_flag_mask);
+
+void se_assign_value(const float *data, float *newData, size_t nGates,
+         float value, size_t dgi_clip_gate, bool *boundary_mask);
 
 void se_threshold_field(Where where, float scaled_thr1, float scaled_thr2,
                         int first_good_gate,

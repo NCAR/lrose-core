@@ -47,7 +47,7 @@
 #include "Args.hh"
 #include "Params.hh"
 #include <rapformats/coord_export.h>
-class SpectraMgr;
+class SpriteMgr;
 class TsReader;
 class BeamMgr;
 
@@ -90,7 +90,7 @@ private:
 
   // managing the rendering objects
 
-  SpectraMgr *_spectraMgr;
+  SpriteMgr *_spectraMgr;
 
   // methods
   

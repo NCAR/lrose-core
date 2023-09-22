@@ -44,7 +44,6 @@
 #include <toolsa/TaThread.hh>
 #include <toolsa/os_config.h>
 #include <dataport/port_types.h>
-#include <ncvalues.h>
 #include <Ncxx/Nc3File.hh>
 
 using namespace std;

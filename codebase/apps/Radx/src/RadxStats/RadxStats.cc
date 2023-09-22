@@ -45,7 +45,6 @@
 #include <Radx/NexradRadxFile.hh>
 #include <Radx/UfRadxFile.hh>
 #include <Radx/RadxGeoref.hh>
-#include <Radx/RadxTime.hh>
 #include <Radx/RadxTimeList.hh>
 #include <Radx/RadxPath.hh>
 #include <didss/LdataInfo.hh>
@@ -59,6 +58,7 @@ RadxStats::RadxStats(int argc, char **argv)
 {
 
   OK = TRUE;
+  _firstFile = true;
   
   // set programe name
 
@@ -226,6 +226,7 @@ int RadxStats::_processFile(const string &filePath)
         cerr << "Skipping file: " << filePath << endl;
         cerr << "  Previously processed in aggregation step" << endl;
       }
+      _firstFile = false;
       return 0;
     }
   }
@@ -268,6 +269,11 @@ int RadxStats::_processFile(const string &filePath)
     _printSweepAngleTable(inFile, vol, cout);
   }
 
+  if (_params.print_time_gap_table) {
+    _printTimeGapTable(inFile, vol, cout);
+  }
+
+  _firstFile = false;
   return 0;
 
 }
@@ -311,6 +317,13 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
                                       ostream &out)
 {
 
+  // initialize
+  
+  if (_firstFile) {
+    out << "# volStartTime, scanName, sweepFixedAngles" << endl;
+    return;
+  }
+  
   RadxTime startTime = vol.getStartRadxTime();
   const vector<RadxSweep *> sweeps = vol.getSweeps();
 
@@ -332,6 +345,50 @@ void RadxStats::_printSweepAngleTable(RadxFile &file,
   }
   
   out.flush();
+  
+}
+
+//////////////////////////////////////////////////
+// print time gap if applicable
+
+void RadxStats::_printTimeGapTable(RadxFile &file,
+                                   const RadxVol &vol,
+                                   ostream &out)
+{
+
+  // initialize
+  
+  if (_firstFile) {
+    _prevStartTime = vol.getStartRadxTime();
+    _prevEndTime = vol.getEndRadxTime();
+    out << "# startTime, endTime, gapSecs, gapHours, gapDays" << endl;
+    return;
+  }
+  
+  // get start and end times
+  
+  RadxTime startTime = vol.getStartRadxTime();
+  RadxTime endTime = vol.getEndRadxTime();
+
+  // compute gap
+
+  double gapSecs = startTime - _prevEndTime;
+  if (gapSecs > _params.max_valid_gap_secs) {
+    out << _prevEndTime.getW3cStr();
+    out << ", ";
+    out << startTime.getW3cStr();
+    out << ", ";
+    out << floor(gapSecs + 0.5);
+    out << ", ";
+    out << gapSecs / 3600.0;
+    out << ", ";
+    out << gapSecs / 86400.0;
+    out << endl;
+    out.flush();
+  }
+
+  _prevStartTime = startTime;
+  _prevEndTime = endTime;
   
 }
 

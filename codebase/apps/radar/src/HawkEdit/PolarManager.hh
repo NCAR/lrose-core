@@ -52,7 +52,7 @@
 #include "ContextEditingView.hh"
 #include "ClickableLabel.hh"
 #include "ParameterColorView.hh"
-#include "BatchFileSaveView.hh"
+//#include "BatchFileSaveView.hh"
 #include "FieldColorController.hh"
 #include "SweepView.hh"
 #include "SweepController.hh"
@@ -63,6 +63,7 @@
 #include "ScriptEditorView.hh"
 #include "BoundaryPointEditor.hh"
 #include "BoundaryPointEditorView.hh"
+#include "StatusPanelController.hh"
 #include "TimeNavView.hh"
 #include "TimeNavController.hh"
 #include "UndoRedoController.hh"
@@ -70,7 +71,7 @@
 #include <QListWidgetItem>
 #include <QStringList>
 #include <QCheckBox>
-#include <euclid/SunPosn.hh>
+//#include <euclid/SunPosn.hh>
 #include <Radx/RadxRay.hh>
 
 class QApplication;
@@ -171,9 +172,9 @@ public:
 
   // location
 
-  double getRadarLat() const { return _radarLat; }
-  double getRadarLon() const { return _radarLon; }
-  double getRadarAltKm() const { return _radarAltKm; }
+  //double getRadarLat() const { return _radarLat; }
+  //double getRadarLon() const { return _radarLon; }
+  //double getRadarAltKm() const { return _radarAltKm; }
   const RadxPlatform &getPlatform() const { return _platform; }
 
 
@@ -232,6 +233,7 @@ public slots:
   void fieldsSelected(vector<string> *selectedFields);
   void closeFieldListDialog(bool clicked);
   void cancelFieldListDialog(bool clicked);
+  void warningMessage(string msg);
 
   string _fileName(QString path);
   string _combinePathFile(string path, string file);
@@ -341,6 +343,12 @@ signals:
 
   void newSweepData(int sweepNumber);
 
+  void readDataFileSignal(vector<string> *selectedFields);
+
+  void dataFileRead();
+
+  void warningMessageEvent(string msg);
+
 // end from DisplayManager
 
 private:
@@ -414,6 +422,8 @@ private:
 
   // status panel
 
+  StatusPanelController *_statusPanelController;
+  /*
   QGroupBox *_statusPanel;
   QGridLayout *_statusLayout;
 
@@ -472,6 +482,12 @@ private:
   QLabel *_cfacRollVal;
   QLabel *_cfacTiltVal;
 
+  QLabel *_geoRefTrackRelRotationVal;
+  QLabel *_geoRefTrackRelAzVal;
+  QLabel *_geoRefTrackRelTiltVal;
+  QLabel *_geoRefTrackRelElVal;
+      
+
   QLabel *_georefsAppliedLabel;
   QLabel *_geoRefRotationLabel;
   QLabel *_geoRefRollLabel;
@@ -479,11 +495,16 @@ private:
   QLabel *_cfacRotationLabel;
   QLabel *_cfacRollLabel;
   QLabel *_cfacTiltLabel;  
-  
 
+  QLabel *_geoRefTrackRelRotationLabel;
+  QLabel *_geoRefTrackRelAzLabel;
+  QLabel *_geoRefTrackRelElLabel;
+  QLabel *_geoRefTrackRelTiltLabel;  
+  
+  */
   bool _altitudeInFeet;
 
-  vector<QLabel *> _valsRight;
+  //vector<QLabel *> _valsRight;
   
   // field panel
   
@@ -513,9 +534,10 @@ private:
 
   QCheckBox *_applyCfacToggle;
   
+  // moved to StatusPanelController
   // sun position calculator
-  double _radarLat, _radarLon, _radarAltKm;
-  SunPosn _sunPosn;
+  //double _radarLat, _radarLon, _radarAltKm;
+  //SunPosn _sunPosn;
 
   // set top bar
 
@@ -531,9 +553,6 @@ private:
   void _updateStatusPanel(const RadxRay *ray);
   double _getInstHtKm(const RadxRay *ray);
 
-  void _applyCfac();
-  void hideCfacs();
-
   // setting text
 
   void _setText(char *text, const char *format, int val);
@@ -543,12 +562,14 @@ private:
 
   QLabel *_newLabelRight(const string &text);
 
+/*
   QLabel *_createStatusVal(const string &leftLabel,
                            const string &rightLabel,
                            int row, 
                            int fontSize,
                            QLabel **label = NULL);
-  
+ */
+
   QLabel *_addLabelRow(QWidget *widget,
                        QGridLayout *layout,
                        const string &leftLabel,
@@ -716,6 +737,8 @@ private:
   void _readDataFile(); // vector<string> *selectedFields);
   int _readDataFile2();
   int _readDataFile2(string &inputPath);
+
+  void _sanityCheck();
 
   // handleArchiveData calls:
   // getArchiveData
@@ -921,7 +944,9 @@ private slots:
   void _scriptEditorSetup();
   void EditRunScript(bool interactive = true);
 
- 
+  void inbetweenReadDataFile(vector<string> *selectedFields);
+
+  void metaDataChanged();
 
 };
 

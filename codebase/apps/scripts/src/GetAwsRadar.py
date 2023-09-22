@@ -364,11 +364,11 @@ def parseArgs():
     parser.add_option('--start',
                       dest='startTime',
                       default='1970 01 01 00 00 00',
-                      help='Start time for retrieval - archive mode')
+                      help='Start time for retrieval - archival mode. Format is "yyyy mm dd hh mm ss", including double quotes.')
     parser.add_option('--end',
                       dest='endTime',
                       default='1970 01 01 00 00 00',
-                      help='End time for retrieval - archive mode')
+                      help='End time for retrieval - archival mode. Format is "yyyy mm dd hh mm ss", including double quotes.')
 
     (options, args) = parser.parse_args()
 

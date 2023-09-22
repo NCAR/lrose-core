@@ -210,6 +210,8 @@ void MomentsFields::init()
   clut_2_wx_ratio = missingDouble;
   spectral_noise = missingDouble;
   spectral_snr = missingDouble;
+  regr_filt_poly_order = missingDouble;
+  regr_filt_cnr_db = missingDouble;
 
   // refractivity fields
 
@@ -353,11 +355,11 @@ void MomentsFields::init()
   // identifying noise
 
   dbm_for_noise = missingDouble;
-  dbm_sdev = missingDouble;
-  ncp_mean = missingDouble;
+  noise_dbm_sdev = missingDouble;
+  noise_ncp_mean = missingDouble;
   phase_for_noise.clear();
-  accum_phase_change = 0.0;
-  phase_change_error = 0.0;
+  noise_accum_phase_change = 0.0;
+  noise_phase_change_error = 0.0;
   
   // flag to indicate noise/signal is present at a gate
 
@@ -383,11 +385,16 @@ void MomentsFields::init()
 
   // fields for testing
 
-  test = missingDouble;
+  test0 = missingDouble;
+  test1 = missingDouble;
   test2 = missingDouble;
   test3 = missingDouble;
   test4 = missingDouble;
   test5 = missingDouble;
+  test6 = missingDouble;
+  test7 = missingDouble;
+  test8 = missingDouble;
+  test9 = missingDouble;
   
 }
 
@@ -554,6 +561,8 @@ void MomentsFields::initToZero()
   clut_2_wx_ratio = 0.0;
   spectral_noise = 0.0;
   spectral_snr = 0.0;
+  regr_filt_poly_order = 0.0;
+  regr_filt_cnr_db = 0.0;
 
   // refractivity fields
 
@@ -697,11 +706,11 @@ void MomentsFields::initToZero()
   // identifying noise
 
   dbm_for_noise = 0.0;
-  dbm_sdev = 0.0;
-  ncp_mean = 0.0;
+  noise_dbm_sdev = 0.0;
+  noise_ncp_mean = 0.0;
   phase_for_noise.clear();
-  accum_phase_change = 0.0;
-  phase_change_error = 0.0;
+  noise_accum_phase_change = 0.0;
+  noise_phase_change_error = 0.0;
   
   // flag to indicate noise/signal is present at a gate
 
@@ -727,11 +736,16 @@ void MomentsFields::initToZero()
 
   // fields for testing
 
-  test = 0.0;
+  test0 = 0.0;
+  test1 = 0.0;
   test2 = 0.0;
   test3 = 0.0;
   test4 = 0.0;
   test5 = 0.0;
+  test6 = 0.0;
+  test7 = 0.0;
+  test8 = 0.0;
+  test9 = 0.0;
   
 }
 

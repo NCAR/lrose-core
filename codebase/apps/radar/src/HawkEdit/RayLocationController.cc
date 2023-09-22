@@ -11,6 +11,13 @@ RayLocationController::RayLocationController() {
 
 RayLocationController::~RayLocationController() {}
 
+// TODO: setPrimaryAxis(Radx... primaryAxis) {
+//  if (_model->getPrimaryAxis != primaryAxis) {
+//    free current model and memory
+//    create new model for requested axis
+//  }
+//}
+
 // call when new data file is read, or when switching to new sweep?
 void RayLocationController::sortRaysIntoRayLocations(float ppi_rendering_beam_width,
   int sweepNumber) {
@@ -23,7 +30,7 @@ bool RayLocationController::isRayLocationSetup() {
 
 size_t RayLocationController::getNRayLocations() {
   return _model->getNRayLocations();
-};
+}
 
 double RayLocationController::getStartRangeKm(size_t rayIdx) {
 	return _model->getStartRangeKm(rayIdx);
@@ -69,4 +76,8 @@ float RayLocationController::getNyquistVelocityForRay(float azDeg, int offset) {
 
 float RayLocationController::getAzimuthForRay(float azDeg, int offset) {
   return _model->getAzimuthForRay(azDeg, offset);
+}
+
+float RayLocationController::getAzimuthForRay(const RadxRay *ray) {
+  return _model->getAzimuthForRay(ray);
 }

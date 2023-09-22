@@ -4,7 +4,7 @@
 /* c------------------------------------------------------------------------ */
 				/* flagged-assign */
 
-void se_assign_value(float constant, const float *data, float *newData, size_t nGates,
+void se_flagged_assign_value(float constant, const float *data, float *newData, size_t nGates,
 		    size_t dgi_clip_gate,
 		    bool *boundary_mask, const bool *bad_flag_mask)
 {
@@ -30,9 +30,9 @@ void se_assign_value(float constant, const float *data, float *newData, size_t n
     memcpy(newData, data, nGates*sizeof(float));
     tt = newData;
 
-      for(; ss < zz; ss++,tt++,bnd++,flag++) {
+    for(; ss < zz; ss++,tt++,bnd++,flag++) {
 	    if(*bnd && *flag) {
-		*tt = scaled_const;
+        *tt = scaled_const;
 	    }
-      }
+    }
 }  

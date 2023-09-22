@@ -103,6 +103,13 @@ public:
   inline void setRollRate(double val) { _rollRate = val; }
   inline void setDriveAngle1(double val) { _driveAngle1 = val; }
   inline void setDriveAngle2(double val) { _driveAngle2 = val; }
+  inline void setTrackRelRot(double val)  { _trackRelRot = val; }
+  inline void setTrackRelTilt(double val)  { _trackRelTilt = val; }
+  inline void setTrackRelAz(double val)  { _trackRelAz = val; }
+  inline void setTrackRelEl(double val)  { _trackRelEl = val; }
+  inline void setXX(double val)  { _xx = val; }
+  inline void setYY(double val)  { _yy = val;  }
+  inline void setZZ(double val)  { _zz = val;  }  
 
   //@}
   /// \name Get methods:
@@ -135,7 +142,13 @@ public:
   inline double getRollRate() const { return _rollRate; }
   inline double getDriveAngle1() const { return _driveAngle1; }
   inline double getDriveAngle2() const { return _driveAngle2; }
-
+  inline double getTrackRelRot() const { return _trackRelRot; }
+  inline double getTrackRelTilt() const { return _trackRelTilt; }
+  inline double getTrackRelAz() const { return _trackRelAz; }
+  inline double getTrackRelEl() const { return _trackRelEl; }
+  inline double getXX() const { return _xx; }
+  inline double getYY() const { return _yy; }
+  inline double getZZ() const { return _zz; }  
   //@}
 
                                                    
@@ -249,9 +262,27 @@ private:
   double _headingRate;   /* Heading rate rate in degrees/second. */
   double _pitchRate;	 /* Pitch rate rate in degrees/second. */
   double _rollRate;	 /* Roll rate rate in degrees/second. */
-
+  
   double _driveAngle1;   /* angle of antenna drive 1, if applicable */
   double _driveAngle2;   /* angle of antenna drive 2, if applicable */
+
+  // For track relative angles, refer to equations 10, 11, 12, 13 in
+  // Mapping of Airborne Doppler Radar Data, Lee et al. 1994
+  
+  double _trackRelRot;   /* track-relative rotation angle
+                          * i.e. rotation in the track-relative reference frame  */
+  double _trackRelTilt;  /* track-relative tilt angle
+                          * i.e. tilt in the track-relative reference frame  */
+  double _trackRelAz ;   /* track-relative azimuth angle
+                          * i.e. azimuth in the track-relative reference frame  */
+  double _trackRelEl;    /* track-relative elevation angle
+                          * i.e. elevation in the track-relative reference frame  */
+
+  // For unit vectors, refer to Mapping of Airborne Doppler Radar Data, Lee et al. 1994
+  
+  double _xx; // georeference transformation intermediate values
+  double _yy;
+  double _zz; 
 
   // methods
   
@@ -294,6 +325,10 @@ private:
     Radx::fl64 rollRate;
     Radx::fl64 driveAngle1;
     Radx::fl64 driveAngle2;
+    Radx::fl64 trackRelRot;
+    Radx::fl64 trackRelTilt;
+    Radx::fl64 trackRelAz;
+    Radx::fl64 trackRelEl;
     Radx::fl64 spareFl64[8];
   
   } msgMetaNumbers_t;

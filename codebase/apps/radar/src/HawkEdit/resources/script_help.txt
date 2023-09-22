@@ -1,0 +1,106 @@
+Getting Started		How to familiarize yourself with HawkEdit Scripts
+    Solo "one time"	commands are replaced by variable assignments in HawkEdit, NYQUIST = 13.0.  Send these variables as arguments to the functions. 
+    Solo "for each ray" 	commands are still available in HawkEdit as predefined functions.  A script applies to every ray.  
+    No overwrite 	Fields are NOT  modified unless it is assigned, i.e. VEL = UNCONDITIONAL_DELETE(VEL).  
+    functional 	HawkEdit scripts follow JavaScript syntax.  JavaScript is a functional language.
+    hidden variables 	Solo had hidden variables such as boundary and bad flags.  HawkEdit exposes these hidden variables as arguments to functions. This way you know exactly which variables affect a function. 
+    <field> 	Arguments in angle brackets: replace with field name.  
+    [<clip-gate>] 	Arguments in square brackets are optional.
+    Example:
+    VZ_COPY = VZ 	Copy VZ data to new field VZ_COPY
+    VZ2 = VZ * 2.0 	Multiply data in field VZ by 2.0
+
+Predefined functions 	Autocomplete contains all the predefined functions. Just start typing and autocomplete will show the possibilities.  Arguments in angle brackets <field> replace with field name and remove angle brackets.  Arguments in square brackets are optional. For all predefined functions, reference the field name as is, e.g. VEL.
+
+    Bad Flag functions	All bad flag functions use a separate field with a flag to indicate bad data is in the associated gate. 
+
+        bad-flags 	Bad flags is a field of flags that can be manipulated with logical operations on fields and then asserted in various fields.
+        bad-data-value 	Default is -FLT_MAX = -3.402823e+38
+        Example: 	The following sequence is one way to remove clutter from both the VE and DZ fields
+            CLEAR_BAD_FLAGS(BAD_FLAGS)
+            SET_BAD_FLAGS_BETWEEN( VE between -1. and 1.)
+            AND_BAD_FLAG_ABOVE(DZ, 35, BAD_FLAGS)
+            ASSERT_BAD_FLAGS(VE, -999, BAD_FLAGS)
+            ASSERT_BAD_FLAGS(DZ, -999, BAD_FLAGS)
+
+        BAD_FLAGS 	a field that contains a flag (i.e. a special value) to indicate the gate has bad data.  The default name of this field is BAD_FLAGS.
+        ABOVE, BELOW, BETWEEN 	BETWEEN is inclusive of both limits whereas ABOVE and BELOW are exclusive of the limit. 
+        ASSERT_BAD_FLAGS(<field>, <bad-flags> [, <bad-data-value>])
+        CLEAR_BAD_FLAGS(<bad-flags>)
+        COMPLEMENT_BAD_FLAGS()
+        COPY_BAD_FLAGS()
+
+        SET_BAD_FLAGS_ABOVE()
+        SET_BAD_FLAGS_BELOW()
+        SET_BAD_FLAGS_BETWEEN()
+        FLAGGED_ADD()
+        FLAGGED_MULTIPLY()
+
+        AND_BAD_FLAG_ABOVE(<field>, <real>, <bad-flags>)	AND the result of (field > real) with the bad flags.  If the test field is flagged as bad the flag in the bad flags is turned off otherwise the condition is ANDed with the corresponding bad flag.  e.g.  and-bad-flags when SW above 4.4 and-bad-flags when VE between -1. and 1.  
+        AND_BAD_FLAGS_BELOW
+        AND_BAD_FLAGS_BETWEEN
+        OR_BAD_FLAG_ABOVE
+        OR_BAD_FLAGS_BELOW
+        OR_BAD_FLAGS_BETWEEN
+        XOR_BAD_FLAG_ABOVE
+        XOR_BAD_FLAGS_BELOW
+        XOR_BAD_FLAGS_BETWEEN
+
+        ASSERT_BAD_FLAGS( <field>, <bad-flags>, <bad-data-value>) 	If the gate is inside the boundary AND the bad flag is set, then the data for the gate is set to the bad-data-value. Essentially, set all field data to the bad-data-value, if it is marked with a bad flag. Otherwise, retain the original value. A new field is returned with the bad flags asserted.
+
+        Example: 	remove clutter from VE and DZ fields
+            VE2 = SET_BAD_FLAGS_BETWEEN (VE, -1, 1., BAD_FLAGS)  
+            DZ2 = AND_BAD_FLAGS_ABOVE (DZ, 35., BAD_FLAGS)  
+            VE3 = ASSERT_BAD_FLAGS (BAD_FLAGS) 
+            DZ3 = ASSERT_BAD_FLAGS (DZ, BAD_FLAGS) 	Turning off the flag when the test field contains a delete flag for AND only guarantees that the absence of a reflectivity will not cause a velocity value between -1. and 1. to be deleted in the above example.  
+    Threshold 
+        THRESHOLD_ABOVE(VZ, 3.5)		
+        THRESHOLD_BELOW
+        Example: 				
+
+    Unfold or Dealias 	Unfold a field based on Nyquist velocity 
+        Variables		
+        Default Values	
+        BB_UNFOLDING_FIRST_GOOD_GATE()	
+        BB_UNFOLDING_LOCAL_WIND()                   
+        BB_UNFOLDING_AC_WIND()                   
+
+    Despeckle
+        DESPECKLE()
+
+    Remove Ring 				
+        Variables 			
+        Default Values
+        REMOVE_RING()
+        Example:				
+
+    Remove Aircraft Motion
+        REMOVE_AIRCRAFT_MOTION()
+
+
+    Remove Only Surface
+        REMOVE_ONLY_SURFACE()
+
+    Delete
+        UNCONDITIONAL_DELETE(<field>, <bad_data_value>, [<clip gate>])
+
+    Miscellaneous	These functions are mostly used to test if the script works.
+        ZERO_INSIDE_BOUNDARY(<field>)
+        ZERO_MIDDLE_THIRD(<field>)
+
+Custom functions			New functions you can create and use with JavaScript maps.  For all custom functions, append _V to the raw field name, e.g. VEL_V
+    Variables 				Predefined variables for use in functions
+        BOUNDARY 			boolean array that represents the current boundary
+    Example: negate all gates for field	first define a new function 'incr', then map incr onto the VEL field. 
+        function incr(val) { return val * -1 }; 	define a function incr, to multiply a value by -1
+        VEL_F = VEL.map(incr);				apply incr function to the VEL field, VEL_F field contains results
+    Anonymous function					a function that does not have a name, only arguments and operations
+    Example: use BOUNDARY and anonymous function	reverse sign of VEL field inside boundary, new field VEL_NEG contains results
+        VEL_NEG = VEL.map(function (num, idx) {		map anonymous function over the VEL field; num is the data at gate[idx] for the current ray
+          if (BOUNDARY[idx] )				anonymous function uses BOUNDARY variable
+            return num * -1;				gate is inside the boundary, negate it
+          else 
+            return num;					gate is outside the boundary, no change
+        });  
+
+

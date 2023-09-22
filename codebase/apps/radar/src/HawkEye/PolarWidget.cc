@@ -276,10 +276,10 @@ void PolarWidget::backgroundColor(const QColor &color)
 
 void PolarWidget::gridRingsColor(const QColor &color)
 {
-  LOG(DEBUG) << "enter " << color.name().toStdString();
+  LOG(DEBUG_VERBOSE) << "enter " << color.name().toStdString();
   _gridRingsColor = color;
   update();
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 
@@ -662,7 +662,7 @@ void PolarWidget::contextMenuCancel()
 void PolarWidget::contextMenuParameterColors()
 {
   /*
-    LOG(DEBUG) << "enter";
+    LOG(DEBUG_VERBOSE) << "enter";
 
     //DisplayField selectedField;
 
@@ -688,7 +688,7 @@ void PolarWidget::contextMenuParameterColors()
     delete parameterColorView;
     delete parameterColorModel;
 
-    LOG(DEBUG) << "exit ";
+    LOG(DEBUG_VERBOSE) << "exit ";
   */
   informationMessage();
    

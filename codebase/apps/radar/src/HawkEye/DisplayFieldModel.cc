@@ -13,14 +13,14 @@ DisplayFieldModel::DisplayFieldModel(vector<DisplayField *> displayFields,
 				     string annotationColor,
 				     string backgroundColor)
 {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   _fields = displayFields;
   _selectedFieldName = selectedFieldName;
   _gridColor = gridColor;
   _emphasisColor = emphasisColor;
   _annotationColor = annotationColor;
   _backgroundColor = backgroundColor;
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 DisplayFieldModel::~DisplayFieldModel() {
@@ -47,9 +47,9 @@ string DisplayFieldModel::getSelectedField() {
 } 
 
 void DisplayFieldModel::setSelectedField(string fieldName) {
-  LOG(DEBUG) << "enter " << fieldName;
+  LOG(DEBUG_VERBOSE) << "enter " << fieldName;
   _selectedFieldName = fieldName;
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 } 
 
 /*
@@ -63,8 +63,8 @@ bool DisplayFieldModel::getChanges() {
 
 ColorMap *DisplayFieldModel::_getOriginalColorMap(string fieldName) {
 
-  LOG(DEBUG) << "looking for field ...";
-  LOG(DEBUG) << fieldName;
+  LOG(DEBUG_VERBOSE) << "looking for field ...";
+  LOG(DEBUG_VERBOSE) << fieldName;
 
   // find the field or return NULL if not found
   ColorMap *colorMap = NULL;
@@ -76,10 +76,10 @@ ColorMap *DisplayFieldModel::_getOriginalColorMap(string fieldName) {
     DisplayField *field = *it;
 
     string name = field->getName();
-    LOG(DEBUG) << "comparing to ...";
-    LOG(DEBUG) << name;
+    LOG(DEBUG_VERBOSE) << "comparing to ...";
+    LOG(DEBUG_VERBOSE) << name;
     if (name.compare(fieldName) == 0) {
-      LOG(DEBUG) << "found color map";
+      LOG(DEBUG_VERBOSE) << "found color map";
       found = true;
       const ColorMap &colorMapOriginal = field->getColorMap();
       colorMap = new ColorMap(colorMapOriginal);
@@ -97,17 +97,17 @@ ColorMap *DisplayFieldModel::_getOriginalColorMap(string fieldName) {
 // return NULL if not found
 ColorMap *DisplayFieldModel::getColorMap(string fieldName) {
   
-  LOG(DEBUG) << "entry " << fieldName;
+  LOG(DEBUG_VERBOSE) << "entry " << fieldName;
 
   ColorMap *workingCopyColorMap = NULL;
 
   // first, look in the working copies
   map<string, ColorMap *>::iterator it = _workingCopies.find(fieldName);
   if (it != _workingCopies.end()) {
-    LOG(DEBUG) << "found in the workingCopies";
+    LOG(DEBUG_VERBOSE) << "found in the workingCopies";
     workingCopyColorMap = it->second; 
   } else {
-    LOG(DEBUG) << " need to make a copy";
+    LOG(DEBUG_VERBOSE) << " need to make a copy";
     // if no working copy, then make one and insert it into list
     //if (!found) {
     workingCopyColorMap = _getOriginalColorMap(fieldName);
@@ -119,7 +119,7 @@ ColorMap *DisplayFieldModel::getColorMap(string fieldName) {
 
   workingCopyColorMap->print(cout);
 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
   
   return workingCopyColorMap;
 }
@@ -128,33 +128,33 @@ ColorMap *DisplayFieldModel::getColorMap(string fieldName) {
 // return NULL if not found
 void DisplayFieldModel::setColorMap(string fieldName, ColorMap *newColorMap) {
   
-  LOG(DEBUG) << "entry " << fieldName;
+  LOG(DEBUG_VERBOSE) << "entry " << fieldName;
 
   // first, look in the working copies
   map<string, ColorMap *>::iterator it = _workingCopies.find(fieldName);
   if (it != _workingCopies.end()) {
-    LOG(DEBUG) << "found in the workingCopies";
+    LOG(DEBUG_VERBOSE) << "found in the workingCopies";
     _workingCopies.erase(it);  
   } 
 
   // insert new version into list
   _workingCopies[fieldName] = newColorMap;
 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
   
 }
 
 
 ColorMap *DisplayFieldModel::colorMapMaxChanged(double newValue) {
-  LOG(DEBUG) << "entry " << newValue;
-  LOG(DEBUG) << "_selectedFieldName " << _selectedFieldName;
+  LOG(DEBUG_VERBOSE) << "entry " << newValue;
+  LOG(DEBUG_VERBOSE) << "_selectedFieldName " << _selectedFieldName;
 
   ColorMap *workingVersion = getColorMap(_selectedFieldName);
 
   if (newValue != workingVersion->rangeMax()) {
     /* create new ColorMap because just setting the range doesn't work
     string currentColorMapName = workingVersion->getName();
-    LOG(DEBUG) << "current ColorMap name " << currentColorMapName;
+    LOG(DEBUG_VERBOSE) << "current ColorMap name " << currentColorMapName;
     ColorMap *newColorMap = new ColorMap(workingVersion->rangeMin(), newValue,
 					 currentColorMapName);
     delete workingVersion;
@@ -163,29 +163,29 @@ ColorMap *DisplayFieldModel::colorMapMaxChanged(double newValue) {
     */
     workingVersion->setRangeMax(newValue);
   }
-  LOG(DEBUG) << "colorMap after max changed";
+  LOG(DEBUG_VERBOSE) << "colorMap after max changed";
   workingVersion->print(cout);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
   return workingVersion;
 }
 
 ColorMap *DisplayFieldModel::colorMapMinChanged(double newValue) {
-  LOG(DEBUG) << "entry " << newValue;
-  LOG(DEBUG) << "_selectedFieldName " << _selectedFieldName;
+  LOG(DEBUG_VERBOSE) << "entry " << newValue;
+  LOG(DEBUG_VERBOSE) << "_selectedFieldName " << _selectedFieldName;
 
   ColorMap *workingVersion = getColorMap(_selectedFieldName);
 
   if (newValue != workingVersion->rangeMin()) {
     workingVersion->setRangeMin(newValue);
   }
-  LOG(DEBUG) << "colorMap after min changed";
+  LOG(DEBUG_VERBOSE) << "colorMap after min changed";
   workingVersion->print(cout);
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
   return workingVersion;
 }
 
 void DisplayFieldModel::colorMapChanged(string newColorMapName) {
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
   // change the ColorMap for the currently selected field
   ColorMap *workingVersion = getColorMap(_selectedFieldName);
 
@@ -199,12 +199,12 @@ void DisplayFieldModel::colorMapChanged(string newColorMapName) {
   setColorMap(_selectedFieldName, colorMap);
 
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 bool DisplayFieldModel::backgroundChanged(string fieldName) {
-  LOG(DEBUG) << fieldName;
-  LOG(DEBUG) << "background changed";
+  LOG(DEBUG_VERBOSE) << fieldName;
+  LOG(DEBUG_VERBOSE) << "background changed";
   return false;
 }
 
@@ -213,9 +213,9 @@ string DisplayFieldModel::getGridColor() {
 }
 
 void DisplayFieldModel::setGridColor(string colorName) {
-  LOG(DEBUG) << "enter " << colorName;
+  LOG(DEBUG_VERBOSE) << "enter " << colorName;
   _gridColor = colorName;
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 string DisplayFieldModel::getEmphasisColor() {

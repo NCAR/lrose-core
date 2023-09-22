@@ -1408,7 +1408,9 @@ typedef struct iwrf_pulse_header {
   si32 txrx_state;  /**< flags for tx/rx status, short/long PRT etc.
                      * see iwrf_txrx_state_flags_t */
 
-  si32 unused[6];
+  fl32 tx_phase_deg; /** phase on transmit - for phase-coded ops */
+
+  si32 unused[5];
 
 } iwrf_pulse_header_t;
 

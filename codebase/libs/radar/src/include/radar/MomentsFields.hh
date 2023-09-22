@@ -210,13 +210,16 @@ public:
   double cpa_interest;
   double zdr_sdev_interest;
   double phidp_sdev_interest;
-
+  
   // clutter power and noise residue
 
   double clut; // total clut power, after corrections for noise floor
   double clut_2_wx_ratio; // as computed by the filter
   double spectral_noise; // dBm power for skirts in spectrum
   double spectral_snr; // SNR for skirts in spectrum
+
+  double regr_filt_poly_order;
+  double regr_filt_cnr_db;
 
   // refractivity fields
 
@@ -359,11 +362,11 @@ public:
   // identifying noise
 
   double dbm_for_noise;
-  double dbm_sdev;
-  double ncp_mean;
+  double noise_dbm_sdev;
+  double noise_ncp_mean;
   RadarComplex_t phase_for_noise;
-  double accum_phase_change;
-  double phase_change_error;
+  double noise_accum_phase_change;
+  double noise_phase_change_error;
 
   // flag to indicate noise/signal is present at a gate
 
@@ -389,11 +392,16 @@ public:
 
   // for testing
 
-  mutable double test;
+  mutable double test0;
+  mutable double test1;
   mutable double test2;
   mutable double test3;
   mutable double test4;
   mutable double test5;
+  mutable double test6;
+  mutable double test7;
+  mutable double test8;
+  mutable double test9;
   
   static const double missingDouble;
 

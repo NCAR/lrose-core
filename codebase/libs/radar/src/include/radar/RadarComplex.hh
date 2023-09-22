@@ -134,6 +134,14 @@ public:
   
   static RadarComplex_t complexMean(RadarComplex_t c1, RadarComplex_t c2);
   
+  // phase shift in the time domain
+  // add the phase shift provided in radians
+  
+  static void timeDomainPhaseShift(const RadarComplex_t *orig,
+                                   int len,
+                                   double shiftRadians,
+                                   RadarComplex_t *shifted);
+  
   // compute mean by dividing by the number of obs
   
   static RadarComplex_t mean(RadarComplex_t sum, double nn);

@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdint>
 #include <iostream>
 
 //#include <sii_param_widgets.hh>

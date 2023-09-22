@@ -538,7 +538,7 @@ void DisplayManager::_changeFieldVariable(bool value) {
 
 void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColorMap) {
 
-  LOG(DEBUG) << "enter"; 
+  LOG(DEBUG_VERBOSE) << "enter"; 
   
   // connect the new color map with the field
   // find the fieldName in the list of FieldDisplays
@@ -568,7 +568,7 @@ void DisplayManager::colorMapRedefineReceived(string fieldName, ColorMap newColo
     _changeField(fieldId, true); 
   }
   
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 
@@ -915,7 +915,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
   
   if (_pulseWidthVal) {
-    _setText(text, "%.2f", ray->getPulseWidthUsec());
+    _setText(text, "%.3f", ray->getPulseWidthUsec());
     _pulseWidthVal->setText(text);
   }
 
@@ -1046,6 +1046,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     _radarLat = _platform.getLatitudeDeg();
     _radarLon = _platform.getLongitudeDeg();
     _radarAltKm = _platform.getAltitudeKm();
+    _beamHt.setInstrumentHtKm(_radarAltKm);
     if (_radarAltKm < -1.0) {
       _radarAltKm = 0.0;
     }

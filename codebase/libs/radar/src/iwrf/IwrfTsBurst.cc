@@ -37,6 +37,7 @@
 #include <toolsa/DateTime.hh>
 #include <toolsa/toolsa_macros.h>
 #include <radar/IwrfTsBurst.hh>
+#include <radar/IwrfTsPulse.hh>
 using namespace std;
 
 // Constructor
@@ -296,17 +297,10 @@ void IwrfTsBurst::convertToFL32()
     // compute from power and phase
     
     si16 *packed = (si16 *) _packed;
-    double phaseMult = 180.0 / 32767.0;
+    auto magScale = pow(10.0, _packedOffset / 20.0);
     for (int ii = 0; ii < _hdr.n_samples * 2; ii += 2) {
-      double powerDbm = packed[ii] * _packedScale + _packedOffset;
-      double power = pow(10.0, powerDbm / 10.0);
-      double phaseDeg = packed[ii+1] * phaseMult;
-      double sinPhase, cosPhase;
-      ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-      double mag = sqrt(power);
-      _iq[ii] = mag * cosPhase;
-      _iq[ii+1] = mag * sinPhase;
-
+      std::tie(_iq[ii], _iq[ii+1])
+        = IwrfTsPulse::_unpackDbmPhaseSi16(packed[ii], packed[ii+1], magScale, _packedScale);
     }
     
   }

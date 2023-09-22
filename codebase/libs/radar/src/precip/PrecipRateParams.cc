@@ -673,7 +673,7 @@
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("RATE_brightband_dbz_correction");
     tt->descr = tdrpStrDup("Correction to be applied in brightband before computing precip rate.");
-    tt->help = tdrpStrDup("This should be negative.");
+    tt->help = tdrpStrDup("This is used for computing rate in wet snow or mixed precip. This should be negative.");
     tt->val_offset = (char *) &RATE_brightband_dbz_correction - &_start_;
     tt->has_max = TRUE;
     tt->max_val.d = 0;
@@ -905,7 +905,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 9");
     tt->comment_hdr = tdrpStrDup("RATE_HYBRID");
-    tt->comment_text = tdrpStrDup("The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n\t  if hail or heavy rain\n\t    if KDP > threhsold and rateKDP is valid\n\t      use RATE_KDP\n\t    else\n\t      use RATE_KDP\n\t  else if snow/ice\n\t    use RATE_ZH_SNOW\n\t  else if mixed precip\n\t    use RATE_ZH_MIXED\n\t  else if rain or SLD\n\t    if dBZ > theshold and KDP > threhsold\n\t      if rateKDP is valid\n\t        use RATE_KDP\n\t      else\n\t        use RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        use RATE_Z\n\t      else\n\t        use RATE_ZZDR\n");
+    tt->comment_text = tdrpStrDup("The HYBRID rate is based on the PID and the BRINGI algorithm. See 'Using dual-polarized radar and dual-frequency profiler for DSD characterization: a case study from Darwin, Australia', Hybrid et al, JTech, Vol 26, 2009, 2107 - 2122.\n\n\t  if hail or heavy rain\n\t    if KDP > threhsold and rateKDP is valid\n\t      use RATE_KDP\n\t    else\n\t      use RATE_ZZDR\n\t  else if snow/ice\n\t    use RATE_ZH_SNOW\n\t  else if mixed precip\n\t    use RATE_ZH_MIXED\n\t  else if rain or SLD\n\t    if dBZ > theshold and KDP > threhsold\n\t      if rateKDP is valid\n\t        use RATE_KDP\n\t      else\n\t        use RATE_ZZDR\n\t    else\n\t      if ZDR >= threshold\n\t        use RATE_ZZDR\n\t      else\n\t        use RATE_Z\n");
     tt++;
     
     // Parameter 'RATE_hybrid_dbz_threshold'

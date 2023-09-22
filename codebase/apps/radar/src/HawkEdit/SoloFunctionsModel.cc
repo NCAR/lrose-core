@@ -53,6 +53,53 @@ void SoloFunctionsModel::writeData(string &path) {
   }  
 }
 */
+
+int SoloFunctionsModel::ConvertRadxPlatformToSoloRadarType(Radx::PlatformType_t platform) {
+
+  int soloRadarType = 0; // default is ground
+  switch (platform) {
+  // PLATFORM_TYPE_NOT_SET = 0, ///< Initialized but not yet set
+  //  PLATFORM_TYPE_FIXED = 1, ///< Radar is in a fixed location
+  //  PLATFORM_TYPE_VEHICLE = 2, ///< Radar is mounted on a land vehicle
+  //  PLATFORM_TYPE_SHIP = 3, ///< Radar is mounted on a ship
+  //  PLATFORM_TYPE_AIRCRAFT = 4, ///< Foreward looking on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_FORE = 5, ///< Foreward looking on aircraft
+    case Radx::PLATFORM_TYPE_AIRCRAFT_AFT: // = 6, ///< Backward looking on aircraft
+      soloRadarType = 2; // AIR_AFT
+      break;
+    case Radx::PLATFORM_TYPE_AIRCRAFT_TAIL: //  = 7, ///< Tail - e.g. ELDORA
+      soloRadarType = 3; // AIR_TAIL
+      break;
+  //  PLATFORM_TYPE_AIRCRAFT_BELLY = 8, ///< Belly radar on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_ROOF = 9, ///< Roof radar on aircraft
+  //  PLATFORM_TYPE_AIRCRAFT_NOSE = 10, ///< radar in nose radome on aircraft
+  //  PLATFORM_TYPE_SATELLITE_ORBIT = 11, ///< orbiting satellite
+  //  PLATFORM_TYPE_SATELLITE_GEOSTAT = 12, ///< geostationary satellite  
+  //  RadxPlatform platform _scriptsDataController::getPlatform();
+    default:
+      soloRadarType = 0; // GROUND
+
+  }
+  // convert from RadxPlatform to Solo radar type;
+  // or just convert Solo radar types to Radx
+  
+  // use DoradeData.hh radar_type_t or lidar_type_t
+/* Dorade radar types */
+/*
+# define           GROUND 0
+# define         AIR_FORE 1
+# define          AIR_AFT 2
+# define         AIR_TAIL 3
+# define           AIR_LF 4
+# define             SHIP 5
+# define         AIR_NOSE 6         
+# define        SATELLITE 7
+# define     LIDAR_MOVING 8
+# define      LIDAR_FIXED 9
+*/ 
+  return soloRadarType;
+}
+
 void SoloFunctionsModel::ClearBoundaryMask() {
   delete[] _boundaryMask;
   _boundaryMask = NULL;
@@ -225,7 +272,7 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
   // because the boundary is for a particular ray; then the boundary
   // can be used with multiple functions ?? maybe NOT!
 
-// TODO: we need the cfactors applied BEFORE accessing this info!!!
+  // we need the cfactors applied BEFORE accessing this info!!!
 
 
   // wrestle this information out of the ray and radar volume ...
@@ -271,17 +318,58 @@ void SoloFunctionsModel::SetBoundaryMaskOriginal(size_t rayIdx, //int sweepIdx,
 
   float gateSize = ray->getGateSpacingKm() * 1000.0;
   float distanceToCellNInMeters = ray->getStartRangeKm() * 1000.0;
-  float azimuth = ray->getAzimuthDeg();
-  if ((azimuth > 180) && (azimuth < 350)) {
-     cerr << "HERE: azimuth = " << azimuth << endl;
-  }
+
   // need to do some conversions here ...
   // TODO: get these from SoloLibrary::dd_math.h
-  int radar_scan_mode = 1; // PPI;
-  int radar_type = 0; // GROUND; 
+  Radx::PlatformType_t platform = _scriptsDataController->getPlatform().getPlatformType();
+  // convert from RadxPlatform to Solo radar type;
+  // or just convert Solo radar types to Radx
+  
+  // use DoradeData.hh radar_type_t or lidar_type_t
+/* Dorade radar types */
+/*
+# define           GROUND 0
+# define         AIR_FORE 1
+# define          AIR_AFT 2
+# define         AIR_TAIL 3
+# define           AIR_LF 4
+# define             SHIP 5
+# define         AIR_NOSE 6         
+# define        SATELLITE 7
+# define     LIDAR_MOVING 8
+# define      LIDAR_FIXED 9
+*/ 
+  int radar_scan_mode = 1; // PPI; // TODO: need to get this: either RHI or PPI? 
+  int radar_type = ConvertRadxPlatformToSoloRadarType(platform);
  
   float tilt_angle = 0.0; // TODO: It should be this ... ray->getElevationDeg();
 
+  /* TODO: if Y-Prime radar, then send the track-relative rotation for the azimuth.
+      PRIMARY_AXIS_Z = 0, ///< vertical
+    PRIMARY_AXIS_Y = 1, ///< longitudinal axis of platform
+    PRIMARY_AXIS_X = 2, ///< lateral axis of platform
+    PRIMARY_AXIS_Z_PRIME = 3, ///< inverted vertical
+    PRIMARY_AXIS_Y_PRIME = 4, ///< ELDORA, HRD tail
+    PRIMARY_AXIS_X_PRIME = 5  ///< translated lateral
+  */ 
+  Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
+  
+  
+  float azimuth = ray->getAzimuthDeg();
+  if (primary_axis == Radx::PRIMARY_AXIS_Y_PRIME) {
+    RadxGeoref *georef = ray->getGeoreference();
+    if (georef == NULL) {
+      LOG(DEBUG) << "ERROR - georef for ray is NULL";
+      string msg = "Georef for ray is null. Cannot apply boundary";
+      throw msg;
+    }
+    azimuth = georef->getTrackRelRot();
+    if (azimuth == Radx::missingMetaDouble) {
+      LOG(DEBUG) << "ERROR - track-relative rotation is missing";
+      string msg = "Track-relative rotation is missing.  Cannot apply boundary";
+      throw msg;
+    }
+  }
 
   // TODO: need to fix this!  sending bool*, expecting short*
   _boundaryMask = new bool[_boundaryMaskLength];
@@ -682,6 +770,7 @@ string SoloFunctionsModel::Despeckle(string fieldName,  //RadxVol *vol,
 string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol,
 						size_t rayIdx, // int sweepIdx,
 						float nyquist_velocity,
+            bool use_radar_angles,
 						size_t clip_gate,
 						float bad_data_value,
 						string newFieldName) { 
@@ -733,60 +822,155 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   }
   */ 
 
+  SoloFunctionsApi soloFunctionsApi;
+
   const RadxGeoref *georef = _scriptsDataController->getGeoreference(rayIdx);
   if (georef == NULL) {
     throw "Remove Aircraft Motion: Georef is null. Cannot find vert_velocity, ew_velocity, ns_velocity.";
-  }  
+  } 
+
+  float tilt = georef->getTrackRelTilt() * Radx::DegToRad;
+  // TODO: elevation changes with different rays/fields how to get the current one???
+  float elevation = georef->getTrackRelEl() * Radx::DegToRad;
+
+  float dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
+  float seds_nyquist_velocity = nyquist_velocity; // TODO: what is this value?
+
+  //==========  
+
+  float new_az = 0.0;
+  
+  if (use_radar_angles) {
+    // these are input args to radar angles calculation
+    float asib_roll = georef->getRoll();
+    float asib_pitch = georef->getPitch();
+    float asib_heading = georef->getHeading();
+    float asib_drift_angle = georef->getDrift();
+    float asib_rotation_angle = georef->getRotation();
+    float asib_tilt = georef->getTilt();
+    float cfac_pitch_corr = _scriptsDataController->getCfactorPitchCorr();
+    float cfac_heading_corr = _scriptsDataController->getCfactorHeadingCorr();
+    float cfac_drift_corr = _scriptsDataController->getCfactorDriftCorr();
+    float cfac_roll_corr = _scriptsDataController->getCfactorRollCorr();
+    float cfac_elevation_corr = _scriptsDataController->getCfactorElevationCorr();
+    float cfac_azimuth_corr = _scriptsDataController->getCfactorAzimuthCorr();
+    float cfac_rot_angle_corr = _scriptsDataController->getCfactorRotationCorr();
+    float cfac_tilt_corr = _scriptsDataController->getCfactorTiltCorr();
+
+    if (_scriptsDataController->getPlatform().getPlatformType() != Radx::PLATFORM_TYPE_AIRCRAFT_TAIL) {
+      throw "SoloII radar_angles only works with Tail radar";
+    } 
+    int radar_type =  3; // hard code to TAIL    // from dgi->dds->radd->radar_type
+    // TODO: convert the Radx::Platform enum to the SoloII int for the radar type
+    //switch (_scriptsDataController->getPlatform().getPlatformType()) {
+    //case ...
+    //}
+
+    bool use_Wen_Chaus_algorithm = true;
+    float dgi_dds_ryib_azimuth = ray->getAzimuthDeg();
+    float dgi_dds_ryib_elevation = ray->getElevationDeg();
+    // these are output args to radar angles calculation
+    float  ra_x;
+    float  ra_y;
+    float  ra_z;
+    float  ra_rotation_angle;
+    float  ra_tilt;
+    float  ra_azimuth;
+    float  ra_elevation;
+    float  ra_psi;  
+
+    soloFunctionsApi.CalculateRadarAngles( 
+       asib_roll,
+       asib_pitch,
+       asib_heading,
+       asib_drift_angle,
+       asib_rotation_angle,
+       asib_tilt,
+       cfac_pitch_corr,
+       cfac_heading_corr,
+       cfac_drift_corr,
+       cfac_roll_corr,
+       cfac_elevation_corr,
+       cfac_azimuth_corr,
+       cfac_rot_angle_corr,
+       cfac_tilt_corr,
+       radar_type,  // from dgi->dds->radd->radar_type
+       use_Wen_Chaus_algorithm,
+       dgi_dds_ryib_azimuth,
+       dgi_dds_ryib_elevation,
+       &ra_x,
+       &ra_y,
+       &ra_z,
+       &ra_rotation_angle,
+       &ra_tilt,
+       &ra_azimuth,
+       &ra_elevation,
+       &ra_psi
+    );
+    // adjust the azimuth to earth-relative coordinates Solo::radar_angles does this ...
+    //float T = asib_heading + cfac_heading_corr + asib_drift_angle + cfac_drift_corr;
+    //ra_azimuth = ra_azimuth * Radx::RadToDeg + T;
+    new_az = ra_azimuth * Radx::RadToDeg;
+    tilt = ra_tilt; //  * Radx::DegToRad;
+    elevation = ra_elevation; //  * Radx::DegToRad; // doradeData.elevation; // fl32;
+    //ray->setElevationDeg(ra_elevation * Radx::RadToDeg);
+    //dds_ra_elevation = ra_elevation; // not sure if in degrees or radians:  * M_PI / 180.00; 
+    float other_az; //  = new_az; // atan2(ra_y, ra_x) * Radx::RadToDeg;
+
+    //if ((ray->getAzimuthDeg() > 90.0) && (ray->getAzimuthDeg() < 180.0)) {
+       //other_az = 360 - new_az;
+    //}
+
+
+    float T_deg = (georef->getHeading() + cfac_heading_corr)  + 
+              (georef->getDrift() + cfac_drift_corr);
+    float T = T_deg * Radx::DegToRad;
+    float ra_x2 = cos(T) * ra_x + sin(T) * ra_y;
+    float ra_y2 = - sin(T) * ra_x + cos(T) * ra_y;
+
+    if (ra_x2 == 0.0) {
+      if (ra_y2 > 0.0) {
+        other_az = 90.0;
+      } else {
+        other_az = 270.0;
+      }
+    } else {
+      double tg = ra_y2/ra_x2;
+      other_az = atan(tg) * Radx::RadToDeg;
+      //other_az = atan(ra_y2, ra_x2) * Radx::RadToDeg; //  + T_deg;
+      if (ra_x2 > 0.0) { // all good no changes 
+      } 
+      if ((ra_x2 < 0.0) && (ra_y2 >= 0.0)) {
+        other_az += 180.0;
+      }
+      if ((ra_x2 < 0.0) && (ra_y2 < 0.0)) {
+        other_az -= 180.0;
+      }
+    }
+    //other_az = other_az - 2 * T_deg;
+
+    
+    cerr << "new_az= " << new_az << " ra_x= " << ra_x << " ra_y= " << ra_y << 
+          " ra_x2= " << ra_x2 << " ra_y2= " << ra_y2 <<
+          " orig_az= " << ray->getAzimuthDeg() <<
+          " T_deg= " << T_deg <<
+          " other_az= " << other_az
+          << endl;
+
+    new_az = ra_rotation_angle * Radx::RadToDeg;
+  }
+
  
   float vert_velocity = georef->getVertVelocity();  // fl32
   float ew_velocity = georef->getEwVelocity(); // fl32
   float ns_velocity = georef->getNsVelocity(); // fl32;
 
-  float ew_gndspd_corr = 0.0; 
+  float ew_gndspd_corr = 0.0; // I don't know what this is or where to find it.
   const RadxCfactors *cfactors = ray->getCfactors();
   if (cfactors != NULL) {
     ew_gndspd_corr = cfactors->getEwVelCorr(); // ?? _gndspd_corr; // fl32;
   }
  
-  float tilt = georef->getTilt(); // fl32; 
-  // TODO: elevation changes with different rays/fields how to get the current one???
-  float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
-
-  /*
-  // TODO:  look up the dataField and get the associated values
-  // look through DoradeRadxFile::_ddParms for a parameter_t type that has parameter_name that matches
-  // the dataField.
-  // short *data; // data is in and out parameter
-  if (field->getDataType() != Radx::SI16) {
-    throw  "ERROR - data is not 16-bit signed integer as expected";
-  } 
-
-  //Radx::fl32 *rawData;
-  //rawData = field->getDataFl32();
-  //Radx::fl32 *ptr = rawData;
-  cerr << " A few data values ";
-  for (int i=0; i< 10; i++) {
-    cerr << field->getDoubleValue(i) << ", ";
-  }
-  cerr << endl;
-  //vector<double> data = field->getData  Radx::fl32 *getDataFl32();   
-  //  double scale = 1.0 / parm.parameter_scale;
-  //  double bias = (-1.0 * parm.parameter_bias) / parm.parameter_scale;
-
-  // related to field->setTypeSi32(parm.bad_data, scale, bias)
-  // RadxField::_scale;  RadxField::_offset = bias; RadxField::_missingSi32 = bad_data
-  // 
-  // TODO: need to find the field. How to do this????
-  short bad = field->getMissingSi16(); // doradeData.bad_data;
-  float parameter_scale = 1.0 / field->getScale(); // doradeData.parameter_scale; 
-  float parameter_bias = -1.0 * field->getOffset() * field->getScale(); // doradeData.parameter_bias; 
-
-  int dgi_clip_gate = field->getNPoints(); // field->num_samples; // or number_cells
-*/
-
-  short dds_radd_eff_unamb_vel = ray->getNyquistMps(); // doradeData.eff_unamb_vel;
-  int seds_nyquist_velocity = 0; // TODO: what is this value?
-
   //  cerr << "sizeof(short) = " << sizeof(short);
   //if (sizeof(short) != 16) 
   //  throw "FATAL ERROR: short is NOT 16 bits! Exiting.";
@@ -829,7 +1013,7 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   //==========
 
   // TODO: data, _boundaryMask, and newData should have all the same dimensions = nGates
-  SoloFunctionsApi soloFunctionsApi;
+
 
   /*						     
   soloFunctionsApi.RemoveAircraftMotion(vert_velocity, ew_velocity, ns_velocity,
@@ -842,23 +1026,15 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   // perform the function ...
   //  soloFunctionsApi.Despeckle(data,  newData, nGates, bad_data_value, speckle_length,
   //                             clip_gate, _boundaryMask);
-
+  // all angles should be in radians
   soloFunctionsApi.RemoveAircraftMotion(vert_velocity, ew_velocity, ns_velocity,
 					ew_gndspd_corr, tilt, elevation,
 					data, newData, nGates,
 					bad_data_value, clip_gate,
 					dds_radd_eff_unamb_vel, seds_nyquist_velocity,
 					_boundaryMask);
-  
-
 
   // insert new field into RadxVol   
-  /*                                                                          
-  cerr << "result = ";
-  for (int i=0; i<50; i++)
-    cerr << newData[i] << ", ";
-  cerr << endl;
-  */
   
   //Radx::fl32 missingValue = Radx::missingFl32; 
   bool isLocal = true;
@@ -868,6 +1044,10 @@ string SoloFunctionsModel::RemoveAircraftMotion(string fieldName, //RadxVol *vol
   //newField->addDataFl32(nGates, newData);
   RadxField *field1 = ray->addField(newFieldName, "m/s", nGates, missingValue, newData, isLocal);
 
+  // replace azimuth with rotation only for display
+  if (use_radar_angles) {
+     ray->setAzimuthDeg(new_az);
+  }
   string tempFieldName = field1->getName();
   tempFieldName.append("#");
 
@@ -923,9 +1103,9 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
   } 
   */
 
-  Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
-  bool force = true;
-  ray->applyGeoref(primary_axis, force);
+  //Radx::PrimaryAxis_t primary_axis = _scriptsDataController->getPrimaryAxis();
+  //bool force = true;
+  //ray->applyGeoref(primary_axis, force);
 
   /*
   const RadxGeoref *georef = ray->getGeoreference();
@@ -948,6 +1128,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 // ----  need these values from cfac/georef
 
   // get from platform
+  // TODO: should these be in radians?
      double dds_asib_rotation_angle = georef->getRotation(); // origin dds->asib->rotation_angle;  asib is struct platform_i
      double dds_asib_roll = georef->getRoll();          // origin dds->asib->roll
      float asib_altitude_agl = georef->getAltitudeKmAgl();     // altitude angle ??? from platform??
@@ -962,7 +1143,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   // TODO: elevation changes with different rays/fields how to get the current one???
   float elevation = ray->getElevationDeg(); // doradeData.elevation; // fl32;
-  float dds_ra_elevation = elevation * M_PI / 180.00; // radar angles!! requires cfac values and calculation
+  float dds_ra_elevation = elevation * Radx::DegToRad; // radar angles!! requires cfac values and calculation
                            // origin dds->ra->elevation, ra = radar_angles
                            // get this from RadxRay::_elev if RadxRay::_georefApplied == true
                            // 1/4/2023 I don't believe that cfacs need to be applied to elevation!!
@@ -1011,7 +1192,7 @@ string SoloFunctionsModel::RemoveOnlySurface(string fieldName,
 
   //==========  
   
-  if (true) { // TODO: add this arg ... use_radar_angles) {
+  if (false) { // TODO: add this arg ... use_radar_angles) {
     // these are input args to radar angles calculation
     float asib_roll = dds_asib_roll;
     float asib_pitch = georef->getPitch();
@@ -2905,6 +3086,60 @@ string SoloFunctionsModel::UnconditionalDelete(string fieldName,  size_t rayIdx,
   // perform the function ...
   soloFunctionsApi.UnconditionalDelete(data, newData, nGates,
           (float) missingValue, 
+          clip_gate, _boundaryMask);
+
+  bool isLocal = true;
+  string field_units = field->getUnits();
+
+  RadxField *field1 = ray->addField(fieldName, field_units, nGates, missingValue, newData, isLocal);
+
+  // get the name that was actually inserted ...
+  string tempFieldName = field1->getName();
+  tempFieldName.append("#");
+
+  return tempFieldName;
+
+}
+
+string SoloFunctionsModel::AssignValue(string fieldName,  size_t rayIdx,
+             float data_value, size_t clip_gate) {
+
+   SoloFunctionsApi api;
+
+  LOG(DEBUG) << "entry with fieldName ... " << fieldName << " radIdx=" << rayIdx;
+  
+  const RadxField *field;
+
+  //  get the ray for this field 
+  RadxRay *ray = _scriptsDataController->getRay(rayIdx); 
+  if (ray == NULL) {
+    LOG(DEBUG) << "ERROR - ray is NULL";
+    throw "Ray is null";
+  } 
+
+  // get the data (in) and create space for new data (out)  
+  field = fetchDataField(ray, fieldName);
+  size_t nGates = ray->getNGates(); 
+
+  // create new data field for return 
+  float *newData = new float[nGates];
+
+  // data, _boundaryMask, and bad flag mask should have all the same dimensions = nGates
+  SoloFunctionsApi soloFunctionsApi;
+
+  if (_boundaryMaskSet) {
+    // verify dimensions on data in/out and boundary mask
+    if (nGates > _boundaryMaskLength)
+      throw "Error: boundary mask and field gate dimension are not equal (SoloFunctionsModel)";
+  }
+
+  const float *data = field->getDataFl32();
+
+  Radx::fl32 missingValue = field->getMissingFl32();
+
+  // perform the function ...
+  soloFunctionsApi.AssignValue(data, newData, nGates,
+          data_value, 
           clip_gate, _boundaryMask);
 
   bool isLocal = true;

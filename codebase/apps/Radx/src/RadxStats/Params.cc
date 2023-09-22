@@ -629,6 +629,18 @@
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
+    // Parameter 'field_for_stats'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("field_for_stats");
+    tt->descr = tdrpStrDup("Field to read, for stats.");
+    tt->help = tdrpStrDup("If set, only this single field will be read in. That will speed up gathering the stats.");
+    tt->val_offset = (char *) &field_for_stats - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'mode'
     // ctype is '_mode_t'
     
@@ -708,16 +720,28 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'field_for_stats'
-    // ctype is 'char*'
+    // Parameter 'print_time_gap_table'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("field_for_stats");
-    tt->descr = tdrpStrDup("Field to read, for stats.");
-    tt->help = tdrpStrDup("If set, only this single field will be read in. That will speed up gathering the stats.");
-    tt->val_offset = (char *) &field_for_stats - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("print_time_gap_table");
+    tt->descr = tdrpStrDup("Option to print out table of time gaps in data.");
+    tt->help = tdrpStrDup("We read through all the files, and look for time gaps. If a time gap exceeds max_valid_gap_secs the gap is added to the output table.");
+    tt->val_offset = (char *) &print_time_gap_table - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'max_valid_gap_secs'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_valid_gap_secs");
+    tt->descr = tdrpStrDup("Max valid data gap (secs).");
+    tt->help = tdrpStrDup("If a gap exceeds this, it is added to the output table.");
+    tt->val_offset = (char *) &max_valid_gap_secs - &_start_;
+    tt->single_val.d = 900;
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -42,6 +42,18 @@ paramdef string {
   p_help = "Files will be searched for in this directory. This is ignored if the list of files is  specified on the command line using the -f option.";
 } input_dir;
 
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} input_file_search_ext;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name sub-string.";
+  p_help = "If set, only files with names containing this sub-string will be processed.";
+} input_file_search_substr;
+
 typedef enum {
   FILELIST, ARCHIVE, REALTIME
 } mode_t;

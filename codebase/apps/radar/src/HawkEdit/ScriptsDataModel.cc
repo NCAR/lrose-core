@@ -1195,6 +1195,7 @@ vector<RadxRay *> &ScriptsDataModel::getRays() {
 	return _vol->getRays();
 }
 
+/*
 // HOW TO KEEP TRACK IF THE CFACS HAVE BEEN APPIED TO THE RAY OR NOT?
 void ScriptsDataModel::applyCorrectionFactors(RadxRay *ray) {
 
@@ -1232,6 +1233,7 @@ void ScriptsDataModel::applyCorrectionFactors(RadxRay *ray) {
     }
   }
 }
+*/
 
 RadxRay *ScriptsDataModel::getRay(size_t rayIdx) {
   _vol->loadRaysFromFields();

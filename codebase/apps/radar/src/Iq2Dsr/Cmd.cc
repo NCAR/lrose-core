@@ -232,76 +232,76 @@ void Cmd::compute(int nGates, bool useDualPol)
   
   for (int igate = 0; igate < nGates; igate++) {
     
-    MomentsFields &flds = _gateData[igate]->flds;
+    MomentsFields *flds = _gateData[igate]->flds;
     
-    if (flds.dbz == MomentsFields::missingDouble) {
+    if (flds->dbz == MomentsFields::missingDouble) {
       continue;
     }
-    if (flds.snr == MomentsFields::missingDouble ||
-        flds.snr < cmdSnrThreshold) {
+    if (flds->snr == MomentsFields::missingDouble ||
+        flds->snr < cmdSnrThreshold) {
       continue;
     }
 
     double sumInterest = 0.0;
     double sumWeights = 0.0;
     
-    flds.tdbz_interest = _tdbzInterestMap->getInterest(flds.tdbz);
+    flds->tdbz_interest = _tdbzInterestMap->getInterest(flds->tdbz);
     if (tdbzWt > 0) {
-      sumInterest += (flds.tdbz_interest * tdbzWt);
+      sumInterest += (flds->tdbz_interest * tdbzWt);
       sumWeights += tdbzWt;
     }
 
-    flds.spin_interest = _spinInterestMap->getInterest(flds.spin);
+    flds->spin_interest = _spinInterestMap->getInterest(flds->spin);
     if (spinWt > 0) {
-      sumInterest += (flds.spin_interest * spinWt);
+      sumInterest += (flds->spin_interest * spinWt);
       sumWeights += spinWt;
     }
 
     if (tdbzSpinWt > 0) {
-      sumInterest += (flds.max_tdbz_spin * tdbzSpinWt);
+      sumInterest += (flds->max_tdbz_spin * tdbzSpinWt);
       sumWeights += tdbzSpinWt;
     }
 
-    flds.cpa_interest = _cpaInterestMap->getInterest(flds.cpa);
+    flds->cpa_interest = _cpaInterestMap->getInterest(flds->cpa);
     if (cpaWt > 0) {
-      sumInterest += flds.cpa_interest * cpaWt;
+      sumInterest += flds->cpa_interest * cpaWt;
       sumWeights += cpaWt;
     }
 
-    flds.zdr_sdev_interest =
-      _zdrSdevInterestMap->getInterest(flds.zdr_sdev);
+    flds->zdr_sdev_interest =
+      _zdrSdevInterestMap->getInterest(flds->zdr_sdev);
     if (zdrSdevWt > 0) {
-      sumInterest += flds.zdr_sdev_interest * zdrSdevWt;
+      sumInterest += flds->zdr_sdev_interest * zdrSdevWt;
       sumWeights += zdrSdevWt;
     }
 
-    flds.phidp_sdev_interest =
-      _phidpSdevInterestMap->getInterest(flds.phidp_sdev);
+    flds->phidp_sdev_interest =
+      _phidpSdevInterestMap->getInterest(flds->phidp_sdev);
     if (phidpSdevWt > 0) {
-      sumInterest += flds.phidp_sdev_interest * phidpSdevWt;
+      sumInterest += flds->phidp_sdev_interest * phidpSdevWt;
       sumWeights += phidpSdevWt;
     }
 
-    flds.cmd = sumInterest / sumWeights;
-    flds.cmd_flag = 0;
+    flds->cmd = sumInterest / sumWeights;
+    flds->cmd_flag = 0;
     
     double checkThreshold = cmdThreshold;
 
     if (_params.cmd_check_for_offzero_weather &&
-        flds.ozsnr > _params.min_snr_for_offzero_weather) {
+        flds->ozsnr > _params.min_snr_for_offzero_weather) {
       if (checkThreshold > offZeroThreshold) {
         checkThreshold = offZeroThreshold;
       }
     }
     
     if (checkForWindfarms) {
-      if (flds.spectral_snr > minSpecSnrForWindfarms) {
+      if (flds->spectral_snr > minSpecSnrForWindfarms) {
         checkThreshold = 0;
       }
     }
     
-    if (flds.cmd >= checkThreshold) {
-      flds.cmd_flag = 1;
+    if (flds->cmd >= checkThreshold) {
+      flds->cmd_flag = 1;
     }
 
   } // igate
@@ -340,25 +340,25 @@ void Cmd::_prepareForTdbzAndSpin(int nGates)
 
   for (int igate = 1; igate < nGates - 1; igate++) {
 
-    MomentsFields &flds = _gateData[igate]->flds;
+    MomentsFields *flds = _gateData[igate]->flds;
 
     // check SNR
-    double snrThis = flds.snr;
+    double snrThis = flds->snr;
     if (snrThis < snrThresh) {
       continue;
     }
-    double snrPrev = _gateData[igate-1]->flds.snr;
-    double snrNext = _gateData[igate+1]->flds.snr;
+    double snrPrev = _gateData[igate-1]->flds->snr;
+    double snrNext = _gateData[igate+1]->flds->snr;
 
-    double dbzPrev = _gateData[igate-1]->flds.dbz;
-    double dbzThis = flds.dbz;
-    double dbzNext = _gateData[igate+1]->flds.dbz;
+    double dbzPrev = _gateData[igate-1]->flds->dbz;
+    double dbzThis = flds->dbz;
+    double dbzNext = _gateData[igate+1]->flds->dbz;
     
     if (dbzPrev != MomentsFields::missingDouble &&
         dbzThis != MomentsFields::missingDouble &&
         snrPrev > snrThresh && snrThis > snrThresh) {
       double dbzDiff = dbzThis - dbzPrev;
-      flds.dbz_diff_sq = dbzDiff * dbzDiff;
+      flds->dbz_diff_sq = dbzDiff * dbzDiff;
     }
 
     if (dbzPrev != MomentsFields::missingDouble &&
@@ -371,9 +371,9 @@ void Cmd::_prepareForTdbzAndSpin(int nGates)
         // sign change
         double spinChange = (fabs(prevDiff) + fabs(nextDiff)) / 2.0;
         if (spinChange > spinThresh) {
-          flds.dbz_spin_change = 1;
+          flds->dbz_spin_change = 1;
         } else {
-          flds.dbz_spin_change = 0;
+          flds->dbz_spin_change = 0;
         }
       }
     }
@@ -383,10 +383,10 @@ void Cmd::_prepareForTdbzAndSpin(int nGates)
   // set first and last gates to nearest neighbor
 
   if (nGates > 2) {
-    _gateData[0]->flds.dbz_diff_sq = _gateData[1]->flds.dbz_diff_sq;
-    _gateData[0]->flds.dbz_spin_change = _gateData[0]->flds.dbz_spin_change;
-    _gateData[nGates-1]->flds.dbz_diff_sq = _gateData[nGates-2]->flds.dbz_diff_sq;
-    _gateData[nGates-1]->flds.dbz_spin_change = _gateData[nGates-2]->flds.dbz_spin_change;
+    _gateData[0]->flds->dbz_diff_sq = _gateData[1]->flds->dbz_diff_sq;
+    _gateData[0]->flds->dbz_spin_change = _gateData[0]->flds->dbz_spin_change;
+    _gateData[nGates-1]->flds->dbz_diff_sq = _gateData[nGates-2]->flds->dbz_diff_sq;
+    _gateData[nGates-1]->flds->dbz_spin_change = _gateData[nGates-2]->flds->dbz_spin_change;
   }
  
 }
@@ -420,7 +420,7 @@ void Cmd::_computeTdbz(int nGates)
     endGate.push_back(end);
   } // igate
   
-  // tdbz3 is based on spatial variation in range and azimuth
+  // tdbz is based on spatial variation in range
 
   for (int igate = 0; igate < nGates; igate++) {
     
@@ -431,7 +431,7 @@ void Cmd::_computeTdbz(int nGates)
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
       
-      double dds = _gateData[jgate]->flds.dbz_diff_sq;
+      double dds = _gateData[jgate]->flds->dbz_diff_sq;
       if (dds != MomentsFields::missingDouble) {
         sumDbzDiffSq += dds;
         nTexture++;
@@ -441,7 +441,7 @@ void Cmd::_computeTdbz(int nGates)
     
     if (nTexture > 0) {
       double texture = sumDbzDiffSq / nTexture;
-      _gateData[igate]->flds.tdbz = texture;
+      _gateData[igate]->flds->tdbz = texture;
     }
 
   } // igate
@@ -488,19 +488,19 @@ void Cmd::_computeSpin(int nGates)
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
         
-      MomentsFields &fld = _gateData[jgate]->flds;
-      double dsc = fld.dbz_spin_change;
-      double dbz = fld.dbz;
+      MomentsFields *flds = _gateData[jgate]->flds;
+      double dsc = flds->dbz_spin_change;
+      double dbz = flds->dbz;
       if (dsc != MomentsFields::missingDouble &&
           dbz != MomentsFields::missingDouble) {
-	  nSpinChange += dsc;
-	  nSpinTotal++;
-	}
+        nSpinChange += dsc;
+        nSpinTotal++;
+      }
 
     } // jgate
       
     if (nSpinTotal > 0) {
-      _gateData[igate]->flds.spin = (nSpinChange / nSpinTotal) * 100.0;
+      _gateData[igate]->flds->spin = (nSpinChange / nSpinTotal) * 100.0;
     }
 
   } // igate
@@ -516,9 +516,9 @@ void Cmd::_computeMaxTdbzAndSpinInterest(int nGates)
   
   for (int igate = 0; igate < nGates; igate++) {
     
-    MomentsFields &fld = _gateData[igate]->flds;
-    double tdbz = fld.tdbz;
-    double spin = fld.spin;
+    MomentsFields *flds = _gateData[igate]->flds;
+    double tdbz = flds->tdbz;
+    double spin = flds->spin;
     
     if (tdbz == MomentsFields::missingDouble ||
         spin == MomentsFields::missingDouble) {
@@ -529,9 +529,9 @@ void Cmd::_computeMaxTdbzAndSpinInterest(int nGates)
     double spinInterest = _spinInterestMap->getInterest(spin);
     
     if (tdbzInterest > spinInterest) {
-      fld.max_tdbz_spin = tdbzInterest;
+      flds->max_tdbz_spin = tdbzInterest;
     } else {
-      fld.max_tdbz_spin = spinInterest;
+      flds->max_tdbz_spin = spinInterest;
     }
 
   } // igate
@@ -572,8 +572,8 @@ void Cmd::_computeZdrSdev(int nGates)
   double snrThresh = _params.cmd_snr_threshold;
   for (int igate = 0; igate < nGates; igate++) {
     
-    MomentsFields &ifld = _gateData[igate]->flds;
-    if (ifld.snr < snrThresh) {
+    MomentsFields *iflds = _gateData[igate]->flds;
+    if (iflds->snr < snrThresh) {
       continue;
     }
 
@@ -585,9 +585,9 @@ void Cmd::_computeZdrSdev(int nGates)
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
       
-      const MomentsFields jfld = _gateData[jgate]->flds;
+      const MomentsFields *jflds = _gateData[jgate]->flds;
     
-      double zz = jfld.zdr;
+      double zz = jflds->zdr;
       if (zz != MomentsFields::missingDouble) {
         sumZdr += zz;
         sumZdrSq += (zz * zz);
@@ -602,7 +602,7 @@ void Cmd::_computeZdrSdev(int nGates)
         double term1 = sumZdrSq / nZdr;
         double term2 = meanZdr * meanZdr;
         if (term1 >= term2) {
-          ifld.zdr_sdev = sqrt(term1 - term2);
+          iflds->zdr_sdev = sqrt(term1 - term2);
         }
       }
     }
@@ -647,8 +647,8 @@ void Cmd::_computePhidpSdevOld(int nGates)
   double snrThresh = _params.cmd_snr_threshold;
   for (int igate = 0; igate < nGates; igate++) {
     
-    MomentsFields &ifld = _gateData[igate]->flds;
-    if (ifld.snr < snrThresh) {
+    MomentsFields *iflds = _gateData[igate]->flds;
+    if (iflds->snr < snrThresh) {
       continue;
     }
 
@@ -660,9 +660,9 @@ void Cmd::_computePhidpSdevOld(int nGates)
     
     for (int jgate = startGate[igate]; jgate <= endGate[igate]; jgate++) {
       
-      const MomentsFields jfld = _gateData[jgate]->flds;
+      const MomentsFields *jflds = _gateData[jgate]->flds;
     
-      double ph = jfld.phidp;
+      double ph = jflds->phidp;
       if (ph != MomentsFields::missingDouble) {
         sumPhidp += ph;
         sumPhidpSq += (ph * ph);
@@ -677,7 +677,7 @@ void Cmd::_computePhidpSdevOld(int nGates)
         double term1 = sumPhidpSq / nPhidp;
         double term2 = meanPhidp * meanPhidp;
         if (term1 >= term2) {
-          ifld.phidp_sdev = sqrt(term1 - term2);
+          iflds->phidp_sdev = sqrt(term1 - term2);
         }
       }
     }
@@ -691,8 +691,8 @@ void Cmd::_computePhidpSdevOld(int nGates)
   TaArray<double> phidp_;
   double *phidp = phidp_.alloc(nGates);
   for (int igate = 0; igate < nGates; igate++) {
-    MomentsFields &ifld = _gateData[igate]->flds;
-    phidp[igate] = ifld.phidp;
+    MomentsFields *iflds = _gateData[igate]->flds;
+    phidp[igate] = iflds->phidp;
   }
   kdp.computePhidpStats(nGates,
                         _startRangeKm, _gateSpacingKm,
@@ -700,8 +700,8 @@ void Cmd::_computePhidpSdevOld(int nGates)
                         MomentsFields::missingDouble);
   const double *phidpSdev = kdp.getPhidpSdev();
   for (int igate = 0; igate < nGates; igate++) {
-    MomentsFields &ifld = _gateData[igate]->flds;
-    ifld.phidp_sdev_4kdp = phidpSdev[igate];
+    MomentsFields *iflds = _gateData[igate]->flds;
+    iflds->phidp_sdev_4kdp = phidpSdev[igate];
   }
 
 }
@@ -727,7 +727,7 @@ void Cmd::_computePhidpSdevNew(int nGates)
   for (int igate = 0; igate < nGates; igate++) {
     PhidpState &state = _phidpStates[igate];
     state.init(MomentsFields::missingDouble);
-    state.phidp = _gateData[igate]->flds.phidp;
+    state.phidp = _gateData[igate]->flds->phidp;
     if (state.phidp != MomentsFields::missingDouble) {
       state.missing = false;
     }
@@ -847,7 +847,7 @@ void Cmd::_computePhidpSdevNew(int nGates)
       }
     }
 
-    _gateData[igate]->flds.phidp_sdev = istate.phidpSdev;
+    _gateData[igate]->flds->phidp_sdev = istate.phidpSdev;
     
   } // igate
   
@@ -900,9 +900,9 @@ void Cmd::_computePhidpFoldingRange(int nGates)
 // Returns 0 on success, -1 on failure
 
 int Cmd::_convertInterestMapToVector(const string &label,
-				      const Params::interest_map_point_t *map,
-				      int nPoints,
-				      vector<InterestMap::ImPoint> &pts)
+                                     const Params::interest_map_point_t *map,
+                                     int nPoints,
+                                     vector<InterestMap::ImPoint> &pts)
 
 {
 
@@ -985,7 +985,7 @@ void Cmd::_applyGapFilter(int nGates)
     // compute sum in forward direction
     
     for (int igate = 0; igate < nGates; igate++) {
-      if (_gateData[igate]->flds.cmd_flag) {
+      if (_gateData[igate]->flds->cmd_flag) {
         sumWtsForward[igate] = 1.0;
         continue; // flag already set, don't need to modify this gate
       }
@@ -993,8 +993,8 @@ void Cmd::_applyGapFilter(int nGates)
       for (int jj = 0; jj < nweights; jj++) {
         int kgate = igate - jj - 1;
         if (kgate >= 0) {
-          if (_gateData[kgate]->flds.cmd_flag) {
-            sumWtsForward[igate] += weights[jj] * _gateData[kgate]->flds.cmd;
+          if (_gateData[kgate]->flds->cmd_flag) {
+            sumWtsForward[igate] += weights[jj] * _gateData[kgate]->flds->cmd;
           }
         }
       }
@@ -1003,7 +1003,7 @@ void Cmd::_applyGapFilter(int nGates)
     // compute sum in reverse direction
     
     for (int igate = nGates - 1; igate >= 0; igate--) {
-      if (_gateData[igate]->flds.cmd_flag) {
+      if (_gateData[igate]->flds->cmd_flag) {
         sumWtsReverse[igate] = 1.0;
         continue; // flag already set, don't need to modify this gate
       }
@@ -1011,8 +1011,8 @@ void Cmd::_applyGapFilter(int nGates)
       for (int jj = 0; jj < nweights; jj++) {
         int kgate = igate + jj + 1;
         if (kgate < nGates) {
-          if (_gateData[kgate]->flds.cmd_flag) {
-            sumWtsReverse[igate] += weights[jj] * _gateData[kgate]->flds.cmd;
+          if (_gateData[kgate]->flds->cmd_flag) {
+            sumWtsReverse[igate] += weights[jj] * _gateData[kgate]->flds->cmd;
           }
         }
       }
@@ -1022,10 +1022,10 @@ void Cmd::_applyGapFilter(int nGates)
     // both forward sum and reverse sum exceed threshold
     
     for (int igate = 0; igate < nGates; igate++) {
-      if (!_gateData[igate]->flds.cmd_flag) {
+      if (!_gateData[igate]->flds->cmd_flag) {
         if (sumWtsForward[igate] > sumWtThreshold &&
             sumWtsReverse[igate] > sumWtThreshold) {
-          _gateData[igate]->flds.cmd_flag = 1;
+          _gateData[igate]->flds->cmd_flag = 1;
           done = false;
         }
       }
@@ -1056,8 +1056,8 @@ void Cmd::_applyGapFilterCVersion(int nGates)
   double *cmd = cmd_.alloc(nGates);
 
   for (int igate = 0; igate < nGates; igate++) {
-    cmd_flag[igate] = (int) (_gateData[igate]->flds.cmd_flag + 0.5);
-    cmd[igate] = _gateData[igate]->flds.cmd;
+    cmd_flag[igate] = (int) (_gateData[igate]->flds->cmd_flag + 0.5);
+    cmd[igate] = _gateData[igate]->flds->cmd;
   }
   
   apply_cmd_flag_gap_filter(nGates, cmd, cmd_flag,
@@ -1065,7 +1065,7 @@ void Cmd::_applyGapFilterCVersion(int nGates)
                             _params.cmd_gap_filter_threshold);
 
   for (int igate = 0; igate < nGates; igate++) {
-    _gateData[igate]->flds.cmd_flag = cmd_flag[igate];
+    _gateData[igate]->flds->cmd_flag = cmd_flag[igate];
   }
 
 }
@@ -1084,8 +1084,8 @@ void Cmd::_applySpeckleFilterCVersion(int nGates)
   double *cmd = cmd_.alloc(nGates);
 
   for (igate = 0; igate < nGates; igate++) {
-    cmd_flag[igate] = (int) (_gateData[igate]->flds.cmd_flag + 0.5);
-    cmd[igate] = _gateData[igate]->flds.cmd;
+    cmd_flag[igate] = (int) (_gateData[igate]->flds->cmd_flag + 0.5);
+    cmd[igate] = _gateData[igate]->flds->cmd;
   }
   
   int nThresholds = _params.cmd_speckle_filter_thresholds_n;
@@ -1104,7 +1104,7 @@ void Cmd::_applySpeckleFilterCVersion(int nGates)
                            nThresholds, runLen, modThresholds);
 
   for (igate = 0; igate < nGates; igate++) {
-    _gateData[igate]->flds.cmd_flag = cmd_flag[igate];
+    _gateData[igate]->flds->cmd_flag = cmd_flag[igate];
   }
 
 }
@@ -1128,7 +1128,7 @@ void Cmd::_applyInfillFilter(int nGates)
   int nSet = 0;
   int nNot = 0;
   for (int igate = 0; igate < nGates; igate++) {
-    if (_gateData[igate]->flds.cmd_flag) {
+    if (_gateData[igate]->flds->cmd_flag) {
       nSet++;
       nNot = 0;
     } else {
@@ -1197,7 +1197,7 @@ void Cmd::_applyInfillFilter(int nGates)
       minAdjacent = MIN(minAdjacent, nAdjacentAbove);
       
       if (minAdjacent >= nNot) {
-        _gateData[igate]->flds.cmd_flag = 1;
+        _gateData[igate]->flds->cmd_flag = 1;
       }
     }
   } // igate
@@ -1258,7 +1258,7 @@ void Cmd::_runSpeckleFilter(int nGates,
   // loop through all gates
   for (int ii = 0; ii < nGates; ii++) {
     // check for CMD flag status
-    if (_gateData[ii]->flds.cmd_flag) {
+    if (_gateData[ii]->flds->cmd_flag) {
       // set, so count up length of run
       count++;
     } else {
@@ -1267,8 +1267,8 @@ void Cmd::_runSpeckleFilter(int nGates,
         // run too short, indicates possible speckle
         for (int jj = ii - count; jj < ii; jj++) {
           // check for CMD values below threshold
-          if (_gateData[jj]->flds.cmd < minValidCmd) {
-            _gateData[jj]->flds.cmd_flag = false;
+          if (_gateData[jj]->flds->cmd < minValidCmd) {
+            _gateData[jj]->flds->cmd_flag = false;
           }
         }
       }
@@ -1339,23 +1339,23 @@ void Cmd::_applyNexradSpikeFilter(int nGates)
 
   for (int ii = 2; ii < nGates - 3; ii++) {
 
-    MomentsFields &fldMinus2F = _gateData[ii - 2]->fldsF;
-    MomentsFields &fldMinus1F = _gateData[ii - 1]->fldsF;
-    MomentsFields &fldF = _gateData[ii]->fldsF;
-    MomentsFields &fldPlus1F = _gateData[ii + 1]->fldsF;
-    MomentsFields &fldPlus2F = _gateData[ii + 2]->fldsF;
-    MomentsFields &fldPlus3F = _gateData[ii + 3]->fldsF;
+    MomentsFields *fldMinus2F = _gateData[ii - 2]->fldsF;
+    MomentsFields *fldMinus1F = _gateData[ii - 1]->fldsF;
+    MomentsFields *fldF = _gateData[ii]->fldsF;
+    MomentsFields *fldPlus1F = _gateData[ii + 1]->fldsF;
+    MomentsFields *fldPlus2F = _gateData[ii + 2]->fldsF;
+    MomentsFields *fldPlus3F = _gateData[ii + 3]->fldsF;
 
     // check for clutter at ii and ii + 1
 
     bool this_gate = false, next_gate = false;
     
-    if ((fldF.dbz - fldMinus2F.dbz) > tcn &&
-	(fldF.dbz - fldPlus2F.dbz) > tcn) {
+    if ((fldF->dbz - fldMinus2F->dbz) > tcn &&
+	(fldF->dbz - fldPlus2F->dbz) > tcn) {
       this_gate = true;
     }
-    if ((fldPlus1F.dbz - fldMinus1F.dbz) > tcn &&
-	(fldPlus1F.dbz - fldPlus3F.dbz) > tcn) {
+    if ((fldPlus1F->dbz - fldMinus1F->dbz) > tcn &&
+	(fldPlus1F->dbz - fldPlus3F->dbz) > tcn) {
       next_gate = true;
     }
 
@@ -1365,37 +1365,37 @@ void Cmd::_applyNexradSpikeFilter(int nGates)
 
 	// only gate ii has clutter, substitute accordingly
 	
-	fldMinus1F.dbz = fldMinus2F.dbz;
-	fldPlus1F.dbz = fldPlus2F.dbz;
-	if (fldMinus2F.dbz == MomentsFields::missingDouble ||
-            fldPlus2F.dbz == MomentsFields::missingDouble) {
-	  fldF.dbz = MomentsFields::missingDouble;
-	  fldF.vel = MomentsFields::missingDouble;
-	  fldF.width = MomentsFields::missingDouble;
+	fldMinus1F->dbz = fldMinus2F->dbz;
+	fldPlus1F->dbz = fldPlus2F->dbz;
+	if (fldMinus2F->dbz == MomentsFields::missingDouble ||
+            fldPlus2F->dbz == MomentsFields::missingDouble) {
+	  fldF->dbz = MomentsFields::missingDouble;
+	  fldF->vel = MomentsFields::missingDouble;
+	  fldF->width = MomentsFields::missingDouble;
 	} else {
-	  fldF.dbz = fldMinus2F.dbz;
-	  fldF.vel = fldMinus2F.vel;
-	  fldF.width = fldMinus2F.width;
+	  fldF->dbz = fldMinus2F->dbz;
+	  fldF->vel = fldMinus2F->vel;
+	  fldF->width = fldMinus2F->width;
 	}
 	
       } else {
 
 	// both gate ii and ii+1 has clutter, substitute accordingly
 
-	fldMinus1F.dbz = fldMinus2F.dbz;
-	fldF.dbz = fldMinus2F.dbz;
-	fldPlus1F.dbz = fldPlus3F.dbz;
-	fldPlus2F.dbz = fldPlus3F.dbz;
+	fldMinus1F->dbz = fldMinus2F->dbz;
+	fldF->dbz = fldMinus2F->dbz;
+	fldPlus1F->dbz = fldPlus3F->dbz;
+	fldPlus2F->dbz = fldPlus3F->dbz;
 
-	fldMinus1F.vel = fldMinus2F.vel;
-	fldF.vel = fldMinus2F.vel;
-	fldPlus1F.vel = fldPlus3F.vel;
-	fldPlus2F.vel = fldPlus3F.vel;
+	fldMinus1F->vel = fldMinus2F->vel;
+	fldF->vel = fldMinus2F->vel;
+	fldPlus1F->vel = fldPlus3F->vel;
+	fldPlus2F->vel = fldPlus3F->vel;
 
-	fldMinus1F.width = fldMinus2F.width;
-	fldF.width = fldMinus2F.width;
-	fldPlus1F.width = fldPlus3F.width;
-	fldPlus2F.width = fldPlus3F.width;
+	fldMinus1F->width = fldMinus2F->width;
+	fldF->width = fldMinus2F->width;
+	fldPlus1F->width = fldPlus3F->width;
+	fldPlus2F->width = fldPlus3F->width;
 
       }
 
