@@ -835,7 +835,7 @@ void WorldPlot::drawLegendsTopLeft(QPainter &painter,
     QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     QRectF bRect(xx, yy, lRect.width() + 2, lRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
-    yy += (_legendTextMargin + tRect.height());
+    yy += (_legendTextMargin + lRect.height());
   }
   
   painter.restore();
@@ -862,12 +862,12 @@ void WorldPlot::drawLegendsTopRight(QPainter &painter,
   
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
-    QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
+    QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _yAxisTickLen -
-                        _legendTextMargin - tRect.width());
-    QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
+                        _legendTextMargin - lRect.width());
+    QRectF bRect(xx, yy, lRect.width() + 2, lRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
-    yy += (_legendTextMargin + tRect.height());
+    yy += (_legendTextMargin + lRect.height());
   }
 
   painter.restore();
@@ -893,9 +893,9 @@ void WorldPlot::drawLegendsBottomLeft(QPainter &painter,
   
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
-    QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
-    yy -= tRect.height();
-    QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
+    QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
+    yy -= lRect.height();
+    QRectF bRect(xx, yy, lRect.width() + 2, lRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
     yy -= _legendTextMargin;
   }
@@ -922,11 +922,11 @@ void WorldPlot::drawLegendsBottomRight(QPainter &painter,
   
   for (size_t i = 0; i < legends.size(); i++) {
     string legend(legends[i]);
-    QRect tRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
+    QRect lRect(painter.fontMetrics().tightBoundingRect(legend.c_str()));
     qreal xx = (qreal) (_xMaxPixel - _yAxisTickLen -
-                        _legendTextMargin - tRect.width());
-    yy -= tRect.height();
-    QRectF bRect(xx, yy, tRect.width() + 2, tRect.height() + 2);
+                        _legendTextMargin - lRect.width());
+    yy -= lRect.height();
+    QRectF bRect(xx, yy, lRect.width() + 2, lRect.height() + 2);
     painter.drawText(bRect, Qt::AlignCenter, legend.c_str());
     yy -= _legendTextMargin;
   }

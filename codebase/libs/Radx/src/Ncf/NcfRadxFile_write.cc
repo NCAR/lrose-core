@@ -1876,6 +1876,26 @@ int NcfRadxFile::_addGeorefVariables()
                      _timeDim, DEGREES);
   }
   
+  if (_geoCount.getTrackRelRot() > 0) {
+    _file.addMetaVar(TRACK_REL_ROT, "", TRACK_REL_ROT_LONG, nc3Float,
+                     _timeDim, DEGREES);
+  }
+  
+  if (_geoCount.getTrackRelTilt() > 0) {
+    _file.addMetaVar(TRACK_REL_TILT, "", TRACK_REL_TILT_LONG, nc3Float,
+                     _timeDim, DEGREES);
+  }
+  
+  if (_geoCount.getTrackRelAz() > 0) {
+    _file.addMetaVar(TRACK_REL_AZ, "", TRACK_REL_AZ_LONG, nc3Float,
+                     _timeDim, DEGREES);
+  }
+  
+  if (_geoCount.getTrackRelEl() > 0) {
+    _file.addMetaVar(TRACK_REL_EL, "", TRACK_REL_EL_LONG, nc3Float,
+                     _timeDim, DEGREES);
+  }
+  
   if (iret) {
     _addErrStr("ERROR - NcfRadxFile::_addGeorefVariables");
     return -1;
@@ -2801,6 +2821,62 @@ int NcfRadxFile::_writeGeorefVariables()
       const RadxGeoref *geo = rays[ii]->getGeoreference();
       if (geo) {
         fvals[ii] = _checkMissingFloat(geo->getDriveAngle2());
+      } else {
+        fvals[ii] = Radx::missingMetaFloat;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, fvals);
+  }
+
+  // track-rel rotation
+  
+  if ((var = ncFile->get_var(TRACK_REL_ROT)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        fvals[ii] = _checkMissingFloat(geo->getTrackRelRot());
+      } else {
+        fvals[ii] = Radx::missingMetaFloat;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, fvals);
+  }
+
+  // track-rel tilt
+  
+  if ((var = ncFile->get_var(TRACK_REL_TILT)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        fvals[ii] = _checkMissingFloat(geo->getTrackRelTilt());
+      } else {
+        fvals[ii] = Radx::missingMetaFloat;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, fvals);
+  }
+
+  // track-rel azimuth
+  
+  if ((var = ncFile->get_var(TRACK_REL_AZ)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        fvals[ii] = _checkMissingFloat(geo->getTrackRelAz());
+      } else {
+        fvals[ii] = Radx::missingMetaFloat;
+      }
+    }
+    iret |= _file.writeVar(var, _timeDim, fvals);
+  }
+
+  // track-rel elevation
+  
+  if ((var = ncFile->get_var(TRACK_REL_EL)) != NULL) {
+    for (size_t ii = 0; ii < rays.size(); ii++) {
+      const RadxGeoref *geo = rays[ii]->getGeoreference();
+      if (geo) {
+        fvals[ii] = _checkMissingFloat(geo->getTrackRelEl());
       } else {
         fvals[ii] = Radx::missingMetaFloat;
       }

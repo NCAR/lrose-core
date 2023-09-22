@@ -42,6 +42,10 @@
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/TaArray.hh>
 #include <radar/Sz864.hh>
+#include <radar/RadarFft.hh>
+#include <radar/GateData.hh>
+#include <radar/ForsytheRegrFilter.hh>
+#include <radar/RadarMoments.hh>
 using namespace std;
 
 // initialize const doubles
@@ -57,8 +61,10 @@ const double Sz864::_initNotchWidthSz = 2.5;
 
 // Constructor
 
-Sz864::Sz864(bool debug) :
-        _debug(debug)
+Sz864::Sz864(bool debug,
+             RadarMoments *mom /* = NULL */) :
+        _debug(debug),
+        _mom(mom)
   
 {
 
@@ -114,6 +120,10 @@ Sz864::Sz864(bool debug) :
   _initVonhann(_vonhann);
   _initBlackman(_blackman);
 
+  // regression filtering for notch
+
+  _forsythe = new ForsytheRegrFilter;
+
   return;
 
 }
@@ -143,6 +153,8 @@ Sz864::~Sz864()
     delete[] _deconvMatrix50;
   }
 
+  delete _forsythe;
+  
 }
 
 /////////////////////////////////////
@@ -182,8 +194,7 @@ void Sz864::setSzOutOfTripPowerNReplicas(int n) {
 }
 
 /////////////////////////////////////////////////////////////
-// compute moments using SZ 8/64 algorithm and pulse-pair
-// for RV dealiasing
+// Separate coded time series into 2 trips
 
 void Sz864::separateTrips(GateData &gateData,
                           const RadarComplex_t *delta12,
@@ -254,8 +265,8 @@ void Sz864::separateTrips(GateData &gateData,
   // compute moments for strong trip
 
   double powerStrong = totalPower;
-  double velStrong, widthStrong;
-  _velWidthFromTd(iqStrong, prtSecs, velStrong, widthStrong);
+  double velStrong, widthStrong, phaseRadStrong;
+  _velWidthFromTd(iqStrong, prtSecs, velStrong, widthStrong, phaseRadStrong);
   
   if (_debug) {
     cerr << "  R1 trip1: " << r1Trip1 << endl;
@@ -307,6 +318,224 @@ void Sz864::separateTrips(GateData &gateData,
     _cohereTrip2_to_Trip1(notchedTd, delta12, weakTd);
   }
 
+  // take fft of cohered weaker trip
+  
+  TaArray<RadarComplex_t> weakSpectra_;
+  RadarComplex_t *weakSpectra = weakSpectra_.alloc(_nSamples);
+  fft.fwd(weakTd, weakSpectra);
+  
+  // compute magnitude of cohered weak spectrum
+  
+  TaArray<double> weakMag_;
+  double *weakMag = weakMag_.alloc(_nSamples);
+  _loadMag(weakSpectra, weakMag);
+  
+  // deconvolve weak trip, by multiplying with the
+  // deconvoltion matrix
+  
+  TaArray<double> weakMagDecon_;
+  double *weakMagDecon = weakMagDecon_.alloc(_nSamples);
+  memset(weakMagDecon, 0, _nSamples * sizeof(double));
+  for (int irow = 0; irow < _nSamples; irow++) {
+    double *decon = _deconvMatrix75 + irow * _nSamples;
+    double *mag = weakMag;
+    double sum = 0.0;
+    for (int icol = 0; icol < _nSamples; icol++, decon++, mag++) {
+      sum += *decon * *mag;
+    }
+    if (sum > 0) {
+      weakMagDecon[irow] = sum;
+    }
+  }
+  
+  // check for replicas in the weak spectra, if they are there,
+  // censor the weak trip
+  
+  double leakage;
+  bool weakHasReplicas = _hasReplicas(weakMagDecon, leakage);
+  if (_debug) {
+    cerr << "  weakHasReplicas: " << weakHasReplicas << endl;
+  }
+  gateData.szLeakage = leakage;
+  if (weakHasReplicas) {
+    gateData.censorWeak = true;
+    return;
+  }
+
+  // compute deconvoluted weak trip complex spectrum, by scaling the
+  // original spectrum with the ratio of the deconvoluted magnitudes
+  // with the original magnitudes
+  
+  TaArray<RadarComplex_t> weakSpecDecon_;
+  RadarComplex_t *weakSpecDecon = weakSpecDecon_.alloc(_nSamples);
+  for (int ii = 0; ii < _nSamples; ii++) {
+    double ratio = weakMagDecon[ii] / weakMag[ii];
+    weakSpecDecon[ii].re = weakSpectra[ii].re * ratio;
+    weakSpecDecon[ii].im = weakSpectra[ii].im * ratio;
+  }
+
+  // invert back into time domain
+  
+  TaArray<RadarComplex_t> weakTdDecon_;
+  RadarComplex_t *weakTdDecon = weakTdDecon_.alloc(_nSamples);
+  fft.inv(weakSpecDecon, weakTdDecon);
+
+  // adjust weak time series for power
+
+  memcpy(gateData.iqWeak, weakTdDecon, _nSamples * sizeof(RadarComplex_t));
+  adjustPower(gateData.iqWeak, powerWeak);
+  
+  return;
+  
+}
+
+/////////////////////////////////////////////////////////////
+// Separate coded time series into 2 trips
+// using a rectangular window and regression filter for the
+// notch
+
+void Sz864::separateTripsRegr(GateData &gateData,
+                              const RadarComplex_t *delta12,
+                              double prtSecs,
+                              const RadarFft &fft,
+                              ForsytheRegrFilter &regr,
+                              double calNoise)
+
+{
+
+  // initialize
+
+  RadarComplex_t empty(0.0, 0.0);
+  gateData.trip1IsStrong = true;
+  gateData.censorStrong = false;
+  gateData.censorWeak = false;
+
+  // check for 64 samples
+  
+  if (_nSamples != 64) {
+    cerr << "ERROR - Sz864::separateTripsRegr" << endl;
+    cerr << "  Can only be run with _nSamples = 64" << endl;
+    cerr << "  _nSamples: " << _nSamples << endl;
+    gateData.censorStrong = true;
+    gateData.censorWeak = true;
+    return;
+  }
+
+  // check thresholding on total power
+
+  double totalPower;
+  if (checkSnThreshold(gateData.iqhc, totalPower)) {
+    gateData.censorStrong = true;
+    gateData.censorWeak = true;
+    return;
+  }
+
+#ifdef NOTNOW
+  // apply regression filter to remove clutter
+
+  vector<RadarComplex_t> iqFiltered(_nSamples, empty);
+  vector<RadarComplex_t> iqNotched(_nSamples, empty);
+  double filterRatio, spectralNoise, spectralSnr;
+
+  _mom->applyRegressionFilter(_nSamples, prtSecs, fft, regr,
+                              gateData.iqhc, // not-windowed
+                              calNoise,
+                              iqFiltered.data(), iqNotched.data(),
+                              filterRatio, spectralNoise, spectralSnr);
+  
+  // IQ data comes in cohered to trip 1
+  
+  const RadarComplex_t *iqTrip1 = iqNotched.data();
+#else
+  const RadarComplex_t *iqTrip1 = gateData.iqhc;
+#endif
+  
+  // cohere to trip 2
+  
+  TaArray<RadarComplex_t> iqTrip2_;
+  RadarComplex_t *iqTrip2 = iqTrip2_.alloc(_nSamples);
+  _cohereTrip1_to_Trip2(iqTrip1, delta12, iqTrip2);
+  
+  // compute R1 for each trip
+  
+  double r1Trip1 = _computeR1(iqTrip1);
+  double r1Trip2 = _computeR1(iqTrip2);
+
+  // determine which trip is strongest by comparing R1 from 
+  // each trip
+  
+  double r1Ratio;
+  const RadarComplex_t *iqStrong;
+  
+  if (r1Trip1 > r1Trip2) {
+    iqStrong = iqTrip1;
+    r1Ratio = r1Trip1 / r1Trip2;
+    gateData.trip1IsStrong = true;
+    memcpy(gateData.iqStrong, iqTrip1, _nSamples * sizeof(RadarComplex_t));
+  } else {
+    iqStrong = iqTrip2;
+    r1Ratio = r1Trip2 / r1Trip1;
+    gateData.trip1IsStrong = false;
+    memcpy(gateData.iqStrong, iqTrip2, _nSamples * sizeof(RadarComplex_t));
+  }
+
+  // compute moments for strong trip
+
+  double powerStrong = totalPower;
+  double velStrong, widthStrong, phaseRadStrong;
+  _velWidthFromTd(iqStrong, prtSecs, velStrong, widthStrong, phaseRadStrong);
+  
+  if (_debug) {
+    cerr << "  R1 trip1: " << r1Trip1 << endl;
+    cerr << "  R1 trip2: " << r1Trip2 << endl;
+    if (gateData.trip1IsStrong) {
+      cerr << "  Strong trip is FIRST, ratio:" << r1Ratio << endl;
+    } else {
+      cerr << "  Strong trip is SECOND, ratio:" << r1Ratio << endl;
+    }
+  }
+
+  // shift phases of strong trip time series to center the
+  // weather at 0
+
+  vector<RadarComplex_t> strongShifted(_nSamples, empty);
+  RadarComplex::timeDomainPhaseShift(iqStrong, _nSamples,
+                                     -phaseRadStrong, strongShifted.data());
+  
+  // apply regression filter to shifted time series - to perform 3/4 notch
+
+  vector<RadarComplex_t> strongNotchedShifted(_nSamples, empty);
+  _forsythe->setup(_nSamples, false, 37,
+                   1.0, 0.6667, 10.0); // last 3 args not used
+  _forsythe->apply(strongShifted.data(),
+                   0.0, 0.0, 0.001, // not used
+                   strongNotchedShifted.data());
+  
+  // shift phases of notched strong trip back to original position
+
+  vector<RadarComplex_t> strongNotched(_nSamples, empty);
+  RadarComplex::timeDomainPhaseShift(strongNotchedShifted.data(), _nSamples,
+                                     phaseRadStrong, strongNotched.data());
+
+  // compute weak trip power
+  
+  double powerWeak = computePower(strongNotched.data());
+  
+  // adjust power
+  
+  double corrPowerStrong = powerStrong - powerWeak;
+  adjustPower(gateData.iqStrong, corrPowerStrong);
+  
+  // cohere to the weaker trip
+  
+  TaArray<RadarComplex_t> weakTd_;
+  RadarComplex_t *weakTd = weakTd_.alloc(_nSamples);
+  if (gateData.trip1IsStrong) {
+    _cohereTrip1_to_Trip2(strongNotched.data(), delta12, weakTd);
+  } else {
+    _cohereTrip2_to_Trip1(strongNotched.data(), delta12, weakTd);
+  }
+  
   // take fft of cohered weaker trip
   
   TaArray<RadarComplex_t> weakSpectra_;
@@ -1085,7 +1314,7 @@ int Sz864::_computeNotchStart(int notchWidth,
   
   double nyquist = _wavelengthMeters / (4.0 * prtSecs);
 
-  // compute the location of the spectral peack based on the
+  // compute the location of the spectral peak based on the
   // velocity
   
   double integ;
@@ -1285,7 +1514,7 @@ void Sz864::_applyNotch50(int startIndex,
 
 void Sz864::_velWidthFromTd(const RadarComplex_t *IQ,
                             double prtSecs,
-                            double &vel, double &width) const
+                            double &vel, double &width, double &phaseRad) const
   
 {
 
@@ -1319,10 +1548,11 @@ void Sz864::_velWidthFromTd(const RadarComplex_t *IQ,
   
   double nyquist = _wavelengthMeters / (4.0 * prtSecs);
   double nyqFac = nyquist / M_PI;
+  phaseRad = atan2(b, a);
   if (a == 0.0 && b == 0.0) {
     vel = 0.0;
   } else {
-    vel = nyqFac * atan2(b, a);
+    vel = nyqFac * phaseRad;
   }
   
   // width from R1R2

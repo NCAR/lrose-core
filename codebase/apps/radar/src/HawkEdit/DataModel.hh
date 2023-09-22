@@ -56,8 +56,8 @@ public:
   void getRayData(string path, vector<string> &fieldNames,
   int sweepNumber);
 
-  void applyCorrectionFactors();
-  void withdrawCorrectionFactors();
+  //void applyCorrectionFactors();
+  //void withdrawCorrectionFactors();
 
   void writeData(string path, bool compressed = false);
   void writeData(string path, RadxVol *vol, bool compressed = false);
@@ -137,6 +137,7 @@ public:
   void getCfactors(double *rollCorr, double *rotCorr, 
     double *tiltCorr);
   const RadxGeoref *getGeoreference(size_t rayIdx);
+  bool getGeoreferenceApplied(size_t rayIdx);
 
   int getNGates(size_t rayIdx, string fieldName = "", double sweepHeight = 0.0);
 
@@ -163,6 +164,8 @@ public:
   void deleteLookAhead();
   void moveToLookAhead();
   void clearVolume();
+
+  void sanityCheckVolume(string &msg);
   
 private:
   
@@ -175,7 +178,7 @@ private:
   void _setupVolRead(RadxFile &file, vector<string> &fieldNames,
     bool debug_verbose, bool debug_extra);
 
-  void adjustAnglesForElevationSurveillance(RadxVol *_vol);
+  //void adjustAnglesForElevationSurveillance(RadxVol *_vol);
   //void resetAnglesForElevationSurveillance(RadxVol *_vol);
 
   void _selectFieldsNotInVolume(vector<string> *allFieldNames);

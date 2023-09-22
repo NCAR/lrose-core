@@ -345,7 +345,9 @@ public:
   /// If force is false, the georefs are applied only if
   /// they have not been applied previously,
   /// i.e. if _georefApplied = false.
-  
+  //void applyGeoref(Radx::PrimaryAxis_t axis, 
+  //  Radx::RadxCfactors *cfactors, bool force /* = true */);
+
   void applyGeoref(Radx::PrimaryAxis_t axis, bool force = true);
 
   /// set the flag to indicate that georef has been applied
@@ -667,9 +669,12 @@ public:
   ///   y = x * scale + offset
   /// After operation, field type is unchanged.
   /// Nothing is done if field does not exist.
+  /// If field folds, ensure the result is within the folding region.
   
   void applyLinearTransform(const string &name,
-                            double scale, double offset);
+                            double scale, double offset,
+                            bool fieldFolds = false,
+                            double foldingValue = 0.0);
 
   /// Converts field type, and optionally changes the
   /// names.
@@ -872,8 +877,9 @@ public:
   inline double getElevationDeg() const { return _elev; }
 
   /// Get the tilt angle for this ray, in degrees.
-
-  inline double getTiltTDeg() const { return _tilt_t; }
+  // TODO: get Tilt from the georef
+  //inline double getTiltTDeg() const { return _tilt_t; }
+  // _georef->getTiltDeg();
 
   /// Get the fixed angle for this ray, in degrees.
   ///
@@ -1278,6 +1284,14 @@ private:
   } msgMetaNumbers_t;
 
   msgMetaNumbers_t _metaNumbers;
+  
+  /// compute track-relative elevation, azimuth,
+  /// rotation and tilt for a y-prime radar
+  
+  void _computeTrackRelAnglesYPrime(double rollRad, double rotRad,
+                                    double cosPitch, double sinPitch,
+                                    double cosTilt, double sinTilt,
+                                    double cosDrift, double sinDrift);
   
   /// convert metadata to XML
   

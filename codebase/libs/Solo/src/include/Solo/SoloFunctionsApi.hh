@@ -311,6 +311,9 @@ public:
   void UnconditionalDelete(const float *data, float *newData, size_t nGates,
 		  float bad, size_t dgi_clip_gate, bool *boundary_mask);
 
+  void AssignValue(const float *data, float *newData, size_t nGates,
+      float value, size_t dgi_clip_gate, bool *boundary_mask);
+
   void CalculateRadarAngles(
       float asib_roll,
       float asib_pitch,

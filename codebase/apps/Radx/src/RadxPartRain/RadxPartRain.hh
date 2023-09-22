@@ -48,8 +48,6 @@
 #include <deque>
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/NoiseLocator.hh>
-#include <radar/KdpBringi.hh>
 #include <radar/TempProfile.hh>
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxArray.hh>

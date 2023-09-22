@@ -626,6 +626,30 @@
     tt->single_val.s = tdrpStrDup(".");
     tt++;
     
+    // Parameter 'input_file_search_ext'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_file_search_ext");
+    tt->descr = tdrpStrDup("File name extension.");
+    tt->help = tdrpStrDup("If set, only files with this extension will be processed.");
+    tt->val_offset = (char *) &input_file_search_ext - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'input_file_search_substr'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_file_search_substr");
+    tt->descr = tdrpStrDup("File name sub-string.");
+    tt->help = tdrpStrDup("If set, only files with names containing this sub-string will be processed.");
+    tt->val_offset = (char *) &input_file_search_substr - &_start_;
+    tt->single_val.s = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'mode'
     // ctype is '_mode_t'
     

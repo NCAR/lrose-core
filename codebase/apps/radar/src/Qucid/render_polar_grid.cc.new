@@ -1,0 +1,328 @@
+/************************************************************************
+ * RENDER_POLAR_GRID (TNG) - Projects one beam edge onto lat lon.
+ *  - Converts to local coords - Use rotation matrix to compute
+ *    polygon corners and then convert to screen coords for filling.
+ *
+ * For the Configurable Interactive Data Display (CIDD) 
+ * Frank Hage May 2000 
+ */
+
+#define RENDER_POLAR_GRID 1
+
+#include "cidd.h"
+
+static void _computeEdgePoints(met_record_t *mr, double az,
+                               double cos_elev,
+                               int *xx_pix, int *yy_pix);
+
+static void _computeEdgePoint(met_record_t *mr, double az,
+                              double cos_elev,
+                              double radius,
+                              double &xx, double &yy);
+  
+/**********************************************************************
+ * RENDER_POLAR_GRID: Render a horizontal plane of  gridded data 
+ *    Returns 1 on success, 0 on failure
+ */
+
+int render_polar_grid(Drawable xid, met_record_t *mr, 
+                      time_t start_time, time_t end_time, int  is_overlay_field)
+{
+
+  unsigned short *ptr = ( unsigned short *) mr->h_data;
+  if(ptr == NULL) return CIDD_FAILURE;
+
+  int i, j;
+  int x_pix, y_pix;           /* pixel point values */
+
+  double x_cent,y_cent;
+  double az;                     /* current azimuth angle */
+  double cos_elev;
+    
+  // double rot_x1_array[MAX_COLS];  // The left edge of one beam 
+  // double rot_y1_array[MAX_COLS];
+  // double rot_x2_array[MAX_COLS];  // The right edge of one beam
+  // double rot_y2_array[MAX_COLS];
+
+  int *xx1_pix = new int[mr->h_fhdr.nx + 1];
+  int *yy1_pix = new int[mr->h_fhdr.nx + 1];
+  int *xx2_pix = new int[mr->h_fhdr.nx + 1];
+  int *yy2_pix = new int[mr->h_fhdr.nx + 1];
+
+  XPoint rad_trap[4];
+
+  // Use unused parameters 
+  start_time = 0;  end_time = 0;
+
+  set_busy_state(1);
+
+  mr->num_display_pts = 0;
+
+  // compute the center coordinates.
+  gd.proj.latlon2xy(mr->h_fhdr.proj_origin_lat,
+                    mr->h_fhdr.proj_origin_lon,
+                    x_cent,y_cent);
+
+  // compute the projection coordinates along the left edge of 0 degree beam
+  // Note this is line is 0.0 degrees - 1/2 of the beam width
+
+  if(gd.use_cosine_correction) {
+    cos_elev = cos(mr->vert[mr->plane].cent * RAD_PER_DEG);
+  } else {
+    cos_elev = 1.0;
+  }
+    
+  // compute start gate so that we do not use negative gates
+
+  int startGate = 0;
+  if (mr->h_fhdr.grid_minx < 0) {
+    startGate = (int) ((-1.0 * mr->h_fhdr.grid_minx) / mr->h_fhdr.grid_dx + 0.5);
+  }
+
+  // compute the coords of the left edge of the first beam
+  az = mr->h_fhdr.grid_miny - mr->h_fhdr.grid_dy / 2.0;
+  _computeEdgePoints(mr, az, cos_elev, xx2_pix, yy2_pix);
+
+  // Now compute the right edges of the beams and plot each valid  gate
+  for(i=0; i <  mr->h_fhdr.ny; i++) {
+
+    // The left edge of the next beam is the right edge of the previous beam
+    memcpy(xx1_pix, xx2_pix, (mr->h_fhdr.nx +1) * sizeof(int));
+    memcpy(yy1_pix, yy2_pix, (mr->h_fhdr.nx +1) * sizeof(int));
+
+    az += mr->h_fhdr.grid_dy;
+
+    // Compute the edge points 
+    _computeEdgePoints(mr, az, cos_elev, xx2_pix, yy2_pix);
+    
+    // Now plot each gate as a filled polygon
+    for(j = 0; j < mr->h_fhdr.nx; j++, ptr++) {
+      if (mr->h_vcm.val_gc[*ptr] != NULL) {
+        if(is_overlay_field) {
+          double val =  (mr->h_fhdr.scale * *ptr) + mr->h_fhdr.bias;
+          if(val < mr->overlay_min || val > mr->overlay_max) continue;
+        }
+        
+        // disp_proj_to_pixel(&gd.h_win.margin, rot_x1_array[j], rot_y1_array[j], &x_pix, &y_pix);
+        x_pix = xx1_pix[j];
+        y_pix = yy1_pix[j];
+
+        rad_trap[0].x = x_pix;
+        rad_trap[0].y = y_pix;
+
+        int minx = x_pix;
+        int maxx = x_pix;
+        int miny = y_pix;
+        int maxy = y_pix;
+
+        // disp_proj_to_pixel(&gd.h_win.margin, rot_x1_array[j+1], rot_y1_array[j+1], &x_pix, &y_pix);
+        x_pix = xx1_pix[j+1];
+        y_pix = yy1_pix[j+1];
+
+        rad_trap[1].x = x_pix;
+        rad_trap[1].y = y_pix;
+
+        minx = MIN(minx, x_pix);
+        maxx = MAX(maxx, x_pix);
+        miny = MIN(miny, y_pix);
+        maxy = MAX(maxy, y_pix);
+
+        // disp_proj_to_pixel(&gd.h_win.margin, rot_x2_array[j+1], rot_y2_array[j+1], &x_pix, &y_pix);
+        x_pix = xx2_pix[j+1];
+        y_pix = yy2_pix[j+1];
+
+        rad_trap[2].x = x_pix;
+        rad_trap[2].y = y_pix;
+
+        minx = MIN(minx, x_pix);
+        maxx = MAX(maxx, x_pix);
+        miny = MIN(miny, y_pix);
+        maxy = MAX(maxy, y_pix);
+
+        // disp_proj_to_pixel(&gd.h_win.margin, rot_x2_array[j], rot_y2_array[j], &x_pix, &y_pix);
+
+        x_pix = xx2_pix[j];
+        y_pix = yy2_pix[j];
+        rad_trap[3].x = x_pix;
+        rad_trap[3].y = y_pix;
+
+        minx = MIN(minx, x_pix);
+        maxx = MAX(maxx, x_pix);
+        miny = MIN(miny, y_pix);
+        maxy = MAX(maxy, y_pix);
+
+        if (minx <= gd.h_win.can_dim.width &&
+            maxx >= 0 &&
+            miny <= gd.h_win.can_dim.height &&
+            maxy >= 0 &&
+            j >= startGate) {
+
+          // XDrawLines(gd.dpy,xid,gd.legends.route_path_color->gc,rad_trap,3,CoordModeOrigin); 
+          XFillPolygon(gd.dpy, xid, mr->h_vcm.val_gc[*ptr], rad_trap, 4, Convex, CoordModeOrigin);
+
+        }
+
+        mr->num_display_pts++;
+      } 
+           
+    }
+  }
+  set_busy_state(0);
+
+  delete[] xx1_pix;
+  delete[] yy1_pix;
+  delete[] xx2_pix;
+  delete[] yy2_pix;
+
+  return 0;
+}
+
+/////////////////////////////////////////////////////////////////////
+// Compute the edge points 
+
+static void _computeEdgePoints(met_record_t *mr, double az,
+                               double cos_elev,
+                               int *xx_pix, int *yy_pix)
+
+{
+  
+  // get screen loc for first and last points
+
+  double radiusFirst = 
+    ((mr->h_fhdr.grid_dx * (0 - 0.5)) + mr->h_fhdr.grid_minx) * cos_elev;
+  double xxFirst, yyFirst;
+  _computeEdgePoint(mr, az, cos_elev, radiusFirst, xxFirst, yyFirst);
+  int xxPixFirst, yyPixFirst;
+  disp_proj_to_pixel(&gd.h_win.margin, xxFirst, yyFirst, &xxPixFirst, &yyPixFirst);
+  
+  double radiusMid = 
+    ((mr->h_fhdr.grid_dx * ((mr->h_fhdr.nx/2) - 0.5)) + mr->h_fhdr.grid_minx) * cos_elev;
+  double xxMid, yyMid;
+  _computeEdgePoint(mr, az, cos_elev, radiusMid, xxMid, yyMid);
+  int xxPixMid, yyPixMid;
+  disp_proj_to_pixel(&gd.h_win.margin, xxMid, yyMid, &xxPixMid, &yyPixMid);
+
+  double radiusLast = 
+    ((mr->h_fhdr.grid_dx * (mr->h_fhdr.nx - 0.5)) + mr->h_fhdr.grid_minx) * cos_elev;
+  double xxLast, yyLast;
+  _computeEdgePoint(mr, az, cos_elev, radiusLast, xxLast, yyLast);
+  int xxPixLast, yyPixLast;
+  disp_proj_to_pixel(&gd.h_win.margin, xxLast, yyLast, &xxPixLast, &yyPixLast);
+
+  if (abs((xxPixMid - xxPixFirst) - (xxPixLast - xxPixMid)) > 1 ||
+      abs((yyPixMid - yyPixFirst) - (yyPixLast - yyPixMid)) > 1) {
+    cerr << "11111 xxPixFirst, yyPixFirst, xxPixLast, yyPixLast: "
+         << xxPixFirst << ", " <<  yyPixFirst << ", " <<  xxPixLast << ", " <<  yyPixLast << endl;
+    
+    cerr << "111111111 dx first half: " << xxPixMid - xxPixFirst << endl;
+    cerr << "111111111 dy first half: " << yyPixMid - yyPixFirst << endl;
+    
+    cerr << "111111111 dx second half: " << xxPixLast - xxPixMid << endl;
+    cerr << "111111111 dy second half: " << yyPixLast - yyPixMid << endl;
+  }
+  
+  double dxPix = ((double) xxPixLast - (double) xxPixFirst) / mr->h_fhdr.nx;
+  double dyPix = ((double) yyPixLast - (double) yyPixFirst) / mr->h_fhdr.nx;
+
+  double xxPix = xxPixFirst;
+  double yyPix = yyPixFirst;
+
+  for(int j = 0; j <= mr->h_fhdr.nx; j++) {  // for each gate
+    xx_pix[j] = (int) floor(xxPix + 0.5);
+    yy_pix[j] = (int) floor(yyPix + 0.5);
+    xxPix += dxPix;
+    yyPix += dyPix;
+  }
+
+  return;
+  
+
+  for(int j = 0; j <= mr->h_fhdr.nx; j++) {  // for each gate
+
+    double radius = ((mr->h_fhdr.grid_dx * (j - 0.5)) + mr->h_fhdr.grid_minx) * cos_elev;
+    double lat, lon;
+    PJGLatLonPlusRTheta(mr->h_fhdr.proj_origin_lat,
+                        mr->h_fhdr.proj_origin_lon,
+                        radius, az,
+                        &lat, &lon);
+    double xx, yy;
+    gd.proj.latlon2xy(lat, lon, xx, yy);
+    int x_pix, y_pix;
+    disp_proj_to_pixel(&gd.h_win.margin, xx, yy, &x_pix, &y_pix);
+    xx_pix[j] = x_pix;
+    yy_pix[j] = y_pix;
+    int xx_pixx = (int) (xxPix + 0.5);
+    int yy_pixx = (int) (yyPix + 0.5);
+
+    if (abs(xx_pix[j] - xx_pixx) > 1 ||
+        abs(yy_pix[j] - yy_pixx) > 1) {
+      cerr << "22222 oldx, newx, oldy, newy: "
+           << xx_pix[j] << ", " << xx_pixx << ", "
+           << yy_pix[j] << ", " << yy_pixx << endl;
+    }
+
+    xxPix += dxPix;
+    yyPix += dyPix;
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////////////
+// Compute an edge point for a given range
+
+static void _computeEdgePoint(met_record_t *mr, double az,
+                              double cos_elev,
+                              double radius,
+                              double &xx, double &yy)
+  
+{
+  
+  double lat, lon;
+  PJGLatLonPlusRTheta(mr->h_fhdr.proj_origin_lat,
+                      mr->h_fhdr.proj_origin_lon,
+                      radius, az,
+                      &lat, &lon);
+  gd.proj.latlon2xy(lat, lon, xx, yy);
+  
+}
+
+/*****************************************************************
+ * ROTATE_POINTS : Rotate the array of points around x_cent, y_cent
+ *  Uses the rotation matrix: 
+ *   |  cos_theta  -sin_theta (-xc * cos_theta + yc * sin_theta + xc) |
+ *   |  sin_theta   cos_theta (-xc * sin_theta - yc * cos_theta + yc) |
+ *   |     0           0                     1                        |
+ */
+void rotate_points(double theta, double x_cent, double y_cent, double *xarr, double *yarr, int num_points)
+{
+  int i;
+  double xnew, ynew;
+  double matrix[6];   // Homogenous matrix for rotation
+
+  if(num_points <=0) return;
+
+  double cos_t = cos(-theta * RAD_PER_DEG);
+  double sin_t = sin(-theta * RAD_PER_DEG);
+
+  // Build the rotation matrix 
+  // First row
+  matrix[0] = cos_t;
+  matrix[1] = -sin_t;
+  matrix[2] = (-x_cent * cos_t) + (y_cent * sin_t) + x_cent;
+
+  // second row
+  matrix[3] = sin_t;
+  matrix[4] = cos_t;
+  matrix[5] = (-x_cent * sin_t) - (y_cent * cos_t) + y_cent;
+
+  // third row is unity. -> 0,0,1 so not used.
+
+  for(i=0; i < num_points; i++) {
+    xnew =  (xarr[i] * matrix[0]) + (yarr[i] *  matrix[1]) + matrix[2];
+
+    ynew =  (xarr[i] * matrix[3]) + (yarr[i] *  matrix[4]) + matrix[5];
+
+    xarr[i] = xnew;
+    yarr[i] = ynew;
+  }
+}

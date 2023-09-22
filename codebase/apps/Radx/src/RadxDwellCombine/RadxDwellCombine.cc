@@ -197,9 +197,6 @@ int RadxDwellCombine::_runArchive()
   RadxTimeList tlist;
   tlist.setDir(_params.input_dir);
   tlist.setModeInterval(_args.startTime, _args.endTime);
-  if (_params.aggregate_sweep_files_on_read) {
-    tlist.setReadAggregateSweeps(true);
-  }
   if (tlist.compile()) {
     cerr << "ERROR - RadxDwellCombine::_runFilelist()" << endl;
     cerr << "  Cannot compile time list, dir: " << _params.input_dir << endl;
@@ -450,16 +447,6 @@ void RadxDwellCombine::_setupRead(RadxFile &file)
     file.setVerbose(true);
   }
 
-  if (_params.aggregate_sweep_files_on_read) {
-    file.setReadAggregateSweeps(true);
-  } else {
-    file.setReadAggregateSweeps(false);
-  }
-
-  if (_params.set_max_range) {
-    file.setReadMaxRangeKm(_params.max_range_km);
-  }
-
   if (_params.debug >= Params::DEBUG_EXTRA) {
     file.printReadRequest(cerr);
   }
@@ -600,64 +587,18 @@ void RadxDwellCombine::_setupWrite(RadxFile &file)
     file.setWriteFileNameMode(RadxFile::FILENAME_WITH_START_AND_END_TIMES);
   }
 
-  if (_params.output_compressed) {
-    file.setWriteCompressed(true);
-    file.setCompressionLevel(_params.compression_level);
-  } else {
-    file.setWriteCompressed(false);
-  }
-
-  if (_params.output_native_byte_order) {
-    file.setWriteNativeByteOrder(true);
-  } else {
-    file.setWriteNativeByteOrder(false);
-  }
+  file.setWriteCompressed(true);
+  file.setCompressionLevel(4);
 
   // set output format
 
   switch (_params.output_format) {
-    case Params::OUTPUT_FORMAT_UF:
-      file.setFileFormat(RadxFile::FILE_FORMAT_UF);
-      break;
-    case Params::OUTPUT_FORMAT_DORADE:
-      file.setFileFormat(RadxFile::FILE_FORMAT_DORADE);
-      break;
-    case Params::OUTPUT_FORMAT_FORAY:
-      file.setFileFormat(RadxFile::FILE_FORMAT_FORAY_NC);
-      break;
-    case Params::OUTPUT_FORMAT_NEXRAD:
-      file.setFileFormat(RadxFile::FILE_FORMAT_NEXRAD_AR2);
-      break;
-    case Params::OUTPUT_FORMAT_MDV_RADIAL:
-      file.setFileFormat(RadxFile::FILE_FORMAT_MDV_RADIAL);
+    case Params::OUTPUT_FORMAT_CFRADIAL2:
+      file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL2);
       break;
     default:
     case Params::OUTPUT_FORMAT_CFRADIAL:
       file.setFileFormat(RadxFile::FILE_FORMAT_CFRADIAL);
-  }
-
-  // set netcdf format - used for CfRadial
-
-  switch (_params.netcdf_style) {
-    case Params::NETCDF4_CLASSIC:
-      file.setNcFormat(RadxFile::NETCDF4_CLASSIC);
-      break;
-    case Params::NC64BIT:
-      file.setNcFormat(RadxFile::NETCDF_OFFSET_64BIT);
-      break;
-    case Params::NETCDF4:
-      file.setNcFormat(RadxFile::NETCDF4);
-      break;
-    default:
-      file.setNcFormat(RadxFile::NETCDF_CLASSIC);
-  }
-
-  if (_params.write_individual_sweeps) {
-    file.setWriteIndividualSweeps(true);
-  }
-
-  if (_params.output_force_ngates_vary) {
-    file.setWriteForceNgatesVary(true);
   }
 
   if (strlen(_params.output_filename_prefix) > 0) {

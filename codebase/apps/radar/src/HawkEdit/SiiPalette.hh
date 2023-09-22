@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include <vector>
+#include <cstdint>
 
 //#include <glibmm/ustring.h>
 //#include <bgdkmm/color.h>

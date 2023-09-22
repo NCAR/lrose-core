@@ -554,7 +554,7 @@ def writeCMakeListsTop(dir):
     fo.write('# Finding Qt on mac OSX\n')
     fo.write('\n')
     fo.write('if(APPLE)\n')
-    fo.write('find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt@5/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt@5/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
+    fo.write('find_path(Qt5_DIR NAMES Qt5Config.cmake qt5-config.cmake HINTS /usr/local/Cellar/qt@5/*/lib/cmake/Qt5 /opt/homebrew/Cellar/qt@5/*/lib/cmake/Qt5 $ENV{HOME}/homebrew/Cellar/qt@5/*/lib/cmake/Qt5 NO_DEFAULT_PATH)\n')
     fo.write('endif(APPLE)\n')
 
     # fo.write('find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
@@ -563,7 +563,7 @@ def writeCMakeListsTop(dir):
     fo.write("  get_filename_component(X11_LIB_DIR ${X11_X11_LIB} DIRECTORY)\n")
     fo.write("endif()\n")
     fo.write('find_package (HDF5)\n')
-    fo.write('find_package (NETCDF)\n')
+    fo.write('# find_package (NETCDF)\n')
     fo.write('# find_package (LROSE)\n')
     fo.write("if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)\n")
     fo.write("  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)\n")

@@ -54,6 +54,7 @@
 #include <Radx/RadxVol.hh>
 #include <Radx/RadxGeoref.hh>
 #include <radar/ClickPointFmq.hh>
+#include <radar/BeamHeight.hh>
 #include "SweepManager.hh"
 
 class QApplication;
@@ -147,6 +148,7 @@ protected:
   // instrument platform details 
 
   RadxPlatform _platform;
+  BeamHeight _beamHt;
   
   // beam reading timer
 

@@ -69,7 +69,7 @@ paramdef double {
   p_default = -10.0;
   p_max = 0.0;
   p_descr = "Correction to be applied in brightband before computing precip rate.";
-  p_help = "This should be negative.";
+  p_help = "This is used for computing rate in wet snow or mixed precip. This should be negative.";
 } RATE_brightband_dbz_correction;
 
 commentdef {
@@ -198,7 +198,7 @@ commentdef {
     "\t    if KDP > threhsold and rateKDP is valid\n"
     "\t      use RATE_KDP\n"
     "\t    else\n"
-    "\t      use RATE_KDP\n"
+    "\t      use RATE_ZZDR\n"
     "\t  else if snow/ice\n"
     "\t    use RATE_ZH_SNOW\n"
     "\t  else if mixed precip\n"
@@ -211,9 +211,9 @@ commentdef {
     "\t        use RATE_ZZDR\n"
     "\t    else\n"
     "\t      if ZDR >= threshold\n"
-    "\t        use RATE_Z\n"
+    "\t        use RATE_ZZDR\n"
     "\t      else\n"
-    "\t        use RATE_ZZDR\n";
+    "\t        use RATE_Z\n";
 }
 
 paramdef double {

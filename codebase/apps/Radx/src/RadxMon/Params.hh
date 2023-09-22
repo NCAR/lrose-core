@@ -424,6 +424,8 @@ public:
 
   int header_interval_in_summary_mode;
 
+  tdrp_bool_t scan_name_in_summary_mode;
+
   int update_interval;
 
   int n_monitor_line_feeds;
@@ -431,6 +433,8 @@ public:
   tdrp_bool_t check_for_missing_beams;
 
   double max_delta_angle;
+
+  tdrp_bool_t check_for_increasing_time;
 
   int output_tcp_port;
 
@@ -443,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

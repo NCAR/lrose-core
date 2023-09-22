@@ -113,6 +113,11 @@ int Args::parse (int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "print_sweep_angle_table = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-print_time_gap_table")) {
+      
+      sprintf(tmp_str, "print_time_gap_table = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-start")) {
       
       if (i < argc - 1) {
@@ -222,6 +227,9 @@ void Args::_usage(ostream &out)
       << "  [ -indir ? ] set input directory\n"
       << "\n"
       << "  [ -print_sweep_angle_table] print out sweep angles\n"
+      << "     A table will be printed to stdout\n"
+      << "\n"
+      << "  [ -print_time_gap_table] print out details of data gaps\n"
       << "     A table will be printed to stdout\n"
       << "\n"
       << "  [ -start \"yyyy mm dd hh mm ss\"] start time\n"

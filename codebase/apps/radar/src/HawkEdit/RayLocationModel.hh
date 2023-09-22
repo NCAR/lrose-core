@@ -8,6 +8,17 @@
 #include "RayLoc.hh"
 
 
+// TODO: this class should become a base class with
+// inherited classes (or abstract class)
+// that implement these functions for the
+// specific primary axis:
+//  * sortRaysIntoRayLocations
+//  * getRayDataOffset
+//  * getClosestRay
+//  * getClsoestRayIdx
+//  * getAzimuthForRay
+//
+
 class RayLocationModel {
 
 public:
@@ -36,6 +47,10 @@ size_t getClosestRayIdx(double azDeg);
 size_t getClosestRayIdx(float azDeg, int offset);
 float getNyquistVelocityForRay(double azDeg, int offset);
 float getAzimuthForRay(double azDeg, int offset);
+float getAzimuthForRay(const RadxRay *ray);
+RadxRay *findClosestNonNullRay(size_t rayIndex);
+size_t validateRayLocIndex(size_t index);
+
 bool isRayLocationSetup();
 
 private:
@@ -45,6 +60,15 @@ private:
 	// to prevent access to the rayLocation array until 
 	// the rays have been sorted.
 	bool _rayLocationSetup;
+
+	void _sortRaysIntoRayLocationsUsingAzimuth(float ppi_rendering_beam_width,
+		int sweepNumber);
+	void _sortRaysIntoRayLocationsUsingRotation(float ppi_rendering_beam_width,
+		int sweepNumber);
+
+	float _getAzimuthForRayYPrimeAxis(double angleDeg, int offset);
+	float _getAzimuthForRayUsingAzimuth(double azDeg, int offset);
+	float _getTrackRelativeRotation(const RadxRay *ray);
 
 };
 

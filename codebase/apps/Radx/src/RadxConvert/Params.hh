@@ -214,6 +214,8 @@ public:
     char* input_field_name;
     double transform_scale;
     double transform_offset;
+    tdrp_bool_t field_folds;
+    double folding_value;
   } transform_field_t;
 
   typedef struct {
@@ -538,6 +540,8 @@ public:
   int file_quiescence;
 
   char* search_ext;
+
+  char* search_substr;
 
   tdrp_bool_t gematronik_realtime_mode;
 
@@ -864,7 +868,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[197];
+  mutable TDRPtable _table[198];
 
   const char *_className;
 

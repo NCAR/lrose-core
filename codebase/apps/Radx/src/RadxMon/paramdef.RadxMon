@@ -148,6 +148,12 @@ paramdef int {
   p_help = "A line header will be printed at regular intervals.";
 } header_interval_in_summary_mode;
 
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Add scan name to end of line in summary mode.";
+  p_help = "If TRUE, the scan name in the ray, if set, will be printed out at the end of the line, just before the transition flag.";
+} scan_name_in_summary_mode;
+
 paramdef int {
   p_default = -1; 
   p_descr = "Update interval for display in secs.";
@@ -161,7 +167,7 @@ paramdef int {
 } n_monitor_line_feeds;
 
 commentdef {
-  p_header = "CHECK FOR MISSING DATA";
+  p_header = "CHECK DATA";
 };
 
 paramdef boolean {
@@ -175,6 +181,12 @@ paramdef double {
   p_descr = "Max delta angle for missing beam check (deg).";
   p_help = "If the angle of the latest beam differs from the angle of the previous beam by more than this value, it will be assumed that one or more beams are missing. For RHI scans, the 'angle' referred to here is the 'elevation angle'. For other scans, it is the 'azimuth angle'.";
 } max_delta_angle;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to check that times increase.";
+  p_help = "If TRUE, we compare times from one ray to the next, and print out a suitable warning if time goes backwards.";
+} check_for_increasing_time;
 
 commentdef {
   p_header = "SERVER MODE";

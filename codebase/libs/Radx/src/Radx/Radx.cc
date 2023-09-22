@@ -1090,17 +1090,65 @@ void Radx::sincos(double radians, double &sinVal, double &cosVal)
 }
 
 /////////////////////////////////////
+/// condition angle to between limits
+
+double Radx::conditionAngle(double angle,
+                            double lowerLimit,
+                            double upperLimit)
+
+{
+
+  // count is used to break out
+  // in case angle value is large pos or neg
+  
+  int count = 0;
+
+  while (angle < lowerLimit) {
+    angle += 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
+  }
+  count = 0;
+  while (angle > upperLimit) {
+    angle -= 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
+  }
+
+  return angle;
+
+}
+
+/////////////////////////////////////
 /// condition az to between 0 and 360
 
 double Radx::conditionAz(double az)
 
 {
+  
+  // count is used to break out
+  // in case angle value is large pos or neg
+  
+  int count = 0;
 
   while (az < 0.0) {
     az += 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
   }
+  count = 0;
   while (az > 360.0) {
     az -= 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
   }
 
   return az;
@@ -1114,11 +1162,25 @@ double Radx::conditionEl(double el)
 
 {
 
+  // count is used to break out
+  // in case angle value is large pos or neg
+  
+  int count = 0;
+
   while (el < -180.0) {
     el += 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
   }
+  count = 0;
   while (el > 180.0) {
     el -= 360.0;
+    if (count > 1000) {
+      break;
+    }
+    count++;
   }
 
   return el;

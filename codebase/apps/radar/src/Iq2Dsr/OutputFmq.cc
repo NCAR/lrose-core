@@ -549,9 +549,7 @@ int OutputFmq::_writeBeamDsRadar(const Beam &beam)
   // params
   
   dsBeam.dataTime = beam.getTimeSecs();
-  double dtime = beam.getDoubleTime();
-  double partialSecs = fmod(dtime, 1.0);
-  dsBeam.nanoSecs = (int) (partialSecs * 1.0e9 + 0.5);
+  dsBeam.nanoSecs = beam.getNanoSecs();
   dsBeam.volumeNum = beam.getVolNum();
   dsBeam.tiltNum = beam.getSweepNum();
   dsBeam.elevation = beam.getEl();
@@ -1055,6 +1053,10 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       
       unfiltFld->setMissingFl32(Radx::missingFl32);
 
+      // set folding attributes
+
+      _setFoldingAttr(beam, ofield, *unfiltFld);
+
       // add field to output ray
       
       ray.addField(unfiltFld);
@@ -1085,6 +1087,10 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
       // convert missing value to standard
       
       filtFld->setMissingFl32(Radx::missingFl32);
+
+      // set folding attributes
+
+      _setFoldingAttr(beam, ofield, *filtFld);
 
       // add field to output ray
       
@@ -1155,6 +1161,39 @@ int OutputFmq::_writeBeamRadx(const Beam &beam)
 
 }
 
+////////////////////////////////////////
+// set folding attributes
+
+void OutputFmq::_setFoldingAttr(const Beam &beam,
+                                const Params::output_field_t &ofld,
+                                RadxField &field)
+
+{
+      
+  if (ofld.id == Params::VEL ||
+      ofld.id == Params::VEL_CORR_MOTION ||
+      ofld.id == Params::VEL_CORR_VERT ||
+      ofld.id == Params::VEL_H_ONLY ||
+      ofld.id == Params::VEL_V_ONLY) {
+    field.setFieldFolds(beam.getNyquist() * -1.0,
+                        beam.getNyquist());
+  } else if (ofld.id == Params::VEL_PRT_SHORT) {
+    field.setFieldFolds(beam.getNyquistPrtShort() * -1.0,
+                        beam.getNyquistPrtShort());
+  } else if (ofld.id == Params::VEL_PRT_LONG) {
+    field.setFieldFolds(beam.getNyquistPrtLong() * -1.0,
+                        beam.getNyquistPrtLong());
+  } else if (ofld.id == Params::PHIDP) {
+    if (beam.getIsAlternating()) {
+      field.setFieldFolds(-90.0, 90.0);
+    } else {
+      field.setFieldFolds(-180.0, 180.0);
+    }
+  }
+
+
+}
+  
 ////////////////////////////////////////
 // put volume flags
 
@@ -1519,7 +1558,7 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.ncp_prt_long - start);
     case Params::NCP_TRIP_FLAG:
       return (&_flds.ncp_trip_flag - start);
-
+      
       // NOISE BIAS RELATIVE TO CALIBRATION
 
     case Params::NOISE_BIAS_DB_HC:
@@ -1531,6 +1570,26 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::NOISE_BIAS_DB_VX:
       return (&_flds.noise_bias_db_vx - start);
 
+      // NOISE IDENTIFICATION
+      
+    case Params::NOISE_FLAG:
+      return (&_flds.noise_flag - start);
+    case Params::NOISE_INTEREST:
+      return (&_flds.noise_interest - start);
+    case Params::SIGNAL_FLAG:
+      return (&_flds.signal_flag - start);
+    case Params::SIGNAL_INTEREST:
+      return (&_flds.signal_interest - start);
+
+    case Params::NOISE_ACCUM_PHASE_CHANGE:
+      return (&_flds.noise_accum_phase_change - start);
+    case Params::NOISE_PHASE_CHANGE_ERROR:
+      return (&_flds.noise_phase_change_error - start);
+    case Params::NOISE_DBM_SDEV:
+      return (&_flds.noise_dbm_sdev - start);
+    case Params::NOISE_NCP_MEAN:
+      return (&_flds.noise_ncp_mean - start);
+      
       // SIGNAL-TO-NOISE RATIO
 
     case Params::SNR:
@@ -1678,17 +1737,10 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.spectral_noise - start);
     case Params::SPECTRAL_SNR:
       return (&_flds.spectral_snr - start);
-
-      // NOISE
-      
-    case Params::NOISE_FLAG:
-      return (&_flds.noise_flag - start);
-    case Params::NOISE_INTEREST:
-      return (&_flds.noise_interest - start);
-    case Params::SIGNAL_FLAG:
-      return (&_flds.signal_flag - start);
-    case Params::SIGNAL_INTEREST:
-      return (&_flds.signal_interest - start);
+    case Params::REGR_FILT_POLY_ORDER:
+      return (&_flds.regr_filt_poly_order - start);
+    case Params::REGR_FILT_CNR_DB:
+      return (&_flds.regr_filt_cnr_db - start);
 
       // REFRACT
 
@@ -1855,7 +1907,11 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
     case Params::NUM_PULSES:
       return (&_flds.num_pulses - start);
     case Params::TEST:
-      return (&_flds.test - start);
+      return (&_flds.test0 - start);
+    case Params::TEST0:
+      return (&_flds.test0 - start);
+    case Params::TEST1:
+      return (&_flds.test1 - start);
     case Params::TEST2:
       return (&_flds.test2 - start);
     case Params::TEST3:
@@ -1864,6 +1920,14 @@ int OutputFmq::_findFieldOffset(Params::field_id_t fieldId)
       return (&_flds.test4 - start);
     case Params::TEST5:
       return (&_flds.test5 - start);
+    case Params::TEST6:
+      return (&_flds.test6 - start);
+    case Params::TEST7:
+      return (&_flds.test7 - start);
+    case Params::TEST8:
+      return (&_flds.test8 - start);
+    case Params::TEST9:
+      return (&_flds.test9 - start);
   }
 
   return 0;

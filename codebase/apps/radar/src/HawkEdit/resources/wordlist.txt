@@ -9,12 +9,13 @@
 # SUBTRACT <field> from <field> put_in <field> ) ; use assignment and -
 ABS(<field>)
 ALTERNATE_GECHO = <bool>
-AND_BAD_FLAGS_ABOVE( <field>, <real>, <bad mask> )
-AND_BAD_FLAGS_BELOW( <field>, <real>, <bad mask> )
-AND_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad mask> )
+AND_BAD_FLAGS_ABOVE( <field>, <real>, <bad-flags> )
+AND_BAD_FLAGS_BELOW( <field>, <real>, <bad-flags> )
+AND_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad-flags> )
 APPEND_HISTOGRAM_TO_FILE - not implemented
 AREA_HISTOGRAM( <field> ) - not implemented
-ASSERT_BAD_FLAGS( <field>, <bad mask> )
+ASSERT_BAD_FLAGS( <field>, <bad-flags> [, <bad-data-value>])
+ASSIGN_VALUE( <field>, <real> )
 A_SPECKLE = <integer> 
 BB_GATES_AVERAGED = <integer> 
 BB_MAX_NEG_FOLDS = <integer>
@@ -22,27 +23,26 @@ BB_MAX_POS_FOLDS = <integer>
 BB_UNFOLDING_FIRST_GOOD_GATE(<field>, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, [bad data value])
 BB_UNFOLDING_AC_WIND(<field>, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, [bad data value])
 BB_UNFOLDING_LOCAL_WIND(<field>, BB_MAX_POS_FOLDS, BB_MAX_NEG_FOLDS, BB_GATES_AVERAGED, EW_WIND, NS_WIND, [bad data value])
-CLEAR_BAD_FLAGS (<bad mask>)
-COMPLEMENT_BAD_FLAGS (<bad mask>)
+CLEAR_BAD_FLAGS (<bad-flags>)
+COMPLEMENT_BAD_FLAGS (<bad-flags>)
 COPY_BAD_FLAGS( <field> )
 COUNT_HISTOGRAM on <field> ) - not implemented
-DEGLITCH_MIN_GATES ( <integer> )
-DEGLITCH_RADIUS ( <integer> )
-DEGLITCH_THRESHOLD ( <real> )
+DEGLITCH_MIN_GATES = <integer> 
+DEGLITCH_RADIUS = <integer> 
+DEGLITCH_THRESHOLD = <real> 
 DESPECKLE( <field>, A_SPECKLE )
 DONT_APPEND_HISTOGRAM_TO_FILE - not implemented
-DONT_USE_BOUNDARY
 DO_HISTOGRAM - not implemented
-DUPLICATE <field>( <field> )
+DUPLICATE (<field>, <field> )
 ESTABLISH_AND_RESET <field> to <field> )
 EW_WIND = <real>
 EXP( <field>,  <real> )  
-FIRST_GOOD_GATE( <integer> )
+FIRST_GOOD_GATE= <integer> 
 FIX_VORTEX_VELOCITIES( <field> )
-FLAGGED_ADD( <field>, <real>, <bad mask> )
+FLAGGED_ADD( <field>, <real>, <bad-flags> )
 FLAGGED_ASSIGN( <real>( <field> ) - not implemented
 FLAGGED_COPY <field> to <field> ) - not implemented
-FLAGGED_MULTIPLY( <field>, <real>, <bad mask> )
+FLAGGED_MULTIPLY( <field>, <real>, <bad-flags> )
 FLAG_FRECKLES( <field> )
 FLAG_GLITCHES( <field> )
 FORCED_UNFOLDING( <field> around <real> )
@@ -55,18 +55,18 @@ HISTOGRAM_DIRECTORY <directory>  - not implemented
 HISTOGRAM_FLUSH  - not implemented
 IGNORE_FIELD( <field> ) - not implemented
 IRREGULAR_HISTOGRAM_BIN from <real> to <real> ) - not implemented
-MERGE_FIELD <field> with <field> put_in <field> )
-MIN_BAD_COUNT( <integer> gates )
-MIN_NOTCH_SHEAR( <real> )
+MERGE_FIELD <field> with <field> put_in <field> ) - not implemented
+MIN_BAD_COUNT= <integer> gates  - not implemented
+MIN_NOTCH_SHEAR= <real> 
 NEW_HISTOGRAM_FILE - not implemented 
 NOTCH_MAX = <real>
 NS_WIND = <real> 
 NYQUIST_VELOCITY = <real> 
 OFFSET_FOR_RADIAL_SHEAR( <integer> gates )
 OPTIMAL_BEAMWIDTH( <real> degrees )
-OR_BAD_FLAGS_ABOVE( <field>, <real>, <bad mask> )
-OR_BAD_FLAGS_BELOW( <field>, <real>, <bad mask> )
-OR_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad mask> )
+OR_BAD_FLAGS_ABOVE( <field>, <real>, <bad-flags> )
+OR_BAD_FLAGS_BELOW( <field>, <real>, <bad-flags> )
+OR_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad-flags> )
 RADIAL_SHEAR( <field> put_in <field> )
 RAIN_RATE( <field> by <real> put_in <field> ) - not implemented
 REGULAR_HISTOGRAM_PARAMETERS LOW <real> high <real>(crement <real> ) - not implemented
@@ -82,16 +82,15 @@ RUN(<starttime>, <stoptime>, <fx>, <boundary>) - not implemented
 SET_BAD_FLAGS_ABOVE(<field>, <threshold>)
 SET_BAD_FLAGS_BELOW(<field>, <threshold>)
 SET_BAD_FLAGS_BETWEEN(<field>, <lower_threshold>, <upper_threshold>)
-SHIFT_FIELD <field> put_in <field> )
-SURFACE_GATE_SHIFT( <integer> gates )
+SHIFT_FIELD <field> put_in <field> ) - not implemented
+SURFACE_GATE_SHIFT( <integer> gates ) - not implemented
 THRESHOLD_ABOVE( <field>, <on field>, <real> )
 THRESHOLD_BELOW( <field>, <on field>, <real> )
 UNCONDITIONAL_DELETE( <field> )
-USE_BOUNDARY
-VERT_WIND( <real> )
-XOR_BAD_FLAGS_ABOVE( <field>, <real>, <bad mask> )
-XOR_BAD_FLAGS_BELOW( <field>, <real>, <bad mask> )
-XOR_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad mask> )
+VERT_WIND= <real> 
+XOR_BAD_FLAGS_ABOVE( <field>, <real>, <bad-flags> )
+XOR_BAD_FLAGS_BELOW( <field>, <real>, <bad-flags> )
+XOR_BAD_FLAGS_BETWEEN( <field>, <lower threshold>, <upper threshold>, <bad-flags> )
 XY_DIRECTORY <directory> ) - not implemented
 XY_LISTING( <field> and  <field> ) - not implemented
 ZERO_MIDDLE_THIRD( <field> )

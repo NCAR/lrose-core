@@ -2667,6 +2667,7 @@ void RadxVol::combineRhi()
   
   // loop through rays, looking for a 180 degree change in azimuth
   float tolerance = 5;
+
   vector<RadxRay *>::iterator it;
   float az0 = _rays[0]->getAzimuthDeg();
   for (it = _rays.begin(); it != _rays.end(); ++it) {
@@ -5257,9 +5258,12 @@ void RadxVol::convertToType(Radx::DataType_t targetType)
 ///   y = x * scale + offset
 /// After operation, field type is unchanged.
 /// Nothing is done if field does not exist.
+/// If field folds, ensure the result is within the folding region.
 
 void RadxVol::applyLinearTransform(const string &name,
-                                   double scale, double offset)
+                                   double scale, double offset,
+                                   bool fieldFolds /* = false */,
+                                   double foldingValue /* = 0.0 */)
 
 {
   
@@ -5277,7 +5281,8 @@ void RadxVol::applyLinearTransform(const string &name,
     // fields are on rays
 
     for (size_t ii = 0; ii < _rays.size(); ii++) {
-      _rays[ii]->applyLinearTransform(name, scale, offset);
+      _rays[ii]->applyLinearTransform(name, scale, offset,
+                                      fieldFolds, foldingValue);
     }
     
   } // if (_fields.size() > 0) {

@@ -49,6 +49,7 @@
 #include <radar/GateData.hh>
 #include <radar/MomentsFields.hh>
 #include <radar/KdpFilt.hh>
+#include <radar/DwellSpectra.hh>
 
 #include "Params.hh"
 
@@ -170,6 +171,18 @@ public:
 
   const RadarMoments *getMoments() { return _mom; }
 
+  double getAntennaRate();
+  int getRegrOrder();
+
+  const vector<RadarComplex_t> &getDelta12() const { return _txDelta12; }
+  const vector<double> &getPhaseDiffs() const { return _phaseDiffs; }
+  const vector<IwrfTsPulse::burst_phase_t> &getBurstPhases() const
+  {
+    return  _burstPhases;
+  }
+
+  void loadDwellSpectra(DwellSpectra &spectra);
+  
 protected:
   
 private:
@@ -270,16 +283,9 @@ private:
 
   IwrfCalib _calib;
 
-  // status XML
-
-  // string _statusXml;
-
   // Moments computations
   
   RadarMoments *_mom;
-  // PhaseCoding _pcode;
-
-  bool _applyFiltering;
 
   // window
 
@@ -353,12 +359,27 @@ private:
   
   // regression clutter filtering
 
-  RegressionFilter *_regr;
-  RegressionFilter *_regrHalf;
+  ForsytheRegrFilter *_regr;
+  ForsytheRegrFilter *_regrHalf;
 
   // regression clutter filtering - staggered prt
 
-  RegressionFilter *_regrStag;
+  ForsytheRegrFilter *_regrStag;
+
+  // antenna rate
+
+  double _beamAzRate;
+  double _beamElRate;
+
+  // sz 864 phase code support
+
+  vector<RadarComplex_t> _txDelta12;
+  vector<double> _phaseDiffs;
+  vector<IwrfTsPulse::burst_phase_t> _burstPhases;
+
+  // spectra in range for dwell
+
+  DwellSpectra _spectra;
 
   // private functions
 
@@ -384,8 +405,8 @@ private:
   void _filterSpH();
   void _filterSpV();
   void _filterSpStagPrt();
-  void _filterRegrSpStagPrt();
   void _filterAdapSpStagPrt();
+  void _filterRegrSpStagPrt();
   void _filterDpAltHvCoCross();
   void _filterDpAltHvCoOnly();
   void _filterDpSimHvFixedPrt();
@@ -421,6 +442,12 @@ private:
   
   double _computeClutPower(const MomentsFields &unfiltered,
                            const MomentsFields &filtered);
+
+  void _computeBeamAzRate();
+  void _computeBeamElRate();
+  
+  void _computePhaseDiffs
+    (const deque<const IwrfTsPulse *> &pulseQueue, int maxTrips);
 
   // copy method for assignment and copy constructor
 

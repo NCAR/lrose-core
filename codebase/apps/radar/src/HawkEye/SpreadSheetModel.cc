@@ -174,16 +174,16 @@ vector<float> *SpreadSheetModel::getData(string fieldName)
   // Radx::fl32 *data = field->getDataFl32();
   // how may gates?
   size_t nPoints = field->getNPoints();
-  LOG(DEBUG) << "nGates = " << nPoints;
+  LOG(DEBUG_VERBOSE) << "nGates = " << nPoints;
   float *data = (float *) field->getDataFl32();
-  LOG(DEBUG) << data << ", " << data+1 << ", " << data +2;
+  LOG(DEBUG_VERBOSE) << data << ", " << data+1 << ", " << data +2;
   vector<float> *dataVector = new vector<float>(data, data + nPoints);
-  //  LOG(DEBUG) << dataVector.at[0] << ", " << dataVector.at[1] << ", " << dataVector.at[2];
+  //  LOG(DEBUG_VERBOSE) << dataVector.at[0] << ", " << dataVector.at[1] << ", " << dataVector.at[2];
 
   //vector<float> *dataVectorPtr = &dataVector;
   for (int i=0; i<3; i++) {
     float value = dataVector->at(i);
-    LOG(DEBUG) << value;
+    LOG(DEBUG_VERBOSE) << value;
   }
 
   return dataVector;
@@ -210,7 +210,7 @@ RadxVol SpreadSheetModel::getVolume() {
 // set data values for the field in the Volume 
 void SpreadSheetModel::setData(string fieldName, vector<float> *data)
 {
-  LOG(DEBUG) << "fieldName=" << fieldName;
+  LOG(DEBUG_VERBOSE) << "fieldName=" << fieldName;
 
   // addField just modifies the name if there is a duplicate name,
   // so we can always add the field; we don't need to modify

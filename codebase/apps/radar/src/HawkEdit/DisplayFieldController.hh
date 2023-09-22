@@ -109,7 +109,7 @@ public:
 
 //  void setSelectedField(string fieldName);
   void dataFileChanged();
-  void fieldSelected(string fieldName);;
+  void fieldSelected(string fieldName);
 
 private:
  

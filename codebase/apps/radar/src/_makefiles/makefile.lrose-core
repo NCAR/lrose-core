@@ -27,6 +27,7 @@ SUB_DIRS = \
 	DualDopplerLobes \
 	Ecco \
 	HawkEye \
+	HawkEdit \
 	HcrTempRxGain \
 	HcrVelCorrect \
 	Hsrl2Radx \
@@ -68,6 +69,7 @@ SUB_DIRS = \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
+	TsMaxPower2Fmq \
 	TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \

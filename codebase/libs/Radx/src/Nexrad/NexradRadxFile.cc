@@ -712,6 +712,7 @@ int NexradRadxFile::readFromPath(const string &path,
     ordered.push_back("ZDR");
     ordered.push_back("PHI");
     ordered.push_back("RHO");
+    ordered.push_back("CFP");
     ordered.push_back("PURPLE_HAZE");
   }
   _readVol->reorderFieldsByName(ordered);
@@ -1568,6 +1569,10 @@ void NexradRadxFile::_handleFieldType31(RadxRay *ray,
     standard_name = "cross_correlation_ratio_hv";
     long_name = "cross_correlation";
     _isDualPol = true;
+  } else if (fieldName == "CFP") {
+    units = "dBZ";
+    standard_name = "equivalent_reflectivity_factor";
+    long_name = "clutter_reflectivity_removed";
   }
 
   // check byte width
@@ -3216,6 +3221,14 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
     haveRho = false;
   }
 
+  bool haveCfp = true;
+  RadxBuf cfpBuf;
+  NexradData::message_31_field_t cfpFhdr;
+  if (_loadField(copy, "CFP", "CFP,CLUT",
+                 1, 2.0, 66.0, cfpFhdr, cfpBuf)) {
+    haveCfp = false;
+  }
+  
   // compute lengths and offsets
 
   int refLen = 0;
@@ -3264,6 +3277,14 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
     hdr.data_block_offset[hdr.n_data_blocks] = offset;
     hdr.n_data_blocks++;
     offset += rhoLen;
+  }
+
+  int cfpLen = 0;
+  if (haveCfp) {
+    cfpLen = sizeof(NexradData::message_31_field_t) + cfpBuf.getLen();
+    hdr.data_block_offset[hdr.n_data_blocks] = offset;
+    hdr.n_data_blocks++;
+    offset += cfpLen;
   }
 
   hdr.radial_length = offset;
@@ -3320,6 +3341,12 @@ int NexradRadxFile::_writeMsg31(const RadxVol &writeVol,
     msgBuf.add(rhoBuf.getPtr(), rhoBuf.getLen());
   }
   
+  if (haveCfp) {
+    NexradData::swap(cfpFhdr);
+    msgBuf.add(&cfpFhdr, sizeof(cfpFhdr));
+    msgBuf.add(cfpBuf.getPtr(), cfpBuf.getLen());
+  }
+
   // pad out to minimum size if too small
   
   size_t minLen = (NexradData::PACKET_SIZE -

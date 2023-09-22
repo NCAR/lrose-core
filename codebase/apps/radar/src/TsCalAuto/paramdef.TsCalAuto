@@ -86,6 +86,18 @@ paramdef int {
   p_help = "See 'check_radar_id' above.";
 } radar_id;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to specify the pulse width.";
+  p_help = "Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. See 'fixed_pulse_width_us'. Pulses with different pulse widths are discarded.";
+} specify_pulse_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Specified pulse width in microseconds.";
+  p_help = "See 'specify_pulse_width'. Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. Pulses with different pulse widths are discarded.";
+} fixed_pulse_width_us;
+
 commentdef {
   p_header = "SIGNAL GENERATOR CONTROL";
 };

@@ -61,6 +61,7 @@ public:
   ~TimeNavController();
 
   void setSliderPosition();
+  void setSliderPositionNoRead();
 
   void timeSliderValueChanged(int value);
   void timeSliderReleased(int value);
@@ -71,7 +72,7 @@ public:
     string fullUrl,
     bool keepTimeRange = false);
 
-  string &getSelectedArchiveFile();
+  string getSelectedArchiveFile();
   string getSelectedArchiveFileName();
   int getSelectedArchiveFileIndex();
   string getArchiveFilePath(int idx);

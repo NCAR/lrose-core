@@ -12,7 +12,7 @@
 //dd_ac_vel(dgi)
 //  DGI_PTR dgi;
 
-
+// tilt and elevation must be in radians
 double dd_ac_vel(float vert_velocity, float ew_velocity, float ns_velocity, float cfac_ew_gndspd_corr,
 		 float ra_tilt, float ra_elevation)
 {

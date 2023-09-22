@@ -30,6 +30,7 @@ SUB_DIRS = \
 	ForayNc \
 	Gamic \
 	Gematronik \
+	HaloPhotonics \
 	Hrd \
 	Leosphere \
 	Ncf \

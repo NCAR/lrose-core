@@ -42,5 +42,5 @@ ax2.set_ylabel('Relative Humidity (%)')
 plt.legend((temp_line, humidity_line), ('Temp', 'Humidity'), loc='lower right')
 fig.autofmt_xdate()  # autoformat the x axis as dates
 
-# plt.show()   # uncomment to show the plot interactively
-plt.savefig('temp_and_humidity.png')
+plt.show()   # uncomment to show the plot interactively
+# plt.savefig('temp_and_humidity.png')
