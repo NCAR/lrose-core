@@ -218,6 +218,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
       sprintf(tmp_str, "flags_in_summary_mode = TRUE;");
       TDRP_add_override(&override, tmp_str);
       
+    } else if (!strcmp(argv[i], "-scan_name")) {
+      
+      sprintf(tmp_str, "scan_name_in_summary_mode = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+      
     } else if (!strcmp(argv[i], "-subsecs_precision")) {
       
       if (i < argc - 1) {
@@ -273,6 +278,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-check_time_increasing")) {
+      
+      sprintf(tmp_str, "check_for_increasing_time = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+
     } // if
     
   } // i
@@ -293,6 +303,8 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [--, -h, -help, -man] produce this list.\n"
       << "  [-check_missing ?] check for missing beams\n"
       << "     Specify the max delta angle (deg) for normal ops.\n"
+      << "  [-check_time_increasing ?] check for increaasing time\n"
+      << "     Prints warning if time goes backwards.\n"
       << "  [-data] full plus data - very verbose\n"
       << "  [-d, -debug] print debug messages\n"
       << "  [-f, -files ???] specify input file list.\n"
@@ -312,6 +324,7 @@ void Args::_usage(string &prog_name, ostream &out)
       << "     if available\n"
       << "  [-power] print power and frequency summary\n"
       << "  [-range] range for single gate print - km\n"
+      << "  [-scan_name] add scan name at end of line in summary mode\n"
       << "  [-start] Seek to start of FMQ\n"
       << "     If not set, reading begins at the end of the FMQ.\n"
       << "  [-summary] scrolling summary\n"

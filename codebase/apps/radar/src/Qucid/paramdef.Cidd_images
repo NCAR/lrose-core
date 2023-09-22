@@ -1,0 +1,87 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/////////////////////////////////////////////////////////////////////////
+// paramdef.CIDD_images
+//
+// This file contains the TDRP parameter definitions for handling some
+// of the CIDD image generation options.
+
+ccommentdef {
+  p_header = "CIDD's TDRP parameters for image generation.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_help = "Debug option.\n"
+           "If set, debug messages will be printed appropriately.\n";
+} debug;
+
+paramdef boolean { 
+  p_descr = "Generate images for specified vertical sections.";
+  p_help = "If TRUE, and CIDD is in html_mode, it will generate vertical section images in addition to the normal plan view images.";
+  p_default = FALSE;
+} generate_vsection_images;
+
+paramdef boolean { 
+  p_descr = "The specified waypts are in latlon degree units.";
+  p_help = "If TRUE, the waypts are specified in lat/lon degrees. If FALSE, they are specified in (xkm, ykm) units in the current projection.";
+  p_default = FALSE;
+} vsection_waypts_in_latlon;
+
+typedef struct {
+  string vsection_label;
+  int n_waypts;
+  string waypt_locs;
+} vsection_spec_t;
+
+paramdef struct vsection_spec_t {
+
+  p_descr = "Vertical section information array";
+  
+  p_help =
+  "The fields in the structure are as follows:\n"
+  "\n"
+  "  vsection_label: label to be used for the specified vertical section.\n"
+  "\n"
+  "  n_waypts: number of waypts for specifying the vert section.\n"
+  "            Normally this is 2 - for a single vertical section segment.\n"
+  "\n"
+  "  waypt_locs: location of way points. This is a string with pairs of points in it, with the following format: (x, y) (x, y) ..... (x, y)\n"
+  "\n";
+  
+  p_default = {
+    {
+      vsection_label = "RHI-north",
+      n_waypts = 2,
+      waypt_locs = "(0, 0) (0, 150)"
+    }
+  };
+
+} vsection_spec[];
+

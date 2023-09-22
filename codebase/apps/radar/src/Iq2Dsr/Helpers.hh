@@ -42,7 +42,7 @@
 #include <map>
 #include <radar/RadarFft.hh>
 #include <radar/RadarMoments.hh>
-#include <radar/RegressionFilter.hh>
+#include <radar/ForsytheRegrFilter.hh>
 using namespace std;
 
 class Helpers
@@ -88,8 +88,8 @@ public:
   
   class Regr {
   public:
-    RegressionFilter regr;
-    RegressionFilter regrHalf;
+    ForsytheRegrFilter regr;
+    ForsytheRegrFilter regrHalf;
     Regr(int nSamples, int order);
   private:
     int _nSamples;
@@ -100,7 +100,7 @@ public:
   
   class RegrStag {
   public:
-    RegressionFilter regr;
+    ForsytheRegrFilter regr;
     RegrStag(int nSamples, int stagM, int stagN, int order);
   private:
     int _nSamples;

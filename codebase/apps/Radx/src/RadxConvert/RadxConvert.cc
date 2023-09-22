@@ -478,12 +478,39 @@ int RadxConvert::_runRealtimeNoLdata()
 int RadxConvert::_readFile(const string &readPath,
                            RadxVol &vol)
 {
-
+  
   PMU_auto_register("Processing file");
 
   // clear all data on volume object
 
   vol.clear();
+
+  // check file name
+  
+  if (strlen(_params.search_ext) > 0) {
+    RadxPath rpath(readPath);
+    if (strcmp(rpath.getExt().c_str(), _params.search_ext)) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << readPath << endl;
+        cerr << "  Does not have correct extension: "
+             << _params.search_ext << endl;
+      }
+      return -1;
+    }
+  }
+  
+  if (strlen(_params.search_substr) > 0) {
+    RadxPath rpath(readPath);
+    if (rpath.getFile().find(_params.search_substr)
+        == string::npos) {
+      if (_params.debug) {
+        cerr << "WARNING - ignoring file: " << readPath << endl;
+        cerr << "  Does not contain required substr: "
+             << _params.search_substr << endl;
+      }
+      return -1;
+    }
+  }
 
   // check we have not already processed this file
   // in the file aggregation step
@@ -1123,7 +1150,10 @@ void RadxConvert::_applyLinearTransform(RadxVol &vol)
     string iname = tfld.input_field_name;
     double scale = tfld.transform_scale;
     double offset = tfld.transform_offset;
-    vol.applyLinearTransform(iname, scale, offset);
+    bool fieldFolds = tfld.field_folds;
+    double foldingValue = tfld.folding_value;
+    vol.applyLinearTransform(iname, scale, offset,
+                             fieldFolds, foldingValue);
   } // ii
 
 }

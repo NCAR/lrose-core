@@ -38,25 +38,16 @@
 #include <vector>
 #include <map>
 
-#include <QDialog>
-#include <QWidget>
-#include <QResizeEvent>
-#include <QImage>
-#include <QTimer>
-#include <QRubberBand>
-#include <QPoint>
-#include <QTransform>
-
 #include <toolsa/TaArray.hh>
 #include <radar/RadarComplex.hh>
+#include <radar/RadarMoments.hh>
+
 #include "Params.hh"
-#include "ScaledLabel.hh"
-#include "WorldPlot.hh"
+#include "SpritePlot.hh"
 
 class Beam;
-class MomentsFields;
 
-class IqPlot
+class IqPlot : public SpritePlot
 {
 
 public:
@@ -83,56 +74,46 @@ public:
    * Clear the plot
    */
   
-  void clear();
+  virtual void clear();
 
   // set the window geometry
   
-  void setWindowGeom(int width,
-                     int height,
-                     int xOffset,
-                     int yOffset);
+  virtual void setWindowGeom(int width,
+                             int height,
+                             int xOffset,
+                             int yOffset);
 
   // set the world limits
 
-  void setWorldLimits(double xMinWorld,
-                      double yMinWorld,
-                      double xMaxWorld,
-                      double yMaxWorld);
+  virtual void setWorldLimits(double xMinWorld,
+                              double yMinWorld,
+                              double xMaxWorld,
+                              double yMaxWorld);
 
   void setWorldLimitsX(double xMinWorld,
                        double xMaxWorld);
   void setWorldLimitsY(double yMinWorld,
                        double yMaxWorld);
 
-  // set the zoom limits, using pixel space
-
-  void setZoomLimits(int xMin,
-                     int yMin,
-                     int xMax,
-                     int yMax);
-  
-  void setZoomLimitsX(int xMin,
-                      int xMax);
-
-  void setZoomLimitsY(int yMin,
-                      int yMax);
-
   // set the plot type and channel
 
   void setPlotType(Params::iq_plot_type_t val);
   void setRxChannel(Params::rx_channel_t val) { _rxChannel = val; }
-  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
 
   // set filtering
   
+  void setFftWindow(Params::fft_window_t val) { _fftWindow = val; }
   void setMedianFiltLen(int val) { _medianFiltLen = val; }
-  void setUseAdaptFilt(bool val) { _useAdaptFilt = val; }
+  void setClutterFilterType(RadarMoments::clutter_filter_type_t val) {
+    _clutterFilterType = val;
+  }
   void setPlotClutModel(bool val) { _plotClutModel = val; }
-  void setClutWidthMps(double val) { _clutWidthMps = val; }
-  void setUseRegrFilt(bool val) { _useRegrFilt = val; }
+  void setClutModelWidthMps(double val) { _clutModelWidthMps = val; }
   void setRegrOrder(int val) { _regrOrder = val; }
-  void setRegrFiltInterpAcrossNotch(bool val) {
-    _regrFiltInterpAcrossNotch = val;
+  void setRegrClutWidthFactor(double val) { _regrClutWidthFactor = val; }
+  void setRegrCnrExponent(double val) { _regrCnrExponent = val; }
+  void setRegrFiltNotchInterpMethod(RadarMoments::notch_interp_method_t val) {
+    _regrNotchInterpMethod = val;
   }
   void setComputePlotRangeDynamically(bool val) {
     _computePlotRangeDynamically = val;
@@ -147,32 +128,9 @@ public:
   
   void plotBeam(QPainter &painter,
                 Beam *beam,
-                int nSamples,
+                size_t nSamples,
                 double selectedRangeKm);
 
-  // set grid lines on/off
-
-  void setXGridLinesOn(bool val) { _xGridLinesOn = val; }
-  void setYGridLinesOn(bool val) { _yGridLinesOn = val; }
-  
-  // get the world plot objects
-  
-  WorldPlot &getFullWorld() { return _fullWorld; }
-  WorldPlot &getZoomWorld() { return _zoomWorld; }
-  bool getIsZoomed() const { return _isZoomed; }
-
-  // get the window geom
-
-  int getWidth() const { return _fullWorld.getWidthPixels(); }
-  int getHeight() const { return _fullWorld.getHeightPixels(); }
-  int getXOffset() const { return _fullWorld.getXPixOffset(); }
-  int getYOffset() const { return _fullWorld.getYPixOffset(); }
-  
-  // get grid lines state
-
-  bool getXGridLinesOn() const { return _xGridLinesOn; }
-  bool getYGridLinesOn() const { return _yGridLinesOn; }
-  
   // get the plot details
 
   const Params::iq_plot_type_t getPlotType() const { return _plotType; }
@@ -182,24 +140,26 @@ public:
   // get the filter details
   
   int getMedianFiltLen() const { return _medianFiltLen; }
-  bool getUseAdaptFilt() const { return _useAdaptFilt; }
+  RadarMoments::clutter_filter_type_t getClutterFilterType() const {
+    return _clutterFilterType;
+  }
   bool getPlotClutModel() const { return _plotClutModel; }
-  double getClutWidthMps() const { return _clutWidthMps; }
-  bool getUseRegrFilt() const { return _useRegrFilt; }
+  double getClutModelWidthMps() const { return _clutModelWidthMps; }
   int getRegrOrder() const { return _regrOrder; }
-  bool getRegrFiltInterpAcrossNotch() const {
-    return _regrFiltInterpAcrossNotch;
+  double getRegrClutWidthFactor() const { return _regrClutWidthFactor; }
+  double getRegrCnrExponent() const { return _regrCnrExponent; }
+  RadarMoments::notch_interp_method_t getRegrFiltNotchInterpMethod() const {
+    return _regrNotchInterpMethod;
   }
   bool getComputePlotRangeDynamically() const {
     return _computePlotRangeDynamically;
   }
-
+  
   // get strings
 
   string getName();
   string getXUnits();
   string getYUnits();
-  string getFftWindowName();
   
 protected:
 
@@ -211,11 +171,21 @@ protected:
   const Params &_params;
   int _id;
 
+  // beam to plot
+  
+  Beam *_beam;
+  size_t _nSamples;
+
   // plot type and channel
 
   Params::iq_plot_type_t _plotType;
   Params::rx_channel_t _rxChannel;
   Params::iq_plot_static_range_t _staticRange;
+  bool _computePlotRangeDynamically;
+  
+  // calibration
+
+  double _calibNoise;
 
   // fft window
   
@@ -226,28 +196,15 @@ protected:
   // filtering
 
   int _medianFiltLen;
-  bool _useAdaptFilt;
+  RadarMoments::clutter_filter_type_t _clutterFilterType;
   bool _plotClutModel;
-  double _clutWidthMps;
-  bool _useRegrFilt;
+  double _clutModelWidthMps;
   int _regrOrder;
-  bool _regrFiltInterpAcrossNotch;
-  bool _computePlotRangeDynamically;
+  int _regrOrderInUse;
+  double _regrClutWidthFactor;
+  double _regrCnrExponent;
+  RadarMoments::notch_interp_method_t _regrNotchInterpMethod;
 
-  // unzoomed world
-
-  WorldPlot _fullWorld;
-
-  // zoomed world
-
-  bool _isZoomed;
-  WorldPlot _zoomWorld;
-
-  // grid lines
-
-  bool _xGridLinesOn;
-  bool _yGridLinesOn;
-  
   ///////////////////////
   // Protected methods //
   ///////////////////////
@@ -257,76 +214,69 @@ protected:
   void _drawOverlays(QPainter &painter, double selectedRangeKm);
   
   void _plotSpectralPower(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
 
   void _plotSpectralPhase(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iq);
 
   void _plotSpectralZdr(QPainter &painter,
-                        Beam *beam,
-                        int nSamples,
                         double selectedRangeKm,
                         int gateNum,
                         const RadarComplex_t *iqHc,
                         const RadarComplex_t *iqVc);
 
   void _plotSpectralPhidp(QPainter &painter,
-                          Beam *beam,
-                          int nSamples,
                           double selectedRangeKm,
                           int gateNum,
                           const RadarComplex_t *iqHc,
                           const RadarComplex_t *iqVc);
 
+  void _plotSpectralSz864(QPainter &painter,
+                          double selectedRangeKm,
+                          int gateNum,
+                          const RadarComplex_t *iq);
+
   void _plotTsPower(QPainter &painter,
-                    Beam *beam,
-                    int nSamples,
                     double selectedRangeKm,
                     int gateNum,
                     const RadarComplex_t *iq);
   
   void _plotTsPhase(QPainter &painter,
-                    Beam *beam,
-                    int nSamples,
                     double selectedRangeKm,
                     int gateNum,
                     const RadarComplex_t *iq);
 
   void _plotIQVals(QPainter &painter,
-                   Beam *beam,
-                   int nSamples,
                    double selectedRangeKm,
                    int gateNum,
-                   const double *iVals, 
-                   const double *qVals);
+                   const RadarComplex_t *iq);
   
   void _plotIvsQ(QPainter &painter,
-                 Beam *beam,
-                 int nSamples,
                  double selectedRangeKm,
                  int gateNum,
                  const RadarComplex_t *iq);
 
   void _plotPhasor(QPainter &painter,
-                   Beam *beam,
-                   int nSamples,
                    double selectedRangeKm,
                    int gateNum,
                    const RadarComplex_t *iq);
 
-  void _computePowerSpectrum(Beam *beam,
-                             int nSamples,
-                             const RadarComplex_t *iq,
-                             double *power,
-                             double *dbm);
+  void _computePowerSpectrum(const RadarComplex_t *iq,
+                             RadarComplex_t *iqFilt,
+                             RadarComplex_t *iqNotched,
+                             double *dbm,
+                             double *dbmFilt,
+                             double &filterRatio,
+                             double &spectralNoise,
+                             double &spectralSnr);
+  
+  void _runRegressionFilter(ForsytheRegrFilter &regrF,
+                            const RadarComplex_t *iqIn,
+                            RadarComplex_t *iqFilt);
   
   void _applyWindow(const RadarComplex_t *iq, 
                     RadarComplex_t *iqWindowed,

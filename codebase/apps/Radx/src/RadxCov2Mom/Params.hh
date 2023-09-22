@@ -219,10 +219,16 @@ public:
     PHIDP_JITTER_FOR_KDP = 72,
     ZDR_SDEV_FOR_KDP = 73,
     TEST = 74,
-    TEST2 = 75,
-    TEST3 = 76,
-    TEST4 = 77,
-    TEST5 = 78
+    TEST0 = 75,
+    TEST1 = 76,
+    TEST2 = 77,
+    TEST3 = 78,
+    TEST4 = 79,
+    TEST5 = 80,
+    TEST6 = 81,
+    TEST7 = 82,
+    TEST8 = 83,
+    TEST9 = 84
   } output_field_id_t;
 
   typedef enum {

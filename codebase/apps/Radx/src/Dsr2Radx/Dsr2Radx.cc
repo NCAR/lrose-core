@@ -1162,18 +1162,6 @@ void Dsr2Radx::_updatePlatform(RadxRay *ray)
   const RadxPlatform &platform = _reader->getPlatform();
   _vol.setPlatform(platform);
 
-  // set scan name
-  // is this a solar?
-
-  string solarScanName(_params.solar_scan_name);
-  string scanName(ray->getScanName());
-  if (scanName == solarScanName) {
-    _isSolarScan = true;
-  } else {
-    _isSolarScan = false;
-  }
-  _vol.setScanName(scanName);
-
   if (_params.override_radar_name) {
     _vol.setInstrumentName(_params.radar_name);
   }
@@ -1660,6 +1648,24 @@ int Dsr2Radx::_loadCurrentScanMode()
     } else {
       cerr << "  currentScanMode: UNKNOWN" << endl;
     }      
+  }
+
+  // set scan name
+  // is this a solar?
+
+  const vector<RadxRay *> rays = _vol.getRays();
+  if (rays.size() > 0) {
+    size_t nRays = rays.size();
+    size_t midIndex = nRays / 2;
+    RadxRay *midRay = rays[midIndex];
+    string solarScanName(_params.solar_scan_name);
+    string scanName(midRay->getScanName());
+    if (scanName == solarScanName) {
+      _isSolarScan = true;
+    } else {
+      _isSolarScan = false;
+    }
+    _vol.setScanName(scanName);
   }
 
   return 0;

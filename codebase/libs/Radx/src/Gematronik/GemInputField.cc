@@ -31,7 +31,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "GemInputField.hh"
-#include "GemSweep.hh"
+#include "GemSweepField.hh"
 #include <cerrno>
 #include <cstdio>
 #include <cmath>
@@ -53,6 +53,7 @@ GemInputField::GemInputField(const string &fileName,
                              bool verbose) :
         _debug(debug),
         _verbose(verbose),
+        _isValid(true),
         _fileName(fileName),
         _filePath(filePath),
         _fieldName(fieldName),
@@ -171,7 +172,7 @@ int GemInputField::read()
   // set the angles and data on each sweep
 
   for (int ii = 0; ii < (int) _sweeps.size(); ii++) {
-    GemSweep &sweep = *_sweeps[ii];
+    GemSweepField &sweep = *_sweeps[ii];
     for (int jj = 0; jj < (int) _blobs.size(); jj++) {
       const GemBlob &blob = *_blobs[jj];
       if (sweep.getAnglesBlobId() == blob.getId()) {
@@ -482,18 +483,18 @@ int GemInputField::_decodeXml(const string &xmlBuf)
     }
   }
 
-  GemSweep *prevSweep = NULL;
+  GemSweepField *prevSweep = NULL;
 
   for (int ii = 0; ii < _scanNumEle; ii++) {
     
     // If a previous sweep exists, use this as a template in 
     // case some info is not available in the XML
 
-    GemSweep *sweep;
+    GemSweepField *sweep;
     if (prevSweep == NULL) {
-      sweep = new GemSweep(ii, _debug, _verbose);
+      sweep = new GemSweepField(ii, _debug, _verbose);
     } else {
-      sweep = new GemSweep(*prevSweep, ii, _debug, _verbose);
+      sweep = new GemSweepField(*prevSweep, ii, _debug, _verbose);
     }
 
     if (sweep->decodeInfoXml(tagBufArray[ii])) {

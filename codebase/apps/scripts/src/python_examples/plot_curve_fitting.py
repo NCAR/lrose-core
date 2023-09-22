@@ -24,5 +24,5 @@ ax.plot(xdata, yfit, 'r-', label='Fit')
 
 ax.legend()
 
-#plt.show()  # uncomment to show the plot interactively
-plt.savefig('fitting_example.png')
+plt.show()  # uncomment to show the plot interactively
+# plt.savefig('fitting_example.png')

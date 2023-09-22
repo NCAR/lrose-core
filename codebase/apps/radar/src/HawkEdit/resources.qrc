@@ -3,6 +3,7 @@
   <file>images/ok_check.png</file>
   <file>images/cancel_x.png</file>
   <file>images/apply.png</file>
-  <file>script_help.txt</file>
+  <file>resources/wordlist.txt</file>
+  <file>resources/script_help.txt</file>
 </qresource>
 </RCC>

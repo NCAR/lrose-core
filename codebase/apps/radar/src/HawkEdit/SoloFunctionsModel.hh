@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+#include "Radx/Radx.hh"
 #include "Radx/RadxVol.hh"
 #include "Point.hh"
 #include "ScriptsDataController.hh"
@@ -27,6 +28,8 @@ public:
   //  vector<string> *fieldNames);  
   //void writeData(string &path);
 
+  int ConvertRadxPlatformToSoloRadarType(Radx::PlatformType_t platform);
+
   vector<double> RemoveAircraftMotion(vector<double>); // , RadxVol *vol);
   vector<double> RemoveAircraftMotion(string fieldName); // RadxVol *vol);
   vector<double> RemoveAircraftMotion(string fieldName, //RadxVol *vol,
@@ -36,6 +39,7 @@ public:
   string RemoveAircraftMotion(string fieldName, //RadxVol *vol,
 			      size_t rayIdx, //int sweepIdx,
 			      float nyquist_velocity,
+			      bool use_radar_angles,
 			      size_t clip_gate,
 			      float bad_data_value,
 			      string newFieldName);
@@ -285,6 +289,8 @@ const float *data, float *newData, size_t nGates,
   string UnconditionalDelete(string fieldName,  size_t rayIdx, //int sweepIdx,
              size_t clip_gate, float bad_data_value);
   
+  string AssignValue(string fieldName,  size_t rayIdx,
+             float data_value, size_t clip_gate);
   /*
 const float *data, float *newData, size_t nGates,
 			 float nyquist_velocity, float dds_radd_eff_unamb_vel,

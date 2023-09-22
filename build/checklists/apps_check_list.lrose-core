@@ -79,6 +79,7 @@ EsdAcIngest
 File2Dsr
 FilterStorms
 FixCfradialPaths
+FixFieldVals
 FixRadxPointing
 FixRadxValues
 FltPath2Symprod
@@ -101,6 +102,7 @@ GribNc2Mdv
 GridForecast
 GtsSockIngest
 HawkEye
+HawkEdit
 HcrTempRxGain
 HcrVelCorrect
 Hiq2Dsr
@@ -272,6 +274,7 @@ RadxPrint
 RadxQc
 RadxQpe
 RadxRate
+RadxStats
 RadxSunMon
 RadxTimeStats
 RadxVolTimingStats

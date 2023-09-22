@@ -46,6 +46,7 @@
 TimeNavModel::TimeNavModel() {
   changePath(".");
   _atEnd = true;
+  _archiveFileList.clear();
 }
 
 TimeNavModel::~TimeNavModel() {
@@ -312,7 +313,7 @@ string TimeNavModel::getArchiveFilePath(int idx) {
 
 string TimeNavModel::getArchiveFileName(int idx) { 
   if (_archiveFileList.size() <= 0) {
-    string empty;
+    string empty("");
     return empty;
   } else {
     string p = _archiveFileList.at(idx);
@@ -392,10 +393,10 @@ void TimeNavModel::setSelectedFile(string fileName)
 
 }
 
-string &TimeNavModel::getSelectedArchiveFile() { 
+string TimeNavModel::getSelectedArchiveFile() { 
   if (_archiveFileList.size() <= 0) {
     string empty;
-    return empty;
+    return string("");
   } else {
     return _archiveFileList.at(_archiveScanIndex);
   }

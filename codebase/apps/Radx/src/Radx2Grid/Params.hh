@@ -493,6 +493,10 @@ public:
 
   char* input_dir;
 
+  char* input_file_search_ext;
+
+  char* input_file_search_substr;
+
   mode_t mode;
 
   int max_realtime_data_age_secs;
@@ -840,7 +844,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[210];
+  mutable TDRPtable _table[212];
 
   const char *_className;
 

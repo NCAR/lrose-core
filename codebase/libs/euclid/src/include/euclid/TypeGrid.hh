@@ -2339,7 +2339,7 @@ int TypeGrid<T>::fillPoly( Polyline &p, T v )
    //
    
    numPoints = p.getNumPts();
-   Point_d polygon[numPoints];
+   Point_d *polygon = new Point_d[numPoints];
   
    for (int i = 0; i < numPoints; i++)
    {
@@ -2367,18 +2367,19 @@ int TypeGrid<T>::fillPoly( Polyline &p, T v )
    //
    for (int iy = yStart; iy < yStop; iy++)
    {
-      for (int ix = xStart; ix < xStop; ix++)
-      {
+     for (int ix = xStart; ix < xStop; ix++)
+       {
          currentPoint.x = ix*geometry.dx+geometry.minx;
-     currentPoint.y = iy*geometry.dx+geometry.miny;
-     
-     if (EG_point_in_polygon(currentPoint, polygon, numPoints))
-         {
-        set(v, ix, iy, iz);
-     }
-      }
+	 currentPoint.y = iy*geometry.dx+geometry.miny;
+	 
+	 if (EG_point_in_polygon(currentPoint, polygon, numPoints))
+	   {
+	     set(v, ix, iy, iz);
+	   }
+       }
    }
-      
+
+   delete[] polygon;
    return (0);
 }
 
@@ -2413,7 +2414,7 @@ int TypeGrid<T>::fillPolyFast( Polyline &p, T v )
   // find rectangle which encloses the polyline
   
   int numPoints = p.getNumPts();
-  Point_d polygon[numPoints];
+  Point_d *polygon = new Point_d[numPoints];
   for (int i = 0; i < numPoints; i++) {
     polygon[i].x = (double) p.getX(i);
     polygon[i].y = (double) p.getY(i);
@@ -2433,8 +2434,8 @@ int TypeGrid<T>::fillPolyFast( Polyline &p, T v )
    // arrays for sides and crossings
   
   int nsides = numPoints - 1;
-  EG_poly_side_t sides[nsides];
-  EG_crossing_t crossings[nsides];
+  EG_poly_side_t *sides = new EG_poly_side_t[nsides];
+  EG_crossing_t *crossings = new EG_crossing_t[nsides];
 
   // load sides, ensuring start has lesser y
   
@@ -2514,6 +2515,7 @@ int TypeGrid<T>::fillPolyFast( Polyline &p, T v )
       ix2 = MAX(ix2, 0);
       ix2 = MIN(ix2, (int) geometry.nx - 1);
 
+
       for (int ix = ix1; ix <= ix2; ix++) {
 	set(v, ix, iy, 0);
       }
@@ -2522,6 +2524,9 @@ int TypeGrid<T>::fillPolyFast( Polyline &p, T v )
     
   } // iy
 
+  delete[] polygon;
+  delete[] sides;
+  delete[] crossings;
   return (0);
 
 }

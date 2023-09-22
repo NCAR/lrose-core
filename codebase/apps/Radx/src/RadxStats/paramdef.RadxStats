@@ -42,6 +42,12 @@ paramdef string {
   p_help = "Files will be searched for in this directory.";
 } input_dir;
 
+paramdef string {
+  p_default = "";
+  p_descr = "Field to read, for stats.";
+  p_help = "If set, only this single field will be read in. That will speed up gathering the stats.";
+} field_for_stats;
+
 typedef enum {
   REALTIME, ARCHIVE, FILELIST
 } mode_t;
@@ -87,10 +93,16 @@ paramdef boolean {
   p_help = "If true, the sweep angles for each file will be printed to stdout.";
 } print_sweep_angle_table;
 
-paramdef string {
-  p_default = "";
-  p_descr = "Field to read, for stats.";
-  p_help = "If set, only this single field will be read in. That will speed up gathering the stats.";
-} field_for_stats;
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to print out table of time gaps in data.";
+  p_help = "We read through all the files, and look for time gaps. If a time gap exceeds max_valid_gap_secs the gap is added to the output table.";
+} print_time_gap_table;
+
+paramdef double {
+  p_default = 900.0;
+  p_descr = "Max valid data gap (secs).";
+  p_help = "If a gap exceeds this, it is added to the output table.";
+} max_valid_gap_secs;
 
 

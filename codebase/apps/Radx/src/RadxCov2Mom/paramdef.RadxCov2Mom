@@ -983,10 +983,16 @@ typedef enum {
   ZDR_SDEV_FOR_KDP,
 
   TEST,
+  TEST0,
+  TEST1,
   TEST2,
   TEST3,
   TEST4,
-  TEST5
+  TEST5,
+  TEST6,
+  TEST7,
+  TEST8,
+  TEST9
 
 } output_field_id_t;
 

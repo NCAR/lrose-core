@@ -95,6 +95,7 @@ SYS_FFLAGS = -DLITENDIAN $(MY_FFLAGS)
 STATIC_FLAG = -static
 SYS_LIBS = 
 SYS_CPPC_LIBS =
+LROSE_PROFILE_LIB_DIR = $(LROSE_INSTALL_DIR)/lib
 
 SYS_LDFLAGS = -L/usr/lib64 $(MY_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib" -L/usr/lib/x86_64-linux-gnu/hdf5/serial
 SYS_CPPC_LDFLAGS = -L/usr/lib64 $(MY_CPPC_LDFLAGS) "-Wl,-rpath,$(LROSE_INSTALL_DIR)/lib"

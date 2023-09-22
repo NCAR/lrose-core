@@ -1330,10 +1330,10 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
   if (_params.use_manual_siggen_control) {
     cerr << "Set siggen power  to " << powerDbm  << " (dBm), delta: " << delta << " (dB)" << endl;
     fprintf(stdout, "Manual control - hit return when ready ...");
-    fgets(input,1023,stdin);
-    // const char *notused = fgets(input,1023,stdin);
-    // notused = NULL;
-   } else {
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenPowerSet - getting user keystroke" << endl;
+    }
+  } else {
     char buf[1024];
     if (_params.debug) {
       cerr << "======================================================" << endl;
@@ -1356,9 +1356,9 @@ void TsCalAuto::_setSiggenFreq(double freqGhz)
   if (_params.use_manual_siggen_control) {
     fprintf(stdout, "Manual control - Set frequency to: %g GHz\n", freqGhz);
     fprintf(stdout, "..............   hit return when ready ...");
-    fgets(input,1023,stdin);
-    // const char *notused = fgets(input,1023,stdin);
-    // notused = NULL;
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenFreq - getting user keystroke" << endl;
+    }
   } else {
     char buf[1024];
     if (_params.debug) {
@@ -1423,6 +1423,7 @@ int TsCalAuto::_sampleReceivedPowers(double powerDbm)
 
 {                              
              
+  int warningCount = 0;
   int pulseCount = 0;
   Stats stats;
 
@@ -1444,6 +1445,20 @@ int TsCalAuto::_sampleReceivedPowers(double powerDbm)
       return -1;
     }
 
+    if (_params.specify_pulse_width) {
+      warningCount++;
+      // check for valid pulse width
+      if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
+        if (warningCount == 100000) {
+          cerr << "WARNING - cannot find pulse with width: "
+               << _params.fixed_pulse_width_us << endl;
+          warningCount = 0;
+        }
+        // Go back to get next pulse
+        continue;
+      }
+    }
+    
     const fl32 *iqChan0 = pulse->getIq0();
     const fl32 *iqChan1 = pulse->getIq1();
     bool isHoriz = pulse->isHoriz();

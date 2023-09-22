@@ -496,6 +496,9 @@ int Mdv2NcfTrans::_parseMdv()
     int compressionLevel = 4;
     if (fhdr.requested_compression != Mdvx::COMPRESSION_NONE) {
       compress = true;
+    } else if (_mdv->_ncfCompress) {
+      compress = true;
+      compressionLevel = _mdv->_ncfCompressionLevel;
     }
     if (_debug && compress) {
       cerr << "Mdv2NcfTrans::_parseMdv: compress is true, field: " << i << endl;

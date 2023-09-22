@@ -67,6 +67,7 @@ codebase/install-sh
 codebase/missing
 codebase/stamp-h1
 codebase/autom4te.cache
+codebase/build*
 
 # qt
 
@@ -474,6 +475,7 @@ codebase/apps/radar/src/IpsTsSim/IpsTsSim
 codebase/apps/radar/src/IpsTs2Moments/IpsTs2Moments
 codebase/apps/radar/src/IpsTs2NetCDF/IpsTs2NetCDF
 
+codebase/apps/radar/src/HcrShortLongCombine/HcrShortLongCombine
 codebase/apps/radar/src/HcrVelCorrect/HcrVelCorrect
 codebase/apps/radar/src/HcrVelCorrect/ReadEgm2008/ReadEgm2008
 codebase/apps/radar/src/HcrTempRxGain/HcrTempRxGain
@@ -493,6 +495,7 @@ codebase/apps/radar/src/MergeHcrAndHsrl/MergeHcrAndHsrl
 codebase/apps/radar/src/Mpd2Radx/Mpd2Radx
 codebase/apps/radar/src/NexradPowerStats/NexradPowerStats
 codebase/apps/radar/src/NoiseMon/NoiseMon
+codebase/apps/radar/src/Qucid/Qucid
 codebase/apps/radar/src/PartRain/PartRain
 codebase/apps/radar/src/PidZdrStats/PidZdrStats
 codebase/apps/radar/src/PointingCpCompute/PointingCpCompute
@@ -672,6 +675,7 @@ codebase/apps/trec/src/ctrec/ctrec
 codebase/apps/Radx/src/Ascii2Radx/Ascii2Radx
 codebase/apps/Radx/src/Dsr2Radx/Dsr2Radx
 codebase/apps/Radx/src/FixCfradialPaths/FixCfradialPaths
+codebase/apps/Radx/src/FixFieldVals/FixFieldVals
 codebase/apps/Radx/src/FixRadxPointing/FixRadxPointing
 codebase/apps/Radx/src/FixRadxValues/FixRadxValues
 codebase/apps/Radx/src/GroundEchoStats/GroundEchoStats

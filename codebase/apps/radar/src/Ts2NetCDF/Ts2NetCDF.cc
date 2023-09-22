@@ -587,6 +587,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
   _el = pulse.getEl();
   _az = pulse.getAz();
   _phaseDiff = pulse.getPhaseDiff0();
+  _txPhaseDeg = pulse.getTxPhaseDeg();
 
   // set start time etc
 
@@ -720,6 +721,7 @@ int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
   _azArrayHc.push_back(_az);
   _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
   _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
   _transitionFlagArrayHc.push_back(pulse.antennaTransition());
 
   _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
@@ -816,6 +818,7 @@ int Ts2NetCDF::_savePulseDataAltH(IwrfTsPulse &pulse)
   _azArrayHc.push_back(_az);
   _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
   _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
   _transitionFlagArrayHc.push_back(pulse.antennaTransition());
 
   _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
@@ -909,6 +912,7 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
   _azArrayVc.push_back(_az);
   _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
   _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
   _transitionFlagArrayVc.push_back(pulse.antennaTransition());
 
   _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
@@ -1042,6 +1046,7 @@ void Ts2NetCDF::_reset()
   _prtArrayHc.clear();
   _pulseWidthArrayHc.clear();
   _modCodeArrayHc.clear();
+  _txPhaseArrayHc.clear();
   _transitionFlagArrayHc.clear();
   _burstMagArrayHc.clear();
   _burstArgArrayHc.clear();
@@ -1054,6 +1059,7 @@ void Ts2NetCDF::_reset()
   _prtArrayVc.clear();
   _pulseWidthArrayVc.clear();
   _modCodeArrayVc.clear();
+  _txPhaseArrayVc.clear();
   _transitionFlagArrayVc.clear();
   _burstMagArrayVc.clear();
   _burstArgArrayVc.clear();
@@ -1636,6 +1642,13 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
     return -1;
   }
   
+  if (_writeVar(file, timeDim,
+                "tx_phase_deg", "transmit_phase", "degrees",
+                _txPhaseArrayHc)) {
+    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
   // PRT variable
   
   if (_writeVar(file, timeDim,
@@ -1666,28 +1679,28 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
   // write burst data
   
   if (_writeVar(file, timeDim,
-                "burst_mag_hc", "", "",
+                "burst_mag_hc", "burst_magnitude_H_copolar", "",
                 _burstMagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_mag_vc", "", "",
+                "burst_mag_vc", "burst_magnitude_V_copolar", "",
                 _burstMagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_hc", "", "",
+                "burst_arg_hc", "burst_phase_H_copolar", "degrees",
                 _burstArgArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_vc", "", "",
+                "burst_arg_vc", "burst_phase_V_copolar", "degrees",
                 _burstArgArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
@@ -1809,6 +1822,21 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
+
+  if (_writeVar(file, timeDim,
+                "tx_phase_deg_hc", "transmit_phase_h_copolar", "degrees",
+                _txPhaseArrayHc)) {
+    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
+  if (_writeVar(file, timeDim,
+                "tx_phase_deg_vc", "transmit_phase_v_copolar", "degrees",
+                _txPhaseArrayVc)) {
+    cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
+    return -1;
+  }
+  
   
   // PRT variable
   
@@ -1859,28 +1887,28 @@ int Ts2NetCDF::_writeTimeDimVarsAlt(NcxxFile &file,
   // write burst data
   
   if (_writeVar(file, timeDim,
-                "burst_mag_hc", "", "",
+                "burst_mag_hc", "burst_magnitude_H_copolar", "",
                 _burstMagArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_mag_vc", "", "",
+                "burst_mag_vc", "burst_magnitude_V_copolar", "",
                 _burstMagArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_hc", "", "",
+                "burst_arg_hc", "burst_phase_H_copolar", "degrees",
                 _burstArgArrayHc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;
   }
   
   if (_writeVar(file, timeDim,
-                "burst_arg_vc", "", "",
+                "burst_arg_vc", "burst_phase_V_copolar", "",
                 _burstArgArrayVc)) {
     cerr << "ERROR - Ts2NetCDF::_writeTimeDimVars" << endl;
     return -1;

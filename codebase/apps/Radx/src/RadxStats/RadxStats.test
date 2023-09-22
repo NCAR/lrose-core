@@ -1,0 +1,178 @@
+/**********************************************************************
+ * TDRP params for RadxStats
+ **********************************************************************/
+
+//======================================================================
+//
+// Computes statistics on CfRadial files.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "precip.data_gaps";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory.
+//
+//
+// Type: string
+//
+
+input_dir = ".";
+
+///////////// field_for_stats /////////////////////////
+//
+// Field to read, for stats.
+//
+// If set, only this single field will be read in. That will speed up 
+//   gathering the stats.
+//
+//
+// Type: string
+//
+
+field_for_stats = "";
+
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+// In REALTIME mode, the program waits for a new input file.  In ARCHIVE 
+//   mode, it moves through the data between the start and end times set 
+//   on the command line. In FILELIST mode, it moves through the list of 
+//   file names specified on the command line. Paths (in ARCHIVE mode, at 
+//   least) MUST contain a day-directory above the data file -- 
+//   ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = REALTIME;
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+//======================================================================
+//
+// STATS OPTIONS.
+//
+//======================================================================
+ 
+///////////// check_ngates_constant ///////////////////
+//
+// Option to check files for constant number of gates in all rays.
+//
+// If true, print out message for if ngates are NOT constant.
+//
+//
+// Type: boolean
+//
+
+check_ngates_constant = FALSE;
+
+///////////// check_ngates_vary ///////////////////////
+//
+// Option to check files for variable number of gates in volume.
+//
+// If true, print out message for if ngates do NOT vary.
+//
+//
+// Type: boolean
+//
+
+check_ngates_vary = FALSE;
+
+///////////// print_sweep_angle_table /////////////////
+//
+// Option to print out sweep angle table.
+//
+// If true, the sweep angles for each file will be printed to stdout.
+//
+//
+// Type: boolean
+//
+
+print_sweep_angle_table = FALSE;
+
+///////////// print_time_gap_table ////////////////////
+//
+// Option to print out table of time gaps in data.
+//
+// We read through all the files, and look for time gaps. If a time gap 
+//   exceeds max_valid_gap_secs the gap is added to the output table.
+//
+//
+// Type: boolean
+//
+
+print_time_gap_table = FALSE;
+
+///////////// max_valid_gap_secs //////////////////////
+//
+// Max valid data gap (secs).
+//
+// If a gap exceeds this, it is added to the output table.
+//
+//
+// Type: double
+//
+
+max_valid_gap_secs = 900;
+

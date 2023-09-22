@@ -348,3 +348,50 @@ void RadarFft::copy(fftw_complex *dest,
   }
 }
 
+//////////////////////////////////////////////////////
+// compute DFT
+
+void RadarFft::computeDft(const vector<double> &inReal,
+                          const vector<double> &inImag,
+                          vector<double> &outReal,
+                          vector<double> &outImag)
+  
+{
+	
+  size_t nn = inReal.size();
+
+  for (size_t kk = 0; kk < nn; kk++) {  // For each output element
+    double sumReal = 0.0;
+    double sumImag = 0.0;
+    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
+      double angle = 2.0 * M_PI * tt * kk / nn;
+      sumReal +=  inReal[tt] * cos(angle) + inImag[tt] * sin(angle);
+      sumImag += -inReal[tt] * sin(angle) + inImag[tt] * cos(angle);
+    }
+    outReal[kk] = sumReal;
+    outImag[kk] = sumImag;
+  }
+
+}
+
+void RadarFft::computeDft(const vector<RadarComplex_t> &in,
+                          vector<RadarComplex_t> &out)
+  
+{
+	
+  size_t nn = in.size();
+
+  for (size_t kk = 0; kk < nn; kk++) {  // For each output element
+    double sumReal = 0.0;
+    double sumImag = 0.0;
+    for (size_t tt = 0; tt < nn; tt++) {  // For each input element
+      double angle = 2.0 * M_PI * tt * kk / nn;
+      sumReal +=  in[tt].re * cos(angle) + in[tt].im * sin(angle);
+      sumImag += -in[tt].re * sin(angle) + in[tt].im * cos(angle);
+    }
+    out[kk].re = sumReal;
+    out[kk].im = sumImag;
+  }
+  
+}
+

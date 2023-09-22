@@ -34,7 +34,9 @@ The latest release can be found at:
 | ------- |:------:|
 | [Cyclone](https://github.com/nsf-lrose/lrose-cyclone) | LROSE year 2, final |
 | [Elle](https://github.com/nsf-lrose/lrose-elle) | LROSE year 3, final |
-| [Topaz](https://github.com/nsf-lrose/lrose-topaz) | LROSE year 4, in progress |
+| [Topaz](https://github.com/nsf-lrose/lrose-topaz) | LROSE year 4 |
+| [Jade](https://github.com/nsf-lrose/lrose-jade) | LROSE outyear |
+
 
 ### INSTALLING FROM DOWNLOADS
 

@@ -1,0 +1,774 @@
+/*********************************************************
+ * parameter definitions for FixFieldVals
+ *
+ * Mike Dixon, RAP, NCAR, Boulder, CO, USA, 80307-3000
+ *
+ * Jan 2010
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+  p_header = "ANALYSIS_STAGE: reads in 2 datasets and computes mean differences between specified fields. Biases are stored in Spdb.";
+}
+
+commentdef {
+  p_header = "CORRECTION_STAGE: retrieves biases from Spdb, corrects specified datasets using those previously-computed biases.";
+}
+
+commentdef {
+  p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+  p_default = "test";
+  p_descr = "Program instance for process registration.";
+  p_help = "This application registers with procmap. This is the instance used for registration.";
+} instance;
+
+commentdef {
+  p_header = "PROCESSING STAGES";
+}
+
+typedef enum {
+  ANALYSIS_STAGE,
+  CORRECTION_STAGE
+} stage_t;
+
+paramdef enum stage_t {
+  p_default = ANALYSIS_STAGE;
+  p_descr = "Stage of processing";
+  p_help = "ANALYSIS_STAGE: reads in 2 datasets and computes mean differences between specified fields. Biases are stored in Spdb.\n\nCORRECTION_STAGE: retrieves biases from Spdn, corrects specified datasets using those previously-computed biases.";
+} processing_stage;
+
+commentdef {
+  p_header = "DATA INPUT";
+}
+
+paramdef string {
+  p_default = "/tmp/cfradial/correction_input";
+  p_descr = "Input directory for searching for CfRadial files that need correction.";
+  p_help = "Applies to both ANALYSIS_STAGE and CORRECTION_STAGE. These will be the files to be corrected, or some which the correction will be computed when compared to the truth files.";
+} correction_input_dir;
+
+paramdef string {
+  p_default = "/tmp/cfradial/truth_input";
+  p_descr = "Input directory for searching for truth CfRadial files.";
+  p_help = "Applies only to ANALYSIS_STAGE.";
+} truth_input_dir;
+
+paramdef double {
+  p_default = 60;
+  p_descr = "Search margin in finding truth files (secs).";
+  p_help = "We perform a 'closest' search. This is the margin around the search time.";
+} truth_file_time_margin_secs;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Azimuth margin in finding truth rays (deg).";
+  p_help = "The truth ray azimuth must be within this tolerance of the correction ray.";
+} truth_ray_az_margin_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Elevation margin in finding truth rays (deg).";
+  p_help = "The truth ray elevation must be within this tolerance of the correction ray.";
+} truth_ray_el_margin_deg;
+
+paramdef double {
+  p_default = 0.1;
+  p_descr = "Time margin in finding truth rays (sec).";
+  p_help = "The truth ray time must be within this tolerance of the correction ray.";
+} truth_ray_time_margin_secs;
+
+typedef struct {
+  string correction_field_name; 
+  string truth_field_name; 
+} comparison_field_t;
+
+paramdef struct comparison_field_t {
+  p_default = {
+    {
+      "DBZ",
+      "DBZ"
+    }
+    ,
+    {
+      "ZDR_F", 
+      "ZDR_F"
+    }
+  };
+  p_descr = "Comparison field names for analysis.";
+  p_help = "In the ANALYSIS_STAGE, we need to compare the correction fields to the truth fields. We do not assume they have the same name, though that is likely.";
+} comparison_fields[];
+
+paramdef double {
+  p_default = 1000;
+  p_descr = "Min number of pts for valid analysis of field diffs.";
+  p_help = "If npts is less than this, the diffs are not written out.";
+} min_npts_for_valid_diff;
+
+typedef enum {
+  ARCHIVE, FILELIST
+} mode_t;
+
+paramdef enum mode_t {
+  p_default = ARCHIVE;
+  p_descr = "Operating mode";
+  p_help = "In ARCHIVE mode, it moves through the data between the start "
+           "and end times set on the command line. "
+           "In FILELIST mode, it moves through the list of file names "
+           "specified on the command line. "
+           "Paths (in ARCHIVE mode, at least) MUST contain a "
+           "day-directory above the data file -- ./data_file.ext will not "
+           "work as a file path, but ./yyyymmdd/data_file.ext will.";
+} mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "File name extension.";
+  p_help = "If set, only files with this extension will be processed.";
+} search_ext;
+
+commentdef {
+  p_header = "SPDB FIELD BIAS DATA";
+  p_text = "Output in ANALYSIS_STAGE, input in CORRECTION_STAGE";
+}
+
+paramdef string {
+  p_default = "/tmp/field_biases/spdb";
+  p_descr = "URL for SPDB XML.";
+  p_help = "For local writes, specify the directory. For remote writes, specify the full url: spdbp:://host::dir";
+} field_bias_spdb_url;
+
+commentdef {
+  p_header = "READ OPTIONS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set fixed angle limits";
+  p_help = "Only use sweeps within the specified fixed angle limits.";
+  p_help = "If 'apply_strict_angle_limits' is set, only read sweeps within the specified fixed angle limits. If strict checking is false and no data lies within the limits, return the closest applicable sweep. NOTE - fixed angles are elevation in PPI mode and azimuth in RHI mode.";
+} set_fixed_angle_limits;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Lower fixed angle limit - degrees.";
+} lower_fixed_angle_limit;
+
+paramdef double {
+  p_default = 90;
+  p_descr = "Upper fixed angle limit - degrees.";
+} upper_fixed_angle_limit;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to apply strict checking for angle or sweep number limits on read.";
+  p_help = "If true, an error will occur if the fixed angle limits or sweep num limits are outside the bounds of the data. If false, a read is guaranteed to return at least 1 sweep - if no sweep lies within the angle limits set, the nearest sweep will be returned.";
+} apply_strict_angle_limits;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set the max range for any ray.";
+} set_max_range;
+
+paramdef double {
+  p_default = 9999;
+  p_descr = "Specified maximim range - km.";
+  p_help = "Gates beyond this range are removed.";
+} max_range_km;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the number of gates to be constant.";
+  p_help = "If TRUE, the number of gates on all rays will be set to the maximum, and gates added to shorter rays will be filled with missing values.";
+} set_ngates_constant;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap all rays to the predominant range geometry.";
+  p_help = "If TRUE, all rays will be remapped onto the same range geometry, determined as the most common geometry amongst all of the rays read in.";
+} remap_to_predominant_range_geometry;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to remap all rays to the finest range geometry.";
+  p_help = "If TRUE, all rays will be remapped onto the same range geometry, determined as that with the finest resolution in range - i.e. with the minimum gate spacing.";
+} remap_to_finest_range_geometry;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the beam width.";
+} override_beam_width;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width in the horizontal plane (deg).";
+  p_help = "See override_beam_width.";
+} beam_width_deg_h;
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Beam width in the vertical plane (deg).";
+  p_help = "See override_beam_width.";
+} beam_width_deg_v;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the antenna gain.";
+} override_antenna_gain;
+
+paramdef double {
+  p_default = 45.1;
+  p_descr = "antenna gain in the horizontal plane (dB).";
+  p_help = "See override_antenna_gain.";
+} antenna_gain_db_h;
+
+paramdef double {
+  p_default = 45.1;
+  p_descr = "antenna gain in the vertical plane (dB).";
+  p_help = "See override_antenna_gain.";
+} antenna_gain_db_v;
+
+commentdef {
+  p_header = "OPTION TO SET NYQUIST VELOCITY FOR SPECIFIED FIELDS.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the nyquist velocity for selected fields.";
+  p_help = "Each ray has a nyquist value that may be set. Plus the folding velocity can be set on each of multiple fields. If more than 1 nyquist is specified - i.e. on different fields - the nyquist from the first field will be applied to the ray as a whole. So make sure the first field is the primary velocity field.";
+} set_nyquist_velocity;
+
+typedef struct {
+  string field_name; 
+  double nyquist_mps;
+} nyquist_field_t;
+
+paramdef struct nyquist_field_t {
+  p_default = {
+    { "VEL", 25.0},
+    { "VEL_F", 25.0}
+  };
+  p_descr = "Fields on which nyquist should be set.";
+  p_help = "Set the folding velocity for the specified fields. If more than 1 field is specified, the first nyquist value in the list will be used for the ray as a whole.";
+} nyquist_fields[];
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
+}
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the version global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the version attribute.";
+} version_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the title global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the title attribute.";
+} title_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the institution global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the institution attribute.";
+} institution_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the references global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the references attribute.";
+} references_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the source global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the source attribute.";
+} source_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the history global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the history attribute.";
+} history_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the comment global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the comment attribute.";
+} comment_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the author global attribute.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the author attribute.";
+} author_override;
+
+commentdef {
+  p_header = "OPTION TO ADD USER-SPECIFIED GLOBAL ATTRIBUTES to output file";
+  p_text = "Only applies to CfRadial output format.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add user-specified global attributes to output file.";
+  p_help = "Only applies to CfRadial files. See below for details.";
+} add_user_specified_global_attributes;
+
+typedef enum {
+  ATTR_STRING,
+  ATTR_INT,
+  ATTR_DOUBLE,
+  ATTR_INT_ARRAY,
+  ATTR_DOUBLE_ARRAY
+} attr_type_t;
+
+typedef struct {
+  string name; 
+  attr_type_t attrType; 
+  string val;
+} attr_t;
+
+paramdef struct attr_t {
+  p_default = {
+    { name = "attr_string",
+      attrType = ATTR_STRING,
+      val = "user-attribute"
+    }
+    ,
+    { name = "attr_int",
+      attrType = ATTR_INT,
+      val = "99"
+    }
+    ,
+    { name = "attr_double",
+      attrType = ATTR_DOUBLE,
+      val = "99.99"
+    }
+    ,
+    { name = "attr_int_array",
+      attrType = ATTR_INT_ARRAY,
+      val = "1,2,3,4,5"
+    }
+    ,
+    { name = "attr_double_array",
+      attrType = ATTR_DOUBLE_ARRAY,
+      val = "1.1,2.2,3.3,4.4,5.5"
+    }
+  };
+  p_descr = "User-defined global attributes.";
+  p_help = "Applies if 'add_user_specified_global_attributes' is true. Array attributes are comma-delimited.";
+} user_defined_global_attributes[];
+
+commentdef {
+  p_header = "OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Set the field names and output encoding";
+  p_help = "If false, all fields will be used.";
+} set_output_fields;
+
+typedef enum {
+  OUTPUT_ENCODING_ASIS,
+  OUTPUT_ENCODING_FLOAT32,
+  OUTPUT_ENCODING_INT32,
+  OUTPUT_ENCODING_INT16,
+  OUTPUT_ENCODING_INT08
+} output_encoding_t;
+
+typedef enum {
+  SCALING_DYNAMIC,
+  SCALING_SPECIFIED
+} output_scaling_t;
+
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string long_name; 
+  string standard_name; 
+  string output_units;
+  output_encoding_t encoding;
+  output_scaling_t output_scaling;
+  double output_scale;
+  double output_offset;
+} output_field_t;
+
+paramdef struct output_field_t {
+  p_default = {
+    { "DBZ",
+      "DBZ",
+      "reflectivity",
+      "equivalent_reflectivity_factor",
+      "dBZ",
+      OUTPUT_ENCODING_ASIS,
+      SCALING_DYNAMIC, 0.01, 0.0
+    },
+    { "VEL", 
+      "VEL", 
+      "radial_velocity",
+      "radial_velocity_of_scatterers_away_from_instrument",
+      "m/s", 
+      OUTPUT_ENCODING_ASIS,
+      SCALING_DYNAMIC, 0.01, 0.0
+    }
+  };
+  p_descr = "Output field details.";
+  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. Set the long name to a more descriptive name. Set the standard name to the CF standard name for this field. If the long name or standard name are empty, the existing names are used. If SCALING_SPECIFIED, then the scale and offset is used.";
+} output_fields[];
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write out the unspecified fields as they are.";
+  p_help = "If false, only the fields listed in output_fields will be written. If this is true, all other fields will be written unchanged.";
+} write_other_fields_unchanged;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to exclude fields in the specified list.";
+  p_help = "If true, the specified fields will be excluded. This may be easier than specifiying all of the fields to be included, if that list is very long.";
+} exclude_specified_fields;
+
+paramdef string {
+  p_default = { "DBZ", "VEL" };
+  p_descr = "List of fields to be excluded.";
+  p_help = "List the names to be excluded";
+} excluded_fields[];
+
+commentdef {
+  p_header = "OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to set output encoding for all fields";
+} set_output_encoding_for_all_fields;
+
+paramdef enum output_encoding_t {
+  p_default = OUTPUT_ENCODING_ASIS;
+  p_descr = "Output encoding for all fields, if requested.";
+} output_encoding;
+
+commentdef {
+  p_header = "CENSORING";
+  p_text = "You have the option of censoring the data fields - i.e. setting the fields to missing values - at gates which meet certain criteria. If this is done correctly, it allows you to preserve the valid data and discard the noise, thereby improving compression.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Apply censoring based on field values and thresholds.";
+  p_help = "If TRUE, censoring will be performed. See 'censoring_fields' for details on how the censoring is applied.";
+} apply_censoring;
+
+typedef enum {
+  LOGICAL_AND, LOGICAL_OR
+} logical_t;
+
+typedef struct {
+  string name;
+  double min_valid_value;
+  double max_valid_value;
+  logical_t combination_method;
+} censoring_field_t;
+
+paramdef struct censoring_field_t {
+  p_default = {
+    { "SNR", 0.0, 1000.0, LOGICAL_OR },
+    { "NCP", 0.15, 1000.0, LOGICAL_OR }
+  };
+  p_descr = "Fields to be used for censoring.";
+  p_help = "Specify the fields to be used to determine whether a gate should be censored. The name refers to the input data field names. Valid field values lie in the range from min_valid_value to max_valid_value inclusive. If the value of a field at a gate lies within this range, it is considered valid. Each specified field is examined at each gate, and is flagged as valid if its value lies in the valid range. These field flags are then combined as follows: first, all of the LOGICAL_OR flags are combined, yielding a single combined_or flag which is true if any of the LOGICAL_OR fields is true. The combined_or flag is then combined with all of the LOGICAL_AND fields, yielding a true value only if the combined_or flag and the LOGICAL_AND fields are all true. If this final flag is true, then the data at the gate is regarded as valid and is retained. If the final flag is false, the data at the gate is censored, and all of the fields at the gate are set to missing.";
+} censoring_fields[];
+  
+paramdef int {
+  p_default = 1;
+  p_descr = "Minimum valid run of non-censored gates.";
+  p_help = "Only active if set to 2 or greater. A check is made to remove short runs of noise. Looking along the radial, we compute the number of contiguous gates (a 'run') with uncensored data. For the gates in this run to be accepted the length of the run must exceed censoring_min_valid_run. If the number of gates in a run is less than this, then all gates in the run are censored.";
+} censoring_min_valid_run;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to specify the fields to be censored.";
+  p_help = "If FALSE, all fields are specified based on the censoring rules.";
+} specify_fields_to_be_censored;
+
+paramdef string {
+  p_default = { "LDR" };
+  p_descr = "List of fields to be censored.";
+  p_help = "Applies if 'specify_fields_to_be_censored' is TRUE.";
+} fields_to_be_censored[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Censor non-missing data within the test pulse ring.";
+  p_help = "If TRUE, non-missing data within the ring will be censored, provided there is no adjacent data in the margins.";
+} censor_test_pulse_ring;
+
+paramdef double {
+  p_default = 238.0;
+  p_descr = "Minimum range of the test pulse to be censored (km).";
+  p_help = "Only non-missing data within the ring will be censored.";
+} test_pulse_min_range_km;
+
+paramdef double {
+  p_default = 239.5;
+  p_descr = "Minimum range of the test pulse to be censored (km).";
+  p_help = "Only non-missing data within the ring will be censored.";
+} test_pulse_max_range_km;
+
+paramdef double {
+  p_default = 2.5;
+  p_descr = "Range margin around test pulse (km).";
+  p_help = "The test pulse is only censored if the margins have only missing data values.";
+} test_pulse_margin_km;
+
+paramdef string {
+  p_default = { "DBZ" };
+  p_descr = "Field used to check for data in or around the test pulse.";
+  p_help = "We use this field to decide if there is non-missing data that needs censoring within the test pulse.";
+} test_pulse_field_name;
+
+commentdef {
+  p_header = "OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.";
+  p_text = "These transforms are fixed. The same transform is applied to all files.";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Apply linear transform to specified fields.";
+  p_help = "If true, we will apply a linear transform to selected fields.";
+} apply_linear_transforms;
+
+typedef struct {
+  string input_field_name; 
+  double transform_scale;
+  double transform_offset;
+  boolean field_folds;
+  double folding_value;
+  string bias_field_name; 
+  boolean read_bias_from_spdb;
+} transform_field_t;
+
+paramdef struct transform_field_t {
+  p_default = {
+               { "DBZ", 1.0, 0.0, false, 0.0, "DBZ", FALSE},
+               { "ZDR", 1.0, 0.0, false, 0.0, "ZDR", FALSE}
+  };
+  p_descr = "transform field details.";
+  p_help = "Set the field name, scale and offset to be applied to the selected fields. NOTE: the field name is the INPUT field name. If read_bias_from_spdb is TRUE, we read the bias values from the ";
+} transform_fields[];
+
+paramdef int {
+  p_default = 900;
+  p_descr = "Time margin for finding bias value from spdb (sec).";
+  p_help = "The bias stored in spdb must be within this tolerance of the vol time.";
+} bias_time_margin_secs;
+
+commentdef {
+  p_header = "OUTPUT OPTIONS FOR CfRadial FILES";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to force the use of ragged arrays for CfRadial files.";
+  p_help = "Only applies to CfRadial. If true, forces the use of ragged arrays even if the number of gates for all rays is constant.";
+} output_force_ngates_vary;
+
+commentdef {
+  p_header = "OUTPUT DIRECTORY AND FILE NAME";
+}
+
+paramdef string {
+  p_default = "./output";
+  p_descr = "Output directory path.";
+  p_help = "Corrected files will be written to this directory.";
+} corrected_files_output_dir;
+
+typedef enum {
+  START_AND_END_TIMES,
+  START_TIME_ONLY,
+  END_TIME_ONLY,
+  SPECIFY_FILE_NAME
+} filename_mode_t;
+
+paramdef enum filename_mode_t {
+  p_default = START_AND_END_TIMES;
+  p_descr = "Mode for computing output file name.";
+  p_help = "START_AND_END_TIMES: include both start and end times in file name. START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: include only end time in file name. SPECIFY_FILE_NAME: file of this name will be written to output_dir.";
+} output_filename_mode;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional prefix for output filename.";
+  p_help = "If empty, the standard prefix will be used. Only applies to CfRadial files. Standard prefix is 'cfrad.'";
+} output_filename_prefix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Optional suffix for output filename.";
+  p_help = "If not empty, the suffix will be inserted immediately prior to the extension.";
+} output_filename_suffix;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the instrument name in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the instrument name will be included just before the volume number in the output file name.";
+} include_instrument_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the site name in the file name.";
+  p_help = "Only applies to CfRadial files. If true, the site name will be included just before the volume number in the output file name.";
+} include_site_name_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include sub-seconds in date-time part of file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the millisecs of the start and end time will be included in the file name.";
+} include_subsecs_in_file_name;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Option to include the scan type in the file name.";
+  p_help = "Default is true. Only applies to CfRadial files. If true, the scan type (SUR, SEC, RHI, VER etc) will be included in the file name.";
+} include_scan_type_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan name in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan name will be included in the file name.";
+} include_scan_name_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the scan Id in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the scan Id will be included in the file name.";
+} include_scan_id_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the range resolution in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the range resolution (50m) will be included in the file name.";
+} include_range_resolution_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to include the volume number in the file name.";
+  p_help = "Default is false. Only applies to CfRadial files. If true, the volume number is included in the file name, preceded by '_v'.";
+} include_vol_num_in_file_name;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to use a hyphen between date and time in filename.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally an underscore is used.";
+} use_hyphen_in_file_name_datetime_part;
+
+paramdef string {
+  p_default = "cfradial.test.nc";
+  p_descr = "Name of output file.";
+  p_help = "Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of this name will be written to output_dir.";
+} output_filename;
+
+paramdef boolean {
+  p_default = true;
+  p_descr = "Add the day directory to the output directory.";
+  p_help = "Path will be output_dir/yyyymmdd/filename.";
+} append_day_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Add the year directory to the output directory.";
+  p_help = "Path will be output_dir/yyyy/yyyymmdd/filename.";
+} append_year_dir_to_output_dir;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to write CfRadial files using 'proposed_standard_name' attribute.";
+  p_help = "Default is false. Only applies to CfRadial files. Normally we use the 'standard_name' attribute. However, some organizations reject these as valid files since the standard names are not yet accepted. Using proposed_standard_name' instead avoids this issue.";
+} write_using_proposed_standard_name_attr;
+
+commentdef {
+  p_header = "OPTION TO OVERRIDE MISSING VALUES";
+  p_text = "Missing values are applicable to both metadata and field data. The default values should be satisfactory for most purposes. However, you can choose to override these if you are careful with the selected values.\n\nThe default values for metadata are:\n\tmissingMetaDouble = -9999.0\n\tmissingMetaFloat = -9999.0\n\tmissingMetaInt = -9999\n\tmissingMetaChar = -128\n\nThe default values for field data are:\n\tmissingFl64 = -9.0e33\n\tmissingFl32 = -9.0e33\n\tmissingSi32 = -2147483647\n\tmissingSi16 = -32768\n\tmissingSi08 = -128\n\n";
+}
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the missing values for meta-data";
+  p_help = "See following parameter options.";
+} override_missing_metadata_values;
+
+paramdef double {
+  p_default = -9999.0;
+  p_descr = "Missing value for metadata of type double.";
+  p_help = "Only applies if override_missing_metadata_values is TRUE";
+} missing_metadata_double;
+
+paramdef float {
+  p_default = -9999.0;
+  p_descr = "Missing value for metadata of type float.";
+  p_help = "Only applies if override_missing_metadata_values is TRUE";
+} missing_metadata_float;
+
+paramdef int {
+  p_default = -9999;
+  p_descr = "Missing value for metadata of type int.";
+  p_help = "Only applies if override_missing_metadata_values is TRUE";
+} missing_metadata_int;
+
+paramdef int {
+  p_default = -128;
+  p_descr = "Missing value for metadata of type char.";
+  p_help = "Only applies if override_missing_metadata_values is TRUE";
+} missing_metadata_char;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to override the missing values for field data";
+  p_help = "See following parameter options.";
+} override_missing_field_values;
+
+paramdef double {
+  p_default = -9.0e33;
+  p_descr = "Missing value for field data of type 64-bit float.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} missing_field_fl64;
+
+paramdef double {
+  p_default = -9.0e33;
+  p_descr = "Missing value for field data of type 32-bit float.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} missing_field_fl32;
+
+paramdef int {
+  p_default = -2147483647;
+  p_descr = "Missing value for field data of type 32-bit integer.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} missing_field_si32;
+
+paramdef int {
+  p_default = -232768;
+  p_descr = "Missing value for field data of type 16-bit integer.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} missing_field_si16;
+
+paramdef int {
+  p_default = -128;
+  p_descr = "Missing value for field data of type 8-bit integer.";
+  p_help = "Only applies if override_missing_field_values is TRUE";
+} missing_field_si08;
+

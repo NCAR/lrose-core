@@ -69,6 +69,7 @@ SUB_DIRS = \
 	TsConvert \
 	TsFile2Fmq \
 	TsFmq2Tcp \
+	TsMaxPower2Fmq \
 	TsGamic2Iwrf \
 	TsMerge \
 	TsOverlay \

@@ -129,7 +129,12 @@ void TimeNavController::setSliderPosition() {
   _view->setSliderPosition(value);
 }
 
-string &TimeNavController::getSelectedArchiveFile() {
+void TimeNavController::setSliderPositionNoRead() {
+  int value = _model->getPositionOfSelection();
+  _view->setSliderPositionNoRead(value);
+}
+
+string TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 

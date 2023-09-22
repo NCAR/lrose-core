@@ -91,6 +91,10 @@ void RadxGeoref::_init()
   _rollRate = Radx::missingMetaDouble;
   _driveAngle1 = Radx::missingMetaDouble;
   _driveAngle2 = Radx::missingMetaDouble;
+  _trackRelRot = Radx::missingMetaDouble;
+  _trackRelTilt = Radx::missingMetaDouble;
+  _trackRelAz = Radx::missingMetaDouble;
+  _trackRelEl = Radx::missingMetaDouble;
 
 }
 
@@ -136,6 +140,10 @@ void RadxGeoref::setToZero()
   _rollRate = 0.0;
   _driveAngle1 = 0.0;
   _driveAngle2 = 0.0;
+  _trackRelRot = 0.0;
+  _trackRelTilt = 0.0;
+  _trackRelAz = 0.0;
+  _trackRelEl = 0.0;
 
 }
 
@@ -193,6 +201,10 @@ void RadxGeoref::incrementIfNotMissing(RadxGeoref &count)
   if (_rollRate != Radx::missingMetaDouble) count._rollRate++;
   if (_driveAngle1 != Radx::missingMetaDouble) count._driveAngle1++;
   if (_driveAngle2 != Radx::missingMetaDouble) count._driveAngle2++;
+  if (_trackRelRot != Radx::missingMetaDouble) count._trackRelRot++;
+  if (_trackRelTilt != Radx::missingMetaDouble) count._trackRelTilt++;
+  if (_trackRelAz != Radx::missingMetaDouble) count._trackRelAz++;
+  if (_trackRelEl != Radx::missingMetaDouble) count._trackRelEl++;
 
 }
 
@@ -233,6 +245,10 @@ void RadxGeoref::print(ostream &out) const
   out << "  rollRate: " << _rollRate << endl;
   out << "  driveAngle1: " << _driveAngle1 << endl;
   out << "  driveAngle2: " << _driveAngle2 << endl;
+  out << "  trackRelRot: " << _trackRelRot << endl;
+  out << "  trackRelTilt: " << _trackRelTilt << endl;
+  out << "  trackRelAz: " << _trackRelAz << endl;
+  out << "  trackRelEl: " << _trackRelEl << endl;
   out << "==========================================" << endl;
 
 }
@@ -275,6 +291,10 @@ void RadxGeoref::convert2Xml(string &xml, int level /* = 0 */)  const
   xml += RadxXml::writeDouble("rollRate", level + 1, _rollRate);
   xml += RadxXml::writeDouble("driveAngle1", level + 1, _driveAngle1);
   xml += RadxXml::writeDouble("driveAngle2", level + 1, _driveAngle2);
+  xml += RadxXml::writeDouble("trackRelRot", level + 1, _trackRelRot);
+  xml += RadxXml::writeDouble("trackRelTilt", level + 1, _trackRelTilt);
+  xml += RadxXml::writeDouble("trackRelAz", level + 1, _trackRelAz);
+  xml += RadxXml::writeDouble("trackRelEl", level + 1, _trackRelEl);
 
   xml += RadxXml::writeEndTag("RadxGeoref", level);
 
@@ -390,6 +410,10 @@ void RadxGeoref::_loadMetaNumbersToMsg()
   _metaNumbers.rollRate = _rollRate;
   _metaNumbers.driveAngle1 = _driveAngle1;
   _metaNumbers.driveAngle2 = _driveAngle2;
+  _metaNumbers.trackRelRot = _trackRelRot;
+  _metaNumbers.trackRelTilt = _trackRelTilt;
+  _metaNumbers.trackRelAz = _trackRelAz;
+  _metaNumbers.trackRelEl = _trackRelEl;
 
 }
 
@@ -450,6 +474,10 @@ int RadxGeoref::_setMetaNumbersFromMsg(const msgMetaNumbers_t *metaNumbers,
   _rollRate = _metaNumbers.rollRate;
   _driveAngle1 = _metaNumbers.driveAngle1;
   _driveAngle2 = _metaNumbers.driveAngle2;
+  _trackRelRot = _metaNumbers.trackRelRot;
+  _trackRelTilt = _metaNumbers.trackRelTilt;
+  _trackRelAz = _metaNumbers.trackRelAz;
+  _trackRelEl = _metaNumbers.trackRelEl;
 
   return 0;
 

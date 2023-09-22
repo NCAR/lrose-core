@@ -179,9 +179,9 @@ private:
   // objects to be set on read
 
   RadxTime _fileTime;
-  int _nSweeps;
-  int _nAngles;
-  int _nGates;
+  size_t _nSweeps;
+  vector<size_t> _nAngles; // by sweep
+  vector<size_t> _nGates;  // by sweep
 
   vector<RadxRay *> _rays;
 
@@ -208,16 +208,17 @@ private:
   
   int _readFields(const string &path);
   
+  void _checkSweepGeometry();
+  
   int _loadRays(const string &path);
-  int _loadSweep(int sweepNum, time_t startTime, time_t endTime, 
+  int _loadSweep(size_t sweepNum, time_t startTime, time_t endTime, 
                  double antennaSpeed);
   int _loadMetaData(const string &path);
   
-  void _printFieldData(ostream &out, int nGates, const double *data) const;
+  void _printFieldData(ostream &out, size_t nGates, const double *data) const;
   void _printPacked(ostream &out, int count, double val) const;
 
   int _computeNSweeps();
-  int _setSweepGeom(int sweepNum);
 
 };
 

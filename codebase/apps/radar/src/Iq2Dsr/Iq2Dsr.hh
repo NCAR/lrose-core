@@ -72,7 +72,10 @@ public:
   // get parameters
 
   const Params &getParams() const { return _params; }
-  
+  double getWavelengthM() const {
+    return _beamReader->getOpsInfo().get_radar_wavelength_cm() / 100.0;
+  }
+
   // get output fmq
   
   OutputFmq *getOutputFmq() const { return _fmq; }

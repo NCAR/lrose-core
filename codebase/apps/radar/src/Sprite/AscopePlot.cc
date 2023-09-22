@@ -32,24 +32,12 @@
 //
 ///////////////////////////////////////////////////////////////
 
-#include <assert.h>
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include <toolsa/toolsa_macros.h>
-#include <toolsa/DateTime.hh>
-#include <toolsa/pjg.h>
-
-#include <QTimer>
-#include <QBrush>
-#include <QPalette>
-#include <QPaintEngine>
-#include <QPen>
-#include <QResizeEvent>
-#include <QStylePainter>
 
 #include "AscopePlot.hh"
-#include "SpectraMgr.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 using namespace std;
@@ -57,14 +45,10 @@ using namespace std;
 AscopePlot::AscopePlot(QWidget* parent,
                        const Params &params,
                        int id) :
-        _parent(parent),
-        _params(params),
-        _id(id)
+        SpritePlot(parent, params, id),
+        _params(params)
         
 {
-  _isZoomed = false;
-  _xGridLinesOn = _params.ascope_x_grid_lines_on;
-  _yGridLinesOn = _params.ascope_y_grid_lines_on;
 }
 
 /*************************************************************************
@@ -87,35 +71,12 @@ void AscopePlot::clear()
 }
 
 /*************************************************************************
- * perform zoom
- */
-
-void AscopePlot::zoom(int x1, int y1, int x2, int y2)
-{
-
-  _zoomWorld.setZoomLimits(x1, y1, x2, y2);
-  _isZoomed = true;
-
-}
-
-/*************************************************************************
- * unzoom the view
- */
-
-void AscopePlot::unzoom()
-{
-
-  _zoomWorld = _fullWorld;
-  _isZoomed = false;
-
-}
-
-/*************************************************************************
  * plot a beam
  */
 
 void AscopePlot::plotBeam(QPainter &painter,
                           Beam *beam,
+                          size_t nSamples,
                           double selectedRangeKm)
   
 {
@@ -359,58 +320,6 @@ double AscopePlot::getMaxVal(Params::moment_type_t mtype)
     default:
       return 10;
   }
-}
-
-/*************************************************************************
- * set the geometry - unzooms
- */
-
-void AscopePlot::setWindowGeom(int width, int height,
-                               int xOffset, int yOffset)
-{
-  _fullWorld.setWindowGeom(width, height, xOffset, yOffset);
-  _zoomWorld = _fullWorld;
-}
-
-/*************************************************************************
- * set the world limits - unzooms
- */
-
-void AscopePlot::setWorldLimits(double xMinWorld,
-                                double yMinWorld,
-                                double xMaxWorld,
-                                double yMaxWorld)
-{
-  _fullWorld.setWorldLimits(xMinWorld, yMinWorld,
-                            xMaxWorld, yMaxWorld);
-  _zoomWorld = _fullWorld;
-}
-
-/*************************************************************************
- * set the zoom limits, from pixel space
- */
-
-void AscopePlot::setZoomLimits(int xMin,
-                               int yMin,
-                               int xMax,
-                               int yMax)
-{
-  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
-  _isZoomed = true;
-}
-
-void AscopePlot::setZoomLimitsX(int xMin,
-                                int xMax)
-{
-  _zoomWorld.setZoomLimitsX(xMin, xMax);
-  _isZoomed = true;
-}
-
-void AscopePlot::setZoomLimitsY(int yMin,
-                                int yMax)
-{
-  _zoomWorld.setZoomLimitsY(yMin, yMax);
-  _isZoomed = true;
 }
 
 /*************************************************************************

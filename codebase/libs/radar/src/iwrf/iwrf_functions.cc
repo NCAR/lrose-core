@@ -617,6 +617,8 @@ void iwrf_pulse_header_init(iwrf_pulse_header_t &val)
   val.offset = 0.0;
   val.n_gates_burst = 0;
 
+  val.tx_phase_deg = IWRF_MISSING_FLOAT;
+  
 }
 
 //////////////////////////////////////////////////////
@@ -2854,6 +2856,8 @@ void iwrf_pulse_header_print(FILE *out,
     fprintf(out, "  txrx state: short PRT\n");
   }
 
+  fprintf(out, "  tx_phase_deg: %g\n", copy.tx_phase_deg);
+
   if (georef != NULL) {
     iwrf_platform_georef_t gcopy = *georef;
     iwrf_platform_georef_swap(gcopy);
@@ -4159,7 +4163,8 @@ void iwrf_pulse_header_print_format(FILE *out, const iwrf_pulse_header_t &val)
   fprintf(out, _dform, "fl32", "gate_spacing_m", sizeof(val.gate_spacing_m), (char *) &val.gate_spacing_m - id);
   fprintf(out, _dform, "si32", "event_flags", sizeof(val.event_flags), (char *) &val.event_flags - id);
   fprintf(out, _dform, "si32", "txrx_state", sizeof(val.txrx_state), (char *) &val.txrx_state - id);
-  fprintf(out, _dform, "si32", "unused[6]", sizeof(val.unused), (char *) val.unused - id);
+  fprintf(out, _dform, "fl32", "tx_phase_deg", sizeof(val.tx_phase_deg), (char *) &val.tx_phase_deg - id);
+  fprintf(out, _dform, "si32", "unused[5]", sizeof(val.unused), (char *) val.unused - id);
 
   _print_format_divider('-', out);
 

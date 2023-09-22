@@ -224,7 +224,7 @@ ComputeThread::~ComputeThread()
 
 // create and destroy FFT objects in a thread safe manner
 
-RadarFft *ComputeThread::createFft(int nSamples)
+RadarFft *ComputeThread::createFft(size_t nSamples)
 
 {
   pthread_mutex_lock(&_fftMutex);
@@ -243,7 +243,7 @@ void ComputeThread::destroyFft(RadarFft *fft)
 
 // initialize the FFTs
 
-void ComputeThread::initFfts(int nSamples)
+void ComputeThread::initFfts(size_t nSamples)
 {
   
   if (nSamplesFft == nSamples) {
@@ -269,7 +269,7 @@ void ComputeThread::initFfts(int nSamples)
   
 // initialize the FFTs - staggered mode
 
-void ComputeThread::initFftsStag(int nSamples, int stagM, int stagN)
+void ComputeThread::initFftsStag(size_t nSamples, int stagM, int stagN)
 {
   
   if (nSamplesFftStag == nSamples &&
@@ -301,7 +301,7 @@ void ComputeThread::initFftsStag(int nSamples, int stagM, int stagN)
 ////////////////////////////////////
 // initialize the regression filter
 
-void ComputeThread::initRegr(int nSamples)
+void ComputeThread::initRegr(size_t nSamples)
 {
 
   if (nSamplesRegr == nSamples) {
@@ -312,12 +312,21 @@ void ComputeThread::initRegr(int nSamples)
 
   assert(_app);
   const Params &params = _app->getParams();
+  double wavelengthM = _app->getWavelengthM();
 
   regr.setup(nSamples,
-             params.regression_filter_polynomial_order);
+             params.regression_filter_determine_order_from_cnr,
+             params.regression_filter_specified_polynomial_order,
+             params.regression_filter_clutter_width_factor,
+             params.regression_filter_cnr_exponent,
+             wavelengthM);
   
   regrHalf.setup(nSamples / 2,
-                 params.regression_filter_polynomial_order);
+                 params.regression_filter_determine_order_from_cnr,
+                 params.regression_filter_specified_polynomial_order,
+                 params.regression_filter_clutter_width_factor,
+                 params.regression_filter_cnr_exponent,
+                 wavelengthM);
   
   nSamplesRegr = nSamples;
   
@@ -326,8 +335,8 @@ void ComputeThread::initRegr(int nSamples)
 ///////////////////////////////////////////////////////////////////
 // initialize the regression filter from another regression object
 
-void ComputeThread::initRegr(const RegressionFilter &master,
-                             const RegressionFilter &masterHalf)
+void ComputeThread::initRegr(const ForsytheRegrFilter &master,
+                             const ForsytheRegrFilter &masterHalf)
 {
   
   if (nSamplesRegr == master.getNSamples()) {
@@ -345,7 +354,7 @@ void ComputeThread::initRegr(const RegressionFilter &master,
 ////////////////////////////////////////////////////
 // initialize the regression filter - staggered PRT
 
-void ComputeThread::initRegrStag(int nSamples, int stagM, int stagN)
+void ComputeThread::initRegrStag(size_t nSamples, int stagM, int stagN)
 {
   
   if (nSamplesRegrStag == nSamples &&
@@ -358,9 +367,14 @@ void ComputeThread::initRegrStag(int nSamples, int stagM, int stagN)
   
   assert(_app);
   const Params &params = _app->getParams();
-
+  double wavelengthM = _app->getWavelengthM();
+  
   regrStag.setupStaggered(nSamples, stagM, stagN,
-                          params.regression_filter_polynomial_order);
+                          params.regression_filter_determine_order_from_cnr,
+                          params.regression_filter_specified_polynomial_order,
+                          params.regression_filter_clutter_width_factor,
+                          params.regression_filter_cnr_exponent,
+                          wavelengthM);
   
   nSamplesRegrStag = nSamples;
   regrStagM = stagM;
@@ -371,7 +385,7 @@ void ComputeThread::initRegrStag(int nSamples, int stagM, int stagN)
 ///////////////////////////////////////////////////////////////////
 // initialize the regression filter from another regression object
 
-void ComputeThread::initRegrStag(const RegressionFilter &master)
+void ComputeThread::initRegrStag(const ForsytheRegrFilter &master)
 {
   
   if (nSamplesRegrStag == master.getNSamples() &&

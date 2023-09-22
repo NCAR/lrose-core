@@ -402,6 +402,10 @@ protected:
   const char* TIME_W3C_STR;
   const char* TITLE;
   const char* TRACK;
+  const char* TRACK_REL_ROT;
+  const char* TRACK_REL_TILT;
+  const char* TRACK_REL_AZ;
+  const char* TRACK_REL_EL;
   const char* TWO_WAY_RADOME_LOSS_H;
   const char* TWO_WAY_RADOME_LOSS_V;
   const char* TWO_WAY_WAVEGUIDE_LOSS_H;
@@ -615,6 +619,10 @@ protected:
   const char* TIME_COVERAGE_END_LONG;
   const char* TIME_COVERAGE_START_LONG;
   const char* TRACK_LONG;
+  const char* TRACK_REL_ROT_LONG;
+  const char* TRACK_REL_TILT_LONG;
+  const char* TRACK_REL_AZ_LONG;
+  const char* TRACK_REL_EL_LONG;
   const char* TWO_WAY_RADOME_LOSS_H_LONG;
   const char* TWO_WAY_RADOME_LOSS_V_LONG;
   const char* TWO_WAY_WAVEGUIDE_LOSS_H_LONG;

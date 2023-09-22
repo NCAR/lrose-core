@@ -292,7 +292,7 @@ void PolarManager::timerEvent(QTimerEvent *event)
     
     if (_archiveMode) {
       if (_archiveRetrievalPending) {
-        _handleArchiveData(event);
+        _handleArchiveData(/*event*/);
         _archiveRetrievalPending = false;
       }
     } else {
@@ -358,7 +358,7 @@ void PolarManager::keyPressEvent(QKeyEvent * e)
   char keychar = e->text().toLatin1().data()[0];
   int key = e->key();
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Clicked char: " << keychar << ":" << (int) keychar << endl;
     cerr << "         key: " << hex << key << dec << endl;
   }
@@ -1063,7 +1063,7 @@ int PolarManager::loadArchiveFileList()
 ///////////////////////////////////////
 // handle data in archive mode
 
-void PolarManager::_handleArchiveData(QTimerEvent * event)
+void PolarManager::_handleArchiveData(/*QTimerEvent * event*/)
 
 {
   
@@ -1436,7 +1436,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray,
                                 const double az,
                                 const double beam_width)
 {
-  LOG(DEBUG) << "az = " << az << " beam_width = " << beam_width;
+  LOG(DEBUG_VERBOSE) << "az = " << az << " beam_width = " << beam_width;
 
   // Determine the extent of this ray
 
@@ -1475,7 +1475,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray,
   if (_startAz >= 360) _startAz -= 360.0;
   if (_endAz >= 360) _endAz -= 360.0;
     
-  LOG(DEBUG) << " startAz = " << _startAz << " endAz = " << _endAz;
+  LOG(DEBUG_VERBOSE) << " startAz = " << _startAz << " endAz = " << _endAz;
 
   // compute start and end indices, using modulus to keep with array bounds
 
@@ -1537,7 +1537,7 @@ void PolarManager::_storeRayLoc(const RadxRay *ray,
 void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
 {
 
-  LOG(DEBUG) << "enter" << " start_index=" << start_index <<
+  LOG(DEBUG_VERBOSE) << "enter" << " start_index=" << start_index <<
     " end_index = " << end_index;
 
   if ((start_index < 0) || (start_index > RayLoc::RAY_LOC_N)) {
@@ -1560,7 +1560,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
     // If this location isn't active, we can skip it
 
     if (!loc.active) {
-      // LOG(DEBUG) << "loc NOT active";
+      // LOG(DEBUG_VERBOSE) << "loc NOT active";
       ++i;
       continue;
     }
@@ -1591,9 +1591,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
 
       // The overlap area covers the end of the current beam.  Reduce the
       // current beam down to just cover the area before the overlap area.
-      LOG(DEBUG) << "Case 1a:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from start_index=" << start_index <<
+      LOG(DEBUG_VERBOSE) << "Case 1a:";
+      LOG(DEBUG_VERBOSE) << " i = " << i;
+      LOG(DEBUG_VERBOSE) << "clearing from start_index=" << start_index <<
 	  " to loc_end_index=" << loc_end_index;
       
       for (int j = start_index; j <= loc_end_index; ++j) {
@@ -1605,8 +1605,8 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
 
       // Update the end indices for the remaining locations in the current
       // beam
-      LOG(DEBUG) << "Case 1b:";
-      LOG(DEBUG) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
+      LOG(DEBUG_VERBOSE) << "Case 1b:";
+      LOG(DEBUG_VERBOSE) << "setting endIndex to " << start_index - 1 << " from loc_start_index=" << loc_start_index <<
 	  " to start_index=" << start_index;
       
       for (int j = loc_start_index; j < start_index; ++j)
@@ -1617,9 +1617,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       // The current beam is bigger than the overlap area.  This should never
       // happen, so go ahead and just clear out the locations for the current
       // beam.
-      LOG(DEBUG) << "Case 2:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+      LOG(DEBUG_VERBOSE) << "Case 2:";
+      LOG(DEBUG_VERBOSE) << " i = " << i;
+      LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
 	  " to loc_end_index=" << loc_end_index;
       
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
@@ -1631,9 +1631,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       // The overlap area covers the beginning of the current beam.  Reduce the
       // current beam down to just cover the area after the overlap area.
 
-	LOG(DEBUG) << "Case 3a:";
-	LOG(DEBUG) << " i = " << i;
-	LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+	LOG(DEBUG_VERBOSE) << "Case 3a:";
+	LOG(DEBUG_VERBOSE) << " i = " << i;
+	LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
 	  " to end_index=" << end_index;
 
       for (int j = loc_start_index; j <= end_index; ++j) {
@@ -1644,8 +1644,8 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       // Update the start indices for the remaining locations in the current
       // beam
 
-      LOG(DEBUG) << "Case 3b:";
-      LOG(DEBUG) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
+      LOG(DEBUG_VERBOSE) << "Case 3b:";
+      LOG(DEBUG_VERBOSE) << "setting startIndex to " << end_index + 1 << " from end_index=" << end_index <<
 	  " to loc_end_index=" << loc_end_index;
       
       for (int j = end_index + 1; j <= loc_end_index; ++j) {
@@ -1656,9 +1656,9 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
       
       // The current beam is completely covered by the overlap area.  Clear
       // out all of the locations for the current beam.
-      LOG(DEBUG) << "Case 4:";
-      LOG(DEBUG) << " i = " << i;
-      LOG(DEBUG) << "clearing from loc_start_index=" << loc_start_index <<
+      LOG(DEBUG_VERBOSE) << "Case 4:";
+      LOG(DEBUG_VERBOSE) << " i = " << i;
+      LOG(DEBUG_VERBOSE) << "clearing from loc_start_index=" << loc_start_index <<
 	  " to loc_end_index=" << loc_end_index;
       
       for (int j = loc_start_index; j <= loc_end_index; ++j) {
@@ -1671,7 +1671,7 @@ void PolarManager::_clearRayOverlap(const int start_index, const int end_index)
 
   } /* endwhile - i */
   
-  LOG(DEBUG) << "exit ";
+  LOG(DEBUG_VERBOSE) << "exit ";
   
 }
 
@@ -1765,7 +1765,7 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
 					    QColor annotationColor,
 					    QColor backgroundColor) {
 
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   // connect the new color map with the field                                                       
   // find the fieldName in the list of FieldDisplays                                                
@@ -1796,16 +1796,16 @@ void PolarManager::colorMapRedefineReceived(string fieldName, ColorMap newColorM
     _ppi->gridRingsColor(gridColor);
     _changeField(fieldId, false);
   }
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 }
 
 void PolarManager::setVolume() { // const RadxVol &radarDataVolume) {
 
-  LOG(DEBUG) << "enter";
+  LOG(DEBUG_VERBOSE) << "enter";
 
   _applyDataEdits(); // radarDataVolume);
 
-  LOG(DEBUG) << "exit";
+  LOG(DEBUG_VERBOSE) << "exit";
 
 
 
@@ -1920,6 +1920,12 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   
   _setText(text, "%6.2f", rangeKm);
   _rangeClicked->setText(text);
+
+  if (_radarAltKm > -9990) {
+    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
+    _setText(text, "%6.2f (km)", gateHtKm);
+    _altitudeClicked->setText(text);
+  }
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setSelectValue(-9999.0);
@@ -2456,7 +2462,7 @@ void PolarManager::_saveFile()
     QByteArray qb = filename.toUtf8();
     const char *name = qb.constData();
     if (_params.debug >= Params::DEBUG_VERBOSE) {
-      LOG(DEBUG) << "selected file path : " << name;
+      LOG(DEBUG_VERBOSE) << "selected file path : " << name;
     }
 
     // TODO: hold it! the save message should
@@ -2465,7 +2471,7 @@ void PolarManager::_saveFile()
     // 
     RadxFile outFile;
     try {
-      LOG(DEBUG) << "writing to file " << name;
+      LOG(DEBUG_VERBOSE) << "writing to file " << name;
       outFile.writeToPath(_vol, name);
     } catch (FileIException &ex) {
       this->setCursor(Qt::ArrowCursor);
@@ -2796,14 +2802,14 @@ void PolarManager::_createRealtimeImageFiles()
 
 void PolarManager::_createArchiveImageFiles()
 {
-  
+
   if (_params.images_creation_mode ==
       Params::CREATE_IMAGES_THEN_EXIT) {
     
     if (_archiveFileList.size() > 0) {
-      
+
       // using input file list to drive image generation
-      
+
       while (_archiveFileList.size() > 0) {
         _createImageFilesAllSweeps();
         _archiveFileList.erase(_archiveFileList.begin(), 
@@ -2882,7 +2888,7 @@ void PolarManager::_createImageFiles()
 
   _ppi->setStartOfSweep(true);
   _rhi->setStartOfSweep(true);
-  _plotArchiveData();
+  _handleArchiveData();
 
   // set times from plots
 

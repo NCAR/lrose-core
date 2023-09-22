@@ -45,6 +45,12 @@ bool IwrfTsPulse::_sigmetFloatLutReady = false;
 bool IwrfTsPulse::_sigmetLegacyUnpacking = false;
 bool IwrfTsPulse::_sigmetLegacyUnpackingActive = false;
 fl32 IwrfTsPulse::_sigmetFloatLut[65536] = { 0 };
+bool IwrfTsPulse::_magPhaseLutReady = false;
+double IwrfTsPulse::_magPhaseLutScale = 0.0;
+fl32 IwrfTsPulse::_magPhaseLutSin[65536] = { 0 };
+fl32 IwrfTsPulse::_magPhaseLutCos[65536] = { 0 };
+fl32 IwrfTsPulse::_magPhaseLutMag[65536] = { 0 };
+pthread_mutex_t IwrfTsPulse::_magPhaseLutMutex = PTHREAD_MUTEX_INITIALIZER;
 const double IwrfTsPulse::PHASE_MULT = 180.0 / 32767.0;
 
 // Constructor
@@ -84,7 +90,6 @@ IwrfTsPulse::IwrfTsPulse(IwrfTsInfo &info,
   // initialize mutexes
 
   _nClients = 0;
-  pthread_mutex_init(&_nClientsMutex, NULL);
 
 }
 
@@ -98,7 +103,6 @@ IwrfTsPulse::IwrfTsPulse(const IwrfTsPulse &rhs) :
 {
   if (this != &rhs) {
     _copy(rhs);
-    pthread_mutex_init(&_nClientsMutex, NULL);
   }
 }
 
@@ -110,7 +114,6 @@ IwrfTsPulse::~IwrfTsPulse()
 {
   _clearIq();
   _clearPacked();
-  pthread_mutex_destroy(&_nClientsMutex);
 }
 
 /////////////////////////////
@@ -504,38 +507,28 @@ void IwrfTsPulse::convertToFL32()
   } else if (_hdr.iq_encoding == IWRF_IQ_ENCODING_DBM_PHASE_SI16) {
 
     // compute from power and phase
-    
-    si16 *packed = (si16 *) _packed;
-    for (int ii = 0; ii < _hdr.n_data; ii += 2) {
-      double powerDbm = packed[ii] * _packedScale + _packedOffset;
-      double power = pow(10.0, powerDbm / 10.0);
-      double phaseDeg = packed[ii+1] * PHASE_MULT;
-      double sinPhase, cosPhase;
-      ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-      double mag = sqrt(power);
-      if (mag == 0.0) {
-        mag = 1.0e-20;
-      }
-      _iqData[ii] = mag * cosPhase;
-      _iqData[ii+1] = mag * sinPhase;
 
-#ifdef DEBUG_PRINT	
+    si16 *packed = (si16 *) _packed;
+    auto magScale = pow(10.0, _packedOffset / 20.0);
+    for (int ii = 0; ii < _hdr.n_data; ii += 2) {
+
+      std::tie(_iqData[ii], _iqData[ii+1])
+        = _unpackDbmPhaseSi16(packed[ii], packed[ii+1], magScale, _packedScale);
+
+#ifdef DEBUG_PRINT
       if (ii == 0) {
-	cerr << "========================================" << endl;
-	cerr << "IWRF_IQ_ENCODING_DBM_PHASE_SI16 to float" << endl;
-	cerr << "packedPwr: " << packed[ii] << endl;
-	cerr << "packedPhase: " << packed[ii+1] << endl;
-	cerr << "powerDbm: " << powerDbm << endl;
-	cerr << "power: " << power << endl;
-	cerr << "phaseDeg: " << phaseDeg << endl;
-	cerr << "II: " << _iqData[ii] << endl;
-	cerr << "QQ: " << _iqData[ii+1] << endl;
-	cerr << "========================================" << endl;
+       cerr << "========================================" << endl;
+       cerr << "IWRF_IQ_ENCODING_DBM_PHASE_SI16 to float" << endl;
+       cerr << "packedPwr: " << packed[ii] << endl;
+       cerr << "packedPhase: " << packed[ii+1] << endl;
+       cerr << "II: " << _iqData[ii] << endl;
+       cerr << "QQ: " << _iqData[ii+1] << endl;
+       cerr << "========================================" << endl;
       }
 #endif
 
     }
-    
+
   } else if (_hdr.iq_encoding == IWRF_IQ_ENCODING_SIGMET_FL16) {
     
     _loadIqFromSigmetFL16();
@@ -626,15 +619,10 @@ void IwrfTsPulse::getIq(int chanNum,
   } else if (_packedEncoding == IWRF_IQ_ENCODING_DBM_PHASE_SI16) {
 
     // compute from power and phase
-    
-    double powerDbm = _packed[offset] * _packedScale + _packedOffset;
-    double power = pow(10.0, powerDbm / 10.0);
-    double phaseDeg = _packed[offset + 1] * PHASE_MULT;
-    double sinPhase, cosPhase;
-    ta_sincos(phaseDeg * DEG_TO_RAD, &sinPhase, &cosPhase);
-    double mag = sqrt(power);
-    ival = mag * cosPhase;
-    qval = mag * sinPhase;
+
+    auto magScale = pow(10.0, _packedOffset / 20.0);
+    std::tie(ival, qval)
+      = _unpackDbmPhaseSi16(_packed[offset], _packed[offset+1], magScale, _packedScale);
 
   } else if (_packedEncoding == IWRF_IQ_ENCODING_SIGMET_FL16) {
 
@@ -1396,23 +1384,13 @@ int IwrfTsPulse::writeToTsarchiveFile(FILE *out) const
 int IwrfTsPulse::addClient() const
   
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  _nClients++;
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+	return ++_nClients;
 }
 
 int IwrfTsPulse::removeClient() const
 
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  _nClients--;
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+	return --_nClients;
 }
 
 void IwrfTsPulse::deleteIfUnused(IwrfTsPulse *pulse)
@@ -1426,11 +1404,7 @@ void IwrfTsPulse::deleteIfUnused(IwrfTsPulse *pulse)
 int IwrfTsPulse::getNClients() const
 
 {
-  int nClients;
-  pthread_mutex_lock(&_nClientsMutex);
-  nClients = _nClients;
-  pthread_mutex_unlock(&_nClientsMutex);
-  return nClients;
+  return _nClients;
 }
 
 /////////////////////////////
@@ -1904,6 +1878,8 @@ void IwrfTsPulse::_deriveFromRvp8Header()
   _hdr.start_range_m = _info.get_proc_start_range_m();
   _hdr.gate_spacing_m = _info.get_proc_gate_spacing_m();
 
+  _hdr.tx_phase_deg = (_rvp8_hdr.i_tx_phase / 256.0) * 360.0;
+
 }
 
 ///////////////////////////////////////////////////////////////
@@ -2053,6 +2029,50 @@ void IwrfTsPulse::_computeSigmetFloatLut() const
 
   pthread_mutex_unlock(&_sigmetLutMutex);
 
+}
+
+///////////////////////////////////////////////////////////////
+// convert packed dbm / phase to floats
+
+std::pair<fl32,fl32> IwrfTsPulse::_unpackDbmPhaseSi16(si16 mag, si16 phase, double magScale, double packedScale)
+{
+
+    if (! _magPhaseLutReady) {
+      _computeMagPhaseLut(packedScale);
+    }
+
+    double unpackedMag;
+    if (packedScale == _magPhaseLutScale) {
+      unpackedMag = _magPhaseLutMag[int(mag)+32768] * magScale;
+    }
+    else {
+      // if packedScale is dynamic then don't use the mag table
+      double powerDbm = mag * packedScale;
+      unpackedMag = pow(10.0, powerDbm / 20.0) * magScale;
+    }
+
+    return { unpackedMag * _magPhaseLutCos[int(phase)+32768],
+             unpackedMag * _magPhaseLutSin[int(phase)+32768] };
+}
+
+///////////////////////////////////////////////////////////////
+// compute lookup table for converting packed db phase to floats
+
+void IwrfTsPulse::_computeMagPhaseLut(double packedScale)
+{
+    pthread_mutex_lock(&_magPhaseLutMutex);
+
+    if (! _magPhaseLutReady) {
+      for (int ii = 0; ii < 65536; ii++) {
+        _magPhaseLutMag[ii] = std::pow(10.0, (ii-32768) * packedScale / 20.0);
+        _magPhaseLutSin[ii] = std::sin((ii-32768) * PHASE_MULT * DEG_TO_RAD);
+        _magPhaseLutCos[ii] = std::cos((ii-32768) * PHASE_MULT * DEG_TO_RAD);
+      }
+      _magPhaseLutScale = packedScale;
+      _magPhaseLutReady = true;
+    }
+
+    pthread_mutex_unlock(&_magPhaseLutMutex);
 }
 
 ///////////////////////////////////////////////////////////////

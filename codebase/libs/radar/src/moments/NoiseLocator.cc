@@ -1718,10 +1718,10 @@ void NoiseLocator::addToMoments(MomentsFields *mfields)
     MomentsFields &mfield = mfields[igate];
     mfield.noise_flag = _noiseFlag[igate];
     mfield.signal_flag = _signalFlag[igate];
-    mfield.accum_phase_change = _accumPhaseChange[igate];
-    mfield.phase_change_error = _phaseChangeError[igate];
-    mfield.dbm_sdev = _dbmSdev[igate];
-    mfield.ncp_mean = _ncpMean[igate];
+    mfield.noise_accum_phase_change = _accumPhaseChange[igate];
+    mfield.noise_phase_change_error = _phaseChangeError[igate];
+    mfield.noise_dbm_sdev = _dbmSdev[igate];
+    mfield.noise_ncp_mean = _ncpMean[igate];
   }
   
 }
