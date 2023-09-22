@@ -196,7 +196,7 @@ void route_winds_init()
 	    }
 
 	    // Collect Label
-	    strncpy(gd.layers.route_wind.route[i].route_label,cfield[0],64);
+	    strncpy(gd.layers.route_wind.route[i].route_label,cfield[0],62);
 
 	    // Collect the number of points  & segments 
 	    gd.layers.route_wind.route[i].num_segments = atoi(cfield[1]) -1;

@@ -220,7 +220,7 @@ void load_db_data_http(const string &fname, char* &db_buf, int &db_len)
   if(ret_stat <= 0 || db_len <= 0) {
     fprintf(stderr,"Could'nt Load Parameter Database from URL: %s,  %d\n",
 	    fname.c_str(), ret_stat);
-    if(stat < 0) {
+    if(ret_stat < 0) {
       fprintf(stderr,"Failed to successfully trasnact with the http server\n");
     } else {
       fprintf(stderr,
