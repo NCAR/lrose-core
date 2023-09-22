@@ -49,7 +49,6 @@
 #include <deque>
 #include <toolsa/TaThread.hh>
 #include <toolsa/TaThreadPool.hh>
-#include <radar/NoiseLocator.hh>
 #include <radar/TempProfile.hh>
 #include <radar/BeamHeight.hh>
 #include <Radx/RadxArray.hh>

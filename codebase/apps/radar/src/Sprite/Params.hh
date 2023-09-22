@@ -108,15 +108,36 @@ public:
   } fft_window_t;
 
   typedef enum {
+    INTERP_METHOD_NONE = 0,
+    INTERP_METHOD_LINEAR = 1,
+    INTERP_METHOD_GAUSSIAN = 2
+  } notch_interp_method_t;
+
+  typedef enum {
+    CLUTTER_FILTER_ADAPTIVE = 0,
+    CLUTTER_FILTER_REGRESSION = 1,
+    CLUTTER_FILTER_NOTCH = 2,
+    CLUTTER_FILTER_NONE = 3
+  } clutter_filter_type_t;
+
+  typedef enum {
     WATERFALL_HC = 0,
     WATERFALL_VC = 1,
     WATERFALL_HX = 2,
     WATERFALL_VX = 3,
-    WATERFALL_ZDR = 4,
-    WATERFALL_PHIDP = 5,
-    WATERFALL_SDEV_ZDR = 6,
-    WATERFALL_SDEV_PHIDP = 7,
-    WATERFALL_CMD = 8
+    WATERFALL_DBZ = 4,
+    WATERFALL_SNR = 5,
+    WATERFALL_ZDR = 6,
+    WATERFALL_PHIDP = 7,
+    WATERFALL_RHOHV = 8,
+    WATERFALL_TDBZ = 9,
+    WATERFALL_SDEV_ZDR = 10,
+    WATERFALL_SDEV_PHIDP = 11,
+    WATERFALL_TDBZ_INT = 12,
+    WATERFALL_SDEV_ZDR_INT = 13,
+    WATERFALL_SDEV_PHIDP_INT = 14,
+    WATERFALL_CMD = 15,
+    WATERFALL_CMD_MEAN = 16
   } waterfall_type_t;
 
   typedef enum {
@@ -124,12 +145,14 @@ public:
     SPECTRAL_PHASE = 1,
     SPECTRAL_ZDR = 2,
     SPECTRAL_PHIDP = 3,
-    TS_POWER = 4,
-    TS_PHASE = 5,
-    I_VALS = 6,
-    Q_VALS = 7,
-    I_VS_Q = 8,
-    PHASOR = 9
+    SPECTRAL_RHOHV = 4,
+    SPECTRAL_SZ864 = 5,
+    TS_POWER = 6,
+    TS_PHASE = 7,
+    I_VALS = 8,
+    Q_VALS = 9,
+    I_VS_Q = 10,
+    PHASOR = 11
   } iq_plot_type_t;
 
   typedef enum {
@@ -194,10 +217,11 @@ public:
     waterfall_type_t plot_type;
     fft_window_t fft_window;
     int median_filter_len;
-    tdrp_bool_t use_adaptive_filter;
+    clutter_filter_type_t clutter_filter_type;
     double clutter_model_width_mps;
     tdrp_bool_t use_regression_filter;
     int regression_order;
+    notch_interp_method_t regression_filter_notch_interp_method;
   } waterfall_plot_t;
 
   typedef struct {
@@ -205,12 +229,11 @@ public:
     rx_channel_t rx_channel;
     fft_window_t fft_window;
     int median_filter_len;
-    tdrp_bool_t use_adaptive_filter;
+    clutter_filter_type_t clutter_filter_type;
     tdrp_bool_t plot_clutter_model;
     double clutter_model_width_mps;
-    tdrp_bool_t use_regression_filter;
     int regression_order;
-    tdrp_bool_t regression_filter_interp_across_notch;
+    notch_interp_method_t regression_filter_notch_interp_method;
     tdrp_bool_t compute_plot_range_dynamically;
   } iq_plot_t;
 
@@ -219,6 +242,11 @@ public:
     double min_val;
     double max_val;
   } iq_plot_static_range_t;
+
+  typedef struct {
+    double value;
+    double interest;
+  } interest_map_point_t;
 
   ///////////////////////////
   // Member functions
@@ -638,6 +666,10 @@ public:
 
   int waterfall_color_scale_width;
 
+  int waterfall_tdbz_kernel_ngates;
+
+  int waterfall_tdbz_kernel_nsamples;
+
   int waterfall_sdev_zdr_kernel_ngates;
 
   int waterfall_sdev_zdr_kernel_nsamples;
@@ -648,17 +680,29 @@ public:
 
   char* color_scale_dir;
 
+  char* waterfall_dbz_color_scale_name;
+
+  char* waterfall_snr_color_scale_name;
+
   char* waterfall_dbm_color_scale_name;
 
   char* waterfall_zdr_color_scale_name;
 
   char* waterfall_phidp_color_scale_name;
 
+  char* waterfall_rhohv_color_scale_name;
+
+  char* waterfall_tdbz_color_scale_name;
+
   char* waterfall_sdev_zdr_color_scale_name;
 
   char* waterfall_sdev_phidp_color_scale_name;
 
+  char* waterfall_interest_color_scale_name;
+
   char* waterfall_cmd_color_scale_name;
+
+  char* waterfall_cmd_mean_color_scale_name;
 
   int waterfall_title_font_size;
 
@@ -782,11 +826,11 @@ public:
 
   tdrp_bool_t iqplot_plot_legend2;
 
+  clutter_filter_type_t ascope_clutter_filter_type;
+
   tdrp_bool_t apply_residue_correction_in_adaptive_filter;
 
   double min_snr_db_for_residue_correction;
-
-  tdrp_bool_t use_polynomial_regression_clutter_filter;
 
   tdrp_bool_t regression_filter_determine_order_from_cnr;
 
@@ -878,6 +922,30 @@ public:
 
   fft_window_t fft_window;
 
+  interest_map_point_t *_snr_interest_map;
+  int snr_interest_map_n;
+
+  double snr_interest_weight;
+
+  interest_map_point_t *_tdbz_interest_map;
+  int tdbz_interest_map_n;
+
+  double tdbz_interest_weight;
+
+  interest_map_point_t *_zdr_sdev_interest_map;
+  int zdr_sdev_interest_map_n;
+
+  double zdr_sdev_interest_weight;
+
+  interest_map_point_t *_phidp_sdev_interest_map;
+  int phidp_sdev_interest_map_n;
+
+  double phidp_sdev_interest_weight;
+
+  double cmd_threshold_for_detection;
+
+  double cmd_threshold_for_moments;
+
   char* cal_file_path;
 
   tdrp_bool_t use_cal_from_time_series;
@@ -895,7 +963,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[206];
+  mutable TDRPtable _table[225];
 
   const char *_className;
 

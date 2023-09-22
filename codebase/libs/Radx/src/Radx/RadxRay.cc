@@ -1703,8 +1703,8 @@ void RadxRay::setUtilityFlag(bool state)
 }
 
 /////////////////////////////////////////////////////////
-/// compute elevation and azimuth from the georeference
-/// data and correction factors.
+/// compute elevation and azimuth in earth coords
+/// from the georeference data and correction factors.
 ///
 /// If the georeference is null, no action is taken.
 /// If the correction factors is null, no corrections are
@@ -1738,6 +1738,7 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
   double headingRad = _georef->getHeading() * Radx::DegToRad;
   double tiltRad = _georef->getTilt() * Radx::DegToRad;
   double rotRad = _georef->getRotation() * Radx::DegToRad;
+  double driftRad = _georef->getDrift() * Radx::DegToRad;
 
   // apply corrections if appropriate
 
@@ -1747,33 +1748,36 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
     headingRad += _cfactors->getHeadingCorr() * Radx::DegToRad;
     tiltRad += _cfactors->getTiltCorr() * Radx::DegToRad;
     rotRad += _cfactors->getRotationCorr() * Radx::DegToRad;
+    driftRad += _cfactors->getDriftCorr() * Radx::DegToRad;
   }
 
   // compute m matrix
 
-  double cosR, sinR;
-  double cosP, sinP;
-  double cosH, sinH;
+  double cosRoll, sinRoll;
+  double cosPitch, sinPitch;
+  double cosHdg, sinHdg;
   double cosTilt, sinTilt;
   double cosRot, sinRot;
+  double cosDrift, sinDrift;
 
-  Radx::sincos(rollRad, sinR, cosR);
-  Radx::sincos(pitchRad, sinP, cosP);
-  Radx::sincos(headingRad, sinH, cosH);
+  Radx::sincos(rollRad, sinRoll, cosRoll);
+  Radx::sincos(pitchRad, sinPitch, cosPitch);
+  Radx::sincos(headingRad, sinHdg, cosHdg);
   Radx::sincos(tiltRad, sinTilt, cosTilt);
   Radx::sincos(rotRad, sinRot, cosRot);
+  Radx::sincos(driftRad, sinDrift, cosDrift);
 
-  double m11 = cosH * cosR + sinH * sinP * sinR;
-  double m12 = sinH * cosP;
-  double m13 = cosH * sinR - sinH * sinP * cosR;
+  double m11 = cosHdg * cosRoll + sinHdg * sinPitch * sinRoll;
+  double m12 = sinHdg * cosPitch;
+  double m13 = cosHdg * sinRoll - sinHdg * sinPitch * cosRoll;
 
-  double m21 = -sinH * cosR + cosH * sinP * sinR;
-  double m22 = cosH * cosP;
-  double m23 = -sinH * sinR - cosH * sinP * cosR;
+  double m21 = -sinHdg * cosRoll + cosHdg * sinPitch * sinRoll;
+  double m22 = cosHdg * cosPitch;
+  double m23 = -sinHdg * sinRoll - cosHdg * sinPitch * cosRoll;
   
-  double m31 = -cosP * sinR;
-  double m32 = sinP;
-  double m33 = cosP * cosR;
+  double m31 = -cosPitch * sinRoll;
+  double m32 = sinPitch;
+  double m33 = cosPitch * cosRoll;
 
   // compute x, y, z for a range of unity
 
@@ -1814,6 +1818,7 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
   }
 
   // save intermediate values
+
   _georef->setXX(xx);
   _georef->setYY(yy);
   _georef->setZZ(zz);
@@ -1821,16 +1826,13 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
   // compute earth-referenced azimuth and elevation
   
   double azimuthDeg = atan2(xx, yy) * Radx::RadToDeg;
-  if (azimuthDeg < 0) {
-    azimuthDeg += 360.0;
-  }
+  azimuthDeg = Radx::conditionAz(azimuthDeg);
+
   double elevationDeg = asin(zz) * Radx::RadToDeg;
+
   double tiltDeg = asin(yy) * Radx::RadToDeg;
   if (tiltDeg < 0) {
     tiltDeg += 360.0;
-  }
-  if (azimuthDeg < 0) {
-    azimuthDeg += 360.0;
   }
 
   double rotDeg = _georef->getRotation();
@@ -1859,12 +1861,66 @@ void RadxRay::applyGeoref(Radx::PrimaryAxis_t axis, bool force /* = true */)
        << rotDeg << endl;
 #endif
 
+  // save az and el
+  
   _az = azimuthDeg;
   _elev = elevationDeg;
-  _tilt_t = tiltDeg;
-  _georef->setTilt(tiltDeg);
-  _georef->setRotation(rotDeg);
+
+  // compute track-relative quantities for Y-Prime radar, and save
+  
+  if (axis == Radx::PRIMARY_AXIS_Y_PRIME) {
+    _computeTrackRelAnglesYPrime(rollRad, rotRad, cosPitch, sinPitch,
+                                 cosTilt, sinTilt, cosDrift, sinDrift);
+  }
+
   _georefApplied = true;
+
+}
+
+/////////////////////////////////////////////////////////
+/// compute track-relative elevation, azimuth,
+/// rotation and tilt for a y-prime radarx
+
+void RadxRay::_computeTrackRelAnglesYPrime(double rollRad, double rotRad,
+                                           double cosPitch, double sinPitch,
+                                           double cosTilt, double sinTilt,
+                                           double cosDrift, double sinDrift)
+  
+{
+  
+
+  double earthRelRotRad = rollRad + rotRad; 
+  double sinEarthRelRot;
+  double cosEarthRelRot;
+  Radx::sincos(earthRelRotRad, sinEarthRelRot, cosEarthRelRot);
+  
+  double xt = (cosEarthRelRot * sinDrift * cosTilt * sinPitch
+               + cosDrift * sinEarthRelRot * cosTilt
+               - sinDrift * cosPitch * sinTilt);
+  
+  double yt = (-cosEarthRelRot * cosDrift * cosTilt * sinPitch
+               + sinDrift * sinEarthRelRot * cosTilt
+               + cosPitch * cosDrift * sinTilt);
+
+  double zz = (cosPitch * cosTilt * cosEarthRelRot
+               + sinPitch * sinTilt);
+  
+  double trackRelRot = atan2(xt, zz) * Radx::RadToDeg;
+  trackRelRot = Radx::conditionAz(trackRelRot);
+
+  double trackRelTilt = asin(yt) * Radx::RadToDeg;
+  trackRelTilt = Radx::conditionEl(trackRelTilt);
+
+  double trackRelAz = atan2(xt, yt) * Radx::RadToDeg;
+  trackRelAz = Radx::conditionAz(trackRelAz);
+
+  double trackRelEl = asin(zz) * Radx::RadToDeg;
+  trackRelEl = Radx::conditionEl(trackRelEl);
+
+  _georef->setTrackRelTilt(trackRelTilt);
+  _georef->setTrackRelRot(trackRelRot);
+  _georef->setTrackRelAz(trackRelAz);
+  _georef->setTrackRelEl(trackRelEl);
 
 }
 

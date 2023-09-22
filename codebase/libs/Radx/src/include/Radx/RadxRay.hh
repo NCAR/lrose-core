@@ -1285,6 +1285,14 @@ private:
 
   msgMetaNumbers_t _metaNumbers;
   
+  /// compute track-relative elevation, azimuth,
+  /// rotation and tilt for a y-prime radar
+  
+  void _computeTrackRelAnglesYPrime(double rollRad, double rotRad,
+                                    double cosPitch, double sinPitch,
+                                    double cosTilt, double sinTilt,
+                                    double cosDrift, double sinDrift);
+  
   /// convert metadata to XML
   
   void _loadMetaStringsToXml(string &xml, int level = 0) const;

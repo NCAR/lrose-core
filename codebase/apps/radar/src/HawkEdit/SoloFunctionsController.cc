@@ -85,15 +85,19 @@ QVector<double> add(QVector<double> v, QVector<double> v2) {
 */
 
 
-QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, float nyquist, float bad_data,
-					   size_t clip_gate) { 
+QString  SoloFunctionsController::REMOVE_AIRCRAFT_MOTION(QString field, 
+     float nyquist, 
+     bool SoloII,
+     float bad_data,
+	   size_t clip_gate) { 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.RemoveAircraftMotion(field.toStdString(), //_data,
-						     currentRayIdx, // _currentSweepIdx,
-						      nyquist,
-						      clip_gate,
-						      bad_data,
-						     field.toStdString());
+						    currentRayIdx, // _currentSweepIdx,
+						    nyquist,
+                SoloII,
+						    clip_gate,
+						    bad_data,
+						    field.toStdString());
 
   // returns name of new field in RadxVol
   return QString::fromStdString(tempFieldName);
@@ -310,8 +314,10 @@ QString SoloFunctionsController::DESPECKLE(QString field, size_t speckle_length,
 }
 
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, float bad_data,
-					     size_t clip_gate, QString bad_flag_field) { 
+QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, 
+               QString bad_flag_field, 
+               float bad_data,
+					     size_t clip_gate) { 
 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   // updated bad_flag_field is returned in tempFieldName
@@ -325,8 +331,11 @@ QString SoloFunctionsController::FLAGGED_ADD(QString field, float constant, floa
 }
 
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, float constant, float bad_data,
-					   size_t clip_gate, QString bad_flag_field) { 
+QString SoloFunctionsController::FLAGGED_MULTIPLY(QString field, 
+                 float constant, 
+                 QString bad_flag_field,
+                 float bad_data,
+					       size_t clip_gate) { 
 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
   string tempFieldName = soloFunctionsModel.FlaggedMultiply(field.toStdString(), //_data,
@@ -488,11 +497,13 @@ QString SoloFunctionsController::XOR_BAD_FLAGS_ABOVE(QString field, float consta
 } 
 */
 // return the name of the field in which the result is stored in the RadxVol
-QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, float bad_data,
-						  size_t clip_gate, QString badFlagMaskFieldName) { 
+QString SoloFunctionsController::ASSERT_BAD_FLAGS(QString field, 
+              QString badFlagMaskFieldName,
+              float bad_data,
+						  size_t clip_gate) { 
   size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
-  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(), //_data,
-							   currentRayIdx, //_currentSweepIdx,
+  string tempFieldName = soloFunctionsModel.AssertBadFlags(field.toStdString(),
+							   currentRayIdx,
 							   clip_gate, bad_data,
 							   badFlagMaskFieldName.toStdString());
 							  
@@ -667,6 +678,18 @@ QString SoloFunctionsController::UNCONDITIONAL_DELETE(QString field,
                      currentRayIdx, //_currentSweepIdx,
                      clip_gate,
                      bad_data_value);
+
+                return QString::fromStdString(tempFieldName);
+} 
+
+// return the name of the field in which the result is stored in the RadxVol
+QString SoloFunctionsController::ASSIGN_VALUE(QString field, 
+                  float value,
+                  size_t clip_gate) {
+  size_t currentRayIdx = _scriptsDataController->getCurrentRayIdx();
+  string tempFieldName = soloFunctionsModel.AssignValue(field.toStdString(),
+                     currentRayIdx, 
+                     value, clip_gate);
 
                 return QString::fromStdString(tempFieldName);
 } 

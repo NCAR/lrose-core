@@ -37,25 +37,15 @@
 #include <string>
 #include <vector>
 
-#include <QDialog>
-#include <QWidget>
-#include <QResizeEvent>
-#include <QImage>
-#include <QTimer>
-#include <QRubberBand>
-#include <QPoint>
-#include <QTransform>
-
 #include "Params.hh"
-#include "ScaledLabel.hh"
-#include "WorldPlot.hh"
+#include "SpritePlot.hh"
 
 class Beam;
 class MomentsFields;
 
 /// AScope plotting
 
-class AscopePlot
+class AscopePlot : public SpritePlot
 {
 
 public:
@@ -82,80 +72,18 @@ public:
    * Clear the plot
    */
   
-  void clear();
+  virtual void clear();
 
-  // set the window geometry
+  // plot a beam
+
+  void plotBeam(QPainter &painter,
+                Beam *beam,
+                size_t nSamples,
+                double selectedRangeKm);
   
-  void setWindowGeom(int width,
-                     int height,
-                     int xOffset,
-                     int yOffset);
-
-  // set the world limits
-
-  void setWorldLimits(double xMinWorld,
-                      double yMinWorld,
-                      double xMaxWorld,
-                      double yMaxWorld);
-
-  // set the zoom limits, using pixel space
-
-  void setZoomLimits(int xMin,
-                     int yMin,
-                     int xMax,
-                     int yMax);
-  
-  void setZoomLimitsX(int xMin,
-                      int xMax);
-
-  void setZoomLimitsY(int yMin,
-                      int yMax);
-
   // set the moment type
 
   void setMomentType(Params::moment_type_t val) { _momentType = val; }
-  
-  // zooming
-
-  void zoom(int x1, int y1, int x2, int y2);
-  void unzoom();
-
-  // plot a beam
-  
-  void plotBeam(QPainter &painter,
-                Beam *beam,
-                double selectedRangeKm);
-
-  // set grid lines on/off
-
-  void setXGridLinesOn(bool val) { _xGridLinesOn = val; }
-  void setYGridLinesOn(bool val) { _yGridLinesOn = val; }
-
-  // legends
-  
-  void setLegendsOn(bool val) { _legendsOn = val; }
-
-  // get the world plot objects
-  
-  WorldPlot &getFullWorld() { return _fullWorld; }
-  WorldPlot &getZoomWorld() { return _zoomWorld; }
-  bool getIsZoomed() const { return _isZoomed; }
-
-  // get the window geom
-
-  int getWidth() const { return _fullWorld.getWidthPixels(); }
-  int getHeight() const { return _fullWorld.getHeightPixels(); }
-  int getXOffset() const { return _fullWorld.getXPixOffset(); }
-  int getYOffset() const { return _fullWorld.getYPixOffset(); }
-  
-  // get grid lines state
-
-  bool getXGridLinesOn() const { return _xGridLinesOn; }
-  bool getYGridLinesOn() const { return _yGridLinesOn; }
-
-  // legends
-
-  bool getLegendsOn() const { return _legendsOn; }
   
   // get the moment type
 
@@ -180,24 +108,6 @@ protected:
   // moment type active for plotting
 
   Params::moment_type_t _momentType;
-  
-  // unzoomed world
-
-  WorldPlot _fullWorld;
-
-  // zoomed world
-
-  bool _isZoomed;
-  WorldPlot _zoomWorld;
-
-  // grid lines
-
-  bool _xGridLinesOn;
-  bool _yGridLinesOn;
-
-  // legends
-
-  bool _legendsOn;
   
   ///////////////////////
   // Protected methods //

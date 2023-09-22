@@ -79,6 +79,8 @@ set (SRCS
       SpreadSheetView.cc
       SpreadSheetController.cc
       SpreadSheetDelegate.cc
+      StatusPanelController.cc
+      StatusPanelView.cc
       SweepView.cc
       TimeNavView.cc
       FunctionEditor.cc
@@ -182,9 +184,9 @@ endif()
 
 # link libs
 
-link_libraries (Spdb)
-link_libraries (Mdv)
 link_libraries (radar)
+link_libraries (Mdv)
+link_libraries (Spdb)
 link_libraries (rapformats)
 link_libraries (Fmq)
 link_libraries (Radx)

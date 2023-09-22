@@ -46,6 +46,7 @@
 #include <radar/ForsytheRegrFilter.hh>
 #include <radar/ClutFilter.hh>
 #include <radar/FilterUtils.hh>
+#include <radar/Sz864.hh>
 
 #include <QTimer>
 #include <QBrush>
@@ -56,7 +57,7 @@
 #include <QStylePainter>
 
 #include "IqPlot.hh"
-#include "SpectraMgr.hh"
+#include "SpriteMgr.hh"
 #include "Beam.hh"
 
 using namespace std;
@@ -64,27 +65,24 @@ using namespace std;
 IqPlot::IqPlot(QWidget* parent,
                const Params &params,
                int id) :
-        _parent(parent),
-        _params(params),
-        _id(id)
+        SpritePlot(parent, params, id),
+        _params(params)
         
 {
-  _isZoomed = false;
-  _xGridLinesOn = _params.x_grid_lines_on;
-  _yGridLinesOn = _params.y_grid_lines_on;
+
   _plotType = Params::SPECTRAL_POWER;
   _rxChannel = Params::CHANNEL_HC;
   _fftWindow = Params::FFT_WINDOW_VONHANN;
-  _useAdaptFilt = false;
+  _clutterFilterType = RadarMoments::CLUTTER_FILTER_NONE;
   _plotClutModel = false;
   _clutModelWidthMps = 0.75;
-  _useRegrFilt = false;
   _regrOrder = _params.regression_filter_specified_polynomial_order;
   _regrOrderInUse = _regrOrder;
   _regrClutWidthFactor = _params.regression_filter_clutter_width_factor;
   _regrCnrExponent = _params.regression_filter_cnr_exponent;
-  _regrFiltInterpAcrossNotch = true;
+  _regrNotchInterpMethod = RadarMoments::INTERP_METHOD_GAUSSIAN;
   _computePlotRangeDynamically = true;
+
 }
 
 /*************************************************************************
@@ -196,26 +194,32 @@ void IqPlot::plotBeam(QPainter &painter,
     case Params::CHANNEL_VX:
       memcpy(iq, gateData->iqvxOrig, _nSamples * sizeof(RadarComplex_t));
   }
+
+  // calibration
+  
+  const IwrfCalib &calib = _beam->getCalib();
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      _calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      _calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      _calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      _calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
   
   // perform the relevant plot
 
   switch (_plotType) {
     case Params::I_VALS:
     case Params::Q_VALS: 
-      {
-        TaArray<double> iVals_;
-        double *iVals = iVals_.alloc(_nSamples);
-        for (size_t ii = 0; ii < _nSamples; ii++) {
-          iVals[ii] = iq[ii].re;
-        }
-        TaArray<double> qVals_;
-        double *qVals = qVals_.alloc(_nSamples);
-        for (size_t ii = 0; ii < _nSamples; ii++) {
-          qVals[ii] = iq[ii].im;
-        }
-        _plotIQVals(painter,  selectedRangeKm,
-                    gateNum, iVals, qVals);
-      }
+      _plotIQVals(painter,  selectedRangeKm, gateNum, iq);
       break;
     case Params::I_VS_Q:
       _plotIvsQ(painter, selectedRangeKm, gateNum, iq);
@@ -233,6 +237,9 @@ void IqPlot::plotBeam(QPainter &painter,
     case Params::SPECTRAL_PHIDP:
       _plotSpectralPhidp(painter, selectedRangeKm, gateNum,
                          gateData->iqhcOrig, gateData->iqvcOrig);
+      break;
+    case Params::SPECTRAL_SZ864:
+      _plotSpectralSz864(painter, selectedRangeKm, gateNum, iq);
       break;
     case Params::TS_POWER:
       _plotTsPower(painter, selectedRangeKm, gateNum, iq);
@@ -258,168 +265,40 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   
 {
 
+  // compute the power spectrum
+  // applying the appropriate clutter filter
+  
+  TaArray<RadarComplex_t> iqWindowed_, iqFilt_, iqNotched_;
+  TaArray<double> dbm_, dbmFilt_;
+
+  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+  RadarComplex_t *iqNotched = iqNotched_.alloc(_nSamples);
+
+  double *dbm = dbm_.alloc(_nSamples);
+  double *dbmFilt = dbmFilt_.alloc(_nSamples);
+  
+  double filterRatio, spectralNoise, spectralSnr;
+  
   // apply window to time series
   
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
   _applyWindow(iq, iqWindowed, _nSamples);
   
-  // compute power spectrum
+  // compute the power spectrum
   
-  TaArray<RadarComplex_t> powerSpec_;
-  RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
-  RadarFft fft(_nSamples);
-  fft.fwd(iqWindowed, powerSpec);
-  fft.shift(powerSpec);
-  
-  // compute power, plus min and max
+  _computePowerSpectrum(iqWindowed, iqFilt, iqNotched,
+                        dbm, dbmFilt,
+                        filterRatio, spectralNoise, spectralSnr);
 
-  TaArray<double> powerDbm_;
-  double *powerDbm = powerDbm_.alloc(_nSamples);
+  // compute power limits
+  
   double minDbm = 9999.0, maxDbm = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    double power = RadarComplex::power(powerSpec[ii]);
-    double dbm = 10.0 * log10(power);
-    if (power <= 1.0e-12) {
-      dbm = -120.0;
-    }
-    powerDbm[ii] = dbm;
-    minDbm = min(dbm, minDbm);
-    maxDbm = max(dbm, maxDbm);
+    minDbm = min(dbm[ii], minDbm);
+    minDbm = min(dbmFilt[ii], minDbm);
+    maxDbm = max(dbm[ii], maxDbm);
+    maxDbm = max(dbmFilt[ii], maxDbm);
   }
-  double totalPower = RadarComplex::meanPower(powerSpec, _nSamples);
-
-  // compute adaptive filter as appropriate
-  
-  TaArray<double> filtAdaptDbm_;
-  double *filtAdaptDbm = filtAdaptDbm_.alloc(_nSamples);
-  
-  const IwrfCalib &calib = _beam->getCalib();
-  double calibNoise = 0.0;
-  switch (_rxChannel) {
-    case Params::CHANNEL_HC:
-      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
-      break;
-    case Params::CHANNEL_VC:
-      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
-      break;
-    case Params::CHANNEL_HX:
-      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
-      break;
-    case Params::CHANNEL_VX:
-      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
-      break;
-  }
-  
-  RadarMoments moments;
-  moments.setNSamples(_nSamples);
-  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
-               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
-  moments.setCalib(calib);
-  moments.setClutterWidthMps(_clutModelWidthMps);
-  moments.setClutterInitNotchWidthMps(3.0);
-  moments.setAntennaRate(_beam->getAntennaRate());
-  
-  double adaptPower = 1.0e-12;
-  double adaptSpectralSnr = 1.0e-12;
-
-  if (_useAdaptFilt) {
-    
-    TaArray<RadarComplex_t> filtAdaptWindowed_;
-    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
-    double filterRatio, spectralNoise;
-    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
-                                iqWindowed, NULL,
-                                calibNoise,
-                                filtAdaptWindowed, NULL,
-                                filterRatio,
-                                spectralNoise,
-                                adaptSpectralSnr);
-    
-    TaArray<RadarComplex_t> filtAdaptSpec_;
-    RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
-    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
-    fft.shift(filtAdaptSpec);
-    
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      double power = RadarComplex::power(filtAdaptSpec[ii]);
-      double dbm = 10.0 * log10(power);
-      if (power <= 1.0e-12) {
-        dbm = -120.0;
-      }
-      filtAdaptDbm[ii] = dbm;
-      minDbm = min(dbm, minDbm);
-      maxDbm = max(dbm, maxDbm);
-    }
-
-    adaptPower = RadarComplex::meanPower(filtAdaptSpec, _nSamples);
-    
-  } // if (_useAdaptFilt)
-
-  // compute regression filter as appropriate
-
-  TaArray<double> filtRegrDbm_;
-  double *filtRegrDbm = filtRegrDbm_.alloc(_nSamples);
-
-  double regrPower = 0.0;
-  _regrOrderInUse = 0;
-
-  if (_useRegrFilt) {
-
-    ForsytheRegrFilter regrF;
-    if (_beam->getIsStagPrt()) {
-      regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
-                           _params.regression_filter_determine_order_from_cnr,
-                           _params.regression_filter_specified_polynomial_order,
-                           _regrClutWidthFactor,
-                           _regrCnrExponent,
-                           _beam->getCalib().getWavelengthCm() / 100.0);
-    } else {
-      regrF.setup(_nSamples,
-                  _params.regression_filter_determine_order_from_cnr,
-                  _params.regression_filter_specified_polynomial_order,
-                  _regrClutWidthFactor,
-                  _regrCnrExponent,
-                  _beam->getCalib().getWavelengthCm() / 100.0);
-    }
-    
-    TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(_nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
-                                  regrF, _windowCoeff,
-                                  iq,
-                                  calibNoise,
-                                  _regrFiltInterpAcrossNotch,
-                                  filtered, NULL,
-                                  filterRatio,
-                                  spectralNoise,
-                                  spectralSnr);
-    _regrOrderInUse = regrF.getPolyOrder();
-    
-    TaArray<RadarComplex_t> filtRegrWindowed_;
-    RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
-    _applyWindow(filtered, filtRegrWindowed, _nSamples);
-  
-    TaArray<RadarComplex_t> filtRegrSpec_;
-    RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(_nSamples);
-    fft.fwd(filtRegrWindowed, filtRegrSpec);
-    fft.shift(filtRegrSpec);
-    
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      double power = RadarComplex::power(filtRegrSpec[ii]);
-      double dbm = 10.0 * log10(power);
-      if (power <= 1.0e-12) {
-        dbm = -120.0;
-      }
-      minDbm = min(dbm, minDbm);
-      maxDbm = max(dbm, maxDbm);
-      filtRegrDbm[ii] = dbm;
-    }
-
-    regrPower = RadarComplex::meanPower(filtRegrSpec, _nSamples);
-    
-  } // if (_useRegrFilt)
 
   // set the Y axis range
 
@@ -440,63 +319,51 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   // draw the unfiltered spectrum
 
-  FilterUtils::applyMedianFilter(powerDbm, _nSamples, _medianFiltLen);
-  painter.save();
-  QPen pen(painter.pen());
-  pen.setColor(_params.iqplot_line_color);
-  pen.setStyle(Qt::SolidLine);
-  pen.setWidth(_params.iqplot_line_width);
-  painter.setPen(pen);
-  QVector<QPointF> pts;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    double val = powerDbm[ii];
-    QPointF pt(ii, val);
-    pts.push_back(pt);
+  FilterUtils::applyMedianFilter(dbm, _nSamples, _medianFiltLen);
+  {
+    painter.save();
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_line_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> pts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      double val = dbm[ii];
+      QPointF pt(ii, val);
+      pts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
   }
-  _zoomWorld.drawLines(painter, pts);
-  painter.restore();
 
-  // draw adaptive filter
+  // apply median filter to the spectrum if needed
+
+  if (_medianFiltLen > 1) {
+    FilterUtils::applyMedianFilter(dbmFilt, _nSamples, _medianFiltLen);
+  }
+
+  // draw filtered spectrum
   
-  if (_useAdaptFilt) {
-    
-    FilterUtils::applyMedianFilter(filtAdaptDbm, _nSamples, _medianFiltLen);
+  {
     painter.save();
     QPen pen(painter.pen());
-    pen.setColor(_params.iqplot_adaptive_filtered_color);
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else {
+      pen.setColor(_params.iqplot_regression_filtered_color);
+    }
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(_params.iqplot_line_width);
     painter.setPen(pen);
     QVector<QPointF> filtPts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, filtAdaptDbm[ii]);
+      QPointF pt(ii, dbmFilt[ii]);
       filtPts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, filtPts);
     painter.restore();
-
-  } // if (_useAdaptFilt)
-
-  // draw regr filter
-
-  if (_useRegrFilt) {
-    
-    FilterUtils::applyMedianFilter(filtRegrDbm, _nSamples, _medianFiltLen);
-    painter.save();
-    QPen pen(painter.pen());
-    pen.setColor(_params.iqplot_regression_filtered_color);
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(_params.iqplot_line_width);
-    painter.setPen(pen);
-    QVector<QPointF> filtPts;
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, filtRegrDbm[ii]);
-      filtPts.push_back(pt);
-    }
-    _zoomWorld.drawLines(painter, filtPts);
-    painter.restore();
-
-  } // if (_useRegrFilt)
+  }
 
   // plot clutter model
 
@@ -507,18 +374,16 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
     double *clutModel = clutModel_.alloc(_nSamples);
     TaArray<double> powerReal_;
     double *powerReal = powerReal_.alloc(_nSamples);
-    for (size_t ii = 0; ii < _nSamples; ii++) {
-      powerReal[ii] = RadarComplex::power(powerSpec[ii]);
-    }
+    RadarComplex::loadPower(iq, powerReal, _nSamples);
     
     if (clut.computeGaussianClutterModel(powerReal,
                                          _nSamples,
                                          _clutModelWidthMps,
                                          _beam->getNyquist(),
-                                         clutModel) == 0) {
+                                         clutModel, true) == 0) {
       
       painter.save();
-      pen = painter.pen();
+      QPen pen = painter.pen();
       pen.setColor(_params.iqplot_clutter_model_color);
       pen.setStyle(Qt::DotLine);
       pen.setWidth(2);
@@ -542,20 +407,25 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
 
   // legends
   
-  // const MomentsFields* fields = _beam->getOutFields();
-  // double dbm = fields[gateNum].dbm;
-  // double dbz = fields[gateNum].dbz;
-  // double vel = fields[gateNum].vel;
-
   char text[1024];
 
   vector<string> legendsLeft;
-  legendsLeft.push_back(getFftWindowName());
+  legendsLeft.push_back(getFftWindowName(_fftWindow) + " window");
   if (_medianFiltLen > 1) {
     snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
     legendsLeft.push_back(text);
   }
-  if (_useRegrFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+    snprintf(text, 1024, "Adaptive filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+    snprintf(text, 1024, "Regression filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+    snprintf(text, 1024, "Notch filter");
+    legendsLeft.push_back(text);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
     legendsLeft.push_back(text);
   }
@@ -568,34 +438,27 @@ void IqPlot::_plotSpectralPower(QPainter &painter,
   }
 
   vector<string> legendsRight;
-  double totalPowerDbm = 10.0 * log10(totalPower);
-  snprintf(text, 1024, "TotalPower (dBm): %.2f", totalPowerDbm);
+  double unfiltPower = RadarComplex::meanPower(iq, _nSamples);
+  double unfiltPowerDbm = 10.0 * log10(unfiltPower);
+  snprintf(text, 1024, "UnfiltPower (dBm): %.2f", unfiltPowerDbm);
   legendsRight.push_back(text);
-  if (_useAdaptFilt) {
-    double adaptClutPower = totalPower - adaptPower;
-    double adaptPowerDbm = 10.0 * log10(adaptPower);
-    double adaptClutPowerDbm = 10.0 * log10(adaptClutPower);
-    double adaptSpectralSnrDb = 10.0 * log10(adaptSpectralSnr);
-    snprintf(text, 1024, "AdaptFiltPower: %.2f", adaptPowerDbm);
+  if (_clutterFilterType != RadarMoments::CLUTTER_FILTER_NONE) {
+    double filtPower = RadarComplex::meanPower(iqFilt, _nSamples);
+    double filtPowerDbm = 10.0 * log10(filtPower);
+    snprintf(text, 1024, "FiltPower: %.2f", filtPowerDbm);
     legendsRight.push_back(text);
-    snprintf(text, 1024, "AdaptClutPower: %.2f", adaptClutPowerDbm);
-    legendsRight.push_back(text);
-    snprintf(text, 1024, "AdaptCSR: %.2f", adaptClutPowerDbm - adaptPowerDbm);
-    legendsRight.push_back(text);
-    snprintf(text, 1024, "AdaptSpecSNR: %.2f", adaptSpectralSnrDb);
-    legendsRight.push_back(text);
+    double clutPower = unfiltPower - filtPower;
+    if (clutPower > 0.0) {
+      double clutPowerDbm = 10.0 * log10(clutPower);
+      snprintf(text, 1024, "ClutPower: %.2f", clutPowerDbm);
+      legendsRight.push_back(text);
+      snprintf(text, 1024, "CSR: %.2f", clutPowerDbm - filtPowerDbm);
+      legendsRight.push_back(text);
+    }
+    // snprintf(text, 1024, "SpecSNR: %.2f", spectralSnr);
+    // legendsRight.push_back(text);
   }
-  if (_useRegrFilt) {
-    double regrClutPower = totalPower - regrPower;
-    double regrPowerDbm = 10.0 * log10(regrPower);
-    double regrClutPowerDbm = 10.0 * log10(regrClutPower);
-    snprintf(text, 1024, "RegrFiltPower: %.2f", regrPowerDbm);
-    legendsRight.push_back(text);
-    snprintf(text, 1024, "RegrClutPower: %.2f", regrClutPowerDbm);
-    legendsRight.push_back(text);
-    snprintf(text, 1024, "RegrCSR: %.2f", regrClutPowerDbm - regrPowerDbm);
-    legendsRight.push_back(text);
-  }
+  
   if (_legendsOn) {
     _zoomWorld.drawLegendsTopRight(painter, legendsRight);
   }
@@ -694,7 +557,7 @@ void IqPlot::_plotSpectralPhase(QPainter &painter,
   }
   
   vector<string> legendsRight;
-  legendsRight.push_back(getFftWindowName());
+  legendsRight.push_back(getFftWindowName(_fftWindow));
   if (_legendsOn) {
     _zoomWorld.drawLegendsTopRight(painter, legendsRight);
   }
@@ -720,17 +583,46 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   
 {
 
-  // compute ZDR spectrum
+  // allocate variables
   
-  TaArray<double> powerHc_, dbmHc_;
-  double *powerHc = powerHc_.alloc(_nSamples);
+  TaArray<RadarComplex_t> iqWindowedHc_, iqWindowedVc_;
+  TaArray<RadarComplex_t> iqFiltHc_, iqFiltVc_;
+  TaArray<RadarComplex_t> iqNotchedHc_, iqNotchedVc_;
+  TaArray<double> dbmHc_, dbmVc_;
+  TaArray<double> dbmFiltHc_, dbmFiltVc_;
+
+  RadarComplex_t *iqWindowedHc = iqWindowedHc_.alloc(_nSamples);
+  RadarComplex_t *iqWindowedVc = iqWindowedVc_.alloc(_nSamples);
+  RadarComplex_t *iqFiltHc = iqFiltHc_.alloc(_nSamples);
+  RadarComplex_t *iqFiltVc = iqFiltVc_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedHc = iqNotchedHc_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedVc = iqNotchedVc_.alloc(_nSamples);
+
   double *dbmHc = dbmHc_.alloc(_nSamples);
-  _computePowerSpectrum(iqHc, powerHc, dbmHc);
-  
-  TaArray<double> powerVc_, dbmVc_;
-  double *powerVc = powerVc_.alloc(_nSamples);
   double *dbmVc = dbmVc_.alloc(_nSamples);
-  _computePowerSpectrum(iqVc, powerVc, dbmVc);
+  double *dbmFiltHc = dbmFiltHc_.alloc(_nSamples);
+  double *dbmFiltVc = dbmFiltVc_.alloc(_nSamples);
+
+  double filterRatioHc, filterRatioVc;
+  double spectralNoiseHc, spectralNoiseVc;
+  double spectralSnrHc, spectralSnrVc;
+  
+  // apply window to time series
+  
+  _applyWindow(iqHc, iqWindowedHc, _nSamples);
+  _applyWindow(iqVc, iqWindowedVc, _nSamples);
+  
+  // compute Hc and Vc spectra
+  
+  _computePowerSpectrum(iqWindowedHc, iqFiltHc, iqNotchedHc,
+                        dbmHc, dbmFiltHc,
+                        filterRatioHc, spectralNoiseHc, spectralSnrHc);
+  
+  _computePowerSpectrum(iqWindowedVc, iqFiltVc, iqNotchedVc,
+                        dbmVc, dbmFiltVc,
+                        filterRatioVc, spectralNoiseVc, spectralSnrVc);
+  
+  // compute ZDR spectrum
   
   TaArray<double> zdr_;
   double minVal = 9999.0, maxVal = -9999.0;
@@ -779,10 +671,10 @@ void IqPlot::_plotSpectralZdr(QPainter &painter,
   
   char text[1024];
   vector<string> legendsLeft;
-  if (_useAdaptFilt) {
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
     snprintf(text, 1024, "Adapt filt, clut width: %.2f", _clutModelWidthMps);
     legendsLeft.push_back(text);
-  } else if (_useRegrFilt) {
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     snprintf(text, 1024, "Regr filt, order: %d", _beam->getRegrOrder());
     legendsLeft.push_back(text);
   }
@@ -900,6 +792,274 @@ void IqPlot::_plotSpectralPhidp(QPainter &painter,
   painter.save();
   painter.setPen(_params.iqplot_title_color);
   _zoomWorld.drawTitleTopCenter(painter, "SPECTRAL PHIDP (H-V)");
+  painter.restore();
+
+}
+
+/*************************************************************************
+ * plot the power spectrum for SZ864
+ */
+
+void IqPlot::_plotSpectralSz864(QPainter &painter,
+                                double selectedRangeKm,
+                                int gateNum,
+                                const RadarComplex_t *iq)
+  
+{
+
+  if (_nSamples < 64) {
+    cerr << "ERROR - IqPlot::_plotSpectralSz864" << endl;
+    cerr << "  nSamples too small: " << _nSamples << endl;
+    return;
+  }
+  if (_nSamples != 64) {
+    cerr << "WARNING - IqPlot::_plotSpectralSz864" << endl;
+    cerr << "  nSamples not equal to 64: " << _nSamples << endl;
+    return;
+  }
+
+  
+  // sz864 phase coding object
+
+  // Sz864 sz(_params.debug >= Params::DEBUG_VERBOSE);
+  Sz864 sz(true);
+  sz.setSignalToNoiseRatioThreshold(0.0);
+  // _sz.setSzNegatePhaseCodes();
+  sz.setSzStrongToWeakPowerRatioThreshold(50.0);
+  sz.setSzOutOfTripPowerRatioThreshold(6.0);
+  sz.setSzOutOfTripPowerNReplicas(3);
+
+  // fft
+  
+  RadarFft fft(_nSamples);
+
+  // get the gate data etc
+
+  GateData *gateData = _beam->getGateData()[gateNum];
+  const vector<RadarComplex_t> &delta12 = _beam->getDelta12();
+
+  // separate the trips
+  
+  sz.separateTrips(*gateData, delta12.data(), _beam->getPrt(), fft);
+    
+  // shift the spectrum by 30deg (PI/6 radians) as a test
+  // double shiftRadians = M_PI_2 / 3.0;
+  // TaArray<RadarComplex_t> iqShifted_;
+  // RadarComplex_t *iqShifted = iqShifted_.alloc(_nSamples);
+  // RadarComplex::timeDomainPhaseShift(iq, _nSamples, shiftRadians, iqShifted);
+
+  // strong trip
+  
+  TaArray<RadarComplex_t> iqFiltStrong_, iqNotchedStrong_;
+  TaArray<double> dbmStrong_, dbmFiltStrong_;
+  
+  RadarComplex_t *iqFiltStrong = iqFiltStrong_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedStrong = iqNotchedStrong_.alloc(_nSamples);
+  
+  double *dbmStrong = dbmStrong_.alloc(_nSamples);
+  double *dbmFiltStrong = dbmFiltStrong_.alloc(_nSamples);
+  
+  double filterRatio, spectralNoise, spectralSnr;
+  
+  _computePowerSpectrum(gateData->iqStrong, iqFiltStrong, iqNotchedStrong,
+                        dbmStrong, dbmFiltStrong,
+                        filterRatio, spectralNoise, spectralSnr);
+
+  // weak trip
+  
+  TaArray<RadarComplex_t> iqFiltWeak_, iqNotchedWeak_;
+  TaArray<double> dbmWeak_, dbmFiltWeak_;
+  
+  RadarComplex_t *iqFiltWeak = iqFiltWeak_.alloc(_nSamples);
+  RadarComplex_t *iqNotchedWeak = iqNotchedWeak_.alloc(_nSamples);
+  
+  double *dbmWeak = dbmWeak_.alloc(_nSamples);
+  double *dbmFiltWeak = dbmFiltWeak_.alloc(_nSamples);
+  
+  _computePowerSpectrum(gateData->iqWeak, iqFiltWeak, iqNotchedWeak,
+                        dbmWeak, dbmFiltWeak,
+                        filterRatio, spectralNoise, spectralSnr);
+
+  // compute power limits
+  
+  double minDbm = 9999.0, maxDbm = -9999.0;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    if (!gateData->censorStrong) {
+      minDbm = min(dbmStrong[ii], minDbm);
+      minDbm = min(dbmFiltStrong[ii], minDbm);
+      maxDbm = max(dbmStrong[ii], maxDbm);
+      maxDbm = max(dbmFiltStrong[ii], maxDbm);
+    }
+    if (!gateData->censorWeak) {
+      minDbm = min(dbmWeak[ii], minDbm);
+      minDbm = min(dbmFiltWeak[ii], minDbm);
+      maxDbm = max(dbmWeak[ii], maxDbm);
+      maxDbm = max(dbmFiltWeak[ii], maxDbm);
+    }
+  }
+
+  // set the Y axis range
+
+  double rangeY = maxDbm - minDbm;
+  double minY = minDbm - rangeY * 0.05;
+  double maxY = maxDbm + rangeY * 0.25;
+  if (!_isZoomed) {
+    if (_computePlotRangeDynamically) {
+      setWorldLimitsY(minY, maxY);
+    } else {
+      setWorldLimitsY(_staticRange.min_val, _staticRange.max_val);
+    }
+  }
+  
+  // draw the overlays
+
+  _drawOverlays(painter, selectedRangeKm);
+
+  // draw the strong unfiltered spectrum
+  
+  FilterUtils::applyMedianFilter(dbmStrong, _nSamples, _medianFiltLen);
+  if (!gateData->censorStrong) {
+    painter.save();
+    QPen pen(painter.pen());
+    pen.setColor(_params.iqplot_line_color);
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> pts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      double val = dbmStrong[ii];
+      QPointF pt(ii, val);
+      pts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, pts);
+    painter.restore();
+  }
+
+  // draw weak spectrum
+  
+  if (!gateData->censorWeak) {
+    painter.save();
+    QPen pen(painter.pen());
+    if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+      pen.setColor(_params.iqplot_adaptive_filtered_color);
+    } else {
+      pen.setColor(_params.iqplot_regression_filtered_color);
+    }
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(_params.iqplot_line_width);
+    painter.setPen(pen);
+    QVector<QPointF> filtPts;
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      QPointF pt(ii, dbmWeak[ii]);
+      filtPts.push_back(pt);
+    }
+    _zoomWorld.drawLines(painter, filtPts);
+    painter.restore();
+  }
+
+  // plot clutter model
+
+  if (_plotClutModel) {
+
+    ClutFilter clut;
+    TaArray<double> clutModel_;
+    double *clutModel = clutModel_.alloc(_nSamples);
+    TaArray<double> powerReal_;
+    double *powerReal = powerReal_.alloc(_nSamples);
+    RadarComplex::loadPower(iq, powerReal, _nSamples);
+    
+    if (clut.computeGaussianClutterModel(powerReal,
+                                         _nSamples,
+                                         _clutModelWidthMps,
+                                         _beam->getNyquist(),
+                                         clutModel, true) == 0) {
+      
+      painter.save();
+      QPen pen = painter.pen();
+      pen.setColor(_params.iqplot_clutter_model_color);
+      pen.setStyle(Qt::DotLine);
+      pen.setWidth(2);
+      painter.setPen(pen);
+      QVector<QPointF> clutPts;
+      for (size_t ii = 0; ii < _nSamples; ii++) {
+        double power = clutModel[ii];
+        double dbm = 10.0 * log10(power);
+        if (dbm < minDbm) {
+          dbm = minDbm;
+        }
+        QPointF pt(ii, dbm);
+        clutPts.push_back(pt);
+      }
+      _zoomWorld.drawLines(painter, clutPts);
+      painter.restore();
+
+    } // if (clut.computeGaussianClutterModel
+
+  } // if (_plotClutModel)
+
+  // legends
+  
+  char text[1024];
+
+  vector<string> legendsLeft;
+  legendsLeft.push_back(getFftWindowName(_fftWindow) + " window");
+  if (_medianFiltLen > 1) {
+    snprintf(text, 1024, "Median filt len: %d", _medianFiltLen);
+    legendsLeft.push_back(text);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+    snprintf(text, 1024, "Adaptive filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+    snprintf(text, 1024, "Regression filter");
+    legendsLeft.push_back(text);
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+    snprintf(text, 1024, "Notch filter");
+    legendsLeft.push_back(text);
+  }
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
+    snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
+    legendsLeft.push_back(text);
+  }
+  if (_plotClutModel) {
+    snprintf(text, 1024, "Clut-model-width: %g", _clutModelWidthMps);
+    legendsLeft.push_back(text);
+  }
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopLeft(painter, legendsLeft);
+  }
+
+  vector<string> legendsRight;
+  double unfiltPower = RadarComplex::meanPower(iq, _nSamples);
+  double unfiltPowerDbm = 10.0 * log10(unfiltPower);
+  snprintf(text, 1024, "UnfiltPower (dBm): %.2f", unfiltPowerDbm);
+  legendsRight.push_back(text);
+  if (_clutterFilterType != RadarMoments::CLUTTER_FILTER_NONE) {
+    double filtPower = RadarComplex::meanPower(iqFiltStrong, _nSamples);
+    double filtPowerDbm = 10.0 * log10(filtPower);
+    snprintf(text, 1024, "FiltPower: %.2f", filtPowerDbm);
+    legendsRight.push_back(text);
+    double clutPower = unfiltPower - filtPower;
+    if (clutPower > 0.0) {
+      double clutPowerDbm = 10.0 * log10(clutPower);
+      snprintf(text, 1024, "ClutPower: %.2f", clutPowerDbm);
+      legendsRight.push_back(text);
+      snprintf(text, 1024, "CSR: %.2f", clutPowerDbm - filtPowerDbm);
+      legendsRight.push_back(text);
+    }
+    // snprintf(text, 1024, "SpecSNR: %.2f", spectralSnr);
+    // legendsRight.push_back(text);
+  }
+  
+  if (_legendsOn) {
+    _zoomWorld.drawLegendsTopRight(painter, legendsRight);
+  }
+
+  // draw the title
+
+  painter.save();
+  painter.setPen(_params.iqplot_title_color);
+  _zoomWorld.drawTitleTopCenter(painter, getName());
   painter.restore();
 
 }
@@ -1058,60 +1218,24 @@ void IqPlot::_plotTsPhase(QPainter &painter,
 void IqPlot::_plotIQVals(QPainter &painter,
                          double selectedRangeKm,
                          int gateNum,
-                         const double *iVals,
-                         const double *qVals)
+                         const RadarComplex_t *iq)
   
 {
 
-  // prepare Forsythe compute object for regression
+  // run the regression filter
   
-  vector<double> xVals;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    xVals.push_back(ii);
-  }
-  ForsytheFit forsythe;
-  forsythe.prepareForFit(_beam->getRegrOrder(), xVals);
+  ForsytheRegrFilter regrF;
+  TaArray<RadarComplex_t> iqFilt_;
+  RadarComplex_t *iqFilt = iqFilt_.alloc(_nSamples);
+  _runRegressionFilter(regrF, iq, iqFilt);
+  const RadarComplex_t* polyFitIq = regrF.getPolyfitIq();
   
-  // compute polynomial regression fit
+  // compute residuals from regression fit
   
-  vector<double> iRaw;
+  vector<double> iResid, qResid;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    iRaw.push_back(iVals[ii]);
-  }
-  forsythe.performFit(iRaw);
-  vector<double> iSmooth = forsythe.getYEstVector();
-  vector<double> iResid;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    iResid.push_back(iRaw[ii] - iSmooth[ii]);
-  }
-
-  vector<double> qRaw;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    qRaw.push_back(qVals[ii]);
-  }
-  forsythe.performFit(qRaw);
-  vector<double> qSmooth = forsythe.getYEstVector();
-  vector<double> qResid;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    qResid.push_back(qRaw[ii] - qSmooth[ii]);
-  }
-
-  // compute CSR
-
-  double sumPowerUnfilt = 0.0;
-  double sumPowerFilt = 0.0;
-  for (size_t ii = 0; ii < _nSamples; ii++) {
-    sumPowerUnfilt += iVals[ii] * iVals[ii] + qVals[ii] * qVals[ii];
-    sumPowerFilt += iResid[ii] * iResid[ii] + qResid[ii] * qResid[ii];
-  }
-  double meanPowerUnfilt = sumPowerUnfilt / _nSamples;
-  double meanPowerFilt = sumPowerFilt / _nSamples;
-  double dbmUnfilt = 10.0 * log10(meanPowerUnfilt);
-  double dbmFilt = 10.0 * log10(meanPowerFilt);
-  double clutPower = meanPowerUnfilt - meanPowerFilt;
-  double csrDb = 0.0;
-  if (clutPower > 0) {
-    csrDb = 10.0 * log10(clutPower / meanPowerFilt);
+    iResid.push_back(iq[ii].re - polyFitIq[ii].re);
+    qResid.push_back(iq[ii].im - polyFitIq[ii].im);
   }
 
   // compute min and max vals for plot
@@ -1119,18 +1243,20 @@ void IqPlot::_plotIQVals(QPainter &painter,
   double minVal = 9999.0;
   double maxVal = -9999.0;
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    minVal = min(iVals[ii], minVal);
-    minVal = min(iSmooth[ii], minVal);
+    minVal = min(iq[ii].re, minVal);
+    minVal = min(iqFilt[ii].re, minVal);
     minVal = min(iResid[ii], minVal);
-    maxVal = max(iVals[ii], maxVal);
-    maxVal = max(iSmooth[ii], maxVal);
+    maxVal = max(iq[ii].re, maxVal);
+    maxVal = max(iqFilt[ii].re, maxVal);
     maxVal = max(iResid[ii], maxVal);
-    minVal = min(qVals[ii], minVal);
-    minVal = min(qSmooth[ii], minVal);
-    minVal = min(qResid[ii], minVal);
-    maxVal = max(qVals[ii], maxVal);
-    maxVal = max(qSmooth[ii], maxVal);
-    maxVal = max(qResid[ii], maxVal);
+
+    minVal = min(iq[ii].im, minVal);
+    minVal = min(iqFilt[ii].im, minVal);
+    minVal = min(iResid[ii], minVal);
+    maxVal = max(iq[ii].im, maxVal);
+    maxVal = max(iqFilt[ii].im, maxVal);
+    maxVal = max(iResid[ii], maxVal);
+
   }
   
   // set the Y axis range
@@ -1150,13 +1276,19 @@ void IqPlot::_plotIQVals(QPainter &painter,
 
   // draw the data
 
-  const double *vals = iVals;
+  vector<double> vals, smoothed;
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    if (_plotType == Params::I_VALS) {
+      vals.push_back(iq[ii].re);
+      smoothed.push_back(polyFitIq[ii].re);
+    } else {
+      vals.push_back(iq[ii].im);
+      smoothed.push_back(polyFitIq[ii].im);
+    }
+  }
   double *resid = iResid.data();
-  double *smooth = iSmooth.data();
   if (_plotType == Params::Q_VALS) {
-    vals = qVals;
     resid = qResid.data();
-    smooth = qSmooth.data();
   }
   
   painter.save();
@@ -1174,8 +1306,8 @@ void IqPlot::_plotIQVals(QPainter &painter,
   painter.restore();
   
   // plot regression filter as appropriate
-
-  if (_useRegrFilt) {
+  
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
     
     // plot the polynomial fit
     
@@ -1187,7 +1319,7 @@ void IqPlot::_plotIQVals(QPainter &painter,
     painter.setPen(pen);
     QVector<QPointF> pts;
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      QPointF pt(ii, smooth[ii]);
+      QPointF pt(ii, smoothed[ii]);
       pts.push_back(pt);
     }
     _zoomWorld.drawLines(painter, pts);
@@ -1214,17 +1346,11 @@ void IqPlot::_plotIQVals(QPainter &painter,
     vector<string> legends;
     snprintf(text, 1024, "Regr-order: %d", _regrOrderInUse);
     legends.push_back(text);
-    snprintf(text, 1024, "PwrUnfilt(dBm): %.2f", dbmUnfilt);
-    legends.push_back(text);
-    snprintf(text, 1024, "PwrFilt(dBm): %.2f", dbmFilt);
-    legends.push_back(text);
-    snprintf(text, 1024, "CSR(dB): %.2f", csrDb);
-    legends.push_back(text);
     if (_legendsOn) {
       _zoomWorld.drawLegendsTopLeft(painter, legends);
     }
 
-  } // if (_useRegrFilt)
+  } // if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION)
 
   // draw the title
 
@@ -1424,32 +1550,42 @@ void IqPlot::_plotPhasor(QPainter &painter,
  * compute the spectrum
  */
 
-void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
-                                   double *power,
-                                   double *dbm)
+void IqPlot::_computePowerSpectrum(const RadarComplex_t *iqIn,
+                                   RadarComplex_t *iqFilt,
+                                   RadarComplex_t *iqNotched,
+                                   double *dbm,
+                                   double *dbmFilt,
+                                   double &filterRatio,
+                                   double &spectralNoise,
+                                   double &spectralSnr)
   
 {
 
   // init
   
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    power[ii] = 1.0e-12;
     dbm[ii] = -120.0;
+    dbmFilt[ii] = -120.0;
   }
 
-  // apply window to time series
-  
-  TaArray<RadarComplex_t> iqWindowed_;
-  RadarComplex_t *iqWindowed = iqWindowed_.alloc(_nSamples);
-  _applyWindow(iq, iqWindowed, _nSamples);
-  
   // compute power spectrum
   
   TaArray<RadarComplex_t> powerSpec_;
   RadarComplex_t *powerSpec = powerSpec_.alloc(_nSamples);
   RadarFft fft(_nSamples);
-  fft.fwd(iqWindowed, powerSpec);
+  fft.fwd(iqIn, powerSpec);
   fft.shift(powerSpec);
+  
+  // compute infiltered power
+  
+  for (size_t ii = 0; ii < _nSamples; ii++) {
+    double power = RadarComplex::power(powerSpec[ii]);
+    if (power <= 1.0e-12) {
+      dbm[ii] = -120.0;
+    } else {
+      dbm[ii] = 10.0 * log10(power);
+    }
+  }
   
   // set up filtering
   
@@ -1481,61 +1617,64 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
   
   // filter as appropriate
   
-  _regrOrderInUse = 0;
-  if (_useAdaptFilt) {
+  TaArray<double> powerFilt_;
+  double *powerFilt = powerFilt_.alloc(_nSamples);
 
-    // adaptive filtering takes precedence over regression
-    
-    TaArray<RadarComplex_t> filtAdaptWindowed_;
-    RadarComplex_t *filtAdaptWindowed = filtAdaptWindowed_.alloc(_nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
-    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(), fft,
-                                iqWindowed, NULL,
+  _regrOrderInUse = 0;
+  if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_ADAPTIVE) {
+
+    // adaptive spectral filter
+
+    ClutFilter clutFilt;
+    moments.applyAdaptiveFilter(_nSamples, _beam->getPrt(),
+                                clutFilt, fft,
+                                iqIn,
                                 calibNoise,
-                                filtAdaptWindowed, NULL,
+                                _beam->getNyquist(),
+                                iqFilt, iqNotched,
                                 filterRatio,
                                 spectralNoise,
                                 spectralSnr);
     
     TaArray<RadarComplex_t> filtAdaptSpec_;
     RadarComplex_t *filtAdaptSpec = filtAdaptSpec_.alloc(_nSamples);
-    fft.fwd(filtAdaptWindowed, filtAdaptSpec);
+    fft.fwd(iqFilt, filtAdaptSpec);
     fft.shift(filtAdaptSpec);
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      power[ii] = RadarComplex::power(filtAdaptSpec[ii]);
+      powerFilt[ii] = RadarComplex::power(filtAdaptSpec[ii]);
     }
     
-  } else if (_useRegrFilt) {
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_REGRESSION) {
 
-    // regression
+    // regression filter
 
+    moments.setUseRegressionFilter(_regrNotchInterpMethod, -120.0);
+    
     ForsytheRegrFilter regrF;
+    bool orderAuto = true;
+    if (_regrOrder > 2) {
+      orderAuto = false;
+    }
+ 
     if (_beam->getIsStagPrt()) {
       regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
-                           _params.regression_filter_determine_order_from_cnr,
-                           _params.regression_filter_specified_polynomial_order,
+                           orderAuto, _regrOrder,
                            _regrClutWidthFactor,
                            _regrCnrExponent,
                            _beam->getCalib().getWavelengthCm() / 100.0);
     } else {
       regrF.setup(_nSamples,
-                  _params.regression_filter_determine_order_from_cnr,
-                  _params.regression_filter_specified_polynomial_order,
+                  orderAuto, _regrOrder,
                   _regrClutWidthFactor,
                   _regrCnrExponent,
                   _beam->getCalib().getWavelengthCm() / 100.0);
     }
     
-    TaArray<RadarComplex_t> filtered_;
-    RadarComplex_t *filtered = filtered_.alloc(_nSamples);
-    double filterRatio, spectralNoise, spectralSnr;
     moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
-                                  regrF, _windowCoeff,
-                                  iq,
+                                  regrF, iqIn,
                                   calibNoise,
-                                  true,
-                                  filtered, NULL,
+                                  iqFilt, NULL,
                                   filterRatio,
                                   spectralNoise,
                                   spectralSnr);
@@ -1543,7 +1682,7 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     
     TaArray<RadarComplex_t> filtRegrWindowed_;
     RadarComplex_t *filtRegrWindowed = filtRegrWindowed_.alloc(_nSamples);
-    _applyWindow(filtered, filtRegrWindowed, _nSamples);
+    _applyWindow(iqFilt, filtRegrWindowed, _nSamples);
     
     TaArray<RadarComplex_t> filtRegrSpec_;
     RadarComplex_t *filtRegrSpec = filtRegrSpec_.alloc(_nSamples);
@@ -1551,7 +1690,28 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     fft.shift(filtRegrSpec);
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      power[ii] = RadarComplex::power(filtRegrSpec[ii]);
+      powerFilt[ii] = RadarComplex::power(filtRegrSpec[ii]);
+    }
+    
+  } else if (_clutterFilterType == RadarMoments::CLUTTER_FILTER_NOTCH) {
+
+    // simple notch filter
+    
+    moments.applyNotchFilter(_nSamples, _beam->getPrt(), fft,
+                             iqIn,
+                             calibNoise,
+                             iqFilt,
+                             filterRatio, spectralNoise, spectralSnr);
+    
+    TaArray<RadarComplex_t> filtNotchSpec_;
+    RadarComplex_t *filtNotchSpec = filtNotchSpec_.alloc(_nSamples);
+    fft.fwd(iqFilt, filtNotchSpec);
+    fft.shift(filtNotchSpec);
+
+    memcpy(iqNotched, iqFilt, _nSamples * sizeof(RadarComplex_t));
+
+    for (size_t ii = 0; ii < _nSamples; ii++) {
+      powerFilt[ii] = RadarComplex::power(filtNotchSpec[ii]);
     }
     
   } else {
@@ -1559,27 +1719,100 @@ void IqPlot::_computePowerSpectrum(const RadarComplex_t *iq,
     // no filtering
     
     for (size_t ii = 0; ii < _nSamples; ii++) {
-      power[ii] = RadarComplex::power(powerSpec[ii]);
+      powerFilt[ii] = RadarComplex::power(powerSpec[ii]);
     }
     
   }
 
-  // compute dbm
+  // compute dbmFilt
   
   for (size_t ii = 0; ii < _nSamples; ii++) {
-    if (power[ii] <= 1.0e-12) {
-      dbm[ii] = -120.0;
+    if (powerFilt[ii] <= 1.0e-12) {
+      dbmFilt[ii] = -120.0;
     } else {
-      dbm[ii] = 10.0 * log10(power[ii]);
+      dbmFilt[ii] = 10.0 * log10(powerFilt[ii]);
     }
   }
 
 }
 
+/*************************************************************************
+ * run the regression filter without interp across notch
+ */
+
+void IqPlot::_runRegressionFilter(ForsytheRegrFilter &regrF,
+                                  const RadarComplex_t *iqIn,
+                                  RadarComplex_t *iqFilt)
+  
+{
+
+  // calibration
+  
+  const IwrfCalib &calib = _beam->getCalib();
+  double calibNoise = 0.0;
+  switch (_rxChannel) {
+    case Params::CHANNEL_HC:
+      calibNoise = pow(10.0, calib.getNoiseDbmHc() / 10.0);
+      break;
+    case Params::CHANNEL_VC:
+      calibNoise = pow(10.0, calib.getNoiseDbmVc() / 10.0);
+      break;
+    case Params::CHANNEL_HX:
+      calibNoise = pow(10.0, calib.getNoiseDbmHx() / 10.0);
+      break;
+    case Params::CHANNEL_VX:
+      calibNoise = pow(10.0, calib.getNoiseDbmVx() / 10.0);
+      break;
+  }
+  
+  // prepare regression filter
+  
+  bool orderAuto = true;
+  if (_regrOrder > 2) {
+    orderAuto = false;
+  }
+  if (_beam->getIsStagPrt()) {
+    regrF.setupStaggered(_nSamples, _beam->getStagM(), _beam->getStagN(),
+                         orderAuto, _regrOrder,
+                         _regrClutWidthFactor,
+                         _regrCnrExponent,
+                         _beam->getCalib().getWavelengthCm() / 100.0);
+  } else {
+    regrF.setup(_nSamples,
+                orderAuto, _regrOrder,
+                _regrClutWidthFactor,
+                _regrCnrExponent,
+                _beam->getCalib().getWavelengthCm() / 100.0);
+  }
+
+  // prepare moments object
+  
+  RadarMoments moments;
+  moments.setNSamples(_nSamples);
+  moments.init(_beam->getPrt(), calib.getWavelengthCm() / 100.0,
+               _beam->getStartRangeKm(), _beam->getGateSpacingKm());
+  moments.setCalib(calib);
+  moments.setClutterWidthMps(_clutModelWidthMps);
+  moments.setClutterInitNotchWidthMps(3.0);
+  moments.setAntennaRate(_beam->getAntennaRate());
+  moments.setUseRegressionFilter(RadarMoments::INTERP_METHOD_NONE, -120.0);
+  RadarFft fft(_nSamples);
+  double filterRatio, spectralNoise, spectralSnr;
+  moments.applyRegressionFilter(_nSamples, _beam->getPrt(), fft,
+                                regrF, iqIn,
+                                calibNoise,
+                                iqFilt, NULL,
+                                filterRatio,
+                                spectralNoise,
+                                spectralSnr);
+  _regrOrderInUse = regrF.getPolyOrder();
+  
+}
+
 ///////////////////////////////////////
 // Apply the window to the time series
 
-void IqPlot::_applyWindow(const RadarComplex_t *iq, 
+void IqPlot::_applyWindow(const RadarComplex_t *iqIn, 
                           RadarComplex_t *iqWindowed,
                           int nSamples)
 {
@@ -1616,7 +1849,7 @@ void IqPlot::_applyWindow(const RadarComplex_t *iq,
 
   // compute power spectrum
   
-  RadarMoments::applyWindow(iq, _windowCoeff, iqWindowed, nSamples);
+  RadarMoments::applyWindow(iqIn, _windowCoeff, iqWindowed, nSamples);
 
 }
   
@@ -1639,6 +1872,12 @@ string IqPlot::getName()
       break;
     case Params::SPECTRAL_PHIDP:
       ptypeStr =  "SPECTRAL_PHIDP";
+      break;
+    case Params::SPECTRAL_RHOHV:
+      ptypeStr =  "SPECTRAL_RHOHV";
+      break;
+    case Params::SPECTRAL_SZ864:
+      ptypeStr =  "SPECTRAL_SZ864";
       break;
     case Params::TS_POWER:
       ptypeStr =  "TS_POWER";
@@ -1692,6 +1931,7 @@ string IqPlot::getXUnits()
     case Params::SPECTRAL_PHASE:
     case Params::SPECTRAL_ZDR:
     case Params::SPECTRAL_PHIDP:
+    case Params::SPECTRAL_RHOHV:
     case Params::TS_POWER:
     case Params::TS_PHASE:
     case Params::I_VALS:
@@ -1719,6 +1959,8 @@ string IqPlot::getYUnits()
       return "dB";
     case Params::SPECTRAL_PHIDP:
       return "deg";
+    case Params::SPECTRAL_RHOHV:
+      return "";
     case Params::TS_POWER:
       return "dbm";
     case Params::TS_PHASE:
@@ -1730,33 +1972,6 @@ string IqPlot::getYUnits()
       return "volts";
     case Params::PHASOR:
       return "volts";
-    default:
-      return "";
-  }
-}
-
-//////////////////////////////////
-// get fft window name
-
-string IqPlot::getFftWindowName()
-{
-  switch (_fftWindow) {
-    case Params::FFT_WINDOW_RECT:
-      return "Rectangular";
-    case Params::FFT_WINDOW_VONHANN:
-      return "VonHann";
-    case Params::FFT_WINDOW_BLACKMAN:
-      return "Blackman";
-    case Params::FFT_WINDOW_BLACKMAN_NUTTALL:
-      return "Blackman-Nuttall";
-    case Params::FFT_WINDOW_TUKEY_10:
-      return "Tukey-10";
-    case Params::FFT_WINDOW_TUKEY_20:
-      return "Tukey-20";
-    case Params::FFT_WINDOW_TUKEY_30:
-      return "Tukey-30";
-    case Params::FFT_WINDOW_TUKEY_50:
-      return "Tukey-50";
     default:
       return "";
   }
@@ -1805,33 +2020,6 @@ void IqPlot::setWorldLimitsY(double yMinWorld,
 }
 
 /*************************************************************************
- * set the zoom limits, from pixel space
- */
-
-void IqPlot::setZoomLimits(int xMin,
-                           int yMin,
-                           int xMax,
-                           int yMax)
-{
-  _zoomWorld.setZoomLimits(xMin, yMin, xMax, yMax);
-  _isZoomed = true;
-}
-
-void IqPlot::setZoomLimitsX(int xMin,
-                            int xMax)
-{
-  _zoomWorld.setZoomLimitsX(xMin, xMax);
-  _isZoomed = true;
-}
-
-void IqPlot::setZoomLimitsY(int yMin,
-                            int yMax)
-{
-  _zoomWorld.setZoomLimitsY(yMin, yMax);
-  _isZoomed = true;
-}
-
-/*************************************************************************
  * Protected methods
  *************************************************************************/
 
@@ -1857,8 +2045,6 @@ void IqPlot::_drawOverlays(QPainter &painter, double selectedRangeKm)
 
   _zoomWorld.drawAxisLeft(painter, getYUnits(), 
                           true, true, true, _yGridLinesOn);
-
-  // _zoomWorld.drawYAxisLabelLeft(painter, "Range");
 
   painter.restore();
 

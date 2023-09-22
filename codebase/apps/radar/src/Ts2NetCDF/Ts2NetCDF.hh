@@ -138,7 +138,8 @@ private:
   double _az;
   double _prt;
   double _phaseDiff;
-
+  double _txPhaseDeg;
+  
   // meta data arrays
 
   vector<int> _nGatesRay;
@@ -151,6 +152,7 @@ private:
   vector<int> _transitionFlagArrayHc;
   vector<float> _burstMagArrayHc;
   vector<float> _burstArgArrayHc;
+  vector<float> _txPhaseArrayHc;
 
   vector<double> _timeArrayVc, _dtimeArrayVc;
   vector<float> _elArrayVc, _azArrayVc, _fixedAngleArrayVc;
@@ -160,6 +162,7 @@ private:
   vector<int> _transitionFlagArrayVc;
   vector<float> _burstMagArrayVc;
   vector<float> _burstArgArrayVc;
+  vector<float> _txPhaseArrayVc;
 
   // IQ data
 

@@ -582,6 +582,10 @@ private:
   vector<double> _geoRollRate;
   vector<double> _geoDriveAngle1;
   vector<double> _geoDriveAngle2;
+  vector<double> _geoTrackRelRot;
+  vector<double> _geoTrackRelTilt;
+  vector<double> _geoTrackRelAz;
+  vector<double> _geoTrackRelEl;
 
   // field meta-data
   
@@ -638,6 +642,7 @@ private:
   int _readGeorefVariables();
   void _clearRayVariables();
   int _readRayVariables();
+  int _checkSweepIndices();
   int _createRays(const string &path);
   int _readFrequencyVariable();
   void _readRayGateGeom();
@@ -698,9 +703,11 @@ private:
 
   int _addFl64FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
+                          double scale, double offset,
                           bool isQualifier = false);
   int _addFl32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,
+                          double scale, double offset,
                           bool isQualifier = false);
   int _addSi32FieldToRays(Nc3Var* var,
                           const string &name, const string &units,

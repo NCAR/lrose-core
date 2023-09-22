@@ -1334,7 +1334,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS");
+    tt->comment_hdr = tdrpStrDup("MOMENTS COMPUTATIONS and BEAM DWELL DEFINITION");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -1345,7 +1345,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("moments_params");
     tt->descr = tdrpStrDup("Moments algorithm parameters.");
-    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nSPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nSPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nCONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam.");
+    tt->help = tdrpStrDup("Sets the moments algorithm parameters by searching through the list of available options.\n\nSEARCHING FOR CORRECT ENTRY IN LIST: we check 5 possible conditions: (a) scan_mode, (b) prf (pulses per second), (c) antenna rate in degrees/sec, (d) xmit_rcv_mode and (e) scan_name.\nThe specified scan mode is checked against the mode in the incoming data.\nSimilarly for the specified scan name, which is checked against the segment_scan_name in the IWRF time series scan_segment header.\nTo ensure that the data will always be processed, include as the last option a default entry in which none of the checks are performed.\n\nPROCESSING OPTIONS:\n(a) beam_n_samples: number of hits.\n(b) index_the_beams: compute beams indexed on evenly-spaced angles.\n(c) index_resolution: angular resolution of the indexed beams.\n(d) min_antenna_rate_for_indexing (deg/sec): if the antenna rate is less than this value, non-indexed beams will be used.\n(e) window: window to be applied to time series. Note that if the VONHANN or BLACKMAN windows are used, beam_n_samples is automatically adjusted to account for the fact that the window concentrates the power in the central part of the time series. The adjustment corrects beam_n_samples by computing the fraction of the window in which 90% of the power occurs. For the VONHANN window this factor is just below 2.0, and for the BLACKMAN window it is just above 2.0. TUKEY_10 refers to a Tukey window with alpha of 0.1. Similarly TUKEY_20 means alpha is 0.2, etc.\n(f) switching_receiver: DEPRECATED (NO LONGER USED), we assuming a switching receiver for the following modes: DP_ALT_HV_CO_ONLY, DP_ALT_HV_CO_CROSS, DP_SIM_HV_SWITCHED_HV.\n(g) xmit_rcv_mode:  mode for xmit and receive for polarization diversity\n(h) apply_clutter_filter: should we apply clutter filtering?\n(i) apply_sz: apply phase decoding? See PHASE DECODING later in this parameter file.\n\nxmit_rcv_mode options:\n SINGLE_POL: single polarization, H channel.\n SINGLE_POL_V: single polarization, V channel.\n DP_ALT_HV_CO_ONLY: Dual pol, alternating transmission, copolar receiver only (e.g. CP2 S-band)\n DP_ALT_HV_CO_CROSS: Dual pol, alternating transmission, co-polar and cross-polar receivers (e.g. SPOL with Mitch Switch and receiver in switching mode, CHILL)\n DP_ALT_HV_FIXED_HV: Dual pol, alternating transmission, fixed H and V receivers (e.g. SPOL with Mitch Switch and receivers in fixed mode)\n DP_SIM_HV_FIXED_HV: Dual pol, simultaneous transmission, fixed H and V receivers (e.g. NEXRAD upgrade, SPOL with T and receivers in fixed mode)\n DP_SIM_HV_SWITCHED_HV: Dual pol, simultaneous transmission, switching H and V receivers (e.g. SPOL with T and receivers in switching mode)\n DP_H_ONLY_FIXED_HV: Dual pol, H transmission, fixed H and V receivers (e.g. CP2 X band)\n DP_V_ONLY_FIXED_HV: Dual pol, V transmission, fixed H and V receivers\n\nchange_vel_sign: Option to change the sign of the velocity field. For some radars, the signal processing is set up in such a way that the velocity sign is incorrect. Set this flag to TRUE to change the sign.\n\nproc_flags: special processing options, not active yet.\n\nbeam_method:\nSPECIFY_N_SAMPLES:\n  take the next N samples to form the beam;\nSPECIFY_ANGLE:\n  check the scanning angles, use those pulses that traverse the specified angular arc;\nCONSTANT_STEERING_ANGLE:\n  process all pulses with a constant azimuth and elevation - this applies to some electronically-steered radars, where the beam is steered to a fixed angle for a while, and then jumps to a different pointing direction. We use all of the pulses with a constant steering angle to form the beam;\nCONSTANT_PULSE_WIDTH: create beams (dwells) with with constant pulse width. If the pulse width changes we move to a new dwell. Also, optionally specify the pulase width and ignore pulses with a different width.");
     tt->array_offset = (char *) &_moments_params - &_start_;
     tt->array_n_offset = (char *) &moments_params_n - &_start_;
     tt->is_array = TRUE;
@@ -1428,7 +1428,7 @@
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_moments_params->beam_method - (char *) _moments_params;
         tt->struct_def.fields[8].enum_def.name = tdrpStrDup("beam_method_t");
-        tt->struct_def.fields[8].enum_def.nfields = 3;
+        tt->struct_def.fields[8].enum_def.nfields = 4;
         tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("BEAM_SPECIFY_N_SAMPLES");
@@ -1437,6 +1437,8 @@
         tt->struct_def.fields[8].enum_def.fields[1].val = BEAM_SPECIFY_ANGLE;
         tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("BEAM_CONSTANT_STEERING_ANGLE");
         tt->struct_def.fields[8].enum_def.fields[2].val = BEAM_CONSTANT_STEERING_ANGLE;
+        tt->struct_def.fields[8].enum_def.fields[3].name = tdrpStrDup("BEAM_CONSTANT_PULSE_WIDTH");
+        tt->struct_def.fields[8].enum_def.fields[3].val = BEAM_CONSTANT_PULSE_WIDTH;
       tt->struct_def.fields[9].ftype = tdrpStrDup("int");
       tt->struct_def.fields[9].fname = tdrpStrDup("beam_n_samples");
       tt->struct_def.fields[9].ptype = INT_TYPE;
@@ -1678,28 +1680,28 @@
     tt->single_val.i = 128;
     tt++;
     
-    // Parameter 'control_n_samples_from_time_series'
+    // Parameter 'specify_pulse_width'
     // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("control_n_samples_from_time_series");
-    tt->descr = tdrpStrDup("Option to control n_samples by using the integration_cycle_pulses value in the time series.");
-    tt->help = tdrpStrDup("If true, the number of samples will be determined by using the value of integration_cycle_pulses in the time series. If false, the beam_n_samples specified in moments_params will be used.");
-    tt->val_offset = (char *) &control_n_samples_from_time_series - &_start_;
+    tt->param_name = tdrpStrDup("specify_pulse_width");
+    tt->descr = tdrpStrDup("Option to specify the pulse width.");
+    tt->help = tdrpStrDup("Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. See 'fixed_pulse_width_us'. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &specify_pulse_width - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'control_xmit_rcv_mode_from_time_series'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'fixed_pulse_width_us'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("control_xmit_rcv_mode_from_time_series");
-    tt->descr = tdrpStrDup("Option to control the xmit/rcv mode by using the xmit_rcv_mode value in the time series.");
-    tt->help = tdrpStrDup("If true, the moments will be computed according to the xmit_rcv_mode value in the time series. If false, the xmit_rcv_mode in the moments_params will be used.");
-    tt->val_offset = (char *) &control_xmit_rcv_mode_from_time_series - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("fixed_pulse_width_us");
+    tt->descr = tdrpStrDup("Specified pulse width in microseconds.");
+    tt->help = tdrpStrDup("See 'specify_pulse_width'. Only applicable if beam_method = BEAM_CONSTANT_PULSE_WIDTH. Pulses with different pulse widths are discarded.");
+    tt->val_offset = (char *) &fixed_pulse_width_us - &_start_;
+    tt->single_val.d = 1;
     tt++;
     
     // Parameter 'control_beam_indexing_from_time_series'
@@ -1723,6 +1725,30 @@
     tt->descr = tdrpStrDup("Option to discard beams that cannot indexed.");
     tt->help = tdrpStrDup("Sometimes, when the antenna moves too slowly, it is not possible to index the beams. In this case we normally revert to non-indexed beams, so that we can at least get some beams from the system. If this parameter is true, we will discard non-indexed beams and only include indexed beams in the output data.");
     tt->val_offset = (char *) &discard_non_indexed_beams - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'control_n_samples_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("control_n_samples_from_time_series");
+    tt->descr = tdrpStrDup("Option to control n_samples by using the integration_cycle_pulses value in the time series.");
+    tt->help = tdrpStrDup("If true, the number of samples will be determined by using the value of integration_cycle_pulses in the time series. If false, the beam_n_samples specified in moments_params will be used.");
+    tt->val_offset = (char *) &control_n_samples_from_time_series - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'control_xmit_rcv_mode_from_time_series'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("control_xmit_rcv_mode_from_time_series");
+    tt->descr = tdrpStrDup("Option to control the xmit/rcv mode by using the xmit_rcv_mode value in the time series.");
+    tt->help = tdrpStrDup("If true, the moments will be computed according to the xmit_rcv_mode value in the time series. If false, the xmit_rcv_mode in the moments_params will be used.");
+    tt->val_offset = (char *) &control_xmit_rcv_mode_from_time_series - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -2681,6 +2707,30 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
+    // Parameter 'clutter_filter_type'
+    // ctype is '_clutter_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("clutter_filter_type");
+    tt->descr = tdrpStrDup("Type of clutter filter to use.");
+    tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
+    tt->val_offset = (char *) &clutter_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+      tt->enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+      tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+      tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+    tt->single_val.e = CLUTTER_FILTER_ADAPTIVE;
+    tt++;
+    
     // Parameter 'clutter_model_width_in_adaptive_filter'
     // ctype is 'double'
     
@@ -2727,18 +2777,6 @@
     tt->help = tdrpStrDup("Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.");
     tt->val_offset = (char *) &min_snr_db_for_residue_correction - &_start_;
     tt->single_val.d = 75;
-    tt++;
-    
-    // Parameter 'use_polynomial_regression_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_polynomial_regression_clutter_filter");
-    tt->descr = tdrpStrDup("Option to apply a regression clutter filter.");
-    tt->help = tdrpStrDup("For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.");
-    tt->val_offset = (char *) &use_polynomial_regression_clutter_filter - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'regression_filter_determine_order_from_cnr'
@@ -2795,34 +2833,44 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("regression_filter_min_cnr_db");
-    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
-    tt->help = tdrpStrDup("As a first step, we compute the CNR the central 3 spectral points. If the CNR is below this threshold, we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->descr = tdrpStrDup("Min valid CNR - Clutter-to-Noise-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CNR from the central 3 spectral points. If the CNR is below this threshold, and the CSR is below min_csr (see below) we do not apply the filter at all, and simply return the unfiltered spectrum. This test");
     tt->val_offset = (char *) &regression_filter_min_cnr_db - &_start_;
-    tt->single_val.d = -5;
+    tt->single_val.d = 0;
     tt++;
     
-    // Parameter 'regression_filter_interp_across_notch'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'regression_filter_min_csr_db'
+    // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("regression_filter_interp_across_notch");
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_min_csr_db");
+    tt->descr = tdrpStrDup("Min valid CSR - Clutter-to-Signal-Ratio - for applying the filter (dB).");
+    tt->help = tdrpStrDup("As a first step, we compute the CSR from the central 3 spectral points. If the CSR is below this threshold, and the CNR is below min_cnr (see above) we do not apply the filter at all, and simply return the unfiltered spectrum.");
+    tt->val_offset = (char *) &regression_filter_min_csr_db - &_start_;
+    tt->single_val.d = -15;
+    tt++;
+    
+    // Parameter 'regression_filter_notch_interp_method'
+    // ctype is '_notch_interp_method_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("regression_filter_notch_interp_method");
     tt->descr = tdrpStrDup("For the regression filter, option to interpolate power across the notch.");
-    tt->help = tdrpStrDup("If true, the spectral power in the notch created by the filter will be interpolated using values to each side of the notch.");
-    tt->val_offset = (char *) &regression_filter_interp_across_notch - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'use_simple_notch_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_simple_notch_clutter_filter");
-    tt->descr = tdrpStrDup("Option to use a simple notch for clutter filtering.");
-    tt->help = tdrpStrDup("If false, spectral adaptive clutter filtering is used. If true, a simple notch is used instead. The width is specified in notch_filter_width_mps. The depth of the notch is down to the calibrated noise floor.");
-    tt->val_offset = (char *) &use_simple_notch_clutter_filter - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->help = tdrpStrDup("If NONE, no interpolation is performed. If LINEAR, a linear interpolation is performed across the notch. If GAUSSIAN, an iterative Gaussian interpolation is performed across the notch.");
+    tt->val_offset = (char *) &regression_filter_notch_interp_method - &_start_;
+    tt->enum_def.name = tdrpStrDup("notch_interp_method_t");
+    tt->enum_def.nfields = 3;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+      tt->enum_def.fields[0].val = INTERP_METHOD_NONE;
+      tt->enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+      tt->enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+      tt->enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+      tt->enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
+    tt->single_val.e = INTERP_METHOD_GAUSSIAN;
     tt++;
     
     // Parameter 'simple_notch_filter_width_mps'
@@ -3811,6 +3859,18 @@
     tt->single_val.i = 3;
     tt++;
     
+    // Parameter 'sz1_use_regression_filter'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("sz1_use_regression_filter");
+    tt->descr = tdrpStrDup("Option to use regression filter in SZ decoding.");
+    tt->help = tdrpStrDup("If TRUE, a rectangular filter will be applied to SZ decoding.");
+    tt->val_offset = (char *) &sz1_use_regression_filter - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 22'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -4487,6 +4547,384 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 25");
+    tt->comment_hdr = tdrpStrDup("SPECTRAL CMD");
+    tt->comment_text = tdrpStrDup("You have the option of running the spectral version of CMD, to filter difficult targets such as wind farms. The moments from this step will be stored in variables specifically named for the purpose.");
+    tt++;
+    
+    // Parameter 'run_spectral_cmd'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("run_spectral_cmd");
+    tt->descr = tdrpStrDup("Run the spectral-CMD filtering step.");
+    tt->help = tdrpStrDup("This computes a version of CMD in the FFT space.");
+    tt->val_offset = (char *) &run_spectral_cmd - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'spec_cmd_clutter_filter_type'
+    // ctype is '_clutter_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_clutter_filter_type");
+    tt->descr = tdrpStrDup("Type of clutter filter to use for spectral CMD.");
+    tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
+    tt->val_offset = (char *) &spec_cmd_clutter_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+      tt->enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+      tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+      tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+    tt->single_val.e = CLUTTER_FILTER_NONE;
+    tt++;
+    
+    // Parameter 'spec_cmd_window_type'
+    // ctype is '_window_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_window_type");
+    tt->descr = tdrpStrDup("Window to use for spectral CMD.");
+    tt->help = tdrpStrDup("VONHANN is recommended.");
+    tt->val_offset = (char *) &spec_cmd_window_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("window_t");
+    tt->enum_def.nfields = 8;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("WINDOW_RECT");
+      tt->enum_def.fields[0].val = WINDOW_RECT;
+      tt->enum_def.fields[1].name = tdrpStrDup("WINDOW_VONHANN");
+      tt->enum_def.fields[1].val = WINDOW_VONHANN;
+      tt->enum_def.fields[2].name = tdrpStrDup("WINDOW_BLACKMAN");
+      tt->enum_def.fields[2].val = WINDOW_BLACKMAN;
+      tt->enum_def.fields[3].name = tdrpStrDup("WINDOW_BLACKMAN_NUTTALL");
+      tt->enum_def.fields[3].val = WINDOW_BLACKMAN_NUTTALL;
+      tt->enum_def.fields[4].name = tdrpStrDup("WINDOW_TUKEY_10");
+      tt->enum_def.fields[4].val = WINDOW_TUKEY_10;
+      tt->enum_def.fields[5].name = tdrpStrDup("WINDOW_TUKEY_20");
+      tt->enum_def.fields[5].val = WINDOW_TUKEY_20;
+      tt->enum_def.fields[6].name = tdrpStrDup("WINDOW_TUKEY_30");
+      tt->enum_def.fields[6].val = WINDOW_TUKEY_30;
+      tt->enum_def.fields[7].name = tdrpStrDup("WINDOW_TUKEY_50");
+      tt->enum_def.fields[7].val = WINDOW_TUKEY_50;
+    tt->single_val.e = WINDOW_VONHANN;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernel size in range for computing TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernel size in samples for computing sdev of TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_zdr_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_zdr_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernel size in range for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_sdev_zdr_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_zdr_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_zdr_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernel size in samples for computing sdev of zdr");
+    tt->help = tdrpStrDup("The standard deviation of ZDR is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &spec_cmd_sdev_zdr_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_phidp_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_phidp_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernel size in range for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &spec_cmd_sdev_phidp_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'spec_cmd_sdev_phidp_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_sdev_phidp_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernel size in samples for computing sdev of phidp");
+    tt->help = tdrpStrDup("The standard deviation of PHIDP is computed over a rectangular kernel. This is the number of samples in that kernel.");
+    tt->val_offset = (char *) &spec_cmd_sdev_phidp_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
+    tt++;
+    
+    // Parameter 'Comment 26'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 26");
+    tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
+    tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
+    tt++;
+    
+    // Parameter 'spec_cmd_snr_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_snr_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for SNR in spectral CMD..");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_snr_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_snr_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_snr_interest_map->value - (char *) _spec_cmd_snr_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_snr_interest_map->interest - (char *) _spec_cmd_snr_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 20;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_snr_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_snr_interest_weight");
+    tt->descr = tdrpStrDup("Weight for SNR interest.");
+    tt->help = tdrpStrDup("This weight is used for combining snr interest into the final spectral CMD interest.");
+    tt->val_offset = (char *) &spec_cmd_snr_interest_weight - &_start_;
+    tt->single_val.d = 1.5;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for TDBZ.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_tdbz_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_tdbz_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_tdbz_interest_map->value - (char *) _spec_cmd_tdbz_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_tdbz_interest_map->interest - (char *) _spec_cmd_tdbz_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 30;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 40;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_tdbz_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_tdbz_interest_weight");
+    tt->descr = tdrpStrDup("Weight for TDBZ interest.");
+    tt->help = tdrpStrDup("This weight is used for combining tdbz interest into the final CMD interest.");
+    tt->val_offset = (char *) &spec_cmd_tdbz_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_zdr_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_zdr_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for zdr.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_zdr_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_zdr_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_zdr_sdev_interest_map->value - (char *) _spec_cmd_zdr_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_zdr_sdev_interest_map->interest - (char *) _spec_cmd_zdr_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 3;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 4;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_zdr_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_zdr_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of zdr.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spec_cmd_zdr_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_phidp_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_phidp_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_spec_cmd_phidp_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &spec_cmd_phidp_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_spec_cmd_phidp_sdev_interest_map->value - (char *) _spec_cmd_phidp_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_spec_cmd_phidp_sdev_interest_map->interest - (char *) _spec_cmd_phidp_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 28;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 32;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_phidp_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_phidp_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &spec_cmd_phidp_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'spec_cmd_threshold_for_wtc_detection'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_wtc_detection");
+    tt->descr = tdrpStrDup("Threshold CMD value for detecting clutter.");
+    tt->help = tdrpStrDup("This is aimed mainly at wind turbine clutter. If the mean spectral CMD exceeds this threshold, wind turbine clutter is assumed detected at the gate.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_wtc_detection - &_start_;
+    tt->single_val.d = 0.8;
+    tt++;
+    
+    // Parameter 'spec_cmd_threshold_for_moments'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_moments");
+    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
+    tt->help = tdrpStrDup("Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_moments - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
+    // Parameter 'Comment 27'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 27");
     tt->comment_hdr = tdrpStrDup("OUTPUT TO MOMENTS FMQ");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -4611,7 +5049,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 181;
+        tt->struct_def.fields[0].enum_def.nfields = 193;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBZ");
@@ -4702,280 +5140,304 @@
         tt->struct_def.fields[0].enum_def.fields[42].val = NOISE_BIAS_DB_VC;
         tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("NOISE_BIAS_DB_VX");
         tt->struct_def.fields[0].enum_def.fields[43].val = NOISE_BIAS_DB_VX;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("SNR");
-        tt->struct_def.fields[0].enum_def.fields[44].val = SNR;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SNRHC");
-        tt->struct_def.fields[0].enum_def.fields[45].val = SNRHC;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("SNRHX");
-        tt->struct_def.fields[0].enum_def.fields[46].val = SNRHX;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("SNRVC");
-        tt->struct_def.fields[0].enum_def.fields[47].val = SNRVC;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("SNRVX");
-        tt->struct_def.fields[0].enum_def.fields[48].val = SNRVX;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("DBM");
-        tt->struct_def.fields[0].enum_def.fields[49].val = DBM;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("DBMHC");
-        tt->struct_def.fields[0].enum_def.fields[50].val = DBMHC;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("DBMHX");
-        tt->struct_def.fields[0].enum_def.fields[51].val = DBMHX;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("DBMVC");
-        tt->struct_def.fields[0].enum_def.fields[52].val = DBMVC;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("DBMVX");
-        tt->struct_def.fields[0].enum_def.fields[53].val = DBMVX;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("DBMHC_NS");
-        tt->struct_def.fields[0].enum_def.fields[54].val = DBMHC_NS;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("DBMHX_NS");
-        tt->struct_def.fields[0].enum_def.fields[55].val = DBMHX_NS;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("DBMVC_NS");
-        tt->struct_def.fields[0].enum_def.fields[56].val = DBMVC_NS;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("DBMVX_NS");
-        tt->struct_def.fields[0].enum_def.fields[57].val = DBMVX_NS;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("ZDRM");
-        tt->struct_def.fields[0].enum_def.fields[58].val = ZDRM;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("ZDR");
-        tt->struct_def.fields[0].enum_def.fields[59].val = ZDR;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("ZDR_BIAS");
-        tt->struct_def.fields[0].enum_def.fields[60].val = ZDR_BIAS;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("LDR");
-        tt->struct_def.fields[0].enum_def.fields[61].val = LDR;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("LDRHM");
-        tt->struct_def.fields[0].enum_def.fields[62].val = LDRHM;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("LDRH");
-        tt->struct_def.fields[0].enum_def.fields[63].val = LDRH;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("LDRVM");
-        tt->struct_def.fields[0].enum_def.fields[64].val = LDRVM;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("LDRV");
-        tt->struct_def.fields[0].enum_def.fields[65].val = LDRV;
-        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("LDR_DIFF");
-        tt->struct_def.fields[0].enum_def.fields[66].val = LDR_DIFF;
-        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("LDR_MEAN");
-        tt->struct_def.fields[0].enum_def.fields[67].val = LDR_MEAN;
-        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("RHOHV");
-        tt->struct_def.fields[0].enum_def.fields[68].val = RHOHV;
-        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("RHOHV_NNC");
-        tt->struct_def.fields[0].enum_def.fields[69].val = RHOHV_NNC;
-        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("PHIDP0");
-        tt->struct_def.fields[0].enum_def.fields[70].val = PHIDP0;
-        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[71].val = PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[72].name = tdrpStrDup("PHIDP_COND");
-        tt->struct_def.fields[0].enum_def.fields[72].val = PHIDP_COND;
-        tt->struct_def.fields[0].enum_def.fields[73].name = tdrpStrDup("PHIDP_FILT");
-        tt->struct_def.fields[0].enum_def.fields[73].val = PHIDP_FILT;
-        tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("PHIDP_SDEV_4KDP");
-        tt->struct_def.fields[0].enum_def.fields[74].val = PHIDP_SDEV_4KDP;
-        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("PHIDP_JITTER_4KDP");
-        tt->struct_def.fields[0].enum_def.fields[75].val = PHIDP_JITTER_4KDP;
-        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("ZDR_SDEV_4KDP");
-        tt->struct_def.fields[0].enum_def.fields[76].val = ZDR_SDEV_4KDP;
-        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("KDP");
-        tt->struct_def.fields[0].enum_def.fields[77].val = KDP;
-        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("PSOB");
-        tt->struct_def.fields[0].enum_def.fields[78].val = PSOB;
-        tt->struct_def.fields[0].enum_def.fields[79].name = tdrpStrDup("KDP_HB");
-        tt->struct_def.fields[0].enum_def.fields[79].val = KDP_HB;
-        tt->struct_def.fields[0].enum_def.fields[80].name = tdrpStrDup("RHO_HC_VX");
-        tt->struct_def.fields[0].enum_def.fields[80].val = RHO_HC_VX;
-        tt->struct_def.fields[0].enum_def.fields[81].name = tdrpStrDup("RHO_VC_HX");
-        tt->struct_def.fields[0].enum_def.fields[81].val = RHO_VC_HX;
-        tt->struct_def.fields[0].enum_def.fields[82].name = tdrpStrDup("RHO_VX_HX");
-        tt->struct_def.fields[0].enum_def.fields[82].val = RHO_VX_HX;
-        tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("RHO_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[83].val = RHO_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("CPR_MAG");
-        tt->struct_def.fields[0].enum_def.fields[84].val = CPR_MAG;
-        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("CPR_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[85].val = CPR_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("CPR_LDR");
-        tt->struct_def.fields[0].enum_def.fields[86].val = CPR_LDR;
-        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[87].val = DBZ_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
-        tt->struct_def.fields[0].enum_def.fields[88].val = ZDR_ATTEN_CORRECTION;
-        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[89].val = DBZ_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
-        tt->struct_def.fields[0].enum_def.fields[90].val = ZDR_ATTEN_CORRECTED;
-        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("CPA");
-        tt->struct_def.fields[0].enum_def.fields[91].val = CPA;
-        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("TDBZ");
-        tt->struct_def.fields[0].enum_def.fields[92].val = TDBZ;
-        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("SPIN");
-        tt->struct_def.fields[0].enum_def.fields[93].val = SPIN;
-        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("MAX_TDBZ_SPIN");
-        tt->struct_def.fields[0].enum_def.fields[94].val = MAX_TDBZ_SPIN;
-        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("ZDR_SDEV");
-        tt->struct_def.fields[0].enum_def.fields[95].val = ZDR_SDEV;
-        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("PHIDP_SDEV");
-        tt->struct_def.fields[0].enum_def.fields[96].val = PHIDP_SDEV;
-        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("DBZ_DIFF_SQ");
-        tt->struct_def.fields[0].enum_def.fields[97].val = DBZ_DIFF_SQ;
-        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("DBZ_SPIN_CHANGE");
-        tt->struct_def.fields[0].enum_def.fields[98].val = DBZ_SPIN_CHANGE;
-        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("CMD");
-        tt->struct_def.fields[0].enum_def.fields[99].val = CMD;
-        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("CMD_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[100].val = CMD_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("TDBZ_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[101].val = TDBZ_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("SPIN_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[102].val = SPIN_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("CPA_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[103].val = CPA_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("ZDR_SDEV_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[104].val = ZDR_SDEV_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("PHIDP_SDEV_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[105].val = PHIDP_SDEV_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[106].name = tdrpStrDup("CLUT");
-        tt->struct_def.fields[0].enum_def.fields[106].val = CLUT;
-        tt->struct_def.fields[0].enum_def.fields[107].name = tdrpStrDup("CLUT_2_WX_RATIO");
-        tt->struct_def.fields[0].enum_def.fields[107].val = CLUT_2_WX_RATIO;
-        tt->struct_def.fields[0].enum_def.fields[108].name = tdrpStrDup("SPECTRAL_NOISE");
-        tt->struct_def.fields[0].enum_def.fields[108].val = SPECTRAL_NOISE;
-        tt->struct_def.fields[0].enum_def.fields[109].name = tdrpStrDup("SPECTRAL_SNR");
-        tt->struct_def.fields[0].enum_def.fields[109].val = SPECTRAL_SNR;
-        tt->struct_def.fields[0].enum_def.fields[110].name = tdrpStrDup("NOISE_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[110].val = NOISE_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[111].name = tdrpStrDup("NOISE_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[111].val = NOISE_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[112].name = tdrpStrDup("SIGNAL_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[112].val = SIGNAL_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[113].name = tdrpStrDup("SIGNAL_INTEREST");
-        tt->struct_def.fields[0].enum_def.fields[113].val = SIGNAL_INTEREST;
-        tt->struct_def.fields[0].enum_def.fields[114].name = tdrpStrDup("AIQ_HC");
-        tt->struct_def.fields[0].enum_def.fields[114].val = AIQ_HC;
-        tt->struct_def.fields[0].enum_def.fields[115].name = tdrpStrDup("NIQ_HC");
-        tt->struct_def.fields[0].enum_def.fields[115].val = NIQ_HC;
-        tt->struct_def.fields[0].enum_def.fields[116].name = tdrpStrDup("AIQ_VC");
-        tt->struct_def.fields[0].enum_def.fields[116].val = AIQ_VC;
-        tt->struct_def.fields[0].enum_def.fields[117].name = tdrpStrDup("NIQ_VC");
-        tt->struct_def.fields[0].enum_def.fields[117].val = NIQ_VC;
-        tt->struct_def.fields[0].enum_def.fields[118].name = tdrpStrDup("SZ_TRIP_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[118].val = SZ_TRIP_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[119].name = tdrpStrDup("SZ_LEAKAGE");
-        tt->struct_def.fields[0].enum_def.fields[119].val = SZ_LEAKAGE;
-        tt->struct_def.fields[0].enum_def.fields[120].name = tdrpStrDup("CENSORING_FLAG");
-        tt->struct_def.fields[0].enum_def.fields[120].val = CENSORING_FLAG;
-        tt->struct_def.fields[0].enum_def.fields[121].name = tdrpStrDup("LAG0_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[121].val = LAG0_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[122].name = tdrpStrDup("LAG0_HX_DB");
-        tt->struct_def.fields[0].enum_def.fields[122].val = LAG0_HX_DB;
-        tt->struct_def.fields[0].enum_def.fields[123].name = tdrpStrDup("LAG0_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[123].val = LAG0_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[124].name = tdrpStrDup("LAG0_VX_DB");
-        tt->struct_def.fields[0].enum_def.fields[124].val = LAG0_VX_DB;
-        tt->struct_def.fields[0].enum_def.fields[125].name = tdrpStrDup("LAG0_HC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[125].val = LAG0_HC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[126].name = tdrpStrDup("LAG0_VC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[126].val = LAG0_VC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("LAG0_HC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[127].val = LAG0_HC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("LAG0_VC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[128].val = LAG0_VC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("LAG0_VCHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[129].val = LAG0_VCHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("LAG0_VCHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[130].val = LAG0_VCHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG0_HCVX_DB");
-        tt->struct_def.fields[0].enum_def.fields[131].val = LAG0_HCVX_DB;
-        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG0_HCVX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[132].val = LAG0_HCVX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG1_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[133].val = LAG1_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG1_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[134].val = LAG1_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG1_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[135].val = LAG1_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG1_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[136].val = LAG1_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG1_HCVC_DB");
-        tt->struct_def.fields[0].enum_def.fields[137].val = LAG1_HCVC_DB;
-        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG1_HCVC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[138].val = LAG1_HCVC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG1_VCHC_DB");
-        tt->struct_def.fields[0].enum_def.fields[139].val = LAG1_VCHC_DB;
-        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG1_VCHC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[140].val = LAG1_VCHC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG1_VXHX_DB");
-        tt->struct_def.fields[0].enum_def.fields[141].val = LAG1_VXHX_DB;
-        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG1_VXHX_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[142].val = LAG1_VXHX_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_HC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_HC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_HC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_VC_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_VC_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_VC_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_HC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_HC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_HC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_VC_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_VC_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_VC_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_HC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_HC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[153].val = LAG1_VC_LONG_TO_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[154].val = LAG1_VC_LONG_TO_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[155].val = LAG1_HC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[156].val = LAG1_HC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[157].val = LAG1_VC_SHORT_TO_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[158].val = LAG1_VC_SHORT_TO_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG2_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[159].val = LAG2_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG2_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[160].val = LAG2_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("LAG2_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[161].val = LAG2_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("LAG2_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[162].val = LAG2_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("LAG3_HC_DB");
-        tt->struct_def.fields[0].enum_def.fields[163].val = LAG3_HC_DB;
-        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("LAG3_HC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[164].val = LAG3_HC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("LAG3_VC_DB");
-        tt->struct_def.fields[0].enum_def.fields[165].val = LAG3_VC_DB;
-        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("LAG3_VC_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[166].val = LAG3_VC_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("RVVHH0_DB");
-        tt->struct_def.fields[0].enum_def.fields[167].val = RVVHH0_DB;
-        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("RVVHH0_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[168].val = RVVHH0_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("RVVHH0_LONG_DB");
-        tt->struct_def.fields[0].enum_def.fields[169].val = RVVHH0_LONG_DB;
-        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("RVVHH0_LONG_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[170].val = RVVHH0_LONG_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("RVVHH0_SHORT_DB");
-        tt->struct_def.fields[0].enum_def.fields[171].val = RVVHH0_SHORT_DB;
-        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[172].val = RVVHH0_SHORT_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("SDEV_VV");
-        tt->struct_def.fields[0].enum_def.fields[173].val = SDEV_VV;
-        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("PRT");
-        tt->struct_def.fields[0].enum_def.fields[174].val = PRT;
-        tt->struct_def.fields[0].enum_def.fields[175].name = tdrpStrDup("NUM_PULSES");
-        tt->struct_def.fields[0].enum_def.fields[175].val = NUM_PULSES;
-        tt->struct_def.fields[0].enum_def.fields[176].name = tdrpStrDup("TEST");
-        tt->struct_def.fields[0].enum_def.fields[176].val = TEST;
-        tt->struct_def.fields[0].enum_def.fields[177].name = tdrpStrDup("TEST2");
-        tt->struct_def.fields[0].enum_def.fields[177].val = TEST2;
-        tt->struct_def.fields[0].enum_def.fields[178].name = tdrpStrDup("TEST3");
-        tt->struct_def.fields[0].enum_def.fields[178].val = TEST3;
-        tt->struct_def.fields[0].enum_def.fields[179].name = tdrpStrDup("TEST4");
-        tt->struct_def.fields[0].enum_def.fields[179].val = TEST4;
-        tt->struct_def.fields[0].enum_def.fields[180].name = tdrpStrDup("TEST5");
-        tt->struct_def.fields[0].enum_def.fields[180].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("NOISE_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[44].val = NOISE_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SIGNAL_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[45].val = SIGNAL_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("NOISE_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[46].val = NOISE_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("SIGNAL_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[47].val = SIGNAL_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("NOISE_ACCUM_PHASE_CHANGE");
+        tt->struct_def.fields[0].enum_def.fields[48].val = NOISE_ACCUM_PHASE_CHANGE;
+        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("NOISE_PHASE_CHANGE_ERROR");
+        tt->struct_def.fields[0].enum_def.fields[49].val = NOISE_PHASE_CHANGE_ERROR;
+        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("NOISE_DBM_SDEV");
+        tt->struct_def.fields[0].enum_def.fields[50].val = NOISE_DBM_SDEV;
+        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("NOISE_NCP_MEAN");
+        tt->struct_def.fields[0].enum_def.fields[51].val = NOISE_NCP_MEAN;
+        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SNR");
+        tt->struct_def.fields[0].enum_def.fields[52].val = SNR;
+        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("SNRHC");
+        tt->struct_def.fields[0].enum_def.fields[53].val = SNRHC;
+        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("SNRHX");
+        tt->struct_def.fields[0].enum_def.fields[54].val = SNRHX;
+        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("SNRVC");
+        tt->struct_def.fields[0].enum_def.fields[55].val = SNRVC;
+        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SNRVX");
+        tt->struct_def.fields[0].enum_def.fields[56].val = SNRVX;
+        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("DBM");
+        tt->struct_def.fields[0].enum_def.fields[57].val = DBM;
+        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("DBMHC");
+        tt->struct_def.fields[0].enum_def.fields[58].val = DBMHC;
+        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("DBMHX");
+        tt->struct_def.fields[0].enum_def.fields[59].val = DBMHX;
+        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("DBMVC");
+        tt->struct_def.fields[0].enum_def.fields[60].val = DBMVC;
+        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("DBMVX");
+        tt->struct_def.fields[0].enum_def.fields[61].val = DBMVX;
+        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("DBMHC_NS");
+        tt->struct_def.fields[0].enum_def.fields[62].val = DBMHC_NS;
+        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("DBMHX_NS");
+        tt->struct_def.fields[0].enum_def.fields[63].val = DBMHX_NS;
+        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("DBMVC_NS");
+        tt->struct_def.fields[0].enum_def.fields[64].val = DBMVC_NS;
+        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("DBMVX_NS");
+        tt->struct_def.fields[0].enum_def.fields[65].val = DBMVX_NS;
+        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("ZDRM");
+        tt->struct_def.fields[0].enum_def.fields[66].val = ZDRM;
+        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("ZDR");
+        tt->struct_def.fields[0].enum_def.fields[67].val = ZDR;
+        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("ZDR_BIAS");
+        tt->struct_def.fields[0].enum_def.fields[68].val = ZDR_BIAS;
+        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("LDR");
+        tt->struct_def.fields[0].enum_def.fields[69].val = LDR;
+        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("LDRHM");
+        tt->struct_def.fields[0].enum_def.fields[70].val = LDRHM;
+        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("LDRH");
+        tt->struct_def.fields[0].enum_def.fields[71].val = LDRH;
+        tt->struct_def.fields[0].enum_def.fields[72].name = tdrpStrDup("LDRVM");
+        tt->struct_def.fields[0].enum_def.fields[72].val = LDRVM;
+        tt->struct_def.fields[0].enum_def.fields[73].name = tdrpStrDup("LDRV");
+        tt->struct_def.fields[0].enum_def.fields[73].val = LDRV;
+        tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("LDR_DIFF");
+        tt->struct_def.fields[0].enum_def.fields[74].val = LDR_DIFF;
+        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("LDR_MEAN");
+        tt->struct_def.fields[0].enum_def.fields[75].val = LDR_MEAN;
+        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[76].val = RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("RHOHV_NNC");
+        tt->struct_def.fields[0].enum_def.fields[77].val = RHOHV_NNC;
+        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("PHIDP0");
+        tt->struct_def.fields[0].enum_def.fields[78].val = PHIDP0;
+        tt->struct_def.fields[0].enum_def.fields[79].name = tdrpStrDup("PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[79].val = PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[80].name = tdrpStrDup("PHIDP_COND");
+        tt->struct_def.fields[0].enum_def.fields[80].val = PHIDP_COND;
+        tt->struct_def.fields[0].enum_def.fields[81].name = tdrpStrDup("PHIDP_FILT");
+        tt->struct_def.fields[0].enum_def.fields[81].val = PHIDP_FILT;
+        tt->struct_def.fields[0].enum_def.fields[82].name = tdrpStrDup("PHIDP_SDEV_4KDP");
+        tt->struct_def.fields[0].enum_def.fields[82].val = PHIDP_SDEV_4KDP;
+        tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("PHIDP_JITTER_4KDP");
+        tt->struct_def.fields[0].enum_def.fields[83].val = PHIDP_JITTER_4KDP;
+        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("ZDR_SDEV_4KDP");
+        tt->struct_def.fields[0].enum_def.fields[84].val = ZDR_SDEV_4KDP;
+        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("KDP");
+        tt->struct_def.fields[0].enum_def.fields[85].val = KDP;
+        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("PSOB");
+        tt->struct_def.fields[0].enum_def.fields[86].val = PSOB;
+        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("KDP_HB");
+        tt->struct_def.fields[0].enum_def.fields[87].val = KDP_HB;
+        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("RHO_HC_VX");
+        tt->struct_def.fields[0].enum_def.fields[88].val = RHO_HC_VX;
+        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("RHO_VC_HX");
+        tt->struct_def.fields[0].enum_def.fields[89].val = RHO_VC_HX;
+        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("RHO_VX_HX");
+        tt->struct_def.fields[0].enum_def.fields[90].val = RHO_VX_HX;
+        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("RHO_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[91].val = RHO_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("CPR_MAG");
+        tt->struct_def.fields[0].enum_def.fields[92].val = CPR_MAG;
+        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("CPR_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[93].val = CPR_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("CPR_LDR");
+        tt->struct_def.fields[0].enum_def.fields[94].val = CPR_LDR;
+        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("DBZ_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[95].val = DBZ_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("ZDR_ATTEN_CORRECTION");
+        tt->struct_def.fields[0].enum_def.fields[96].val = ZDR_ATTEN_CORRECTION;
+        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("DBZ_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[97].val = DBZ_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("ZDR_ATTEN_CORRECTED");
+        tt->struct_def.fields[0].enum_def.fields[98].val = ZDR_ATTEN_CORRECTED;
+        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("CPA");
+        tt->struct_def.fields[0].enum_def.fields[99].val = CPA;
+        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("TDBZ");
+        tt->struct_def.fields[0].enum_def.fields[100].val = TDBZ;
+        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("SPIN");
+        tt->struct_def.fields[0].enum_def.fields[101].val = SPIN;
+        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("MAX_TDBZ_SPIN");
+        tt->struct_def.fields[0].enum_def.fields[102].val = MAX_TDBZ_SPIN;
+        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("ZDR_SDEV");
+        tt->struct_def.fields[0].enum_def.fields[103].val = ZDR_SDEV;
+        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("PHIDP_SDEV");
+        tt->struct_def.fields[0].enum_def.fields[104].val = PHIDP_SDEV;
+        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("DBZ_DIFF_SQ");
+        tt->struct_def.fields[0].enum_def.fields[105].val = DBZ_DIFF_SQ;
+        tt->struct_def.fields[0].enum_def.fields[106].name = tdrpStrDup("DBZ_SPIN_CHANGE");
+        tt->struct_def.fields[0].enum_def.fields[106].val = DBZ_SPIN_CHANGE;
+        tt->struct_def.fields[0].enum_def.fields[107].name = tdrpStrDup("CMD");
+        tt->struct_def.fields[0].enum_def.fields[107].val = CMD;
+        tt->struct_def.fields[0].enum_def.fields[108].name = tdrpStrDup("CMD_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[108].val = CMD_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[109].name = tdrpStrDup("TDBZ_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[109].val = TDBZ_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[110].name = tdrpStrDup("SPIN_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[110].val = SPIN_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[111].name = tdrpStrDup("CPA_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[111].val = CPA_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[112].name = tdrpStrDup("ZDR_SDEV_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[112].val = ZDR_SDEV_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[113].name = tdrpStrDup("PHIDP_SDEV_INTEREST");
+        tt->struct_def.fields[0].enum_def.fields[113].val = PHIDP_SDEV_INTEREST;
+        tt->struct_def.fields[0].enum_def.fields[114].name = tdrpStrDup("CLUT");
+        tt->struct_def.fields[0].enum_def.fields[114].val = CLUT;
+        tt->struct_def.fields[0].enum_def.fields[115].name = tdrpStrDup("CLUT_2_WX_RATIO");
+        tt->struct_def.fields[0].enum_def.fields[115].val = CLUT_2_WX_RATIO;
+        tt->struct_def.fields[0].enum_def.fields[116].name = tdrpStrDup("SPECTRAL_NOISE");
+        tt->struct_def.fields[0].enum_def.fields[116].val = SPECTRAL_NOISE;
+        tt->struct_def.fields[0].enum_def.fields[117].name = tdrpStrDup("SPECTRAL_SNR");
+        tt->struct_def.fields[0].enum_def.fields[117].val = SPECTRAL_SNR;
+        tt->struct_def.fields[0].enum_def.fields[118].name = tdrpStrDup("REGR_FILT_POLY_ORDER");
+        tt->struct_def.fields[0].enum_def.fields[118].val = REGR_FILT_POLY_ORDER;
+        tt->struct_def.fields[0].enum_def.fields[119].name = tdrpStrDup("REGR_FILT_CNR_DB");
+        tt->struct_def.fields[0].enum_def.fields[119].val = REGR_FILT_CNR_DB;
+        tt->struct_def.fields[0].enum_def.fields[120].name = tdrpStrDup("AIQ_HC");
+        tt->struct_def.fields[0].enum_def.fields[120].val = AIQ_HC;
+        tt->struct_def.fields[0].enum_def.fields[121].name = tdrpStrDup("NIQ_HC");
+        tt->struct_def.fields[0].enum_def.fields[121].val = NIQ_HC;
+        tt->struct_def.fields[0].enum_def.fields[122].name = tdrpStrDup("AIQ_VC");
+        tt->struct_def.fields[0].enum_def.fields[122].val = AIQ_VC;
+        tt->struct_def.fields[0].enum_def.fields[123].name = tdrpStrDup("NIQ_VC");
+        tt->struct_def.fields[0].enum_def.fields[123].val = NIQ_VC;
+        tt->struct_def.fields[0].enum_def.fields[124].name = tdrpStrDup("SZ_TRIP_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[124].val = SZ_TRIP_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[125].name = tdrpStrDup("SZ_LEAKAGE");
+        tt->struct_def.fields[0].enum_def.fields[125].val = SZ_LEAKAGE;
+        tt->struct_def.fields[0].enum_def.fields[126].name = tdrpStrDup("CENSORING_FLAG");
+        tt->struct_def.fields[0].enum_def.fields[126].val = CENSORING_FLAG;
+        tt->struct_def.fields[0].enum_def.fields[127].name = tdrpStrDup("LAG0_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[127].val = LAG0_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[128].name = tdrpStrDup("LAG0_HX_DB");
+        tt->struct_def.fields[0].enum_def.fields[128].val = LAG0_HX_DB;
+        tt->struct_def.fields[0].enum_def.fields[129].name = tdrpStrDup("LAG0_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[129].val = LAG0_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[130].name = tdrpStrDup("LAG0_VX_DB");
+        tt->struct_def.fields[0].enum_def.fields[130].val = LAG0_VX_DB;
+        tt->struct_def.fields[0].enum_def.fields[131].name = tdrpStrDup("LAG0_HC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[131].val = LAG0_HC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[132].name = tdrpStrDup("LAG0_VC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[132].val = LAG0_VC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[133].name = tdrpStrDup("LAG0_HC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[133].val = LAG0_HC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[134].name = tdrpStrDup("LAG0_VC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[134].val = LAG0_VC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[135].name = tdrpStrDup("LAG0_VCHX_DB");
+        tt->struct_def.fields[0].enum_def.fields[135].val = LAG0_VCHX_DB;
+        tt->struct_def.fields[0].enum_def.fields[136].name = tdrpStrDup("LAG0_VCHX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[136].val = LAG0_VCHX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[137].name = tdrpStrDup("LAG0_HCVX_DB");
+        tt->struct_def.fields[0].enum_def.fields[137].val = LAG0_HCVX_DB;
+        tt->struct_def.fields[0].enum_def.fields[138].name = tdrpStrDup("LAG0_HCVX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[138].val = LAG0_HCVX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[139].name = tdrpStrDup("LAG1_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[139].val = LAG1_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[140].name = tdrpStrDup("LAG1_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[140].val = LAG1_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[141].name = tdrpStrDup("LAG1_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[141].val = LAG1_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[142].name = tdrpStrDup("LAG1_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[142].val = LAG1_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[143].name = tdrpStrDup("LAG1_HCVC_DB");
+        tt->struct_def.fields[0].enum_def.fields[143].val = LAG1_HCVC_DB;
+        tt->struct_def.fields[0].enum_def.fields[144].name = tdrpStrDup("LAG1_HCVC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[144].val = LAG1_HCVC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[145].name = tdrpStrDup("LAG1_VCHC_DB");
+        tt->struct_def.fields[0].enum_def.fields[145].val = LAG1_VCHC_DB;
+        tt->struct_def.fields[0].enum_def.fields[146].name = tdrpStrDup("LAG1_VCHC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[146].val = LAG1_VCHC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[147].name = tdrpStrDup("LAG1_VXHX_DB");
+        tt->struct_def.fields[0].enum_def.fields[147].val = LAG1_VXHX_DB;
+        tt->struct_def.fields[0].enum_def.fields[148].name = tdrpStrDup("LAG1_VXHX_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[148].val = LAG1_VXHX_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[149].name = tdrpStrDup("LAG1_HC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[149].val = LAG1_HC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[150].name = tdrpStrDup("LAG1_HC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[150].val = LAG1_HC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[151].name = tdrpStrDup("LAG1_VC_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[151].val = LAG1_VC_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[152].name = tdrpStrDup("LAG1_VC_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[152].val = LAG1_VC_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[153].name = tdrpStrDup("LAG1_HC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[153].val = LAG1_HC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[154].name = tdrpStrDup("LAG1_HC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[154].val = LAG1_HC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[155].name = tdrpStrDup("LAG1_VC_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[155].val = LAG1_VC_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[156].name = tdrpStrDup("LAG1_VC_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[156].val = LAG1_VC_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[157].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[157].val = LAG1_HC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[158].name = tdrpStrDup("LAG1_HC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[158].val = LAG1_HC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[159].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[159].val = LAG1_VC_LONG_TO_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[160].name = tdrpStrDup("LAG1_VC_LONG_TO_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[160].val = LAG1_VC_LONG_TO_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[161].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[161].val = LAG1_HC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[162].name = tdrpStrDup("LAG1_HC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[162].val = LAG1_HC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[163].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[163].val = LAG1_VC_SHORT_TO_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[164].name = tdrpStrDup("LAG1_VC_SHORT_TO_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[164].val = LAG1_VC_SHORT_TO_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[165].name = tdrpStrDup("LAG2_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[165].val = LAG2_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[166].name = tdrpStrDup("LAG2_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[166].val = LAG2_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[167].name = tdrpStrDup("LAG2_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[167].val = LAG2_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[168].name = tdrpStrDup("LAG2_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[168].val = LAG2_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[169].name = tdrpStrDup("LAG3_HC_DB");
+        tt->struct_def.fields[0].enum_def.fields[169].val = LAG3_HC_DB;
+        tt->struct_def.fields[0].enum_def.fields[170].name = tdrpStrDup("LAG3_HC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[170].val = LAG3_HC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[171].name = tdrpStrDup("LAG3_VC_DB");
+        tt->struct_def.fields[0].enum_def.fields[171].val = LAG3_VC_DB;
+        tt->struct_def.fields[0].enum_def.fields[172].name = tdrpStrDup("LAG3_VC_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[172].val = LAG3_VC_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[173].name = tdrpStrDup("RVVHH0_DB");
+        tt->struct_def.fields[0].enum_def.fields[173].val = RVVHH0_DB;
+        tt->struct_def.fields[0].enum_def.fields[174].name = tdrpStrDup("RVVHH0_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[174].val = RVVHH0_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[175].name = tdrpStrDup("RVVHH0_LONG_DB");
+        tt->struct_def.fields[0].enum_def.fields[175].val = RVVHH0_LONG_DB;
+        tt->struct_def.fields[0].enum_def.fields[176].name = tdrpStrDup("RVVHH0_LONG_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[176].val = RVVHH0_LONG_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[177].name = tdrpStrDup("RVVHH0_SHORT_DB");
+        tt->struct_def.fields[0].enum_def.fields[177].val = RVVHH0_SHORT_DB;
+        tt->struct_def.fields[0].enum_def.fields[178].name = tdrpStrDup("RVVHH0_SHORT_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[178].val = RVVHH0_SHORT_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[179].name = tdrpStrDup("SDEV_VV");
+        tt->struct_def.fields[0].enum_def.fields[179].val = SDEV_VV;
+        tt->struct_def.fields[0].enum_def.fields[180].name = tdrpStrDup("PRT");
+        tt->struct_def.fields[0].enum_def.fields[180].val = PRT;
+        tt->struct_def.fields[0].enum_def.fields[181].name = tdrpStrDup("NUM_PULSES");
+        tt->struct_def.fields[0].enum_def.fields[181].val = NUM_PULSES;
+        tt->struct_def.fields[0].enum_def.fields[182].name = tdrpStrDup("TEST");
+        tt->struct_def.fields[0].enum_def.fields[182].val = TEST;
+        tt->struct_def.fields[0].enum_def.fields[183].name = tdrpStrDup("TEST0");
+        tt->struct_def.fields[0].enum_def.fields[183].val = TEST0;
+        tt->struct_def.fields[0].enum_def.fields[184].name = tdrpStrDup("TEST1");
+        tt->struct_def.fields[0].enum_def.fields[184].val = TEST1;
+        tt->struct_def.fields[0].enum_def.fields[185].name = tdrpStrDup("TEST2");
+        tt->struct_def.fields[0].enum_def.fields[185].val = TEST2;
+        tt->struct_def.fields[0].enum_def.fields[186].name = tdrpStrDup("TEST3");
+        tt->struct_def.fields[0].enum_def.fields[186].val = TEST3;
+        tt->struct_def.fields[0].enum_def.fields[187].name = tdrpStrDup("TEST4");
+        tt->struct_def.fields[0].enum_def.fields[187].val = TEST4;
+        tt->struct_def.fields[0].enum_def.fields[188].name = tdrpStrDup("TEST5");
+        tt->struct_def.fields[0].enum_def.fields[188].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[189].name = tdrpStrDup("TEST6");
+        tt->struct_def.fields[0].enum_def.fields[189].val = TEST6;
+        tt->struct_def.fields[0].enum_def.fields[190].name = tdrpStrDup("TEST7");
+        tt->struct_def.fields[0].enum_def.fields[190].val = TEST7;
+        tt->struct_def.fields[0].enum_def.fields[191].name = tdrpStrDup("TEST8");
+        tt->struct_def.fields[0].enum_def.fields[191].val = TEST8;
+        tt->struct_def.fields[0].enum_def.fields[192].name = tdrpStrDup("TEST9");
+        tt->struct_def.fields[0].enum_def.fields[192].val = TEST9;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
@@ -5569,8 +6031,8 @@
       tt->struct_vals[557].d = 0;
       tt->struct_vals[558].b = pTRUE;
       tt->struct_vals[559].b = pFALSE;
-      tt->struct_vals[560].e = TEST;
-      tt->struct_vals[561].s = tdrpStrDup("TEST");
+      tt->struct_vals[560].e = TEST0;
+      tt->struct_vals[561].s = tdrpStrDup("TEST0");
       tt->struct_vals[562].s = tdrpStrDup("");
       tt->struct_vals[563].d = 0.01;
       tt->struct_vals[564].d = -320;
@@ -5578,11 +6040,11 @@
       tt->struct_vals[566].b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 26'
+    // Parameter 'Comment 28'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 26");
+    tt->param_name = tdrpStrDup("Comment 28");
     tt->comment_hdr = tdrpStrDup("SWEEP TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-sweep and start-of-sweep conditions found in the time series.");
     tt++;
@@ -5659,11 +6121,11 @@
     tt->single_val.i = 32;
     tt++;
     
-    // Parameter 'Comment 27'
+    // Parameter 'Comment 29'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 27");
+    tt->param_name = tdrpStrDup("Comment 29");
     tt->comment_hdr = tdrpStrDup("VOLUME TRANSITIONS");
     tt->comment_text = tdrpStrDup("We can modify the end-of-volume conditions found in the time series. This section only applies if 'use_volume_info_from_time_series' is set to FALSE.");
     tt++;
@@ -5754,11 +6216,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 28'
+    // Parameter 'Comment 30'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 28");
+    tt->param_name = tdrpStrDup("Comment 30");
     tt->comment_hdr = tdrpStrDup("TRANSITION FLAG");
     tt->comment_text = tdrpStrDup("");
     tt++;

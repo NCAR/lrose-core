@@ -6,7 +6,6 @@
 #
 #===========================================================================
 
-from __future__ import print_function
 import os
 import sys
 import shutil
@@ -91,7 +90,10 @@ def main():
         else:
             installPackagesCentos8()
     elif (osType == "almalinux"):
-        installPackagesAlmalinux8()
+        if (osVersion >= 9):
+            installPackagesAlmalinux9()
+        else:
+            installPackagesAlmalinux8()
     elif (osType == "fedora"):
          installPackagesFedora()
     elif (osType == "debian"):
@@ -327,7 +329,68 @@ def installPackagesAlmalinux8():
     # create link for qtmake
 
     shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
-    
+
+
+########################################################################
+# install packages for ALMALINUX 9
+
+packages_alma9 = """
+python3
+tcsh wget git
+emacs rsync python3 mlocate
+platform-python-devel
+m4 make cmake libtool autoconf automake
+gcc gcc-c++ gcc-gfortran glibc-devel
+libX11-devel libXext-devel libcurl-devel
+libpng-devel libtiff-devel zlib-devel libzip-devel
+eigen3-devel armadillo-devel
+expat-devel libcurl-devel openmpi-devel
+flex-devel fftw3-devel
+bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel
+hdf5-devel netcdf-devel
+xorg-x11-xauth
+rpm-build redhat-rpm-config rpm-devel rpmdevtools
+""".split()
+
+# no flex-devel.i686 on 9, replaced with libfl-static.i686
+packages_cid32 = """
+glibc-devel.i686
+libX11-devel.i686
+libXext-devel.i686
+libcurl-devel.i686
+libtiff-devel.i686
+libpng-devel.i686
+libstdc++-devel.i686
+libtiff-devel.i686
+zlib-devel.i686
+expat-devel.i686
+libfl-static.i686
+fftw-devel.i686
+bzip2-devel.i686
+gnuplot ImageMagick-devel ImageMagick-c++-devel
+xorg-x11-fonts-100dpi xorg-x11-fonts-ISO8859-1-100dpi
+xorg-x11-fonts-75dpi xorg-x11-fonts-ISO8859-1-75dpi
+xorg-x11-fonts-misc xrdb
+""".split()
+
+def installPackagesAlmalinux9():
+
+    print("Installing packages for Alma Linux 9...")
+    # install epel
+
+    shellCmd("dnf install -y epel-release")
+
+    # install main packages
+    dnf_install(packages_alma9)
+
+    # install required 32-bit packages for CIDD
+    if (options.cidd32):
+        dnf_install(packages_cid32)
+
+    # create link for qtmake
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+
+
 ########################################################################
 # install packages for FEDORA
 
@@ -591,7 +654,17 @@ def shellCmd(cmd):
 
     if (options.debug):
         print(".... done", file=sys.stderr)
-    
+
+def dnf_install(packages):
+    """
+    Install packages with dnf, breaking it up into groups of 10 so it doesn't
+    crash inside docker.
+    """
+    i = 0
+    while i < len(packages):
+        shellCmd("dnf install -y --allowerasing " + " ".join(packages[i:i+10]))
+        i += 10
+
 ########################################################################
 # Run - entry point
 

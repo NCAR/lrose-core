@@ -669,6 +669,7 @@ void RhiWidget::_storeRayLoc(const RadxRay *ray)
 
   int startIndex = (int) ((_startElev + 180.0) * RayLoc::RAY_LOC_RES);
   int endIndex = (int) ((_endElev + 180.0) * RayLoc::RAY_LOC_RES + 1);
+  if (endIndex >= 3600) endIndex = 3599; // don't go past _rayLoc size
 
   // Clear out any rays in the locations list that are overlapped by the
   // new ray

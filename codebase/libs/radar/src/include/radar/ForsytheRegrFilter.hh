@@ -106,7 +106,7 @@ public:
              double clutterWidthFactor,
              double cnrExponent,
              double wavelengthM);
-  
+
   // set up regression parameters - staggered PRT
   //
   // nSamples: number of samples in IQ time series
@@ -151,6 +151,10 @@ public:
              double prtSecs,
              RadarComplex_t *filteredIq);
   
+  // compute the power using a 3rd order polynomial
+  
+  double computeOrder3ClutPower(const RadarComplex_t *unfiltIq);
+  
   // compute the power from the central 3 points in the FFT
   
   double compute3PtClutPower(const RadarComplex_t *rawIq);
@@ -194,7 +198,7 @@ public:
 protected:
 private:
 
-  static const size_t AUTO_ORDER_MIN_VAL = 3;
+  static const size_t AUTO_ORDER_MIN_VAL = 1;
   static const size_t ORDER_ARRAY_MAX = 32;
   static const size_t NSAMPLES_ARRAY_MAX = 1024;
   

@@ -1417,6 +1417,7 @@ void RadxConvert::_setupWrite(RadxFile &file)
   file.setWriteSubsecsInFileName(_params.include_subsecs_in_file_name);
   file.setWriteScanTypeInFileName(_params.include_scan_type_in_file_name);
   file.setWriteScanNameInFileName(_params.include_scan_name_in_file_name);
+  file.setWriteScanIdInFileName(_params.include_scan_id_in_file_name);
   file.setWriteRangeResolutionInFileName(_params.include_range_resolution_in_file_name);
   file.setWriteVolNumInFileName(_params.include_vol_num_in_file_name);
   file.setWriteHyphenInDateTime(_params.use_hyphen_in_file_name_datetime_part);

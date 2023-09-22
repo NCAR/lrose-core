@@ -1,0 +1,1322 @@
+/**********************************************************************
+ * TDRP params for HcrShortLongCombine
+ **********************************************************************/
+
+//======================================================================
+//
+// Combines multiple dwells from CfRadial files, writes out combined 
+//   dwell files. The goal is to summarize dwells in pointing data - for 
+//   example from vertically-pointing instruments. This can make 
+//   displaying the data in a BSCAN quicker and more efficient.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Program instance for process registration.
+//
+// This application registers with procmap. This is the instance used 
+//   for registration.
+//
+//
+// Type: string
+//
+
+instance = "qc.2hz";
+
+//======================================================================
+//
+// DATA INPUT.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operating mode.
+//
+
+// REALTIME: wait for a new input file.  
+//
+// ARCHIVE: move through the data between the start and end times set on 
+//   the command line. 
+//
+// FILELIST: move through the list of file names specified on the 
+//   command line. 
+// Paths (in ARCHIVE mode, at least) MUST contain a day-directory above 
+//   the data file -- ./data_file.ext will not work as a file path, but 
+//   ./yyyymmdd/data_file.ext will.
+//
+// FMQ: read data from one moments FMQ, combine the dwells and write to 
+//   an output queue.
+//
+//
+// Type: enum
+// Options:
+//     REALTIME
+//     ARCHIVE
+//     FILELIST
+//     FMQ
+//
+
+mode = ARCHIVE;
+
+///////////// input_dir ///////////////////////////////
+//
+// Input directory for searching for files.
+//
+// Files will be searched for in this directory. REALTIME, ARCHIVE and 
+//   FILELIST modes .
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/snow2/rsfdata/projects/socrates/hcr/qc3/cfradial/v3.0_full/10hz";
+
+///////////// max_realtime_data_age_secs //////////////
+//
+// Maximum age of realtime data (secs).
+//
+// Only data less old than this will be used.
+//
+//
+// Type: int
+//
+
+max_realtime_data_age_secs = 300;
+
+///////////// latest_data_info_avail //////////////////
+//
+// Is _latest_data_info file available?.
+//
+// If TRUE, will watch the latest_data_info file. If FALSE, will scan 
+//   the input directory for new files.
+//
+//
+// Type: boolean
+//
+
+latest_data_info_avail = TRUE;
+
+///////////// search_recursively //////////////////////
+//
+// Option to recurse to subdirectories while looking for new files.
+//
+// If TRUE, all subdirectories with ages less than max_dir_age will be 
+//   searched. This may take considerable CPU, so be careful in its use. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+//
+// Type: boolean
+//
+
+search_recursively = TRUE;
+
+///////////// max_recursion_depth /////////////////////
+//
+// Maximum depth for recursive directory scan.
+//
+// Only applies search_recursively is TRUE. This is the max depth, below 
+//   input_dir, to which the recursive directory search will be carried 
+//   out. A depth of 0 will search the top-level directory only. A depth 
+//   of 1 will search the level below the top directory, etc.
+//
+//
+// Type: int
+//
+
+max_recursion_depth = 5;
+
+///////////// wait_between_checks /////////////////////
+//
+// Sleep time between checking directory for input - secs.
+//
+// If a directory is large and files do not arrive frequently, set this 
+//   to a higher value to reduce the CPU load from checking the directory. 
+//   Only applies if latest_data_info_avail is FALSE.
+//
+// Minimum val: 1
+//
+// Type: int
+//
+
+wait_between_checks = 2;
+
+///////////// file_quiescence /////////////////////////
+//
+// File quiescence when checking for files - secs.
+//
+// This allows you to make sure that a file coming from a remote machine 
+//   is complete before reading it. Only applies if latest_data_info_avail 
+//   is FALSE.
+//
+//
+// Type: int
+//
+
+file_quiescence = 5;
+
+///////////// search_ext //////////////////////////////
+//
+// File name extension.
+//
+// If set, only files with this extension will be processed.
+//
+//
+// Type: string
+//
+
+search_ext = "";
+
+///////////// gematronik_realtime_mode ////////////////
+//
+// Set to TRUE if we are watching for Gematronik XML volumes.
+//
+// Gematronik volumes (for a given time) are stored in multiple files, 
+//   one for each field. Therefore, after the time on a volume changes and 
+//   a new field file is detected, we need to wait a while to ensure that 
+//   all of the files have had a chance to be writted to disk. You need to 
+//   set gematronik_realtime_wait_secs to a value in excess of the time it 
+//   takes for all of the files to be written.
+//
+//
+// Type: boolean
+//
+
+gematronik_realtime_mode = FALSE;
+
+///////////// gematronik_realtime_wait_secs ///////////
+//
+// Number of seconds to wait, so that all field files can be written to 
+//   disk before we start to read.
+//
+// See 'gematronik_realtime_mode'.
+//
+//
+// Type: int
+//
+
+gematronik_realtime_wait_secs = 5;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// FMQ from which to read the moments stream.
+//
+// FMQ mode only.
+//
+//
+// Type: string
+//
+
+input_fmq_url = "fmqp:://localhost::/tmp/fmq/input";
+
+///////////// seek_to_end_of_input_fmq ////////////////
+//
+// Option to seek to the end of the input FMQ.
+//
+// If TRUE, the program will seek to the end of the fmq and only read in 
+//   new data. If FALSE, it will start reading from the beginning of the 
+//   FMQ.
+//
+//
+// Type: boolean
+//
+
+seek_to_end_of_input_fmq = TRUE;
+
+//======================================================================
+//
+// READ OPTIONS.
+//
+//======================================================================
+ 
+///////////// aggregate_sweep_files_on_read ///////////
+//
+// Option to aggregate sweep files into a volume on read.
+//
+// If true, and the input data is in sweeps rather than volumes (e.g. 
+//   DORADE), the sweep files from a volume will be aggregated into a 
+//   volume.
+//
+//
+// Type: boolean
+//
+
+aggregate_sweep_files_on_read = FALSE;
+
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range for any ray.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Specified maximim range - km.
+//
+// Gates beyond this range are removed.
+//
+//
+// Type: double
+//
+
+max_range_km = 9999;
+
+///////////// set_field_folds_attribute ///////////////
+//
+// Set the 'field_folds' attribute on selected fields.
+//
+// Useful if this attribute is missing. If a field folds, and averaging 
+//   is performed to combine the dwell, we need to take the folding into 
+//   account.
+//
+//
+// Type: boolean
+//
+
+set_field_folds_attribute = FALSE;
+
+///////////// field_folds /////////////////////////////
+//
+// Specifies fields for adding folding attribute.
+//
+// Specify the field names, plus whether to use the nyquist in the data. 
+//   If use_nyquist is false, specify the lower and upper limit at which 
+//   the field folds.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      boolean use_nyquist;
+//      double fold_limit_lower;
+//      double fold_limit_upper;
+//   }
+//
+// 1D array - variable length.
+//
+
+field_folds = {
+  {
+    field_name = "VEL",
+    use_nyquist = TRUE,
+    fold_limit_lower = 0,
+    fold_limit_upper = 0
+  }
+  ,
+  {
+    field_name = "PHIDP",
+    use_nyquist = FALSE,
+    fold_limit_lower = -90,
+    fold_limit_upper = 90
+  }
+};
+
+//======================================================================
+//
+// SET THE DWELL DETAILS.
+//
+//======================================================================
+ 
+///////////// dwell_time_secs /////////////////////////
+//
+// Specify the output dwell time (secs).
+//
+// Dwells from the input data will be combined to form dwells covering 
+//   the specified time.
+//
+//
+// Type: double
+//
+
+dwell_time_secs = 0.5;
+
+///////////// center_dwell_on_time ////////////////////
+//
+// Option to center the dwell on a multiple of the dwell_time.
+//
+// The dwell will be chosen so that the center time of the dwell will be 
+//   close to an even multiple of the dwell_time_secs. So if for example 
+//   dwell_time_secs is set to 0.5, the dwell centers would be at 0.25, 
+//   0.75, 1.25 secs etc.
+//
+//
+// Type: boolean
+//
+
+center_dwell_on_time = TRUE;
+
+///////////// dwell_stats_method //////////////////////
+//
+// Method for computing stats on the dwell.
+//
+// MIDDLE refers to the middle ray in the dwell sequence. The 
+//   DISCRETE_MODE computes applies only to discrete (integer) fields, and 
+//   returns the most common entry in a discrete data set.
+//
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//     DWELL_STATS_DISCRETE_MODE
+//
+
+dwell_stats_method = DWELL_STATS_MEDIAN;
+
+///////////// dwell_stats_max_fraction_missing ////////
+//
+// Specify the max fraction of the dwell that can have missing data.
+//
+// We compute how much of the dwell is missing for each field. If the 
+//   fraction exceeds this parameter, the combined value will be set to 
+//   missing.
+//
+// Minimum val: 0
+// Maximum val: 1
+//
+// Type: double
+//
+
+dwell_stats_max_fraction_missing = 0.5;
+
+//======================================================================
+//
+// OPTION TO SET STATS METHOD FOR INDIVIDUAL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_stats_method_for_individual_fields //
+//
+// Set the stats method for individual fields.
+//
+// The global stats method is set by the 'dwell_stats_method' parameter. 
+//   If 'set_stats_method_for_individual_fields' is true, we can set the 
+//   stats method on particular fields. Fields not specified here will use 
+//   the global parameter.
+//
+//
+// Type: boolean
+//
+
+set_stats_method_for_individual_fields = TRUE;
+
+///////////// stats_method_fields /////////////////////
+//
+// Stats methods for individual fields.
+//
+// Applies if 'set_stats_method_for_individual_fields' is true. The 
+//   global stats method is set by the 'dwell_stats_method' parameter. 
+//   Fields not specified here will use the global parameter.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string field_name;
+//      dwell_stats_method_t stats_method;
+//        Options:
+//          DWELL_STATS_MEAN
+//          DWELL_STATS_MEDIAN
+//          DWELL_STATS_MAXIMUM
+//          DWELL_STATS_MINIMUM
+//          DWELL_STATS_MIDDLE
+//          DWELL_STATS_DISCRETE_MODE
+//   }
+//
+// 1D array - variable length.
+//
+
+stats_method_fields = {
+  {
+    field_name = "FLAG",
+    stats_method = DWELL_STATS_DISCRETE_MODE
+  }
+};
+
+//======================================================================
+//
+// OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES.
+//
+//======================================================================
+ 
+///////////// radar_name_override /////////////////////
+//
+// Option to override the radar name.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the radar name.
+//
+//
+// Type: string
+//
+
+radar_name_override = "HCR";
+
+///////////// site_name_override //////////////////////
+//
+// Option to override the site name.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the site name.
+//
+//
+// Type: string
+//
+
+site_name_override = "SOCRATES";
+
+///////////// title_override //////////////////////////
+//
+// Option to override the title global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the title attribute.
+//
+//
+// Type: string
+//
+
+title_override = "";
+
+///////////// institution_override ////////////////////
+//
+// Option to override the institution global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the institution attribute.
+//
+//
+// Type: string
+//
+
+institution_override = "";
+
+///////////// references_override /////////////////////
+//
+// Option to override the references global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the references attribute.
+//
+//
+// Type: string
+//
+
+references_override = "";
+
+///////////// source_override /////////////////////////
+//
+// Option to override the source global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the source attribute.
+//
+//
+// Type: string
+//
+
+source_override = "";
+
+///////////// history_override ////////////////////////
+//
+// Option to override the history global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the history attribute.
+//
+//
+// Type: string
+//
+
+history_override = "";
+
+///////////// comment_override ////////////////////////
+//
+// Option to override the comment global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the comment attribute.
+//
+//
+// Type: string
+//
+
+comment_override = "";
+
+///////////// author_override /////////////////////////
+//
+// Option to override the author global attribute.
+//
+// If empty, no effect. If not empty, this string is used to override 
+//   the author attribute.
+//
+//
+// Type: string
+//
+
+author_override = "";
+
+//======================================================================
+//
+// CENSORING.
+//
+// You have the option of censoring the data fields - i.e. setting the 
+//   fields to missing values - at gates which meet certain criteria. If 
+//   this is done correctly, it allows you to preserve the valid data and 
+//   discard the noise, thereby improving compression.
+//
+//======================================================================
+ 
+///////////// apply_censoring /////////////////////////
+//
+// Apply censoring based on field values and thresholds.
+//
+// If TRUE, censoring will be performed. See 'censoring_fields' for 
+//   details on how the censoring is applied.
+//
+//
+// Type: boolean
+//
+
+apply_censoring = FALSE;
+
+///////////// censoring_fields ////////////////////////
+//
+// Fields to be used for determining censoring.
+//
+// Specify the fields to be used to determine whether a gate should be 
+//   censored. The name refers to the input data field names. Valid field 
+//   values lie in the range from min_valid_value to max_valid_value 
+//   inclusive. If the value of a field at a gate lies within this range, 
+//   it is considered valid. Each specified field is examined at each 
+//   gate, and is flagged as valid if its value lies in the valid range. 
+//   These field flags are then combined as follows: first, all of the 
+//   LOGICAL_OR flags are combined, yielding a single combined_or flag 
+//   which is true if any of the LOGICAL_OR fields is true. The 
+//   combined_or flag is then combined with all of the LOGICAL_AND fields, 
+//   yielding a true value only if the combined_or flag and the 
+//   LOGICAL_AND fields are all true. If this final flag is true, then the 
+//   data at the gate is regarded as valid and is retained. If the final 
+//   flag is false, the data at the gate is censored, and all of the 
+//   fields at the gate are set to missing.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string name;
+//      double min_valid_value;
+//      double max_valid_value;
+//      logical_t combination_method;
+//        Options:
+//          LOGICAL_AND
+//          LOGICAL_OR
+//   }
+//
+// 1D array - variable length.
+//
+
+censoring_fields = {
+  {
+    name = "SNR",
+    min_valid_value = 0,
+    max_valid_value = 1000,
+    combination_method = LOGICAL_OR
+  }
+  ,
+  {
+    name = "NCP",
+    min_valid_value = 0.12,
+    max_valid_value = 1000,
+    combination_method = LOGICAL_OR
+  }
+};
+
+///////////// censoring_min_valid_run /////////////////
+//
+// Minimum valid run of non-censored gates.
+//
+// Only active if set to 2 or greater. A check is made to remove short 
+//   runs of noise. Looking along the radial, we compute the number of 
+//   contiguous gates (a 'run') with uncensored data. For the gates in 
+//   this run to be accepted the length of the run must exceed 
+//   censoring_min_valid_run. If the number of gates in a run is less than 
+//   this, then all gates in the run are censored.
+//
+//
+// Type: int
+//
+
+censoring_min_valid_run = 3;
+
+///////////// specify_non_censored_fields /////////////
+//
+// Option to exclude fields from censoring.
+//
+// If censoring is turned on, you also have the option of non censoring 
+//   specified fields. Set this parameter to TRUE, and specify the fields 
+//   to be excluded in the non_censored_fields list.
+//
+//
+// Type: boolean
+//
+
+specify_non_censored_fields = FALSE;
+
+///////////// non_censored_fields /////////////////////
+//
+// List of fields to be excluded from censoring.
+//
+// See 'specify_non_censored_fields'.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+non_censored_fields = {
+ "DBMHC",
+ "DBMVC"
+};
+
+//======================================================================
+//
+// OPTION TO SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// set_output_fields ///////////////////////
+//
+// Set the field names and output encoding.
+//
+// If false, all fields will be used.
+//
+//
+// Type: boolean
+//
+
+set_output_fields = FALSE;
+
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+//
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. Set the long name to a more descriptive name. 
+//   Set the standard name to the CF standard name for this field. If the 
+//   long name or standard name are empty, the existing names are used. If 
+//   SCALING_SPECIFIED, then the scale and offset is used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string long_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_ASIS
+//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//      output_scaling_t output_scaling;
+//        Options:
+//          SCALING_DYNAMIC
+//          SCALING_SPECIFIED
+//      double output_scale;
+//      double output_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "DBZ",
+    output_field_name = "DBZ",
+    long_name = "reflectivity",
+    standard_name = "equivalent_reflectivity_factor",
+    output_units = "dBZ",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    output_field_name = "VEL",
+    long_name = "radial_velocity",
+    standard_name = "radial_velocity_of_scatterers_away_from_instrument",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_ASIS,
+    output_scaling = SCALING_DYNAMIC,
+    output_scale = 0.01,
+    output_offset = 0
+  }
+};
+
+///////////// exclude_specified_fields ////////////////
+//
+// Option to exclude fields in the specified list.
+//
+// If true, the specified fields will be excluded. This may be easier 
+//   than specifiying all of the fields to be included, if that list is 
+//   very long.
+//
+//
+// Type: boolean
+//
+
+exclude_specified_fields = TRUE;
+
+///////////// excluded_fields /////////////////////////
+//
+// List of fields to be excluded.
+//
+// List the names to be excluded.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+excluded_fields = {
+ "MELTING_LAYER",
+ "ICING_LEVEL"
+};
+
+//======================================================================
+//
+// OPTION TO SPECIFY OUTPUT ENCODING FOR ALL FIELDS.
+//
+//======================================================================
+ 
+///////////// set_output_encoding_for_all_fields //////
+//
+// Option to set output encoding for all fields.
+//
+//
+// Type: boolean
+//
+
+set_output_encoding_for_all_fields = TRUE;
+
+///////////// output_encoding /////////////////////////
+//
+// Output encoding for all fields, if requested.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_ENCODING_ASIS
+//     OUTPUT_ENCODING_FLOAT32
+//     OUTPUT_ENCODING_INT32
+//     OUTPUT_ENCODING_INT16
+//     OUTPUT_ENCODING_INT08
+//
+
+output_encoding = OUTPUT_ENCODING_FLOAT32;
+
+//======================================================================
+//
+// OPTION TO APPLY LINEAR TRANSFORM TO SPECIFIED FIELDS.
+//
+// These transforms are fixed. The same transform is applied to all 
+//   files.
+//
+//======================================================================
+ 
+///////////// apply_linear_transforms /////////////////
+//
+// Apply linear transform to specified fields.
+//
+// If true, we will apply a linear transform to selected fields.
+//
+//
+// Type: boolean
+//
+
+apply_linear_transforms = FALSE;
+
+///////////// transform_fields ////////////////////////
+//
+// transform field details.
+//
+// Set the field name, scale and offset to be applied to the selected 
+//   fields. NOTE: the field name is the INPUT field name.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      double transform_scale;
+//      double transform_offset;
+//   }
+//
+// 1D array - variable length.
+//
+
+transform_fields = {
+  {
+    input_field_name = "DBZ",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+  ,
+  {
+    input_field_name = "VEL",
+    transform_scale = 1,
+    transform_offset = 0
+  }
+};
+
+//======================================================================
+//
+// OUTPUT FORMAT.
+//
+//======================================================================
+ 
+///////////// output_format ///////////////////////////
+//
+// Format for the output files.
+//
+//
+// Type: enum
+// Options:
+//     OUTPUT_FORMAT_CFRADIAL
+//     OUTPUT_FORMAT_DORADE
+//     OUTPUT_FORMAT_FORAY
+//     OUTPUT_FORMAT_NEXRAD
+//     OUTPUT_FORMAT_UF
+//     OUTPUT_FORMAT_MDV_RADIAL
+//
+
+output_format = OUTPUT_FORMAT_CFRADIAL;
+
+///////////// netcdf_style ////////////////////////////
+//
+// NetCDF style - if output_format is CFRADIAL.
+//
+// netCDF classic format, netCDF 64-bit offset format, netCDF4 using 
+//   HDF5 format, netCDF4 using HDF5 format but only netCDF3 calls.
+//
+//
+// Type: enum
+// Options:
+//     CLASSIC
+//     NC64BIT
+//     NETCDF4
+//     NETCDF4_CLASSIC
+//
+
+netcdf_style = NETCDF4;
+
+//======================================================================
+//
+// OUTPUT BYTE-SWAPPING and COMPRESSION.
+//
+//======================================================================
+ 
+///////////// output_native_byte_order ////////////////
+//
+// Option to leave data in native byte order.
+//
+// If false, data will be byte-swapped as appropriate on output.
+//
+//
+// Type: boolean
+//
+
+output_native_byte_order = FALSE;
+
+///////////// output_compressed ///////////////////////
+//
+// Option to compress data fields on output.
+//
+// Applies to netCDF and Dorade. UF does not support compression.
+//
+//
+// Type: boolean
+//
+
+output_compressed = TRUE;
+
+//======================================================================
+//
+// OUTPUT OPTIONS FOR CfRadial FILES.
+//
+//======================================================================
+ 
+///////////// output_force_ngates_vary ////////////////
+//
+// Option to force the use of ragged arrays for CfRadial files.
+//
+// Only applies to CfRadial. If true, forces the use of ragged arrays 
+//   even if the number of gates for all rays is constant.
+//
+//
+// Type: boolean
+//
+
+output_force_ngates_vary = FALSE;
+
+///////////// compression_level ///////////////////////
+//
+// Compression level for output, if compressed.
+//
+// Applies to netCDF only. Dorade compression is run-length encoding, 
+//   and has not options..
+//
+//
+// Type: int
+//
+
+compression_level = 4;
+
+//======================================================================
+//
+// WRITE CFRADIAL FILES.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory path.
+//
+// Files will be written to this directory.
+//
+//
+// Type: string
+//
+
+output_dir = "/scr/snow2/rsfdata/projects/socrates/hcr/qc3/cfradial/v3.0_full/2hz";
+
+///////////// output_filename_mode ////////////////////
+//
+// Mode for computing output file name.
+//
+// START_AND_END_TIMES: include both start and end times in file name. 
+//   START_TIME_ONLY: include only start time in file name. END_TIME_ONLY: 
+//   include only end time in file name. SPECIFY_FILE_NAME: file of this 
+//   name will be written to output_dir.
+//
+//
+// Type: enum
+// Options:
+//     START_AND_END_TIMES
+//     START_TIME_ONLY
+//     END_TIME_ONLY
+//     SPECIFY_FILE_NAME
+//
+
+output_filename_mode = START_AND_END_TIMES;
+
+///////////// output_filename_prefix //////////////////
+//
+// Optional prefix for output filename.
+//
+// If empty, the standard prefix will be used.
+//
+//
+// Type: string
+//
+
+output_filename_prefix = "";
+
+///////////// write_output_files_on_time_boundaries ///
+//
+// Option to write the output files on time boundaries.
+//
+// See 'output_file_time_interval_secs'.
+//
+//
+// Type: boolean
+//
+
+write_output_files_on_time_boundaries = TRUE;
+
+///////////// output_file_time_interval_secs //////////
+//
+// Time interval at which files will be written out (secs).
+//
+// See 'split_output_files_on_time'. To make sense, this interval should 
+//   divide evenly into an hour - i.e. 3600.
+//
+//
+// Type: int
+//
+
+output_file_time_interval_secs = 900;
+
+///////////// include_instrument_name_in_file_name ////
+//
+// Option to include the instrument name in the file name.
+//
+// Only applies to CfRadial files. If true, the instrument name will be 
+//   included just before the volume number in the output file name.
+//
+//
+// Type: boolean
+//
+
+include_instrument_name_in_file_name = TRUE;
+
+///////////// include_site_name_in_file_name //////////
+//
+// Option to include the site name in the file name.
+//
+// Only applies to CfRadial files. If true, the site name will be 
+//   included just before the volume number in the output file name.
+//
+//
+// Type: boolean
+//
+
+include_site_name_in_file_name = TRUE;
+
+///////////// include_subsecs_in_file_name ////////////
+//
+// Option to include sub-seconds in date-time part of file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the 
+//   millisecs of the start and end time will be included in the file 
+//   name.
+//
+//
+// Type: boolean
+//
+
+include_subsecs_in_file_name = TRUE;
+
+///////////// include_scan_type_in_file_name //////////
+//
+// Option to include the scan type in the file name.
+//
+// Default is true. Only applies to CfRadial files. If true, the scan 
+//   type (SUR, SEC, RHI, VER etc) will be included in the file name.
+//
+//
+// Type: boolean
+//
+
+include_scan_type_in_file_name = FALSE;
+
+///////////// include_vol_num_in_file_name ////////////
+//
+// Option to include the volume number in the file name.
+//
+// Default is false. Only applies to CfRadial files. If true, the volume 
+//   number is included in the file name, preceded by '_v'.
+//
+//
+// Type: boolean
+//
+
+include_vol_num_in_file_name = FALSE;
+
+///////////// use_hyphen_in_file_name_datetime_part ///
+//
+// Option to use a hyphen between date and time in filename.
+//
+// Default is false. Only applies to CfRadial files. Normally an 
+//   underscore is used.
+//
+//
+// Type: boolean
+//
+
+use_hyphen_in_file_name_datetime_part = FALSE;
+
+///////////// output_filename /////////////////////////
+//
+// Name of output file.
+//
+// Applies only if output_filename_mode is SPECIFY_FILE_NAME. File of 
+//   this name will be written to output_dir.
+//
+//
+// Type: string
+//
+
+output_filename = "cfradial.test.nc";
+
+///////////// append_day_dir_to_output_dir ////////////
+//
+// Add the day directory to the output directory.
+//
+// Path will be output_dir/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_day_dir_to_output_dir = TRUE;
+
+///////////// append_year_dir_to_output_dir ///////////
+//
+// Add the year directory to the output directory.
+//
+// Path will be output_dir/yyyy/yyyymmdd/filename.
+//
+//
+// Type: boolean
+//
+
+append_year_dir_to_output_dir = FALSE;
+
+///////////// write_individual_sweeps /////////////////
+//
+// Option to write out individual sweeps if appropriate.
+//
+// If true, the volume is split into individual sweeps for writing. 
+//   Applies to CfRadial format. This is always true for DORADE format 
+//   files.
+//
+//
+// Type: boolean
+//
+
+write_individual_sweeps = FALSE;
+
+///////////// write_latest_data_info //////////////////
+//
+// Option to write out _latest_data_info files.
+//
+// If true, the _latest_data_info files will be written after the 
+//   converted file is written.
+//
+//
+// Type: boolean
+//
+
+write_latest_data_info = FALSE;
+
+//======================================================================
+//
+// OUTPUT IN FMQ MODE.
+//
+//======================================================================
+ 
+///////////// output_fmq_url //////////////////////////
+//
+// FMQ to which the combined dwells are written.
+//
+// FMQ mode only.
+//
+//
+// Type: string
+//
+
+output_fmq_url = "fmqp:://localhost::/tmp/fmq/output";
+
+///////////// output_fmq_compress /////////////////////
+//
+// Option to compress the output fmq.
+//
+// The default is for no compression.
+//
+//
+// Type: boolean
+//
+
+output_fmq_compress = FALSE;
+
+///////////// output_fmq_n_slots //////////////////////
+//
+// Number of slots in output FMQ.
+//
+//
+// Type: int
+//
+
+output_fmq_n_slots = 5000;
+
+///////////// output_fmq_buf_size /////////////////////
+//
+// Size of buffer in output FMQ.
+//
+//
+// Type: int
+//
+
+output_fmq_buf_size = 100000000;
+
+///////////// output_fmq_write_blocking ///////////////
+//
+// Option to block on write when the radar queue fills up.
+//
+// If false, the program writes data to the output queue without regard 
+//   to whether the reader is keeping up. This mode should usually be used 
+//   in realtime, to avoid holding things up if a client becomes slow. If 
+//   true, the program will not overwrite data in the queue which has not 
+//   been read by the reader. This is recommended for ARCHIVE and FILELIST 
+//   mode. In this mode there should be only one reader. If you need to 
+//   service more than one reader, use Fmq2Fmq in write blocking mode with 
+//   multiple output urls to multiplex the queue.
+//
+//
+// Type: boolean
+//
+
+output_fmq_write_blocking = FALSE;
+
+///////////// output_fmq_data_mapper_report_interval //
+//
+// Number of seconds between reports to DataMapper.
+//
+// If > 0, the program will register with the DataMapper when the output 
+//   FMQs are written to. If <= 0, registration will not be performed.
+//
+//
+// Type: int
+//
+
+output_fmq_data_mapper_report_interval = 5;
+

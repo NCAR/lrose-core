@@ -141,9 +141,13 @@ public:
   inline iwrf_xmit_rcv_mode_t getXmitRcvMode() const {
     return _xmitRcvMode;
   }
-
+  
   inline bool applyClutterFilter() const {
-    return _mparams.apply_clutter_filter;
+    if (_params.clutter_filter_type == Params::CLUTTER_FILTER_NONE) {
+      return false;
+    } else {
+      return _mparams.apply_clutter_filter;
+    }
   }
 
   inline bool applyPhaseDecoding() const { return _mparams.apply_sz; }

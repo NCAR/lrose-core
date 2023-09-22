@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <memory>
 #include <radar/RadarMoments.hh>
 #include <radar/RadarComplex.hh>
 #include <radar/IwrfTsInfo.hh>
@@ -54,6 +55,7 @@
 #include <radar/KdpBringi.hh>
 #include <radar/AtmosAtten.hh>
 #include <radar/PhaseCoding.hh>
+#include <radar/DwellSpectra.hh>
 #include "Params.hh"
 #include "Cmd.hh"
 #include "MomentsMgr.hh"
@@ -102,7 +104,7 @@ public:
             bool endOfVolFlag,
             const AtmosAtten &atmosAtten,
             const IwrfTsInfo &opsInfo,
-            const vector<const IwrfTsPulse *> &pulses);
+            const vector<shared_ptr<IwrfTsPulse>> &pulses);
 
   // destructor
   
@@ -139,6 +141,8 @@ public:
   double getPrtLong() const { return _prtLong; }
   double getPulseWidth() const { return _pulseWidth; }
   double getNyquist() const { return _nyquist; }
+  double getNyquistPrtShort() const { return _nyquistPrtShort; }
+  double getNyquistPrtLong() const { return _nyquistPrtLong; }
   double getUnambigRangeKm() const;
 
   double getMeasXmitPowerDbmH() const { return _measXmitPowerDbmH; }
@@ -205,8 +209,9 @@ private:
 
   // pulse vector
 
-  vector<const IwrfTsPulse *> _pulses;
+  vector<shared_ptr<IwrfTsPulse>> _pulses;
   bool _hasMissingPulses;
+  static pthread_mutex_t _pulseUnpackMutex;
 
   // number of samples
 
@@ -411,6 +416,11 @@ private:
 
   ForsytheRegrFilter *_regrStag;
 
+  // spectral CMD
+
+  bool _specCmdValid;
+  DwellSpectra _specCmd;
+
   // debug printing
   
   static pthread_mutex_t _debugPrintMutex;
@@ -418,7 +428,6 @@ private:
  // private functions
   
   void _freeWindows();
-  void _releasePulses();
   void _prepareForComputeMoments();
   int _getVolNum();
   int _getSweepNum();
@@ -441,8 +450,8 @@ private:
   void _filterSpH();
   void _filterSpV();
   void _filterSpStagPrt();
-  void _filterRegrSpStagPrt();
   void _filterAdapSpStagPrt();
+  void _filterRegrSpStagPrt();
   void _filterSpSz864();
   void _filterDpAltHvCoCross();
   void _filterDpAltHvCoOnly();
@@ -452,6 +461,9 @@ private:
   void _filterDpHOnlyStagPrt();
   void _filterDpVOnlyFixedPrt();
   void _filterDpVOnlyStagPrt();
+
+  int _specCmdInit();
+  void _filtSpecCmdSimHv();
   
   void _computeWindowRValues();
   void _overrideOpsInfo();
@@ -474,7 +486,7 @@ private:
                                      vector<InterestMap::ImPoint> &pts);
 
 
-  void _checkAntennaTransition(const vector<const IwrfTsPulse *> &pulses);
+  void _checkAntennaTransition(const vector<shared_ptr<IwrfTsPulse>> &pulses);
   void _allocGateData(int nGates);
   void _freeGateData();
   void _initFieldData();
@@ -510,7 +522,7 @@ private:
   void _printSelectedMoments();
 
   void _computePhaseDiffs
-    (const vector<const IwrfTsPulse *> &pulseQueue, int maxTrips);
+    (const vector<shared_ptr<IwrfTsPulse>> &pulseQueue, int maxTrips);
 
   void _setNoiseFields();
   void _censorByNoiseFlag();

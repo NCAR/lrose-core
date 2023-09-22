@@ -278,6 +278,11 @@ int Args::parse(int argc, char **argv, string &prog_name)
 	iret = -1;
       }
 	
+    } else if (!strcmp(argv[i], "-check_time_increasing")) {
+      
+      sprintf(tmp_str, "check_for_increasing_time = TRUE;");
+      TDRP_add_override(&override, tmp_str);
+
     } // if
     
   } // i
@@ -298,6 +303,8 @@ void Args::_usage(string &prog_name, ostream &out)
       << "  [--, -h, -help, -man] produce this list.\n"
       << "  [-check_missing ?] check for missing beams\n"
       << "     Specify the max delta angle (deg) for normal ops.\n"
+      << "  [-check_time_increasing ?] check for increaasing time\n"
+      << "     Prints warning if time goes backwards.\n"
       << "  [-data] full plus data - very verbose\n"
       << "  [-d, -debug] print debug messages\n"
       << "  [-f, -files ???] specify input file list.\n"

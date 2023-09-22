@@ -42,6 +42,7 @@
 #include "Beam.hh"
 #include <Fmq/DsFmq.hh>
 #include <Fmq/DsRadarQueue.hh>
+#include <Radx/RadxField.hh>
 class IwrfTsInfo;
 using namespace std;
 
@@ -76,6 +77,12 @@ public:
   // write the beam data
   
   int writeBeam(const Beam &beam);
+
+  // set folding attributes for selected fields
+  
+  void _setFoldingAttr(const Beam &beam,
+                       const Params::output_field_t &ofld,
+                       RadxField &field);
   
   // put flags
   

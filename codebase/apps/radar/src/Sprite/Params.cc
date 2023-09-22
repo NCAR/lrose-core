@@ -1547,7 +1547,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("waterfall_plots");
     tt->descr = tdrpStrDup("Details of waterfall plots for each sub panel.");
-    tt->help = tdrpStrDup("HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.");
+    tt->help = tdrpStrDup("HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood. For the regression filter, set the order to -1 to compute the order automatically in the filter.");
     tt->array_offset = (char *) &_waterfall_plots - &_start_;
     tt->array_n_offset = (char *) &waterfall_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -1555,7 +1555,7 @@
     tt->array_elem_size = sizeof(waterfall_plot_t);
     tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("waterfall_plot_t");
-    tt->struct_def.nfields = 7;
+    tt->struct_def.nfields = 8;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("waterfall_type_t");
@@ -1564,7 +1564,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_waterfall_plots->plot_type - (char *) _waterfall_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("waterfall_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 9;
+        tt->struct_def.fields[0].enum_def.nfields = 17;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("WATERFALL_HC");
@@ -1575,16 +1575,32 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = WATERFALL_HX;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("WATERFALL_VX");
         tt->struct_def.fields[0].enum_def.fields[3].val = WATERFALL_VX;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
-        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_SDEV_ZDR;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
-        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_SDEV_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_CMD");
-        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("WATERFALL_DBZ");
+        tt->struct_def.fields[0].enum_def.fields[4].val = WATERFALL_DBZ;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("WATERFALL_SNR");
+        tt->struct_def.fields[0].enum_def.fields[5].val = WATERFALL_SNR;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("WATERFALL_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[6].val = WATERFALL_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("WATERFALL_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[7].val = WATERFALL_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("WATERFALL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[8].val = WATERFALL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("WATERFALL_TDBZ");
+        tt->struct_def.fields[0].enum_def.fields[9].val = WATERFALL_TDBZ;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("WATERFALL_SDEV_ZDR");
+        tt->struct_def.fields[0].enum_def.fields[10].val = WATERFALL_SDEV_ZDR;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("WATERFALL_SDEV_PHIDP");
+        tt->struct_def.fields[0].enum_def.fields[11].val = WATERFALL_SDEV_PHIDP;
+        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("WATERFALL_TDBZ_INT");
+        tt->struct_def.fields[0].enum_def.fields[12].val = WATERFALL_TDBZ_INT;
+        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("WATERFALL_SDEV_ZDR_INT");
+        tt->struct_def.fields[0].enum_def.fields[13].val = WATERFALL_SDEV_ZDR_INT;
+        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("WATERFALL_SDEV_PHIDP_INT");
+        tt->struct_def.fields[0].enum_def.fields[14].val = WATERFALL_SDEV_PHIDP_INT;
+        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("WATERFALL_CMD");
+        tt->struct_def.fields[0].enum_def.fields[15].val = WATERFALL_CMD;
+        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("WATERFALL_CMD_MEAN");
+        tt->struct_def.fields[0].enum_def.fields[16].val = WATERFALL_CMD_MEAN;
       tt->struct_def.fields[1].ftype = tdrpStrDup("fft_window_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("fft_window");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -1615,11 +1631,23 @@
       tt->struct_def.fields[2].ptype = INT_TYPE;
       tt->struct_def.fields[2].rel_offset = 
         (char *) &_waterfall_plots->median_filter_len - (char *) _waterfall_plots;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[3].fname = tdrpStrDup("use_adaptive_filter");
-      tt->struct_def.fields[3].ptype = BOOL_TYPE;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("clutter_filter_type_t");
+      tt->struct_def.fields[3].fname = tdrpStrDup("clutter_filter_type");
+      tt->struct_def.fields[3].ptype = ENUM_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_waterfall_plots->use_adaptive_filter - (char *) _waterfall_plots;
+        (char *) &_waterfall_plots->clutter_filter_type - (char *) _waterfall_plots;
+        tt->struct_def.fields[3].enum_def.name = tdrpStrDup("clutter_filter_type_t");
+        tt->struct_def.fields[3].enum_def.nfields = 4;
+        tt->struct_def.fields[3].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[3].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[3].enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+        tt->struct_def.fields[3].enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+        tt->struct_def.fields[3].enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+        tt->struct_def.fields[3].enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+        tt->struct_def.fields[3].enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+        tt->struct_def.fields[3].enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+        tt->struct_def.fields[3].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+        tt->struct_def.fields[3].enum_def.fields[3].val = CLUTTER_FILTER_NONE;
       tt->struct_def.fields[4].ftype = tdrpStrDup("double");
       tt->struct_def.fields[4].fname = tdrpStrDup("clutter_model_width_mps");
       tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
@@ -1635,23 +1663,40 @@
       tt->struct_def.fields[6].ptype = INT_TYPE;
       tt->struct_def.fields[6].rel_offset = 
         (char *) &_waterfall_plots->regression_order - (char *) _waterfall_plots;
-    tt->n_struct_vals = 14;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("notch_interp_method_t");
+      tt->struct_def.fields[7].fname = tdrpStrDup("regression_filter_notch_interp_method");
+      tt->struct_def.fields[7].ptype = ENUM_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_waterfall_plots->regression_filter_notch_interp_method - (char *) _waterfall_plots;
+        tt->struct_def.fields[7].enum_def.name = tdrpStrDup("notch_interp_method_t");
+        tt->struct_def.fields[7].enum_def.nfields = 3;
+        tt->struct_def.fields[7].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[7].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[7].enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+        tt->struct_def.fields[7].enum_def.fields[0].val = INTERP_METHOD_NONE;
+        tt->struct_def.fields[7].enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+        tt->struct_def.fields[7].enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+        tt->struct_def.fields[7].enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+        tt->struct_def.fields[7].enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
+    tt->n_struct_vals = 16;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = WATERFALL_HC;
       tt->struct_vals[1].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[2].i = 3;
-      tt->struct_vals[3].b = pFALSE;
+      tt->struct_vals[2].i = 1;
+      tt->struct_vals[3].e = CLUTTER_FILTER_NONE;
       tt->struct_vals[4].d = 0.75;
       tt->struct_vals[5].b = pFALSE;
-      tt->struct_vals[6].i = 3;
-      tt->struct_vals[7].e = WATERFALL_ZDR;
-      tt->struct_vals[8].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[9].i = 3;
-      tt->struct_vals[10].b = pFALSE;
-      tt->struct_vals[11].d = 0.75;
-      tt->struct_vals[12].b = pFALSE;
-      tt->struct_vals[13].i = 3;
+      tt->struct_vals[6].i = -1;
+      tt->struct_vals[7].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[8].e = WATERFALL_ZDR;
+      tt->struct_vals[9].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[10].i = 1;
+      tt->struct_vals[11].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[12].d = 0.75;
+      tt->struct_vals[13].b = pFALSE;
+      tt->struct_vals[14].i = -1;
+      tt->struct_vals[15].e = INTERP_METHOD_GAUSSIAN;
     tt++;
     
     // Parameter 'waterfall_width'
@@ -1676,6 +1721,30 @@
     tt->help = tdrpStrDup("The color scale sits to the right of the data.");
     tt->val_offset = (char *) &waterfall_color_scale_width - &_start_;
     tt->single_val.i = 30;
+    tt++;
+    
+    // Parameter 'waterfall_tdbz_kernel_ngates'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tdbz_kernel_ngates");
+    tt->descr = tdrpStrDup("Kernal size in range for computing TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.");
+    tt->val_offset = (char *) &waterfall_tdbz_kernel_ngates - &_start_;
+    tt->single_val.i = 5;
+    tt++;
+    
+    // Parameter 'waterfall_tdbz_kernel_nsamples'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tdbz_kernel_nsamples");
+    tt->descr = tdrpStrDup("Kernal size in samples for computing sdev of TDBZ");
+    tt->help = tdrpStrDup("The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.");
+    tt->val_offset = (char *) &waterfall_tdbz_kernel_nsamples - &_start_;
+    tt->single_val.i = 3;
     tt++;
     
     // Parameter 'waterfall_sdev_zdr_kernel_ngates'
@@ -1738,6 +1807,30 @@
     tt->single_val.s = tdrpStrDup("../share/color_scales");
     tt++;
     
+    // Parameter 'waterfall_dbz_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_dbz_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for dbz");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_dbz_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbz.colors");
+    tt++;
+    
+    // Parameter 'waterfall_snr_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_snr_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for snr");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_snr_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("snr.colors");
+    tt++;
+    
     // Parameter 'waterfall_dbm_color_scale_name'
     // ctype is 'char*'
     
@@ -1774,6 +1867,30 @@
     tt->single_val.s = tdrpStrDup("phidp.colors");
     tt++;
     
+    // Parameter 'waterfall_rhohv_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_rhohv_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for rhohv");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_rhohv_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("rhohv.colors");
+    tt++;
+    
+    // Parameter 'waterfall_tdbz_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_tdbz_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for TDBZ");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_tdbz_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("dbz.colors");
+    tt++;
+    
     // Parameter 'waterfall_sdev_zdr_color_scale_name'
     // ctype is 'char*'
     
@@ -1798,6 +1915,18 @@
     tt->single_val.s = tdrpStrDup("sdphidp_spectra.colors");
     tt++;
     
+    // Parameter 'waterfall_interest_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_interest_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for interest values");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_interest_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("interest.colors");
+    tt++;
+    
     // Parameter 'waterfall_cmd_color_scale_name'
     // ctype is 'char*'
     
@@ -1808,6 +1937,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &waterfall_cmd_color_scale_name - &_start_;
     tt->single_val.s = tdrpStrDup("cmd_spectra.colors");
+    tt++;
+    
+    // Parameter 'waterfall_cmd_mean_color_scale_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("waterfall_cmd_mean_color_scale_name");
+    tt->descr = tdrpStrDup("Color scale name for CMD SPECTRAL MEAN");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &waterfall_cmd_mean_color_scale_name - &_start_;
+    tt->single_val.s = tdrpStrDup("cmd_mean.colors");
     tt++;
     
     // Parameter 'waterfall_title_font_size'
@@ -2102,7 +2243,7 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("iq_plots");
     tt->descr = tdrpStrDup("Details of IQ plots for each sub panel.");
-    tt->help = tdrpStrDup("SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra.");
+    tt->help = tdrpStrDup("SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra. For the regression filter, set the order to -1 to compute the order automatically in the filter");
     tt->array_offset = (char *) &_iq_plots - &_start_;
     tt->array_n_offset = (char *) &iq_plots_n - &_start_;
     tt->is_array = TRUE;
@@ -2110,7 +2251,7 @@
     tt->array_elem_size = sizeof(iq_plot_t);
     tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("iq_plot_t");
-    tt->struct_def.nfields = 11;
+    tt->struct_def.nfields = 10;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("iq_plot_type_t");
@@ -2119,7 +2260,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_iq_plots->plot_type - (char *) _iq_plots;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iq_plot_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 10;
+        tt->struct_def.fields[0].enum_def.nfields = 12;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRAL_POWER");
@@ -2130,18 +2271,22 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = SPECTRAL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SPECTRAL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[3].val = SPECTRAL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("TS_POWER");
-        tt->struct_def.fields[0].enum_def.fields[4].val = TS_POWER;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("TS_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[5].val = TS_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("I_VALS");
-        tt->struct_def.fields[0].enum_def.fields[6].val = I_VALS;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("Q_VALS");
-        tt->struct_def.fields[0].enum_def.fields[7].val = Q_VALS;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VS_Q");
-        tt->struct_def.fields[0].enum_def.fields[8].val = I_VS_Q;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("PHASOR");
-        tt->struct_def.fields[0].enum_def.fields[9].val = PHASOR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("SPECTRAL_SZ864");
+        tt->struct_def.fields[0].enum_def.fields[5].val = SPECTRAL_SZ864;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_POWER");
+        tt->struct_def.fields[0].enum_def.fields[6].val = TS_POWER;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("TS_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[7].val = TS_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VALS");
+        tt->struct_def.fields[0].enum_def.fields[8].val = I_VALS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("Q_VALS");
+        tt->struct_def.fields[0].enum_def.fields[9].val = Q_VALS;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[10].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[11].val = PHASOR;
       tt->struct_def.fields[1].ftype = tdrpStrDup("rx_channel_t");
       tt->struct_def.fields[1].fname = tdrpStrDup("rx_channel");
       tt->struct_def.fields[1].ptype = ENUM_TYPE;
@@ -2189,11 +2334,23 @@
       tt->struct_def.fields[3].ptype = INT_TYPE;
       tt->struct_def.fields[3].rel_offset = 
         (char *) &_iq_plots->median_filter_len - (char *) _iq_plots;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[4].fname = tdrpStrDup("use_adaptive_filter");
-      tt->struct_def.fields[4].ptype = BOOL_TYPE;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("clutter_filter_type_t");
+      tt->struct_def.fields[4].fname = tdrpStrDup("clutter_filter_type");
+      tt->struct_def.fields[4].ptype = ENUM_TYPE;
       tt->struct_def.fields[4].rel_offset = 
-        (char *) &_iq_plots->use_adaptive_filter - (char *) _iq_plots;
+        (char *) &_iq_plots->clutter_filter_type - (char *) _iq_plots;
+        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("clutter_filter_type_t");
+        tt->struct_def.fields[4].enum_def.nfields = 4;
+        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+        tt->struct_def.fields[4].enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+        tt->struct_def.fields[4].enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+        tt->struct_def.fields[4].enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+        tt->struct_def.fields[4].enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+        tt->struct_def.fields[4].enum_def.fields[3].val = CLUTTER_FILTER_NONE;
       tt->struct_def.fields[5].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[5].fname = tdrpStrDup("plot_clutter_model");
       tt->struct_def.fields[5].ptype = BOOL_TYPE;
@@ -2204,117 +2361,114 @@
       tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[6].rel_offset = 
         (char *) &_iq_plots->clutter_model_width_mps - (char *) _iq_plots;
-      tt->struct_def.fields[7].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[7].fname = tdrpStrDup("use_regression_filter");
-      tt->struct_def.fields[7].ptype = BOOL_TYPE;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("int");
+      tt->struct_def.fields[7].fname = tdrpStrDup("regression_order");
+      tt->struct_def.fields[7].ptype = INT_TYPE;
       tt->struct_def.fields[7].rel_offset = 
-        (char *) &_iq_plots->use_regression_filter - (char *) _iq_plots;
-      tt->struct_def.fields[8].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[8].fname = tdrpStrDup("regression_order");
-      tt->struct_def.fields[8].ptype = INT_TYPE;
-      tt->struct_def.fields[8].rel_offset = 
         (char *) &_iq_plots->regression_order - (char *) _iq_plots;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("notch_interp_method_t");
+      tt->struct_def.fields[8].fname = tdrpStrDup("regression_filter_notch_interp_method");
+      tt->struct_def.fields[8].ptype = ENUM_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_iq_plots->regression_filter_notch_interp_method - (char *) _iq_plots;
+        tt->struct_def.fields[8].enum_def.name = tdrpStrDup("notch_interp_method_t");
+        tt->struct_def.fields[8].enum_def.nfields = 3;
+        tt->struct_def.fields[8].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[8].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[8].enum_def.fields[0].name = tdrpStrDup("INTERP_METHOD_NONE");
+        tt->struct_def.fields[8].enum_def.fields[0].val = INTERP_METHOD_NONE;
+        tt->struct_def.fields[8].enum_def.fields[1].name = tdrpStrDup("INTERP_METHOD_LINEAR");
+        tt->struct_def.fields[8].enum_def.fields[1].val = INTERP_METHOD_LINEAR;
+        tt->struct_def.fields[8].enum_def.fields[2].name = tdrpStrDup("INTERP_METHOD_GAUSSIAN");
+        tt->struct_def.fields[8].enum_def.fields[2].val = INTERP_METHOD_GAUSSIAN;
       tt->struct_def.fields[9].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[9].fname = tdrpStrDup("regression_filter_interp_across_notch");
+      tt->struct_def.fields[9].fname = tdrpStrDup("compute_plot_range_dynamically");
       tt->struct_def.fields[9].ptype = BOOL_TYPE;
       tt->struct_def.fields[9].rel_offset = 
-        (char *) &_iq_plots->regression_filter_interp_across_notch - (char *) _iq_plots;
-      tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
-      tt->struct_def.fields[10].fname = tdrpStrDup("compute_plot_range_dynamically");
-      tt->struct_def.fields[10].ptype = BOOL_TYPE;
-      tt->struct_def.fields[10].rel_offset = 
         (char *) &_iq_plots->compute_plot_range_dynamically - (char *) _iq_plots;
-    tt->n_struct_vals = 88;
+    tt->n_struct_vals = 80;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].e = SPECTRAL_POWER;
       tt->struct_vals[1].e = CHANNEL_HC;
       tt->struct_vals[2].e = FFT_WINDOW_VONHANN;
       tt->struct_vals[3].i = 1;
-      tt->struct_vals[4].b = pTRUE;
+      tt->struct_vals[4].e = CLUTTER_FILTER_ADAPTIVE;
       tt->struct_vals[5].b = pFALSE;
       tt->struct_vals[6].d = 0.75;
-      tt->struct_vals[7].b = pFALSE;
-      tt->struct_vals[8].i = 3;
+      tt->struct_vals[7].i = -1;
+      tt->struct_vals[8].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[9].b = pTRUE;
-      tt->struct_vals[10].b = pTRUE;
-      tt->struct_vals[11].e = SPECTRAL_PHASE;
-      tt->struct_vals[12].e = CHANNEL_HC;
-      tt->struct_vals[13].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[14].i = 1;
-      tt->struct_vals[15].b = pTRUE;
-      tt->struct_vals[16].b = pFALSE;
-      tt->struct_vals[17].d = 0.75;
-      tt->struct_vals[18].b = pFALSE;
-      tt->struct_vals[19].i = 3;
-      tt->struct_vals[20].b = pTRUE;
-      tt->struct_vals[21].b = pTRUE;
-      tt->struct_vals[22].e = TS_POWER;
-      tt->struct_vals[23].e = CHANNEL_HC;
-      tt->struct_vals[24].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[25].i = 1;
-      tt->struct_vals[26].b = pTRUE;
-      tt->struct_vals[27].b = pFALSE;
-      tt->struct_vals[28].d = 0.75;
-      tt->struct_vals[29].b = pFALSE;
-      tt->struct_vals[30].i = 3;
-      tt->struct_vals[31].b = pTRUE;
-      tt->struct_vals[32].b = pTRUE;
-      tt->struct_vals[33].e = TS_PHASE;
-      tt->struct_vals[34].e = CHANNEL_HC;
-      tt->struct_vals[35].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[36].i = 1;
-      tt->struct_vals[37].b = pTRUE;
-      tt->struct_vals[38].b = pFALSE;
-      tt->struct_vals[39].d = 0.75;
-      tt->struct_vals[40].b = pFALSE;
-      tt->struct_vals[41].i = 3;
-      tt->struct_vals[42].b = pTRUE;
-      tt->struct_vals[43].b = pTRUE;
-      tt->struct_vals[44].e = I_VALS;
-      tt->struct_vals[45].e = CHANNEL_HC;
-      tt->struct_vals[46].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[47].i = 1;
-      tt->struct_vals[48].b = pTRUE;
-      tt->struct_vals[49].b = pFALSE;
-      tt->struct_vals[50].d = 0.75;
-      tt->struct_vals[51].b = pFALSE;
-      tt->struct_vals[52].i = 3;
-      tt->struct_vals[53].b = pTRUE;
-      tt->struct_vals[54].b = pTRUE;
-      tt->struct_vals[55].e = Q_VALS;
-      tt->struct_vals[56].e = CHANNEL_HC;
-      tt->struct_vals[57].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[58].i = 1;
+      tt->struct_vals[10].e = SPECTRAL_PHASE;
+      tt->struct_vals[11].e = CHANNEL_HC;
+      tt->struct_vals[12].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[13].i = 1;
+      tt->struct_vals[14].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[15].b = pFALSE;
+      tt->struct_vals[16].d = 0.75;
+      tt->struct_vals[17].i = -1;
+      tt->struct_vals[18].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[19].b = pTRUE;
+      tt->struct_vals[20].e = TS_POWER;
+      tt->struct_vals[21].e = CHANNEL_HC;
+      tt->struct_vals[22].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[23].i = 1;
+      tt->struct_vals[24].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[25].b = pFALSE;
+      tt->struct_vals[26].d = 0.75;
+      tt->struct_vals[27].i = -1;
+      tt->struct_vals[28].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[29].b = pTRUE;
+      tt->struct_vals[30].e = TS_PHASE;
+      tt->struct_vals[31].e = CHANNEL_HC;
+      tt->struct_vals[32].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[33].i = 1;
+      tt->struct_vals[34].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[35].b = pFALSE;
+      tt->struct_vals[36].d = 0.75;
+      tt->struct_vals[37].i = -1;
+      tt->struct_vals[38].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[39].b = pTRUE;
+      tt->struct_vals[40].e = I_VALS;
+      tt->struct_vals[41].e = CHANNEL_HC;
+      tt->struct_vals[42].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[43].i = 1;
+      tt->struct_vals[44].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[45].b = pFALSE;
+      tt->struct_vals[46].d = 0.75;
+      tt->struct_vals[47].i = -1;
+      tt->struct_vals[48].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[49].b = pTRUE;
+      tt->struct_vals[50].e = Q_VALS;
+      tt->struct_vals[51].e = CHANNEL_HC;
+      tt->struct_vals[52].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[53].i = 1;
+      tt->struct_vals[54].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[55].b = pFALSE;
+      tt->struct_vals[56].d = 0.75;
+      tt->struct_vals[57].i = -1;
+      tt->struct_vals[58].e = INTERP_METHOD_GAUSSIAN;
       tt->struct_vals[59].b = pTRUE;
-      tt->struct_vals[60].b = pFALSE;
-      tt->struct_vals[61].d = 0.75;
-      tt->struct_vals[62].b = pFALSE;
-      tt->struct_vals[63].i = 3;
-      tt->struct_vals[64].b = pTRUE;
-      tt->struct_vals[65].b = pTRUE;
-      tt->struct_vals[66].e = I_VS_Q;
-      tt->struct_vals[67].e = CHANNEL_HC;
-      tt->struct_vals[68].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[69].i = 1;
-      tt->struct_vals[70].b = pTRUE;
-      tt->struct_vals[71].b = pFALSE;
-      tt->struct_vals[72].d = 0.75;
-      tt->struct_vals[73].b = pFALSE;
-      tt->struct_vals[74].i = 3;
-      tt->struct_vals[75].b = pTRUE;
-      tt->struct_vals[76].b = pTRUE;
-      tt->struct_vals[77].e = PHASOR;
-      tt->struct_vals[78].e = CHANNEL_HC;
-      tt->struct_vals[79].e = FFT_WINDOW_VONHANN;
-      tt->struct_vals[80].i = 1;
-      tt->struct_vals[81].b = pTRUE;
-      tt->struct_vals[82].b = pFALSE;
-      tt->struct_vals[83].d = 0.75;
-      tt->struct_vals[84].b = pFALSE;
-      tt->struct_vals[85].i = 3;
-      tt->struct_vals[86].b = pTRUE;
-      tt->struct_vals[87].b = pTRUE;
+      tt->struct_vals[60].e = I_VS_Q;
+      tt->struct_vals[61].e = CHANNEL_HC;
+      tt->struct_vals[62].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[63].i = 1;
+      tt->struct_vals[64].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[65].b = pFALSE;
+      tt->struct_vals[66].d = 0.75;
+      tt->struct_vals[67].i = -1;
+      tt->struct_vals[68].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[69].b = pTRUE;
+      tt->struct_vals[70].e = PHASOR;
+      tt->struct_vals[71].e = CHANNEL_HC;
+      tt->struct_vals[72].e = FFT_WINDOW_VONHANN;
+      tt->struct_vals[73].i = 1;
+      tt->struct_vals[74].e = CLUTTER_FILTER_ADAPTIVE;
+      tt->struct_vals[75].b = pFALSE;
+      tt->struct_vals[76].d = 0.75;
+      tt->struct_vals[77].i = -1;
+      tt->struct_vals[78].e = INTERP_METHOD_GAUSSIAN;
+      tt->struct_vals[79].b = pTRUE;
     tt++;
     
     // Parameter 'iq_plot_static_ranges'
@@ -2341,7 +2495,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_iq_plot_static_ranges->plot_type - (char *) _iq_plot_static_ranges;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("iq_plot_type_t");
-        tt->struct_def.fields[0].enum_def.nfields = 10;
+        tt->struct_def.fields[0].enum_def.nfields = 12;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("SPECTRAL_POWER");
@@ -2352,18 +2506,22 @@
         tt->struct_def.fields[0].enum_def.fields[2].val = SPECTRAL_ZDR;
         tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("SPECTRAL_PHIDP");
         tt->struct_def.fields[0].enum_def.fields[3].val = SPECTRAL_PHIDP;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("TS_POWER");
-        tt->struct_def.fields[0].enum_def.fields[4].val = TS_POWER;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("TS_PHASE");
-        tt->struct_def.fields[0].enum_def.fields[5].val = TS_PHASE;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("I_VALS");
-        tt->struct_def.fields[0].enum_def.fields[6].val = I_VALS;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("Q_VALS");
-        tt->struct_def.fields[0].enum_def.fields[7].val = Q_VALS;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VS_Q");
-        tt->struct_def.fields[0].enum_def.fields[8].val = I_VS_Q;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("PHASOR");
-        tt->struct_def.fields[0].enum_def.fields[9].val = PHASOR;
+        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("SPECTRAL_RHOHV");
+        tt->struct_def.fields[0].enum_def.fields[4].val = SPECTRAL_RHOHV;
+        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("SPECTRAL_SZ864");
+        tt->struct_def.fields[0].enum_def.fields[5].val = SPECTRAL_SZ864;
+        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("TS_POWER");
+        tt->struct_def.fields[0].enum_def.fields[6].val = TS_POWER;
+        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("TS_PHASE");
+        tt->struct_def.fields[0].enum_def.fields[7].val = TS_PHASE;
+        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("I_VALS");
+        tt->struct_def.fields[0].enum_def.fields[8].val = I_VALS;
+        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("Q_VALS");
+        tt->struct_def.fields[0].enum_def.fields[9].val = Q_VALS;
+        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("I_VS_Q");
+        tt->struct_def.fields[0].enum_def.fields[10].val = I_VS_Q;
+        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHASOR");
+        tt->struct_def.fields[0].enum_def.fields[11].val = PHASOR;
       tt->struct_def.fields[1].ftype = tdrpStrDup("double");
       tt->struct_def.fields[1].fname = tdrpStrDup("min_val");
       tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
@@ -2892,6 +3050,30 @@
     tt->comment_text = tdrpStrDup("The default clutter filtering method is the Adaptive Filter, with residue correction activated.");
     tt++;
     
+    // Parameter 'ascope_clutter_filter_type'
+    // ctype is '_clutter_filter_type_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = ENUM_TYPE;
+    tt->param_name = tdrpStrDup("ascope_clutter_filter_type");
+    tt->descr = tdrpStrDup("Type of clutter filter to use.");
+    tt->help = tdrpStrDup("ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.");
+    tt->val_offset = (char *) &ascope_clutter_filter_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("clutter_filter_type_t");
+    tt->enum_def.nfields = 4;
+    tt->enum_def.fields = (enum_field_t *)
+        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
+      tt->enum_def.fields[0].name = tdrpStrDup("CLUTTER_FILTER_ADAPTIVE");
+      tt->enum_def.fields[0].val = CLUTTER_FILTER_ADAPTIVE;
+      tt->enum_def.fields[1].name = tdrpStrDup("CLUTTER_FILTER_REGRESSION");
+      tt->enum_def.fields[1].val = CLUTTER_FILTER_REGRESSION;
+      tt->enum_def.fields[2].name = tdrpStrDup("CLUTTER_FILTER_NOTCH");
+      tt->enum_def.fields[2].val = CLUTTER_FILTER_NOTCH;
+      tt->enum_def.fields[3].name = tdrpStrDup("CLUTTER_FILTER_NONE");
+      tt->enum_def.fields[3].val = CLUTTER_FILTER_NONE;
+    tt->single_val.e = CLUTTER_FILTER_ADAPTIVE;
+    tt++;
+    
     // Parameter 'apply_residue_correction_in_adaptive_filter'
     // ctype is 'tdrp_bool_t'
     
@@ -2914,18 +3096,6 @@
     tt->help = tdrpStrDup("Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.");
     tt->val_offset = (char *) &min_snr_db_for_residue_correction - &_start_;
     tt->single_val.d = 75;
-    tt++;
-    
-    // Parameter 'use_polynomial_regression_clutter_filter'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_polynomial_regression_clutter_filter");
-    tt->descr = tdrpStrDup("Option to apply a regression clutter filter.");
-    tt->help = tdrpStrDup("For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.");
-    tt->val_offset = (char *) &use_polynomial_regression_clutter_filter - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'regression_filter_determine_order_from_cnr'
@@ -3564,6 +3734,235 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 18");
+    tt->comment_hdr = tdrpStrDup("SPECTRAL CMD INTEREST MAPS and WEIGHTS");
+    tt->comment_text = tdrpStrDup("Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.");
+    tt++;
+    
+    // Parameter 'snr_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("snr_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for SNR.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_snr_interest_map - &_start_;
+    tt->array_n_offset = (char *) &snr_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_snr_interest_map->value - (char *) _snr_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_snr_interest_map->interest - (char *) _snr_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 0;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 20;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'snr_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("snr_interest_weight");
+    tt->descr = tdrpStrDup("Weight for SNR interest.");
+    tt->help = tdrpStrDup("This weight is used for combining snr interest into the final CMD interest.");
+    tt->val_offset = (char *) &snr_interest_weight - &_start_;
+    tt->single_val.d = 1.5;
+    tt++;
+    
+    // Parameter 'tdbz_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("tdbz_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for TDBZ.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_tdbz_interest_map - &_start_;
+    tt->array_n_offset = (char *) &tdbz_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_tdbz_interest_map->value - (char *) _tdbz_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_tdbz_interest_map->interest - (char *) _tdbz_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 30;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 40;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'tdbz_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("tdbz_interest_weight");
+    tt->descr = tdrpStrDup("Weight for TDBZ interest.");
+    tt->help = tdrpStrDup("This weight is used for combining tdbz interest into the final CMD interest.");
+    tt->val_offset = (char *) &tdbz_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'zdr_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("zdr_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for zdr.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_zdr_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &zdr_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_zdr_sdev_interest_map->value - (char *) _zdr_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_zdr_sdev_interest_map->interest - (char *) _zdr_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 3;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 4;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'zdr_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("zdr_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of zdr.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &zdr_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'phidp_sdev_interest_map'
+    // ctype is '_interest_map_point_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("phidp_sdev_interest_map");
+    tt->descr = tdrpStrDup("Interest mapping for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->array_offset = (char *) &_phidp_sdev_interest_map - &_start_;
+    tt->array_n_offset = (char *) &phidp_sdev_interest_map_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(interest_map_point_t);
+    tt->array_n = 2;
+    tt->struct_def.name = tdrpStrDup("interest_map_point_t");
+    tt->struct_def.nfields = 2;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[0].fname = tdrpStrDup("value");
+      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_phidp_sdev_interest_map->value - (char *) _phidp_sdev_interest_map;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[1].fname = tdrpStrDup("interest");
+      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_phidp_sdev_interest_map->interest - (char *) _phidp_sdev_interest_map;
+    tt->n_struct_vals = 4;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].d = 28;
+      tt->struct_vals[1].d = 0.0001;
+      tt->struct_vals[2].d = 32;
+      tt->struct_vals[3].d = 1;
+    tt++;
+    
+    // Parameter 'phidp_sdev_interest_weight'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("phidp_sdev_interest_weight");
+    tt->descr = tdrpStrDup("Weight for standard deviation of phidp.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &phidp_sdev_interest_weight - &_start_;
+    tt->single_val.d = 1;
+    tt++;
+    
+    // Parameter 'cmd_threshold_for_detection'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cmd_threshold_for_detection");
+    tt->descr = tdrpStrDup("Threshold CMD value for detecting clutter.");
+    tt->help = tdrpStrDup("If the mean CMD value exceeds this threshold, clutter is assumed to exist at that point.");
+    tt->val_offset = (char *) &cmd_threshold_for_detection - &_start_;
+    tt->single_val.d = 0.9;
+    tt++;
+    
+    // Parameter 'cmd_threshold_for_moments'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("cmd_threshold_for_moments");
+    tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
+    tt->help = tdrpStrDup("If CMD at a spectral point exceeds this threshold, it is set to 0 so it is not used in the computation of the moments.");
+    tt->val_offset = (char *) &cmd_threshold_for_moments - &_start_;
+    tt->single_val.d = 0.7;
+    tt++;
+    
+    // Parameter 'Comment 19'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 19");
     tt->comment_hdr = tdrpStrDup("RADAR CALIBRATION");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -3592,11 +3991,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 19'
+    // Parameter 'Comment 20'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 19");
+    tt->param_name = tdrpStrDup("Comment 20");
     tt->comment_hdr = tdrpStrDup("CLICK POINT DATA MESSAGING from display (HawkEye or CIDD)");
     tt->comment_text = tdrpStrDup("Reading and writing the click point location to an FMQ in XML format.");
     tt++;

@@ -122,7 +122,6 @@ WorldTerrain: WorldTerrain.cc
 	-o WorldTerrain WorldTerrain.cc \
 	-L$(LROSE_INSTALL_DIR)/lib $(LOC_LDFLAGS) $(LOC_LIBS)
 
-
 cleaner: clean_all
 	/bin/rm -f TestClientTerrainHt TerrainHtServer WorldTerrain
 

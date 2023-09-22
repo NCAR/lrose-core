@@ -2406,7 +2406,7 @@
       tt->struct_def.fields[0].rel_offset = 
         (char *) &_output_fields->id - (char *) _output_fields;
         tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_id_t");
-        tt->struct_def.fields[0].enum_def.nfields = 79;
+        tt->struct_def.fields[0].enum_def.nfields = 85;
         tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
           (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
         tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("DBZ");
@@ -2559,14 +2559,26 @@
         tt->struct_def.fields[0].enum_def.fields[73].val = ZDR_SDEV_FOR_KDP;
         tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("TEST");
         tt->struct_def.fields[0].enum_def.fields[74].val = TEST;
-        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("TEST2");
-        tt->struct_def.fields[0].enum_def.fields[75].val = TEST2;
-        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("TEST3");
-        tt->struct_def.fields[0].enum_def.fields[76].val = TEST3;
-        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("TEST4");
-        tt->struct_def.fields[0].enum_def.fields[77].val = TEST4;
-        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("TEST5");
-        tt->struct_def.fields[0].enum_def.fields[78].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("TEST0");
+        tt->struct_def.fields[0].enum_def.fields[75].val = TEST0;
+        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("TEST1");
+        tt->struct_def.fields[0].enum_def.fields[76].val = TEST1;
+        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("TEST2");
+        tt->struct_def.fields[0].enum_def.fields[77].val = TEST2;
+        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("TEST3");
+        tt->struct_def.fields[0].enum_def.fields[78].val = TEST3;
+        tt->struct_def.fields[0].enum_def.fields[79].name = tdrpStrDup("TEST4");
+        tt->struct_def.fields[0].enum_def.fields[79].val = TEST4;
+        tt->struct_def.fields[0].enum_def.fields[80].name = tdrpStrDup("TEST5");
+        tt->struct_def.fields[0].enum_def.fields[80].val = TEST5;
+        tt->struct_def.fields[0].enum_def.fields[81].name = tdrpStrDup("TEST6");
+        tt->struct_def.fields[0].enum_def.fields[81].val = TEST6;
+        tt->struct_def.fields[0].enum_def.fields[82].name = tdrpStrDup("TEST7");
+        tt->struct_def.fields[0].enum_def.fields[82].val = TEST7;
+        tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("TEST8");
+        tt->struct_def.fields[0].enum_def.fields[83].val = TEST8;
+        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("TEST9");
+        tt->struct_def.fields[0].enum_def.fields[84].val = TEST9;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
       tt->struct_def.fields[1].fname = tdrpStrDup("name");
       tt->struct_def.fields[1].ptype = STRING_TYPE;

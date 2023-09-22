@@ -108,7 +108,7 @@ public:
   // Destructor
   //
 
-  ~RefParams ();
+  virtual ~RefParams ();
 
   ////////////////////////////////////////////
   // Assignment

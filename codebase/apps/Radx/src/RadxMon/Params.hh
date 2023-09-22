@@ -434,6 +434,8 @@ public:
 
   double max_delta_angle;
 
+  tdrp_bool_t check_for_increasing_time;
+
   int output_tcp_port;
 
   double nsecs_for_antenna_rate;
@@ -445,7 +447,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[32];
+  mutable TDRPtable _table[33];
 
   const char *_className;
 

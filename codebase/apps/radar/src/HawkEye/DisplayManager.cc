@@ -915,7 +915,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
   }
   
   if (_pulseWidthVal) {
-    _setText(text, "%.2f", ray->getPulseWidthUsec());
+    _setText(text, "%.3f", ray->getPulseWidthUsec());
     _pulseWidthVal->setText(text);
   }
 
@@ -1046,6 +1046,7 @@ void DisplayManager::_updateStatusPanel(const RadxRay *ray)
     _radarLat = _platform.getLatitudeDeg();
     _radarLon = _platform.getLongitudeDeg();
     _radarAltKm = _platform.getAltitudeKm();
+    _beamHt.setInstrumentHtKm(_radarAltKm);
     if (_radarAltKm < -1.0) {
       _radarAltKm = 0.0;
     }

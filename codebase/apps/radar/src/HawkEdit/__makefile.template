@@ -26,7 +26,7 @@
 # Makefile for HawkEye program
 #
 # Mike Dixon, RAP, NCAR
-# POBox 3000, Boulder, CO, 80307, USA
+# POBox 3000,Boulder, CO, 80307, USA
 #
 # May 2006
 #
@@ -40,7 +40,7 @@ LOC_INCLUDES = $(QT_INCLUDES) $(NETCDF4_INCS)
 
 # Note: QJSENGINE is defined in rap_make.OSX_LINUX
 
-LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
+LOC_LIBS = -lradar -lMdv -lSpdb -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 	-ldsserver -ldidss -leuclid -lphysics \
 	-lrapmath -ltoolsa -ldataport -ltdrp \
 	$(QT_LIBS) $(QJSENGINE) $(NETCDF4_LIBS) \
@@ -49,7 +49,6 @@ LOC_LIBS = -lSpdb -lMdv -lradar -lrapformats -lFmq -lRadx -lSolo -lNcxx \
 LOC_LDFLAGS = -L$(LROSE_INSTALL_DIR)/lib $(QT_LDFLAGS) $(NETCDF4_LDFLAGS)
 
 LOC_CPPC_CFLAGS = -g  $(QT_CPPC_CFLAGS)
-
 
 HDRS = \
 	$(PARAMS_HH) \
@@ -105,6 +104,8 @@ HDRS = \
 	SpreadSheetModel.hh \
 	SpreadSheetUtils.hh \
 	SpreadSheetView.hh \
+	StatusPanelController.hh \
+	StatusPanelView.hh \
 	SweepView.hh \
 	SweepController.hh \
 	SweepModel.hh \
@@ -184,6 +185,8 @@ MOC_SRCS = \
 	SpreadSheetView.cc \
 	SpreadSheetController.cc \
 	SpreadSheetDelegate.cc \
+	StatusPanelController.cc \
+	StatusPanelView.cc \
 	SweepView.cc \
 	TimeNavView.cc \
 	FunctionEditor.cc 
@@ -212,14 +215,17 @@ MOC_OUTPUT = \
 	moc_SpreadSheetView.cpp \
 	moc_SpreadSheetController.cpp \
 	moc_SpreadSheetDelegate.cpp \
+	moc_StatusPanelController.cpp \
+	moc_StatusPanelView.cpp \
 	moc_SweepView.cpp \
 	moc_FunctionEditor.cpp \
-	moc_TimeNavView.cpp \
-	qrc_resources.cpp \
-	qrc_customcompleter.cpp
+	moc_TimeNavView.cpp 
+
+RESOURCES = \
+	qrc_resources.cpp
 
 CC_SRCS = $(NORM_SRCS) $(MOC_SRCS)
-CPP_SRCS = $(MOC_OUTPUT)
+CPP_SRCS = $(MOC_OUTPUT) $(RESOURCES)
 
 #
 # tdrp macros
@@ -238,6 +244,10 @@ include $(LROSE_CORE_DIR)/build/make_include/lrose_make_qt_targets
 #
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_c++_targets
+
+# create cpp file for resources
+compiler_rcc_make_all:
+	rcc -name resources resources.qrc -o qrc_resources.cpp
 
 #
 # local targets
@@ -274,15 +284,15 @@ hawkeye_app:
 	mkdir -p HawkEye.app/Contents/MacOS/../share
 	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
 # make the dmg  
-	# export MAC_QT_PATH="/usr/local/Cellar/qt/5.13.1/bin"
-	# must be set in the environment
-	# export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
-	# /usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
+# export MAC_QT_PATH="/usr/local/Cellar/qt/5.13.1/bin"
+# must be set in the environment
+# export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
+# /usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
 	/usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEye.app -dmg -always-overwrite -sign-for-notarization="${CERT_NAME}"
 # now build the folder for the dmg installer
-	# mkdir -p HawkEye_bkg_test
-	# cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
-	# rsync -r HawkEye.app HawkEye_bkg_test/.
+# mkdir -p HawkEye_bkg_test
+# cp ~/Desktop/arrow.pdf HawkEye_bkg_test/.background
+# rsync -r HawkEye.app HawkEye_bkg_test/.
 	hdiutil create -volname HawkEye_edit -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app -ov -format UDZO HawkEye_edit.dmg
 
 # rm -r HawkEye_staging/HawkEye.app
@@ -290,54 +300,54 @@ hawkeye_app:
 # cp arrow.pdf HawkEye_staging/.background
 # ln -s /Applications HawkEye_staging/Applications
 # rsync -r HawkEye.app HawkEye_staging/.
-	# hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Edit.dmg
+# hdiutil create -volname HawkEye_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Edit.dmg
 
 
 
 DMG_BASE_DIR = /Users/brenda
 hawkedit_app:
-	# pulled from circleci.yml
+# pulled from circleci.yml
 	echo "building HawkEdit.dmg"
-	# cd /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit
-	# pwd
+# cd /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit
+# pwd
 	make clean_all
-	#
-	# in dev area only ...
+#
+# in dev area only ...
 	make install  
-	# in circleci area only ...
-	#/usr/local/Cellar/qt/5.15.0/bin/qmake -o Makefile.qmake
-	#echo " ...  make from_qmake"
+# in circleci area only ...
+#/usr/local/Cellar/qt/5.15.0/bin/qmake -o Makefile.qmake
+#echo " ...  make from_qmake"
 	make -f Makefile.qmake
-	#echo " ... after qmake"
-	# end of dev vs. circleci distinction 
-	#
+#echo " ... after qmake"
+# end of dev vs. circleci distinction 
+#
 	mkdir -p HawkEdit.app/Contents/Frameworks
 	echo " ... after mkdir"
-	# cp /usr/local/Cellar/qt/5.15.0/plugins/platforms/libqcocoa.dylib HawkEdit.app/Contents/Plugins/platforms/.
-	#cp /usr/lib/libexpat.1.dylib HawkEdit.app/Contents/Frameworks/.
-	#cp /usr/lib/libbz2.1.0.dylib HawkEdit.app/Contents/Frameworks/.
-	#cp /usr/lib/libz.1.dylib     HawkEdit.app/Contents/Frameworks/.
-	#cp /usr/lib/libSystem.B.dylib HawkEdit.app/Contents/Frameworks/.
-	#
-	# add the color scales
-	#
+# cp /usr/local/Cellar/qt/5.15.0/plugins/platforms/libqcocoa.dylib HawkEdit.app/Contents/Plugins/platforms/.
+#cp /usr/lib/libexpat.1.dylib HawkEdit.app/Contents/Frameworks/.
+#cp /usr/lib/libbz2.1.0.dylib HawkEdit.app/Contents/Frameworks/.
+#cp /usr/lib/libz.1.dylib     HawkEdit.app/Contents/Frameworks/.
+#cp /usr/lib/libSystem.B.dylib HawkEdit.app/Contents/Frameworks/.
+#
+# add the color scales
+#
 	mkdir -p HawkEdit.app/Contents/MacOS/../share
-	# cp -r /private/tmp/workarea/$SOURCE_DIR/share/color_scales HawkEdit-Elle.app/Contents/MacOS/../share/.
+# cp -r /private/tmp/workarea/$SOURCE_DIR/share/color_scales HawkEdit-Elle.app/Contents/MacOS/../share/.
 	cp -r ~/git/lrose-displays/color_scales HawkEdit.app/Contents/MacOS/../share/.
-	#
-	# cp the HawkEdit executable to the HawkEdit.app area because make doesn't put it there.
-	#
-	# cp HawkEdit HawkEdit.app/Contents/MacOS/HawkEdit
-	#
+#
+# cp the HawkEdit executable to the HawkEdit.app area because make doesn't put it there.
+#
+# cp HawkEdit HawkEdit.app/Contents/MacOS/HawkEdit
+#
 	echo " ... before calling macdeployqt"
-	# macdeployqt HawkEdit.app -dmg -always-overwrite
-	# /usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEdit.app -no-plugins -dmg -always-overwrite -codesign="${CERT_NAME}"
+# macdeployqt HawkEdit.app -dmg -always-overwrite
+# /usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEdit.app -no-plugins -dmg -always-overwrite -codesign="${CERT_NAME}"
 	/usr/local/Cellar/qt/5.15.0/bin/macdeployqt HawkEdit.app  -dmg -always-overwrite -codesign="${CERT_NAME}"
 	echo " .. before calling hdiutil"
-	#hdiutil create -volname HawkEdit -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEdit/HawkEdit.app -ov -format UDZO HawkEdit_Elle.dmg
-	## hdiutil create -volname HawkEdit-Elle_Installer -srcfolder /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit/HawkEdit-Elle.app -ov -format UDZO HawkEdit-Elle.dmg
+#hdiutil create -volname HawkEdit -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEdit/HawkEdit.app -ov -format UDZO HawkEdit_Elle.dmg
+## hdiutil create -volname HawkEdit-Elle_Installer -srcfolder /private/tmp/workarea/$SOURCE_DIR/apps/radar/src/HawkEdit/HawkEdit-Elle.app -ov -format UDZO HawkEdit-Elle.dmg
 	echo " ... after dmg build"
-	# cp HawkEdit.dmg /private/tmp/workspace_macos/releases/lrose-cyclone
+# cp HawkEdit.dmg /private/tmp/workspace_macos/releases/lrose-cyclone
 	echo " ... done  building HawkEdit"
 #         hdiutil create -volname HawkEdit_Installer -srcfolder /Users/brenda/git/lrose-core/codebase/apps/radar/src/HawkEdit/HawkEdit.app  -ov -format UDZO HawkEdit_Elle.dmg
 

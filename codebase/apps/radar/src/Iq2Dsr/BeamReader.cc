@@ -53,108 +53,107 @@ BeamReader::BeamReader(const string &prog_name,
                        deque<Beam *> &beamRecyclePool,
                        pthread_mutex_t &beamRecyclePoolMutex,
                        vector<const MomentsMgr *> &momentsMgrArray) :
+        constructorOK(true),
         _progName(prog_name),
         _params(params),
         _args(args),
         _beamRecyclePool(beamRecyclePool),
         _beamRecyclePoolMutex(beamRecyclePoolMutex),
         _momentsMgrArray(momentsMgrArray),
-        _momentsMgr(NULL)
+        _momentsMgr(NULL),
+        _mgrIndex(-1),
+        _missMgrCount(0),
+        _pulseReader(NULL),
+        _startTime(args.startTime),
+        _endTime(args.endTime),
+        _endOfSweepPending(false),
+        _endOfVolPending(false),
+        _endOfVolPulseSeqNum(0),
+        _endOfSweepPulseSeqNum(0),
+        _endOfSweepFlag(false),
+        _endOfVolFlag(false),
+
+        // Create the pulse pool, starting with 0 pulses, and providing a custom
+        // pulse factory function (since IwrfTsPulse has no default constructor).
+        _pulsePool(0, std::function<IwrfTsPulse*()>([this]() { return new IwrfTsPulse(_pulseReader->getOpsInfo()); })),
+
+        _pulseSeqNum(0),
+        _prevPulseSeqNum(0),
+        _prevPulse(NULL),
+        _latestPulse(NULL),
+        _pulseQueue(),
+        _pulseCache(),
+        _pulseCount(0),
+        _pulseCountSinceStatus(0),
+        _interpQueue(),
+        _interpReady(false),
+        _interpOverflow(false),
+        _prevAzInterp(-9999.0),
+        _prevElInterp(-9999.0),
+        _burstPhases(),
+        _beamCount(0),
+        _midIndex(0),
+        _startIndex(0),
+        _endIndex(0),
+        _prevBeamPulseSeqNum(0),
+        _scanType(Beam::SCAN_TYPE_UNKNOWN),
+        _nGates(0),
+        _nSamples(_params.min_n_samples),
+        _az(0.0),
+        _el(0.0),
+        _prt(0.001),
+        _meanPrf(1000.0),
+        _pulseWidthUs(1.0),
+        _isAlternating(false),
+        _startsOnHoriz(true),
+        _isStaggeredPrt(false),
+        _startsOnPrtShort(true),
+        _prtShort(0.001),
+        _prtLong(0.001),
+        _nGatesPrtShort(0),
+        _nGatesPrtLong(0),
+        _isDualPrt(false),
+        _isDualReady(false),
+        _dualPrtIndexStart(0),
+        _dualPrtIndexEnd(0),
+        _azIndex(0),
+        _prevAzIndex(-999),
+        _elIndex(0),
+        _prevElIndex(-999),
+
+        // initialize rate computations
+
+        _azRateInitialized(false),
+        _prevTimeForAzRate(0),
+        _prevAzForRate(-999),
+        _progressiveAzRate(0),
+        _beamAzRate(0),
+        _rotationClockwise(true),
         
+        _elRateInitialized(false),
+        _prevTimeForElRate(0),
+        _prevElForRate(-999),
+        _progressiveElRate(0),
+        _beamElRate(0),
+        _rotationUpwards(true),
+
+        // beam indexing
+
+        _indexTheBeams(false),
+        _indexedResolution(1.0),
+        _beamAngleDeg(1.0),
+
+        // windowing
+
+        _windowFactorRect(),
+        _windowFactorVonhann(),
+        _windowFactorBlackman(),
+        _windowFactorBlackmanNuttall(),
+
+        // atmospheric attenuation
+
+        _atmosAtten()
 {
-
-  constructorOK = true;
-
-  _pulseReader = NULL;
-
-  _startTime = args.startTime;
-  _endTime = args.endTime;
-
-  _endOfSweepFlag = false;
-  _endOfVolFlag = false;
-  
-  _endOfSweepPending = false;
-  _endOfSweepPulseSeqNum = 0;
-  _endOfVolPending = false;
-  _endOfVolPulseSeqNum = 0;
-
-  _pulseSeqNum = 0;
-  _prevPulseSeqNum = 0;
-  _latestPulse = NULL;
-  _prevPulse = NULL;
-  _pulseCount = 0;
-  _pulseCountSinceStatus = 0;
-
-  _interpReady = false;
-  _interpOverflow = false;
-  _prevAzInterp = -9999.0;
-  _prevElInterp = -9999.0;
-
-  // memset(&_burstPhases, 0, sizeof(_burstPhases));
-
-  _beamCount = 0;
-  _midIndex = 0;
-  _prevBeamPulseSeqNum = 0;
-
-  _scanType = Beam::SCAN_TYPE_UNKNOWN;
-  _nGates = 0;
-  _nSamples = _params.min_n_samples;
-
-  _az = 0.0;
-  _el = 0.0;
-  _prt = 0.001;
-  _meanPrf = 1000.0;
-  _pulseWidthUs = 1.0;
-
-  _isAlternating = false;
-  _startsOnHoriz = true;
-
-  _isStaggeredPrt = false;
-  _startsOnPrtShort = true;
-
-  _prtShort = 0.001;
-  _prtLong = 0.001;
-
-  _nGatesPrtShort = 0;
-  _nGatesPrtLong = 0;
-
-  _isDualPrt = false;
-  _isDualReady = false;
-
-  _dualPrtIndexStart = 0;
-  _dualPrtIndexEnd = 0;
-
-  _azIndex = 0;
-  _prevAzIndex = -999;
-  
-  _elIndex = 0;
-  _prevElIndex = -999;
-
-  // initialize rate computations
-  
-  _azRateInitialized = false;
-  _prevTimeForAzRate = 0;
-  _prevAzForRate = -999;
-  _progressiveAzRate = 0;
-  _beamAzRate = 0;
-  _rotationClockwise = true;
-
-  _elRateInitialized = false;
-  _prevTimeForElRate = 0;
-  _prevElForRate = -999;
-  _progressiveElRate = 0;
-  _beamElRate = 0;
-  _rotationUpwards = true;
-
-  _mgrIndex = -1;
-  _missMgrCount = 0;
-
-  // beam indexing
-  
-  _indexTheBeams = false;
-  _indexedResolution = 1.0;
-  _beamAngleDeg = 1.0;
-
   // compute the window factors
   
   _computeWindowFactors();
@@ -178,7 +177,7 @@ BeamReader::BeamReader(const string &prog_name,
     inputPathList = args.inputFileList;
   }
     
-  // check that file list set in SIMLATE mode
+  // check that file list set in SIMULATE mode
   
   if (_params.mode == Params::SIMULATE && args.inputFileList.size() == 0) {
     cerr << "ERROR: BeamReader::BeamReader." << endl;
@@ -255,40 +254,8 @@ BeamReader::~BeamReader()
 
 {
   
-  if (_params.debug) {
-    cerr << "Entering BeamReader destructor" << endl;
-  }
-
-  if (_prevPulse != NULL) {
-    delete _prevPulse;
-  }
-
-  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
-    delete _pulseQueue[ii];
-  } // ii
-  _pulseQueue.clear();
-  
-  for (size_t ii = 0; ii < _pulseCache.size(); ii++) {
-    delete _pulseCache[ii];
-  } // ii
-  _pulseCache.clear();
-  
-  for (size_t ii = 0; ii < _pulseRecyclePool.size(); ii++) {
-    delete _pulseRecyclePool[ii];
-  } // ii
-  _pulseRecyclePool.clear();
-  
-  for (size_t ii = 0; ii < _interpQueue.size(); ii++) {
-    delete _interpQueue[ii];
-  } // ii
-  _interpQueue.clear();
-
   if (_pulseReader) {
     delete _pulseReader;
-  }
-
-  if (_params.debug) {
-    cerr << "Exiting BeamReader destructor" << endl;
   }
 
 }
@@ -334,6 +301,13 @@ Beam *BeamReader::getNextBeam()
     if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_STEERING_ANGLE) {
 
       if (_readConstantSteeringAngleBeam()) {
+        // end of data
+        return NULL;
+      }
+      
+    } else if (_momentsMgr->getBeamMethod() == Params::BEAM_CONSTANT_PULSE_WIDTH) {
+
+      if (_readConstantPulseWidthBeam()) {
         // end of data
         return NULL;
       }
@@ -419,10 +393,10 @@ Beam *BeamReader::getNextBeam()
   }
   
 
-  // load the pulse pointers into a vector for just this beam
+  // load the pulse shared_ptr-s into a vector for just this beam
   // reversing the order, so we start with oldest pulse
       
-  vector<const IwrfTsPulse *> beamPulses;
+  vector<shared_ptr<IwrfTsPulse>> beamPulses;
   for (int ii = _startIndex; ii >= _endIndex; ii--) {
     beamPulses.push_back(_pulseQueue[ii]);
   }
@@ -536,11 +510,11 @@ int BeamReader::_initializeQueue()
   
 {
 
-  int nStart = _params.min_n_samples;
+  size_t nStart = _params.min_n_samples;
   if (nStart < 55) {
     nStart = 55;
   }
-  while ((int) _pulseQueue.size() < nStart) {
+  while (_pulseQueue.size() < nStart) {
     if (_getNextPulse() == NULL) {
       // end of data
       return -1;
@@ -575,7 +549,7 @@ int BeamReader::_readDualPrtBeam()
     
     // get a pulse
 
-    IwrfTsPulse *pulse = _getNextPulse();
+    shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
       return -1;
@@ -660,7 +634,7 @@ int BeamReader::_readNonIndexedBeam()
     
 //////////////////////////////////////////////////
 // read in data for a beam with constant steering
-// angle, as in phsed array radar.
+// angle, as in phased array radar.
 // returns 0 on success, -1 on failure
 
 int BeamReader::_readConstantSteeringAngleBeam()
@@ -677,7 +651,7 @@ int BeamReader::_readConstantSteeringAngleBeam()
     
     // get a pulse
     
-    IwrfTsPulse *pulse = _getNextPulse();
+    shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
     if (pulse == NULL) {
       // end of data
       return -1;
@@ -714,6 +688,90 @@ int BeamReader::_readConstantSteeringAngleBeam()
   // by dropping one pulse if needed
   
   _nSamples = (count / 2) * 2;
+  _midIndex = _nSamples / 2;
+
+  _startIndex = _nSamples - 1;
+  _endIndex = 0;
+
+  _az = _conditionAz(_pulseQueue[_midIndex]->getAz());
+  _el = _conditionEl(_pulseQueue[_midIndex]->getEl());
+
+  _computeBeamAzRate(0, _nSamples);
+  _computeBeamElRate(0, _nSamples);
+
+  // save sequence numbers in case we switch to indexed search
+  
+  _prevBeamPulseSeqNum = _pulseQueue[_midIndex]->getPulseSeqNum();
+  
+  return 0;
+
+}
+    
+//////////////////////////////////////////////////
+// read in data for a beam with constant pulse
+// width, as in HCR.
+// returns 0 on success, -1 on failure
+
+int BeamReader::_readConstantPulseWidthBeam()
+  
+{
+
+  // read in pulses until PRT changes
+  
+  int nPulsesInDwell = 0;
+  int warningCount = 0;
+  double pulseWidthUs = -9999;
+  
+  while (nPulsesInDwell <= _params.max_n_samples) {
+    
+    // get a pulse
+    shared_ptr<IwrfTsPulse> pulse = _getNextPulse();
+    if (pulse == NULL) {
+      // end of data
+      return -1;
+    }
+    warningCount++;
+    
+    // save pulse width from first pulse
+    
+    if (nPulsesInDwell == 0) {
+      if (_params.specify_pulse_width) {
+        // check for valid pulse width
+        if (fabs(_params.fixed_pulse_width_us - pulse->getPulseWidthUs()) > 2.0e-3) {
+          // _getNextPulse() automatically inserted this pulse at the front of
+          // _pulseQueue, but we don't want it! Remove it from the deque now.
+          _pulseQueue.pop_front();
+
+          if (warningCount == 100000) {
+            cerr << "WARNING - " << warningCount << " consecutive pulses with width != "
+		 << _params.fixed_pulse_width_us << " us" << endl;
+            warningCount = 0;
+          }
+          // Go back to get a shared pointer to the next pulse
+          continue;
+        }
+      }
+      pulseWidthUs = pulse->getPulseWidthUs();
+    }
+
+    // check if pulse width has changed
+    
+    if (fabs(pulseWidthUs - pulse->getPulseWidthUs()) > 2.0e-3 && nPulsesInDwell > 1) {
+      break;
+    }
+    
+    nPulsesInDwell++;
+
+  } // while
+
+  // set PRT (and mean PRF)
+
+  _setPrt();
+
+  // set number of samples, ensuring an even number of pulses
+  // by dropping one pulse if needed
+  
+  _nSamples = (nPulsesInDwell / 2) * 2;
   _midIndex = _nSamples / 2;
 
   _startIndex = _nSamples - 1;
@@ -835,7 +893,7 @@ int BeamReader::_findPrevIndexedBeam()
 
   int prevLoc = 0;
   for (int ii = 0; ii < (int) _pulseQueue.size() - 1; ii++) {
-    IwrfTsPulse *pulse = _pulseQueue[ii];
+    shared_ptr<IwrfTsPulse> pulse = _pulseQueue[ii];
     if (pulse->getPulseSeqNum() == _prevBeamPulseSeqNum) {
       prevLoc = ii;
       break;
@@ -1144,11 +1202,15 @@ void BeamReader::_constrainPulsesToWithinDwell()
 }
   
 /////////////////////////////////////////////////////////
-// get the next pulse
-// check to see if it has a moments manager
-// loops until one is found, or end of data is reached
+/// @brief Find the next valid pulse, push it onto the front of _pulseQueue,
+/// assign it as _latestPulse, and return the associated shared pointer.
+///
+/// A pulse is considered valid if it has a moments manager.
+///
+/// @return a shared pointer to the pulse which was read, or a NULL shared
+/// pointer if the end of data is reached.
 
-IwrfTsPulse *BeamReader::_getNextPulse()
+shared_ptr<IwrfTsPulse> BeamReader::_getNextPulse()
 
 {
 
@@ -1159,7 +1221,7 @@ IwrfTsPulse *BeamReader::_getNextPulse()
 
     // get the next pulse
 
-    IwrfTsPulse *pulse = _readNextPulse();
+    shared_ptr<IwrfTsPulse> pulse = _readNextPulse();
     if (pulse == NULL && _params.mode == Params::SIMULATE) {
       // in simulate mode, reset the queue
       _pulseReader->reset();
@@ -1193,7 +1255,6 @@ IwrfTsPulse *BeamReader::_getNextPulse()
 
     if (!_pulseReader->getOpsInfo().isRadarInfoActive() ||
         !_pulseReader->getOpsInfo().isTsProcessingActive()) {
-      delete pulse;
       continue;
     }
 
@@ -1202,7 +1263,6 @@ IwrfTsPulse *BeamReader::_getNextPulse()
     if (_params.mode == Params::ARCHIVE) {
       time_t pulseTime = pulse->getTime();
       if (pulseTime < _startTime || pulseTime > _endTime) {
-        delete pulse;
         continue;
       }
     }
@@ -1289,7 +1349,8 @@ IwrfTsPulse *BeamReader::_getNextPulse()
         cerr << "  Ignoring this pulse" << endl;
       }
       _missMgrCount++;
-      delete pulse;
+
+      // Drop the current shared pointer and go back for another.
       continue;
     }
     
@@ -1326,13 +1387,14 @@ IwrfTsPulse *BeamReader::_getNextPulse()
 
     _addPulseToQueue(pulse);
 
-    // return pointer to this pulse
+    // save the shared pointer as _latestPulse, then return it
 
     _latestPulse = pulse;
-    return pulse;
+    return _latestPulse;
   
   } // while (true)
 
+  // Nothing left. Return a NULL pulse
   return NULL;
     
 }
@@ -1340,11 +1402,11 @@ IwrfTsPulse *BeamReader::_getNextPulse()
 /////////////////////////////////////////////////////////
 // get the next pulse
 
-IwrfTsPulse *BeamReader::_readNextPulse()
+shared_ptr<IwrfTsPulse> BeamReader::_readNextPulse()
 
 {
 
-  IwrfTsPulse *pulse = NULL;
+  shared_ptr<IwrfTsPulse> pulse(NULL);
 
   if (_pulseCache.size() > 0) {
 
@@ -1352,11 +1414,6 @@ IwrfTsPulse *BeamReader::_readNextPulse()
 
     pulse = _pulseCache.front();
     _pulseCache.pop_front();
-
-    // reduce client count since this will now be managed
-    // by the main queue which will add to the count
-
-    pulse->removeClient();
 
   } else {
 
@@ -1391,32 +1448,41 @@ IwrfTsPulse *BeamReader::_readNextPulse()
 // read the next pulse from the reader
 // check prt is correct
 
-IwrfTsPulse *BeamReader::_doReadNextPulse()
+shared_ptr<IwrfTsPulse> BeamReader::_doReadNextPulse()
 
 {
+  shared_ptr<IwrfTsPulse> sptr;
 
-  // initially fill the _prevPulse slot
+  // Fill _prevPulse if needed
   
   if (_prevPulse == NULL) {
-    _prevPulse = _pulseReader->getNextPulse(true);
-    if  (_prevPulse == NULL) {
+    // Get a pulse shared_ptr from the pool
+    sptr = _getPulseFromRecyclePool();
+    if (sptr == NULL) return NULL;
+
+    // Extract the next pulse, if any, into sptr's raw pointer.
+    if (_pulseReader->getNextPulse(true, sptr.get()) == NULL) {
+      // No pulse was obtained, so return NULL
       return NULL;
     }
+
+    // The reader gave us something; save it as _prevPulse
+    _prevPulse = sptr;
+    cerr << "_doReadNextPulse initialized _prevPulse to " << hex << _prevPulse << dec << endl;
   }
 
-  // read pulse from reader
-  
-  IwrfTsPulse *latest = _getPulseFromRecyclePool();
-  if (latest == NULL) {
-    // create a new pulse
-    latest = _pulseReader->getNextPulse(true);
-  } else {
-    // recycle previously used pulse
-    latest = _pulseReader->getNextPulse(true, latest);
+  // Get a pulse shared_ptr from the pool
+  sptr = _getPulseFromRecyclePool();
+  if (sptr == NULL) return NULL;
+
+  // Extract the next pulse, if any, into sptr's raw pointer.
+  if (_pulseReader->getNextPulse(true, sptr.get()) == NULL) {
+      // No pulse was obtained, so return NULL
+      return NULL;
   }
-  if (latest == NULL) {
-    return NULL;
-  }
+
+  // The reader gave us something, so we have a real latest pulse
+  shared_ptr<IwrfTsPulse> latest = sptr;
 
   // swap the PRT values if the current prt refers to the 
   // time to NEXT pulse instead of time since PREV pulse
@@ -1448,7 +1514,7 @@ IwrfTsPulse *BeamReader::_doReadNextPulse()
 
   // return the previously-read pulse
 
-  IwrfTsPulse *prev = _prevPulse;
+  shared_ptr<IwrfTsPulse> prev = _prevPulse;
   _prevPulse = latest;
 
   return prev;
@@ -1458,7 +1524,7 @@ IwrfTsPulse *BeamReader::_doReadNextPulse()
 /////////////////////////////////////////////////////////
 // get the next pulse, with interpolation
 
-IwrfTsPulse *BeamReader::_readNextPulseWithInterp()
+shared_ptr<IwrfTsPulse> BeamReader::_readNextPulseWithInterp()
 
 {
 
@@ -1578,11 +1644,11 @@ IwrfTsPulse *BeamReader::_readNextPulseWithInterp()
 // read another pulse and push onto the interp queue
 // return pulse read, NULL on failure
 
-IwrfTsPulse *BeamReader::_pushOntoInterpQueue()
+shared_ptr<IwrfTsPulse> BeamReader::_pushOntoInterpQueue()
 
 {
   
-  IwrfTsPulse *pulse = _doReadNextPulse();
+  shared_ptr<IwrfTsPulse> pulse = _doReadNextPulse();
 
   if (pulse != NULL) {
     _interpQueue.push_front(pulse);
@@ -1599,11 +1665,11 @@ IwrfTsPulse *BeamReader::_pushOntoInterpQueue()
 ///////////////////////////////////////////////
 // return the oldest pulse on the interp queue
 
-IwrfTsPulse *BeamReader::_popFromInterpQueue()
+shared_ptr<IwrfTsPulse> BeamReader::_popFromInterpQueue()
 
 {
 
-  IwrfTsPulse *oldest = _interpQueue.back();
+  shared_ptr<IwrfTsPulse> oldest = _interpQueue.back();
   _interpQueue.pop_back();
   if (_params.angle_interp_debug) {
     fprintf(stderr, "==========>> interpolated el, az: %7.3f %7.3f\n",
@@ -1651,7 +1717,7 @@ bool BeamReader::_beamOk()
     if (pulsesMissing) {
       cerr << "  n pulses in queue to be discarded: " << _pulseQueue.size() << endl;
       int midIndex = (_startIndex + _endIndex) / 2;
-      const IwrfTsPulse *pulse = _pulseQueue[midIndex];
+      shared_ptr<IwrfTsPulse> pulse = _pulseQueue[midIndex];
       RadxTime ptime(pulse->getTime(), pulse->getNanoSecs() / 1.0e9);
       cerr << "  time, el, az: "
            << ptime.asString(3) << ", "
@@ -1671,14 +1737,12 @@ bool BeamReader::_beamOk()
 // so the youngest pulses are at the front and
 // the oldest at the back
     
-void BeamReader::_addPulseToQueue(IwrfTsPulse *pulse)
+void BeamReader::_addPulseToQueue(shared_ptr<IwrfTsPulse> pulse)
   
 {
   
   // push pulse onto front of queue
-  // increase client count by 1 so we know pulse is being used
-  
-  pulse->addClient();
+
   _pulseQueue.push_front(pulse);
   _pulseCount++;
   
@@ -1706,7 +1770,7 @@ void BeamReader::_cacheLatestPulse()
 
     // grab the latest pulse - from front of queue
 
-    IwrfTsPulse *pulse = _pulseQueue.front();
+    shared_ptr<IwrfTsPulse> pulse = _pulseQueue.front();
     _pulseQueue.pop_front();
 
     // save to front of cache
@@ -1727,25 +1791,13 @@ void BeamReader::_cacheLatestPulse()
 void BeamReader::_clearPulseQueue()
   
 {
-
-  for (size_t ii = 0; ii < _pulseQueue.size(); ii++) {
-    IwrfTsPulse *pulse = _pulseQueue.back();
-    _pulseQueue.pop_back();
-    pulse->removeClient();
-    _addPulseToRecyclePool(pulse);
-  }
-
-  for (size_t ii = 0; ii < _pulseCache.size(); ii++) {
-    IwrfTsPulse *pulse = _pulseCache.back();
-    _pulseCache.pop_back();
-    pulse->removeClient();
-    _addPulseToRecyclePool(pulse);
-  }
-
+  // Drop all of our shared pointers in _pulseQueue and _pulseCache
+  _pulseQueue.clear();
+  _pulseCache.clear();
 }
 
 /////////////////////////////////////////////////
-// move excess pulses to recycle pool
+// free excess pulses so they're returned to the pool
 // we keep at least nSamples * 2 on the queue
 
 void BeamReader::_recyclePulses()
@@ -1754,24 +1806,8 @@ void BeamReader::_recyclePulses()
 
   int nExcess = (int) _pulseQueue.size() - (_nSamples * 2) - _maxTrips;
   for (int ii = 0; ii < nExcess; ii++) {
-    IwrfTsPulse *pulse = _pulseQueue.back();
+    // Pop the back entry. This releases our hold on the shared_ptr.
     _pulseQueue.pop_back();
-    pulse->removeClient();
-    _addPulseToRecyclePool(pulse);
-  }
-
-}
-
-/////////////////////////////////////////////////////////
-// add pulse to recycle pool
-
-void BeamReader::_addPulseToRecyclePool(IwrfTsPulse *pulse)
-  
-{
-  _pulseRecyclePool.push_front(pulse);
-  if (_params.debug >= Params::DEBUG_EXTRA_VERBOSE) {
-    cerr << "Pulse recycle pool size: "
-         << _pulseRecyclePool.size() << endl;
   }
 
 }
@@ -1781,29 +1817,10 @@ void BeamReader::_addPulseToRecyclePool(IwrfTsPulse *pulse)
 // Returns NULL if the pool is empty, or if the pulse
 // at the back of the queue still has clients
 
-IwrfTsPulse *BeamReader::_getPulseFromRecyclePool()
+shared_ptr<IwrfTsPulse> BeamReader::_getPulseFromRecyclePool()
 
 {
-  if (_pulseRecyclePool.size() < 1) {
-    return NULL;
-  }
-
-  // find a pulse with no clients - i.e. all threads have released it
-
-  deque<IwrfTsPulse *>::iterator ii;
-  for (ii = _pulseRecyclePool.begin();
-       ii != _pulseRecyclePool.end(); ii++) {
-    IwrfTsPulse *pulse = *ii;
-    if (pulse->getNClients() == 0) {
-      _pulseRecyclePool.erase(ii);
-      return pulse;
-    }
-  }
-  
-  // none available
-
-  return NULL;
-
+    return _pulsePool.alloc();
 }
 
 /////////////////////////////////////////////////
@@ -1958,7 +1975,11 @@ void BeamReader::_setPrt()
 
   // set prt, assuming single PRT for now
   
-  _prt = _pulseQueue[0]->getPrt();
+  if (_params.specify_pulse_width) {
+    _prt = _pulseQueue[_pulseQueue.size() / 2]->getPrt();
+  } else {
+    _prt = _pulseQueue[0]->getPrt();
+  }
   if (_params.override_primary_prt) {
     _prt = _params.primary_prt_secs;
   }
@@ -2283,7 +2304,7 @@ int BeamReader::_computeNSamplesIndexed()
   nSamples = (nSamples / 2) * 2;
   
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-    const IwrfTsPulse *pulse = _pulseQueue[0];
+    shared_ptr<IwrfTsPulse> pulse = _pulseQueue[0];
     time_t psecs = pulse->getTime();
     int pnanosecs = pulse->getNanoSecs();
     DateTime ptime(psecs);
@@ -2397,8 +2418,8 @@ void BeamReader::_checkIsStaggeredPrt()
 
   _isStaggeredPrt = false;
 
-  IwrfTsPulse *pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
-  IwrfTsPulse *pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
+  shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
+  shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
 
   double prt0 = pulse0->getPrt();
   double prt1 = pulse1->getPrt();
@@ -2478,8 +2499,8 @@ void BeamReader::_checkStaggeredStartsOnShort()
   
   // the pulses are stored in reverse order
 
-  IwrfTsPulse *pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
-  IwrfTsPulse *pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
+  shared_ptr<IwrfTsPulse> pulse0 = _pulseQueue[_nSamples-1]; // first pulse in series
+  shared_ptr<IwrfTsPulse> pulse1 = _pulseQueue[_nSamples-2]; // second pulse in series
 
   double prt0 = pulse0->getPrt();
   double prt1 = pulse1->getPrt();
@@ -2537,7 +2558,7 @@ double BeamReader::_conditionEl(double el)
 ////////////////////////////////////////////////////////////////
 // compute azimuth rate progressively as pulses are added
 
-void BeamReader::_computeProgressiveAzRate(const IwrfTsPulse *pulse)
+void BeamReader::_computeProgressiveAzRate(const shared_ptr<IwrfTsPulse> pulse)
 
 {
 
@@ -2586,7 +2607,7 @@ void BeamReader::_computeProgressiveAzRate(const IwrfTsPulse *pulse)
 ////////////////////////////////////////////////////////////////
 // compute elevation rate progressively as pulses are added
 
-void BeamReader::_computeProgressiveElRate(const IwrfTsPulse *pulse)
+void BeamReader::_computeProgressiveElRate(const shared_ptr<IwrfTsPulse> pulse)
 
 {
 
@@ -2666,8 +2687,8 @@ void BeamReader::_computeBeamAzRate(int endIndex, int nSamples)
     startIndex = (int) _pulseQueue.size() - 1;
   }
 
-  const IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
-  const IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
+  shared_ptr<IwrfTsPulse> pulseStart = _pulseQueue[startIndex];
+  shared_ptr<IwrfTsPulse> pulseEnd = _pulseQueue[endIndex];
   
   double azStart = pulseStart->getAz();
   double azEnd = pulseEnd->getAz();
@@ -2718,8 +2739,8 @@ void BeamReader::_computeBeamElRate(int endIndex, int nSamples)
     startIndex = _pulseQueue.size() - 1;
   }
 
-  const IwrfTsPulse *pulseStart = _pulseQueue[startIndex];
-  const IwrfTsPulse *pulseEnd = _pulseQueue[endIndex];
+  shared_ptr<IwrfTsPulse> pulseStart = _pulseQueue[startIndex];
+  shared_ptr<IwrfTsPulse> pulseEnd = _pulseQueue[endIndex];
   
   double elStart = pulseStart->getEl();
   double elEnd = pulseEnd->getEl();
@@ -2764,7 +2785,7 @@ double BeamReader::getAntennaRate()
 ////////////////////////////////////////////////////////////////
 // check for end of vol and sweep flags
 
-void BeamReader::_checkForEndFlags(const vector<const IwrfTsPulse *> &beamPulses)
+void BeamReader::_checkForEndFlags(const vector<shared_ptr<IwrfTsPulse>> &beamPulses)
   
 {
   
@@ -2807,38 +2828,25 @@ void BeamReader::_checkQueueStatus()
 
   // trim resize pool as required
 
-  size_t nInUse = _pulseQueue.size() + _pulseCache.size();
+  size_t nInUse = _pulsePool.getInUseCount();
   size_t nTarget = (int) (nInUse * 1.5);
-  size_t nStart = _pulseRecyclePool.size();
+  size_t nStart = _pulsePool.getCount();
   int nExcess = nStart - nTarget;
   if (nExcess > 0) {
-    for (int ii = 0; ii < nExcess; ii++) {
-      IwrfTsPulse *pulse = _pulseRecyclePool.back();
-      if (pulse->getNClients() == 0) {
-        _pulseRecyclePool.pop_back();
-        delete pulse;
-      } else {
-        break;
-      }
-    } // ii
+    _pulsePool.resize(nTarget);
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "================= Recycle status ==================" << endl;
-      cerr << "  trimmed recycle pool, nStart: " << nStart << endl;
-      cerr << "                        nInUse: " << nInUse << endl;
-      cerr << "                        nExcess: " << nExcess << endl;
-      cerr << "                        nPool: " << _pulseRecyclePool.size() << endl;
+      cerr << "  trimmed pulse pool, nStart: " << nStart << endl;
+      cerr << "                      nInUse: " << nInUse << endl;
+      cerr << "                      nExcess: " << nExcess << endl;
+      cerr << "                      nPool: " << _pulsePool.getCount() << endl;
       cerr << "===================================================" << endl;
     }
   }
 
   // how many pulses are now available from the recycle pool?
 
-  int nAvailable = 0;
-  for (size_t ii = 0; ii < _pulseRecyclePool.size(); ii++) {
-    if (_pulseRecyclePool[ii]->getNClients() == 0) {
-      nAvailable++;
-    }
-  }
+  int nAvailable = _pulsePool.getFreeCount();
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "================= Queue status ==================" << endl;
@@ -2847,10 +2855,10 @@ void BeamReader::_checkQueueStatus()
     cerr << "  pulse cache size: " << _pulseCache.size() << endl;
     cerr << "  interp queue size: " << _interpQueue.size() << endl;
     cerr << "  pulse recycle pool size, n available: "
-	<< _pulseRecyclePool.size() << ", "
-	<< nAvailable << endl;
+         << _pulsePool.getCount() << ", "
+         << nAvailable << endl;
     cerr << "  pulse+recycle queue size: "
-	 << _pulseQueue.size() + _pulseRecyclePool.size() << endl;
+         << _pulseQueue.size() + _pulsePool.getCount() << endl;
     cerr << "  beam recycle pool size: " << _beamRecyclePool.size() << endl;
     cerr << "=================================================" << endl;
   }
@@ -2931,9 +2939,9 @@ void BeamReader::_computeWindowFactors()
     cerr << "_windowFactorRect: " << _windowFactorRect << endl;
     cerr << "_windowFactorVonhann: " << _windowFactorVonhann << endl;
     cerr << "_windowFactorBlackman: " << _windowFactorBlackman << endl;
-    cerr << "_windowFactorBlackmanNuttall: " 
+    cerr << "_windowFactorBlackmanNuttall: "
          << _windowFactorBlackmanNuttall << endl;
   }
-  
+
 }
 

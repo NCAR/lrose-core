@@ -1,0 +1,155 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/////////////////////////////////////////////////////////////////////////
+// paramdef.CIDD_syprods
+//
+// This file contains the TDRP parameter definitions for CIDD
+//
+
+ccommentdef {
+  p_header = "CIDD's TDRP parameters for product rendering.";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_default = DEBUG_OFF;
+  p_help = "Debug option.\n"
+           "If set, debug messages will be printed appropriately.\n";
+} debug;
+
+paramdef boolean { 
+  p_descr = "Gather Data Frame by Frame, Otherwise by loop span";
+  p_help = "Gathers Products valid for the current frame only - Speeds up"
+           " gathering of large data sets, like METAR data" ;
+  p_default = FALSE;
+} short_requests;
+
+paramdef boolean { 
+  p_descr = "Request data using GZIP compression";
+  p_help = "If true, symprod data will be GZIP compressed by the server.";
+  p_default = FALSE;
+} gzip_requests;
+
+typedef enum {
+  RENDER_ALL,             // Do no temporal clipping
+  RENDER_ALL_VALID,       // Render all Valid in frame
+  RENDER_VALID_IN_LAST_FRAME,   // Render all Valid in the last movie frame 
+  RENDER_LATEST_IN_FRAME, // Render the latest product of like data_types (ID) valid in the frame.
+  RENDER_LATEST_IN_LOOP,  // Render the latest product of like data_types (ID) valid in the movie loop.
+  RENDER_FIRST_BEFORE_FRAME_TIME,// Render the latest product before the end of frame time
+  RENDER_FIRST_BEFORE_DATA_TIME,// Render the latest product before the data time in each frame 
+  RENDER_FIRST_AFTER_DATA_TIME, // Render the earliest product after the data time in each frame 
+  RENDER_ALL_BEFORE_DATA_TIME,  // Render all valid products before the data time in each frame 
+  RENDER_ALL_AFTER_DATA_TIME,   // Render all valid products after the data time in each frame 
+  RENDER_GET_VALID, // Render only those returned with an SPDB GetValid() call
+  RENDER_GET_VALID_AT_FRAME_TIME // Render products which have not expired at the frame time
+} render_type_t;
+
+typedef struct {
+  string menu_label;
+  string url;
+  int data_type;
+  render_type_t render_type;
+  boolean on_by_default;
+  double minutes_allow_before;
+  double minutes_allow_after;
+  double text_off_threshold;
+  boolean request_data_on_zoom;
+  boolean request_data_on_vert_change;
+} prod_info_t;
+
+paramdef struct prod_info_t {
+
+  p_descr = "Product Source and Rendering Information Array";
+  
+  p_help =
+  "The fields in the structure are as follows:\n"
+  "\n"
+  "  menu_label: label to be used for the product in menu.\n"
+  "\n"
+  "  url: for retrieving the data.\n"
+  "    example: spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2\n"
+  "\n"
+  "  data_type: used when querying the SPDB data server\n"
+  "    (set to 0 to retrieve all data).\n"
+  "\n"
+  "  render_type: Select how temporal clipping is done:\n"
+  "    RENDER_ALL: Do no temporal clipping.\n"
+  "    RENDER_ALL_VALID: Render all Valid in frame\n"
+  "    RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame\n"
+  "    RENDER_LATEST_IN_FRAME: Render the latest product of like data_types (ID)  in the frame.\n"
+  "    RENDER_LATEST_IN_LOOP:  Render the latest product of like data_types (ID)  valid in the movie loop.\n"
+  "    RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of like data_types (ID) before the end of frame time\n"
+  "    RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of like data_types (ID  before the data time in each frame.\n"
+  "    RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product after the data time in each frame.\n"
+  "    RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before the data time in each frame.\n"
+  "    RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after the data time in each frame.\n"
+  "    RENDER_GET_VALID:      Render all valid products returned with a GetValid Spdb call.\n"
+  "    RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not expired at the frame time\n"
+  "\n"
+  "Note: all comparisons are less than or equal or greater than or equal\n"
+  "\n"
+  "  on_by_default: True or False\n"
+  "\n"
+  "  minutes_allow_before: Stretch the frame time this many minutes - prior\n"
+  "  minutes_allow_after: Stretch the frame time this many minutes - after\n"
+  "\n"
+  "  text_off_threshold: Threshold where text disappears. Use the function:\n"
+  "      log10(scaling_constant/km_distance_across_screen ) + 1.0\n"
+  "      Use 0.0 to disable the off feature. (always displayed)\n"
+  "\n"
+  "  request_data_on_zoom: Flag indicating whether to request new data for\n"
+  "      this product whenever the user changes the zoom.  Normally, this\n"
+  "      should be set to false for efficiency reasons.  If the products\n"
+  "      to be rendered would change with a zoom change then this should be\n"
+  "      set to true.\n"
+  "\n"
+  "  request_data_on_vert_change: Flag indicating whether to request new data\n"
+  "      for this product whenever the user changes the currently displayed\n"
+  "      vertical level.  Normally, this should be set to false for efficiency\n"
+  "      reasons.  If the products to be rendered would change with a zoom\n"
+  "      change then this should be set to true.\n"
+  "\n";
+  
+  p_default = {
+    {
+      menu_label = "RHI-ticks",
+      url = "spdbp:Rhi2Symprod://localhost::spdb/rhi",
+      data_type = 0,
+      render_type = RENDER_ALL_VALID,
+      on_by_default = FALSE,
+      minutes_allow_before = 20.0,
+      minutes_allow_after = 10.0,
+      text_off_threshold = 0.4,
+      request_data_on_zoom = false,
+      request_data_on_vert_change = false
+    }
+  };
+
+} prod_info[];
+

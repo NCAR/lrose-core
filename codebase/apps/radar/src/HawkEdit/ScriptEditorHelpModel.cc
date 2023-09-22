@@ -179,8 +179,8 @@ void ScriptEditorHelpModel::setupModelData(const QStringList &lines, ScriptEdito
             // TODO - FIX this
             // const QStringList columnStrings =
             //     lineData.split(QLatin1Char('\t'), Qt::SkipEmptyParts);
-            const QStringList columnStrings = lineData.split(QLatin1Char('\t'),
-                Qt::SkipEmptyParts);
+            const QStringList columnStrings = lineData.split(QLatin1Char('\t'));
+            // default is behavior =  Qt::SkipEmptyParts);
             QVector<QVariant> columnData;
             columnData.reserve(columnStrings.count());
             for (const QString &columnString : columnStrings)

@@ -179,6 +179,20 @@ RadxRate::RadxRate(int argc, char **argv)
     }
   }
 
+  // read in RATE params if applicable
+
+  if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
+    // not using defaults
+    if (_precipRateParams.load(_params.RATE_params_file_path,
+                               NULL, true, _args.tdrpDebug)) {
+      cerr << "ERROR: " << _progName << endl;
+      cerr << "Cannot read params file for PrecipRate: "
+           << _params.RATE_params_file_path << endl;
+      OK = FALSE;
+      return;
+    }
+  }
+
   // initialize compute object
 
   pthread_mutex_init(&_debugPrintMutex, NULL);
@@ -241,13 +255,13 @@ void RadxRate::_printParamsRate()
   }
 
   // read in RATE params if applicable
-  
+
   if (strstr(_params.RATE_params_file_path, "use-defaults") == NULL) {
     // not using defaults
     if (_precipRateParams.load(_params.RATE_params_file_path,
                                NULL, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for PrecipFilt: "
+      cerr << "Cannot read params file for PrecipRate: "
            << _params.RATE_params_file_path << endl;
       OK = FALSE;
       return;
@@ -295,7 +309,7 @@ void RadxRate::_printParamsPid()
     if (_ncarPidParams.load(_params.PID_params_file_path,
                             NULL, expandEnvVars, _args.tdrpDebug)) {
       cerr << "ERROR: " << _progName << endl;
-      cerr << "Cannot read params file for PidFilt: "
+      cerr << "Cannot read params file for NcarPid: "
            << _params.PID_params_file_path << endl;
       OK = FALSE;
       return;

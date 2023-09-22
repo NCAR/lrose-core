@@ -463,34 +463,56 @@ typedef enum {
 } fft_window_t;
 
 typedef enum {
+  INTERP_METHOD_NONE,
+  INTERP_METHOD_LINEAR,
+  INTERP_METHOD_GAUSSIAN
+} notch_interp_method_t;
+
+typedef enum {
+  CLUTTER_FILTER_ADAPTIVE,
+  CLUTTER_FILTER_REGRESSION,
+  CLUTTER_FILTER_NOTCH,
+  CLUTTER_FILTER_NONE
+} clutter_filter_type_t;
+
+typedef enum {
   WATERFALL_HC,
   WATERFALL_VC,
   WATERFALL_HX,
   WATERFALL_VX,
+  WATERFALL_DBZ,
+  WATERFALL_SNR,
   WATERFALL_ZDR,
   WATERFALL_PHIDP,
+  WATERFALL_RHOHV,
+  WATERFALL_TDBZ,
   WATERFALL_SDEV_ZDR,
   WATERFALL_SDEV_PHIDP,
-  WATERFALL_CMD
+  WATERFALL_TDBZ_INT,
+  WATERFALL_SDEV_ZDR_INT,
+  WATERFALL_SDEV_PHIDP_INT,
+  WATERFALL_CMD,
+  WATERFALL_CMD_MEAN
 } waterfall_type_t;
 
 typedef struct {
   waterfall_type_t plot_type;
   fft_window_t fft_window;
   int median_filter_len;
-  boolean use_adaptive_filter;
+  clutter_filter_type_t clutter_filter_type;
   double clutter_model_width_mps;
   boolean use_regression_filter;
   int regression_order;
+  notch_interp_method_t regression_filter_notch_interp_method;
 } waterfall_plot_t;
 
 paramdef struct waterfall_plot_t {
   p_default = {
-    { WATERFALL_HC, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 },
-    { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 3, false, 0.75, false, 3 }
+  { WATERFALL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_NONE, 0.75, false, -1, INTERP_METHOD_GAUSSIAN },
+  { WATERFALL_ZDR, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, 0.75, false, -1, INTERP_METHOD_GAUSSIAN }
   };
   p_descr = "Details of waterfall plots for each sub panel.";
-  p_help = "HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood.";
+  p_help = "HC: H-Co power spectrum vs range.\nVC: V-Co power spectrum vs range.\nHX: H-cross power spectrum vs range.\nVX: V-cross power spectrum vs range.\nZDR: zdr spectrum vs range.\nPHIDP: phidp spectrum vs. range.\nSDEV_ZDR: standard deviation of ZDR.\nSDEV_PHIDP: standard deviation of PHIDP.\nCMD: interest field for clutter likelihood. For the regression filter, set the order to -1 to compute the order automatically in the filter.";
 } waterfall_plots[];
 
 paramdef int {
@@ -504,6 +526,18 @@ paramdef int {
   p_descr = "Width of color scale in waterfall plots (pixels).";
   p_help = "The color scale sits to the right of the data.";
 } waterfall_color_scale_width;
+
+paramdef int {
+  p_default = 5;
+  p_descr = "Kernal size in range for computing TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the size of that kernel in range.";
+} waterfall_tdbz_kernel_ngates;
+
+paramdef int {
+  p_default = 3;
+  p_descr = "Kernal size in samples for computing sdev of TDBZ";
+  p_help = "The standard deviation of DBZ-squared is computed over a rectangular kernel, and then the square-root is computed. This is the number of samples in the kernel.";
+} waterfall_tdbz_kernel_nsamples;
 
 paramdef int {
   p_default = 5;
@@ -536,6 +570,16 @@ paramdef string {
 } color_scale_dir;
 
 paramdef string {
+  p_default = "dbz.colors";
+  p_descr = "Color scale name for dbz";
+} waterfall_dbz_color_scale_name;
+
+paramdef string {
+  p_default = "snr.colors";
+  p_descr = "Color scale name for snr";
+} waterfall_snr_color_scale_name;
+
+paramdef string {
   p_default = "dbm_spectra.colors";
   p_descr = "Color scale name for dbm";
 } waterfall_dbm_color_scale_name;
@@ -551,6 +595,16 @@ paramdef string {
 } waterfall_phidp_color_scale_name;
 
 paramdef string {
+  p_default = "rhohv.colors";
+  p_descr = "Color scale name for rhohv";
+} waterfall_rhohv_color_scale_name;
+
+paramdef string {
+  p_default = "dbz.colors";
+  p_descr = "Color scale name for TDBZ";
+} waterfall_tdbz_color_scale_name;
+
+paramdef string {
   p_default = "sdzdr_spectra.colors";
   p_descr = "Color scale name for sdev of zdr";
 } waterfall_sdev_zdr_color_scale_name;
@@ -561,9 +615,19 @@ paramdef string {
 } waterfall_sdev_phidp_color_scale_name;
 
 paramdef string {
+  p_default = "interest.colors";
+  p_descr = "Color scale name for interest values";
+} waterfall_interest_color_scale_name;
+
+paramdef string {
   p_default = "cmd_spectra.colors";
   p_descr = "Color scale name for CMD";
 } waterfall_cmd_color_scale_name;
+
+paramdef string {
+  p_default = "cmd_mean.colors";
+  p_descr = "Color scale name for CMD SPECTRAL MEAN";
+} waterfall_cmd_mean_color_scale_name;
 
 paramdef int {
   p_default = 10;
@@ -696,6 +760,8 @@ typedef enum {
   SPECTRAL_PHASE,
   SPECTRAL_ZDR,
   SPECTRAL_PHIDP,
+  SPECTRAL_RHOHV,
+  SPECTRAL_SZ864,
   TS_POWER,
   TS_PHASE,
   I_VALS,
@@ -716,28 +782,27 @@ typedef struct {
   rx_channel_t rx_channel;
   fft_window_t fft_window;
   int median_filter_len;
-  boolean use_adaptive_filter;
+  clutter_filter_type_t clutter_filter_type;
   boolean plot_clutter_model;
   double clutter_model_width_mps;
-  boolean use_regression_filter;
   int regression_order;
-  boolean regression_filter_interp_across_notch;
+  notch_interp_method_t regression_filter_notch_interp_method;
   boolean compute_plot_range_dynamically;
 } iq_plot_t;
 
 paramdef struct iq_plot_t {
   p_default = {
-    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true },
-    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, true, false, 0.75, false, 3, true, true }
+    { SPECTRAL_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { SPECTRAL_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { TS_POWER, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { TS_PHASE, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { I_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { Q_VALS, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { I_VS_Q, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true },
+    { PHASOR, CHANNEL_HC, FFT_WINDOW_VONHANN, 1, CLUTTER_FILTER_ADAPTIVE, false, 0.75, -1, INTERP_METHOD_GAUSSIAN, true }
   };
   p_descr = "Details of IQ plots for each sub panel.";
-  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra.";
+  p_help = "SPECTRAL_POWER: power spectrum, log.\nSPECTRAL_PHASE: phase in the spectral domain.\nSPECTRAL_ZDR: (H/V) power ratio of the spectrum.\nSPECTRAL_PHIDP: H/V phase difference in the spectrum.\nTS_POWER: time domain power, log.\nTS_PHASE: time domain phase.\nI_VALS: I vals of time series.\nQ_VALS: Q vals of time series.\nI_VS_Q: I on x axis, Q on y axis.\nPHASE: sum of I vs sum of Q. I on x axis.\n\nmedian_filter_len: median filter for spectra. For the regression filter, set the order to -1 to compute the order automatically in the filter";
 } iq_plots[];
 
 typedef struct {
@@ -967,6 +1032,12 @@ commentdef {
   p_text = "The default clutter filtering method is the Adaptive Filter, with residue correction activated.";
 }
 
+paramdef enum clutter_filter_type_t {
+  p_default = CLUTTER_FILTER_ADAPTIVE;
+  p_descr = "Type of clutter filter to use.";
+  p_help = "ADAPTIVE: spectral filter with gaussian interpolation. REGRESSION: polynomial filter with specified interpolation. NOTCH: simple notch filter of specified width. NONE: cancels clutter filtering.";
+} ascope_clutter_filter_type;
+
 paramdef boolean {
   p_default = true;
   p_descr = "Option to apply residue correction to adaptive filter.";
@@ -978,12 +1049,6 @@ paramdef double {
   p_descr = "Min SNR for applying the residue correction (dB).";
   p_help = "Spectral residue seems to occur at high powers, when the receiver is close to saturated. This is probably related to increased phase noise. Only apply residue correction if SNR exceeds this value. Otherwise, do not apply a correction.";
 } min_snr_db_for_residue_correction;
-
-paramdef boolean {
-  p_default = false;
-  p_descr = "Option to apply a regression clutter filter.";
-  p_help = "For the regression filter, a polynomial fit is performed on the I and Q data individually. The filtered time series is computed as the original minus the regression fit. If true, this takes preference over the notch filter.";
-} use_polynomial_regression_clutter_filter;
 
 paramdef boolean {
   p_default = true;
@@ -1284,6 +1349,70 @@ paramdef enum fft_window_t {
   p_default = FFT_WINDOW_VONHANN;
   p_descr = "Window to be applied to time series before computing spectra.";
 } fft_window;
+
+commentdef {
+  p_header = "SPECTRAL CMD INTEREST MAPS and WEIGHTS";
+  p_text = "Each map should hold at least 2 points. The points should be increasing in value, i.e. the value should increase for each subsequent point. The various interest values are combined using the specified weights in a weighted mean to produce the final CMD value.";
+};
+
+typedef struct {
+  double value;
+  double interest;
+} interest_map_point_t;
+
+paramdef struct interest_map_point_t {
+  p_default = {{0.0, 0.0001}, {20.0, 1.0}};
+  p_descr = "Interest mapping for SNR.";
+} snr_interest_map[];
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "Weight for SNR interest.";
+  p_help = "This weight is used for combining snr interest into the final CMD interest.";
+} snr_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{30.0, 0.0001}, {40.0, 1.0}};
+  p_descr = "Interest mapping for TDBZ.";
+} tdbz_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for TDBZ interest.";
+  p_help = "This weight is used for combining tdbz interest into the final CMD interest.";
+} tdbz_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{3.0, 0.0001}, {4.0, 1.0}};
+  p_descr = "Interest mapping for zdr.";
+} zdr_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of zdr.";
+} zdr_sdev_interest_weight;
+
+paramdef struct interest_map_point_t {
+  p_default = {{28.0, 0.0001}, {32.0, 1.0}};
+  p_descr = "Interest mapping for standard deviation of phidp.";
+} phidp_sdev_interest_map[];
+
+paramdef double {
+  p_default = 1.0;
+  p_descr = "Weight for standard deviation of phidp.";
+} phidp_sdev_interest_weight;
+
+paramdef double {
+  p_default = 0.9;
+  p_descr = "Threshold CMD value for detecting clutter.";
+  p_help = "If the mean CMD value exceeds this threshold, clutter is assumed to exist at that point.";
+} cmd_threshold_for_detection;
+
+paramdef double {
+  p_default = 0.7;
+  p_descr = "Threshold CMD value for computing moments.";
+  p_help = "If CMD at a spectral point exceeds this threshold, it is set to 0 so it is not used in the computation of the moments.";
+} cmd_threshold_for_moments;
 
 commentdef {
   p_header = "RADAR CALIBRATION";
