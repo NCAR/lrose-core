@@ -1335,10 +1335,12 @@ void init_data_space()
     fprintf(stderr,"Could'nt Find MAPS SECTION\n");
     exit(-1);
   }
-  /* establish and initialize Map overlay data */
+
+  // overlays
+
+  gd.map_file_subdir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
   init_over_data_links(param_text, param_text_len, param_text_line_no);
-
-
+  
   // Instantiate the Station locator classes and params.
   gd.locator_margin_km = gd.uparams->getDouble("cidd.locator_margin_km", 50.0);
   gd.station_loc_url = gd.uparams->getString("cidd.station_loc_url", "");
@@ -1560,10 +1562,9 @@ void init_data_space()
   gd.horiz_default_y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
   gd.horiz_default_x_pos = gd.uparams->getLong("cidd.horiz_default_x_pos",0);
 
-  // overlays
-
-  gd.map_file_sub_dir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
-
+  gd.vert_default_x_pos = gd.uparams->getLong("cidd.vert_default_x_pos", 0);
+  gd.vert_default_y_pos = gd.uparams->getLong("cidd.vert_default_y_pos", 0);
+  
   // page_pu_proc
 
   gd.ideal_x_vectors = gd.uparams->getLong("cidd.ideal_x_vectors", 20);
@@ -1589,8 +1590,10 @@ void init_data_space()
 
   // timer control
 
-  gd.redraw_interval = gd.uparams->getLong("cidd.redraw_interval", 1000);
-  gd.update_interval = gd.uparams->getLong("cidd.update_interval", 120);
+  gd.redraw_interval =
+    gd.uparams->getLong("cidd.redraw_interval", REDRAW_INTERVAL);
+  gd.update_interval =
+    gd.uparams->getLong("cidd.update_interval", UPDATE_INTERVAL);
 
   gd.uparams->setPrintTdrp(false);
 

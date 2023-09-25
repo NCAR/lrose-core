@@ -987,12 +987,12 @@ void stop_timer()
 
 void start_timer()
 {
-#ifdef NOTNOW
-  struct  itimerval   timer;
 
+  struct itimerval timer;
+  
   if(redraw_interv == 0) {
-    redraw_interv = gd.uparams->getLong( "cidd.redraw_interval", REDRAW_INTERVAL);
-    update_interv =  gd.uparams->getLong( "cidd.update_interval", UPDATE_INTERVAL);
+    redraw_interv = gd.redraw_interval;
+    update_interv = gd.update_interval;
   }
 
   /* set up interval timer interval */
@@ -1000,15 +1000,17 @@ void start_timer()
   timer.it_value.tv_usec = 10000;
   timer.it_interval.tv_sec = 0;
   timer.it_interval.tv_usec = 10000;
-#endif
-
+  
   if(gd.debug) fprintf(stderr,"Starting Interval timer\n"); 
-
+  if(gd.debug) fprintf(stderr,"tv.sec: %ld\n", timer.it_value.tv_sec); 
+  if(gd.debug) fprintf(stderr,"tv.usec: %ld\n", timer.it_value.tv_usec); 
+  
   /* Set the interval timer function and start timer */
   // notify_set_itimer_func(gd.h_win_horiz_bw->horiz_bw,
   //                        (Notify_func)timer_func,
   //                        ITIMER_REAL, &timer, NULL); /*  */
 
   gd.coord_expt->shmem_ready = 1;  // Display should be up and running */
+
 }
 

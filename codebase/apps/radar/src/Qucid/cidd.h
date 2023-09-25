@@ -552,10 +552,12 @@ struct    Global_data {
 
   int horiz_default_x_pos;
   int horiz_default_y_pos;
+  int vert_default_x_pos;
+  int vert_default_y_pos;
   
   // overlays
 
-  const char *map_file_sub_dir;
+  const char *map_file_subdir;
 
   // page_pu_proc
 

@@ -82,7 +82,7 @@ void render_click_marks()
     double lon = gd.coord_expt->pointer_lon;
     double lat = gd.coord_expt->pointer_lat;
     gd.proj.latlon2xy(lat, lon, xx, yy);
-    int size = gd.uparams->getLong("cidd.latest_click_mark_size", 11);
+    int size = gd.latest_click_mark_size;
     _draw_mark(gd.h_win.vis_xid, xx, yy, gd.legends.latest_click_mark_color, size);
   }
 
@@ -93,7 +93,7 @@ void render_click_marks()
     double lon = gd.coord_expt->client_lon;
     double lat = gd.coord_expt->client_lat;
     gd.proj.latlon2xy(lat, lon, xx, yy);
-    int size = gd.uparams->getLong("cidd.latest_client_mark_size", 11);
+    int size = gd.latest_click_mark_size;
     _draw_mark(gd.h_win.vis_xid, xx, yy, gd.legends.latest_client_mark_color, size);
   }
   

@@ -64,10 +64,9 @@ void init_shared()
   } 
   gd.coord_expt->pointer_seq_num = 0;
 
-  gd.coord_expt->datum_latitude = gd.uparams->getDouble(
-          "cidd.origin_latitude", 39.8783);
-  gd.coord_expt->datum_longitude = gd.uparams->getDouble( 
-          "cidd.origin_longitude", -104.7568);
+  gd.coord_expt->datum_latitude = gd.origin_latitude;
+  gd.coord_expt->datum_longitude = gd.origin_longitude;
+
   gd.coord_expt->pointer_x = 0.0;
   gd.coord_expt->pointer_y = 0.0;
   gd.coord_expt->pointer_lon = gd.coord_expt->datum_longitude;

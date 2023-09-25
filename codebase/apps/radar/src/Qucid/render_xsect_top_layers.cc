@@ -49,11 +49,13 @@ void render_xsect_top_layers(Drawable xid, int page)
     Font    font;
 
     static double units_scale_factor = 0.0;
-    static const char* units_label;  
+    static const char* units_label = NULL;  
 
     if(units_scale_factor == 0.0) { // first time 
-      units_scale_factor = gd.uparams->getDouble( "cidd.wind_units_scale_factor", 1.0);
-      units_label = gd.uparams->getString( "cidd.wind_units_label", "m/sec");
+      units_scale_factor = gd.wind_units_scale_factor;
+    }
+    if (units_label == NULL) {
+      units_label = gd.wind_units_label;
     }
 
     /* Render cross reference line showing the altitude of the plan view */

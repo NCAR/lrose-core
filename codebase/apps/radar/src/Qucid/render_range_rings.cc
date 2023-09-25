@@ -69,11 +69,11 @@ void draw_cap_range_rings( Drawable xid)
 	u_label = gd.scale_units_label;
 
     if(ring_spacing == 0.0) {
-        x_space = gd.uparams->getLong("cidd.range_ring_x_space", 50);
-        y_space = gd.uparams->getLong("cidd.range_ring_y_space", 15);
-        ring_spacing = gd.uparams->getDouble("cidd.range_ring_spacing", -1.0);
-        max_ring_range = gd.uparams->getDouble("cidd.max_ring_range", 1000.0);
-        render_labels = gd.uparams->getLong("cidd.range_ring_labels", 1);
+      x_space = gd.range_ring_x_space;
+      y_space = gd.range_ring_y_space;
+      ring_spacing = gd.range_ring_spacing;
+      max_ring_range = gd.max_ring_range;
+      render_labels = gd.range_ring_labels;
     }
 
     if(ring_spacing > 0.0) {

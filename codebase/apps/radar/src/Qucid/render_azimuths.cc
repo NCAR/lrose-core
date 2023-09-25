@@ -49,14 +49,12 @@ void draw_cap_azimuth_lines(Drawable xid)
   static double range = 0.0;
   
   if(az_interval == 0.0) {
-    az_interval = gd.uparams->getDouble( "cidd.azmith_interval", 30.0);
-    az_interval = gd.uparams->getDouble( "cidd.azimuth_interval", az_interval);
+    az_interval = gd.azimuth_interval;
     az_interval = fabs(az_interval);
   }
-
+  
   if(range == 0.0) {
-    range = gd.uparams->getDouble( "cidd.azmith_radius", 200.0);
-    range = gd.uparams->getDouble( "cidd.azimuth_radius", range);
+    range = gd.azimuth_radius;
   }
 
   double lon1 = gd.h_win.origin_lon;

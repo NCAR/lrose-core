@@ -103,7 +103,7 @@ int render_vert_wind_vectors( Drawable xid)
 
     if(xid == 0) return CIDD_FAILURE;
     if(w_scale_factor == 0.0) {
-        w_scale_factor = gd.uparams->getDouble( "cidd.wind_w_scale_factor", 10.0);
+      w_scale_factor = gd.wind_w_scale_factor;
     }
     total_dist = 0.0;
     for(i=0; i < num_way_points; i++) {

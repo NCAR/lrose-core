@@ -779,11 +779,11 @@ topo_onoff_proc(Panel_item item, int value, Event *event)
 void
 set_wind_density_proc(Panel_item item, int value, Event *event)
 {
-   int x_vects = gd.uparams->getLong( "cidd.ideal_x_vectors", 20);
-   int y_vects = gd.uparams->getLong( "cidd.ideal_y_vectors", 20);
-   gd.ideal_x_vects = value * x_vects;
-   gd.ideal_y_vects = value * y_vects;
-   set_redraw_flags(1,1);
+  int x_vects = gd.ideal_x_vectors;
+  int y_vects = gd.ideal_y_vectors;
+  gd.ideal_x_vects = value * x_vects;
+  gd.ideal_y_vects = value * y_vects;
+  set_redraw_flags(1,1);
 }
  
 #endif

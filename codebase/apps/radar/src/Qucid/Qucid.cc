@@ -812,8 +812,10 @@ void Qucid::_initGlobals()
 
   gd.horiz_default_x_pos = 0;
   gd.horiz_default_y_pos = 0;
+  gd.vert_default_x_pos = 0;
+  gd.vert_default_y_pos = 0;
 
-  gd.map_file_sub_dir = NULL;
+  gd.map_file_subdir = NULL;
 
   gd.ideal_x_vectors = 0;
   gd.ideal_y_vectors = 0;

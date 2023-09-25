@@ -117,11 +117,11 @@ int   load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
  * LOAD_OVERLAY_DATA: Load each Map
  */
 
-int    load_overlay_data(Overlay_t **over, int  num_overlays)
+int load_overlay_data(Overlay_t **over, int  num_overlays)
 {
     int i;
     Overlay_t    *ov;    /* pointer to the current overlay structure */
-    const char *map_file_subdir =  gd.uparams->getString( "cidd.map_file_subdir", "maps");
+    const char *map_file_subdir = gd.map_file_subdir;
 
     /* Read in each overlay file */
     for(i=0; i < num_overlays; i++) {

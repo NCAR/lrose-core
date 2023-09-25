@@ -171,7 +171,7 @@ void show_dpd_menu(u_int value)
         /* Position the popup Far Left, below control panel */
         // x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
 #ifdef NOTNOW
-        y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+        y_pos = gd.horiz_default_y_pos;
 #endif
         // xv_set(gd.data_pu->data_pu,
         //        XV_X,    p_x + x_pos, 
@@ -241,7 +241,7 @@ void show_view_menu(u_int value)
         /* Position the popup Just Right of the data_pu, below control panel */
         // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
 #ifdef NOTNOW
-        y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+        y_pos = gd.horiz_default_y_pos;
 #endif
         // xv_set(gd.zoom_pu->zoom_pu,
         //        XV_X,    p_x + x_pos, 
@@ -737,7 +737,7 @@ void show_past_time_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
 #ifdef NOTNOW
-             y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+             y_pos = gd.horiz_default_y_pos;
 #endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
@@ -808,7 +808,7 @@ void show_forecast_time_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
 #ifdef NOTNOW
-             y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+             y_pos = gd.horiz_default_y_pos;
 #endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
@@ -879,7 +879,7 @@ void show_bookmk_menu( u_int value)
              XGetGeometry(gd.dpy,parent,&root,&p_x,&p_y,&width,&height,&border_width,&depth);
 
 #ifdef NOTNOW
-             y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+             y_pos = gd.horiz_default_y_pos;
 #endif
              // x_pos = xv_get(gd.data_pu->data_pu,XV_WIDTH) + 10 + xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
              // x_pos += xv_get(gd.zoom_pu->zoom_pu,XV_WIDTH) + 10;
@@ -952,8 +952,16 @@ void show_xsect_panel( u_int value)
         //XV_X,    p_x, /* On lower left corner of parent win */
         //XV_Y,    p_y + gd.h_win.can_dim.height - gd.v_win.can_dim.height, /* */
 #ifdef NOTNOW
-	x_pos = gd.uparams->getLong( "cidd.vert_default_x_pos", display_width  - gd.v_win.win_dim.width - 10);
-	y_pos = gd.uparams->getLong( "cidd.vert_default_y_pos", display_height - gd.v_win.win_dim.height - 30);
+        if (gd.vert_default_x_pos == 0) {
+          x_pos = display_width  - gd.v_win.win_dim.width - 10;
+        } else {
+          xpos = gd.vert_default_x_pos;
+        }
+        if (gd.vert_default_y_pos == 0) {
+          y_pos = display_height - gd.v_win.win_dim.height - 30;
+        } else {
+          ypos = gd.vert_default_y_pos;
+        }
 #endif
 
       if(first_time) {
@@ -1068,7 +1076,7 @@ void show_status_panel( u_int value)
 {
     // int x_pos = xv_get(gd.h_win_horiz_bw->cp,XV_WIDTH) + 10;
 #ifdef NOTNOW
-    int y_pos = gd.uparams->getLong("cidd.horiz_default_y_pos",0);
+  int y_pos = gd.horiz_default_y_pos;
 #endif
     // xv_set(gd.status_pu->status_pu,
     //        XV_X, x_pos, 
