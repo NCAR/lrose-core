@@ -746,6 +746,8 @@ void init_data_space()
   gd.min_ht = gd.uparams->getDouble("cidd.min_ht", 0.0);
   gd.max_ht = gd.uparams->getDouble("cidd.max_ht", 30.0);
   gd.start_ht = gd.uparams->getDouble("cidd.start_ht", 0.0);
+  gd.planview_start_page = gd.uparams->getLong("cidd.planview_start_page", 1) -1;
+  gd.xsect_start_page = gd.uparams->getLong("cidd.xsect_start_page", 1) -1;
 
   gd.h_win.min_ht = gd.min_ht;
   gd.h_win.max_ht = gd.max_ht;
@@ -1048,7 +1050,7 @@ void init_data_space()
   gd.ideal_y_vects = gd.uparams->getLong("cidd.ideal_y_vectors", 20);
   gd.wind_head_size = gd.uparams->getLong("cidd.wind_head_size", 5);
   gd.wind_head_angle = gd.uparams->getDouble("cidd.wind_head_angle", 45.0);
-  gd.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 25);
+  gd.barb_shaft_len = gd.uparams->getLong("cidd.barb_shaft_len", 33);
   
   /* Initialize Extra features data */
   gd.all_winds_on = gd.uparams->getLong("cidd.all_winds_on", 1);

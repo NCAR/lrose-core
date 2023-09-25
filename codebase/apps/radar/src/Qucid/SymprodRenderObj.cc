@@ -1521,8 +1521,7 @@ void SymprodRenderChunk::_drawStation(station_report_t *station, RenderContext &
   // get the barb shaft len
   
   if(_barbShaftLen == 0) {
-    // _barbShaftLen = gd.uparams->getLong( "cidd.barb_shaft_len", 33);
-    _barbShaftLen = 33;
+    _barbShaftLen = gd.barb_shaft_len;
   }
   
   // Find world/projection coordinates

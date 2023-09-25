@@ -245,6 +245,8 @@ struct    Global_data {
   double min_ht;
   double max_ht;
   double start_ht;
+  int planview_start_page;
+  int xsect_start_page;
   
   int    label_contours; // 0 = No numeric Labels, 1 = Add numeric value labels
   int    top_margin_render_style; //  1 = Distance scale, 2 = Frame time, etc, 3 = None.

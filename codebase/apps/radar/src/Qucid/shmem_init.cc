@@ -38,16 +38,6 @@
 void init_shared()
 {
 
-  if((gd.coord_expt =
-      (coord_export_t *) ushm_create(gd.coord_key,
-                                     sizeof(coord_export_t),
-                                     0666)) == NULL) {
-    fprintf(stderr, "Couldn't create shared memory segment for Aux process communications\n");
-    exit(-1);
-  }
-  
-  memset(gd.coord_expt, 0, sizeof(coord_export_t));
-
   /* Initialize shared memory area for coordinate/selection communications */
 
   gd.coord_expt->button =  0;

@@ -100,8 +100,6 @@ Notify_value base_win_destroy( Notify_client client, Destroy_status status)
                 if(gd.debug) fprintf(stderr,"Removing Exported Coordinate shared memory\n");
 		gd.coord_expt->shmem_ready = 0;
 	        ushm_detach((void *)gd.coord_expt);
-		// int coord_key = gd.uparams->getLong( "cidd.coord_key", 63500);
-	        // if (ushm_nattach(coord_key) == 0) ushm_remove(coord_key);
 	    }
 
             if(gd.debug) fprintf(stderr,"De-Registering from Procmap\n");

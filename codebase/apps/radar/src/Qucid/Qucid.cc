@@ -570,6 +570,8 @@ void Qucid::_initGlobals()
   gd.min_ht = 0;
   gd.max_ht = 0;
   gd.start_ht = 0;
+  gd.planview_start_page = 0;
+  gd.xsect_start_page = 0;
   
   gd.label_contours = 0; 
   gd.top_margin_render_style = 0; 
