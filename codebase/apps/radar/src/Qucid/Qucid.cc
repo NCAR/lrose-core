@@ -563,10 +563,39 @@ void Qucid::_initGlobals()
   gd.latlon_mode = 0;    
   gd.zoom_limits_in_latlon = 0; 
 
+  gd.horiz_top_margin = 0;
+  gd.horiz_bot_margin = 0;
+  gd.horiz_left_margin = 0;
+  gd.horiz_right_margin = 0;
+  
+  gd.vert_top_margin = 0;
+  gd.vert_bot_margin = 0;
+  gd.vert_left_margin = 0;
+  gd.vert_right_margin = 0;
+  
+  gd.horiz_min_height = 0;
+  gd.horiz_min_width = 0;
+  gd.horiz_default_height = 0;
+  gd.horiz_default_width = 0;
+  
+  gd.vert_min_height = 0;
+  gd.vert_min_width = 0;
+  gd.vert_default_height = 0;
+  gd.vert_default_width = 0;
+  
+  gd.horiz_legends_start_x = 0;
+  gd.horiz_legends_start_y = 0;
+  gd.horiz_legends_delta_y = 0;
+
+  gd.vert_legends_start_x = 0;
+  gd.vert_legends_start_y = 0;
+  gd.vert_legends_delta_y = 0;
+
   gd.domain_limit_min_x = 0;
   gd.domain_limit_max_x = 0;
   gd.domain_limit_min_y = 0;
   gd.domain_limit_max_y = 0;
+  
   gd.min_ht = 0;
   gd.max_ht = 0;
   gd.start_ht = 0;

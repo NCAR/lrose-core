@@ -100,48 +100,44 @@ void modify_gui_objects()
     }
 
     /* determine margin and other window assoc sizes for HORIZ window */
-    gd.h_win.margin.top =  gd.uparams->getLong( "cidd.horiz_top_margin", 20);
-    gd.h_win.margin.bot =  gd.uparams->getLong( "cidd.horiz_bot_margin", 20);
-    gd.h_win.margin.left = gd.uparams->getLong( "cidd.horiz_left_margin", 20);
-    gd.h_win.margin.right = gd.uparams->getLong( "cidd.horiz_right_margin", 80);
+    gd.h_win.margin.top = gd.horiz_top_margin;
+    gd.h_win.margin.bot = gd.horiz_bot_margin;
+    gd.h_win.margin.left = gd.horiz_left_margin;
+    gd.h_win.margin.right = gd.horiz_right_margin;
 
-    gd.h_win.legends_start_x =
-      gd.uparams->getLong( "cidd.horiz_legends_start_x",
-			   gd.h_win.margin.left + 5);
+    if (gd.horiz_legends_start_x == 0) {
+      gd.h_win.legends_start_x = gd.h_win.margin.left + 5;
+    } else {
+      gd.h_win.legends_start_x = gd.horiz_legends_start_x;
+    }
     
-    gd.h_win.legends_start_y =
-      gd.uparams->getLong( "cidd.horiz_legends_start_y",
-			   gd.h_win.margin.top * 2);
-    
-    gd.h_win.legends_delta_y =
-      gd.uparams->getLong( "cidd.horiz_legends_delta_y",
-			   gd.h_win.margin.top);
+    if (gd.horiz_legends_start_y == 0) {
+      gd.h_win.legends_start_y = gd.h_win.margin.top * 2;
+    } else {
+      gd.h_win.legends_start_y = gd.horiz_legends_start_y;
+    }
 
-    gd.h_win.min_height = gd.uparams->getLong( "cidd.horiz_min_height", 440);
-    gd.h_win.min_width = gd.uparams->getLong( "cidd.horiz_min_width", 580);
+    if (gd.horiz_legends_delta_y == 0) {
+      gd.h_win.legends_delta_y = gd.h_win.margin.top;
+    } else {
+      gd.h_win.legends_delta_y = gd.horiz_legends_delta_y;
+    }
+
+    gd.h_win.min_height = gd.horiz_min_height;
+    gd.h_win.min_width = gd.horiz_min_width;
     gd.h_win.active = 1;
 
-    gd.wsddm_mode  = gd.uparams->getLong( "cidd.wsddm_mode", 0);
-    gd.one_click_rhi  = gd.uparams->getLong( "cidd.one_click_rhi", 0);
-    gd.click_posn_rel_to_origin  = gd.uparams->getLong( "cidd.click_posn_rel_to_origin", 0);
-    gd.report_clicks_in_status_window = gd.uparams->getLong("cidd.report_clicks_in_status_window", 0);
-    gd.report_clicks_in_degM_and_nm = gd.uparams->getLong( "cidd.report_clicks_in_degM_and_nm", 0);
-    gd.magnetic_variation_deg = gd.uparams->getLong( "cidd.magnetic_variation_deg", 0);
-    gd.check_data_times = gd.uparams->getLong( "cidd.check_data_times", 0);
-
-    gd.frame_label = gd.uparams->getString( "cidd.horiz_frame_label", "CIDD"),
-    gd.no_data_message = gd.uparams->getString( "cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)"),
-
-    fname = gd.uparams->getString( "cidd.status_info_file", ""); 
+    fname = gd.status_info_file; 
     if(strlen(fname) < 2) {
-        gd.status.status_fname = NULL;
+      gd.status.status_fname = NULL;
     } else {
-        gd.status.status_fname = fname;
+      gd.status.status_fname = fname;
     }
+
     // xv_set(gd.h_win_horiz_bw->horiz_bw,
-    //     XV_X, gd.uparams->getLong( "cidd.horiz_default_x_pos",0),
-    //     XV_Y, gd.uparams->getLong( "cidd.horiz_default_y_pos",0),
-    //     XV_HEIGHT, gd.uparams->getLong( "cidd.horiz_default_height", 440),
+    //     XV_X, gd.horiz_default_x_pos,
+    //     XV_Y, gd.horiz_default_y_pos,
+    //     XV_HEIGHT, gd.horiz_default_height,
     //     XV_LABEL, gd.frame_label,
     //     FRAME_ICON, xv_create(XV_NULL, ICON, 
     //                           ICON_IMAGE,image1,
@@ -417,30 +413,36 @@ void modify_gui_objects()
 
 
     /* determine margin and other window assoc sizes for VERT window */
-    gd.v_win.margin.top =  gd.uparams->getLong( "cidd.vert_top_margin", 20);
-    gd.v_win.margin.bot =  gd.uparams->getLong( "cidd.vert_bot_margin", 20);
-    gd.v_win.margin.left = gd.uparams->getLong( "cidd.vert_left_margin", 20);
-    gd.v_win.margin.right = gd.uparams->getLong( "cidd.vert_right_margin", 80);
+    gd.v_win.margin.top = gd.vert_top_margin;
+    gd.v_win.margin.bot =  gd.vert_bot_margin;
+    gd.v_win.margin.left = gd.vert_left_margin;
+    gd.v_win.margin.right = gd.vert_right_margin;
 
-    gd.v_win.legends_start_x =
-      gd.uparams->getLong( "cidd.vert_legends_start_x",
-			   gd.v_win.margin.left + 5);
+    if (gd.vert_legends_start_x == 0) {
+      gd.v_win.legends_start_x = gd.v_win.margin.left + 5;
+    } else {
+      gd.v_win.legends_start_x = gd.vert_legends_start_x;
+    }
     
-    gd.v_win.legends_start_y =
-      gd.uparams->getLong( "cidd.horiz_legends_start_y",
-			   gd.v_win.margin.top * 2);
-    
-    gd.v_win.legends_delta_y =
-      gd.uparams->getLong( "cidd.horiz_legends_delta_y",
-			   gd.v_win.margin.top);
+    if (gd.vert_legends_start_y == 0) {
+      gd.v_win.legends_start_y = gd.v_win.margin.top * 2;
+    } else {
+      gd.v_win.legends_start_y = gd.vert_legends_start_y;
+    }
 
-    gd.v_win.min_height = gd.uparams->getLong( "cidd.vert_min_height", 440);
-    gd.v_win.min_width = gd.uparams->getLong( "cidd.vert_min_width", 540);
-	if(gd.v_win.min_width < 280) {
-		 // Don't let hidden XView widgets obsure others 
-		 fprintf(stderr,"Warning: Minimum X-Section width minimum of 280 being enforced.\n");
-		 gd.v_win.min_width = 280;
-	}
+    if (gd.vert_legends_delta_y == 0) {
+      gd.v_win.legends_delta_y = gd.v_win.margin.top;
+    } else {
+      gd.v_win.legends_delta_y = gd.vert_legends_delta_y;
+    }
+
+    gd.v_win.min_height = gd.vert_min_height;
+    gd.v_win.min_width = gd.vert_min_width;
+    if(gd.v_win.min_width < 280) {
+      // Don't let hidden XView widgets obsure others 
+      fprintf(stderr,"Warning: Minimum X-Section width minimum of 280 being enforced.\n");
+      gd.v_win.min_width = 280;
+    }
     gd.v_win.active = 0;
 
     sprintf(string,"%g",gd.v_win.min_ht);
@@ -449,8 +451,8 @@ void modify_gui_objects()
     // xv_set(gd.v_win_v_win_pu->ht_top_tx,PANEL_VALUE,string,NULL);
     
     // xv_set(gd.v_win_v_win_pu->v_win_pu,
-    //        WIN_HEIGHT,    gd.uparams->getLong( "cidd.vert_default_height", 240),
-    //        WIN_WIDTH,    gd.uparams->getLong( "cidd.vert_default_width", 360),
+    //        WIN_HEIGHT, gd.vert_default_height,
+    //        WIN_WIDTH,  gd.vert_default_width,
     //        FRAME_SHOW_HEADER,    TRUE,
     //        XV_SHOW,    FALSE,
     //        NULL);

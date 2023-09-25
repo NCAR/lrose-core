@@ -1522,29 +1522,41 @@ void init_data_space()
   gd.no_data_message = gd.uparams->getString
     ("cidd.no_data_message",
      "NO DATA FOUND (in this area at the selected time)");
+  
+  gd.horiz_top_margin =  gd.uparams->getLong("cidd.horiz_top_margin", 20);
+  gd.horiz_bot_margin =  gd.uparams->getLong("cidd.horiz_bot_margin", 20);
+  gd.horiz_left_margin = gd.uparams->getLong("cidd.horiz_left_margin", 20);
+  gd.horiz_right_margin = gd.uparams->getLong("cidd.horiz_right_margin", 80);
+  
+  gd.vert_top_margin =  gd.uparams->getLong("cidd.vert_top_margin", 20);
+  gd.vert_bot_margin =  gd.uparams->getLong("cidd.vert_bot_margin", 20);
+  gd.vert_left_margin = gd.uparams->getLong("cidd.vert_left_margin", 20);
+  gd.vert_right_margin = gd.uparams->getLong("cidd.vert_right_margin", 80);
+  
+  gd.horiz_legends_start_x =
+    gd.uparams->getLong("cidd.horiz_legends_start_x", 0);
+  gd.horiz_legends_start_y =
+    gd.uparams->getLong("cidd.horiz_legends_start_y", 0);
+  gd.horiz_legends_delta_y =
+    gd.uparams->getLong("cidd.horiz_legends_delta_y", 0);
+  
+  gd.vert_legends_start_x =
+    gd.uparams->getLong("cidd.vert_legends_start_x", 0);
+  gd.vert_legends_start_y =
+    gd.uparams->getLong("cidd.vert_legends_start_y", 0);
+  gd.vert_legends_delta_y =
+    gd.uparams->getLong("cidd.vert_legends_delta_y", 0);
+  
+  gd.horiz_min_height = gd.uparams->getLong("cidd.horiz_min_height", 400);
+  gd.horiz_min_width = gd.uparams->getLong("cidd.horiz_min_width", 600);
+  gd.horiz_default_height = gd.uparams->getLong("cidd.horiz_default_height", 600);
+  gd.horiz_default_width = gd.uparams->getLong("cidd.horiz_default_width", 800);
 
-  
-  gd.h_win.margin.top =  gd.uparams->getLong("cidd.horiz_top_margin", 20);
-  gd.h_win.margin.bot =  gd.uparams->getLong("cidd.horiz_bot_margin", 20);
-  gd.h_win.margin.left = gd.uparams->getLong("cidd.horiz_left_margin", 20);
-  gd.h_win.margin.right = gd.uparams->getLong("cidd.horiz_right_margin", 80);
-  
-  gd.h_win.legends_start_x =
-    gd.uparams->getLong("cidd.horiz_legends_start_x",
-                         gd.h_win.margin.left + 5);
-  
-  gd.h_win.legends_start_y =
-    gd.uparams->getLong("cidd.horiz_legends_start_y",
-                         gd.h_win.margin.top * 2);
-  
-  gd.h_win.legends_delta_y =
-    gd.uparams->getLong("cidd.horiz_legends_delta_y",
-                         gd.h_win.margin.top);
-  
-  gd.h_win.min_height = gd.uparams->getLong("cidd.horiz_min_height", 440);
-  gd.h_win.min_width = gd.uparams->getLong("cidd.horiz_min_width", 580);
-  gd.h_win.active = 1;
-  
+  gd.vert_min_height = gd.uparams->getLong("cidd.vert_min_height", 400);
+  gd.vert_min_width = gd.uparams->getLong("cidd.vert_min_width", 600);
+  gd.vert_default_height = gd.uparams->getLong("cidd.vert_default_height", 400);
+  gd.vert_default_width = gd.uparams->getLong("cidd.vert_default_width", 600);
+
   gd.wsddm_mode  = gd.uparams->getLong("cidd.wsddm_mode", 0);
   gd.one_click_rhi  = gd.uparams->getLong("cidd.one_click_rhi", 0);
   gd.click_posn_rel_to_origin  = gd.uparams->getLong("cidd.click_posn_rel_to_origin", 0);

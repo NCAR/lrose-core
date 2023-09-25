@@ -237,6 +237,34 @@ struct    Global_data {
   int    start_zoom_level; // starting zoom level - 1-based
   int    zoom_limits_in_latlon; // 1 = set zoom limits in lat/lon degrees instead of km
 
+  int horiz_top_margin;
+  int horiz_bot_margin;
+  int horiz_left_margin;
+  int horiz_right_margin;
+  
+  int vert_top_margin;
+  int vert_bot_margin;
+  int vert_left_margin;
+  int vert_right_margin;
+
+  int horiz_legends_start_x;
+  int horiz_legends_start_y;
+  int horiz_legends_delta_y;
+
+  int vert_legends_start_x;
+  int vert_legends_start_y;
+  int vert_legends_delta_y;
+
+  int horiz_min_height;
+  int horiz_min_width;
+  int horiz_default_height;
+  int horiz_default_width;
+  
+  int vert_min_height;
+  int vert_min_width;
+  int vert_default_height;
+  int vert_default_width;
+  
   double domain_limit_min_x;
   double domain_limit_max_x;
   double domain_limit_min_y;
