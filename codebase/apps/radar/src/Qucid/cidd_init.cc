@@ -1094,6 +1094,14 @@ void init_data_space()
   param_text = find_tag_text(gd.db_data,"WINDS",
                              &param_text_len, &param_text_line_no);
 
+  // winds init
+  
+  gd.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
+  gd.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
+  gd.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
+  gd.wind_w_scale_factor = gd.uparams->getDouble("cidd.wind_w_scale_factor", 10.0);
+  gd.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
+
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug)fprintf(stderr,"Couldn't Find WINDS Section\n");
   } else {
@@ -1574,9 +1582,6 @@ void init_data_space()
   gd.range_ring_spacing = gd.uparams->getDouble("cidd.range_ring_spacing", -1.0);
   gd.max_ring_range = gd.uparams->getDouble("cidd.max_ring_range", 1000.0);
   gd.range_ring_labels = gd.uparams->getLong("cidd.range_ring_labels", 1);
-  gd.wind_units_scale_factor = gd.uparams->getDouble("cidd.wind_units_scale_factor", 1.0);
-  gd.wind_units_label = gd.uparams->getString("cidd.wind_units_label", "m/sec");
-  gd.wind_w_scale_factor = gd.uparams->getDouble("cidd.wind_w_scale_factor", 10.0);
 
   // symprods
   
@@ -1586,11 +1591,6 @@ void init_data_space()
 
   gd.redraw_interval = gd.uparams->getLong("cidd.redraw_interval", 1000);
   gd.update_interval = gd.uparams->getLong("cidd.update_interval", 120);
-
-  // winds init
-  
-  gd.wind_marker_type = gd.uparams->getString("cidd.wind_marker_type", "arrow");
-  gd.wind_reference_speed = gd.uparams->getDouble("cidd.wind_reference_speed", 10.0);
 
   gd.uparams->setPrintTdrp(false);
 

@@ -85,7 +85,7 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
       }
 
       // Set up global barb preferences
-      const char *type_ptr = gd.uparams->getString( "cidd.wind_marker_type", "arrow");
+      const char *type_ptr = gd.wind_marker_type;
 
       if(strncasecmp(type_ptr, "tuft", 4) == 0)  default_marker_type = TUFT;
       if(strncasecmp(type_ptr, "barb", 4) == 0)  default_marker_type = BARB;
@@ -282,11 +282,9 @@ void init_wind_data_links(const char *param_buf, long param_buf_len, long line_n
             gd.layers.wind[i].wind_w =  (met_record_t *) NULL;
         }
 
-	gd.layers.wind[i].units_scale_factor = gd.uparams->getDouble( "cidd.wind_units_scale_factor", 1.0);
-	gd.layers.wind[i].reference_speed = gd.uparams->getDouble( "cidd.wind_reference_speed", 10.0);
-
-	gd.layers.wind[i].units_label = gd.uparams->getString( "cidd.wind_units_label", "m/sec");
-
+	gd.layers.wind[i].units_scale_factor = gd.wind_units_scale_factor;
+	gd.layers.wind[i].reference_speed = gd.wind_reference_speed;
+	gd.layers.wind[i].units_label = gd.wind_units_label;
 
     }
 
