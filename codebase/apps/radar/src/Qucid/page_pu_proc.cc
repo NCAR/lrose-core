@@ -48,7 +48,7 @@ void set_color( char *cname, void* c_data)
 {
     XColor  rgb_def;
     Color_change_t *ptr;
-    char string[128];
+    char string[1024];
  
  
     ptr = (Color_change_t *) c_data;

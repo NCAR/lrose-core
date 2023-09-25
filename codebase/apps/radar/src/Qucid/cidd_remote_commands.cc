@@ -329,7 +329,7 @@ void remote_set_domain(double x1, double y1, double x2, double y2)
 
 void remote_set_domain_name(char *name)
 {
-  char *label;
+  char *label = NULL;
   for(int i = 0; i < gd.h_win.num_zoom_levels - NUM_CUSTOM_ZOOMS; i++) {
     // label = (char *) xv_get(gd.zoom_pu->domain_st,PANEL_CHOICE_STRING,i);
     if(label != NULL)  {

@@ -84,6 +84,9 @@ Font choose_font( const char *string, int x_size, int y_size,
     int i;
     int len,direct,ascent,descent;
     XCharStruct overall;
+    overall.width = 0;
+    overall.ascent = 0;
+    overall.descent = 0;
  
     len = strlen(string);
     for(i = gd.num_fonts -1; i >= 0; i-- ) {

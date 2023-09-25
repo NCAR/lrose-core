@@ -172,7 +172,7 @@ void dump_cidd_image(int win, int confirm_flag, int print_flag,int page)
   char pathname[MAX_PATH_LEN * 4];
   const char *fname;
   char dir[MAX_PATH_LEN * 2];
-  Window w;
+  Window w = 0;
   Drawable xid;
 
   // day dir?

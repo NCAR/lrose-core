@@ -99,6 +99,19 @@ void init_data_space()
   gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
   gd.debug2 |= gd.uparams->getLong("cidd.debug2_flag", 0);
 
+  // shmem
+  
+  gd.coord_key = gd.uparams->getLong("cidd.coord_key", 63500);
+  if((gd.coord_expt =
+      (coord_export_t *) ushm_create(gd.coord_key,
+                                     sizeof(coord_export_t),
+                                     0666)) == NULL) {
+    fprintf(stderr, "Couldn't create shared memory segment for aux process communications\n");
+    exit(-1);
+  }
+  memset(gd.coord_expt, 0, sizeof(coord_export_t));
+
+
   // How many idle seconds can elapse before resetting the display
   gd.idle_reset_seconds = gd.uparams->getLong("cidd.idle_reset_seconds",0);
 
@@ -1491,10 +1504,6 @@ void init_data_space()
   // zoom
   
   gd.min_zoom_threshold = gd.uparams->getDouble("cidd.min_zoom_threshold", 5.0);
-
-  // shmem
-  
-  gd.coord_key = gd.uparams->getLong("cidd.coord_key", 63500);
 
   // gui
 

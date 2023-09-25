@@ -44,8 +44,8 @@ void modify_gui_objects()
 #ifdef NOTNOW
     int    height;
 #endif
-    int    width;
-    int    render_line;
+    int    width = 0;
+    int    render_line = 0;
     int    value = 0;
     extern void  field_mi_proc();
     extern void  zoom_mi_proc();
