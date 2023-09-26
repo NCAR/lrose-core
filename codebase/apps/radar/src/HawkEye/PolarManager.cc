@@ -1920,6 +1920,12 @@ void PolarManager::_locationClicked(double xkm, double ykm,
   
   _setText(text, "%6.2f", rangeKm);
   _rangeClicked->setText(text);
+
+  if (_radarAltKm > -9990) {
+    double gateHtKm = _beamHt.computeHtKm(ray->getElevationDeg(), rangeKm);
+    _setText(text, "%6.2f (km)", gateHtKm);
+    _altitudeClicked->setText(text);
+  }
   
   for (size_t ii = 0; ii < _fields.size(); ii++) {
     _fields[ii]->setSelectValue(-9999.0);

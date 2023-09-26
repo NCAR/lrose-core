@@ -1330,10 +1330,10 @@ void TsCalAuto::_setSiggenPower(double powerDbm)
   if (_params.use_manual_siggen_control) {
     cerr << "Set siggen power  to " << powerDbm  << " (dBm), delta: " << delta << " (dB)" << endl;
     fprintf(stdout, "Manual control - hit return when ready ...");
-    fgets(input,1023,stdin);
-    // const char *notused = fgets(input,1023,stdin);
-    // notused = NULL;
-   } else {
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenPowerSet - getting user keystroke" << endl;
+    }
+  } else {
     char buf[1024];
     if (_params.debug) {
       cerr << "======================================================" << endl;
@@ -1356,9 +1356,9 @@ void TsCalAuto::_setSiggenFreq(double freqGhz)
   if (_params.use_manual_siggen_control) {
     fprintf(stdout, "Manual control - Set frequency to: %g GHz\n", freqGhz);
     fprintf(stdout, "..............   hit return when ready ...");
-    fgets(input,1023,stdin);
-    // const char *notused = fgets(input,1023,stdin);
-    // notused = NULL;
+    if (fgets(input,1023,stdin) == NULL) {
+      cerr << "ERROR - _setSiggenFreq - getting user keystroke" << endl;
+    }
   } else {
     char buf[1024];
     if (_params.debug) {

@@ -384,8 +384,9 @@ void RadxVolTimingStats::_addGeomFields(RadxVol &vol)
     }
     sampleVol->addDataFl32(nGates, volData);
     ray->addField(sampleVol);
+    delete[] volData;
     
-    // add height in km
+    // add height in km above radar
     
     RadxField *height = new RadxField("height", "km");
     height->setStandardName("beam_height_above_radar");
@@ -400,6 +401,24 @@ void RadxVolTimingStats::_addGeomFields(RadxVol &vol)
     }
     height->addDataFl32(nGates, htData);
     ray->addField(height);
+    delete[] htData;
+    
+    // add height in km above MSL
+    
+    RadxField *msl = new RadxField("height_msl", "km");
+    msl->setStandardName("beam_height_above_msl");
+    msl->setLongName("beam_height_above_msl");
+    msl->setMissingFl32(-9999.0);
+    msl->copyRangeGeom(*ray);
+    Radx::fl32 *htMsl = new Radx::fl32[nGates];
+    for (int ii = 0; ii < nGates; ii++) {
+      double rangeKm = startRangeKm + ii * gateSpacingKm;
+      double beamHtMsl = beamHt.computeHtKm(el, rangeKm) + _params.radar_location.altitudeKm;
+      htMsl[ii] = beamHtMsl;
+    }
+    msl->addDataFl32(nGates, htMsl);
+    ray->addField(msl);
+    delete[] htMsl;
     
   } // iray
   

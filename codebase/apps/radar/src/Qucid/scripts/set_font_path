@@ -1,0 +1,26 @@
+#! /bin/csh
+
+# set the font path
+# try various options
+
+xset fp= /usr/share/X11/fonts/misc/,/usr/share/X11/fonts/75dpi/,/usr/share/X11/fonts/100dpi/
+if ($status == 0) then
+    exit 0
+endif
+
+xset fp= /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/
+if ($status == 0) then
+    exit 0
+endif
+
+xset fp= /usr/share/fonts/misc/,/usr/share/fonts/75dpi/,/usr/share/fonts/100dpi/
+if ($status == 0) then
+    exit 0
+endif
+
+xset fp= /usr/X11R6/lib/X11/fonts/misc/,/usr/X11R6/lib/X11/fonts/75dpi/,/usr/X11R6/lib/X11/fonts/100dpi/
+if ($status == 0) then
+    exit 0
+endif
+
+

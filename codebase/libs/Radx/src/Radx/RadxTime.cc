@@ -84,6 +84,20 @@ RadxTime::RadxTime(time_t when, double subSec)
   _normalize();
 }
 
+////////////////////////////////////
+// construct from double secs
+// Unused is a dummy, to disambiguate.
+
+// RadxTime::RadxTime(double secs, bool unused)
+// {
+//   _init();
+//   time_t when = (time_t) secs;
+//   double subSec = secs - when;
+//   _uTime = when;
+//   _subSec = subSec;
+//   _normalize();
+// }
+
 /////////////////////////////////////////////////////////////////
 // construct from year, month, day, hour, min, sec, partial secs
 // hour, min, secs and subSec are optional args, that default
@@ -188,6 +202,19 @@ void
   _uTime = when; 
   _subSec = subSec;
   _normalize();
+}
+
+///////////////////////////////
+// Set from double
+  
+time_t RadxTime::setFromDouble(double secs)
+{
+  time_t when = (time_t) secs;
+  double subSec = secs - when;
+  _uTime = when;
+  _subSec = subSec;
+  _normalize();
+  return _uTime;
 }
 
 /////////////////////////////////////////////////////////////////

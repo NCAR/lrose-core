@@ -127,7 +127,7 @@ radar_name = "VIRTUAL";
 radar_location = {
     latitudeDeg = 40,
     longitudeDeg = -105,
-    altitudeKm = 1500
+    altitudeKm = 1.500
 };
 
 ///////////// radar_wavelength_cm /////////////////////
@@ -298,6 +298,20 @@ sweeps = {
   }
 };
 
+///////////// reverse_sweep_order_in_vol //////////////
+//
+// Reverse the order of the sweeps in the volume, but preserve times.
+//
+// If TRUE, reverse the order in which the sweeps are stored in the 
+//   volume. But do not change the times on the rays. This is used for 
+//   testing purposes and checking for bugs in the analysis.
+//
+//
+// Type: boolean
+//
+
+reverse_sweep_order_in_vol = FALSE;
+
 //======================================================================
 //
 // DATA AGE ANALYSIS.
@@ -318,29 +332,39 @@ n_bins_age_histogram = 20;
 
 ///////////// age_hist_max_ht_km //////////////////////
 //
-// Max height of data used in age histogram (km).
+// Max heights to be used in age histogram (km).
 //
 //
 // Type: double
+// 1D array - variable length.
 //
 
-age_hist_max_ht_km = 20;
+age_hist_max_ht_km = {
+ 20
+};
 
-///////////// reverse_sweep_order /////////////////////
+//======================================================================
 //
-// Reverse the order of the sweeps in the volume.
+// WRITING OUT RANGE-HEIGHT TABLE.
 //
-// This allows you to test the opposite scanning order.
+//======================================================================
+ 
+///////////// print_range_height_table ////////////////
+//
+// Print range-height table to stdout.
+//
+// If TRUE, the height of the sweep elevation angles, vs range, are 
+//   written to stdout.
 //
 //
 // Type: boolean
 //
 
-reverse_sweep_order = FALSE;
+print_range_height_table = FALSE;
 
 //======================================================================
 //
-// WRITING FILES TO OUTPUT DIRECTORY.
+// WRITING CFRADIAL FILES TO OUTPUT DIRECTORY.
 //
 //======================================================================
  
@@ -354,7 +378,7 @@ reverse_sweep_order = FALSE;
 // Type: boolean
 //
 
-write_volume_to_output_file = FALSE;
+write_volume_to_output_file = TRUE;
 
 ///////////// output_dir //////////////////////////////
 //
@@ -366,5 +390,5 @@ write_volume_to_output_file = FALSE;
 // Type: string
 //
 
-output_dir = "./output/RadxVolTimingStats/";
+output_dir = "/tmp/output/RadxVolTimingStats/";
 

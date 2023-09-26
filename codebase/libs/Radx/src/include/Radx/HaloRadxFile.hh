@@ -261,13 +261,14 @@ private:
 
 
   int _readRayQualifiers(RadxRay *ray, char *line);
-  int _readRayData();
+  int _readRayData(int  nRaysInFile, size_t nGatesPerRay);
   int _readRayData(RadxRay *ray, vector<Field> &fields);
 
   void _fillRay(RadxRay *ray, vector<Field> &fields);
   void _readNStoreFieldData(char *line, vector<Field> &fields,
     int gateIdx);  
   int _getNGates(unordered_map<string, string> &dictionary);
+  int _getNRays(unordered_map<string, string> &dictionary);
 /*
   int _readRayDataModel200();
   int _readRayDataModel70();
@@ -282,6 +283,7 @@ private:
   int findElevationAngle();
 
   int identifyModel(unordered_map<string, string> &dictionary);
+  int identify(string &label, unordered_map<string, string> &dictionary);
 
   int _openRead(const string &path);
   void _close();
@@ -297,8 +299,7 @@ private:
   string _stripLine(const char *line);
   bool _contains(string &s1, string &s2);
   void decipherField(RadxRay *ray, Field &field, string value);
-
-  unsigned char _lowerIt(unsigned char c);
+  Radx::SweepMode_t decodeScanType(string &scanType);
   
 };
 

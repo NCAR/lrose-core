@@ -1975,7 +1975,11 @@ void BeamReader::_setPrt()
 
   // set prt, assuming single PRT for now
   
-  _prt = _pulseQueue[0]->getPrt();
+  if (_params.specify_pulse_width) {
+    _prt = _pulseQueue[_pulseQueue.size() / 2]->getPrt();
+  } else {
+    _prt = _pulseQueue[0]->getPrt();
+  }
   if (_params.override_primary_prt) {
     _prt = _params.primary_prt_secs;
   }

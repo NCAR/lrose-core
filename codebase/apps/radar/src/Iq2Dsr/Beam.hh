@@ -141,6 +141,8 @@ public:
   double getPrtLong() const { return _prtLong; }
   double getPulseWidth() const { return _pulseWidth; }
   double getNyquist() const { return _nyquist; }
+  double getNyquistPrtShort() const { return _nyquistPrtShort; }
+  double getNyquistPrtLong() const { return _nyquistPrtLong; }
   double getUnambigRangeKm() const;
 
   double getMeasXmitPowerDbmH() const { return _measXmitPowerDbmH; }
@@ -416,6 +418,7 @@ private:
 
   // spectral CMD
 
+  bool _specCmdValid;
   DwellSpectra _specCmd;
 
   // debug printing
@@ -459,6 +462,7 @@ private:
   void _filterDpVOnlyFixedPrt();
   void _filterDpVOnlyStagPrt();
 
+  int _specCmdInit();
   void _filtSpecCmdSimHv();
   
   void _computeWindowRValues();

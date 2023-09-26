@@ -134,7 +134,7 @@ void TimeNavController::setSliderPositionNoRead() {
   _view->setSliderPositionNoRead(value);
 }
 
-string &TimeNavController::getSelectedArchiveFile() {
+string TimeNavController::getSelectedArchiveFile() {
   return _model->getSelectedArchiveFile();
 }
 

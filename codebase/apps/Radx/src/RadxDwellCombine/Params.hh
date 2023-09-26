@@ -110,19 +110,8 @@ public:
 
   typedef enum {
     OUTPUT_FORMAT_CFRADIAL = 0,
-    OUTPUT_FORMAT_DORADE = 1,
-    OUTPUT_FORMAT_FORAY = 2,
-    OUTPUT_FORMAT_NEXRAD = 3,
-    OUTPUT_FORMAT_UF = 4,
-    OUTPUT_FORMAT_MDV_RADIAL = 5
+    OUTPUT_FORMAT_CFRADIAL2 = 1
   } output_format_t;
-
-  typedef enum {
-    CLASSIC = 0,
-    NC64BIT = 1,
-    NETCDF4 = 2,
-    NETCDF4_CLASSIC = 3
-  } netcdf_style_t;
 
   typedef enum {
     START_AND_END_TIMES = 0,
@@ -496,8 +485,6 @@ public:
 
   tdrp_bool_t seek_to_end_of_input_fmq;
 
-  tdrp_bool_t aggregate_sweep_files_on_read;
-
   tdrp_bool_t set_max_range;
 
   double max_range_km;
@@ -571,16 +558,6 @@ public:
 
   output_format_t output_format;
 
-  netcdf_style_t netcdf_style;
-
-  tdrp_bool_t output_native_byte_order;
-
-  tdrp_bool_t output_compressed;
-
-  tdrp_bool_t output_force_ngates_vary;
-
-  int compression_level;
-
   char* output_dir;
 
   filename_mode_t output_filename_mode;
@@ -632,7 +609,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[94];
+  mutable TDRPtable _table[85];
 
   const char *_className;
 

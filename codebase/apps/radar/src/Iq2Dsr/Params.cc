@@ -4896,16 +4896,16 @@
     tt->single_val.d = 1;
     tt++;
     
-    // Parameter 'spec_cmd_threshold_for_detection'
+    // Parameter 'spec_cmd_threshold_for_wtc_detection'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_detection");
+    tt->param_name = tdrpStrDup("spec_cmd_threshold_for_wtc_detection");
     tt->descr = tdrpStrDup("Threshold CMD value for detecting clutter.");
-    tt->help = tdrpStrDup("This is aimed mainly at wind turbine clutter. If the CMD value exceeds this threshold, clutter is assumed detected at the gate.");
-    tt->val_offset = (char *) &spec_cmd_threshold_for_detection - &_start_;
-    tt->single_val.d = 0.9;
+    tt->help = tdrpStrDup("This is aimed mainly at wind turbine clutter. If the mean spectral CMD exceeds this threshold, wind turbine clutter is assumed detected at the gate.");
+    tt->val_offset = (char *) &spec_cmd_threshold_for_wtc_detection - &_start_;
+    tt->single_val.d = 0.8;
     tt++;
     
     // Parameter 'spec_cmd_threshold_for_moments'
@@ -4917,18 +4917,6 @@
     tt->descr = tdrpStrDup("Threshold CMD value for computing moments.");
     tt->help = tdrpStrDup("Spectral points with CMD in excess of this threshold are set to 0, so that they are not used in the moments calculations.");
     tt->val_offset = (char *) &spec_cmd_threshold_for_moments - &_start_;
-    tt->single_val.d = 0.7;
-    tt++;
-    
-    // Parameter 'spec_cmd_fraction_threshold_for_wind_turbine'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("spec_cmd_fraction_threshold_for_wind_turbine");
-    tt->descr = tdrpStrDup("Threshold of CMD spectral fraction, for wind turbine detection.");
-    tt->help = tdrpStrDup("If the fraction of the CMD spectrum in excess of 'spec_cmd_threshold_for_detection' exceeds this, we flag the gate as having a wind turbine gate.");
-    tt->val_offset = (char *) &spec_cmd_fraction_threshold_for_wind_turbine - &_start_;
     tt->single_val.d = 0.7;
     tt++;
     

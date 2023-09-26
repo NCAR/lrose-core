@@ -29,7 +29,7 @@ CPPC_SRCS = \
 	GemBlob.cc \
 	GemRadxFile.cc \
 	GemInputField.cc \
-	GemSweep.cc
+	GemSweepField.cc
 
 #
 # general targets

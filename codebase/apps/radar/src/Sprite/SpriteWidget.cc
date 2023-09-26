@@ -1727,6 +1727,14 @@ void SpriteWidget::_createWaterfallContextMenu(const QPoint &pos)
           } );
   setPlotTypeMenu.addAction(&plotSnr);
   
+  QAction plotCmdMean("Plot CMD MEAN", &contextMenu);
+  connect(&plotCmdMean, &QAction::triggered,
+          [this, id] () {
+            _waterfalls[id]->setPlotType(Params::WATERFALL_CMD_MEAN);
+            _configureWaterfall(id);
+          } );
+  setPlotTypeMenu.addAction(&plotCmdMean);
+  
   QAction plotZdr("Plot ZDR", &contextMenu);
   connect(&plotZdr, &QAction::triggered,
           [this, id] () {

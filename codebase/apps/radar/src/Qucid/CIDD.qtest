@@ -1,0 +1,4228 @@
+/**********************************************************************
+ * TDRP params for Qucid
+ **********************************************************************/
+
+//======================================================================
+//
+// Qucid is an integrating display for weather data products.
+//
+// This is a C++ application using the QT GUI toolkit. It is based on 
+//   the legacy CIDD app.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+///////////// check_ray_alloc /////////////////////////
+//
+// Print out checks on ray memory allocation.
+//
+// If TRUE, the app will keep track of the number of rays allocated and 
+//   freed, and print out that information every 100 rays.
+//
+//
+// Type: boolean
+//
+
+check_ray_alloc = FALSE;
+
+///////////// register_with_procmap ///////////////////
+//
+// Option to register this process with the process mapper (procmap).
+//
+// If TRUE, every minute this process will register a heartbeat with 
+//   procmap. If the process hangs, it will be restared by the 
+//   auto_restarter.
+//
+//
+// Type: boolean
+//
+
+register_with_procmap = FALSE;
+
+///////////// instance ////////////////////////////////
+//
+// Process instance.
+//
+// Used for registration with procmap.
+//
+//
+// Type: string
+//
+
+instance = "test";
+
+//======================================================================
+//
+// REALTIME DATA INPUT.
+//
+//======================================================================
+ 
+///////////// input_mode //////////////////////////////
+//
+// Method for reading the input data.
+//
+// 	IWRF_FMQ_INPUT: read IWRF moments from an FMQ.
+// 	IWRF_TCP_INPUT: read an IWRF moments stream from a TCP socket.
+// 	SIMULATED_INPUT: internally-generated test pattern data.
+// 	DSR_FMQ_INPUT: deprecated.
+//
+//
+// Type: enum
+// Options:
+//     IWRF_FMQ_INPUT
+//     IWRF_TCP_INPUT
+//     SIMULATED_INPUT
+//     DSR_FMQ_INPUT
+//
+
+input_mode = IWRF_FMQ_INPUT;
+
+///////////// input_fmq_url ///////////////////////////
+//
+// DSR_FMQ_INPUT or IWRF_FMQ_INPUT mode: input URL for moments data from 
+//   an FMQ.
+//
+// Full url is of the form fmqp:://hostname:port:path. Path does not in 
+//   lude the file extension.
+//
+//
+// Type: string
+//
+
+input_fmq_url = "/tmp/fmq/test";
+
+///////////// seek_to_start_of_fmq ////////////////////
+//
+// Option to seek to the start of the input FMQ.
+//
+// If TRUE, the program will seek to the start of the fmq and read the 
+//   entire contents at startup. If FALSE, it will read only new data as 
+//   it arrives.
+//
+//
+// Type: boolean
+//
+
+seek_to_start_of_fmq = FALSE;
+
+///////////// input_tcp_host //////////////////////////
+//
+// IWRF_TCP_INPUT: name of host running IWRF moments server.
+//
+//
+// Type: string
+//
+
+input_tcp_host = "localhost";
+
+///////////// input_tcp_port //////////////////////////
+//
+// IWRF_TCP_INPUT: port for IWRF moments server.
+//
+//
+// Type: int
+//
+
+input_tcp_port = 11000;
+
+///////////// beam_queue_size /////////////////////////
+//
+// Size of the internal queue used to store beams.
+//
+// The reader runs in a separate thread, and stored the beams in a 
+//   queue. The main thread then grabs the available beams from the queue 
+//   as they become available.
+//
+//
+// Type: int
+//
+
+beam_queue_size = 400;
+
+//======================================================================
+//
+// ARCHIVE MODE.
+//
+//======================================================================
+ 
+///////////// begin_in_archive_mode ///////////////////
+//
+// Option to begin in archive mode.
+//
+// If TRUE, the app will start up and read data from the 
+//   archive_data_url, at the specified start time. If the start time is 
+//   not set, the start time will be set to NOW.
+//
+//
+// Type: boolean
+//
+
+begin_in_archive_mode = TRUE;
+
+///////////// archive_start_time //////////////////////
+//
+// Start time for archive mode.
+//
+// In archive mode, data retrieval starts at this time.
+//
+//
+// Type: string
+//
+
+archive_start_time = "1970 01 01 00 00 00";
+
+///////////// archive_time_span_secs //////////////////
+//
+// Time span in ARCHIVE mode (secs).
+//
+// Archive end time = archive_start_time + archive_time_span.
+//
+//
+// Type: double
+//
+
+archive_time_span_secs = 3600;
+
+///////////// archive_data_url ////////////////////////
+//
+// URL for archive data files.
+//
+// This should point to a CfRadial moments data set.
+//
+//
+// Type: string
+//
+
+archive_data_url = ".";
+
+//======================================================================
+//
+// STATUS TO BE SHOWN IN GUI.
+//
+//======================================================================
+ 
+///////////// show_status_in_gui //////////////////////
+//
+// Indicate which status items to show in GUI.
+//
+// These items are shown in the left panel in the GUI. Setting an item 
+//   to false will hide it in the GUI.
+//
+//
+// Type: struct
+//   typedef struct {
+//      boolean azimuth;
+//      boolean elevation;
+//      boolean fixed_angle;
+//      boolean volume_number;
+//      boolean sweep_number;
+//      boolean n_samples;
+//      boolean n_gates;
+//      boolean gate_length;
+//      boolean pulse_width;
+//      boolean prf_mode;
+//      boolean prf;
+//      boolean nyquist;
+//      boolean max_range;
+//      boolean unambiguous_range;
+//      boolean measured_power_h;
+//      boolean measured_power_v;
+//      boolean scan_name;
+//      boolean scan_mode;
+//      boolean polarization_mode;
+//      boolean latitude;
+//      boolean longitude;
+//      boolean altitude;
+//      boolean altitude_rate;
+//      boolean sun_elevation;
+//      boolean sun_azimuth;
+//      boolean speed;
+//      boolean heading;
+//      boolean track;
+//   }
+//
+//
+
+show_status_in_gui = {
+    azimuth = TRUE,
+    elevation = TRUE,
+    fixed_angle = TRUE,
+    volume_number = FALSE,
+    sweep_number = TRUE,
+    n_samples = TRUE,
+    n_gates = TRUE,
+    gate_length = TRUE,
+    pulse_width = TRUE,
+    prf_mode = TRUE,
+    prf = TRUE,
+    nyquist = TRUE,
+    max_range = TRUE,
+    unambiguous_range = TRUE,
+    measured_power_h = FALSE,
+    measured_power_v = FALSE,
+    scan_name = FALSE,
+    scan_mode = TRUE,
+    polarization_mode = TRUE,
+    latitude = TRUE,
+    longitude = TRUE,
+    altitude = TRUE,
+    altitude_rate = FALSE,
+    sun_elevation = TRUE,
+    sun_azimuth = TRUE,
+    speed = FALSE,
+    heading = FALSE,
+    track = FALSE
+};
+
+//======================================================================
+//
+// FIELDS TO BE DISPLAYED.
+//
+//======================================================================
+ 
+///////////// color_scale_dir /////////////////////////
+//
+// Directory for color scales.
+//
+// You can set this in 2 ways:
+//
+// (a) Set to the absolute path
+//
+// (b)Set as a path relative to the location of the application binary 
+//   executable.
+//
+//
+// Type: string
+//
+
+color_scale_dir = "$(HOME)/git/lrose-displays/color_scales";
+
+///////////// fields //////////////////////////////////
+//
+// Fields to be displayed.
+//
+// label: appears on the GUI. raw_name: unfiltered field name. 
+//   filtered_name: field with clutter filter applied. units: units string 
+//   for color scale. color_map: name of color map in color_scale_dir. 
+//   shortcut: keyboard character for shortcut. Specified key will select 
+//   raw field. Use ALT-key to get filtered field. .
+//
+//
+// Type: struct
+//   typedef struct {
+//      string label;
+//      string raw_name;
+//      string filtered_name;
+//      string units;
+//      string color_map;
+//      string shortcut;
+//   }
+//
+// 1D array - variable length.
+//
+
+fields = {
+  {
+    label = "DBZ",
+    raw_name = "DBZ",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "1"
+  }
+  ,
+  {
+    label = "REF",
+    raw_name = "REF",
+    filtered_name = "",
+    units = "dBZ",
+    color_map = "dbz.colors",
+    shortcut = "2"
+  }
+  ,
+  {
+    label = "VEL",
+    raw_name = "VEL",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "vel.colors",
+    shortcut = "3"
+  }
+  ,
+  {
+    label = "WIDTH",
+    raw_name = "WIDTH",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "width.colors",
+    shortcut = "4"
+  }
+  ,
+  {
+    label = "SW",
+    raw_name = "SW",
+    filtered_name = "",
+    units = "m/s",
+    color_map = "width.colors",
+    shortcut = "5"
+  }
+  ,
+  {
+    label = "ZDR",
+    raw_name = "ZDR",
+    filtered_name = "",
+    units = "dB",
+    color_map = "zdr.colors",
+    shortcut = "6"
+  }
+  ,
+  {
+    label = "PHIDP",
+    raw_name = "PHIDP",
+    filtered_name = "",
+    units = "deg",
+    color_map = "phidp.colors",
+    shortcut = "7"
+  }
+  ,
+  {
+    label = "RHOHV",
+    raw_name = "RHOHV",
+    filtered_name = "",
+    units = "unitless",
+    color_map = "rhohv.colors",
+    shortcut = "8"
+  }
+};
+
+///////////// background_render_mins //////////////////
+//
+// Background rendering time period in minutes.
+//
+// Any field which is viewed will continue to be rendered in the 
+//   background for this number of minutes.
+//
+// Minimum val: 0
+//
+// Type: double
+//
+
+background_render_mins = 2;
+
+///////////// use_field_label_in_title ////////////////
+//
+// Option to use field label in the display title.
+//
+// If TRUE, the label will be used in the title. If FALSE, the raw_name 
+//   or filtered name will be used.
+//
+//
+// Type: boolean
+//
+
+use_field_label_in_title = FALSE;
+
+//======================================================================
+//
+// SET MAX RANGE.
+//
+//======================================================================
+ 
+///////////// set_max_range ///////////////////////////
+//
+// Option to set the max range to be used for plotting.
+//
+// If FALSE, the max range of the data will be used. If TRUE, 
+//   max_range_km will override the max range in the data.
+//
+//
+// Type: boolean
+//
+
+set_max_range = FALSE;
+
+///////////// max_range_km ////////////////////////////
+//
+// Max range for the display (km).
+//
+//
+// Type: double
+//
+
+max_range_km = 225;
+
+//======================================================================
+//
+// DISPLAY TYPE.
+//
+//======================================================================
+ 
+///////////// display_mode ////////////////////////////
+//
+// Main display mode.
+//
+// 	POLAR_DISPLAY - normal HORIZ and VERT display. 	BSCAN_DISPLAY - 
+//   BSCAN mode.
+//
+//
+// Type: enum
+// Options:
+//     POLAR_DISPLAY
+//     BSCAN_DISPLAY
+//
+
+display_mode = POLAR_DISPLAY;
+
+//======================================================================
+//
+// NAMES AND LABELS.
+//
+//======================================================================
+ 
+///////////// override_radar_name /////////////////////
+//
+// Option to override radar name in the data.
+//
+//
+// Type: boolean
+//
+
+override_radar_name = FALSE;
+
+///////////// radar_name //////////////////////////////
+//
+// Radar name if overridden.
+//
+//
+// Type: string
+//
+
+radar_name = "SPOL";
+
+///////////// display_site_name ///////////////////////
+//
+// Option to display the site name in the left panel.
+//
+//
+// Type: boolean
+//
+
+display_site_name = FALSE;
+
+///////////// override_site_name //////////////////////
+//
+// Option to override site name in the data.
+//
+//
+// Type: boolean
+//
+
+override_site_name = FALSE;
+
+///////////// site_name ///////////////////////////////
+//
+// Site name if overridden.
+//
+//
+// Type: string
+//
+
+site_name = "MARSHALL";
+
+//======================================================================
+//
+// WINDOW DIMENSIONS AND PLOTTING DETAILS.
+//
+//======================================================================
+ 
+///////////// main_window_width ///////////////////////
+//
+// Startup width of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_width = 1100;
+
+///////////// main_window_height //////////////////////
+//
+// Startup height of main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_height = 635;
+
+///////////// main_window_start_x /////////////////////
+//
+// Startup X for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_x = 0;
+
+///////////// main_window_start_y /////////////////////
+//
+// Startup Y for main window (pixels).
+//
+//
+// Type: int
+//
+
+main_window_start_y = 0;
+
+///////////// color_scale_width ///////////////////////
+//
+// Width of color scale (pixels).
+//
+//
+// Type: int
+//
+
+color_scale_width = 40;
+
+///////////// label_font_size /////////////////////////
+//
+// Basic font size for labels (pixels).
+//
+// Some of the labels are scaled relative to this size.
+//
+//
+// Type: int
+//
+
+label_font_size = 12;
+
+///////////// background_color ////////////////////////
+//
+// Color of main display background.
+//
+//
+// Type: string
+//
+
+background_color = "black";
+
+///////////// text_color //////////////////////////////
+//
+// Color of text annotation in main display.
+//
+//
+// Type: string
+//
+
+text_color = "yellow";
+
+///////////// grid_and_range_ring_color ///////////////
+//
+// Color of grids and range rings.
+//
+//
+// Type: string
+//
+
+grid_and_range_ring_color = "white";
+
+///////////// range_ring_label_font_size //////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+range_ring_label_font_size = 8;
+
+///////////// click_cross_color ///////////////////////
+//
+// Color of cross at click point.
+//
+//
+// Type: string
+//
+
+click_cross_color = "cyan";
+
+///////////// click_cross_size ////////////////////////
+//
+// Size of cross at click point (pixels).
+//
+// Size of cross drawn at click point, to select data.
+//
+//
+// Type: int
+//
+
+click_cross_size = 11;
+
+///////////// click_cross_line_width //////////////////
+//
+// Line width for click cross.
+//
+//
+// Type: int
+//
+
+click_cross_line_width = 1;
+
+//======================================================================
+//
+// HORIZ MODE DISPLAY.
+//
+//======================================================================
+ 
+///////////// horiz_display_type //////////////////////
+//
+// Type of display to use for the HORIZ window.
+//
+// 	HORIZ_FULL - Display the full 360 degrees of the HORIZ. This is the 
+//   default.
+// 	HORIZ_AIRBORN - Use the airborn radar HORIZ display. This display 
+//   shows just the 180 degrees of radar pointing forward from the nose of 
+//   the plane.
+//
+//
+// Type: enum
+// Options:
+//     HORIZ_FULL
+//     HORIZ_AIRBORNE
+//
+
+horiz_display_type = HORIZ_FULL;
+
+///////////// horiz_aspect_ratio //////////////////////
+//
+// Aspect ratio (width/height) of HORIZ window.
+//
+//
+// Type: double
+//
+
+horiz_aspect_ratio = 1;
+
+///////////// horiz_grids_on_at_startup ///////////////
+//
+// Set HORIZ grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+horiz_grids_on_at_startup = FALSE;
+
+///////////// horiz_range_rings_on_at_startup /////////
+//
+// Set HORIZ range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+horiz_range_rings_on_at_startup = TRUE;
+
+///////////// horiz_azimuth_lines_on_at_startup ///////
+//
+// Set HORIZ azimuth lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+horiz_azimuth_lines_on_at_startup = TRUE;
+
+///////////// horiz_main_legend_pos ///////////////////
+//
+// Position of main legend in the HORIZ plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+horiz_main_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// horiz_override_rendering_beam_width /////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally Qucid determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+horiz_override_rendering_beam_width = FALSE;
+
+///////////// horiz_rendering_beam_width //////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'horiz_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+horiz_rendering_beam_width = 1;
+
+//======================================================================
+//
+// VERT MODE DISPLAY.
+//
+//======================================================================
+ 
+///////////// vert_window_width ///////////////////////
+//
+// Startup width of VERT window (pixels).
+//
+//
+// Type: int
+//
+
+vert_window_width = 500;
+
+///////////// vert_window_height //////////////////////
+//
+// Startup height of VERT window (pixels).
+//
+//
+// Type: int
+//
+
+vert_window_height = 500;
+
+///////////// vert_window_start_x /////////////////////
+//
+// Startup X for VERT window (pixels).
+//
+//
+// Type: int
+//
+
+vert_window_start_x = 1100;
+
+///////////// vert_window_start_y /////////////////////
+//
+// Startup Y for VERT window (pixels).
+//
+//
+// Type: int
+//
+
+vert_window_start_y = 0;
+
+///////////// vert_top_margin /////////////////////////
+//
+// Height of top margin in VERT mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+vert_top_margin = 20;
+
+///////////// vert_bottom_margin //////////////////////
+//
+// Height of bottom margin in VERT mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+vert_bottom_margin = 20;
+
+///////////// vert_left_margin ////////////////////////
+//
+// Width of left margin in VERT mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+vert_left_margin = 20;
+
+///////////// vert_right_margin ///////////////////////
+//
+// Width of right margin in VERT mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+vert_right_margin = 20;
+
+///////////// vert_label_font_size ////////////////////
+//
+// Font size for labels on range rings (pixels).
+//
+//
+// Type: int
+//
+
+vert_label_font_size = 8;
+
+///////////// vert_axis_tick_len //////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+vert_axis_tick_len = 7;
+
+///////////// vert_n_ticks_ideal //////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+vert_n_ticks_ideal = 7;
+
+///////////// vert_text_margin ////////////////////////
+//
+// Margin around some text (pixels).
+//
+//
+// Type: int
+//
+
+vert_text_margin = 5;
+
+///////////// vert_display_180_degrees ////////////////
+//
+// Flag indicating to display full 180 degrees in VERT window. If set to 
+//   false, the VERT window will just display 90 degrees of the VERT.
+//
+//
+// Type: boolean
+//
+
+vert_display_180_degrees = FALSE;
+
+///////////// vert_aspect_ratio ///////////////////////
+//
+// Aspect ratio (width/height) of VERT window.
+//
+//
+// Type: double
+//
+
+vert_aspect_ratio = 1;
+
+///////////// vert_max_height_km //////////////////////
+//
+// Max height of data in VERT window (km).
+//
+//
+// Type: double
+//
+
+vert_max_height_km = 25;
+
+///////////// vert_color_scale_width //////////////////
+//
+// Width of color scale for VERT window (pixels).
+//
+//
+// Type: int
+//
+
+vert_color_scale_width = 40;
+
+///////////// vert_grids_on_at_startup ////////////////
+//
+// Set VERT grids overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+vert_grids_on_at_startup = TRUE;
+
+///////////// vert_range_rings_on_at_startup //////////
+//
+// Set VERT range rings overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+vert_range_rings_on_at_startup = TRUE;
+
+///////////// vert_elevation_lines_on_at_startup //////
+//
+// Set VERT elevation lines overlay on at startup.
+//
+//
+// Type: boolean
+//
+
+vert_elevation_lines_on_at_startup = FALSE;
+
+///////////// vert_main_legend_pos ////////////////////
+//
+// Position of main legend in the VERT plot window.
+//
+// This include time, field name and elevation angle.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+vert_main_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// vert_beam_queue_size ////////////////////
+//
+// Size of the queue for VERT beams.
+//
+// After the queue reaches this size, older beams are discarded.
+//
+//
+// Type: int
+//
+
+vert_beam_queue_size = 360;
+
+///////////// vert_override_rendering_beam_width //////
+//
+// Option to override the azimuth beam width for rendering.
+//
+// Normally Qucid determines the azimuth rendering beam width 
+//   automatically. You can override this and specifcally set the azimuth 
+//   beam width for rendering.
+//
+//
+// Type: boolean
+//
+
+vert_override_rendering_beam_width = FALSE;
+
+///////////// vert_rendering_beam_width ///////////////
+//
+// Rendering beam width, if override is active.
+//
+// See 'vert_override_rendering_beam_width'.
+//
+//
+// Type: double
+//
+
+vert_rendering_beam_width = 1;
+
+//======================================================================
+//
+// BSCAN TIME LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_time_span_secs ////////////////////
+//
+// Number of seconds in BSCAN display.
+//
+// In REALTIME mode, when we reach the right-hand side of the display, 
+//   the existing plot will be moved left to make room for more data.
+//
+//
+// Type: double
+//
+
+bscan_time_span_secs = 60;
+
+///////////// bscan_truncate_start_time ///////////////
+//
+// Option to truncate the plot start time to even seconds.
+//
+// If true, we truncate the start time to the previous second.
+//
+//
+// Type: boolean
+//
+
+bscan_truncate_start_time = FALSE;
+
+///////////// bscan_subsec_precision //////////////////
+//
+// Precision of subseconds in time labels.
+//
+// Number of decimals of precision in time labels. Set to 0 for times in 
+//   integer seconds.
+//
+// Minimum val: 0
+// Maximum val: 9
+//
+// Type: int
+//
+
+bscan_subsec_precision = 3;
+
+//======================================================================
+//
+// BSCAN REALTIME CONTROLS.
+//
+//======================================================================
+ 
+///////////// bscan_realtime_fraction_saved ///////////
+//
+// What fraction of the existing data to save when moving the plot to 
+//   the left.
+//
+// When we reach the right-hand side of the display, we need to move the 
+//   plot to the left. This is the fraction of the plot that is saved 
+//   after the move has taken place.
+//
+//
+// Type: double
+//
+
+bscan_realtime_fraction_saved = 0.5;
+
+///////////// bscan_min_secs_between_reading_beams ////
+//
+// Min time between incoming beams (secs).
+//
+// If beams arrive too fast, we discard some so that the time between 
+//   the beams is at least this long.
+//
+//
+// Type: double
+//
+
+bscan_min_secs_between_reading_beams = 0.01;
+
+///////////// bscan_min_secs_between_rendering_beams //
+//
+// Min time between rendering (secs).
+//
+// Setting this higher makes the display less smooth, but prevents the 
+//   display from taking up too much CPU and/or GPU.
+//
+//
+// Type: double
+//
+
+bscan_min_secs_between_rendering_beams = 0;
+
+//======================================================================
+//
+// BSCAN RANGE AND ALTITUDE LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_specify_range_limits //////////////
+//
+// Specify the min and max range when in range mode.
+//
+// If false, we will use the start range and max range in the data.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_range_limits = TRUE;
+
+///////////// bscan_min_range_km //////////////////////
+//
+// Min range to be plotted (km).
+//
+// Used if 'bscan_specify_range_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_range_km = 0;
+
+///////////// bscan_max_range_km //////////////////////
+//
+// Max range to be plotted (km).
+//
+// Used if 'bscan_specify_range_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_range_km = 25;
+
+///////////// bscan_min_altitude_km ///////////////////
+//
+// Min altitude plotted (km).
+//
+//
+// Type: double
+//
+
+bscan_min_altitude_km = -0.5;
+
+///////////// bscan_max_altitude_km ///////////////////
+//
+// Max altitude plotted (km).
+//
+//
+// Type: double
+//
+
+bscan_max_altitude_km = 25;
+
+///////////// bscan_altitude_in_feet //////////////////
+//
+// Use feet for altitude units?.
+//
+//
+// Type: boolean
+//
+
+bscan_altitude_in_feet = FALSE;
+
+///////////// bscan_range_in_feet /////////////////////
+//
+// Use feet for range units?.
+//
+//
+// Type: boolean
+//
+
+bscan_range_in_feet = FALSE;
+
+///////////// bscan_range_axis_mode ///////////////////
+//
+// Options for plotting range in the vertical scale.
+//
+// RANGE_AXIS_UP - instrument is at the bottom, range plotted positively 
+//   upwards. RANGE_AXIS_DOWN: instrument is at the top, range plotted 
+//   downwards. RANGE_AXIS_ALTITUDE: vertical scale represents the 
+//   altitude of the gates in earth coordinates.
+//
+//
+// Type: enum
+// Options:
+//     RANGE_AXIS_UP
+//     RANGE_AXIS_DOWN
+//     RANGE_AXIS_ALTITUDE
+//
+
+bscan_range_axis_mode = RANGE_AXIS_ALTITUDE;
+
+//======================================================================
+//
+// BSCAN ANGLE LIMITS.
+//
+//======================================================================
+ 
+///////////// bscan_specify_elevation_limits //////////
+//
+// Specify the min and max elevation angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_elevation_limits = FALSE;
+
+///////////// bscan_min_elevation_deg /////////////////
+//
+// Min elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_elevation_deg = 89;
+
+///////////// bscan_max_elevation_deg /////////////////
+//
+// Max elevation angle to be plotted (deg).
+//
+// Used if 'bscan_specify_elevation_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_elevation_deg = 91;
+
+///////////// bscan_specify_azimuth_limits ////////////
+//
+// Specify the min and max azimuth angle.
+//
+// If true, only beams within the specified limits will be plotted.
+//
+//
+// Type: boolean
+//
+
+bscan_specify_azimuth_limits = FALSE;
+
+///////////// bscan_min_azimuth_deg ///////////////////
+//
+// Min azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_min_azimuth_deg = 89;
+
+///////////// bscan_max_azimuth_deg ///////////////////
+//
+// Max azimuth angle to be plotted (deg).
+//
+// Used if 'bscan_specify_azimuth_limits' is true.
+//
+//
+// Type: double
+//
+
+bscan_max_azimuth_deg = 91;
+
+//======================================================================
+//
+// BSCAN CENSOR DATA BELOW SURFACE.
+//
+//======================================================================
+ 
+///////////// bscan_censor_data_below_surface /////////
+//
+// Option to censor data below the measured surface.
+//
+//
+// Type: boolean
+//
+
+bscan_censor_data_below_surface = FALSE;
+
+///////////// bscan_surface_field /////////////////////
+//
+// Name of field used to identify the surface from the data.
+//
+// The surface will be identified at the gate with the maximum value in 
+//   this field.
+//
+//
+// Type: string
+//
+
+bscan_surface_field = "DBZ";
+
+///////////// bscan_min_range_to_surface_km ///////////
+//
+// Minumum range to the surface (km).
+//
+// We will search for the surface echo in the gates beyound this range.
+//
+//
+// Type: double
+//
+
+bscan_min_range_to_surface_km = 0.5;
+
+///////////// bscan_surface_range_margin_km ///////////
+//
+// Margin of data plotted beyond the surface (km).
+//
+// We will censor the data beyond the surface gate, plus this range 
+//   margin.
+//
+//
+// Type: double
+//
+
+bscan_surface_range_margin_km = 0.2;
+
+///////////// bscan_max_field_val_below_surface ///////
+//
+// Maximum value of the surface field, below the measured surface.
+//
+// After finding the range to the surface, we inspect the surface_field 
+//   values below the surface. If we find values that exceed this 
+//   parameter, we conclude that the surface cannot be reliably found.
+//
+//
+// Type: double
+//
+
+bscan_max_field_val_below_surface = 5;
+
+//======================================================================
+//
+// BSCAN MARGINS.
+//
+//======================================================================
+ 
+///////////// bscan_top_margin ////////////////////////
+//
+// Height of top margin in BSCAN mode (pixels).
+//
+// Titles go in the top margin.
+//
+//
+// Type: int
+//
+
+bscan_top_margin = 40;
+
+///////////// bscan_bottom_margin /////////////////////
+//
+// Height of bottom margin in BSCAN mode (pixels).
+//
+// Time scale goes in the bottom margin.
+//
+//
+// Type: int
+//
+
+bscan_bottom_margin = 45;
+
+///////////// bscan_left_margin ///////////////////////
+//
+// Width of left margin in BSCAN mode (pixels).
+//
+// Height scale goes in the left margin.
+//
+//
+// Type: int
+//
+
+bscan_left_margin = 50;
+
+///////////// bscan_right_margin //////////////////////
+//
+// Width of right margin in BSCAN mode (pixels).
+//
+// Height scale goes in the right margin.
+//
+//
+// Type: int
+//
+
+bscan_right_margin = 40;
+
+///////////// bscan_axis_tick_len /////////////////////
+//
+// Length of ticks on axes (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_tick_len = 6;
+
+///////////// bscan_n_ticks_ideal /////////////////////
+//
+// Ideal number of ticks on axes.
+//
+//
+// Type: int
+//
+
+bscan_n_ticks_ideal = 10;
+
+///////////// bscan_text_margin ///////////////////////
+//
+// Margin around some text (pixels).
+//
+//
+// Type: int
+//
+
+bscan_text_margin = 5;
+
+//======================================================================
+//
+// BSCAN TITLES, LABELS AND AXES.
+//
+//======================================================================
+ 
+///////////// bscan_title_font_size ///////////////////
+//
+// Font size of center title (pixels).
+//
+//
+// Type: int
+//
+
+bscan_title_font_size = 12;
+
+///////////// bscan_axis_label_font_size //////////////
+//
+// Font size of axis labels in bscan (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_label_font_size = 10;
+
+///////////// bscan_axis_values_font_size /////////////
+//
+// Font size of axis values (pixels).
+//
+//
+// Type: int
+//
+
+bscan_axis_values_font_size = 8;
+
+///////////// bscan_axes_color ////////////////////////
+//
+// Color of axes in bscan.
+//
+//
+// Type: string
+//
+
+bscan_axes_color = "white";
+
+///////////// bscan_grid_color ////////////////////////
+//
+// Color of grid lines on bscan.
+//
+//
+// Type: string
+//
+
+bscan_grid_color = "gray";
+
+///////////// bscan_labels_color //////////////////////
+//
+// Color of labels in bscan.
+//
+//
+// Type: string
+//
+
+bscan_labels_color = "white";
+
+///////////// bscan_draw_time_grid_lines //////////////
+//
+// Option to draw grid lines across plot at regular time intervals.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_time_grid_lines = TRUE;
+
+///////////// bscan_draw_range_grid_lines /////////////
+//
+// Option to draw grid lines across plot at regular range intervals.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_range_grid_lines = TRUE;
+
+///////////// bscan_draw_instrument_height_line ///////
+//
+// Option to draw a line for the instrument location.
+//
+//
+// Type: boolean
+//
+
+bscan_draw_instrument_height_line = TRUE;
+
+///////////// bscan_instrument_height_color ///////////
+//
+// Color of instrument height line in ALTITUDE plot.
+//
+//
+// Type: string
+//
+
+bscan_instrument_height_color = "white";
+
+//======================================================================
+//
+// DISTANCE SCALE.
+//
+//======================================================================
+ 
+///////////// bscan_add_distance_to_time_axis /////////
+//
+// Option to plot distance as well as time on the time axis.
+//
+// If true, extra tick marks will show the distance in km along the time 
+//   axis, in addition to the time.
+//
+//
+// Type: boolean
+//
+
+bscan_add_distance_to_time_axis = TRUE;
+
+///////////// bscan_n_segments_for_computing_distance /
+//
+// Number of segments to be used for computing distance.
+//
+// We divide the rays into this number of segments and then compute the 
+//   distance travelled during each segment using the change in lat/lon 
+//   position. We keep the number of segments reasonably small to avoid 
+//   unnecessary CPU usage.
+//
+//
+// Type: int
+//
+
+bscan_n_segments_for_computing_distance = 50;
+
+//======================================================================
+//
+// BSCAN LEGENDS.
+//
+//======================================================================
+ 
+///////////// bscan_plot_starting_latlon_as_legend ////
+//
+// Option to plot the starting lat/lon position as a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+bscan_plot_starting_latlon_as_legend = TRUE;
+
+///////////// bscan_starting_latlon_legend_pos ////////
+//
+// Position of lat/lon legend in plot.
+//
+// The starting latitude/longitude will be plotted as a legend in the 
+//   location specified. See 'bscan_plot_starting_latlon_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+bscan_starting_latlon_legend_pos = LEGEND_TOP_LEFT;
+
+///////////// bscan_plot_mean_track_and_speed_as_legend 
+//
+// Option to plot the mean track and speed in a legend.
+//
+// This helps in geolocating the data from a mobile system.
+//
+//
+// Type: boolean
+//
+
+bscan_plot_mean_track_and_speed_as_legend = TRUE;
+
+///////////// bscan_mean_track_and_speed_legend_pos ///
+//
+// Position of track/speed legend in plot.
+//
+// The mean track and speed will be plotted as a legend in the location 
+//   specified. See 'bscan_plot_track_and_speed_as_legend'.
+//
+//
+// Type: enum
+// Options:
+//     LEGEND_TOP_LEFT
+//     LEGEND_TOP_RIGHT
+//     LEGEND_BOTTOM_LEFT
+//     LEGEND_BOTTOM_RIGHT
+//
+
+bscan_mean_track_and_speed_legend_pos = LEGEND_TOP_RIGHT;
+
+//======================================================================
+//
+// BSCAN DWELL CONTROLS.
+//
+//======================================================================
+ 
+///////////// bscan_archive_dwell_auto ////////////////
+//
+// Compute dwell from image size and time range.
+//
+// If TRUE, we compute the optimal dwell so that there will be 
+//   approximately 1 dwell for each pixel in the resulting image. If 
+//   FALSE, the dwell is specified below.
+//
+//
+// Type: boolean
+//
+
+bscan_archive_dwell_auto = TRUE;
+
+///////////// bscan_archive_dwell_secs ////////////////
+//
+// Specified dwell time for archive mode (secs).
+//
+//
+// Type: double
+//
+
+bscan_archive_dwell_secs = 0.1;
+
+///////////// bscan_dwell_stats ///////////////////////
+//
+// Method for computing stats on the dwell.
+//
+// Applies to READ_RAYS_IN_INTERVAL mode. MIDDLE refers to the middle 
+//   ray in the dwell sequence.
+//
+//
+// Type: enum
+// Options:
+//     DWELL_STATS_MEAN
+//     DWELL_STATS_MEDIAN
+//     DWELL_STATS_MAXIMUM
+//     DWELL_STATS_MINIMUM
+//     DWELL_STATS_MIDDLE
+//
+
+bscan_dwell_stats = DWELL_STATS_MIDDLE;
+
+//======================================================================
+//
+// SAVING IMAGES TO FILE.
+//
+// In creating files for the field catalog, the file name is of the 
+//   form:
+//
+// 	category.platform.YYYYMMDDHHmm.product_name.ext
+//
+// The following parameters control the output directory, and the 
+//   construction of the file name.
+//
+//======================================================================
+ 
+///////////// images_output_dir ///////////////////////
+//
+// Output directory for images generated by this app.
+//
+//
+// Type: string
+//
+
+images_output_dir = "/tmp/images/Qucid";
+
+///////////// images_write_to_day_dir /////////////////
+//
+// Option to create a subdirectory for each day.
+//
+//
+// Type: boolean
+//
+
+images_write_to_day_dir = TRUE;
+
+///////////// images_file_name_category ///////////////
+//
+// Set the category string.
+//
+// If empty, no category will be included.
+//
+//
+// Type: string
+//
+
+images_file_name_category = "radar";
+
+///////////// images_file_name_platform ///////////////
+//
+// Set the platform string.
+//
+// If empty, no platform will be included.
+//
+//
+// Type: string
+//
+
+images_file_name_platform = "NSF_NCAR_GV_HCR";
+
+///////////// images_file_name_extension //////////////
+//
+// Set the extension string. This also governs the file format. It 
+//   should be 'png', 'jpg', 'gif' etc.
+//
+// An extension is always required.
+//
+//
+// Type: string
+//
+
+images_file_name_extension = "png";
+
+///////////// images_file_name_delimiter //////////////
+//
+// Set the delimiter between the parts of the file name.
+//
+// NOTE: before the extension the delimited is always a period: '.'.
+//
+//
+// Type: string
+//
+
+images_file_name_delimiter = ".";
+
+///////////// images_include_time_part_in_file_name ///
+//
+// Normally the file name includes a time part: YYYYMMDDHHMMSS.
+//
+// If FALSE, the time part will be omitted.
+//
+//
+// Type: boolean
+//
+
+images_include_time_part_in_file_name = TRUE;
+
+///////////// images_include_seconds_in_time_part /////
+//
+// Normally the time part include the seconds: YYYYMMDDHHMMSS.
+//
+// If FALSE, the SS will be excluuded from the time part.
+//
+//
+// Type: boolean
+//
+
+images_include_seconds_in_time_part = FALSE;
+
+///////////// images_include_field_label_in_file_name /
+//
+// Normally the file name includes the field label (product type).
+//
+// If FALSE, the field label will be omitted.
+//
+//
+// Type: boolean
+//
+
+images_include_field_label_in_file_name = TRUE;
+
+///////////// images_include_scan_type_in_file_name ///
+//
+// Option to include the scan type in the image file name.
+//
+// If TRUE, the scan type will be added to the image file name.
+//
+//
+// Type: boolean
+//
+
+images_include_scan_type_in_file_name = FALSE;
+
+///////////// images_include_scan_id_in_file_name /////
+//
+// Option to include the scan Id in the image file name.
+//
+// If TRUE, the scan Id will be added to the image file name.
+//
+//
+// Type: boolean
+//
+
+images_include_scan_id_in_file_name = FALSE;
+
+///////////// images_write_latest_data_info ///////////
+//
+// Option to write latest_data_info files when an image is created.
+//
+//
+// Type: boolean
+//
+
+images_write_latest_data_info = TRUE;
+
+//======================================================================
+//
+// OPTION TO CREATE IMAGES AUTOMATICALLY.
+//
+//======================================================================
+ 
+///////////// images_auto_create //////////////////////
+//
+// Option to create images automatically.
+//
+//
+// Type: boolean
+//
+
+images_auto_create = FALSE;
+
+///////////// images_creation_mode ////////////////////
+//
+// Mode for controlling auto image creation.
+//
+
+//
+// CREATE_IMAGES_FROM_GUI: create images interactively using the GUI.
+//
+// CREATE_IMAGES_THEN_EXIT: for the specified start time and time span, 
+//   create an output image for every field in the fields array, and then 
+//   exit.
+//
+// CREATE_IMAGES_ON_REALTIME_SCHEDULE: wait for the scheduled time, then 
+//   generate an image for each field.
+//
+// CREATE_IMAGES_ON_ARCHIVE_SCHEDULE: for each scheduled time between 
+//   the start and end times, generate an image for each field.
+//
+//
+// Type: enum
+// Options:
+//     CREATE_IMAGES_THEN_EXIT
+//     CREATE_IMAGES_ON_REALTIME_SCHEDULE
+//     CREATE_IMAGES_ON_ARCHIVE_SCHEDULE
+//
+
+images_creation_mode = CREATE_IMAGES_THEN_EXIT;
+
+///////////// images_schedule_interval_secs ///////////
+//
+// Interval at which images are created on schedule (secs).
+//
+// The application waits until the interval has passed, plus any 
+//   specified delay, and then creates the images.
+//
+//
+// Type: int
+//
+
+images_schedule_interval_secs = 300;
+
+///////////// images_schedule_delay_secs //////////////
+//
+// Delay between scheduled time and image creation (secs).
+//
+// In order to ensure that the data has been written, a delay may be 
+//   provided. This allows for the writing application to complete writing 
+//   the data before this application tries to access it.
+//
+//
+// Type: int
+//
+
+images_schedule_delay_secs = 60;
+
+///////////// images_archive_start_time ///////////////
+//
+// Start time for image generation in archive mode.
+//
+// Image generation starts with a seach at this time, and the proceeds 
+//   at increments of images_schedule_interval_secs.
+//
+//
+// Type: string
+//
+
+images_archive_start_time = "1970 01 01 00 00 00";
+
+///////////// images_archive_end_time /////////////////
+//
+// End time for image generation in archive mode.
+//
+// Image generation is terminated when the search time exceeds this end 
+//   time.
+//
+//
+// Type: string
+//
+
+images_archive_end_time = "1970 01 01 00 00 00";
+
+///////////// images_scan_interval_secs ///////////////
+//
+// Time between scans in archive mode (secs).
+//
+// Only applies to POLAR (HORIZ/VERT) mode, not BSCAN mode.
+//
+//
+// Type: int
+//
+
+images_scan_interval_secs = 300;
+
+///////////// images_set_sweep_index_list /////////////
+//
+// Option to specify the sweep indexes for the image generation.
+//
+// If TRUE, only the specified sweeps will be processed.
+//
+//
+// Type: boolean
+//
+
+images_set_sweep_index_list = FALSE;
+
+///////////// images_sweep_index_list /////////////////
+//
+// List of valid sweep indexes for image generation.
+//
+// See 'images_set_sweep_index_list'. Images will only be generated for 
+//   the specified sweep indexes.
+//
+//
+// Type: int
+// 1D array - variable length.
+//
+
+images_sweep_index_list = {
+ 0,
+ 1,
+ 2
+};
+
+//======================================================================
+//
+// SIMULATION MODE.
+//
+//======================================================================
+ 
+///////////// sim_sleep_msecs /////////////////////////
+//
+// Number of milliseconds to sleep between beams in simulated input 
+//   mode.
+//
+//
+// Type: int
+//
+
+sim_sleep_msecs = 10;
+
+///////////// sim_n_gates /////////////////////////////
+//
+// Number of gates in simulated data.
+//
+//
+// Type: int
+//
+
+sim_n_gates = 1000;
+
+///////////// sim_start_range_km //////////////////////
+//
+// Start range in simulated mode (km).
+//
+//
+// Type: double
+//
+
+sim_start_range_km = 0.075;
+
+///////////// sim_gate_spacing_km /////////////////////
+//
+// Gate spacing in simulated mode (km).
+//
+//
+// Type: double
+//
+
+sim_gate_spacing_km = 0.15;
+
+//======================================================================
+//
+// CLICK POINT DATA MESSAGING.
+//
+// Writing the click point location to an FMQ in XML format.
+//
+//======================================================================
+ 
+///////////// click_point_fmq_url /////////////////////
+//
+// URL for click point URL.
+//
+// The details of the latest click point are written to an FMQ. The 
+//   format is XML. You can view the FMQ using FmqMon -mode ASCII_PRINT.
+//
+//
+// Type: string
+//
+
+click_point_fmq_url = "/tmp/fmq/click_point";
+
+//======================================================================
+//
+// CIDD GUI Configuration Parameters.
+//
+//======================================================================
+ 
+///////////// gui_field_list //////////////////////////
+//
+//  Groups Grids into Sets.
+//
+//  Each Entry needs:
+// ID_Label  List
+// 	List - Space Delimited list of grid legend names match strings.
+// 	If a group is "ON", then any grid whose legend label contains any  
+//   of the match strings in the group list becomes active.
+//
+//
+// Type: struct
+//   typedef struct {
+//      char* id_label;
+//      char* grid_list;
+//   }
+//
+// 1D array - variable length.
+//
+
+gui_field_list = {
+};
+
+//======================================================================
+//
+// Draw/Export Parameters.
+//
+//======================================================================
+ 
+///////////// dexport_info ////////////////////////////
+//
+// Human Drawn Products for Export Parameters.
+//
+//  Each Entry needs:
+// ID_Label FMQ_URL Valid_Minutes Default_ID_no    ID_LABEL - This is 
+//   used to designate Product types
+//     FMQ_URL: example: fmqp:://host::dir/file 
+//    Valid_Minutes: How many minutes the product is valid by default
+//    Default_ID_no: Default Data Type (Enumerated ID)
+//    Default_label: Test to place into Label field by default.
+//
+//
+// Type: struct
+//   typedef struct {
+//      char* id_label;
+//      char* url;
+//      double valid_minutes;
+//      int default_id_no;
+//      char* default_label;
+//   }
+//
+// 1D array - variable length.
+//
+
+dexport_info = {
+  {
+    id_label = "Boundry",
+    url = "/tmp/cidd.fmq",
+    valid_minutes = 60,
+    default_id_no = 0,
+    default_label = "A"
+  }
+  ,
+  {
+    id_label = "Boundry-b",
+    url = "/tmp/cidd.fmq",
+    valid_minutes = 60,
+    default_id_no = 0,
+    default_label = "B"
+  }
+};
+
+///////////// symprod_debug ///////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     SYMPROD_DEBUG_OFF
+//     SYMPROD_DEBUG_NORM
+//     SYMPROD_DEBUG_VERBOSE
+//
+
+symprod_debug = SYMPROD_DEBUG_OFF;
+
+///////////// symprod_short_requests //////////////////
+//
+// Gather Data Frame by Frame, Otherwise by loop span.
+//
+// Gathers Products valid for the current frame only - Speeds up 
+//   gathering of large data sets, like METAR data.
+//
+//
+// Type: boolean
+//
+
+symprod_short_requests = FALSE;
+
+///////////// symprod_gzip_requests ///////////////////
+//
+// Request data using GZIP compression.
+//
+// If true, symprod data will be GZIP compressed by the server.
+//
+//
+// Type: boolean
+//
+
+symprod_gzip_requests = FALSE;
+
+///////////// symprod_prod_info ///////////////////////
+//
+// Product Source and Rendering Information Array.
+//
+// The fields in the structure are as follows:
+//
+//   menu_label: label to be used for the product in menu.
+//
+//   url: for retrieving the data.
+//     example: 
+//   spdbp:transform_executable:[param_file]//host.dom:[port]:dir1/dir2
+//
+//   data_type: used when querying the SPDB data server
+//     (set to 0 to retrieve all data).
+//
+//   render_type: Select how temporal clipping is done:
+//     RENDER_ALL: Do no temporal clipping.
+//     RENDER_ALL_VALID: Render all Valid in frame
+//     RENDER_VALID_IN_LAST_FRAME: Render all Valid in the last frame
+//     RENDER_LATEST_IN_FRAME: Render the latest product of like 
+//   data_types (ID)  in the frame.
+//     RENDER_LATEST_IN_LOOP:  Render the latest product of like 
+//   data_types (ID)  valid in the movie loop.
+//     RENDER_FIRST_BEFORE_FRAME_TIME:  Render the latest product of 
+//   like data_types (ID) before the end of frame time
+//     RENDER_FIRST_BEFORE_DATA_TIME:   Render the latest product of 
+//   like data_types (ID  before the data time in each frame.
+//     RENDER_FIRST_AFTER_DATA_TIME:    Render the earliest product 
+//   after the data time in each frame.
+//     RENDER_ALL_BEFORE_DATA_TIME:     Render all valid products before 
+//   the data time in each frame.
+//     RENDER_ALL_AFTER_DATA_TIME:      Render all valid products after 
+//   the data time in each frame.
+//     RENDER_GET_VALID:      Render all valid products returned with a 
+//   GetValid Spdb call.
+//     RENDER_GET_VALID_AT_FRAME_TIME:  Render products which have not 
+//   expired at the frame time
+//
+// Note: all comparisons are less than or equal or greater than or equal
+//
+//   on_by_default: True or False
+//
+//   minutes_allow_before: Stretch the frame time this many minutes - 
+//   prior
+//   minutes_allow_after: Stretch the frame time this many minutes - 
+//   after
+//
+//   text_off_threshold: Threshold where text disappears. Use the 
+//   function:
+//       log10(scaling_constant/km_distance_across_screen ) + 1.0
+//       Use 0.0 to disable the off feature. (always displayed)
+//
+//   request_data_on_zoom: Flag indicating whether to request new data 
+//   for
+//       this product whenever the user changes the zoom.  Normally, 
+//   this
+//       should be set to false for efficiency reasons.  If the products
+//       to be rendered would change with a zoom change then this should 
+//   be
+//       set to true.
+//
+//   request_data_on_vert_change: Flag indicating whether to request new 
+//   data
+//       for this product whenever the user changes the currently 
+//   displayed
+//       vertical level.  Normally, this should be set to false for 
+//   efficiency
+//       reasons.  If the products to be rendered would change with a 
+//   zoom
+//       change then this should be set to true.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string menu_label;
+//      string url;
+//      int data_type;
+//      symprod_render_type_t render_type;
+//        Options:
+//          RENDER_ALL
+//          RENDER_ALL_VALID
+//          RENDER_VALID_IN_LAST_FRAME
+//          RENDER_LATEST_IN_FRAME
+//          RENDER_LATEST_IN_LOOP
+//          RENDER_FIRST_BEFORE_FRAME_TIME
+//          RENDER_FIRST_BEFORE_DATA_TIME
+//          RENDER_FIRST_AFTER_DATA_TIME
+//          RENDER_ALL_BEFORE_DATA_TIME
+//          RENDER_ALL_AFTER_DATA_TIME
+//          RENDER_GET_VALID
+//          RENDER_GET_VALID_AT_FRAME_TIME
+//      boolean on_by_default;
+//      double minutes_allow_before;
+//      double minutes_allow_after;
+//      double text_off_threshold;
+//      boolean request_data_on_zoom;
+//      boolean request_data_on_vert_change;
+//   }
+//
+// 1D array - variable length.
+//
+
+symprod_prod_info = {
+  {
+    menu_label = "RHI-ticks",
+    url = "spdbp:Rhi2Symprod://localhost::spdb/rhi",
+    data_type = 0,
+    render_type = RENDER_ALL_VALID,
+    on_by_default = FALSE,
+    minutes_allow_before = 20,
+    minutes_allow_after = 10,
+    text_off_threshold = 0.4,
+    request_data_on_zoom = FALSE,
+    request_data_on_vert_change = FALSE
+  }
+};
+
+//======================================================================
+//
+// Terrain Parameters.
+//
+//======================================================================
+ 
+///////////// terrain_id_label ////////////////////////
+//
+// Label used for legends.
+//
+//
+// Type: string
+//
+
+terrain_id_label = "Terrain";
+
+///////////// terrain_url /////////////////////////////
+//
+// Used to located gridded terrain data.
+//
+// Terrain_URL 
+//  Note example URL:
+//   mdvp::static//venus::mdv/terrain&Elevation
+//  Field name follows the Ampersand. Use #N for field number override   
+//   Use caret: ^ as a substitute for spaces in field names.
+//
+//
+// Type: string
+//
+
+terrain_url = "";
+
+///////////// terrain_height_scaler ///////////////////
+//
+// Conversion from terrain units to local coords.
+//
+// Choose a scaler which converts plane height values
+// Default is Hecto-feet (FL) per meter.
+//
+//
+// Type: double
+//
+
+terrain_height_scaler = 0.0328083;
+
+///////////// landuse_url /////////////////////////////
+//
+// Used to located gridded land use data.
+//
+// Land Use URL 
+//  Note URL is of the form 
+//   mdvp::[param_file]//host.dom::dir/dir&field_name
+//  Field name follows the Ampersand. Use #N for field number override   
+//   Use caret: ^ as a substitute for spaces in field names.
+//
+//
+// Type: string
+//
+
+landuse_url = "mdvp:://tempest:0:topo/relief/mdv&RGBA";
+
+///////////// landuse_colorscale //////////////////////
+//
+// Color lookup table for Land use.
+//
+// Land Use colorscale file name
+//  Note: CIDD looks in the colorscale dir, then in the current dir for 
+//   this file.
+//
+//
+// Type: string
+//
+
+landuse_colorscale = "terrain.colors";
+
+///////////// land_use_render_method //////////////////
+//
+// Land Use rendering style.
+//
+// Use Contours only for continious data like elevation.
+//
+//
+// Type: enum
+// Options:
+//     TERRAIN_RENDER_FILLED_CONT
+//     TERRAIN_RENDER_RECTANGLES
+//     TERRAIN_RENDER_DYNAMIC_CONTOURS
+//
+
+land_use_render_method = TERRAIN_RENDER_RECTANGLES;
+
+///////////// landuse_active //////////////////////////
+//
+// Default Display state of Land Use/ Basemap.
+//
+//
+// Type: boolean
+//
+
+landuse_active = FALSE;
+
+///////////// earth_color1 ////////////////////////////
+//
+// Earth's skin color.
+//
+//
+// Type: string
+//
+
+earth_color1 = "sienna";
+
+///////////// earth_color2 ////////////////////////////
+//
+// Earth's core color.
+//
+//
+// Type: string
+//
+
+earth_color2 = "red4";
+
+///////////// image_debug /////////////////////////////
+//
+// Debug option.
+// If set, debug messages will be printed appropriately.
+//
+//
+// Type: enum
+// Options:
+//     IMAGE_DEBUG_OFF
+//     IMAGE_DEBUG_NORM
+//     IMAGE_DEBUG_VERBOSE
+//
+
+image_debug = IMAGE_DEBUG_OFF;
+
+///////////// generate_vsection_images ////////////////
+//
+// Generate images for specified vertical sections.
+//
+// If TRUE, and CIDD is in html_mode, it will generate vertical section 
+//   images in addition to the normal plan view images.
+//
+//
+// Type: boolean
+//
+
+generate_vsection_images = FALSE;
+
+///////////// image_vsection_waypts_in_latlon /////////
+//
+// The specified waypts are in latlon degree units.
+//
+// If TRUE, the waypts are specified in lat/lon degrees. If FALSE, they 
+//   are specified in (xkm, ykm) units in the current projection.
+//
+//
+// Type: boolean
+//
+
+image_vsection_waypts_in_latlon = FALSE;
+
+///////////// image_vsection_spec /////////////////////
+//
+// Vertical section information array.
+//
+// The fields in the structure are as follows:
+//
+//   vsection_label: label to be used for the specified vertical 
+//   section.
+//
+//   n_waypts: number of waypts for specifying the vert section.
+//             Normally this is 2 - for a single vertical section 
+//   segment.
+//
+//   waypt_locs: location of way points. This is a string with pairs of 
+//   points in it, with the following format: (x, y) (x, y) ..... (x, y).
+//
+//
+// Type: struct
+//   typedef struct {
+//      string vsection_label;
+//      int n_waypts;
+//      string waypt_locs;
+//   }
+//
+// 1D array - variable length.
+//
+
+image_vsection_spec = {
+  {
+    vsection_label = "RHI-north",
+    n_waypts = 2,
+    waypt_locs = "(0, 0) (0, 150)"
+  }
+};
+
+//======================================================================
+//
+// Route Winds Parameters.
+//
+//======================================================================
+ 
+///////////// route_debug /////////////////////////////
+//
+// Set to DEBUG_NORM or DEBUG_VERBOSE for diagnostic output.
+//
+//
+// Type: enum
+// Options:
+//     ROUTE_DEBUG_OFF
+//     ROUTE_DEBUG_NORM
+//     ROUTE_DEBUG_VERBOSE
+//
+
+route_debug = ROUTE_DEBUG_OFF;
+
+///////////// route_font_height ///////////////////////
+//
+//  Maximum height in Pixels of labels.
+//
+//
+// Type: int
+//
+
+route_font_height = 13;
+
+///////////// route_add_waypoints_labels //////////////
+//
+// Default state of the add_waypoints_labels.
+//
+// 0 = off, 1 = on.
+//
+//
+// Type: int
+//
+
+route_add_waypoints_labels = 1;
+
+///////////// route_add_wind_text /////////////////////
+//
+// Default state of the add_wind_text labels.
+//
+// 0 = off, 1 = on.
+//
+//
+// Type: int
+//
+
+route_add_wind_text = 1;
+
+///////////// route_label_style ///////////////////////
+//
+// Set to REGULAR_INTERVALS or EQUAL_DIVISIONS.
+//
+//
+// Type: enum
+// Options:
+//     REGULAR_INTERVALS
+//     EQUAL_DIVISIONS
+//
+
+route_label_style = REGULAR_INTERVALS;
+
+///////////// route_label_interval ////////////////////
+//
+// Distance in km between winds labels.
+//
+// Used if label_style is set to REGULAR_INTERVALS.
+//
+//
+// Type: double
+//
+
+route_label_interval = 55.6;
+
+///////////// route_num_route_labels //////////////////
+//
+// number of route wind labels to plot along the route.
+//
+// Typically this should be set between 5 and 20.
+//
+// Minimum val: 2
+// Maximum val: 100
+//
+// Type: int
+//
+
+route_num_route_labels = 10;
+
+///////////// route_track_line_width //////////////////
+//
+// Width in pixels of the route winds track.
+//
+// Minimum val: 1
+// Maximum val: 20
+//
+// Type: int
+//
+
+route_track_line_width = 3;
+
+///////////// route_u_url /////////////////////////////
+//
+// U Wind Componet.
+//
+//  URL's take the form  mdvp::[paramfile]//host.dom::dir/dir&fieldname.
+//
+//
+// Type: string
+//
+
+route_u_url = "mdvp::zoom_mds//neptune::mdv/mm5&U";
+
+///////////// route_v_url /////////////////////////////
+//
+// v Wind Componet.
+//
+//
+// Type: string
+//
+
+route_v_url = "mdvp::zoom_mds//neptune::mdv/mm5&V";
+
+///////////// route_turb_url //////////////////////////
+//
+// Turbulence Index.
+//
+//
+// Type: string
+//
+
+route_turb_url = "mdvp::d3_d4//neptune::mdv/mm5&Turb";
+
+///////////// route_turb_low_thresh ///////////////////
+//
+// Value at which the turbulence is considered Low.
+//
+//
+// Type: double
+//
+
+route_turb_low_thresh = 0.25;
+
+///////////// route_turb_mod_thresh ///////////////////
+//
+// Value at which the turbulence is considered Moderate.
+//
+//
+// Type: double
+//
+
+route_turb_mod_thresh = 0.5;
+
+///////////// route_turb_hi_thresh ////////////////////
+//
+// Value at which the turbulence is considered High.
+//
+//
+// Type: double
+//
+
+route_turb_hi_thresh = 0.75;
+
+///////////// route_icing_url /////////////////////////
+//
+// Icing Index.
+//
+//
+// Type: string
+//
+
+route_icing_url = "mdvp::d3_d4//neptune::mdv/mm5&Icing";
+
+///////////// route_icing_low_thresh //////////////////
+//
+// Value at which the icing is considered Light.
+//
+//
+// Type: double
+//
+
+route_icing_low_thresh = 0.25;
+
+///////////// route_icing_mod_thresh //////////////////
+//
+// Value at which the icing is considered Moderate.
+//
+//
+// Type: double
+//
+
+route_icing_mod_thresh = 0.5;
+
+///////////// route_icing_hi_thresh ///////////////////
+//
+// Value at which the icing is considered Heavy.
+//
+//
+// Type: double
+//
+
+route_icing_hi_thresh = 0.75;
+
+///////////// route_paths /////////////////////////////
+//
+//  Route path strings - Format of each string isROUTE_LABEL NPOINTS  
+//   ID_String Lat Lon ID_String LAT Lon ...
+//
+// ROUTE_LABEL will be used in the menu, 
+// NPoints = Number of way points in route 
+//   Followed by NPoint triplets of the following:
+// ID_string -> usually a Airport or VOR 
+// Lat Lon :  decimal degrees.
+//
+//
+// Type: string
+// 1D array - variable length.
+//
+
+route_paths = {
+ "A-1 8 BULAN 27.0917 124.0000 OSTAR 26.3317 123.0000 SHARK 25.8333 122.3583 ANNNA 25.5717 122.0217 APU 25.1767 121.5233 HLG 24.6400 120.7833 MKG 23.5583 119.6283 ELATO 22.3333 117.5000 ",
+ "M-750 12 MOLKA 26.6583 124.0000 MORSU 25.9100 123.0000 LEKOS 25.5100 122.4717 ROBIN 25.4200 122.2083 NOKAS 25.1317 121.9917 SANAS 24.8967 121.6917 PILOX 24.4150 121.0250 ANLOT 23.9417 120.5233 TOROX 23.3533 119.9083 RENOT 22.5683 118.5117 DADON 22.2767 118.0033 ENVAR 21.9917 117.5000 ",
+ "G-581 7 IGURU 23.9500 124.0000 TULTO 23.3233 123.0000 HCN 21.9283 120.8433 PARPA 22.0150 120.1683 CYRUS 22.2167 118.5317 DADON 22.2767 118.0033 ELATO 22.3333 117.5000 ",
+ "B-591 9 APU 25.1767 121.5233 SANAS 24.8967 121.6917 TINHO 24.3533 122.0283 TITUS 23.8283 121.8517 TACLE 22.9933 121.5867 GID 22.6733 121.4867 TUNNY 22.3600 121.2150 HCN 21.9283 120.8433 DOREX 21.0000 120.7833 ",
+ "R-583 5 BORDO 26.0167 124.0000 KIKIT 25.8817 123.5917 PABSO 25.6517 122.8750 LEKOS 25.5100 122.4717 APU 25.1767 121.5233 ",
+ "G-86 3 HCN 21.9283 120.8433 ANDRE 21.7783 120.1683 KAPLI 21.1667 117.5000 ",
+ "B-576 3 SALMI 28.3150 124.0000 BERBA 27.0783 123.0000 APU 25.1767 121.5233 "
+};
+
+//////////////////////////////////////////////////////////
+// paramdef.Cidd_terrain: Parameter definitions for
+// Terrain Data
+
+commentdef {
+  p_header = "Terrain Parameters";
+  p_comment = "Note: Terrain Fields must be on the same projection as the Display";
+};
+
+paramdef string {
+  p_default = "Terrain";
+  p_descr = "Label used for legends";
+} terrain_id_label ;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Used to located gridded terrain data";
+  p_help = "Terrain_URL \n"
+    " Note example URL:\n"
+    "  mdvp::static//venus::mdv/terrain&Elevation\n"
+    " Field name follows the Ampersand. Use #N for field number override "
+    "  Use caret: ^ as a substitute for spaces in field names";
+    "\n";
+} terrain_url;
+
+paramdef double {
+  p_default = 0.03280834;
+  p_descr = "Conversion from terrain units to local coords";
+  p_help = "Choose a scaler which converts plane height values\n"
+           "Default is Hecto-feet (FL) per meter";
+} terrain_height_scaler;
+
+paramdef string {
+  p_default = "mdvp:://tempest:0:topo/relief/mdv&RGBA";
+  p_descr = "Used to located gridded land use data";
+  p_help = "Land Use URL \n"
+    " Note URL is of the form mdvp::[param_file]//host.dom::dir/dir&field_name\n"
+    " Field name follows the Ampersand. Use #N for field number override "
+    "  Use caret: ^ as a substitute for spaces in field names";
+    "\n";
+} landuse_url;
+
+paramdef string {
+  p_default = "terrain.colors";
+  p_descr = "Color lookup table for Land use";
+  p_help = "Land Use colorscale file name\n"
+    " Note: CIDD looks in the colorscale dir, then in the current dir for this file"; 
+} landuse_colorscale;
+
+typedef enum {
+   TERRAIN_RENDER_FILLED_CONT = 1, TERRAIN_RENDER_RECTANGLES, TERRAIN_RENDER_DYNAMIC_CONTOURS
+} terrain_render_type_t;
+
+paramdef enum render_type_t {
+  p_default = TERRAIN_RENDER_RECTANGLES;
+  p_descr = "Land Use rendering style";
+  p_help = "Use Contours only for continious data like elevation";
+} land_use_render_method;
+
+paramdef boolean {
+  p_default = false;
+  p_descr = "Default Display state of Land Use/ Basemap";
+} landuse_active;
+
+paramdef string {
+  p_default = "sienna";
+  p_descr = "Earth's skin color";
+} earth_color1;
+
+paramdef string {
+  p_default = "red4";
+  p_descr = "Earth's core color";
+} earth_color2;
+
+#####################################################################################
+#  CIDD.master
+#  Configurable Interactive Data Display Master Params
+#
+#  NCAR/RAP May 2000  -FH.
+# 
+#  Note:  This is an example file for the Configurable Interactive Data Display (CIDD).
+#
+#  The order of the various sections of the param file is arbitrary and are delimited by
+#   <SECTION_NAME> ...Content... </SECTION_NAME>    tags
+#
+# Currently Supported sections:
+#
+#  GRIDS   - Describes each source of data and which color scales to use, etc.
+#  WINDS   - Describes each source of wind data.
+#  MAPS    - Describes each map overlay source
+#  MAIN_PARAMS - Controls most of the features of the Display - Sets domains, menu bars, etc.
+#  DRAW_EXPORT - (TDRP syntax) Describes possible products to manually draw.
+#  SYMPRODS    - (TDRP syntax) Describes the sources of Symbolic Product Data
+#  TERRAIN     - (TDRP syntax) Describes the of Land Use and Terrain Data
+#  ROUTE_WINDS  - (TDRP syntax) Describes the Pre-defined Route's Features
+#  GUI_CONFIG -   (TDRP syntax)  Describes New GUI Feature Parameters for CIDD
+#
+#####################################################################################
+
+<GUI_CONFIG>
+</GUI_CONFIG>
+  
+<GRIDS>
+# Legend Label: used for all on-screen labels and for movie/html file naming.
+#           An Empty grid field can be obtained by using the keyword "None"
+## Button Label:  used for all menus.
+#
+# URL:  is of the form:  mdvp:://host.domain:[port]:dir/dir&Field_name.
+#                          (Run the DsServerMgr executable for mdvp service)
+#   Spaces can be in field names by substituting a Caret character for the space:
+#
+#   Field^Name = "Field Name"
+#   Field Index can alternatively be specified by prepending a '#' character to the field
+#
+# Colorscale:  Name of the file containing the value to color mapping for this field.
+#
+# Units:  A label used on the colorscales, etc.
+#
+# Cont-lo-hi-interv:  Default/Starting Contour low and high limits and interval.
+# Note: Setting the Contour interval to 0.0 tells CIDD to use the colorscale
+# for it's colors and values. This feature is used to produce color coded
+# line contours.
+#
+# Rendering Format: The style to render the grid. Current options are:
+#  cart:  - Rectangle/polygon fills of gridded data. (note "radial" is also
+#           supported for backwards compatibility. CIDD now "autodetects"
+#           datasets with non-rectangular grid cells.
+#  cont:  - False color filled  contours.
+#  lcont:  - Line contours.
+#  dcont:  - Dynamic Contours - Automatically switches between cart & cont.
+#          - Uses the 'cidd.dynamic_contour_treshold:' parameter
+#  Note: Add the word "comp" to the format keyword to turn on composite request by default:
+#     example:  cont,comp for a composite color filled contours.
+#     example:  cart,comp for a composite filled polygon rendering
+#        Add the word "autoscale" to the format keyword to turn on automatic colorscale scaling
+#        (In this mode the colorscale will be expanded/shrunk to cover the dynamic range of the
+#        data plane in memory, with regular, linear intervals.)
+#     example:  cont,comp,autoscale for a composite color filled contours, that is autoscaled.
+#
+# Display_in_menu: Display this field in the main menu. (1 = Yes 0 = No)
+# Bkgnd_Render: Render this field automatically in the background. (1 = Yes 0 = No)
+#  Note: This is used to set up "toggleable" field images for comparing two fields,
+#  and to select which fields get generated in HTML output mode. 
+
+#----------------------------------------------------------------------------------------------------------
+#Legend   Button                                                             Rendering
+#Label    Label       URL           Colorscale Units Cont-lo-hi-interv Format Display_in_menu Bkgnd_Render
+#----------------------------------------------------------------------------------------------------------
+# Front Range
+#
+
+# S-BAND MOMENTS
+
+FLD_DBZ_F   FLD_DBZ_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
+FLD_DBZ     FLD_DBZ     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBZ     dbz.colors   dBZ -5 80 5 radial 1 0
+FLD_VEL_F   FLD_VEL_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&VEL_F   vel.colors   m/s -5 80 5 radial 1 0
+FLD_VEL     FLD_VEL     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&VEL     vel.colors   m/s -5 80 5 radial 1 0
+FLD_WIDTH_F FLD_WIDTH_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&WIDTH_F  width.colors m/s -5 80 5 radial 1 0
+FLD_WIDTH   FLD_WIDTH   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&WIDTH    width.colors m/s -5 80 5 radial 1 0
+
+FLD_ZDRM_F   FLD_ZDRM_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM_F zdr.colors   dB  -5 80 5 radial 1 0
+FLD_ZDRM     FLD_ZDRM     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM   zdr.colors   dB  -5 80 5 radial 1 0
+FLD_ZDR_F   FLD_ZDR_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_F zdr.colors   dB  -5 80 5 radial 1 0
+FLD_ZDR     FLD_ZDR     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR   zdr.colors   dB  -5 80 5 radial 1 0
+FLD_LDRH_F  FLD_LDRH_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH_F ldr.colors   dB  -5 80 5 radial 1 0
+FLD_LDRH    FLD_LDRH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
+
+FLD_LDRV_F  FLD_LDRV_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV_F ldr.colors   dB  -5 80 5 radial 1 0
+FLD_LDRV    FLD_LDRV    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV   ldr.colors   dB  -5 80 5 radial 1 0
+FLD_PHIDP_F FLD_PHIDP_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_F phidp.colors deg -5 80 5 radial 1 0
+FLD_PHIDP   FLD_PHIDP   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP   phidp.colors deg -5 80 5 radial 1 0
+FLD_RHOHV_F FLD_RHOHV_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
+FLD_RHOHV   FLD_RHOHV   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV   rhohv.colors _   -5 80 5 radial 1 0
+
+FLD_KDP_F   FLD_KDP_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP_F  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+FLD_KDP     FLD_KDP     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+FLD_CPA   FLD_CPA    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
+FLD_NCP   FLD_NCP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&NCP  ncp.colors  dB   -5   80  5  radial   1 0
+FLD_CMD      FLD_CMD       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD      cmd.colors  none -5 80 5 radial 1 0
+FLD_CMD_FLAG FLD_CMD_FLAG  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD_FLAG cmd_flag.colors  none -5 80 5 radial 1 0
+
+# S-BAND SNR and DBM
+
+FLD_SNRHC_F   FLD_SNRHC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRHC     FLD_SNRHC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRVC_F   FLD_SNRVC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRVC     FLD_SNRVC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRHX_F   FLD_SNRHX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX_F  snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRHX     FLD_SNRHX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX    snr.colors   dB     -5 80 5 radial 1 0
+
+FLD_SNRVX_F   FLD_SNRVX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX_F  snr.colors   dB     -5 80 5 radial 1 0
+FLD_SNRVX     FLD_SNRVX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX    snr.colors   dB     -5 80 5 radial 1 0
+FLD_DBMHC_F  FLD_DBMHC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMHC    FLD_DBMHC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMVC_F  FLD_DBMVC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMVC    FLD_DBMVC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
+
+FLD_DBMHX_F  FLD_DBMHX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMHX    FLD_DBMHX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX    dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMVX_F  FLD_DBMVX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMVX    FLD_DBMVX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX    dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_TDBZ FLD_TDBZ  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&TDBZ    tdbz.colors  dBZSq -5 80 5 radial 1 0
+FLD_SPIN FLD_SPIN  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SPIN    spin.colors  dBZSq -5 80 5 radial 1 0
+
+FLD_ZDR_SDEV  FLD_ZDR_SDEV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_SDEV   sdzdr.colors    dB -5 80 5 radial 1 0
+FLD_PHIDP_SDEV FLD_PHIDP_SDEV mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
+FLD_CLUT FLD_CLUT  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CLUT  dbz.colors dB -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+# K-BAND MOMENTS
+
+FLD_DBZ_K    FLD_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBZ     dbz.colors   dBZ -5 80 5 radial 1 0
+FLD_VEL_K    FLD_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&VEL     vel_k.colors   m/s -5 80 5 radial 1 0
+FLD_WIDTH_K  FLD_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&WIDTH   width_k.colors m/s -5 80 5 radial 1 0
+FLD_LDRH_K   FLD_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
+FLD_SNRHC_K  FLD_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRHC  snr.colors   dB  -5 80 5 radial 1 0
+FLD_SNRVX_K  FLD_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRVX  snr.colors dB -5 80 5 radial 1 0
+
+FLD_DBMHC_K  FLD_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMHC  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_DBMVX_K  FLD_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMVX  dbmlow.colors dBm -5 80 5 radial 1 0
+FLD_CPA_K  FLD_CPA_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
+FLD_NCP_K  FLD_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&NCP  ncp.colors  dB -5 80  5  radial   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+FLD_PID  FLD_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
+FLD_TEMP_FOR_PID    FLD_TEMP_FOR_PID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+FLD_RATE_ZH    FLD_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
+FLD_RATE_Z_ZDR    FLD_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
+FLD_RATE_KDP    FLD_RATE_KDP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
+FLD_RATE_KDP_ZDR    FLD_RATE_KDP_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
+FLD_RATE_HYBRID    FLD_RATE_HYBRID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+# QC moments from covariances
+
+QC_DBZ_S   QC_DBZ_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_S   dbz.colors   dBZ -5 80 5 radial 1 0
+QC_DBZNAA_S QC_DBZNAA_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_NAA_S   dbz.colors   dBZ -5 80 5 radial 1 0
+QC_VEL_S   QC_VEL_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_S   vel.colors   m/s -5 80 5 radial 1 0
+QC_VEL_HV  QC_VEL_HV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_HV_S vel.colors   m/s -5 80 5 radial 1 0
+QC_VEL_ALT QC_VEL_ALT    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_ALT_S   vel.colors   m/s -5 80 5 radial 1 0
+QC_WIDTH_S QC_WIDTH_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&WIDTH_S  width.colors m/s -5 80 5 radial 1 0
+
+QC_ZDRM_S  QC_ZDRM_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDRM_S zdr.colors   dB  -5 80 5 radial 1 0
+QC_ZDR_S   QC_ZDR_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDR_S zdr.colors   dB  -5 80 5 radial 1 0
+QC_PHIDP_S QC_PHIDP_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PHIDP_S   phidp.colors deg -5 80 5 radial 1 0
+QC_KDP_S   QC_KDP_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&KDP_S  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+QC_PSOB_S  QC_PSOB_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PSOB_S   psob.colors   deg -5 80 5 radial 1 0     
+QC_NCP_S   QC_NCP_S       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NCP_S  ncp.colors  dB   -5   80  5  radial   1 0
+
+QC_LDRH_S  QC_LDRH_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRH_S ldr.colors   dB  -5 80 5 radial 1 0
+QC_LDRV_S  QC_LDRV_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRV_S ldr.colors   dB  -5 80 5 radial 1 0
+QC_RHOHV_S QC_RHOHV_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_S rhohv.colors _   -5 80 5 radial 1 0
+QC_RHO_NNC_S QC_RHO_NNC_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_NNC_S rhohv.colors _   -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+QC_SNRHC_S   QC_SNRHC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHC_S  snr.colors   dB     -5 80 5 radial 1 0
+QC_SNRVC_S   QC_SNRVC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVC_S  snr.colors   dB     -5 80 5 radial 1 0
+QC_SNRHX_S   QC_SNRHX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHX_S  snr.colors   dB     -5 80 5 radial 1 0
+QC_SNRVX_S   QC_SNRVX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVX_S  snr.colors   dB     -5 80 5 radial 1 0
+QC_DBMHC_S  QC_DBMHC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+QC_DBMVC_S  QC_DBMVC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+
+QC_DBMHX_S  QC_DBMHX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+QC_DBMVX_S  QC_DBMVX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+QC_CLUT_S QC_CLUT_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CLUT_S  dbz.colors dB -5 80 5 radial 1 0
+QC_CPA_S  QC_CPA_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CPA_S  cpa.colors  - -5 80 5 radial 1 0
+QC_CMD_S  QC_CMD_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_S      cmd.colors  none -5 80 5 radial 1 0
+QC_CMDFL_S QC_CMDFL_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_FLAG_S cmd_flag.colors  none -5 80 5 radial 1 0
+
+QC_NOISE_FLAG_S QC_NOISE_FLAG_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_FLAG_S noise_flag.colors  none -5 80 5 radial 1 0
+QC_NS_BIAS_HCS QC_NS_BIAS_HCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_HC_S noise_bias.colors  none -5 80 5 radial 1 0
+QC_NS_BIAS_VCS QC_NS_BIAS_VCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_VC_S noise_bias.colors  none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+QC_DBZ_K     QC_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_K     dbz.colors   dBZ -5 80 5 radial 1 0
+QC_DBZ_NAA_K QC_DBZ_NAA_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_NAA_K     dbz.colors   dBZ -5 80 5 radial 1 0
+QC_DBZVX_K   QC_DBZVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZVX_K     dbz.colors   dBZ -5 80 5 radial 1 0
+QC_VEL_K     QC_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&VEL_K     vel_k.colors   m/s -5 80 5 radial 1 0
+QC_WIDTH_K   QC_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&WIDTH_K   width_k.colors m/s -5 80 5 radial 1 0
+QC_LDRH_K   QC_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&LDRH_K   ldr.colors   dB  -5 80 5 radial 1 0
+
+QC_NCP_K  QC_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NCP_K  ncp.colors  dB -5 80  5  radial   1 0
+QC_NOISE_FLAG_K QC_NOISE_FLAG_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_FLAG_K noise_flag.colors  none -5 80 5 radial 1 0
+QC_NS_BIAS_HCK QC_NS_BIAS_HCK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_HC_K noise_bias.colors  none -5 80 5 radial 1 0
+QC_NS_BIAS_VXK QC_NS_BIAS_VXK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_VX_K noise_bias.colors  none -5 80 5 radial 1 0
+QC_SNRHC_K  QC_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRHC_K  snr.colors   dB  -5 80 5 radial 1 0
+QC_SNRVX_K   QC_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRVX_K  snr.colors dB -5 80 5 radial 1 0
+
+QC_DBMHC_K  QC_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMHC_K  dbmlow.colors dBm -5 80 5 radial 1 0
+QC_DBMVX_K  QC_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMVX_K  dbmlow.colors dBm -5 80 5 radial 1 0
+QC_PID  QC_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
+QC_TEMP_PID QC_TEMP_PID mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+QC_RATE_ZH  QC_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
+RATE_Z_ZDR  QC_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
+RATE_KDP  QC_RATE_KDP mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
+RATE_KDP_ZDR  QC_RATE_KDP_ZDR  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
+RATE_HYBRID   QC_RATE_HYBRID   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+#PHASE_FOR_NOISE_K PHASE_FOR_NOISE_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&PHASE_FOR_NOISE_K phase.colors   m/s -5 80 5 radial 1 0
+#ACCUM_PHASE_CHANGE_K ACCUM_PHASE_CHANGE_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&ACCUM_PHASE_CHANGE_K phase.colors   m/s -5 80 5 radial 1 0
+#PHASE_CHANGE_ERROR_K PHASE_CHANGE_ERROR_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&PHASE_CHANGE_ERROR_K phase_error.colors m/s -5 80 5 radial 1 0
+#DBM_SDEV_K DBM_SDEV_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBM_SDEV_K noise_bias.colors m/s -5 80 5 radial 1 0
+#NCP_MEAN_K  NCP_MEAN_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NCP_MEAN_K  ncp.colors  dB -5 80  5  radial   1 0
+
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+# Merged QC moments
+
+MG1_DBZ_S   MG1_DBZ_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_S   dbz.colors   dBZ -5 80 5 radial 1 0
+MG1_DBZ_NAA_S MG1_DBZ_NAA_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_NAA_S dbz.colors dBZ -5 80 5 radial 1 0
+MG1_VEL_S   MG1_VEL_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_S   vel.colors   m/s -5 80 5 radial 1 0
+MG1_VEL_HV  MG1_VEL_HV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_HV_S vel.colors   m/s -5 80 5 radial 1 0
+MG1_VEL_ALT    MG1_VEL_ALT    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_ALT_S   vel.colors   m/s -5 80 5 radial 1 0
+MG1_WIDTH_S MG1_WIDTH_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&WIDTH_S  width.colors m/s -5 80 5 radial 1 0
+
+MG1_ZDR_S   MG1_ZDR_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&ZDR_S zdr.colors   dB  -5 80 5 radial 1 0
+MG1_PHIDP_S MG1_PHIDP_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PHIDP_S   phidp_alt.colors deg -5 80 5 radial 1 0
+MG1_KDP_S   MG1_KDP_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&KDP_S  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+MG1_PSOB_S  MG1_PSOB_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PSOB_S   psob.colors   deg -5 80 5 radial 1 0     
+MG1_NCP_S  MG1_NCP_S       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&NCP_S  ncp.colors  dB   -5   80  5  radial   1 0
+MG1_CPA_S  MG1_CPA_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CPA_S  cpa.colors  - -5 80 5 radial 1 0
+
+MG1_LDRH_S  MG1_LDRH_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&LDRH_S ldr.colors   dB  -5 80 5 radial 1 0
+MG1_LDRV_S  MG1_LDRV_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&LDRV_S ldr.colors   dB  -5 80 5 radial 1 0
+MG1_RHOHV_S MG1_RHOHV_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RHOHV_S rhohv.colors _   -5 80 5 radial 1 0
+MG1_RHOHV_NNC_S MG1_RHOHV_NNC_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RHOHV_NNC_S rhohv.colors _   -5 80 5 radial 1 0
+MG1_SNRHC_S   MG1_SNRHC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHC_S  snr.colors   dB     -5 80 5 radial 1 0
+MG1_SNRVC_S   MG1_SNRVC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVC_S  snr.colors   dB     -5 80 5 radial 1 0
+
+MG1_SNRHX_S   MG1_SNRHX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHX_S  snr.colors   dB     -5 80 5 radial 1 0
+MG1_SNRVX_S   MG1_SNRVX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVX_S  snr.colors   dB     -5 80 5 radial 1 0
+MG1_DBMHC_S  MG1_DBMHC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+MG1_DBMVC_S  MG1_DBMVC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+MG1_DBMHX_S  MG1_DBMHX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+MG1_DBMVX_S  MG1_DBMVX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+
+MG1_CLUT_S MG1_CLUT_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CLUT_S  dbz.colors dB -5 80 5 radial 1 0
+MG1_CMD_S  MG1_CMD_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CMD_S      cmd.colors  none -5 80 5 radial 1 0
+MG1_CMD_FLAG_S MG1_CMD_FLAG_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CMD_FLAG_S cmd_flag.colors  none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+# MERGED Kband moments
+
+MG1_DBZ_K  MG1_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_K     dbz.colors   dBZ -5 80 5 radial 1 0
+MG1_DBZ_NAA_K MG1_DBZ_NAA_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_NAA_K     dbz.colors   dBZ -5 80 5 radial 1 0
+MG1_SNRHC_K  MG1_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHC_K  snr.colors   dB  -5 80 5 radial 1 0
+MG1_SNRVX_K   MG1_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVX_K  snr.colors dB -5 80 5 radial 1 0
+MG1_DBMHC_K  MG1_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHC_K  dbmlow.colors dBm -5 80 5 radial 1 0
+MG1_DBMVX_K  MG1_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVX_K  dbmlow.colors dBm -5 80 5 radial 1 0
+
+# Merged PID
+
+MG1_PID  MG1_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
+MG1_TEMP_PID MG1_TEMP_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+MG1_RATE_ZH  MG1_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
+MG1_RATE_Z_ZDR MG1_RATE_Z_ZDR  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
+MG1_RATE_KDP MG1_RATE_KDP mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
+MG1_RATE_KDP_ZDR MG1_RATE_KDP_ZDR mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
+MG1_RATE_HYBRID MG1_RATE_HYBRID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+# SATELLITE
+
+VIS VIS mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/vis?use_http=true&VIS  sat_cloud.colors  none -5 80 5 radial 1 0
+IR  IR  mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/ir?use_http=true&IR    sat_tempK.colors  none -5 80 5 radial 1 0
+WV  WV  mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/wv?use_http=true&WV    sat_tempK.colors  none -5 80 5 radial 1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+
+</GRIDS>
+
+<MAPS>
+#
+# MAP_CODE Must be less than 16 characters, Color must be regualr X color name
+# Complete map file name used is  map_file_subdir/Map_file_name
+# 0 = OFF, > 0 = ON, line of width N
+# Detail thresholds are in Km across the image.#
+#
+#------------------------------------------------------------------------------------------
+# MAP_CODE Control_Label   Map_File_Name   On/OFF Detail__min Detail_max Color     
+#------------------------------------------------------------------------------------------
+
+World         World          world_states.map        2  0.0 1000000.0  white
+Maldives      Maldives       maldives.map            1  0.0 10000.0    white
+#Towers        Towers         dynamo_towers.map       0  0.0 10000.0    cyan
+Points        Points         dynamo_points.map       0  0.0 1000000.0  cyan
+
+# Colorado
+
+#Counties     Counties     us_counties.map   1      0.0      10000.0     blue 
+#States       States       usa.map           1      0.0      10000.0     white
+#roads        roads        colo_roads.map    0      0.0      10000.0     white
+#dia          dia          DIA_all.map       1      0.0      10000.0     white
+#BAO          BAO          bao_tower.map     1      0.0      10000.0     white
+
+# Taiwan
+
+#Taiwan        Taiwan         taiwan_coast.map        0  0.0 1000000.0  white
+#Liouchiou     Liouchiou      liouchiou.map           1  0.0 1000000.0  yellow
+#islands       islands        taiwan_islands.map      1  0.0 1000000.0  pink
+#TW_Airports   Airports       taiwan_airports.map     0  0.0 2000.0     red
+#Cities        Cities         taiwan_cities.map       0  0.0 2000.0     white
+#Cities2       Cities2        Major_Cities.shp        0  0.0 2000.0     white
+#Regional_B    Regional_B     Regional_Boundaries.shp 0  0.0 2000.0     gray
+#hydro_basins  hydro_basins   hydro_basins.shp        1  0.0 2000.0     cyan
+#DualDop_GoldenBeach30 DualDop_GoldenBeach30 SPol_GoldenBeach30.map 0 0.0 2000.0 yellow
+#DualDop_JiuRuLevee DualDop_JiuRuLevee SPol_JiuRuLevee30.map 0 0.0 2000.0 orange
+#DualDop_JDOP DualDop_JDOP SPol_Jdop.map 0 0.0 2000.0 orange
+#network_no_labels  network_no_labels network_no_labels.map 1 0.0 2000.0 white
+#network_labels  network_labels network_labels.map 0 0.0 2000.0 white
+#supersite_no_labels  supersite_no_labels supersite_no_labels.map 1 0.0 2000.0 white
+#supersite_labels  supersite_labels supersite_labels.map 0 0.0 2000.0 white
+
+</MAPS>
+
+<WINDS>
+#----------------------------------------------------------------------------
+# Note:
+# Legend_label: Used for Image Labels and Menus
+# URL: should be of the form "protocol://host:port/dir/&" 
+#   The U,V and W field names will be appended to complete the URL
+#   Use the name "None" to indicate no W field componet.
+# U: The  East-West Wind componet Field name 
+#   Spaces can be in field names by substituting a Caret character for the space:
+#   Example: Field^Name = "Field Name"
+#   Field Index can alternatively be specified by prepending a '#' character to the field 
+#   (Use this if there are duplicate field names in the data files)
+#   Example: First field in file = "#1"
+# V: North-South Wind componet Field name 
+# W: Up-Down  Wind componet Field name - Use "None" to indicate no W field
+#
+#  Units: Labels append this (for barbs and reference lines) 
+# 
+# Style: This column is broken in to several componets for backward compatibility
+# 1. A mandantory number must be first.
+#     Absolute value of the number is the starting Line width.
+#     Values <= 0 Turns it off to begin with
+# 2. Second componet is a comma followed by the rendering style:  
+#     Wind Rendering Style  Options:
+#     "arrow" (centered at data point),
+#     "vector",(Vertex at data point )
+#     "barb" (N Hemisp),
+#     "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+#     "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
+#     "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
+#     "metbarb" (Calcs latitude - works for both hemispheres and
+#     adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
+#     "barb_sh" (S Hemisphere),
+#     "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+#     NOTE: When using arrow,vector,tuft,tickvector,  the data must be in
+#     m/sec for the scaling to work correctly. For the others (Barbs),
+#     the units are arbitrary, but the flag units on the barbs will reflect
+#     the data's native units. 
+# Example: "-2,metbarb" -->  Width 2, off to start, using winds aloft chart barbs
+# Example: "1"  --> Width 1, On to start, Uses cidd.wind_marker_type: defined in main section
+#
+# Color: Any Legal X color name - Can be several words, Example: dark green
+#
+# Legend_label  URL U V W_fieldnames units  Style [Color]
+#----------------------------------------------------------------------------
+#TREC_mdvp    mdvp:://oberon::dia/mdv/trec/ftg&  #1 #2 None  m/s  2      yellow
+
+</WINDS>
+
+######################################################################################
+######################################################################################
+######################################################################################
+######################################################################################
+######################################################################################
+<MAIN_PARAMS>
+
+# Parameter data base for the Configurable Interactive Data Display; CIDD
+
+# Note: One can set these from the command line using the -v flag.
+# The value is a bitwise combiation of the following debug
+# parameters. Example : -v7 turns on all three -v 3, the first two
+
+# General informational messages - Initialisation messages
+cidd.debug_flag:            0
+
+# Data flow related messages  - More verbose
+cidd.debug1_flag:           0
+
+# Verbose diagnostics - developer debugging info - 
+cidd.debug2_flag:           0
+
+# Uncomment the next parameter to start up cidd in archival mode
+#  Starting at the indicated time. Enter HH:MM MM/DD/YY format time string
+#  System will startup using field 0, requesting data closest to the
+# demo time. The movie frame will be centered on the time after applying
+# temporal rounding. 
+cidd.demo_time:  02:30 10/16/2011
+
+# Set times to the nearest value divisible by the number of seconds
+cidd.temporal_rounding:    1
+
+#  MOVIE Related resources
+
+cidd.movie_frame_dir: /tmp
+
+#  This determines how many movie frames are in the loop to start with
+#  Setting this high will cause the X server to hog memory.
+cidd.starting_movie_frames:  12
+
+# minutes per movie frame on startup
+# The display will atomatically update every this interval, throwing away its
+# oldest movie frame and creating and drawing a new one.
+cidd.time_interval:  15
+
+# This parameter sets the maximum number of hours in the future a user can select
+# from the quick forecast menu. See SHOW_FORECAST_MENU menu bar button
+cidd.forecast_interval:  24
+
+# This parameter sets the maximum number of hours in the PAST a user can select
+# from the quick forecast menu. See SHOW_PAST_MENU menu bar button
+cidd.past_interval:  96
+
+# When a Forecast hour is chosen, magnify the time interval by this factor.
+# This adjusts the frame time_interval to be more appropriate for 
+# forecast (model) data, which is often output on a more coarse time interval.
+# When "Now" is selected the magnification is undone. Default is 1.0
+# 
+cidd.movie_magnify_factor:  1.0
+
+# Set this paramet to 1 to get CIDD to check and reject for rendering
+# Any data that falls outside the movie frame interval + the
+# slop/strecch_factor - Used to reject "out of date" data.
+cidd.check_data_times:  0
+
+# Sets the allowable time error for data to appear in movie frames
+# (times the time_interval) (6 min * 6 = 36 minutes before or after
+# the beginning or end of the movie frame times
+cidd.stretch_factor:     20.0
+
+# Sets whether Cidd request data closest to the midpoint of a movie
+# frame (0) or the end (1). 
+# 0= Midpoint requests(Closest_to), 1 = End point requests (First_before).
+# Typically, real-time operation should operate as 1 (End point requests)
+# Choose mode 0 if you want to enter a time and have data the data
+# at that time appear, regardless of how wide the movie frame interval is.
+cidd.gather_data_mode:  0
+
+# Number of milliseconds between checks for images needing redrawn
+# Set this lower on faster hardware - Recommended 50-250
+# This sets the ultimate speed of the movie looping
+cidd.redraw_interval:     100
+
+# Number of seconds between data update requests - The display will
+# check the Data Mapper for new data every interval in real-time mode.
+# Every interval CIDD will check for updates to each grid and product. If
+# no datamap_host is set, the data is assumed to be old and will be reloaded
+# every interval. Set this wisely. Values of 10-900 are typical. Default=120
+# Setting this below 3 seconds is not advised.  interacts with the Data
+# Mapper Host parameter: cidd.datamap_host:
+
+cidd.update_interval:      30
+
+# Data Mapper Host
+#cidd.datamap_host:  venus
+
+#  Number of seconds to wait for data to come in before giving up
+#  On very slow networks this may need to go as high as 180 seconds!
+cidd.data_timeout_secs: 40
+
+# Length of time to wait before killing simple external commands
+# Used When running single image convert scripts and driving
+# Browsers to web pages.
+cidd.simple_command_timeout_secs: 30
+
+# Length of time to wait before killing complex external commands
+# Used when spawining animation building script
+cidd.complex_command_timeout_secs: 180
+
+# Set to 1 to start up cidd in movie-on mode, 0 = off
+cidd.movie_on: 0
+
+# Set the delay at the end of the movie loop in msec 
+cidd.movie_delay: 3000
+
+# Set the speed of the movie loop. - (msec per frame)
+cidd.movie_speed_msec: 75
+
+# If set to 1 - forces CIDD to reload all data every time the movie frames 
+# rotate one old frame out and generate a new frame.
+cidd.reset_frames:   0
+
+# Gather model run times within these number of hours from the end
+# of the movie loop. More hours means more Model runs wll appear in the menu.
+cidd.model_run_list_hours:  24   
+
+# After this period of inactivity, the display
+# will reset itself to a known starting point
+# Set this <= 0 to essentially turn off.
+cidd.idle_reset_seconds: 0
+
+# HTML Mode - Set this to 1 to put CIDD into the automatic HTML output mode.
+# Note: cidd.image_dir MUST be set.
+cidd.html_mode: 0
+
+# Image Generation related resources
+# Set this to a value to get cidd to output imagery as XWD in this directory
+cidd.image_dir: $(HOME)/images
+
+# Set to 1 if one wants CIDD to run once through it's HTML output
+# plot list and then exit - Currently all fields at each zoom level
+cidd.run_once_and_exit: 0
+
+# The HTML MODE Output file name is built from parts:
+# 'cidd' + fieldname + zoom_level + [height] +
+#  frame_time + [data_generation_time] + [data_valid_time] + .'xwd'
+
+# When set to 1 forces the output filename to contain height
+# information in it's file name.  See the comment above on the order
+cidd.add_height_to_filename: 1
+
+# When set to 1 forces the output filename to contain the data's generataion
+# time in it's file name.  See the comment above on the order
+cidd.add_gen_time_to_filename: 0
+
+# When set to 1 forces the output filename to contain  the data's valid
+# time in it's file name.  See the comment above on the order
+cidd.add_valid_time_to_filename: 0
+
+# Set the format for the time fields in the names of output xwd images.
+# See strftime(3) for options.  Default is: %H%M
+cidd.movieframe_time_format:  %H%M
+
+# This script will be exec'd if set whenever an html_mode image is output.
+# The full path name of the xwd image will be sent as the script argument
+cidd.image_convert_script: convert_image.csh
+
+# This script will be exec'd if set whenever a print command is issued.
+# The full path name of the xwd image will be sent as the script argument
+cidd.print_script: convert_image_print.csh
+
+# This script will be exec'd if set whenever the user selects the Output Loop
+# Button, after the last image has output. The arguments will be a list
+# of each output file in the series. CIDD will prepends the cidd.image_dir to each
+# files name which takes the form: cidd_field_name_zoom_name.xwd 
+cidd.series_convert_script: make_anim.csh
+
+# Set to 1 to ask that data be compressed during the MDV Protocol
+# data requests. Default is = 0
+cidd.request_compressed_data: 1
+ 
+
+#                  DOMAIN RELATED RESOURCES 
+#
+# Sets the projection for cidd's plan view - Current valid choices are:
+# CARTESIAN, LAT_LON, LAMBERT,  STEREOGRAPHIC
+cidd.projection_type:    CARTESIAN
+
+# These must be set if using a Lambert conformal projection - Ignored otherwise
+cidd.lambert_lat1: 20.0
+cidd.lambert_lat2: 60.0 
+
+# These must be set when using a STEREOGRAPHIC (Polar stereo or Oblique stereo)
+cidd.tangent_lat: 20.0
+cidd.tangent_lon: -104.0
+
+# Set this to the amount grids are rotated clockwise to true north.
+# Overlays will rotate counterclockwise. - In Degrees
+# Only valid for CARTESIAN projection
+cidd.north_angle:        0.0
+
+# Set the scale factor and label for Range rings and Distance scales.
+#cidd.units_per_km:      1.0
+
+# Set the following to Deg for LAT_LON projections - Default is "km"
+#cidd.scale_units_label:  nm
+
+# When set to 1, always gets full domain, zooms don't force a data request
+cidd.always_get_full_domain:  0
+
+# Set the aspect ratio of the domain for Cidd. Cidd will preserve this aspect
+# ration for all zooms. Ratio is Width/Height.
+# If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the
+# first domain.
+cidd.aspect_ratio:   1.0
+#cidd.aspect_ratio:   1.3
+
+# Switch to enable the status window. 0 = off
+cidd.enable_status_window: 0
+ 
+# Switch to enable the single middle button click save image feature
+# Warning - WiLL allow users shell access, or to write to other dirs.
+cidd.enable_save_image_panel: 1
+ 
+# On startup and each time the reset button is pressed, the display
+# will indicate a click at this point, as if the user had clicked..
+cidd.reset_click_longitude:  73.102766
+cidd.reset_click_latitude:   -0.630447
+#
+# The Outer most domain: Overlays are clipped to this domain and 
+# pan/moves cannot exceed these edge limits.
+cidd.domain_limit_min_x:        -7000
+cidd.domain_limit_max_x:         7000
+cidd.domain_limit_min_y:        -7000
+cidd.domain_limit_max_y:         7000
+ 
+# The Lat, Long of the center of the display. Internal range rings
+# are relative to this point.
+cidd.origin_longitude:       73.102766
+cidd.origin_latitude:        -0.630447
+#
+#
+# Select the data fields/page to start on.
+cidd.planview_start_page:   1
+cidd.xsect_start_page:      1
+#
+
+#
+# The Outer most domain:
+cidd.num_zoom_levels:       8
+cidd.start_zoom_level:      3
+
+# The number of Cached images for zooms.
+cidd.num_cache_zooms:       0
+#
+# Note, the Domain labels are used for automated output imagery.
+# It's suggested that names without spaces be used when running
+# in.
+#
+cidd.level1_label:                  40km
+cidd.level1_min_xkm:                -40.0
+cidd.level1_min_ykm:                -40.0
+cidd.level1_max_xkm:                40.0
+cidd.level1_max_ykm:                40.0
+#
+cidd.level2_label:                  75km
+cidd.level2_min_xkm:                -75.0
+cidd.level2_min_ykm:                -75.0
+cidd.level2_max_xkm:                75.0
+cidd.level2_max_ykm:                75.0
+#
+#
+cidd.level3_label:                  150km
+cidd.level3_min_xkm:                -150.0
+cidd.level3_min_ykm:                -150.0
+cidd.level3_max_xkm:                150.0
+cidd.level3_max_ykm:                150.0
+#
+#
+cidd.level4_label:                  500km
+cidd.level4_min_xkm:                -500.0
+cidd.level4_min_ykm:                -500.0
+cidd.level4_max_xkm:                500.0
+cidd.level4_max_ykm:                500.0
+#
+cidd.level5_label:                  1000km
+cidd.level5_min_xkm:                -1000.0
+cidd.level5_min_ykm:                -1000.0
+cidd.level5_max_xkm:                1000.0
+cidd.level5_max_ykm:                1000.0
+#
+cidd.level6_label:                  3000km
+cidd.level6_min_xkm:                -3000.0
+cidd.level6_min_ykm:                -3000.0
+cidd.level6_max_xkm:                3000.0
+cidd.level6_max_ykm:                3000.0
+#
+cidd.level7_label:                  5000km
+cidd.level7_min_xkm:                -5000.0
+cidd.level7_min_ykm:                -5000.0
+cidd.level7_max_xkm:                5000.0
+cidd.level7_max_ykm:                5000.0
+#
+
+# Vertical Range and Resolution - Establishes a vertical coordinate system
+# for the cross sectional imagery.
+# All data must map into this range for it to be visible. 
+# min_ht is value nearest the ground - Plotted at the bottom.
+# max_ht is the value furtherest from the ground - Plotted at the top.
+#
+# Units are ignored and no interconversions or re-mappings are performed.
+# Returned cross sections are are often km, but could be sigma, pressure or degrees elevation. 
+# Examples:
+# Sigma : min_ht = 1.0, max_ht = 0.0
+# Pressure : min_ht = 1100.0, max_ht = 100.0
+# Radial Radar:  min_ht = 0.0 max_ht = 25.0
+#  
+cidd.min_ht:               0.0
+cidd.max_ht:               20.0
+cidd.start_ht:             0.5
+
+# Radial data Limits
+cidd.min_rkm:                0.0
+cidd.max_rkm:                400.0
+cidd.min_adeg:               0.0
+cidd.max_adeg:               360.0
+
+# List of comma delimited local directories or HTTP URLs to search
+# Searchs . then each directory/URL in order 
+cidd.color_file_subdir:   http://front.eol.ucar.edu/color_scales
+cidd.map_file_subdir:     http://front.eol.ucar.edu/maps
+
+#
+# Station locator features
+#
+# Maximum allowed  Distance in km between request point and station
+cidd.locator_margin_km:   50
+# Full Path File name or http URL to a station data file.
+# The format of each line is:  ID, LAT, LON, ALT(m), TYPE
+#cidd.station_loc_url: http://front.eol.ucar.edu/maps/world_stations.dat
+
+
+#
+# FMQ Type URL for Receiving Remote commands
+#cidd.remote_ui_url: /tmp/remoteUI
+
+# Tunnel for all DsServer (mdvp,spdbp,etc) Protocols
+# USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAIN 
+#Set this to the special http tunnel that resides in the same local
+#network as the  data server hosts. This allows "tunneling" the MDV and
+#Spdb data protocols through a host, running apache:httpd that is visible
+#from the internet or intranet. Note: a special  "Apache::Mod_perl"
+#extension (The tunnel - it's similar to a cgi mechanism) must be
+#installed on the http server for this to work.
+#
+#cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
+#
+# USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain
+# Set this to the url of a http forwarding proxy to pass 
+# http requests through the proxy. 
+# This is usually the same as the HTTP proxy URL in your browser.
+# Note. If you need the data to flow through the proxy
+# the http_tunnel_url must be enabled
+#
+# This is NCAR's internal HTTP proxy
+#cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
+#
+# Another view of the possible Service Topologies.
+# 
+# All Local - No Firewalls - Standard Setup 
+#--------- Local Lan --------------
+# CIDD<--- MDVP --->DsMdvServer
+# 
+# Data Services Behind a firewall
+#----- Internet ----|Firewall|------ Local Lan ----------------
+# CIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer
+#  
+## Both Client and Data Services behind Firewalls
+#---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------
+# CIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer
+#
+#
+
+#  Plan View and Cross Section COLORS
+#
+# Legends, scales, etc use this color
+cidd.foreground_color: white
+
+# Background of Images use this color
+cidd.background_color: black
+
+# Background of margins will be this color
+cidd.margin_color: black
+
+# Render values outside the data range of the color scale in this color
+# 'transparent' is the default
+cidd.out_of_range_color: transparent
+
+# Color of the cross section reference line 
+cidd.route_path_color: yellow
+
+# Text in the time axis margins are this color
+cidd.time_axis_color: pink
+
+# A solid rectangle  showing the movie frame extent is drawn in this color
+cidd.time_frame_color: gray50
+
+# The text in the height selector margin is rendered in this color
+cidd.height_axis_color: pink
+
+# A solid rectangle showing the height extent of the data plane is drawn in this color
+cidd.height_indicator_color: gray50
+
+# Range rings and azmiuth lines
+cidd.range_ring_color: gray
+
+# 
+# Set the follwing colors to 'transparent' to avoid having these
+# plotted. (This is the default) Otherwise, these data will be
+# plotted in the indicated color
+cidd.missing_data_color: grey20
+
+cidd.bad_data_color: grey20
+#
+# Time Control (Movie) Popup Colors
+cidd.epoch_indicator_color: orange
+cidd.now_time_color: red
+cidd.time_tick_color1: cyan
+cidd.time_tick_color2: yellow
+cidd.time_tick_color3: magenta
+cidd.time_tick_color4: green
+cidd.time_tick_color5: red
+cidd.time_tick_color6: blue
+
+#Toggle for displaying the height Selector in Right Margin
+# Note Right Margin shoud be at least 50 pixels wide
+cidd.show_height_sel:       1
+
+# Display data access and rendering messages - This is probably not
+# necessary in situations where all data is small and local.
+cidd.show_data_messages: 1
+
+# Sets the relative intensity of the image, relative to the overlays on startup
+# Set between 0.2 and 1.0.
+cidd.image_inten:            0.8
+# The number of selectable intensity levels in the slider control
+cidd.inten_levels:            32
+
+# Sets the threshold in drawable grid points where image rendering 
+# is done by a filling method on the client, rather than by rectangles
+# on the Xserver.
+# Set this high if the X server is fast or the comm link to the server is slow.
+# Set this low if the X server is slow. Typical values range from 10,000 to
+# 100,000  Used for 'cart' style rendering.
+
+cidd.image_fill_threshold:    80000
+
+# This sets the threshold in grid cells when the the display will
+# render a grid as contours or as filled rectangles. Grids contining
+# less than the threshold cells will be rendered as filled contours.
+# used for 'dcont' style rendering
+cidd.dynamic_contour_threshold:    160000
+
+# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec"
+cidd.latlon_mode:        0
+
+# Set the format for the time strings. See 'man strftime' for format options.
+# Can add additional text as part of the Time string.
+# Default is: "%m/%d/%Y %H:%M:%S"
+cidd.label_time_format:  %m/%d/%Y %H:%M:%S
+
+# Plot a Legend for each Grid overlay; 0=Off, 1=On
+cidd.layer_legends_on: 1  
+
+# Plot a Legend for each Contour overlay; 0=Off, 1=On
+cidd.cont_legends_on: 1
+
+# Plot a Legend for each Wind overlay; 0=Off, 1=On
+cidd.wind_legends_on: 1
+
+# Plot a Legend for each Symbolic Product overlay; 0=Off, 1=On
+cidd.symprod_legends_on: 1
+    
+# Switch to turn off all data labels on the display
+cidd.display_labels: 1  
+#
+# Switch to turn on/off Height and Route reference lines
+cidd.display_ref_lines: 1
+# 
+
+# TOP Margin styles:
+# 1. Default. Places a distance scale in the top Margin.
+# 2. Place a Frame number and Time - Used often for HTML output.
+# 3. None: -  Used often to place the Data label
+#
+cidd.top_margin_render_style: 1
+
+# Bottom Margin Styles
+# 1 - Distance Scale
+# 2 - Time Scale
+cidd.bot_margin_render_style: 2
+
+#
+# Explititly set the Label start coords, and delta Y.
+# If left unset, ledgends start relative to the top and left margins.
+#
+cidd.horiz_legends_start_x:  30
+cidd.horiz_legends_start_y:  40
+cidd.horiz_legends_delta_y:  30
+
+#
+# WINDOW SIZE PARAMS
+#
+cidd.horiz_default_height:    950
+cidd.horiz_min_height:        400
+cidd.horiz_min_width:         400
+cidd.horiz_default_x_pos:     0
+cidd.horiz_default_y_pos:     0
+
+cidd.horiz_top_margin:        30
+cidd.horiz_bot_margin:        20
+cidd.horiz_left_margin:       20
+cidd.horiz_right_margin:      60
+
+cidd.vert_min_height:        120
+cidd.vert_min_width:         120
+cidd.vert_default_height:    440
+cidd.vert_default_width:     600
+
+cidd.vert_top_margin:        40
+cidd.vert_bot_margin:        20
+cidd.vert_left_margin:       20
+cidd.vert_right_margin:      30
+
+
+# Set range_ring_spacing to a negative value to dynamically determing spacing.
+cidd.range_ring_spacing:     25.0
+cidd.max_ring_range:     150.0
+# x_space, y_space in pixels determine allowable space for range ring labels
+cidd.range_ring_x_space:    40
+cidd.range_ring_y_space:    13
+cidd.azmith_interval:       30.0
+cidd.azmith_radius:         200.0
+
+# Toggles to turn on/off  Extras features on startup
+cidd.range_rings:             1
+cidd.azmith_lines:            1
+
+# Starting state of the All Winds ON/OFF feature
+cidd.all_winds_on: 1
+
+# Wind vector parameters 
+cidd.barb_shaft_len:         30
+cidd.wind_head_size:         5
+cidd.ideal_x_vectors:        20
+cidd.ideal_y_vectors:        20
+cidd.wind_head_angle:        30.0
+#
+
+#  Minutes between steps on the wind scaling slider. Wind vector 
+#  size starts at 3 times this interval.
+#  Starting/Default length = 3 * wind_time_scale_interval *  wind velocity
+cidd.wind_time_scale_interval: 10.0
+
+# Wind Rendering Style  Options:
+# "arrow" (centered at data point),
+# "vector",(Vertex at data point )
+# "barb" (N Hemisp),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
+# "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
+# "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
+# "metbarb" (Calcs latitude - works for both hemispheres and
+# adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
+# "barb_sh" (S Hemisphere),
+# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)       
+# NOTE: When using arrow,vector,tuft,tickvector,  the data must be in
+# m/sec for the scaling to work correctly. For the others (Barbs),
+# the units are arbitrary, but the flag units on the barbs will reflect
+# the data's native units.
+cidd.wind_marker_type:      vector
+cidd.wind_w_scale_factor:    10.0
+#
+# Set this value to convert from the your reference speed units 
+# to m/sec.  ie wind_units_scale_factor =  m/sec / chosen units
+# default = 1.0
+cidd.wind_units_scale_factor:     0.2778
+
+# Sets the length of the wind vector reference speed legend.
+cidd.wind_reference_speed: 30.0
+
+# Select the label to be printed next to the reference bar
+# Default = m/sec
+cidd.wind_units_label:  km/hr
+
+# Uncomment the following lines to turn on default contour fields
+# Uses the contour levels and the Field Label string in data.info
+# The parameters are Exact_field_label and color and optional "off"
+# Keyword. If "off" param is used, the field will be defined, but will
+# not be acitvated on startup.
+#cidd.contour1_field: FzLevel red off
+#cidd.contour2_field: SURF_T white
+#cidd.contour3_field: SURF_T white
+#cidd.contour4_field: SURF_T white
+#cidd.contour5_field: SURF_T white
+# 
+# Set to 1 to have numeric labels on line contours, 0 = off
+cidd.label_contours:   0           
+
+#  Default line width of contours
+cidd.contour_line_width: 1
+
+# Apply smoothing to data grids before contouring
+# 0 = Off, 1 = single pass, 2 = double pass
+cidd.smooth_contours: 0 
+
+# Add 1 part in 250 Noise to help smooth contours
+cidd.add_noise: 0 
+
+# Use Alternate (Mdvx) Contouring Routines -
+# Slower - Nicer labeling - Less smooth - 
+# Warning - Does not work correctly when data and dislay origins are different
+# (Works fine in lat/lon projections)
+cidd.use_alt_contours: 0 
+
+#
+# Contours at this value will have a wider line
+# 
+# 
+cidd.special_contour_value: 0.25
+
+# Sometimes, for CONTOURING it is useful to make
+# the assumption that the bad and/or missing values
+# should be considered at the minimum of the dynamic range of the
+# data. IE. If you want bad an/or missing contoured
+# set these to 1, otherwise, set them to 0 (default)
+#
+cidd.map_bad_to_min_value: 0
+cidd.map_missing_to_min_value: 0
+#
+# Uncomment the following lines to set up fields on startup that will
+# appear as overlaid fields. Layers are on by default unless the
+# optional "off" string appears last. 
+#cidd.layer5_field:  KCYS-DBZ 
+#cidd.layer4_field:  KPUX-DBZ
+#cidd.layer3_field:  KGJX-DBZ
+#cidd.layer1_field:  IR
+#cidd.layer2_field:  DBZ_F_MDV
+
+# Rendering order for layers:
+#  0: render main field first then layers
+#  1: render main field on top of layers.
+cidd.draw_main_on_top: 0
+
+
+# Place Cidd fonts in asending order of size. Cidd will choose the
+# highest font number that will fit in a given screen space.
+# Pick a nice spectrum of font sizes, with all of them readable.
+# CIDD currently accepts up to 16 different fonts
+cidd.num_fonts: 4
+#
+cidd.font1: 6x9
+cidd.font2: -*-courier-medium-r-normal-*-10-*-*-*-*-*-*-*
+cidd.font3: -*-courier-medium-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font4: -*-courier-bold-r-normal-*-12-*-*-*-*-*-*-*
+cidd.font5: -*-courier-bold-r-normal-*-14-*-*-*-*-*-*-*
+cidd.font6: -*-courier-bold-r-normal-*-15-*-*-*-*-*-*-*
+cidd.font7: -*-courier-bold-r-normal-*-16-*-*-*-*-*-*-*
+cidd.font8: -*-courier-bold-r-normal-*-18-*-*-*-*-*-*-*
+cidd.font9: -*-courier-bold-r-normal-*-24-*-*-*-*-*-*-*
+cidd.font10: -*-courier-bold-r-normal-*-30-*-*-*-*-*-*-*
+
+# font_display_mode = 1 - Clears background behind label text., 0 - No
+cidd.font_display_mode: 0
+# 
+# 
+# Manual Image save resources    
+# Note cidd appends the image name to the command string before executing
+# This allows the script to pull the name off the command line,
+# Otherwise it is often useful to place a "rm" as the last command to remove
+# the image after printing, conversion, etc
+#
+# Saved images go here
+cidd.horiz_image_dir:   /tmp
+# The file name will be until reset by the user - Appends '.xwd' automatically
+cidd.horiz_image_fname:   CH
+# Then the post processing command is run, with the xwd file as the first argument
+cidd.horiz_image_command:  convert_image.csh
+#
+cidd.vert_image_dir:    /tmp
+cidd.vert_image_fname:    CV
+cidd.vert_image_command:  convert_image.csh
+
+
+#Toggle for displaying an analog clock in the upper right hand corner of the image
+cidd.show_clock:       0
+# Set to 0 to draw the analogue clock using GMT, 1 = local time.
+cidd.draw_clock_local: 0
+
+cidd.one_click_rhi: 1
+cidd.click_posn_rel_to_origin: 1
+
+#####################################################################################
+# GUI RELATED STUFF
+#
+# Set this parameter to force the field menu popup to this many columns
+# If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
+# column.
+cidd.num_field_menu_cols: 6
+
+# This parameter sets WSDDM specific behavior On -
+# - Go to end of loop when movie stops.
+# - No on-image no-data message when winds are missing
+cidd.wsddm_mode:            0
+
+# 
+# MENU_BAR Configuration
+# The Menu bar is configurable. One can configure which buttons/functions are
+availible to the user. In many operational setting many of the fuctions should
+not be availible.  For research/ post analysis most of them should be enabled. 
+#####################################################################################
+# Defines for the Menu Bar at the top of the main window. Functions are:
+#
+#    --- One Shot Functions ---
+# RELOAD - (Force all data to be reloaded)
+# RESET - (Set display to starting zoom, field, products on/off state, etc)
+# SET_TO_NOW - (Sets the display to current time - canceling forecast mode)
+# SET_DRAW_MODE - (Enable the Human entered feature drawing mode)
+# PRINT_BUTTON - (Save and Print the plan view image) 
+# HELP_BUTTON - (Send Netscape to a useful help Page)
+# EXIT_BUTTON - Kills the Display
+# CLONE_CIDD - Starts another instance of the same display 
+# SNAP_IMAGE - Starts A Snapshot viewer - Displaying the current image
+#
+#    --- Toggle things on and off ----
+# LOOP_ONOFF - (Turn the movie loop on/off)
+# WINDS_ONOFF - (Turn all winds on/off)
+# SYMPRODS_ONOFF - (Turn all Symbolic Products on/off)
+# REPORT_MODE_ONOFF - (Turn on/off COntinious REport Mode )
+#
+#    --- Display Panels ---
+# SHOW_DPD_PANEL - (Show/Hide Page Definition Panel which configures individual pages)
+# SHOW_XSECT_PANEL - (Show/Hide the Cross Section Display View Panel)
+# SHOW_GRID_PANEL - (Show/Hide the Data Source Configuration Panel)
+# SHOW_STATUS_PANEL - (Show/Hide a Status message window)
+# SHOW_TIME_PANEL - (Show/Hide the Movie loop control Panel) 
+# CLOSE_POPUPS  - (Close all Popup panels)
+#
+#    --- Display Additional Menus ---
+# SHOW_DPD_MENU - (Show/Hide the field/page description menu)
+# SHOW_VIEW_MENU - (Show/Hide the zoom level menu)
+# SHOW_MAP_MENU - (Show/Hide the map overlay menu)
+# SHOW_PRODUCT_MENU - (Show/Hide the symbolic product menu)
+# SHOW_FORECAST_MENU -(Show/Hide the forecast mode menu)
+# SHOW_PAST_MENU    - (Show/Hide the past mode menu)
+# SHOW_BOOKMARK_MEN - (Show/Hide the helpful bookmark menu)
+# SHOW_GENTIME_MENU - (Show/Hide the Model Generation Time menu)
+# SHOW_CMD_MENU  -    (Show/Hide the Command menu)
+# 
+#
+#####################################################################################
+cidd.num_menu_bar_cells: 16
+#
+cidd.menu_bar_label1: Fields...
+cidd.menu_bar_funct1: SHOW_DPD_MENU
+# 
+cidd.menu_bar_label2: View...
+cidd.menu_bar_funct2: SHOW_VIEW_MENU
+#
+cidd.menu_bar_label3: Maps...
+cidd.menu_bar_funct3: SHOW_MAP_MENU
+#
+cidd.menu_bar_label4: Movie...
+cidd.menu_bar_funct4: SHOW_TIME_PANEL
+#
+cidd.menu_bar_label5: Loop
+cidd.menu_bar_funct5: LOOP_ONOFF
+#  
+cidd.menu_bar_label6: Now
+cidd.menu_bar_funct6: SET_TO_NOW
+#
+cidd.menu_bar_label7: Overlays...
+cidd.menu_bar_funct7: SHOW_DPD_PANEL
+#
+cidd.menu_bar_label8: Products...
+cidd.menu_bar_funct8: SHOW_PRODUCT_MENU
+#
+cidd.menu_bar_label9: Vsection
+cidd.menu_bar_funct9: SHOW_XSECT_PANEL
+#
+cidd.menu_bar_label10: Reset
+cidd.menu_bar_funct10: RESET
+#
+cidd.menu_bar_label11: Reload
+cidd.menu_bar_funct11: RELOAD
+#
+cidd.menu_bar_label12: Value
+cidd.menu_bar_funct12: REPORT_MODE_ONOFF
+#
+cidd.menu_bar_label13: Config...
+cidd.menu_bar_funct13: SHOW_GRID_PANEL
+#
+cidd.menu_bar_label14: Back
+cidd.menu_bar_funct14: ZOOM_BACK
+
+cidd.menu_bar_label16: Exit
+cidd.menu_bar_funct16: EXIT_BUTTON
+#
+cidd.menu_bar_label15: Status...
+cidd.menu_bar_funct15: SHOW_STATUS_PANEL
+#
+#cidd.menu_bar_label10: Symprods on/off
+#cidd.menu_bar_funct10: SYMPRODS_ONOFF
+#
+#cidd.menu_bar_label17: Help...
+#cidd.menu_bar_funct17: HELP_BUTTON
+#
+#cidd.menu_bar_label7: URL...
+#cidd.menu_bar_funct7: SHOW_BOOKMARK_MENU
+#
+#cidd.menu_bar_label8: Model Run...
+#cidd.menu_bar_funct8: SHOW_GENTIME_MENU
+#
+#
+#cidd.menu_bar_label12: Print
+#cidd.menu_bar_funct12: PRINT_BUTTON
+#
+#cidd.menu_bar_label14: Fcast
+#cidd.menu_bar_funct14: SHOW_FORECAST_MENU
+#
+#cidd.menu_bar_label15: Past
+#cidd.menu_bar_funct15: SHOW_PAST_MENU
+#
+#cidd.menu_bar_label17: Close Popups
+#cidd.menu_bar_funct17: CLOSE_POPUPS
+#
+#cidd.menu_bar_label19: Winds
+#cidd.menu_bar_funct19: WINDS_ONOFF
+#
+#cidd.menu_bar_label24: Draw Mode
+#cidd.menu_bar_funct24: SET_DRAW_MODE
+#
+#cidd.menu_bar_label27: Commands
+#cidd.menu_bar_funct27: SHOW_CMD_MENU
+#
+#cidd.menu_bar_label28: Snapshot
+#cidd.menu_bar_funct28: SNAP_IMAGE
+#
+#cidd.menu_bar_label29: Base Map
+#cidd.menu_bar_funct29: LANDUSE_ONOFF
+#
+
+cidd.horiz_frame_label: SPOL WHARF SITE GAN
+
+# Set the message to display when no data is availible
+cidd.no_data_message:     NO DATA FOUND (in this area at the selected time)
+
+# System NO-Data  Status/Info File
+# Cidd will check for updates to this file and will Replace the no_data_message
+# With the text from this file
+cidd.status_info_file:
+
+# HELP TEXT LINKS                       
+# These take the form:
+# cidd.widget_name_help:       file_name:file_index_key_string
+# The HELPPATH envoronment variable must be set or the help file
+# must be located in /ussr/lib/help.
+# Note the file name gets expanded to file_name.info
+#
+cidd.canvas_help:              cidd_help:canvas
+cidd.frame_message_help:       cidd_help:frame_message
+
+cidd.help_command:   netscape_starter -remote 'openURL(http://www.rap.ucar.edu/CIDD/mds_user_manual/)'
+
+#
+# This command is run whenever a BOOKMARK_MENU button is pressed.
+# The characters; %U are replaced with the url text from the
+# parameters; cidd.bookmarkN below.
+cidd.bookmark_command:  netscape_starter -remote 'openURL(%U)'
+
+# Number of bookmarks in the Menu
+cidd.num_bookmarks: 4
+
+# BOOKMARKS FOR Quick Reference
+# Create N Bookmark and Label parameters
+# cidd.bookmarkN: - The exact URL text for use in the cidd.bookmark_command.
+# cidd.bookmark_labelN: The Label that appears in the menu
+#
+cidd.bookmark1: http://mars/aoaws/doc/roc_mds.html
+cidd.bookmark_label1: ROC
+cidd.bookmark2: http://www.rap.ucar.edu/weather/
+cidd.bookmark_label2: RAP Weather
+cidd.bookmark3: http://adds.awc-kc.noaa.gov/
+cidd.bookmark_label3: ADDS
+cidd.bookmark4: http://cessna/
+cidd.bookmark_label4: ADDS-Cessna
+
+
+# Resources for compatibility with TITAN-TIME HISTORY Program
+
+cidd.track_server_instance:         Operations
+cidd.track_past_plot_period:        0
+cidd.track_future_plot_period:      0
+cidd.track_n_forecast_steps:        5
+cidd.track_forecast_interval:       6
+cidd.track_data_time_margin:        750
+cidd.track_past_color:              yellow
+cidd.track_current_color:           cyan
+cidd.track_future_color:            blue
+cidd.track_forecast_color:          red
+
+#  KEYS for SHARED MEMORY SEGMENTS
+
+# Key for coordinate shared memory
+cidd.coord_key:               61500
+
+# Key for TITAN control shared memory
+cidd.titan_key               61501
+
+
+#  Starting Size size of fonts for symbolic products - From above list
+cidd.product_font_size: 4
+
+#Detail thresholds and font adjustment parameters. First implicit threshold is 0.0
+# If the current distance across a domain is between the thresholds, then an adjustment is made to the
+# default/selected font size. This is used to change the size of the fonts
+# automatically as the users zooms in and out. Threshold values are in km across the
+# viewing domain
+cidd.product_detail_threshold1: 50.0
+cidd.product_detail_adjustment1: +3
+#
+cidd.product_detail_threshold2: 200.0
+cidd.product_detail_adjustment2: +2
+#
+cidd.product_detail_threshold3: 400.0
+cidd.product_detail_adjustment3: +1
+
+# Product Scaling Constant. - Set this constant to determine
+# at what zoom icons and will have a scale factor of 1.0
+# Default = 300. Function = log10(Constant /km_across_screen) + 1.0;
+# Set to 0 or less to leave icons unscaled
+cidd.scale_constant: -1
+
+# prevent CIDD from closing popup windows when changing desktops
+
+cidd.close_popups: 0
+
+# RHI support
+
+# CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI
+# by +/- these amounts (degrees)
+# 7-9 is coarse 4-6 is medium and 1-3 is fine.
+cidd.rotate_coarse_adjust: 6
+cidd.rotate_medium_adjust: 2
+cidd.rotate_fine_adjust:  1
+
+</MAIN_PARAMS>
+
