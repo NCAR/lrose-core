@@ -260,8 +260,10 @@ private:
   void _addRayQualifiers(RadxRay *ray, vector<string> &tok);
 
 
-  int _readRayQualifiers(RadxRay *ray, char *line);
-  int _readRayData(int  nRaysInFile, size_t nGatesPerRay);
+  int _readRayQualifiers(RadxRay *ray, char *line,
+    int year, int month, int day);
+  int _readRayData(int  nRaysInFile, size_t nGatesPerRay,
+    int year, int month, int day);
   int _readRayData(RadxRay *ray, vector<Field> &fields);
 
   void _fillRay(RadxRay *ray, vector<Field> &fields);
@@ -284,6 +286,9 @@ private:
 
   int identifyModel(unordered_map<string, string> &dictionary);
   int identify(string &label, unordered_map<string, string> &dictionary);
+  RadxTime identifyTime(string &label, unordered_map<string, string> &dictionary);
+  string identifyS(string &label, unordered_map<string, string> &dictionary);
+
 
   int _openRead(const string &path);
   void _close();

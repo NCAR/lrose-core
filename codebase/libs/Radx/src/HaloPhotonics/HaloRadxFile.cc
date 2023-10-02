@@ -370,7 +370,14 @@ int HaloRadxFile::readFromPath(const string &path,
   // this is useless; it is not always correct.
 
   // read in ray data
-  int iret = _readRayData(nRaysInFile, nGatesPerRay);
+  RadxTime radxTime;
+  time_t seconds;
+  string startTimeLabel("Start time");
+  string dateTime = identifyS(startTimeLabel, _rawHeaderInfo);
+  time_t timeT = RadxTime().parseDateTime(dateTime);
+  radxTime.set(timeT); // dateTime);
+  int iret = _readRayData(nRaysInFile, nGatesPerRay,
+    radxTime.getYear(), radxTime.getMonth(), radxTime.getDay());
 
   if (iret) {
     _addErrStr("ERROR - HaloRadxFile::readFromPath");
@@ -1021,7 +1028,8 @@ void HaloRadxFile::decipherField(RadxRay *ray, Field &field, string value) {
   }
 }
 
-int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
+int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line,
+  int year, int month, int day) {
 
       int error = -1;
       string ll(_stripLine(line));
@@ -1044,24 +1052,57 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
       // time is in hours
       value = toks[0];
       double timeInHours = atof(value.c_str());
-      printf("timeInHours %15.12f original string: %s\n", timeInHours, value.c_str());
+      if (_verbose) {
+        printf("timeInHours %15.12f original string: %s\n", timeInHours, value.c_str());
+      }
+      /*
       int minutesInHour = 60;  // also seconds in minute
       // int secondsInHour = minutesInHour * 60;
       int hours = int(timeInHours);
       double minutesf = timeInHours - hours;
       int minutes = int(minutesf * minutesInHour);
-      double secondsf = minutesf - minutes;
+      double secondsf = minutesf - minutes/60;
       int seconds = int(secondsf * 60); // seconds in minute
-      double subseconds = (secondsf - seconds) * 1.0e3;
-      RadxTime rtime(hours, minutes, seconds, subseconds);
-      cerr.precision(10);
-      cerr << "Ray time: " << hours << ":" << minutes 
-        << ":" << seconds << "." << subseconds << endl;  
-      ray->setTime(rtime.utime(), subseconds);
-      double reconstituted = hours + minutes/minutesInHour + seconds/(60*60) + subseconds/1.0e3;
-      cerr << "Ray time reconstituted: " << reconstituted << " vs. original "
-       << timeInHours << " diff = " << timeInHours - reconstituted << endl;
+      double subseconds = (secondsf - seconds/60) * 1.0e3;
+      */
 
+     double total = timeInHours;
+     int hours = int(total);
+     
+     double minutesFloat = (total - hours) * 60.;
+     int minutes = int(minutesFloat);
+     //double secondsFloat = (total - hours - (minutes/60.)) * 60. * 60.;
+     double secondsFloat = (minutesFloat - minutes) * 60;
+
+     // TODO: When # seconds exceeds 60, the calculation is wonky
+     // probably the same for the number of minutes > 60???
+     int seconds = int(secondsFloat);
+     double subseconds = (secondsFloat - seconds); //  * 1000;
+
+     //if ((minutes < 0) || (seconds < 0) || (subseconds < 0)) {
+
+     double reconstituted = hours +  ((double) minutes/60.) + ((double)seconds/(60.*60.)) + subseconds/(60.*60.);
+
+
+      RadxTime rtime;
+      rtime.set(year, month, day, hours, minutes, seconds, 0.0);
+      if (1) {
+        cerr.precision(10);
+        cerr << "Ray time: " << hours << ":" << minutes 
+          << ":" << seconds << "  " << subseconds << endl;  
+      }
+      cout << "ray time = " << rtime.getStrn() << endl;
+      ray->setTime(rtime.utime(), subseconds);
+      //double reconstituted = hours + minutes/minutesInHour + seconds/(60*60) + subseconds/1.0e3;
+      double diff = timeInHours - reconstituted;
+      if (1) {
+        cerr << "Ray time reconstituted: " << reconstituted << " vs. original "
+         << timeInHours << " diff = " << diff << endl;
+      }
+      if (abs(diff) > 1.0e-6) {
+        cout << " ERROR hour breakdown is not correct!" << endl;
+
+      }
       value = toks[1];   
       double az = 0.0;
       az = atof(value.c_str());
@@ -1151,7 +1192,8 @@ int HaloRadxFile::_readRayQualifiers(RadxRay *ray, char *line) {
 // <gate 0> <field 1 data> <field 2 data> ...
 // <gate N-1> <field 1 data> <field 2 data>
 
-int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay) {
+int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay,
+  int year, int month, int day) {
   // int error = -1;
   int nRays = 0;
   RadxRay *ray = NULL;
@@ -1163,17 +1205,19 @@ int HaloRadxFile::_readRayData(int  nRaysInFile, size_t nGatesPerRay) {
       cerr << "reading ray " << nRays << endl;
       ray = new RadxRay();
       ray->setNGates(nGatesPerRay);
-      _readRayQualifiers(ray, line);
+      _readRayQualifiers(ray, line, year, month, day);
       _readRayData(ray, _fields);
       // add ray to vector
       _rays.push_back(ray);  
-      cout << "in readRayData: nGates = " << ray->getNGates() << endl;
+      if (_verbose) {
+        cout << "in readRayData: nGates = " << ray->getNGates() << endl;
+      }
       nRays += 1;
     }
   } // while
-  if (nRays != nRaysInFile) {
-    cerr << "Not enough rays in file: expected " << endl;
-  }
+  //if (nRays != nRaysInFile) {
+  //  cerr << "Not enough rays in file: expected " << endl;
+  //}
   return 0;
 }
 
@@ -1354,11 +1398,22 @@ int HaloRadxFile::_loadReadVolume()
   _readVol->setOrigFormat("HaloPhotonics");
   _readVol->setInstrumentType(Radx::INSTRUMENT_TYPE_LIDAR);
   _readVol->setPlatformType(Radx::PLATFORM_TYPE_FIXED);
-  
-  _readVol->setStartTime(_rays[0]->getTimeSecs(),
-                         _rays[0]->getNanoSecs());
-  _readVol->setEndTime(_rays[nRays-1]->getTimeSecs(),
-                       _rays[nRays-1]->getNanoSecs());
+  RadxTime radxTime;
+  time_t seconds;
+  string startTimeLabel("Start time");
+  string dateTime = identifyS(startTimeLabel, _rawHeaderInfo);
+  time_t timeT = RadxTime().parseDateTime(dateTime);
+  //  RadxTime rtime(time_t);
+  double nanoSeconds = 0.0; // identifyStartTimeNanoSeconds();
+
+  _readVol->setStartTime(timeT, nanoSeconds);
+
+    //_rays[0]->getTimeSecs(),
+    //                     _rays[0]->getNanoSecs());
+  time_t lastRayTimeInHours = _rays[nRays-1]->getTimeSecs();
+  //time_t endTime = timeT.setTime(hours, minutes, seconds, subseconds);;
+  _readVol->setEndTime(lastRayTimeInHours, _rays[nRays-1]->getNanoSecs()); // _rays[nRays-1]->getTimeSecs(),
+                       //_rays[nRays-1]->getNanoSecs());
 
   _readVol->setTitle("HaloPhotonics LIDAR");
   _readVol->setSource(_instrumentName);
@@ -1895,6 +1950,34 @@ int HaloRadxFile::identify(string &label, unordered_map<string, string> &diction
     std::cerr << label << " Not found\n";
     return 0;
   }
+}
+
+string HaloRadxFile::identifyS(string &label, unordered_map<string, string> &dictionary) {
+  unordered_map<string, string>::iterator it = dictionary.find(label.c_str());
+  if (it != dictionary.end()) {
+    return it->second;
+  } else {
+    std::cerr << label << " Not found\n";
+    return "";
+  }
+}
+
+RadxTime HaloRadxFile::identifyTime(string &label, unordered_map<string, string> &dictionary) {
+  unordered_map<string, string>::iterator it = dictionary.find(label.c_str());
+  RadxTime rtime;
+  if (it != dictionary.end()) {
+    string dateTime = it->second;
+    //string year = dateTime.substr(0,4);
+    time_t timeT = RadxTime().parseDateTime(dateTime);
+
+    rtime.set(timeT);
+
+    //return rtime; // RadxTime(it->second);
+  } else {
+    std::cerr << label << " Not found\n";
+    //return RadxTime();
+  }
+  return rtime;
 }
 
 /*
