@@ -31,8 +31,8 @@ Requires: libtiff
 Requires: libzip 
 Requires: netcdf 
 Requires: openmpi 
-Requires: qt5-qtbase
-Requires: qt5-qtdeclarative 
+Requires: qt6-qtbase
+Requires: qt6-qtdeclarative 
 Requires: xorg-x11-apps
 Requires: xorg-x11-xauth
 Requires: rpm

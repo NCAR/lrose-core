@@ -16,7 +16,7 @@ From: centos:8
     eigen3-devel armadillo-devel bzip2-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel GeographicLib-devel \
-    qt5-qtbase-devel qt5-qtdeclarative-devel qt5-qtcharts-devel \
+    qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtcharts-devel \
     hdf5-devel netcdf-devel \
     gnuplot ImageMagick-devel ImageMagick-c++-devel \
     xorg-x11-xauth xorg-x11-apps \
@@ -24,7 +24,7 @@ From: centos:8
     rpm-devel rpmdevtools
   alternatives --set python /usr/bin/python3
   cd /usr/bin; \
-  ln -s qmake-qt5 qmake
+  ln -s qmake-qt6 qmake
 %environment
   export LANG=C
   export PATH=/usr/local/lrose/bin:$PATH

@@ -194,12 +194,12 @@ NETCDF_LDFLAGS=$(NETCDF4_LDFLAGS)
 # QT
 
 PKG_CONFIG_PATH = /usr/local/opt/qt/lib/pkgconfig
-QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui Qt5Charts Qt5Network )
-QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui )
-QT_LIBS = $(shell pkg-config --libs Qt5Qml Qt5Core Qt5Widgets Qt5Gui Qt5Charts Qt5Network)
+QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Charts Qt6Network )
+QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui )
+QT_LIBS = $(shell pkg-config --libs Qt6Qml Qt6Core Qt6Widgets Qt6Gui Qt6Charts Qt6Network)
 
 QT_CPPC_CFLAGS = -fPIC -std=c++11
-QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
+QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
 
 
 # do not have jasper lib
