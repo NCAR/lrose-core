@@ -5,7 +5,6 @@
 
 #include <QPushButton>
 #include <QApplication>
-#include <QDesktopWidget>
 
 ColorMapTemplates::ColorMapTemplates(QWidget *parent) :
     QDialog(parent)

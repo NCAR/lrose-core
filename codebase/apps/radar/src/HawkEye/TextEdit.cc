@@ -1,5 +1,6 @@
 #include "TextEdit.hh"
 #include <iostream>
+#include <QFile>
 #include <QCompleter>
 #include <QKeyEvent>
 #include <QAbstractItemView>

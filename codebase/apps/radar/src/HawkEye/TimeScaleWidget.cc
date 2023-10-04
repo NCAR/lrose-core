@@ -189,10 +189,8 @@ void TimeScaleWidget::setBackgroundColor(const QColor &color)
 void TimeScaleWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  cerr << "4444444444444444444444444" << endl;
-  
-  _mousePressX = e->x();
-  _mousePressY = e->y();
+  _mousePressX = e->position().x();
+  _mousePressY = e->position().y();
   
   _worldPressX = _world.getXWorld(_mousePressX);
   _worldPressY = _world.getYWorld(_mousePressY);
@@ -206,8 +204,6 @@ void TimeScaleWidget::mousePressEvent(QMouseEvent *e)
 
 void TimeScaleWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-
-  cerr << "5555555555555555555555555" << endl;
 
   _pointClicked = false;
 
@@ -243,12 +239,9 @@ void TimeScaleWidget::paintEvent(QPaintEvent *event)
   // }
   // _timeLastRendered = now;
 
-  cerr << "6666666666666666666666666" << endl;
-
   QPainter painter(this);
   QPaintDevice *device = painter.device();
   if (device == 0) {
-    cerr << "vvvvvvvvvvvvvvvvvvvvvvvv - painter device not active" << endl;
     return;
   }
   painter.save();
@@ -267,9 +260,6 @@ void TimeScaleWidget::paintEvent(QPaintEvent *event)
 void TimeScaleWidget::resizeEvent(QResizeEvent * e)
 {
 
-  cerr << "1111111111777777777777777" << endl;
-  cerr << "width, height: " << width() << ", " << height() << endl;
-
   _resetWorld(width(), height());
   configureAxes();
 
@@ -277,19 +267,14 @@ void TimeScaleWidget::resizeEvent(QResizeEvent * e)
     _timesPending = false;
   }
 
-  cerr << "pppppppppppppppppppppppppppp" << endl;
   QPainter painter(this);
   QPaintDevice *device = painter.device();
-  cerr << "zzzzzzzzzzzzzzzzz - painter device: " << device << endl;
   if (device == 0) {
-    cerr << "wwwwwwwwwwwwwwwwwwwwwwwwwwww - painter device not active " << endl;
     return;
   }
   _drawOverlays(painter);
   update();
   
-  cerr << "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << endl;
-
 }
 
 
@@ -356,11 +341,8 @@ void TimeScaleWidget::_drawOverlays(QPainter &painter)
 
   QPaintDevice *device = painter.device();
   if (device == 0) {
-    cerr << "88888888888888888888 - painter device not active" << endl;
     return;
   }
-
-  cerr << "99999999999999999999999999" << endl;
 
   // save painter state
   
@@ -420,8 +402,6 @@ void TimeScaleWidget::_drawOverlays(QPainter &painter)
   // reset painter state
   
   painter.restore();
-
-  cerr << "000000000000000000000000000" << endl;
 
 }
 
