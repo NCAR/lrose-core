@@ -458,8 +458,8 @@ void SpriteWidget::mousePressEvent(QMouseEvent *e)
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
   _rubberBand->show();
 
-  _mousePressX = e->x();
-  _mousePressY = e->y();
+  _mousePressX = e->position().x();
+  _mousePressY = e->position().y();
 
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);
   _worldPressY = _zoomWorld.getYWorld(_mousePressY);
@@ -480,8 +480,8 @@ void SpriteWidget::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
-  int x = e->x();
-  int y = e->y();
+  int x = e->position().x();
+  int y = e->position().y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
