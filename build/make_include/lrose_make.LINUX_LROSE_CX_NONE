@@ -199,7 +199,7 @@ QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui Qt6Network )
 #QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui )
 QT_LIBS = $(shell pkg-config --libs Qt6Qml Qt6Core Qt6Widgets Qt6Gui Qt6Network)
 
-QT_CPPC_CFLAGS = -fPIC -std=c++11
+QT_CPPC_CFLAGS = -fPIC -std=c++17
 QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
 
 

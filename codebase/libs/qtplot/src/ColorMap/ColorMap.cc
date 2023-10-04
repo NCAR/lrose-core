@@ -1526,12 +1526,12 @@ void
 QImage *ColorMap::getColorScaleLegend() {
   // const ColorMap &colorMap,  // internal
   // QPainter &painter,
-  int unitsFontSize = 10;
+  // int unitsFontSize = 10;
   
   LOG(DEBUG) << "enter";
   
   int pltHt = _entries.size(); // _plotHeight;
-  int width = 10; // _colorScaleWidth;
+  // int width = 10; // _colorScaleWidth;
   QImage *image = new QImage(10, pltHt, QImage::Format_RGB32);
   image->fill("black");
   QPainter painter(image);
@@ -1552,22 +1552,22 @@ QImage *ColorMap::getColorScaleLegend() {
 
   //double colorScaleWidthScaled = _colorScaleWidth * widthInWorld / _widthPixels; // widthInPixels;;
   //int xStart = 100; // _widthPixels - width;
-  size_t nHts = _entries.size() + 1; // leave some space at top and bottom
-  double patchHt = (double)(pltHt) / nHts;
-  int iPatchHt = (int) patchHt;
-  int bottomMargin = (int) patchHt/2.0;
+  // size_t nHts = _entries.size() + 1; // leave some space at top and bottom
+  // double patchHt = (double)(pltHt) / nHts;
+  // int iPatchHt = (int) patchHt;
+  // int bottomMargin = (int) patchHt/2.0;
 
   // fill the swatches with the color
   
   //painter.save();
   painter.setPen(Qt::SolidLine);
-  int scaleYTop = 0, scaleYBot = 0;
+  // int scaleYTop = 0, scaleYBot = 0;
   for (size_t ii = 0; ii < _entries.size(); ii++) {
     const ColorMap::CmapEntry &entry = _entries[ii];
     QColor color(entry.red, entry.green, entry.blue);
     painter.setBrush(color);
     //double topY = pltHt - (int) (ii + 2) * patchHt + (patchHt / 2) + _topMargin;
-    double topY = (100-bottomMargin) - (ii+1)*patchHt;
+    // double topY = (100-bottomMargin) - (ii+1)*patchHt;
     double x, y, width, height;
     x = 0, y = ii; width = 1; height = 1;
     QRectF r(x, y, width, height); // xStart, topY, width, patchHt);
