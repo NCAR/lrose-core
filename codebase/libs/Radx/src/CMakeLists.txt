@@ -91,7 +91,7 @@ set (SRCS
       ./Gematronik/GemBlob.cc
       ./Gematronik/GemRadxFile.cc
       ./Gematronik/GemInputField.cc
-      ./Gematronik/GemSweep.cc
+      ./Gematronik/GemSweepField.cc
       ./HaloPhotonics/HaloRadxFile.cc
       ./Hrd/HrdRadxFile.cc
       ./Leosphere/LeoRadxFile.cc

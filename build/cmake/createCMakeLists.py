@@ -1360,7 +1360,7 @@ def writeCMakeListsApp(appName, appDir, appCompileFileList,
     fo.write("\n")
 
     if (needQt):
-!        fo.write("# QT6\n")
+        fo.write("# QT6\n")
         fo.write("\n")
         fo.write("set (CMAKE_INCLUDE_CURRENT_DIR ON)\n")
         fo.write("set (CMAKE_AUTOMOC ON)\n")
