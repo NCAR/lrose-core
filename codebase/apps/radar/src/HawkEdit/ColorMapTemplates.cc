@@ -5,7 +5,6 @@
 
 #include <QPushButton>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QFileDialog>
 
 ColorMapTemplates *ColorMapTemplates::_instance = NULL;
