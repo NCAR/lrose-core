@@ -2337,9 +2337,9 @@ void DoVerify::compute_as_is(ui08 **forecast_grid,
   
 {
   
-  register ui08 *truth, *forecast;
-  register long i;
-  register long n_succ = 0, n_fail = 0, n_false = 0, n_non = 0;
+  ui08 *truth, *forecast;
+  long i;
+  long n_succ = 0, n_fail = 0, n_false = 0, n_non = 0;
 
   /*
    * set pointer to start of grids
