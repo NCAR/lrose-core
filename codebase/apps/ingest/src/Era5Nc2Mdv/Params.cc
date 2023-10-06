@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Wrf2Mdv reads output files from the WRF model and writes MDV data. It also allows the computation of some derived products.");
+    tt->comment_hdr = tdrpStrDup("Era5Nc2Mdv reads output files from the WRF model and writes MDV data. It also allows the computation of some derived products.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -627,7 +627,7 @@
     tt->descr = tdrpStrDup("Process instance");
     tt->help = tdrpStrDup("Used for registration with procmap.");
     tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("Test");
+    tt->single_val.s = tdrpStrDup("test");
     tt++;
     
     // Parameter 'Procmap_reg_interval_secs'
@@ -2136,7 +2136,7 @@
     tt->descr = tdrpStrDup("Data set info.");
     tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
     tt->val_offset = (char *) &data_set_info - &_start_;
-    tt->single_val.s = tdrpStrDup("This MDV file was created by Wrf2Mdv.");
+    tt->single_val.s = tdrpStrDup("This MDV file was created by Era5Nc2Mdv.");
     tt++;
     
     // Parameter 'data_set_name'

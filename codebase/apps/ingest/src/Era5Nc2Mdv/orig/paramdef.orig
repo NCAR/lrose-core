@@ -56,7 +56,7 @@ paramdef int {
 } procmap_register_interval_secs;
 
 paramdef string {
-  p_default = "./";
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
   p_descr = "Input directory";
   p_help = "Directory which contains input grib2 files. Used only "
            "if files are not specified on the command line";

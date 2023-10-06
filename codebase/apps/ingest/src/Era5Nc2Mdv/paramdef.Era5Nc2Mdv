@@ -22,23 +22,22 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /*********************************************************
- * parameter definitions for Wrf2Mdv
+ * parameter definitions for Era5Nc2Mdv
  *
- * Paul Prestopnik, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ * Mike Dixon, EOL, NCAR, Boulder, CO, USA, 80307-3000
  *
- * June 2007
+ * Oct 2023
  * 
- * Wrf2Mdv takes WRF output files (netcdf) and converts to MDV format.
+ * Era5Nc2Mdv takes ERA5 NetCDF files, created using a CISL translator,
+ * and converts to MDV format.
  */
-
 
 commentdef
 {
-  p_header = "Wrf2Mdv reads output files from the WRF model and writes "
-             "MDV data. "
-             "It also allows the computation of some derived products.";
+  p_header = "Era5Nc2Mdv reads output files from the WRF model and writes "
+    "MDV data. "
+    "It also allows the computation of some derived products.";
 }
-
 
 /*********************************************************
  * Debugging and process control.
@@ -74,17 +73,16 @@ typedef enum
 
 paramdef enum alg_debug_t
 {
-  p_descr = "Detailed debug information about a particular section of code";
-  p_help = "This can be useful for debugging a particular algorithm - "
-           "without having to turn all lots of debug printing.";
-  p_default = DEBUG_NONE;
+ p_descr = "Detailed debug information about a particular section of code";
+ p_help = "This can be useful for debugging a particular algorithm - without having to turn all lots of debug printing.";
+ p_default = DEBUG_NONE;
 } alg_debug;
 
 paramdef string
 {
   p_descr = "Process instance";
   p_help = "Used for registration with procmap.";
-  p_default = "Test";
+  p_default = "test";
 } instance;
 
 paramdef int
@@ -143,7 +141,7 @@ paramdef string
   p_descr = "Directory for input WRF data - REALTIME mode.";
   p_help = "The latest_data_info file in this directory is updated each time "
            "the model adds a forecast time step to the output file.";
-  p_default = ".";
+  p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
 } realtime_input_dir;
 
 paramdef int
@@ -778,7 +776,7 @@ paramdef string
   p_descr = "Data set info.";
   p_help = "This is placed in the MDV master header for "
     "documentation purposes.";
-  p_default = "This MDV file was created by Wrf2Mdv.";
+  p_default = "This MDV file was created by Era5Nc2Mdv.";
 } data_set_info;
 
 paramdef string
