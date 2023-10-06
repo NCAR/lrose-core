@@ -1,0 +1,521 @@
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/* ** Copyright UCAR (c) 1990 - 2016                                         */
+/* ** University Corporation for Atmospheric Research (UCAR)                 */
+/* ** National Center for Atmospheric Research (NCAR)                        */
+/* ** Boulder, Colorado, USA                                                 */
+/* ** BSD licence applies - redistribution and use in source and binary      */
+/* ** forms, with or without modification, are permitted provided that       */
+/* ** the following conditions are met:                                      */
+/* ** 1) If the software is modified to produce derivative works,            */
+/* ** such modified software should be clearly marked, so as not             */
+/* ** to confuse it with the version available from UCAR.                    */
+/* ** 2) Redistributions of source code must retain the above copyright      */
+/* ** notice, this list of conditions and the following disclaimer.          */
+/* ** 3) Redistributions in binary form must reproduce the above copyright   */
+/* ** notice, this list of conditions and the following disclaimer in the    */
+/* ** documentation and/or other materials provided with the distribution.   */
+/* ** 4) Neither the name of UCAR nor the names of its contributors,         */
+/* ** if any, may be used to endorse or promote products derived from        */
+/* ** this software without specific prior written permission.               */
+/* ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS  */
+/* ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      */
+/* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
+/* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
+/*********************************************************
+ * parameter definitions for Era5Nc2Mdv
+ *
+ */
+
+commentdef {
+  p_header = "Era5Nc2Mdv PARAMETER FILE";
+  p_text = "Era5Nc2Mdv creates MDV from grib2 data files\n";
+
+}
+
+commentdef {
+  p_header = "PROGRAM MODES OF OPERATION.";
+}
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Debug option";
+  p_help = "0 = No Debug info\n"
+	"1 = Regular Debug info\n"
+	"2 = Full Grib2 file output (see printSec params).";
+} debug;
+
+paramdef string {
+  p_default = "Test";
+  p_descr = "Instance";
+  p_help = "Process instance for registration with process mapper";
+} instance;
+
+paramdef int {
+  p_default = 1200;
+  p_descr = "Interval for procmap registration";
+  p_help = "Set to a high value if processing takes a long time. This will prevent the auto_restarter from killing and restarting the app.";
+} procmap_register_interval_secs;
+
+paramdef string {
+  p_default = "./";
+  p_descr = "Input directory";
+  p_help = "Directory which contains input grib2 files. Used only "
+           "if files are not specified on the command line";
+} input_dir;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file suffix";
+  p_help = "Input file suffixes will be checked against this string. "
+           "Used only if files are not specified on the command line";
+} input_suffix;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Input file substring check.";
+  p_help = "Input files will be checked against this string."
+           "Can be used to filter different forecast times."
+           "Used only if files are not specified on the command line";
+} input_substring;
+
+paramdef string {
+  p_default = {};
+  p_descr = "Input file substrings check.";
+  p_help = "Input files will be checked against these strings. "
+           "Can be used to filter different forecast times. "
+           "Used only if files are not specified on the command line "
+           "and input_substring is set to an empty string.";
+} input_substrings[];
+
+paramdef int {             
+  p_min = 60;
+  p_default = 10800;
+  p_descr = "Max age (in seconds) of input data";
+  p_help = "Used only if files are not specified on the command line";
+} max_input_data_age;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE, watch input_dir for change in _latest_data_info.";
+  p_help = "If FALSE, watch input_dir for new files.";
+} latest_data_info_avail;
+
+paramdef boolean {             
+  p_default = TRUE;
+  p_descr = "Option to recurse when searching for new files.";
+  p_help = "Only applies if latest_data_info_avail is FALSE.";
+} recursive_search;
+
+paramdef boolean {             
+  p_default = TRUE;
+  p_descr = "Option to only process the latest file in directory.";
+  p_help = "If TRUE, only the latest file will be processed. If FALSE, previously-written files will be processed.";
+} latest_file_only;
+
+paramdef int {             
+  p_default = 5;
+  p_descr = "How often to check for new data (secs).";
+} data_check_interval_secs;
+
+commentdef {
+  p_header = "PRINT SECTIONS PARAMETERS";
+  p_text = "Parameters only used with -printSec or debug > 1\n"
+	"For each grib message prints the sections defined below\n";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Indicator Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_is;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Identification Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_ids;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Local Use Section (if present).";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_lus;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Grid Definition Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_gds;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "If TRUE prints the Product Definition Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_pds;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Data Representation Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_drs;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Bit-map Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_bms;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE prints the Data Section.";
+  p_help = "Only prints with -printSec or debug > 1";
+} printSec_ds;
+
+commentdef {
+  p_header = "MDV OUTPUT PARAMETERS";
+}
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "This option will infer the missing value from the data if possible.";
+  p_help = "Grib2 doesnt allow for setting a missing value unless complex data packing used. ";
+} autoset_missing_value;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to limit the lead time of output files.";
+  p_help = "If set, we check the lead time before writing files.";
+} check_lead_time;
+
+paramdef int {             
+  p_default = 86400;
+  p_descr = "Maximum lead time for output files (secs).";
+  p_help = "See 'check_lead_time'.";
+} max_lead_time_secs;
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Lead time subsampling flag";
+  p_help = "Set to true to enable lead time subsampling.";
+} lead_time_subsampling;
+
+paramdef int
+{ 
+  p_default = {};
+  p_descr = "The subsampled lead times to process";
+  p_descr = "Units are seconds.  Used only when do_lead_time_subsampling "
+    "is TRUE. If it empty, all lead times are sampled, even when do_lead_time_subsampling=TRUE";
+} subsample_lead_times[];
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Write mdv files in a forecast directory structure";
+  p_help = "If this is true, mdv files will be written in the "
+           "rap forecast directory structure.  Note that if "
+           "write_non_forecast is also set to true, two mdv "
+           "files will be written";
+} write_forecast;
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv";
+  p_descr = "Url for mdv files in forecast structure";
+  p_help = "";
+} forecast_mdv_url;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write mdv files in a non-forecast directory structure";
+  p_help = "If this is true, mdv files will be written in the "
+           "regular (non-forecast) rap directory structure.  Note "
+           "that if write_forecast is also set to true, two mdv "
+           "files will be written.  Note also that this option allows "
+           "for overwriting files, since the forecast time will be "        
+           "used as the data time in this case.  This is a temporary "
+           "option to allow for easier display of the data";
+} write_non_forecast;
+
+paramdef string {
+  p_default = "mdvp:://localhost::./mdv";
+  p_descr = "Url for mdv files in non-forecast structure";
+  p_help = "";
+} non_forecast_mdv_url;
+
+typedef enum { 
+  TIMESTAMP_GEN_TIME, TIMESTAMP_FCAST_TIME
+} timestamp_t;
+
+paramdef enum timestamp_t {
+  p_default = TIMESTAMP_FCAST_TIME;
+  p_descr = "This parameter allows user to timestamp non-forecast mdv files based "
+	"on the model's run time or the forecast time.";
+  p_help = "The choices are TIMESTAMP_GEN_TIME and TIMESTAMP_FCAST_TIME";
+} non_forecast_timestamp;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Write mdv files as regular data files";
+  p_help = "If this is true, the output mdv files are assumed to be non-forecast data.  If this flag is set true, the write_non_forecast flag must also be set true and the non_forecast_mdv_url must be set.  If this flag is set false, and write_non_forecast_mdv_url is true, the output is assumed to be forecast data, but written into a regular (non-forecast) rap directory structure anyway";
+} data_is_non_forecast;
+
+paramdef boolean
+{
+  p_default = true;
+  p_descr = "Write _latest_data_info files for output data.";
+  p_help = "If false, will suppress writing of _latest_data_info files.";
+} writeLdataInfo;
+
+paramdef string
+  {
+   p_default = "Converted to MDV with Era5Nc2Mdv.";
+   p_descr = "Data set info.";
+   p_help = "This is placed in the MDV master header for documentation purposes.";
+  } data_set_info;
+
+paramdef string {
+  p_default = "GFS model output.";
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_name;
+
+paramdef string {
+  p_default = "Grib2.";
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for documentation purposes.";
+} data_set_source;
+
+typedef enum {
+  ENCODING_ASIS =      0,
+  ENCODING_INT8 =      1,
+  ENCODING_INT16 =     2,
+  ENCODING_FLOAT32 =   5
+} encoding_type_t;
+
+typedef enum {
+  COMPRESSION_ASIS = -1,
+  COMPRESSION_NONE =  0,
+  COMPRESSION_RLE =   1,
+  COMPRESSION_LZO =   2,
+  COMPRESSION_ZLIB =  3,
+  COMPRESSION_BZIP =  4, 
+  COMPRESSION_GZIP =  5
+} compression_type_t;
+
+typedef enum { 
+  NO_CHANGE = 0,
+  MPS_TO_KNOTS = 1,
+  M_TO_KM = 2,
+  M_TO_100FT = 3,
+  PASCALS_TO_MBAR = 4,
+  KELVIN_TO_CELCIUS = 5,
+  KGPKG_TO_GPKG = 6,
+  PERCENT_TO_FRACTION = 7,
+  FRACTION_TO_PERCENT = 8,
+  M_TO_FT = 9,
+  M_TO_MI = 10,
+  M_TO_KFT = 11,
+  MM_S_TO_MM_HR = 12
+} out_units_t;
+
+typedef enum {
+  BAD_VALUE = 0,
+  UNKNOWN_VALUE = 1,
+  USER_DEFINED = 2,
+} qc_default_t;
+
+typedef struct {
+  string param;
+  string level;
+  string mdv_name;
+  out_units_t units;
+  double upper_range_limit;
+  double lower_range_limit;
+  encoding_type_t encoding_type;
+  qc_default_t qc_default_type;
+  double qc_default_value;
+  int vert_level_min;
+  int vert_level_max;
+  int vert_level_dz;
+  boolean use_additional_bad_data_value;
+  double additional_bad_data_value;
+  boolean use_additional_missing_data_value;
+  double additional_missing_data_value;
+} out_field_t;
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "Flag to process all fields";
+  p_help = "If TRUE, all fields will be processed.\n"
+           "If FALSE, only fields listed in output_fields list will be processed";
+} process_everything;
+
+paramdef struct out_field_t {
+  p_descr = "List of output fields, which are descibed by the field parameter and vertical level type\n";
+  p_help = "To determine the available params and levels, use the command line argument -printSummary -file [filename]\n"
+  "  No Mdv output will be created, only a list of params and associated levels contained"
+  " in the GRIB file.\n"
+  "Note: process_everything must be set to FALSE to use this list.\n"
+  "                                 \n"
+  "out_field_t structure definition:\n"
+  "  param:string GRIB2 product ID.\n"
+  "  level:string GRIB2 level ID.\n"
+  "  mdv_name:string MDV short field name. Overrides default name.\n"
+  "                  Use empty string to keep default (param) name.\n"
+  "  out_units:out_units_t simple unit conversion utility. Options are:\n"
+  "    NO_CHANGE            -- no change to units\n"
+  "    MPS_TO_KNOTS         -- convert m/s to knots\n"
+  "    M_TO_KM              -- convert meters to kilometers\n"
+  "    M_TO_FT              -- convert meters to feet, \n"
+  "    M_TO_MI              -- convert meters to miles, \n"
+  "    M_TO_100FT           -- convert meters to 100's of feet, \n"
+  "                            flight levels\n"
+  "    PASCALS_TO_MBAR      -- convert pascals to millibars\n"
+  "    KELVIN_TO_CELCIUS    -- convert degrees kelvin to to degrees\n"
+  "                            celcius\n"
+  "    KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n"
+  "                            per kilogram\n"
+  "    PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n"
+  "                            between 0 and 1\n"
+  "    FRACTION_TO_PERCENT  -- convert fraction to percentage, values\n"
+  "                            between 0 and 100\n"
+  "                                           \n" 
+  "   upper_range_limit:double upper limit threshold for field.\n" 
+  "   lower_range_limit:double lower limit threshold for field. \n"
+  "                            When both upper and lower limits are set\n"
+  "                            to zero no thresholds are applied.\n"
+  "  encoding_type:encoding_type_t  Output variable encoding type\n"
+  "  qc_default_type:qc_default_t Replacement value for inputs outside\n"
+  "                               of the range_limit\n"
+  "  qc_default_value:double User defined replacement value.\n"
+  "  vert_level_min: minimum integer level that will be processed(If set to -1,\n"
+  "                  no restrictions will be set.)\n"
+  "  vert_level_max: maximum integer level that will be processed(If set to -1,\n"
+  "                  no restrictions will be set.)\n"
+  "  vert_level_dz:  integer change in vertical levels that will be processed.\n\n"
+  "Default behavior is to process everything with no changes";
+  p_default = {{"PRES", "HYBL", "", NO_CHANGE, 0.0, 0.0, ENCODING_FLOAT32, BAD_VALUE, 0.0, -1, -1, 1, false, 0.0, false, 0.0}};
+} output_fields[];
+
+paramdef enum encoding_type_t {
+  p_default = ENCODING_FLOAT32;
+  p_descr = "File encoding type, Used only when process_everything is true.";
+} encoding_type;
+
+paramdef enum compression_type_t {
+  p_default = COMPRESSION_GZIP;
+  p_descr = "File compression type, Used only when process_everything is true.";
+} compression_type;
+
+typedef struct {
+  boolean SpecifyScaling;
+  double scale;
+  double bias;
+} Scaling_info_t;
+
+paramdef struct Scaling_info_t {
+  p_descr = "Options for user defined scale and bias.";
+  p_help = "Only applies if ENCODING type is INT8 or INT16.\n"
+           "If SpecifyScaling is true then the following scale "
+           "and bias values will be used. If false dynamic scaling "
+           "is applied.";
+  p_default = {FALSE, 0.50, -32.0};
+} output_scaling_info;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "If TRUE remaps output.";
+  p_help = "";
+} remap_output;
+
+typedef enum {
+  PROJ_LATLON		= 0,
+  PROJ_LAMBERT_CONF	= 3,
+  PROJ_FLAT		= 8
+} projection_t;
+
+typedef struct {
+  projection_t type;
+  double rotation;
+  double origin_lat;
+  double origin_lon;
+  double ref_lat_1;
+  double ref_lat_2;
+} projection_info_t;
+
+paramdef struct projection_info_t {
+  p_descr = "This is the user defined projection";
+  p_help = "If remap_output is true this defines the projection to remap to."
+           "\n\nThe choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
+           "PROJ_FLAT.\n\nPROJ_LATLON is a latitude/longitude projection, and if "
+           "it is chosen the remaining parameters can be ignored.\n\nPROJ_FLAT is "
+           "a flat projection, and if it is chosen the parameters rotation, "
+           "origin_lat, origin_lon must be set.\n\nPROJ_LAMBERT_CONF is a Lambert "
+           "conformal projection, and if it is chosen the parameters origin_lat, "
+           "origin_lon, ref_lat_1 and ref_lat_2 must be set.";
+  p_default = {PROJ_LAMBERT_CONF, 0.0, 25.0, -95.0, 25.0, 25.0};
+} out_projection_info; 
+  
+typedef struct {
+  int nx;
+  int ny;
+  double minx;
+  double miny;
+  double dx;
+  double dy;
+} grid_info_t;
+
+paramdef struct grid_info_t {
+  p_descr = "This is the user defined grid.";
+  p_help = "If remap_output is true this defines the grid info for the remap.\n\nFor a LATLON projection:\n  minx = minLon\n  miny = minLat\n  dx = deltaLon\n  dy = deltaLat.";
+  p_default = {301, 225, -3332.142334, -588.890442, 20.318001, 20.318001};
+} out_grid_info; 
+
+paramdef string {
+  p_default = ""; 
+  p_descr = "Option to override the vlevels in the vlevel header of the specified level types.";
+  p_help = "If not empty, will replace the vlevels of variables with the specified vlevel type with those specified in 'vlevel_array'.\n"
+           "Normal vlevel types to replace are: 'SIGL', 'SIGMA', or 'HYBL'.\n"
+           "Please note using this functionality can create incorrect levels, use carefully!";
+} override_vlevels;        
+
+paramdef double {
+  p_default = 0;
+  p_descr = "vlevel values to override what is already in the file.";
+  p_help = "See 'override_vlevels'.";
+} vlevel_array[];
+
+commentdef {
+  p_header = "INTERPOLATE INTO HEIGHT LEVELS (km MSL)";
+  p_text = "Option to interpolate the model data into height levels. This requires that (a) the vertical coords are pressure levels and (b) the geopotential height field is included in the input data.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to interpolate onto height levels (km MSL).";
+  p_help = "(a) The vertical coords of the input data set MUST be PRESSURE levels. (b) Also, geopotential height must be available in the data set. This field is used for the interpolation.\n";
+} interp_vlevels_to_height;
+
+paramdef string {
+  p_default = "HGT"; 
+  p_descr = "Name of geopotential height field in MDV file.";
+  p_help = "See output_fields array.\n";
+} height_field_mdv_name;        
+
+paramdef double {
+  p_default = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+  p_descr = "Array of output height levels (km MSL).";
+  p_help = "The data fields are intepolated onto this set of height levels.";
+} height_levels[];
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Option to determine the heights from the pressure levels.";
+  p_help = "If TRUE, we use the ICAO standard atmosphere to compute the target heights from the pressure levels. In this case, the height_levels array is ignored.\n";
+} compute_heights_from_pressure_levels;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum height when computing from pressure levels (km).";
+  p_help = "Any heights below this are removed when converting from pressure levels.";
+} min_height_from_pressure_levels;
+

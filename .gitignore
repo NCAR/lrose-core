@@ -240,6 +240,7 @@ codebase/apps/ingest/src/Dorade2Dsr/Dorade2Dsr
 codebase/apps/ingest/src/Dorade2DsrArchiveDriver/Dorade2DsrArchiveDriver
 codebase/apps/ingest/src/EolMobileKml2Spdb/EolMobileKml2Spdb
 codebase/apps/ingest/src/EraGrib2Mdv/EraGrib2Mdv
+codebase/apps/ingest/src/Era5Nc2Mdv/Era5Nc2Mdv
 codebase/apps/ingest/src/GemScan2Dsr/GemScan2Dsr
 codebase/apps/ingest/src/GemVolXml2Dsr/GemVolXml2Dsr
 codebase/apps/ingest/src/Gini2Mdv/Gini2Mdv
