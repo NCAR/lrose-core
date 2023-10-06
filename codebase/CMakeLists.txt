@@ -102,7 +102,7 @@ endFunction()
 enable_testing()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++17 ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_JASPER_LIB ")
 
 # Set RPATH so that executablefinds lrose libraries without needing LD_LIBRARY_PATH
