@@ -21,96 +21,51 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+/////////////////////////////////////////////////////////////
+// Args.h: Command line object
+//
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Sept 1998
+//
+/////////////////////////////////////////////////////////////
 
+#ifndef ARGS_H
+#define ARGS_H
 
-/************************************************************************
- * Args.hh : header file for the Args class.
- *
- * RAP, NCAR, Boulder CO
- *
- * January 1999
- *
- * Nancy Rehak
- *
- ************************************************************************/
-
-#ifndef Args_HH
-#define Args_HH
-
-/*
- **************************** includes **********************************
- */
-
-#include <cstdio>
-
+#include <iostream>
 #include <tdrp/tdrp.h>
+#include <string>
 using namespace std;
 
-/*
- ******************************* defines ********************************
- */
-
-
-/*
- ******************************* structures *****************************
- */
-
-/*
- ************************* global variables *****************************
- */
-
-/*
- ***************************** function prototypes **********************
- */
-
-/*
- ************************* class definitions ****************************
- */
-
-class Args
-{
- public:
-
-  // Constructor
-
-  Args(int argc, char **argv, char *prog_name);
+class Args {
   
-  // Destructor
+public:
 
-  ~Args(void);
-  
-  // Flag indicating whether the current object status is okay.
+  // constructor
 
-  bool okay;
-  
-  // TDRP overrides specified in the command line arguments.
+  Args ();
+
+  // destructor
+
+  ~Args ();
+
+  // parse
+
+  int parse(int argc, char **argv, const string &prog_name);
+
+   // public data
 
   tdrp_override_t override;
+  char **filePaths;
+  int nFiles;
 
-  int _nFiles;
-  bool _printSummary;
-  bool _printVarList;
-  bool _printSections;
-  char **_fileList;
+protected:
   
- private:
-  
-  // Print the usage for this program.
+private:
 
-  void _usage(char *prog_name,
-	      FILE *stream);
-  
-  // Return the class name for error messages.
-
-  static const char *_className(void)
-  {
-    return("Args");
-  }
+  void _usage(const string &prog_name, ostream &out);
   
 };
 
-
 #endif
-
-

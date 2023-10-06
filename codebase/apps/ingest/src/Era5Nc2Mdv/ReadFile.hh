@@ -54,11 +54,11 @@ class MdvxProj;
 class MdvxField;
 class OutputFile;
 
-class EraFile {
+class ReadFile {
 public:
    
-  EraFile (Params &params);
-  ~EraFile();
+  ReadFile (Params &params);
+  ~ReadFile();
    
   int init (int nFiles, char** fileList, bool printVarList,
 	    bool printsummary , bool printsections);

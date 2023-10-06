@@ -21,82 +21,73 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// OutputFile.hh
+///////////////////////////////////////////////////////////////
 //
-// OutputFile class - handles the output to MDV files
+// main for Era5Nc2Mdv
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// October 1998
+// October 2023
 //
 ///////////////////////////////////////////////////////////////
+//
+// Era5Nc2Mdv ingests ERA5 data and converts to MDV format.
+// The ERA5 files are in NetCDF, created using NCAR/CISL software
+// that sub-sections a part of the global data set.
+//
+////////////////////////////////////////////////////////////////
 
-#ifndef OutputFile_HH
-#define OutputFile_HH
-
-#include "Params.hh"
-#include "Era5Data.hh"
-#include <Mdv/DsMdvx.hh>
-
-#include <string>
+#include "Era5Nc2Mdv.hh"
+#include <toolsa/port.h>
+#include <toolsa/str.h>
+#include <signal.h>
 using namespace std;
 
-class OutputFile {
-  
-public:
-  
-  // constructor
-  
-  OutputFile(const string &prog_name, const Params &params,
-	     time_t model_time, time_t forecast_time, int forecast_delta,
-	     Era5Data &inData, Params::afield_name_map_t *field_name_map);
-  
-  // destructor
-  
-  virtual ~OutputFile();
-  
-  // return reference to DsMdvx object
-  DsMdvx &getDsMdvx() { return (_mdvx); }
+// file scope
 
-  // write out merged volume
-  int writeVol();
+static void tidy_and_exit (int sig);
+static Era5Nc2Mdv *Prog;
 
-protected:
+// main
 
-  
-private:
+int main(int argc, char **argv)
+{
+  // set signal handling
 
+  PORTsignal(SIGHUP, tidy_and_exit);
+  PORTsignal(SIGINT, tidy_and_exit);
+  PORTsignal(SIGTERM, tidy_and_exit);
+  PORTsignal(SIGQUIT, tidy_and_exit);
+  PORTsignal(SIGKILL, tidy_and_exit);
+  PORTsignal(SIGPIPE, (PORTsigfunc)SIG_IGN);
 
+  // create program object
 
-  const string &_progName;
-  const Params &_params;
-  const Params::afield_name_map_t *_field_name_map; //owned by Wrf2Mdv
+  Prog = new Era5Nc2Mdv(argc, argv);
+  if (!Prog->init(argc, argv))
+    return -1;
 
-  DsMdvx _mdvx;
+  // run it
 
-  int _npointsPlane;
+  int iret = 0;
 
-  void _initMdvx(time_t model_time, time_t forecast_time,
-		 int forecast_delta, Era5Data &inData);
-  
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-		     const char *name,
-		     const char *name_long,
-		     const char *units,
-		     const char *transform,
-		     const int field_code);
+  if (Prog->Run())
+    iret = -1;
 
+  // clean up
 
+  tidy_and_exit(iret);
+  return iret;
+}
 
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-			       const Params::output_field_name_t &field_name_enum,
-			       const char *units,
-			       const char *transform,
-		     const int field_code);
+// tidy up on exit
+
+static void tidy_and_exit (int sig)
+
+{
+  delete(Prog);
+  exit(sig);
+}
 
 
 
-};
-
-#endif

@@ -22,81 +22,99 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 /////////////////////////////////////////////////////////////
-// OutputFile.hh
+// WRFGrid.h
 //
-// OutputFile class - handles the output to MDV files
+// This class is responsible for computations concerning the 
+// model grid localtions.
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Paul Prestopnik, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// October 1998
+// 2007
 //
-///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
-#ifndef OutputFile_HH
-#define OutputFile_HH
+#ifndef WRFGrid_H
+#define WRFGrid_H
 
-#include "Params.hh"
-#include "Era5Data.hh"
-#include <Mdv/DsMdvx.hh>
-
+#include <dataport/port_types.h>
 #include <string>
+#include "Era5Data.hh"
+#include <Mdv/MdvxProj.hh>
 using namespace std;
 
-class OutputFile {
+
+class WRFGrid {
   
 public:
-  
+
   // constructor
   
-  OutputFile(const string &prog_name, const Params &params,
-	     time_t model_time, time_t forecast_time, int forecast_delta,
-	     Era5Data &inData, Params::afield_name_map_t *field_name_map);
+  WRFGrid(const string &prog_name, bool debug,
+	  int model_nlat, int model_nlon,
+	  fl32 **model_lat, fl32 **model_lon);
+  
+  WRFGrid(const string &prog_name, bool debug, Era5Data &inData);
   
   // destructor
   
-  virtual ~OutputFile();
+  ~WRFGrid();
+
+  // find model location for a lat/lon
   
-  // return reference to DsMdvx object
-  DsMdvx &getDsMdvx() { return (_mdvx); }
+  int findModelLoc(double lat, double lon);
 
-  // write out merged volume
-  int writeVol();
+  bool getGridIndices(double lat, double lon);
 
+  // Set for non-interpolation at the given point
+
+  void setNonInterp(int ilat, int ilon);
+
+  // model grid locations
+
+  int latIndex;
+  int lonIndex;
+
+  // interpolation factors for each corner
+
+  double wtSW;
+  double wtNW;
+  double wtNE;
+  double wtSE;
+
+  MdvxProj proj;
+  
 protected:
-
   
 private:
 
-
-
   const string &_progName;
-  const Params &_params;
-  const Params::afield_name_map_t *_field_name_map; //owned by Wrf2Mdv
+  bool _debug;
 
-  DsMdvx _mdvx;
+  int _nLat;
+  int _nLon; 
 
-  int _npointsPlane;
+  int _nx;  
+  int _ny; 
 
-  void _initMdvx(time_t model_time, time_t forecast_time,
-		 int forecast_delta, Era5Data &inData);
-  
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-		     const char *name,
-		     const char *name_long,
-		     const char *units,
-		     const char *transform,
-		     const int field_code);
+  fl32 **_lat;
+  fl32 **_lon;
 
+  double _minLat;
+  double _minLon;
+  double _maxLat;
+  double _maxLon;
+  double _meanDLat;
+  double _meanDLon;
+  double _midLon;
 
+  double _minx;
+  double _miny;
+  double _dx;
+  double _dy;
 
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-			       const Params::output_field_name_t &field_name_enum,
-			       const char *units,
-			       const char *transform,
-		     const int field_code);
-
-
+  double _conditionLon(double lon);
 
 };
 
 #endif
+

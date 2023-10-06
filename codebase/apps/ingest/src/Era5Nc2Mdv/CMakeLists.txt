@@ -16,7 +16,7 @@ project (Era5Nc2Mdv)
 set (SRCS
       Params.cc
       Args.cc
-      EraFile.cc
+      ReadFile.cc
       HtInterp.cc
       OutputFile.cc
       Era5Nc2Mdv.cc

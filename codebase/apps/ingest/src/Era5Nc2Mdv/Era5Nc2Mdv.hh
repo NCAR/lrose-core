@@ -21,109 +21,143 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////////////
-// Era5Nc2Mdv top-level application class
+/////////////////////////////////////////////////////////////
+// Era5Nc2Mdv.hh
 //
-// Converts Grib2 files into MDV format
-// Tested GRIB2 Models:
-//    gfs004    (gfs half degree resolution)  
-//    dgex218   (Downscaled Gfs with Eta Extensions, 10km resolution)
-//    eta218    (Eta/Nam 10km resolution)
-//    NDFD      (National Digital Forecast Database CONUS operational fields)
+// Era5Nc2Mdv object
 //
-// -Jason Craig-  Jun 2006
-////////////////////////////////////////////////////////////////////
-#ifndef _GRIB2_TO_MDV_HH
-#define _GRIB2_TO_MDV_HH
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+//
+// Oct 2023
+//
+///////////////////////////////////////////////////////////////
+
+#ifndef Era5Nc2Mdv_H
+#define Era5Nc2Mdv_H
 
 #include <string>
-#include <tdrp/tdrp.h>
-#include <toolsa/str.h>
-#include <toolsa/Path.hh>
 
-#include "Params.hh"
+#include <Mdv/DsMdvx.hh>
+#include <Mdv/MdvxProj.hh>
+#include <tdrp/tdrp.h>
+#include <toolsa/umisc.h>
+
 #include "Args.hh"
+#include "Params.hh"
+#include "HtInterp.hh"
+#include "PresInterp.hh"
+#include "Era5Data.hh"
+#include "WRFGrid.hh"
+
 using namespace std;
 
-//
-// Defines for success and failure returns
-//
-#define RI_FAILURE -1
-#define RI_SUCCESS 0
-
-//
-// Forward class declarations
-//
-class EraFile;
+class Era5Data;
+class InputPath;
+class ItfaIndices;
 
 class Era5Nc2Mdv {
- public:
+  
+public:
 
-  // instance -- create the Singleton
-  static Era5Nc2Mdv *Inst(int argc, char **argv);
-  static Era5Nc2Mdv *Inst();
+  // constructor
 
-   ~Era5Nc2Mdv();
-   
-   //
-   // Initialization
-   //
-   int init( int argc, char**argv );
+  Era5Nc2Mdv();
+  bool init(int argc, char **argv);
 
+  // destructor
+  
+  ~Era5Nc2Mdv();
 
-   // Flag indicating whether the program status is currently okay.
+  // run 
 
-   bool okay;
+  bool Run();
 
-   //
-   // Execution
-   //
-   int run();
-   
- private:
+private:
 
-   // 
-   // Initialization
-   //
-   Path _program;
-   
-   // Constructor -- private because this is a singleton object
-   Era5Nc2Mdv(int argc, char **argv);
+  /////////////////////
+  // Private members //
+  /////////////////////
 
-   void _usage();
-   int _processArgs( int argc, char **argv,
-		     tdrp_override_t& override ,
-		     int* nFiles, char*** fileList );
-   
-   //
-   // Singleton instance pointer
-   //
-   static Era5Nc2Mdv *_instance;  // singleton instance
+  Params::afield_name_map_t *_field_name_map;
 
-   //
-   // Parameter processing
-   //
-   char   *_paramsPath;
-   int _processParams( int nFiles, char** fileList );
+  string _progName;
+  Args _args;
+  Params _params;
+  char *_paramsPath;
+  PresInterp _presInterp;
 
-   //
-   // Processing
-   //
-   string _inputFileSuffix;
-   EraFile *_grib2Mdv;
+  MdvxProj _outputProj;
+  bool _rotateOutputUV;
+  
+  /////////////////////
+  // Private methods //
+  /////////////////////
 
-   // Program parameters.
+  bool _checkParams();
+  bool _initVertInterp();
+  
+  bool _run(InputPath &input_path);
 
-   char *_progName;
-   Args *_args;
-   Params *_params;
+  bool _processInData(Era5Data &inData);
 
-   int _nfiles;
-   char *_flist;
+  bool _acceptLeadTime(int lead_time);
+  
+  int _processForecast(Era5Data &inData,
+		       time_t gen_time,
+		       int lead_time,
+		       time_t forecast_time);
+
+  void _loadCrossOutputFields(Era5Data &inData,
+			      DsMdvx &mdvx);
+  
+  void _loadEdgeOutputFields(Era5Data &inData,
+			    DsMdvx &mdvx);
+  void _loadUEdgeOutputFields(Era5Data &inData,
+			    DsMdvx &mdvx);
+  void _loadVEdgeOutputFields(Era5Data &inData,
+			    DsMdvx &mdvx);
+  
+  void _interp3dField(Era5Data &inFile,
+		      const char *field_name,
+		      fl32 ***field_data,
+		      DsMdvx &mdvx,
+		      int planeOffset,
+		      int nPointsPlane,
+		      fl32 missingDataVal,
+		      const WRFGrid &mGrid,
+		      double mult = 1.0);
+
+ void _interp3dField(Era5Data &inData,
+		     const  Params::output_field_name_t &field_name_enum,
+		     fl32 ***field_data,
+		     DsMdvx &mdvx,
+		     const int planeOffset,
+		     const int nPointsPlane,
+		     const fl32 missingDataVal,
+		     const WRFGrid &mGrid,
+		     const double factor  = 1.0 );
+ 
+  void _interp2dField(Era5Data &inFile,
+		      const char *field_name,
+		      fl32 **field_data,
+		      DsMdvx &mdvx,
+		      int planeOffset,
+		      fl32 missingDataVal,
+		      const WRFGrid &mGrid,
+		      double mult = 1.0);
+
+  void _interp2dField(Era5Data &inData,
+		      const  Params::output_field_name_t &field_name_enum,
+		      fl32 **field_data,
+		      DsMdvx &mdvx,
+		      int planeOffset,
+		      fl32 missingDataVal,
+		      const WRFGrid &mGrid,
+		      double factor  = 1.0 );
+
+  void _initFieldNameMap();
+
 
 };
 
 #endif
-
-
-

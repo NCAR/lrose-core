@@ -25,9 +25,9 @@
 #
 # Makefile for Era5Nc2Mdv program
 #
-# RAP, NCAR, Boulder, CO, 80307, USA
+# Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
-# June 2006
+# Oct 2023
 #
 ###########################################################################
 
@@ -53,7 +53,7 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	EraFile.hh \
+	ReadFile.hh \
 	HtInterp.hh \
 	OutputFile.hh \
 	Era5Nc2Mdv.hh
@@ -62,7 +62,7 @@ HDRS = \
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	EraFile.cc \
+	ReadFile.cc \
 	HtInterp.cc \
 	OutputFile.cc \
 	Era5Nc2Mdv.cc \

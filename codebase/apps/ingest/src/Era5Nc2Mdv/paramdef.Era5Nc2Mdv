@@ -22,500 +22,895 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /*********************************************************
- * parameter definitions for Era5Nc2Mdv
+ * parameter definitions for Wrf2Mdv
  *
+ * Paul Prestopnik, RAP, NCXAR, Boulder, CO, USA, 80307-3000
+ *
+ * June 2007
+ * 
+ * Wrf2Mdv takes WRF output files (netcdf) and converts to MDV format.
  */
 
-commentdef {
-  p_header = "Era5Nc2Mdv PARAMETER FILE";
-  p_text = "Era5Nc2Mdv creates MDV from grib2 data files\n";
 
+commentdef
+{
+  p_header = "Wrf2Mdv reads output files from the WRF model and writes "
+             "MDV data. "
+             "It also allows the computation of some derived products.";
 }
 
-commentdef {
+
+/*********************************************************
+ * Debugging and process control.
+ */
+
+commentdef
+{
+  p_header = "DEBUGGING AND PROCESS CONTROL";
+}
+
+typedef enum
+{
+  DEBUG_OFF,
+  DEBUG_WARNINGS,
+  DEBUG_NORM,
+  DEBUG_VERBOSE
+} debug_t;
+
+paramdef enum debug_t
+{
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed with the "
+           "appropriate level of detail.";
+  p_default = DEBUG_OFF;
+} debug;
+
+typedef enum
+{
+  DEBUG_RH2,
+  DEBUG_SOIL_AM,
+  DEBUG_NONE
+} alg_debug_t;
+
+paramdef enum alg_debug_t
+{
+  p_descr = "Detailed debug information about a particular section of code";
+  p_help = "This can be useful for debugging a particular algorithm - "
+           "without having to turn all lots of debug printing.";
+  p_default = DEBUG_NONE;
+} alg_debug;
+
+paramdef string
+{
+  p_descr = "Process instance";
+  p_help = "Used for registration with procmap.";
+  p_default = "Test";
+} instance;
+
+paramdef int
+{
+  p_descr = "Time between registration with procmap.";
+  p_help = "The default is 60 secs. Set this to a longer value (say 120 secs) if you need to scan a large directory structure and there is no latest_data_info available.";
+  p_default = 60;
+} Procmap_reg_interval_secs;
+
+
+/*********************************************************
+ * Program modes of operation.
+ */
+
+commentdef
+{
   p_header = "PROGRAM MODES OF OPERATION.";
 }
 
-paramdef int {
-  p_default = 0;
-  p_descr = "Debug option";
-  p_help = "0 = No Debug info\n"
-	"1 = Regular Debug info\n"
-	"2 = Full Grib2 file output (see printSec params).";
-} debug;
-
-paramdef string {
-  p_default = "Test";
-  p_descr = "Instance";
-  p_help = "Process instance for registration with process mapper";
-} instance;
-
-paramdef int {
-  p_default = 1200;
-  p_descr = "Interval for procmap registration";
-  p_help = "Set to a high value if processing takes a long time. This will prevent the auto_restarter from killing and restarting the app.";
-} procmap_register_interval_secs;
-
-paramdef string {
-  p_default = "./";
-  p_descr = "Input directory";
-  p_help = "Directory which contains input grib2 files. Used only "
-           "if files are not specified on the command line";
-} input_dir;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Input file suffix";
-  p_help = "Input file suffixes will be checked against this string. "
-           "Used only if files are not specified on the command line";
-} input_suffix;
-
-paramdef string {
-  p_default = "";
-  p_descr = "Input file substring check.";
-  p_help = "Input files will be checked against this string."
-           "Can be used to filter different forecast times."
-           "Used only if files are not specified on the command line";
-} input_substring;
-
-paramdef string {
-  p_default = {};
-  p_descr = "Input file substrings check.";
-  p_help = "Input files will be checked against these strings. "
-           "Can be used to filter different forecast times. "
-           "Used only if files are not specified on the command line "
-           "and input_substring is set to an empty string.";
-} input_substrings[];
-
-paramdef int {             
-  p_min = 60;
-  p_default = 10800;
-  p_descr = "Max age (in seconds) of input data";
-  p_help = "Used only if files are not specified on the command line";
-} max_input_data_age;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "If TRUE, watch input_dir for change in _latest_data_info.";
-  p_help = "If FALSE, watch input_dir for new files.";
-} latest_data_info_avail;
-
-paramdef boolean {             
-  p_default = TRUE;
-  p_descr = "Option to recurse when searching for new files.";
-  p_help = "Only applies if latest_data_info_avail is FALSE.";
-} recursive_search;
-
-paramdef boolean {             
-  p_default = TRUE;
-  p_descr = "Option to only process the latest file in directory.";
-  p_help = "If TRUE, only the latest file will be processed. If FALSE, previously-written files will be processed.";
-} latest_file_only;
-
-paramdef int {             
-  p_default = 5;
-  p_descr = "How often to check for new data (secs).";
-} data_check_interval_secs;
-
-commentdef {
-  p_header = "PRINT SECTIONS PARAMETERS";
-  p_text = "Parameters only used with -printSec or debug > 1\n"
-	"For each grib message prints the sections defined below\n";
-}
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE prints the Indicator Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_is;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "If TRUE prints the Identification Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_ids;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE prints the Local Use Section (if present).";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_lus;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "If TRUE prints the Grid Definition Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_gds;
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "If TRUE prints the Product Definition Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_pds;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE prints the Data Representation Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_drs;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE prints the Bit-map Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_bms;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "If TRUE prints the Data Section.";
-  p_help = "Only prints with -printSec or debug > 1";
-} printSec_ds;
-
-commentdef {
-  p_header = "MDV OUTPUT PARAMETERS";
-}
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "This option will infer the missing value from the data if possible.";
-  p_help = "Grib2 doesnt allow for setting a missing value unless complex data packing used. ";
-} autoset_missing_value;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to limit the lead time of output files.";
-  p_help = "If set, we check the lead time before writing files.";
-} check_lead_time;
-
-paramdef int {             
-  p_default = 86400;
-  p_descr = "Maximum lead time for output files (secs).";
-  p_help = "See 'check_lead_time'.";
-} max_lead_time_secs;
-
-paramdef boolean
+typedef enum
 {
-  p_default = FALSE;
-  p_descr = "Lead time subsampling flag";
-  p_help = "Set to true to enable lead time subsampling.";
-} lead_time_subsampling;
+  ARCHIVE,
+  REALTIME
+} mode_t;
 
-paramdef int
-{ 
-  p_default = {};
-  p_descr = "The subsampled lead times to process";
-  p_descr = "Units are seconds.  Used only when do_lead_time_subsampling "
-    "is TRUE. If it empty, all lead times are sampled, even when do_lead_time_subsampling=TRUE";
-} subsample_lead_times[];
-
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Write mdv files in a forecast directory structure";
-  p_help = "If this is true, mdv files will be written in the "
-           "rap forecast directory structure.  Note that if "
-           "write_non_forecast is also set to true, two mdv "
-           "files will be written";
-} write_forecast;
-
-paramdef string {
-  p_default = "mdvp:://localhost::./mdv";
-  p_descr = "Url for mdv files in forecast structure";
-  p_help = "";
-} forecast_mdv_url;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write mdv files in a non-forecast directory structure";
-  p_help = "If this is true, mdv files will be written in the "
-           "regular (non-forecast) rap directory structure.  Note "
-           "that if write_forecast is also set to true, two mdv "
-           "files will be written.  Note also that this option allows "
-           "for overwriting files, since the forecast time will be "        
-           "used as the data time in this case.  This is a temporary "
-           "option to allow for easier display of the data";
-} write_non_forecast;
-
-paramdef string {
-  p_default = "mdvp:://localhost::./mdv";
-  p_descr = "Url for mdv files in non-forecast structure";
-  p_help = "";
-} non_forecast_mdv_url;
-
-typedef enum { 
-  TIMESTAMP_GEN_TIME, TIMESTAMP_FCAST_TIME
-} timestamp_t;
-
-paramdef enum timestamp_t {
-  p_default = TIMESTAMP_FCAST_TIME;
-  p_descr = "This parameter allows user to timestamp non-forecast mdv files based "
-	"on the model's run time or the forecast time.";
-  p_help = "The choices are TIMESTAMP_GEN_TIME and TIMESTAMP_FCAST_TIME";
-} non_forecast_timestamp;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Write mdv files as regular data files";
-  p_help = "If this is true, the output mdv files are assumed to be non-forecast data.  If this flag is set true, the write_non_forecast flag must also be set true and the non_forecast_mdv_url must be set.  If this flag is set false, and write_non_forecast_mdv_url is true, the output is assumed to be forecast data, but written into a regular (non-forecast) rap directory structure anyway";
-} data_is_non_forecast;
-
-paramdef boolean
+paramdef enum mode_t
 {
-  p_default = true;
-  p_descr = "Write _latest_data_info files for output data.";
-  p_help = "If false, will suppress writing of _latest_data_info files.";
-} writeLdataInfo;
+  p_descr = "Operation mode";
+  p_help = "Program may be run in two modes, archive and realtime. "
+  "In realtime mode, the analysis is performed for each volume scan "
+  "as it becomes available. In archive mode, the file list is obtained "
+  "from the command line.";
+  p_default = ARCHIVE;
+} mode;
+
+
+/*********************************************************
+ * Input data.
+ */
+
+commentdef
+{
+  p_header = "INPUT DATA.";
+}
 
 paramdef string
-  {
-   p_default = "Converted to MDV with Era5Nc2Mdv.";
-   p_descr = "Data set info.";
-   p_help = "This is placed in the MDV master header for documentation purposes.";
-  } data_set_info;
+{
+  p_descr = "path to SOILPARM.TBL config file that was used when running WRF.";
+  p_help = "Information in this table is neccessary to calculate "
+           "MOIST_AVAIL_FIELD.";
+  p_default = "./SOILPARM.TBL";
+} soilparm_path;
 
-paramdef string {
-  p_default = "GFS model output.";
-  p_descr = "Data set name.";
-  p_help = "This is placed in the MDV master header for documentation purposes.";
-} data_set_name;
+paramdef string
+{
+  p_descr = "Directory for input WRF data - REALTIME mode.";
+  p_help = "The latest_data_info file in this directory is updated each time "
+           "the model adds a forecast time step to the output file.";
+  p_default = ".";
+} realtime_input_dir;
 
-paramdef string {
-  p_default = "Grib2.";
-  p_descr = "Data set source details.";
-  p_help = "This is placed in the MDV master header for documentation purposes.";
-} data_set_source;
+paramdef int
+{
+  p_descr = "Wait for the file to be this many seconds quiescent "
+            "before processing it";
+  p_help = "Used for Real time mode when use_ldata = FALSE ;.";
+  p_default = 60;
+} File_quiescence_secs;
 
-typedef enum {
-  ENCODING_ASIS =      0,
-  ENCODING_INT8 =      1,
-  ENCODING_INT16 =     2,
-  ENCODING_FLOAT32 =   5
-} encoding_type_t;
+paramdef int
+{
+  p_descr = "Search no more than this level deep in the realtime_input_dir";
+  p_help = "This can be used to only ingest one domain.";
+  p_default = 3;
+} Dir_search_depth;
 
-typedef enum {
-  COMPRESSION_ASIS = -1,
-  COMPRESSION_NONE =  0,
-  COMPRESSION_RLE =   1,
-  COMPRESSION_LZO =   2,
-  COMPRESSION_ZLIB =  3,
-  COMPRESSION_BZIP =  4, 
-  COMPRESSION_GZIP =  5
-} compression_type_t;
+paramdef int
+{
+  p_descr = "Interval at which directory is scanned (secs).";
+  p_help = "The app waits for this time interval between directory scans.";
+  p_default = 50;
+} Dir_scan_interval_secs;
 
-typedef enum { 
-  NO_CHANGE = 0,
-  MPS_TO_KNOTS = 1,
-  M_TO_KM = 2,
-  M_TO_100FT = 3,
-  PASCALS_TO_MBAR = 4,
-  KELVIN_TO_CELCIUS = 5,
-  KGPKG_TO_GPKG = 6,
-  PERCENT_TO_FRACTION = 7,
-  FRACTION_TO_PERCENT = 8,
-  M_TO_FT = 9,
-  M_TO_MI = 10,
-  M_TO_KFT = 11,
-  MM_S_TO_MM_HR = 12
-} out_units_t;
+paramdef string
+{
+  p_descr = "If set to other than NULL, filenames must contain this string to be ingested.";
+  p_help = "This allows you to control which files will be processed. The app checks that this substring exists in the file name before processing.";
+  p_default = "";
+} DomainString;
 
-typedef enum {
-  BAD_VALUE = 0,
-  UNKNOWN_VALUE = 1,
-  USER_DEFINED = 2,
-} qc_default_t;
+paramdef string
+{
+  p_descr = "If set to other than NULL, filenames must have this extension "
+            "to be ingested.";
+  p_help = "This can be used to limit the type of files processed.";
+  p_default = "";
+} File_extension;
 
-typedef struct {
-  string param;
-  string level;
-  string mdv_name;
-  out_units_t units;
-  double upper_range_limit;
-  double lower_range_limit;
-  encoding_type_t encoding_type;
-  qc_default_t qc_default_type;
-  double qc_default_value;
-  int vert_level_min;
-  int vert_level_max;
-  int vert_level_dz;
-  boolean use_additional_bad_data_value;
-  double additional_bad_data_value;
-  boolean use_additional_missing_data_value;
-  double additional_missing_data_value;
-} out_field_t;
+paramdef boolean
+{
+  p_descr = "Set to TRUE if WRF is writing a _latest_data_info file.";
+  p_help = "Realtime mode only.";
+  p_default = FALSE;
+} use_ldata;
 
-paramdef boolean {
-  p_default = TRUE;
-  p_descr = "Flag to process all fields";
-  p_help = "If TRUE, all fields will be processed.\n"
-           "If FALSE, only fields listed in output_fields list will be processed";
-} process_everything;
+paramdef boolean
+{
+  p_descr = "Set to TRUE if the forecast and generation time and domain "
+            "should be determined from the filename.";
+  p_help = "Otherwise the forecast time is determined via the 'TIMES' variable,
+  "
+           "generation time is determined from the START_TIME attribute, "
+           "and domain is set to the GRID_ID attribute.  "
+           "The filename must be in the format dn.yyyymmddhh.tmHHMM.wrf "
+           "where n is the domain, yyyymmddhh is the gen time and "
+           "HHMM is the forecast lead time";
+  p_default = FALSE;
+} get_times_from_filenames;
 
-paramdef struct out_field_t {
-  p_descr = "List of output fields, which are descibed by the field parameter and vertical level type\n";
-  p_help = "To determine the available params and levels, use the command line argument -printSummary -file [filename]\n"
-  "  No Mdv output will be created, only a list of params and associated levels contained"
-  " in the GRIB file.\n"
-  "Note: process_everything must be set to FALSE to use this list.\n"
-  "                                 \n"
-  "out_field_t structure definition:\n"
-  "  param:string GRIB2 product ID.\n"
-  "  level:string GRIB2 level ID.\n"
-  "  mdv_name:string MDV short field name. Overrides default name.\n"
-  "                  Use empty string to keep default (param) name.\n"
-  "  out_units:out_units_t simple unit conversion utility. Options are:\n"
-  "    NO_CHANGE            -- no change to units\n"
-  "    MPS_TO_KNOTS         -- convert m/s to knots\n"
-  "    M_TO_KM              -- convert meters to kilometers\n"
-  "    M_TO_FT              -- convert meters to feet, \n"
-  "    M_TO_MI              -- convert meters to miles, \n"
-  "    M_TO_100FT           -- convert meters to 100's of feet, \n"
-  "                            flight levels\n"
-  "    PASCALS_TO_MBAR      -- convert pascals to millibars\n"
-  "    KELVIN_TO_CELCIUS    -- convert degrees kelvin to to degrees\n"
-  "                            celcius\n"
-  "    KGPKG_TO_GPKG        -- convert kilogram per kilogram to gram\n"
-  "                            per kilogram\n"
-  "    PERCENT_TO_FRACTION  -- convert percentage to fraction, values\n"
-  "                            between 0 and 1\n"
-  "    FRACTION_TO_PERCENT  -- convert fraction to percentage, values\n"
-  "                            between 0 and 100\n"
-  "                                           \n" 
-  "   upper_range_limit:double upper limit threshold for field.\n" 
-  "   lower_range_limit:double lower limit threshold for field. \n"
-  "                            When both upper and lower limits are set\n"
-  "                            to zero no thresholds are applied.\n"
-  "  encoding_type:encoding_type_t  Output variable encoding type\n"
-  "  qc_default_type:qc_default_t Replacement value for inputs outside\n"
-  "                               of the range_limit\n"
-  "  qc_default_value:double User defined replacement value.\n"
-  "  vert_level_min: minimum integer level that will be processed(If set to -1,\n"
-  "                  no restrictions will be set.)\n"
-  "  vert_level_max: maximum integer level that will be processed(If set to -1,\n"
-  "                  no restrictions will be set.)\n"
-  "  vert_level_dz:  integer change in vertical levels that will be processed.\n\n"
-  "Default behavior is to process everything with no changes";
-  p_default = {{"PRES", "HYBL", "", NO_CHANGE, 0.0, 0.0, ENCODING_FLOAT32, BAD_VALUE, 0.0, -1, -1, 1, false, 0.0, false, 0.0}};
+paramdef int
+{
+  p_descr = "Number of seconds to apply as an offset to the gen time.";
+  p_help = "This is useful if the file name time or the time found "
+           "in the data has an offset error. The default is no offset. "
+           "Use negative values to decrease the time.";
+  p_default = 0;
+} gen_time_offset;
+
+paramdef int
+{
+  p_descr = "Max age of input data - REALTIME mode.";
+  p_help = "For realtime only - max age of input data for it to be "
+           "valid (secs). "
+    "If the latest_data_info file is older than this, the program waits "
+    "for new data.";
+  p_min = 0;
+  p_default = 300;
+} max_realtime_valid_age;
+
+paramdef int
+{
+  p_descr = "The minimum forecast time (secs) relative to model start time.";
+  p_help = "Only forecast times greater than or equal to this dtime are "
+    "used. This allows us to ignore the first n forecasts, which may not "
+    "be good anyway due to model spin-up requirements.";
+  p_default = 0;
+} min_forecast_dtime;
+
+paramdef int
+{
+  p_descr = "The maximum forecast time (secs) relative to model start time.";
+  p_help = "Only forecast times less than or equal to this dtime are "
+    "used. This allows us to ignore the last n forecast.";
+  p_default = 99999999;
+} max_forecast_dtime;
+
+paramdef boolean
+{
+  p_descr = "Option to specify which lead times to process.";
+  p_help = "If FALSE, all lead times are processed. "
+            "If TRUE, only files with lead times in the parameter 'lead_times' "
+            "will be processed. "
+            "If this is set, it will act together with min_forecast_dtime to "
+            "limit the output times. "
+            "For a forecast to be accepted it must have a lead time equal to "
+            "or greater than min_forecast_dtime, and must also be in the "
+            "lead_times array.";
+  p_default = FALSE;
+} specify_lead_times;
+
+paramdef int
+{
+  p_descr = "Array of lead times (secs).";
+  p_help = "If 'specify_lead_times' is TRUE, only the files with lead times "
+           "matching this array will be processed.";
+  p_default = { };
+} lead_times[];
+
+
+/*********************************************************
+ * Output data.
+ */
+
+commentdef
+{
+  p_header = "OUTPUT DATA.";
+}
+
+paramdef string
+{
+  p_descr = "Output URL.";
+  p_help = "The WRF data is output to URL in MDV format.";
+  p_default = ".";
+} output_url;
+
+commentdef
+{
+  p_header = "Supported WRF raw and derived fields";
+  p_text =
+    "====== raw WRF 3-d fields - on cross (center) points =====\n"
+    "\t\n"
+    "U_FIELD, V_FIELD, Q_FIELD,\n"
+    "CLW_FIELD, RNW_FIELD, ICE_FIELD,\n"
+    "SNOW_FIELD, GRAUPEL_FIELD\n"
+    "W_FIELD, P_FIELD, PB_FIELD\n"
+    "PHB_FIELD, PH_FIELD, DNW_FIELD,\n"
+    "MUB_FIELD, MU_FIELD, REFL_10CM_FIELD\n"
+    "QNRAIN_FIELD, QNCLOUD_FIELD\n"
+    "\t\n"
+    "======= raw WRF 3-d fields - on dot (corner) points =====\n"
+    "\t\n"
+    "NOTE: only applicable if output_projection is OUTPUT_PROJ_NATIVE\n"
+    "\t\n"
+    "U_EDGE_FIELD, V_EDGE_FIELD,\n"
+    "\t\n"
+    "========== derived 3-d fields ==========\n"
+    "\t\n"
+    "TK_FIELD, TC_FIELD, WSPD_FIELD, WDIR_FIELD\n"
+    "PRESSURE_FIELD, RH_FIELD, SPEC_H_FIELD, DEWPT_FIELD, ICING_FIELD,\n"
+    "CLW_G_FIELD, RNW_G_FIELD\n"
+    "THETA_FIELD, DBZ_3D_FIELD, HGT_FIELD, Z_AGL_FIELD, ITFADEF_FIELD \n"
+    "\tQ_G_FIELD\n"
+    "     =====  CAPE/CIN 3D fields ======\n"
+    "CAPE_3D_FIELD, CIN_3D_FIELD, LCL_3D_FIELD, LFC_3D_FIELD, EL_3D_FIELD\n"
+    "\t\n"
+    "========== raw WRF 2-d fields ==========\n"
+    "\t\n"
+    "SOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,\n"
+    "SOIL_T_4_FIELD, SOIL_T_5_FIELD,\n"
+    "SOIL_M_1_FIELD, SOIL_M_2_FIELD, SOIL_M_3_FIELD,\n"
+    "SOIL_M_4_FIELD, SOIL_M_5_FIELD\n"
+    "SOIL_AM_1_FIELD, SOIL_AM_2_FIELD, SOIL_AM_3_FIELD,\n"
+    "SOIL_AM_4_FIELD, SOIL_AM_5_FIELD,\n"
+
+    "LAT_FIELD, LON_FIELD\n"
+	
+    "GROUND_T_FIELD, RAINC_FIELD, RAINNC_FIELD,\n"
+    "TERRAIN_FIELD\n"
+    "LAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,\n"
+    "PBL_HGT_FIELD\n"
+    "T2_FIELD, Q2_FIELD, U10_FIELD, V10_FIELD,\n"
+    "SNOWH_FIELD\n"
+    "SFC_PRES_FIELD, LAND_MASK_FIELD, TH2_FIELD,\n"
+    "HFX_FIELD, LH_FIELD, SNOW_WE_FIELD, SOIL_TYPE_FIELD\n"
+    "SNOW_NC_FIELD, GRAUPEL_NC_FIELD\n"
+    "\t\n"
+    "========== derived 2-d fields ==========\n"
+    "\t\n"
+    "FZLEVEL_FIELD, RAIN_TOTAL_FIELD,\n"
+    "RH2_FIELD, T2C_FIELD\n"
+    "WSPD10_FIELD, WDIR10_FIELD,\n"
+    "TWP_FIELD, RWP_FIELD, VIL_FIELD\n"
+    "DBZ_2D_FIELD, SPEC_H_2M_FIELD \n"
+    "     =====  CAPE/CIN 2D fields ======\n"
+    "CAPE_FIELD, CIN_FIELD, LCL_FIELD, LFC_FIELD, EL_FIELD\n"
+    "\t\n"
+	
+    "========== raw GEOGRID 2-d fields ==========\n"
+    "\t\n"
+    "LANDUSEF_1_FIELD (urban),\n"
+    "LANDUSEF_2_FIELD (crops/woods),\n"
+    "LANDUSEF_6_FIELD (dryland crops and pasture), \n"
+    "LANDUSEF_15_FIELD (mixed forest), \n"
+    "GREENFRAC_7_FIELD (July)\n";
+}
+ 
+typedef enum
+{
+  // raw WRF 3-d fields, on dot (center) points
+
+  U_FIELD, V_FIELD,  Q_FIELD,
+  CLW_FIELD, RNW_FIELD, ICE_FIELD,
+  SNOW_FIELD, GRAUPEL_FIELD, 
+  W_FIELD, P_FIELD, PB_FIELD,
+  PHB_FIELD, PH_FIELD, DNW_FIELD,
+  MUB_FIELD, MU_FIELD, REFL_10CM_FIELD,
+  QNRAIN_FIELD, QNCLOUD_FIELD,
+
+  // raw WRF 3-d fields, on cross (corner) points
+
+  U_EDGE_FIELD, V_EDGE_FIELD,
+
+  // derived 3-d fields
+
+  TK_FIELD,
+  TC_FIELD, WSPD_FIELD, WDIR_FIELD, 
+  PRESSURE_FIELD, RH_FIELD, SPEC_H_FIELD, DEWPT_FIELD, 
+  ICING_FIELD,
+  CLW_G_FIELD, RNW_G_FIELD, 
+  THETA_FIELD, 
+  DBZ_3D_FIELD, HGT_FIELD,Z_AGL_FIELD,
+  ITFADEF_FIELD, GEO_POT_FIELD, Q_G_FIELD,
+
+  //CAPE/CIN 3d fields
+
+  CAPE_3D_FIELD, CIN_3D_FIELD, LCL_3D_FIELD, LFC_3D_FIELD, EL_3D_FIELD,
+
+  // raw WRF 2-d fields
+
+  START_2D_FIELDS,
+  SOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,
+  SOIL_T_4_FIELD, SOIL_T_5_FIELD,
+  SOIL_M_1_FIELD, SOIL_M_2_FIELD, SOIL_M_3_FIELD,
+  SOIL_M_4_FIELD, SOIL_M_5_FIELD, SOIL_AM_1_FIELD,
+  SOIL_AM_2_FIELD, SOIL_AM_3_FIELD, SOIL_AM_4_FIELD,
+  SOIL_AM_5_FIELD,
+
+  //be sure to put the soil fields first in the 2d fields section
+
+  LAT_FIELD, LON_FIELD, GROUND_T_FIELD, 
+  RAINC_FIELD, RAINNC_FIELD, TERRAIN_FIELD, 
+  LAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,
+  PBL_HGT_FIELD, 
+  T2_FIELD, Q2_FIELD, U10_FIELD, V10_FIELD,
+  SNOWH_FIELD,
+  SFC_PRES_FIELD, LAND_MASK_FIELD, TH2_FIELD,
+  HFX_FIELD, LH_FIELD, SNOW_WE_FIELD, SNOW_NC_FIELD,
+  GRAUPEL_NC_FIELD, SOIL_TYPE_FIELD,
+
+  // derived 2-d fields
+
+  FZLEVEL_FIELD, RAIN_TOTAL_FIELD,
+  RH2_FIELD, 
+  T2C_FIELD, WSPD10_FIELD, WDIR10_FIELD,
+  TWP_FIELD, RWP_FIELD, VIL_FIELD,
+  DBZ_2D_FIELD, SPEC_H_2M_FIELD,
+  CAPE_FIELD, CIN_FIELD, LCL_FIELD, LFC_FIELD, EL_FIELD,
+
+  // raw GEOGRID 2-d fields 
+
+  LANDUSEF_1_FIELD, LANDUSEF_2_FIELD,
+  LANDUSEF_6_FIELD, LANDUSEF_15_FIELD,
+  GREENFRAC_7_FIELD,
+
+ // **** LEAVE THIS AS THE LAST FIELD ******
+
+   TOTAL_FIELD_COUNT
+} output_field_name_t;
+
+typedef enum
+{
+  OUT_INT8 = 1,
+  OUT_INT16 = 2,
+  OUT_FLOAT32 = 5
+} output_encoding_t;
+
+typedef struct
+{
+  output_field_name_t name;
+  output_encoding_t encoding;
+} output_field_t;
+
+paramdef struct output_field_t
+{
+  p_descr = "Output fields with encoding type.";
+  p_help = "Note: do not use START_2D_FIELDS or TOTAL_FIELD_COUNT - these "
+           "are only delimiters.";
+  p_default = {
+    { U_FIELD, OUT_INT8 },
+    { V_FIELD, OUT_INT8 },
+    { WSPD_FIELD, OUT_INT8 },
+    { TC_FIELD, OUT_INT16 },
+    { RH_FIELD, OUT_INT8 },
+    { CLW_FIELD, OUT_INT8 },
+    { FZLEVEL_FIELD, OUT_INT16 },
+    { DBZ_2D_FIELD, OUT_INT8 }
+  };
 } output_fields[];
 
-paramdef enum encoding_type_t {
-  p_default = ENCODING_FLOAT32;
-  p_descr = "File encoding type, Used only when process_everything is true.";
-} encoding_type;
 
-paramdef enum compression_type_t {
-  p_default = COMPRESSION_GZIP;
-  p_descr = "File compression type, Used only when process_everything is true.";
-} compression_type;
+typedef struct
+{
+  output_field_name_t original_name;
+  string name;
+  string long_name;
+} afield_name_map_t;
 
-typedef struct {
-  boolean SpecifyScaling;
-  double scale;
-  double bias;
-} Scaling_info_t;
+paramdef struct afield_name_map_t
+{
+  p_descr = "These tuples match a field to a new name and long name.";
+  p_help = "This allows you to rename individual fields to whatever you like.  "
+           "If you define field_name_map you must define it for all fields you "
+           "are using.  "
+           "If you do not define it, the default names are used for all fields.";
+  p_default = {
+  { U_FIELD, "U", "u-component of wind"},
+  { V_FIELD, "V", "v-component of wind"},
+  { Q_FIELD, "Q", "Mixing ratio"},
+  { CLW_FIELD, "clw", "Cloud liquid mixing ratio"},
+  { RNW_FIELD, "rnw", "Rain mixing ratio"},
+  { ICE_FIELD, "ice", "Ice mixing ratio"},
+  { SNOW_FIELD, "snow", "Snow mixing ratio"},
+  { GRAUPEL_FIELD, "graupel", "Graupel mixing ratio"},
+  { W_FIELD, "W", "w-component of wind"},
+  { P_FIELD, "P", "pressure perturbation"},
+  { PB_FIELD, "PB", "BASE STATE PRESSURE"},
+  { U_EDGE_FIELD, "U_EDGE", "u wind on edge"},
+  { V_EDGE_FIELD, "V_EDGE", "v wind on edge"},
+  { PHB_FIELD, "PHB", "base-state geopotential" },
+  { PH_FIELD, "PH", "perturbation geopotential" },
+  { DNW_FIELD, "DNW", "d(eta) values between full (w) levels" },
+  { MUB_FIELD, "MUB", "base state dry air mass in column" },
+  { MU_FIELD, "MU", "perturbation dry air mass in column" },
+  { REFL_10CM_FIELD, "dbz", "Radar Reflectivity" },
+  { QNRAIN_FIELD, "nRain", "number concentration of rain" },
+  { QNCLOUD_FIELD, "nCloud", "number concentration of cloud" },
+  { ITFADEF_FIELD, "ITFADEF", "Turbulence severity - ITFA"},
+  { TK_FIELD, "TK", "Temperature"},
+  { TC_FIELD, "Temp", "Temperature"},
+  { WSPD_FIELD, "Wspeed", "Wind speed"},
+  { WDIR_FIELD, "Wdir", "Wind dirn"},
+  { PRESSURE_FIELD, "pressure", "Absolute pressure"},
+  { RH_FIELD, "RH", "Relative humidity"},
+  { SPEC_H_FIELD, "SpecH", "Specific humidity"},
+  { DEWPT_FIELD, "DewPt", "Dew point"},
+  { ICING_FIELD, "Icing", "Icing severity index"},
+  { CLW_G_FIELD, "CLW_G", "Cloud Liquid Mixing Ratio g/kg"},
+  { RNW_G_FIELD, "RNW_G", "Rain Liquid Mixing Ratio g/kg"},
+  { THETA_FIELD, "THETA", "Potential Temperature"},
+  { DBZ_3D_FIELD, "dbz_3d", "dBZ-3D Estimated"},
+  { HGT_FIELD, "geo_hgt", "Geopotential Height"},
+  { GEO_POT_FIELD, "geo_pot", "Geopotential"},
+  { Q_G_FIELD, "Q_g", "Mixing ratio g/kg"},
+  { CAPE_3D_FIELD, "CAPE_3D", "CAPE 3D"},
+  { CIN_3D_FIELD, "CIN_3D", "CIN 3D"},
+  { LCL_3D_FIELD, "LCL_3D", "LCL 3D"},
+  { LFC_3D_FIELD, "LFC_3D", "LFC 3D"},
+  { EL_3D_FIELD, "EL_3D", "EL 3D"},
+  { Z_AGL_FIELD, "zz", "Height above ground"},
+  { SOIL_T_1_FIELD, "soil_t_1", "Soil temperature in layer 1"},
+  { SOIL_T_2_FIELD, "soil_t_2", "Soil temperature in layer 2"},
+  { SOIL_T_3_FIELD, "soil_t_3", "Soil temperature in layer 3"},
+  { SOIL_T_4_FIELD, "soil_t_4", "Soil temperature in layer 4"},
+  { SOIL_T_5_FIELD, "soil_t_5", "Soil temperature in layer 5"},
+  { SOIL_M_1_FIELD, "soil_m_1", "Soil moisture in layer 1"},
+  { SOIL_M_2_FIELD, "soil_m_2", "Soil moisture in layer 2"},
+  { SOIL_M_3_FIELD, "soil_m_3", "Soil moisture in layer 3"},
+  { SOIL_M_4_FIELD, "soil_m_4", "Soil moisture in layer 4"},
+  { SOIL_M_5_FIELD, "soil_m_5", "Soil moisture in layer 5"},
+  { SOIL_AM_1_FIELD, "soil_am_1", "Available Soil moisture in layer 1"},
+  { SOIL_AM_2_FIELD, "soil_am_2", "Available Soil moisture in layer 2"},
+  { SOIL_AM_3_FIELD, "soil_am_3", "Available Soil moisture in layer 3"},
+  { SOIL_AM_4_FIELD, "soil_am_4", "Available Soil moisture in layer 4"},
+  { SOIL_AM_5_FIELD, "soil_am_5", "Available Soil moisture in layer 5"},
+  { LAT_FIELD, "latitude", "Latitude"},
+  { LON_FIELD, "longitude", "Longitude"},
+  { GROUND_T_FIELD, "ground_t", "Ground temperature"},
+  { RAINC_FIELD, "rainc", "Accumulated Total Cumulus Precipitation"},
+  { RAINNC_FIELD, "rainnc", "Accumulated Total Grid Scale Precipitation"},
+  { TERRAIN_FIELD, "terrain", "Terrain height"},
+  { LAND_USE_FIELD, "land_use", "Land use category"},
+  { SNOWCOVR_FIELD, "snowcovr", "Snow cover flags"},
+  { TSEASFC_FIELD, "tseasfc", "Sea surface temperature"},
+  { PBL_HGT_FIELD, "pbl_hgt", "Pbl height"},
+  { T2_FIELD, "T2", "2-meter Temperature"},
+  { Q2_FIELD, "Q2", "2-meter Mixing Ratio"},
+  { U10_FIELD, "U10", "10-meter U Component"},
+  { V10_FIELD, "V10", "10-meter V Component"},
+  { SNOWH_FIELD, "snowh", "Physical snow depth"},
+  { SFC_PRES_FIELD, "surfP", "Surface Pressure"},
+  { LAND_MASK_FIELD, "land_mask", "Land Mask (1-land 0-water)"},
+  { TH2_FIELD, "TH2", "POT TEMP at 2 M"},
+  { HFX_FIELD, "HFX", "UPWARD HEAT FLUX AT THE SURFACE"},
+  { LH_FIELD, "LH", "LATENT HEAT FLUX AT THE SURFACE"},
+  { SNOW_WE_FIELD, "SNOW_WE", "SNOW WATER EQUIVALENT"},
+  { SNOW_NC_FIELD, "SNOW_NC", "ACCUMULATED TOTAL GRID SCALE SNOW AND ICE"},
+  { GRAUPEL_NC_FIELD, "GRAUPEL_NC", "ACCUMULATED TOTAL GRID SCALE GRAUPEL"},
+  { SOIL_TYPE_FIELD, "SOIL_TYPE", "DOMINANT SOIL CATEGORY"},
+  { FZLEVEL_FIELD, "FZLevel", "freezing level"},
+  { RAIN_TOTAL_FIELD, "rain_total", "Rain accumulation - con + non"},
+  { T2C_FIELD, "T2C", "2-meter Temperature in C"},
+  { DBZ_2D_FIELD, "dbz_2d", "dBZ-2D Estimated"},
+  { RH2_FIELD, "RH2", "Relative humidity at 2 meters"},
+  { WSPD10_FIELD, "Wspeed10", "Wind speed at 10 meters"},
+  { WDIR10_FIELD, "Wdir10", "Wind direction at 10 meters"},
+  { LANDUSEF_1_FIELD, "Landusef_1", "Landuse (urban)"},
+  { LANDUSEF_2_FIELD, "Landusef_2", "Landuse (crops/woods)"},
+  { LANDUSEF_6_FIELD, "Landusef_6", "Landuse (dryland crops and pasture)"},
+  { LANDUSEF_15_FIELD, "Landusef_15", "Landuse (mixed forest)"},
+  { GREENFRAC_7_FIELD, "Greenfrac_7", "Green Fraction (July)"},
+  { TWP_FIELD, "twp", "Total Water Path"},
+  { VIL_FIELD, "vil", "digital vil"},
+  { RWP_FIELD, "rwp", "Rain Water Path"},
+  { SPEC_H_2M_FIELD, "spec_h2m", "Specific Humidity at 2 meters"},
+  { CAPE_FIELD, "CAPE", "CAPE"},
+  { CIN_FIELD, "CIN", "CIN"},
+  { LCL_FIELD, "LCL", "LCL"},
+  { LFC_FIELD, "LFC", "LFC"},
+  { EL_FIELD, "EL", "EL"}
+  };
+} field_name_map[];
 
-paramdef struct Scaling_info_t {
-  p_descr = "Options for user defined scale and bias.";
-  p_help = "Only applies if ENCODING type is INT8 or INT16.\n"
-           "If SpecifyScaling is true then the following scale "
-           "and bias values will be used. If false dynamic scaling "
-           "is applied.";
-  p_default = {FALSE, 0.50, -32.0};
-} output_scaling_info;
-
-paramdef boolean {
+paramdef boolean
+{
   p_default = FALSE;
-  p_descr = "If TRUE remaps output.";
-  p_help = "";
-} remap_output;
+  p_descr = "Set to TRUE to convert wind speed fields to knots.";
+} wind_speed_in_knots;
 
-typedef enum {
-  PROJ_LATLON		= 0,
-  PROJ_LAMBERT_CONF	= 3,
-  PROJ_FLAT		= 8
-} projection_t;
+typedef enum
+{
+  OUTPUT_PROJ_FLAT,
+  OUTPUT_PROJ_LATLON,
+  OUTPUT_PROJ_LAMBERT,
+  OUTPUT_PROJ_STEREOGRAPHIC,
+  OUTPUT_PROJ_MERCATOR,
+  OUTPUT_PROJ_NATIVE
+} output_projection_t;
 
-typedef struct {
-  projection_t type;
-  double rotation;
-  double origin_lat;
-  double origin_lon;
-  double ref_lat_1;
-  double ref_lat_2;
-} projection_info_t;
+paramdef enum output_projection_t
+{
+  p_descr = "Projection of output grid.";
+  p_help = "\tFLAT - (x,y) Cartesian data in km from a given origin.\n"
+           "\tLATLON - lat/lon grid with constant grid spacing.\n"
+           "\tLAMBERT - Lambert conformal projection.\n"
+           "\tNATIVE - use the native data grid, copy to output. "
+           "NATIVE only works for model data on Lambert and "
+           "Stereographic projections.";
+  p_default = OUTPUT_PROJ_FLAT;
+} output_projection;
 
-paramdef struct projection_info_t {
-  p_descr = "This is the user defined projection";
-  p_help = "If remap_output is true this defines the projection to remap to."
-           "\n\nThe choice of projections are PROJ_LATLON, PROJ_LAMBERT_CONF and "
-           "PROJ_FLAT.\n\nPROJ_LATLON is a latitude/longitude projection, and if "
-           "it is chosen the remaining parameters can be ignored.\n\nPROJ_FLAT is "
-           "a flat projection, and if it is chosen the parameters rotation, "
-           "origin_lat, origin_lon must be set.\n\nPROJ_LAMBERT_CONF is a Lambert "
-           "conformal projection, and if it is chosen the parameters origin_lat, "
-           "origin_lon, ref_lat_1 and ref_lat_2 must be set.";
-  p_default = {PROJ_LAMBERT_CONF, 0.0, 25.0, -95.0, 25.0, 25.0};
-} out_projection_info; 
-  
-typedef struct {
+
+typedef struct
+{
+  double lat;
+  double lon;
+} output_origin_t;
+
+paramdef struct output_origin_t
+{
+  p_descr = "Origin of output grid.";
+  p_help = "Used with OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LAMBERT, "
+           "OUTPUT_PROJ_STEREOGRAPHIC.";
+  p_default = { 40.0, -104.0 };
+} output_origin;
+
+paramdef double
+{
+  p_descr = "lat 1 value for Lambert conformal projection.";
+  p_default = 10.0;
+} lambert_lat1;
+
+paramdef double
+{
+  p_descr = "lat 2 value for Lambert conformal projection.";
+  p_default = 60.0;
+} lambert_lat2;
+
+paramdef double
+{
+  p_descr = "Tangent latitude for stereographic projection.";
+  p_default = 60.0;
+} stereographic_tangent_lat;
+
+paramdef double
+{
+  p_descr = "Tangent longitude for stereographic projection.";
+  p_default = 0.0;
+} stereographic_tangent_lon;
+
+typedef struct
+{
   int nx;
   int ny;
   double minx;
   double miny;
   double dx;
   double dy;
-} grid_info_t;
+} output_grid_t;
 
-paramdef struct grid_info_t {
-  p_descr = "This is the user defined grid.";
-  p_help = "If remap_output is true this defines the grid info for the remap.\n\nFor a LATLON projection:\n  minx = minLon\n  miny = minLat\n  dx = deltaLon\n  dy = deltaLat.";
-  p_default = {301, 225, -3332.142334, -588.890442, 20.318001, 20.318001};
-} out_grid_info; 
+paramdef struct output_grid_t
+{
+  p_descr = "Output grid parameters.";
+  p_help = "The grid params for the output grid.";
+  p_default = { 300, 300, -149.5, -149.5, 1.0, 1.0 };
+} output_grid;
 
-paramdef string {
-  p_default = ""; 
-  p_descr = "Option to override the vlevels in the vlevel header of the specified level types.";
-  p_help = "If not empty, will replace the vlevels of variables with the specified vlevel type with those specified in 'vlevel_array'.\n"
-           "Normal vlevel types to replace are: 'SIGL', 'SIGMA', or 'HYBL'.\n"
-           "Please note using this functionality can create incorrect levels, use carefully!";
-} override_vlevels;        
+typedef enum
+{
+  FLIGHT_LEVELS,
+  PRESSURE_LEVELS,
+  HEIGHT_LEVELS,
+  NATIVE_VERTICAL_LEVELS
+} output_levels_t;
 
-paramdef double {
-  p_default = 0;
-  p_descr = "vlevel values to override what is already in the file.";
-  p_help = "See 'override_vlevels'.";
-} vlevel_array[];
+paramdef enum output_levels_t
+{
+  p_descr = "Option to choose vertical levels for output file.";
+  p_help = "If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical "
+           "levels will be interpolated accordingly. "
+           "If NATIVE_VERTICAL_LEVELS, no interpolation is done and the data "
+           "is output on the original vertical levels (i.e. sigma, eta, etc.).";
+  p_default = FLIGHT_LEVELS;
+} output_levels;
 
-commentdef {
-  p_header = "INTERPOLATE INTO HEIGHT LEVELS (km MSL)";
-  p_text = "Option to interpolate the model data into height levels. This requires that (a) the vertical coords are pressure levels and (b) the geopotential height field is included in the input data.";
-}
+paramdef int
+{
+  p_descr = "Array of output flight levels.";
+  p_help = "Only used if output_levels is FLIGHT_LEVELS. "
+    "The output grid has a variable Z dimension, in flight levels. "
+    "The flight levels in the output are taken from this array.";
+  p_default = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+	       110, 120, 130, 140, 150, 160, 170, 180, 190, 200,
+	       210, 230, 250, 270, 290, 310, 330, 350, 370, 390,
+	       410, 430, 450};
+} flight_levels[];
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to interpolate onto height levels (km MSL).";
-  p_help = "(a) The vertical coords of the input data set MUST be PRESSURE levels. (b) Also, geopotential height must be available in the data set. This field is used for the interpolation.\n";
-} interp_vlevels_to_height;
+paramdef double
+{
+  p_descr = "Array of output pressure levels (mb).";
+  p_help = "Only used if output_levels is PRESSURE_LEVELS. "
+    "The output grid has a variable Z dimension, in pressure levels. "
+    "The pressure levels in the output are taken from this array.";
+  p_default = {1000, 950, 900, 850, 700, 500, 300, 200, 100};
+} pressure_levels[];
 
-paramdef string {
-  p_default = "HGT"; 
-  p_descr = "Name of geopotential height field in MDV file.";
-  p_help = "See output_fields array.\n";
-} height_field_mdv_name;        
-
-paramdef double {
+paramdef double
+{
+  p_descr = "Array of output height levels (km).";
+  p_help = "Only used if output_levels is HEIGHT_LEVELS. "
+    "The output grid has a variable Z dimension. "
+    "The height levels in the output are taken from this array.";
   p_default = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-  p_descr = "Array of output height levels (km MSL).";
-  p_help = "The data fields are intepolated onto this set of height levels.";
 } height_levels[];
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "Option to determine the heights from the pressure levels.";
-  p_help = "If TRUE, we use the ICAO standard atmosphere to compute the target heights from the pressure levels. In this case, the height_levels array is ignored.\n";
-} compute_heights_from_pressure_levels;
+typedef enum {
+  _MDV_COMPRESSION_NONE = 0,
+  _MDV_COMPRESSION_RLE = 1,
+  _MDV_COMPRESSION_LZO = 2,
+  _MDV_COMPRESSION_ZLIB = 3,
+  _MDV_COMPRESSION_BZIP = 4
+} compression_t;
 
-paramdef double {
-  p_default = 0;
-  p_descr = "Minimum height when computing from pressure levels (km).";
-  p_help = "Any heights below this are removed when converting from pressure levels.";
-} min_height_from_pressure_levels;
+paramdef boolean
+{
+  p_descr = "Option to copy the lowest valid value down to the lowest level";
+  p_help = "This option is applicable only to FLIGHT_LEVELS. "
+           "Where terrain is encountered, there may be flight levels which "
+           "have missing data after vertical interpolation from sigma levels "
+           "to flight levels. "
+           "If this option is set to true, the data from the lowest valid "
+           "flight level will be copied down to the levels below.";
+  p_default = false;
+} copy_lowest_downwards;
 
+paramdef enum compression_t
+{
+  p_descr = "Compression type for output files";
+  p_help = "See <mdv/mdv_macros.h> for the C definitions to which these "
+           "correspond.";
+  p_default = _MDV_COMPRESSION_ZLIB;
+} output_compression;
+
+typedef enum
+{
+  SCALING_ROUNDED,
+  SCALING_DYNAMIC
+} scaling_t;
+
+paramdef enum scaling_t
+{
+  p_descr = "Applicable for INT8 and INT16 encoding.";
+  p_help = "\tROUNDED: produces values which are easily readable.\n"
+           "\tINTEGRAL: integer output values.\n"
+           "\tDYNAMIC: utilizes the full dynamic range.\n";
+  p_default = SCALING_DYNAMIC;
+} output_scaling;
+
+paramdef boolean
+{
+  p_descr = "Option to create output path in forecast format.";
+  p_help = "If false, the output path is determined  using the valid time: "
+           "topdir/yyyymmdd/hhmmss.mdv. "
+           "If true, the output path is determined using the model "
+           "initialization (generate) time and the forecast lead time in "
+           "secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv";
+  p_default = false;
+} output_path_in_forecast_format;
+
+
+/*********************************************************
+ * File header info.
+ */
+
+commentdef
+{
+  p_header = "FILE HEADER INFO";
+}
+
+paramdef string
+{
+  p_descr = "Data set info.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+  p_default = "This MDV file was created by Wrf2Mdv.";
+} data_set_info;
+
+paramdef string
+{
+  p_descr = "Data set name.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+  p_default = "WRF model output.";
+} data_set_name;
+
+paramdef string
+{
+  p_descr = "Data set source details.";
+  p_help = "This is placed in the MDV master header for "
+    "documentation purposes.";
+  p_default = "WRF output from somewhere.";
+} data_set_source;
+
+
+/*********************************************************
+ * Icing severity product.
+ */
+
+commentdef
+{
+  p_header = "ICING SEVERITY PRODUCT";
+  p_text = "The icing severity product is normalized between 0 and 1, "
+           "where 0 indicates no icing and 1 indicates a high probability "
+           "of severe icing.";
+}
+
+paramdef float
+{
+  p_descr = "Cloud liquid water content threshold for trace icing - g/m3.";
+  p_default = 0.0;
+} no_icing_clw;
+
+paramdef float
+{
+  p_descr = "Cloud liquid water content threshold for trace icing - g/m3.";
+  p_default = 0.04;
+} trace_icing_clw;
+
+paramdef float
+{
+  p_descr = "Icing severity threshold for trace icing.";
+  p_default = 0.15;
+} trace_severity;
+
+paramdef float
+{
+  p_descr = "Cloud liquid water content threshold for light icing - g/m3.";
+  p_default = 0.08;
+} light_icing_clw;
+
+paramdef float
+{
+  p_descr = "Icing severity threshold for light icing.";
+  p_default = 0.3;
+} light_severity;
+
+paramdef float
+{
+  p_descr = "Cloud liquid water content threshold for moderate icing - g/m3.";
+  p_default = 0.2;
+} moderate_icing_clw;
+
+paramdef float
+{
+  p_descr = "Icing severity threshold for moderate icing.";
+  p_default = 0.5;
+} moderate_severity;
+
+paramdef float
+{
+  p_descr = "Cloud liquid water content threshold for severe icing - g/m3.";
+  p_default = 0.5;
+} severe_icing_clw;
+
+paramdef float
+{
+  p_descr = "Icing severity threshold for severe icing.";
+  p_default = 1.0;
+} severe_severity;
+
+
+/*********************************************************
+ * CAPE/CIN parameters.
+ */
+
+commentdef
+{
+  p_header = "CAPE/CIN parameters";
+  p_text = "CAPE & CIN are used as inputs to CIP & FIP";
+}
+
+paramdef string
+{
+  p_descr = "File containing the adiabat temperature lookup table.";
+  p_help = "This file originally comes from the MM5 RIP code and must "
+           "follow that format.  "
+           "The current RIP code file can be found in CVS under:\n"
+           "\tlibs/physics/data/psadilookup.dat\n"
+	   "Leave this set to 'null' and CAPE/CIN can't be calculated\n";
+	   
+  p_default = "null";
+} adiabat_temp_lookup_filename;
+
+paramdef boolean
+{
+  p_descr = "Should CIN values be negative?";
+  p_help = "The physics library calculates positive CIN values, but negative "
+           "values are often expected.";
+  p_default = true;
+} negative_cin;
+
+typedef struct
+{
+  double lower_level;
+  double upper_level;
+} pressure_limits_t;
+
+paramdef struct pressure_limits_t
+{
+  p_descr = "The minimum and maximum pressure levels to process";
+  p_help = "All levels of the input fields are read in and used for "
+           "calculating the CAPE/CIN values at these levels.  "
+           "Currently, all levels of the input fields are output in the "
+           "CAPE/CIN fields, but only the levels between these (inclusive) "
+           "are calculated.  "
+           "The CAPE/CIN values for other levels will be 0.0 (unless the "
+           "dynamically calculated scale and bias make these a little off "
+           "from 0.0).";
+  p_default = { 1000.0, 700.0 };
+} pressure_limits;

@@ -21,81 +21,76 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/////////////////////////////////////////////////////////////
-// OutputFile.hh
+///////////////////////////////////////////////////
+// OutputFile - adapted from code by Mike Dixon for
+// MM5Ingest
 //
-// OutputFile class - handles the output to MDV files
-//
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
-//
-// October 1998
-//
-///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////
+#ifndef _OUTPUT_FILE_
+#define _OUTPUT_FILE_
 
-#ifndef OutputFile_HH
-#define OutputFile_HH
-
+//
+// Forward class declarations
+//
 #include "Params.hh"
-#include "Era5Data.hh"
-#include <Mdv/DsMdvx.hh>
-
-#include <string>
-using namespace std;
+class MdvxField;
+class DsMdvx;
+class HtInterp;
 
 class OutputFile {
   
 public:
-  
-  // constructor
-  
-  OutputFile(const string &prog_name, const Params &params,
-	     time_t model_time, time_t forecast_time, int forecast_delta,
-	     Era5Data &inData, Params::afield_name_map_t *field_name_map);
-  
-  // destructor
-  
-  virtual ~OutputFile();
-  
-  // return reference to DsMdvx object
-  DsMdvx &getDsMdvx() { return (_mdvx); }
 
-  // write out merged volume
-  int writeVol();
+  OutputFile( Params *params );
+ 
+  ~OutputFile();
+
+  inline void setVerticalType( const int& vt  ){_verticalType = vt;}
+
+  void addField(MdvxField* inputField, Mdvx::encoding_type_t encoding);
+
+  int  writeVol(time_t gen_time, long int lead_secs );
+
+  void clear();
+
+  int numFields();
+
+  static Mdvx::encoding_type_t 
+    mdvEncoding(Params::encoding_type_t paramEncoding);
+  
+  static Mdvx::compression_type_t 
+    mdvCompression(Params::compression_type_t paramCompression);
 
 protected:
-
   
 private:
 
+  typedef struct {
+    double ht;
+    int indexLower;
+    int indexUpper;
+    double ghtLower;
+    double ghtUpper;
+    double wtLower;
+    double wtUpper;
+  } interp_pt_t;
 
+  Params *_paramsPtr;
 
-  const string &_progName;
-  const Params &_params;
-  const Params::afield_name_map_t *_field_name_map; //owned by Wrf2Mdv
+  DsMdvx *_mdvObj;
 
-  DsMdvx _mdvx;
+  HtInterp *_htInterp;
 
-  int _npointsPlane;
+  int _verticalType;
 
-  void _initMdvx(time_t model_time, time_t forecast_time,
-		 int forecast_delta, Era5Data &inData);
-  
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-		     const char *name,
-		     const char *name_long,
-		     const char *units,
-		     const char *transform,
-		     const int field_code);
+  void _remap(MdvxField* inputField);
 
+  void _setMasterHdr( time_t genTime, long int leadSecs, bool isObs );
 
+  void _remapLambertLambert(MdvxField* inputField);
 
-  void _setFieldName(Mdvx::field_header_t &fhdr,
-			       const Params::output_field_name_t &field_name_enum,
-			       const char *units,
-			       const char *transform,
-		     const int field_code);
-
-
+  float _interp2(Mdvx::field_header_t *fieldHdr, 
+                 double x, double y, int z, float *field);
 
 };
 
