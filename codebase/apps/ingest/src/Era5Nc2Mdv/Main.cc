@@ -63,19 +63,21 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Prog = new Era5Nc2Mdv(argc, argv);
-  if (!Prog->init(argc, argv))
+  Prog = new Era5Nc2Mdv();
+  if (!Prog->init(argc, argv)) {
     return -1;
+  }
 
   // run it
 
   int iret = 0;
 
-  if (Prog->Run())
+  if (Prog->Run()) {
     iret = -1;
+  }
 
   // clean up
-
+  
   tidy_and_exit(iret);
   return iret;
 }
@@ -83,9 +85,9 @@ int main(int argc, char **argv)
 // tidy up on exit
 
 static void tidy_and_exit (int sig)
-
+  
 {
-  delete(Prog);
+  delete Prog;
   exit(sig);
 }
 

@@ -33,7 +33,7 @@
 ///////////////////////////////////////////////////////////////
 
 #include "OutputFile.hh"
-#include "WRFData.hh"
+#include "Era5Data.hh"
 
 #include <toolsa/str.h>
 #include <toolsa/mem.h>
@@ -52,7 +52,7 @@ OutputFile::OutputFile(const string &prog_name,
 		       time_t model_time,
 		       time_t forecast_time,
 		       int forecast_delta,
-		       WRFData &inData,
+		       Era5Data &inData,
 		        Params::afield_name_map_t *field_name_map) :
   _progName(prog_name), _params(params), _field_name_map(field_name_map)
 
@@ -129,7 +129,7 @@ int OutputFile::writeVol()
 //
 
 void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
-			   int forecast_delta, WRFData &inData)
+			   int forecast_delta, Era5Data &inData)
   
 {
 
@@ -258,13 +258,13 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 
     case Params::OUTPUT_PROJ_NATIVE: {
       switch (inData.getProjType()) {
-      case WRFData::LAMBERT_CONF: {
+      case Era5Data::LAMBERT_CONF: {
 	fhdr.proj_type = Mdvx::PROJ_LAMBERT_CONF;
 	fhdr.proj_param[0] = inData.getTrueLat1();
 	fhdr.proj_param[1] = inData.getTrueLat2();
 	break;
       }
-      case WRFData::STEREOGRAPHIC: {
+      case Era5Data::STEREOGRAPHIC: {
 	fhdr.proj_type = Mdvx::PROJ_POLAR_STEREO;
 	fhdr.proj_param[0] = inData.getProjCenterLon();
 	fhdr.proj_param[1] =
@@ -272,7 +272,7 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 	fhdr.proj_param[2] = inData.calculate_central_scale();
 	break;
       }
-      case WRFData::MERCATOR: {
+      case Era5Data::MERCATOR: {
 	fhdr.proj_type = Mdvx::PROJ_MERCATOR;
 	break;
       }
@@ -363,8 +363,8 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
     
     fhdr.proj_rotation = 0.0;
     
-    fhdr.bad_data_value = WRFData::MISSING_DOUBLE;
-    fhdr.missing_data_value = WRFData::MISSING_DOUBLE;
+    fhdr.bad_data_value = Era5Data::MISSING_DOUBLE;
+    fhdr.missing_data_value = Era5Data::MISSING_DOUBLE;
 
     fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
     fhdr.data_element_nbytes = sizeof(fl32);

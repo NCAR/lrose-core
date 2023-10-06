@@ -39,7 +39,7 @@
 #include <toolsa/mem.h>
 #include <toolsa/toolsa_macros.h>
 #include <toolsa/pjg.h>
-#include "WRFData.hh"
+#include "Era5Data.hh"
 #include "WRFGrid.hh"
 
 using namespace std;
@@ -48,7 +48,7 @@ using namespace std;
 // Constructor
 
 
-WRFGrid::WRFGrid (const string &prog_name, bool debug, WRFData &inData):
+WRFGrid::WRFGrid (const string &prog_name, bool debug, Era5Data &inData):
   _progName(prog_name), _debug(debug)
 {
   inData.initProjection(proj);
