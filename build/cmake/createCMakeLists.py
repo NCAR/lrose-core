@@ -554,7 +554,7 @@ def writeCMakeListsTop(dir):
     fo.write('# Finding Qt on mac OSX\n')
     fo.write('\n')
     fo.write('if(APPLE)\n')
-    fo.write('find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt@5/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt@5/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt@5/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
+    fo.write('find_path(Qt6_DIR NAMES Qt6Config.cmake qt6-config.cmake HINTS /usr/local/Cellar/qt/*/lib/cmake/Qt6 /opt/homebrew/Cellar/qt/*/lib/cmake/Qt6 $ENV{HOME}/homebrew/Cellar/qt/*/lib/cmake/Qt6 NO_DEFAULT_PATH)\n')
     fo.write('endif(APPLE)\n')
 
     # fo.write('find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr NO_DEFAULT_PATH)\n')
