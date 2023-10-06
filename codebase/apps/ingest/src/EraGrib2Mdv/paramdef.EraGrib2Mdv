@@ -22,13 +22,13 @@
 /* ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    */
 /* *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* */
 /*********************************************************
- * parameter definitions for EraNc2Mdv
+ * parameter definitions for EraGrib2Mdv
  *
  */
 
 commentdef {
-  p_header = "EraNc2Mdv PARAMETER FILE";
-  p_text = "EraNc2Mdv creates MDV from grib2 data files\n";
+  p_header = "EraGrib2Mdv PARAMETER FILE";
+  p_text = "EraGrib2Mdv creates MDV from grib2 data files\n";
 
 }
 
@@ -266,7 +266,7 @@ paramdef boolean
 } writeLdataInfo;
 
 paramdef string {
-  p_default = "Converted to MDV with EraNc2Mdv.";
+!  p_default = "Converted to MDV with EraGrib2Mdv.";
   p_descr = "Data set info.";
   p_help = "This is placed in the MDV master header for documentation purposes.";
 } data_set_info;

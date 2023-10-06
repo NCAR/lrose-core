@@ -54,11 +54,11 @@ class MdvxProj;
 class MdvxField;
 class OutputFile;
 
-class ReadNcFiles {
+class ReadGribFiles {
 public:
    
-  ReadNcFiles (Params &params);
-  ~ReadNcFiles();
+  ReadGribFiles (Params &params);
+  ~ReadGribFiles();
    
   int init (int nFiles, char** fileList, bool printVarList,
 	    bool printsummary , bool printsections);

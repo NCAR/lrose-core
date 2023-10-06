@@ -23,7 +23,7 @@
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 ###########################################################################
 #
-# Makefile for EraNc2Mdv program
+# Makefile for EraGrib2Mdv program
 #
 # RAP, NCAR, Boulder, CO, 80307, USA
 #
@@ -33,7 +33,7 @@
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_macros
 
-TARGET_FILE = EraNc2Mdv
+TARGET_FILE = EraGrib2Mdv
 MODULE_TYPE = progcpp
 
 LOC_INCLUDES = $(JASPER_INCLUDES) $(NETCDF4_INCS)
@@ -53,19 +53,19 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	ReadNcFiles.hh \
+	ReadGribFiles.hh \
 	HtInterp.hh \
 	OutputFile.hh \
-	EraNc2Mdv.hh
+	EraGrib2Mdv.hh
 
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	ReadNcFiles.cc \
+	ReadGribFiles.cc \
 	HtInterp.cc \
 	OutputFile.cc \
-	EraNc2Mdv.cc \
+	EraGrib2Mdv.cc \
 	main.cc
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros

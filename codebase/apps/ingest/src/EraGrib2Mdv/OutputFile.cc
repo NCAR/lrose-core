@@ -38,7 +38,7 @@
 
 #include "OutputFile.hh"
 #include "Params.hh"
-#include "EraNc2Mdv.hh"
+#include "EraGrib2Mdv.hh"
 #include "HtInterp.hh"
 using namespace std;
 
