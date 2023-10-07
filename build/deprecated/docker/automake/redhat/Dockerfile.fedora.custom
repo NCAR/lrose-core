@@ -19,7 +19,7 @@ RUN \
     GeographicLib-devel eigen3-devel armadillo-devel \
     expat-devel libcurl-devel openmpi-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
@@ -29,7 +29,7 @@ RUN \
 
 RUN \
     cd /usr/bin; \
-    ln -s qmake-qt5 qmake;
+    ln -s qmake-qt6 qmake;
 
 # 32-bit libs etc for CIDD build
 

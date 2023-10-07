@@ -95,7 +95,9 @@ QSize FlowLayout::minimumSize() const
     foreach (item, itemList)
         size = size.expandedTo(item->minimumSize());
 
-    size += QSize(2*margin(), 2*margin());
+    int marginLeft, marginRight, marginTop, marginBottom;
+    getContentsMargins(&marginLeft, &marginTop, &marginRight, &marginBottom); 
+    size += QSize(marginLeft + marginRight, marginTop + marginBottom);
     return size;
 }
 

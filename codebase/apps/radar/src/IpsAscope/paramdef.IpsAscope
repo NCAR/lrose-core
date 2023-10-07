@@ -10,7 +10,7 @@
 
 commentdef {
   p_header = "IpsAscope is the ascope display for time series data in IPS format.";
-  p_text = "Support for Idependent Pulse Sampling."
+  p_text = "Support for Idependent Pulse Sampling.";
 }
 
 commentdef {

@@ -615,7 +615,7 @@ void ParameterColorView::setColorOnButton(QPushButton *button, QColor color)
 QColor ParameterColorView::getColorOnButton(QPushButton *button)
 {
   LOG(DEBUG) << "enter";
-  const QColor color = button->palette().color(QPalette::Background);
+  const QColor color = button->palette().color(QPalette::Window);
   return color;
   LOG(DEBUG) << "exit";
 }

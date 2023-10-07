@@ -9,6 +9,7 @@
 #include <QAbstractItemModel>
 #include <QScrollBar>
 #include <QStringListModel>
+#include <QFile>
 
 TextEdit::TextEdit(QWidget *parent)
 : QTextEdit(parent), c(0)

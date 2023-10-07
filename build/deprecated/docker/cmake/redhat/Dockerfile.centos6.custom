@@ -19,7 +19,7 @@ RUN \
     libpng-devel libtiff-devel zlib-devel \
     expat-devel libcurl-devel \
     flex-devel fftw3-devel \
-    bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
     xorg-x11-xauth xorg-x11-apps \
     rpm-build redhat-rpm-config \
@@ -44,7 +44,7 @@ RUN \
 
 RUN \
     cd /usr/bin; \
-    ln -s qmake-qt5 qmake;
+    ln -s qmake-qt6 qmake;
 
 # install updated gcc and g++ toolchain
 

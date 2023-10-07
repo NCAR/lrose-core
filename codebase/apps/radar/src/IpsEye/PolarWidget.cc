@@ -426,16 +426,16 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
   
   if (e->button() == Qt::RightButton) {
     QPointF clickPos(e->pos());
-    _mousePressX = e->x();
-    _mousePressY = e->y();
+    _mousePressX = e->position().x();
+    _mousePressY = e->position().y();
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
     emit customContextMenuRequested(clickPos.toPoint());
   } else {
     _rubberBand->setGeometry(QRect(e->pos(), QSize()));
     _rubberBand->show();
-    _mousePressX = e->x();
-    _mousePressY = e->y();
+    _mousePressX = e->position().x();
+    _mousePressY = e->position().y();
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
   }
@@ -472,8 +472,8 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   // Zooming with the mouse
 
-  int ix = e->x();
-  int iy = e->y();
+  int ix = e->position().x();
+  int iy = e->position().y();
   int deltaX = ix - _mousePressX;
   int deltaY = iy - _mousePressY;
   
@@ -513,8 +513,8 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     
     QPointF clickPos(e->pos());
     
-    _mousePressX = e->x();
-    _mousePressY = e->y();
+    _mousePressX = e->position().x();
+    _mousePressY = e->position().y();
     
     emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
     

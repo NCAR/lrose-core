@@ -27,8 +27,8 @@ Requires: flex
 Requires: fftw3-devel
 Requires: libbz2-devel
 Requires: libzip-devel
-Requires: libqt5-qtbase-devel
-Requires: libqt5-qtdeclarative-devel
+Requires: libqt6-qtbase-devel
+Requires: libqt6-qtdeclarative-devel
 Requires: hdf5-devel
 Requires: netcdf-devel
 Requires: xorg-x11-xauth

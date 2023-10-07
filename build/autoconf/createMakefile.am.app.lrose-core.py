@@ -488,10 +488,10 @@ def decodeLibLine(line):
         elif (thisTok.find("TDRP_LIBS") >= 0):
             libs.append("tdrp")
         #elif (thisTok.find("QT_LIBS") >= 0):
-        #    libs.append("Qt5Core")
-        #    libs.append("Qt5Gui")
-        #    libs.append("Qt5Widgets")
-        #    libs.append("Qt5Network")
+        #    libs.append("Qt6Core")
+        #    libs.append("Qt6Gui")
+        #    libs.append("Qt6Widgets")
+        #    libs.append("Qt6Network")
 
     return libs
 
@@ -599,11 +599,11 @@ def writeMakefileAm():
     if (needQt):
         fo.write("# for QT\n")
         fo.write("AM_CFLAGS += -std=c++11\n")
-        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Core)\n")
-        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Gui)\n")
-        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Widgets)\n")
-        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Network)\n")
-        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt5Qml)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt6Core)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt6Gui)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt6Widgets)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt6Network)\n")
+        fo.write("AM_CFLAGS += $(shell pkg-config --cflags Qt6Qml)\n")
     fo.write("\n")
 
     fo.write("AM_CXXFLAGS = $(AM_CFLAGS)\n")
@@ -624,12 +624,12 @@ def writeMakefileAm():
         fo.write("AM_LDFLAGS += -L/usr/local/opt/flex/lib\n")
     if (needQt):
         fo.write("# for QT\n")
-        fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt5Gui)\n")
-        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Core)\n")
-        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Gui)\n")
-        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Widgets)\n")
-        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Network)\n")
-        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt5Qml)\n")
+        fo.write("AM_LDFLAGS += -L$(shell pkg-config --variable=libdir Qt6Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt6Core)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt6Gui)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt6Widgets)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt6Network)\n")
+        fo.write("AM_LDFLAGS += $(shell pkg-config --libs Qt6Qml)\n")
     fo.write("\n")
 
     if (len(loadLibList) > 0):
@@ -645,10 +645,10 @@ def writeMakefileAm():
     #if (needQt):
     #    fo.write("# qt libs\n")
     #    fo.write("\n")
-    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Core)\n")
-    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Gui)\n")
-    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Widgets)\n")
-    #    fo.write("LDADD += $(shell pkg-config --libs Qt5Network)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt6Core)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt6Gui)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt6Widgets)\n")
+    #    fo.write("LDADD += $(shell pkg-config --libs Qt6Network)\n")
     #    fo.write("\n")
 
     fo.write("# set app name\n")

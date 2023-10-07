@@ -391,7 +391,7 @@ def createQtMocFiles(appDir):
     
     os.chdir(appDir)
     shellCmd("rm -f moc*");
-    shellCmd("qmake-qt5 -o Makefile.qmake");
+    shellCmd("qmake-qt6 -o Makefile.qmake");
     shellCmd("make -f Makefile.qmake mocables");
 
 ########################################################################
@@ -514,7 +514,7 @@ class LroseCore < Formula
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'qt5'
+  depends_on 'qt6'
   depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'rsync'
@@ -565,7 +565,7 @@ class LroseCore < Formula
   depends_on 'jpeg'
   depends_on 'libpng'
   depends_on 'libzip'
-  depends_on 'qt5'
+  depends_on 'qt6'
   depends_on 'pkg-config'
   depends_on 'cmake'
   depends_on 'rsync'

@@ -134,7 +134,7 @@ def installPackagesCentos6():
              "libpng-devel libtiff-devel zlib-devel " +
              "expat-devel libcurl-devel " +
              "flex-devel fftw3-devel " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
@@ -156,7 +156,7 @@ def installPackagesCentos6():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
     
     # install updated gcc and g++ toolchain
 
@@ -192,7 +192,7 @@ def installPackagesCentos7():
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
@@ -214,7 +214,7 @@ def installPackagesCentos7():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
     
 ########################################################################
 # install packages for CENTOS 8
@@ -246,7 +246,7 @@ def installPackagesCentos8():
              "flex-devel fftw3-devel ")
 
     shellCmd("dnf install -y --allowerasing " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
@@ -271,7 +271,7 @@ def installPackagesCentos8():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
     
 ########################################################################
 # install packages for ALMALINUX 8
@@ -303,7 +303,7 @@ def installPackagesAlmalinux8():
              "flex-devel fftw3-devel ")
 
     shellCmd("dnf install -y --allowerasing " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
@@ -328,7 +328,7 @@ def installPackagesAlmalinux8():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
 
 
 ########################################################################
@@ -346,7 +346,7 @@ libpng-devel libtiff-devel zlib-devel libzip-devel
 eigen3-devel armadillo-devel
 expat-devel libcurl-devel openmpi-devel
 flex-devel fftw3-devel
-bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel
+bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel
 hdf5-devel netcdf-devel
 xorg-x11-xauth
 rpm-build redhat-rpm-config rpm-devel rpmdevtools
@@ -388,7 +388,7 @@ def installPackagesAlmalinux9():
         dnf_install(packages_cid32)
 
     # create link for qtmake
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
 
 
 ########################################################################
@@ -410,7 +410,7 @@ def installPackagesFedora():
     shellCmd("yum install -y " +
              "expat-devel libcurl-devel openmpi-devel " +
              "flex-devel fftw3-devel " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "hdf5-devel netcdf-devel " +
              "xorg-x11-xauth xorg-x11-apps " +
              "rpm-build redhat-rpm-config " +
@@ -433,7 +433,7 @@ def installPackagesFedora():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
 
 ########################################################################
 # install packages for ORACLE 8
@@ -463,14 +463,14 @@ def installPackagesOracle():
              "flex fftw3-devel ")
 
     shellCmd("dnf install -y --allowerasing " +
-             "bzip2-devel qt5-qtbase-devel qt5-qtdeclarative-devel " +
+             "bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel " +
              "xorg-x11-xauth " +
              "rpm-build redhat-rpm-config " +
              "rpm-devel rpmdevtools")
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
     
 ########################################################################
 # install packages for Debian
@@ -499,9 +499,9 @@ def installPackagesDebian():
     # create link for qmake
 
     shellCmd("cd /usr/bin; " +
-             "/bin/rm -f qmake qmake-qt5; " +
-             "ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; " +
-             "ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5")
+             "/bin/rm -f qmake qmake-qt6; " +
+             "ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake; " +
+             "ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake-qt6")
 
     # install packages for running CIDD
 
@@ -535,7 +535,7 @@ def installPackagesSuse():
              "flex fftw3-devel ")
     shellCmd("zypper install -y tcsh wget git " +
              "libbz2-devel libzip-devel " +
-             "libqt5-qtbase-devel libqt5-qtdeclarative-devel " +
+             "libqt6-qtbase-devel libqt6-qtdeclarative-devel " +
              "eigen3-devel " +
              "hdf5-devel netcdf-devel " +
              "armadillo-devel openmpi-devel " +
@@ -557,7 +557,7 @@ def installPackagesSuse():
 
     # create link for qtmake
 
-    shellCmd("cd /usr/bin; ln -f -s qmake-qt5 qmake")
+    shellCmd("cd /usr/bin; ln -f -s qmake-qt6 qmake")
     
 ########################################################################
 # get the OS type from the /etc/os-release file in linux

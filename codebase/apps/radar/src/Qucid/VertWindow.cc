@@ -87,7 +87,7 @@ VertWindow::VertWindow(CartManager *manager,
   // contain multiple widgets.
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
-  main_layout->setMargin(0);
+  main_layout->setContentsMargins(0,0,0,0);
   main_layout->addWidget(_vertTopFrame, 100);
   main_layout->addWidget(_statusPanel, 0);
   

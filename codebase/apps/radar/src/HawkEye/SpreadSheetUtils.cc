@@ -14,5 +14,5 @@ void SpreadSheetUtils::decode_pos(const QString &pos, int *row, int *col)
 
 QString SpreadSheetUtils::encode_pos(int row, int col)
 {
-    return QString(col + 'A') + QString::number(row + 1);
+  return QString::number(col + 'A') + QString::number(row + 1);
 }

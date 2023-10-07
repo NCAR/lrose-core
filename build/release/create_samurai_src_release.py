@@ -369,7 +369,7 @@ class LroseSamurai < Formula
   depends_on 'netcdf' => 'enable-cxx-compat'
   depends_on 'libx11'
   depends_on 'libxext'
-  depends_on 'qt5'
+  depends_on 'qt6'
   depends_on 'fftw'
   depends_on 'libomp'
   depends_on 'libzip'

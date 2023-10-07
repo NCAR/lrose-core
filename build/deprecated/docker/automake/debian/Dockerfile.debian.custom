@@ -24,9 +24,9 @@ RUN apt-get update && \
 
 RUN \
     cd /usr/bin; \
-    /bin/rm -f qmake qmake-qt5; \
-    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake; \
-    ln -s /usr/lib/x86_64-linux-gnu/qt5/bin/qmake qmake-qt5
+    /bin/rm -f qmake qmake-qt6; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake; \
+    ln -s /usr/lib/x86_64-linux-gnu/qt6/bin/qmake qmake-qt6
 
 
 # install packages for running CIDD

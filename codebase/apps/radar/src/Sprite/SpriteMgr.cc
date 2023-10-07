@@ -197,7 +197,7 @@ void SpriteMgr::_setupWindows()
   // main window layout
   
   QHBoxLayout *mainLayout = new QHBoxLayout(_main);
-  mainLayout->setMargin(3);
+  mainLayout->setContentsMargins(3,3,3,3);
   mainLayout->addWidget(_statusPanel);
   mainLayout->addWidget(_mainFrame);
 

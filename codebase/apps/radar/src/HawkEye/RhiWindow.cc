@@ -87,7 +87,7 @@ RhiWindow::RhiWindow(PolarManager *manager,
   // contain multiple widgets.
 
   QVBoxLayout *main_layout = new QVBoxLayout(_main);
-  main_layout->setMargin(0);
+  main_layout->setContentsMargins(0,0,0,0);
   main_layout->addWidget(_rhiTopFrame, 100);
   main_layout->addWidget(_statusPanel, 0);
   

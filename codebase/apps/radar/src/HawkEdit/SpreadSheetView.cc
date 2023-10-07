@@ -511,7 +511,7 @@ void SpreadSheetView::updateColor(QTableWidgetItem *item)
     QPixmap pix(16, 16);
     QColor col;
     if (item)
-        col = item->backgroundColor();
+      col = item->background().color();
     if (!col.isValid())
         col = palette().base().color();
 

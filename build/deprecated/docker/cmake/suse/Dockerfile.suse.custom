@@ -17,7 +17,7 @@ RUN \
     libexpat-devel libcurl-devel \
     flex fftw3-devel \
     libbz2-devel libzip-devel \
-    libqt5-qtbase-devel libqt5-qtdeclarative-devel \
+    libqt6-qtbase-devel libqt6-qtdeclarative-devel \
     eigen3-devel \
     hdf5-devel netcdf-devel \
     armadillo-devel openmpi-devel \
@@ -28,7 +28,7 @@ RUN \
 
 RUN \
     cd /usr/bin; \
-    ln -s qmake-qt5 qmake;
+    ln -s qmake-qt6 qmake;
 
 # 32-bit libs etc for CIDD build
 

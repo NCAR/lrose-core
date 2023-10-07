@@ -86,19 +86,19 @@ set (SRCS
       FunctionEditor.cc
     )
 
-# QT5
+# QT6
 
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
-find_package (Qt5 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
+find_package (Qt6 COMPONENTS Widgets Network Qml REQUIRED PATHS /usr /usr/local/opt/qt NO_DEFAULT_PATH)
 
-pkg_search_module(Qt5Core REQUIRED)
-pkg_search_module(Qt5Gui REQUIRED)
-pkg_search_module(Qt5Widgets REQUIRED)
-pkg_search_module(Qt5Network REQUIRED)
-pkg_search_module(Qt5Qml REQUIRED)
+pkg_search_module(Qt6Core REQUIRED)
+pkg_search_module(Qt6Gui REQUIRED)
+pkg_search_module(Qt6Widgets REQUIRED)
+pkg_search_module(Qt6Network REQUIRED)
+pkg_search_module(Qt6Qml REQUIRED)
 
 # include directories
 
@@ -150,11 +150,11 @@ if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
 
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${Qt5Gui_INCLUDE_DIRS})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-include_directories(${Qt5Network_INCLUDE_DIRS})
-include_directories(${Qt5Qml_INCLUDE_DIRS})
+include_directories(${Qt6Core_INCLUDE_DIRS})
+include_directories(${Qt6Gui_INCLUDE_DIRS})
+include_directories(${Qt6Widgets_INCLUDE_DIRS})
+include_directories(${Qt6Network_INCLUDE_DIRS})
+include_directories(${Qt6Qml_INCLUDE_DIRS})
 
 # link directories
 
@@ -210,11 +210,11 @@ link_libraries (bz2)
 link_libraries (z)
 link_libraries (pthread)
 link_libraries (m)
-link_libraries (${Qt5Core_LIBRARIES})
-link_libraries (${Qt5Gui_LIBRARIES})
-link_libraries (${Qt5Widgets_LIBRARIES})
-link_libraries (${Qt5Network_LIBRARIES})
-link_libraries (${Qt5Qml_LIBRARIES})
+link_libraries (${Qt6Core_LIBRARIES})
+link_libraries (${Qt6Gui_LIBRARIES})
+link_libraries (${Qt6Widgets_LIBRARIES})
+link_libraries (${Qt6Network_LIBRARIES})
+link_libraries (${Qt6Qml_LIBRARIES})
 
 # If needed, generate TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file

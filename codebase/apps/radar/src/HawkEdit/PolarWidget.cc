@@ -439,7 +439,7 @@ void PolarWidget::colorScaleLegend()
 
 QImage* PolarWidget::getImage()
 {
-  QPixmap pixmap = QPixmap::grabWidget(this);
+  QPixmap pixmap = grab();
   QImage* image = new QImage(pixmap.toImage());
   return image;
 }
@@ -451,7 +451,7 @@ QImage* PolarWidget::getImage()
 
 QPixmap* PolarWidget::getPixmap()
 {
-  QPixmap* pixmap = new QPixmap(QPixmap::grabWidget(this));
+  QPixmap* pixmap = new QPixmap(grab());
   return pixmap;
 }
 
@@ -475,8 +475,8 @@ void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) 
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _mousePressX = e->x();
-  _mousePressY = e->y();
+  _mousePressX = e->position().x();
+  _mousePressY = e->position().y();
 
   mapPixelToWorld(_mousePressX, _mousePressY, &_worldPressX, &_worldPressY);
 
@@ -510,8 +510,8 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
    
   // Zooming with the mouse
 
-  int x = e->x();
-  int y = e->y();
+  int x = e->position().x();
+  int y = e->position().y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
@@ -736,7 +736,7 @@ void PolarWidget::paintEvent(QPaintEvent *event)
         // TODO: move to sizeInBytes when no longer supporting Centos7;
         // byteCount() and numBytes() are obsolete.
         //memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
-        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.byteCount());
+        memcpy(m_buffer.bits(), m_base_buffer.bits(), m_buffer.sizeInBytes());
 
         {
             QPainter p(&m_buffer);

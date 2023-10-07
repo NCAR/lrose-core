@@ -560,7 +560,7 @@
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
     tt->comment_hdr = tdrpStrDup("IpsAscope is the ascope display for time series data in IPS format.");
-    tt->comment_text = tdrpStrDup("");
+    tt->comment_text = tdrpStrDup("Support for Idependent Pulse Sampling.");
     tt++;
     
     // Parameter 'Comment 1'
