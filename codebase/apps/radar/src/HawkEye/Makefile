@@ -221,7 +221,7 @@ hawkeye_app:
 	mkdir -p HawkEye.app/Contents/MacOS/../share
 	cp -r ~/git/lrose-displays/color_scales HawkEye.app/Contents/MacOS/../share/.
 # make the dmg  
-	`pkg-config --variable=host_bins Qt5Core`/macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
+	`pkg-config --variable=host_bins Qt6Core`/macdeployqt HawkEye.app -dmg -always-overwrite -codesign="${CERT_NAME}"
 # now build the folder for the dmg installer
 	hdiutil create -volname HawkEye_Installer -srcfolder ${LROSE_CORE_DIR}/codebase/apps/radar/src/HawkEye/HawkEye.app  -ov -format UDZO HawkEye_Elle.dmg
 
