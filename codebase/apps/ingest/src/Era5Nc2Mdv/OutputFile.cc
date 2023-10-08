@@ -52,10 +52,10 @@ OutputFile::OutputFile(const string &prog_name,
 		       time_t model_time,
 		       time_t forecast_time,
 		       int forecast_delta,
-		       Era5Data &inData,
-		        Params::afield_name_map_t *field_name_map) :
-  _progName(prog_name), _params(params), _field_name_map(field_name_map)
-
+		       Era5Data &inData):
+                       /* Params::afield_name_map_t *field_name_map */
+                       _progName(prog_name), _params(params)/* , _field_name_map(field_name_map) */
+        
 {
   _initMdvx(model_time, forecast_time, forecast_delta, inData);
 
@@ -153,6 +153,7 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
   mhdr.data_collection_type = Mdvx::DATA_FORECAST;
   mhdr.native_vlevel_type = Mdvx::VERT_TYPE_WRF_ETA;
 
+#ifdef JUNK
   switch (_params.output_levels) {
   case Params::NATIVE_VERTICAL_LEVELS:
     mhdr.vlevel_type = Mdvx::VERT_TYPE_WRF_ETA;
@@ -171,17 +172,18 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
     mhdr.max_nz = _params.height_levels_n;
     break;
   }
+#endif
 
   mhdr.vlevel_included = TRUE;
   mhdr.grid_orientation = Mdvx::ORIENT_SN_WE;
   mhdr.data_ordering = Mdvx::ORDER_XYZ;
-  if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE) {
+  // if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE) {
     mhdr.max_nx = inData.getNLon();
     mhdr.max_ny = inData.getNLat();
-  } else {
-    mhdr.max_nx = _params.output_grid.nx;
-    mhdr.max_ny = _params.output_grid.ny;
-  }
+  // } else {
+  //   mhdr.max_nx = _params.output_grid.nx;
+  //   mhdr.max_ny = _params.output_grid.ny;
+  // }
 
   mhdr.n_chunks = 0;
   mhdr.field_grids_differ = FALSE;
@@ -225,6 +227,7 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
     fhdr.forecast_delta = forecast_time - model_time;
     fhdr.forecast_time = forecast_time;
 
+#ifdef NOTNOW
     switch (_params.output_projection) {
       
     case Params::OUTPUT_PROJ_FLAT: {
@@ -319,6 +322,8 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
       fhdr.grid_miny = _params.output_grid.miny;
       
     }
+
+#endif
     
     _npointsPlane = fhdr.nx * fhdr.ny;
     
@@ -327,6 +332,8 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
     fhdr.scaling_type = Mdvx::SCALING_NONE;
 
     fhdr.native_vlevel_type = Mdvx::VERT_TYPE_WRF_ETA;
+
+#ifdef NOTNOW
     switch (_params.output_levels) {
     case Params::NATIVE_VERTICAL_LEVELS:
       fhdr.vlevel_type = Mdvx::VERT_TYPE_WRF_ETA;
@@ -353,13 +360,14 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
       fhdr.grid_dz = 1.0;
       break;
     }
+#endif
     fhdr.dz_constant = false;
 
-    if (_params._output_fields[out_field].name > Params::START_2D_FIELDS) {
-      fhdr.nz = 1;
-      fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-      fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
-    }
+    // if (_params._output_fields[out_field].name > Params::START_2D_FIELDS) {
+    //   fhdr.nz = 1;
+    //   fhdr.native_vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+    //   fhdr.vlevel_type = Mdvx::VERT_TYPE_SURFACE;
+    // }
     
     fhdr.proj_rotation = 0.0;
     
@@ -368,13 +376,14 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 
     fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
     fhdr.data_element_nbytes = sizeof(fl32);
-    if (_params._output_fields[out_field].name > Params::START_2D_FIELDS) {
-      fhdr.volume_size = fhdr.nx * fhdr.ny * sizeof(fl32);
-    } else {
+    // if (_params._output_fields[out_field].name > Params::START_2D_FIELDS) {
+    //   fhdr.volume_size = fhdr.nx * fhdr.ny * sizeof(fl32);
+    // } else {
       fhdr.volume_size = fhdr.nx * fhdr.ny * fhdr.nz * sizeof(fl32);
-    }
+    // }
 
-    switch (_params._output_fields[out_field].name) {
+#ifdef JUNk
+      switch (_params._output_fields[out_field].output_field_name) {
 
       MdvxFieldCode::entry_t codeEntry;
       
@@ -1356,7 +1365,10 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
       break;
 
     } // switch
-    
+
+#endif
+
+#ifdef JUNK
     // vlevel header
     if (_params._output_fields[out_field].name > Params::START_2D_FIELDS) 
       {
@@ -1435,6 +1447,7 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
       }
       
     }
+#endif
 
     // create field
 
@@ -1448,9 +1461,9 @@ void OutputFile::_initMdvx(time_t model_time, time_t forecast_time,
 
   // set the output format
 
-  if (_params.output_path_in_forecast_format) {
-    _mdvx.setWriteAsForecast();
-  }
+  // if (_params.output_path_in_forecast_format) {
+  //   _mdvx.setWriteAsForecast();
+  // }
 
 }
 
@@ -1484,12 +1497,15 @@ void OutputFile::_setFieldName(Mdvx::field_header_t &fhdr,
 //
 
 void OutputFile::_setFieldName(Mdvx::field_header_t &fhdr,
-			       const Params::output_field_name_t &field_name_enum,
+			       // const Params::output_field_name_t &field_name_enum,
 			       const char *units,
 			       const char *transform,
 			       const int field_code)	
   
+
 {
+
+#ifdef JUNK
   int i = static_cast<int>(field_name_enum);
 
   if ( ( _field_name_map[i].name == NULL) || (_field_name_map[i].long_name == NULL) )
@@ -1498,6 +1514,8 @@ void OutputFile::_setFieldName(Mdvx::field_header_t &fhdr,
   _setFieldName(fhdr, _field_name_map[i].name,
 	        _field_name_map[i].long_name,
 		units, transform, field_code);
+#endif
+  
 }
 
 

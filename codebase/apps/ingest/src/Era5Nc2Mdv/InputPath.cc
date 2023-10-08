@@ -90,12 +90,13 @@ InputPath::InputPath (const string &prog_name,
 
   _dsInputPath = new DsInputPath("Wrf2Mdv",
 				 _params.debug >= Params::DEBUG_VERBOSE,
-				 _params.realtime_input_dir,
-				 _params.max_realtime_valid_age,
+				 _params.input_dir,
+				 300,
 				 _heartbeatFunc,
-				 _params.use_ldata,
+				 false,
 				 false);
 
+#ifdef JUNK
   // Will periodically search the input dir.
   if (! _params.use_ldata){
 
@@ -118,6 +119,7 @@ InputPath::InputPath (const string &prog_name,
       _dsInputPath->setSearchExt(_params.File_extension);
     }
   }
+#endif
 
 }
 
@@ -176,10 +178,11 @@ const string &InputPath::next()
 
       _inputPath = filePath;
 
-    }while (
-	    (strlen(_params.DomainString) > 0) &&
-	    (NULL == strstr(filePath, _params.DomainString))
-	    );
+    }while (true);
+    
+	    // (strlen(_params.DomainString) > 0) &&
+	    // (NULL == strstr(filePath, _params.DomainString))
+	    // );
 
     if (_params.debug >= Params::DEBUG_NORM){
       cerr << "Input path returned is " << _inputPath  << endl;

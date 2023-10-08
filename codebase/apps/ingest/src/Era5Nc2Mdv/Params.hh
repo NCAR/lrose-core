@@ -69,152 +69,28 @@ public:
 
   typedef enum {
     DEBUG_OFF = 0,
-    DEBUG_WARNINGS = 1,
-    DEBUG_NORM = 2,
-    DEBUG_VERBOSE = 3
+    DEBUG_NORM = 1,
+    DEBUG_VERBOSE = 2,
+    DEBUG_EXTRA = 3
   } debug_t;
 
   typedef enum {
-    DEBUG_RH2 = 0,
-    DEBUG_SOIL_AM = 1,
-    DEBUG_NONE = 2
-  } alg_debug_t;
-
-  typedef enum {
     ARCHIVE = 0,
-    REALTIME = 1
+    FILELIST = 1
   } mode_t;
 
   typedef enum {
-    U_FIELD = 0,
-    V_FIELD = 1,
-    Q_FIELD = 2,
-    CLW_FIELD = 3,
-    RNW_FIELD = 4,
-    ICE_FIELD = 5,
-    SNOW_FIELD = 6,
-    GRAUPEL_FIELD = 7,
-    W_FIELD = 8,
-    P_FIELD = 9,
-    PB_FIELD = 10,
-    PHB_FIELD = 11,
-    PH_FIELD = 12,
-    DNW_FIELD = 13,
-    MUB_FIELD = 14,
-    MU_FIELD = 15,
-    REFL_10CM_FIELD = 16,
-    QNRAIN_FIELD = 17,
-    QNCLOUD_FIELD = 18,
-    U_EDGE_FIELD = 19,
-    V_EDGE_FIELD = 20,
-    TK_FIELD = 21,
-    TC_FIELD = 22,
-    WSPD_FIELD = 23,
-    WDIR_FIELD = 24,
-    PRESSURE_FIELD = 25,
-    RH_FIELD = 26,
-    SPEC_H_FIELD = 27,
-    DEWPT_FIELD = 28,
-    ICING_FIELD = 29,
-    CLW_G_FIELD = 30,
-    RNW_G_FIELD = 31,
-    THETA_FIELD = 32,
-    DBZ_3D_FIELD = 33,
-    HGT_FIELD = 34,
-    Z_AGL_FIELD = 35,
-    ITFADEF_FIELD = 36,
-    GEO_POT_FIELD = 37,
-    Q_G_FIELD = 38,
-    CAPE_3D_FIELD = 39,
-    CIN_3D_FIELD = 40,
-    LCL_3D_FIELD = 41,
-    LFC_3D_FIELD = 42,
-    EL_3D_FIELD = 43,
-    START_2D_FIELDS = 44,
-    SOIL_T_1_FIELD = 45,
-    SOIL_T_2_FIELD = 46,
-    SOIL_T_3_FIELD = 47,
-    SOIL_T_4_FIELD = 48,
-    SOIL_T_5_FIELD = 49,
-    SOIL_M_1_FIELD = 50,
-    SOIL_M_2_FIELD = 51,
-    SOIL_M_3_FIELD = 52,
-    SOIL_M_4_FIELD = 53,
-    SOIL_M_5_FIELD = 54,
-    SOIL_AM_1_FIELD = 55,
-    SOIL_AM_2_FIELD = 56,
-    SOIL_AM_3_FIELD = 57,
-    SOIL_AM_4_FIELD = 58,
-    SOIL_AM_5_FIELD = 59,
-    LAT_FIELD = 60,
-    LON_FIELD = 61,
-    GROUND_T_FIELD = 62,
-    RAINC_FIELD = 63,
-    RAINNC_FIELD = 64,
-    TERRAIN_FIELD = 65,
-    LAND_USE_FIELD = 66,
-    SNOWCOVR_FIELD = 67,
-    TSEASFC_FIELD = 68,
-    PBL_HGT_FIELD = 69,
-    T2_FIELD = 70,
-    Q2_FIELD = 71,
-    U10_FIELD = 72,
-    V10_FIELD = 73,
-    SNOWH_FIELD = 74,
-    SFC_PRES_FIELD = 75,
-    LAND_MASK_FIELD = 76,
-    TH2_FIELD = 77,
-    HFX_FIELD = 78,
-    LH_FIELD = 79,
-    SNOW_WE_FIELD = 80,
-    SNOW_NC_FIELD = 81,
-    GRAUPEL_NC_FIELD = 82,
-    SOIL_TYPE_FIELD = 83,
-    FZLEVEL_FIELD = 84,
-    RAIN_TOTAL_FIELD = 85,
-    RH2_FIELD = 86,
-    T2C_FIELD = 87,
-    WSPD10_FIELD = 88,
-    WDIR10_FIELD = 89,
-    TWP_FIELD = 90,
-    RWP_FIELD = 91,
-    VIL_FIELD = 92,
-    DBZ_2D_FIELD = 93,
-    SPEC_H_2M_FIELD = 94,
-    CAPE_FIELD = 95,
-    CIN_FIELD = 96,
-    LCL_FIELD = 97,
-    LFC_FIELD = 98,
-    EL_FIELD = 99,
-    LANDUSEF_1_FIELD = 100,
-    LANDUSEF_2_FIELD = 101,
-    LANDUSEF_6_FIELD = 102,
-    LANDUSEF_15_FIELD = 103,
-    GREENFRAC_7_FIELD = 104,
-    TOTAL_FIELD_COUNT = 105
-  } output_field_name_t;
-
-  typedef enum {
-    OUT_INT8 = 1,
-    OUT_INT16 = 2,
-    OUT_FLOAT32 = 5
+    OUTPUT_ENCODING_FLOAT32 = 0,
+    OUTPUT_ENCODING_INT16 = 1,
+    OUTPUT_ENCODING_INT08 = 2
   } output_encoding_t;
-
-  typedef enum {
-    OUTPUT_PROJ_FLAT = 0,
-    OUTPUT_PROJ_LATLON = 1,
-    OUTPUT_PROJ_LAMBERT = 2,
-    OUTPUT_PROJ_STEREOGRAPHIC = 3,
-    OUTPUT_PROJ_MERCATOR = 4,
-    OUTPUT_PROJ_NATIVE = 5
-  } output_projection_t;
 
   typedef enum {
     FLIGHT_LEVELS = 0,
     PRESSURE_LEVELS = 1,
     HEIGHT_LEVELS = 2,
     NATIVE_VERTICAL_LEVELS = 3
-  } output_levels_t;
+  } output_level_type_t;
 
   typedef enum {
     _MDV_COMPRESSION_NONE = 0,
@@ -224,42 +100,15 @@ public:
     _MDV_COMPRESSION_BZIP = 4
   } compression_t;
 
-  typedef enum {
-    SCALING_ROUNDED = 0,
-    SCALING_DYNAMIC = 1
-  } scaling_t;
-
   // struct typedefs
 
   typedef struct {
-    output_field_name_t name;
+    char* input_field_name;
+    char* output_field_name;
+    char* standard_name;
+    char* output_units;
     output_encoding_t encoding;
   } output_field_t;
-
-  typedef struct {
-    output_field_name_t original_name;
-    char* name;
-    char* long_name;
-  } afield_name_map_t;
-
-  typedef struct {
-    double lat;
-    double lon;
-  } output_origin_t;
-
-  typedef struct {
-    int nx;
-    int ny;
-    double minx;
-    double miny;
-    double dx;
-    double dy;
-  } output_grid_t;
-
-  typedef struct {
-    double lower_level;
-    double upper_level;
-  } pressure_limits_t;
 
   ///////////////////////////
   // Member functions
@@ -557,117 +406,29 @@ public:
 
   debug_t debug;
 
-  alg_debug_t alg_debug;
-
-  char* instance;
-
-  int Procmap_reg_interval_secs;
-
   mode_t mode;
 
   char* soilparm_path;
 
-  char* realtime_input_dir;
-
-  int File_quiescence_secs;
-
-  int Dir_search_depth;
-
-  int Dir_scan_interval_secs;
-
-  char* DomainString;
-
-  char* File_extension;
-
-  tdrp_bool_t use_ldata;
-
-  tdrp_bool_t get_times_from_filenames;
-
-  int gen_time_offset;
-
-  int max_realtime_valid_age;
-
-  int min_forecast_dtime;
-
-  int max_forecast_dtime;
-
-  tdrp_bool_t specify_lead_times;
-
-  int *_lead_times;
-  int lead_times_n;
-
-  char* output_url;
+  char* input_dir;
 
   output_field_t *_output_fields;
   int output_fields_n;
 
-  afield_name_map_t *_field_name_map;
-  int field_name_map_n;
+  tdrp_bool_t convert_temperature_to_celcius;
 
-  tdrp_bool_t wind_speed_in_knots;
+  char* output_url;
 
-  output_projection_t output_projection;
-
-  output_origin_t output_origin;
-
-  double lambert_lat1;
-
-  double lambert_lat2;
-
-  double stereographic_tangent_lat;
-
-  double stereographic_tangent_lon;
-
-  output_grid_t output_grid;
-
-  output_levels_t output_levels;
-
-  int *_flight_levels;
-  int flight_levels_n;
-
-  double *_pressure_levels;
-  int pressure_levels_n;
+  output_level_type_t output_level_type;
 
   double *_height_levels;
   int height_levels_n;
-
-  tdrp_bool_t copy_lowest_downwards;
-
-  compression_t output_compression;
-
-  scaling_t output_scaling;
-
-  tdrp_bool_t output_path_in_forecast_format;
 
   char* data_set_info;
 
   char* data_set_name;
 
   char* data_set_source;
-
-  float no_icing_clw;
-
-  float trace_icing_clw;
-
-  float trace_severity;
-
-  float light_icing_clw;
-
-  float light_severity;
-
-  float moderate_icing_clw;
-
-  float moderate_severity;
-
-  float severe_icing_clw;
-
-  float severe_severity;
-
-  char* adiabat_temp_lookup_filename;
-
-  tdrp_bool_t negative_cin;
-
-  pressure_limits_t pressure_limits;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -676,7 +437,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[64];
+  mutable TDRPtable _table[20];
 
   const char *_className;
 

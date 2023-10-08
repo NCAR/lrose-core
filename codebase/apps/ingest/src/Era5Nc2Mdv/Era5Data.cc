@@ -1256,7 +1256,7 @@ void Era5Data::_computeRH2()
     return;
   }
 
-  _computeT2C();
+  // _computeT2C();
   
   if (_t2c == 0)
   {
@@ -1326,7 +1326,7 @@ fl32 Era5Data::_find2MPres(int lat, int lon)
   fl32 m =( (hi_p - low_p) / (hi_ht - low_ht) );
   fl32 b = hi_p - m*hi_ht;
 
-  if (_params.alg_debug == Params::DEBUG_RH2)
+  if (_params.debug >= Params::DEBUG_VERBOSE)
   {
     cerr << "H,log(p):" << endl
 	 << _geo_hgt[low_ix][lat][lon]/9.8 << ","
@@ -1681,8 +1681,6 @@ void Era5Data::_loadUWind()
 	_uu[iEta][iLat][iLon] = 
 	  (_uu_C[iEta][iLat][iLon] + _uu_C[iEta][iLat][iLon+1]) / 2.0;
 
-	if (_params.wind_speed_in_knots)
-	  _uu[iEta][iLat][iLon] *= MS_TO_KNOTS;
       } // endfor - iLon
     } // endfor - iLat
   } // endfor - iEta
@@ -1796,8 +1794,6 @@ void Era5Data::_loadVWind()
 	_vv[iEta][iLat][iLon] = 
 	  (_vv_C[iEta][iLat][iLon] + _vv_C[iEta][iLat+1][iLon]) / 2.0;
 
-	if (_params.wind_speed_in_knots)
-	  _vv[iEta][iLat][iLon] *= MS_TO_KNOTS;
       } // endfor - iLon
     } // endfor - iLat
   } // endfor - iEta
@@ -1891,7 +1887,7 @@ void Era5Data::_loadLat()
   if (_llLat == BAD_LAT_LON)
   {
     _llLat = _lat[0][0];
-    if (_params.debug > Params::DEBUG_WARNINGS)
+    if (_params.debug >= Params::DEBUG_VERBOSE)
       cerr << "INFO: Using lat[0][0] (" << _lat[0][0] << ") for ll_lat\n";
   }
 
@@ -1911,7 +1907,7 @@ void Era5Data::_loadLon()
   if (_llLon == BAD_LAT_LON)
   {
     _llLon = _lon[0][0];
-    if (_params.debug > Params::DEBUG_WARNINGS)
+    if (_params.debug >= Params::DEBUG_VERBOSE)
       cerr << "INFO: Using _lon[0][0] (" << _lon[0][0] << ") for ll_lon\n";
   }
 
@@ -1963,20 +1959,6 @@ void Era5Data::_loadU10()
   if (_u10 == 0)
     return;
   
-  // Convert to knots, if requested
-
-  if (_params.wind_speed_in_knots)
-  {
-    for (int ilat = 0; ilat < _nLat; ilat++)
-    {
-      for (int ilon = 0; ilon < _nLon; ilon++)
-      {
-        // convert units to knots
-
-        _u10[ilat][ilon] *= MS_TO_KNOTS;
-      } // endfor - ilon
-    } // endfor - ilat
-  }
 
 }
 
@@ -1991,20 +1973,6 @@ void Era5Data::_loadV10()
   if (_v10 == 0)
     return;
   
-  // Convert to knots, if requested
-
-  if (_params.wind_speed_in_knots)
-  {
-    for (int ilat = 0; ilat < _nLat; ilat++)
-    {
-      for (int ilon = 0; ilon < _nLon; ilon++)
-      {
-        // convert units to knots
-
-        _v10[ilat][ilon] *= MS_TO_KNOTS;
-      } // endfor - ilon
-    } // endfor - ilat
-  }
 
 }
 
@@ -2523,11 +2491,12 @@ bool  Era5Data::_setTimes()
   _heartbeatFunc("Entering Era5Data::_setTimes()");
   
 
-  int gyear, gmonth, gday, ghour, gmin, gsec;
-  int fyear, fmonth, fday, fhour, fmin, fsec;
-  int numtokens, domain;
-  DateTime gDateTime,fDateTime;
-  
+  // int gyear, gmonth, gday, ghour, gmin, gsec;
+  // int fyear, fmonth, fday, fhour, fmin, fsec;
+  // int numtokens, domain;
+  // DateTime gDateTime,fDateTime;
+
+#ifdef JUNK
   if (_params.get_times_from_filenames)
     {
       //get forecast & gen time from the filename
@@ -2613,28 +2582,29 @@ bool  Era5Data::_setTimes()
       domain = atoi(domainString);
       delete [] domainString;
     }
-
-  if (_params.debug >= Params::DEBUG_NORM) 	
-    {
-      cerr << "\nFORECAST TIME\n";
-      cerr << fDateTime.getStrn() << endl;
-      cerr << "domain = " << domain << endl;
-    }
+#endif
+  
+  // if (_params.debug >= Params::DEBUG_NORM) 	
+  //   {
+  //     cerr << "\nFORECAST TIME\n";
+  //     cerr << fDateTime.getStrn() << endl;
+  //     cerr << "domain = " << domain << endl;
+  //   }
 
   // Define the model forecast time using time from model output filename
-  forecastTime = fDateTime.utime();
+  // forecastTime = fDateTime.utime();
   
-  if (_params.debug >= Params::DEBUG_NORM) 	
-    {
-      cerr << "\nGENERATION TIME\n";
-      cerr << gDateTime.getStrn() << endl;
-      cerr << "domain = " << domain << endl;
-    }
+  // if (_params.debug >= Params::DEBUG_NORM) 	
+  //   {
+  //     cerr << "\nGENERATION TIME\n";
+  //     cerr << gDateTime.getStrn() << endl;
+  //     cerr << "domain = " << domain << endl;
+  //   }
 
-    // Set the model gen time
-  genTime = gDateTime.utime() + _params.gen_time_offset;
+  //   // Set the model gen time
+  // genTime = gDateTime.utime();
 
-  forecastLeadTime = forecastTime - genTime;
+  // forecastLeadTime = forecastTime - genTime;
 
   return true;
 }
@@ -3065,11 +3035,6 @@ void Era5Data::_loadSoilParamFile(ifstream &spt)
 		   >> fields[4] >> fields[5] >> fields[6] >> fields[7]
 		   >> fields[8] >> fields[9] >> fields[10] >> fields[11];
                                          
-	    if (_params.alg_debug == Params::DEBUG_SOIL_AM)
-	      {
-		cerr << "Loading wilt moisture: " << atof(fields[9]) << endl;
-		cerr << "Loading saturation moisture: " << atof(fields[4]) << endl;
-	      }
 	    _soilWiltMoist.push_back(atof(fields[9]));
 	    _soilSatMoist.push_back(atof(fields[4])); 
 	  }
@@ -3556,666 +3521,6 @@ void Era5Data::_computeWspdDirnField()
 
 }
    
-//////////////////////////////////////////////////////////////////////
-// _computeIcing()
-//
-// Load icing severity field from cloud mixing ratio and temperature
-//
-// Index of severity ranges from 0.0 to 1.0
-
-#define RPRIME 287.04
-
-void Era5Data::_computeIcing()
-{
-  _heartbeatFunc("Entering Era5Data::_computeIcing()");
-  
-  // If we already have the field, do nothing
-
-  if (_icing != 0)
-    return;
-  
-  // Load the needed fields
-
-  _computePressure();
-  
-  if (_pres == 0)
-  {
-    cerr << "WARNING: pressure not available" << endl;
-    cerr << "Cannot calculate icing" << endl;
-    
-    return;
-  }
-  
-  _computeTemp();
-  
-  if (_tk == 0)
-  {
-    cerr << "WARNING: temperature not available" << endl;
-    cerr << "Cannot calculate icing" << endl;
-    
-    return;
-  }
-  
-  _loadCloudMixingRatio();
-  
-  if (_clw == 0)
-  {
-    cerr << "WARNING: cloud mixing ratio not available" << endl;
-    cerr << "Cannot calculate icing" << endl;
-    
-    return;
-  }
-  
-  // Allocate space for the field
-
-  _icing = (fl32 ***) umalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-  
-  // Calculate the field
-
-  double freezingPt = 273.15;
-  double trace_slope = _params.trace_severity /
-    (_params.trace_icing_clw - _params.no_icing_clw);
-  double light_slope = (_params.light_severity - _params.trace_severity) /
-    (_params.moderate_icing_clw - _params.light_icing_clw);
-  double moderate_slope = (_params.moderate_severity - _params.light_severity) /
-    (_params.moderate_icing_clw - _params.light_icing_clw);
-  double severe_slope = (_params.severe_severity - _params.moderate_severity) /
-    (_params.severe_icing_clw - _params.moderate_icing_clw);
-  double total = 0.0, first = 0.0, second = 0.0, third = 0.0, fourth = 0.0;
-
-  for (int isig = 0; isig < _nEta; isig++)
-  {
-    for (int ilat = 0; ilat < _nLat; ilat++)
-    {
-      for (int ilon = 0; ilon < _nLon; ilon++)
-      {
-	double pressure = _pres[isig][ilat][ilon];
-	double tempk = _tk[isig][ilat][ilon];
-	double Clw = _clw[isig][ilat][ilon];
-	double dens = (pressure * 100.0) / (RPRIME * tempk);
-	double g_per_m3 = Clw * dens * 1000.0;
-	double severity;
-
-	if (g_per_m3 < _params.no_icing_clw)
-	  severity = 0.0;
-	else if (g_per_m3 < _params.trace_icing_clw)
-	  severity = (g_per_m3 - _params.no_icing_clw) * trace_slope;
-	else if (g_per_m3 < _params.light_icing_clw)
-	  severity = _params.trace_severity + 
-	    (g_per_m3 - _params.trace_icing_clw)* light_slope;
-	else if (g_per_m3 < _params.moderate_icing_clw)
-	  severity = _params.light_severity + 
-	    (g_per_m3 - _params.light_icing_clw) * moderate_slope;
-	else if (g_per_m3 < _params.severe_icing_clw)
-	  severity = _params.moderate_severity + 
-	    (g_per_m3 - _params.moderate_icing_clw) * severe_slope;
-	else
-	  severity = _params.severe_severity;
-
-	if (tempk > freezingPt)
-	  severity = 0.0;
-	
-	_icing[isig][ilat][ilon] = severity;
-
-	total++;
-
-	if (severity < 0.25)
-	  first++;
-	else if (severity < 0.5)
-	  second++;
-	else if (severity < 0.75)
-	  third++;
-	else
-	  fourth++;
-
-      } // ilon
-    } // ilat
-  } // isig
-
-  if (_params.debug)
-  {
-    cerr << "Icing combined percentages:" << endl;
-    cerr << "  0.00 - 0.25: " << (first / total) * 100.0 << endl;
-    cerr << "  0.25 - 0.50: " << (second / total) * 100.0 << endl;
-    cerr << "  0.50 - 0.75: " << (third / total) * 100.0 << endl;
-    cerr << "  0.75 - 1.00: " << (fourth / total) * 100.0 << endl;
-  }
-  
-}
-   
-///////////////////////
-// _computeT2C()
-//
-// Compute Temp in C from Temp in K at 2 meters
-//
-
-void Era5Data::_computeT2C()
-{
-  _heartbeatFunc("Entering Era5Data::_computeT2C()");
-  
-  // If we already have the field, do nothing
-
-  if (_t2c != 0)
-    return;
-  
-  // Load needed fields
-
-  _loadT2();
-  
-  if (_t2 == 0)
-  {
-    cerr << "WARNING: t2 not available" << endl;
-    cerr << "Cannot compute t2c" << endl;
-    return;
-  }
-  
-  // Allocate space for the field
-
-  _t2c = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
-  
-  // Compute the field
-
-  for (int ilat = 0; ilat < _nLat; ilat++)
-  {
-    for (int ilon = 0; ilon < _nLon; ilon++)
-    {
-      _t2c[ilat][ilon] = _t2[ilat][ilon] - 273.15;
-    } // endfor - ilon
-  } // endfor - ilat
-
-}
-   
-///////////////////////
-///////////////////////
-// _computeFzlevel()
-//
-// Load the freezing level field
-//
-// Freezing level is defined as the lowest occurrence of freezing
-// temperature.
-//
-
-void Era5Data::_computeFzlevel()
-{
-  _heartbeatFunc("Entering Era5Data::_computeFzlevel()");
-  
-  // If we've already computed the field, don't do it again
-
-  if (_fzlevel != 0)
-    return;
-  
-  // Load the needed fields
-
-  _computeTempC();
-  
-  if (_tc == 0)
-  {
-    cerr << "WARNING: temp C not available" << endl;
-    cerr << "Cannot compute freezing level" << endl;
-    return;
-  }
-  
-  _computePressure();
-  
-  if (_pres == 0)
-  {
-    cerr << "WARNING: pressure not available" << endl;
-    cerr << "Cannot compute freezing level" << endl;
-    return;
-  }
-  
-  // Allocate space for the field
-
-  _fzlevel = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
-  
-  // Compute the field
-
-  for (int ilat = 0; ilat < _nLat; ilat++)
-  {
-    for (int ilon = 0; ilon < _nLon; ilon++)
-    {
-      _fzlevel[ilat][ilon] = 0.0;
-      
-      for (int isig = 0; isig < _nEta - 1; isig++)
-      {
-	double t1 = _tc[isig][ilat][ilon];
-	double t2 = _tc[isig+1][ilat][ilon];
-	
-	if (t1 >= 0.0 && t2 <= 0.0)
-	{
-	  // Find the level
-
-	  double fraction = t1 / (t1 - t2);
-	  
-	  double p1 = _pres[isig][ilat][ilon];
-	  double p2 = _pres[isig+1][ilat][ilon];
-
-	  // Interpolate the pressure for this level
-
-	  double pressure = p1 + fraction * (p2 - p1);
-
-	  double flight_level = _isa.pres2flevel(pressure);
-	  _fzlevel[ilat][ilon] = flight_level;
-
-	  break;
-	  
-	} // if (t1 >= 0.0 && t2 <= 0.0) {
-      } // isig
-    } // ilon
-  } // ilat
-  
-}
-
-/////////////////////////
-// _computeDbz2DField()
-// This Version takes the max of the column at each lat lon.
-//
-void Era5Data::_computeDbz2DField()
-{
-  _heartbeatFunc("Entering Era5Data::_computeDbz2DField()");
-  
-  // If we have the field already, do nothing
-
-  if (_dbz_2d != 0)
-    return;
-  
-  // Load needed fields
-
-  _computeDbz3DField();
-  
-  if (_dbz_3d == 0)
-  {
-    cerr << "WARNING: dbz_3d not available" << endl;
-    cerr << "Cannot compute dbz_2d field" << endl;
-    return;
-  }
-
-  // Allocate space for the field
-
-  _dbz_2d = (fl32 **) umalloc2( _nLat, _nLon, sizeof(fl32));
-  
-  // Compute the field
-
-  for (int ilat = 0; ilat < _nLat; ilat++)
-  {
-    for (int ilon = 0; ilon < _nLon; ilon++)
-    {
-      // Set  _dbz_2d[ilat][ilon] to the max in the [ilat][ilon] column
-
-      _dbz_2d[ilat][ilon] = _dbz_3d[0][ilat][ilon];
-      
-      for (int isig = 1; isig < _nEta; isig++)
-      {
-	if ( _dbz_3d[isig][ilat][ilon] > _dbz_2d[ilat][ilon] )
-	  _dbz_2d[ilat][ilon] = _dbz_3d[isig][ilat][ilon];
-      } // endfor - isig
-    } // endfor - ilon
-  } // endfor - ilat
-
-}
-
-/////////////////////////
-// _computeDbz3DField()
-//
-// Estimate the Ground level DBZ.
-//     This routine computes equivalent reflectivity factor (in dBZ) at
-//     each model grid point.  In calculating Ze, the RIP algorithm makes
-//     assumptions consistent with those made in an early version
-//     (ca. 1996) of the bulk mixed-phase microphysical scheme in the WRF
-//     model (i.e., the scheme known as "Resiner-2").  For each species:
-//
-//     1. Particles are assumed to be spheres of constant density.  The
-//     densities of rain drops, snow particles, and graupel particles are
-//     taken to be rho_r = rho_l = 1000 kg m^-3, rho_s = 100 kg m^-3, and
-//     rho_g = 400 kg m^-3, respectively. (l refers to the density of
-//     liquid water.)
-//
-//     2. The size distribution (in terms of the actual diameter of the
-//     particles, rather than the melted diameter or the equivalent solid
-//     ice sphere diameter) is assumed to follow an exponential
-//     distribution of the form N(D) = N_0 * exp( lambda*D ).
-//
-//     3. If ivarint=0, the intercept parameters are assumed constant (as
-//     in early Reisner-2), with values of 8x10^6, 2x10^7, and 4x10^6 m^-4,
-//     for rain, snow, and graupel, respectively.  If ivarint=1, variable
-//     intercept parameters are used, as calculated in Thompson, Rasmussen,
-//     and Manning (2004, Monthly Weather Review, Vol. 132, No. 2, pp. 519-542.)
-//
-//     More information on the derivation of simulated reflectivity in RIP
-//     can be found in Stoelinga (2005, unpublished write-up).  Contact
-//     Mark Stoelinga (stoeling@atmos.washington.edu) for a copy.
-
-// This macro returns virtual temperature in K, given temperature
-// in K and mixing ratio in kg/kg
-//
-#define VIRTUAL(t,r) ( t * (0.622 + r) / (0.622 *(1+r)) )
-
-void Era5Data::_computeDbz3DField()
-{
-  _heartbeatFunc("Entering Era5Data::_computeDbz3DField()");
-  
-  // If we already have the field, do nothing
-
-  if (_dbz_3d != 0)
-    return;
-  
-  // Load the needed fields
-
-  _computeTemp();
-  
-  if (_tk == 0)
-  {
-    cerr << "WARNING: temperature not available" << endl;
-    cerr << "Cannot calculate dbz 3D field" << endl;
-    
-    return;
-  }
-
-  _computePressure();
-  
-  if (_pres == 0)
-  {
-    cerr << "WARNING: pressure not available" << endl;
-    cerr << "Cannot calculate dbz 3D field" << endl;
-    
-    return;
-  }
-
-  _loadWaterMixingRatio();
-  
-  if (_qq == 0)
-  {
-    cerr << "WARNING: mixing ratio not available" << endl;
-    cerr << "Cannot calculate dbz 3D field" << endl;
-    
-    return;
-  }
-
-  _loadRainMixingRatio();
-  
-  if (_rnw == 0)
-  {
-    cerr << "WARNING: rain mising ratio not available" << endl;
-    cerr << "Cannot calculate dbz 3D field" << endl;
-    
-    return;
-  }
-
-  // Load the optional fields.  These are used if available.
-
-  _loadSnowMixingRatio();
-  _loadGraupelMixingRatio();
-  
-  // Set the needed constants
-
-  double rn0_r = 8.e6; // m^-4
-  double rn0_s = 2.e7;
-  double rn0_g = 4.e6;
-
-  double celkel = 273.15;
-  double rhowat = 1000.0;
-  double rgas = 287.04;
-  
-  double gamma_seven = 720.0;
-  double rho_r = rhowat; // 1000. kg m^-3
-  double rho_s = 100.0;  // kg m^-3
-  double rho_g = 400.0;  // kg m^-3
-  double alpha = 0.224;
-  double factor_r = gamma_seven * 1.e18 * pow((1./(M_PI*rho_r)),1.75);
-  double factor_s = gamma_seven * 1.e18 * pow((1./(M_PI*rho_s)),1.75)
-    * pow((rho_s/rhowat),2.0) * alpha;
-  double  factor_g = gamma_seven * 1.e18 * pow((1./(M_PI*rho_g)),1.75)
-    * pow((rho_g/rhowat),2.0) * alpha;
-  
-  // Allocate space for the new field
-
-  _dbz_3d = (fl32 ***) umalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-
-  // Calculate the field
-
-  fl32 *db_ptr = &_dbz_3d[0][0][0];
-  fl32 *tk_ptr = &_tk[0][0][0];  // Temperature kelvin
-  fl32 *pr_ptr = &_pres[0][0][0];  // Pressure 
-  fl32 *qvp_ptr = &_qq[0][0][0];  // Water Vapor Mixing Ratio 
-  fl32 *qra_ptr = &_rnw[0][0][0];  // Rain  Mixing Ratio 
-  fl32 *qsn_ptr = 0;
-  if (_snow != 0)
-    qsn_ptr = &_snow[0][0][0];  // Snow Mixing Ratio 
-  fl32 *qgr_ptr = 0;
-  if (_graupel != 0)
-    qgr_ptr = &_graupel[0][0][0];  // Graupel Mixing Ratio 
-
-  int num_pts = _nLat * _nLon * _nEta;
-  
-  for (int i = 0; i < num_pts; i++)
-  {
-    double rhoair = *pr_ptr * 100.0 / (rgas * VIRTUAL(*tk_ptr,*qvp_ptr));
-
-    // Adjust factor for brightband, where snow or graupel particle
-    // scatters like liquid water (alpha=1.0) because it is assumed to
-    // have a liquid skin.
-
-    double factorb_s, factorb_g;
-
-    if (*tk_ptr > celkel)
-    {
-      factorb_s=factor_s/alpha;
-      factorb_g=factor_g/alpha;
-    }
-    else
-    {
-      factorb_s=factor_s;
-      factorb_g=factor_g;
-    }
-
-    // Scheme without Ice physics.
-
-    double ronv = rn0_r;
-    double sonv = rn0_s;
-    double gonv = rn0_g;
-
-    // Total equivalent reflectivity factor (z_e, in mm^6 m^-3) is
-
-    double z_e = 0.0;
-
-    if (*tk_ptr > celkel)
-    {
-      z_e = factor_r * pow((rhoair * *qra_ptr),1.75) / pow(ronv,0.75);
-      if (qsn_ptr)
-	z_e += factorb_s * pow((rhoair * *qsn_ptr),1.75) / pow(sonv,0.75);
-
-      if (qgr_ptr)
-	z_e += factorb_g * pow((rhoair * *qgr_ptr),1.75) / pow(gonv,0.75);
-
-    }
-    else
-    {
-      // Below freezing, take qra value as qsn
-      z_e = factorb_s * pow((rhoair * *qra_ptr),1.75) / pow(sonv,0.75);
-
-      if (qsn_ptr)
-	z_e += factorb_s * pow((rhoair * *qsn_ptr),1.75) / pow(sonv,0.75);
-
-      if (qgr_ptr)
-	z_e += factorb_g * pow((rhoair * *qgr_ptr),1.75) / pow(gonv,0.75);
-    }
-
-    //  Adjust small values of Z_e so that dBZ is no lower than -40
-    if (z_e < 0.0001) z_e = 0.0001;
-
-    *db_ptr = 10.0 * log10(z_e);
-
-    db_ptr++;
-    tk_ptr++;
-    pr_ptr++;
-    qvp_ptr++;
-    qra_ptr++;
-    if (qsn_ptr)
-      qsn_ptr++;
-
-    if (qgr_ptr)
-      qgr_ptr++;
-
-  } // All points
-  
-}
-
-/////////////////////////
-// _computeSpeedDir10()
-//
-// Load the wind speed and direction at 10 meters fields.
-
-void Era5Data::_computeSpeedDir10()
-{
-  _heartbeatFunc("Entering Era5Data::_computeSpeedDir10()");
-  
-  // If we already have the fields, do nothing
-
-  if (_wspd10 != 0 && _wdir10 != 0)
-    return;
-  
-  // Load the needed fields
-
-  _loadU10();
-  
-  if (_u10 == 0)
-  {
-    cerr << "WARNING: 10 meter U not available" << endl;
-    cerr << "Cannot compute 10 meter wind speed/dir" << endl;
-    return;
-  }
-  
-  _loadV10();
-  
-  if (_v10 == 0)
-  {
-    cerr << "WARNING: 10 meter V not available" << endl;
-    cerr << "Cannot compute 10 meter wind speed/dir" << endl;
-    return;
-  }
-  
-  // Allocate space for the fields
-
-  _wspd10 = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
-  _wdir10 = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
-
-  // Compute the field
-
-  //BUG?? - similiar to above - it looks like this permanently change _u10,_v10?
-  //we should make a copy to manipulate probably.
-
-  for (int ilat = 0; ilat < _nLat; ilat++)
-  {
-    for (int ilon = 0; ilon < _nLon; ilon++)
-    {
-      // use temp to simplify notation
-
-      double u = _u10[ilat][ilon];
-      double v = _v10[ilat][ilon];
-
-      // do the math
-
-      _wspd10[ilat][ilon] = sqrt(u * u + v * v);
-      if (u == 0.0 && v == 0.0)
-        _wdir10[ilat][ilon] = 0.0;
-      else
-        _wdir10[ilat][ilon] = atan2(-u, -v) / DEG_TO_RAD;
-    } // endfor - ilon
-  } // endfor - ilat
-
-}
-
-///////////////////////
-// _computeCLW_GField()
-//
-// Compute cloud liquid water in g/kg from kg/kg
-//
-
-void Era5Data::_computeCLW_GField()
-{
-  _heartbeatFunc("Entering Era5Data::_computeCLW_GField()");
-  
-  // If we already have the field, do nothing
-
-  if (_clw_g != 0)
-    return;
-  
-  // Load the needed fields
-
-  _loadCloudMixingRatio();
-  
-  if (_clw == 0)
-  {
-    cerr << "WARNING: cloud mixing ratio not available" << endl;
-    cerr << "Cannot calculate g/kg cloud mixing ratio" << endl;
-    
-    return;
-  }
-
-  // Allocate space for the field
-
-  _clw_g = (fl32 ***) umalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-
-  // Calculate the field
-
-  for (int isig = 0; isig < _nEta; isig++)
-  {
-    for (int ilat = 0; ilat < _nLat; ilat++)
-    {
-      for (int ilon = 0; ilon < _nLon; ilon++)
-      {
-	_clw_g[isig][ilat][ilon] = _clw[isig][ilat][ilon] * 1000.0;
-      } // endfor - ilon
-    } // endfor - ilat
-  } // endfor - isig
-
-}
-
-///////////////////////
-// _computeRNW_GField()
-//
-// Compute rain liquid water in g/kg from kg/kg
-//
-
-void Era5Data::_computeRNW_GField()
-{
-  _heartbeatFunc("Entering Era5Data::_computeRNW_GField()");
-  
-  // If we already have the field, do nothing
-
-  if (_rnw_g != 0)
-    return;
-  
-  // Load the needed fields
-
-  _loadRainMixingRatio();
-  
-  if (_rnw == 0)
-  {
-    cerr << "WARNING: rain mixing ratio not available" << endl;
-    cerr << "Cannot calculate g/kg rain mixing ratio" << endl;
-    return;
-  }
-
-  // Allocate space for the new field
-
-  _rnw_g = (fl32 ***) umalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-
-  // Calculate the field
-
-  for (int isig = 0; isig < _nEta; isig++)
-  {
-    for (int ilat = 0; ilat < _nLat; ilat++)
-    {
-      for (int ilon = 0; ilon < _nLon; ilon++)
-      {
-	_rnw_g[isig][ilat][ilon] = _rnw[isig][ilat][ilon] * 1000.0;
-      } // endfor - ilon
-    } // endfor - ilat
-  } // endfor - isig
-
-}
-
 ///////////////////////
 // _computeQ_GField()
 //
@@ -4836,223 +4141,6 @@ void Era5Data::_scale2DField(fl32** field, double factor)
     for (int ilat = 0; ilat < _nLat; ilat++)
       if ((fl32)MISSING_DOUBLE != field[ilat][ilon])
 	field[ilat][ilon] *= factor;
-
-}
-
-
-/////////////////////////
-// _computeCAPECIN_3D()
-//compute 3-D cape,cin,el,lcl, &lfc
-//
-
-void Era5Data::_computeCAPECIN_3D()
-{
-  _heartbeatFunc("Entering Era5Data::_computeCAPECIN_3D()");
-  
-  // If we've already computed the fields, don't do it again
-
-  if (_cape3d != 0 && _cin3d != 0 && _lcl3d != 0 && _lfc3d != 0 && _el3d != 0)
-    return;
-  
-  if (strcmp(_params.adiabat_temp_lookup_filename, "null") == 0)
-  {
-    cerr << "WARNING: adiabat_temp_lookup_filename is null in params" << endl;
-    cerr << "CAPE/CIN/LCL/LFC/EL cannot be calculated." << endl;
-    return;
-  }
-
-  // Load any needed fields
-
-  _computePressure();
-  
-  if (_pres == 0)
-  {
-    cerr << "WARNING: pressure not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeTemp();
-  
-  if (_tk == 0)
-  {
-    cerr << "WARNING: temp K not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeQ_GField();
-  
-  if (_q_g == 0)
-  {
-    cerr << "WARNING: mixing ratio g/kg not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeGeopotHeight();
-  
-  if (_geo_hgt == 0)
-  {
-    cerr << "WARNING: geo_hgt not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  // Allocate space for the fields
-
-  _cape3d = (fl32 ***) ucalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-  _cin3d = (fl32 ***) ucalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-  _lcl3d = (fl32 ***) ucalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-  _lfc3d = (fl32 ***) ucalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-  _el3d = (fl32 ***) ucalloc3(_nEta, _nLat, _nLon, sizeof(fl32));
-
-  // Load the adiabat lookup table
-
-  AdiabatTempLookupTable lookupTable;
-  lookupTable.setFilename(_params.adiabat_temp_lookup_filename);
-
-  // Compute the fields
-
-  if (!PhysicsLib::calcCapeCin3D(lookupTable,
-				 (**_pres),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_tk),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_q_g),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_geo_hgt),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 **_cape3d, MISSING_DOUBLE,
-				 **_cin3d, MISSING_DOUBLE,
-				 //				 min_calc_level, max_calc_level,
-				 0,_nEta-1,
-				 _gridDx, _gridDy, _nLon, _nLat, _nEta,
-				 **_lcl3d, MISSING_DOUBLE,
-				 **_lfc3d, MISSING_DOUBLE,
-				 **_el3d, MISSING_DOUBLE,
-				 //				 PMU_auto_register))
-				 _heartbeatFunc))
-  {
-    cerr << "Error calculating CAPE/CIN fields" << endl;
-    return;
-  }
-
-  if (_params.negative_cin)
-    _scale3DField(_cin3d,-1., _nEta);
-}
-
-
-/////////////////////////
-// _computeCAPECIN_2D()
-//compute 2-D cape,cin,el,lcl, &lfc
-//
-
-void Era5Data::_computeCAPECIN_2D()
-{
-  _heartbeatFunc("Entering Era5Data::_computeCAPECIN_2D()");
-  
-  // If we've already computed it, don't do it again
-
-  if (_lcl != 0 && _lfc != 0 && _el != 0 && _cape != 0 && _cin != 0)
-    return;
-  
-  // We can't do the computations if no adiabt file is specified
-
-  if (strcmp(_params.adiabat_temp_lookup_filename, "null") == 0)
-  {
-    cerr << "WARNING: adiabat_temp_lookup_filename is null in params" << endl;
-    cerr << "CAPE/CIN/LCL/LFC/EL cannot be calculated." << endl;
-    return;
-  }
-
-  // Load any needed fields
-
-  _computePressure();
-  
-  if (_pres == 0)
-  {
-    cerr << "WARNING: pressure not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeTemp();
-  
-  if (_tk == 0)
-  {
-    cerr << "WARNING: temp K not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeQ_GField();
-  
-  if (_q_g == 0)
-  {
-    cerr << "WARNING: mixing ratio g/kg not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  _computeGeopotHeight();
-  
-  if (_geo_hgt == 0)
-  {
-    cerr << "WARNING: geo_hgt not available" << endl;
-    cerr << "Cannot compute 3D CAPE/CIN/LCL/LFC/EL" << endl;
-    return;
-  }
-
-  // Allocate space for the fields
-
-  _lcl = (fl32 **) ucalloc2(_nLat, _nLon, sizeof(fl32));
-  _lfc = (fl32 **) ucalloc2(_nLat, _nLon, sizeof(fl32));
-  _el = (fl32 **) ucalloc2(_nLat, _nLon, sizeof(fl32));
-  _cape = (fl32 **) ucalloc2(_nLat, _nLon, sizeof(fl32));
-  _cin = (fl32 **) ucalloc2(_nLat, _nLon, sizeof(fl32));
-
-  // Load the adiabat lookup table
-
-  AdiabatTempLookupTable lookupTable;
-  lookupTable.setFilename(_params.adiabat_temp_lookup_filename);
-
-  // Compute the fields
-
-  if (!PhysicsLib::calcCapeCin3D(lookupTable,
-				 (**_pres),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_tk),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_q_g),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 (**_geo_hgt),
-				 MISSING_DOUBLE,
-				 MISSING_DOUBLE,
-				 *_cape, MISSING_DOUBLE,
-				 *_cin, MISSING_DOUBLE,
-				 //				 min_calc_level, max_calc_level,
-				 0,0,
-				 _gridDx, _gridDy, _nLon, _nLat, _nEta,
-				 *_lcl, MISSING_DOUBLE,
-				 *_lfc, MISSING_DOUBLE,
-				 *_el, MISSING_DOUBLE,
-				 //				 PMU_auto_register))
-				 _heartbeatFunc))
-  {
-    cerr << "Error calculating CAPE/CIN fields" << endl;
-    return;
-  }
-
-  if (_params.negative_cin)
-    _scale2DField(_cin,-1.);
 
 }
 

@@ -78,7 +78,7 @@ private:
   // Private members //
   /////////////////////
 
-  Params::afield_name_map_t *_field_name_map;
+  // Params::afield_name_map_t *_field_name_map;
 
   string _progName;
   Args _args;
@@ -128,7 +128,7 @@ private:
 		      double mult = 1.0);
 
  void _interp3dField(Era5Data &inData,
-		     const  Params::output_field_name_t &field_name_enum,
+		     // const  Params::output_field_name_t &field_name_enum,
 		     fl32 ***field_data,
 		     DsMdvx &mdvx,
 		     const int planeOffset,
@@ -147,7 +147,7 @@ private:
 		      double mult = 1.0);
 
   void _interp2dField(Era5Data &inData,
-		      const  Params::output_field_name_t &field_name_enum,
+		      // const  Params::output_field_name_t &field_name_enum,
 		      fl32 **field_data,
 		      DsMdvx &mdvx,
 		      int planeOffset,

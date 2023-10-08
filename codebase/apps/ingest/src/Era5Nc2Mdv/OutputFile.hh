@@ -50,7 +50,7 @@ public:
   
   OutputFile(const string &prog_name, const Params &params,
 	     time_t model_time, time_t forecast_time, int forecast_delta,
-	     Era5Data &inData, Params::afield_name_map_t *field_name_map);
+	     Era5Data &inData /*, Params::afield_name_map_t *field_name_map*/);
   
   // destructor
   
@@ -71,7 +71,7 @@ private:
 
   const string &_progName;
   const Params &_params;
-  const Params::afield_name_map_t *_field_name_map; //owned by Wrf2Mdv
+  // const Params::afield_name_map_t *_field_name_map; //owned by Wrf2Mdv
 
   DsMdvx _mdvx;
 
@@ -90,9 +90,9 @@ private:
 
 
   void _setFieldName(Mdvx::field_header_t &fhdr,
-			       const Params::output_field_name_t &field_name_enum,
-			       const char *units,
-			       const char *transform,
+                     // const Params::output_field_name_t &field_name_enum,
+                     const char *units,
+                     const char *transform,
 		     const int field_code);
 
 

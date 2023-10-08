@@ -579,7 +579,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("debug");
     tt->descr = tdrpStrDup("Debug option");
-    tt->help = tdrpStrDup("If set, debug messages will be printed with the appropriate level of detail.");
+    tt->help = tdrpStrDup("NORM - minimal debug level. VERBOSE - verbose messaged. EXTRA - extra verbose messages.");
     tt->val_offset = (char *) &debug - &_start_;
     tt->enum_def.name = tdrpStrDup("debug_t");
     tt->enum_def.nfields = 4;
@@ -587,59 +587,13 @@
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_OFF");
       tt->enum_def.fields[0].val = DEBUG_OFF;
-      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_WARNINGS");
-      tt->enum_def.fields[1].val = DEBUG_WARNINGS;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_NORM");
-      tt->enum_def.fields[2].val = DEBUG_NORM;
-      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_VERBOSE");
-      tt->enum_def.fields[3].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_NORM");
+      tt->enum_def.fields[1].val = DEBUG_NORM;
+      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_VERBOSE");
+      tt->enum_def.fields[2].val = DEBUG_VERBOSE;
+      tt->enum_def.fields[3].name = tdrpStrDup("DEBUG_EXTRA");
+      tt->enum_def.fields[3].val = DEBUG_EXTRA;
     tt->single_val.e = DEBUG_OFF;
-    tt++;
-    
-    // Parameter 'alg_debug'
-    // ctype is '_alg_debug_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("alg_debug");
-    tt->descr = tdrpStrDup("Detailed debug information about a particular section of code");
-    tt->help = tdrpStrDup("This can be useful for debugging a particular algorithm - without having to turn all lots of debug printing.");
-    tt->val_offset = (char *) &alg_debug - &_start_;
-    tt->enum_def.name = tdrpStrDup("alg_debug_t");
-    tt->enum_def.nfields = 3;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("DEBUG_RH2");
-      tt->enum_def.fields[0].val = DEBUG_RH2;
-      tt->enum_def.fields[1].name = tdrpStrDup("DEBUG_SOIL_AM");
-      tt->enum_def.fields[1].val = DEBUG_SOIL_AM;
-      tt->enum_def.fields[2].name = tdrpStrDup("DEBUG_NONE");
-      tt->enum_def.fields[2].val = DEBUG_NONE;
-    tt->single_val.e = DEBUG_NONE;
-    tt++;
-    
-    // Parameter 'instance'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("instance");
-    tt->descr = tdrpStrDup("Process instance");
-    tt->help = tdrpStrDup("Used for registration with procmap.");
-    tt->val_offset = (char *) &instance - &_start_;
-    tt->single_val.s = tdrpStrDup("test");
-    tt++;
-    
-    // Parameter 'Procmap_reg_interval_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("Procmap_reg_interval_secs");
-    tt->descr = tdrpStrDup("Time between registration with procmap.");
-    tt->help = tdrpStrDup("The default is 60 secs. Set this to a longer value (say 120 secs) if you need to scan a large directory structure and there is no latest_data_info available.");
-    tt->val_offset = (char *) &Procmap_reg_interval_secs - &_start_;
-    tt->single_val.i = 60;
     tt++;
     
     // Parameter 'Comment 2'
@@ -658,7 +612,7 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("mode");
     tt->descr = tdrpStrDup("Operation mode");
-    tt->help = tdrpStrDup("Program may be run in two modes, archive and realtime. In realtime mode, the analysis is performed for each volume scan as it becomes available. In archive mode, the file list is obtained from the command line.");
+    tt->help = tdrpStrDup("ARCHIVE - set start and end time. FILELIST - specify files on command line. Each ERA5 NetCDF file contains a single field and a single level, and a number of times. When given a specified file path, we search for all files with the same time interval, assemble all of the levels and fields, and write out one output file per input time.");
     tt->val_offset = (char *) &mode - &_start_;
     tt->enum_def.name = tdrpStrDup("mode_t");
     tt->enum_def.nfields = 2;
@@ -666,8 +620,8 @@
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("ARCHIVE");
       tt->enum_def.fields[0].val = ARCHIVE;
-      tt->enum_def.fields[1].name = tdrpStrDup("REALTIME");
-      tt->enum_def.fields[1].val = REALTIME;
+      tt->enum_def.fields[1].name = tdrpStrDup("FILELIST");
+      tt->enum_def.fields[1].val = FILELIST;
     tt->single_val.e = ARCHIVE;
     tt++;
     
@@ -692,180 +646,16 @@
     tt->single_val.s = tdrpStrDup("./SOILPARM.TBL");
     tt++;
     
-    // Parameter 'realtime_input_dir'
+    // Parameter 'input_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("realtime_input_dir");
-    tt->descr = tdrpStrDup("Directory for input WRF data - REALTIME mode.");
-    tt->help = tdrpStrDup("The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.");
-    tt->val_offset = (char *) &realtime_input_dir - &_start_;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Directory for input data - ARCHIVE mode.");
+    tt->help = tdrpStrDup("We search this dir for all files between the start and end times.");
+    tt->val_offset = (char *) &input_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles");
-    tt++;
-    
-    // Parameter 'File_quiescence_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("File_quiescence_secs");
-    tt->descr = tdrpStrDup("Wait for the file to be this many seconds quiescent before processing it");
-    tt->help = tdrpStrDup("Used for Real time mode when use_ldata = FALSE ;.");
-    tt->val_offset = (char *) &File_quiescence_secs - &_start_;
-    tt->single_val.i = 60;
-    tt++;
-    
-    // Parameter 'Dir_search_depth'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("Dir_search_depth");
-    tt->descr = tdrpStrDup("Search no more than this level deep in the realtime_input_dir");
-    tt->help = tdrpStrDup("This can be used to only ingest one domain.");
-    tt->val_offset = (char *) &Dir_search_depth - &_start_;
-    tt->single_val.i = 3;
-    tt++;
-    
-    // Parameter 'Dir_scan_interval_secs'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("Dir_scan_interval_secs");
-    tt->descr = tdrpStrDup("Interval at which directory is scanned (secs).");
-    tt->help = tdrpStrDup("The app waits for this time interval between directory scans.");
-    tt->val_offset = (char *) &Dir_scan_interval_secs - &_start_;
-    tt->single_val.i = 50;
-    tt++;
-    
-    // Parameter 'DomainString'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("DomainString");
-    tt->descr = tdrpStrDup("If set to other than NULL, filenames must contain this string to be ingested.");
-    tt->help = tdrpStrDup("This allows you to control which files will be processed. The app checks that this substring exists in the file name before processing.");
-    tt->val_offset = (char *) &DomainString - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'File_extension'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("File_extension");
-    tt->descr = tdrpStrDup("If set to other than NULL, filenames must have this extension to be ingested.");
-    tt->help = tdrpStrDup("This can be used to limit the type of files processed.");
-    tt->val_offset = (char *) &File_extension - &_start_;
-    tt->single_val.s = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'use_ldata'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("use_ldata");
-    tt->descr = tdrpStrDup("Set to TRUE if WRF is writing a _latest_data_info file.");
-    tt->help = tdrpStrDup("Realtime mode only.");
-    tt->val_offset = (char *) &use_ldata - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'get_times_from_filenames'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("get_times_from_filenames");
-    tt->descr = tdrpStrDup("Set to TRUE if the forecast and generation time and domain should be determined from the filename.");
-    tt->help = tdrpStrDup("Otherwise the forecast time is determined via the 'TIMES' variable,  generation time is determined from the START_TIME attribute, and domain is set to the GRID_ID attribute.  The filename must be in the format dn.yyyymmddhh.tmHHMM.wrf where n is the domain, yyyymmddhh is the gen time and HHMM is the forecast lead time");
-    tt->val_offset = (char *) &get_times_from_filenames - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'gen_time_offset'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("gen_time_offset");
-    tt->descr = tdrpStrDup("Number of seconds to apply as an offset to the gen time.");
-    tt->help = tdrpStrDup("This is useful if the file name time or the time found in the data has an offset error. The default is no offset. Use negative values to decrease the time.");
-    tt->val_offset = (char *) &gen_time_offset - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'max_realtime_valid_age'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_realtime_valid_age");
-    tt->descr = tdrpStrDup("Max age of input data - REALTIME mode.");
-    tt->help = tdrpStrDup("For realtime only - max age of input data for it to be valid (secs). If the latest_data_info file is older than this, the program waits for new data.");
-    tt->val_offset = (char *) &max_realtime_valid_age - &_start_;
-    tt->has_min = TRUE;
-    tt->min_val.i = 0;
-    tt->single_val.i = 300;
-    tt++;
-    
-    // Parameter 'min_forecast_dtime'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("min_forecast_dtime");
-    tt->descr = tdrpStrDup("The minimum forecast time (secs) relative to model start time.");
-    tt->help = tdrpStrDup("Only forecast times greater than or equal to this dtime are used. This allows us to ignore the first n forecasts, which may not be good anyway due to model spin-up requirements.");
-    tt->val_offset = (char *) &min_forecast_dtime - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'max_forecast_dtime'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("max_forecast_dtime");
-    tt->descr = tdrpStrDup("The maximum forecast time (secs) relative to model start time.");
-    tt->help = tdrpStrDup("Only forecast times less than or equal to this dtime are used. This allows us to ignore the last n forecast.");
-    tt->val_offset = (char *) &max_forecast_dtime - &_start_;
-    tt->single_val.i = 99999999;
-    tt++;
-    
-    // Parameter 'specify_lead_times'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("specify_lead_times");
-    tt->descr = tdrpStrDup("Option to specify which lead times to process.");
-    tt->help = tdrpStrDup("If FALSE, all lead times are processed. If TRUE, only files with lead times in the parameter 'lead_times' will be processed. If this is set, it will act together with min_forecast_dtime to limit the output times. For a forecast to be accepted it must have a lead time equal to or greater than min_forecast_dtime, and must also be in the lead_times array.");
-    tt->val_offset = (char *) &specify_lead_times - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'lead_times'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("lead_times");
-    tt->descr = tdrpStrDup("Array of lead times (secs).");
-    tt->help = tdrpStrDup("If 'specify_lead_times' is TRUE, only the files with lead times matching this array will be processed.");
-    tt->array_offset = (char *) &_lead_times - &_start_;
-    tt->array_n_offset = (char *) &lead_times_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 0;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
     tt++;
     
     // Parameter 'Comment 4'
@@ -873,6 +663,130 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
+    tt->comment_hdr = tdrpStrDup("SPECIFY FIELD NAMES AND OUTPUT ENCODING");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'output_fields'
+    // ctype is '_output_field_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("output_fields");
+    tt->descr = tdrpStrDup("Output field details.");
+    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.");
+    tt->array_offset = (char *) &_output_fields - &_start_;
+    tt->array_n_offset = (char *) &output_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(output_field_t);
+    tt->array_n = 9;
+    tt->struct_def.name = tdrpStrDup("output_field_t");
+    tt->struct_def.nfields = 5;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_output_fields->input_field_name - (char *) _output_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_output_fields->output_field_name - (char *) _output_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("standard_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_output_fields->standard_name - (char *) _output_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("output_units");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_output_fields->output_units - (char *) _output_fields;
+      tt->struct_def.fields[4].ftype = tdrpStrDup("output_encoding_t");
+      tt->struct_def.fields[4].fname = tdrpStrDup("encoding");
+      tt->struct_def.fields[4].ptype = ENUM_TYPE;
+      tt->struct_def.fields[4].rel_offset = 
+        (char *) &_output_fields->encoding - (char *) _output_fields;
+        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("output_encoding_t");
+        tt->struct_def.fields[4].enum_def.nfields = 3;
+        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
+        tt->struct_def.fields[4].enum_def.fields[0].val = OUTPUT_ENCODING_FLOAT32;
+        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
+        tt->struct_def.fields[4].enum_def.fields[1].val = OUTPUT_ENCODING_INT16;
+        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
+        tt->struct_def.fields[4].enum_def.fields[2].val = OUTPUT_ENCODING_INT08;
+    tt->n_struct_vals = 45;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("D");
+      tt->struct_vals[1].s = tdrpStrDup("divergence");
+      tt->struct_vals[2].s = tdrpStrDup("divergence_of_wind");
+      tt->struct_vals[3].s = tdrpStrDup("1/s");
+      tt->struct_vals[4].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[5].s = tdrpStrDup("Q");
+      tt->struct_vals[6].s = tdrpStrDup("specific_humidity");
+      tt->struct_vals[7].s = tdrpStrDup("specific_humidity");
+      tt->struct_vals[8].s = tdrpStrDup("kg/kg");
+      tt->struct_vals[9].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[10].s = tdrpStrDup("R");
+      tt->struct_vals[11].s = tdrpStrDup("RH");
+      tt->struct_vals[12].s = tdrpStrDup("relative_humidity");
+      tt->struct_vals[13].s = tdrpStrDup("%");
+      tt->struct_vals[14].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[15].s = tdrpStrDup("T");
+      tt->struct_vals[16].s = tdrpStrDup("temperature");
+      tt->struct_vals[17].s = tdrpStrDup("air_temperature");
+      tt->struct_vals[18].s = tdrpStrDup("K");
+      tt->struct_vals[19].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[20].s = tdrpStrDup("U");
+      tt->struct_vals[21].s = tdrpStrDup("u");
+      tt->struct_vals[22].s = tdrpStrDup("eastward_wind");
+      tt->struct_vals[23].s = tdrpStrDup("m/s");
+      tt->struct_vals[24].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[25].s = tdrpStrDup("V");
+      tt->struct_vals[26].s = tdrpStrDup("v");
+      tt->struct_vals[27].s = tdrpStrDup("northward_wind");
+      tt->struct_vals[28].s = tdrpStrDup("m/s");
+      tt->struct_vals[29].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[30].s = tdrpStrDup("U");
+      tt->struct_vals[31].s = tdrpStrDup("u");
+      tt->struct_vals[32].s = tdrpStrDup("eastward_wind");
+      tt->struct_vals[33].s = tdrpStrDup("m/s");
+      tt->struct_vals[34].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[35].s = tdrpStrDup("W");
+      tt->struct_vals[36].s = tdrpStrDup("w");
+      tt->struct_vals[37].s = tdrpStrDup("vertical_velocity");
+      tt->struct_vals[38].s = tdrpStrDup("m/s");
+      tt->struct_vals[39].e = OUTPUT_ENCODING_FLOAT32;
+      tt->struct_vals[40].s = tdrpStrDup("Z");
+      tt->struct_vals[41].s = tdrpStrDup("z");
+      tt->struct_vals[42].s = tdrpStrDup("geopotential_height");
+      tt->struct_vals[43].s = tdrpStrDup("m");
+      tt->struct_vals[44].e = OUTPUT_ENCODING_FLOAT32;
+    tt++;
+    
+    // Parameter 'convert_temperature_to_celcius'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("convert_temperature_to_celcius");
+    tt->descr = tdrpStrDup("The temperature is read in degrees Kelvin. This option allows us to convert to degrees C.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &convert_temperature_to_celcius - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 5'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 5");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -884,1043 +798,21 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("output_url");
     tt->descr = tdrpStrDup("Output URL.");
-    tt->help = tdrpStrDup("The WRF data is output to URL in MDV format.");
+    tt->help = tdrpStrDup("The assembled ERA5 data is output to URL in MDV format.");
     tt->val_offset = (char *) &output_url - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
+    tt->single_val.s = tdrpStrDup("/tmp/ERA5");
     tt++;
     
-    // Parameter 'Comment 5'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 5");
-    tt->comment_hdr = tdrpStrDup("Supported WRF raw and derived fields");
-    tt->comment_text = tdrpStrDup("====== raw WRF 3-d fields - on cross (center) points =====\n\t\nU_FIELD, V_FIELD, Q_FIELD,\nCLW_FIELD, RNW_FIELD, ICE_FIELD,\nSNOW_FIELD, GRAUPEL_FIELD\nW_FIELD, P_FIELD, PB_FIELD\nPHB_FIELD, PH_FIELD, DNW_FIELD,\nMUB_FIELD, MU_FIELD, REFL_10CM_FIELD\nQNRAIN_FIELD, QNCLOUD_FIELD\n\t\n======= raw WRF 3-d fields - on dot (corner) points =====\n\t\nNOTE: only applicable if output_projection is OUTPUT_PROJ_NATIVE\n\t\nU_EDGE_FIELD, V_EDGE_FIELD,\n\t\n========== derived 3-d fields ==========\n\t\nTK_FIELD, TC_FIELD, WSPD_FIELD, WDIR_FIELD\nPRESSURE_FIELD, RH_FIELD, SPEC_H_FIELD, DEWPT_FIELD, ICING_FIELD,\nCLW_G_FIELD, RNW_G_FIELD\nTHETA_FIELD, DBZ_3D_FIELD, HGT_FIELD, Z_AGL_FIELD, ITFADEF_FIELD \n\tQ_G_FIELD\n     =====  CAPE/CIN 3D fields ======\nCAPE_3D_FIELD, CIN_3D_FIELD, LCL_3D_FIELD, LFC_3D_FIELD, EL_3D_FIELD\n\t\n========== raw WRF 2-d fields ==========\n\t\nSOIL_T_1_FIELD, SOIL_T_2_FIELD, SOIL_T_3_FIELD,\nSOIL_T_4_FIELD, SOIL_T_5_FIELD,\nSOIL_M_1_FIELD, SOIL_M_2_FIELD, SOIL_M_3_FIELD,\nSOIL_M_4_FIELD, SOIL_M_5_FIELD\nSOIL_AM_1_FIELD, SOIL_AM_2_FIELD, SOIL_AM_3_FIELD,\nSOIL_AM_4_FIELD, SOIL_AM_5_FIELD,\nLAT_FIELD, LON_FIELD\nGROUND_T_FIELD, RAINC_FIELD, RAINNC_FIELD,\nTERRAIN_FIELD\nLAND_USE_FIELD, SNOWCOVR_FIELD, TSEASFC_FIELD,\nPBL_HGT_FIELD\nT2_FIELD, Q2_FIELD, U10_FIELD, V10_FIELD,\nSNOWH_FIELD\nSFC_PRES_FIELD, LAND_MASK_FIELD, TH2_FIELD,\nHFX_FIELD, LH_FIELD, SNOW_WE_FIELD, SOIL_TYPE_FIELD\nSNOW_NC_FIELD, GRAUPEL_NC_FIELD\n\t\n========== derived 2-d fields ==========\n\t\nFZLEVEL_FIELD, RAIN_TOTAL_FIELD,\nRH2_FIELD, T2C_FIELD\nWSPD10_FIELD, WDIR10_FIELD,\nTWP_FIELD, RWP_FIELD, VIL_FIELD\nDBZ_2D_FIELD, SPEC_H_2M_FIELD \n     =====  CAPE/CIN 2D fields ======\nCAPE_FIELD, CIN_FIELD, LCL_FIELD, LFC_FIELD, EL_FIELD\n\t\n========== raw GEOGRID 2-d fields ==========\n\t\nLANDUSEF_1_FIELD (urban),\nLANDUSEF_2_FIELD (crops/woods),\nLANDUSEF_6_FIELD (dryland crops and pasture), \nLANDUSEF_15_FIELD (mixed forest), \nGREENFRAC_7_FIELD (July)\n");
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output fields with encoding type.");
-    tt->help = tdrpStrDup("Note: do not use START_2D_FIELDS or TOTAL_FIELD_COUNT - these are only delimiters.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 8;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("output_field_name_t");
-      tt->struct_def.fields[0].fname = tdrpStrDup("name");
-      tt->struct_def.fields[0].ptype = ENUM_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->name - (char *) _output_fields;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_name_t");
-        tt->struct_def.fields[0].enum_def.nfields = 106;
-        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("U_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[0].val = U_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("V_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[1].val = V_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("Q_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[2].val = Q_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("CLW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[3].val = CLW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("RNW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[4].val = RNW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("ICE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[5].val = ICE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("SNOW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[6].val = SNOW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("GRAUPEL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[7].val = GRAUPEL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("W_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[8].val = W_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("P_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[9].val = P_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("PB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[10].val = PB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[11].val = PHB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("PH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[12].val = PH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("DNW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[13].val = DNW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("MUB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[14].val = MUB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("MU_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[15].val = MU_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("REFL_10CM_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[16].val = REFL_10CM_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("QNRAIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[17].val = QNRAIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[18].name = tdrpStrDup("QNCLOUD_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[18].val = QNCLOUD_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[19].name = tdrpStrDup("U_EDGE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[19].val = U_EDGE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[20].name = tdrpStrDup("V_EDGE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[20].val = V_EDGE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[21].name = tdrpStrDup("TK_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[21].val = TK_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[22].name = tdrpStrDup("TC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[22].val = TC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[23].name = tdrpStrDup("WSPD_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[23].val = WSPD_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[24].name = tdrpStrDup("WDIR_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[24].val = WDIR_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[25].name = tdrpStrDup("PRESSURE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[25].val = PRESSURE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[26].name = tdrpStrDup("RH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[26].val = RH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[27].name = tdrpStrDup("SPEC_H_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[27].val = SPEC_H_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[28].name = tdrpStrDup("DEWPT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[28].val = DEWPT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[29].name = tdrpStrDup("ICING_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[29].val = ICING_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[30].name = tdrpStrDup("CLW_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[30].val = CLW_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("RNW_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[31].val = RNW_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("THETA_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[32].val = THETA_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("DBZ_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[33].val = DBZ_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("HGT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[34].val = HGT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("Z_AGL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[35].val = Z_AGL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("ITFADEF_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[36].val = ITFADEF_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("GEO_POT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[37].val = GEO_POT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("Q_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[38].val = Q_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("CAPE_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[39].val = CAPE_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("CIN_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[40].val = CIN_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("LCL_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[41].val = LCL_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("LFC_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[42].val = LFC_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("EL_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[43].val = EL_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("START_2D_FIELDS");
-        tt->struct_def.fields[0].enum_def.fields[44].val = START_2D_FIELDS;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SOIL_T_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[45].val = SOIL_T_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("SOIL_T_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[46].val = SOIL_T_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("SOIL_T_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[47].val = SOIL_T_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("SOIL_T_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[48].val = SOIL_T_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("SOIL_T_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[49].val = SOIL_T_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("SOIL_M_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[50].val = SOIL_M_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("SOIL_M_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[51].val = SOIL_M_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SOIL_M_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[52].val = SOIL_M_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("SOIL_M_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[53].val = SOIL_M_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("SOIL_M_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[54].val = SOIL_M_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("SOIL_AM_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[55].val = SOIL_AM_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SOIL_AM_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[56].val = SOIL_AM_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("SOIL_AM_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[57].val = SOIL_AM_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("SOIL_AM_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[58].val = SOIL_AM_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("SOIL_AM_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[59].val = SOIL_AM_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("LAT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[60].val = LAT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("LON_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[61].val = LON_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("GROUND_T_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[62].val = GROUND_T_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("RAINC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[63].val = RAINC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("RAINNC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[64].val = RAINNC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("TERRAIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[65].val = TERRAIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("LAND_USE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[66].val = LAND_USE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("SNOWCOVR_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[67].val = SNOWCOVR_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("TSEASFC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[68].val = TSEASFC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("PBL_HGT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[69].val = PBL_HGT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("T2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[70].val = T2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("Q2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[71].val = Q2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[72].name = tdrpStrDup("U10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[72].val = U10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[73].name = tdrpStrDup("V10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[73].val = V10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("SNOWH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[74].val = SNOWH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("SFC_PRES_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[75].val = SFC_PRES_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("LAND_MASK_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[76].val = LAND_MASK_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("TH2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[77].val = TH2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("HFX_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[78].val = HFX_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[79].name = tdrpStrDup("LH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[79].val = LH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[80].name = tdrpStrDup("SNOW_WE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[80].val = SNOW_WE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[81].name = tdrpStrDup("SNOW_NC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[81].val = SNOW_NC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[82].name = tdrpStrDup("GRAUPEL_NC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[82].val = GRAUPEL_NC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("SOIL_TYPE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[83].val = SOIL_TYPE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("FZLEVEL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[84].val = FZLEVEL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("RAIN_TOTAL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[85].val = RAIN_TOTAL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("RH2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[86].val = RH2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("T2C_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[87].val = T2C_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("WSPD10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[88].val = WSPD10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("WDIR10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[89].val = WDIR10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("TWP_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[90].val = TWP_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("RWP_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[91].val = RWP_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("VIL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[92].val = VIL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("DBZ_2D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[93].val = DBZ_2D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("SPEC_H_2M_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[94].val = SPEC_H_2M_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("CAPE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[95].val = CAPE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("CIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[96].val = CIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("LCL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[97].val = LCL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("LFC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[98].val = LFC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("EL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[99].val = EL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("LANDUSEF_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[100].val = LANDUSEF_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("LANDUSEF_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[101].val = LANDUSEF_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("LANDUSEF_6_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[102].val = LANDUSEF_6_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("LANDUSEF_15_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[103].val = LANDUSEF_15_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("GREENFRAC_7_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[104].val = GREENFRAC_7_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("TOTAL_FIELD_COUNT");
-        tt->struct_def.fields[0].enum_def.fields[105].val = TOTAL_FIELD_COUNT;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[1].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[1].ptype = ENUM_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[1].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[1].enum_def.nfields = 3;
-        tt->struct_def.fields[1].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[1].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[1].enum_def.fields[0].name = tdrpStrDup("OUT_INT8");
-        tt->struct_def.fields[1].enum_def.fields[0].val = OUT_INT8;
-        tt->struct_def.fields[1].enum_def.fields[1].name = tdrpStrDup("OUT_INT16");
-        tt->struct_def.fields[1].enum_def.fields[1].val = OUT_INT16;
-        tt->struct_def.fields[1].enum_def.fields[2].name = tdrpStrDup("OUT_FLOAT32");
-        tt->struct_def.fields[1].enum_def.fields[2].val = OUT_FLOAT32;
-    tt->n_struct_vals = 16;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = U_FIELD;
-      tt->struct_vals[1].e = OUT_INT8;
-      tt->struct_vals[2].e = V_FIELD;
-      tt->struct_vals[3].e = OUT_INT8;
-      tt->struct_vals[4].e = WSPD_FIELD;
-      tt->struct_vals[5].e = OUT_INT8;
-      tt->struct_vals[6].e = TC_FIELD;
-      tt->struct_vals[7].e = OUT_INT16;
-      tt->struct_vals[8].e = RH_FIELD;
-      tt->struct_vals[9].e = OUT_INT8;
-      tt->struct_vals[10].e = CLW_FIELD;
-      tt->struct_vals[11].e = OUT_INT8;
-      tt->struct_vals[12].e = FZLEVEL_FIELD;
-      tt->struct_vals[13].e = OUT_INT16;
-      tt->struct_vals[14].e = DBZ_2D_FIELD;
-      tt->struct_vals[15].e = OUT_INT8;
-    tt++;
-    
-    // Parameter 'field_name_map'
-    // ctype is '_afield_name_map_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("field_name_map");
-    tt->descr = tdrpStrDup("These tuples match a field to a new name and long name.");
-    tt->help = tdrpStrDup("This allows you to rename individual fields to whatever you like.  If you define field_name_map you must define it for all fields you are using.  If you do not define it, the default names are used for all fields.");
-    tt->array_offset = (char *) &_field_name_map - &_start_;
-    tt->array_n_offset = (char *) &field_name_map_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(afield_name_map_t);
-    tt->array_n = 104;
-    tt->struct_def.name = tdrpStrDup("afield_name_map_t");
-    tt->struct_def.nfields = 3;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("output_field_name_t");
-      tt->struct_def.fields[0].fname = tdrpStrDup("original_name");
-      tt->struct_def.fields[0].ptype = ENUM_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_field_name_map->original_name - (char *) _field_name_map;
-        tt->struct_def.fields[0].enum_def.name = tdrpStrDup("output_field_name_t");
-        tt->struct_def.fields[0].enum_def.nfields = 106;
-        tt->struct_def.fields[0].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[0].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[0].enum_def.fields[0].name = tdrpStrDup("U_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[0].val = U_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[1].name = tdrpStrDup("V_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[1].val = V_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[2].name = tdrpStrDup("Q_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[2].val = Q_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[3].name = tdrpStrDup("CLW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[3].val = CLW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[4].name = tdrpStrDup("RNW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[4].val = RNW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[5].name = tdrpStrDup("ICE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[5].val = ICE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[6].name = tdrpStrDup("SNOW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[6].val = SNOW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[7].name = tdrpStrDup("GRAUPEL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[7].val = GRAUPEL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[8].name = tdrpStrDup("W_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[8].val = W_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[9].name = tdrpStrDup("P_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[9].val = P_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[10].name = tdrpStrDup("PB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[10].val = PB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[11].name = tdrpStrDup("PHB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[11].val = PHB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[12].name = tdrpStrDup("PH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[12].val = PH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[13].name = tdrpStrDup("DNW_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[13].val = DNW_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[14].name = tdrpStrDup("MUB_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[14].val = MUB_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[15].name = tdrpStrDup("MU_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[15].val = MU_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[16].name = tdrpStrDup("REFL_10CM_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[16].val = REFL_10CM_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[17].name = tdrpStrDup("QNRAIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[17].val = QNRAIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[18].name = tdrpStrDup("QNCLOUD_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[18].val = QNCLOUD_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[19].name = tdrpStrDup("U_EDGE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[19].val = U_EDGE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[20].name = tdrpStrDup("V_EDGE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[20].val = V_EDGE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[21].name = tdrpStrDup("TK_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[21].val = TK_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[22].name = tdrpStrDup("TC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[22].val = TC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[23].name = tdrpStrDup("WSPD_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[23].val = WSPD_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[24].name = tdrpStrDup("WDIR_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[24].val = WDIR_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[25].name = tdrpStrDup("PRESSURE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[25].val = PRESSURE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[26].name = tdrpStrDup("RH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[26].val = RH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[27].name = tdrpStrDup("SPEC_H_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[27].val = SPEC_H_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[28].name = tdrpStrDup("DEWPT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[28].val = DEWPT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[29].name = tdrpStrDup("ICING_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[29].val = ICING_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[30].name = tdrpStrDup("CLW_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[30].val = CLW_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[31].name = tdrpStrDup("RNW_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[31].val = RNW_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[32].name = tdrpStrDup("THETA_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[32].val = THETA_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[33].name = tdrpStrDup("DBZ_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[33].val = DBZ_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[34].name = tdrpStrDup("HGT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[34].val = HGT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[35].name = tdrpStrDup("Z_AGL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[35].val = Z_AGL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[36].name = tdrpStrDup("ITFADEF_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[36].val = ITFADEF_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[37].name = tdrpStrDup("GEO_POT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[37].val = GEO_POT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[38].name = tdrpStrDup("Q_G_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[38].val = Q_G_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[39].name = tdrpStrDup("CAPE_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[39].val = CAPE_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[40].name = tdrpStrDup("CIN_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[40].val = CIN_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[41].name = tdrpStrDup("LCL_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[41].val = LCL_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[42].name = tdrpStrDup("LFC_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[42].val = LFC_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[43].name = tdrpStrDup("EL_3D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[43].val = EL_3D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[44].name = tdrpStrDup("START_2D_FIELDS");
-        tt->struct_def.fields[0].enum_def.fields[44].val = START_2D_FIELDS;
-        tt->struct_def.fields[0].enum_def.fields[45].name = tdrpStrDup("SOIL_T_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[45].val = SOIL_T_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[46].name = tdrpStrDup("SOIL_T_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[46].val = SOIL_T_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[47].name = tdrpStrDup("SOIL_T_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[47].val = SOIL_T_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[48].name = tdrpStrDup("SOIL_T_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[48].val = SOIL_T_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[49].name = tdrpStrDup("SOIL_T_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[49].val = SOIL_T_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[50].name = tdrpStrDup("SOIL_M_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[50].val = SOIL_M_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[51].name = tdrpStrDup("SOIL_M_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[51].val = SOIL_M_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[52].name = tdrpStrDup("SOIL_M_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[52].val = SOIL_M_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[53].name = tdrpStrDup("SOIL_M_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[53].val = SOIL_M_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[54].name = tdrpStrDup("SOIL_M_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[54].val = SOIL_M_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[55].name = tdrpStrDup("SOIL_AM_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[55].val = SOIL_AM_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[56].name = tdrpStrDup("SOIL_AM_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[56].val = SOIL_AM_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[57].name = tdrpStrDup("SOIL_AM_3_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[57].val = SOIL_AM_3_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[58].name = tdrpStrDup("SOIL_AM_4_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[58].val = SOIL_AM_4_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[59].name = tdrpStrDup("SOIL_AM_5_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[59].val = SOIL_AM_5_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[60].name = tdrpStrDup("LAT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[60].val = LAT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[61].name = tdrpStrDup("LON_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[61].val = LON_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[62].name = tdrpStrDup("GROUND_T_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[62].val = GROUND_T_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[63].name = tdrpStrDup("RAINC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[63].val = RAINC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[64].name = tdrpStrDup("RAINNC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[64].val = RAINNC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[65].name = tdrpStrDup("TERRAIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[65].val = TERRAIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[66].name = tdrpStrDup("LAND_USE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[66].val = LAND_USE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[67].name = tdrpStrDup("SNOWCOVR_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[67].val = SNOWCOVR_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[68].name = tdrpStrDup("TSEASFC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[68].val = TSEASFC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[69].name = tdrpStrDup("PBL_HGT_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[69].val = PBL_HGT_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[70].name = tdrpStrDup("T2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[70].val = T2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[71].name = tdrpStrDup("Q2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[71].val = Q2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[72].name = tdrpStrDup("U10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[72].val = U10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[73].name = tdrpStrDup("V10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[73].val = V10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[74].name = tdrpStrDup("SNOWH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[74].val = SNOWH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[75].name = tdrpStrDup("SFC_PRES_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[75].val = SFC_PRES_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[76].name = tdrpStrDup("LAND_MASK_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[76].val = LAND_MASK_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[77].name = tdrpStrDup("TH2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[77].val = TH2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[78].name = tdrpStrDup("HFX_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[78].val = HFX_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[79].name = tdrpStrDup("LH_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[79].val = LH_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[80].name = tdrpStrDup("SNOW_WE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[80].val = SNOW_WE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[81].name = tdrpStrDup("SNOW_NC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[81].val = SNOW_NC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[82].name = tdrpStrDup("GRAUPEL_NC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[82].val = GRAUPEL_NC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[83].name = tdrpStrDup("SOIL_TYPE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[83].val = SOIL_TYPE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[84].name = tdrpStrDup("FZLEVEL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[84].val = FZLEVEL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[85].name = tdrpStrDup("RAIN_TOTAL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[85].val = RAIN_TOTAL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[86].name = tdrpStrDup("RH2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[86].val = RH2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[87].name = tdrpStrDup("T2C_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[87].val = T2C_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[88].name = tdrpStrDup("WSPD10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[88].val = WSPD10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[89].name = tdrpStrDup("WDIR10_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[89].val = WDIR10_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[90].name = tdrpStrDup("TWP_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[90].val = TWP_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[91].name = tdrpStrDup("RWP_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[91].val = RWP_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[92].name = tdrpStrDup("VIL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[92].val = VIL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[93].name = tdrpStrDup("DBZ_2D_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[93].val = DBZ_2D_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[94].name = tdrpStrDup("SPEC_H_2M_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[94].val = SPEC_H_2M_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[95].name = tdrpStrDup("CAPE_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[95].val = CAPE_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[96].name = tdrpStrDup("CIN_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[96].val = CIN_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[97].name = tdrpStrDup("LCL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[97].val = LCL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[98].name = tdrpStrDup("LFC_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[98].val = LFC_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[99].name = tdrpStrDup("EL_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[99].val = EL_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[100].name = tdrpStrDup("LANDUSEF_1_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[100].val = LANDUSEF_1_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[101].name = tdrpStrDup("LANDUSEF_2_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[101].val = LANDUSEF_2_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[102].name = tdrpStrDup("LANDUSEF_6_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[102].val = LANDUSEF_6_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[103].name = tdrpStrDup("LANDUSEF_15_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[103].val = LANDUSEF_15_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[104].name = tdrpStrDup("GREENFRAC_7_FIELD");
-        tt->struct_def.fields[0].enum_def.fields[104].val = GREENFRAC_7_FIELD;
-        tt->struct_def.fields[0].enum_def.fields[105].name = tdrpStrDup("TOTAL_FIELD_COUNT");
-        tt->struct_def.fields[0].enum_def.fields[105].val = TOTAL_FIELD_COUNT;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_field_name_map->name - (char *) _field_name_map;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("long_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_field_name_map->long_name - (char *) _field_name_map;
-    tt->n_struct_vals = 312;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].e = U_FIELD;
-      tt->struct_vals[1].s = tdrpStrDup("U");
-      tt->struct_vals[2].s = tdrpStrDup("u-component of wind");
-      tt->struct_vals[3].e = V_FIELD;
-      tt->struct_vals[4].s = tdrpStrDup("V");
-      tt->struct_vals[5].s = tdrpStrDup("v-component of wind");
-      tt->struct_vals[6].e = Q_FIELD;
-      tt->struct_vals[7].s = tdrpStrDup("Q");
-      tt->struct_vals[8].s = tdrpStrDup("Mixing ratio");
-      tt->struct_vals[9].e = CLW_FIELD;
-      tt->struct_vals[10].s = tdrpStrDup("clw");
-      tt->struct_vals[11].s = tdrpStrDup("Cloud liquid mixing ratio");
-      tt->struct_vals[12].e = RNW_FIELD;
-      tt->struct_vals[13].s = tdrpStrDup("rnw");
-      tt->struct_vals[14].s = tdrpStrDup("Rain mixing ratio");
-      tt->struct_vals[15].e = ICE_FIELD;
-      tt->struct_vals[16].s = tdrpStrDup("ice");
-      tt->struct_vals[17].s = tdrpStrDup("Ice mixing ratio");
-      tt->struct_vals[18].e = SNOW_FIELD;
-      tt->struct_vals[19].s = tdrpStrDup("snow");
-      tt->struct_vals[20].s = tdrpStrDup("Snow mixing ratio");
-      tt->struct_vals[21].e = GRAUPEL_FIELD;
-      tt->struct_vals[22].s = tdrpStrDup("graupel");
-      tt->struct_vals[23].s = tdrpStrDup("Graupel mixing ratio");
-      tt->struct_vals[24].e = W_FIELD;
-      tt->struct_vals[25].s = tdrpStrDup("W");
-      tt->struct_vals[26].s = tdrpStrDup("w-component of wind");
-      tt->struct_vals[27].e = P_FIELD;
-      tt->struct_vals[28].s = tdrpStrDup("P");
-      tt->struct_vals[29].s = tdrpStrDup("pressure perturbation");
-      tt->struct_vals[30].e = PB_FIELD;
-      tt->struct_vals[31].s = tdrpStrDup("PB");
-      tt->struct_vals[32].s = tdrpStrDup("BASE STATE PRESSURE");
-      tt->struct_vals[33].e = U_EDGE_FIELD;
-      tt->struct_vals[34].s = tdrpStrDup("U_EDGE");
-      tt->struct_vals[35].s = tdrpStrDup("u wind on edge");
-      tt->struct_vals[36].e = V_EDGE_FIELD;
-      tt->struct_vals[37].s = tdrpStrDup("V_EDGE");
-      tt->struct_vals[38].s = tdrpStrDup("v wind on edge");
-      tt->struct_vals[39].e = PHB_FIELD;
-      tt->struct_vals[40].s = tdrpStrDup("PHB");
-      tt->struct_vals[41].s = tdrpStrDup("base-state geopotential");
-      tt->struct_vals[42].e = PH_FIELD;
-      tt->struct_vals[43].s = tdrpStrDup("PH");
-      tt->struct_vals[44].s = tdrpStrDup("perturbation geopotential");
-      tt->struct_vals[45].e = DNW_FIELD;
-      tt->struct_vals[46].s = tdrpStrDup("DNW");
-      tt->struct_vals[47].s = tdrpStrDup("d(eta) values between full (w) levels");
-      tt->struct_vals[48].e = MUB_FIELD;
-      tt->struct_vals[49].s = tdrpStrDup("MUB");
-      tt->struct_vals[50].s = tdrpStrDup("base state dry air mass in column");
-      tt->struct_vals[51].e = MU_FIELD;
-      tt->struct_vals[52].s = tdrpStrDup("MU");
-      tt->struct_vals[53].s = tdrpStrDup("perturbation dry air mass in column");
-      tt->struct_vals[54].e = REFL_10CM_FIELD;
-      tt->struct_vals[55].s = tdrpStrDup("dbz");
-      tt->struct_vals[56].s = tdrpStrDup("Radar Reflectivity");
-      tt->struct_vals[57].e = QNRAIN_FIELD;
-      tt->struct_vals[58].s = tdrpStrDup("nRain");
-      tt->struct_vals[59].s = tdrpStrDup("number concentration of rain");
-      tt->struct_vals[60].e = QNCLOUD_FIELD;
-      tt->struct_vals[61].s = tdrpStrDup("nCloud");
-      tt->struct_vals[62].s = tdrpStrDup("number concentration of cloud");
-      tt->struct_vals[63].e = ITFADEF_FIELD;
-      tt->struct_vals[64].s = tdrpStrDup("ITFADEF");
-      tt->struct_vals[65].s = tdrpStrDup("Turbulence severity - ITFA");
-      tt->struct_vals[66].e = TK_FIELD;
-      tt->struct_vals[67].s = tdrpStrDup("TK");
-      tt->struct_vals[68].s = tdrpStrDup("Temperature");
-      tt->struct_vals[69].e = TC_FIELD;
-      tt->struct_vals[70].s = tdrpStrDup("Temp");
-      tt->struct_vals[71].s = tdrpStrDup("Temperature");
-      tt->struct_vals[72].e = WSPD_FIELD;
-      tt->struct_vals[73].s = tdrpStrDup("Wspeed");
-      tt->struct_vals[74].s = tdrpStrDup("Wind speed");
-      tt->struct_vals[75].e = WDIR_FIELD;
-      tt->struct_vals[76].s = tdrpStrDup("Wdir");
-      tt->struct_vals[77].s = tdrpStrDup("Wind dirn");
-      tt->struct_vals[78].e = PRESSURE_FIELD;
-      tt->struct_vals[79].s = tdrpStrDup("pressure");
-      tt->struct_vals[80].s = tdrpStrDup("Absolute pressure");
-      tt->struct_vals[81].e = RH_FIELD;
-      tt->struct_vals[82].s = tdrpStrDup("RH");
-      tt->struct_vals[83].s = tdrpStrDup("Relative humidity");
-      tt->struct_vals[84].e = SPEC_H_FIELD;
-      tt->struct_vals[85].s = tdrpStrDup("SpecH");
-      tt->struct_vals[86].s = tdrpStrDup("Specific humidity");
-      tt->struct_vals[87].e = DEWPT_FIELD;
-      tt->struct_vals[88].s = tdrpStrDup("DewPt");
-      tt->struct_vals[89].s = tdrpStrDup("Dew point");
-      tt->struct_vals[90].e = ICING_FIELD;
-      tt->struct_vals[91].s = tdrpStrDup("Icing");
-      tt->struct_vals[92].s = tdrpStrDup("Icing severity index");
-      tt->struct_vals[93].e = CLW_G_FIELD;
-      tt->struct_vals[94].s = tdrpStrDup("CLW_G");
-      tt->struct_vals[95].s = tdrpStrDup("Cloud Liquid Mixing Ratio g/kg");
-      tt->struct_vals[96].e = RNW_G_FIELD;
-      tt->struct_vals[97].s = tdrpStrDup("RNW_G");
-      tt->struct_vals[98].s = tdrpStrDup("Rain Liquid Mixing Ratio g/kg");
-      tt->struct_vals[99].e = THETA_FIELD;
-      tt->struct_vals[100].s = tdrpStrDup("THETA");
-      tt->struct_vals[101].s = tdrpStrDup("Potential Temperature");
-      tt->struct_vals[102].e = DBZ_3D_FIELD;
-      tt->struct_vals[103].s = tdrpStrDup("dbz_3d");
-      tt->struct_vals[104].s = tdrpStrDup("dBZ-3D Estimated");
-      tt->struct_vals[105].e = HGT_FIELD;
-      tt->struct_vals[106].s = tdrpStrDup("geo_hgt");
-      tt->struct_vals[107].s = tdrpStrDup("Geopotential Height");
-      tt->struct_vals[108].e = GEO_POT_FIELD;
-      tt->struct_vals[109].s = tdrpStrDup("geo_pot");
-      tt->struct_vals[110].s = tdrpStrDup("Geopotential");
-      tt->struct_vals[111].e = Q_G_FIELD;
-      tt->struct_vals[112].s = tdrpStrDup("Q_g");
-      tt->struct_vals[113].s = tdrpStrDup("Mixing ratio g/kg");
-      tt->struct_vals[114].e = CAPE_3D_FIELD;
-      tt->struct_vals[115].s = tdrpStrDup("CAPE_3D");
-      tt->struct_vals[116].s = tdrpStrDup("CAPE 3D");
-      tt->struct_vals[117].e = CIN_3D_FIELD;
-      tt->struct_vals[118].s = tdrpStrDup("CIN_3D");
-      tt->struct_vals[119].s = tdrpStrDup("CIN 3D");
-      tt->struct_vals[120].e = LCL_3D_FIELD;
-      tt->struct_vals[121].s = tdrpStrDup("LCL_3D");
-      tt->struct_vals[122].s = tdrpStrDup("LCL 3D");
-      tt->struct_vals[123].e = LFC_3D_FIELD;
-      tt->struct_vals[124].s = tdrpStrDup("LFC_3D");
-      tt->struct_vals[125].s = tdrpStrDup("LFC 3D");
-      tt->struct_vals[126].e = EL_3D_FIELD;
-      tt->struct_vals[127].s = tdrpStrDup("EL_3D");
-      tt->struct_vals[128].s = tdrpStrDup("EL 3D");
-      tt->struct_vals[129].e = Z_AGL_FIELD;
-      tt->struct_vals[130].s = tdrpStrDup("zz");
-      tt->struct_vals[131].s = tdrpStrDup("Height above ground");
-      tt->struct_vals[132].e = SOIL_T_1_FIELD;
-      tt->struct_vals[133].s = tdrpStrDup("soil_t_1");
-      tt->struct_vals[134].s = tdrpStrDup("Soil temperature in layer 1");
-      tt->struct_vals[135].e = SOIL_T_2_FIELD;
-      tt->struct_vals[136].s = tdrpStrDup("soil_t_2");
-      tt->struct_vals[137].s = tdrpStrDup("Soil temperature in layer 2");
-      tt->struct_vals[138].e = SOIL_T_3_FIELD;
-      tt->struct_vals[139].s = tdrpStrDup("soil_t_3");
-      tt->struct_vals[140].s = tdrpStrDup("Soil temperature in layer 3");
-      tt->struct_vals[141].e = SOIL_T_4_FIELD;
-      tt->struct_vals[142].s = tdrpStrDup("soil_t_4");
-      tt->struct_vals[143].s = tdrpStrDup("Soil temperature in layer 4");
-      tt->struct_vals[144].e = SOIL_T_5_FIELD;
-      tt->struct_vals[145].s = tdrpStrDup("soil_t_5");
-      tt->struct_vals[146].s = tdrpStrDup("Soil temperature in layer 5");
-      tt->struct_vals[147].e = SOIL_M_1_FIELD;
-      tt->struct_vals[148].s = tdrpStrDup("soil_m_1");
-      tt->struct_vals[149].s = tdrpStrDup("Soil moisture in layer 1");
-      tt->struct_vals[150].e = SOIL_M_2_FIELD;
-      tt->struct_vals[151].s = tdrpStrDup("soil_m_2");
-      tt->struct_vals[152].s = tdrpStrDup("Soil moisture in layer 2");
-      tt->struct_vals[153].e = SOIL_M_3_FIELD;
-      tt->struct_vals[154].s = tdrpStrDup("soil_m_3");
-      tt->struct_vals[155].s = tdrpStrDup("Soil moisture in layer 3");
-      tt->struct_vals[156].e = SOIL_M_4_FIELD;
-      tt->struct_vals[157].s = tdrpStrDup("soil_m_4");
-      tt->struct_vals[158].s = tdrpStrDup("Soil moisture in layer 4");
-      tt->struct_vals[159].e = SOIL_M_5_FIELD;
-      tt->struct_vals[160].s = tdrpStrDup("soil_m_5");
-      tt->struct_vals[161].s = tdrpStrDup("Soil moisture in layer 5");
-      tt->struct_vals[162].e = SOIL_AM_1_FIELD;
-      tt->struct_vals[163].s = tdrpStrDup("soil_am_1");
-      tt->struct_vals[164].s = tdrpStrDup("Available Soil moisture in layer 1");
-      tt->struct_vals[165].e = SOIL_AM_2_FIELD;
-      tt->struct_vals[166].s = tdrpStrDup("soil_am_2");
-      tt->struct_vals[167].s = tdrpStrDup("Available Soil moisture in layer 2");
-      tt->struct_vals[168].e = SOIL_AM_3_FIELD;
-      tt->struct_vals[169].s = tdrpStrDup("soil_am_3");
-      tt->struct_vals[170].s = tdrpStrDup("Available Soil moisture in layer 3");
-      tt->struct_vals[171].e = SOIL_AM_4_FIELD;
-      tt->struct_vals[172].s = tdrpStrDup("soil_am_4");
-      tt->struct_vals[173].s = tdrpStrDup("Available Soil moisture in layer 4");
-      tt->struct_vals[174].e = SOIL_AM_5_FIELD;
-      tt->struct_vals[175].s = tdrpStrDup("soil_am_5");
-      tt->struct_vals[176].s = tdrpStrDup("Available Soil moisture in layer 5");
-      tt->struct_vals[177].e = LAT_FIELD;
-      tt->struct_vals[178].s = tdrpStrDup("latitude");
-      tt->struct_vals[179].s = tdrpStrDup("Latitude");
-      tt->struct_vals[180].e = LON_FIELD;
-      tt->struct_vals[181].s = tdrpStrDup("longitude");
-      tt->struct_vals[182].s = tdrpStrDup("Longitude");
-      tt->struct_vals[183].e = GROUND_T_FIELD;
-      tt->struct_vals[184].s = tdrpStrDup("ground_t");
-      tt->struct_vals[185].s = tdrpStrDup("Ground temperature");
-      tt->struct_vals[186].e = RAINC_FIELD;
-      tt->struct_vals[187].s = tdrpStrDup("rainc");
-      tt->struct_vals[188].s = tdrpStrDup("Accumulated Total Cumulus Precipitation");
-      tt->struct_vals[189].e = RAINNC_FIELD;
-      tt->struct_vals[190].s = tdrpStrDup("rainnc");
-      tt->struct_vals[191].s = tdrpStrDup("Accumulated Total Grid Scale Precipitation");
-      tt->struct_vals[192].e = TERRAIN_FIELD;
-      tt->struct_vals[193].s = tdrpStrDup("terrain");
-      tt->struct_vals[194].s = tdrpStrDup("Terrain height");
-      tt->struct_vals[195].e = LAND_USE_FIELD;
-      tt->struct_vals[196].s = tdrpStrDup("land_use");
-      tt->struct_vals[197].s = tdrpStrDup("Land use category");
-      tt->struct_vals[198].e = SNOWCOVR_FIELD;
-      tt->struct_vals[199].s = tdrpStrDup("snowcovr");
-      tt->struct_vals[200].s = tdrpStrDup("Snow cover flags");
-      tt->struct_vals[201].e = TSEASFC_FIELD;
-      tt->struct_vals[202].s = tdrpStrDup("tseasfc");
-      tt->struct_vals[203].s = tdrpStrDup("Sea surface temperature");
-      tt->struct_vals[204].e = PBL_HGT_FIELD;
-      tt->struct_vals[205].s = tdrpStrDup("pbl_hgt");
-      tt->struct_vals[206].s = tdrpStrDup("Pbl height");
-      tt->struct_vals[207].e = T2_FIELD;
-      tt->struct_vals[208].s = tdrpStrDup("T2");
-      tt->struct_vals[209].s = tdrpStrDup("2-meter Temperature");
-      tt->struct_vals[210].e = Q2_FIELD;
-      tt->struct_vals[211].s = tdrpStrDup("Q2");
-      tt->struct_vals[212].s = tdrpStrDup("2-meter Mixing Ratio");
-      tt->struct_vals[213].e = U10_FIELD;
-      tt->struct_vals[214].s = tdrpStrDup("U10");
-      tt->struct_vals[215].s = tdrpStrDup("10-meter U Component");
-      tt->struct_vals[216].e = V10_FIELD;
-      tt->struct_vals[217].s = tdrpStrDup("V10");
-      tt->struct_vals[218].s = tdrpStrDup("10-meter V Component");
-      tt->struct_vals[219].e = SNOWH_FIELD;
-      tt->struct_vals[220].s = tdrpStrDup("snowh");
-      tt->struct_vals[221].s = tdrpStrDup("Physical snow depth");
-      tt->struct_vals[222].e = SFC_PRES_FIELD;
-      tt->struct_vals[223].s = tdrpStrDup("surfP");
-      tt->struct_vals[224].s = tdrpStrDup("Surface Pressure");
-      tt->struct_vals[225].e = LAND_MASK_FIELD;
-      tt->struct_vals[226].s = tdrpStrDup("land_mask");
-      tt->struct_vals[227].s = tdrpStrDup("Land Mask (1-land 0-water)");
-      tt->struct_vals[228].e = TH2_FIELD;
-      tt->struct_vals[229].s = tdrpStrDup("TH2");
-      tt->struct_vals[230].s = tdrpStrDup("POT TEMP at 2 M");
-      tt->struct_vals[231].e = HFX_FIELD;
-      tt->struct_vals[232].s = tdrpStrDup("HFX");
-      tt->struct_vals[233].s = tdrpStrDup("UPWARD HEAT FLUX AT THE SURFACE");
-      tt->struct_vals[234].e = LH_FIELD;
-      tt->struct_vals[235].s = tdrpStrDup("LH");
-      tt->struct_vals[236].s = tdrpStrDup("LATENT HEAT FLUX AT THE SURFACE");
-      tt->struct_vals[237].e = SNOW_WE_FIELD;
-      tt->struct_vals[238].s = tdrpStrDup("SNOW_WE");
-      tt->struct_vals[239].s = tdrpStrDup("SNOW WATER EQUIVALENT");
-      tt->struct_vals[240].e = SNOW_NC_FIELD;
-      tt->struct_vals[241].s = tdrpStrDup("SNOW_NC");
-      tt->struct_vals[242].s = tdrpStrDup("ACCUMULATED TOTAL GRID SCALE SNOW AND ICE");
-      tt->struct_vals[243].e = GRAUPEL_NC_FIELD;
-      tt->struct_vals[244].s = tdrpStrDup("GRAUPEL_NC");
-      tt->struct_vals[245].s = tdrpStrDup("ACCUMULATED TOTAL GRID SCALE GRAUPEL");
-      tt->struct_vals[246].e = SOIL_TYPE_FIELD;
-      tt->struct_vals[247].s = tdrpStrDup("SOIL_TYPE");
-      tt->struct_vals[248].s = tdrpStrDup("DOMINANT SOIL CATEGORY");
-      tt->struct_vals[249].e = FZLEVEL_FIELD;
-      tt->struct_vals[250].s = tdrpStrDup("FZLevel");
-      tt->struct_vals[251].s = tdrpStrDup("freezing level");
-      tt->struct_vals[252].e = RAIN_TOTAL_FIELD;
-      tt->struct_vals[253].s = tdrpStrDup("rain_total");
-      tt->struct_vals[254].s = tdrpStrDup("Rain accumulation - con + non");
-      tt->struct_vals[255].e = T2C_FIELD;
-      tt->struct_vals[256].s = tdrpStrDup("T2C");
-      tt->struct_vals[257].s = tdrpStrDup("2-meter Temperature in C");
-      tt->struct_vals[258].e = DBZ_2D_FIELD;
-      tt->struct_vals[259].s = tdrpStrDup("dbz_2d");
-      tt->struct_vals[260].s = tdrpStrDup("dBZ-2D Estimated");
-      tt->struct_vals[261].e = RH2_FIELD;
-      tt->struct_vals[262].s = tdrpStrDup("RH2");
-      tt->struct_vals[263].s = tdrpStrDup("Relative humidity at 2 meters");
-      tt->struct_vals[264].e = WSPD10_FIELD;
-      tt->struct_vals[265].s = tdrpStrDup("Wspeed10");
-      tt->struct_vals[266].s = tdrpStrDup("Wind speed at 10 meters");
-      tt->struct_vals[267].e = WDIR10_FIELD;
-      tt->struct_vals[268].s = tdrpStrDup("Wdir10");
-      tt->struct_vals[269].s = tdrpStrDup("Wind direction at 10 meters");
-      tt->struct_vals[270].e = LANDUSEF_1_FIELD;
-      tt->struct_vals[271].s = tdrpStrDup("Landusef_1");
-      tt->struct_vals[272].s = tdrpStrDup("Landuse (urban)");
-      tt->struct_vals[273].e = LANDUSEF_2_FIELD;
-      tt->struct_vals[274].s = tdrpStrDup("Landusef_2");
-      tt->struct_vals[275].s = tdrpStrDup("Landuse (crops/woods)");
-      tt->struct_vals[276].e = LANDUSEF_6_FIELD;
-      tt->struct_vals[277].s = tdrpStrDup("Landusef_6");
-      tt->struct_vals[278].s = tdrpStrDup("Landuse (dryland crops and pasture)");
-      tt->struct_vals[279].e = LANDUSEF_15_FIELD;
-      tt->struct_vals[280].s = tdrpStrDup("Landusef_15");
-      tt->struct_vals[281].s = tdrpStrDup("Landuse (mixed forest)");
-      tt->struct_vals[282].e = GREENFRAC_7_FIELD;
-      tt->struct_vals[283].s = tdrpStrDup("Greenfrac_7");
-      tt->struct_vals[284].s = tdrpStrDup("Green Fraction (July)");
-      tt->struct_vals[285].e = TWP_FIELD;
-      tt->struct_vals[286].s = tdrpStrDup("twp");
-      tt->struct_vals[287].s = tdrpStrDup("Total Water Path");
-      tt->struct_vals[288].e = VIL_FIELD;
-      tt->struct_vals[289].s = tdrpStrDup("vil");
-      tt->struct_vals[290].s = tdrpStrDup("digital vil");
-      tt->struct_vals[291].e = RWP_FIELD;
-      tt->struct_vals[292].s = tdrpStrDup("rwp");
-      tt->struct_vals[293].s = tdrpStrDup("Rain Water Path");
-      tt->struct_vals[294].e = SPEC_H_2M_FIELD;
-      tt->struct_vals[295].s = tdrpStrDup("spec_h2m");
-      tt->struct_vals[296].s = tdrpStrDup("Specific Humidity at 2 meters");
-      tt->struct_vals[297].e = CAPE_FIELD;
-      tt->struct_vals[298].s = tdrpStrDup("CAPE");
-      tt->struct_vals[299].s = tdrpStrDup("CAPE");
-      tt->struct_vals[300].e = CIN_FIELD;
-      tt->struct_vals[301].s = tdrpStrDup("CIN");
-      tt->struct_vals[302].s = tdrpStrDup("CIN");
-      tt->struct_vals[303].e = LCL_FIELD;
-      tt->struct_vals[304].s = tdrpStrDup("LCL");
-      tt->struct_vals[305].s = tdrpStrDup("LCL");
-      tt->struct_vals[306].e = LFC_FIELD;
-      tt->struct_vals[307].s = tdrpStrDup("LFC");
-      tt->struct_vals[308].s = tdrpStrDup("LFC");
-      tt->struct_vals[309].e = EL_FIELD;
-      tt->struct_vals[310].s = tdrpStrDup("EL");
-      tt->struct_vals[311].s = tdrpStrDup("EL");
-    tt++;
-    
-    // Parameter 'wind_speed_in_knots'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("wind_speed_in_knots");
-    tt->descr = tdrpStrDup("Set to TRUE to convert wind speed fields to knots.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &wind_speed_in_knots - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_projection'
-    // ctype is '_output_projection_t'
+    // Parameter 'output_level_type'
+    // ctype is '_output_level_type_t'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_projection");
-    tt->descr = tdrpStrDup("Projection of output grid.");
-    tt->help = tdrpStrDup("\tFLAT - (x,y) Cartesian data in km from a given origin.\n\tLATLON - lat/lon grid with constant grid spacing.\n\tLAMBERT - Lambert conformal projection.\n\tNATIVE - use the native data grid, copy to output. NATIVE only works for model data on Lambert and Stereographic projections.");
-    tt->val_offset = (char *) &output_projection - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_projection_t");
-    tt->enum_def.nfields = 6;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("OUTPUT_PROJ_FLAT");
-      tt->enum_def.fields[0].val = OUTPUT_PROJ_FLAT;
-      tt->enum_def.fields[1].name = tdrpStrDup("OUTPUT_PROJ_LATLON");
-      tt->enum_def.fields[1].val = OUTPUT_PROJ_LATLON;
-      tt->enum_def.fields[2].name = tdrpStrDup("OUTPUT_PROJ_LAMBERT");
-      tt->enum_def.fields[2].val = OUTPUT_PROJ_LAMBERT;
-      tt->enum_def.fields[3].name = tdrpStrDup("OUTPUT_PROJ_STEREOGRAPHIC");
-      tt->enum_def.fields[3].val = OUTPUT_PROJ_STEREOGRAPHIC;
-      tt->enum_def.fields[4].name = tdrpStrDup("OUTPUT_PROJ_MERCATOR");
-      tt->enum_def.fields[4].val = OUTPUT_PROJ_MERCATOR;
-      tt->enum_def.fields[5].name = tdrpStrDup("OUTPUT_PROJ_NATIVE");
-      tt->enum_def.fields[5].val = OUTPUT_PROJ_NATIVE;
-    tt->single_val.e = OUTPUT_PROJ_FLAT;
-    tt++;
-    
-    // Parameter 'output_origin'
-    // ctype is '_output_origin_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_origin");
-    tt->descr = tdrpStrDup("Origin of output grid.");
-    tt->help = tdrpStrDup("Used with OUTPUT_PROJ_FLAT, OUTPUT_PROJ_LAMBERT, OUTPUT_PROJ_STEREOGRAPHIC.");
-    tt->val_offset = (char *) &output_origin - &_start_;
-    tt->struct_def.name = tdrpStrDup("output_origin_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("lat");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &output_origin.lat - (char *) &output_origin;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("lon");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &output_origin.lon - (char *) &output_origin;
-    tt->n_struct_vals = 2;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 40;
-      tt->struct_vals[1].d = -104;
-    tt++;
-    
-    // Parameter 'lambert_lat1'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lambert_lat1");
-    tt->descr = tdrpStrDup("lat 1 value for Lambert conformal projection.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lambert_lat1 - &_start_;
-    tt->single_val.d = 10;
-    tt++;
-    
-    // Parameter 'lambert_lat2'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("lambert_lat2");
-    tt->descr = tdrpStrDup("lat 2 value for Lambert conformal projection.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &lambert_lat2 - &_start_;
-    tt->single_val.d = 60;
-    tt++;
-    
-    // Parameter 'stereographic_tangent_lat'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("stereographic_tangent_lat");
-    tt->descr = tdrpStrDup("Tangent latitude for stereographic projection.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &stereographic_tangent_lat - &_start_;
-    tt->single_val.d = 60;
-    tt++;
-    
-    // Parameter 'stereographic_tangent_lon'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("stereographic_tangent_lon");
-    tt->descr = tdrpStrDup("Tangent longitude for stereographic projection.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &stereographic_tangent_lon - &_start_;
-    tt->single_val.d = 0;
-    tt++;
-    
-    // Parameter 'output_grid'
-    // ctype is '_output_grid_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_grid");
-    tt->descr = tdrpStrDup("Output grid parameters.");
-    tt->help = tdrpStrDup("The grid params for the output grid.");
-    tt->val_offset = (char *) &output_grid - &_start_;
-    tt->struct_def.name = tdrpStrDup("output_grid_t");
-    tt->struct_def.nfields = 6;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[0].fname = tdrpStrDup("nx");
-      tt->struct_def.fields[0].ptype = INT_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &output_grid.nx - (char *) &output_grid;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("int");
-      tt->struct_def.fields[1].fname = tdrpStrDup("ny");
-      tt->struct_def.fields[1].ptype = INT_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &output_grid.ny - (char *) &output_grid;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[2].fname = tdrpStrDup("minx");
-      tt->struct_def.fields[2].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &output_grid.minx - (char *) &output_grid;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[3].fname = tdrpStrDup("miny");
-      tt->struct_def.fields[3].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &output_grid.miny - (char *) &output_grid;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[4].fname = tdrpStrDup("dx");
-      tt->struct_def.fields[4].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &output_grid.dx - (char *) &output_grid;
-      tt->struct_def.fields[5].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[5].fname = tdrpStrDup("dy");
-      tt->struct_def.fields[5].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[5].rel_offset = 
-        (char *) &output_grid.dy - (char *) &output_grid;
-    tt->n_struct_vals = 6;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].i = 300;
-      tt->struct_vals[1].i = 300;
-      tt->struct_vals[2].d = -149.5;
-      tt->struct_vals[3].d = -149.5;
-      tt->struct_vals[4].d = 1;
-      tt->struct_vals[5].d = 1;
-    tt++;
-    
-    // Parameter 'output_levels'
-    // ctype is '_output_levels_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_levels");
+    tt->param_name = tdrpStrDup("output_level_type");
     tt->descr = tdrpStrDup("Option to choose vertical levels for output file.");
     tt->help = tdrpStrDup("If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no interpolation is done and the data is output on the original vertical levels (i.e. sigma, eta, etc.).");
-    tt->val_offset = (char *) &output_levels - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_levels_t");
+    tt->val_offset = (char *) &output_level_type - &_start_;
+    tt->enum_def.name = tdrpStrDup("output_level_type_t");
     tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
@@ -1932,85 +824,7 @@
       tt->enum_def.fields[2].val = HEIGHT_LEVELS;
       tt->enum_def.fields[3].name = tdrpStrDup("NATIVE_VERTICAL_LEVELS");
       tt->enum_def.fields[3].val = NATIVE_VERTICAL_LEVELS;
-    tt->single_val.e = FLIGHT_LEVELS;
-    tt++;
-    
-    // Parameter 'flight_levels'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("flight_levels");
-    tt->descr = tdrpStrDup("Array of output flight levels.");
-    tt->help = tdrpStrDup("Only used if output_levels is FLIGHT_LEVELS. The output grid has a variable Z dimension, in flight levels. The flight levels in the output are taken from this array.");
-    tt->array_offset = (char *) &_flight_levels - &_start_;
-    tt->array_n_offset = (char *) &flight_levels_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(int);
-    tt->array_n = 33;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].i = 10;
-      tt->array_vals[1].i = 20;
-      tt->array_vals[2].i = 30;
-      tt->array_vals[3].i = 40;
-      tt->array_vals[4].i = 50;
-      tt->array_vals[5].i = 60;
-      tt->array_vals[6].i = 70;
-      tt->array_vals[7].i = 80;
-      tt->array_vals[8].i = 90;
-      tt->array_vals[9].i = 100;
-      tt->array_vals[10].i = 110;
-      tt->array_vals[11].i = 120;
-      tt->array_vals[12].i = 130;
-      tt->array_vals[13].i = 140;
-      tt->array_vals[14].i = 150;
-      tt->array_vals[15].i = 160;
-      tt->array_vals[16].i = 170;
-      tt->array_vals[17].i = 180;
-      tt->array_vals[18].i = 190;
-      tt->array_vals[19].i = 200;
-      tt->array_vals[20].i = 210;
-      tt->array_vals[21].i = 230;
-      tt->array_vals[22].i = 250;
-      tt->array_vals[23].i = 270;
-      tt->array_vals[24].i = 290;
-      tt->array_vals[25].i = 310;
-      tt->array_vals[26].i = 330;
-      tt->array_vals[27].i = 350;
-      tt->array_vals[28].i = 370;
-      tt->array_vals[29].i = 390;
-      tt->array_vals[30].i = 410;
-      tt->array_vals[31].i = 430;
-      tt->array_vals[32].i = 450;
-    tt++;
-    
-    // Parameter 'pressure_levels'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("pressure_levels");
-    tt->descr = tdrpStrDup("Array of output pressure levels (mb).");
-    tt->help = tdrpStrDup("Only used if output_levels is PRESSURE_LEVELS. The output grid has a variable Z dimension, in pressure levels. The pressure levels in the output are taken from this array.");
-    tt->array_offset = (char *) &_pressure_levels - &_start_;
-    tt->array_n_offset = (char *) &pressure_levels_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 9;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 1000;
-      tt->array_vals[1].d = 950;
-      tt->array_vals[2].d = 900;
-      tt->array_vals[3].d = 850;
-      tt->array_vals[4].d = 700;
-      tt->array_vals[5].d = 500;
-      tt->array_vals[6].d = 300;
-      tt->array_vals[7].d = 200;
-      tt->array_vals[8].d = 100;
+    tt->single_val.e = HEIGHT_LEVELS;
     tt++;
     
     // Parameter 'height_levels'
@@ -2046,76 +860,6 @@
       tt->array_vals[14].d = 14;
       tt->array_vals[15].d = 15;
       tt->array_vals[16].d = 16;
-    tt++;
-    
-    // Parameter 'copy_lowest_downwards'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("copy_lowest_downwards");
-    tt->descr = tdrpStrDup("Option to copy the lowest valid value down to the lowest level");
-    tt->help = tdrpStrDup("This option is applicable only to FLIGHT_LEVELS. Where terrain is encountered, there may be flight levels which have missing data after vertical interpolation from sigma levels to flight levels. If this option is set to true, the data from the lowest valid flight level will be copied down to the levels below.");
-    tt->val_offset = (char *) &copy_lowest_downwards - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'output_compression'
-    // ctype is '_compression_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_compression");
-    tt->descr = tdrpStrDup("Compression type for output files");
-    tt->help = tdrpStrDup("See <mdv/mdv_macros.h> for the C definitions to which these correspond.");
-    tt->val_offset = (char *) &output_compression - &_start_;
-    tt->enum_def.name = tdrpStrDup("compression_t");
-    tt->enum_def.nfields = 5;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("_MDV_COMPRESSION_NONE");
-      tt->enum_def.fields[0].val = _MDV_COMPRESSION_NONE;
-      tt->enum_def.fields[1].name = tdrpStrDup("_MDV_COMPRESSION_RLE");
-      tt->enum_def.fields[1].val = _MDV_COMPRESSION_RLE;
-      tt->enum_def.fields[2].name = tdrpStrDup("_MDV_COMPRESSION_LZO");
-      tt->enum_def.fields[2].val = _MDV_COMPRESSION_LZO;
-      tt->enum_def.fields[3].name = tdrpStrDup("_MDV_COMPRESSION_ZLIB");
-      tt->enum_def.fields[3].val = _MDV_COMPRESSION_ZLIB;
-      tt->enum_def.fields[4].name = tdrpStrDup("_MDV_COMPRESSION_BZIP");
-      tt->enum_def.fields[4].val = _MDV_COMPRESSION_BZIP;
-    tt->single_val.e = _MDV_COMPRESSION_ZLIB;
-    tt++;
-    
-    // Parameter 'output_scaling'
-    // ctype is '_scaling_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_scaling");
-    tt->descr = tdrpStrDup("Applicable for INT8 and INT16 encoding.");
-    tt->help = tdrpStrDup("\tROUNDED: produces values which are easily readable.\n\tINTEGRAL: integer output values.\n\tDYNAMIC: utilizes the full dynamic range.\n");
-    tt->val_offset = (char *) &output_scaling - &_start_;
-    tt->enum_def.name = tdrpStrDup("scaling_t");
-    tt->enum_def.nfields = 2;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("SCALING_ROUNDED");
-      tt->enum_def.fields[0].val = SCALING_ROUNDED;
-      tt->enum_def.fields[1].name = tdrpStrDup("SCALING_DYNAMIC");
-      tt->enum_def.fields[1].val = SCALING_DYNAMIC;
-    tt->single_val.e = SCALING_DYNAMIC;
-    tt++;
-    
-    // Parameter 'output_path_in_forecast_format'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("output_path_in_forecast_format");
-    tt->descr = tdrpStrDup("Option to create output path in forecast format.");
-    tt->help = tdrpStrDup("If false, the output path is determined  using the valid time: topdir/yyyymmdd/hhmmss.mdv. If true, the output path is determined using the model initialization (generate) time and the forecast lead time in secs: yyyymmdd/g_hhmmss/f_ssssssss.mdv");
-    tt->val_offset = (char *) &output_path_in_forecast_format - &_start_;
-    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'Comment 6'
@@ -2161,186 +905,6 @@
     tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
     tt->val_offset = (char *) &data_set_source - &_start_;
     tt->single_val.s = tdrpStrDup("WRF output from somewhere.");
-    tt++;
-    
-    // Parameter 'Comment 7'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("ICING SEVERITY PRODUCT");
-    tt->comment_text = tdrpStrDup("The icing severity product is normalized between 0 and 1, where 0 indicates no icing and 1 indicates a high probability of severe icing.");
-    tt++;
-    
-    // Parameter 'no_icing_clw'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("no_icing_clw");
-    tt->descr = tdrpStrDup("Cloud liquid water content threshold for trace icing - g/m3.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &no_icing_clw - &_start_;
-    tt->single_val.f = 0;
-    tt++;
-    
-    // Parameter 'trace_icing_clw'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("trace_icing_clw");
-    tt->descr = tdrpStrDup("Cloud liquid water content threshold for trace icing - g/m3.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &trace_icing_clw - &_start_;
-    tt->single_val.f = 0.04;
-    tt++;
-    
-    // Parameter 'trace_severity'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("trace_severity");
-    tt->descr = tdrpStrDup("Icing severity threshold for trace icing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &trace_severity - &_start_;
-    tt->single_val.f = 0.15;
-    tt++;
-    
-    // Parameter 'light_icing_clw'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("light_icing_clw");
-    tt->descr = tdrpStrDup("Cloud liquid water content threshold for light icing - g/m3.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &light_icing_clw - &_start_;
-    tt->single_val.f = 0.08;
-    tt++;
-    
-    // Parameter 'light_severity'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("light_severity");
-    tt->descr = tdrpStrDup("Icing severity threshold for light icing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &light_severity - &_start_;
-    tt->single_val.f = 0.3;
-    tt++;
-    
-    // Parameter 'moderate_icing_clw'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("moderate_icing_clw");
-    tt->descr = tdrpStrDup("Cloud liquid water content threshold for moderate icing - g/m3.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &moderate_icing_clw - &_start_;
-    tt->single_val.f = 0.2;
-    tt++;
-    
-    // Parameter 'moderate_severity'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("moderate_severity");
-    tt->descr = tdrpStrDup("Icing severity threshold for moderate icing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &moderate_severity - &_start_;
-    tt->single_val.f = 0.5;
-    tt++;
-    
-    // Parameter 'severe_icing_clw'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("severe_icing_clw");
-    tt->descr = tdrpStrDup("Cloud liquid water content threshold for severe icing - g/m3.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &severe_icing_clw - &_start_;
-    tt->single_val.f = 0.5;
-    tt++;
-    
-    // Parameter 'severe_severity'
-    // ctype is 'float'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = FLOAT_TYPE;
-    tt->param_name = tdrpStrDup("severe_severity");
-    tt->descr = tdrpStrDup("Icing severity threshold for severe icing.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &severe_severity - &_start_;
-    tt->single_val.f = 1;
-    tt++;
-    
-    // Parameter 'Comment 8'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 8");
-    tt->comment_hdr = tdrpStrDup("CAPE/CIN parameters");
-    tt->comment_text = tdrpStrDup("CAPE & CIN are used as inputs to CIP & FIP");
-    tt++;
-    
-    // Parameter 'adiabat_temp_lookup_filename'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("adiabat_temp_lookup_filename");
-    tt->descr = tdrpStrDup("File containing the adiabat temperature lookup table.");
-    tt->help = tdrpStrDup("This file originally comes from the MM5 RIP code and must follow that format.  The current RIP code file can be found in CVS under:\n\tlibs/physics/data/psadilookup.dat\nLeave this set to 'null' and CAPE/CIN can't be calculated\n");
-    tt->val_offset = (char *) &adiabat_temp_lookup_filename - &_start_;
-    tt->single_val.s = tdrpStrDup("null");
-    tt++;
-    
-    // Parameter 'negative_cin'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("negative_cin");
-    tt->descr = tdrpStrDup("Should CIN values be negative?");
-    tt->help = tdrpStrDup("The physics library calculates positive CIN values, but negative values are often expected.");
-    tt->val_offset = (char *) &negative_cin - &_start_;
-    tt->single_val.b = pTRUE;
-    tt++;
-    
-    // Parameter 'pressure_limits'
-    // ctype is '_pressure_limits_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("pressure_limits");
-    tt->descr = tdrpStrDup("The minimum and maximum pressure levels to process");
-    tt->help = tdrpStrDup("All levels of the input fields are read in and used for calculating the CAPE/CIN values at these levels.  Currently, all levels of the input fields are output in the CAPE/CIN fields, but only the levels between these (inclusive) are calculated.  The CAPE/CIN values for other levels will be 0.0 (unless the dynamically calculated scale and bias make these a little off from 0.0).");
-    tt->val_offset = (char *) &pressure_limits - &_start_;
-    tt->struct_def.name = tdrpStrDup("pressure_limits_t");
-    tt->struct_def.nfields = 2;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[0].fname = tdrpStrDup("lower_level");
-      tt->struct_def.fields[0].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &pressure_limits.lower_level - (char *) &pressure_limits;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("double");
-      tt->struct_def.fields[1].fname = tdrpStrDup("upper_level");
-      tt->struct_def.fields[1].ptype = DOUBLE_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &pressure_limits.upper_level - (char *) &pressure_limits;
-    tt->n_struct_vals = 2;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].d = 1000;
-      tt->struct_vals[1].d = 700;
     tt++;
     
     // trailing entry has param_name set to NULL

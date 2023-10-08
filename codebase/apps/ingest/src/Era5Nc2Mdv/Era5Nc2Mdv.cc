@@ -105,41 +105,41 @@ bool Era5Nc2Mdv::init(int argc, char **argv)
   
   // initialize the output grid computations
 
-  if (_params.output_projection == Params::OUTPUT_PROJ_FLAT)
-  {
-    _outputProj.initFlat(_params.output_origin.lat,
-			 _params.output_origin.lon,
-			 0.0);
-  }
-  else if (_params.output_projection == Params::OUTPUT_PROJ_LAMBERT)
-  {
-    _outputProj.initLc2(_params.output_origin.lat,
-			_params.output_origin.lon,
-			_params.lambert_lat1,
-			_params.lambert_lat2);
-    _rotateOutputUV = true;
-  }
-  else if (_params.output_projection == Params::OUTPUT_PROJ_MERCATOR)
-  {
-    _outputProj.initMercator(_params.output_origin.lat,
-			     _params.output_origin.lon);
-  }
-  else
-  {
+  // if (_params.output_projection == Params::OUTPUT_PROJ_FLAT)
+  // {
+  //   _outputProj.initFlat(_params.output_origin.lat,
+  //       		 _params.output_origin.lon,
+  //       		 0.0);
+  // }
+  // else if (_params.output_projection == Params::OUTPUT_PROJ_LAMBERT)
+  // {
+  //   _outputProj.initLc2(_params.output_origin.lat,
+  //       		_params.output_origin.lon,
+  //       		_params.lambert_lat1,
+  //       		_params.lambert_lat2);
+  //   _rotateOutputUV = true;
+  // }
+  // else if (_params.output_projection == Params::OUTPUT_PROJ_MERCATOR)
+  // {
+  //   _outputProj.initMercator(_params.output_origin.lat,
+  //       		     _params.output_origin.lon);
+  // }
+  // else
+  // {
     _outputProj.initLatlon();
-  }
+  // }
 
   // init process mapper registration
   
-  PMU_auto_init((char *) _progName.c_str(),
-		_params.instance,
-		_params.Procmap_reg_interval_secs);
+  // PMU_auto_init((char *) _progName.c_str(),
+  //       	_params.instance,
+  //       	_params.Procmap_reg_interval_secs);
 
-  cout << "Reg with procmap, progname: " << _progName.c_str()
-       << ", instance: " << _params.instance
-       << ", interval(secs): " << _params.Procmap_reg_interval_secs << endl;
+  // cout << "Reg with procmap, progname: " << _progName.c_str()
+  //      << ", instance: " << _params.instance
+  //      << ", interval(secs): " << _params.Procmap_reg_interval_secs << endl;
   
-  PMU_auto_register("Starting ...");
+  // PMU_auto_register("Starting ...");
 
   return true;
 }
@@ -151,17 +151,17 @@ Era5Nc2Mdv::~Era5Nc2Mdv()
 {
   // Free space in the field name map
 
-  for (int j = 0; j< Params::TOTAL_FIELD_COUNT; j++)
-  {
-    delete [] _field_name_map[j].name;
-    delete [] _field_name_map[j].long_name;
-  }
+  // for (int j = 0; j< Params::TOTAL_FIELD_COUNT; j++)
+  // {
+  //   delete [] _field_name_map[j].name;
+  //   delete [] _field_name_map[j].long_name;
+  // }
 
-  delete [] _field_name_map;
+  // delete [] _field_name_map;
 
   // unregister process
 
-  PMU_auto_unregister();
+  // PMU_auto_unregister();
 }
 
 //////////////////////////////////////////////////
@@ -175,10 +175,10 @@ bool Era5Nc2Mdv::Run ()
   // create input path object
 
   InputPath *inputPath;
-  if (_params.mode == Params::REALTIME)
-    inputPath = new InputPath(_progName, _params,
-			      PMU_auto_register);
-  else
+  // if (_params.mode == Params::REALTIME)
+  //   inputPath = new InputPath(_progName, _params,
+  //       		      PMU_auto_register);
+  // else
     inputPath = new InputPath(_progName, _params,
 			      _args.nFiles, _args.filePaths);
   
@@ -200,6 +200,7 @@ bool Era5Nc2Mdv::Run ()
   
 bool Era5Nc2Mdv::_checkParams()
 {
+#ifdef JUNK
   // make sure START_2D_FIELDS & TOTAL_FIELD_COUNT are not selected
 
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
@@ -240,7 +241,8 @@ bool Era5Nc2Mdv::_checkParams()
       }
     }
   } // ifield
-
+#endif
+  
   return true;
 }
 
@@ -250,6 +252,7 @@ bool Era5Nc2Mdv::_checkParams()
   
 bool Era5Nc2Mdv::_initVertInterp()
 {
+#ifdef JUNK
   switch (_params.output_levels)
   {
   case Params::FLIGHT_LEVELS:
@@ -298,7 +301,7 @@ bool Era5Nc2Mdv::_initVertInterp()
     break;
     
   } // switch
-
+#endif
   return true;
 }
 
@@ -378,19 +381,19 @@ bool Era5Nc2Mdv::_processInData(Era5Data &inData)
   // check projection
   // native proj only OK for Lambert, stereographic, and Mercator
     
-  if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE &&
-      inData.getProjType() != Era5Data::LAMBERT_CONF &&
-      inData.getProjType() != Era5Data::STEREOGRAPHIC &&
-      inData.getProjType() != Era5Data::MERCATOR)
-  {
-    cerr << "ERROR - " << method_name << endl;
-    cerr << "  Output projection is set to NATIVE." << endl;
-    cerr << "  Input WRF data file has projection UNKNOWN: "
-	 << inData.getProjType() << endl;
-    cerr << "  Only Lambert, stereographic, and Mercator projections "
-	 << "are supported." << endl;
-    return false;
-  }
+  // if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE &&
+  //     inData.getProjType() != Era5Data::LAMBERT_CONF &&
+  //     inData.getProjType() != Era5Data::STEREOGRAPHIC &&
+  //     inData.getProjType() != Era5Data::MERCATOR)
+  // {
+  //   cerr << "ERROR - " << method_name << endl;
+  //   cerr << "  Output projection is set to NATIVE." << endl;
+  //   cerr << "  Input WRF data file has projection UNKNOWN: "
+  //        << inData.getProjType() << endl;
+  //   cerr << "  Only Lambert, stereographic, and Mercator projections "
+  //        << "are supported." << endl;
+  //   return false;
+  // }
   
   // round the lead_time to nearest 15 mins
 
@@ -421,20 +424,20 @@ bool Era5Nc2Mdv::_processInData(Era5Data &inData)
 
 bool Era5Nc2Mdv::_acceptLeadTime(int lead_time)
 {
-  if (lead_time < _params.min_forecast_dtime)
-    return false;
+  // if (lead_time < _params.min_forecast_dtime)
+  //   return false;
 
-  if (lead_time > _params.max_forecast_dtime)
-    return false;
+  // if (lead_time > _params.max_forecast_dtime)
+  //   return false;
 
-  if (!_params.specify_lead_times)
-    return true;
+  // if (!_params.specify_lead_times)
+  //   return true;
 
-  for (int i = 0; i < _params.lead_times_n; i++)
-  {
-    if (lead_time == _params._lead_times[i])
-      return true;
-  } // i
+  // for (int i = 0; i < _params.lead_times_n; i++)
+  // {
+  //   if (lead_time == _params._lead_times[i])
+  //     return true;
+  // } // i
 
   return false;
 }
@@ -454,7 +457,7 @@ int Era5Nc2Mdv::_processForecast(Era5Data &inData,
   // create the output file
 
   OutputFile outFile(_progName, _params, gen_time, forecast_time, 
-		     lead_time, inData, _field_name_map);
+		     lead_time, inData /*, _field_name_map*/);
 
   DsMdvx &mdvx = outFile.getDsMdvx();
 
@@ -468,27 +471,27 @@ int Era5Nc2Mdv::_processForecast(Era5Data &inData,
   
   // convert to desired output types
 
-  Mdvx::compression_type_t compression_type;
-  switch (_params.output_compression)
-  {
-  case Params::_MDV_COMPRESSION_NONE:
-    compression_type = Mdvx::COMPRESSION_NONE;
-    break;
-  case Params::_MDV_COMPRESSION_RLE:
-    compression_type = Mdvx::COMPRESSION_RLE;
-    break;
-  case Params::_MDV_COMPRESSION_LZO:
-    compression_type = Mdvx::COMPRESSION_LZO;
-    break;
-  case Params::_MDV_COMPRESSION_ZLIB:
-    compression_type = Mdvx::COMPRESSION_ZLIB;
-    break;
-  case Params::_MDV_COMPRESSION_BZIP:
-    compression_type = Mdvx::COMPRESSION_BZIP;
-    break;
-  default:
-    compression_type = Mdvx::COMPRESSION_NONE;
-  }
+  Mdvx::compression_type_t compression_type = Mdvx::COMPRESSION_GZIP;
+  // switch (_params.output_compression)
+  // {
+  // case Params::_MDV_COMPRESSION_NONE:
+  //   compression_type = Mdvx::COMPRESSION_NONE;
+  //   break;
+  // case Params::_MDV_COMPRESSION_RLE:
+  //   compression_type = Mdvx::COMPRESSION_RLE;
+  //   break;
+  // case Params::_MDV_COMPRESSION_LZO:
+  //   compression_type = Mdvx::COMPRESSION_LZO;
+  //   break;
+  // case Params::_MDV_COMPRESSION_ZLIB:
+  //   compression_type = Mdvx::COMPRESSION_ZLIB;
+  //   break;
+  // case Params::_MDV_COMPRESSION_BZIP:
+  //   compression_type = Mdvx::COMPRESSION_BZIP;
+  //   break;
+  // default:
+  //   compression_type = Mdvx::COMPRESSION_NONE;
+  // }
   
   for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
   {
@@ -496,20 +499,14 @@ int Era5Nc2Mdv::_processForecast(Era5Data &inData,
 
     MdvxField *field = mdvx.getFieldByNum(ifield);
 
-    if (_params._output_fields[ifield].encoding == Params::OUT_INT8)
+    if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_INT08)
     {
-      if (_params.output_scaling == Params::SCALING_ROUNDED)
-        field->convertRounded(Mdvx::ENCODING_INT8, compression_type);
-      else
-        field->convertDynamic(Mdvx::ENCODING_INT8, compression_type);
-    } else if (_params._output_fields[ifield].encoding == Params::OUT_INT16)
+      field->convertDynamic(Mdvx::ENCODING_INT8, compression_type);
+    } else if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_INT16)
     {
-      if (_params.output_scaling == Params::SCALING_ROUNDED)
-        field->convertRounded(Mdvx::ENCODING_INT16, compression_type);
-      else
-        field->convertDynamic(Mdvx::ENCODING_INT16, compression_type);
+      field->convertDynamic(Mdvx::ENCODING_INT16, compression_type);
     }
-    else if (_params._output_fields[ifield].encoding == Params::OUT_FLOAT32)
+    else if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_FLOAT32)
     {
       field->convertRounded(Mdvx::ENCODING_FLOAT32, compression_type);
     }
@@ -530,6 +527,7 @@ int Era5Nc2Mdv::_processForecast(Era5Data &inData,
 void Era5Nc2Mdv::_loadCrossOutputFields(Era5Data &inData,
 				       DsMdvx &mdvx)
 {
+#ifdef JUNK
   static const string method_name = "Era5Nc2Mdv::_loadCrossOutputFields()";
   
   if (_rotateOutputUV)
@@ -578,11 +576,6 @@ void Era5Nc2Mdv::_loadCrossOutputFields(Era5Data &inData,
     {
       // set up grid interp object
 
-      if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE)
-      {
-	mGrid.setNonInterp(iy, ix);
-      }
-      else
       {
 	// compute x and y, and plane offset
 	double yy = fhdr->grid_miny + iy * fhdr->grid_dy;
@@ -600,20 +593,17 @@ void Era5Nc2Mdv::_loadCrossOutputFields(Era5Data &inData,
 
       // set up vert interp
 
-      if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
+      // load up interpolated vertical pressure array for this point
+      vector<double> presVert;
+      if (inData.dataDimension() > 2)
       {
-	// load up interpolated vertical pressure array for this point
-	vector<double> presVert;
-	if (inData.dataDimension() > 2)
-	{
-	  inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-			       "press", inData.getPres(),
-			       mGrid.wtSW, mGrid.wtNW,
-			       mGrid.wtNE, mGrid.wtSE,
-			       presVert);
-	  // load up the vertical interpolation array if interp3dField is successful
-	  _presInterp.prepareInterp(presVert);
-	}
+        inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
+                             "press", inData.getPres(),
+                             mGrid.wtSW, mGrid.wtNW,
+                             mGrid.wtNE, mGrid.wtSE,
+                             presVert);
+        // load up the vertical interpolation array if interp3dField is successful
+        _presInterp.prepareInterp(presVert);
       }
       // interp the fields for this point
 
@@ -1331,7 +1321,7 @@ void Era5Nc2Mdv::_loadCrossOutputFields(Era5Data &inData,
       } // ifield
     } // ix
   } // iy
-
+#endif
 }
 
 /////////////////////////////////////////////////
@@ -1347,12 +1337,6 @@ void Era5Nc2Mdv::_loadEdgeOutputFields(Era5Data &inData,
 void Era5Nc2Mdv::_loadUEdgeOutputFields(Era5Data &inData,
 				     DsMdvx &mdvx)
 {
-  if (_params.output_projection != Params::OUTPUT_PROJ_NATIVE)
-  {
-    // only applies to native projection
-    return;
-  }
-  
   // set up grid remapping object
 
   WRFGrid mGrid(_progName, _params.debug >= Params::DEBUG_VERBOSE,inData);
@@ -1398,40 +1382,40 @@ void Era5Nc2Mdv::_loadUEdgeOutputFields(Era5Data &inData,
     {
       mGrid.setNonInterp(iy, ix);
 
-      if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
-      {
-	// load up interpolated vertical pressure array for this point
-	vector<double> presVert;
-	if (inData.dataDimension() > 2)
-	{
-	  inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-			       "press", inData.getPres(),
-			       mGrid.wtSW, mGrid.wtNW,
-			       mGrid.wtNE, mGrid.wtSE,
-			       presVert);
+      // if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
+      // {
+      //   // load up interpolated vertical pressure array for this point
+      //   vector<double> presVert;
+      //   if (inData.dataDimension() > 2)
+      //   {
+      //     inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
+      //   		       "press", inData.getPres(),
+      //   		       mGrid.wtSW, mGrid.wtNW,
+      //   		       mGrid.wtNE, mGrid.wtSE,
+      //   		       presVert);
 
-	  // load up the vertical interpolation array
+      //     // load up the vertical interpolation array
 
-	  _presInterp.prepareInterp(presVert);
-	}
-      }
+      //     _presInterp.prepareInterp(presVert);
+      //   }
+      // }
       
       // interp the fields for this point
       
       for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
       {
-	switch (_params._output_fields[ifield].name)
-	{
-          case Params::U_EDGE_FIELD:
-            _interp3dField(inData, "U_EDGE", inData.getUuC(), mdvx,
-                           planeOffset, nPointsPlane,
-                           fhdr->missing_data_value, mGrid);
-            break;
+	// switch (_params._output_fields[ifield].name)
+	// {
+        //   case Params::U_EDGE_FIELD:
+        //     _interp3dField(inData, "U_EDGE", inData.getUuC(), mdvx,
+        //                    planeOffset, nPointsPlane,
+        //                    fhdr->missing_data_value, mGrid);
+        //     break;
 	    
-	default:
-	  break;
+	// default:
+	//   break;
 
-	} // switch
+	// } // switch
       } // ifield
     } // ix
   } // iy
@@ -1441,11 +1425,6 @@ void Era5Nc2Mdv::_loadUEdgeOutputFields(Era5Data &inData,
 void Era5Nc2Mdv::_loadVEdgeOutputFields(Era5Data &inData,
 				     DsMdvx &mdvx)
 {
-  // Only applies to native projection
-
-  if (_params.output_projection != Params::OUTPUT_PROJ_NATIVE)
-    return;
-  
   // set up grid remapping object
 
   WRFGrid mGrid(_progName, _params.debug >= Params::DEBUG_VERBOSE,inData);
@@ -1490,40 +1469,40 @@ void Era5Nc2Mdv::_loadVEdgeOutputFields(Era5Data &inData,
     {
       mGrid.setNonInterp(iy, ix);
 
-      if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
-      {
-	// load up interpolated vertical pressure array for this point
-	vector<double> presVert;
-	if (inData.dataDimension() > 2)
-	{
-	  inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-			       "press", inData.getPres(),
-			       mGrid.wtSW, mGrid.wtNW,
-			       mGrid.wtNE, mGrid.wtSE,
-			       presVert);
+      // if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
+      // {
+      //   // load up interpolated vertical pressure array for this point
+      //   vector<double> presVert;
+      //   if (inData.dataDimension() > 2)
+      //   {
+      //     inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
+      //   		       "press", inData.getPres(),
+      //   		       mGrid.wtSW, mGrid.wtNW,
+      //   		       mGrid.wtNE, mGrid.wtSE,
+      //   		       presVert);
 
-	  // load up the vertical interpolation array
+      //     // load up the vertical interpolation array
 
-	  _presInterp.prepareInterp(presVert);
-	}
-      }
+      //     _presInterp.prepareInterp(presVert);
+      //   }
+      // }
       
       // interp the fields for this point
       
       for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
       {
-	switch (_params._output_fields[ifield].name)
-	{
-	case Params::V_EDGE_FIELD:
-	  _interp3dField(inData, "V_EDGE", inData.getVvC(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
+	// switch (_params._output_fields[ifield].name)
+	// {
+	// case Params::V_EDGE_FIELD:
+	//   _interp3dField(inData, "V_EDGE", inData.getVvC(), mdvx,
+	// 		 planeOffset, nPointsPlane,
+	// 		 fhdr->missing_data_value, mGrid);
+	//   break;
             
-	default:
-	  break;
+	// default:
+	//   break;
 
-	} // switch
+	// } // switch
       } // ifield
     } // ix
   } // iy
@@ -1537,7 +1516,7 @@ void Era5Nc2Mdv::_loadVEdgeOutputFields(Era5Data &inData,
 //
 
 void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
-			       const  Params::output_field_name_t &field_name_enum,
+                                // const  Params::output_field_name_t &field_name_enum,
 			       fl32 ***field_data,
 			       DsMdvx &mdvx,
 			       int planeOffset,
@@ -1546,6 +1525,7 @@ void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
 			       const WRFGrid &mGrid,
 			       double factor /* = 1.0*/ )
 {
+#ifdef JUNK
  int i = static_cast<int>(field_name_enum);
 
  if (_field_name_map[i].name == NULL || _field_name_map[i].long_name == NULL)
@@ -1553,6 +1533,7 @@ void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
 
  _interp3dField(inData,_field_name_map[i].name,field_data,
 		mdvx, planeOffset, nPointsPlane, missingDataVal, mGrid, factor);
+#endif
 }  
 
 
@@ -1586,6 +1567,7 @@ void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
   // load up vertical array for this point
 
   vector<double> vlevelData;
+#ifdef NOTNOW
   
   if (_params.output_levels == Params::NATIVE_VERTICAL_LEVELS)
   {
@@ -1611,6 +1593,7 @@ void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
 			 _params.copy_lowest_downwards);
    
   }
+#endif
   
   // put into targetVol
   
@@ -1635,7 +1618,7 @@ void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
 //the other version of _interp2dField().
 
 void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
-			       const  Params::output_field_name_t &field_name_enum,
+                                // const  Params::output_field_name_t &field_name_enum,
 			       fl32 **field_data,
 			       DsMdvx &mdvx,
 			       int planeOffset,
@@ -1643,6 +1626,7 @@ void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
 			       const WRFGrid &mGrid,
 			       double factor /* = 1.0*/ )
 {
+#ifdef NOTNOW
  int i = static_cast<int>(field_name_enum);
 
  if (_field_name_map[i].name == NULL || _field_name_map[i].long_name == NULL)
@@ -1650,6 +1634,7 @@ void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
 
  _interp2dField(inData,_field_name_map[i].name,field_data,
 		mdvx, planeOffset, missingDataVal, mGrid, factor);
+#endif
 }
 
 
@@ -1712,6 +1697,7 @@ void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
 
 void Era5Nc2Mdv::_initFieldNameMap()
 {
+#ifdef JUNK
   _field_name_map = new Params::afield_name_map_t[Params::TOTAL_FIELD_COUNT];
 
   for (int j = 0; j< Params::TOTAL_FIELD_COUNT; j++)
@@ -1730,5 +1716,6 @@ void Era5Nc2Mdv::_initFieldNameMap()
       new char[strlen(_params._field_name_map[i].long_name)+1];
     strcpy(_field_name_map[j].long_name,_params._field_name_map[i].long_name);
   }
+#endif
 
 }
