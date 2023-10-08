@@ -701,7 +701,7 @@
     tt->descr = tdrpStrDup("Directory for input WRF data - REALTIME mode.");
     tt->help = tdrpStrDup("The latest_data_info file in this directory is updated each time the model adds a forecast time step to the output file.");
     tt->val_offset = (char *) &realtime_input_dir - &_start_;
-    tt->single_val.s = tdrpStrDup(".");
+    tt->single_val.s = tdrpStrDup("/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles");
     tt++;
     
     // Parameter 'File_quiescence_secs'
