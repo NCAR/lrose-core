@@ -253,12 +253,12 @@ int Era5Nc2Mdv::_processFile(const char *input_path)
     // write output file
     
     if (_params.debug) {
-      cerr << "Writing file to url: " << _params.output_url << endl;
+      cerr << "Writing file to url: " << _params.output_dir << endl;
     }
 
-    if (mdvx.writeToDir(_params.output_url)) {
+    if (mdvx.writeToDir(_params.output_dir)) {
       cerr << "ERROR - Era5Nc2Mdv" << endl;
-      cerr << "  Cannot write file to url: " << _params.output_url << endl;
+      cerr << "  Cannot write file to url: " << _params.output_dir << endl;
       cerr << mdvx.getErrStr() << endl;
       return -1;
     }

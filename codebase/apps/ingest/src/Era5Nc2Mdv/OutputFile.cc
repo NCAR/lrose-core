@@ -83,7 +83,7 @@ int OutputFile::writeVol()
   
   if (_params.debug) {
     fprintf(stderr, "Writing MDV file, time %s, to url %s\n",
-	    utimstr(_mdvx.getMasterHeader().time_centroid), _params.output_url);
+	    utimstr(_mdvx.getMasterHeader().time_centroid), _params.output_dir);
   }
   
   // set precip fields to log scale if they are INT8
@@ -108,7 +108,7 @@ int OutputFile::writeVol()
 
   _mdvx.setAppName(_progName);
   _mdvx.setWriteLdataInfo();
-  if (_mdvx.writeToDir(_params.output_url)) {
+  if (_mdvx.writeToDir(_params.output_dir)) {
     cerr << "ERROR - OutputFile::writeVol" << endl;
     cerr << _mdvx.getErrStr() << endl;
     return -1;

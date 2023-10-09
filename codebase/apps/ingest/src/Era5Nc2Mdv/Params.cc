@@ -815,15 +815,15 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'output_url'
+    // Parameter 'output_dir'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("output_url");
-    tt->descr = tdrpStrDup("Output URL.");
-    tt->help = tdrpStrDup("The assembled ERA5 data is output to URL in MDV format.");
-    tt->val_offset = (char *) &output_url - &_start_;
+    tt->param_name = tdrpStrDup("output_dir");
+    tt->descr = tdrpStrDup("Output directory.");
+    tt->help = tdrpStrDup("The assembled ERA5 data is output to this dir in MDV format.");
+    tt->val_offset = (char *) &output_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/ERA5");
     tt++;
     

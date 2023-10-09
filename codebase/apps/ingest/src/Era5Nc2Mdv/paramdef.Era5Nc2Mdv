@@ -223,10 +223,10 @@ commentdef
 
 paramdef string
 {
-  p_descr = "Output URL.";
-  p_help = "The assembled ERA5 data is output to URL in MDV format.";
+  p_descr = "Output directory.";
+  p_help = "The assembled ERA5 data is output to this dir in MDV format.";
   p_default = "/tmp/ERA5";
-} output_url;
+} output_dir;
 
 typedef enum
 {

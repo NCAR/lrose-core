@@ -421,7 +421,7 @@ public:
 
   tdrp_bool_t convert_temperature_to_celcius;
 
-  char* output_url;
+  char* output_dir;
 
   output_level_type_t output_level_type;
 
