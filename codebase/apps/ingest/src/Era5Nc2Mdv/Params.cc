@@ -625,6 +625,30 @@
     tt->single_val.e = ARCHIVE;
     tt++;
     
+    // Parameter 'start_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("start_time");
+    tt->descr = tdrpStrDup("Set the start time in ARCHIVE mode.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &start_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2023 06 01 00 00 00");
+    tt++;
+    
+    // Parameter 'end_time'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("end_time");
+    tt->descr = tdrpStrDup("Set the end time in ARCHIVE mode.");
+    tt->help = tdrpStrDup("Format is 'yyyy mm dd hh mm ss'.");
+    tt->val_offset = (char *) &end_time - &_start_;
+    tt->single_val.s = tdrpStrDup("2023 07 01 00 00 00");
+    tt++;
+    
     // Parameter 'Comment 3'
     
     memset(tt, 0, sizeof(TDRPtable));

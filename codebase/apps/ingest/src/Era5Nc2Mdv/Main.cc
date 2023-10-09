@@ -63,8 +63,8 @@ int main(int argc, char **argv)
 
   // create program object
 
-  Prog = new Era5Nc2Mdv();
-  if (!Prog->init(argc, argv)) {
+  Prog = new Era5Nc2Mdv(argc, argv);
+  if (!Prog->isOK) {
     return -1;
   }
 

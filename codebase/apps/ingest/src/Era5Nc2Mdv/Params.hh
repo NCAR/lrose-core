@@ -408,6 +408,10 @@ public:
 
   mode_t mode;
 
+  char* start_time;
+
+  char* end_time;
+
   char* soilparm_path;
 
   char* input_dir;
@@ -437,7 +441,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[20];
+  mutable TDRPtable _table[22];
 
   const char *_className;
 

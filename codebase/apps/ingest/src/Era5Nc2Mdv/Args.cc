@@ -32,18 +32,19 @@
 
 #include "Args.hh"
 #include "Params.hh"
-#include <string.h>
-#include <toolsa/umisc.h>
+#include <string>
+#include <iostream>
+#include <Radx/RadxTime.hh>
 using namespace std;
 
 // Constructor
 
 Args::Args ()
-
 {
   TDRP_init_override(&override);
+  startTimeSet = false;
+  endTimeSet = false;
 }
-
 
 // Destructor
 
@@ -53,110 +54,157 @@ Args::~Args ()
   TDRP_free_override(&override);
 }
 
-// parse
+// parse the command line
+//
+// returns 0 on success, -1 on failure  
 
-int Args::parse (int argc, char **argv, const string &prog_name)
+int Args::parse (int argc, char **argv, string &prog_name)
 
 {
 
-  int iret = 0;
+  _progName = prog_name;
   char tmp_str[BUFSIZ];
+  bool OK = true;
+  vector<string> fields;
 
   // loop through args
   
   for (int i =  1; i < argc; i++) {
-
+    
     if (!strcmp(argv[i], "--") ||
 	!strcmp(argv[i], "-h") ||
 	!strcmp(argv[i], "-help") ||
 	!strcmp(argv[i], "-man")) {
       
-      _usage(prog_name, cout);
+      usage(cout);
       exit (0);
       
-    } else if (!strcmp(argv[i], "-debug")) {
+    } else if (!strcmp(argv[i], "-d") ||
+               !strcmp(argv[i], "-debug")) {
       
       sprintf(tmp_str, "debug = DEBUG_NORM;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-i")) {
-      
-      sprintf(tmp_str, "realtime_input_dir = %s;",argv[i+1]);
-      TDRP_add_override(&override, tmp_str);
-      
-    } else if (!strcmp(argv[i], "-verbose")) {
+    } else if (!strcmp(argv[i], "-v") ||
+               !strcmp(argv[i], "-verbose")) {
       
       sprintf(tmp_str, "debug = DEBUG_VERBOSE;");
       TDRP_add_override(&override, tmp_str);
       
-    } else if (!strcmp(argv[i], "-mode")) {
+    } else if (!strcmp(argv[i], "-vv") ||
+               !strcmp(argv[i], "-extra")) {
       
-      if (i < argc - 1) {
-	sprintf(tmp_str, "mode = %s;", argv[i+1]);
-	TDRP_add_override(&override, tmp_str);
-      } else {
-	iret = -1;
-      }
-	
-    } else if (!strcmp(argv[i], "-f")) {
-      
-      sprintf(tmp_str, "mode = ARCHIVE;");
+      sprintf(tmp_str, "debug = DEBUG_EXTRA;");
       TDRP_add_override(&override, tmp_str);
       
-      if(i < argc - 1) {
-
-	int j;
-
-	// search for next arg which starts with '-'
-
-	for (j = i + 1; j < argc; j++)
-	  if (argv[j][0] == '-')
-	    break;
-	
-	/*
-	 * compute number of files
-	 */
-
-	nFiles = j - i - 1;
-
-	// set file name array
-
-	filePaths = argv + i + 1;
-	
+    } else if (!strcmp(argv[i], "-start")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "start_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        startTimeSet = true;
+      } else {
+	OK = false;
       }
-
-    } // if
+	
+    } else if (!strcmp(argv[i], "-end")) {
+      
+      if (i < argc - 1) {
+        sprintf(tmp_str, "end_time = \"%s\";", argv[i+1]);
+        TDRP_add_override(&override, tmp_str);
+        sprintf(tmp_str, "mode = ARCHIVE;");
+        TDRP_add_override(&override, tmp_str);
+        endTimeSet = true;
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-path") || !strcmp(argv[i], "-f")) {
+      
+      if (i < argc - 1) {
+	// load up file list vector. Break at next arg which
+	// start with -
+	for (int j = i + 1; j < argc; j++) {
+	  if (argv[j][0] == '-') {
+	    break;
+	  } else {
+	    inputFileList.push_back(argv[j]);
+	  }
+	}
+	sprintf(tmp_str, "mode = FILELIST;");
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+      
+    } else if (!strcmp(argv[i], "-indir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "input_dir = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    } else if (!strcmp(argv[i], "-outdir")) {
+      
+      if (i < argc - 1) {
+	sprintf(tmp_str, "output_dir = \"%s\";", argv[++i]);
+	TDRP_add_override(&override, tmp_str);
+      } else {
+	OK = false;
+      }
+	
+    }
     
   } // i
 
-  if (iret) {
-    _usage(prog_name, cerr);
+  if (!OK) {
+    usage(cerr);
+    return -1;
   }
 
-  return (iret);
+  return 0;
     
 }
 
-void Args::_usage(const string &prog_name, ostream &out)
+void Args::usage(ostream &out)
 {
 
-  out << "Usage: " << prog_name << " [options as below]\n"
-      << "options:\n"
-      << "       [ --, -h, -help, -man ] produce this list.\n"
-      << "       [ -debug ] print debug messages\n"
-      << "       [ -i input_directory] For REALTIME mode\n"
-      << "       [ -f file_paths] file paths list - ARCHIVE mode\n"
-      << "       [ -mode ?] ARCHIVE or REALTIME\n"
-      << "       [ -verbose ] print verbose debug messages\n"
+  Params defaults;
+
+  out << "Usage: " << _progName << " [args as below]\n"
+      << "Options:\n"
+      << "\n"
+      << "  [ -h ] produce this list.\n"
+      << "\n"
+      << "  [ -d, -debug ] print debug messages\n"
+      << "\n"
+      << "  [ -end \"yyyy mm dd hh mm ss\"]\n"
+      << "     Set the end time in archive mode\n"
+      << "     Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -f, -paths ? ] set input file paths\n"
+      << "     Sets mode to FILELIST\n"
+      << "\n"
+      << "  [ -indir ? ] set input directory\n"
+      << "     for ARCHIVE mode\n"
+      << "     see also -start and -end\n"
+      << "\n"
+      << "  [ -outdir ? ] set output directory\n"
+      << "\n"
+      << "  [ -start \"yyyy mm dd hh mm ss\"]\n"
+      << "     Set the start time in archive mode\n"
+      << "     Sets mode to ARCHIVE\n"
+      << "\n"
+      << "  [ -v, -verbose ] print verbose debug messages\n"
+      << "\n"
+      << "  [ -vv, -extra ] print extra verbose debug messages\n"
+      << "\n"
       << endl;
   
   Params::usage(out);
-
+  
 }
-
-
-
-
-
-
-

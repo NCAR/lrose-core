@@ -30,12 +30,13 @@
 //
 /////////////////////////////////////////////////////////////
 
-#ifndef ARGS_H
-#define ARGS_H
+#ifndef ARGS_HH
+#define ARGS_HH
 
 #include <iostream>
 #include <tdrp/tdrp.h>
 #include <string>
+#include <vector>
 using namespace std;
 
 class Args {
@@ -46,26 +47,32 @@ public:
 
   Args ();
 
-  // destructor
+  // Destructor
 
-  ~Args ();
+  ~Args();
+  
+  // parse the command line
+  // Returns 0 on success, -1 on failure
 
-  // parse
+  int parse (int argc, char **argv, string &prog_name);
 
-  int parse(int argc, char **argv, const string &prog_name);
-
-   // public data
-
+  // public data
+  
   tdrp_override_t override;
-  char **filePaths;
-  int nFiles;
+  bool startTimeSet, endTimeSet;
+  vector<string> inputFileList;
+
+  void usage(ostream &out);
 
 protected:
   
 private:
 
-  void _usage(const string &prog_name, ostream &out);
+  string _progName;
   
 };
 
 #endif
+
+
+

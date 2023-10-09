@@ -26,1696 +26,2332 @@
 //
 // Era5Nc2Mdv object
 //
-// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2023
+// Oct 2008
 //
 ///////////////////////////////////////////////////////////////
+//
+// Era5Nc2Mdv reads McIdas data in NetCDF format, and
+// converts to MDV
+//
+////////////////////////////////////////////////////////////////
 
-#include <Mdv/MdvxField.hh>
+#include <cmath>
+#include <toolsa/toolsa_macros.h>
+#include <toolsa/umisc.h>
+#include <toolsa/pmu.h>
+#include <toolsa/DateTime.hh>
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
-#include <toolsa/pjg.h>
-#include <toolsa/pmu.h>
-#include <toolsa/toolsa_macros.h>
-
-#include "InputPath.hh"
-#include "OutputFile.hh"
+#include <Mdv/MdvxField.hh>
+#include <dsserver/DsLdataInfo.hh>
 #include "Era5Nc2Mdv.hh"
-
 using namespace std;
 
-/////////////////
+const fl32 Era5Nc2Mdv::_missingFloat = -9999.0;
+
 // Constructor
 
-Era5Nc2Mdv::Era5Nc2Mdv() :
-  _rotateOutputUV(false)
+Era5Nc2Mdv::Era5Nc2Mdv(int argc, char **argv)
+
 {
+
+  isOK = true;
+  _input = NULL;
+
   // set programe name
 
   _progName = "Era5Nc2Mdv";
   ucopyright((char *) _progName.c_str());
 
-}
+  // get command line args
 
-
-/////////////////
-// init()
-
-bool Era5Nc2Mdv::init(int argc, char **argv)
-{
-  static const string method_name = "Era5Nc2Mdv::init()";
-  
-  // Get command line args
-
-  if (_args.parse(argc, argv, _progName))
-  {
+  if (_args.parse(argc, argv, _progName)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with command line args" << endl;
-
-    return false;
+    isOK = false;
+    return;
   }
-  
-  // Get TDRP params
+
+  // get TDRP params
   
   _paramsPath = (char *) "unknown";
-  if (_params.loadFromArgs(argc, argv,
-			   _args.override.list,
-			   &_paramsPath))
-  {
+  if (_params.loadFromArgs(argc, argv, _args.override.list,
+			   &_paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters" << endl;
-
-    return false;
+    isOK = false;
   }
+
+  // check that file list set in archive mode
   
-  // Set up the field name map from the config info
+  if (_params.mode == Params::FILELIST && _args.inputFileList.size() == 0) {
+    cerr << "ERROR: Era5Nc2Mdv" << endl;
+    cerr << "  Mode is ARCHIVE."; 
+    cerr << "  You must use -f to specify files on the command line."
+	 << endl;
+    _args.usage(cerr);
+    isOK = false;
+  }
 
-  _initFieldNameMap();
-
-  // Check the parameters
-
-  if (!_checkParams())
-    return false;
+  // initialize the data input object
   
-  // set up vertical level interpolation 
+  if (_params.mode == Params::ARCHIVE) {
 
-  if (!_initVertInterp())
-    return false;
-  
-  // initialize the output grid computations
+    // get start and end times
+    
+    time_t startTime = DateTime::parseDateTime(_params.start_time);
+    if (startTime == DateTime::NEVER) {
+      cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
+      cerr << "  Start time format incorrect: " << _params.start_time << endl;
+      if (_args.startTimeSet) {
+        cerr << "  Check command line" << endl;
+      } else {
+        cerr << "  Check params file: " << _paramsPath << endl;
+      }
+      isOK = false;
+      return;
+    }
+    
+    time_t endTime = DateTime::parseDateTime(_params.end_time);
+    if (endTime == DateTime::NEVER) {
+      cerr << "ERROR - Radx2Grid::_runArchive()" << endl;
+      cerr << "  End time format incorrect: " << _params.end_time << endl;
+      if (_args.endTimeSet) {
+        cerr << "  Check command line" << endl;
+      } else {
+        cerr << "  Check params file: " << _paramsPath << endl;
+      }
+      isOK = false;
+      return;
+    }
+    
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _params.input_dir,
+			     startTime, endTime);
+    
+  } else if (_params.mode == Params::FILELIST) {
 
-  // if (_params.output_projection == Params::OUTPUT_PROJ_FLAT)
-  // {
-  //   _outputProj.initFlat(_params.output_origin.lat,
-  //       		 _params.output_origin.lon,
-  //       		 0.0);
-  // }
-  // else if (_params.output_projection == Params::OUTPUT_PROJ_LAMBERT)
-  // {
-  //   _outputProj.initLc2(_params.output_origin.lat,
-  //       		_params.output_origin.lon,
-  //       		_params.lambert_lat1,
-  //       		_params.lambert_lat2);
-  //   _rotateOutputUV = true;
-  // }
-  // else if (_params.output_projection == Params::OUTPUT_PROJ_MERCATOR)
-  // {
-  //   _outputProj.initMercator(_params.output_origin.lat,
-  //       		     _params.output_origin.lon);
-  // }
-  // else
-  // {
-    _outputProj.initLatlon();
-  // }
+    if (_params.debug) {
+      for (int ii = 0; ii < (int) _args.inputFileList.size(); ii++) {
+        cerr << "Adding path: " << _args.inputFileList[ii] << endl;
+      }
+    }
 
-  // init process mapper registration
-  
-  // PMU_auto_init((char *) _progName.c_str(),
-  //       	_params.instance,
-  //       	_params.Procmap_reg_interval_secs);
+    _input = new DsInputPath(_progName,
+			     _params.debug >= Params::DEBUG_VERBOSE,
+			     _args.inputFileList);
+  }
 
-  // cout << "Reg with procmap, progname: " << _progName.c_str()
-  //      << ", instance: " << _params.instance
-  //      << ", interval(secs): " << _params.Procmap_reg_interval_secs << endl;
-  
-  // PMU_auto_register("Starting ...");
-
-  return true;
 }
 
-/////////////////
 // destructor
 
 Era5Nc2Mdv::~Era5Nc2Mdv()
+
 {
-  // Free space in the field name map
-
-  // for (int j = 0; j< Params::TOTAL_FIELD_COUNT; j++)
-  // {
-  //   delete [] _field_name_map[j].name;
-  //   delete [] _field_name_map[j].long_name;
-  // }
-
-  // delete [] _field_name_map;
 
   // unregister process
 
-  // PMU_auto_unregister();
+  PMU_auto_unregister();
+
+  // free up
+
+  if (_input) {
+    delete _input;
+  }
+
 }
 
 //////////////////////////////////////////////////
 // Run
 
-bool Era5Nc2Mdv::Run ()
+int Era5Nc2Mdv::Run ()
 {
-
-  PMU_auto_register("Era5Nc2Mdv::Run");
-
-  // create input path object
-
-  InputPath *inputPath;
-  // if (_params.mode == Params::REALTIME)
-  //   inputPath = new InputPath(_progName, _params,
-  //       		      PMU_auto_register);
-  // else
-    inputPath = new InputPath(_progName, _params,
-			      _args.nFiles, _args.filePaths);
   
-  // run
-
-  bool iret = _run(*inputPath);
-
-  // clean up
-
-  delete inputPath;
-
+  int iret = 0;
+  PMU_auto_register("Run");
+  
+  // loop until end of data
+  
+  char *inputPath;
+  while ((inputPath = _input->next()) != NULL) {
+    
+    PMU_auto_register("Reading file");
+    ta_file_uncompress(inputPath);
+    if (_processFile(inputPath)) {
+      cerr << "ERROR = Era5Nc2Mdv::Run" << endl;
+      cerr << "  Processing file: " << inputPath << endl;
+      iret = -1;
+    }
+    
+  }
+  
   return iret;
+
 }
 
-//////////////////////////////////////////////////
-// check the parameters
-//
-// returns true on success, false on failure
-  
-bool Era5Nc2Mdv::_checkParams()
+///////////////////////////////
+// process file
+
+int Era5Nc2Mdv::_processFile(const char *input_path)
+
 {
-#ifdef JUNK
-  // make sure START_2D_FIELDS & TOTAL_FIELD_COUNT are not selected
 
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-  {
-    if (_params._output_fields[ifield].name == Params::START_2D_FIELDS)
-    {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  Do not select START_2D_FIELDS." << endl;
-      cerr << "  This is only a marker." << endl;
-
-      return false;
-    }
-
-    if (_params._output_fields[ifield].name == Params::TOTAL_FIELD_COUNT)
-    {
-      cerr << "ERROR: " << _progName << endl;
-      cerr << "  Do not select TOTAL_FIELD_COUNT." << endl;
-      cerr << "  This is only a marker." << endl;
-
-      return false;
-    }
+  PMU_auto_register("Processing file");
+  
+  if (_params.debug) {
+    cerr << "Processing file: " << input_path << endl;
   }
 
-  // make sure EDGE fields are only selected for NATIVE projection
-
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-  {
-    if (_params._output_fields[ifield].name == Params::U_EDGE_FIELD ||
-	_params._output_fields[ifield].name == Params::V_EDGE_FIELD)
-    {
-      if (_params.output_projection != Params::OUTPUT_PROJ_NATIVE)
-      {
-	cerr << "ERROR: " << _progName << endl;
-	cerr << "  Output projection is not NATIVE." << endl;
-	cerr <<"  Therefore you cannot select U_EDGE or V_EDGE output fields." << endl;
-
-	return false;
-      }
-    }
-  } // ifield
-#endif
+  // open file
   
-  return true;
+  if (_openNc3File(input_path)) {
+    cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
+    cerr << "  File path: " << input_path << endl;
+    return -1;
+  }
+  
+  if (_params.debug >= Params::DEBUG_EXTRA) {
+    _printFile(*_ncFile);
+  }
+
+  // check that this is a valid file
+
+  if (_loadMetaData()) {
+    cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
+    cerr << "  File has invalid data" << endl;
+    cerr << "  File: " << input_path << endl;
+    return -1;
+  }
+
+  // loop through times
+
+  for (int itime = 0; itime < _nTimes; itime++) {
+
+    // create output Mdvx file object
+    
+    DsMdvx mdvx;
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      mdvx.setDebug(true);
+    }
+    
+    // set master header
+    
+    if (_setMasterHeader(mdvx, itime)) {
+      return -1;
+    }
+
+    // add the data fields
+
+    if (_addDataFields(mdvx, itime)) {
+      return -1;
+    }
+    
+    // write output file
+    
+    if (_params.debug) {
+      cerr << "Writing file to url: " << _params.output_url << endl;
+    }
+
+    if (mdvx.writeToDir(_params.output_url)) {
+      cerr << "ERROR - Era5Nc2Mdv" << endl;
+      cerr << "  Cannot write file to url: " << _params.output_url << endl;
+      cerr << mdvx.getErrStr() << endl;
+      return -1;
+    }
+    
+    if (_params.debug) {
+      cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
+    }
+
+  } // itime
+
+  return 0;
+
 }
 
+/////////////////////////////////////////////
+// initialize the input projection
 
-//////////////////////////////////////////////////
-// _initVertInterp()
-  
-bool Era5Nc2Mdv::_initVertInterp()
+void Era5Nc2Mdv::_initInputProjection()
+
 {
-#ifdef JUNK
-  switch (_params.output_levels)
-  {
-  case Params::FLIGHT_LEVELS:
-  {
-    TaArray<double> levels_;
-    double *levels = levels_.alloc(_params.flight_levels_n);
-    for (int i = 0; i < _params.flight_levels_n; i++)
-      levels[i] = _params._flight_levels[i];
+  
+  // if (_params.input_projection == Params::PROJ_LATLON) {
+  //   double midLon = _minx + _nx * _dx / 2.0;
+  //   _inputProj.initLatlon(midLon);
+  // } else if (_params.input_projection == Params::PROJ_FLAT) {
+  //   _inputProj.initFlat(_params.input_proj_origin_lat,
+  //                       _params.input_proj_origin_lon,
+  //                       _params.input_proj_rotation);
+  // } else if (_params.input_projection == Params::PROJ_LAMBERT_CONF) {
+  //   _inputProj.initLambertConf(_params.input_proj_origin_lat,
+  //                              _params.input_proj_origin_lon,
+  //                              _params.input_proj_lat1,
+  //                              _params.input_proj_lat2);
+  // } else if (_params.input_projection == Params::PROJ_POLAR_STEREO) {
+  //   Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
+  //   if (!_params.input_proj_pole_is_north) {
+  //     poleType = Mdvx::POLE_SOUTH;
+  //   }
+  //   _inputProj.initPolarStereo(_params.input_proj_origin_lat,
+  //                              _params.input_proj_origin_lon,
+  //                              _params.input_proj_tangent_lon,
+  //                              poleType,
+  //                              _params.input_proj_central_scale);
+  // } else if (_params.input_projection == Params::PROJ_OBLIQUE_STEREO) {
+  //   _inputProj.initObliqueStereo(_params.input_proj_origin_lat,
+  //                                _params.input_proj_origin_lon,
+  //                                _params.input_proj_tangent_lat,
+  //                                _params.input_proj_tangent_lon);
+  // } else if (_params.input_projection == Params::PROJ_MERCATOR) {
+  //   _inputProj.initMercator(_params.input_proj_origin_lat,
+  //                           _params.input_proj_origin_lon);
+  // } else if (_params.input_projection == Params::PROJ_TRANS_MERCATOR) {
+  //   _inputProj.initTransMercator(_params.input_proj_origin_lat,
+  //                                _params.input_proj_origin_lon,
+  //                                _params.input_proj_central_scale);
+  // } else if (_params.input_projection == Params::PROJ_ALBERS) {
+  //   _inputProj.initAlbers(_params.input_proj_origin_lat,
+  //                         _params.input_proj_origin_lon,
+  //                         _params.input_proj_lat1,
+  //                         _params.input_proj_lat2);
+  // } else if (_params.input_projection == Params::PROJ_LAMBERT_AZIM) {
+  //   _inputProj.initLambertAzim(_params.input_proj_origin_lat,
+  //                              _params.input_proj_origin_lon);
+  // } else if (_params.input_projection == Params::PROJ_VERT_PERSP) {
+  //   _inputProj.initVertPersp(_params.input_proj_origin_lat,
+  //                            _params.input_proj_origin_lon,
+  //                            _params.input_proj_persp_radius);
+  // }
 
-    _presInterp.setFlightLevels(_params.flight_levels_n, levels);
-    if (_params.debug >= Params::DEBUG_VERBOSE)
-      _presInterp.printPressureArray(cerr);
+  // if (_params.debug) {
+  //   cerr << "Input projection:" << endl;
+  //   _inputProj.print(cerr);
+  // }
+  
+  return;
 
-    break;
-  }
-
-  case Params::PRESSURE_LEVELS:
-  {
-    TaArray<double> levels_;
-    double *levels = levels_.alloc(_params.pressure_levels_n);
-    for (int i = 0; i < _params.pressure_levels_n; i++)
-      levels[i] = _params._pressure_levels[i];
-
-    _presInterp.setPressureLevels(_params.pressure_levels_n, levels);
-    if (_params.debug >= Params::DEBUG_VERBOSE)
-      _presInterp.printPressureArray(cerr);
-
-    break;
-  }
-
-  case Params::HEIGHT_LEVELS:
-  {
-    TaArray<double> levels_;
-    double *levels = levels_.alloc(_params.height_levels_n);
-    for (int i = 0; i < _params.height_levels_n; i++)
-      levels[i] = _params._height_levels[i] * 1000.0;
-
-    _presInterp.setHeightLevels(_params.height_levels_n, levels);
-    if (_params.debug >= Params::DEBUG_VERBOSE)
-      _presInterp.printPressureArray(cerr);
-
-    break;
-  }
-
-  default:
-    break;
-    
-  } // switch
-#endif
-  return true;
 }
 
-
-//////////////////////////////////////////////////
-// _run
-
-bool Era5Nc2Mdv::_run(InputPath &input_path)
-{
-  static const string method_name = "Era5Nc2Mdv::_run()";
-  
-  PMU_auto_register("Era5Nc2Mdv::_run");
-  
-  // loop through the input files
-  
-  string filePath;
-  while ((filePath = input_path.next()) != "")
-  {
-    Path path(filePath);
-    
-    string base = path.getBase();
-    if (_params.debug >= Params::DEBUG_NORM)
-      cerr << "File base name = <" << base << ">" << endl;
-    
-    PMU_force_register((string("Processing file ") + path.getPath()).c_str());
-
-    if (_params.debug >= Params::DEBUG_NORM)
-      cerr << "Processing file " << filePath << endl;
-    
-    Era5Data *in_data = new Era5Data();
-    if (!in_data->init(_progName, _params, PMU_auto_register))
-    {
-      cerr << "ERROR - " << method_name << endl;
-      cerr << "Error initializing Era5Data object" << endl;
-      
-      return false;
-    }
-    
-    if (!in_data->initFile(filePath))
-      return false;
-
-    PMU_auto_register("Processing inData");
-
-    if (!_processInData(*in_data))
-    {
-      cerr << "ERROR - Era5Nc2Mdv::_run" << endl;
-      cerr << "  Processing file: " << filePath << endl;
-      umsleep(2);
-      break;
-    }
-
-    in_data->clearData();
-  
-    delete in_data;
-    
-  } // endwhile
-    
-  return true;
-}
-
-/////////////////////////////////////////
-// _processInData()
-//
-// Process input data
+//////////////////////////////////////
+// open netcdf file
 //
 // Returns 0 on success, -1 on failure
 
-bool Era5Nc2Mdv::_processInData(Era5Data &inData)
+int Era5Nc2Mdv::_openNc3File(const string &path)
+  
 {
-  static const string method_name = "Era5Nc2Mdv::_processInData()";
   
-  // read in data set
+  if (_ncFile) {
+    _ncFile->close();
+    delete _ncFile;
+  }
 
-  if (!inData.read())
-    return false;
+  _ncFile = new Nc3File(path.c_str(), Nc3File::ReadOnly);
+
+  // Check that constructor succeeded
+
+  if (!_ncFile->is_valid()) {
+    cerr << "ERROR - Era5Nc2Mdv::_openNc3File" << endl;
+    cerr << "  Opening file, path: " << path << endl;
+    return 1;
+  }
+  
+  // Change the error behavior of the netCDF C++ API by creating an
+  // Nc3Error object. Until it is destroyed, this Nc3Error object will
+  // ensure that the netCDF C++ API silently returns error codes
+  // on any failure, and leaves any other error handling to the
+  // calling program.
+  
+  _ncErr = new Nc3Error(Nc3Error::silent_nonfatal);
+
+  if (_params.debug) {
+    cerr << "Opened input file: " << path << endl;
+  }
+ 
+  return 0;
+
+
+}
+
+//////////////////////////////////////
+// close netcdf file if open
+// remove error object if it exists
+
+void Era5Nc2Mdv::_closeNc3File()
+  
+{
+  
+  // close file if open, delete ncFile
+  
+  if (_ncFile) {
+    _ncFile->close();
+    delete _ncFile;
+    _ncFile = NULL;
+  }
+
+  if (_ncErr) {
+    delete _ncErr;
+    _ncErr = NULL;
+  }
+
+}
+
+//////////////////////////////////
+// Check that this is a valid file
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_loadMetaData()
+
+{
+
+#ifdef JUNK
+  
+  // dimensions
+
+  _timeDim = _ncFile->get_dim(_params.netcdf_dim_time);
+  if (_timeDim == NULL) {
+    if (strcmp(_params.netcdf_dim_time, "none") == 0) {
+      _nTimes = 1;
+    } else {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  time dimension missing: " << _params.netcdf_dim_time << endl;
+      return -1;
+    }
+  } else {
+    _nTimes = _timeDim->size();
+  }
+
+  if (strcmp(_params.netcdf_dim_z, "none") == 0) {
+    _zDim = NULL;
+    _nz = 1;
+  } else {
+    _zDim = _ncFile->get_dim(_params.netcdf_dim_z);
+    if (_zDim == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  Z dimension missing: " << _params.netcdf_dim_z << endl;
+      return -1;
+    }
+    _nz = _zDim->size();
+  }
+  
+  _yDim = _ncFile->get_dim(_params.netcdf_dim_y);
+  if (_yDim == NULL) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  Y dimension missing: " << _params.netcdf_dim_y << endl;
+    return -1;
+  }
+  _ny = _yDim->size();
+  
+  _xDim = _ncFile->get_dim(_params.netcdf_dim_x);
+  if (_xDim == NULL) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  Z dimension missing: " << _params.netcdf_dim_x << endl;
+    return -1;
+  }
+  _nx = _xDim->size();
+
+  // variables
+  
+  if (strcmp(_params.netcdf_var_base_time, "none") == 0) {
+    _baseTimeVar = NULL;
+  } else {
+    _baseTimeVar = _ncFile->get_var(_params.netcdf_var_base_time);
+    if (_baseTimeVar == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  base time var variable missing: " << _params.netcdf_var_base_time << endl;
+      return -1;
+    }
+  }
+  
+  _timeOffsetVar = _ncFile->get_var(_params.netcdf_var_time_offset);
+  if (_timeOffsetVar == NULL) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  time offset variable missing: " << _params.netcdf_var_time_offset << endl;
+    return -1;
+  }
+
+  if (_zDim == NULL) {
+    _zVar = NULL;
+  } else {
+    _zVar = _ncFile->get_var(_params.netcdf_var_z);
+    if (_zVar == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  z variable missing: " << _params.netcdf_var_z << endl;
+    return -1;
+    }
+  }
+
+  _yVar = _ncFile->get_var(_params.netcdf_var_y);
+  if (_yVar == NULL) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  y variable missing: " << _params.netcdf_var_y << endl;
+    return -1;
+  }
+
+  _xVar = _ncFile->get_var(_params.netcdf_var_x);
+  if (_xVar == NULL) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  x variable missing: " << _params.netcdf_var_x << endl;
+    return -1;
+  }
+
+  // Z coord values
+
+  _zArray = (float *) _zArray_.alloc(_nz);
+  if (_zVar == NULL) {
     
-  // check projection
-  // native proj only OK for Lambert, stereographic, and Mercator
+    _zArray[0] = 0.0;
     
-  // if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE &&
-  //     inData.getProjType() != Era5Data::LAMBERT_CONF &&
-  //     inData.getProjType() != Era5Data::STEREOGRAPHIC &&
-  //     inData.getProjType() != Era5Data::MERCATOR)
-  // {
-  //   cerr << "ERROR - " << method_name << endl;
-  //   cerr << "  Output projection is set to NATIVE." << endl;
-  //   cerr << "  Input WRF data file has projection UNKNOWN: "
-  //        << inData.getProjType() << endl;
-  //   cerr << "  Only Lambert, stereographic, and Mercator projections "
-  //        << "are supported." << endl;
-  //   return false;
-  // }
+  } else {
+    
+    if (_zVar->get(_zArray, _nz) == 0) {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  Cannot get z coords from var: " << _params.netcdf_var_z << endl;
+      return -1;
+    }
   
-  // round the lead_time to nearest 15 mins
+    // convert to km
+    
+    double zScale = 1.0;
+    Nc3Att *zUnits = _zVar->get_att("units");
+    if (zUnits != NULL) {
+      string units = zUnits->as_string(0);
+      if (units == "m" || units == "meters") {
+        zScale = 0.001;
+      }
+      delete zUnits;
+    }
+    if (zScale != 1.0) {
+      for (int ii = 0; ii < _zDim->size(); ii++) {
+        _zArray[ii] *= zScale;
+      }
+    }
 
-  int rounded_lead_time =
-    ((int)((inData.forecastTime - inData.genTime) / 900.0 + 0.5)) * 900;
-  
-  // check lead time
-  
-  if (!_acceptLeadTime(rounded_lead_time))
-  {
-    if (_params.debug)
-      cerr << "Rejecting file at lead time (secs): "
-	   << rounded_lead_time << endl;
+  }
 
+  // Y coord values
+
+  _yArray = (float *) _yArray_.alloc(_yDim->size());
+  if (_yVar->get(_yArray, _yDim->size()) == 0) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  Cannot get y coords from var: " << _params.netcdf_var_y << endl;
+    return -1;
+  }
+
+  // convert to km
+
+  double yScale = 1.0;
+  Nc3Att *yUnits = _yVar->get_att("units");
+  if (yUnits != NULL) {
+    string units = yUnits->as_string(0);
+    if (units == "m" || units == "meters") {
+      yScale = 0.001;
+    }
+    delete yUnits;
+  }
+  if (yScale != 1.0) {
+    for (int ii = 0; ii < _yDim->size(); ii++) {
+      _yArray[ii] *= yScale;
+    }
+  }
+
+  // X coord values
+
+  _xArray = (float *) _xArray_.alloc(_xDim->size());
+  if (_xVar->get(_xArray, _xDim->size()) == 0) {
+    cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+    cerr << "  Cannot get x coords from var: " << _params.netcdf_var_x << endl;
+    return -1;
+  }
+
+  // convert to km
+
+  double xScale = 1.0;
+  Nc3Att *xUnits = _xVar->get_att("units");
+  if (xUnits != NULL) {
+    string units = xUnits->as_string(0);
+    if (units == "m" || units == "meters") {
+      xScale = 0.001;
+    }
+    delete xUnits;
+  }
+  if (xScale != 1.0) {
+    for (int ii = 0; ii < _xDim->size(); ii++) {
+      _xArray[ii] *= xScale;
+    }
+  }
+  
+  // attributes
+  
+  Nc3Att *source = _ncFile->get_att("source");
+  if (source != NULL) {
+    _source = source->as_string(0);
+    delete source;
+  } else {
+    _source = _params.data_set_source;
+  }
+
+  // data set info
+
+  Nc3Att *history = _ncFile->get_att("history");
+  if (history != NULL) {
+    _history = history->as_string(0);
+    delete history;
+  } else {
+    _history = _params.data_set_info;
+  }
+
+  // reverse the Y array?
+
+  _yIsReversed = false;
+  if (_ny >= 2) {
+    int midNy = _ny / 2;
+    double dyOrig = (_yArray[midNy+1] - _yArray[midNy]);
+    if (dyOrig < 0) {
+      _yIsReversed = true;
+    }
+  }
+
+  if (_yIsReversed) {
+    TaArray<float> tmpArray_;
+    float *tmpArray = tmpArray_.alloc(_ny);
+    memcpy(tmpArray, _yArray, _ny * sizeof(float));
+    for (int ii = 0, jj = _ny - 1; ii < _ny; ii++, jj--) {
+      _yArray[ii] = tmpArray[jj];
+    }
+  }
+
+  // set up geometry, for now assuming constant dx and dy
+
+  _minz = _zArray[0];
+  _miny = _yArray[0];
+  _minx = _xArray[0];
+
+  _maxz = _zArray[_nz-1];
+  _maxy = _yArray[_ny-1];
+  _maxx = _xArray[_nx-1];
+
+  if (_nz < 2) {
+    _dz = 1.0;
+  } else {
+    _dz = (_zArray[_nz - 1] - _zArray[0]) / (_nz - 1.0);
+  }
+  
+  if (_ny < 2) {
+    _dy = 1.0;
+  } else {
+    _dy = (_yArray[_ny - 1] - _yArray[0]) / (_ny - 1.0);
+  }
+  
+  if (_nx < 2) {
+    _dx = 1.0;
+  } else {
+    _dx = (_xArray[_nx - 1] - _xArray[0]) / (_nx - 1.0);
+  }
+
+  _nxValid = _nx;
+  _nyValid = _ny;
+  _ixValidStart = 0;
+  _ixValidEnd = _nx - 1;
+  _iyValidStart = 0;
+  _iyValidEnd = _ny - 1;
+
+  // check we have a constant deltax and y
+
+  _dxIsConstant = _checkDxIsConstant();
+  _dyIsConstant = _checkDyIsConstant();
+  
+  // for file with latlon coords, find the valid end indices for the lat/lon coords
+  
+  if (_params.input_xy_is_latlon) {
+    if (_findValidLatLonLimits()) {
+      cerr << "ERROR - Era5Nc2Mdv::_loadMetaData" << endl;
+      cerr << "  Bad lat/lon values, cannot process" << endl;
+      return -1;
+    }
+  }
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "Input geometry:" << endl;
+    cerr << "  nz: " << _nz << endl;
+    cerr << "  ny: " << _ny << endl;
+    cerr << "  nx: " << _nx << endl;
+    cerr << "  minz: " << _minz << endl;
+    cerr << "  miny: " << _miny << endl;
+    cerr << "  minx: " << _minx << endl;
+    cerr << "  dz: " << _dz << endl;
+    cerr << "  dy: " << _dy << endl;
+    cerr << "  yIsReversed: " << _yIsReversed << endl;
+    cerr << "  dx: " << _dx << endl;
+    cerr << "  dxIsConstant: " << (_dxIsConstant?"Y":"N") << endl;
+    cerr << "  dyIsConstant: " << (_dyIsConstant?"Y":"N") << endl;
+  }
+  
+  _initInputProjection();
+
+#endif
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////
+// Set the master header from the NCF file
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
+
+{
+
+  mdvx.clearMasterHeader();
+
+#ifdef JUNK
+  
+  // time
+
+  time_t baseTimeUtc = 0;
+  if (_baseTimeVar) {
+    baseTimeUtc = _baseTimeVar->as_int(0);
+  } else {
+    DateTime btime(_params.base_time_string);
+    baseTimeUtc = btime.utime();
+  }
+
+  // check time units
+  
+  double offsetMult = 1.0; // secs
+  Nc3Att *timeUnits = _timeOffsetVar->get_att("units");
+  if (timeUnits != NULL) {
+    string unitsStr = timeUnits->as_string(0);
+    if (unitsStr.find("day") != string::npos) {
+      offsetMult = 86400.0;
+    } else if (unitsStr.find("hour") != string::npos) {
+      offsetMult = 3600.0;
+    } else if (unitsStr.find("min") != string::npos) {
+      offsetMult = 60.0;
+    }
+    DateTime refTime;
+    if (refTime.setFromW3c(unitsStr.c_str()) == 0) {
+      baseTimeUtc = refTime.utime();
+    }
+    delete timeUnits;
+  }
+  
+  double timeOffsetSecs = 0;
+  if (offsetMult == 1.0) {
+    timeOffsetSecs = _timeOffsetVar->as_double(itime);
+  } else {
+    double timeOffsetDays = _timeOffsetVar->as_double(itime);
+    timeOffsetSecs = timeOffsetDays * offsetMult;
+  }
+  _validTime = baseTimeUtc + (time_t) (timeOffsetSecs + 0.5);
+  mdvx.setValidTime(_validTime);
+
+  if (_params.debug) {
+    cerr << "===========================================" << endl;
+    cerr << "Found data set at time: " << DateTime::strm(_validTime) << endl;
+  }
+  
+  // data collection type
+  
+  mdvx.setDataCollectionType(Mdvx::DATA_MEASURED);
+
+  // data set name, source and info
+
+  mdvx.setDataSetName(_params.data_set_name);
+  mdvx.setDataSetSource(_source.c_str());
+  mdvx.setDataSetInfo(_history.c_str());
+
+#endif
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////
+// Add the data fields
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_addDataFields(DsMdvx &mdvx, int itime)
+
+{
+  
+  for (int ivar = 0; ivar < _ncFile->num_vars(); ivar++) {
+
+    Nc3Var *var = _ncFile->get_var(ivar);
+
+    int dimStart = 0;
+    if (_timeDim == NULL) {
+      dimStart = 0;
+    } else {
+      if (var->get_dim(0) != _timeDim) {
+        continue;
+      }
+      dimStart = 1;
+    }
+    
+    bool xySwapped = false;
+    if (_zDim) {
+      if (var->num_dims() < dimStart+3) {
+        continue;
+      }
+      if (var->get_dim(dimStart) != _zDim) {
+        continue;
+      }
+      if (var->get_dim(dimStart+1) == _yDim && var->get_dim(dimStart+2) == _xDim) {
+        xySwapped = false;
+      } else if (var->get_dim(dimStart+2) == _yDim && var->get_dim(dimStart+1) == _xDim) {
+        xySwapped = true;
+      } else {
+        continue;
+      }
+    } else {
+      if (var->num_dims() < dimStart+2) {
+        continue;
+      }
+      if (var->get_dim(dimStart) == _yDim && var->get_dim(dimStart+1) == _xDim) {
+        xySwapped = false;
+      } else if (var->get_dim(dimStart+1) == _yDim && var->get_dim(dimStart) == _xDim) {
+        xySwapped = true;
+      } else {
+        continue;
+      }
+    }
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "Found var:" << endl;
+      cerr << "  Name: " << var->name() << endl;
+      cerr << "  Is valid: " << var->is_valid() << endl;
+      cerr << "  N dims: " << var->num_dims() << endl;
+      cerr << "  xySwapped: " << (xySwapped?"Y":"N") << endl;
+    }
+
+    _addDataField(var, mdvx, itime, xySwapped);
+
+  } // ivar
+  
+  return 0;
+
+}
+
+/////////////////////////////////////////////////
+// Add the data field
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
+                                 int itime, bool xySwapped)
+
+{
+
+  Nc3Att *missingAtt = var->get_att("missing_value");
+  if (missingAtt == NULL) {
+    missingAtt = var->get_att("_FillValue");
+    if (missingAtt == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+      cerr << "  Cannot find missing_value of _FillValue attribute" << endl;
+      cerr << "  field name: " << var->name() << endl;
+      return -1;
+    }
+  }
+
+  // set npoints, allocate float values array
+
+  int npts = _nz * _ny * _nx;
+
+  TaArray<float> vals_;
+  float *vals = vals_.alloc(npts);
+
+  // set current location based on time
+
+  if (_zDim) {
+    var->set_cur(itime, 0, 0, 0);
+  } else {
+    var->set_cur(itime, 0, 0);
+  }
+
+  if (var->type() == NC_FLOAT) {
+
+    TaArray<float> fvals_;
+    float *fvals = fvals_.alloc(npts);
+    
+    // read data
+
+    int iret = 0;
+    if (_timeDim) {
+      if (_zDim) {
+        if (xySwapped) {
+          iret = var->get(fvals, 1, _nz, _nx, _ny);
+        } else {
+          iret = var->get(fvals, 1, _nz, _ny, _nx);
+        }
+      } else {
+        if (xySwapped) {
+          iret = var->get(fvals, 1, _nx, _ny);
+      } else {
+          iret = var->get(fvals, 1, _ny, _nx);
+        }
+      } // _zDim
+    } else {
+      if (_zDim) {
+        if (xySwapped) {
+          iret = var->get(fvals, _nz, _nx, _ny);
+        } else {
+          iret = var->get(fvals, _nz, _ny, _nx);
+        }
+      } else {
+        if (xySwapped) {
+          iret = var->get(fvals, _nx, _ny);
+      } else {
+          iret = var->get(fvals, _ny, _nx);
+        }
+      } // _zDim
+    } // _timeDim
+
+    if (iret == 0) {
+      cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+      cerr << "  Cannot get data from input netcdf variable" << endl;
+      cerr << "  field name: " << var->name() << endl;
+      cerr << _ncErr->get_errmsg() << endl;
+      return -1;
+    }
+
+    // save data
+    
+    float missing = missingAtt->as_float(0);
+    for (int ii = 0; ii < npts; ii++) {
+      if (std::isnan(fvals[ii]) || fvals[ii] == missing) {
+        vals[ii] = _missingFloat;
+      } else {
+        vals[ii] = fvals[ii];
+      }
+    }
+
+  } else if (var->type() == NC_DOUBLE) {
+    
+    TaArray<double> dvals_;
+    double *dvals = dvals_.alloc(npts);
+
+    // read data
+
+    int iret = 0;
+    if (_timeDim) {
+      if (_zDim) {
+        if (xySwapped) {
+          iret = var->get(dvals, 1, _nz, _nx, _ny);
+        } else {
+          iret = var->get(dvals, 1, _nz, _ny, _nx);
+        }
+      } else {
+        if (xySwapped) {
+          iret = var->get(dvals, 1, _nx, _ny);
+      } else {
+          iret = var->get(dvals, 1, _ny, _nx);
+        }
+      } // _zDim
+    } else {
+      if (_zDim) {
+        if (xySwapped) {
+          iret = var->get(dvals, _nz, _nx, _ny);
+        } else {
+          iret = var->get(dvals, _nz, _ny, _nx);
+        }
+      } else {
+        if (xySwapped) {
+          iret = var->get(dvals, _nx, _ny);
+      } else {
+          iret = var->get(dvals, _ny, _nx);
+        }
+      } // _zDim
+    } // _timeDim
+
+    if (iret == 0) {
+      cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+      cerr << "  Cannot get data from input netcdf variable" << endl;
+      cerr << "  field name: " << var->name() << endl;
+      cerr << _ncErr->get_errmsg() << endl;
+      return -1;
+    }
+
+    // save data
+    
+    double missing = missingAtt->as_double(0);
+    for (int ii = 0; ii < npts; ii++) {
+      if (std::isnan(dvals[ii]) || dvals[ii] == missing) {
+        vals[ii] = _missingFloat;
+      } else {
+        vals[ii] = dvals[ii];
+      }
+    }
+
+  } else {
+
+    // for int fields, we need scale and offset
+
+    double scale = 1.0;
+    Nc3Att *scaleAtt = var->get_att("scale");
+    if (scaleAtt == NULL) {
+      scaleAtt = var->get_att("scale_factor");
+    }
+    if (scaleAtt == NULL) {
+      cerr << "WARNING - Era5Nc2Mdv::_addDataField" << endl;
+      cerr << "  Cannot get scale for integer variable" << endl;
+      cerr << "  field name: " << var->name() << endl;
+      cerr << "  Setting scale to 1.0" << endl;
+    } else {
+      scale = scaleAtt->as_double(0);
+      delete scaleAtt;
+    }
+      
+    double offset = 0.0;
+    Nc3Att *offsetAtt = var->get_att("offset");
+    if (offsetAtt == NULL) {
+      if (_params.debug) {
+        cerr << "WARNING - Era5Nc2Mdv::_addDataField" << endl;
+        cerr << "  Cannot get offset for integer variable" << endl;
+        cerr << "  field name: " << var->name() << endl;
+        cerr << "  setting to 0" << endl;
+      }
+    } else {
+      offset = offsetAtt->as_double(0);
+      delete offsetAtt;
+    }
+    
+    if (var->type() == NC_INT) {
+      
+      TaArray<int> ivals_;
+      int *ivals = ivals_.alloc(npts);
+      
+      // read data
+      
+      int iret = 0;
+      if (_timeDim) {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(ivals, 1, _nz, _nx, _ny);
+          } else {
+            iret = var->get(ivals, 1, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(ivals, 1, _nx, _ny);
+          } else {
+            iret = var->get(ivals, 1, _ny, _nx);
+          }
+        } // _zDim
+      } else {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(ivals, _nz, _nx, _ny);
+          } else {
+            iret = var->get(ivals, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(ivals, _nx, _ny);
+          } else {
+            iret = var->get(ivals, _ny, _nx);
+          }
+        } // _zDim
+      } // _timeDim
+
+      if (iret == 0) {
+        cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+        cerr << "  Cannot get data from input netcdf variable" << endl;
+        cerr << "  field name: " << var->name() << endl;
+        cerr << _ncErr->get_errmsg() << endl;
+        return -1;
+      }
+
+      // save data
+
+      int missing = missingAtt->as_int(0);
+      for (int ii = 0; ii < npts; ii++) {
+        if (ivals[ii] == missing) {
+          vals[ii] = _missingFloat;
+        } else {
+          vals[ii] = ivals[ii] * scale + offset;
+        }
+      }
+
+    } else if (var->type() == NC_SHORT) {
+      
+      TaArray<short> svals_;
+      short *svals = svals_.alloc(npts);
+      
+      // read data
+      
+      int iret = 0;
+      if (_timeDim) {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(svals, 1, _nz, _nx, _ny);
+          } else {
+            iret = var->get(svals, 1, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(svals, 1, _nx, _ny);
+          } else {
+            iret = var->get(svals, 1, _ny, _nx);
+          }
+        } // _zDim
+      } else {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(svals, _nz, _nx, _ny);
+          } else {
+            iret = var->get(svals, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(svals, _nx, _ny);
+          } else {
+            iret = var->get(svals, _ny, _nx);
+          }
+        } // _zDim
+      } // _timeDim
+      
+      if (iret == 0) {
+        cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+        cerr << "  Cannot get data from input netcdf variable" << endl;
+        cerr << "  field name: " << var->name() << endl;
+        cerr << _ncErr->get_errmsg() << endl;
+        return -1;
+      }
+
+      // save data
+
+      short missing = missingAtt->as_short(0);
+      for (int ii = 0; ii < npts; ii++) {
+        if (svals[ii] == missing) {
+          vals[ii] = _missingFloat;
+        } else {
+          vals[ii] = svals[ii] * scale + offset;
+        }
+      }
+
+    } else if (var->type() == NC_BYTE) {
+      
+
+      TaArray<ncbyte> bvals_;
+      ncbyte *bvals = bvals_.alloc(npts);
+      TaArray<unsigned char> uvals_;
+      unsigned char *uvals = uvals_.alloc(npts);
+      
+      // read data
+      
+      int iret = 0;
+      if (_timeDim) {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(bvals, 1, _nz, _nx, _ny);
+          } else {
+            iret = var->get(bvals, 1, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(bvals, 1, _nx, _ny);
+          } else {
+            iret = var->get(bvals, 1, _ny, _nx);
+          }
+        } // _zDim
+      } else {
+        if (_zDim) {
+          if (xySwapped) {
+            iret = var->get(bvals, _nz, _nx, _ny);
+          } else {
+            iret = var->get(bvals, _nz, _ny, _nx);
+          }
+        } else {
+          if (xySwapped) {
+            iret = var->get(bvals, _nx, _ny);
+          } else {
+            iret = var->get(bvals, _ny, _nx);
+          }
+        } // _zDim
+      } // _timeDim
+      if (iret == 0) {
+        cerr << "ERROR - Era5Nc2Mdv::_addDataField" << endl;
+        cerr << "  Cannot get data from input netcdf variable" << endl;
+        cerr << "  field name: " << var->name() << endl;
+        cerr << _ncErr->get_errmsg() << endl;
+        return -1;
+      }
+      memcpy(uvals, bvals, npts);
+
+      // save data
+      
+      ncbyte missing = missingAtt->as_ncbyte(0);
+      for (int ii = 0; ii < npts; ii++) {
+        if (bvals[ii] == missing) {
+          vals[ii] = _missingFloat;
+        } else {
+          // if (_params.treat_ncbyte_as_unsigned) {
+          //   vals[ii] = (int) uvals[ii] * scale + offset;
+          // } else {
+            vals[ii] = (int) bvals[ii] * scale + offset;
+          // }
+        }
+      }
+
+    } // if (var->type() == NC_INT)
+
+  } // if (var->type() == NC_FLOAT)
+
+  // free up attribute
+
+  delete missingAtt;
+
+  // swap (x,y) if required
+
+#ifdef JUNK
+  if (xySwapped) {
+
+    TaArray<float> tmpVals_;
+    float *tmpVals = tmpVals_.alloc(npts);
+    memcpy(tmpVals, vals, npts * sizeof(float));
+
+    int nptsPlane = _ny * _nx;
+
+    for (int iz = 0; iz < _nz; iz ++) {
+      int planeOffset = iz * nptsPlane;
+      for (int iy = 0; iy < _ny; iy ++) {
+        for (int ix = 0; ix < _nx; ix ++) {
+          float *src = tmpVals + planeOffset + ix * _ny + iy;
+          float *dest = vals + planeOffset + iy * _nx + ix;
+          *dest = *src;
+        } // ix
+      } // iy
+    } // iz
+    
+  } // if (xySwapped) 
+#endif
+
+  // reverse y order if it was in reverse order in the file
+
+  if (_yIsReversed) {
+
+    TaArray<float> tmpVals_;
+    float *tmpVals = tmpVals_.alloc(npts);
+    memcpy(tmpVals, vals, npts * sizeof(float));
+
+    int nptsPlane = _ny * _nx;
+
+    for (int iz = 0; iz < _nz; iz ++) {
+      int planeOffset = iz * nptsPlane;
+      for (int iy = 0; iy < _ny; iy ++) {
+        float *src = tmpVals + planeOffset + _nx * (_ny - 1 - iy);
+        float *dest = vals + planeOffset + _nx * iy;
+        memcpy(dest, src, _nx * sizeof(float));
+      } // iy
+    } // iz
+    
+  } // if (_yIsReversed) 
+  
+  // get field name and units
+
+  string fieldName(var->name());
+
+  string units;
+  Nc3Att *unitsAtt = var->get_att("units");
+  if (unitsAtt != NULL) {
+    units = unitsAtt->as_string(0);
+    delete unitsAtt;
+  }
+
+  string longName(fieldName);
+  Nc3Att *longNameAtt = var->get_att("long_name");
+  if (longNameAtt != NULL) {
+    longName = longNameAtt->as_string(0);
+    delete longNameAtt;
+  }
+
+#ifdef JUNK
+  
+  // create fields and add to mdvx object
+
+  if (_params.input_xy_is_latlon &&
+      _params.resample_latlon_onto_regular_grid &&
+      (!_dxIsConstant || !_dyIsConstant)) {
+    
+    // create the field from the remapped grid
+    
+    MdvxField *field =
+      _createRegularLatlonField(fieldName, longName, units, vals);
+
+    // transform the field if required
+
+    if (_params.apply_linear_transforms) {
+      _transformField(field);
+    }
+
+    // add to Mdvx, which takes over ownership
+
+    mdvx.addField(field);
+    
+  } else {
+  
+    // create the field from the netcdf array
+
+    MdvxField *field = _createMdvxField(fieldName, longName, units,
+                                        _nx, _ny, _nz,
+                                        _minx, _miny, _minz,
+                                        _dx, _dy, _dz,
+                                        vals);
+
+    // transform the field if required
+    
+    if (_params.apply_linear_transforms) {
+      _transformField(field);
+    }
+
+    // add to Mdvx, which takes over ownership
+
+    mdvx.addField(field);
+    
+  }
+
+#endif
+  
+  return 0;
+
+}
+
+///////////////////////////////
+// Create an Mdvx field
+
+MdvxField *Era5Nc2Mdv::_createMdvxField
+  (const string &fieldName,
+   const string &longName,
+   const string &units,
+   int nx, int ny, int nz,
+   double minx, double miny, double minz,
+   double dx, double dy, double dz,
+   const float *vals)
+
+{
+
+  // check max levels
+
+  if (nz > MDV_MAX_VLEVELS) {
+    nz = MDV_MAX_VLEVELS;
+  }
+
+  // set up MdvxField headers
+
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+  
+  _inputProj.syncToFieldHdr(fhdr);
+
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.dz_constant = false;
+  fhdr.data_dimension = 3;
+
+  fhdr.bad_data_value = _missingFloat;
+  fhdr.missing_data_value = _missingFloat;
+  
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = nx * ny * nz * sizeof(fl32);
+  
+  fhdr.nx = nx;
+  fhdr.ny = ny;
+  fhdr.nz = nz;
+
+  fhdr.grid_minx = minx;
+  fhdr.grid_miny = miny;
+  fhdr.grid_minz = minz;
+
+  fhdr.grid_dx = dx;
+  fhdr.grid_dy = dy;
+  fhdr.grid_dz = dz;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  
+  for (int ii = 0; ii < nz; ii++) {
+    vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
+    vhdr.level[ii] = _zArray[ii];
+  }
+
+  // create MdvxField object
+  // converting data to encoding and compression types
+
+  MdvxField *field = new MdvxField(fhdr, vhdr, vals);
+  // field->convertType
+  //   ((Mdvx::encoding_type_t) _params.output_encoding_type,
+  //    (Mdvx::compression_type_t) _params.output_compression_type);
+
+  // set names etc
+  
+  // field->setFieldName(fieldName.c_str());
+  // field->setFieldNameLong(longName.c_str());
+  // field->setUnits(units.c_str());
+  // field->setTransform("");
+
+  return field;
+
+}
+
+/////////////////////////////////////////////////////////
+// Apply a linear transform to the field if specified
+
+void Era5Nc2Mdv::_transformField(MdvxField *field)
+  
+{
+
+#ifdef JUNK
+  
+  if (!_params.apply_linear_transforms) {
+    return;
+  }
+
+  bool doTransform = false;
+  Params::transform_field_t transform;
+  for (int itf = 0; itf < _params.transform_fields_n; itf++) {
+    if (strcmp(_params._transform_fields[itf].input_field_name,
+               field->getFieldName()) == 0) {
+      doTransform = true;
+      transform = _params._transform_fields[itf];
+      break;
+    }
+  }
+
+  if (!doTransform) {
+    return;
+  }
+  
+  field->applyLinearTransform(transform.scale, transform.offset,
+                              transform.output_field_name, transform.output_units);
+
+#endif
+  
+}
+  
+////////////////////////////////////////////////////////////////
+// Create a field remapped from lat/lon onto regular grid
+
+MdvxField *Era5Nc2Mdv::_createRegularLatlonField
+  (const string &fieldName,
+   const string &longName,
+   const string &units,
+   const float *vals)
+
+{
+
+  if (_params.debug) {
+    cerr << "==== Creating regular lat/lon grid ====" << endl;
+  }
+
+  // compute min dlat and dlon
+
+  double dLon = 1.0e6;
+  for (int ix = _ixValidStart; ix < _ixValidEnd; ix++) {
+    double lonVal = fabs(_xArray[ix+1] - _xArray[ix]);
+    if (lonVal < dLon) {
+      dLon = lonVal;
+    }
+  }
+
+  double dLat = 1.0e6;
+  for (int iy = _iyValidStart; iy < _iyValidEnd; iy++) {
+    double latVal = fabs(_yArray[iy+1] - _yArray[iy]);
+    if (latVal < dLat) {
+      dLat = latVal;
+    }
+  }
+
+  double minLon = _xArray[_ixValidStart];
+  double maxLon = _xArray[_ixValidEnd];
+  double rangeLon = maxLon - minLon;
+
+  double minLat = _yArray[_iyValidStart];
+  double maxLat = _yArray[_iyValidEnd];
+  double rangeLat = maxLat - minLat;
+
+  int nLon = (int) (rangeLon / dLon) + 1;
+  int nLat = (int) (rangeLat / dLat) + 1;
+
+  if (_params.debug) {
+    cerr << "==>> minLon, maxLon, rangeLon, dLon, nLon: "
+         << minLon << ", " << maxLon << ", "
+         << rangeLon << ", " << dLon << ", " << nLon << endl;
+    cerr << "==>> minLat, maxLat, rangeLat, dLat, nLat: "
+         << minLat << ", " << maxLat << ", "
+         << rangeLat << ", " << dLat << ", " << nLat << endl;
+  }
+
+  // create resampled grid
+
+  int nResamp = nLon * nLat;
+  TaArray<fl32> resampled_;
+  fl32 *resampled = resampled_.alloc(nResamp);
+
+  // compute resampling indices
+
+  vector<int> latIndex;
+  double latitude = minLat;
+  for (int ilat = 0; ilat < nLat; ilat++, latitude += dLat) {
+    int index = _getClosestLatIndex(latitude, dLat / 2.0);
+    latIndex.push_back(index);
+  }
+
+  vector<int> lonIndex;
+  double longitude = minLon;
+  for (int ilon = 0; ilon < nLon; ilon++, longitude += dLon) {
+    int index = _getClosestLonIndex(longitude, dLon / 2.0);
+    lonIndex.push_back(index);
+  }
+  
+  // load the resampled grid
+
+  fl32 *resamp = resampled;
+  for (int ilat = 0; ilat < nLat; ilat++) {
+    int latIx = latIndex[ilat];
+    for (int ilon = 0; ilon < nLon; ilon++, resamp++) {
+      int lonIx = lonIndex[ilon];
+      if (latIx < 0 || lonIx < 0) {
+        *resamp = _missingFloat;
+      } else {
+        int valIndex = latIx * _nx + lonIx;
+        *resamp = vals[valIndex];
+      }
+    } // ilon
+  } // ilat
+
+  // create the field
+
+  // set up MdvxField headers
+
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+
+  fhdr.proj_type = Mdvx::PROJ_LATLON;
+  fhdr.proj_origin_lat = minLat + rangeLat / 2.0;
+  fhdr.proj_origin_lon = minLon + rangeLon / 2.0;
+
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
+  fhdr.dz_constant = false;
+  fhdr.data_dimension = 3;
+
+  fhdr.bad_data_value = _missingFloat;
+  fhdr.missing_data_value = _missingFloat;
+  
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = nLon * nLat * _nz * sizeof(fl32);
+  
+  fhdr.nx = nLon;
+  fhdr.ny = nLat;
+  fhdr.nz = _nz;
+
+  fhdr.grid_minx = minLon;
+  fhdr.grid_miny = minLat;
+  fhdr.grid_minz = _minz;
+
+  fhdr.grid_dx = dLon;
+  fhdr.grid_dy = dLat;
+  fhdr.grid_dz = _dz;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  
+  for (int ii = 0; ii < _nz; ii++) {
+    vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
+    vhdr.level[ii] = _zArray[ii];
+  }
+
+  // create MdvxField object
+  // converting data to encoding and compression types
+  
+  MdvxField *field = new MdvxField(fhdr, vhdr, resampled);
+  // field->convertType
+  //   ((Mdvx::encoding_type_t) _params.output_encoding_type,
+  //    (Mdvx::compression_type_t) _params.output_compression_type);
+
+  // set names etc
+  
+  field->setFieldName(fieldName.c_str());
+  field->setFieldNameLong(longName.c_str());
+  field->setUnits(units.c_str());
+  field->setTransform("");
+
+  return field;
+
+}
+  
+///////////////////////////////
+// print data in file
+
+void Era5Nc2Mdv::_printFile(Nc3File &ncf)
+
+{
+
+  cout << "ndims: " << ncf.num_dims() << endl;
+  cout << "nvars: " << ncf.num_vars() << endl;
+  cout << "ngatts: " << ncf.num_atts() << endl;
+  Nc3Dim *unlimd = ncf.rec_dim();
+  if (unlimd != NULL) {
+    cout << "unlimd: " << unlimd->size() << endl;
+  }
+  
+  // dimensions
+
+  TaArray<Nc3Dim *> dims_;
+  Nc3Dim **dims = dims_.alloc(ncf.num_dims());
+  for (int idim = 0; idim < ncf.num_dims(); idim++) {
+    dims[idim] = ncf.get_dim(idim);
+
+    cout << endl;
+    cout << "Dim #: " << idim << endl;
+    cout << "  Name: " << dims[idim]->name() << endl;
+    cout << "  Length: " << dims[idim]->size() << endl;
+    cout << "  Is valid: " << dims[idim]->is_valid() << endl;
+    cout << "  Is unlimited: " << dims[idim]->is_unlimited() << endl;
+    
+  } // idim
+  
+  cout << endl;
+
+  // global attributes
+
+  cout << "Global attributes:" << endl;
+
+  for (int iatt = 0; iatt < ncf.num_atts(); iatt++) {
+    cout << "  Att num: " << iatt << endl;
+    Nc3Att *att = ncf.get_att(iatt);
+    _printAtt(att);
+    delete att;
+  }
+
+  // loop through variables
+
+  TaArray<Nc3Var *> vars_;
+  Nc3Var **vars = vars_.alloc(ncf.num_vars());
+  for (int ivar = 0; ivar < ncf.num_vars(); ivar++) {
+
+    vars[ivar] = ncf.get_var(ivar);
+    cout << endl;
+    cout << "Var #: " << ivar << endl;
+    cout << "  Name: " << vars[ivar]->name() << endl;
+    cout << "  Is valid: " << vars[ivar]->is_valid() << endl;
+    cout << "  N dims: " << vars[ivar]->num_dims();
+    TaArray<Nc3Dim *> vdims_;
+    Nc3Dim **vdims = vdims_.alloc(vars[ivar]->num_dims());
+    if (vars[ivar]->num_dims() > 0) {
+      cout << ": (";
+      for (int ii = 0; ii < vars[ivar]->num_dims(); ii++) {
+	vdims[ii] = vars[ivar]->get_dim(ii);
+	cout << " " << vdims[ii]->name();
+	if (ii != vars[ivar]->num_dims() - 1) {
+	  cout << ", ";
+	}
+      }
+      cout << " )";
+    }
+    cout << endl;
+    cout << "  N atts: " << vars[ivar]->num_atts() << endl;
+    
+    for (int iatt = 0; iatt < vars[ivar]->num_atts(); iatt++) {
+
+      cout << "  Att num: " << iatt << endl;
+      Nc3Att *att = vars[ivar]->get_att(iatt);
+      _printAtt(att);
+      delete att;
+
+    } // iatt
+
+    cout << endl;
+    _printVarVals(vars[ivar]);
+    
+  } // ivar
+  
+}
+
+/////////////////////
+// print an attribute
+
+void Era5Nc2Mdv::_printAtt(Nc3Att *att)
+
+{
+
+  cout << "    Name: " << att->name() << endl;
+  cout << "    Num vals: " << att->num_vals() << endl;
+  cout << "    Type: ";
+  
+  Nc3Values *values = att->values();
+
+  switch(att->type()) {
+    
+  case nc3NoType: {
+    cout << "No type: ";
+  }
+  break;
+  
+  case nc3Byte: {
+    cout << "BYTE: ";
+    unsigned char *vals = (unsigned char *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Char: {
+    cout << "CHAR: ";
+    TaArray<char> vals_;
+    char *vals = vals_.alloc(att->num_vals() + 1);
+    memset(vals, 0, att->num_vals() + 1);
+    memcpy(vals, values->base(), att->num_vals());
+    cout << vals;
+  }
+  break;
+  
+  case nc3Short: {
+    cout << "SHORT: ";
+    short *vals = (short *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Int: {
+    cout << "INT: ";
+    int *vals = (int *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Float: {
+    cout << "FLOAT: ";
+    float *vals = (float *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Double: {
+    cout << "DOUBLE: ";
+    double *vals = (double *) values->base();
+    for (long ii = 0; ii < att->num_vals(); ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+
+    default: {}
+  
+  }
+  
+  cout << endl;
+
+  delete values;
+
+}
+
+    
+///////////////////////////////
+// print variable values
+
+void Era5Nc2Mdv::_printVarVals(Nc3Var *var)
+
+{
+
+  int nprint = var->num_vals();
+  if (nprint > 100) {
+    nprint = 100;
+  }
+
+  Nc3Values *values = var->values();
+
+  cout << "  Variable vals:";
+  
+  switch(var->type()) {
+    
+  case nc3NoType: {
+  }
+  break;
+  
+  case nc3Byte: {
+    cout << "(byte)";
+    unsigned char *vals = (unsigned char *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Char: {
+    cout << "(char)";
+    TaArray<char> str_;
+    char *str = str_.alloc(nprint + 1);
+    memset(str, 0, nprint + 1);
+    memcpy(str, values->base(), nprint);
+    cout << " " << str;
+  }
+  break;
+  
+  case nc3Short: {
+    cout << "(short)";
+    short *vals = (short *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Int: {
+    cout << "(int)";
+    int *vals = (int *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Float: {
+    cout << "(float)";
+    float *vals = (float *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+  
+  case nc3Double: {
+    cout << "(double)";
+    double *vals = (double *) values->base();
+    for (long ii = 0; ii < nprint; ii++) {
+      cout << " " << vals[ii];
+    }
+  }
+  break;
+
+    default: {}
+  
+  }
+  
+  cout << endl;
+
+  delete values;
+
+}
+
+////////////////////////////////////////////
+// remap output data
+
+void Era5Nc2Mdv::_remapOutput(DsMdvx &mdvx)
+
+{
+
+#ifdef JUNK
+  if (!_params.remap_output_projection) {
+    return;
+  }
+
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+    
+    MdvxField *field = mdvx.getField(ifld);
+    
+    if (field == NULL) {
+      cerr << "ERROR - MdvxConvert::_remap" << endl;
+      cerr << "  Error remapping field #" << ifld <<
+	" in output file" << endl;
+      return;
+    }
+    
+    if (_params.remap_projection == Params::PROJ_LATLON) {
+      field->remap2Latlon(_remapLut,
+			  _params.remap_grid.nx,
+			  _params.remap_grid.ny,
+			  _params.remap_grid.minx,
+			  _params.remap_grid.miny,
+			  _params.remap_grid.dx,
+			  _params.remap_grid.dy);
+    } else if (_params.remap_projection == Params::PROJ_FLAT) {
+      field->remap2Flat(_remapLut,
+			_params.remap_grid.nx,
+			_params.remap_grid.ny,
+			_params.remap_grid.minx,
+			_params.remap_grid.miny,
+			_params.remap_grid.dx,
+			_params.remap_grid.dy,
+			_params.remap_origin_lat,
+			_params.remap_origin_lon,
+			_params.remap_rotation,
+                        _params.remap_false_northing,
+                        _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_LAMBERT_CONF)	{
+      field->remap2LambertConf(_remapLut,
+			       _params.remap_grid.nx,
+			       _params.remap_grid.ny,
+			       _params.remap_grid.minx,
+			       _params.remap_grid.miny,
+			       _params.remap_grid.dx,
+			       _params.remap_grid.dy,
+			       _params.remap_origin_lat,
+			       _params.remap_origin_lon,
+			       _params.remap_lat1,
+			       _params.remap_lat2,
+                               _params.remap_false_northing,
+                               _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_POLAR_STEREO) {
+      Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
+      if (!_params.remap_pole_is_north) {
+	poleType = Mdvx::POLE_SOUTH;
+      }
+      field->remap2PolarStereo(_remapLut,
+			       _params.remap_grid.nx,
+			       _params.remap_grid.ny,
+			       _params.remap_grid.minx,
+			       _params.remap_grid.miny,
+			       _params.remap_grid.dx,
+			       _params.remap_grid.dy,
+			       _params.remap_origin_lat,
+			       _params.remap_origin_lon,
+			       _params.remap_tangent_lon,
+			       poleType,
+			       _params.remap_central_scale,
+                               _params.remap_false_northing,
+                               _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_OBLIQUE_STEREO) {
+      field->remap2ObliqueStereo(_remapLut,
+				 _params.remap_grid.nx,
+				 _params.remap_grid.ny,
+				 _params.remap_grid.minx,
+				 _params.remap_grid.miny,
+				 _params.remap_grid.dx,
+				 _params.remap_grid.dy,
+				 _params.remap_origin_lat,
+				 _params.remap_origin_lon,
+				 _params.remap_tangent_lat,
+				 _params.remap_tangent_lon,
+                                 _params.remap_false_northing,
+                                 _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_MERCATOR) {
+      field->remap2Mercator(_remapLut,
+			    _params.remap_grid.nx,
+			    _params.remap_grid.ny,
+			    _params.remap_grid.minx,
+			    _params.remap_grid.miny,
+			    _params.remap_grid.dx,
+			    _params.remap_grid.dy,
+			    _params.remap_origin_lat,
+			    _params.remap_origin_lon,
+                            _params.remap_false_northing,
+                            _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_TRANS_MERCATOR) {
+      field->remap2TransverseMercator(_remapLut,
+				      _params.remap_grid.nx,
+				      _params.remap_grid.ny,
+				      _params.remap_grid.minx,
+				      _params.remap_grid.miny,
+				      _params.remap_grid.dx,
+				      _params.remap_grid.dy,
+				      _params.remap_origin_lat,
+				      _params.remap_origin_lon,
+				      _params.remap_central_scale,
+                                      _params.remap_false_northing,
+                                      _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_ALBERS) {
+      field->remap2Albers(_remapLut,
+			  _params.remap_grid.nx,
+			  _params.remap_grid.ny,
+			  _params.remap_grid.minx,
+			  _params.remap_grid.miny,
+			  _params.remap_grid.dx,
+			  _params.remap_grid.dy,
+			  _params.remap_origin_lat,
+			  _params.remap_origin_lon,
+			  _params.remap_lat1,
+			  _params.remap_lat2,
+                          _params.remap_false_northing,
+                          _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_LAMBERT_AZIM) {
+      field->remap2LambertAzimuthal(_remapLut,
+				    _params.remap_grid.nx,
+				    _params.remap_grid.ny,
+				    _params.remap_grid.minx,
+				    _params.remap_grid.miny,
+				    _params.remap_grid.dx,
+				    _params.remap_grid.dy,
+				    _params.remap_origin_lat,
+				    _params.remap_origin_lon,
+                                    _params.remap_false_northing,
+                                    _params.remap_false_easting);
+    } else if (_params.remap_projection == Params::PROJ_VERT_PERSP) {
+      field->remap2VertPersp(_remapLut,
+                             _params.remap_grid.nx,
+                             _params.remap_grid.ny,
+                             _params.remap_grid.minx,
+                             _params.remap_grid.miny,
+                             _params.remap_grid.dx,
+                             _params.remap_grid.dy,
+                             _params.remap_origin_lat,
+                             _params.remap_origin_lon,
+                             _params.remap_persp_radius,
+                             _params.remap_false_northing,
+                             _params.remap_false_easting);
+     }
+  }
+
+#endif
+  
+}
+
+////////////////////////////////////////////
+// auto remap to latlon grid
+//
+// Automatically picks the grid resolution and extent
+// from the existing data.
+
+void Era5Nc2Mdv::_autoRemapToLatLon(DsMdvx &mdvx)
+
+{
+
+#ifdef JUNK
+  for (size_t ifld = 0; ifld < mdvx.getNFields(); ifld++) {
+    
+    MdvxField *field = mdvx.getField(ifld);
+    
+    if (field == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_autoRemapToLatLon()" << endl;
+      cerr << "  Error remapping field #" << ifld <<
+	" in output file" << endl;
+      return;
+    }
+    
+    field->autoRemap2Latlon(_remapLut);
+  }
+
+#endif
+  
+}
+
+///////////////////////////////////////////
+// Check if dx is constant
+
+bool Era5Nc2Mdv::_checkDxIsConstant()
+
+{
+
+  if (_nx < 3) {
     return true;
   }
 
-  _processForecast(inData, inData.genTime, rounded_lead_time,
-		   inData.forecastTime);
+  for (int ix = 0; ix < _nx - 1; ix++) {
+    double dx = _xArray[ix+1] - _xArray[ix];
+    double diff = fabs(dx - _dx);
+    double diffFraction = diff / fabs(_dx);
+    if (diffFraction > 0.001) {
+      return false;
+    }
+  }
 
   return true;
+
 }
 
-/////////////////////////////////////////
-// _acceptLeadTime()
-//
-// Check that this lead time is accepted
+////////////////////////////////////////////
+// Check if dy is constant
 
-bool Era5Nc2Mdv::_acceptLeadTime(int lead_time)
+bool Era5Nc2Mdv::_checkDyIsConstant()
+
 {
-  // if (lead_time < _params.min_forecast_dtime)
-  //   return false;
 
-  // if (lead_time > _params.max_forecast_dtime)
-  //   return false;
+  if (_ny < 3) {
+    return true;
+  }
 
-  // if (!_params.specify_lead_times)
-  //   return true;
+  for (int iy = 0; iy < _ny - 1; iy++) {
+    double dy = _yArray[iy+1] - _yArray[iy];
+    double diff = fabs(dy - _dy);
+    double diffFraction = diff / fabs(_dy);
+    if (diffFraction > 0.001) {
+      return false;
+    }
+  }
+  
+  return true;
 
-  // for (int i = 0; i < _params.lead_times_n; i++)
-  // {
-  //   if (lead_time == _params._lead_times[i])
-  //     return true;
-  // } // i
-
-  return false;
 }
 
-/////////////////////////////////////////
-// _processForecast()
-//
-// Process data for a given forecast
+//////////////////////////////////////////////////////////////////////////
+// Initialize the mercator projection from the input file coord variables
 
-int Era5Nc2Mdv::_processForecast(Era5Data &inData,
-				time_t gen_time,
-				int lead_time,
-				time_t forecast_time)
+void Era5Nc2Mdv::_initMercatorFromInputCoords()
+
 {
-  PMU_auto_register("In Era5Nc2Mdv::_processForecast");
 
-  // create the output file
+  // sanity check
 
-  OutputFile outFile(_progName, _params, gen_time, forecast_time, 
-		     lead_time, inData /*, _field_name_map*/);
+  if (_nx < 5 || _ny < 5) {
+    cerr << "WARNING - Era5Nc2Mdv::_initMercatorFromInputCoords()" << endl;
+    cerr << "  Grid too small to deduce Mercator properties accurately" << endl;
+    cerr << "  nx: " << _nx << endl;
+    cerr << "  ny: " << _ny << endl;
+    return;
+  }
 
-  DsMdvx &mdvx = outFile.getDsMdvx();
+  // find mid pt
 
-  // load up fields on cross (center) grid points
+  int midIx = _nx / 2;
+  int midIy = _ny / 2;
 
-  _loadCrossOutputFields(inData, mdvx);
+  // set origin
+
+  double originLon = _xArray[midIx];
+  double originLat = _yArray[midIy];
+
+  if (_params.debug) {
+    cerr << "Setting Mercator from input data" << endl;
+    cerr << "  Origin lon: " << originLon << endl;
+    cerr << "  Origin lat: " << originLat << endl;
+  }
+
+  _inputProj.initMercator(originLat, originLon);
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// FInd the limits of valid lat/lon values if the x,y locations are
+// supplied in latitude/longitude coords
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_findValidLatLonLimits()
+
+{
   
-  // load up fields on dot (edge) grid points
+  // sanity check
 
-  _loadEdgeOutputFields(inData, mdvx);
+  if (_nx < 5 || _ny < 5) {
+    cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+    cerr << "  Grid too small to deduce limits accurately" << endl;
+    cerr << "  nx: " << _nx << endl;
+    cerr << "  ny: " << _ny << endl;
+    _ixValidStart = 0;
+    _ixValidEnd = _nx - 1;
+    _iyValidStart = 0;
+    _iyValidEnd = _ny - 1;
+    return -1;
+  }
   
-  // convert to desired output types
+  // find mid pt
 
-  Mdvx::compression_type_t compression_type = Mdvx::COMPRESSION_GZIP;
-  // switch (_params.output_compression)
-  // {
-  // case Params::_MDV_COMPRESSION_NONE:
-  //   compression_type = Mdvx::COMPRESSION_NONE;
-  //   break;
-  // case Params::_MDV_COMPRESSION_RLE:
-  //   compression_type = Mdvx::COMPRESSION_RLE;
-  //   break;
-  // case Params::_MDV_COMPRESSION_LZO:
-  //   compression_type = Mdvx::COMPRESSION_LZO;
-  //   break;
-  // case Params::_MDV_COMPRESSION_ZLIB:
-  //   compression_type = Mdvx::COMPRESSION_ZLIB;
-  //   break;
-  // case Params::_MDV_COMPRESSION_BZIP:
-  //   compression_type = Mdvx::COMPRESSION_BZIP;
-  //   break;
-  // default:
-  //   compression_type = Mdvx::COMPRESSION_NONE;
-  // }
-  
-  for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-  {
-    PMU_auto_register("Era5Nc2Mdv::_processForecast: converting fields");
+  int midIx = _nx / 2;
+  int midIy = _ny / 2;
 
-    MdvxField *field = mdvx.getFieldByNum(ifield);
+  // set origin
 
-    if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_INT08)
-    {
-      field->convertDynamic(Mdvx::ENCODING_INT8, compression_type);
-    } else if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_INT16)
-    {
-      field->convertDynamic(Mdvx::ENCODING_INT16, compression_type);
+  double centerLon = _xArray[midIx];
+  double centerLat = _yArray[midIy];
+
+  if (_params.debug) {
+    cerr << "DEBUG - findValidLatLonLimits()" << endl;
+    cerr << "  data center lon: " << centerLon << endl;
+    cerr << "  data center lat: " << centerLat << endl;
+  }
+
+  // get starting deltas at center of grid
+
+  double dLon0 =  fabs(_xArray[midIx+1] - _xArray[midIx-1]) / 2.0;
+  double dLat0 =  fabs(_yArray[midIy+1] - _yArray[midIy-1]) / 2.0;
+
+  // move out from the grid center, looking for big jumps in the delta
+  // and stop there
+
+  _ixValidStart = 0;
+  double dLonPrev = dLon0;
+  for (int ix = midIx; ix > 0; ix--) {
+    double lon0 =  _xArray[ix];
+    double lon1 =  _xArray[ix-1];
+    double dLon =  fabs(lon0 - lon1);
+    double dd = fabs(dLon - dLonPrev);
+    double ddFrac = dd / dLonPrev;
+    if (fabs(lon0) > 180.0 || lon0 == 0.0 || ddFrac > 1.0) {
+      // bad jump, stop here
+      _ixValidStart = ix;
+      cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "   Bad longitude jump, ix, lon0, lon1: "
+           << ix << ", " << lon0 << ", " << lon1 << endl;
+      break;
     }
-    else if (_params._output_fields[ifield].encoding == Params::OUTPUT_ENCODING_FLOAT32)
-    {
-      field->convertRounded(Mdvx::ENCODING_FLOAT32, compression_type);
-    }
+    dLonPrev = dLon;
+  } // ix
 
-  } // ifield
-  
-  // write out volume
-  
-  if (outFile.writeVol())
-    cerr << "Cannot write output file" << endl;
+  _ixValidEnd = _nx - 1;
+  dLonPrev = dLon0;
+  for (int ix = midIx; ix < _nx - 1; ix++) {
+    double lon0 =  _xArray[ix];
+    double lon1 =  _xArray[ix+1];
+    double dLon =  fabs(_xArray[ix+1] - _xArray[ix]);
+    double dd = fabs(dLon - dLonPrev);
+    double ddFrac = dd / dLonPrev;
+    if (fabs(lon0) > 360.0 || lon0 == 0.0 || ddFrac > 1.0) {
+      // bad jump, stop here
+      _ixValidEnd = ix;
+      cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "   Bad longitude jump, ix, lon0, lon1: "
+           << ix << ", " << lon0 << ", " << lon1 << endl;
+      break;
+    }
+    dLonPrev = dLon;
+  } // ix
+
+  _iyValidStart = 0;
+  double dLatPrev = dLat0;
+  for (int iy = midIy; iy > 0; iy--) {
+    double lat0 =  _yArray[iy];
+    double lat1 =  _yArray[iy-1];
+    double dLat =  fabs(_yArray[iy] - _yArray[iy-1]);
+    double dd = fabs(dLat - dLatPrev);
+    double ddFrac = dd / dLatPrev;
+    if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
+      // big jump, stop here
+      _iyValidStart = iy;
+      cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "   Bad latitude jump, iy, lat0, lat1: " 
+           << iy << ", " << lat0 << ", " << lat1 << endl;
+      break;
+    }
+    dLatPrev = dLat;
+  } // iy
+
+  _iyValidEnd = _ny - 1;
+  dLatPrev = dLat0;
+  for (int iy = midIy; iy < _ny - 1; iy++) {
+    double lat0 =  _yArray[iy];
+    double lat1 =  _yArray[iy+1];
+    double dLat =  fabs(_yArray[iy+1] - _yArray[iy]);
+    double dd = fabs(dLat - dLatPrev);
+    double ddFrac = dd / dLatPrev;
+    if (fabs(lat0) > 90.0 || lat0 == 0.0 || ddFrac > 1.0) {
+      // big jump, stop here
+      _iyValidEnd = iy;
+      cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+      cerr << "   Bad latitude jump, iy, lat0, lat1: " 
+           << iy << ", " << lat0 << ", " << lat1 << endl;
+      break;
+    }
+    dLatPrev = dLat;
+  } // iy
+
+  _nxValid = _ixValidEnd - _ixValidStart + 1;
+  _nyValid = _iyValidEnd - _iyValidStart + 1;
+
+  if (_nxValid < 5 || _nyValid < 5) {
+    cerr << "ERROR - Era5Nc2Mdv::_findValidLatLonLimits()" << endl;
+    cerr << "  Valid grid too small to process" << endl;
+    cerr << "  nxValid: " << _nxValid << endl;
+    cerr << "  nyValid: " << _nyValid << endl;
+    return -1;
+  }
 
   return 0;
+  
 }
 
-/////////////////////////////////////////////////
-// Load up output fields on cross (center) points
+//////////////////////////////////////////////////
+// get the closest lat index to a given latitude
+// within the tolerance
+// return -1 if outside grid by more than tolerance
 
-void Era5Nc2Mdv::_loadCrossOutputFields(Era5Data &inData,
-				       DsMdvx &mdvx)
+int Era5Nc2Mdv::_getClosestLatIndex(double latitude, double tolerance)
+
 {
-#ifdef JUNK
-  static const string method_name = "Era5Nc2Mdv::_loadCrossOutputFields()";
-  
-  if (_rotateOutputUV)
-    inData.computeUVOutput(_outputProj);
 
-  // set up grid remapping object
-  
-  WRFGrid mGrid(_progName, _params.debug >= Params::DEBUG_VERBOSE, inData);
-  
-  // get representative field header
-  
-  const Mdvx::field_header_t *fhdr = NULL;
-  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
-  {
-    MdvxField *fld = mdvx.getField(ifield);
-    // make sure we don't have an edge field
-    if (!strstr(fld->getFieldName(), "_EDGE"))
-    {
-      fhdr = &fld->getFieldHeader();
-      break;
+  if (latitude < _yArray[_iyValidStart]) {
+    if (fabs(latitude - _yArray[_iyValidStart]) <= tolerance) {
+      return _iyValidStart;
+    } else {
+      return -1;
     }
-  } // ifields
-
-  if (fhdr == NULL)
-  {
-    // no non-edge fields
-    return;
   }
 
-  // loop through the grid
-  
-  int nPointsPlane = fhdr->ny * fhdr->nx;
-  if (_params.debug == Params::DEBUG_VERBOSE)
-  {
-    cerr << "In " << method_name << " nPointsPlane = " << nPointsPlane
-	 << " ny = " << fhdr->ny << " nx = " << fhdr->nx << endl;
+  if (latitude > _yArray[_iyValidEnd]) {
+    if (fabs(latitude - _yArray[_iyValidEnd]) <= tolerance) {
+      return _iyValidEnd;
+    } else {
+      return -1;
+    }
   }
 
-  for (int iy = 0; iy < fhdr->ny; iy++)
-  {
-    PMU_auto_register("In Era5Nc2Mdv::_loadCrossOutputFields loop");
-
-    int planeOffset = iy * fhdr->nx;
-
-    for (int ix = 0; ix < fhdr->nx; ix++, planeOffset++)
-    {
-      // set up grid interp object
-
-      {
-	// compute x and y, and plane offset
-	double yy = fhdr->grid_miny + iy * fhdr->grid_dy;
-	double xx = fhdr->grid_minx + ix * fhdr->grid_dx;
-	// compute latlon
-	double lat, lon;
-	_outputProj.xy2latlon(xx, yy, lat, lon);
-	// find the model position for this point
-	if (!mGrid.getGridIndices(lat, lon))
-	{
-	  // cannot process this grid point
-	  continue;
-	}
+  for (int iy = _iyValidStart; iy < _iyValidEnd; iy++) {
+    if (latitude >= _yArray[iy] && latitude <= _yArray[iy+1]) {
+      if (fabs(latitude - _yArray[iy]) < fabs(latitude - _yArray[iy+1])) {
+        return iy;
+      } else {
+        return iy + 1;
       }
+    }
+  }
 
-      // set up vert interp
+  return -1;
 
-      // load up interpolated vertical pressure array for this point
-      vector<double> presVert;
-      if (inData.dataDimension() > 2)
-      {
-        inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-                             "press", inData.getPres(),
-                             mGrid.wtSW, mGrid.wtNW,
-                             mGrid.wtNE, mGrid.wtSE,
-                             presVert);
-        // load up the vertical interpolation array if interp3dField is successful
-        _presInterp.prepareInterp(presVert);
+}
+
+
+//////////////////////////////////////////////////
+// get the closest lon index to a given longitude
+// within the tolerance
+// return -1 if outside grid by more than tolerance
+
+int Era5Nc2Mdv::_getClosestLonIndex(double longitude, double tolerance)
+
+{
+
+  if (longitude < _xArray[_ixValidStart]) {
+    if (fabs(longitude - _xArray[_ixValidStart]) <= tolerance) {
+      return _ixValidStart;
+    } else {
+      return -1;
+    }
+  }
+
+  if (longitude > _xArray[_ixValidEnd]) {
+    if (fabs(longitude - _xArray[_ixValidEnd]) <= tolerance) {
+      return _ixValidEnd;
+    } else {
+      return -1;
+    }
+  }
+
+  for (int ix = _ixValidStart; ix < _ixValidEnd; ix++) {
+    if (longitude >= _xArray[ix] && longitude <= _xArray[ix+1]) {
+      if (fabs(longitude - _xArray[ix]) < fabs(longitude - _xArray[ix+1])) {
+        return ix;
+      } else {
+        return ix + 1;
       }
-      // interp the fields for this point
-
-      for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-      {
-	switch (_params._output_fields[ifield].name)
-	{
-	  // raw 3d fields
-
-	case Params::U_FIELD:
-          if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE)
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getUu(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  else if (_rotateOutputUV)
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getUuOut(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  else
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getUuTn(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  break;
-	    
-	case Params::V_FIELD:
-          if (_params.output_projection == Params::OUTPUT_PROJ_NATIVE)
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getVv(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  else if (_rotateOutputUV)
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getVvOut(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  else
-	  {
-            _interp3dField(inData, _params._output_fields[ifield].name,
-			   inData.getVvTn(), mdvx, planeOffset,
-                           nPointsPlane, fhdr->missing_data_value, mGrid);
-          }
-	  break;
-	    
-	case Params::Q_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getQq(), mdvx, planeOffset,
-			 nPointsPlane, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::CLW_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getClw(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RNW_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getRnw(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::ICE_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getIce(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::QNRAIN_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getNRain(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::QNCLOUD_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getNCloud(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SNOW_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getSnow(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::GRAUPEL_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getGraupel(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::W_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getWw(), mdvx, planeOffset,
-			 nPointsPlane, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::P_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getPp(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::PB_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getPb(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::ITFADEF_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getItfadef(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-    
-	case Params::PHB_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getPhb(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::PH_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getPhC(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::DNW_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getDNW(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::MUB_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getMUB(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::MU_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getMU(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-
-	case Params::REFL_10CM_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getREFL3D(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	    
-	  // derived 3d fields
-
-	case Params::TK_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getTk(), mdvx, planeOffset,
-			 nPointsPlane, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::TC_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getTc(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::WSPD_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getWspd(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::WDIR_FIELD:
-	  _interp3dField(inData,_params._output_fields[ifield].name,
-			 inData.getWdir(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::PRESSURE_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getPres(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RH_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getRh(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SPEC_H_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getSpecH(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::DEWPT_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getDewpt(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::ICING_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getIcing(), mdvx,
-			 planeOffset, nPointsPlane,
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::CLW_G_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getClwG(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RNW_G_FIELD:
-	  _interp3dField(inData,_params._output_fields[ifield].name,
-			 inData.getRnwG(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::THETA_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getTheta(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::DBZ_3D_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getDbz3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::HGT_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getGeoHgt(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-	case Params::GEO_POT_FIELD:
-	  _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getGeoPot(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-	  break;
-
-        case Params::Z_AGL_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getZz(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::Q_G_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getQG(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::CIN_3D_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getCin3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::CAPE_3D_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getCape3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::LCL_3D_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getLcl3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::LFC_3D_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getLfc3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::EL_3D_FIELD:
-          _interp3dField(inData, _params._output_fields[ifield].name,
-			 inData.getEl3d(), mdvx,
-			 planeOffset, nPointsPlane, 
-			 fhdr->missing_data_value, mGrid);
-
-	  break;
-
-
-	// raw 2d fields
-
-	case Params::START_2D_FIELDS:
-	  break;
-
-	case Params::SOIL_T_1_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilT1(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::SOIL_T_2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilT2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_T_3_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilT3(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_T_4_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilT4(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_T_5_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilT5(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::SOIL_M_1_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilM1(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_M_2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilM2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_M_3_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilM3(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SOIL_M_4_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilM4(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-       	case Params::SOIL_M_5_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilM5(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_AM_1_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilAM1(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_AM_2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilAM2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_AM_3_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilAM3(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_AM_4_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilAM5(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_AM_5_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilAM5(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LAT_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLat(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::LON_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLon(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::GROUND_T_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getGroundT(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RAINC_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getRainC(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RAINNC_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getRainNC(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::TERRAIN_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getTerrain(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LAND_USE_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLandUse(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SNOWCOVR_FIELD:
-	  _interp2dField(inData,_params._output_fields[ifield].name,
-			 inData.getSnowCovr(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::TSEASFC_FIELD:
-	  _interp2dField(inData,_params._output_fields[ifield].name,
-			 inData.getTSeaSfc(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::PBL_HGT_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getPblHgt(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::T2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getT2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::Q2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getQ2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::U10_FIELD:
-	  _interp2dField(inData,_params._output_fields[ifield].name,
-			 inData.getU10(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::V10_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getV10(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::SNOWH_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSnowH(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SFC_PRES_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSurfP(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
- 	case Params::LAND_MASK_FIELD:
- 	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLandMask(), mdvx,
- 			 planeOffset, fhdr->missing_data_value, mGrid);
- 	  break;
-	    
-	case Params::TH2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getTh2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::HFX_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getHfx(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LH_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLh(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::SNOW_WE_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSnowWE(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::SNOW_NC_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSnowNC(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::GRAUPEL_NC_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getGraupelNC(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-       	case Params::SOIL_TYPE_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSoilType(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	  // derived 2d fields
-	    
-	case Params::FZLEVEL_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getFzLevel(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    
-	case Params::RAIN_TOTAL_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getRainTotal(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	    	
-	case Params::T2C_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getT2C(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	  
-	case Params::DBZ_2D_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getDbz2D(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-	  
-	case Params::RH2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getRH2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::SPEC_H_2M_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getSpecH2M(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::WSPD10_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getWspd10(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::WDIR10_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getWdir10(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-        case Params::CIN_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getCin(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-        case Params::CAPE_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getCape(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-        case Params::LCL_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLcl(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::LFC_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLfc(), mdvx,
-			 planeOffset,  fhdr->missing_data_value, mGrid);
-
-	  break;
-
-        case Params::EL_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getEl(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-
-	  break;
-
-	  // GEOGRID 2-d fields
-
-	case Params::LANDUSEF_1_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLanduseF1(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LANDUSEF_2_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLanduseF2(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LANDUSEF_6_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLanduseF6(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::LANDUSEF_15_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getLanduseF15(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-
-	case Params::GREENFRAC_7_FIELD:
-	  _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getGreenFrac7(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::TWP_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getTwp(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-  
-        case Params::RWP_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getRwp(), mdvx,
-			 planeOffset, fhdr->missing_data_value, mGrid);
-	  break;
-
-	case Params::VIL_FIELD:
-          _interp2dField(inData, _params._output_fields[ifield].name,
-			 inData.getVil(), mdvx,
-                         planeOffset, fhdr->missing_data_value, mGrid);
-          break;
-
-	default:
-	  break;
-
-	} // switch
-      } // ifield
-    } // ix
-  } // iy
-#endif
-}
-
-/////////////////////////////////////////////////
-// Load up output fields on edge points
-
-void Era5Nc2Mdv::_loadEdgeOutputFields(Era5Data &inData,
-				     DsMdvx &mdvx)
-{
-  _loadUEdgeOutputFields(inData,mdvx);
-  _loadVEdgeOutputFields(inData,mdvx);
-}
-
-void Era5Nc2Mdv::_loadUEdgeOutputFields(Era5Data &inData,
-				     DsMdvx &mdvx)
-{
-  // set up grid remapping object
-
-  WRFGrid mGrid(_progName, _params.debug >= Params::DEBUG_VERBOSE,inData);
-  
-  // get representative field header
-  
-  const Mdvx::field_header_t *fhdr = NULL;
-  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
-  {
-    MdvxField *fld = mdvx.getField(ifield);
-  
-    // make sure we have a U EDGE field
-
-    if (strstr(fld->getFieldName(), "U_EDGE"))
-    {
-      fhdr = &fld->getFieldHeader();
-      break;
     }
-  } // ifields
-
-  if (fhdr == NULL)
-  {
-    // no U-edge fields
-    return;
   }
-  
-  // loop through the grid
-  
-  int nPointsPlane = fhdr->ny * fhdr->nx;
-  if (_params.debug == Params::DEBUG_VERBOSE)
-  {
-    cerr << "In Era5Nc2Mdv::_loadUEdgeOutputFields() "
-	 << "nPointsPlane = " << nPointsPlane
-	 << " ny = " << fhdr->ny << " nx = " << fhdr->nx << endl;
-  }
- 
-  for (int iy = 0; iy < fhdr->ny; iy++)
-  {
-    PMU_auto_register("In Era5Nc2Mdv::_loadUEdgeOutputFields loop");
-    int planeOffset = iy * fhdr->nx;
-    
-    for (int ix = 0; ix < fhdr->nx; ix++, planeOffset++)
-    {
-      mGrid.setNonInterp(iy, ix);
 
-      // if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
-      // {
-      //   // load up interpolated vertical pressure array for this point
-      //   vector<double> presVert;
-      //   if (inData.dataDimension() > 2)
-      //   {
-      //     inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-      //   		       "press", inData.getPres(),
-      //   		       mGrid.wtSW, mGrid.wtNW,
-      //   		       mGrid.wtNE, mGrid.wtSE,
-      //   		       presVert);
-
-      //     // load up the vertical interpolation array
-
-      //     _presInterp.prepareInterp(presVert);
-      //   }
-      // }
-      
-      // interp the fields for this point
-      
-      for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-      {
-	// switch (_params._output_fields[ifield].name)
-	// {
-        //   case Params::U_EDGE_FIELD:
-        //     _interp3dField(inData, "U_EDGE", inData.getUuC(), mdvx,
-        //                    planeOffset, nPointsPlane,
-        //                    fhdr->missing_data_value, mGrid);
-        //     break;
-	    
-	// default:
-	//   break;
-
-	// } // switch
-      } // ifield
-    } // ix
-  } // iy
+  return -1;
 
 }
 
-void Era5Nc2Mdv::_loadVEdgeOutputFields(Era5Data &inData,
-				     DsMdvx &mdvx)
-{
-  // set up grid remapping object
-
-  WRFGrid mGrid(_progName, _params.debug >= Params::DEBUG_VERBOSE,inData);
-  
-  // get representative field header
-  
-  const Mdvx::field_header_t *fhdr = NULL;
-  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++)
-  {
-    MdvxField *fld = mdvx.getField(ifield);
-
-    // make sure we have a V_EDGE field
-
-    if (strstr(fld->getFieldName(), "V_EDGE"))
-    {
-      fhdr = &fld->getFieldHeader();
-      break;
-    }
-  } // ifields
-
-  // If there are no V-edge fields, then we don't have anything to do
-
-  if (fhdr == NULL)
-    return;
-  
-  // loop through the grid
-  
-  int nPointsPlane = fhdr->ny * fhdr->nx;
-  if (_params.debug == Params::DEBUG_VERBOSE)
-  {
-    cerr << "In Era5Nc2Mdv::_loadVEdgeOutputFields() "
-	 << "nPointsPlane = " << nPointsPlane
-	 << " ny = " << fhdr->ny << " nx = " << fhdr->nx << endl;
-  }
- 
-  for (int iy = 0; iy < fhdr->ny; iy++)
-  {
-    PMU_auto_register("In Era5Nc2Mdv::_loadVEdgeOutputFields loop");
-    int planeOffset = iy * fhdr->nx;
-    
-    for (int ix = 0; ix < fhdr->nx; ix++, planeOffset++)
-    {
-      mGrid.setNonInterp(iy, ix);
-
-      // if (_params.output_levels != Params::NATIVE_VERTICAL_LEVELS)
-      // {
-      //   // load up interpolated vertical pressure array for this point
-      //   vector<double> presVert;
-      //   if (inData.dataDimension() > 2)
-      //   {
-      //     inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-      //   		       "press", inData.getPres(),
-      //   		       mGrid.wtSW, mGrid.wtNW,
-      //   		       mGrid.wtNE, mGrid.wtSE,
-      //   		       presVert);
-
-      //     // load up the vertical interpolation array
-
-      //     _presInterp.prepareInterp(presVert);
-      //   }
-      // }
-      
-      // interp the fields for this point
-      
-      for (int ifield = 0; ifield < _params.output_fields_n; ifield++)
-      {
-	// switch (_params._output_fields[ifield].name)
-	// {
-	// case Params::V_EDGE_FIELD:
-	//   _interp3dField(inData, "V_EDGE", inData.getVvC(), mdvx,
-	// 		 planeOffset, nPointsPlane,
-	// 		 fhdr->missing_data_value, mGrid);
-	//   break;
-            
-	// default:
-	//   break;
-
-	// } // switch
-      } // ifield
-    } // ix
-  } // iy
-
-}
-
-//////////////////
-// _interp3dField()
-//
-// Interpolate the 3d field data onto the output grid point
-//
-
-void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
-                                // const  Params::output_field_name_t &field_name_enum,
-			       fl32 ***field_data,
-			       DsMdvx &mdvx,
-			       int planeOffset,
-			       int nPointsPlane,
-			       fl32 missingDataVal,
-			       const WRFGrid &mGrid,
-			       double factor /* = 1.0*/ )
-{
-#ifdef JUNK
- int i = static_cast<int>(field_name_enum);
-
- if (_field_name_map[i].name == NULL || _field_name_map[i].long_name == NULL)
-   cerr << "ERROR - fieldnames for field: " << i << " not defined!" << endl;
-
- _interp3dField(inData,_field_name_map[i].name,field_data,
-		mdvx, planeOffset, nPointsPlane, missingDataVal, mGrid, factor);
-#endif
-}  
-
-
-//////////////////
-// _interp3dField()
-//
-// Interpolate the 3d field data onto the output grid point
-//
-
-void Era5Nc2Mdv::_interp3dField(Era5Data &inData,
-			     const char *field_name,
-			     fl32 ***field_data,
-			     DsMdvx &mdvx,
-			     const int planeOffset,
-			     const int nPointsPlane,
-			     const fl32 missingDataVal,
-			     const WRFGrid &mGrid,
-			     const double factor)
-{
-  // Get a pointer to the output field.  If we can't find this field, then
-  // we don't need to do anything.
-
-  MdvxField *field = mdvx.getFieldByName(field_name);
-  if (field == 0)
-  {
-    cerr << "ERROR - Era5Nc2Mdv::_interp3dField" << endl;
-    cerr << "  Cannot find field name: " << field_name << endl;
-    return;
-  }
-
-  // load up vertical array for this point
-
-  vector<double> vlevelData;
-#ifdef NOTNOW
-  
-  if (_params.output_levels == Params::NATIVE_VERTICAL_LEVELS)
-  {
-    inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-			 field_name, field_data,
-			 mGrid.wtSW, mGrid.wtNW,
-			 mGrid.wtNE, mGrid.wtSE,
-			 vlevelData);
-  }
-  else
-  {
-    vector<double> vertData;
-    inData.interp3dField(mGrid.latIndex, mGrid.lonIndex,
-			 field_name, field_data,
-			 mGrid.wtSW, mGrid.wtNW,
-			 mGrid.wtNE, mGrid.wtSE,
-			 vertData,
-			 &_presInterp.getVertNeeded());
-  
-    // interpolate field onto flight levels
-    
-    _presInterp.doInterp(vertData, vlevelData,
-			 _params.copy_lowest_downwards);
-   
-  }
-#endif
-  
-  // put into targetVol
-  
-  //Mdvx::field_header_t fhdr = field->getFieldHeader();
-  fl32 *targetVol = (fl32 *) field->getVol();
-  fl32 *ffp = targetVol + planeOffset;
-
-  for (size_t i = 0; i < vlevelData.size(); i++, ffp += nPointsPlane)
-  {
-    if (vlevelData[i] == Era5Data::MISSING_DOUBLE)
-      *ffp = missingDataVal;
-    else
-      *ffp = vlevelData[i] * factor;
-  }
-  
-}
-
-
-/////////////////////////
-// _interp2dField()
-//uses the field_name_enum to get the field_name and then calls
-//the other version of _interp2dField().
-
-void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
-                                // const  Params::output_field_name_t &field_name_enum,
-			       fl32 **field_data,
-			       DsMdvx &mdvx,
-			       int planeOffset,
-			       fl32 missingDataVal,
-			       const WRFGrid &mGrid,
-			       double factor /* = 1.0*/ )
-{
-#ifdef NOTNOW
- int i = static_cast<int>(field_name_enum);
-
- if (_field_name_map[i].name == NULL || _field_name_map[i].long_name == NULL)
-   cerr << "ERROR - fieldnames for field: " << i << " not defined!" << endl;
-
- _interp2dField(inData,_field_name_map[i].name,field_data,
-		mdvx, planeOffset, missingDataVal, mGrid, factor);
-#endif
-}
-
-
-//////////////////
-// _interp2dField()
-//
-// Interpolate the 2d field data onto the output grid point
-//
-
-void Era5Nc2Mdv::_interp2dField(Era5Data &inData,
-			       const char *field_name,
-			       fl32 **field_data,
-			       DsMdvx &mdvx,
-			       int planeOffset,
-			       fl32 missingDataVal,
-			       const WRFGrid &mGrid,
-			       double factor)
-{
-  //  if (_params.debug == Params::DEBUG_VERBOSE)
-  //    {
-  //      cerr << "Entered Era5Nc2Mdv::_interp2dField for field: " << field_name
-  //	   << "\n\tplaneOffset = " << planeOffset << endl;
-  //    }
-
-  // get interp value for point
-
-  double interpVal =
-    inData.interp2dField(mGrid.latIndex, mGrid.lonIndex,
-			 field_name, field_data,
-			 mGrid.wtSW, mGrid.wtNW,
-			 mGrid.wtNE, mGrid.wtSE);
-  
-  // put into targetVol
-  
-  MdvxField *field = mdvx.getFieldByName(field_name);
-  if (field == NULL)
-  {
-    cerr << "ERROR - Era5Nc2Mdv::_interp2dField" << endl;
-    cerr << "  Cannot find field name: " << field_name << endl;
-    return;
-  }
-
-  //Mdvx::field_header_t fhdr = field->getFieldHeader();
-  fl32 *targetVol = (fl32 *) field->getVol();
-  fl32 *ffp = targetVol + planeOffset;
-
-  if (interpVal == Era5Data::MISSING_DOUBLE)
-    *ffp = missingDataVal;
-  else
-    *ffp = interpVal * factor;
-}
-
-////////////////////////////////////////////////////
-// _initFieldNameMap()
-//
-// Sets up the field name map from the config file
-//
-// When this is done, _field_name_map[U_FIELD] will hold the name info for U_FIELD.
-// This function allocates space for _field_name_map
-
-void Era5Nc2Mdv::_initFieldNameMap()
-{
-#ifdef JUNK
-  _field_name_map = new Params::afield_name_map_t[Params::TOTAL_FIELD_COUNT];
-
-  for (int j = 0; j< Params::TOTAL_FIELD_COUNT; j++)
-  {
-    _field_name_map[j].name = NULL;
-    _field_name_map[j].long_name = NULL;
-  }
-  
-  for (int i = 0; i< _params.field_name_map_n; i++)
-  {
-    int j = _params._field_name_map[i].original_name;
-    _field_name_map[j].name =
-      new char[strlen(_params._field_name_map[i].name)+1];
-    strcpy(_field_name_map[j].name,_params._field_name_map[i].name);
-    _field_name_map[j].long_name =
-      new char[strlen(_params._field_name_map[i].long_name)+1];
-    strcpy(_field_name_map[j].long_name,_params._field_name_map[i].long_name);
-  }
-#endif
-
-}
