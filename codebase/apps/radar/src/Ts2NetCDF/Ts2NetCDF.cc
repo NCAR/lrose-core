@@ -644,11 +644,46 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
         }
       }
     } else {
-      if (_savePulseData(pulse)) {
-        return -1;
+      if (_xmitRcvMode == IWRF_SIM_HV_FIXED_HV) {
+        if (_savePulseDataSimHV(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SIM_HV_SWITCHED_HV) {
+        if (_savePulseDataSimHV(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_H_ONLY_FIXED_HV) {
+        if (_savePulseDataSimHOnly(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_V_ONLY_FIXED_HV) {
+        if (_savePulseDataSimVOnly(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SINGLE_POL) {
+        if (_savePulseDataSinglePol(pulse)) {
+          return -1;
+        }
+      } else if (_xmitRcvMode == IWRF_SINGLE_POL_V) {
+        if (_savePulseDataSinglePolV(pulse)) {
+          return -1;
+        }
+      } else {
+        if (_savePulseData(pulse)) {
+          return -1;
+        }
       }
     }
     
+    if (_params.debug >= Params::DEBUG_EXTRA) {
+      cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
+           << _pulseTime << " "
+           << _prt << " "
+           << _el << " "
+           << _az << " "
+           << _nGates << endl;
+    }
+
   } else {
     
     if (_params.debug >= Params::DEBUG_EXTRA) {
@@ -704,9 +739,9 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 }
 
 /////////////////////////////
-// save pulse data
+// save pulse data - sim HV
 
-int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
+int Ts2NetCDF::_savePulseDataSimHV(IwrfTsPulse &pulse)
 
 {
 
@@ -786,15 +821,180 @@ int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
 
   } // if (chan1 != NULL)
   
-  if (_params.debug >= Params::DEBUG_EXTRA) {
-    cerr << "Using pulse, time, _prt, _el, _az, _nGates: "
-         << _pulseTime << " "
-         << _prt << " "
-         << _el << " "
-         << _az << " "
-         << _nGates << endl;
+  return 0;
+
+}
+    
+/////////////////////////////////////////////////////
+// save pulse data - H transmit, fixed HV
+
+int Ts2NetCDF::_savePulseDataSimHOnly(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
   }
 
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHc++;
+    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVx++;
+    _iBufVx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVx++;
+      _iBufVx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHc++;
+      _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
+  return 0;
+
+}
+    
+/////////////////////////////////////////////////////
+// save pulse data - V transmit, fixed HV
+
+int Ts2NetCDF::_savePulseDataSimVOnly(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHx++;
+    _iBufHx.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHx.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVc++;
+    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVc++;
+      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHx++;
+      _iBufHx.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHx.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
   return 0;
 
 }
@@ -1000,6 +1200,201 @@ int Ts2NetCDF::_savePulseDataAltV(IwrfTsPulse &pulse)
          << _nGates << endl;
   }
 
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseDataSinglePol(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  _nPulsesHc++;
+  _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseDataSinglePolV(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayVc.push_back(_pulseTime);
+  _dtimeArrayVc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayVc.push_back(_prt);
+  _pulseWidthArrayVc.push_back(pulse.getPulseWidthUs());
+  _elArrayVc.push_back(_el);
+  _azArrayVc.push_back(_az);
+  _fixedAngleArrayVc.push_back(pulse.getFixedAngle());
+  _modCodeArrayVc.push_back(_phaseDiff);
+  _txPhaseArrayVc.push_back(_txPhaseDeg);
+  _transitionFlagArrayVc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  _nPulsesVc++;
+  _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+  _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  
+  return 0;
+
+}
+    
+/////////////////////////////
+// save pulse data
+
+int Ts2NetCDF::_savePulseData(IwrfTsPulse &pulse)
+
+{
+
+  _nGatesRay.push_back(_nGates);
+
+  _timeArrayHc.push_back(_pulseTime);
+  _dtimeArrayHc.push_back((_pulseTimeSecs - _startTime) 
+                          + pulse.getNanoSecs() * 1.0e-9);
+  _prtArrayHc.push_back(_prt);
+  _pulseWidthArrayHc.push_back(pulse.getPulseWidthUs());
+  _elArrayHc.push_back(_el);
+  _azArrayHc.push_back(_az);
+  _fixedAngleArrayHc.push_back(pulse.getFixedAngle());
+  _modCodeArrayHc.push_back(_phaseDiff);
+  _txPhaseArrayHc.push_back(_txPhaseDeg);
+  _transitionFlagArrayHc.push_back(pulse.antennaTransition());
+
+  _burstMagArrayHc.push_back(pulse.get_burst_mag(0));
+  _burstMagArrayVc.push_back(pulse.get_burst_mag(1));
+  _burstArgArrayHc.push_back(pulse.get_burst_arg(0));
+  _burstArgArrayVc.push_back(pulse.get_burst_arg(1));
+
+  const fl32 *chan0 = pulse.getIq0();
+  float *ivals0 = (float *) _iBuf0.getPtr();
+  float *qvals0 = (float *) _qBuf0.getPtr();
+  
+  for (int igate = 0; igate < _nGates; igate++, ivals0++, qvals0++) {
+    *ivals0 = *chan0;
+    chan0++;
+    *qvals0 = *chan0;
+    chan0++;
+  } // igate
+  if (_params.pad_n_gates_to_max) {
+    for (int igate = _nGates; igate < _nGatesMax; igate++, ivals0++, qvals0++) {
+      *ivals0 = -9999.0;
+      *qvals0 = -9999.0;
+    } // igate
+  }
+
+  int nGatesStore = _nGates;
+  if (_params.pad_n_gates_to_max) {
+    nGatesStore = _nGatesMax;
+  }
+
+  if (_params.chan0_is_h_or_copolar || pulse.getIq1() == NULL) {
+    _nPulsesHc++;
+    _iBufHc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufHc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  } else {
+    _nPulsesVc++;
+    _iBufVc.add(_iBuf0.getPtr(), nGatesStore * sizeof(float));
+    _qBufVc.add(_qBuf0.getPtr(), nGatesStore * sizeof(float));
+  }
+  
+  if (pulse.getIq1() != NULL) {
+    
+    const fl32 *chan1 = pulse.getIq1();
+    float *ivals1 = (float *) _iBuf1.getPtr();
+    float *qvals1 = (float *) _qBuf1.getPtr();
+    
+    for (int igate = 0; igate < nGatesStore; igate++, ivals1++, qvals1++) {
+      *ivals1 = *chan1;
+      chan1++;
+      *qvals1 = *chan1;
+      chan1++;
+    } // igate
+
+    if (_params.chan0_is_h_or_copolar) {
+      _nPulsesVc++;
+      _iBufVc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufVc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    } else {
+      _nPulsesHc++;
+      _iBufHc.add(_iBuf1.getPtr(), nGatesStore * sizeof(float));
+      _qBufHc.add(_qBuf1.getPtr(), nGatesStore * sizeof(float));
+    }
+
+  } // if (chan1 != NULL)
+  
   return 0;
 
 }

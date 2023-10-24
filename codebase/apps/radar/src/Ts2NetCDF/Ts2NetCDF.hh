@@ -192,9 +192,14 @@ private:
   bool _checkInfoChanged(const IwrfTsPulse &pulse);
   bool _checkReadyToWrite(const IwrfTsPulse &pulse);
   int _handlePulse(IwrfTsPulse &pulse);
-  int _savePulseData(IwrfTsPulse &pulse);
+  int _savePulseDataSimHV(IwrfTsPulse &pulse);
+  int _savePulseDataSimHOnly(IwrfTsPulse &pulse);
+  int _savePulseDataSimVOnly(IwrfTsPulse &pulse);
   int _savePulseDataAltH(IwrfTsPulse &pulse);
   int _savePulseDataAltV(IwrfTsPulse &pulse);
+  int _savePulseDataSinglePol(IwrfTsPulse &pulse);
+  int _savePulseDataSinglePolV(IwrfTsPulse &pulse);
+  int _savePulseData(IwrfTsPulse &pulse);
   void _reset();
 
   int _writeFile();
