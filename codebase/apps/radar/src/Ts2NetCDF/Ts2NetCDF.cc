@@ -36,6 +36,7 @@
 
 #include "Ts2NetCDF.hh"
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
 #include <fstream>
 #include <cerrno>
@@ -1560,13 +1561,21 @@ int Ts2NetCDF::_writeFile()
   }
 
   // compute number of times active
-  
-  _nTimes = _elArrayHc.size();
-  if (_elArrayVc.size() > 0) {
-    if (_elArrayVc.size() < _nTimes) {
-      _nTimes = _elArrayVc.size();
-    }
+
+  vector<size_t> nTimesArray;
+  if (_elArrayHc.size() > 0) {
+    nTimesArray.push_back(_elArrayHc.size());
   }
+  if (_elArrayVc.size() > 0) {
+    nTimesArray.push_back(_elArrayVc.size());
+  }
+  if (_elArrayHx.size() > 0) {
+    nTimesArray.push_back(_elArrayHx.size());
+  }
+  if (_elArrayVx.size() > 0) {
+    nTimesArray.push_back(_elArrayVx.size());
+  }
+  _nTimes = *std::min_element(nTimesArray.begin(), nTimesArray.end());
 
   // write out tmp file
 
