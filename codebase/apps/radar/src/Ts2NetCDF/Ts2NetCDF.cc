@@ -286,7 +286,10 @@ int Ts2NetCDF::Run ()
       }
     }
 
-    if (_elArrayHc.size() < 1) {
+    if (_elArrayHc.size() < 1 &&
+        _elArrayVc.size() < 1 &&
+        _elArrayHx.size() < 1 &&
+        _elArrayVx.size() < 1) {
       readyToWrite = false;
     }
     
