@@ -88,7 +88,7 @@ This requires upgrading the compiler toolchain.
   ln -s qmake-qt6 qmake;
 ```
 
-## Manually install packages for CENTOS 8 and RHEL 8
+## Manually install packages for RHEL 8, ALMA LINUX 8, ROCKY 8
 
 ```
   dnf install -y epel-release ; \
@@ -121,35 +121,28 @@ This requires upgrading the compiler toolchain.
   ln -s qmake-qt6 qmake;
 ```
 
-## Manually install packages for CENTOS STREAM (latest)
+## Manually install packages for RHEL 9, ALMA LINUX 9, ROCKY 9
 
 ```
-  dnf install -y epel-release ; \
-  dnf install -y 'dnf-command(config-manager)' ; \
-  dnf config-manager --set-enabled powertools ; \
-  dnf install -y python2 python3 ; \
-  dnf install -y python2-devel platform-python-devel ; \
-  dnf install -y --allowerasing \
-    tcsh wget git tk-devel perl-Env \
-    emacs rsync mlocate \
+  dnf install -y epel-release; \
+  dnf install -y 'dnf-command(config-manager)'; \
+  dnf install -y \
+    tcsh wget git \
+    emacs rsync python mlocate \
+    python-devel platform-python-devel \
     m4 make cmake libtool autoconf automake \
-    gcc gcc-c++ gcc-gfortran glibc-devel libgcc \
-    libX11-devel libXext-devel \
-    libpng-devel libtiff-devel zlib-devel libzip-devel \
-    eigen3-devel armadillo-devel \
+    gcc gcc-c++ gcc-gfortran glibc-devel ; \
+  dnf install -y --allowerasing \
+    libX11-devel libXext-devel libcurl-devel \
+    libpng-devel libtiff-devel zlib-devel libzip \
     expat-devel libcurl-devel openmpi-devel \
-    flex-devel fftw3-devel \
-    bzip2-devel \
-    qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtcharts-devel \
+    flex fftw3-devel; \
+  dnf install -y --allowerasing \
+    bzip2-devel qt6-qtbase-devel qt6-qtdeclarative-devel \
     hdf5-devel netcdf-devel \
-    gnuplot ImageMagick-devel ImageMagick-c++-devel \
-    xorg-x11-xauth xorg-x11-apps \
+    xorg-x11-xauth \
     rpm-build redhat-rpm-config \
-    rpm-devel rpmdevtools
-  alternatives --set python /usr/bin/python3
-
-  # create link for qtmake
-
+    rpm-devel rpmdevtools ; \
   cd /usr/bin; \
   ln -s qmake-qt6 qmake;
 ```
