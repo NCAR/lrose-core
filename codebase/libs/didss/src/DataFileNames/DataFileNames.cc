@@ -349,7 +349,7 @@ int DataFileNames::getDataTime(const string& file_path,
   data_time = 0;
   date_only = false;
   
-  date_time_t ftime;
+  date_time_t ftime, ftime2;
   int lead_time;
 
   // Copy the filename
@@ -357,7 +357,32 @@ int DataFileNames::getDataTime(const string& file_path,
   char fcopy[MAX_PATH_LEN];
   STRcopy(fcopy, file_path.c_str(), MAX_PATH_LEN);
 
-  // first search for yyyymmdd?hhmmss in the file name
+  // try yyyymmddhh_yyyymmddhh - date and hour, start and end times
+
+  {
+    Path fpath(file_path);
+    string fname = fpath.getFile();
+    if (fname.size() >= 15) {
+      for (size_t ii = 0; ii < fname.size() - 15; ii++) {
+        const char *ptr = fname.c_str() + ii;
+        char cc;
+        if (sscanf(ptr, "%4d%2d%2d%2d%1c%4d%2d%2d%2d",
+                   &ftime.year, &ftime.month, &ftime.day, &ftime.hour, &cc,
+                   &ftime2.year, &ftime2.month, &ftime2.day, &ftime2.hour)
+            == 9) {
+          if (!isdigit(cc)) {
+            ftime.min = 0;
+            ftime.sec = 0;
+            uconvert_to_utime(&ftime);
+            data_time = ftime.unix_time;
+            return 0;
+          }
+        }
+      } // ii
+    } // if (fname.size() >= 15)
+  }
+
+  // search for yyyymmdd?hhmmss in the file name
   // this is the most common case
 
   Path fpath(file_path);
