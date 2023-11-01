@@ -45,6 +45,7 @@
 #include <toolsa/Path.hh>
 #include <toolsa/TaArray.hh>
 #include <Mdv/MdvxField.hh>
+#include <didss/DataFileNames.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include "Era5Nc2Mdv.hh"
 using namespace std;
@@ -173,21 +174,83 @@ int Era5Nc2Mdv::Run ()
   
   int iret = 0;
   PMU_auto_register("Run");
-  
-  // loop until end of data
 
-  char *inputPath;
-  while ((inputPath = _input->next()) != NULL) {
+  // get first file in list, as initial seed
 
-    PMU_auto_register("Reading file");
-    ta_file_uncompress(inputPath);
-    if (_processFile(inputPath)) {
-      cerr << "ERROR = Era5Nc2Mdv::Run" << endl;
-      cerr << "  Processing file: " << inputPath << endl;
-      iret = -1;
-    }
-    
+  char *inputPath = _input->next();
+  if (inputPath == NULL) {
+    cerr << "ERROR = Era5Nc2Mdv::Run" << endl;
+    cerr << "  No files found" << endl;
+    return -1;
   }
+  string seedPath = inputPath;
+  
+  // loop until data is exhausted
+  
+  while (seedPath.size() > 0) {
+
+    // get seed time
+    
+    time_t seedTime;
+    bool dateOnly;
+    if (DataFileNames::getDataTime(seedPath, seedTime, dateOnly)) {
+      cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
+      cerr << "  Bad time for seed path: " << seedPath << endl;
+      return -1;
+    }
+
+    // create set of paths at the seed time
+    
+    vector<string> timePaths;
+    while ((inputPath = _input->next()) != NULL) {
+      
+      time_t fileTime;
+      if (DataFileNames::getDataTime(inputPath, fileTime, dateOnly)) {
+        cerr << "WARNING - Era5Nc2Mdv::Run" << endl;
+        cerr << "  Bad time for path: " << inputPath << endl;
+        cerr << "  ignoring" << endl;
+        continue;
+      }
+
+      if (fileTime == seedTime) {
+        timePaths.push_back(inputPath);
+      } else {
+        seedPath = inputPath;
+        break;
+      }
+      
+    } // while ((inputPath = _input->next()) != NULL)
+
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "=================================" << endl;
+      cerr << "Processing files for time: " << DateTime::strm(seedTime) << endl;
+      for (size_t ii = 0; ii < timePaths.size(); ii++) {
+        cerr << "  path: " << timePaths[ii] << endl;
+      }
+      cerr << "=================================" << endl;
+    }
+
+    if (inputPath == NULL) {
+      // done
+      return 0;
+    }
+
+  } // while (seedPath.size() > 0)
+  
+  // // loop until end of data
+
+  // char *inputPath;
+  // while ((inputPath = _input->next()) != NULL) {
+
+  //   PMU_auto_register("Reading file");
+  //   ta_file_uncompress(inputPath);
+  //   if (_processFile(inputPath)) {
+  //     cerr << "ERROR = Era5Nc2Mdv::Run" << endl;
+  //     cerr << "  Processing file: " << inputPath << endl;
+  //     iret = -1;
+  //   }
+    
+  // }
   
   return iret;
 
