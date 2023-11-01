@@ -175,10 +175,10 @@ int Era5Nc2Mdv::Run ()
   PMU_auto_register("Run");
   
   // loop until end of data
-  
+
   char *inputPath;
   while ((inputPath = _input->next()) != NULL) {
-    
+
     PMU_auto_register("Reading file");
     ta_file_uncompress(inputPath);
     if (_processFile(inputPath)) {
@@ -205,6 +205,8 @@ int Era5Nc2Mdv::_processFile(const char *input_path)
   if (_params.debug) {
     cerr << "Processing file: " << input_path << endl;
   }
+
+  return 0;
 
   // open file
   

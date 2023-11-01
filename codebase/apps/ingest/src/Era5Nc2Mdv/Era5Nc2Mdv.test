@@ -1,0 +1,346 @@
+/**********************************************************************
+ * TDRP params for ./Era5Nc2Mdv
+ **********************************************************************/
+
+//======================================================================
+//
+// Era5Nc2Mdv reads output files from the WRF model and writes MDV data. 
+//   It also allows the computation of some derived products.
+//
+//======================================================================
+ 
+//======================================================================
+//
+// DEBUGGING AND PROCESS CONTROL.
+//
+//======================================================================
+ 
+///////////// debug ///////////////////////////////////
+//
+// Debug option.
+//
+// NORM - minimal debug level. VERBOSE - verbose messaged. EXTRA - extra 
+//   verbose messages.
+//
+//
+// Type: enum
+// Options:
+//     DEBUG_OFF
+//     DEBUG_NORM
+//     DEBUG_VERBOSE
+//     DEBUG_EXTRA
+//
+
+debug = DEBUG_OFF;
+
+//======================================================================
+//
+// PROGRAM MODES OF OPERATION.
+//
+//======================================================================
+ 
+///////////// mode ////////////////////////////////////
+//
+// Operation mode.
+//
+// ARCHIVE - set start and end time. FILELIST - specify files on command 
+//   line. Each ERA5 NetCDF file contains a single field and a single 
+//   level, and a number of times. When given a specified file path, we 
+//   search for all files with the same time interval, assemble all of the 
+//   levels and fields, and write out one output file per input time.
+//
+//
+// Type: enum
+// Options:
+//     ARCHIVE
+//     FILELIST
+//
+
+mode = ARCHIVE;
+
+///////////// start_time //////////////////////////////
+//
+// Set the start time in ARCHIVE mode.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+start_time = "2023 06 01 00 00 00";
+
+///////////// end_time ////////////////////////////////
+//
+// Set the end time in ARCHIVE mode.
+//
+// Format is 'yyyy mm dd hh mm ss'.
+//
+//
+// Type: string
+//
+
+end_time = "2023 07 01 00 00 00";
+
+//======================================================================
+//
+// INPUT DATA.
+//
+//======================================================================
+ 
+///////////// soilparm_path ///////////////////////////
+//
+// path to SOILPARM.TBL config file that was used when running WRF.
+//
+// Information in this table is neccessary to calculate 
+//   MOIST_AVAIL_FIELD.
+//
+//
+// Type: string
+//
+
+soilparm_path = "./SOILPARM.TBL";
+
+///////////// input_dir ///////////////////////////////
+//
+// Directory for input data - ARCHIVE mode.
+//
+// We search this dir for all files between the start and end times.
+//
+//
+// Type: string
+//
+
+// input_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
+input_dir = "$(HOME)/data/ERA5/levelFiles";
+
+//======================================================================
+//
+// SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+//
+//======================================================================
+ 
+///////////// output_fields ///////////////////////////
+//
+// Output field details.
+//
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. The standard name is set to the MDV long name. 
+//   If the long name or standard name are empty, the existing names are 
+//   used.
+//
+//
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string standard_name;
+//      string output_units;
+//      output_encoding_t encoding;
+//        Options:
+//          OUTPUT_ENCODING_FLOAT32
+//          OUTPUT_ENCODING_INT16
+//          OUTPUT_ENCODING_INT08
+//   }
+//
+// 1D array - variable length.
+//
+
+output_fields = {
+  {
+    input_field_name = "D",
+    output_field_name = "divergence",
+    standard_name = "divergence_of_wind",
+    output_units = "1/s",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "Q",
+    output_field_name = "specific_humidity",
+    standard_name = "specific_humidity",
+    output_units = "kg/kg",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "R",
+    output_field_name = "RH",
+    standard_name = "relative_humidity",
+    output_units = "%",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "T",
+    output_field_name = "temperature",
+    standard_name = "air_temperature",
+    output_units = "K",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "U",
+    output_field_name = "u",
+    standard_name = "eastward_wind",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "V",
+    output_field_name = "v",
+    standard_name = "northward_wind",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "U",
+    output_field_name = "u",
+    standard_name = "eastward_wind",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "W",
+    output_field_name = "w",
+    standard_name = "vertical_velocity",
+    output_units = "m/s",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+  ,
+  {
+    input_field_name = "Z",
+    output_field_name = "z",
+    standard_name = "geopotential_height",
+    output_units = "m",
+    encoding = OUTPUT_ENCODING_FLOAT32
+  }
+};
+
+///////////// convert_temperature_to_celcius //////////
+//
+// The temperature is read in degrees Kelvin. This option allows us to 
+//   convert to degrees C.
+//
+//
+// Type: boolean
+//
+
+convert_temperature_to_celcius = FALSE;
+
+//======================================================================
+//
+// OUTPUT DATA.
+//
+//======================================================================
+ 
+///////////// output_dir //////////////////////////////
+//
+// Output directory.
+//
+// The assembled ERA5 data is output to this dir in MDV format.
+//
+//
+// Type: string
+//
+
+output_dir = "/tmp/ERA5";
+
+///////////// output_level_type ///////////////////////
+//
+// Option to choose vertical levels for output file.
+//
+// If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels 
+//   will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no 
+//   interpolation is done and the data is output on the original vertical 
+//   levels (i.e. sigma, eta, etc.).
+//
+//
+// Type: enum
+// Options:
+//     FLIGHT_LEVELS
+//     PRESSURE_LEVELS
+//     HEIGHT_LEVELS
+//     NATIVE_VERTICAL_LEVELS
+//
+
+output_level_type = HEIGHT_LEVELS;
+
+///////////// height_levels ///////////////////////////
+//
+// Array of output height levels (km).
+//
+// Only used if output_levels is HEIGHT_LEVELS. The output grid has a 
+//   variable Z dimension. The height levels in the output are taken from 
+//   this array.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+height_levels = {
+ 0,
+ 1,
+ 2,
+ 3,
+ 4,
+ 5,
+ 6,
+ 7,
+ 8,
+ 9,
+ 10,
+ 11,
+ 12,
+ 13,
+ 14,
+ 15,
+ 16
+};
+
+//======================================================================
+//
+// FILE HEADER INFO.
+//
+//======================================================================
+ 
+///////////// data_set_info ///////////////////////////
+//
+// Data set info.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_info = "This MDV file was created by Era5Nc2Mdv.";
+
+///////////// data_set_name ///////////////////////////
+//
+// Data set name.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_name = "WRF model output.";
+
+///////////// data_set_source /////////////////////////
+//
+// Data set source details.
+//
+// This is placed in the MDV master header for documentation purposes.
+//
+//
+// Type: string
+//
+
+data_set_source = "WRF output from somewhere.";
+
