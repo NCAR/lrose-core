@@ -704,7 +704,7 @@
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 9;
+    tt->array_n = 8;
     tt->struct_def.name = tdrpStrDup("output_field_t");
     tt->struct_def.nfields = 5;
     tt->struct_def.fields = (struct_field_t *)
@@ -744,7 +744,7 @@
         tt->struct_def.fields[4].enum_def.fields[1].val = OUTPUT_ENCODING_INT16;
         tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
         tt->struct_def.fields[4].enum_def.fields[2].val = OUTPUT_ENCODING_INT08;
-    tt->n_struct_vals = 45;
+    tt->n_struct_vals = 40;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
       tt->struct_vals[0].s = tdrpStrDup("D");
@@ -777,21 +777,16 @@
       tt->struct_vals[27].s = tdrpStrDup("northward_wind");
       tt->struct_vals[28].s = tdrpStrDup("m/s");
       tt->struct_vals[29].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[30].s = tdrpStrDup("U");
-      tt->struct_vals[31].s = tdrpStrDup("u");
-      tt->struct_vals[32].s = tdrpStrDup("eastward_wind");
+      tt->struct_vals[30].s = tdrpStrDup("W");
+      tt->struct_vals[31].s = tdrpStrDup("w");
+      tt->struct_vals[32].s = tdrpStrDup("vertical_velocity");
       tt->struct_vals[33].s = tdrpStrDup("m/s");
       tt->struct_vals[34].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[35].s = tdrpStrDup("W");
-      tt->struct_vals[36].s = tdrpStrDup("w");
-      tt->struct_vals[37].s = tdrpStrDup("vertical_velocity");
-      tt->struct_vals[38].s = tdrpStrDup("m/s");
+      tt->struct_vals[35].s = tdrpStrDup("Z");
+      tt->struct_vals[36].s = tdrpStrDup("z");
+      tt->struct_vals[37].s = tdrpStrDup("geopotential_height");
+      tt->struct_vals[38].s = tdrpStrDup("m");
       tt->struct_vals[39].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[40].s = tdrpStrDup("Z");
-      tt->struct_vals[41].s = tdrpStrDup("z");
-      tt->struct_vals[42].s = tdrpStrDup("geopotential_height");
-      tt->struct_vals[43].s = tdrpStrDup("m");
-      tt->struct_vals[44].e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
     // Parameter 'convert_temperature_to_celcius'

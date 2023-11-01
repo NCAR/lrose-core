@@ -182,13 +182,6 @@ paramdef struct output_field_t {
       OUTPUT_ENCODING_FLOAT32
     }
     ,
-    { "U",
-      "u",
-      "eastward_wind",
-      "m/s",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
     { "W",
       "w",
       "vertical_velocity",

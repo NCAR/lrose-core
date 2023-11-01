@@ -196,14 +196,6 @@ output_fields = {
   }
   ,
   {
-    input_field_name = "U",
-    output_field_name = "u",
-    standard_name = "eastward_wind",
-    output_units = "m/s",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
     input_field_name = "W",
     output_field_name = "w",
     standard_name = "vertical_velocity",
