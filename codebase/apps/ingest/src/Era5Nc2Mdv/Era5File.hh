@@ -47,7 +47,7 @@ using namespace std;
 #include "Params.hh"
 
 ///////////////////////////////////////////////////////////////
-/// FILE IO CLASS FOR NETCDF FILE FORMAT
+/// FILE IO CLASS FOR ERA5 DATA IN NETCDF FILE FORMAT
 
 class Era5File
 
@@ -84,7 +84,7 @@ public:
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
   
-  int getTimeFromPath(const string &path, RadxTime &dtime);
+  // int getTimeFromPath(const string &path, DateTime &dtime);
   
   ////////////////////////
   /// \name Error string:
@@ -125,6 +125,8 @@ private:
   NcxxDim _latDim;
   
   size_t _nTimesInFile;
+  size_t _nLevels;
+  size_t _nLat, _nLon;
   ssize_t _nPoints;
 
   // global attributes
@@ -136,14 +138,16 @@ private:
   
   // times
 
+  DateTime _refTime;
   DateTime _startTime;
   NcxxVar _timeVar;
   vector<DateTime> _dataTimes;
-  vector<double> _dTimes;
+  vector<int> _iTimes;
+  int _hour;
 
   // lon/lat
 
-  NcxxVar _lonVar, _latVal;
+  NcxxVar _lonVar, _latVar;
   vector<double> _lon, _lat;
   
   // levels
@@ -166,10 +170,10 @@ private:
   int _readDimensions();
   int _readGlobalAttributes();
   int _readTimes();
-  int _readRange();
-  void _clearField();
+  int _readLatLon();
   int _readField();
 
+#ifdef JUNK
   int _readRayVar(const string &name, vector<double> &vals);
   int _readRayVar(const string &name, vector<float> &vals);
   int _getRayVar(NcxxVar &var, const string &name, bool required);
@@ -198,6 +202,7 @@ private:
                         const string &name,
                         const string &units,
                         const string &description);
+#endif
 
   /// add integer value to error string, with label
   

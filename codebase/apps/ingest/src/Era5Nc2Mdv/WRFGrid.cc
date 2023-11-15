@@ -51,7 +51,7 @@ using namespace std;
 WRFGrid::WRFGrid (const string &prog_name, bool debug, Era5Data &inData):
   _progName(prog_name), _debug(debug)
 {
-  inData.initProjection(proj);
+  // inData.initProjection(proj);
 
   _minx = inData.getGridMinX();
   _dx = inData.getGridDx();
@@ -70,8 +70,8 @@ WRFGrid::WRFGrid (const string &prog_name, bool debug, Era5Data &inData):
   _lat = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
   _lon = (fl32 **) umalloc2(_nLat, _nLon, sizeof(fl32));
 
-  memcpy(*_lat, *inData.getLat(), _nLat * _nLon * sizeof(fl32));
-  memcpy(*_lon, *inData.getLon(), _nLat * _nLon * sizeof(fl32));
+  // memcpy(*_lat, *inData.getLat(), _nLat * _nLon * sizeof(fl32));
+  // memcpy(*_lon, *inData.getLon(), _nLat * _nLon * sizeof(fl32));
 }
 
 ///////////////

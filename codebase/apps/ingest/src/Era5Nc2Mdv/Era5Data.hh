@@ -75,7 +75,6 @@ public:
 
   static const double MISSING_DOUBLE;
 
-
   ////////////////////
   // Public members //
   ////////////////////
@@ -690,19 +689,19 @@ public:
     return _terrain;
   }
   
-  inline fl32 **getLat()
-  {
-    _loadLat();
+  // inline fl32 **getLat()
+  // {
+  //   _loadLat();
     
-    return _lat;
-  }
+  //   return _lat;
+  // }
   
-  inline fl32 **getLon()
-  {
-    _loadLon();
+  // inline fl32 **getLon()
+  // {
+  //   _loadLon();
     
-    return _lon;
-  }
+  //   return _lon;
+  // }
   
   inline fl32 **getLandUse()
   {

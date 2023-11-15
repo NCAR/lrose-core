@@ -53,6 +53,7 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
+	Era5Data.hh \
 	Era5File.hh \
 	Era5Nc2Mdv.hh \
 	PresInterp.hh \
@@ -63,6 +64,7 @@ CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Era5File.cc \
+	Era5Data.cc \
 	Era5Nc2Mdv.cc \
 	Main.cc \
 	PresInterp.cc \

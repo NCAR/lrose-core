@@ -35,7 +35,7 @@
 
 #include "Era5File.hh"
 #include <Ncxx/NcxxVar.hh>
-#include <Radx/RadxTime.hh>
+#include <toolsa/Path.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -88,9 +88,9 @@ void Era5File::clear()
 
   // _timeVar.setNull();
   _dataTimes.clear();
-  _dTimes.clear();
+  _iTimes.clear();
 
-  _clearField();
+  _data.clear();
   
 }
 
@@ -133,15 +133,17 @@ bool Era5File::isEra5File(const string &path)
 
 }
 
+#ifdef JUNK
+
 ////////////////////////////////////////////////
 // get the date and time from a dorade file path
 // returns 0 on success, -1 on failure
 
-int Era5File::getTimeFromPath(const string &path, RadxTime &rtime)
+int Era5File::getTimeFromPath(const string &path, DateTime &rtime)
 
 {
 
-  RadxPath rpath(path);
+  Path rpath(path);
   const string &fileName = rpath.getFile();
   
   // find first digit in entry name - if no digits, return now
@@ -180,6 +182,8 @@ int Era5File::getTimeFromPath(const string &path, RadxTime &rtime)
   
 }
 
+#endif
+
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
@@ -187,8 +191,7 @@ int Era5File::getTimeFromPath(const string &path, RadxTime &rtime)
 //
 // Use getErrStr() if error occurs
 
-int Era5File::readFromPath(const string &path,
-                             RadxVol &vol)
+int Era5File::readFromPath(const string &path)
   
 {
   
@@ -198,19 +201,12 @@ int Era5File::readFromPath(const string &path,
 
   string errStr("ERROR - Era5File::readFromPath");
 
-  _readVol = &vol;
-
-  // get the start time from the file path
-
-  getTimeFromPath(path, _startTime);
-
   // init
   
   clear();
   _nTimesInFile = 0;
-  _nRangeInFile = 0;
-  _rays.clear();
-
+  _nPoints = 0;
+  
   // open file
 
   try {
@@ -242,6 +238,8 @@ int Era5File::readFromPath(const string &path,
     _addErrStr(errStr);
     return -1;
   }
+
+#ifdef JUNK
   
   // read range variable
   
@@ -296,6 +294,9 @@ int Era5File::readFromPath(const string &path,
   _dataTimes.clear();
   _dTimes.clear();
 
+#endif
+  
+
   return 0;
 
 }
@@ -310,15 +311,21 @@ int Era5File::_readDimensions()
   // read required dimensions
 
   _nTimesInFile = 0;
-  _nRangeInFile = 0;
+  _nPoints = 0;
 
   try {
     
     _timeDim = _file.getDim("time");
     _nTimesInFile = _timeDim.getSize();
 
-    _rangeDim = _file.getDim("range");
-    _nRangeInFile = _rangeDim.getSize();
+    _levelDim = _file.getDim("level");
+    _nLevels = _levelDim.getSize();
+    
+    _latDim = _file.getDim("latitude");
+    _nLat = _latDim.getSize();
+    
+    _lonDim = _file.getDim("longitude");
+    _nLon = _lonDim.getSize();
     
   } catch (NcxxException &e) {
 
@@ -328,7 +335,7 @@ int Era5File::_readDimensions()
 
   }
 
-  _nPoints = _nTimesInFile * _nRangeInFile;
+  _nPoints = _nLat * _nLon;
 
   return 0;
 
@@ -341,7 +348,19 @@ int Era5File::_readGlobalAttributes()
 
 {
 
-  // check for history global attribute
+  // data source
+  
+  _dataSource.clear();
+  try {
+    NcxxGroupAtt att = _file.getAtt("DATA_SOURCE");
+    _dataSource = att.asString();
+  } catch (NcxxException& e) {
+    if (_params.debug >= Params::DEBUG_VERBOSE) {
+      cerr << "WARNING - no dataSource global attribute found" << endl;
+    }
+  }
+  
+  // history
   
   _history.clear();
   try {
@@ -353,24 +372,12 @@ int Era5File::_readGlobalAttributes()
     }
   }
   
-  // check for project global attribute
-  
-  _project.clear();
-  try {
-    NcxxGroupAtt att = _file.getAtt("project");
-    _project = att.asString();
-  } catch (NcxxException& e) {
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      cerr << "WARNING - no project global attribute found" << endl;
-    }
-  }
-  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     if (_history.size() > 0) {
-      cerr << "Global attr history: " << _history << endl;
+      cerr << "history: " << _history << endl;
     }
-    if (_project.size() > 0) {
-      cerr << "Global attr project: " << _project << endl;
+    if (_dataSource.size() > 0) {
+      cerr << "dataSource: " << _dataSource << endl;
     }
   }
 
@@ -386,7 +393,7 @@ int Era5File::_readTimes()
 {
 
   _dataTimes.clear();
-  _dTimes.clear();
+  _iTimes.clear();
 
   // read the time variable
 
@@ -423,14 +430,20 @@ int Era5File::_readTimes()
 
   // parse the time units reference time
 
-  RadxTime stime(units);
+  int year, month, day, hour, min, sec;
+  if (sscanf(units.c_str(),
+             "hours since %4d-%2d-%2d %2d-%2d-%2d",
+             &year, &month, &day, &hour, &min, &sec) != 6) {
+    _addErrStr("ERROR - Era5File::_readTimes");
+    _addErrStr("  Bad time units string: ", units);
+  }
+  _refTime.set(year, month, day, hour, min, sec);
 
   // read the time array
   
-  RadxArray<double> dtimes_;
-  double *dtimes = dtimes_.alloc(_nTimesInFile);
+  _iTimes.resize(_nTimesInFile);
   try {
-    _timeVar.getVal(dtimes);
+    _timeVar.getVal(_iTimes.data());
   } catch (NcxxException& e) {
     _addErrStr("ERROR - Era5File::_readTimes");
     _addErrStr("  Cannot read times variable");
@@ -438,10 +451,8 @@ int Era5File::_readTimes()
     return -1;
   }
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    float dt = dtimes[ii];
-    _dTimes.push_back(dt);
-    RadxTime rayTime(stime + dt);
-    _dataTimes.push_back(rayTime);
+    DateTime mtime = _refTime + _iTimes[ii] * 3600;
+    _dataTimes.push_back(mtime);
   }
 
   return 0;
@@ -449,85 +460,86 @@ int Era5File::_readTimes()
 }
 
 ///////////////////////////////////
-// read the range variable
+// read the lat/lon variables
 
-int Era5File::_readRange()
-
-{
-
-  _rangeVar = _file.getVar("range");
-  if (_rangeVar.isNull() || _rangeVar.numVals() < 1) {
-    _addErrStr("ERROR - Era5File::_readRangeVariable");
-    _addErrStr("  Cannot read range");
-    _addErrStr(_file.getErrStr());
-    return -1;
-  }
-  _rangeKm.clear();
-  _nRangeInFile = _rangeDim.getSize();
-
-  if (_rangeVar.getDimCount() != 1) {
-    _addErrStr("ERROR - Era5File::_readRangeVariable");
-    _addErrStr("  'range' is not 1-dimensional");
-    return -1;
-  }
-    
-  NcxxDim rangeDim = _rangeVar.getDim(0);
-  if (rangeDim != _rangeDim) {
-    _addErrStr("ERROR - Era5File::_readRangeVariable");
-    _addErrStr("  Range has incorrect dimension, name: ", rangeDim.getName());
-    return -1;
-  }
-  
-  _rangeKm.clear();
-  RadxArray<double> rangeMeters_;
-  double *rangeMeters = rangeMeters_.alloc(_nRangeInFile);
-  try {
-    _rangeVar.getVal(rangeMeters);
-    double *rr = rangeMeters;
-    for (size_t ii = 0; ii < _nRangeInFile; ii++, rr++) {
-      _rangeKm.push_back(*rr / 1000.0);
-    }
-  } catch (NcxxException& e) {
-    _addErrStr("ERROR - Era5File::_readRangeVariable");
-    _addErrStr("  getVal fails, cannot get range data array, var name: ",
-               rangeDim.getName());
-    return -1;
-  }
-
-  // set the geometry from the range vector
-  
-  RadxRemap remap;
-  if (remap.computeRangeLookup(_rangeKm)) {
-    return -1;
-  }
-  _gateSpacingIsConstant = remap.getGateSpacingIsConstant();
-  _geom.setRangeGeom(remap.getStartRangeKm(), remap.getGateSpacingKm());
-  
-  return 0;
-
-}
-
-///////////////////////////////////
-// clear the ray variables
-
-void Era5File::_clearRayVariables()
+int Era5File::_readLatLon()
 
 {
-
-  _polAngle.clear();
-  _telescopeDirection.clear();
 
   _lat.clear();
   _lon.clear();
-  _alt.clear();
-  _roll.clear();
-  _pitch.clear();
-  _heading.clear();
-  _pressure.clear();
-  _tas.clear();
-  _temp.clear();
+
+  // latitude
+  
+  _latVar = _file.getVar("latitude");
+  if (_latVar.isNull() || _latVar.numVals() < 1) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  Cannot read latitude");
+    _addErrStr(_file.getErrStr());
+    return -1;
+  }
+  
+  if (_latVar.getDimCount() != 1) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  'latitude' is not 1-dimensional");
+    return -1;
+  }
+    
+  NcxxDim latDim = _latVar.getDim(0);
+  if (latDim != _latDim) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  latitude has incorrect dimension, name: ", _latVar.getName());
+    return -1;
+  }
+
+  _lat.resize(_nLat);
+  try {
+    _latVar.getVal(_lat.data());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  getVal fails, cannot get latitude array, var name: ",
+               _latVar.getName());
+    return -1;
+  }
+
+  // longitude
+  
+  _lonVar = _file.getVar("longitude");
+  if (_lonVar.isNull() || _lonVar.numVals() < 1) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  Cannot read longitude");
+    _addErrStr(_file.getErrStr());
+    return -1;
+  }
+  
+  if (_lonVar.getDimCount() != 1) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  'longitude' is not 1-dimensional");
+    return -1;
+  }
+    
+  NcxxDim lonDim = _lonVar.getDim(0);
+  if (lonDim != _lonDim) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  longitude has incorrect dimension, name: ", _lonVar.getName());
+    return -1;
+  }
+
+  _lon.resize(_nLon);
+  try {
+    _lonVar.getVal(_lon.data());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readLatLon");
+    _addErrStr("  getVal fails, cannot get longitude array, var name: ",
+               _lonVar.getName());
+    return -1;
+  }
+
+  return 0;
 
 }
+
+#ifdef JUNK
 
 ///////////////////////////////////
 // read in ray variables
@@ -1881,6 +1893,7 @@ int Era5File::_addSi08FieldToRays(NcxxVar &var,
   
 }
 
+#endif
 
 ///////////////////////////////////////////////
 // add labelled integer value to error string,
@@ -1888,7 +1901,13 @@ int Era5File::_addSi08FieldToRays(NcxxVar &var,
 
 void Era5File::_addErrInt(string label, int iarg, bool cr)
 {
-  Radx::addErrInt(_errStr, label, iarg, cr);
+  _errStr += label;
+  char str[32];
+  sprintf(str, "%d", iarg);
+  _errStr += str;
+  if (cr) {
+    _errStr += "\n";
+  }
 }
 
 ///////////////////////////////////////////////
@@ -1900,7 +1919,13 @@ void Era5File::_addErrDbl(string label, double darg,
                             string format, bool cr)
   
 {
-  Radx::addErrDbl(_errStr, label, darg, format, cr);
+  _errStr += label;
+  char str[128];
+  sprintf(str, format.c_str(), darg);
+  _errStr += str;
+  if (cr) {
+    _errStr += "\n";
+  }
 }
 
 ////////////////////////////////////////
@@ -1910,72 +1935,10 @@ void Era5File::_addErrDbl(string label, double darg,
 void Era5File::_addErrStr(string label, string strarg, bool cr)
 
 {
-  Radx::addErrStr(_errStr, label, strarg, cr);
-}
-
-void Era5File::_clearRays()
-{
-  for (int ii = 0; ii < (int) _rays.size(); ii++) {
-    delete _rays[ii];
+  _errStr += label;
+  _errStr += strarg;
+  if (cr) {
+    _errStr += "\n";
   }
-  _rays.clear();
-}
-
-///////////////////////////////////////////////////////////////////
-// compute the true azimuth, elevation, etc. from platform
-// parameters using Testud's equations with their different
-// definitions of rotation angle, etc.
-//
-// see Wen-Chau Lee's paper
-// "Mapping of the Airborne Doppler Radar Data"
-
-void Era5File::computeRadarAngles(RadxGeoref &georef,
-                                  RadxCfactors &corr,
-                                  double &azimuthDeg,
-                                  double &elevationDeg)
-  
-{
-  
-  double R = (georef.getRoll() + corr.getRollCorr()) * Radx::DegToRad;
-  double P = (georef.getPitch() + corr.getPitchCorr()) * Radx::DegToRad;
-  double H = (georef.getHeading() + corr.getHeadingCorr()) * Radx::DegToRad;
-  double D = (georef.getDrift() + corr.getDriftCorr()) * Radx::DegToRad;
-  double T = H + D;
-  
-  double sinP = sin(P);
-  double cosP = cos(P);
-  double sinD = sin(D);
-  double cosD = cos(D);
-  
-  double theta_a = 
-    (georef.getRotation() + corr.getRotationCorr()) * Radx::DegToRad;
-  double tau_a =
-    (georef.getTilt() + corr.getTiltCorr()) * Radx::DegToRad;
-  double sin_tau_a = sin(tau_a);
-  double cos_tau_a = cos(tau_a);
-  double sin_theta_rc = sin(theta_a + R); /* roll corrected rotation angle */
-  double cos_theta_rc = cos(theta_a + R); /* roll corrected rotation angle */
-  
-  double xsubt = (cos_theta_rc * sinD * cos_tau_a * sinP
-                  + cosD * sin_theta_rc * cos_tau_a
-                  -sinD * cosP * sin_tau_a);
-  
-  double ysubt = (-cos_theta_rc * cosD * cos_tau_a * sinP
-                  + sinD * sin_theta_rc * cos_tau_a
-                  + cosP * cosD * sin_tau_a);
-  
-  double zsubt = (cosP * cos_tau_a * cos_theta_rc
-                  + sinP * sin_tau_a);
-  
-  double lambda_t = atan2(xsubt, ysubt);
-  double azimuthRad = fmod(lambda_t + T, M_PI * 2.0);
-  double elevationRad = asin(zsubt);
-  
-  elevationDeg = elevationRad * Radx::RadToDeg;
-  azimuthDeg = azimuthRad * Radx::RadToDeg;
-  if (azimuthDeg < 0) {
-    azimuthDeg += 360.0;
-  }
-  
 }
 

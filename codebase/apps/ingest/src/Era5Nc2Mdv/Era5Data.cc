@@ -53,7 +53,6 @@ using namespace std;
 const double Era5Data::MISSING_DOUBLE = -9999.9;
 const double Era5Data::BAD_LAT_LON = -9999;
 
-
 void null_heartbeat(const char *label)
 {
   // do nothing
