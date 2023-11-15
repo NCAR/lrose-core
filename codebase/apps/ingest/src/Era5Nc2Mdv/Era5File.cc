@@ -35,6 +35,7 @@
 
 #include "Era5File.hh"
 #include <Ncxx/NcxxVar.hh>
+#include <Radx/RadxTime.hh>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
