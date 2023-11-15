@@ -629,8 +629,44 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 2");
-    tt->comment_hdr = tdrpStrDup("INPUT DATA");
+    tt->comment_hdr = tdrpStrDup("CONSTRAIN BY ELEVATION ANGLE");
     tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'constrain_by_elevation_angle'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("constrain_by_elevation_angle");
+    tt->descr = tdrpStrDup("Constrain valid data to be between elevation limits.");
+    tt->help = tdrpStrDup("If TRUE, will only use sweeps with elevation angles between the limits.");
+    tt->val_offset = (char *) &constrain_by_elevation_angle - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_elevation_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_elevation_deg");
+    tt->descr = tdrpStrDup("Minimum elevation angle in input data (deg).");
+    tt->help = tdrpStrDup("Constrain the elevation of data used to be at or above this elevation angle.");
+    tt->val_offset = (char *) &min_elevation_deg - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'max_elevation_deg'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("max_elevation_deg");
+    tt->descr = tdrpStrDup("Maximum elevation angle in input data (deg).");
+    tt->help = tdrpStrDup("Constrain the elevation of data used to be at or below this elevation angle.");
+    tt->val_offset = (char *) &max_elevation_deg - &_start_;
+    tt->single_val.d = 90;
     tt++;
     
     // Parameter 'Comment 3'

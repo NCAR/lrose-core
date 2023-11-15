@@ -191,6 +191,13 @@ bool Data::_readLite(RadxFile &primaryFile, const std::string &path,
   // sort into ascending sweep order
   _vol.sortSweepsByFixedAngle();
 
+  // constrain by elevation angle
+
+  if (_params.constrain_by_elevation_angle) {
+    _vol.constrainByFixedAngle(_params.min_elevation_deg,
+                               _params.max_elevation_deg);
+  }
+
   // load sweeps
   _sweeps.clear();
   const vector<RadxSweep *> sw = _vol.getSweeps();

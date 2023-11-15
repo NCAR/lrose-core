@@ -447,6 +447,12 @@ public:
 
   double min_valid_precip_rate;
 
+  tdrp_bool_t constrain_by_elevation_angle;
+
+  double min_elevation_deg;
+
+  double max_elevation_deg;
+
   mode_t mode;
 
   char* instance;
@@ -565,7 +571,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[73];
+  mutable TDRPtable _table[76];
 
   const char *_className;
 
