@@ -22,6 +22,7 @@
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 #include <toolsa/copyright.h>
+#include <cmath>
 
 /**
  * @file Geom.cc
@@ -64,24 +65,8 @@ Geom::Geom(bool isIndexed, double angleResDeg,
     }
   }
 
-  if (outputAngleResDeg == 1.0)
-  {
-    _output_na = 360;
-  }
-  else if (outputAngleResDeg == 0.5)
-  {
-    _output_na = 720;
-  }
-  else if (outputAngleResDeg == 2.0)
-  {
-    _output_na = 180;
-  }
-  else
-  {
-    LOGF(LogMsg::ERROR, "COnfigured angle res=%lf only allow 0.5,1,2", 
-	 outputAngleResDeg);
-    exit(1);
-  }  
+  _output_na = (int) ((360.0 / fabs(outputAngleResDeg)) + 0.5);
+
 }
 
 //----------------------------------------------------------------
