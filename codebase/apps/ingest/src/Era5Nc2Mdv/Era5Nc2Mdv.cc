@@ -48,6 +48,7 @@
 #include <didss/DataFileNames.hh>
 #include <dsserver/DsLdataInfo.hh>
 #include "Era5Nc2Mdv.hh"
+#include "Era5File.hh"
 using namespace std;
 
 const fl32 Era5Nc2Mdv::_missingFloat = -9999.0;
@@ -226,6 +227,10 @@ int Era5Nc2Mdv::Run ()
       cerr << "Processing files for time: " << DateTime::strm(seedTime) << endl;
       for (size_t ii = 0; ii < timePaths.size(); ii++) {
         cerr << "  path: " << timePaths[ii] << endl;
+        if (_processFile(timePaths[ii])) {
+          cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
+          cerr << "  path: " << timePaths[ii] << endl;
+        }
       }
       cerr << "=================================" << endl;
     }
@@ -259,7 +264,7 @@ int Era5Nc2Mdv::Run ()
 ///////////////////////////////
 // process file
 
-int Era5Nc2Mdv::_processFile(const char *input_path)
+int Era5Nc2Mdv::_processFile(const string &input_path)
 
 {
 
@@ -269,6 +274,15 @@ int Era5Nc2Mdv::_processFile(const char *input_path)
     cerr << "Processing file: " << input_path << endl;
   }
 
+  // read file into object
+
+  Era5File eraFile(_params);
+  if (eraFile.readFromPath(input_path)) {
+    cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
+    cerr << "  File path: " << input_path << endl;
+    return -1;
+  }
+  
   return 0;
 
   // open file

@@ -239,6 +239,43 @@ int Era5File::readFromPath(const string &path)
     return -1;
   }
 
+  // read lat lon variables
+  
+  if (_readLatLon()) {
+    _addErrStr(errStr);
+    return -1;
+  }
+
+  cerr << "1111111111111111111111111111111111111111" << endl;
+
+  cerr << "File: " << path << endl;
+  cerr << "  _nTimesInFile: " << _nTimesInFile << endl;
+  cerr << "  _nLat: " << _nLat << endl;
+  cerr << "  _nLon: " << _nLon << endl;
+  cerr << "  _nPoints: " << _nPoints << endl;
+  
+  cerr << "  _refTime: " << _refTime.asString() << endl;
+  for (size_t ii = 0; ii < _iTimes.size(); ii++) {
+    cerr << "    ii, itime: " << ii << ", " << _iTimes[ii] << endl;
+  }
+  for (size_t ii = 0; ii < _dataTimes.size(); ii++) {
+    cerr << "    ii, time: " << ii << ", " << _dataTimes[ii].asString() << endl;
+  }
+
+  cerr << "lats: ";
+  for (size_t ii = 0; ii < _lat.size(); ii++) {
+    cerr << _lat[ii] << ", ";
+  }
+  cerr << endl;
+
+  cerr << "lons: ";
+  for (size_t ii = 0; ii < _lon.size(); ii++) {
+    cerr << _lon[ii] << ", ";
+  }
+  cerr << endl;
+
+  cerr << "1111111111111111111111111111111111111111" << endl;
+
 #ifdef JUNK
   
   // read range variable
@@ -432,13 +469,24 @@ int Era5File::_readTimes()
 
   int year, month, day, hour, min, sec;
   if (sscanf(units.c_str(),
-             "hours since %4d-%2d-%2d %2d-%2d-%2d",
+             "hours since %4d-%2d-%2d %2d:%2d:%2d",
              &year, &month, &day, &hour, &min, &sec) != 6) {
     _addErrStr("ERROR - Era5File::_readTimes");
     _addErrStr("  Bad time units string: ", units);
   }
   _refTime.set(year, month, day, hour, min, sec);
 
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
+  cerr << "year, month, day, hour, min, sec: "
+       << year << ", "
+       << month << ", "
+       << day << ", "
+       << hour << ", "
+       << min << ", "
+       << sec << endl;
+  cerr << "RefTime: " << _refTime.asString() << endl;
+  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
+  
   // read the time array
   
   _iTimes.resize(_nTimesInFile);
@@ -451,7 +499,8 @@ int Era5File::_readTimes()
     return -1;
   }
   for (size_t ii = 0; ii < _nTimesInFile; ii++) {
-    DateTime mtime = _refTime + _iTimes[ii] * 3600;
+    DeltaTime delTime((long) _iTimes[ii] * 3600);
+    DateTime mtime = _refTime + delTime;
     _dataTimes.push_back(mtime);
   }
 

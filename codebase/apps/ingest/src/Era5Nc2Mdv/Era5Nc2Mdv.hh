@@ -135,7 +135,7 @@ private:
 
   // private methods
 
-  int _processFile(const char *input_path);
+  int _processFile(const string &inputPath);
   void _initInputProjection();
 
   /// open netcdf file
