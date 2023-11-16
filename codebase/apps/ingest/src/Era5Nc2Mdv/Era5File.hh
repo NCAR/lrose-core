@@ -38,6 +38,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include <Ncxx/Ncxx.hh>
 #include <Ncxx/NcxxFile.hh>
@@ -67,25 +68,18 @@ public:
   
   virtual void clear();
   
-  /// Check if specified file is a Matt type file.
-  /// Returns true on success, false on failure
-  
-  bool isEra5File(const string &path);
-    
   //////////////////////////////////////////////////////////////
   /// Perform the read:
-  
   /// Read in data file from specified path,
   /// Returns 0 on success, -1 on failure
   /// Use getErrStr() if error occurs
   
   int readFromPath(const string &path, int timeIndex);
   
-  /// Get the date and time from a dorade file path.
-  /// returns 0 on success, -1 on failure
+  // print data details after read
   
-  // int getTimeFromPath(const string &path, DateTime &dtime);
-  
+  void printData(ostream &out);
+
   ////////////////////////
   /// \name Error string:
   //@{
@@ -116,6 +110,7 @@ private:
   // netcdf file
   
   NcxxFile _file;
+  string _pathInUse;
 
   // dimensions
 
@@ -173,41 +168,11 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
   int _readLatLon();
+  int _readLevel();
   int _readField(int timeIndex);
   int _readFieldVariable(string fieldName,
                          int timeIndex,
                          NcxxVar &var);
-
-#ifdef JUNK
-  int _readRayVar(const string &name, vector<double> &vals);
-  int _readRayVar(const string &name, vector<float> &vals);
-  int _getRayVar(NcxxVar &var, const string &name, bool required);
-
-  int _readFieldVariablesAuto();
-  int _readFieldVariablesSpecified();
-  
-  int _readFieldVariable(string inputName,
-                         string outputName,
-                         NcxxVar &var,
-                         bool &gotStatus,
-                         bool required = false,
-                         bool applyMask = false,
-                         const string maskName = "",
-                         int maskValidValue = 0);
-  
-  int _readMaskVar(const string &maskFieldName,
-                   vector<int> &maskVals);
-
-  int _addFl64FieldData(NcxxVar &var,
-                        const string &name,
-                        const string &units,
-                        const string &description);
-  
-  int _addFl32FieldData(NcxxVar &var,
-                        const string &name,
-                        const string &units,
-                        const string &description);
-#endif
 
   /// add integer value to error string, with label
   
