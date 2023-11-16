@@ -86,11 +86,10 @@ void Era5File::clear()
   _datasetUrl.clear();
   _datasetDoi.clear();
 
-  // _timeVar.setNull();
   _dataTimes.clear();
   _iTimes.clear();
 
-  _data.clear();
+  _fieldData.clear();
   
 }
 
@@ -187,11 +186,15 @@ int Era5File::getTimeFromPath(const string &path, DateTime &rtime)
 ////////////////////////////////////////////////////////////
 // Read in data from specified path, load up volume object.
 //
+// If timeIndex is negative, do not read field data.
+// If timeIndex is 0 or positive, read for that time index.
+//
 // Returns 0 on success, -1 on failure
 //
 // Use getErrStr() if error occurs
 
-int Era5File::readFromPath(const string &path)
+int Era5File::readFromPath(const string &path,
+                           int timeIndex)
   
 {
   
@@ -246,35 +249,65 @@ int Era5File::readFromPath(const string &path)
     return -1;
   }
 
-  cerr << "1111111111111111111111111111111111111111" << endl;
-
-  cerr << "File: " << path << endl;
-  cerr << "  _nTimesInFile: " << _nTimesInFile << endl;
-  cerr << "  _nLat: " << _nLat << endl;
-  cerr << "  _nLon: " << _nLon << endl;
-  cerr << "  _nPoints: " << _nPoints << endl;
-  
-  cerr << "  _refTime: " << _refTime.asString() << endl;
-  for (size_t ii = 0; ii < _iTimes.size(); ii++) {
-    cerr << "    ii, itime: " << ii << ", " << _iTimes[ii] << endl;
-  }
-  for (size_t ii = 0; ii < _dataTimes.size(); ii++) {
-    cerr << "    ii, time: " << ii << ", " << _dataTimes[ii].asString() << endl;
+  if (timeIndex >= 0) {
+    if (_readField(timeIndex)) {
+      _addErrStr(errStr);
+      return -1;
+    }
   }
 
-  cerr << "lats: ";
-  for (size_t ii = 0; ii < _lat.size(); ii++) {
-    cerr << _lat[ii] << ", ";
-  }
-  cerr << endl;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    
+    cerr << "========================================================" << endl;
+    
+    cerr << "File: " << path << endl;
+    cerr << "  _nTimesInFile: " << _nTimesInFile << endl;
+    cerr << "  _nLat: " << _nLat << endl;
+    cerr << "  _nLon: " << _nLon << endl;
+    cerr << "  _nPoints: " << _nPoints << endl;
+    
+    cerr << "  _refTime: " << _refTime.asString() << endl;
+    for (size_t ii = 0; ii < _iTimes.size(); ii++) {
+      cerr << "    ii, itime: " << ii << ", " << _iTimes[ii] << endl;
+    }
+    for (size_t ii = 0; ii < _dataTimes.size(); ii++) {
+      cerr << "    ii, time: " << ii << ", " << _dataTimes[ii].asString() << endl;
+    }
+    
+    cerr << "=============>> lats: ";
+    for (size_t ii = 0; ii < _lat.size(); ii++) {
+      cerr << _lat[ii] << ", ";
+    }
+    cerr << endl;
+    
+    cerr << "=============>> lons: ";
+    for (size_t ii = 0; ii < _lon.size(); ii++) {
+      cerr << _lon[ii] << ", ";
+    }
+    cerr << endl;
+    
+    if (timeIndex >= 0) {
+      cerr << "=============== field ===============" << endl;
+      cerr << "  name: " << _name << endl;
+      cerr << "  longName: " << _longName << endl;
+      cerr << "  shortName: " << _shortName << endl;
+      cerr << "  units: " << _units << endl;
+      cerr << "  fillValue: " << _fillValue << endl;
+      cerr << "  minValue: " << _minValue << endl;
+      cerr << "  maxValue: " << _maxValue << endl;
+      if (_params.debug >= Params::DEBUG_EXTRA) {
+        cerr << "=============>> data: ";
+        for (size_t ii = 0; ii < _fieldData.size(); ii++) {
+          cerr << _fieldData[ii] << endl;
+        }
+        cerr << endl;
+      }
+      cerr << "=============== field ===============" << endl;
+    }
+    
+    cerr << "========================================================" << endl;
 
-  cerr << "lons: ";
-  for (size_t ii = 0; ii < _lon.size(); ii++) {
-    cerr << _lon[ii] << ", ";
   }
-  cerr << endl;
-
-  cerr << "1111111111111111111111111111111111111111" << endl;
 
 #ifdef JUNK
   
@@ -321,18 +354,17 @@ int Era5File::readFromPath(const string &path)
 
   _loadReadVolume();
 
+#endif
+  
   // close file
   
   _file.close();
 
   // clean up
 
-  _rays.clear();
-  _dataTimes.clear();
-  _dTimes.clear();
-
-#endif
-  
+  // _rays.clear();
+  // _dataTimes.clear();
+  // _dTimes.clear();
 
   return 0;
 
@@ -476,17 +508,6 @@ int Era5File::_readTimes()
   }
   _refTime.set(year, month, day, hour, min, sec);
 
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-  cerr << "year, month, day, hour, min, sec: "
-       << year << ", "
-       << month << ", "
-       << day << ", "
-       << hour << ", "
-       << min << ", "
-       << sec << endl;
-  cerr << "RefTime: " << _refTime.asString() << endl;
-  cerr << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
-  
   // read the time array
   
   _iTimes.resize(_nTimesInFile);
@@ -582,6 +603,191 @@ int Era5File::_readLatLon()
     _addErrStr("  getVal fails, cannot get longitude array, var name: ",
                _lonVar.getName());
     return -1;
+  }
+
+  return 0;
+
+}
+
+/////////////////////////////////////////
+// read field for a specified time index
+
+int Era5File::_readField(int timeIndex)
+
+{
+
+  _timeIndex = timeIndex;
+
+  // loop through the variables, adding data fields as appropriate
+  
+  const multimap<string, NcxxVar> &vars = _file.getVars();
+
+  for (multimap<string, NcxxVar>::const_iterator iter = vars.begin();
+       iter != vars.end(); iter++) {
+    
+    NcxxVar var = iter->second;
+    if (var.isNull()) {
+      continue;
+    }
+    
+    if (_readFieldVariable(var.getName(), timeIndex, var) == 0) {
+      return 0;
+    }
+    
+  } // iter
+
+  // no field found
+  
+  return -1;
+
+}
+
+////////////////////////////////////////////
+// read in a field variable
+
+int Era5File::_readFieldVariable(string fieldName,
+                                 int timeIndex,
+                                 NcxxVar &var)
+  
+{
+
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    cerr << "DEBUG - Era5File::_readFieldVariable" << endl;
+    cerr << "  -->> adding field, input name: " << fieldName << endl;
+    cerr << "  -->> timeIndex: " << timeIndex << endl;
+  }
+  
+  // check the type
+  
+  NcxxType ftype = var.getType();
+  if (ftype != ncxxFloat) {
+    return -1;
+  }
+  
+  int numDims = var.getDimCount();
+  // we need fields with 4 dimensions
+  if (numDims != 4) {
+    return -1;
+  }
+  
+  // check that we have the correct dimensions
+  
+  NcxxDim timeDim = var.getDim(0);
+  if (timeDim != _timeDim) {
+    return -1;
+  }
+  
+  NcxxDim levelDim = var.getDim(1);
+  if (levelDim != _levelDim) {
+    return -1;
+  }
+  
+  NcxxDim latDim = var.getDim(2);
+  if (latDim != _latDim) {
+    return -1;
+  }
+  
+  NcxxDim lonDim = var.getDim(3);
+  if (lonDim != _lonDim) {
+    return -1;
+  }
+  
+  // set names, units, etc from attributes
+
+  _name = var.getName();
+  try {
+    NcxxVarAtt att = var.getAtt("long_name");
+    att.getValues(_longName);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  Var has no long_name: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("short_name");
+    att.getValues(_shortName);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  Var has no short_name: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("units");
+    att.getValues(_units);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  Var has no units: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  try {
+    NcxxVarAtt att = var.getAtt("_FillValue");
+    att.getValues(&_fillValue);
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  Var has no _FillValue: ", fieldName);
+    _addErrStr("  ", e.whatStr());
+    return -1;
+  }
+
+  _minValue = -1.0e33;
+  try {
+    NcxxVarAtt att = var.getAtt("minimum_value");
+    att.getValues(&_minValue);
+  } catch (NcxxException& e) {
+  }
+
+  _maxValue = 1.0e33;
+  try {
+    NcxxVarAtt att = var.getAtt("maximum_value");
+    att.getValues(&_maxValue);
+  } catch (NcxxException& e) {
+  }
+
+  // set starting location in each dimension
+
+  vector<size_t> start;
+  start.push_back(timeIndex);
+  start.push_back(0);
+  start.push_back(0);
+  start.push_back(0);
+
+  // set count in each dimension
+
+  vector<size_t> count;
+  count.push_back(1);
+  count.push_back(1);
+  count.push_back(_nLat);
+  count.push_back(_nLon);
+
+  vector<float> fdata;
+  fdata.resize(_nTimesInFile * _nPoints);
+  try {
+    var.getVal(fdata.data());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  getVal fails, var name: ",
+               var.getName());
+    return -1;
+  }
+  
+  _fieldData.resize(_nPoints);
+  try {
+    var.getVal(start, count, _fieldData.data());
+  } catch (NcxxException& e) {
+    _addErrStr("ERROR - Era5File::_readFieldVariable");
+    _addErrStr("  getVal fails, var name: ",
+               var.getName());
+    return -1;
+  }
+
+  for (size_t ii = 0; ii < (size_t) _nPoints; ii++) {
+    cerr << "ffffffffff ii " << ii << ", " << fdata[timeIndex * _nPoints + ii] << ", " << _fieldData[ii] << endl;
   }
 
   return 0;

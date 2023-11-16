@@ -26,9 +26,9 @@
 //
 // Era5Nc2Mdv object
 //
-// Mike Dixon, RAP, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
+// Mike Dixon, EOL, NCAR, P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2008
+// Oct 2023
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -202,7 +202,7 @@ int Era5Nc2Mdv::Run ()
 
     // create set of paths at the seed time
     
-    vector<string> timePaths;
+    vector<string> pathsAtTime;
     while ((inputPath = _input->next()) != NULL) {
       
       time_t fileTime;
@@ -214,7 +214,7 @@ int Era5Nc2Mdv::Run ()
       }
 
       if (fileTime == seedTime) {
-        timePaths.push_back(inputPath);
+        pathsAtTime.push_back(inputPath);
       } else {
         seedPath = inputPath;
         break;
@@ -225,11 +225,11 @@ int Era5Nc2Mdv::Run ()
     if (_params.debug >= Params::DEBUG_VERBOSE) {
       cerr << "=================================" << endl;
       cerr << "Processing files for time: " << DateTime::strm(seedTime) << endl;
-      for (size_t ii = 0; ii < timePaths.size(); ii++) {
-        cerr << "  path: " << timePaths[ii] << endl;
-        if (_processFile(timePaths[ii])) {
+      for (size_t ii = 0; ii < pathsAtTime.size(); ii++) {
+        cerr << "  path: " << pathsAtTime[ii] << endl;
+        if (_processFile(pathsAtTime[ii], 0)) {
           cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
-          cerr << "  path: " << timePaths[ii] << endl;
+          cerr << "  path: " << pathsAtTime[ii] << endl;
         }
       }
       cerr << "=================================" << endl;
@@ -264,7 +264,7 @@ int Era5Nc2Mdv::Run ()
 ///////////////////////////////
 // process file
 
-int Era5Nc2Mdv::_processFile(const string &input_path)
+int Era5Nc2Mdv::_processFile(const string &input_path, int timeIndex)
 
 {
 
@@ -277,9 +277,10 @@ int Era5Nc2Mdv::_processFile(const string &input_path)
   // read file into object
 
   Era5File eraFile(_params);
-  if (eraFile.readFromPath(input_path)) {
+  if (eraFile.readFromPath(input_path, timeIndex)) {
     cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
     cerr << "  File path: " << input_path << endl;
+    cerr << eraFile.getErrStr() << endl;
     return -1;
   }
   

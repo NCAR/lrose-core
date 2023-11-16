@@ -79,7 +79,7 @@ public:
   /// Returns 0 on success, -1 on failure
   /// Use getErrStr() if error occurs
   
-  int readFromPath(const string &path);
+  int readFromPath(const string &path, int timeIndex);
   
   /// Get the date and time from a dorade file path.
   /// returns 0 on success, -1 on failure
@@ -157,12 +157,14 @@ private:
   
   // field data
 
-  vector<float> _data;
-  float _fillValue;
-  float _minVal, _maxVal;
+  int _timeIndex;
+  string _name;
   string _longName;
   string _shortName;
   string _units;
+  float _fillValue;
+  float _minValue, _maxValue;
+  vector<float> _fieldData;
 
   // private methods
   
@@ -171,7 +173,10 @@ private:
   int _readGlobalAttributes();
   int _readTimes();
   int _readLatLon();
-  int _readField();
+  int _readField(int timeIndex);
+  int _readFieldVariable(string fieldName,
+                         int timeIndex,
+                         NcxxVar &var);
 
 #ifdef JUNK
   int _readRayVar(const string &name, vector<double> &vals);
