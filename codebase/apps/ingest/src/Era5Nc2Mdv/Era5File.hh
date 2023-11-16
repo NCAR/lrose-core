@@ -109,7 +109,6 @@ public:
   const vector<DateTime> &getDataTimes() const { return _dataTimes; }
   const vector<int> &getITimes() const { return _iTimes; }
 
-
   const vector<double> &getLon() const { return _lon; }
   const vector<double> &getLat() const { return _lat; }
   double getLevel() const {
@@ -120,7 +119,7 @@ public:
     }
   }
   int getTimeIndex() const { return _timeIndex; }
-  string getFieldName() const { return _name; }
+  string getFieldName() const { return _fieldName; }
   string getLongName() const { return _longName; }
   string getShortName() const { return _shortName; }
   string getUnits() const { return _units; }
@@ -187,7 +186,7 @@ private:
   // field data
 
   int _timeIndex;
-  string _name;
+  string _fieldName;
   string _longName;
   string _shortName;
   string _units;

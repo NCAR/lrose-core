@@ -180,7 +180,7 @@ int Era5File::readFromPath(const string &path,
 
   // print data in debug mode
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     printData(std::cerr);
   }
   
@@ -263,7 +263,7 @@ int Era5File::_readGlobalAttributes()
     }
   }
   
-  if (_params.debug >= Params::DEBUG_VERBOSE) {
+  if (_params.debug >= Params::DEBUG_EXTRA) {
     if (_history.size() > 0) {
       cerr << "history: " << _history << endl;
     }
@@ -565,7 +565,7 @@ int Era5File::_readFieldVariable(string fieldName,
   
   // set names, units, etc from attributes
 
-  _name = var.getName();
+  _fieldName = var.getName();
   try {
     NcxxVarAtt att = var.getAtt("long_name");
     att.getValues(_longName);
@@ -702,7 +702,7 @@ void Era5File::printData(ostream &out)
   if (_timeIndex >= 0) {
     out << "=============== field ===============" << endl;
     out << "  time: " << _dataTimes[_timeIndex].asString() << endl;
-    out << "  name: " << _name << endl;
+    out << "  fieldName: " << _fieldName << endl;
     out << "  longName: " << _longName << endl;
     out << "  shortName: " << _shortName << endl;
     out << "  units: " << _units << endl;

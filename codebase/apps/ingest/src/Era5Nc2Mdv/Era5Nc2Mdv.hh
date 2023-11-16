@@ -24,12 +24,10 @@
 /////////////////////////////////////////////////////////////
 // Era5Nc2Mdv.hh
 //
-// Era5Nc2Mdv object
-//
-// Mike Dixon, RAP, NCAR
+// Mike Dixon, EOL, NCAR
 // P.O.Box 3000, Boulder, CO, 80307-3000, USA
 //
-// Oct 2008
+// Nov 2023
 //
 ///////////////////////////////////////////////////////////////
 //
@@ -42,13 +40,9 @@
 #define Era5Nc2Mdv_H
 
 #include <string>
-#include <toolsa/TaArray.hh>
 #include <didss/DsInputPath.hh>
 #include <Mdv/DsMdvx.hh>
 #include <Mdv/MdvxProj.hh>
-#include <Mdv/MdvxRemapLut.hh>
-#include <Ncxx/Nc3File.hh>
-#include <Ncxx/Nc3File.hh>
 #include "Args.hh"
 #include "Params.hh"
 using namespace std;
@@ -80,84 +74,34 @@ protected:
   
 private:
 
-  static const fl32 _missingFloat;
-
   string _progName;
   char *_paramsPath;
   Args _args;
   Params _params;
   DsInputPath *_input;
 
-  // NetCDF file
-
-  Nc3File *_ncFile;
-  Nc3Error *_ncErr;
-  
-  // NetCDF dimensions
-
-  Nc3Dim *_timeDim;
-  Nc3Dim *_zDim;
-  Nc3Dim *_yDim;
-  Nc3Dim *_xDim;
-
-  // NetCDF coordinate variables
-
-  Nc3Var *_baseTimeVar;
-  Nc3Var *_timeOffsetVar;
-  Nc3Var *_zVar;
-  Nc3Var *_yVar;
-  Nc3Var *_xVar;
-
-  TaArray<float> _zArray_, _yArray_, _xArray_;
-  float *_zArray, *_yArray, *_xArray;
-
-  // NetCDF attributes
-
-  string _source;
-  string _history;
+  fl32 _missingFloat;
 
   // data set members
   
   MdvxProj _inputProj;
-  MdvxRemapLut _remapLut;
   int _nTimes;
   time_t _validTime;
   int _nx, _ny, _nz;
   double _minx, _miny, _minz;
-  double _maxx, _maxy, _maxz;
   double _dx, _dy, _dz;
-  bool _yIsReversed;
-  bool _dxIsConstant, _dyIsConstant;
-
-  int _nxValid, _nyValid;
-  int _ixValidStart, _ixValidEnd;
-  int _iyValidStart, _iyValidEnd;
-
+  
   // private methods
 
+  int _processTime(const vector<string> &pathsAtTime);
   int _processFile(const string &inputPath, int timeIndex);
   void _initInputProjection();
-
-  /// open netcdf file
-  /// create error object so we can handle errors
-  /// Returns 0 on success, -1 on failure
-
-  int _openNc3File(const string &path);
-
-  /// close netcdf file if open
-  /// remove error object if it exists
   
-  void _closeNc3File();
-
-  // load up dimensions and variables
-
-  int _loadMetaData();
-
   /// set MDV headers
 
   int _setMasterHeader(DsMdvx &mdvx, int itime);
   int _addDataFields(DsMdvx &mdvx, int itime);
-  int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime, bool xySwapped);
+  //   int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
   
   MdvxField *_createMdvxField(const string &fieldName,
                               const string &longName,
@@ -167,16 +111,10 @@ private:
                               double dx, double dy, double dz,
                               const float *vals);
 
-  void _transformField(MdvxField *field);
-
   MdvxField *_createRegularLatlonField(const string &fieldName,
                                        const string &longName,
                                        const string &units,
                                        const float *vals);
-
-  void _printFile(Nc3File &ncf);
-  void _printAtt(Nc3Att *att);
-  void _printVarVals(Nc3Var *var);
 
   void _remapOutput(DsMdvx &mdvx);
   void _autoRemapToLatLon(DsMdvx &mdvx);
