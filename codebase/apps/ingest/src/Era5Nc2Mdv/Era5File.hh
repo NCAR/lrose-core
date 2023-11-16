@@ -88,12 +88,47 @@ public:
   
   void clearErrStr() { _errStr.clear(); }
   
-  /// Get the Error String.
-  ///
-  /// The contents are only meaningful if an error has returned.
+  /// Get methods
   
   string getErrStr() const { return _errStr; }
+  string getPathInUse() const { return _pathInUse; }
+
+  size_t getNTimesInFile() const { return _nTimesInFile; }
+  size_t getNLevels() const { return _nLevels; }
+  size_t getNLat() const { return _nLat; }
+  size_t getNLon() const { return _nLon; }
+  size_t getNPoints() const { return _nPoints; }
   
+  string getDataSource() const { return _dataSource; }
+  string getHistory() const { return _history; }
+  string getDatasetUrl() const { return _datasetUrl; }
+  string getDatasetDoi() const { return _datasetDoi; }
+  
+  const DateTime &getRefTime() const { return _refTime; }
+  const DateTime &getStartTime() const { return _startTime; }
+  const vector<DateTime> &getDataTimes() const { return _dataTimes; }
+  const vector<int> &getITimes() const { return _iTimes; }
+
+
+  const vector<double> &getLon() const { return _lon; }
+  const vector<double> &getLat() const { return _lat; }
+  double getLevel() const {
+    if (_level.size() > 0) {
+      return _level[0];
+    } else {
+      return -9999.0;
+    }
+  }
+  int getTimeIndex() const { return _timeIndex; }
+  string getFieldName() const { return _name; }
+  string getLongName() const { return _longName; }
+  string getShortName() const { return _shortName; }
+  string getUnits() const { return _units; }
+  float getFillValue() const { return _fillValue; }
+  float getMinValue() const { return _minValue; }
+  float getMaxValue() const { return _maxValue; }
+  const vector<float> &getFieldData() const { return _fieldData; }
+
   //@}
 
 protected:
@@ -122,7 +157,7 @@ private:
   size_t _nTimesInFile;
   size_t _nLevels;
   size_t _nLat, _nLon;
-  ssize_t _nPoints;
+  size_t _nPoints;
 
   // global attributes
 
@@ -138,7 +173,6 @@ private:
   NcxxVar _timeVar;
   vector<DateTime> _dataTimes;
   vector<int> _iTimes;
-  int _hour;
 
   // lon/lat
 
