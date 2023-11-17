@@ -84,16 +84,24 @@ private:
 
   // data set members
   
-  MdvxProj _inputProj;
+  size_t _nTimesInFile;
+  size_t _nLat, _nLon;
+  vector<double> _lat, _lon;
+  vector<DateTime> _dataTimes;
+  vector<double> _levels;
+  vector<string> _fieldNames;
+  
   int _nTimes;
   time_t _validTime;
   int _nx, _ny, _nz;
   double _minx, _miny, _minz;
   double _dx, _dy, _dz;
+  bool _inverty;
   
   // private methods
 
   int _processTime(const vector<string> &pathsAtTime);
+  void _printGeom(ostream &out);
   int _processFile(const string &inputPath, int timeIndex);
   void _initInputProjection();
   

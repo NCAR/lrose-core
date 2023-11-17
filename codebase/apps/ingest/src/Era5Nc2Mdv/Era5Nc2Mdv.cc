@@ -255,13 +255,9 @@ int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
   // read all of the files and check that the geometry is
   // constant throughout the data set
   
-  size_t nTimesInFile = 0;
-  size_t nLat = 0, nLon = 0;
-  vector<double> lat, lon;
-  vector<DateTime> dataTimes;
   set<double> levelsSet;
   set<string> fieldNamesSet;
-  
+
   for (size_t ii = 0; ii < pathsAtTime.size(); ii++) {
     
     // read file metadata
@@ -277,44 +273,44 @@ int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
     // check geometry is constant
     
     if (ii == 0) {
-      nTimesInFile = eraFile.getNTimesInFile();
-      nLat = eraFile.getNLat();
-      nLon = eraFile.getNLon();
-      lat = eraFile.getLat();
-      lon = eraFile.getLon();
-      dataTimes = eraFile.getDataTimes();
+      _nTimesInFile = eraFile.getNTimesInFile();
+      _nLat = eraFile.getNLat();
+      _nLon = eraFile.getNLon();
+      _lat = eraFile.getLat();
+      _lon = eraFile.getLon();
+      _dataTimes = eraFile.getDataTimes();
     } else {
-      if (nTimesInFile != eraFile.getNTimesInFile()) {
+      if (_nTimesInFile != eraFile.getNTimesInFile()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  number of times not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
         return -1;
       }
-      if (nLat != eraFile.getNLat()) {
+      if (_nLat != eraFile.getNLat()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  number of latitudes not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
         return -1;
       }
-      if (nLon != eraFile.getNLon()) {
+      if (_nLon != eraFile.getNLon()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  number of longitudes not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
         return -1;
       }
-      if (lat != eraFile.getLat()) {
+      if (_lat != eraFile.getLat()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  latitudes not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
         return -1;
       }
-      if (lon != eraFile.getLon()) {
+      if (_lon != eraFile.getLon()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  longitudes not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
         return -1;
       }
-      if (dataTimes != eraFile.getDataTimes()) {
+      if (_dataTimes != eraFile.getDataTimes()) {
         cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
         cerr << "  data times not constant" << endl;
         cerr << "  file path: " << pathsAtTime[ii] << endl;
@@ -328,58 +324,104 @@ int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
   } // ii
 
   // copy sets to vectors
+
+  _levels.clear();
+  for (auto ii = levelsSet.begin(); ii != levelsSet.end(); ii++) {
+    _levels.push_back(*ii);
+  }
+  _fieldNames.clear();
+  for (auto ii = fieldNamesSet.begin(); ii != fieldNamesSet.end(); ii++) {
+    _fieldNames.push_back(*ii);
+  }
+
+  // set geom
+
+  _ny = _nLat;
+  _miny = _lat[0];
+  _dy = (_lat[_nLat-1] - _lat[0]) / (_lat.size() - 1.0);
+  _inverty = false;
+  if (_dy < 0) {
+    _dy *= -1.0;
+    _miny = _lat[_nLat-1];
+    _inverty = true;
+  }
   
-  vector<double> levels(levelsSet.begin(), levelsSet.end());
-  vector<string> fieldNames(fieldNamesSet.begin(), fieldNamesSet.end());
+  _nx = _nLon;
+  _minx = _lon[0];
+  _dx = (_lon[_nLon-1] - _lon[0]) / (_lon.size() - 1.0);
+  if (_minx > 180.0) {
+    _minx -= 360.0;
+  }
 
+  _minz = _levels[0];
+  _dz = (_levels[_levels.size() - 1] - _minz) / (_levels.size() - 1.0);
+  _nz = _levels.size();
+  
   if (_params.debug >= Params::DEBUG_VERBOSE) {
-
-    cerr << "================================================" << endl;
-    cerr << "  nTimesInFile: " << nTimesInFile << endl;
-    cerr << "  nLat: " << nLat << endl;
-    cerr << "  nLon: " << nLon << endl;
-    cerr << "=========>> lats: ";
-    for (size_t ii = 0; ii < lat.size(); ii++) {
-      cerr << lat[ii];
-      if (ii < lat.size() - 1) {
-        cerr << ", ";
-      }
-    }
-    cerr << endl;
-    cerr << "=========>> lons: ";
-    for (size_t ii = 0; ii < lon.size(); ii++) {
-      cerr << lon[ii];
-      if (ii < lon.size() - 1) {
-        cerr << ", ";
-      }
-    }
-    cerr << endl;
-    for (size_t ii = 0; ii < dataTimes.size(); ii++) {
-      cerr << "    ii, dataTime: "
-           << ii << ", "
-           << dataTimes[ii].asString() << endl;
-    }
-    cerr << "=========>> levels: ";
-    for (size_t ii = 0; ii < levels.size(); ii++) {
-      cerr << levels[ii];
-      if (ii < levels.size() - 1) {
-        cerr << ", ";
-      }
-    }
-    cerr << endl;
-    cerr << "=========>> fieldNames: ";
-    for (size_t ii = 0; ii < fieldNames.size(); ii++) {
-      cerr << fieldNames[ii];
-      if (ii < fieldNames.size() - 1) {
-        cerr << ", ";
-      }
-    }
-    cerr << endl;
-    cerr << "================================================" << endl;
+    _printGeom(cerr);
   }
   
   return 0;
 
+}
+
+///////////////////////////////////////////////
+// print geometry
+
+void Era5Nc2Mdv::_printGeom(ostream &out)
+{
+
+  out << "================================================" << endl;
+  out << "  nTimesInFile: " << _nTimesInFile << endl;
+  out << "  nLat: " << _nLat << endl;
+  out << "  nLon: " << _nLon << endl;
+  out << "=========>> lats: ";
+  for (size_t ii = 0; ii < _lat.size(); ii++) {
+    out << _lat[ii];
+    if (ii < _lat.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << endl;
+  out << "=========>> lons: ";
+  for (size_t ii = 0; ii < _lon.size(); ii++) {
+    out << _lon[ii];
+    if (ii < _lon.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << endl;
+  for (size_t ii = 0; ii < _dataTimes.size(); ii++) {
+    out << "    ii, dataTime: "
+         << ii << ", "
+         << _dataTimes[ii].asString() << endl;
+  }
+  out << "=========>> _levels: ";
+  for (size_t ii = 0; ii < _levels.size(); ii++) {
+    out << _levels[ii];
+    if (ii < _levels.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << endl;
+
+  out << "=====>> nz, ny, nx: "
+      << _nz << ", " << _ny << ", " << _nx << endl;
+  out << "=====>> minz, miny, minx: "
+      << _minz << ", " << _miny << ", " << _minx << endl;
+  out << "====>> dz, dy, dx: "
+      << _dz << ", " << _dy << ", " << _dx << endl;
+  out << "====>> inverty: " << (_inverty? "Y":"N") << endl;
+  out << "=========>> fieldNames: ";
+  for (size_t ii = 0; ii < _fieldNames.size(); ii++) {
+    out << _fieldNames[ii];
+    if (ii < _fieldNames.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << endl;
+  out << "================================================" << endl;
+    
 }
 
 ///////////////////////////////
@@ -1180,7 +1222,7 @@ MdvxField *Era5Nc2Mdv::_createMdvxField
   Mdvx::field_header_t fhdr;
   MEM_zero(fhdr);
   
-  _inputProj.syncToFieldHdr(fhdr);
+  // _inputProj.syncToFieldHdr(fhdr);
 
   fhdr.compression_type = Mdvx::COMPRESSION_NONE;
   fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
