@@ -408,6 +408,50 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
     return -1;
   }
 
+  // create and add the field objects, with empty data arrays
+
+  for (size_t ii = 0; ii < _fieldNames.size(); ii++) {
+    MdvxField *fld = _createMdvxField(_fieldNames[ii]);
+    mdvx.addField(fld);
+  }
+
+  // loop through the files, setting the field data appropriately
+
+  for (size_t ii = 0; ii < pathsAtTime.size(); ii++) {
+    
+    // read file metadata
+    
+    Era5File eraFile(_params);
+    if (eraFile.readFromPath(pathsAtTime[ii], timeIndex)) {
+      cerr << "ERROR - Era5Nc2Mdv::_createVol" << endl;
+      cerr << "  File path: " << pathsAtTime[ii] << endl;
+      cerr << eraFile.getErrStr() << endl;
+      return -1;
+    }
+    string fieldName = eraFile.getFieldName();
+
+    // get the relevant Mdvx field
+
+    MdvxField *field = mdvx.getField(fieldName.c_str());
+    if (field == NULL) {
+      cerr << "ERROR - Era5Nc2Mdv::_createVol" << endl;
+      cerr << "  File path: " << pathsAtTime[ii] << endl;
+      cerr << "  Ignoring field: " << fieldName << endl;
+      continue;
+    }
+
+    // set metadata
+    
+    field->setFieldNameLong(eraFile.getLongName().c_str());
+    field->setUnits(eraFile.getUnits().c_str());
+
+    float *data = (float *) field->getVol();
+
+    int levelNum = 0;
+    long offset = (_nLat * _nLon) * levelNum;
+    
+  } // ii
+
 #ifdef JUNK
 
   // add the data fields
@@ -634,6 +678,76 @@ int Era5Nc2Mdv::_setMasterHeader(DsMdvx &mdvx, time_t volTime)
   mdvx.setAppName("Era5Nc2Mdv");
 
   return 0;
+
+}
+
+///////////////////////////////
+// Create Mdvx field
+
+MdvxField *Era5Nc2Mdv::_createMdvxField(const string &fieldName)
+
+{
+
+  // check max levels
+
+  if (_nz > MDV_MAX_VLEVELS) {
+    _nz = MDV_MAX_VLEVELS;
+  }
+
+  // set up MdvxField headers
+
+  Mdvx::field_header_t fhdr;
+  MEM_zero(fhdr);
+  
+  // _inputProj.syncToFieldHdr(fhdr);
+
+  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
+  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
+  fhdr.scaling_type = Mdvx::SCALING_NONE;
+  
+  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_PRESSURE;
+  fhdr.vlevel_type = Mdvx::VERT_TYPE_PRESSURE;
+  fhdr.dz_constant = false;
+  fhdr.data_dimension = 3;
+
+  fhdr.bad_data_value = -9999.0;
+  fhdr.missing_data_value = -9999.0;
+  
+  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
+  fhdr.data_element_nbytes = sizeof(fl32);
+  fhdr.volume_size = _nx * _ny * _nz * sizeof(fl32);
+  
+  fhdr.nx = _nx;
+  fhdr.ny = _ny;
+  fhdr.nz = _nz;
+
+  fhdr.grid_minx = _minx;
+  fhdr.grid_miny = _miny;
+  fhdr.grid_minz = _minz;
+
+  fhdr.grid_dx = _dx;
+  fhdr.grid_dy = _dy;
+  fhdr.grid_dz = _dz;
+  
+  Mdvx::vlevel_header_t vhdr;
+  MEM_zero(vhdr);
+  
+  for (int ii = 0; ii < _nz; ii++) {
+    vhdr.type[ii] = Mdvx::VERT_TYPE_PRESSURE;
+    vhdr.level[ii] = _levels[_nz - 1 - ii];
+  }
+
+  // create MdvxField object
+  // this will create an empty array for the data
+  
+  MdvxField *field = new MdvxField(fhdr, vhdr);
+
+  // set names etc
+  
+  field->setFieldName(fieldName.c_str());
+  field->setTransform("");
+
+  return field;
 
 }
 
@@ -1181,88 +1295,6 @@ int Era5Nc2Mdv::_addDataField(Nc3Var *var, DsMdvx &mdvx,
 }
 
 #endif
-
-///////////////////////////////
-// Create an Mdvx field
-
-MdvxField *Era5Nc2Mdv::_createMdvxField
-  (const string &fieldName,
-   const string &longName,
-   const string &units,
-   int nx, int ny, int nz,
-   double minx, double miny, double minz,
-   double dx, double dy, double dz,
-   const float *vals)
-
-{
-
-  // check max levels
-
-  if (nz > MDV_MAX_VLEVELS) {
-    nz = MDV_MAX_VLEVELS;
-  }
-
-  // set up MdvxField headers
-
-  Mdvx::field_header_t fhdr;
-  MEM_zero(fhdr);
-  
-  // _inputProj.syncToFieldHdr(fhdr);
-
-  fhdr.compression_type = Mdvx::COMPRESSION_NONE;
-  fhdr.transform_type = Mdvx::DATA_TRANSFORM_NONE;
-  fhdr.scaling_type = Mdvx::SCALING_NONE;
-  
-  fhdr.native_vlevel_type = Mdvx::VERT_TYPE_Z;
-  fhdr.vlevel_type = Mdvx::VERT_TYPE_Z;
-  fhdr.dz_constant = false;
-  fhdr.data_dimension = 3;
-
-  fhdr.bad_data_value = _missingFloat;
-  fhdr.missing_data_value = _missingFloat;
-  
-  fhdr.encoding_type = Mdvx::ENCODING_FLOAT32;
-  fhdr.data_element_nbytes = sizeof(fl32);
-  fhdr.volume_size = nx * ny * nz * sizeof(fl32);
-  
-  fhdr.nx = nx;
-  fhdr.ny = ny;
-  fhdr.nz = nz;
-
-  fhdr.grid_minx = minx;
-  fhdr.grid_miny = miny;
-  fhdr.grid_minz = minz;
-
-  fhdr.grid_dx = dx;
-  fhdr.grid_dy = dy;
-  fhdr.grid_dz = dz;
-  
-  Mdvx::vlevel_header_t vhdr;
-  MEM_zero(vhdr);
-  
-  for (int ii = 0; ii < nz; ii++) {
-    vhdr.type[ii] = Mdvx::VERT_TYPE_Z;
-    // vhdr.level[ii] = _zArray[ii];
-  }
-
-  // create MdvxField object
-  // converting data to encoding and compression types
-
-  MdvxField *field = new MdvxField(fhdr, vhdr, vals);
-  // field->convertType
-  //   ((Mdvx::encoding_type_t) _params.output_encoding_type,
-  //    (Mdvx::compression_type_t) _params.output_compression_type);
-
-  // set names etc
-  
-  // field->setFieldName(fieldName.c_str());
-  // field->setFieldNameLong(longName.c_str());
-  // field->setUnits(units.c_str());
-  // field->setTransform("");
-
-  return field;
-
-}
 
 ////////////////////////////////////////////////////////////////
 // Create a field remapped from lat/lon onto regular grid

@@ -115,17 +115,10 @@ private:
   /// set MDV headers
 
   int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
+  MdvxField *_createMdvxField(const string &fieldName);
   int _addDataFields(DsMdvx &mdvx, int itime);
   //   int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
   
-  MdvxField *_createMdvxField(const string &fieldName,
-                              const string &longName,
-                              const string &units,
-                              int nx, int ny, int nz,
-                              double minx, double miny, double minz,
-                              double dx, double dy, double dz,
-                              const float *vals);
-
   MdvxField *_createRegularLatlonField(const string &fieldName,
                                        const string &longName,
                                        const string &units,
