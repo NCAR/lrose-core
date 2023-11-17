@@ -88,8 +88,14 @@ private:
   size_t _nLat, _nLon;
   vector<double> _lat, _lon;
   vector<DateTime> _dataTimes;
+  int _deltaTimeSecs;
   vector<double> _levels;
   vector<string> _fieldNames;
+
+  string _dataSource;
+  string _history;
+  string _datasetUrl;
+  string _datasetDoi;
   
   int _nTimes;
   time_t _validTime;
@@ -97,17 +103,18 @@ private:
   double _minx, _miny, _minz;
   double _dx, _dy, _dz;
   bool _inverty;
+
+  MdvxProj _inputProj;
   
   // private methods
 
-  int _processTime(const vector<string> &pathsAtTime);
+  int _setGeom(const vector<string> &pathsAtTime);
+  int _createVol(const vector<string> &pathsAtTime, size_t timeIndex);
   void _printGeom(ostream &out);
-  int _processFile(const string &inputPath, int timeIndex);
-  void _initInputProjection();
   
   /// set MDV headers
 
-  int _setMasterHeader(DsMdvx &mdvx, int itime);
+  int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
   int _addDataFields(DsMdvx &mdvx, int itime);
   //   int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
   

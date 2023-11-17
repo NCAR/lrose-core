@@ -226,12 +226,23 @@ int Era5Nc2Mdv::Run ()
       
     } // while ((inputPath = _input->next()) != NULL)
 
-    // process the files at this time
+    // set the geometry for this time set
 
-    if (_processTime(pathsAtTime)) {
+    if (_setGeom(pathsAtTime)) {
       cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
+      cerr << "  cannot set geom" << endl;
       cerr << "  seed time: " << DateTime::strm(seedTime) << endl;
       return -1;
+    }
+    
+    // create a volume for each hour of the time set
+    
+    for (size_t itime = 0; itime < _nTimesInFile; itime++) {
+      if (_createVol(pathsAtTime, itime)) {
+        cerr << "ERROR - Era5Nc2Mdv::Run" << endl;
+        cerr << "  cannot create volume for time index: " << itime << endl;
+        cerr << "  seed time: " << DateTime::strm(seedTime) << endl;
+      }
     }
     
     if (inputPath == NULL) {
@@ -246,9 +257,9 @@ int Era5Nc2Mdv::Run ()
 }
 
 //////////////////////////////////
-// process files for a given time
+// set the geometry for this time
 
-int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
+int Era5Nc2Mdv::_setGeom(const vector<string> &pathsAtTime)
 
 {
 
@@ -336,6 +347,10 @@ int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
 
   // set geom
 
+  _deltaTimeSecs =
+    (int) ((_dataTimes[_dataTimes.size()-1] - _dataTimes[0]) /
+           (_dataTimes.size()-1.0) + 0.5);
+
   _ny = _nLat;
   _miny = _lat[0];
   _dy = (_lat[_nLat-1] - _lat[0]) / (_lat.size() - 1.0);
@@ -360,6 +375,179 @@ int Era5Nc2Mdv::_processTime(const vector<string> &pathsAtTime)
   if (_params.debug >= Params::DEBUG_VERBOSE) {
     _printGeom(cerr);
   }
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
+// create volume for given time index
+
+int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
+                           size_t timeIndex)
+
+{
+
+  DateTime volTime = _dataTimes[timeIndex];
+
+  // initialize projection
+  
+  double midLon = _minx + _nx * _dx / 2.0;
+  _inputProj.initLatlon(midLon);
+  
+  // create output Mdvx file object
+  
+  DsMdvx mdvx;
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    mdvx.setDebug(true);
+  }
+    
+  // set master header
+  
+  if (_setMasterHeader(mdvx, volTime.utime())) {
+    return -1;
+  }
+
+#ifdef JUNK
+
+  // add the data fields
+  
+  if (_addDataFields(mdvx, itime)) {
+    return -1;
+  }
+  
+  // write output file
+  
+  if (_params.debug) {
+    cerr << "Writing file to url: " << _params.output_dir << endl;
+  }
+  
+  if (mdvx.writeToDir(_params.output_dir)) {
+    cerr << "ERROR - Era5Nc2Mdv" << endl;
+    cerr << "  Cannot write file to url: " << _params.output_dir << endl;
+    cerr << mdvx.getErrStr() << endl;
+    return -1;
+  }
+  
+  if (_params.debug) {
+    cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
+  }
+  
+  // read all of the files and check that the geometry is
+  // constant throughout the data set
+  
+  set<double> levelsSet;
+  set<string> fieldNamesSet;
+
+  for (size_t ii = 0; ii < pathsAtTime.size(); ii++) {
+    
+    // read file metadata
+    
+    Era5File eraFile(_params);
+    if (eraFile.readFromPath(pathsAtTime[ii], 0)) {
+      cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
+      cerr << "  File path: " << pathsAtTime[ii] << endl;
+      cerr << eraFile.getErrStr() << endl;
+      return -1;
+    }
+
+    // check geometry is constant
+    
+    if (ii == 0) {
+      _nTimesInFile = eraFile.getNTimesInFile();
+      _nLat = eraFile.getNLat();
+      _nLon = eraFile.getNLon();
+      _lat = eraFile.getLat();
+      _lon = eraFile.getLon();
+      _dataTimes = eraFile.getDataTimes();
+    } else {
+      if (_nTimesInFile != eraFile.getNTimesInFile()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  number of times not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+      if (_nLat != eraFile.getNLat()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  number of latitudes not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+      if (_nLon != eraFile.getNLon()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  number of longitudes not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+      if (_lat != eraFile.getLat()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  latitudes not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+      if (_lon != eraFile.getLon()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  longitudes not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+      if (_dataTimes != eraFile.getDataTimes()) {
+        cerr << "ERROR - Era5Nc2Mdv::_processTime()" << endl;
+        cerr << "  data times not constant" << endl;
+        cerr << "  file path: " << pathsAtTime[ii] << endl;
+        return -1;
+      }
+    }
+
+    levelsSet.insert(eraFile.getLevel());
+    fieldNamesSet.insert(eraFile.getFieldName());
+
+    _dataSource = eraFile.getDataSource();
+    _history = eraFile.getHistory();
+    _datasetUrl = eraFile.getDatasetUrl();
+    _datasetDoi = eraFile.getDatasetDoi();
+  
+  } // ii
+
+  // copy sets to vectors
+
+  _levels.clear();
+  for (auto ii = levelsSet.begin(); ii != levelsSet.end(); ii++) {
+    _levels.push_back(*ii);
+  }
+  _fieldNames.clear();
+  for (auto ii = fieldNamesSet.begin(); ii != fieldNamesSet.end(); ii++) {
+    _fieldNames.push_back(*ii);
+  }
+
+  // set geom
+
+  _ny = _nLat;
+  _miny = _lat[0];
+  _dy = (_lat[_nLat-1] - _lat[0]) / (_lat.size() - 1.0);
+  _inverty = false;
+  if (_dy < 0) {
+    _dy *= -1.0;
+    _miny = _lat[_nLat-1];
+    _inverty = true;
+  }
+  
+  _nx = _nLon;
+  _minx = _lon[0];
+  _dx = (_lon[_nLon-1] - _lon[0]) / (_lon.size() - 1.0);
+  if (_minx > 180.0) {
+    _minx -= 360.0;
+  }
+
+  _minz = _levels[0];
+  _dz = (_levels[_levels.size() - 1] - _minz) / (_levels.size() - 1.0);
+  _nz = _levels.size();
+  
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
+    _printGeom(cerr);
+  }
+
+#endif
   
   return 0;
 
@@ -396,6 +584,7 @@ void Era5Nc2Mdv::_printGeom(ostream &out)
          << ii << ", "
          << _dataTimes[ii].asString() << endl;
   }
+  out << "=========>> _deltaTimeSecs: " << _deltaTimeSecs << endl;
   out << "=========>> _levels: ";
   for (size_t ii = 0; ii < _levels.size(); ii++) {
     out << _levels[ii];
@@ -424,230 +613,26 @@ void Era5Nc2Mdv::_printGeom(ostream &out)
     
 }
 
-///////////////////////////////
-// process file
-
-int Era5Nc2Mdv::_processFile(const string &input_path, int timeIndex)
-
-{
-
-  if (_params.debug) {
-    cerr << "Processing file: " << input_path << endl;
-  }
-
-  // read file into object
-
-  Era5File eraFile(_params);
-  if (eraFile.readFromPath(input_path, timeIndex)) {
-    cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
-    cerr << "  File path: " << input_path << endl;
-    cerr << eraFile.getErrStr() << endl;
-    return -1;
-  }
-  
-  return 0;
-
-  // open file
-  
-  // if (_openNc3File(input_path)) {
-  //   cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
-  //   cerr << "  File path: " << input_path << endl;
-  //   return -1;
-  // }
-  
-  // if (_params.debug >= Params::DEBUG_EXTRA) {
-  //   _printFile(*_ncFile);
-  // }
-
-  // check that this is a valid file
-
-  // if (_loadMetaData()) {
-  //   cerr << "ERROR - Era5Nc2Mdv::_processFile" << endl;
-  //   cerr << "  File has invalid data" << endl;
-  //   cerr << "  File: " << input_path << endl;
-  //   return -1;
-  // }
-
-  // loop through times
-
-  for (int itime = 0; itime < _nTimes; itime++) {
-
-    // create output Mdvx file object
-    
-    DsMdvx mdvx;
-    if (_params.debug >= Params::DEBUG_VERBOSE) {
-      mdvx.setDebug(true);
-    }
-    
-    // set master header
-    
-    if (_setMasterHeader(mdvx, itime)) {
-      return -1;
-    }
-
-    // add the data fields
-
-    if (_addDataFields(mdvx, itime)) {
-      return -1;
-    }
-    
-    // write output file
-    
-    if (_params.debug) {
-      cerr << "Writing file to url: " << _params.output_dir << endl;
-    }
-
-    if (mdvx.writeToDir(_params.output_dir)) {
-      cerr << "ERROR - Era5Nc2Mdv" << endl;
-      cerr << "  Cannot write file to url: " << _params.output_dir << endl;
-      cerr << mdvx.getErrStr() << endl;
-      return -1;
-    }
-    
-    if (_params.debug) {
-      cerr << "  Wrote output file: " << mdvx.getPathInUse() << endl;
-    }
-
-  } // itime
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////
-// initialize the input projection
-
-void Era5Nc2Mdv::_initInputProjection()
-
-{
-  
-  // if (_params.input_projection == Params::PROJ_LATLON) {
-  //   double midLon = _minx + _nx * _dx / 2.0;
-  //   _inputProj.initLatlon(midLon);
-  // } else if (_params.input_projection == Params::PROJ_FLAT) {
-  //   _inputProj.initFlat(_params.input_proj_origin_lat,
-  //                       _params.input_proj_origin_lon,
-  //                       _params.input_proj_rotation);
-  // } else if (_params.input_projection == Params::PROJ_LAMBERT_CONF) {
-  //   _inputProj.initLambertConf(_params.input_proj_origin_lat,
-  //                              _params.input_proj_origin_lon,
-  //                              _params.input_proj_lat1,
-  //                              _params.input_proj_lat2);
-  // } else if (_params.input_projection == Params::PROJ_POLAR_STEREO) {
-  //   Mdvx::pole_type_t poleType = Mdvx::POLE_NORTH;
-  //   if (!_params.input_proj_pole_is_north) {
-  //     poleType = Mdvx::POLE_SOUTH;
-  //   }
-  //   _inputProj.initPolarStereo(_params.input_proj_origin_lat,
-  //                              _params.input_proj_origin_lon,
-  //                              _params.input_proj_tangent_lon,
-  //                              poleType,
-  //                              _params.input_proj_central_scale);
-  // } else if (_params.input_projection == Params::PROJ_OBLIQUE_STEREO) {
-  //   _inputProj.initObliqueStereo(_params.input_proj_origin_lat,
-  //                                _params.input_proj_origin_lon,
-  //                                _params.input_proj_tangent_lat,
-  //                                _params.input_proj_tangent_lon);
-  // } else if (_params.input_projection == Params::PROJ_MERCATOR) {
-  //   _inputProj.initMercator(_params.input_proj_origin_lat,
-  //                           _params.input_proj_origin_lon);
-  // } else if (_params.input_projection == Params::PROJ_TRANS_MERCATOR) {
-  //   _inputProj.initTransMercator(_params.input_proj_origin_lat,
-  //                                _params.input_proj_origin_lon,
-  //                                _params.input_proj_central_scale);
-  // } else if (_params.input_projection == Params::PROJ_ALBERS) {
-  //   _inputProj.initAlbers(_params.input_proj_origin_lat,
-  //                         _params.input_proj_origin_lon,
-  //                         _params.input_proj_lat1,
-  //                         _params.input_proj_lat2);
-  // } else if (_params.input_projection == Params::PROJ_LAMBERT_AZIM) {
-  //   _inputProj.initLambertAzim(_params.input_proj_origin_lat,
-  //                              _params.input_proj_origin_lon);
-  // } else if (_params.input_projection == Params::PROJ_VERT_PERSP) {
-  //   _inputProj.initVertPersp(_params.input_proj_origin_lat,
-  //                            _params.input_proj_origin_lon,
-  //                            _params.input_proj_persp_radius);
-  // }
-
-  // if (_params.debug) {
-  //   cerr << "Input projection:" << endl;
-  //   _inputProj.print(cerr);
-  // }
-  
-  return;
-
-}
-
 /////////////////////////////////////////////////
 // Set the master header from the NCF file
 //
 // Returns 0 on success, -1 on failure
 
-int Era5Nc2Mdv::_setMasterHeader(DsMdvx &mdvx, int itime)
-
+int Era5Nc2Mdv::_setMasterHeader(DsMdvx &mdvx, time_t volTime)
+  
 {
 
   mdvx.clearMasterHeader();
-
-#ifdef JUNK
-  
-  // time
-
-  time_t baseTimeUtc = 0;
-  if (_baseTimeVar) {
-    baseTimeUtc = _baseTimeVar->as_int(0);
-  } else {
-    DateTime btime(_params.base_time_string);
-    baseTimeUtc = btime.utime();
-  }
-
-  // check time units
-  
-  double offsetMult = 1.0; // secs
-  Nc3Att *timeUnits = _timeOffsetVar->get_att("units");
-  if (timeUnits != NULL) {
-    string unitsStr = timeUnits->as_string(0);
-    if (unitsStr.find("day") != string::npos) {
-      offsetMult = 86400.0;
-    } else if (unitsStr.find("hour") != string::npos) {
-      offsetMult = 3600.0;
-    } else if (unitsStr.find("min") != string::npos) {
-      offsetMult = 60.0;
-    }
-    DateTime refTime;
-    if (refTime.setFromW3c(unitsStr.c_str()) == 0) {
-      baseTimeUtc = refTime.utime();
-    }
-    delete timeUnits;
-  }
-  
-  double timeOffsetSecs = 0;
-  if (offsetMult == 1.0) {
-    timeOffsetSecs = _timeOffsetVar->as_double(itime);
-  } else {
-    double timeOffsetDays = _timeOffsetVar->as_double(itime);
-    timeOffsetSecs = timeOffsetDays * offsetMult;
-  }
-  _validTime = baseTimeUtc + (time_t) (timeOffsetSecs + 0.5);
-  mdvx.setValidTime(_validTime);
-
-  if (_params.debug) {
-    cerr << "===========================================" << endl;
-    cerr << "Found data set at time: " << DateTime::strm(_validTime) << endl;
-  }
-  
-  // data collection type
-  
-  mdvx.setDataCollectionType(Mdvx::DATA_MEASURED);
-
-  // data set name, source and info
-
-  mdvx.setDataSetName(_params.data_set_name);
-  mdvx.setDataSetSource(_source.c_str());
+  mdvx.setValidTime(volTime);
+  mdvx.setBeginTime(volTime - _deltaTimeSecs / 2);
+  mdvx.setEndTime(volTime + _deltaTimeSecs / 2);
+  mdvx.setForecastLeadSecs(0);
+  mdvx.setDataCollectionType(Mdvx::DATA_SYNTHESIS);
+  mdvx.setDataSetName(_datasetDoi.c_str());
+  mdvx.setDataSetSource(_dataSource.c_str());
   mdvx.setDataSetInfo(_history.c_str());
+  mdvx.setAppName("Era5Nc2Mdv");
 
-#endif
-  
   return 0;
 
 }
