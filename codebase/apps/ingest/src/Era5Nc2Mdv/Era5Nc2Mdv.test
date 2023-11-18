@@ -239,7 +239,7 @@ convert_temperature_to_celcius = FALSE;
 // Type: string
 //
 
-output_dir = "/tmp/ERA5";
+output_dir = "$(HOME)/data/ERA5/mdv";
 
 ///////////// output_level_type ///////////////////////
 //
