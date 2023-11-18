@@ -53,23 +53,17 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	Era5Data.hh \
 	Era5File.hh \
 	Era5Nc2Mdv.hh \
-	HtInterp.hh \
-	OutputFile.hh \
-	WRFGrid.hh
+	HtInterp.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
 	Era5File.cc \
-	Era5Data.cc \
 	Era5Nc2Mdv.cc \
 	HtInterp.cc \
-	Main.cc \
-	OutputFile.cc \
-	WRFGrid.cc
+	Main.cc
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 
