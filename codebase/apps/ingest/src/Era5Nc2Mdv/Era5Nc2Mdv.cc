@@ -1,4 +1,4 @@
-// *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
+//*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
 // ** Copyright UCAR (c) 1990 - 2016                                         
 // ** University Corporation for Atmospheric Research (UCAR)                 
 // ** National Center for Atmospheric Research (NCAR)                        
@@ -473,11 +473,10 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
 
   // create height field from geopotential, for interpolation onto height levels
 
+  _addHeightField(mdvx);
   if (_params.interp_to_height_levels) {
-    _addHeightField(mdvx);
     HtInterp interp(_params);
     interp.interpVlevelsToHeight(mdvx);
-    _interpToHtLevels(mdvx);
   }
 
   // write output file
@@ -692,10 +691,6 @@ int Era5Nc2Mdv::_addHeightField(DsMdvx &mdvx)
 
 {
 
-  if (!_params.interp_to_height_levels) {
-    return 0;
-  }
-
   // copy the geopeotential field
   
   const MdvxField *zField = mdvx.getField(_params.geopotential_field_name);
@@ -714,20 +709,18 @@ int Era5Nc2Mdv::_addHeightField(DsMdvx &mdvx)
   float *zData = (float*) htField->getVol();
   int64_t nPoints = htField->getVolNumValues();
   for (int64_t ii = 0; ii < nPoints; ii++) {
-    double ht = zData[ii] / _g;
-    zData[ii] = ht;
+    double htm = zData[ii] / (_g * 1000.0); // meters to km
+    zData[ii] = htm;
   }
   htField->setFieldName("height");
   htField->setFieldNameLong("ht_derived_from_geopotential_ht");
-  htField->setUnits("m");
+  htField->setUnits("km");
 
   mdvx.addField(htField);
   
   // Add a pressure field which will then be interpolated
 
   MdvxField *presField = new MdvxField(*zField);
-  presField->convertType(Mdvx::ENCODING_FLOAT32,
-                         Mdvx::COMPRESSION_NONE);
   presField->setFieldName("pressure");
   presField->setFieldNameLong("pressure");
   presField->setUnits("hPa");
@@ -751,18 +744,6 @@ int Era5Nc2Mdv::_addHeightField(DsMdvx &mdvx)
   }
   
   mdvx.addField(presField);
-
-  return 0;
-
-}
-
-/////////////////////////////////////////////////
-// interpolate to height levels
-// Returns 0 on success, -1 on failure
-
-int Era5Nc2Mdv::_interpToHtLevels(DsMdvx &mdvx)
-
-{
 
   return 0;
 

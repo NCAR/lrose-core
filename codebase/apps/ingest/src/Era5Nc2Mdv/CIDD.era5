@@ -97,15 +97,16 @@ field_list = {
 # ERA5
 #
 
-Div Div mdvp:://localhost::$(HOME)/data/ERA5/mdv&D        div.colors         1/s     -5 80 5 dcont 1 0
-Q   Q   mdvp:://localhost::$(HOME)/data/ERA5/mdv&Q        mixr_kgpkg.colors  kg/kg   -5 80 5 dcont 1 0
-RH  RH  mdvp:://localhost::$(HOME)/data/ERA5/mdv&R        rh.colors          %       -5 80 5 dcont 1 0
-T   T   mdvp:://localhost::$(HOME)/data/ERA5/mdv&T        tempK.colors       K       -5 80 5 dcont 1 0
-U   U   mdvp:://localhost::$(HOME)/data/ERA5/mdv&U        vel_45.colors      m/s     -5 80 5 dcont 1 0
-V   V   mdvp:://localhost::$(HOME)/data/ERA5/mdv&V        vel_45.colors      m/s     -5 80 5 dcont 1 0
-W   W   mdvp:://localhost::$(HOME)/data/ERA5/mdv&W        vert_wspd.colors   Pa/s    -5 80 5 dcont 1 0
-height height mdvp:://localhost::$(HOME)/data/ERA5/mdv&height        ht.colors          m2/s2   -5 80 5 dcont 1 0
-Pressure pressure mdvp:://localhost::$(HOME)/data/ERA5/mdv&pressure  pressure_mb.colors          m2/s2   -5 80 5 dcont 1 0
+Div  Div   mdvp:://localhost::$(HOME)/data/ERA5/mdv&D         div.colors         1/s     -5 80 5 dcont 1 0
+Q    Q     mdvp:://localhost::$(HOME)/data/ERA5/mdv&Q         mixr_kgpkg.colors  kg/kg   -5 80 5 dcont 1 0
+RH   RH    mdvp:://localhost::$(HOME)/data/ERA5/mdv&R         rh.colors          %       -5 80 5 dcont 1 0
+T    T     mdvp:://localhost::$(HOME)/data/ERA5/mdv&T         tempK.colors       K       -5 80 5 dcont 1 0
+U    U     mdvp:://localhost::$(HOME)/data/ERA5/mdv&U         vel_45.colors      m/s     -5 80 5 dcont 1 0
+V    V     mdvp:://localhost::$(HOME)/data/ERA5/mdv&V         vel_45.colors      m/s     -5 80 5 dcont 1 0
+W    W     mdvp:://localhost::$(HOME)/data/ERA5/mdv&W         vert_wspd.colors   Pa/s    -5 80 5 dcont 1 0
+Z    Z     mdvp:://localhost::$(HOME)/data/ERA5/mdv&Z         geoht_m.colors     m2/s2   -5 80 5 dcont 1 0
+ht   ht    mdvp:://localhost::$(HOME)/data/ERA5/mdv&height    heightkm.colors    m       -5 80 5 dcont 1 0
+pres pres  mdvp:://localhost::$(HOME)/data/ERA5/mdv&pressure  pressure_mb.colors hPa     -5 80 5 dcont 1 0
 
 </GRIDS>
 
@@ -428,7 +429,7 @@ cidd.xsect_start_page:      1
 #
 # The Outer most domain:
 cidd.num_zoom_levels:       6
-cidd.start_zoom_level:      4
+cidd.start_zoom_level:      5
 
 # The number of Cached images for zooms.
 cidd.num_cache_zooms:       0
@@ -891,7 +892,7 @@ cidd.click_posn_rel_to_origin: 1
 # Set this parameter to force the field menu popup to this many columns
 # If set <= 0, then cidd sets this dynamically, allowing at most 30 in each
 # column.
-cidd.num_field_menu_cols: 8
+cidd.num_field_menu_cols: 1
 
 # This parameter sets WSDDM specific behavior On -
 # - Go to end of loop when movie stops.

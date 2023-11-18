@@ -67,8 +67,8 @@ int HtInterp::interpVlevelsToHeight(DsMdvx &mdvx)
     return -1;
   }
 
-  const Mdvx::field_header_t &ghtFhdr = htFld->getFieldHeader();
-  const Mdvx::vlevel_header_t &ghtVhdr = htFld->getVlevelHeader();
+  const Mdvx::field_header_t &htFhdr = htFld->getFieldHeader();
+  const Mdvx::vlevel_header_t &htVhdr = htFld->getVlevelHeader();
 
   // create height levels vector
 
@@ -77,8 +77,8 @@ int HtInterp::interpVlevelsToHeight(DsMdvx &mdvx)
     // create the height vector by converting pressure to
     // ht using the standard atmosphere
     IcaoStdAtmos isa;
-    for (int ii = 0; ii < ghtFhdr.nz; ii++) {
-      double htKm = isa.pres2ht(ghtVhdr.level[ii]) / 1000.0;
+    for (int ii = 0; ii < htFhdr.nz; ii++) {
+      double htKm = isa.pres2ht(htVhdr.level[ii]) / 1000.0;
       if (htKm >= _params.min_height_from_pressure_levels) {
         htsOut.push_back(htKm);
       }
@@ -122,32 +122,33 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
   
 {
 
-  const Mdvx::field_header_t &ghtFhdr = htFld->getFieldHeader();
+  const Mdvx::field_header_t &htFhdr = htFld->getFieldHeader();
 
   int nzOut = (int) htsOut.size();
-  int nzIn = ghtFhdr.nz;
-  int ny = ghtFhdr.ny;
-  int nx = ghtFhdr.nx;
+  int nzIn = htFhdr.nz;
+  int ny = htFhdr.ny;
+  int nx = htFhdr.nx;
   int nptsXy = ny * nx;
   int nptsOut = nzOut * nptsXy;
   interpPts.resize(nptsOut);
   
   // load up interp pt data
   
-  fl32 *ghtsVol = (fl32 *) htFld->getVol();
+  fl32 *htsVol = (fl32 *) htFld->getVol();
   
   int yxIndex = 0;
-  vector<double> ghts;
+  vector<double> hts;
   for (int iy = 0; iy < ny; iy++) {
     for (int ix = 0; ix < nx; ix++, yxIndex++) {
 
-      // compute column of geopotential hts
+      // load column of geopotential hts
       
-      ghts.clear();
+      hts.clear();
       int zIndex = 0;
       for (int iz = 0; iz < nzIn; iz++, zIndex += nptsXy) {
-        double ght = ghtsVol[zIndex + yxIndex];
-        ghts.push_back(ght);
+        double ht = htsVol[zIndex + yxIndex];
+        // cerr << " -->>iz,ht:" << iz << "," << ht; 
+        hts.push_back(ht);
       } // iz
       
       // compute interpolation weights
@@ -159,23 +160,23 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
         double ht = htsOut[jz];
         interpPt.ht = ht;
 
-        if (ht <= ghts[0]) {
+        if (ht <= hts[0]) {
           // we are below the lowest ght
           interpPt.indexLower = 0;
           interpPt.indexUpper = 0;
-          interpPt.ghtLower = ghts[0];
-          interpPt.ghtUpper = ghts[0];
+          interpPt.ghtLower = hts[0];
+          interpPt.ghtUpper = hts[0];
           interpPt.wtLower = 0.0;
           interpPt.wtUpper = 1.0;
           continue;
         } 
         
-        if (ht >= ghts[nzIn-1]) {
+        if (ht >= hts[nzIn-1]) {
           // we are above the highest ght
           interpPt.indexLower = nzIn-1;
           interpPt.indexUpper = nzIn-1;
-          interpPt.ghtLower = ghts[nzIn-1];
-          interpPt.ghtUpper = ghts[nzIn-1];
+          interpPt.ghtLower = hts[nzIn-1];
+          interpPt.ghtUpper = hts[nzIn-1];
           interpPt.wtLower = 1.0;
           interpPt.wtUpper = 0.0;
           continue;
@@ -184,8 +185,8 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
         // we are within the ght limits
 
         for (int iz = 1; iz < nzIn; iz++, zIndex += nptsXy) {
-          double ghtLower = ghts[iz-1];
-          double ghtUpper = ghts[iz];
+          double ghtLower = hts[iz-1];
+          double ghtUpper = hts[iz];
           if (ht >= ghtLower && ht <= ghtUpper) {
             interpPt.indexLower = iz-1;
             interpPt.indexUpper = iz;
@@ -193,7 +194,7 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
             interpPt.ghtUpper = ghtUpper;
             interpPt.wtLower = (ghtUpper - ht) / (ghtUpper - ghtLower);
             interpPt.wtUpper = 1.0 - interpPt.wtLower;
-            break;
+            // break;
           }
         } // iz
 

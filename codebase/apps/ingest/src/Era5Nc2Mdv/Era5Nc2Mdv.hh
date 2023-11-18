@@ -121,7 +121,6 @@ private:
   int _getLevelIndex(double level);
   int _addHeightField(DsMdvx &mdvx);
   int _addPressureField(DsMdvx &mdvx);
-  int _interpToHtLevels(DsMdvx &mdvx);
   
 };
 

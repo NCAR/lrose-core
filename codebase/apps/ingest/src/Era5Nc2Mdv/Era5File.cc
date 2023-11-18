@@ -110,7 +110,7 @@ int Era5File::readFromPath(const string &path,
 
   string errStr("ERROR - Era5File::readFromPath");
 
-  if (_params.debug) {
+  if (_params.debug >= Params::DEBUG_VERBOSE) {
     cerr << "Reading file: " << path << endl;
   }
 
