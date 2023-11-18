@@ -116,6 +116,7 @@ private:
 
   int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
   MdvxField *_createMdvxField(const string &fieldName);
+  int _getLevelIndex(double level);
   int _addDataFields(DsMdvx &mdvx, int itime);
   //   int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
   
