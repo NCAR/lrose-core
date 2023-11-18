@@ -41,8 +41,8 @@
 #include "Params.hh"
 using namespace std;
 
-HtInterp::HtInterp(Params *params) :
-        _paramsPtr(params)
+HtInterp::HtInterp(const Params &params) :
+        _params(params)
 {
 }
 
@@ -53,61 +53,43 @@ HtInterp::~HtInterp()
 //////////////////////////////////////////
 // interp vlevels onto heights msl
 
-int HtInterp::interpVlevelsToHeight(DsMdvx *mdvObj)
+int HtInterp::interpVlevelsToHeight(DsMdvx &mdvx)
 
 {
 
   // get the field with geopotential height
 
-  MdvxField *ghtFld = mdvObj->getField(_paramsPtr->height_field_mdv_name);
-  if (ghtFld == NULL) {
+  MdvxField *htFld = mdvx.getField("height");
+  if (htFld == NULL) {
     cerr << "ERROR - HtInterp::_interpVlevelsToHeight()" << endl;
     cerr << " Cannot interpolate onto height levels" << endl;
-    cerr << " Cannot find geopot height field in MDV: "
-         << _paramsPtr->height_field_mdv_name << endl;
+    cerr << " Cannot find 'height' field in MDV" << endl;
     return -1;
   }
 
-  const Mdvx::field_header_t &ghtFhdr = ghtFld->getFieldHeader();
-  const Mdvx::vlevel_header_t &ghtVhdr = ghtFld->getVlevelHeader();
-
-  // check we have the correct type of vertical units
-
-  if (_paramsPtr->compute_heights_from_pressure_levels &&
-      ghtFhdr.vlevel_type != Mdvx::VERT_TYPE_PRESSURE) {
-    cerr << "ERROR - HtInterp::_interpVlevelsToHeight()" << endl;
-    cerr << "  Cannot interpolate onto height levels" << endl;
-    cerr << "  Cannot compute height levels from vert levels" << endl;
-    cerr << "  Vert levels must be of type PRESSURE" << endl;
-    cerr << "  Vert levels are of type: "
-         << Mdvx::vertType2Str(ghtFhdr.vlevel_type) << endl;
-    return -1;
-  }
-
-  // add a pressure field to be interpolated
-
-  _addPressureField(mdvObj, ghtFld);
+  const Mdvx::field_header_t &ghtFhdr = htFld->getFieldHeader();
+  const Mdvx::vlevel_header_t &ghtVhdr = htFld->getVlevelHeader();
 
   // create height levels vector
 
   vector<double> htsOut;
-  if (_paramsPtr->compute_heights_from_pressure_levels) {
+  if (_params.compute_heights_from_pressure_levels) {
     // create the height vector by converting pressure to
     // ht using the standard atmosphere
     IcaoStdAtmos isa;
     for (int ii = 0; ii < ghtFhdr.nz; ii++) {
       double htKm = isa.pres2ht(ghtVhdr.level[ii]) / 1000.0;
-      if (htKm >= _paramsPtr->min_height_from_pressure_levels) {
+      if (htKm >= _params.min_height_from_pressure_levels) {
         htsOut.push_back(htKm);
       }
     }
   } else {
-    for (int ii = 0; ii < _paramsPtr->height_levels_n; ii++) {
-      htsOut.push_back(_paramsPtr->_height_levels[ii]);
+    for (int ii = 0; ii < _params.height_levels_n; ii++) {
+      htsOut.push_back(_params._height_levels[ii]);
     }
   }
 
-  if (_paramsPtr->debug) {
+  if (_params.debug) {
     cerr << "Converting to following height levels:" << endl;
     for (size_t ii = 0; ii < htsOut.size(); ii++) {
       cerr << " " << htsOut[ii];
@@ -118,12 +100,12 @@ int HtInterp::interpVlevelsToHeight(DsMdvx *mdvObj)
   // compute array of interp points
 
   vector<interp_pt_t> interpPts;
-  _computeInterpPts(htsOut, ghtFld, interpPts);
+  _computeInterpPts(htsOut, htFld, interpPts);
 
   // interpolate each field
 
-  for (size_t ifield = 0; ifield < mdvObj->getNFields(); ifield++) {
-    MdvxField *fld = mdvObj->getField(ifield);
+  for (size_t ifield = 0; ifield < mdvx.getNFields(); ifield++) {
+    MdvxField *fld = mdvx.getField(ifield);
     _interpField(fld, interpPts, htsOut);
   }
   
@@ -132,55 +114,15 @@ int HtInterp::interpVlevelsToHeight(DsMdvx *mdvObj)
 }
 
 ////////////////////////////////////////////////////////
-// Add a pressure field which will then be interpolated
-
-void HtInterp::_addPressureField(DsMdvx *mdvObj,
-                                 const MdvxField *ghtFld)
-
-{
-  
-  // copy the geopotential height field
-  // rename
-
-  MdvxField *presFld = new MdvxField(*ghtFld);
-  presFld->convertType(Mdvx::ENCODING_FLOAT32,
-                       Mdvx::COMPRESSION_NONE);
-  presFld->setFieldName("Pressure");
-  presFld->setFieldNameLong("Pressure");
-  presFld->setUnits("hPa");
-
-  // set the data to the vertical level
-
-  const Mdvx::field_header_t &fhdr = presFld->getFieldHeader();
-  const Mdvx::vlevel_header_t &vhdr = presFld->getVlevelHeader();
-
-  int nz = fhdr.nz;
-  int ny = fhdr.ny;
-  int nx = fhdr.nx;
-  int nptsXy = ny * nx;
-
-  fl32 *pp = (fl32 *) presFld->getVol();
-  for (int iz = 0; iz < nz; iz++) {
-    double pres = vhdr.level[iz];
-    for (int ipt = 0; ipt < nptsXy; ipt++, pp++) {
-      *pp = pres;
-    }
-  }
-
-  mdvObj->addField(presFld);
-
-}
-
-////////////////////////////////////////////////////////
 // Compute interpolation struct array
 
 void HtInterp::_computeInterpPts(const vector<double> &htsOut,
-                                 const MdvxField *ghtFld,
+                                 const MdvxField *htFld,
                                  vector<interp_pt_t> &interpPts)
   
 {
 
-  const Mdvx::field_header_t &ghtFhdr = ghtFld->getFieldHeader();
+  const Mdvx::field_header_t &ghtFhdr = htFld->getFieldHeader();
 
   int nzOut = (int) htsOut.size();
   int nzIn = ghtFhdr.nz;
@@ -192,7 +134,7 @@ void HtInterp::_computeInterpPts(const vector<double> &htsOut,
   
   // load up interp pt data
   
-  fl32 *ghtsVol = (fl32 *) ghtFld->getVol();
+  fl32 *ghtsVol = (fl32 *) htFld->getVol();
   
   int yxIndex = 0;
   vector<double> ghts;

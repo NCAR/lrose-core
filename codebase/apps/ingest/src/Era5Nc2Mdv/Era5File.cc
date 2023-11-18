@@ -650,6 +650,8 @@ int Era5File::_readFieldVariable(string fieldName,
   count.push_back(_nLat);
   count.push_back(_nLon);
 
+  // get the data
+  
   _fieldData.resize(_nPoints);
   try {
     var.getVal(start, count, _fieldData.data());

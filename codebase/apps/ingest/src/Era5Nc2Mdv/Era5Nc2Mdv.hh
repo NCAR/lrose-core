@@ -104,6 +104,8 @@ private:
   double _dx, _dy, _dz;
   bool _inverty;
 
+  double _g;
+  
   MdvxProj _inputProj;
   
   // private methods
@@ -117,25 +119,10 @@ private:
   int _setMasterHeader(DsMdvx &mdvx, time_t volTime);
   MdvxField *_createMdvxField(const string &fieldName);
   int _getLevelIndex(double level);
-  int _addDataFields(DsMdvx &mdvx, int itime);
-  //   int _addDataField(Nc3Var *var, DsMdvx &mdvx, int itime);
+  int _addHeightField(DsMdvx &mdvx);
+  int _addPressureField(DsMdvx &mdvx);
+  int _interpToHtLevels(DsMdvx &mdvx);
   
-  MdvxField *_createRegularLatlonField(const string &fieldName,
-                                       const string &longName,
-                                       const string &units,
-                                       const float *vals);
-
-  void _remapOutput(DsMdvx &mdvx);
-  void _autoRemapToLatLon(DsMdvx &mdvx);
-
-  bool _checkDxIsConstant();
-  bool _checkDyIsConstant();
-  void _initMercatorFromInputCoords();
-  int _findValidLatLonLimits();
-
-  int _getClosestLatIndex(double latitude, double tolerance);
-  int _getClosestLonIndex(double longitude, double tolerance);
-
 };
 
 #endif

@@ -207,6 +207,48 @@ paramdef boolean
 } convert_temperature_to_celcius;
 
 /////////////////////////////////////////////////////////////////////////
+// Interpolate to height levels
+
+commentdef
+{
+  p_header = "INTERP TO HEIGHT.";
+}
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to interpolate from pressure levels to height levels.";
+  p_help = "This requires that the geopotential height field exists in the input data. This normally has the field name 'Z'.";
+} interp_to_height_levels;
+
+paramdef string
+{
+  p_descr = "NetCDF variable name of geopotential height in input data.";
+  p_help = "We use this field to provide heights for interpolation.";
+  p_default = "Z";
+} geopotential_field_name;
+
+paramdef double
+{
+  p_default = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+  p_descr = "Array of output height levels for intpolation (km).";
+  p_help = "The various data fields are interpolated onto these height levels.";
+} height_levels[];
+
+paramdef boolean
+{
+  p_default = FALSE;
+  p_descr = "Option to compute the output heights from the input pressure levels in the model.";
+  p_help = "If FALSE, we will interpolate onto the height_levels specified below. If TRUE, the height levels will be computed from the standard atmosphere.";
+} compute_heights_from_pressure_levels;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Minimum height when computing from pressure levels (km).";
+  p_help = "Any heights below this are removed when converting from pressure levels.";
+} min_height_from_pressure_levels;
+
+/////////////////////////////////////////////////////////////////////////
 // Output data
 
 commentdef
@@ -235,15 +277,6 @@ paramdef enum output_level_type_t
   p_help = "If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no interpolation is done and the data is output on the original vertical levels (i.e. sigma, eta, etc.).";
   p_default = HEIGHT_LEVELS;
 } output_level_type;
-
-paramdef double
-{
-  p_descr = "Array of output height levels (km).";
-  p_help = "Only used if output_levels is HEIGHT_LEVELS. "
-    "The output grid has a variable Z dimension. "
-    "The height levels in the output are taken from this array.";
-  p_default = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-} height_levels[];
 
 typedef enum {
   _MDV_COMPRESSION_NONE = 0,

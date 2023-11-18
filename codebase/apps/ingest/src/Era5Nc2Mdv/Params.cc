@@ -806,6 +806,102 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 5");
+    tt->comment_hdr = tdrpStrDup("INTERP TO HEIGHT.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
+    // Parameter 'interp_to_height_levels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("interp_to_height_levels");
+    tt->descr = tdrpStrDup("Option to interpolate from pressure levels to height levels.");
+    tt->help = tdrpStrDup("This requires that the geopotential height field exists in the input data. This normally has the field name 'Z'.");
+    tt->val_offset = (char *) &interp_to_height_levels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'geopotential_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("geopotential_field_name");
+    tt->descr = tdrpStrDup("NetCDF variable name of geopotential height in input data.");
+    tt->help = tdrpStrDup("We use this field to provide heights for interpolation.");
+    tt->val_offset = (char *) &geopotential_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("Z");
+    tt++;
+    
+    // Parameter 'height_levels'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("height_levels");
+    tt->descr = tdrpStrDup("Array of output height levels for intpolation (km).");
+    tt->help = tdrpStrDup("The various data fields are interpolated onto these height levels.");
+    tt->array_offset = (char *) &_height_levels - &_start_;
+    tt->array_n_offset = (char *) &height_levels_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(double);
+    tt->array_n = 21;
+    tt->array_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
+      tt->array_vals[0].d = 0;
+      tt->array_vals[1].d = 1;
+      tt->array_vals[2].d = 2;
+      tt->array_vals[3].d = 3;
+      tt->array_vals[4].d = 4;
+      tt->array_vals[5].d = 5;
+      tt->array_vals[6].d = 6;
+      tt->array_vals[7].d = 7;
+      tt->array_vals[8].d = 8;
+      tt->array_vals[9].d = 9;
+      tt->array_vals[10].d = 10;
+      tt->array_vals[11].d = 11;
+      tt->array_vals[12].d = 12;
+      tt->array_vals[13].d = 13;
+      tt->array_vals[14].d = 14;
+      tt->array_vals[15].d = 15;
+      tt->array_vals[16].d = 16;
+      tt->array_vals[17].d = 17;
+      tt->array_vals[18].d = 18;
+      tt->array_vals[19].d = 19;
+      tt->array_vals[20].d = 20;
+    tt++;
+    
+    // Parameter 'compute_heights_from_pressure_levels'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("compute_heights_from_pressure_levels");
+    tt->descr = tdrpStrDup("Option to compute the output heights from the input pressure levels in the model.");
+    tt->help = tdrpStrDup("If FALSE, we will interpolate onto the height_levels specified below. If TRUE, the height levels will be computed from the standard atmosphere.");
+    tt->val_offset = (char *) &compute_heights_from_pressure_levels - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'min_height_from_pressure_levels'
+    // ctype is 'double'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = DOUBLE_TYPE;
+    tt->param_name = tdrpStrDup("min_height_from_pressure_levels");
+    tt->descr = tdrpStrDup("Minimum height when computing from pressure levels (km).");
+    tt->help = tdrpStrDup("Any heights below this are removed when converting from pressure levels.");
+    tt->val_offset = (char *) &min_height_from_pressure_levels - &_start_;
+    tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 6'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 6");
     tt->comment_hdr = tdrpStrDup("OUTPUT DATA.");
     tt->comment_text = tdrpStrDup("");
     tt++;
@@ -846,46 +942,11 @@
     tt->single_val.e = HEIGHT_LEVELS;
     tt++;
     
-    // Parameter 'height_levels'
-    // ctype is 'double'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = DOUBLE_TYPE;
-    tt->param_name = tdrpStrDup("height_levels");
-    tt->descr = tdrpStrDup("Array of output height levels (km).");
-    tt->help = tdrpStrDup("Only used if output_levels is HEIGHT_LEVELS. The output grid has a variable Z dimension. The height levels in the output are taken from this array.");
-    tt->array_offset = (char *) &_height_levels - &_start_;
-    tt->array_n_offset = (char *) &height_levels_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(double);
-    tt->array_n = 17;
-    tt->array_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->array_n * sizeof(tdrpVal_t));
-      tt->array_vals[0].d = 0;
-      tt->array_vals[1].d = 1;
-      tt->array_vals[2].d = 2;
-      tt->array_vals[3].d = 3;
-      tt->array_vals[4].d = 4;
-      tt->array_vals[5].d = 5;
-      tt->array_vals[6].d = 6;
-      tt->array_vals[7].d = 7;
-      tt->array_vals[8].d = 8;
-      tt->array_vals[9].d = 9;
-      tt->array_vals[10].d = 10;
-      tt->array_vals[11].d = 11;
-      tt->array_vals[12].d = 12;
-      tt->array_vals[13].d = 13;
-      tt->array_vals[14].d = 14;
-      tt->array_vals[15].d = 15;
-      tt->array_vals[16].d = 16;
-    tt++;
-    
-    // Parameter 'Comment 6'
+    // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 6");
+    tt->param_name = tdrpStrDup("Comment 7");
     tt->comment_hdr = tdrpStrDup("FILE HEADER INFO");
     tt->comment_text = tdrpStrDup("");
     tt++;

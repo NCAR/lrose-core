@@ -56,7 +56,7 @@ HDRS = \
 	Era5Data.hh \
 	Era5File.hh \
 	Era5Nc2Mdv.hh \
-	PresInterp.hh \
+	HtInterp.hh \
 	OutputFile.hh \
 	WRFGrid.hh
 
@@ -66,8 +66,8 @@ CPPC_SRCS = \
 	Era5File.cc \
 	Era5Data.cc \
 	Era5Nc2Mdv.cc \
+	HtInterp.cc \
 	Main.cc \
-	PresInterp.cc \
 	OutputFile.cc \
 	WRFGrid.cc
 

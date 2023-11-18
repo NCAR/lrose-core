@@ -53,24 +53,19 @@ public:
     double wtUpper;
   } interp_pt_t;
   
-  HtInterp(Params *params);
+  HtInterp(const Params &params);
  
   ~HtInterp();
   
   // interp vlevels onto heights msl
 
-  int interpVlevelsToHeight(DsMdvx *mdvObj);
+  int interpVlevelsToHeight(DsMdvx &mdvx);
   
 protected:
 private:
 
-  Params *_paramsPtr;
+  const Params &_params;
 
-  // Add a pressure field which will then be interpolated
-
-  void _addPressureField(DsMdvx *mdvObj,
-                         const MdvxField *ghtFld);
-  
   // Compute interpolation struct array
   
   void _computeInterpPts(const vector<double> &htsOut,

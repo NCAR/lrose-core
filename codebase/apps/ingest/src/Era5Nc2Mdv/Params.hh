@@ -421,12 +421,20 @@ public:
 
   tdrp_bool_t convert_temperature_to_celcius;
 
-  char* output_dir;
+  tdrp_bool_t interp_to_height_levels;
 
-  output_level_type_t output_level_type;
+  char* geopotential_field_name;
 
   double *_height_levels;
   int height_levels_n;
+
+  tdrp_bool_t compute_heights_from_pressure_levels;
+
+  double min_height_from_pressure_levels;
+
+  char* output_dir;
+
+  output_level_type_t output_level_type;
 
   char* data_set_info;
 
@@ -441,7 +449,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[22];
+  mutable TDRPtable _table[27];
 
   const char *_className;
 

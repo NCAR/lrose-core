@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Era5Nc2Mdv
+ * TDRP params for Era5Nc2Mdv
  **********************************************************************/
 
 //======================================================================
@@ -111,7 +111,6 @@ soilparm_path = "./SOILPARM.TBL";
 // Type: string
 //
 
-// input_dir = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
 input_dir = "$(HOME)/data/ERA5/levelFiles";
 
 //======================================================================
@@ -225,6 +224,100 @@ convert_temperature_to_celcius = FALSE;
 
 //======================================================================
 //
+// INTERP TO HEIGHT.
+//
+//======================================================================
+ 
+///////////// interp_to_height_levels /////////////////
+//
+// Option to interpolate from pressure levels to height levels.
+//
+// This requires that the geopotential height field exists in the input 
+//   data. This normally has the field name 'Z'.
+//
+//
+// Type: boolean
+//
+
+interp_to_height_levels = TRUE;
+
+///////////// geopotential_field_name /////////////////
+//
+// Z.
+//
+// NetCDF variable name of geopotential height in input data.
+//
+//
+// Type: string
+//
+
+geopotential_field_name = "Z";
+
+///////////// height_levels ///////////////////////////
+//
+// Array of output height levels for intpolation (km).
+//
+// The various data fields are interpolated onto these height levels.
+//
+//
+// Type: double
+// 1D array - variable length.
+//
+
+height_levels = {
+ 0,
+ 1,
+ 2,
+ 3,
+ 4,
+ 5,
+ 6,
+ 7,
+ 8,
+ 9,
+ 10,
+ 11,
+ 12,
+ 13,
+ 14,
+ 15,
+ 16,
+ 17,
+ 18,
+ 19,
+ 20
+};
+
+///////////// compute_heights_from_pressure_levels ////
+//
+// Option to compute the output heights from the input pressure levels 
+//   in the model.
+//
+// If FALSE, we will interpolate onto the height_levels specified below. 
+//   If TRUE, the height levels will be computed from the standard 
+//   atmosphere.
+//
+//
+// Type: boolean
+//
+
+compute_heights_from_pressure_levels = FALSE;
+
+///////////// min_height_from_pressure_levels /////////
+//
+// Minimum height when computing from pressure levels (km).
+//
+// Any heights below this are removed when converting from pressure 
+//   levels.
+//
+//
+// Type: double
+//
+
+min_height_from_pressure_levels = 0;
+
+//======================================================================
+//
 // OUTPUT DATA.
 //
 //======================================================================
@@ -260,39 +353,6 @@ output_dir = "$(HOME)/data/ERA5/mdv";
 //
 
 output_level_type = HEIGHT_LEVELS;
-
-///////////// height_levels ///////////////////////////
-//
-// Array of output height levels (km).
-//
-// Only used if output_levels is HEIGHT_LEVELS. The output grid has a 
-//   variable Z dimension. The height levels in the output are taken from 
-//   this array.
-//
-//
-// Type: double
-// 1D array - variable length.
-//
-
-height_levels = {
- 0,
- 1,
- 2,
- 3,
- 4,
- 5,
- 6,
- 7,
- 8,
- 9,
- 10,
- 11,
- 12,
- 13,
- 14,
- 15,
- 16
-};
 
 //======================================================================
 //

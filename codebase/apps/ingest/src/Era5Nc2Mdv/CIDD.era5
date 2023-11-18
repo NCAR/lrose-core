@@ -104,7 +104,8 @@ T   T   mdvp:://localhost::$(HOME)/data/ERA5/mdv&T        tempK.colors       K  
 U   U   mdvp:://localhost::$(HOME)/data/ERA5/mdv&U        vel_45.colors      m/s     -5 80 5 dcont 1 0
 V   V   mdvp:://localhost::$(HOME)/data/ERA5/mdv&V        vel_45.colors      m/s     -5 80 5 dcont 1 0
 W   W   mdvp:://localhost::$(HOME)/data/ERA5/mdv&W        vert_wspd.colors   Pa/s    -5 80 5 dcont 1 0
-Z   Z   mdvp:://localhost::$(HOME)/data/ERA5/mdv&Z        ht.colors          m2/s2   -5 80 5 dcont 1 0
+height height mdvp:://localhost::$(HOME)/data/ERA5/mdv&height        ht.colors          m2/s2   -5 80 5 dcont 1 0
+Pressure pressure mdvp:://localhost::$(HOME)/data/ERA5/mdv&pressure  pressure_mb.colors          m2/s2   -5 80 5 dcont 1 0
 
 </GRIDS>
 
