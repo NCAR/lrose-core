@@ -115,7 +115,7 @@ input_dir = "$(HOME)/data/ERA5/levelFiles";
 // Type: boolean
 //
 
-convert_temperature_to_celcius = FALSE;
+convert_temperature_to_celcius = TRUE;
 
 ///////////// temperature_field_name //////////////////
 //
@@ -309,21 +309,21 @@ output_fields = {
   ,
   {
     input_field_name = "U",
-    output_field_name = "u",
+    output_field_name = "U",
     output_long_name = "wind_east_component",
     output_units = "m/s"
   }
   ,
   {
     input_field_name = "V",
-    output_field_name = "v",
+    output_field_name = "V",
     output_long_name = "wind_north_component",
     output_units = "m/s"
   }
   ,
   {
     input_field_name = "W",
-    output_field_name = "w",
+    output_field_name = "W",
     output_long_name = "vertical_velocity",
     output_units = "m/s"
   }
