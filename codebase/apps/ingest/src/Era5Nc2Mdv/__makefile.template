@@ -25,9 +25,9 @@
 #
 # Makefile for Era5Nc2Mdv program
 #
-# RAP, NCAR, Boulder, CO, 80307, USA
+# Mike Dixon, EOL, NCAR, Boulder, CO, 80307, USA
 #
-# June 2006
+# Oct 2023
 #
 ###########################################################################
 
@@ -53,20 +53,17 @@ LOC_CPPC_CFLAGS =
 HDRS = \
 	$(PARAMS_HH) \
 	Args.hh \
-	ReadFile.hh \
-	HtInterp.hh \
-	OutputFile.hh \
-	Era5Nc2Mdv.hh
-
+	Era5File.hh \
+	Era5Nc2Mdv.hh \
+	HtInterp.hh
 
 CPPC_SRCS = \
 	$(PARAMS_CC) \
 	Args.cc \
-	ReadFile.cc \
-	HtInterp.cc \
-	OutputFile.cc \
+	Era5File.cc \
 	Era5Nc2Mdv.cc \
-	main.cc
+	HtInterp.cc \
+	Main.cc
 
 include $(LROSE_CORE_DIR)/build/make_include/lrose_make_tdrp_macros
 

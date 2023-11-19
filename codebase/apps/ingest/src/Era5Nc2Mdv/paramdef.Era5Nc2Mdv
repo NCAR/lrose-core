@@ -34,7 +34,7 @@
 
 commentdef
 {
-  p_header = "Era5Nc2Mdv reads output files from the WRF model and writes MDV data. It also allows the computation of some derived products.";
+  p_header = "Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator, and converts to MDV CF-NetCDF format.";
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -104,107 +104,32 @@ commentdef
 
 paramdef string
 {
-  p_descr = "path to SOILPARM.TBL config file that was used when running WRF.";
-  p_help = "Information in this table is neccessary to calculate "
-           "MOIST_AVAIL_FIELD.";
-  p_default = "./SOILPARM.TBL";
-} soilparm_path;
-
-paramdef string
-{
   p_descr = "Directory for input data - ARCHIVE mode.";
   p_help = "We search this dir for all files between the start and end times.";
   p_default = "/scr/cirrus2/rsfdata/projects/nexrad-mrms/ERA5/levelFiles";
 } input_dir;
 
 /////////////////////////////////////////////////////////////////////////
-// Field names
+// Convert temperature to C
 
-commentdef {
-  p_header = "SPECIFY FIELD NAMES AND OUTPUT ENCODING";
+commentdef
+{
+  p_header = "CONVERT TEMP TO C.";
 }
-
-typedef enum {
-  OUTPUT_ENCODING_FLOAT32,
-  OUTPUT_ENCODING_INT16,
-  OUTPUT_ENCODING_INT08
-} output_encoding_t;
-
-typedef struct {
-  string input_field_name; 
-  string output_field_name; 
-  string standard_name; 
-  string output_units;
-  output_encoding_t encoding;
-} output_field_t;
-
-paramdef struct output_field_t {
-  p_default = {
-    { "D",
-      "divergence",
-      "divergence_of_wind",
-      "1/s",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "Q",
-      "specific_humidity",
-      "specific_humidity",
-      "kg/kg",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "R",
-      "RH",
-      "relative_humidity",
-      "%",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "T",
-      "temperature",
-      "air_temperature",
-      "K",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "U",
-      "u",
-      "eastward_wind",
-      "m/s",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "V",
-      "v",
-      "northward_wind",
-      "m/s",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "W",
-      "w",
-      "vertical_velocity",
-      "m/s",
-      OUTPUT_ENCODING_FLOAT32
-    }
-    ,
-    { "Z", 
-      "z", 
-      "geopotential_height",
-      "m", 
-      OUTPUT_ENCODING_FLOAT32
-    }
-  };
-  p_descr = "Output field details.";
-  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.";
-} output_fields[];
 
 paramdef boolean
 {
   p_default = FALSE;
   p_descr = "The temperature is read in degrees Kelvin. This option allows us to convert to degrees C.";
 } convert_temperature_to_celcius;
+
+paramdef string
+{
+  p_descr = "NetCDF variable name of temperature field in input data.";
+  p_help = "This is the field to be converted to C.";
+  p_default = "T";
+} temperature_field_name;
+
 
 /////////////////////////////////////////////////////////////////////////
 // Interpolate to height levels
@@ -263,60 +188,53 @@ paramdef string
   p_default = "/tmp/ERA5";
 } output_dir;
 
-typedef enum
-{
-  FLIGHT_LEVELS,
-  PRESSURE_LEVELS,
-  HEIGHT_LEVELS,
-  NATIVE_VERTICAL_LEVELS
-} output_level_type_t;
+/////////////////////////////////////////////////////////////////////////
+// Rename fields
 
-paramdef enum output_level_type_t
-{
-  p_descr = "Option to choose vertical levels for output file.";
-  p_help = "If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no interpolation is done and the data is output on the original vertical levels (i.e. sigma, eta, etc.).";
-  p_default = HEIGHT_LEVELS;
-} output_level_type;
-
-typedef enum {
-  _MDV_COMPRESSION_NONE = 0,
-  _MDV_COMPRESSION_RLE = 1,
-  _MDV_COMPRESSION_LZO = 2,
-  _MDV_COMPRESSION_ZLIB = 3,
-  _MDV_COMPRESSION_BZIP = 4
-} compression_t;
-
-/*********************************************************
- * File header info.
- */
-
-commentdef
-{
-  p_header = "FILE HEADER INFO";
+commentdef {
+  p_header = "SPECIFY OUTPUT FIELD NAMES AND UNITS";
 }
 
-paramdef string
+paramdef boolean
 {
-  p_descr = "Data set info.";
-  p_help = "This is placed in the MDV master header for "
-    "documentation purposes.";
-  p_default = "This MDV file was created by Era5Nc2Mdv.";
-} data_set_info;
+  p_default = FALSE;
+  p_descr = "Option to rename the fields, and set the units, before writing.";
+} rename_output_fields;
 
-paramdef string
-{
-  p_descr = "Data set name.";
-  p_help = "This is placed in the MDV master header for "
-    "documentation purposes.";
-  p_default = "WRF model output.";
-} data_set_name;
+typedef struct {
+  string input_field_name; 
+  string output_field_name; 
+  string output_long_name; 
+  string output_units;
+} output_field_t;
 
-paramdef string
-{
-  p_descr = "Data set source details.";
-  p_help = "This is placed in the MDV master header for "
-    "documentation purposes.";
-  p_default = "WRF output from somewhere.";
-} data_set_source;
-
+paramdef struct output_field_t {
+  p_default = {
+    { "D",
+      "divergence",
+      "divergence_of_wind",
+      "1/s"
+    }
+    ,
+    { "Q",
+      "specific_humidity",
+      "specific_humidity",
+      "kg/kg"
+    }
+    ,
+    { "T",
+      "temperature",
+      "air_temperature",
+      "K"
+    }
+    ,
+    { "W",
+      "w",
+      "vertical_velocity",
+      "m/s"
+    }
+  };
+  p_descr = "Output field details.";
+  p_help = "Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.";
+} output_fields[];
 

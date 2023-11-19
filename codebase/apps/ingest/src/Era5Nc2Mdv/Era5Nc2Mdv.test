@@ -1,11 +1,11 @@
 /**********************************************************************
- * TDRP params for Era5Nc2Mdv
+ * TDRP params for ./Era5Nc2Mdv
  **********************************************************************/
 
 //======================================================================
 //
-// Era5Nc2Mdv reads output files from the WRF model and writes MDV data. 
-//   It also allows the computation of some derived products.
+// Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator, 
+//   and converts to MDV CF-NetCDF format.
 //
 //======================================================================
  
@@ -88,19 +88,6 @@ end_time = "2023 07 01 00 00 00";
 //
 //======================================================================
  
-///////////// soilparm_path ///////////////////////////
-//
-// path to SOILPARM.TBL config file that was used when running WRF.
-//
-// Information in this table is neccessary to calculate 
-//   MOIST_AVAIL_FIELD.
-//
-//
-// Type: string
-//
-
-soilparm_path = "./SOILPARM.TBL";
-
 ///////////// input_dir ///////////////////////////////
 //
 // Directory for input data - ARCHIVE mode.
@@ -115,102 +102,10 @@ input_dir = "$(HOME)/data/ERA5/levelFiles";
 
 //======================================================================
 //
-// SPECIFY FIELD NAMES AND OUTPUT ENCODING.
+// CONVERT TEMP TO C.
 //
 //======================================================================
  
-///////////// output_fields ///////////////////////////
-//
-// Output field details.
-//
-// Set the details for the output fields. The output_field_name is the 
-//   ndtCDF variable name. The standard name is set to the MDV long name. 
-//   If the long name or standard name are empty, the existing names are 
-//   used.
-//
-//
-// Type: struct
-//   typedef struct {
-//      string input_field_name;
-//      string output_field_name;
-//      string standard_name;
-//      string output_units;
-//      output_encoding_t encoding;
-//        Options:
-//          OUTPUT_ENCODING_FLOAT32
-//          OUTPUT_ENCODING_INT16
-//          OUTPUT_ENCODING_INT08
-//   }
-//
-// 1D array - variable length.
-//
-
-output_fields = {
-  {
-    input_field_name = "D",
-    output_field_name = "divergence",
-    standard_name = "divergence_of_wind",
-    output_units = "1/s",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "Q",
-    output_field_name = "specific_humidity",
-    standard_name = "specific_humidity",
-    output_units = "kg/kg",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "R",
-    output_field_name = "RH",
-    standard_name = "relative_humidity",
-    output_units = "%",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "T",
-    output_field_name = "temperature",
-    standard_name = "air_temperature",
-    output_units = "K",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "U",
-    output_field_name = "u",
-    standard_name = "eastward_wind",
-    output_units = "m/s",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "V",
-    output_field_name = "v",
-    standard_name = "northward_wind",
-    output_units = "m/s",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "W",
-    output_field_name = "w",
-    standard_name = "vertical_velocity",
-    output_units = "m/s",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-  ,
-  {
-    input_field_name = "Z",
-    output_field_name = "z",
-    standard_name = "geopotential_height",
-    output_units = "m",
-    encoding = OUTPUT_ENCODING_FLOAT32
-  }
-};
-
 ///////////// convert_temperature_to_celcius //////////
 //
 // The temperature is read in degrees Kelvin. This option allows us to 
@@ -221,6 +116,18 @@ output_fields = {
 //
 
 convert_temperature_to_celcius = FALSE;
+
+///////////// temperature_field_name //////////////////
+//
+// NetCDF variable name of temperature field in input data.
+//
+// This is the field to be converted to C.
+//
+//
+// Type: string
+//
+
+temperature_field_name = "T";
 
 //======================================================================
 //
@@ -243,9 +150,9 @@ interp_to_height_levels = TRUE;
 
 ///////////// geopotential_field_name /////////////////
 //
-// Z.
-//
 // NetCDF variable name of geopotential height in input data.
+//
+// We use this field to provide heights for interpolation.
 //
 //
 // Type: string
@@ -334,65 +241,91 @@ min_height_from_pressure_levels = 0;
 
 output_dir = "$(HOME)/data/ERA5/mdv";
 
-///////////// output_level_type ///////////////////////
-//
-// Option to choose vertical levels for output file.
-//
-// If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels 
-//   will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no 
-//   interpolation is done and the data is output on the original vertical 
-//   levels (i.e. sigma, eta, etc.).
-//
-//
-// Type: enum
-// Options:
-//     FLIGHT_LEVELS
-//     PRESSURE_LEVELS
-//     HEIGHT_LEVELS
-//     NATIVE_VERTICAL_LEVELS
-//
-
-output_level_type = HEIGHT_LEVELS;
-
 //======================================================================
 //
-// FILE HEADER INFO.
+// SPECIFY OUTPUT FIELD NAMES AND UNITS.
 //
 //======================================================================
  
-///////////// data_set_info ///////////////////////////
+///////////// rename_output_fields ////////////////////
 //
-// Data set info.
-//
-// This is placed in the MDV master header for documentation purposes.
+// Option to rename the fields, and set the units, before writing.
 //
 //
-// Type: string
+// Type: boolean
 //
 
-data_set_info = "This MDV file was created by Era5Nc2Mdv.";
+rename_output_fields = TRUE;
 
-///////////// data_set_name ///////////////////////////
+///////////// output_fields ///////////////////////////
 //
-// Data set name.
+// Output field details.
 //
-// This is placed in the MDV master header for documentation purposes.
+// Set the details for the output fields. The output_field_name is the 
+//   ndtCDF variable name. The standard name is set to the MDV long name. 
+//   If the long name or standard name are empty, the existing names are 
+//   used.
 //
 //
-// Type: string
+// Type: struct
+//   typedef struct {
+//      string input_field_name;
+//      string output_field_name;
+//      string output_long_name;
+//      string output_units;
+//   }
+//
+// 1D array - variable length.
 //
 
-data_set_name = "WRF model output.";
-
-///////////// data_set_source /////////////////////////
-//
-// Data set source details.
-//
-// This is placed in the MDV master header for documentation purposes.
-//
-//
-// Type: string
-//
-
-data_set_source = "WRF output from somewhere.";
+output_fields = {
+  {
+    input_field_name = "D",
+    output_field_name = "div",
+    output_long_name = "divergence_of_wind",
+    output_units = "1/s"
+  }
+  ,
+  {
+    input_field_name = "Q",
+    output_field_name = "spec_hum",
+    output_long_name = "specific_humidity",
+    output_units = "kg/kg"
+  }
+  ,
+  {
+    input_field_name = "R",
+    output_field_name = "RH",
+    output_long_name = "relative_humidity",
+    output_units = "%"
+  }
+  ,
+  {
+    input_field_name = "T",
+    output_field_name = "temp",
+    output_long_name = "air_temperature",
+    output_units = "K"
+  }
+  ,
+  {
+    input_field_name = "U",
+    output_field_name = "u",
+    output_long_name = "wind_east_component",
+    output_units = "m/s"
+  }
+  ,
+  {
+    input_field_name = "V",
+    output_field_name = "v",
+    output_long_name = "wind_north_component",
+    output_units = "m/s"
+  }
+  ,
+  {
+    input_field_name = "W",
+    output_field_name = "w",
+    output_long_name = "vertical_velocity",
+    output_units = "m/s"
+  }
+};
 

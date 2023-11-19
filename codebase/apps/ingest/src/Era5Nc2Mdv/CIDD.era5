@@ -97,16 +97,16 @@ field_list = {
 # ERA5
 #
 
-Div  Div   mdvp:://localhost::$(HOME)/data/ERA5/mdv&D         div.colors         1/s     -5 80 5 dcont 1 0
-Q    Q     mdvp:://localhost::$(HOME)/data/ERA5/mdv&Q         mixr_kgpkg.colors  kg/kg   -5 80 5 dcont 1 0
-RH   RH    mdvp:://localhost::$(HOME)/data/ERA5/mdv&R         rh.colors          %       -5 80 5 dcont 1 0
-T    T     mdvp:://localhost::$(HOME)/data/ERA5/mdv&T         tempK.colors       K       -5 80 5 dcont 1 0
-U    U     mdvp:://localhost::$(HOME)/data/ERA5/mdv&U         vel_45.colors      m/s     -5 80 5 dcont 1 0
-V    V     mdvp:://localhost::$(HOME)/data/ERA5/mdv&V         vel_45.colors      m/s     -5 80 5 dcont 1 0
-W    W     mdvp:://localhost::$(HOME)/data/ERA5/mdv&W         vert_wspd.colors   Pa/s    -5 80 5 dcont 1 0
-Z    Z     mdvp:://localhost::$(HOME)/data/ERA5/mdv&Z         geoht_m.colors     m2/s2   -5 80 5 dcont 1 0
-ht   ht    mdvp:://localhost::$(HOME)/data/ERA5/mdv&height    heightkm.colors    m       -5 80 5 dcont 1 0
-pres pres  mdvp:://localhost::$(HOME)/data/ERA5/mdv&pressure  pressure_mb.colors hPa     -5 80 5 dcont 1 0
+Div  Div   mdvp:://localhost::$(HOME)/data/ERA5/mdv&div        div.colors         1/s     -5 80 5 dcont 1 0
+Q    Q     mdvp:://localhost::$(HOME)/data/ERA5/mdv&spec_hum   mixr_kgpkg.colors  kg/kg   -5 80 5 dcont 1 0
+RH   RH    mdvp:://localhost::$(HOME)/data/ERA5/mdv&RH         rh.colors          %       -5 80 5 dcont 1 0
+T    T     mdvp:://localhost::$(HOME)/data/ERA5/mdv&temp       tempK.colors       K       -5 80 5 dcont 1 0
+U    U     mdvp:://localhost::$(HOME)/data/ERA5/mdv&u          vel_45.colors      m/s     -5 80 5 dcont 1 0
+V    V     mdvp:://localhost::$(HOME)/data/ERA5/mdv&v          vel_45.colors      m/s     -5 80 5 dcont 1 0
+W    W     mdvp:://localhost::$(HOME)/data/ERA5/mdv&w          vert_wspd.colors   Pa/s    -5 80 5 dcont 1 0
+Z    Z     mdvp:://localhost::$(HOME)/data/ERA5/mdv&Z          geoht_m.colors     m2/s2   -5 80 5 dcont 1 0
+ht   ht    mdvp:://localhost::$(HOME)/data/ERA5/mdv&height     heightkm.colors    m       -5 80 5 dcont 1 0
+pres pres  mdvp:://localhost::$(HOME)/data/ERA5/mdv&pressure   pressure_mb.colors hPa     -5 80 5 dcont 1 0
 
 </GRIDS>
 

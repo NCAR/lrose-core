@@ -16,11 +16,10 @@ project (Era5Nc2Mdv)
 set (SRCS
       Params.cc
       Args.cc
-      ReadFile.cc
-      HtInterp.cc
-      OutputFile.cc
+      Era5File.cc
       Era5Nc2Mdv.cc
-      main.cc
+      HtInterp.cc
+      Main.cc
     )
 
 # include directories

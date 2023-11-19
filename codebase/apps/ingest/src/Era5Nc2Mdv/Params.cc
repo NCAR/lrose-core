@@ -559,7 +559,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 0");
-    tt->comment_hdr = tdrpStrDup("Era5Nc2Mdv reads output files from the WRF model and writes MDV data. It also allows the computation of some derived products.");
+    tt->comment_hdr = tdrpStrDup("Era5Nc2Mdv reads ERA5 NetCDF files, created using a CISL translator, and converts to MDV CF-NetCDF format.");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
@@ -658,18 +658,6 @@
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'soilparm_path'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("soilparm_path");
-    tt->descr = tdrpStrDup("path to SOILPARM.TBL config file that was used when running WRF.");
-    tt->help = tdrpStrDup("Information in this table is neccessary to calculate MOIST_AVAIL_FIELD.");
-    tt->val_offset = (char *) &soilparm_path - &_start_;
-    tt->single_val.s = tdrpStrDup("./SOILPARM.TBL");
-    tt++;
-    
     // Parameter 'input_dir'
     // ctype is 'char*'
     
@@ -687,106 +675,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 4");
-    tt->comment_hdr = tdrpStrDup("SPECIFY FIELD NAMES AND OUTPUT ENCODING");
+    tt->comment_hdr = tdrpStrDup("CONVERT TEMP TO C.");
     tt->comment_text = tdrpStrDup("");
-    tt++;
-    
-    // Parameter 'output_fields'
-    // ctype is '_output_field_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRUCT_TYPE;
-    tt->param_name = tdrpStrDup("output_fields");
-    tt->descr = tdrpStrDup("Output field details.");
-    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.");
-    tt->array_offset = (char *) &_output_fields - &_start_;
-    tt->array_n_offset = (char *) &output_fields_n - &_start_;
-    tt->is_array = TRUE;
-    tt->array_len_fixed = FALSE;
-    tt->array_elem_size = sizeof(output_field_t);
-    tt->array_n = 8;
-    tt->struct_def.name = tdrpStrDup("output_field_t");
-    tt->struct_def.nfields = 5;
-    tt->struct_def.fields = (struct_field_t *)
-        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
-      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
-      tt->struct_def.fields[0].ptype = STRING_TYPE;
-      tt->struct_def.fields[0].rel_offset = 
-        (char *) &_output_fields->input_field_name - (char *) _output_fields;
-      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
-      tt->struct_def.fields[1].ptype = STRING_TYPE;
-      tt->struct_def.fields[1].rel_offset = 
-        (char *) &_output_fields->output_field_name - (char *) _output_fields;
-      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("standard_name");
-      tt->struct_def.fields[2].ptype = STRING_TYPE;
-      tt->struct_def.fields[2].rel_offset = 
-        (char *) &_output_fields->standard_name - (char *) _output_fields;
-      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("output_units");
-      tt->struct_def.fields[3].ptype = STRING_TYPE;
-      tt->struct_def.fields[3].rel_offset = 
-        (char *) &_output_fields->output_units - (char *) _output_fields;
-      tt->struct_def.fields[4].ftype = tdrpStrDup("output_encoding_t");
-      tt->struct_def.fields[4].fname = tdrpStrDup("encoding");
-      tt->struct_def.fields[4].ptype = ENUM_TYPE;
-      tt->struct_def.fields[4].rel_offset = 
-        (char *) &_output_fields->encoding - (char *) _output_fields;
-        tt->struct_def.fields[4].enum_def.name = tdrpStrDup("output_encoding_t");
-        tt->struct_def.fields[4].enum_def.nfields = 3;
-        tt->struct_def.fields[4].enum_def.fields = (enum_field_t *) tdrpMalloc
-          (tt->struct_def.fields[4].enum_def.nfields * sizeof(enum_field_t));
-        tt->struct_def.fields[4].enum_def.fields[0].name = tdrpStrDup("OUTPUT_ENCODING_FLOAT32");
-        tt->struct_def.fields[4].enum_def.fields[0].val = OUTPUT_ENCODING_FLOAT32;
-        tt->struct_def.fields[4].enum_def.fields[1].name = tdrpStrDup("OUTPUT_ENCODING_INT16");
-        tt->struct_def.fields[4].enum_def.fields[1].val = OUTPUT_ENCODING_INT16;
-        tt->struct_def.fields[4].enum_def.fields[2].name = tdrpStrDup("OUTPUT_ENCODING_INT08");
-        tt->struct_def.fields[4].enum_def.fields[2].val = OUTPUT_ENCODING_INT08;
-    tt->n_struct_vals = 40;
-    tt->struct_vals = (tdrpVal_t *)
-        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("D");
-      tt->struct_vals[1].s = tdrpStrDup("divergence");
-      tt->struct_vals[2].s = tdrpStrDup("divergence_of_wind");
-      tt->struct_vals[3].s = tdrpStrDup("1/s");
-      tt->struct_vals[4].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[5].s = tdrpStrDup("Q");
-      tt->struct_vals[6].s = tdrpStrDup("specific_humidity");
-      tt->struct_vals[7].s = tdrpStrDup("specific_humidity");
-      tt->struct_vals[8].s = tdrpStrDup("kg/kg");
-      tt->struct_vals[9].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[10].s = tdrpStrDup("R");
-      tt->struct_vals[11].s = tdrpStrDup("RH");
-      tt->struct_vals[12].s = tdrpStrDup("relative_humidity");
-      tt->struct_vals[13].s = tdrpStrDup("%");
-      tt->struct_vals[14].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[15].s = tdrpStrDup("T");
-      tt->struct_vals[16].s = tdrpStrDup("temperature");
-      tt->struct_vals[17].s = tdrpStrDup("air_temperature");
-      tt->struct_vals[18].s = tdrpStrDup("K");
-      tt->struct_vals[19].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[20].s = tdrpStrDup("U");
-      tt->struct_vals[21].s = tdrpStrDup("u");
-      tt->struct_vals[22].s = tdrpStrDup("eastward_wind");
-      tt->struct_vals[23].s = tdrpStrDup("m/s");
-      tt->struct_vals[24].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[25].s = tdrpStrDup("V");
-      tt->struct_vals[26].s = tdrpStrDup("v");
-      tt->struct_vals[27].s = tdrpStrDup("northward_wind");
-      tt->struct_vals[28].s = tdrpStrDup("m/s");
-      tt->struct_vals[29].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[30].s = tdrpStrDup("W");
-      tt->struct_vals[31].s = tdrpStrDup("w");
-      tt->struct_vals[32].s = tdrpStrDup("vertical_velocity");
-      tt->struct_vals[33].s = tdrpStrDup("m/s");
-      tt->struct_vals[34].e = OUTPUT_ENCODING_FLOAT32;
-      tt->struct_vals[35].s = tdrpStrDup("Z");
-      tt->struct_vals[36].s = tdrpStrDup("z");
-      tt->struct_vals[37].s = tdrpStrDup("geopotential_height");
-      tt->struct_vals[38].s = tdrpStrDup("m");
-      tt->struct_vals[39].e = OUTPUT_ENCODING_FLOAT32;
     tt++;
     
     // Parameter 'convert_temperature_to_celcius'
@@ -799,6 +689,18 @@
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &convert_temperature_to_celcius - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'temperature_field_name'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("temperature_field_name");
+    tt->descr = tdrpStrDup("NetCDF variable name of temperature field in input data.");
+    tt->help = tdrpStrDup("This is the field to be converted to C.");
+    tt->val_offset = (char *) &temperature_field_name - &_start_;
+    tt->single_val.s = tdrpStrDup("T");
     tt++;
     
     // Parameter 'Comment 5'
@@ -918,73 +820,84 @@
     tt->single_val.s = tdrpStrDup("/tmp/ERA5");
     tt++;
     
-    // Parameter 'output_level_type'
-    // ctype is '_output_level_type_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = ENUM_TYPE;
-    tt->param_name = tdrpStrDup("output_level_type");
-    tt->descr = tdrpStrDup("Option to choose vertical levels for output file.");
-    tt->help = tdrpStrDup("If FLIGHT_LEVELS, PRESSURE_LEVELS or HEIGHT_LEVELS, vertical levels will be interpolated accordingly. If NATIVE_VERTICAL_LEVELS, no interpolation is done and the data is output on the original vertical levels (i.e. sigma, eta, etc.).");
-    tt->val_offset = (char *) &output_level_type - &_start_;
-    tt->enum_def.name = tdrpStrDup("output_level_type_t");
-    tt->enum_def.nfields = 4;
-    tt->enum_def.fields = (enum_field_t *)
-        tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
-      tt->enum_def.fields[0].name = tdrpStrDup("FLIGHT_LEVELS");
-      tt->enum_def.fields[0].val = FLIGHT_LEVELS;
-      tt->enum_def.fields[1].name = tdrpStrDup("PRESSURE_LEVELS");
-      tt->enum_def.fields[1].val = PRESSURE_LEVELS;
-      tt->enum_def.fields[2].name = tdrpStrDup("HEIGHT_LEVELS");
-      tt->enum_def.fields[2].val = HEIGHT_LEVELS;
-      tt->enum_def.fields[3].name = tdrpStrDup("NATIVE_VERTICAL_LEVELS");
-      tt->enum_def.fields[3].val = NATIVE_VERTICAL_LEVELS;
-    tt->single_val.e = HEIGHT_LEVELS;
-    tt++;
-    
     // Parameter 'Comment 7'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 7");
-    tt->comment_hdr = tdrpStrDup("FILE HEADER INFO");
+    tt->comment_hdr = tdrpStrDup("SPECIFY OUTPUT FIELD NAMES AND UNITS");
     tt->comment_text = tdrpStrDup("");
     tt++;
     
-    // Parameter 'data_set_info'
-    // ctype is 'char*'
+    // Parameter 'rename_output_fields'
+    // ctype is 'tdrp_bool_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("data_set_info");
-    tt->descr = tdrpStrDup("Data set info.");
-    tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
-    tt->val_offset = (char *) &data_set_info - &_start_;
-    tt->single_val.s = tdrpStrDup("This MDV file was created by Era5Nc2Mdv.");
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("rename_output_fields");
+    tt->descr = tdrpStrDup("Option to rename the fields, and set the units, before writing.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &rename_output_fields - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'data_set_name'
-    // ctype is 'char*'
+    // Parameter 'output_fields'
+    // ctype is '_output_field_t'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("data_set_name");
-    tt->descr = tdrpStrDup("Data set name.");
-    tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
-    tt->val_offset = (char *) &data_set_name - &_start_;
-    tt->single_val.s = tdrpStrDup("WRF model output.");
-    tt++;
-    
-    // Parameter 'data_set_source'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("data_set_source");
-    tt->descr = tdrpStrDup("Data set source details.");
-    tt->help = tdrpStrDup("This is placed in the MDV master header for documentation purposes.");
-    tt->val_offset = (char *) &data_set_source - &_start_;
-    tt->single_val.s = tdrpStrDup("WRF output from somewhere.");
+    tt->ptype = STRUCT_TYPE;
+    tt->param_name = tdrpStrDup("output_fields");
+    tt->descr = tdrpStrDup("Output field details.");
+    tt->help = tdrpStrDup("Set the details for the output fields. The output_field_name is the ndtCDF variable name. The standard name is set to the MDV long name. If the long name or standard name are empty, the existing names are used.");
+    tt->array_offset = (char *) &_output_fields - &_start_;
+    tt->array_n_offset = (char *) &output_fields_n - &_start_;
+    tt->is_array = TRUE;
+    tt->array_len_fixed = FALSE;
+    tt->array_elem_size = sizeof(output_field_t);
+    tt->array_n = 4;
+    tt->struct_def.name = tdrpStrDup("output_field_t");
+    tt->struct_def.nfields = 4;
+    tt->struct_def.fields = (struct_field_t *)
+        tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
+      tt->struct_def.fields[0].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[0].fname = tdrpStrDup("input_field_name");
+      tt->struct_def.fields[0].ptype = STRING_TYPE;
+      tt->struct_def.fields[0].rel_offset = 
+        (char *) &_output_fields->input_field_name - (char *) _output_fields;
+      tt->struct_def.fields[1].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[1].fname = tdrpStrDup("output_field_name");
+      tt->struct_def.fields[1].ptype = STRING_TYPE;
+      tt->struct_def.fields[1].rel_offset = 
+        (char *) &_output_fields->output_field_name - (char *) _output_fields;
+      tt->struct_def.fields[2].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[2].fname = tdrpStrDup("output_long_name");
+      tt->struct_def.fields[2].ptype = STRING_TYPE;
+      tt->struct_def.fields[2].rel_offset = 
+        (char *) &_output_fields->output_long_name - (char *) _output_fields;
+      tt->struct_def.fields[3].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[3].fname = tdrpStrDup("output_units");
+      tt->struct_def.fields[3].ptype = STRING_TYPE;
+      tt->struct_def.fields[3].rel_offset = 
+        (char *) &_output_fields->output_units - (char *) _output_fields;
+    tt->n_struct_vals = 16;
+    tt->struct_vals = (tdrpVal_t *)
+        tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
+      tt->struct_vals[0].s = tdrpStrDup("D");
+      tt->struct_vals[1].s = tdrpStrDup("divergence");
+      tt->struct_vals[2].s = tdrpStrDup("divergence_of_wind");
+      tt->struct_vals[3].s = tdrpStrDup("1/s");
+      tt->struct_vals[4].s = tdrpStrDup("Q");
+      tt->struct_vals[5].s = tdrpStrDup("specific_humidity");
+      tt->struct_vals[6].s = tdrpStrDup("specific_humidity");
+      tt->struct_vals[7].s = tdrpStrDup("kg/kg");
+      tt->struct_vals[8].s = tdrpStrDup("T");
+      tt->struct_vals[9].s = tdrpStrDup("temperature");
+      tt->struct_vals[10].s = tdrpStrDup("air_temperature");
+      tt->struct_vals[11].s = tdrpStrDup("K");
+      tt->struct_vals[12].s = tdrpStrDup("W");
+      tt->struct_vals[13].s = tdrpStrDup("w");
+      tt->struct_vals[14].s = tdrpStrDup("vertical_velocity");
+      tt->struct_vals[15].s = tdrpStrDup("m/s");
     tt++;
     
     // trailing entry has param_name set to NULL

@@ -79,35 +79,13 @@ public:
     FILELIST = 1
   } mode_t;
 
-  typedef enum {
-    OUTPUT_ENCODING_FLOAT32 = 0,
-    OUTPUT_ENCODING_INT16 = 1,
-    OUTPUT_ENCODING_INT08 = 2
-  } output_encoding_t;
-
-  typedef enum {
-    FLIGHT_LEVELS = 0,
-    PRESSURE_LEVELS = 1,
-    HEIGHT_LEVELS = 2,
-    NATIVE_VERTICAL_LEVELS = 3
-  } output_level_type_t;
-
-  typedef enum {
-    _MDV_COMPRESSION_NONE = 0,
-    _MDV_COMPRESSION_RLE = 1,
-    _MDV_COMPRESSION_LZO = 2,
-    _MDV_COMPRESSION_ZLIB = 3,
-    _MDV_COMPRESSION_BZIP = 4
-  } compression_t;
-
   // struct typedefs
 
   typedef struct {
     char* input_field_name;
     char* output_field_name;
-    char* standard_name;
+    char* output_long_name;
     char* output_units;
-    output_encoding_t encoding;
   } output_field_t;
 
   ///////////////////////////
@@ -412,14 +390,11 @@ public:
 
   char* end_time;
 
-  char* soilparm_path;
-
   char* input_dir;
 
-  output_field_t *_output_fields;
-  int output_fields_n;
-
   tdrp_bool_t convert_temperature_to_celcius;
+
+  char* temperature_field_name;
 
   tdrp_bool_t interp_to_height_levels;
 
@@ -434,13 +409,10 @@ public:
 
   char* output_dir;
 
-  output_level_type_t output_level_type;
+  tdrp_bool_t rename_output_fields;
 
-  char* data_set_info;
-
-  char* data_set_name;
-
-  char* data_set_source;
+  output_field_t *_output_fields;
+  int output_fields_n;
 
   char _end_; // end of data region
               // needed for zeroing out data
@@ -449,7 +421,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[27];
+  mutable TDRPtable _table[24];
 
   const char *_className;
 

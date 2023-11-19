@@ -471,6 +471,12 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
     
   } // ipath
 
+  // convert temp field units to C
+
+  if (_params.convert_temperature_to_celcius) {
+    _convertTempToC(mdvx);
+  }
+
   // create height field from geopotential, for interpolation onto height levels
 
   _addHeightField(mdvx);
@@ -479,6 +485,12 @@ int Era5Nc2Mdv::_createVol(const vector<string> &pathsAtTime,
     interp.interpVlevelsToHeight(mdvx);
   }
 
+  // rename fields if requested
+
+  if (_params.rename_output_fields) {
+    _renameFields(mdvx);
+  }
+  
   // write output file
   
   if (_params.debug) {
@@ -747,5 +759,64 @@ int Era5Nc2Mdv::_addHeightField(DsMdvx &mdvx)
 
   return 0;
 
+}
+
+////////////////////////////////////////////////////////
+// convert temperature field units to C
+//
+// Returns 0 on success, -1 on failure
+
+int Era5Nc2Mdv::_convertTempToC(DsMdvx &mdvx)
+
+{
+
+  MdvxField *tField = mdvx.getField(_params.temperature_field_name);
+  if (tField == NULL) {
+    cerr << "WARNING - Era5Nc2Mdv::_convertTempToC" << endl;
+    cerr << "  Cannot find temperature field: "
+         << _params.temperature_field_name <<endl;
+    return -1;
+  }
+
+  float *tData = (float*) tField->getVol();
+  int64_t nPoints = tField->getVolNumValues();
+  for (int64_t ii = 0; ii < nPoints; ii++) {
+    double kelvin = tData[ii];
+    double celcius = kelvin - 273.16;
+    tData[ii] = celcius;
+  }
+  tField->setUnits("C");
+
+  return 0;
+
+}
+
+////////////////////////////////////////////////////////
+// rename fields before write
+// Returns 0 on success, -1 on failure
+
+void Era5Nc2Mdv::_renameFields(DsMdvx &mdvx)
+
+{
+
+  for (int ifield = 0; ifield < _params.output_fields_n; ifield++) {
+
+    const Params::output_field_t &ofld = _params._output_fields[ifield];
+    
+    MdvxField *field = mdvx.getField(ofld.input_field_name);
+    if (field == NULL) {
+      cerr << "WARNING - Era5Nc2Mdv::_renameFields" << endl;
+      cerr << "  Cannot find field: "
+           << ofld.input_field_name <<endl;
+      cerr << "  Renaming will be ignored" << endl;
+      continue;
+    }
+    
+    field->setFieldName(ofld.output_field_name);
+    field->setFieldNameLong(ofld.output_long_name);
+    field->setUnits(ofld.output_units);
+    
+  }
+    
 }
 
