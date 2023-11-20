@@ -34,7 +34,8 @@
 #define PARSE_FIELD_SIZE    1024
 #define INPUT_LINE_LEN      2048
 
-void init_data_links(const char *param_buf, long param_buf_len, long line_no)
+void init_data_links(const char *param_buf, long param_buf_len, long line_no,
+                     Params &params)
 {
     int  i,j;
     int  len,total_len;
@@ -191,9 +192,10 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no)
     }
     /* Make sure the first field is always on */
     gd.mrec[0]->currently_displayed = 1;
-
+    
     /* free up temp storage for substrings */
     for(i = 0; i < NUM_PARSE_FIELDS; i++) {
         free(cfield[i]);
     }
+
 }

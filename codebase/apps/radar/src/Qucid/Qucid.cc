@@ -110,7 +110,7 @@ Qucid::Qucid(int argc, char **argv) :
 
   // initialize globals, get/set defaults, establish data sources etc.
   
-  init_data_space();
+  init_data_space(_params);
   
   // check for any filtered fields
 

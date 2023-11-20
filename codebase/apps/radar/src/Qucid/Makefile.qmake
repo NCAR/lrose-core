@@ -1795,6 +1795,7 @@ Product.o: Product.cc $(HOME)/lrose/include/toolsa/str.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -1938,6 +1939,7 @@ ProductMgr.o: ProductMgr.cc ProductMgr.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		TimePlot.hh \
 		TimeList.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
@@ -2415,6 +2417,7 @@ SymprodRender.o: SymprodRender.cc SymprodRender.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -2563,6 +2566,7 @@ SymprodRenderObj.o: SymprodRenderObj.cc SymprodRenderObj.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -2704,6 +2708,7 @@ TimePlot.o: TimePlot.cc TimePlot.hh \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -2976,6 +2981,7 @@ cidd_coords.o: cidd_coords.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3118,6 +3124,7 @@ cidd_font.o: cidd_font.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3260,6 +3267,7 @@ cidd_init.o: cidd_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3402,6 +3410,7 @@ cidd_params.o: cidd_params.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3545,6 +3554,7 @@ cidd_remote_commands.o: cidd_remote_commands.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3687,6 +3697,7 @@ cidd_reset.o: cidd_reset.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3829,6 +3840,7 @@ cidd_signals.o: cidd_signals.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -3971,6 +3983,7 @@ colorscales.o: colorscales.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4113,6 +4126,7 @@ contours.o: contours.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4256,6 +4270,7 @@ data_gather.o: data_gather.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4398,6 +4413,7 @@ data_init.o: data_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4540,6 +4556,7 @@ data_io.o: data_io.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4682,6 +4699,7 @@ data_pu_proc.o: data_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4824,6 +4842,7 @@ draw_export_init.o: draw_export_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -4966,6 +4985,7 @@ draw_pu_proc.o: draw_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5109,6 +5129,7 @@ fields_pu_proc.o: fields_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5251,6 +5272,7 @@ graphic_canvas_events.o: graphic_canvas_events.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5393,6 +5415,7 @@ graphic_canvas_events_bkwd.o: graphic_canvas_events_bkwd.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5535,6 +5558,7 @@ graphic_check.o: graphic_check.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5677,6 +5701,7 @@ graphic_compute.o: graphic_compute.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5819,6 +5844,7 @@ graphic_cross_section.o: graphic_cross_section.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -5961,6 +5987,7 @@ graphic_dump_image.o: graphic_dump_image.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6108,6 +6135,7 @@ graphic_manage.o: graphic_manage.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6250,6 +6278,7 @@ graphic_margin_events.o: graphic_margin_events.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6392,6 +6421,7 @@ graphic_panel.o: graphic_panel.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6534,6 +6564,7 @@ graphic_reset.o: graphic_reset.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6676,6 +6707,7 @@ graphic_resize.o: graphic_resize.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6818,6 +6850,7 @@ graphic_xsect_canvas_events.o: graphic_xsect_canvas_events.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -6960,6 +6993,7 @@ graphic_xsect_resize.o: graphic_xsect_resize.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7102,6 +7136,7 @@ graphic_zoom.o: graphic_zoom.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7244,6 +7279,7 @@ gui_destroy.o: gui_destroy.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7386,6 +7422,7 @@ gui_init.o: gui_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7528,6 +7565,7 @@ gui_label_frame.o: gui_label_frame.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7670,6 +7708,7 @@ gui_modify.o: gui_modify.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7814,6 +7853,7 @@ h_win_proc.o: h_win_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -7956,6 +7996,7 @@ mdvx_data_request.o: mdvx_data_request.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8098,6 +8139,7 @@ movie_control.o: movie_control.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8240,6 +8282,7 @@ movie_frame_retrieve.o: movie_frame_retrieve.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8382,6 +8425,7 @@ movie_frame_save.o: movie_frame_save.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8524,6 +8568,7 @@ movie_pu_proc.o: movie_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8666,6 +8711,7 @@ overlay_init.o: overlay_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8809,6 +8855,7 @@ page_pu_proc.o: page_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -8951,6 +8998,7 @@ process_args.o: process_args.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9093,6 +9141,7 @@ render_azimuths.o: render_azimuths.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9235,6 +9284,7 @@ render_bottom_margin.o: render_bottom_margin.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9377,6 +9427,7 @@ render_cart_grid.o: render_cart_grid.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9519,6 +9570,7 @@ render_cbar.o: render_cbar.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9661,6 +9713,7 @@ render_click_marks.o: render_click_marks.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9803,6 +9856,7 @@ render_control.o: render_control.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -9945,6 +9999,7 @@ render_distorted_grid.o: render_distorted_grid.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10087,6 +10142,7 @@ render_filled_contours.o: render_filled_contours.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10229,6 +10285,7 @@ render_filled_image.o: render_filled_image.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10371,6 +10428,7 @@ render_grids.o: render_grids.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10513,6 +10571,7 @@ render_ht_sel.o: render_ht_sel.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10655,6 +10714,7 @@ render_left_margin.o: render_left_margin.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10797,6 +10857,7 @@ render_legends.o: render_legends.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -10939,6 +11000,7 @@ render_line_contours.o: render_line_contours.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11081,6 +11143,7 @@ render_margins.o: render_margins.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11223,6 +11286,7 @@ render_movie_frame.o: render_movie_frame.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11365,6 +11429,7 @@ render_overlays.o: render_overlays.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11507,6 +11572,7 @@ render_polar_grid.o: render_polar_grid.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11649,6 +11715,7 @@ render_products.o: render_products.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11791,6 +11858,7 @@ render_range_rings.o: render_range_rings.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -11933,6 +12001,7 @@ render_right_margin.o: render_right_margin.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12075,6 +12144,7 @@ render_route_winds.o: render_route_winds.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12217,6 +12287,7 @@ render_terrain.o: render_terrain.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12359,6 +12430,7 @@ render_top_layers.o: render_top_layers.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12501,6 +12573,7 @@ render_top_margin.o: render_top_margin.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12643,6 +12716,7 @@ render_winds.o: render_winds.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12785,6 +12859,7 @@ render_xsect_control.o: render_xsect_control.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -12927,6 +13002,7 @@ render_xsect_grids.o: render_xsect_grids.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13069,6 +13145,7 @@ render_xsect_line_contours.o: render_xsect_line_contours.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13211,6 +13288,7 @@ render_xsect_margins.o: render_xsect_margins.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13353,6 +13431,7 @@ render_xsect_products.o: render_xsect_products.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13495,6 +13574,7 @@ render_xsect_top_layers.o: render_xsect_top_layers.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13637,6 +13717,7 @@ render_xsect_winds.o: render_xsect_winds.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13779,6 +13860,7 @@ route_winds_init.o: route_winds_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -13921,6 +14003,7 @@ shmem_init.o: shmem_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14063,6 +14146,7 @@ status_pu_proc.o: status_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14206,6 +14290,7 @@ symprod_init.o: symprod_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14348,6 +14433,7 @@ timer_control.o: timer_control.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14491,6 +14577,7 @@ v_win_proc.o: v_win_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14633,6 +14720,7 @@ winds_init.o: winds_init.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14775,6 +14863,7 @@ xview_file_access.o: xview_file_access.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
@@ -14917,6 +15006,7 @@ zoom_pu_proc.o: zoom_pu_proc.cc cidd.h \
 		cidd_windows.h \
 		cidd_legend.h \
 		cidd_funcs.h \
+		Params.hh \
 		ProductMgr.hh \
 		$(HOME)/lrose/include/dsserver/DmapAccess.hh \
 		$(HOME)/lrose/include/dsserver/DmapMessage.hh \
