@@ -62,11 +62,19 @@ public:
   tdrp_override_t override;
   vector<string> inputFileList;
 
+  bool usingLegacyParams() const { return _usingLegacyParams; }
+  string legacyParamsPath() const { return _legacyParamsPath; }
+
+
 protected:
   
 private:
 
   string _progName;
+
+  bool _usingLegacyParams;
+  string _legacyParamsPath;
+
   int _processLegacyArgs(int argc, const char **argv);
   void _usage(ostream &out);
   

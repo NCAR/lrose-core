@@ -87,7 +87,6 @@ private:
   // data fields
 
   vector<DisplayField *> _displayFields;
-  bool _haveFilteredFields;
 
   // managing the rendering objects
 

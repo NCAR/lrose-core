@@ -89,17 +89,17 @@ Qucid::Qucid(int argc, char **argv) :
   }
   
   // load TDRP params from command line
-  
+
   char *paramsPath = (char *) "unknown";
   if (_params.loadFromArgs(argc, argv,
-			   _args.override.list,
-			   &paramsPath)) {
+                           _args.override.list,
+                           &paramsPath)) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "Problem with TDRP parameters." << endl;
     OK = false;
     return;
   }
-
+  
   if (_params.fields_n < 1) {
     cerr << "ERROR: " << _progName << endl;
     cerr << "  0 fields specified" << endl;
@@ -107,20 +107,13 @@ Qucid::Qucid(int argc, char **argv) :
     OK = false;
     return;
   }
-
+  
   // initialize globals, get/set defaults, establish data sources etc.
   
-  init_data_space(_params);
-  
-  // check for any filtered fields
-
-  _haveFilteredFields = false;
-  for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-    if (strlen(_params._fields[ifield].field_name) > 0) {
-      _haveFilteredFields = true;
-    }
+  if (_args.usingLegacyParams()) {
+    init_data_space(_params);
   }
-
+  
   // set params on alloc checker
 
   if (_params.debug >= Params::DEBUG_VERBOSE) {
@@ -230,7 +223,7 @@ int Qucid::Run(QApplication &app)
   if (_params.display_mode == Params::POLAR_DISPLAY) {
 
     _cartManager = new CartManager(_params, _reader,
-                                   _displayFields, _haveFilteredFields);
+                                   _displayFields, false);
     
     if (_args.inputFileList.size() > 0) {
       _cartManager->setArchiveFileList(_args.inputFileList);
