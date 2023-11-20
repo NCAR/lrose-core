@@ -204,6 +204,13 @@ paramdef string {
   p_help = "You can set this in 2 ways:\n\n(a) Set to the absolute path\n\n(b)Set as a path relative to the location of the application binary executable.";
 } color_scale_dir;
 
+typedef enum {
+  POLYGONS,
+  FILLED_CONTOURS,
+  DYNAMIC_CONTOURS,
+  LINE_CONTOURS
+} render_mode_t;
+
 typedef struct {
   string button_label;
   string legend_label;
@@ -214,7 +221,7 @@ typedef struct {
   double contour_low;
   double contour_high;
   double contour_interval;
-  string render_mode;
+  render_mode_t render_mode;
   boolean display_in_menu;
   boolean background_render;
 } field_t;
@@ -231,7 +238,7 @@ paramdef struct field_t {
       contour_low = -5,
       contour_high = 80,
       contour_interval = 5,
-      render_mode = "radial",
+      render_mode = POLYGONS,
       display_in_menu = true,
       background_render = false
     }
@@ -246,7 +253,7 @@ paramdef struct field_t {
       contour_low = -5,
       contour_high = 80,
       contour_interval = 5,
-      render_mode = "radial",
+      render_mode = POLYGONS,
       display_in_menu = true,
       background_render = false
     }

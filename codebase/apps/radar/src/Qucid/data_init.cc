@@ -35,7 +35,7 @@
 #define INPUT_LINE_LEN      2048
 
 void init_data_links(const char *param_buf, long param_buf_len, long line_no,
-                     Params &params)
+                     Params &tdrpParams)
 {
     int  i,j;
     int  len,total_len;
@@ -151,11 +151,11 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
 
         gd.mrec[i]->currently_displayed = atoi(cfield[9]);
 
-		if(gd.run_once_and_exit) {
-		  gd.mrec[i]->auto_render = 1;
-	    } else {
-		  gd.mrec[i]->auto_render = atoi(cfield[10]);
-		}
+        if(gd.run_once_and_exit) {
+          gd.mrec[i]->auto_render = 1;
+        } else {
+          gd.mrec[i]->auto_render = atoi(cfield[10]);
+        }
 
         gd.mrec[i]->last_elev = (char *)NULL;
         gd.mrec[i]->elev_size = 0;
@@ -196,6 +196,30 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
     /* free up temp storage for substrings */
     for(i = 0; i < NUM_PARSE_FIELDS; i++) {
         free(cfield[i]);
+    }
+
+    // set the tdrp params for the fields
+
+    tdrpParams.arrayRealloc("fields", gd.num_datafields);
+
+    for(i = 0; i < gd.num_datafields; i++) {
+
+      met_record_t &record = *(gd.mrec[i]);
+      Params::field_t &field = tdrpParams._fields[i];
+
+      TDRP_str_replace(&field.button_label, record.button_name);
+      TDRP_str_replace(&field.legend_label, record.legend_name);
+      TDRP_str_replace(&field.url, record.url);
+      TDRP_str_replace(&field.field_name, record.field_label);
+      TDRP_str_replace(&field.color_map, record.color_file);
+      TDRP_str_replace(&field.units, record.field_units);
+      field.contour_low = record.cont_low;
+      field.contour_high = record.cont_high;
+      field.contour_interval = record.cont_interv;
+      field.render_mode = (Params::render_mode_t) record.render_method;
+      field.display_in_menu = (tdrp_bool_t) record.currently_displayed;
+      field.background_render = (tdrp_bool_t) record.auto_render;
+
     }
 
 }

@@ -82,6 +82,13 @@ public:
   } input_mode_t;
 
   typedef enum {
+    POLYGONS = 0,
+    FILLED_CONTOURS = 1,
+    DYNAMIC_CONTOURS = 2,
+    LINE_CONTOURS = 3
+  } render_mode_t;
+
+  typedef enum {
     POLAR_DISPLAY = 0,
     BSCAN_DISPLAY = 1
   } display_mode_t;
@@ -205,7 +212,7 @@ public:
     double contour_low;
     double contour_high;
     double contour_interval;
-    char* render_mode;
+    render_mode_t render_mode;
     tdrp_bool_t display_in_menu;
     tdrp_bool_t background_render;
   } field_t;

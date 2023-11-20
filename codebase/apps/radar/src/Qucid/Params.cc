@@ -1061,11 +1061,23 @@
       tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
       tt->struct_def.fields[8].rel_offset = 
         (char *) &_fields->contour_interval - (char *) _fields;
-      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[9].ftype = tdrpStrDup("render_mode_t");
       tt->struct_def.fields[9].fname = tdrpStrDup("render_mode");
-      tt->struct_def.fields[9].ptype = STRING_TYPE;
+      tt->struct_def.fields[9].ptype = ENUM_TYPE;
       tt->struct_def.fields[9].rel_offset = 
         (char *) &_fields->render_mode - (char *) _fields;
+        tt->struct_def.fields[9].enum_def.name = tdrpStrDup("render_mode_t");
+        tt->struct_def.fields[9].enum_def.nfields = 4;
+        tt->struct_def.fields[9].enum_def.fields = (enum_field_t *) tdrpMalloc
+          (tt->struct_def.fields[9].enum_def.nfields * sizeof(enum_field_t));
+        tt->struct_def.fields[9].enum_def.fields[0].name = tdrpStrDup("POLYGONS");
+        tt->struct_def.fields[9].enum_def.fields[0].val = POLYGONS;
+        tt->struct_def.fields[9].enum_def.fields[1].name = tdrpStrDup("FILLED_CONTOURS");
+        tt->struct_def.fields[9].enum_def.fields[1].val = FILLED_CONTOURS;
+        tt->struct_def.fields[9].enum_def.fields[2].name = tdrpStrDup("DYNAMIC_CONTOURS");
+        tt->struct_def.fields[9].enum_def.fields[2].val = DYNAMIC_CONTOURS;
+        tt->struct_def.fields[9].enum_def.fields[3].name = tdrpStrDup("LINE_CONTOURS");
+        tt->struct_def.fields[9].enum_def.fields[3].val = LINE_CONTOURS;
       tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
       tt->struct_def.fields[10].fname = tdrpStrDup("display_in_menu");
       tt->struct_def.fields[10].ptype = BOOL_TYPE;
@@ -1088,7 +1100,7 @@
       tt->struct_vals[6].d = -5;
       tt->struct_vals[7].d = 80;
       tt->struct_vals[8].d = 5;
-      tt->struct_vals[9].s = tdrpStrDup("radial");
+      tt->struct_vals[9].e = POLYGONS;
       tt->struct_vals[10].b = pTRUE;
       tt->struct_vals[11].b = pFALSE;
       tt->struct_vals[12].s = tdrpStrDup("VEL_F");
@@ -1100,7 +1112,7 @@
       tt->struct_vals[18].d = -5;
       tt->struct_vals[19].d = 80;
       tt->struct_vals[20].d = 5;
-      tt->struct_vals[21].s = tdrpStrDup("radial");
+      tt->struct_vals[21].e = POLYGONS;
       tt->struct_vals[22].b = pTRUE;
       tt->struct_vals[23].b = pFALSE;
     tt++;
