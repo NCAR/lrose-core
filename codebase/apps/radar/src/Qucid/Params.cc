@@ -1005,98 +1005,104 @@
     tt->ptype = STRUCT_TYPE;
     tt->param_name = tdrpStrDup("fields");
     tt->descr = tdrpStrDup("Fields to be displayed.");
-    tt->help = tdrpStrDup("label: appears on the GUI. raw_name: unfiltered field name. filtered_name: field with clutter filter applied. units: units string for color scale. color_map: name of color map in color_scale_dir. shortcut: keyboard character for shortcut. Specified key will select raw field. Use ALT-key to get filtered field. ");
+    tt->help = tdrpStrDup("/nbutton_label: appears on the GUI. /nlegend_label: appears in the plot. /nurl: location of data or data server. /nfield_name: name in the file. /ncolor_map: name of color map in color_scale_dir. /nunits: units to appear on the display. /ncontour_low: contour rendering lower limit. /ncontour_high: contour rendering upper limit. /ncontour_interval: contour rendering interval. /nrender_mode:/n  cart: Rectangle/polygon fills of gridded data./n  cont: false color filled contours./n  lcont: line contours./n  dcont: dynamic contours, auto switching between cart and cont./n         uses dynamic_contour_treshold.");
     tt->array_offset = (char *) &_fields - &_start_;
     tt->array_n_offset = (char *) &fields_n - &_start_;
     tt->is_array = TRUE;
     tt->array_len_fixed = FALSE;
     tt->array_elem_size = sizeof(field_t);
-    tt->array_n = 8;
+    tt->array_n = 2;
     tt->struct_def.name = tdrpStrDup("field_t");
-    tt->struct_def.nfields = 6;
+    tt->struct_def.nfields = 12;
     tt->struct_def.fields = (struct_field_t *)
         tdrpMalloc(tt->struct_def.nfields * sizeof(struct_field_t));
       tt->struct_def.fields[0].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[0].fname = tdrpStrDup("label");
+      tt->struct_def.fields[0].fname = tdrpStrDup("button_label");
       tt->struct_def.fields[0].ptype = STRING_TYPE;
       tt->struct_def.fields[0].rel_offset = 
-        (char *) &_fields->label - (char *) _fields;
+        (char *) &_fields->button_label - (char *) _fields;
       tt->struct_def.fields[1].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[1].fname = tdrpStrDup("raw_name");
+      tt->struct_def.fields[1].fname = tdrpStrDup("legend_label");
       tt->struct_def.fields[1].ptype = STRING_TYPE;
       tt->struct_def.fields[1].rel_offset = 
-        (char *) &_fields->raw_name - (char *) _fields;
+        (char *) &_fields->legend_label - (char *) _fields;
       tt->struct_def.fields[2].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[2].fname = tdrpStrDup("filtered_name");
+      tt->struct_def.fields[2].fname = tdrpStrDup("url");
       tt->struct_def.fields[2].ptype = STRING_TYPE;
       tt->struct_def.fields[2].rel_offset = 
-        (char *) &_fields->filtered_name - (char *) _fields;
+        (char *) &_fields->url - (char *) _fields;
       tt->struct_def.fields[3].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[3].fname = tdrpStrDup("units");
+      tt->struct_def.fields[3].fname = tdrpStrDup("field_name");
       tt->struct_def.fields[3].ptype = STRING_TYPE;
       tt->struct_def.fields[3].rel_offset = 
-        (char *) &_fields->units - (char *) _fields;
+        (char *) &_fields->field_name - (char *) _fields;
       tt->struct_def.fields[4].ftype = tdrpStrDup("string");
       tt->struct_def.fields[4].fname = tdrpStrDup("color_map");
       tt->struct_def.fields[4].ptype = STRING_TYPE;
       tt->struct_def.fields[4].rel_offset = 
         (char *) &_fields->color_map - (char *) _fields;
       tt->struct_def.fields[5].ftype = tdrpStrDup("string");
-      tt->struct_def.fields[5].fname = tdrpStrDup("shortcut");
+      tt->struct_def.fields[5].fname = tdrpStrDup("units");
       tt->struct_def.fields[5].ptype = STRING_TYPE;
       tt->struct_def.fields[5].rel_offset = 
-        (char *) &_fields->shortcut - (char *) _fields;
-    tt->n_struct_vals = 48;
+        (char *) &_fields->units - (char *) _fields;
+      tt->struct_def.fields[6].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[6].fname = tdrpStrDup("contour_low");
+      tt->struct_def.fields[6].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[6].rel_offset = 
+        (char *) &_fields->contour_low - (char *) _fields;
+      tt->struct_def.fields[7].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[7].fname = tdrpStrDup("contour_high");
+      tt->struct_def.fields[7].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[7].rel_offset = 
+        (char *) &_fields->contour_high - (char *) _fields;
+      tt->struct_def.fields[8].ftype = tdrpStrDup("double");
+      tt->struct_def.fields[8].fname = tdrpStrDup("contour_interval");
+      tt->struct_def.fields[8].ptype = DOUBLE_TYPE;
+      tt->struct_def.fields[8].rel_offset = 
+        (char *) &_fields->contour_interval - (char *) _fields;
+      tt->struct_def.fields[9].ftype = tdrpStrDup("string");
+      tt->struct_def.fields[9].fname = tdrpStrDup("render_mode");
+      tt->struct_def.fields[9].ptype = STRING_TYPE;
+      tt->struct_def.fields[9].rel_offset = 
+        (char *) &_fields->render_mode - (char *) _fields;
+      tt->struct_def.fields[10].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[10].fname = tdrpStrDup("display_in_menu");
+      tt->struct_def.fields[10].ptype = BOOL_TYPE;
+      tt->struct_def.fields[10].rel_offset = 
+        (char *) &_fields->display_in_menu - (char *) _fields;
+      tt->struct_def.fields[11].ftype = tdrpStrDup("boolean");
+      tt->struct_def.fields[11].fname = tdrpStrDup("background_render");
+      tt->struct_def.fields[11].ptype = BOOL_TYPE;
+      tt->struct_def.fields[11].rel_offset = 
+        (char *) &_fields->background_render - (char *) _fields;
+    tt->n_struct_vals = 24;
     tt->struct_vals = (tdrpVal_t *)
         tdrpMalloc(tt->n_struct_vals * sizeof(tdrpVal_t));
-      tt->struct_vals[0].s = tdrpStrDup("DBZ");
-      tt->struct_vals[1].s = tdrpStrDup("DBZ");
-      tt->struct_vals[2].s = tdrpStrDup("");
-      tt->struct_vals[3].s = tdrpStrDup("dBZ");
+      tt->struct_vals[0].s = tdrpStrDup("DBZ_F");
+      tt->struct_vals[1].s = tdrpStrDup("DBZ_F");
+      tt->struct_vals[2].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur");
+      tt->struct_vals[3].s = tdrpStrDup("DBZ_F");
       tt->struct_vals[4].s = tdrpStrDup("dbz.colors");
-      tt->struct_vals[5].s = tdrpStrDup("1");
-      tt->struct_vals[6].s = tdrpStrDup("REF");
-      tt->struct_vals[7].s = tdrpStrDup("REF");
-      tt->struct_vals[8].s = tdrpStrDup("");
-      tt->struct_vals[9].s = tdrpStrDup("dBZ");
-      tt->struct_vals[10].s = tdrpStrDup("dbz.colors");
-      tt->struct_vals[11].s = tdrpStrDup("2");
-      tt->struct_vals[12].s = tdrpStrDup("VEL");
-      tt->struct_vals[13].s = tdrpStrDup("VEL");
-      tt->struct_vals[14].s = tdrpStrDup("");
-      tt->struct_vals[15].s = tdrpStrDup("m/s");
+      tt->struct_vals[5].s = tdrpStrDup("dBZ");
+      tt->struct_vals[6].d = -5;
+      tt->struct_vals[7].d = 80;
+      tt->struct_vals[8].d = 5;
+      tt->struct_vals[9].s = tdrpStrDup("radial");
+      tt->struct_vals[10].b = pTRUE;
+      tt->struct_vals[11].b = pFALSE;
+      tt->struct_vals[12].s = tdrpStrDup("VEL_F");
+      tt->struct_vals[13].s = tdrpStrDup("VEL_F");
+      tt->struct_vals[14].s = tdrpStrDup("mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur");
+      tt->struct_vals[15].s = tdrpStrDup("VEL_F");
       tt->struct_vals[16].s = tdrpStrDup("vel.colors");
-      tt->struct_vals[17].s = tdrpStrDup("3");
-      tt->struct_vals[18].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[19].s = tdrpStrDup("WIDTH");
-      tt->struct_vals[20].s = tdrpStrDup("");
-      tt->struct_vals[21].s = tdrpStrDup("m/s");
-      tt->struct_vals[22].s = tdrpStrDup("width.colors");
-      tt->struct_vals[23].s = tdrpStrDup("4");
-      tt->struct_vals[24].s = tdrpStrDup("SW");
-      tt->struct_vals[25].s = tdrpStrDup("SW");
-      tt->struct_vals[26].s = tdrpStrDup("");
-      tt->struct_vals[27].s = tdrpStrDup("m/s");
-      tt->struct_vals[28].s = tdrpStrDup("width.colors");
-      tt->struct_vals[29].s = tdrpStrDup("5");
-      tt->struct_vals[30].s = tdrpStrDup("ZDR");
-      tt->struct_vals[31].s = tdrpStrDup("ZDR");
-      tt->struct_vals[32].s = tdrpStrDup("");
-      tt->struct_vals[33].s = tdrpStrDup("dB");
-      tt->struct_vals[34].s = tdrpStrDup("zdr.colors");
-      tt->struct_vals[35].s = tdrpStrDup("6");
-      tt->struct_vals[36].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[37].s = tdrpStrDup("PHIDP");
-      tt->struct_vals[38].s = tdrpStrDup("");
-      tt->struct_vals[39].s = tdrpStrDup("deg");
-      tt->struct_vals[40].s = tdrpStrDup("phidp.colors");
-      tt->struct_vals[41].s = tdrpStrDup("7");
-      tt->struct_vals[42].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[43].s = tdrpStrDup("RHOHV");
-      tt->struct_vals[44].s = tdrpStrDup("");
-      tt->struct_vals[45].s = tdrpStrDup("unitless");
-      tt->struct_vals[46].s = tdrpStrDup("rhohv.colors");
-      tt->struct_vals[47].s = tdrpStrDup("8");
+      tt->struct_vals[17].s = tdrpStrDup("m/s");
+      tt->struct_vals[18].d = -5;
+      tt->struct_vals[19].d = 80;
+      tt->struct_vals[20].d = 5;
+      tt->struct_vals[21].s = tdrpStrDup("radial");
+      tt->struct_vals[22].b = pTRUE;
+      tt->struct_vals[23].b = pFALSE;
     tt++;
     
     // Parameter 'background_render_mins'

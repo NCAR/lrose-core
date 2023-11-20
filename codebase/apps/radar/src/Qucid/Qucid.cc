@@ -116,7 +116,7 @@ Qucid::Qucid(int argc, char **argv) :
 
   _haveFilteredFields = false;
   for (int ifield = 0; ifield < _params.fields_n; ifield++) {
-    if (strlen(_params._fields[ifield].filtered_name) > 0) {
+    if (strlen(_params._fields[ifield].field_name) > 0) {
       _haveFilteredFields = true;
     }
   }
@@ -390,16 +390,16 @@ int Qucid::_setupDisplayFields()
 
     // check we have a valid label
     
-    if (strlen(pfld.label) == 0) {
+    if (strlen(pfld.legend_label) == 0) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
-      cerr << "  Empty field label, ifield: " << ifield << endl;
+      cerr << "  Empty field legend_label, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
       continue;
     }
     
     // check we have a raw field name
     
-    if (strlen(pfld.raw_name) == 0) {
+    if (strlen(pfld.field_name) == 0) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
       cerr << "  Empty raw field name, ifield: " << ifield << endl;
       cerr << "  Ignoring" << endl;
@@ -412,23 +412,23 @@ int Qucid::_setupDisplayFields()
     colorMapPath += PATH_DELIM;
     colorMapPath += pfld.color_map;
     ColorMap map;
-    map.setName(pfld.label);
+    map.setName(pfld.legend_label);
     map.setUnits(pfld.units);
-    // TODO: the logic here is a little weird ... the label and units have been set, but are we throwing them away?
+    // TODO: the logic here is a little weird ... the legend_label and units have been set, but are we throwing them away?
 
     bool noColorMap = false;
 
     if (map.readMap(colorMapPath)) {
       cerr << "WARNING - Qucid::_setupDisplayFields()" << endl;
       cerr << "  Cannot read in color map file: " << colorMapPath << endl;
-      cerr << "  Looking for default color map for field " << pfld.label << endl; 
+      cerr << "  Looking for default color map for field " << pfld.legend_label << endl; 
 
       try {
-        // check here for smart color scale; look up by field name/label and
+        // check here for smart color scale; look up by field name/legend_label and
         // see if the name is a usual parameter for a known color map
         SoloDefaultColorWrapper sd = SoloDefaultColorWrapper::getInstance();
-        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.label);
-        cerr << "  found default color map for " <<  pfld.label  << endl;
+        ColorMap colorMap = sd.ColorMapForUsualParm.at(pfld.legend_label);
+        cerr << "  found default color map for " <<  pfld.legend_label  << endl;
         // if (_params.debug) colorMap.print(cout); // LOG(DEBUG_VERBOSE)); // cout);
         map = colorMap;
         // HERE: What is missing from the ColorMap object??? 
@@ -445,8 +445,8 @@ int Qucid::_setupDisplayFields()
     // unfiltered field
 
     DisplayField *field =
-      new DisplayField(pfld.label, pfld.raw_name, pfld.units, 
-                       pfld.shortcut, map, ifield, false);
+      new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, 
+                       "a", map, ifield, false);
     if (noColorMap)
       field->setNoColorMap();
 
@@ -454,10 +454,10 @@ int Qucid::_setupDisplayFields()
 
     // filtered field
 
-    if (strlen(pfld.filtered_name) > 0) {
-      string filtLabel = string(pfld.label) + "-filt";
+    if (strlen(pfld.field_name) > 0) {
+      string filtField_Label = string(pfld.legend_label) + "-filt";
       DisplayField *filt =
-        new DisplayField(filtLabel, pfld.filtered_name, pfld.units, pfld.shortcut, 
+        new DisplayField(pfld.legend_label, pfld.field_name, pfld.units, "a", 
                          map, ifield, true);
       _displayFields.push_back(filt);
     }

@@ -196,12 +196,18 @@ public:
   } show_status_t;
 
   typedef struct {
-    char* label;
-    char* raw_name;
-    char* filtered_name;
-    char* units;
+    char* button_label;
+    char* legend_label;
+    char* url;
+    char* field_name;
     char* color_map;
-    char* shortcut;
+    char* units;
+    double contour_low;
+    double contour_high;
+    double contour_interval;
+    char* render_mode;
+    tdrp_bool_t display_in_menu;
+    tdrp_bool_t background_render;
   } field_t;
 
   typedef struct {
