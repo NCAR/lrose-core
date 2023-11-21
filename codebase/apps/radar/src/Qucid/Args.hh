@@ -57,6 +57,24 @@ public:
 
   int parse (const int argc, const char **argv);
 
+  // get the legacy params file from the command line
+  // returns 0 on success, -1 on failure
+
+  int getLegacyParamsPath(const int argc, const char **argv,
+                          string &legacyPath);
+
+  // get the tdrp params file from the command line
+  // returns 0 on success, -1 on failure
+
+  int getTdrpParamsPath(const int argc, const char **argv,
+                        string &tdrpPath);
+
+  // get the print mode from the command line
+  // returns 0 on success, -1 on failure
+  
+  int getTdrpPrintMode(const int argc, const char **argv,
+                       tdrp_print_mode_t &printMode);
+
   // public data
 
   tdrp_override_t override;

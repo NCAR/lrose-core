@@ -200,25 +200,30 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
 
     // set the tdrp params for the fields
 
+    cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
+    
     tdrpParams.arrayRealloc("fields", gd.num_datafields);
-
+    memset(tdrpParams._fields, 0, gd.num_datafields * sizeof(Params::field_t));
     for(i = 0; i < gd.num_datafields; i++) {
 
       met_record_t &record = *(gd.mrec[i]);
-      Params::field_t &field = tdrpParams._fields[i];
+      Params::field_t *field = tdrpParams._fields + i;
 
-      TDRP_str_replace(&field.button_label, record.button_name);
-      TDRP_str_replace(&field.legend_label, record.legend_name);
-      TDRP_str_replace(&field.url, record.url);
-      TDRP_str_replace(&field.field_name, record.field_label);
-      TDRP_str_replace(&field.color_map, record.color_file);
-      TDRP_str_replace(&field.units, record.field_units);
-      field.contour_low = record.cont_low;
-      field.contour_high = record.cont_high;
-      field.contour_interval = record.cont_interv;
-      field.render_mode = (Params::render_mode_t) record.render_method;
-      field.display_in_menu = (tdrp_bool_t) record.currently_displayed;
-      field.background_render = (tdrp_bool_t) record.auto_render;
+      cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
+
+      TDRP_str_replace(&field->button_label, record.button_name);
+      TDRP_str_replace(&field->legend_label, record.legend_name);
+      TDRP_str_replace(&field->url, record.url);
+      TDRP_str_replace(&field->field_name, record.field_label);
+      TDRP_str_replace(&field->color_map, record.color_file);
+      TDRP_str_replace(&field->units, record.field_units);
+      field->contour_low = record.cont_low;
+      field->contour_low = -9999;
+      field->contour_high = record.cont_high;
+      field->contour_interval = record.cont_interv;
+      field->render_mode = (Params::render_mode_t) record.render_method;
+      field->display_in_menu = (tdrp_bool_t) record.currently_displayed;
+      field->background_render = (tdrp_bool_t) record.auto_render;
 
     }
 

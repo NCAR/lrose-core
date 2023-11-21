@@ -317,6 +317,84 @@ int Args::parse (const int argc, const char **argv)
     
 }
 
+//////////////////////////////////////////////////////
+// get the legacy params file from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getLegacyParamsPath(const int argc, const char **argv,
+                              string &legacyPath)
+{
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-p")) {
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        legacyPath = optarg;
+        return 0;
+      }
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+//////////////////////////////////////////////////////
+// get the tdrp params path from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getTdrpParamsPath(const int argc, const char **argv,
+                            string &tdrpPath)
+{
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-params")) {
+      if (ii < argc - 1) {
+        const char *optarg = argv[++ii];
+        tdrpPath = optarg;
+        return 0;
+      }
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+
+//////////////////////////////////////////////////////
+// get the print mode from the command line
+// returns 0 on success, -1 on failure
+
+int Args::getTdrpPrintMode(const int argc, const char **argv,
+                           tdrp_print_mode_t &printMode)
+{
+  printMode = NO_PRINT;
+  for (int ii =  1; ii < argc; ii++) {
+    if (!strcmp(argv[ii], "-print_params")) {
+      if (ii < argc - 1) {
+        const char *mode = argv[++ii];
+	if (!strcmp(mode, "short")) {
+	  printMode = PRINT_SHORT;
+	} else if (!strcmp(mode, "norm")) {
+	  printMode = PRINT_NORM;
+	} else if (!strcmp(mode, "long")) {
+	  printMode = PRINT_LONG;
+	} else if (!strcmp(mode, "verbose")) {
+	  printMode = PRINT_VERBOSE;
+	} else {
+	  printMode = PRINT_NORM;
+        }
+      } else {
+        printMode = NO_PRINT;
+      }
+      return 0;
+    }
+  } // ii
+  // failure
+  return -1;
+}
+
+
+//////////////////////////////////////////////////////
+// usage
+
 void Args::_usage(ostream &out)
 
 {
