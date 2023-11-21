@@ -322,15 +322,15 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
 
     //-------
 
-    QPointF clickPos(e->pos());
+    QPointF pos(e->pos());
 
-    _mousePressX = e->position().x();
-    _mousePressY = e->position().y();
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
 
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
-    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
 
   } else {
 
@@ -338,8 +338,10 @@ void CartWidget::mousePressEvent(QMouseEvent *e)
     _rubberBand->setGeometry(QRect(e->pos(), QSize()));
     _rubberBand->show();
 
-    _mousePressX = e->position().x();
-    _mousePressY = e->position().y();
+    QPointF pos(e->pos());
+
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
 
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
@@ -373,8 +375,10 @@ void CartWidget::mouseMoveEvent(QMouseEvent * e)
 
   // Zooming with the mouse
 
-  int x = e->position().x();
-  int y = e->position().y();
+  QPointF pos(e->pos());
+
+  int x = pos.x();
+  int y = pos.y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
@@ -413,12 +417,12 @@ void CartWidget::mouseReleaseEvent(QMouseEvent *e)
 
   if (e->button() == Qt::RightButton) {
 
-    QPointF clickPos(e->pos());
+    QPointF pos(e->pos());
 
-    _mousePressX = e->position().x();
-    _mousePressY = e->position().y();
+    _mousePressX = pos.x();
+    _mousePressY = pos.y();
 
-    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
 
   } else {
     
@@ -427,10 +431,10 @@ void CartWidget::mouseReleaseEvent(QMouseEvent *e)
     // If the mouse hasn't moved much, assume we are clicking rather than
     // zooming
 
-    QPointF clickPos(e->pos());
+    QPointF pos(e->pos());
   
-    _mouseReleaseX = clickPos.x();
-    _mouseReleaseY = clickPos.y();
+    _mouseReleaseX = pos.x();
+    _mouseReleaseY = pos.y();
 
     // get click location in world coords
 
