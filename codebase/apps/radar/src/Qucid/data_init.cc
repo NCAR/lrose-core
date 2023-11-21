@@ -200,10 +200,14 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
 
     // set the tdrp params for the fields
 
+
     cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
+    cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << tdrpParams.fields_n << endl;
     
     tdrpParams.arrayRealloc("fields", gd.num_datafields);
-    memset(tdrpParams._fields, 0, gd.num_datafields * sizeof(Params::field_t));
+
+    cerr << "cccccccccccccccccccccc fields_n: " << tdrpParams.fields_n << endl;
+    cerr << "dddddddddddddddddddddd fields ptr: " << tdrpParams._fields << endl;
     for(i = 0; i < gd.num_datafields; i++) {
 
       met_record_t &record = *(gd.mrec[i]);

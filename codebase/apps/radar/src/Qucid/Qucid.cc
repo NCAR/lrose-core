@@ -84,7 +84,11 @@ Qucid::Qucid(int argc, char **argv) :
   string legacyParamsPath;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     gd.db_name = strdup(legacyParamsPath.c_str());
+    cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
+    cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
     init_data_space(_params);
+    cerr << "fffffffffffff fields ptr: " << _params._fields << endl;
+    cerr << "fffffffffffff nfields: " << _params.fields_n << endl;
     tdrp_print_mode_t printMode;
     if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
       if (printMode != NO_PRINT) {

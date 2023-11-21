@@ -2916,172 +2916,172 @@ paramdef string {
 
 # S-BAND MOMENTS
 
-FLD_DBZ_F   FLD_DBZ_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
+TTEST1   TTEST1   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBZ_F   dbz.colors   dBZ -5 80 5 radial 1 0
 FLD_DBZ     FLD_DBZ     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBZ     dbz.colors   dBZ -5 80 5 radial 1 0
 FLD_VEL_F   FLD_VEL_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&VEL_F   vel.colors   m/s -5 80 5 radial 1 0
 FLD_VEL     FLD_VEL     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&VEL     vel.colors   m/s -5 80 5 radial 1 0
 FLD_WIDTH_F FLD_WIDTH_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&WIDTH_F  width.colors m/s -5 80 5 radial 1 0
 FLD_WIDTH   FLD_WIDTH   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&WIDTH    width.colors m/s -5 80 5 radial 1 0
 
-FLD_ZDRM_F   FLD_ZDRM_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM_F zdr.colors   dB  -5 80 5 radial 1 0
-FLD_ZDRM     FLD_ZDRM     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM   zdr.colors   dB  -5 80 5 radial 1 0
-FLD_ZDR_F   FLD_ZDR_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_F zdr.colors   dB  -5 80 5 radial 1 0
-FLD_ZDR     FLD_ZDR     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR   zdr.colors   dB  -5 80 5 radial 1 0
-FLD_LDRH_F  FLD_LDRH_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH_F ldr.colors   dB  -5 80 5 radial 1 0
-FLD_LDRH    FLD_LDRH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
+#FLD_ZDRM_F   FLD_ZDRM_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM_F zdr.colors   dB  -5 80 5 radial 1 0
+#FLD_ZDRM     FLD_ZDRM     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDRM   zdr.colors   dB  -5 80 5 radial 1 0
+#FLD_ZDR_F   FLD_ZDR_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_F zdr.colors   dB  -5 80 5 radial 1 0
+#FLD_ZDR     FLD_ZDR     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR   zdr.colors   dB  -5 80 5 radial 1 0
+#FLD_LDRH_F  FLD_LDRH_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH_F ldr.colors   dB  -5 80 5 radial 1 0
+#FLD_LDRH    FLD_LDRH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
 
-FLD_LDRV_F  FLD_LDRV_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV_F ldr.colors   dB  -5 80 5 radial 1 0
-FLD_LDRV    FLD_LDRV    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV   ldr.colors   dB  -5 80 5 radial 1 0
-FLD_PHIDP_F FLD_PHIDP_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_F phidp.colors deg -5 80 5 radial 1 0
-FLD_PHIDP   FLD_PHIDP   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP   phidp.colors deg -5 80 5 radial 1 0
-FLD_RHOHV_F FLD_RHOHV_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
-FLD_RHOHV   FLD_RHOHV   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV   rhohv.colors _   -5 80 5 radial 1 0
+#FLD_LDRV_F  FLD_LDRV_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV_F ldr.colors   dB  -5 80 5 radial 1 0
+#FLD_LDRV    FLD_LDRV    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&LDRV   ldr.colors   dB  -5 80 5 radial 1 0
+#FLD_PHIDP_F FLD_PHIDP_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_F phidp.colors deg -5 80 5 radial 1 0
+#FLD_PHIDP   FLD_PHIDP   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP   phidp.colors deg -5 80 5 radial 1 0
+#FLD_RHOHV_F FLD_RHOHV_F mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV_F rhohv.colors _   -5 80 5 radial 1 0
+#FLD_RHOHV   FLD_RHOHV   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&RHOHV   rhohv.colors _   -5 80 5 radial 1 0
 
-FLD_KDP_F   FLD_KDP_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP_F  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-FLD_KDP     FLD_KDP     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-FLD_CPA   FLD_CPA    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
-FLD_NCP   FLD_NCP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&NCP  ncp.colors  dB   -5   80  5  radial   1 0
-FLD_CMD      FLD_CMD       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD      cmd.colors  none -5 80 5 radial 1 0
-FLD_CMD_FLAG FLD_CMD_FLAG  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD_FLAG cmd_flag.colors  none -5 80 5 radial 1 0
+#FLD_KDP_F   FLD_KDP_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP_F  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+#FLD_KDP     FLD_KDP     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&KDP    kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+#FLD_CPA   FLD_CPA    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
+#FLD_NCP   FLD_NCP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&NCP  ncp.colors  dB   -5   80  5  radial   1 0
+#FLD_CMD      FLD_CMD       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD      cmd.colors  none -5 80 5 radial 1 0
+#FLD_CMD_FLAG FLD_CMD_FLAG  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CMD_FLAG cmd_flag.colors  none -5 80 5 radial 1 0
 
 # S-BAND SNR and DBM
 
-FLD_SNRHC_F   FLD_SNRHC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRHC     FLD_SNRHC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRVC_F   FLD_SNRVC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRVC     FLD_SNRVC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRHX_F   FLD_SNRHX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX_F  snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRHX     FLD_SNRHX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX    snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRHC_F   FLD_SNRHC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC_F  snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRHC     FLD_SNRHC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHC    snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRVC_F   FLD_SNRVC_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC_F  snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRVC     FLD_SNRVC     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVC    snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRHX_F   FLD_SNRHX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX_F  snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRHX     FLD_SNRHX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRHX    snr.colors   dB     -5 80 5 radial 1 0
 
-FLD_SNRVX_F   FLD_SNRVX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX_F  snr.colors   dB     -5 80 5 radial 1 0
-FLD_SNRVX     FLD_SNRVX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX    snr.colors   dB     -5 80 5 radial 1 0
-FLD_DBMHC_F  FLD_DBMHC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMHC    FLD_DBMHC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMVC_F  FLD_DBMVC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMVC    FLD_DBMVC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_SNRVX_F   FLD_SNRVX_F   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX_F  snr.colors   dB     -5 80 5 radial 1 0
+#FLD_SNRVX     FLD_SNRVX     mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SNRVX    snr.colors   dB     -5 80 5 radial 1 0
+#FLD_DBMHC_F  FLD_DBMHC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMHC    FLD_DBMHC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHC    dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMVC_F  FLD_DBMVC_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC_F  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMVC    FLD_DBMVC    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVC    dbmlow.colors dBm -5 80 5 radial 1 0
 
-FLD_DBMHX_F  FLD_DBMHX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX_F  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMHX    FLD_DBMHX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX    dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMVX_F  FLD_DBMVX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX_F  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMVX    FLD_DBMVX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX    dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_TDBZ FLD_TDBZ  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&TDBZ    tdbz.colors  dBZSq -5 80 5 radial 1 0
-FLD_SPIN FLD_SPIN  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SPIN    spin.colors  dBZSq -5 80 5 radial 1 0
+#FLD_DBMHX_F  FLD_DBMHX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMHX    FLD_DBMHX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMHX    dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMVX_F  FLD_DBMVX_F  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX_F  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMVX    FLD_DBMVX    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&DBMVX    dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_TDBZ FLD_TDBZ  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&TDBZ    tdbz.colors  dBZSq -5 80 5 radial 1 0
+#FLD_SPIN FLD_SPIN  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&SPIN    spin.colors  dBZSq -5 80 5 radial 1 0
 
-FLD_ZDR_SDEV  FLD_ZDR_SDEV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_SDEV   sdzdr.colors    dB -5 80 5 radial 1 0
-FLD_PHIDP_SDEV FLD_PHIDP_SDEV mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
-FLD_CLUT FLD_CLUT  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CLUT  dbz.colors dB -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#FLD_ZDR_SDEV  FLD_ZDR_SDEV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&ZDR_SDEV   sdzdr.colors    dB -5 80 5 radial 1 0
+#FLD_PHIDP_SDEV FLD_PHIDP_SDEV mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&PHIDP_SDEV  sdphidp.colors  - -5 80 5 radial 1 0
+#FLD_CLUT FLD_CLUT  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/sband/sur?use_http=true&CLUT  dbz.colors dB -5 80 5 radial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 # K-BAND MOMENTS
 
-FLD_DBZ_K    FLD_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBZ     dbz.colors   dBZ -5 80 5 radial 1 0
-FLD_VEL_K    FLD_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&VEL     vel_k.colors   m/s -5 80 5 radial 1 0
-FLD_WIDTH_K  FLD_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&WIDTH   width_k.colors m/s -5 80 5 radial 1 0
-FLD_LDRH_K   FLD_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
-FLD_SNRHC_K  FLD_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRHC  snr.colors   dB  -5 80 5 radial 1 0
-FLD_SNRVX_K  FLD_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRVX  snr.colors dB -5 80 5 radial 1 0
+#FLD_DBZ_K    FLD_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBZ     dbz.colors   dBZ -5 80 5 radial 1 0
+##FLD_VEL_K    FLD_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&VEL     vel_k.colors   m/s -5 80 5 radial 1 0
+#FLD_WIDTH_K  FLD_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&WIDTH   width_k.colors m/s -5 80 5 radial 1 0
+#FLD_LDRH_K   FLD_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&LDRH   ldr.colors   dB  -5 80 5 radial 1 0
+#FLD_SNRHC_K  FLD_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRHC  snr.colors   dB  -5 80 5 radial 1 0
+#FLD_SNRVX_K  FLD_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&SNRVX  snr.colors dB -5 80 5 radial 1 0
 
-FLD_DBMHC_K  FLD_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMHC  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_DBMVX_K  FLD_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMVX  dbmlow.colors dBm -5 80 5 radial 1 0
-FLD_CPA_K  FLD_CPA_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
-FLD_NCP_K  FLD_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&NCP  ncp.colors  dB -5 80  5  radial   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#FLD_DBMHC_K  FLD_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMHC  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_DBMVX_K  FLD_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&DBMVX  dbmlow.colors dBm -5 80 5 radial 1 0
+#FLD_CPA_K  FLD_CPA_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&CPA  cpa.colors  - -5 80 5 radial 1 0
+#FLD_NCP_K  FLD_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/moments/kband/sur?use_http=true&NCP  ncp.colors  dB -5 80  5  radial   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-FLD_PID  FLD_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
-FLD_TEMP_FOR_PID    FLD_TEMP_FOR_PID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#FLD_PID  FLD_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
+#FLD_TEMP_FOR_PID    FLD_TEMP_FOR_PID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-FLD_RATE_ZH    FLD_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
-FLD_RATE_Z_ZDR    FLD_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
-FLD_RATE_KDP    FLD_RATE_KDP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
-FLD_RATE_KDP_ZDR    FLD_RATE_KDP_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
-FLD_RATE_HYBRID    FLD_RATE_HYBRID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#FLD_RATE_ZH    FLD_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
+#FLD_RATE_Z_ZDR    FLD_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
+#FLD_RATE_KDP    FLD_RATE_KDP    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
+#FLD_RATE_KDP_ZDR    FLD_RATE_KDP_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
+#FLD_RATE_HYBRID    FLD_RATE_HYBRID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/orig/partrain/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 # QC moments from covariances
 
-QC_DBZ_S   QC_DBZ_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_S   dbz.colors   dBZ -5 80 5 radial 1 0
-QC_DBZNAA_S QC_DBZNAA_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_NAA_S   dbz.colors   dBZ -5 80 5 radial 1 0
-QC_VEL_S   QC_VEL_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_S   vel.colors   m/s -5 80 5 radial 1 0
-QC_VEL_HV  QC_VEL_HV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_HV_S vel.colors   m/s -5 80 5 radial 1 0
-QC_VEL_ALT QC_VEL_ALT    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_ALT_S   vel.colors   m/s -5 80 5 radial 1 0
-QC_WIDTH_S QC_WIDTH_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&WIDTH_S  width.colors m/s -5 80 5 radial 1 0
+#QC_DBZ_S   QC_DBZ_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_S   dbz.colors   dBZ -5 80 5 radial 1 0
+#QC_DBZNAA_S QC_DBZNAA_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBZ_NAA_S   dbz.colors   dBZ -5 80 5 radial 1 0
+#QC_VEL_S   QC_VEL_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_S   vel.colors   m/s -5 80 5 radial 1 0
+#QC_VEL_HV  QC_VEL_HV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_HV_S vel.colors   m/s -5 80 5 radial 1 0
+#QC_VEL_ALT QC_VEL_ALT    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&VEL_ALT_S   vel.colors   m/s -5 80 5 radial 1 0
+#QC_WIDTH_S QC_WIDTH_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&WIDTH_S  width.colors m/s -5 80 5 radial 1 0
 
-QC_ZDRM_S  QC_ZDRM_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDRM_S zdr.colors   dB  -5 80 5 radial 1 0
-QC_ZDR_S   QC_ZDR_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDR_S zdr.colors   dB  -5 80 5 radial 1 0
-QC_PHIDP_S QC_PHIDP_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PHIDP_S   phidp.colors deg -5 80 5 radial 1 0
-QC_KDP_S   QC_KDP_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&KDP_S  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-QC_PSOB_S  QC_PSOB_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PSOB_S   psob.colors   deg -5 80 5 radial 1 0     
-QC_NCP_S   QC_NCP_S       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NCP_S  ncp.colors  dB   -5   80  5  radial   1 0
+#QC_ZDRM_S  QC_ZDRM_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDRM_S zdr.colors   dB  -5 80 5 radial 1 0
+#QC_ZDR_S   QC_ZDR_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&ZDR_S zdr.colors   dB  -5 80 5 radial 1 0
+#QC_PHIDP_S QC_PHIDP_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PHIDP_S   phidp.colors deg -5 80 5 radial 1 0
+#QC_KDP_S   QC_KDP_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&KDP_S  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
+#QC_PSOB_S  QC_PSOB_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PSOB_S   psob.colors   deg -5 80 5 radial 1 0     
+#QC_NCP_S   QC_NCP_S       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NCP_S  ncp.colors  dB   -5   80  5  radial   1 0
 
-QC_LDRH_S  QC_LDRH_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRH_S ldr.colors   dB  -5 80 5 radial 1 0
-QC_LDRV_S  QC_LDRV_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRV_S ldr.colors   dB  -5 80 5 radial 1 0
-QC_RHOHV_S QC_RHOHV_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_S rhohv.colors _   -5 80 5 radial 1 0
-QC_RHO_NNC_S QC_RHO_NNC_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_NNC_S rhohv.colors _   -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#QC_LDRH_S  QC_LDRH_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRH_S ldr.colors   dB  -5 80 5 radial 1 0
+#QC_LDRV_S  QC_LDRV_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&LDRV_S ldr.colors   dB  -5 80 5 radial 1 0
+#QC_RHOHV_S QC_RHOHV_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_S rhohv.colors _   -5 80 5 radial 1 0
+#QC_RHO_NNC_S QC_RHO_NNC_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RHOHV_NNC_S rhohv.colors _   -5 80 5 radial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-QC_SNRHC_S   QC_SNRHC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHC_S  snr.colors   dB     -5 80 5 radial 1 0
-QC_SNRVC_S   QC_SNRVC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVC_S  snr.colors   dB     -5 80 5 radial 1 0
-QC_SNRHX_S   QC_SNRHX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHX_S  snr.colors   dB     -5 80 5 radial 1 0
-QC_SNRVX_S   QC_SNRVX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVX_S  snr.colors   dB     -5 80 5 radial 1 0
-QC_DBMHC_S  QC_DBMHC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHC_S  dbmlow.colors dBm -5 80 5 radial 1 0
-QC_DBMVC_S  QC_DBMVC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_SNRHC_S   QC_SNRHC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHC_S  snr.colors   dB     -5 80 5 radial 1 0
+#QC_SNRVC_S   QC_SNRVC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVC_S  snr.colors   dB     -5 80 5 radial 1 0
+#QC_SNRHX_S   QC_SNRHX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRHX_S  snr.colors   dB     -5 80 5 radial 1 0
+#QC_SNRVX_S   QC_SNRVX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&SNRVX_S  snr.colors   dB     -5 80 5 radial 1 0
+#QC_DBMHC_S  QC_DBMHC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHC_S  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_DBMVC_S  QC_DBMVC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVC_S  dbmlow.colors dBm -5 80 5 radial 1 0
 
-QC_DBMHX_S  QC_DBMHX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHX_S  dbmlow.colors dBm -5 80 5 radial 1 0
-QC_DBMVX_S  QC_DBMVX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVX_S  dbmlow.colors dBm -5 80 5 radial 1 0
-QC_CLUT_S QC_CLUT_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CLUT_S  dbz.colors dB -5 80 5 radial 1 0
-QC_CPA_S  QC_CPA_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CPA_S  cpa.colors  - -5 80 5 radial 1 0
-QC_CMD_S  QC_CMD_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_S      cmd.colors  none -5 80 5 radial 1 0
-QC_CMDFL_S QC_CMDFL_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_FLAG_S cmd_flag.colors  none -5 80 5 radial 1 0
+#QC_DBMHX_S  QC_DBMHX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMHX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_DBMVX_S  QC_DBMVX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&DBMVX_S  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_CLUT_S QC_CLUT_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CLUT_S  dbz.colors dB -5 80 5 radial 1 0
+#QC_CPA_S  QC_CPA_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CPA_S  cpa.colors  - -5 80 5 radial 1 0
+#QC_CMD_S  QC_CMD_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_S      cmd.colors  none -5 80 5 radial 1 0
+#QC_CMDFL_S QC_CMDFL_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/clut/sband/sur?use_http=true&CMD_FLAG_S cmd_flag.colors  none -5 80 5 radial 1 0
 
-QC_NOISE_FLAG_S QC_NOISE_FLAG_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_FLAG_S noise_flag.colors  none -5 80 5 radial 1 0
-QC_NS_BIAS_HCS QC_NS_BIAS_HCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_HC_S noise_bias.colors  none -5 80 5 radial 1 0
-QC_NS_BIAS_VCS QC_NS_BIAS_VCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_VC_S noise_bias.colors  none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#QC_NOISE_FLAG_S QC_NOISE_FLAG_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_FLAG_S noise_flag.colors  none -5 80 5 radial 1 0
+#QC_NS_BIAS_HCS QC_NS_BIAS_HCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_HC_S noise_bias.colors  none -5 80 5 radial 1 0
+#QC_NS_BIAS_VCS QC_NS_BIAS_VCS mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&NOISE_BIAS_DB_VC_S noise_bias.colors  none -5 80 5 radial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-QC_DBZ_K     QC_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_K     dbz.colors   dBZ -5 80 5 radial 1 0
-QC_DBZ_NAA_K QC_DBZ_NAA_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_NAA_K     dbz.colors   dBZ -5 80 5 radial 1 0
-QC_DBZVX_K   QC_DBZVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZVX_K     dbz.colors   dBZ -5 80 5 radial 1 0
-QC_VEL_K     QC_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&VEL_K     vel_k.colors   m/s -5 80 5 radial 1 0
-QC_WIDTH_K   QC_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&WIDTH_K   width_k.colors m/s -5 80 5 radial 1 0
-QC_LDRH_K   QC_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&LDRH_K   ldr.colors   dB  -5 80 5 radial 1 0
+#QC_DBZ_K     QC_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_K     dbz.colors   dBZ -5 80 5 radial 1 0
+#QC_DBZ_NAA_K QC_DBZ_NAA_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZ_NAA_K     dbz.colors   dBZ -5 80 5 radial 1 0
+#QC_DBZVX_K   QC_DBZVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBZVX_K     dbz.colors   dBZ -5 80 5 radial 1 0
+#QC_VEL_K     QC_VEL_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&VEL_K     vel_k.colors   m/s -5 80 5 radial 1 0
+#QC_WIDTH_K   QC_WIDTH_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&WIDTH_K   width_k.colors m/s -5 80 5 radial 1 0
+#QC_LDRH_K   QC_LDRH_K    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&LDRH_K   ldr.colors   dB  -5 80 5 radial 1 0
 
-QC_NCP_K  QC_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NCP_K  ncp.colors  dB -5 80  5  radial   1 0
-QC_NOISE_FLAG_K QC_NOISE_FLAG_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_FLAG_K noise_flag.colors  none -5 80 5 radial 1 0
-QC_NS_BIAS_HCK QC_NS_BIAS_HCK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_HC_K noise_bias.colors  none -5 80 5 radial 1 0
-QC_NS_BIAS_VXK QC_NS_BIAS_VXK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_VX_K noise_bias.colors  none -5 80 5 radial 1 0
-QC_SNRHC_K  QC_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRHC_K  snr.colors   dB  -5 80 5 radial 1 0
-QC_SNRVX_K   QC_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRVX_K  snr.colors dB -5 80 5 radial 1 0
+#QC_NCP_K  QC_NCP_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NCP_K  ncp.colors  dB -5 80  5  radial   1 0
+#QC_NOISE_FLAG_K QC_NOISE_FLAG_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_FLAG_K noise_flag.colors  none -5 80 5 radial 1 0
+#QC_NS_BIAS_HCK QC_NS_BIAS_HCK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_HC_K noise_bias.colors  none -5 80 5 radial 1 0
+#QC_NS_BIAS_VXK QC_NS_BIAS_VXK mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NOISE_BIAS_DB_VX_K noise_bias.colors  none -5 80 5 radial 1 0
+#QC_SNRHC_K  QC_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRHC_K  snr.colors   dB  -5 80 5 radial 1 0
+#QC_SNRVX_K   QC_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&SNRVX_K  snr.colors dB -5 80 5 radial 1 0
 
-QC_DBMHC_K  QC_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMHC_K  dbmlow.colors dBm -5 80 5 radial 1 0
-QC_DBMVX_K  QC_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMVX_K  dbmlow.colors dBm -5 80 5 radial 1 0
-QC_PID  QC_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
-QC_TEMP_PID QC_TEMP_PID mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#QC_DBMHC_K  QC_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMHC_K  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_DBMVX_K  QC_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBMVX_K  dbmlow.colors dBm -5 80 5 radial 1 0
+#QC_PID  QC_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
+#QC_TEMP_PID QC_TEMP_PID mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
-QC_RATE_ZH  QC_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
-RATE_Z_ZDR  QC_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
-RATE_KDP  QC_RATE_KDP mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
-RATE_KDP_ZDR  QC_RATE_KDP_ZDR  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
-RATE_HYBRID   QC_RATE_HYBRID   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#QC_RATE_ZH  QC_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
+#RATE_Z_ZDR  QC_RATE_Z_ZDR    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
+#RATE_KDP  QC_RATE_KDP mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
+#RATE_KDP_ZDR  QC_RATE_KDP_ZDR  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
+#RATE_HYBRID   QC_RATE_HYBRID   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/sband/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 #PHASE_FOR_NOISE_K PHASE_FOR_NOISE_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&PHASE_FOR_NOISE_K phase.colors   m/s -5 80 5 radial 1 0
 #ACCUM_PHASE_CHANGE_K ACCUM_PHASE_CHANGE_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&ACCUM_PHASE_CHANGE_K phase.colors   m/s -5 80 5 radial 1 0
@@ -3089,90 +3089,21 @@ RATE_HYBRID   QC_RATE_HYBRID   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/q
 #DBM_SDEV_K DBM_SDEV_K mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&DBM_SDEV_K noise_bias.colors m/s -5 80 5 radial 1 0
 #NCP_MEAN_K  NCP_MEAN_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/kband/sur?use_http=true&NCP_MEAN_K  ncp.colors  dB -5 80  5  radial   1 0
 
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-# Merged QC moments
-
-MG1_DBZ_S   MG1_DBZ_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_S   dbz.colors   dBZ -5 80 5 radial 1 0
-MG1_DBZ_NAA_S MG1_DBZ_NAA_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_NAA_S dbz.colors dBZ -5 80 5 radial 1 0
-MG1_VEL_S   MG1_VEL_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_S   vel.colors   m/s -5 80 5 radial 1 0
-MG1_VEL_HV  MG1_VEL_HV  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_HV_S vel.colors   m/s -5 80 5 radial 1 0
-MG1_VEL_ALT    MG1_VEL_ALT    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&VEL_ALT_S   vel.colors   m/s -5 80 5 radial 1 0
-MG1_WIDTH_S MG1_WIDTH_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&WIDTH_S  width.colors m/s -5 80 5 radial 1 0
-
-MG1_ZDR_S   MG1_ZDR_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&ZDR_S zdr.colors   dB  -5 80 5 radial 1 0
-MG1_PHIDP_S MG1_PHIDP_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PHIDP_S   phidp_alt.colors deg -5 80 5 radial 1 0
-MG1_KDP_S   MG1_KDP_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&KDP_S  kdp_sband.colors   deg/km -5 80 5 radial 1 0     
-MG1_PSOB_S  MG1_PSOB_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PSOB_S   psob.colors   deg -5 80 5 radial 1 0     
-MG1_NCP_S  MG1_NCP_S       mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&NCP_S  ncp.colors  dB   -5   80  5  radial   1 0
-MG1_CPA_S  MG1_CPA_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CPA_S  cpa.colors  - -5 80 5 radial 1 0
-
-MG1_LDRH_S  MG1_LDRH_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&LDRH_S ldr.colors   dB  -5 80 5 radial 1 0
-MG1_LDRV_S  MG1_LDRV_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&LDRV_S ldr.colors   dB  -5 80 5 radial 1 0
-MG1_RHOHV_S MG1_RHOHV_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RHOHV_S rhohv.colors _   -5 80 5 radial 1 0
-MG1_RHOHV_NNC_S MG1_RHOHV_NNC_S mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RHOHV_NNC_S rhohv.colors _   -5 80 5 radial 1 0
-MG1_SNRHC_S   MG1_SNRHC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHC_S  snr.colors   dB     -5 80 5 radial 1 0
-MG1_SNRVC_S   MG1_SNRVC_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVC_S  snr.colors   dB     -5 80 5 radial 1 0
-
-MG1_SNRHX_S   MG1_SNRHX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHX_S  snr.colors   dB     -5 80 5 radial 1 0
-MG1_SNRVX_S   MG1_SNRVX_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVX_S  snr.colors   dB     -5 80 5 radial 1 0
-MG1_DBMHC_S  MG1_DBMHC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHC_S  dbmlow.colors dBm -5 80 5 radial 1 0
-MG1_DBMVC_S  MG1_DBMVC_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVC_S  dbmlow.colors dBm -5 80 5 radial 1 0
-MG1_DBMHX_S  MG1_DBMHX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHX_S  dbmlow.colors dBm -5 80 5 radial 1 0
-MG1_DBMVX_S  MG1_DBMVX_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVX_S  dbmlow.colors dBm -5 80 5 radial 1 0
-
-MG1_CLUT_S MG1_CLUT_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CLUT_S  dbz.colors dB -5 80 5 radial 1 0
-MG1_CMD_S  MG1_CMD_S   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CMD_S      cmd.colors  none -5 80 5 radial 1 0
-MG1_CMD_FLAG_S MG1_CMD_FLAG_S  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&CMD_FLAG_S cmd_flag.colors  none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-# MERGED Kband moments
-
-MG1_DBZ_K  MG1_DBZ_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_K     dbz.colors   dBZ -5 80 5 radial 1 0
-MG1_DBZ_NAA_K MG1_DBZ_NAA_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBZ_NAA_K     dbz.colors   dBZ -5 80 5 radial 1 0
-MG1_SNRHC_K  MG1_SNRHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRHC_K  snr.colors   dB  -5 80 5 radial 1 0
-MG1_SNRVX_K   MG1_SNRVX_K   mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&SNRVX_K  snr.colors dB -5 80 5 radial 1 0
-MG1_DBMHC_K  MG1_DBMHC_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMHC_K  dbmlow.colors dBm -5 80 5 radial 1 0
-MG1_DBMVX_K  MG1_DBMVX_K  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&DBMVX_K  dbmlow.colors dBm -5 80 5 radial 1 0
-
-# Merged PID
-
-MG1_PID  MG1_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&PID    pid.colors  none -5 80 5 radial 1 0
-MG1_TEMP_PID MG1_TEMP_PID  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&TEMP_FOR_PID  temp.colors    C -5 80 5 redial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-MG1_RATE_ZH  MG1_RATE_ZH    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_ZH precip_color none -5 80 5 radial 1 0
-MG1_RATE_Z_ZDR MG1_RATE_Z_ZDR  mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_Z_ZDR precip_color none -5 80 5 radial 1 0
-MG1_RATE_KDP MG1_RATE_KDP mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_KDP precip_color none -5 80 5 radial 1 0
-MG1_RATE_KDP_ZDR MG1_RATE_KDP_ZDR mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_KDP_ZDR precip_color none -5 80 5 radial 1 0
-MG1_RATE_HYBRID MG1_RATE_HYBRID    mdvp:://front.eol.ucar.edu:8080:dynamo/cfradial/qcv1/moments/merged/sur?use_http=true&RATE_HYBRID precip_color none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 # SATELLITE
 
 VIS VIS mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/vis?use_http=true&VIS  sat_cloud.colors  none -5 80 5 radial 1 0
 IR  IR  mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/ir?use_http=true&IR    sat_tempK.colors  none -5 80 5 radial 1 0
 WV  WV  mdvp:://front.eol.ucar.edu:8080:dynamo/mdv/sat/wv?use_http=true&WV    sat_tempK.colors  none -5 80 5 radial 1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
-======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
+#======== ========  mdvp::static//front.eol.ucar.edu:8080:/spacer?use_http=true&Elevation  none.colors   m   -5   80  5  dcont   1 0
 
 </GRIDS>
 

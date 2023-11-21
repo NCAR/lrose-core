@@ -1087,6 +1087,8 @@ void init_data_space(Params &tdrpParams)
   }
   // establish and initialize sources of data 
   init_data_links(param_text, param_text_len, param_text_line_no, tdrpParams);
+  return;
+
   // copy legacy params to tdrp
 
   // Load the Wind Data Field  parameters
