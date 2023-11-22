@@ -190,8 +190,9 @@ void TimeScaleWidget::setBackgroundColor(const QColor &color)
 void TimeScaleWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _mousePressX = e->position().x();
-  _mousePressY = e->position().y();
+  QPointF pos(e->pos());
+  _mousePressX = pos.x();
+  _mousePressY = pos.y();
   
   _worldPressX = _world.getXWorld(_mousePressX);
   _worldPressY = _world.getYWorld(_mousePressY);
