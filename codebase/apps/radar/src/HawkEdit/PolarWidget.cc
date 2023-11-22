@@ -475,8 +475,9 @@ void PolarWidget::mapPixelToWorld(int x, int y, double *worldX, double *worldY) 
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _mousePressX = e->position().x();
-  _mousePressY = e->position().y();
+  QPointF pos(e->pos());
+  _mousePressX = pos.x();
+  _mousePressY = pos.y();
 
   mapPixelToWorld(_mousePressX, _mousePressY, &_worldPressX, &_worldPressY);
 
@@ -510,8 +511,9 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
    
   // Zooming with the mouse
 
-  int x = e->position().x();
-  int y = e->position().y();
+  QPointF pos(e->pos());
+  int x = pos.x();
+  int y = pos.y();
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
