@@ -918,6 +918,18 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'save_georeference_variables'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("save_georeference_variables");
+    tt->descr = tdrpStrDup("If true, georeference variables for moving platforms, if available, will be added to the output files.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &save_georeference_variables - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // trailing entry has param_name set to NULL
     
     tt->param_name = NULL;

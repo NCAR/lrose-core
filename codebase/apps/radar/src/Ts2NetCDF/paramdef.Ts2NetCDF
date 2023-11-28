@@ -179,3 +179,8 @@ paramdef boolean {
   p_descr = "If true, write one file only and then quit.";
 } one_file_only;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "If true, georeference variables for moving platforms, if available, will be added to the output files.";
+} save_georeference_variables;
+

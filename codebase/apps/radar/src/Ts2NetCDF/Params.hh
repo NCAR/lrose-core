@@ -422,6 +422,8 @@ public:
 
   tdrp_bool_t one_file_only;
 
+  tdrp_bool_t save_georeference_variables;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -429,7 +431,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[31];
+  mutable TDRPtable _table[32];
 
   const char *_className;
 

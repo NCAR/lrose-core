@@ -1,5 +1,5 @@
 /**********************************************************************
- * TDRP params for ./Ts2NetCDF
+ * TDRP params for Ts2NetCDF
  **********************************************************************/
 
 //======================================================================
@@ -216,7 +216,7 @@ chan0_is_h_or_copolar = TRUE;
 // Type: string
 //
 
-output_dir = "/tmp/nc";
+output_dir = "$(HOME)/data/time_series/nc/test";
 
 ///////////// preserve_file_name //////////////////////
 //
@@ -228,7 +228,7 @@ output_dir = "/tmp/nc";
 // Type: boolean
 //
 
-preserve_file_name = TRUE;
+preserve_file_name = FALSE;
 
 ///////////// save_one_file_per_input_file ////////////
 //
@@ -243,6 +243,20 @@ preserve_file_name = TRUE;
 //
 
 save_one_file_per_input_file = TRUE;
+
+///////////// save_file_when_processing_details_change 
+//
+// If true, save to output file when processing details change.
+//
+// Only applies to TS_FILE_INPUT mode, in which the input files are 
+//   specified on the command line. Write an output file if the scan or 
+//   processing details change.
+//
+//
+// Type: boolean
+//
+
+save_file_when_processing_details_change = FALSE;
 
 ///////////// save_scans_in_sectors ///////////////////
 //
@@ -281,7 +295,7 @@ max_sector_size = 360;
 // Type: int
 //
 
-max_pulses_per_file = 50000;
+max_pulses_per_file = 250000;
 
 ///////////// specify_n_gates_save ////////////////////
 //
@@ -309,6 +323,24 @@ specify_n_gates_save = FALSE;
 
 n_gates_save = 1000;
 
+///////////// pad_n_gates_to_max //////////////////////
+//
+// Option to pad all rays out to the maximum number of gates in the 
+//   file.
+//
+// If true, we read through the file to determine the maximum number of 
+//   gates in the file. Then, if the number of gates varies from ray to 
+//   ray, the shorter rays are padded out to the maximum number of gates 
+//   found. Also, the number of gates per ray is stored out as a netCDF 
+//   variable nGatesRay. This option is not compatible with 
+//   'specify_n_gates_save'.
+//
+//
+// Type: boolean
+//
+
+pad_n_gates_to_max = FALSE;
+
 ///////////// one_file_only ///////////////////////////
 //
 // If true, write one file only and then quit.
@@ -318,4 +350,15 @@ n_gates_save = 1000;
 //
 
 one_file_only = FALSE;
+
+///////////// save_georeference_variables /////////////
+//
+// If true, georeference variables for moving platforms, if available, 
+//   will be added to the output files.
+//
+//
+// Type: boolean
+//
+
+save_georeference_variables = TRUE;
 

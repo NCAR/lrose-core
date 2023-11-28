@@ -81,6 +81,7 @@ Ts2NetCDF::Ts2NetCDF(int argc, char **argv)
   _procPrev.prf_mode = -1;
 
   MEM_zero(_calibPrev);
+  _nGeorefChecks = 0;
 
   // set programe name
   
@@ -577,6 +578,23 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
 
 {
 
+  const IwrfTsInfo &opsInfo = _pulseReader->getOpsInfo();
+  if (_params.save_georeference_variables) {
+    if (opsInfo.isPlatformGeorefActive()) {
+      _georefs.push_back(opsInfo.getPlatformGeoref());
+    } else if (opsInfo.isPlatformGeoref1Active()) {
+      _georefs.push_back(opsInfo.getPlatformGeoref1());
+    } else {
+      // waiting for georefs
+      _nGeorefChecks++;
+      if ((_nGeorefChecks % 10000) == 0) {
+        cerr << "WARNING - no georefs found yet" << endl;
+        cerr << "Consider setting save_georeference_variables to false" << endl;
+      }
+      return 0;
+    }
+  }
+
   // convert to floats
   
   _nPulsesRead++;
@@ -600,8 +618,7 @@ int Ts2NetCDF::_handlePulse(IwrfTsPulse &pulse)
     _startEl = _el;
     _startAz = _az;
     _scanMode = pulse.getScanMode();
-    _xmitRcvMode = (iwrf_xmit_rcv_mode)
-      _pulseReader->getOpsInfo().get_proc_xmit_rcv_mode();
+    _xmitRcvMode = (iwrf_xmit_rcv_mode) opsInfo.get_proc_xmit_rcv_mode();
   }
 
   // set number of gates to be saved out
@@ -1543,6 +1560,8 @@ void Ts2NetCDF::_reset()
   _burstMagArrayVx.clear();
   _burstArgArrayVx.clear();
 
+  _georefs.clear();
+
 }
 
 ////////////////////////////////////////
@@ -1663,6 +1682,11 @@ int Ts2NetCDF::_writeFileTmp()
   }
 
   if (_writeTimeDimVars(file, timeDim)) {
+    cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
+    return -1;
+  }
+
+  if (_writeGeorefVars(file, timeDim)) {
     cerr << "ERROR - Ts2NetCDF::_writeFileTmp" << endl;
     return -1;
   }
@@ -2516,6 +2540,337 @@ int Ts2NetCDF::_writeTimeDimVars(NcxxFile &file,
 }
 
 ////////////////////////////////////////
+// write out georef variables
+// Returns 0 on success, -1 on failure
+
+int Ts2NetCDF::_writeGeorefVars(NcxxFile &file,
+                                NcxxDim &timeDim)
+  
+{
+
+  // check we have data
+  
+  if (_georefs.size() < 1) {
+    return 0;
+  }
+  if (_georefs.size() != _nTimes) {
+    cerr << "ERROR - _writeGeorefVars()" << endl;
+    cerr << "  nTimes: " << _nTimes << endl;
+    cerr << "  nGeorefs: " << _georefs.size() << endl;
+    cerr << "  These should be the same" << endl;
+  }
+  
+  // Time variable - secs since start of file
+
+  char timeUnitsStr[256];
+  DateTime stime(_startTime);
+  sprintf(timeUnitsStr, "seconds since %.4d-%.2d-%.2dT%.2d:%.2d:%.2dZ",
+          stime.getYear(), stime.getMonth(), stime.getDay(),
+          stime.getHour(), stime.getMin(), stime.getSec());
+
+  NcxxVar timeVarGeoref;
+  if (_addVar(file, timeVarGeoref, ncxxDouble, timeDim,
+              "time_offset_georef", "time_offset_from_base_time", timeUnitsStr)) {
+    cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+    cerr << "  Cannot create time var" << endl;
+    return -1;
+  }
+  timeVarGeoref.addScalarAttr("_FillValue", -9999.0);
+  TaArray<double> times_;
+  double *times = times_.alloc(_georefs.size());
+  for (size_t ii = 0; ii < _georefs.size(); ii++) {
+    times[ii] = (double) ((_georefs[ii].packet.time_secs_utc - _startTime) +
+                          _georefs[ii].packet.time_nano_secs / 1.0e9);
+  }
+  timeVarGeoref.putVal(times);
+
+  // variables
+  
+  // longitude
+  {
+    vector<double> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].longitude);
+    }
+    if (_writeVar(file, timeDim,
+                  "longitude", "longitude", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // latitude
+  {
+    vector<double> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].latitude);
+    }
+    if (_writeVar(file, timeDim,
+                  "latitude", "latitude", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // altitude MSL
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].altitude_msl_km * 1000.0);
+    }
+    if (_writeVar(file, timeDim,
+                  "altitude", "altitude", "meters",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // altitude AGL
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].altitude_agl_km * 1000.0);
+    }
+    if (_writeVar(file, timeDim,
+                  "altitude_agl", "altitude_agl", "meters",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ew vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ew_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "eastward_velocity", "platform_eastward_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ns vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ns_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "northward_velocity", "platform_northward_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // vert vel
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].vert_velocity_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "vertical_velocity", "platform_vertical_velocity", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // heading
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].heading_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "heading", "platform_heading_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // roll
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].roll_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "roll", "platform_roll_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // pitch
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].pitch_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "pitch", "platform_pitch_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // drift
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].drift_angle_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "drift", "platform_drift_angle", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // track
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].track_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "track", "platform_track_over_the_ground", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // rotation
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].rotation_angle_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "rotation", "ray_rotation_angle_relative_to_platform", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // tilt
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].tilt_deg);
+    }
+    if (_writeVar(file, timeDim,
+                  "tilt", "ray_tilt_angle_relative_to_platform", "degrees",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ew wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ew_horiz_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "eastward_horiz_wind", "platform_eastward_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // ns wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].ns_horiz_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "northward_horiz_wind", "platform_northward_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // vert wind
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].vert_wind_mps);
+    }
+    if (_writeVar(file, timeDim,
+                  "vertical_wind", "platform_vertical_wind", "meters per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // heading rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].heading_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "heading_rate", "platform_heading_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // pitch rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].pitch_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "pitch_rate", "platform_pitch_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  // roll rate
+  {
+    vector<float> vals;
+    for (size_t ii = 0; ii < _georefs.size(); ii++) {
+      vals.push_back(_georefs[ii].roll_rate_dps);
+    }
+    if (_writeVar(file, timeDim,
+                  "roll_rate", "platform_roll_rate", "degrees per second",
+                  vals)) {
+      cerr << "ERROR - Ts2NetCDF::_writeGeorefVars" << endl;
+      return -1;
+    }
+  }
+
+  return 0;
+
+}
+
+////////////////////////////////////////
 // write out range coordinate variable
 // Returns 0 on success, -1 on failure
 
@@ -2805,33 +3160,54 @@ int Ts2NetCDF::_addVar(NcxxFile &file,
 }
 
 ////////////////////////////////////////
+// add and write double var
+// Returns 0 on success, -1 on failure
+
+int Ts2NetCDF::_writeVar(NcxxFile &file,
+                         NcxxDim &vdim,
+                         const string &name,
+                         const string &standardName,
+                         const string &units,
+                         const vector<double> &vals)
+  
+{
+  
+  NcxxVar var;
+  if (_addVar(file, var, ncxxDouble, vdim,
+              name, standardName, units)) {
+    cerr << "ERROR - Ts2NetCDF::_addDoubleVar" << endl;
+    cerr << "  Cannot create var, name: " << name << endl;
+    return -1;
+  }
+  var.addScalarAttr("_FillValue", -9999.0);
+  var.putVal(vals.data());
+  
+  return 0;
+
+}
+
+////////////////////////////////////////
 // add and write float var
 // Returns 0 on success, -1 on failure
 
 int Ts2NetCDF::_writeVar(NcxxFile &file,
-                         NcxxDim &timeDim,
+                         NcxxDim &vdim,
                          const string &name,
                          const string &standardName,
                          const string &units,
-                         const vector<float> vals)
+                         const vector<float> &vals)
   
 {
   
-  TaArray<float> floats_;
-  float *floats = floats_.alloc(timeDim.getSize());
-  
   NcxxVar var;
-  if (_addVar(file, var, ncxxFloat, timeDim,
+  if (_addVar(file, var, ncxxFloat, vdim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addFloatVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
   var.addScalarAttr("_FillValue", -9999.0f);
-  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
-    floats[jj] = vals[jj];
-  }
-  var.putVal(floats);
+  var.putVal(vals.data());
   
   return 0;
 
@@ -2842,29 +3218,23 @@ int Ts2NetCDF::_writeVar(NcxxFile &file,
 // Returns 0 on success, -1 on failure
 
 int Ts2NetCDF::_writeVar(NcxxFile &file,
-                         NcxxDim &timeDim,
+                         NcxxDim &vdim,
                          const string &name,
                          const string &standardName,
                          const string &units,
-                         const vector<int> vals)
+                         const vector<int> &vals)
   
 {
   
-  TaArray<int> ints_;
-  int *ints = ints_.alloc(timeDim.getSize());
-  
   NcxxVar var;
-  if (_addVar(file, var, ncxxInt, timeDim,
+  if (_addVar(file, var, ncxxInt, vdim,
               name, standardName, units)) {
     cerr << "ERROR - Ts2NetCDF::_addIntVar" << endl;
     cerr << "  Cannot create var, name: " << name << endl;
     return -1;
   }
   var.addScalarAttr("_FillValue", -9999);
-  for (size_t jj = 0; jj < timeDim.getSize(); jj++) {
-    ints[jj] = vals[jj];
-  }
-  var.putVal(ints);
+  var.putVal(vals.data());
   
   return 0;
 

@@ -198,6 +198,11 @@ private:
   MemBuf _iBufHx, _qBufHx;
   MemBuf _iBufVx, _qBufVx;
 
+  // georeference data
+
+  vector<iwrf_platform_georef_t> _georefs;
+  size_t _nGeorefChecks;
+
   // output file
 
   string _outputName;
@@ -226,11 +231,11 @@ private:
   int _writeFileTmp();
   int _computeOutputFilePaths();
 
-
   void _addGlobAtt(NcxxFile &out);
   
   int _writeBaseTimeVars(NcxxFile &file);
   int _writeTimeDimVars(NcxxFile &file, NcxxDim &timeDim);
+  int _writeGeorefVars(NcxxFile &file, NcxxDim &georefDim);
   int _writeRangeVar(NcxxFile &file, NcxxDim &rangeDim);
     
   int _addAttr(NcxxVar &var,
@@ -270,18 +275,25 @@ private:
               const string &units = "");
 
   int _writeVar(NcxxFile &file,
-                NcxxDim &timeDim,
+                NcxxDim &vdim,
                 const string &name,
                 const string &standardName,
                 const string &units,
-                const vector<float> vals);
+                const vector<double> &vals);
   
   int _writeVar(NcxxFile &file,
-                NcxxDim &timeDim,
+                NcxxDim &vDim,
                 const string &name,
                 const string &standardName,
                 const string &units,
-                const vector<int> vals);
+                const vector<float> &vals);
+  
+  int _writeVar(NcxxFile &file,
+                NcxxDim &vDim,
+                const string &name,
+                const string &standardName,
+                const string &units,
+                const vector<int> &vals);
   
   int _writeIqVars(NcxxFile &file,
                    NcxxDim &timeDim,
