@@ -252,7 +252,7 @@ IwrfTsReaderFile::IwrfTsReaderFile(const char *input_dir,
   
 }
 
-// ARCHIVE mode - specify list of files to be read
+// FILELIST mode - specify list of files to be read
 
 IwrfTsReaderFile::IwrfTsReaderFile(const vector<string> &fileList,
 				   IwrfDebug_t debug) :
@@ -269,6 +269,29 @@ IwrfTsReaderFile::IwrfTsReaderFile(const vector<string> &fileList,
     const vector<string> &pathList = _input->getPathList();
     for (size_t ii = 0; ii < pathList.size(); ii++) {
       cerr << "  using file: " << pathList[ii] << endl;
+    }
+  }
+
+}
+
+// ARCHIVE mode - specify input_dir and start and end times
+
+IwrfTsReaderFile::IwrfTsReaderFile(const char *input_dir,
+                                   time_t start_time,
+                                   time_t end_time,
+				   IwrfDebug_t debug) :
+        IwrfTsReader(debug)
+        
+{
+  
+  _input = new DsInputPath("IwrfTsReaderFile", debug, input_dir, start_time, end_time);
+  _fileList = _input->getPathList();
+  _in = NULL;
+  _fileIsRvp8Type = false;
+  if (_debug) {
+    cerr << "INFO - IwrfTsReaderFile" << endl;
+    for (size_t ii = 0; ii < _fileList.size(); ii++) {
+      cerr << "  using file: " << _fileList[ii] << endl;
     }
   }
 

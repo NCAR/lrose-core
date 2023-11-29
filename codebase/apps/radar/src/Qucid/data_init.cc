@@ -47,6 +47,17 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
     total_len = 0;
     start_ptr = param_buf;
 
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    cerr << "fields_n: " << tdrpParams.fields_n << endl;
+    for (int ii = 0; ii < tdrpParams.fields_n; ii++) {
+      Params::field_t &fld = tdrpParams._fields[ii];
+      cerr << "  button label: " << fld.button_label << endl;
+      cerr << "  legend label: " << fld.legend_label << endl;
+      cerr << "  contour_low: " << fld.contour_low << endl;
+    }
+    cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+    
+
     // read all the lines in the data information buffer
     while((end_ptr = strchr(start_ptr,'\n')) != NULL && (total_len < param_buf_len)) {
 	// Skip over blank, short or commented lines
@@ -200,7 +211,6 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
 
     // set the tdrp params for the fields
 
-
     cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
     cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << tdrpParams.fields_n << endl;
     
@@ -230,5 +240,15 @@ void init_data_links(const char *param_buf, long param_buf_len, long line_no,
       field->background_render = (tdrp_bool_t) record.auto_render;
 
     }
+
+    cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+    for (int ii = 0; ii < tdrpParams.fields_n; ii++) {
+      Params::field_t &fld = tdrpParams._fields[ii];
+      cerr << "  button label: " << fld.button_label << endl;
+      cerr << "  legend label: " << fld.legend_label << endl;
+      cerr << "  contour_low: " << fld.contour_low << endl;
+    }
+    cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+    
 
 }

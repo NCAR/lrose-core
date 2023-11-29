@@ -636,10 +636,10 @@
     tt->ptype = ENUM_TYPE;
     tt->param_name = tdrpStrDup("input_mode");
     tt->descr = tdrpStrDup("Input mode - files or time series API.");
-    tt->help = tdrpStrDup("If TS_FMQ_INPUT, the application will read the time series from a file message queue and process the pulses as they come in. If TS_FILE_INPUT, the application will process all the files specified on the command line.");
+    tt->help = tdrpStrDup("TS_FILE_INPUT: the application will process all the files specified on the command line.\n\nTS_ARCHIVE_INPUT: reads data files from input_dir, between start_time and end_time.\n\nTS_FMQ_INPUT: realtime, the application will read the time series from a file message queue and process the pulses as they come in.\n\nTS_TCP_INPUT: realtime, the application will read the time series from a TCP socket as they come in.");
     tt->val_offset = (char *) &input_mode - &_start_;
     tt->enum_def.name = tdrpStrDup("input_mode_t");
-    tt->enum_def.nfields = 3;
+    tt->enum_def.nfields = 4;
     tt->enum_def.fields = (enum_field_t *)
         tdrpMalloc(tt->enum_def.nfields * sizeof(enum_field_t));
       tt->enum_def.fields[0].name = tdrpStrDup("TS_FILE_INPUT");
@@ -648,7 +648,21 @@
       tt->enum_def.fields[1].val = TS_FMQ_INPUT;
       tt->enum_def.fields[2].name = tdrpStrDup("TS_TCP_INPUT");
       tt->enum_def.fields[2].val = TS_TCP_INPUT;
+      tt->enum_def.fields[3].name = tdrpStrDup("TS_ARCHIVE_INPUT");
+      tt->enum_def.fields[3].val = TS_ARCHIVE_INPUT;
     tt->single_val.e = TS_FILE_INPUT;
+    tt++;
+    
+    // Parameter 'input_dir'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("input_dir");
+    tt->descr = tdrpStrDup("Dir for input data files.");
+    tt->help = tdrpStrDup("This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE modes, the file paths are specified on the command line.");
+    tt->val_offset = (char *) &input_dir - &_start_;
+    tt->single_val.s = tdrpStrDup("./input");
     tt++;
     
     // Parameter 'input_fmq_name'

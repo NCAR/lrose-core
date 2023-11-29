@@ -64,10 +64,17 @@ instance = "test";
 //
 // Input mode - files or time series API.
 //
-// If TS_FMQ_INPUT, the application will read the time series from a 
-//   file message queue and process the pulses as they come in. If 
-//   TS_FILE_INPUT, the application will process all the files specified 
+// TS_FILE_INPUT: the application will process all the files specified 
 //   on the command line.
+//
+// TS_ARCHIVE_INPUT: reads data files from input_dir, between start_time 
+//   and end_time.
+//
+// TS_FMQ_INPUT: realtime, the application will read the time series 
+//   from a file message queue and process the pulses as they come in.
+//
+// TS_TCP_INPUT: realtime, the application will read the time series 
+//   from a TCP socket as they come in.
 //
 //
 // Type: enum
@@ -75,9 +82,23 @@ instance = "test";
 //     TS_FILE_INPUT
 //     TS_FMQ_INPUT
 //     TS_TCP_INPUT
+//     TS_ARCHIVE_INPUT
 //
 
 input_mode = TS_FILE_INPUT;
+
+///////////// input_dir ///////////////////////////////
+//
+// Dir for input data files.
+//
+// This is used in REALTIME and ARCHIVE modes. In FILELIST and SIMULATE 
+//   modes, the file paths are specified on the command line.
+//
+//
+// Type: string
+//
+
+input_dir = "/scr/sleet3/rsfdata/projects/spicule/hcr/time_series/wband/save";
 
 ///////////// input_fmq_name //////////////////////////
 //
@@ -216,7 +237,7 @@ chan0_is_h_or_copolar = TRUE;
 // Type: string
 //
 
-output_dir = "$(HOME)/data/time_series/nc/test";
+output_dir = "/tmp/nc";
 
 ///////////// preserve_file_name //////////////////////
 //
