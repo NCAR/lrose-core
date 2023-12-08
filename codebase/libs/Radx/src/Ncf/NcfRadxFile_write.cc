@@ -980,9 +980,10 @@ int NcfRadxFile::_addCoordinateVariables()
   }
 
   iret |= _file.addAttr(_rangeVar, LONG_NAME, RANGE_LONG);
-  iret |= _file.addAttr(_rangeVar, LONG_NAME,
-                        "Range from instrument to center of gate");
+  iret |= _file.addAttr(_rangeVar, STANDARD_NAME,
+                        "projection_range_coordinate");
   iret |= _file.addAttr(_rangeVar, UNITS, METERS);
+  iret |= _file.addAttr(_rangeVar, AXIS, "radial_range_coordinate");
   iret |= _file.addAttr(_rangeVar, SPACING_IS_CONSTANT, "true");
   iret |= _file.addAttr(_rangeVar, METERS_TO_CENTER_OF_FIRST_GATE,
                         (float) _writeVol->getStartRangeKm() * 1000.0);
@@ -3693,7 +3694,11 @@ Nc3Var *NcfRadxFile::_createFieldVar(const RadxField &field)
   } // switch
 
   iret |= _file.addAttr(var, GRID_MAPPING, GRID_MAPPING);
-  iret |= _file.addAttr(var, COORDINATES, "time range");
+  if (_georefsActive) {
+    iret |= _file.addAttr(var, COORDINATES, "elevation azimuth range heading roll pitch rotation tilt");
+  } else {
+    iret |= _file.addAttr(var, COORDINATES, "elevation azimuth range");
+  }
 
   // set compression
   
