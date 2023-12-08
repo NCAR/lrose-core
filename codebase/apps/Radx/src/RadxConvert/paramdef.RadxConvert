@@ -387,6 +387,12 @@ paramdef double {
   p_help = "See override_radar_location.";
 } radar_longitude_deg;
 
+paramdef boolean {
+  p_default = false;
+  p_descr = "Option to negate the latitude.";
+  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
+} change_radar_latitude_sign;
+
 paramdef double {
   p_default = -999;
   p_descr = "Radar altitude (meters).";
@@ -395,9 +401,15 @@ paramdef double {
 
 paramdef boolean {
   p_default = false;
-  p_descr = "Option to negate the latitude.";
-  p_help = "Mainly useful for RAPIC files. In RAPIC, latitude is always positive, so mostly you need to set the latitiude to the negative value of itself.";
-} change_radar_latitude_sign;
+  p_descr = "Option to override the radar height above the ground (m).";
+  p_help = "If true, the height_agl will be set to radar_height_agl in meters.";
+} override_height_agl;
+
+paramdef double {
+  p_default = 0;
+  p_descr = "Radar height AGL (meters).";
+  p_help = "See override_height_agl.";
+} radar_height_agl_meters;
 
 paramdef boolean {
   p_default = false;
@@ -738,6 +750,18 @@ paramdef boolean {
 commentdef {
   p_header = "OPTION TO OVERRIDE SELECTED GLOBAL ATTRIBUTES";
 }
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the CfRadial convention in the file.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the convention attribute.";
+} convention_override;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Option to override the subconvention in the file.";
+  p_help = "If empty, no effect. If not empty, this string is used to override the subconvention attribute.";
+} subconvention_override;
 
 paramdef string {
   p_default = "";

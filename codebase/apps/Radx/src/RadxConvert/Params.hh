@@ -629,9 +629,13 @@ public:
 
   double radar_longitude_deg;
 
+  tdrp_bool_t change_radar_latitude_sign;
+
   double radar_altitude_meters;
 
-  tdrp_bool_t change_radar_latitude_sign;
+  tdrp_bool_t override_height_agl;
+
+  double radar_height_agl_meters;
 
   tdrp_bool_t apply_georeference_corrections;
 
@@ -707,6 +711,10 @@ public:
   tdrp_bool_t sort_rays_by_time;
 
   tdrp_bool_t sort_rays_by_time_decreasing;
+
+  char* convention_override;
+
+  char* subconvention_override;
 
   char* version_override;
 
@@ -868,7 +876,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[198];
+  mutable TDRPtable _table[202];
 
   const char *_className;
 

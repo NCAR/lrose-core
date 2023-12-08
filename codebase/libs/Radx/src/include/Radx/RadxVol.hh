@@ -151,9 +151,13 @@ public:
 
   void setDebug(bool val);
 
-  /// Set the volume convention, if available.
+  /// Set the volume convention, to override the default.
 
   void setConvention(const string &val) { _convention = val; }
+
+  /// Set the volume sub conventions, to override the default.
+
+  void setSubConventions(const string &val) { _subconventions = val; }
 
   /// Set the volume version, if available. Use this for the project name.
 
@@ -1288,6 +1292,10 @@ public:
 
   inline const string &getConvention() const { return _convention; }
 
+  /// Get sub conventions.
+
+  inline const string &getSubConventions() const { return _subconventions; }
+
   /// Get version. May be used for project name.
 
   inline const string &getVersion() const { return _version; }
@@ -1916,6 +1924,7 @@ private:
   // meta strings
 
   string _convention;  // from CF
+  string _subconventions;  // from CF
   string _version;     // from CF
   string _title;       // from CF
   string _institution; // from CF
