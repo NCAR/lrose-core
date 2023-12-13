@@ -25,7 +25,8 @@
 //
 // RadxTime
 //
-// Utility class for manipulating date/time
+// Utility class for manipulating date/time.
+// Originally based on toolsa DateTime class.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -113,6 +114,14 @@ public:
   /// Clear - set to Jan 1 1970
 
   void clear();
+  
+  /// sets to subsec precision, using getTimeOfDay()
+  
+  void setToNow();
+
+  /// set to invalid
+  
+  void setToNever();
 
   /// Set from time_t
 
