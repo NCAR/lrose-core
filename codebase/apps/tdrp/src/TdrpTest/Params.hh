@@ -470,6 +470,8 @@ public:
   tdrp_bool_t *_flags;
   int flags_n;
 
+  tdrp_bool_t modify_and_print;
+
   char* path_delim;
 
   char* input_file_ext;
@@ -511,7 +513,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[38];
+  mutable TDRPtable _table[39];
 
   const char *_className;
 

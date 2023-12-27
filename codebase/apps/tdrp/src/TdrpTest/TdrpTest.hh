@@ -71,6 +71,7 @@ private:
   Args *_args;
   Params *_params;
 
+  void _modifySelectedParams();
   void _doPrintout(FILE *out);
 
 };

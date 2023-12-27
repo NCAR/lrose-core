@@ -1085,6 +1085,18 @@
       tt->array_vals[5].b = pTRUE;
     tt++;
     
+    // Parameter 'modify_and_print'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("modify_and_print");
+    tt->descr = tdrpStrDup("Modify selected parameters and print.");
+    tt->help = tdrpStrDup("Modify selected parameters in memory, and then print params. These can then be compared with the standard set.");
+    tt->val_offset = (char *) &modify_and_print - &_start_;
+    tt->single_val.b = pFALSE;
+    tt++;
+    
     // Parameter 'Comment 5'
     
     memset(tt, 0, sizeof(TDRPtable));

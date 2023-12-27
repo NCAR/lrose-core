@@ -101,6 +101,12 @@ TdrpTest::~TdrpTest()
 int TdrpTest::Run()
 {
 
+  // optionally modify selected parameters
+  
+  if (_params->modify_and_print) {
+    _modifySelectedParams();
+  }
+
   // print out the parameters from user space
   
   _doPrintout(stdout);
@@ -208,6 +214,28 @@ int TdrpTest::Run()
 
   return (0);
 
+}
+
+//////////////////////////////////////////////////
+// modify selected params
+
+void TdrpTest::_modifySelectedParams()
+
+{
+
+  _params->your_age = 99;
+
+  _params->arrayRealloc("our_ages", 7);
+  _params->_our_ages[5] = 98;
+  _params->_our_ages[6] = 97;
+
+  _params->mass_coefficient = -88.88;
+  _params->__length_factor[1][4] = -77.77;
+
+  _params->_flags[4] = (tdrp_bool_t) false;
+
+  TDRP_str_replace(&_params->input_file_ext, "nc");
+  
 }
 
 //////////////////////////////////////////////////
