@@ -107,6 +107,18 @@ int TdrpTest::Run()
     _modifySelectedParams();
   }
 
+  /*
+   * print out table to params.out
+   */
+  
+  fprintf(stdout, "\n\n");
+  fprintf(stdout, "======================================\n");
+  fprintf(stdout, "INIT PRINTOUT OF PARAMETERS FROM TABLE\n");
+  fprintf(stdout, "======================================\n\n");
+  _params->print(stdout, PRINT_SHORT);
+  fprintf(stdout, "\n\n");
+  fprintf(stdout, "======================================\n\n");
+
   // print out the parameters from user space
   
   _doPrintout(stdout);
@@ -208,9 +220,12 @@ int TdrpTest::Run()
    */
   
   fprintf(stdout, "\n\n");
-  fprintf(stdout, "PRINTOUT OF PARAMETERS FROM TABLE\n");
-  fprintf(stdout, "=================================\n\n");
+  fprintf(stdout, "=======================================\n");
+  fprintf(stdout, "FINAL PRINTOUT OF PARAMETERS FROM TABLE\n");
+  fprintf(stdout, "=======================================\n\n");
   _params->print(stdout, PRINT_SHORT);
+  fprintf(stdout, "\n\n");
+  fprintf(stdout, "=======================================\n\n");
 
   return (0);
 
