@@ -115,6 +115,7 @@ int TdrpTest::Run()
   fprintf(stdout, "======================================\n");
   fprintf(stdout, "INIT PRINTOUT OF PARAMETERS FROM TABLE\n");
   fprintf(stdout, "======================================\n\n");
+  _params->sync();
   _params->print(stdout, PRINT_SHORT);
   fprintf(stdout, "\n\n");
   fprintf(stdout, "======================================\n\n");
