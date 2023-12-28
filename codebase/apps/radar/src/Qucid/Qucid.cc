@@ -92,6 +92,7 @@ Qucid::Qucid(int argc, char **argv) :
     tdrp_print_mode_t printMode;
     if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
       if (printMode != NO_PRINT) {
+        _params.sync();
         _params.print(stdout, printMode);
         exit(0);
       }
