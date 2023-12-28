@@ -136,80 +136,6 @@ int TdrpTest::Run()
   _params->print(out, PRINT_SHORT);
   fclose(out);
 
-  // change a few params from within the program
-  
-  _params->your_age = 22;
-  
-  if (_params->our_ages_n > 0) {
-    _params->_our_ages[_params->our_ages_n - 1] = 27;
-  }
-  
-  if (_params->item_count_n1 > 0 &&
-      _params->item_count_n2 > 0) {
-    _params->__item_count[_params->item_count_n1 - 1]
-      [_params->item_count_n2 - 1] = 77;
-  }
-  
-  if (_params->storm_volume_n > 0) {
-    _params->_storm_volume[_params->storm_volume_n - 1] = 99.99;
-  }
-  
-  if (_params->rain_accumulation_n1 > 0 &&
-      _params->rain_accumulation_n2 > 0) {
-    _params->__rain_accumulation[_params->rain_accumulation_n1 - 1]
-      [_params->rain_accumulation_n2 - 1] = 3.3;
-  }
-  
-  _params->mass_coefficient = 8.8e-8;
-  _params->debug = (tdrp_bool_t) TRUE;
-  
-  if (_params->compute_length_n1 > 0 &&
-      _params->compute_length_n2 > 0) {
-    _params->__compute_length[_params->compute_length_n1 - 1]
-      [_params->compute_length_n2 - 1] = (tdrp_bool_t) TRUE;
-  }
-  
-  TDRP_str_replace(&_params->input_file_ext, "dob");
-  
-  if (_params->input_file_paths_n > 0) {
-    TDRP_str_replace
-      (&_params->_input_file_paths[_params->input_file_paths_n - 1],
-       "New_file_path");
-  }
-    
-  _params->grid.dy = 3.9;
-
-  if (_params->surface_stations_n > 0) {
-    _params->_surface_stations[_params->surface_stations_n - 1].lat =
-      39.9998;
-    _params->_surface_stations[_params->surface_stations_n - 1].gauge_make =
-      Params::ETI;
-  }
-
-  if (_params->data_field_n > 0) {
-    TDRP_str_replace(&_params->_data_field[_params->data_field_n - 1].name,
-		     "Spectral width");
-  }
-
-  /*
-   * realloc some arrays
-   */
-  
-  _params->arrayRealloc("our_ages", 7);
-  _params->_our_ages[5] = 55;
-  _params->_our_ages[6] = 70;
-  
-  _params->array2DRealloc("rain_accumulation", 6, 8);
-  _params->array2DRealloc("output_file_paths", 4, 3);
-  _params->arrayRealloc("data_field", 3);
-
-  TDRP_str_replace(&_params->__output_file_paths[2][2], "Test_path");
-  
-  _params->_data_field[2].scale = 1.1;
-  _params->_data_field[2].bias = -25.0;
-  TDRP_str_replace(&_params->_data_field[2].name, "Signal-to-noise");
-  TDRP_str_replace(&_params->_data_field[2].units, "dB");
-  
   /*
    * copy params back to table
    */
@@ -239,19 +165,76 @@ void TdrpTest::_modifySelectedParams()
 
 {
 
+  _params->debug = (tdrp_bool_t) true;
+
   _params->your_age = 99;
 
+  if (_params->our_ages_n > 0) {
+    _params->_our_ages[_params->our_ages_n - 1] = 888;
+  }
   _params->arrayRealloc("our_ages", 7);
   _params->_our_ages[5] = 98;
   _params->_our_ages[6] = 97;
-
+  
   _params->mass_coefficient = -88.88;
   _params->__length_factor[1][4] = -77.77;
-
+  
   _params->_flags[4] = (tdrp_bool_t) false;
-
+  
   TDRP_str_replace(&_params->input_file_ext, "nc");
   
+  if (_params->item_count_n1 > 0 &&
+      _params->item_count_n2 > 0) {
+    _params->__item_count[_params->item_count_n1 - 1]
+      [_params->item_count_n2 - 1] = 77;
+  }
+  
+  if (_params->storm_volume_n > 0) {
+    _params->_storm_volume[_params->storm_volume_n - 1] = 99.99;
+  }
+  
+  _params->array2DRealloc("rain_accumulation", 6, 8);
+  if (_params->rain_accumulation_n1 > 0 &&
+      _params->rain_accumulation_n2 > 0) {
+    _params->__rain_accumulation[_params->rain_accumulation_n1 - 1]
+      [_params->rain_accumulation_n2 - 1] = 3.3;
+  }
+  
+  
+  if (_params->compute_length_n1 > 0 &&
+      _params->compute_length_n2 > 0) {
+    _params->__compute_length[_params->compute_length_n1 - 1]
+      [_params->compute_length_n2 - 1] = (tdrp_bool_t) TRUE;
+  }
+  
+  if (_params->input_file_paths_n > 0) {
+    TDRP_str_replace
+      (&_params->_input_file_paths[_params->input_file_paths_n - 1],
+       "New_file_path");
+  }
+    
+  _params->grid.dy = 3.9;
+
+  if (_params->surface_stations_n > 0) {
+    _params->_surface_stations[_params->surface_stations_n - 1].lat =
+      39.9998;
+    _params->_surface_stations[_params->surface_stations_n - 1].gauge_make =
+      Params::ETI;
+  }
+
+  _params->array2DRealloc("output_file_paths", 4, 3);
+  TDRP_str_replace(&_params->__output_file_paths[2][2], "Test_path");
+  
+  if (_params->data_field_n > 0) {
+    TDRP_str_replace(&_params->_data_field[_params->data_field_n - 1].name,
+		     "Spectral width");
+  }
+  _params->arrayRealloc("data_field", 3);
+  _params->_data_field[2].scale = 1.1;
+  _params->_data_field[2].bias = -25.0;
+  TDRP_str_replace(&_params->_data_field[2].name, "Signal-to-noise");
+  TDRP_str_replace(&_params->_data_field[2].units, "dB");
+
 }
 
 //////////////////////////////////////////////////
