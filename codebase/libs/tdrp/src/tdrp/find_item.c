@@ -629,7 +629,6 @@ int tdrpLoadStruct(token_handle_t *handle,
      
 {
   
-  char *expected_tok = NULL;
   int itok = start_tok;
   int ifield;
   struct_def_t *def = &tt->struct_def;
@@ -797,8 +796,6 @@ int tdrpLoadStruct(token_handle_t *handle,
 
     if (strcmp(tokens[itok].tok, ",")) {
       fprintf(stderr, "\n>>> TDRP_ERROR <<<\n");
-      fprintf(stderr, "Syntax error in struct data - expecting '%s'\n",
-	      expected_tok);
       fprintf(stderr, "Item %s\n", item_label);
       fprintf(stderr, "%s\n", tdrpLineInfo(handle, &tokens[itok]));
       return (-1);
