@@ -428,6 +428,9 @@ extern void init_over_data_links(const char *param_buf, long param_buf_len, long
 extern int load_overlay_info(const char *param_buf, long param_buf_len, long line_no,
                            Overlay_t **over, int  max_overlays);
 int load_overlay_data(Overlay_t **over, int  num_overlays);
+extern void load_rap_map(Overlay_t *ov, const char *map_file_subdir);
+extern void load_shape_map(Overlay_t *ov, const char    *map_file_subdir);
+
 #endif
 
 #ifndef PROCESS_ARGS

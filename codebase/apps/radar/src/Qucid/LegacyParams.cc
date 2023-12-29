@@ -21,29 +21,326 @@
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED      
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.    
 // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=* 
-/************************************************************************
- * CIDD_INIT.CC: Routines that read initialization files, set up
- *         communications between processes, etc.,
- *
- * For the Configurable Interactive Data Display (CIDD)
- * Frank Hage   July 1991 NCAR, Research Applications Program
- *  Special thanks to Mike Dixon. Without his guidance, support and
- * friendship, CIDD would not have been possible.
- */
+////////////////////////////////////////////////////////////
+// LegacyParams.hh
+//
+// Read legacy params, write out tdrp-compatible param file
+//
+// Mike Dixon, EOL, NCAR, Boulder, CO, USA
+// Dec 2023
+//
+/////////////////////////////////////////////////////////////
 
-#define CIDD_INIT    1
 #include "cidd.h"
-#include <algorithm>
+#include "LegacyParams.hh"
+#include <cerrno>
+#include <iostream>
+#include <cstdio>
+#include <toolsa/umisc.h>
+#include <toolsa/str.h>
 
-// #define NUM_PARSE_FIELDS    64
-// #define PARSE_FIELD_SIZE    1024
-// #define INPUT_LINE_LEN      512
+// constructor
 
-/*****************************************************************
- * INIT_DATA_SPACE : Init all globals and set up defaults
- */
+LegacyParams::LegacyParams()
+{
+  _printTdrp = false;
+  _paramsBuf = NULL;
+  _paramsBufLen = 0;
+}
 
-void init_data_space(Params &tdrpParams)
+// destructor
+
+LegacyParams::~LegacyParams()
+{
+  clear();
+}
+
+// Clear the data base
+
+void LegacyParams::clear()
+{
+  _plist.clear();
+  _paramsBuf = NULL;
+  _paramsBufLen = 0;
+}
+
+////////////////////////////////////////
+// read in from param file
+//
+// returns 0 on success, -1 on failure
+
+int LegacyParams::readFromPath(const char *file_path,
+                               const char *prog_name)
+
+{
+
+  // open file
+
+  FILE *params_file;
+  if ((params_file = fopen(file_path, "r")) == NULL) {
+    int errNum = errno;
+    cerr << "ERROR - LegacyParams::read" << endl;
+    cerr << "  Cannot read params from file: " << file_path << endl;
+    cerr << "  " << strerror(errNum) << endl;
+    return -1;
+  }
+
+  // loop through file
+  
+  char line[BUFSIZ];
+
+  while (!feof(params_file)) {
+    
+    // read a line
+    
+    if (fgets(line, BUFSIZ, params_file) == NULL) {
+      break;
+    }
+    
+    if (feof(params_file))
+      break;
+
+    // substitute in any environment variables
+    
+    usubstitute_env(line, BUFSIZ);
+
+    // delete past any hash-bang
+
+    char *sptr;
+    if ((sptr = strstr(line, "#!")) != NULL) {
+      *sptr = '\0';
+    }
+    
+    // process only if the line has the program name followed by a period.
+    
+    char *name = line;
+    if (strlen(name) < strlen(prog_name + 1)) {
+      continue;
+    }
+    if (strncmp(prog_name, name, strlen(prog_name)) ||
+	name[strlen(prog_name)] != '.') {
+      continue;
+    }
+
+    // check that there is a colon
+
+    char *colon = strchr(name, ':');
+    if (!colon) {
+      continue;
+    }
+    
+    // back up past any white space
+    
+    char *end_of_name = colon - 1;
+    while (*end_of_name == ' ' || *end_of_name == '\t') {
+      end_of_name--;
+    }
+
+    // place null at end of name
+
+    *(end_of_name + 1) = '\0';
+
+    // get entry string
+
+    char *entry = colon + 1;
+
+    // advance past white space
+    
+    while (*entry == ' ' || *entry == '\t') {
+      entry++;
+    }
+
+    // back up past white space
+    
+    char *end_of_entry = entry + strlen(entry);
+    while (*end_of_entry == ' ' || *end_of_entry == '\t' ||
+	   *end_of_entry == '\r' || *end_of_entry == '\n' ||
+	   *end_of_entry == '\0') {
+      end_of_entry--;
+    }
+
+    // place null at end of entry
+    
+    *(end_of_entry + 1) = '\0';
+
+    // check that we do not already have this param
+    
+    bool previous_entry_found = false;
+    for (size_t ii = 0; ii < _plist.size(); ii++) {
+      if (_plist[ii].name == name) {
+	_plist[ii].entry = entry;
+	previous_entry_found = true;
+	break;
+      }
+    } // ii
+
+    // if previous entry was not found,
+    // store name and entry pointers in params list
+
+    if (!previous_entry_found) {
+      param_list_t ll;
+      ll.name = name;
+      ll.entry = entry;
+      _plist.push_back(ll);
+    }
+      
+  } /* while (!feof(params_file)) */
+
+  // close file
+
+  fclose(params_file);
+
+  // debug print
+
+  // for (size_t ii = 0; ii < _plist.size(); ii++) {
+  //   cerr << "name, val: " << _plist[ii].name << ", " << _plist[ii].entry << endl;
+  // } // ii
+  // cerr << "Param list size: " << _plist.size() << endl;
+
+  return 0;
+
+}
+
+////////////////////////////////////////
+// read from a param buffer
+//
+// returns 0 on success, -1 on failure
+
+int LegacyParams::readFromBuf(const char *buf,
+                              int buf_len,
+                              const char *prog_name)
+
+{
+
+  // loop through lines in buffer
+  
+  char line[BUFSIZ];
+  const char *ptr = buf;
+  
+  while (ptr < buf + buf_len) {
+  
+    // find a line
+
+    const char *eol = strchr(ptr, '\n');
+    if (eol == NULL) {
+      break;
+    }
+    
+    int lineLen = eol - ptr + 1;
+    int copyLen;
+    if (lineLen > BUFSIZ) {
+      copyLen = BUFSIZ;
+    } else {
+      copyLen = lineLen;
+    }
+    STRncopy(line, ptr, copyLen);
+    ptr += lineLen;
+
+    // substitute in any environment variables
+    
+    usubstitute_env(line, BUFSIZ);
+    
+    // delete past any hash-bang
+
+    char *sptr;
+    if ((sptr = strstr(line, "#!")) != NULL) {
+      *sptr = '\0';
+    }
+    
+    // process only if the line has the program name followed by a period.
+    
+    char *name = line;
+    if (strlen(name) < strlen(prog_name + 1)) {
+      continue;
+    }
+    if (strncmp(prog_name, name, strlen(prog_name)) ||
+	name[strlen(prog_name)] != '.') {
+      continue;
+    }
+
+    // check that there is a colon
+
+    char *colon = strchr(name, ':');
+    if (!colon) {
+      continue;
+    }
+    
+    // back up past any white space
+    
+    char *end_of_name = colon - 1;
+    while (*end_of_name == ' ' || *end_of_name == '\t') {
+      end_of_name--;
+    }
+
+    // place null at end of name
+
+    *(end_of_name + 1) = '\0';
+
+    // get entry string
+
+    char *entry = colon + 1;
+
+    // advance past white space
+    
+    while (*entry == ' ' || *entry == '\t') {
+      entry++;
+    }
+
+    // back up past white space
+    
+    char *end_of_entry = entry + strlen(entry);
+    while (*end_of_entry == ' ' || *end_of_entry == '\t' ||
+	   *end_of_entry == '\r' || *end_of_entry == '\n' ||
+	   *end_of_entry == '\0') {
+      end_of_entry--;
+    }
+
+    // place null at end of entry
+    
+    *(end_of_entry + 1) = '\0';
+
+    // check that we do not already have this param
+    
+    bool previous_entry_found = false;
+    for (size_t ii = 0; ii < _plist.size(); ii++) {
+      if (_plist[ii].name == name) {
+	_plist[ii].entry = entry;
+	previous_entry_found = true;
+	break;
+      }
+    } // ii
+
+    // if previous entry was not found,
+    // store name and entry pointers in params list
+
+    if (!previous_entry_found) {
+      param_list_t ll;
+      ll.name = name;
+      ll.entry = entry;
+      _plist.push_back(ll);
+    }
+      
+  } /* while (!feof(params_file)) */
+
+  // debug print
+
+  // for (size_t ii = 0; ii < _plist.size(); ii++) {
+  //   cerr << "name, val: " << _plist[ii].name << ", " << _plist[ii].entry << endl;
+  // } // ii
+  // cerr << "Param list size: " << _plist.size() << endl;
+
+  return 0;
+
+}
+
+///////////////////////////////////////////////////////////////
+// read in the legacy params
+// write out tdrp params file
+///////////////////////////////////////////////////////////////
+
+int LegacyParams::translateToTdrp(const string &legacyParamsPath,
+                                  const string &tdrpParamsPath)
+  
 {
 
   int i,j,pid;
@@ -59,34 +356,37 @@ void init_data_space(Params &tdrpParams)
   double delta_x,delta_y;
   double lat1 = 0, lat2 = 0;
 
-  UTIMstruct    temp_utime;
-
-  // INSTANCE = xv_unique_key(); /* get keys for retrieving data */
-  // MENU_KEY = xv_unique_key();
+  UTIMstruct temp_utime;
 
   // load up the params buffer from file or http
-
-  load_db_data(gd.db_name);  // Retrieve the parameter text file
-
-  // create uparams object, read params into it from buffer
-
-  gd.uparams = new Uparams();
-  if (gd.uparams->read(gd.db_data, gd.db_data_len, "cidd")) {
-    fprintf(stderr,"init_data_space: could not read params buffer\n");
-    exit(-1);
+  
+  if (_loadDbData(legacyParamsPath)) {
+    fprintf(stderr,"LegacyParams::translateToTdrp()\n");
+    fprintf(stderr,"  Could not load params from file\n");
+    return -1;
   }
-  gd.uparams->setPrintTdrp(true);
+  
+  // Retrieve the parameters from text file
+  // read params in from buffer
+  
+  if (readFromBuf(_paramsBuf, _paramsBufLen, "cidd")) {
+    fprintf(stderr,"LegacyParams::translateToTdrp()\n");
+    fprintf(stderr,"  Could not read params buffer\n");
+    return -1;
+  }
+
+  setPrintTdrp(true);
 
   // Load the Main parameters
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"MAIN_PARAMS",
+  param_text = find_tag_text(_paramsBuf,"MAIN_PARAMS",
                              &param_text_len, &param_text_line_no);
     
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
-    exit(-1);
+    return -1;
   }
     
   // set_X_parameter_database(param_text); /* load the main parameter database*/
@@ -108,7 +408,7 @@ void init_data_space(Params &tdrpParams)
                                      sizeof(coord_export_t),
                                      0666)) == NULL) {
     fprintf(stderr, "Couldn't create shared memory segment for aux process communications\n");
-    exit(-1);
+    return -1;
   }
   memset(gd.coord_expt, 0, sizeof(coord_export_t));
 
@@ -340,7 +640,7 @@ void init_data_space(Params &tdrpParams)
   }
   if(err_flag) {
     fprintf(stderr,"Correct the cidd.bookmark section of the parameter file\n");
-    exit(-1);
+    return -1;
   }
 
   // origin latitude and longitude
@@ -410,7 +710,7 @@ void init_data_space(Params &tdrpParams)
     if(lat1 == -90.0 || lat2 == -90.0) {
       fprintf(stderr,
               "Must set cidd.lambert_lat1 and cidd.lambert_lat2 parameters for LAMBERT projections\n");
-      exit(-1);
+      return -1;
     }
     if(gd.debug) {
       printf("LAMBERT Projection - Origin at: %g, %g Parallels at: %g, %g\n",
@@ -464,7 +764,7 @@ void init_data_space(Params &tdrpParams)
 
     fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", gd.projection_type);
     fprintf(stderr," Current valid types are: CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, MERCATOR\n");
-    exit(-1);
+    return -1;
 
   }
 
@@ -1017,12 +1317,12 @@ void init_data_space(Params &tdrpParams)
         gd.menu_bar.zoom_back_bit = 1 << (i-1) ;
       } else {
         fprintf(stderr,"Unrecognized Menu Bar Cell Function %d: %s\n",i,resource);
-        exit(-1);
+        return -1;
       }
     }
   } else {
     fprintf(stderr,"Menu Bar cells must be defined in this version\n");
-    exit(-1);
+    return -1;
   } 
 
   gd.v_win.zmin_x = (double *)  calloc(sizeof(double), 1);
@@ -1038,7 +1338,6 @@ void init_data_space(Params &tdrpParams)
   gd.v_win.max_y = gd.h_win.max_y;
   gd.v_win.min_ht = gd.h_win.min_ht;
   gd.v_win.max_ht = gd.h_win.max_ht;
-    
 
   // Set Vertical window route  params
   gd.v_win.cmin_x = gd.h_win.route.x_world[0];
@@ -1074,28 +1373,28 @@ void init_data_space(Params &tdrpParams)
 
   plot_azimuths = gd.uparams->getLong("cidd.azimuth_lines", plot_azimuths);
   gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
-  init_signal_handlers();  
 
   // Load the GRID / DATA FIELD parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"GRIDS",
+  param_text = find_tag_text(_paramsBuf,"GRIDS",
                              &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Couldn't Find GRIDS Section\n");
-    exit(-1);
+    return -1;
   }
   // establish and initialize sources of data 
-  init_data_links(param_text, param_text_len, param_text_line_no, tdrpParams);
-  return;
+  if (_initDataFields(param_text, param_text_len, param_text_line_no)) {
+    return -1;
+  }
 
   // copy legacy params to tdrp
 
   // Load the Wind Data Field  parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"WINDS",
+  param_text = find_tag_text(_paramsBuf,"WINDS",
                              &param_text_len, &param_text_line_no);
 
   // winds init
@@ -1110,7 +1409,9 @@ void init_data_space(Params &tdrpParams)
     if(gd.debug)fprintf(stderr,"Couldn't Find WINDS Section\n");
   } else {
     /* Establish and initialize connections to wind fields */
-    init_wind_data_links(param_text, param_text_len, param_text_line_no);
+    if (_initWindFields(param_text, param_text_len, param_text_line_no)) {
+      return -1;
+    }
   }
     
   if(gd.layers.num_wind_sets == 0) gd.layers.wind_vectors = 0;
@@ -1120,7 +1421,7 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"SYMPRODS",
+  param_text = find_tag_text(_paramsBuf,"SYMPRODS",
                              &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No SYMPRODS Section in params\n");
@@ -1133,7 +1434,7 @@ void init_data_space(Params &tdrpParams)
                                 param_text_line_no,
                                 TRUE,gd.debug2) < 0) {
       fprintf(stderr,"Please fix the <SYMPRODS> parameter section\n");
-      exit(-1);
+      return -1;
     }
   }
 
@@ -1142,7 +1443,7 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"TERRAIN",
+  param_text = find_tag_text(_paramsBuf,"TERRAIN",
                              &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No TERRAIN Section in params\n");
@@ -1153,7 +1454,7 @@ void init_data_space(Params &tdrpParams)
                                        param_text_line_no,
                                        TRUE,gd.debug2) < 0) {
       fprintf(stderr,"Please fix the <TERRAIN> parameter section\n");
-      exit(-1);
+      return -1;
     }
     if(strlen(gd.layers.earth._P->terrain_url) >0) {
       gd.layers.earth.terrain_active = 1;
@@ -1161,7 +1462,7 @@ void init_data_space(Params &tdrpParams)
 
       if(gd.layers.earth.terr == NULL) {
         fprintf(stderr,"Cannot allocate space for terrain data\n");
-        exit(-1);
+        return -1;
       }
       gd.layers.earth.terr->time_allowance = 5270400; // 10 years
       STRcopy(gd.layers.earth.terr->color_file,
@@ -1186,7 +1487,7 @@ void init_data_space(Params &tdrpParams)
 
       if(gd.layers.earth.land_use == NULL) {
         fprintf(stderr,"Cannot allocate space for land_use data\n");
-        exit(-1);
+        return -1;
       }
       gd.layers.earth.land_use->time_allowance = 5270400; // 10 years
       STRcopy(gd.layers.earth.land_use->color_file,
@@ -1228,7 +1529,7 @@ void init_data_space(Params &tdrpParams)
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"ROUTE_WINDS",
+  param_text = find_tag_text(_paramsBuf,"ROUTE_WINDS",
                              &param_text_len, &param_text_line_no); 
   if(param_text == NULL || param_text_len <=0 ) {
     if(gd.debug) fprintf(stderr," Warning: No ROUTE_WINDS Section in params\n");
@@ -1240,7 +1541,7 @@ void init_data_space(Params &tdrpParams)
                                             param_text_line_no,
                                             TRUE,gd.debug2) < 0) {
       fprintf(stderr,"Please fix the <ROUTE_WINDS> parameter section\n");
-      exit(-1);
+      return -1;
     }
 
     gd.layers.route_wind.has_params = 1;
@@ -1256,7 +1557,7 @@ void init_data_space(Params &tdrpParams)
   // Load the GUI_CONFIG parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"GUI_CONFIG",
+  param_text = find_tag_text(_paramsBuf,"GUI_CONFIG",
                              &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
@@ -1267,7 +1568,7 @@ void init_data_space(Params &tdrpParams)
                              param_text_line_no,
                              TRUE,gd.debug2)  < 0) { 
       fprintf(stderr,"Please fix the <GUI_CONFIG> parameter section\n");
-      exit(-1);
+      return -1;
     }
   }
 
@@ -1277,7 +1578,7 @@ void init_data_space(Params &tdrpParams)
   // Load the IMAGES_CONFIG parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"IMAGE_GENERATION",
+  param_text = find_tag_text(_paramsBuf,"IMAGE_GENERATION",
                              &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
@@ -1288,7 +1589,7 @@ void init_data_space(Params &tdrpParams)
                                 param_text_line_no,
                                 TRUE,gd.debug2)  < 0) { 
       fprintf(stderr,"Please fix the <IMAGE_GENERATION> parameter section\n");
-      exit(-1);
+      return -1;
     }
   }
 
@@ -1298,7 +1599,7 @@ void init_data_space(Params &tdrpParams)
   // Load the Draw_Export parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"DRAW_EXPORT",
+  param_text = find_tag_text(_paramsBuf,"DRAW_EXPORT",
                              &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
@@ -1311,11 +1612,13 @@ void init_data_space(Params &tdrpParams)
 			      param_text_line_no,
 			      TRUE,gd.debug2)  < 0) { 
       fprintf(stderr,"Please fix the <DRAW_EXPORT> parameter section\n");
-      exit(-1);
+      return -1;
     }
 
     /* Establish and initialize Draw-Export params */
-    init_draw_export_links();
+    if (_initDrawExportLinks()) {
+      return -1;
+    }
   }
     
   if(gd.draw.num_draw_products == 0 && gd.menu_bar.set_draw_mode_bit >0) {
@@ -1325,25 +1628,27 @@ void init_data_space(Params &tdrpParams)
 	    "Either remove SET_DRAW_MODE button or define products in DRAW_EXPORT \n"); 
     fprintf(stderr,
 	    "Section of the parameter file \n"); 
-    exit(-1);
+    return -1;
   }
 
 
   // Load the Map Overlay parameters
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(gd.db_data,"MAPS",
+  param_text = find_tag_text(_paramsBuf,"MAPS",
                              &param_text_len, &param_text_line_no);
 
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Could'nt Find MAPS SECTION\n");
-    exit(-1);
+    return -1;
   }
 
   // overlays
 
   gd.map_file_subdir =  gd.uparams->getString("cidd.map_file_subdir", "maps");
-  init_over_data_links(param_text, param_text_len, param_text_line_no);
+  if (_initOverlays(param_text, param_text_len, param_text_line_no)) {
+    return -1;
+  }
   
   // Instantiate the Station locator classes and params.
   gd.locator_margin_km = gd.uparams->getDouble("cidd.locator_margin_km", 50.0);
@@ -1356,12 +1661,12 @@ void init_data_space(Params &tdrpParams)
     gd.station_loc =  new StationLoc();
     if(gd.station_loc == NULL) {
       fprintf(stderr,"CIDD: Fatal Alloc constructing new StationLoc()\n");
-      exit(-1);
+      return -1;
     }
 
     if(gd.station_loc->ReadData(gd.station_loc_url) < 0) {
       fprintf(stderr,"CIDD: Can't load Station Data from %s\n",gd.station_loc_url);
-      exit(-1);
+      return -1;
     }
     // gd.station_loc->PrintAll();  // DEBUG
 
@@ -1407,7 +1712,7 @@ void init_data_space(Params &tdrpParams)
 
   if(cfield[0]  == NULL || cfield[1] == NULL || cfield[2] == NULL) {
     fprintf(stderr,"Cidd: Fatal Alloc failure of %d bytes\n", NAME_LENGTH);
-    exit(-1);
+    return -1;
   }
 
   /* Setup default CONTOUR FIELDS */
@@ -1590,9 +1895,9 @@ void init_data_space(Params &tdrpParams)
   gd.azimuth_interval = gd.uparams->getDouble("cidd.azimuth_interval",
                                               gd.azimuth_interval);
   gd.azimuth_radius = gd.uparams->getDouble("cidd.azmith_radius",
-                                             200.0);
+                                            200.0);
   gd.azimuth_radius = gd.uparams->getDouble("cidd.azimuth_radius",
-                                             gd.azimuth_radius);
+                                            gd.azimuth_radius);
   gd.latest_click_mark_size = gd.uparams->getLong("cidd.latest_click_mark_size", 11);
   gd.range_ring_x_space = gd.uparams->getLong("cidd.range_ring_x_space", 50);
   gd.range_ring_y_space = gd.uparams->getLong("cidd.range_ring_y_space", 15);
@@ -1613,18 +1918,1177 @@ void init_data_space(Params &tdrpParams)
 
   gd.uparams->setPrintTdrp(false);
 
-  // initialize procmap
+  return 0;
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// gets an entry from the param list
+// returns NULL if this fails
+///////////////////////////////////////////////////////////////
+
+const char *LegacyParams::_get(const char *search_name) const
+
+{
   
-  if(!gd.run_once_and_exit) {
-    PMU_auto_init(gd.app_name, gd.app_instance, PROCMAP_REGISTER_INTERVAL);
+  for (size_t ii =  0; ii < _plist.size(); ii++) {
+    if (_plist[ii].name == search_name) {
+      return (_plist[ii].entry.c_str());
+    }
   }
 
-  // initialize shared memory
-  
-  if(!gd.run_once_and_exit) {
-    PMU_auto_register("Initializing SHMEM");
+  return NULL;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a double parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+double LegacyParams::getDouble(const char *name, double default_val)
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef double {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
   }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    double val;
+    if (sscanf(entryStr, "%lg", &val) == 1) {
+      return val;
+    } else {
+      return default_val;
+    }
+  }
+
+  return default_val;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a float parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+float LegacyParams::getFloat(const char *name, float default_val)
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef double {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    float val;
+    if (sscanf(entryStr, "%g", &val) == 1) {
+      return val;
+    } else {
+      return default_val;
+    }
+  }
+  
+  return default_val;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a int parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+int LegacyParams::getInt(const char *name, int default_val)
+
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef int {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    int val;
+    if (sscanf(entryStr, "%d", &val) == 1) {
+      return val;
+    } else {
+      return default_val;
+    }
+  }
+  
+  return default_val;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a boolean parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+bool LegacyParams::getBoolean(const char *name, int default_val)
+
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef boolean {" << endl;
+    if (default_val == 0) {
+      cout << "  p_default = FALSE;" << endl;
+    } else {
+      cout << "  p_default = TRUE;" << endl;
+    }
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    int val;
+    if (sscanf(entryStr, "%d", &val) == 1) {
+      return val;
+    } else {
+      return default_val;
+    }
+  }
+  
+  return default_val;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a long parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+long LegacyParams::getLong(const char *name, long default_val)
+
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef int {" << endl;
+    cout << "  p_default = " << default_val << ";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    long val;
+    if (sscanf(entryStr, "%ld", &val) == 1) {
+      return val;
+    } else {
+      return default_val;
+    }
+  }
+  
+  return default_val;
+
+}
+
+///////////////////////////////////////////////////////////////
+// returns the value of a string parameter
+// If it cannot find the parameter, returns the default
+///////////////////////////////////////////////////////////////
+
+const char *LegacyParams::getString(const char *name, const char *default_val)
+
+{
+
+  if (_printTdrp) {
+    cout << endl;
+    cout << "paramdef string {" << endl;
+    cout << "  p_default = \"" << default_val << "\";" << endl;
+    cout << "  p_descr = \"\"" << ";" << endl;
+    cout << "  p_help = \"\"" << ";" << endl;
+    cout << "} " << name << ";" << endl;
+    cout << endl;
+  }
+  
+  const char *entryStr = _get(name);
+  if (entryStr == NULL) {
+    return default_val;
+  } else {
+    return (char *) entryStr;
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// FIND_TAG_TEXT Search a null terminated string for the text between tags
+//
+// Searches through input_buf for text between tags of the form <TAG>...Text...</TAG>
+// Returns a pointer to the beginning of the text and its length if found.
+// text_line_no is used on input to begin counting and is set on output to the starting
+// line number of the tagged text
+
+#define TAG_BUF_LEN 256
+const char *LegacyParams::_findTagText(const char *input_buf,
+                                       const char * tag,
+                                       long *text_len,
+                                       long *text_line_no)
+{
+  int start_line_no;
+  const char *start_ptr;
+  const char *end_ptr;
+  const char *ptr;
+  char end_tag[TAG_BUF_LEN];
+  char start_tag[TAG_BUF_LEN];
+  
+  // Reasonable tag check - Give up
+  if(strlen(tag) > TAG_BUF_LEN - 5) {
+    fprintf(stderr,"Unreasonable tag: %s - TOO long!\n",tag);
+    *text_len = 0;
+    return NULL;
+  }
+  
+  // Clear the string buffers
+  memset(start_tag,0,TAG_BUF_LEN);
+  memset(end_tag,0,TAG_BUF_LEN);
+  
+  start_line_no = *text_line_no;
+  
+  sprintf(start_tag,"<%s>",tag);
+  sprintf(end_tag,"</%s>",tag);
+  
+  // Search for Start tag
+  if((start_ptr = strstr(input_buf,start_tag)) == NULL) {
+    *text_len = 0;
+    *text_line_no = start_line_no;
+    return NULL;
+  }
+  start_ptr +=  strlen(start_tag); // Skip ofer tag to get to the text
+  
+  // Search for end tag after the start tag
+  if((end_ptr = strstr(start_ptr,end_tag)) == NULL) {
+    *text_len = 0;
+    *text_line_no = start_line_no;
+    return NULL;
+  }
+  end_ptr--;  // Skip back one character to last text character
+  
+  // Compute the length of the text_tag
+  *text_len = (long) (end_ptr - start_ptr);
+  
+  // Count the lines before the starting tag
+  ptr = input_buf;
+  while(((ptr = strchr(ptr,'\n')) != NULL) && (ptr < start_ptr)) {
+    ptr++; // Move past the found NL
+    start_line_no++;
+  }
+  
+  *text_line_no = start_line_no;
+  return start_ptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// LOAD_DB_DATA_DEFAULT : Allocate and load the parameter data base using the
+//                        default parameter settings and set Global Struct
+//                        members
+// 
+
+int LegacyParams::_loadDbDataDefault(char* &db_buf, int &db_len)
+{
+
+  // Generate the full params string.  The non-TDRP portions are kept in
+  // static strings while the TDRP portions are loaded from the default
+  // parameters
+
+  gd.gui_P = new Cgui_P;
+  gd.syprod_P = new Csyprod_P;
+  gd.draw_P = new Cdraw_P;
+  gd.images_P = new Cimages_P;
+  gd.layers.earth._P = new Cterrain_P;
+  gd.layers.route_wind._P = new Croutes_P;
+  
+  string params_text = ParamsTextMasterHeader;
+  params_text += get_default_tdrp_params("GUI_CONFIG", gd.gui_P);
+  params_text += ParamsTextGrids;
+  params_text += ParamsTextWinds;
+  params_text += ParamsTextMaps;
+  params_text += ParamsTextMainParams;
+  params_text += get_default_tdrp_params("DRAW_EXPORT", gd.draw_P);
+  params_text += get_default_tdrp_params("IMAGE_GENERATION", gd.images_P);
+  params_text += get_default_tdrp_params("SYMPRODS", gd.syprod_P);
+  params_text += get_default_tdrp_params("TERRAIN",
+					 gd.layers.earth._P);
+  params_text += get_default_tdrp_params("ROUTE_WINDS",
+					 gd.layers.route_wind._P);
+  
+
+  // Allocate space for the buffer copy
+  
+  db_len = params_text.size() + 1;
+  
+  if ((db_buf = (char *)calloc(db_len, 1)) == NULL) {
+    fprintf(stderr,"Problems allocating %ld bytes for parameter file\n",
+	    (long)db_len);
+    return -1;
+  }
+
+  // Copy the parameters into the buffer
+
+  memcpy(db_buf, params_text.c_str(), db_len - 1);
+  db_buf[db_len-1] = '\0';
+
+  return 0;
+  
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// LOAD_DB_DATA_FILE : Allocate and load the parameter data base from a file
+//                     and set Global Struct members
+// 
+
+int LegacyParams::_loadDbDataFile(const string &fname,
+                                  char* &db_buf,
+                                  int &db_len)
+{
+
+  FILE *infile;
+  
+  // create temp buffer
+  
+  int tmpLen = 1000000;
+  char *tmpBuf = new char[tmpLen];
+  
+  // Open DB file
+  
+  if((infile = fopen(fname.c_str(),"r")) == NULL) {
+    perror(fname.c_str());
+    fprintf(stderr,"Problems Opening %s\n",fname.c_str());
+    return -1;
+  }
+  
+  // Read into tmp buf
+  db_len = fread(tmpBuf,1,tmpLen,infile);
+  if(db_len <= 0) {
+    perror(fname.c_str());
+    fprintf(stderr,"Problems Reading %s\n",fname.c_str());
+    return -1;
+  }
+  
+  // Allocate space for the whole file plus a null
+  if((db_buf = (char *)  calloc(db_len + 1, 1)) == NULL) {
+    fprintf(stderr,"Problems allocating %d bytes for parameter file\n",
+            db_len);
+    return -1;
+  }
+  
+  // copy in
+  
+  memcpy(db_buf, tmpBuf, db_len);
+  db_buf[db_len] = '\0'; // Make sure to null terminate
+  delete[] tmpBuf;
+  
+  // Close DB file
+  if(fclose(infile) != 0 )  {
+    fprintf(stderr,"Problems Closing %s\n",fname.c_str());
+    return -1;
+  }
+
+  return 0;
+  
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// LOAD_DB_DATA_HTTP : Allocate and load the parameter data base from a Web
+//                     server and set Global Struct members
+// 
+
+int LegacyParams::_loadDbDataHttp(const string &fname,
+                                  char* &db_buf,
+                                  int &db_len)
+{
+
+  int ret_stat;
+  
+  // Allow 5 seconds to retrieve the data 
+  
+  if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE) {
+    ret_stat = HTTPgetURL_via_proxy(gd.http_proxy_url, fname.c_str(), 5000,
+				    &db_buf, &db_len);
+  } else {
+    ret_stat = HTTPgetURL(fname.c_str(), 5000, &db_buf, &db_len);
+  }
+  
+  if(ret_stat <= 0 || db_len <= 0) {
+    fprintf(stderr,"Could'nt Load Parameter Database from URL: %s,  %d\n",
+	    fname.c_str(), ret_stat);
+    if(ret_stat < 0) {
+      fprintf(stderr,"Failed to successfully trasnact with the http server\n");
+    } else {
+      fprintf(stderr,
+	      "HTTP server couldn't retreive the file - Returned  Stat: %d\n",
+	      ret_stat);
+    }
+    fprintf(stderr,
+	    "Make sure URL looks like: http://host.domain/dir/filename\n");
+    fprintf(stderr,
+	    "The most common problem is usually missing  the :// part \n");
+    fprintf(stderr,"or a misspelled/incorrect host, directory or filename\n");
+    if(strlen(gd.http_proxy_url)  > URL_MIN_SIZE)
+      fprintf(stderr,"Also Check Proxy URL:%s\n",gd.http_proxy_url);
+    return -1;
+  }
+
+  return 0;
+  
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// LOAD_DB_DATA : Allocate and load the data base file - Set Global
+// Struct members
+// 
+
+int LegacyParams::_loadDbData(const string &fname)
+{
+  
+  char *db_buf = NULL;
+  int db_len = 0;
+  int iret = 0;
+  
+  if (fname == "") {
+    // Default parameters
+    iret = _loadDbDataDefault(db_buf, db_len);
+  } else if(strncasecmp(fname.c_str(), "http:", 5) == 0) {
+    // HTTP Based retrieve 
+    iret = _loadDbDataHttp(fname, db_buf, db_len);
+  } else {
+    // FILE based retrieve
+    iret = _loadDbDataFile(fname, db_buf, db_len);
+  }
+
+  if (iret == 0) {
+    _paramsBuf = db_buf;
+    _paramsBufLen = db_len;
+    return 0;
+  } else {
+    return -1;
+  }
+  
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// initialize data field structs
+
+#define NUM_PARSE_FIELDS    32
+#define PARSE_FIELD_SIZE    1024
+#define INPUT_LINE_LEN      2048
+
+int LegacyParams::_initDataFields(const char *param_buf,
+                                  long param_buf_len,
+                                  long line_no)
+{
+  int  i,j;
+  int  len,total_len;
+  const char *start_ptr;
+  const char *end_ptr;
+  char *cfield[NUM_PARSE_FIELDS];
+
+  gd.num_datafields = 0;
+  total_len = 0;
+  start_ptr = param_buf;
+
+  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+  cerr << "fields_n: " << gParams.fields_n << endl;
+  for (int ii = 0; ii < gParams.fields_n; ii++) {
+    Params::field_t &fld = gParams._fields[ii];
+    cerr << "  button label: " << fld.button_label << endl;
+    cerr << "  legend label: " << fld.legend_label << endl;
+    cerr << "  contour_low: " << fld.contour_low << endl;
+  }
+  cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
     
-  init_shared(); /* Initialize Shared memory based communications */
+
+  // read all the lines in the data information buffer
+  while((end_ptr = strchr(start_ptr,'\n')) != NULL && (total_len < param_buf_len)) {
+    // Skip over blank, short or commented lines
+    len = (end_ptr - start_ptr)+1;
+    if( (len < 20)  || (*start_ptr == '#')) {
+      total_len += len  +1;
+      start_ptr = end_ptr +1; // Skip past the newline
+      line_no++;
+      continue;
+    }
+
+    if(gd.num_datafields < MAX_DATA_FIELDS -1) {
+      // Ask for 128 extra bytes for the null and potential env var  expansion
+      gd.data_info[gd.num_datafields] = (char *)  calloc(len+128, 1);
+      STRcopy(gd.data_info[gd.num_datafields],start_ptr,len);
+
+      /* Do Environment variable substitution */
+      usubstitute_env(gd.data_info[gd.num_datafields], len+128);
+      gd.num_datafields++;
+    } else {
+      fprintf(stderr,
+              "Cidd: Warning. Too many Data Fields. Data field not processed\n");
+      fprintf(stderr,"Line %ld \n",line_no);
+	 
+    }
+
+    total_len += len + 1;   // Count characters processed 
+    start_ptr = end_ptr +1; // Skip past the newline
+    line_no++;
+  }
+
+  if(gd.num_datafields <=0) {
+    fprintf(stderr,"CIDD requires at least one valid gridded data field to be defined\n");
+    return -1;
+  }
+
+  /* get temp space for substrings */
+  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+    cfield[i] = (char *)  calloc(PARSE_FIELD_SIZE, 1);
+  }
+
+  /* scan through each of the data information lines */
+  for(i = 0; i < gd.num_datafields; i++) {
+
+    /* get space for data info */
+    gd.mrec[i] =  (met_record_t *) calloc(sizeof(met_record_t), 1);
+
+    /* separate into substrings */
+    STRparse(gd.data_info[i], cfield, INPUT_LINE_LEN, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
+    STRcopy(gd.mrec[i]->legend_name,cfield[0],NAME_LENGTH);
+    STRcopy(gd.mrec[i]->button_name,cfield[1],NAME_LENGTH);
+
+    if(gd.html_mode == 0) {
+      /* Replace Underscores with spaces in names */
+      for(j=strlen(gd.mrec[i]->button_name)-1 ; j >= 0; j--) {
+        if(gd.replace_underscores && gd.mrec[i]->button_name[j] == '_') gd.mrec[i]->button_name[j] = ' ';
+        if(gd.replace_underscores && gd.mrec[i]->legend_name[j] == '_') gd.mrec[i]->legend_name[j] = ' ';
+      }
+    }
+    STRcopy(gd.mrec[i]->url,cfield[2],URL_LENGTH);
+
+    STRcopy(gd.mrec[i]->color_file,cfield[3],NAME_LENGTH);
+
+    // if units are "" or --, set to zero-length string
+    if (!strcmp(cfield[4], "\"\"") || !strcmp(cfield[4], "--")) {
+      STRcopy(gd.mrec[i]->field_units,"",LABEL_LENGTH);
+    } else {
+      STRcopy(gd.mrec[i]->field_units,cfield[4],LABEL_LENGTH);
+    }
+
+    gd.mrec[i]->cont_low = atof(cfield[5]);
+    gd.mrec[i]->cont_high = atof(cfield[6]);
+    gd.mrec[i]->cont_interv = atof(cfield[7]);
+
+    gd.mrec[i]->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+
+    if (strncasecmp(cfield[8],"rad",3) == 0) {
+      gd.mrec[i]->render_method = POLYGONS;
+    } else {
+      gd.mrec[i]->render_method = POLYGONS;
+    }
+
+    if (strncasecmp(cfield[8],"cont",4) == 0) {
+      gd.mrec[i]->render_method = FILLED_CONTOURS;
+    }
+
+    if (strncasecmp(cfield[8],"lcont",4) == 0) {
+      gd.mrec[i]->render_method = LINE_CONTOURS;
+    }
+
+    if (strncasecmp(cfield[8],"dcont",4) == 0) {
+      gd.mrec[i]->render_method = DYNAMIC_CONTOURS;
+    }
+
+    if (strstr(cfield[8],"comp") != NULL) {
+      gd.mrec[i]->composite_mode = TRUE;
+    }
+
+    if (strstr(cfield[8],"autoscale") != NULL) {
+      gd.mrec[i]->auto_scale = TRUE;
+    }
+
+    gd.mrec[i]->currently_displayed = atoi(cfield[9]);
+
+    if(gd.run_once_and_exit) {
+      gd.mrec[i]->auto_render = 1;
+    } else {
+      gd.mrec[i]->auto_render = atoi(cfield[10]);
+    }
+
+    gd.mrec[i]->last_elev = (char *)NULL;
+    gd.mrec[i]->elev_size = 0;
+
+    gd.mrec[i]->plane = 0;
+    gd.mrec[i]->h_data_valid = 0;
+    gd.mrec[i]->v_data_valid = 0;
+    gd.mrec[i]->h_last_scale  = -1.0;
+    gd.mrec[i]->h_last_bias  = -1.0;
+    gd.mrec[i]->h_last_missing  = -1.0;
+    gd.mrec[i]->h_last_bad  = -1.0;
+    gd.mrec[i]->h_last_transform  = -1;
+    gd.mrec[i]->v_last_scale  = -1.0;
+    gd.mrec[i]->v_last_bias  = -1.0;
+    gd.mrec[i]->v_last_missing  = -1.0;
+    gd.mrec[i]->v_last_bad  = -1.0;
+    gd.mrec[i]->v_last_transform  = -1;
+    gd.mrec[i]->h_fhdr.proj_origin_lat  = 0.0;
+    gd.mrec[i]->h_fhdr.proj_origin_lon  = 0.0;
+    gd.mrec[i]->time_list.num_alloc_entries = 0;
+    gd.mrec[i]->time_list.num_entries = 0;
+
+    STRcopy(gd.mrec[i]->units_label_cols,"KM",LABEL_LENGTH);
+    STRcopy(gd.mrec[i]->units_label_rows,"KM",LABEL_LENGTH);
+    STRcopy(gd.mrec[i]->units_label_sects,"KM",LABEL_LENGTH);
+
+    // instantiate classes
+    gd.mrec[i]->h_mdvx = new DsMdvxThreaded;
+    gd.mrec[i]->v_mdvx = new DsMdvxThreaded;
+    gd.mrec[i]->h_mdvx_int16 = new MdvxField;
+    gd.mrec[i]->v_mdvx_int16 = new MdvxField;
+    gd.mrec[i]->proj = new MdvxProj;
+
+  }
+  /* Make sure the first field is always on */
+  gd.mrec[0]->currently_displayed = 1;
+    
+  /* free up temp storage for substrings */
+  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+    free(cfield[i]);
+  }
+
+  // set the tdrp params for the fields
+
+  cerr << "aaaaaaaaaaaaaaaaaaaaa num_datafields: " << gd.num_datafields << endl;
+  cerr << "bbbbbbbbbbbbbbbbbbbbbb fields_n: " << gParams.fields_n << endl;
+    
+  gParams.arrayRealloc("fields", gd.num_datafields);
+
+  cerr << "cccccccccccccccccccccc fields_n: " << gParams.fields_n << endl;
+  cerr << "dddddddddddddddddddddd fields ptr: " << gParams._fields << endl;
+  for(i = 0; i < gd.num_datafields; i++) {
+
+    met_record_t &record = *(gd.mrec[i]);
+    Params::field_t *field = gParams._fields + i;
+
+    cerr << "111111111111 i, button_name, legend_name: " << record.button_name << ", " << record.legend_name << endl;
+
+    TDRP_str_replace(&field->button_label, record.button_name);
+    TDRP_str_replace(&field->legend_label, record.legend_name);
+    TDRP_str_replace(&field->url, record.url);
+    TDRP_str_replace(&field->field_name, record.field_label);
+    TDRP_str_replace(&field->color_map, record.color_file);
+    TDRP_str_replace(&field->units, record.field_units);
+    field->contour_low = record.cont_low;
+    field->contour_low = -9999;
+    field->contour_high = record.cont_high;
+    field->contour_interval = record.cont_interv;
+    field->render_mode = (Params::render_mode_t) record.render_method;
+    field->display_in_menu = (tdrp_bool_t) record.currently_displayed;
+    field->background_render = (tdrp_bool_t) record.auto_render;
+
+  }
+
+  cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+  for (int ii = 0; ii < gParams.fields_n; ii++) {
+    Params::field_t &fld = gParams._fields[ii];
+    cerr << "  button label: " << fld.button_label << endl;
+    cerr << "  legend label: " << fld.legend_label << endl;
+    cerr << "  contour_low: " << fld.contour_low << endl;
+  }
+  cerr << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" << endl;
+
+  return 0;
+
+}
+/************************************************************************
+ * INIT_WIND_DATA_LINKS:  Scan cidd_wind_data.info file and setup link to
+ *         data source for the wind fields.
+ *
+ */
+
+int LegacyParams::_initWindFields(const char *param_buf,
+                                  long param_buf_len,
+                                  long line_no)
+{
+  int    i;
+  int    len,total_len;
+  int    num_sets;    /* number of sets of wind data */
+  int    num_fields;
+  const char   *start_ptr;
+  const char   *end_ptr;
+  char   *cfield[NUM_PARSE_FIELDS];
+  
+  // initialize pointers to NULL
+  
+  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+    cfield[i] = NULL;
+  }
+  
+  /* PASS 1 - Count the wind set lines */
+  num_sets = 0;
+  total_len = 0;
+  start_ptr = param_buf;
+  while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
+        (total_len < param_buf_len)) {
+    // Skip over blank, short or commented lines
+    len = (end_ptr - start_ptr)+1;
+    if( len > 15  && *start_ptr != '#') {
+      num_sets++;
+    }
+    start_ptr = end_ptr +1; // Skip past the newline
+    total_len += len  +1;
+  }
+
+   
+  int default_marker_type = ARROWS;  
+  if(num_sets > 0) {  /* ALLOCATE Space */
+    /* get temp space for substrings */
+    for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+      cfield[i] =(char *)  calloc(PARSE_FIELD_SIZE, 1);
+    }
+    
+    if((gd.layers.wind =(wind_data_t*) calloc(num_sets,sizeof(wind_data_t))) == NULL) {
+      fprintf(stderr,"Unable to allocate space for %d wind sets\n",num_sets);
+      perror("Cidd");
+      return -1;
+    }
+    
+    // Set up global barb preferences
+    const char *type_ptr = gd.wind_marker_type;
+    
+    if(strncasecmp(type_ptr, "tuft", 4) == 0)  default_marker_type = TUFT;
+    if(strncasecmp(type_ptr, "barb", 4) == 0)  default_marker_type = BARB;
+    if(strncasecmp(type_ptr, "vector", 6) == 0)  default_marker_type = VECTOR;
+    if(strncasecmp(type_ptr, "tickvector", 10) == 0)  default_marker_type = TICKVECTOR; 
+    if(strncasecmp(type_ptr, "labeledbarb", 11) == 0)  default_marker_type = LABELEDBARB;
+    if(strncasecmp(type_ptr, "metbarb", 7) == 0)  default_marker_type = METBARB;
+    if(strncasecmp(type_ptr, "barb_sh", 7) == 0)  default_marker_type = BARB_SH;
+    if(strncasecmp(type_ptr, "labeledbarb_sh", 14) == 0)  default_marker_type = LABELEDBARB_SH;
+    
+    /* PASS 2 - fill in the params in the wind sets */
+    num_sets = 0;
+    
+    total_len = 0;
+    start_ptr = param_buf;
+    while((end_ptr = strchr(start_ptr,'\n')) != NULL && 
+          (total_len < param_buf_len)) {
+      len = (end_ptr - start_ptr)+1; 
+      // Skip over blank, short or commented lines
+      if( len > 15  && *start_ptr != '#') {
+        num_fields = STRparse(start_ptr, cfield, len, NUM_PARSE_FIELDS, PARSE_FIELD_SIZE); 
+        if( *start_ptr != '#' && num_fields >= 7) {
+          
+          // Ask for 128 extra bytes for the null and potential env var  expansion
+          gd.layers.wind[num_sets].data_info = (char *) calloc(len+128, 1);
+          if(gd.layers.wind[num_sets].data_info == NULL) {
+            fprintf(stderr,"Unable to allocate %d bytes for wind info\n",len+128);
+            perror("Cidd");
+            return -1;
+          }
+          STRcopy(gd.layers.wind[num_sets].data_info,start_ptr,len);
+          
+          /* DO Environment variable substitution */
+          usubstitute_env(gd.layers.wind[num_sets].data_info, len+128);
+          num_sets++;
+        }
+      }
+      start_ptr = end_ptr +1; // Skip past the newline
+      total_len += len  +1;
+    }
+  }
+  
+  gd.layers.num_wind_sets = num_sets;
+  
+  for(i=0; i < gd.layers.num_wind_sets; i++) {
+    num_fields = STRparse(gd.layers.wind[i].data_info, cfield,
+                          INPUT_LINE_LEN,
+                          NUM_PARSE_FIELDS, PARSE_FIELD_SIZE);
+    if(num_fields < 7) {
+      fprintf(stderr,
+              "Error in wind field line. Wrong number of parameters,  -Line: \n %s"
+              ,gd.layers.wind[i].data_info);
+    }
+    
+    /* Allocate Space for U record and initialize */
+    gd.layers.wind[i].wind_u = (met_record_t *)
+      calloc(sizeof(met_record_t), 1);
+    gd.layers.wind[i].wind_u->h_data_valid = 0;
+    gd.layers.wind[i].wind_u->v_data_valid = 0;
+    gd.layers.wind[i].wind_u->h_vcm.nentries = 0;
+    gd.layers.wind[i].wind_u->v_vcm.nentries = 0;
+    gd.layers.wind[i].wind_u->h_fhdr.scale = -1.0;
+    gd.layers.wind[i].wind_u->h_last_scale = 0.0;
+    gd.layers.wind[i].wind_u->time_list.num_alloc_entries = 0;
+    gd.layers.wind[i].wind_u->time_list.num_entries = 0;
+    STRcopy(gd.layers.wind[i].wind_u->legend_name,cfield[0],NAME_LENGTH);
+    STRcopy(gd.layers.wind[i].wind_u->button_name,cfield[0],NAME_LENGTH);
+    STRcopy(gd.layers.wind[i].wind_u->url,cfield[1],URL_LENGTH);
+    
+    if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+      for(int j=strlen(gd.layers.wind[i].wind_u->button_name)-1 ; j >= 0; j--) {
+        if(gd.replace_underscores && gd.layers.wind[i].wind_u->button_name[j] == '_') gd.layers.wind[i].wind_u->button_name[j] = ' ';
+        if(gd.replace_underscores && gd.layers.wind[i].wind_u->legend_name[j] == '_') gd.layers.wind[i].wind_u->legend_name[j] = ' ';
+      }
+    }
+    
+    // Append the field name
+    strcat(gd.layers.wind[i].wind_u->url,cfield[2]);
+    
+    STRcopy(gd.layers.wind[i].wind_u->field_units,cfield[5],LABEL_LENGTH);
+    gd.layers.wind[i].wind_u->currently_displayed = atoi(cfield[6]);
+    gd.layers.wind[i].active = (atoi(cfield[6]) > 0)? 1: 0;
+    gd.layers.wind[i].line_width = abs(atoi(cfield[6]));
+    // Sanity check
+    if(gd.layers.wind[i].line_width == 0 ||
+       gd.layers.wind[i].line_width > 10) gd.layers.wind[i].line_width = 1;
+    
+    // Pick out Optional Marker type fields
+    gd.layers.wind[i].marker_type = default_marker_type;
+    if(strstr(cfield[6], ",tuft") != NULL)  gd.layers.wind[i].marker_type = TUFT;
+    if(strstr(cfield[6], ",barb") != NULL)  gd.layers.wind[i].marker_type = BARB;
+    if(strstr(cfield[6], ",vector") != NULL)  gd.layers.wind[i].marker_type = VECTOR;
+    if(strstr(cfield[6], ",tickvector") != NULL)  gd.layers.wind[i].marker_type = TICKVECTOR; 
+    if(strstr(cfield[6], ",labeledbarb") != NULL)  gd.layers.wind[i].marker_type = LABELEDBARB;
+    if(strstr(cfield[6], ",metbarb") != NULL)  gd.layers.wind[i].marker_type = METBARB;
+    if(strstr(cfield[6], ",barb_sh") != NULL)  gd.layers.wind[i].marker_type = BARB_SH;
+    if(strstr(cfield[6], ",labeledbarb_sh") != NULL)  gd.layers.wind[i].marker_type = LABELEDBARB_SH;
+    
+    
+    // Pick out Optional Color
+    if(num_fields > 7) {
+      STRcopy(gd.layers.wind[i].color_name, cfield[7], NAME_LENGTH);
+    } else {
+      STRcopy(gd.layers.wind[i].color_name, "white", NAME_LENGTH);
+    }
+    gd.layers.wind[i].wind_u->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    gd.layers.wind[i].wind_u->h_fhdr.proj_origin_lon = 0.0;
+    gd.layers.wind[i].wind_u->h_fhdr.proj_origin_lat = 0.0;
+    
+    // instantiate classes
+    gd.layers.wind[i].wind_u->h_mdvx = new DsMdvxThreaded;
+    gd.layers.wind[i].wind_u->v_mdvx = new DsMdvxThreaded;
+    gd.layers.wind[i].wind_u->h_mdvx_int16 = new MdvxField;
+    gd.layers.wind[i].wind_u->v_mdvx_int16 = new MdvxField;
+    gd.layers.wind[i].wind_u->proj = new MdvxProj;
+    
+    /* Allocate Space for V record and initialize */
+    gd.layers.wind[i].wind_v = (met_record_t *)
+      calloc(sizeof(met_record_t), 1);
+    gd.layers.wind[i].wind_v->h_data_valid = 0;
+    gd.layers.wind[i].wind_v->v_data_valid = 0;
+    gd.layers.wind[i].wind_v->h_vcm.nentries = 0;
+    gd.layers.wind[i].wind_v->v_vcm.nentries = 0;
+    gd.layers.wind[i].wind_v->h_fhdr.scale = -1.0;
+    gd.layers.wind[i].wind_v->h_last_scale = 0.0;
+    gd.layers.wind[i].wind_v->time_list.num_alloc_entries = 0;
+    gd.layers.wind[i].wind_v->time_list.num_entries = 0;
+    STRcopy(gd.layers.wind[i].wind_v->legend_name,cfield[0],NAME_LENGTH);
+    STRcopy(gd.layers.wind[i].wind_v->button_name,cfield[0],NAME_LENGTH);
+    STRcopy(gd.layers.wind[i].wind_v->url,cfield[1],URL_LENGTH);
+    
+    
+    if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+      for(int j=strlen(gd.layers.wind[i].wind_v->button_name)-1 ; j >= 0; j--) {
+        if(gd.replace_underscores && gd.layers.wind[i].wind_v->button_name[j] == '_') gd.layers.wind[i].wind_v->button_name[j] = ' ';
+        if(gd.replace_underscores && gd.layers.wind[i].wind_v->legend_name[j] == '_') gd.layers.wind[i].wind_v->legend_name[j] = ' ';
+      }
+    }
+    // Append the field name
+    strcat(gd.layers.wind[i].wind_v->url,cfield[3]);
+    
+    STRcopy(gd.layers.wind[i].wind_v->field_units,cfield[5],LABEL_LENGTH);
+    gd.layers.wind[i].wind_v->currently_displayed = atoi(cfield[6]);
+    gd.layers.wind[i].wind_v->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+    gd.layers.wind[i].wind_v->h_fhdr.proj_origin_lon = 0.0;
+    gd.layers.wind[i].wind_v->h_fhdr.proj_origin_lat = 0.0;
+    
+    // instantiate classes
+    gd.layers.wind[i].wind_v->h_mdvx = new DsMdvxThreaded();
+    gd.layers.wind[i].wind_v->v_mdvx = new DsMdvxThreaded();
+    gd.layers.wind[i].wind_v->h_mdvx_int16 = new MdvxField;
+    gd.layers.wind[i].wind_v->v_mdvx_int16 = new MdvxField;
+    gd.layers.wind[i].wind_v->proj = new MdvxProj;
+    
+    /* Allocate Space for W  record (If necessary)  and initialize */
+    if(strncasecmp(cfield[4],"None",4) != 0) {
+      gd.layers.wind[i].wind_w = (met_record_t *) calloc(sizeof(met_record_t), 1);
+      gd.layers.wind[i].wind_w->h_data_valid = 0;
+      gd.layers.wind[i].wind_w->v_data_valid = 0;
+      gd.layers.wind[i].wind_w->v_vcm.nentries = 0;
+      gd.layers.wind[i].wind_w->h_vcm.nentries = 0;
+      gd.layers.wind[i].wind_w->h_fhdr.scale = -1.0;
+      gd.layers.wind[i].wind_w->h_last_scale = 0.0;
+      gd.layers.wind[i].wind_w->time_list.num_alloc_entries = 0;
+      gd.layers.wind[i].wind_w->time_list.num_entries = 0;
+      
+      STRcopy(gd.layers.wind[i].wind_w->legend_name,cfield[0],NAME_LENGTH);
+      sprintf(gd.layers.wind[i].wind_w->button_name,"%s_W ",cfield[0]);
+      STRcopy(gd.layers.wind[i].wind_w->url,cfield[1],URL_LENGTH);
+      
+      if(gd.html_mode == 0) { /* Replace Underscores with spaces in names */
+        for(int j=strlen(gd.layers.wind[i].wind_w->button_name)-1 ; j >= 0; j--) {
+          if(gd.replace_underscores && gd.layers.wind[i].wind_w->button_name[j] == '_') gd.layers.wind[i].wind_w->button_name[j] = ' ';
+          if(gd.layers.wind[i].wind_w->legend_name[j] == '_') gd.layers.wind[i].wind_w->legend_name[j] = ' ';
+        }
+      }
+      
+      // Append the field name
+      strcat(gd.layers.wind[i].wind_w->url,cfield[4]);
+      
+      STRcopy(gd.layers.wind[i].wind_w->field_units,cfield[5],LABEL_LENGTH);
+      gd.layers.wind[i].wind_w->currently_displayed = atoi(cfield[6]);
+      gd.layers.wind[i].wind_w->time_allowance = gd.movie.mr_stretch_factor * gd.movie.time_interval;
+      gd.layers.wind[i].wind_w->h_fhdr.proj_origin_lon = 0.0;
+      gd.layers.wind[i].wind_w->h_fhdr.proj_origin_lat = 0.0;
+      
+      // instantiate classes
+      gd.layers.wind[i].wind_w->h_mdvx = new DsMdvxThreaded();
+      gd.layers.wind[i].wind_w->v_mdvx = new DsMdvxThreaded();
+      gd.layers.wind[i].wind_w->h_mdvx_int16 = new MdvxField;
+      gd.layers.wind[i].wind_w->v_mdvx_int16 = new MdvxField;
+      gd.layers.wind[i].wind_w->proj = new MdvxProj;
+    } else {
+      gd.layers.wind[i].wind_w =  (met_record_t *) NULL;
+    }
+    
+    gd.layers.wind[i].units_scale_factor = gd.wind_units_scale_factor;
+    gd.layers.wind[i].reference_speed = gd.wind_reference_speed;
+    gd.layers.wind[i].units_label = gd.wind_units_label;
+    
+  }
+  
+  /* free temp space */
+  for(i = 0; i < NUM_PARSE_FIELDS; i++) {
+    if (cfield[i] != NULL) {
+      free(cfield[i]);
+    }
+  }
+
+  return 0;
+  
+}
+/************************************************************************
+ * INIT_DRAW_EXPORT_LINKS:  Scan param file and setup links to
+ *  for drawn and exported points 
+ *
+ */
+
+int LegacyParams::_initDrawExportLinks()
+{
+  int  i,len;
+  
+  gd.draw.num_draw_products = gd.draw_P->dexport_info_n;
+  
+  if((gd.draw.dexport =(draw_export_info_t*)
+      calloc(gd.draw.num_draw_products,sizeof(draw_export_info_t))) == NULL) {
+    fprintf(stderr,"Unable to allocate space for %d draw.dexport sets\n",gd.draw.num_draw_products);
+    perror("CIDD");
+    return -1;
+  }
+
+  
+  // Allocate space for control struct and record starting values for each product.
+  for(i=0; i < gd.draw.num_draw_products;  i++) {
+    
+    // Product ID  
+    len = strlen(gd.draw_P->_dexport_info[i].id_label) +1;
+    gd.draw.dexport[i].product_id_label = (char *)  calloc(1,len);
+    STRcopy(gd.draw.dexport[i].product_id_label,gd.draw_P->_dexport_info[i].id_label,len);
+    
+    // Allocate space for product_label_text (annotations) and set to nulls
+    gd.draw.dexport[i].product_label_text =  (char *) calloc(1,TITLE_LENGTH);
+    
+    strncpy(gd.draw.dexport[i].product_label_text, gd.draw_P->_dexport_info[i].default_label,TITLE_LENGTH-1);
+    
+    // FMQ URL 
+    len = strlen(gd.draw_P->_dexport_info[i].url) +1;
+    if(len > NAME_LENGTH) {
+      fprintf(stderr,"URL: %s too long - Must be less than %d chars. Sorry.",
+              gd.draw_P->_dexport_info[i].url,URL_LENGTH);
+      return -1;
+    }
+    gd.draw.dexport[i].product_fmq_url =  (char *) calloc(1,URL_LENGTH);
+    STRcopy(gd.draw.dexport[i].product_fmq_url,gd.draw_P->_dexport_info[i].url,URL_LENGTH);
+    
+    // Get the Default valid time  
+    gd.draw.dexport[i].default_valid_minutes = gd.draw_P->_dexport_info[i].valid_minutes;
+    
+    // Get the Default ID   
+    gd.draw.dexport[i].default_serial_no = gd.draw_P->_dexport_info[i].default_id_no;
+  }
+
+  return 0;
+  
+}
+/************************************************************************
+ * LOAD_OVERLAY_INFO:  Scan info file and record info about overlay
+ *         sources. Returns number of overlay info lines found &
+ *         filled;
+ *
+ */
+
+int LegacyParams::_loadOverlayInfo(const char *param_buf, long param_buf_len,
+                                   long line_no,
+                                   Overlay_t **over, int  max_overlays)
+{
+  int i,num_overlays;
+  int  len,total_len;
+  int num_fields;
+  const char *start_ptr;
+  const char *end_ptr;
+  char    *cfield[32];
+   
+  char full_line[BUFSIZ];
+    
+  for(i=0; i < 32; i++)  cfield[i] = (char *) calloc(1,64);  /* get space for sub strings */
+
+  /* read all the lines in the information file */
+  num_overlays = 0;
+  total_len = 0;
+  start_ptr = param_buf;
+  while((end_ptr = strchr(start_ptr,'\n')) != NULL &&
+        (total_len < param_buf_len) && 
+        (num_overlays < max_overlays)) {
+    len = (end_ptr - start_ptr)+1;
+    // Skip over blank, short or commented lines
+    if((len > 20)  && *start_ptr != '#') {
+      
+      STRcopy(full_line, start_ptr, len);
+      usubstitute_env(full_line, BUFSIZ);
+      
+      over[num_overlays] = (Overlay_t *) calloc(1,sizeof(Overlay_t));
+      
+      num_fields = STRparse(full_line,cfield,BUFSIZ,32,64);  /* separate into substrings */
+      
+      if(num_fields >= 7) {    /* Is a correctly formatted line */
+        STRcopy(over[num_overlays]->map_code,cfield[0],LABEL_LENGTH);
+        STRcopy(over[num_overlays]->control_label,cfield[1],LABEL_LENGTH);
+        STRcopy(over[num_overlays]->map_file_name,cfield[2],NAME_LENGTH);
+        over[num_overlays]->default_on_state = atoi(cfield[3]);
+        over[num_overlays]->line_width = atoi(cfield[3]);
+        if(over[num_overlays]->line_width <=0) 
+          over[num_overlays]->line_width = 1;
+        over[num_overlays]->detail_thresh_min = atof(cfield[4]);
+        over[num_overlays]->detail_thresh_max = atof(cfield[5]);
+        
+        over[num_overlays]->active = over[num_overlays]->default_on_state;
+        
+        over[num_overlays]->color_name[0] = '\0';
+        for(i=6; i < num_fields; i++) {
+          strncat(over[num_overlays]->color_name,cfield[i],NAME_LENGTH-1);
+          strncat(over[num_overlays]->color_name," ",NAME_LENGTH-1);
+        }
+        over[num_overlays]->color_name[strlen(over[num_overlays]->color_name) -1] = '\0';
+        
+        /* strip underscores out of control label */
+        for(i = strlen(over[num_overlays]->control_label)-1;i >0 ; i--) {
+          if (gd.replace_underscores && over[num_overlays]->control_label[i] == '_') 
+            over[num_overlays]->control_label[i] = ' ';
+        }
+        
+        num_overlays++;
+      }
+    }
+
+    total_len += len  +1;
+    start_ptr = end_ptr +1; // Skip past the newline
+    line_no++;
+  }
+
+  for(i=0; i < 32; i++)  free(cfield[i]);         /* free space for sub strings */
+     
+  return num_overlays;
+}
+
+
+/************************************************************************
+ * LOAD_OVERLAY_DATA: Load each Map
+ */
+
+int LegacyParams::_loadOverlayData(Overlay_t **over, int  num_overlays)
+{
+
+  int i;
+  Overlay_t    *ov;    /* pointer to the current overlay structure */
+  const char *map_file_subdir = gd.map_file_subdir;
+  
+  /* Read in each overlay file */
+  for(i=0; i < num_overlays; i++) {
+    ov = over[i];
+    ov->num_polylines = 0;
+    ov->num_labels = 0;
+    ov->num_icons = 0;
+    
+    if(strstr(ov->map_file_name,".shp") != NULL  ||
+       strstr(ov->map_file_name,".shx") != NULL) {
+      
+      load_shape_map(ov,map_file_subdir);
+
+    } else {  // Assume RAP Map Format 
+      load_rap_map(ov,map_file_subdir);
+    }
+    
+    if(gd.debug)
+      printf("Overlay File %s contains %ld Polylines, %ld Icon_defns, %ld Icons, %ld Labels\n",
+             ov->map_file_name,ov->num_polylines,ov->num_icondefs,ov->num_icons,ov->num_labels);
+    
+  }  // End for(i=0; i < num_overlays ...
+
+  return 0;
+}
+
+/************************************************************************
+ * INIT_OVER_DATA_LINKS:  Scan cidd_overlays.info file and setup
+ *
+ */ 
+
+int LegacyParams::_initOverlays(const char *param_buf,
+                                long param_buf_len,
+                                long line_no)
+  
+{
+
+  gd.num_map_overlays =
+    _loadOverlayInfo(param_buf, param_buf_len, line_no, gd.over, MAX_OVERLAYS);
+  
+  if(_loadOverlayData(gd.over, gd.num_map_overlays) != 0) {
+    fprintf(stderr,"Problem loading overlay data\n");
+    return -1;
+  }
+  
+  calc_local_over_coords();
+
+  return 0;
   
 }

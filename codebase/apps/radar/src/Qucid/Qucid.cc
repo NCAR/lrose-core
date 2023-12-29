@@ -79,6 +79,10 @@ Qucid::Qucid(int argc, char **argv) :
   
   _initGlobals();
 
+  // initialize signal handling
+  
+  init_signal_handlers();  
+
   // check for legacy params file
 
   string legacyParamsPath;
