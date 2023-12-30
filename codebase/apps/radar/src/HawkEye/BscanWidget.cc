@@ -548,10 +548,14 @@ void BscanWidget::mousePressEvent(QMouseEvent *e)
   _rubberBand->setGeometry(QRect(e->pos(), QSize()));
   _rubberBand->show();
 
-  QPointF pos(e->pos());
-  _mousePressX = pos.x();
-  _mousePressY = pos.y();
-
+#if QT_VERSION >= 0x060000
+  _mousePressX = e->position().x();
+  _mousePressY = e->position().y();
+#else
+  _mousePressX = e->x();
+  _mousePressY = e->y();
+#endif
+  
   _worldPressX = _zoomWorld.getXWorld(_mousePressX);
   _worldPressY = _zoomWorld.getYWorld(_mousePressY);
 
@@ -566,9 +570,14 @@ void BscanWidget::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
-  QPointF pos(e->pos());
-  int x = pos.x();
-  int y = pos.y();
+#if QT_VERSION >= 0x060000
+  int x = e->position().x();
+  int y = e->position().y();
+#else
+  int x = e->x();
+  int y = e->y();
+#endif
+
   int deltaX = x - _mousePressX;
   int deltaY = y - _mousePressY;
 
