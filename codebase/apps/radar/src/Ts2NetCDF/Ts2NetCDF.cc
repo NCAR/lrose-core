@@ -140,9 +140,9 @@ Ts2NetCDF::Ts2NetCDF(int argc, char **argv)
                                        _params.tcp_server_port,
 				       iwrfDebug);
   } else if (_params.input_mode == Params::TS_ARCHIVE_INPUT) {
-    _pulseReader = new IwrfTsReaderFile(_params.input_dir,
-                                        _args.startTime.utime(),
+    _pulseReader = new IwrfTsReaderFile(_args.startTime.utime(),
                                         _args.endTime.utime(),
+                                        _params.input_dir,
                                         iwrfDebug);
   } else {
     _pulseReader = new IwrfTsReaderFile(_args.inputFileList, iwrfDebug);

@@ -455,14 +455,14 @@ QPixmap* SpriteWidget::getPixmap()
 void SpriteWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _rubberBand->setGeometry(QRect(e->pos(), QSize()));
-  _rubberBand->show();
-
 #if QT_VERSION >= 0x060000
   QPointF pos(e->position());
 #else
   QPointF pos(e->pos());
 #endif
+
+  _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
+  _rubberBand->show();
 
   _mousePressX = pos.x();
   _mousePressY = pos.y();

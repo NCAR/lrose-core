@@ -190,7 +190,12 @@ void TimeScaleWidget::setBackgroundColor(const QColor &color)
 void TimeScaleWidget::mousePressEvent(QMouseEvent *e)
 {
 
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
   QPointF pos(e->pos());
+#endif
+
   _mousePressX = pos.x();
   _mousePressY = pos.y();
   
@@ -209,9 +214,14 @@ void TimeScaleWidget::mouseReleaseEvent(QMouseEvent *e)
 
   _pointClicked = false;
 
-  QPointF clickPos(e->pos());
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  _mouseReleaseX = pos.x();
+  _mouseReleaseY = pos.y();
 
   // get click location in world coords
 

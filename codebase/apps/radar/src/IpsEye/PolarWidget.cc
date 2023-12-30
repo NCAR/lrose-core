@@ -424,17 +424,21 @@ QPixmap* PolarWidget::getPixmap()
 void PolarWidget::mousePressEvent(QMouseEvent *e)
 {
   
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
   if (e->button() == Qt::RightButton) {
-    QPointF pos(e->pos());
     _mousePressX = pos.x();
     _mousePressY = pos.y();
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
     _worldPressY = _zoomWorld.getYWorld(_mousePressY);
     emit customContextMenuRequested(pos.toPoint());
   } else {
-    _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+    _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
     _rubberBand->show();
-    QPointF pos(e->pos());
     _mousePressX = pos.x();
     _mousePressY = pos.y();
     _worldPressX = _zoomWorld.getXWorld(_mousePressX);
@@ -451,8 +455,14 @@ void PolarWidget::mousePressEvent(QMouseEvent *e)
 void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 {
 
-  int worldX = (int)_zoomWorld.getXWorld(e->pos().x());
-  int worldY = (int)_zoomWorld.getYWorld(e->pos().y());
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  int worldX = (int)_zoomWorld.getXWorld(pos.x());
+  int worldY = (int)_zoomWorld.getYWorld(pos.y());
   
   if (_manager._boundaryEditorDialog->isVisible()) {
 
@@ -473,7 +483,6 @@ void PolarWidget::mouseMoveEvent(QMouseEvent * e)
 
   // Zooming with the mouse
 
-  QPointF pos(e->pos());
   int ix = pos.x();
   int iy = pos.y();
   int deltaX = ix - _mousePressX;
@@ -510,16 +519,19 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
 {
   
   _pointClicked = false;
+
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
   
   if (e->button() == Qt::RightButton) {
     
-    QPointF clickPos(e->pos());
-    
-    QPointF pos(e->pos());
     _mousePressX = pos.x();
     _mousePressY = pos.y();
     
-    emit customContextMenuRequested(clickPos.toPoint()); // , closestRay);
+    emit customContextMenuRequested(pos.toPoint()); // , closestRay);
     
   } else {
     
@@ -528,10 +540,8 @@ void PolarWidget::mouseReleaseEvent(QMouseEvent *e)
     // If the mouse hasn't moved much, assume we are clicking rather than
     // zooming
     
-    QPointF clickPos(e->pos());
-    
-    _mouseReleaseX = clickPos.x();
-    _mouseReleaseY = clickPos.y();
+    _mouseReleaseX = pos.x();
+    _mouseReleaseY = pos.y();
     
     // get click location in world coords
     

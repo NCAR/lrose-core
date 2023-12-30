@@ -540,10 +540,11 @@ QPixmap* BscanWidget::getPixmap()
 void BscanWidget::mousePressEvent(QMouseEvent *e)
 {
 
-  _rubberBand->setGeometry(QRect(e->pos(), QSize()));
+  QPointF pos(e->pos());
+  
+  _rubberBand->setGeometry(pos.x(), pos.y(), 0, 0);
   _rubberBand->show();
 
-  QPointF pos(e->pos());
   _mousePressX = pos.x();
   _mousePressY = pos.y();
 
@@ -561,7 +562,12 @@ void BscanWidget::mouseMoveEvent(QMouseEvent * e)
 {
   // Zooming with the mouse
 
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
   QPointF pos(e->pos());
+#endif
+
   int x = pos.x();
   int y = pos.y();
   int deltaX = x - _mousePressX;
@@ -589,10 +595,14 @@ void BscanWidget::mouseReleaseEvent(QMouseEvent *e)
   // If the mouse hasn't moved much, assume we are clicking rather than
   // zooming
 
-  QPointF clickPos(e->pos());
-  
-  _mouseReleaseX = clickPos.x();
-  _mouseReleaseY = clickPos.y();
+#if QT_VERSION >= 0x060000
+  QPointF pos(e->position());
+#else
+  QPointF pos(e->pos());
+#endif
+
+  _mouseReleaseX = pos.x();
+  _mouseReleaseY = pos.y();
 
   // get click location in world coords
 
