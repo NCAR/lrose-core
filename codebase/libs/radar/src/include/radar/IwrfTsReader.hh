@@ -252,9 +252,9 @@ public:
   // ARCHIVE mode, read files from input_dir
   // between start time and end time.
   
-  IwrfTsReaderFile(const char *input_dir,
-                   time_t start_time,
+  IwrfTsReaderFile(time_t start_time,
                    time_t end_time,
+                   const char *input_dir,
                    IwrfDebug_t debug = IWRF_DEBUG_OFF);
   
   // FILELIST mode - specify list of files to be read

@@ -276,10 +276,10 @@ IwrfTsReaderFile::IwrfTsReaderFile(const vector<string> &fileList,
 
 // ARCHIVE mode - specify input_dir and start and end times
 
-IwrfTsReaderFile::IwrfTsReaderFile(const char *input_dir,
-                                   time_t start_time,
+IwrfTsReaderFile::IwrfTsReaderFile(time_t start_time,
                                    time_t end_time,
-				   IwrfDebug_t debug) :
+				   const char *input_dir,
+                                   IwrfDebug_t debug) :
         IwrfTsReader(debug)
         
 {
