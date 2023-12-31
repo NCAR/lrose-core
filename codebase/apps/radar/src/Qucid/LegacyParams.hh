@@ -127,9 +127,9 @@ private:
   
   int _loadOverlayInfo(const char *param_buf, long param_buf_len,
                        long line_no,
-                       Overlay_t **over, int  max_overlays);
+                       int  max_overlays);
   
-  int _loadOverlayData(Overlay_t **over, int  num_overlays);
+  int _loadOverlayData(int  num_overlays);
   
   int _initOverlays(const char *param_buf,
                     long param_buf_len,

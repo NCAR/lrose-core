@@ -31,13 +31,14 @@
 //
 /////////////////////////////////////////////////////////////
 
-#include "cidd.h"
 #include "LegacyParams.hh"
+#include "cidd.h"
 #include <cerrno>
 #include <iostream>
 #include <cstdio>
 #include <toolsa/umisc.h>
 #include <toolsa/str.h>
+#include <toolsa/utim.h>
 
 // constructor
 
@@ -381,8 +382,8 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   param_text_line_no = 0;
   param_text_len = 0;
-  param_text = find_tag_text(_paramsBuf,"MAIN_PARAMS",
-                             &param_text_len, &param_text_line_no);
+  param_text = _findTagText(_paramsBuf,"MAIN_PARAMS",
+                            &param_text_len, &param_text_line_no);
     
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Could'nt Find MAIN_PARAMS SECTION\n");
@@ -391,10 +392,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     
   // set_X_parameter_database(param_text); /* load the main parameter database*/
   
-  if(!gd.quiet_mode) {
-    fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n",
-            CIDD_VERSION, CIDD_UCOPYRIGHT);
-  }
+  // if(!gd.quiet_mode) {
+  //   fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n",
+  //           CIDD_VERSION, CIDD_UCOPYRIGHT);
+  // }
 
   gd.debug |= gd.uparams->getLong("cidd.debug_flag", 0);
   gd.debug1 |= gd.uparams->getLong("cidd.debug1_flag", 0);
@@ -2960,7 +2961,7 @@ int LegacyParams::_initDrawExportLinks()
 
 int LegacyParams::_loadOverlayInfo(const char *param_buf, long param_buf_len,
                                    long line_no,
-                                   Overlay_t **over, int  max_overlays)
+                                   int  max_overlays)
 {
   int i,num_overlays;
   int  len,total_len;
@@ -2987,35 +2988,35 @@ int LegacyParams::_loadOverlayInfo(const char *param_buf, long param_buf_len,
       STRcopy(full_line, start_ptr, len);
       usubstitute_env(full_line, BUFSIZ);
       
-      over[num_overlays] = (Overlay_t *) calloc(1,sizeof(Overlay_t));
+      // over[num_overlays] = (Overlay_t *) calloc(1,sizeof(Overlay_t));
       
       num_fields = STRparse(full_line,cfield,BUFSIZ,32,64);  /* separate into substrings */
       
       if(num_fields >= 7) {    /* Is a correctly formatted line */
-        STRcopy(over[num_overlays]->map_code,cfield[0],LABEL_LENGTH);
-        STRcopy(over[num_overlays]->control_label,cfield[1],LABEL_LENGTH);
-        STRcopy(over[num_overlays]->map_file_name,cfield[2],NAME_LENGTH);
-        over[num_overlays]->default_on_state = atoi(cfield[3]);
-        over[num_overlays]->line_width = atoi(cfield[3]);
-        if(over[num_overlays]->line_width <=0) 
-          over[num_overlays]->line_width = 1;
-        over[num_overlays]->detail_thresh_min = atof(cfield[4]);
-        over[num_overlays]->detail_thresh_max = atof(cfield[5]);
+        // STRcopy(over[num_overlays]->map_code,cfield[0],LABEL_LENGTH);
+        // STRcopy(over[num_overlays]->control_label,cfield[1],LABEL_LENGTH);
+        // STRcopy(over[num_overlays]->map_file_name,cfield[2],NAME_LENGTH);
+        // over[num_overlays]->default_on_state = atoi(cfield[3]);
+        // over[num_overlays]->line_width = atoi(cfield[3]);
+        // if(over[num_overlays]->line_width <=0) 
+        //   over[num_overlays]->line_width = 1;
+        // over[num_overlays]->detail_thresh_min = atof(cfield[4]);
+        // over[num_overlays]->detail_thresh_max = atof(cfield[5]);
         
-        over[num_overlays]->active = over[num_overlays]->default_on_state;
+        // over[num_overlays]->active = over[num_overlays]->default_on_state;
         
-        over[num_overlays]->color_name[0] = '\0';
-        for(i=6; i < num_fields; i++) {
-          strncat(over[num_overlays]->color_name,cfield[i],NAME_LENGTH-1);
-          strncat(over[num_overlays]->color_name," ",NAME_LENGTH-1);
-        }
-        over[num_overlays]->color_name[strlen(over[num_overlays]->color_name) -1] = '\0';
+        // over[num_overlays]->color_name[0] = '\0';
+        // for(i=6; i < num_fields; i++) {
+        //   strncat(over[num_overlays]->color_name,cfield[i],NAME_LENGTH-1);
+        //   strncat(over[num_overlays]->color_name," ",NAME_LENGTH-1);
+        // }
+        // over[num_overlays]->color_name[strlen(over[num_overlays]->color_name) -1] = '\0';
         
         /* strip underscores out of control label */
-        for(i = strlen(over[num_overlays]->control_label)-1;i >0 ; i--) {
-          if (gd.replace_underscores && over[num_overlays]->control_label[i] == '_') 
-            over[num_overlays]->control_label[i] = ' ';
-        }
+        // for(i = strlen(over[num_overlays]->control_label)-1;i >0 ; i--) {
+        //   if (gd.replace_underscores && over[num_overlays]->control_label[i] == '_') 
+        //     over[num_overlays]->control_label[i] = ' ';
+        // }
         
         num_overlays++;
       }
@@ -3036,10 +3037,12 @@ int LegacyParams::_loadOverlayInfo(const char *param_buf, long param_buf_len,
  * LOAD_OVERLAY_DATA: Load each Map
  */
 
-int LegacyParams::_loadOverlayData(Overlay_t **over, int  num_overlays)
+int LegacyParams::_loadOverlayData(int  num_overlays)
 {
 
-  int i;
+  // int i;
+
+#ifdef JUNK
   Overlay_t    *ov;    /* pointer to the current overlay structure */
   const char *map_file_subdir = gd.map_file_subdir;
   
@@ -3064,7 +3067,8 @@ int LegacyParams::_loadOverlayData(Overlay_t **over, int  num_overlays)
              ov->map_file_name,ov->num_polylines,ov->num_icondefs,ov->num_icons,ov->num_labels);
     
   }  // End for(i=0; i < num_overlays ...
-
+#endif
+  
   return 0;
 }
 
@@ -3080,9 +3084,9 @@ int LegacyParams::_initOverlays(const char *param_buf,
 {
 
   gd.num_map_overlays =
-    _loadOverlayInfo(param_buf, param_buf_len, line_no, gd.over, MAX_OVERLAYS);
+    _loadOverlayInfo(param_buf, param_buf_len, line_no, MAX_OVERLAYS);
   
-  if(_loadOverlayData(gd.over, gd.num_map_overlays) != 0) {
+  if(_loadOverlayData(gd.num_map_overlays) != 0) {
     fprintf(stderr,"Problem loading overlay data\n");
     return -1;
   }

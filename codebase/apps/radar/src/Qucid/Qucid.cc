@@ -39,6 +39,7 @@
 #include "Qucid.hh"
 #include "CartManager.hh"
 #include "DisplayField.hh"
+#include "LegacyParams.hh"
 #include <qtplot/ColorMap.hh>
 #include "Params.hh"
 #include "Reader.hh"
@@ -85,11 +86,15 @@ Qucid::Qucid(int argc, char **argv) :
 
   // check for legacy params file
 
+  
   string legacyParamsPath;
   if (_args.getLegacyParamsPath(argc, (const char **) argv, legacyParamsPath) == 0) {
     gd.db_name = strdup(legacyParamsPath.c_str());
     cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
     cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
+    LegacyParams lparams;
+    string tdrpParamsPath("/tmp/CIDD.tdrp");
+    lparams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
     init_data_space(_params);
     cerr << "fffffffffffff fields ptr: " << _params._fields << endl;
     cerr << "fffffffffffff nfields: " << _params.fields_n << endl;

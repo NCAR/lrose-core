@@ -2001,6 +2001,8 @@ Qucid.o: Qucid.cc Qucid.hh \
 		$(HOME)/lrose/include/radar/BeamHeight.hh \
 		$(HOME)/lrose/include/toolsa/TaArray2D.hh \
 		DisplayField.hh \
+		LegacyParams.hh \
+		cidd_params.h \
 		Reader.hh \
 		$(HOME)/lrose/include/toolsa/TaThread.hh \
 		$(HOME)/lrose/include/radar/IwrfMomReader.hh \

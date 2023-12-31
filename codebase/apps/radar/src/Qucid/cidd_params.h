@@ -34,7 +34,10 @@
  * Nancy Rehak
  ************************************************************************/
 
-static const string ParamsTextMasterHeader =
+#include <unistd.h>
+#include <sys/stat.h>
+
+static const std::string ParamsTextMasterHeader =
 "#####################################################################################\n"
 "#  CIDD.master\n"
 "#  Configurable Interactive Data Display Master Params\n"
@@ -61,7 +64,7 @@ static const string ParamsTextMasterHeader =
 "#####################################################################################\n"
 "\n";
 
-static const string ParamsTextGrids =
+static const std::string ParamsTextGrids =
 "<GRIDS>\n"
 "# Legend Label: used for all on-screen labels and for movie/html file naming.\n"
 "#           An Empty grid field can be obtained by using the keyword \"None\"\n"
@@ -145,7 +148,7 @@ static const string ParamsTextGrids =
 "</GRIDS>\n"
 "\n";
 
-static const string ParamsTextWinds =
+static const std::string ParamsTextWinds =
 "<WINDS>\n"
 "#----------------------------------------------------------------------------\n"
 "# Note:\n"
@@ -196,7 +199,7 @@ static const string ParamsTextWinds =
 "</WINDS>\n"
 "\n";
 
-static const string ParamsTextMaps =
+static const std::string ParamsTextMaps =
 "<MAPS>\n"
 "#\n"
 "# MAP_CODE Must be less than 16 characters, Color must be regular X color name\n"
@@ -241,7 +244,7 @@ static const string ParamsTextMaps =
 "</MAPS>\n"
 "\n";
 
-static const string ParamsTextMainParams =
+static const std::string ParamsTextMainParams =
 "######################################################################################\n"
 "######################################################################################\n"
 "######################################################################################\n"
@@ -1386,7 +1389,7 @@ static const string ParamsTextMainParams =
 // 
 
 template <class T>
-string get_default_tdrp_params(const string &section_name, T *params)
+  std::string get_default_tdrp_params(const std::string &section_name, T *params)
 {
   // Load the temporary parameters since we don't seem to have them
   // loaded yet
@@ -1396,7 +1399,7 @@ string get_default_tdrp_params(const string &section_name, T *params)
   // Open a temporary file to hold the parameters.  Write the parameters
   // to that file and close it.
 
-  const string tmp_filename = ".params";
+  const std::string tmp_filename = ".params";
   
   FILE *tmp_file;
 
@@ -1446,7 +1449,7 @@ string get_default_tdrp_params(const string &section_name, T *params)
 
   tmp_buffer[tmp_file_stat.st_size] = '\0';
 
-  string return_string = "<" + section_name + ">\n";
+  std::string return_string = "<" + section_name + ">\n";
   return_string += tmp_buffer;
   return_string += "</" + section_name + ">\n\n";
   
