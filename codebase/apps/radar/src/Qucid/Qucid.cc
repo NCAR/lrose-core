@@ -92,20 +92,20 @@ Qucid::Qucid(int argc, char **argv) :
     gd.db_name = strdup(legacyParamsPath.c_str());
     cerr << "eeeeeeeeeee fields ptr: " << _params._fields << endl;
     cerr << "eeeeeeeeeee nfields: " << _params.fields_n << endl;
-    LegacyParams lparams;
     string tdrpParamsPath("/tmp/CIDD.tdrp");
-    lparams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
-    init_data_space(_params);
+    LegacyParams lParams;
+    lParams.translateToTdrp(legacyParamsPath, tdrpParamsPath);
+    // init_data_space(_params);
     cerr << "fffffffffffff fields ptr: " << _params._fields << endl;
     cerr << "fffffffffffff nfields: " << _params.fields_n << endl;
-    tdrp_print_mode_t printMode;
-    if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
-      if (printMode != NO_PRINT) {
-        _params.sync();
-        _params.print(stdout, printMode);
-        exit(0);
-      }
-    }
+    // tdrp_print_mode_t printMode;
+    // if (_args.getTdrpPrintMode(argc, (const char **) argv, printMode) == 0) {
+    //   if (printMode != NO_PRINT) {
+    //     _params.sync();
+    //     _params.print(stdout, printMode);
+    //     exit(0);
+    //   }
+    // }
   }
   
   // get command line args

@@ -103,6 +103,8 @@ private:
                            long *text_len,
                            long *text_line_no);
 
+  const char *_removeCidd(const char *name) const;
+
   int _loadDbDataDefault(char* &db_buf, int &db_len);
 
   int _loadDbDataFile(const string &fname,
