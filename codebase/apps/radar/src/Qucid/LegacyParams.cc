@@ -845,6 +845,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.products_on = getLong("cidd.products_on", 1);
   gd.product_line_width = getLong("cidd.product_line_width", 1);
   gd.product_font_size = getLong("cidd.product_font_size", 1);
+  // symprods
+  
+  gd.scale_constant = getDouble("cidd.scale_constant", 300.0);
+
   
   // copy to structs
   
@@ -875,6 +879,8 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
 
 
+  // contours etc
+
   gd.layers.layer_legends_on = gd.layer_legends_on;
   gd.layers.cont_legends_on = gd.cont_legends_on;
   gd.layers.wind_legends_on = gd.wind_legends_on;
@@ -886,6 +892,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.layers.map_bad_to_min_value = gd.map_bad_to_min_value;
   gd.layers.map_missing_to_min_value = gd.map_missing_to_min_value;
 
+  gd.contour_font_num = getLong("contour_font_num", 6);
+  gd.n_ideal_contour_labels = getLong("n_ideal_contour_labels", 5);
+
+  
   // drawing
   
   gd.drawing_mode = 0;
@@ -1916,23 +1926,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
 #endif
 
-  // contours
-
-  gd.contour_font_num = getLong("contour_font_num", 6);
-  gd.n_ideal_contour_labels = getLong("n_ideal_contour_labels", 5);
-
   // gui
 
   gd.click_posn_rel_to_origin  = getLong("cidd.click_posn_rel_to_origin", 0);
-
-  // page_pu_proc
-
-  gd.ideal_x_vectors = getLong("cidd.ideal_x_vectors", 20);
-  gd.ideal_y_vectors = getLong("cidd.ideal_y_vectors", 20);
-
-  // symprods
-  
-  gd.scale_constant = getDouble("cidd.scale_constant", 300.0);
 
   // timer control
 
