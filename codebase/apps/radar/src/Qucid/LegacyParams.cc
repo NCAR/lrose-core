@@ -397,9 +397,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   //           CIDD_VERSION, CIDD_UCOPYRIGHT);
   // }
 
-  gd.debug |= getLong("cidd.debug_flag", 0);
-  gd.debug1 |= getLong("cidd.debug1_flag", 0);
-  gd.debug2 |= getLong("cidd.debug2_flag", 0);
+  gd.debug |= getBoolean("cidd.debug_flag", 0);
+  gd.debug1 |= getBoolean("cidd.debug1_flag", 0);
+  gd.debug2 |= getBoolean("cidd.debug2_flag", 0);
 
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
@@ -421,10 +421,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.forecast_interval = getDouble("cidd.forecast_interval", 0.0);
   gd.past_interval = getDouble("cidd.past_interval", 0.0);
   gd.movie_magnify_factor = getDouble("cidd.movie_magnify_factor",1.0);
-  gd.check_data_times = getLong("cidd.check_data_times", 0);
+  gd.check_data_times = getBoolean("cidd.check_data_times", 0);
 
   // clipping for rendering
-  gd.check_clipping = getLong("cidd.check_clipping", 0);
+  gd.check_clipping = getBoolean("cidd.check_clipping", 0);
   
   gd.stretch_factor = getDouble("cidd.stretch_factor", 1.5);
   gd.gather_data_mode = getLong("cidd.gather_data_mode",
@@ -439,26 +439,26 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.simple_command_timeout_secs =  getLong("cidd.simple_command_timeout_secs",30);
   gd.complex_command_timeout_secs =  getLong("cidd.complex_command_timeout_secs",180);
   
-  gd.movie_on = getLong("cidd.movie_on", 0);
+  gd.movie_on = getBoolean("cidd.movie_on", 0);
   gd.movie_delay = getLong("cidd.movie_delay",3000);
   gd.movie_speed_msec = getLong("cidd.movie_speed_msec", 75);
-  gd.reset_frames = getLong("cidd.reset_frames", 0);
+  gd.reset_frames = getBoolean("cidd.reset_frames", 0);
 
   gd.model_run_list_hours = getLong("cidd.model_run_list_hours",24);
 
   // How many idle seconds can elapse before resetting the display
   gd.idle_reset_seconds = getLong("cidd.idle_reset_seconds",0);
 
-  gd.html_mode = getLong("cidd.html_mode", 0);
-  gd.run_once_and_exit = getLong("cidd.run_once_and_exit",0);
+  gd.html_mode = getBoolean("cidd.html_mode", 0);
+  gd.run_once_and_exit = getBoolean("cidd.run_once_and_exit",0);
 
-  gd.transparent_images = getLong("cidd.transparent_images", 0);
+  gd.transparent_images = getBoolean("cidd.transparent_images", 0);
   
   // Image dir - for output images
   gd.image_dir = getString("cidd.image_dir", "/tmp/image_dir");
   
   gd.save_images_to_day_subdir =
-    getLong("cidd.save_images_to_day_subdir", 0);
+    getBoolean("cidd.save_images_to_day_subdir", 0);
   
   // Set up our default image type.
   // force png for now
@@ -472,22 +472,22 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // output image file names
   
   gd.add_height_to_filename =
-    getLong("cidd.add_height_to_filename",0);
+    getBoolean("cidd.add_height_to_filename",0);
      
   gd.add_frame_time_to_filename =
-    getLong("cidd.add_frame_time_to_filename",1);
+    getBoolean("cidd.add_frame_time_to_filename",1);
      
   gd.add_button_name_to_filename =
-    getLong("cidd.add_button_name_to_filename",0);
+    getBoolean("cidd.add_button_name_to_filename",0);
 
   gd.add_frame_num_to_filename =
-    getLong("cidd.add_frame_num_to_filename",1);
+    getBoolean("cidd.add_frame_num_to_filename",1);
 
   gd.add_gen_time_to_filename =
-    getLong("cidd.add_gen_time_to_filename",0);
+    getBoolean("cidd.add_gen_time_to_filename",0);
   
   gd.add_valid_time_to_filename =
-    getLong("cidd.add_valid_time_to_filename",0);
+    getBoolean("cidd.add_valid_time_to_filename",0);
      
   gd.horiz_image_dir =
     getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
@@ -503,8 +503,8 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.vert_image_command =
     getString("cidd.vert_image_command", "");
   
-  gd.output_geo_xml =   getLong("cidd.output_geo_xml", 0);
-  gd.use_latlon_in_geo_xml =   getLong("cidd.use_latlon_in_geo_xml", 0);
+  gd.output_geo_xml =   getBoolean("cidd.output_geo_xml", 0);
+  gd.use_latlon_in_geo_xml =   getBoolean("cidd.use_latlon_in_geo_xml", 0);
 
   gd.movieframe_time_format = getString(
 	  "cidd.movieframe_time_format", "%H%M");
@@ -528,9 +528,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   // data compression from server
   
   gd.request_compressed_data =
-    getLong("cidd.request_compressed_data",0);
+    getBoolean("cidd.request_compressed_data",0);
   gd.request_gzip_vol_compression =
-    getLong("cidd.request_gzip_vol_compression",0);
+    getBoolean("cidd.request_gzip_vol_compression",0);
 
   /* Establish the projection type */
 
@@ -549,7 +549,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   /* Use cosine correction for computing range in polar data */
   if (gd.use_cosine_correction < 0) {
     // not set on command line
-    int use_cosine = getLong("cidd.use_cosine", 1); // legacy
+    int use_cosine = getBoolean("cidd.use_cosine", 1); // legacy
     gd.use_cosine_correction =
       getLong("cidd.use_cosine_correction", use_cosine);
   }
@@ -557,9 +557,9 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.scale_units_per_km = getDouble("cidd.scale_units_per_km",1.0);
   gd.scale_units_label = getString("cidd.scale_units_label", "km");
   
-  gd.always_get_full_domain = getLong("cidd.always_get_full_domain", 0);
-  gd.do_not_clip_on_mdv_request = getLong("cidd.do_not_clip_on_mdv_request", 0);
-  gd.do_not_decimate_on_mdv_request = getLong("cidd.do_not_decimate_on_mdv_request", 0);
+  gd.always_get_full_domain = getBoolean("cidd.always_get_full_domain", 0);
+  gd.do_not_clip_on_mdv_request = getBoolean("cidd.do_not_clip_on_mdv_request", 0);
+  gd.do_not_decimate_on_mdv_request = getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
      
   // zoom
   
@@ -571,16 +571,16 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   }
 
   /* Toggle for enabling a status report window */
-  gd.enable_status_window = getLong("cidd.enable_status_window", 0);
+  gd.enable_status_window = getBoolean("cidd.enable_status_window", 0);
 
-  gd.report_clicks_in_status_window = getLong("cidd.report_clicks_in_status_window", 0);
-  gd.report_clicks_in_degM_and_nm = getLong("cidd.report_clicks_in_degM_and_nm", 0);
-  gd.magnetic_variation_deg = getLong("cidd.magnetic_variation_deg", 0);
+  gd.report_clicks_in_status_window = getBoolean("cidd.report_clicks_in_status_window", 0);
+  gd.report_clicks_in_degM_and_nm = getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
+  gd.magnetic_variation_deg = getDouble("cidd.magnetic_variation_deg", 0);
   
   /* Toggle for enabling a Save Image Panel */
   // WARNING - ALLOWS USERS SHELL ACCESS
   gd.enable_save_image_panel =
-    getLong("cidd.enable_save_image_panel", 0);
+    getBoolean("cidd.enable_save_image_panel", 0);
   
   gd.domain_limit_min_x = getDouble("cidd.domain_limit_min_x",-10000);
   gd.domain_limit_max_x = getDouble("cidd.domain_limit_max_x",10000);
@@ -604,7 +604,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   
   gd.num_zoom_levels =  getLong("cidd.num_zoom_levels",1);
   gd.start_zoom_level =  getLong("cidd.start_zoom_level",1);
-  gd.zoom_limits_in_latlon =  getLong("cidd.zoom_limits_in_latlon",0);
+  gd.zoom_limits_in_latlon =  getBoolean("cidd.zoom_limits_in_latlon",0);
   gd.num_cache_zooms = getLong("cidd.num_cache_zooms",1);
 
   gd.min_ht = getDouble("cidd.min_ht", 0.0);
@@ -645,10 +645,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   color_name = gd.uparams->getString( "cidd.latest_client_mark_color", "yellow");
   
   /* Toggle for displaying the height Selector in Right Margin */
-  gd.show_height_sel = getLong("cidd.show_height_sel", 1);
+  gd.show_height_sel = getBoolean("cidd.show_height_sel", 1);
 
   /* Toggle for displaying data access and rendering messages */
-  gd.show_data_messages = getLong("cidd.show_data_messages", 1);
+  gd.show_data_messages = getBoolean("cidd.show_data_messages", 1);
 
   gd.latlon_mode = getLong("cidd.latlon_mode",0);
 
@@ -663,15 +663,15 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
 
-  gd.layer_legends_on = (getLong("cidd.layer_legends_on", 1) & 1);
-  gd.cont_legends_on = (getLong("cidd.cont_legends_on", 1) & 1);
-  gd.wind_legends_on = (getLong("cidd.wind_legends_on", 1) & 1);
+  gd.layer_legends_on = (getBoolean("cidd.layer_legends_on", 1) & 1);
+  gd.cont_legends_on = (getBoolean("cidd.cont_legends_on", 1) & 1);
+  gd.wind_legends_on = (getBoolean("cidd.wind_legends_on", 1) & 1);
 
   /* Toggle for displaying data labels */
-  gd.display_labels = getLong("cidd.display_labels", 1);
+  gd.display_labels = getBoolean("cidd.display_labels", 1);
 
   /* Toggle for displaying the analog clock */
-  gd.display_ref_lines = getLong("cidd.display_ref_lines", 1);
+  gd.display_ref_lines = getBoolean("cidd.display_ref_lines", 1);
 
   // margins
   
@@ -727,22 +727,22 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.max_ring_range = getDouble("cidd.max_ring_range", 1000.0);
   
   // Toggle for displaying range rings at the data's origin - Useful for mobile units.
-  gd.range_ring_follows_data = getLong("cidd.range_ring_follows_data", 0);
-  gd.range_ring_for_radar_only = getLong("cidd.range_ring_for_radar_only", 0);
+  gd.range_ring_follows_data = getBoolean("cidd.range_ring_follows_data", 0);
+  gd.range_ring_for_radar_only = getBoolean("cidd.range_ring_for_radar_only", 0);
 
   // Toggle for shifting the display origin - Useful for mobile units.
-  gd.domain_follows_data = getLong("cidd.domain_follows_data", 0);
+  gd.domain_follows_data = getBoolean("cidd.domain_follows_data", 0);
 
-  int plot_range_rings = getLong("cidd.range_rings", 0);
+  int plot_range_rings = getBoolean("cidd.range_rings", 0);
   gd.range_ring_x_space = getLong("cidd.range_ring_x_space", 50);
   gd.range_ring_y_space = getLong("cidd.range_ring_y_space", 15);
-  gd.range_ring_labels = getLong("cidd.range_ring_labels", 1);
+  gd.range_ring_labels = getBoolean("cidd.range_ring_labels", 1);
   
   gd.azimuth_interval = getDouble("cidd.azmith_interval", 30.0);
   gd.azimuth_radius = getDouble("cidd.azmith_radius", 200.0);
-  int plot_azimuth_lines = getLong("cidd.azmith_lines", 0);
+  int plot_azimuth_lines = getBoolean("cidd.azmith_lines", 0);
   
-  gd.all_winds_on = getLong("cidd.all_winds_on", 1);
+  gd.all_winds_on = getBoolean("cidd.all_winds_on", 1);
 
   // Load Wind Rendering preferences.
   gd.barb_shaft_len = getLong("cidd.barb_shaft_len", 33);
@@ -760,25 +760,25 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.wind_reference_speed = getDouble("cidd.wind_reference_speed", 10.0);
   gd.wind_units_label = getString("cidd.wind_units_label", "m/sec");
 
-  gd.label_contours = getLong("cidd.label_contours",1);
+  gd.label_contours = getBoolean("cidd.label_contours",1);
   gd.contour_line_width = getLong("cidd.contour_line_width", 1);
-  gd.smooth_contours = getLong("cidd.smooth_contours", 0);
-  gd.use_alt_contours = getLong("cidd.use_alt_contours", 0);
-  gd.add_noise = getLong("cidd.add_noise", 0);
+  gd.smooth_contours = getBoolean("cidd.smooth_contours", 0);
+  gd.use_alt_contours = getBoolean("cidd.use_alt_contours", 0);
+  gd.add_noise = getBoolean("cidd.add_noise", 0);
   gd.special_contour_value = getDouble("cidd.special_contour_value", 0.0);
 
-  gd.map_bad_to_min_value =  getLong("cidd.map_bad_to_min_value", 0);
-  gd.map_missing_to_min_value =  getLong("cidd.map_missing_to_min_value", 0);
+  gd.map_bad_to_min_value =  getBoolean("cidd.map_bad_to_min_value", 0);
+  gd.map_missing_to_min_value =  getBoolean("cidd.map_missing_to_min_value", 0);
 
 
   // main field on top?
   
-  gd.draw_main_on_top = (getLong("cidd.draw_main_on_top", 0) & 1);
+  gd.draw_main_on_top = (getBoolean("cidd.draw_main_on_top", 0) & 1);
 
   // latest click location
   
   gd.mark_latest_click_location =
-    getLong("cidd.mark_latest_click_location", 0);
+    getBoolean("cidd.mark_latest_click_location", 0);
 
   gd.latest_click_mark_size = getLong("cidd.latest_click_mark_size", 11);
 
@@ -787,21 +787,21 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   
   /* Toggle for displaying the analog clock */
-  gd.show_clock = getLong("cidd.show_clock", 0);
+  gd.show_clock = getBoolean("cidd.show_clock", 0);
 
   /* Set the time to display on the analog clock */
-  gd.draw_clock_local = getLong("cidd.draw_clock_local", 0);
+  gd.draw_clock_local = getBoolean("cidd.draw_clock_local", 0);
   
   /* Use local times for Product timestamps and user input widgets. */
-  gd.use_local_timestamps = getLong("cidd.use_local_timestamps", 0);
+  gd.use_local_timestamps = getBoolean("cidd.use_local_timestamps", 0);
   
   // field menu - number of columns
   
   gd.num_field_menu_cols = getLong("cidd.num_field_menu_cols",0);
   
   
-  gd.wsddm_mode  = getLong("cidd.wsddm_mode", 0);
-  gd.one_click_rhi  = getLong("cidd.one_click_rhi", 0);
+  gd.wsddm_mode  = getBoolean("cidd.wsddm_mode", 0);
+  gd.one_click_rhi  = getBoolean("cidd.one_click_rhi", 0);
 
   // canvas events
 
@@ -809,10 +809,10 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.rotate_medium_adjust = getDouble("cidd.rotate_medium_adjust",2.0);
   gd.rotate_fine_adjust = getDouble("cidd.rotate_fine_adjust", 0.5);
 
-  gd.disable_pick_mode =   getLong("cidd.disable_pick_mode", 1);
-  gd.replace_underscores =   getLong("cidd.replace_underscores", 1);
-  gd.close_popups =   getLong("cidd.close_popups", 0);
-  gd.clip_overlay_fields =   getLong("cidd.clip_overlay_fields", 0);
+  gd.disable_pick_mode =   getBoolean("cidd.disable_pick_mode", 1);
+  gd.replace_underscores =   getBoolean("cidd.replace_underscores", 1);
+  gd.close_popups =   getBoolean("cidd.close_popups", 0);
+  gd.clip_overlay_fields =   getBoolean("cidd.clip_overlay_fields", 0);
   
   gd.frame_label = getString("cidd.horiz_frame_label", "Qucid");
 
@@ -842,7 +842,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   
   gd.coord_key = getLong("cidd.coord_key", 63500);
 
-  gd.products_on = getLong("cidd.products_on", 1);
+  gd.products_on = getBoolean("cidd.products_on", 1);
   gd.product_line_width = getLong("cidd.product_line_width", 1);
   gd.product_font_size = getLong("cidd.product_font_size", 1);
   // symprods
@@ -1490,7 +1490,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   gd.layers.wind_vectors = gd.all_winds_on;
   gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
   
-  gd.wind_mode = getLong("cidd.wind_mode", 0);
+  gd.wind_mode = getBoolean("cidd.wind_mode", 0);
   gd.layers.wind_mode = gd.wind_mode;
   
   gd.layers.wind_time_scale_interval = gd.wind_time_scale_interval;
@@ -1928,7 +1928,7 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   // gui
 
-  gd.click_posn_rel_to_origin  = getLong("cidd.click_posn_rel_to_origin", 0);
+  gd.click_posn_rel_to_origin  = getBoolean("cidd.click_posn_rel_to_origin", 0);
 
   // timer control
 
