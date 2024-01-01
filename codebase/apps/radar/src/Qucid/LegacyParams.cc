@@ -390,386 +390,332 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
     
-  // set_X_parameter_database(param_text); /* load the main parameter database*/
-  
-  // if(!gd.quiet_mode) {
-  //   fprintf(stderr,"\n\nCIDD: Version %s\nUcopyright %s\n\n",
-  //           CIDD_VERSION, CIDD_UCOPYRIGHT);
-  // }
-
-  gd.debug |= getBoolean("cidd.debug_flag", 0);
-  gd.debug1 |= getBoolean("cidd.debug1_flag", 0);
-  gd.debug2 |= getBoolean("cidd.debug2_flag", 0);
+  getBoolean("cidd.debug_flag", 0);
+  getBoolean("cidd.debug1_flag", 0);
+  getBoolean("cidd.debug2_flag", 0);
 
   // IF demo_time is set in the params
   // Set into Archive Mode at the indicated time.
 
-  gd.demo_time = getString("cidd.demo_time", "");
+  getString("cidd.demo_time", "");
 
-  gd.temporal_rounding = getLong("cidd.temporal_rounding", 300);
+  getLong("cidd.temporal_rounding", 300);
   
-  gd.climo_mode = getString("cidd.climo_mode", "regular");
+  getString("cidd.climo_mode", "regular");
 
   /* Toggle for displaying the analog clock */
-  gd.max_time_list_span = getLong("cidd.max_time_list_span", 365);
+  getLong("cidd.max_time_list_span", 365);
 
   // movies
   
-  gd.starting_movie_frames = getLong("cidd.starting_movie_frames", 12);
-  gd.time_interval = getDouble("cidd.time_interval",10.0);
-  gd.frame_span = getDouble("cidd.frame_span", gd.time_interval);
-  gd.forecast_interval = getDouble("cidd.forecast_interval", 0.0);
-  gd.past_interval = getDouble("cidd.past_interval", 0.0);
-  gd.movie_magnify_factor = getDouble("cidd.movie_magnify_factor",1.0);
-  gd.check_data_times = getBoolean("cidd.check_data_times", 0);
+  getLong("cidd.starting_movie_frames", 12);
+  getDouble("cidd.time_interval",10.0);
+  getDouble("cidd.frame_span", gd.time_interval);
+  getDouble("cidd.forecast_interval", 0.0);
+  getDouble("cidd.past_interval", 0.0);
+  getDouble("cidd.movie_magnify_factor",1.0);
+  getBoolean("cidd.check_data_times", 0);
 
   // clipping for rendering
-  gd.check_clipping = getBoolean("cidd.check_clipping", 0);
+  getBoolean("cidd.check_clipping", 0);
   
-  gd.stretch_factor = getDouble("cidd.stretch_factor", 1.5);
-  gd.gather_data_mode = getLong("cidd.gather_data_mode",
-                                            CLOSEST_TO_FRAME_CENTER);
-  gd.redraw_interval =
-    getLong("cidd.redraw_interval", REDRAW_INTERVAL);
-  gd.update_interval =
-    getLong("cidd.update_interval", UPDATE_INTERVAL);
+  getDouble("cidd.stretch_factor", 1.5);
+  getLong("cidd.gather_data_mode", CLOSEST_TO_FRAME_CENTER);
+  getLong("cidd.redraw_interval", REDRAW_INTERVAL);
+  getLong("cidd.update_interval", UPDATE_INTERVAL);
 
-  gd.datamap_host = getString("cidd.datamap_host", "");
-  gd.data_timeout_secs = getLong("cidd.data_timeout_secs", 10);
-  gd.simple_command_timeout_secs =  getLong("cidd.simple_command_timeout_secs",30);
-  gd.complex_command_timeout_secs =  getLong("cidd.complex_command_timeout_secs",180);
+  getString("cidd.datamap_host", "");
+  getLong("cidd.data_timeout_secs", 10);
+  getLong("cidd.simple_command_timeout_secs",30);
+  getLong("cidd.complex_command_timeout_secs",180);
   
-  gd.movie_on = getBoolean("cidd.movie_on", 0);
-  gd.movie_delay = getLong("cidd.movie_delay",3000);
-  gd.movie_speed_msec = getLong("cidd.movie_speed_msec", 75);
-  gd.reset_frames = getBoolean("cidd.reset_frames", 0);
+  getBoolean("cidd.movie_on", 0);
+  getLong("cidd.movie_delay",3000);
+  getLong("cidd.movie_speed_msec", 75);
+  getBoolean("cidd.reset_frames", 0);
 
-  gd.model_run_list_hours = getLong("cidd.model_run_list_hours",24);
+  getLong("cidd.model_run_list_hours",24);
 
   // How many idle seconds can elapse before resetting the display
-  gd.idle_reset_seconds = getLong("cidd.idle_reset_seconds",0);
+  getLong("cidd.idle_reset_seconds",0);
 
-  gd.html_mode = getBoolean("cidd.html_mode", 0);
-  gd.run_once_and_exit = getBoolean("cidd.run_once_and_exit",0);
+  getBoolean("cidd.html_mode", 0);
+  getBoolean("cidd.run_once_and_exit",0);
 
-  gd.transparent_images = getBoolean("cidd.transparent_images", 0);
+  getBoolean("cidd.transparent_images", 0);
   
   // Image dir - for output images
-  gd.image_dir = getString("cidd.image_dir", "/tmp/image_dir");
+  getString("cidd.image_dir", "/tmp/image_dir");
   
-  gd.save_images_to_day_subdir =
-    getBoolean("cidd.save_images_to_day_subdir", 0);
+  getBoolean("cidd.save_images_to_day_subdir", 0);
   
   // Set up our default image type.
   // force png for now
-  gd.image_ext = getString("cidd.image_ext", "png");
-  gd.image_ext = "png";
+  getString("cidd.image_ext", "png");
 
-  gd.image_horiz_prefix = getString("cidd.image_horiz_prefix", "CP");
-  gd.image_vert_prefix = getString("cidd.image_vert_prefix", "CV");
-  gd.image_name_separator = getString("cidd.image_name_separator", "_");
+  getString("cidd.image_horiz_prefix", "CP");
+  getString("cidd.image_vert_prefix", "CV");
+  getString("cidd.image_name_separator", "_");
 
   // output image file names
   
-  gd.add_height_to_filename =
-    getBoolean("cidd.add_height_to_filename",0);
+  getBoolean("cidd.add_height_to_filename",0);
      
-  gd.add_frame_time_to_filename =
-    getBoolean("cidd.add_frame_time_to_filename",1);
+  getBoolean("cidd.add_frame_time_to_filename",1);
      
-  gd.add_button_name_to_filename =
-    getBoolean("cidd.add_button_name_to_filename",0);
+  getBoolean("cidd.add_button_name_to_filename",0);
 
-  gd.add_frame_num_to_filename =
-    getBoolean("cidd.add_frame_num_to_filename",1);
+  getBoolean("cidd.add_frame_num_to_filename",1);
 
-  gd.add_gen_time_to_filename =
-    getBoolean("cidd.add_gen_time_to_filename",0);
+  getBoolean("cidd.add_gen_time_to_filename",0);
   
-  gd.add_valid_time_to_filename =
-    getBoolean("cidd.add_valid_time_to_filename",0);
+  getBoolean("cidd.add_valid_time_to_filename",0);
      
-  gd.horiz_image_dir =
-    getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
-  gd.horiz_image_fname =
-    getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
-  gd.horiz_image_command =
-    getString("cidd.horiz_image_command", "");
+  getString("cidd.horiz_image_dir", "/tmp/cidd_horiz_image_dir");
+  getString("cidd.horiz_image_fname", "cidd_horiz_view.png");
+  getString("cidd.horiz_image_command", "");
   
-  gd.vert_image_dir =
-    getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
-  gd.vert_image_fname =
-    getString("cidd.vert_image_fname", "cidd_vert_view.png");
-  gd.vert_image_command =
-    getString("cidd.vert_image_command", "");
+  getString("cidd.vert_image_dir", "/tmp/cidd_vert_image_dir");
+  getString("cidd.vert_image_fname", "cidd_vert_view.png");
+  getString("cidd.vert_image_command", "");
   
-  gd.output_geo_xml =   getBoolean("cidd.output_geo_xml", 0);
-  gd.use_latlon_in_geo_xml =   getBoolean("cidd.use_latlon_in_geo_xml", 0);
+  getBoolean("cidd.output_geo_xml", 0);
+  getBoolean("cidd.use_latlon_in_geo_xml", 0);
 
-  gd.movieframe_time_format = getString(
-	  "cidd.movieframe_time_format", "%H%M");
+  getString("cidd.movieframe_time_format", "%H%M");
 
-  gd.movieframe_time_mode = getLong(
-          "cidd.movieframe_time_mode", 0);
+  getLong("cidd.movieframe_time_mode", 0);
 
   // script to run after generating image
   
-  gd.image_convert_script =
-    getString("cidd.image_convert_script", "convert_image.csh");
+  getString("cidd.image_convert_script", "convert_image.csh");
   
-  resource = getString("cidd.print_script", "");
-  if(strlen(resource) > 1) {
-    gd.print_script = resource;
-  }
+  getString("cidd.print_script", "");
 
-  gd.series_convert_script =
-    getString("cidd.series_convert_script", "make_anim.csh");
+  getString("cidd.series_convert_script", "make_anim.csh");
 
   // data compression from server
   
-  gd.request_compressed_data =
-    getBoolean("cidd.request_compressed_data",0);
-  gd.request_gzip_vol_compression =
-    getBoolean("cidd.request_gzip_vol_compression",0);
+  getBoolean("cidd.request_compressed_data",0);
+  getBoolean("cidd.request_gzip_vol_compression",0);
 
   /* Establish the projection type */
 
-  gd.projection_type = getString("cidd.projection_type", "CARTESIAN");
+  getString("cidd.projection_type", "CARTESIAN");
 
   // projections
   
-  gd.lambert_lat1 = getDouble("cidd.lambert_lat1",20.0);
-  gd.lambert_lat2 = getDouble("cidd.lambert_lat2",60.0);
-  gd.tangent_lat = getDouble("cidd.tangent_lat",90.0);
-  gd.tangent_lon = getDouble("cidd.tangent_lon",0.0);
-  gd.central_scale = getDouble("cidd.central_scale",1.0);
+  getDouble("cidd.lambert_lat1",20.0);
+  getDouble("cidd.lambert_lat2",60.0);
+  getDouble("cidd.tangent_lat",90.0);
+  getDouble("cidd.tangent_lon",0.0);
+  getDouble("cidd.central_scale",1.0);
 
-  gd.north_angle = getDouble("cidd.north_angle",0.0);
+  getDouble("cidd.north_angle",0.0);
+  getBoolean("cidd.use_cosine", 1); // legacy
+  getLong("cidd.use_cosine_correction", 1);
 
-  /* Use cosine correction for computing range in polar data */
-  if (gd.use_cosine_correction < 0) {
-    // not set on command line
-    int use_cosine = getBoolean("cidd.use_cosine", 1); // legacy
-    gd.use_cosine_correction =
-      getLong("cidd.use_cosine_correction", use_cosine);
-  }
-
-  gd.scale_units_per_km = getDouble("cidd.scale_units_per_km",1.0);
-  gd.scale_units_label = getString("cidd.scale_units_label", "km");
+  getDouble("cidd.scale_units_per_km",1.0);
+  getString("cidd.scale_units_label", "km");
   
-  gd.always_get_full_domain = getBoolean("cidd.always_get_full_domain", 0);
-  gd.do_not_clip_on_mdv_request = getBoolean("cidd.do_not_clip_on_mdv_request", 0);
-  gd.do_not_decimate_on_mdv_request = getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
+  getBoolean("cidd.always_get_full_domain", 0);
+  getBoolean("cidd.do_not_clip_on_mdv_request", 0);
+  getBoolean("cidd.do_not_decimate_on_mdv_request", 0);
      
   // zoom
   
-  gd.min_zoom_threshold = getDouble("cidd.min_zoom_threshold", 5.0);
+  getDouble("cidd.min_zoom_threshold", 5.0);
 
-  gd.aspect_ratio = getDouble("cidd.aspect_ratio", 1.0);
-  if (gd.aspect_ratio <= 0.0 && gd.debug) {
-    cerr << "WARNING - Using first domain to set aspect ratio: " << endl;
-  }
+  getDouble("cidd.aspect_ratio", 1.0);
 
   /* Toggle for enabling a status report window */
-  gd.enable_status_window = getBoolean("cidd.enable_status_window", 0);
+  getBoolean("cidd.enable_status_window", 0);
 
-  gd.report_clicks_in_status_window = getBoolean("cidd.report_clicks_in_status_window", 0);
-  gd.report_clicks_in_degM_and_nm = getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
-  gd.magnetic_variation_deg = getDouble("cidd.magnetic_variation_deg", 0);
+  getBoolean("cidd.report_clicks_in_status_window", 0);
+  getBoolean("cidd.report_clicks_in_degM_and_nm", 0);
+  getDouble("cidd.magnetic_variation_deg", 0);
   
   /* Toggle for enabling a Save Image Panel */
   // WARNING - ALLOWS USERS SHELL ACCESS
-  gd.enable_save_image_panel =
-    getBoolean("cidd.enable_save_image_panel", 0);
+  getBoolean("cidd.enable_save_image_panel", 0);
   
-  gd.domain_limit_min_x = getDouble("cidd.domain_limit_min_x",-10000);
-  gd.domain_limit_max_x = getDouble("cidd.domain_limit_max_x",10000);
-  gd.domain_limit_min_y = getDouble("cidd.domain_limit_min_y",-10000);
-  gd.domain_limit_max_y = getDouble("cidd.domain_limit_max_y",10000);
+  getDouble("cidd.domain_limit_min_x",-10000);
+  getDouble("cidd.domain_limit_max_x",10000);
+  getDouble("cidd.domain_limit_min_y",-10000);
+  getDouble("cidd.domain_limit_max_y",10000);
   
   // origin latitude and longitude
   
-  gd.origin_latitude = getDouble("cidd.origin_latitude", 0.0);
-  gd.origin_longitude = getDouble("cidd.origin_longitude", 0.0);
+  getDouble("cidd.origin_latitude", 0.0);
+  getDouble("cidd.origin_longitude", 0.0);
 
   // click location on reset
   
-  gd.reset_click_latitude =
-    getDouble("cidd.reset_click_latitude", gd.origin_latitude);
-  gd.reset_click_longitude =
-    getDouble("cidd.reset_click_longitude", gd.origin_longitude);
+  getDouble("cidd.reset_click_latitude", gd.origin_latitude);
+  getDouble("cidd.reset_click_longitude", gd.origin_longitude);
 
-  gd.planview_start_page = getLong("cidd.planview_start_page", 1) -1;
-  gd.xsect_start_page = getLong("cidd.xsect_start_page", 1) -1;
+  getLong("cidd.planview_start_page", 1); // subtract 1
+  getLong("cidd.xsect_start_page", 1); // subtract 1
   
-  gd.num_zoom_levels =  getLong("cidd.num_zoom_levels",1);
-  gd.start_zoom_level =  getLong("cidd.start_zoom_level",1);
-  gd.zoom_limits_in_latlon =  getBoolean("cidd.zoom_limits_in_latlon",0);
-  gd.num_cache_zooms = getLong("cidd.num_cache_zooms",1);
+  getLong("cidd.num_zoom_levels",1);
+  getLong("cidd.start_zoom_level",1);
+  getBoolean("cidd.zoom_limits_in_latlon",0);
+  getLong("cidd.num_cache_zooms",1);
 
-  gd.min_ht = getDouble("cidd.min_ht", 0.0);
-  gd.max_ht = getDouble("cidd.max_ht", 30.0);
-  gd.start_ht = getDouble("cidd.start_ht", 0.0);
+  getDouble("cidd.min_ht", 0.0);
+  getDouble("cidd.max_ht", 30.0);
+  getDouble("cidd.start_ht", 0.0);
 
-  gd.map_file_subdir =  getString("cidd.map_file_subdir", "maps");
-  gd.uparams->getString( "cidd.color_file_subdir", "colorscales");
-     
-  // Instantiate the Station locator classes and params.
-  gd.locator_margin_km = getDouble("cidd.locator_margin_km", 50.0);
-  gd.station_loc_url = getString("cidd.station_loc_url", "");
+  getString("cidd.map_file_subdir", "maps");
+  getDouble("cidd.locator_margin_km", 50.0);
+  getString("cidd.station_loc_url", "");
 
-  gd.remote_ui_url = getString("cidd.remote_ui_url", "");
+  getString("cidd.remote_ui_url", "");
 
-  gd.http_tunnel_url = getString("cidd.http_tunnel_url", "");
-  gd.http_proxy_url = getString("cidd.http_proxy_url", "");
+  getString("cidd.http_tunnel_url", "");
+  getString("cidd.http_proxy_url", "");
   
-  const char *color_name = gd.uparams->getString("cidd.foreground_color", "White");
-  color_name = gd.uparams->getString("cidd.background_color", "Black");
-  color_name = gd.uparams->getString("cidd.margin_color", color_name);
-  color_name = gd.uparams->getString("cidd.out_of_range_color", "transparent");
-  color_name = gd.uparams->getString("cidd.route_path_color", "yellow");
-  color_name = gd.uparams->getString("cidd.time_axis_color", "cyan");
-  color_name = gd.uparams->getString("cidd.time_frame_color", "yellow");
-  color_name = gd.uparams->getString("cidd.height_axis_color", "cyan");
-  color_name = gd.uparams->getString("cidd.height_indicator_color", "red");
-  color_name = gd.uparams->getString("cidd.range_ring_color", "grey");
-  color_name = gd.uparams->getString("cidd.missing_data_color","transparent");
-  color_name = gd.uparams->getString("cidd.bad_data_color","transparent");
-  color_name = gd.uparams->getString("cidd.epoch_indicator_color", "yellow");
-  color_name = gd.uparams->getString("cidd.now_time_color", "red");
+  getString("cidd.foreground_color", "White");
+  getString("cidd.background_color", "Black");
+  getString("cidd.margin_color", "Black");
+  getString("cidd.out_of_range_color", "transparent");
+  getString("cidd.route_path_color", "yellow");
+  getString("cidd.time_axis_color", "cyan");
+  getString("cidd.time_frame_color", "yellow");
+  getString("cidd.height_axis_color", "cyan");
+  getString("cidd.height_indicator_color", "red");
+  getString("cidd.range_ring_color", "grey");
+  getString("cidd.missing_data_color","transparent");
+  getString("cidd.bad_data_color","transparent");
+  getString("cidd.epoch_indicator_color", "yellow");
+  getString("cidd.now_time_color", "red");
 
   // need multiple time ticks - i.e. array
   
-  color_name = gd.uparams->getString("cidd.time_tick_color", "yellow");
-  color_name = gd.uparams->getString("cidd.latest_click_mark_color", "red");
-  color_name = gd.uparams->getString( "cidd.latest_client_mark_color", "yellow");
+  getString("cidd.time_tick_color", "yellow");
+  getString("cidd.latest_click_mark_color", "red");
+  getString( "cidd.latest_client_mark_color", "yellow");
   
   /* Toggle for displaying the height Selector in Right Margin */
-  gd.show_height_sel = getBoolean("cidd.show_height_sel", 1);
+  getBoolean("cidd.show_height_sel", 1);
 
   /* Toggle for displaying data access and rendering messages */
-  gd.show_data_messages = getBoolean("cidd.show_data_messages", 1);
+  getBoolean("cidd.show_data_messages", 1);
 
-  gd.latlon_mode = getLong("cidd.latlon_mode",0);
+  getLong("cidd.latlon_mode",0);
 
-  gd.label_time_format = getString(
-	  "cidd.label_time_format", "%m/%d/%y %H:%M:%S");
+  getString("cidd.label_time_format", "%m/%d/%y %H:%M:%S");
 
-  gd.moviestart_time_format = getString(
-	  "cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
+  getString("cidd.moviestart_time_format", "%H:%M %m/%d/%Y");
 
-  gd.frame_range_time_format = getString(
-	  "cidd.frame_range_time_format", "%H:%M");
+  getString("cidd.frame_range_time_format", "%H:%M");
 
   // Get the on/off state of the extra legend plotting - Force to either 0 or 1
 
-  gd.layer_legends_on = (getBoolean("cidd.layer_legends_on", 1) & 1);
-  gd.cont_legends_on = (getBoolean("cidd.cont_legends_on", 1) & 1);
-  gd.wind_legends_on = (getBoolean("cidd.wind_legends_on", 1) & 1);
+  getBoolean("cidd.layer_legends_on", 1);
+  getBoolean("cidd.cont_legends_on", 1);
+  getBoolean("cidd.wind_legends_on", 1);
 
   /* Toggle for displaying data labels */
-  gd.display_labels = getBoolean("cidd.display_labels", 1);
+  getBoolean("cidd.display_labels", 1);
 
   /* Toggle for displaying the analog clock */
-  gd.display_ref_lines = getBoolean("cidd.display_ref_lines", 1);
+  getBoolean("cidd.display_ref_lines", 1);
 
   // margins
   
-  gd.top_margin_render_style =
-    getLong("cidd.top_margin_render_style", 1);
+  getLong("cidd.top_margin_render_style", 1);
   
-  gd.bot_margin_render_style =
-    getLong("cidd.bot_margin_render_style", 1);
+  getLong("cidd.bot_margin_render_style", 1);
   
   // h_win_proc
   
-  gd.horiz_default_y_pos = getLong("cidd.horiz_default_y_pos",0);
-  gd.horiz_default_x_pos = getLong("cidd.horiz_default_x_pos",0);
+  getLong("cidd.horiz_default_y_pos",0);
+  getLong("cidd.horiz_default_x_pos",0);
 
-  gd.horiz_default_height = getLong("cidd.horiz_default_height", 600);
-  gd.horiz_default_width = getLong("cidd.horiz_default_width", 800);
+  getLong("cidd.horiz_default_height", 600);
+  getLong("cidd.horiz_default_width", 800);
 
-  gd.horiz_min_height = getLong("cidd.horiz_min_height", 400);
-  gd.horiz_min_width = getLong("cidd.horiz_min_width", 600);
+  getLong("cidd.horiz_min_height", 400);
+  getLong("cidd.horiz_min_width", 600);
 
-  gd.horiz_top_margin =  getLong("cidd.horiz_top_margin", 20);
-  gd.horiz_bot_margin =  getLong("cidd.horiz_bot_margin", 20);
-  gd.horiz_left_margin = getLong("cidd.horiz_left_margin", 20);
-  gd.horiz_right_margin = getLong("cidd.horiz_right_margin", 80);
+  getLong("cidd.horiz_top_margin", 20);
+  getLong("cidd.horiz_bot_margin", 20);
+  getLong("cidd.horiz_left_margin", 20);
+  getLong("cidd.horiz_right_margin", 80);
   
-  gd.horiz_legends_start_x = getLong("cidd.horiz_legends_start_x", 0);
-  gd.horiz_legends_start_y = getLong("cidd.horiz_legends_start_y", 0);
-  gd.horiz_legends_delta_y = getLong("cidd.horiz_legends_delta_y", 0);
+  getLong("cidd.horiz_legends_start_x", 0);
+  getLong("cidd.horiz_legends_start_y", 0);
+  getLong("cidd.horiz_legends_delta_y", 0);
   
   // h_win_proc
   
-  gd.vert_default_x_pos = getLong("cidd.vert_default_x_pos", 0);
-  gd.vert_default_y_pos = getLong("cidd.vert_default_y_pos", 0);
+  getLong("cidd.vert_default_x_pos", 0);
+  getLong("cidd.vert_default_y_pos", 0);
   
-  gd.vert_default_height = getLong("cidd.vert_default_height", 400);
-  gd.vert_default_width = getLong("cidd.vert_default_width", 600);
+  getLong("cidd.vert_default_height", 400);
+  getLong("cidd.vert_default_width", 600);
 
-  gd.vert_min_height = getLong("cidd.vert_min_height", 400);
-  gd.vert_min_width = getLong("cidd.vert_min_width", 600);
+  getLong("cidd.vert_min_height", 400);
+  getLong("cidd.vert_min_width", 600);
   
-  gd.vert_top_margin =  getLong("cidd.vert_top_margin", 20);
-  gd.vert_bot_margin =  getLong("cidd.vert_bot_margin", 20);
-  gd.vert_left_margin = getLong("cidd.vert_left_margin", 20);
-  gd.vert_right_margin = getLong("cidd.vert_right_margin", 80);
+  getLong("cidd.vert_top_margin", 20);
+  getLong("cidd.vert_bot_margin", 20);
+  getLong("cidd.vert_left_margin", 20);
+  getLong("cidd.vert_right_margin", 80);
   
-  gd.vert_legends_start_x = getLong("cidd.vert_legends_start_x", 0);
-  gd.vert_legends_start_y = getLong("cidd.vert_legends_start_y", 0);
-  gd.vert_legends_delta_y = getLong("cidd.vert_legends_delta_y", 0);
+  getLong("cidd.vert_legends_start_x", 0);
+  getLong("cidd.vert_legends_start_y", 0);
+  getLong("cidd.vert_legends_delta_y", 0);
 
   // range rings
   
-  gd.range_ring_spacing = getDouble("cidd.range_ring_spacing", -1.0);
-  gd.max_ring_range = getDouble("cidd.max_ring_range", 1000.0);
+  getDouble("cidd.range_ring_spacing", -1.0);
+  getDouble("cidd.max_ring_range", 1000.0);
   
   // Toggle for displaying range rings at the data's origin - Useful for mobile units.
-  gd.range_ring_follows_data = getBoolean("cidd.range_ring_follows_data", 0);
-  gd.range_ring_for_radar_only = getBoolean("cidd.range_ring_for_radar_only", 0);
+  getBoolean("cidd.range_ring_follows_data", 0);
+  getBoolean("cidd.range_ring_for_radar_only", 0);
 
   // Toggle for shifting the display origin - Useful for mobile units.
-  gd.domain_follows_data = getBoolean("cidd.domain_follows_data", 0);
+  getBoolean("cidd.domain_follows_data", 0);
 
-  int plot_range_rings = getBoolean("cidd.range_rings", 0);
-  gd.range_ring_x_space = getLong("cidd.range_ring_x_space", 50);
-  gd.range_ring_y_space = getLong("cidd.range_ring_y_space", 15);
-  gd.range_ring_labels = getBoolean("cidd.range_ring_labels", 1);
+  getBoolean("cidd.range_rings", 0);
+  getLong("cidd.range_ring_x_space", 50);
+  getLong("cidd.range_ring_y_space", 15);
+  getBoolean("cidd.range_ring_labels", 1);
   
-  gd.azimuth_interval = getDouble("cidd.azmith_interval", 30.0);
-  gd.azimuth_radius = getDouble("cidd.azmith_radius", 200.0);
-  int plot_azimuth_lines = getBoolean("cidd.azmith_lines", 0);
+  getDouble("cidd.azmith_interval", 30.0);
+  getDouble("cidd.azmith_radius", 200.0);
+  getBoolean("cidd.azmith_lines", 0);
   
-  gd.all_winds_on = getBoolean("cidd.all_winds_on", 1);
+  getBoolean("cidd.all_winds_on", 1);
 
   // Load Wind Rendering preferences.
-  gd.barb_shaft_len = getLong("cidd.barb_shaft_len", 33);
-  gd.ideal_x_vects = getLong("cidd.ideal_x_vectors", 20);
-  gd.ideal_y_vects = getLong("cidd.ideal_y_vectors", 20);
-  gd.wind_head_size = getLong("cidd.wind_head_size", 5);
-  gd.wind_head_angle = getDouble("cidd.wind_head_angle", 45.0);
+  getLong("cidd.barb_shaft_len", 33);
+  getLong("cidd.ideal_x_vectors", 20);
+  getLong("cidd.ideal_y_vectors", 20);
+  getLong("cidd.wind_head_size", 5);
+  getDouble("cidd.wind_head_angle", 45.0);
   
-  gd.wind_scaler = getLong("cidd.wind_scaler", 3);
-  gd.wind_time_scale_interval = getDouble("cidd.wind_time_scale_interval", 10.0);
+  getLong("cidd.wind_scaler", 3);
+  getDouble("cidd.wind_time_scale_interval", 10.0);
 
-  gd.wind_marker_type = getString("cidd.wind_marker_type", "arrow");
-  gd.wind_w_scale_factor = getDouble("cidd.wind_w_scale_factor", 10.0);
-  gd.wind_units_scale_factor = getDouble("cidd.wind_units_scale_factor", 1.0);
-  gd.wind_reference_speed = getDouble("cidd.wind_reference_speed", 10.0);
-  gd.wind_units_label = getString("cidd.wind_units_label", "m/sec");
+  getString("cidd.wind_marker_type", "arrow");
+  getDouble("cidd.wind_w_scale_factor", 10.0);
+  getDouble("cidd.wind_units_scale_factor", 1.0);
+  getDouble("cidd.wind_reference_speed", 10.0);
+  getString("cidd.wind_units_label", "m/sec");
 
-  gd.label_contours = getBoolean("cidd.label_contours",1);
-  gd.contour_line_width = getLong("cidd.contour_line_width", 1);
-  gd.smooth_contours = getBoolean("cidd.smooth_contours", 0);
-  gd.use_alt_contours = getBoolean("cidd.use_alt_contours", 0);
-  gd.add_noise = getBoolean("cidd.add_noise", 0);
-  gd.special_contour_value = getDouble("cidd.special_contour_value", 0.0);
+  getBoolean("cidd.label_contours",1);
+  getLong("cidd.contour_line_width", 1);
+  getBoolean("cidd.smooth_contours", 0);
+  getBoolean("cidd.use_alt_contours", 0);
+  getBoolean("cidd.add_noise", 0);
+  getDouble("cidd.special_contour_value", 0.0);
 
-  gd.map_bad_to_min_value =  getBoolean("cidd.map_bad_to_min_value", 0);
-  gd.map_missing_to_min_value =  getBoolean("cidd.map_missing_to_min_value", 0);
-
+  getBoolean("cidd.map_bad_to_min_value", 0);
+  getBoolean("cidd.map_missing_to_min_value", 0);
 
   // main field on top?
   
@@ -777,131 +723,82 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
   // latest click location
   
-  gd.mark_latest_click_location =
-    getBoolean("cidd.mark_latest_click_location", 0);
+  getBoolean("cidd.mark_latest_click_location", 0);
 
-  gd.latest_click_mark_size = getLong("cidd.latest_click_mark_size", 11);
+  getLong("cidd.latest_click_mark_size", 11);
 
-  gd.num_fonts = getLong("cidd.num_fonts", 1);
-  gd.font_display_mode = getLong("cidd.font_display_mode",1);
+  getLong("cidd.num_fonts", 1);
+  getLong("cidd.font_display_mode",1);
 
   
   /* Toggle for displaying the analog clock */
-  gd.show_clock = getBoolean("cidd.show_clock", 0);
+  getBoolean("cidd.show_clock", 0);
 
   /* Set the time to display on the analog clock */
-  gd.draw_clock_local = getBoolean("cidd.draw_clock_local", 0);
+  getBoolean("cidd.draw_clock_local", 0);
   
   /* Use local times for Product timestamps and user input widgets. */
-  gd.use_local_timestamps = getBoolean("cidd.use_local_timestamps", 0);
+  getBoolean("cidd.use_local_timestamps", 0);
   
   // field menu - number of columns
   
-  gd.num_field_menu_cols = getLong("cidd.num_field_menu_cols",0);
+  getLong("cidd.num_field_menu_cols",0);
   
   
-  gd.wsddm_mode  = getBoolean("cidd.wsddm_mode", 0);
-  gd.one_click_rhi  = getBoolean("cidd.one_click_rhi", 0);
+  getBoolean("cidd.wsddm_mode", 0);
+  getBoolean("cidd.one_click_rhi", 0);
 
   // canvas events
 
-  gd.rotate_coarse_adjust = getDouble("cidd.rotate_coarse_adjust",6.0);
-  gd.rotate_medium_adjust = getDouble("cidd.rotate_medium_adjust",2.0);
-  gd.rotate_fine_adjust = getDouble("cidd.rotate_fine_adjust", 0.5);
+  getDouble("cidd.rotate_coarse_adjust",6.0);
+  getDouble("cidd.rotate_medium_adjust",2.0);
+  getDouble("cidd.rotate_fine_adjust", 0.5);
 
-  gd.disable_pick_mode =   getBoolean("cidd.disable_pick_mode", 1);
-  gd.replace_underscores =   getBoolean("cidd.replace_underscores", 1);
-  gd.close_popups =   getBoolean("cidd.close_popups", 0);
-  gd.clip_overlay_fields =   getBoolean("cidd.clip_overlay_fields", 0);
+  getBoolean("cidd.disable_pick_mode", 1);
+  getBoolean("cidd.replace_underscores", 1);
+  getBoolean("cidd.close_popups", 0);
+  getBoolean("cidd.clip_overlay_fields", 0);
   
-  gd.frame_label = getString("cidd.horiz_frame_label", "Qucid");
+  getString("cidd.horiz_frame_label", "Qucid");
 
-  gd.no_data_message = getString
-    ("cidd.no_data_message",
-     "NO DATA FOUND (in this area at the selected time)");
+  getString("cidd.no_data_message", "NO DATA FOUND (in this area at the selected time)");
   
-  gd.status_info_file = getString("cidd.status_info_file", "");
+  getString("cidd.status_info_file", "");
 
-  gd.help_command = getString("cidd.help_command", "");
+  getString("cidd.help_command", "");
 
   // Bookmarks for a menu of URLS - Index starts at 1
-  gd.bookmark_command = getString("cidd.bookmark_command", "");
-  gd.num_bookmarks = getLong("cidd.num_bookmarks", 0);
+  getString("cidd.bookmark_command", "");
+  getLong("cidd.num_bookmarks", 0);
   
-  gd.image_inten = getDouble("cidd.image_inten", 0.8);
-  gd.inten_levels = getLong("cidd.inten_levels", 32);
-  gd.data_inten = getDouble("cidd.data_inten", 1.0);
+  getDouble("cidd.image_inten", 0.8);
+  getLong("cidd.inten_levels", 32);
+  getDouble("cidd.data_inten", 1.0);
 
-  gd.image_fill_threshold =
-    getLong("cidd.image_fill_threshold", 120000);
+  getLong("cidd.image_fill_threshold", 120000);
 
-  gd.dynamic_contour_threshold =
-    getLong("cidd.dynamic_contour_threshold", 160000);
+  getLong("cidd.dynamic_contour_threshold", 160000);
 
   // shmem
   
-  gd.coord_key = getLong("cidd.coord_key", 63500);
+  getLong("cidd.coord_key", 63500);
 
-  gd.products_on = getBoolean("cidd.products_on", 1);
-  gd.product_line_width = getLong("cidd.product_line_width", 1);
-  gd.product_font_size = getLong("cidd.product_font_size", 1);
+  getBoolean("cidd.products_on", 1);
+  getLong("cidd.product_line_width", 1);
+  getLong("cidd.product_font_size", 1);
+
   // symprods
   
-  gd.scale_constant = getDouble("cidd.scale_constant", 300.0);
+  getDouble("cidd.scale_constant", 300.0);
 
-  
-  // copy to structs
-  
-  STRcopy(gd.h_win.image_dir, gd.image_dir, MAX_PATH_LEN);
-  STRcopy(gd.v_win.image_dir, gd.image_dir, MAX_PATH_LEN);
-
-  
-  STRcopy(gd.h_win.image_fname, gd.horiz_image_fname, MAX_PATH_LEN);
-  STRcopy(gd.h_win.image_command, gd.horiz_image_command, MAX_PATH_LEN);
-
-  STRcopy(gd.v_win.image_fname, gd.vert_image_fname, MAX_PATH_LEN);
-  STRcopy(gd.v_win.image_command, gd.vert_image_command, MAX_PATH_LEN);
-
-  // If individual horiz and vert scripts have not been set
-  // use the General one.
-  
-  if(strlen(gd.v_win.image_command) < 3) {
-    STRcopy(gd.v_win.image_command,gd.image_convert_script,MAX_PATH_LEN);
-  }
-
-  if(strlen(gd.h_win.image_command) < 3) {
-    STRcopy(gd.h_win.image_command,gd.image_convert_script,MAX_PATH_LEN);
-  }
-
-  if(gd.idle_reset_seconds <= 0 || gd.html_mode == 1) {
-    gd.idle_reset_seconds = 259200000; // 3000 days.
-  }
-
-
-
-  // contours etc
-
-  gd.layers.layer_legends_on = gd.layer_legends_on;
-  gd.layers.cont_legends_on = gd.cont_legends_on;
-  gd.layers.wind_legends_on = gd.wind_legends_on;
-  gd.layers.contour_line_width = gd.contour_line_width;
-  gd.layers.smooth_contours = gd.smooth_contours;
-  gd.layers.use_alt_contours = gd.use_alt_contours;
-  gd.layers.add_noise = gd.add_noise;
-  gd.layers.special_contour_value = gd.special_contour_value;
-  gd.layers.map_bad_to_min_value = gd.map_bad_to_min_value;
-  gd.layers.map_missing_to_min_value = gd.map_missing_to_min_value;
-
-  gd.contour_font_num = getLong("contour_font_num", 6);
-  gd.n_ideal_contour_labels = getLong("n_ideal_contour_labels", 5);
-
-  
   // drawing
   
   gd.drawing_mode = 0;
 
   // products
-  
+
+#ifdef JUNK
+
   gd.prod.products_on = gd.products_on;
   gd.prod.prod_line_width = gd.product_line_width;
   gd.prod.prod_font_num = gd.product_font_size;
@@ -917,20 +814,15 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     gd.prod.detail[i].adjustment = gd.product_detail_adjustment[i];
 
   }
-	
 
-  // if domain follows data, do not clip or decimate
+#endif
 
-  if (gd.domain_follows_data) {
-    gd.always_get_full_domain = 1;
-    gd.do_not_clip_on_mdv_request = 1;
-    gd.do_not_decimate_on_mdv_request = 1;
-  }
+#ifdef JUNK
 
   if(gd.num_bookmarks > 0) {
     gd.bookmark = (bookmark_t *)  calloc(sizeof(bookmark_t),gd.num_bookmarks);
   }
-
+  
   err_flag = 0;
   for(i=0; i < gd.num_bookmarks; i++) {
     sprintf(str_buf,"cidd.bookmark%d",i+1);
@@ -955,106 +847,15 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
 
-  gd.h_win.origin_lat = gd.origin_latitude;
-  gd.h_win.origin_lon = gd.origin_longitude;
-
-  gd.h_win.reset_click_lat = gd.reset_click_latitude;
-  gd.h_win.reset_click_lon = gd.reset_click_longitude;
-
-  gd.proj_param[0] = gd.north_angle; // flat projection is default
+#endif
 
   /* Establish the native projection type */
+  
+  getString("cidd.projection_type", "CARTESIAN");
 
-  gd.projection_type = getString("cidd.projection_type", "CARTESIAN");
-
-  if (strncasecmp(gd.projection_type,"CARTESIAN",9) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_FLAT;
-    if(gd.debug) {
-      printf("Cartesian Projection - Origin at: %g, %g\n", 
-             gd.origin_latitude,gd.origin_longitude);
-    }
-    gd.proj.initFlat(gd.origin_latitude,gd.origin_longitude,gd.north_angle);
-
-  } else if (strncasecmp(gd.projection_type,"LAT_LON",7) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_LATLON;
-    if(gd.debug) {
-      printf("LATLON/ Cylindrical Projection - Origin at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude);
-    }
-
-  } else if (strncasecmp(gd.projection_type,"LAMBERT",7) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_LAMBERT_CONF;
-    gd.proj_param[0] = gd.lambert_lat1;
-    gd.proj_param[1] = gd.lambert_lat2;
-    if(lat1 == -90.0 || lat2 == -90.0) {
-      fprintf(stderr,
-              "Must set cidd.lambert_lat1 and cidd.lambert_lat2 parameters for LAMBERT projections\n");
-      return -1;
-    }
-    if(gd.debug) {
-      printf("LAMBERT Projection - Origin at: %g, %g Parallels at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.lambert_lat1, gd.lambert_lat2);
-      gd.proj.initLambertConf(gd.origin_latitude,gd.origin_longitude,
-                              gd.lambert_lat1, gd.lambert_lat2);
-    }
-
-  } else if (strncasecmp(gd.projection_type,"STEREOGRAPHIC",13) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_OBLIQUE_STEREO;
-    gd.proj_param[0] = gd.tangent_lat;
-    gd.proj_param[1] = gd.tangent_lon;
-    gd.proj_param[2] = gd.central_scale;
-    if(gd.debug) {
-      printf("Oblique Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.tangent_lat,gd.tangent_lon);
-    }
-    gd.proj.initStereographic(gd.tangent_lat, gd.tangent_lon, gd.central_scale);
-    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
-
-  } else if (strncasecmp(gd.projection_type,"POLAR_STEREO",12) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_POLAR_STEREO;
-    gd.proj_param[0] = gd.tangent_lat;
-    gd.proj_param[1] = gd.tangent_lon;
-    gd.proj_param[2] = gd.central_scale;
-    if(gd.debug) {
-      printf("Polar Stereographic Projection - Origin at: %g, %g Tangent at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude,
-             gd.tangent_lat,gd.tangent_lon);
-    }
-    gd.proj.initPolarStereo
-      (gd.tangent_lon,
-       (Mdvx::pole_type_t) (gd.tangent_lat < 0.0 ? Mdvx::POLE_SOUTH : Mdvx::POLE_NORTH),
-       gd.central_scale);
-    gd.proj.setOffsetOrigin(gd.origin_latitude,gd.origin_longitude);
-
-  } else if (strncasecmp(gd.projection_type,"MERCATOR",8) == 0) {
-
-    gd.display_projection = Mdvx::PROJ_MERCATOR;
-    if(gd.debug) {
-      printf("MERCATOR Projection - Origin at: %g, %g\n",
-             gd.origin_latitude,gd.origin_longitude);
-    }
-    gd.proj.initMercator(gd.origin_latitude,gd.origin_longitude);
-
-  } else {
-
-    fprintf(stderr,"Unknown projection type: cidd.projection_type = %s !\n", gd.projection_type);
-    fprintf(stderr," Current valid types are: CARTESIAN, LAT_LON, LAMBERT, STEREOGRAPHIC, MERCATOR\n");
-    return -1;
-
-  }
-
-  gd.h_win.last_page = -1;
-  gd.v_win.last_page = -1;
-
+#ifdef JUNK
   // movies
-
+  
   pid = getpid();
   for(i=0; i < MAX_FRAMES; i++) {
     sprintf(gd.movie.frame[i].fname,
@@ -1065,184 +866,11 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     gd.movie.frame[i].redraw_horiz = 1;
     gd.movie.frame[i].redraw_vert = 1;
   }
+#endif
 
+  // zooms
 
-  // copy movie info to other globals
-
-  gd.movie.movie_on = gd.movie_on;
-  if(gd.html_mode) gd.movie.movie_on = 0;
-  gd.movie.magnify_factor = gd.movie_magnify_factor;
-  gd.movie.time_interval = gd.time_interval;
-  gd.movie.frame_span = gd.frame_span;
-  gd.movie.num_frames = gd.starting_movie_frames;
-  gd.movie.reset_frames = gd.reset_frames;
-  gd.movie.delay = gd.movie_delay;
-  gd.movie.forecast_interval = gd.forecast_interval;
-  gd.movie.past_interval = gd.past_interval;
-  gd.movie.mr_stretch_factor = gd.stretch_factor;
-  gd.movie.round_to_seconds = gd.temporal_rounding;
-  gd.movie.display_time_msec = gd.movie_speed_msec;
-
-  gd.movie.start_frame = 0;
-  gd.movie.sweep_on = 0;
-  gd.movie.sweep_dir = 1;
-  gd.movie.end_frame = gd.movie.num_frames -1 ;
-  gd.movie.cur_frame = gd.movie.num_frames -1;
-  gd.movie.last_frame = gd.movie.cur_frame;
-
-  gd.movie.climo_mode = REGULAR_INTERVAL;
-  if(strncmp(gd.climo_mode,"daily", 5) == 0) gd.movie.climo_mode = DAILY_INTERVAL;
-  if(strncmp(gd.climo_mode,"yearly",6) == 0) gd.movie.climo_mode = YEARLY_INTERVAL;
-
-  
-  /* If demo time param is not set and command line option hasn't set archive mode */
-
-  if(strlen(gd.demo_time) < 8 &&
-     (gd.movie.mode != ARCHIVE_MODE) ) { /* REALTIME MODE */
-    gd.movie.mode = REALTIME_MODE;
-    gd.coord_expt->runtime_mode = RUNMODE_REALTIME;
-    gd.coord_expt->time_seq_num++;
-    gd.forecast_mode = 0;
-    
-    /* set the first index's time based on current time  */
-    time_t clock = time(0);    /* get current time */
-    gd.movie.start_time = (time_t) (clock - ((gd.movie.num_frames -1) * gd.movie.time_interval * 60.0));
-    gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
-    gd.movie.demo_time = 0; // Indicated REAL-TIME is Native
-
-    UTIMunix_to_date(gd.movie.start_time,&temp_utime);
-    gd.movie.demo_mode = 0;
-
-  } else {   /* ARCHIVE MODE */
-    
-    if(gd.movie.mode != ARCHIVE_MODE) { /* if not set by command line args */
-      gd.movie.mode = ARCHIVE_MODE;     /* time_series */
-      gd.coord_expt->runtime_mode = RUNMODE_ARCHIVE;
-      gd.coord_expt->time_seq_num++;
-
-      parse_string_into_time(gd.demo_time,&temp_utime);
-      UTIMdate_to_unix(&temp_utime);
-      /* set the first index's time  based on indicated time */
-      gd.movie.start_time = temp_utime.unix_time;
-    }
-    gd.movie.demo_mode = 1;
-	 
-    /* Adjust the start time downward to the nearest round interval seconds */
-    gd.movie.start_time -= (gd.movie.start_time % gd.movie.round_to_seconds);
-
-    if(gd.gather_data_mode == CLOSEST_TO_FRAME_CENTER) {
-      // Offset movie frame by 1/2 frame interval so that interest time
-      // lies on frame mid point
-      gd.movie.start_time -=  (time_t) (gd.movie.time_interval * 30.0);
-    }
-
-    gd.movie.demo_time = gd.movie.start_time;
-
-    UTIMunix_to_date(gd.movie.start_time,&temp_utime);
-
-    gd.h_win.movie_page = gd.h_win.page;
-    gd.v_win.movie_page = gd.v_win.page;
-    gd.movie.cur_frame = 0;
-  }
-
-  reset_time_points(); // reset movie
-
-
-  // caching zooms to go back to
-  
-  if(gd.num_cache_zooms > MAX_CACHE_PIXMAPS) {
-    gd.num_cache_zooms = MAX_CACHE_PIXMAPS;
-  }
-  if(gd.num_cache_zooms < 1) {
-    gd.num_cache_zooms = 1 ;
-  }
-
-  gd.h_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
-  gd.v_win.can_xid = (Drawable *) calloc(sizeof(Drawable *),gd.num_cache_zooms);
-  
-  if(gd.html_mode ==0) {
-    gd.h_win.zoom_level = gd.start_zoom_level;
-    gd.h_win.num_zoom_levels = gd.num_zoom_levels;
-    if(gd.h_win.zoom_level < 0) gd.h_win.zoom_level = 0;
-    if(gd.h_win.zoom_level > gd.h_win.num_zoom_levels) {
-      gd.h_win.zoom_level = gd.h_win.num_zoom_levels -1;
-    }
-    gd.h_win.start_zoom_level = gd.h_win.zoom_level;
-  }
-
-  gd.h_win.zmin_x =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmax_x =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmin_y =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-  gd.h_win.zmax_y =
-    (double *) calloc(sizeof(double),gd.h_win.num_zoom_levels+NUM_CUSTOM_ZOOMS + 1);
-
-  if (gd.display_projection == Mdvx::PROJ_LATLON) {
-    gd.h_win.min_x = max(gd.domain_limit_min_x, -360.0);
-    gd.h_win.max_x = min(gd.domain_limit_max_x, 360.0);
-    gd.h_win.min_y = max(gd.domain_limit_min_y, -90.0);
-    gd.h_win.max_y = min(gd.domain_limit_max_y, 90.0);
-  } else {
-    gd.h_win.min_x = gd.domain_limit_min_x;
-    gd.h_win.max_x = gd.domain_limit_max_x;
-    gd.h_win.min_y = gd.domain_limit_min_y;
-    gd.h_win.max_y = gd.domain_limit_max_y;
-  }
-  
-  gd.h_win.min_ht = gd.min_ht;
-  gd.h_win.max_ht = gd.max_ht;
-
-  // Otherwise set in the command line arguments
-  if(gd.num_render_heights == 0) {
-    gd.h_win.cur_ht = gd.start_ht;
-  }
-
-  // Fix out of order limits.
-  if(gd.h_win.min_x > gd.h_win.max_x) {
-    double tmp = gd.h_win.min_x;
-    gd.h_win.min_x = gd.h_win.max_x;
-    gd.h_win.max_x = tmp;
-  }
-    
-  if(gd.h_win.min_y > gd.h_win.max_y) {
-    double tmp = gd.h_win.min_y;
-    gd.h_win.min_y = gd.h_win.max_y;
-    gd.h_win.max_y = tmp;
-  }
-    
-  // Sanitize Full earth domain limits.
-  if (gd.display_projection == Mdvx::PROJ_LATLON) {
-      
-    if( gd.h_win.min_x == gd.h_win.max_x) {
-      gd.h_win.min_x = gd.h_win.min_x - 180.0;
-      gd.h_win.max_x = gd.h_win.max_x + 180.0;
-    }
-      
-    if( gd.h_win.min_x < -360.0) gd.h_win.min_x = -360.0;
-    if( gd.h_win.max_x > 360.0) gd.h_win.max_x = 360.0;
-    if( gd.h_win.min_y < -180.0) gd.h_win.min_y = -180.0;
-    if( gd.h_win.max_y > 180.0) gd.h_win.max_y = 180.0;
-      
-    if((gd.h_win.max_x - gd.h_win.min_x) > 360.0)  { 
-      gd.h_win.min_x = ((gd.h_win.max_x + gd.h_win.min_x) / 2.0) - 180.0;
-      gd.h_win.max_x = gd.h_win.min_x + 360;
-    }
-    double originLon = (gd.h_win.min_x + gd.h_win.max_x) / 2.0;
-    gd.proj.initLatlon(originLon);
-  }
-    
-  if(gd.debug) {
-    fprintf(stderr,
-            " LIMITS:  X: %g,%g   Y: %g,%g \n",
-            gd.h_win.min_x,gd.h_win.max_x,
-            gd.h_win.min_y,gd.h_win.max_y );
-  }
-    
-  double max_delta_x = gd.h_win.max_x - gd.h_win.min_x;
-  double max_delta_y = gd.h_win.max_y - gd.h_win.min_y;
-
+#ifdef JUNK
   for(i=0; i < gd.h_win.num_zoom_levels; i++) {
     
     sprintf(str_buf, "cidd.level%d_min_xkm", i+1);
@@ -1256,138 +884,17 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
 
     sprintf(str_buf, "cidd.level%d_max_ykm", i+1);
     double maxy = getDouble(str_buf,200.0/(i+1));
-
-    // convert from latlon if needed
-
-    if (gd.zoom_limits_in_latlon) {
-
-      double minLon = minx;
-      double maxLon = maxx;
-      double minLat = miny;
-      double maxLat = maxy;
-
-      gd.proj.latlon2xy(minLat, minLon, minx, miny);
-      gd.proj.latlon2xy(maxLat, maxLon, maxx, maxy);
-      
-      if(gd.debug) {
-        cerr << "Zoom number: " << (i + 1) << endl;
-        cerr << "  converting lat/lon to km" << endl;
-        cerr << "  minLon, minLat: " << minLon << ", " << minLat << endl;
-        cerr << "  maxLon, maxLat: " << maxLon << ", " << maxLat << endl;
-        cerr << "  minXkm, minYkm: " << minx << ", " << miny << endl;
-        cerr << "  maxXkm, maxYkm: " << maxx << ", " << maxy << endl;
-      }
-
-    }
     
-    gd.h_win.zmin_x[i] = minx;
-    gd.h_win.zmin_y[i] = miny;
-    gd.h_win.zmax_x[i] = maxx;
-    gd.h_win.zmax_y[i] = maxy;
-
-    delta_x = gd.h_win.zmax_x[i] - gd.h_win.zmin_x[i];
-    delta_y = gd.h_win.zmax_y[i] - gd.h_win.zmin_y[i];
-
-    if(delta_x > max_delta_x) delta_x = max_delta_x;
-    if(delta_y > max_delta_y) delta_y = max_delta_y;
-
-    // trap bogus values
-    if(gd.h_win.zmin_x[i] < gd.h_win.min_x) {
-      gd.h_win.zmin_x[i] = gd.h_win.min_x;
-      gd.h_win.zmax_x[i] =  gd.h_win.min_x + delta_x;
-    }
-
-    if(gd.h_win.zmin_y[i] < gd.h_win.min_y) {
-      gd.h_win.zmin_y[i] = gd.h_win.min_y;
-      gd.h_win.zmax_y[i] =  gd.h_win.min_y + delta_y;
-    }
-
-    if(gd.h_win.zmax_x[i] > gd.h_win.max_x) {
-      gd.h_win.zmax_x[i] = gd.h_win.max_x;
-      gd.h_win.zmin_x[i] =  gd.h_win.max_x - delta_x;
-    }
-
-    if(gd.h_win.zmax_y[i] > gd.h_win.max_y) {
-      gd.h_win.zmax_y[i] = gd.h_win.max_y;
-      gd.h_win.zmin_y[i] =  gd.h_win.max_y - delta_y;
-    }
-
-    if(gd.aspect_ratio <= 0.0) gd.aspect_ratio = fabs(delta_x/delta_y);
-
-    gd.aspect_correction =
-      cos(((gd.h_win.zmax_y[i] + gd.h_win.zmin_y[i])/2.0) * DEG_TO_RAD);
-
-    /* Make sure domains are consistant with the window aspect ratio */
-    switch(gd.display_projection) {
-      case Mdvx::PROJ_LATLON:
-        /* forshorten the Y coords to make things look better */
-        delta_y /= gd.aspect_correction;
-        break;
-    }
-
-    delta_x /= gd.aspect_ratio;
-
-    if(delta_x > delta_y) {
-      gd.h_win.zmax_y[i] += ((delta_x - delta_y) /2.0) ;
-      gd.h_win.zmin_y[i] -= ((delta_x - delta_y) /2.0) ;
-    } else {
-      gd.h_win.zmax_x[i] += ((delta_y - delta_x) /2.0) ;
-      gd.h_win.zmin_x[i] -= ((delta_y - delta_x) /2.0) ;
-    }
-
-    if(gd.debug) {
-      printf(" ZOOM: %d --  X: %g,%g   Y: %g,%g,  Delta: %g,%g\n",i,
-             gd.h_win.zmin_x[i],gd.h_win.zmax_x[i],
-             gd.h_win.zmin_y[i],gd.h_win.zmax_y[i],
-             delta_x,delta_y);
-    }
-
   } // i
+  
+#endif
 
-  gd.h_win.cmin_x = gd.h_win.zmin_x[gd.h_win.zoom_level];
-  gd.h_win.cmax_x = gd.h_win.zmax_x[gd.h_win.zoom_level];
-  gd.h_win.cmin_y = gd.h_win.zmin_y[gd.h_win.zoom_level];
-  gd.h_win.cmax_y = gd.h_win.zmax_y[gd.h_win.zoom_level];
+  // menu bar
+  
 
-  if(gd.debug) {
-    printf("CUR X: %g,%g   Y: %g,%g,\n",
-           gd.h_win.cmin_x,gd.h_win.cmax_x,
-           gd.h_win.cmin_y,gd.h_win.cmax_y);
-  }
-
-  // Define a very simple vertical oriented  route - In current domain
-  gd.h_win.route.num_segments = 1;
-  gd.h_win.route.x_world[0] = (gd.h_win.cmin_x + gd.h_win.cmax_x) / 2;
-  gd.h_win.route.x_world[1] = gd.h_win.route.x_world[0];
-
-  gd.h_win.route.y_world[0] =  gd.h_win.cmin_y + ((gd.h_win.cmax_y - gd.h_win.cmin_y) / 4);
-  gd.h_win.route.y_world[1] =  gd.h_win.cmax_y - ((gd.h_win.cmax_y - gd.h_win.cmin_y) / 4);
-
-  gd.h_win.route.seg_length[0] = disp_proj_dist(gd.h_win.route.x_world[0],gd.h_win.route.y_world[0],
-                                                gd.h_win.route.x_world[1],gd.h_win.route.y_world[1]);
-  gd.h_win.route.total_length = gd.h_win.route.seg_length[0];
-
-  /* Automatically define the Custom Zoom levels */
-  for(i=0; i <= NUM_CUSTOM_ZOOMS; i++) {
-    gd.h_win.zmin_x[gd.h_win.num_zoom_levels] = gd.h_win.zmin_x[0] + 
-      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - i  + 2.0));
-
-    gd.h_win.zmax_x[gd.h_win.num_zoom_levels] = gd.h_win.zmax_x[0] - 
-      ((gd.h_win.zmax_x[0] -gd.h_win.zmin_x[0]) / ( NUM_CUSTOM_ZOOMS - i  + 2.0));
-
-    gd.h_win.zmin_y[gd.h_win.num_zoom_levels] = gd.h_win.zmin_y[0] + 
-      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - i  + 2.0));
-
-    gd.h_win.zmax_y[gd.h_win.num_zoom_levels] = gd.h_win.zmax_y[0] - 
-      ((gd.h_win.zmax_y[0] -gd.h_win.zmin_y[0]) / ( NUM_CUSTOM_ZOOMS - i  + 2.0));
-
-    gd.h_win.num_zoom_levels++;
-  }
-
-  ZERO_STRUCT(&gd.menu_bar);
-
+#ifdef JUNK
   // Establish what each Menu Bar Cell Does.
-  gd.menu_bar.num_menu_bar_cells = getLong("cidd.num_menu_bar_cells",0);
+  getLong("cidd.num_menu_bar_cells",0);
   if(gd.menu_bar.num_menu_bar_cells > 0) {
     for(i=1; i <= gd.menu_bar.num_menu_bar_cells; i++) {
       sprintf(str_buf,"cidd.menu_bar_funct%d",i);
@@ -1464,51 +971,16 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   } else {
     fprintf(stderr,"Menu Bar cells must be defined in this version\n");
     return -1;
-  } 
-
-  gd.v_win.zmin_x = (double *)  calloc(sizeof(double), 1);
-  gd.v_win.zmax_x = (double *)  calloc(sizeof(double), 1);
-  gd.v_win.zmin_y = (double *)  calloc(sizeof(double), 1);
-  gd.v_win.zmax_y = (double *)  calloc(sizeof(double), 1);
-
-  gd.v_win.origin_lat = gd.origin_latitude;
-  gd.v_win.origin_lon = gd.origin_longitude;
-  gd.v_win.min_x = gd.h_win.min_x;
-  gd.v_win.max_x = gd.h_win.max_x;
-  gd.v_win.min_y = gd.h_win.min_y;
-  gd.v_win.max_y = gd.h_win.max_y;
-  gd.v_win.min_ht = gd.h_win.min_ht;
-  gd.v_win.max_ht = gd.h_win.max_ht;
-
-  // Set Vertical window route  params
-  gd.v_win.cmin_x = gd.h_win.route.x_world[0];
-  gd.v_win.cmin_y = gd.h_win.route.y_world[0];
-  gd.v_win.cmax_x = gd.h_win.route.x_world[1];
-  gd.v_win.cmax_y = gd.h_win.route.y_world[1];
-
-  /* Initialize Extra features data */
-  gd.layers.wind_vectors = gd.all_winds_on;
-  gd.layers.init_state_wind_vectors = gd.layers.wind_vectors;
+  }
+#endif
   
-  gd.wind_mode = getBoolean("cidd.wind_mode", 0);
-  gd.layers.wind_mode = gd.wind_mode;
-  
-  gd.layers.wind_time_scale_interval = gd.wind_time_scale_interval;
+  getBoolean("cidd.wind_mode", 0);
 
-  gd.layers.wind_scaler = gd.wind_scaler;
+#ifdef JUNK
 
-  // int plot_azimuths = getLong("cidd.azmith_lines", 0);
-  // plot_azimuths = getLong("cidd.azimuth_lines", plot_azimuths);
-
-  // plot_azimuths = getLong("cidd.azimuth_lines", plot_azimuths);
-  // gd.legends.azimuths = plot_azimuths ? AZIMUTH_BIT : 0;
-
-  // Load the GRID / DATA FIELD parameters
-  param_text_line_no = 0;
-  param_text_len = 0;
   param_text = find_tag_text(_paramsBuf,"GRIDS",
                              &param_text_len, &param_text_line_no);
-
+  
   if(param_text == NULL || param_text_len <=0 ) {
     fprintf(stderr,"Couldn't Find GRIDS Section\n");
     return -1;
@@ -1753,7 +1225,8 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
     return -1;
   }
 
-
+#endif
+  
   // Load the Map Overlay parameters
   param_text_line_no = 0;
   param_text_len = 0;
