@@ -155,8 +155,8 @@ NCAR_CPPC=ncarg++
 #       NETCDF4_INCS defines location of netCDF 4 include files
 #       NETCDF4_LDFLAGS defines location of netCDF 4 libraries
 
-NETCDF_INCS=$(MY_NETCDF_INCS) -I/usr/local/netcdf/include -I/opt/homebrew/include
-NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/usr/local/netcdf/lib -L/opt/homebrew/lib
+NETCDF_INCS=$(MY_NETCDF_INCS) -I/usr/local/netcdf/include
+NETCDF_LDFLAGS=$(MY_NETCDF_LDFLAGS) -L/usr/local/netcdf/lib
 NETCDF4_INCS=$(MY_NETCDF4_INCS)
 NETCDF4_LDFLAGS=$(MY_NETCDF4_LDFLAGS)
 
@@ -172,12 +172,12 @@ NETCDF4_LIBS=-lnetcdf -lhdf5_hl -lhdf5 -lz -lbz2
 #
 
 QJSENGINE = -F/usr/local/Cellar/qt/5.14.2/lib -framework QtQml
-PKG_CONFIG_PATH = /usr/local/opt/qt6/lib/pkgconfig
-QT_INCLUDES = $(shell pkg-config --cflags Qt6Core Qt6Widgets Qt6Gui) -I/opt/homebrew/include
-QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt6Gui) -L/opt/homebrew/lib
-QT_LIBS = $(shell pkg-config --libs Qt6Core Qt6Widgets Qt6Gui)
+PKG_CONFIG_PATH = /usr/local/opt/qt5/lib/pkgconfig
+QT_INCLUDES = $(shell pkg-config --cflags Qt5Core Qt5Widgets Qt5Gui)
+QT_LDFLAGS = -L$(shell pkg-config --variable=libdir Qt5Gui)
+QT_LIBS = $(shell pkg-config --libs Qt5Core Qt5Widgets Qt5Gui)
 QT_CPPC_CFLAGS = -std=c++17
-QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt6Core)
+QT_EXEC_PATH=$(shell pkg-config --variable=exec_prefix Qt5Core)
 
 # do not have jasper lib
 

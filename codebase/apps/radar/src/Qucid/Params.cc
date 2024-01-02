@@ -4098,10 +4098,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("idle_reset_seconds");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("After this period of inactivity, the display will reset itself to a known starting point");
+    tt->help = tdrpStrDup("Set this <= 0 to essentially turn off.");
     tt->val_offset = (char *) &idle_reset_seconds - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 32'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 32");
+    tt->comment_hdr = tdrpStrDup("Image generation");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'html_mode'
@@ -4110,8 +4119,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("html_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set this to TRUE to activate automatic HTML output mode.");
+    tt->help = tdrpStrDup("Note: image_dir MUST be set.");
     tt->val_offset = (char *) &html_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4122,8 +4131,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("run_once_and_exit");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("After this period of inactivity, the display will reset itself to a known starting point.");
+    tt->help = tdrpStrDup("Set this to FALSE to essentially turn off.");
     tt->val_offset = (char *) &run_once_and_exit - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4134,8 +4143,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("transparent_images");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set transparency of generated images.");
+    tt->help = tdrpStrDup("If FALSE, the normal background color is used. Set to TRUE for transparent background.");
     tt->val_offset = (char *) &transparent_images - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4146,7 +4155,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_dir");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Directory for output image plots.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &image_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/image_dir");
@@ -4158,7 +4167,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("save_images_to_day_subdir");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Save images to subdirs based on date.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &save_images_to_day_subdir - &_start_;
     tt->single_val.b = pFALSE;
@@ -4170,8 +4179,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_ext");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the output image type.");
+    tt->help = tdrpStrDup("In latest version, only png type is available.");
     tt->val_offset = (char *) &image_ext - &_start_;
     tt->single_val.s = tdrpStrDup("png");
     tt++;
@@ -4182,7 +4191,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_horiz_prefix");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The prefix for the horiz (plan view) image file names.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &image_horiz_prefix - &_start_;
     tt->single_val.s = tdrpStrDup("CP");
@@ -4194,7 +4203,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_vert_prefix");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The prefix for the vert image file names");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &image_vert_prefix - &_start_;
     tt->single_val.s = tdrpStrDup("CV");
@@ -4206,10 +4215,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_name_separator");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The separator used in the image file names.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &image_name_separator - &_start_;
     tt->single_val.s = tdrpStrDup("_");
+    tt++;
+    
+    // Parameter 'Comment 33'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 33");
+    tt->comment_hdr = tdrpStrDup("The HTML MODE Output file name is built from parts.");
+    tt->comment_text = tdrpStrDup("Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_name + zoom_level + [button_name] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'");
     tt++;
     
     // Parameter 'add_height_to_filename'
@@ -4218,7 +4236,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_height_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds height to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_height_to_filename - &_start_;
     tt->single_val.b = pFALSE;
@@ -4230,7 +4248,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_frame_time_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds frame time to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_frame_time_to_filename - &_start_;
     tt->single_val.b = pTRUE;
@@ -4242,7 +4260,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_button_name_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds GUI button label to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_button_name_to_filename - &_start_;
     tt->single_val.b = pFALSE;
@@ -4254,10 +4272,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_frame_num_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds frame number to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_frame_num_to_filename - &_start_;
-    tt->single_val.b = pTRUE;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'add_gen_time_to_filename'
@@ -4266,7 +4284,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_gen_time_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds model gen time to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_gen_time_to_filename - &_start_;
     tt->single_val.b = pFALSE;
@@ -4278,10 +4296,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_valid_time_to_filename");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adds data valid time to the output file name.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_valid_time_to_filename - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 34'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 34");
+    tt->comment_hdr = tdrpStrDup("Separate Horizontal and Vertical Image save resources.");
+    tt->comment_text = tdrpStrDup("NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.");
     tt++;
     
     // Parameter 'horiz_image_dir'
@@ -4290,8 +4317,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("horiz_image_dir");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Image directory for horiz images.");
+    tt->help = tdrpStrDup("Note - this is initially set to image_dir");
     tt->val_offset = (char *) &horiz_image_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/cidd_horiz_image_dir");
     tt++;
@@ -4302,8 +4329,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("horiz_image_fname");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The default file name until reset by the user.");
+    tt->help = tdrpStrDup("Appends other info automatically.");
     tt->val_offset = (char *) &horiz_image_fname - &_start_;
     tt->single_val.s = tdrpStrDup("cidd_horiz_view.png");
     tt++;
@@ -4314,10 +4341,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("horiz_image_command");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Command to be run after image is created.");
+    tt->help = tdrpStrDup("Note that this is initially set to 'image_convert_script'.");
     tt->val_offset = (char *) &horiz_image_command - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("convert_image.csh");
     tt++;
     
     // Parameter 'vert_image_dir'
@@ -4326,8 +4353,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("vert_image_dir");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Image directory for vert images.");
+    tt->help = tdrpStrDup("Note - this is initially set to image_dir");
     tt->val_offset = (char *) &vert_image_dir - &_start_;
     tt->single_val.s = tdrpStrDup("/tmp/cidd_vert_image_dir");
     tt++;
@@ -4338,8 +4365,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("vert_image_fname");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The default file name until reset by the user.");
+    tt->help = tdrpStrDup("Appends other info automatically.");
     tt->val_offset = (char *) &vert_image_fname - &_start_;
     tt->single_val.s = tdrpStrDup("cidd_vert_view.png");
     tt++;
@@ -4350,10 +4377,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("vert_image_command");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Command to be run after image is created.");
+    tt->help = tdrpStrDup("Note that this is initially set to 'image_convert_script'.");
     tt->val_offset = (char *) &vert_image_command - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("convert_image.csh");
     tt++;
     
     // Parameter 'output_geo_xml'
@@ -4362,8 +4389,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("output_geo_xml");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Output an imagename.xml file which contains geo referencing information.");
+    tt->help = tdrpStrDup("If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.");
     tt->val_offset = (char *) &output_geo_xml - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4374,8 +4401,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_latlon_in_geo_xml");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Georef info is in lat/lon projection.");
+    tt->help = tdrpStrDup("For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.");
     tt->val_offset = (char *) &use_latlon_in_geo_xml - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4386,8 +4413,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("movieframe_time_format");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the format for the time fields in the names of output xwd images.");
+    tt->help = tdrpStrDup("See strftime(3) for options.  Default is: %H%M.");
     tt->val_offset = (char *) &movieframe_time_format - &_start_;
     tt->single_val.s = tdrpStrDup("%H%M");
     tt++;
@@ -4410,8 +4437,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("image_convert_script");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This script will be exec'd if set whenever an html_mode image is output.");
+    tt->help = tdrpStrDup("The full path name of the xwd image will be sent as the script argument. Setting horiz_image_command or cidd.horiz_image_command will override this and allow separate scripts to be called for horiz and vert images.");
     tt->val_offset = (char *) &image_convert_script - &_start_;
     tt->single_val.s = tdrpStrDup("convert_image.csh");
     tt++;
@@ -4422,10 +4449,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("print_script");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This script will be exec'd if set whenever a print command is issued.");
+    tt->help = tdrpStrDup("The full path name of the xwd image will be sent as the script argument.");
     tt->val_offset = (char *) &print_script - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("do_print.csh");
     tt++;
     
     // Parameter 'series_convert_script'
@@ -4434,8 +4461,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("series_convert_script");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.");
+    tt->help = tdrpStrDup("The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.");
     tt->val_offset = (char *) &series_convert_script - &_start_;
     tt->single_val.s = tdrpStrDup("make_anim.csh");
     tt++;
@@ -4446,8 +4473,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("request_compressed_data");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Request data from MDV servers be compressed.");
+    tt->help = tdrpStrDup("When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.");
     tt->val_offset = (char *) &request_compressed_data - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4458,8 +4485,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("request_gzip_vol_compression");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Use gzip-style compression for remote data access.");
+    tt->help = tdrpStrDup("See 'request_compressed_data'.");
     tt->val_offset = (char *) &request_gzip_vol_compression - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4470,8 +4497,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("projection_type");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the projection for the plan view.");
+    tt->help = tdrpStrDup("Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.");
     tt->val_offset = (char *) &projection_type - &_start_;
     tt->single_val.s = tdrpStrDup("CARTESIAN");
     tt++;
@@ -4482,8 +4509,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("lambert_lat1");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Standard latitude 1.");
+    tt->help = tdrpStrDup("For LAMBERT projection. Ignored otherwise.");
     tt->val_offset = (char *) &lambert_lat1 - &_start_;
     tt->single_val.d = 20;
     tt++;
@@ -4494,8 +4521,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("lambert_lat2");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Standard latitude 2.");
+    tt->help = tdrpStrDup("For LAMBERT projection. Ignored otherwise.");
     tt->val_offset = (char *) &lambert_lat2 - &_start_;
     tt->single_val.d = 60;
     tt++;
@@ -4506,8 +4533,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("tangent_lat");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Tangent latitude.");
+    tt->help = tdrpStrDup("For POLAR_STEREO, set to 90. For OBLIQUE_STEREO, set to 60.");
     tt->val_offset = (char *) &tangent_lat - &_start_;
     tt->single_val.d = 90;
     tt++;
@@ -4518,8 +4545,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("tangent_lon");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Tangent longitude.");
+    tt->help = tdrpStrDup("Applies to POLAR_STEREO and OBLIQUE_STEREO.");
     tt->val_offset = (char *) &tangent_lon - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -4530,8 +4557,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("central_scale");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Central scale factor.");
+    tt->help = tdrpStrDup("Applies to STEREO projections.");
     tt->val_offset = (char *) &central_scale - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -4542,8 +4569,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("north_angle");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Amount grids are rotated clockwise to true north");
+    tt->help = tdrpStrDup("Applies to CARTESIAN (FLAT) projection.");
     tt->val_offset = (char *) &north_angle - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -4554,8 +4581,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_cosine");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).");
+    tt->help = tdrpStrDup("Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.");
     tt->val_offset = (char *) &use_cosine - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -4566,7 +4593,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("use_cosine_correction");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("See use_cosine.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &use_cosine_correction - &_start_;
     tt->single_val.i = 1;
@@ -4578,10 +4605,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("scale_units_per_km");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the scale factor and label for Range rings and Distance scales.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &scale_units_per_km - &_start_;
-    tt->single_val.d = 1;
+    tt->single_val.d = 0.539593;
     tt++;
     
     // Parameter 'scale_units_label'
@@ -4590,8 +4617,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("scale_units_label");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the units labels.");
+    tt->help = tdrpStrDup("km, nm, deg");
     tt->val_offset = (char *) &scale_units_label - &_start_;
     tt->single_val.s = tdrpStrDup("km");
     tt++;
@@ -4602,8 +4629,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("always_get_full_domain");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Request the outer domain established by domain_limit params.");
+    tt->help = tdrpStrDup("i.e. do not clip the data on request.");
     tt->val_offset = (char *) &always_get_full_domain - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4614,7 +4641,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("do_not_clip_on_mdv_request");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Request the whole earth or Hemisphere, centered on the origin.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &do_not_clip_on_mdv_request - &_start_;
     tt->single_val.b = pFALSE;
@@ -4626,7 +4653,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("do_not_decimate_on_mdv_request");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Do not decimate on MDV request, get all points from MDV server.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &do_not_decimate_on_mdv_request - &_start_;
     tt->single_val.b = pFALSE;
@@ -4638,8 +4665,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("min_zoom_threshold");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minimum distance to zoom into to in KM.");
+    tt->help = tdrpStrDup("Won't allow the user to define custom zooms small than this size (along the longest edge).");
     tt->val_offset = (char *) &min_zoom_threshold - &_start_;
     tt->single_val.d = 5;
     tt++;
@@ -4650,8 +4677,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("aspect_ratio");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the aspect ratio of the domain for the display.");
+    tt->help = tdrpStrDup("Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).");
     tt->val_offset = (char *) &aspect_ratio - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -4662,8 +4689,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("enable_status_window");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Enable the status window.");
+    tt->help = tdrpStrDup("If FALSE, no status window is displayed.");
     tt->val_offset = (char *) &enable_status_window - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4674,8 +4701,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("report_clicks_in_status_window");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Report clicks in the status window.");
+    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
     tt->val_offset = (char *) &report_clicks_in_status_window - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4686,8 +4713,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("report_clicks_in_degM_and_nm");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Report click position in degrees magnetic and nautical miles.");
+    tt->help = tdrpStrDup("By default distance are in km and bearings in deg T.");
     tt->val_offset = (char *) &report_clicks_in_degM_and_nm - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4698,8 +4725,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("magnetic_variation_deg");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the magnetic variation for the display location.");
+    tt->help = tdrpStrDup("Variation is true minus magnetic.");
     tt->val_offset = (char *) &magnetic_variation_deg - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -4710,8 +4737,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("enable_save_image_panel");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Enable the single middle button click to save image feature.");
+    tt->help = tdrpStrDup("Warning - will allow users shell access, or to write to other dirs.");
     tt->val_offset = (char *) &enable_save_image_panel - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6492,11 +6519,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 32'
+    // Parameter 'Comment 35'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 32");
+    tt->param_name = tdrpStrDup("Comment 35");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

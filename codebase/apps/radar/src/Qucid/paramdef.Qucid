@@ -1838,178 +1838,167 @@ paramdef int {
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "After this period of inactivity, the display will reset itself to a known starting point";
+  p_help = "Set this <= 0 to essentially turn off.";
 } idle_reset_seconds;
 
+commentdef {
+  p_header = "Image generation";
+}
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set this to TRUE to activate automatic HTML output mode.";
+  p_help = "Note: image_dir MUST be set.";
 } html_mode;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "After this period of inactivity, the display will reset itself to a known starting point.";
+  p_help = "Set this to FALSE to essentially turn off.";
 } run_once_and_exit;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set transparency of generated images.";
+  p_help = "If FALSE, the normal background color is used. Set to TRUE for transparent background.";
 } transparent_images;
-
 
 paramdef string {
   p_default = "/tmp/image_dir";
-  p_descr = "";
+  p_descr = "Directory for output image plots.";
   p_help = "";
 } image_dir;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Save images to subdirs based on date.";
   p_help = "";
 } save_images_to_day_subdir;
 
-
 paramdef string {
   p_default = "png";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets the output image type.";
+  p_help = "In latest version, only png type is available.";
 } image_ext;
-
 
 paramdef string {
   p_default = "CP";
-  p_descr = "";
+  p_descr = "The prefix for the horiz (plan view) image file names.";
   p_help = "";
 } image_horiz_prefix;
 
-
 paramdef string {
   p_default = "CV";
-  p_descr = "";
+  p_descr = "The prefix for the vert image file names";
   p_help = "";
 } image_vert_prefix;
 
-
 paramdef string {
   p_default = "_";
-  p_descr = "";
+  p_descr = "The separator used in the image file names.";
   p_help = "";
 } image_name_separator;
 
+commentdef {
+  p_header = "The HTML MODE Output file name is built from parts.";
+  p_text = "Some of these are optional - see related parameters below. 'Prefix' + Frame_number + legend_name + zoom_level + [button_name] + [height] + frame_time + [data_generation_time] + [data_valid_time] + .'cidd.image_ext'";
+}
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Adds height to the output file name.";
   p_help = "";
 } add_height_to_filename;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Adds frame time to the output file name.";
   p_help = "";
 } add_frame_time_to_filename;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Adds GUI button label to the output file name.";
   p_help = "";
 } add_button_name_to_filename;
 
-
 paramdef boolean {
-  p_default = TRUE;
-  p_descr = "";
+  p_default = FALSE;
+  p_descr = "Adds frame number to the output file name.";
   p_help = "";
 } add_frame_num_to_filename;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Adds model gen time to the output file name.";
   p_help = "";
 } add_gen_time_to_filename;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Adds data valid time to the output file name.";
   p_help = "";
 } add_valid_time_to_filename;
 
+commentdef {
+  p_header = "Separate Horizontal and Vertical Image save resources.";
+  p_text = "NOTE: we append the image name to the command string before executing.This allows the script to pull the name off the command line. It is often useful to place a 'rm' as the last command to remove the image after printing, conversion, etc.";
+}
 
 paramdef string {
   p_default = "/tmp/cidd_horiz_image_dir";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Image directory for horiz images.";
+  p_help = "Note - this is initially set to image_dir";
 } horiz_image_dir;
-
 
 paramdef string {
   p_default = "cidd_horiz_view.png";
-  p_descr = "";
-  p_help = "";
+  p_descr = "The default file name until reset by the user.";
+  p_help = "Appends other info automatically.";
 } horiz_image_fname;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "convert_image.csh";
+  p_descr = "Command to be run after image is created.";
+  p_help = "Note that this is initially set to 'image_convert_script'.";
 } horiz_image_command;
-
 
 paramdef string {
   p_default = "/tmp/cidd_vert_image_dir";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Image directory for vert images.";
+  p_help = "Note - this is initially set to image_dir";
 } vert_image_dir;
-
 
 paramdef string {
   p_default = "cidd_vert_view.png";
-  p_descr = "";
-  p_help = "";
+  p_descr = "The default file name until reset by the user.";
+  p_help = "Appends other info automatically.";
 } vert_image_fname;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "convert_image.csh";
+  p_descr = "Command to be run after image is created.";
+  p_help = "Note that this is initially set to 'image_convert_script'.";
 } vert_image_command;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Output an imagename.xml file which contains geo referencing information.";
+  p_help = "If use_latlon_in_geo_xml is true, then the georeferencing information will be given in latitude/longitude values.";
 } output_geo_xml;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Georef info is in lat/lon projection.";
+  p_help = "For a lat/lon projection, information is always given in latitude/longitude. Otherwise projection information will be used.";
 } use_latlon_in_geo_xml;
-
 
 paramdef string {
   p_default = "%H%M";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the format for the time fields in the names of output xwd images.";
+  p_help = "See strftime(3) for options.  Default is: %H%M.";
 } movieframe_time_format;
-
 
 paramdef int {
   p_default = 0;
@@ -2017,186 +2006,160 @@ paramdef int {
   p_help = "";
 } movieframe_time_mode;
 
-
 paramdef string {
   p_default = "convert_image.csh";
-  p_descr = "";
-  p_help = "";
+  p_descr = "This script will be exec'd if set whenever an html_mode image is output.";
+  p_help = "The full path name of the xwd image will be sent as the script argument. Setting horiz_image_command or cidd.horiz_image_command will override this and allow separate scripts to be called for horiz and vert images.";
 } image_convert_script;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "do_print.csh";
+  p_descr = "This script will be exec'd if set whenever a print command is issued.";
+  p_help = "The full path name of the xwd image will be sent as the script argument.";
 } print_script;
-
 
 paramdef string {
   p_default = "make_anim.csh";
-  p_descr = "";
-  p_help = "";
+  p_descr = "When the user selects the OutputLoop button, this script will be exec'd after the last image in a loop has been written.";
+  p_help = "The arguments will be a list of each output file in the series. CIDD will prepend the cidd.image_dir to each file name which takes the form: cidd_field_name_zoom_name.xwd.";
 } series_convert_script;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Request data from MDV servers be compressed.";
+  p_help = "When a remote URL is used, the server can compress the data for transmission. This makes sense for slow remote connections.";
 } request_compressed_data;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Use gzip-style compression for remote data access.";
+  p_help = "See 'request_compressed_data'.";
 } request_gzip_vol_compression;
-
 
 paramdef string {
   p_default = "CARTESIAN";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets the projection for the plan view.";
+  p_help = "Current valid choices are: CARTESIAN, LAT_LON, LAMBERT,  POLAR_STEREO, STEREOGRAPHIC, MERCATOR. Mercator is relative to the longitude origin.";
 } projection_type;
-
 
 paramdef double {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Standard latitude 1.";
+  p_help = "For LAMBERT projection. Ignored otherwise.";
 } lambert_lat1;
-
 
 paramdef double {
   p_default = 60;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Standard latitude 2.";
+  p_help = "For LAMBERT projection. Ignored otherwise.";
 } lambert_lat2;
-
 
 paramdef double {
   p_default = 90;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Tangent latitude.";
+  p_help = "For POLAR_STEREO, set to 90. For OBLIQUE_STEREO, set to 60.";
 } tangent_lat;
-
 
 paramdef double {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Tangent longitude.";
+  p_help = "Applies to POLAR_STEREO and OBLIQUE_STEREO.";
 } tangent_lon;
-
 
 paramdef double {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Central scale factor.";
+  p_help = "Applies to STEREO projections.";
 } central_scale;
-
 
 paramdef double {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Amount grids are rotated clockwise to true north";
+  p_help = "Applies to CARTESIAN (FLAT) projection.";
 } north_angle;
-
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Diagnostic mode used to ignore the Elevation angle on polar data (radars, etc).";
+  p_help = "Set to FALSE to display all polar grids as if the elevation were always 0.0 degrees. This allows one to view radial data near 90 degrees elevation.";
 } use_cosine;
-
 
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "See use_cosine.";
   p_help = "";
 } use_cosine_correction;
 
-
 paramdef double {
-  p_default = 1;
-  p_descr = "";
+  p_default = 0.5395932;
+  p_descr = "Set the scale factor and label for Range rings and Distance scales.";
   p_help = "";
 } scale_units_per_km;
 
-
 paramdef string {
   p_default = "km";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the units labels.";
+  p_help = "km, nm, deg";
 } scale_units_label;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Request the outer domain established by domain_limit params.";
+  p_help = "i.e. do not clip the data on request.";
 } always_get_full_domain;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Request the whole earth or Hemisphere, centered on the origin.";
   p_help = "";
 } do_not_clip_on_mdv_request;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "Do not decimate on MDV request, get all points from MDV server.";
   p_help = "";
 } do_not_decimate_on_mdv_request;
 
-
 paramdef double {
   p_default = 5;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Minimum distance to zoom into to in KM.";
+  p_help = "Won't allow the user to define custom zooms small than this size (along the longest edge).";
 } min_zoom_threshold;
-
 
 paramdef double {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the aspect ratio of the domain for the display.";
+  p_help = "Cidd will preserve this aspect ratio for all zooms. Ratio is Width/Height. If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the first domain. Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them appear to be equi-distant in Latitude and Longitude. Based on the cos(average latitude of the current view).";
 } aspect_ratio;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Enable the status window.";
+  p_help = "If FALSE, no status window is displayed.";
 } enable_status_window;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Report clicks in the status window.";
+  p_help = "By default distance are in km and bearings in deg T.";
 } report_clicks_in_status_window;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Report click position in degrees magnetic and nautical miles.";
+  p_help = "By default distance are in km and bearings in deg T.";
 } report_clicks_in_degM_and_nm;
-
 
 paramdef double {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the magnetic variation for the display location.";
+  p_help = "Variation is true minus magnetic.";
 } magnetic_variation_deg;
-
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Enable the single middle button click to save image feature.";
+  p_help = "Warning - will allow users shell access, or to write to other dirs.";
 } enable_save_image_panel;
 
 
@@ -2205,7 +2168,6 @@ paramdef double {
   p_descr = "";
   p_help = "";
 } domain_limit_min_x;
-
 
 paramdef double {
   p_default = 10000;
