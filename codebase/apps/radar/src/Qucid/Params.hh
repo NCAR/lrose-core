@@ -610,7 +610,7 @@ public:
 
   int label_font_size;
 
-  char* background_color;
+  char* background_color2;
 
   char* text_color;
 
@@ -648,13 +648,13 @@ public:
 
   int vert_window_start_y;
 
-  int vert_top_margin;
+  int vert_top_margin2;
 
-  int vert_bottom_margin;
+  int vert_bottom_margin2;
 
-  int vert_left_margin;
+  int vert_left_margin2;
 
-  int vert_right_margin;
+  int vert_right_margin2;
 
   int vert_label_font_size;
 
@@ -922,6 +922,462 @@ public:
   char* *_route_paths;
   int route_paths_n;
 
+  tdrp_bool_t debug_flag;
+
+  tdrp_bool_t debug1_flag;
+
+  tdrp_bool_t debug2_flag;
+
+  char* demo_time;
+
+  int temporal_rounding;
+
+  char* climo_mode;
+
+  int max_time_list_span;
+
+  int starting_movie_frames;
+
+  double time_interval;
+
+  double frame_span;
+
+  double forecast_interval;
+
+  double past_interval;
+
+  double movie_magnify_factor;
+
+  tdrp_bool_t check_data_times;
+
+  tdrp_bool_t check_clipping;
+
+  double stretch_factor;
+
+  int gather_data_mode;
+
+  int redraw_interval;
+
+  int update_interval;
+
+  char* datamap_host;
+
+  int data_timeout_secs;
+
+  int simple_command_timeout_secs;
+
+  int complex_command_timeout_secs;
+
+  tdrp_bool_t movie_on;
+
+  int movie_delay;
+
+  int movie_speed_msec;
+
+  tdrp_bool_t reset_frames;
+
+  int model_run_list_hours;
+
+  int idle_reset_seconds;
+
+  tdrp_bool_t html_mode;
+
+  tdrp_bool_t run_once_and_exit;
+
+  tdrp_bool_t transparent_images;
+
+  char* image_dir;
+
+  tdrp_bool_t save_images_to_day_subdir;
+
+  char* image_ext;
+
+  char* image_horiz_prefix;
+
+  char* image_vert_prefix;
+
+  char* image_name_separator;
+
+  tdrp_bool_t add_height_to_filename;
+
+  tdrp_bool_t add_frame_time_to_filename;
+
+  tdrp_bool_t add_button_name_to_filename;
+
+  tdrp_bool_t add_frame_num_to_filename;
+
+  tdrp_bool_t add_gen_time_to_filename;
+
+  tdrp_bool_t add_valid_time_to_filename;
+
+  char* horiz_image_dir;
+
+  char* horiz_image_fname;
+
+  char* horiz_image_command;
+
+  char* vert_image_dir;
+
+  char* vert_image_fname;
+
+  char* vert_image_command;
+
+  tdrp_bool_t output_geo_xml;
+
+  tdrp_bool_t use_latlon_in_geo_xml;
+
+  char* movieframe_time_format;
+
+  int movieframe_time_mode;
+
+  char* image_convert_script;
+
+  char* print_script;
+
+  char* series_convert_script;
+
+  tdrp_bool_t request_compressed_data;
+
+  tdrp_bool_t request_gzip_vol_compression;
+
+  char* projection_type;
+
+  double lambert_lat1;
+
+  double lambert_lat2;
+
+  double tangent_lat;
+
+  double tangent_lon;
+
+  double central_scale;
+
+  double north_angle;
+
+  tdrp_bool_t use_cosine;
+
+  int use_cosine_correction;
+
+  double scale_units_per_km;
+
+  char* scale_units_label;
+
+  tdrp_bool_t always_get_full_domain;
+
+  tdrp_bool_t do_not_clip_on_mdv_request;
+
+  tdrp_bool_t do_not_decimate_on_mdv_request;
+
+  double min_zoom_threshold;
+
+  double aspect_ratio;
+
+  tdrp_bool_t enable_status_window;
+
+  tdrp_bool_t report_clicks_in_status_window;
+
+  tdrp_bool_t report_clicks_in_degM_and_nm;
+
+  double magnetic_variation_deg;
+
+  tdrp_bool_t enable_save_image_panel;
+
+  double domain_limit_min_x;
+
+  double domain_limit_max_x;
+
+  double domain_limit_min_y;
+
+  double domain_limit_max_y;
+
+  double origin_latitude;
+
+  double origin_longitude;
+
+  double reset_click_latitude;
+
+  double reset_click_longitude;
+
+  int planview_start_page;
+
+  int xsect_start_page;
+
+  int num_zoom_levels;
+
+  int start_zoom_level;
+
+  tdrp_bool_t zoom_limits_in_latlon;
+
+  int num_cache_zooms;
+
+  double min_ht;
+
+  double max_ht;
+
+  double start_ht;
+
+  char* map_file_subdir;
+
+  double locator_margin_km;
+
+  char* station_loc_url;
+
+  char* remote_ui_url;
+
+  char* http_tunnel_url;
+
+  char* http_proxy_url;
+
+  char* foreground_color;
+
+  char* background_color;
+
+  char* margin_color;
+
+  char* out_of_range_color;
+
+  char* route_path_color;
+
+  char* time_axis_color;
+
+  char* time_frame_color;
+
+  char* height_axis_color;
+
+  char* height_indicator_color;
+
+  char* range_ring_color;
+
+  char* missing_data_color;
+
+  char* bad_data_color;
+
+  char* epoch_indicator_color;
+
+  char* now_time_color;
+
+  char* time_tick_color;
+
+  char* latest_click_mark_color;
+
+  char* latest_client_mark_color;
+
+  tdrp_bool_t show_height_sel;
+
+  tdrp_bool_t show_data_messages;
+
+  int latlon_mode;
+
+  char* label_time_format;
+
+  char* moviestart_time_format;
+
+  char* frame_range_time_format;
+
+  tdrp_bool_t layer_legends_on;
+
+  tdrp_bool_t cont_legends_on;
+
+  tdrp_bool_t wind_legends_on;
+
+  tdrp_bool_t display_labels;
+
+  tdrp_bool_t display_ref_lines;
+
+  int top_margin_render_style;
+
+  int bot_margin_render_style;
+
+  int horiz_default_y_pos;
+
+  int horiz_default_x_pos;
+
+  int horiz_default_height;
+
+  int horiz_default_width;
+
+  int horiz_min_height;
+
+  int horiz_min_width;
+
+  int horiz_top_margin;
+
+  int horiz_bot_margin;
+
+  int horiz_left_margin;
+
+  int horiz_right_margin;
+
+  int horiz_legends_start_x;
+
+  int horiz_legends_start_y;
+
+  int horiz_legends_delta_y;
+
+  int vert_default_x_pos;
+
+  int vert_default_y_pos;
+
+  int vert_default_height;
+
+  int vert_default_width;
+
+  int vert_min_height;
+
+  int vert_min_width;
+
+  int vert_top_margin;
+
+  int vert_bot_margin;
+
+  int vert_left_margin;
+
+  int vert_right_margin;
+
+  int vert_legends_start_x;
+
+  int vert_legends_start_y;
+
+  int vert_legends_delta_y;
+
+  double range_ring_spacing;
+
+  double max_ring_range;
+
+  tdrp_bool_t range_ring_follows_data;
+
+  tdrp_bool_t range_ring_for_radar_only;
+
+  tdrp_bool_t domain_follows_data;
+
+  tdrp_bool_t range_rings;
+
+  int range_ring_x_space;
+
+  int range_ring_y_space;
+
+  tdrp_bool_t range_ring_labels;
+
+  double azmith_interval;
+
+  double azmith_radius;
+
+  tdrp_bool_t azmith_lines;
+
+  tdrp_bool_t all_winds_on;
+
+  int barb_shaft_len;
+
+  int ideal_x_vectors;
+
+  int ideal_y_vectors;
+
+  int wind_head_size;
+
+  double wind_head_angle;
+
+  int wind_scaler;
+
+  double wind_time_scale_interval;
+
+  char* wind_marker_type;
+
+  double wind_w_scale_factor;
+
+  double wind_units_scale_factor;
+
+  double wind_reference_speed;
+
+  char* wind_units_label;
+
+  tdrp_bool_t label_contours;
+
+  int contour_line_width;
+
+  tdrp_bool_t smooth_contours;
+
+  tdrp_bool_t use_alt_contours;
+
+  tdrp_bool_t add_noise;
+
+  double special_contour_value;
+
+  tdrp_bool_t map_bad_to_min_value;
+
+  tdrp_bool_t map_missing_to_min_value;
+
+  tdrp_bool_t draw_main_on_top;
+
+  tdrp_bool_t mark_latest_click_location;
+
+  int latest_click_mark_size;
+
+  int num_fonts;
+
+  int font_display_mode;
+
+  tdrp_bool_t show_clock;
+
+  tdrp_bool_t draw_clock_local;
+
+  tdrp_bool_t use_local_timestamps;
+
+  int num_field_menu_cols;
+
+  tdrp_bool_t wsddm_mode;
+
+  tdrp_bool_t one_click_rhi;
+
+  double rotate_coarse_adjust;
+
+  double rotate_medium_adjust;
+
+  double rotate_fine_adjust;
+
+  tdrp_bool_t disable_pick_mode;
+
+  tdrp_bool_t replace_underscores;
+
+  tdrp_bool_t close_popups;
+
+  tdrp_bool_t clip_overlay_fields;
+
+  char* horiz_frame_label;
+
+  char* no_data_message;
+
+  char* status_info_file;
+
+  char* help_command;
+
+  char* bookmark_command;
+
+  int num_bookmarks;
+
+  double image_inten;
+
+  int inten_levels;
+
+  double data_inten;
+
+  int image_fill_threshold;
+
+  int dynamic_contour_threshold;
+
+  int coord_key;
+
+  tdrp_bool_t products_on;
+
+  int product_line_width;
+
+  int product_font_size;
+
+  double scale_constant;
+
+  tdrp_bool_t wind_mode;
+
+  tdrp_bool_t click_posn_rel_to_origin;
+
   char _end_; // end of data region
               // needed for zeroing out data
 
@@ -929,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[217];
+  mutable TDRPtable _table[447];
 
   const char *_className;
 

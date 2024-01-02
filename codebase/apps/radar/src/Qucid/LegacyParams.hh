@@ -56,31 +56,10 @@ public:
 
   void setPrintTdrp(bool val) { _printTdrp = val; }
     
-  // read in from param file
-  // returns 0 on success, -1 on failure
-  
-  int readFromPath(const char *file_path,
-                   const char *prog_name);
-  
-  // read in from param file
-  // returns 0 on success, -1 on failure
-  
-  int readFromBuf(const char *buf, int buf_len,
-                  const char *prog_name);
-
   //  translate legacy to TDRP
   
   int translateToTdrp(const string &legacyParamsPath,
                       const string &tdrpParamsPath);
-
-  // get param values of various types
-  
-  double getDouble(const char *param_name, double default_val);
-  float getFloat(const char *param_name, float default_val);
-  int getInt(const char *param_name, int default_val);
-  bool getBoolean(const char *param_name, int default_val);
-  long getLong(const char *param_name, long default_val);
-  const char *getString(const char *param_name, const char *default_val);
 
 private:
 
@@ -91,32 +70,52 @@ private:
   
   vector<param_list_t> _plist;
 
-  const char *_get(const char *search_name) const;
-
   bool _printTdrp;
 
   int _paramsBufLen;
   char *_paramsBuf; // Pointer to the parameter data
 
+  // read in from param file
+  // returns 0 on success, -1 on failure
+  
+  int _readFromPath(const char *file_path,
+                    const char *prog_name);
+  
+  // read in from param file
+  // returns 0 on success, -1 on failure
+  
+  int _readFromBuf(const char *buf, int buf_len,
+                   const char *prog_name);
+
+  // get param values of various types
+  
+  const char *_get(const char *search_name) const;
+  double _getDouble(const char *param_name, double default_val);
+  float _getFloat(const char *param_name, float default_val);
+  int _getInt(const char *param_name, int default_val);
+  bool _getBoolean(const char *param_name, int default_val);
+  long _getLong(const char *param_name, long default_val);
+  const char *_getString(const char *param_name, const char *default_val);
+  
   const char *_findTagText(const char *input_buf,
                            const char * tag,
                            long *text_len,
                            long *text_line_no);
 
-  const char *_removeCidd(const char *name) const;
+  const char *_removeCiddStr(const char *name) const;
 
-  int _loadDbDataDefault(char* &db_buf, int &db_len);
+  int _loadKeyValPairsDefault(char* &db_buf, int &db_len);
 
-  int _loadDbDataFile(const string &fname,
-                      char* &db_buf,
-                      int &db_len);
+  int _loadKeyValPairsFile(const string &fname,
+                           char* &db_buf,
+                           int &db_len);
   
-  int _loadDbDataHttp(const string &fname,
-                      char* &db_buf,
-                      int &db_len);
+  int _loadKeyValPairsHttp(const string &fname,
+                           char* &db_buf,
+                           int &db_len);
   
-  int _loadDbData(const string &fname);
-
+  int _loadKeyValPairs(const string &fname);
+  
   int _initDataFields(const char *param_buf,
                       long param_buf_len,
                       long line_no);

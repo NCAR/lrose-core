@@ -392,7 +392,7 @@ paramdef int {
 paramdef string {
   p_default = "black";
   p_descr = "Color of main display background.";
-} background_color;
+} background_color2;
 
 paramdef string {
   p_default = "yellow";
@@ -517,25 +517,25 @@ paramdef int {
   p_default = 20;
   p_descr = "Height of top margin in VERT mode (pixels).";
   p_help = "Titles go in the top margin.";
-} vert_top_margin;
+} vert_top_margin2;
 
 paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin in VERT mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
-} vert_bottom_margin;
+} vert_bottom_margin2;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of left margin in VERT mode (pixels).";
   p_help = "Height scale goes in the left margin.";
-} vert_left_margin;
+} vert_left_margin2;
 
 paramdef int {
   p_default = 20;
   p_descr = "Width of right margin in VERT mode (pixels).";
   p_help = "Height scale goes in the right margin.";
-} vert_right_margin;
+} vert_right_margin2;
 
 paramdef int {
   p_default = 8;
@@ -1660,4 +1660,1606 @@ paramdef string {
       "Note: Make sure white space separates the fields!\n";
 } route_paths[];
 
+commentdef {
+  p_header = "<MAIN>";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} debug_flag;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} debug1_flag;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} debug2_flag;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} demo_time;
+
+
+paramdef int {
+  p_default = 300;
+  p_descr = "";
+  p_help = "";
+} temporal_rounding;
+
+
+paramdef string {
+  p_default = "regular";
+  p_descr = "";
+  p_help = "";
+} climo_mode;
+
+
+paramdef int {
+  p_default = 365;
+  p_descr = "";
+  p_help = "";
+} max_time_list_span;
+
+
+paramdef int {
+  p_default = 12;
+  p_descr = "";
+  p_help = "";
+} starting_movie_frames;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} time_interval;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} frame_span;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} forecast_interval;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} past_interval;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} movie_magnify_factor;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} check_data_times;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} check_clipping;
+
+
+paramdef double {
+  p_default = 1.5;
+  p_descr = "";
+  p_help = "";
+} stretch_factor;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} gather_data_mode;
+
+
+paramdef int {
+  p_default = 1000;
+  p_descr = "";
+  p_help = "";
+} redraw_interval;
+
+
+paramdef int {
+  p_default = 120;
+  p_descr = "";
+  p_help = "";
+} update_interval;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} datamap_host;
+
+
+paramdef int {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} data_timeout_secs;
+
+
+paramdef int {
+  p_default = 30;
+  p_descr = "";
+  p_help = "";
+} simple_command_timeout_secs;
+
+
+paramdef int {
+  p_default = 180;
+  p_descr = "";
+  p_help = "";
+} complex_command_timeout_secs;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} movie_on;
+
+
+paramdef int {
+  p_default = 3000;
+  p_descr = "";
+  p_help = "";
+} movie_delay;
+
+
+paramdef int {
+  p_default = 75;
+  p_descr = "";
+  p_help = "";
+} movie_speed_msec;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} reset_frames;
+
+
+paramdef int {
+  p_default = 24;
+  p_descr = "";
+  p_help = "";
+} model_run_list_hours;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} idle_reset_seconds;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} html_mode;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} run_once_and_exit;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} transparent_images;
+
+
+paramdef string {
+  p_default = "/tmp/image_dir";
+  p_descr = "";
+  p_help = "";
+} image_dir;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} save_images_to_day_subdir;
+
+
+paramdef string {
+  p_default = "png";
+  p_descr = "";
+  p_help = "";
+} image_ext;
+
+
+paramdef string {
+  p_default = "CP";
+  p_descr = "";
+  p_help = "";
+} image_horiz_prefix;
+
+
+paramdef string {
+  p_default = "CV";
+  p_descr = "";
+  p_help = "";
+} image_vert_prefix;
+
+
+paramdef string {
+  p_default = "_";
+  p_descr = "";
+  p_help = "";
+} image_name_separator;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} add_height_to_filename;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} add_frame_time_to_filename;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} add_button_name_to_filename;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} add_frame_num_to_filename;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} add_gen_time_to_filename;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} add_valid_time_to_filename;
+
+
+paramdef string {
+  p_default = "/tmp/cidd_horiz_image_dir";
+  p_descr = "";
+  p_help = "";
+} horiz_image_dir;
+
+
+paramdef string {
+  p_default = "cidd_horiz_view.png";
+  p_descr = "";
+  p_help = "";
+} horiz_image_fname;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} horiz_image_command;
+
+
+paramdef string {
+  p_default = "/tmp/cidd_vert_image_dir";
+  p_descr = "";
+  p_help = "";
+} vert_image_dir;
+
+
+paramdef string {
+  p_default = "cidd_vert_view.png";
+  p_descr = "";
+  p_help = "";
+} vert_image_fname;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} vert_image_command;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} output_geo_xml;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} use_latlon_in_geo_xml;
+
+
+paramdef string {
+  p_default = "%H%M";
+  p_descr = "";
+  p_help = "";
+} movieframe_time_format;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} movieframe_time_mode;
+
+
+paramdef string {
+  p_default = "convert_image.csh";
+  p_descr = "";
+  p_help = "";
+} image_convert_script;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} print_script;
+
+
+paramdef string {
+  p_default = "make_anim.csh";
+  p_descr = "";
+  p_help = "";
+} series_convert_script;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} request_compressed_data;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} request_gzip_vol_compression;
+
+
+paramdef string {
+  p_default = "CARTESIAN";
+  p_descr = "";
+  p_help = "";
+} projection_type;
+
+
+paramdef double {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} lambert_lat1;
+
+
+paramdef double {
+  p_default = 60;
+  p_descr = "";
+  p_help = "";
+} lambert_lat2;
+
+
+paramdef double {
+  p_default = 90;
+  p_descr = "";
+  p_help = "";
+} tangent_lat;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} tangent_lon;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} central_scale;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} north_angle;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} use_cosine;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} use_cosine_correction;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} scale_units_per_km;
+
+
+paramdef string {
+  p_default = "km";
+  p_descr = "";
+  p_help = "";
+} scale_units_label;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} always_get_full_domain;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} do_not_clip_on_mdv_request;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} do_not_decimate_on_mdv_request;
+
+
+paramdef double {
+  p_default = 5;
+  p_descr = "";
+  p_help = "";
+} min_zoom_threshold;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} aspect_ratio;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} enable_status_window;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} report_clicks_in_status_window;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} report_clicks_in_degM_and_nm;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} magnetic_variation_deg;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} enable_save_image_panel;
+
+
+paramdef double {
+  p_default = -10000;
+  p_descr = "";
+  p_help = "";
+} domain_limit_min_x;
+
+
+paramdef double {
+  p_default = 10000;
+  p_descr = "";
+  p_help = "";
+} domain_limit_max_x;
+
+
+paramdef double {
+  p_default = -10000;
+  p_descr = "";
+  p_help = "";
+} domain_limit_min_y;
+
+
+paramdef double {
+  p_default = 10000;
+  p_descr = "";
+  p_help = "";
+} domain_limit_max_y;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} origin_latitude;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} origin_longitude;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} reset_click_latitude;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} reset_click_longitude;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} planview_start_page;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} xsect_start_page;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} num_zoom_levels;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} start_zoom_level;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} zoom_limits_in_latlon;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} num_cache_zooms;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} min_ht;
+
+
+paramdef double {
+  p_default = 30;
+  p_descr = "";
+  p_help = "";
+} max_ht;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} start_ht;
+
+
+paramdef string {
+  p_default = "maps";
+  p_descr = "";
+  p_help = "";
+} map_file_subdir;
+
+
+paramdef double {
+  p_default = 50;
+  p_descr = "";
+  p_help = "";
+} locator_margin_km;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} station_loc_url;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} remote_ui_url;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} http_tunnel_url;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} http_proxy_url;
+
+
+paramdef string {
+  p_default = "White";
+  p_descr = "";
+  p_help = "";
+} foreground_color;
+
+
+paramdef string {
+  p_default = "Black";
+  p_descr = "";
+  p_help = "";
+} background_color;
+
+
+paramdef string {
+  p_default = "Black";
+  p_descr = "";
+  p_help = "";
+} margin_color;
+
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "";
+  p_help = "";
+} out_of_range_color;
+
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "";
+  p_help = "";
+} route_path_color;
+
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "";
+  p_help = "";
+} time_axis_color;
+
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "";
+  p_help = "";
+} time_frame_color;
+
+
+paramdef string {
+  p_default = "cyan";
+  p_descr = "";
+  p_help = "";
+} height_axis_color;
+
+
+paramdef string {
+  p_default = "red";
+  p_descr = "";
+  p_help = "";
+} height_indicator_color;
+
+
+paramdef string {
+  p_default = "grey";
+  p_descr = "";
+  p_help = "";
+} range_ring_color;
+
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "";
+  p_help = "";
+} missing_data_color;
+
+
+paramdef string {
+  p_default = "transparent";
+  p_descr = "";
+  p_help = "";
+} bad_data_color;
+
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "";
+  p_help = "";
+} epoch_indicator_color;
+
+
+paramdef string {
+  p_default = "red";
+  p_descr = "";
+  p_help = "";
+} now_time_color;
+
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "";
+  p_help = "";
+} time_tick_color;
+
+
+paramdef string {
+  p_default = "red";
+  p_descr = "";
+  p_help = "";
+} latest_click_mark_color;
+
+
+paramdef string {
+  p_default = "yellow";
+  p_descr = "";
+  p_help = "";
+} latest_client_mark_color;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} show_height_sel;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} show_data_messages;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} latlon_mode;
+
+
+paramdef string {
+  p_default = "%m/%d/%y %H:%M:%S";
+  p_descr = "";
+  p_help = "";
+} label_time_format;
+
+
+paramdef string {
+  p_default = "%H:%M %m/%d/%Y";
+  p_descr = "";
+  p_help = "";
+} moviestart_time_format;
+
+
+paramdef string {
+  p_default = "%H:%M";
+  p_descr = "";
+  p_help = "";
+} frame_range_time_format;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} layer_legends_on;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} cont_legends_on;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} wind_legends_on;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} display_labels;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} display_ref_lines;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} top_margin_render_style;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} bot_margin_render_style;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} horiz_default_y_pos;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} horiz_default_x_pos;
+
+
+paramdef int {
+  p_default = 600;
+  p_descr = "";
+  p_help = "";
+} horiz_default_height;
+
+
+paramdef int {
+  p_default = 800;
+  p_descr = "";
+  p_help = "";
+} horiz_default_width;
+
+
+paramdef int {
+  p_default = 400;
+  p_descr = "";
+  p_help = "";
+} horiz_min_height;
+
+
+paramdef int {
+  p_default = 600;
+  p_descr = "";
+  p_help = "";
+} horiz_min_width;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} horiz_top_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} horiz_bot_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} horiz_left_margin;
+
+
+paramdef int {
+  p_default = 80;
+  p_descr = "";
+  p_help = "";
+} horiz_right_margin;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} horiz_legends_start_x;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} horiz_legends_start_y;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} horiz_legends_delta_y;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} vert_default_x_pos;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} vert_default_y_pos;
+
+
+paramdef int {
+  p_default = 400;
+  p_descr = "";
+  p_help = "";
+} vert_default_height;
+
+
+paramdef int {
+  p_default = 600;
+  p_descr = "";
+  p_help = "";
+} vert_default_width;
+
+
+paramdef int {
+  p_default = 400;
+  p_descr = "";
+  p_help = "";
+} vert_min_height;
+
+
+paramdef int {
+  p_default = 600;
+  p_descr = "";
+  p_help = "";
+} vert_min_width;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} vert_top_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} vert_bot_margin;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} vert_left_margin;
+
+
+paramdef int {
+  p_default = 80;
+  p_descr = "";
+  p_help = "";
+} vert_right_margin;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} vert_legends_start_x;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} vert_legends_start_y;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} vert_legends_delta_y;
+
+
+paramdef double {
+  p_default = -1;
+  p_descr = "";
+  p_help = "";
+} range_ring_spacing;
+
+
+paramdef double {
+  p_default = 1000;
+  p_descr = "";
+  p_help = "";
+} max_ring_range;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} range_ring_follows_data;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} range_ring_for_radar_only;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} domain_follows_data;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} range_rings;
+
+
+paramdef int {
+  p_default = 50;
+  p_descr = "";
+  p_help = "";
+} range_ring_x_space;
+
+
+paramdef int {
+  p_default = 15;
+  p_descr = "";
+  p_help = "";
+} range_ring_y_space;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} range_ring_labels;
+
+
+paramdef double {
+  p_default = 30;
+  p_descr = "";
+  p_help = "";
+} azmith_interval;
+
+
+paramdef double {
+  p_default = 200;
+  p_descr = "";
+  p_help = "";
+} azmith_radius;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} azmith_lines;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} all_winds_on;
+
+
+paramdef int {
+  p_default = 33;
+  p_descr = "";
+  p_help = "";
+} barb_shaft_len;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} ideal_x_vectors;
+
+
+paramdef int {
+  p_default = 20;
+  p_descr = "";
+  p_help = "";
+} ideal_y_vectors;
+
+
+paramdef int {
+  p_default = 5;
+  p_descr = "";
+  p_help = "";
+} wind_head_size;
+
+
+paramdef double {
+  p_default = 45;
+  p_descr = "";
+  p_help = "";
+} wind_head_angle;
+
+
+paramdef int {
+  p_default = 3;
+  p_descr = "";
+  p_help = "";
+} wind_scaler;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} wind_time_scale_interval;
+
+
+paramdef string {
+  p_default = "arrow";
+  p_descr = "";
+  p_help = "";
+} wind_marker_type;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} wind_w_scale_factor;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} wind_units_scale_factor;
+
+
+paramdef double {
+  p_default = 10;
+  p_descr = "";
+  p_help = "";
+} wind_reference_speed;
+
+
+paramdef string {
+  p_default = "m/sec";
+  p_descr = "";
+  p_help = "";
+} wind_units_label;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} label_contours;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} contour_line_width;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} smooth_contours;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} use_alt_contours;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} add_noise;
+
+
+paramdef double {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} special_contour_value;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} map_bad_to_min_value;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} map_missing_to_min_value;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} draw_main_on_top;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} mark_latest_click_location;
+
+
+paramdef int {
+  p_default = 11;
+  p_descr = "";
+  p_help = "";
+} latest_click_mark_size;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} num_fonts;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} font_display_mode;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} show_clock;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} draw_clock_local;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} use_local_timestamps;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} num_field_menu_cols;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} wsddm_mode;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} one_click_rhi;
+
+
+paramdef double {
+  p_default = 6;
+  p_descr = "";
+  p_help = "";
+} rotate_coarse_adjust;
+
+
+paramdef double {
+  p_default = 2;
+  p_descr = "";
+  p_help = "";
+} rotate_medium_adjust;
+
+
+paramdef double {
+  p_default = 0.5;
+  p_descr = "";
+  p_help = "";
+} rotate_fine_adjust;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} disable_pick_mode;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} replace_underscores;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} close_popups;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} clip_overlay_fields;
+
+
+paramdef string {
+  p_default = "Qucid";
+  p_descr = "";
+  p_help = "";
+} horiz_frame_label;
+
+
+paramdef string {
+  p_default = "NO DATA FOUND (in this area at the selected time)";
+  p_descr = "";
+  p_help = "";
+} no_data_message;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} status_info_file;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} help_command;
+
+
+paramdef string {
+  p_default = "";
+  p_descr = "";
+  p_help = "";
+} bookmark_command;
+
+
+paramdef int {
+  p_default = 0;
+  p_descr = "";
+  p_help = "";
+} num_bookmarks;
+
+
+paramdef double {
+  p_default = 0.8;
+  p_descr = "";
+  p_help = "";
+} image_inten;
+
+
+paramdef int {
+  p_default = 32;
+  p_descr = "";
+  p_help = "";
+} inten_levels;
+
+
+paramdef double {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} data_inten;
+
+
+paramdef int {
+  p_default = 120000;
+  p_descr = "";
+  p_help = "";
+} image_fill_threshold;
+
+
+paramdef int {
+  p_default = 160000;
+  p_descr = "";
+  p_help = "";
+} dynamic_contour_threshold;
+
+
+paramdef int {
+  p_default = 63500;
+  p_descr = "";
+  p_help = "";
+} coord_key;
+
+
+paramdef boolean {
+  p_default = TRUE;
+  p_descr = "";
+  p_help = "";
+} products_on;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} product_line_width;
+
+
+paramdef int {
+  p_default = 1;
+  p_descr = "";
+  p_help = "";
+} product_font_size;
+
+
+paramdef double {
+  p_default = 300;
+  p_descr = "";
+  p_help = "";
+} scale_constant;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} wind_mode;
+
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "";
+  p_help = "";
+} click_posn_rel_to_origin;
+
+commentdef {
+  p_header = "</MAIN>";
+}
 
