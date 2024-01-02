@@ -1633,15 +1633,15 @@
     tt->single_val.i = 20;
     tt++;
     
-    // Parameter 'vert_bottom_margin2'
+    // Parameter 'vert_bottom_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_bottom_margin2");
+    tt->param_name = tdrpStrDup("vert_bottom_margin");
     tt->descr = tdrpStrDup("Height of bottom margin in VERT mode (pixels).");
     tt->help = tdrpStrDup("Time scale goes in the bottom margin.");
-    tt->val_offset = (char *) &vert_bottom_margin2 - &_start_;
+    tt->val_offset = (char *) &vert_bottom_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
     
@@ -3870,10 +3870,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("frame_span");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Span in minutes a frame covers in Climo mode.");
+    tt->help = tdrpStrDup("The time_interval will be either '1 day' or '1 year'");
     tt->val_offset = (char *) &frame_span - &_start_;
-    tt->single_val.d = 0;
+    tt->single_val.d = 10;
     tt++;
     
     // Parameter 'forecast_interval'
@@ -3882,10 +3882,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("forecast_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu");
+    tt->help = tdrpStrDup("See SHOW_FORECAST_MENU menu bar button");
     tt->val_offset = (char *) &forecast_interval - &_start_;
-    tt->single_val.d = 0;
+    tt->single_val.d = 24;
     tt++;
     
     // Parameter 'past_interval'
@@ -3894,8 +3894,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("past_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The maximum number of hours in the PAST a user can selectfrom the quick forecast menu");
+    tt->help = tdrpStrDup("See SHOW_PAST_MENU menu bar button.");
     tt->val_offset = (char *) &past_interval - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -3906,8 +3906,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("movie_magnify_factor");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("When a Forecast hour is chosen, magnify the time interval by this factor.");
+    tt->help = tdrpStrDup("This adjusts the frame time_interval to be more appropriate for forecast (model) data, which is often output on a more coarse time interval. When 'Now' is selected the magnification is undone.");
     tt->val_offset = (char *) &movie_magnify_factor - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -3918,8 +3918,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("check_data_times");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Used to reject 'out of date' data.");
+    tt->help = tdrpStrDup(" Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.");
     tt->val_offset = (char *) &check_data_times - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -3930,8 +3930,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("check_clipping");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.");
+    tt->help = tdrpStrDup("Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.");
     tt->val_offset = (char *) &check_clipping - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -3942,10 +3942,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("stretch_factor");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the allowable time error for data to appear in movie frames.");
+    tt->help = tdrpStrDup("(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.");
     tt->val_offset = (char *) &stretch_factor - &_start_;
-    tt->single_val.d = 1.5;
+    tt->single_val.d = 6;
     tt++;
     
     // Parameter 'gather_data_mode'
@@ -3954,8 +3954,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("gather_data_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets whether we request data closest to the midpoint of a movie frame (0) or the end (1).");
+    tt->help = tdrpStrDup("0= Midpoint requests(Closest_to), 1 = End point requests (First_before). Typically, real-time operation should operate as 1 (End point requests). Choose mode 0 if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.");
     tt->val_offset = (char *) &gather_data_mode - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -3966,10 +3966,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("redraw_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Number of milliseconds between checks for images needing redrawn.");
+    tt->help = tdrpStrDup("Set this lower on faster hardware - Recommended 50-250. This sets the ultimate speed of the movie looping.");
     tt->val_offset = (char *) &redraw_interval - &_start_;
-    tt->single_val.i = 1000;
+    tt->single_val.i = 100;
     tt++;
     
     // Parameter 'update_interval'
@@ -3978,8 +3978,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("update_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Number of seconds between data update requests.");
+    tt->help = tdrpStrDup("The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:");
     tt->val_offset = (char *) &update_interval - &_start_;
     tt->single_val.i = 120;
     tt++;
@@ -3990,10 +3990,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("datamap_host");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("DataMapper Host");
+    tt->help = tdrpStrDup("Host on which the DataMapper app is running.");
     tt->val_offset = (char *) &datamap_host - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("localhost");
     tt++;
     
     // Parameter 'data_timeout_secs'
@@ -4002,10 +4002,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("data_timeout_secs");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Number of seconds to wait for data to come in before giving up.");
+    tt->help = tdrpStrDup("On very slow networks this may need to go as high as 180 seconds.");
     tt->val_offset = (char *) &data_timeout_secs - &_start_;
-    tt->single_val.i = 10;
+    tt->single_val.i = 30;
     tt++;
     
     // Parameter 'simple_command_timeout_secs'
@@ -4014,8 +4014,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("simple_command_timeout_secs");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Length of time to wait before killing simple external commands.");
+    tt->help = tdrpStrDup("Used When running single image convert scripts and driving Browsers to web pages.");
     tt->val_offset = (char *) &simple_command_timeout_secs - &_start_;
     tt->single_val.i = 30;
     tt++;
@@ -4026,8 +4026,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("complex_command_timeout_secs");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Length of time to wait before killing complex external commands.");
+    tt->help = tdrpStrDup("Used when spawning animation building script.");
     tt->val_offset = (char *) &complex_command_timeout_secs - &_start_;
     tt->single_val.i = 180;
     tt++;
@@ -4038,8 +4038,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("movie_on");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Determine whether to start with movie looping on.");
+    tt->help = tdrpStrDup("Set to TRUE to start up in movie-on mode, FALSE = off");
     tt->val_offset = (char *) &movie_on - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4050,7 +4050,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("movie_delay");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the delay at the end of the movie loop in (msec).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &movie_delay - &_start_;
     tt->single_val.i = 3000;
@@ -4062,7 +4062,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("movie_speed_msec");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the speed of the movie loop (msec per frame).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &movie_speed_msec - &_start_;
     tt->single_val.i = 75;
@@ -4074,8 +4074,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("reset_frames");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Forces reload of all data every time the movie frames rotate one old frame out and generate a new frame.");
+    tt->help = tdrpStrDup("If TRUE, this will slow down data gathering for movie rendering.");
     tt->val_offset = (char *) &reset_frames - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4086,8 +4086,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("model_run_list_hours");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Gather model run times within these number of hours from the end of the movie loop.");
+    tt->help = tdrpStrDup("More hours means more Model runs will appear in the menu.");
     tt->val_offset = (char *) &model_run_list_hours - &_start_;
     tt->single_val.i = 24;
     tt++;

@@ -75,14 +75,14 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   
 {
 
-  int i,j;
-  int num_fields;
+  // int i,j;
+  // int num_fields;
   long param_text_len;
   long param_text_line_no;
   const char *param_text;
-  const char *field_str;
-  char str_buf[128];   /* Space to build resource strings */
-  char *cfield[3];     /* Space to collect sub strings */
+  // const char *field_str;
+  // char str_buf[128];   /* Space to build resource strings */
+  // char *cfield[3];     /* Space to collect sub strings */
 
   // load up the params buffer from file or http
   
@@ -135,8 +135,8 @@ int LegacyParams::translateToTdrp(const string &legacyParamsPath,
   
   _getLong("cidd.starting_movie_frames", 12);
   _getDouble("cidd.time_interval",10.0);
-  _getDouble("cidd.frame_span", gd.time_interval);
-  _getDouble("cidd.forecast_interval", 0.0);
+  _getDouble("cidd.frame_span", 10.0);
+  _getDouble("cidd.forecast_interval", 2.0);
   _getDouble("cidd.past_interval", 0.0);
   _getDouble("cidd.movie_magnify_factor",1.0);
   _getBoolean("cidd.check_data_times", 0);

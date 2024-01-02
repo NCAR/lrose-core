@@ -650,7 +650,7 @@ public:
 
   int vert_top_margin2;
 
-  int vert_bottom_margin2;
+  int vert_bottom_margin;
 
   int vert_left_margin2;
 

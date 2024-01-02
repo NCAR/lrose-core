@@ -523,7 +523,7 @@ paramdef int {
   p_default = 20;
   p_descr = "Height of bottom margin in VERT mode (pixels).";
   p_help = "Time scale goes in the bottom margin.";
-} vert_bottom_margin2;
+} vert_bottom_margin;
 
 paramdef int {
   p_default = 20;
@@ -1670,20 +1670,17 @@ paramdef boolean {
   p_help = "General informational messages - Initialization messages.";
 } debug_flag;
 
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "More verbose debug flag.";
   p_help = "Data flow related messages.";
 } debug1_flag;
 
-
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Verbose diagnostics.";
   p_help = "Developer debugging information.";
 } debug2_flag;
-
 
 paramdef string {
   p_default = "20:00 5/25/2000";
@@ -1696,7 +1693,6 @@ paramdef int {
   p_descr = "Set times to the nearest value divisible by the number of seconds.";
   p_help = "";
 } temporal_rounding;
-
 
 paramdef string {
   p_default = "regular";
@@ -1727,137 +1723,118 @@ paramdef double {
 } time_interval;
 
 paramdef double {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_default = 10;
+  p_descr = "Span in minutes a frame covers in Climo mode.";
+  p_help = "The time_interval will be either '1 day' or '1 year'";
 } frame_span;
 
-
 paramdef double {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_default = 24;
+  p_descr = "This parameter sets the maximum number of hours in the future a user can select from the quick forecast menu";
+  p_help = "See SHOW_FORECAST_MENU menu bar button";
 } forecast_interval;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "The maximum number of hours in the PAST a user can selectfrom the quick forecast menu";
+  p_help = "See SHOW_PAST_MENU menu bar button.";
 } past_interval;
-
 
 paramdef double {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "When a Forecast hour is chosen, magnify the time interval by this factor.";
+  p_help = "This adjusts the frame time_interval to be more appropriate for forecast (model) data, which is often output on a more coarse time interval. When 'Now' is selected the magnification is undone.";
 } movie_magnify_factor;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Used to reject 'out of date' data.";
+  p_help = " Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
 } check_data_times;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set this parameter to TRUE when displaying data on dissimilar grid projection and stripes or other artifacts are rendered.";
+  p_help = "Each polygon will be checked to make sure it will render correctly. This slows down the rendering a bit so it is FALSE by default.";
 } check_clipping;
 
-
 paramdef double {
-  p_default = 1.5;
-  p_descr = "";
-  p_help = "";
+  p_default = 6.0;
+  p_descr = "Sets the allowable time error for data to appear in movie frames.";
+  p_help = "(times the time_interval) (6 min * 6 = 36 minutes before or after the beginning or end of the movie frame times.";
 } stretch_factor;
-
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets whether we request data closest to the midpoint of a movie frame (0) or the end (1).";
+  p_help = "0= Midpoint requests(Closest_to), 1 = End point requests (First_before). Typically, real-time operation should operate as 1 (End point requests). Choose mode 0 if you want to enter a time and have data the data at that time appear, regardless of how wide the movie frame interval is.";
 } gather_data_mode;
 
-
 paramdef int {
-  p_default = 1000;
-  p_descr = "";
-  p_help = "";
+  p_default = 100;
+  p_descr = "Number of milliseconds between checks for images needing redrawn.";
+  p_help = "Set this lower on faster hardware - Recommended 50-250. This sets the ultimate speed of the movie looping.";
 } redraw_interval;
-
 
 paramdef int {
   p_default = 120;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Number of seconds between data update requests.";
+  p_help = "The display will check the Data Mapper for new data every interval in real-time mode. At every interval we will check for updates to each grid and product. If no datamap_host is set, the data is assumed to be old and will be reloaded every interval. Set this wisely. Values of 10-900 are typical. Default=120 Setting this below 3 seconds is not advised.  interacts with the Data Mapper Host parameter: cidd.datamap_host:";
 } update_interval;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "localhost";
+  p_descr = "DataMapper Host";
+  p_help = "Host on which the DataMapper app is running.";
 } datamap_host;
-
-
-paramdef int {
-  p_default = 10;
-  p_descr = "";
-  p_help = "";
-} data_timeout_secs;
-
 
 paramdef int {
   p_default = 30;
-  p_descr = "";
-  p_help = "";
-} simple_command_timeout_secs;
+  p_descr = "Number of seconds to wait for data to come in before giving up.";
+  p_help = "On very slow networks this may need to go as high as 180 seconds.";
+} data_timeout_secs;
 
+paramdef int {
+  p_default = 30;
+  p_descr = "Length of time to wait before killing simple external commands.";
+  p_help = "Used When running single image convert scripts and driving Browsers to web pages.";
+} simple_command_timeout_secs;
 
 paramdef int {
   p_default = 180;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Length of time to wait before killing complex external commands.";
+  p_help = "Used when spawning animation building script.";
 } complex_command_timeout_secs;
-
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Determine whether to start with movie looping on.";
+  p_help = "Set to TRUE to start up in movie-on mode, FALSE = off";
 } movie_on;
-
 
 paramdef int {
   p_default = 3000;
-  p_descr = "";
+  p_descr = "Set the delay at the end of the movie loop in (msec).";
   p_help = "";
 } movie_delay;
 
-
 paramdef int {
   p_default = 75;
-  p_descr = "";
+  p_descr = "Set the speed of the movie loop (msec per frame).";
   p_help = "";
 } movie_speed_msec;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Forces reload of all data every time the movie frames rotate one old frame out and generate a new frame.";
+  p_help = "If TRUE, this will slow down data gathering for movie rendering.";
 } reset_frames;
-
 
 paramdef int {
   p_default = 24;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Gather model run times within these number of hours from the end of the movie loop.";
+  p_help = "More hours means more Model runs will appear in the menu.";
 } model_run_list_hours;
-
 
 paramdef int {
   p_default = 0;

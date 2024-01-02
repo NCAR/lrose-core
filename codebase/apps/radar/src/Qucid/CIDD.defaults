@@ -258,15 +258,15 @@ cidd.debug2_flag:           0
 #  System will startup using field 0, requesting data closest to the
 # demo time. The movie frame will be centered on the time after applying
 # temporal rounding. 
-#cidd.demo_time:  20:00 5/25/2000
+cidd.demo_time:  20:00 5/25/2000
 
 # Set times to the nearest value divisible by the number of seconds
 cidd.temporal_rounding:    300
 
-# Sets the time_interval to "regular", "daily" or "yearly"
-# CIDD users can do this interactively by entering "1 yr" or "1 day"
+# Sets the time_interval to 'regular', 'daily' or 'yearly'
+# CIDD users can do this interactively by entering '1 yr' or '1 day'
 # in the movie control panel  interval text widget. CIDD will recognize these special
-# "intervals" and will do the right thing.
+# 'intervals' and will do the right thing.
 cidd.climo_mode: regular
 
 # Maximum number of days over which to request time lists.
@@ -287,7 +287,7 @@ cidd.starting_movie_frames:     16
 cidd.time_interval:  5.0
 
 # Span in minutes a frame covers in Climo mode. - The time_interval will be
-# either "1 day" or "1 year" 
+# either '1 day' or '1 year' 
 cidd.frame_span:  60.0
 
 # This parameter sets the maximum number of hours in the future a user can select
@@ -301,13 +301,13 @@ cidd.past_interval:  96
 # When a Forecast hour is chosen, magnify the time interval by this factor.
 # This adjusts the frame time_interval to be more appropriate for 
 # forecast (model) data, which is often output on a more coarse time interval.
-# When "Now" is selected the magnification is undone. Default is 1.0
+# When 'Now' is selected the magnification is undone. Default is 1.0
 # 
 cidd.movie_magnify_factor:  10.0
 
 # Set this param to 1 to get CIDD to check and reject for rendering
 # Any data that falls outside the movie frame interval + the
-# slop/stretch_factor - Used to reject "out of date" data.
+# slop/stretch_factor - Used to reject 'out of date' data.
 cidd.check_data_times:  0
 
 
@@ -346,7 +346,7 @@ cidd.redraw_interval:     100
 cidd.update_interval:      300
 
 # Data Mapper Host
-#cidd.datamap_host:  venus
+cidd.datamap_host:  venus
 
 #  Number of seconds to wait for data to come in before giving up
 #  On very slow networks this may need to go as high as 180 seconds!
@@ -399,10 +399,10 @@ cidd.transparent_images: 0
 # Image Generation related resources
 
 # Set this to a value to get cidd to output imagery in this directory
-#cidd.image_dir: /tmp
+cidd.image_dir: /tmp
 
 # Save images to subdirs based on date?
-#cidd.save_images_to_day_subdir: 0
+cidd.save_images_to_day_subdir: 0
 
 # Image extension - Sets the output image types
 # In latest CIDD versions, only png type is available.
@@ -446,7 +446,7 @@ cidd.add_valid_time_to_filename: 0
 #
 # NOTE: CIDD appends the image name to the command string before executing.
 # This allows the script to pull the name off the command line.
-# It is often useful to place a "rm" as the last command to remove
+# It is often useful to place a 'rm' as the last command to remove
 # the image after printing, conversion, etc
 #
 # Note: that this is initially set to cidd.image_dir
@@ -479,7 +479,7 @@ cidd.movieframe_time_format:  %H%M
 # The full path name of the xwd image will be sent as the script argument
 # Setting cidd.horiz_image_command or cidd.horiz_image_command will override
 # this and allow separate scripts to be called for horiz and vert images.
-#cidd.image_convert_script: convert_image.csh
+cidd.image_convert_script: convert_image.csh
 
 # This script will be exec'd if set whenever a print command is issued.
 # The full path name of the xwd image will be sent as the script argument
@@ -512,7 +512,7 @@ cidd.lambert_lat2: 60.0
 # These must be set when using POLAR_STEREO (Polar stereographic)
 #cidd.tangent_lat: 90.0
 #cidd.tangent_lon: 0.0
-#cidd.central_scale: 1.0
+3cidd.central_scale: 1.0
 
 # These must be set when using STEREOGRAPHIC (Oblique stereographic)
 cidd.tangent_lat: 60.0
@@ -531,10 +531,10 @@ cidd.north_angle:        0.0
 cidd.use_cosine: 1
 
 # Set the scale factor and label for Range rings and Distance scales.
-#cidd.units_per_km:          0.5395932
+cidd.units_per_km:          0.5395932
 
-# Set the following to Deg for LAT_LON projections - Default is "km"
-#cidd.scale_units_label:  nm
+# Set the following to Deg for LAT_LON projections - Default is 'km'
+cidd.scale_units_label:  nm
 
 # When set to 1, Request the outer domain established by cidd.domain_limit params
 cidd.always_get_full_domain:  0
@@ -553,8 +553,7 @@ cidd.min_zoom_threshold: 5.0
 # ration for all zooms. Ratio is Width/Height.
 # If set <= 0.0, CIDD will compute the aspect ratio based on the extent of the
 # first domain.
-#cidd.aspect_ratio:   0.0
-cidd.aspect_ratio:   1.1
+cidd.aspect_ratio:   1.0
 
 # Note CIDD now applies a correction to LAT_LON projections to expand the Y coords, making them
 # appear to be equi-distant in Latitude and Longitude.
@@ -675,8 +674,8 @@ cidd.max_adeg:               360.0
 
 # List of comma delimited local directories or HTTP URLs to search
 # Search . then each directory/URL in order 
-cidd.color_file_subdir:   /local/colorscales, http://www.rap.ucar.edu/colorscales
-cidd.map_file_subdir:     /local/maps, http://www.rap.ucar.edu/maps
+cidd.color_file_subdir:   /local/colorscales,http://www.rap.ucar.edu/colorscales
+cidd.map_file_subdir:     /local/maps,http://www.rap.ucar.edu/maps
 
 #
 # Station locator features
@@ -686,22 +685,22 @@ cidd.locator_margin_km:   50
 
 # Full Path File name or http URL to a station data file.
 # The format of each line is:  ID, LAT, LON, ALT(m), TYPE
-#cidd.station_loc_url: http://www.rap.ucar.edu/maps/Taiwan_stations.dat 
+cidd.station_loc_url: http://www.rap.ucar.edu/maps/Taiwan_stations.dat 
 
 #
 # FMQ Type URL for Receiving Remote commands
-#cidd.remote_ui_url: /tmp/remoteUI
+cidd.remote_ui_url: /tmp/remoteUI
 
 # Tunnel for all DsServer (mdvp,spdbp,etc) Protocols
 # USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAIN 
 #Set this to the special http tunnel that resides in the same local
-#network as the  data server hosts. This allows "tunneling" the MDV and
+#network as the  data server hosts. This allows 'tunneling' the MDV and
 #Spdb data protocols through a host, running apache:httpd that is visible
-#from the Internet or intranet. Note: a special  "Apache::Mod_perl"
+#from the Internet or intranet. Note: a special  'Apache::Mod_perl'
 #extension (The tunnel - it's similar to a cgi mechanism) must be
 #installed on the http server for this to work.
 #
-#cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
+cidd.http_tunnel_url: http://www.rap.ucar.edu/DsServerTunnel
 #
 # USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain
 # Set this to the url of a http forwarding proxy to pass 
@@ -711,7 +710,7 @@ cidd.locator_margin_km:   50
 # the http_tunnel_url must be enabled
 #
 # This is NCAR's internal HTTP proxy
-#cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
+cidd.http_proxy_url: http://webcache.ucar.edu:3128/  
 #
 # Another view of the possible Service Topologies.
 # 
@@ -813,12 +812,12 @@ cidd.image_fill_threshold:    80000
 # used for 'dcont' style rendering
 cidd.dynamic_contour_threshold:    160000
 
-# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec"
+# Sets the format for output of Lat, Lon's. 0= Decimal Degrees, 1 = deg min' sec'
 cidd.latlon_mode:        0
 
 # Set the format for the time strings. See 'man strftime' for format options.
 # Can add additional text as part of the Time string.
-# Default is: "%m/%d/%Y %H:%M:%S"
+# Default is: '%m/%d/%Y %H:%M:%S'
 cidd.label_time_format:  %m/%d/%Y %H:%M
 
 # Set the format for the time string in the movie start time text field
@@ -826,7 +825,7 @@ cidd.label_time_format:  %m/%d/%Y %H:%M
 # time string because you generally don't want any extra text and want
 # to display things in an order that allows for easier entry.
 # Default is: %H:%M %m/%d/%Y
-cidd.moviestart_time_format: %H:%M %m/%d/%Y
+cidd.moviestart_time_format: %H:%M_%m/%d/%Y
 
 # Set the format for the time strings in the frame range text fields.
 # Default is: %H:%M
@@ -950,16 +949,16 @@ cidd.wind_scaler: 3
 cidd.wind_time_scale_interval: 10.0
 
 # Wind Rendering Style  Options:
-# "arrow" (centered at data point),
-# "vector",(Vertex at data point )
-# "barb" (N Hemisp),
-# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)
-# "tuft", (like a piece of yarn - the least obtrusive - like a headless vector)
-# "tickvector" (Cross ticks at wind_time_scale_interval  minutes)
-# "metbarb" (Calcs latitude - works for both hemispheres and
+# 'arrow' (centered at data point),
+# 'vector',(Vertex at data point )
+# 'barb' (N Hemisp),
+# 'labeledbarb', (labeled to nearest 10 degrees at the center - N. Hemisp)
+# 'tuft', (like a piece of yarn - the least obtrusive - like a headless vector)
+# 'tickvector' (Cross ticks at wind_time_scale_interval  minutes)
+# 'metbarb' (Calcs latitude - works for both hemispheres and
 # adds a label of the 10's digit off the end of the barb, ala winds aloft charts)
-# "barb_sh" (S Hemisphere),
-# "labeledbarb", (labeled to nearest 10 degrees at the center - N. Hemisp)       
+# 'barb_sh' (S Hemisphere),
+# 'labeledbarb', (labeled to nearest 10 degrees at the center - N. Hemisp)       
 # NOTE: When using arrow,vector,tuft,tickvector,  the data must be in
 # m/sec for the scaling to work correctly. For the others (Barbs),
 # the units are arbitrary, but the flag units on the barbs will reflect
@@ -981,14 +980,14 @@ cidd.wind_units_label:  km/hr
 
 # Uncomment the following lines to turn on default contour fields
 # Uses the contour levels and the Field Label string in data.info
-# The parameters are Exact_field_label and color and optional "off"
-# Keyword. If "off" param is used, the field will be defined, but will
+# The parameters are Exact_field_label and color and optional 'off'
+# Keyword. If 'off' param is used, the field will be defined, but will
 # not be activated on startup.
-#cidd.contour1_field: FzLevel red off
-#cidd.contour2_field: SURF_T white
-#cidd.contour3_field: SURF_T white
-#cidd.contour4_field: SURF_T white
-#cidd.contour5_field: SURF_T white
+cidd.contour1_field: FzLevel red off
+cidd.contour2_field: SURF_T white
+cidd.contour3_field: SURF_T white
+cidd.contour4_field: SURF_T white
+cidd.contour5_field: SURF_T white
 # 
 # Set to 1 to have numeric labels on line contours, 0 = off
 cidd.label_contours:   0           
@@ -1026,7 +1025,7 @@ cidd.map_missing_to_min_value: 0
 #
 # Uncomment the following lines to set up fields on startup that will
 # appear as overlaid fields. Layers are on by default unless the
-optional "off" string appears last. 
+optional 'off' string appears last. 
 cidd.layer5_field:  KCYS-DBZ 
 cidd.layer4_field:  KPUX-DBZ
 cidd.layer3_field:  KGJX-DBZ
