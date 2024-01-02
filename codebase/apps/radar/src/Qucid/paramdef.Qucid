@@ -1666,66 +1666,65 @@ commentdef {
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Basic debug flag.";
+  p_help = "General informational messages - Initialization messages.";
 } debug_flag;
 
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "More verbose debug flag.";
+  p_help = "Data flow related messages.";
 } debug1_flag;
 
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Verbose diagnostics.";
+  p_help = "Developer debugging information.";
 } debug2_flag;
 
 
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "20:00 5/25/2000";
+  p_descr = "Startup time for the display data.";
+  p_help = "If set, start up cidd in archival mode. Starting at the indicated time. Enter HH:MM MM/DD/YY format time string. System will startup using field 0, requesting data closest to the demo time. The movie frame will be centered on the time after applying temporal rounding.";
 } demo_time;
-
 
 paramdef int {
   p_default = 300;
-  p_descr = "";
+  p_descr = "Set times to the nearest value divisible by the number of seconds.";
   p_help = "";
 } temporal_rounding;
 
 
 paramdef string {
   p_default = "regular";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Options are 'regular', 'daily' or 'yearly'";
+  p_help = "Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. CIDD will recognize these special 'intervals' and will do the right thing.";
 } climo_mode;
-
 
 paramdef int {
   p_default = 365;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Maximum number of days over which to request time lists.";
+  p_help = "If the epoch exceeds this number of days, then no time list requests will be made. Time lists requests spanning many years can take too long.";
 } max_time_list_span;
 
+commentdef {
+  p_header = "Movie loops";
+}
 
 paramdef int {
   p_default = 12;
-  p_descr = "";
-  p_help = "";
+  p_descr = "This determines how many movie frames are in the loop at startup.";
+  p_help = "Setting this high will cause the X server to hog memory.";
 } starting_movie_frames;
-
 
 paramdef double {
   p_default = 10;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Minutes per movie frame on startup.";
+  p_help = "The display will automatically update every this interval, throwing away its oldest movie frame and creating and drawing a new one.";
 } time_interval;
-
 
 paramdef double {
   p_default = 0;

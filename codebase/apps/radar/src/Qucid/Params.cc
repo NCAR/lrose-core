@@ -3753,8 +3753,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("debug_flag");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Basic debug flag.");
+    tt->help = tdrpStrDup("General informational messages - Initialization messages.");
     tt->val_offset = (char *) &debug_flag - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -3765,8 +3765,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("debug1_flag");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("More verbose debug flag.");
+    tt->help = tdrpStrDup("Data flow related messages.");
     tt->val_offset = (char *) &debug1_flag - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -3777,8 +3777,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("debug2_flag");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Verbose diagnostics.");
+    tt->help = tdrpStrDup("Developer debugging information.");
     tt->val_offset = (char *) &debug2_flag - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -3789,10 +3789,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("demo_time");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Startup time for the display data.");
+    tt->help = tdrpStrDup("If set, start up cidd in archival mode. Starting at the indicated time. Enter HH:MM MM/DD/YY format time string. System will startup using field 0, requesting data closest to the demo time. The movie frame will be centered on the time after applying temporal rounding.");
     tt->val_offset = (char *) &demo_time - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("20:00 5/25/2000");
     tt++;
     
     // Parameter 'temporal_rounding'
@@ -3801,7 +3801,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("temporal_rounding");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set times to the nearest value divisible by the number of seconds.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &temporal_rounding - &_start_;
     tt->single_val.i = 300;
@@ -3813,8 +3813,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("climo_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Options are 'regular', 'daily' or 'yearly'");
+    tt->help = tdrpStrDup("Users can do this interactively by entering '1 yr' or '1 day' in the movie control panel interval text widget. CIDD will recognize these special 'intervals' and will do the right thing.");
     tt->val_offset = (char *) &climo_mode - &_start_;
     tt->single_val.s = tdrpStrDup("regular");
     tt++;
@@ -3825,10 +3825,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("max_time_list_span");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Maximum number of days over which to request time lists.");
+    tt->help = tdrpStrDup("If the epoch exceeds this number of days, then no time list requests will be made. Time lists requests spanning many years can take too long.");
     tt->val_offset = (char *) &max_time_list_span - &_start_;
     tt->single_val.i = 365;
+    tt++;
+    
+    // Parameter 'Comment 31'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 31");
+    tt->comment_hdr = tdrpStrDup("Movie loops");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'starting_movie_frames'
@@ -3837,8 +3846,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("starting_movie_frames");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This determines how many movie frames are in the loop at startup.");
+    tt->help = tdrpStrDup("Setting this high will cause the X server to hog memory.");
     tt->val_offset = (char *) &starting_movie_frames - &_start_;
     tt->single_val.i = 12;
     tt++;
@@ -3849,8 +3858,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("time_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minutes per movie frame on startup.");
+    tt->help = tdrpStrDup("The display will automatically update every this interval, throwing away its oldest movie frame and creating and drawing a new one.");
     tt->val_offset = (char *) &time_interval - &_start_;
     tt->single_val.d = 10;
     tt++;
@@ -6483,11 +6492,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 31'
+    // Parameter 'Comment 32'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 31");
+    tt->param_name = tdrpStrDup("Comment 32");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
