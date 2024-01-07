@@ -2303,236 +2303,223 @@ paramdef string {
   p_help = "";
 } remote_ui_url;
 
+commentdef {
+  p_header = "Server access.";
+  p_text = "";
+}
+
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "http://www.rap.ucar.edu/DsServerTunnel.";
+  p_descr = "Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.";
+  p_help = "USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.";
 } http_tunnel_url;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "http://webcache.ucar.edu:3128/";
+  p_descr = "USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.";
+  p_help = "# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n";
 } http_proxy_url;
 
+commentdef {
+  p_header = "Another view of the possible Service Topologies.";
+  p_text = "All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer";
+}
+
+commentdef {
+  p_header = "Setting colors.";
+  p_text = "";
+}
 
 paramdef string {
-  p_default = "White";
-  p_descr = "";
+  p_default = "white";
+  p_descr = "Legends, scales.";
   p_help = "";
 } foreground_color;
 
-
 paramdef string {
-  p_default = "Black";
-  p_descr = "";
+  p_default = "black";
+  p_descr = "Background of images.";
   p_help = "";
 } background_color;
 
-
 paramdef string {
-  p_default = "Black";
-  p_descr = "";
+  p_default = "black";
+  p_descr = "Background of margins.";
   p_help = "";
 } margin_color;
 
-
 paramdef string {
   p_default = "transparent";
-  p_descr = "";
+  p_descr = "Render values outside the data range of the color scale.";
   p_help = "";
 } out_of_range_color;
 
-
 paramdef string {
   p_default = "yellow";
-  p_descr = "";
+  p_descr = "Color of the cross section reference line.";
   p_help = "";
 } route_path_color;
 
-
 paramdef string {
-  p_default = "cyan";
-  p_descr = "";
+  p_default = "pink";
+  p_descr = "Text in the time axis margins.";
   p_help = "";
 } time_axis_color;
 
-
 paramdef string {
-  p_default = "yellow";
-  p_descr = "";
+  p_default = "gray50";
+  p_descr = "A solid rectangle showing the movie frame extent.";
   p_help = "";
 } time_frame_color;
 
-
 paramdef string {
-  p_default = "cyan";
-  p_descr = "";
+  p_default = "pink";
+  p_descr = "The text in the height selector margin.";
   p_help = "";
 } height_axis_color;
 
-
 paramdef string {
-  p_default = "red";
-  p_descr = "";
+  p_default = "gray50";
+  p_descr = "A solid rectangle showing the height extent of the data plane.";
   p_help = "";
 } height_indicator_color;
 
-
 paramdef string {
   p_default = "grey";
-  p_descr = "";
+  p_descr = "Range rings and azimuth lines.";
   p_help = "";
 } range_ring_color;
 
-
 paramdef string {
   p_default = "transparent";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set to 'transparent' to avoid having these plotted. ";
+  p_help = "Otherwise, these data will be plotted in the indicated color.";
 } missing_data_color;
 
-
 paramdef string {
   p_default = "transparent";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set to 'transparent' to avoid having these plotted. ";
+  p_help = "Otherwise, these data will be plotted in the indicated color.";
 } bad_data_color;
 
-
 paramdef string {
-  p_default = "yellow";
-  p_descr = "";
+  p_default = "orange";
+  p_descr = "Time Control (Movie) Pop-up Colors.";
   p_help = "";
 } epoch_indicator_color;
 
-
 paramdef string {
   p_default = "red";
-  p_descr = "";
+  p_descr = "Color of current time tick.";
   p_help = "";
 } now_time_color;
 
-
 paramdef string {
   p_default = "yellow";
-  p_descr = "";
+  p_descr = "Color of time ticks.";
   p_help = "";
 } time_tick_color;
 
-
 paramdef string {
   p_default = "red";
-  p_descr = "";
+  p_descr = "Color of mark showing latest click location.";
   p_help = "";
 } latest_click_mark_color;
 
-
 paramdef string {
   p_default = "yellow";
-  p_descr = "";
+  p_descr = "Color of mark showing latest click of remote client.";
   p_help = "";
 } latest_client_mark_color;
 
+commentdef {
+  p_header = "Mode flags.";
+  p_text = "";
+}
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Show the height selector in the right margin.";
+  p_help = "oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.";
 } show_height_sel;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Show data status messages at top of image.";
+  p_help = "There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.";
 } show_data_messages;
-
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Sets the format for output of Lat, Lon's.";
+  p_help = "0= Decimal Degrees, 1 = deg min' sec'.";
 } latlon_mode;
-
 
 paramdef string {
   p_default = "%m/%d/%y %H:%M:%S";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the format for the time strings.";
+  p_help = "See 'man strftime' for format options. Can add additional text as part of the Time string.";
 } label_time_format;
-
 
 paramdef string {
   p_default = "%H:%M %m/%d/%Y";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Set the format for the time string in the movie start time text field of the movie pop-up window.";
+  p_help = "This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.";
 } moviestart_time_format;
-
 
 paramdef string {
   p_default = "%H:%M";
-  p_descr = "";
+  p_descr = "Set the format for the time strings in the frame range text fields.";
   p_help = "";
 } frame_range_time_format;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Plot a Legend for each Grid overlay.";
   p_help = "";
 } layer_legends_on;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Plot a Legend for each Contour overlay.";
   p_help = "";
 } cont_legends_on;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Plot a Legend for each Wind overlay.";
   p_help = "";
 } wind_legends_on;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Switch to turn off all data labels on the display.";
   p_help = "";
 } display_labels;
 
-
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
+  p_descr = "Switch to turn on/off Height, Route and Wind Scale reference lines.";
   p_help = "";
 } display_ref_lines;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "TOP Margin styles.";
+  p_help = " 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label";
 } top_margin_render_style;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Bottom Margin Styles.";
+  p_help = "1 - Distance Scale. 2 - Time Scale.";
 } bot_margin_render_style;
-
 
 paramdef int {
   p_default = 0;
   p_descr = "";
   p_help = "";
 } horiz_default_y_pos;
-
 
 paramdef int {
   p_default = 0;

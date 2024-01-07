@@ -5022,16 +5022,25 @@
     tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
     tt++;
     
+    // Parameter 'Comment 38'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 38");
+    tt->comment_hdr = tdrpStrDup("Server access.");
+    tt->comment_text = tdrpStrDup("");
+    tt++;
+    
     // Parameter 'http_tunnel_url'
     // ctype is 'char*'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("http_tunnel_url");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Tunnel for all DsServer (mdvp,spdbp,etc) Protocols.");
+    tt->help = tdrpStrDup("USE THIS TO CROSS A FIREWALL ON THE SERVER END OF THE CHAI. Set this to the special http tunnel that resides in the same local network as the  data server hosts. This allows 'tunneling' the MDV and Spdb data protocols through a host, running apache:httpd that is visible from the Internet or intranet. Note: a special  'Apache::Mod_perl' extension (The tunnel - it's similar to a cgi mechanism) must be installed on the http server for this to work.");
     tt->val_offset = (char *) &http_tunnel_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/DsServerTunnel.");
     tt++;
     
     // Parameter 'http_proxy_url'
@@ -5040,10 +5049,28 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("http_proxy_url");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("USE THIS TO CROSS A FIREWALL AT THE Client/CIDD End of the Chain.");
+    tt->help = tdrpStrDup("# Set this to the url of a http forwarding proxy to pass http requests through the proxy. This is usually the same as the HTTP proxy URL in your browser. Note. If you need the data to flow through the proxy the http_tunnel_url must be enabled.\n\n");
     tt->val_offset = (char *) &http_proxy_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("http://webcache.ucar.edu:3128/");
+    tt++;
+    
+    // Parameter 'Comment 39'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 39");
+    tt->comment_hdr = tdrpStrDup("Another view of the possible Service Topologies.");
+    tt->comment_text = tdrpStrDup("All Local - No Firewalls - Standard Setup\n--------- Local Lan --------------\nCIDD<--- MDVP --->DsMdvServer\n\nData Services Behind a firewall\n----- Internet ----|Firewall|------ Local Lan ----------------\nCIDD<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer\n\nBoth Client and Data Services behind Firewalls\n---Local Lan ---|Firewall|--Internet----|Firewall|--------Local Lan ----------\nCIDD<---HTTP--->Http Proxy<---HTTP--->DsServer Tunnel<---MDVP--->DsMdvServer");
+    tt++;
+    
+    // Parameter 'Comment 40'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 40");
+    tt->comment_hdr = tdrpStrDup("Setting colors.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'foreground_color'
@@ -5052,10 +5079,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("foreground_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Legends, scales.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &foreground_color - &_start_;
-    tt->single_val.s = tdrpStrDup("White");
+    tt->single_val.s = tdrpStrDup("white");
     tt++;
     
     // Parameter 'background_color'
@@ -5064,10 +5091,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("background_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Background of images.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &background_color - &_start_;
-    tt->single_val.s = tdrpStrDup("Black");
+    tt->single_val.s = tdrpStrDup("black");
     tt++;
     
     // Parameter 'margin_color'
@@ -5076,10 +5103,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("margin_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Background of margins.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &margin_color - &_start_;
-    tt->single_val.s = tdrpStrDup("Black");
+    tt->single_val.s = tdrpStrDup("black");
     tt++;
     
     // Parameter 'out_of_range_color'
@@ -5088,7 +5115,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("out_of_range_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Render values outside the data range of the color scale.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &out_of_range_color - &_start_;
     tt->single_val.s = tdrpStrDup("transparent");
@@ -5100,7 +5127,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("route_path_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Color of the cross section reference line.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &route_path_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
@@ -5112,10 +5139,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("time_axis_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Text in the time axis margins.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &time_axis_color - &_start_;
-    tt->single_val.s = tdrpStrDup("cyan");
+    tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
     // Parameter 'time_frame_color'
@@ -5124,10 +5151,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("time_frame_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("A solid rectangle showing the movie frame extent.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &time_frame_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("gray50");
     tt++;
     
     // Parameter 'height_axis_color'
@@ -5136,10 +5163,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("height_axis_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The text in the height selector margin.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &height_axis_color - &_start_;
-    tt->single_val.s = tdrpStrDup("cyan");
+    tt->single_val.s = tdrpStrDup("pink");
     tt++;
     
     // Parameter 'height_indicator_color'
@@ -5148,10 +5175,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("height_indicator_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("A solid rectangle showing the height extent of the data plane.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &height_indicator_color - &_start_;
-    tt->single_val.s = tdrpStrDup("red");
+    tt->single_val.s = tdrpStrDup("gray50");
     tt++;
     
     // Parameter 'range_ring_color'
@@ -5160,7 +5187,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("range_ring_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Range rings and azimuth lines.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &range_ring_color - &_start_;
     tt->single_val.s = tdrpStrDup("grey");
@@ -5172,8 +5199,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("missing_data_color");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set to 'transparent' to avoid having these plotted. ");
+    tt->help = tdrpStrDup("Otherwise, these data will be plotted in the indicated color.");
     tt->val_offset = (char *) &missing_data_color - &_start_;
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
@@ -5184,8 +5211,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("bad_data_color");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set to 'transparent' to avoid having these plotted. ");
+    tt->help = tdrpStrDup("Otherwise, these data will be plotted in the indicated color.");
     tt->val_offset = (char *) &bad_data_color - &_start_;
     tt->single_val.s = tdrpStrDup("transparent");
     tt++;
@@ -5196,10 +5223,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("epoch_indicator_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Time Control (Movie) Pop-up Colors.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &epoch_indicator_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
+    tt->single_val.s = tdrpStrDup("orange");
     tt++;
     
     // Parameter 'now_time_color'
@@ -5208,7 +5235,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("now_time_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Color of current time tick.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &now_time_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
@@ -5220,7 +5247,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("time_tick_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Color of time ticks.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &time_tick_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
@@ -5232,7 +5259,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("latest_click_mark_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Color of mark showing latest click location.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &latest_click_mark_color - &_start_;
     tt->single_val.s = tdrpStrDup("red");
@@ -5244,10 +5271,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("latest_client_mark_color");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Color of mark showing latest click of remote client.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &latest_client_mark_color - &_start_;
     tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'Comment 41'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 41");
+    tt->comment_hdr = tdrpStrDup("Mode flags.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'show_height_sel'
@@ -5256,8 +5292,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("show_height_sel");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Show the height selector in the right margin.");
+    tt->help = tdrpStrDup("oggle for displaying the height Selector in Right Margin. Note Right Margin should be at least 50 pixels wide.");
     tt->val_offset = (char *) &show_height_sel - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -5268,8 +5304,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("show_data_messages");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Show data status messages at top of image.");
+    tt->help = tdrpStrDup("There will be one line of status for each field in the stack. This is probably not necessary in situations where all data is small and local.");
     tt->val_offset = (char *) &show_data_messages - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -5280,8 +5316,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("latlon_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the format for output of Lat, Lon's.");
+    tt->help = tdrpStrDup("0= Decimal Degrees, 1 = deg min' sec'.");
     tt->val_offset = (char *) &latlon_mode - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -5292,8 +5328,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("label_time_format");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the format for the time strings.");
+    tt->help = tdrpStrDup("See 'man strftime' for format options. Can add additional text as part of the Time string.");
     tt->val_offset = (char *) &label_time_format - &_start_;
     tt->single_val.s = tdrpStrDup("%m/%d/%y %H:%M:%S");
     tt++;
@@ -5304,8 +5340,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("moviestart_time_format");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the format for the time string in the movie start time text field of the movie pop-up window.");
+    tt->help = tdrpStrDup("This is set separately from the general time string because you generally don't want any extra text and want to display things in an order that allows for easier entry.");
     tt->val_offset = (char *) &moviestart_time_format - &_start_;
     tt->single_val.s = tdrpStrDup("%H:%M %m/%d/%Y");
     tt++;
@@ -5316,7 +5352,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("frame_range_time_format");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set the format for the time strings in the frame range text fields.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &frame_range_time_format - &_start_;
     tt->single_val.s = tdrpStrDup("%H:%M");
@@ -5328,7 +5364,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("layer_legends_on");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot a Legend for each Grid overlay.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &layer_legends_on - &_start_;
     tt->single_val.b = pTRUE;
@@ -5340,7 +5376,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("cont_legends_on");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot a Legend for each Contour overlay.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &cont_legends_on - &_start_;
     tt->single_val.b = pTRUE;
@@ -5352,7 +5388,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("wind_legends_on");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot a Legend for each Wind overlay.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wind_legends_on - &_start_;
     tt->single_val.b = pTRUE;
@@ -5364,7 +5400,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("display_labels");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Switch to turn off all data labels on the display.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &display_labels - &_start_;
     tt->single_val.b = pTRUE;
@@ -5376,7 +5412,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("display_ref_lines");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Switch to turn on/off Height, Route and Wind Scale reference lines.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &display_ref_lines - &_start_;
     tt->single_val.b = pTRUE;
@@ -5388,8 +5424,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("top_margin_render_style");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("TOP Margin styles.");
+    tt->help = tdrpStrDup(" 1 (Default): Places a distance scale in the top Margin. 2: Place a Frame number and Time - Used often for HTML output. 3: None -  Used often to place the Data label");
     tt->val_offset = (char *) &top_margin_render_style - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -5400,8 +5436,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("bot_margin_render_style");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Bottom Margin Styles.");
+    tt->help = tdrpStrDup("1 - Distance Scale. 2 - Time Scale.");
     tt->val_offset = (char *) &bot_margin_render_style - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -6546,11 +6582,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 38'
+    // Parameter 'Comment 42'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 38");
+    tt->param_name = tdrpStrDup("Comment 42");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
