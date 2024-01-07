@@ -140,22 +140,21 @@ static void print_entry(FILE *out, const TDRPtable *tt, tdrp_print_mode_t mode)
       }
     }
     fprintf(out, "\n");
-    fprintf(out, "//\n");
 
     if (strlen(tt->descr) > 0) {
+      fprintf(out, "//\n");
       print_comment_lines(out, tt->descr, 70);
-      if (mode >= PRINT_LONG) {
-        fprintf(out, "//\n");
-      }
     }
 
     if (strlen(tt->help) > 0) {
+      fprintf(out, "//\n");
       print_comment_lines(out, tt->help, 70);
-      if (mode >= PRINT_LONG) {
-        fprintf(out, "//\n");
-      }
     }
 
+    if (tt->has_min || tt->has_max) {
+      fprintf(out, "//\n");
+    }
+    
     if (tt->has_min) {
       val_str = sprintf_val(tt->ptype, &tt->enum_def, &tt->min_val);
       fprintf(out, "// Minimum val: %s\n", val_str);
@@ -188,7 +187,6 @@ static void print_entry(FILE *out, const TDRPtable *tt, tdrp_print_mode_t mode)
 	fprintf(out, "// 1D array - variable length.\n");
       }
     }
-    fprintf(out, "//\n");
     fprintf(out, "\n");
     
   }
