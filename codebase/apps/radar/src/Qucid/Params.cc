@@ -3919,7 +3919,7 @@
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("check_data_times");
     tt->descr = tdrpStrDup("Used to reject 'out of date' data.");
-    tt->help = tdrpStrDup(" Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.");
+    tt->help = tdrpStrDup("Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.");
     tt->val_offset = (char *) &check_data_times - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -4743,13 +4743,22 @@
     tt->single_val.b = pFALSE;
     tt++;
     
+    // Parameter 'Comment 35'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 35");
+    tt->comment_hdr = tdrpStrDup("The Outer most domain.");
+    tt->comment_text = tdrpStrDup("Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.");
+    tt++;
+    
     // Parameter 'domain_limit_min_x'
     // ctype is 'double'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("domain_limit_min_x");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minimum X for outer domain.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &domain_limit_min_x - &_start_;
     tt->single_val.d = -10000;
@@ -4761,7 +4770,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("domain_limit_max_x");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Maximum X for outer domain.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &domain_limit_max_x - &_start_;
     tt->single_val.d = 10000;
@@ -4773,7 +4782,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("domain_limit_min_y");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minimum Y for outer domain.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &domain_limit_min_y - &_start_;
     tt->single_val.d = -10000;
@@ -4785,7 +4794,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("domain_limit_max_y");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Maximum Y for outer domain.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &domain_limit_max_y - &_start_;
     tt->single_val.d = 10000;
@@ -4797,7 +4806,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("origin_latitude");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The longitude of the center of the display. Internal range rings are relative to this point.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &origin_latitude - &_start_;
     tt->single_val.d = 0;
@@ -4809,7 +4818,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("origin_longitude");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The latitude of the center of the display. Internal range rings are relative to this point.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &origin_longitude - &_start_;
     tt->single_val.d = 0;
@@ -4821,7 +4830,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("reset_click_latitude");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &reset_click_latitude - &_start_;
     tt->single_val.d = 0;
@@ -4833,7 +4842,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("reset_click_longitude");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &reset_click_longitude - &_start_;
     tt->single_val.d = 0;
@@ -4845,8 +4854,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("planview_start_page");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Select the data field/page to start on.");
+    tt->help = tdrpStrDup("For the horizontal view.");
     tt->val_offset = (char *) &planview_start_page - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -4857,8 +4866,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("xsect_start_page");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Select the data field/page to start on.");
+    tt->help = tdrpStrDup("For the vertical (cross section) view.");
     tt->val_offset = (char *) &xsect_start_page - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -4869,7 +4878,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("num_zoom_levels");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The number of zoom levels.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &num_zoom_levels - &_start_;
     tt->single_val.i = 1;
@@ -4881,7 +4890,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("start_zoom_level");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Zoom level on which to start.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &start_zoom_level - &_start_;
     tt->single_val.i = 1;
@@ -4893,7 +4902,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("zoom_limits_in_latlon");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The units of the zoom limits are in deg lat/lon.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &zoom_limits_in_latlon - &_start_;
     tt->single_val.b = pFALSE;
@@ -4905,10 +4914,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("num_cache_zooms");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The number of Cached images for zooms.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &num_cache_zooms - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 36'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 36");
+    tt->comment_hdr = tdrpStrDup("Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.");
+    tt->comment_text = tdrpStrDup(" All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0");
     tt++;
     
     // Parameter 'min_ht'
@@ -4917,7 +4935,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("min_ht");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minimum ht of cross section.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &min_ht - &_start_;
     tt->single_val.d = 0;
@@ -4929,7 +4947,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("max_ht");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Maximum ht of cross section.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_ht - &_start_;
     tt->single_val.d = 30;
@@ -4941,10 +4959,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("start_ht");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Starting height of horizontal view.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &start_ht - &_start_;
     tt->single_val.d = 0;
+    tt++;
+    
+    // Parameter 'Comment 37'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 37");
+    tt->comment_hdr = tdrpStrDup("Finding the resources for maps/overlays, surface stations.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'map_file_subdir'
@@ -4953,10 +4980,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("map_file_subdir");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Directory for maps/overlays.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &map_file_subdir - &_start_;
-    tt->single_val.s = tdrpStrDup("maps");
+    tt->single_val.s = tdrpStrDup("$(HOME)/maps");
     tt++;
     
     // Parameter 'locator_margin_km'
@@ -4965,8 +4992,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("locator_margin_km");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Station locator features.");
+    tt->help = tdrpStrDup("Maximum allowed  Distance in km between request point and station.");
     tt->val_offset = (char *) &locator_margin_km - &_start_;
     tt->single_val.d = 50;
     tt++;
@@ -4977,10 +5004,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("station_loc_url");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Full Path File name or http URL to a station data file.");
+    tt->help = tdrpStrDup("The format of each line is:  ID, LAT, LON, ALT(m), TYPE.");
     tt->val_offset = (char *) &station_loc_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("http://www.rap.ucar.edu/maps/Taiwan_stations.dat");
     tt++;
     
     // Parameter 'remote_ui_url'
@@ -4989,10 +5016,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("remote_ui_url");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("FMQ Type URL for Receiving Remote commands.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &remote_ui_url - &_start_;
-    tt->single_val.s = tdrpStrDup("");
+    tt->single_val.s = tdrpStrDup("/tmp/remoteUI");
     tt++;
     
     // Parameter 'http_tunnel_url'
@@ -6519,11 +6546,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 35'
+    // Parameter 'Comment 38'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 35");
+    tt->param_name = tdrpStrDup("Comment 38");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

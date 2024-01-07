@@ -1749,7 +1749,7 @@ paramdef double {
 paramdef boolean {
   p_default = FALSE;
   p_descr = "Used to reject 'out of date' data.";
-  p_help = " Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
+  p_help = "Set this param to TRUE to check and reject for rendering any data that falls outside the movie frame interval + the slop/stretch_factor.";
 } check_data_times;
 
 paramdef boolean {
@@ -2162,152 +2162,146 @@ paramdef boolean {
   p_help = "Warning - will allow users shell access, or to write to other dirs.";
 } enable_save_image_panel;
 
+commentdef {
+  p_header = "The Outer most domain.";
+  p_text = "Overlays are clipped to this domain and pan/moves cannot exceed these edge limits. Note: CIDD does not pan on the outermost domain.\n\nNote: for Lat/Lon Domains, Choose 0-360, -90+90. to get whole earth.\n\nOne can also choose Longitude range -180 to 180, -90 to 270, etc.\nFor whole earth views, aspect ration 1.0,  set the outer most domain to -180 to 180 and -180 to 180. Otherwise, set the aspect ratio to 2.0 and use -180 to 180 and -90 to 90.";
+}
 
 paramdef double {
   p_default = -10000;
-  p_descr = "";
+  p_descr = "Minimum X for outer domain.";
   p_help = "";
 } domain_limit_min_x;
 
 paramdef double {
   p_default = 10000;
-  p_descr = "";
+  p_descr = "Maximum X for outer domain.";
   p_help = "";
 } domain_limit_max_x;
 
-
 paramdef double {
   p_default = -10000;
-  p_descr = "";
+  p_descr = "Minimum Y for outer domain.";
   p_help = "";
 } domain_limit_min_y;
 
-
 paramdef double {
   p_default = 10000;
-  p_descr = "";
+  p_descr = "Maximum Y for outer domain.";
   p_help = "";
 } domain_limit_max_y;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "The longitude of the center of the display. Internal range rings are relative to this point.";
   p_help = "";
 } origin_latitude;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "The latitude of the center of the display. Internal range rings are relative to this point.";
   p_help = "";
 } origin_longitude;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.";
   p_help = "";
 } reset_click_latitude;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "On startup and each time the reset button is pressed, the display will indicate a click at this point, as if the user had clicked.";
   p_help = "";
 } reset_click_longitude;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Select the data field/page to start on.";
+  p_help = "For the horizontal view.";
 } planview_start_page;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Select the data field/page to start on.";
+  p_help = "For the vertical (cross section) view.";
 } xsect_start_page;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "The number of zoom levels.";
   p_help = "";
 } num_zoom_levels;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "Zoom level on which to start.";
   p_help = "";
 } start_zoom_level;
 
-
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
+  p_descr = "The units of the zoom limits are in deg lat/lon.";
   p_help = "";
 } zoom_limits_in_latlon;
 
-
 paramdef int {
   p_default = 1;
-  p_descr = "";
+  p_descr = "The number of Cached images for zooms.";
   p_help = "";
 } num_cache_zooms;
 
+commentdef {
+  p_header = "Vertical Range and Resolution - Establishes a vertical coordinate system for the cross sectional imagery.";
+  p_text = " All data must map into this range for it to be visible.\n\tmin_ht is value nearest the ground - Plotted at the bottom.\n\tmax_ht is the value furtherest from the ground - Plotted at the top.\n\nUnits are ignored and no inter conversions or re-mappings are performed.\n\nReturned cross sections are are often km, but could be sigma, pressure or degrees elevation.\n\nExamples:\n\tSigma : min_ht = 1.0, max_ht = 0.0, ht_interval = .1\n\tPressure : min_ht = 1100.0, max_ht = 100.0, ht_interval = -100\n\tRadial Radar:  min_ht = 0.0 max_ht = 25.0, ht_interval = 1.0";
+}
 
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "Minimum ht of cross section.";
   p_help = "";
 } min_ht;
 
-
 paramdef double {
   p_default = 30;
-  p_descr = "";
+  p_descr = "Maximum ht of cross section.";
   p_help = "";
 } max_ht;
 
-
 paramdef double {
   p_default = 0;
-  p_descr = "";
+  p_descr = "Starting height of horizontal view.";
   p_help = "";
 } start_ht;
 
+commentdef {
+  p_header = "Finding the resources for maps/overlays, surface stations.";
+  p_text = "";
+}
 
 paramdef string {
-  p_default = "maps";
-  p_descr = "";
+  p_default = "$(HOME)/maps";
+  p_descr = "Directory for maps/overlays.";
   p_help = "";
 } map_file_subdir;
 
-
 paramdef double {
   p_default = 50;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Station locator features.";
+  p_help = "Maximum allowed  Distance in km between request point and station.";
 } locator_margin_km;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
-  p_help = "";
+  p_default = "http://www.rap.ucar.edu/maps/Taiwan_stations.dat";
+  p_descr = "Full Path File name or http URL to a station data file.";
+  p_help = "The format of each line is:  ID, LAT, LON, ALT(m), TYPE.";
 } station_loc_url;
 
-
 paramdef string {
-  p_default = "";
-  p_descr = "";
+  p_default = "/tmp/remoteUI";
+  p_descr = "FMQ Type URL for Receiving Remote commands.";
   p_help = "";
 } remote_ui_url;
-
 
 paramdef string {
   p_default = "";
