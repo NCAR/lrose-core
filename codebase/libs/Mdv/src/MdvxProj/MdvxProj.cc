@@ -1918,7 +1918,7 @@ void MdvxProj::_coord2ProjParams(Mdvx::projection_type_t proj_type,
   
 {
 
-  memset(proj_params, 0, MDV_MAX_PROJ_PARAMS * sizeof(fl32));
+  memset(proj_params, 0, MDV_MAX_PROJ_PARAMS * sizeof(fl64));
 
   switch (proj_type) {
     
@@ -1976,7 +1976,7 @@ void MdvxProj::_coord2ProjParams(Mdvx::projection_type_t proj_type,
 
 ////////////////////////////////////////////////////////
 // copy proj_param info to coord struct
-// Proj params array should be at least length 8 = MDV_MAX_PROJ_PARAMS
+// Proj params array should be at least length MDV_MAX_PROJ_PARAMS
 
 void MdvxProj::_projParams2Coord(Mdvx::projection_type_t proj_type,
 				 const fl64 *proj_params,
