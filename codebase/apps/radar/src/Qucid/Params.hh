@@ -1184,21 +1184,21 @@ public:
 
   tdrp_bool_t display_ref_lines;
 
-  int top_margin_render_style;
-
-  int bot_margin_render_style;
+  int horiz_default_x_pos;
 
   int horiz_default_y_pos;
 
-  int horiz_default_x_pos;
+  int horiz_default_width;
 
   int horiz_default_height;
 
-  int horiz_default_width;
+  int horiz_min_width;
 
   int horiz_min_height;
 
-  int horiz_min_width;
+  int top_margin_render_style;
+
+  int bot_margin_render_style;
 
   int horiz_top_margin;
 
@@ -1385,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[458];
+  mutable TDRPtable _table[461];
 
   const char *_className;
 

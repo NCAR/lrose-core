@@ -5418,6 +5418,96 @@
     tt->single_val.b = pTRUE;
     tt++;
     
+    // Parameter 'Comment 42'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 42");
+    tt->comment_hdr = tdrpStrDup("Window sizes.");
+    tt->comment_text = tdrpStrDup("Window width and height is specified in pixels.");
+    tt++;
+    
+    // Parameter 'horiz_default_x_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_x_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &horiz_default_x_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_default_y_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_y_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &horiz_default_y_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_default_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_width");
+    tt->descr = tdrpStrDup("Default width of main window (pixels).");
+    tt->help = tdrpStrDup("Height of main window at startup.");
+    tt->val_offset = (char *) &horiz_default_width - &_start_;
+    tt->single_val.i = 800;
+    tt++;
+    
+    // Parameter 'horiz_default_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_default_height");
+    tt->descr = tdrpStrDup("Default height of main window (pixels).");
+    tt->help = tdrpStrDup("Width of main window at startup.");
+    tt->val_offset = (char *) &horiz_default_height - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'horiz_min_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_min_width");
+    tt->descr = tdrpStrDup("Minimum width of main window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
+    tt->val_offset = (char *) &horiz_min_width - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'horiz_min_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_min_height");
+    tt->descr = tdrpStrDup("Minimum height of main window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the main window smaller than this.");
+    tt->val_offset = (char *) &horiz_min_height - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
+    // Parameter 'Comment 43'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 43");
+    tt->comment_hdr = tdrpStrDup("Margin details.");
+    tt->comment_text = tdrpStrDup("Margins are specified in pixels.");
+    tt++;
+    
     // Parameter 'top_margin_render_style'
     // ctype is 'int'
     
@@ -5442,86 +5532,14 @@
     tt->single_val.i = 1;
     tt++;
     
-    // Parameter 'horiz_default_y_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_y_pos");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_default_y_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_default_x_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_x_pos");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_default_x_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_default_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_height");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_default_height - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'horiz_default_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_default_width");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_default_width - &_start_;
-    tt->single_val.i = 800;
-    tt++;
-    
-    // Parameter 'horiz_min_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_min_height");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_min_height - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'horiz_min_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_min_width");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_min_width - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
     // Parameter 'horiz_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_top_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Height of top margin (pixels).");
+    tt->help = tdrpStrDup("Size of top margin for main window.");
     tt->val_offset = (char *) &horiz_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5532,8 +5550,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_bot_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
+    tt->help = tdrpStrDup("Size of bottom margin for main window.");
     tt->val_offset = (char *) &horiz_bot_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5544,8 +5562,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_left_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Width of left margin (pixels).");
+    tt->help = tdrpStrDup("Size of left margin for main window.");
     tt->val_offset = (char *) &horiz_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5556,10 +5574,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("horiz_right_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Width of right margin (pixels).");
+    tt->help = tdrpStrDup("Size of right margin for main window.");
     tt->val_offset = (char *) &horiz_right_margin - &_start_;
     tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'Comment 44'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 44");
+    tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
+    tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer.");
     tt++;
     
     // Parameter 'horiz_legends_start_x'
@@ -6582,11 +6609,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 42'
+    // Parameter 'Comment 45'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 42");
+    tt->param_name = tdrpStrDup("Comment 45");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
