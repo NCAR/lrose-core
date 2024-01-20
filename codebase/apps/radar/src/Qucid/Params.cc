@@ -5265,18 +5265,6 @@
     tt->single_val.s = tdrpStrDup("red");
     tt++;
     
-    // Parameter 'latest_client_mark_color'
-    // ctype is 'char*'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = STRING_TYPE;
-    tt->param_name = tdrpStrDup("latest_client_mark_color");
-    tt->descr = tdrpStrDup("Color of mark showing latest click of remote client.");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &latest_client_mark_color - &_start_;
-    tt->single_val.s = tdrpStrDup("yellow");
-    tt++;
-    
     // Parameter 'Comment 41'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -6046,7 +6034,7 @@
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("wind_marker_type");
     tt->descr = tdrpStrDup("Wind vector rendering style.");
-    tt->help = tdrpStrDup("\t'arrow': centered at data point.\n\t'vector': Vertex at data point.\n\t'barb': N Hemisp.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\t'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n\t'tickvector': Cross ticks at wind_time_scale_interval minutes.\n\t'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n\t'barb_sh': S Hemisphere.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For the others (Barbs) the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
+    tt->help = tdrpStrDup("'arrow': centered at data point.\n'vector': Vertex at data point.\n'barb': N Hemisp.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n'tickvector': Cross ticks at wind_time_scale_interval minutes.\n'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n'barb_sh': S Hemisphere.\n'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For barbs the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
     tt->val_offset = (char *) &wind_marker_type - &_start_;
     tt->single_val.s = tdrpStrDup("arrow");
     tt++;
@@ -6081,8 +6069,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wind_reference_speed");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Sets the length of the wind vector reference legend.");
+    tt->help = tdrpStrDup("The legend shows a symbos representing a wind speed of this value.");
     tt->val_offset = (char *) &wind_reference_speed - &_start_;
     tt->single_val.d = 10;
     tt++;
@@ -6093,10 +6081,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("wind_units_label");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Select the label to be printed next to the reference bar.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wind_units_label - &_start_;
     tt->single_val.s = tdrpStrDup("m/sec");
+    tt++;
+    
+    // Parameter 'Comment 47'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 47");
+    tt->comment_hdr = tdrpStrDup("Plotting contours in data fields.");
+    tt->comment_text = tdrpStrDup("In the data layers section you can select contour plotting.");
     tt++;
     
     // Parameter 'label_contours'
@@ -6105,7 +6102,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("label_contours");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set to TRUE to have numeric labels on line contours.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &label_contours - &_start_;
     tt->single_val.b = pTRUE;
@@ -6117,22 +6114,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("contour_line_width");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Width of contour lines.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &contour_line_width - &_start_;
     tt->single_val.i = 1;
     tt++;
     
     // Parameter 'smooth_contours'
-    // ctype is 'tdrp_bool_t'
+    // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
+    tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("smooth_contours");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Apply smoothing to data grids before contouring.");
+    tt->help = tdrpStrDup("0 = Off, 1 = single pass, 2 = double pass.");
     tt->val_offset = (char *) &smooth_contours - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'use_alt_contours'
@@ -6141,8 +6138,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_alt_contours");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Use Alternate (Mdvx) Contouring Routines.");
+    tt->help = tdrpStrDup("Slower - Nicer labeling - Less smooth. Warning - Does not work correctly when data and display origins are different. Works fine in lat/lon projections");
     tt->val_offset = (char *) &use_alt_contours - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6153,7 +6150,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("add_noise");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Add 1 part in 250 Noise to help smooth contours.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &add_noise - &_start_;
     tt->single_val.b = pFALSE;
@@ -6165,8 +6162,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("special_contour_value");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Specify special contour value.");
+    tt->help = tdrpStrDup("Contours at this value will have a wider line.");
     tt->val_offset = (char *) &special_contour_value - &_start_;
     tt->single_val.d = 0;
     tt++;
@@ -6177,8 +6174,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("map_bad_to_min_value");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Contour the bad value, by setting bad cells to have min value in data.");
+    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the bad and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want bad contoured, set this to TRUE.");
     tt->val_offset = (char *) &map_bad_to_min_value - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6189,10 +6186,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("map_missing_to_min_value");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Contour the missing value, by setting missing cells to have min value in data.");
+    tt->help = tdrpStrDup("Sometimes, for CONTOURING it is useful to make the assumption that the missing and/or missing values should be considered at the minimum of the dynamic range of the data. i.e. if you want missing contoured, set this to TRUE.");
     tt->val_offset = (char *) &map_missing_to_min_value - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 48'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 48");
+    tt->comment_hdr = tdrpStrDup("Overall rendering order.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'draw_main_on_top'
@@ -6201,10 +6207,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("draw_main_on_top");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("TRUE: render main field first, then layers.");
+    tt->help = tdrpStrDup("FALSE: render main field on top of layers.");
     tt->val_offset = (char *) &draw_main_on_top - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 49'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 49");
+    tt->comment_hdr = tdrpStrDup("Marking click location from separate app.");
+    tt->comment_text = tdrpStrDup("CIDD can cooperate with a secondary app, receiving click details via shared memo");
     tt++;
     
     // Parameter 'mark_latest_click_location'
@@ -6213,7 +6228,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("mark_latest_click_location");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Option to mark latest click location from client app.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &mark_latest_click_location - &_start_;
     tt->single_val.b = pFALSE;
@@ -6225,10 +6240,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("latest_click_mark_size");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Size of marker at latest click location (pixels).");
+    tt->help = tdrpStrDup("Location clicked in client app.");
     tt->val_offset = (char *) &latest_click_mark_size - &_start_;
     tt->single_val.i = 11;
+    tt++;
+    
+    // Parameter 'latest_client_mark_color'
+    // ctype is 'char*'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = STRING_TYPE;
+    tt->param_name = tdrpStrDup("latest_client_mark_color");
+    tt->descr = tdrpStrDup("Color of mark showing latest click of remote client.");
+    tt->help = tdrpStrDup("");
+    tt->val_offset = (char *) &latest_client_mark_color - &_start_;
+    tt->single_val.s = tdrpStrDup("yellow");
+    tt++;
+    
+    // Parameter 'Comment 50'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 50");
+    tt->comment_hdr = tdrpStrDup("Fonts.");
+    tt->comment_text = tdrpStrDup("TO-DO - fix this.");
     tt++;
     
     // Parameter 'num_fonts'
@@ -6237,8 +6273,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("num_fonts");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Number of fonts of increasing size.");
+    tt->help = tdrpStrDup("The display picks the appropriate font size in tight location - e.g. axis labels,");
     tt->val_offset = (char *) &num_fonts - &_start_;
     tt->single_val.i = 1;
     tt++;
@@ -6249,10 +6285,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("font_display_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("1 - Clears background behind label text. 0 - Does not clear.");
+    tt->help = tdrpStrDup("Using 1 can maket the text stand out better, but some data is overwritten.");
     tt->val_offset = (char *) &font_display_mode - &_start_;
     tt->single_val.i = 1;
+    tt++;
+    
+    // Parameter 'Comment 51'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 51");
+    tt->comment_hdr = tdrpStrDup("Analog clock.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'show_clock'
@@ -6261,7 +6306,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("show_clock");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set TRUE for displaying an analog clock in the upper right hand corner of the image.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &show_clock - &_start_;
     tt->single_val.b = pFALSE;
@@ -6273,8 +6318,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("draw_clock_local");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set TRUE for clock in local time.");
+    tt->help = tdrpStrDup("Otherwise UTC.");
     tt->val_offset = (char *) &draw_clock_local - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6285,10 +6330,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("use_local_timestamps");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("TRUE: time stamps are local. FALSE: time stamps are UTC.");
+    tt->help = tdrpStrDup("All Input time widgets expect UTC when FALSE, local times when set TRUE.");
     tt->val_offset = (char *) &use_local_timestamps - &_start_;
     tt->single_val.b = pFALSE;
+    tt++;
+    
+    // Parameter 'Comment 52'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 52");
+    tt->comment_hdr = tdrpStrDup("GUI.");
+    tt->comment_text = tdrpStrDup("");
     tt++;
     
     // Parameter 'num_field_menu_cols'
@@ -6297,7 +6351,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("num_field_menu_cols");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Set this parameter to force the field menu pop-up to this many columns.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &num_field_menu_cols - &_start_;
     tt->single_val.i = 0;
@@ -6309,8 +6363,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("wsddm_mode");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Turn on WSDDM-specific behavior.");
+    tt->help = tdrpStrDup("Go to end of loop when movie stops. No on-image no-data message when winds are missing");
     tt->val_offset = (char *) &wsddm_mode - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6321,8 +6375,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("one_click_rhi");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("This parameter allows the user to define a route/rhi with one mouse click and drag.");
+    tt->help = tdrpStrDup("When set to TRUE, disallows multi way point cross sections. RHI are defined by clicking right mouse near the radar origin and dragging away from the radar along the desired  azimuth and releasing.");
     tt->val_offset = (char *) &one_click_rhi - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6333,8 +6387,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rotate_coarse_adjust");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("CIDD uses the number pad keys 7,9,4,6,1,3 to rotate the RHI by +/- these amounts (deg).");
+    tt->help = tdrpStrDup("7-9 is coarse, 4-6 is medium, and 1-3 is fine.");
     tt->val_offset = (char *) &rotate_coarse_adjust - &_start_;
     tt->single_val.d = 6;
     tt++;
@@ -6345,8 +6399,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rotate_medium_adjust");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adjust RHI azimuth in medium mode.");
+    tt->help = tdrpStrDup("Keys 4-6.");
     tt->val_offset = (char *) &rotate_medium_adjust - &_start_;
     tt->single_val.d = 2;
     tt++;
@@ -6357,8 +6411,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("rotate_fine_adjust");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Adjust RHI azimuth in fine mode.");
+    tt->help = tdrpStrDup("Keys 1-3.");
     tt->val_offset = (char *) &rotate_fine_adjust - &_start_;
     tt->single_val.d = 0.5;
     tt++;
@@ -6369,7 +6423,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("disable_pick_mode");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Disable pick feature.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &disable_pick_mode - &_start_;
     tt->single_val.b = pTRUE;
@@ -6381,7 +6435,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("replace_underscores");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Underscores in field names and legends are replaced by spaces.");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &replace_underscores - &_start_;
     tt->single_val.b = pTRUE;
@@ -6393,8 +6447,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("close_popups");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Close CIDD's pop ups When the main window is closed.");
+    tt->help = tdrpStrDup("Set this to FALSE if you don't want CIDD to close its pop ups when switching between virtual desktops");
     tt->val_offset = (char *) &close_popups - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6405,8 +6459,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("clip_overlay_fields");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The default behavior is to render the overlay fields using the same render method as the primary field.");
+    tt->help = tdrpStrDup("CIDD can Render Overlay fields using filled polygons, and clip the data between some minimum and maximum. This is useful, for example, if one wants to show Radar data over +40dB overlaid on satellite imagery.");
     tt->val_offset = (char *) &clip_overlay_fields - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -6627,11 +6681,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 47'
+    // Parameter 'Comment 53'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 47");
+    tt->param_name = tdrpStrDup("Comment 53");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;

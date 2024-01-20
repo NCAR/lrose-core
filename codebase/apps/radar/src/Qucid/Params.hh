@@ -1160,8 +1160,6 @@ public:
 
   char* latest_click_mark_color;
 
-  char* latest_client_mark_color;
-
   tdrp_bool_t show_height_sel;
 
   tdrp_bool_t show_data_messages;
@@ -1294,7 +1292,7 @@ public:
 
   int contour_line_width;
 
-  tdrp_bool_t smooth_contours;
+  int smooth_contours;
 
   tdrp_bool_t use_alt_contours;
 
@@ -1311,6 +1309,8 @@ public:
   tdrp_bool_t mark_latest_click_location;
 
   int latest_click_mark_size;
+
+  char* latest_client_mark_color;
 
   int num_fonts;
 
@@ -1385,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[463];
+  mutable TDRPtable _table[469];
 
   const char *_className;
 
