@@ -1258,11 +1258,11 @@ public:
 
   tdrp_bool_t range_ring_labels;
 
+  tdrp_bool_t azmith_lines;
+
   double azmith_interval;
 
   double azmith_radius;
-
-  tdrp_bool_t azmith_lines;
 
   tdrp_bool_t all_winds_on;
 
@@ -1385,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[462];
+  mutable TDRPtable _table[463];
 
   const char *_className;
 

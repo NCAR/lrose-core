@@ -2687,7 +2687,7 @@ paramdef int {
 } vert_legends_delta_y;
 
 commentdef {
-  p_header = "Range rings.";
+  p_header = "Draw range rings and azimuth lines.";
   p_text = "These apply to radars only.";
 }
 
@@ -2729,104 +2729,109 @@ paramdef boolean {
 
 paramdef int {
   p_default = 50;
-  p_descr = "";
+  p_descr = "Spacing in x for range ring labels (pixels).";
   p_help = "";
 } range_ring_x_space;
 
 paramdef int {
   p_default = 15;
-  p_descr = "";
+  p_descr = "Spacing in y for range ring labels (pixels).";
   p_help = "";
 } range_ring_y_space;
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Plot range ring labels.";
+  p_help = "Label the range for each ring.";
 } range_ring_labels;
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Draw azimuth lines for a radar location.";
+  p_help = "These complement range rings, to provide guidance on azimuths for radar gates.";
+} azmith_lines;
 
 paramdef double {
   p_default = 30;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Interval for azimuth lines.";
+  p_help = "If azimuth lines are on.";
 } azmith_interval;
 
 paramdef double {
   p_default = 200;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Max radius for azimuth lines.";
+  p_help = "If azimuth lines are on.";
 } azmith_radius;
 
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "";
-  p_help = "";
-} azmith_lines;
+commentdef {
+  p_header = "Plotting wind vectors.";
+  p_text = "See also the wind layers section.";
+}
 
 paramdef boolean {
   p_default = TRUE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Plot all wind layers.";
+  p_help = "Turns on all wind layers.";
 } all_winds_on;
 
 paramdef int {
   p_default = 33;
-  p_descr = "";
+  p_descr = "Wind barb shaft length (pixels).";
   p_help = "";
 } barb_shaft_len;
 
 paramdef int {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Ideal number of vectors in the x dimension.";
+  p_help = "The display will space the wind vectors in x accordingly.";
 } ideal_x_vectors;
 
 paramdef int {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Ideal number of vectors in the y dimension.";
+  p_help = "The display will space the wind vectors in y accordingly.";
 } ideal_y_vectors;
 
 paramdef int {
   p_default = 5;
-  p_descr = "";
+  p_descr = "Minimum arrow head size for wind vectors (pixels).";
   p_help = "";
 } wind_head_size;
 
 paramdef double {
   p_default = 45;
-  p_descr = "";
+  p_descr = "Angle of arrow head for wind vectors (deg).";
   p_help = "";
 } wind_head_angle;
 
 paramdef int {
   p_default = 3;
-  p_descr = "";
-  p_help = "";
+  p_descr = "The display will space the wind vectors in x accordingly.";
+  p_help = "Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.";
 } wind_scaler;
 
 paramdef double {
   p_default = 10;
-  p_descr = "";
-  p_help = "";
+  p_descr = "inutes between steps on the wind scaling slider.";
+  p_help = "Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity";
 } wind_time_scale_interval;
 
 paramdef string {
   p_default = "arrow";
-  p_descr = "";
-  p_help = "";
+  p_descr = "Wind vector rendering style.";
+  p_help = "\t'arrow': centered at data point.\n\t'vector': Vertex at data point.\n\t'barb': N Hemisp.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\t'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n\t'tickvector': Cross ticks at wind_time_scale_interval minutes.\n\t'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n\t'barb_sh': S Hemisphere.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For the others (Barbs) the units are arbitrary, but the flag units on the barbs will reflect the data's native units.";
 } wind_marker_type;
 
 paramdef double {
   p_default = 10;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Scale the vertical velocity by this factor, relative to the U/V. ";
+  p_help = "W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.";
 } wind_w_scale_factor;
 
 paramdef double {
   p_default = 1;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Value to convert from the your reference speed units to m/sec. ";
+  p_help = "i.e. wind_units_scale_factor =  m/sec / chosen units.";
 } wind_units_scale_factor;
 
 paramdef double {

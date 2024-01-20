@@ -5786,7 +5786,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
     tt->param_name = tdrpStrDup("Comment 45");
-    tt->comment_hdr = tdrpStrDup("Range rings.");
+    tt->comment_hdr = tdrpStrDup("Draw range rings and azimuth lines.");
     tt->comment_text = tdrpStrDup("These apply to radars only.");
     tt++;
     
@@ -5868,7 +5868,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("range_ring_x_space");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Spacing in x for range ring labels (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &range_ring_x_space - &_start_;
     tt->single_val.i = 50;
@@ -5880,7 +5880,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("range_ring_y_space");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Spacing in y for range ring labels (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &range_ring_y_space - &_start_;
     tt->single_val.i = 15;
@@ -5892,10 +5892,22 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("range_ring_labels");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot range ring labels.");
+    tt->help = tdrpStrDup("Label the range for each ring.");
     tt->val_offset = (char *) &range_ring_labels - &_start_;
     tt->single_val.b = pTRUE;
+    tt++;
+    
+    // Parameter 'azmith_lines'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("azmith_lines");
+    tt->descr = tdrpStrDup("Draw azimuth lines for a radar location.");
+    tt->help = tdrpStrDup("These complement range rings, to provide guidance on azimuths for radar gates.");
+    tt->val_offset = (char *) &azmith_lines - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'azmith_interval'
@@ -5904,8 +5916,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("azmith_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Interval for azimuth lines.");
+    tt->help = tdrpStrDup("If azimuth lines are on.");
     tt->val_offset = (char *) &azmith_interval - &_start_;
     tt->single_val.d = 30;
     tt++;
@@ -5916,22 +5928,19 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("azmith_radius");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Max radius for azimuth lines.");
+    tt->help = tdrpStrDup("If azimuth lines are on.");
     tt->val_offset = (char *) &azmith_radius - &_start_;
     tt->single_val.d = 200;
     tt++;
     
-    // Parameter 'azmith_lines'
-    // ctype is 'tdrp_bool_t'
+    // Parameter 'Comment 46'
     
     memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("azmith_lines");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &azmith_lines - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 46");
+    tt->comment_hdr = tdrpStrDup("Plotting wind vectors.");
+    tt->comment_text = tdrpStrDup("See also the wind layers section.");
     tt++;
     
     // Parameter 'all_winds_on'
@@ -5940,8 +5949,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("all_winds_on");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot all wind layers.");
+    tt->help = tdrpStrDup("Turns on all wind layers.");
     tt->val_offset = (char *) &all_winds_on - &_start_;
     tt->single_val.b = pTRUE;
     tt++;
@@ -5952,7 +5961,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("barb_shaft_len");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Wind barb shaft length (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &barb_shaft_len - &_start_;
     tt->single_val.i = 33;
@@ -5964,8 +5973,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("ideal_x_vectors");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the x dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in x accordingly.");
     tt->val_offset = (char *) &ideal_x_vectors - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5976,8 +5985,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("ideal_y_vectors");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Ideal number of vectors in the y dimension.");
+    tt->help = tdrpStrDup("The display will space the wind vectors in y accordingly.");
     tt->val_offset = (char *) &ideal_y_vectors - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5988,7 +5997,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("wind_head_size");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Minimum arrow head size for wind vectors (pixels).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wind_head_size - &_start_;
     tt->single_val.i = 5;
@@ -6000,7 +6009,7 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wind_head_angle");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Angle of arrow head for wind vectors (deg).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &wind_head_angle - &_start_;
     tt->single_val.d = 45;
@@ -6012,8 +6021,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("wind_scaler");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("The display will space the wind vectors in x accordingly.");
+    tt->help = tdrpStrDup("Vectors will be drawn to show wind_scaler * wind_time_scale_interval minutes of motion.");
     tt->val_offset = (char *) &wind_scaler - &_start_;
     tt->single_val.i = 3;
     tt++;
@@ -6024,8 +6033,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wind_time_scale_interval");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("inutes between steps on the wind scaling slider.");
+    tt->help = tdrpStrDup("Wind vector length = wind_scaler * wind_time_scale_interval *  wind velocity");
     tt->val_offset = (char *) &wind_time_scale_interval - &_start_;
     tt->single_val.d = 10;
     tt++;
@@ -6036,8 +6045,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = STRING_TYPE;
     tt->param_name = tdrpStrDup("wind_marker_type");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Wind vector rendering style.");
+    tt->help = tdrpStrDup("\t'arrow': centered at data point.\n\t'vector': Vertex at data point.\n\t'barb': N Hemisp.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\n\t'tuft': like a piece of yarn - the least obtrusive - like a headless vector.\n\t'tickvector': Cross ticks at wind_time_scale_interval minutes.\n\t'metbarb': Calcs latitude - works for both hemispheres and adds a label of the 10's digit off the end of the barb, ala winds aloft charts.\n\t'barb_sh': S Hemisphere.\n\t'labeledbarb': labeled to nearest 10 degrees at the center - N. Hemisp.\nNOTE: When using arrow,vector,tuft,tickvector,  the data must be in m/sec for the scaling to work correctly. For the others (Barbs) the units are arbitrary, but the flag units on the barbs will reflect the data's native units.");
     tt->val_offset = (char *) &wind_marker_type - &_start_;
     tt->single_val.s = tdrpStrDup("arrow");
     tt++;
@@ -6048,8 +6057,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wind_w_scale_factor");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Scale the vertical velocity by this factor, relative to the U/V. ");
+    tt->help = tdrpStrDup("W tends to be small compared to U/V. Scaling it up makes the rendering more meaningful.");
     tt->val_offset = (char *) &wind_w_scale_factor - &_start_;
     tt->single_val.d = 10;
     tt++;
@@ -6060,8 +6069,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("wind_units_scale_factor");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Value to convert from the your reference speed units to m/sec. ");
+    tt->help = tdrpStrDup("i.e. wind_units_scale_factor =  m/sec / chosen units.");
     tt->val_offset = (char *) &wind_units_scale_factor - &_start_;
     tt->single_val.d = 1;
     tt++;
@@ -6618,11 +6627,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 46'
+    // Parameter 'Comment 47'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 46");
+    tt->param_name = tdrpStrDup("Comment 47");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
