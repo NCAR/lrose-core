@@ -2544,6 +2544,42 @@ paramdef int {
   p_help = "The user cannot shrink the main window smaller than this.";
 } horiz_min_height;
 
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} vert_default_x_pos;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Startup position of main window, relative to top-left of screen (pixels).";
+  p_help = "The main display window will start at this location.";
+} vert_default_y_pos;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Default width of vert section window (pixels).";
+  p_help = "Height of vert section window at startup.";
+} vert_default_width;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Default height of vert section window (pixels).";
+  p_help = "Width of vert section window at startup.";
+} vert_default_height;
+
+paramdef int {
+  p_default = 600;
+  p_descr = "Minimum width of vert section window (pixels).";
+  p_help = "The user cannot shrink the vert section window smaller than this.";
+} vert_min_width;
+
+paramdef int {
+  p_default = 400;
+  p_descr = "Minimum height of vert section window (pixels).";
+  p_help = "The user cannot shrink the vert section window smaller than this.";
+} vert_min_height;
+
 commentdef {
   p_header = "Margin details.";
   p_text = "Margins are specified in pixels.";
@@ -2585,142 +2621,111 @@ paramdef int {
   p_help = "Size of right margin for main window.";
 } horiz_right_margin;
 
-commentdef {
-  p_header = "Legends displayed within the plot window.";
-  p_text = "A legend can be displayed for each data layer.";
-}
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} horiz_legends_start_x;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} horiz_legends_start_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} horiz_legends_delta_y;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} vert_default_x_pos;
-
-paramdef int {
-  p_default = 0;
-  p_descr = "";
-  p_help = "";
-} vert_default_y_pos;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "";
-  p_help = "";
-} vert_default_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "";
-  p_help = "";
-} vert_default_width;
-
-paramdef int {
-  p_default = 400;
-  p_descr = "";
-  p_help = "";
-} vert_min_height;
-
-paramdef int {
-  p_default = 600;
-  p_descr = "";
-  p_help = "";
-} vert_min_width;
-
 paramdef int {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Height of top margin (pixels).";
+  p_help = "Size of top margin for vert section window.";
 } vert_top_margin;
 
 paramdef int {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Height of bottom margin (pixels).";
+  p_help = "Size of bottom margin for vert section window.";
 } vert_bot_margin;
 
 paramdef int {
   p_default = 20;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Width of left margin (pixels).";
+  p_help = "Size of left margin for vert section window.";
 } vert_left_margin;
 
 paramdef int {
   p_default = 80;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Width of right margin (pixels).";
+  p_help = "Size of right margin for vert section window.";
 } vert_right_margin;
+
+commentdef {
+  p_header = "Legends displayed within the plot window.";
+  p_text = "A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.";
+}
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Horizontal window legends start x position (pixels).";
+  p_help = "Relative to top left of window.";
+} horiz_legends_start_x;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Horizontal window legends start y position (pixels).";
+  p_help = "Relative to top left of window.";
+} horiz_legends_start_y;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Horizontal window legends spacing (pixels).";
+  p_help = "This is the line spacing between the legends.";
+} horiz_legends_delta_y;
+
+paramdef int {
+  p_default = 0;
+  p_descr = "Vertical window legends start x position (pixels).";
+  p_help = "Relative to top left of window.";
 } vert_legends_start_x;
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Vertical window legends start y position (pixels).";
+  p_help = "Relative to top left of window.";
 } vert_legends_start_y;
 
 paramdef int {
   p_default = 0;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Vertical window legends spacing (pixels).";
+  p_help = "This is the line spacing between the legends.";
 } vert_legends_delta_y;
 
+commentdef {
+  p_header = "Range rings.";
+  p_text = "These apply to radars only.";
+}
+
+paramdef boolean {
+  p_default = FALSE;
+  p_descr = "Turn range rings on/off.";
+  p_help = "TRUE means on - i.r. plot range rings.";
+} range_rings;
+
 paramdef double {
-  p_default = -1;
-  p_descr = "";
+  p_default = 50;
+  p_descr = "Spacing between range rings (km).";
   p_help = "";
 } range_ring_spacing;
 
 paramdef double {
-  p_default = 1000;
-  p_descr = "";
+  p_default = 500;
+  p_descr = "Maximum range ring (km)";
   p_help = "";
 } max_ring_range;
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Plot range rings relative to radar location.";
+  p_help = "We get the location from the data. If FALSE, rings are relative to plot origin.";
 } range_ring_follows_data;
 
 paramdef boolean {
-  p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_default = TRUE;
+  p_descr = "Only plot range rings for radar data sets.";
+  p_help = "TRUE turns off rings for non-radar data sets.";
 } range_ring_for_radar_only;
 
 paramdef boolean {
   p_default = FALSE;
-  p_descr = "";
-  p_help = "";
+  p_descr = "Plot domain moves with origin of the data set.";
+  p_help = "Shift the domain limits if the data origin shifts.";
 } domain_follows_data;
-
-paramdef boolean {
-  p_default = FALSE;
-  p_descr = "";
-  p_help = "";
-} range_rings;
 
 paramdef int {
   p_default = 50;

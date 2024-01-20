@@ -1196,6 +1196,18 @@ public:
 
   int horiz_min_height;
 
+  int vert_default_x_pos;
+
+  int vert_default_y_pos;
+
+  int vert_default_width;
+
+  int vert_default_height;
+
+  int vert_min_width;
+
+  int vert_min_height;
+
   int top_margin_render_style;
 
   int bot_margin_render_style;
@@ -1208,24 +1220,6 @@ public:
 
   int horiz_right_margin;
 
-  int horiz_legends_start_x;
-
-  int horiz_legends_start_y;
-
-  int horiz_legends_delta_y;
-
-  int vert_default_x_pos;
-
-  int vert_default_y_pos;
-
-  int vert_default_height;
-
-  int vert_default_width;
-
-  int vert_min_height;
-
-  int vert_min_width;
-
   int vert_top_margin;
 
   int vert_bot_margin;
@@ -1234,11 +1228,19 @@ public:
 
   int vert_right_margin;
 
+  int horiz_legends_start_x;
+
+  int horiz_legends_start_y;
+
+  int horiz_legends_delta_y;
+
   int vert_legends_start_x;
 
   int vert_legends_start_y;
 
   int vert_legends_delta_y;
+
+  tdrp_bool_t range_rings;
 
   double range_ring_spacing;
 
@@ -1249,8 +1251,6 @@ public:
   tdrp_bool_t range_ring_for_radar_only;
 
   tdrp_bool_t domain_follows_data;
-
-  tdrp_bool_t range_rings;
 
   int range_ring_x_space;
 
@@ -1385,7 +1385,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[461];
+  mutable TDRPtable _table[462];
 
   const char *_className;
 

@@ -5499,6 +5499,78 @@
     tt->single_val.i = 400;
     tt++;
     
+    // Parameter 'vert_default_x_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_x_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &vert_default_x_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_default_y_pos'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_y_pos");
+    tt->descr = tdrpStrDup("Startup position of main window, relative to top-left of screen (pixels).");
+    tt->help = tdrpStrDup("The main display window will start at this location.");
+    tt->val_offset = (char *) &vert_default_y_pos - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'vert_default_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_width");
+    tt->descr = tdrpStrDup("Default width of vert section window (pixels).");
+    tt->help = tdrpStrDup("Height of vert section window at startup.");
+    tt->val_offset = (char *) &vert_default_width - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
+    // Parameter 'vert_default_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_default_height");
+    tt->descr = tdrpStrDup("Default height of vert section window (pixels).");
+    tt->help = tdrpStrDup("Width of vert section window at startup.");
+    tt->val_offset = (char *) &vert_default_height - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'vert_min_width'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_min_width");
+    tt->descr = tdrpStrDup("Minimum width of vert section window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
+    tt->val_offset = (char *) &vert_min_width - &_start_;
+    tt->single_val.i = 600;
+    tt++;
+    
+    // Parameter 'vert_min_height'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("vert_min_height");
+    tt->descr = tdrpStrDup("Minimum height of vert section window (pixels).");
+    tt->help = tdrpStrDup("The user cannot shrink the vert section window smaller than this.");
+    tt->val_offset = (char *) &vert_min_height - &_start_;
+    tt->single_val.i = 400;
+    tt++;
+    
     // Parameter 'Comment 43'
     
     memset(tt, 0, sizeof(TDRPtable));
@@ -5580,131 +5652,14 @@
     tt->single_val.i = 80;
     tt++;
     
-    // Parameter 'Comment 44'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 44");
-    tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
-    tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer.");
-    tt++;
-    
-    // Parameter 'horiz_legends_start_x'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_start_x");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_legends_start_x - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_legends_start_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_start_y");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_legends_start_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'horiz_legends_delta_y'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("horiz_legends_delta_y");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &horiz_legends_delta_y - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_default_x_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_x_pos");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_default_x_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_default_y_pos'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_y_pos");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_default_y_pos - &_start_;
-    tt->single_val.i = 0;
-    tt++;
-    
-    // Parameter 'vert_default_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_height");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_default_height - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'vert_default_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_default_width");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_default_width - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
-    // Parameter 'vert_min_height'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_min_height");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_min_height - &_start_;
-    tt->single_val.i = 400;
-    tt++;
-    
-    // Parameter 'vert_min_width'
-    // ctype is 'int'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = INT_TYPE;
-    tt->param_name = tdrpStrDup("vert_min_width");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &vert_min_width - &_start_;
-    tt->single_val.i = 600;
-    tt++;
-    
     // Parameter 'vert_top_margin'
     // ctype is 'int'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_top_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Height of top margin (pixels).");
+    tt->help = tdrpStrDup("Size of top margin for vert section window.");
     tt->val_offset = (char *) &vert_top_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5715,8 +5670,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_bot_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Height of bottom margin (pixels).");
+    tt->help = tdrpStrDup("Size of bottom margin for vert section window.");
     tt->val_offset = (char *) &vert_bot_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5727,8 +5682,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_left_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Width of left margin (pixels).");
+    tt->help = tdrpStrDup("Size of left margin for vert section window.");
     tt->val_offset = (char *) &vert_left_margin - &_start_;
     tt->single_val.i = 20;
     tt++;
@@ -5739,10 +5694,55 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_right_margin");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Width of right margin (pixels).");
+    tt->help = tdrpStrDup("Size of right margin for vert section window.");
     tt->val_offset = (char *) &vert_right_margin - &_start_;
     tt->single_val.i = 80;
+    tt++;
+    
+    // Parameter 'Comment 44'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 44");
+    tt->comment_hdr = tdrpStrDup("Legends displayed within the plot window.");
+    tt->comment_text = tdrpStrDup("A legend can be displayed for each data layer. Explicitly set the Label start coords, and delta Y. If left unset, legends start relative to the top and left margins.");
+    tt++;
+    
+    // Parameter 'horiz_legends_start_x'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_start_x");
+    tt->descr = tdrpStrDup("Horizontal window legends start x position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &horiz_legends_start_x - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_legends_start_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_start_y");
+    tt->descr = tdrpStrDup("Horizontal window legends start y position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
+    tt->val_offset = (char *) &horiz_legends_start_y - &_start_;
+    tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'horiz_legends_delta_y'
+    // ctype is 'int'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = INT_TYPE;
+    tt->param_name = tdrpStrDup("horiz_legends_delta_y");
+    tt->descr = tdrpStrDup("Horizontal window legends spacing (pixels).");
+    tt->help = tdrpStrDup("This is the line spacing between the legends.");
+    tt->val_offset = (char *) &horiz_legends_delta_y - &_start_;
+    tt->single_val.i = 0;
     tt++;
     
     // Parameter 'vert_legends_start_x'
@@ -5751,8 +5751,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_legends_start_x");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Vertical window legends start x position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
     tt->val_offset = (char *) &vert_legends_start_x - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -5763,8 +5763,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_legends_start_y");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Vertical window legends start y position (pixels).");
+    tt->help = tdrpStrDup("Relative to top left of window.");
     tt->val_offset = (char *) &vert_legends_start_y - &_start_;
     tt->single_val.i = 0;
     tt++;
@@ -5775,10 +5775,31 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = INT_TYPE;
     tt->param_name = tdrpStrDup("vert_legends_delta_y");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Vertical window legends spacing (pixels).");
+    tt->help = tdrpStrDup("This is the line spacing between the legends.");
     tt->val_offset = (char *) &vert_legends_delta_y - &_start_;
     tt->single_val.i = 0;
+    tt++;
+    
+    // Parameter 'Comment 45'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = COMMENT_TYPE;
+    tt->param_name = tdrpStrDup("Comment 45");
+    tt->comment_hdr = tdrpStrDup("Range rings.");
+    tt->comment_text = tdrpStrDup("These apply to radars only.");
+    tt++;
+    
+    // Parameter 'range_rings'
+    // ctype is 'tdrp_bool_t'
+    
+    memset(tt, 0, sizeof(TDRPtable));
+    tt->ptype = BOOL_TYPE;
+    tt->param_name = tdrpStrDup("range_rings");
+    tt->descr = tdrpStrDup("Turn range rings on/off.");
+    tt->help = tdrpStrDup("TRUE means on - i.r. plot range rings.");
+    tt->val_offset = (char *) &range_rings - &_start_;
+    tt->single_val.b = pFALSE;
     tt++;
     
     // Parameter 'range_ring_spacing'
@@ -5787,10 +5808,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("range_ring_spacing");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Spacing between range rings (km).");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &range_ring_spacing - &_start_;
-    tt->single_val.d = -1;
+    tt->single_val.d = 50;
     tt++;
     
     // Parameter 'max_ring_range'
@@ -5799,10 +5820,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = DOUBLE_TYPE;
     tt->param_name = tdrpStrDup("max_ring_range");
-    tt->descr = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Maximum range ring (km)");
     tt->help = tdrpStrDup("");
     tt->val_offset = (char *) &max_ring_range - &_start_;
-    tt->single_val.d = 1000;
+    tt->single_val.d = 500;
     tt++;
     
     // Parameter 'range_ring_follows_data'
@@ -5811,8 +5832,8 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("range_ring_follows_data");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot range rings relative to radar location.");
+    tt->help = tdrpStrDup("We get the location from the data. If FALSE, rings are relative to plot origin.");
     tt->val_offset = (char *) &range_ring_follows_data - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
@@ -5823,10 +5844,10 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("range_ring_for_radar_only");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Only plot range rings for radar data sets.");
+    tt->help = tdrpStrDup("TRUE turns off rings for non-radar data sets.");
     tt->val_offset = (char *) &range_ring_for_radar_only - &_start_;
-    tt->single_val.b = pFALSE;
+    tt->single_val.b = pTRUE;
     tt++;
     
     // Parameter 'domain_follows_data'
@@ -5835,21 +5856,9 @@
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = BOOL_TYPE;
     tt->param_name = tdrpStrDup("domain_follows_data");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
+    tt->descr = tdrpStrDup("Plot domain moves with origin of the data set.");
+    tt->help = tdrpStrDup("Shift the domain limits if the data origin shifts.");
     tt->val_offset = (char *) &domain_follows_data - &_start_;
-    tt->single_val.b = pFALSE;
-    tt++;
-    
-    // Parameter 'range_rings'
-    // ctype is 'tdrp_bool_t'
-    
-    memset(tt, 0, sizeof(TDRPtable));
-    tt->ptype = BOOL_TYPE;
-    tt->param_name = tdrpStrDup("range_rings");
-    tt->descr = tdrpStrDup("");
-    tt->help = tdrpStrDup("");
-    tt->val_offset = (char *) &range_rings - &_start_;
     tt->single_val.b = pFALSE;
     tt++;
     
@@ -6609,11 +6618,11 @@
     tt->single_val.b = pFALSE;
     tt++;
     
-    // Parameter 'Comment 45'
+    // Parameter 'Comment 46'
     
     memset(tt, 0, sizeof(TDRPtable));
     tt->ptype = COMMENT_TYPE;
-    tt->param_name = tdrpStrDup("Comment 45");
+    tt->param_name = tdrpStrDup("Comment 46");
     tt->comment_hdr = tdrpStrDup("</MAIN>");
     tt->comment_text = tdrpStrDup("");
     tt++;
